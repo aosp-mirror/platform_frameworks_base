@@ -79,7 +79,7 @@
     <string name="RestrictedOnAllVoiceTitle" msgid="158800171499150681">"Δεν υπάρχει φωνητική υπηρεσία/υπηρεσία έκτακτης ανάγκης"</string>
     <string name="RestrictedStateContent" msgid="4278821484643362350">"Δεν προσφέρεται προσωρινά από το δίκτυο κινητής τηλεφωνίας στην τοποθεσία σας"</string>
     <string name="NetworkPreferenceSwitchTitle" msgid="4008877505368566980">"Δεν είναι δυνατή η σύνδεση στο δίκτυο"</string>
-    <string name="NetworkPreferenceSwitchSummary" msgid="1203771446683319957">"Για να βελτιώσετε τη λήψη, δοκιμάστε να αλλάξετε τον επιλεγμένο τύπο από τις Ρυθμίσεις &gt; Δίκτυο και διαδίκτυο &gt; Δίκτυα κινητής τηλεφωνίας &gt; Προτιμώμενος τύπος δικτύου."</string>
+    <string name="NetworkPreferenceSwitchSummary" msgid="7056776609127756440">"Για να βελτιώσετε τη λήψη, δοκιμάστε να αλλάξετε τον επιλεγμένο τύπο από τις Ρυθμίσεις &gt; Δίκτυο και διαδίκτυο &gt; Δίκτυα κινητής τηλεφωνίας &gt; Προτιμώμενος τύπος δικτύου."</string>
     <string name="EmergencyCallWarningTitle" msgid="4790413876281901612">"Η κλήση Wi‑Fi είναι ενεργή"</string>
     <string name="EmergencyCallWarningSummary" msgid="8973232888021643293">"Για κλήσεις έκτακτης ανάγκης, απαιτείται δίκτυο κινητής τηλεφωνίας."</string>
     <string name="notification_channel_network_alert" msgid="4427736684338074967">"Ειδοποιήσεις"</string>
@@ -1051,6 +1051,9 @@
     <string name="screen_compat_mode_hint" msgid="1064524084543304459">"Ενεργοποιήστε το ξανά στις Ρυθμίσεις συστημάτων &gt; Εφαρμογές &gt; Ληφθείσες."</string>
     <string name="unsupported_display_size_message" msgid="6545327290756295232">"Η εφαρμογή <xliff:g id="APP_NAME">%1$s</xliff:g> δεν υποστηρίζει την τρέχουσα ρύθμιση Μεγέθους οθόνης και ενδέχεται να παρουσιάζει μη αναμενόμενη συμπεριφορά."</string>
     <string name="unsupported_display_size_show" msgid="7969129195360353041">"Να εμφανίζεται πάντα"</string>
+    <string name="unsupported_compile_sdk_message" msgid="4253168368781441759">"Η εφαρμογή <xliff:g id="APP_NAME">%1$s</xliff:g> δημιουργήθηκε για μια μη συμβατή έκδοση του λειτουργικού συστήματος Android και μπορεί να έχει μη αναμενόμενη συμπεριφορά. Μπορεί να υπάρχει ενημερωμένη έκδοση της εφαρμογής."</string>
+    <string name="unsupported_compile_sdk_show" msgid="2681877855260970231">"Να εμφανίζεται πάντα"</string>
+    <string name="unsupported_compile_sdk_check_update" msgid="3312723623323216101">"Έλεγχος για ενημέρωση"</string>
     <string name="smv_application" msgid="3307209192155442829">"Η εφαρμογή <xliff:g id="APPLICATION">%1$s</xliff:g> (διεργασία <xliff:g id="PROCESS">%2$s</xliff:g>) παραβίασε την αυτοεπιβαλλόμενη πολιτική StrictMode."</string>
     <string name="smv_process" msgid="5120397012047462446">"Η διεργασία <xliff:g id="PROCESS">%1$s</xliff:g> παραβίασε την αυτοεπιβαλόμενη πολιτική StrictMode."</string>
     <string name="android_upgrading_title" msgid="1584192285441405746">"Το Android αναβαθμίζεται..."</string>
@@ -1116,10 +1119,10 @@
     <string name="network_available_sign_in" msgid="1848877297365446605">"Σύνδεση στο δίκτυο"</string>
     <!-- no translation found for network_available_sign_in_detailed (8000081941447976118) -->
     <skip />
-    <string name="wifi_no_internet" msgid="8451173622563841546">"Το δίκτυο Wi-Fi δεν έχει πρόσβαση στο διαδίκτυο"</string>
+    <string name="wifi_no_internet" msgid="8938267198124654938">"Το Wi-Fi δεν έχει πρόσβαση στο διαδίκτυο"</string>
     <string name="wifi_no_internet_detailed" msgid="8083079241212301741">"Πατήστε για να δείτε τις επιλογές"</string>
     <string name="network_switch_metered" msgid="4671730921726992671">"Μετάβαση σε δίκτυο <xliff:g id="NETWORK_TYPE">%1$s</xliff:g>"</string>
-    <string name="network_switch_metered_detail" msgid="5325661434777870353">"Η συσκευή χρησιμοποιεί το δίκτυο <xliff:g id="NEW_NETWORK">%1$s</xliff:g> όταν το δίκτυο <xliff:g id="PREVIOUS_NETWORK">%2$s</xliff:g> δεν έχει πρόσβαση στο διαδίκτυο. Ενδέχεται να ισχύουν χρεώσεις."</string>
+    <string name="network_switch_metered_detail" msgid="775163331794506615">"Η συσκευή χρησιμοποιεί το δίκτυο <xliff:g id="NEW_NETWORK">%1$s</xliff:g> όταν το δίκτυο <xliff:g id="PREVIOUS_NETWORK">%2$s</xliff:g> δεν έχει πρόσβαση στο διαδίκτυο. Μπορεί να ισχύουν χρεώσεις."</string>
     <string name="network_switch_metered_toast" msgid="5779283181685974304">"Μετάβαση από το δίκτυο <xliff:g id="PREVIOUS_NETWORK">%1$s</xliff:g> στο δίκτυο <xliff:g id="NEW_NETWORK">%2$s</xliff:g>"</string>
   <string-array name="network_switch_type_name">
     <item msgid="3979506840912951943">"δεδομένα κινητής τηλεφωνίας"</item>
@@ -1130,7 +1133,7 @@
   </string-array>
     <string name="network_switch_type_name_unknown" msgid="4552612897806660656">"άγνωστος τύπος δικτύου"</string>
     <string name="wifi_watchdog_network_disabled" msgid="7904214231651546347">"Δεν είναι δυνατή η σύνδεση στο Wi-Fi"</string>
-    <string name="wifi_watchdog_network_disabled_detailed" msgid="5548780776418332675">" έχει κακή σύνδεση στο Διαδίκτυο."</string>
+    <string name="wifi_watchdog_network_disabled_detailed" msgid="4917472096696322767">" έχει κακή σύνδεση Διαδικτύου."</string>
     <string name="wifi_connect_alert_title" msgid="8455846016001810172">"Να επιτρέπεται η σύνδεση;"</string>
     <string name="wifi_connect_alert_message" msgid="6451273376815958922">"Η εφαρμογή %1$s θα ήθελε να συνδεθεί με το δίκτυο WiFi %2$s"</string>
     <string name="wifi_connect_default_application" msgid="7143109390475484319">"Μια εφαρμογή"</string>
@@ -1626,7 +1629,6 @@
     <string name="managed_profile_label_badge_2" msgid="5048136430082124036">"<xliff:g id="LABEL">%1$s</xliff:g> εργασίας 2"</string>
     <string name="managed_profile_label_badge_3" msgid="2808305070321719040">"<xliff:g id="LABEL">%1$s</xliff:g> εργασίας 3"</string>
     <string name="lock_to_app_toast" msgid="6820571533009838261">"Για να ξεκαρφιτσώσετε αυτήν την οθόνη, αγγίξτε παρατεταμένα τα κουμπιά \"Πίσω\" και \"Επισκόπηση\""</string>
-    <string name="lock_to_app_toast_locked" msgid="7849470948648628704">"Το ξεκαρφίτσωμα αυτής της εφαρμογής δεν είναι δυνατό"</string>
     <string name="lock_to_app_start" msgid="6643342070839862795">"Η οθόνη καρφιτσώθηκε"</string>
     <string name="lock_to_app_exit" msgid="8598219838213787430">"Η οθόνη ξεκαρφιτσώθηκε"</string>
     <string name="lock_to_app_unlock_pin" msgid="2552556656504331634">"Να γίνεται ερώτηση για το PIN, πριν από το ξεκαρφίτσωμα"</string>
@@ -1635,7 +1637,7 @@
     <string name="package_installed_device_owner" msgid="6875717669960212648">"Εγκαταστάθηκε από τον διαχειριστή σας"</string>
     <string name="package_updated_device_owner" msgid="1847154566357862089">"Ενημερώθηκε από τον διαχειριστή σας"</string>
     <string name="package_deleted_device_owner" msgid="2307122077550236438">"Διαγράφηκε από τον διαχειριστή σας"</string>
-    <string name="battery_saver_description" msgid="1960431123816253034">"Προκειμένου να βελτιώσει τη διάρκεια ζωής της μπαταρίας σας, η Εξοικονόμηση μπαταρίας μειώνει την απόδοση της συσκευής σας και περιορίζει λειτουργίες όπως η δόνηση, οι υπηρεσίες τοποθεσίας και τα περισσότερα δεδομένα παρασκηνίου. Το ηλεκτρονικό ταχυδρομείο, η ανταλλαγή μηνυμάτων και άλλες εφαρμογές που βασίζονται στο συγχρονισμό ενδέχεται να μην ενημερώνονται μέχρι να τις ανοίξετε.\n\nΗ Εξοικονόμηση μπαταρίας απενεργοποιείται αυτόματα όταν η συσκευή σας φορτίζει."</string>
+    <string name="battery_saver_description" msgid="5394663545060026162">"Προκειμένου να βελτιώσει τη διάρκεια ζωής της μπαταρίας σας, η Εξοικονόμηση μπαταρίας μειώνει την απόδοση της συσκευής σας και περιορίζει λειτουργίες όπως η δόνηση, οι υπηρεσίες τοποθεσίας και τα περισσότερα δεδομένα παρασκηνίου. Το ηλεκτρονικό ταχυδρομείο, η ανταλλαγή μηνυμάτων και άλλες εφαρμογές που βασίζονται στον συγχρονισμό μπορεί να μην ενημερώνονται έως ότου τις ανοίξετε.\n\nΗ Εξοικονόμηση μπαταρίας απενεργοποιείται αυτόματα κατά τη διάρκεια της φόρτισης της συσκευής σας."</string>
     <string name="data_saver_description" msgid="6015391409098303235">"Προκειμένου να μειωθεί η χρήση δεδομένων, η Εξοικονόμηση δεδομένων αποτρέπει την αποστολή ή λήψη δεδομένων από ορισμένες εφαρμογές στο παρασκήνιο. Μια εφαρμογή που χρησιμοποιείτε αυτήν τη στιγμή μπορεί να χρησιμοποιήσει δεδομένα αλλά με μικρότερη συχνότητα. Για παράδειγμα, οι εικόνες μπορεί να μην εμφανίζονται μέχρι να τις πατήσετε."</string>
     <string name="data_saver_enable_title" msgid="4674073932722787417">"Ενεργ.Εξοικονόμησης δεδομένων;"</string>
     <string name="data_saver_enable_button" msgid="7147735965247211818">"Ενεργοποίηση"</string>
@@ -1782,14 +1784,10 @@
     <string name="etws_primary_default_message_test" msgid="2709597093560037455">"Δοκιμαστικό μήνυμα έκτακτης ανάγκης"</string>
     <string name="notification_reply_button_accessibility" msgid="3621714652387814344">"Απάντηση"</string>
     <string name="etws_primary_default_message_others" msgid="6293148756130398971"></string>
-    <!-- no translation found for mmcc_authentication_reject (5767701075994754356) -->
-    <skip />
-    <!-- no translation found for mmcc_imsi_unknown_in_hlr (5316658473301462825) -->
-    <skip />
-    <!-- no translation found for mmcc_illegal_ms (807334478177362062) -->
-    <skip />
-    <!-- no translation found for mmcc_illegal_me (1950705155760872972) -->
-    <skip />
+    <string name="mmcc_authentication_reject" msgid="5767701075994754356">"Δεν επιτρέπεται η χρήση της κάρτας SIM για φωνητικές εντολές"</string>
+    <string name="mmcc_imsi_unknown_in_hlr" msgid="5316658473301462825">"Δεν παρέχεται κάρτα SIM για φωνητικές εντολές"</string>
+    <string name="mmcc_illegal_ms" msgid="807334478177362062">"Δεν επιτρέπεται η χρήση της κάρτας SIM για φωνητικές εντολές"</string>
+    <string name="mmcc_illegal_me" msgid="1950705155760872972">"Δεν επιτρέπεται η χρήση του τηλεφώνου για φωνητικές εντολές"</string>
     <string name="popup_window_default_title" msgid="4874318849712115433">"Αναδυόμενο παράθυρο"</string>
     <string name="slice_more_content" msgid="8504342889413274608">"+ <xliff:g id="NUMBER">%1$d</xliff:g>"</string>
     <string name="shortcut_restored_on_lower_version" msgid="5270675146351613828">"Αυτή η συντόμευση απαιτεί την πιο πρόσφατη έκδοση της εφαρμογής"</string>

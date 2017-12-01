@@ -81,7 +81,7 @@
     <string name="RestrictedOnAllVoiceTitle" msgid="158800171499150681">"Ni storitve za glasovne klice / klice v sili"</string>
     <string name="RestrictedStateContent" msgid="4278821484643362350">"Ta storitev trenutno ni na voljo v mobilnem omrežju na vaši lokaciji"</string>
     <string name="NetworkPreferenceSwitchTitle" msgid="4008877505368566980">"Povezave z omrežjem ni mogoče vzpostaviti"</string>
-    <string name="NetworkPreferenceSwitchSummary" msgid="1203771446683319957">"Če želite izboljšati sprejem, poskusite zamenjati vrsto omrežja v »Nastavitve« &gt; »Omrežje in internet« &gt; »Mobilna omrežja« &gt; »Prednostna vrsta omrežja«."</string>
+    <string name="NetworkPreferenceSwitchSummary" msgid="7056776609127756440">"Če želite izboljšati sprejem, poskusite zamenjati vrsto omrežja v »Nastavitve« &gt; »Omrežje in internet« &gt; »Mobilna omrežja« &gt; »Prednostna vrsta omrežja«."</string>
     <string name="EmergencyCallWarningTitle" msgid="4790413876281901612">"Klicanje prek Wi-Fi-ja je aktivno"</string>
     <string name="EmergencyCallWarningSummary" msgid="8973232888021643293">"Za klice v sili potrebujete mobilno omrežje."</string>
     <string name="notification_channel_network_alert" msgid="4427736684338074967">"Opozorila"</string>
@@ -1091,6 +1091,9 @@
     <string name="screen_compat_mode_hint" msgid="1064524084543304459">"Znova omogočite to v sistemskih nastavitvah &gt; Aplikacije &gt; Preneseno."</string>
     <string name="unsupported_display_size_message" msgid="6545327290756295232">"Aplikacija <xliff:g id="APP_NAME">%1$s</xliff:g> ne podpira trenutne nastavitve velikosti zaslona, kar lahko vodi v nepričakovano delovanje."</string>
     <string name="unsupported_display_size_show" msgid="7969129195360353041">"Vedno pokaži"</string>
+    <string name="unsupported_compile_sdk_message" msgid="4253168368781441759">"Aplikacija <xliff:g id="APP_NAME">%1$s</xliff:g> je bila ustvarjena za nezdružljivo različico operacijskega sistema Android, kar lahko vodi v nepričakovano delovanje. Morda je na voljo posodobljena različica aplikacije."</string>
+    <string name="unsupported_compile_sdk_show" msgid="2681877855260970231">"Vedno pokaži"</string>
+    <string name="unsupported_compile_sdk_check_update" msgid="3312723623323216101">"Preveri, ali je na voljo posodobitev"</string>
     <string name="smv_application" msgid="3307209192155442829">"Aplikacija <xliff:g id="APPLICATION">%1$s</xliff:g> (proces <xliff:g id="PROCESS">%2$s</xliff:g>) krši svoj samouveljavljiv pravilnik o strogem načinu."</string>
     <string name="smv_process" msgid="5120397012047462446">"Proces <xliff:g id="PROCESS">%1$s</xliff:g> krši svoj samoizvedljivi pravilnik o strogem načinu."</string>
     <string name="android_upgrading_title" msgid="1584192285441405746">"Poteka nadgradnja Androida ..."</string>
@@ -1160,10 +1163,10 @@
     <string name="network_available_sign_in" msgid="1848877297365446605">"Prijava v omrežje"</string>
     <!-- no translation found for network_available_sign_in_detailed (8000081941447976118) -->
     <skip />
-    <string name="wifi_no_internet" msgid="8451173622563841546">"Omrežje Wi-Fi nima dostopa do interneta"</string>
+    <string name="wifi_no_internet" msgid="8938267198124654938">"Omrežje Wi-Fi nima dostopa do interneta"</string>
     <string name="wifi_no_internet_detailed" msgid="8083079241212301741">"Dotaknite se za možnosti"</string>
     <string name="network_switch_metered" msgid="4671730921726992671">"Preklopljeno na omrežje vrste <xliff:g id="NETWORK_TYPE">%1$s</xliff:g>"</string>
-    <string name="network_switch_metered_detail" msgid="5325661434777870353">"Naprava uporabi omrežje vrste <xliff:g id="NEW_NETWORK">%1$s</xliff:g>, ko omrežje vrste <xliff:g id="PREVIOUS_NETWORK">%2$s</xliff:g> nima dostopa do interneta. Prenos podatkov se lahko zaračuna posebej."</string>
+    <string name="network_switch_metered_detail" msgid="775163331794506615">"Naprava uporabi omrežje vrste <xliff:g id="NEW_NETWORK">%1$s</xliff:g>, ko omrežje vrste <xliff:g id="PREVIOUS_NETWORK">%2$s</xliff:g> nima dostopa do interneta. Prenos podatkov se lahko zaračuna."</string>
     <string name="network_switch_metered_toast" msgid="5779283181685974304">"Preklopljeno z omrežja vrste <xliff:g id="PREVIOUS_NETWORK">%1$s</xliff:g> na omrežje vrste <xliff:g id="NEW_NETWORK">%2$s</xliff:g>"</string>
   <string-array name="network_switch_type_name">
     <item msgid="3979506840912951943">"prenos podatkov v mobilnem omrežju"</item>
@@ -1174,7 +1177,7 @@
   </string-array>
     <string name="network_switch_type_name_unknown" msgid="4552612897806660656">"neznana vrsta omrežja"</string>
     <string name="wifi_watchdog_network_disabled" msgid="7904214231651546347">"Z omrežjem Wi-Fi se ni mogoče povezati"</string>
-    <string name="wifi_watchdog_network_disabled_detailed" msgid="5548780776418332675">" ima slabo internetno povezavo."</string>
+    <string name="wifi_watchdog_network_disabled_detailed" msgid="4917472096696322767">" ima slabo internetno povezavo."</string>
     <string name="wifi_connect_alert_title" msgid="8455846016001810172">"Ali dovolite vzpostavitev povezave?"</string>
     <string name="wifi_connect_alert_message" msgid="6451273376815958922">"Aplikacija %1$s želi vzpostaviti povezavo z omrežjem Wi-Fi %2$s"</string>
     <string name="wifi_connect_default_application" msgid="7143109390475484319">"Aplikacija"</string>
@@ -1676,7 +1679,6 @@
     <string name="managed_profile_label_badge_2" msgid="5048136430082124036">"2. službeni <xliff:g id="LABEL">%1$s</xliff:g>"</string>
     <string name="managed_profile_label_badge_3" msgid="2808305070321719040">"3. službeni <xliff:g id="LABEL">%1$s</xliff:g>"</string>
     <string name="lock_to_app_toast" msgid="6820571533009838261">"Če želite odpeti ta zaslon, se hkrati dotaknite gumbov za nazaj in za pregled ter ju pridržite."</string>
-    <string name="lock_to_app_toast_locked" msgid="7849470948648628704">"Te aplikacije ni mogoče odpeti"</string>
     <string name="lock_to_app_start" msgid="6643342070839862795">"Zaslon je pripet"</string>
     <string name="lock_to_app_exit" msgid="8598219838213787430">"Zaslon je odpet"</string>
     <string name="lock_to_app_unlock_pin" msgid="2552556656504331634">"Zahtevaj PIN pred odpenjanjem"</string>
@@ -1685,7 +1687,7 @@
     <string name="package_installed_device_owner" msgid="6875717669960212648">"Namestil skrbnik"</string>
     <string name="package_updated_device_owner" msgid="1847154566357862089">"Posodobil skrbnik"</string>
     <string name="package_deleted_device_owner" msgid="2307122077550236438">"Izbrisal skrbnik"</string>
-    <string name="battery_saver_description" msgid="1960431123816253034">"Varčevanje z energijo akumulatorja podaljša čas njegovega delovanja tako, da zmanjša zmogljivost delovanja naprave in omeji vibriranje, lokacijske storitve ter prenos večine podatkov v ozadju. Aplikacije za e-pošto, sporočanje in drugo, ki uporabljajo sinhroniziranje, se morda ne posodabljajo, razen če jih odprete.\n\nVarčevanje z energijo akumulatorja se samodejno izklopi med polnjenjem akumulatorja naprave."</string>
+    <string name="battery_saver_description" msgid="5394663545060026162">"Varčevanje z energijo akumulatorja podaljša čas njegovega delovanja tako, da zmanjša zmogljivost delovanja naprave in omeji vibriranje, lokacijske storitve ter prenos večine podatkov v ozadju. Aplikacije za e-pošto, sporočanje in drugo, ki uporabljajo sinhroniziranje, se morda ne posodabljajo, razen če jih odprete.\n\nVarčevanje z energijo akumulatorja se samodejno izklopi med polnjenjem akumulatorja naprave."</string>
     <string name="data_saver_description" msgid="6015391409098303235">"Zaradi zmanjševanja prenesene količine podatkov varčevanje s podatki nekaterim aplikacijam preprečuje, da bi v ozadju pošiljale ali prejemale podatke. Aplikacija, ki jo trenutno uporabljate, lahko prenaša podatke, vendar to morda počne manj pogosto. To na primer pomeni, da se slike ne prikažejo, dokler se jih ne dotaknete."</string>
     <string name="data_saver_enable_title" msgid="4674073932722787417">"Vklop varčevanja s podatki?"</string>
     <string name="data_saver_enable_button" msgid="7147735965247211818">"Vklop"</string>
@@ -1852,14 +1854,10 @@
     <string name="etws_primary_default_message_test" msgid="2709597093560037455">"Preskus sporočil v sili"</string>
     <string name="notification_reply_button_accessibility" msgid="3621714652387814344">"Odgovor"</string>
     <string name="etws_primary_default_message_others" msgid="6293148756130398971"></string>
-    <!-- no translation found for mmcc_authentication_reject (5767701075994754356) -->
-    <skip />
-    <!-- no translation found for mmcc_imsi_unknown_in_hlr (5316658473301462825) -->
-    <skip />
-    <!-- no translation found for mmcc_illegal_ms (807334478177362062) -->
-    <skip />
-    <!-- no translation found for mmcc_illegal_me (1950705155760872972) -->
-    <skip />
+    <string name="mmcc_authentication_reject" msgid="5767701075994754356">"Kartica SIM ne dovoljuje glasovnih klicev"</string>
+    <string name="mmcc_imsi_unknown_in_hlr" msgid="5316658473301462825">"Kartica SIM ne omogoča opravljanja glasovnih klicev"</string>
+    <string name="mmcc_illegal_ms" msgid="807334478177362062">"Kartica SIM ne dovoljuje glasovnih klicev"</string>
+    <string name="mmcc_illegal_me" msgid="1950705155760872972">"Telefon ne dovoljuje glasovnih klicev"</string>
     <string name="popup_window_default_title" msgid="4874318849712115433">"Pojavno okno"</string>
     <string name="slice_more_content" msgid="8504342889413274608">"in še <xliff:g id="NUMBER">%1$d</xliff:g>"</string>
     <string name="shortcut_restored_on_lower_version" msgid="5270675146351613828">"Za to bližnjico potrebujete najnovejšo aplikacijo"</string>

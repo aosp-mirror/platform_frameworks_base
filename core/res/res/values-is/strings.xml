@@ -79,7 +79,7 @@
     <string name="RestrictedOnAllVoiceTitle" msgid="158800171499150681">"Símtöl/neyðarsímtöl eru ekki í boði"</string>
     <string name="RestrictedStateContent" msgid="4278821484643362350">"Ekki í boði á farsímakerfinu á þínum stað eins og er"</string>
     <string name="NetworkPreferenceSwitchTitle" msgid="4008877505368566980">"Ekki næst samband við símkerfi"</string>
-    <string name="NetworkPreferenceSwitchSummary" msgid="1203771446683319957">"Reyndu að breyta valinni gerð í Stillingar &gt; Netkerfi og internet > Farsímakerfi &gt; Valin símkerfistegund til að bæta móttökuskilyrðin."</string>
+    <string name="NetworkPreferenceSwitchSummary" msgid="7056776609127756440">"Reyndu að breyta valinni gerð í Stillingar &gt; Netkerfi og internet > Farsímakerfi &gt; Valin símkerfistegund til að bæta móttökuskilyrðin."</string>
     <string name="EmergencyCallWarningTitle" msgid="4790413876281901612">"Wi-Fi símtöl eru virk"</string>
     <string name="EmergencyCallWarningSummary" msgid="8973232888021643293">"Neyðarsímtöl krefjast farsímanets."</string>
     <string name="notification_channel_network_alert" msgid="4427736684338074967">"Tilkynningar"</string>
@@ -1051,6 +1051,9 @@
     <string name="screen_compat_mode_hint" msgid="1064524084543304459">"Þú getur kveikt aftur á þessu undir Kerfisstillingar &gt; Forrit &gt; Sótt."</string>
     <string name="unsupported_display_size_message" msgid="6545327290756295232">"<xliff:g id="APP_NAME">%1$s</xliff:g> styður ekki núverandi skjástærðarstillingu og gæti því ekki virkað sem skyldi."</string>
     <string name="unsupported_display_size_show" msgid="7969129195360353041">"Sýna alltaf"</string>
+    <string name="unsupported_compile_sdk_message" msgid="4253168368781441759">"<xliff:g id="APP_NAME">%1$s</xliff:g> var hannað fyrir ósamhæfa útgáfu af Android stýrikerfinu og virkni þess kann að vera önnur en ætlast var til. Uppfærð útgáfa af forritinu kann að vera í boði."</string>
+    <string name="unsupported_compile_sdk_show" msgid="2681877855260970231">"Sýna alltaf"</string>
+    <string name="unsupported_compile_sdk_check_update" msgid="3312723623323216101">"Leita að uppfærslu"</string>
     <string name="smv_application" msgid="3307209192155442829">"Forritið <xliff:g id="APPLICATION">%1$s</xliff:g> (ferli <xliff:g id="PROCESS">%2$s</xliff:g>) hefur brotið gegn eigin StrictMode-stefnu."</string>
     <string name="smv_process" msgid="5120397012047462446">"Forritið <xliff:g id="PROCESS">%1$s</xliff:g> braut gegn eigin StrictMode-stefnu."</string>
     <string name="android_upgrading_title" msgid="1584192285441405746">"Android er að uppfæra…"</string>
@@ -1116,10 +1119,10 @@
     <string name="network_available_sign_in" msgid="1848877297365446605">"Skrá inn á net"</string>
     <!-- no translation found for network_available_sign_in_detailed (8000081941447976118) -->
     <skip />
-    <string name="wifi_no_internet" msgid="8451173622563841546">"Wi-Fi netið er ekki með tengingu við internetið"</string>
+    <string name="wifi_no_internet" msgid="8938267198124654938">"Wi-Fi er ekki með tengingu við internetið"</string>
     <string name="wifi_no_internet_detailed" msgid="8083079241212301741">"Ýttu til að sjá valkosti"</string>
     <string name="network_switch_metered" msgid="4671730921726992671">"Skipt yfir á <xliff:g id="NETWORK_TYPE">%1$s</xliff:g>"</string>
-    <string name="network_switch_metered_detail" msgid="5325661434777870353">"Tækið notar <xliff:g id="NEW_NETWORK">%1$s</xliff:g> þegar <xliff:g id="PREVIOUS_NETWORK">%2$s</xliff:g> er ekki með internetaðgang. Gjöld geta átt við."</string>
+    <string name="network_switch_metered_detail" msgid="775163331794506615">"Tækið notar <xliff:g id="NEW_NETWORK">%1$s</xliff:g> þegar <xliff:g id="PREVIOUS_NETWORK">%2$s</xliff:g> er ekki með internetaðgang. Gjöld kunna að eiga við."</string>
     <string name="network_switch_metered_toast" msgid="5779283181685974304">"Skipt úr <xliff:g id="PREVIOUS_NETWORK">%1$s</xliff:g> yfir í <xliff:g id="NEW_NETWORK">%2$s</xliff:g>"</string>
   <string-array name="network_switch_type_name">
     <item msgid="3979506840912951943">"farsímagögn"</item>
@@ -1130,7 +1133,8 @@
   </string-array>
     <string name="network_switch_type_name_unknown" msgid="4552612897806660656">"óþekkt tegund netkerfis"</string>
     <string name="wifi_watchdog_network_disabled" msgid="7904214231651546347">"Ekki var hægt að tengjast Wi-Fi"</string>
-    <string name="wifi_watchdog_network_disabled_detailed" msgid="5548780776418332675">" er með lélegt netsamband."</string>
+    <!-- no translation found for wifi_watchdog_network_disabled_detailed (4917472096696322767) -->
+    <skip />
     <string name="wifi_connect_alert_title" msgid="8455846016001810172">"Leyfa tengingu?"</string>
     <string name="wifi_connect_alert_message" msgid="6451273376815958922">"Forritið %1$s vill tengjast Wi-Fi netinu %2$s"</string>
     <string name="wifi_connect_default_application" msgid="7143109390475484319">"Forrit"</string>
@@ -1626,7 +1630,6 @@
     <string name="managed_profile_label_badge_2" msgid="5048136430082124036">"<xliff:g id="LABEL">%1$s</xliff:g> í vinnu (2)"</string>
     <string name="managed_profile_label_badge_3" msgid="2808305070321719040">"<xliff:g id="LABEL">%1$s</xliff:g> í vinnu (3)"</string>
     <string name="lock_to_app_toast" msgid="6820571533009838261">"Til að losa þessa skjámynd skaltu halda hnöppunum „Til baka“ og „Yfirlit“ inni"</string>
-    <string name="lock_to_app_toast_locked" msgid="7849470948648628704">"Ekki er hægt að losa þetta forrit"</string>
     <string name="lock_to_app_start" msgid="6643342070839862795">"Skjár festur"</string>
     <string name="lock_to_app_exit" msgid="8598219838213787430">"Skjár opnaður"</string>
     <string name="lock_to_app_unlock_pin" msgid="2552556656504331634">"Biðja um PIN-númer til að losa"</string>
@@ -1635,7 +1638,7 @@
     <string name="package_installed_device_owner" msgid="6875717669960212648">"Kerfisstjóri setti upp"</string>
     <string name="package_updated_device_owner" msgid="1847154566357862089">"Kerfisstjóri uppfærði"</string>
     <string name="package_deleted_device_owner" msgid="2307122077550236438">"Kerfisstjóri eyddi"</string>
-    <string name="battery_saver_description" msgid="1960431123816253034">"Til að auka endingu rafhlöðunnar mun orkusparnaður draga úr afköstum tækisins og takmarka titring, staðsetningarþjónustu og megnið af bakgrunnsgögnum. Ekki er víst að tölvupóstur, skilaboð og önnur forrit sem reiða sig á samstillingu uppfærist nema þú opnir þau.\n\nSjálfkrafa er slökkt á orkusparnaði þegar tækið er í hleðslu."</string>
+    <string name="battery_saver_description" msgid="5394663545060026162">"Til að auka endingu rafhlöðunnar dregur rafhlöðusparnaður úr afköstum tækisins og takmarkar titring og flest bakgrunnsgögn. Ekki er víst að tölvupóstur, skilaboð og önnur forrit sem reiða sig á samstillingu verði uppfærð fyrr en þú opnar þau.\n\nSjálfkrafa er slökkt á rafhlöðusparnaði þegar tækið er í hleðslu."</string>
     <string name="data_saver_description" msgid="6015391409098303235">"Gagnasparnaður getur hjálpað til við að draga úr gagnanotkun með því að hindra forrit í að senda eða sækja gögn í bakgrunni. Forrit sem er í notkun getur náð í gögn, en gerir það kannski sjaldnar. Niðurstaðan gæti verið, svo dæmi sé tekið, að myndir séu ekki birtar fyrr en þú ýtir á þær."</string>
     <string name="data_saver_enable_title" msgid="4674073932722787417">"Kveikja á gagnasparnaði?"</string>
     <string name="data_saver_enable_button" msgid="7147735965247211818">"Kveikja"</string>
@@ -1782,14 +1785,10 @@
     <string name="etws_primary_default_message_test" msgid="2709597093560037455">"Prófun neyðarskilaboða"</string>
     <string name="notification_reply_button_accessibility" msgid="3621714652387814344">"Svara"</string>
     <string name="etws_primary_default_message_others" msgid="6293148756130398971"></string>
-    <!-- no translation found for mmcc_authentication_reject (5767701075994754356) -->
-    <skip />
-    <!-- no translation found for mmcc_imsi_unknown_in_hlr (5316658473301462825) -->
-    <skip />
-    <!-- no translation found for mmcc_illegal_ms (807334478177362062) -->
-    <skip />
-    <!-- no translation found for mmcc_illegal_me (1950705155760872972) -->
-    <skip />
+    <string name="mmcc_authentication_reject" msgid="5767701075994754356">"SIM-kort er ekki heimilað fyrir rödd"</string>
+    <string name="mmcc_imsi_unknown_in_hlr" msgid="5316658473301462825">"SIM-korti er ekki úthlutað fyrir rödd"</string>
+    <string name="mmcc_illegal_ms" msgid="807334478177362062">"SIM-kort er ekki heimilað fyrir rödd"</string>
+    <string name="mmcc_illegal_me" msgid="1950705155760872972">"Sími er ekki heimilaður fyrir rödd"</string>
     <string name="popup_window_default_title" msgid="4874318849712115433">"Sprettigluggi"</string>
     <string name="slice_more_content" msgid="8504342889413274608">"+ <xliff:g id="NUMBER">%1$d</xliff:g>"</string>
     <string name="shortcut_restored_on_lower_version" msgid="5270675146351613828">"Nýjasta útgáfa forritsins þarf að vera til staðar til að þessi flýtileið virki"</string>

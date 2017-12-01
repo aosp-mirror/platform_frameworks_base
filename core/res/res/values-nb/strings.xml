@@ -79,7 +79,7 @@
     <string name="RestrictedOnAllVoiceTitle" msgid="158800171499150681">"Ingen tale-/nødtjeneste"</string>
     <string name="RestrictedStateContent" msgid="4278821484643362350">"Tilbys midlertidig ikke gjennom mobilnettverket der du er"</string>
     <string name="NetworkPreferenceSwitchTitle" msgid="4008877505368566980">"Får ikke kontakt med nettverket"</string>
-    <string name="NetworkPreferenceSwitchSummary" msgid="1203771446683319957">"For å forbedre signalet, prøv å endre valgt nettverkstype i Innstillinger &gt; Nettverk og Internett &gt; Mobilnettverk &gt; Foretrukket nettverkstype."</string>
+    <string name="NetworkPreferenceSwitchSummary" msgid="7056776609127756440">"For å forbedre signalet, prøv å endre valgt nettverkstype i Innstillinger &gt; Nettverk og Internett &gt; Mobilnettverk &gt; Foretrukket nettverkstype."</string>
     <string name="EmergencyCallWarningTitle" msgid="4790413876281901612">"Wi‑Fi-anrop er aktivt"</string>
     <string name="EmergencyCallWarningSummary" msgid="8973232888021643293">"Du trenger et mobilnettverk for å utføre nødanrop."</string>
     <string name="notification_channel_network_alert" msgid="4427736684338074967">"Varsler"</string>
@@ -204,7 +204,7 @@
     <string name="reboot_safemode_title" msgid="7054509914500140361">"Start på nytt i sikker modus"</string>
     <string name="reboot_safemode_confirm" msgid="55293944502784668">"Ønsker du å starte på nytt i sikker modus? Dette deaktiverer alle tredjepartsprogrammene du har installert. De gjenopprettes når du starter på nytt."</string>
     <string name="recent_tasks_title" msgid="3691764623638127888">"Nylig"</string>
-    <string name="no_recent_tasks" msgid="8794906658732193473">"Ingen nylige apper."</string>
+    <string name="no_recent_tasks" msgid="8794906658732193473">"Ingen nylig brukte apper."</string>
     <string name="global_actions" product="tablet" msgid="408477140088053665">"Innstillinger for nettbrett"</string>
     <string name="global_actions" product="tv" msgid="7240386462508182976">"Alternativer for TV"</string>
     <string name="global_actions" product="default" msgid="2406416831541615258">"Telefoninnstillinger"</string>
@@ -1051,6 +1051,9 @@
     <string name="screen_compat_mode_hint" msgid="1064524084543304459">"Reaktiver dette i systeminnstillingene  &gt; Apper &gt; Nedlastet."</string>
     <string name="unsupported_display_size_message" msgid="6545327290756295232">"<xliff:g id="APP_NAME">%1$s</xliff:g> støtter ikke den nåværende innstillingen for skjermstørrelse og fungerer kanskje ikke som den skal."</string>
     <string name="unsupported_display_size_show" msgid="7969129195360353041">"Vis alltid"</string>
+    <string name="unsupported_compile_sdk_message" msgid="4253168368781441759">"<xliff:g id="APP_NAME">%1$s</xliff:g> ble utviklet for en inkompatibel versjon av Android OS og fungerer kanskje ikke som forventet. En oppdatert versjon av appen kan være tilgjengelig."</string>
+    <string name="unsupported_compile_sdk_show" msgid="2681877855260970231">"Vis alltid"</string>
+    <string name="unsupported_compile_sdk_check_update" msgid="3312723623323216101">"Se etter oppdateringer"</string>
     <string name="smv_application" msgid="3307209192155442829">"Appen <xliff:g id="APPLICATION">%1$s</xliff:g> (prosessen <xliff:g id="PROCESS">%2$s</xliff:g>) har brutt de selvpålagte StrictMode-retningslinjene."</string>
     <string name="smv_process" msgid="5120397012047462446">"Prosessen<xliff:g id="PROCESS">%1$s</xliff:g> har brutt de selvpålagte StrictMode-retningslinjene."</string>
     <string name="android_upgrading_title" msgid="1584192285441405746">"Android oppgraderes …"</string>
@@ -1116,10 +1119,10 @@
     <string name="network_available_sign_in" msgid="1848877297365446605">"Logg på nettverk"</string>
     <!-- no translation found for network_available_sign_in_detailed (8000081941447976118) -->
     <skip />
-    <string name="wifi_no_internet" msgid="8451173622563841546">"Wi-Fi har ikke Internett-tilgang"</string>
+    <string name="wifi_no_internet" msgid="8938267198124654938">"Wi-Fi har ikke Internett-tilgang"</string>
     <string name="wifi_no_internet_detailed" msgid="8083079241212301741">"Trykk for å få alternativer"</string>
     <string name="network_switch_metered" msgid="4671730921726992671">"Byttet til <xliff:g id="NETWORK_TYPE">%1$s</xliff:g>"</string>
-    <string name="network_switch_metered_detail" msgid="5325661434777870353">"Enheten bruker <xliff:g id="NEW_NETWORK">%1$s</xliff:g> når <xliff:g id="PREVIOUS_NETWORK">%2$s</xliff:g> ikke har Internett-tilgang. Avgifter kan påløpe."</string>
+    <string name="network_switch_metered_detail" msgid="775163331794506615">"Enheten bruker <xliff:g id="NEW_NETWORK">%1$s</xliff:g> når <xliff:g id="PREVIOUS_NETWORK">%2$s</xliff:g> ikke har Internett-tilgang. Avgifter kan påløpe."</string>
     <string name="network_switch_metered_toast" msgid="5779283181685974304">"Byttet fra <xliff:g id="PREVIOUS_NETWORK">%1$s</xliff:g> til <xliff:g id="NEW_NETWORK">%2$s</xliff:g>"</string>
   <string-array name="network_switch_type_name">
     <item msgid="3979506840912951943">"mobildata"</item>
@@ -1130,7 +1133,7 @@
   </string-array>
     <string name="network_switch_type_name_unknown" msgid="4552612897806660656">"en ukjent nettverkstype"</string>
     <string name="wifi_watchdog_network_disabled" msgid="7904214231651546347">"Kan ikke koble til Wi-Fi"</string>
-    <string name="wifi_watchdog_network_disabled_detailed" msgid="5548780776418332675">" har en dårlig Internett-tilkobling."</string>
+    <string name="wifi_watchdog_network_disabled_detailed" msgid="4917472096696322767">" har en dårlig Internett-tilkobling."</string>
     <string name="wifi_connect_alert_title" msgid="8455846016001810172">"Vil du tillat tilkoblingen?"</string>
     <string name="wifi_connect_alert_message" msgid="6451273376815958922">"Appen %1$s vil koble til Wi-Fi-nettverket %2$s"</string>
     <string name="wifi_connect_default_application" msgid="7143109390475484319">"En app"</string>
@@ -1626,7 +1629,6 @@
     <string name="managed_profile_label_badge_2" msgid="5048136430082124036">"Andre <xliff:g id="LABEL">%1$s</xliff:g> for jobben"</string>
     <string name="managed_profile_label_badge_3" msgid="2808305070321719040">"Tredje <xliff:g id="LABEL">%1$s</xliff:g> for jobben"</string>
     <string name="lock_to_app_toast" msgid="6820571533009838261">"For å løsne denne skjermen, trykk på og hold inne Tilbake- og Oversikt-knappene"</string>
-    <string name="lock_to_app_toast_locked" msgid="7849470948648628704">"Denne appen kan ikke løsnes"</string>
     <string name="lock_to_app_start" msgid="6643342070839862795">"Skjermen er festet"</string>
     <string name="lock_to_app_exit" msgid="8598219838213787430">"Skjermen er løsnet"</string>
     <string name="lock_to_app_unlock_pin" msgid="2552556656504331634">"PIN-kode for å løsne apper"</string>
@@ -1635,7 +1637,7 @@
     <string name="package_installed_device_owner" msgid="6875717669960212648">"Installert av administratoren din"</string>
     <string name="package_updated_device_owner" msgid="1847154566357862089">"Oppdatert av administratoren din"</string>
     <string name="package_deleted_device_owner" msgid="2307122077550236438">"Slettet av administratoren din"</string>
-    <string name="battery_saver_description" msgid="1960431123816253034">"Med batterisparing forlenges batteritiden ved at bruk av for eksempel vibrasjon, posisjonstjenester og bakgrunnsdata reduseres. E-post, sending av meldinger og andre apper som er avhengig av synkronisering, oppdateres kanskje ikke med mindre du åpner dem.\n\nBatterisparing slås av automatisk når enheten lader."</string>
+    <string name="battery_saver_description" msgid="5394663545060026162">"Med batterisparing forlenges batterilevetiden ved at bruk av for eksempel vibrasjon, posisjonstjenester og bakgrunnsdata reduseres. E-post, sending av meldinger og andre apper som er avhengig av synkronisering, oppdateres kanskje ikke med mindre du åpner dem.\n\nBatterisparing slås av automatisk når enheten lader."</string>
     <string name="data_saver_description" msgid="6015391409098303235">"Datasparing hindrer at apper kan sende og motta data i bakgrunnen. Apper du bruker i øyeblikket, bruker ikke data i like stor grad – for eksempel vises ikke bilder før du trykker på dem."</string>
     <string name="data_saver_enable_title" msgid="4674073932722787417">"Vil du slå på Datasparing?"</string>
     <string name="data_saver_enable_button" msgid="7147735965247211818">"Slå på"</string>
@@ -1782,14 +1784,10 @@
     <string name="etws_primary_default_message_test" msgid="2709597093560037455">"Test av nødmeldinger"</string>
     <string name="notification_reply_button_accessibility" msgid="3621714652387814344">"Svar"</string>
     <string name="etws_primary_default_message_others" msgid="6293148756130398971"></string>
-    <!-- no translation found for mmcc_authentication_reject (5767701075994754356) -->
-    <skip />
-    <!-- no translation found for mmcc_imsi_unknown_in_hlr (5316658473301462825) -->
-    <skip />
-    <!-- no translation found for mmcc_illegal_ms (807334478177362062) -->
-    <skip />
-    <!-- no translation found for mmcc_illegal_me (1950705155760872972) -->
-    <skip />
+    <string name="mmcc_authentication_reject" msgid="5767701075994754356">"SIM-kortet har ikke tillatelse til tale"</string>
+    <string name="mmcc_imsi_unknown_in_hlr" msgid="5316658473301462825">"SIM-kortet er ikke klargjort for tale"</string>
+    <string name="mmcc_illegal_ms" msgid="807334478177362062">"SIM-kortet har ikke tillatelse til tale"</string>
+    <string name="mmcc_illegal_me" msgid="1950705155760872972">"Telefonen har ikke tillatelse til tale"</string>
     <string name="popup_window_default_title" msgid="4874318849712115433">"Forgrunnsvindu"</string>
     <string name="slice_more_content" msgid="8504342889413274608">"+ <xliff:g id="NUMBER">%1$d</xliff:g>"</string>
     <string name="shortcut_restored_on_lower_version" msgid="5270675146351613828">"Denne snarveien krever den nyeste appen"</string>

@@ -80,7 +80,7 @@
     <string name="RestrictedOnAllVoiceTitle" msgid="158800171499150681">"Balss un ārkārtas izsaukumu pakalpojums nedarbojas"</string>
     <string name="RestrictedStateContent" msgid="4278821484643362350">"Pagaidām netiek piedāvāts mobilajā tīklā jūsu atrašanās vietā"</string>
     <string name="NetworkPreferenceSwitchTitle" msgid="4008877505368566980">"Nevar sasniegt tīklu"</string>
-    <string name="NetworkPreferenceSwitchSummary" msgid="1203771446683319957">"Lai uzlabotu uztveršanu, mainiet atlasīto veidu sadaļā Iestatījumi &gt; Tīkls un internets &gt; Mobilie tīkli &gt; Ieteicamais tīkla veids."</string>
+    <string name="NetworkPreferenceSwitchSummary" msgid="7056776609127756440">"Lai uzlabotu uztveršanu, mainiet atlasīto veidu sadaļā Iestatījumi &gt; Tīkls un internets &gt; Mobilie tīkli &gt; Ieteicamais tīkla veids."</string>
     <string name="EmergencyCallWarningTitle" msgid="4790413876281901612">"Wi‑Fi zvani ir aktīvi"</string>
     <string name="EmergencyCallWarningSummary" msgid="8973232888021643293">"Lai veiktu ārkārtas zvanus, ir nepieciešams mobilais tīkls."</string>
     <string name="notification_channel_network_alert" msgid="4427736684338074967">"Brīdinājumi"</string>
@@ -1071,6 +1071,9 @@
     <string name="screen_compat_mode_hint" msgid="1064524084543304459">"Atkārtoti iespējojiet šeit: Sistēmas iestatījumi &gt; Lietotnes &gt; Lejupielādētās."</string>
     <string name="unsupported_display_size_message" msgid="6545327290756295232">"Lietotnē <xliff:g id="APP_NAME">%1$s</xliff:g> netiek atbalstīts pašreizējais displeja lieluma iestatījums, tādēļ tā var tikt attēlota neparedzētā veidā."</string>
     <string name="unsupported_display_size_show" msgid="7969129195360353041">"Rādīt vienmēr"</string>
+    <string name="unsupported_compile_sdk_message" msgid="4253168368781441759">"Lietotne <xliff:g id="APP_NAME">%1$s</xliff:g> tika izstrādāta nesaderīgai Android OS versijai, tādēļ tā var darboties neparedzētā veidā. Iespējams, ir pieejama atjaunināta lietotnes versija."</string>
+    <string name="unsupported_compile_sdk_show" msgid="2681877855260970231">"Vienmēr rādīt"</string>
+    <string name="unsupported_compile_sdk_check_update" msgid="3312723623323216101">"Pārbaudīt, vai ir pieejams atjauninājums"</string>
     <string name="smv_application" msgid="3307209192155442829">"Lietotne <xliff:g id="APPLICATION">%1$s</xliff:g> (process <xliff:g id="PROCESS">%2$s</xliff:g>) ir pārkāpusi savu pašieviesto StrictMode politiku."</string>
     <string name="smv_process" msgid="5120397012047462446">"Process <xliff:g id="PROCESS">%1$s</xliff:g> ir pārkāpis savu pašieviesto StrictMode politiku."</string>
     <string name="android_upgrading_title" msgid="1584192285441405746">"Notiek Android jaunināšana..."</string>
@@ -1138,10 +1141,10 @@
     <string name="network_available_sign_in" msgid="1848877297365446605">"Pierakstīšanās tīklā"</string>
     <!-- no translation found for network_available_sign_in_detailed (8000081941447976118) -->
     <skip />
-    <string name="wifi_no_internet" msgid="8451173622563841546">"Wi-Fi tīklā nav piekļuves internetam."</string>
+    <string name="wifi_no_internet" msgid="8938267198124654938">"Wi-Fi tīklā nav piekļuves internetam."</string>
     <string name="wifi_no_internet_detailed" msgid="8083079241212301741">"Pieskarieties, lai skatītu iespējas."</string>
     <string name="network_switch_metered" msgid="4671730921726992671">"Pārslēdzās uz tīklu <xliff:g id="NETWORK_TYPE">%1$s</xliff:g>"</string>
-    <string name="network_switch_metered_detail" msgid="5325661434777870353">"Kad tīklā <xliff:g id="PREVIOUS_NETWORK">%2$s</xliff:g> nav piekļuves internetam, ierīcē tiek izmantots tīkls <xliff:g id="NEW_NETWORK">%1$s</xliff:g>. Var tikt piemērota maksa."</string>
+    <string name="network_switch_metered_detail" msgid="775163331794506615">"Kad vienā tīklā (<xliff:g id="PREVIOUS_NETWORK">%2$s</xliff:g>) nav piekļuves internetam, ierīcē tiek izmantots cits tīkls (<xliff:g id="NEW_NETWORK">%1$s</xliff:g>). Var tikt piemērota maksa."</string>
     <string name="network_switch_metered_toast" msgid="5779283181685974304">"Pārslēdzās no tīkla <xliff:g id="PREVIOUS_NETWORK">%1$s</xliff:g> uz tīklu <xliff:g id="NEW_NETWORK">%2$s</xliff:g>"</string>
   <string-array name="network_switch_type_name">
     <item msgid="3979506840912951943">"mobilie dati"</item>
@@ -1152,7 +1155,7 @@
   </string-array>
     <string name="network_switch_type_name_unknown" msgid="4552612897806660656">"nezināms tīkla veids"</string>
     <string name="wifi_watchdog_network_disabled" msgid="7904214231651546347">"Nevarēja izveidot savienojumu ar Wi-Fi."</string>
-    <string name="wifi_watchdog_network_disabled_detailed" msgid="5548780776418332675">" ir slikts interneta savienojums."</string>
+    <string name="wifi_watchdog_network_disabled_detailed" msgid="4917472096696322767">" ir slikts interneta savienojums."</string>
     <string name="wifi_connect_alert_title" msgid="8455846016001810172">"Vai atļaut savienojumu?"</string>
     <string name="wifi_connect_alert_message" msgid="6451273376815958922">"Lietotne %1$s vēlas izveidot savienojumu ar Wi-Fi tīklu %2$s"</string>
     <string name="wifi_connect_default_application" msgid="7143109390475484319">"Lietojumprogramma"</string>
@@ -1651,7 +1654,6 @@
     <string name="managed_profile_label_badge_2" msgid="5048136430082124036">"2. darba profils: <xliff:g id="LABEL">%1$s</xliff:g>"</string>
     <string name="managed_profile_label_badge_3" msgid="2808305070321719040">"3. darba profils: <xliff:g id="LABEL">%1$s</xliff:g>"</string>
     <string name="lock_to_app_toast" msgid="6820571533009838261">"Lai atspraustu šo ekrānu, pieskarieties pogām “Atpakaļ” un “Pārskats” un turiet tās."</string>
-    <string name="lock_to_app_toast_locked" msgid="7849470948648628704">"Šo lietotni nevar atspraust."</string>
     <string name="lock_to_app_start" msgid="6643342070839862795">"Ekrāns ir piesprausts"</string>
     <string name="lock_to_app_exit" msgid="8598219838213787430">"Ekrāns ir atsprausts"</string>
     <string name="lock_to_app_unlock_pin" msgid="2552556656504331634">"Prasīt PIN kodu pirms atspraušanas"</string>
@@ -1660,7 +1662,7 @@
     <string name="package_installed_device_owner" msgid="6875717669960212648">"Instalēja administrators"</string>
     <string name="package_updated_device_owner" msgid="1847154566357862089">"Atjaunināja administrators"</string>
     <string name="package_deleted_device_owner" msgid="2307122077550236438">"Dzēsa administrators"</string>
-    <string name="battery_saver_description" msgid="1960431123816253034">"Lai paildzinātu akumulatora darbību, akumulatora jaudas taupīšanas režīmā tiek samazināta ierīces veiktspēja un tiek ierobežota vibrācija, atrašanās vietu pakalpojumi un lielākā daļa fona datu. E-pasta, ziņojumapmaiņas un cita veida lietotnes, kuru darbības pamatā ir datu sinhronizācija, var netikt atjauninātas, ja tās neatverat.\n\nTiklīdz tiek sākta ierīces uzlāde, akumulatora jaudas taupīšanas režīms automātiski tiek izslēgts."</string>
+    <string name="battery_saver_description" msgid="5394663545060026162">"Lai paildzinātu akumulatora darbību, akumulatora jaudas taupīšanas režīmā tiek samazināta ierīces veiktspēja un tiek ierobežota vibrācija, atrašanās vietu pakalpojumi un lielākā daļa fona datu. E-pasta, ziņojumapmaiņas un citas lietotnes, kurām ir nepieciešama sinhronizācija, var netikt atjauninātas, ja tās neatverat.\n\nTiklīdz tiek sākta ierīces uzlāde, akumulatora jaudas taupīšanas režīms tiek automātiski izslēgts."</string>
     <string name="data_saver_description" msgid="6015391409098303235">"Lai samazinātu datu lietojumu, datu lietojuma samazinātājs neļauj dažām lietotnēm fonā nosūtīt vai saņemt datus. Lietotne, kuru pašlaik izmantojat, var piekļūt datiem, bet, iespējams, piekļūs tiem retāk (piemēram, attēli tiks parādīti tikai tad, kad tiem pieskarsieties)."</string>
     <string name="data_saver_enable_title" msgid="4674073932722787417">"Vai ieslēgt datu lietojuma samazinātāju?"</string>
     <string name="data_saver_enable_button" msgid="7147735965247211818">"Ieslēgt"</string>
@@ -1817,14 +1819,10 @@
     <string name="etws_primary_default_message_test" msgid="2709597093560037455">"Ārkārtas ziņojuma pārbaude"</string>
     <string name="notification_reply_button_accessibility" msgid="3621714652387814344">"Atbildēt"</string>
     <string name="etws_primary_default_message_others" msgid="6293148756130398971"></string>
-    <!-- no translation found for mmcc_authentication_reject (5767701075994754356) -->
-    <skip />
-    <!-- no translation found for mmcc_imsi_unknown_in_hlr (5316658473301462825) -->
-    <skip />
-    <!-- no translation found for mmcc_illegal_ms (807334478177362062) -->
-    <skip />
-    <!-- no translation found for mmcc_illegal_me (1950705155760872972) -->
-    <skip />
+    <string name="mmcc_authentication_reject" msgid="5767701075994754356">"SIM karti nav atļauts izmantot balss zvaniem"</string>
+    <string name="mmcc_imsi_unknown_in_hlr" msgid="5316658473301462825">"SIM kartē netiek nodrošināti balss zvani"</string>
+    <string name="mmcc_illegal_ms" msgid="807334478177362062">"SIM karti nav atļauts izmantot balss zvaniem"</string>
+    <string name="mmcc_illegal_me" msgid="1950705155760872972">"Tālruni nav atļauts izmantot balss zvaniem"</string>
     <string name="popup_window_default_title" msgid="4874318849712115433">"Uznirstošais logs"</string>
     <string name="slice_more_content" msgid="8504342889413274608">"Vēl <xliff:g id="NUMBER">%1$d</xliff:g>"</string>
     <string name="shortcut_restored_on_lower_version" msgid="5270675146351613828">"Šai saīsnei ir nepieciešama jaunākā lietotne."</string>

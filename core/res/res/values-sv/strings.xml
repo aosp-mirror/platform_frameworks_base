@@ -79,7 +79,7 @@
     <string name="RestrictedOnAllVoiceTitle" msgid="158800171499150681">"Tjänster för röst- och nödsamtal har blockerats"</string>
     <string name="RestrictedStateContent" msgid="4278821484643362350">"Detta erbjuds för tillfället inte på mobilnätverket där du befinner dig"</string>
     <string name="NetworkPreferenceSwitchTitle" msgid="4008877505368566980">"Det går inte att nå nätverket"</string>
-    <string name="NetworkPreferenceSwitchSummary" msgid="1203771446683319957">"Testa om du får bättre mottagning genom att ändra till en annan typ under Inställningar &gt; Nätverk och internet &gt; Mobila nätverk &gt; Önskad nätverkstyp."</string>
+    <string name="NetworkPreferenceSwitchSummary" msgid="7056776609127756440">"Testa om du får bättre mottagning genom att ändra till en annan typ under Inställningar &gt; Nätverk och internet &gt; Mobila nätverk &gt; Önskad nätverkstyp."</string>
     <string name="EmergencyCallWarningTitle" msgid="4790413876281901612">"Wi-Fi-samtal är aktiverat"</string>
     <string name="EmergencyCallWarningSummary" msgid="8973232888021643293">"Mobilnätverk krävs för att ringa nödsamtal."</string>
     <string name="notification_channel_network_alert" msgid="4427736684338074967">"Aviseringar"</string>
@@ -431,7 +431,7 @@
     <string name="permdesc_setTimeZone" product="tv" msgid="888864653946175955">"Tillåter att appen ändrar tidszonen på TV:n."</string>
     <string name="permdesc_setTimeZone" product="default" msgid="4499943488436633398">"Tillåter att appen ändrar mobilens tidszon."</string>
     <string name="permlab_getAccounts" msgid="1086795467760122114">"hitta konton på enheten"</string>
-    <string name="permdesc_getAccounts" product="tablet" msgid="2741496534769660027">"Tillåter att appen hämtar en lista över alla kända konton på surfplattan. Detta kan inkludera konton som har skapats av appar som du har installerat."</string>
+    <string name="permdesc_getAccounts" product="tablet" msgid="2741496534769660027">"Tillåter att appen laddar ned en lista över alla kända konton på surfplattan. Detta kan inkludera konton som har skapats av appar som du har installerat."</string>
     <string name="permdesc_getAccounts" product="tv" msgid="4190633395633907543">"Tillåter att appen hämtar listan med konton som TV:n kan identifiera. Den kan innehålla konton som skapats av appar som du har installerat."</string>
     <string name="permdesc_getAccounts" product="default" msgid="3448316822451807382">"Tillåter att appen hämtar en lista över alla kända konton på mobilen. Detta kan inkludera konton som har skapats av appar som du har installerat."</string>
     <string name="permlab_accessNetworkState" msgid="4951027964348974773">"visa nätverksanslutningar"</string>
@@ -452,7 +452,7 @@
     <string name="permdesc_changeWifiMulticastState" product="default" msgid="6851949706025349926">"Tillåter att appen tar emot paket som skickats med multicast-adress till alla enheter i ett Wi-Fi-nätverk och inte bara till den här mobilen. Detta drar mer batteri än när multicastläget inte används."</string>
     <string name="permlab_bluetoothAdmin" msgid="6006967373935926659">"få åtkomst till Bluetooth-inställningar"</string>
     <string name="permdesc_bluetoothAdmin" product="tablet" msgid="6921177471748882137">"Tillåter att appen konfigurerar den lokala Bluetooth-surfplattan samt upptäcker och parkopplar den med fjärranslutna enheter."</string>
-    <string name="permdesc_bluetoothAdmin" product="tv" msgid="3373125682645601429">"Tillåter att appen konfigurerar den lokala Bluetooth-TV:n och identifierar och kopplar den till fjärrenheter."</string>
+    <string name="permdesc_bluetoothAdmin" product="tv" msgid="3373125682645601429">"Tillåter att appen konfigurerar den lokala Bluetooth-TV:n och identifierar och parkopplar den till fjärrenheter."</string>
     <string name="permdesc_bluetoothAdmin" product="default" msgid="8931682159331542137">"Tillåter att appen konfigurerar den lokala Bluetooth-mobilen samt upptäcker och parkopplar den med fjärranslutna enheter."</string>
     <string name="permlab_accessWimaxState" msgid="4195907010610205703">"ansluta till och koppla från WiMAX"</string>
     <string name="permdesc_accessWimaxState" msgid="6360102877261978887">"Tillåter att appen avgör om WiMAX är aktiverat och kommer åt information om eventuella anslutna WiMAX-nätverk."</string>
@@ -460,7 +460,7 @@
     <string name="permdesc_changeWimaxState" product="tablet" msgid="3156456504084201805">"Tillåter att appen ansluter surfplattan till eller kopplar från WiMAX-nätverk."</string>
     <string name="permdesc_changeWimaxState" product="tv" msgid="6022307083934827718">"Tillåter att appen ansluter TV:n till och kopplar från TV:n från WiMAX-nätverk."</string>
     <string name="permdesc_changeWimaxState" product="default" msgid="697025043004923798">"Tillåter att appen ansluter mobilen till eller kopplar från WiMAX-nätverk."</string>
-    <string name="permlab_bluetooth" msgid="6127769336339276828">"koppla till Bluetooth-enheter"</string>
+    <string name="permlab_bluetooth" msgid="6127769336339276828">"parkoppla till Bluetooth-enheter"</string>
     <string name="permdesc_bluetooth" product="tablet" msgid="3480722181852438628">"Tillåter att appen kommer åt pekdatorns Bluetooth-konfiguration och upprättar och godkänner anslutningar till parkopplade enheter."</string>
     <string name="permdesc_bluetooth" product="tv" msgid="3974124940101104206">"Tillåter att appen visar konfigurationen av Bluetooth på TV:n och godkänner alla anslutningar till kopplade enheter."</string>
     <string name="permdesc_bluetooth" product="default" msgid="3207106324452312739">"Tillåter att appen kommer åt mobilens Bluetooth-konfiguration och upprättar och godkänner anslutningar till parkopplade enheter."</string>
@@ -1051,6 +1051,9 @@
     <string name="screen_compat_mode_hint" msgid="1064524084543304459">"Aktivera detta igen i Systeminställningar &gt; Appar &gt; Hämtat."</string>
     <string name="unsupported_display_size_message" msgid="6545327290756295232">"<xliff:g id="APP_NAME">%1$s</xliff:g> har inte stöd för den nuvarande inställningen för skärmstorlek och kanske inte fungerar som förväntat."</string>
     <string name="unsupported_display_size_show" msgid="7969129195360353041">"Visa alltid"</string>
+    <string name="unsupported_compile_sdk_message" msgid="4253168368781441759">"<xliff:g id="APP_NAME">%1$s</xliff:g> skapades för en inkompatibel version av operativsystemet Android och kanske inte fungerar som förväntat. En uppdaterad version av appen kan vara tillgänglig."</string>
+    <string name="unsupported_compile_sdk_show" msgid="2681877855260970231">"Visa alltid"</string>
+    <string name="unsupported_compile_sdk_check_update" msgid="3312723623323216101">"Sök efter uppdateringar"</string>
     <string name="smv_application" msgid="3307209192155442829">"Appen <xliff:g id="APPLICATION">%1$s</xliff:g> (processen <xliff:g id="PROCESS">%2$s</xliff:g>) har brutit mot sin egen StrictMode-policy."</string>
     <string name="smv_process" msgid="5120397012047462446">"Processen <xliff:g id="PROCESS">%1$s</xliff:g> har brutit mot sin egen StrictMode-policy."</string>
     <string name="android_upgrading_title" msgid="1584192285441405746">"Android uppgraderas ..."</string>
@@ -1116,10 +1119,10 @@
     <string name="network_available_sign_in" msgid="1848877297365446605">"Logga in på nätverket"</string>
     <!-- no translation found for network_available_sign_in_detailed (8000081941447976118) -->
     <skip />
-    <string name="wifi_no_internet" msgid="8451173622563841546">"Wi-Fi-nätverket är inte anslutet till internet"</string>
+    <string name="wifi_no_internet" msgid="8938267198124654938">"Wi-Fi-nätverket är inte anslutet till internet"</string>
     <string name="wifi_no_internet_detailed" msgid="8083079241212301741">"Tryck för alternativ"</string>
     <string name="network_switch_metered" msgid="4671730921726992671">"Byte av nätverk till <xliff:g id="NETWORK_TYPE">%1$s</xliff:g>"</string>
-    <string name="network_switch_metered_detail" msgid="5325661434777870353">"<xliff:g id="NEW_NETWORK">%1$s</xliff:g> används på enheten när det inte finns internetåtkomst via <xliff:g id="PREVIOUS_NETWORK">%2$s</xliff:g>. Avgifter kan tillkomma."</string>
+    <string name="network_switch_metered_detail" msgid="775163331794506615">"<xliff:g id="NEW_NETWORK">%1$s</xliff:g> används på enheten när det inte finns internetåtkomst via <xliff:g id="PREVIOUS_NETWORK">%2$s</xliff:g>. Avgifter kan tillkomma."</string>
     <string name="network_switch_metered_toast" msgid="5779283181685974304">"Byte av nätverk från <xliff:g id="PREVIOUS_NETWORK">%1$s</xliff:g> till <xliff:g id="NEW_NETWORK">%2$s</xliff:g>"</string>
   <string-array name="network_switch_type_name">
     <item msgid="3979506840912951943">"mobildata"</item>
@@ -1130,7 +1133,7 @@
   </string-array>
     <string name="network_switch_type_name_unknown" msgid="4552612897806660656">"en okänd nätverkstyp"</string>
     <string name="wifi_watchdog_network_disabled" msgid="7904214231651546347">"Det gick inte att ansluta till Wi-Fi"</string>
-    <string name="wifi_watchdog_network_disabled_detailed" msgid="5548780776418332675">" har en dålig Internetanslutning."</string>
+    <string name="wifi_watchdog_network_disabled_detailed" msgid="4917472096696322767">" har en dålig Internetanslutning."</string>
     <string name="wifi_connect_alert_title" msgid="8455846016001810172">"Tillåt anslutning?"</string>
     <string name="wifi_connect_alert_message" msgid="6451273376815958922">"Appen %1$s vill ansluta till Wi-Fi-nätverket %2$s"</string>
     <string name="wifi_connect_default_application" msgid="7143109390475484319">"En app"</string>
@@ -1626,7 +1629,6 @@
     <string name="managed_profile_label_badge_2" msgid="5048136430082124036">"Andra <xliff:g id="LABEL">%1$s</xliff:g> för jobbet"</string>
     <string name="managed_profile_label_badge_3" msgid="2808305070321719040">"Tredje <xliff:g id="LABEL">%1$s</xliff:g> för jobbet"</string>
     <string name="lock_to_app_toast" msgid="6820571533009838261">"Om du vill lossa skärmen trycker du länge på knapparna Tillbaka och Översikt"</string>
-    <string name="lock_to_app_toast_locked" msgid="7849470948648628704">"Denna app kan inte lossas"</string>
     <string name="lock_to_app_start" msgid="6643342070839862795">"Skärmen är fäst"</string>
     <string name="lock_to_app_exit" msgid="8598219838213787430">"Skärmen är inte längre fäst"</string>
     <string name="lock_to_app_unlock_pin" msgid="2552556656504331634">"Be om pinkod innan skärmen slutar fästas"</string>
@@ -1635,7 +1637,7 @@
     <string name="package_installed_device_owner" msgid="6875717669960212648">"Administratören installerade paketet"</string>
     <string name="package_updated_device_owner" msgid="1847154566357862089">"Administratören uppdaterade paketet"</string>
     <string name="package_deleted_device_owner" msgid="2307122077550236438">"Administratören raderade paketet"</string>
-    <string name="battery_saver_description" msgid="1960431123816253034">"I batterisparläget reduceras enhetens prestanda så att batteriet ska räcka längre och vibration, platstjänster samt den mesta användningen av bakgrundsdata begränsas. Det kan hända att appar för e-post, sms och annat som kräver synkronisering inte uppdateras förrän du öppnar dem.\n\nBatterisparläget inaktiveras automatiskt när enheten laddas."</string>
+    <string name="battery_saver_description" msgid="5394663545060026162">"I batterisparläget reduceras enhetens prestanda så att batteriet ska räcka längre. Vibration, platstjänster och den mesta användningen av bakgrundsdata begränsas. Det kan hända att appar för e-post, sms och annat som kräver synkronisering inte uppdateras förrän du öppnar dem.\n\nBatterisparläget inaktiveras automatiskt när enheten laddas."</string>
     <string name="data_saver_description" msgid="6015391409098303235">"Med databesparing kan du minska dataanvändningen genom att hindra en del appar från att skicka eller ta emot data i bakgrunden. Appar som du använder kan komma åt data, men det sker kanske inte lika ofta. Detta innebär t.ex. att bilder inte visas förrän du trycker på dem."</string>
     <string name="data_saver_enable_title" msgid="4674073932722787417">"Aktivera Databesparing?"</string>
     <string name="data_saver_enable_button" msgid="7147735965247211818">"Aktivera"</string>
@@ -1782,14 +1784,10 @@
     <string name="etws_primary_default_message_test" msgid="2709597093560037455">"Test för nödmeddelanden"</string>
     <string name="notification_reply_button_accessibility" msgid="3621714652387814344">"Svara"</string>
     <string name="etws_primary_default_message_others" msgid="6293148756130398971"></string>
-    <!-- no translation found for mmcc_authentication_reject (5767701075994754356) -->
-    <skip />
-    <!-- no translation found for mmcc_imsi_unknown_in_hlr (5316658473301462825) -->
-    <skip />
-    <!-- no translation found for mmcc_illegal_ms (807334478177362062) -->
-    <skip />
-    <!-- no translation found for mmcc_illegal_me (1950705155760872972) -->
-    <skip />
+    <string name="mmcc_authentication_reject" msgid="5767701075994754356">"SIM-kort tillåts inte för röst"</string>
+    <string name="mmcc_imsi_unknown_in_hlr" msgid="5316658473301462825">"SIM-kort tillhandahålls inte för röst"</string>
+    <string name="mmcc_illegal_ms" msgid="807334478177362062">"SIM-kort tillåts inte för röst"</string>
+    <string name="mmcc_illegal_me" msgid="1950705155760872972">"Telefon tillåts inte för röst"</string>
     <string name="popup_window_default_title" msgid="4874318849712115433">"popup-fönster"</string>
     <string name="slice_more_content" msgid="8504342889413274608">"<xliff:g id="NUMBER">%1$d</xliff:g> till"</string>
     <string name="shortcut_restored_on_lower_version" msgid="5270675146351613828">"Den här genvägen kräver den senaste versionen av appen"</string>

@@ -79,7 +79,7 @@
     <string name="RestrictedOnAllVoiceTitle" msgid="158800171499150681">"Tidak ada layanan panggilan suara/darurat"</string>
     <string name="RestrictedStateContent" msgid="4278821484643362350">"Untuk sementara tidak ditawarkan oleh jaringan seluler di lokasi Anda"</string>
     <string name="NetworkPreferenceSwitchTitle" msgid="4008877505368566980">"Tidak dapat menjangkau jaringan"</string>
-    <string name="NetworkPreferenceSwitchSummary" msgid="1203771446683319957">"Untuk menyempurnakan penerimaan sinyal, coba ubah jenis yang dipilih di Setelan &gt; Jaringan &amp; Internet &gt; Jaringan seluler &gt; Jenis jaringan pilihan."</string>
+    <string name="NetworkPreferenceSwitchSummary" msgid="7056776609127756440">"Untuk menyempurnakan penerimaan sinyal, coba ubah jenis yang dipilih di Setelan &gt; Jaringan &amp; internet &gt; Jaringan seluler &gt; Jenis jaringan pilihan."</string>
     <string name="EmergencyCallWarningTitle" msgid="4790413876281901612">"Panggilan Wi‑Fi aktif"</string>
     <string name="EmergencyCallWarningSummary" msgid="8973232888021643293">"Panggilan darurat memerlukan jaringan seluler."</string>
     <string name="notification_channel_network_alert" msgid="4427736684338074967">"Notifikasi"</string>
@@ -495,7 +495,7 @@
     <string name="permlab_writeSyncSettings" msgid="5408694875793945314">"nyalakan dan matikan sinkronisasi"</string>
     <string name="permdesc_writeSyncSettings" msgid="8956262591306369868">"Memungkinkan aplikasi mengubah setelan sinkronisasi untuk sebuah akun. Misalnya, izin ini dapat digunakan untuk mengaktifkan sinkronisasi dari aplikasi Orang dengan sebuah akun."</string>
     <string name="permlab_readSyncStats" msgid="7396577451360202448">"statistika baca sinkron"</string>
-    <string name="permdesc_readSyncStats" msgid="1510143761757606156">"Memungkinkan aplikasi membaca statistik sinkronisasi untuk sebuah akun, termasuk riwayat kejadian sinkronisasi dan berapa banyak data yang disinkronkan."</string>
+    <string name="permdesc_readSyncStats" msgid="1510143761757606156">"Memungkinkan aplikasi membaca statistik sinkronisasi untuk sebuah akun, termasuk histori kejadian sinkronisasi dan berapa banyak data yang disinkronkan."</string>
     <string name="permlab_sdcardRead" product="nosdcard" msgid="367275095159405468">"baca konten simpanan USB Anda"</string>
     <string name="permlab_sdcardRead" product="default" msgid="2188156462934977940">"baca konten kartu SD Anda"</string>
     <string name="permdesc_sdcardRead" product="nosdcard" msgid="3446988712598386079">"Mengizinkan aplikasi membaca konten penyimpanan USB Anda."</string>
@@ -518,7 +518,7 @@
     <string name="permdesc_bind_connection_service" msgid="4008754499822478114">"Memungkinkan aplikasi berinteraksi dengan layanan telepon untuk melakukan/menerima panggilan."</string>
     <string name="permlab_control_incall_experience" msgid="9061024437607777619">"memberikan pengalaman pengguna dalam panggilan"</string>
     <string name="permdesc_control_incall_experience" msgid="915159066039828124">"Memungkinkan aplikasi memberikan pengalaman pengguna dalam panggilan."</string>
-    <string name="permlab_readNetworkUsageHistory" msgid="7862593283611493232">"baca riwayat penggunaan jaringan"</string>
+    <string name="permlab_readNetworkUsageHistory" msgid="7862593283611493232">"baca histori penggunaan jaringan"</string>
     <string name="permdesc_readNetworkUsageHistory" msgid="7689060749819126472">"Mengizinkan apl membaca penggunaan jaringan historis untuk apl dan jaringan tertentu."</string>
     <string name="permlab_manageNetworkPolicy" msgid="2562053592339859990">"kelola kebijakan jaringan"</string>
     <string name="permdesc_manageNetworkPolicy" msgid="7537586771559370668">"Mengizinkan apl mengelola kebijakan jaringan dan menentukan peraturan khusus apl."</string>
@@ -796,7 +796,7 @@
     <string name="password_keyboard_label_alt_key" msgid="1284820942620288678">"ALT"</string>
     <string name="granularity_label_character" msgid="7336470535385009523">"karakter"</string>
     <string name="granularity_label_word" msgid="7075570328374918660">"kata"</string>
-    <string name="granularity_label_link" msgid="5815508880782488267">"tautan"</string>
+    <string name="granularity_label_link" msgid="5815508880782488267">"link"</string>
     <string name="granularity_label_line" msgid="5764267235026120888">"baris"</string>
     <string name="factorytest_failed" msgid="5410270329114212041">"Uji pabrik gagal"</string>
     <string name="factorytest_not_system" msgid="4435201656767276723">"Tindakan FACTORY_TEST hanya didukung untuk paket yang terpasang pada /system/app."</string>
@@ -828,12 +828,12 @@
     <string name="autofill_parish" msgid="8202206105468820057">"Kampung"</string>
     <string name="autofill_area" msgid="3547409050889952423">"Area"</string>
     <string name="autofill_emirate" msgid="2893880978835698818">"Emirat"</string>
-    <string name="permlab_readHistoryBookmarks" msgid="3775265775405106983">"baca riwayat dan bookmark web Anda"</string>
-    <string name="permdesc_readHistoryBookmarks" msgid="8462378226600439658">"Memungkinkan aplikasi membaca riwayat semua URL yang telah dikunjungi Browser, dan semua bookmark Browser. Catatan: izin ini tidak dapat diberlakukan oleh browser pihak ketiga atau aplikasi lain dengan kemampuan menjelajahi web."</string>
-    <string name="permlab_writeHistoryBookmarks" msgid="3714785165273314490">"tulis riwayat dan bookmark web"</string>
-    <string name="permdesc_writeHistoryBookmarks" product="tablet" msgid="6825527469145760922">"Memungkinkan aplikasi mengubah riwayat atau bookmark Browser yang tersimpan dalam tablet Anda. Izin ini memungkinkan aplikasi menghapus atau mengubah data Browser. Catatan: izin ini tidak dapat diberlakukan oleh browser pihak ketiga atau aplikasi lain dengan kemampuan menjelajahi web."</string>
-    <string name="permdesc_writeHistoryBookmarks" product="tv" msgid="7007393823197766548">"Mengizinkan aplikasi untuk memodifikasi riwayat atau bookmark Browser yang disimpan di TV. Izin ini memungkinkan aplikasi untuk menghapus atau memodifikasi data Browser. Catatan: izin ini mungkin diterapkan oleh browser pihak ketiga atau aplikasi lain yang memiliki kemampuan menjelajah web."</string>
-    <string name="permdesc_writeHistoryBookmarks" product="default" msgid="8497389531014185509">"Memungkinkan aplikasi mengubah riwayat atau bookmark Browser yang tersimpan dalam ponsel Anda. Izin ini memungkinkan aplikasi menghapus atau mengubah data Browser. Catatan: izin ini tidak dapat diberlakukan oleh browser pihak ketiga atau aplikasi lain dengan kemampuan menjelajahi web."</string>
+    <string name="permlab_readHistoryBookmarks" msgid="3775265775405106983">"baca histori dan bookmark web Anda"</string>
+    <string name="permdesc_readHistoryBookmarks" msgid="8462378226600439658">"Memungkinkan aplikasi membaca histori semua URL yang telah dikunjungi Browser, dan semua bookmark Browser. Catatan: izin ini tidak dapat diberlakukan oleh browser pihak ketiga atau aplikasi lain dengan kemampuan menjelajahi web."</string>
+    <string name="permlab_writeHistoryBookmarks" msgid="3714785165273314490">"tulis histori dan bookmark web"</string>
+    <string name="permdesc_writeHistoryBookmarks" product="tablet" msgid="6825527469145760922">"Memungkinkan aplikasi mengubah histori atau bookmark Browser yang tersimpan dalam tablet Anda. Izin ini memungkinkan aplikasi menghapus atau mengubah data Browser. Catatan: izin ini tidak dapat diberlakukan oleh browser pihak ketiga atau aplikasi lain dengan kemampuan menjelajahi web."</string>
+    <string name="permdesc_writeHistoryBookmarks" product="tv" msgid="7007393823197766548">"Mengizinkan aplikasi untuk memodifikasi histori atau bookmark Browser yang disimpan di TV. Izin ini memungkinkan aplikasi untuk menghapus atau memodifikasi data Browser. Catatan: izin ini mungkin diterapkan oleh browser pihak ketiga atau aplikasi lain yang memiliki kemampuan menjelajah web."</string>
+    <string name="permdesc_writeHistoryBookmarks" product="default" msgid="8497389531014185509">"Memungkinkan aplikasi mengubah histori atau bookmark Browser yang tersimpan dalam ponsel Anda. Izin ini memungkinkan aplikasi menghapus atau mengubah data Browser. Catatan: izin ini tidak dapat diberlakukan oleh browser pihak ketiga atau aplikasi lain dengan kemampuan menjelajahi web."</string>
     <string name="permlab_setAlarm" msgid="1379294556362091814">"setel alarm"</string>
     <string name="permdesc_setAlarm" msgid="316392039157473848">"Mengizinkan apl menyetel alarm di apl jam alarm yang terpasang. Beberapa apl jam alarm mungkin tidak menerapkan fitur ini."</string>
     <string name="permlab_addVoicemail" msgid="5525660026090959044">"tambahkan kotak pesan"</string>
@@ -1051,6 +1051,9 @@
     <string name="screen_compat_mode_hint" msgid="1064524084543304459">"Aktifkan kembali dialog ini di Setelan sistem &gt; Apl &gt; Terdownload."</string>
     <string name="unsupported_display_size_message" msgid="6545327290756295232">"<xliff:g id="APP_NAME">%1$s</xliff:g> tidak mendukung setelan Ukuran layar saat ini dan dapat menunjukkan perilaku yang tak diharapkan."</string>
     <string name="unsupported_display_size_show" msgid="7969129195360353041">"Selalu tampilkan"</string>
+    <string name="unsupported_compile_sdk_message" msgid="4253168368781441759">"<xliff:g id="APP_NAME">%1$s</xliff:g> dibuat untuk versi OS Android yang tidak kompatibel dan mungkin berperilaku tak terduga. Versi aplikasi yang diupdate mungkin tersedia."</string>
+    <string name="unsupported_compile_sdk_show" msgid="2681877855260970231">"Selalu tampilkan"</string>
+    <string name="unsupported_compile_sdk_check_update" msgid="3312723623323216101">"Periksa apakah ada update"</string>
     <string name="smv_application" msgid="3307209192155442829">"Apl <xliff:g id="APPLICATION">%1$s</xliff:g> (proses <xliff:g id="PROCESS">%2$s</xliff:g>) telah melanggar kebijakan StrictMode yang diberlakukannya sendiri."</string>
     <string name="smv_process" msgid="5120397012047462446">"Proses <xliff:g id="PROCESS">%1$s</xliff:g> telah melanggar kebijakan StrictMode yang diberlakukan secara otomatis."</string>
     <string name="android_upgrading_title" msgid="1584192285441405746">"Android sedang meningkatkan versi..."</string>
@@ -1116,10 +1119,10 @@
     <string name="network_available_sign_in" msgid="1848877297365446605">"Masuk ke jaringan"</string>
     <!-- no translation found for network_available_sign_in_detailed (8000081941447976118) -->
     <skip />
-    <string name="wifi_no_internet" msgid="8451173622563841546">"Wi-Fi tidak memiliki akses internet"</string>
+    <string name="wifi_no_internet" msgid="8938267198124654938">"Wi-Fi tidak memiliki akses internet"</string>
     <string name="wifi_no_internet_detailed" msgid="8083079241212301741">"Ketuk untuk melihat opsi"</string>
     <string name="network_switch_metered" msgid="4671730921726992671">"Dialihkan ke <xliff:g id="NETWORK_TYPE">%1$s</xliff:g>"</string>
-    <string name="network_switch_metered_detail" msgid="5325661434777870353">"Perangkat menggunakan <xliff:g id="NEW_NETWORK">%1$s</xliff:g> jika <xliff:g id="PREVIOUS_NETWORK">%2$s</xliff:g> tidak memiliki akses internet. Tarif mungkin berlaku."</string>
+    <string name="network_switch_metered_detail" msgid="775163331794506615">"Perangkat menggunakan <xliff:g id="NEW_NETWORK">%1$s</xliff:g> jika <xliff:g id="PREVIOUS_NETWORK">%2$s</xliff:g> tidak memiliki akses internet. Tarif mungkin berlaku."</string>
     <string name="network_switch_metered_toast" msgid="5779283181685974304">"Dialihkan dari <xliff:g id="PREVIOUS_NETWORK">%1$s</xliff:g> ke <xliff:g id="NEW_NETWORK">%2$s</xliff:g>"</string>
   <string-array name="network_switch_type_name">
     <item msgid="3979506840912951943">"data seluler"</item>
@@ -1130,7 +1133,7 @@
   </string-array>
     <string name="network_switch_type_name_unknown" msgid="4552612897806660656">"jenis jaringan yang tidak dikenal"</string>
     <string name="wifi_watchdog_network_disabled" msgid="7904214231651546347">"Tidak dapat tersambung ke Wi-Fi"</string>
-    <string name="wifi_watchdog_network_disabled_detailed" msgid="5548780776418332675">" memiliki sambungan internet yang buruk."</string>
+    <string name="wifi_watchdog_network_disabled_detailed" msgid="4917472096696322767">" memiliki sambungan internet yang buruk."</string>
     <string name="wifi_connect_alert_title" msgid="8455846016001810172">"Izinkan hubungan?"</string>
     <string name="wifi_connect_alert_message" msgid="6451273376815958922">"Aplikasi %1$s ingin tersambung ke Jaringan Wifi %2$s"</string>
     <string name="wifi_connect_default_application" msgid="7143109390475484319">"Aplikasi"</string>
@@ -1634,7 +1637,7 @@
     <string name="package_installed_device_owner" msgid="6875717669960212648">"Diinstal oleh admin Anda"</string>
     <string name="package_updated_device_owner" msgid="1847154566357862089">"Diupdate oleh admin Anda"</string>
     <string name="package_deleted_device_owner" msgid="2307122077550236438">"Dihapus oleh admin Anda"</string>
-    <string name="battery_saver_description" msgid="1960431123816253034">"Untuk membantu meningkatkan masa pakai baterai, penghemat baterai mengurangi kinerja perangkat dan membatasi getaran, layanan lokasi, dan sebagian besar data latar belakang. Email, pesan, dan aplikasi lain yang mengandalkan sinkronisasi mungkin tidak diperbarui kecuali jika dibuka.\n\nPenghemat baterai otomatis nonaktif jika perangkat diisi dayanya."</string>
+    <string name="battery_saver_description" msgid="5394663545060026162">"Untuk membantu meningkatkan masa pakai baterai, Penghemat Baterai mengurangi performa perangkat dan membatasi getaran, layanan lokasi, dan sebagian besar data latar belakang. Email, messaging, dan aplikasi lain yang mengandalkan sinkronisasi mungkin tidak diupdate kecuali jika dibuka.\n\nPenghemat Baterai otomatis nonaktif jika perangkat diisi dayanya."</string>
     <string name="data_saver_description" msgid="6015391409098303235">"Untuk membantu mengurangi penggunaan data, Penghemat Kuota Internet mencegah beberapa aplikasi mengirim atau menerima data di latar belakang. Aplikasi yang sedang digunakan dapat mengakses data, tetapi frekuensinya agak lebih jarang. Misalnya saja, gambar hanya akan ditampilkan setelah disentuh."</string>
     <string name="data_saver_enable_title" msgid="4674073932722787417">"Aktifkan Penghemat Kuota Internet?"</string>
     <string name="data_saver_enable_button" msgid="7147735965247211818">"Aktifkan"</string>

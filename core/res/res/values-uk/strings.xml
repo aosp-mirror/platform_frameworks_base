@@ -81,7 +81,7 @@
     <string name="RestrictedOnAllVoiceTitle" msgid="158800171499150681">"Немає голосової/екстреної служби"</string>
     <string name="RestrictedStateContent" msgid="4278821484643362350">"Тимчасово не пропонується мобільною мережею у вашому місцезнаходженні"</string>
     <string name="NetworkPreferenceSwitchTitle" msgid="4008877505368566980">"Не вдається під’єднатися до мережі"</string>
-    <string name="NetworkPreferenceSwitchSummary" msgid="1203771446683319957">"Щоб покращити прийняття сигналу, змініть тип у меню \"Налаштування\" &gt; \"Мережа й Інтернет\" &gt; \"Мобільні мережі\" &gt; \"Тип мережі\"."</string>
+    <string name="NetworkPreferenceSwitchSummary" msgid="7056776609127756440">"Щоб покращити прийняття сигналу, змініть тип у меню \"Налаштування\" &gt; \"Мережа й Інтернет\" &gt; \"Мобільні мережі\" &gt; \"Тип мережі\"."</string>
     <string name="EmergencyCallWarningTitle" msgid="4790413876281901612">"Виклики через Wi-Fi активовано"</string>
     <string name="EmergencyCallWarningSummary" msgid="8973232888021643293">"Щоб здійснювати екстрені виклики, потрібне з’єднання з мобільною мережею."</string>
     <string name="notification_channel_network_alert" msgid="4427736684338074967">"Сповіщення"</string>
@@ -261,7 +261,7 @@
     <string name="foreground_service_apps_in_background" msgid="7175032677643332242">"Додатків, що використовують заряд акумулятора: <xliff:g id="NUMBER">%1$d</xliff:g>"</string>
     <string name="foreground_service_tap_for_details" msgid="372046743534354644">"Торкніться, щоб перевірити використання акумулятора й трафік"</string>
     <string name="foreground_service_multiple_separator" msgid="4021901567939866542">"<xliff:g id="LEFT_SIDE">%1$s</xliff:g>, <xliff:g id="RIGHT_SIDE">%2$s</xliff:g>"</string>
-    <string name="safeMode" msgid="2788228061547930246">"Безп. режим"</string>
+    <string name="safeMode" msgid="2788228061547930246">"Безпечний режим"</string>
     <string name="android_system_label" msgid="6577375335728551336">"Система Android"</string>
     <string name="user_owner_label" msgid="1119010402169916617">"Перейти в особистий профіль"</string>
     <string name="managed_profile_label" msgid="5289992269827577857">"Перейти в робочий профіль"</string>
@@ -1091,6 +1091,9 @@
     <string name="screen_compat_mode_hint" msgid="1064524084543304459">"Знову ввімкнути це в меню Налаштування системи &gt; Програми &gt; Завантажені."</string>
     <string name="unsupported_display_size_message" msgid="6545327290756295232">"Додаток <xliff:g id="APP_NAME">%1$s</xliff:g> не підтримує поточне налаштування розміру екрана та може працювати неналежним чином."</string>
     <string name="unsupported_display_size_show" msgid="7969129195360353041">"Завжди показувати"</string>
+    <string name="unsupported_compile_sdk_message" msgid="4253168368781441759">"Додаток <xliff:g id="APP_NAME">%1$s</xliff:g> несумісний із вашою версією ОС Android і може працювати неналежним чином. Можливо, доступна оновлена версія додатка."</string>
+    <string name="unsupported_compile_sdk_show" msgid="2681877855260970231">"Завжди показувати"</string>
+    <string name="unsupported_compile_sdk_check_update" msgid="3312723623323216101">"Шукати оновлення"</string>
     <string name="smv_application" msgid="3307209192155442829">"Програма <xliff:g id="APPLICATION">%1$s</xliff:g> (процес <xliff:g id="PROCESS">%2$s</xliff:g>) порушила свою самозастосовну політику StrictMode."</string>
     <string name="smv_process" msgid="5120397012047462446">"Процес <xliff:g id="PROCESS">%1$s</xliff:g> порушив свою самозастосовну політику StrictMode."</string>
     <string name="android_upgrading_title" msgid="1584192285441405746">"Android оновлюється..."</string>
@@ -1160,10 +1163,10 @@
     <string name="network_available_sign_in" msgid="1848877297365446605">"Вхід у мережу"</string>
     <!-- no translation found for network_available_sign_in_detailed (8000081941447976118) -->
     <skip />
-    <string name="wifi_no_internet" msgid="8451173622563841546">"Мережа Wi-Fi не має доступу до Інтернету"</string>
+    <string name="wifi_no_internet" msgid="8938267198124654938">"Мережа Wi-Fi не має доступу до Інтернету"</string>
     <string name="wifi_no_internet_detailed" msgid="8083079241212301741">"Торкніться, щоб відкрити опції"</string>
     <string name="network_switch_metered" msgid="4671730921726992671">"Пристрій перейшов на мережу <xliff:g id="NETWORK_TYPE">%1$s</xliff:g>"</string>
-    <string name="network_switch_metered_detail" msgid="5325661434777870353">"Пристрій використовує мережу <xliff:g id="NEW_NETWORK">%1$s</xliff:g>, коли мережа <xliff:g id="PREVIOUS_NETWORK">%2$s</xliff:g> не має доступу до Інтернету. Може стягуватися плата."</string>
+    <string name="network_switch_metered_detail" msgid="775163331794506615">"Коли мережа <xliff:g id="PREVIOUS_NETWORK">%2$s</xliff:g> не має доступу до Інтернету, використовується <xliff:g id="NEW_NETWORK">%1$s</xliff:g>. Може стягуватися плата."</string>
     <string name="network_switch_metered_toast" msgid="5779283181685974304">"Пристрій перейшов з мережі <xliff:g id="PREVIOUS_NETWORK">%1$s</xliff:g> на мережу <xliff:g id="NEW_NETWORK">%2$s</xliff:g>"</string>
   <string-array name="network_switch_type_name">
     <item msgid="3979506840912951943">"мобільне передавання даних"</item>
@@ -1174,7 +1177,7 @@
   </string-array>
     <string name="network_switch_type_name_unknown" msgid="4552612897806660656">"невідомий тип мережі"</string>
     <string name="wifi_watchdog_network_disabled" msgid="7904214231651546347">"Не вдалося під’єднатися до мережі Wi-Fi"</string>
-    <string name="wifi_watchdog_network_disabled_detailed" msgid="5548780776418332675">" має погане з’єднання з Інтернетом."</string>
+    <string name="wifi_watchdog_network_disabled_detailed" msgid="4917472096696322767">" має погане з’єднання з Інтернетом."</string>
     <string name="wifi_connect_alert_title" msgid="8455846016001810172">"Дозволити з’єднання?"</string>
     <string name="wifi_connect_alert_message" msgid="6451273376815958922">"Додаток %1$s хоче під’єднатися до мережі Wi-Fi \"%2$s\""</string>
     <string name="wifi_connect_default_application" msgid="7143109390475484319">"Додаток"</string>
@@ -1676,7 +1679,6 @@
     <string name="managed_profile_label_badge_2" msgid="5048136430082124036">"2-а робота: <xliff:g id="LABEL">%1$s</xliff:g>"</string>
     <string name="managed_profile_label_badge_3" msgid="2808305070321719040">"3-я робота: <xliff:g id="LABEL">%1$s</xliff:g>"</string>
     <string name="lock_to_app_toast" msgid="6820571533009838261">"Щоб відкріпити цей екран, натисніть і втримуйте кнопки \"Назад\" та \"Огляд\""</string>
-    <string name="lock_to_app_toast_locked" msgid="7849470948648628704">"Не вдається відкріпити цей додаток"</string>
     <string name="lock_to_app_start" msgid="6643342070839862795">"Екран закріплено"</string>
     <string name="lock_to_app_exit" msgid="8598219838213787430">"Екран відкріплено"</string>
     <string name="lock_to_app_unlock_pin" msgid="2552556656504331634">"PIN-код для відкріплення"</string>
@@ -1685,7 +1687,7 @@
     <string name="package_installed_device_owner" msgid="6875717669960212648">"Установлено адміністратором"</string>
     <string name="package_updated_device_owner" msgid="1847154566357862089">"Оновлено адміністратором"</string>
     <string name="package_deleted_device_owner" msgid="2307122077550236438">"Видалено адміністратором"</string>
-    <string name="battery_saver_description" msgid="1960431123816253034">"Щоб подовжити час роботи акумулятора, функція заощадження заряду акумулятора знижує продуктивність пристрою, а також обмежує вібрацію, функції служб локації та передавання більшості фонових даних. Електронна пошта, чати й інші додатки, які синхронізуються, можуть не оновлюватися, доки ви їх не відкриєте.\n\nФункція заощадження заряду акумулятора автоматично вимикається під час заряджання пристрою."</string>
+    <string name="battery_saver_description" msgid="5394663545060026162">"Щоб подовжити час роботи акумулятора, у режимі економії заряду акумулятора знижується продуктивність пристрою й обмежуються вібрація, функції служб локації та фоновий режим обміну даними. Електронна пошта, чати й інші додатки, які синхронізуються, можуть не оновлюватися, доки ви їх не відкриєте.\n\nРежим економії заряду акумулятора автоматично вимикається під час заряджання пристрою."</string>
     <string name="data_saver_description" msgid="6015391409098303235">"Щоб зменшити використання трафіку, функція \"Заощадження трафіку\" не дозволяє деяким додаткам надсилати чи отримувати дані у фоновому режимі. Поточний додаток зможе отримувати доступ до таких даних, але рідше. Наприклад, зображення не відображатиметься, доки ви не торкнетеся його."</string>
     <string name="data_saver_enable_title" msgid="4674073932722787417">"Увімкнути Заощадження трафіку?"</string>
     <string name="data_saver_enable_button" msgid="7147735965247211818">"Увімкнути"</string>
@@ -1852,14 +1854,10 @@
     <string name="etws_primary_default_message_test" msgid="2709597093560037455">"Перевірка екстрених повідомлень"</string>
     <string name="notification_reply_button_accessibility" msgid="3621714652387814344">"Відповісти"</string>
     <string name="etws_primary_default_message_others" msgid="6293148756130398971"></string>
-    <!-- no translation found for mmcc_authentication_reject (5767701075994754356) -->
-    <skip />
-    <!-- no translation found for mmcc_imsi_unknown_in_hlr (5316658473301462825) -->
-    <skip />
-    <!-- no translation found for mmcc_illegal_ms (807334478177362062) -->
-    <skip />
-    <!-- no translation found for mmcc_illegal_me (1950705155760872972) -->
-    <skip />
+    <string name="mmcc_authentication_reject" msgid="5767701075994754356">"Голосові дзвінки із SIM-карти заборонено"</string>
+    <string name="mmcc_imsi_unknown_in_hlr" msgid="5316658473301462825">"Не вказано SIM-карту для голосових дзвінків"</string>
+    <string name="mmcc_illegal_ms" msgid="807334478177362062">"Голосові дзвінки із SIM-карти заборонено"</string>
+    <string name="mmcc_illegal_me" msgid="1950705155760872972">"Голосові дзвінки з телефона заборонено"</string>
     <string name="popup_window_default_title" msgid="4874318849712115433">"Спливаюче вікно"</string>
     <string name="slice_more_content" msgid="8504342889413274608">"+ <xliff:g id="NUMBER">%1$d</xliff:g>"</string>
     <string name="shortcut_restored_on_lower_version" msgid="5270675146351613828">"Для цього ярлика потрібна найновіша версія додатка"</string>

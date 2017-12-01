@@ -81,7 +81,7 @@
     <string name="RestrictedOnAllVoiceTitle" msgid="158800171499150681">"Hlasová ani tísňová volání nejsou k dispozici"</string>
     <string name="RestrictedStateContent" msgid="4278821484643362350">"Mobilní síť ve vaší oblasti tuto službu dočasně nenabízí"</string>
     <string name="NetworkPreferenceSwitchTitle" msgid="4008877505368566980">"K síti se nelze připojit"</string>
-    <string name="NetworkPreferenceSwitchSummary" msgid="1203771446683319957">"Chcete-li zlepšit příjem, zkuste změnit vybraný typ sítě v Nastavení &gt; Síť a internet &gt; Mobilní sítě &gt; Preferovaný typ sítě."</string>
+    <string name="NetworkPreferenceSwitchSummary" msgid="7056776609127756440">"Chcete-li zlepšit příjem, zkuste změnit vybraný typ sítě v Nastavení &gt; Síť a internet &gt; Mobilní sítě &gt; Preferovaný typ sítě."</string>
     <string name="EmergencyCallWarningTitle" msgid="4790413876281901612">"Volání přes Wi-Fi je aktivní"</string>
     <string name="EmergencyCallWarningSummary" msgid="8973232888021643293">"Tísňová volání vyžadují mobilní síť."</string>
     <string name="notification_channel_network_alert" msgid="4427736684338074967">"Upozornění"</string>
@@ -1091,6 +1091,9 @@
     <string name="screen_compat_mode_hint" msgid="1064524084543304459">"Tento režim znovu povolíte v sekci Nastavení systému &gt; Aplikace &gt; Stažené."</string>
     <string name="unsupported_display_size_message" msgid="6545327290756295232">"Aplikace <xliff:g id="APP_NAME">%1$s</xliff:g> aktuální nastavení velikosti zobrazení nepodporuje a může se chovat neočekávaně."</string>
     <string name="unsupported_display_size_show" msgid="7969129195360353041">"Vždy zobrazovat"</string>
+    <string name="unsupported_compile_sdk_message" msgid="4253168368781441759">"Aplikace <xliff:g id="APP_NAME">%1$s</xliff:g> byla vytvořena nekompatibilní systému Android a může se chovat neočekávaně. K dispozici může být aktualizovaná verze aplikace."</string>
+    <string name="unsupported_compile_sdk_show" msgid="2681877855260970231">"Vždy zobrazovat"</string>
+    <string name="unsupported_compile_sdk_check_update" msgid="3312723623323216101">"Zkontrolovat aktualizace"</string>
     <string name="smv_application" msgid="3307209192155442829">"Aplikace <xliff:g id="APPLICATION">%1$s</xliff:g> (proces <xliff:g id="PROCESS">%2$s</xliff:g>) porušila své vlastní vynucené zásady StrictMode."</string>
     <string name="smv_process" msgid="5120397012047462446">"Proces <xliff:g id="PROCESS">%1$s</xliff:g> porušil své vlastní vynucené zásady StrictMode."</string>
     <string name="android_upgrading_title" msgid="1584192285441405746">"Android se upgraduje..."</string>
@@ -1160,10 +1163,10 @@
     <string name="network_available_sign_in" msgid="1848877297365446605">"Přihlásit se k síti"</string>
     <!-- no translation found for network_available_sign_in_detailed (8000081941447976118) -->
     <skip />
-    <string name="wifi_no_internet" msgid="8451173622563841546">"Wi-Fi nemá přístup k internetu"</string>
+    <string name="wifi_no_internet" msgid="8938267198124654938">"Wi-Fi nemá přístup k internetu"</string>
     <string name="wifi_no_internet_detailed" msgid="8083079241212301741">"Klepnutím zobrazíte možnosti"</string>
     <string name="network_switch_metered" msgid="4671730921726992671">"Přechod na síť <xliff:g id="NETWORK_TYPE">%1$s</xliff:g>"</string>
-    <string name="network_switch_metered_detail" msgid="5325661434777870353">"Když síť <xliff:g id="PREVIOUS_NETWORK">%2$s</xliff:g> nebude mít přístup k internetu, zařízení použije síť <xliff:g id="NEW_NETWORK">%1$s</xliff:g>. Mohou být účtovány poplatky."</string>
+    <string name="network_switch_metered_detail" msgid="775163331794506615">"Když síť <xliff:g id="PREVIOUS_NETWORK">%2$s</xliff:g> nebude mít přístup k internetu, zařízení použije síť <xliff:g id="NEW_NETWORK">%1$s</xliff:g>. Mohou být účtovány poplatky."</string>
     <string name="network_switch_metered_toast" msgid="5779283181685974304">"Přechod ze sítě <xliff:g id="PREVIOUS_NETWORK">%1$s</xliff:g> na síť <xliff:g id="NEW_NETWORK">%2$s</xliff:g>"</string>
   <string-array name="network_switch_type_name">
     <item msgid="3979506840912951943">"mobilní data"</item>
@@ -1174,7 +1177,7 @@
   </string-array>
     <string name="network_switch_type_name_unknown" msgid="4552612897806660656">"neznámý typ sítě"</string>
     <string name="wifi_watchdog_network_disabled" msgid="7904214231651546347">"Připojení k síti Wi-Fi se nezdařilo"</string>
-    <string name="wifi_watchdog_network_disabled_detailed" msgid="5548780776418332675">" má pomalé připojení k internetu."</string>
+    <string name="wifi_watchdog_network_disabled_detailed" msgid="4917472096696322767">" má pomalé připojení k internetu."</string>
     <string name="wifi_connect_alert_title" msgid="8455846016001810172">"Povolit připojení?"</string>
     <string name="wifi_connect_alert_message" msgid="6451273376815958922">"Aplikace %1$s se chce připojit k síti Wi-Fi %2$s."</string>
     <string name="wifi_connect_default_application" msgid="7143109390475484319">"Aplikace"</string>
@@ -1676,7 +1679,6 @@
     <string name="managed_profile_label_badge_2" msgid="5048136430082124036">"2. <xliff:g id="LABEL">%1$s</xliff:g> do práce"</string>
     <string name="managed_profile_label_badge_3" msgid="2808305070321719040">"3. <xliff:g id="LABEL">%1$s</xliff:g> do práce"</string>
     <string name="lock_to_app_toast" msgid="6820571533009838261">"Chcete-li tuto obrazovku uvolnit, podržte tlačítka Zpět a Přehled"</string>
-    <string name="lock_to_app_toast_locked" msgid="7849470948648628704">"Tuto aplikaci nelze odepnout"</string>
     <string name="lock_to_app_start" msgid="6643342070839862795">"Obrazovka připnuta"</string>
     <string name="lock_to_app_exit" msgid="8598219838213787430">"Obrazovka uvolněna"</string>
     <string name="lock_to_app_unlock_pin" msgid="2552556656504331634">"Před uvolněním požádat o PIN"</string>
@@ -1685,7 +1687,7 @@
     <string name="package_installed_device_owner" msgid="6875717669960212648">"Nainstalováno administrátorem"</string>
     <string name="package_updated_device_owner" msgid="1847154566357862089">"Aktualizováno administrátorem"</string>
     <string name="package_deleted_device_owner" msgid="2307122077550236438">"Smazáno administrátorem"</string>
-    <string name="battery_saver_description" msgid="1960431123816253034">"Spořič baterie prodlužuje výdrž baterie tím, že snižuje výkon zařízení a omezuje vibrace, služby určování polohy a většinu dat na pozadí. E-mail, aplikace pro zasílání zpráv a další aplikace, které používají synchronizaci, se nemusejí aktualizovat, dokud je neotevřete.\n\nPři nabíjení zařízení se spořič baterie automaticky vypne."</string>
+    <string name="battery_saver_description" msgid="5394663545060026162">"Spořič baterie za účelem prodloužení výdrže baterie snižuje výkon zařízení a omezuje vibrace, služby určování polohy a většinu dat na pozadí. E-mail, aplikace pro zasílání zpráv a další aplikace, které používají synchronizaci, se nemusejí aktualizovat, dokud je neotevřete.\n\nPři nabíjení zařízení se spořič baterie automaticky vypne."</string>
     <string name="data_saver_description" msgid="6015391409098303235">"Spořič dat z důvodu snížení využití dat některým aplikacím brání v odesílání nebo příjmu dat na pozadí. Aplikace, kterou právě používáte, data přenášet může, ale může tak činit méně často. V důsledku toho se například obrázky nemusejí zobrazit, dokud na ně neklepnete."</string>
     <string name="data_saver_enable_title" msgid="4674073932722787417">"Chcete zapnout Spořič dat?"</string>
     <string name="data_saver_enable_button" msgid="7147735965247211818">"Zapnout"</string>
@@ -1852,14 +1854,10 @@
     <string name="etws_primary_default_message_test" msgid="2709597093560037455">"Test nouzových zpráv"</string>
     <string name="notification_reply_button_accessibility" msgid="3621714652387814344">"Odpovědět"</string>
     <string name="etws_primary_default_message_others" msgid="6293148756130398971"></string>
-    <!-- no translation found for mmcc_authentication_reject (5767701075994754356) -->
-    <skip />
-    <!-- no translation found for mmcc_imsi_unknown_in_hlr (5316658473301462825) -->
-    <skip />
-    <!-- no translation found for mmcc_illegal_ms (807334478177362062) -->
-    <skip />
-    <!-- no translation found for mmcc_illegal_me (1950705155760872972) -->
-    <skip />
+    <string name="mmcc_authentication_reject" msgid="5767701075994754356">"SIM karta není povolena pro hlasovou komunikaci"</string>
+    <string name="mmcc_imsi_unknown_in_hlr" msgid="5316658473301462825">"SIM karta není poskytována pro hlasovou komunikaci"</string>
+    <string name="mmcc_illegal_ms" msgid="807334478177362062">"SIM karta není povolena pro hlasovou komunikaci"</string>
+    <string name="mmcc_illegal_me" msgid="1950705155760872972">"Telefon není povolen pro hlasovou komunikaci"</string>
     <string name="popup_window_default_title" msgid="4874318849712115433">"Vyskakovací okno"</string>
     <string name="slice_more_content" msgid="8504342889413274608">"a ještě <xliff:g id="NUMBER">%1$d</xliff:g>"</string>
     <string name="shortcut_restored_on_lower_version" msgid="5270675146351613828">"Tato zkratka vyžaduje nejnovější verzi aplikace"</string>

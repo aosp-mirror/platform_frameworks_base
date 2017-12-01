@@ -83,7 +83,7 @@
     <string name="RestrictedOnAllVoiceTitle" msgid="158800171499150681">"لا تتوفر خدمة الصوت/الطوارئ"</string>
     <string name="RestrictedStateContent" msgid="4278821484643362350">"مؤقتا لا تقدمها شبكة الجوال في موقعك"</string>
     <string name="NetworkPreferenceSwitchTitle" msgid="4008877505368566980">"يتعذر الوصول إلى الشبكة"</string>
-    <string name="NetworkPreferenceSwitchSummary" msgid="1203771446683319957">"‏لتحسين الاستقبال، يمكنك محاولة تغيير النوع المحدّد من خلال الإعدادات &gt; الشبكة والإنترنت &gt; شبكات الجوّال &gt; نوع الشبكة المفضّل."</string>
+    <string name="NetworkPreferenceSwitchSummary" msgid="7056776609127756440">"‏لتحسين الاستقبال، يمكنك محاولة تغيير النوع المحدّد من خلال الإعدادات &gt; الشبكة والإنترنت &gt; شبكات الجوّال &gt; نوع الشبكة المفضّل."</string>
     <string name="EmergencyCallWarningTitle" msgid="4790413876281901612">"‏الاتصال عبر Wi-Fi نشط"</string>
     <string name="EmergencyCallWarningSummary" msgid="8973232888021643293">"تتطلب مكالمات الطوارئ شبكة جوّال."</string>
     <string name="notification_channel_network_alert" msgid="4427736684338074967">"التنبيهات"</string>
@@ -1131,6 +1131,9 @@
     <string name="screen_compat_mode_hint" msgid="1064524084543304459">"‏يمكنك إعادة تمكين هذا في إعدادات النظام &gt; التطبيقات &gt; ما تم تنزيله."</string>
     <string name="unsupported_display_size_message" msgid="6545327290756295232">"<xliff:g id="APP_NAME">%1$s</xliff:g> غير متوافق مع الإعداد الحالي لحجم شاشة العرض وربما يعمل بطريقة غير متوقعة."</string>
     <string name="unsupported_display_size_show" msgid="7969129195360353041">"العرض دائمًا"</string>
+    <string name="unsupported_compile_sdk_message" msgid="4253168368781441759">"‏تم تصميم <xliff:g id="APP_NAME">%1$s</xliff:g> لإصدار غير متوافق من نظام تشغيل Android وقد يحدث خلل في أدائه. قد يتوفّر إصدار محدّث من التطبيق."</string>
+    <string name="unsupported_compile_sdk_show" msgid="2681877855260970231">"الإظهار دائمًا"</string>
+    <string name="unsupported_compile_sdk_check_update" msgid="3312723623323216101">"البحث عن تحديث"</string>
     <string name="smv_application" msgid="3307209192155442829">"‏انتهك التطبيق <xliff:g id="APPLICATION">%1$s</xliff:g> (العملية <xliff:g id="PROCESS">%2$s</xliff:g>) سياسة StrictMode المفروضة ذاتيًا."</string>
     <string name="smv_process" msgid="5120397012047462446">"‏انتهكت العملية <xliff:g id="PROCESS">%1$s</xliff:g> سياسة StrictMode المفروضة ذاتيًا."</string>
     <string name="android_upgrading_title" msgid="1584192285441405746">"‏جارٍ ترقية Android..."</string>
@@ -1204,10 +1207,10 @@
     <string name="network_available_sign_in" msgid="1848877297365446605">"تسجيل الدخول إلى الشبكة"</string>
     <!-- no translation found for network_available_sign_in_detailed (8000081941447976118) -->
     <skip />
-    <string name="wifi_no_internet" msgid="8451173622563841546">"‏شبكة Wi-Fi غير متصلة بالإنترنت"</string>
+    <string name="wifi_no_internet" msgid="8938267198124654938">"‏شبكة Wi-Fi غير متصلة بالإنترنت"</string>
     <string name="wifi_no_internet_detailed" msgid="8083079241212301741">"انقر للحصول على الخيارات."</string>
     <string name="network_switch_metered" msgid="4671730921726992671">"تم التبديل إلى <xliff:g id="NETWORK_TYPE">%1$s</xliff:g>"</string>
-    <string name="network_switch_metered_detail" msgid="5325661434777870353">"يستخدم الجهاز <xliff:g id="NEW_NETWORK">%1$s</xliff:g> عندما لا يتوفر اتصال بالإنترنت في شبكة <xliff:g id="PREVIOUS_NETWORK">%2$s</xliff:g>، ويمكن أن يتم فرض رسوم مقابل ذلك."</string>
+    <string name="network_switch_metered_detail" msgid="775163331794506615">"يستخدم الجهاز <xliff:g id="NEW_NETWORK">%1$s</xliff:g> عندما لا يتوفر اتصال بالإنترنت في شبكة <xliff:g id="PREVIOUS_NETWORK">%2$s</xliff:g>، ويمكن أن يتم فرض رسوم مقابل ذلك."</string>
     <string name="network_switch_metered_toast" msgid="5779283181685974304">"تم التبديل من <xliff:g id="PREVIOUS_NETWORK">%1$s</xliff:g> إلى <xliff:g id="NEW_NETWORK">%2$s</xliff:g>"</string>
   <string-array name="network_switch_type_name">
     <item msgid="3979506840912951943">"بيانات الجوّال"</item>
@@ -1218,7 +1221,7 @@
   </string-array>
     <string name="network_switch_type_name_unknown" msgid="4552612897806660656">"نوع شبكة غير معروف"</string>
     <string name="wifi_watchdog_network_disabled" msgid="7904214231651546347">"‏تعذر الاتصال بـ Wi-Fi"</string>
-    <string name="wifi_watchdog_network_disabled_detailed" msgid="5548780776418332675">" لديها اتصال إنترنت رديء."</string>
+    <string name="wifi_watchdog_network_disabled_detailed" msgid="4917472096696322767">" تحتوي على اتصال إنترنت ضعيف."</string>
     <string name="wifi_connect_alert_title" msgid="8455846016001810172">"هل تريد السماح بالاتصال؟"</string>
     <string name="wifi_connect_alert_message" msgid="6451273376815958922">"‏يريد تطبيق %1$s الاتصال بشبكة Wifi ‏%2$s"</string>
     <string name="wifi_connect_default_application" msgid="7143109390475484319">"تطبيق"</string>
@@ -1734,7 +1737,7 @@
     <string name="package_installed_device_owner" msgid="6875717669960212648">"تم التثبيت بواسطة المشرف"</string>
     <string name="package_updated_device_owner" msgid="1847154566357862089">"تم التحديث بواسطة المشرف"</string>
     <string name="package_deleted_device_owner" msgid="2307122077550236438">"تم الحذف بواسطة المشرف"</string>
-    <string name="battery_saver_description" msgid="1960431123816253034">"للمساعدة في تحسين عمر البطارية، يساعد موفّر البطارية في تقليل أداء الجهاز والحد من الاهتزاز وخدمات الموقع ومعظم بيانات الخلفية، بالإضافة إلى عدم تحديث البريد الإلكتروني والمراسلة والتطبيقات الأخرى التي تعتمد على المزامنة ما لم يتم فتحها.\n\nيتم إيقاف موفّر البطارية تلقائيًا أثناء شحن الجهاز."</string>
+    <string name="battery_saver_description" msgid="5394663545060026162">"للمساعدة في تحسين عمر البطارية، تساعد ميزة توفير شحن البطارية في تقليل أداء الجهاز والحد من الاهتزاز وخدمات المواقع الجغرافي ومعظم بيانات الخلفية. وقد لا يتم تحديث البريد الإلكتروني والمراسلة والتطبيقات الأخرى التي تعتمد على المزامنة ما لم يتم فتحها.\n\nيتم إيقاف ميزة توفير شحن البطارية تلقائيًا عند شحن الجهاز."</string>
     <string name="data_saver_description" msgid="6015391409098303235">"للمساعدة في خفض استخدام البيانات، يمنع توفير البيانات بعض التطبيقات من إرسال البيانات وتلقيها في الخلفية. يمكن للتطبيق الذي تستخدمه الآن الوصول إلى البيانات، ولكن لا يمكنه تنفيذ ذلك كثيرًا. وهذا يعني أن الصور على سبيل المثال لا تظهر حتى تنقر عليها."</string>
     <string name="data_saver_enable_title" msgid="4674073932722787417">"هل تريد تشغيل توفير البيانات؟"</string>
     <string name="data_saver_enable_button" msgid="7147735965247211818">"تشغيل"</string>
