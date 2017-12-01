@@ -41,6 +41,8 @@ import java.util.Objects;
  * @hide (@SystemApi)
  */
 public class ResponderConfig implements Parcelable {
+    private static final int AWARE_BAND_2_DISCOVERY_CHANNEL = 2437;
+
     /** @hide */
     @IntDef({RESPONDER_AP, RESPONDER_STA, RESPONDER_P2P_GO, RESPONDER_P2P_CLIENT, RESPONDER_AWARE})
     @Retention(RetentionPolicy.SOURCE)
@@ -271,9 +273,13 @@ public class ResponderConfig implements Parcelable {
      * Responder. The Responder parameters are set to defaults.
      */
     public static ResponderConfig fromWifiAwarePeerMacAddressWithDefaults(byte[] macAddress) {
-        // TODO b/67678464: determine "right" parameters or
-        return new ResponderConfig(macAddress, RESPONDER_AWARE, true, CHANNEL_WIDTH_80MHZ,
-                5200, 5210, 0, PREAMBLE_VHT);
+        /* Note: the parameters are those of the Aware discovery channel (channel 6). A Responder
+         * is expected to be brought up and available to negotiate a maximum accuracy channel
+         * (i.e. Band 5 @ 80MHz). A Responder is brought up on the peer by starting an Aware
+         * Unsolicited Publisher with Ranging enabled.
+         */
+        return new ResponderConfig(macAddress, RESPONDER_AWARE, true, CHANNEL_WIDTH_20MHZ,
+                AWARE_BAND_2_DISCOVERY_CHANNEL, 0, 0, PREAMBLE_HT);
     }
 
     /**
@@ -281,9 +287,13 @@ public class ResponderConfig implements Parcelable {
      * Responder. The Responder parameters are set to defaults.
      */
     public static ResponderConfig fromWifiAwarePeerHandleWithDefaults(PeerHandle peerHandle) {
-        // TODO b/67678464: determine "right" parameters or
-        return new ResponderConfig(peerHandle, RESPONDER_AWARE, true, CHANNEL_WIDTH_80MHZ,
-                5200, 5210, 0, PREAMBLE_VHT);
+        /* Note: the parameters are those of the Aware discovery channel (channel 6). A Responder
+         * is expected to be brought up and available to negotiate a maximum accuracy channel
+         * (i.e. Band 5 @ 80MHz). A Responder is brought up on the peer by starting an Aware
+         * Unsolicited Publisher with Ranging enabled.
+         */
+        return new ResponderConfig(peerHandle, RESPONDER_AWARE, true, CHANNEL_WIDTH_20MHZ,
+                AWARE_BAND_2_DISCOVERY_CHANNEL, 0, 0, PREAMBLE_HT);
     }
 
     /**
