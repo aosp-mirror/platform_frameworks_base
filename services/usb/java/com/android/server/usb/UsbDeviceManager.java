@@ -16,6 +16,9 @@
 
 package com.android.server.usb;
 
+import android.app.ActivityManager;
+import android.app.ActivityManagerInternal;
+import android.app.KeyguardManager;
 import android.app.Notification;
 import android.app.NotificationChannel;
 import android.app.NotificationManager;
@@ -26,6 +29,7 @@ import android.content.ContentResolver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.content.res.Resources;
 import android.database.ContentObserver;
@@ -38,6 +42,7 @@ import android.hardware.usb.UsbManager;
 import android.hardware.usb.UsbPort;
 import android.hardware.usb.UsbPortStatus;
 import android.os.BatteryManager;
+import android.os.Environment;
 import android.os.FileUtils;
 import android.os.Handler;
 import android.os.Looper;
@@ -60,6 +65,7 @@ import com.android.internal.notification.SystemNotificationChannels;
 import com.android.internal.os.SomeArgs;
 import com.android.internal.util.IndentingPrintWriter;
 import com.android.server.FgThread;
+import com.android.server.LocalServices;
 
 import java.io.File;
 import java.io.FileNotFoundException;
@@ -75,7 +81,7 @@ import java.util.Set;
 /**
  * UsbDeviceManager manages USB state in device mode.
  */
-public class UsbDeviceManager {
+public class UsbDeviceManager implements ActivityManagerInternal.ScreenObserver {
 
     private static final String TAG = "UsbDeviceManager";
     private static final boolean DEBUG = false;
@@ -95,6 +101,12 @@ public class UsbDeviceManager {
      * The non-persistent property which stores the current USB actual state.
      */
     private static final String USB_STATE_PROPERTY = "sys.usb.state";
+
+    /**
+     * The SharedPreference setting per user that stores the screen unlocked functions between
+     * sessions.
+     */
+    private static final String UNLOCKED_CONFIG_PREF = "usb-screen-unlocked-config-%d";
 
     /**
      * ro.bootmode value when phone boots into usual Android.
@@ -128,6 +140,8 @@ public class UsbDeviceManager {
     private static final int MSG_UPDATE_CHARGING_STATE = 9;
     private static final int MSG_UPDATE_HOST_STATE = 10;
     private static final int MSG_LOCALE_CHANGED = 11;
+    private static final int MSG_SET_SCREEN_UNLOCKED_FUNCTIONS = 12;
+    private static final int MSG_UPDATE_SCREEN_LOCK = 13;
 
     private static final int AUDIO_MODE_SOURCE = 1;
 
@@ -169,6 +183,7 @@ public class UsbDeviceManager {
     private Intent mBroadcastedIntent;
     private boolean mPendingBootBroadcast;
     private static Set<Integer> sBlackListedInterfaces;
+    private SharedPreferences mSettings;
 
     static {
         sBlackListedInterfaces = new HashSet<>();
@@ -216,6 +231,31 @@ public class UsbDeviceManager {
             }
         }
     };
+
+    @Override
+    public void onKeyguardStateChanged(boolean isShowing) {
+        int userHandle = ActivityManager.getCurrentUser();
+        boolean secure = mContext.getSystemService(KeyguardManager.class)
+                .isDeviceSecure(userHandle);
+        boolean unlocking = mContext.getSystemService(UserManager.class)
+                .isUserUnlockingOrUnlocked(userHandle);
+        if (DEBUG) {
+            Slog.v(TAG, "onKeyguardStateChanged: isShowing:" + isShowing + " secure:" + secure
+                    + " unlocking:" + unlocking + " user:" + userHandle);
+        }
+        // We are unlocked when the keyguard is down or non-secure, and user storage is unlocked.
+        mHandler.sendMessage(MSG_UPDATE_SCREEN_LOCK, (isShowing && secure) || !unlocking);
+    }
+
+    @Override
+    public void onAwakeStateChanged(boolean isAwake) {
+        // ignore
+    }
+
+    /** Called when a user is unlocked. */
+    public void onUnlockUser(int userHandle) {
+        onKeyguardStateChanged(false);
+    }
 
     public UsbDeviceManager(Context context, UsbAlsaManager alsaManager,
             UsbSettingsManager settingsManager) {
@@ -302,6 +342,8 @@ public class UsbDeviceManager {
 
     public void systemReady() {
         if (DEBUG) Slog.d(TAG, "systemReady");
+
+        LocalServices.getService(ActivityManagerInternal.class).registerScreenObserver(this);
 
         mNotificationManager = (NotificationManager)
                 mContext.getSystemService(Context.NOTIFICATION_SERVICE);
@@ -407,6 +449,14 @@ public class UsbDeviceManager {
         return mContext.getPackageManager().hasSystemFeature(PackageManager.FEATURE_LEANBACK);
     }
 
+    private SharedPreferences getPinnedSharedPrefs(Context context) {
+        final File prefsFile = new File(new File(
+                Environment.getDataUserCePackageDirectory(StorageManager.UUID_PRIVATE_INTERNAL,
+                        context.getUserId(), context.getPackageName()), "shared_prefs"),
+                UsbDeviceManager.class.getSimpleName() + ".xml");
+        return context.getSharedPreferences(prefsFile, Context.MODE_PRIVATE);
+    }
+
     private final class UsbHandler extends Handler {
 
         // current USB state
@@ -423,11 +473,13 @@ public class UsbDeviceManager {
         private UsbAccessory mCurrentAccessory;
         private int mUsbNotificationId;
         private boolean mAdbNotificationShown;
-        private int mCurrentUser = UserHandle.USER_NULL;
+        private int mCurrentUser;
         private boolean mUsbCharging;
         private String mCurrentOemFunctions;
         private boolean mHideUsbNotification;
         private boolean mSupportsAllCombinations;
+        private String mScreenUnlockedFunctions = UsbManager.USB_FUNCTION_NONE;
+        private boolean mScreenLocked;
 
         public UsbHandler(Looper looper) {
             super(looper);
@@ -448,6 +500,9 @@ public class UsbDeviceManager {
                             UsbManager.USB_FUNCTION_NONE).equals(
                             SystemProperties.get(USB_STATE_PROPERTY));
                 }
+
+                mCurrentUser = ActivityManager.getCurrentUser();
+                mScreenLocked = true;
 
                 /*
                  * Use the normal bootmode persistent prop to maintain state of adb across
@@ -653,7 +708,7 @@ public class UsbDeviceManager {
         private boolean trySetEnabledFunctions(String functions, boolean forceRestart) {
             if (functions == null || applyAdbFunction(functions)
                     .equals(UsbManager.USB_FUNCTION_NONE)) {
-                functions = getDefaultFunctions();
+                functions = getChargingFunctions();
             }
             functions = applyAdbFunction(functions);
 
@@ -876,6 +931,14 @@ public class UsbDeviceManager {
                     mMidiEnabled && mConfigured, mMidiCard, mMidiDevice);
         }
 
+        private void setScreenUnlockedFunctions() {
+            setEnabledFunctions(mScreenUnlockedFunctions, false,
+                    UsbManager.containsFunction(mScreenUnlockedFunctions,
+                            UsbManager.USB_FUNCTION_MTP)
+                            || UsbManager.containsFunction(mScreenUnlockedFunctions,
+                            UsbManager.USB_FUNCTION_PTP));
+        }
+
         @Override
         public void handleMessage(Message msg) {
             switch (msg.what) {
@@ -895,7 +958,13 @@ public class UsbDeviceManager {
                     if (mBootCompleted) {
                         if (!mConnected && !hasMessages(MSG_ACCESSORY_MODE_ENTER_TIMEOUT)) {
                             // restore defaults when USB is disconnected
-                            setEnabledFunctions(null, !mAdbEnabled, false);
+                            if (!mScreenLocked
+                                    && !UsbManager.USB_FUNCTION_NONE.equals(
+                                    mScreenUnlockedFunctions)) {
+                                setScreenUnlockedFunctions();
+                            } else {
+                                setEnabledFunctions(null, !mAdbEnabled, false);
+                            }
                         }
                         updateUsbFunctions();
                     } else {
@@ -978,6 +1047,47 @@ public class UsbDeviceManager {
                     String functions = (String) msg.obj;
                     setEnabledFunctions(functions, false, msg.arg1 == 1);
                     break;
+                case MSG_SET_SCREEN_UNLOCKED_FUNCTIONS:
+                    mScreenUnlockedFunctions = (String) msg.obj;
+                    SharedPreferences.Editor editor = mSettings.edit();
+                    editor.putString(String.format(Locale.ENGLISH, UNLOCKED_CONFIG_PREF,
+                            mCurrentUser), mScreenUnlockedFunctions);
+                    editor.commit();
+                    if (!mScreenLocked && !UsbManager.USB_FUNCTION_NONE.equals(
+                            mScreenUnlockedFunctions)) {
+                        // If the screen is unlocked, also set current functions.
+                        setScreenUnlockedFunctions();
+                    }
+                    break;
+                case MSG_UPDATE_SCREEN_LOCK:
+                    if (msg.arg1 == 1 == mScreenLocked) {
+                        break;
+                    }
+                    mScreenLocked = msg.arg1 == 1;
+                    if (mSettings == null && !mScreenLocked) {
+                        // Shared preferences aren't accessible until the user has been unlocked.
+                        mSettings = getPinnedSharedPrefs(mContext);
+                        mScreenUnlockedFunctions = mSettings.getString(
+                                String.format(Locale.ENGLISH, UNLOCKED_CONFIG_PREF, mCurrentUser),
+                                UsbManager.USB_FUNCTION_NONE);
+                    }
+                    if (!mBootCompleted) {
+                        break;
+                    }
+                    if (mScreenLocked) {
+                        if (!mConnected) {
+                            setEnabledFunctions(null, false, false);
+                        }
+                    } else {
+                        if (!UsbManager.USB_FUNCTION_NONE.equals(mScreenUnlockedFunctions)
+                                && (UsbManager.USB_FUNCTION_ADB.equals(mCurrentFunctions)
+                                || (UsbManager.USB_FUNCTION_MTP.equals(mCurrentFunctions)
+                                        && !mUsbDataUnlocked))) {
+                            // Set the screen unlocked functions if current function is charging.
+                            setScreenUnlockedFunctions();
+                        }
+                    }
+                    break;
                 case MSG_UPDATE_USER_RESTRICTIONS:
                     // Restart the USB stack if USB transfer is enabled but no longer allowed.
                     final boolean forceRestart = mUsbDataUnlocked
@@ -1001,7 +1111,13 @@ public class UsbDeviceManager {
                         updateUsbStateBroadcastIfNeeded(false);
                         mPendingBootBroadcast = false;
                     }
-                    setEnabledFunctions(null, false, false);
+
+                    if (!mScreenLocked
+                            && !UsbManager.USB_FUNCTION_NONE.equals(mScreenUnlockedFunctions)) {
+                        setScreenUnlockedFunctions();
+                    } else {
+                        setEnabledFunctions(null, false, false);
+                    }
                     if (mCurrentAccessory != null) {
                         getCurrentSettings().accessoryAttached(mCurrentAccessory);
                     }
@@ -1011,16 +1127,15 @@ public class UsbDeviceManager {
                     break;
                 case MSG_USER_SWITCHED: {
                     if (mCurrentUser != msg.arg1) {
-                        // Restart the USB stack and re-apply user restrictions for MTP or PTP.
-                        if (mUsbDataUnlocked
-                                && isUsbDataTransferActive()
-                                && mCurrentUser != UserHandle.USER_NULL) {
-                            Slog.v(TAG, "Current user switched to " + msg.arg1
-                                    + "; resetting USB host stack for MTP or PTP");
-                            // avoid leaking sensitive data from previous user
-                            setEnabledFunctions(null, true, false);
+                        if (DEBUG) {
+                            Slog.v(TAG, "Current user switched to " + msg.arg1);
                         }
                         mCurrentUser = msg.arg1;
+                        mScreenLocked = true;
+                        mScreenUnlockedFunctions = mSettings.getString(
+                                String.format(Locale.ENGLISH, UNLOCKED_CONFIG_PREF, mCurrentUser),
+                                UsbManager.USB_FUNCTION_NONE);
+                        setEnabledFunctions(null, false, false);
                     }
                     break;
                 }
@@ -1072,20 +1187,12 @@ public class UsbDeviceManager {
                 titleRes = com.android.internal.R.string.usb_unsupported_audio_accessory_title;
                 id = SystemMessage.NOTE_USB_AUDIO_ACCESSORY_NOT_SUPPORTED;
             } else if (mConnected) {
-                if (!mUsbDataUnlocked) {
-                    if (mSourcePower) {
-                        titleRes = com.android.internal.R.string.usb_supplying_notification_title;
-                        id = SystemMessage.NOTE_USB_SUPPLYING;
-                    } else {
-                        titleRes = com.android.internal.R.string.usb_charging_notification_title;
-                        id = SystemMessage.NOTE_USB_CHARGING;
-                    }
-                } else if (UsbManager.containsFunction(mCurrentFunctions,
-                        UsbManager.USB_FUNCTION_MTP)) {
+                if (UsbManager.containsFunction(mCurrentFunctions,
+                        UsbManager.USB_FUNCTION_MTP) && mUsbDataUnlocked) {
                     titleRes = com.android.internal.R.string.usb_mtp_notification_title;
                     id = SystemMessage.NOTE_USB_MTP;
                 } else if (UsbManager.containsFunction(mCurrentFunctions,
-                        UsbManager.USB_FUNCTION_PTP)) {
+                        UsbManager.USB_FUNCTION_PTP) && mUsbDataUnlocked) {
                     titleRes = com.android.internal.R.string.usb_ptp_notification_title;
                     id = SystemMessage.NOTE_USB_PTP;
                 } else if (UsbManager.containsFunction(mCurrentFunctions,
@@ -1236,7 +1343,7 @@ public class UsbDeviceManager {
             }
         }
 
-        private String getDefaultFunctions() {
+        private String getChargingFunctions() {
             String func = SystemProperties.get(getPersistProp(true),
                     UsbManager.USB_FUNCTION_NONE);
             // if ADB is enabled, reset functions to ADB
@@ -1253,6 +1360,8 @@ public class UsbDeviceManager {
             pw.println("  mCurrentFunctions: " + mCurrentFunctions);
             pw.println("  mCurrentOemFunctions: " + mCurrentOemFunctions);
             pw.println("  mCurrentFunctionsApplied: " + mCurrentFunctionsApplied);
+            pw.println("  mScreenUnlockedFunctions: " + mScreenUnlockedFunctions);
+            pw.println("  mScreenLocked: " + mScreenLocked);
             pw.println("  mConnected: " + mConnected);
             pw.println("  mConfigured: " + mConfigured);
             pw.println("  mUsbDataUnlocked: " + mUsbDataUnlocked);
@@ -1307,6 +1416,17 @@ public class UsbDeviceManager {
                     usbDataUnlocked + ")");
         }
         mHandler.sendMessage(MSG_SET_CURRENT_FUNCTIONS, functions, usbDataUnlocked);
+    }
+
+    /**
+     * Sets the functions which are set when the screen is unlocked.
+     * @param functions Functions to set.
+     */
+    public void setScreenUnlockedFunctions(String functions) {
+        if (DEBUG) {
+            Slog.d(TAG, "setScreenUnlockedFunctions(" + functions + ")");
+        }
+        mHandler.sendMessage(MSG_SET_SCREEN_UNLOCKED_FUNCTIONS, functions);
     }
 
     private void readOemUsbOverrideConfig() {
