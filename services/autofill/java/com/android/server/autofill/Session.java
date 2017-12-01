@@ -126,8 +126,8 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
     @GuardedBy("mLock")
     @NonNull private IBinder mActivityToken;
 
-    /** Package name of the app that is auto-filled */
-    @NonNull private final String mPackageName;
+    /** Component that's being auto-filled */
+    @NonNull private final ComponentName mComponentName;
 
     @GuardedBy("mLock")
     private final ArrayMap<AutofillId, ViewState> mViewStates = new ArrayMap<>();
@@ -227,6 +227,16 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
                 structure.ensureData();
 
                 // Sanitize structure before it's sent to service.
+                final ComponentName componentNameFromApp = structure.getActivityComponent();
+                if (!mComponentName.equals(componentNameFromApp)) {
+                    Slog.w(TAG, "Activity " + mComponentName + " forged different component on "
+                            + "AssistStructure: " + componentNameFromApp);
+                    structure.setActivityComponent(mComponentName);
+                    mMetricsLogger.write(newLogMaker(MetricsEvent.AUTOFILL_FORGED_COMPONENT_ATTEMPT)
+                            .addTaggedData(MetricsEvent.FIELD_AUTOFILL_FORGED_COMPONENT_NAME,
+                                            componentNameFromApp == null ? "null"
+                                                    : componentNameFromApp.flattenToShortString()));
+                }
                 structure.sanitizeForParceling(true);
 
                 // Flags used to start the session.
@@ -415,7 +425,7 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
             @NonNull Context context, @NonNull HandlerCaller handlerCaller, int userId,
             @NonNull Object lock, int sessionId, int uid, @NonNull IBinder activityToken,
             @NonNull IBinder client, boolean hasCallback, @NonNull LocalLog uiLatencyHistory,
-            @NonNull ComponentName componentName, @NonNull String packageName) {
+            @NonNull ComponentName serviceComponentName, @NonNull ComponentName appComponentName) {
         id = sessionId;
         this.uid = uid;
         mStartTime = SystemClock.elapsedRealtime();
@@ -423,11 +433,11 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
         mLock = lock;
         mUi = ui;
         mHandlerCaller = handlerCaller;
-        mRemoteFillService = new RemoteFillService(context, componentName, userId, this);
+        mRemoteFillService = new RemoteFillService(context, serviceComponentName, userId, this);
         mActivityToken = activityToken;
         mHasCallback = hasCallback;
         mUiLatencyHistory = uiLatencyHistory;
-        mPackageName = packageName;
+        mComponentName = appComponentName;
         mClient = IAutoFillManagerClient.Stub.asInterface(client);
 
         writeLog(MetricsEvent.AUTOFILL_SESSION_STARTED);
@@ -1008,8 +1018,8 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
                 final IAutoFillManagerClient client = getClient();
                 mPendingSaveUi = new PendingUi(mActivityToken, id, client);
                 getUiForShowing().showSaveUi(mService.getServiceLabel(), mService.getServiceIcon(),
-                        mService.getServicePackageName(), saveInfo, valueFinder, mPackageName, this,
-                        mPendingSaveUi);
+                        mService.getServicePackageName(), saveInfo, valueFinder,
+                        mComponentName.getPackageName(), this, mPendingSaveUi);
                 if (client != null) {
                     try {
                         client.setSaveUiState(id, true);
@@ -1365,7 +1375,7 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
         }
 
         getUiForShowing().showFillUi(filledId, response, filterText,
-                mService.getServicePackageName(), mPackageName, this);
+                mService.getServicePackageName(), mComponentName.getPackageName(), this);
 
         synchronized (mLock) {
             if (mUiShownTime == 0) {
@@ -1690,14 +1700,14 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
 
     @Override
     public String toString() {
-        return "Session: [id=" + id + ", pkg=" + mPackageName + "]";
+        return "Session: [id=" + id + ", pkg=" + mComponentName.getPackageName() + "]";
     }
 
     void dumpLocked(String prefix, PrintWriter pw) {
         final String prefix2 = prefix + "  ";
         pw.print(prefix); pw.print("id: "); pw.println(id);
         pw.print(prefix); pw.print("uid: "); pw.println(uid);
-        pw.print(prefix); pw.print("mPackagename: "); pw.println(mPackageName);
+        pw.print(prefix); pw.print("mComponentName: "); pw.println(mComponentName);
         pw.print(prefix); pw.print("mActivityToken: "); pw.println(mActivityToken);
         pw.print(prefix); pw.print("mStartTime: "); pw.println(mStartTime);
         pw.print(prefix); pw.print("Time to show UI: ");
@@ -1920,7 +1930,7 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
     }
 
     private LogMaker newLogMaker(int category, String servicePackageName) {
-        return Helper.newLogMaker(category, mPackageName, servicePackageName);
+        return Helper.newLogMaker(category, mComponentName.getPackageName(), servicePackageName);
     }
 
     private void writeLog(int category) {
