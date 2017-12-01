@@ -767,6 +767,8 @@ final class BinderProxy implements IBinder {
         private static final int LOG_MAIN_INDEX_SIZE = 8;
         private static final int MAIN_INDEX_SIZE = 1 <<  LOG_MAIN_INDEX_SIZE;
         private static final int MAIN_INDEX_MASK = MAIN_INDEX_SIZE - 1;
+        // Debuggable builds will throw an AssertionError if the number of map entries exceeds:
+        private static final int CRASH_AT_SIZE = 5_000;
 
         /**
          * We next warn when we exceed this bucket size.
@@ -888,9 +890,14 @@ final class BinderProxy implements IBinder {
                 keyArray[size] = key;
             }
             if (size >= mWarnBucketSize) {
+                final int total_size = size();
                 Log.v(Binder.TAG, "BinderProxy map growth! bucket size = " + size
-                        + " total = " + size());
+                        + " total = " + total_size);
                 mWarnBucketSize += WARN_INCREMENT;
+                if (Build.IS_DEBUGGABLE && total_size > CRASH_AT_SIZE) {
+                    throw new AssertionError("Binder ProxyMap has too many entries. "
+                            + "BinderProxy leak?");
+                }
             }
         }
 
