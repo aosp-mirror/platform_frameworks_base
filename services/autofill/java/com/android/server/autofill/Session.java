@@ -236,6 +236,11 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
                 structure.ensureData();
 
                 // Sanitize structure before it's sent to service.
+                if (!mComponentName.equals(structure.getActivityComponent())) {
+                    Slog.w(TAG, "Activity " + mComponentName + " forged different component on "
+                            + "AssistStructure: " + structure.getActivityComponent());
+                    structure.setActivityComponent(mComponentName);
+                }
                 structure.sanitizeForParceling(true);
 
                 // Flags used to start the session.
