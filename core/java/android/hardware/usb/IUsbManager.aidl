@@ -96,6 +96,11 @@ interface IUsbManager
      */
     void setCurrentFunction(String function, boolean usbDataUnlocked);
 
+    /* Sets the screen unlocked USB function(s), which will be set automatically
+     * when the screen is unlocked.
+     */
+    void setScreenUnlockedFunctions(String function);
+
     /* Allow USB debugging from the attached host. If alwaysAllow is true, add the
      * the public key to list of host keys that the user has approved.
      */
