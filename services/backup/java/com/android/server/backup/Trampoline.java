@@ -38,7 +38,6 @@ import android.os.RemoteException;
 import android.os.SystemProperties;
 import android.os.Trace;
 import android.os.UserHandle;
-import android.provider.Settings;
 import android.util.Slog;
 
 import com.android.internal.util.DumpUtils;
@@ -88,23 +87,8 @@ public class Trampoline extends IBackupManager.Stub {
         mSuppressFile.getParentFile().mkdirs();
     }
 
-    protected BackupManagerServiceInterface createService() {
-        if (isRefactoredServiceEnabled()) {
-            Slog.i(TAG, "Instantiating RefactoredBackupManagerService");
-            return createRefactoredBackupManagerService();
-        }
-
-        Slog.i(TAG, "Instantiating BackupManagerService");
-        return createBackupManagerService();
-    }
-
     protected boolean isBackupDisabled() {
         return SystemProperties.getBoolean(BACKUP_DISABLE_PROPERTY, false);
-    }
-
-    protected boolean isRefactoredServiceEnabled() {
-        return Settings.Global.getInt(mContext.getContentResolver(),
-                Settings.Global.BACKUP_REFACTORED_SERVICE_DISABLED, 0) == 0;
     }
 
     protected int binderGetCallingUid() {
@@ -120,10 +104,6 @@ public class Trampoline extends IBackupManager.Stub {
         return RefactoredBackupManagerService.create(mContext, this, mHandlerThread);
     }
 
-    protected BackupManagerServiceInterface createBackupManagerService() {
-        return new BackupManagerService(mContext, this, mHandlerThread);
-    }
-
     // internal control API
     public void initialize(final int whichUser) {
         // Note that only the owner user is currently involved in backup/restore
@@ -137,7 +117,7 @@ public class Trampoline extends IBackupManager.Stub {
 
             synchronized (this) {
                 if (!mSuppressFile.exists()) {
-                    mService = createService();
+                    mService = createRefactoredBackupManagerService();
                 } else {
                     Slog.i(TAG, "Backup inactive in user " + whichUser);
                 }
@@ -182,7 +162,7 @@ public class Trampoline extends IBackupManager.Stub {
                     Slog.i(TAG, "Making backup "
                             + (makeActive ? "" : "in") + "active in user " + userHandle);
                     if (makeActive) {
-                        mService = createService();
+                        mService = createRefactoredBackupManagerService();
                         mSuppressFile.delete();
                     } else {
                         mService = null;

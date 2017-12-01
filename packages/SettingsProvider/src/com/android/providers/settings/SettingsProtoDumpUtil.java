@@ -1057,9 +1057,6 @@ class SettingsProtoDumpUtil {
                 Settings.Global.LOCATION_SETTINGS_LINK_TO_PERMISSIONS_ENABLED,
                 GlobalSettingsProto.LOCATION_SETTINGS_LINK_TO_PERMISSIONS_ENABLED);
         dumpSetting(s, p,
-                Settings.Global.BACKUP_REFACTORED_SERVICE_DISABLED,
-                GlobalSettingsProto.BACKUP_REFACTORED_SERVICE_DISABLED);
-        dumpSetting(s, p,
                 Settings.Global.EUICC_FACTORY_RESET_TIMEOUT_MILLIS,
                 GlobalSettingsProto.EUICC_FACTORY_RESET_TIMEOUT_MILLIS);
         dumpSetting(s, p,
