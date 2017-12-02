@@ -45,10 +45,11 @@ bool StatsCompanionServicePuller::Pull(const int tagId, vector<shared_ptr<LogEve
     if (statsCompanion != NULL) {
         Status status = statsCompanion->pullData(tagId, &returned_value);
         if (!status.isOk()) {
-            ALOGW("error pulling kernel wakelock");
+            ALOGW("error pulling for %d", tagId);
             return false;
         }
         data->clear();
+        long timestamp = time(nullptr);
         for (const StatsLogEventWrapper& it : returned_value) {
             log_msg tmp;
             tmp.entry_v1.len = it.bytes.size();
@@ -56,9 +57,10 @@ bool StatsCompanionServicePuller::Pull(const int tagId, vector<shared_ptr<LogEve
             tmp.entry.hdr_size = kLogMsgHeaderSize;
             // And set the received bytes starting after the 28 bytes reserved for header.
             std::copy(it.bytes.begin(), it.bytes.end(), tmp.buf + kLogMsgHeaderSize);
+            tmp.entry_v1.sec = timestamp;
             data->push_back(make_shared<LogEvent>(tmp));
         }
-        ALOGD("KernelWakelockPuller::pull succeeded!");
+        ALOGD("StatsCompanionServicePuller::pull succeeded for %d", tagId);
         return true;
     } else {
         ALOGW("statsCompanion not found!");
