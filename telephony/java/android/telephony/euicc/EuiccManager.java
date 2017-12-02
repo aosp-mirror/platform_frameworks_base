@@ -63,7 +63,7 @@ public class EuiccManager {
      * embedded SIM.
      *
      * <p>The activity will immediately finish with {@link android.app.Activity#RESULT_CANCELED} if
-     * {@link #isEnabled} is false or if the device is already provisioned.
+     * {@link #isEnabled} is false.
      *
      * TODO(b/35851809): Make this a SystemApi.
      */
