@@ -99,6 +99,9 @@ GaugeMetricProducer::GaugeMetricProducer(const ConfigKey& key, const GaugeMetric
 
 GaugeMetricProducer::~GaugeMetricProducer() {
     VLOG("~GaugeMetricProducer() called");
+    if (mPullTagId != -1) {
+        mStatsPullerManager.UnRegisterReceiver(mPullTagId, this);
+    }
 }
 
 void GaugeMetricProducer::startNewProtoOutputStream(long long startTime) {
