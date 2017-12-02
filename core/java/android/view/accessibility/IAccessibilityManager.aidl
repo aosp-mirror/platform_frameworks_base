@@ -45,7 +45,8 @@ interface IAccessibilityManager {
     List<AccessibilityServiceInfo> getEnabledAccessibilityServiceList(int feedbackType, int userId);
 
     int addAccessibilityInteractionConnection(IWindow windowToken,
-            in IAccessibilityInteractionConnection connection, int userId);
+            in IAccessibilityInteractionConnection connection,
+            String packageName, int userId);
 
     void removeAccessibilityInteractionConnection(IWindow windowToken);
 
