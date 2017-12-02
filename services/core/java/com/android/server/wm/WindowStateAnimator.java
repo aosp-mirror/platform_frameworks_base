@@ -720,15 +720,6 @@ class WindowStateAnimator {
                     + width + "x" + height + "), layer=" + mAnimLayer + " HIDE", false);
         }
 
-        // Start a new transaction and apply position & offset.
-
-        mService.openSurfaceTransaction();
-        try {
-            mSurfaceController.setPositionInTransaction(mTmpSize.left, mTmpSize.top, false);
-        } finally {
-            mService.closeSurfaceTransaction("createSurfaceLocked");
-        }
-
         mLastHidden = true;
 
         if (WindowManagerService.localLOGV) Slog.v(TAG, "Created surface " + this);
