@@ -347,6 +347,7 @@ public class MbmsDownloadSession implements AutoCloseable {
 
                     @Override
                     public void onServiceDisconnected(ComponentName name) {
+                        Log.w(LOG_TAG, "bindAndInitialize: Remote service disconnected");
                         sIsInitialized.set(false);
                         mService.set(null);
                     }
@@ -385,6 +386,7 @@ public class MbmsDownloadSession implements AutoCloseable {
         } catch (RemoteException e) {
             Log.w(LOG_TAG, "Remote process died");
             mService.set(null);
+            sIsInitialized.set(false);
             sendErrorToApp(MbmsErrors.ERROR_MIDDLEWARE_LOST, null);
         }
     }
@@ -438,6 +440,7 @@ public class MbmsDownloadSession implements AutoCloseable {
             }
         } catch (RemoteException e) {
             mService.set(null);
+            sIsInitialized.set(false);
             sendErrorToApp(MbmsErrors.ERROR_MIDDLEWARE_LOST, null);
             return;
         }
@@ -521,6 +524,7 @@ public class MbmsDownloadSession implements AutoCloseable {
             downloadService.download(request);
         } catch (RemoteException e) {
             mService.set(null);
+            sIsInitialized.set(false);
             sendErrorToApp(MbmsErrors.ERROR_MIDDLEWARE_LOST, null);
         }
     }
@@ -542,6 +546,7 @@ public class MbmsDownloadSession implements AutoCloseable {
             return downloadService.listPendingDownloads(mSubscriptionId);
         } catch (RemoteException e) {
             mService.set(null);
+            sIsInitialized.set(false);
             sendErrorToApp(MbmsErrors.ERROR_MIDDLEWARE_LOST, null);
             return Collections.emptyList();
         }
@@ -583,6 +588,7 @@ public class MbmsDownloadSession implements AutoCloseable {
             }
         } catch (RemoteException e) {
             mService.set(null);
+            sIsInitialized.set(false);
             sendErrorToApp(MbmsErrors.ERROR_MIDDLEWARE_LOST, null);
             return;
         }
@@ -622,6 +628,7 @@ public class MbmsDownloadSession implements AutoCloseable {
                 }
             } catch (RemoteException e) {
                 mService.set(null);
+                sIsInitialized.set(false);
                 sendErrorToApp(MbmsErrors.ERROR_MIDDLEWARE_LOST, null);
             }
         } finally {
@@ -658,6 +665,7 @@ public class MbmsDownloadSession implements AutoCloseable {
             }
         } catch (RemoteException e) {
             mService.set(null);
+            sIsInitialized.set(false);
             sendErrorToApp(MbmsErrors.ERROR_MIDDLEWARE_LOST, null);
             return;
         }
@@ -686,6 +694,7 @@ public class MbmsDownloadSession implements AutoCloseable {
             return downloadService.getDownloadStatus(downloadRequest, fileInfo);
         } catch (RemoteException e) {
             mService.set(null);
+            sIsInitialized.set(false);
             sendErrorToApp(MbmsErrors.ERROR_MIDDLEWARE_LOST, null);
             return STATUS_UNKNOWN;
         }
@@ -727,6 +736,7 @@ public class MbmsDownloadSession implements AutoCloseable {
             }
         } catch (RemoteException e) {
             mService.set(null);
+            sIsInitialized.set(false);
             sendErrorToApp(MbmsErrors.ERROR_MIDDLEWARE_LOST, null);
         }
     }
