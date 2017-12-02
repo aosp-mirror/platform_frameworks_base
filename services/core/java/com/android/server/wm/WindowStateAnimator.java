@@ -602,13 +602,6 @@ class WindowStateAnimator {
         return mWin.getDisplayContent().getDisplay().getLayerStack();
     }
 
-    void updateLayerStackInTransaction() {
-        if (mSurfaceController != null) {
-            mSurfaceController.setLayerStackInTransaction(
-                    getLayerStack());
-        }
-    }
-
     void resetDrawState() {
         mDrawState = DRAW_PENDING;
 
@@ -732,7 +725,6 @@ class WindowStateAnimator {
         mService.openSurfaceTransaction();
         try {
             mSurfaceController.setPositionInTransaction(mTmpSize.left, mTmpSize.top, false);
-            mSurfaceController.setLayerStackInTransaction(getLayerStack());
         } finally {
             mService.closeSurfaceTransaction("createSurfaceLocked");
         }
