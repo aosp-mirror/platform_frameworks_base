@@ -282,6 +282,7 @@ public class ServiceWatcher implements ServiceConnection {
         mBoundUserId = UserHandle.USER_NULL;
         if (component != null) {
             if (D) Log.d(mTag, "unbinding " + component);
+            mBoundService = null;
             mContext.unbindService(this);
         }
     }
