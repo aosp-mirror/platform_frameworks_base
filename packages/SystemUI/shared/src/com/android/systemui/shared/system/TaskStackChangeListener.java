@@ -43,6 +43,9 @@ public abstract class TaskStackChangeListener {
     public void onActivityDismissingDockedStack() { }
     public void onActivityLaunchOnSecondaryDisplayFailed() { }
     public void onTaskProfileLocked(int taskId, int userId) { }
+    public void onTaskRemoved(int taskId) { }
+    public void onTaskMovedToFront(int taskId) { }
+    public void onActivityRequestedOrientationChanged(int taskId, int requestedOrientation) { }
 
     /**
      * Checks that the current user matches the process. Since

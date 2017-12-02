@@ -145,6 +145,23 @@ public class TaskStackChangeListeners extends TaskStackListener {
         mHandler.obtainMessage(H.ON_TASK_SNAPSHOT_CHANGED, taskId, 0, snapshot).sendToTarget();
     }
 
+    @Override
+    public void onTaskRemoved(int taskId) throws RemoteException {
+        mHandler.obtainMessage(H.ON_TASK_REMOVED, taskId, 0).sendToTarget();
+    }
+
+    @Override
+    public void onTaskMovedToFront(int taskId) throws RemoteException {
+        mHandler.obtainMessage(H.ON_TASK_MOVED_TO_FRONT, taskId, 0).sendToTarget();
+    }
+
+    @Override
+    public void onActivityRequestedOrientationChanged(int taskId, int requestedOrientation)
+            throws RemoteException {
+        mHandler.obtainMessage(H.ON_ACTIVITY_REQUESTED_ORIENTATION_CHANGE, taskId,
+                requestedOrientation).sendToTarget();
+    }
+
     private final class H extends Handler {
         private static final int ON_TASK_STACK_CHANGED = 1;
         private static final int ON_TASK_SNAPSHOT_CHANGED = 2;
@@ -157,6 +174,10 @@ public class TaskStackChangeListeners extends TaskStackListener {
         private static final int ON_PINNED_STACK_ANIMATION_STARTED = 9;
         private static final int ON_ACTIVITY_UNPINNED = 10;
         private static final int ON_ACTIVITY_LAUNCH_ON_SECONDARY_DISPLAY_FAILED = 11;
+        private static final int ON_TASK_REMOVED = 12;
+        private static final int ON_TASK_MOVED_TO_FRONT = 13;
+        private static final int ON_ACTIVITY_REQUESTED_ORIENTATION_CHANGE = 14;
+
 
         public H(Looper looper) {
             super(looper);
@@ -238,6 +259,25 @@ public class TaskStackChangeListeners extends TaskStackListener {
                     case ON_TASK_PROFILE_LOCKED: {
                         for (int i = mTaskStackListeners.size() - 1; i >= 0; i--) {
                             mTaskStackListeners.get(i).onTaskProfileLocked(msg.arg1, msg.arg2);
+                        }
+                        break;
+                    }
+                    case ON_TASK_REMOVED: {
+                        for (int i = mTaskStackListeners.size() - 1; i >= 0; i--) {
+                            mTaskStackListeners.get(i).onTaskRemoved(msg.arg1);
+                        }
+                        break;
+                    }
+                    case ON_TASK_MOVED_TO_FRONT: {
+                        for (int i = mTaskStackListeners.size() - 1; i >= 0; i--) {
+                            mTaskStackListeners.get(i).onTaskMovedToFront(msg.arg1);
+                        }
+                        break;
+                    }
+                    case ON_ACTIVITY_REQUESTED_ORIENTATION_CHANGE: {
+                        for (int i = mTaskStackListeners.size() - 1; i >= 0; i--) {
+                            mTaskStackListeners.get(i).onActivityRequestedOrientationChanged(
+                                    msg.arg1, msg.arg2);
                         }
                         break;
                     }
