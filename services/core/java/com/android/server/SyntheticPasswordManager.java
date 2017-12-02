@@ -75,7 +75,8 @@ public class SyntheticPasswordManager {
     public static final long DEFAULT_HANDLE = 0;
     private static final String DEFAULT_PASSWORD = "default-password";
 
-    private static final byte SYNTHETIC_PASSWORD_VERSION = 1;
+    private static final byte SYNTHETIC_PASSWORD_VERSION_V1 = 1;
+    private static final byte SYNTHETIC_PASSWORD_VERSION = 2;
     private static final byte SYNTHETIC_PASSWORD_PASSWORD_BASED = 0;
     private static final byte SYNTHETIC_PASSWORD_TOKEN_BASED = 1;
 
@@ -468,10 +469,11 @@ public class SyntheticPasswordManager {
         }
 
 
+        final long sid = sidFromPasswordHandle(pwd.passwordHandle);
         byte[] applicationId = transformUnderSecdiscardable(pwdToken,
                 loadSecdiscardable(handle, userId));
         result.authToken = unwrapSyntheticPasswordBlob(handle, SYNTHETIC_PASSWORD_PASSWORD_BASED,
-                applicationId, userId);
+                applicationId, sid, userId);
 
         // Perform verifyChallenge to refresh auth tokens for GK if user password exists.
         result.gkResponse = verifyChallenge(gatekeeper, result.authToken, 0L, userId);
@@ -490,7 +492,7 @@ public class SyntheticPasswordManager {
         byte[] applicationId = transformUnderSecdiscardable(token,
                 loadSecdiscardable(handle, userId));
         result.authToken = unwrapSyntheticPasswordBlob(handle, SYNTHETIC_PASSWORD_TOKEN_BASED,
-                applicationId, userId);
+                applicationId, 0L, userId);
         if (result.authToken != null) {
             result.gkResponse = verifyChallenge(gatekeeper, result.authToken, 0L, userId);
             if (result.gkResponse == null) {
@@ -505,19 +507,26 @@ public class SyntheticPasswordManager {
     }
 
     private AuthenticationToken unwrapSyntheticPasswordBlob(long handle, byte type,
-            byte[] applicationId, int userId) {
+            byte[] applicationId, long sid, int userId) {
         byte[] blob = loadState(SP_BLOB_NAME, handle, userId);
         if (blob == null) {
             return null;
         }
-        if (blob[0] != SYNTHETIC_PASSWORD_VERSION) {
+        final byte version = blob[0];
+        if (version != SYNTHETIC_PASSWORD_VERSION && version != SYNTHETIC_PASSWORD_VERSION_V1) {
             throw new RuntimeException("Unknown blob version");
         }
         if (blob[1] != type) {
             throw new RuntimeException("Invalid blob type");
         }
-        byte[] secret = decryptSPBlob(getHandleName(handle),
+        final byte[] secret;
+        if (version == SYNTHETIC_PASSWORD_VERSION_V1) {
+            secret = SyntheticPasswordCrypto.decryptBlobV1(getHandleName(handle),
+                    Arrays.copyOfRange(blob, 2, blob.length), applicationId);
+        } else {
+            secret = decryptSPBlob(getHandleName(handle),
                 Arrays.copyOfRange(blob, 2, blob.length), applicationId);
+        }
         if (secret == null) {
             Log.e(TAG, "Fail to decrypt SP for user " + userId);
             return null;
@@ -531,6 +540,10 @@ public class SyntheticPasswordManager {
             result.recreate(secret);
         } else {
             result.syntheticPassword = new String(secret);
+        }
+        if (version == SYNTHETIC_PASSWORD_VERSION_V1) {
+            Log.i(TAG, "Upgrade v1 SP blob for user " + userId + ", type = " + type);
+            createSyntheticPasswordBlob(handle, type, result, applicationId, sid, userId);
         }
         return result;
     }
