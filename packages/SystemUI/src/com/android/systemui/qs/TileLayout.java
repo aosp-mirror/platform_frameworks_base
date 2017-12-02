@@ -84,7 +84,7 @@ public class TileLayout extends ViewGroup implements QSTileLayout {
     public boolean updateResources() {
         final Resources res = mContext.getResources();
 
-        final int columns;
+        int columns;
         if (res.getConfiguration().orientation == Configuration.ORIENTATION_PORTRAIT) {
             columns = Settings.System.getIntForUser(resolver,
                     Settings.System.QS_COLUMNS_PORTRAIT, 5,
@@ -94,7 +94,9 @@ public class TileLayout extends ViewGroup implements QSTileLayout {
                     Settings.System.QS_COLUMNS_LANDSCAPE, 5,
                     UserHandle.USER_CURRENT);
         }
-
+        if (columns < 1) {
+            columns = 1;
+        }
         mCellHeight = mContext.getResources().getDimensionPixelSize(R.dimen.qs_tile_height);
         mCellMarginHorizontal = res.getDimensionPixelSize(R.dimen.qs_tile_margin_horizontal);
         mCellMarginVertical= res.getDimensionPixelSize(R.dimen.qs_tile_margin_vertical);
@@ -161,6 +163,9 @@ public class TileLayout extends ViewGroup implements QSTileLayout {
             mRows = Settings.System.getIntForUser(mContext.getContentResolver(),
                         Settings.System.QS_ROWS_LANDSCAPE, 2,
                         UserHandle.USER_CURRENT);
+        }
+        if (mRows < 1) {
+            mRows = 1;
         }
         if (mRows > (tilesCount + mColumns - 1) / mColumns) {
             mRows = (tilesCount + mColumns - 1) / mColumns;
