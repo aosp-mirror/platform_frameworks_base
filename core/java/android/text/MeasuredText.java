@@ -29,6 +29,10 @@ import android.text.style.MetricAffectingSpan;
 import android.text.style.ReplacementSpan;
 import android.util.Pools.SynchronizedPool;
 
+import dalvik.annotation.optimization.CriticalNative;
+
+import libcore.util.NativeAllocationRegistry;
+
 import java.util.Arrays;
 
 /**
@@ -56,6 +60,9 @@ import java.util.Arrays;
  */
 public class MeasuredText {
     private static final char OBJECT_REPLACEMENT_CHARACTER = '\uFFFC';
+
+    private static final NativeAllocationRegistry sRegistry = new NativeAllocationRegistry(
+            MeasuredText.class.getClassLoader(), nGetReleaseFunc(), 1024);
 
     private MeasuredText() {}  // Use build static functions instead.
 
@@ -119,6 +126,26 @@ public class MeasuredText {
     // See getFontMetrics comments.
     private @Nullable IntArray mFontMetrics = new IntArray(4 * 4);
 
+    // The native MeasuredText.
+    // See getNativePtr comments.
+    // Do not modify these members directly. Use bindNativeObject/unbindNativeObject instead.
+    private /* Maybe Zero */ long mNativePtr = 0;
+    private @Nullable Runnable mNativeObjectCleaner;
+
+    // Associate the native object to this Java object.
+    private void bindNativeObject(/* Non Zero*/ long nativePtr) {
+        mNativePtr = nativePtr;
+        mNativeObjectCleaner = sRegistry.registerNativeAllocation(this, nativePtr);
+    }
+
+    // Decouple the native object from this Java object and release the native object.
+    private void unbindNativeObject() {
+        if (mNativePtr != 0) {
+            mNativeObjectCleaner.run();
+            mNativePtr = 0;
+        }
+    }
+
     // Following two objects are for avoiding object allocation.
     private @NonNull TextPaint mCachedPaint = new TextPaint();
     private @Nullable Paint.FontMetricsInt mCachedFm;
@@ -145,6 +172,7 @@ public class MeasuredText {
         mWidths.clear();
         mFontMetrics.clear();
         mSpanEndCache.clear();
+        unbindNativeObject();
     }
 
     /**
@@ -223,6 +251,16 @@ public class MeasuredText {
      */
     public @NonNull IntArray getFontMetrics() {
         return mFontMetrics;
+    }
+
+    /**
+     * Returns the native ptr of the MeasuredText.
+     *
+     * This is available only if the MeasureText is computed with computeForStaticLayout.
+     * Returns 0 in other cases.
+     */
+    public /* Maybe Zero */ long getNativePtr() {
+        return mNativePtr;
     }
 
     /**
@@ -308,7 +346,6 @@ public class MeasuredText {
      * @param start the inclusive start offset of the target region in the text
      * @param end the exclusive end offset of the target region in the text
      * @param textDir the text direction
-     * @param nativeStaticLayoutPtr the pointer to the native static layout object
      * @param recycle pass existing MeasuredText if you want to recycle it.
      *
      * @return measured text
@@ -319,31 +356,46 @@ public class MeasuredText {
             @IntRange(from = 0) int start,
             @IntRange(from = 0) int end,
             @NonNull TextDirectionHeuristic textDir,
-            /* Non-Zero */ long nativeStaticLayoutPtr,
             @Nullable MeasuredText recycle) {
         final MeasuredText mt = recycle == null ? obtain() : recycle;
         mt.resetAndAnalyzeBidi(text, start, end, textDir);
         if (mt.mTextLength == 0) {
+            // Need to build empty native measured text for StaticLayout.
+            // TODO: Stop creating empty measured text for empty lines.
+            long nativeBuilderPtr = nInitBuilder();
+            try {
+                mt.bindNativeObject(nBuildNativeMeasuredText(nativeBuilderPtr, mt.mCopiedBuffer));
+            } finally {
+                nFreeBuilder(nativeBuilderPtr);
+            }
             return mt;
         }
 
-        if (mt.mSpanned == null) {
-            // No style change by MetricsAffectingSpan. Just measure all text.
-            mt.applyMetricsAffectingSpan(paint, null /* spans */, start, end,
-                    nativeStaticLayoutPtr);
-            mt.mSpanEndCache.append(end);
-        } else {
-            // There may be a MetricsAffectingSpan. Split into span transitions and apply styles.
-            int spanEnd;
-            for (int spanStart = start; spanStart < end; spanStart = spanEnd) {
-                spanEnd = mt.mSpanned.nextSpanTransition(spanStart, end, MetricAffectingSpan.class);
-                MetricAffectingSpan[] spans = mt.mSpanned.getSpans(spanStart, spanEnd,
-                        MetricAffectingSpan.class);
-                spans = TextUtils.removeEmptySpans(spans, mt.mSpanned, MetricAffectingSpan.class);
-                mt.applyMetricsAffectingSpan(paint, spans, spanStart, spanEnd,
-                        nativeStaticLayoutPtr);
-                mt.mSpanEndCache.append(spanEnd);
+        long nativeBuilderPtr = nInitBuilder();
+        try {
+            if (mt.mSpanned == null) {
+                // No style change by MetricsAffectingSpan. Just measure all text.
+                mt.applyMetricsAffectingSpan(paint, null /* spans */, start, end, nativeBuilderPtr);
+                mt.mSpanEndCache.append(end);
+            } else {
+                // There may be a MetricsAffectingSpan. Split into span transitions and apply
+                // styles.
+                int spanEnd;
+                for (int spanStart = start; spanStart < end; spanStart = spanEnd) {
+                    spanEnd = mt.mSpanned.nextSpanTransition(spanStart, end,
+                                                             MetricAffectingSpan.class);
+                    MetricAffectingSpan[] spans = mt.mSpanned.getSpans(spanStart, spanEnd,
+                            MetricAffectingSpan.class);
+                    spans = TextUtils.removeEmptySpans(spans, mt.mSpanned,
+                                                       MetricAffectingSpan.class);
+                    mt.applyMetricsAffectingSpan(paint, spans, spanStart, spanEnd,
+                                                 nativeBuilderPtr);
+                    mt.mSpanEndCache.append(spanEnd);
+                }
             }
+            mt.bindNativeObject(nBuildNativeMeasuredText(nativeBuilderPtr, mt.mCopiedBuffer));
+        } finally {
+            nFreeBuilder(nativeBuilderPtr);
         }
 
         return mt;
@@ -415,13 +467,13 @@ public class MeasuredText {
     private void applyReplacementRun(@NonNull ReplacementSpan replacement,
                                      @IntRange(from = 0) int start,  // inclusive, in copied buffer
                                      @IntRange(from = 0) int end,  // exclusive, in copied buffer
-                                     /* Maybe Zero */ long nativeStaticLayoutPtr) {
+                                     /* Maybe Zero */ long nativeBuilderPtr) {
         // Use original text. Shouldn't matter.
         // TODO: passing uninitizlied FontMetrics to developers. Do we need to keep this for
         //       backward compatibility? or Should we initialize them for getFontMetricsInt?
         final float width = replacement.getSize(
                 mCachedPaint, mSpanned, start + mTextStart, end + mTextStart, mCachedFm);
-        if (nativeStaticLayoutPtr == 0) {
+        if (nativeBuilderPtr == 0) {
             // Assigns all width to the first character. This is the same behavior as minikin.
             mWidths.set(start, width);
             if (end > start + 1) {
@@ -429,25 +481,26 @@ public class MeasuredText {
             }
             mWholeWidth += width;
         } else {
-            StaticLayout.addReplacementRun(nativeStaticLayoutPtr, mCachedPaint, start, end, width);
+            nAddReplacementRun(nativeBuilderPtr, mCachedPaint.getNativeInstance(), start, end,
+                               width);
         }
     }
 
     private void applyStyleRun(@IntRange(from = 0) int start,  // inclusive, in copied buffer
                                @IntRange(from = 0) int end,  // exclusive, in copied buffer
-                               /* Maybe Zero */ long nativeStaticLayoutPtr) {
-        if (nativeStaticLayoutPtr != 0) {
+                               /* Maybe Zero */ long nativeBuilderPtr) {
+        if (nativeBuilderPtr != 0) {
             mCachedPaint.getFontMetricsInt(mCachedFm);
         }
 
         if (mLtrWithoutBidi) {
             // If the whole text is LTR direction, just apply whole region.
-            if (nativeStaticLayoutPtr == 0) {
+            if (nativeBuilderPtr == 0) {
                 mWholeWidth += mCachedPaint.getTextRunAdvances(
                         mCopiedBuffer, start, end - start, start, end - start, false /* isRtl */,
                         mWidths.getRawArray(), start);
             } else {
-                StaticLayout.addStyleRun(nativeStaticLayoutPtr, mCachedPaint, start, end,
+                nAddStyleRun(nativeBuilderPtr, mCachedPaint.getNativeInstance(), start, end,
                         false /* isRtl */);
             }
         } else {
@@ -458,14 +511,14 @@ public class MeasuredText {
             for (int levelStart = start, levelEnd = start + 1;; ++levelEnd) {
                 if (levelEnd == end || mLevels.get(levelEnd) != level) {  // transition point
                     final boolean isRtl = (level & 0x1) != 0;
-                    if (nativeStaticLayoutPtr == 0) {
+                    if (nativeBuilderPtr == 0) {
                         final int levelLength = levelEnd - levelStart;
                         mWholeWidth += mCachedPaint.getTextRunAdvances(
                                 mCopiedBuffer, levelStart, levelLength, levelStart, levelLength,
                                 isRtl, mWidths.getRawArray(), levelStart);
                     } else {
-                        StaticLayout.addStyleRun(
-                                nativeStaticLayoutPtr, mCachedPaint, levelStart, levelEnd, isRtl);
+                        nAddStyleRun(nativeBuilderPtr, mCachedPaint.getNativeInstance(), levelStart,
+                                levelEnd, isRtl);
                     }
                     if (levelEnd == end) {
                         break;
@@ -482,12 +535,12 @@ public class MeasuredText {
             @Nullable MetricAffectingSpan[] spans,
             @IntRange(from = 0) int start,  // inclusive, in original text buffer
             @IntRange(from = 0) int end,  // exclusive, in original text buffer
-            /* Maybe Zero */ long nativeStaticLayoutPtr) {
+            /* Maybe Zero */ long nativeBuilderPtr) {
         mCachedPaint.set(paint);
         // XXX paint should not have a baseline shift, but...
         mCachedPaint.baselineShift = 0;
 
-        final boolean needFontMetrics = nativeStaticLayoutPtr != 0;
+        final boolean needFontMetrics = nativeBuilderPtr != 0;
 
         if (needFontMetrics && mCachedFm == null) {
             mCachedFm = new Paint.FontMetricsInt();
@@ -512,9 +565,9 @@ public class MeasuredText {
 
         if (replacement != null) {
             applyReplacementRun(replacement, startInCopiedBuffer, endInCopiedBuffer,
-                    nativeStaticLayoutPtr);
+                                nativeBuilderPtr);
         } else {
-            applyStyleRun(startInCopiedBuffer, endInCopiedBuffer, nativeStaticLayoutPtr);
+            applyStyleRun(startInCopiedBuffer, endInCopiedBuffer, nativeBuilderPtr);
         }
 
         if (needFontMetrics) {
@@ -580,4 +633,44 @@ public class MeasuredText {
         }
         return width;
     }
+
+    private static native /* Non Zero */ long nInitBuilder();
+
+    /**
+     * Apply style to make native measured text.
+     *
+     * @param nativeBuilderPtr The native MeasuredText builder pointer.
+     * @param paintPtr The native paint pointer to be applied.
+     * @param start The start offset in the copied buffer.
+     * @param end The end offset in the copied buffer.
+     * @param isRtl True if the text is RTL.
+     */
+    private static native void nAddStyleRun(/* Non Zero */ long nativeBuilderPtr,
+                                            /* Non Zero */ long paintPtr,
+                                            @IntRange(from = 0) int start,
+                                            @IntRange(from = 0) int end,
+                                            boolean isRtl);
+
+    /**
+     * Apply ReplacementRun to make native measured text.
+     *
+     * @param nativeBuilderPtr The native MeasuredText builder pointer.
+     * @param paintPtr The native paint pointer to be applied.
+     * @param start The start offset in the copied buffer.
+     * @param end The end offset in the copied buffer.
+     * @param width The width of the replacement.
+     */
+    private static native void nAddReplacementRun(/* Non Zero */ long nativeBuilderPtr,
+                                                  /* Non Zero */ long paintPtr,
+                                                  @IntRange(from = 0) int start,
+                                                  @IntRange(from = 0) int end,
+                                                  @FloatRange(from = 0) float width);
+
+    private static native long nBuildNativeMeasuredText(/* Non Zero */ long nativeBuilderPtr,
+                                                 @NonNull char[] text);
+
+    private static native void nFreeBuilder(/* Non Zero */ long nativeBuilderPtr);
+
+    @CriticalNative
+    private static native /* Non Zero */ long nGetReleaseFunc();
 }

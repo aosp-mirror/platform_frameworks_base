@@ -115,6 +115,7 @@ static void recycleCopy(JNIEnv* env, jobject recycle, jintArray recycleBreaks,
 static jint nComputeLineBreaks(JNIEnv* env, jclass, jlong nativePtr,
         // Inputs
         jcharArray javaText,
+        jlong measuredTextPtr,
         jint length,
         jfloat firstWidth,
         jint firstWidthLineCount,
@@ -139,37 +140,18 @@ static jint nComputeLineBreaks(JNIEnv* env, jclass, jlong nativePtr,
     ScopedNullableIntArrayRO tabStops(env, variableTabStops);
 
     minikin::U16StringPiece u16Text(text.get(), length);
-    minikin::MeasuredText measuredText = builder->measureText(u16Text);
+    minikin::MeasuredText* measuredText = reinterpret_cast<minikin::MeasuredText*>(measuredTextPtr);
     minikin::LineBreakResult result = builder->computeBreaks(
-            u16Text, measuredText, firstWidth, firstWidthLineCount, restWidth, indentsOffset,
+            u16Text, *measuredText, firstWidth, firstWidthLineCount, restWidth, indentsOffset,
             tabStops.get(), tabStops.size(), defaultTabStop);
 
     recycleCopy(env, recycle, recycleBreaks, recycleWidths, recycleAscents, recycleDescents,
             recycleFlags, recycleLength, result);
 
-    env->SetFloatArrayRegion(charWidths, 0, measuredText.widths.size(), measuredText.widths.data());
-
-    builder->clearRuns();
+    env->SetFloatArrayRegion(charWidths, 0, measuredText->widths.size(),
+                             measuredText->widths.data());
 
     return static_cast<jint>(result.breakPoints.size());
-}
-
-// Basically similar to Paint.getTextRunAdvances but with C++ interface
-// CriticalNative
-static void nAddStyleRun(jlong nativePtr, jlong nativePaint, jint start, jint end, jboolean isRtl) {
-    minikin::android::StaticLayoutNative* builder = toNative(nativePtr);
-    Paint* paint = reinterpret_cast<Paint*>(nativePaint);
-    const Typeface* typeface = Typeface::resolveDefault(paint->getAndroidTypeface());
-    minikin::MinikinPaint minikinPaint = MinikinUtils::prepareMinikinPaint(paint, typeface);
-    builder->addStyleRun(start, end, std::move(minikinPaint), typeface->fFontCollection, isRtl);
-}
-
-// CriticalNative
-static void nAddReplacementRun(jlong nativePtr, jlong nativePaint, jint start, jint end,
-        jfloat width) {
-    minikin::android::StaticLayoutNative* builder = toNative(nativePtr);
-    Paint* paint = reinterpret_cast<Paint*>(nativePaint);
-    builder->addReplacementRun(start, end, width, paint->getMinikinLocaleListId());
 }
 
 static const JNINativeMethod gMethods[] = {
@@ -185,8 +167,6 @@ static const JNINativeMethod gMethods[] = {
 
     // Critical Natives
     {"nFinish", "(J)V", (void*) nFinish},
-    {"nAddStyleRun", "(JJIIZ)V", (void*) nAddStyleRun},
-    {"nAddReplacementRun", "(JJIIF)V", (void*) nAddReplacementRun},
 
     // Regular JNI
     {"nComputeLineBreaks", "("
@@ -194,6 +174,7 @@ static const JNINativeMethod gMethods[] = {
 
         // Inputs
         "[C"  // text
+        "J"  // MeasuredText ptr.
         "I"  // length
         "F"  // firstWidth
         "I"  // firstWidthLineCount
