@@ -19,7 +19,7 @@
     android:layout_width="match_parent"
     android:layout_height="wrap_content">
 
-    <fragment class="android.test.sample.App$Inner" />
+    <fragment class="android.test.sample.App$Inner" android:id="@id/sample_generated_id"/>
 
     <variable name="user" type="com.android.User" />
 
