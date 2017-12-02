@@ -8538,6 +8538,8 @@
         <attr name="maxWidth" />
         <attr name="maxCollapsedHeight" format="dimension" />
         <attr name="maxCollapsedHeightSmall" format="dimension" />
+        <!-- Whether the Drawer should be positioned at the top rather than at the bottom. -->
+        <attr name="showAtTop" format="boolean" />
     </declare-styleable>
 
     <declare-styleable name="MessagingLinearLayout">
