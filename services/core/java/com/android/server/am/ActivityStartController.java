@@ -25,8 +25,6 @@ import static com.android.server.am.ActivityManagerService.ALLOW_FULL_ONLY;
 
 import android.app.ActivityOptions;
 import android.app.IApplicationThread;
-import android.app.ProfilerInfo;
-import android.app.WaitResult;
 import android.content.ComponentName;
 import android.content.ContentResolver;
 import android.content.Intent;
@@ -34,7 +32,6 @@ import android.content.pm.ActivityInfo;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageManager;
 import android.content.pm.ResolveInfo;
-import android.content.res.Configuration;
 import android.os.Binder;
 import android.os.Bundle;
 import android.os.FactoryTest;
@@ -43,12 +40,10 @@ import android.os.IBinder;
 import android.os.Looper;
 import android.os.Message;
 import android.provider.Settings;
-import android.service.voice.IVoiceInteractionSession;
 import android.util.Slog;
 
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.server.am.ActivityStackSupervisor.PendingActivityLaunch;
-import com.android.internal.app.IVoiceInteractor;
 import com.android.server.am.ActivityStarter.DefaultFactory;
 import com.android.server.am.ActivityStarter.Factory;
 
@@ -72,7 +67,6 @@ public class ActivityStartController {
 
     private final ActivityManagerService mService;
     private final ActivityStackSupervisor mSupervisor;
-    private final ActivityStartInterceptor mInterceptor;
 
     /** Last home activity record we attempted to start. */
     private ActivityRecord mLastHomeActivityStartRecord;
@@ -115,7 +109,9 @@ public class ActivityStartController {
     private ActivityStarter mLastStarter;
 
     ActivityStartController(ActivityManagerService service) {
-        this(service, service.mStackSupervisor, new DefaultFactory());
+        this(service, service.mStackSupervisor,
+                new DefaultFactory(service, service.mStackSupervisor,
+                    new ActivityStartInterceptor(service, service.mStackSupervisor)));
     }
 
     @VisibleForTesting
@@ -124,38 +120,20 @@ public class ActivityStartController {
         mService = service;
         mSupervisor = supervisor;
         mHandler = new StartHandler(mService.mHandlerThread.getLooper());
-        mInterceptor = new ActivityStartInterceptor(mService, mSupervisor);
         mFactory = factory;
+        mFactory.setController(this);
     }
 
     /**
-     * Retrieves a starter to be used for a new start request. The starter will be added to the
-     * active starters list.
-     *
-     * TODO(b/64750076): This should be removed when {@link #obtainStarter} is implemented. At that
-     * time, {@link ActivityStarter#execute} will be able to handle cleaning up the starter's
-     * internal references.
+     * @return A starter to configure and execute starting an activity. It is valid until after
+     *         {@link ActivityStarter#execute} is invoked. At that point, the starter should be
+     *         considered invalid and no longer modified or used.
      */
-    private ActivityStarter createStarter() {
-        mLastStarter = mFactory.getStarter(this, mService, mService.mStackSupervisor, mInterceptor);
-        return mLastStarter;
-    }
+    ActivityStarter obtainStarter(Intent intent, String reason) {
+        final ActivityStarter starter = mFactory.obtainStarter();
+        mLastStarter = starter;
 
-    /**
-     * TODO(b/64750076): Remove once we directly expose starter interface to callers through
-     * {@link #obtainStarter}.
-     */
-    int startActivity(IApplicationThread caller, Intent intent, Intent ephemeralIntent,
-            String resolvedType, ActivityInfo aInfo, ResolveInfo rInfo,
-            IVoiceInteractionSession voiceSession, IVoiceInteractor voiceInteractor,
-            IBinder resultTo, String resultWho, int requestCode, int callingPid, int callingUid,
-            String callingPackage, int realCallingPid, int realCallingUid, int startFlags,
-            ActivityOptions options, boolean ignoreTargetSecurity, boolean componentSpecified,
-            ActivityRecord[] outActivity, TaskRecord inTask, String reason) {
-        return createStarter().startActivityLocked(caller, intent, ephemeralIntent, resolvedType,
-                aInfo, rInfo, voiceSession, voiceInteractor, resultTo, resultWho, requestCode,
-                callingPid, callingUid, callingPackage, realCallingPid, realCallingUid, startFlags,
-                options, ignoreTargetSecurity, componentSpecified, outActivity, inTask, reason);
+        return starter.setIntent(intent).setReason(reason);
     }
 
     /**
@@ -170,18 +148,12 @@ public class ActivityStartController {
     void startHomeActivity(Intent intent, ActivityInfo aInfo, String reason) {
         mSupervisor.moveHomeStackTaskToTop(reason);
 
-        final ActivityStarter starter = createStarter();
-
-        mLastHomeActivityStartResult = starter.startActivityLocked(null /*caller*/, intent,
-                null /*ephemeralIntent*/, null /*resolvedType*/, aInfo, null /*rInfo*/,
-                null /*voiceSession*/, null /*voiceInteractor*/, null /*resultTo*/,
-                null /*resultWho*/, 0 /*requestCode*/, 0 /*callingPid*/, 0 /*callingUid*/,
-                null /*callingPackage*/, 0 /*realCallingPid*/, 0 /*realCallingUid*/,
-                0 /*startFlags*/, null /*options*/, false /*ignoreTargetSecurity*/,
-                false /*componentSpecified*/, tmpOutRecord, null /*inTask*/,
-                "startHomeActivity: " + reason);
+        mLastHomeActivityStartResult = obtainStarter(intent, "startHomeActivity: " + reason)
+                .setOutActivity(tmpOutRecord)
+                .setCallingUid(0)
+                .setActivityInfo(aInfo)
+                .execute();
         mLastHomeActivityStartRecord = tmpOutRecord[0];
-
         if (mSupervisor.inResumeTopActivity) {
             // If we are in resume section already, home activity will be initialized, but not
             // resumed (to avoid recursive resume) and will stay that way until something pokes it
@@ -228,9 +200,10 @@ public class ActivityStartController {
                     intent.setFlags(FLAG_ACTIVITY_NEW_TASK);
                     intent.setComponent(new ComponentName(
                             ri.activityInfo.packageName, ri.activityInfo.name));
-                    startActivity(null, intent, null /*ephemeralIntent*/, null, ri.activityInfo,
-                            null /*rInfo*/, null, null, null, null, 0, 0, 0, null, 0, 0, 0, null,
-                            false, false, null, null, "startSetupActivity");
+                    obtainStarter(intent, "startSetupActivity")
+                            .setCallingUid(0)
+                            .setActivityInfo(ri.activityInfo)
+                            .execute();
                 }
             }
         }
@@ -246,9 +219,17 @@ public class ActivityStartController {
                 null);
 
         // TODO: Switch to user app stacks here.
-        return startActivityMayWait(null, uid, callingPackage,
-                intent, resolvedType, null, null, resultTo, resultWho, requestCode, startFlags,
-                null, null, null, bOptions, false, userId, inTask, reason);
+        return obtainStarter(intent, reason)
+                .setCallingUid(uid)
+                .setCallingPackage(callingPackage)
+                .setResolvedType(resolvedType)
+                .setResultTo(resultTo)
+                .setResultWho(resultWho)
+                .setRequestCode(requestCode)
+                .setStartFlags(startFlags)
+                .setMayWait(bOptions, userId)
+                .setInTask(inTask)
+                .execute();
     }
 
     final int startActivitiesInPackage(int uid, String callingPackage, Intent[] intents,
@@ -260,24 +241,6 @@ public class ActivityStartController {
         int ret = startActivities(null, uid, callingPackage, intents, resolvedTypes, resultTo,
                 bOptions, userId, reason);
         return ret;
-    }
-
-    /**
-     * TODO(b/64750076): Remove once we directly expose starter interface to callers through
-     * {@link #obtainStarter}.
-     */
-    int startActivityMayWait(IApplicationThread caller, int callingUid,
-            String callingPackage, Intent intent, String resolvedType,
-            IVoiceInteractionSession voiceSession, IVoiceInteractor voiceInteractor,
-            IBinder resultTo, String resultWho, int requestCode, int startFlags,
-            ProfilerInfo profilerInfo, WaitResult outResult,
-            Configuration globalConfig, Bundle bOptions, boolean ignoreTargetSecurity, int userId,
-            TaskRecord inTask, String reason) {
-        return createStarter().startActivityMayWait(caller, callingUid, callingPackage, intent,
-                resolvedType, voiceSession, voiceInteractor, resultTo, resultWho, requestCode,
-                startFlags, profilerInfo, outResult, globalConfig, bOptions,
-                ignoreTargetSecurity,
-                userId, inTask, reason);
     }
 
     int startActivities(IApplicationThread caller, int callingUid, String callingPackage,
@@ -340,11 +303,23 @@ public class ActivityStartController {
 
                     ActivityOptions options = ActivityOptions.fromBundle(
                             i == intents.length - 1 ? bOptions : null);
-                    int res = startActivity(caller, intent, null /*ephemeralIntent*/,
-                            resolvedTypes[i], aInfo, null /*rInfo*/, null, null, resultTo, null, -1,
-                            callingPid, callingUid, callingPackage,
-                            realCallingPid, realCallingUid, 0,
-                            options, false, componentSpecified, outActivity, null, reason);
+
+                    final int res = obtainStarter(intent, reason)
+                            .setCaller(caller)
+                            .setResolvedType(resolvedTypes[i])
+                            .setActivityInfo(aInfo)
+                            .setResultTo(resultTo)
+                            .setRequestCode(-1)
+                            .setCallingPid(callingPid)
+                            .setCallingUid(callingUid)
+                            .setCallingPackage(callingPackage)
+                            .setRealCallingPid(realCallingPid)
+                            .setRealCallingUid(realCallingUid)
+                            .setActivityOptions(options)
+                            .setComponentSpecified(componentSpecified)
+                            .setOutActivity(outActivity)
+                            .execute();
+
                     if (res < 0) {
                         return res;
                     }
@@ -369,10 +344,11 @@ public class ActivityStartController {
         while (!mPendingActivityLaunches.isEmpty()) {
             final PendingActivityLaunch pal = mPendingActivityLaunches.remove(0);
             final boolean resume = doResume && mPendingActivityLaunches.isEmpty();
-            final ActivityStarter starter = createStarter();
+            final ActivityStarter starter = obtainStarter(null /* intent */,
+                    "pendingActivityLaunch");
             try {
-                starter.startActivity(pal.r, pal.sourceRecord, null, null, pal.startFlags, resume,
-                        null, null, null /*outRecords*/);
+                starter.startResolvedActivity(pal.r, pal.sourceRecord, null, null, pal.startFlags,
+                        resume, null, null, null /* outRecords */);
             } catch (Exception e) {
                 Slog.e(TAG, "Exception during pending activity launch pal=" + pal, e);
                 pal.sendErrorResult(e.getMessage());
