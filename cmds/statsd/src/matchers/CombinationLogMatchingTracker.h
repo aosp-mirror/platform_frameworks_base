@@ -28,12 +28,12 @@ namespace android {
 namespace os {
 namespace statsd {
 
-// Represents a LogEntryMatcher_Combination in the StatsdConfig.
+// Represents a AtomMatcher_Combination in the StatsdConfig.
 class CombinationLogMatchingTracker : public virtual LogMatchingTracker {
 public:
     CombinationLogMatchingTracker(const std::string& name, const int index);
 
-    bool init(const std::vector<LogEntryMatcher>& allLogMatchers,
+    bool init(const std::vector<AtomMatcher>& allLogMatchers,
               const std::vector<sp<LogMatchingTracker>>& allTrackers,
               const std::unordered_map<std::string, int>& matcherMap,
               std::vector<bool>& stack);

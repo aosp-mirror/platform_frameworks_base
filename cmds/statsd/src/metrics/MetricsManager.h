@@ -71,8 +71,8 @@ private:
     // holds A's sp. (2) When we evaluate matcher results, or condition results, we can quickly get
     // the related results from a cache using the index.
 
-    // Hold all the log entry matchers from the config.
-    std::vector<sp<LogMatchingTracker>> mAllLogEntryMatchers;
+    // Hold all the atom matchers from the config.
+    std::vector<sp<LogMatchingTracker>> mAllAtomMatchers;
 
     // Hold all the conditions from the config.
     std::vector<sp<ConditionTracker>> mAllConditionTrackers;

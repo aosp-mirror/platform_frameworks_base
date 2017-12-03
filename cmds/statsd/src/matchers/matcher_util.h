@@ -42,7 +42,7 @@ enum MatchingState {
 bool combinationMatch(const std::vector<int>& children, const LogicalOperation& operation,
                       const std::vector<MatchingState>& matcherResults);
 
-bool matchesSimple(const SimpleLogEntryMatcher& simpleMatcher, const LogEvent& wrapper);
+bool matchesSimple(const SimpleAtomMatcher& simpleMatcher, const LogEvent& wrapper);
 
 std::vector<KeyValuePair> getDimensionKey(const LogEvent& event,
                                           const std::vector<KeyMatcher>& dimensions);

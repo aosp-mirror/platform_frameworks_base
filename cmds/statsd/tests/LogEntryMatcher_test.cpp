@@ -36,10 +36,10 @@ const int FIELD_ID_3 = 2;
 extern "C" void android_log_rewind(android_log_context ctx);
 
 #ifdef __ANDROID__
-TEST(LogEntryMatcherTest, TestSimpleMatcher) {
+TEST(AtomMatcherTest, TestSimpleMatcher) {
     // Set up the matcher
-    LogEntryMatcher matcher;
-    auto simpleMatcher = matcher.mutable_simple_log_entry_matcher();
+    AtomMatcher matcher;
+    auto simpleMatcher = matcher.mutable_simple_atom_matcher();
     simpleMatcher->set_tag(TAG_ID);
 
     LogEvent event(TAG_ID, 0);
@@ -49,10 +49,10 @@ TEST(LogEntryMatcherTest, TestSimpleMatcher) {
     EXPECT_TRUE(matchesSimple(*simpleMatcher, event));
 }
 
-TEST(LogEntryMatcherTest, TestBoolMatcher) {
+TEST(AtomMatcherTest, TestBoolMatcher) {
     // Set up the matcher
-    LogEntryMatcher matcher;
-    auto simpleMatcher = matcher.mutable_simple_log_entry_matcher();
+    AtomMatcher matcher;
+    auto simpleMatcher = matcher.mutable_simple_atom_matcher();
     simpleMatcher->set_tag(TAG_ID);
     auto keyValue1 = simpleMatcher->add_key_value_matcher();
     keyValue1->mutable_key_matcher()->set_key(FIELD_ID_1);
@@ -84,10 +84,10 @@ TEST(LogEntryMatcherTest, TestBoolMatcher) {
     EXPECT_FALSE(matchesSimple(*simpleMatcher, event));
 }
 
-TEST(LogEntryMatcherTest, TestStringMatcher) {
+TEST(AtomMatcherTest, TestStringMatcher) {
     // Set up the matcher
-    LogEntryMatcher matcher;
-    auto simpleMatcher = matcher.mutable_simple_log_entry_matcher();
+    AtomMatcher matcher;
+    auto simpleMatcher = matcher.mutable_simple_atom_matcher();
     simpleMatcher->set_tag(TAG_ID);
     auto keyValue = simpleMatcher->add_key_value_matcher();
     keyValue->mutable_key_matcher()->set_key(FIELD_ID_1);
@@ -103,10 +103,10 @@ TEST(LogEntryMatcherTest, TestStringMatcher) {
     EXPECT_TRUE(matchesSimple(*simpleMatcher, event));
 }
 
-TEST(LogEntryMatcherTest, TestMultiFieldsMatcher) {
+TEST(AtomMatcherTest, TestMultiFieldsMatcher) {
     // Set up the matcher
-    LogEntryMatcher matcher;
-    auto simpleMatcher = matcher.mutable_simple_log_entry_matcher();
+    AtomMatcher matcher;
+    auto simpleMatcher = matcher.mutable_simple_atom_matcher();
     simpleMatcher->set_tag(TAG_ID);
     auto keyValue1 = simpleMatcher->add_key_value_matcher();
     keyValue1->mutable_key_matcher()->set_key(FIELD_ID_1);
@@ -135,10 +135,10 @@ TEST(LogEntryMatcherTest, TestMultiFieldsMatcher) {
     EXPECT_FALSE(matchesSimple(*simpleMatcher, event));
 }
 
-TEST(LogEntryMatcherTest, TestIntComparisonMatcher) {
+TEST(AtomMatcherTest, TestIntComparisonMatcher) {
     // Set up the matcher
-    LogEntryMatcher matcher;
-    auto simpleMatcher = matcher.mutable_simple_log_entry_matcher();
+    AtomMatcher matcher;
+    auto simpleMatcher = matcher.mutable_simple_atom_matcher();
 
     simpleMatcher->set_tag(TAG_ID);
     auto keyValue = simpleMatcher->add_key_value_matcher();
@@ -192,10 +192,10 @@ TEST(LogEntryMatcherTest, TestIntComparisonMatcher) {
     EXPECT_FALSE(matchesSimple(*simpleMatcher, event));
 }
 
-TEST(LogEntryMatcherTest, TestFloatComparisonMatcher) {
+TEST(AtomMatcherTest, TestFloatComparisonMatcher) {
     // Set up the matcher
-    LogEntryMatcher matcher;
-    auto simpleMatcher = matcher.mutable_simple_log_entry_matcher();
+    AtomMatcher matcher;
+    auto simpleMatcher = matcher.mutable_simple_atom_matcher();
     simpleMatcher->set_tag(TAG_ID);
 
     auto keyValue = simpleMatcher->add_key_value_matcher();
@@ -225,14 +225,14 @@ TEST(LogEntryMatcherTest, TestFloatComparisonMatcher) {
 }
 
 // Helper for the composite matchers.
-void addSimpleMatcher(SimpleLogEntryMatcher* simpleMatcher, int tag, int key, int val) {
+void addSimpleMatcher(SimpleAtomMatcher* simpleMatcher, int tag, int key, int val) {
     simpleMatcher->set_tag(tag);
     auto keyValue = simpleMatcher->add_key_value_matcher();
     keyValue->mutable_key_matcher()->set_key(key);
     keyValue->set_eq_int(val);
 }
 
-TEST(LogEntryMatcherTest, TestAndMatcher) {
+TEST(AtomMatcherTest, TestAndMatcher) {
     // Set up the matcher
     LogicalOperation operation = LogicalOperation::AND;
 
@@ -256,7 +256,7 @@ TEST(LogEntryMatcherTest, TestAndMatcher) {
     EXPECT_TRUE(combinationMatch(children, operation, matcherResults));
 }
 
-TEST(LogEntryMatcherTest, TestOrMatcher) {
+TEST(AtomMatcherTest, TestOrMatcher) {
     // Set up the matcher
     LogicalOperation operation = LogicalOperation::OR;
 
@@ -280,7 +280,7 @@ TEST(LogEntryMatcherTest, TestOrMatcher) {
     EXPECT_FALSE(combinationMatch(children, operation, matcherResults));
 }
 
-TEST(LogEntryMatcherTest, TestNotMatcher) {
+TEST(AtomMatcherTest, TestNotMatcher) {
     // Set up the matcher
     LogicalOperation operation = LogicalOperation::NOT;
 
@@ -297,7 +297,7 @@ TEST(LogEntryMatcherTest, TestNotMatcher) {
     EXPECT_TRUE(combinationMatch(children, operation, matcherResults));
 }
 
-TEST(LogEntryMatcherTest, TestNandMatcher) {
+TEST(AtomMatcherTest, TestNandMatcher) {
     // Set up the matcher
     LogicalOperation operation = LogicalOperation::NAND;
 
@@ -322,7 +322,7 @@ TEST(LogEntryMatcherTest, TestNandMatcher) {
     EXPECT_FALSE(combinationMatch(children, operation, matcherResults));
 }
 
-TEST(LogEntryMatcherTest, TestNorMatcher) {
+TEST(AtomMatcherTest, TestNorMatcher) {
     // Set up the matcher
     LogicalOperation operation = LogicalOperation::NOR;
 

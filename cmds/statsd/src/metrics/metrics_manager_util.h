@@ -40,11 +40,11 @@ namespace statsd {
 // [config]: the input StatsdConfig
 // output:
 // [logTrackerMap]: this map should contain matcher name to index mapping
-// [allLogEntryMatchers]: should store the sp to all the LogMatchingTracker
+// [allAtomMatchers]: should store the sp to all the LogMatchingTracker
 // [allTagIds]: contains the set of all interesting tag ids to this config.
 bool initLogTrackers(const StatsdConfig& config,
                      std::unordered_map<std::string, int>& logTrackerMap,
-                     std::vector<sp<LogMatchingTracker>>& allLogEntryMatchers,
+                     std::vector<sp<LogMatchingTracker>>& allAtomMatchers,
                      std::set<int>& allTagIds);
 
 // Initialize ConditionTrackers
@@ -80,7 +80,7 @@ bool initMetrics(
         const std::unordered_map<std::string, int>& logTrackerMap,
         const std::unordered_map<std::string, int>& conditionTrackerMap,
         const std::unordered_map<int, std::vector<EventConditionLink>>& eventConditionLinks,
-        const vector<sp<LogMatchingTracker>>& allLogEntryMatchers,
+        const vector<sp<LogMatchingTracker>>& allAtomMatchers,
         vector<sp<ConditionTracker>>& allConditionTrackers,
         std::vector<sp<MetricProducer>>& allMetricProducers,
         std::unordered_map<int, std::vector<int>>& conditionToMetricMap,
@@ -89,7 +89,7 @@ bool initMetrics(
 // Initialize MetricsManager from StatsdConfig.
 // Parameters are the members of MetricsManager. See MetricsManager for declaration.
 bool initStatsdConfig(const ConfigKey& key, const StatsdConfig& config, std::set<int>& allTagIds,
-                      std::vector<sp<LogMatchingTracker>>& allLogEntryMatchers,
+                      std::vector<sp<LogMatchingTracker>>& allAtomMatchers,
                       std::vector<sp<ConditionTracker>>& allConditionTrackers,
                       std::vector<sp<MetricProducer>>& allMetricProducers,
                       vector<sp<AnomalyTracker>>& allAnomalyTrackers,

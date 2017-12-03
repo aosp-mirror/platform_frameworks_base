@@ -30,9 +30,8 @@ import com.android.internal.os.StatsdConfigProto.GaugeMetric;
 import com.android.internal.os.StatsdConfigProto.ValueMetric;
 import com.android.internal.os.StatsdConfigProto.KeyMatcher;
 import com.android.internal.os.StatsdConfigProto.KeyValueMatcher;
-import com.android.internal.os.StatsdConfigProto.LogEntryMatcher;
+import com.android.internal.os.StatsdConfigProto.AtomMatcher;
 import com.android.internal.os.StatsdConfigProto.SimpleCondition;
-import com.android.internal.os.StatsdConfigProto.SimpleLogEntryMatcher;
 import com.android.internal.os.StatsdConfigProto.StatsdConfig;
 
 import java.io.InputStream;
@@ -119,7 +118,7 @@ public class ConfigFactory {
               addCondition(condition, i, config);
             }
             // matchers
-            for (LogEntryMatcher matcher : mTemplate.getLogEntryMatcherList()) {
+            for (AtomMatcher matcher : mTemplate.getAtomMatcherList()) {
               addMatcher(matcher, i, config);
             }
         }
@@ -282,20 +281,20 @@ public class ConfigFactory {
     }
 
     /**
-     * Creates a {@link LogEntryMatcher} based on the template. Makes sure that all names
+     * Creates a {@link AtomMatcher} based on the template. Makes sure that all names
      * are appended with the provided suffix. Then adds that matcher to the config.
      */
-    private void addMatcher(LogEntryMatcher template, int suffix, StatsdConfig.Builder config) {
-        LogEntryMatcher.Builder matcher = template.toBuilder()
+    private void addMatcher(AtomMatcher template, int suffix, StatsdConfig.Builder config) {
+        AtomMatcher.Builder matcher = template.toBuilder()
             .setName(template.getName() + suffix);
         if (template.hasCombination()) {
-            LogEntryMatcher.Combination.Builder cb = template.getCombination().toBuilder()
+            AtomMatcher.Combination.Builder cb = template.getCombination().toBuilder()
                 .clearMatcher();
             for (String child : template.getCombination().getMatcherList()) {
                 cb.addMatcher(child + suffix);
             }
             matcher.setCombination(cb);
         }
-        config.addLogEntryMatcher(matcher);
+        config.addAtomMatcher(matcher);
     }
 }

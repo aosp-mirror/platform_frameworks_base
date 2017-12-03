@@ -39,14 +39,14 @@ public:
     virtual ~LogMatchingTracker(){};
 
     // Initialize this LogMatchingTracker.
-    // allLogMatchers: the list of the LogEntryMatcher proto config. This is needed because we don't
+    // allLogMatchers: the list of the AtomMatcher proto config. This is needed because we don't
     //                 store the proto object in memory. We only need it during initilization.
     // allTrackers: the list of the LogMatchingTracker objects. It's a one-to-one mapping with
     //              allLogMatchers. This is needed because the initialization is done recursively
     //              for CombinationLogMatchingTrackers using DFS.
     // stack: a bit map to record which matcher has been visited on the stack. This is for detecting
     //        circle dependency.
-    virtual bool init(const std::vector<LogEntryMatcher>& allLogMatchers,
+    virtual bool init(const std::vector<AtomMatcher>& allLogMatchers,
                       const std::vector<sp<LogMatchingTracker>>& allTrackers,
                       const std::unordered_map<std::string, int>& matcherMap,
                       std::vector<bool>& stack) = 0;
