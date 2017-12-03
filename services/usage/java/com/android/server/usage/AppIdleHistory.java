@@ -16,10 +16,7 @@
 
 package com.android.server.usage;
 
-import static android.app.usage.AppStandby.*;
-
-import android.app.usage.AppStandby;
-import android.os.Environment;
+import android.app.usage.UsageStatsManager;
 import android.os.SystemClock;
 import android.util.ArrayMap;
 import android.util.AtomicFile;
@@ -99,7 +96,8 @@ public class AppIdleHistory {
         final byte[] recent = new byte[HISTORY_SIZE];
         long lastUsedElapsedTime;
         long lastUsedScreenTime;
-        @StandbyBuckets int currentBucket;
+        @UsageStatsManager.StandbyBuckets
+        int currentBucket;
         String bucketingReason;
         int lastInformedBucket;
     }
@@ -190,14 +188,14 @@ public class AppIdleHistory {
                 + (elapsedRealtime - mElapsedSnapshot);
         appUsageHistory.lastUsedScreenTime = getScreenOnTime(elapsedRealtime);
         appUsageHistory.recent[HISTORY_SIZE - 1] = FLAG_LAST_STATE | FLAG_PARTIAL_ACTIVE;
-        if (appUsageHistory.currentBucket > STANDBY_BUCKET_ACTIVE) {
-            appUsageHistory.currentBucket = STANDBY_BUCKET_ACTIVE;
+        if (appUsageHistory.currentBucket > UsageStatsManager.STANDBY_BUCKET_ACTIVE) {
+            appUsageHistory.currentBucket = UsageStatsManager.STANDBY_BUCKET_ACTIVE;
             if (DEBUG) {
                 Slog.d(TAG, "Moved " + packageName + " to bucket=" + appUsageHistory.currentBucket
                         + ", reason=" + appUsageHistory.bucketingReason);
             }
         }
-        appUsageHistory.bucketingReason = AppStandby.REASON_USAGE;
+        appUsageHistory.bucketingReason = UsageStatsManager.REASON_USAGE;
 
         return appUsageHistory.currentBucket;
     }
@@ -206,15 +204,15 @@ public class AppIdleHistory {
         ArrayMap<String, AppUsageHistory> userHistory = getUserHistory(userId);
         AppUsageHistory appUsageHistory = getPackageHistory(userHistory, packageName,
                 elapsedRealtime, true);
-        if (appUsageHistory.currentBucket > STANDBY_BUCKET_WORKING_SET) {
-            appUsageHistory.currentBucket = STANDBY_BUCKET_WORKING_SET;
+        if (appUsageHistory.currentBucket > UsageStatsManager.STANDBY_BUCKET_WORKING_SET) {
+            appUsageHistory.currentBucket = UsageStatsManager.STANDBY_BUCKET_WORKING_SET;
             if (DEBUG) {
                 Slog.d(TAG, "Moved " + packageName + " to bucket=" + appUsageHistory.currentBucket
                         + ", reason=" + appUsageHistory.bucketingReason);
             }
         }
         // TODO: Should this be a different reason for partial usage?
-        appUsageHistory.bucketingReason = AppStandby.REASON_USAGE;
+        appUsageHistory.bucketingReason = UsageStatsManager.REASON_USAGE;
 
         return appUsageHistory.currentBucket;
     }
@@ -271,8 +269,9 @@ public class AppIdleHistory {
             appUsageHistory = new AppUsageHistory();
             appUsageHistory.lastUsedElapsedTime = getElapsedTime(elapsedRealtime);
             appUsageHistory.lastUsedScreenTime = getScreenOnTime(elapsedRealtime);
-            appUsageHistory.currentBucket = AppStandby.STANDBY_BUCKET_NEVER;
-            appUsageHistory.bucketingReason = REASON_DEFAULT;
+            appUsageHistory.currentBucket = UsageStatsManager.STANDBY_BUCKET_NEVER;
+            appUsageHistory.bucketingReason = UsageStatsManager.REASON_DEFAULT;
+            appUsageHistory.lastInformedBucket = -1;
             userHistory.put(packageName, appUsageHistory);
         }
         return appUsageHistory;
@@ -289,7 +288,7 @@ public class AppIdleHistory {
         if (appUsageHistory == null) {
             return false; // Default to not idle
         } else {
-            return appUsageHistory.currentBucket >= AppStandby.STANDBY_BUCKET_RARE;
+            return appUsageHistory.currentBucket >= UsageStatsManager.STANDBY_BUCKET_RARE;
             // Whether or not it's passed will now be externally calculated and the
             // bucket will be pushed to the history using setAppStandbyBucket()
             //return hasPassedThresholds(appUsageHistory, elapsedRealtime);
@@ -333,12 +332,12 @@ public class AppIdleHistory {
         AppUsageHistory appUsageHistory = getPackageHistory(userHistory, packageName,
                 elapsedRealtime, true);
         if (idle) {
-            appUsageHistory.currentBucket = STANDBY_BUCKET_RARE;
-            appUsageHistory.bucketingReason = REASON_FORCED;
+            appUsageHistory.currentBucket = UsageStatsManager.STANDBY_BUCKET_RARE;
+            appUsageHistory.bucketingReason = UsageStatsManager.REASON_FORCED;
         } else {
-            appUsageHistory.currentBucket = STANDBY_BUCKET_ACTIVE;
+            appUsageHistory.currentBucket = UsageStatsManager.STANDBY_BUCKET_ACTIVE;
             // This is to pretend that the app was just used, don't freeze the state anymore.
-            appUsageHistory.bucketingReason = REASON_USAGE;
+            appUsageHistory.bucketingReason = UsageStatsManager.REASON_USAGE;
         }
         return appUsageHistory.currentBucket;
     }
@@ -435,12 +434,12 @@ public class AppIdleHistory {
                         String currentBucketString = parser.getAttributeValue(null,
                                 ATTR_CURRENT_BUCKET);
                         appUsageHistory.currentBucket = currentBucketString == null
-                                ? AppStandby.STANDBY_BUCKET_ACTIVE
+                                ? UsageStatsManager.STANDBY_BUCKET_ACTIVE
                                 : Integer.parseInt(currentBucketString);
                         appUsageHistory.bucketingReason =
                                 parser.getAttributeValue(null, ATTR_BUCKETING_REASON);
                         if (appUsageHistory.bucketingReason == null) {
-                            appUsageHistory.bucketingReason = REASON_DEFAULT;
+                            appUsageHistory.bucketingReason = UsageStatsManager.REASON_DEFAULT;
                         }
                         userHistory.put(packageName, appUsageHistory);
                     }

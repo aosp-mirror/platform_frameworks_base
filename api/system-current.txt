@@ -609,8 +609,11 @@ package android.app.usage {
   }
 
   public final class UsageStatsManager {
+    method public int getAppStandbyBucket(java.lang.String);
     method public void setAppStandbyBucket(java.lang.String, int);
     method public void whitelistAppTemporarily(java.lang.String, long, android.os.UserHandle);
+    field public static final int STANDBY_BUCKET_EXEMPTED = 5; // 0x5
+    field public static final int STANDBY_BUCKET_NEVER = 50; // 0x32
   }
 
 }

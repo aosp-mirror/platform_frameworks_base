@@ -16,9 +16,12 @@
 
 package com.android.server.usage;
 
-import static android.app.usage.AppStandby.*;
 import static android.app.usage.UsageEvents.Event.NOTIFICATION_SEEN;
 import static android.app.usage.UsageEvents.Event.USER_INTERACTION;
+import static android.app.usage.UsageStatsManager.STANDBY_BUCKET_ACTIVE;
+import static android.app.usage.UsageStatsManager.STANDBY_BUCKET_FREQUENT;
+import static android.app.usage.UsageStatsManager.STANDBY_BUCKET_RARE;
+import static android.app.usage.UsageStatsManager.STANDBY_BUCKET_WORKING_SET;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
@@ -30,8 +33,8 @@ import static org.mockito.Matchers.anyString;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
 
-import android.app.usage.AppStandby;
 import android.app.usage.UsageEvents;
+import android.app.usage.UsageStatsManager;
 import android.appwidget.AppWidgetManager;
 import android.content.Context;
 import android.content.ContextWrapper;
@@ -280,7 +283,7 @@ public class AppStandbyControllerTests {
     public void testBuckets() throws Exception {
         AppStandbyController controller = setupController();
 
-        assertTimeout(controller, 0, STANDBY_BUCKET_NEVER);
+        assertTimeout(controller, 0, UsageStatsManager.STANDBY_BUCKET_NEVER);
 
         reportEvent(controller, USER_INTERACTION, 0);
 
@@ -312,7 +315,7 @@ public class AppStandbyControllerTests {
         AppStandbyController controller = setupController();
         mInjector.setDisplayOn(false);
 
-        assertTimeout(controller, 0, STANDBY_BUCKET_NEVER);
+        assertTimeout(controller, 0, UsageStatsManager.STANDBY_BUCKET_NEVER);
 
         reportEvent(controller, USER_INTERACTION, 0);
 
