@@ -79,7 +79,7 @@
     <string name="RestrictedOnAllVoiceTitle" msgid="158800171499150681">"Häälkõned/hädaabiteenus pole saadaval"</string>
     <string name="RestrictedStateContent" msgid="4278821484643362350">"Teie asukoha mobiilsidevõrk seda teenust ajutiselt ei paku"</string>
     <string name="NetworkPreferenceSwitchTitle" msgid="4008877505368566980">"Võrguga ei saa ühendust"</string>
-    <string name="NetworkPreferenceSwitchSummary" msgid="1203771446683319957">"Vastuvõtu parandamiseks muutke valitud tüüpi jaotises Seaded &gt; Võrk ja Internet &gt; Mobiilsidevõrgud &gt; Eelistatud võrgutüüp."</string>
+    <string name="NetworkPreferenceSwitchSummary" msgid="7056776609127756440">"Vastuvõtu parandamiseks muutke valitud tüüpi jaotises Seaded &gt; Võrk ja Internet &gt; Mobiilsidevõrgud &gt; Eelistatud võrgutüüp."</string>
     <string name="EmergencyCallWarningTitle" msgid="4790413876281901612">"WiFi-kõned on aktiivsed"</string>
     <string name="EmergencyCallWarningSummary" msgid="8973232888021643293">"Hädaabikõnede jaoks on vajalik mobiilsidevõrk."</string>
     <string name="notification_channel_network_alert" msgid="4427736684338074967">"Teatised"</string>
@@ -1051,6 +1051,9 @@
     <string name="screen_compat_mode_hint" msgid="1064524084543304459">"Lubage see uuesti valikutes Süsteemiseaded &gt; Rakendused &gt; Allalaaditud."</string>
     <string name="unsupported_display_size_message" msgid="6545327290756295232">"Rakendus <xliff:g id="APP_NAME">%1$s</xliff:g> ei toeta praegust ekraani suuruse seadet ja võib ootamatult käituda."</string>
     <string name="unsupported_display_size_show" msgid="7969129195360353041">"Kuva alati"</string>
+    <string name="unsupported_compile_sdk_message" msgid="4253168368781441759">"Rakendus <xliff:g id="APP_NAME">%1$s</xliff:g> loodi Android OS-i ühildumatu versiooni jaoks ja võib käituda ootamatult. Saadaval võib olla rakenduse värskendatud versioon."</string>
+    <string name="unsupported_compile_sdk_show" msgid="2681877855260970231">"Kuva alati"</string>
+    <string name="unsupported_compile_sdk_check_update" msgid="3312723623323216101">"Otsi värskendust"</string>
     <string name="smv_application" msgid="3307209192155442829">"Rakendus <xliff:g id="APPLICATION">%1$s</xliff:g> (protsess <xliff:g id="PROCESS">%2$s</xliff:g>) on rikkunud isekehtestatud StrictMode\'i eeskirju."</string>
     <string name="smv_process" msgid="5120397012047462446">"Protsess <xliff:g id="PROCESS">%1$s</xliff:g> on rikkunud isejõustatud StrictMode\'i eeskirju."</string>
     <string name="android_upgrading_title" msgid="1584192285441405746">"Android viiakse üle uuemale versioonile ..."</string>
@@ -1116,10 +1119,10 @@
     <string name="network_available_sign_in" msgid="1848877297365446605">"Võrku sisselogimine"</string>
     <!-- no translation found for network_available_sign_in_detailed (8000081941447976118) -->
     <skip />
-    <string name="wifi_no_internet" msgid="8451173622563841546">"WiFi-l pole juurdepääsu Internetile"</string>
+    <string name="wifi_no_internet" msgid="8938267198124654938">"WiFi-võrgul pole juurdepääsu Internetile"</string>
     <string name="wifi_no_internet_detailed" msgid="8083079241212301741">"Puudutage valikute nägemiseks"</string>
     <string name="network_switch_metered" msgid="4671730921726992671">"Lülitati võrgule <xliff:g id="NETWORK_TYPE">%1$s</xliff:g>"</string>
-    <string name="network_switch_metered_detail" msgid="5325661434777870353">"Seade kasutab võrku <xliff:g id="NEW_NETWORK">%1$s</xliff:g>, kui võrgul <xliff:g id="PREVIOUS_NETWORK">%2$s</xliff:g> puudub Interneti-ühendus. Rakenduda võivad tasud."</string>
+    <string name="network_switch_metered_detail" msgid="775163331794506615">"Seade kasutab võrku <xliff:g id="NEW_NETWORK">%1$s</xliff:g>, kui võrgul <xliff:g id="PREVIOUS_NETWORK">%2$s</xliff:g> puudub juurdepääs Internetile. Rakenduda võivad tasud."</string>
     <string name="network_switch_metered_toast" msgid="5779283181685974304">"Lülitati võrgult <xliff:g id="PREVIOUS_NETWORK">%1$s</xliff:g> võrgule <xliff:g id="NEW_NETWORK">%2$s</xliff:g>"</string>
   <string-array name="network_switch_type_name">
     <item msgid="3979506840912951943">"mobiilne andmeside"</item>
@@ -1130,7 +1133,7 @@
   </string-array>
     <string name="network_switch_type_name_unknown" msgid="4552612897806660656">"tundmatu võrgutüüp"</string>
     <string name="wifi_watchdog_network_disabled" msgid="7904214231651546347">"Ei saanud WiFi-ga ühendust"</string>
-    <string name="wifi_watchdog_network_disabled_detailed" msgid="5548780776418332675">" on halb Interneti-ühendus."</string>
+    <string name="wifi_watchdog_network_disabled_detailed" msgid="4917472096696322767">" on halb Interneti-ühendus."</string>
     <string name="wifi_connect_alert_title" msgid="8455846016001810172">"Kas lubada ühendus?"</string>
     <string name="wifi_connect_alert_message" msgid="6451273376815958922">"Rakendus %1$s soovib luua ühenduse WiFi-võrguga %2$s"</string>
     <string name="wifi_connect_default_application" msgid="7143109390475484319">"Rakendus"</string>
@@ -1626,7 +1629,6 @@
     <string name="managed_profile_label_badge_2" msgid="5048136430082124036">"2. töö <xliff:g id="LABEL">%1$s</xliff:g>"</string>
     <string name="managed_profile_label_badge_3" msgid="2808305070321719040">"3. töö <xliff:g id="LABEL">%1$s</xliff:g>"</string>
     <string name="lock_to_app_toast" msgid="6820571533009838261">"Ekraani vabastamiseks puudutage pikalt nuppe Tagasi ja Ülevaade"</string>
-    <string name="lock_to_app_toast_locked" msgid="7849470948648628704">"Seda rakendust ei saa vabastada"</string>
     <string name="lock_to_app_start" msgid="6643342070839862795">"Ekraan on kinnitatud"</string>
     <string name="lock_to_app_exit" msgid="8598219838213787430">"Ekraan on vabastatud"</string>
     <string name="lock_to_app_unlock_pin" msgid="2552556656504331634">"Enne vabastamist küsi PIN-koodi"</string>
@@ -1635,7 +1637,7 @@
     <string name="package_installed_device_owner" msgid="6875717669960212648">"Administraator on selle installinud"</string>
     <string name="package_updated_device_owner" msgid="1847154566357862089">"Administraator on seda värskendanud"</string>
     <string name="package_deleted_device_owner" msgid="2307122077550236438">"Administraator on selle kustutanud"</string>
-    <string name="battery_saver_description" msgid="1960431123816253034">"Aku kestuse parandamiseks vähendab akusäästja teie seadme toimivust ning piirab vibreerimist, asukohateenuseid ja suuremat osa taustaandmetest. E-posti, sõnumsidet ja muid sünkroonimisele tuginevaid rakendusi võidakse värskendada ainult siis, kui te need avate.\n\nAkusäästja lülitatakse seadme laadimise ajal automaatselt välja."</string>
+    <string name="battery_saver_description" msgid="5394663545060026162">"Aku tööea parandamiseks vähendab akusäästja teie seadme toimivust ning piirab vibratsiooni, asukohateenuseid ja suuremat osa taustaandmetest. E-posti, sõnumsidet ja muid sünkroonimisele tuginevaid rakendusi võidakse värskendada ainult siis, kui need avate.\n\nSeadme laadimise ajal lülitatakse akusäästja automaatselt välja."</string>
     <string name="data_saver_description" msgid="6015391409098303235">"Andmekasutuse vähendamiseks keelab andmeside mahu säästja mõne rakenduse puhul andmete taustal saatmise ja vastuvõtmise. Rakendus, mida praegu kasutate, pääseb andmesidele juurde, kuid võib seda teha väiksema sagedusega. Seetõttu võidakse näiteks kujutised kuvada alles siis, kui neid puudutate."</string>
     <string name="data_saver_enable_title" msgid="4674073932722787417">"Lül. andmemahu säästja sisse?"</string>
     <string name="data_saver_enable_button" msgid="7147735965247211818">"Lülita sisse"</string>
@@ -1782,14 +1784,10 @@
     <string name="etws_primary_default_message_test" msgid="2709597093560037455">"Hädaabisõnumite test"</string>
     <string name="notification_reply_button_accessibility" msgid="3621714652387814344">"Vasta"</string>
     <string name="etws_primary_default_message_others" msgid="6293148756130398971"></string>
-    <!-- no translation found for mmcc_authentication_reject (5767701075994754356) -->
-    <skip />
-    <!-- no translation found for mmcc_imsi_unknown_in_hlr (5316658473301462825) -->
-    <skip />
-    <!-- no translation found for mmcc_illegal_ms (807334478177362062) -->
-    <skip />
-    <!-- no translation found for mmcc_illegal_me (1950705155760872972) -->
-    <skip />
+    <string name="mmcc_authentication_reject" msgid="5767701075994754356">"SIM-kaarti ei lubata häälega kasutada"</string>
+    <string name="mmcc_imsi_unknown_in_hlr" msgid="5316658473301462825">"SIM-kaart pole häälega kasutamiseks ettevalmistatud"</string>
+    <string name="mmcc_illegal_ms" msgid="807334478177362062">"SIM-kaarti ei lubata häälega kasutada"</string>
+    <string name="mmcc_illegal_me" msgid="1950705155760872972">"Telefoni ei lubata häälega kasutada"</string>
     <string name="popup_window_default_title" msgid="4874318849712115433">"Hüpikaken"</string>
     <string name="slice_more_content" msgid="8504342889413274608">"+ <xliff:g id="NUMBER">%1$d</xliff:g>"</string>
     <string name="shortcut_restored_on_lower_version" msgid="5270675146351613828">"See otsetee nõuab rakenduse uusimat versiooni"</string>

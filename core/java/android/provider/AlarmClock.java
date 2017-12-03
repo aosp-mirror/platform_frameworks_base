@@ -158,7 +158,6 @@ public final class AlarmClock {
      * <p>
      * Dismiss all currently expired timers. If there are no expired timers, then this is a no-op.
      * </p>
-     * @hide
      */
     @SdkConstant(SdkConstantType.ACTIVITY_INTENT_ACTION)
     public static final String ACTION_DISMISS_TIMER = "android.intent.action.DISMISS_TIMER";

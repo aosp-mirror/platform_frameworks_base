@@ -81,7 +81,7 @@
     <string name="RestrictedOnAllVoiceTitle" msgid="158800171499150681">"Голосовые и экстренные вызовы недоступны"</string>
     <string name="RestrictedStateContent" msgid="4278821484643362350">"Местная мобильная сеть временно не поддерживает эту функцию."</string>
     <string name="NetworkPreferenceSwitchTitle" msgid="4008877505368566980">"Сеть недоступна"</string>
-    <string name="NetworkPreferenceSwitchSummary" msgid="1203771446683319957">"Чтобы улучшить сигнал, попробуйте выбрать другой тип сети в настройках (раздел \"Мобильные сети\")."</string>
+    <string name="NetworkPreferenceSwitchSummary" msgid="7056776609127756440">"Чтобы улучшить сигнал, попробуйте выбрать другой тип сети в настройках (раздел \"Мобильные сети\")."</string>
     <string name="EmergencyCallWarningTitle" msgid="4790413876281901612">"Включена функция \"Звонки по Wi‑Fi\""</string>
     <string name="EmergencyCallWarningSummary" msgid="8973232888021643293">"Для экстренных вызовов требуется мобильная сеть."</string>
     <string name="notification_channel_network_alert" msgid="4427736684338074967">"Оповещения"</string>
@@ -1091,6 +1091,9 @@
     <string name="screen_compat_mode_hint" msgid="1064524084543304459">"Включить эту функцию можно в меню \"Настройки &gt; Приложения &gt; Загруженные\"."</string>
     <string name="unsupported_display_size_message" msgid="6545327290756295232">"Приложение \"<xliff:g id="APP_NAME">%1$s</xliff:g>\" не поддерживает выбранный масштаб изображения на экране и может работать некорректно."</string>
     <string name="unsupported_display_size_show" msgid="7969129195360353041">"Всегда показывать"</string>
+    <string name="unsupported_compile_sdk_message" msgid="4253168368781441759">"Приложение \"<xliff:g id="APP_NAME">%1$s</xliff:g>\" было разработано для несовместимой версии ОС Android и может работать некорректно. Рекомендуем скачать новую версию приложения."</string>
+    <string name="unsupported_compile_sdk_show" msgid="2681877855260970231">"Всегда показывать"</string>
+    <string name="unsupported_compile_sdk_check_update" msgid="3312723623323216101">"Проверить обновления"</string>
     <string name="smv_application" msgid="3307209192155442829">"Приложение \"<xliff:g id="APPLICATION">%1$s</xliff:g>\" (процесс: <xliff:g id="PROCESS">%2$s</xliff:g>) нарушило собственную политику StrictMode."</string>
     <string name="smv_process" msgid="5120397012047462446">"Процесс <xliff:g id="PROCESS">%1$s</xliff:g> нарушил собственную политику StrictMode."</string>
     <string name="android_upgrading_title" msgid="1584192285441405746">"Обновление Android..."</string>
@@ -1160,10 +1163,10 @@
     <string name="network_available_sign_in" msgid="1848877297365446605">"Регистрация в сети"</string>
     <!-- no translation found for network_available_sign_in_detailed (8000081941447976118) -->
     <skip />
-    <string name="wifi_no_internet" msgid="8451173622563841546">"Сеть Wi-Fi не подключена к Интернету"</string>
+    <string name="wifi_no_internet" msgid="8938267198124654938">"Сеть Wi-Fi не подключена к Интернету"</string>
     <string name="wifi_no_internet_detailed" msgid="8083079241212301741">"Нажмите, чтобы показать варианты."</string>
     <string name="network_switch_metered" msgid="4671730921726992671">"Новое подключение: <xliff:g id="NETWORK_TYPE">%1$s</xliff:g>"</string>
-    <string name="network_switch_metered_detail" msgid="5325661434777870353">"Устройство использует <xliff:g id="NEW_NETWORK">%1$s</xliff:g>, если подключение к сети <xliff:g id="PREVIOUS_NETWORK">%2$s</xliff:g> недоступно. Может взиматься плата за передачу данных."</string>
+    <string name="network_switch_metered_detail" msgid="775163331794506615">"Устройство использует <xliff:g id="NEW_NETWORK">%1$s</xliff:g>, если подключение к сети <xliff:g id="PREVIOUS_NETWORK">%2$s</xliff:g> недоступно. Может взиматься плата за передачу данных."</string>
     <string name="network_switch_metered_toast" msgid="5779283181685974304">"Устройство отключено от сети <xliff:g id="NEW_NETWORK">%2$s</xliff:g> и теперь использует <xliff:g id="PREVIOUS_NETWORK">%1$s</xliff:g>"</string>
   <string-array name="network_switch_type_name">
     <item msgid="3979506840912951943">"мобильный Интернет"</item>
@@ -1174,7 +1177,7 @@
   </string-array>
     <string name="network_switch_type_name_unknown" msgid="4552612897806660656">"неизвестный тип сети"</string>
     <string name="wifi_watchdog_network_disabled" msgid="7904214231651546347">"Не удалось подключиться к сети Wi-Fi"</string>
-    <string name="wifi_watchdog_network_disabled_detailed" msgid="5548780776418332675">" – плохое интернет-соединение."</string>
+    <string name="wifi_watchdog_network_disabled_detailed" msgid="4917472096696322767">" – плохое интернет-соединение."</string>
     <string name="wifi_connect_alert_title" msgid="8455846016001810172">"Разрешить подключение?"</string>
     <string name="wifi_connect_alert_message" msgid="6451273376815958922">"Приложение \"%1$s\" запрашивает доступ на подключение к сети Wi-Fi (%2$s)"</string>
     <string name="wifi_connect_default_application" msgid="7143109390475484319">"Приложение"</string>
@@ -1676,7 +1679,6 @@
     <string name="managed_profile_label_badge_2" msgid="5048136430082124036">"Задача 2: <xliff:g id="LABEL">%1$s</xliff:g>"</string>
     <string name="managed_profile_label_badge_3" msgid="2808305070321719040">"Задача 3: <xliff:g id="LABEL">%1$s</xliff:g>"</string>
     <string name="lock_to_app_toast" msgid="6820571533009838261">"Чтобы открепить экран, нажмите и удерживайте кнопки \"Назад\" и \"Обзор\""</string>
-    <string name="lock_to_app_toast_locked" msgid="7849470948648628704">"Это приложение нельзя открепить"</string>
     <string name="lock_to_app_start" msgid="6643342070839862795">"Блокировка включена"</string>
     <string name="lock_to_app_exit" msgid="8598219838213787430">"Блокировка выключена"</string>
     <string name="lock_to_app_unlock_pin" msgid="2552556656504331634">"PIN-код для отключения"</string>
@@ -1685,7 +1687,7 @@
     <string name="package_installed_device_owner" msgid="6875717669960212648">"Установлено администратором"</string>
     <string name="package_updated_device_owner" msgid="1847154566357862089">"Обновлено администратором"</string>
     <string name="package_deleted_device_owner" msgid="2307122077550236438">"Удалено администратором"</string>
-    <string name="battery_saver_description" msgid="1960431123816253034">"Чтобы продлить время работы устройства от батареи, в режиме энергосбережения снижается производительность, а также ограничивается использование вибрации, геолокации и фоновой передачи данных. Данные, требующие синхронизации, могут обновляться только когда вы откроете приложение.\n\nРежим энергосбережения автоматически отключается во время зарядки устройства."</string>
+    <string name="battery_saver_description" msgid="5394663545060026162">"Чтобы продлить время работы устройства от батареи, в режиме энергосбережения снижается производительность, а также ограничивается использование вибросигнала, геолокации и фоновой передачи данных. Данные, требующие синхронизации, могут обновляться только после того, как вы откроете приложение.\n\nРежим энергосбережения автоматически отключается во время зарядки устройства."</string>
     <string name="data_saver_description" msgid="6015391409098303235">"В режиме экономии трафика фоновая передача для некоторых приложений отключена. Приложение, которым вы пользуетесь, может получать и отправлять данные, но реже, чем обычно. Например, изображения могут не загружаться, пока вы не нажмете на них."</string>
     <string name="data_saver_enable_title" msgid="4674073932722787417">"Включить экономию трафика?"</string>
     <string name="data_saver_enable_button" msgid="7147735965247211818">"Включить"</string>
@@ -1744,7 +1746,7 @@
     <string name="zen_mode_rule_name_combination" msgid="191109939968076477">"<xliff:g id="FIRST">%1$s</xliff:g> / <xliff:g id="REST">%2$s</xliff:g>"</string>
     <string name="toolbar_collapse_description" msgid="2821479483960330739">"Свернуть"</string>
     <string name="zen_mode_feature_name" msgid="5254089399895895004">"Не беспокоить"</string>
-    <string name="zen_mode_downtime_feature_name" msgid="2626974636779860146">"Режим оповещения"</string>
+    <string name="zen_mode_downtime_feature_name" msgid="2626974636779860146">"Режим уведомления"</string>
     <string name="zen_mode_default_weeknights_name" msgid="3081318299464998143">"Будний вечер"</string>
     <string name="zen_mode_default_weekends_name" msgid="2786495801019345244">"Выходные"</string>
     <string name="zen_mode_default_events_name" msgid="8158334939013085363">"Мероприятие"</string>
@@ -1852,14 +1854,10 @@
     <string name="etws_primary_default_message_test" msgid="2709597093560037455">"Тестовое экстренное сообщение"</string>
     <string name="notification_reply_button_accessibility" msgid="3621714652387814344">"Ответить"</string>
     <string name="etws_primary_default_message_others" msgid="6293148756130398971"></string>
-    <!-- no translation found for mmcc_authentication_reject (5767701075994754356) -->
-    <skip />
-    <!-- no translation found for mmcc_imsi_unknown_in_hlr (5316658473301462825) -->
-    <skip />
-    <!-- no translation found for mmcc_illegal_ms (807334478177362062) -->
-    <skip />
-    <!-- no translation found for mmcc_illegal_me (1950705155760872972) -->
-    <skip />
+    <string name="mmcc_authentication_reject" msgid="5767701075994754356">"Для SIM-карты недоступны голосовые вызовы"</string>
+    <string name="mmcc_imsi_unknown_in_hlr" msgid="5316658473301462825">"SIM-карта не активирована для голосовых вызовов"</string>
+    <string name="mmcc_illegal_ms" msgid="807334478177362062">"Для SIM-карты недоступны голосовые вызовы"</string>
+    <string name="mmcc_illegal_me" msgid="1950705155760872972">"Для телефона недоступны голосовые вызовы"</string>
     <string name="popup_window_default_title" msgid="4874318849712115433">"Всплывающее окно"</string>
     <string name="slice_more_content" msgid="8504342889413274608">"+ <xliff:g id="NUMBER">%1$d</xliff:g>"</string>
     <string name="shortcut_restored_on_lower_version" msgid="5270675146351613828">"Требуется последняя версия приложения"</string>

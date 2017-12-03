@@ -3574,7 +3574,9 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
 
                 int layer = mService.mPolicy.getWindowLayerFromTypeLw(
                         wt.windowType, wt.mOwnerCanManageAppTokens);
-                if (needAssignIme && layer >= TYPE_INPUT_METHOD_DIALOG) {
+
+                if (needAssignIme && layer >= mService.mPolicy.getWindowLayerFromTypeLw(
+                                TYPE_INPUT_METHOD_DIALOG, true)) {
                     t.setRelativeLayer(imeContainer.getSurfaceControl(),
                             wt.getSurfaceControl(), -1);
                     needAssignIme = false;
@@ -3582,7 +3584,7 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
             }
             if (needAssignIme) {
                 t.setRelativeLayer(imeContainer.getSurfaceControl(),
-                        getSurfaceControl(), Integer.MIN_VALUE);
+                        getSurfaceControl(), Integer.MAX_VALUE);
             }
         }
     }

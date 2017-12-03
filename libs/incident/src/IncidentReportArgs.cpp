@@ -69,7 +69,7 @@ IncidentReportArgs::writeToParcel(Parcel* out) const
         return err;
     }
 
-    for (vector<vector<int8_t>>::const_iterator it = mHeaders.begin(); it != mHeaders.end(); it++) {
+    for (vector<vector<uint8_t>>::const_iterator it = mHeaders.begin(); it != mHeaders.end(); it++) {
         err = out->writeByteVector(*it);
         if (err != NO_ERROR) {
             return err;
@@ -161,7 +161,7 @@ IncidentReportArgs::addSection(int section)
 }
 
 void
-IncidentReportArgs::addHeader(const vector<int8_t>& header)
+IncidentReportArgs::addHeader(const vector<uint8_t>& header)
 {
     mHeaders.push_back(header);
 }

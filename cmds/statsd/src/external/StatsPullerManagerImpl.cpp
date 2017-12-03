@@ -76,7 +76,9 @@ bool StatsPullerManagerImpl::Pull(int tagId, vector<shared_ptr<LogEvent>>* data)
     if (DEBUG) ALOGD("Initiating pulling %d", tagId);
 
     if (mPullers.find(tagId) != mPullers.end()) {
-        return mPullers.find(tagId)->second->Pull(tagId, data);
+        bool ret = mPullers.find(tagId)->second->Pull(tagId, data);
+        ALOGD("pulled %d items", (int)data->size());
+        return ret;
     } else {
         ALOGD("Unknown tagId %d", tagId);
         return false;  // Return early since we don't know what to pull.

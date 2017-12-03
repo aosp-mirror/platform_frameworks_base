@@ -79,7 +79,7 @@
     <string name="RestrictedOnAllVoiceTitle" msgid="158800171499150681">"音声通話 / 緊急通報サービス停止"</string>
     <string name="RestrictedStateContent" msgid="4278821484643362350">"現在地のモバイル ネットワークでは一時的に提供されていません"</string>
     <string name="NetworkPreferenceSwitchTitle" msgid="4008877505368566980">"ネットワークにアクセスできません"</string>
-    <string name="NetworkPreferenceSwitchSummary" msgid="1203771446683319957">"受信状態を改善するには、[設定] &gt; [ネットワークとインターネット] &gt; [モバイル ネットワーク] &gt; [優先ネットワーク タイプ] で選択したタイプを変更してみてください。"</string>
+    <string name="NetworkPreferenceSwitchSummary" msgid="7056776609127756440">"受信状態を改善するには、[設定] &gt; [ネットワークとインターネット] &gt; [モバイル ネットワーク] &gt; [優先ネットワーク タイプ] で選択したタイプを変更してみてください。"</string>
     <string name="EmergencyCallWarningTitle" msgid="4790413876281901612">"Wi‑Fi 通話が有効な状態です"</string>
     <string name="EmergencyCallWarningSummary" msgid="8973232888021643293">"緊急通報にはモバイル ネットワークが必要です。"</string>
     <string name="notification_channel_network_alert" msgid="4427736684338074967">"通知"</string>
@@ -1051,6 +1051,9 @@
     <string name="screen_compat_mode_hint" msgid="1064524084543304459">"[システム設定]&gt;[アプリ]&gt;[ダウンロード済み]で再度有効にします。"</string>
     <string name="unsupported_display_size_message" msgid="6545327290756295232">"「<xliff:g id="APP_NAME">%1$s</xliff:g>」は現在の [表示サイズ] 設定に対応していないため、予期しない動作が発生するおそれがあります。"</string>
     <string name="unsupported_display_size_show" msgid="7969129195360353041">"常に表示"</string>
+    <string name="unsupported_compile_sdk_message" msgid="4253168368781441759">"<xliff:g id="APP_NAME">%1$s</xliff:g> は、互換性のない Android OS バージョン用にビルドされているため、予期しない動作が発生するおそれがあります。アプリの更新バージョンを利用できる場合があります。"</string>
+    <string name="unsupported_compile_sdk_show" msgid="2681877855260970231">"常に表示"</string>
+    <string name="unsupported_compile_sdk_check_update" msgid="3312723623323216101">"アップデートをチェック"</string>
     <string name="smv_application" msgid="3307209192155442829">"アプリ「<xliff:g id="APPLICATION">%1$s</xliff:g>」（プロセス「<xliff:g id="PROCESS">%2$s</xliff:g>」）でStrictModeポリシー違反がありました。"</string>
     <string name="smv_process" msgid="5120397012047462446">"プロセス<xliff:g id="PROCESS">%1$s</xliff:g>でStrictModeポリシー違反がありました。"</string>
     <string name="android_upgrading_title" msgid="1584192285441405746">"Androidをアップグレードしています..."</string>
@@ -1116,10 +1119,10 @@
     <string name="network_available_sign_in" msgid="1848877297365446605">"ネットワークにログインしてください"</string>
     <!-- no translation found for network_available_sign_in_detailed (8000081941447976118) -->
     <skip />
-    <string name="wifi_no_internet" msgid="8451173622563841546">"Wi-Fiはインターネットに接続していません"</string>
+    <string name="wifi_no_internet" msgid="8938267198124654938">"Wi‑Fi はインターネットに接続していません"</string>
     <string name="wifi_no_internet_detailed" msgid="8083079241212301741">"タップしてその他のオプションを表示"</string>
     <string name="network_switch_metered" msgid="4671730921726992671">"「<xliff:g id="NETWORK_TYPE">%1$s</xliff:g>」に切り替えました"</string>
-    <string name="network_switch_metered_detail" msgid="5325661434777870353">"端末で「<xliff:g id="PREVIOUS_NETWORK">%2$s</xliff:g>」によるインターネット接続ができない場合に「<xliff:g id="NEW_NETWORK">%1$s</xliff:g>」を使用します。通信料が発生することがあります。"</string>
+    <string name="network_switch_metered_detail" msgid="775163331794506615">"端末で「<xliff:g id="PREVIOUS_NETWORK">%2$s</xliff:g>」によるインターネット接続ができない場合に「<xliff:g id="NEW_NETWORK">%1$s</xliff:g>」を使用します。通信料が発生することがあります。"</string>
     <string name="network_switch_metered_toast" msgid="5779283181685974304">"「<xliff:g id="PREVIOUS_NETWORK">%1$s</xliff:g>」から「<xliff:g id="NEW_NETWORK">%2$s</xliff:g>」に切り替えました"</string>
   <string-array name="network_switch_type_name">
     <item msgid="3979506840912951943">"モバイルデータ"</item>
@@ -1130,7 +1133,7 @@
   </string-array>
     <string name="network_switch_type_name_unknown" msgid="4552612897806660656">"不明なネットワーク タイプ"</string>
     <string name="wifi_watchdog_network_disabled" msgid="7904214231651546347">"Wi-Fiに接続できませんでした"</string>
-    <string name="wifi_watchdog_network_disabled_detailed" msgid="5548780776418332675">" はインターネット接続に問題があります。"</string>
+    <string name="wifi_watchdog_network_disabled_detailed" msgid="4917472096696322767">" はインターネット接続に問題があります。"</string>
     <string name="wifi_connect_alert_title" msgid="8455846016001810172">"接続を許可しますか？"</string>
     <string name="wifi_connect_alert_message" msgid="6451273376815958922">"アプリ%1$sがWi-Fiネットワーク%2$sへの接続を希望しています"</string>
     <string name="wifi_connect_default_application" msgid="7143109390475484319">"アプリ"</string>
@@ -1626,7 +1629,6 @@
     <string name="managed_profile_label_badge_2" msgid="5048136430082124036">"2 番目の仕事用<xliff:g id="LABEL">%1$s</xliff:g>"</string>
     <string name="managed_profile_label_badge_3" msgid="2808305070321719040">"3 番目の仕事用<xliff:g id="LABEL">%1$s</xliff:g>"</string>
     <string name="lock_to_app_toast" msgid="6820571533009838261">"この画面の固定を解除するには [戻る] ボタンと [最近] ボタンを押し続けます"</string>
-    <string name="lock_to_app_toast_locked" msgid="7849470948648628704">"このアプリの固定を解除できません"</string>
     <string name="lock_to_app_start" msgid="6643342070839862795">"画面を固定しました"</string>
     <string name="lock_to_app_exit" msgid="8598219838213787430">"画面固定を解除しました"</string>
     <string name="lock_to_app_unlock_pin" msgid="2552556656504331634">"オフライン再生を解除する前にPINの入力を求める"</string>
@@ -1635,7 +1637,7 @@
     <string name="package_installed_device_owner" msgid="6875717669960212648">"管理者によりインストールされています"</string>
     <string name="package_updated_device_owner" msgid="1847154566357862089">"管理者により更新されています"</string>
     <string name="package_deleted_device_owner" msgid="2307122077550236438">"管理者により削除されています"</string>
-    <string name="battery_saver_description" msgid="1960431123816253034">"バッテリーを長持ちさせるため、バッテリーセーバーは端末のパフォーマンスを抑え、バイブレーション、位置情報サービス、大半のバックグラウンドデータを制限します。メール、SMSや、同期を使用するその他のアプリは、起動しても更新されないことがあります。\n\nバッテリーセーバーは端末の充電中は自動的にOFFになります。"</string>
+    <string name="battery_saver_description" msgid="5394663545060026162">"バッテリーを長持ちさせるため、バッテリー セーバーは端末のパフォーマンスを抑え、バイブレーション、位置情報サービス、大半のバックグラウンド データを制限します。同期を使用するメールやメッセージなどのアプリは起動しないと更新されない場合があります。\n\nバッテリー セーバーは端末の充電中は自動的に OFF になります。"</string>
     <string name="data_saver_description" msgid="6015391409098303235">"データセーバーは、一部のアプリによるバックグラウンドでのデータ送受信を停止することでデータ使用量を抑制します。使用中のアプリからデータにアクセスすることはできますが、その頻度は低くなる場合があります。この影響として、たとえば画像はタップしないと表示されないようになります。"</string>
     <string name="data_saver_enable_title" msgid="4674073932722787417">"データセーバーを ON にしますか？"</string>
     <string name="data_saver_enable_button" msgid="7147735965247211818">"ON にする"</string>
@@ -1782,14 +1784,10 @@
     <string name="etws_primary_default_message_test" msgid="2709597093560037455">"テスト用緊急速報メール"</string>
     <string name="notification_reply_button_accessibility" msgid="3621714652387814344">"返信"</string>
     <string name="etws_primary_default_message_others" msgid="6293148756130398971"></string>
-    <!-- no translation found for mmcc_authentication_reject (5767701075994754356) -->
-    <skip />
-    <!-- no translation found for mmcc_imsi_unknown_in_hlr (5316658473301462825) -->
-    <skip />
-    <!-- no translation found for mmcc_illegal_ms (807334478177362062) -->
-    <skip />
-    <!-- no translation found for mmcc_illegal_me (1950705155760872972) -->
-    <skip />
+    <string name="mmcc_authentication_reject" msgid="5767701075994754356">"音声を使用できない SIM です"</string>
+    <string name="mmcc_imsi_unknown_in_hlr" msgid="5316658473301462825">"音声に対応していない SIM です"</string>
+    <string name="mmcc_illegal_ms" msgid="807334478177362062">"音声を使用できない SIM です"</string>
+    <string name="mmcc_illegal_me" msgid="1950705155760872972">"音声を使用できないスマートフォンです"</string>
     <string name="popup_window_default_title" msgid="4874318849712115433">"ポップアップ ウィンドウ"</string>
     <string name="slice_more_content" msgid="8504342889413274608">"他 <xliff:g id="NUMBER">%1$d</xliff:g> 件"</string>
     <string name="shortcut_restored_on_lower_version" msgid="5270675146351613828">"このショートカットを使用するには、最新のアプリが必要です"</string>

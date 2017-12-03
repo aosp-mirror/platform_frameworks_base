@@ -34,14 +34,14 @@
     <string name="status_bar_latest_events_title" msgid="6594767438577593172">"Notificacións"</string>
     <string name="battery_low_title" msgid="6456385927409742437">"Queda pouca batería"</string>
     <string name="battery_low_percent_format" msgid="2900940511201380775">"<xliff:g id="PERCENTAGE">%s</xliff:g> restante"</string>
-    <string name="battery_low_percent_format_saver_started" msgid="6859235584035338833">"<xliff:g id="PERCENTAGE">%s</xliff:g> restante. A función de aforro da batería está activada."</string>
+    <string name="battery_low_percent_format_saver_started" msgid="7879389868952879166">"<xliff:g id="PERCENTAGE">%s</xliff:g> restante. Está activada a función Aforro de batería."</string>
     <string name="invalid_charger" msgid="4549105996740522523">"Non compatible coa carga por USB.\nUtiliza só o cargador proporcionado."</string>
     <string name="invalid_charger_title" msgid="3515740382572798460">"Non se admite a carga mediante USB."</string>
     <string name="invalid_charger_text" msgid="5474997287953892710">"Utiliza soamente o cargador fornecido."</string>
     <string name="battery_low_why" msgid="4553600287639198111">"Configuración"</string>
-    <string name="battery_saver_confirmation_title" msgid="5299585433050361634">"Queres activar o aforro de batería?"</string>
+    <string name="battery_saver_confirmation_title" msgid="2052100465684817154">"Queres activar a función Aforro de batería?"</string>
     <string name="battery_saver_confirmation_ok" msgid="7507968430447930257">"Activar"</string>
-    <string name="battery_saver_start_action" msgid="5576697451677486320">"Activar o aforro de batería"</string>
+    <string name="battery_saver_start_action" msgid="8187820911065797519">"Activar a función Aforro de batería"</string>
     <string name="status_bar_settings_settings_button" msgid="3023889916699270224">"Configuración"</string>
     <string name="status_bar_settings_wifi_button" msgid="1733928151698311923">"Wifi"</string>
     <string name="status_bar_settings_auto_rotation" msgid="3790482541357798421">"Xirar pantalla automaticamente"</string>
@@ -51,21 +51,15 @@
     <string name="bluetooth_tethered" msgid="7094101612161133267">"Conexión compartida por Bluetooth"</string>
     <string name="status_bar_input_method_settings_configure_input_methods" msgid="3504292471512317827">"Configurar métodos de entrada"</string>
     <string name="status_bar_use_physical_keyboard" msgid="7551903084416057810">"Teclado físico"</string>
-    <!-- no translation found for usb_device_permission_prompt (1825685909587559679) -->
-    <skip />
-    <!-- no translation found for usb_accessory_permission_prompt (2465531696941369047) -->
-    <skip />
-    <!-- no translation found for usb_device_confirm_prompt (7440562274256843905) -->
-    <skip />
-    <!-- no translation found for usb_accessory_confirm_prompt (4333670517539993561) -->
-    <skip />
+    <string name="usb_device_permission_prompt" msgid="1825685909587559679">"Queres permitir que <xliff:g id="APPLICATION">%1$s</xliff:g> acceda a <xliff:g id="USB_DEVICE">%2$s</xliff:g>?"</string>
+    <string name="usb_accessory_permission_prompt" msgid="2465531696941369047">"Queres permitir que <xliff:g id="APPLICATION">%1$s</xliff:g> acceda a <xliff:g id="USB_ACCESSORY">%2$s</xliff:g>?"</string>
+    <string name="usb_device_confirm_prompt" msgid="7440562274256843905">"Queres abrir <xliff:g id="APPLICATION">%1$s</xliff:g> para utilizar <xliff:g id="USB_DEVICE">%2$s</xliff:g>?"</string>
+    <string name="usb_accessory_confirm_prompt" msgid="4333670517539993561">"Queres abrir <xliff:g id="APPLICATION">%1$s</xliff:g> para utilizar <xliff:g id="USB_ACCESSORY">%2$s</xliff:g>?"</string>
     <string name="usb_accessory_uri_prompt" msgid="513450621413733343">"Ningunha aplicación instalada funciona co accesorio USB. Máis información: <xliff:g id="URL">%1$s</xliff:g>"</string>
     <string name="title_usb_accessory" msgid="4966265263465181372">"Accesorio USB"</string>
     <string name="label_view" msgid="6304565553218192990">"Ver"</string>
-    <!-- no translation found for always_use_device (4015357883336738417) -->
-    <skip />
-    <!-- no translation found for always_use_accessory (3257892669444535154) -->
-    <skip />
+    <string name="always_use_device" msgid="4015357883336738417">"Abrir sempre <xliff:g id="APPLICATION">%1$s</xliff:g> cando se conecte <xliff:g id="USB_DEVICE">%2$s</xliff:g>"</string>
+    <string name="always_use_accessory" msgid="3257892669444535154">"Abrir sempre <xliff:g id="APPLICATION">%1$s</xliff:g> cando se conecte <xliff:g id="USB_ACCESSORY">%2$s</xliff:g>"</string>
     <string name="usb_debugging_title" msgid="4513918393387141949">"Permitir a depuración de erros de USB?"</string>
     <string name="usb_debugging_message" msgid="2220143855912376496">"A impresión dixital da clave de RSA do ordenador é:\n<xliff:g id="FINGERPRINT">%1$s</xliff:g>"</string>
     <string name="usb_debugging_always" msgid="303335496705863070">"Permitir sempre desde este ordenador"</string>
@@ -251,8 +245,6 @@
     <string name="data_usage_disabled_dialog_title" msgid="3932437232199671967">"Os datos están en pausa"</string>
     <string name="data_usage_disabled_dialog" msgid="4919541636934603816">"Alcanzouse o límite de datos que fixaches. Xa non estás usando datos móbiles.\n\nSe os reactivas, pódense aplicar cargos polo seu uso."</string>
     <string name="data_usage_disabled_dialog_enable" msgid="1412395410306390593">"Retomar"</string>
-    <string name="status_bar_settings_signal_meter_disconnected" msgid="1940231521274147771">"Sen Internet"</string>
-    <string name="status_bar_settings_signal_meter_wifi_nossid" msgid="6557486452774597820">"Wi-Fi conectada"</string>
     <string name="gps_notification_searching_text" msgid="8574247005642736060">"Buscando GPS"</string>
     <string name="gps_notification_found_text" msgid="4619274244146446464">"Localización establecida polo GPS"</string>
     <string name="accessibility_location_active" msgid="2427290146138169014">"Solicitudes de localización activas"</string>
@@ -409,9 +401,9 @@
     <string name="user_remove_user_title" msgid="4681256956076895559">"Queres eliminar o usuario?"</string>
     <string name="user_remove_user_message" msgid="1453218013959498039">"Eliminaranse todas as aplicacións e os datos deste usuario."</string>
     <string name="user_remove_user_remove" msgid="7479275741742178297">"Eliminar"</string>
-    <string name="battery_saver_notification_title" msgid="237918726750955859">"O aforro de batería está activado"</string>
+    <string name="battery_saver_notification_title" msgid="8614079794522291840">"A función Aforro de batería está activada"</string>
     <string name="battery_saver_notification_text" msgid="820318788126672692">"Reduce o rendemento e os datos en segundo plano"</string>
-    <string name="battery_saver_notification_action_text" msgid="109158658238110382">"Desactivar o aforro de batería"</string>
+    <string name="battery_saver_notification_action_text" msgid="132118784269455533">"Desactivar a función Aforro de batería"</string>
     <string name="media_projection_dialog_text" msgid="3071431025448218928">"<xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g> comezará a capturar todo o que apareza na túa pantalla."</string>
     <string name="media_projection_remember_text" msgid="3103510882172746752">"Non mostrar outra vez"</string>
     <string name="clear_all_notifications_text" msgid="814192889771462828">"Eliminar todas"</string>
@@ -590,8 +582,8 @@
       <item quantity="one">%d minuto</item>
     </plurals>
     <string name="battery_panel_title" msgid="7944156115535366613">"Uso de batería"</string>
-    <string name="battery_detail_charging_summary" msgid="4055327085770378335">"A función Aforro de batería non está dispoñible durante a carga"</string>
-    <string name="battery_detail_switch_title" msgid="8763441006881907058">"Aforro de batería"</string>
+    <string name="battery_detail_charging_summary" msgid="1279095653533044008">"A función de aforro da batería non está dispoñible durante a carga"</string>
+    <string name="battery_detail_switch_title" msgid="6285872470260795421">"Aforro de batería"</string>
     <string name="battery_detail_switch_summary" msgid="9049111149407626804">"Reduce o rendemento e os datos en segundo plano"</string>
     <string name="keyboard_key_button_template" msgid="6230056639734377300">"Botón <xliff:g id="NAME">%1$s</xliff:g>"</string>
     <string name="keyboard_key_home" msgid="2243500072071305073">"Inicio"</string>

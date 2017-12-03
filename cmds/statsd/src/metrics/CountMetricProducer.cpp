@@ -83,7 +83,7 @@ CountMetricProducer::CountMetricProducer(const ConfigKey& key, const CountMetric
         mConditionSliced = true;
     }
 
-    startNewProtoOutputStream(mStartTimeNs);
+    startNewProtoOutputStreamLocked(mStartTimeNs);
 
     VLOG("metric %s created. bucket size %lld start_time: %lld", metric.name().c_str(),
          (long long)mBucketSizeNs, (long long)mStartTimeNs);
@@ -93,7 +93,7 @@ CountMetricProducer::~CountMetricProducer() {
     VLOG("~CountMetricProducer() called");
 }
 
-void CountMetricProducer::startNewProtoOutputStream(long long startTime) {
+void CountMetricProducer::startNewProtoOutputStreamLocked(long long startTime) {
     mProto = std::make_unique<ProtoOutputStream>();
     mProto->write(FIELD_TYPE_STRING | FIELD_ID_NAME, mMetric.name());
     mProto->write(FIELD_TYPE_INT64 | FIELD_ID_START_REPORT_NANOS, startTime);
@@ -103,17 +103,17 @@ void CountMetricProducer::startNewProtoOutputStream(long long startTime) {
 void CountMetricProducer::finish() {
 }
 
-void CountMetricProducer::onSlicedConditionMayChange(const uint64_t eventTime) {
+void CountMetricProducer::onSlicedConditionMayChangeLocked(const uint64_t eventTime) {
     VLOG("Metric %s onSlicedConditionMayChange", mMetric.name().c_str());
 }
 
-std::unique_ptr<std::vector<uint8_t>> CountMetricProducer::onDumpReport() {
+std::unique_ptr<std::vector<uint8_t>> CountMetricProducer::onDumpReportLocked() {
     long long endTime = time(nullptr) * NS_PER_SEC;
 
     // Dump current bucket if it's stale.
     // If current bucket is still on-going, don't force dump current bucket.
     // In finish(), We can force dump current bucket.
-    flushIfNeeded(endTime);
+    flushIfNeededLocked(endTime);
     VLOG("metric %s dump report now...", mMetric.name().c_str());
 
     for (const auto& counter : mPastBuckets) {
@@ -165,9 +165,9 @@ std::unique_ptr<std::vector<uint8_t>> CountMetricProducer::onDumpReport() {
                   (long long)mCurrentBucketStartTimeNs);
 
     VLOG("metric %s dump report now...", mMetric.name().c_str());
-    std::unique_ptr<std::vector<uint8_t>> buffer = serializeProto();
+    std::unique_ptr<std::vector<uint8_t>> buffer = serializeProtoLocked();
 
-    startNewProtoOutputStream(endTime);
+    startNewProtoOutputStreamLocked(endTime);
     mPastBuckets.clear();
 
     return buffer;
@@ -175,12 +175,13 @@ std::unique_ptr<std::vector<uint8_t>> CountMetricProducer::onDumpReport() {
     // TODO: Clear mDimensionKeyMap once the report is dumped.
 }
 
-void CountMetricProducer::onConditionChanged(const bool conditionMet, const uint64_t eventTime) {
+void CountMetricProducer::onConditionChangedLocked(const bool conditionMet,
+                                                   const uint64_t eventTime) {
     VLOG("Metric %s onConditionChanged", mMetric.name().c_str());
     mCondition = conditionMet;
 }
 
-bool CountMetricProducer::hitGuardRail(const HashableDimensionKey& newKey) {
+bool CountMetricProducer::hitGuardRailLocked(const HashableDimensionKey& newKey) {
     if (mCurrentSlicedCounter->find(newKey) != mCurrentSlicedCounter->end()) {
         return false;
     }
@@ -200,13 +201,14 @@ bool CountMetricProducer::hitGuardRail(const HashableDimensionKey& newKey) {
 
     return false;
 }
-void CountMetricProducer::onMatchedLogEventInternal(
+
+void CountMetricProducer::onMatchedLogEventInternalLocked(
         const size_t matcherIndex, const HashableDimensionKey& eventKey,
         const map<string, HashableDimensionKey>& conditionKey, bool condition,
         const LogEvent& event, bool scheduledPull) {
     uint64_t eventTimeNs = event.GetTimestampNs();
 
-    flushIfNeeded(eventTimeNs);
+    flushIfNeededLocked(eventTimeNs);
 
     if (condition == false) {
         return;
@@ -216,7 +218,7 @@ void CountMetricProducer::onMatchedLogEventInternal(
 
     if (it == mCurrentSlicedCounter->end()) {
         // ===========GuardRail==============
-        if (hitGuardRail(eventKey)) {
+        if (hitGuardRailLocked(eventKey)) {
             return;
         }
 
@@ -239,7 +241,7 @@ void CountMetricProducer::onMatchedLogEventInternal(
 
 // When a new matched event comes in, we check if event falls into the current
 // bucket. If not, flush the old counter to past buckets and initialize the new bucket.
-void CountMetricProducer::flushIfNeeded(const uint64_t eventTimeNs) {
+void CountMetricProducer::flushIfNeededLocked(const uint64_t& eventTimeNs) {
     if (eventTimeNs < mCurrentBucketStartTimeNs + mBucketSizeNs) {
         return;
     }
@@ -272,7 +274,7 @@ void CountMetricProducer::flushIfNeeded(const uint64_t eventTimeNs) {
 // Rough estimate of CountMetricProducer buffer stored. This number will be
 // greater than actual data size as it contains each dimension of
 // CountMetricData is  duplicated.
-size_t CountMetricProducer::byteSize() const {
+size_t CountMetricProducer::byteSizeLocked() const {
     size_t totalSize = 0;
     for (const auto& pair : mPastBuckets) {
         totalSize += pair.second.size() * kBucketSize;

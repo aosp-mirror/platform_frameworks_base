@@ -47,7 +47,7 @@ class MultiApkGenerator {
   virtual std::unique_ptr<ResourceTable> FilterTable(
       const configuration::Artifact& artifact,
       const configuration::PostProcessingConfiguration& config, const ResourceTable& old_table,
-      FilterChain* chain);
+      IAaptContext* context, FilterChain* chain);
 
  private:
   IDiagnostics* GetDiagnostics() {

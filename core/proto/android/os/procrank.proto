@@ -18,12 +18,15 @@ syntax = "proto2";
 option java_multiple_files = true;
 option java_outer_classname = "ProcrankProto";
 
+import "frameworks/base/libs/incident/proto/android/privacy.proto";
 import "frameworks/base/tools/streaming_proto/stream.proto";
 
 package android.os;
 
 //Memory usage of running processes
 message Procrank {
+    option (android.msg_privacy).dest = DEST_AUTOMATIC;
+
     // Currently running process
     repeated ProcessProto processes = 1;
 
@@ -34,6 +37,7 @@ message Procrank {
 // Next Tag: 11
 message ProcessProto {
     option (stream_proto.stream_msg).enable_fields_mapping = true;
+    option (android.msg_privacy).dest = DEST_AUTOMATIC;
 
     // ID of the process
     optional int32 pid = 1;
@@ -68,6 +72,8 @@ message ProcessProto {
 
 // Next Tag: 3
 message SummaryProto {
+    option (android.msg_privacy).dest = DEST_AUTOMATIC;
+
     optional ProcessProto total = 1;
 
     optional ZramProto zram = 2;
@@ -77,9 +83,13 @@ message SummaryProto {
 
 // TODO: sync on how to use these values
 message ZramProto {
+    option (android.msg_privacy).dest = DEST_AUTOMATIC;
+
     optional string raw_text = 1;
 }
 
 message RamProto {
+    option (android.msg_privacy).dest = DEST_AUTOMATIC;
+
     optional string raw_text = 1;
 }

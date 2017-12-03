@@ -46,9 +46,11 @@ message BatteryServiceDumpProto {
     optional bool are_updates_stopped = 1;
     // Plugged status of power sources
     optional android.os.BatteryManagerProto.PlugType plugged = 2;
-    // Max current in microamperes
+    // Max current in microamperes. This may be 0 if the device's kernel drivers
+    // don't support it.
     optional int32 max_charging_current = 3;
-    // Max voltage
+    // Max voltage. This may be 0 if the device's kernel drivers don't support
+    // it.
     optional int32 max_charging_voltage = 4;
     // Battery capacity in microampere-hours
     optional int32 charge_counter = 5;

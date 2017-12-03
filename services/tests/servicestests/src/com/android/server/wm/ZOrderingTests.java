@@ -39,6 +39,7 @@ import static android.app.WindowConfiguration.WINDOWING_MODE_FULLSCREEN;
 import static android.app.WindowConfiguration.WINDOWING_MODE_PINNED;
 import static android.app.WindowConfiguration.WINDOWING_MODE_SPLIT_SCREEN_PRIMARY;
 import static android.view.WindowManager.LayoutParams.TYPE_APPLICATION_ATTACHED_DIALOG;
+import static android.view.WindowManager.LayoutParams.TYPE_APPLICATION_MEDIA;
 import static android.view.WindowManager.LayoutParams.TYPE_APPLICATION_MEDIA_OVERLAY;
 import static android.view.WindowManager.LayoutParams.TYPE_BASE_APPLICATION;
 import static android.view.WindowManager.LayoutParams.TYPE_SYSTEM_OVERLAY;
@@ -342,5 +343,23 @@ public class ZOrderingTests extends WindowTestsBase {
         assertWindowLayerGreaterThan(mTransaction, navBarPanel, mNavBarWindow);
         assertWindowLayerGreaterThan(mTransaction, statusBarPanel, mStatusBarWindow);
         assertWindowLayerGreaterThan(mTransaction, statusBarSubPanel, statusBarPanel);
+    }
+
+    @Test
+    public void testAssignWindowLayers_ForNegativelyZOrderedSubtype() throws Exception {
+        // TODO(b/70040778): We should aim to eliminate the last user of TYPE_APPLICATION_MEDIA
+        // then we can drop all negative layering on the windowing side.
+
+        final WindowState anyWindow =
+                createWindow(null, TYPE_BASE_APPLICATION, mDisplayContent, "anyWindow");
+        final WindowState child = createWindow(anyWindow, TYPE_APPLICATION_MEDIA, mDisplayContent,
+                "TypeApplicationMediaChild");
+        final WindowState mediaOverlayChild = createWindow(anyWindow, TYPE_APPLICATION_MEDIA_OVERLAY,
+                mDisplayContent, "TypeApplicationMediaOverlayChild");
+
+        mDisplayContent.assignChildLayers(mTransaction);
+
+        assertWindowLayerGreaterThan(mTransaction, anyWindow, mediaOverlayChild);
+        assertWindowLayerGreaterThan(mTransaction, mediaOverlayChild, child);
     }
 }

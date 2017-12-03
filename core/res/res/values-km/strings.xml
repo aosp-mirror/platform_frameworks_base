@@ -79,7 +79,7 @@
     <string name="RestrictedOnAllVoiceTitle" msgid="158800171499150681">"គ្មាន​សេវាកម្ម​សំឡេង/សង្រ្គោះបន្ទាន់​ទេ"</string>
     <string name="RestrictedStateContent" msgid="4278821484643362350">"​មិន​បាន​ផ្តល់​ជូន​ដោយ​បណ្តាញចល័តនៅ​ទីកន្លែងរបស់អ្នកជា​បណ្តោះ​អាសន្ន"</string>
     <string name="NetworkPreferenceSwitchTitle" msgid="4008877505368566980">"មិន​អាច​ភ្ជាប់​ទៅ​បណ្តាញ​បានទេ​"</string>
-    <string name="NetworkPreferenceSwitchSummary" msgid="1203771446683319957">"ដើម្បី​ធ្វើ​ឲ្យ​ការ​ទទួល​​រលក​សញ្ញា​​ប្រសើរ​ជាងមុន សូមសាកល្បងប្តូរប្រភេទដែលបានជ្រើសរើសនៅ ការកំណត់ &gt; បណ្តាញ និងអ៊ីនធឺណិត &gt; បណ្តាញទូរសព្ទចល័ត &gt; ប្រភេទបណ្តាញដែលចង់ប្រើ។"</string>
+    <string name="NetworkPreferenceSwitchSummary" msgid="7056776609127756440">"ដើម្បី​ធ្វើ​ឱ្យ​ការ​ទទួល​រលក​សញ្ញា​ប្រសើរ​ជាងមុន សូម​សាកល្បង​ប្តូរ​ប្រភេទ​ដែល​បាន​ជ្រើសរើស​នៅការ​កំណត់ &gt; បណ្តាញ និង​អ៊ីនធឺណិត &gt; បណ្តាញ​ទូរសព្ទ​ចល័ត &gt; ប្រភេទ​បណ្តាញ​ដែល​ចង់​ប្រើ។"</string>
     <string name="EmergencyCallWarningTitle" msgid="4790413876281901612">"ការហៅតាម Wi-Fi បានបើក"</string>
     <string name="EmergencyCallWarningSummary" msgid="8973232888021643293">"ការហៅ​បន្ទាន់​តម្រូវឲ្យ​មានបណ្ដាញ​ទូរសព្ទ​ចល័ត។"</string>
     <string name="notification_channel_network_alert" msgid="4427736684338074967">"ការជូនដំណឹង"</string>
@@ -1053,6 +1053,9 @@
     <string name="screen_compat_mode_hint" msgid="1064524084543304459">"បើក​វា​ឡើងវិញ​ក្នុង​ការ​កំណត់​ប្រព័ន្ធ &gt; កម្មវិធី &gt; ទាញ​យក។"</string>
     <string name="unsupported_display_size_message" msgid="6545327290756295232">"<xliff:g id="APP_NAME">%1$s</xliff:g> មិនគាំទ្រការកំណត់ទំហំនៃការបង្ហាញបច្ចុប្បន្ន និងអាចមានសកម្មភាពខុសពីការរំពឹងទុក។"</string>
     <string name="unsupported_display_size_show" msgid="7969129195360353041">"បង្ហាញ​ជា​និច្ច"</string>
+    <string name="unsupported_compile_sdk_message" msgid="4253168368781441759">"<xliff:g id="APP_NAME">%1$s</xliff:g> ត្រូវបាន​បង្កើត​ឡើង​សម្រាប់​កំណែដែល​មិនត្រូវគ្នាជាមួយ​ប្រព័ន្ធ​ប្រតិបត្តិការ Android ហើយ​អាច​នឹង​ដំណើរការ​ខុសប្រក្រតី។ អាច​នឹង​មាន​កំណែ​កម្មវិធី​ដែល​បាន​ដំឡើង​ជំនាន់។"</string>
+    <string name="unsupported_compile_sdk_show" msgid="2681877855260970231">"បង្ហាញ​ជា​និច្ច"</string>
+    <string name="unsupported_compile_sdk_check_update" msgid="3312723623323216101">"រក​មើល​កំណែ​ថ្មី"</string>
     <string name="smv_application" msgid="3307209192155442829">"កម្មវិធី <xliff:g id="APPLICATION">%1$s</xliff:g> (ដំណើរការ <xliff:g id="PROCESS">%2$s</xliff:g>) បាន​បំពាន​គោលនយោបាយ​របៀប​តឹងរ៉ឹង​អនុវត្ត​ដោយ​ខ្លួន​​ឯង។"</string>
     <string name="smv_process" msgid="5120397012047462446">"ដំណើរការ <xliff:g id="PROCESS">%1$s</xliff:g> បាន​បំពាន​គោលនយោបាយ​​របៀប​​តឹង​រឹង​​​បង្ខំ​ដោយ​ខ្លួន​ឯង"</string>
     <string name="android_upgrading_title" msgid="1584192285441405746">"Android កំពុង​ធ្វើ​បច្ចុប្បន្នភាព..."</string>
@@ -1118,10 +1121,10 @@
     <string name="network_available_sign_in" msgid="1848877297365446605">"ចូលទៅបណ្តាញ"</string>
     <!-- no translation found for network_available_sign_in_detailed (8000081941447976118) -->
     <skip />
-    <string name="wifi_no_internet" msgid="8451173622563841546">"Wi-Fi មិនមានអ៊ិនធឺណិតនោះទេ"</string>
+    <string name="wifi_no_internet" msgid="8938267198124654938">"Wi-Fi មិនមាន​ការតភ្ជាប់​អ៊ីនធឺណិតទេ"</string>
     <string name="wifi_no_internet_detailed" msgid="8083079241212301741">"ប៉ះសម្រាប់ជម្រើស"</string>
     <string name="network_switch_metered" msgid="4671730921726992671">"បានប្តូរទៅ <xliff:g id="NETWORK_TYPE">%1$s</xliff:g>"</string>
-    <string name="network_switch_metered_detail" msgid="5325661434777870353">"ឧបករណ៍ប្រើ <xliff:g id="NEW_NETWORK">%1$s</xliff:g> នៅពេលដែល <xliff:g id="PREVIOUS_NETWORK">%2$s</xliff:g> គ្មានការតភ្ជាប់អ៊ីនធឺណិត។ អាចគិតប្រាក់លើការប្រើប្រាស់ទិន្នន័យ។"</string>
+    <string name="network_switch_metered_detail" msgid="775163331794506615">"ឧបករណ៍​ប្រើ <xliff:g id="NEW_NETWORK">%1$s</xliff:g> នៅ​ពេល​ដែល <xliff:g id="PREVIOUS_NETWORK">%2$s</xliff:g> មិនមាន​ការ​តភ្ជាប់​អ៊ីនធឺណិត។ អាច​គិតថ្លៃ​លើការ​ប្រើប្រាស់​ទិន្នន័យ។"</string>
     <string name="network_switch_metered_toast" msgid="5779283181685974304">"បានប្តូរពី <xliff:g id="PREVIOUS_NETWORK">%1$s</xliff:g> ទៅ <xliff:g id="NEW_NETWORK">%2$s</xliff:g>"</string>
   <string-array name="network_switch_type_name">
     <item msgid="3979506840912951943">"ទិន្នន័យ​ទូរសព្ទចល័ត"</item>
@@ -1132,7 +1135,7 @@
   </string-array>
     <string name="network_switch_type_name_unknown" msgid="4552612897806660656">"ប្រភេទបណ្តាញមិនស្គាល់"</string>
     <string name="wifi_watchdog_network_disabled" msgid="7904214231651546347">"មិន​​អាច​តភ្ជាប់​វ៉ាយហ្វាយ"</string>
-    <string name="wifi_watchdog_network_disabled_detailed" msgid="5548780776418332675">" មាន​ការ​តភ្ជាប់​អ៊ីនធឺណិត​មិន​ល្អ។"</string>
+    <string name="wifi_watchdog_network_disabled_detailed" msgid="4917472096696322767">" មាន​ការ​តភ្ជាប់​អ៊ីនធឺណិត​​មិន​ល្អ។"</string>
     <string name="wifi_connect_alert_title" msgid="8455846016001810172">"អនុញ្ញាត​ភ្ជាប់?"</string>
     <string name="wifi_connect_alert_message" msgid="6451273376815958922">"កម្មវិធី %1$s ចង់ភ្ជាប់ទៅបណ្តាញ Wifi %2$s"</string>
     <string name="wifi_connect_default_application" msgid="7143109390475484319">"កម្មវិធី"</string>
@@ -1628,7 +1631,6 @@
     <string name="managed_profile_label_badge_2" msgid="5048136430082124036">"<xliff:g id="LABEL">%1$s</xliff:g> ការងារទី 2"</string>
     <string name="managed_profile_label_badge_3" msgid="2808305070321719040">"<xliff:g id="LABEL">%1$s</xliff:g> ការងារទី 3"</string>
     <string name="lock_to_app_toast" msgid="6820571533009838261">"ដើម្បី​ដក​ការ​ខ្ទាស់​អេក្រង់​នេះ សូម​ចុច​ប៉ូតុង​ថយ​ក្រោយ និង​ប៊ូតុង​ទិដ្ឋភាព​ឲ្យ​ជាប់"</string>
-    <string name="lock_to_app_toast_locked" msgid="7849470948648628704">"មិនអាច​ដក​ការ​ខ្ទាស់​កម្មវិធីនេះ​បានទេ"</string>
     <string name="lock_to_app_start" msgid="6643342070839862795">"បាន​ភ្ជាប់​អេក្រង់"</string>
     <string name="lock_to_app_exit" msgid="8598219838213787430">"មិន​បាន​ភ្ជាប់​អេក្រង់"</string>
     <string name="lock_to_app_unlock_pin" msgid="2552556656504331634">"សួរ​រក​កូដ PIN មុន​ពេល​ផ្ដាច់"</string>
@@ -1637,7 +1639,7 @@
     <string name="package_installed_device_owner" msgid="6875717669960212648">"​ដំឡើង​ដោយ​អ្នកគ្រប់គ្រង​របស់​អ្នក"</string>
     <string name="package_updated_device_owner" msgid="1847154566357862089">"ធ្វើ​បច្ចុប្បន្នភាព​ដោយ​អ្នកគ្រប់គ្រង​របស់​អ្នក"</string>
     <string name="package_deleted_device_owner" msgid="2307122077550236438">"លុប​ដោយ​អ្នកគ្រប់គ្រង​របស់​អ្នក"</string>
-    <string name="battery_saver_description" msgid="1960431123816253034">"ដើម្បីជួយឲ្យថាមពលថ្មប្រសើរឡើង កម្មវិធីសន្សំសំចៃថ្មកាត់បន្ថយប្រតិបត្តិការឧបករណ៍របស់អ្នក និងកម្រិតភាពញ័រ សេវាកម្មទីតាំង និងទិន្នន័យផ្ទៃខាងក្រោយស្ទើរតែទាំងអស់។ អ៊ីមែល ការផ្ញើសារ និងកម្មវិធីផ្សេងទៀតដែលពឹងផ្អែកលើការធ្វើសមកាលកម្មអាចនឹងមិនដំឡើងកំណែទេ លុះត្រាតែអ្នកបើកពួកវា។\n\nកម្មវិធីសន្សំសំចៃថ្មបិទដោយស្វ័យប្រវត្តិ នៅពេលដែលឧបករណ៍របស់អ្នកកំពុងសាកថ្ម។"</string>
+    <string name="battery_saver_description" msgid="5394663545060026162">"ដើម្បី​ជួយ​ឱ្យ​កម្រិត​ថាមពល​ថ្ម​ប្រសើរឡើង កម្មវិធី​សន្សំថ្ម​កាត់បន្ថយ​ប្រតិបត្តិការ​ឧបករណ៍​របស់អ្នក និងកម្រិត​ការញ័រ សេវាកម្មទីតាំង និងទិន្នន័យ​ផ្ទៃខាងក្រោយ​ភាគច្រើន។ អ៊ីមែល ការផ្ញើសារ និងកម្មវិធី​ផ្សេងទៀត​ដែលពឹងផ្អែក​លើការ​ធ្វើ​សមកាលកម្ម​មិនអាច​​ដំឡើង​ជំនាន់បានទេ ប្រសិនបើ​អ្នក​មិនបើក​ពួកវា។\n\nកម្មវិធី​សន្សំ​ថ្ម​បិទ​ដោយ​ស្វ័យប្រវត្តិ នៅពេលដែល​ឧបករណ៍​របស់អ្នក​កំពុងសាកថ្ម។"</string>
     <string name="data_saver_description" msgid="6015391409098303235">"ដើម្បីជួយកាត់បន្ថយការប្រើប្រាស់ទិន្នន័យ កម្មវិធីសន្សំសំចៃទិន្នន័យរារាំងកម្មវិធីមួយចំនួនមិនឲ្យបញ្ជូន ឬទទួលទិន្នន័យនៅផ្ទៃខាងក្រោយទេ។ កម្មវិធីដែលអ្នកកំពុងប្រើនាពេលបច្ចុប្បន្នអាចចូលប្រើប្រាស់​ទិន្នន័យបាន ប៉ុន្តែអាចនឹងមិនញឹកញាប់ដូចមុនទេ។ ឧទាហរណ៍ រូបភាពមិនបង្ហាញទេ លុះត្រាតែអ្នកប៉ះរូបភាពទាំងនោះ។"</string>
     <string name="data_saver_enable_title" msgid="4674073932722787417">"បើកកម្មវិធីសន្សំសំចៃទិន្នន័យឬ?"</string>
     <string name="data_saver_enable_button" msgid="7147735965247211818">"បើក"</string>
@@ -1784,14 +1786,10 @@
     <string name="etws_primary_default_message_test" msgid="2709597093560037455">"សារសាកល្បងពេលមានអាសន្ន"</string>
     <string name="notification_reply_button_accessibility" msgid="3621714652387814344">"ឆ្លើយតប"</string>
     <string name="etws_primary_default_message_others" msgid="6293148756130398971"></string>
-    <!-- no translation found for mmcc_authentication_reject (5767701075994754356) -->
-    <skip />
-    <!-- no translation found for mmcc_imsi_unknown_in_hlr (5316658473301462825) -->
-    <skip />
-    <!-- no translation found for mmcc_illegal_ms (807334478177362062) -->
-    <skip />
-    <!-- no translation found for mmcc_illegal_me (1950705155760872972) -->
-    <skip />
+    <string name="mmcc_authentication_reject" msgid="5767701075994754356">"ស៊ីមកាតមិនអនុញ្ញាតសម្រាប់ការហៅទូរសព្ទទេ"</string>
+    <string name="mmcc_imsi_unknown_in_hlr" msgid="5316658473301462825">"ស៊ីមកាតមិនមែនផ្តល់ជូនសម្រាប់ការហៅទូរសព្ទទេ"</string>
+    <string name="mmcc_illegal_ms" msgid="807334478177362062">"ស៊ីមកាតមិនអនុញ្ញាតសម្រាប់ការហៅទូរសព្ទទេ"</string>
+    <string name="mmcc_illegal_me" msgid="1950705155760872972">"ទូរសព្ទមិនអនុញ្ញាតសម្រាប់ការហៅទូរសព្ទទេ"</string>
     <string name="popup_window_default_title" msgid="4874318849712115433">"វិនដូលេចឡើង"</string>
     <string name="slice_more_content" msgid="8504342889413274608">"+ <xliff:g id="NUMBER">%1$d</xliff:g>"</string>
     <string name="shortcut_restored_on_lower_version" msgid="5270675146351613828">"ផ្លូវកាត់នេះត្រូវការកម្មវិធីថ្មីបំផុត"</string>

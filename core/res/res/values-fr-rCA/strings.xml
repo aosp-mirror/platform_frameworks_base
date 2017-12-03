@@ -79,7 +79,7 @@
     <string name="RestrictedOnAllVoiceTitle" msgid="158800171499150681">"Aucun service vocal ou d\'urgence"</string>
     <string name="RestrictedStateContent" msgid="4278821484643362350">"Ce service est temporairement non offert par le réseau cellulaire à l\'endroit où vous êtes"</string>
     <string name="NetworkPreferenceSwitchTitle" msgid="4008877505368566980">"Impossible de joindre le réseau"</string>
-    <string name="NetworkPreferenceSwitchSummary" msgid="1203771446683319957">"Pour améliorer la réception, essayez de changer le type de réseau sélectionné, sous Paramètres &gt; Réseaux et Internet &gt; Réseaux cellulaires &gt; Type de réseau préféré."</string>
+    <string name="NetworkPreferenceSwitchSummary" msgid="7056776609127756440">"Pour améliorer la réception, essayez de changer le type de réseau sélectionné, sous Paramètres &gt; Réseaux et Internet &gt; Réseaux cellulaires &gt; Type de réseau préféré."</string>
     <string name="EmergencyCallWarningTitle" msgid="4790413876281901612">"Les appels Wi-Fi sont actifs"</string>
     <string name="EmergencyCallWarningSummary" msgid="8973232888021643293">"Les appels d\'urgence nécessitent un réseau cellulaire."</string>
     <string name="notification_channel_network_alert" msgid="4427736684338074967">"Alertes"</string>
@@ -1051,6 +1051,9 @@
     <string name="screen_compat_mode_hint" msgid="1064524084543304459">"Réactivez ce mode en accédant à Paramètres système &gt; Applications &gt; Téléchargements"</string>
     <string name="unsupported_display_size_message" msgid="6545327290756295232">"<xliff:g id="APP_NAME">%1$s</xliff:g> n\'est pas compatible avec le paramètre de taille d\'affichage actuel et peut se comporter de manière inattendue."</string>
     <string name="unsupported_display_size_show" msgid="7969129195360353041">"Toujours afficher"</string>
+    <string name="unsupported_compile_sdk_message" msgid="4253168368781441759">"<xliff:g id="APP_NAME">%1$s</xliff:g> a été conçue pour une version incompatible du système d\'exploitation Android et peut se comporter de manière inattendue. Il se peut qu\'une version mise à jour de l\'application soit proposée."</string>
+    <string name="unsupported_compile_sdk_show" msgid="2681877855260970231">"Toujours afficher"</string>
+    <string name="unsupported_compile_sdk_check_update" msgid="3312723623323216101">"Vérifier la présence de mises à jour"</string>
     <string name="smv_application" msgid="3307209192155442829">"L\'application <xliff:g id="APPLICATION">%1$s</xliff:g> (du processus <xliff:g id="PROCESS">%2$s</xliff:g>) a enfreint ses propres règles du mode strict."</string>
     <string name="smv_process" msgid="5120397012047462446">"Le processus <xliff:g id="PROCESS">%1$s</xliff:g> a enfreint ses propres règles du mode strict."</string>
     <string name="android_upgrading_title" msgid="1584192285441405746">"Mise à jour d\'Android…"</string>
@@ -1116,10 +1119,10 @@
     <string name="network_available_sign_in" msgid="1848877297365446605">"Connectez-vous au réseau"</string>
     <!-- no translation found for network_available_sign_in_detailed (8000081941447976118) -->
     <skip />
-    <string name="wifi_no_internet" msgid="8451173622563841546">"Le réseau Wi-Fi ne dispose d\'aucun accès à Internet"</string>
+    <string name="wifi_no_internet" msgid="8938267198124654938">"Le réseau Wi-Fi ne dispose d\'aucun accès à Internet"</string>
     <string name="wifi_no_internet_detailed" msgid="8083079241212301741">"Touchez pour afficher les options"</string>
     <string name="network_switch_metered" msgid="4671730921726992671">"Passé au réseau <xliff:g id="NETWORK_TYPE">%1$s</xliff:g>"</string>
-    <string name="network_switch_metered_detail" msgid="5325661434777870353">"L\'appareil utilise <xliff:g id="NEW_NETWORK">%1$s</xliff:g> quand <xliff:g id="PREVIOUS_NETWORK">%2$s</xliff:g> n\'a pas d\'accès à Internet. Des frais peuvent s\'appliquer."</string>
+    <string name="network_switch_metered_detail" msgid="775163331794506615">"L\'appareil utilise <xliff:g id="NEW_NETWORK">%1$s</xliff:g> quand <xliff:g id="PREVIOUS_NETWORK">%2$s</xliff:g> n\'a pas d\'accès à Internet. Des frais peuvent s\'appliquer."</string>
     <string name="network_switch_metered_toast" msgid="5779283181685974304">"Passé du réseau <xliff:g id="PREVIOUS_NETWORK">%1$s</xliff:g> au <xliff:g id="NEW_NETWORK">%2$s</xliff:g>"</string>
   <string-array name="network_switch_type_name">
     <item msgid="3979506840912951943">"données cellulaires"</item>
@@ -1130,7 +1133,7 @@
   </string-array>
     <string name="network_switch_type_name_unknown" msgid="4552612897806660656">"un type de réseau inconnu"</string>
     <string name="wifi_watchdog_network_disabled" msgid="7904214231651546347">"Impossible de se connecter au Wi-Fi."</string>
-    <string name="wifi_watchdog_network_disabled_detailed" msgid="5548780776418332675">" dispose d\'une mauvaise connexion Internet."</string>
+    <string name="wifi_watchdog_network_disabled_detailed" msgid="4917472096696322767">" dispose d\'une connexion Internet faible."</string>
     <string name="wifi_connect_alert_title" msgid="8455846016001810172">"Autoriser la connexion?"</string>
     <string name="wifi_connect_alert_message" msgid="6451273376815958922">"L\'application %1$s souhaite se connecter au réseau Wi-Fi %2$s."</string>
     <string name="wifi_connect_default_application" msgid="7143109390475484319">"Une application"</string>
@@ -1634,7 +1637,7 @@
     <string name="package_installed_device_owner" msgid="6875717669960212648">"Installé par votre administrateur"</string>
     <string name="package_updated_device_owner" msgid="1847154566357862089">"Mise à jour par votre administrateur"</string>
     <string name="package_deleted_device_owner" msgid="2307122077550236438">"Supprimé par votre administrateur"</string>
-    <string name="battery_saver_description" msgid="1960431123816253034">"Pour améliorer l\'autonomie de la pile, la fonction d\'économie d\'énergie réduit les performances de votre appareil et limite la vibration, les services de localisation ainsi que la plupart des données en arrière-plan. Les applications Courriel, Messages et d\'autres qui reposent sur la synchronisation ne peuvent pas se mettre à jour, sauf si vous les ouvrez. \n\nL\'économiseur d\'énergie se désactive automatiquement lorsque votre appareil est en charge."</string>
+    <string name="battery_saver_description" msgid="5394663545060026162">"Pour améliorer l\'autonomie de la pile, la fonction Économie d\'énergie réduit les performances de votre appareil et limite la vibration, les services de localisation ainsi que la plupart des données en arrière-plan. Les applications Courriel, Messages et d\'autres qui reposent sur la synchronisation ne peuvent pas se mettre à jour, sauf si vous les ouvrez. \n\nLa fonction Économie d\'énergie se désactive automatiquement lorsque votre appareil est en charge."</string>
     <string name="data_saver_description" msgid="6015391409098303235">"Pour aider à diminuer l\'utilisation des données, la fonction Économiseur de données empêche certaines applications d\'envoyer ou de recevoir des données en arrière-plan. Une application que vous utilisez actuellement peut accéder à des données, mais peut le faire moins souvent. Cela peut signifier, par exemple, que les images ne s\'affichent pas jusqu\'à ce que vous les touchiez."</string>
     <string name="data_saver_enable_title" msgid="4674073932722787417">"Activer l\'Économiseur de données?"</string>
     <string name="data_saver_enable_button" msgid="7147735965247211818">"Activer"</string>

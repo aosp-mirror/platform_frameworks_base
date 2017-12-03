@@ -367,7 +367,7 @@ message GlobalSettingsProto {
     optional SettingProto database_creation_buildid = 330;
     optional SettingProto contacts_database_wal_enabled = 275;
     optional SettingProto location_settings_link_to_permissions_enabled = 331;
-    optional SettingProto backup_refactored_service_disabled = 332;
+    reserved 332; // Removed backup_refactored_service_disabled
     optional SettingProto euicc_factory_reset_timeout_millis = 333;
     optional SettingProto storage_settings_clobber_threshold = 334;
     optional SettingProto multi_sim_voice_call_subscription = 276;

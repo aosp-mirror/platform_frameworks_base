@@ -106,14 +106,9 @@ import java.util.concurrent.atomic.AtomicInteger;
                             contextHubId, hidlNanoAppBinary, this.getTransactionId());
                 } catch (RemoteException e) {
                     Log.e(TAG, "RemoteException while trying to load nanoapp with ID 0x" +
-                            Long.toHexString(nanoAppBinary.getNanoAppId()));
+                            Long.toHexString(nanoAppBinary.getNanoAppId()), e);
                     return Result.UNKNOWN_FAILURE;
                 }
-            }
-
-            @Override
-            /* package */ void onTimeout() {
-                onTransactionComplete(ContextHubTransaction.TRANSACTION_FAILED_TIMEOUT);
             }
 
             @Override
@@ -124,7 +119,7 @@ import java.util.concurrent.atomic.AtomicInteger;
                         mClientManager.onNanoAppLoaded(contextHubId, nanoAppBinary.getNanoAppId());
                     }
                 } catch (RemoteException e) {
-                    Log.e(TAG, "RemoteException while calling client onTransactionComplete");
+                    Log.e(TAG, "RemoteException while calling client onTransactionComplete", e);
                 }
             }
         };
@@ -149,14 +144,9 @@ import java.util.concurrent.atomic.AtomicInteger;
                             contextHubId, nanoAppId, this.getTransactionId());
                 } catch (RemoteException e) {
                     Log.e(TAG, "RemoteException while trying to unload nanoapp with ID 0x" +
-                            Long.toHexString(nanoAppId));
+                            Long.toHexString(nanoAppId), e);
                     return Result.UNKNOWN_FAILURE;
                 }
-            }
-
-            @Override
-            /* package */ void onTimeout() {
-                onTransactionComplete(ContextHubTransaction.TRANSACTION_FAILED_TIMEOUT);
             }
 
             @Override
@@ -167,7 +157,7 @@ import java.util.concurrent.atomic.AtomicInteger;
                         mClientManager.onNanoAppUnloaded(contextHubId, nanoAppId);
                     }
                 } catch (RemoteException e) {
-                    Log.e(TAG, "RemoteException while calling client onTransactionComplete");
+                    Log.e(TAG, "RemoteException while calling client onTransactionComplete", e);
                 }
             }
         };
@@ -189,15 +179,14 @@ import java.util.concurrent.atomic.AtomicInteger;
                 try {
                     return mContextHubProxy.queryApps(contextHubId);
                 } catch (RemoteException e) {
-                    Log.e(TAG, "RemoteException while trying to query for nanoapps");
+                    Log.e(TAG, "RemoteException while trying to query for nanoapps", e);
                     return Result.UNKNOWN_FAILURE;
                 }
             }
 
             @Override
-            /* package */ void onTimeout() {
-                onQueryResponse(ContextHubTransaction.TRANSACTION_FAILED_TIMEOUT,
-                        Collections.emptyList());
+            /* package */ void onTransactionComplete(int result) {
+                onQueryResponse(result, Collections.emptyList());
             }
 
             @Override
@@ -205,7 +194,7 @@ import java.util.concurrent.atomic.AtomicInteger;
                 try {
                     onCompleteCallback.onQueryResponse(result, nanoAppStateList);
                 } catch (RemoteException e) {
-                    Log.e(TAG, "RemoteException while calling client onQueryComplete");
+                    Log.e(TAG, "RemoteException while calling client onQueryComplete", e);
                 }
             }
         };
@@ -333,7 +322,8 @@ import java.util.concurrent.atomic.AtomicInteger;
                     synchronized (this) {
                         if (!transaction.isComplete()) {
                             Log.d(TAG, transaction + " timed out");
-                            transaction.onTimeout();
+                            transaction.onTransactionComplete(
+                                    ContextHubTransaction.TRANSACTION_FAILED_TIMEOUT);
 
                             removeTransactionAndStartNext();
                         }
@@ -344,6 +334,8 @@ import java.util.concurrent.atomic.AtomicInteger;
                 mTimeoutFuture = mTimeoutExecutor.schedule(onTimeoutFunc, timeoutSeconds,
                         TimeUnit.SECONDS);
             } else {
+                transaction.onTransactionComplete(
+                        ContextHubServiceUtil.toTransactionResult(result));
                 mTransactionQueue.remove();
             }
         }

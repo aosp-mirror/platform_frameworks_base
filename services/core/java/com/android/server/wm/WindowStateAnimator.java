@@ -602,13 +602,6 @@ class WindowStateAnimator {
         return mWin.getDisplayContent().getDisplay().getLayerStack();
     }
 
-    void updateLayerStackInTransaction() {
-        if (mSurfaceController != null) {
-            mSurfaceController.setLayerStackInTransaction(
-                    getLayerStack());
-        }
-    }
-
     void resetDrawState() {
         mDrawState = DRAW_PENDING;
 
@@ -725,16 +718,6 @@ class WindowStateAnimator {
             WindowManagerService.logSurface(w, "CREATE pos=("
                     + w.mFrame.left + "," + w.mFrame.top + ") ("
                     + width + "x" + height + "), layer=" + mAnimLayer + " HIDE", false);
-        }
-
-        // Start a new transaction and apply position & offset.
-
-        mService.openSurfaceTransaction();
-        try {
-            mSurfaceController.setPositionInTransaction(mTmpSize.left, mTmpSize.top, false);
-            mSurfaceController.setLayerStackInTransaction(getLayerStack());
-        } finally {
-            mService.closeSurfaceTransaction("createSurfaceLocked");
         }
 
         mLastHidden = true;

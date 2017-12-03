@@ -18,13 +18,12 @@ package android.view.textclassifier;
 
 import android.annotation.FloatRange;
 import android.annotation.NonNull;
+import android.util.ArrayMap;
 
 import com.android.internal.util.Preconditions;
 
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.Comparator;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -36,42 +35,43 @@ import java.util.Map;
  */
 final class EntityConfidence<T> {
 
-    private final Map<T, Float> mEntityConfidence = new HashMap<>();
-
-    private final Comparator<T> mEntityComparator = (e1, e2) -> {
-        float score1 = mEntityConfidence.get(e1);
-        float score2 = mEntityConfidence.get(e2);
-        if (score1 > score2) {
-            return -1;
-        }
-        if (score1 < score2) {
-            return 1;
-        }
-        return 0;
-    };
+    private final ArrayMap<T, Float> mEntityConfidence = new ArrayMap<>();
+    private final ArrayList<T> mSortedEntities = new ArrayList<>();
 
     EntityConfidence() {}
 
     EntityConfidence(@NonNull EntityConfidence<T> source) {
         Preconditions.checkNotNull(source);
         mEntityConfidence.putAll(source.mEntityConfidence);
+        mSortedEntities.addAll(source.mSortedEntities);
     }
 
     /**
-     * Sets an entity type for the classified text and assigns a confidence score.
+     * Constructs an EntityConfidence from a map of entity to confidence.
      *
-     * @param confidenceScore a value from 0 (low confidence) to 1 (high confidence).
-     *      0 implies the entity does not exist for the classified text.
-     *      Values greater than 1 are clamped to 1.
+     * Map entries that have 0 confidence are removed, and values greater than 1 are clamped to 1.
+     *
+     * @param source a map from entity to a confidence value in the range 0 (low confidence) to
+     *               1 (high confidence).
      */
-    public void setEntityType(
-            @NonNull T type, @FloatRange(from = 0.0, to = 1.0) float confidenceScore) {
-        Preconditions.checkNotNull(type);
-        if (confidenceScore > 0) {
-            mEntityConfidence.put(type, Math.min(1, confidenceScore));
-        } else {
-            mEntityConfidence.remove(type);
+    EntityConfidence(@NonNull Map<T, Float> source) {
+        Preconditions.checkNotNull(source);
+
+        // Prune non-existent entities and clamp to 1.
+        mEntityConfidence.ensureCapacity(source.size());
+        for (Map.Entry<T, Float> it : source.entrySet()) {
+            if (it.getValue() <= 0) continue;
+            mEntityConfidence.put(it.getKey(), Math.min(1, it.getValue()));
         }
+
+        // Create a list of entities sorted by decreasing confidence for getEntities().
+        mSortedEntities.ensureCapacity(mEntityConfidence.size());
+        mSortedEntities.addAll(mEntityConfidence.keySet());
+        mSortedEntities.sort((e1, e2) -> {
+            float score1 = mEntityConfidence.get(e1);
+            float score2 = mEntityConfidence.get(e2);
+            return Float.compare(score2, score1);
+        });
     }
 
     /**
@@ -80,10 +80,7 @@ final class EntityConfidence<T> {
      */
     @NonNull
     public List<T> getEntities() {
-        List<T> entities = new ArrayList<>(mEntityConfidence.size());
-        entities.addAll(mEntityConfidence.keySet());
-        entities.sort(mEntityComparator);
-        return Collections.unmodifiableList(entities);
+        return Collections.unmodifiableList(mSortedEntities);
     }
 
     /**

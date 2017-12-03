@@ -117,8 +117,14 @@ public class Build {
     public static final String SERIAL = getString("no.such.thing");
 
     /**
-     * Gets the hardware serial, if available.
-     * @return The serial if specified.
+     * Gets the hardware serial number, if available.
+     *
+     * <p class="note"><b>Note:</b> Root access may allow you to modify device identifiers, such as
+     * the hardware serial number. If you change these identifiers, you can use
+     * <a href="/training/articles/security-key-attestation.html">key attestation</a> to obtain
+     * proof of the device's original identifiers.
+     *
+     * @return The serial number if specified.
      */
     @RequiresPermission(Manifest.permission.READ_PHONE_STATE)
     public static String getSerial() {
@@ -937,7 +943,9 @@ public class Build {
         if (IS_ENG) return true;
 
         if (IS_TREBLE_ENABLED) {
-            int result = VintfObject.verify(new String[0]);
+            // If we can run this code, the device should already pass AVB.
+            // So, we don't need to check AVB here.
+            int result = VintfObject.verifyWithoutAvb();
 
             if (result != 0) {
                 Slog.e(TAG, "Vendor interface is incompatible, error="

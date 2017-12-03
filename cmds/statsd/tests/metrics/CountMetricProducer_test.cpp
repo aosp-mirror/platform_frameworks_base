@@ -58,11 +58,11 @@ TEST(CountMetricProducerTest, TestNonDimensionalEvents) {
     countProducer.onMatchedLogEvent(1 /*log matcher index*/, event2, false);
 
     // Flushes at event #2.
-    countProducer.flushIfNeeded(bucketStartTimeNs + 2);
+    countProducer.flushIfNeededLocked(bucketStartTimeNs + 2);
     EXPECT_EQ(0UL, countProducer.mPastBuckets.size());
 
     // Flushes.
-    countProducer.flushIfNeeded(bucketStartTimeNs + bucketSizeNs + 1);
+    countProducer.flushIfNeededLocked(bucketStartTimeNs + bucketSizeNs + 1);
     EXPECT_EQ(1UL, countProducer.mPastBuckets.size());
     EXPECT_TRUE(countProducer.mPastBuckets.find(DEFAULT_DIMENSION_KEY) !=
                 countProducer.mPastBuckets.end());
@@ -75,7 +75,7 @@ TEST(CountMetricProducerTest, TestNonDimensionalEvents) {
     // 1 matched event happens in bucket 2.
     LogEvent event3(tagId, bucketStartTimeNs + bucketSizeNs + 2);
     countProducer.onMatchedLogEvent(1 /*log matcher index*/, event3, false);
-    countProducer.flushIfNeeded(bucketStartTimeNs + 2 * bucketSizeNs + 1);
+    countProducer.flushIfNeededLocked(bucketStartTimeNs + 2 * bucketSizeNs + 1);
     EXPECT_EQ(1UL, countProducer.mPastBuckets.size());
     EXPECT_TRUE(countProducer.mPastBuckets.find(DEFAULT_DIMENSION_KEY) !=
                 countProducer.mPastBuckets.end());
@@ -86,7 +86,7 @@ TEST(CountMetricProducerTest, TestNonDimensionalEvents) {
     EXPECT_EQ(1LL, bucketInfo2.mCount);
 
     // nothing happens in bucket 3. we should not record anything for bucket 3.
-    countProducer.flushIfNeeded(bucketStartTimeNs + 3 * bucketSizeNs + 1);
+    countProducer.flushIfNeededLocked(bucketStartTimeNs + 3 * bucketSizeNs + 1);
     EXPECT_EQ(1UL, countProducer.mPastBuckets.size());
     EXPECT_TRUE(countProducer.mPastBuckets.find(DEFAULT_DIMENSION_KEY) !=
                 countProducer.mPastBuckets.end());
@@ -119,7 +119,7 @@ TEST(CountMetricProducerTest, TestEventsWithNonSlicedCondition) {
     countProducer.onMatchedLogEvent(1 /*matcher index*/, event2, false /*pulled*/);
     EXPECT_EQ(0UL, countProducer.mPastBuckets.size());
 
-    countProducer.flushIfNeeded(bucketStartTimeNs + bucketSizeNs + 1);
+    countProducer.flushIfNeededLocked(bucketStartTimeNs + bucketSizeNs + 1);
     EXPECT_EQ(1UL, countProducer.mPastBuckets.size());
     EXPECT_TRUE(countProducer.mPastBuckets.find(DEFAULT_DIMENSION_KEY) !=
                 countProducer.mPastBuckets.end());
@@ -167,11 +167,11 @@ TEST(CountMetricProducerTest, TestEventsWithSlicedCondition) {
                                       bucketStartTimeNs);
 
     countProducer.onMatchedLogEvent(1 /*log matcher index*/, event1, false);
-    countProducer.flushIfNeeded(bucketStartTimeNs + 1);
+    countProducer.flushIfNeededLocked(bucketStartTimeNs + 1);
     EXPECT_EQ(0UL, countProducer.mPastBuckets.size());
 
     countProducer.onMatchedLogEvent(1 /*log matcher index*/, event2, false);
-    countProducer.flushIfNeeded(bucketStartTimeNs + bucketSizeNs + 1);
+    countProducer.flushIfNeededLocked(bucketStartTimeNs + bucketSizeNs + 1);
     EXPECT_EQ(1UL, countProducer.mPastBuckets.size());
     EXPECT_TRUE(countProducer.mPastBuckets.find(DEFAULT_DIMENSION_KEY) !=
                 countProducer.mPastBuckets.end());

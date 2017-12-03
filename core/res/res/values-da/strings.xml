@@ -79,7 +79,7 @@
     <string name="RestrictedOnAllVoiceTitle" msgid="158800171499150681">"Ingen tale- og nødtjenester"</string>
     <string name="RestrictedStateContent" msgid="4278821484643362350">"Tilbydes i øjeblikket ikke af mobilnetværket på din placering"</string>
     <string name="NetworkPreferenceSwitchTitle" msgid="4008877505368566980">"Der er ingen forbindelse til netværket"</string>
-    <string name="NetworkPreferenceSwitchSummary" msgid="1203771446683319957">"Hvis du vil forbedre signalet, kan du prøve at ændre den valgte netværkstype i Indstillinger &gt; Netværk og internet &gt; Mobilnetværk &gt; Foretrukken netværkstype."</string>
+    <string name="NetworkPreferenceSwitchSummary" msgid="7056776609127756440">"Hvis du vil forbedre signalet, kan du prøve at ændre den valgte netværkstype i Indstillinger &gt; Netværk og internet &gt; Mobilnetværk &gt; Foretrukken netværkstype."</string>
     <string name="EmergencyCallWarningTitle" msgid="4790413876281901612">"Wi‑Fi-opkald er aktiveret"</string>
     <string name="EmergencyCallWarningSummary" msgid="8973232888021643293">"Nødopkald kræver adgang til et mobilnetværk."</string>
     <string name="notification_channel_network_alert" msgid="4427736684338074967">"Underretninger"</string>
@@ -1051,6 +1051,9 @@
     <string name="screen_compat_mode_hint" msgid="1064524084543304459">"Aktivér dette igen i Systemindstillinger &gt; Apps &gt; Downloadet."</string>
     <string name="unsupported_display_size_message" msgid="6545327290756295232">"<xliff:g id="APP_NAME">%1$s</xliff:g> understøtter ikke den aktuelle indstilling for visningsstørrelse og vil muligvis ikke fungere som forventet."</string>
     <string name="unsupported_display_size_show" msgid="7969129195360353041">"Vis altid"</string>
+    <string name="unsupported_compile_sdk_message" msgid="4253168368781441759">"<xliff:g id="APP_NAME">%1$s</xliff:g> er lavet til en inkompatibel version af Android OS, og det er ikke sikkert, den fungerer som forventet. Der findes muligvis en opdateret version af appen."</string>
+    <string name="unsupported_compile_sdk_show" msgid="2681877855260970231">"Vis altid"</string>
+    <string name="unsupported_compile_sdk_check_update" msgid="3312723623323216101">"Søg efter opdatering"</string>
     <string name="smv_application" msgid="3307209192155442829">"Appen <xliff:g id="APPLICATION">%1$s</xliff:g> (proces <xliff:g id="PROCESS">%2$s</xliff:g>) har overtrådt sin egen StrictMode-politik."</string>
     <string name="smv_process" msgid="5120397012047462446">"Processen <xliff:g id="PROCESS">%1$s</xliff:g> har overtrådt sin egen StrictMode-politik."</string>
     <string name="android_upgrading_title" msgid="1584192285441405746">"Android opgraderes..."</string>
@@ -1095,7 +1098,7 @@
     <string name="ringtone_silent" msgid="7937634392408977062">"Ingen"</string>
     <string name="ringtone_picker_title" msgid="3515143939175119094">"Ringetoner"</string>
     <string name="ringtone_picker_title_alarm" msgid="6473325356070549702">"Alarmlyde"</string>
-    <string name="ringtone_picker_title_notification" msgid="4837740874822788802">"Meddelelseslyde"</string>
+    <string name="ringtone_picker_title_notification" msgid="4837740874822788802">"Underretningslyde"</string>
     <string name="ringtone_unknown" msgid="3914515995813061520">"Ukendt"</string>
     <plurals name="wifi_available" formatted="false" msgid="7900333017752027322">
       <item quantity="one">Tilgængelige Wi-Fi-netværk</item>
@@ -1116,10 +1119,10 @@
     <string name="network_available_sign_in" msgid="1848877297365446605">"Log ind på netværk"</string>
     <!-- no translation found for network_available_sign_in_detailed (8000081941447976118) -->
     <skip />
-    <string name="wifi_no_internet" msgid="8451173622563841546">"Wi-Fi har ingen internetadgang"</string>
+    <string name="wifi_no_internet" msgid="8938267198124654938">"Wi-Fi-netværket har ikke internetadgang"</string>
     <string name="wifi_no_internet_detailed" msgid="8083079241212301741">"Tryk for at se valgmuligheder"</string>
     <string name="network_switch_metered" msgid="4671730921726992671">"Der blev skiftet til <xliff:g id="NETWORK_TYPE">%1$s</xliff:g>"</string>
-    <string name="network_switch_metered_detail" msgid="5325661434777870353">"Enheden benytter <xliff:g id="NEW_NETWORK">%1$s</xliff:g>, når <xliff:g id="PREVIOUS_NETWORK">%2$s</xliff:g> ikke har adgang til internettet. Der opkræves muligvis gebyr."</string>
+    <string name="network_switch_metered_detail" msgid="775163331794506615">"Enheden benytter <xliff:g id="NEW_NETWORK">%1$s</xliff:g>, når der ikke er internetadgang via <xliff:g id="PREVIOUS_NETWORK">%2$s</xliff:g>. Der opkræves muligvis betaling."</string>
     <string name="network_switch_metered_toast" msgid="5779283181685974304">"Der blev skiftet fra <xliff:g id="PREVIOUS_NETWORK">%1$s</xliff:g> til <xliff:g id="NEW_NETWORK">%2$s</xliff:g>"</string>
   <string-array name="network_switch_type_name">
     <item msgid="3979506840912951943">"mobildata"</item>
@@ -1130,7 +1133,7 @@
   </string-array>
     <string name="network_switch_type_name_unknown" msgid="4552612897806660656">"en ukendt netværkstype"</string>
     <string name="wifi_watchdog_network_disabled" msgid="7904214231651546347">"Kunne ikke oprette forbindelse til Wi-Fi"</string>
-    <string name="wifi_watchdog_network_disabled_detailed" msgid="5548780776418332675">" har en dårlig internetforbindelse."</string>
+    <string name="wifi_watchdog_network_disabled_detailed" msgid="4917472096696322767">" har en dårlig internetforbindelse."</string>
     <string name="wifi_connect_alert_title" msgid="8455846016001810172">"Vil du tillade denne forbindelse?"</string>
     <string name="wifi_connect_alert_message" msgid="6451273376815958922">"Applikationen %1$s vil gerne have forbindelse til Wi-Fi-netværk %2$s"</string>
     <string name="wifi_connect_default_application" msgid="7143109390475484319">"En applikation"</string>
@@ -1626,7 +1629,6 @@
     <string name="managed_profile_label_badge_2" msgid="5048136430082124036">"2. <xliff:g id="LABEL">%1$s</xliff:g> til arbejde"</string>
     <string name="managed_profile_label_badge_3" msgid="2808305070321719040">"3. <xliff:g id="LABEL">%1$s</xliff:g> til arbejde"</string>
     <string name="lock_to_app_toast" msgid="6820571533009838261">"Hvis du vil frigøre dette skærmbillede, skal du trykke på knapperne Tilbage og Oversigt og holde fingrene nede"</string>
-    <string name="lock_to_app_toast_locked" msgid="7849470948648628704">"Denne app kan ikke frigøres"</string>
     <string name="lock_to_app_start" msgid="6643342070839862795">"Skærmen blev fastgjort"</string>
     <string name="lock_to_app_exit" msgid="8598219838213787430">"Skærmen blev frigjort"</string>
     <string name="lock_to_app_unlock_pin" msgid="2552556656504331634">"Bed om pinkode inden frigørelse"</string>
@@ -1635,7 +1637,7 @@
     <string name="package_installed_device_owner" msgid="6875717669960212648">"Installeret af din administrator"</string>
     <string name="package_updated_device_owner" msgid="1847154566357862089">"Opdateret af din administrator"</string>
     <string name="package_deleted_device_owner" msgid="2307122077550236438">"Slettet af din administrator"</string>
-    <string name="battery_saver_description" msgid="1960431123816253034">"Batterisparefunktionen hjælper med at forlænge batteriets levetid ved at reducere enhedens ydeevne og begrænse vibration, placeringstjenester og det meste baggrundsdata. E-mail, beskedfunktioner og andre apps, der benytter synkronisering, opdateres muligvis ikke, medmindre du åbner dem.\n\nBatterisparefunktionen deaktiveres automatisk, når enheden oplader."</string>
+    <string name="battery_saver_description" msgid="5394663545060026162">"Batterisparefunktionen hjælper med at forlænge batteritiden ved at reducere enhedens ydeevne og begrænse vibration, placeringstjenester og det meste baggrundsdata. Mail, beskedfunktioner og andre apps, der benytter synkronisering, opdateres muligvis ikke, medmindre du åbner dem.\n\nBatterisparefunktionen deaktiveres automatisk, når enheden oplader."</string>
     <string name="data_saver_description" msgid="6015391409098303235">"Datasparefunktionen forhindrer nogle apps i at sende eller modtage data i baggrunden for at reducere dataforbruget. En app, der er i brug, kan få adgang til data, men gør det måske ikke så ofte. Dette kan f.eks. betyde, at billeder ikke vises, før du trykker på dem."</string>
     <string name="data_saver_enable_title" msgid="4674073932722787417">"Vil du slå Datasparefunktion til?"</string>
     <string name="data_saver_enable_button" msgid="7147735965247211818">"Slå til"</string>
@@ -1648,7 +1650,7 @@
       <item quantity="other">I %1$d min. (indtil kl. <xliff:g id="FORMATTEDTIME_1">%2$s</xliff:g>)</item>
     </plurals>
     <plurals name="zen_mode_duration_hours_summary" formatted="false" msgid="8152974162096743862">
-      <item quantity="one">I %1$d timer (indtil <xliff:g id="FORMATTEDTIME_1">%2$s</xliff:g>)</item>
+      <item quantity="one">I %1$d time (indtil <xliff:g id="FORMATTEDTIME_1">%2$s</xliff:g>)</item>
       <item quantity="other">I %1$d timer (indtil <xliff:g id="FORMATTEDTIME_1">%2$s</xliff:g>)</item>
     </plurals>
     <plurals name="zen_mode_duration_hours_summary_short" formatted="false" msgid="4787552595253082371">
@@ -1664,7 +1666,7 @@
       <item quantity="other">I %d min.</item>
     </plurals>
     <plurals name="zen_mode_duration_hours" formatted="false" msgid="3938821308277433854">
-      <item quantity="one">I %d timer</item>
+      <item quantity="one">I %d time</item>
       <item quantity="other">I %d timer</item>
     </plurals>
     <plurals name="zen_mode_duration_hours_short" formatted="false" msgid="6748277774662434217">
@@ -1782,18 +1784,14 @@
     <string name="etws_primary_default_message_test" msgid="2709597093560037455">"Test af nødbeskeder"</string>
     <string name="notification_reply_button_accessibility" msgid="3621714652387814344">"Svar"</string>
     <string name="etws_primary_default_message_others" msgid="6293148756130398971"></string>
-    <!-- no translation found for mmcc_authentication_reject (5767701075994754356) -->
-    <skip />
-    <!-- no translation found for mmcc_imsi_unknown_in_hlr (5316658473301462825) -->
-    <skip />
-    <!-- no translation found for mmcc_illegal_ms (807334478177362062) -->
-    <skip />
-    <!-- no translation found for mmcc_illegal_me (1950705155760872972) -->
-    <skip />
+    <string name="mmcc_authentication_reject" msgid="5767701075994754356">"SIM-kort er ikke tilladt for tale"</string>
+    <string name="mmcc_imsi_unknown_in_hlr" msgid="5316658473301462825">"SIM-kort er ikke aktiveret for tale"</string>
+    <string name="mmcc_illegal_ms" msgid="807334478177362062">"SIM-kort er ikke tilladt for tale"</string>
+    <string name="mmcc_illegal_me" msgid="1950705155760872972">"Telefon er ikke tilladt for tale"</string>
     <string name="popup_window_default_title" msgid="4874318849712115433">"Pop op-vindue"</string>
     <string name="slice_more_content" msgid="8504342889413274608">"<xliff:g id="NUMBER">%1$d</xliff:g> mere"</string>
     <string name="shortcut_restored_on_lower_version" msgid="5270675146351613828">"Denne genvej kræver den nyeste app"</string>
-    <string name="shortcut_restore_not_supported" msgid="5028808567940014190">"Genvejen kunne ikke gendannes, da appen ikke understøtter sikkerhedskopiering og gendannelse"</string>
+    <string name="shortcut_restore_not_supported" msgid="5028808567940014190">"Genvejen kunne ikke gendannes, da appen ikke understøtter backup og gendannelse"</string>
     <string name="shortcut_restore_signature_mismatch" msgid="2406209324521327518">"Genvejen kunne ikke gendannes på grund af uoverensstemmelse i appsignatur"</string>
     <string name="shortcut_restore_unknown_issue" msgid="8703738064603262597">"Genvejen kunne ikke gendannes"</string>
 </resources>

@@ -16,12 +16,18 @@
 package com.android.server.power.batterysaver;
 
 import android.Manifest;
+import android.app.ActivityManager;
 import android.app.ActivityManagerInternal;
+import android.app.Notification;
+import android.app.Notification.BigTextStyle;
+import android.app.NotificationManager;
+import android.app.PendingIntent;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.hardware.power.V1_0.PowerHint;
+import android.net.Uri;
 import android.os.Handler;
 import android.os.Looper;
 import android.os.Message;
@@ -32,9 +38,11 @@ import android.os.PowerSaveState;
 import android.os.UserHandle;
 import android.util.ArrayMap;
 import android.util.Slog;
-import android.widget.Toast;
 
+import com.android.internal.R;
 import com.android.internal.annotations.GuardedBy;
+import com.android.internal.messages.nano.SystemMessageProto.SystemMessage;
+import com.android.internal.notification.SystemNotificationChannels;
 import com.android.internal.util.ArrayUtils;
 import com.android.internal.util.Preconditions;
 import com.android.server.LocalServices;
@@ -60,6 +68,8 @@ public class BatterySaverController implements BatterySaverPolicyListener {
     private PowerManager mPowerManager;
 
     private final BatterySaverPolicy mBatterySaverPolicy;
+
+    private static final String WARNING_LINK_URL = "http://goto.google.com/extreme-battery-saver";
 
     @GuardedBy("mLock")
     private final ArrayList<LowPowerModeListener> mListeners = new ArrayList<>();
@@ -230,9 +240,9 @@ public class BatterySaverController implements BatterySaverPolicyListener {
         if (sendBroadcast) {
             if (enabled) {
                 // STOPSHIP Remove the toast.
-                Toast.makeText(mContext,
-                        com.android.internal.R.string.battery_saver_warning,
-                        Toast.LENGTH_LONG).show();
+                postWarningNotification();
+            } else {
+                cancelWarningNotification();
             }
 
             if (DEBUG) {
@@ -263,6 +273,53 @@ public class BatterySaverController implements BatterySaverPolicyListener {
                                 listener.getServiceType(), enabled);
                 listener.onLowPowerModeChanged(result);
             }
+        }
+    }
+
+    private void postWarningNotification() {
+        final UserHandle foregroundUser = UserHandle.of(ActivityManager.getCurrentUser());
+
+        final PendingIntent pendingIntent = PendingIntent
+                .getActivityAsUser(mContext, 0,
+                        new Intent(Intent.ACTION_VIEW, Uri.parse(WARNING_LINK_URL)),
+                        PendingIntent.FLAG_CANCEL_CURRENT, null,
+                       foregroundUser);
+
+        final CharSequence title = mContext.getString
+                (com.android.internal.R.string.battery_saver_warning_title);
+        final CharSequence text = mContext.getString
+                (com.android.internal.R.string.battery_saver_warning);
+
+        final Notification notification =
+                new Notification.Builder(mContext, SystemNotificationChannels.ALERTS)
+                .setSmallIcon(R.drawable.stat_notify_error)
+                .setTicker(title)
+                .setWhen(System.currentTimeMillis())
+                .setContentTitle(title)
+                .setContentText(text)
+                .setContentIntent(pendingIntent)
+                .setStyle(new BigTextStyle().bigText(text))
+                .build();
+
+        final NotificationManager nm = mContext.getSystemService(NotificationManager.class);
+
+        if (nm != null) {
+            nm.notifyAsUser(title.toString(),
+                    SystemMessage.NOTE_BATTERY_SAVER_WARNING,
+                    notification,
+                    foregroundUser);
+        }
+    }
+
+    private void cancelWarningNotification() {
+        final UserHandle foregroundUser = UserHandle.of(ActivityManager.getCurrentUser());
+        final CharSequence title = mContext.getString
+                (com.android.internal.R.string.battery_saver_warning_title);
+
+        final NotificationManager nm = mContext.getSystemService(NotificationManager.class);
+        if (nm != null) {
+            nm.cancelAsUser(title.toString(), SystemMessage.NOTE_BATTERY_SAVER_WARNING,
+                    foregroundUser);
         }
     }
 }

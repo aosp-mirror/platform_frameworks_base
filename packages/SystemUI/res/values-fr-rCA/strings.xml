@@ -34,14 +34,14 @@
     <string name="status_bar_latest_events_title" msgid="6594767438577593172">"Notifications"</string>
     <string name="battery_low_title" msgid="6456385927409742437">"Pile faible"</string>
     <string name="battery_low_percent_format" msgid="2900940511201380775">"<xliff:g id="PERCENTAGE">%s</xliff:g> restants"</string>
-    <string name="battery_low_percent_format_saver_started" msgid="6859235584035338833">"<xliff:g id="PERCENTAGE">%s</xliff:g> restants. L\'économiseur d\'énergie est activé."</string>
+    <string name="battery_low_percent_format_saver_started" msgid="7879389868952879166">"<xliff:g id="PERCENTAGE">%s</xliff:g> restants. La fonction Économie d\'énergie est activée."</string>
     <string name="invalid_charger" msgid="4549105996740522523">"Chargement USB non compatible.\nVous devez utiliser le chargeur fourni."</string>
     <string name="invalid_charger_title" msgid="3515740382572798460">"Le chargement par USB n\'est pas pris en charge."</string>
     <string name="invalid_charger_text" msgid="5474997287953892710">"Utilisez uniquement le chargeur fourni."</string>
     <string name="battery_low_why" msgid="4553600287639198111">"Paramètres"</string>
-    <string name="battery_saver_confirmation_title" msgid="5299585433050361634">"Activer l\'économiseur d\'énergie?"</string>
+    <string name="battery_saver_confirmation_title" msgid="2052100465684817154">"Activer la fonction Économie d\'énergie?"</string>
     <string name="battery_saver_confirmation_ok" msgid="7507968430447930257">"Activer"</string>
-    <string name="battery_saver_start_action" msgid="5576697451677486320">"Activer l\'économiseur d\'énergie"</string>
+    <string name="battery_saver_start_action" msgid="8187820911065797519">"Activer la fonction Économie d\'énergie"</string>
     <string name="status_bar_settings_settings_button" msgid="3023889916699270224">"Paramètres"</string>
     <string name="status_bar_settings_wifi_button" msgid="1733928151698311923">"Wi-Fi"</string>
     <string name="status_bar_settings_auto_rotation" msgid="3790482541357798421">"Rotation auto de l\'écran"</string>
@@ -245,8 +245,6 @@
     <string name="data_usage_disabled_dialog_title" msgid="3932437232199671967">"Données désactivées"</string>
     <string name="data_usage_disabled_dialog" msgid="4919541636934603816">"La limite de données que vous avez définie a été atteinte. Vous n\'utilisez plus les données cellulaires.\n\nSi vous rétablissez la connexion de données cellulaires, des frais peuvent s\'appliquer."</string>
     <string name="data_usage_disabled_dialog_enable" msgid="1412395410306390593">"Reprendre"</string>
-    <string name="status_bar_settings_signal_meter_disconnected" msgid="1940231521274147771">"Aucune connexion Internet"</string>
-    <string name="status_bar_settings_signal_meter_wifi_nossid" msgid="6557486452774597820">"Connecté au Wi-Fi"</string>
     <string name="gps_notification_searching_text" msgid="8574247005642736060">"Recherche de GPS..."</string>
     <string name="gps_notification_found_text" msgid="4619274244146446464">"Position définie par GPS"</string>
     <string name="accessibility_location_active" msgid="2427290146138169014">"Demandes de localisation actives"</string>
@@ -403,9 +401,9 @@
     <string name="user_remove_user_title" msgid="4681256956076895559">"Supprimer l\'utilisateur?"</string>
     <string name="user_remove_user_message" msgid="1453218013959498039">"Toutes les applications et les données de cet utilisateur seront supprimées."</string>
     <string name="user_remove_user_remove" msgid="7479275741742178297">"Supprimer"</string>
-    <string name="battery_saver_notification_title" msgid="237918726750955859">"La fonction Économie d\'énergie est activée"</string>
+    <string name="battery_saver_notification_title" msgid="8614079794522291840">"La fonction Économie d\'énergie est activée"</string>
     <string name="battery_saver_notification_text" msgid="820318788126672692">"Réduire les performances et de fond"</string>
-    <string name="battery_saver_notification_action_text" msgid="109158658238110382">"Désactiver l\'économiseur d\'énergie"</string>
+    <string name="battery_saver_notification_action_text" msgid="132118784269455533">"Désactiver la fonction Économie d\'énergie"</string>
     <string name="media_projection_dialog_text" msgid="3071431025448218928">"<xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g> commencer à enregistrer tout ce qui s\'affiche sur votre écran."</string>
     <string name="media_projection_remember_text" msgid="3103510882172746752">"Ne plus afficher"</string>
     <string name="clear_all_notifications_text" msgid="814192889771462828">"Tout effacer"</string>
@@ -584,8 +582,8 @@
       <item quantity="other">%d minutes</item>
     </plurals>
     <string name="battery_panel_title" msgid="7944156115535366613">"Utilisation de la pile"</string>
-    <string name="battery_detail_charging_summary" msgid="4055327085770378335">"Le mode Économie d\'énergie n\'est pas accessible pendant la recharge"</string>
-    <string name="battery_detail_switch_title" msgid="8763441006881907058">"Économie d\'énergie"</string>
+    <string name="battery_detail_charging_summary" msgid="1279095653533044008">"Le mode Économie d\'énergie n\'est pas accessible pendant la charge"</string>
+    <string name="battery_detail_switch_title" msgid="6285872470260795421">"Économie d\'énergie"</string>
     <string name="battery_detail_switch_summary" msgid="9049111149407626804">"Réduit les performances et les données en arrière-plan"</string>
     <string name="keyboard_key_button_template" msgid="6230056639734377300">"Bouton <xliff:g id="NAME">%1$s</xliff:g>"</string>
     <string name="keyboard_key_home" msgid="2243500072071305073">"Accueil"</string>

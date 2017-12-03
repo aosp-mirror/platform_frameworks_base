@@ -35,14 +35,14 @@
     <string name="status_bar_latest_events_title" msgid="6594767438577593172">"Paziņojumi"</string>
     <string name="battery_low_title" msgid="6456385927409742437">"Zems akumulatora enerģijas līmenis"</string>
     <string name="battery_low_percent_format" msgid="2900940511201380775">"Atlikuši <xliff:g id="PERCENTAGE">%s</xliff:g>"</string>
-    <string name="battery_low_percent_format_saver_started" msgid="6859235584035338833">"Atlikuši <xliff:g id="PERCENTAGE">%s</xliff:g>. Ir ieslēgts akumulatora jaudas taupīšanas režīms."</string>
+    <string name="battery_low_percent_format_saver_started" msgid="7879389868952879166">"Atlikuši <xliff:g id="PERCENTAGE">%s</xliff:g>. Ir ieslēgts akumulatora jaudas taupīšanas režīms."</string>
     <string name="invalid_charger" msgid="4549105996740522523">"USB lādēšana netiek atbalstīta.\nIzmantojiet tikai komplektā iekļauto lādētāju."</string>
     <string name="invalid_charger_title" msgid="3515740382572798460">"USB uzlāde netiek atbalstīta."</string>
     <string name="invalid_charger_text" msgid="5474997287953892710">"Izmantojiet tikai komplektā iekļauto lādētāju."</string>
     <string name="battery_low_why" msgid="4553600287639198111">"Iestatījumi"</string>
-    <string name="battery_saver_confirmation_title" msgid="5299585433050361634">"Vai ieslēgt akumulatora jaudas taupīšanu?"</string>
+    <string name="battery_saver_confirmation_title" msgid="2052100465684817154">"Vai ieslēgt akumulatora jaudas taupīšanas režīmu?"</string>
     <string name="battery_saver_confirmation_ok" msgid="7507968430447930257">"Ieslēgt"</string>
-    <string name="battery_saver_start_action" msgid="5576697451677486320">"Ieslēgt akumulatora jaudas taupīšanu"</string>
+    <string name="battery_saver_start_action" msgid="8187820911065797519">"Ieslēgt akumulatora jaudas taupīšanas režīmu"</string>
     <string name="status_bar_settings_settings_button" msgid="3023889916699270224">"Iestatījumi"</string>
     <string name="status_bar_settings_wifi_button" msgid="1733928151698311923">"Wi-Fi"</string>
     <string name="status_bar_settings_auto_rotation" msgid="3790482541357798421">"Automātiska ekrāna pagriešana"</string>
@@ -52,15 +52,15 @@
     <string name="bluetooth_tethered" msgid="7094101612161133267">"Bluetooth piesaiste"</string>
     <string name="status_bar_input_method_settings_configure_input_methods" msgid="3504292471512317827">"Iestatīt ievades metodes"</string>
     <string name="status_bar_use_physical_keyboard" msgid="7551903084416057810">"Fiziskā tastatūra"</string>
-    <string name="usb_device_permission_prompt" msgid="834698001271562057">"Vai ļaut lietotnei <xliff:g id="APPLICATION">%1$s</xliff:g> piekļūt šai USB ierīcei?"</string>
-    <string name="usb_accessory_permission_prompt" msgid="5171775411178865750">"Vai ļaut lietotnei <xliff:g id="APPLICATION">%1$s</xliff:g> piekļūt šim USB piederumam?"</string>
-    <string name="usb_device_confirm_prompt" msgid="5161205258635253206">"Vai atvērt darbību <xliff:g id="ACTIVITY">%1$s</xliff:g>, kad tiek pievienota šī USB ierīce?"</string>
-    <string name="usb_accessory_confirm_prompt" msgid="3808984931830229888">"Vai atvērt darbību <xliff:g id="ACTIVITY">%1$s</xliff:g>, kad tiek pievienots šis USB piederums?"</string>
+    <string name="usb_device_permission_prompt" msgid="1825685909587559679">"Vai atļaut lietotnei <xliff:g id="APPLICATION">%1$s</xliff:g> piekļūt šai ierīcei: <xliff:g id="USB_DEVICE">%2$s</xliff:g>?"</string>
+    <string name="usb_accessory_permission_prompt" msgid="2465531696941369047">"Vai atļaut lietotnei <xliff:g id="APPLICATION">%1$s</xliff:g> piekļūt šim piederumam: <xliff:g id="USB_ACCESSORY">%2$s</xliff:g>?"</string>
+    <string name="usb_device_confirm_prompt" msgid="7440562274256843905">"Vai atvērt lietotni <xliff:g id="APPLICATION">%1$s</xliff:g>, lai izmantotu šo ierīci: <xliff:g id="USB_DEVICE">%2$s</xliff:g>?"</string>
+    <string name="usb_accessory_confirm_prompt" msgid="4333670517539993561">"Vai atvērt lietotni <xliff:g id="APPLICATION">%1$s</xliff:g>, lai izmantotu šo piederumu: <xliff:g id="USB_ACCESSORY">%2$s</xliff:g>?"</string>
     <string name="usb_accessory_uri_prompt" msgid="513450621413733343">"Neviena no inst. liet. nedarb. ar šo USB pied. Uzz. vairāk par šo pied. vietnē <xliff:g id="URL">%1$s</xliff:g>."</string>
     <string name="title_usb_accessory" msgid="4966265263465181372">"USB piederums"</string>
     <string name="label_view" msgid="6304565553218192990">"Skatīt"</string>
-    <string name="always_use_device" msgid="1450287437017315906">"Pēc noklusējuma izmantot šai USB ierīcei"</string>
-    <string name="always_use_accessory" msgid="1210954576979621596">"Pēc noklusējuma izmantot šim USB piederumam"</string>
+    <string name="always_use_device" msgid="4015357883336738417">"Vienmēr atvērt lietotni <xliff:g id="APPLICATION">%1$s</xliff:g>, kad ir pievienota <xliff:g id="USB_DEVICE">%2$s</xliff:g>"</string>
+    <string name="always_use_accessory" msgid="3257892669444535154">"Vienmēr atvērt lietotni <xliff:g id="APPLICATION">%1$s</xliff:g>, kad ir pievienots <xliff:g id="USB_ACCESSORY">%2$s</xliff:g>"</string>
     <string name="usb_debugging_title" msgid="4513918393387141949">"Vai atļaut USB atkļūdošanu?"</string>
     <string name="usb_debugging_message" msgid="2220143855912376496">"Datora RSA atslēgas ciparfails: \n<xliff:g id="FINGERPRINT">%1$s</xliff:g>"</string>
     <string name="usb_debugging_always" msgid="303335496705863070">"Vienmēr atļaut no šī datora"</string>
@@ -244,8 +244,6 @@
     <string name="data_usage_disabled_dialog_title" msgid="3932437232199671967">"Datu lietojums ir apturēts"</string>
     <string name="data_usage_disabled_dialog" msgid="4919541636934603816">"Ir sasniegts jūsu iestatītais datu ierobežojums. Jūs vairs neizmantojat mobilos datus.\n\nJa atsāksiet, var tikt piemērota maksa par datu lietojumu."</string>
     <string name="data_usage_disabled_dialog_enable" msgid="1412395410306390593">"Atsākt"</string>
-    <string name="status_bar_settings_signal_meter_disconnected" msgid="1940231521274147771">"Nav interneta sav."</string>
-    <string name="status_bar_settings_signal_meter_wifi_nossid" msgid="6557486452774597820">"Izv. sav. ar Wi-Fi"</string>
     <string name="gps_notification_searching_text" msgid="8574247005642736060">"Notiek GPS meklēšana..."</string>
     <string name="gps_notification_found_text" msgid="4619274244146446464">"GPS iestatītā atrašanās vieta"</string>
     <string name="accessibility_location_active" msgid="2427290146138169014">"Aktīvi atrašanās vietu pieprasījumi"</string>
@@ -403,9 +401,9 @@
     <string name="user_remove_user_title" msgid="4681256956076895559">"Vai noņemt lietotāju?"</string>
     <string name="user_remove_user_message" msgid="1453218013959498039">"Tiks dzēstas visas šī lietotāja lietotnes un dati."</string>
     <string name="user_remove_user_remove" msgid="7479275741742178297">"Noņemt"</string>
-    <string name="battery_saver_notification_title" msgid="237918726750955859">"Ieslēgts akumulatora enerģijas taupīšanas režīms"</string>
+    <string name="battery_saver_notification_title" msgid="8614079794522291840">"Akumulatora jaudas taupīšanas režīms ir ieslēgts"</string>
     <string name="battery_saver_notification_text" msgid="820318788126672692">"Samazina veiktspēju un fona datus"</string>
-    <string name="battery_saver_notification_action_text" msgid="109158658238110382">"Izslēgt akumulatora jaudas taupīšanu"</string>
+    <string name="battery_saver_notification_action_text" msgid="132118784269455533">"Izslēgt akumulatora jaudas taupīšanas režīmu"</string>
     <string name="media_projection_dialog_text" msgid="3071431025448218928">"<xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g> sāks uzņemt visu, kas tiks rādīts jūsu ekrānā."</string>
     <string name="media_projection_remember_text" msgid="3103510882172746752">"Vairs nerādīt"</string>
     <string name="clear_all_notifications_text" msgid="814192889771462828">"Dzēst visu"</string>
@@ -588,8 +586,8 @@
       <item quantity="other">%d minūtes</item>
     </plurals>
     <string name="battery_panel_title" msgid="7944156115535366613">"Akumulatora lietojums"</string>
-    <string name="battery_detail_charging_summary" msgid="4055327085770378335">"Akumulatora jaudas taupīšanas režīms nav pieejams uzlādes laikā."</string>
-    <string name="battery_detail_switch_title" msgid="8763441006881907058">"Akumulatora jaudas taupīšanas režīms"</string>
+    <string name="battery_detail_charging_summary" msgid="1279095653533044008">"Akumulatora jaudas taupīšanas režīms uzlādes laikā nav pieejams."</string>
+    <string name="battery_detail_switch_title" msgid="6285872470260795421">"Akumulatora jaudas taupīšanas režīms"</string>
     <string name="battery_detail_switch_summary" msgid="9049111149407626804">"Samazina veiktspēju un fona datus."</string>
     <string name="keyboard_key_button_template" msgid="6230056639734377300">"Poga <xliff:g id="NAME">%1$s</xliff:g>"</string>
     <string name="keyboard_key_home" msgid="2243500072071305073">"Sākumvietas taustiņš"</string>

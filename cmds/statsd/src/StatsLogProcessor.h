@@ -36,7 +36,7 @@ public:
                       const std::function<void(const ConfigKey&)>& sendBroadcast);
     virtual ~StatsLogProcessor();
 
-    virtual void OnLogEvent(const LogEvent& event);
+    void OnLogEvent(const LogEvent& event);
 
     void OnConfigUpdated(const ConfigKey& key, const StatsdConfig& config);
     void OnConfigRemoved(const ConfigKey& key);

@@ -60,7 +60,7 @@ TEST(GaugeMetricProducerTest, TestWithCondition) {
     allData.push_back(event2);
 
     gaugeProducer.onDataPulled(allData);
-    gaugeProducer.flushIfNeeded(event2->GetTimestampNs() + 1);
+    gaugeProducer.flushIfNeededLocked(event2->GetTimestampNs() + 1);
     EXPECT_EQ(0UL, gaugeProducer.mCurrentSlicedBucket->size());
     EXPECT_EQ(0UL, gaugeProducer.mPastBuckets.size());
 
@@ -74,7 +74,7 @@ TEST(GaugeMetricProducerTest, TestWithCondition) {
     event3->init();
     allData.push_back(event3);
     gaugeProducer.onDataPulled(allData);
-    gaugeProducer.flushIfNeeded(bucketStartTimeNs + 2 * bucketSizeNs + 10);
+    gaugeProducer.flushIfNeededLocked(bucketStartTimeNs + 2 * bucketSizeNs + 10);
     EXPECT_EQ(1UL, gaugeProducer.mCurrentSlicedBucket->size());
     EXPECT_EQ(25L, gaugeProducer.mCurrentSlicedBucket->begin()->second);
     // One dimension.

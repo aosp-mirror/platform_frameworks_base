@@ -33,15 +33,13 @@
     <string name="wifi_check_password_try_again" msgid="516958988102584767">"Comprueba la contraseña y vuelve a intentarlo"</string>
     <string name="wifi_not_in_range" msgid="1136191511238508967">"Fuera de rango"</string>
     <string name="wifi_no_internet_no_reconnect" msgid="5724903347310541706">"No se establecerá conexión automáticamente"</string>
-    <!-- no translation found for wifi_no_internet (4663834955626848401) -->
-    <skip />
+    <string name="wifi_no_internet" msgid="4663834955626848401">"No se ha detectado ningún acceso a Internet"</string>
     <string name="saved_network" msgid="4352716707126620811">"Guardada por <xliff:g id="NAME">%1$s</xliff:g>"</string>
     <string name="connected_via_network_scorer" msgid="5713793306870815341">"Conectada automáticamente a través de %1$s"</string>
     <string name="connected_via_network_scorer_default" msgid="7867260222020343104">"Conectado automáticamente a través de un proveedor de valoración de redes"</string>
     <string name="connected_via_passpoint" msgid="2826205693803088747">"Conectado a través de %1$s"</string>
     <string name="available_via_passpoint" msgid="1617440946846329613">"Disponible a través de %1$s"</string>
-    <!-- no translation found for wifi_connected_no_internet (8202906332837777829) -->
-    <skip />
+    <string name="wifi_connected_no_internet" msgid="8202906332837777829">"Conexión sin Internet"</string>
     <string name="wifi_ap_unable_to_handle_new_sta" msgid="5348824313514404541">"Punto de acceso temporalmente lleno"</string>
     <string name="connected_via_carrier" msgid="7583780074526041912">"Conectado a través de %1$s"</string>
     <string name="available_via_carrier" msgid="1469036129740799053">"Disponible a través de %1$s"</string>
@@ -86,8 +84,7 @@
     <string name="bluetooth_hid_profile_summary_connected" msgid="3381760054215168689">"Conectado a dispositivo de entrada"</string>
     <string name="bluetooth_pan_user_profile_summary_connected" msgid="6436258151814414028">"Conectado para acceder a Internet"</string>
     <string name="bluetooth_pan_nap_profile_summary_connected" msgid="1322694224800769308">"Compartiendo conexión local con dispositivo"</string>
-    <!-- no translation found for bluetooth_pan_profile_summary_use_for (5736111170225304239) -->
-    <skip />
+    <string name="bluetooth_pan_profile_summary_use_for" msgid="5736111170225304239">"Usar para acceder a Internet"</string>
     <string name="bluetooth_map_profile_summary_use_for" msgid="5154200119919927434">"Usar para mapa"</string>
     <string name="bluetooth_sap_profile_summary_use_for" msgid="7085362712786907993">"Utilizar para acceso a tarjeta SIM"</string>
     <string name="bluetooth_a2dp_profile_summary_use_for" msgid="4630849022250168427">"Utilizar para audio de medio"</string>

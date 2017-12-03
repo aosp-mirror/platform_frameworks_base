@@ -33,15 +33,13 @@
     <string name="wifi_check_password_try_again" msgid="516958988102584767">"கடவுச்சொல்லைச் சரிபார்த்து, மீண்டும் முயலவும்"</string>
     <string name="wifi_not_in_range" msgid="1136191511238508967">"தொடர்பு எல்லையில் இல்லை"</string>
     <string name="wifi_no_internet_no_reconnect" msgid="5724903347310541706">"தானாக இணைக்கப்படாது"</string>
-    <!-- no translation found for wifi_no_internet (4663834955626848401) -->
-    <skip />
+    <string name="wifi_no_internet" msgid="4663834955626848401">"இண்டர்நெட் அணுகல் இல்லை"</string>
     <string name="saved_network" msgid="4352716707126620811">"<xliff:g id="NAME">%1$s</xliff:g> சேமித்தது"</string>
     <string name="connected_via_network_scorer" msgid="5713793306870815341">"%1$s மூலம் தானாக இணைக்கப்பட்டது"</string>
     <string name="connected_via_network_scorer_default" msgid="7867260222020343104">"நெட்வொர்க் மதிப்பீடு வழங்குநரால் தானாக இணைக்கப்பட்டது"</string>
     <string name="connected_via_passpoint" msgid="2826205693803088747">"%1$s வழியாக இணைக்கப்பட்டது"</string>
     <string name="available_via_passpoint" msgid="1617440946846329613">"%1$s வழியாகக் கிடைக்கிறது"</string>
-    <!-- no translation found for wifi_connected_no_internet (8202906332837777829) -->
-    <skip />
+    <string name="wifi_connected_no_internet" msgid="8202906332837777829">"இணைக்கப்பட்டுள்ளது, ஆனால் இண்டர்நெட் இல்லை"</string>
     <string name="wifi_ap_unable_to_handle_new_sta" msgid="5348824313514404541">"தற்காலிகமாக அணுகல் புள்ளி நிரம்பியுள்ளது"</string>
     <string name="connected_via_carrier" msgid="7583780074526041912">"%1$s வழியாக இணைக்கப்பட்டது"</string>
     <string name="available_via_carrier" msgid="1469036129740799053">"%1$s வழியாகக் கிடைக்கிறது"</string>
@@ -86,8 +84,7 @@
     <string name="bluetooth_hid_profile_summary_connected" msgid="3381760054215168689">"உள்ளீட்டுச் சாதனத்துடன் இணைக்கப்பட்டது"</string>
     <string name="bluetooth_pan_user_profile_summary_connected" msgid="6436258151814414028">"சாதனத்துடன் இணைந்தது"</string>
     <string name="bluetooth_pan_nap_profile_summary_connected" msgid="1322694224800769308">"சாதனத்துடன் உள்ளூர் இண்டர்நெட்டைப் பகிர்தல்"</string>
-    <!-- no translation found for bluetooth_pan_profile_summary_use_for (5736111170225304239) -->
-    <skip />
+    <string name="bluetooth_pan_profile_summary_use_for" msgid="5736111170225304239">"இண்டர்நெட்டை அணுகப் பயன்படுத்து"</string>
     <string name="bluetooth_map_profile_summary_use_for" msgid="5154200119919927434">"வரைபடத்திற்குப் பயன்படுத்து"</string>
     <string name="bluetooth_sap_profile_summary_use_for" msgid="7085362712786907993">"சிம் அணுகலுக்குப் பயன்படுத்தும்"</string>
     <string name="bluetooth_a2dp_profile_summary_use_for" msgid="4630849022250168427">"மீடியாவின் ஆடியோவிற்குப் பயன்படுத்து"</string>

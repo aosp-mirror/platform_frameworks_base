@@ -79,7 +79,7 @@
     <string name="RestrictedOnAllVoiceTitle" msgid="158800171499150681">"سرویس صوتی/اضطراری دردسترس نیست"</string>
     <string name="RestrictedStateContent" msgid="4278821484643362350">"موقتاً توسط شبکه داده دستگاه همراه در مکان شما ارائه نمی‌شود"</string>
     <string name="NetworkPreferenceSwitchTitle" msgid="4008877505368566980">"شبکه دردسترس نیست"</string>
-    <string name="NetworkPreferenceSwitchSummary" msgid="1203771446683319957">"برای بهبود دریافت، نوع شبکه انتخاب‌شده را در «تنظیمات &gt; شبکه‌ و اینترنت &gt; شبکه‌های تلفن همراه &gt; نوع شبکه ترجیحی» تغییر دهید."</string>
+    <string name="NetworkPreferenceSwitchSummary" msgid="7056776609127756440">"برای بهبود دریافت، نوع شبکه انتخاب‌شده را در «تنظیمات &gt; شبکه‌ و اینترنت &gt; شبکه‌های تلفن همراه &gt; نوع شبکه ترجیحی» تغییر دهید."</string>
     <string name="EmergencyCallWarningTitle" msgid="4790413876281901612">"‏تماس ازطریق Wi-Fi فعال است"</string>
     <string name="EmergencyCallWarningSummary" msgid="8973232888021643293">"برای انجام تماس‌های اضطراری به شبکه تلفن همراه نیاز دارید."</string>
     <string name="notification_channel_network_alert" msgid="4427736684338074967">"هشدارها"</string>
@@ -977,7 +977,7 @@
     <string name="addToDictionary" msgid="4352161534510057874">"افزودن به واژه‌نامه"</string>
     <string name="deleteText" msgid="6979668428458199034">"حذف"</string>
     <string name="inputMethod" msgid="1653630062304567879">"روش ورودی"</string>
-    <string name="editTextMenuTitle" msgid="4909135564941815494">"عملکردهای متنی"</string>
+    <string name="editTextMenuTitle" msgid="4909135564941815494">"کنش‌های متنی"</string>
     <string name="email" msgid="4560673117055050403">"رایانامه"</string>
     <string name="dial" msgid="1253998302767701559">"تماس"</string>
     <string name="map" msgid="6521159124535543457">"مکان‌یابی"</string>
@@ -1051,6 +1051,9 @@
     <string name="screen_compat_mode_hint" msgid="1064524084543304459">"‏در تنظیمات سیستم &gt;برنامه‎ها &gt; مورد بارگیری شده آن را دوباره فعال کنید."</string>
     <string name="unsupported_display_size_message" msgid="6545327290756295232">"<xliff:g id="APP_NAME">%1$s</xliff:g> از تنظیم فعلی اندازه نمایشگر پشتیبانی نمی‌کند و ممکن است رفتار غیرمنتظره‌ای داشته باشد."</string>
     <string name="unsupported_display_size_show" msgid="7969129195360353041">"همیشه نشان داده شود"</string>
+    <string name="unsupported_compile_sdk_message" msgid="4253168368781441759">"‏<xliff:g id="APP_NAME">%1$s</xliff:g> برای نسخه ناسازگار سیستم‌عامل Android ساخته شده است و ممکن است رفتاری برخلاف انتظار داشته باشد. ممکن است نسخه به‌روزی از برنامه در دسترس باشد."</string>
+    <string name="unsupported_compile_sdk_show" msgid="2681877855260970231">"همیشه نشان داده شود"</string>
+    <string name="unsupported_compile_sdk_check_update" msgid="3312723623323216101">"بررسی وجود به‌روزرسانی"</string>
     <string name="smv_application" msgid="3307209192155442829">"‏برنامه <xliff:g id="APPLICATION">%1$s</xliff:g> (پردازش <xliff:g id="PROCESS">%2$s</xliff:g>) خط‌مشی StrictMode اجرایی خود را نقض کرده است."</string>
     <string name="smv_process" msgid="5120397012047462446">"‏فرآیند <xliff:g id="PROCESS">%1$s</xliff:g> خط‌مشی StrictMode اجرای خودکار خود را نقض کرده است."</string>
     <string name="android_upgrading_title" msgid="1584192285441405746">"‏Android در حال ارتقا است..."</string>
@@ -1116,10 +1119,10 @@
     <string name="network_available_sign_in" msgid="1848877297365446605">"ورود به سیستم شبکه"</string>
     <!-- no translation found for network_available_sign_in_detailed (8000081941447976118) -->
     <skip />
-    <string name="wifi_no_internet" msgid="8451173622563841546">"‏Wi-Fi به اینترنت دسترسی ندارد"</string>
+    <string name="wifi_no_internet" msgid="8938267198124654938">"‏Wi-Fi به اینترنت دسترسی ندارد"</string>
     <string name="wifi_no_internet_detailed" msgid="8083079241212301741">"برای گزینه‌ها ضربه بزنید"</string>
     <string name="network_switch_metered" msgid="4671730921726992671">"به <xliff:g id="NETWORK_TYPE">%1$s</xliff:g> تغییر کرد"</string>
-    <string name="network_switch_metered_detail" msgid="5325661434777870353">"وقتی <xliff:g id="PREVIOUS_NETWORK">%2$s</xliff:g> دسترسی به اینترنت نداشته باشد، دستگاه از <xliff:g id="NEW_NETWORK">%1$s</xliff:g> استفاده می‌کند. ممکن است هزینه‌هایی اعمال شود."</string>
+    <string name="network_switch_metered_detail" msgid="775163331794506615">"وقتی <xliff:g id="PREVIOUS_NETWORK">%2$s</xliff:g> به اینترنت دسترسی نداشته باشد، دستگاه از <xliff:g id="NEW_NETWORK">%1$s</xliff:g> استفاده می‌کند. ممکن است هزینه‌هایی اعمال شود."</string>
     <string name="network_switch_metered_toast" msgid="5779283181685974304">"از <xliff:g id="PREVIOUS_NETWORK">%1$s</xliff:g> به <xliff:g id="NEW_NETWORK">%2$s</xliff:g> تغییر کرد"</string>
   <string-array name="network_switch_type_name">
     <item msgid="3979506840912951943">"داده تلفن همراه"</item>
@@ -1130,7 +1133,7 @@
   </string-array>
     <string name="network_switch_type_name_unknown" msgid="4552612897806660656">"نوع شبکه نامشخص"</string>
     <string name="wifi_watchdog_network_disabled" msgid="7904214231651546347">"‏اتصال به Wi-Fi ممکن نیست"</string>
-    <string name="wifi_watchdog_network_disabled_detailed" msgid="5548780776418332675">" اتصال اینترنتی ضعیفی دارد."</string>
+    <string name="wifi_watchdog_network_disabled_detailed" msgid="4917472096696322767">" اتصال اینترنتی ضعیفی دارد."</string>
     <string name="wifi_connect_alert_title" msgid="8455846016001810172">"اتصال مجاز است؟"</string>
     <string name="wifi_connect_alert_message" msgid="6451273376815958922">"‏برنامه %1$s می‌خواهد به شبکه Wifi ‏%2$s وصل شود"</string>
     <string name="wifi_connect_default_application" msgid="7143109390475484319">"برنامه"</string>
@@ -1626,7 +1629,6 @@
     <string name="managed_profile_label_badge_2" msgid="5048136430082124036">"کار دوم <xliff:g id="LABEL">%1$s</xliff:g>"</string>
     <string name="managed_profile_label_badge_3" msgid="2808305070321719040">"کار سوم <xliff:g id="LABEL">%1$s</xliff:g>"</string>
     <string name="lock_to_app_toast" msgid="6820571533009838261">"برای برداشتن پین این صفحه، دکمه‌های «برگشت» و «نمای کلی» را لمس کنید و نگه‌دارید"</string>
-    <string name="lock_to_app_toast_locked" msgid="7849470948648628704">"نمی‌توان پین این برنامه را برداشت"</string>
     <string name="lock_to_app_start" msgid="6643342070839862795">"صفحه پین شد"</string>
     <string name="lock_to_app_exit" msgid="8598219838213787430">"پین صفحه برداشته شد"</string>
     <string name="lock_to_app_unlock_pin" msgid="2552556656504331634">"درخواست کد پین قبل از برداشتن پین"</string>
@@ -1635,7 +1637,7 @@
     <string name="package_installed_device_owner" msgid="6875717669960212648">"توسط سرپرست سیستم نصب شد"</string>
     <string name="package_updated_device_owner" msgid="1847154566357862089">"توسط سرپرست سیستم به‌روزرسانی شد"</string>
     <string name="package_deleted_device_owner" msgid="2307122077550236438">"توسط سرپرست سیستم حذف شد"</string>
-    <string name="battery_saver_description" msgid="1960431123816253034">"برای کمک به بهبود عمر باتری، بهینه‌سازی باتری عملکرد دستگاهتان را کاهش می‌دهد و لرزش، سرویس‌های مبتنی بر مکان، و دسترسی به اکثر داده‌ها در پس‌زمینه را محدود می‌کند. رایانامه، پیام‌رسانی و برنامه‌های دیگری که به همگام‌سازی وابسته‌اند، تا زمانی‌که آن‌ها را باز نکنید نمی‌توانند به‌روز شوند.\n\nبهینه‌سازی باتری به‌صورت خودکار در هنگام شارژ شدن دستگاه خاموش می‌شود."</string>
+    <string name="battery_saver_description" msgid="5394663545060026162">"برای کمک به بهبود عمر باتری، بهینه‌سازی باتری عملکرد دستگاهتان را کاهش می‌دهد و لرزش، خدمات مکان و دسترسی به اکثر داده‌ها در پس‌زمینه را محدود می‌کند. رایانامه، پیام‌رسانی و برنامه‌های دیگری که به همگام‌سازی وابسته‌ هستند، تا زمانی‌که آن‌ها را باز نکنید نمی‌توانند به‌روز شوند.\n\nبهینه‌سازی باتری به‌صورت خودکار در هنگام شارژ شدن دستگاه خاموش می‌شود."</string>
     <string name="data_saver_description" msgid="6015391409098303235">"برای کمک به کاهش مصرف داده، «صرفه‌جویی داده» از ارسال و دریافت داده در پس‌زمینه از طرف بعضی برنامه‌ها جلوگیری می‌کند. برنامه‌ای که درحال‌حاضر استفاده می‌کنید می‌تواند به داده‌ها دسترسی داشته باشد اما دفعات دسترسی آن محدود است.این یعنی، برای مثال، تصاویر تا زمانی که روی آنها ضربه نزنید نشان داده نمی‌شوند."</string>
     <string name="data_saver_enable_title" msgid="4674073932722787417">"صرفه‌جویی داده روشن شود؟"</string>
     <string name="data_saver_enable_button" msgid="7147735965247211818">"روشن کردن"</string>
@@ -1782,14 +1784,10 @@
     <string name="etws_primary_default_message_test" msgid="2709597093560037455">"آزمایش پیام‌های اضطراری"</string>
     <string name="notification_reply_button_accessibility" msgid="3621714652387814344">"پاسخ"</string>
     <string name="etws_primary_default_message_others" msgid="6293148756130398971"></string>
-    <!-- no translation found for mmcc_authentication_reject (5767701075994754356) -->
-    <skip />
-    <!-- no translation found for mmcc_imsi_unknown_in_hlr (5316658473301462825) -->
-    <skip />
-    <!-- no translation found for mmcc_illegal_ms (807334478177362062) -->
-    <skip />
-    <!-- no translation found for mmcc_illegal_me (1950705155760872972) -->
-    <skip />
+    <string name="mmcc_authentication_reject" msgid="5767701075994754356">"سیم‌کارت برای عملیات صوتی مجاز نیست"</string>
+    <string name="mmcc_imsi_unknown_in_hlr" msgid="5316658473301462825">"سیم‌کارت مجوز لازم برای عملیات صوتی را ندارد"</string>
+    <string name="mmcc_illegal_ms" msgid="807334478177362062">"سیم‌کارت برای عملیات صوتی مجاز نیست"</string>
+    <string name="mmcc_illegal_me" msgid="1950705155760872972">"تلفن برای عملیات صوتی مجاز نیست"</string>
     <string name="popup_window_default_title" msgid="4874318849712115433">"پنجره بازشو"</string>
     <string name="slice_more_content" msgid="8504342889413274608">"‎+ <xliff:g id="NUMBER">%1$d</xliff:g>‎"</string>
     <string name="shortcut_restored_on_lower_version" msgid="5270675146351613828">"این میان‌بر به جدیدترین نسخه برنامه نیاز دارد"</string>

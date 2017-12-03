@@ -54,18 +54,10 @@ import java.util.concurrent.TimeUnit;
     abstract int onTransact();
 
     /**
-     * A function to invoke when a transaction times out.
-     *
-     * All instances of this class must implement this method by reporting the timeout to the
-     * client.
-     */
-    /* package */
-    abstract void onTimeout();
-
-    /**
      * A function to invoke when the transaction completes.
      *
-     * Only relevant for load, unload, enable, or disable transactions.
+     * For transactions with expected contents (such as a query), the class instance should
+     * implement the appropriate behavior (e.g. invoke onQueryResponse with an empty list).
      *
      * @param result the result of the transaction
      */

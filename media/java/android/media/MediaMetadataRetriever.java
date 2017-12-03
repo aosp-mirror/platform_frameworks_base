@@ -226,9 +226,12 @@ public class MediaMetadataRetriever
     /**
      * Call this method after setDataSource(). This method finds a
      * representative frame close to the given time position by considering
-     * the given option if possible, and returns it as a bitmap. This is
-     * useful for generating a thumbnail for an input data source or just
-     * obtain and display a frame at the given time position.
+     * the given option if possible, and returns it as a bitmap.
+     *
+     * <p>If you don't need a full-resolution
+     * frame (for example, because you need a thumbnail image), use
+     * {@link #getScaledFrameAtTime getScaledFrameAtTime()} instead of this
+     * method.</p>
      *
      * @param timeUs The time position where the frame will be retrieved.
      * When retrieving the frame at the given time position, there is no
@@ -315,10 +318,14 @@ public class MediaMetadataRetriever
     /**
      * Call this method after setDataSource(). This method finds a
      * representative frame close to the given time position if possible,
-     * and returns it as a bitmap. This is useful for generating a thumbnail
-     * for an input data source. Call this method if one does not care
+     * and returns it as a bitmap. Call this method if one does not care
      * how the frame is found as long as it is close to the given time;
      * otherwise, please call {@link #getFrameAtTime(long, int)}.
+     *
+     * <p>If you don't need a full-resolution
+     * frame (for example, because you need a thumbnail image), use
+     * {@link #getScaledFrameAtTime getScaledFrameAtTime()} instead of this
+     * method.</p>
      *
      * @param timeUs The time position where the frame will be retrieved.
      * When retrieving the frame at the given time position, there is no
@@ -339,10 +346,14 @@ public class MediaMetadataRetriever
     /**
      * Call this method after setDataSource(). This method finds a
      * representative frame at any time position if possible,
-     * and returns it as a bitmap. This is useful for generating a thumbnail
-     * for an input data source. Call this method if one does not
+     * and returns it as a bitmap. Call this method if one does not
      * care about where the frame is located; otherwise, please call
      * {@link #getFrameAtTime(long)} or {@link #getFrameAtTime(long, int)}
+     *
+     * <p>If you don't need a full-resolution
+     * frame (for example, because you need a thumbnail image), use
+     * {@link #getScaledFrameAtTime getScaledFrameAtTime()} instead of this
+     * method.</p>
      *
      * @return A Bitmap containing a representative video frame, which
      *         can be null, if such a frame cannot be retrieved.

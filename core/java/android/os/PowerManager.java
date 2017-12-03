@@ -680,6 +680,26 @@ public final class PowerManager {
      * as the user moves between applications and doesn't require a special permission.
      * </p>
      *
+     * <p>
+     * Recommended naming conventions for tags to make debugging easier:
+     * <ul>
+     * <li>use a unique prefix delimited by a colon for your app/library (e.g.
+     * gmail:mytag) to make it easier to understand where the wake locks comes
+     * from. This namespace will also avoid collision for tags inside your app
+     * coming from different libraries which will make debugging easier.
+     * <li>use constants (e.g. do not include timestamps in the tag) to make it
+     * easier for tools to aggregate similar wake locks. When collecting
+     * debugging data, the platform only monitors a finite number of tags,
+     * using constants will help tools to provide better debugging data.
+     * <li>avoid using Class#getName() or similar method since this class name
+     * can be transformed by java optimizer and obfuscator tools.
+     * <li>avoid wrapping the tag or a prefix to avoid collision with wake lock
+     * tags from the platform (e.g. *alarm*).
+     * <li>never include personnally identifiable information for privacy
+     * reasons.
+     * </ul>
+     * </p>
+     *
      * @param levelAndFlags Combination of wake lock level and flag values defining
      * the requested behavior of the WakeLock.
      * @param tag Your class name (or other tag) for debugging purposes.
@@ -1507,6 +1527,13 @@ public final class PowerManager {
          * the wake lock is being held.  This is useful in the case where a
          * service is performing work on behalf of an application so that the
          * cost of that work can be accounted to the application.
+         * </p>
+         *
+         * <p>
+         * Make sure to follow the tag naming convention when using WorkSource
+         * to make it easier for app developers to understand wake locks
+         * attributed to them. See {@link PowerManager#newWakeLock(int, String)}
+         * documentation.
          * </p>
          *
          * @param ws The work source, or null if none.

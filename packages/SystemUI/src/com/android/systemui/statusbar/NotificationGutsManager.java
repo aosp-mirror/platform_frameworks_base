@@ -37,7 +37,6 @@ import android.view.accessibility.AccessibilityManager;
 
 import com.android.internal.logging.MetricsLogger;
 import com.android.internal.logging.nano.MetricsProto;
-import com.android.internal.statusbar.IStatusBarService;
 import com.android.systemui.Dependency;
 import com.android.systemui.Dumpable;
 import com.android.systemui.Interpolators;
@@ -66,30 +65,27 @@ public class NotificationGutsManager implements Dumpable {
 
     private final MetricsLogger mMetricsLogger = Dependency.get(MetricsLogger.class);
     private final Set<String> mNonBlockablePkgs;
-    private final NotificationPresenter mPresenter;
-    // TODO: Create NotificationListContainer interface and use it instead of
-    // NotificationStackScrollLayout here
-    private final NotificationStackScrollLayout mStackScroller;
     private final Context mContext;
     private final AccessibilityManager mAccessibilityManager;
+    private final NotificationLockscreenUserManager mLockscreenUserManager;
+
     // which notification is currently being longpress-examined by the user
     private NotificationGuts mNotificationGutsExposed;
     private NotificationMenuRowPlugin.MenuItem mGutsMenuItem;
-    private final NotificationInfo.CheckSaveListener mCheckSaveListener;
-    private final OnSettingsClickListener mOnSettingsClickListener;
+    private NotificationPresenter mPresenter;
+
+    // TODO: Create NotificationListContainer interface and use it instead of
+    // NotificationStackScrollLayout here
+    private NotificationStackScrollLayout mStackScroller;
+    private NotificationInfo.CheckSaveListener mCheckSaveListener;
+    private OnSettingsClickListener mOnSettingsClickListener;
     private String mKeyToRemoveOnGutsClosed;
 
     public NotificationGutsManager(
-            NotificationPresenter presenter,
-            NotificationStackScrollLayout stackScroller,
-            NotificationInfo.CheckSaveListener checkSaveListener,
-            Context context,
-            OnSettingsClickListener onSettingsClickListener) {
-        mPresenter = presenter;
-        mStackScroller = stackScroller;
-        mCheckSaveListener = checkSaveListener;
+            NotificationLockscreenUserManager lockscreenUserManager,
+            Context context) {
+        mLockscreenUserManager = lockscreenUserManager;
         mContext = context;
-        mOnSettingsClickListener = onSettingsClickListener;
         Resources res = context.getResources();
 
         mNonBlockablePkgs = new HashSet<>();
@@ -98,6 +94,16 @@ public class NotificationGutsManager implements Dumpable {
 
         mAccessibilityManager = (AccessibilityManager)
                 mContext.getSystemService(Context.ACCESSIBILITY_SERVICE);
+    }
+
+    public void setUp(NotificationPresenter presenter,
+            NotificationStackScrollLayout stackScroller,
+            NotificationInfo.CheckSaveListener checkSaveListener,
+            OnSettingsClickListener onSettingsClickListener) {
+        mPresenter = presenter;
+        mStackScroller = stackScroller;
+        mCheckSaveListener = checkSaveListener;
+        mOnSettingsClickListener = onSettingsClickListener;
     }
 
     public String getKeyToRemoveOnGutsClosed() {
@@ -189,7 +195,7 @@ public class NotificationGutsManager implements Dumpable {
             // system user.
             NotificationInfo.OnSettingsClickListener onSettingsClick = null;
             if (!userHandle.equals(UserHandle.ALL)
-                    || mPresenter.getCurrentUserId() == UserHandle.USER_SYSTEM) {
+                    || mLockscreenUserManager.getCurrentUserId() == UserHandle.USER_SYSTEM) {
                 onSettingsClick = (View v, NotificationChannel channel, int appUid) -> {
                     mMetricsLogger.action(MetricsProto.MetricsEvent.ACTION_NOTE_INFO);
                     guts.resetFalsingCheck();
@@ -354,7 +360,8 @@ public class NotificationGutsManager implements Dumpable {
 
     @Override
     public void dump(FileDescriptor fd, PrintWriter pw, String[] args) {
-        pw.print("mKeyToRemoveOnGutsClosed: ");
+        pw.println("NotificationGutsManager state:");
+        pw.print("  mKeyToRemoveOnGutsClosed: ");
         pw.println(mKeyToRemoveOnGutsClosed);
     }
 

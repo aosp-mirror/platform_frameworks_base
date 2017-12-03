@@ -84,6 +84,9 @@ class ContextWrapper : public IAaptContext {
   }
 
   IDiagnostics* GetDiagnostics() override {
+    if (source_diag_) {
+      return source_diag_.get();
+    }
     return context_->GetDiagnostics();
   }
 
@@ -111,8 +114,13 @@ class ContextWrapper : public IAaptContext {
     min_sdk_ = min_sdk;
   }
 
+  void SetSource(const Source& source) {
+    source_diag_ = util::make_unique<SourcePathDiagnostics>(source, context_->GetDiagnostics());
+  }
+
  private:
   IAaptContext* context_;
+  std::unique_ptr<SourcePathDiagnostics> source_diag_;
 
   int min_sdk_ = -1;
 };
@@ -123,7 +131,6 @@ MultiApkGenerator::MultiApkGenerator(LoadedApk* apk, IAaptContext* context)
 
 bool MultiApkGenerator::FromBaseApk(const MultiApkGeneratorOptions& options) {
   // TODO(safarmer): Handle APK version codes for the generated APKs.
-  IDiagnostics* diag = context_->GetDiagnostics();
   const PostProcessingConfiguration& config = options.config;
 
   const std::string& apk_name = file::GetFilename(apk_->GetSource().path).to_string();
@@ -132,55 +139,60 @@ bool MultiApkGenerator::FromBaseApk(const MultiApkGeneratorOptions& options) {
 
   // For now, just write out the stripped APK since ABI splitting doesn't modify anything else.
   for (const Artifact& artifact : config.artifacts) {
+    SourcePathDiagnostics diag{{apk_name}, context_->GetDiagnostics()};
+
     FilterChain filters;
 
     if (!artifact.name && !config.artifact_format) {
-      diag->Error(
+      diag.Error(
           DiagMessage() << "Artifact does not have a name and no global name template defined");
       return false;
     }
 
-    Maybe<std::string> artifact_name =
-        (artifact.name) ? artifact.Name(apk_name, diag)
-                        : artifact.ToArtifactName(config.artifact_format.value(), apk_name, diag);
+    Maybe<std::string> maybe_artifact_name =
+        (artifact.name) ? artifact.Name(apk_name, &diag)
+                        : artifact.ToArtifactName(config.artifact_format.value(), apk_name, &diag);
 
-    if (!artifact_name) {
-      diag->Error(DiagMessage() << "Could not determine split APK artifact name");
+    if (!maybe_artifact_name) {
+      diag.Error(DiagMessage() << "Could not determine split APK artifact name");
       return false;
     }
 
+    const std::string& artifact_name = maybe_artifact_name.value();
+
+    ContextWrapper wrapped_context{context_};
+    wrapped_context.SetSource({artifact_name});
+
     std::unique_ptr<ResourceTable> table =
-        FilterTable(artifact, config, *apk_->GetResourceTable(), &filters);
+        FilterTable(artifact, config, *apk_->GetResourceTable(), &wrapped_context, &filters);
     if (!table) {
       return false;
     }
 
     std::unique_ptr<XmlResource> manifest;
-    if (!UpdateManifest(artifact, config, &manifest, diag)) {
-      diag->Error(DiagMessage() << "could not update AndroidManifest.xml for "
-                                << artifact_name.value());
+    if (!UpdateManifest(artifact, config, &manifest, &diag)) {
+      diag.Error(DiagMessage() << "could not update AndroidManifest.xml for output artifact");
       return false;
     }
 
     std::string out = options.out_dir;
     if (!file::mkdirs(out)) {
-      context_->GetDiagnostics()->Warn(DiagMessage() << "could not create out dir: " << out);
+      diag.Warn(DiagMessage() << "could not create out dir: " << out);
     }
-    file::AppendPath(&out, artifact_name.value());
+    file::AppendPath(&out, artifact_name);
 
     if (context_->IsVerbose()) {
-      context_->GetDiagnostics()->Note(DiagMessage() << "Generating split: " << out);
+      diag.Note(DiagMessage() << "Generating split: " << out);
     }
 
-    std::unique_ptr<IArchiveWriter> writer =
-        CreateZipFileArchiveWriter(context_->GetDiagnostics(), out);
+    std::unique_ptr<IArchiveWriter> writer = CreateZipFileArchiveWriter(&diag, out);
 
     if (context_->IsVerbose()) {
-      diag->Note(DiagMessage() << "Writing output: " << out);
+      diag.Note(DiagMessage() << "Writing output: " << out);
     }
 
-    if (!apk_->WriteToArchive(context_, table.get(), options.table_flattener_options, &filters,
-                              writer.get(), manifest.get())) {
+    if (!apk_->WriteToArchive(&wrapped_context, table.get(), options.table_flattener_options,
+                              &filters, writer.get(), manifest.get())) {
       return false;
     }
   }
@@ -191,10 +203,10 @@ bool MultiApkGenerator::FromBaseApk(const MultiApkGeneratorOptions& options) {
 std::unique_ptr<ResourceTable> MultiApkGenerator::FilterTable(
     const configuration::Artifact& artifact,
     const configuration::PostProcessingConfiguration& config, const ResourceTable& old_table,
-    FilterChain* filters) {
+    IAaptContext* context, FilterChain* filters) {
   TableSplitterOptions splits;
   AxisConfigFilter axis_filter;
-  ContextWrapper wrappedContext{context_};
+  ContextWrapper wrapped_context{context};
 
   if (artifact.abi_group) {
     const std::string& group_name = artifact.abi_group.value();
@@ -202,8 +214,8 @@ std::unique_ptr<ResourceTable> MultiApkGenerator::FilterTable(
     auto group = config.abi_groups.find(group_name);
     // TODO: Remove validation when configuration parser ensures referential integrity.
     if (group == config.abi_groups.end()) {
-      context_->GetDiagnostics()->Error(DiagMessage() << "could not find referenced ABI group '"
-                                                      << group_name << "'");
+      context->GetDiagnostics()->Error(DiagMessage() << "could not find referenced ABI group '"
+                                                     << group_name << "'");
       return {};
     }
     filters->AddFilter(AbiFilter::FromAbiList(group->second));
@@ -215,13 +227,13 @@ std::unique_ptr<ResourceTable> MultiApkGenerator::FilterTable(
     auto group = config.screen_density_groups.find(group_name);
     // TODO: Remove validation when configuration parser ensures referential integrity.
     if (group == config.screen_density_groups.end()) {
-      context_->GetDiagnostics()->Error(DiagMessage() << "could not find referenced group '"
-                                                      << group_name << "'");
+      context->GetDiagnostics()->Error(DiagMessage()
+                                       << "could not find referenced group '" << group_name << "'");
       return {};
     }
 
     const std::vector<ConfigDescription>& densities = group->second;
-    for(const auto& density_config : densities) {
+    for (const auto& density_config : densities) {
       splits.preferred_densities.push_back(density_config.density);
     }
   }
@@ -231,8 +243,8 @@ std::unique_ptr<ResourceTable> MultiApkGenerator::FilterTable(
     auto group = config.locale_groups.find(group_name);
     // TODO: Remove validation when configuration parser ensures referential integrity.
     if (group == config.locale_groups.end()) {
-      context_->GetDiagnostics()->Error(DiagMessage() << "could not find referenced group '"
-                                                      << group_name << "'");
+      context->GetDiagnostics()->Error(DiagMessage()
+                                       << "could not find referenced group '" << group_name << "'");
       return {};
     }
 
@@ -243,16 +255,16 @@ std::unique_ptr<ResourceTable> MultiApkGenerator::FilterTable(
     splits.config_filter = &axis_filter;
   }
 
-  Maybe<AndroidSdk> sdk = GetAndroidSdk(artifact, config, context_->GetDiagnostics());
+  Maybe<AndroidSdk> sdk = GetAndroidSdk(artifact, config, context->GetDiagnostics());
   if (sdk && sdk.value().min_sdk_version) {
-    wrappedContext.SetMinSdkVersion(sdk.value().min_sdk_version.value());
+    wrapped_context.SetMinSdkVersion(sdk.value().min_sdk_version.value());
   }
 
   std::unique_ptr<ResourceTable> table = old_table.Clone();
 
   VersionCollapser collapser;
-  if (!collapser.Consume(&wrappedContext, table.get())) {
-    context_->GetDiagnostics()->Error(DiagMessage() << "Failed to strip versioned resources");
+  if (!collapser.Consume(&wrapped_context, table.get())) {
+    context->GetDiagnostics()->Error(DiagMessage() << "Failed to strip versioned resources");
     return {};
   }
 

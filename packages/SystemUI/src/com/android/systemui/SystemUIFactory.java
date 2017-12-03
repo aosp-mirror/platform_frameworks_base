@@ -27,6 +27,8 @@ import com.android.keyguard.ViewMediatorCallback;
 import com.android.systemui.Dependency.DependencyProvider;
 import com.android.systemui.keyguard.DismissCallbackRegistry;
 import com.android.systemui.statusbar.KeyguardIndicationController;
+import com.android.systemui.statusbar.NotificationGutsManager;
+import com.android.systemui.statusbar.NotificationLockscreenUserManager;
 import com.android.systemui.statusbar.ScrimView;
 import com.android.systemui.statusbar.phone.DozeParameters;
 import com.android.systemui.statusbar.phone.KeyguardBouncer;
@@ -39,7 +41,6 @@ import com.android.systemui.qs.QSTileHost;
 import com.android.systemui.statusbar.phone.ScrimController;
 import com.android.systemui.statusbar.phone.StatusBarIconController;
 import com.android.systemui.statusbar.phone.StatusBarKeyguardViewManager;
-import com.android.systemui.volume.VolumeDialogControllerImpl;
 
 import java.util.function.Consumer;
 
@@ -113,5 +114,10 @@ public class SystemUIFactory {
     }
 
     public void injectDependencies(ArrayMap<Object, DependencyProvider> providers,
-            Context context) { }
+            Context context) {
+        providers.put(NotificationLockscreenUserManager.class,
+                () -> new NotificationLockscreenUserManager(context));
+        providers.put(NotificationGutsManager.class, () -> new NotificationGutsManager(
+                Dependency.get(NotificationLockscreenUserManager.class), context));
+    }
 }

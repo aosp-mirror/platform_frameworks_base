@@ -80,7 +80,7 @@
     <string name="RestrictedOnAllVoiceTitle" msgid="158800171499150681">"Fără servicii vocale/de urgență"</string>
     <string name="RestrictedStateContent" msgid="4278821484643362350">"Momentan nu este oferit de rețeaua mobilă în locația dvs."</string>
     <string name="NetworkPreferenceSwitchTitle" msgid="4008877505368566980">"Nu se poate stabili conexiunea la rețea"</string>
-    <string name="NetworkPreferenceSwitchSummary" msgid="1203771446683319957">"Pentru o recepție mai bună, încercați să schimbați tipul selectat în Setări &gt; Rețea și internet &gt; Rețele mobile &gt; Tip preferat de rețea."</string>
+    <string name="NetworkPreferenceSwitchSummary" msgid="7056776609127756440">"Pentru o recepție mai bună, încercați să schimbați tipul selectat în Setări &gt; Rețea și internet &gt; Rețele mobile &gt; Tip preferat de rețea."</string>
     <string name="EmergencyCallWarningTitle" msgid="4790413876281901612">"Apelarea prin Wi-Fi este activă"</string>
     <string name="EmergencyCallWarningSummary" msgid="8973232888021643293">"Apelurile de urgență necesită o rețea mobilă."</string>
     <string name="notification_channel_network_alert" msgid="4427736684338074967">"Alerte"</string>
@@ -1071,6 +1071,9 @@
     <string name="screen_compat_mode_hint" msgid="1064524084543304459">"Reactivați acest mod din Setări de sistem &gt; Aplicații &gt; Descărcate."</string>
     <string name="unsupported_display_size_message" msgid="6545327290756295232">"<xliff:g id="APP_NAME">%1$s</xliff:g> nu acceptă setarea actuală pentru Dimensiunea afișării și este posibil să aibă un comportament neașteptat."</string>
     <string name="unsupported_display_size_show" msgid="7969129195360353041">"Afișează întotdeauna"</string>
+    <string name="unsupported_compile_sdk_message" msgid="4253168368781441759">"<xliff:g id="APP_NAME">%1$s</xliff:g> a fost concepută pentru o versiune incompatibilă de sistem de operare Android și este posibil să se comporte în mod neprevăzut. Poate fi disponibilă o versiune actualizată a aplicației."</string>
+    <string name="unsupported_compile_sdk_show" msgid="2681877855260970231">"Afișați întotdeauna"</string>
+    <string name="unsupported_compile_sdk_check_update" msgid="3312723623323216101">"Căutați actualizări"</string>
     <string name="smv_application" msgid="3307209192155442829">"Aplicația <xliff:g id="APPLICATION">%1$s</xliff:g> (procesul <xliff:g id="PROCESS">%2$s</xliff:g>) a încălcat propria politică StrictMode."</string>
     <string name="smv_process" msgid="5120397012047462446">"Procesul <xliff:g id="PROCESS">%1$s</xliff:g> a încălcat propria politică StrictMode."</string>
     <string name="android_upgrading_title" msgid="1584192285441405746">"Android trece la o versiune superioară..."</string>
@@ -1138,10 +1141,10 @@
     <string name="network_available_sign_in" msgid="1848877297365446605">"Conectați-vă la rețea"</string>
     <!-- no translation found for network_available_sign_in_detailed (8000081941447976118) -->
     <skip />
-    <string name="wifi_no_internet" msgid="8451173622563841546">"Rețeaua Wi-Fi nu are acces la internet"</string>
+    <string name="wifi_no_internet" msgid="8938267198124654938">"Rețeaua Wi-Fi nu are acces la internet"</string>
     <string name="wifi_no_internet_detailed" msgid="8083079241212301741">"Atingeți pentru opțiuni"</string>
     <string name="network_switch_metered" msgid="4671730921726992671">"S-a comutat la <xliff:g id="NETWORK_TYPE">%1$s</xliff:g>"</string>
-    <string name="network_switch_metered_detail" msgid="5325661434777870353">"Dispozitivul folosește <xliff:g id="NEW_NETWORK">%1$s</xliff:g> când <xliff:g id="PREVIOUS_NETWORK">%2$s</xliff:g> nu are acces la internet. Se pot aplica taxe."</string>
+    <string name="network_switch_metered_detail" msgid="775163331794506615">"Dispozitivul folosește <xliff:g id="NEW_NETWORK">%1$s</xliff:g> când <xliff:g id="PREVIOUS_NETWORK">%2$s</xliff:g> nu are acces la internet. Se pot aplica taxe."</string>
     <string name="network_switch_metered_toast" msgid="5779283181685974304">"S-a comutat de la <xliff:g id="PREVIOUS_NETWORK">%1$s</xliff:g> la <xliff:g id="NEW_NETWORK">%2$s</xliff:g>"</string>
   <string-array name="network_switch_type_name">
     <item msgid="3979506840912951943">"date mobile"</item>
@@ -1152,7 +1155,7 @@
   </string-array>
     <string name="network_switch_type_name_unknown" msgid="4552612897806660656">"un tip de rețea necunoscut"</string>
     <string name="wifi_watchdog_network_disabled" msgid="7904214231651546347">"Nu se poate conecta la Wi-Fi"</string>
-    <string name="wifi_watchdog_network_disabled_detailed" msgid="5548780776418332675">" are o conexiune la internet slabă."</string>
+    <string name="wifi_watchdog_network_disabled_detailed" msgid="4917472096696322767">" are o conexiune la internet slabă."</string>
     <string name="wifi_connect_alert_title" msgid="8455846016001810172">"Permiteți conectarea?"</string>
     <string name="wifi_connect_alert_message" msgid="6451273376815958922">"Aplicația %1$s dorește să se conecteze la rețeaua Wi-Fi %2$s"</string>
     <string name="wifi_connect_default_application" msgid="7143109390475484319">"O aplicație"</string>
@@ -1659,7 +1662,7 @@
     <string name="package_installed_device_owner" msgid="6875717669960212648">"Instalat de administratorul dvs."</string>
     <string name="package_updated_device_owner" msgid="1847154566357862089">"Actualizat de administratorul dvs."</string>
     <string name="package_deleted_device_owner" msgid="2307122077550236438">"Șters de administratorul dvs."</string>
-    <string name="battery_saver_description" msgid="1960431123816253034">"Pentru a îmbunătăți autonomia bateriei, funcția de economisire a energiei reduce performanțele dispozitivului și limitează vibrațiile, serviciile de localizare și majoritatea datelor de fundal. Este posibil ca e-mailurile, mesageria și alte aplicații care depind de sincronizare să nu se actualizeze dacă nu le deschideți.\n\nFuncția de economisire a energiei se dezactivează automat când dispozitivul se încarcă."</string>
+    <string name="battery_saver_description" msgid="5394663545060026162">"Pentru a îmbunătăți autonomia bateriei, economisirea bateriei reduce performanțele dispozitivului și limitează vibrațiile, serviciile de localizare și majoritatea datelor de fundal. Este posibil ca e-mailurile, mesageria și alte aplicații care depind de sincronizare să nu se actualizeze dacă nu le deschideți.\n\nEconomisirea bateriei se dezactivează automat când dispozitivul se încarcă."</string>
     <string name="data_saver_description" msgid="6015391409098303235">"Pentru a contribui la reducerea utilizării de date, Economizorul de date împiedică unele aplicații să trimită sau să primească date în fundal. O aplicație pe care o folosiți poate accesa datele, însă mai rar. Aceasta poate însemna, de exemplu, că imaginile se afișează numai după ce le atingeți."</string>
     <string name="data_saver_enable_title" msgid="4674073932722787417">"Activați Economizorul de date?"</string>
     <string name="data_saver_enable_button" msgid="7147735965247211818">"Activați"</string>

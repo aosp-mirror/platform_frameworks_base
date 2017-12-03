@@ -4753,5 +4753,8 @@
     <string name="shortcut_restore_unknown_issue">Couldn\u2019t restore shortcut</string>
 
     <!--Battery saver warning. STOPSHIP: Remove it eventually. -->
-    <string name="battery_saver_warning" translatable="false">Battery saver activated.\n\nSee go/extreme-battery-saver.\n\nThis contains aggressive experimental changes for P and may affect background app behavior.\n</string>
+    <string name="battery_saver_warning" translatable="false">\"Extreme\" battery saver activated.\n\nSee the details at: go/extreme-battery-saver\n\nEBS aggressively throttles background apps and changes screen-off behavior.\n</string>
+
+    <!--Battery saver warning. STOPSHIP: Remove it eventually. -->
+    <string name="battery_saver_warning_title" translatable="false">Extreme battery saver</string>
 </resources>

@@ -18,6 +18,7 @@ package com.android.internal.app;
 
 import com.android.internal.R;
 import com.android.internal.app.ResolverActivity.ResolvedComponentInfo;
+import com.android.internal.widget.ResolverDrawerLayout;
 
 import org.junit.Before;
 import org.junit.Rule;
@@ -33,6 +34,8 @@ import android.os.UserHandle;
 import android.support.test.InstrumentationRegistry;
 import android.support.test.rule.ActivityTestRule;
 import android.support.test.runner.AndroidJUnit4;
+import android.view.View;
+import android.widget.RelativeLayout;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -97,6 +100,34 @@ public class ResolverActivityTest {
                 .perform(click());
         waitForIdle();
         assertThat(chosen[0], is(toChoose));
+    }
+
+    @Test
+    public void setShowAtTopToTrue() throws Exception {
+        Intent sendIntent = createSendImageIntent();
+        List<ResolvedComponentInfo> resolvedComponentInfos = createResolvedComponentsForTest(2);
+
+        when(sOverrides.resolverListController.getResolversForIntent(Mockito.anyBoolean(),
+                Mockito.anyBoolean(),
+                Mockito.isA(List.class))).thenReturn(resolvedComponentInfos);
+        waitForIdle();
+
+        final ResolverWrapperActivity activity = mActivityRule.launchActivity(sendIntent);
+        final View resolverList = activity.findViewById(R.id.resolver_list);
+        final RelativeLayout profileView =
+            (RelativeLayout) activity.findViewById(R.id.profile_button).getParent();
+        assertThat("Drawer should show at bottom by default",
+                profileView.getBottom() == resolverList.getTop() && profileView.getTop() > 0);
+
+        activity.runOnUiThread(() -> {
+            ResolverDrawerLayout layout = (ResolverDrawerLayout)
+                    activity.findViewById(
+                            R.id.contentPanel);
+            layout.setShowAtTop(true);
+        });
+        waitForIdle();
+        assertThat("Drawer should show at top with new attribute",
+            profileView.getBottom() == resolverList.getTop() && profileView.getTop() == 0);
     }
 
     @Test

@@ -33,6 +33,12 @@ constexpr static const char kApkResourceTablePath[] = "resources.arsc";
 constexpr static const char kProtoResourceTablePath[] = "resources.pb";
 constexpr static const char kAndroidManifestPath[] = "AndroidManifest.xml";
 
+enum ApkFormat {
+  kUnknown,
+  kBinary,
+  kProto,
+};
+
 // Info about an APK loaded in memory.
 class LoadedApk {
  public:
@@ -104,6 +110,8 @@ class LoadedApk {
   std::unique_ptr<io::IFileCollection> apk_;
   std::unique_ptr<ResourceTable> table_;
   std::unique_ptr<xml::XmlResource> manifest_;
+
+  static ApkFormat DetermineApkFormat(io::IFileCollection* apk);
 };
 
 }  // namespace aapt

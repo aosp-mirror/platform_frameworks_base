@@ -741,7 +741,7 @@ public final class AudioAttributes implements Parcelable {
         /**
          * @hide
          * Same as {@link #setCapturePreset(int)} but authorizes the use of HOTWORD,
-         * REMOTE_SUBMIX and RADIO_TUNER.
+         * REMOTE_SUBMIX, RADIO_TUNER, VOICE_DOWNLINK, VOICE_UPLINK and VOICE_CALL.
          * @param preset
          * @return the same Builder instance.
          */
@@ -749,7 +749,10 @@ public final class AudioAttributes implements Parcelable {
         public Builder setInternalCapturePreset(int preset) {
             if ((preset == MediaRecorder.AudioSource.HOTWORD)
                     || (preset == MediaRecorder.AudioSource.REMOTE_SUBMIX)
-                    || (preset == MediaRecorder.AudioSource.RADIO_TUNER)) {
+                    || (preset == MediaRecorder.AudioSource.RADIO_TUNER)
+                    || (preset == MediaRecorder.AudioSource.VOICE_DOWNLINK)
+                    || (preset == MediaRecorder.AudioSource.VOICE_UPLINK)
+                    || (preset == MediaRecorder.AudioSource.VOICE_CALL)) {
                 mSource = preset;
             } else {
                 setCapturePreset(preset);

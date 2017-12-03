@@ -34,14 +34,14 @@
     <string name="status_bar_latest_events_title" msgid="6594767438577593172">"Pemberitahuan"</string>
     <string name="battery_low_title" msgid="6456385927409742437">"Bateri lemah"</string>
     <string name="battery_low_percent_format" msgid="2900940511201380775">"<xliff:g id="PERCENTAGE">%s</xliff:g> yang tinggal"</string>
-    <string name="battery_low_percent_format_saver_started" msgid="6859235584035338833">"<xliff:g id="PERCENTAGE">%s</xliff:g> yang tinggal. Penjimat bateri dihidupkan."</string>
+    <string name="battery_low_percent_format_saver_started" msgid="7879389868952879166">"Tinggal <xliff:g id="PERCENTAGE">%s</xliff:g>. Penjimat Bateri dihidupkan."</string>
     <string name="invalid_charger" msgid="4549105996740522523">"Pengecasan USB tidak disokong.\nGunakan hanya pengecas yang dibekalkan."</string>
     <string name="invalid_charger_title" msgid="3515740382572798460">"Pengecasan USB tidak disokong."</string>
     <string name="invalid_charger_text" msgid="5474997287953892710">"Gunakan pengecas yang dibekalkan sahaja."</string>
     <string name="battery_low_why" msgid="4553600287639198111">"Tetapan"</string>
-    <string name="battery_saver_confirmation_title" msgid="5299585433050361634">"Hidupkan penjimat bateri?"</string>
+    <string name="battery_saver_confirmation_title" msgid="2052100465684817154">"Hidupkan Penjimat Bateri?"</string>
     <string name="battery_saver_confirmation_ok" msgid="7507968430447930257">"Hidupkan"</string>
-    <string name="battery_saver_start_action" msgid="5576697451677486320">"Hidupkan penjimat bateri"</string>
+    <string name="battery_saver_start_action" msgid="8187820911065797519">"Hidupkan Penjimat Bateri"</string>
     <string name="status_bar_settings_settings_button" msgid="3023889916699270224">"Tetapan"</string>
     <string name="status_bar_settings_wifi_button" msgid="1733928151698311923">"Wi-Fi"</string>
     <string name="status_bar_settings_auto_rotation" msgid="3790482541357798421">"Autoputar skrin"</string>
@@ -51,15 +51,15 @@
     <string name="bluetooth_tethered" msgid="7094101612161133267">"Bluetooth ditambatkan"</string>
     <string name="status_bar_input_method_settings_configure_input_methods" msgid="3504292471512317827">"Sediakan kaedah input"</string>
     <string name="status_bar_use_physical_keyboard" msgid="7551903084416057810">"Papan kekunci fizikal"</string>
-    <string name="usb_device_permission_prompt" msgid="834698001271562057">"Benarkan aplikasi <xliff:g id="APPLICATION">%1$s</xliff:g> mengakses peranti USB?"</string>
-    <string name="usb_accessory_permission_prompt" msgid="5171775411178865750">"Benarkan aplikasi <xliff:g id="APPLICATION">%1$s</xliff:g> mengakses aksesori USB?"</string>
-    <string name="usb_device_confirm_prompt" msgid="5161205258635253206">"Buka <xliff:g id="ACTIVITY">%1$s</xliff:g> apabila peranti USB ini disambungkan?"</string>
-    <string name="usb_accessory_confirm_prompt" msgid="3808984931830229888">"Buka <xliff:g id="ACTIVITY">%1$s</xliff:g> apabila aksesori USB ini disambungkan?"</string>
+    <string name="usb_device_permission_prompt" msgid="1825685909587559679">"Benarkan <xliff:g id="APPLICATION">%1$s</xliff:g> mengakses <xliff:g id="USB_DEVICE">%2$s</xliff:g>?"</string>
+    <string name="usb_accessory_permission_prompt" msgid="2465531696941369047">"Benarkan <xliff:g id="APPLICATION">%1$s</xliff:g> mengakses <xliff:g id="USB_ACCESSORY">%2$s</xliff:g>?"</string>
+    <string name="usb_device_confirm_prompt" msgid="7440562274256843905">"Buka <xliff:g id="APPLICATION">%1$s</xliff:g> untuk mengendalikan <xliff:g id="USB_DEVICE">%2$s</xliff:g>?"</string>
+    <string name="usb_accessory_confirm_prompt" msgid="4333670517539993561">"Buka <xliff:g id="APPLICATION">%1$s</xliff:g> untuk mengendalikan <xliff:g id="USB_ACCESSORY">%2$s</xliff:g>?"</string>
     <string name="usb_accessory_uri_prompt" msgid="513450621413733343">"Tiada apl yg dipsg bfungsi dgn aksesori USB ini. Ketahui lg ttg aksesori ini di <xliff:g id="URL">%1$s</xliff:g>"</string>
     <string name="title_usb_accessory" msgid="4966265263465181372">"Aksesori USB"</string>
     <string name="label_view" msgid="6304565553218192990">"Lihat"</string>
-    <string name="always_use_device" msgid="1450287437017315906">"Gunakan secara lalai untuk peranti USB ini"</string>
-    <string name="always_use_accessory" msgid="1210954576979621596">"Gunakan secara lalai untuk aksesori USB ini"</string>
+    <string name="always_use_device" msgid="4015357883336738417">"Sentiasa buka <xliff:g id="APPLICATION">%1$s</xliff:g> apabila <xliff:g id="USB_DEVICE">%2$s</xliff:g> disambungkan"</string>
+    <string name="always_use_accessory" msgid="3257892669444535154">"Sentiasa buka <xliff:g id="APPLICATION">%1$s</xliff:g> apabila <xliff:g id="USB_ACCESSORY">%2$s</xliff:g> disambungkan"</string>
     <string name="usb_debugging_title" msgid="4513918393387141949">"Benarkan penyahpepijatan USB?"</string>
     <string name="usb_debugging_message" msgid="2220143855912376496">"Cap jari kekunci RSA komputer ialah:\n<xliff:g id="FINGERPRINT">%1$s</xliff:g>"</string>
     <string name="usb_debugging_always" msgid="303335496705863070">"Sentiasa benarkan komputer ini"</string>
@@ -243,8 +243,6 @@
     <string name="data_usage_disabled_dialog_title" msgid="3932437232199671967">"Data dijeda"</string>
     <string name="data_usage_disabled_dialog" msgid="4919541636934603816">"Had data yang anda tetapkan telah dicapai. Anda tidak lagi menggunakan data mudah alih.\n\nJika anda menyambung semula, caj mungkin digunakan untuk penggunaan data."</string>
     <string name="data_usage_disabled_dialog_enable" msgid="1412395410306390593">"Sambung semula"</string>
-    <string name="status_bar_settings_signal_meter_disconnected" msgid="1940231521274147771">"Tiada smbg Internet"</string>
-    <string name="status_bar_settings_signal_meter_wifi_nossid" msgid="6557486452774597820">"Wi-Fi disambungkan"</string>
     <string name="gps_notification_searching_text" msgid="8574247005642736060">"Mencari GPS"</string>
     <string name="gps_notification_found_text" msgid="4619274244146446464">"Lokasi ditetapkan oleh GPS"</string>
     <string name="accessibility_location_active" msgid="2427290146138169014">"Permintaan lokasi aktif"</string>
@@ -401,9 +399,9 @@
     <string name="user_remove_user_title" msgid="4681256956076895559">"Alih keluar pengguna?"</string>
     <string name="user_remove_user_message" msgid="1453218013959498039">"Semua apl dan data pengguna ini akan dipadamkan."</string>
     <string name="user_remove_user_remove" msgid="7479275741742178297">"Alih keluar"</string>
-    <string name="battery_saver_notification_title" msgid="237918726750955859">"Penjimat bateri dihidupkan"</string>
+    <string name="battery_saver_notification_title" msgid="8614079794522291840">"Penjimat Bateri dihidupkan"</string>
     <string name="battery_saver_notification_text" msgid="820318788126672692">"Mengurangkan prestasi dan data latar belakang"</string>
-    <string name="battery_saver_notification_action_text" msgid="109158658238110382">"Matikan penjimat bateri"</string>
+    <string name="battery_saver_notification_action_text" msgid="132118784269455533">"Matikan Penjimat Bateri"</string>
     <string name="media_projection_dialog_text" msgid="3071431025448218928">"<xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g> akan mula mengabadikan semua yang dipaparkan pada skrin anda.."</string>
     <string name="media_projection_remember_text" msgid="3103510882172746752">"Jangan tunjukkan lagi"</string>
     <string name="clear_all_notifications_text" msgid="814192889771462828">"Kosongkan semua"</string>
@@ -582,8 +580,8 @@
       <item quantity="one">%d minit</item>
     </plurals>
     <string name="battery_panel_title" msgid="7944156115535366613">"Penggunaan bateri"</string>
-    <string name="battery_detail_charging_summary" msgid="4055327085770378335">"Penjimat bateri tidak tersedia semasa mengecas"</string>
-    <string name="battery_detail_switch_title" msgid="8763441006881907058">"Penjimat bateri"</string>
+    <string name="battery_detail_charging_summary" msgid="1279095653533044008">"Penjimat Bateri tidak tersedia semasa mengecas"</string>
+    <string name="battery_detail_switch_title" msgid="6285872470260795421">"Penjimat Bateri"</string>
     <string name="battery_detail_switch_summary" msgid="9049111149407626804">"Mengurangkan prestasi dan data latar belakang"</string>
     <string name="keyboard_key_button_template" msgid="6230056639734377300">"Butang <xliff:g id="NAME">%1$s</xliff:g>"</string>
     <string name="keyboard_key_home" msgid="2243500072071305073">"Skrin Utama"</string>

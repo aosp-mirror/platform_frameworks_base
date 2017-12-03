@@ -7,7 +7,7 @@ LOCAL_PACKAGE_NAME := OverlayTest
 
 LOCAL_DEX_PREOPT := false
 
-LOCAL_JAVA_LIBRARIES += legacy-test
+LOCAL_JAVA_LIBRARIES += android.test.base
 
 LOCAL_MODULE_PATH := $(TARGET_OUT)/app
 

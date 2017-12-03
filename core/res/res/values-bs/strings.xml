@@ -80,7 +80,7 @@
     <string name="RestrictedOnAllVoiceTitle" msgid="158800171499150681">"Nema govornih/hitnih usluga"</string>
     <string name="RestrictedStateContent" msgid="4278821484643362350">"Trenutno nije u ponudi mobilne mreže na vašoj lokaciji"</string>
     <string name="NetworkPreferenceSwitchTitle" msgid="4008877505368566980">"Nije moguće dosegnuti mrežu"</string>
-    <string name="NetworkPreferenceSwitchSummary" msgid="1203771446683319957">"Da poboljšate prijem, pokušajte promijeniti odabranu vrstu u meniju Postavke &lt; Mreža i internet &lt; Mobilne mreže &lt; Preferirana vrsta mreže."</string>
+    <string name="NetworkPreferenceSwitchSummary" msgid="7056776609127756440">"Da poboljšate prijem, pokušajte promijeniti odabrani tip u meniju Postavke &gt; Mreža i internet &gt; Mobilne mreže &gt; Preferirani tip mreže."</string>
     <string name="EmergencyCallWarningTitle" msgid="4790413876281901612">"Aktivno je Wi‑Fi pozivanje"</string>
     <string name="EmergencyCallWarningSummary" msgid="8973232888021643293">"Za hitne pozive potrebna je mreža"</string>
     <string name="notification_channel_network_alert" msgid="4427736684338074967">"Upozorenja"</string>
@@ -364,13 +364,13 @@
     <string name="permdesc_broadcastSticky" product="tv" msgid="6839285697565389467">"Dozvoljava aplikaciji slanje ljepljivih informacija koje ostaju nakon prestanka emitiranja. Pretjeranom upotrebom može se usporiti ili destabilizirati rad TV-a zbog korištenja previše memorije."</string>
     <string name="permdesc_broadcastSticky" product="default" msgid="2825803764232445091">"Omogućava aplikaciji slanje ljepljivih informacija koje ostaju nakon prestanka emitiranja. Njihova pretjerana upotreba može usporiti ili destabilizirati rad telefona jer troši previše memorije."</string>
     <string name="permlab_readContacts" msgid="8348481131899886131">"čitanje vaših kontakata"</string>
-    <string name="permdesc_readContacts" product="tablet" msgid="5294866856941149639">"Omogućava aplikaciji čitanje podataka o kontaktima koji su pohranjeni na vašem tabletu, uključujući učestalost vaših poziva, slanja e-pošte ili nekog drugog vida komunikacije sa određenim pojedincima. Ova dozvola omogućava aplikacijama da pohrane podatke o vašim kontaktima tako da ih zlonamjerne aplikacije mogu podijeliti bez vašeg znanja."</string>
-    <string name="permdesc_readContacts" product="tv" msgid="1839238344654834087">"Dozvoljava aplikaciji da čita podatke o vašim kontaktima pohranjenim na TV-u, uključujući učestalost poziva, slanja e-pošte ili komuniciranja na bilo koji način s određenim osobama. Ovom dozvolom aplikacijama se omogućava da sačuvaju podatke o kontaktima, a zlonamjerne aplikacije mogu bez vašeg znanja podijeliti ove podatke."</string>
-    <string name="permdesc_readContacts" product="default" msgid="8440654152457300662">"Omogućava aplikaciji čitanje podataka o kontaktima koji su pohranjeni na vašem telefonu, uključujući učestalost vaših poziva, slanja e-pošte ili nekog drugog vida komunikacije sa određenim pojedincima. Ova dozvola omogućava aplikacijama da pohrane podatke o vašim kontaktima tako da ih zlonamjerne aplikacije mogu podijeliti bez vašeg znanja."</string>
+    <string name="permdesc_readContacts" product="tablet" msgid="5294866856941149639">"Omogućava aplikaciji čitanje podataka o kontaktima koji su pohranjeni na vašem tabletu, uključujući učestalost vaših poziva, slanja e-pošte ili nekog drugog vida komunikacije sa određenim pojedincima. Ovo odobrenje omogućava aplikacijama da pohrane podatke o vašim kontaktima tako da ih zlonamjerne aplikacije mogu podijeliti bez vašeg znanja."</string>
+    <string name="permdesc_readContacts" product="tv" msgid="1839238344654834087">"Dozvoljava aplikaciji da čita podatke o vašim kontaktima pohranjenim na TV-u, uključujući učestalost poziva, slanja e-pošte ili komuniciranja na bilo koji način s određenim osobama. Ovim odobrenjem aplikacijama se omogućava da sačuvaju podatke o kontaktima, a zlonamjerne aplikacije mogu bez vašeg znanja podijeliti ove podatke."</string>
+    <string name="permdesc_readContacts" product="default" msgid="8440654152457300662">"Omogućava aplikaciji čitanje podataka o kontaktima koji su pohranjeni na vašem telefonu, uključujući učestalost vaših poziva, slanja e-pošte ili nekog drugog vida komunikacije sa određenim pojedincima. Ovo odobrenje omogućava aplikacijama da pohrane podatke o vašim kontaktima tako da ih zlonamjerne aplikacije mogu podijeliti bez vašeg znanja."</string>
     <string name="permlab_writeContacts" msgid="5107492086416793544">"izmjena podataka o kontaktima"</string>
-    <string name="permdesc_writeContacts" product="tablet" msgid="897243932521953602">"Omogućava aplikaciji da izmijeni podatke o kontaktima koji su pohranjeni na vašem tabletu, uključujući učestalost vaših poziva, slanje e-pošte, ili neki drugi vid komunikacije sa određenim kontaktima. Ova dozvola omogućava aplikaciji da obriše podatke o kontaktima."</string>
-    <string name="permdesc_writeContacts" product="tv" msgid="5438230957000018959">"Dozvoljava aplikaciji izmjenu podataka o vašim kontaktima pohranjenim na TV-u, uključujući učestalost poziva, slanja e-pošte ili komuniciranja na bilo koji način s određenim kontaktima. Ovom dozvolom aplikacijama se omogućava brisanje podataka o kontaktima."</string>
-    <string name="permdesc_writeContacts" product="default" msgid="589869224625163558">"Omogućava aplikaciji da izmijeni podatke o kontaktima koji su pohranjeni na vašem telefonu, uključujući učestalost vaših poziva, slanje e-pošte, ili neki drugi vid komunikacije sa određenim kontaktima. Ova dozvola omogućava aplikaciji da izbriše podatke o kontaktima."</string>
+    <string name="permdesc_writeContacts" product="tablet" msgid="897243932521953602">"Omogućava aplikaciji da izmijeni podatke o kontaktima koji su pohranjeni na vašem tabletu, uključujući učestalost vaših poziva, slanje e-pošte, ili neki drugi vid komunikacije sa određenim kontaktima. Ovo odobrenje omogućava aplikaciji da obriše podatke o kontaktima."</string>
+    <string name="permdesc_writeContacts" product="tv" msgid="5438230957000018959">"Dozvoljava aplikaciji izmjenu podataka o vašim kontaktima pohranjenim na TV-u, uključujući učestalost poziva, slanja e-pošte ili komuniciranja na bilo koji način s određenim kontaktima. Ovim odobrenjem aplikacijama se omogućava brisanje podataka o kontaktima."</string>
+    <string name="permdesc_writeContacts" product="default" msgid="589869224625163558">"Omogućava aplikaciji da izmijeni podatke o kontaktima koji su pohranjeni na vašem telefonu, uključujući učestalost vaših poziva, slanje e-pošte, ili neki drugi vid komunikacije sa određenim kontaktima. Ovo odobrenje omogućava aplikaciji da izbriše podatke o kontaktima."</string>
     <string name="permlab_readCallLog" msgid="3478133184624102739">"čitanje zapisnika poziva"</string>
     <string name="permdesc_readCallLog" msgid="3204122446463552146">"Ova aplikacija može čitati historiju vaših poziva."</string>
     <string name="permlab_writeCallLog" msgid="8552045664743499354">"pisanje zapisnika poziva"</string>
@@ -410,7 +410,7 @@
     <string name="permlab_accessImsCallService" msgid="3574943847181793918">"pristup usluzi IMS pozivanja"</string>
     <string name="permdesc_accessImsCallService" msgid="8992884015198298775">"Omogućava aplikaciji da koristi IMS uslugu za pozivanje bez vaše intervencije."</string>
     <string name="permlab_readPhoneState" msgid="9178228524507610486">"čitanje statusa i identiteta telefona"</string>
-    <string name="permdesc_readPhoneState" msgid="1639212771826125528">"Omogućava aplikaciji pristup telefonskim funkcijama uređaja. Ova dozvola omogućava aplikaciji određivanje telefonskog i identifikacionog broja uređaja, bez obzira da li je poziv aktivan i da li je uspostavljena veza sa pozivanim brojem."</string>
+    <string name="permdesc_readPhoneState" msgid="1639212771826125528">"Omogućava aplikaciji pristup telefonskim funkcijama uređaja. Ovo odobrenje omogućava aplikaciji određivanje telefonskog i identifikacionog broja uređaja, bez obzira da li je poziv aktivan i da li je uspostavljena veza sa pozivanim brojem."</string>
     <string name="permlab_manageOwnCalls" msgid="1503034913274622244">"usmjeravanje poziva preko sistema"</string>
     <string name="permdesc_manageOwnCalls" msgid="6552974537554717418">"Dopušta aplikaciji da pozive usmjeri preko sistema radi poboljšanja iskustva pozivanja."</string>
     <string name="permlab_readPhoneNumbers" msgid="6108163940932852440">"čitanje telefonskih brojeva"</string>
@@ -832,11 +832,11 @@
     <string name="autofill_area" msgid="3547409050889952423">"Oblast"</string>
     <string name="autofill_emirate" msgid="2893880978835698818">"Emirat"</string>
     <string name="permlab_readHistoryBookmarks" msgid="3775265775405106983">"čitanje internet oznaka i historije"</string>
-    <string name="permdesc_readHistoryBookmarks" msgid="8462378226600439658">"Omogućava aplikaciji čitanje historije URL-ova koje je preglednik posjetio, kao i svih  oznaka preglednika. Napomena: ovu dozvolu ne mogu iskoristiti preglednici trećih strana ili druge aplikacije koje imaju mogućnost pregledanja interneta."</string>
+    <string name="permdesc_readHistoryBookmarks" msgid="8462378226600439658">"Omogućava aplikaciji čitanje historije URL-ova koje je preglednik posjetio, kao i svih  oznaka preglednika. Napomena: ovo odobrenje ne mogu iskoristiti preglednici trećih strana ili druge aplikacije koje imaju mogućnost pregledanja interneta."</string>
     <string name="permlab_writeHistoryBookmarks" msgid="3714785165273314490">"pisanje internet oznaka i historije"</string>
-    <string name="permdesc_writeHistoryBookmarks" product="tablet" msgid="6825527469145760922">"Omogućava aplikaciji da izmijeni historiju ili oznake preglednika koji su pohranjeni na vašem tabletu. Ovim se aplikaciji može omogućiti da izbriše ili izmijeni podatke preglednika. Napomena: ovu dozvolu ne mogu koristiti preglednici trećih strana ili druge aplikacije koje imaju mogućnost pregledanja interneta."</string>
-    <string name="permdesc_writeHistoryBookmarks" product="tv" msgid="7007393823197766548">"Dozvoljava aplikaciji izmjenu historije ili oznaka preglednika pohranjenih na TV-u. Ovim se aplikaciji može omogućiti brisanje ili izmjena podataka preglednika. Napomena: ovu dozvolu ne mogu iskoristiti preglednici trećih strana ili druge aplikacije koje imaju mogućnost pregleda interneta."</string>
-    <string name="permdesc_writeHistoryBookmarks" product="default" msgid="8497389531014185509">"Omogućava aplikaciji da izmijeni historiju ili oznake preglednika koji su pohranjeni na vašem telefonu. Ovim se aplikaciji može omogućiti da izbriše ili izmijeni podatke preglednika. Napomena: ovu dozvolu ne mogu koristiti preglednika trećih strana ili druge aplikacije koje imaju mogućnost pregledanja interneta."</string>
+    <string name="permdesc_writeHistoryBookmarks" product="tablet" msgid="6825527469145760922">"Omogućava aplikaciji da izmijeni historiju ili oznake preglednika koji su pohranjeni na vašem tabletu. Ovim se aplikaciji može omogućiti da izbriše ili izmijeni podatke preglednika. Napomena: ovo odobrenje ne mogu koristiti preglednici trećih strana ili druge aplikacije koje imaju mogućnost pregledanja interneta."</string>
+    <string name="permdesc_writeHistoryBookmarks" product="tv" msgid="7007393823197766548">"Dozvoljava aplikaciji izmjenu historije ili oznaka preglednika pohranjenih na TV-u. Ovim se aplikaciji može omogućiti brisanje ili izmjena podataka preglednika. Napomena: ovo odobrenje ne mogu iskoristiti preglednici trećih strana ili druge aplikacije koje imaju mogućnost pregleda interneta."</string>
+    <string name="permdesc_writeHistoryBookmarks" product="default" msgid="8497389531014185509">"Omogućava aplikaciji da izmijeni historiju ili oznake preglednika koji su pohranjeni na vašem telefonu. Ovim se aplikaciji može omogućiti da izbriše ili izmijeni podatke preglednika. Napomena: ovo odobrenje ne mogu koristiti preglednika trećih strana ili druge aplikacije koje imaju mogućnost pregledanja interneta."</string>
     <string name="permlab_setAlarm" msgid="1379294556362091814">"postavljanje alarma"</string>
     <string name="permdesc_setAlarm" msgid="316392039157473848">"Dozvoljava aplikaciji postavljanje alarma u instaliranom budilniku. Moguće je da neki budilnici neće primijeniti ovu funkciju."</string>
     <string name="permlab_addVoicemail" msgid="5525660026090959044">"dodavanje govorne pošte"</string>
@@ -847,7 +847,7 @@
     <string name="save_password_notnow" msgid="6389675316706699758">"Ne sada"</string>
     <string name="save_password_remember" msgid="6491879678996749466">"Zapamti"</string>
     <string name="save_password_never" msgid="8274330296785855105">"Nikad"</string>
-    <string name="open_permission_deny" msgid="7374036708316629800">"Nemate dozvolu za otvaranje ove stranice."</string>
+    <string name="open_permission_deny" msgid="7374036708316629800">"Nemate odobrenje za otvaranje ove stranice."</string>
     <string name="text_copied" msgid="4985729524670131385">"Tekst kopiran u međuspremnik."</string>
     <string name="more_item_label" msgid="4650918923083320495">"Više"</string>
     <string name="prepend_shortcut_label" msgid="2572214461676015642">"Meni+"</string>
@@ -1073,6 +1073,9 @@
     <string name="screen_compat_mode_hint" msgid="1064524084543304459">"Ponovo omogućite ovu opciju u meniju Postavke sistema &gt; Aplikacije &gt; Preuzete aplikacije."</string>
     <string name="unsupported_display_size_message" msgid="6545327290756295232">"Aplikacija <xliff:g id="APP_NAME">%1$s</xliff:g> ne podržava trenutnu postavku veličine ekrana i može se ponašati neočekivano."</string>
     <string name="unsupported_display_size_show" msgid="7969129195360353041">"Uvijek prikaži"</string>
+    <string name="unsupported_compile_sdk_message" msgid="4253168368781441759">"Aplikacija <xliff:g id="APP_NAME">%1$s</xliff:g> je napravljena za verziju operativnog sistema Android koja nije kompatibilna i može se ponašati neočekivano. Ažurirana verzija aplikacije može biti dostupna."</string>
+    <string name="unsupported_compile_sdk_show" msgid="2681877855260970231">"Uvijek prikaži"</string>
+    <string name="unsupported_compile_sdk_check_update" msgid="3312723623323216101">"Provjerite ima li ažuriranja"</string>
     <string name="smv_application" msgid="3307209192155442829">"Aplikacija <xliff:g id="APPLICATION">%1$s</xliff:g> (proces <xliff:g id="PROCESS">%2$s</xliff:g>) prekršila je vlastita StrictMode pravila."</string>
     <string name="smv_process" msgid="5120397012047462446">"Proces <xliff:g id="PROCESS">%1$s</xliff:g> prekršio je vlastita StrictMode pravila."</string>
     <string name="android_upgrading_title" msgid="1584192285441405746">"Nadogradnja sistema Android u toku..."</string>
@@ -1140,10 +1143,10 @@
     <string name="network_available_sign_in" msgid="1848877297365446605">"Prijava na mrežu"</string>
     <!-- no translation found for network_available_sign_in_detailed (8000081941447976118) -->
     <skip />
-    <string name="wifi_no_internet" msgid="8451173622563841546">"Wi-Fi nema pristup Internetu"</string>
+    <string name="wifi_no_internet" msgid="8938267198124654938">"Wi-Fi nema pristup internetu"</string>
     <string name="wifi_no_internet_detailed" msgid="8083079241212301741">"Dodirnite za opcije"</string>
     <string name="network_switch_metered" msgid="4671730921726992671">"Prebačeno na: <xliff:g id="NETWORK_TYPE">%1$s</xliff:g>"</string>
-    <string name="network_switch_metered_detail" msgid="5325661434777870353">"Kada na uređaju <xliff:g id="PREVIOUS_NETWORK">%2$s</xliff:g> nema pristup internetu, koristi se <xliff:g id="NEW_NETWORK">%1$s</xliff:g>. Moguća je naplata usluge."</string>
+    <string name="network_switch_metered_detail" msgid="775163331794506615">"Kada <xliff:g id="PREVIOUS_NETWORK">%2$s</xliff:g> nema pristup internetu, uređaj koristi mrežu <xliff:g id="NEW_NETWORK">%1$s</xliff:g>. Moguća je naplata usluge."</string>
     <string name="network_switch_metered_toast" msgid="5779283181685974304">"Prebačeno iz mreže <xliff:g id="PREVIOUS_NETWORK">%1$s</xliff:g> u <xliff:g id="NEW_NETWORK">%2$s</xliff:g> mrežu"</string>
   <string-array name="network_switch_type_name">
     <item msgid="3979506840912951943">"mobilni podaci"</item>
@@ -1154,7 +1157,7 @@
   </string-array>
     <string name="network_switch_type_name_unknown" msgid="4552612897806660656">"nepoznata vrsta mreže"</string>
     <string name="wifi_watchdog_network_disabled" msgid="7904214231651546347">"Problem prilikom spajanja na Wi-Fi mrežu"</string>
-    <string name="wifi_watchdog_network_disabled_detailed" msgid="5548780776418332675">" ima lošu internet vezu."</string>
+    <string name="wifi_watchdog_network_disabled_detailed" msgid="4917472096696322767">" ima lošu internetsku vezu."</string>
     <string name="wifi_connect_alert_title" msgid="8455846016001810172">"Želite li dozvoliti povezivanje?"</string>
     <string name="wifi_connect_alert_message" msgid="6451273376815958922">"Aplikacija %1$s se želi povezati na Wi-Fi mrežu %2$s"</string>
     <string name="wifi_connect_default_application" msgid="7143109390475484319">"Aplikacija"</string>
@@ -1286,7 +1289,7 @@
     <string name="permlab_requestDeletePackages" msgid="1703686454657781242">"zatraži brisanje paketanja"</string>
     <string name="permdesc_requestDeletePackages" msgid="3406172963097595270">"Omogućava aplikaciji da zatraži brisanje paketa."</string>
     <string name="permlab_requestIgnoreBatteryOptimizations" msgid="8021256345643918264">"traži zanemarivanje optimizacije baterije"</string>
-    <string name="permdesc_requestIgnoreBatteryOptimizations" msgid="8359147856007447638">"Omogućava aplikaciji da traži dozvolu za zanemarivanje optimizacije baterije za tu aplikaciju."</string>
+    <string name="permdesc_requestIgnoreBatteryOptimizations" msgid="8359147856007447638">"Omogućava aplikaciji da traži odobrenje za zanemarivanje optimizacije baterije za tu aplikaciju."</string>
     <string name="tutorial_double_tap_to_zoom_message_short" msgid="1311810005957319690">"Dodirnite dvaput za kontrolu uvećanja"</string>
     <string name="gadget_host_error_inflating" msgid="4882004314906466162">"Dodavanje vidžeta nije uspjelo."</string>
     <string name="ime_action_go" msgid="8320845651737369027">"Započni"</string>
@@ -1298,12 +1301,12 @@
     <string name="ime_action_default" msgid="2840921885558045721">"Izvrši"</string>
     <string name="dial_number_using" msgid="5789176425167573586">"Biraj\nbroj <xliff:g id="NUMBER">%s</xliff:g>"</string>
     <string name="create_contact_using" msgid="4947405226788104538">"Napraviti kontakt\nkoristeći broj <xliff:g id="NUMBER">%s</xliff:g>"</string>
-    <string name="grant_credentials_permission_message_header" msgid="2106103817937859662">"Sljedeće aplikacije zahtijevaju dozvolu za pristup vašem računu, sada i u budućnosti."</string>
+    <string name="grant_credentials_permission_message_header" msgid="2106103817937859662">"Sljedeće aplikacije zahtijevaju odobrenje za pristup vašem računu, sada i u budućnosti."</string>
     <string name="grant_credentials_permission_message_footer" msgid="3125211343379376561">"Želite li dozvoliti taj zahtjev?"</string>
     <string name="grant_permissions_header_text" msgid="6874497408201826708">"Zahtjev za pristup"</string>
     <string name="allow" msgid="7225948811296386551">"Dozvoli"</string>
     <string name="deny" msgid="2081879885755434506">"Odbijte"</string>
-    <string name="permission_request_notification_title" msgid="6486759795926237907">"Upućen zahtjev za dozvolu"</string>
+    <string name="permission_request_notification_title" msgid="6486759795926237907">"Upućen zahtjev za odobrenje"</string>
     <string name="permission_request_notification_with_subtitle" msgid="8530393139639560189">"Upućen zahtjev za dozvolu\nza račun <xliff:g id="ACCOUNT">%s</xliff:g>."</string>
     <string name="forward_intent_to_owner" msgid="1207197447013960896">"Aplikaciju koristite van poslovnog profila"</string>
     <string name="forward_intent_to_work" msgid="621480743856004612">"Aplikaciju koristite u poslovnom profilu"</string>
@@ -1661,7 +1664,7 @@
     <string name="package_installed_device_owner" msgid="6875717669960212648">"Instalirao je vaš administrator"</string>
     <string name="package_updated_device_owner" msgid="1847154566357862089">"Ažurirao je vaš administrator"</string>
     <string name="package_deleted_device_owner" msgid="2307122077550236438">"Izbrisao je vaš administrator"</string>
-    <string name="battery_saver_description" msgid="1960431123816253034">"Da bi se produžilo trajanje baterije, opcija za uštedu baterije minimizira rad uređaja i ograničava vibraciju, usluge lokacije i većinu prijenosa podataka u pozadini. E-pošta, poruke i druge aplikacije koje se oslanjaju na sinhronizaciju ne mogu se ažurirati dok ih ne otvorite.\n\nUšteda baterije se automatski isključuje prilikom punjenja uređaja."</string>
+    <string name="battery_saver_description" msgid="5394663545060026162">"Za produženje trajanja baterije, Ušteda baterije svodi rad uređaja na najmanju moguću mjeru i ograničava vibriranje, usluge lokacije i većinu prijenosa podataka u pozadini. Aplikacije za e-poštu, razmjenu poruka i druge aplikacije koje se oslanjaju na sinhronizaciju ne mogu se ažurirati dok ih ne otvorite.\n\nUšteda baterije se automatski isključuje prilikom punjenja uređaja."</string>
     <string name="data_saver_description" msgid="6015391409098303235">"Da bi se smanjio prijenos podataka, usluga Ušteda podataka sprečava da neke aplikacije šalju ili primaju podatke u pozadini. Aplikacija koju trenutno koristite može pristupiti podacima, ali se to može desiti rjeđe. To može značiti, naprimjer, da se slike ne prikazuju sve dok ih ne dodirnete."</string>
     <string name="data_saver_enable_title" msgid="4674073932722787417">"Uključiti Uštedu podataka?"</string>
     <string name="data_saver_enable_button" msgid="7147735965247211818">"Uključi"</string>

@@ -79,7 +79,7 @@
     <string name="RestrictedOnAllVoiceTitle" msgid="158800171499150681">"Ayikho isevisi yezwi/yesimo esiphuthumayo"</string>
     <string name="RestrictedStateContent" msgid="4278821484643362350">"Okwesikhashana akunikezwa inethiwekhi yeselula endaweni yakho"</string>
     <string name="NetworkPreferenceSwitchTitle" msgid="4008877505368566980">"Ayikwazi ukufinyelela inethiwekhi"</string>
-    <string name="NetworkPreferenceSwitchSummary" msgid="1203771446683319957">"Ukuze uthuthukise ukwamukelwa, zama ukushintsha uhlobo olukhethiwe kuzilungiselelo &gt; Inethiwekhi ne-inthanethi &gt; amanethiwekhi eselula &gt; Uhlobo oluncanyelwayo lwenethiwekhi."</string>
+    <string name="NetworkPreferenceSwitchSummary" msgid="7056776609127756440">"Ukuze uthuthukise ukwamukela, zama ukushintsha uhlobo olukhethiwe kuzilungiselelo &gt; Inethiwekhi ne-inthanethi &gt; Amanethiwekhi eselula &gt; Uhlobo lwenethiwekhi oluncanyelwayo."</string>
     <string name="EmergencyCallWarningTitle" msgid="4790413876281901612">"Ukushaya kwe-Wi-Fi kuyasebenza"</string>
     <string name="EmergencyCallWarningSummary" msgid="8973232888021643293">"Amakholi aphuthumayo adinga inethiwekhi yeselula."</string>
     <string name="notification_channel_network_alert" msgid="4427736684338074967">"Izexwayiso"</string>
@@ -1051,6 +1051,9 @@
     <string name="screen_compat_mode_hint" msgid="1064524084543304459">"Yenza kuphinde kusebenze kuzilungiselelo Zesistimue &gt; Izinhlelo zokusebenza &gt; Okulayishiwe."</string>
     <string name="unsupported_display_size_message" msgid="6545327290756295232">"I-<xliff:g id="APP_NAME">%1$s</xliff:g> ayisekeli isilungiselelo sosayizi sokubonisa samanje futhi ingasebenza ngokungalindelekile."</string>
     <string name="unsupported_display_size_show" msgid="7969129195360353041">"Bonisa njalo"</string>
+    <string name="unsupported_compile_sdk_message" msgid="4253168368781441759">"I-<xliff:g id="APP_NAME">%1$s</xliff:g> yakhiwe kunguqulo engahambisani ye-Android OS futhi ingaziphatha ngokungalindelekile. Inguqulo ebuyekeziwe yohlelo lokusebenza ingatholakala."</string>
+    <string name="unsupported_compile_sdk_show" msgid="2681877855260970231">"Bonisa njalo"</string>
+    <string name="unsupported_compile_sdk_check_update" msgid="3312723623323216101">"Hlola izibuyekezo"</string>
     <string name="smv_application" msgid="3307209192155442829">"Inqubo <xliff:g id="APPLICATION">%1$s</xliff:g> (yohlelo <xliff:g id="PROCESS">%2$s</xliff:g>) iphule inqubomgomo oziphoqelela yona Yemodi Ebukhali."</string>
     <string name="smv_process" msgid="5120397012047462446">"Inqubo <xliff:g id="PROCESS">%1$s</xliff:g> yephule inqubomgomo yokuziphoqelela Yemodi Ebukhali."</string>
     <string name="android_upgrading_title" msgid="1584192285441405746">"I-Android ifaka ezakamuva..."</string>
@@ -1116,10 +1119,10 @@
     <string name="network_available_sign_in" msgid="1848877297365446605">"Ngena ngemvume kunethiwekhi"</string>
     <!-- no translation found for network_available_sign_in_detailed (8000081941447976118) -->
     <skip />
-    <string name="wifi_no_internet" msgid="8451173622563841546">"I-Wi-Fi ayinakho ukufinyelela kwe-inthanethi"</string>
+    <string name="wifi_no_internet" msgid="8938267198124654938">"I-Wi-Fi ayinakho ukufinyelela kwe-inthanethi"</string>
     <string name="wifi_no_internet_detailed" msgid="8083079241212301741">"Thepha ukuze uthole izinketho"</string>
     <string name="network_switch_metered" msgid="4671730921726992671">"Kushintshelwe ku-<xliff:g id="NETWORK_TYPE">%1$s</xliff:g>"</string>
-    <string name="network_switch_metered_detail" msgid="5325661434777870353">"Idivayisi isebenzisa i-<xliff:g id="NEW_NETWORK">%1$s</xliff:g> uma i-<xliff:g id="PREVIOUS_NETWORK">%2$s</xliff:g> ingenakho ukufinyelela kwe-inthanethi. Izindleko zingasebenza."</string>
+    <string name="network_switch_metered_detail" msgid="775163331794506615">"Idivayisi isebenzisa i-<xliff:g id="NEW_NETWORK">%1$s</xliff:g> uma i-<xliff:g id="PREVIOUS_NETWORK">%2$s</xliff:g> inganakho ukufinyelela kwe-inthanethi. Kungasebenza izindleko."</string>
     <string name="network_switch_metered_toast" msgid="5779283181685974304">"Kushintshelewe kusuka ku-<xliff:g id="PREVIOUS_NETWORK">%1$s</xliff:g> kuya ku-<xliff:g id="NEW_NETWORK">%2$s</xliff:g>"</string>
   <string-array name="network_switch_type_name">
     <item msgid="3979506840912951943">"idatha yeselula"</item>
@@ -1130,7 +1133,7 @@
   </string-array>
     <string name="network_switch_type_name_unknown" msgid="4552612897806660656">"uhlobo olungaziwa lwenethiwekhi"</string>
     <string name="wifi_watchdog_network_disabled" msgid="7904214231651546347">"Ayikwazanga ukuxhuma kwi-Wi-Fi"</string>
-    <string name="wifi_watchdog_network_disabled_detailed" msgid="5548780776418332675">" inoxhumano oluphansi lwe-inthanethi."</string>
+    <string name="wifi_watchdog_network_disabled_detailed" msgid="4917472096696322767">" inoxhumano oluphansi lwe-inthanethi."</string>
     <string name="wifi_connect_alert_title" msgid="8455846016001810172">"Vumela ukuxhumeka?"</string>
     <string name="wifi_connect_alert_message" msgid="6451273376815958922">"Uhlelo lokusebenza %1$s lungathanda ukuxhuma kunethiwekhi ye-Wifi %2$s"</string>
     <string name="wifi_connect_default_application" msgid="7143109390475484319">"Uhlelo lokusebenza"</string>
@@ -1626,7 +1629,6 @@
     <string name="managed_profile_label_badge_2" msgid="5048136430082124036">"Umsebenzi wesibili <xliff:g id="LABEL">%1$s</xliff:g>"</string>
     <string name="managed_profile_label_badge_3" msgid="2808305070321719040">"Umsebenzi wesithathu <xliff:g id="LABEL">%1$s</xliff:g>"</string>
     <string name="lock_to_app_toast" msgid="6820571533009838261">"Ukuze ususe ukuphina lesi sikrini, thinta uphinde ubambe izinkinobho zokubuyela emuva nezokubuka konke"</string>
-    <string name="lock_to_app_toast_locked" msgid="7849470948648628704">"Lolu hlelo lokusebenza alukwazi ukususwa ukuphinwa"</string>
     <string name="lock_to_app_start" msgid="6643342070839862795">"Isikrini siphiniwe"</string>
     <string name="lock_to_app_exit" msgid="8598219838213787430">"Isikrini sisuswe ukuphina"</string>
     <string name="lock_to_app_unlock_pin" msgid="2552556656504331634">"Cela iphinikhodi ngaphambi kokuphina"</string>
@@ -1635,7 +1637,7 @@
     <string name="package_installed_device_owner" msgid="6875717669960212648">"Kufakwe umlawuli wakho"</string>
     <string name="package_updated_device_owner" msgid="1847154566357862089">"Kubuyekezwe umlawuli wakho"</string>
     <string name="package_deleted_device_owner" msgid="2307122077550236438">"Kususwe umlawuli wakho"</string>
-    <string name="battery_saver_description" msgid="1960431123816253034">"Ukusiza ukuthuthukisa impilo yebhethri, isilondoloze sebhethri sehlisa ukusebenza kwedivayisi yakho futhi sikhawulele ukudlidliza, amasevisi wendawo, nedatha eningi yangasemuva. I-imeyili, imilayezo, nezinye izinhlelo zokusebenza ezincike ekuvumelaniseni zingahle zingabuyekezwa ngaphandle kokuthi uzivule.\n\nIsilondolozi sebhethri siyavaleka ngokuzenzakalelayo uma idivayisi yakho ishaja."</string>
+    <string name="battery_saver_description" msgid="5394663545060026162">"Ukuze kusizwe ukuthuthukisa impilo yebhethri, isilondolozi sebhethri sehlisa ukusebenza kwedivayisi yakho kuphinde kukhawulele ukudlidliza, amasevisi endawo kanye nedatha eningi yasemuva. I-imeyili, ukulayeza nezinye izinhlelo zokusebenza ezithembele ekuvunyelanisweni kungenzeka zingabuyekezwa ngaphandle kokuthi uzivule.\n\nIsilondolozi sebhethri sivalwa ngokuzenzakalela uma idivayisi yakho ishaja."</string>
     <string name="data_saver_description" msgid="6015391409098303235">"Ukusiza ukwehlisa ukusetshenziswa kwedatha, iseva yedatha igwema ezinye izinhlelo zokusebenza ukuthi zithumele noma zamukele idatha ngasemuva. Uhlelo lokusebenza olisebenzisa okwamanje lingafinyelela idatha, kodwa lingenza kanjalo kancane. Lokhu kungachaza, isibonelo, ukuthi izithombe azibonisi uze uzithephe."</string>
     <string name="data_saver_enable_title" msgid="4674073932722787417">"Vula iseva yedatha?"</string>
     <string name="data_saver_enable_button" msgid="7147735965247211818">"Vula"</string>
@@ -1782,14 +1784,10 @@
     <string name="etws_primary_default_message_test" msgid="2709597093560037455">"Ukuhlolwa kwemilayezo yesimo esiphuthumayo"</string>
     <string name="notification_reply_button_accessibility" msgid="3621714652387814344">"Phendula"</string>
     <string name="etws_primary_default_message_others" msgid="6293148756130398971"></string>
-    <!-- no translation found for mmcc_authentication_reject (5767701075994754356) -->
-    <skip />
-    <!-- no translation found for mmcc_imsi_unknown_in_hlr (5316658473301462825) -->
-    <skip />
-    <!-- no translation found for mmcc_illegal_ms (807334478177362062) -->
-    <skip />
-    <!-- no translation found for mmcc_illegal_me (1950705155760872972) -->
-    <skip />
+    <string name="mmcc_authentication_reject" msgid="5767701075994754356">"I-SIM ayivunyelwe kwizwi"</string>
+    <string name="mmcc_imsi_unknown_in_hlr" msgid="5316658473301462825">"I-SIM ayinikezelwe izwi"</string>
+    <string name="mmcc_illegal_ms" msgid="807334478177362062">"I-SIM ayivunyelwe kwizwi"</string>
+    <string name="mmcc_illegal_me" msgid="1950705155760872972">"Ifoni ayivunyelwe izwi"</string>
     <string name="popup_window_default_title" msgid="4874318849712115433">"Iwindi lesigelekeqe"</string>
     <string name="slice_more_content" msgid="8504342889413274608">"+ <xliff:g id="NUMBER">%1$d</xliff:g>"</string>
     <string name="shortcut_restored_on_lower_version" msgid="5270675146351613828">"Lesi sinqamuleli sidinga uhlelo lokusebenza lwakamuva"</string>

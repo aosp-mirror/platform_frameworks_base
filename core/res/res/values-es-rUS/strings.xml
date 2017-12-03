@@ -79,7 +79,7 @@
     <string name="RestrictedOnAllVoiceTitle" msgid="158800171499150681">"Sin servicio de voz/emergencia"</string>
     <string name="RestrictedStateContent" msgid="4278821484643362350">"La red móvil de tu ubicación no ofrece este servicio de forma temporal"</string>
     <string name="NetworkPreferenceSwitchTitle" msgid="4008877505368566980">"No se puede establecer conexión con la red"</string>
-    <string name="NetworkPreferenceSwitchSummary" msgid="1203771446683319957">"Para mejorar la recepción, cambia el tipo de red. Selecciona Configuración &gt; Internet y red &gt; Redes móviles &gt; Tipo de red preferido."</string>
+    <string name="NetworkPreferenceSwitchSummary" msgid="7056776609127756440">"Para mejorar la recepción, cambia el tipo de red. Selecciona Configuración &gt; Internet y red &gt; Redes móviles &gt; Tipo de red preferido."</string>
     <string name="EmergencyCallWarningTitle" msgid="4790413876281901612">"Las llamadas con Wi-Fi están activadas"</string>
     <string name="EmergencyCallWarningSummary" msgid="8973232888021643293">"Las llamadas de emergencia requieren una red móvil."</string>
     <string name="notification_channel_network_alert" msgid="4427736684338074967">"Alertas"</string>
@@ -1051,6 +1051,9 @@
     <string name="screen_compat_mode_hint" msgid="1064524084543304459">"Volver a activar Configuración del sistema &gt; Aplicaciones &gt; Descargas"</string>
     <string name="unsupported_display_size_message" msgid="6545327290756295232">"<xliff:g id="APP_NAME">%1$s</xliff:g> no es compatible con la configuración del tamaño de pantalla actual. Es posible que no se comporte de manera correcta."</string>
     <string name="unsupported_display_size_show" msgid="7969129195360353041">"Mostrar siempre"</string>
+    <string name="unsupported_compile_sdk_message" msgid="4253168368781441759">"Se diseñó <xliff:g id="APP_NAME">%1$s</xliff:g> para una versión no compatible del SO Android. Es posible que dicha app funcione de forma inesperada y que ya haya una versión actualizada disponible."</string>
+    <string name="unsupported_compile_sdk_show" msgid="2681877855260970231">"Mostrar siempre"</string>
+    <string name="unsupported_compile_sdk_check_update" msgid="3312723623323216101">"Buscar actualización"</string>
     <string name="smv_application" msgid="3307209192155442829">"La aplicación <xliff:g id="APPLICATION">%1$s</xliff:g> (proceso <xliff:g id="PROCESS">%2$s</xliff:g>) ha infringido su política StrictMode de aplicación automática."</string>
     <string name="smv_process" msgid="5120397012047462446">"El proceso <xliff:g id="PROCESS">%1$s</xliff:g> ha violado su política StrictMode autoimpuesta."</string>
     <string name="android_upgrading_title" msgid="1584192285441405746">"Android se está actualizando..."</string>
@@ -1116,10 +1119,10 @@
     <string name="network_available_sign_in" msgid="1848877297365446605">"Acceder a la red"</string>
     <!-- no translation found for network_available_sign_in_detailed (8000081941447976118) -->
     <skip />
-    <string name="wifi_no_internet" msgid="8451173622563841546">"La red Wi-Fi no tiene acceso a Internet"</string>
+    <string name="wifi_no_internet" msgid="8938267198124654938">"La red Wi-Fi no tiene acceso a Internet"</string>
     <string name="wifi_no_internet_detailed" msgid="8083079241212301741">"Presiona para ver opciones"</string>
     <string name="network_switch_metered" msgid="4671730921726992671">"Se cambió a <xliff:g id="NETWORK_TYPE">%1$s</xliff:g>"</string>
-    <string name="network_switch_metered_detail" msgid="5325661434777870353">"El dispositivo usa <xliff:g id="NEW_NETWORK">%1$s</xliff:g> cuando <xliff:g id="PREVIOUS_NETWORK">%2$s</xliff:g> no tiene acceso a Internet. Es posible que se apliquen cargos."</string>
+    <string name="network_switch_metered_detail" msgid="775163331794506615">"El dispositivo usa <xliff:g id="NEW_NETWORK">%1$s</xliff:g> cuando <xliff:g id="PREVIOUS_NETWORK">%2$s</xliff:g> no tiene acceso a Internet. Es posible que se apliquen cargos."</string>
     <string name="network_switch_metered_toast" msgid="5779283181685974304">"Se cambió de <xliff:g id="PREVIOUS_NETWORK">%1$s</xliff:g> a <xliff:g id="NEW_NETWORK">%2$s</xliff:g>"</string>
   <string-array name="network_switch_type_name">
     <item msgid="3979506840912951943">"Datos móviles"</item>
@@ -1130,7 +1133,7 @@
   </string-array>
     <string name="network_switch_type_name_unknown" msgid="4552612897806660656">"un tipo de red desconocido"</string>
     <string name="wifi_watchdog_network_disabled" msgid="7904214231651546347">"No se pudo conectar a la red Wi-Fi."</string>
-    <string name="wifi_watchdog_network_disabled_detailed" msgid="5548780776418332675">" tiene una mala conexión a Internet."</string>
+    <string name="wifi_watchdog_network_disabled_detailed" msgid="4917472096696322767">" tiene una mala conexión a Internet."</string>
     <string name="wifi_connect_alert_title" msgid="8455846016001810172">"¿Permitir la conexión?"</string>
     <string name="wifi_connect_alert_message" msgid="6451273376815958922">"La aplicación %1$s quiere conectarse a la red Wi-Fi %2$s."</string>
     <string name="wifi_connect_default_application" msgid="7143109390475484319">"Una aplicación"</string>
@@ -1626,7 +1629,6 @@
     <string name="managed_profile_label_badge_2" msgid="5048136430082124036">"<xliff:g id="LABEL">%1$s</xliff:g> de trabajo 2"</string>
     <string name="managed_profile_label_badge_3" msgid="2808305070321719040">"<xliff:g id="LABEL">%1$s</xliff:g> de trabajo 3"</string>
     <string name="lock_to_app_toast" msgid="6820571533009838261">"Para dejar de fijar esta pantalla, mantén presionados los botones Atrás y Recientes"</string>
-    <string name="lock_to_app_toast_locked" msgid="7849470948648628704">"No se puede dejar de fijar esta app"</string>
     <string name="lock_to_app_start" msgid="6643342070839862795">"Pantalla fija"</string>
     <string name="lock_to_app_exit" msgid="8598219838213787430">"Pantalla no fija"</string>
     <string name="lock_to_app_unlock_pin" msgid="2552556656504331634">"Solicitar PIN para quitar fijación"</string>
@@ -1635,7 +1637,7 @@
     <string name="package_installed_device_owner" msgid="6875717669960212648">"Tu administrador instaló este paquete"</string>
     <string name="package_updated_device_owner" msgid="1847154566357862089">"Tu administrador actualizó este paquete"</string>
     <string name="package_deleted_device_owner" msgid="2307122077550236438">"Tu administrador borró este paquete"</string>
-    <string name="battery_saver_description" msgid="1960431123816253034">"Para mejorar la duración de la batería, la función de ahorro de batería reduce el rendimiento del dispositivo y limita la vibración, los servicios de ubicación y la mayoría de los datos en segundo plano. Es posible que no puedan actualizarse el correo electrónico, la mensajería y otras aplicaciones que se basan en la sincronización, a menos que los abras.\n\nEl ahorro de batería se desactiva de forma automática cuando el dispositivo se está cargando."</string>
+    <string name="battery_saver_description" msgid="5394663545060026162">"Para mejorar la duración de la batería, el Ahorro de batería reduce el rendimiento del dispositivo y limita la vibración, los servicios de ubicación y la mayoría de los datos en segundo plano. Es posible que no se puedan actualizar el correo electrónico, los mensajes y otras apps que se basan en la sincronización, a menos que los abras.\n\nEl Ahorro de batería se desactiva automáticamente cuando el dispositivo se está cargando."</string>
     <string name="data_saver_description" msgid="6015391409098303235">"Para reducir el uso de datos, \"Reducir datos\" evita que algunas apps envíen y reciban datos en segundo plano. La app que estés usando podrá acceder a los datos, pero con menor frecuencia. De esta forma, por ejemplo, las imágenes no se mostrarán hasta que las presiones."</string>
     <string name="data_saver_enable_title" msgid="4674073932722787417">"¿Activar Ahorro de datos?"</string>
     <string name="data_saver_enable_button" msgid="7147735965247211818">"Activar"</string>
@@ -1782,14 +1784,10 @@
     <string name="etws_primary_default_message_test" msgid="2709597093560037455">"Prueba de mensajes de emergencia"</string>
     <string name="notification_reply_button_accessibility" msgid="3621714652387814344">"Responder"</string>
     <string name="etws_primary_default_message_others" msgid="6293148756130398971"></string>
-    <!-- no translation found for mmcc_authentication_reject (5767701075994754356) -->
-    <skip />
-    <!-- no translation found for mmcc_imsi_unknown_in_hlr (5316658473301462825) -->
-    <skip />
-    <!-- no translation found for mmcc_illegal_ms (807334478177362062) -->
-    <skip />
-    <!-- no translation found for mmcc_illegal_me (1950705155760872972) -->
-    <skip />
+    <string name="mmcc_authentication_reject" msgid="5767701075994754356">"La SIM no admite acciones de voz"</string>
+    <string name="mmcc_imsi_unknown_in_hlr" msgid="5316658473301462825">"No se brindó una SIM para las acciones de voz"</string>
+    <string name="mmcc_illegal_ms" msgid="807334478177362062">"La SIM no admite acciones de voz"</string>
+    <string name="mmcc_illegal_me" msgid="1950705155760872972">"El teléfono no admite acciones de voz"</string>
     <string name="popup_window_default_title" msgid="4874318849712115433">"Ventana emergente"</string>
     <string name="slice_more_content" msgid="8504342889413274608">"<xliff:g id="NUMBER">%1$d</xliff:g> más"</string>
     <string name="shortcut_restored_on_lower_version" msgid="5270675146351613828">"Este acceso directo requiere la app más reciente"</string>

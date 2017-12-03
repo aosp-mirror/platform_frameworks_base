@@ -210,9 +210,9 @@ HeaderSection::Execute(ReportRequestSet* requests) const
 {
     for (ReportRequestSet::iterator it=requests->begin(); it!=requests->end(); it++) {
         const sp<ReportRequest> request = *it;
-        const vector<vector<int8_t>>& headers = request->args.headers();
+        const vector<vector<uint8_t>>& headers = request->args.headers();
 
-        for (vector<vector<int8_t>>::const_iterator buf=headers.begin(); buf!=headers.end(); buf++) {
+        for (vector<vector<uint8_t>>::const_iterator buf=headers.begin(); buf!=headers.end(); buf++) {
             if (buf->empty()) continue;
 
             // So the idea is only requests with negative fd are written to dropbox file.

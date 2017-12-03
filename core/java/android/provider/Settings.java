@@ -8651,6 +8651,12 @@ public final class Settings {
                 "wifi_scan_always_enabled";
 
         /**
+         * Whether soft AP will shut down after a timeout period when no devices are connected.
+         * @hide
+         */
+        public static final String SOFT_AP_TIMEOUT_ENABLED = "soft_ap_timeout_enabled";
+
+        /**
          * Value to specify if Wi-Fi Wakeup feature is enabled.
          *
          * Type: int (0 for false, 1 for true)
@@ -10430,14 +10436,6 @@ public final class Settings {
                 "location_settings_link_to_permissions_enabled";
 
         /**
-         * Flag to enable use of RefactoredBackupManagerService.
-         *
-         * @hide
-         */
-        public static final String BACKUP_REFACTORED_SERVICE_DISABLED =
-            "backup_refactored_service_disabled";
-
-        /**
          * Flag to set the waiting time for euicc factory reset inside System > Settings
          * Type: long
          *
@@ -10501,7 +10499,8 @@ public final class Settings {
             LOW_POWER_MODE_TRIGGER_LEVEL,
             BLUETOOTH_ON,
             PRIVATE_DNS_MODE,
-            PRIVATE_DNS_SPECIFIER
+            PRIVATE_DNS_SPECIFIER,
+            SOFT_AP_TIMEOUT_ENABLED
         };
 
         /** @hide */

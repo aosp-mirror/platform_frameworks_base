@@ -24,6 +24,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.graphics.drawable.Drawable;
 import android.os.LocaleList;
+import android.util.ArrayMap;
 import android.view.View.OnClickListener;
 import android.view.textclassifier.TextClassifier.EntityType;
 
@@ -32,6 +33,7 @@ import com.android.internal.util.Preconditions;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
+import java.util.Map;
 
 /**
  * Information for generating a widget to handle classified text.
@@ -95,7 +97,6 @@ public final class TextClassification {
     @NonNull private final List<Intent> mIntents;
     @NonNull private final List<OnClickListener> mOnClickListeners;
     @NonNull private final EntityConfidence<String> mEntityConfidence;
-    @NonNull private final List<String> mEntities;
     private int mLogType;
     @NonNull private final String mVersionInfo;
 
@@ -105,7 +106,7 @@ public final class TextClassification {
             @NonNull List<String> labels,
             @NonNull List<Intent> intents,
             @NonNull List<OnClickListener> onClickListeners,
-            @NonNull EntityConfidence<String> entityConfidence,
+            @NonNull Map<String, Float> entityConfidence,
             int logType,
             @NonNull String versionInfo) {
         Preconditions.checkArgument(labels.size() == intents.size());
@@ -117,7 +118,6 @@ public final class TextClassification {
         mIntents = intents;
         mOnClickListeners = onClickListeners;
         mEntityConfidence = new EntityConfidence<>(entityConfidence);
-        mEntities = mEntityConfidence.getEntities();
         mLogType = logType;
         mVersionInfo = versionInfo;
     }
@@ -135,7 +135,7 @@ public final class TextClassification {
      */
     @IntRange(from = 0)
     public int getEntityCount() {
-        return mEntities.size();
+        return mEntityConfidence.getEntities().size();
     }
 
     /**
@@ -147,7 +147,7 @@ public final class TextClassification {
      */
     @NonNull
     public @EntityType String getEntity(int index) {
-        return mEntities.get(index);
+        return mEntityConfidence.getEntities().get(index);
     }
 
     /**
@@ -311,8 +311,7 @@ public final class TextClassification {
         @NonNull private final List<String> mLabels = new ArrayList<>();
         @NonNull private final List<Intent> mIntents = new ArrayList<>();
         @NonNull private final List<OnClickListener> mOnClickListeners = new ArrayList<>();
-        @NonNull private final EntityConfidence<String> mEntityConfidence =
-                new EntityConfidence<>();
+        @NonNull private final Map<String, Float> mEntityConfidence = new ArrayMap<>();
         private int mLogType;
         @NonNull private String mVersionInfo = "";
 
@@ -334,7 +333,7 @@ public final class TextClassification {
         public Builder setEntityType(
                 @NonNull @EntityType String type,
                 @FloatRange(from = 0.0, to = 1.0) float confidenceScore) {
-            mEntityConfidence.setEntityType(type, confidenceScore);
+            mEntityConfidence.put(type, confidenceScore);
             return this;
         }
 

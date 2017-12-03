@@ -142,7 +142,7 @@ void MetricsManager::onLogEvent(const LogEvent& event) {
                     // metric cares about sliced conditions, and it may have changed. Send
                     // notification, and the metric can query the sliced conditions that are
                     // interesting to it.
-                } else if (mAllMetricProducers[metricIndex]->isConditionSliced()) {
+                } else {
                     mAllMetricProducers[metricIndex]->onSlicedConditionMayChange(eventTime);
                 }
             }
@@ -159,8 +159,8 @@ void MetricsManager::onLogEvent(const LogEvent& event) {
                 auto& metricList = pair->second;
                 for (const int metricIndex : metricList) {
                     // pushed metrics are never scheduled pulls
-                    mAllMetricProducers[metricIndex]->onMatchedLogEvent(
-                        i, event, false /* schedulePull */);
+                    mAllMetricProducers[metricIndex]->onMatchedLogEvent(i, event,
+                                                                        false /* schedulePull */);
                 }
             }
         }

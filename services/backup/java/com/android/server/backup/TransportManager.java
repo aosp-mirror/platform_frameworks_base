@@ -16,9 +16,10 @@
 
 package com.android.server.backup;
 
+import static com.android.internal.annotations.VisibleForTesting.Visibility.PACKAGE;
+
 import android.annotation.Nullable;
 import android.app.backup.BackupManager;
-import android.app.backup.BackupTransport;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
@@ -54,6 +55,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.function.Predicate;
 
 /**
  * Handles in-memory bookkeeping of all BackupTransport objects.
@@ -80,11 +82,8 @@ public class TransportManager {
      * This listener is called after we bind to any transport. If it returns true, this is a valid
      * transport.
      */
-    private final TransportBoundListener mTransportBoundListener;
+    private TransportBoundListener mTransportBoundListener;
 
-    private String mCurrentTransportName;
-
-    /** Lock on this before accessing mValidTransports and mBoundTransports. */
     private final Object mTransportLock = new Object();
 
     /**
@@ -98,9 +97,18 @@ public class TransportManager {
     @GuardedBy("mTransportLock")
     private final Map<String, ComponentName> mBoundTransports = new ArrayMap<>();
 
-    /** Names of transports we've bound to at least once */
+    /** @see #getEligibleTransportComponents() */
     @GuardedBy("mTransportLock")
-    private final Map<String, ComponentName> mTransportsByName = new ArrayMap<>();
+    private final Set<ComponentName> mEligibleTransports = new ArraySet<>();
+
+    /** @see #getRegisteredTransportNames() */
+    @GuardedBy("mTransportLock")
+    private final Map<ComponentName, TransportDescription> mRegisteredTransportsDescriptionMap =
+            new ArrayMap<>();
+
+    @GuardedBy("mTransportLock")
+    private volatile String mCurrentTransportName;
+
 
     /**
      * Callback interface for {@link #ensureTransportReady(ComponentName, TransportReadyCallback)}.
@@ -118,8 +126,21 @@ public class TransportManager {
         void onFailure(int reason);
     }
 
-    TransportManager(Context context, Set<ComponentName> whitelist, String defaultTransport,
-            TransportBoundListener listener, Looper looper) {
+    TransportManager(
+            Context context,
+            Set<ComponentName> whitelist,
+            String defaultTransport,
+            TransportBoundListener listener,
+            Looper looper) {
+        this(context, whitelist, defaultTransport, looper);
+        mTransportBoundListener = listener;
+    }
+
+    TransportManager(
+            Context context,
+            Set<ComponentName> whitelist,
+            String defaultTransport,
+            Looper looper) {
         mContext = context;
         mPackageManager = context.getPackageManager();
         if (whitelist != null) {
@@ -128,9 +149,12 @@ public class TransportManager {
             mTransportWhitelist = new ArraySet<>();
         }
         mCurrentTransportName = defaultTransport;
-        mTransportBoundListener = listener;
         mHandler = new RebindOnTimeoutHandler(looper);
         mTransportClientManager = new TransportClientManager(context);
+    }
+
+    public void setTransportBoundListener(TransportBoundListener transportBoundListener) {
+        mTransportBoundListener = transportBoundListener;
     }
 
     void onPackageAdded(String packageName) {
@@ -161,6 +185,8 @@ public class TransportManager {
                     }
                 }
             }
+            removeTransportsIfLocked(
+                    componentName -> packageName.equals(componentName.getPackageName()));
         }
     }
 
@@ -168,8 +194,10 @@ public class TransportManager {
         synchronized (mTransportLock) {
             // Remove all changed components from mValidTransports. We'll bind to them again
             // and re-add them if still valid.
+            Set<ComponentName> transportsToBeRemoved = new ArraySet<>();
             for (String component : components) {
                 ComponentName componentName = new ComponentName(packageName, component);
+                transportsToBeRemoved.add(componentName);
                 TransportConnection removed = mValidTransports.remove(componentName);
                 if (removed != null) {
                     mContext.unbindService(removed);
@@ -177,8 +205,15 @@ public class TransportManager {
                             componentName.flattenToShortString());
                 }
             }
+            removeTransportsIfLocked(transportsToBeRemoved::contains);
             bindToAllInternal(packageName, components);
         }
+    }
+
+    @GuardedBy("mTransportLock")
+    private void removeTransportsIfLocked(Predicate<ComponentName> filter) {
+        mEligibleTransports.removeIf(filter);
+        mRegisteredTransportsDescriptionMap.keySet().removeIf(filter);
     }
 
     public IBackupTransport getTransportBinder(String transportName) {
@@ -213,39 +248,64 @@ public class TransportManager {
     }
 
     /**
-     * Returns the transport name associated with {@param transportClient} or {@code null} if not
+     * Returns the transport name associated with {@param transportComponent} or {@code null} if not
      * found.
      */
     @Nullable
-    public String getTransportName(TransportClient transportClient) {
-        ComponentName transportComponent = transportClient.getTransportComponent();
+    public String getTransportName(ComponentName transportComponent) {
         synchronized (mTransportLock) {
-            for (Map.Entry<String, ComponentName> transportEntry : mTransportsByName.entrySet()) {
-                if (transportEntry.getValue().equals(transportComponent)) {
-                    return transportEntry.getKey();
-                }
+            TransportDescription description =
+                    mRegisteredTransportsDescriptionMap.get(transportComponent);
+            if (description == null) {
+                Slog.e(TAG, "Trying to find name of unregistered transport " + transportComponent);
+                return null;
             }
-            return null;
+            return description.name;
         }
     }
 
-    /**
-     * Returns a {@link TransportClient} for {@param transportName} or {@code null} if not found.
-     *
-     * @param transportName The name of the transport as returned by {@link BackupTransport#name()}.
-     * @param caller A {@link String} identifying the caller for logging/debugging purposes. Check
-     *     {@link TransportClient#connectAsync(TransportConnectionListener, String)} for more
-     *     details.
-     * @return A {@link TransportClient} or null if not found.
-     */
+    @GuardedBy("mTransportLock")
+    @Nullable
+    private ComponentName getRegisteredTransportComponentLocked(String transportName) {
+        Map.Entry<ComponentName, TransportDescription> entry =
+                getRegisteredTransportEntryLocked(transportName);
+        return (entry == null) ? null : entry.getKey();
+    }
+
+    @GuardedBy("mTransportLock")
+    @Nullable
+    private TransportDescription getRegisteredTransportDescriptionLocked(String transportName) {
+        Map.Entry<ComponentName, TransportDescription> entry =
+                getRegisteredTransportEntryLocked(transportName);
+        return (entry == null) ? null : entry.getValue();
+    }
+
+    @GuardedBy("mTransportLock")
+    @Nullable
+    private Map.Entry<ComponentName, TransportDescription> getRegisteredTransportEntryLocked(
+            String transportName) {
+        for (Map.Entry<ComponentName, TransportDescription> entry
+                : mRegisteredTransportsDescriptionMap.entrySet()) {
+            TransportDescription description = entry.getValue();
+            if (transportName.equals(description.name)) {
+                return entry;
+            }
+        }
+        return null;
+    }
+
     @Nullable
     public TransportClient getTransportClient(String transportName, String caller) {
-        ComponentName transportComponent = mTransportsByName.get(transportName);
-        if (transportComponent == null) {
-            Slog.w(TAG, "Transport " + transportName + " not registered");
-            return null;
+        synchronized (mTransportLock) {
+            ComponentName component = getRegisteredTransportComponentLocked(transportName);
+            if (component == null) {
+                Slog.w(TAG, "Transport " + transportName + " not registered");
+                return null;
+            }
+            TransportDescription description = mRegisteredTransportsDescriptionMap.get(component);
+            return mTransportClientManager.getTransportClient(
+                    component, description.transportDirName, caller);
         }
-        return mTransportClientManager.getTransportClient(transportComponent, caller);
     }
 
     /**
@@ -285,12 +345,65 @@ public class TransportManager {
         }
     }
 
-    String getCurrentTransportName() {
-        return mCurrentTransportName;
+    /**
+     * An *eligible* transport is a service component that satisfies intent with action
+     * android.backup.TRANSPORT_HOST and returns true for
+     * {@link #isTransportTrusted(ComponentName)}. It may be registered or not registered.
+     * This method returns the {@link ComponentName}s of those transports.
+     */
+    ComponentName[] getEligibleTransportComponents() {
+        synchronized (mTransportLock) {
+            return mEligibleTransports.toArray(new ComponentName[mEligibleTransports.size()]);
+        }
     }
 
     Set<ComponentName> getTransportWhitelist() {
         return mTransportWhitelist;
+    }
+
+    /**
+     * A *registered* transport is an eligible transport that has been successfully connected and
+     * that returned true for method
+     * {@link TransportBoundListener#onTransportBound(IBackupTransport)} of TransportBoundListener
+     * provided in the constructor. This method returns the names of the registered transports.
+     */
+    String[] getRegisteredTransportNames() {
+        synchronized (mTransportLock) {
+            return mRegisteredTransportsDescriptionMap.values().stream()
+                    .map(transportDescription -> transportDescription.name)
+                    .toArray(String[]::new);
+        }
+    }
+
+    /**
+     * Updates given values for the transport already registered and identified with
+     * {@param transportComponent}. If the transport is not registered it will log and return.
+     */
+    public void describeTransport(
+            ComponentName transportComponent,
+            String name,
+            @Nullable Intent configurationIntent,
+            String currentDestinationString,
+            @Nullable Intent dataManagementIntent,
+            String dataManagementLabel) {
+        synchronized (mTransportLock) {
+            TransportDescription description =
+                    mRegisteredTransportsDescriptionMap.get(transportComponent);
+            if (description == null) {
+                Slog.e(TAG, "Transport " + name + " not registered tried to change description");
+                return;
+            }
+            description.name = name;
+            description.configurationIntent = configurationIntent;
+            description.currentDestinationString = currentDestinationString;
+            description.dataManagementIntent = dataManagementIntent;
+            description.dataManagementLabel = dataManagementLabel;
+        }
+    }
+
+    @Nullable
+    String getCurrentTransportName() {
+        return mCurrentTransportName;
     }
 
     String selectTransport(String transport) {
@@ -315,7 +428,12 @@ public class TransportManager {
         }
     }
 
-    void registerAllTransports() {
+
+    // This is for mocking, Mockito can't mock if package-protected and in the same package but
+    // different class loaders. Checked with the debugger and class loaders are different
+    // See https://github.com/mockito/mockito/issues/796
+    @VisibleForTesting(visibility = PACKAGE)
+    public void registerAllTransports() {
         bindToAllInternal(null /* all packages */, null /* all components */);
     }
 
@@ -391,6 +509,9 @@ public class TransportManager {
         Slog.d(TAG, "Binding to transport: " + transportComponentName.flattenToShortString());
         // TODO: b/22388012 (Multi user backup and restore)
         TransportConnection connection = new TransportConnection(transportComponentName);
+        synchronized (mTransportLock) {
+            mEligibleTransports.add(transportComponentName);
+        }
         if (bindToTransport(transportComponentName, connection)) {
             synchronized (mTransportLock) {
                 mValidTransports.put(transportComponentName, connection);
@@ -407,9 +528,25 @@ public class TransportManager {
                 createSystemUserHandle());
     }
 
+    /** If {@link RemoteException} is thrown the transport is guaranteed to not be registered. */
+    private void registerTransport(ComponentName transportComponent, IBackupTransport transport)
+            throws RemoteException {
+        synchronized (mTransportLock) {
+            String name = transport.name();
+            TransportDescription description = new TransportDescription(
+                    name,
+                    transport.transportDirName(),
+                    transport.configurationIntent(),
+                    transport.currentDestinationString(),
+                    transport.dataManagementIntent(),
+                    transport.dataManagementLabel());
+            mRegisteredTransportsDescriptionMap.put(transportComponent, description);
+        }
+    }
+
     private class TransportConnection implements ServiceConnection {
 
-        // Hold mTransportsLock to access these fields so as to provide a consistent view of them.
+        // Hold mTransportLock to access these fields so as to provide a consistent view of them.
         private volatile IBackupTransport mBinder;
         private final List<TransportReadyCallback> mListeners = new ArrayList<>();
         private volatile String mTransportName;
@@ -433,7 +570,22 @@ public class TransportManager {
                     mTransportName = mBinder.name();
                     // BackupManager requests some fields from the transport. If they are
                     // invalid, throw away this transport.
-                    success = mTransportBoundListener.onTransportBound(mBinder);
+                    final boolean valid;
+                    if (mTransportBoundListener != null) {
+                        valid = mTransportBoundListener.onTransportBound(mBinder);
+                    } else {
+                        Slog.w(TAG, "setTransportBoundListener() not called, assuming transport "
+                                + component + " valid");
+                        valid = true;
+                    }
+                    if (valid) {
+                        // We're now using the always-bound connection to do the registration but
+                        // when we remove the always-bound code this will be in the first binding
+                        // TODO: Move registration to first binding
+                        registerTransport(component, mBinder);
+                        // If registerTransport() hasn't thrown...
+                        success = true;
+                    }
                 } catch (RemoteException e) {
                     success = false;
                     Slog.e(TAG, "Couldn't get transport name.", e);
@@ -443,7 +595,6 @@ public class TransportManager {
                     String componentShortString = component.flattenToShortString().intern();
                     if (success) {
                         Slog.d(TAG, "Bound to transport: " + componentShortString);
-                        mTransportsByName.put(mTransportName, component);
                         mBoundTransports.put(mTransportName, component);
                         for (TransportReadyCallback listener : mListeners) {
                             listener.onSuccess(mTransportName);
@@ -457,6 +608,7 @@ public class TransportManager {
                                 componentShortString, 0);
                         mContext.unbindService(this);
                         mValidTransports.remove(component);
+                        mEligibleTransports.remove(component);
                         mBinder = null;
                         for (TransportReadyCallback listener : mListeners) {
                             listener.onFailure(BackupManager.ERROR_TRANSPORT_INVALID);
@@ -600,5 +752,29 @@ public class TransportManager {
     // TODO: Get rid of this once Robolectric is updated.
     public static UserHandle createSystemUserHandle() {
         return new UserHandle(UserHandle.USER_SYSTEM);
+    }
+
+    private static class TransportDescription {
+        private String name;
+        private final String transportDirName;
+        @Nullable private Intent configurationIntent;
+        private String currentDestinationString;
+        @Nullable private Intent dataManagementIntent;
+        private String dataManagementLabel;
+
+        private TransportDescription(
+                String name,
+                String transportDirName,
+                @Nullable Intent configurationIntent,
+                String currentDestinationString,
+                @Nullable Intent dataManagementIntent,
+                String dataManagementLabel) {
+            this.name = name;
+            this.transportDirName = transportDirName;
+            this.configurationIntent = configurationIntent;
+            this.currentDestinationString = currentDestinationString;
+            this.dataManagementIntent = dataManagementIntent;
+            this.dataManagementLabel = dataManagementLabel;
+        }
     }
 }

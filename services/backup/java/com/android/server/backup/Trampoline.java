@@ -16,6 +16,7 @@
 
 package com.android.server.backup;
 
+import android.annotation.Nullable;
 import android.app.backup.BackupManager;
 import android.app.backup.IBackupManager;
 import android.app.backup.IBackupObserver;
@@ -31,14 +32,12 @@ import android.os.Environment;
 import android.os.Handler;
 import android.os.HandlerThread;
 import android.os.IBinder;
-import android.os.Looper;
 import android.os.ParcelFileDescriptor;
 import android.os.Process;
 import android.os.RemoteException;
 import android.os.SystemProperties;
 import android.os.Trace;
 import android.os.UserHandle;
-import android.provider.Settings;
 import android.util.Slog;
 
 import com.android.internal.util.DumpUtils;
@@ -88,23 +87,8 @@ public class Trampoline extends IBackupManager.Stub {
         mSuppressFile.getParentFile().mkdirs();
     }
 
-    protected BackupManagerServiceInterface createService() {
-        if (isRefactoredServiceEnabled()) {
-            Slog.i(TAG, "Instantiating RefactoredBackupManagerService");
-            return createRefactoredBackupManagerService();
-        }
-
-        Slog.i(TAG, "Instantiating BackupManagerService");
-        return createBackupManagerService();
-    }
-
     protected boolean isBackupDisabled() {
         return SystemProperties.getBoolean(BACKUP_DISABLE_PROPERTY, false);
-    }
-
-    protected boolean isRefactoredServiceEnabled() {
-        return Settings.Global.getInt(mContext.getContentResolver(),
-                Settings.Global.BACKUP_REFACTORED_SERVICE_DISABLED, 0) == 0;
     }
 
     protected int binderGetCallingUid() {
@@ -117,11 +101,7 @@ public class Trampoline extends IBackupManager.Stub {
     }
 
     protected BackupManagerServiceInterface createRefactoredBackupManagerService() {
-        return new RefactoredBackupManagerService(mContext, this, mHandlerThread);
-    }
-
-    protected BackupManagerServiceInterface createBackupManagerService() {
-        return new BackupManagerService(mContext, this, mHandlerThread);
+        return RefactoredBackupManagerService.create(mContext, this, mHandlerThread);
     }
 
     // internal control API
@@ -137,7 +117,7 @@ public class Trampoline extends IBackupManager.Stub {
 
             synchronized (this) {
                 if (!mSuppressFile.exists()) {
-                    mService = createService();
+                    mService = createRefactoredBackupManagerService();
                 } else {
                     Slog.i(TAG, "Backup inactive in user " + whichUser);
                 }
@@ -182,7 +162,7 @@ public class Trampoline extends IBackupManager.Stub {
                     Slog.i(TAG, "Making backup "
                             + (makeActive ? "" : "in") + "active in user " + userHandle);
                     if (makeActive) {
-                        mService = createService();
+                        mService = createRefactoredBackupManagerService();
                         mSuppressFile.delete();
                     } else {
                         mService = null;
@@ -375,6 +355,26 @@ public class Trampoline extends IBackupManager.Stub {
     public String[] getTransportWhitelist() {
         BackupManagerServiceInterface svc = mService;
         return (svc != null) ? svc.getTransportWhitelist() : null;
+    }
+
+    @Override
+    public void updateTransportAttributes(
+            ComponentName transportComponent,
+            String name,
+            @Nullable Intent configurationIntent,
+            String currentDestinationString,
+            @Nullable Intent dataManagementIntent,
+            String dataManagementLabel) {
+        BackupManagerServiceInterface svc = mService;
+        if (svc != null) {
+            svc.updateTransportAttributes(
+                    transportComponent,
+                    name,
+                    configurationIntent,
+                    currentDestinationString,
+                    dataManagementIntent,
+                    dataManagementLabel);
+        }
     }
 
     @Override

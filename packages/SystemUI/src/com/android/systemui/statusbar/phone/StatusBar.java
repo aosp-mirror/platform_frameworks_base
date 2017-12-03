@@ -16,7 +16,6 @@
 
 package com.android.systemui.statusbar.phone;
 
-import static android.app.StatusBarManager.DISABLE2_NOTIFICATION_SHADE;
 import static android.app.StatusBarManager.WINDOW_STATE_HIDDEN;
 import static android.app.StatusBarManager.WINDOW_STATE_SHOWING;
 import static android.app.StatusBarManager.windowStateToString;
@@ -25,6 +24,9 @@ import static android.app.WindowConfiguration.WINDOWING_MODE_FULLSCREEN_OR_SPLIT
 import static com.android.systemui.keyguard.WakefulnessLifecycle.WAKEFULNESS_ASLEEP;
 import static com.android.systemui.keyguard.WakefulnessLifecycle.WAKEFULNESS_AWAKE;
 import static com.android.systemui.keyguard.WakefulnessLifecycle.WAKEFULNESS_WAKING;
+import static com.android.systemui.statusbar.NotificationLockscreenUserManager
+        .NOTIFICATION_UNLOCKED_BY_WORK_CHALLENGE_ACTION;
+import static com.android.systemui.statusbar.NotificationLockscreenUserManager.PERMISSION_SELF;
 import static com.android.systemui.statusbar.NotificationMediaManager.DEBUG_MEDIA;
 import static com.android.systemui.statusbar.notification.NotificationInflater.InflationCallback;
 import static com.android.systemui.statusbar.phone.BarTransitions.MODE_LIGHTS_OUT;
@@ -108,7 +110,6 @@ import android.util.EventLog;
 import android.util.Log;
 import android.util.Slog;
 import android.util.SparseArray;
-import android.util.SparseBooleanArray;
 import android.view.Display;
 import android.view.IWindowManager;
 import android.view.KeyEvent;
@@ -127,7 +128,6 @@ import android.widget.DateTimeView;
 import android.widget.ImageView;
 import android.widget.RemoteViews;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.colorextraction.ColorExtractor;
@@ -153,7 +153,6 @@ import com.android.systemui.Dependency;
 import com.android.systemui.EventLogTags;
 import com.android.systemui.ForegroundServiceController;
 import com.android.systemui.Interpolators;
-import com.android.systemui.OverviewProxyService;
 import com.android.systemui.Prefs;
 import com.android.systemui.R;
 import com.android.systemui.RecentsComponent;
@@ -201,6 +200,7 @@ import com.android.systemui.statusbar.NotificationData;
 import com.android.systemui.statusbar.NotificationData.Entry;
 import com.android.systemui.statusbar.NotificationGutsManager;
 import com.android.systemui.statusbar.NotificationInfo;
+import com.android.systemui.statusbar.NotificationLockscreenUserManager;
 import com.android.systemui.statusbar.NotificationMediaManager;
 import com.android.systemui.statusbar.NotificationPresenter;
 import com.android.systemui.statusbar.NotificationShelf;
@@ -238,7 +238,6 @@ import com.android.systemui.statusbar.stack.NotificationStackScrollLayout
         .OnChildLocationsChangedListener;
 import com.android.systemui.util.NotificationChannels;
 import com.android.systemui.util.leak.LeakDetector;
-import com.android.systemui.util.wakelock.WakeLock;
 import com.android.systemui.volume.VolumeComponent;
 
 import java.io.FileDescriptor;
@@ -267,7 +266,6 @@ public class StatusBar extends SystemUI implements DemoMode,
             = SystemProperties.getBoolean("debug.child_notifs", true);
     public static final boolean FORCE_REMOTE_INPUT_HISTORY =
             SystemProperties.getBoolean("debug.force_remoteinput_history", true);
-    private static final boolean ENABLE_LOCK_SCREEN_ALLOW_REMOTE_INPUT = false;
 
     protected static final int MSG_HIDE_RECENT_APPS = 1020;
     protected static final int MSG_PRELOAD_RECENT_APPS = 1022;
@@ -278,7 +276,6 @@ public class StatusBar extends SystemUI implements DemoMode,
     protected static final boolean ENABLE_HEADS_UP = true;
     protected static final String SETTING_HEADS_UP_TICKER = "ticker_gets_heads_up";
 
-    private static final String PERMISSION_SELF = "com.android.systemui.permission.SELF";
 
     // Should match the values in PhoneWindowManager
     public static final String SYSTEM_DIALOG_REASON_HOME_KEY = "homekey";
@@ -289,8 +286,6 @@ public class StatusBar extends SystemUI implements DemoMode,
             "com.android.systemui.statusbar.banner_action_cancel";
     private static final String BANNER_ACTION_SETUP =
             "com.android.systemui.statusbar.banner_action_setup";
-    private static final String NOTIFICATION_UNLOCKED_BY_WORK_CHALLENGE_ACTION
-            = "com.android.systemui.statusbar.work_challenge_unlocked_notification_action";
     public static final String TAG = "StatusBar";
     public static final boolean DEBUG = false;
     public static final boolean SPEW = false;
@@ -380,8 +375,6 @@ public class StatusBar extends SystemUI implements DemoMode,
      */
     protected int mState;
     protected boolean mBouncerShowing;
-    protected boolean mShowLockscreenNotifications;
-    protected boolean mAllowLockscreenRemoteInput;
 
     private PhoneStatusBarPolicy mIconPolicy;
 
@@ -544,6 +537,7 @@ public class StatusBar extends SystemUI implements DemoMode,
             new PorterDuffXfermode(PorterDuff.Mode.SRC_OVER);
 
     private NotificationMediaManager mMediaManager;
+    protected NotificationLockscreenUserManager mLockscreenUserManager;
 
     /** Keys of notifications currently visible to the user. */
     private final ArraySet<NotificationVisibility> mCurrentlyVisibleNotifications =
@@ -742,6 +736,8 @@ public class StatusBar extends SystemUI implements DemoMode,
         mSystemServicesProxy = SystemServicesProxy.getInstance(mContext);
         mOverlayManager = IOverlayManager.Stub.asInterface(
                 ServiceManager.getService(Context.OVERLAY_SERVICE));
+        mLockscreenUserManager = Dependency.get(NotificationLockscreenUserManager.class);
+        mGutsManager = Dependency.get(NotificationGutsManager.class);
 
         mColorExtractor = Dependency.get(SysuiColorExtractor.class);
         mColorExtractor.addOnColorsChangedListener(this);
@@ -777,26 +773,6 @@ public class StatusBar extends SystemUI implements DemoMode,
 
         mDeviceProvisionedController = Dependency.get(DeviceProvisionedController.class);
         mDeviceProvisionedController.addCallback(mDeviceProvisionedListener);
-        mContext.getContentResolver().registerContentObserver(
-                Settings.Global.getUriFor(Settings.Global.ZEN_MODE), false,
-                mSettingsObserver);
-        mContext.getContentResolver().registerContentObserver(
-                Settings.Secure.getUriFor(Settings.Secure.LOCK_SCREEN_SHOW_NOTIFICATIONS), false,
-                mLockscreenSettingsObserver,
-                UserHandle.USER_ALL);
-        if (ENABLE_LOCK_SCREEN_ALLOW_REMOTE_INPUT) {
-            mContext.getContentResolver().registerContentObserver(
-                    Settings.Secure.getUriFor(Settings.Secure.LOCK_SCREEN_ALLOW_REMOTE_INPUT),
-                    false,
-                    mSettingsObserver,
-                    UserHandle.USER_ALL);
-        }
-
-        mContext.getContentResolver().registerContentObserver(
-                Settings.Secure.getUriFor(Settings.Secure.LOCK_SCREEN_ALLOW_PRIVATE_NOTIFICATIONS),
-                true,
-                mLockscreenSettingsObserver,
-                UserHandle.USER_ALL);
 
         mBarService = IStatusBarService.Stub.asInterface(
                 ServiceManager.getService(Context.STATUS_BAR_SERVICE));
@@ -808,6 +784,7 @@ public class StatusBar extends SystemUI implements DemoMode,
         mLockPatternUtils = new LockPatternUtils(mContext);
 
         mMediaManager = new NotificationMediaManager(this, mContext);
+        mLockscreenUserManager.setUpWithPresenter(this);
 
         // Connect in to the status bar manager service
         mCommandQueue = getComponent(CommandQueue.class);
@@ -828,7 +805,6 @@ public class StatusBar extends SystemUI implements DemoMode,
 
         createAndAddWindows();
 
-        mSettingsObserver.onChange(false); // set up
         mCommandQueue.disable(switches[0], switches[6], false /* animate */);
         setSystemUiVisibility(switches[1], switches[7], switches[8], 0xffffffff,
                 fullscreenStackBounds, dockedStackBounds);
@@ -863,29 +839,13 @@ public class StatusBar extends SystemUI implements DemoMode,
                    ));
         }
 
-        mCurrentUserId = ActivityManager.getCurrentUser();
-        setHeadsUpUser(mCurrentUserId);
-
-        IntentFilter filter = new IntentFilter();
-        filter.addAction(Intent.ACTION_USER_SWITCHED);
-        filter.addAction(Intent.ACTION_USER_ADDED);
-        filter.addAction(Intent.ACTION_USER_PRESENT);
-        filter.addAction(Intent.ACTION_USER_UNLOCKED);
-        mContext.registerReceiver(mBaseBroadcastReceiver, filter);
+        setHeadsUpUser(mLockscreenUserManager.getCurrentUserId());
 
         IntentFilter internalFilter = new IntentFilter();
-        internalFilter.addAction(NOTIFICATION_UNLOCKED_BY_WORK_CHALLENGE_ACTION);
         internalFilter.addAction(BANNER_ACTION_CANCEL);
         internalFilter.addAction(BANNER_ACTION_SETUP);
-        mContext.registerReceiver(mBaseBroadcastReceiver, internalFilter, PERMISSION_SELF, null);
-
-        IntentFilter allUsersFilter = new IntentFilter();
-        allUsersFilter.addAction(
-                DevicePolicyManager.ACTION_DEVICE_POLICY_MANAGER_STATE_CHANGED);
-        allUsersFilter.addAction(Intent.ACTION_DEVICE_LOCKED_CHANGED);
-        mContext.registerReceiverAsUser(mAllUsersReceiver, UserHandle.ALL, allUsersFilter,
-                null, null);
-        updateCurrentProfilesCache();
+        mContext.registerReceiver(mBannerActionBroadcastReceiver, internalFilter, PERMISSION_SELF,
+                null);
 
         IVrManager vrManager = IVrManager.Stub.asInterface(ServiceManager.getService(
                 Context.VR_SERVICE));
@@ -899,7 +859,6 @@ public class StatusBar extends SystemUI implements DemoMode,
 
         // Lastly, call to the icon policy to install/update all the icons.
         mIconPolicy = new PhoneStatusBarPolicy(mContext, mIconController);
-        mSettingsObserver.onChange(false); // set up
 
         mHeadsUpObserver.onChange(true); // set up
         if (ENABLE_HEADS_UP) {
@@ -944,8 +903,7 @@ public class StatusBar extends SystemUI implements DemoMode,
         // into fragments, but the rest here, it leaves some awkward lifecycle and whatnot.
         mNotificationPanel = mStatusBarWindow.findViewById(R.id.notification_panel);
         mStackScroller = mStatusBarWindow.findViewById(R.id.notification_stack_scroller);
-        mGutsManager = new NotificationGutsManager(this, mStackScroller,
-                mCheckSaveListener, mContext,
+        mGutsManager.setUp(this, mStackScroller, mCheckSaveListener,
                 key -> {
                     try {
                         mBarService.onNotificationSettingsViewed(key);
@@ -1431,7 +1389,7 @@ public class StatusBar extends SystemUI implements DemoMode,
                 }
             }
             try {
-                mBarService.onClearAllNotifications(mCurrentUserId);
+                mBarService.onClearAllNotifications(mLockscreenUserManager.getCurrentUserId());
             } catch (Exception ex) {
             }
         });
@@ -1469,15 +1427,6 @@ public class StatusBar extends SystemUI implements DemoMode,
             currentDelay = Math.max(50, currentDelay - rowDelayDecrement);
             totalDelay += currentDelay;
         }
-    }
-
-    protected void setZenMode(int mode) {
-        // start old BaseStatusBar.setZenMode().
-        if (isDeviceProvisioned()) {
-            mZenMode = mode;
-            updateNotifications();
-        }
-        // end old BaseStatusBar.setZenMode().
     }
 
     protected void startKeyguard() {
@@ -1876,12 +1825,17 @@ public class StatusBar extends SystemUI implements DemoMode,
             int userId = ent.notification.getUserId();
 
             // Display public version of the notification if we need to redact.
-            boolean devicePublic = isLockscreenPublicMode(mCurrentUserId);
-            boolean userPublic = devicePublic || isLockscreenPublicMode(userId);
-            boolean needsRedaction = needsRedaction(ent);
+            // TODO: This area uses a lot of calls into NotificationLockscreenUserManager.
+            // We can probably move some of this code there.
+            boolean devicePublic = mLockscreenUserManager.isLockscreenPublicMode(
+                    mLockscreenUserManager.getCurrentUserId());
+            boolean userPublic = devicePublic
+                    || mLockscreenUserManager.isLockscreenPublicMode(userId);
+            boolean needsRedaction = mLockscreenUserManager.needsRedaction(ent);
             boolean sensitive = userPublic && needsRedaction;
             boolean deviceSensitive = devicePublic
-                    && !userAllowsPrivateNotificationsInPublic(mCurrentUserId);
+                    && !mLockscreenUserManager.userAllowsPrivateNotificationsInPublic(
+                    mLockscreenUserManager.getCurrentUserId());
             ent.row.setSensitive(sensitive, deviceSensitive);
             ent.row.setNeedsRedaction(needsRedaction);
             if (mGroupManager.isChildInGroupWithSummary(ent.row.getStatusBarNotification())) {
@@ -1971,21 +1925,6 @@ public class StatusBar extends SystemUI implements DemoMode,
 
         // Let's also update the icons
         mNotificationIconAreaController.updateNotificationIcons(mNotificationData);
-    }
-
-    /** @return true if the entry needs redaction when on the lockscreen. */
-    private boolean needsRedaction(Entry ent) {
-        int userId = ent.notification.getUserId();
-
-        boolean currentUserWantsRedaction = !userAllowsPrivateNotificationsInPublic(mCurrentUserId);
-        boolean notiUserWantsRedaction = !userAllowsPrivateNotificationsInPublic(userId);
-        boolean redactedLockscreen = currentUserWantsRedaction || notiUserWantsRedaction;
-
-        boolean notificationRequestsRedaction =
-                ent.notification.getNotification().visibility == Notification.VISIBILITY_PRIVATE;
-        boolean userForcesRedaction = packageHasVisibilityOverride(ent.notification.getKey());
-
-        return userForcesRedaction || notificationRequestsRedaction && redactedLockscreen;
     }
 
     /**
@@ -2090,9 +2029,6 @@ public class StatusBar extends SystemUI implements DemoMode,
         mQSPanel.clickTile(tile);
     }
 
-    private boolean packageHasVisibilityOverride(String key) {
-        return mNotificationData.getVisibilityOverride(key) == Notification.VISIBILITY_PRIVATE;
-    }
 
     private void updateClearAll() {
         if (!mClearAllEnabled) {
@@ -2694,7 +2630,7 @@ public class StatusBar extends SystemUI implements DemoMode,
         OverlayInfo themeInfo = null;
         try {
             themeInfo = mOverlayManager.getOverlayInfo("com.android.systemui.theme.dark",
-                    mCurrentUserId);
+                    mLockscreenUserManager.getCurrentUserId());
         } catch (RemoteException e) {
             e.printStackTrace();
         }
@@ -3333,13 +3269,11 @@ public class StatusBar extends SystemUI implements DemoMode,
         pw.println(BarTransitions.modeToString(mStatusBarMode));
         pw.print("  mDozing="); pw.println(mDozing);
         pw.print("  mZenMode=");
-        pw.println(Settings.Global.zenModeToString(mZenMode));
+        pw.println(Settings.Global.zenModeToString(Settings.Global.getInt(
+                mContext.getContentResolver(), Settings.Global.ZEN_MODE,
+                Settings.Global.ZEN_MODE_OFF)));
         pw.print("  mUseHeadsUp=");
         pw.println(mUseHeadsUp);
-        pw.print("  mGutsManager: ");
-        if (mGutsManager != null) {
-            mGutsManager.dump(fd, pw, args);
-        }
         if (mStatusBarView != null) {
             dumpBarTransitions(pw, "mStatusBarView", mStatusBarView.getBarTransitions());
         }
@@ -3484,7 +3418,7 @@ public class StatusBar extends SystemUI implements DemoMode,
         if (onlyProvisioned && !isDeviceProvisioned()) return;
 
         final boolean afterKeyguardGone = PreviewInflater.wouldLaunchResolverActivity(
-                mContext, intent, mCurrentUserId);
+                mContext, intent, mLockscreenUserManager.getCurrentUserId());
         Runnable runnable = () -> {
             mAssistManager.hideAssist();
             intent.setFlags(
@@ -3576,7 +3510,7 @@ public class StatusBar extends SystemUI implements DemoMode,
                 if (mRemoteInputController != null) {
                     mRemoteInputController.closeRemoteInputs();
                 }
-                if (isCurrentProfile(getSendingUserId())) {
+                if (mLockscreenUserManager.isCurrentProfile(getSendingUserId())) {
                     int flags = CommandQueue.FLAG_EXCLUDE_NONE;
                     String reason = intent.getStringExtra("reason");
                     if (reason != null && reason.equals(SYSTEM_DIALOG_REASON_RECENT_APPS)) {
@@ -3668,7 +3602,8 @@ public class StatusBar extends SystemUI implements DemoMode,
         mScreenPinningRequest.onConfigurationChanged();
     }
 
-    public void userSwitched(int newUserId) {
+    @Override
+    public void onUserSwitched(int newUserId) {
         // Begin old BaseStatusBar.userSwitched
         setHeadsUpUser(newUserId);
         // End old BaseStatusBar.userSwitched
@@ -3683,6 +3618,11 @@ public class StatusBar extends SystemUI implements DemoMode,
         updateNotificationShade();
         mMediaManager.clearCurrentMediaNotification();
         setLockscreenUser(newUserId);
+    }
+
+    @Override
+    public NotificationLockscreenUserManager getNotificationLockscreenUserManager() {
+        return mLockscreenUserManager;
     }
 
     protected void setLockscreenUser(int newUserId) {
@@ -3931,7 +3871,8 @@ public class StatusBar extends SystemUI implements DemoMode,
 
     public void destroy() {
         // Begin old BaseStatusBar.destroy().
-        mContext.unregisterReceiver(mBaseBroadcastReceiver);
+        mContext.unregisterReceiver(mBannerActionBroadcastReceiver);
+        mLockscreenUserManager.destroy();
         try {
             mNotificationListener.unregisterAsSystemService();
         } catch (RemoteException e) {
@@ -4337,18 +4278,21 @@ public class StatusBar extends SystemUI implements DemoMode,
         mKeyguardMonitor.notifyKeyguardDoneFading();
     }
 
+    // TODO: Move this to NotificationLockscreenUserManager.
     private void updatePublicMode() {
         final boolean showingKeyguard = mStatusBarKeyguardViewManager.isShowing();
         final boolean devicePublic = showingKeyguard
-                && mStatusBarKeyguardViewManager.isSecure(mCurrentUserId);
+                && mStatusBarKeyguardViewManager.isSecure(
+                        mLockscreenUserManager.getCurrentUserId());
 
         // Look for public mode users. Users are considered public in either case of:
         //   - device keyguard is shown in secure mode;
         //   - profile is locked with a work challenge.
-        for (int i = mCurrentProfiles.size() - 1; i >= 0; i--) {
-            final int userId = mCurrentProfiles.valueAt(i).id;
+        SparseArray<UserInfo> currentProfiles = mLockscreenUserManager.getCurrentProfiles();
+        for (int i = currentProfiles.size() - 1; i >= 0; i--) {
+            final int userId = currentProfiles.valueAt(i).id;
             boolean isProfilePublic = devicePublic;
-            if (!devicePublic && userId != mCurrentUserId) {
+            if (!devicePublic && userId != mLockscreenUserManager.getCurrentUserId()) {
                 // We can't rely on KeyguardManager#isDeviceLocked() for unified profile challenge
                 // due to a race condition where this code could be called before
                 // TrustManagerService updates its internal records, resulting in an incorrect
@@ -4358,7 +4302,7 @@ public class StatusBar extends SystemUI implements DemoMode,
                     isProfilePublic = mKeyguardManager.isDeviceLocked(userId);
                 }
             }
-            setLockscreenPublicMode(isProfilePublic, userId);
+            mLockscreenUserManager.setLockscreenPublicMode(isProfilePublic, userId);
         }
     }
 
@@ -4416,7 +4360,7 @@ public class StatusBar extends SystemUI implements DemoMode,
             mUiOffloadThread.submit(() -> {
                 try {
                     mOverlayManager.setEnabled("com.android.systemui.theme.dark",
-                            useDarkTheme, mCurrentUserId);
+                            useDarkTheme, mLockscreenUserManager.getCurrentUserId());
                 } catch (RemoteException e) {
                     Log.w(TAG, "Can't change theme", e);
                 }
@@ -4468,7 +4412,7 @@ public class StatusBar extends SystemUI implements DemoMode,
     public void updateStackScrollerState(boolean goingToFullShade, boolean fromShadeLocked) {
         if (mStackScroller == null) return;
         boolean onKeyguard = mState == StatusBarState.KEYGUARD;
-        boolean publicMode = isAnyProfilePublicMode();
+        boolean publicMode = mLockscreenUserManager.isAnyProfilePublicMode();
         mStackScroller.setHideSensitive(publicMode, goingToFullShade);
         mStackScroller.setDimmed(onKeyguard, fromShadeLocked /* animate */);
         mStackScroller.setExpandingEnabled(!onKeyguard);
@@ -4762,7 +4706,7 @@ public class StatusBar extends SystemUI implements DemoMode,
             return;
         }
 
-        int userId = mCurrentUserId;
+        int userId = mLockscreenUserManager.getCurrentUserId();
         ExpandableNotificationRow row = null;
         if (expandView instanceof ExpandableNotificationRow) {
             row = (ExpandableNotificationRow) expandView;
@@ -4774,9 +4718,11 @@ public class StatusBar extends SystemUI implements DemoMode,
                 userId = row.getStatusBarNotification().getUserId();
             }
         }
-        boolean fullShadeNeedsBouncer = !userAllowsPrivateNotificationsInPublic(mCurrentUserId)
-                || !mShowLockscreenNotifications || mFalsingManager.shouldEnforceBouncer();
-        if (isLockscreenPublicMode(userId) && fullShadeNeedsBouncer) {
+        boolean fullShadeNeedsBouncer = !mLockscreenUserManager.
+                userAllowsPrivateNotificationsInPublic(mLockscreenUserManager.getCurrentUserId())
+                || !mLockscreenUserManager.shouldShowLockscreenNotifications()
+                || mFalsingManager.shouldEnforceBouncer();
+        if (mLockscreenUserManager.isLockscreenPublicMode(userId) && fullShadeNeedsBouncer) {
             mLeaveOpenOnKeyguardHide = true;
             showBouncerIfKeyguard();
             mDraggedDownRow = row;
@@ -4855,19 +4801,12 @@ public class StatusBar extends SystemUI implements DemoMode,
         mPendingWorkRemoteInputView = clicked;
     }
 
-    private boolean isAnyProfilePublicMode() {
-        for (int i = mCurrentProfiles.size() - 1; i >= 0; i--) {
-            if (isLockscreenPublicMode(mCurrentProfiles.valueAt(i).id)) {
-                return true;
-            }
-        }
-        return false;
-    }
-
-    protected void onWorkChallengeChanged() {
+    @Override
+    public void onWorkChallengeChanged() {
         updatePublicMode();
         updateNotifications();
-        if (mPendingWorkRemoteInputView != null && !isAnyProfilePublicMode()) {
+        if (mPendingWorkRemoteInputView != null
+                && !mLockscreenUserManager.isAnyProfilePublicMode()) {
             // Expand notification panel and the notification row, then click on remote input view
             final Runnable clickPendingViewRunnable = () -> {
                 final View pendingWorkRemoteInputView = mPendingWorkRemoteInputView;
@@ -5147,12 +5086,14 @@ public class StatusBar extends SystemUI implements DemoMode,
     }
 
     boolean isCameraAllowedByAdmin() {
-        if (mDevicePolicyManager.getCameraDisabled(null, mCurrentUserId)) {
+        if (mDevicePolicyManager.getCameraDisabled(null,
+                mLockscreenUserManager.getCurrentUserId())) {
             return false;
         } else if (mStatusBarKeyguardViewManager == null ||
                 (isKeyguardShowing() && isKeyguardSecure())) {
             // Check if the admin has disabled the camera specifically for the keyguard
-            return (mDevicePolicyManager.getKeyguardDisabledFeatures(null, mCurrentUserId)
+            return (mDevicePolicyManager.
+                    getKeyguardDisabledFeatures(null, mLockscreenUserManager.getCurrentUserId())
                     & DevicePolicyManager.KEYGUARD_DISABLE_SECURE_CAMERA) == 0;
         }
 
@@ -5441,8 +5382,6 @@ public class StatusBar extends SystemUI implements DemoMode,
     // handling reordering
     protected final VisualStabilityManager mVisualStabilityManager = new VisualStabilityManager();
 
-    protected int mCurrentUserId = 0;
-    final protected SparseArray<UserInfo> mCurrentProfiles = new SparseArray<>();
 
     protected AccessibilityManager mAccessibilityManager;
 
@@ -5469,11 +5408,6 @@ public class StatusBar extends SystemUI implements DemoMode,
     protected PowerManager mPowerManager;
     protected StatusBarKeyguardViewManager mStatusBarKeyguardViewManager;
 
-    // public mode, private notifications, etc
-    private final SparseBooleanArray mLockscreenPublicMode = new SparseBooleanArray();
-    private final SparseBooleanArray mUsersAllowingPrivateNotifications = new SparseBooleanArray();
-    private final SparseBooleanArray mUsersAllowingNotifications = new SparseBooleanArray();
-
     private UserManager mUserManager;
 
     protected KeyguardManager mKeyguardManager;
@@ -5490,8 +5424,6 @@ public class StatusBar extends SystemUI implements DemoMode,
     protected Display mDisplay;
 
     protected RecentsComponent mRecents;
-
-    protected int mZenMode;
 
     protected NotificationShelf mNotificationShelf;
     protected DismissView mDismissView;
@@ -5531,30 +5463,6 @@ public class StatusBar extends SystemUI implements DemoMode,
         }
     };
 
-    protected final ContentObserver mSettingsObserver = new ContentObserver(mHandler) {
-        @Override
-        public void onChange(boolean selfChange) {
-            final int mode = Settings.Global.getInt(mContext.getContentResolver(),
-                    Settings.Global.ZEN_MODE, Settings.Global.ZEN_MODE_OFF);
-            setZenMode(mode);
-
-            updateLockscreenNotificationSetting();
-        }
-    };
-
-    private final ContentObserver mLockscreenSettingsObserver = new ContentObserver(mHandler) {
-        @Override
-        public void onChange(boolean selfChange) {
-            // We don't know which user changed LOCK_SCREEN_ALLOW_PRIVATE_NOTIFICATIONS or
-            // LOCK_SCREEN_SHOW_NOTIFICATIONS, so we just dump our cache ...
-            mUsersAllowingPrivateNotifications.clear();
-            mUsersAllowingNotifications.clear();
-            // ... and refresh all the notifications
-            updateLockscreenNotificationSetting();
-            updateNotifications();
-        }
-    };
-
     private final RemoteViews.OnClickHandler mOnClickHandler = new RemoteViews.OnClickHandler() {
 
         @Override
@@ -5581,7 +5489,8 @@ public class StatusBar extends SystemUI implements DemoMode,
             final boolean isActivity = pendingIntent.isActivity();
             if (isActivity) {
                 final boolean afterKeyguardGone = PreviewInflater.wouldLaunchResolverActivity(
-                        mContext, pendingIntent.getIntent(), mCurrentUserId);
+                        mContext, pendingIntent.getIntent(),
+                        mLockscreenUserManager.getCurrentUserId());
                 dismissKeyguardThenExecute(() -> {
                     try {
                         ActivityManager.getService().resumeAppSwitches();
@@ -5702,9 +5611,9 @@ public class StatusBar extends SystemUI implements DemoMode,
 
             row.setUserExpanded(true);
 
-            if (!mAllowLockscreenRemoteInput) {
+            if (!mLockscreenUserManager.shouldAllowLockscreenRemoteInput()) {
                 final int userId = pendingIntent.getCreatorUserHandle().getIdentifier();
-                if (isLockscreenPublicMode(userId)) {
+                if (mLockscreenUserManager.isLockscreenPublicMode(userId)) {
                     onLockedRemoteInput(row, view);
                     return true;
                 }
@@ -5760,51 +5669,15 @@ public class StatusBar extends SystemUI implements DemoMode,
         }
     };
 
-    private final BroadcastReceiver mBaseBroadcastReceiver = new BroadcastReceiver() {
+    private final BroadcastReceiver mBannerActionBroadcastReceiver = new BroadcastReceiver() {
         @Override
         public void onReceive(Context context, Intent intent) {
             String action = intent.getAction();
-            if (Intent.ACTION_USER_SWITCHED.equals(action)) {
-                mCurrentUserId = intent.getIntExtra(Intent.EXTRA_USER_HANDLE, -1);
-                updateCurrentProfilesCache();
-                Log.v(TAG, "userId " + mCurrentUserId + " is in the house");
-
-                updateLockscreenNotificationSetting();
-
-                userSwitched(mCurrentUserId);
-            } else if (Intent.ACTION_USER_ADDED.equals(action)) {
-                updateCurrentProfilesCache();
-            } else if (Intent.ACTION_USER_UNLOCKED.equals(action)) {
-                // Start the overview connection to the launcher service
-                Dependency.get(OverviewProxyService.class).startConnectionToCurrentUser();
-            } else if (Intent.ACTION_USER_PRESENT.equals(action)) {
-                List<ActivityManager.RecentTaskInfo> recentTask = null;
-                try {
-                    recentTask = ActivityManager.getService().getRecentTasks(1,
-                            ActivityManager.RECENT_WITH_EXCLUDED,
-                            mCurrentUserId).getList();
-                } catch (RemoteException e) {
-                    // Abandon hope activity manager not running.
-                }
-                if (recentTask != null && recentTask.size() > 0) {
-                    UserInfo user = mUserManager.getUserInfo(recentTask.get(0).userId);
-                    if (user != null && user.isManagedProfile()) {
-                        Toast toast = Toast.makeText(mContext,
-                                R.string.managed_profile_foreground_toast,
-                                Toast.LENGTH_SHORT);
-                        TextView text = toast.getView().findViewById(android.R.id.message);
-                        text.setCompoundDrawablesRelativeWithIntrinsicBounds(
-                                R.drawable.stat_sys_managed_profile_status, 0, 0, 0);
-                        int paddingPx = mContext.getResources().getDimensionPixelSize(
-                                R.dimen.managed_profile_toast_padding);
-                        text.setCompoundDrawablePadding(paddingPx);
-                        toast.show();
-                    }
-                }
-            } else if (BANNER_ACTION_CANCEL.equals(action) || BANNER_ACTION_SETUP.equals(action)) {
+            if (BANNER_ACTION_CANCEL.equals(action) || BANNER_ACTION_SETUP.equals(action)) {
                 NotificationManager noMan = (NotificationManager)
                         mContext.getSystemService(Context.NOTIFICATION_SERVICE);
-                noMan.cancel(SystemMessage.NOTE_HIDDEN_NOTIFICATIONS);
+                noMan.cancel(com.android.internal.messages.nano.SystemMessageProto.SystemMessage.
+                        NOTE_HIDDEN_NOTIFICATIONS);
 
                 Settings.Secure.putInt(mContext.getContentResolver(),
                         Settings.Secure.SHOW_NOTE_ABOUT_NOTIFICATION_HIDING, 0);
@@ -5815,42 +5688,6 @@ public class StatusBar extends SystemUI implements DemoMode,
                             .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
 
                     );
-                }
-            } else if (NOTIFICATION_UNLOCKED_BY_WORK_CHALLENGE_ACTION.equals(action)) {
-                final IntentSender intentSender = intent.getParcelableExtra(Intent.EXTRA_INTENT);
-                final String notificationKey = intent.getStringExtra(Intent.EXTRA_INDEX);
-                if (intentSender != null) {
-                    try {
-                        mContext.startIntentSender(intentSender, null, 0, 0, 0);
-                    } catch (IntentSender.SendIntentException e) {
-                        /* ignore */
-                    }
-                }
-                if (notificationKey != null) {
-                    try {
-                        mBarService.onNotificationClick(notificationKey);
-                    } catch (RemoteException e) {
-                        /* ignore */
-                    }
-                }
-            }
-        }
-    };
-
-    private final BroadcastReceiver mAllUsersReceiver = new BroadcastReceiver() {
-        @Override
-        public void onReceive(Context context, Intent intent) {
-            final String action = intent.getAction();
-            final int userId = intent.getIntExtra(Intent.EXTRA_USER_HANDLE, UserHandle.USER_NULL);
-
-            if (DevicePolicyManager.ACTION_DEVICE_POLICY_MANAGER_STATE_CHANGED.equals(action) &&
-                    isCurrentProfile(getSendingUserId())) {
-                mUsersAllowingPrivateNotifications.clear();
-                updateLockscreenNotificationSetting();
-                updateNotifications();
-            } else if (Intent.ACTION_DEVICE_LOCKED_CHANGED.equals(action)) {
-                if (userId != mCurrentUserId && isCurrentProfile(userId)) {
-                    onWorkChallengeChanged();
                 }
             }
         }
@@ -5941,17 +5778,6 @@ public class StatusBar extends SystemUI implements DemoMode,
 
     };
 
-    private void updateCurrentProfilesCache() {
-        synchronized (mCurrentProfiles) {
-            mCurrentProfiles.clear();
-            if (mUserManager != null) {
-                for (UserInfo user : mUserManager.getProfiles(mCurrentUserId)) {
-                    mCurrentProfiles.put(user.id, user);
-                }
-            }
-        }
-    }
-
     protected void notifyUserAboutHiddenNotifications() {
         if (0 != Settings.Secure.getInt(mContext.getContentResolver(),
                 Settings.Secure.SHOW_NOTE_ABOUT_NOTIFICATION_HIDING, 1)) {
@@ -6006,9 +5832,9 @@ public class StatusBar extends SystemUI implements DemoMode,
         final int notificationUserId = n.getUserId();
         if (DEBUG && MULTIUSER_DEBUG) {
             Log.v(TAG, String.format("%s: current userid: %d, notification userid: %d", n,
-                    mCurrentUserId, notificationUserId));
+                    mLockscreenUserManager.getCurrentUserId(), notificationUserId));
         }
-        return isCurrentProfile(notificationUserId);
+        return mLockscreenUserManager.isCurrentProfile(notificationUserId);
     }
 
     protected void setNotificationShown(StatusBarNotification n) {
@@ -6020,12 +5846,6 @@ public class StatusBar extends SystemUI implements DemoMode,
             mNotificationListener.setNotificationsShown(keys);
         } catch (RuntimeException e) {
             Log.d(TAG, "failed setNotificationsShown: ", e);
-        }
-    }
-
-    protected boolean isCurrentProfile(int userId) {
-        synchronized (mCurrentProfiles) {
-            return userId == UserHandle.USER_ALL || mCurrentProfiles.get(userId) != null;
         }
     }
 
@@ -6115,89 +5935,14 @@ public class StatusBar extends SystemUI implements DemoMode,
         KeyboardShortcuts.dismiss();
     }
 
-    /**
-     * Save the current "public" (locked and secure) state of the lockscreen.
-     */
-    public void setLockscreenPublicMode(boolean publicMode, int userId) {
-        mLockscreenPublicMode.put(userId, publicMode);
-    }
-
-    public boolean isLockscreenPublicMode(int userId) {
-        if (userId == UserHandle.USER_ALL) {
-            return mLockscreenPublicMode.get(mCurrentUserId, false);
-        }
-        return mLockscreenPublicMode.get(userId, false);
-    }
-
-    /**
-     * Has the given user chosen to allow notifications to be shown even when the lockscreen is in
-     * "public" (secure & locked) mode?
-     */
-    public boolean userAllowsNotificationsInPublic(int userHandle) {
-        if (userHandle == UserHandle.USER_ALL) {
-            return true;
-        }
-
-        if (mUsersAllowingNotifications.indexOfKey(userHandle) < 0) {
-            final boolean allowed = 0 != Settings.Secure.getIntForUser(
-                    mContext.getContentResolver(),
-                    Settings.Secure.LOCK_SCREEN_SHOW_NOTIFICATIONS, 0, userHandle);
-            mUsersAllowingNotifications.append(userHandle, allowed);
-            return allowed;
-        }
-
-        return mUsersAllowingNotifications.get(userHandle);
-    }
-
-    /**
-     * Has the given user chosen to allow their private (full) notifications to be shown even
-     * when the lockscreen is in "public" (secure & locked) mode?
-     */
-    public boolean userAllowsPrivateNotificationsInPublic(int userHandle) {
-        if (userHandle == UserHandle.USER_ALL) {
-            return true;
-        }
-
-        if (mUsersAllowingPrivateNotifications.indexOfKey(userHandle) < 0) {
-            final boolean allowedByUser = 0 != Settings.Secure.getIntForUser(
-                    mContext.getContentResolver(),
-                    Settings.Secure.LOCK_SCREEN_ALLOW_PRIVATE_NOTIFICATIONS, 0, userHandle);
-            final boolean allowedByDpm = adminAllowsUnredactedNotifications(userHandle);
-            final boolean allowed = allowedByUser && allowedByDpm;
-            mUsersAllowingPrivateNotifications.append(userHandle, allowed);
-            return allowed;
-        }
-
-        return mUsersAllowingPrivateNotifications.get(userHandle);
-    }
-
-    private boolean adminAllowsUnredactedNotifications(int userHandle) {
-        if (userHandle == UserHandle.USER_ALL) {
-            return true;
-        }
-        final int dpmFlags = mDevicePolicyManager.getKeyguardDisabledFeatures(null /* admin */,
-                    userHandle);
-        return (dpmFlags & DevicePolicyManager.KEYGUARD_DISABLE_UNREDACTED_NOTIFICATIONS) == 0;
-    }
-
-    /**
-     * Returns true if we're on a secure lockscreen and the user wants to hide notification data.
-     * If so, notifications should be hidden.
-     */
     @Override  // NotificationData.Environment
     public boolean shouldHideNotifications(int userId) {
-        return isLockscreenPublicMode(userId) && !userAllowsNotificationsInPublic(userId)
-                || (userId != mCurrentUserId && shouldHideNotifications(mCurrentUserId));
+        return mLockscreenUserManager.shouldHideNotifications(userId);
     }
 
-    /**
-     * Returns true if we're on a secure lockscreen and the user wants to hide notifications via
-     * package-specific override.
-     */
     @Override // NotificationDate.Environment
     public boolean shouldHideNotifications(String key) {
-        return isLockscreenPublicMode(mCurrentUserId)
-                && mNotificationData.getVisibilityOverride(key) == Notification.VISIBILITY_SECRET;
+        return mLockscreenUserManager.shouldHideNotifications(key);
     }
 
     /**
@@ -6205,7 +5950,7 @@ public class StatusBar extends SystemUI implements DemoMode,
      */
     @Override  // NotificationData.Environment
     public boolean isSecurelyLocked(int userId) {
-        return isLockscreenPublicMode(userId);
+        return mLockscreenUserManager.isLockscreenPublicMode(userId);
     }
 
     /**
@@ -6286,7 +6031,7 @@ public class StatusBar extends SystemUI implements DemoMode,
 
     private void updateNotification(Entry entry, PackageManager pmUser,
             StatusBarNotification sbn, ExpandableNotificationRow row) {
-        row.setNeedsRedaction(needsRedaction(entry));
+        row.setNeedsRedaction(mLockscreenUserManager.needsRedaction(entry));
         boolean isLowPriority = mNotificationData.isAmbient(sbn.getKey());
         boolean isUpdate = mNotificationData.get(entry.key) != null;
         boolean wasLowPriority = row.isLowPriority();
@@ -6368,7 +6113,7 @@ public class StatusBar extends SystemUI implements DemoMode,
 
         final boolean afterKeyguardGone = intent.isActivity()
                 && PreviewInflater.wouldLaunchResolverActivity(mContext, intent.getIntent(),
-                mCurrentUserId);
+                mLockscreenUserManager.getCurrentUserId());
         dismissKeyguardThenExecute(() -> {
             new Thread(() -> {
                 try {
@@ -6443,7 +6188,7 @@ public class StatusBar extends SystemUI implements DemoMode,
 
             final boolean afterKeyguardGone = intent.isActivity()
                     && PreviewInflater.wouldLaunchResolverActivity(mContext, intent.getIntent(),
-                            mCurrentUserId);
+                            mLockscreenUserManager.getCurrentUserId());
             dismissKeyguardThenExecute(() -> {
                 if (mHeadsUpManager != null && mHeadsUpManager.isHeadsUp(notificationKey)) {
                     // Release the HUN notification to the shade.
@@ -6697,9 +6442,11 @@ public class StatusBar extends SystemUI implements DemoMode,
             int userId = entry.notification.getUserId();
             boolean suppressedSummary = mGroupManager.isSummaryOfSuppressedGroup(
                     entry.notification) && !entry.row.isRemoved();
-            boolean showOnKeyguard = shouldShowOnKeyguard(entry.notification);
+            boolean showOnKeyguard = mLockscreenUserManager.shouldShowOnKeyguard(entry
+                    .notification);
             if (suppressedSummary
-                    || (isLockscreenPublicMode(userId) && !mShowLockscreenNotifications)
+                    || (mLockscreenUserManager.isLockscreenPublicMode(userId)
+                            && !mLockscreenUserManager.shouldShowLockscreenNotifications())
                     || (onKeyguard && !showOnKeyguard)) {
                 entry.row.setVisibility(View.GONE);
             } else {
@@ -6747,47 +6494,6 @@ public class StatusBar extends SystemUI implements DemoMode,
 
         // Scrim opacity varies based on notification count
         mScrimController.setNotificationCount(mStackScroller.getNotGoneChildCount());
-    }
-
-    public boolean shouldShowOnKeyguard(StatusBarNotification sbn) {
-        return mShowLockscreenNotifications
-                && ((mDisabled2 & DISABLE2_NOTIFICATION_SHADE) == 0)
-                && !mNotificationData.isAmbient(sbn.getKey());
-    }
-
-    // extended in StatusBar
-    protected void setShowLockscreenNotifications(boolean show) {
-        mShowLockscreenNotifications = show;
-    }
-
-    protected void setLockScreenAllowRemoteInput(boolean allowLockscreenRemoteInput) {
-        mAllowLockscreenRemoteInput = allowLockscreenRemoteInput;
-    }
-
-    protected void updateLockscreenNotificationSetting() {
-        final boolean show = Settings.Secure.getIntForUser(mContext.getContentResolver(),
-                Settings.Secure.LOCK_SCREEN_SHOW_NOTIFICATIONS,
-                1,
-                mCurrentUserId) != 0;
-        final int dpmFlags = mDevicePolicyManager.getKeyguardDisabledFeatures(
-                null /* admin */, mCurrentUserId);
-        final boolean allowedByDpm = (dpmFlags
-                & DevicePolicyManager.KEYGUARD_DISABLE_SECURE_NOTIFICATIONS) == 0;
-
-        setShowLockscreenNotifications(show && allowedByDpm);
-
-        if (ENABLE_LOCK_SCREEN_ALLOW_REMOTE_INPUT) {
-            final boolean remoteInput = Settings.Secure.getIntForUser(mContext.getContentResolver(),
-                    Settings.Secure.LOCK_SCREEN_ALLOW_REMOTE_INPUT,
-                    0,
-                    mCurrentUserId) != 0;
-            final boolean remoteInputDpm =
-                    (dpmFlags & DevicePolicyManager.KEYGUARD_DISABLE_REMOTE_INPUT) == 0;
-
-            setLockScreenAllowRemoteInput(remoteInput && remoteInputDpm);
-        } else {
-            setLockScreenAllowRemoteInput(false);
-        }
     }
 
     public void updateNotification(StatusBarNotification notification, RankingMap ranking)
@@ -6903,9 +6609,11 @@ public class StatusBar extends SystemUI implements DemoMode,
         }
 
         if (mIsOccluded && !isDozing()) {
-            boolean devicePublic = isLockscreenPublicMode(mCurrentUserId);
-            boolean userPublic = devicePublic || isLockscreenPublicMode(sbn.getUserId());
-            boolean needsRedaction = needsRedaction(entry);
+            boolean devicePublic = mLockscreenUserManager.
+                    isLockscreenPublicMode(mLockscreenUserManager.getCurrentUserId());
+            boolean userPublic = devicePublic
+                    || mLockscreenUserManager.isLockscreenPublicMode(sbn.getUserId());
+            boolean needsRedaction = mLockscreenUserManager.needsRedaction(entry);
             if (userPublic && needsRedaction) {
                 return false;
             }
@@ -7021,13 +6729,13 @@ public class StatusBar extends SystemUI implements DemoMode,
     }
 
     @Override
-    public int getCurrentUserId() {
-        return mCurrentUserId;
+    public NotificationData getNotificationData() {
+        return mNotificationData;
     }
 
     @Override
-    public NotificationData getNotificationData() {
-        return mNotificationData;
+    public Handler getHandler() {
+        return mHandler;
     }
 
     @Override
@@ -7035,12 +6743,12 @@ public class StatusBar extends SystemUI implements DemoMode,
         return mLatestRankingMap;
     }
 
-    final NotificationInfo.CheckSaveListener mCheckSaveListener =
+    private final NotificationInfo.CheckSaveListener mCheckSaveListener =
             (Runnable saveImportance, StatusBarNotification sbn) -> {
                 // If the user has security enabled, show challenge if the setting is changed.
-                if (isLockscreenPublicMode(sbn.getUser().getIdentifier()) && (
-                        mState == StatusBarState.KEYGUARD
-                                || mState == StatusBarState.SHADE_LOCKED)) {
+                if (mLockscreenUserManager.isLockscreenPublicMode(sbn.getUser().getIdentifier())
+                        && (mState == StatusBarState.KEYGUARD ||
+                                mState == StatusBarState.SHADE_LOCKED)) {
                     onLockedNotificationImportanceChange(() -> {
                         saveImportance.run();
                         return true;

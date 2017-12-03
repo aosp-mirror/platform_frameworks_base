@@ -81,7 +81,7 @@
     <string name="RestrictedOnAllVoiceTitle" msgid="158800171499150681">"Няма сэрвісу галасавых / экстранных выклікаў"</string>
     <string name="RestrictedStateContent" msgid="4278821484643362350">"Часова не прапаноўваецца сеткай мабільнай сувязі ў вашым месцазанходжанні"</string>
     <string name="NetworkPreferenceSwitchTitle" msgid="4008877505368566980">"Немагчыма падключыцца да сеткі"</string>
-    <string name="NetworkPreferenceSwitchSummary" msgid="1203771446683319957">"Каб палепшыць якасць прыёму, паспрабуйце змяніць тып, выбраны ў меню \"Налады &gt; Сетка і інтэрнэт &gt; Мабільныя сеткі &gt; Прыярытэтны тып сеткі\"."</string>
+    <string name="NetworkPreferenceSwitchSummary" msgid="7056776609127756440">"Каб палепшыць якасць прыёму, паспрабуйце змяніць тып, выбраны ў меню \"Налады &gt; Сетка і інтэрнэт &gt; Мабільныя сеткі &gt; Прыярытэтны тып сеткі\"."</string>
     <string name="EmergencyCallWarningTitle" msgid="4790413876281901612">"Wi-Fi-тэлефанія актыўная"</string>
     <string name="EmergencyCallWarningSummary" msgid="8973232888021643293">"Для экстранных выклікаў патрабуецца мабільная сетка."</string>
     <string name="notification_channel_network_alert" msgid="4427736684338074967">"Абвесткі"</string>
@@ -1091,6 +1091,9 @@
     <string name="screen_compat_mode_hint" msgid="1064524084543304459">"Зноў уключыце гэта ў раздзеле \"Сістэмныя налады &gt; Прыкладанні &gt; Спампаваныя\"."</string>
     <string name="unsupported_display_size_message" msgid="6545327290756295232">"<xliff:g id="APP_NAME">%1$s</xliff:g> не падтрымлівае бягучую наладу Памеру дысплэя і можа паводзіць сябе непрадказальным чынам."</string>
     <string name="unsupported_display_size_show" msgid="7969129195360353041">"Заўсёды паказваць"</string>
+    <string name="unsupported_compile_sdk_message" msgid="4253168368781441759">"Праграма <xliff:g id="APP_NAME">%1$s</xliff:g> была створана для несумяшчальнай версии АС Android і можа паводзіць сябе неспадзявана. Можа быць даступна абноўленая версія праграмы."</string>
+    <string name="unsupported_compile_sdk_show" msgid="2681877855260970231">"Заўсёды паказваць"</string>
+    <string name="unsupported_compile_sdk_check_update" msgid="3312723623323216101">"Праверыць на наяўнасць абнаўленняў"</string>
     <string name="smv_application" msgid="3307209192155442829">"Прыкладанне <xliff:g id="APPLICATION">%1$s</xliff:g> (працэс <xliff:g id="PROCESS">%2$s</xliff:g>) парушыла ўласную палітыку StrictMode."</string>
     <string name="smv_process" msgid="5120397012047462446">"Працэс <xliff:g id="PROCESS">%1$s</xliff:g> парушыў уласную палітыку StrictMode."</string>
     <string name="android_upgrading_title" msgid="1584192285441405746">"Абнаўленне Android..."</string>
@@ -1160,10 +1163,10 @@
     <string name="network_available_sign_in" msgid="1848877297365446605">"Увайдзіце ў сетку"</string>
     <!-- no translation found for network_available_sign_in_detailed (8000081941447976118) -->
     <skip />
-    <string name="wifi_no_internet" msgid="8451173622563841546">"У Wi-Fi няма доступу да Інтэрнэту"</string>
+    <string name="wifi_no_internet" msgid="8938267198124654938">"У Wi-Fi няма доступу да інтэрнэту"</string>
     <string name="wifi_no_internet_detailed" msgid="8083079241212301741">"Дакраніцеся, каб убачыць параметры"</string>
     <string name="network_switch_metered" msgid="4671730921726992671">"Выкананы пераход да <xliff:g id="NETWORK_TYPE">%1$s</xliff:g>"</string>
-    <string name="network_switch_metered_detail" msgid="5325661434777870353">"Прылада выкарыстоўвае <xliff:g id="NEW_NETWORK">%1$s</xliff:g>, калі ў <xliff:g id="PREVIOUS_NETWORK">%2$s</xliff:g> няма доступу да інтэрнэту. Можа спаганяцца дадатковая плата."</string>
+    <string name="network_switch_metered_detail" msgid="775163331794506615">"Прылада выкарыстоўвае сетку <xliff:g id="NEW_NETWORK">%1$s</xliff:g>, калі ў сетцы <xliff:g id="PREVIOUS_NETWORK">%2$s</xliff:g> няма доступу да інтэрнэту. Можа спаганяцца плата."</string>
     <string name="network_switch_metered_toast" msgid="5779283181685974304">"Выкананы пераход з <xliff:g id="PREVIOUS_NETWORK">%1$s</xliff:g> да <xliff:g id="NEW_NETWORK">%2$s</xliff:g>"</string>
   <string-array name="network_switch_type_name">
     <item msgid="3979506840912951943">"мабільная перадача даных"</item>
@@ -1174,7 +1177,7 @@
   </string-array>
     <string name="network_switch_type_name_unknown" msgid="4552612897806660656">"невядомы тып сеткі"</string>
     <string name="wifi_watchdog_network_disabled" msgid="7904214231651546347">"Немагчыма падключыцца да Wi-Fi"</string>
-    <string name="wifi_watchdog_network_disabled_detailed" msgid="5548780776418332675">" дрэннае падключэнне да Інтэрнэту."</string>
+    <string name="wifi_watchdog_network_disabled_detailed" msgid="4917472096696322767">" дрэннае падключэнне да Інтэрнэту."</string>
     <string name="wifi_connect_alert_title" msgid="8455846016001810172">"Дазволіць падключэнне?"</string>
     <string name="wifi_connect_alert_message" msgid="6451273376815958922">"Праграма %1$s хоча падлучыцца да сеткі Wi-Fi %2$s"</string>
     <string name="wifi_connect_default_application" msgid="7143109390475484319">"Праграма"</string>
@@ -1684,7 +1687,7 @@
     <string name="package_installed_device_owner" msgid="6875717669960212648">"Усталяваны вашым адміністратарам"</string>
     <string name="package_updated_device_owner" msgid="1847154566357862089">"Абноўлены вашым адміністратарам"</string>
     <string name="package_deleted_device_owner" msgid="2307122077550236438">"Выдалены вашым адміністратарам"</string>
-    <string name="battery_saver_description" msgid="1960431123816253034">"Каб падоўжыць час працы акумулятара, у рэжыме эканоміі зараду памяншаецца прадукцыйнасць вашай прылады, абмяжоўваецца выкарыстанне вібрацыі, службаў вызначэння месцазнаходжання і большасці задач фонавай перадачы даных. Электронная пошта, абмен паведамленнямі і іншыя праграмы, якія выкарыстоўваюць сінхранізацыю, могуць не абнаўляцца, пакуль вы іх не адкрыеце.\n\nРэжым эканоміі зараду адключаецца аўтаматычна, калі прылада зараджаецца."</string>
+    <string name="battery_saver_description" msgid="5394663545060026162">"Каб падоўжыць час працы акумулятара, у рэжыме эканоміі зараду памяншаецца прадукцыйнасць вашай прылады, абмяжоўваецца выкарыстанне вібрацыі, службаў вызначэння месцазнаходжання і большасці задач фонавай перадачы даных. Электронная пошта, абмен паведамленнямі і іншыя праграмы, якія выкарыстоўваюць сінхранізацыю, могуць не абнаўляцца, пакуль вы іх не адкрыеце.\n\nРэжым эканоміі зараду адключаецца аўтаматычна, калі прылада зараджаецца."</string>
     <string name="data_saver_description" msgid="6015391409098303235">"Каб паменшыць выкарыстанне даных, Эканомія трафіку не дазваляе некаторым праграмам адпраўляць ці атрымліваць даныя ў фонавым рэжыме. Праграма, якую вы зараз выкарыстоўваеце, можа атрымліваць доступ да даных, але можа рабіць гэта радзей. Гэта можа азначаць, напрыклад, што відарысы не паказваюцца, пакуль вы не дакраняцеся да іх."</string>
     <string name="data_saver_enable_title" msgid="4674073932722787417">"Уключыць Эканомію трафіка?"</string>
     <string name="data_saver_enable_button" msgid="7147735965247211818">"Уключыць"</string>

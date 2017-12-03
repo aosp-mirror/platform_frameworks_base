@@ -1514,7 +1514,8 @@ public class MediaPlayer extends PlayerBase
             if (listener != null && !mRoutingChangeListeners.containsKey(listener)) {
                 enableNativeRoutingCallbacksLocked(true);
                 mRoutingChangeListeners.put(
-                        listener, new NativeRoutingEventHandlerDelegate(this, listener, handler));
+                        listener, new NativeRoutingEventHandlerDelegate(this, listener,
+                                handler != null ? handler : mEventHandler));
             }
         }
     }
@@ -1531,36 +1532,6 @@ public class MediaPlayer extends PlayerBase
             if (mRoutingChangeListeners.containsKey(listener)) {
                 mRoutingChangeListeners.remove(listener);
                 enableNativeRoutingCallbacksLocked(false);
-            }
-        }
-    }
-
-    /**
-     * Helper class to handle the forwarding of native events to the appropriate listener
-     * (potentially) handled in a different thread
-     */
-    private class NativeRoutingEventHandlerDelegate {
-        private MediaPlayer mMediaPlayer;
-        private AudioRouting.OnRoutingChangedListener mOnRoutingChangedListener;
-        private Handler mHandler;
-
-        NativeRoutingEventHandlerDelegate(final MediaPlayer mediaPlayer,
-                final AudioRouting.OnRoutingChangedListener listener, Handler handler) {
-            mMediaPlayer = mediaPlayer;
-            mOnRoutingChangedListener = listener;
-            mHandler = handler != null ? handler : mEventHandler;
-        }
-
-        void notifyClient() {
-            if (mHandler != null) {
-                mHandler.post(new Runnable() {
-                    @Override
-                    public void run() {
-                        if (mOnRoutingChangedListener != null) {
-                            mOnRoutingChangedListener.onRoutingChanged(mMediaPlayer);
-                        }
-                    }
-                });
             }
         }
     }

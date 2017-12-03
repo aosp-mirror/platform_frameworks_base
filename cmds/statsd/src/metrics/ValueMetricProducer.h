@@ -44,19 +44,9 @@ public:
 
     virtual ~ValueMetricProducer();
 
-    void onConditionChanged(const bool condition, const uint64_t eventTime) override;
-
     void finish() override;
-    void flushIfNeeded(const uint64_t eventTimeNs) override;
-
-    // TODO: Pass a timestamp as a parameter in onDumpReport.
-    std::unique_ptr<std::vector<uint8_t>> onDumpReport() override;
-
-    void onSlicedConditionMayChange(const uint64_t eventTime);
 
     void onDataPulled(const std::vector<std::shared_ptr<LogEvent>>& data) override;
-
-    size_t byteSize() const override;
 
     // TODO: Implement this later.
     virtual void notifyAppUpgrade(const string& apk, const int uid, const int version) override{};
@@ -64,14 +54,30 @@ public:
     virtual void notifyAppRemoved(const string& apk, const int uid) override{};
 
 protected:
-    void onMatchedLogEventInternal(const size_t matcherIndex, const HashableDimensionKey& eventKey,
-                                   const std::map<std::string, HashableDimensionKey>& conditionKey,
-                                   bool condition, const LogEvent& event,
-                                   bool scheduledPull) override;
-
-    void startNewProtoOutputStream(long long timestamp) override;
+    void onMatchedLogEventInternalLocked(
+            const size_t matcherIndex, const HashableDimensionKey& eventKey,
+            const std::map<std::string, HashableDimensionKey>& conditionKey, bool condition,
+            const LogEvent& event, bool scheduledPull) override;
 
 private:
+    // TODO: Pass a timestamp as a parameter in onDumpReport.
+    std::unique_ptr<std::vector<uint8_t>> onDumpReportLocked() override;
+
+    // Internal interface to handle condition change.
+    void onConditionChangedLocked(const bool conditionMet, const uint64_t eventTime) override;
+
+    // Internal interface to handle sliced condition change.
+    void onSlicedConditionMayChangeLocked(const uint64_t eventTime) override;
+
+    // Internal function to calculate the current used bytes.
+    size_t byteSizeLocked() const override;
+
+    // Util function to flush the old packet.
+    void flushIfNeededLocked(const uint64_t& eventTime);
+
+    // Util function to init/reset the proto output stream.
+    void startNewProtoOutputStreamLocked(long long timestamp);
+
     const ValueMetric mMetric;
 
     std::shared_ptr<StatsPullerManager> mStatsPullerManager;
@@ -81,8 +87,6 @@ private:
                         const int conditionIndex, const sp<ConditionWizard>& wizard,
                         const int pullTagId, const uint64_t startTimeNs,
                         std::shared_ptr<StatsPullerManager> statsPullerManager);
-
-    Mutex mLock;
 
     // tagId for pulled data. -1 if this is not pulled
     const int mPullTagId;
@@ -104,7 +108,8 @@ private:
 
     long get_value(const LogEvent& event);
 
-    bool hitGuardRail(const HashableDimensionKey& newKey);
+    // Util function to check whether the specified dimension hits the guardrail.
+    bool hitGuardRailLocked(const HashableDimensionKey& newKey);
 
     static const size_t kBucketSize = sizeof(ValueBucket{});
 

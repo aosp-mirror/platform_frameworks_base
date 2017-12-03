@@ -4389,6 +4389,7 @@ public class BatteryStatsImpl extends BatteryStats {
                     + Integer.toHexString(mHistoryCur.states));
             addHistoryRecordLocked(elapsedRealtime, uptime);
             mMobileRadioPowerState = powerState;
+            StatsLog.write(StatsLog.MOBILE_RADIO_POWER_STATE_CHANGED, uid, powerState);
             if (active) {
                 mMobileRadioActiveTimer.startRunningLocked(elapsedRealtime);
                 mMobileRadioActivePerAppTimer.startRunningLocked(elapsedRealtime);
@@ -4426,7 +4427,7 @@ public class BatteryStatsImpl extends BatteryStats {
         }
     }
 
-    public void noteDeviceIdleModeLocked(int mode, String activeReason, int activeUid) {
+    public void noteDeviceIdleModeLocked(final int mode, String activeReason, int activeUid) {
         final long elapsedRealtime = mClocks.elapsedRealtime();
         final long uptime = mClocks.uptimeMillis();
         boolean nowIdling = mode == DEVICE_IDLE_MODE_DEEP;
@@ -4444,6 +4445,13 @@ public class BatteryStatsImpl extends BatteryStats {
         if (activeReason != null && (mDeviceIdling || mDeviceLightIdling)) {
             addHistoryEventLocked(elapsedRealtime, uptime, HistoryItem.EVENT_ACTIVE,
                     activeReason, activeUid);
+        }
+        if (mDeviceIdling != nowIdling || mDeviceLightIdling != nowLightIdling) {
+            int statsmode;
+            if (nowIdling)           statsmode = DEVICE_IDLE_MODE_DEEP;
+            else if (nowLightIdling) statsmode = DEVICE_IDLE_MODE_LIGHT;
+            else                     statsmode = DEVICE_IDLE_MODE_OFF;
+            StatsLog.write(StatsLog.DEVICE_IDLING_MODE_STATE_CHANGED, statsmode);
         }
         if (mDeviceIdling != nowIdling) {
             mDeviceIdling = nowIdling;
@@ -4489,6 +4497,7 @@ public class BatteryStatsImpl extends BatteryStats {
                 mDeviceIdleModeFullTimer.startRunningLocked(elapsedRealtime);
             }
             mDeviceIdleMode = mode;
+            StatsLog.write(StatsLog.DEVICE_IDLE_MODE_STATE_CHANGED, mode);
         }
     }
 
@@ -5085,6 +5094,7 @@ public class BatteryStatsImpl extends BatteryStats {
                     + Integer.toHexString(mHistoryCur.states));
             addHistoryRecordLocked(elapsedRealtime, uptime);
             mWifiRadioPowerState = powerState;
+            StatsLog.write(StatsLog.WIFI_RADIO_POWER_STATE_CHANGED, uid, powerState);
         }
     }
 
@@ -8928,8 +8938,6 @@ public class BatteryStatsImpl extends BatteryStats {
             }
             if (type == WAKE_TYPE_PARTIAL) {
                 createAggregatedPartialWakelockTimerLocked().startRunningLocked(elapsedRealtimeMs);
-                // TODO(statsd): Possibly use a worksource instead of a uid.
-                StatsLog.write(StatsLog.UID_WAKELOCK_STATE_CHANGED, getUid(), type, 1);
                 if (pid >= 0) {
                     Pid p = getPidStatsLocked(pid);
                     if (p.mWakeNesting++ == 0) {
@@ -8952,11 +8960,6 @@ public class BatteryStatsImpl extends BatteryStats {
             if (type == WAKE_TYPE_PARTIAL) {
                 if (mAggregatedPartialWakelockTimer != null) {
                     mAggregatedPartialWakelockTimer.stopRunningLocked(elapsedRealtimeMs);
-                    if (!mAggregatedPartialWakelockTimer.isRunningLocked()) {
-                        // TODO(statsd): Possibly use a worksource instead of a uid.
-                        StatsLog.write(StatsLog.UID_WAKELOCK_STATE_CHANGED, getUid(), type,
-                                0);
-                    }
                 }
                 if (pid >= 0) {
                     Pid p = mPids.get(pid);

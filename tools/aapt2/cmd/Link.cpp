@@ -36,6 +36,7 @@
 #include "ValueVisitor.h"
 #include "cmd/Util.h"
 #include "compile/IdAssigner.h"
+#include "compile/XmlIdCollector.h"
 #include "filter/ConfigFilter.h"
 #include "format/Archive.h"
 #include "format/Container.h"
@@ -1235,19 +1236,10 @@ class LinkCommand {
     return true;
   }
 
-  bool MergeCompiledFile(const ResourceFile& compiled_file, io::IFile* file, bool override) {
-    if (context_->IsVerbose()) {
-      context_->GetDiagnostics()->Note(DiagMessage()
-                                       << "merging '" << compiled_file.name
-                                       << "' from compiled file " << compiled_file.source);
-    }
-
-    if (!table_merger_->MergeFile(compiled_file, override, file)) {
-      return false;
-    }
-
+  bool MergeExportedSymbols(const Source& source,
+                            const std::vector<SourcedResourceName>& exported_symbols) {
     // Add the exports of this file to the table.
-    for (const SourcedResourceName& exported_symbol : compiled_file.exported_symbols) {
+    for (const SourcedResourceName& exported_symbol : exported_symbols) {
       ResourceName res_name = exported_symbol.name;
       if (res_name.package.empty()) {
         res_name.package = context_->GetCompilationPackage();
@@ -1259,7 +1251,7 @@ class LinkCommand {
       }
 
       std::unique_ptr<Id> id = util::make_unique<Id>();
-      id->SetSource(compiled_file.source.WithLine(exported_symbol.line));
+      id->SetSource(source.WithLine(exported_symbol.line));
       bool result = final_table_.AddResourceAllowMangled(
           res_name, ConfigDescription::DefaultConfig(), std::string(), std::move(id),
           context_->GetDiagnostics());
@@ -1268,6 +1260,19 @@ class LinkCommand {
       }
     }
     return true;
+  }
+
+  bool MergeCompiledFile(const ResourceFile& compiled_file, io::IFile* file, bool override) {
+    if (context_->IsVerbose()) {
+      context_->GetDiagnostics()->Note(DiagMessage()
+                                       << "merging '" << compiled_file.name
+                                       << "' from compiled file " << compiled_file.source);
+    }
+
+    if (!table_merger_->MergeFile(compiled_file, override, file)) {
+      return false;
+    }
+    return MergeExportedSymbols(compiled_file.source, compiled_file.exported_symbols);
   }
 
   // Takes a path to load as a ZIP file and merges the files within into the master ResourceTable.
@@ -1571,6 +1576,19 @@ class LinkCommand {
                                        << StringPrintf("linking package '%s' using package ID %02x",
                                                        context_->GetCompilationPackage().data(),
                                                        context_->GetPackageId()));
+    }
+
+    // Extract symbols from AndroidManifest.xml, since this isn't merged like the other XML files
+    // in res/**/*.
+    {
+      XmlIdCollector collector;
+      if (!collector.Consume(context_, manifest_xml.get())) {
+        return false;
+      }
+
+      if (!MergeExportedSymbols(manifest_xml->file.source, manifest_xml->file.exported_symbols)) {
+        return false;
+      }
     }
 
     for (const std::string& input : input_files) {

@@ -17,6 +17,7 @@
 package com.android.server.backup.transport;
 
 import static com.android.server.backup.TransportManager.SERVICE_ACTION_TRANSPORT_HOST;
+import static com.google.common.truth.Truth.assertThat;
 
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyInt;
@@ -54,6 +55,7 @@ public class TransportClientTest {
     private static final String PACKAGE_NAME = "some.package.name";
     private static final ComponentName TRANSPORT_COMPONENT =
             new ComponentName(PACKAGE_NAME, PACKAGE_NAME + ".transport.Transport");
+    private static final String TRANSPORT_DIR_NAME = TRANSPORT_COMPONENT.toString();
 
     @Mock private Context mContext;
     @Mock private TransportConnectionListener mTransportConnectionListener;
@@ -72,7 +74,12 @@ public class TransportClientTest {
         mBindIntent = new Intent(SERVICE_ACTION_TRANSPORT_HOST).setComponent(TRANSPORT_COMPONENT);
         mTransportClient =
                 new TransportClient(
-                        mContext, mBindIntent, TRANSPORT_COMPONENT, "1", new Handler(mainLooper));
+                        mContext,
+                        mBindIntent,
+                        TRANSPORT_COMPONENT,
+                        TRANSPORT_DIR_NAME,
+                        "1",
+                        new Handler(mainLooper));
 
         when(mContext.bindServiceAsUser(
                         eq(mBindIntent),
@@ -82,7 +89,16 @@ public class TransportClientTest {
                 .thenReturn(true);
     }
 
-    // TODO: Testing implementation? Remove?
+    @Test
+    public void testGetTransportDirName_returnsTransportDirName() {
+        assertThat(mTransportClient.getTransportDirName()).isEqualTo(TRANSPORT_DIR_NAME);
+    }
+
+    @Test
+    public void testGetTransportComponent_returnsTransportComponent() {
+        assertThat(mTransportClient.getTransportComponent()).isEqualTo(TRANSPORT_COMPONENT);
+    }
+
     @Test
     public void testConnectAsync_callsBindService() throws Exception {
         mTransportClient.connectAsync(mTransportConnectionListener, "caller");

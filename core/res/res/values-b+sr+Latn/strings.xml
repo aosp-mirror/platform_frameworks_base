@@ -80,7 +80,7 @@
     <string name="RestrictedOnAllVoiceTitle" msgid="158800171499150681">"Nema glasovne usluge/usluge za hitne pozive"</string>
     <string name="RestrictedStateContent" msgid="4278821484643362350">"Privremeno je onemogućeno na mobilnoj mreži na vašoj lokaciji"</string>
     <string name="NetworkPreferenceSwitchTitle" msgid="4008877505368566980">"Povezivanje sa mrežom nije uspelo"</string>
-    <string name="NetworkPreferenceSwitchSummary" msgid="1203771446683319957">"Da biste poboljšali prijem, probajte da promenite izabrani tip u odeljku Podešavanja &gt; Mreža i internet &gt; Mobilne mreže &gt; Željeni tip mreže."</string>
+    <string name="NetworkPreferenceSwitchSummary" msgid="7056776609127756440">"Da biste poboljšali prijem, probajte da promenite izabrani tip u odeljku Podešavanja &gt; Mreža i internet &gt; Mobilne mreže &gt; Željeni tip mreže."</string>
     <string name="EmergencyCallWarningTitle" msgid="4790413876281901612">"Wi‑Fi pozivanje je aktivno"</string>
     <string name="EmergencyCallWarningSummary" msgid="8973232888021643293">"Hitni pozivi zahtevaju mobilnu mrežu."</string>
     <string name="notification_channel_network_alert" msgid="4427736684338074967">"Obaveštenja"</string>
@@ -1071,6 +1071,9 @@
     <string name="screen_compat_mode_hint" msgid="1064524084543304459">"Ponovo omogućite u meniju Sistemska podešavanja &gt; Aplikacije &gt; Preuzeto."</string>
     <string name="unsupported_display_size_message" msgid="6545327290756295232">"<xliff:g id="APP_NAME">%1$s</xliff:g> ne podržava trenutno podešavanje veličine prikaza i može da se ponaša neočekivano."</string>
     <string name="unsupported_display_size_show" msgid="7969129195360353041">"Uvek prikazuj"</string>
+    <string name="unsupported_compile_sdk_message" msgid="4253168368781441759">"Aplikacija <xliff:g id="APP_NAME">%1$s</xliff:g> je napravljena za nekompatibilnu verziju Android OS-a i može da se ponaša na neočekivan način. Možda je dostupna ažurirana verzija aplikacije."</string>
+    <string name="unsupported_compile_sdk_show" msgid="2681877855260970231">"Uvek prikaži"</string>
+    <string name="unsupported_compile_sdk_check_update" msgid="3312723623323216101">"Potraži ažuriranje"</string>
     <string name="smv_application" msgid="3307209192155442829">"Aplikacija <xliff:g id="APPLICATION">%1$s</xliff:g> (proces <xliff:g id="PROCESS">%2$s</xliff:g>) je prekršila samonametnute StrictMode smernice."</string>
     <string name="smv_process" msgid="5120397012047462446">"Proces <xliff:g id="PROCESS">%1$s</xliff:g> je prekršio samonametnute StrictMode smernice."</string>
     <string name="android_upgrading_title" msgid="1584192285441405746">"Android se nadograđuje…"</string>
@@ -1138,10 +1141,10 @@
     <string name="network_available_sign_in" msgid="1848877297365446605">"Prijavite se na mrežu"</string>
     <!-- no translation found for network_available_sign_in_detailed (8000081941447976118) -->
     <skip />
-    <string name="wifi_no_internet" msgid="8451173622563841546">"Wi-Fi nema pristup internetu"</string>
+    <string name="wifi_no_internet" msgid="8938267198124654938">"Wi-Fi nema pristup internetu"</string>
     <string name="wifi_no_internet_detailed" msgid="8083079241212301741">"Dodirnite za opcije"</string>
     <string name="network_switch_metered" msgid="4671730921726992671">"Prešli ste na tip mreže <xliff:g id="NETWORK_TYPE">%1$s</xliff:g>"</string>
-    <string name="network_switch_metered_detail" msgid="5325661434777870353">"Uređaj koristi tip mreže <xliff:g id="NEW_NETWORK">%1$s</xliff:g> kada tip mreže <xliff:g id="PREVIOUS_NETWORK">%2$s</xliff:g> nema pristup internetu. Možda će se naplaćivati troškovi."</string>
+    <string name="network_switch_metered_detail" msgid="775163331794506615">"Uređaj koristi tip mreže <xliff:g id="NEW_NETWORK">%1$s</xliff:g> kada tip mreže <xliff:g id="PREVIOUS_NETWORK">%2$s</xliff:g> nema pristup internetu. Možda će se naplaćivati troškovi."</string>
     <string name="network_switch_metered_toast" msgid="5779283181685974304">"Prešli ste sa tipa mreže <xliff:g id="PREVIOUS_NETWORK">%1$s</xliff:g> na tip mreže <xliff:g id="NEW_NETWORK">%2$s</xliff:g>"</string>
   <string-array name="network_switch_type_name">
     <item msgid="3979506840912951943">"mobilni podaci"</item>
@@ -1152,7 +1155,7 @@
   </string-array>
     <string name="network_switch_type_name_unknown" msgid="4552612897806660656">"nepoznat tip mreže"</string>
     <string name="wifi_watchdog_network_disabled" msgid="7904214231651546347">"Nije moguće povezati sa Wi-Fi mrežom"</string>
-    <string name="wifi_watchdog_network_disabled_detailed" msgid="5548780776418332675">" ima lošu internet vezu."</string>
+    <string name="wifi_watchdog_network_disabled_detailed" msgid="4917472096696322767">" ima lošu internet vezu."</string>
     <string name="wifi_connect_alert_title" msgid="8455846016001810172">"Želite li da dozvolite povezivanje?"</string>
     <string name="wifi_connect_alert_message" msgid="6451273376815958922">"Aplikacija %1$s želi da se poveže na Wi-Fi mrežu %2$s"</string>
     <string name="wifi_connect_default_application" msgid="7143109390475484319">"Aplikacija"</string>
@@ -1659,7 +1662,7 @@
     <string name="package_installed_device_owner" msgid="6875717669960212648">"Instalirao je administrator"</string>
     <string name="package_updated_device_owner" msgid="1847154566357862089">"Ažurirao je administrator"</string>
     <string name="package_deleted_device_owner" msgid="2307122077550236438">"Izbrisao je administrator"</string>
-    <string name="battery_saver_description" msgid="1960431123816253034">"Da bi produžila vreme trajanja baterije, ušteda baterije smanjuje performanse uređaja i ograničava vibraciju, usluge lokacije i većinu pozadinskih podataka. Imejl, razmena poruka i druge aplikacije koje se oslanjaju na sinhronizaciju neće se ažurirati dok ih ne otvorite.\n\nUšteda baterije se automatski isključuje kada se uređaj puni."</string>
+    <string name="battery_saver_description" msgid="5394663545060026162">"Da bi produžila trajanje baterije, Ušteda baterije smanjuje performanse uređaja i ograničava vibraciju, usluge lokacije i većinu pozadinskih podataka. Imejl, razmena poruka i druge aplikacije koje se oslanjaju na sinhronizaciju se neće ažurirati ako ih ne otvorite.\n\nUšteda baterije se automatski isključuje kada se uređaj puni."</string>
     <string name="data_saver_description" msgid="6015391409098303235">"Da bi se smanjila potrošnja podataka, Ušteda podataka sprečava neke aplikacije da šalju ili primaju podatke u pozadini. Aplikacija koju trenutno koristite može da pristupa podacima, ali će to činiti ređe. Na primer, slike se neće prikazivati dok ih ne dodirnete."</string>
     <string name="data_saver_enable_title" msgid="4674073932722787417">"Uključiti Uštedu podataka?"</string>
     <string name="data_saver_enable_button" msgid="7147735965247211818">"Uključi"</string>

@@ -33,15 +33,13 @@
     <string name="wifi_check_password_try_again" msgid="516958988102584767">"請檢查密碼，然後再試一次"</string>
     <string name="wifi_not_in_range" msgid="1136191511238508967">"不在有效範圍內"</string>
     <string name="wifi_no_internet_no_reconnect" msgid="5724903347310541706">"無法自動連線"</string>
-    <!-- no translation found for wifi_no_internet (4663834955626848401) -->
-    <skip />
+    <string name="wifi_no_internet" msgid="4663834955626848401">"沒有可用的網際網路連線"</string>
     <string name="saved_network" msgid="4352716707126620811">"由「<xliff:g id="NAME">%1$s</xliff:g>」儲存"</string>
     <string name="connected_via_network_scorer" msgid="5713793306870815341">"已透過 %1$s 自動連線"</string>
     <string name="connected_via_network_scorer_default" msgid="7867260222020343104">"已透過網路評分供應商自動連線"</string>
     <string name="connected_via_passpoint" msgid="2826205693803088747">"已透過 %1$s 連線"</string>
     <string name="available_via_passpoint" msgid="1617440946846329613">"可透過 %1$s 使用"</string>
-    <!-- no translation found for wifi_connected_no_internet (8202906332837777829) -->
-    <skip />
+    <string name="wifi_connected_no_internet" msgid="8202906332837777829">"已連線，沒有網際網路"</string>
     <string name="wifi_ap_unable_to_handle_new_sta" msgid="5348824313514404541">"存取點暫時滿載"</string>
     <string name="connected_via_carrier" msgid="7583780074526041912">"已透過 %1$s 連線"</string>
     <string name="available_via_carrier" msgid="1469036129740799053">"可透過 %1$s 使用"</string>
@@ -86,8 +84,7 @@
     <string name="bluetooth_hid_profile_summary_connected" msgid="3381760054215168689">"已連線到輸入裝置"</string>
     <string name="bluetooth_pan_user_profile_summary_connected" msgid="6436258151814414028">"已連線至裝置並取得網際網路連線"</string>
     <string name="bluetooth_pan_nap_profile_summary_connected" msgid="1322694224800769308">"與裝置分享本地網際網路連線"</string>
-    <!-- no translation found for bluetooth_pan_profile_summary_use_for (5736111170225304239) -->
-    <skip />
+    <string name="bluetooth_pan_profile_summary_use_for" msgid="5736111170225304239">"用於網際網路連線"</string>
     <string name="bluetooth_map_profile_summary_use_for" msgid="5154200119919927434">"地圖使用偏好"</string>
     <string name="bluetooth_sap_profile_summary_use_for" msgid="7085362712786907993">"用於 SIM 卡存取權"</string>
     <string name="bluetooth_a2dp_profile_summary_use_for" msgid="4630849022250168427">"用於媒體音訊"</string>

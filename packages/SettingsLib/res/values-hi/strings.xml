@@ -33,15 +33,13 @@
     <string name="wifi_check_password_try_again" msgid="516958988102584767">"पासवर्ड जाँचें और दोबारा कोशिश करें"</string>
     <string name="wifi_not_in_range" msgid="1136191511238508967">"रेंज में नहीं"</string>
     <string name="wifi_no_internet_no_reconnect" msgid="5724903347310541706">"अपने आप कनेक्ट नहीं होगा"</string>
-    <!-- no translation found for wifi_no_internet (4663834955626848401) -->
-    <skip />
+    <string name="wifi_no_internet" msgid="4663834955626848401">"इंटरनेट नहीं है"</string>
     <string name="saved_network" msgid="4352716707126620811">"<xliff:g id="NAME">%1$s</xliff:g> के द्वारा सहेजा गया"</string>
     <string name="connected_via_network_scorer" msgid="5713793306870815341">"%1$s के ज़रिए ऑटोमैटिक रूप से कनेक्ट है"</string>
     <string name="connected_via_network_scorer_default" msgid="7867260222020343104">"नेटवर्क रेटिंग प्रदाता के ज़रिए अपने आप कनेक्ट है"</string>
     <string name="connected_via_passpoint" msgid="2826205693803088747">"%1$s के द्वारा उपलब्ध"</string>
     <string name="available_via_passpoint" msgid="1617440946846329613">"%1$s के द्वारा उपलब्ध"</string>
-    <!-- no translation found for wifi_connected_no_internet (8202906332837777829) -->
-    <skip />
+    <string name="wifi_connected_no_internet" msgid="8202906332837777829">"कनेक्ट हो गया है, लेकिन इंटरनेट नहीं है"</string>
     <string name="wifi_ap_unable_to_handle_new_sta" msgid="5348824313514404541">"एक्सेस पॉइंट फ़िलहाल भरा हुआ है"</string>
     <string name="connected_via_carrier" msgid="7583780074526041912">"%1$s के ज़रिए कनेक्ट"</string>
     <string name="available_via_carrier" msgid="1469036129740799053">"%1$s के ज़रिए उपलब्ध"</string>
@@ -86,8 +84,7 @@
     <string name="bluetooth_hid_profile_summary_connected" msgid="3381760054215168689">"इनपुट डिवाइस से कनेक्‍ट किया गया"</string>
     <string name="bluetooth_pan_user_profile_summary_connected" msgid="6436258151814414028">"इंटरनेट के लिए डिवाइस से कनेक्ट है"</string>
     <string name="bluetooth_pan_nap_profile_summary_connected" msgid="1322694224800769308">"डिवाइस से इंटरनेट शेयर हो रहा है"</string>
-    <!-- no translation found for bluetooth_pan_profile_summary_use_for (5736111170225304239) -->
-    <skip />
+    <string name="bluetooth_pan_profile_summary_use_for" msgid="5736111170225304239">"इंटरनेट से जुड़ने के लिए इस्तेमाल करें"</string>
     <string name="bluetooth_map_profile_summary_use_for" msgid="5154200119919927434">"मानचित्र के लिए उपयोग करें"</string>
     <string name="bluetooth_sap_profile_summary_use_for" msgid="7085362712786907993">"सिम ऐक्सेस के लिए उपयोग करें"</string>
     <string name="bluetooth_a2dp_profile_summary_use_for" msgid="4630849022250168427">"मीडिया ऑडियो के लिए उपयोग करें"</string>
@@ -375,10 +372,10 @@
     <string name="battery_info_status_discharging" msgid="310932812698268588">"चार्ज नहीं हो रही है"</string>
     <string name="battery_info_status_not_charging" msgid="8523453668342598579">"प्लग इन है, अभी चार्ज नहीं हो सकती"</string>
     <string name="battery_info_status_full" msgid="2824614753861462808">"पूरी"</string>
-    <string name="disabled_by_admin_summary_text" msgid="6750513964908334617">"व्यवस्थापक द्वारा नियंत्रित"</string>
+    <string name="disabled_by_admin_summary_text" msgid="6750513964908334617">"इसका नियंत्रण एडमिन के पास है"</string>
     <string name="enabled_by_admin" msgid="5302986023578399263">"व्यवस्थापक ने सक्षम किया है"</string>
     <string name="disabled_by_admin" msgid="8505398946020816620">"व्यवस्थापक ने अक्षम किया है"</string>
-    <string name="disabled" msgid="9206776641295849915">"अक्षम किया गया"</string>
+    <string name="disabled" msgid="9206776641295849915">"बंद किया गया"</string>
     <string name="external_source_trusted" msgid="2707996266575928037">"अनुमति है"</string>
     <string name="external_source_untrusted" msgid="2677442511837596726">"अनुमति नहीं है"</string>
     <string name="install_other_apps" msgid="6986686991775883017">"अनजान ऐप इंस्टॉल करें"</string>

@@ -101,4 +101,18 @@ public abstract class DevicePolicyManagerInternal {
      * not enforced by the profile/device owner.
      */
     public abstract Intent createUserRestrictionSupportIntent(int userId, String userRestriction);
+
+    /**
+     * Returns whether this user/profile is affiliated with the device.
+     *
+     * <p>
+     * By definition, the user that the device owner runs on is always affiliated with the device.
+     * Any other user/profile is considered affiliated with the device if the set specified by its
+     * profile owner via {@link DevicePolicyManager#setAffiliationIds} intersects with the device
+     * owner's.
+     * <p>
+     * Profile owner on the primary user will never be considered as affiliated as there is no
+     * device owner to be affiliated with.
+     */
+    public abstract boolean isUserAffiliatedWithDevice(int userId);
 }

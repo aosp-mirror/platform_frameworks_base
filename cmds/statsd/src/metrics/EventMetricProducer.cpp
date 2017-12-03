@@ -62,7 +62,7 @@ EventMetricProducer::EventMetricProducer(const ConfigKey& key, const EventMetric
         mConditionSliced = true;
     }
 
-    startNewProtoOutputStream(mStartTimeNs);
+    startNewProtoOutputStreamLocked(mStartTimeNs);
 
     VLOG("metric %s created. bucket size %lld start_time: %lld", metric.name().c_str(),
          (long long)mBucketSizeNs, (long long)mStartTimeNs);
@@ -72,7 +72,7 @@ EventMetricProducer::~EventMetricProducer() {
     VLOG("~EventMetricProducer() called");
 }
 
-void EventMetricProducer::startNewProtoOutputStream(long long startTime) {
+void EventMetricProducer::startNewProtoOutputStreamLocked(long long startTime) {
     mProto = std::make_unique<ProtoOutputStream>();
     // TODO: We need to auto-generate the field IDs for StatsLogReport, EventMetricData,
     // and StatsEvent.
@@ -84,29 +84,30 @@ void EventMetricProducer::startNewProtoOutputStream(long long startTime) {
 void EventMetricProducer::finish() {
 }
 
-void EventMetricProducer::onSlicedConditionMayChange(const uint64_t eventTime) {
+void EventMetricProducer::onSlicedConditionMayChangeLocked(const uint64_t eventTime) {
 }
 
-std::unique_ptr<std::vector<uint8_t>> EventMetricProducer::onDumpReport() {
+std::unique_ptr<std::vector<uint8_t>> EventMetricProducer::onDumpReportLocked() {
     long long endTime = time(nullptr) * NS_PER_SEC;
     mProto->end(mProtoToken);
     mProto->write(FIELD_TYPE_INT64 | FIELD_ID_END_REPORT_NANOS, endTime);
 
     size_t bufferSize = mProto->size();
     VLOG("metric %s dump report now... proto size: %zu ", mMetric.name().c_str(), bufferSize);
-    std::unique_ptr<std::vector<uint8_t>> buffer = serializeProto();
+    std::unique_ptr<std::vector<uint8_t>> buffer = serializeProtoLocked();
 
-    startNewProtoOutputStream(endTime);
+    startNewProtoOutputStreamLocked(endTime);
 
     return buffer;
 }
 
-void EventMetricProducer::onConditionChanged(const bool conditionMet, const uint64_t eventTime) {
+void EventMetricProducer::onConditionChangedLocked(const bool conditionMet,
+                                                   const uint64_t eventTime) {
     VLOG("Metric %s onConditionChanged", mMetric.name().c_str());
     mCondition = conditionMet;
 }
 
-void EventMetricProducer::onMatchedLogEventInternal(
+void EventMetricProducer::onMatchedLogEventInternalLocked(
         const size_t matcherIndex, const HashableDimensionKey& eventKey,
         const std::map<std::string, HashableDimensionKey>& conditionKey, bool condition,
         const LogEvent& event, bool scheduledPull) {
@@ -123,7 +124,7 @@ void EventMetricProducer::onMatchedLogEventInternal(
     mProto->end(wrapperToken);
 }
 
-size_t EventMetricProducer::byteSize() const {
+size_t EventMetricProducer::byteSizeLocked() const {
     return mProto->bytesWritten();
 }
 

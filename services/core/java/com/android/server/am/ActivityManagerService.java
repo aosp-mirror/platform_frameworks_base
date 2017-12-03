@@ -417,6 +417,7 @@ import com.android.server.am.ActivityStack.ActivityState;
 import com.android.server.am.proto.ActivityManagerServiceProto;
 import com.android.server.am.proto.BroadcastProto;
 import com.android.server.am.proto.GrantUriProto;
+import com.android.server.am.proto.MemInfoProto;
 import com.android.server.am.proto.NeededUriGrantsProto;
 import com.android.server.am.proto.StickyBroadcastProto;
 import com.android.server.firewall.IntentFirewall;
@@ -2569,14 +2570,13 @@ public class ActivityManagerService extends IActivityManager.Stub
             @Override
             public void dumpHigh(FileDescriptor fd, PrintWriter pw, String[] args,
                     boolean asProto) {
-                if (asProto) return;
-                mActivityManagerService.dumpApplicationMemoryUsage(fd,
-                        pw, "  ", new String[] {"-a"}, false, null);
+                dump(fd, pw, new String[] {"-a"}, asProto);
             }
+
             @Override
             public void dump(FileDescriptor fd, PrintWriter pw, String[] args, boolean asProto) {
-                if (asProto) return;
-                mActivityManagerService.dumpApplicationMemoryUsage(fd, pw, "  ", args, false, null);
+                mActivityManagerService.dumpApplicationMemoryUsage(
+                        fd, pw, "  ", args, false, null, asProto);
             }
         };
 
@@ -13696,7 +13696,8 @@ public class ActivityManagerService extends IActivityManager.Stub
                     stats.getPackageStatsLocked(sourceUid >= 0 ? sourceUid : uid,
                             sourcePkg != null ? sourcePkg : rec.key.packageName);
                 pkg.noteWakeupAlarmLocked(tag);
-                StatsLog.write(StatsLog.WAKEUP_ALARM_OCCURRED, sourceUid >= 0 ? sourceUid : uid);
+                StatsLog.write(StatsLog.WAKEUP_ALARM_OCCURRED, sourceUid >= 0 ? sourceUid : uid,
+                        tag);
             }
         }
     }
@@ -17207,8 +17208,8 @@ public class ActivityManagerService extends IActivityManager.Stub
         boolean dumpProto;
     }
 
-    final void dumpApplicationMemoryUsage(FileDescriptor fd,
-            PrintWriter pw, String prefix, String[] args, boolean brief, PrintWriter categoryPw) {
+    final void dumpApplicationMemoryUsage(FileDescriptor fd, PrintWriter pw, String prefix,
+            String[] args, boolean brief, PrintWriter categoryPw, boolean asProto) {
         MemoryUsageDumpOptions opts = new MemoryUsageDumpOptions();
         opts.dumpDetails = false;
         opts.dumpFullDetails = false;
@@ -17221,7 +17222,7 @@ public class ActivityManagerService extends IActivityManager.Stub
         opts.packages = false;
         opts.isCheckinRequest = false;
         opts.dumpSwapPss = false;
-        opts.dumpProto = false;
+        opts.dumpProto = asProto;
 
         int opti = 0;
         while (opti < args.length) {
@@ -17289,7 +17290,7 @@ public class ActivityManagerService extends IActivityManager.Stub
         }
     }
 
-    final void dumpApplicationMemoryUsage(FileDescriptor fd, PrintWriter pw, String prefix,
+    private final void dumpApplicationMemoryUsage(FileDescriptor fd, PrintWriter pw, String prefix,
             MemoryUsageDumpOptions opts, String[] innerArgs, boolean brief,
             ArrayList<ProcessRecord> procs, PrintWriter categoryPw) {
         long uptime = SystemClock.uptimeMillis();
@@ -17298,54 +17299,59 @@ public class ActivityManagerService extends IActivityManager.Stub
 
         if (procs == null) {
             // No Java processes.  Maybe they want to print a native process.
-            if (innerArgs.length > 0 && innerArgs[0].charAt(0) != '-') {
-                ArrayList<ProcessCpuTracker.Stats> nativeProcs
-                        = new ArrayList<ProcessCpuTracker.Stats>();
-                updateCpuStatsNow();
-                int findPid = -1;
-                try {
-                    findPid = Integer.parseInt(innerArgs[0]);
-                } catch (NumberFormatException e) {
-                }
-                synchronized (mProcessCpuTracker) {
-                    final int N = mProcessCpuTracker.countStats();
-                    for (int i=0; i<N; i++) {
-                        ProcessCpuTracker.Stats st = mProcessCpuTracker.getStats(i);
-                        if (st.pid == findPid || (st.baseName != null
-                                && st.baseName.equals(innerArgs[0]))) {
-                            nativeProcs.add(st);
+            String proc = "N/A";
+            if (innerArgs.length > 0) {
+                proc = innerArgs[0];
+                if (proc.charAt(0) != '-') {
+                    ArrayList<ProcessCpuTracker.Stats> nativeProcs
+                            = new ArrayList<ProcessCpuTracker.Stats>();
+                    updateCpuStatsNow();
+                    int findPid = -1;
+                    try {
+                        findPid = Integer.parseInt(innerArgs[0]);
+                    } catch (NumberFormatException e) {
+                    }
+                    synchronized (mProcessCpuTracker) {
+                        final int N = mProcessCpuTracker.countStats();
+                        for (int i=0; i<N; i++) {
+                            ProcessCpuTracker.Stats st = mProcessCpuTracker.getStats(i);
+                            if (st.pid == findPid || (st.baseName != null
+                                    && st.baseName.equals(innerArgs[0]))) {
+                                nativeProcs.add(st);
+                            }
                         }
                     }
-                }
-                if (nativeProcs.size() > 0) {
-                    dumpApplicationMemoryUsageHeader(pw, uptime, realtime, opts.isCheckinRequest,
-                            opts.isCompact);
-                    Debug.MemoryInfo mi = null;
-                    for (int i = nativeProcs.size() - 1 ; i >= 0 ; i--) {
-                        final ProcessCpuTracker.Stats r = nativeProcs.get(i);
-                        final int pid = r.pid;
-                        if (!opts.isCheckinRequest && opts.dumpDetails) {
-                            pw.println("\n** MEMINFO in pid " + pid + " [" + r.baseName + "] **");
+                    if (nativeProcs.size() > 0) {
+                        dumpApplicationMemoryUsageHeader(pw, uptime, realtime,
+                                opts.isCheckinRequest, opts.isCompact);
+                        Debug.MemoryInfo mi = null;
+                        for (int i = nativeProcs.size() - 1 ; i >= 0 ; i--) {
+                            final ProcessCpuTracker.Stats r = nativeProcs.get(i);
+                            final int pid = r.pid;
+                            if (!opts.isCheckinRequest && opts.dumpDetails) {
+                                pw.println("\n** MEMINFO in pid " + pid + " [" + r.baseName + "] **");
+                            }
+                            if (mi == null) {
+                                mi = new Debug.MemoryInfo();
+                            }
+                            if (opts.dumpDetails || (!brief && !opts.oomOnly)) {
+                                Debug.getMemoryInfo(pid, mi);
+                            } else {
+                                mi.dalvikPss = (int)Debug.getPss(pid, tmpLong, null);
+                                mi.dalvikPrivateDirty = (int)tmpLong[0];
+                            }
+                            ActivityThread.dumpMemInfoTable(pw, mi, opts.isCheckinRequest,
+                                    opts.dumpFullDetails, opts.dumpDalvik, opts.dumpSummaryOnly,
+                                    pid, r.baseName, 0, 0, 0, 0, 0, 0);
+                            if (opts.isCheckinRequest) {
+                                pw.println();
+                            }
                         }
-                        if (mi == null) {
-                            mi = new Debug.MemoryInfo();
-                        }
-                        if (opts.dumpDetails || (!brief && !opts.oomOnly)) {
-                            Debug.getMemoryInfo(pid, mi);
-                        } else {
-                            mi.dalvikPss = (int)Debug.getPss(pid, tmpLong, null);
-                            mi.dalvikPrivateDirty = (int)tmpLong[0];
-                        }
-                        ActivityThread.dumpMemInfoTable(pw, mi, opts.isCheckinRequest, opts.dumpFullDetails,
-                                opts.dumpDalvik, opts.dumpSummaryOnly, pid, r.baseName, 0, 0, 0, 0, 0, 0);
-                        if (opts.isCheckinRequest) {
-                            pw.println();
-                        }
+                        return;
                     }
-                    return;
                 }
             }
-            pw.println("No process found for: " + innerArgs[0]);
+            pw.println("No process found for: " + proc);
             return;
         }
 
@@ -17768,15 +17774,77 @@ public class ActivityManagerService extends IActivityManager.Stub
         }
     }
 
-    final void dumpApplicationMemoryUsage(FileDescriptor fd, PrintWriter pw,
+    private final void dumpApplicationMemoryUsage(FileDescriptor fd, PrintWriter pw,
             MemoryUsageDumpOptions opts, String[] innerArgs, boolean brief,
             ArrayList<ProcessRecord> procs) {
-        ProtoOutputStream proto = new ProtoOutputStream(fd);
+        final long uptimeMs = SystemClock.uptimeMillis();
+        final long realtimeMs = SystemClock.elapsedRealtime();
+        final long[] tmpLong = new long[1];
 
-        // TODO: implement
-        pw.println("Not yet implemented. Have a cookie instead! :]");
+        if (procs == null) {
+            // No Java processes.  Maybe they want to print a native process.
+            String proc = "N/A";
+            if (innerArgs.length > 0) {
+                proc = innerArgs[0];
+                if (proc.charAt(0) != '-') {
+                    ArrayList<ProcessCpuTracker.Stats> nativeProcs
+                            = new ArrayList<ProcessCpuTracker.Stats>();
+                    updateCpuStatsNow();
+                    int findPid = -1;
+                    try {
+                        findPid = Integer.parseInt(innerArgs[0]);
+                    } catch (NumberFormatException e) {
+                    }
+                    synchronized (mProcessCpuTracker) {
+                        final int N = mProcessCpuTracker.countStats();
+                        for (int i=0; i<N; i++) {
+                            ProcessCpuTracker.Stats st = mProcessCpuTracker.getStats(i);
+                            if (st.pid == findPid || (st.baseName != null
+                                    && st.baseName.equals(innerArgs[0]))) {
+                                nativeProcs.add(st);
+                            }
+                        }
+                    }
+                    if (nativeProcs.size() > 0) {
+                        ProtoOutputStream proto = new ProtoOutputStream(fd);
 
-        proto.flush();
+                        proto.write(MemInfoProto.UPTIME_DURATION_MS, uptimeMs);
+                        proto.write(MemInfoProto.ELAPSED_REALTIME_MS, realtimeMs);
+                        Debug.MemoryInfo mi = null;
+                        for (int i = nativeProcs.size() - 1 ; i >= 0 ; i--) {
+                            final ProcessCpuTracker.Stats r = nativeProcs.get(i);
+                            final int pid = r.pid;
+                            final long nToken = proto.start(MemInfoProto.NATIVE_PROCESSES);
+
+                            proto.write(MemInfoProto.NativeProcess.PID, pid);
+                            proto.write(MemInfoProto.NativeProcess.PROCESS_NAME, r.baseName);
+
+                            if (mi == null) {
+                                mi = new Debug.MemoryInfo();
+                            }
+                            if (opts.dumpDetails || (!brief && !opts.oomOnly)) {
+                                Debug.getMemoryInfo(pid, mi);
+                            } else {
+                                mi.dalvikPss = (int)Debug.getPss(pid, tmpLong, null);
+                                mi.dalvikPrivateDirty = (int)tmpLong[0];
+                            }
+                            ActivityThread.dumpMemInfoTable(proto, mi, opts.dumpDalvik,
+                                    opts.dumpSummaryOnly, 0, 0, 0, 0, 0, 0);
+
+                            proto.end(nToken);
+                        }
+
+                        proto.flush();
+                        return;
+                    }
+                }
+            }
+            Log.d(TAG, "No process found for: " + innerArgs[0]);
+            return;
+        }
+
+        // TODO: finish
+        pw.println("Java processes aren't implemented yet. Have a coffee instead! :]");
     }
 
     private void appendBasicMemEntry(StringBuilder sb, int oomAdj, int procState, long pss,

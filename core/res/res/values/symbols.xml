@@ -391,6 +391,8 @@
   <java-symbol type="integer" name="config_wifi_framework_min_tx_rate_for_staying_on_network" />
   <java-symbol type="integer" name="config_wifi_framework_min_rx_rate_for_staying_on_network" />
 
+  <java-symbol type="integer" name="config_wifi_framework_soft_ap_timeout_delay" />
+
   <java-symbol type="bool" name="config_wifi_framework_cellular_handover_enable_user_triggered_adjustment" />
   <java-symbol type="integer" name="config_wifi_framework_associated_full_scan_tx_packet_threshold" />
   <java-symbol type="integer" name="config_wifi_framework_associated_full_scan_rx_packet_threshold" />
@@ -459,6 +461,7 @@
   <java-symbol type="bool" name="config_hasPermanentDpad" />
   <java-symbol type="bool" name="config_useDefaultFocusHighlight" />
   <java-symbol type="array" name="config_deviceSpecificSystemServices" />
+  <java-symbol type="string" name="config_deviceSpecificDevicePolicyManagerService" />
 
   <java-symbol type="color" name="tab_indicator_text_v4" />
 
@@ -3158,4 +3161,6 @@
   <java-symbol type="layout" name="unsupported_compile_sdk_dialog_content" />
   <java-symbol type="string" name="unsupported_compile_sdk_message" />
   <java-symbol type="string" name="unsupported_compile_sdk_check_update" />
+
+  <java-symbol type="string" name="battery_saver_warning_title" />
 </resources>
