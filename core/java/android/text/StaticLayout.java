@@ -610,8 +610,8 @@ public class StaticLayout extends Layout {
 
     /* package */ void generate(Builder b, boolean includepad, boolean trackpad) {
         final CharSequence source = b.mText;
-        int bufStart = b.mStart;
-        int bufEnd = b.mEnd;
+        final int bufStart = b.mStart;
+        final int bufEnd = b.mEnd;
         TextPaint paint = b.mPaint;
         int outerWidth = b.mWidth;
         TextDirectionHeuristic textDir = b.mTextDir;
@@ -633,10 +633,6 @@ public class StaticLayout extends Layout {
 
         Paint.FontMetricsInt fm = b.mFontMetricsInt;
         int[] chooseHtv = null;
-
-        Spanned spanned = null;
-        if (source instanceof Spanned)
-            spanned = (Spanned) source;
 
         final int[] indents;
         if (mLeftIndents != null || mRightIndents != null) {
@@ -660,16 +656,34 @@ public class StaticLayout extends Layout {
                 b.mJustificationMode != Layout.JUSTIFICATION_MODE_NONE,
                 indents, mLeftPaddings, mRightPaddings);
 
-        MeasuredText measured = null;
+        PremeasuredText premeasured = null;
+        final Spanned spanned;
+        if (source instanceof PremeasuredText) {
+            premeasured = (PremeasuredText) source;
+
+            final CharSequence original = premeasured.getText();
+            spanned = (original instanceof Spanned) ? (Spanned) original : null;
+
+            if (bufStart != premeasured.getStart() || bufEnd != premeasured.getEnd()) {
+                // The buffer position has changed. Re-measure here.
+                premeasured = PremeasuredText.build(original, paint, textDir, bufStart, bufEnd);
+            } else {
+                // We can use premeasured information.
+
+                // Overwrite with the one when premeasured.
+                // TODO: Give an option for developer not to overwrite and measure again here?
+                textDir = premeasured.getTextDir();
+                paint = premeasured.getPaint();
+            }
+        } else {
+            premeasured = PremeasuredText.build(source, paint, textDir, bufStart, bufEnd);
+            spanned = (source instanceof Spanned) ? (Spanned) source : null;
+        }
+
         try {
-            int paraEnd;
-            for (int paraStart = bufStart; paraStart <= bufEnd; paraStart = paraEnd) {
-                paraEnd = TextUtils.indexOf(source, CHAR_NEW_LINE, paraStart, bufEnd);
-                if (paraEnd < 0) {
-                    paraEnd = bufEnd;
-                } else {
-                    paraEnd++;
-                }
+            for (int paraIndex = 0; paraIndex < premeasured.getParagraphCount(); paraIndex++) {
+                final int paraStart = premeasured.getParagraphStart(paraIndex);
+                final int paraEnd = premeasured.getParagraphEnd(paraIndex);
 
                 int firstWidthLineCount = 1;
                 int firstWidth = outerWidth;
@@ -735,8 +749,7 @@ public class StaticLayout extends Layout {
                     }
                 }
 
-                measured = MeasuredText.buildForStaticLayout(
-                        paint, source, paraStart, paraEnd, textDir, measured);
+                final MeasuredText measured = premeasured.getMeasuredText(paraIndex);
                 final char[] chs = measured.getChars();
                 final int[] spanEndCache = measured.getSpanEndCache().getRawArray();
                 final int[] fmCache = measured.getFontMetrics().getRawArray();
@@ -887,7 +900,8 @@ public class StaticLayout extends Layout {
 
             if ((bufEnd == bufStart || source.charAt(bufEnd - 1) == CHAR_NEW_LINE)
                     && mLineCount < mMaximumVisibleLineCount) {
-                measured = MeasuredText.buildForBidi(source, bufEnd, bufEnd, textDir, measured);
+                final MeasuredText measured =
+                        MeasuredText.buildForBidi(source, bufEnd, bufEnd, textDir, null);
                 paint.getFontMetricsInt(fm);
                 v = out(source,
                         bufEnd, bufEnd, fm.ascent, fm.descent,
@@ -901,9 +915,6 @@ public class StaticLayout extends Layout {
                         ellipsizedWidth, 0, paint, false);
             }
         } finally {
-            if (measured != null) {
-                measured.recycle();
-            }
             nFinish(nativePtr);
         }
     }

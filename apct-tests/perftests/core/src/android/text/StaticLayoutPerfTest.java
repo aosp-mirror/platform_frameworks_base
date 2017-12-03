@@ -16,6 +16,8 @@
 
 package android.text;
 
+import static android.text.TextDirectionHeuristics.LTR;
+
 import android.perftests.utils.BenchmarkState;
 import android.perftests.utils.PerfStatusReporter;
 
@@ -174,6 +176,86 @@ public class StaticLayoutPerfTest {
         while (state.keepRunning()) {
             state.pauseTiming();
             final CharSequence text = generateRandomParagraph(WORD_LENGTH, STYLE_TEXT);
+            state.resumeTiming();
+
+            StaticLayout.Builder.obtain(text, 0, text.length(), PAINT, TEXT_WIDTH)
+                    .setHyphenationFrequency(Layout.HYPHENATION_FREQUENCY_NONE)
+                    .setBreakStrategy(Layout.BREAK_STRATEGY_SIMPLE)
+                    .build();
+        }
+    }
+
+    @Test
+    public void testCreate_MeasuredText_NoStyled_Greedy_NoHyphenation() {
+        final BenchmarkState state = mPerfStatusReporter.getBenchmarkState();
+        while (state.keepRunning()) {
+            state.pauseTiming();
+            final PremeasuredText text = PremeasuredText.build(
+                    generateRandomParagraph(WORD_LENGTH, NO_STYLE_TEXT), PAINT, LTR);
+            state.resumeTiming();
+
+            StaticLayout.Builder.obtain(text, 0, text.length(), PAINT, TEXT_WIDTH)
+                    .setHyphenationFrequency(Layout.HYPHENATION_FREQUENCY_NONE)
+                    .setBreakStrategy(Layout.BREAK_STRATEGY_SIMPLE)
+                    .build();
+        }
+    }
+
+    @Test
+    public void testCreate_MeasuredText_NoStyled_Greedy_Hyphenation() {
+        final BenchmarkState state = mPerfStatusReporter.getBenchmarkState();
+        while (state.keepRunning()) {
+            state.pauseTiming();
+            final PremeasuredText text = PremeasuredText.build(
+                    generateRandomParagraph(WORD_LENGTH, NO_STYLE_TEXT), PAINT, LTR);
+            state.resumeTiming();
+
+            StaticLayout.Builder.obtain(text, 0, text.length(), PAINT, TEXT_WIDTH)
+                    .setHyphenationFrequency(Layout.HYPHENATION_FREQUENCY_NORMAL)
+                    .setBreakStrategy(Layout.BREAK_STRATEGY_SIMPLE)
+                    .build();
+        }
+    }
+
+    @Test
+    public void testCreate_MeasuredText_NoStyled_Balanced_NoHyphenation() {
+        final BenchmarkState state = mPerfStatusReporter.getBenchmarkState();
+        while (state.keepRunning()) {
+            state.pauseTiming();
+            final PremeasuredText text = PremeasuredText.build(
+                    generateRandomParagraph(WORD_LENGTH, NO_STYLE_TEXT), PAINT, LTR);
+            state.resumeTiming();
+
+            StaticLayout.Builder.obtain(text, 0, text.length(), PAINT, TEXT_WIDTH)
+                    .setHyphenationFrequency(Layout.HYPHENATION_FREQUENCY_NONE)
+                    .setBreakStrategy(Layout.BREAK_STRATEGY_BALANCED)
+                    .build();
+        }
+    }
+
+    @Test
+    public void testCreate_MeasuredText_NoStyled_Balanced_Hyphenation() {
+        final BenchmarkState state = mPerfStatusReporter.getBenchmarkState();
+        while (state.keepRunning()) {
+            state.pauseTiming();
+            final PremeasuredText text = PremeasuredText.build(
+                    generateRandomParagraph(WORD_LENGTH, NO_STYLE_TEXT), PAINT, LTR);
+            state.resumeTiming();
+
+            StaticLayout.Builder.obtain(text, 0, text.length(), PAINT, TEXT_WIDTH)
+                    .setHyphenationFrequency(Layout.HYPHENATION_FREQUENCY_NORMAL)
+                    .setBreakStrategy(Layout.BREAK_STRATEGY_BALANCED)
+                    .build();
+        }
+    }
+
+    @Test
+    public void testCreate_MeasuredText_Styled_Greedy_NoHyphenation() {
+        final BenchmarkState state = mPerfStatusReporter.getBenchmarkState();
+        while (state.keepRunning()) {
+            state.pauseTiming();
+            final PremeasuredText text = PremeasuredText.build(
+                    generateRandomParagraph(WORD_LENGTH, STYLE_TEXT), PAINT, LTR);
             state.resumeTiming();
 
             StaticLayout.Builder.obtain(text, 0, text.length(), PAINT, TEXT_WIDTH)

@@ -77,6 +77,7 @@ import android.text.InputFilter;
 import android.text.InputType;
 import android.text.Layout;
 import android.text.ParcelableSpan;
+import android.text.PremeasuredText;
 import android.text.Selection;
 import android.text.SpanWatcher;
 import android.text.Spannable;
@@ -5326,7 +5327,7 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
             if (imm != null) imm.restartInput(this);
         } else if (type == BufferType.SPANNABLE || mMovement != null) {
             text = mSpannableFactory.newSpannable(text);
-        } else if (!(text instanceof CharWrapper)) {
+        } else if (!(text instanceof PremeasuredText || text instanceof CharWrapper)) {
             text = TextUtils.stringOrSpannedString(text);
         }
 
@@ -5610,10 +5611,15 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
                 spannable = (Spannable) text;
             } else {
                 spannable = mSpannableFactory.newSpannable(text);
-                text = spannable;
             }
 
             SuggestionSpan[] spans = spannable.getSpans(0, text.length(), SuggestionSpan.class);
+            if (spans.length == 0) {
+                return text;
+            } else {
+                text = spannable;
+            }
+
             for (int i = 0; i < spans.length; i++) {
                 spannable.removeSpan(spans[i]);
             }
