@@ -101,7 +101,8 @@ public:
         SkIRect src = SkIRect::MakeWH(bitmap.width(), bitmap.height());
         lattice.fBounds = &src;
         NinePatchUtils::SetLatticeDivs(&lattice, *chunk, bitmap.width(), bitmap.height());
-        lattice.fFlags = nullptr;
+        lattice.fRectTypes = nullptr;
+        lattice.fColors = nullptr;
 
         SkRegion* region = nullptr;
         if (SkLatticeIter::Valid(bitmap.width(), bitmap.height(), lattice)) {

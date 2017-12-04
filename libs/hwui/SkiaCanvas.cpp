@@ -699,7 +699,8 @@ void SkiaCanvas::drawNinePatch(Bitmap& bitmap, const Res_png_9patch& chunk, floa
     SkCanvas::Lattice lattice;
     NinePatchUtils::SetLatticeDivs(&lattice, chunk, bitmap.width(), bitmap.height());
 
-    lattice.fFlags = nullptr;
+    lattice.fRectTypes = nullptr;
+    lattice.fColors = nullptr;
     int numFlags = 0;
     if (chunk.numColors > 0 && chunk.numColors == NinePatchUtils::NumDistinctRects(lattice)) {
         // We can expect the framework to give us a color for every distinct rect.
@@ -707,9 +708,10 @@ void SkiaCanvas::drawNinePatch(Bitmap& bitmap, const Res_png_9patch& chunk, floa
         numFlags = (lattice.fXCount + 1) * (lattice.fYCount + 1);
     }
 
-    SkAutoSTMalloc<25, SkCanvas::Lattice::Flags> flags(numFlags);
+    SkAutoSTMalloc<25, SkCanvas::Lattice::RectType> flags(numFlags);
+    SkAutoSTMalloc<25, SkColor> colors(numFlags);
     if (numFlags > 0) {
-        NinePatchUtils::SetLatticeFlags(&lattice, flags.get(), numFlags, chunk);
+        NinePatchUtils::SetLatticeFlags(&lattice, flags.get(), numFlags, chunk, colors.get());
     }
 
     lattice.fBounds = nullptr;
