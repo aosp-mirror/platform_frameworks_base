@@ -4455,6 +4455,12 @@ public class Intent implements Parcelable, Cloneable {
     public static final String EXTRA_EPHEMERAL_TOKEN = "android.intent.extra.EPHEMERAL_TOKEN";
 
     /**
+     * The action that triggered an instant application resolution.
+     * @hide
+     */
+    public static final String EXTRA_INSTANT_APP_ACTION = "android.intent.extra.INSTANT_APP_ACTION";
+
+    /**
      * The version code of the app to install components from.
      * @hide
      */
