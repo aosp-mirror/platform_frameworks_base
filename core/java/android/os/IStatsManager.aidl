@@ -69,9 +69,14 @@ interface IStatsManager {
 
     /**
      * Fetches data for the specified configuration key. Returns a byte array representing proto
-     * wire-encoded of ConfigMetricsReport.
+     * wire-encoded of ConfigMetricsReportList.
      */
     byte[] getData(in String key);
+
+    /**
+     * Fetches metadata across statsd. Returns byte array representing wire-encoded proto.
+     */
+    byte[] getMetadata();
 
     /**
      * Sets a configuration with the specified config key and subscribes to updates for this
