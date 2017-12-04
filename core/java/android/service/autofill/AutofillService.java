@@ -440,7 +440,6 @@ import com.android.internal.os.SomeArgs;
  *  save(username, password);
  * </pre>
  *
- *
  * <a name="Privacy"></a>
  * <h3>Privacy</h3>
  *
@@ -453,6 +452,13 @@ import com.android.internal.os.SomeArgs;
  * <p>Because this data could contain PII (Personally Identifiable Information, such as username or
  * email address), the service should only use it locally (i.e., in the app's process) for
  * heuristics purposes, but it should not be sent to external servers.
+ *
+ * <a name="FieldsClassification"></a>
+ * <h3>Metrics and fields classification</h3
+ *
+ * <p>TODO(b/67867469): document it or remove this section; in particular, document the relationship
+ * between set/getUserData(), FillResponse.setFieldClassificationIds(), and
+ * FillEventHistory.getFieldsClassification.
  */
 public abstract class AutofillService extends Service {
     private static final String TAG = "AutofillService";

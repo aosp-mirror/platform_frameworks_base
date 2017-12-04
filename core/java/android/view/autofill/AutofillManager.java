@@ -24,6 +24,7 @@ import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.SystemService;
+import android.annotation.TestApi;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
@@ -36,6 +37,7 @@ import android.os.Parcelable;
 import android.os.RemoteException;
 import android.service.autofill.AutofillService;
 import android.service.autofill.FillEventHistory;
+import android.service.autofill.UserData;
 import android.util.ArrayMap;
 import android.util.ArraySet;
 import android.util.Log;
@@ -1003,6 +1005,54 @@ public final class AutofillManager {
             return mService.isServiceEnabled(mContext.getUserId(), mContext.getPackageName());
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
+        }
+    }
+
+    /**
+     * Gets the user data used for <a href="#FieldsClassification">fields classification</a>.
+     *
+     * <p><b>Note:</b> This method should only be called by an app providing an autofill service.
+     *
+     * TODO(b/67867469):
+     *  - proper javadoc
+     *  - unhide / remove testApi
+     *
+     * @return value previously set by {@link #setUserData(UserData)} or {@code null} if it was
+     * reset or if the caller currently does not have an enabled autofill service for the user.
+     *
+     * @hide
+     */
+    @TestApi
+    @Nullable public UserData getUserData() {
+        try {
+            return mService.getUserData();
+        } catch (RemoteException e) {
+            e.rethrowFromSystemServer();
+            return null;
+        }
+    }
+
+    /**
+     * Sets the user data used for <a href="#FieldsClassification">fields classification</a>.
+     *
+     * <p><b>Note:</b> This method should only be called by an app providing an autofill service,
+     * and it's ignored if the caller currently doesn't have an enabled autofill service for
+     * the user.
+     *
+     * TODO(b/67867469):
+     *  - proper javadoc
+     *  - unhide / remove testApi
+     *  - add unit tests:
+     *    - call set / get / verify
+     *
+     * @hide
+     */
+    @TestApi
+    public void setUserData(@Nullable UserData userData) {
+        try {
+            mService.setUserData(userData);
+        } catch (RemoteException e) {
+            e.rethrowFromSystemServer();
         }
     }
 

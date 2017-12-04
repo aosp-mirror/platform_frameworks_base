@@ -76,7 +76,7 @@ public final class FillResponse implements Parcelable {
     private final @Nullable AutofillId[] mAuthenticationIds;
     private final @Nullable AutofillId[] mIgnoredIds;
     private final long mDisableDuration;
-    private final @Nullable FieldsDetection mFieldsDetection;
+    private final @Nullable AutofillId[] mFieldClassificationIds;
     private final int mFlags;
     private int mRequestId;
 
@@ -89,7 +89,7 @@ public final class FillResponse implements Parcelable {
         mAuthenticationIds = builder.mAuthenticationIds;
         mIgnoredIds = builder.mIgnoredIds;
         mDisableDuration = builder.mDisableDuration;
-        mFieldsDetection = builder.mFieldsDetection;
+        mFieldClassificationIds = builder.mFieldClassificationIds;
         mFlags = builder.mFlags;
         mRequestId = INVALID_REQUEST_ID;
     }
@@ -135,8 +135,8 @@ public final class FillResponse implements Parcelable {
     }
 
     /** @hide */
-    public @Nullable FieldsDetection getFieldsDetection() {
-        return mFieldsDetection;
+    public @Nullable AutofillId[] getFieldClassificationIds() {
+        return mFieldClassificationIds;
     }
 
     /** @hide */
@@ -175,7 +175,7 @@ public final class FillResponse implements Parcelable {
         private AutofillId[] mAuthenticationIds;
         private AutofillId[] mIgnoredIds;
         private long mDisableDuration;
-        private FieldsDetection mFieldsDetection;
+        private AutofillId[] mFieldClassificationIds;
         private int mFlags;
         private boolean mDestroyed;
 
@@ -329,21 +329,29 @@ public final class FillResponse implements Parcelable {
         }
 
         /**
+         * Sets which fields are used for <a href="#FieldsClassification">fields classification</a>
+         *
+         * @throws IllegalArgumentException is length of {@code ids} args is more than
+         * {@link UserData#getMaxFieldClassificationIdsSize()}.
+         * @throws IllegalStateException if {@link #build()} or {@link #disableAutofill(long)} was
+         * already called.
+         * @throws NullPointerException if {@code ids} or any element on it is {@code null}.
+         *
          * TODO(b/67867469):
-         *  - javadoc it
-         *  - javadoc how to check results
-         *  - unhide
+         *  - improve javadoc: explain relationship with UserData and how to check results
          *  - unhide / remove testApi
-         *  - throw exception (and document) if response has datasets or saveinfo
-         *  - throw exception (and document) if id on fieldsDetection is ignored
+         *  - implement multiple ids
          *
          * @hide
          */
         @TestApi
-        public Builder setFieldsDetection(@NonNull FieldsDetection fieldsDetection) {
+        public Builder setFieldClassificationIds(@NonNull AutofillId... ids) {
             throwIfDestroyed();
             throwIfDisableAutofillCalled();
-            mFieldsDetection = Preconditions.checkNotNull(fieldsDetection);
+            Preconditions.checkArrayElementsNotNull(ids, "ids");
+            Preconditions.checkArgumentInRange(ids.length, 1,
+                    UserData.getMaxFieldClassificationIdsSize(), "ids length");
+            mFieldClassificationIds = ids;
             return this;
         }
 
@@ -391,16 +399,17 @@ public final class FillResponse implements Parcelable {
          * @throws IllegalArgumentException if {@code duration} is not a positive number.
          * @throws IllegalStateException if either {@link #addDataset(Dataset)},
          *       {@link #setAuthentication(AutofillId[], IntentSender, RemoteViews)},
-         *       {@link #setSaveInfo(SaveInfo)}, or {@link #setClientState(Bundle)}
-         *       was already called.
+         *       {@link #setSaveInfo(SaveInfo)}, {@link #setClientState(Bundle)}, or
+         *       {link #setFieldClassificationIds(AutofillId...)} was already called.
          */
+        // TODO(b/67867469): add @ to {link setFieldClassificationIds} once it's public
         public Builder disableAutofill(long duration) {
             throwIfDestroyed();
             if (duration <= 0) {
                 throw new IllegalArgumentException("duration must be greater than 0");
             }
             if (mAuthentication != null || mDatasets != null || mSaveInfo != null
-                    || mFieldsDetection != null || mClientState != null) {
+                    || mFieldClassificationIds != null || mClientState != null) {
                 throw new IllegalStateException("disableAutofill() must be the only method called");
             }
 
@@ -417,15 +426,18 @@ public final class FillResponse implements Parcelable {
          *   <li>No call was made to {@link #addDataset(Dataset)},
          *       {@link #setAuthentication(AutofillId[], IntentSender, RemoteViews)},
          *       {@link #setSaveInfo(SaveInfo)}, {@link #disableAutofill(long)},
-         *       or {@link #setClientState(Bundle)}.
+         *       {@link #setClientState(Bundle)},
+         *       or {link #setFieldClassificationIds(AutofillId...)}.
          * </ol>
          *
          * @return A built response.
          */
+        // TODO(b/67867469): add @ to {link setFieldClassificationIds} once it's public
         public FillResponse build() {
             throwIfDestroyed();
             if (mAuthentication == null && mDatasets == null && mSaveInfo == null
-                    && mDisableDuration == 0 && mFieldsDetection == null && mClientState == null) {
+                    && mDisableDuration == 0 && mFieldClassificationIds == null
+                    && mClientState == null) {
                 throw new IllegalStateException("need to provide: at least one DataSet, or a "
                         + "SaveInfo, or an authentication with a presentation, "
                         + "or a FieldsDetection, or a client state, or disable autofill");
@@ -466,7 +478,8 @@ public final class FillResponse implements Parcelable {
                 .append(", ignoredIds=").append(Arrays.toString(mIgnoredIds))
                 .append(", disableDuration=").append(mDisableDuration)
                 .append(", flags=").append(mFlags)
-                .append(", fieldDetection=").append(mFieldsDetection)
+                .append(", fieldClassificationIds=")
+                    .append(Arrays.toString(mFieldClassificationIds))
                 .append("]")
                 .toString();
     }
@@ -490,7 +503,7 @@ public final class FillResponse implements Parcelable {
         parcel.writeParcelable(mPresentation, flags);
         parcel.writeParcelableArray(mIgnoredIds, flags);
         parcel.writeLong(mDisableDuration);
-        parcel.writeParcelable(mFieldsDetection, flags);
+        parcel.writeParcelableArray(mFieldClassificationIds, flags);
         parcel.writeInt(mFlags);
         parcel.writeInt(mRequestId);
     }
@@ -526,9 +539,10 @@ public final class FillResponse implements Parcelable {
             if (disableDuration > 0) {
                 builder.disableAutofill(disableDuration);
             }
-            final FieldsDetection fieldsDetection = parcel.readParcelable(null);
-            if (fieldsDetection != null) {
-                builder.setFieldsDetection(fieldsDetection);
+            final AutofillId[] fieldClassifactionIds =
+                    parcel.readParcelableArray(null, AutofillId.class);
+            if (fieldClassifactionIds != null) {
+                builder.setFieldClassificationIds(fieldClassifactionIds);
             }
             builder.setFlags(parcel.readInt());
 
