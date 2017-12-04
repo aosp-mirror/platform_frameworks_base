@@ -4474,6 +4474,9 @@
     <!-- Zen mode - name of default automatic calendar event-based rule. [CHAR LIMIT=40] -->
     <string name="zen_mode_default_events_name">Event</string>
 
+    <!-- Zen mode - name of default automatic calendar time-based rule that is triggered every night (when sleeping). [CHAR LIMIT=40] -->
+    <string name="zen_mode_default_every_night_name">Sleeping</string>
+
     <!-- Indication that the current volume and other effects (vibration) are being suppressed by a third party, such as a notification listener. [CHAR LIMIT=30] -->
     <string name="muted_by">Muted by <xliff:g id="third_party">%1$s</xliff:g></string>
 

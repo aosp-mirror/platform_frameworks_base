@@ -98,11 +98,6 @@ public class ZenModeHelper {
     private final Metrics mMetrics = new Metrics();
     private final ConditionProviders.Config mServiceConfig;
 
-    protected final ArrayList<String> mDefaultRuleIds = new ArrayList<>();
-    private final String EVENTS_DEFAULT_RULE = "EVENTS_DEFAULT_RULE";
-    private final String SCHEDULED_DEFAULT_RULE_1 = "SCHEDULED_DEFAULT_RULE_1";
-    private final String SCHEDULED_DEFAULT_RULE_2 = "SCHEDULED_DEFAULT_RULE_2";
-
     @VisibleForTesting protected int mZenMode;
     private int mUser = UserHandle.USER_SYSTEM;
     @VisibleForTesting protected ZenModeConfig mConfig;
@@ -115,9 +110,8 @@ public class ZenModeHelper {
     public static final long SUPPRESSED_EFFECT_ALL = SUPPRESSED_EFFECT_CALLS
             | SUPPRESSED_EFFECT_NOTIFICATIONS;
 
-    protected String mDefaultRuleWeeknightsName;
+    protected String mDefaultRuleEveryNightName;
     protected String mDefaultRuleEventsName;
-    protected String mDefaultRuleWeekendsName;
 
     public ZenModeHelper(Context context, Looper looper, ConditionProviders conditionProviders) {
         mContext = context;
@@ -230,10 +224,23 @@ public class ZenModeHelper {
             config = mDefaultConfig.copy();
             config.user = user;
         }
+        enforceDefaultRulesExist(config);
         synchronized (mConfig) {
             setConfigLocked(config, reason);
         }
         cleanUpZenRules();
+    }
+
+    private void enforceDefaultRulesExist(ZenModeConfig config) {
+        for (String id : ZenModeConfig.DEFAULT_RULE_IDS) {
+            if (!config.automaticRules.containsKey(id)) {
+                if (id.equals(ZenModeConfig.EVENTS_DEFAULT_RULE_ID)) {
+                    appendDefaultEventRules(config);
+                } else if (id.equals(ZenModeConfig.EVERY_NIGHT_DEFAULT_RULE_ID)) {
+                    appendDefaultEveryNightRule(config);
+                }
+            }
+        }
     }
 
     public int getZenModeListenerInterruptionFilter() {
@@ -421,17 +428,12 @@ public class ZenModeHelper {
 
     public void setDefaultZenRules(Context context) {
         mDefaultConfig = readDefaultConfig(context.getResources());
-
-        mDefaultRuleIds.add(EVENTS_DEFAULT_RULE);
-        mDefaultRuleIds.add(SCHEDULED_DEFAULT_RULE_1);
-        mDefaultRuleIds.add(SCHEDULED_DEFAULT_RULE_2);
-
         appendDefaultRules(mDefaultConfig);
     }
 
     private void appendDefaultRules (ZenModeConfig config) {
         getDefaultRuleNames();
-        appendDefaultScheduleRules(config);
+        appendDefaultEveryNightRule(config);
         appendDefaultEventRules(config);
     }
 
@@ -450,7 +452,7 @@ public class ZenModeHelper {
     protected void updateDefaultZenRules() {
         ZenModeConfig configDefaultRules = new ZenModeConfig();
         appendDefaultRules(configDefaultRules); // "new" localized default rules
-        for (String ruleId : mDefaultRuleIds) {
+        for (String ruleId : ZenModeConfig.DEFAULT_RULE_IDS) {
             AutomaticZenRule currRule = getAutomaticZenRule(ruleId);
             ZenRule defaultRule = configDefaultRules.automaticRules.get(ruleId);
             // if default rule wasn't customized, use localized name instead of previous
@@ -812,10 +814,8 @@ public class ZenModeHelper {
 
     private void getDefaultRuleNames() {
         // on locale-change, these values differ
-        mDefaultRuleWeeknightsName = mContext.getResources()
-                .getString(R.string.zen_mode_default_weeknights_name);
-        mDefaultRuleWeekendsName = mContext.getResources()
-                .getString(R.string.zen_mode_default_weekends_name);
+        mDefaultRuleEveryNightName = mContext.getResources()
+                .getString(R.string.zen_mode_default_every_night_name);
         mDefaultRuleEventsName = mContext.getResources()
                 .getString(R.string.zen_mode_default_events_name);
     }
@@ -935,39 +935,23 @@ public class ZenModeHelper {
         return new ZenModeConfig();
     }
 
-    private void appendDefaultScheduleRules(ZenModeConfig config) {
+    private void appendDefaultEveryNightRule(ZenModeConfig config) {
         if (config == null) return;
 
         final ScheduleInfo weeknights = new ScheduleInfo();
-        weeknights.days = ZenModeConfig.WEEKNIGHT_DAYS;
+        weeknights.days = ZenModeConfig.ALL_DAYS;
         weeknights.startHour = 22;
         weeknights.endHour = 7;
         weeknights.exitAtAlarm = true;
-        final ZenRule rule1 = new ZenRule();
-        rule1.enabled = false;
-        rule1.name = mDefaultRuleWeeknightsName;
-        rule1.conditionId = ZenModeConfig.toScheduleConditionId(weeknights);
-        rule1.zenMode = Global.ZEN_MODE_IMPORTANT_INTERRUPTIONS;
-        rule1.component = ScheduleConditionProvider.COMPONENT;
-        rule1.id = SCHEDULED_DEFAULT_RULE_1;
-        rule1.creationTime = System.currentTimeMillis();
-        config.automaticRules.put(rule1.id, rule1);
-
-        final ScheduleInfo weekends = new ScheduleInfo();
-        weekends.days = ZenModeConfig.WEEKEND_DAYS;
-        weekends.startHour = 23;
-        weekends.startMinute = 30;
-        weekends.endHour = 10;
-        weekends.exitAtAlarm = true;
-        final ZenRule rule2 = new ZenRule();
-        rule2.enabled = false;
-        rule2.name = mDefaultRuleWeekendsName;
-        rule2.conditionId = ZenModeConfig.toScheduleConditionId(weekends);
-        rule2.zenMode = Global.ZEN_MODE_IMPORTANT_INTERRUPTIONS;
-        rule2.component = ScheduleConditionProvider.COMPONENT;
-        rule2.id = SCHEDULED_DEFAULT_RULE_2;
-        rule2.creationTime = System.currentTimeMillis();
-        config.automaticRules.put(rule2.id, rule2);
+        final ZenRule rule = new ZenRule();
+        rule.enabled = false;
+        rule.name = mDefaultRuleEveryNightName;
+        rule.conditionId = ZenModeConfig.toScheduleConditionId(weeknights);
+        rule.zenMode = Global.ZEN_MODE_IMPORTANT_INTERRUPTIONS;
+        rule.component = ScheduleConditionProvider.COMPONENT;
+        rule.id = ZenModeConfig.EVERY_NIGHT_DEFAULT_RULE_ID;
+        rule.creationTime = System.currentTimeMillis();
+        config.automaticRules.put(rule.id, rule);
     }
 
     private void appendDefaultEventRules(ZenModeConfig config) {
@@ -982,7 +966,7 @@ public class ZenModeHelper {
         rule.conditionId = ZenModeConfig.toEventConditionId(events);
         rule.zenMode = Global.ZEN_MODE_IMPORTANT_INTERRUPTIONS;
         rule.component = EventConditionProvider.COMPONENT;
-        rule.id = EVENTS_DEFAULT_RULE;
+        rule.id = ZenModeConfig.EVENTS_DEFAULT_RULE_ID;
         rule.creationTime = System.currentTimeMillis();
         config.automaticRules.put(rule.id, rule);
     }
