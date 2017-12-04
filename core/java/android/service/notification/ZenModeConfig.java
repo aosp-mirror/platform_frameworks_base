@@ -890,7 +890,17 @@ public class ZenModeConfig implements Parcelable {
     }
 
     public static boolean isValidScheduleConditionId(Uri conditionId) {
-        return tryParseScheduleConditionId(conditionId) != null;
+        ScheduleInfo info;
+        try {
+            info = tryParseScheduleConditionId(conditionId);
+        } catch (NullPointerException | ArrayIndexOutOfBoundsException e) {
+            return false;
+        }
+
+        if (info == null || info.days == null || info.days.length == 0) {
+            return false;
+        }
+        return true;
     }
 
     public static ScheduleInfo tryParseScheduleConditionId(Uri conditionId) {
