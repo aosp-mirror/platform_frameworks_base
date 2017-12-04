@@ -36,7 +36,7 @@ CombinationLogMatchingTracker::CombinationLogMatchingTracker(const string& name,
 CombinationLogMatchingTracker::~CombinationLogMatchingTracker() {
 }
 
-bool CombinationLogMatchingTracker::init(const vector<LogEntryMatcher>& allLogMatchers,
+bool CombinationLogMatchingTracker::init(const vector<AtomMatcher>& allLogMatchers,
                                          const vector<sp<LogMatchingTracker>>& allTrackers,
                                          const unordered_map<string, int>& matcherMap,
                                          vector<bool>& stack) {
@@ -47,7 +47,7 @@ bool CombinationLogMatchingTracker::init(const vector<LogEntryMatcher>& allLogMa
     // mark this node as visited in the recursion stack.
     stack[mIndex] = true;
 
-    LogEntryMatcher_Combination matcher = allLogMatchers[mIndex].combination();
+    AtomMatcher_Combination matcher = allLogMatchers[mIndex].combination();
 
     // LogicalOperation is missing in the config
     if (!matcher.has_operation()) {

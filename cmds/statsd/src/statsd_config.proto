@@ -23,93 +23,93 @@ option java_package = "com.android.internal.os";
 option java_outer_classname = "StatsdConfigProto";
 
 message KeyMatcher {
-  optional int32 key = 1;
+    optional int32 key = 1;
 
-  optional bool as_package_name = 2 [ default = false ];
+    optional bool as_package_name = 2 [default = false];
 }
 
 message KeyValueMatcher {
-  optional KeyMatcher key_matcher = 1;
+    optional KeyMatcher key_matcher = 1;
 
-  oneof value_matcher {
-    bool eq_bool = 2;
-    string eq_string = 3;
-    int32 eq_int = 4;
+    oneof value_matcher {
+        bool eq_bool = 2;
+        string eq_string = 3;
+        int32 eq_int = 4;
 
-    int64 lt_int = 5;
-    int64 gt_int = 6;
-    float lt_float = 7;
-    float gt_float = 8;
+        int64 lt_int = 5;
+        int64 gt_int = 6;
+        float lt_float = 7;
+        float gt_float = 8;
 
-    int64 lte_int = 9;
-    int64 gte_int = 10;
-  }
+        int64 lte_int = 9;
+        int64 gte_int = 10;
+    }
 }
 
 enum LogicalOperation {
-  LOGICAL_OPERATION_UNSPECIFIED = 0;
-  AND = 1;
-  OR = 2;
-  NOT = 3;
-  NAND = 4;
-  NOR = 5;
+    LOGICAL_OPERATION_UNSPECIFIED = 0;
+    AND = 1;
+    OR = 2;
+    NOT = 3;
+    NAND = 4;
+    NOR = 5;
 }
 
-message SimpleLogEntryMatcher {
-  optional int32 tag = 1;
+message SimpleAtomMatcher {
+    optional int32 tag = 1;
 
-  repeated KeyValueMatcher key_value_matcher = 2;
+    repeated KeyValueMatcher key_value_matcher = 2;
 }
 
-message LogEntryMatcher {
-  optional string name = 1;
+message AtomMatcher {
+    optional string name = 1;
 
-  message Combination {
-    optional LogicalOperation operation = 1;
+    message Combination {
+        optional LogicalOperation operation = 1;
 
-    repeated string matcher = 2;
-  }
-  oneof contents {
-    SimpleLogEntryMatcher simple_log_entry_matcher = 2;
-    Combination combination = 3;
-  }
+        repeated string matcher = 2;
+    }
+    oneof contents {
+        SimpleAtomMatcher simple_atom_matcher = 2;
+        Combination combination = 3;
+    }
 }
 
 message SimpleCondition {
-  optional string start = 1;
+    optional string start = 1;
 
-  optional string stop = 2;
+    optional string stop = 2;
 
-  optional bool count_nesting = 3 [default = true];
+    optional bool count_nesting = 3 [default = true];
 
-  optional string stop_all = 4;
+    optional string stop_all = 4;
 
-  enum InitialValue {
-    UNKNOWN = 0;
-    FALSE = 1;
-  }
-  optional InitialValue initial_value = 5 [default = FALSE];
+    enum InitialValue {
+        UNKNOWN = 0;
+        FALSE = 1;
+    }
+    optional InitialValue initial_value = 5 [default = FALSE];
 
-  repeated KeyMatcher dimension = 6;
+    repeated KeyMatcher dimension = 6;
 }
 
 message Condition {
-  optional string name = 1;
+    optional string name = 1;
 
-  message Combination {
-    optional LogicalOperation operation = 1;
+    message Combination {
+        optional LogicalOperation operation = 1;
 
-    repeated string condition = 2;
-  }
+        repeated string condition = 2;
+    }
 
-  oneof contents {
-    SimpleCondition simple_condition = 2;
-    Combination combination = 3;
-  }
+    oneof contents {
+        SimpleCondition simple_condition = 2;
+        Combination combination = 3;
+    }
 }
 
 message Bucket {
-  optional int64 bucket_size_millis = 1;
+    optional int64 bucket_size_millis = 1;
 }
 
 message EventConditionLink {
@@ -154,9 +154,9 @@ message DurationMetric {
     repeated EventConditionLink links = 4;
 
     enum AggregationType {
-      SUM = 1;
+        SUM = 1;
 
-      MAX_SPARSE = 2;
+        MAX_SPARSE = 2;
     }
     optional AggregationType aggregation_type = 5 [default = SUM];
 
@@ -196,9 +196,7 @@ message ValueMetric {
 
     repeated EventConditionLink links = 7;
 
-    enum AggregationType {
-      SUM = 1;
-    }
+    enum AggregationType { SUM = 1; }
     optional AggregationType aggregation_type = 8 [default = SUM];
 }
 
@@ -208,7 +206,7 @@ message Alert {
     optional string metric_name = 2;
 
     message IncidentdDetails {
-      repeated int32 section = 1;
+        repeated int32 section = 1;
     }
     optional IncidentdDetails incidentd_details = 3;
 
@@ -232,7 +230,7 @@ message StatsdConfig {
 
     repeated DurationMetric duration_metric = 6;
 
-    repeated LogEntryMatcher log_entry_matcher = 7;
+    repeated AtomMatcher atom_matcher = 7;
 
     repeated Condition condition = 8;
 

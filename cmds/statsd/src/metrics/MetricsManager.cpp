@@ -39,7 +39,7 @@ namespace statsd {
 
 MetricsManager::MetricsManager(const ConfigKey& key, const StatsdConfig& config) : mConfigKey(key) {
     mConfigValid =
-            initStatsdConfig(key, config, mTagIds, mAllLogEntryMatchers, mAllConditionTrackers,
+            initStatsdConfig(key, config, mTagIds, mAllAtomMatchers, mAllConditionTrackers,
                              mAllMetricProducers, mAllAnomalyTrackers, mConditionToMetricMap,
                              mTrackerToMetricMap, mTrackerToConditionMap);
 
@@ -47,11 +47,11 @@ MetricsManager::MetricsManager(const ConfigKey& key, const StatsdConfig& config)
     // no matter whether this config is valid, log it in the stats.
     StatsdStats::getInstance().noteConfigReceived(key, mAllMetricProducers.size(),
                                                   mAllConditionTrackers.size(),
-                                                  mAllLogEntryMatchers.size(), 0, mConfigValid);
+                                                  mAllAtomMatchers.size(), 0, mConfigValid);
     // Guardrail. Reject the config if it's too big.
     if (mAllMetricProducers.size() > StatsdStats::kMaxMetricCountPerConfig ||
         mAllConditionTrackers.size() > StatsdStats::kMaxConditionCountPerConfig ||
-        mAllLogEntryMatchers.size() > StatsdStats::kMaxMatcherCountPerConfig) {
+        mAllAtomMatchers.size() > StatsdStats::kMaxMatcherCountPerConfig) {
         ALOGE("This config is too big! Reject!");
         mConfigValid = false;
     }
@@ -95,10 +95,10 @@ void MetricsManager::onLogEvent(const LogEvent& event) {
         return;
     }
 
-    vector<MatchingState> matcherCache(mAllLogEntryMatchers.size(), MatchingState::kNotComputed);
+    vector<MatchingState> matcherCache(mAllAtomMatchers.size(), MatchingState::kNotComputed);
 
-    for (auto& matcher : mAllLogEntryMatchers) {
-        matcher->onLogEvent(event, mAllLogEntryMatchers, matcherCache);
+    for (auto& matcher : mAllAtomMatchers) {
+        matcher->onLogEvent(event, mAllAtomMatchers, matcherCache);
     }
 
     // A bitmap to see which ConditionTracker needs to be re-evaluated.
@@ -149,11 +149,11 @@ void MetricsManager::onLogEvent(const LogEvent& event) {
         }
     }
 
-    // For matched LogEntryMatchers, tell relevant metrics that a matched event has come.
-    for (size_t i = 0; i < mAllLogEntryMatchers.size(); i++) {
+    // For matched AtomMatchers, tell relevant metrics that a matched event has come.
+    for (size_t i = 0; i < mAllAtomMatchers.size(); i++) {
         if (matcherCache[i] == MatchingState::kMatched) {
             StatsdStats::getInstance().noteMatcherMatched(mConfigKey,
-                                                          mAllLogEntryMatchers[i]->getName());
+                                                          mAllAtomMatchers[i]->getName());
             auto pair = mTrackerToMetricMap.find(i);
             if (pair != mTrackerToMetricMap.end()) {
                 auto& metricList = pair->second;
