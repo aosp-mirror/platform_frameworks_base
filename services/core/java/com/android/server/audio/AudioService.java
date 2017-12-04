@@ -1645,6 +1645,11 @@ public class AudioService extends IAudioService.Stub
     };
 
     private int getNewRingerMode(int stream, int index, int flags) {
+        // setRingerMode does nothing if the device is single volume,so the value would be unchanged
+        if (mIsSingleVolume) {
+            return getRingerModeExternal();
+        }
+
         // setting volume on ui sounds stream type also controls silent mode
         if (((flags & AudioManager.FLAG_ALLOW_RINGER_MODES) != 0) ||
                 (stream == getUiSoundsStreamType())) {
@@ -3691,7 +3696,7 @@ public class AudioService extends IAudioService.Stub
     private int checkForRingerModeChange(int oldIndex, int direction, int step, boolean isMuted,
             String caller, int flags) {
         int result = FLAG_ADJUST_VOLUME;
-        if (isPlatformTelevision()) {
+        if (isPlatformTelevision() || mIsSingleVolume) {
             return result;
         }
 
