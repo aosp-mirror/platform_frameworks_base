@@ -2389,19 +2389,24 @@ public class RefactoredBackupManagerService implements BackupManagerServiceInter
             if (MORE_DEBUG) Slog.v(TAG, "Found the app - running clear process");
             mBackupHandler.removeMessages(MSG_RETRY_CLEAR);
             synchronized (mQueueLock) {
-                final IBackupTransport transport =
-                        mTransportManager.getTransportBinder(transportName);
-                if (transport == null) {
-                    // transport is currently unavailable -- make sure to retry
+                TransportClient transportClient =
+                        mTransportManager
+                                .getTransportClient(transportName, "BMS.clearBackupData()");
+                if (transportClient == null) {
+                    // transport is currently unregistered -- make sure to retry
                     Message msg = mBackupHandler.obtainMessage(MSG_RETRY_CLEAR,
                             new ClearRetryParams(transportName, packageName));
                     mBackupHandler.sendMessageDelayed(msg, TRANSPORT_RETRY_INTERVAL);
                     return;
                 }
                 long oldId = Binder.clearCallingIdentity();
+                OnTaskFinishedListener listener =
+                        caller ->
+                                mTransportManager.disposeOfTransportClient(transportClient, caller);
                 mWakelock.acquire();
-                Message msg = mBackupHandler.obtainMessage(MSG_RUN_CLEAR,
-                        new ClearParams(transport, info));
+                Message msg = mBackupHandler.obtainMessage(
+                        MSG_RUN_CLEAR,
+                        new ClearParams(transportClient, info, listener));
                 mBackupHandler.sendMessage(msg);
                 Binder.restoreCallingIdentity(oldId);
             }
