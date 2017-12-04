@@ -32,6 +32,7 @@ import android.provider.ContactsContract;
 import android.provider.Settings;
 import android.text.util.Linkify;
 import android.util.Patterns;
+import android.view.View.OnClickListener;
 import android.widget.TextViewMetrics;
 
 import com.android.internal.annotations.GuardedBy;
@@ -383,48 +384,54 @@ final class TextClassifierImpl implements TextClassifier {
         final String type = getHighestScoringType(classifications);
         builder.setLogType(IntentFactory.getLogType(type));
 
-        final List<Intent> intents = IntentFactory.create(mContext, type, text.toString());
-        for (Intent intent : intents) {
-            extendClassificationWithIntent(intent, builder);
-        }
+        addActions(builder, IntentFactory.create(mContext, type, text.toString()));
 
         return builder.setVersionInfo(getVersionInfo()).build();
     }
 
-    /** Extends the classification with the intent if it can be resolved. */
-    private void extendClassificationWithIntent(Intent intent, TextClassification.Builder builder) {
-        final PackageManager pm;
-        final ResolveInfo resolveInfo;
-        if (intent != null) {
-            pm = mContext.getPackageManager();
-            resolveInfo = pm.resolveActivity(intent, 0);
-        } else {
-            pm = null;
-            resolveInfo = null;
-        }
-        if (resolveInfo != null && resolveInfo.activityInfo != null) {
-            final String packageName = resolveInfo.activityInfo.packageName;
-            CharSequence label;
-            Drawable icon;
-            if ("android".equals(packageName)) {
-                // Requires the chooser to find an activity to handle the intent.
-                label = IntentFactory.getLabel(mContext, intent);
-                icon = null;
+    /** Extends the classification with the intents that can be resolved. */
+    private void addActions(
+            TextClassification.Builder builder, List<Intent> intents) {
+        final PackageManager pm = mContext.getPackageManager();
+        final int size = intents.size();
+        for (int i = 0; i < size; i++) {
+            final Intent intent = intents.get(i);
+            final ResolveInfo resolveInfo;
+            if (intent != null) {
+                resolveInfo = pm.resolveActivity(intent, 0);
             } else {
-                // A default activity will handle the intent.
-                intent.setComponent(new ComponentName(packageName, resolveInfo.activityInfo.name));
-                icon = resolveInfo.activityInfo.loadIcon(pm);
-                if (icon == null) {
-                    icon = resolveInfo.loadIcon(pm);
+                resolveInfo = null;
+            }
+            if (resolveInfo != null && resolveInfo.activityInfo != null) {
+                final String packageName = resolveInfo.activityInfo.packageName;
+                CharSequence label;
+                Drawable icon;
+                if ("android".equals(packageName)) {
+                    // Requires the chooser to find an activity to handle the intent.
+                    label = IntentFactory.getLabel(mContext, intent);
+                    icon = null;
+                } else {
+                    // A default activity will handle the intent.
+                    intent.setComponent(
+                            new ComponentName(packageName, resolveInfo.activityInfo.name));
+                    icon = resolveInfo.activityInfo.loadIcon(pm);
+                    if (icon == null) {
+                        icon = resolveInfo.loadIcon(pm);
+                    }
+                    label = resolveInfo.activityInfo.loadLabel(pm);
+                    if (label == null) {
+                        label = resolveInfo.loadLabel(pm);
+                    }
                 }
-                label = resolveInfo.activityInfo.loadLabel(pm);
-                if (label == null) {
-                    label = resolveInfo.loadLabel(pm);
+                final String labelString = (label != null) ? label.toString() : null;
+                final OnClickListener onClickListener =
+                        TextClassification.createStartActivityOnClickListener(mContext, intent);
+                if (i == 0) {
+                    builder.setPrimaryAction(intent, labelString, icon, onClickListener);
+                } else {
+                    builder.addSecondaryAction(intent, labelString, icon, onClickListener);
                 }
             }
-            builder.addAction(
-                    intent, label != null ? label.toString() : null, icon,
-                    TextClassification.createStartActivityOnClickListener(mContext, intent));
         }
     }
 
