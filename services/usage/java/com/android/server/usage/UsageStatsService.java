@@ -20,11 +20,11 @@ import android.Manifest;
 import android.app.ActivityManager;
 import android.app.AppOpsManager;
 import android.app.IUidObserver;
-import android.app.usage.AppStandby;
 import android.app.usage.ConfigurationStats;
 import android.app.usage.IUsageStatsManager;
 import android.app.usage.UsageEvents;
-import android.app.usage.AppStandby.StandbyBuckets;
+import android.app.usage.UsageStatsManager;
+import android.app.usage.UsageStatsManager.StandbyBuckets;
 import android.app.usage.UsageEvents.Event;
 import android.app.usage.UsageStats;
 import android.app.usage.UsageStatsManagerInternal;
@@ -149,6 +149,8 @@ public class UsageStatsService extends SystemService implements
 
         publishLocalService(UsageStatsManagerInternal.class, new LocalService());
         publishBinderService(Context.USAGE_STATS_SERVICE, new BinderService());
+        // Make sure we initialize the data, in case job scheduler needs it early.
+        getUserDataAndInitializeIfNeededLocked(UserHandle.USER_SYSTEM, mSystemTimeSnapshot);
     }
 
     @Override
@@ -678,10 +680,6 @@ public class UsageStatsService extends SystemService implements
 
         @Override
         public int getAppStandbyBucket(String packageName, String callingPackage, int userId) {
-            if (!hasPermission(callingPackage)) {
-                throw new SecurityException("Don't have permission to query app standby bucket");
-            }
-
             final int callingUid = Binder.getCallingUid();
             try {
                 userId = ActivityManager.getService().handleIncomingUser(
@@ -689,6 +687,14 @@ public class UsageStatsService extends SystemService implements
                         "getAppStandbyBucket", null);
             } catch (RemoteException re) {
                 throw re.rethrowFromSystemServer();
+            }
+            // If the calling app is asking about itself, continue, else check for permission.
+            if (mPackageManagerInternal.getPackageUid(packageName, PackageManager.MATCH_ANY_USER,
+                    userId) != callingUid) {
+                if (!hasPermission(callingPackage)) {
+                    throw new SecurityException(
+                            "Don't have permission to query app standby bucket");
+                }
             }
             final boolean obfuscateInstantApps = shouldObfuscateInstantAppsForCaller(callingUid,
                     userId);
@@ -707,6 +713,10 @@ public class UsageStatsService extends SystemService implements
             getContext().enforceCallingPermission(Manifest.permission.CHANGE_APP_IDLE_STATE,
                     "No permission to change app standby state");
 
+            if (bucket < UsageStatsManager.STANDBY_BUCKET_ACTIVE
+                    || bucket > UsageStatsManager.STANDBY_BUCKET_NEVER) {
+                throw new IllegalArgumentException("Cannot set the standby bucket to " + bucket);
+            }
             final int callingUid = Binder.getCallingUid();
             try {
                 userId = ActivityManager.getService().handleIncomingUser(
@@ -717,8 +727,13 @@ public class UsageStatsService extends SystemService implements
             }
             final long token = Binder.clearCallingIdentity();
             try {
+                // Caller cannot set their own standby state
+                if (mPackageManagerInternal.getPackageUid(packageName,
+                        PackageManager.MATCH_ANY_USER, userId) == callingUid) {
+                    throw new IllegalArgumentException("Cannot set your own standby bucket");
+                }
                 mAppStandby.setAppStandbyBucket(packageName, userId, bucket,
-                        AppStandby.REASON_PREDICTED + ":" + callingUid,
+                        UsageStatsManager.REASON_PREDICTED + ":" + callingUid,
                         SystemClock.elapsedRealtime());
             } finally {
                 Binder.restoreCallingIdentity(token);

@@ -16,7 +16,7 @@
 
 package android.app.usage;
 
-import android.app.usage.AppStandby.StandbyBuckets;
+import android.app.usage.UsageStatsManager.StandbyBuckets;
 import android.content.ComponentName;
 import android.content.res.Configuration;
 

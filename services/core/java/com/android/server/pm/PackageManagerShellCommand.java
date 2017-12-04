@@ -1538,13 +1538,26 @@ class PackageManagerShellCommand extends ShellCommand {
         return 0;
     }
 
+    private boolean isVendorApp(String pkg) {
+        try {
+            final PackageInfo info = mInterface.getPackageInfo(pkg, 0, UserHandle.USER_SYSTEM);
+            return info != null && info.applicationInfo.isVendor();
+        } catch (RemoteException e) {
+            return false;
+        }
+    }
+
     private int runGetPrivappPermissions() {
         final String pkg = getNextArg();
         if (pkg == null) {
             getErrPrintWriter().println("Error: no package specified.");
             return 1;
         }
-        ArraySet<String> privAppPermissions = SystemConfig.getInstance().getPrivAppPermissions(pkg);
+
+        ArraySet<String> privAppPermissions = isVendorApp(pkg) ?
+                SystemConfig.getInstance().getVendorPrivAppPermissions(pkg)
+                    : SystemConfig.getInstance().getPrivAppPermissions(pkg);
+
         getOutPrintWriter().println(privAppPermissions == null
                 ? "{}" : privAppPermissions.toString());
         return 0;
@@ -1556,10 +1569,13 @@ class PackageManagerShellCommand extends ShellCommand {
             getErrPrintWriter().println("Error: no package specified.");
             return 1;
         }
-        ArraySet<String> privAppDenyPermissions =
-                SystemConfig.getInstance().getPrivAppDenyPermissions(pkg);
-        getOutPrintWriter().println(privAppDenyPermissions == null
-                ? "{}" : privAppDenyPermissions.toString());
+
+        ArraySet<String> privAppPermissions = isVendorApp(pkg) ?
+                SystemConfig.getInstance().getVendorPrivAppDenyPermissions(pkg)
+                    : SystemConfig.getInstance().getPrivAppDenyPermissions(pkg);
+
+        getOutPrintWriter().println(privAppPermissions == null
+                ? "{}" : privAppPermissions.toString());
         return 0;
     }
 

@@ -16,15 +16,23 @@
 
 package com.android.server.usage;
 
+import static android.app.usage.UsageStatsManager.REASON_FORCED;
+import static android.app.usage.UsageStatsManager.REASON_TIMEOUT;
+import static android.app.usage.UsageStatsManager.REASON_USAGE;
+import static android.app.usage.UsageStatsManager.STANDBY_BUCKET_ACTIVE;
+import static android.app.usage.UsageStatsManager.STANDBY_BUCKET_FREQUENT;
+import static android.app.usage.UsageStatsManager.STANDBY_BUCKET_RARE;
+import static android.app.usage.UsageStatsManager.STANDBY_BUCKET_WORKING_SET;
+
 import static com.android.server.SystemService.PHASE_BOOT_COMPLETED;
 import static com.android.server.SystemService.PHASE_SYSTEM_SERVICES_READY;
 
 import android.app.ActivityManager;
 import android.app.AppGlobals;
 import android.app.admin.DevicePolicyManager;
-import android.app.usage.AppStandby;
-import android.app.usage.AppStandby.StandbyBuckets;
+import android.app.usage.UsageStatsManager.StandbyBuckets;
 import android.app.usage.UsageEvents;
+import android.app.usage.UsageStatsManager;
 import android.app.usage.UsageStatsManagerInternal.AppIdleStateChangeListener;
 import android.appwidget.AppWidgetManager;
 import android.content.BroadcastReceiver;
@@ -102,10 +110,10 @@ public class AppStandbyController {
     };
 
     static final int[] THRESHOLD_BUCKETS = {
-            AppStandby.STANDBY_BUCKET_ACTIVE,
-            AppStandby.STANDBY_BUCKET_WORKING_SET,
-            AppStandby.STANDBY_BUCKET_FREQUENT,
-            AppStandby.STANDBY_BUCKET_RARE
+            STANDBY_BUCKET_ACTIVE,
+            STANDBY_BUCKET_WORKING_SET,
+            STANDBY_BUCKET_FREQUENT,
+            STANDBY_BUCKET_RARE
     };
 
     // To name the lock for stack traces
@@ -371,18 +379,18 @@ public class AppStandbyController {
                 }
                 if (isSpecial) {
                     maybeInformListeners(packageName, userId, elapsedRealtime,
-                            AppStandby.STANDBY_BUCKET_ACTIVE);
+                            STANDBY_BUCKET_ACTIVE);
                 } else {
                     synchronized (mAppIdleLock) {
                         String bucketingReason = mAppIdleHistory.getAppStandbyReason(packageName,
                                 userId, elapsedRealtime);
                         // If the bucket was forced by the developer, leave it alone
-                        if (AppStandby.REASON_FORCED.equals(bucketingReason)) {
+                        if (REASON_FORCED.equals(bucketingReason)) {
                             continue;
                         }
                         // If the bucket was moved up due to usage, let the timeouts apply.
-                        if (AppStandby.REASON_USAGE.equals(bucketingReason)
-                                || AppStandby.REASON_TIMEOUT.equals(bucketingReason)) {
+                        if (REASON_USAGE.equals(bucketingReason)
+                                || REASON_TIMEOUT.equals(bucketingReason)) {
                             int oldBucket = mAppIdleHistory.getAppStandbyBucket(packageName, userId,
                                     elapsedRealtime);
                             int newBucket = getBucketForLocked(packageName, userId,
@@ -393,7 +401,7 @@ public class AppStandbyController {
                             }
                             if (oldBucket < newBucket) {
                                 mAppIdleHistory.setAppStandbyBucket(packageName, userId,
-                                        elapsedRealtime, newBucket, AppStandby.REASON_TIMEOUT);
+                                        elapsedRealtime, newBucket, REASON_TIMEOUT);
                                 maybeInformListeners(packageName, userId, elapsedRealtime,
                                         newBucket);
                             }
@@ -742,7 +750,7 @@ public class AppStandbyController {
             long elapsedRealtime, boolean shouldObfuscateInstantApps) {
         if (shouldObfuscateInstantApps &&
                 mInjector.isPackageEphemeral(userId, packageName)) {
-            return AppStandby.STANDBY_BUCKET_ACTIVE;
+            return STANDBY_BUCKET_ACTIVE;
         }
 
         return mAppIdleHistory.getAppStandbyBucket(packageName, userId, elapsedRealtime);
@@ -811,7 +819,7 @@ public class AppStandbyController {
     }
 
     void informListeners(String packageName, int userId, int bucket) {
-        final boolean idle = bucket >= AppStandby.STANDBY_BUCKET_RARE;
+        final boolean idle = bucket >= STANDBY_BUCKET_RARE;
         for (AppIdleStateChangeListener listener : mPackageAccessListeners) {
             listener.onAppIdleStateChanged(packageName, userId, idle, bucket);
         }
