@@ -441,8 +441,7 @@ public class VolumeDialogImpl implements VolumeDialog {
                 .withEndAction(() -> mDialog.dismiss())
                 .setInterpolator(new SystemUIInterpolators.LogAccelerateInterpolator())
                 .start();
-        if (mAccessibilityMgr.isObservedEventType(
-                AccessibilityEvent.TYPE_WINDOW_STATE_CHANGED)) {
+        if (mAccessibilityMgr.isEnabled()) {
             AccessibilityEvent event =
                     AccessibilityEvent.obtain(AccessibilityEvent.TYPE_WINDOW_STATE_CHANGED);
             event.setPackageName(mContext.getPackageName());

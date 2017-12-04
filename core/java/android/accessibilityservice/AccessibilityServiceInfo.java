@@ -16,8 +16,6 @@
 
 package android.accessibilityservice;
 
-import static android.content.pm.PackageManager.FEATURE_FINGERPRINT;
-
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.pm.PackageManager;
@@ -48,6 +46,8 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+
+import static android.content.pm.PackageManager.FEATURE_FINGERPRINT;
 
 /**
  * This class describes an {@link AccessibilityService}. The system notifies an
@@ -554,7 +554,7 @@ public class AccessibilityServiceInfo implements Parcelable {
     }
 
     /**
-     * Updates the properties that an AccessibilityService can change dynamically.
+     * Updates the properties that an AccessibilitySerivice can change dynamically.
      *
      * @param other The info from which to update the properties.
      *

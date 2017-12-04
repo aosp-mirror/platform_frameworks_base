@@ -186,9 +186,6 @@ public abstract class ExploreByTouchHelper extends View.AccessibilityDelegate {
         }
 
         final AccessibilityEvent event = createEvent(virtualViewId, eventType);
-        if (event == null) {
-            return false;
-        }
         return parent.requestSendAccessibilityEvent(mView, event);
     }
 
@@ -243,9 +240,6 @@ public abstract class ExploreByTouchHelper extends View.AccessibilityDelegate {
             if (parent != null) {
                 final AccessibilityEvent event = createEvent(virtualViewId,
                         AccessibilityEvent.TYPE_WINDOW_CONTENT_CHANGED);
-                if (event == null) {
-                    return;
-                }
                 event.setContentChangeTypes(changeTypes);
                 parent.requestSendAccessibilityEvent(mView, event);
             }
@@ -311,9 +305,6 @@ public abstract class ExploreByTouchHelper extends View.AccessibilityDelegate {
      *         the specified item.
      */
     private AccessibilityEvent createEventForHost(int eventType) {
-        if (!AccessibilityManager.getInstance(mContext).isObservedEventType(eventType)) {
-            return null;
-        }
         final AccessibilityEvent event = AccessibilityEvent.obtain(eventType);
         mView.onInitializeAccessibilityEvent(event);
 
@@ -334,9 +325,6 @@ public abstract class ExploreByTouchHelper extends View.AccessibilityDelegate {
      *         the specified item.
      */
     private AccessibilityEvent createEventForChild(int virtualViewId, int eventType) {
-        if (!AccessibilityManager.getInstance(mContext).isObservedEventType(eventType)) {
-            return null;
-        }
         final AccessibilityEvent event = AccessibilityEvent.obtain(eventType);
         event.setEnabled(true);
         event.setClassName(DEFAULT_CLASS_NAME);

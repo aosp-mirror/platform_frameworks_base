@@ -7196,8 +7196,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      * @param text The announcement text.
      */
     public void announceForAccessibility(CharSequence text) {
-        if (AccessibilityManager.getInstance(mContext).isObservedEventType(
-                AccessibilityEvent.TYPE_ANNOUNCEMENT) && mParent != null) {
+        if (AccessibilityManager.getInstance(mContext).isEnabled() && mParent != null) {
             AccessibilityEvent event = AccessibilityEvent.obtain(
                     AccessibilityEvent.TYPE_ANNOUNCEMENT);
             onInitializeAccessibilityEvent(event);
@@ -10916,8 +10915,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
         if ((mPrivateFlags2 & PFLAG2_ACCESSIBILITY_FOCUSED) != 0) {
             mPrivateFlags2 &= ~PFLAG2_ACCESSIBILITY_FOCUSED;
             invalidate();
-            if (AccessibilityManager.getInstance(mContext).isObservedEventType(
-                    AccessibilityEvent.TYPE_VIEW_ACCESSIBILITY_FOCUS_CLEARED)) {
+            if (AccessibilityManager.getInstance(mContext).isEnabled()) {
                 AccessibilityEvent event = AccessibilityEvent.obtain(
                         AccessibilityEvent.TYPE_VIEW_ACCESSIBILITY_FOCUS_CLEARED);
                 event.setAction(action);
@@ -11742,8 +11740,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
 
     private void sendViewTextTraversedAtGranularityEvent(int action, int granularity,
             int fromIndex, int toIndex) {
-        if (mParent == null || !AccessibilityManager.getInstance(mContext).isObservedEventType(
-                AccessibilityEvent.TYPE_VIEW_TEXT_TRAVERSED_AT_MOVEMENT_GRANULARITY)) {
+        if (mParent == null) {
             return;
         }
         AccessibilityEvent event = AccessibilityEvent.obtain(
@@ -26133,8 +26130,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
 
         @Override
         public void run() {
-            if (AccessibilityManager.getInstance(mContext).isObservedEventType(
-                    AccessibilityEvent.TYPE_VIEW_SCROLLED)) {
+            if (AccessibilityManager.getInstance(mContext).isEnabled()) {
                 AccessibilityEvent event = AccessibilityEvent.obtain(
                         AccessibilityEvent.TYPE_VIEW_SCROLLED);
                 event.setScrollDeltaX(mDeltaX);
