@@ -39,8 +39,10 @@ import android.content.pm.ServiceInfo;
 import android.content.pm.UserInfo;
 import android.os.Binder;
 import android.os.Build;
+import android.os.Handler;
 import android.os.IBinder;
 import android.os.IInterface;
+import android.os.Looper;
 import android.os.RemoteException;
 import android.os.UserHandle;
 import android.os.UserManager;
@@ -82,6 +84,7 @@ abstract public class ManagedServices {
     protected final String TAG = getClass().getSimpleName();
     protected final boolean DEBUG = Log.isLoggable(TAG, Log.DEBUG);
 
+    private static final int ON_BINDING_DIED_REBIND_DELAY_MS = 10000;
     protected static final String ENABLED_SERVICES_SEPARATOR = ":";
 
     /**
@@ -101,12 +104,15 @@ abstract public class ManagedServices {
     private final IPackageManager mPm;
     private final UserManager mUm;
     private final Config mConfig;
+    private final Handler mHandler = new Handler(Looper.getMainLooper());
 
     // contains connections to all connected services, including app services
     // and system services
     private final ArrayList<ManagedServiceInfo> mServices = new ArrayList<>();
     // things that will be put into mServices as soon as they're ready
     private final ArrayList<String> mServicesBinding = new ArrayList<>();
+    private final ArraySet<String> mServicesRebinding = new ArraySet<>();
+
     // lists the component names of all enabled (and therefore potentially connected)
     // app services for current profiles.
     private ArraySet<ComponentName> mEnabledServicesForCurrentProfiles
@@ -823,6 +829,7 @@ abstract public class ManagedServices {
 
         final String servicesBindingTag = name.toString() + "/" + userid;
         if (mServicesBinding.contains(servicesBindingTag)) {
+            Slog.v(TAG, "Not registering " + name + " as bind is already in progress");
             // stop registering this thing already! we're working on it
             return;
         }
@@ -871,6 +878,7 @@ abstract public class ManagedServices {
                     boolean added = false;
                     ManagedServiceInfo info = null;
                     synchronized (mMutex) {
+                        mServicesRebinding.remove(servicesBindingTag);
                         mServicesBinding.remove(servicesBindingTag);
                         try {
                             mService = asInterface(binder);
@@ -891,6 +899,27 @@ abstract public class ManagedServices {
                 public void onServiceDisconnected(ComponentName name) {
                     mServicesBinding.remove(servicesBindingTag);
                     Slog.v(TAG, getCaption() + " connection lost: " + name);
+                }
+
+                @Override
+                public void onBindingDied(ComponentName name) {
+                    Slog.w(TAG, getCaption() + " binding died: " + name);
+                    synchronized (mMutex) {
+                        mServicesBinding.remove(servicesBindingTag);
+                        mContext.unbindService(this);
+                        if (!mServicesRebinding.contains(servicesBindingTag)) {
+                            mServicesRebinding.add(servicesBindingTag);
+                            mHandler.postDelayed(new Runnable() {
+                                    @Override
+                                    public void run() {
+                                        registerService(name, userid);
+                                    }
+                               }, ON_BINDING_DIED_REBIND_DELAY_MS);
+                        } else {
+                            Slog.v(TAG, getCaption() + " not rebinding as "
+                                    + "a previous rebind attempt was made: " + name);
+                        }
+                    }
                 }
             };
             if (!mContext.bindServiceAsUser(intent,
