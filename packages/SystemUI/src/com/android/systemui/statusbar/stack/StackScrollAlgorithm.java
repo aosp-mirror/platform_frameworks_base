@@ -135,7 +135,7 @@ public class StackScrollAlgorithm {
         for (int i = 0; i < childCount; i++) {
             ExpandableView child = algorithmState.visibleChildren.get(i);
             ExpandableViewState state = resultState.getViewStateForView(child);
-            if (!child.mustStayOnScreen()) {
+            if (!child.mustStayOnScreen() || state.headsUpIsVisible) {
                 previousNotificationEnd = Math.max(drawStart, previousNotificationEnd);
                 previousNotificationStart = Math.max(drawStart, previousNotificationStart);
             }
@@ -378,6 +378,13 @@ public class StackScrollAlgorithm {
         boolean isEmptyShadeView = child instanceof EmptyShadeView;
 
         childViewState.location = ExpandableViewState.LOCATION_MAIN_AREA;
+        float inset = ambientState.getTopPadding() + ambientState.getStackTranslation();
+        if (child.mustStayOnScreen() && childViewState.yTranslation >= 0) {
+            // Even if we're not scrolled away we're in view and we're also not in the
+            // shelf. We can relax the constraints and let us scroll off the top!
+            float end = childViewState.yTranslation + childViewState.height + inset;
+            childViewState.headsUpIsVisible = end < ambientState.getMaxHeadsUpTranslation();
+        }
         if (isDismissView) {
             childViewState.yTranslation = Math.min(childViewState.yTranslation,
                     ambientState.getInnerHeight() - childHeight);
@@ -396,8 +403,7 @@ public class StackScrollAlgorithm {
             Log.wtf(LOG_TAG, "Failed to assign location for child " + i);
         }
 
-        childViewState.yTranslation += ambientState.getTopPadding()
-                + ambientState.getStackTranslation();
+        childViewState.yTranslation += inset;
         return currentYPosition;
     }
 
@@ -420,19 +426,21 @@ public class StackScrollAlgorithm {
                 break;
             }
             ExpandableViewState childState = resultState.getViewStateForView(row);
-            if (topHeadsUpEntry == null) {
+            if (topHeadsUpEntry == null && row.mustStayOnScreen() && !childState.headsUpIsVisible) {
                 topHeadsUpEntry = row;
                 childState.location = ExpandableViewState.LOCATION_FIRST_HUN;
             }
             boolean isTopEntry = topHeadsUpEntry == row;
             float unmodifiedEndLocation = childState.yTranslation + childState.height;
             if (mIsExpanded) {
-                // Ensure that the heads up is always visible even when scrolled off
-                clampHunToTop(ambientState, row, childState);
-                if (i == 0 && ambientState.isAboveShelf(row)) {
-                    // the first hun can't get off screen.
-                    clampHunToMaxTranslation(ambientState, row, childState);
-                    childState.hidden = false;
+                if (row.mustStayOnScreen() && !childState.headsUpIsVisible) {
+                    // Ensure that the heads up is always visible even when scrolled off
+                    clampHunToTop(ambientState, row, childState);
+                    if (i == 0 && ambientState.isAboveShelf(row)) {
+                        // the first hun can't get off screen.
+                        clampHunToMaxTranslation(ambientState, row, childState);
+                        childState.hidden = false;
+                    }
                 }
             }
             if (row.isPinned()) {
@@ -493,6 +501,7 @@ public class StackScrollAlgorithm {
         if (childViewState.yTranslation >= shelfStart) {
             childViewState.hidden = true;
             childViewState.inShelf = true;
+            childViewState.headsUpIsVisible = false;
         }
         if (!ambientState.isShadeExpanded()) {
             childViewState.height = (int) (mStatusBarHeight - childViewState.yTranslation);
@@ -531,7 +540,8 @@ public class StackScrollAlgorithm {
         ExpandableViewState childViewState = resultState.getViewStateForView(child);
         int zDistanceBetweenElements = ambientState.getZDistanceBetweenElements();
         float baseZ = ambientState.getBaseZHeight();
-        if (child.mustStayOnScreen() && !ambientState.isDozingAndNotPulsing(child)
+        if (child.mustStayOnScreen() && !childViewState.headsUpIsVisible
+                && !ambientState.isDozingAndNotPulsing(child)
                 && childViewState.yTranslation < ambientState.getTopPadding()
                 + ambientState.getStackTranslation()) {
             if (childrenOnTop != 0.0f) {
