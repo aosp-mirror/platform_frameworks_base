@@ -16,6 +16,9 @@
 
 package android.view;
 
+import static android.view.Surface.ROTATION_270;
+import static android.view.Surface.ROTATION_90;
+
 import android.annotation.Size;
 import android.graphics.Bitmap;
 import android.graphics.GraphicBuffer;
@@ -55,8 +58,6 @@ public class SurfaceControl {
     private static native void nativeScreenshot(IBinder displayToken, Surface consumer,
             Rect sourceCrop, int width, int height, int minLayer, int maxLayer,
             boolean allLayers, boolean useIdentityTransform);
-    private static native void nativeCaptureLayers(IBinder layerHandleToken, Surface consumer,
-            Rect sourceCrop, float frameScale);
     private static native GraphicBuffer nativeCaptureLayers(IBinder layerHandleToken,
             Rect sourceCrop, float frameScale);
 
@@ -1144,22 +1145,35 @@ public class SurfaceControl {
 
     /**
      * Like {@link SurfaceControl#screenshot(int, int, int, int, boolean)} but
-     * includes all Surfaces in the screenshot.
+     * includes all Surfaces in the screenshot. This will also update the orientation so it
+     * sends the correct coordinates to SF based on the rotation value.
      *
+     * @param sourceCrop The portion of the screen to capture into the Bitmap;
+     * caller may pass in 'new Rect()' if no cropping is desired.
      * @param width The desired width of the returned bitmap; the raw
      * screen will be scaled down to this size.
      * @param height The desired height of the returned bitmap; the raw
      * screen will be scaled down to this size.
+     * @param rotation Apply a custom clockwise rotation to the screenshot, i.e.
+     * Surface.ROTATION_0,90,180,270. Surfaceflinger will always take
+     * screenshots in its native portrait orientation by default, so this is
+     * useful for returning screenshots that are independent of device
+     * orientation.
      * @return Returns a Bitmap containing the screen contents, or null
      * if an error occurs. Make sure to call Bitmap.recycle() as soon as
      * possible, once its content is not needed anymore.
      */
-    public static Bitmap screenshot(int width, int height) {
+    public static Bitmap screenshot(Rect sourceCrop, int width, int height, int rotation) {
         // TODO: should take the display as a parameter
         IBinder displayToken = SurfaceControl.getBuiltInDisplay(
                 SurfaceControl.BUILT_IN_DISPLAY_ID_MAIN);
-        return nativeScreenshot(displayToken, new Rect(), width, height, 0, 0, true,
-                false, Surface.ROTATION_0);
+        if (rotation == ROTATION_90 || rotation == ROTATION_270) {
+            rotation = (rotation == ROTATION_90) ? ROTATION_270 : ROTATION_90;
+        }
+
+        SurfaceControl.rotateCropForSF(sourceCrop, rotation);
+        return nativeScreenshot(displayToken, sourceCrop, width, height, 0, 0, true,
+                false, rotation);
     }
 
     private static void screenshot(IBinder display, Surface consumer, Rect sourceCrop,
@@ -1175,26 +1189,29 @@ public class SurfaceControl {
                 minLayer, maxLayer, allLayers, useIdentityTransform);
     }
 
+    private static void rotateCropForSF(Rect crop, int rot) {
+        if (rot == Surface.ROTATION_90 || rot == Surface.ROTATION_270) {
+            int tmp = crop.top;
+            crop.top = crop.left;
+            crop.left = tmp;
+            tmp = crop.right;
+            crop.right = crop.bottom;
+            crop.bottom = tmp;
+        }
+    }
+
     /**
      * Captures a layer and its children into the provided {@link Surface}.
      *
      * @param layerHandleToken The root layer to capture.
-     * @param consumer         The {@link Surface} to capture the layer into.
      * @param sourceCrop       The portion of the root surface to capture; caller may pass in 'new
      *                         Rect()' or null if no cropping is desired.
      * @param frameScale       The desired scale of the returned buffer; the raw
      *                         screen will be scaled up/down.
+     *
+     * @return Returns a GraphicBuffer that contains the layer capture.
      */
-    public static void captureLayers(IBinder layerHandleToken, Surface consumer, Rect sourceCrop,
-            float frameScale) {
-        nativeCaptureLayers(layerHandleToken, consumer, sourceCrop, frameScale);
-    }
-
-    /**
-     * Same as {@link #captureLayers(IBinder, Surface, Rect, float)} except this
-     * captures to a {@link GraphicBuffer} instead of a {@link Surface}.
-     */
-    public static GraphicBuffer captureLayersToBuffer(IBinder layerHandleToken, Rect sourceCrop,
+    public static GraphicBuffer captureLayers(IBinder layerHandleToken, Rect sourceCrop,
             float frameScale) {
         return nativeCaptureLayers(layerHandleToken, sourceCrop, frameScale);
     }

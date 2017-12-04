@@ -18,6 +18,7 @@ package android.app;
 
 import android.accessibilityservice.IAccessibilityServiceClient;
 import android.graphics.Bitmap;
+import android.graphics.Rect;
 import android.view.InputEvent;
 import android.view.WindowContentFrameStats;
 import android.view.WindowAnimationFrameStats;
@@ -37,7 +38,7 @@ interface IUiAutomationConnection {
     void disconnect();
     boolean injectInputEvent(in InputEvent event, boolean sync);
     boolean setRotation(int rotation);
-    Bitmap takeScreenshot(int width, int height);
+    Bitmap takeScreenshot(in Rect crop, int rotation);
     boolean clearWindowContentFrameStats(int windowId);
     WindowContentFrameStats getWindowContentFrameStats(int windowId);
     void clearWindowAnimationFrameStats();

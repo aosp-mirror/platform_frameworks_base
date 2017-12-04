@@ -17,12 +17,11 @@
 package com.android.shell;
 
 import android.graphics.Bitmap;
-import android.graphics.Canvas;
 import android.graphics.Point;
+import android.graphics.Rect;
 import android.hardware.display.DisplayManagerGlobal;
 import android.util.Log;
 import android.view.Display;
-import android.view.Surface;
 import android.view.SurfaceControl;
 
 /**
@@ -34,18 +33,6 @@ import android.view.SurfaceControl;
 final class Screenshooter {
 
     private static final String TAG = "Screenshooter";
-
-    /** Rotation constant: Freeze rotation to 0 degrees (natural orientation) */
-    public static final int ROTATION_FREEZE_0 = Surface.ROTATION_0;
-
-    /** Rotation constant: Freeze rotation to 90 degrees . */
-    public static final int ROTATION_FREEZE_90 = Surface.ROTATION_90;
-
-    /** Rotation constant: Freeze rotation to 180 degrees . */
-    public static final int ROTATION_FREEZE_180 = Surface.ROTATION_180;
-
-    /** Rotation constant: Freeze rotation to 270 degrees . */
-    public static final int ROTATION_FREEZE_270 = Surface.ROTATION_270;
 
     /**
      * Takes a screenshot.
@@ -60,56 +47,16 @@ final class Screenshooter {
         final int displayWidth = displaySize.x;
         final int displayHeight = displaySize.y;
 
-        final float screenshotWidth;
-        final float screenshotHeight;
-
-        final int rotation = display.getRotation();
-        switch (rotation) {
-            case ROTATION_FREEZE_0: {
-                screenshotWidth = displayWidth;
-                screenshotHeight = displayHeight;
-            } break;
-            case ROTATION_FREEZE_90: {
-                screenshotWidth = displayHeight;
-                screenshotHeight = displayWidth;
-            } break;
-            case ROTATION_FREEZE_180: {
-                screenshotWidth = displayWidth;
-                screenshotHeight = displayHeight;
-            } break;
-            case ROTATION_FREEZE_270: {
-                screenshotWidth = displayHeight;
-                screenshotHeight = displayWidth;
-            } break;
-            default: {
-                throw new IllegalArgumentException("Invalid rotation: "
-                        + rotation);
-            }
-        }
-
+        int rotation = display.getRotation();
+        Rect crop = new Rect(0, 0, displayWidth, displayHeight);
         Log.d(TAG, "Taking screenshot of dimensions " + displayWidth + " x " + displayHeight);
         // Take the screenshot
         Bitmap screenShot =
-                SurfaceControl.screenshot((int) screenshotWidth, (int) screenshotHeight);
+                SurfaceControl.screenshot(crop, displayWidth, displayHeight, rotation);
         if (screenShot == null) {
-            Log.e(TAG, "Failed to take screenshot of dimensions " + screenshotWidth + " x "
-                    + screenshotHeight);
+            Log.e(TAG, "Failed to take screenshot of dimensions " + displayWidth + " x "
+                    + displayHeight);
             return null;
-        }
-
-        // Rotate the screenshot to the current orientation
-        if (rotation != ROTATION_FREEZE_0) {
-            Bitmap unrotatedScreenShot = Bitmap.createBitmap(displayWidth, displayHeight,
-                    Bitmap.Config.ARGB_8888, screenShot.hasAlpha(), screenShot.getColorSpace());
-            Canvas canvas = new Canvas(unrotatedScreenShot);
-            canvas.translate(unrotatedScreenShot.getWidth() / 2,
-                    unrotatedScreenShot.getHeight() / 2);
-            canvas.rotate(getDegreesForRotation(rotation));
-            canvas.translate(- screenshotWidth / 2, - screenshotHeight / 2);
-            canvas.drawBitmap(screenShot, 0, 0, null);
-            canvas.setBitmap(null);
-            screenShot.recycle();
-            screenShot = unrotatedScreenShot;
         }
 
         // Optimization
@@ -117,21 +64,4 @@ final class Screenshooter {
 
         return screenShot;
     }
-
-    private static float getDegreesForRotation(int value) {
-        switch (value) {
-            case Surface.ROTATION_90: {
-                return 360f - 90f;
-            }
-            case Surface.ROTATION_180: {
-                return 360f - 180f;
-            }
-            case Surface.ROTATION_270: {
-                return 360f - 270f;
-            } default: {
-                return 0;
-            }
-        }
-    }
-
 }
