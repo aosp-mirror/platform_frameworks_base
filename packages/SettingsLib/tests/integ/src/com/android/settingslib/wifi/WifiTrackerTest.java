@@ -723,9 +723,9 @@ public class WifiTrackerTest {
         CountDownLatch latch = new CountDownLatch(1);
 
         // Once the new info has been fetched, we need to wait for the access points to be copied
+        mAccessPointsChangedLatch = new CountDownLatch(1);
         doAnswer(invocation -> {
                     latch.countDown();
-                    mAccessPointsChangedLatch = new CountDownLatch(1);
                     return info;
                 }).when(mockWifiManager).getConnectionInfo();
 
