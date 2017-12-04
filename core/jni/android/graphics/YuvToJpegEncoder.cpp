@@ -26,12 +26,13 @@ YuvToJpegEncoder::YuvToJpegEncoder(int* strides) : fStrides(strides) {
 bool YuvToJpegEncoder::encode(SkWStream* stream, void* inYuv, int width,
         int height, int* offsets, int jpegQuality) {
     jpeg_compress_struct    cinfo;
-    skjpeg_error_mgr        sk_err;
+    jpeg_error_mgr          err;
     skjpeg_destination_mgr  sk_wstream(stream);
 
-    cinfo.err = jpeg_std_error(&sk_err);
-    sk_err.error_exit = skjpeg_error_exit;
-    if (setjmp(sk_err.fJmpBuf)) {
+    cinfo.err = jpeg_std_error(&err);
+    err.error_exit = skjpeg_error_exit;
+    jmp_buf jmp;
+    if (setjmp(jmp)) {
         return false;
     }
     jpeg_create_compress(&cinfo);
