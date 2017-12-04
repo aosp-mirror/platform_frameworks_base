@@ -19,6 +19,7 @@ package android.net;
 import android.annotation.RequiresPermission;
 import android.annotation.SuppressLint;
 import android.annotation.SystemApi;
+import android.annotation.TestApi;
 import android.app.DownloadManager;
 import android.app.backup.BackupManager;
 import android.app.usage.NetworkStatsManager;
@@ -153,6 +154,8 @@ public class TrafficStats {
     private static NetworkStats sActiveProfilingStart;
 
     private static Object sProfilingLock = new Object();
+
+    private static final String LOOPBACK_IFACE = "lo";
 
     /**
      * Set active tag to use when accounting {@link Socket} traffic originating
@@ -540,6 +543,30 @@ public class TrafficStats {
     /** {@hide} */
     public static long getRxBytes(String iface) {
         return nativeGetIfaceStat(iface, TYPE_RX_BYTES);
+    }
+
+    /** {@hide} */
+    @TestApi
+    public static long getLoopbackTxPackets() {
+        return nativeGetIfaceStat(LOOPBACK_IFACE, TYPE_TX_PACKETS);
+    }
+
+    /** {@hide} */
+    @TestApi
+    public static long getLoopbackRxPackets() {
+        return nativeGetIfaceStat(LOOPBACK_IFACE, TYPE_RX_PACKETS);
+    }
+
+    /** {@hide} */
+    @TestApi
+    public static long getLoopbackTxBytes() {
+        return nativeGetIfaceStat(LOOPBACK_IFACE, TYPE_TX_BYTES);
+    }
+
+    /** {@hide} */
+    @TestApi
+    public static long getLoopbackRxBytes() {
+        return nativeGetIfaceStat(LOOPBACK_IFACE, TYPE_RX_BYTES);
     }
 
     /**
