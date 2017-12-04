@@ -221,7 +221,14 @@ void StatsLogProcessor::flushIfNecessary(uint64_t timestampNs,
     std::lock_guard<std::mutex> lock(mBroadcastTimesMutex);
 
     size_t totalBytes = metricsManager->byteSize() + mUidMap->getBytesUsed();
-    if (totalBytes > .9 * kMaxSerializedBytes) { // Send broadcast so that receivers can pull data.
+    // TODO: Find a way to test that the dropping and broadcasts are sent when memory is exceeded.
+    if (totalBytes > kMaxSerializedBytes) {  // Too late. We need to start clearing data.
+        // We ignore the return value so we force each metric producer to clear its contents.
+        metricsManager->onDumpReport();
+        StatsdStats::getInstance().noteDataDropped(key);
+        VLOG("StatsD had to toss out metrics for %s", key.ToString().c_str());
+    } else if (totalBytes >
+               .9 * kMaxSerializedBytes) {  // Send broadcast so that receivers can pull data.
         auto lastFlushNs = mLastBroadcastTimes.find(key);
         if (lastFlushNs != mLastBroadcastTimes.end()) {
             if (timestampNs - lastFlushNs->second < kMinBroadcastPeriod) {
@@ -232,11 +239,6 @@ void StatsLogProcessor::flushIfNecessary(uint64_t timestampNs,
         VLOG("StatsD requesting broadcast for %s", key.ToString().c_str());
         mSendBroadcast(key);
         StatsdStats::getInstance().noteBroadcastSent(key);
-    } else if (totalBytes > kMaxSerializedBytes) { // Too late. We need to start clearing data.
-        // We ignore the return value so we force each metric producer to clear its contents.
-        metricsManager->onDumpReport();
-        StatsdStats::getInstance().noteDataDropped(key);
-        VLOG("StatsD had to toss out metrics for %s", key.ToString().c_str());
     }
 }
 
