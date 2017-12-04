@@ -25,7 +25,7 @@
 #include <android/hardware/broadcastradio/1.1/IBroadcastRadio.h>
 #include <android/hardware/broadcastradio/1.2/IBroadcastRadioFactory.h>
 #include <android/hidl/manager/1.0/IServiceManager.h>
-#include <broadcastradio-utils/Utils.h>
+#include <broadcastradio-utils-1x/Utils.h>
 #include <core_jni_helpers.h>
 #include <hidl/ServiceManagement.h>
 #include <nativehelper/JNIHelp.h>
