@@ -248,7 +248,10 @@ public class ResponderConfig implements Parcelable {
      * Point (AP), which can be obtained from {@link android.net.wifi.WifiManager#getScanResults()}.
      */
     public static ResponderConfig fromScanResult(ScanResult scanResult) {
-        byte[] macAddress = new MacAddress(scanResult.BSSID).toByteArray();
+        byte[] macAddress = null;
+        if (scanResult.BSSID != null) {
+            macAddress = MacAddress.byteAddrFromStringAddr(scanResult.BSSID);
+        }
         int responderType = RESPONDER_AP;
         boolean supports80211mc = scanResult.is80211mcResponder();
         int channelWidth = translcateScanResultChannelWidth(scanResult.channelWidth);
