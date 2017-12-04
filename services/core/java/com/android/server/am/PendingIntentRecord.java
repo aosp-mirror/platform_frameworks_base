@@ -332,12 +332,14 @@ final class PendingIntentRecord extends IIntentSender.Stub {
                                 }
                                 allIntents[allIntents.length-1] = finalIntent;
                                 allResolvedTypes[allResolvedTypes.length-1] = resolvedType;
-                                owner.startActivitiesInPackage(uid, key.packageName, allIntents,
-                                        allResolvedTypes, resultTo, options, userId);
+                                owner.getActivityStartController().startActivitiesInPackage(uid,
+                                        key.packageName, allIntents, allResolvedTypes, resultTo,
+                                        options, userId);
                             } else {
-                                owner.startActivityInPackage(uid, key.packageName, finalIntent,
-                                        resolvedType, resultTo, resultWho, requestCode, 0,
-                                        options, userId, null, "PendingIntentRecord");
+                                owner.getActivityStartController().startActivityInPackage(uid,
+                                        key.packageName, finalIntent, resolvedType, resultTo,
+                                        resultWho, requestCode, 0, options, userId, null,
+                                        "PendingIntentRecord");
                             }
                         } catch (RuntimeException e) {
                             Slog.w(TAG, "Unable to send startActivity intent", e);

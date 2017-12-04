@@ -3892,11 +3892,12 @@ class ActivityStack<T extends StackWindowController> extends ConfigurationContai
                 try {
                     ActivityInfo aInfo = AppGlobals.getPackageManager().getActivityInfo(
                             destIntent.getComponent(), 0, srec.userId);
-                    int res = mService.mActivityStarter.startActivityLocked(srec.app.thread,
-                            destIntent, null /*ephemeralIntent*/, null, aInfo, null /*rInfo*/, null,
-                            null, parent.appToken, null, 0, -1, parent.launchedFromUid,
-                            parent.launchedFromPackage, -1, parent.launchedFromUid, 0, null,
-                            false, true, null, null, "navigateUpTo");
+                    int res = mService.getActivityStartController().startActivity(
+                            srec.app.thread, destIntent, null /*ephemeralIntent*/, null, aInfo,
+                            null /*rInfo*/, null, null, parent.appToken, null, 0, -1,
+                            parent.launchedFromUid, parent.launchedFromPackage, -1,
+                            parent.launchedFromUid, 0, null, false, true, null, null,
+                            "navigateUpTo");
                     foundParentInTask = res == ActivityManager.START_SUCCESS;
                 } catch (RemoteException e) {
                     foundParentInTask = false;

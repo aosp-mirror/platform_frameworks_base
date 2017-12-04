@@ -65,10 +65,10 @@ import static android.app.ActivityManager.START_INTENT_NOT_RESOLVED;
 import com.android.internal.os.BatteryStatsImpl;
 
 /**
- * Tests for the {@link ActivityStack} class.
+ * Tests for the {@link ActivityStarter} class.
  *
  * Build/Install/Run:
- *  bit FrameworksServicesTests:com.android.server.am.ActivityStarterTests
+ *  atest FrameworksServicesTests:ActivityStarterTests
  */
 @SmallTest
 @Presubmit
@@ -76,7 +76,7 @@ import com.android.internal.os.BatteryStatsImpl;
 public class ActivityStarterTests extends ActivityTestsBase {
     private ActivityManagerService mService;
     private ActivityStarter mStarter;
-    private IPackageManager mPackageManager;
+    private ActivityStartController mController;
 
     private static final int PRECONDITION_NO_CALLER_APP = 1;
     private static final int PRECONDITION_NO_INTENT_COMPONENT = 1 << 1;
@@ -94,7 +94,9 @@ public class ActivityStarterTests extends ActivityTestsBase {
     public void setUp() throws Exception {
         super.setUp();
         mService = createActivityManagerService();
-        mStarter = new ActivityStarter(mService);
+        mController = mock(ActivityStartController.class);
+        mStarter = new ActivityStarter(mController, mService, mService.mStackSupervisor,
+                mock(ActivityStartInterceptor.class));
     }
 
     @Test
@@ -176,8 +178,10 @@ public class ActivityStarterTests extends ActivityTestsBase {
             int expectedResult) {
         final ActivityManagerService service = createActivityManagerService();
         final IPackageManager packageManager = mock(IPackageManager.class);
-        final ActivityStarter starter = new ActivityStarter(service);
+        final ActivityStartController controller = mock(ActivityStartController.class);
 
+        final ActivityStarter starter = new ActivityStarter(controller, service,
+                service.mStackSupervisor, mock(ActivityStartInterceptor.class));
         final IApplicationThread caller = mock(IApplicationThread.class);
 
         // If no caller app, return {@code null} {@link ProcessRecord}.
