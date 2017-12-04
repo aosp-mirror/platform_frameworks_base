@@ -248,7 +248,6 @@ public class StatusBarWindowView extends FrameLayout {
 
     public void setTouchActive(boolean touchActive) {
         mTouchActive = touchActive;
-        mStackScrollLayout.setTouchActive(touchActive);
     }
 
     @Override
