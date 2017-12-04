@@ -16,8 +16,6 @@
 
 package android.widget.espresso;
 
-import org.hamcrest.Matcher;
-
 import android.support.test.espresso.UiController;
 import android.support.test.espresso.ViewAction;
 import android.support.test.espresso.action.CoordinatesProvider;
@@ -25,9 +23,12 @@ import android.support.test.espresso.action.MotionEvents;
 import android.support.test.espresso.action.MotionEvents.DownResultHolder;
 import android.support.test.espresso.action.Press;
 import android.support.test.espresso.action.Tapper;
+import android.view.InputDevice;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewConfiguration;
+
+import org.hamcrest.Matcher;
 
 /**
  * ViewAction for performing an click on View by a mouse.
@@ -41,8 +42,9 @@ public final class MouseClickAction implements ViewAction {
         TRIPLE {
             @Override
             public Tapper.Status sendTap(UiController uiController, float[] coordinates,
-                    float[] precision) {
-                Tapper.Status stat = sendSingleTap(uiController, coordinates, precision);
+                    float[] precision, int inputDevice, int buttonState) {
+                Tapper.Status stat = sendSingleTap(uiController, coordinates, precision,
+                        inputDevice, buttonState);
                 boolean warning = false;
                 if (stat == Tapper.Status.FAILURE) {
                     return Tapper.Status.FAILURE;
@@ -55,7 +57,8 @@ public final class MouseClickAction implements ViewAction {
                     if (0 < doubleTapMinimumTimeout) {
                         uiController.loopMainThreadForAtLeast(doubleTapMinimumTimeout);
                     }
-                    stat = sendSingleTap(uiController, coordinates, precision);
+                    stat = sendSingleTap(uiController, coordinates, precision, inputDevice,
+                            buttonState);
                     if (stat == Tapper.Status.FAILURE) {
                         return Tapper.Status.FAILURE;
                     } else if (stat == Tapper.Status.WARNING) {
@@ -69,11 +72,19 @@ public final class MouseClickAction implements ViewAction {
                     return Tapper.Status.SUCCESS;
                 }
             }
+
+            @Override
+            public Tapper.Status sendTap(UiController uiController, float[] coordinates,
+                    float[] precision) {
+                return sendTap(uiController, coordinates, precision, InputDevice.SOURCE_UNKNOWN,
+                        MotionEvent.BUTTON_PRIMARY);
+            }
         };
 
         private static Tapper.Status sendSingleTap(UiController uiController,
-                float[] coordinates, float[] precision) {
-            DownResultHolder res = MotionEvents.sendDown(uiController, coordinates, precision);
+                float[] coordinates, float[] precision, int inputDevice, int buttonState) {
+            DownResultHolder res = MotionEvents.sendDown(uiController, coordinates, precision,
+                    inputDevice, buttonState);
             try {
                 if (!MotionEvents.sendUp(uiController, res.down)) {
                     MotionEvents.sendCancel(uiController, res.down);
