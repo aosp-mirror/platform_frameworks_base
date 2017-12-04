@@ -286,10 +286,9 @@ files_to_check_apis += \
       $(SOONG_FRAMEWORK_SRCS)))
 
 # Find all generated files that were used to compile framework.jar
-files_to_check_apis += \
-  $(addprefix ../../,\
-    $(filter $(OUT_DIR)/%,\
-      $(SOONG_FRAMEWORK_SRCS)))
+files_to_check_apis_generated := \
+  $(filter $(OUT_DIR)/%,\
+    $(SOONG_FRAMEWORK_SRCS))
 
 # These are relative to frameworks/base
 # FRAMEWORKS_BASE_SUBDIRS comes from build/core/pathmap.mk
@@ -326,8 +325,9 @@ framework_docs_LOCAL_DROIDDOC_SOURCE_PATH := \
 
 framework_docs_LOCAL_SRCJARS := $(SOONG_FRAMEWORK_SRCJARS)
 
-framework_docs_LOCAL_INTERMEDIATE_SOURCES := \
-	$(patsubst $(TARGET_OUT_COMMON_INTERMEDIATES)/%,%,$(libcore_to_document_generated))
+framework_docs_LOCAL_GENERATED_SOURCES := \
+  $(libcore_to_document_generated) \
+  $(files_to_check_apis_generated) \
 
 framework_docs_LOCAL_API_CHECK_JAVA_LIBRARIES := \
 	core-oj \
@@ -444,7 +444,7 @@ framework_docs_LOCAL_DROIDDOC_OPTIONS += \
 include $(CLEAR_VARS)
 
 LOCAL_SRC_FILES:=$(framework_docs_LOCAL_API_CHECK_SRC_FILES)
-LOCAL_INTERMEDIATE_SOURCES:=$(framework_docs_LOCAL_INTERMEDIATE_SOURCES)
+LOCAL_GENERATED_SOURCES:=$(framework_docs_LOCAL_GENERATED_SOURCES)
 LOCAL_SRCJARS:=$(framework_docs_LOCAL_SRCJARS)
 LOCAL_JAVA_LIBRARIES:=$(framework_docs_LOCAL_API_CHECK_JAVA_LIBRARIES)
 LOCAL_MODULE_CLASS:=$(framework_docs_LOCAL_MODULE_CLASS)
@@ -479,7 +479,7 @@ $(call dist-for-goals,sdk,$(INTERNAL_PLATFORM_API_FILE))
 include $(CLEAR_VARS)
 
 LOCAL_SRC_FILES:=$(framework_docs_LOCAL_API_CHECK_SRC_FILES)
-LOCAL_INTERMEDIATE_SOURCES:=$(framework_docs_LOCAL_INTERMEDIATE_SOURCES)
+LOCAL_GENERATED_SOURCES:=$(framework_docs_LOCAL_GENERATED_SOURCES)
 LOCAL_SRCJARS:=$(framework_docs_LOCAL_SRCJARS)
 LOCAL_JAVA_LIBRARIES:=$(framework_docs_LOCAL_API_CHECK_JAVA_LIBRARIES)
 LOCAL_MODULE_CLASS:=$(framework_docs_LOCAL_MODULE_CLASS)
@@ -516,7 +516,7 @@ $(call dist-for-goals,sdk,$(INTERNAL_PLATFORM_SYSTEM_API_FILE))
 include $(CLEAR_VARS)
 
 LOCAL_SRC_FILES:=$(framework_docs_LOCAL_API_CHECK_SRC_FILES)
-LOCAL_INTERMEDIATE_SOURCES:=$(framework_docs_LOCAL_INTERMEDIATE_SOURCES)
+LOCAL_GENERATED_SOURCES:=$(framework_docs_LOCAL_GENERATED_SOURCES)
 LOCAL_SRCJARS:=$(framework_docs_LOCAL_SRCJARS)
 LOCAL_JAVA_LIBRARIES:=$(framework_docs_LOCAL_API_CHECK_JAVA_LIBRARIES)
 LOCAL_MODULE_CLASS:=$(framework_docs_LOCAL_MODULE_CLASS)
@@ -554,7 +554,7 @@ $(call dist-for-goals,sdk,$(INTERNAL_PLATFORM_TEST_API_FILE))
 include $(CLEAR_VARS)
 
 LOCAL_SRC_FILES:=$(framework_docs_LOCAL_SRC_FILES)
-LOCAL_INTERMEDIATE_SOURCES:=$(framework_docs_LOCAL_INTERMEDIATE_SOURCES)
+LOCAL_GENERATED_SOURCES:=$(framework_docs_LOCAL_GENERATED_SOURCES)
 LOCAL_SRCJARS:=$(framework_docs_LOCAL_SRCJARS)
 LOCAL_JAVA_LIBRARIES:=$(framework_docs_LOCAL_JAVA_LIBRARIES)
 LOCAL_MODULE_CLASS:=$(framework_docs_LOCAL_MODULE_CLASS)
@@ -588,7 +588,7 @@ update-api: doc-comment-check-docs
 include $(CLEAR_VARS)
 
 LOCAL_SRC_FILES:=$(framework_docs_LOCAL_SRC_FILES)
-LOCAL_INTERMEDIATE_SOURCES:=$(framework_docs_LOCAL_INTERMEDIATE_SOURCES)
+LOCAL_GENERATED_SOURCES:=$(framework_docs_LOCAL_GENERATED_SOURCES)
 LOCAL_SRCJARS:=$(framework_docs_LOCAL_SRCJARS)
 LOCAL_JAVA_LIBRARIES:=$(framework_docs_LOCAL_JAVA_LIBRARIES)
 LOCAL_MODULE_CLASS:=$(framework_docs_LOCAL_MODULE_CLASS)
@@ -624,7 +624,7 @@ $(full_target): $(static_doc_index_redirect)
 include $(CLEAR_VARS)
 
 LOCAL_SRC_FILES:=$(framework_docs_LOCAL_SRC_FILES)
-LOCAL_INTERMEDIATE_SOURCES:=$(framework_docs_LOCAL_INTERMEDIATE_SOURCES)
+LOCAL_GENERATED_SOURCES:=$(framework_docs_LOCAL_GENERATED_SOURCES)
 LOCAL_SRCJARS:=$(framework_docs_LOCAL_SRCJARS)
 LOCAL_JAVA_LIBRARIES:=$(framework_docs_LOCAL_JAVA_LIBRARIES)
 LOCAL_MODULE_CLASS:=$(framework_docs_LOCAL_MODULE_CLASS)
@@ -666,7 +666,7 @@ $(full_target): $(static_doc_properties)
 include $(CLEAR_VARS)
 
 LOCAL_SRC_FILES:=$(framework_docs_LOCAL_SRC_FILES)
-LOCAL_INTERMEDIATE_SOURCES:=$(framework_docs_LOCAL_INTERMEDIATE_SOURCES)
+LOCAL_GENERATED_SOURCES:=$(framework_docs_LOCAL_GENERATED_SOURCES)
 LOCAL_SRCJARS:=$(framework_docs_LOCAL_SRCJARS)
 LOCAL_STATIC_JAVA_LIBRARIES:=$(framework_docs_LOCAL_STATIC_JAVA_LIBRARIES)
 LOCAL_JAVA_LIBRARIES:=$(framework_docs_LOCAL_JAVA_LIBRARIES)
@@ -695,7 +695,7 @@ include $(BUILD_DROIDDOC)
 include $(CLEAR_VARS)
 
 LOCAL_SRC_FILES:=$(framework_docs_LOCAL_SRC_FILES)
-LOCAL_INTERMEDIATE_SOURCES:=$(framework_docs_LOCAL_INTERMEDIATE_SOURCES)
+LOCAL_GENERATED_SOURCES:=$(framework_docs_LOCAL_GENERATED_SOURCES)
 LOCAL_SRCJARS:=$(framework_docs_LOCAL_SRCJARS)
 LOCAL_STATIC_JAVA_LIBRARIES:=$(framework_docs_LOCAL_STATIC_JAVA_LIBRARIES)
 LOCAL_JAVA_LIBRARIES:=$(framework_docs_LOCAL_JAVA_LIBRARIES)
@@ -731,7 +731,7 @@ include $(BUILD_DROIDDOC)
 # ==== docs for the web (on the devsite app engine server) =======================
 include $(CLEAR_VARS)
 LOCAL_SRC_FILES:=$(framework_docs_LOCAL_SRC_FILES)
-LOCAL_INTERMEDIATE_SOURCES:=$(framework_docs_LOCAL_INTERMEDIATE_SOURCES)
+LOCAL_GENERATED_SOURCES:=$(framework_docs_LOCAL_GENERATED_SOURCES)
 LOCAL_SRCJARS:=$(framework_docs_LOCAL_SRCJARS)
 LOCAL_STATIC_JAVA_LIBRARIES:=$(framework_docs_LOCAL_STATIC_JAVA_LIBRARIES)
 LOCAL_JAVA_LIBRARIES:=$(framework_docs_LOCAL_JAVA_LIBRARIES)
@@ -761,7 +761,7 @@ include $(BUILD_DROIDDOC)
 # ==== docs for the web (on the devsite app engine server) =======================
 include $(CLEAR_VARS)
 LOCAL_SRC_FILES:=$(framework_docs_LOCAL_SRC_FILES)
-LOCAL_INTERMEDIATE_SOURCES:=$(framework_docs_LOCAL_INTERMEDIATE_SOURCES)
+LOCAL_GENERATED_SOURCES:=$(framework_docs_LOCAL_GENERATED_SOURCES)
 LOCAL_SRCJARS:=$(framework_docs_LOCAL_SRCJARS)
 LOCAL_STATIC_JAVA_LIBRARIES:=$(framework_docs_LOCAL_STATIC_JAVA_LIBRARIES)
 LOCAL_JAVA_LIBRARIES:=$(framework_docs_LOCAL_JAVA_LIBRARIES)
@@ -791,7 +791,7 @@ include $(BUILD_DROIDDOC)
 include $(CLEAR_VARS)
 
 LOCAL_SRC_FILES:=$(framework_docs_LOCAL_SRC_FILES)
-LOCAL_INTERMEDIATE_SOURCES:=$(framework_docs_LOCAL_INTERMEDIATE_SOURCES)
+LOCAL_GENERATED_SOURCES:=$(framework_docs_LOCAL_GENERATED_SOURCES)
 LOCAL_SRCJARS:=$(framework_docs_LOCAL_SRCJARS)
 LOCAL_STATIC_JAVA_LIBRARIES:=$(framework_docs_LOCAL_STATIC_JAVA_LIBRARIES)
 LOCAL_JAVA_LIBRARIES:=$(framework_docs_LOCAL_JAVA_LIBRARIES)
@@ -817,7 +817,7 @@ include $(BUILD_DROIDDOC)
 include $(CLEAR_VARS)
 
 LOCAL_SRC_FILES:=$(framework_docs_LOCAL_SRC_FILES)
-LOCAL_INTERMEDIATE_SOURCES:=$(framework_docs_LOCAL_INTERMEDIATE_SOURCES)
+LOCAL_GENERATED_SOURCES:=$(framework_docs_LOCAL_GENERATED_SOURCES)
 LOCAL_SRCJARS:=$(framework_docs_LOCAL_SRCJARS)
 LOCAL_STATIC_JAVA_LIBRARIES:=$(framework_docs_LOCAL_STATIC_JAVA_LIBRARIES)
 LOCAL_JAVA_LIBRARIES:=$(framework_docs_LOCAL_JAVA_LIBRARIES)
@@ -846,7 +846,7 @@ include $(BUILD_DROIDDOC)
 include $(CLEAR_VARS)
 
 LOCAL_SRC_FILES:=$(framework_docs_LOCAL_SRC_FILES)
-LOCAL_INTERMEDIATE_SOURCES:=$(framework_docs_LOCAL_INTERMEDIATE_SOURCES)
+LOCAL_GENERATED_SOURCES:=$(framework_docs_LOCAL_GENERATED_SOURCES)
 LOCAL_SRCJARS:=$(framework_docs_LOCAL_SRCJARS)
 LOCAL_JAVA_LIBRARIES:=$(framework_docs_LOCAL_JAVA_LIBRARIES)
 LOCAL_MODULE_CLASS:=$(framework_docs_LOCAL_MODULE_CLASS)
