@@ -51,8 +51,15 @@ static const nsecs_t DISPATCH_FRAME_CALLBACKS_DELAY = milliseconds_to_nanosecond
 
 static bool gHasRenderThreadInstance = false;
 
+static void (*gOnStartHook)() = nullptr;
+
 bool RenderThread::hasInstance() {
     return gHasRenderThreadInstance;
+}
+
+void RenderThread::setOnStartHook(void (*onStartHook)()) {
+    LOG_ALWAYS_FATAL_IF(hasInstance(), "can't set an onStartHook after we've started...");
+    gOnStartHook = onStartHook;
 }
 
 RenderThread& RenderThread::getInstance() {
@@ -256,6 +263,9 @@ void RenderThread::requestVsync() {
 
 bool RenderThread::threadLoop() {
     setpriority(PRIO_PROCESS, 0, PRIORITY_DISPLAY);
+    if (gOnStartHook) {
+        gOnStartHook();
+    }
     initThreadLocals();
 
     while (true) {
