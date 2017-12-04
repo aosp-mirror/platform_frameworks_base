@@ -27,10 +27,8 @@ import android.content.res.Configuration;
 import android.content.res.Resources;
 import android.os.AsyncTask;
 import android.os.SystemClock;
-import android.os.UserHandle;
 import android.os.VibrationEffect;
 import android.os.Vibrator;
-import android.provider.Settings;
 import android.util.AttributeSet;
 import android.util.Log;
 import android.view.InputDevice;
@@ -42,7 +40,7 @@ import android.view.animation.Interpolator;
 import android.widget.FrameLayout;
 
 import com.android.internal.logging.nano.MetricsProto.MetricsEvent;
-import com.android.keyguard.LatencyTracker;
+import com.android.internal.util.LatencyTracker;
 import com.android.systemui.DejankUtils;
 import com.android.systemui.Interpolators;
 import com.android.systemui.R;
@@ -50,7 +48,6 @@ import com.android.systemui.classifier.FalsingManager;
 import com.android.systemui.doze.DozeLog;
 import com.android.systemui.statusbar.FlingAnimationUtils;
 import com.android.systemui.statusbar.StatusBarState;
-import com.android.systemui.statusbar.notification.NotificationUtils;
 import com.android.systemui.statusbar.policy.HeadsUpManager;
 
 import java.io.FileDescriptor;
