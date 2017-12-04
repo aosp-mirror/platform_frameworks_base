@@ -229,6 +229,7 @@ import com.android.internal.policy.IKeyguardDismissCallback;
 import com.android.internal.policy.IShortcutService;
 import com.android.internal.util.DumpUtils;
 import com.android.internal.util.FastPrintWriter;
+import com.android.internal.util.LatencyTracker;
 import com.android.internal.view.IInputContext;
 import com.android.internal.view.IInputMethodClient;
 import com.android.internal.view.IInputMethodManager;
@@ -5863,6 +5864,7 @@ public class WindowManagerService extends IWindowManager.Stub
             Debug.startMethodTracing(file.toString(), 8 * 1024 * 1024);
         }
 
+        LatencyTracker.getInstance(mContext).onActionStart(LatencyTracker.ACTION_ROTATE_SCREEN);
         // TODO(multidisplay): rotation on non-default displays
         if (CUSTOM_SCREEN_ROTATION && displayContent.isDefaultDisplay) {
             mExitAnimId = exitAnim;
@@ -5987,6 +5989,7 @@ public class WindowManagerService extends IWindowManager.Stub
         if (configChanged) {
             mH.obtainMessage(H.SEND_NEW_CONFIGURATION, displayId).sendToTarget();
         }
+        LatencyTracker.getInstance(mContext).onActionEnd(LatencyTracker.ACTION_ROTATE_SCREEN);
     }
 
     static int getPropertyInt(String[] tokens, int index, int defUnits, int defDps,
