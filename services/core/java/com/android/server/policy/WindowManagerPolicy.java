@@ -1380,8 +1380,10 @@ public interface WindowManagerPolicy extends WindowManagerPolicyConstants {
      * Ask the policy to dismiss the keyguard, if it is currently shown.
      *
      * @param callback Callback to be informed about the result.
+     * @param message A message that should be displayed in the keyguard.
      */
-    public void dismissKeyguardLw(@Nullable IKeyguardDismissCallback callback);
+    public void dismissKeyguardLw(@Nullable IKeyguardDismissCallback callback,
+            CharSequence message);
 
     /**
      * Ask the policy whether the Keyguard has drawn. If the Keyguard is disabled, this method

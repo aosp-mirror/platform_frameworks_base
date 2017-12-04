@@ -2941,10 +2941,10 @@ public class WindowManagerService extends IWindowManager.Stub
     }
 
     @Override
-    public void dismissKeyguard(IKeyguardDismissCallback callback) {
+    public void dismissKeyguard(IKeyguardDismissCallback callback, CharSequence message) {
         checkCallingPermission(permission.CONTROL_KEYGUARD, "dismissKeyguard");
         synchronized(mWindowMap) {
-            mPolicy.dismissKeyguardLw(callback);
+            mPolicy.dismissKeyguardLw(callback, message);
         }
     }
 

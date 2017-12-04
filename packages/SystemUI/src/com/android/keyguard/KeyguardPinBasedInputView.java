@@ -103,7 +103,7 @@ public abstract class KeyguardPinBasedInputView extends KeyguardAbsKeyInputView
     }
 
     @Override
-    protected int getPromtReasonStringRes(int reason) {
+    protected int getPromptReasonStringRes(int reason) {
         switch (reason) {
             case PROMPT_REASON_RESTART:
                 return R.string.kg_prompt_reason_restart_pin;

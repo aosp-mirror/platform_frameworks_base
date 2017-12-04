@@ -257,9 +257,9 @@ public class KeyguardServiceDelegate {
         mKeyguardState.occluded = isOccluded;
     }
 
-    public void dismiss(IKeyguardDismissCallback callback) {
+    public void dismiss(IKeyguardDismissCallback callback, CharSequence message) {
         if (mKeyguardService != null) {
-            mKeyguardService.dismiss(callback);
+            mKeyguardService.dismiss(callback, message);
         }
     }
 

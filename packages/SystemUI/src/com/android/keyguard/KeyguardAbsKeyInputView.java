@@ -280,7 +280,7 @@ public abstract class KeyguardAbsKeyInputView extends LinearLayout
     @Override
     public void showPromptReason(int reason) {
         if (reason != PROMPT_REASON_NONE) {
-            int promtReasonStringRes = getPromtReasonStringRes(reason);
+            int promtReasonStringRes = getPromptReasonStringRes(reason);
             if (promtReasonStringRes != 0) {
                 mSecurityMessageDisplay.setMessage(promtReasonStringRes);
             }
@@ -288,12 +288,12 @@ public abstract class KeyguardAbsKeyInputView extends LinearLayout
     }
 
     @Override
-    public void showMessage(String message, int color) {
+    public void showMessage(CharSequence message, int color) {
         mSecurityMessageDisplay.setNextMessageColor(color);
         mSecurityMessageDisplay.setMessage(message);
     }
 
-    protected abstract int getPromtReasonStringRes(int reason);
+    protected abstract int getPromptReasonStringRes(int reason);
 
     // Cause a VIRTUAL_KEY vibration
     public void doHapticKeyClick() {

@@ -416,7 +416,8 @@ class TestWindowManagerPolicy implements WindowManagerPolicy {
     }
 
     @Override
-    public void dismissKeyguardLw(@Nullable IKeyguardDismissCallback callback) {
+    public void dismissKeyguardLw(@Nullable IKeyguardDismissCallback callback,
+            CharSequence message) {
     }
 
     @Override

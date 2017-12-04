@@ -6881,12 +6881,12 @@ public class PhoneWindowManager implements WindowManagerPolicy {
     }
 
     @Override
-    public void dismissKeyguardLw(IKeyguardDismissCallback callback) {
+    public void dismissKeyguardLw(IKeyguardDismissCallback callback, CharSequence message) {
         if (mKeyguardDelegate != null && mKeyguardDelegate.isShowing()) {
             if (DEBUG_KEYGUARD) Slog.d(TAG, "PWM.dismissKeyguardLw");
 
             // ask the keyguard to prompt the user to authenticate if necessary
-            mKeyguardDelegate.dismiss(callback);
+            mKeyguardDelegate.dismiss(callback, message);
         } else if (callback != null) {
             try {
                 callback.onDismissError();
