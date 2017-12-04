@@ -160,6 +160,7 @@ class ArtifactBuilder {
   ArtifactBuilder() = default;
 
   ArtifactBuilder& SetName(const std::string& name);
+  ArtifactBuilder& SetVersion(int version);
   ArtifactBuilder& AddAbi(configuration::Abi abi);
   ArtifactBuilder& AddDensity(const ConfigDescription& density);
   ArtifactBuilder& AddLocale(const ConfigDescription& locale);
@@ -167,7 +168,39 @@ class ArtifactBuilder {
   configuration::OutputArtifact Build();
 
  private:
+  DISALLOW_COPY_AND_ASSIGN(ArtifactBuilder);
+
   configuration::OutputArtifact artifact_;
+};
+
+class PostProcessingConfigurationBuilder {
+ public:
+  PostProcessingConfigurationBuilder() = default;
+
+  PostProcessingConfigurationBuilder& AddAbiGroup(const std::string& label,
+                                                  std::vector<configuration::Abi> abis = {});
+  PostProcessingConfigurationBuilder& AddDensityGroup(const std::string& label,
+                                                      std::vector<std::string> densities = {});
+  PostProcessingConfigurationBuilder& AddLocaleGroup(const std::string& label,
+                                                     std::vector<std::string> locales = {});
+  PostProcessingConfigurationBuilder& AddDeviceFeatureGroup(const std::string& label);
+  PostProcessingConfigurationBuilder& AddGlTextureGroup(const std::string& label);
+  PostProcessingConfigurationBuilder& AddAndroidSdk(std::string label, int min_sdk);
+  PostProcessingConfigurationBuilder& AddArtifact(configuration::ConfiguredArtifact artrifact);
+
+  configuration::PostProcessingConfiguration Build();
+
+ private:
+  template <typename T>
+  inline PostProcessingConfigurationBuilder& AddGroup(const std::string& label,
+                                                      configuration::Group<T>* group,
+                                                      std::vector<T> to_add = {}) {
+    auto& values = GetOrCreateGroup(label, group);
+    values.insert(std::begin(values), std::begin(to_add), std::end(to_add));
+    return *this;
+  }
+
+  configuration::PostProcessingConfiguration config_;
 };
 
 }  // namespace test
