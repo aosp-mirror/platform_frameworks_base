@@ -724,6 +724,14 @@ public class CarrierConfigManager {
     public static final String KEY_SHOW_ICCID_IN_SIM_STATUS_BOOL = "show_iccid_in_sim_status_bool";
 
     /**
+     * Flag specifying whether signal strength is hidden in SIM Status screen,
+     * default to false.
+     * @hide
+     */
+    public static final String KEY_HIDE_SIGNAL_STRENGTH_IN_SIM_STATUS_BOOL =
+        "hide_signal_strength_in_sim_status_bool";
+
+    /**
      * Flag specifying whether an additional (client initiated) intent needs to be sent on System
      * update
      */
@@ -1767,6 +1775,7 @@ public class CarrierConfigManager {
         sDefaults.putString(KEY_CARRIER_VVM_PACKAGE_NAME_STRING, "");
         sDefaults.putStringArray(KEY_CARRIER_VVM_PACKAGE_NAME_STRING_ARRAY, null);
         sDefaults.putBoolean(KEY_SHOW_ICCID_IN_SIM_STATUS_BOOL, false);
+        sDefaults.putBoolean(KEY_HIDE_SIGNAL_STRENGTH_IN_SIM_STATUS_BOOL, false);
         sDefaults.putBoolean(KEY_CI_ACTION_ON_SYS_UPDATE_BOOL, false);
         sDefaults.putString(KEY_CI_ACTION_ON_SYS_UPDATE_INTENT_STRING, "");
         sDefaults.putString(KEY_CI_ACTION_ON_SYS_UPDATE_EXTRA_STRING, "");
