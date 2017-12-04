@@ -959,8 +959,9 @@ Slog.e(TAG, "TODD: Packages: " + Arrays.toString(packages));
      * <p>This handles parent/child apps.
      */
     private boolean hasPrivappWhitelistEntry(String perm, PackageParser.Package pkg) {
-        ArraySet<String> wlPermissions = SystemConfig.getInstance()
-                .getPrivAppPermissions(pkg.packageName);
+        ArraySet<String> wlPermissions = pkg.isVendor() ?
+                SystemConfig.getInstance().getVendorPrivAppPermissions(pkg.packageName)
+                    : SystemConfig.getInstance().getPrivAppPermissions(pkg.packageName);
         // Let's check if this package is whitelisted...
         boolean whitelisted = wlPermissions != null && wlPermissions.contains(perm);
         // If it's not, we'll also tail-recurse to the parent.
@@ -971,7 +972,8 @@ Slog.e(TAG, "TODD: Packages: " + Arrays.toString(packages));
     private boolean grantSignaturePermission(String perm, PackageParser.Package pkg,
             BasePermission bp, PermissionsState origPermissions) {
         boolean oemPermission = bp.isOEM();
-        boolean privilegedPermission = bp.isPrivileged();
+        boolean vendorPrivilegedPermission = bp.isVendorPrivileged();
+        boolean privilegedPermission = bp.isPrivileged() || bp.isVendorPrivileged();
         boolean privappPermissionsDisable =
                 RoSystemProperties.CONTROL_PRIVAPP_PERMISSIONS_DISABLE;
         boolean platformPermission = PLATFORM_PACKAGE_NAME.equals(bp.getSourcePackageName());
@@ -982,8 +984,11 @@ Slog.e(TAG, "TODD: Packages: " + Arrays.toString(packages));
                 // Only report violations for apps on system image
                 if (!mSystemReady && !pkg.isUpdatedSystemApp()) {
                     // it's only a reportable violation if the permission isn't explicitly denied
-                    final ArraySet<String> deniedPermissions = SystemConfig.getInstance()
-                            .getPrivAppDenyPermissions(pkg.packageName);
+                    final ArraySet<String> deniedPermissions = pkg.isVendor() ?
+                            SystemConfig.getInstance()
+                                    .getVendorPrivAppDenyPermissions(pkg.packageName)
+                            : SystemConfig.getInstance()
+                                    .getPrivAppDenyPermissions(pkg.packageName);
                     final boolean permissionViolation =
                             deniedPermissions == null || !deniedPermissions.contains(perm);
                     if (permissionViolation) {
@@ -1085,6 +1090,15 @@ Slog.e(TAG, "TODD: Packages: " + Arrays.toString(packages));
                     allowed = (privilegedPermission && pkg.isPrivileged())
                             || (oemPermission && pkg.isOem()
                                     && canGrantOemPermission(ps, perm));
+                }
+                // In any case, don't grant a privileged permission to privileged vendor apps, if
+                // the permission's protectionLevel does not have the extra 'vendorPrivileged'
+                // flag.
+                if (allowed && privilegedPermission &&
+                        !vendorPrivilegedPermission && pkg.isVendor()) {
+                   Slog.w(TAG, "Permission " + perm + " cannot be granted to privileged vendor apk "
+                           + pkg.packageName + " because it isn't a 'vendorPrivileged' permission.");
+                   allowed = false;
                 }
             }
         }
