@@ -47,7 +47,7 @@ import android.os.UserManager;
 import android.provider.Settings;
 import android.service.autofill.AutofillService;
 import android.service.autofill.AutofillServiceInfo;
-import android.service.autofill.FieldClassification;
+import android.service.autofill.FieldClassification.Match;
 import android.service.autofill.FillEventHistory;
 import android.service.autofill.FillEventHistory.Event;
 import android.service.autofill.FillResponse;
@@ -75,7 +75,7 @@ import com.android.server.autofill.ui.AutoFillUI;
 
 import java.io.PrintWriter;
 import java.util.ArrayList;
-import java.util.Map;
+import java.util.Arrays;
 import java.util.Random;
 
 /**
@@ -628,7 +628,7 @@ final class AutofillManagerServiceImpl {
             if (isValidEventLocked("setAuthenticationSelected()", sessionId)) {
                 mEventHistory.addEvent(
                         new Event(Event.TYPE_AUTHENTICATION_SELECTED, null, clientState, null, null,
-                                null, null, null, null, null));
+                                null, null, null, null, null, null));
             }
         }
     }
@@ -642,7 +642,7 @@ final class AutofillManagerServiceImpl {
             if (isValidEventLocked("logDatasetAuthenticationSelected()", sessionId)) {
                 mEventHistory.addEvent(
                         new Event(Event.TYPE_DATASET_AUTHENTICATION_SELECTED, selectedDataset,
-                                clientState, null, null, null, null, null, null, null));
+                                clientState, null, null, null, null, null, null, null, null));
             }
         }
     }
@@ -654,7 +654,7 @@ final class AutofillManagerServiceImpl {
         synchronized (mLock) {
             if (isValidEventLocked("logSaveShown()", sessionId)) {
                 mEventHistory.addEvent(new Event(Event.TYPE_SAVE_SHOWN, null, clientState, null,
-                        null, null, null, null, null, null));
+                        null, null, null, null, null, null, null));
             }
         }
     }
@@ -668,7 +668,7 @@ final class AutofillManagerServiceImpl {
             if (isValidEventLocked("logDatasetSelected()", sessionId)) {
                 mEventHistory.addEvent(
                         new Event(Event.TYPE_DATASET_SELECTED, selectedDataset, clientState, null,
-                                null, null, null, null, null, null));
+                                null, null, null, null, null, null, null));
             }
         }
     }
@@ -683,15 +683,24 @@ final class AutofillManagerServiceImpl {
             @Nullable ArrayList<String> changedDatasetIds,
             @Nullable ArrayList<AutofillId> manuallyFilledFieldIds,
             @Nullable ArrayList<ArrayList<String>> manuallyFilledDatasetIds,
-            @Nullable Map<AutofillId, FieldClassification> fieldsClassification) {
+            @NonNull ArrayList<AutofillId> detectedFieldIdsList,
+            @NonNull ArrayList<Match> detectedMatchesList) {
 
         synchronized (mLock) {
             if (isValidEventLocked("logDatasetNotSelected()", sessionId)) {
+                AutofillId[] detectedFieldsIds = null;
+                Match[] detectedMatches = null;
+                if (!detectedFieldIdsList.isEmpty()) {
+                    detectedFieldsIds = new AutofillId[detectedFieldIdsList.size()];
+                    detectedFieldIdsList.toArray(detectedFieldsIds);
+                    detectedMatches = new Match[detectedMatchesList.size()];
+                    detectedMatchesList.toArray(detectedMatches);
+                }
                 mEventHistory.addEvent(new Event(Event.TYPE_CONTEXT_COMMITTED, null,
                         clientState, selectedDatasets, ignoredDatasets,
                         changedFieldIds, changedDatasetIds,
                         manuallyFilledFieldIds, manuallyFilledDatasetIds,
-                        fieldsClassification));
+                        detectedFieldsIds, detectedMatches));
             }
         }
     }

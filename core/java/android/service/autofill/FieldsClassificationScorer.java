@@ -38,9 +38,24 @@ public final class FieldsClassificationScorer {
      * partial mathces are something in between, typically using edit-distance algorithms.
      */
     public static int getScore(@NonNull AutofillValue actualValue, @NonNull String userData) {
-        // TODO(b/67867469): implement edit distance - currently it's returning either 0 or 100%
         if (actualValue == null || !actualValue.isText() || userData == null) return 0;
-        return actualValue.getTextValue().toString().equalsIgnoreCase(userData) ? MAX_VALUE : 0;
+        // TODO(b/67867469): implement edit distance - currently it's returning either 0, 100%, or
+        // partial match when number of chars match
+        final String textValue = actualValue.getTextValue().toString();
+        final int total = textValue.length();
+        if (total != userData.length()) return 0;
+
+        int matches = 0;
+        for (int i = 0; i < total; i++) {
+            if (Character.toLowerCase(textValue.charAt(i)) == Character
+                    .toLowerCase(userData.charAt(i))) {
+                matches++;
+            }
+        }
+
+        final float percentage = ((float) matches) / total;
+        final int rounded = (int) (percentage * MAX_VALUE);
+        return rounded;
     }
 
     private FieldsClassificationScorer() {

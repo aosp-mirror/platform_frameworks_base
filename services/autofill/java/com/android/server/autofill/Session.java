@@ -55,7 +55,7 @@ import android.os.RemoteException;
 import android.os.SystemClock;
 import android.service.autofill.AutofillService;
 import android.service.autofill.Dataset;
-import android.service.autofill.FieldClassification;
+import android.service.autofill.FieldClassification.Match;
 import android.service.autofill.FillContext;
 import android.service.autofill.FillRequest;
 import android.service.autofill.FillResponse;
@@ -944,22 +944,18 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
         }
 
         final UserData userData = mService.getUserData();
-        // TODO(b/67867469): support multiple fields / merge redundant variables below
-        final AutofillId detectableFieldId;
-        final String detectableRemoteId;
-        String detectedRemoteId = null;
-        Map<AutofillId, FieldClassification> fieldsClassification = null;
 
-        if (userData == null) {
-            detectableFieldId = null;
-            detectableRemoteId = null;
+        final ArrayList<AutofillId> detectedFieldIds;
+        final ArrayList<Match> detectedMatches;
+
+        if (userData != null) {
+            final int maxFieldsSize = UserData.getMaxFieldClassificationIdsSize();
+            detectedFieldIds = new ArrayList<>(maxFieldsSize);
+            detectedMatches = new ArrayList<>(maxFieldsSize);
         } else {
-            // TODO(b/67867469): hardcoded to just first entry on initial refactoring.
-            detectableFieldId = fieldClassificationIds[0];
-            detectableRemoteId = userData.getRemoteIds()[0];
+            detectedFieldIds = null;
+            detectedMatches = null;
         }
-
-        int detectedFieldScore = -1;
 
         for (int i = 0; i < mViewStates.size(); i++) {
             final ViewState viewState = mViewStates.valueAt(i);
@@ -1003,8 +999,8 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
                     final AutofillValue currentValue = viewState.getCurrentValue();
                     if (currentValue == null) {
                         if (sDebug) {
-                            Slog.d(TAG, "logContextCommitted(): skipping view witout current value "
-                                    + "( " + viewState + ")");
+                            Slog.d(TAG, "logContextCommitted(): skipping view without current "
+                                    + "value ( " + viewState + ")");
                         }
                         continue;
                     }
@@ -1065,22 +1061,11 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
                         } // for j
                     }
 
-                    // Check if detectable field changed.
-                    if (detectableFieldId != null && detectableFieldId.equals(viewState.id)
-                            && currentValue.isText() && currentValue.getTextValue() != null) {
-                        // TODO(b/67867469): hardcoded to just first entry on initial refactoring.
-                        detectedFieldScore = FieldsClassificationScorer.getScore(currentValue,
-                                userData.getValues()[0]);
-                        if (detectedFieldScore > 0) {
-                            detectedRemoteId = detectableRemoteId;
-                            fieldsClassification = new ArrayMap<AutofillId, FieldClassification>(1);
-                            fieldsClassification.put(detectableFieldId,
-                                    new FieldClassification(new FieldClassification.Match(
-                                            detectedRemoteId, detectedFieldScore)));
-                        } else if (sVerbose) {
-                            Slog.v(TAG, "Detection mismatch for field " + detectableFieldId);
-                        }
-                    } // if
+                    // Sets field classification score for field
+                    if (userData!= null) {
+                        setScore(detectedFieldIds, detectedMatches, userData, viewState.id,
+                                currentValue);
+                    }
                 } // else
             } // else
         }
@@ -1092,9 +1077,8 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
                     + ", changedAutofillIds=" + changedFieldIds
                     + ", changedDatasetIds=" + changedDatasetIds
                     + ", manuallyFilledIds=" + manuallyFilledIds
-                    + ", detectableFieldId=" + detectableFieldId
-                    + ", detectedFieldScore=" + detectedFieldScore
-                    + ", fieldsClassification=" + fieldsClassification
+                    + ", detectedFieldIds=" + detectedFieldIds
+                    + ", detectedMatches=" + detectedMatches
                     );
         }
 
@@ -1116,7 +1100,47 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
 
         mService.logContextCommitted(id, mClientState, mSelectedDatasetIds, ignoredDatasets,
                 changedFieldIds, changedDatasetIds,
-                manuallyFilledFieldIds, manuallyFilledDatasetIds, fieldsClassification);
+                manuallyFilledFieldIds, manuallyFilledDatasetIds,
+                detectedFieldIds, detectedMatches);
+    }
+
+    /**
+     * Adds the top score match to {@code detectedFieldsIds} and {@code detectedMatches} for
+     * {@code fieldId} based on its {@code currentValue} and {@code userData}.
+     */
+    private static void setScore(@NonNull ArrayList<AutofillId> detectedFieldIds,
+            @NonNull ArrayList<Match> detectedMatches, @NonNull UserData userData,
+            @NonNull AutofillId fieldId, @NonNull AutofillValue currentValue) {
+
+        final String[] userValues = userData.getValues();
+        final String[] remoteIds = userData.getRemoteIds();
+
+        // Sanity check
+        if (userValues == null || remoteIds == null || userValues.length != remoteIds.length) {
+            final int valuesLength = userValues == null ? -1 : userValues.length;
+            final int idsLength = remoteIds == null ? -1 : remoteIds.length;
+            Slog.w(TAG, "setScores(): user data mismatch: values.length = "
+                    + valuesLength + ", ids.length = " + idsLength);
+            return;
+        }
+        String remoteId = null;
+        int topScore = 0;
+        for (int i = 0; i < userValues.length; i++) {
+            final String value = userValues[i];
+            final int score = FieldsClassificationScorer.getScore(currentValue, value);
+            if (score > topScore) {
+                topScore = score;
+                remoteId = remoteIds[i];
+            }
+        }
+
+        if (remoteId != null && topScore > 0) {
+            if (sVerbose) Slog.v(TAG, "setScores(): top score for #" + fieldId + " is " + topScore);
+            detectedFieldIds.add(fieldId);
+            detectedMatches.add(new Match(remoteId, topScore));
+        } else if (sVerbose) {
+            Slog.v(TAG, "setScores(): no top score for #" + fieldId + ": " + topScore);
+        }
     }
 
     /**
