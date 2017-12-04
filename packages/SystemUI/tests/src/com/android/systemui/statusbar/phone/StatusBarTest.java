@@ -430,6 +430,7 @@ public class StatusBarTest extends SysuiTestCase {
     public void testLogHidden() {
         try {
             mStatusBar.handleVisibleToUserChanged(false);
+            waitForUiOffloadThread();
             verify(mBarService, times(1)).onPanelHidden();
             verify(mBarService, never()).onPanelRevealed(anyBoolean(), anyInt());
         } catch (RemoteException e) {
@@ -447,7 +448,7 @@ public class StatusBarTest extends SysuiTestCase {
 
         try {
             mStatusBar.handleVisibleToUserChanged(true);
-
+            waitForUiOffloadThread();
             verify(mBarService, never()).onPanelHidden();
             verify(mBarService, times(1)).onPanelRevealed(false, 1);
         } catch (RemoteException e) {
@@ -466,7 +467,7 @@ public class StatusBarTest extends SysuiTestCase {
 
         try {
             mStatusBar.handleVisibleToUserChanged(true);
-
+            waitForUiOffloadThread();
             verify(mBarService, never()).onPanelHidden();
             verify(mBarService, times(1)).onPanelRevealed(true, 5);
         } catch (RemoteException e) {
@@ -485,7 +486,7 @@ public class StatusBarTest extends SysuiTestCase {
 
         try {
             mStatusBar.handleVisibleToUserChanged(true);
-
+            waitForUiOffloadThread();
             verify(mBarService, never()).onPanelHidden();
             verify(mBarService, times(1)).onPanelRevealed(false, 5);
         } catch (RemoteException e) {

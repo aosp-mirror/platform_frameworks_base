@@ -45,6 +45,7 @@ import android.widget.Toast;
 import com.android.internal.logging.MetricsLogger;
 import com.android.internal.logging.nano.MetricsProto;
 import com.android.keyguard.KeyguardStatusView;
+import com.android.keyguard.KeyguardUpdateMonitor;
 import com.android.settingslib.Utils;
 import com.android.settingslib.drawable.UserIconDrawable;
 import com.android.systemui.Dependency;
@@ -431,7 +432,7 @@ public class QSFooterImpl extends FrameLayout implements QSFooter,
     @Override
     public void onUserInfoChanged(String name, Drawable picture, String userAccount) {
         if (picture != null &&
-                UserManager.get(mContext).isGuestUser(ActivityManager.getCurrentUser()) &&
+                UserManager.get(mContext).isGuestUser(KeyguardUpdateMonitor.getCurrentUser()) &&
                 !(picture instanceof UserIconDrawable)) {
             picture = picture.getConstantState().newDrawable(mContext.getResources()).mutate();
             picture.setColorFilter(

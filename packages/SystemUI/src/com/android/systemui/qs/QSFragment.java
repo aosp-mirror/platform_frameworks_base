@@ -63,6 +63,7 @@ public class QSFragment extends Fragment implements QS {
     private QSContainerImpl mContainer;
     private int mLayoutDirection;
     private QSFooter mFooter;
+    private float mLastQSExpansion = -1;
 
     @Override
     public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container,
@@ -227,6 +228,7 @@ public class QSFragment extends Fragment implements QS {
     public void setKeyguardShowing(boolean keyguardShowing) {
         if (DEBUG) Log.d(TAG, "setKeyguardShowing " + keyguardShowing);
         mKeyguardShowing = keyguardShowing;
+        mLastQSExpansion = -1;
 
         if (mQSAnimator != null) {
             mQSAnimator.setOnKeyguard(keyguardShowing);
@@ -268,6 +270,10 @@ public class QSFragment extends Fragment implements QS {
             getView().setTranslationY(mKeyguardShowing ? (translationScaleY * height)
                     : headerTranslation);
         }
+        if (expansion == mLastQSExpansion) {
+            return;
+        }
+        mLastQSExpansion = expansion;
         mHeader.setExpansion(mKeyguardShowing ? 1 : expansion);
         mFooter.setExpansion(mKeyguardShowing ? 1 : expansion);
         int heightDiff = mQSPanel.getBottom() - mHeader.getBottom() + mHeader.getPaddingBottom()

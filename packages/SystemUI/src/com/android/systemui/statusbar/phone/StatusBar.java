@@ -3697,23 +3697,35 @@ public class StatusBar extends SystemUI implements DemoMode,
      * See also StatusBar.setPanelExpanded for another place where we attempt to do this.
      */
     private void handleVisibleToUserChangedImpl(boolean visibleToUser) {
-        try {
-            if (visibleToUser) {
-                boolean pinnedHeadsUp = mHeadsUpManager.hasPinnedHeadsUp();
-                boolean clearNotificationEffects =
-                        !isPresenterFullyCollapsed() &&
-                        (mState == StatusBarState.SHADE || mState == StatusBarState.SHADE_LOCKED);
-                int notificationLoad = mNotificationData.getActiveNotifications().size();
-                if (pinnedHeadsUp && isPresenterFullyCollapsed())  {
-                    notificationLoad = 1;
-                }
-                mBarService.onPanelRevealed(clearNotificationEffects, notificationLoad);
-            } else {
-                mBarService.onPanelHidden();
+        if (visibleToUser) {
+            boolean pinnedHeadsUp = mHeadsUpManager.hasPinnedHeadsUp();
+            boolean clearNotificationEffects =
+                    !isPresenterFullyCollapsed() &&
+                            (mState == StatusBarState.SHADE
+                                    || mState == StatusBarState.SHADE_LOCKED);
+            int notificationLoad = mNotificationData.getActiveNotifications().size();
+            if (pinnedHeadsUp && isPresenterFullyCollapsed()) {
+                notificationLoad = 1;
             }
-        } catch (RemoteException ex) {
-            // Won't fail unless the world has ended.
+            final int finalNotificationLoad = notificationLoad;
+            mUiOffloadThread.submit(() -> {
+                try {
+                    mBarService.onPanelRevealed(clearNotificationEffects,
+                            finalNotificationLoad);
+                } catch (RemoteException ex) {
+                    // Won't fail unless the world has ended.
+                }
+            });
+        } else {
+            mUiOffloadThread.submit(() -> {
+                try {
+                    mBarService.onPanelHidden();
+                } catch (RemoteException ex) {
+                    // Won't fail unless the world has ended.
+                }
+            });
         }
+
     }
 
     private void stopNotificationLogging() {
@@ -3749,21 +3761,23 @@ public class StatusBar extends SystemUI implements DemoMode,
                 newlyVisible.toArray(new NotificationVisibility[newlyVisible.size()]);
         NotificationVisibility[] noLongerVisibleAr =
                 noLongerVisible.toArray(new NotificationVisibility[noLongerVisible.size()]);
-        try {
-            mBarService.onNotificationVisibilityChanged(newlyVisibleAr, noLongerVisibleAr);
-        } catch (RemoteException e) {
-            // Ignore.
-        }
-
-        final int N = newlyVisible.size();
-        if (N > 0) {
-            String[] newlyVisibleKeyAr = new String[N];
-            for (int i = 0; i < N; i++) {
-                newlyVisibleKeyAr[i] = newlyVisibleAr[i].key;
+        mUiOffloadThread.submit(() -> {
+            try {
+                mBarService.onNotificationVisibilityChanged(newlyVisibleAr, noLongerVisibleAr);
+            } catch (RemoteException e) {
+                // Ignore.
             }
 
-            setNotificationsShown(newlyVisibleKeyAr);
-        }
+            final int N = newlyVisible.size();
+            if (N > 0) {
+                String[] newlyVisibleKeyAr = new String[N];
+                for (int i = 0; i < N; i++) {
+                    newlyVisibleKeyAr[i] = newlyVisibleAr[i].key;
+                }
+
+                setNotificationsShown(newlyVisibleKeyAr);
+            }
+        });
     }
 
     // State logging
