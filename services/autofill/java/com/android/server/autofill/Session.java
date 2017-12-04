@@ -55,6 +55,7 @@ import android.os.RemoteException;
 import android.os.SystemClock;
 import android.service.autofill.AutofillService;
 import android.service.autofill.Dataset;
+import android.service.autofill.FieldClassification;
 import android.service.autofill.FillContext;
 import android.service.autofill.FillRequest;
 import android.service.autofill.FillResponse;
@@ -64,6 +65,7 @@ import android.service.autofill.SaveInfo;
 import android.service.autofill.SaveRequest;
 import android.service.autofill.UserData;
 import android.service.autofill.ValueFinder;
+import android.service.autofill.FieldsClassificationScorer;
 import android.util.ArrayMap;
 import android.util.ArraySet;
 import android.util.LocalLog;
@@ -942,9 +944,12 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
         }
 
         final UserData userData = mService.getUserData();
+        // TODO(b/67867469): support multiple fields / merge redundant variables below
         final AutofillId detectableFieldId;
         final String detectableRemoteId;
         String detectedRemoteId = null;
+        Map<AutofillId, FieldClassification> fieldsClassification = null;
+
         if (userData == null) {
             detectableFieldId = null;
             detectableRemoteId = null;
@@ -1063,17 +1068,19 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
                     // Check if detectable field changed.
                     if (detectableFieldId != null && detectableFieldId.equals(viewState.id)
                             && currentValue.isText() && currentValue.getTextValue() != null) {
-                        final String actualValue = currentValue.getTextValue().toString();
                         // TODO(b/67867469): hardcoded to just first entry on initial refactoring.
-                        final String expectedValue = userData.getValues()[0];
-                        if (actualValue.equalsIgnoreCase(expectedValue)) {
+                        detectedFieldScore = FieldsClassificationScorer.getScore(currentValue,
+                                userData.getValues()[0]);
+                        if (detectedFieldScore > 0) {
                             detectedRemoteId = detectableRemoteId;
-                            detectedFieldScore = 0;
+                            fieldsClassification = new ArrayMap<AutofillId, FieldClassification>(1);
+                            fieldsClassification.put(detectableFieldId,
+                                    new FieldClassification(new FieldClassification.Match(
+                                            detectedRemoteId, detectedFieldScore)));
                         } else if (sVerbose) {
                             Slog.v(TAG, "Detection mismatch for field " + detectableFieldId);
                         }
-                        // TODO(b/67867469): set score on partial hits
-                    }
+                    } // if
                 } // else
             } // else
         }
@@ -1087,6 +1094,7 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
                     + ", manuallyFilledIds=" + manuallyFilledIds
                     + ", detectableFieldId=" + detectableFieldId
                     + ", detectedFieldScore=" + detectedFieldScore
+                    + ", fieldsClassification=" + fieldsClassification
                     );
         }
 
@@ -1108,8 +1116,7 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
 
         mService.logContextCommitted(id, mClientState, mSelectedDatasetIds, ignoredDatasets,
                 changedFieldIds, changedDatasetIds,
-                manuallyFilledFieldIds, manuallyFilledDatasetIds,
-                detectedRemoteId, detectedFieldScore);
+                manuallyFilledFieldIds, manuallyFilledDatasetIds, fieldsClassification);
     }
 
     /**

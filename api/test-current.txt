@@ -457,8 +457,27 @@ package android.service.autofill {
     method public void apply(android.service.autofill.ValueFinder, android.widget.RemoteViews, int) throws java.lang.Exception;
   }
 
+  public final class FieldClassification implements android.os.Parcelable {
+    method public int describeContents();
+    method public android.service.autofill.FieldClassification.Match getTopMatch();
+    method public void writeToParcel(android.os.Parcel, int);
+    field public static final android.os.Parcelable.Creator<android.service.autofill.FieldClassification> CREATOR;
+  }
+
+  public static final class FieldClassification.Match implements android.os.Parcelable {
+    method public int describeContents();
+    method public java.lang.String getRemoteId();
+    method public int getScore();
+    method public void writeToParcel(android.os.Parcel, int);
+    field public static final android.os.Parcelable.Creator<android.service.autofill.FieldClassification.Match> CREATOR;
+  }
+
+  public final class FieldsClassificationScorer {
+    method public static int getScore(android.view.autofill.AutofillValue, java.lang.String);
+  }
+
   public static final class FillEventHistory.Event {
-    method public java.util.Map<java.lang.String, java.lang.Integer> getFieldsClassification();
+    method public java.util.Map<android.view.autofill.AutofillId, android.service.autofill.FieldClassification> getFieldsClassification();
   }
 
   public static final class FillResponse.Builder {

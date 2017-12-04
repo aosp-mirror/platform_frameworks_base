@@ -38,6 +38,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Set;
 
 /**
@@ -123,34 +124,35 @@ public final class FillEventHistory implements Parcelable {
     }
 
     @Override
-    public void writeToParcel(Parcel dest, int flags) {
-        dest.writeBundle(mClientState);
+    public void writeToParcel(Parcel parcel, int flags) {
+        parcel.writeBundle(mClientState);
         if (mEvents == null) {
-            dest.writeInt(0);
+            parcel.writeInt(0);
         } else {
-            dest.writeInt(mEvents.size());
+            parcel.writeInt(mEvents.size());
 
             int numEvents = mEvents.size();
             for (int i = 0; i < numEvents; i++) {
                 Event event = mEvents.get(i);
-                dest.writeInt(event.mEventType);
-                dest.writeString(event.mDatasetId);
-                dest.writeBundle(event.mClientState);
-                dest.writeStringList(event.mSelectedDatasetIds);
-                dest.writeArraySet(event.mIgnoredDatasetIds);
-                dest.writeTypedList(event.mChangedFieldIds);
-                dest.writeStringList(event.mChangedDatasetIds);
+                parcel.writeInt(event.mEventType);
+                parcel.writeString(event.mDatasetId);
+                parcel.writeBundle(event.mClientState);
+                parcel.writeStringList(event.mSelectedDatasetIds);
+                parcel.writeArraySet(event.mIgnoredDatasetIds);
+                parcel.writeTypedList(event.mChangedFieldIds);
+                parcel.writeStringList(event.mChangedDatasetIds);
 
-                dest.writeTypedList(event.mManuallyFilledFieldIds);
+                parcel.writeTypedList(event.mManuallyFilledFieldIds);
                 if (event.mManuallyFilledFieldIds != null) {
                     final int size = event.mManuallyFilledFieldIds.size();
                     for (int j = 0; j < size; j++) {
-                        dest.writeStringList(event.mManuallyFilledDatasetIds.get(j));
+                        parcel.writeStringList(event.mManuallyFilledDatasetIds.get(j));
                     }
                 }
-                dest.writeString(event.mDetectedRemoteId);
+                parcel.writeParcelable(event.mDetectedFieldId, flags);
                 if (event.mDetectedRemoteId != null) {
-                    dest.writeInt(event.mDetectedFieldScore);
+                    parcel.writeString(event.mDetectedRemoteId);
+                    parcel.writeInt(event.mDetectedFieldScore);
                 }
             }
         }
@@ -242,6 +244,8 @@ public final class FillEventHistory implements Parcelable {
         @Nullable private final ArrayList<AutofillId> mManuallyFilledFieldIds;
         @Nullable private final ArrayList<ArrayList<String>> mManuallyFilledDatasetIds;
 
+        // TODO(b/67867469): store list of fields instead of hardcoding just one
+        @Nullable private final AutofillId mDetectedFieldId;
         @Nullable private final String mDetectedRemoteId;
         private final int mDetectedFieldScore;
 
@@ -347,37 +351,29 @@ public final class FillEventHistory implements Parcelable {
         }
 
         /**
-         * Gets the results of the last fields classification request.
-         *
-         * @return map of edit-distance match ({@code 0} means full match,
-         * {@code 1} means 1 character different, etc...) by remote id (as set on
-         * {@link UserData.Builder#add(String, android.view.autofill.AutofillValue)}),
-         * or {@code null} if none of the user-input values
-         * matched the requested detection.
+         * Gets the <a href="#FieldsClassification">fields classification</a> results.
          *
          * <p><b>Note: </b>Only set on events of type {@link #TYPE_CONTEXT_COMMITTED}, when the
          * service requested {@link FillResponse.Builder#setFieldClassificationIds(AutofillId...)
-         * fields detection}.
+         * fields classification}.
          *
          * TODO(b/67867469):
          *  - improve javadoc
-         *  - refine score meaning (for example, should 1 be different of -1?)
-         *  - mention when it's set
-         *  - unhide
          *  - unhide / remove testApi
-         *  - add @NonNull / check it / add unit tests
-         *  - add link to AutofillService #FieldsClassification anchor
          *
          * @hide
          */
         @TestApi
-        @NonNull public Map<String, Integer> getFieldsClassification() {
-            if (mDetectedRemoteId == null || mDetectedFieldScore == -1) {
+        @NonNull public Map<AutofillId, FieldClassification> getFieldsClassification() {
+            if (mDetectedFieldId == null || mDetectedRemoteId == null
+                    || mDetectedFieldScore == -1) {
                 return Collections.emptyMap();
             }
 
-            final ArrayMap<String, Integer> map = new ArrayMap<>(1);
-            map.put(mDetectedRemoteId, mDetectedFieldScore);
+            final ArrayMap<AutofillId, FieldClassification> map = new ArrayMap<>(1);
+            map.put(mDetectedFieldId,
+                    new FieldClassification(new FieldClassification.Match(
+                            mDetectedRemoteId, mDetectedFieldScore)));
             return map;
         }
 
@@ -464,7 +460,7 @@ public final class FillEventHistory implements Parcelable {
          *
          * @hide
          */
-        // TODO(b/67867469): document detection field parameters once stable
+        // TODO(b/67867469): document field classification parameters once stable
         public Event(int eventType, @Nullable String datasetId, @Nullable Bundle clientState,
                 @Nullable List<String> selectedDatasetIds,
                 @Nullable ArraySet<String> ignoredDatasetIds,
@@ -472,7 +468,7 @@ public final class FillEventHistory implements Parcelable {
                 @Nullable ArrayList<String> changedDatasetIds,
                 @Nullable ArrayList<AutofillId> manuallyFilledFieldIds,
                 @Nullable ArrayList<ArrayList<String>> manuallyFilledDatasetIds,
-                @Nullable String detectedRemoteId, int detectedFieldScore) {
+                @Nullable Map<AutofillId, FieldClassification> fieldsClassification) {
             mEventType = Preconditions.checkArgumentInRange(eventType, 0, TYPE_CONTEXT_COMMITTED,
                     "eventType");
             mDatasetId = datasetId;
@@ -495,8 +491,21 @@ public final class FillEventHistory implements Parcelable {
             }
             mManuallyFilledFieldIds = manuallyFilledFieldIds;
             mManuallyFilledDatasetIds = manuallyFilledDatasetIds;
-            mDetectedRemoteId = detectedRemoteId;
-            mDetectedFieldScore = detectedFieldScore;
+
+            // TODO(b/67867469): store list of fields instead of hardcoding just one
+            if (fieldsClassification == null) {
+                mDetectedFieldId = null;
+                mDetectedRemoteId = null;
+                mDetectedFieldScore = 0;
+
+            } else {
+                final Entry<AutofillId, FieldClassification> tmpEntry = fieldsClassification
+                        .entrySet().iterator().next();
+                final FieldClassification.Match tmpMatch = tmpEntry.getValue().getTopMatch();
+                mDetectedFieldId = tmpEntry.getKey();
+                mDetectedRemoteId = tmpMatch.getRemoteId();
+                mDetectedFieldScore = tmpMatch.getScore();
+            }
         }
 
         @Override
@@ -509,6 +518,7 @@ public final class FillEventHistory implements Parcelable {
                     + ", changedDatasetsIds=" + mChangedDatasetIds
                     + ", manuallyFilledFieldIds=" + mManuallyFilledFieldIds
                     + ", manuallyFilledDatasetIds=" + mManuallyFilledDatasetIds
+                    + ", detectedFieldId=" + mDetectedFieldId
                     + ", detectedRemoteId=" + mDetectedRemoteId
                     + ", detectedFieldScore=" + mDetectedFieldScore
                     + "]";
@@ -546,15 +556,23 @@ public final class FillEventHistory implements Parcelable {
                         } else {
                             manuallyFilledDatasetIds = null;
                         }
-                        final String detectedRemoteId = parcel.readString();
-                        final int detectedFieldScore = detectedRemoteId == null ? -1
-                                : parcel.readInt();
+                        // TODO(b/67867469): store list of fields instead of hardcoding just one
+                        ArrayMap<AutofillId, FieldClassification> fieldsClassification = null;
+                        final AutofillId detectedFieldId = parcel.readParcelable(null);
+                        if (detectedFieldId == null) {
+                            fieldsClassification = null;
+                        } else {
+                            fieldsClassification = new ArrayMap<AutofillId, FieldClassification>(1);
+                            fieldsClassification.put(detectedFieldId,
+                                    new FieldClassification(new FieldClassification.Match(
+                                            parcel.readString(), parcel.readInt())));
+                        }
 
                         selection.addEvent(new Event(eventType, datasetId, clientState,
                                 selectedDatasetIds, ignoredDatasets,
                                 changedFieldIds, changedDatasetIds,
                                 manuallyFilledFieldIds, manuallyFilledDatasetIds,
-                                detectedRemoteId, detectedFieldScore));
+                                fieldsClassification));
                     }
                     return selection;
                 }
