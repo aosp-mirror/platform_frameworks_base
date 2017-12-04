@@ -315,6 +315,7 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
     private static final Set<String> SECURE_SETTINGS_DEVICEOWNER_WHITELIST;
     private static final Set<String> GLOBAL_SETTINGS_WHITELIST;
     private static final Set<String> GLOBAL_SETTINGS_DEPRECATED;
+    private static final Set<String> SYSTEM_SETTINGS_WHITELIST;
     static {
         SECURE_SETTINGS_WHITELIST = new ArraySet<>();
         SECURE_SETTINGS_WHITELIST.add(Settings.Secure.DEFAULT_INPUT_METHOD);
@@ -341,6 +342,11 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
         GLOBAL_SETTINGS_DEPRECATED.add(Settings.Global.MODE_RINGER);
         GLOBAL_SETTINGS_DEPRECATED.add(Settings.Global.NETWORK_PREFERENCE);
         GLOBAL_SETTINGS_DEPRECATED.add(Settings.Global.WIFI_ON);
+
+        SYSTEM_SETTINGS_WHITELIST = new ArraySet<>();
+        SYSTEM_SETTINGS_WHITELIST.add(Settings.System.SCREEN_BRIGHTNESS);
+        SYSTEM_SETTINGS_WHITELIST.add(Settings.System.SCREEN_BRIGHTNESS_MODE);
+        SYSTEM_SETTINGS_WHITELIST.add(Settings.System.SCREEN_OFF_TIMEOUT);
     }
 
     /**
@@ -1820,6 +1826,10 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
 
         void settingsGlobalPutString(String name, String value) {
             Settings.Global.putString(mContext.getContentResolver(), name, value);
+        }
+
+        void settingsSystemPutString(String name, String value) {
+            Settings.System.putString(mContext.getContentResolver(), name, value);
         }
 
         void securityLogSetLoggingEnabledProperty(boolean enabled) {
@@ -9133,6 +9143,24 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
             } finally {
                 mInjector.binderRestoreCallingIdentity(id);
             }
+        }
+    }
+
+    @Override
+    public void setSystemSetting(ComponentName who, String setting, String value) {
+        Preconditions.checkNotNull(who, "ComponentName is null");
+        Preconditions.checkStringNotEmpty(setting, "String setting is null or empty");
+
+        synchronized (this) {
+            getActiveAdminForCallerLocked(who, DeviceAdminInfo.USES_POLICY_DEVICE_OWNER);
+
+            if (!SYSTEM_SETTINGS_WHITELIST.contains(setting)) {
+                throw new SecurityException(String.format(
+                        "Permission denial: device owners cannot update %1$s", setting));
+            }
+
+            mInjector.binderWithCleanCallingIdentity(() -> mInjector.settingsSystemPutString(
+                    setting, value));
         }
     }
 

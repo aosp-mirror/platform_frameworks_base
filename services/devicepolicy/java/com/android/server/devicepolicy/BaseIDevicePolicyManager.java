@@ -16,6 +16,7 @@
 package com.android.server.devicepolicy;
 
 import android.app.admin.IDevicePolicyManager;
+import android.content.ComponentName;
 
 import com.android.internal.R;
 import com.android.server.SystemService;
@@ -54,4 +55,6 @@ abstract class BaseIDevicePolicyManager extends IDevicePolicyManager.Stub {
      * @see {@link SystemService#onStopUser}
      */
     abstract void handleStopUser(int userId);
+    
+    public void setSystemSetting(ComponentName who, String setting, String value){}
 }
