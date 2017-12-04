@@ -138,8 +138,6 @@ public class NetworkControllerDataTest extends NetworkControllerBaseTest {
     }
 
     @Test
-    @Ignore("Flaky")
-    //TODO(evanlaird): figure out why this fails
     public void testAlwaysShowDataRatIcon() {
         setupDefaultSignal();
         when(mMockTm.getDataEnabled(mSubId)).thenReturn(false);
