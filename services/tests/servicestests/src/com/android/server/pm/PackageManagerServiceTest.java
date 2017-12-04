@@ -43,11 +43,13 @@ public class PackageManagerServiceTest extends AndroidTestCase {
       class PackageSenderImpl implements PackageSender {
         public void sendPackageBroadcast(final String action, final String pkg,
             final Bundle extras, final int flags, final String targetPkg,
-            final IIntentReceiver finishedReceiver, final int[] userIds) {
+            final IIntentReceiver finishedReceiver, final int[] userIds,
+            int[] instantUserIds) {
         }
 
         public void sendPackageAddedForNewUsers(String packageName,
-            boolean sendBootComplete, boolean includeStopped, int appId, int... userIds) {
+            boolean sendBootComplete, boolean includeStopped, int appId,
+            int[] userIds, int[] instantUserIds) {
         }
       }
 
