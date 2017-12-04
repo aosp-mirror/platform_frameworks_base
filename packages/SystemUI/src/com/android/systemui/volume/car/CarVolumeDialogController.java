@@ -29,6 +29,8 @@ import com.android.systemui.volume.VolumeDialogControllerImpl;
 
 /**
  * A volume dialog controller for the automotive use case.
+ * TODO(hwwang): consider removing this class since it's coupled with stream_type and we are
+ * moving to use AudioAttributes usage for volume control in a car.
  *
  * {@link android.car.media.CarAudioManager} is the source of truth to get the stream volumes.
  * And volume changes should be sent to the car's audio module instead of the android's audio mixer.
@@ -70,7 +72,7 @@ public class CarVolumeDialogController extends VolumeDialogControllerImpl {
             return;
         }
         try {
-            mCarAudioManager.setStreamVolume(stream, level, flag);
+            mCarAudioManager.setUsageVolume(stream, level, flag);
         } catch (CarNotConnectedException e) {
             Log.e(TAG, "Car is not connected", e);
         }
@@ -84,7 +86,7 @@ public class CarVolumeDialogController extends VolumeDialogControllerImpl {
         }
 
         try {
-            return mCarAudioManager.getStreamVolume(stream);
+            return mCarAudioManager.getUsageVolume(stream);
         } catch (CarNotConnectedException e) {
             Log.e(TAG, "Car is not connected", e);
             return 0;
@@ -99,7 +101,7 @@ public class CarVolumeDialogController extends VolumeDialogControllerImpl {
         }
 
         try {
-            return mCarAudioManager.getStreamMaxVolume(stream);
+            return mCarAudioManager.getUsageMaxVolume(stream);
         } catch (CarNotConnectedException e) {
             Log.e(TAG, "Car is not connected", e);
             return 0;
@@ -114,7 +116,7 @@ public class CarVolumeDialogController extends VolumeDialogControllerImpl {
         }
 
         try {
-            return mCarAudioManager.getStreamMinVolume(stream);
+            return mCarAudioManager.getUsageMinVolume(stream);
         } catch (CarNotConnectedException e) {
             Log.e(TAG, "Car is not connected", e);
             return 0;
