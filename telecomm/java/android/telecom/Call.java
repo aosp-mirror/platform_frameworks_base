@@ -858,7 +858,8 @@ public final class Call {
          * @hide
          */
         @IntDef({HANDOVER_FAILURE_DEST_APP_REJECTED, HANDOVER_FAILURE_DEST_NOT_SUPPORTED,
-                HANDOVER_FAILURE_DEST_INVALID_PERM, HANDOVER_FAILURE_DEST_USER_REJECTED})
+                HANDOVER_FAILURE_DEST_INVALID_PERM, HANDOVER_FAILURE_DEST_USER_REJECTED,
+                HANDOVER_FAILURE_ONGOING_EMERG_CALL})
         @Retention(RetentionPolicy.SOURCE)
         public @interface HandoverFailureErrors {}
 
@@ -885,6 +886,12 @@ public final class Call {
          * rejects handover.
          */
         public static final int HANDOVER_FAILURE_DEST_USER_REJECTED = 4;
+
+        /**
+         * Handover failure reason returned via {@link #onHandoverFailed(Call, int)} when there
+         * is ongoing emergency call.
+         */
+        public static final int HANDOVER_FAILURE_ONGOING_EMERG_CALL = 5;
 
 
         /**
@@ -1932,6 +1939,15 @@ public final class Call {
             final Call call = this;
             final Callback callback = record.getCallback();
             record.getHandler().post(() -> callback.onRttInitiationFailure(call, reason));
+        }
+    }
+
+    /** {@hide} */
+    final void internalOnHandoverFailed(int error) {
+        for (CallbackRecord<Callback> record : mCallbackRecords) {
+            final Call call = this;
+            final Callback callback = record.getCallback();
+            record.getHandler().post(() -> callback.onHandoverFailed(call, error));
         }
     }
 
