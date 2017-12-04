@@ -42,6 +42,7 @@ import android.text.style.EasyEditSpan;
 import android.text.style.ForegroundColorSpan;
 import android.text.style.LeadingMarginSpan;
 import android.text.style.LocaleSpan;
+import android.text.style.MetricAffectingSpan;
 import android.text.style.ParagraphStyle;
 import android.text.style.QuoteSpan;
 import android.text.style.RelativeSizeSpan;
@@ -1250,11 +1251,10 @@ public class TextUtils {
             @NonNull String ellipsis) {
 
         final int len = text.length();
-        MeasuredText mt = null;
+        final MeasuredText mt = MeasuredText.obtain();
         MeasuredText resultMt = null;
         try {
-            mt = MeasuredText.buildForMeasurement(paint, text, 0, text.length(), textDir, mt);
-            float width = mt.getWholeWidth();
+            float width = setPara(mt, paint, text, 0, text.length(), textDir);
 
             if (width <= avail) {
                 if (callback != null) {
@@ -1263,6 +1263,7 @@ public class TextUtils {
                 return text;
             }
 
+            resultMt = MeasuredText.obtain();
             // First estimate of effective width of ellipsis.
             float ellipsisWidth = paint.measureText(ellipsis);
             int numberOfTries = 0;
@@ -1289,7 +1290,7 @@ public class TextUtils {
                     }
                 }
 
-                final char[] buf = mt.getChars();
+                final char[] buf = mt.mChars;
                 final Spanned sp = text instanceof Spanned ? (Spanned) text : null;
 
                 final int removed = end - start;
@@ -1332,9 +1333,7 @@ public class TextUtils {
                 if (remaining == 0) { // All text is gone.
                     textFits = true;
                 } else {
-                    resultMt = MeasuredText.buildForMeasurement(
-                            paint, result, 0, result.length(), textDir, resultMt);
-                    width = resultMt.getWholeWidth();
+                    width = setPara(resultMt, paint, result, 0, result.length(), textDir);
                     if (width <= avail) {
                         textFits = true;
                     } else {
@@ -1358,11 +1357,9 @@ public class TextUtils {
             }
             return result;
         } finally {
-            if (mt != null) {
-                mt.recycle();
-            }
+            MeasuredText.recycle(mt);
             if (resultMt != null) {
-                resultMt.recycle();
+                MeasuredText.recycle(resultMt);
             }
         }
     }
@@ -1479,17 +1476,15 @@ public class TextUtils {
     public static CharSequence commaEllipsize(CharSequence text, TextPaint p,
          float avail, String oneMore, String more, TextDirectionHeuristic textDir) {
 
-        MeasuredText mt = null;
-        MeasuredText tempMt = null;
+        MeasuredText mt = MeasuredText.obtain();
         try {
             int len = text.length();
-            mt = MeasuredText.buildForMeasurement(p, text, 0, len, textDir, mt);
-            float width = mt.getWholeWidth();
+            float width = setPara(mt, p, text, 0, len, textDir);
             if (width <= avail) {
                 return text;
             }
 
-            char[] buf = mt.getChars();
+            char[] buf = mt.mChars;
 
             int commaCount = 0;
             for (int i = 0; i < len; i++) {
@@ -1505,8 +1500,9 @@ public class TextUtils {
 
             int w = 0;
             int count = 0;
-            float[] widths = mt.getWidths().getRawArray();
+            float[] widths = mt.mWidths;
 
+            MeasuredText tempMt = MeasuredText.obtain();
             for (int i = 0; i < len; i++) {
                 w += widths[i];
 
@@ -1523,9 +1519,8 @@ public class TextUtils {
                     }
 
                     // XXX this is probably ok, but need to look at it more
-                    tempMt = MeasuredText.buildForMeasurement(
-                            p, format, 0, format.length(), textDir, tempMt);
-                    float moreWid = tempMt.getWholeWidth();
+                    tempMt.setPara(format, 0, format.length(), textDir);
+                    float moreWid = tempMt.addStyleRun(p, tempMt.mLen, null);
 
                     if (w + moreWid <= avail) {
                         ok = i + 1;
@@ -1533,18 +1528,40 @@ public class TextUtils {
                     }
                 }
             }
+            MeasuredText.recycle(tempMt);
 
             SpannableStringBuilder out = new SpannableStringBuilder(okFormat);
             out.insert(0, text, 0, ok);
             return out;
         } finally {
-            if (mt != null) {
-                mt.recycle();
-            }
-            if (tempMt != null) {
-                tempMt.recycle();
+            MeasuredText.recycle(mt);
+        }
+    }
+
+    private static float setPara(MeasuredText mt, TextPaint paint,
+            CharSequence text, int start, int end, TextDirectionHeuristic textDir) {
+
+        mt.setPara(text, start, end, textDir);
+
+        float width;
+        Spanned sp = text instanceof Spanned ? (Spanned) text : null;
+        int len = end - start;
+        if (sp == null) {
+            width = mt.addStyleRun(paint, len, null);
+        } else {
+            width = 0;
+            int spanEnd;
+            for (int spanStart = 0; spanStart < len; spanStart = spanEnd) {
+                spanEnd = sp.nextSpanTransition(spanStart, len,
+                        MetricAffectingSpan.class);
+                MetricAffectingSpan[] spans = sp.getSpans(
+                        spanStart, spanEnd, MetricAffectingSpan.class);
+                spans = TextUtils.removeEmptySpans(spans, sp, MetricAffectingSpan.class);
+                width += mt.addStyleRun(paint, spans, spanEnd - spanStart, null);
             }
         }
+
+        return width;
     }
 
     // Returns true if the character's presence could affect RTL layout.
