@@ -324,6 +324,16 @@ StatsdConfig build_fake_config() {
     durationMetric->set_aggregation_type(DurationMetric_AggregationType_SUM);
     durationMetric->set_what("SCREEN_IS_ON");
 
+    // Anomaly threshold for background count.
+    alert = config.add_alert();
+    alert->set_name("ALERT_8");
+    alert->set_metric_name("METRIC_8");
+    alert->set_number_of_buckets(4);
+    alert->set_trigger_if_sum_gt(2000000000); // 2 seconds
+    alert->set_refractory_period_secs(120);
+    details = alert->mutable_incidentd_details();
+    details->add_section(-1);
+
     // Value metric to count KERNEL_WAKELOCK when screen turned on
     ValueMetric* valueMetric = config.add_value_metric();
     valueMetric->set_name("METRIC_6");

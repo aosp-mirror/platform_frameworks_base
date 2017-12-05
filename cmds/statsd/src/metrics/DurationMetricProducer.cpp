@@ -103,6 +103,17 @@ DurationMetricProducer::~DurationMetricProducer() {
     VLOG("~DurationMetric() called");
 }
 
+sp<AnomalyTracker> DurationMetricProducer::createAnomalyTracker(const Alert &alert) {
+    if (alert.trigger_if_sum_gt() > alert.number_of_buckets() * mBucketSizeNs) {
+        ALOGW("invalid alert: threshold (%lld) > possible recordable value (%d x %lld)",
+              alert.trigger_if_sum_gt(), alert.number_of_buckets(),
+              (long long)mBucketSizeNs);
+        return nullptr;
+    }
+    // TODO: return a DurationAnomalyTracker (which should sublclass AnomalyTracker)
+    return new AnomalyTracker(alert);
+}
+
 void DurationMetricProducer::startNewProtoOutputStreamLocked(long long startTime) {
     mProto = std::make_unique<ProtoOutputStream>();
     mProto->write(FIELD_TYPE_STRING | FIELD_ID_NAME, mMetric.name());
