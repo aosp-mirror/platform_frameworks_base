@@ -1944,15 +1944,17 @@ public class ActivityManager {
      * @param animate Whether we should play an animation for the moving the task
      * @param initialBounds If the primary stack gets created, it will use these bounds for the
      *                      docked stack. Pass {@code null} to use default bounds.
+     * @param showRecents If the recents activity should be shown on the other side of the task
+     *                    going into split-screen mode.
      * @hide
      */
     @TestApi
     @RequiresPermission(android.Manifest.permission.MANAGE_ACTIVITY_STACKS)
     public void setTaskWindowingModeSplitScreenPrimary(int taskId, int createMode, boolean toTop,
-            boolean animate, Rect initialBounds) throws SecurityException {
+            boolean animate, Rect initialBounds, boolean showRecents) throws SecurityException {
         try {
             getService().setTaskWindowingModeSplitScreenPrimary(taskId, createMode, toTop, animate,
-                    initialBounds);
+                    initialBounds, showRecents);
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }

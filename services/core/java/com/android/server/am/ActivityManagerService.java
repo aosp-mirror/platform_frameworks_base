@@ -416,6 +416,7 @@ import com.android.server.SystemServiceManager;
 import com.android.server.ThreadPriorityBooster;
 import com.android.server.Watchdog;
 import com.android.server.am.ActivityStack.ActivityState;
+import com.android.server.am.EventLogTags;
 import com.android.server.am.proto.ActivityManagerServiceProto;
 import com.android.server.am.proto.BroadcastProto;
 import com.android.server.am.proto.GrantUriProto;
@@ -10433,7 +10434,7 @@ public class ActivityManagerService extends IActivityManager.Stub
     public void setTaskWindowingMode(int taskId, int windowingMode, boolean toTop) {
         if (windowingMode == WINDOWING_MODE_SPLIT_SCREEN_PRIMARY) {
             setTaskWindowingModeSplitScreenPrimary(taskId, SPLIT_SCREEN_CREATE_MODE_TOP_OR_LEFT,
-                    toTop, ANIMATE, null /* initialBounds */);
+                    toTop, ANIMATE, null /* initialBounds */, true /* showRecents */);
             return;
         }
         enforceCallerIsRecentsOrHasPermission(MANAGE_ACTIVITY_STACKS, "setTaskWindowingMode()");
@@ -10479,10 +10480,12 @@ public class ActivityManagerService extends IActivityManager.Stub
      * @param animate Whether we should play an animation for the moving the task.
      * @param initialBounds If the primary stack gets created, it will use these bounds for the
      *                      stack. Pass {@code null} to use default bounds.
+     * @param showRecents If the recents activity should be shown on the other side of the task
+     *                    going into split-screen mode.
      */
     @Override
     public boolean setTaskWindowingModeSplitScreenPrimary(int taskId, int createMode, boolean toTop,
-            boolean animate, Rect initialBounds) {
+            boolean animate, Rect initialBounds, boolean showRecents) {
         enforceCallerIsRecentsOrHasPermission(MANAGE_ACTIVITY_STACKS,
                 "setTaskWindowingModeSplitScreenPrimary()");
         synchronized (this) {
@@ -10507,7 +10510,7 @@ public class ActivityManagerService extends IActivityManager.Stub
                 if (toTop) {
                     stack.moveToFront("setTaskWindowingModeSplitScreenPrimary", task);
                 }
-                stack.setWindowingMode(WINDOWING_MODE_SPLIT_SCREEN_PRIMARY, animate);
+                stack.setWindowingMode(WINDOWING_MODE_SPLIT_SCREEN_PRIMARY, animate, showRecents);
                 return windowingMode != task.getWindowingMode();
             } finally {
                 Binder.restoreCallingIdentity(ident);

@@ -18,7 +18,7 @@ package android.app {
     method public void removeStacksWithActivityTypes(int[]) throws java.lang.SecurityException;
     method public void resizeStack(int, android.graphics.Rect) throws java.lang.SecurityException;
     method public void setTaskWindowingMode(int, int, boolean) throws java.lang.SecurityException;
-    method public void setTaskWindowingModeSplitScreenPrimary(int, int, boolean, boolean, android.graphics.Rect) throws java.lang.SecurityException;
+    method public void setTaskWindowingModeSplitScreenPrimary(int, int, boolean, boolean, android.graphics.Rect, boolean) throws java.lang.SecurityException;
     method public static boolean supportsMultiWindow(android.content.Context);
     method public static boolean supportsSplitScreenMultiWindow(android.content.Context);
     field public static final int SPLIT_SCREEN_CREATE_MODE_BOTTOM_OR_RIGHT = 1; // 0x1
