@@ -1321,9 +1321,15 @@ public class DevicePolicyManager {
     public static final String DELEGATION_ENABLE_SYSTEM_APP = "delegation-enable-system-app";
 
     /**
+     * Delegation for installing existing packages. This scope grants access to the
+     * {@link #installExistingPackage} API.
+     */
+    public static final String DELEGATION_INSTALL_EXISTING_PACKAGE =
+            "delegation-install-existing-package";
+
+    /**
      * Delegation of management of uninstalled packages. This scope grants access to the
      * {@code #setKeepUninstalledPackages} and {@code #getKeepUninstalledPackages} APIs.
-     * @hide
      */
     public static final String DELEGATION_KEEP_UNINSTALLED_PACKAGES =
             "delegation-keep-uninstalled-packages";
@@ -6085,7 +6091,6 @@ public class DevicePolicyManager {
      * @return List of package names to keep cached.
      * @see #setDelegatedScopes
      * @see #DELEGATION_KEEP_UNINSTALLED_PACKAGES
-     * @hide
      */
     public @Nullable List<String> getKeepUninstalledPackages(@Nullable ComponentName admin) {
         throwIfParentInstance("getKeepUninstalledPackages");
@@ -6113,7 +6118,6 @@ public class DevicePolicyManager {
      * @throws SecurityException if {@code admin} is not a device owner.
      * @see #setDelegatedScopes
      * @see #DELEGATION_KEEP_UNINSTALLED_PACKAGES
-     * @hide
      */
     public void setKeepUninstalledPackages(@Nullable ComponentName admin,
             @NonNull List<String> packageNames) {
@@ -6588,6 +6592,37 @@ public class DevicePolicyManager {
             }
         }
         return 0;
+    }
+
+    /**
+     * Install an existing package that has been installed in another user, or has been kept after
+     * removal via {@link #setKeepUninstalledPackages}.
+     * This function can be called by a device owner, profile owner or a delegate given
+     * the {@link #DELEGATION_INSTALL_EXISTING_PACKAGE} scope via {@link #setDelegatedScopes}.
+     * When called in a secondary user or managed profile, the user/profile must be affiliated with
+     * the device owner. See {@link #setAffiliationIds}.
+     *
+     * @param admin Which {@link DeviceAdminReceiver} this request is associated with.
+     * @param packageName The package to be installed in the calling profile.
+     * @return {@code true} if the app is installed; {@code false} otherwise.
+     * @throws SecurityException if {@code admin} is not the device owner, or the profile owner of
+     * an affiliated user or profile.
+     * @see #setKeepUninstalledPackages
+     * @see #setDelegatedScopes
+     * @see #setAffiliationIds
+     * @see #DELEGATION_PACKAGE_ACCESS
+     */
+    public boolean installExistingPackage(@NonNull ComponentName admin, String packageName) {
+        throwIfParentInstance("installExistingPackage");
+        if (mService != null) {
+            try {
+                return mService.installExistingPackage(admin, mContext.getPackageName(),
+                        packageName);
+            } catch (RemoteException e) {
+                throw e.rethrowFromSystemServer();
+            }
+        }
+        return false;
     }
 
     /**

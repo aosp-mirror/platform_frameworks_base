@@ -40,6 +40,7 @@ import static android.app.admin.DevicePolicyManager.DELEGATION_APP_RESTRICTIONS;
 import static android.app.admin.DevicePolicyManager.DELEGATION_BLOCK_UNINSTALL;
 import static android.app.admin.DevicePolicyManager.DELEGATION_CERT_INSTALL;
 import static android.app.admin.DevicePolicyManager.DELEGATION_ENABLE_SYSTEM_APP;
+import static android.app.admin.DevicePolicyManager.DELEGATION_INSTALL_EXISTING_PACKAGE;
 import static android.app.admin.DevicePolicyManager.DELEGATION_KEEP_UNINSTALLED_PACKAGES;
 import static android.app.admin.DevicePolicyManager.DELEGATION_PACKAGE_ACCESS;
 import static android.app.admin.DevicePolicyManager.DELEGATION_PERMISSION_GRANT;
@@ -296,7 +297,9 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
         DELEGATION_ENABLE_SYSTEM_APP,
         DELEGATION_KEEP_UNINSTALLED_PACKAGES,
         DELEGATION_PACKAGE_ACCESS,
-        DELEGATION_PERMISSION_GRANT
+        DELEGATION_PERMISSION_GRANT,
+        DELEGATION_INSTALL_EXISTING_PACKAGE,
+        DELEGATION_KEEP_UNINSTALLED_PACKAGES
     };
 
     /**
@@ -8840,6 +8843,39 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
                     " is not present on this device");
         }
         return (appInfo.flags & ApplicationInfo.FLAG_SYSTEM) != 0;
+    }
+
+    @Override
+    public boolean installExistingPackage(ComponentName who, String callerPackage,
+            String packageName) {
+        synchronized (this) {
+            // Ensure the caller is a PO or an install existing package delegate
+            enforceCanManageScope(who, callerPackage, DeviceAdminInfo.USES_POLICY_PROFILE_OWNER,
+                    DELEGATION_INSTALL_EXISTING_PACKAGE);
+            final int callingUserId = mInjector.userHandleGetCallingUserId();
+            if (!isUserAffiliatedWithDeviceLocked(callingUserId)) {
+                throw new SecurityException("Admin " + who +
+                        " is neither the device owner or affiliated user's profile owner.");
+            }
+
+            final long id = mInjector.binderClearCallingIdentity();
+            try {
+                if (VERBOSE_LOG) {
+                    Slog.v(LOG_TAG, "installing " + packageName + " for "
+                            + callingUserId);
+                }
+
+                // Install the package.
+                return mIPackageManager.installExistingPackageAsUser(packageName, callingUserId,
+                        0 /*installFlags*/, PackageManager.INSTALL_REASON_POLICY)
+                        == PackageManager.INSTALL_SUCCEEDED;
+            } catch (RemoteException re) {
+                // shouldn't happen
+                return false;
+            } finally {
+                mInjector.binderRestoreCallingIdentity(id);
+            }
+        }
     }
 
     @Override
