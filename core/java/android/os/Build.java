@@ -270,6 +270,14 @@ public class Build {
          * @hide
          */
         public static final int RESOURCES_SDK_INT = SDK_INT + ACTIVE_CODENAMES.length;
+
+        /**
+         * The current lowest supported value of app target SDK. Applications targeting
+         * lower values will fail to install and run. Its possible values are defined
+         * in {@link Build.VERSION_CODES}.
+         */
+        public static final int MIN_SUPPORTED_TARGET_SDK_INT = SystemProperties.getInt(
+                "ro.build.version.min_supported_target_sdk", 0);
     }
 
     /**
