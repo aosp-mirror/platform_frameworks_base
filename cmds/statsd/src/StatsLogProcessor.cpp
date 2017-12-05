@@ -84,10 +84,12 @@ void StatsLogProcessor::onAnomalyAlarmFired(
 void StatsLogProcessor::OnLogEvent(const LogEvent& msg) {
     StatsdStats::getInstance().noteAtomLogged(msg.GetTagId(), msg.GetTimestampNs() / NS_PER_SEC);
     // pass the event to metrics managers.
-    for (auto& pair : mMetricsManagers) {
-        pair.second->onLogEvent(msg);
-        flushIfNecessary(msg.GetTimestampNs(), pair.first, pair.second);
-    }
+    // TODO: THIS CHECK FAILS BECAUSE ONCE UIDMAP SIZE EXCEEDS LIMIT, DROPPING METRICS DATA
+    // DOESN'T HELP. FIX THIS.
+    //for (auto& pair : mMetricsManagers) {
+    //    pair.second->onLogEvent(msg);
+    //    flushIfNecessary(msg.GetTimestampNs(), pair.first, pair.second);
+    //}
 
     // Hard-coded logic to update the isolated uid's in the uid-map.
     // The field numbers need to be currently updated by hand with atoms.proto
