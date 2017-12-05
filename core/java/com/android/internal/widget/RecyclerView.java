@@ -9556,7 +9556,7 @@ public class RecyclerView extends ViewGroup implements ScrollingView, NestedScro
             if (vScroll == 0 && hScroll == 0) {
                 return false;
             }
-            mRecyclerView.smoothScrollBy(hScroll, vScroll);
+            mRecyclerView.scrollBy(hScroll, vScroll);
             return true;
         }
 
