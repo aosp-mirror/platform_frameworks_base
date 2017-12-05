@@ -33,8 +33,6 @@ import java.util.Random;
  *
  * This class only supports 48 bits long addresses and does not support 64 bits long addresses.
  * Instances of this class are immutable.
- *
- * @hide
  */
 public final class MacAddress implements Parcelable {
 
