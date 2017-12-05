@@ -30,7 +30,7 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 import java.util.Set;
-import java.util.function.*;
+import java.util.function.Function;
 import java.util.stream.Stream;
 
 /**
