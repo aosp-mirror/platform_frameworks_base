@@ -25,7 +25,6 @@ import android.content.pm.PackageManager;
 import android.content.pm.ProviderInfo;
 import android.content.pm.ResolveInfo;
 import android.content.res.Resources;
-import android.os.SystemClock;
 import android.os.UserHandle;
 import android.util.Slog;
 
@@ -34,7 +33,7 @@ import java.util.List;
 /**
  * A single class that implements multiple helper interfaces for use by {@link PackageTracker}.
  */
-final class PackageTrackerHelperImpl implements ClockHelper, ConfigHelper, PackageManagerHelper {
+final class PackageTrackerHelperImpl implements ConfigHelper, PackageManagerHelper {
 
     private static final String TAG = "PackageTrackerHelperImpl";
 
@@ -71,13 +70,6 @@ final class PackageTrackerHelperImpl implements ClockHelper, ConfigHelper, Packa
     @Override
     public int getFailedCheckRetryCount() {
         return mContext.getResources().getInteger(R.integer.config_timeZoneRulesCheckRetryCount);
-    }
-
-    @Override
-    public long currentTimestamp() {
-        // Use of elapsedRealtime() because this is in-memory state and elapsedRealtime() shouldn't
-        // change if the system clock changes.
-        return SystemClock.elapsedRealtime();
     }
 
     @Override
