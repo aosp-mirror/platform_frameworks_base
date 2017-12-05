@@ -22,6 +22,11 @@ import android.perftests.utils.PerfStatusReporter;
 import android.support.test.filters.LargeTest;
 import android.support.test.runner.AndroidJUnit4;
 
+import android.content.res.ColorStateList;
+import android.graphics.Typeface;
+import android.text.Layout;
+import android.text.style.TextAppearanceSpan;
+
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -33,40 +38,35 @@ import java.util.Random;
 @RunWith(AndroidJUnit4.class)
 public class StaticLayoutPerfTest {
 
-    public StaticLayoutPerfTest() {
-    }
+    public StaticLayoutPerfTest() {}
 
     @Rule
     public PerfStatusReporter mPerfStatusReporter = new PerfStatusReporter();
 
-    private static final String FIXED_TEXT = "Lorem ipsum dolor sit amet, consectetur adipiscing "
-            + "elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad "
-            + "minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea "
-            + "commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse "
-            + "cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non "
-            + "proident, sunt in culpa qui officia deserunt mollit anim id est laborum.";
-    private static final int FIXED_TEXT_LENGTH = FIXED_TEXT.length();
+    private static final int WORD_LENGTH = 9;  // Random word has 9 characters.
+    private static final int WORDS_IN_LINE = 8;  // Roughly, 8 words in a line.
+    private static final int PARA_LENGTH = 500;  // Number of characters in a paragraph.
 
-    private static TextPaint PAINT = new TextPaint();
-    private static final int TEXT_WIDTH = 20 * (int) PAINT.getTextSize();
+    private static final boolean NO_STYLE_TEXT = false;
+    private static final boolean STYLE_TEXT = true;
 
-    @Test
-    public void testCreate() {
-        final BenchmarkState state = mPerfStatusReporter.getBenchmarkState();
-        while (state.keepRunning()) {
-            StaticLayout.Builder.obtain(FIXED_TEXT, 0, FIXED_TEXT_LENGTH, PAINT, TEXT_WIDTH)
-                    .build();
-        }
-    }
+    private final Random mRandom = new Random(31415926535L);
 
     private static final String ALPHABET = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz";
     private static final int ALPHABET_LENGTH = ALPHABET.length();
 
-    private static final int PARA_LENGTH = 500;
-    private final char[] mBuffer = new char[PARA_LENGTH];
-    private final Random mRandom = new Random(31415926535L);
+    private static final ColorStateList TEXT_COLOR = ColorStateList.valueOf(0x00000000);
+    private static final String[] FAMILIES = { "sans-serif", "serif", "monospace" };
+    private static final int[] STYLES = {
+            Typeface.NORMAL, Typeface.BOLD, Typeface.ITALIC, Typeface.BOLD_ITALIC
+    };
 
-    private CharSequence generateRandomParagraph(int wordLen) {
+    private final char[] mBuffer = new char[PARA_LENGTH];
+
+    private static TextPaint PAINT = new TextPaint();
+    private static final int TEXT_WIDTH = WORDS_IN_LINE * WORD_LENGTH * (int) PAINT.getTextSize();
+
+    private CharSequence generateRandomParagraph(int wordLen, boolean applyRandomStyle) {
         for (int i = 0; i < PARA_LENGTH; i++) {
             if (i % (wordLen + 1) == wordLen) {
                 mBuffer[i] = ' ';
@@ -74,28 +74,111 @@ public class StaticLayoutPerfTest {
                 mBuffer[i] = ALPHABET.charAt(mRandom.nextInt(ALPHABET_LENGTH));
             }
         }
-        return CharBuffer.wrap(mBuffer);
+
+        CharSequence cs = CharBuffer.wrap(mBuffer);
+        if (!applyRandomStyle) {
+            return cs;
+        }
+
+        SpannableStringBuilder ssb = new SpannableStringBuilder(cs);
+        for (int i = 0; i < ssb.length(); i += WORD_LENGTH) {
+            final int spanStart = i;
+            final int spanEnd = (i + WORD_LENGTH) > ssb.length() ? ssb.length() : i + WORD_LENGTH;
+
+            final TextAppearanceSpan span = new TextAppearanceSpan(
+                  FAMILIES[mRandom.nextInt(FAMILIES.length)],
+                  STYLES[mRandom.nextInt(STYLES.length)],
+                  24 + mRandom.nextInt(32),  // text size. min 24 max 56
+                  TEXT_COLOR, TEXT_COLOR);
+
+            ssb.setSpan(span, spanStart, spanEnd, Spanned.SPAN_INCLUSIVE_EXCLUSIVE);
+        }
+        return ssb;
     }
 
-    // This tries to simulate the case where the cache hit rate is low, and most of the text is
-    // new text.
     @Test
-    public void testCreateRandom() {
+    public void testCreate_FixedText_NoStyle_Greedy_NoHyphenation() {
         final BenchmarkState state = mPerfStatusReporter.getBenchmarkState();
+        final CharSequence text = generateRandomParagraph(WORD_LENGTH, NO_STYLE_TEXT);
         while (state.keepRunning()) {
-            final CharSequence text = generateRandomParagraph(9);
             StaticLayout.Builder.obtain(text, 0, text.length(), PAINT, TEXT_WIDTH)
+                    .setHyphenationFrequency(Layout.HYPHENATION_FREQUENCY_NONE)
+                    .setBreakStrategy(Layout.BREAK_STRATEGY_SIMPLE)
                     .build();
         }
     }
 
     @Test
-    public void testCreateRandom_breakBalanced() {
+    public void testCreate_RandomText_NoStyled_Greedy_NoHyphenation() {
         final BenchmarkState state = mPerfStatusReporter.getBenchmarkState();
         while (state.keepRunning()) {
-            final CharSequence text = generateRandomParagraph(9);
+            state.pauseTiming();
+            final CharSequence text = generateRandomParagraph(WORD_LENGTH, NO_STYLE_TEXT);
+            state.resumeTiming();
+
             StaticLayout.Builder.obtain(text, 0, text.length(), PAINT, TEXT_WIDTH)
+                    .setHyphenationFrequency(Layout.HYPHENATION_FREQUENCY_NONE)
+                    .setBreakStrategy(Layout.BREAK_STRATEGY_SIMPLE)
+                    .build();
+        }
+    }
+
+    @Test
+    public void testCreate_RandomText_NoStyled_Greedy_Hyphenation() {
+        final BenchmarkState state = mPerfStatusReporter.getBenchmarkState();
+        while (state.keepRunning()) {
+            state.pauseTiming();
+            final CharSequence text = generateRandomParagraph(WORD_LENGTH, NO_STYLE_TEXT);
+            state.resumeTiming();
+
+            StaticLayout.Builder.obtain(text, 0, text.length(), PAINT, TEXT_WIDTH)
+                    .setHyphenationFrequency(Layout.HYPHENATION_FREQUENCY_NORMAL)
+                    .setBreakStrategy(Layout.BREAK_STRATEGY_SIMPLE)
+                    .build();
+        }
+    }
+
+    @Test
+    public void testCreate_RandomText_NoStyled_Balanced_NoHyphenation() {
+        final BenchmarkState state = mPerfStatusReporter.getBenchmarkState();
+        while (state.keepRunning()) {
+            state.pauseTiming();
+            final CharSequence text = generateRandomParagraph(WORD_LENGTH, NO_STYLE_TEXT);
+            state.resumeTiming();
+
+            StaticLayout.Builder.obtain(text, 0, text.length(), PAINT, TEXT_WIDTH)
+                    .setHyphenationFrequency(Layout.HYPHENATION_FREQUENCY_NONE)
                     .setBreakStrategy(Layout.BREAK_STRATEGY_BALANCED)
+                    .build();
+        }
+    }
+
+    @Test
+    public void testCreate_RandomText_NoStyled_Balanced_Hyphenation() {
+        final BenchmarkState state = mPerfStatusReporter.getBenchmarkState();
+        while (state.keepRunning()) {
+            state.pauseTiming();
+            final CharSequence text = generateRandomParagraph(WORD_LENGTH, NO_STYLE_TEXT);
+            state.resumeTiming();
+
+            StaticLayout.Builder.obtain(text, 0, text.length(), PAINT, TEXT_WIDTH)
+                    .setHyphenationFrequency(Layout.HYPHENATION_FREQUENCY_NORMAL)
+                    .setBreakStrategy(Layout.BREAK_STRATEGY_BALANCED)
+                    .build();
+        }
+    }
+
+    @Test
+    public void testCreate_RandomText_Styled_Greedy_NoHyphenation() {
+        final BenchmarkState state = mPerfStatusReporter.getBenchmarkState();
+        while (state.keepRunning()) {
+            state.pauseTiming();
+            final CharSequence text = generateRandomParagraph(WORD_LENGTH, STYLE_TEXT);
+            state.resumeTiming();
+
+            StaticLayout.Builder.obtain(text, 0, text.length(), PAINT, TEXT_WIDTH)
+                    .setHyphenationFrequency(Layout.HYPHENATION_FREQUENCY_NONE)
+                    .setBreakStrategy(Layout.BREAK_STRATEGY_SIMPLE)
                     .build();
         }
     }
