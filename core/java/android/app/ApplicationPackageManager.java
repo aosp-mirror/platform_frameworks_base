@@ -55,6 +55,7 @@ import android.content.pm.ServiceInfo;
 import android.content.pm.SharedLibraryInfo;
 import android.content.pm.VerifierDeviceIdentity;
 import android.content.pm.VersionedPackage;
+import android.content.pm.dex.ArtManager;
 import android.content.res.Resources;
 import android.content.res.XmlResourceParser;
 import android.graphics.Bitmap;
@@ -121,6 +122,8 @@ public class ApplicationPackageManager extends PackageManager {
     private UserManager mUserManager;
     @GuardedBy("mLock")
     private PackageInstaller mInstaller;
+    @GuardedBy("mLock")
+    private ArtManager mArtManager;
 
     @GuardedBy("mDelegates")
     private final ArrayList<MoveCallbackDelegate> mDelegates = new ArrayList<>();
@@ -2748,6 +2751,20 @@ public class ApplicationPackageManager extends PackageManager {
                     isSharedModule, callbackDelegate);
         } catch (RemoteException e) {
             throw e.rethrowAsRuntimeException();
+        }
+    }
+
+    @Override
+    public ArtManager getArtManager() {
+        synchronized (mLock) {
+            if (mArtManager == null) {
+                try {
+                    mArtManager = new ArtManager(mPM.getArtManager());
+                } catch (RemoteException e) {
+                    throw e.rethrowFromSystemServer();
+                }
+            }
+            return mArtManager;
         }
     }
 }

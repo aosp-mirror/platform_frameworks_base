@@ -111,7 +111,6 @@ import static com.android.server.pm.PackageManagerServiceUtils.verifySignatures;
 import static com.android.server.pm.permission.PermissionsState.PERMISSION_OPERATION_FAILURE;
 import static com.android.server.pm.permission.PermissionsState.PERMISSION_OPERATION_SUCCESS;
 import static com.android.server.pm.permission.PermissionsState.PERMISSION_OPERATION_SUCCESS_GIDS_CHANGED;
-import static dalvik.system.DexFile.getNonProfileGuidedCompilerFilter;
 
 import android.Manifest;
 import android.annotation.IntDef;
@@ -187,6 +186,7 @@ import android.content.pm.UserInfo;
 import android.content.pm.VerifierDeviceIdentity;
 import android.content.pm.VerifierInfo;
 import android.content.pm.VersionedPackage;
+import android.content.pm.dex.IArtManager;
 import android.content.res.Resources;
 import android.database.ContentObserver;
 import android.graphics.Bitmap;
@@ -265,14 +265,12 @@ import com.android.internal.content.PackageHelper;
 import com.android.internal.logging.MetricsLogger;
 import com.android.internal.logging.nano.MetricsProto.MetricsEvent;
 import com.android.internal.os.IParcelFileDescriptorFactory;
-import com.android.internal.os.RoSystemProperties;
 import com.android.internal.os.SomeArgs;
 import com.android.internal.os.Zygote;
 import com.android.internal.telephony.CarrierAppUtils;
 import com.android.internal.util.ArrayUtils;
 import com.android.internal.util.ConcurrentUtils;
 import com.android.internal.util.DumpUtils;
-import com.android.internal.util.FastPrintWriter;
 import com.android.internal.util.FastXmlSerializer;
 import com.android.internal.util.IndentingPrintWriter;
 import com.android.internal.util.Preconditions;
@@ -292,6 +290,7 @@ import com.android.server.net.NetworkPolicyManagerInternal;
 import com.android.server.pm.Installer.InstallerException;
 import com.android.server.pm.Settings.DatabaseVersion;
 import com.android.server.pm.Settings.VersionInfo;
+import com.android.server.pm.dex.ArtManagerService;
 import com.android.server.pm.dex.DexLogger;
 import com.android.server.pm.dex.DexManager;
 import com.android.server.pm.dex.DexoptOptions;
@@ -307,30 +306,23 @@ import com.android.server.pm.permission.PermissionsState.PermissionState;
 import com.android.server.storage.DeviceStorageMonitorInternal;
 
 import dalvik.system.CloseGuard;
-import dalvik.system.DexFile;
 import dalvik.system.VMRuntime;
 
 import libcore.io.IoUtils;
-import libcore.io.Streams;
-import libcore.util.EmptyArray;
 
 import org.xmlpull.v1.XmlPullParser;
 import org.xmlpull.v1.XmlPullParserException;
 import org.xmlpull.v1.XmlSerializer;
 
 import java.io.BufferedOutputStream;
-import java.io.BufferedReader;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileDescriptor;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
-import java.io.FileReader;
 import java.io.FilenameFilter;
 import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
 import java.io.PrintWriter;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
@@ -341,15 +333,12 @@ import java.security.NoSuchAlgorithmException;
 import java.security.PublicKey;
 import java.security.SecureRandom;
 import java.security.cert.Certificate;
-import java.security.cert.CertificateEncodingException;
 import java.security.cert.CertificateException;
-import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
-import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -363,7 +352,6 @@ import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
-import java.util.zip.GZIPInputStream;
 
 /**
  * Keep track of all those APKs everywhere.
@@ -938,6 +926,8 @@ public class PackageManagerService extends IPackageManager.Stub
             = new SparseArray<PackageVerificationState>();
 
     final PackageInstallerService mInstallerService;
+
+    final ArtManagerService mArtManagerService;
 
     private final PackageDexOptimizer mPackageDexOptimizer;
     // DexManager handles the usage of dex files (e.g. secondary files, whether or not a package
@@ -3047,6 +3037,7 @@ public class PackageManagerService extends IPackageManager.Stub
             }
 
             mInstallerService = new PackageInstallerService(context, this);
+            mArtManagerService = new ArtManagerService(this);
             final Pair<ComponentName, String> instantAppResolverComponent =
                     getInstantAppResolverLPr();
             if (instantAppResolverComponent != null) {
@@ -22271,6 +22262,11 @@ Slog.v(TAG, ":: stepped forward, applying functor at tag " + parser.getName());
             return null;
         }
         return mInstallerService;
+    }
+
+    @Override
+    public IArtManager getArtManager() {
+        return mArtManagerService;
     }
 
     private boolean userNeedsBadging(int userId) {
