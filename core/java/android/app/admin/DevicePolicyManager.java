@@ -8475,6 +8475,38 @@ public class DevicePolicyManager {
     }
 
     /**
+     * Called by a device owner to specify whether a logout button is enabled for all secondary
+     * users. The system may show a logout button that stops the user and switches back to the
+     * primary user.
+     *
+     * @param admin Which {@link DeviceAdminReceiver} this request is associated with.
+     * @param enabled whether logout button should be enabled or not.
+     * @throws SecurityException if {@code admin} is not a device owner.
+     */
+    public void setLogoutButtonEnabled(@NonNull ComponentName admin, boolean enabled) {
+        throwIfParentInstance("setLogoutButtonEnabled");
+        try {
+            mService.setLogoutButtonEnabled(admin, enabled);
+        } catch (RemoteException re) {
+            throw re.rethrowFromSystemServer();
+        }
+    }
+
+    /**
+     * Returns whether logout button is enabled by a device owner.
+     *
+     * @return {@code true} if logout button is enabled by device owner, {@code false} otherwise.
+     */
+    public boolean isLogoutButtonEnabled() {
+        throwIfParentInstance("isLogoutButtonEnabled");
+        try {
+            return mService.isLogoutButtonEnabled();
+        } catch (RemoteException re) {
+            throw re.rethrowFromSystemServer();
+        }
+    }
+
+    /**
      * Callback used in {@link #clearApplicationUserData}
      * to indicate that the clearing of an application's user data is done.
      */

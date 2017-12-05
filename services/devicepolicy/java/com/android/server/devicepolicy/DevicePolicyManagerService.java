@@ -736,6 +736,7 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
         private static final String TAG_ORGANIZATION_NAME = "organization-name";
         private static final String ATTR_LAST_NETWORK_LOGGING_NOTIFICATION = "last-notification";
         private static final String ATTR_NUM_NETWORK_LOGGING_NOTIFICATIONS = "num-notifications";
+        private static final String TAG_IS_LOGOUT_BUTTON_ENABLED = "is_logout_button_enabled";
 
         final DeviceAdminInfo info;
 
@@ -785,6 +786,7 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
         boolean requireAutoTime = false; // Can only be set by a device owner.
         boolean forceEphemeralUsers = false; // Can only be set by a device owner.
         boolean isNetworkLoggingEnabled = false; // Can only be set by a device owner.
+        boolean isLogoutButtonEnabled = false; // Can only be set by a device owner.
 
         // one notification after enabling + one more after reboots
         static final int DEF_MAXIMUM_NETWORK_LOGGING_NOTIFICATIONS_SHOWN = 2;
@@ -1102,6 +1104,11 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
                 out.text(organizationName);
                 out.endTag(null, TAG_ORGANIZATION_NAME);
             }
+            if (isLogoutButtonEnabled) {
+                out.startTag(null, TAG_IS_LOGOUT_BUTTON_ENABLED);
+                out.attribute(null, ATTR_VALUE, Boolean.toString(isLogoutButtonEnabled));
+                out.endTag(null, TAG_IS_LOGOUT_BUTTON_ENABLED);
+            }
         }
 
         void writePackageListToXml(XmlSerializer out, String outerTag,
@@ -1275,6 +1282,9 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
                     } else {
                         Log.w(LOG_TAG, "Missing text when loading organization name");
                     }
+                } else if (TAG_IS_LOGOUT_BUTTON_ENABLED.equals(tag)) {
+                    isLogoutButtonEnabled = Boolean.parseBoolean(
+                            parser.getAttributeValue(null, ATTR_VALUE));
                 } else {
                     Slog.w(LOG_TAG, "Unknown admin tag: " + tag);
                     XmlUtils.skipCurrentTag(parser);
@@ -11433,4 +11443,37 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
         }
         return false;
     }
+
+    @Override
+    public synchronized void setLogoutButtonEnabled(ComponentName admin, boolean enabled) {
+        if (!mHasFeature) {
+            return;
+        }
+        Preconditions.checkNotNull(admin);
+        getActiveAdminForCallerLocked(admin, DeviceAdminInfo.USES_POLICY_DEVICE_OWNER);
+
+        if (enabled == isLogoutButtonEnabledInternalLocked()) {
+            // already in the requested state
+            return;
+        }
+        ActiveAdmin deviceOwner = getDeviceOwnerAdminLocked();
+        deviceOwner.isLogoutButtonEnabled = enabled;
+        saveSettingsLocked(mInjector.userHandleGetCallingUserId());
+    }
+
+    @Override
+    public boolean isLogoutButtonEnabled() {
+        if (!mHasFeature) {
+            return false;
+        }
+        synchronized (this) {
+            return isLogoutButtonEnabledInternalLocked();
+        }
+    }
+
+    private boolean isLogoutButtonEnabledInternalLocked() {
+        ActiveAdmin deviceOwner = getDeviceOwnerAdminLocked();
+        return (deviceOwner != null) && deviceOwner.isLogoutButtonEnabled;
+    }
+
 }
