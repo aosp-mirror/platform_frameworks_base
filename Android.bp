@@ -603,11 +603,9 @@ gensrcs {
         "soong_zip",
     ],
 
-    // Append protoc-gen-javastream tool's PATH otherwise aprotoc can't find the plugin tool
-    cmd: "export PATH=$$PATH:$$(dirname $(location protoc-gen-javastream)) " +
-        "&& mkdir -p $(genDir)/$(in) " +
+    cmd: "mkdir -p $(genDir)/$(in) " +
         "&& $(location aprotoc) " +
-        "  --plugin=protoc-gen-java-stream=protoc-gen-javastream " +
+        "  --plugin=$(location protoc-gen-javastream) " +
         "  --dependency_out=$(depfile) " +
         "  --javastream_out=$(genDir)/$(in) " +
         "  -Iexternal/protobuf/src " +
