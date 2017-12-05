@@ -127,6 +127,15 @@ class TableFlattenerTest : public ::testing::Test {
              << StringPiece16(actual_name.name, actual_name.nameLen) << "'";
     }
 
+    ResourceName actual_res_name(resName.value());
+
+    if (expected_res_name.entry != actual_res_name.entry ||
+        expected_res_name.package != actual_res_name.package ||
+        expected_res_name.type != actual_res_name.type) {
+      return ::testing::AssertionFailure() << "expected resource '" << expected_res_name.to_string()
+                                           << "' but got '" << actual_res_name.to_string() << "'";
+    }
+
     if (expected_config != config) {
       return ::testing::AssertionFailure() << "expected config '" << expected_config
                                            << "' but got '" << ConfigDescription(config) << "'";
@@ -448,6 +457,115 @@ TEST_F(TableFlattenerTest, LongSharedLibraryPackageNameIsIllegal) {
 
   ResTable result;
   ASSERT_FALSE(Flatten(context.get(), {}, table.get(), &result));
+}
+
+TEST_F(TableFlattenerTest, ObfuscatingResourceNamesNoWhitelistSucceeds) {
+  std::unique_ptr<ResourceTable> table =
+      test::ResourceTableBuilder()
+          .SetPackageId("com.app.test", 0x7f)
+          .AddSimple("com.app.test:id/one", ResourceId(0x7f020000))
+          .AddSimple("com.app.test:id/two", ResourceId(0x7f020001))
+          .AddValue("com.app.test:id/three", ResourceId(0x7f020002),
+                    test::BuildReference("com.app.test:id/one", ResourceId(0x7f020000)))
+          .AddValue("com.app.test:integer/one", ResourceId(0x7f030000),
+                    util::make_unique<BinaryPrimitive>(uint8_t(Res_value::TYPE_INT_DEC), 1u))
+          .AddValue("com.app.test:integer/one", test::ParseConfigOrDie("v1"),
+                    ResourceId(0x7f030000),
+                    util::make_unique<BinaryPrimitive>(uint8_t(Res_value::TYPE_INT_DEC), 2u))
+          .AddString("com.app.test:string/test", ResourceId(0x7f040000), "foo")
+          .AddString("com.app.test:layout/bar", ResourceId(0x7f050000), "res/layout/bar.xml")
+          .Build();
+
+  TableFlattenerOptions options;
+  options.collapse_key_stringpool = true;
+
+  ResTable res_table;
+
+  ASSERT_TRUE(Flatten(context_.get(), options, table.get(), &res_table));
+
+  EXPECT_TRUE(Exists(&res_table, "com.app.test:id/0_resource_name_obfuscated",
+                     ResourceId(0x7f020000), {}, Res_value::TYPE_INT_BOOLEAN, 0u, 0u));
+
+  EXPECT_TRUE(Exists(&res_table, "com.app.test:id/0_resource_name_obfuscated",
+                     ResourceId(0x7f020001), {}, Res_value::TYPE_INT_BOOLEAN, 0u, 0u));
+
+  EXPECT_TRUE(Exists(&res_table, "com.app.test:id/0_resource_name_obfuscated",
+                     ResourceId(0x7f020002), {}, Res_value::TYPE_REFERENCE, 0x7f020000u, 0u));
+
+  EXPECT_TRUE(Exists(&res_table, "com.app.test:integer/0_resource_name_obfuscated",
+                     ResourceId(0x7f030000), {}, Res_value::TYPE_INT_DEC, 1u,
+                     ResTable_config::CONFIG_VERSION));
+
+  EXPECT_TRUE(Exists(&res_table, "com.app.test:integer/0_resource_name_obfuscated",
+                     ResourceId(0x7f030000), test::ParseConfigOrDie("v1"), Res_value::TYPE_INT_DEC,
+                     2u, ResTable_config::CONFIG_VERSION));
+
+  std::u16string foo_str = u"foo";
+  ssize_t idx = res_table.getTableStringBlock(0)->indexOfString(foo_str.data(), foo_str.size());
+  ASSERT_GE(idx, 0);
+  EXPECT_TRUE(Exists(&res_table, "com.app.test:string/0_resource_name_obfuscated",
+                     ResourceId(0x7f040000), {}, Res_value::TYPE_STRING, (uint32_t)idx, 0u));
+
+  std::u16string bar_path = u"res/layout/bar.xml";
+  idx = res_table.getTableStringBlock(0)->indexOfString(bar_path.data(), bar_path.size());
+  ASSERT_GE(idx, 0);
+  EXPECT_TRUE(Exists(&res_table, "com.app.test:layout/0_resource_name_obfuscated",
+                     ResourceId(0x7f050000), {}, Res_value::TYPE_STRING, (uint32_t)idx, 0u));
+}
+
+TEST_F(TableFlattenerTest, ObfuscatingResourceNamesWithWhitelistSucceeds) {
+  std::unique_ptr<ResourceTable> table =
+      test::ResourceTableBuilder()
+          .SetPackageId("com.app.test", 0x7f)
+          .AddSimple("com.app.test:id/one", ResourceId(0x7f020000))
+          .AddSimple("com.app.test:id/two", ResourceId(0x7f020001))
+          .AddValue("com.app.test:id/three", ResourceId(0x7f020002),
+                    test::BuildReference("com.app.test:id/one", ResourceId(0x7f020000)))
+          .AddValue("com.app.test:integer/one", ResourceId(0x7f030000),
+                    util::make_unique<BinaryPrimitive>(uint8_t(Res_value::TYPE_INT_DEC), 1u))
+          .AddValue("com.app.test:integer/one", test::ParseConfigOrDie("v1"),
+                    ResourceId(0x7f030000),
+                    util::make_unique<BinaryPrimitive>(uint8_t(Res_value::TYPE_INT_DEC), 2u))
+          .AddString("com.app.test:string/test", ResourceId(0x7f040000), "foo")
+          .AddString("com.app.test:layout/bar", ResourceId(0x7f050000), "res/layout/bar.xml")
+          .Build();
+
+  TableFlattenerOptions options;
+  options.collapse_key_stringpool = true;
+  options.whitelisted_resources.insert("test");
+  options.whitelisted_resources.insert("three");
+  ResTable res_table;
+
+  ASSERT_TRUE(Flatten(context_.get(), options, table.get(), &res_table));
+
+  EXPECT_TRUE(Exists(&res_table, "com.app.test:id/0_resource_name_obfuscated",
+                     ResourceId(0x7f020000), {}, Res_value::TYPE_INT_BOOLEAN, 0u, 0u));
+
+  EXPECT_TRUE(Exists(&res_table, "com.app.test:id/0_resource_name_obfuscated",
+                     ResourceId(0x7f020001), {}, Res_value::TYPE_INT_BOOLEAN, 0u, 0u));
+
+  EXPECT_TRUE(Exists(&res_table, "com.app.test:id/three", ResourceId(0x7f020002), {},
+                     Res_value::TYPE_REFERENCE, 0x7f020000u, 0u));
+
+  EXPECT_TRUE(Exists(&res_table, "com.app.test:integer/0_resource_name_obfuscated",
+                     ResourceId(0x7f030000), {}, Res_value::TYPE_INT_DEC, 1u,
+                     ResTable_config::CONFIG_VERSION));
+
+  EXPECT_TRUE(Exists(&res_table, "com.app.test:integer/0_resource_name_obfuscated",
+                     ResourceId(0x7f030000), test::ParseConfigOrDie("v1"), Res_value::TYPE_INT_DEC,
+                     2u, ResTable_config::CONFIG_VERSION));
+
+  std::u16string foo_str = u"foo";
+  ssize_t idx = res_table.getTableStringBlock(0)->indexOfString(foo_str.data(), foo_str.size());
+  ASSERT_GE(idx, 0);
+  EXPECT_TRUE(Exists(&res_table, "com.app.test:string/test", ResourceId(0x7f040000), {},
+                     Res_value::TYPE_STRING, (uint32_t)idx, 0u));
+
+  std::u16string bar_path = u"res/layout/bar.xml";
+  idx = res_table.getTableStringBlock(0)->indexOfString(bar_path.data(), bar_path.size());
+  ASSERT_GE(idx, 0);
+  EXPECT_TRUE(Exists(&res_table, "com.app.test:layout/0_resource_name_obfuscated",
+                     ResourceId(0x7f050000), {}, Res_value::TYPE_STRING, (uint32_t)idx, 0u));
 }
 
 }  // namespace aapt

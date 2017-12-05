@@ -122,8 +122,8 @@ class AppTaskImpl extends IAppTask.Stub {
                 throw new IllegalArgumentException("Bad app thread " + appThread);
             }
         }
-        return mService.mActivityStarter.startActivityMayWait(appThread, -1, callingPackage,
-                intent, resolvedType, null, null, null, null, 0, 0, null, null,
+        return mService.getActivityStartController().startActivityMayWait(appThread, -1,
+                callingPackage, intent, resolvedType, null, null, null, null, 0, 0, null, null,
                 null, bOptions, false, callingUser, tr, "AppTaskImpl");
     }
 

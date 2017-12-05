@@ -30,7 +30,7 @@ using std::vector;
 
 
 SimpleLogMatchingTracker::SimpleLogMatchingTracker(const string& name, const int index,
-                                                   const SimpleLogEntryMatcher& matcher)
+                                                   const SimpleAtomMatcher& matcher)
     : LogMatchingTracker(name, index), mMatcher(matcher) {
     if (!matcher.has_tag()) {
         mInitialized = false;
@@ -43,7 +43,7 @@ SimpleLogMatchingTracker::SimpleLogMatchingTracker(const string& name, const int
 SimpleLogMatchingTracker::~SimpleLogMatchingTracker() {
 }
 
-bool SimpleLogMatchingTracker::init(const vector<LogEntryMatcher>& allLogMatchers,
+bool SimpleLogMatchingTracker::init(const vector<AtomMatcher>& allLogMatchers,
                                     const vector<sp<LogMatchingTracker>>& allTrackers,
                                     const unordered_map<string, int>& matcherMap,
                                     vector<bool>& stack) {

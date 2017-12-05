@@ -19,11 +19,13 @@
 #include "TestHelpers.h"
 #include "data/basic/R.h"
 #include "data/libclient/R.h"
+#include "data/sparse/R.h"
 #include "data/styles/R.h"
 
 namespace app = com::android::app;
 namespace basic = com::android::basic;
 namespace libclient = com::android::libclient;
+namespace sparse = com::android::sparse;
 
 namespace android {
 
@@ -65,6 +67,23 @@ TEST(LoadedArscTest, FindDefaultEntry) {
 
   FindEntryResult entry;
   ASSERT_TRUE(loaded_arsc->FindEntry(basic::R::string::test1, desired_config, &entry));
+  ASSERT_NE(nullptr, entry.entry);
+}
+
+TEST(LoadedArscTest, LoadSparseEntryApp) {
+  std::string contents;
+  ASSERT_TRUE(ReadFileFromZipToString(GetTestDataPath() + "/sparse/sparse.apk", "resources.arsc",
+                                      &contents));
+
+  std::unique_ptr<const LoadedArsc> loaded_arsc = LoadedArsc::Load(StringPiece(contents));
+  ASSERT_NE(nullptr, loaded_arsc);
+
+  ResTable_config config;
+  memset(&config, 0, sizeof(config));
+  config.sdkVersion = 26;
+
+  FindEntryResult entry;
+  ASSERT_TRUE(loaded_arsc->FindEntry(sparse::R::integer::foo_9, config, &entry));
   ASSERT_NE(nullptr, entry.entry);
 }
 

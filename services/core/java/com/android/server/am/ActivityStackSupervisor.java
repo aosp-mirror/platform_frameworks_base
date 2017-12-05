@@ -129,7 +129,7 @@ import android.graphics.Rect;
 import android.hardware.display.DisplayManager;
 import android.hardware.display.DisplayManager.DisplayListener;
 import android.hardware.display.DisplayManagerInternal;
-import android.hardware.input.InputManagerInternal;
+import android.hardware.power.V1_0.PowerHint;
 import android.os.Binder;
 import android.os.Bundle;
 import android.os.Debug;
@@ -363,6 +363,9 @@ public class ActivityStackSupervisor extends ConfigurationContainer implements D
     /** Set to indicate whether to issue an onUserLeaving callback when a newly launched activity
      * is being brought in front of us. */
     boolean mUserLeaving = false;
+
+    /** Set when a power hint has started, but not ended. */
+    private boolean mPowerHintSent;
 
     /**
      * We don't want to allow the device to go to sleep while in the process
@@ -978,7 +981,7 @@ public class ActivityStackSupervisor extends ConfigurationContainer implements D
             }
         }
         // Send launch end powerhint when idle
-        mService.mActivityStarter.sendPowerHintForLaunchEndIfNeeded();
+        sendPowerHintForLaunchEndIfNeeded();
         return true;
     }
 
@@ -1470,7 +1473,7 @@ public class ActivityStackSupervisor extends ConfigurationContainer implements D
         // a chance to initialize itself while in the background, making the
         // switch back to it faster and look better.
         if (isFocusedStack(stack)) {
-            mService.startSetupActivityLocked();
+            mService.getActivityStartController().startSetupActivity();
         }
 
         // Update any services we are bound to that might care about whether
@@ -1529,6 +1532,32 @@ public class ActivityStackSupervisor extends ConfigurationContainer implements D
 
         mService.startProcessLocked(r.processName, r.info.applicationInfo, true, 0,
                 "activity", r.intent.getComponent(), false, false, true);
+    }
+
+    void sendPowerHintForLaunchStartIfNeeded(boolean forceSend, ActivityRecord targetActivity) {
+        boolean sendHint = forceSend;
+
+        if (!sendHint) {
+            // If not forced, send power hint when the activity's process is different than the
+            // current resumed activity.
+            final ActivityRecord resumedActivity = getResumedActivityLocked();
+            sendHint = resumedActivity == null
+                    || resumedActivity.app == null
+                    || !resumedActivity.app.equals(targetActivity.app);
+        }
+
+        if (sendHint && mService.mLocalPowerManager != null) {
+            mService.mLocalPowerManager.powerHint(PowerHint.LAUNCH, 1);
+            mPowerHintSent = true;
+        }
+    }
+
+    void sendPowerHintForLaunchEndIfNeeded() {
+        // Trigger launch power hint if activity is launched
+        if (mPowerHintSent && mService.mLocalPowerManager != null) {
+            mService.mLocalPowerManager.powerHint(PowerHint.LAUNCH, 0);
+            mPowerHintSent = false;
+        }
     }
 
     boolean checkStartAnyActivityPermission(Intent intent, ActivityInfo aInfo,
@@ -2481,14 +2510,14 @@ public class ActivityStackSupervisor extends ConfigurationContainer implements D
         }
     }
 
-    private void deferUpdateBounds(int activityType) {
+    void deferUpdateBounds(int activityType) {
         final ActivityStack stack = getStack(WINDOWING_MODE_UNDEFINED, activityType);
         if (stack != null) {
             stack.deferUpdateBounds();
         }
     }
 
-    private void continueUpdateBounds(int activityType) {
+    void continueUpdateBounds(int activityType) {
         final ActivityStack stack = getStack(WINDOWING_MODE_UNDEFINED, activityType);
         if (stack != null) {
             stack.continueUpdateBounds();
@@ -3335,7 +3364,7 @@ public class ActivityStackSupervisor extends ConfigurationContainer implements D
         }
 
         // Send launch end powerhint before going sleep
-        mService.mActivityStarter.sendPowerHintForLaunchEndIfNeeded();
+        sendPowerHintForLaunchEndIfNeeded();
 
         removeSleepTimeouts();
 
@@ -4473,7 +4502,7 @@ public class ActivityStackSupervisor extends ConfigurationContainer implements D
      *
      * @param task The task to put into resizing mode
      */
-    private void setResizingDuringAnimation(TaskRecord task) {
+    void setResizingDuringAnimation(TaskRecord task) {
         mResizingTasksDuringAnimation.add(task.taskId);
         task.setTaskDockedResizing(true);
     }
@@ -4532,8 +4561,7 @@ public class ActivityStackSupervisor extends ConfigurationContainer implements D
                     && task.getRootActivity() != null) {
                 final ActivityRecord targetActivity = task.getTopActivity();
 
-                mService.mActivityStarter.sendPowerHintForLaunchStartIfNeeded(true /* forceSend */,
-                        targetActivity);
+                sendPowerHintForLaunchStartIfNeeded(true /* forceSend */, targetActivity);
                 mActivityMetricsLogger.notifyActivityLaunching();
                 try {
                     mService.moveTaskToFrontLocked(task.taskId, 0, bOptions,
@@ -4550,8 +4578,9 @@ public class ActivityStackSupervisor extends ConfigurationContainer implements D
                     setResizingDuringAnimation(task);
                 }
 
-                mService.mActivityStarter.postStartActivityProcessing(task.getTopActivity(),
-                        ActivityManager.START_TASK_TO_FRONT, task.getStack());
+                mService.getActivityStartController().postStartActivityProcessingForLastStarter(
+                        task.getTopActivity(), ActivityManager.START_TASK_TO_FRONT,
+                        task.getStack());
                 return ActivityManager.START_TASK_TO_FRONT;
             }
             callingUid = task.mCallingUid;
@@ -4559,8 +4588,9 @@ public class ActivityStackSupervisor extends ConfigurationContainer implements D
             intent = task.intent;
             intent.addFlags(Intent.FLAG_ACTIVITY_LAUNCHED_FROM_HISTORY);
             userId = task.userId;
-            int result = mService.startActivityInPackage(callingUid, callingPackage, intent, null,
-                    null, null, 0, 0, bOptions, userId, task, "startActivityFromRecents");
+            int result = mService.getActivityStartController().startActivityInPackage(callingUid,
+                    callingPackage, intent, null, null, null, 0, 0, bOptions, userId, task,
+                    "startActivityFromRecents");
             if (windowingMode == WINDOWING_MODE_SPLIT_SCREEN_PRIMARY) {
                 setResizingDuringAnimation(task);
             }

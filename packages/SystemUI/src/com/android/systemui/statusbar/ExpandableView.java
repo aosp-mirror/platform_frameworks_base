@@ -478,6 +478,9 @@ public abstract class ExpandableView extends FrameLayout {
         return false;
     }
 
+    public void setHeadsUpIsVisible() {
+    }
+
     public boolean isChildInGroup() {
         return false;
     }

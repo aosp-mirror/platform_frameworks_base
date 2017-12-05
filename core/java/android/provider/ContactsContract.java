@@ -22,6 +22,7 @@ import android.annotation.SdkConstant.SdkConstantType;
 import android.annotation.SystemApi;
 import android.app.Activity;
 import android.content.BroadcastReceiver;
+import android.content.ComponentName;
 import android.content.ContentProviderClient;
 import android.content.ContentProviderOperation;
 import android.content.ContentResolver;
@@ -42,10 +43,12 @@ import android.database.DatabaseUtils;
 import android.graphics.Rect;
 import android.net.Uri;
 import android.os.RemoteException;
+import android.telecom.PhoneAccountHandle;
 import android.text.TextUtils;
 import android.util.DisplayMetrics;
 import android.util.Pair;
 import android.view.View;
+
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -4237,6 +4240,25 @@ public final class ContactsContract {
          * current carrier. An allowed bitmask of {@link #CARRIER_PRESENCE}.
          */
         public static final int CARRIER_PRESENCE_VT_CAPABLE = 0x01;
+
+        /**
+         * The flattened {@link android.content.ComponentName} of a  {@link
+         * android.telecom.PhoneAccountHandle} that is the preferred {@code PhoneAccountHandle} to
+         * call the contact with. Used by {@link CommonDataKinds.Phone}.
+         *
+         * @see PhoneAccountHandle#getComponentName()
+         * @see ComponentName#flattenToString()
+         */
+        String PREFERRED_PHONE_ACCOUNT_COMPONENT_NAME = "preferred_phone_account_component_name";
+
+        /**
+         * The ID of a  {@link
+         * android.telecom.PhoneAccountHandle} that is the preferred {@code PhoneAccountHandle} to
+         * call the contact with. Used by {@link CommonDataKinds.Phone}.
+         *
+         * @see PhoneAccountHandle#getId() ()
+         */
+        String PREFERRED_PHONE_ACCOUNT_ID = "preferred_phone_account_id";
     }
 
     /**

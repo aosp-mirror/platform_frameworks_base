@@ -18,6 +18,7 @@
 
 #include "androidfw/LoadedArsc.h"
 
+#include <algorithm>
 #include <cstddef>
 #include <limits>
 
@@ -128,9 +129,14 @@ LoadedPackage::~LoadedPackage() = default;
 // Precondition: The header passed in has already been verified, so reading any fields and trusting
 // the ResChunk_header is safe.
 static bool VerifyResTableType(const ResTable_type* header) {
+  if (header->id == 0) {
+    LOG(ERROR) << "RES_TABLE_TYPE_TYPE has invalid ID 0.";
+    return false;
+  }
+
   const size_t entry_count = dtohl(header->entryCount);
   if (entry_count > std::numeric_limits<uint16_t>::max()) {
-    LOG(ERROR) << "Too many entries in RES_TABLE_TYPE_TYPE.";
+    LOG(ERROR) << "RES_TABLE_TYPE_TYPE has too many entries (" << entry_count << ").";
     return false;
   }
 
@@ -140,17 +146,17 @@ static bool VerifyResTableType(const ResTable_type* header) {
   const size_t offsets_length = sizeof(uint32_t) * entry_count;
 
   if (offsets_offset > entries_offset || entries_offset - offsets_offset < offsets_length) {
-    LOG(ERROR) << "Entry offsets overlap actual entry data.";
+    LOG(ERROR) << "RES_TABLE_TYPE_TYPE entry offsets overlap actual entry data.";
     return false;
   }
 
   if (entries_offset > dtohl(header->header.size)) {
-    LOG(ERROR) << "Entry offsets extend beyond chunk.";
+    LOG(ERROR) << "RES_TABLE_TYPE_TYPE entry offsets extend beyond chunk.";
     return false;
   }
 
   if (entries_offset & 0x03) {
-    LOG(ERROR) << "Entries start at unaligned address.";
+    LOG(ERROR) << "RES_TABLE_TYPE_TYPE entries start at unaligned address.";
     return false;
   }
   return true;
@@ -235,7 +241,6 @@ static bool VerifyResTableEntry(const ResTable_type* type, uint32_t entry_offset
   return true;
 }
 
-template <bool Verified>
 bool LoadedPackage::FindEntry(const TypeSpecPtr& type_spec_ptr, uint16_t entry_idx,
                               const ResTable_config& config, FindEntryResult* out_entry) const {
   const ResTable_config* best_config = nullptr;
@@ -244,31 +249,56 @@ bool LoadedPackage::FindEntry(const TypeSpecPtr& type_spec_ptr, uint16_t entry_i
 
   for (uint32_t i = 0; i < type_spec_ptr->type_count; i++) {
     const Type* type = &type_spec_ptr->types[i];
+    const ResTable_type* type_chunk = type->type;
 
     if (type->configuration.match(config) &&
         (best_config == nullptr || type->configuration.isBetterThan(*best_config, &config))) {
       // The configuration matches and is better than the previous selection.
       // Find the entry value if it exists for this configuration.
-      const size_t entry_count = dtohl(type->type->entryCount);
-      const size_t offsets_offset = dtohs(type->type->header.headerSize);
-      if (entry_idx < entry_count) {
-        // If the package hasn't been verified, do bounds checking.
-        if (!Verified) {
-          if (!VerifyResTableType(type->type)) {
-            continue;
-          }
+      const size_t entry_count = dtohl(type_chunk->entryCount);
+      const size_t offsets_offset = dtohs(type_chunk->header.headerSize);
+
+      // Check if there is the desired entry in this type.
+
+      if (type_chunk->flags & ResTable_type::FLAG_SPARSE) {
+        // This is encoded as a sparse map, so perform a binary search.
+        const ResTable_sparseTypeEntry* sparse_indices =
+            reinterpret_cast<const ResTable_sparseTypeEntry*>(
+                reinterpret_cast<const uint8_t*>(type_chunk) + offsets_offset);
+        const ResTable_sparseTypeEntry* sparse_indices_end = sparse_indices + entry_count;
+        const ResTable_sparseTypeEntry* result =
+            std::lower_bound(sparse_indices, sparse_indices_end, entry_idx,
+                             [](const ResTable_sparseTypeEntry& entry, uint16_t entry_idx) {
+                               return dtohs(entry.idx) < entry_idx;
+                             });
+
+        if (result == sparse_indices_end || dtohs(result->idx) != entry_idx) {
+          // No entry found.
+          continue;
+        }
+
+        // Extract the offset from the entry. Each offset must be a multiple of 4 so we store it as
+        // the real offset divided by 4.
+        best_offset = uint32_t{dtohs(result->offset)} * 4u;
+      } else {
+        if (entry_idx >= entry_count) {
+          // This entry cannot be here.
+          continue;
         }
 
         const uint32_t* entry_offsets = reinterpret_cast<const uint32_t*>(
-            reinterpret_cast<const uint8_t*>(type->type) + offsets_offset);
+            reinterpret_cast<const uint8_t*>(type_chunk) + offsets_offset);
         const uint32_t offset = dtohl(entry_offsets[entry_idx]);
-        if (offset != ResTable_type::NO_ENTRY) {
-          // There is an entry for this resource, record it.
-          best_config = &type->configuration;
-          best_type = type->type;
-          best_offset = offset;
+        if (offset == ResTable_type::NO_ENTRY) {
+          continue;
         }
+
+        // There is an entry for this resource, record it.
+        best_offset = offset;
       }
+
+      best_config = &type->configuration;
+      best_type = type_chunk;
     }
   }
 
@@ -276,10 +306,8 @@ bool LoadedPackage::FindEntry(const TypeSpecPtr& type_spec_ptr, uint16_t entry_i
     return false;
   }
 
-  if (!Verified) {
-    if (!VerifyResTableEntry(best_type, best_offset, entry_idx)) {
-      return false;
-    }
+  if (UNLIKELY(!VerifyResTableEntry(best_type, best_offset, entry_idx))) {
+    return false;
   }
 
   const ResTable_entry* best_entry = reinterpret_cast<const ResTable_entry*>(
@@ -301,7 +329,7 @@ bool LoadedPackage::FindEntry(uint8_t type_idx, uint16_t entry_idx, const ResTab
   // If the type IDs are offset in this package, we need to take that into account when searching
   // for a type.
   const TypeSpecPtr& ptr = type_specs_[type_idx - type_id_offset_];
-  if (ptr == nullptr) {
+  if (UNLIKELY(ptr == nullptr)) {
     return false;
   }
 
@@ -312,41 +340,7 @@ bool LoadedPackage::FindEntry(uint8_t type_idx, uint16_t entry_idx, const ResTab
       return false;
     }
   }
-
-  // Don't bother checking if the entry ID is larger than the number of entries.
-  if (entry_idx >= dtohl(ptr->type_spec->entryCount)) {
-    return false;
-  }
-
-  if (verified_) {
-    return FindEntry<true>(ptr, entry_idx, config, out_entry);
-  }
-  return FindEntry<false>(ptr, entry_idx, config, out_entry);
-}
-
-static bool VerifyType(const Chunk& chunk) {
-  ATRACE_CALL();
-  const ResTable_type* header = chunk.header<ResTable_type, kResTableTypeMinSize>();
-
-  if (!VerifyResTableType(header)) {
-    return false;
-  }
-
-  const size_t entry_count = dtohl(header->entryCount);
-  const size_t offsets_offset = chunk.header_size();
-
-  // Check each entry offset.
-  const uint32_t* offsets =
-      reinterpret_cast<const uint32_t*>(reinterpret_cast<const uint8_t*>(header) + offsets_offset);
-  for (size_t i = 0; i < entry_count; i++) {
-    uint32_t offset = dtohl(offsets[i]);
-    if (offset != ResTable_type::NO_ENTRY) {
-      if (!VerifyResTableEntry(header, offset, i)) {
-        return false;
-      }
-    }
-  }
-  return true;
+  return FindEntry(ptr, entry_idx, config, out_entry);
 }
 
 void LoadedPackage::CollectConfigurations(bool exclude_mipmap,
@@ -461,7 +455,7 @@ std::unique_ptr<const LoadedPackage> LoadedPackage::Load(const Chunk& chunk,
       sizeof(ResTable_package) - sizeof(ResTable_package::typeIdOffset);
   const ResTable_package* header = chunk.header<ResTable_package, kMinPackageSize>();
   if (header == nullptr) {
-    LOG(ERROR) << "Chunk RES_TABLE_PACKAGE_TYPE is too small.";
+    LOG(ERROR) << "RES_TABLE_PACKAGE_TYPE too small.";
     return {};
   }
 
@@ -483,7 +477,7 @@ std::unique_ptr<const LoadedPackage> LoadedPackage::Load(const Chunk& chunk,
   if (header->header.headerSize >= sizeof(ResTable_package)) {
     uint32_t type_id_offset = dtohl(header->typeIdOffset);
     if (type_id_offset > std::numeric_limits<uint8_t>::max()) {
-      LOG(ERROR) << "Type ID offset in RES_TABLE_PACKAGE_TYPE is too large.";
+      LOG(ERROR) << "RES_TABLE_PACKAGE_TYPE type ID offset too large.";
       return {};
     }
     loaded_package->type_id_offset_ = static_cast<int>(type_id_offset);
@@ -514,7 +508,7 @@ std::unique_ptr<const LoadedPackage> LoadedPackage::Load(const Chunk& chunk,
           status_t err = loaded_package->type_string_pool_.setTo(
               child_chunk.header<ResStringPool_header>(), child_chunk.size());
           if (err != NO_ERROR) {
-            LOG(ERROR) << "Corrupt package type string pool.";
+            LOG(ERROR) << "RES_STRING_POOL_TYPE for types corrupt.";
             return {};
           }
         } else if (pool_address == header_address + dtohl(header->keyStrings)) {
@@ -522,11 +516,11 @@ std::unique_ptr<const LoadedPackage> LoadedPackage::Load(const Chunk& chunk,
           status_t err = loaded_package->key_string_pool_.setTo(
               child_chunk.header<ResStringPool_header>(), child_chunk.size());
           if (err != NO_ERROR) {
-            LOG(ERROR) << "Corrupt package key string pool.";
+            LOG(ERROR) << "RES_STRING_POOL_TYPE for keys corrupt.";
             return {};
           }
         } else {
-          LOG(WARNING) << "Too many string pool chunks found in package.";
+          LOG(WARNING) << "Too many RES_STRING_POOL_TYPEs found in RES_TABLE_PACKAGE_TYPE.";
         }
       } break;
 
@@ -557,18 +551,18 @@ std::unique_ptr<const LoadedPackage> LoadedPackage::Load(const Chunk& chunk,
 
         const ResTable_typeSpec* type_spec = child_chunk.header<ResTable_typeSpec>();
         if (type_spec == nullptr) {
-          LOG(ERROR) << "Chunk RES_TABLE_TYPE_SPEC_TYPE is too small.";
+          LOG(ERROR) << "RES_TABLE_TYPE_SPEC_TYPE too small.";
           return {};
         }
 
         if (type_spec->id == 0) {
-          LOG(ERROR) << "Chunk RES_TABLE_TYPE_SPEC_TYPE has invalid ID 0.";
+          LOG(ERROR) << "RES_TABLE_TYPE_SPEC_TYPE has invalid ID 0.";
           return {};
         }
 
         if (loaded_package->type_id_offset_ + static_cast<int>(type_spec->id) >
             std::numeric_limits<uint8_t>::max()) {
-          LOG(ERROR) << "Chunk RES_TABLE_TYPE_SPEC_TYPE has out of range ID.";
+          LOG(ERROR) << "RES_TABLE_TYPE_SPEC_TYPE has out of range ID.";
           return {};
         }
 
@@ -580,12 +574,12 @@ std::unique_ptr<const LoadedPackage> LoadedPackage::Load(const Chunk& chunk,
         // There can only be 2^16 entries in a type, because that is the ID
         // space for entries (EEEE) in the resource ID 0xPPTTEEEE.
         if (entry_count > std::numeric_limits<uint16_t>::max()) {
-          LOG(ERROR) << "Too many entries in RES_TABLE_TYPE_SPEC_TYPE: " << entry_count << ".";
+          LOG(ERROR) << "RES_TABLE_TYPE_SPEC_TYPE has too many entries (" << entry_count << ").";
           return {};
         }
 
         if (entry_count * sizeof(uint32_t) > chunk.data_size()) {
-          LOG(ERROR) << "Chunk too small to hold entries in RES_TABLE_TYPE_SPEC_TYPE.";
+          LOG(ERROR) << "RES_TABLE_TYPE_SPEC_TYPE too small to hold entries.";
           return {};
         }
 
@@ -604,27 +598,18 @@ std::unique_ptr<const LoadedPackage> LoadedPackage::Load(const Chunk& chunk,
       case RES_TABLE_TYPE_TYPE: {
         const ResTable_type* type = child_chunk.header<ResTable_type, kResTableTypeMinSize>();
         if (type == nullptr) {
-          LOG(ERROR) << "Chunk RES_TABLE_TYPE_TYPE is too small.";
+          LOG(ERROR) << "RES_TABLE_TYPE_TYPE too small.";
           return {};
         }
 
-        if (type->id == 0) {
-          LOG(ERROR) << "Chunk RES_TABLE_TYPE_TYPE has invalid ID 0.";
+        if (!VerifyResTableType(type)) {
           return {};
         }
 
         // Type chunks must be preceded by their TypeSpec chunks.
         if (!types_builder || type->id - 1 != last_type_idx) {
-          LOG(ERROR) << "Found RES_TABLE_TYPE_TYPE chunk without RES_TABLE_TYPE_SPEC_TYPE.";
+          LOG(ERROR) << "RES_TABLE_TYPE_TYPE found without preceding RES_TABLE_TYPE_SPEC_TYPE.";
           return {};
-        }
-
-        // Only verify the type if we haven't already failed verification.
-        if (loaded_package->verified_) {
-          if (!VerifyType(child_chunk)) {
-            LOG(WARNING) << "Package failed verification, resource retrieval may be slower";
-            loaded_package->verified_ = false;
-          }
         }
 
         types_builder->AddType(type);
@@ -633,12 +618,12 @@ std::unique_ptr<const LoadedPackage> LoadedPackage::Load(const Chunk& chunk,
       case RES_TABLE_LIBRARY_TYPE: {
         const ResTable_lib_header* lib = child_chunk.header<ResTable_lib_header>();
         if (lib == nullptr) {
-          LOG(ERROR) << "Chunk RES_TABLE_LIBRARY_TYPE is too small.";
+          LOG(ERROR) << "RES_TABLE_LIBRARY_TYPE too small.";
           return {};
         }
 
         if (child_chunk.data_size() / sizeof(ResTable_lib_entry) < dtohl(lib->count)) {
-          LOG(ERROR) << "Chunk too small to hold entries in RES_TABLE_LIBRARY_TYPE.";
+          LOG(ERROR) << "RES_TABLE_LIBRARY_TYPE too small to hold entries.";
           return {};
         }
 
@@ -705,7 +690,7 @@ bool LoadedArsc::FindEntry(uint32_t resid, const ResTable_config& config,
   const uint8_t type_id = get_type_id(resid);
   const uint16_t entry_id = get_entry_id(resid);
 
-  if (type_id == 0) {
+  if (UNLIKELY(type_id == 0)) {
     LOG(ERROR) << base::StringPrintf("Invalid ID 0x%08x.", resid);
     return false;
   }
@@ -723,7 +708,7 @@ bool LoadedArsc::LoadTable(const Chunk& chunk, const LoadedIdmap* loaded_idmap,
   ATRACE_CALL();
   const ResTable_header* header = chunk.header<ResTable_header>();
   if (header == nullptr) {
-    LOG(ERROR) << "Chunk RES_TABLE_TYPE is too small.";
+    LOG(ERROR) << "RES_TABLE_TYPE too small.";
     return false;
   }
 
@@ -742,11 +727,11 @@ bool LoadedArsc::LoadTable(const Chunk& chunk, const LoadedIdmap* loaded_idmap,
           status_t err = global_string_pool_.setTo(child_chunk.header<ResStringPool_header>(),
                                                    child_chunk.size());
           if (err != NO_ERROR) {
-            LOG(ERROR) << "Corrupt string pool.";
+            LOG(ERROR) << "RES_STRING_POOL_TYPE corrupt.";
             return false;
           }
         } else {
-          LOG(WARNING) << "Multiple string pool chunks found in resource table.";
+          LOG(WARNING) << "Multiple RES_STRING_POOL_TYPEs found in RES_TABLE_TYPE.";
         }
         break;
 

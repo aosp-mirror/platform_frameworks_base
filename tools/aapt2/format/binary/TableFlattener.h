@@ -35,6 +35,14 @@ struct TableFlattenerOptions {
   // This is only available on platforms O+ and will only be respected when
   // minSdk is O+.
   bool use_sparse_entries = false;
+
+  // When true, the key string pool in the final ResTable
+  // is collapsed to a single entry. All resource entries
+  // have name indices that point to this single value
+  bool collapse_key_stringpool = false;
+
+  // Set of whitelisted resource names to avoid altering in key stringpool
+  std::set<std::string> whitelisted_resources;
 };
 
 class TableFlattener : public IResourceTableConsumer {

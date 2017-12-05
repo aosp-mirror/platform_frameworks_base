@@ -52,6 +52,7 @@ import android.os.UserManager;
 import android.os.UserManagerInternal;
 import android.provider.Settings;
 import android.service.autofill.FillEventHistory;
+import android.service.autofill.UserData;
 import android.util.LocalLog;
 import android.util.Slog;
 import android.util.SparseArray;
@@ -581,6 +582,34 @@ public final class AutofillManagerService extends SystemService {
         }
 
         @Override
+        public UserData getUserData() throws RemoteException {
+            UserHandle user = getCallingUserHandle();
+            int uid = getCallingUid();
+
+            synchronized (mLock) {
+                AutofillManagerServiceImpl service = peekServiceForUserLocked(user.getIdentifier());
+                if (service != null) {
+                    return service.getUserData(uid);
+                }
+            }
+
+            return null;
+        }
+
+        @Override
+        public void setUserData(UserData userData) throws RemoteException {
+            UserHandle user = getCallingUserHandle();
+            int uid = getCallingUid();
+
+            synchronized (mLock) {
+                AutofillManagerServiceImpl service = peekServiceForUserLocked(user.getIdentifier());
+                if (service != null) {
+                    service.setUserData(uid, userData);
+                }
+            }
+        }
+
+        @Override
         public boolean restoreSession(int sessionId, IBinder activityToken, IBinder appCallback)
                 throws RemoteException {
             activityToken = Preconditions.checkNotNull(activityToken, "activityToken");
@@ -723,6 +752,7 @@ public final class AutofillManagerService extends SystemService {
             }
 
             boolean oldDebug = sDebug;
+            final String prefix = "  ";
             try {
                 synchronized (mLock) {
                     oldDebug = sDebug;
@@ -731,6 +761,7 @@ public final class AutofillManagerService extends SystemService {
                     pw.print("Verbose mode: "); pw.println(sVerbose);
                     pw.print("Disabled users: "); pw.println(mDisabledUsers);
                     pw.print("Max partitions per session: "); pw.println(sPartitionMaxCount);
+                    pw.println("User data constraints: "); UserData.dumpConstraints(prefix, pw);
                     final int size = mServicesCache.size();
                     pw.print("Cached services: ");
                     if (size == 0) {
@@ -740,7 +771,7 @@ public final class AutofillManagerService extends SystemService {
                         for (int i = 0; i < size; i++) {
                             pw.print("\nService at index "); pw.println(i);
                             final AutofillManagerServiceImpl impl = mServicesCache.valueAt(i);
-                            impl.dumpLocked("  ", pw);
+                            impl.dumpLocked(prefix, pw);
                         }
                     }
                     mUi.dump(pw);

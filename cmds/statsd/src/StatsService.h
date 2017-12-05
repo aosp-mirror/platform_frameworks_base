@@ -76,6 +76,11 @@ public:
     virtual Status getData(const String16& key, vector<uint8_t>* output) override;
 
     /**
+     * Binder call for clients to get metadata across all configs in statsd.
+     */
+    virtual Status getMetadata(vector<uint8_t>* output) override;
+
+    /**
      * Binder call to let clients send a configuration and indicate they're interested when they
      * should requestData for this configuration.
      */

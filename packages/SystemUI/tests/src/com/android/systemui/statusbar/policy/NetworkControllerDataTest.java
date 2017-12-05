@@ -15,6 +15,7 @@ import android.testing.TestableLooper.RunWithLooper;
 
 import com.android.settingslib.net.DataUsageController;
 
+import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
@@ -134,6 +135,22 @@ public class NetworkControllerDataTest extends NetworkControllerBaseTest {
 
         // Don't show the X until the device is setup.
         verifyDataIndicators(0, 0);
+    }
+
+    @Test
+    public void testAlwaysShowDataRatIcon() {
+        setupDefaultSignal();
+        when(mMockTm.getDataEnabled(mSubId)).thenReturn(false);
+        updateDataConnectionState(TelephonyManager.DATA_DISCONNECTED,
+                TelephonyManager.NETWORK_TYPE_GSM);
+
+        // Switch to showing data RAT icon when data is disconnected
+        // and re-initialize the NetworkController.
+        mConfig.alwaysShowDataRatIcon = true;
+        mNetworkController.handleConfigurationChanged();
+
+        verifyDataIndicators(TelephonyIcons.ICON_G,
+                TelephonyIcons.QS_DATA_G);
     }
 
     @Test

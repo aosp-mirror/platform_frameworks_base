@@ -231,6 +231,7 @@ interface IDevicePolicyManager {
     int getLockTaskFeatures(in ComponentName who);
 
     void setGlobalSetting(in ComponentName who, in String setting, in String value);
+    void setSystemSetting(in ComponentName who, in String setting, in String value);
     void setSecureSetting(in ComponentName who, in String setting, in String value);
 
     boolean setTime(in ComponentName who, long millis);

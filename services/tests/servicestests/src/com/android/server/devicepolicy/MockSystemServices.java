@@ -379,6 +379,9 @@ public class MockSystemServices {
         public void settingsGlobalPutString(String name, String value) {
         }
 
+        public void settingsSystemPutString(String name, String value) {
+        }
+
         public int settingsGlobalGetInt(String name, int value) {
             return 0;
         }

@@ -26,12 +26,10 @@
 #include "data/basic/R.h"
 #include "data/libclient/R.h"
 #include "data/styles/R.h"
-#include "data/unverified/R.h"
 
 namespace app = com::android::app;
 namespace basic = com::android::basic;
 namespace libclient = com::android::libclient;
-namespace unverified = com::android::unverified;
 
 namespace android {
 
@@ -83,37 +81,6 @@ static void BM_AssetManagerLoadFrameworkAssetsOld(benchmark::State& state) {
 }
 BENCHMARK(BM_AssetManagerLoadFrameworkAssetsOld);
 
-static void GetResourceBenchmark(const std::vector<std::string>& paths,
-                                 const ResTable_config* config, uint32_t resid,
-                                 benchmark::State& state) {
-  std::vector<std::unique_ptr<const ApkAssets>> apk_assets;
-  std::vector<const ApkAssets*> apk_assets_ptrs;
-  for (const std::string& path : paths) {
-    std::unique_ptr<const ApkAssets> apk = ApkAssets::Load(path);
-    if (apk == nullptr) {
-      state.SkipWithError(base::StringPrintf("Failed to load assets %s", path.c_str()).c_str());
-      return;
-    }
-    apk_assets_ptrs.push_back(apk.get());
-    apk_assets.push_back(std::move(apk));
-  }
-
-  AssetManager2 assetmanager;
-  assetmanager.SetApkAssets(apk_assets_ptrs);
-  if (config != nullptr) {
-    assetmanager.SetConfiguration(*config);
-  }
-
-  Res_value value;
-  ResTable_config selected_config;
-  uint32_t flags;
-
-  while (state.KeepRunning()) {
-    assetmanager.GetResource(resid, false /* may_be_bag */, 0u /* density_override */, &value,
-                             &selected_config, &flags);
-  }
-}
-
 static void BM_AssetManagerGetResource(benchmark::State& state) {
   GetResourceBenchmark({GetTestDataPath() + "/basic/basic.apk"}, nullptr /*config*/,
                        basic::R::integer::number1, state);
@@ -125,12 +92,6 @@ static void BM_AssetManagerGetResourceOld(benchmark::State& state) {
                           basic::R::integer::number1, state);
 }
 BENCHMARK(BM_AssetManagerGetResourceOld);
-
-static void BM_AssetManagerGetResourceUnverified(benchmark::State& state) {
-  GetResourceBenchmark({GetTestDataPath() + "/unverified/unverified.apk"}, nullptr /*config*/,
-                       unverified::R::integer::number1, state);
-}
-BENCHMARK(BM_AssetManagerGetResourceUnverified);
 
 static void BM_AssetManagerGetLibraryResource(benchmark::State& state) {
   GetResourceBenchmark(
@@ -213,30 +174,6 @@ static void BM_AssetManagerGetBagOld(benchmark::State& state) {
   }
 }
 BENCHMARK(BM_AssetManagerGetBagOld);
-
-static void BM_AssetManagerGetBagUnverified(benchmark::State& state) {
-  std::unique_ptr<const ApkAssets> apk =
-      ApkAssets::Load(GetTestDataPath() + "/unverified/unverified.apk");
-  if (apk == nullptr) {
-    state.SkipWithError("Failed to load assets");
-    return;
-  }
-
-  AssetManager2 assets;
-  assets.SetApkAssets({apk.get()});
-
-  while (state.KeepRunning()) {
-    const ResolvedBag* bag = assets.GetBag(unverified::R::array::integerArray1);
-    const auto bag_end = end(bag);
-    for (auto iter = begin(bag); iter != bag_end; ++iter) {
-      uint32_t key = iter->key;
-      Res_value value = iter->value;
-      benchmark::DoNotOptimize(key);
-      benchmark::DoNotOptimize(value);
-    }
-  }
-}
-BENCHMARK(BM_AssetManagerGetBagUnverified);
 
 static void BM_AssetManagerGetResourceLocales(benchmark::State& state) {
   std::unique_ptr<const ApkAssets> apk = ApkAssets::Load(kFrameworkPath);

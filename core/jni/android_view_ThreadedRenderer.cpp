@@ -1043,7 +1043,22 @@ static const JNINativeMethod gMethods[] = {
     { "nSetHighContrastText", "(Z)V", (void*)android_view_ThreadedRenderer_setHighContrastText },
 };
 
+static JavaVM* mJvm = nullptr;
+
+static void attachRenderThreadToJvm() {
+    LOG_ALWAYS_FATAL_IF(!mJvm, "No jvm but we set the hook??");
+
+    JavaVMAttachArgs args;
+    args.version = JNI_VERSION_1_4;
+    args.name = (char*) "RenderThread";
+    args.group = NULL;
+    JNIEnv* env;
+    mJvm->AttachCurrentThreadAsDaemon(&env, (void*) &args);
+}
+
 int register_android_view_ThreadedRenderer(JNIEnv* env) {
+    env->GetJavaVM(&mJvm);
+    RenderThread::setOnStartHook(&attachRenderThreadToJvm);
     jclass observerClass = FindClassOrDie(env, "android/view/FrameMetricsObserver");
     gFrameMetricsObserverClassInfo.frameMetrics = GetFieldIDOrDie(
             env, observerClass, "mFrameMetrics", "Landroid/view/FrameMetrics;");

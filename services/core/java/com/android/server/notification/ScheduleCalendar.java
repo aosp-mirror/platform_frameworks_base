@@ -18,6 +18,7 @@ package com.android.server.notification;
 
 import android.service.notification.ZenModeConfig.ScheduleInfo;
 import android.util.ArraySet;
+import android.util.Log;
 
 import java.util.Calendar;
 import java.util.Objects;
@@ -41,10 +42,25 @@ public class ScheduleCalendar {
     }
 
     public void maybeSetNextAlarm(long now, long nextAlarm) {
-        if (mSchedule != null) {
-            if (mSchedule.exitAtAlarm
-                    && (now > mSchedule.nextAlarm || nextAlarm < mSchedule.nextAlarm)) {
-                mSchedule.nextAlarm = nextAlarm;
+        if (mSchedule != null && mSchedule.exitAtAlarm) {
+            // alarm canceled
+            if (nextAlarm == 0) {
+                mSchedule.nextAlarm = 0;
+            }
+            // only allow alarms in the future
+            if (nextAlarm > now) {
+                // store earliest alarm
+                if (mSchedule.nextAlarm == 0) {
+                    mSchedule.nextAlarm = nextAlarm;
+                } else {
+                    mSchedule.nextAlarm = Math.min(mSchedule.nextAlarm, nextAlarm);
+                }
+            } else if (mSchedule.nextAlarm < now) {
+                if (ScheduleConditionProvider.DEBUG) {
+                    Log.d(ScheduleConditionProvider.TAG,
+                            "All alarms are in the past " + mSchedule.nextAlarm);
+                }
+                mSchedule.nextAlarm = 0;
             }
         }
     }
@@ -87,6 +103,9 @@ public class ScheduleCalendar {
     }
 
     public boolean shouldExitForAlarm(long time) {
+        if (mSchedule == null) {
+            return false;
+        }
         return mSchedule.exitAtAlarm
                 && mSchedule.nextAlarm != 0
                 && time >= mSchedule.nextAlarm;

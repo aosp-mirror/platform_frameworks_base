@@ -31,7 +31,10 @@ class ThreadBase : protected Thread {
     PREVENT_COPY_AND_ASSIGN(ThreadBase);
 
 public:
-    ThreadBase() : mLooper(new Looper(false)), mQueue([this]() { mLooper->wake(); }, mLock) {}
+    ThreadBase()
+            : Thread(false)
+            , mLooper(new Looper(false))
+            , mQueue([this]() { mLooper->wake(); }, mLock) {}
 
     WorkQueue& queue() { return mQueue; }
 

@@ -258,6 +258,7 @@ public abstract class InstantAppResolver {
         if (origIntent.getData() != null) {
             intent.putExtra(Intent.EXTRA_EPHEMERAL_HOSTNAME, origIntent.getData().getHost());
         }
+        intent.putExtra(Intent.EXTRA_INSTANT_APP_ACTION, origIntent.getAction());
 
         // We have all of the data we need; just start the installer without a second phase
         if (!needsPhaseTwo) {

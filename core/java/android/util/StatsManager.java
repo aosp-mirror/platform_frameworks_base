@@ -93,10 +93,11 @@ public final class StatsManager {
     }
 
     /**
-     * Clients can request data with a binder call.
+     * Clients can request data with a binder call. This getter is destructive and also clears
+     * the retrieved metrics from statsd memory.
      *
      * @param configKey Configuration key to retrieve data from.
-     * @return Serialized ConfigMetricsReport proto. Returns null on failure.
+     * @return Serialized ConfigMetricsReportList proto. Returns null on failure.
      */
     @RequiresPermission(Manifest.permission.DUMP)
     public byte[] getData(String configKey) {
@@ -110,6 +111,30 @@ public final class StatsManager {
                 return service.getData(configKey);
             } catch (RemoteException e) {
                 Slog.d(TAG, "Failed to connecto statsd when getting data");
+                return null;
+            }
+        }
+    }
+
+    /**
+     * Clients can request metadata for statsd. Will contain stats across all configurations but not
+     * the actual metrics themselves (metrics must be collected via {@link #getData(String)}.
+     * This getter is not destructive and will not reset any metrics/counters.
+     *
+     * @return Serialized StatsdStatsReport proto. Returns null on failure.
+     */
+    @RequiresPermission(Manifest.permission.DUMP)
+    public byte[] getMetadata() {
+        synchronized (this) {
+            try {
+                IStatsManager service = getIStatsManagerLocked();
+                if (service == null) {
+                    Slog.d(TAG, "Failed to find statsd when getting metadata");
+                    return null;
+                }
+                return service.getMetadata();
+            } catch (RemoteException e) {
+                Slog.d(TAG, "Failed to connecto statsd when getting metadata");
                 return null;
             }
         }

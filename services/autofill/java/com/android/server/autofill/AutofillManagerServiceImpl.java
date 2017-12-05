@@ -51,6 +51,7 @@ import android.service.autofill.FillEventHistory;
 import android.service.autofill.FillEventHistory.Event;
 import android.service.autofill.FillResponse;
 import android.service.autofill.IAutoFillService;
+import android.service.autofill.UserData;
 import android.text.TextUtils;
 import android.util.ArrayMap;
 import android.util.ArraySet;
@@ -121,6 +122,11 @@ final class AutofillManagerServiceImpl {
     private boolean mDisabled;
 
     /**
+     * Data used for field classification.
+     */
+    private UserData mUserData;
+
+    /**
      * Caches whether the setup completed for the current user.
      */
     @GuardedBy("mLock")
@@ -181,6 +187,14 @@ final class AutofillManagerServiceImpl {
             Slog.e(TAG, "Could not get label for " + packageName + ": " + e);
             return packageName;
         }
+    }
+
+    private int getServiceUidLocked() {
+        if (mInfo == null) {
+            Slog.w(TAG,  "getServiceUidLocked(): no mInfo");
+            return -1;
+        }
+        return mInfo.getServiceInfo().applicationInfo.uid;
     }
 
     @Nullable
@@ -574,9 +588,9 @@ final class AutofillManagerServiceImpl {
      * Initializes the last fill selection after an autofill service returned a new
      * {@link FillResponse}.
      */
-    void setLastResponse(int serviceUid, int sessionId, @NonNull FillResponse response) {
+    void setLastResponse(int sessionId, @NonNull FillResponse response) {
         synchronized (mLock) {
-            mEventHistory = new FillEventHistory(serviceUid, sessionId, response.getClientState());
+            mEventHistory = new FillEventHistory(sessionId, response.getClientState());
         }
     }
 
@@ -688,18 +702,54 @@ final class AutofillManagerServiceImpl {
      */
     FillEventHistory getFillEventHistory(int callingUid) {
         synchronized (mLock) {
-            if (mEventHistory != null && mEventHistory.getServiceUid() == callingUid) {
+            if (mEventHistory != null
+                    && isCalledByServiceLocked("getFillEventHistory", callingUid)) {
                 return mEventHistory;
             }
         }
-
         return null;
+    }
+
+    // Called by Session - does not need to check uid
+    UserData getUserData() {
+        synchronized (mLock) {
+            return mUserData;
+        }
+    }
+
+    // Called by AutofillManager
+    UserData getUserData(int callingUid) {
+        synchronized (mLock) {
+            if (isCalledByServiceLocked("getUserData", callingUid)) {
+                return mUserData;
+            }
+        }
+        return null;
+    }
+
+    // Called by AutofillManager
+    void setUserData(int callingUid, UserData userData) {
+        synchronized (mLock) {
+            if (isCalledByServiceLocked("setUserData", callingUid)) {
+                mUserData = userData;
+            }
+        }
+    }
+
+    private boolean isCalledByServiceLocked(String methodName, int callingUid) {
+        if (getServiceUidLocked() != callingUid) {
+            Slog.w(TAG, methodName + "() called by UID " + callingUid
+                    + ", but service UID is " + getServiceUidLocked());
+            return false;
+        }
+        return true;
     }
 
     void dumpLocked(String prefix, PrintWriter pw) {
         final String prefix2 = prefix + "  ";
 
         pw.print(prefix); pw.print("User: "); pw.println(mUserId);
+        pw.print(prefix); pw.print("UID: "); pw.println(getServiceUidLocked());
         pw.print(prefix); pw.print("Component: "); pw.println(mInfo != null
                 ? mInfo.getServiceInfo().getComponentName() : null);
         pw.print(prefix); pw.print("Component from settings: ");
@@ -762,8 +812,13 @@ final class AutofillManagerServiceImpl {
             }
         }
 
-        pw.print(prefix); pw.println("Clients");
-        mClients.dump(pw, prefix2);
+        pw.print(prefix); pw.print("Clients: ");
+        if (mClients == null) {
+            pw.println("N/A");
+        } else {
+            pw.println();
+            mClients.dump(pw, prefix2);
+        }
 
         if (mEventHistory == null || mEventHistory.getEvents() == null
                 || mEventHistory.getEvents().size() == 0) {
@@ -778,6 +833,14 @@ final class AutofillManagerServiceImpl {
                 pw.println("  " + i + ": eventType=" + event.getType() + " datasetId="
                         + event.getDatasetId());
             }
+        }
+
+        pw.print(prefix); pw.print("User data: ");
+        if (mUserData == null) {
+            pw.println("N/A");
+        } else {
+            pw.println();
+            mUserData.dump(prefix2, pw);
         }
     }
 

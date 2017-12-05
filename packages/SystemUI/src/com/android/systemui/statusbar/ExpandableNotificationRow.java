@@ -112,6 +112,7 @@ public class ExpandableNotificationRow extends ActivatableNotificationView
     private int mNotificationMaxHeight;
     private int mNotificationAmbientHeight;
     private int mIncreasedPaddingBetweenElements;
+    private boolean mMustStayOnScreen;
 
     /** Does this row contain layouts that can adapt to row expansion */
     private boolean mExpandable;
@@ -491,6 +492,7 @@ public class ExpandableNotificationRow extends ActivatableNotificationView
             notifyHeightChanged(false  /* needsAnimation */);
         }
         if (isHeadsUp) {
+            mMustStayOnScreen = true;
             setAboveShelf(true);
         } else if (isAboveShelf() != wasAboveShelf) {
             mAboveShelfChangedListener.onAboveShelfStateChanged(!wasAboveShelf);
@@ -515,6 +517,12 @@ public class ExpandableNotificationRow extends ActivatableNotificationView
 
     public void addChildNotification(ExpandableNotificationRow row) {
         addChildNotification(row, -1);
+    }
+
+    @Override
+    public void setHeadsUpIsVisible() {
+        super.setHeadsUpIsVisible();
+        mMustStayOnScreen = false;
     }
 
     /**
@@ -1942,7 +1950,7 @@ public class ExpandableNotificationRow extends ActivatableNotificationView
 
     @Override
     public boolean mustStayOnScreen() {
-        return mIsHeadsUp;
+        return mIsHeadsUp && mMustStayOnScreen;
     }
 
     /**

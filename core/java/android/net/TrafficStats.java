@@ -17,6 +17,7 @@
 package android.net;
 
 import android.annotation.RequiresPermission;
+import android.annotation.SuppressLint;
 import android.annotation.SystemApi;
 import android.app.DownloadManager;
 import android.app.backup.BackupManager;
@@ -30,6 +31,8 @@ import com.android.server.NetworkManagementSocketTagger;
 
 import dalvik.system.SocketTagger;
 
+import java.io.FileDescriptor;
+import java.io.IOException;
 import java.net.DatagramSocket;
 import java.net.Socket;
 import java.net.SocketException;
@@ -264,14 +267,25 @@ public class TrafficStats {
     }
 
     /**
+     * Set specific UID to use when accounting {@link Socket} traffic
+     * originating from the current thread as the calling UID. Designed for use
+     * when another application is performing operations on your behalf.
+     * <p>
+     * Changes only take effect during subsequent calls to
+     * {@link #tagSocket(Socket)}.
+     */
+    public static void setThreadStatsUidSelf() {
+        setThreadStatsUid(android.os.Process.myUid());
+    }
+
+    /**
      * Clear any active UID set to account {@link Socket} traffic originating
      * from the current thread.
      *
      * @see #setThreadStatsUid(int)
-     * @hide
      */
     @SystemApi
-    @RequiresPermission(android.Manifest.permission.UPDATE_DEVICE_STATS)
+    @SuppressLint("Doclava125")
     public static void clearThreadStatsUid() {
         NetworkManagementSocketTagger.setThreadSocketStatsUid(-1);
     }
@@ -313,6 +327,27 @@ public class TrafficStats {
      */
     public static void untagDatagramSocket(DatagramSocket socket) throws SocketException {
         SocketTagger.get().untag(socket);
+    }
+
+    /**
+     * Tag the given {@link FileDescriptor} socket with any statistics
+     * parameters active for the current thread. Subsequent calls always replace
+     * any existing parameters. When finished, call
+     * {@link #untagFileDescriptor(FileDescriptor)} to remove statistics
+     * parameters.
+     *
+     * @see #setThreadStatsTag(int)
+     */
+    public static void tagFileDescriptor(FileDescriptor fd) throws IOException {
+        SocketTagger.get().tag(fd);
+    }
+
+    /**
+     * Remove any statistics parameters from the given {@link FileDescriptor}
+     * socket.
+     */
+    public static void untagFileDescriptor(FileDescriptor fd) throws IOException {
+        SocketTagger.get().untag(fd);
     }
 
     /**

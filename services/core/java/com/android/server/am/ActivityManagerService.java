@@ -44,7 +44,9 @@ import static android.app.WindowConfiguration.WINDOWING_MODE_FULLSCREEN_OR_SPLIT
 import static android.app.WindowConfiguration.WINDOWING_MODE_PINNED;
 import static android.app.WindowConfiguration.WINDOWING_MODE_SPLIT_SCREEN_PRIMARY;
 import static android.app.WindowConfiguration.WINDOWING_MODE_UNDEFINED;
+import static android.content.Intent.FLAG_ACTIVITY_EXCLUDE_FROM_RECENTS;
 import static android.content.Intent.FLAG_ACTIVITY_NEW_TASK;
+import static android.content.Intent.FLAG_ACTIVITY_TASK_ON_HOME;
 import static android.content.pm.PackageManager.FEATURE_ACTIVITIES_ON_SECONDARY_DISPLAYS;
 import static android.content.pm.PackageManager.FEATURE_FREEFORM_WINDOW_MANAGEMENT;
 import static android.content.pm.PackageManager.FEATURE_LEANBACK_ONLY;
@@ -414,6 +416,7 @@ import com.android.server.SystemServiceManager;
 import com.android.server.ThreadPriorityBooster;
 import com.android.server.Watchdog;
 import com.android.server.am.ActivityStack.ActivityState;
+import com.android.server.am.EventLogTags;
 import com.android.server.am.proto.ActivityManagerServiceProto;
 import com.android.server.am.proto.BroadcastProto;
 import com.android.server.am.proto.GrantUriProto;
@@ -632,7 +635,7 @@ public class ActivityManagerService extends IActivityManager.Stub
     final ActivityStackSupervisor mStackSupervisor;
     private final KeyguardController mKeyguardController;
 
-    final ActivityStarter mActivityStarter;
+    private final ActivityStartController mActivityStartController;
 
     final ClientLifecycleManager mLifecycleManager;
 
@@ -1361,7 +1364,7 @@ public class ActivityManagerService extends IActivityManager.Stub
     @GuardedBy("this") boolean mCallFinishBooting = false;
     @GuardedBy("this") boolean mBootAnimationComplete = false;
     @GuardedBy("this") boolean mLaunchWarningShown = false;
-    @GuardedBy("this") boolean mCheckedForSetup = false;
+    private @GuardedBy("this") boolean mCheckedForSetup = false;
 
     final Context mContext;
 
@@ -1707,7 +1710,6 @@ public class ActivityManagerService extends IActivityManager.Stub
     static final int SHOW_UID_ERROR_UI_MSG = 14;
     static final int SHOW_FINGERPRINT_ERROR_UI_MSG = 15;
     static final int PROC_START_TIMEOUT_MSG = 20;
-    static final int DO_PENDING_ACTIVITY_LAUNCHES_MSG = 21;
     static final int KILL_APPLICATION_MSG = 22;
     static final int FINALIZE_PENDING_INTENT_MSG = 23;
     static final int POST_HEAVY_NOTIFICATION_MSG = 24;
@@ -2075,11 +2077,6 @@ public class ActivityManagerService extends IActivityManager.Stub
                 ProcessRecord app = (ProcessRecord)msg.obj;
                 synchronized (ActivityManagerService.this) {
                     processContentProviderPublishTimedOutLocked(app);
-                }
-            } break;
-            case DO_PENDING_ACTIVITY_LAUNCHES_MSG: {
-                synchronized (ActivityManagerService.this) {
-                    mActivityStarter.doPendingActivityLaunchesLocked(true);
                 }
             } break;
             case KILL_APPLICATION_MSG: {
@@ -2677,7 +2674,7 @@ public class ActivityManagerService extends IActivityManager.Stub
         mContext = mInjector.getContext();
         mUiContext = null;
         GL_ES_VERSION = 0;
-        mActivityStarter = null;
+        mActivityStartController = null;
         mAppErrors = null;
         mAppWarnings = null;
         mAppOpsService = mInjector.getAppOpsService(null, null);
@@ -2801,7 +2798,7 @@ public class ActivityManagerService extends IActivityManager.Stub
         mIntentFirewall = new IntentFirewall(new IntentFirewallInterface(), mHandler);
         mTaskChangeNotificationController =
                 new TaskChangeNotificationController(this, mStackSupervisor, mHandler);
-        mActivityStarter = new ActivityStarter(this);
+        mActivityStartController = new ActivityStartController(this);
         mRecentTasks = createRecentTasks();
         mStackSupervisor.setRecentTasks(mRecentTasks);
         mLockTaskController = new LockTaskController(mContext, mStackSupervisor, mHandler);
@@ -4121,7 +4118,7 @@ public class ActivityManagerService extends IActivityManager.Stub
                 // For ANR debugging to verify if the user activity is the one that actually
                 // launched.
                 final String myReason = reason + ":" + userId + ":" + resolvedUserId;
-                mActivityStarter.startHomeActivityLocked(intent, aInfo, myReason);
+                mActivityStartController.startHomeActivity(intent, aInfo, myReason);
             }
         } else {
             Slog.wtf(TAG, "No home screen found for " + intent, new Throwable());
@@ -4154,49 +4151,12 @@ public class ActivityManagerService extends IActivityManager.Stub
         return ai;
     }
 
-    /**
-     * Starts the "new version setup screen" if appropriate.
-     */
-    void startSetupActivityLocked() {
-        // Only do this once per boot.
-        if (mCheckedForSetup) {
-            return;
-        }
+    boolean getCheckedForSetup() {
+        return mCheckedForSetup;
+    }
 
-        // We will show this screen if the current one is a different
-        // version than the last one shown, and we are not running in
-        // low-level factory test mode.
-        final ContentResolver resolver = mContext.getContentResolver();
-        if (mFactoryTest != FactoryTest.FACTORY_TEST_LOW_LEVEL &&
-                Settings.Global.getInt(resolver,
-                        Settings.Global.DEVICE_PROVISIONED, 0) != 0) {
-            mCheckedForSetup = true;
-
-            // See if we should be showing the platform update setup UI.
-            final Intent intent = new Intent(Intent.ACTION_UPGRADE_SETUP);
-            final List<ResolveInfo> ris = mContext.getPackageManager().queryIntentActivities(intent,
-                    PackageManager.MATCH_SYSTEM_ONLY | PackageManager.GET_META_DATA);
-            if (!ris.isEmpty()) {
-                final ResolveInfo ri = ris.get(0);
-                String vers = ri.activityInfo.metaData != null
-                        ? ri.activityInfo.metaData.getString(Intent.METADATA_SETUP_VERSION)
-                        : null;
-                if (vers == null && ri.activityInfo.applicationInfo.metaData != null) {
-                    vers = ri.activityInfo.applicationInfo.metaData.getString(
-                            Intent.METADATA_SETUP_VERSION);
-                }
-                String lastVers = Settings.Secure.getString(
-                        resolver, Settings.Secure.LAST_SETUP_SHOWN);
-                if (vers != null && !vers.equals(lastVers)) {
-                    intent.setFlags(FLAG_ACTIVITY_NEW_TASK);
-                    intent.setComponent(new ComponentName(
-                            ri.activityInfo.packageName, ri.activityInfo.name));
-                    mActivityStarter.startActivityLocked(null, intent, null /*ephemeralIntent*/,
-                            null, ri.activityInfo, null /*rInfo*/, null, null, null, null, 0, 0, 0,
-                            null, 0, 0, 0, null, false, false, null, null, "startSetupActivity");
-                }
-            }
-        }
+    void setCheckedForSetup(boolean checked) {
+        mCheckedForSetup = checked;
     }
 
     CompatibilityInfo compatibilityInfoForPackageLocked(ApplicationInfo ai) {
@@ -4562,8 +4522,8 @@ public class ActivityManagerService extends IActivityManager.Stub
         userId = mUserController.handleIncomingUser(Binder.getCallingPid(), Binder.getCallingUid(),
                 userId, false, ALLOW_FULL_ONLY, "startActivity", null);
         // TODO: Switch to user app stacks here.
-        return mActivityStarter.startActivityMayWait(caller, -1, callingPackage, intent,
-                resolvedType, null, null, resultTo, resultWho, requestCode, startFlags,
+        return mActivityStartController.startActivityMayWait(caller, -1, callingPackage,
+                intent, resolvedType, null, null, resultTo, resultWho, requestCode, startFlags,
                 profilerInfo, null, null, bOptions, false, userId, null, "startActivityAsUser");
     }
 
@@ -4625,10 +4585,10 @@ public class ActivityManagerService extends IActivityManager.Stub
 
         // TODO: Switch to user app stacks here.
         try {
-            int ret = mActivityStarter.startActivityMayWait(null, targetUid, targetPackage, intent,
-                    resolvedType, null, null, resultTo, resultWho, requestCode, startFlags, null,
-                    null, null, bOptions, ignoreTargetSecurity, userId, null,
-                    "startActivityAsCaller");
+            int ret = mActivityStartController.startActivityMayWait(null, targetUid,
+                    targetPackage, intent, resolvedType, null, null, resultTo, resultWho,
+                    requestCode, startFlags, null, null, null, bOptions, ignoreTargetSecurity,
+                    userId, null, "startActivityAsCaller");
             return ret;
         } catch (SecurityException e) {
             // XXX need to figure out how to propagate to original app.
@@ -4655,9 +4615,9 @@ public class ActivityManagerService extends IActivityManager.Stub
                 userId, false, ALLOW_FULL_ONLY, "startActivityAndWait", null);
         WaitResult res = new WaitResult();
         // TODO: Switch to user app stacks here.
-        mActivityStarter.startActivityMayWait(caller, -1, callingPackage, intent, resolvedType,
-                null, null, resultTo, resultWho, requestCode, startFlags, profilerInfo, res, null,
-                bOptions, false, userId, null, "startActivityAndWait");
+        mActivityStartController.startActivityMayWait(caller, -1, callingPackage, intent,
+                resolvedType, null, null, resultTo, resultWho, requestCode, startFlags,
+                profilerInfo, res, null, bOptions, false, userId, null, "startActivityAndWait");
         return res;
     }
 
@@ -4669,9 +4629,9 @@ public class ActivityManagerService extends IActivityManager.Stub
         userId = mUserController.handleIncomingUser(Binder.getCallingPid(), Binder.getCallingUid(),
                 userId, false, ALLOW_FULL_ONLY, "startActivityWithConfig", null);
         // TODO: Switch to user app stacks here.
-        int ret = mActivityStarter.startActivityMayWait(caller, -1, callingPackage, intent,
-                resolvedType, null, null, resultTo, resultWho, requestCode, startFlags,
-                null, null, config, bOptions, false, userId, null, "startActivityWithConfig");
+        int ret = mActivityStartController.startActivityMayWait(caller, -1, callingPackage, intent,
+                resolvedType, null, null, resultTo, resultWho, requestCode, startFlags, null, null,
+                config, bOptions, false, userId, null, "startActivityWithConfig");
         return ret;
     }
 
@@ -4718,9 +4678,9 @@ public class ActivityManagerService extends IActivityManager.Stub
         userId = mUserController.handleIncomingUser(callingPid, callingUid, userId, false,
                 ALLOW_FULL_ONLY, "startVoiceActivity", null);
         // TODO: Switch to user app stacks here.
-        return mActivityStarter.startActivityMayWait(null, callingUid, callingPackage, intent,
-                resolvedType, session, interactor, null, null, 0, startFlags, profilerInfo, null,
-                null, bOptions, false, userId, null, "startVoiceActivity");
+        return mActivityStartController.startActivityMayWait(null, callingUid, callingPackage,
+                intent, resolvedType, session, interactor, null, null, 0, startFlags, profilerInfo,
+                null, null, bOptions, false, userId, null, "startVoiceActivity");
     }
 
     @Override
@@ -4729,9 +4689,9 @@ public class ActivityManagerService extends IActivityManager.Stub
         enforceCallingPermission(BIND_VOICE_INTERACTION, "startAssistantActivity()");
         userId = mUserController.handleIncomingUser(callingPid, callingUid, userId, false,
                 ALLOW_FULL_ONLY, "startAssistantActivity", null);
-        return mActivityStarter.startActivityMayWait(null, callingUid, callingPackage, intent,
-                resolvedType, null, null, null, null, 0, 0, null, null, null, bOptions, false,
-                userId, null, "startAssistantActivity");
+        return mActivityStartController.startActivityMayWait(null, callingUid, callingPackage,
+                intent, resolvedType, null, null, null, null, 0, 0, null, null, null, bOptions,
+                false, userId, null, "startAssistantActivity");
     }
 
     @Override
@@ -4771,9 +4731,9 @@ public class ActivityManagerService extends IActivityManager.Stub
                 intent.setFlags(FLAG_ACTIVITY_NEW_TASK);
                 intent.setComponent(recentsComponent);
                 intent.putExtras(options);
-                return mActivityStarter.startActivityMayWait(null, recentsUid, recentsPackage,
-                        intent, null, null, null, null, null, 0, 0, null, null, null, activityOptions,
-                        false, userId, null, "startRecentsActivity");
+                return mActivityStartController.startActivityMayWait(null, recentsUid,
+                        recentsPackage, intent, null, null, null, null, null, 0, 0, null, null,
+                        null, activityOptions, false, userId, null, "startRecentsActivity");
             }
         } finally {
             Binder.restoreCallingIdentity(origId);
@@ -4946,7 +4906,7 @@ public class ActivityManagerService extends IActivityManager.Stub
             }
 
             final long origId = Binder.clearCallingIdentity();
-            int res = mActivityStarter.startActivityLocked(r.app.thread, intent,
+            int res = mActivityStartController.startActivity(r.app.thread, intent,
                     null /*ephemeralIntent*/, r.resolvedType, aInfo, null /*rInfo*/, null,
                     null, resultTo != null ? resultTo.appToken : null, resultWho, requestCode, -1,
                     r.launchedFromUid, r.launchedFromPackage, -1, r.launchedFromUid, 0, options,
@@ -4976,20 +4936,6 @@ public class ActivityManagerService extends IActivityManager.Stub
         }
     }
 
-    final int startActivityInPackage(int uid, String callingPackage,
-            Intent intent, String resolvedType, IBinder resultTo,
-            String resultWho, int requestCode, int startFlags, Bundle bOptions, int userId,
-            TaskRecord inTask, String reason) {
-
-        userId = mUserController.handleIncomingUser(Binder.getCallingPid(), Binder.getCallingUid(),
-                userId, false, ALLOW_FULL_ONLY, "startActivityInPackage", null);
-
-        // TODO: Switch to user app stacks here.
-        return mActivityStarter.startActivityMayWait(null, uid, callingPackage, intent,
-                resolvedType, null, null, resultTo, resultWho, requestCode, startFlags,
-                null, null, null, bOptions, false, userId, inTask, reason);
-    }
-
     @Override
     public final int startActivities(IApplicationThread caller, String callingPackage,
             Intent[] intents, String[] resolvedTypes, IBinder resultTo, Bundle bOptions,
@@ -4999,21 +4945,8 @@ public class ActivityManagerService extends IActivityManager.Stub
         userId = mUserController.handleIncomingUser(Binder.getCallingPid(), Binder.getCallingUid(),
                 userId, false, ALLOW_FULL_ONLY, reason, null);
         // TODO: Switch to user app stacks here.
-        int ret = mActivityStarter.startActivities(caller, -1, callingPackage, intents,
-                resolvedTypes, resultTo, bOptions, userId, reason);
-        return ret;
-    }
-
-    final int startActivitiesInPackage(int uid, String callingPackage,
-            Intent[] intents, String[] resolvedTypes, IBinder resultTo,
-            Bundle bOptions, int userId) {
-
-        final String reason = "startActivityInPackage";
-        userId = mUserController.handleIncomingUser(Binder.getCallingPid(), Binder.getCallingUid(),
-                userId, false, ALLOW_FULL_ONLY, reason, null);
-        // TODO: Switch to user app stacks here.
-        int ret = mActivityStarter.startActivities(null, uid, callingPackage, intents, resolvedTypes,
-                resultTo, bOptions, userId, reason);
+        int ret = mActivityStartController.startActivities(caller, -1, callingPackage,
+                intents, resolvedTypes, resultTo, bOptions, userId, reason);
         return ret;
     }
 
@@ -6667,7 +6600,7 @@ public class ActivityManagerService extends IActivityManager.Stub
                 ProcessList.INVALID_ADJ, callerWillRestart, true, doit, evenPersistent,
                 packageName == null ? ("stop user " + userId) : ("stop " + packageName));
 
-        didSomething |= mActivityStarter.clearPendingActivityLaunchesLocked(packageName);
+        didSomething |= mActivityStartController.clearPendingActivityLaunches(packageName);
 
         if (mStackSupervisor.finishDisabledPackageActivitiesLocked(
                 packageName, null, doit, evenPersistent, userId)) {
@@ -10501,7 +10434,7 @@ public class ActivityManagerService extends IActivityManager.Stub
     public void setTaskWindowingMode(int taskId, int windowingMode, boolean toTop) {
         if (windowingMode == WINDOWING_MODE_SPLIT_SCREEN_PRIMARY) {
             setTaskWindowingModeSplitScreenPrimary(taskId, SPLIT_SCREEN_CREATE_MODE_TOP_OR_LEFT,
-                    toTop, ANIMATE, null /* initialBounds */);
+                    toTop, ANIMATE, null /* initialBounds */, true /* showRecents */);
             return;
         }
         enforceCallerIsRecentsOrHasPermission(MANAGE_ACTIVITY_STACKS, "setTaskWindowingMode()");
@@ -10547,10 +10480,12 @@ public class ActivityManagerService extends IActivityManager.Stub
      * @param animate Whether we should play an animation for the moving the task.
      * @param initialBounds If the primary stack gets created, it will use these bounds for the
      *                      stack. Pass {@code null} to use default bounds.
+     * @param showRecents If the recents activity should be shown on the other side of the task
+     *                    going into split-screen mode.
      */
     @Override
     public boolean setTaskWindowingModeSplitScreenPrimary(int taskId, int createMode, boolean toTop,
-            boolean animate, Rect initialBounds) {
+            boolean animate, Rect initialBounds, boolean showRecents) {
         enforceCallerIsRecentsOrHasPermission(MANAGE_ACTIVITY_STACKS,
                 "setTaskWindowingModeSplitScreenPrimary()");
         synchronized (this) {
@@ -10575,7 +10510,7 @@ public class ActivityManagerService extends IActivityManager.Stub
                 if (toTop) {
                     stack.moveToFront("setTaskWindowingModeSplitScreenPrimary", task);
                 }
-                stack.setWindowingMode(WINDOWING_MODE_SPLIT_SCREEN_PRIMARY, animate);
+                stack.setWindowingMode(WINDOWING_MODE_SPLIT_SCREEN_PRIMARY, animate, showRecents);
                 return windowingMode != task.getWindowingMode();
             } finally {
                 Binder.restoreCallingIdentity(ident);
@@ -11755,6 +11690,10 @@ public class ActivityManagerService extends IActivityManager.Stub
         return AppGlobals.getPackageManager();
     }
 
+    ActivityStartController getActivityStartController() {
+        return mActivityStartController;
+    }
+
     PackageManagerInternal getPackageManagerInternalLocked() {
         if (mPackageManagerInt == null) {
             mPackageManagerInt = LocalServices.getService(PackageManagerInternal.class);
@@ -12604,7 +12543,16 @@ public class ActivityManagerService extends IActivityManager.Stub
         synchronized (this) {
             final long ident = Binder.clearCallingIdentity();
             try {
-                mActivityStarter.startConfirmCredentialIntent(intent, options);
+                intent.addFlags(FLAG_ACTIVITY_NEW_TASK |
+                        FLAG_ACTIVITY_EXCLUDE_FROM_RECENTS |
+                        FLAG_ACTIVITY_TASK_ON_HOME);
+                ActivityOptions activityOptions = options != null
+                        ? new ActivityOptions(options)
+                        : ActivityOptions.makeBasic();
+                activityOptions.setLaunchTaskId(
+                        mStackSupervisor.getHomeActivity().getTask().taskId);
+                mContext.startActivityAsUser(intent, activityOptions.toBundle(),
+                        UserHandle.CURRENT);
             } finally {
                 Binder.restoreCallingIdentity(ident);
             }
@@ -12623,9 +12571,7 @@ public class ActivityManagerService extends IActivityManager.Stub
             mAppSwitchesAllowedTime = SystemClock.uptimeMillis()
                     + APP_SWITCH_DELAY_TIME;
             mDidAppSwitch = false;
-            mHandler.removeMessages(DO_PENDING_ACTIVITY_LAUNCHES_MSG);
-            Message msg = mHandler.obtainMessage(DO_PENDING_ACTIVITY_LAUNCHES_MSG);
-            mHandler.sendMessageDelayed(msg, APP_SWITCH_DELAY_TIME);
+            mActivityStartController.schedulePendingActivityLaunches(APP_SWITCH_DELAY_TIME);
         }
     }
 
@@ -15491,7 +15437,7 @@ public class ActivityManagerService extends IActivityManager.Stub
 
     private void dumpActivityStarterLocked(PrintWriter pw, String dumpPackage) {
         pw.println("ACTIVITY MANAGER STARTER (dumpsys activity starter)");
-        mActivityStarter.dump(pw, "", dumpPackage);
+        mActivityStartController.dump(pw, "", dumpPackage);
     }
 
     void dumpActivitiesLocked(FileDescriptor fd, PrintWriter pw, String[] args,
@@ -24248,8 +24194,8 @@ public class ActivityManagerService extends IActivityManager.Stub
             }
 
             synchronized (ActivityManagerService.this) {
-                return startActivitiesInPackage(packageUid, packageName, intents, resolvedTypes,
-                        /*resultTo*/ null, bOptions, userId);
+                return mActivityStartController.startActivitiesInPackage(packageUid, packageName,
+                        intents, resolvedTypes, /*resultTo*/ null, bOptions, userId);
             }
         }
 
@@ -24400,7 +24346,7 @@ public class ActivityManagerService extends IActivityManager.Stub
                     pw.println("  Reason: " + reason);
                 }
                 pw.println();
-                mActivityStarter.dump(pw, "  ", null);
+                mActivityStartController.dump(pw, "  ", null);
                 pw.println();
                 pw.println("-------------------------------------------------------------------------------");
                 dumpActivitiesLocked(null /* fd */, pw, null /* args */, 0 /* opti */,

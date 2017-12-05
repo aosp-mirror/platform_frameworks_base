@@ -91,7 +91,7 @@ bool combinationMatch(const vector<int>& children, const LogicalOperation& opera
     return matched;
 }
 
-bool matchesSimple(const SimpleLogEntryMatcher& simpleMatcher, const LogEvent& event) {
+bool matchesSimple(const SimpleAtomMatcher& simpleMatcher, const LogEvent& event) {
     const int tagId = event.GetTagId();
 
     if (simpleMatcher.tag() != tagId) {

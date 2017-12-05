@@ -735,6 +735,14 @@ public class CarrierConfigManager {
     public static final String KEY_SHOW_ICCID_IN_SIM_STATUS_BOOL = "show_iccid_in_sim_status_bool";
 
     /**
+     * Flag specifying whether signal strength is hidden in SIM Status screen,
+     * default to false.
+     * @hide
+     */
+    public static final String KEY_HIDE_SIGNAL_STRENGTH_IN_SIM_STATUS_BOOL =
+        "hide_signal_strength_in_sim_status_bool";
+
+    /**
      * Flag specifying whether an additional (client initiated) intent needs to be sent on System
      * update
      */
@@ -989,6 +997,12 @@ public class CarrierConfigManager {
     public static final String KEY_STK_DISABLE_LAUNCH_BROWSER_BOOL =
             "stk_disable_launch_browser_bool";
 
+    /**
+     * Boolean indicating if show data RAT icon on status bar even when data is disabled
+     * @hide
+     */
+    public static final String KEY_ALWAYS_SHOW_DATA_RAT_ICON_BOOL =
+            "always_show_data_rat_icon_bool";
 
     // These variables are used by the MMS service and exposed through another API, {@link
     // SmsManager}. The variable names and string values are copied from there.
@@ -1768,6 +1782,7 @@ public class CarrierConfigManager {
         sDefaults.putString(KEY_CARRIER_VVM_PACKAGE_NAME_STRING, "");
         sDefaults.putStringArray(KEY_CARRIER_VVM_PACKAGE_NAME_STRING_ARRAY, null);
         sDefaults.putBoolean(KEY_SHOW_ICCID_IN_SIM_STATUS_BOOL, false);
+        sDefaults.putBoolean(KEY_HIDE_SIGNAL_STRENGTH_IN_SIM_STATUS_BOOL, false);
         sDefaults.putBoolean(KEY_CI_ACTION_ON_SYS_UPDATE_BOOL, false);
         sDefaults.putString(KEY_CI_ACTION_ON_SYS_UPDATE_INTENT_STRING, "");
         sDefaults.putString(KEY_CI_ACTION_ON_SYS_UPDATE_EXTRA_STRING, "");
@@ -1967,6 +1982,7 @@ public class CarrierConfigManager {
         sDefaults.putStringArray(KEY_FEATURE_ACCESS_CODES_STRING_ARRAY, null);
         sDefaults.putBoolean(KEY_IDENTIFY_HIGH_DEFINITION_CALLS_IN_CALL_LOG_BOOL, false);
         sDefaults.putBoolean(KEY_SPN_DISPLAY_RULE_USE_ROAMING_FROM_SERVICE_STATE_BOOL, false);
+        sDefaults.putBoolean(KEY_ALWAYS_SHOW_DATA_RAT_ICON_BOOL, false);
     }
 
     /**

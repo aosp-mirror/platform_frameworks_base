@@ -3123,6 +3123,10 @@ public final class Settings {
          * to dream after a period of inactivity.  This value is also known as the
          * user activity timeout period since the screen isn't necessarily turned off
          * when it expires.
+         *
+         * <p>
+         * This value is bounded by maximum timeout set by
+         * {@link android.app.admin.DevicePolicyManager#setMaximumTimeToLock(ComponentName, long)}.
          */
         public static final String SCREEN_OFF_TIMEOUT = "screen_off_timeout";
 
@@ -5331,6 +5335,42 @@ public final class Settings {
          */
         @TestApi
         public static final String AUTOFILL_FEATURE_FIELD_DETECTION = "autofill_field_detection";
+
+        /**
+         * Experimental autofill feature.
+         *
+         * <p>TODO(b/67867469): document (or remove) once feature is finished
+         * @hide
+         */
+        public static final String AUTOFILL_USER_DATA_MAX_USER_DATA_SIZE =
+                "autofill_user_data_max_user_data_size";
+
+        /**
+         * Experimental autofill feature.
+         *
+         * <p>TODO(b/67867469): document (or remove) once feature is finished
+         * @hide
+         */
+        public static final String AUTOFILL_USER_DATA_MAX_FIELD_CLASSIFICATION_IDS_SIZE =
+                "autofill_user_data_max_field_classification_size";
+
+        /**
+         * Experimental autofill feature.
+         *
+         * <p>TODO(b/67867469): document (or remove) once feature is finished
+         * @hide
+         */
+        public static final String AUTOFILL_USER_DATA_MAX_VALUE_LENGTH =
+                "autofill_user_data_max_value_length";
+
+        /**
+         * Experimental autofill feature.
+         *
+         * <p>TODO(b/67867469): document (or remove) once feature is finished
+         * @hide
+         */
+        public static final String AUTOFILL_USER_DATA_MIN_VALUE_LENGTH =
+                "autofill_user_data_min_value_length";
 
         /**
          * @deprecated Use {@link android.provider.Settings.Global#DEVICE_PROVISIONED} instead

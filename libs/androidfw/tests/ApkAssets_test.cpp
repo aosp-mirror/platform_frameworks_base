@@ -39,7 +39,6 @@ TEST(ApkAssetsTest, LoadApk) {
 
   const LoadedPackage* loaded_package = loaded_arsc->GetPackageForId(0x7f010000);
   ASSERT_NE(nullptr, loaded_package);
-  EXPECT_TRUE(loaded_package->IsVerified());
 
   std::unique_ptr<Asset> asset = loaded_apk->Open("res/layout/main.xml");
   ASSERT_NE(nullptr, asset);
@@ -59,7 +58,6 @@ TEST(ApkAssetsTest, LoadApkFromFd) {
 
   const LoadedPackage* loaded_package = loaded_arsc->GetPackageForId(0x7f010000);
   ASSERT_NE(nullptr, loaded_package);
-  EXPECT_TRUE(loaded_package->IsVerified());
 
   std::unique_ptr<Asset> asset = loaded_apk->Open("res/layout/main.xml");
   ASSERT_NE(nullptr, asset);
@@ -112,20 +110,6 @@ TEST(ApkAssetsTest, LoadApkWithIdmap) {
 
   std::unique_ptr<const ApkAssets> loaded_overlay_apk = ApkAssets::LoadOverlay(tf.path);
   ASSERT_NE(nullptr, loaded_overlay_apk);
-}
-
-TEST(ApkAssetsTest, LoadUnverifiableApk) {
-  std::unique_ptr<const ApkAssets> loaded_apk =
-      ApkAssets::Load(GetTestDataPath() + "/unverified/unverified.apk");
-  ASSERT_NE(nullptr, loaded_apk);
-
-  const LoadedArsc* loaded_arsc = loaded_apk->GetLoadedArsc();
-  ASSERT_NE(nullptr, loaded_arsc);
-
-  const LoadedPackage* loaded_package = loaded_arsc->GetPackageForId(0x7f010000);
-  ASSERT_NE(nullptr, loaded_package);
-
-  EXPECT_FALSE(loaded_package->IsVerified());
 }
 
 TEST(ApkAssetsTest, CreateAndDestroyAssetKeepsApkAssetsOpen) {

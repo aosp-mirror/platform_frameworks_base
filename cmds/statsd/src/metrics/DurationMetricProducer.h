@@ -45,6 +45,8 @@ public:
 
     virtual ~DurationMetricProducer();
 
+    virtual sp<AnomalyTracker> createAnomalyTracker(const Alert &alert) override;
+
     void finish() override;
 
     // TODO: Implement this later.
@@ -79,13 +81,13 @@ private:
 
     const DurationMetric mMetric;
 
-    // Index of the SimpleLogEntryMatcher which defines the start.
+    // Index of the SimpleAtomMatcher which defines the start.
     const size_t mStartIndex;
 
-    // Index of the SimpleLogEntryMatcher which defines the stop.
+    // Index of the SimpleAtomMatcher which defines the stop.
     const size_t mStopIndex;
 
-    // Index of the SimpleLogEntryMatcher which defines the stop all for all dimensions.
+    // Index of the SimpleAtomMatcher which defines the stop all for all dimensions.
     const size_t mStopAllIndex;
 
     // nest counting -- for the same key, stops must match the number of starts to make real stop
@@ -118,4 +120,3 @@ private:
 }  // namespace statsd
 }  // namespace os
 }  // namespace android
-

@@ -3090,6 +3090,27 @@ public class DevicePolicyManagerTest extends DpmTestBase {
         assertEquals(-1, dpm.getLastSecurityLogRetrievalTime());
     }
 
+    public void testSetSystemSettingFailWithNonWhitelistedSettings() throws Exception {
+        mContext.binder.callingUid = DpmMockContext.CALLER_SYSTEM_USER_UID;
+        setupDeviceOwner();
+        assertExpectException(SecurityException.class, null, () ->
+                dpm.setSystemSetting(admin1, Settings.System.SCREEN_BRIGHTNESS_FOR_VR, "0"));
+    }
+
+    public void testSetSystemSettingFailWithPO() throws Exception {
+        setupProfileOwner();
+        assertExpectException(SecurityException.class, null, () ->
+                dpm.setSystemSetting(admin1, Settings.System.SCREEN_BRIGHTNESS, "0"));
+    }
+
+    public void testSetSystemSetting() throws Exception {
+        mContext.binder.callingUid = DpmMockContext.CALLER_SYSTEM_USER_UID;
+        setupDeviceOwner();
+        dpm.setSystemSetting(admin1, Settings.System.SCREEN_BRIGHTNESS, "0");
+        verify(getServices().settings).settingsSystemPutString(
+                Settings.System.SCREEN_BRIGHTNESS, "0");
+    }
+
     public void testSetTime() throws Exception {
         mContext.binder.callingUid = DpmMockContext.CALLER_SYSTEM_USER_UID;
         setupDeviceOwner();

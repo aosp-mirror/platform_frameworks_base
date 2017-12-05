@@ -324,6 +324,16 @@ StatsdConfig build_fake_config() {
     durationMetric->set_aggregation_type(DurationMetric_AggregationType_SUM);
     durationMetric->set_what("SCREEN_IS_ON");
 
+    // Anomaly threshold for background count.
+    alert = config.add_alert();
+    alert->set_name("ALERT_8");
+    alert->set_metric_name("METRIC_8");
+    alert->set_number_of_buckets(4);
+    alert->set_trigger_if_sum_gt(2000000000); // 2 seconds
+    alert->set_refractory_period_secs(120);
+    details = alert->mutable_incidentd_details();
+    details->add_section(-1);
+
     // Value metric to count KERNEL_WAKELOCK when screen turned on
     ValueMetric* valueMetric = config.add_value_metric();
     valueMetric->set_name("METRIC_6");
@@ -348,69 +358,69 @@ StatsdConfig build_fake_config() {
     gaugeMetric->mutable_bucket()->set_bucket_size_millis(60 * 1000L);
 
     // Event matchers............
-    LogEntryMatcher* temperatureEntryMatcher = config.add_log_entry_matcher();
-    temperatureEntryMatcher->set_name("DEVICE_TEMPERATURE");
-    temperatureEntryMatcher->mutable_simple_log_entry_matcher()->set_tag(
+    AtomMatcher* temperatureAtomMatcher = config.add_atom_matcher();
+    temperatureAtomMatcher->set_name("DEVICE_TEMPERATURE");
+    temperatureAtomMatcher->mutable_simple_atom_matcher()->set_tag(
         DEVICE_TEMPERATURE_TAG_ID);
 
-    LogEntryMatcher* eventMatcher = config.add_log_entry_matcher();
+    AtomMatcher* eventMatcher = config.add_atom_matcher();
     eventMatcher->set_name("SCREEN_TURNED_ON");
-    SimpleLogEntryMatcher* simpleLogEntryMatcher = eventMatcher->mutable_simple_log_entry_matcher();
-    simpleLogEntryMatcher->set_tag(SCREEN_EVENT_TAG_ID);
-    KeyValueMatcher* keyValueMatcher = simpleLogEntryMatcher->add_key_value_matcher();
+    SimpleAtomMatcher* simpleAtomMatcher = eventMatcher->mutable_simple_atom_matcher();
+    simpleAtomMatcher->set_tag(SCREEN_EVENT_TAG_ID);
+    KeyValueMatcher* keyValueMatcher = simpleAtomMatcher->add_key_value_matcher();
     keyValueMatcher->mutable_key_matcher()->set_key(SCREEN_EVENT_STATE_KEY);
     keyValueMatcher->set_eq_int(SCREEN_EVENT_ON_VALUE);
 
-    eventMatcher = config.add_log_entry_matcher();
+    eventMatcher = config.add_atom_matcher();
     eventMatcher->set_name("SCREEN_TURNED_OFF");
-    simpleLogEntryMatcher = eventMatcher->mutable_simple_log_entry_matcher();
-    simpleLogEntryMatcher->set_tag(SCREEN_EVENT_TAG_ID);
-    keyValueMatcher = simpleLogEntryMatcher->add_key_value_matcher();
+    simpleAtomMatcher = eventMatcher->mutable_simple_atom_matcher();
+    simpleAtomMatcher->set_tag(SCREEN_EVENT_TAG_ID);
+    keyValueMatcher = simpleAtomMatcher->add_key_value_matcher();
     keyValueMatcher->mutable_key_matcher()->set_key(SCREEN_EVENT_STATE_KEY);
     keyValueMatcher->set_eq_int(SCREEN_EVENT_OFF_VALUE);
 
-    eventMatcher = config.add_log_entry_matcher();
+    eventMatcher = config.add_atom_matcher();
     eventMatcher->set_name("PROCESS_STATE_CHANGE");
-    simpleLogEntryMatcher = eventMatcher->mutable_simple_log_entry_matcher();
-    simpleLogEntryMatcher->set_tag(UID_PROCESS_STATE_TAG_ID);
+    simpleAtomMatcher = eventMatcher->mutable_simple_atom_matcher();
+    simpleAtomMatcher->set_tag(UID_PROCESS_STATE_TAG_ID);
 
-    eventMatcher = config.add_log_entry_matcher();
+    eventMatcher = config.add_atom_matcher();
     eventMatcher->set_name("APP_GOES_BACKGROUND");
-    simpleLogEntryMatcher = eventMatcher->mutable_simple_log_entry_matcher();
-    simpleLogEntryMatcher->set_tag(APP_USAGE_ID);
-    keyValueMatcher = simpleLogEntryMatcher->add_key_value_matcher();
+    simpleAtomMatcher = eventMatcher->mutable_simple_atom_matcher();
+    simpleAtomMatcher->set_tag(APP_USAGE_ID);
+    keyValueMatcher = simpleAtomMatcher->add_key_value_matcher();
     keyValueMatcher->mutable_key_matcher()->set_key(APP_USAGE_STATE_KEY);
     keyValueMatcher->set_eq_int(APP_USAGE_BACKGROUND);
 
-    eventMatcher = config.add_log_entry_matcher();
+    eventMatcher = config.add_atom_matcher();
     eventMatcher->set_name("APP_GOES_FOREGROUND");
-    simpleLogEntryMatcher = eventMatcher->mutable_simple_log_entry_matcher();
-    simpleLogEntryMatcher->set_tag(APP_USAGE_ID);
-    keyValueMatcher = simpleLogEntryMatcher->add_key_value_matcher();
+    simpleAtomMatcher = eventMatcher->mutable_simple_atom_matcher();
+    simpleAtomMatcher->set_tag(APP_USAGE_ID);
+    keyValueMatcher = simpleAtomMatcher->add_key_value_matcher();
     keyValueMatcher->mutable_key_matcher()->set_key(APP_USAGE_STATE_KEY);
     keyValueMatcher->set_eq_int(APP_USAGE_FOREGROUND);
 
-    eventMatcher = config.add_log_entry_matcher();
+    eventMatcher = config.add_atom_matcher();
     eventMatcher->set_name("APP_GET_WL");
-    simpleLogEntryMatcher = eventMatcher->mutable_simple_log_entry_matcher();
-    simpleLogEntryMatcher->set_tag(WAKE_LOCK_TAG_ID);
-    keyValueMatcher = simpleLogEntryMatcher->add_key_value_matcher();
+    simpleAtomMatcher = eventMatcher->mutable_simple_atom_matcher();
+    simpleAtomMatcher->set_tag(WAKE_LOCK_TAG_ID);
+    keyValueMatcher = simpleAtomMatcher->add_key_value_matcher();
     keyValueMatcher->mutable_key_matcher()->set_key(WAKE_LOCK_STATE_KEY);
     keyValueMatcher->set_eq_int(WAKE_LOCK_ACQUIRE_VALUE);
 
-    eventMatcher = config.add_log_entry_matcher();
+    eventMatcher = config.add_atom_matcher();
     eventMatcher->set_name("APP_RELEASE_WL");
-    simpleLogEntryMatcher = eventMatcher->mutable_simple_log_entry_matcher();
-    simpleLogEntryMatcher->set_tag(WAKE_LOCK_TAG_ID);
-    keyValueMatcher = simpleLogEntryMatcher->add_key_value_matcher();
+    simpleAtomMatcher = eventMatcher->mutable_simple_atom_matcher();
+    simpleAtomMatcher->set_tag(WAKE_LOCK_TAG_ID);
+    keyValueMatcher = simpleAtomMatcher->add_key_value_matcher();
     keyValueMatcher->mutable_key_matcher()->set_key(WAKE_LOCK_STATE_KEY);
     keyValueMatcher->set_eq_int(WAKE_LOCK_RELEASE_VALUE);
 
     // pulled events
-    eventMatcher = config.add_log_entry_matcher();
+    eventMatcher = config.add_atom_matcher();
     eventMatcher->set_name("KERNEL_WAKELOCK");
-    simpleLogEntryMatcher = eventMatcher->mutable_simple_log_entry_matcher();
-    simpleLogEntryMatcher->set_tag(KERNEL_WAKELOCK_TAG_ID);
+    simpleAtomMatcher = eventMatcher->mutable_simple_atom_matcher();
+    simpleAtomMatcher->set_tag(KERNEL_WAKELOCK_TAG_ID);
 
     // Conditions.............
     Condition* condition = config.add_condition();

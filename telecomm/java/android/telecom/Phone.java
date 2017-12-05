@@ -223,6 +223,13 @@ public final class Phone {
         }
     }
 
+    final void internalOnHandoverFailed(String callId, int error) {
+        Call call = mCallByTelecomCallId.get(callId);
+        if (call != null) {
+            call.internalOnHandoverFailed(error);
+        }
+    }
+
     /**
      * Called to destroy the phone and cleanup any lingering calls.
      */
