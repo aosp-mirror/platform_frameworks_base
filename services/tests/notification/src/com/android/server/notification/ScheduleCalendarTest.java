@@ -21,10 +21,10 @@ import static junit.framework.Assert.assertFalse;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
+import android.service.notification.ScheduleCalendar;
 import android.service.notification.ZenModeConfig;
 import android.support.test.runner.AndroidJUnit4;
 import android.test.suitebuilder.annotation.SmallTest;
-import android.util.Slog;
 
 import org.junit.Before;
 import org.junit.Test;
