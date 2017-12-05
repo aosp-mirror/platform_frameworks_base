@@ -119,11 +119,6 @@ class LoadedPackage {
     return overlay_;
   }
 
-  // Returns true if this package is verified to be valid.
-  inline bool IsVerified() const {
-    return verified_;
-  }
-
   // Returns the map of package name to package ID used in this LoadedPackage. At runtime, a
   // package could have been assigned a different package ID than what this LoadedPackage was
   // compiled with. AssetManager rewrites the package IDs so that they are compatible at runtime.
@@ -145,7 +140,6 @@ class LoadedPackage {
 
   LoadedPackage();
 
-  template <bool Verified>
   bool FindEntry(const util::unique_cptr<TypeSpec>& type_spec_ptr, uint16_t entry_idx,
                  const ResTable_config& config, FindEntryResult* out_entry) const;
 
@@ -157,7 +151,6 @@ class LoadedPackage {
   bool dynamic_ = false;
   bool system_ = false;
   bool overlay_ = false;
-  bool verified_ = true;
 
   ByteBucketArray<util::unique_cptr<TypeSpec>> type_specs_;
   std::vector<DynamicPackageEntry> dynamic_package_map_;

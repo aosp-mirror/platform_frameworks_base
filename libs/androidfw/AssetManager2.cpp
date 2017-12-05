@@ -299,10 +299,9 @@ ApkAssetsCookie AssetManager2::FindEntry(uint32_t resid, uint16_t density_overri
 
   const PackageGroup& package_group = package_groups_[idx];
   const size_t package_count = package_group.packages_.size();
+  FindEntryResult current_entry;
   for (size_t i = 0; i < package_count; i++) {
     const LoadedPackage* loaded_package = package_group.packages_[i];
-
-    FindEntryResult current_entry;
     if (!loaded_package->FindEntry(type_idx, entry_id, *desired_config, &current_entry)) {
       continue;
     }
@@ -394,7 +393,7 @@ ApkAssetsCookie AssetManager2::GetResource(uint32_t resid, bool may_be_bag,
     return kInvalidCookie;
   }
 
-  if (dtohl(entry.entry->flags) & ResTable_entry::FLAG_COMPLEX) {
+  if (dtohs(entry.entry->flags) & ResTable_entry::FLAG_COMPLEX) {
     if (!may_be_bag) {
       LOG(ERROR) << base::StringPrintf("Resource %08x is a complex map type.", resid);
       return kInvalidCookie;
