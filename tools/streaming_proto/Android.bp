@@ -24,6 +24,10 @@ cc_defaults {
         "stream_proto_utils.cpp",
         "string_utils.cpp",
     ],
+    cflags: [
+        "-Wall",
+        "-Werror",
+    ],
 
     shared_libs: ["libprotoc"],
 }
