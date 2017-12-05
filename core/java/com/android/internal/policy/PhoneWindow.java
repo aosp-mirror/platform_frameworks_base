@@ -2040,6 +2040,10 @@ public class PhoneWindow extends Window implements MenuBuilder.Callback {
                 if (getKeyguardManager().inKeyguardRestrictedInputMode()) {
                     break;
                 }
+                if ((getContext().getResources().getConfiguration().uiMode
+                        & Configuration.UI_MODE_TYPE_MASK) == Configuration.UI_MODE_TYPE_WATCH) {
+                    break;
+                }
                 if (event.isTracking() && !event.isCanceled()) {
                     launchDefaultSearch(event);
                 }
