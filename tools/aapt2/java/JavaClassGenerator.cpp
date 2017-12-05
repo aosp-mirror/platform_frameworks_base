@@ -272,7 +272,7 @@ void JavaClassGenerator::ProcessStyleable(const ResourceNameRef& name, const Res
   // Build the JavaDoc comment for the Styleable array. This has references to child attributes
   // and what possible values can be used for them.
   const size_t attr_count = sorted_attributes.size();
-  if (attr_count > 0) {
+  if (out_class_def != nullptr && attr_count > 0) {
     std::stringstream styleable_comment;
     if (!styleable.GetComment().empty()) {
       styleable_comment << styleable.GetComment() << "\n";
@@ -356,54 +356,56 @@ void JavaClassGenerator::ProcessStyleable(const ResourceNameRef& name, const Res
       continue;
     }
 
-    StringPiece comment = styleable_attr.attr_ref->GetComment();
-    if (styleable_attr.symbol.value().attribute && comment.empty()) {
-      comment = styleable_attr.symbol.value().attribute->GetComment();
+    if (out_class_def != nullptr) {
+      StringPiece comment = styleable_attr.attr_ref->GetComment();
+      if (styleable_attr.symbol.value().attribute && comment.empty()) {
+        comment = styleable_attr.symbol.value().attribute->GetComment();
+      }
+
+      if (comment.contains("@removed")) {
+        // Removed attributes are public but hidden from the documentation, so
+        // don't emit them as part of the class documentation.
+        continue;
+      }
+
+      const ResourceName& attr_name = styleable_attr.attr_ref->name.value();
+
+      StringPiece package_name = attr_name.package;
+      if (package_name.empty()) {
+        package_name = context_->GetCompilationPackage();
+      }
+
+      std::unique_ptr<IntMember> index_member =
+          util::make_unique<IntMember>(sorted_attributes[i].field_name, static_cast<uint32_t>(i));
+
+      AnnotationProcessor* attr_processor = index_member->GetCommentBuilder();
+
+      if (!comment.empty()) {
+        attr_processor->AppendComment("<p>\n@attr description");
+        attr_processor->AppendComment(comment);
+      } else {
+        std::stringstream default_comment;
+        default_comment << "<p>This symbol is the offset where the "
+                        << "{@link " << package_name << ".R.attr#"
+                        << TransformToFieldName(attr_name.entry) << "}\n"
+                        << "attribute's value can be found in the "
+                        << "{@link #" << array_field_name << "} array.";
+        attr_processor->AppendComment(default_comment.str());
+      }
+
+      attr_processor->AppendNewLine();
+      AddAttributeFormatDoc(attr_processor, styleable_attr.symbol.value().attribute.get());
+      attr_processor->AppendNewLine();
+      attr_processor->AppendComment(
+          StringPrintf("@attr name %s:%s", package_name.data(), attr_name.entry.data()));
+
+      out_class_def->AddMember(std::move(index_member));
     }
-
-    if (comment.contains("@removed")) {
-      // Removed attributes are public but hidden from the documentation, so
-      // don't emit them as part of the class documentation.
-      continue;
-    }
-
-    const ResourceName& attr_name = styleable_attr.attr_ref->name.value();
-
-    StringPiece package_name = attr_name.package;
-    if (package_name.empty()) {
-      package_name = context_->GetCompilationPackage();
-    }
-
-    std::unique_ptr<IntMember> index_member = util::make_unique<IntMember>(
-        sorted_attributes[i].field_name, static_cast<uint32_t>(i));
-
-    AnnotationProcessor* attr_processor = index_member->GetCommentBuilder();
-
-    if (!comment.empty()) {
-      attr_processor->AppendComment("<p>\n@attr description");
-      attr_processor->AppendComment(comment);
-    } else {
-      std::stringstream default_comment;
-      default_comment << "<p>This symbol is the offset where the "
-                      << "{@link " << package_name << ".R.attr#"
-                      << TransformToFieldName(attr_name.entry) << "}\n"
-                      << "attribute's value can be found in the "
-                      << "{@link #" << array_field_name << "} array.";
-      attr_processor->AppendComment(default_comment.str());
-    }
-
-    attr_processor->AppendNewLine();
-    AddAttributeFormatDoc(attr_processor, styleable_attr.symbol.value().attribute.get());
-    attr_processor->AppendNewLine();
-    attr_processor->AppendComment(
-        StringPrintf("@attr name %s:%s", package_name.data(), attr_name.entry.data()));
 
     if (r_txt_printer != nullptr) {
       r_txt_printer->Println(
           StringPrintf("int styleable %s %zd", sorted_attributes[i].field_name.c_str(), i));
     }
-
-    out_class_def->AddMember(std::move(index_member));
   }
 
   // If there is a rewrite method to generate, add the statements that rewrite package IDs
@@ -434,31 +436,33 @@ void JavaClassGenerator::ProcessResource(const ResourceNameRef& name, const Reso
   }
 
   const std::string field_name = TransformToFieldName(name.entry);
-  std::unique_ptr<ResourceMember> resource_member =
-      util::make_unique<ResourceMember>(field_name, real_id);
+  if (out_class_def != nullptr) {
+    std::unique_ptr<ResourceMember> resource_member =
+        util::make_unique<ResourceMember>(field_name, real_id);
 
-  // Build the comments and annotations for this entry.
-  AnnotationProcessor* processor = resource_member->GetCommentBuilder();
+    // Build the comments and annotations for this entry.
+    AnnotationProcessor* processor = resource_member->GetCommentBuilder();
 
-  // Add the comments from any <public> tags.
-  if (entry.symbol_status.state != SymbolState::kUndefined) {
-    processor->AppendComment(entry.symbol_status.comment);
-  }
-
-  // Add the comments from all configurations of this entry.
-  for (const auto& config_value : entry.values) {
-    processor->AppendComment(config_value->value->GetComment());
-  }
-
-  // If this is an Attribute, append the format Javadoc.
-  if (!entry.values.empty()) {
-    if (Attribute* attr = ValueCast<Attribute>(entry.values.front()->value.get())) {
-      // We list out the available values for the given attribute.
-      AddAttributeFormatDoc(processor, attr);
+    // Add the comments from any <public> tags.
+    if (entry.symbol_status.state != SymbolState::kUndefined) {
+      processor->AppendComment(entry.symbol_status.comment);
     }
-  }
 
-  out_class_def->AddMember(std::move(resource_member));
+    // Add the comments from all configurations of this entry.
+    for (const auto& config_value : entry.values) {
+      processor->AppendComment(config_value->value->GetComment());
+    }
+
+    // If this is an Attribute, append the format Javadoc.
+    if (!entry.values.empty()) {
+      if (Attribute* attr = ValueCast<Attribute>(entry.values.front()->value.get())) {
+        // We list out the available values for the given attribute.
+        AddAttributeFormatDoc(processor, attr);
+      }
+    }
+
+    out_class_def->AddMember(std::move(resource_member));
+  }
 
   if (r_txt_printer != nullptr) {
     r_txt_printer->Print("int ")
@@ -576,7 +580,7 @@ bool JavaClassGenerator::Generate(const StringPiece& package_name_to_generate,
   }
 
   // Generate an onResourcesLoaded() callback if requested.
-  if (options_.rewrite_callback_options) {
+  if (out != nullptr && options_.rewrite_callback_options) {
     rewrite_method =
         util::make_unique<MethodDefinition>("public static void onResourcesLoaded(int p)");
     for (const std::string& package_to_callback :
@@ -597,8 +601,12 @@ bool JavaClassGenerator::Generate(const StringPiece& package_name_to_generate,
       const bool force_creation_if_empty =
           (options_.types == JavaClassGeneratorOptions::SymbolTypes::kPublic);
 
-      std::unique_ptr<ClassDefinition> class_def = util::make_unique<ClassDefinition>(
-          to_string(type->type), ClassQualifier::kStatic, force_creation_if_empty);
+      std::unique_ptr<ClassDefinition> class_def;
+      if (out != nullptr) {
+        class_def = util::make_unique<ClassDefinition>(
+            to_string(type->type), ClassQualifier::kStatic, force_creation_if_empty);
+      }
+
       if (!ProcessType(package_name_to_generate, *package, *type, class_def.get(),
                        rewrite_method.get(), r_txt_printer.get())) {
         return false;
@@ -615,16 +623,17 @@ bool JavaClassGenerator::Generate(const StringPiece& package_name_to_generate,
         }
       }
 
-      if (type->type == ResourceType::kStyleable &&
+      if (out != nullptr && type->type == ResourceType::kStyleable &&
           options_.types == JavaClassGeneratorOptions::SymbolTypes::kPublic) {
         // When generating a public R class, we don't want Styleable to be part
         // of the API. It is only emitted for documentation purposes.
         class_def->GetCommentBuilder()->AppendComment("@doconly");
       }
 
-      AppendJavaDocAnnotations(options_.javadoc_annotations, class_def->GetCommentBuilder());
-
-      r_class.AddMember(std::move(class_def));
+      if (out != nullptr) {
+        AppendJavaDocAnnotations(options_.javadoc_annotations, class_def->GetCommentBuilder());
+        r_class.AddMember(std::move(class_def));
+      }
     }
   }
 
@@ -632,8 +641,10 @@ bool JavaClassGenerator::Generate(const StringPiece& package_name_to_generate,
     r_class.AddMember(std::move(rewrite_method));
   }
 
-  AppendJavaDocAnnotations(options_.javadoc_annotations, r_class.GetCommentBuilder());
-  ClassDefinition::WriteJavaFile(&r_class, out_package_name, options_.use_final, out);
+  if (out != nullptr) {
+    AppendJavaDocAnnotations(options_.javadoc_annotations, r_class.GetCommentBuilder());
+    ClassDefinition::WriteJavaFile(&r_class, out_package_name, options_.use_final, out);
+  }
   return true;
 }
 

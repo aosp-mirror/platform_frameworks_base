@@ -975,25 +975,29 @@ class LinkCommand {
   bool WriteJavaFile(ResourceTable* table, const StringPiece& package_name_to_generate,
                      const StringPiece& out_package, const JavaClassGeneratorOptions& java_options,
                      const Maybe<std::string>& out_text_symbols_path = {}) {
-    if (!options_.generate_java_class_path) {
+    if (!options_.generate_java_class_path && !out_text_symbols_path) {
       return true;
     }
 
-    std::string out_path = options_.generate_java_class_path.value();
-    file::AppendPath(&out_path, file::PackageToPath(out_package));
-    if (!file::mkdirs(out_path)) {
-      context_->GetDiagnostics()->Error(DiagMessage() << "failed to create directory '" << out_path
-                                                      << "'");
-      return false;
-    }
+    std::string out_path;
+    std::unique_ptr<io::FileOutputStream> fout;
+    if (options_.generate_java_class_path) {
+      out_path = options_.generate_java_class_path.value();
+      file::AppendPath(&out_path, file::PackageToPath(out_package));
+      if (!file::mkdirs(out_path)) {
+        context_->GetDiagnostics()->Error(DiagMessage()
+                                          << "failed to create directory '" << out_path << "'");
+        return false;
+      }
 
-    file::AppendPath(&out_path, "R.java");
+      file::AppendPath(&out_path, "R.java");
 
-    io::FileOutputStream fout(out_path);
-    if (fout.HadError()) {
-      context_->GetDiagnostics()->Error(DiagMessage() << "failed writing to '" << out_path
-                                                      << "': " << fout.GetError());
-      return false;
+      fout = util::make_unique<io::FileOutputStream>(out_path);
+      if (fout->HadError()) {
+        context_->GetDiagnostics()->Error(DiagMessage() << "failed writing to '" << out_path
+                                                        << "': " << fout->GetError());
+        return false;
+      }
     }
 
     std::unique_ptr<io::FileOutputStream> fout_text;
@@ -1008,18 +1012,11 @@ class LinkCommand {
     }
 
     JavaClassGenerator generator(context_, table, java_options);
-    if (!generator.Generate(package_name_to_generate, out_package, &fout, fout_text.get())) {
+    if (!generator.Generate(package_name_to_generate, out_package, fout.get(), fout_text.get())) {
       context_->GetDiagnostics()->Error(DiagMessage(out_path) << generator.GetError());
       return false;
     }
 
-    fout.Flush();
-
-    if (fout.HadError()) {
-      context_->GetDiagnostics()->Error(DiagMessage() << "failed writing to '" << out_path
-                                                      << "': " << fout.GetError());
-      return false;
-    }
     return true;
   }
 
@@ -1838,7 +1835,7 @@ class LinkCommand {
       return 1;
     }
 
-    if (options_.generate_java_class_path) {
+    if (options_.generate_java_class_path || options_.generate_text_symbols_path) {
       if (!GenerateJavaClasses()) {
         return 1;
       }
