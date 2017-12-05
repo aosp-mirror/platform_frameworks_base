@@ -125,6 +125,11 @@ class WindowToken extends WindowContainer<WindowState> {
     }
 
     void setExiting() {
+        if (mChildren.size() == 0) {
+            super.removeImmediately();
+            return;
+        }
+
         // This token is exiting, so allow it to be removed when it no longer contains any windows.
         mPersistOnEmpty = false;
 
