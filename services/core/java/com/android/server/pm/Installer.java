@@ -503,7 +503,7 @@ public class Installer extends SystemService {
             throws InstallerException {
         if (!checkBeforeRemote()) return false;
         try {
-            return mInstalld.snapshotProfile(appId, packageName, codePath);
+            return mInstalld.createProfileSnapshot(appId, packageName, codePath);
         } catch (Exception e) {
             throw InstallerException.from(e);
         }
