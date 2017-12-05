@@ -418,6 +418,15 @@ const Attribute* Element::FindAttribute(const StringPiece& ns, const StringPiece
   return nullptr;
 }
 
+Attribute* Element::FindOrCreateAttribute(const StringPiece& ns, const StringPiece& name) {
+  Attribute* attr = FindAttribute(ns, name);
+  if (attr == nullptr) {
+    attributes.push_back(Attribute{ns.to_string(), name.to_string()});
+    attr = &attributes.back();
+  }
+  return attr;
+}
+
 Element* Element::FindChild(const StringPiece& ns, const StringPiece& name) {
   return FindChildWithAttribute(ns, name, {}, {}, {});
 }

@@ -199,6 +199,10 @@ class AssetManagerSymbolSource : public ISymbolSource {
   std::unique_ptr<SymbolTable::Symbol> FindByReference(
       const Reference& ref) override;
 
+  android::AssetManager* GetAssetManager() {
+    return &assets_;
+  }
+
  private:
   android::AssetManager assets_;
 
