@@ -18,7 +18,6 @@ package com.android.internal.telephony;
 
 import android.app.PendingIntent;
 import android.telephony.SubscriptionInfo;
-import com.android.internal.telephony.ISubscriptionListener;
 
 interface ISub {
     /**
