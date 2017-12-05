@@ -667,7 +667,7 @@ public class SurfaceControl {
      */
     @Deprecated
     public static void mergeToGlobalTransaction(Transaction t) {
-        synchronized(sGlobalTransaction) {
+        synchronized(SurfaceControl.class) {
             sGlobalTransaction.merge(t);
         }
     }
