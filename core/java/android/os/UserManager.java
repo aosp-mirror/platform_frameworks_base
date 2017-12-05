@@ -2111,15 +2111,34 @@ public class UserManager {
     }
 
     /**
-     * Set quiet mode of a managed profile.
+     * @see {@link #trySetQuietModeEnabled(boolean, UserHandle, IntentSender)}
      *
-     * @param userHandle The user handle of the profile.
-     * @param enableQuietMode Whether quiet mode should be enabled or disabled.
      * @hide
      */
-    public void setQuietModeEnabled(@UserIdInt int userHandle, boolean enableQuietMode) {
+    public boolean trySetQuietModeEnabled(boolean enableQuietMode, @NonNull UserHandle userHandle) {
+        return trySetQuietModeEnabled(enableQuietMode, userHandle, null);
+    }
+
+    /**
+     * Set quiet mode of a managed profile. If quiet mode is on, work apps don't run, generate
+     * notifications, or consume data or the battery. You also can’t access work apps or widgets.
+     * <p>
+     * If user credential is needed, confirm credential screen would be shown to user.
+     *
+     * @param enableQuietMode Whether work mode should be enabled or disabled.
+     * @param userHandle The user handle of the profile.
+     * @param target The target to start once work mode is enabled.
+     * @return {@code false} confirm credential screen is shown in order turn off quiet mode,
+     *         {@code true} otherwise.
+     * @throws IllegalArgumentException if enableWorkMode is {@code false} while target is not null.
+     * @throws IllegalArgumentException if userHandle is not a managed profile.
+     * @hide
+     */
+    public boolean trySetQuietModeEnabled(
+            boolean enableQuietMode, @NonNull UserHandle userHandle, IntentSender target) {
         try {
-            mService.setQuietModeEnabled(userHandle, enableQuietMode, null);
+            return mService.trySetQuietModeEnabled(
+                    enableQuietMode, userHandle.getIdentifier(), target);
         } catch (RemoteException re) {
             throw re.rethrowFromSystemServer();
         }
@@ -2135,27 +2154,6 @@ public class UserManager {
     public boolean isQuietModeEnabled(UserHandle userHandle) {
         try {
             return mService.isQuietModeEnabled(userHandle.getIdentifier());
-        } catch (RemoteException re) {
-            throw re.rethrowFromSystemServer();
-        }
-    }
-
-    /**
-     * Tries disabling quiet mode for a given user. If the user is still locked, we unlock the user
-     * first by showing the confirm credentials screen and disable quiet mode upon successful
-     * unlocking. If the user is already unlocked, we call through to {@link #setQuietModeEnabled}
-     * directly.
-     *
-     * @param userHandle The user that is going to disable quiet mode.
-     * @param target The target to launch when the user is unlocked.
-     * @return {@code true} if quiet mode is disabled without showing confirm credentials screen,
-     *         {@code false} otherwise.
-     * @hide
-     */
-    public boolean trySetQuietModeDisabled(
-            @UserIdInt int userHandle, @Nullable IntentSender target) {
-        try {
-            return mService.trySetQuietModeDisabled(userHandle, target);
         } catch (RemoteException re) {
             throw re.rethrowFromSystemServer();
         }
