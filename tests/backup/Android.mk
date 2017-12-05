@@ -20,7 +20,8 @@ include $(CLEAR_VARS)
 
 LOCAL_SRC_FILES := \
     backup_helper_test.cpp
- 
+
+LOCAL_CFLAGS := -Wall -Werror
 LOCAL_MODULE_TAGS := optional
 LOCAL_MODULE := backup_helper_test
 LOCAL_MODULE_PATH := $(TARGET_OUT_DATA_APPS)
@@ -43,4 +44,3 @@ LOCAL_PACKAGE_NAME := BackupTest
 LOCAL_PROGUARD_ENABLED := disabled
 
 include $(BUILD_PACKAGE)
-    
