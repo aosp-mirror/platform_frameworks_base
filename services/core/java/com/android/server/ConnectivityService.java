@@ -949,7 +949,10 @@ public class ConnectivityService extends IConnectivityManager.Stub
                         getNetworkTypeName(networkType), "");
                 info.setDetailedState(NetworkInfo.DetailedState.DISCONNECTED, null, null);
                 info.setIsAvailable(true);
-                state = new NetworkState(info, new LinkProperties(), new NetworkCapabilities(),
+                final NetworkCapabilities capabilities = new NetworkCapabilities();
+                capabilities.setCapability(NetworkCapabilities.NET_CAPABILITY_NOT_ROAMING,
+                        !info.isRoaming());
+                state = new NetworkState(info, new LinkProperties(), capabilities,
                         null, null, null);
             }
             filterNetworkStateForUid(state, uid, ignoreBlocked);
