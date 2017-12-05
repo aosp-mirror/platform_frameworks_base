@@ -314,10 +314,6 @@ package android.location {
     method public void setType(int);
   }
 
-  public class LocationManager {
-    method public int getGnssYearOfHardware();
-  }
-
 }
 
 package android.net {

@@ -414,16 +414,16 @@ public class GnssLocationProvider implements LocationProviderInterface {
     private WorkSource mClientSource = new WorkSource();
 
     private GeofenceHardwareImpl mGeofenceHardwareImpl;
-    private int mYearOfHardware = 0;
+
+    // Volatile for simple inter-thread sync on these values.
+    private volatile int mHardwareYear = 0;
+    private volatile String mHardwareModelName = LocationManager.GNSS_HARDWARE_MODEL_NAME_UNKNOWN;
 
     // Set lower than the current ITAR limit of 600m/s to allow this to trigger even if GPS HAL
     // stops output right at 600m/s, depriving this of the information of a device that reaches
     // greater than 600m/s, and higher than the speed of sound to avoid impacting most use cases.
     private static final float ITAR_SPEED_LIMIT_METERS_PER_SECOND = 400.0F;
 
-    // TODO: improve comment
-    // Volatile to ensure that potentially near-concurrent outputs from HAL
-    // react to this value change promptly
     private volatile boolean mItarSpeedLimitExceeded = false;
 
     // GNSS Metrics
@@ -1825,33 +1825,53 @@ public class GnssLocationProvider implements LocationProviderInterface {
     /**
      * called from native code to inform us what the GPS engine capabilities are
      */
-    private void setEngineCapabilities(int capabilities) {
-        mEngineCapabilities = capabilities;
+    private void setEngineCapabilities(final int capabilities) {
+        // send to handler thread for fast native return, and in-order handling
+        mHandler.post(new Runnable() {
+            @Override
+            public void run() {
+                mEngineCapabilities = capabilities;
 
-        if (hasCapability(GPS_CAPABILITY_ON_DEMAND_TIME)) {
-            mOnDemandTimeInjection = true;
-            requestUtcTime();
-        }
+                if (hasCapability(GPS_CAPABILITY_ON_DEMAND_TIME)) {
+                    mOnDemandTimeInjection = true;
+                    requestUtcTime();
+                }
 
-        mGnssMeasurementsProvider.onCapabilitiesUpdated(
-                (capabilities & GPS_CAPABILITY_MEASUREMENTS) == GPS_CAPABILITY_MEASUREMENTS);
-        mGnssNavigationMessageProvider.onCapabilitiesUpdated(
-                (capabilities & GPS_CAPABILITY_NAV_MESSAGES) == GPS_CAPABILITY_NAV_MESSAGES);
+                mGnssMeasurementsProvider.onCapabilitiesUpdated(hasCapability(
+                        GPS_CAPABILITY_MEASUREMENTS));
+                mGnssNavigationMessageProvider.onCapabilitiesUpdated(hasCapability(
+                        GPS_CAPABILITY_NAV_MESSAGES));
+            }
+        });
+   }
+
+    /**
+     * Called from native code to inform us the hardware year.
+     */
+    private void setGnssYearOfHardware(final int yearOfHardware) {
+        // mHardwareYear is simply set here, to be read elsewhere, and is volatile for safe sync
+        if (DEBUG) Log.d(TAG, "setGnssYearOfHardware called with " + yearOfHardware);
+        mHardwareYear = yearOfHardware;
     }
 
     /**
-     * Called from native code to inform us the hardware information.
+     * Called from native code to inform us the hardware model name.
      */
-    private void setGnssYearOfHardware(int yearOfHardware) {
-        if (DEBUG) Log.d(TAG, "setGnssYearOfHardware called with " + yearOfHardware);
-        mYearOfHardware = yearOfHardware;
+    private void setGnssHardwareModelName(final String modelName) {
+        // mHardwareModelName is simply set here, to be read elsewhere, and volatile for safe sync
+        if (DEBUG) Log.d(TAG, "setGnssModelName called with " + modelName);
+        mHardwareModelName = modelName;
     }
 
     public interface GnssSystemInfoProvider {
         /**
-         * Returns the year of GPS hardware.
+         * Returns the year of underlying GPS hardware.
          */
         int getGnssYearOfHardware();
+        /**
+         * Returns the model name of underlying GPS hardware.
+         */
+        String getGnssHardwareModelName();
     }
 
     /**
@@ -1861,7 +1881,11 @@ public class GnssLocationProvider implements LocationProviderInterface {
         return new GnssSystemInfoProvider() {
             @Override
             public int getGnssYearOfHardware() {
-                return mYearOfHardware;
+                return mHardwareYear;
+            }
+            @Override
+            public String getGnssHardwareModelName() {
+                return mHardwareModelName;
             }
         };
     }
