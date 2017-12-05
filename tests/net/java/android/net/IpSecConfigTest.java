@@ -71,7 +71,7 @@ public class IpSecConfigTest {
         c.setAuthentication(
                 IpSecTransform.DIRECTION_OUT,
                 new IpSecAlgorithm(
-                        IpSecAlgorithm.AUTH_HMAC_SHA1,
+                        IpSecAlgorithm.AUTH_HMAC_MD5,
                         new byte[] {1, 2, 3, 4, 5, 6, 7, 8, 9, 0xA, 0xB, 0xC, 0xD, 0xE, 0xF, 0}));
         c.setSpiResourceId(IpSecTransform.DIRECTION_OUT, 1984);
         c.setEncryption(
@@ -82,7 +82,7 @@ public class IpSecConfigTest {
         c.setAuthentication(
                 IpSecTransform.DIRECTION_IN,
                 new IpSecAlgorithm(
-                        IpSecAlgorithm.AUTH_HMAC_SHA1,
+                        IpSecAlgorithm.AUTH_HMAC_MD5,
                         new byte[] {1, 2, 3, 4, 5, 6, 7, 8, 9, 0xA, 0xB, 0xC, 0xD, 0xE, 0xF, 1}));
         c.setSpiResourceId(IpSecTransform.DIRECTION_IN, 99);
         assertParcelingIsLossless(c);
