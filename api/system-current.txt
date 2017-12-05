@@ -782,11 +782,12 @@ package android.content.pm {
 
   public final class InstantAppResolveInfo implements android.os.Parcelable {
     ctor public InstantAppResolveInfo(android.content.pm.InstantAppResolveInfo.InstantAppDigest, java.lang.String, java.util.List<android.content.pm.InstantAppIntentFilter>, int);
-    ctor public InstantAppResolveInfo(android.content.pm.InstantAppResolveInfo.InstantAppDigest, java.lang.String, java.util.List<android.content.pm.InstantAppIntentFilter>, long);
+    ctor public InstantAppResolveInfo(android.content.pm.InstantAppResolveInfo.InstantAppDigest, java.lang.String, java.util.List<android.content.pm.InstantAppIntentFilter>, long, android.os.Bundle);
     ctor public InstantAppResolveInfo(java.lang.String, java.lang.String, java.util.List<android.content.pm.InstantAppIntentFilter>);
     method public int describeContents();
     method public byte[] getDigestBytes();
     method public int getDigestPrefix();
+    method public android.os.Bundle getExtras();
     method public java.util.List<android.content.pm.InstantAppIntentFilter> getIntentFilters();
     method public long getLongVersionCode();
     method public java.lang.String getPackageName();

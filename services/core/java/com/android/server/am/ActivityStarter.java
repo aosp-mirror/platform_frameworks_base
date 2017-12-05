@@ -74,7 +74,6 @@ import static com.android.server.am.TaskRecord.REPARENT_KEEP_STACK_AT_FRONT;
 import static com.android.server.am.TaskRecord.REPARENT_MOVE_STACK_TO_FRONT;
 
 import android.annotation.NonNull;
-import android.annotation.Nullable;
 import android.app.ActivityManager;
 import android.app.ActivityOptions;
 import android.app.IApplicationThread;
@@ -87,7 +86,6 @@ import android.content.IntentSender;
 import android.content.pm.ActivityInfo;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.AuxiliaryResolveInfo;
-import android.content.pm.IPackageManager;
 import android.content.pm.PackageManager;
 import android.content.pm.ResolveInfo;
 import android.content.pm.UserInfo;
@@ -569,7 +567,8 @@ class ActivityStarter {
                 auxiliaryResponse.failureIntent, callingPackage, verificationBundle,
                 resolvedType, userId, auxiliaryResponse.packageName, auxiliaryResponse.splitName,
                 auxiliaryResponse.installFailureActivity, auxiliaryResponse.versionCode,
-                auxiliaryResponse.token, auxiliaryResponse.needsPhaseTwo);
+                auxiliaryResponse.token, auxiliaryResponse.resolveInfo.getExtras(),
+                auxiliaryResponse.needsPhaseTwo);
     }
 
     void postStartActivityProcessing(ActivityRecord r, int result, ActivityStack targetStack) {
