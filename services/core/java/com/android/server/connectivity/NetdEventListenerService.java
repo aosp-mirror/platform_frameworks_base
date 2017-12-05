@@ -244,7 +244,7 @@ public class NetdEventListenerService extends INetdEventListener.Stub {
         event.timestampMs = timestampMs;
         event.uid = uid;
         event.ethertype = ethertype;
-        event.dstHwAddr = new MacAddress(dstHw);
+        event.dstHwAddr = MacAddress.fromBytes(dstHw);
         event.srcIp = srcIp;
         event.dstIp = dstIp;
         event.ipNextHeader = ipNextHeader;
