@@ -896,6 +896,13 @@ public class VectorDrawable extends Drawable {
         return mVectorState.getNativeRenderer();
     }
 
+    /**
+     * @hide
+     */
+    public void setAntiAlias(boolean aa) {
+        nSetAntiAlias(mVectorState.mNativeTree.get(), aa);
+    }
+
     static class VectorDrawableState extends ConstantState {
         // Variables below need to be copied (deep copy if applicable) for mutation.
         int[] mThemeAttrs;
@@ -2268,6 +2275,8 @@ public class VectorDrawable extends Drawable {
     private static native boolean nSetRootAlpha(long rendererPtr, float alpha);
     @FastNative
     private static native float nGetRootAlpha(long rendererPtr);
+    @FastNative
+    private static native void nSetAntiAlias(long rendererPtr, boolean aa);
     @FastNative
     private static native void nSetAllowCaching(long rendererPtr, boolean allowCaching);
 
