@@ -108,8 +108,10 @@ final class FillUi {
         mCallback = callback;
 
         final LayoutInflater inflater = LayoutInflater.from(context);
+
         final ViewGroup decor = (ViewGroup) inflater.inflate(
                 R.layout.autofill_dataset_picker, null);
+
 
         final RemoteViews.OnClickHandler interceptionHandler = new RemoteViews.OnClickHandler() {
             @Override
@@ -153,7 +155,38 @@ final class FillUi {
             mCallback.requestShowFillUi(mContentWidth, mContentHeight, mWindowPresenter);
         } else {
             final int datasetCount = response.getDatasets().size();
-            final ArrayList<ViewItem> items = new ArrayList<>(datasetCount);
+
+            // Total items include the (optional) header and footer - we cannot use listview's
+            // addHeader() and addFooter() because it would complicate the scrolling logic.
+            int totalItems = datasetCount;
+
+            RemoteViews.OnClickHandler clickBlocker = null;
+            final RemoteViews headerPresentation = response.getHeader();
+            View header = null;
+            if (headerPresentation != null) {
+                clickBlocker = newClickBlocker();
+                header = headerPresentation.apply(context, null, clickBlocker);
+                totalItems++;
+            }
+
+            final RemoteViews footerPresentation = response.getFooter();
+            View footer = null;
+            if (footerPresentation != null) {
+                if (clickBlocker == null) { // already set for header
+                    clickBlocker = newClickBlocker();
+                }
+                footer = footerPresentation.apply(context, null, clickBlocker);
+                totalItems++;
+            }
+            if (sVerbose) {
+                Slog.v(TAG, "Number datasets: " + datasetCount + " Total items: " + totalItems);
+            }
+
+            final ArrayList<ViewItem> items = new ArrayList<>(totalItems);
+            if (header != null) {
+                if (sVerbose) Slog.v(TAG, "adding header");
+                items.add(new ViewItem(null, null, null, header));
+            }
             for (int i = 0; i < datasetCount; i++) {
                 final Dataset dataset = response.getDatasets().get(i);
                 final int index = dataset.getFieldIds().indexOf(focusedViewId);
@@ -184,6 +217,10 @@ final class FillUi {
                     items.add(new ViewItem(dataset, filter, valueText, view));
                 }
             }
+            if (footer != null) {
+                if (sVerbose) Slog.v(TAG, "adding footer");
+                items.add(new ViewItem(null, null, null, footer));
+            }
 
             mAdapter = new ItemsAdapter(items);
 
@@ -192,7 +229,12 @@ final class FillUi {
             mListView.setVisibility(View.VISIBLE);
             mListView.setOnItemClickListener((adapter, view, position, id) -> {
                 final ViewItem vi = mAdapter.getItem(position);
-                mCallback.onDatasetPicked(vi.getDataset());
+                if (vi.dataset == null) {
+                    // Clicked on header or footer; ignore.
+                    if (sDebug) Slog.d(TAG, "Ignoring click on item " + position + ": " + view);
+                    return;
+                }
+                mCallback.onDatasetPicked(vi.dataset);
             });
 
             if (filterText == null) {
@@ -204,6 +246,20 @@ final class FillUi {
             applyNewFilterText();
             mWindow = new AnchoredWindow(decor, overlayControl);
         }
+    }
+
+    /**
+     * Creates a remoteview interceptor used to block clicks.
+     */
+    private RemoteViews.OnClickHandler newClickBlocker() {
+        return new RemoteViews.OnClickHandler() {
+            @Override
+            public boolean onClickHandler(View view, PendingIntent pendingIntent,
+                    Intent fillInIntent) {
+                if (sVerbose) Slog.v(TAG, "Ignoring click on " + view);
+                return true;
+            }
+        };
     }
 
     private void applyNewFilterText() {
@@ -298,7 +354,7 @@ final class FillUi {
                 MeasureSpec.AT_MOST);
         final int itemCount = mAdapter.getCount();
         for (int i = 0; i < itemCount; i++) {
-            View view = mAdapter.getItem(i).getView();
+            View view = mAdapter.getItem(i).view;
             view.measure(widthMeasureSpec, heightMeasureSpec);
             final int clampedMeasuredWidth = Math.min(view.getMeasuredWidth(), maxSize.x);
             final int newContentWidth = Math.max(mContentWidth, clampedMeasuredWidth);
@@ -336,33 +392,21 @@ final class FillUi {
         outPoint.y = (int) typedValue.getFraction(outPoint.y, outPoint.y);
     }
 
+    /**
+     * An item for the list view - either a (clickable) dataset or a (read-only) header / footer.
+     */
     private static class ViewItem {
-        private final String mValue;
-        private final Dataset mDataset;
-        private final View mView;
-        private final Pattern mFilter;
+        public final @Nullable String value;
+        public final @Nullable Dataset dataset;
+        public final @NonNull View view;
+        public final @Nullable Pattern filter;
 
-        ViewItem(Dataset dataset, Pattern filter, String value, View view) {
-            mDataset = dataset;
-            mValue = value;
-            mView = view;
-            mFilter = filter;
-        }
-
-        public Pattern getFilter() {
-            return mFilter;
-        }
-
-        public View getView() {
-            return mView;
-        }
-
-        public Dataset getDataset() {
-            return mDataset;
-        }
-
-        public String getValue() {
-            return mValue;
+        ViewItem(@Nullable Dataset dataset, @Nullable Pattern filter, @Nullable String value,
+                @NonNull View view) {
+            this.dataset = dataset;
+            this.value = value;
+            this.view = view;
+            this.filter = filter;
         }
     }
 
@@ -525,15 +569,13 @@ final class FillUi {
                     final int itemCount = mAllItems.size();
                     for (int i = 0; i < itemCount; i++) {
                         final ViewItem item = mAllItems.get(i);
-                        final String value = item.getValue();
-                        final Pattern filter = item.getFilter();
                         final boolean matches;
-                        if (filter != null) {
-                            matches = filter.matcher(constraintLowerCase).matches();
+                        if (item.filter != null) {
+                            matches = item.filter.matcher(constraintLowerCase).matches();
                         } else {
-                            matches = (value == null)
-                                    ? (item.mDataset.getAuthentication() == null)
-                                    : value.toLowerCase().startsWith(constraintLowerCase);
+                            matches = (item.value == null)
+                                    ? (item.dataset.getAuthentication() == null)
+                                    : item.value.toLowerCase().startsWith(constraintLowerCase);
                         }
                         if (matches) {
                             filteredItems.add(item);
@@ -580,7 +622,7 @@ final class FillUi {
 
         @Override
         public View getView(int position, View convertView, ViewGroup parent) {
-            return getItem(position).getView();
+            return getItem(position).view;
         }
     }
 
