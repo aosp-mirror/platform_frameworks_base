@@ -532,6 +532,18 @@ public class TransportManagerTest {
         assertThat(transportName).isEqualTo("newName");
     }
 
+    @Test
+    public void isTransportRegistered_returnsCorrectly() throws Exception {
+        TransportManager transportManager =
+                createTransportManagerAndSetUpTransports(
+                        Collections.singletonList(mTransport1),
+                        Collections.singletonList(mTransport2),
+                        mTransport1.name);
+
+        assertThat(transportManager.isTransportRegistered(mTransport1.name)).isTrue();
+        assertThat(transportManager.isTransportRegistered(mTransport2.name)).isFalse();
+    }
+
     private void setUpPackageWithTransports(String packageName, List<TransportInfo> transports,
             int flags) throws Exception {
         PackageInfo packageInfo = new PackageInfo();

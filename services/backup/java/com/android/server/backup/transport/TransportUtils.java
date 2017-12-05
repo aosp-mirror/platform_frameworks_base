@@ -31,7 +31,7 @@ public class TransportUtils {
      * Throws {@link TransportNotAvailableException} if {@param transport} is null. The semantics is
      * similar to a {@link DeadObjectException} coming from a dead transport binder.
      */
-    public static IBackupTransport checkTransport(@Nullable IBackupTransport transport)
+    public static IBackupTransport checkTransportNotNull(@Nullable IBackupTransport transport)
             throws TransportNotAvailableException {
         if (transport == null) {
             log(Log.ERROR, TAG, "Transport not available");

@@ -907,7 +907,7 @@ public class PerformBackupTask implements BackupRestoreTask {
             mStatus = BackupTransport.TRANSPORT_OK;
             long size = 0;
             try {
-                TransportUtils.checkTransport(transport);
+                TransportUtils.checkTransportNotNull(transport);
                 size = mBackupDataName.length();
                 if (size > 0) {
                     if (mStatus == BackupTransport.TRANSPORT_OK) {
@@ -997,7 +997,7 @@ public class PerformBackupTask implements BackupRestoreTask {
                 }
                 if (mAgentBinder != null) {
                     try {
-                        TransportUtils.checkTransport(transport);
+                        TransportUtils.checkTransportNotNull(transport);
                         long quota = transport.getBackupQuota(mCurrentPackage.packageName, false);
                         mAgentBinder.doQuotaExceeded(size, quota);
                     } catch (Exception e) {
