@@ -33,6 +33,7 @@ import android.util.ArraySet;
 import android.util.IntProperty;
 import android.util.Property;
 import android.util.TypedValue;
+import android.view.Surface;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.ViewParent;
@@ -288,6 +289,20 @@ public class Utilities {
      */
     public static Configuration getAppConfiguration(Context context) {
         return context.getApplicationContext().getResources().getConfiguration();
+    }
+
+    /**
+     * @return The next frame name for the specified surface.
+     */
+    public static long getNextFrameNumber(Surface s) {
+        return s.getNextFrameNumber();
+    }
+
+    /**
+     * @return The surface for the specified view.
+     */
+    public static Surface getSurface(View v) {
+        return v.getViewRootImpl().mSurface;
     }
 
     /**
