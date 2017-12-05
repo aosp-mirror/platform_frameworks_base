@@ -45,7 +45,7 @@ public final class AuxiliaryResolveInfo extends IntentFilter {
     /** Opaque token to track the instant application resolution */
     public final String token;
     /** The version code of the package */
-    public final int versionCode;
+    public final long versionCode;
     /** An intent to start upon failure to install */
     public final Intent failureIntent;
 
@@ -71,7 +71,7 @@ public final class AuxiliaryResolveInfo extends IntentFilter {
     public AuxiliaryResolveInfo(@NonNull String packageName,
             @Nullable String splitName,
             @Nullable ComponentName failureActivity,
-            int versionCode,
+            long versionCode,
             @Nullable Intent failureIntent) {
         super();
         this.packageName = packageName;

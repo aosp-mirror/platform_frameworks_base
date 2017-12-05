@@ -1246,13 +1246,13 @@ public class PackageTrackerTest {
     }
 
     private void configureUpdateAppPackageVersion(String updateAppPackageName,
-            int updataAppPackageVersion) throws Exception {
+            long updataAppPackageVersion) throws Exception {
         when(mMockPackageManagerHelper.getInstalledPackageVersion(updateAppPackageName))
                 .thenReturn(updataAppPackageVersion);
     }
 
     private void configureDataAppPackageVersion(String dataAppPackageName,
-            int dataAppPackageVersion) throws Exception {
+            long dataAppPackageVersion) throws Exception {
         when(mMockPackageManagerHelper.getInstalledPackageVersion(dataAppPackageName))
                 .thenReturn(dataAppPackageVersion);
     }

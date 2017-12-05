@@ -471,7 +471,7 @@ public class PackageParserTest {
         pkg.usesStaticLibraries.add("foo23");
         pkg.usesStaticLibrariesCertDigests = new String[1][];
         pkg.usesStaticLibrariesCertDigests[0] = new String[] { "digest" };
-        pkg.usesStaticLibrariesVersions = new int[] { 100 };
+        pkg.usesStaticLibrariesVersions = new long[] { 100 };
 
         pkg.libraryNames = new ArrayList<>();
         pkg.libraryNames.add("foo10");

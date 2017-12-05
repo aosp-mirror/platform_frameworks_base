@@ -97,7 +97,7 @@ public class FullBackupUtils {
 
         printer.println(Integer.toString(BACKUP_MANIFEST_VERSION));
         printer.println(pkg.packageName);
-        printer.println(Integer.toString(pkg.versionCode));
+        printer.println(Long.toString(pkg.getLongVersionCode()));
         printer.println(Integer.toString(Build.VERSION.SDK_INT));
 
         String installerName = packageManager.getInstallerPackageName(pkg.packageName);

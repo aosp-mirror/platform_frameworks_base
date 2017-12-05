@@ -155,6 +155,14 @@ public class StatsCompanionService extends IStatsCompanionService.Stub {
         return ret;
     }
 
+    private final static long[] toLongArray(List<Long> list) {
+        long[] ret = new long[list.size()];
+        for (int i = 0; i < ret.length; i++) {
+            ret[i] = list.get(i);
+        }
+        return ret;
+    }
+
     // Assumes that sStatsdLock is held.
     private final void informAllUidsLocked(Context context) throws RemoteException {
         UserManager um = (UserManager) context.getSystemService(Context.USER_SERVICE);
@@ -165,7 +173,7 @@ public class StatsCompanionService extends IStatsCompanionService.Stub {
         }
 
         List<Integer> uids = new ArrayList();
-        List<Integer> versions = new ArrayList();
+        List<Long> versions = new ArrayList();
         List<String> apps = new ArrayList();
 
         // Add in all the apps for every user/profile.
@@ -174,12 +182,12 @@ public class StatsCompanionService extends IStatsCompanionService.Stub {
             for (int j = 0; j < pi.size(); j++) {
                 if (pi.get(j).applicationInfo != null) {
                     uids.add(pi.get(j).applicationInfo.uid);
-                    versions.add(pi.get(j).versionCode);
+                    versions.add(pi.get(j).getLongVersionCode());
                     apps.add(pi.get(j).packageName);
                 }
             }
         }
-        sStatsd.informAllUidData(toIntArray(uids), toIntArray(versions), apps.toArray(new
+        sStatsd.informAllUidData(toIntArray(uids), toLongArray(versions), apps.toArray(new
                 String[apps.size()]));
         if (DEBUG) {
             Slog.w(TAG, "Sent data for " + uids.size() + " apps");
@@ -222,7 +230,7 @@ public class StatsCompanionService extends IStatsCompanionService.Stub {
                         int uid = b.getInt(Intent.EXTRA_UID);
                         String app = intent.getData().getSchemeSpecificPart();
                         PackageInfo pi = pm.getPackageInfo(app, PackageManager.MATCH_ANY_USER);
-                        sStatsd.informOnePackage(app, uid, pi.versionCode);
+                        sStatsd.informOnePackage(app, uid, pi.getLongVersionCode());
                     }
                 } catch (Exception e) {
                     Slog.w(TAG, "Failed to inform statsd of an app update", e);

@@ -725,7 +725,7 @@ class ShortcutPackage extends ShortcutPackageItem {
                 // This means if a system app's version code doesn't change on an OTA,
                 // we don't notice it's updated.  But that's fine since their version code *should*
                 // really change on OTAs.
-                if ((getPackageInfo().getVersionCode() == pi.versionCode)
+                if ((getPackageInfo().getVersionCode() == pi.getLongVersionCode())
                         && (getPackageInfo().getLastUpdateTime() == pi.lastUpdateTime)
                         && areAllActivitiesStillEnabled()) {
                     return false;
@@ -759,11 +759,11 @@ class ShortcutPackage extends ShortcutPackageItem {
         if (ShortcutService.DEBUG) {
             Slog.d(TAG, String.format("Package %s %s, version %d -> %d", getPackageName(),
                     (isNewApp ? "added" : "updated"),
-                    getPackageInfo().getVersionCode(), pi.versionCode));
+                    getPackageInfo().getVersionCode(), pi.getLongVersionCode()));
         }
 
         getPackageInfo().updateFromPackageInfo(pi);
-        final int newVersionCode = getPackageInfo().getVersionCode();
+        final long newVersionCode = getPackageInfo().getVersionCode();
 
         // See if there are any shortcuts that were prevented restoring because the app was of a
         // lower version, and re-enable them.
@@ -1412,7 +1412,7 @@ class ShortcutPackage extends ShortcutPackageItem {
             ShortcutService.writeAttr(out, ATTR_FLAGS, flags);
 
             // Set the publisher version code at every backup.
-            final int packageVersionCode = getPackageInfo().getVersionCode();
+            final long packageVersionCode = getPackageInfo().getVersionCode();
             if (packageVersionCode == 0) {
                 s.wtf("Package version code should be available at this point.");
                 // However, 0 is a valid version code, so we just go ahead with it...

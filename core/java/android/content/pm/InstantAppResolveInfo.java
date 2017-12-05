@@ -44,10 +44,15 @@ public final class InstantAppResolveInfo implements Parcelable {
     /** The filters used to match domain */
     private final List<InstantAppIntentFilter> mFilters;
     /** The version code of the app that this class resolves to */
-    private final int mVersionCode;
+    private final long mVersionCode;
 
     public InstantAppResolveInfo(@NonNull InstantAppDigest digest, @Nullable String packageName,
             @Nullable List<InstantAppIntentFilter> filters, int versionCode) {
+        this(digest, packageName, filters, (long)versionCode);
+    }
+
+    public InstantAppResolveInfo(@NonNull InstantAppDigest digest, @Nullable String packageName,
+            @Nullable List<InstantAppIntentFilter> filters, long versionCode) {
         // validate arguments
         if ((packageName == null && (filters != null && filters.size() != 0))
                 || (packageName != null && (filters == null || filters.size() == 0))) {
@@ -74,7 +79,7 @@ public final class InstantAppResolveInfo implements Parcelable {
         mPackageName = in.readString();
         mFilters = new ArrayList<InstantAppIntentFilter>();
         in.readList(mFilters, null /*loader*/);
-        mVersionCode = in.readInt();
+        mVersionCode = in.readLong();
     }
 
     public byte[] getDigestBytes() {
@@ -93,7 +98,15 @@ public final class InstantAppResolveInfo implements Parcelable {
         return mFilters;
     }
 
+    /**
+     * @deprecated Use {@link #getLongVersionCode} instead.
+     */
+    @Deprecated
     public int getVersionCode() {
+        return (int) (mVersionCode & 0xffffffff);
+    }
+
+    public long getLongVersionCode() {
         return mVersionCode;
     }
 
@@ -107,7 +120,7 @@ public final class InstantAppResolveInfo implements Parcelable {
         out.writeParcelable(mDigest, flags);
         out.writeString(mPackageName);
         out.writeList(mFilters);
-        out.writeInt(mVersionCode);
+        out.writeLong(mVersionCode);
     }
 
     public static final Parcelable.Creator<InstantAppResolveInfo> CREATOR

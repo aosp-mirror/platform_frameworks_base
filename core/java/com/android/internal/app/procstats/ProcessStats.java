@@ -28,6 +28,7 @@ import android.util.ArrayMap;
 import android.util.ArraySet;
 import android.util.DebugUtils;
 import android.util.Log;
+import android.util.LongSparseArray;
 import android.util.Slog;
 import android.util.SparseArray;
 import android.util.TimeUtils;
@@ -157,7 +158,7 @@ public final class ProcessStats implements Parcelable {
     };
 
     // Current version of the parcel format.
-    private static final int PARCEL_VERSION = 21;
+    private static final int PARCEL_VERSION = 22;
     // In-memory Parcel magic number, used to detect attempts to unmarshall bad data
     private static final int MAGIC = 0x50535454;
 
@@ -165,9 +166,8 @@ public final class ProcessStats implements Parcelable {
     public String mTimePeriodStartClockStr;
     public int mFlags;
 
-    public final ProcessMap<SparseArray<PackageState>> mPackages
-            = new ProcessMap<SparseArray<PackageState>>();
-    public final ProcessMap<ProcessState> mProcesses = new ProcessMap<ProcessState>();
+    public final ProcessMap<LongSparseArray<PackageState>> mPackages = new ProcessMap<>();
+    public final ProcessMap<ProcessState> mProcesses = new ProcessMap<>();
 
     public final long[] mMemFactorDurations = new long[ADJ_COUNT];
     public int mMemFactor = STATE_NOTHING;
@@ -218,15 +218,16 @@ public final class ProcessStats implements Parcelable {
     }
 
     public void add(ProcessStats other) {
-        ArrayMap<String, SparseArray<SparseArray<PackageState>>> pkgMap = other.mPackages.getMap();
+        ArrayMap<String, SparseArray<LongSparseArray<PackageState>>> pkgMap =
+                other.mPackages.getMap();
         for (int ip=0; ip<pkgMap.size(); ip++) {
             final String pkgName = pkgMap.keyAt(ip);
-            final SparseArray<SparseArray<PackageState>> uids = pkgMap.valueAt(ip);
+            final SparseArray<LongSparseArray<PackageState>> uids = pkgMap.valueAt(ip);
             for (int iu=0; iu<uids.size(); iu++) {
                 final int uid = uids.keyAt(iu);
-                final SparseArray<PackageState> versions = uids.valueAt(iu);
+                final LongSparseArray<PackageState> versions = uids.valueAt(iu);
                 for (int iv=0; iv<versions.size(); iv++) {
-                    final int vers = versions.keyAt(iv);
+                    final long vers = versions.keyAt(iv);
                     final PackageState otherState = versions.valueAt(iv);
                     final int NPROCS = otherState.mProcesses.size();
                     final int NSRVS = otherState.mServices.size();
@@ -269,7 +270,7 @@ public final class ProcessStats implements Parcelable {
                 ProcessState otherProc = uids.valueAt(iu);
                 final String name = otherProc.getName();
                 final String pkg = otherProc.getPackage();
-                final int vers = otherProc.getVersion();
+                final long vers = otherProc.getVersion();
                 ProcessState thisProc = mProcesses.get(name, uid);
                 if (DEBUG) Slog.d(TAG, "Adding uid " + uid + " proc " + name);
                 if (thisProc == null) {
@@ -420,11 +421,12 @@ public final class ProcessStats implements Parcelable {
 
         // Next reset or prune all per-package processes, and for the ones that are reset
         // track this back to the common processes.
-        final ArrayMap<String, SparseArray<SparseArray<PackageState>>> pkgMap = mPackages.getMap();
+        final ArrayMap<String, SparseArray<LongSparseArray<PackageState>>> pkgMap =
+                mPackages.getMap();
         for (int ip=pkgMap.size()-1; ip>=0; ip--) {
-            final SparseArray<SparseArray<PackageState>> uids = pkgMap.valueAt(ip);
+            final SparseArray<LongSparseArray<PackageState>> uids = pkgMap.valueAt(ip);
             for (int iu=uids.size()-1; iu>=0; iu--) {
-                final SparseArray<PackageState> vpkgs = uids.valueAt(iu);
+                final LongSparseArray<PackageState> vpkgs = uids.valueAt(iu);
                 for (int iv=vpkgs.size()-1; iv>=0; iv--) {
                     final PackageState pkgState = vpkgs.valueAt(iv);
                     for (int iproc=pkgState.mProcesses.size()-1; iproc>=0; iproc--) {
@@ -727,13 +729,14 @@ public final class ProcessStats implements Parcelable {
                 uids.valueAt(iu).commitStateTime(now);
             }
         }
-        final ArrayMap<String, SparseArray<SparseArray<PackageState>>> pkgMap = mPackages.getMap();
+        final ArrayMap<String, SparseArray<LongSparseArray<PackageState>>> pkgMap =
+                mPackages.getMap();
         final int NPKG = pkgMap.size();
         for (int ip=0; ip<NPKG; ip++) {
-            final SparseArray<SparseArray<PackageState>> uids = pkgMap.valueAt(ip);
+            final SparseArray<LongSparseArray<PackageState>> uids = pkgMap.valueAt(ip);
             final int NUID = uids.size();
             for (int iu=0; iu<NUID; iu++) {
-                final SparseArray<PackageState> vpkgs = uids.valueAt(iu);
+                final LongSparseArray<PackageState> vpkgs = uids.valueAt(iu);
                 final int NVERS = vpkgs.size();
                 for (int iv=0; iv<NVERS; iv++) {
                     PackageState pkgState = vpkgs.valueAt(iv);
@@ -781,23 +784,23 @@ public final class ProcessStats implements Parcelable {
                 out.writeInt(uids.keyAt(iu));
                 final ProcessState proc = uids.valueAt(iu);
                 writeCommonString(out, proc.getPackage());
-                out.writeInt(proc.getVersion());
+                out.writeLong(proc.getVersion());
                 proc.writeToParcel(out, now);
             }
         }
         out.writeInt(NPKG);
         for (int ip=0; ip<NPKG; ip++) {
             writeCommonString(out, pkgMap.keyAt(ip));
-            final SparseArray<SparseArray<PackageState>> uids = pkgMap.valueAt(ip);
+            final SparseArray<LongSparseArray<PackageState>> uids = pkgMap.valueAt(ip);
             final int NUID = uids.size();
             out.writeInt(NUID);
             for (int iu=0; iu<NUID; iu++) {
                 out.writeInt(uids.keyAt(iu));
-                final SparseArray<PackageState> vpkgs = uids.valueAt(iu);
+                final LongSparseArray<PackageState> vpkgs = uids.valueAt(iu);
                 final int NVERS = vpkgs.size();
                 out.writeInt(NVERS);
                 for (int iv=0; iv<NVERS; iv++) {
-                    out.writeInt(vpkgs.keyAt(iv));
+                    out.writeLong(vpkgs.keyAt(iv));
                     final PackageState pkgState = vpkgs.valueAt(iv);
                     final int NPROCS = pkgState.mProcesses.size();
                     out.writeInt(NPROCS);
@@ -963,7 +966,7 @@ public final class ProcessStats implements Parcelable {
                     mReadError = "bad process package name";
                     return;
                 }
-                final int vers = in.readInt();
+                final long vers = in.readLong();
                 ProcessState proc = hadData ? mProcesses.get(procName, uid) : null;
                 if (proc != null) {
                     if (!proc.readFromParcel(in, false)) {
@@ -1014,11 +1017,11 @@ public final class ProcessStats implements Parcelable {
                 }
                 while (NVERS > 0) {
                     NVERS--;
-                    final int vers = in.readInt();
+                    final long vers = in.readLong();
                     PackageState pkgState = new PackageState(pkgName, uid);
-                    SparseArray<PackageState> vpkg = mPackages.get(pkgName, uid);
+                    LongSparseArray<PackageState> vpkg = mPackages.get(pkgName, uid);
                     if (vpkg == null) {
-                        vpkg = new SparseArray<PackageState>();
+                        vpkg = new LongSparseArray<>();
                         mPackages.put(pkgName, uid, vpkg);
                     }
                     vpkg.put(vers, pkgState);
@@ -1117,10 +1120,10 @@ public final class ProcessStats implements Parcelable {
         if (DEBUG_PARCEL) Slog.d(TAG, "Successfully read procstats!");
     }
 
-    public PackageState getPackageStateLocked(String packageName, int uid, int vers) {
-        SparseArray<PackageState> vpkg = mPackages.get(packageName, uid);
+    public PackageState getPackageStateLocked(String packageName, int uid, long vers) {
+        LongSparseArray<PackageState> vpkg = mPackages.get(packageName, uid);
         if (vpkg == null) {
-            vpkg = new SparseArray<PackageState>();
+            vpkg = new LongSparseArray<PackageState>();
             mPackages.put(packageName, uid, vpkg);
         }
         PackageState as = vpkg.get(vers);
@@ -1132,7 +1135,7 @@ public final class ProcessStats implements Parcelable {
         return as;
     }
 
-    public ProcessState getProcessStateLocked(String packageName, int uid, int vers,
+    public ProcessState getProcessStateLocked(String packageName, int uid, long vers,
             String processName) {
         final PackageState pkgState = getPackageStateLocked(packageName, uid, vers);
         ProcessState ps = pkgState.mProcesses.get(processName);
@@ -1202,7 +1205,7 @@ public final class ProcessStats implements Parcelable {
         return ps;
     }
 
-    public ServiceState getServiceStateLocked(String packageName, int uid, int vers,
+    public ServiceState getServiceStateLocked(String packageName, int uid, long vers,
             String processName, String className) {
         final ProcessStats.PackageState as = getPackageStateLocked(packageName, uid, vers);
         ServiceState ss = as.mServices.get(className);
@@ -1228,16 +1231,16 @@ public final class ProcessStats implements Parcelable {
             mSysMemUsage.dump(pw, "  ", ALL_SCREEN_ADJ, ALL_MEM_ADJ);
             sepNeeded = true;
         }
-        ArrayMap<String, SparseArray<SparseArray<PackageState>>> pkgMap = mPackages.getMap();
+        ArrayMap<String, SparseArray<LongSparseArray<PackageState>>> pkgMap = mPackages.getMap();
         boolean printedHeader = false;
         for (int ip=0; ip<pkgMap.size(); ip++) {
             final String pkgName = pkgMap.keyAt(ip);
-            final SparseArray<SparseArray<PackageState>> uids = pkgMap.valueAt(ip);
+            final SparseArray<LongSparseArray<PackageState>> uids = pkgMap.valueAt(ip);
             for (int iu=0; iu<uids.size(); iu++) {
                 final int uid = uids.keyAt(iu);
-                final SparseArray<PackageState> vpkgs = uids.valueAt(iu);
+                final LongSparseArray<PackageState> vpkgs = uids.valueAt(iu);
                 for (int iv=0; iv<vpkgs.size(); iv++) {
-                    final int vers = vpkgs.keyAt(iv);
+                    final long vers = vpkgs.keyAt(iv);
                     final PackageState pkgState = vpkgs.valueAt(iv);
                     final int NPROCS = pkgState.mProcesses.size();
                     final int NSRVS = pkgState.mServices.size();
@@ -1531,12 +1534,13 @@ public final class ProcessStats implements Parcelable {
             int[] procStates, int sortProcStates[], long now, String reqPackage,
             boolean activeOnly) {
         final ArraySet<ProcessState> foundProcs = new ArraySet<ProcessState>();
-        final ArrayMap<String, SparseArray<SparseArray<PackageState>>> pkgMap = mPackages.getMap();
+        final ArrayMap<String, SparseArray<LongSparseArray<PackageState>>> pkgMap =
+                mPackages.getMap();
         for (int ip=0; ip<pkgMap.size(); ip++) {
             final String pkgName = pkgMap.keyAt(ip);
-            final SparseArray<SparseArray<PackageState>> procs = pkgMap.valueAt(ip);
+            final SparseArray<LongSparseArray<PackageState>> procs = pkgMap.valueAt(ip);
             for (int iu=0; iu<procs.size(); iu++) {
-                final SparseArray<PackageState> vpkgs = procs.valueAt(iu);
+                final LongSparseArray<PackageState> vpkgs = procs.valueAt(iu);
                 final int NVERS = vpkgs.size();
                 for (int iv=0; iv<NVERS; iv++) {
                     final PackageState state = vpkgs.valueAt(iv);
@@ -1571,7 +1575,8 @@ public final class ProcessStats implements Parcelable {
 
     public void dumpCheckinLocked(PrintWriter pw, String reqPackage) {
         final long now = SystemClock.uptimeMillis();
-        final ArrayMap<String, SparseArray<SparseArray<PackageState>>> pkgMap = mPackages.getMap();
+        final ArrayMap<String, SparseArray<LongSparseArray<PackageState>>> pkgMap =
+                mPackages.getMap();
         pw.println("vers,5");
         pw.print("period,"); pw.print(mTimePeriodStartClockStr);
         pw.print(","); pw.print(mTimePeriodStartRealtime); pw.print(",");
@@ -1602,12 +1607,12 @@ public final class ProcessStats implements Parcelable {
             if (reqPackage != null && !reqPackage.equals(pkgName)) {
                 continue;
             }
-            final SparseArray<SparseArray<PackageState>> uids = pkgMap.valueAt(ip);
+            final SparseArray<LongSparseArray<PackageState>> uids = pkgMap.valueAt(ip);
             for (int iu=0; iu<uids.size(); iu++) {
                 final int uid = uids.keyAt(iu);
-                final SparseArray<PackageState> vpkgs = uids.valueAt(iu);
+                final LongSparseArray<PackageState> vpkgs = uids.valueAt(iu);
                 for (int iv=0; iv<vpkgs.size(); iv++) {
-                    final int vers = vpkgs.keyAt(iv);
+                    final long vers = vpkgs.keyAt(iv);
                     final PackageState pkgState = vpkgs.valueAt(iv);
                     final int NPROCS = pkgState.mProcesses.size();
                     final int NSRVS = pkgState.mServices.size();
@@ -1709,7 +1714,8 @@ public final class ProcessStats implements Parcelable {
     }
 
     public void toProto(ProtoOutputStream proto, long now) {
-        final ArrayMap<String, SparseArray<SparseArray<PackageState>>> pkgMap = mPackages.getMap();
+        final ArrayMap<String, SparseArray<LongSparseArray<PackageState>>> pkgMap =
+                mPackages.getMap();
 
         proto.write(ProcessStatsSectionProto.START_REALTIME_MS, mTimePeriodStartRealtime);
         proto.write(ProcessStatsSectionProto.END_REALTIME_MS,
@@ -1750,10 +1756,10 @@ public final class ProcessStats implements Parcelable {
     }
 
     final public static class ProcessStateHolder {
-        public final int appVersion;
+        public final long appVersion;
         public ProcessState state;
 
-        public ProcessStateHolder(int _appVersion) {
+        public ProcessStateHolder(long _appVersion) {
             appVersion = _appVersion;
         }
     }

@@ -38,8 +38,26 @@ public class PackageInfoLite implements Parcelable {
 
     /**
      * The android:versionCode of the package.
+     * @deprecated Use {@link #getLongVersionCode()} instead, which includes both
+     * this and the additional
+     * {@link android.R.styleable#AndroidManifest_versionCode versionCodeMajor} attribute.
      */
+    @Deprecated
     public int versionCode;
+
+    /**
+     * @hide
+     * The android:versionCodeMajor of the package.
+     */
+    public int versionCodeMajor;
+
+    /**
+     * Return {@link #versionCode} and {@link #versionCodeMajor} combined together as a
+     * single long value.  The {@link #versionCodeMajor} is placed in the upper 32 bits.
+     */
+    public long getLongVersionCode() {
+        return PackageInfo.composeLongVersionCode(versionCodeMajor, versionCode);
+    }
 
     /** Revision code of base APK */
     public int baseRevisionCode;
@@ -55,10 +73,10 @@ public class PackageInfoLite implements Parcelable {
 
     /**
      * Specifies the recommended install location. Can be one of
-     * {@link #PackageHelper.RECOMMEND_INSTALL_INTERNAL} to install on internal storage
-     * {@link #PackageHelper.RECOMMEND_INSTALL_EXTERNAL} to install on external media
-     * {@link PackageHelper.RECOMMEND_FAILED_INSUFFICIENT_STORAGE} for storage errors
-     * {@link PackageHelper.RECOMMEND_FAILED_INVALID_APK} for parse errors.
+     * {@link PackageHelper#RECOMMEND_INSTALL_INTERNAL} to install on internal storage,
+     * {@link PackageHelper#RECOMMEND_INSTALL_EXTERNAL} to install on external media,
+     * {@link PackageHelper#RECOMMEND_FAILED_INSUFFICIENT_STORAGE} for storage errors,
+     * or {@link PackageHelper#RECOMMEND_FAILED_INVALID_APK} for parse errors.
      */
     public int recommendedInstallLocation;
     public int installLocation;
@@ -82,6 +100,7 @@ public class PackageInfoLite implements Parcelable {
         dest.writeString(packageName);
         dest.writeStringArray(splitNames);
         dest.writeInt(versionCode);
+        dest.writeInt(versionCodeMajor);
         dest.writeInt(baseRevisionCode);
         dest.writeIntArray(splitRevisionCodes);
         dest.writeInt(recommendedInstallLocation);
@@ -111,6 +130,7 @@ public class PackageInfoLite implements Parcelable {
         packageName = source.readString();
         splitNames = source.createStringArray();
         versionCode = source.readInt();
+        versionCodeMajor = source.readInt();
         baseRevisionCode = source.readInt();
         splitRevisionCodes = source.createIntArray();
         recommendedInstallLocation = source.readInt();

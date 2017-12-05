@@ -1512,8 +1512,8 @@ public class WebViewUpdateServiceTest {
         // Ensure the API is correct before running waitForAndGetProvider
         assertEquals(firstPackage.packageName,
                 mWebViewUpdateServiceImpl.getCurrentWebViewPackage().packageName);
-        assertEquals(firstPackage.versionCode,
-                mWebViewUpdateServiceImpl.getCurrentWebViewPackage().versionCode);
+        assertEquals(firstPackage.getLongVersionCode(),
+                mWebViewUpdateServiceImpl.getCurrentWebViewPackage().getLongVersionCode());
         assertEquals(firstPackage.versionName,
                 mWebViewUpdateServiceImpl.getCurrentWebViewPackage().versionName);
 
@@ -1524,8 +1524,8 @@ public class WebViewUpdateServiceTest {
         // Ensure the API is still correct after running waitForAndGetProvider
         assertEquals(firstPackage.packageName,
                 mWebViewUpdateServiceImpl.getCurrentWebViewPackage().packageName);
-        assertEquals(firstPackage.versionCode,
-                mWebViewUpdateServiceImpl.getCurrentWebViewPackage().versionCode);
+        assertEquals(firstPackage.getLongVersionCode(),
+                mWebViewUpdateServiceImpl.getCurrentWebViewPackage().getLongVersionCode());
         assertEquals(firstPackage.versionName,
                 mWebViewUpdateServiceImpl.getCurrentWebViewPackage().versionName);
     }

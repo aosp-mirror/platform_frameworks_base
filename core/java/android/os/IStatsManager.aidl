@@ -55,12 +55,12 @@ interface IStatsManager {
      * Inform statsd what the version and package are for each uid. Note that each array should
      * have the same number of elements, and version[i] and package[i] correspond to uid[i].
      */
-    oneway void informAllUidData(in int[] uid, in int[] version, in String[] app);
+    oneway void informAllUidData(in int[] uid, in long[] version, in String[] app);
 
     /**
      * Inform statsd what the uid and version are for one app that was updated.
      */
-    oneway void informOnePackage(in String app, in int uid, in int version);
+    oneway void informOnePackage(in String app, in int uid, in long version);
 
     /**
      * Inform stats that an app was removed.

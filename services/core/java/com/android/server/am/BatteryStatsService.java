@@ -935,7 +935,7 @@ public final class BatteryStatsService extends IBatteryStats.Stub
         }
     }
 
-    public void notePackageInstalled(String pkgName, int versionCode) {
+    public void notePackageInstalled(String pkgName, long versionCode) {
         enforceCallingPermission();
         synchronized (mStats) {
             mStats.notePackageInstalledLocked(pkgName, versionCode);

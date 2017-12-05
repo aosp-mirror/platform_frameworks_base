@@ -14542,7 +14542,7 @@ public class ActivityManagerService extends IActivityManager.Stub
                 try {
                     PackageInfo pi = pm.getPackageInfo(pkg, 0, UserHandle.getCallingUserId());
                     if (pi != null) {
-                        sb.append(" v").append(pi.versionCode);
+                        sb.append(" v").append(pi.getLongVersionCode());
                         if (pi.versionName != null) {
                             sb.append(" (").append(pi.versionName).append(")");
                         }

@@ -2854,6 +2854,8 @@
       <public name="compileSdkVersionCodename" />
       <public name="screenReaderFocusable" />
       <public name="buttonCornerRadius" />
+      <public name="versionCodeMajor" />
+      <public name="versionMajor" />
     </public-group>
 
     <public-group type="style" first-id="0x010302e0">

@@ -120,7 +120,7 @@ public class BatteryStatsImpl extends BatteryStats {
     private static final int MAGIC = 0xBA757475; // 'BATSTATS'
 
     // Current on-disk Parcel version
-    private static final int VERSION = 169 + (USE_OLD_HISTORY ? 1000 : 0);
+    private static final int VERSION = 170 + (USE_OLD_HISTORY ? 1000 : 0);
 
     // Maximum number of items we will record in the history.
     private static final int MAX_HISTORY_ITEMS;
@@ -4501,11 +4501,12 @@ public class BatteryStatsImpl extends BatteryStats {
         }
     }
 
-    public void notePackageInstalledLocked(String pkgName, int versionCode) {
+    public void notePackageInstalledLocked(String pkgName, long versionCode) {
         final long elapsedRealtime = mClocks.elapsedRealtime();
         final long uptime = mClocks.uptimeMillis();
+        // XXX need to figure out what to do with long version codes.
         addHistoryEventLocked(elapsedRealtime, uptime, HistoryItem.EVENT_PACKAGE_INSTALLED,
-                pkgName, versionCode);
+                pkgName, (int)versionCode);
         PackageChange pc = new PackageChange();
         pc.mPackageName = pkgName;
         pc.mUpdate = true;
@@ -9283,7 +9284,7 @@ public class BatteryStatsImpl extends BatteryStats {
                     if (pc.mUpdate) {
                         out.startTag(null, "upd");
                         out.attribute(null, "pkg", pc.mPackageName);
-                        out.attribute(null, "ver", Integer.toString(pc.mVersionCode));
+                        out.attribute(null, "ver", Long.toString(pc.mVersionCode));
                         out.endTag(null, "upd");
                     } else {
                         out.startTag(null, "rem");
@@ -9412,7 +9413,7 @@ public class BatteryStatsImpl extends BatteryStats {
                 pc.mUpdate = true;
                 pc.mPackageName = parser.getAttributeValue(null, "pkg");
                 String verStr = parser.getAttributeValue(null, "ver");
-                pc.mVersionCode = verStr != null ? Integer.parseInt(verStr) : 0;
+                pc.mVersionCode = verStr != null ? Long.parseLong(verStr) : 0;
                 dit.mPackageChanges.add(pc);
                 XmlUtils.skipCurrentTag(parser);
             } else if (tagName.equals("rem")) {
@@ -12113,7 +12114,7 @@ public class BatteryStatsImpl extends BatteryStats {
                 PackageChange pc = new PackageChange();
                 pc.mPackageName = in.readString();
                 pc.mUpdate = in.readInt() != 0;
-                pc.mVersionCode = in.readInt();
+                pc.mVersionCode = in.readLong();
                 mDailyPackageChanges.add(pc);
             }
         } else {
@@ -12538,7 +12539,7 @@ public class BatteryStatsImpl extends BatteryStats {
                 PackageChange pc = mDailyPackageChanges.get(i);
                 out.writeString(pc.mPackageName);
                 out.writeInt(pc.mUpdate ? 1 : 0);
-                out.writeInt(pc.mVersionCode);
+                out.writeLong(pc.mVersionCode);
             }
         } else {
             out.writeInt(0);

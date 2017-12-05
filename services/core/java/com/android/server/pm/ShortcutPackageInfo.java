@@ -59,8 +59,8 @@ class ShortcutPackageInfo {
      * been installed yet.
      */
     private boolean mIsShadow;
-    private int mVersionCode = ShortcutInfo.VERSION_CODE_UNKNOWN;
-    private int mBackupSourceVersionCode = ShortcutInfo.VERSION_CODE_UNKNOWN;
+    private long mVersionCode = ShortcutInfo.VERSION_CODE_UNKNOWN;
+    private long mBackupSourceVersionCode = ShortcutInfo.VERSION_CODE_UNKNOWN;
     private long mLastUpdateTime;
     private ArrayList<byte[]> mSigHashes;
 
@@ -73,7 +73,7 @@ class ShortcutPackageInfo {
     private boolean mBackupAllowed;
     private boolean mBackupSourceBackupAllowed;
 
-    private ShortcutPackageInfo(int versionCode, long lastUpdateTime,
+    private ShortcutPackageInfo(long versionCode, long lastUpdateTime,
             ArrayList<byte[]> sigHashes, boolean isShadow) {
         mVersionCode = versionCode;
         mLastUpdateTime = lastUpdateTime;
@@ -96,11 +96,11 @@ class ShortcutPackageInfo {
         mIsShadow = shadow;
     }
 
-    public int getVersionCode() {
+    public long getVersionCode() {
         return mVersionCode;
     }
 
-    public int getBackupSourceVersionCode() {
+    public long getBackupSourceVersionCode() {
         return mBackupSourceVersionCode;
     }
 
@@ -123,7 +123,7 @@ class ShortcutPackageInfo {
      */
     public void updateFromPackageInfo(@NonNull PackageInfo pi) {
         if (pi != null) {
-            mVersionCode = pi.versionCode;
+            mVersionCode = pi.getLongVersionCode();
             mLastUpdateTime = pi.lastUpdateTime;
             mBackupAllowed = ShortcutService.shouldBackupApp(pi);
             mBackupAllowedInitialized = true;
@@ -145,7 +145,7 @@ class ShortcutPackageInfo {
             Slog.w(TAG, "Can't restore: package didn't or doesn't allow backup");
             return ShortcutInfo.DISABLED_REASON_BACKUP_NOT_SUPPORTED;
         }
-        if (!anyVersionOkay && (currentPackage.versionCode < mBackupSourceVersionCode)) {
+        if (!anyVersionOkay && (currentPackage.getLongVersionCode() < mBackupSourceVersionCode)) {
             Slog.w(TAG, String.format(
                     "Can't restore: package current version %d < backed up version %d",
                     currentPackage.versionCode, mBackupSourceVersionCode));
@@ -162,11 +162,12 @@ class ShortcutPackageInfo {
             Slog.e(TAG, "Can't get signatures: package=" + packageName);
             return null;
         }
-        final ShortcutPackageInfo ret = new ShortcutPackageInfo(pi.versionCode, pi.lastUpdateTime,
-                BackupUtils.hashSignatureArray(pi.signatures), /* shadow=*/ false);
+        final ShortcutPackageInfo ret = new ShortcutPackageInfo(pi.getLongVersionCode(),
+                pi.lastUpdateTime, BackupUtils.hashSignatureArray(pi.signatures),
+                /* shadow=*/ false);
 
         ret.mBackupSourceBackupAllowed = s.shouldBackupApp(pi);
-        ret.mBackupSourceVersionCode = pi.versionCode;
+        ret.mBackupSourceVersionCode = pi.getLongVersionCode();
         return ret;
     }
 
@@ -213,7 +214,7 @@ class ShortcutPackageInfo {
             throws IOException, XmlPullParserException {
 
         // Don't use the version code from the backup file.
-        final int versionCode = ShortcutService.parseIntAttribute(parser, ATTR_VERSION,
+        final long versionCode = ShortcutService.parseLongAttribute(parser, ATTR_VERSION,
                 ShortcutInfo.VERSION_CODE_UNKNOWN);
 
         final long lastUpdateTime = ShortcutService.parseLongAttribute(
@@ -225,7 +226,7 @@ class ShortcutPackageInfo {
 
         // We didn't used to save these attributes, and all backed up shortcuts were from
         // apps that support backups, so the default values take this fact into consideration.
-        final int backupSourceVersion = ShortcutService.parseIntAttribute(parser,
+        final long backupSourceVersion = ShortcutService.parseLongAttribute(parser,
                 ATTR_BACKUP_SOURCE_VERSION, ShortcutInfo.VERSION_CODE_UNKNOWN);
 
         // Note the only time these "true" default value is used is when restoring from an old

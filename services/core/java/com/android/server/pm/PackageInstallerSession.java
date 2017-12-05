@@ -225,7 +225,7 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
     @GuardedBy("mLock")
     private String mPackageName;
     @GuardedBy("mLock")
-    private int mVersionCode;
+    private long mVersionCode;
     @GuardedBy("mLock")
     private Signature[] mSignatures;
     @GuardedBy("mLock")
@@ -1006,7 +1006,7 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
             // Use first package to define unknown values
             if (mPackageName == null) {
                 mPackageName = apk.packageName;
-                mVersionCode = apk.versionCode;
+                mVersionCode = apk.getLongVersionCode();
             }
             if (mSignatures == null) {
                 mSignatures = apk.signatures;
@@ -1057,7 +1057,7 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
             // ensure we've got appropriate package name, version code and signatures
             if (mPackageName == null) {
                 mPackageName = pkgInfo.packageName;
-                mVersionCode = pkgInfo.versionCode;
+                mVersionCode = pkgInfo.getLongVersionCode();
             }
             if (mSignatures == null) {
                 mSignatures = pkgInfo.signatures;
@@ -1149,7 +1149,7 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
                     + " specified package " + params.appPackageName
                     + " inconsistent with " + apk.packageName);
         }
-        if (mVersionCode != apk.versionCode) {
+        if (mVersionCode != apk.getLongVersionCode()) {
             throw new PackageManagerException(INSTALL_FAILED_INVALID_APK, tag
                     + " version code " + apk.versionCode + " inconsistent with "
                     + mVersionCode);

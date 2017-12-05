@@ -73,8 +73,7 @@ public final class SharedLibraryInfo implements Parcelable {
 
     private final String mName;
 
-    // TODO: Make long when we change the paltform to use longs
-    private final int mVersion;
+    private final long mVersion;
     private final @Type int mType;
     private final VersionedPackage mDeclaringPackage;
     private final List<VersionedPackage> mDependentPackages;
@@ -90,7 +89,7 @@ public final class SharedLibraryInfo implements Parcelable {
      *
      * @hide
      */
-    public SharedLibraryInfo(String name, int version, int type,
+    public SharedLibraryInfo(String name, long version, int type,
             VersionedPackage declaringPackage, List<VersionedPackage> dependentPackages) {
         mName = name;
         mVersion = version;
@@ -100,7 +99,7 @@ public final class SharedLibraryInfo implements Parcelable {
     }
 
     private SharedLibraryInfo(Parcel parcel) {
-        this(parcel.readString(), parcel.readInt(), parcel.readInt(),
+        this(parcel.readString(), parcel.readLong(), parcel.readInt(),
                 parcel.readParcelable(null), parcel.readArrayList(null));
     }
 
@@ -124,6 +123,14 @@ public final class SharedLibraryInfo implements Parcelable {
     }
 
     /**
+     * @deprecated Use {@link #getLongVersion()} instead.
+     */
+    @Deprecated
+    public @IntRange(from = -1) int getVersion() {
+        return mVersion < 0 ? (int) mVersion : (int) (mVersion & 0x7fffffff);
+    }
+
+    /**
      * Gets the version of the library. For {@link #TYPE_STATIC static} libraries
      * this is the declared version and for {@link #TYPE_DYNAMIC dynamic} and
      * {@link #TYPE_BUILTIN builtin} it is {@link #VERSION_UNDEFINED} as these
@@ -131,7 +138,7 @@ public final class SharedLibraryInfo implements Parcelable {
      *
      * @return The version.
      */
-    public @IntRange(from = -1) int getVersion() {
+    public @IntRange(from = -1) long getLongVersion() {
         return mVersion;
     }
 
@@ -192,7 +199,7 @@ public final class SharedLibraryInfo implements Parcelable {
     @Override
     public void writeToParcel(Parcel parcel, int flags) {
         parcel.writeString(mName);
-        parcel.writeInt(mVersion);
+        parcel.writeLong(mVersion);
         parcel.writeInt(mType);
         parcel.writeParcelable(mDeclaringPackage, flags);
         parcel.writeList(mDependentPackages);

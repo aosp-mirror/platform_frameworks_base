@@ -263,6 +263,17 @@ public abstract class BackupAgent extends ContextWrapper {
             ParcelFileDescriptor newState) throws IOException;
 
     /**
+     * New version of {@link #onRestore(BackupDataInput, int, android.os.ParcelFileDescriptor)}
+     * that handles a long app version code.  Default implementation casts the version code to
+     * an int and calls {@link #onRestore(BackupDataInput, int, android.os.ParcelFileDescriptor)}.
+     */
+    public void onRestore(BackupDataInput data, long appVersionCode,
+            ParcelFileDescriptor newState)
+            throws IOException {
+        onRestore(data, (int) appVersionCode, newState);
+    }
+
+    /**
      * The application is having its entire file system contents backed up.  {@code data}
      * points to the backup destination, and the app has the opportunity to choose which
      * files are to be stored.  To commit a file as part of the backup, call the
@@ -947,7 +958,7 @@ public abstract class BackupAgent extends ContextWrapper {
         }
 
         @Override
-        public void doRestore(ParcelFileDescriptor data, int appVersionCode,
+        public void doRestore(ParcelFileDescriptor data, long appVersionCode,
                 ParcelFileDescriptor newState,
                 int token, IBackupManager callbackBinder) throws RemoteException {
             // Ensure that we're running with the app's normal permission level
