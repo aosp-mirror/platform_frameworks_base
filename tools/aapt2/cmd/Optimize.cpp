@@ -17,6 +17,7 @@
 #include <memory>
 #include <vector>
 
+#include "android-base/file.h"
 #include "android-base/stringprintf.h"
 
 #include "androidfw/ResourceTypes.h"
@@ -47,6 +48,7 @@ using ::aapt::configuration::Artifact;
 using ::aapt::configuration::PostProcessingConfiguration;
 using ::android::ResTable_config;
 using ::android::StringPiece;
+using ::android::base::ReadFileToString;
 using ::android::base::StringAppendF;
 using ::android::base::StringPrintf;
 
@@ -279,6 +281,20 @@ class OptimizeCommand {
   OptimizeContext* context_;
 };
 
+bool ExtractWhitelistFromConfig(const std::string& path, OptimizeContext* context,
+                                OptimizeOptions* options) {
+  std::string contents;
+  if (!ReadFileToString(path, &contents, true)) {
+    context->GetDiagnostics()->Error(DiagMessage()
+                                     << "failed to parse whitelist from config file: " << path);
+    return false;
+  }
+  for (const StringPiece& resource_name : util::Tokenize(contents, ',')) {
+    options->table_flattener_options.whitelisted_resources.insert(resource_name.to_string());
+  }
+  return true;
+}
+
 bool ExtractAppDataFromManifest(OptimizeContext* context, const LoadedApk* apk,
                                 OptimizeOptions* out_options) {
   const xml::XmlResource* manifest = apk->GetManifest();
@@ -302,6 +318,7 @@ int Optimize(const std::vector<StringPiece>& args) {
   OptimizeContext context;
   OptimizeOptions options;
   Maybe<std::string> config_path;
+  Maybe<std::string> whitelist_path;
   Maybe<std::string> target_densities;
   Maybe<std::string> target_abis;
   std::vector<std::string> configs;
@@ -320,6 +337,10 @@ int Optimize(const std::vector<StringPiece>& args) {
               "All the resources that would be unused on devices of the given densities will be \n"
               "removed from the APK.",
               &target_densities)
+          .OptionalFlag("--whitelist-config-path",
+                        "Path to the whitelist.cfg file containing whitelisted resources \n"
+                        "whose names should not be altered in final resource tables.",
+                        &whitelist_path)
           .OptionalFlag(
               "--target-abis",
               "Comma separated list of the CPU ABIs that the APK will be optimized for.\n"
@@ -339,6 +360,9 @@ int Optimize(const std::vector<StringPiece>& args) {
                           "Enables encoding sparse entries using a binary search tree.\n"
                           "This decreases APK size at the cost of resource retrieval performance.",
                           &options.table_flattener_options.use_sparse_entries)
+          .OptionalSwitch("--enable-resource-obfuscation",
+                          "Enables obfuscation of key string pool to single value",
+                          &options.table_flattener_options.collapse_key_stringpool)
           .OptionalSwitch("-v", "Enables verbose logging", &verbose);
 
   if (!flags.Parse("aapt2 optimize", args, &std::cerr)) {
@@ -423,6 +447,15 @@ int Optimize(const std::vector<StringPiece>& args) {
   } else if (print_only) {
     diag->Error(DiagMessage() << "Asked to print artifacts without providing a configurations");
     return 1;
+  }
+
+  if (options.table_flattener_options.collapse_key_stringpool) {
+    if (whitelist_path) {
+      std::string& path = whitelist_path.value();
+      if (!ExtractWhitelistFromConfig(path, &context, &options)) {
+        return 1;
+      }
+    }
   }
 
   if (!ExtractAppDataFromManifest(&context, apk.get(), &options)) {
