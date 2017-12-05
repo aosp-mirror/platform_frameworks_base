@@ -23,7 +23,6 @@ import com.android.internal.telecom.IVideoProvider;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.SystemApi;
-import android.annotation.TestApi;
 import android.app.Notification;
 import android.bluetooth.BluetoothDevice;
 import android.content.Intent;
@@ -397,9 +396,7 @@ public abstract class Connection extends Conferenceable {
     /**
      * Set by the framework to indicate that a connection has an active RTT session associated with
      * it.
-     * @hide
      */
-    @TestApi
     public static final int PROPERTY_IS_RTT = 1 << 8;
 
     //**********************************************************************************************
@@ -831,9 +828,7 @@ public abstract class Connection extends Conferenceable {
 
     /**
      * Provides methods to read and write RTT data to/from the in-call app.
-     * @hide
      */
-    @TestApi
     public static final class RttTextStream {
         private static final int READ_BUFFER_SIZE = 1000;
         private final InputStreamReader mPipeFromInCall;
@@ -2608,10 +2603,8 @@ public abstract class Connection extends Conferenceable {
     /**
      * Informs listeners that a previously requested RTT session via
      * {@link ConnectionRequest#isRequestingRtt()} or
-     * {@link #onStartRtt(ParcelFileDescriptor, ParcelFileDescriptor)} has succeeded.
-     * @hide
+     * {@link #onStartRtt(RttTextStream)} has succeeded.
      */
-    @TestApi
     public final void sendRttInitiationSuccess() {
         setRttProperty();
         mListeners.forEach((l) -> l.onRttInitiationSuccess(Connection.this));
@@ -2619,14 +2612,11 @@ public abstract class Connection extends Conferenceable {
 
     /**
      * Informs listeners that a previously requested RTT session via
-     * {@link ConnectionRequest#isRequestingRtt()} or
-     * {@link #onStartRtt(ParcelFileDescriptor, ParcelFileDescriptor)}
+     * {@link ConnectionRequest#isRequestingRtt()} or {@link #onStartRtt(RttTextStream)}
      * has failed.
      * @param reason One of the reason codes defined in {@link RttModifyStatus}, with the
      *               exception of {@link RttModifyStatus#SESSION_MODIFY_REQUEST_SUCCESS}.
-     * @hide
      */
-    @TestApi
     public final void sendRttInitiationFailure(int reason) {
         unsetRttProperty();
         mListeners.forEach((l) -> l.onRttInitiationFailure(Connection.this, reason));
@@ -2635,9 +2625,7 @@ public abstract class Connection extends Conferenceable {
     /**
      * Informs listeners that a currently active RTT session has been terminated by the remote
      * side of the coll.
-     * @hide
      */
-    @TestApi
     public final void sendRttSessionRemotelyTerminated() {
         mListeners.forEach((l) -> l.onRttSessionRemotelyTerminated(Connection.this));
     }
@@ -2645,9 +2633,7 @@ public abstract class Connection extends Conferenceable {
     /**
      * Informs listeners that the remote side of the call has requested an upgrade to include an
      * RTT session in the call.
-     * @hide
      */
-    @TestApi
     public final void sendRemoteRttRequest() {
         mListeners.forEach((l) -> l.onRemoteRttRequest(Connection.this));
     }
@@ -2864,17 +2850,13 @@ public abstract class Connection extends Conferenceable {
      * request, respectively.
      * @param rttTextStream The object that should be used to send text to or receive text from
      *                      the in-call app.
-     * @hide
      */
-    @TestApi
     public void onStartRtt(@NonNull RttTextStream rttTextStream) {}
 
     /**
      * Notifies this {@link Connection} that it should terminate any existing RTT communication
      * channel. No response to Telecom is needed for this method.
-     * @hide
      */
-    @TestApi
     public void onStopRtt() {}
 
     /**
@@ -2882,11 +2864,9 @@ public abstract class Connection extends Conferenceable {
      * request sent via {@link #sendRemoteRttRequest}. Acceptance of the request is
      * indicated by the supplied {@link RttTextStream} being non-null, and rejection is
      * indicated by {@code rttTextStream} being {@code null}
-     * @hide
      * @param rttTextStream The object that should be used to send text to or receive text from
      *                      the in-call app.
      */
-    @TestApi
     public void handleRttUpgradeResponse(@Nullable RttTextStream rttTextStream) {}
 
     /**
