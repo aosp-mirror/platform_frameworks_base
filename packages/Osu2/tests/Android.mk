@@ -20,7 +20,7 @@ LOCAL_CERTIFICATE := platform
 
 LOCAL_SRC_FILES := $(call all-java-files-under, src)
 
-LOCAL_JAVA_LIBRARIES := android.test.runner
+LOCAL_JAVA_LIBRARIES := android.test.runner android.test.base
 
 LOCAL_JACK_FLAGS := --multi-dex native
 

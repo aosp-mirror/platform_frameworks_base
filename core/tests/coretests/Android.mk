@@ -45,7 +45,14 @@ LOCAL_STATIC_JAVA_LIBRARIES := \
     truth-prebuilt \
     print-test-util-lib
 
-LOCAL_JAVA_LIBRARIES := android.test.runner conscrypt telephony-common org.apache.http.legacy
+LOCAL_JAVA_LIBRARIES := \
+    android.test.runner \
+    conscrypt \
+    telephony-common \
+    org.apache.http.legacy \
+    android.test.base \
+    android.test.mock \
+
 LOCAL_PACKAGE_NAME := FrameworksCoreTests
 LOCAL_COMPATIBILITY_SUITE := device-tests
 
