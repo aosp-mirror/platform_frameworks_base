@@ -109,8 +109,7 @@ public final class TextClassification {
     @NonNull private final List<Intent> mSecondaryIntents;
     @NonNull private final List<OnClickListener> mSecondaryOnClickListeners;
     @NonNull private final EntityConfidence<String> mEntityConfidence;
-    private int mLogType;
-    @NonNull private final String mVersionInfo;
+    @NonNull private final String mSignature;
 
     private TextClassification(
             @Nullable String text,
@@ -123,8 +122,7 @@ public final class TextClassification {
             @NonNull List<Intent> secondaryIntents,
             @NonNull List<OnClickListener> secondaryOnClickListeners,
             @NonNull Map<String, Float> entityConfidence,
-            int logType,
-            @NonNull String versionInfo) {
+            @NonNull String signature) {
         Preconditions.checkArgument(secondaryLabels.size() == secondaryIntents.size());
         Preconditions.checkArgument(secondaryIcons.size() == secondaryIntents.size());
         Preconditions.checkArgument(secondaryOnClickListeners.size() == secondaryIntents.size());
@@ -138,8 +136,7 @@ public final class TextClassification {
         mSecondaryIntents = secondaryIntents;
         mSecondaryOnClickListeners = secondaryOnClickListeners;
         mEntityConfidence = new EntityConfidence<>(entityConfidence);
-        mLogType = logType;
-        mVersionInfo = versionInfo;
+        mSignature = signature;
     }
 
     /**
@@ -315,30 +312,26 @@ public final class TextClassification {
     }
 
     /**
-     * Returns the MetricsLogger subtype for the action that is performed for this result.
-     * @hide
-     */
-    public int getLogType() {
-        return mLogType;
-    }
-
-    /**
-     * Returns information about the classifier model used to generate this TextClassification.
-     * @hide
+     * Returns the signature for this object.
+     * The TextClassifier that generates this object may use it as a way to internally identify
+     * this object.
      */
     @NonNull
-    public String getVersionInfo() {
-        return mVersionInfo;
+    public String getSignature() {
+        return mSignature;
     }
 
     @Override
     public String toString() {
-        return String.format("TextClassification {"
+        return String.format(Locale.US, "TextClassification {"
                         + "text=%s, entities=%s, "
                         + "primaryLabel=%s, secondaryLabels=%s, "
-                        + "primaryIntent=%s, secondaryIntents=%s}",
+                        + "primaryIntent=%s, secondaryIntents=%s, "
+                        + "signature=%s}",
                 mText, mEntityConfidence,
-                mPrimaryLabel, mSecondaryLabels, mPrimaryIntent, mSecondaryIntents);
+                mPrimaryLabel, mSecondaryLabels,
+                mPrimaryIntent, mSecondaryIntents,
+                mSignature);
     }
 
     /**
@@ -383,8 +376,7 @@ public final class TextClassification {
         @Nullable String mPrimaryLabel;
         @Nullable Intent mPrimaryIntent;
         @Nullable OnClickListener mPrimaryOnClickListener;
-        private int mLogType;
-        @NonNull private String mVersionInfo = "";
+        @NonNull private String mSignature = "";
 
         /**
          * Sets the classified text.
@@ -508,20 +500,12 @@ public final class TextClassification {
         }
 
         /**
-         * Sets the MetricsLogger subtype for the action that is performed for this result.
-         * @hide
+         * Sets a signature for the TextClassification object.
+         * The TextClassifier that generates the TextClassification object may use it as a way to
+         * internally identify the TextClassification object.
          */
-        public Builder setLogType(int type) {
-            mLogType = type;
-            return this;
-        }
-
-        /**
-         * Sets information about the classifier model used to generate this TextClassification.
-         * @hide
-         */
-        Builder setVersionInfo(@NonNull String versionInfo) {
-            mVersionInfo = Preconditions.checkNotNull(versionInfo);
+        public Builder setSignature(@NonNull String signature) {
+            mSignature = Preconditions.checkNotNull(signature);
             return this;
         }
 
@@ -535,7 +519,7 @@ public final class TextClassification {
                     mPrimaryIntent, mPrimaryOnClickListener,
                     mSecondaryIcons, mSecondaryLabels,
                     mSecondaryIntents, mSecondaryOnClickListeners,
-                    mEntityConfidence, mLogType, mVersionInfo);
+                    mEntityConfidence, mSignature);
         }
     }
 

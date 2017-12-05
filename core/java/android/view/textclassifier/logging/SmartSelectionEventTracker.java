@@ -473,7 +473,7 @@ public final class SmartSelectionEventTracker {
             final String entityType = classification.getEntityCount() > 0
                     ? classification.getEntity(0)
                     : TextClassifier.TYPE_UNKNOWN;
-            final String versionTag = classification.getVersionInfo();
+            final String versionTag = getVersionInfo(classification.getSignature());
             return new SelectionEvent(
                     start, end, EventType.SELECTION_MODIFIED, entityType, versionTag);
         }
@@ -489,7 +489,7 @@ public final class SmartSelectionEventTracker {
          */
         public static SelectionEvent selectionModified(
                 int start, int end, @NonNull TextSelection selection) {
-            final boolean smartSelection = selection.getSourceClassifier()
+            final boolean smartSelection = getSourceClassifier(selection.getSignature())
                     .equals(TextClassifier.DEFAULT_LOG_TAG);
             final int eventType;
             if (smartSelection) {
@@ -503,7 +503,7 @@ public final class SmartSelectionEventTracker {
             final String entityType = selection.getEntityCount() > 0
                     ? selection.getEntity(0)
                     : TextClassifier.TYPE_UNKNOWN;
-            final String versionTag = selection.getVersionInfo();
+            final String versionTag = getVersionInfo(selection.getSignature());
             return new SelectionEvent(start, end, eventType, entityType, versionTag);
         }
 
@@ -538,26 +538,25 @@ public final class SmartSelectionEventTracker {
             final String entityType = classification.getEntityCount() > 0
                     ? classification.getEntity(0)
                     : TextClassifier.TYPE_UNKNOWN;
-            final String versionTag = classification.getVersionInfo();
+            final String versionTag = getVersionInfo(classification.getSignature());
             return new SelectionEvent(start, end, actionType, entityType, versionTag);
         }
 
-        private boolean isActionType() {
-            switch (mEventType) {
-                case ActionType.OVERTYPE:  // fall through
-                case ActionType.COPY:  // fall through
-                case ActionType.PASTE:  // fall through
-                case ActionType.CUT:  // fall through
-                case ActionType.SHARE:  // fall through
-                case ActionType.SMART_SHARE:  // fall through
-                case ActionType.DRAG:  // fall through
-                case ActionType.ABANDON:  // fall through
-                case ActionType.SELECT_ALL:  // fall through
-                case ActionType.RESET:  // fall through
-                    return true;
-                default:
-                    return false;
+        private static String getVersionInfo(String signature) {
+            final int start = signature.indexOf("|");
+            final int end = signature.indexOf("|", start);
+            if (start >= 0 && end >= start) {
+                return signature.substring(start, end);
             }
+            return "";
+        }
+
+        private static String getSourceClassifier(String signature) {
+            final int end = signature.indexOf("|");
+            if (end >= 0) {
+                return signature.substring(0, end);
+            }
+            return "";
         }
 
         private boolean isTerminal() {

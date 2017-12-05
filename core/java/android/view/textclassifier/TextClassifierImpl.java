@@ -33,7 +33,6 @@ import android.provider.Settings;
 import android.text.util.Linkify;
 import android.util.Patterns;
 import android.view.View.OnClickListener;
-import android.widget.TextViewMetrics;
 
 import com.android.internal.annotations.GuardedBy;
 import com.android.internal.logging.MetricsLogger;
@@ -122,8 +121,8 @@ final class TextClassifierImpl implements TextClassifier {
                         tsBuilder.setEntityType(results[i].mCollection, results[i].mScore);
                     }
                     return tsBuilder
-                            .setLogSource(LOG_TAG)
-                            .setVersionInfo(getVersionInfo())
+                            .setSignature(
+                                    getSignature(string, selectionStartIndex, selectionEndIndex))
                             .build();
                 } else {
                     // We can not trust the result. Log the issue and ignore the result.
@@ -155,8 +154,7 @@ final class TextClassifierImpl implements TextClassifier {
                                 getHintFlags(string, startIndex, endIndex));
                 if (results.length > 0) {
                     final TextClassification classificationResult =
-                            createClassificationResult(
-                                    results, string.subSequence(startIndex, endIndex));
+                            createClassificationResult(results, string, startIndex, endIndex);
                     return classificationResult;
                 }
             }
@@ -230,13 +228,13 @@ final class TextClassifierImpl implements TextClassifier {
         }
     }
 
-    @NonNull
-    private String getVersionInfo() {
+    private String getSignature(String text, int start, int end) {
         synchronized (mSmartSelectionLock) {
-            if (mLocale != null) {
-                return String.format("%s_v%d", mLocale.toLanguageTag(), mVersion);
-            }
-            return "";
+            final String versionInfo = (mLocale != null)
+                    ? String.format(Locale.US, "%s_v%d", mLocale.toLanguageTag(), mVersion)
+                    : "";
+            final int hash = Objects.hash(text, start, end, mContext.getPackageName());
+            return String.format(Locale.US, "%s|%s|%d", LOG_TAG, versionInfo, hash);
         }
     }
 
@@ -372,9 +370,11 @@ final class TextClassifierImpl implements TextClassifier {
     }
 
     private TextClassification createClassificationResult(
-            SmartSelection.ClassificationResult[] classifications, CharSequence text) {
+            SmartSelection.ClassificationResult[] classifications,
+            String text, int start, int end) {
+        final String classifiedText = text.substring(start, end);
         final TextClassification.Builder builder = new TextClassification.Builder()
-                .setText(text.toString());
+                .setText(classifiedText);
 
         final int size = classifications.length;
         for (int i = 0; i < size; i++) {
@@ -382,11 +382,9 @@ final class TextClassifierImpl implements TextClassifier {
         }
 
         final String type = getHighestScoringType(classifications);
-        builder.setLogType(IntentFactory.getLogType(type));
+        addActions(builder, IntentFactory.create(mContext, type, text));
 
-        addActions(builder, IntentFactory.create(mContext, type, text.toString()));
-
-        return builder.setVersionInfo(getVersionInfo()).build();
+        return builder.setSignature(getSignature(text, start, end)).build();
     }
 
     /** Extends the classification with the intents that can be resolved. */
@@ -562,23 +560,6 @@ final class TextClassifierImpl implements TextClassifier {
                     }
                 default:
                     return null;
-            }
-        }
-
-        @Nullable
-        public static int getLogType(String type) {
-            type = type.trim().toLowerCase(Locale.ENGLISH);
-            switch (type) {
-                case TextClassifier.TYPE_EMAIL:
-                    return TextViewMetrics.SUBTYPE_ASSIST_MENU_ITEM_EMAIL;
-                case TextClassifier.TYPE_PHONE:
-                    return TextViewMetrics.SUBTYPE_ASSIST_MENU_ITEM_PHONE;
-                case TextClassifier.TYPE_ADDRESS:
-                    return TextViewMetrics.SUBTYPE_ASSIST_MENU_ITEM_ADDRESS;
-                case TextClassifier.TYPE_URL:
-                    return TextViewMetrics.SUBTYPE_ASSIST_MENU_ITEM_URL;
-                default:
-                    return TextViewMetrics.SUBTYPE_ASSIST_MENU_ITEM_OTHER;
             }
         }
     }
