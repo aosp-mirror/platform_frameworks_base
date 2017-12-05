@@ -568,9 +568,21 @@ public class AlarmManager {
     }
 
     /**
-     * Schedule an alarm that represents an alarm clock.
+     * Schedule an alarm that represents an alarm clock, which will be used to notify the user
+     * when it goes off.  The expectation is that when this alarm triggers, the application will
+     * further wake up the device to tell the user about the alarm -- turning on the screen,
+     * playing a sound, vibrating, etc.  As such, the system will typically also use the
+     * information supplied here to tell the user about this upcoming alarm if appropriate.
      *
-     * The system may choose to display information about this alarm to the user.
+     * <p>Due to the nature of this kind of alarm, similar to {@link #setExactAndAllowWhileIdle},
+     * these alarms will be allowed to trigger even if the system is in a low-power idle
+     * (a.k.a. doze) mode.  The system may also do some prep-work when it sees that such an
+     * alarm coming up, to reduce the amount of background work that could happen if this
+     * causes the device to fully wake up -- this is to avoid situations such as a large number
+     * of devices having an alarm set at the same time in the morning, all waking up at that
+     * time and suddenly swamping the network with pending background work.  As such, these
+     * types of alarms can be extremely expensive on battery use and should only be used for
+     * their intended purpose.</p>
      *
      * <p>
      * This method is like {@link #setExact(int, long, PendingIntent)}, but implies
@@ -783,9 +795,9 @@ public class AlarmManager {
 
     /**
      * Like {@link #set(int, long, PendingIntent)}, but this alarm will be allowed to execute
-     * even when the system is in low-power idle modes.  This type of alarm must <b>only</b>
-     * be used for situations where it is actually required that the alarm go off while in
-     * idle -- a reasonable example would be for a calendar notification that should make a
+     * even when the system is in low-power idle (a.k.a. doze) modes.  This type of alarm must
+     * <b>only</b> be used for situations where it is actually required that the alarm go off while
+     * in idle -- a reasonable example would be for a calendar notification that should make a
      * sound so the user is aware of it.  When the alarm is dispatched, the app will also be
      * added to the system's temporary whitelist for approximately 10 seconds to allow that
      * application to acquire further wake locks in which to complete its work.</p>
