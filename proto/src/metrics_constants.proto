@@ -5023,6 +5023,11 @@ message MetricsEvent {
     // OS: P
     CONNECTION_DEVICE_ADVANCED = 1264;
 
+    // OPEN: Settings > Security > Screen lock gear icon
+    // CATEGORY: SETTINGS
+    // OS: P
+    SCREEN_LOCK_SETTINGS = 1265;
+
     // ---- End P Constants, all P constants go above this line ----
 
     // Add new aosp constants above this line.
