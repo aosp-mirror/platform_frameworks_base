@@ -34,7 +34,7 @@ using android::sp;
 using std::set;
 using std::unordered_map;
 using std::vector;
-using android::os::statsd::Condition;
+using android::os::statsd::Predicate;
 
 #ifdef __ANDROID__
 
@@ -165,7 +165,7 @@ StatsdConfig buildMissingMatchers() {
     return config;
 }
 
-StatsdConfig buildMissingCondition() {
+StatsdConfig buildMissingPredicate() {
     StatsdConfig config;
     config.set_name("12345");
 
@@ -223,7 +223,7 @@ StatsdConfig buildDimensionMetricsWithMultiTags() {
     return config;
 }
 
-StatsdConfig buildCircleConditions() {
+StatsdConfig buildCirclePredicates() {
     StatsdConfig config;
     config.set_name("12345");
 
@@ -247,19 +247,19 @@ StatsdConfig buildCircleConditions() {
     simpleAtomMatcher->mutable_key_value_matcher(0)->set_eq_int(
             1 /*SCREEN_STATE_CHANGE__DISPLAY_STATE__STATE_OFF*/);
 
-    auto condition = config.add_condition();
+    auto condition = config.add_predicate();
     condition->set_name("SCREEN_IS_ON");
-    SimpleCondition* simpleCondition = condition->mutable_simple_condition();
-    simpleCondition->set_start("SCREEN_IS_ON");
-    simpleCondition->set_stop("SCREEN_IS_OFF");
+    SimplePredicate* simplePredicate = condition->mutable_simple_predicate();
+    simplePredicate->set_start("SCREEN_IS_ON");
+    simplePredicate->set_stop("SCREEN_IS_OFF");
 
-    condition = config.add_condition();
+    condition = config.add_predicate();
     condition->set_name("SCREEN_IS_EITHER_ON_OFF");
 
-    Condition_Combination* combination = condition->mutable_combination();
+    Predicate_Combination* combination = condition->mutable_combination();
     combination->set_operation(LogicalOperation::OR);
-    combination->add_condition("SCREEN_IS_ON");
-    combination->add_condition("SCREEN_IS_EITHER_ON_OFF");
+    combination->add_predicate("SCREEN_IS_ON");
+    combination->add_predicate("SCREEN_IS_EITHER_ON_OFF");
 
     return config;
 }
@@ -329,8 +329,8 @@ TEST(MetricsManagerTest, TestMissingMatchers) {
                                   conditionToMetricMap, trackerToMetricMap, trackerToConditionMap));
 }
 
-TEST(MetricsManagerTest, TestMissingCondition) {
-    StatsdConfig config = buildMissingCondition();
+TEST(MetricsManagerTest, TestMissingPredicate) {
+    StatsdConfig config = buildMissingPredicate();
     set<int> allTagIds;
     vector<sp<LogMatchingTracker>> allAtomMatchers;
     vector<sp<ConditionTracker>> allConditionTrackers;
@@ -344,8 +344,8 @@ TEST(MetricsManagerTest, TestMissingCondition) {
                                   conditionToMetricMap, trackerToMetricMap, trackerToConditionMap));
 }
 
-TEST(MetricsManagerTest, TestCircleConditionDependency) {
-    StatsdConfig config = buildCircleConditions();
+TEST(MetricsManagerTest, TestCirclePredicateDependency) {
+    StatsdConfig config = buildCirclePredicates();
     set<int> allTagIds;
     vector<sp<LogMatchingTracker>> allAtomMatchers;
     vector<sp<ConditionTracker>> allConditionTrackers;

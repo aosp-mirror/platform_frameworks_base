@@ -45,12 +45,12 @@ public:
     // Initialize this ConditionTracker. This initialization is done recursively (DFS). It can also
     // be done in the constructor, but we do it separately because (1) easy to return a bool to
     // indicate whether the initialization is successful. (2) makes unit test easier.
-    // allConditionConfig: the list of all Condition config from statsd_config.
+    // allConditionConfig: the list of all Predicate config from statsd_config.
     // allConditionTrackers: the list of all ConditionTrackers (this is needed because we may also
     //                       need to call init() on children conditions)
     // conditionNameIndexMap: the mapping from condition name to its index.
     // stack: a bit map to keep track which nodes have been visited on the stack in the recursion.
-    virtual bool init(const std::vector<Condition>& allConditionConfig,
+    virtual bool init(const std::vector<Predicate>& allConditionConfig,
                       const std::vector<sp<ConditionTracker>>& allConditionTrackers,
                       const std::unordered_map<std::string, int>& conditionNameIndexMap,
                       std::vector<bool>& stack) = 0;
@@ -118,4 +118,3 @@ protected:
 }  // namespace statsd
 }  // namespace os
 }  // namespace android
-

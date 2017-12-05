@@ -30,12 +30,12 @@ namespace statsd {
 class SimpleConditionTracker : public virtual ConditionTracker {
 public:
     SimpleConditionTracker(const ConfigKey& key, const std::string& name, const int index,
-                           const SimpleCondition& simpleCondition,
+                           const SimplePredicate& simplePredicate,
                            const std::unordered_map<std::string, int>& trackerNameIndexMap);
 
     ~SimpleConditionTracker();
 
-    bool init(const std::vector<Condition>& allConditionConfig,
+    bool init(const std::vector<Predicate>& allConditionConfig,
               const std::vector<sp<ConditionTracker>>& allConditionTrackers,
               const std::unordered_map<std::string, int>& conditionNameIndexMap,
               std::vector<bool>& stack) override;

@@ -422,57 +422,57 @@ StatsdConfig build_fake_config() {
     simpleAtomMatcher = eventMatcher->mutable_simple_atom_matcher();
     simpleAtomMatcher->set_tag(KERNEL_WAKELOCK_TAG_ID);
 
-    // Conditions.............
-    Condition* condition = config.add_condition();
-    condition->set_name("SCREEN_IS_ON");
-    SimpleCondition* simpleCondition = condition->mutable_simple_condition();
-    simpleCondition->set_start("SCREEN_TURNED_ON");
-    simpleCondition->set_stop("SCREEN_TURNED_OFF");
-    simpleCondition->set_count_nesting(false);
+    // Predicates.............
+    Predicate* predicate = config.add_predicate();
+    predicate->set_name("SCREEN_IS_ON");
+    SimplePredicate* simplePredicate = predicate->mutable_simple_predicate();
+    simplePredicate->set_start("SCREEN_TURNED_ON");
+    simplePredicate->set_stop("SCREEN_TURNED_OFF");
+    simplePredicate->set_count_nesting(false);
 
-    condition = config.add_condition();
-    condition->set_name("SCREEN_IS_OFF");
-    simpleCondition = condition->mutable_simple_condition();
-    simpleCondition->set_start("SCREEN_TURNED_OFF");
-    simpleCondition->set_stop("SCREEN_TURNED_ON");
-    simpleCondition->set_count_nesting(false);
+    predicate = config.add_predicate();
+    predicate->set_name("SCREEN_IS_OFF");
+    simplePredicate = predicate->mutable_simple_predicate();
+    simplePredicate->set_start("SCREEN_TURNED_OFF");
+    simplePredicate->set_stop("SCREEN_TURNED_ON");
+    simplePredicate->set_count_nesting(false);
 
-    condition = config.add_condition();
-    condition->set_name("APP_IS_BACKGROUND");
-    simpleCondition = condition->mutable_simple_condition();
-    simpleCondition->set_start("APP_GOES_BACKGROUND");
-    simpleCondition->set_stop("APP_GOES_FOREGROUND");
-    KeyMatcher* condition_dimension1 = simpleCondition->add_dimension();
-    condition_dimension1->set_key(APP_USAGE_UID_KEY_ID);
-    simpleCondition->set_count_nesting(false);
+    predicate = config.add_predicate();
+    predicate->set_name("APP_IS_BACKGROUND");
+    simplePredicate = predicate->mutable_simple_predicate();
+    simplePredicate->set_start("APP_GOES_BACKGROUND");
+    simplePredicate->set_stop("APP_GOES_FOREGROUND");
+    KeyMatcher* predicate_dimension1 = simplePredicate->add_dimension();
+    predicate_dimension1->set_key(APP_USAGE_UID_KEY_ID);
+    simplePredicate->set_count_nesting(false);
 
-    condition = config.add_condition();
-    condition->set_name("APP_IS_BACKGROUND_AND_SCREEN_ON");
-    Condition_Combination* combination_condition = condition->mutable_combination();
-    combination_condition->set_operation(LogicalOperation::AND);
-    combination_condition->add_condition("APP_IS_BACKGROUND");
-    combination_condition->add_condition("SCREEN_IS_ON");
+    predicate = config.add_predicate();
+    predicate->set_name("APP_IS_BACKGROUND_AND_SCREEN_ON");
+    Predicate_Combination* combination_predicate = predicate->mutable_combination();
+    combination_predicate->set_operation(LogicalOperation::AND);
+    combination_predicate->add_predicate("APP_IS_BACKGROUND");
+    combination_predicate->add_predicate("SCREEN_IS_ON");
 
-    condition = config.add_condition();
-    condition->set_name("WL_HELD_PER_APP_PER_NAME");
-    simpleCondition = condition->mutable_simple_condition();
-    simpleCondition->set_start("APP_GET_WL");
-    simpleCondition->set_stop("APP_RELEASE_WL");
-    KeyMatcher* condition_dimension = simpleCondition->add_dimension();
-    condition_dimension->set_key(WAKE_LOCK_UID_KEY_ID);
-    condition_dimension = simpleCondition->add_dimension();
-    condition_dimension->set_key(WAKE_LOCK_NAME_KEY);
-    simpleCondition->set_count_nesting(true);
+    predicate = config.add_predicate();
+    predicate->set_name("WL_HELD_PER_APP_PER_NAME");
+    simplePredicate = predicate->mutable_simple_predicate();
+    simplePredicate->set_start("APP_GET_WL");
+    simplePredicate->set_stop("APP_RELEASE_WL");
+    KeyMatcher* predicate_dimension = simplePredicate->add_dimension();
+    predicate_dimension->set_key(WAKE_LOCK_UID_KEY_ID);
+    predicate_dimension = simplePredicate->add_dimension();
+    predicate_dimension->set_key(WAKE_LOCK_NAME_KEY);
+    simplePredicate->set_count_nesting(true);
 
-    condition = config.add_condition();
-    condition->set_name("WL_HELD_PER_APP");
-    simpleCondition = condition->mutable_simple_condition();
-    simpleCondition->set_start("APP_GET_WL");
-    simpleCondition->set_stop("APP_RELEASE_WL");
-    simpleCondition->set_initial_value(SimpleCondition_InitialValue_FALSE);
-    condition_dimension = simpleCondition->add_dimension();
-    condition_dimension->set_key(WAKE_LOCK_UID_KEY_ID);
-    simpleCondition->set_count_nesting(true);
+    predicate = config.add_predicate();
+    predicate->set_name("WL_HELD_PER_APP");
+    simplePredicate = predicate->mutable_simple_predicate();
+    simplePredicate->set_start("APP_GET_WL");
+    simplePredicate->set_stop("APP_RELEASE_WL");
+    simplePredicate->set_initial_value(SimplePredicate_InitialValue_FALSE);
+    predicate_dimension = simplePredicate->add_dimension();
+    predicate_dimension->set_key(WAKE_LOCK_UID_KEY_ID);
+    simplePredicate->set_count_nesting(true);
 
     return config;
 }

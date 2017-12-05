@@ -39,11 +39,11 @@ CombinationConditionTracker::~CombinationConditionTracker() {
     VLOG("~CombinationConditionTracker() %s", mName.c_str());
 }
 
-bool CombinationConditionTracker::init(const vector<Condition>& allConditionConfig,
+bool CombinationConditionTracker::init(const vector<Predicate>& allConditionConfig,
                                        const vector<sp<ConditionTracker>>& allConditionTrackers,
                                        const unordered_map<string, int>& conditionNameIndexMap,
                                        vector<bool>& stack) {
-    VLOG("Combiniation condition init() %s", mName.c_str());
+    VLOG("Combination predicate init() %s", mName.c_str());
     if (mInitialized) {
         return true;
     }
@@ -51,22 +51,22 @@ bool CombinationConditionTracker::init(const vector<Condition>& allConditionConf
     // mark this node as visited in the recursion stack.
     stack[mIndex] = true;
 
-    Condition_Combination combinationCondition = allConditionConfig[mIndex].combination();
+    Predicate_Combination combinationCondition = allConditionConfig[mIndex].combination();
 
     if (!combinationCondition.has_operation()) {
         return false;
     }
     mLogicalOperation = combinationCondition.operation();
 
-    if (mLogicalOperation == LogicalOperation::NOT && combinationCondition.condition_size() != 1) {
+    if (mLogicalOperation == LogicalOperation::NOT && combinationCondition.predicate_size() != 1) {
         return false;
     }
 
-    for (string child : combinationCondition.condition()) {
+    for (string child : combinationCondition.predicate()) {
         auto it = conditionNameIndexMap.find(child);
 
         if (it == conditionNameIndexMap.end()) {
-            ALOGW("Condition %s not found in the config", child.c_str());
+            ALOGW("Predicate %s not found in the config", child.c_str());
             return false;
         }
 
@@ -154,7 +154,7 @@ void CombinationConditionTracker::evaluateCondition(
             }
         }
         nonSlicedConditionCache[mIndex] = ConditionState::kUnknown;
-        ALOGD("CombinationCondition %s sliced may changed? %d", mName.c_str(),
+        ALOGD("CombinationPredicate %s sliced may changed? %d", mName.c_str(),
               conditionChangedCache[mIndex] == true);
     }
 }
