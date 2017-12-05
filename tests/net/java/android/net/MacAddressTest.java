@@ -161,6 +161,9 @@ public class MacAddressTest {
 
             assertEquals(mac, MacAddress.fromString(stringRepr));
             assertEquals(mac, MacAddress.fromBytes(bytesRepr));
+
+            assertEquals(mac, MacAddress.fromString(MacAddress.stringAddrFromByteAddr(bytesRepr)));
+            assertEquals(mac, MacAddress.fromBytes(MacAddress.byteAddrFromStringAddr(stringRepr)));
         }
     }
 
