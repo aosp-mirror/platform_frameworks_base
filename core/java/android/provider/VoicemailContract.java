@@ -16,7 +16,6 @@
 
 package android.provider;
 
-import android.Manifest;
 import android.annotation.SdkConstant;
 import android.annotation.SdkConstant.SdkConstantType;
 import android.content.ComponentName;
@@ -50,7 +49,7 @@ import java.util.List;
  * </ul>
  *
  * <P> The minimum permission needed to access this content provider is
- * {@link Manifest.permission#ADD_VOICEMAIL}
+ * {@link android.Manifest.permission#ADD_VOICEMAIL}
  *
  * <P>Voicemails are inserted by what is called as a "voicemail source"
  * application, which is responsible for syncing voicemail data between a remote
@@ -293,9 +292,24 @@ public class VoicemailContract {
          * Flag used to indicate that local, unsynced changes are present.
          * Currently, this is used to indicate that the voicemail was read or deleted.
          * The value will be 1 if dirty is true, 0 if false.
+         *
+         * <p>When a caller updates a voicemail row (either with {@link ContentResolver#update} or
+         * {@link ContentResolver#applyBatch}), and if the {@link ContentValues} doesn't contain
+         * this column, the voicemail provider implicitly sets it to 0 if the calling package is
+         * the {@link #SOURCE_PACKAGE} or to 1 otherwise. To prevent this behavior, explicitly set
+         * {@link #DIRTY_RETAIN} to this column in the {@link ContentValues}.
+         *
          * <P>Type: INTEGER (boolean)</P>
+         *
+         * @see #DIRTY_RETAIN
          */
         public static final String DIRTY = "dirty";
+
+        /**
+         * Value of {@link #DIRTY} when updating to indicate that the value should not be updated
+         * during this operation.
+         */
+        public static final int DIRTY_RETAIN = -1;
 
         /**
          * Flag used to indicate that the voicemail was deleted but not synced to the server.
