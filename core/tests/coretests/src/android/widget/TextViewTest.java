@@ -204,7 +204,7 @@ public class TextViewTest {
         int lineCount = layout.getLineCount();
         boolean hyphenationHappend = false;
         for (int i = 0; i < lineCount; ++i) {
-            if (layout.getHyphen(i) != 1) {
+            if (layout.getHyphen(i) == 0) {
                 continue;  // Hyphantion does not happen.
             }
             hyphenationHappend = true;
