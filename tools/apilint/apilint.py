@@ -940,11 +940,14 @@ def verify_callback_handlers(clazz):
 
     for f in found.values():
         takes_handler = False
+        takes_exec = False
         for m in by_name[f.name]:
             if "android.os.Handler" in m.args:
                 takes_handler = True
-        if not takes_handler:
-            warn(clazz, f, "L1", "Registration methods should have overload that accepts delivery Handler")
+            if "java.util.concurrent.Executor" in m.args:
+                takes_exec = True
+        if not takes_exec:
+            warn(clazz, f, "L1", "Registration methods should have overload that accepts delivery Executor")
 
 
 def verify_context_first(clazz):
@@ -968,7 +971,7 @@ def verify_listener_last(clazz):
         for a in m.args:
             if a.endswith("Callback") or a.endswith("Callbacks") or a.endswith("Listener"):
                 found = True
-            elif found and a != "android.os.Handler":
+            elif found and a != "android.os.Handler" and a != "java.util.concurrent.Executor":
                 warn(clazz, m, "M3", "Listeners should always be at end of argument list")
 
 
@@ -1218,6 +1221,18 @@ def verify_method_name_not_kotlin_operator(clazz):
             unique_binary_op(m, m.name[:-6])  # Remove 'Assign' suffix
 
 
+def verify_collections_over_arrays(clazz):
+    """Warn that [] should be Collections."""
+
+    safe = ["java.lang.String[]","byte[]","short[]","int[]","long[]","float[]","double[]","boolean[]","char[]"]
+    for m in clazz.methods:
+        if m.typ.endswith("[]") and m.typ not in safe:
+            warn(clazz, m, None, "Method should return Collection<> (or subclass) instead of raw array")
+        for arg in m.args:
+            if arg.endswith("[]") and arg not in safe:
+                warn(clazz, m, None, "Method argument should be Collection<> (or subclass) instead of raw array")
+
+
 def examine_clazz(clazz):
     """Find all style issues in the given class."""
 
@@ -1260,7 +1275,7 @@ def examine_clazz(clazz):
     verify_manager(clazz)
     verify_boxed(clazz)
     verify_static_utils(clazz)
-    verify_overload_args(clazz)
+    # verify_overload_args(clazz)
     verify_callback_handlers(clazz)
     verify_context_first(clazz)
     verify_listener_last(clazz)
@@ -1274,6 +1289,7 @@ def examine_clazz(clazz):
     verify_closable(clazz)
     verify_member_name_not_kotlin_keyword(clazz)
     verify_method_name_not_kotlin_operator(clazz)
+    verify_collections_over_arrays(clazz)
 
 
 def examine_stream(stream):
