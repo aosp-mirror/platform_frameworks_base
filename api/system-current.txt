@@ -4106,6 +4106,7 @@ package android.telephony {
     method public java.lang.String getCdmaMdn(int);
     method public java.lang.String getCdmaMin();
     method public java.lang.String getCdmaMin(int);
+    method public java.lang.String getCdmaPrlVersion();
     method public int getCurrentPhoneType();
     method public int getCurrentPhoneType(int);
     method public deprecated boolean getDataEnabled();
