@@ -217,10 +217,15 @@ final class SharedPreferencesImpl implements SharedPreferences {
     }
 
     private @GuardedBy("mLock") Map<String, Object> getLoaded() {
-        try {
-            return mMap.get();
-        } catch (InterruptedException | ExecutionException e) {
-            throw new IllegalStateException(e);
+        // For backwards compatibility, we need to ignore any interrupts. b/70122540.
+        for (;;) {
+            try {
+                return mMap.get();
+            } catch (ExecutionException e) {
+                throw new IllegalStateException(e);
+            } catch (InterruptedException e) {
+                // Ignore and try again.
+            }
         }
     }
     private @GuardedBy("mLock") Map<String, Object> getLoadedWithBlockGuard() {
