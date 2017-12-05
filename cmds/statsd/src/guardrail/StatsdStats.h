@@ -19,6 +19,7 @@
 #include "frameworks/base/cmds/statsd/src/stats_log.pb.h"
 
 #include <gtest/gtest_prod.h>
+#include <log/log_time.h>
 #include <mutex>
 #include <string>
 #include <vector>
@@ -45,9 +46,19 @@ public:
 
     const static int kMaxTimestampCount = 20;
 
+    // Max memory allowed for storing metrics per configuration. When this limit is approached,
+    // statsd will send a broadcast so that the client can fetch the data and clear this memory.
+    static const size_t kMaxMetricsBytesPerConfig = 128 * 1024;
+
     // Cap the UID map's memory usage to this. This should be fairly high since the UID information
     // is critical for understanding the metrics.
     const static size_t kMaxBytesUsedUidMap = 50 * 1024;
+
+    /* Minimum period between two broadcasts in nanoseconds. */
+    static const unsigned long long kMinBroadcastPeriodNs = 60 * NS_PER_SEC;
+
+    /* Min period between two checks of byte size per config key in nanoseconds. */
+    static const unsigned long long kMinByteSizeCheckPeriodNs = 10 * NS_PER_SEC;
 
     /**
      * Report a new config has been received and report the static stats about the config.
