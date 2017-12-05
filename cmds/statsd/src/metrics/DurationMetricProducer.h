@@ -106,7 +106,7 @@ private:
 
     // Helper function to create a duration tracker given the metric aggregation type.
     std::unique_ptr<DurationTracker> createDurationTracker(
-            const HashableDimensionKey& eventKey, std::vector<DurationBucket>& bucket) const;
+            const HashableDimensionKey& eventKey) const;
 
     // Util function to check whether the specified dimension hits the guardrail.
     bool hitGuardRailLocked(const HashableDimensionKey& newKey);

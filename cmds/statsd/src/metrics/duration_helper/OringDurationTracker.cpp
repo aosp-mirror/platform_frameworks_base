@@ -29,10 +29,9 @@ OringDurationTracker::OringDurationTracker(const ConfigKey& key, const string& n
                                            sp<ConditionWizard> wizard, int conditionIndex,
                                            bool nesting, uint64_t currentBucketStartNs,
                                            uint64_t bucketSizeNs,
-                                           const std::vector<sp<AnomalyTracker>>& anomalyTrackers,
-                                           std::vector<DurationBucket>& bucket)
+                                           const std::vector<sp<AnomalyTracker>>& anomalyTrackers)
     : DurationTracker(key, name, eventKey, wizard, conditionIndex, nesting, currentBucketStartNs,
-                      bucketSizeNs, anomalyTrackers, bucket),
+                      bucketSizeNs, anomalyTrackers),
       mStarted(),
       mPaused() {
     mLastStartTime = 0;
@@ -128,7 +127,8 @@ void OringDurationTracker::noteStopAll(const uint64_t timestamp) {
     mConditionKeyMap.clear();
 }
 
-bool OringDurationTracker::flushIfNeeded(uint64_t eventTime) {
+bool OringDurationTracker::flushIfNeeded(
+        uint64_t eventTime, unordered_map<HashableDimensionKey, vector<DurationBucket>>* output) {
     if (eventTime < mCurrentBucketStartTimeNs + mBucketSizeNs) {
         return false;
     }
@@ -145,7 +145,7 @@ bool OringDurationTracker::flushIfNeeded(uint64_t eventTime) {
     }
     if (mDuration > 0) {
         current_info.mDuration = mDuration;
-        mBucket.push_back(current_info);
+        (*output)[mEventKey].push_back(current_info);
         addPastBucketToAnomalyTrackers(current_info.mDuration, current_info.mBucketNum);
         VLOG("  duration: %lld", (long long)current_info.mDuration);
     }
@@ -157,9 +157,9 @@ bool OringDurationTracker::flushIfNeeded(uint64_t eventTime) {
             info.mBucketEndNs = info.mBucketStartNs + mBucketSizeNs;
             info.mBucketNum = mCurrentBucketNum + i;
             info.mDuration = mBucketSizeNs;
-                mBucket.push_back(info);
-                addPastBucketToAnomalyTrackers(info.mDuration, info.mBucketNum);
-                VLOG("  add filling bucket with duration %lld", (long long)info.mDuration);
+            (*output)[mEventKey].push_back(info);
+            addPastBucketToAnomalyTrackers(info.mDuration, info.mBucketNum);
+            VLOG("  add filling bucket with duration %lld", (long long)info.mDuration);
         }
     }
     mCurrentBucketStartTimeNs += numBucketsForward * mBucketSizeNs;

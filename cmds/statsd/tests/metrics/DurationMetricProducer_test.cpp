@@ -89,7 +89,7 @@ TEST(DurationMetricTrackerTest, TestNonSlicedCondition) {
     LogEvent event4(tagId, bucketStartTimeNs + bucketSizeNs + 3);
 
     DurationMetricProducer durationProducer(
-            kConfigKey, metric, 0 /*no condition*/, 1 /* start index */, 2 /* stop index */,
+            kConfigKey, metric, 0 /* condition index */, 1 /* start index */, 2 /* stop index */,
             3 /* stop_all index */, false /*nesting*/, wizard, {}, bucketStartTimeNs);
     EXPECT_FALSE(durationProducer.mCondition);
     EXPECT_FALSE(durationProducer.isConditionSliced());
@@ -97,12 +97,7 @@ TEST(DurationMetricTrackerTest, TestNonSlicedCondition) {
     durationProducer.onMatchedLogEvent(1 /* start index*/, event1, false /* scheduledPull */);
     durationProducer.onMatchedLogEvent(2 /* stop index*/, event2, false /* scheduledPull */);
     durationProducer.flushIfNeededLocked(bucketStartTimeNs + bucketSizeNs + 1);
-    EXPECT_EQ(1UL, durationProducer.mPastBuckets.size());
-    EXPECT_TRUE(durationProducer.mPastBuckets.find(DEFAULT_DIMENSION_KEY) !=
-                durationProducer.mPastBuckets.end());
-    const auto& buckets1 = durationProducer.mPastBuckets[DEFAULT_DIMENSION_KEY];
-    EXPECT_EQ(0UL, buckets1.size());
-
+    EXPECT_EQ(0UL, durationProducer.mPastBuckets.size());
 
     durationProducer.onMatchedLogEvent(1 /* start index*/, event3, false /* scheduledPull */);
     durationProducer.onConditionChanged(true /* condition */, bucketStartTimeNs + bucketSizeNs + 2);
