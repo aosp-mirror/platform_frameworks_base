@@ -30,6 +30,9 @@ namespace android {
 void GetResourceBenchmarkOld(const std::vector<std::string>& paths, const ResTable_config* config,
                              uint32_t resid, ::benchmark::State& state);
 
+void GetResourceBenchmark(const std::vector<std::string>& paths, const ResTable_config* config,
+                          uint32_t resid, benchmark::State& state);
+
 }  // namespace android
 
 #endif  // ANDROIDFW_TESTS_BENCHMARKHELPERS_H
