@@ -1,3 +1,46 @@
+// merge all required services into one jar
+// ============================================================
+java_library {
+    name: "services",
+
+    dex_preopt: {
+        app_image: true,
+        profile: "art-profile",
+    },
+
+    srcs: [
+        "java/**/*.java",
+    ],
+
+    // The convention is to name each service module 'services.$(module_name)'
+    static_libs: [
+        "services.core.priorityboosted",
+        "services.accessibility",
+        "services.appwidget",
+        "services.autofill",
+        "services.backup",
+        "services.companion",
+        "services.coverage",
+        "services.devicepolicy",
+        "services.midi",
+        "services.net",
+        "services.print",
+        "services.restrictions",
+        "services.usage",
+        "services.usb",
+        "services.voiceinteraction",
+        "android.hidl.base-V1.0-java",
+    ],
+
+    libs: [
+        "android.hidl.manager-V1.0-java",
+    ],
+
+    // Uncomment to enable output of certain warnings (deprecated, unchecked)
+    //javacflags: ["-Xlint"],
+
+}
+
 // native library
 // =============================================================
 
