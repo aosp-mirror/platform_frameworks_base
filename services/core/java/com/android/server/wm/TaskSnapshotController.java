@@ -236,7 +236,7 @@ class TaskSnapshotController {
             return null;
         }
         return new TaskSnapshot(buffer, top.getConfiguration().orientation,
-                minRect(mainWindow.mContentInsets, mainWindow.mStableInsets),
+                getInsetsFromTaskBounds(mainWindow, task),
                 isLowRamDevice /* reduced */, scaleFraction /* scale */);
     }
 
@@ -244,11 +244,18 @@ class TaskSnapshotController {
         return mIsRunningOnWear || mIsRunningOnTv || mIsRunningOnIoT;
     }
 
-    private Rect minRect(Rect rect1, Rect rect2) {
-        return new Rect(Math.min(rect1.left, rect2.left),
-                Math.min(rect1.top, rect2.top),
-                Math.min(rect1.right, rect2.right),
-                Math.min(rect1.bottom, rect2.bottom));
+    private Rect getInsetsFromTaskBounds(WindowState state, Task task) {
+        final Rect r = new Rect();
+        r.set(state.getContentFrameLw());
+        r.intersectUnchecked(state.getStableFrameLw());
+
+        final Rect taskBounds = task.getBounds();
+
+        r.set(Math.max(0, r.left - taskBounds.left),
+                Math.max(0, r.top - taskBounds.top),
+                Math.max(0, taskBounds.right - r.right),
+                Math.max(0, taskBounds.bottom - r.bottom));
+        return r;
     }
 
     /**
