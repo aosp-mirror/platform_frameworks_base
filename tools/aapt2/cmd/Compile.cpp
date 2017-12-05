@@ -49,6 +49,7 @@
 #include "xml/XmlPullParser.h"
 
 using ::aapt::io::FileInputStream;
+using ::aapt::text::Printer;
 using ::android::StringPiece;
 using ::android::base::SystemErrorCodeToString;
 using ::google::protobuf::io::CopyingOutputStreamAdaptor;
@@ -112,6 +113,7 @@ static Maybe<ResourcePathData> ExtractResourcePathData(const std::string& path,
 struct CompileOptions {
   std::string output_path;
   Maybe<std::string> res_dir;
+  Maybe<std::string> generate_text_symbols_path;
   bool pseudolocalize = false;
   bool no_png_crunch = false;
   bool legacy_mode = false;
@@ -261,6 +263,58 @@ static bool CompileTable(IAaptContext* context, const CompileOptions& options,
     context->GetDiagnostics()->Error(DiagMessage(output_path) << "failed to finish entry");
     return false;
   }
+
+  if (options.generate_text_symbols_path) {
+    io::FileOutputStream fout_text(options.generate_text_symbols_path.value());
+
+    if (fout_text.HadError()) {
+      context->GetDiagnostics()->Error(DiagMessage()
+                                       << "failed writing to'"
+                                       << options.generate_text_symbols_path.value()
+                                       << "': " << fout_text.GetError());
+      return false;
+    }
+
+    Printer r_txt_printer(&fout_text);
+    for (const auto& package : table.packages) {
+      for (const auto& type : package->types) {
+        for (const auto& entry : type->entries) {
+          // Check access modifiers.
+          switch(entry->visibility.level) {
+            case Visibility::Level::kUndefined :
+              r_txt_printer.Print("default ");
+              break;
+            case Visibility::Level::kPublic :
+              r_txt_printer.Print("public ");
+              break;
+            case Visibility::Level::kPrivate :
+              r_txt_printer.Print("private ");
+          }
+
+          if (type->type != ResourceType::kStyleable) {
+            r_txt_printer.Print("int ");
+            r_txt_printer.Print(to_string(type->type));
+            r_txt_printer.Print(" ");
+            r_txt_printer.Println(entry->name);
+          } else {
+            r_txt_printer.Print("int[] styleable ");
+            r_txt_printer.Println(entry->name);
+
+            if (!entry->values.empty()) {
+              auto styleable = static_cast<const Styleable*>(entry->values.front()->value.get());
+              for (const auto& attr : styleable->entries) {
+                r_txt_printer.Print("default int styleable ");
+                r_txt_printer.Print(entry->name);
+                r_txt_printer.Print("_");
+                r_txt_printer.Println(attr.name.value().entry);
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+
   return true;
 }
 
@@ -402,6 +456,31 @@ static bool CompileXml(IAaptContext* context, const CompileOptions& options,
     context->GetDiagnostics()->Error(DiagMessage(output_path) << "failed to finish writing data");
     return false;
   }
+
+  if (options.generate_text_symbols_path) {
+    io::FileOutputStream fout_text(options.generate_text_symbols_path.value());
+
+    if (fout_text.HadError()) {
+      context->GetDiagnostics()->Error(DiagMessage()
+                                       << "failed writing to'"
+                                       << options.generate_text_symbols_path.value()
+                                       << "': " << fout_text.GetError());
+      return false;
+    }
+
+    Printer r_txt_printer(&fout_text);
+    for (const auto res : xmlres->file.exported_symbols) {
+      r_txt_printer.Print("default int id ");
+      r_txt_printer.Println(res.name.entry);
+    }
+
+    // And print ourselves.
+    r_txt_printer.Print("default int ");
+    r_txt_printer.Print(path_data.resource_dir);
+    r_txt_printer.Print(" ");
+    r_txt_printer.Println(path_data.name);
+  }
+
   return true;
 }
 
@@ -609,6 +688,10 @@ int Compile(const std::vector<StringPiece>& args, IDiagnostics* diagnostics) {
       Flags()
           .RequiredFlag("-o", "Output path", &options.output_path)
           .OptionalFlag("--dir", "Directory to scan for resources", &options.res_dir)
+          .OptionalFlag("--output-text-symbols",
+                        "Generates a text file containing the resource symbols in the\n"
+                        "specified file",
+                        &options.generate_text_symbols_path)
           .OptionalSwitch("--pseudo-localize",
                           "Generate resources for pseudo-locales "
                           "(en-XA and ar-XB)",
