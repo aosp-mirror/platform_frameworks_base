@@ -141,9 +141,9 @@ TEST(CountMetricProducerTest, TestEventsWithSlicedCondition) {
     metric.set_name("1");
     metric.mutable_bucket()->set_bucket_size_millis(bucketSizeNs / 1000000);
     metric.set_condition("APP_IN_BACKGROUND_PER_UID_AND_SCREEN_ON");
-    EventConditionLink* link = metric.add_links();
+    MetricConditionLink* link = metric.add_links();
     link->set_condition("APP_IN_BACKGROUND_PER_UID");
-    link->add_key_in_main()->set_key(1);
+    link->add_key_in_what()->set_key(1);
     link->add_key_in_condition()->set_key(2);
 
     LogEvent event1(1, bucketStartTimeNs + 1);

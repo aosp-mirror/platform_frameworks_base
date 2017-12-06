@@ -272,9 +272,9 @@ StatsdConfig build_fake_config() {
     keyMatcher = metric->add_dimension();
     keyMatcher->set_key(WAKE_LOCK_UID_KEY_ID);
     metric->set_condition("APP_IS_BACKGROUND_AND_SCREEN_ON");
-    EventConditionLink* link = metric->add_links();
+    MetricConditionLink* link = metric->add_links();
     link->set_condition("APP_IS_BACKGROUND");
-    link->add_key_in_main()->set_key(WAKE_LOCK_UID_KEY_ID);
+    link->add_key_in_what()->set_key(WAKE_LOCK_UID_KEY_ID);
     link->add_key_in_condition()->set_key(APP_USAGE_UID_KEY_ID);
 
     // Duration of an app holding any wl, while screen on and app in background, slice by uid
@@ -288,7 +288,7 @@ StatsdConfig build_fake_config() {
     durationMetric->set_condition("APP_IS_BACKGROUND_AND_SCREEN_ON");
     link = durationMetric->add_links();
     link->set_condition("APP_IS_BACKGROUND");
-    link->add_key_in_main()->set_key(WAKE_LOCK_UID_KEY_ID);
+    link->add_key_in_what()->set_key(WAKE_LOCK_UID_KEY_ID);
     link->add_key_in_condition()->set_key(APP_USAGE_UID_KEY_ID);
 
     // max Duration of an app holding any wl, while screen on and app in background, slice by uid
@@ -302,7 +302,7 @@ StatsdConfig build_fake_config() {
     durationMetric->set_condition("APP_IS_BACKGROUND_AND_SCREEN_ON");
     link = durationMetric->add_links();
     link->set_condition("APP_IS_BACKGROUND");
-    link->add_key_in_main()->set_key(WAKE_LOCK_UID_KEY_ID);
+    link->add_key_in_what()->set_key(WAKE_LOCK_UID_KEY_ID);
     link->add_key_in_condition()->set_key(APP_USAGE_UID_KEY_ID);
 
     // Duration of an app holding any wl, while screen on and app in background
@@ -314,7 +314,7 @@ StatsdConfig build_fake_config() {
     durationMetric->set_condition("APP_IS_BACKGROUND_AND_SCREEN_ON");
     link = durationMetric->add_links();
     link->set_condition("APP_IS_BACKGROUND");
-    link->add_key_in_main()->set_key(WAKE_LOCK_UID_KEY_ID);
+    link->add_key_in_what()->set_key(WAKE_LOCK_UID_KEY_ID);
     link->add_key_in_condition()->set_key(APP_USAGE_UID_KEY_ID);
 
     // Duration of screen on time.
