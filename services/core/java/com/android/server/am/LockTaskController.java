@@ -22,8 +22,10 @@ import static android.app.ActivityManager.LOCK_TASK_MODE_PINNED;
 import static android.app.WindowConfiguration.WINDOWING_MODE_UNDEFINED;
 import static android.content.Context.DEVICE_POLICY_SERVICE;
 import static android.content.Context.STATUS_BAR_SERVICE;
+import static android.content.Intent.ACTION_CALL_EMERGENCY;
 import static android.os.UserHandle.USER_ALL;
 import static android.os.UserHandle.USER_CURRENT;
+import static android.telecom.TelecomManager.EMERGENCY_DIALER_COMPONENT;
 import static android.view.Display.DEFAULT_DISPLAY;
 
 import static com.android.server.am.ActivityManagerDebugConfig.DEBUG_LOCKTASK;
@@ -45,6 +47,7 @@ import android.app.admin.DevicePolicyManager;
 import android.app.admin.IDevicePolicyManager;
 import android.content.ComponentName;
 import android.content.Context;
+import android.content.Intent;
 import android.os.Binder;
 import android.os.Debug;
 import android.os.Handler;
@@ -52,9 +55,11 @@ import android.os.IBinder;
 import android.os.RemoteException;
 import android.os.ServiceManager;
 import android.provider.Settings;
+import android.telecom.TelecomManager;
 import android.util.Pair;
 import android.util.Slog;
 import android.util.SparseArray;
+import android.util.SparseIntArray;
 
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.statusbar.IStatusBarService;
@@ -133,6 +138,8 @@ public class LockTaskController {
     WindowManagerService mWindowManager;
     @VisibleForTesting
     LockPatternUtils mLockPatternUtils;
+    @VisibleForTesting
+    TelecomManager mTelecomManager;
 
     /**
      * Helper that is responsible for showing the right toast when a disallowed activity operation
@@ -165,7 +172,7 @@ public class LockTaskController {
     /**
      * Features that are allowed by DPC to show during LockTask mode.
      */
-    private final SparseArray<Integer> mLockTaskFeatures = new SparseArray<>();
+    private final SparseIntArray mLockTaskFeatures = new SparseIntArray();
 
     /**
      * Store the current lock task mode. Possible values:
@@ -298,12 +305,48 @@ public class LockTaskController {
             return false;
         }
 
+        // Allow emergency calling when the device is protected by a locked keyguard
+        if (isKeyguardAllowed(task.userId) && isEmergencyCallTask(task)) {
+            return false;
+        }
+
         return !(isTaskWhitelisted(task) || mLockTaskModeTasks.isEmpty());
     }
 
     private boolean isRecentsAllowed(int userId) {
         return (getLockTaskFeaturesForUser(userId)
                 & DevicePolicyManager.LOCK_TASK_FEATURE_RECENTS) != 0;
+    }
+
+    private boolean isKeyguardAllowed(int userId) {
+        return (getLockTaskFeaturesForUser(userId)
+                & DevicePolicyManager.LOCK_TASK_FEATURE_KEYGUARD) != 0;
+    }
+
+    private boolean isEmergencyCallTask(TaskRecord task) {
+        final Intent intent = task.intent;
+        if (intent == null) {
+            return false;
+        }
+
+        // 1. The emergency keypad activity launched on top of the keyguard
+        if (EMERGENCY_DIALER_COMPONENT.equals(intent.getComponent())) {
+            return true;
+        }
+
+        // 2. The intent sent by the keypad, which is handled by Telephony
+        if (ACTION_CALL_EMERGENCY.equals(intent.getAction())) {
+            return true;
+        }
+
+        // 3. Telephony then starts the default package for making the call
+        final TelecomManager tm = getTelecomManager();
+        final String dialerPackage = tm != null ? tm.getSystemDialerPackage() : null;
+        if (dialerPackage != null && dialerPackage.equals(intent.getComponent().getPackageName())) {
+            return true;
+        }
+
+        return false;
     }
 
     /**
@@ -686,11 +729,10 @@ public class LockTaskController {
             mWindowManager.reenableKeyguard(mToken);
 
         } else if (lockTaskModeState == LOCK_TASK_MODE_LOCKED) {
-            int lockTaskFeatures = getLockTaskFeaturesForUser(userId);
-            if ((DevicePolicyManager.LOCK_TASK_FEATURE_KEYGUARD & lockTaskFeatures) == 0) {
-                mWindowManager.disableKeyguard(mToken, LOCK_TASK_TAG);
-            } else {
+            if (isKeyguardAllowed(userId)) {
                 mWindowManager.reenableKeyguard(mToken);
+            } else {
+                mWindowManager.disableKeyguard(mToken, LOCK_TASK_TAG);
             }
 
         } else { // lockTaskModeState == LOCK_TASK_MODE_PINNED
@@ -782,6 +824,15 @@ public class LockTaskController {
             return new LockPatternUtils(mContext);
         }
         return mLockPatternUtils;
+    }
+
+    @Nullable
+    private TelecomManager getTelecomManager() {
+        if (mTelecomManager == null) {
+            // We don't preserve the TelecomManager object to save memory
+            return mContext.getSystemService(TelecomManager.class);
+        }
+        return mTelecomManager;
     }
 
     // Should only be called on the handler thread
