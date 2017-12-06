@@ -10020,7 +10020,7 @@ public class ActivityManagerService extends IActivityManager.Stub
                     }
                 }
 
-                TaskRecord task = new TaskRecord(this,
+                TaskRecord task = TaskRecord.create(this,
                         mStackSupervisor.getNextTaskIdForUserLocked(r.userId),
                         ainfo, intent, description);
                 if (!mRecentTasks.addToBottom(task)) {
