@@ -79,7 +79,7 @@ interface IUserManager {
     void setDefaultGuestRestrictions(in Bundle restrictions);
     Bundle getDefaultGuestRestrictions();
     boolean markGuestForDeletion(int userHandle);
-    void setQuietModeEnabled(int userHandle, boolean enableQuietMode);
+    void setQuietModeEnabled(int userHandle, boolean enableQuietMode, in IntentSender target);
     boolean isQuietModeEnabled(int userHandle);
     boolean trySetQuietModeDisabled(int userHandle, in IntentSender target);
     void setSeedAccountData(int userHandle, in String accountName,

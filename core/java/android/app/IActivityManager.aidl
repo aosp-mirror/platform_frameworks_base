@@ -667,4 +667,10 @@ interface IActivityManager {
 
      void setShowWhenLocked(in IBinder token, boolean showWhenLocked);
      void setTurnScreenOn(in IBinder token, boolean turnScreenOn);
+
+     /**
+      *  Similar to {@link #startUserInBackground(int userId), but with a listener to report
+      *  user unlock progress.
+      */
+     boolean startUserInBackgroundWithListener(int userid, IProgressListener unlockProgressListener);
 }
