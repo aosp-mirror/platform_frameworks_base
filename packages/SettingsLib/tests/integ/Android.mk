@@ -28,6 +28,8 @@ LOCAL_PACKAGE_NAME := SettingsLibTests
 LOCAL_PRIVATE_PLATFORM_APIS := true
 LOCAL_COMPATIBILITY_SUITE := device-tests
 
+LOCAL_USE_AAPT2 := true
+
 LOCAL_STATIC_JAVA_LIBRARIES := \
     android-support-test \
     espresso-core \
