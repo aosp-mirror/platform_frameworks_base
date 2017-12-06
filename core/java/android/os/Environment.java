@@ -24,6 +24,7 @@ import android.text.TextUtils;
 import android.util.Log;
 
 import java.io.File;
+import java.util.LinkedList;
 
 /**
  * Provides access to environment variables.
@@ -606,6 +607,79 @@ public class Environment {
             }
         }
         return false;
+    }
+
+    /** {@hide} */ public static final int HAS_MUSIC = 1 << 0;
+    /** {@hide} */ public static final int HAS_PODCASTS = 1 << 1;
+    /** {@hide} */ public static final int HAS_RINGTONES = 1 << 2;
+    /** {@hide} */ public static final int HAS_ALARMS = 1 << 3;
+    /** {@hide} */ public static final int HAS_NOTIFICATIONS = 1 << 4;
+    /** {@hide} */ public static final int HAS_PICTURES = 1 << 5;
+    /** {@hide} */ public static final int HAS_MOVIES = 1 << 6;
+    /** {@hide} */ public static final int HAS_DOWNLOADS = 1 << 7;
+    /** {@hide} */ public static final int HAS_DCIM = 1 << 8;
+    /** {@hide} */ public static final int HAS_DOCUMENTS = 1 << 9;
+
+    /** {@hide} */ public static final int HAS_ANDROID = 1 << 16;
+    /** {@hide} */ public static final int HAS_OTHER = 1 << 17;
+
+    /**
+     * Classify the content types present on the given external storage device.
+     * <p>
+     * This is typically useful for deciding if an inserted SD card is empty, or
+     * if it contains content like photos that should be preserved.
+     *
+     * @hide
+     */
+    public static int classifyExternalStorageDirectory(File dir) {
+        int res = 0;
+        for (File f : FileUtils.listFilesOrEmpty(dir)) {
+            if (f.isFile() && isInterestingFile(f)) {
+                res |= HAS_OTHER;
+            } else if (f.isDirectory() && hasInterestingFiles(f)) {
+                final String name = f.getName();
+                if (DIRECTORY_MUSIC.equals(name)) res |= HAS_MUSIC;
+                else if (DIRECTORY_PODCASTS.equals(name)) res |= HAS_PODCASTS;
+                else if (DIRECTORY_RINGTONES.equals(name)) res |= HAS_RINGTONES;
+                else if (DIRECTORY_ALARMS.equals(name)) res |= HAS_ALARMS;
+                else if (DIRECTORY_NOTIFICATIONS.equals(name)) res |= HAS_NOTIFICATIONS;
+                else if (DIRECTORY_PICTURES.equals(name)) res |= HAS_PICTURES;
+                else if (DIRECTORY_MOVIES.equals(name)) res |= HAS_MOVIES;
+                else if (DIRECTORY_DOWNLOADS.equals(name)) res |= HAS_DOWNLOADS;
+                else if (DIRECTORY_DCIM.equals(name)) res |= HAS_DCIM;
+                else if (DIRECTORY_DOCUMENTS.equals(name)) res |= HAS_DOCUMENTS;
+                else if (DIRECTORY_ANDROID.equals(name)) res |= HAS_ANDROID;
+                else res |= HAS_OTHER;
+            }
+        }
+        return res;
+    }
+
+    private static boolean hasInterestingFiles(File dir) {
+        final LinkedList<File> explore = new LinkedList<>();
+        explore.add(dir);
+        while (!explore.isEmpty()) {
+            dir = explore.pop();
+            for (File f : FileUtils.listFilesOrEmpty(dir)) {
+                if (isInterestingFile(f)) return true;
+                if (f.isDirectory()) explore.add(f);
+            }
+        }
+        return false;
+    }
+
+    private static boolean isInterestingFile(File file) {
+        if (file.isFile()) {
+            final String name = file.getName().toLowerCase();
+            if (name.endsWith(".exe") || name.equals("autorun.inf")
+                    || name.equals("launchpad.zip") || name.equals(".nomedia")) {
+                return false;
+            } else {
+                return true;
+            }
+        } else {
+            return false;
+        }
     }
 
     /**
