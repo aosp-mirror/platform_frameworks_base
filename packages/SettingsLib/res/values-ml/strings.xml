@@ -40,12 +40,16 @@
     <string name="connected_via_passpoint" msgid="2826205693803088747">"%1$s വഴി ബന്ധിപ്പിച്ചു"</string>
     <string name="available_via_passpoint" msgid="1617440946846329613">"%1$s വഴി ലഭ്യം"</string>
     <string name="wifi_connected_no_internet" msgid="3149853966840874992">"കണക്റ്റുചെയ്തിരിക്കുന്നു, ഇന്റർനെറ്റില്ല"</string>
+    <string name="wifi_ap_unable_to_handle_new_sta" msgid="5348824313514404541">"ആക്‌സസ് പോയിന്റ് താൽക്കാലികമായി നിറഞ്ഞിരിക്കുന്നു"</string>
+    <string name="connected_via_carrier" msgid="7583780074526041912">"%1$s വഴി ബന്ധിപ്പിച്ചു"</string>
+    <string name="available_via_carrier" msgid="1469036129740799053">"%1$s വഴി ലഭ്യം"</string>
     <string name="speed_label_very_slow" msgid="1867055264243608530">"വളരെ കുറഞ്ഞ വേഗത്തിൽ"</string>
     <string name="speed_label_slow" msgid="813109590815810235">"കുറഞ്ഞ വേഗത്തിൽ"</string>
     <string name="speed_label_okay" msgid="2331665440671174858">"ശരി"</string>
     <string name="speed_label_medium" msgid="3175763313268941953">"ഇടത്തരം"</string>
     <string name="speed_label_fast" msgid="7715732164050975057">"വേഗത്തിൽ"</string>
     <string name="speed_label_very_fast" msgid="2265363430784523409">"വളരെ വേഗത്തിൽ"</string>
+    <string name="preference_summary_default_combination" msgid="8532964268242666060">"<xliff:g id="STATE">%1$s</xliff:g> / <xliff:g id="DESCRIPTION">%2$s</xliff:g>"</string>
     <string name="bluetooth_disconnected" msgid="6557104142667339895">"വിച്ഛേദിച്ചു"</string>
     <string name="bluetooth_disconnecting" msgid="8913264760027764974">"വിച്‌ഛേദിക്കുന്നു..."</string>
     <string name="bluetooth_connecting" msgid="8555009514614320497">"കണക്‌റ്റുചെയ്യുന്നു..."</string>
@@ -101,6 +105,8 @@
     <string name="accessibility_wifi_two_bars" msgid="3569851234710034416">"വൈഫൈ സിഗ്നൽ രണ്ട് ബാറുകൾ."</string>
     <string name="accessibility_wifi_three_bars" msgid="8134185644861380311">"വൈഫൈ സിഗ്നൽ മൂന്ന് ബാറുകൾ."</string>
     <string name="accessibility_wifi_signal_full" msgid="7061045677694702">"വൈഫൈ മികച്ച സിഗ്‌നൽ."</string>
+    <string name="accessibility_wifi_security_type_none" msgid="1223747559986205423">"ഓപ്പൺ നെറ്റ്‍വര്‍ക്ക്"</string>
+    <string name="accessibility_wifi_security_type_secured" msgid="862921720418885331">"സുരക്ഷിത നെറ്റ്‍വര്‍ക്ക്"</string>
     <string name="process_kernel_label" msgid="3916858646836739323">"Android OS"</string>
     <string name="data_usage_uninstalled_apps" msgid="614263770923231598">"നീക്കംചെയ്‌ത അപ്ലിക്കേഷനുകൾ"</string>
     <string name="data_usage_uninstalled_apps_users" msgid="7986294489899813194">"നീക്കംചെയ്‌ത അപ്ലിക്കേഷനുകളും ഉപയോക്താക്കളും"</string>
@@ -187,6 +193,7 @@
     <string name="wifi_allow_scan_with_traffic" msgid="3601853081178265786">"എപ്പോഴും വൈഫൈ റോം സ്‌‌കാൻ അനുവദിക്കൂ"</string>
     <string name="mobile_data_always_on" msgid="8774857027458200434">"മൊബൈൽ ഡാറ്റ എല്ലായ്‌പ്പോഴും സജീവം"</string>
     <string name="tethering_hardware_offload" msgid="7470077827090325814">"ടെതറിംഗ് ഹാർഡ്‌വെയർ ത്വരിതപ്പെടുത്തൽ"</string>
+    <string name="bluetooth_show_devices_without_names" msgid="4708446092962060176">"പേരില്ലാത്ത Bluetooth ഉപകരണങ്ങൾ കാണിക്കുക"</string>
     <string name="bluetooth_disable_absolute_volume" msgid="2660673801947898809">"അബ്‌സൊല്യൂട്ട് വോളിയം പ്രവർത്തനരഹിതമാക്കുക"</string>
     <string name="bluetooth_enable_inband_ringing" msgid="3291686366721786740">"ഇൻ-ബാൻഡ് റിംഗുചെയ്യൽ പ്രവർത്തനക്ഷമമാക്കുക"</string>
     <string name="bluetooth_select_avrcp_version_string" msgid="3750059931120293633">"Bluetooth AVRCP പതിപ്പ്"</string>
@@ -202,6 +209,12 @@
     <string name="bluetooth_select_a2dp_codec_ldac_playback_quality" msgid="3619694372407843405">"Bluetooth ഓഡിയോ LDAC കോഡെക്: പ്ലേബാക്ക് ‌നിലവാരം"</string>
     <string name="bluetooth_select_a2dp_codec_ldac_playback_quality_dialog_title" msgid="3181967377574368400">"Bluetooth ഓഡിയോ LDAC കോഡെക് തിരഞ്ഞെടുക്കുക:\nപ്ലേബാക്ക് ‌നിലവാരം"</string>
     <string name="bluetooth_select_a2dp_codec_streaming_label" msgid="5347862512596240506">"സ്ട്രീമിംഗ്: <xliff:g id="STREAMING_PARAMETER">%1$s</xliff:g>"</string>
+    <string name="select_private_dns_configuration_title" msgid="3700456559305263922">"സ്വകാര്യ DNS"</string>
+    <string name="select_private_dns_configuration_dialog_title" msgid="9221994415765826811">"സ്വകാര്യ DNS മോഡ് തിരഞ്ഞെടുക്കുക"</string>
+    <string name="private_dns_mode_off" msgid="8236575187318721684">"ഓഫ്"</string>
+    <string name="private_dns_mode_opportunistic" msgid="7608409735589131766">"അവസരവാദപരം"</string>
+    <string name="private_dns_mode_provider" msgid="8354935160639360804">"സ്വകാര്യ DNS ദാതാവിന്‍റെ ഹോസ്റ്റുനാമം"</string>
+    <string name="private_dns_mode_provider_hostname_hint" msgid="2487492386970928143">"DNS ദാതാവിന്‍റെ ഹോസ്റ്റുനാമം നൽകുക"</string>
     <string name="wifi_display_certification_summary" msgid="1155182309166746973">"വയർലെസ് ഡിസ്‌പ്ലേ സർട്ടിഫിക്കേഷനായി ഓപ്‌ഷനുകൾ ദൃശ്യമാക്കുക"</string>
     <string name="wifi_verbose_logging_summary" msgid="6615071616111731958">"വൈഫൈ പിക്കറിൽ ഓരോ SSID RSSI പ്രകാരം കാണിക്കാൻ വൈഫൈ ലോഗിംഗ് നില വർദ്ധിപ്പിക്കുക"</string>
     <string name="wifi_aggressive_handover_summary" msgid="7266329646559808827">"പ്രവർത്തനക്ഷമമായിരിക്കുമ്പോൾ, വൈഫൈ സിഗ്‌നൽ കുറവായിരിക്കുന്ന സമയത്ത് മൊബൈലിലേക്ക് ഡാറ്റ കണക്ഷൻ വഴി കൈമാറുന്നതിൽ വൈഫൈ കൂടുതൽ സക്രിയമായിരിക്കും"</string>
@@ -226,6 +239,7 @@
     <string name="dev_settings_warning_message" msgid="2298337781139097964">"ഈ ക്രമീകരണങ്ങൾ വികസന ഉപയോഗത്തിന് മാത്രമായുള്ളതാണ്. അവ നിങ്ങളുടെ ഉപകരണവും അതിലെ അപ്ലിക്കേഷനുകളും തകരാറിലാക്കുന്നതിനോ തെറ്റായി പ്രവർത്തിക്കുന്നതിനോ ഇടയാക്കാം."</string>
     <string name="verify_apps_over_usb_title" msgid="4177086489869041953">"USB വഴി ആപ്സ് പരിശോധിച്ചുറപ്പിക്കൂ"</string>
     <string name="verify_apps_over_usb_summary" msgid="9164096969924529200">"കേടാക്കുന്ന പ്രവർത്തനരീതിയുള്ള ADB/ADT വഴി ഇൻസ്റ്റാളുചെയ്‌ത അപ്ലിക്കേഷനുകൾ പരിശോധിക്കുക."</string>
+    <string name="bluetooth_show_devices_without_names_summary" msgid="2351196058115755520">"പേരില്ലാത്ത Bluetooth ഉപകരണങ്ങൾ (MAC വിലാസങ്ങൾ മാത്രം) പ്രദർശിപ്പിക്കും"</string>
     <string name="bluetooth_disable_absolute_volume_summary" msgid="6031284410786545957">"അസ്വീകാര്യമായ തരത്തിൽ ഉയർന്ന വോളിയമോ ശബ്ദ നിയന്ത്രണത്തിന്റെ അഭാവമോ പോലെ, വിദൂര ഉപകരണങ്ങളുമായി ബന്ധപ്പെട്ട വോളിയം പ്രശ്നങ്ങൾ ഉണ്ടാകുന്ന സാഹചര്യത്തിൽ, Bluetooth അബ്‌സൊല്യൂട്ട് വോളിയം ഫീച്ചർ പ്രവർത്തനരഹിതമാക്കുന്നു."</string>
     <string name="bluetooth_enable_inband_ringing_summary" msgid="2787866074741784975">"ഫോണിലെ റിംഗ്‌ടോണുകൾ Bluetooth ഹെഡ്‌സെറ്റുകളിൽ പ്ലേ ചെയ്യാനായി അനുവദിക്കുക"</string>
     <string name="enable_terminal_title" msgid="95572094356054120">"പ്രാദേശിക ടെർമിനൽ"</string>
@@ -345,12 +359,11 @@
     <string name="power_discharging_duration_short" msgid="4192244429001842403">"<xliff:g id="LEVEL">^1</xliff:g> - <xliff:g id="TIME">^2</xliff:g> ശേഷിക്കുന്നു"</string>
     <string name="power_charging" msgid="1779532561355864267">"<xliff:g id="LEVEL">%1$s</xliff:g> - <xliff:g id="STATE">%2$s</xliff:g>"</string>
     <string name="power_charging_duration" msgid="4676999980973411875">"<xliff:g id="LEVEL">^1</xliff:g> - ഫുൾ ചാർജാകാൻ <xliff:g id="TIME">^2</xliff:g>"</string>
-    <string name="power_charging_duration_short" msgid="1098603958472207920">"<xliff:g id="LEVEL">^1</xliff:g> - <xliff:g id="TIME">^2</xliff:g>"</string>
     <string name="battery_info_status_unknown" msgid="196130600938058547">"അജ്ഞാതം"</string>
     <string name="battery_info_status_charging" msgid="1705179948350365604">"ചാർജ്ജുചെയ്യുന്നു"</string>
     <string name="battery_info_status_charging_lower" msgid="8689770213898117994">"ചാർജ് ചെയ്യുന്നു"</string>
     <string name="battery_info_status_discharging" msgid="310932812698268588">"ചാർജ്ജുചെയ്യുന്നില്ല"</string>
-    <string name="battery_info_status_not_charging" msgid="2820070506621483576">"ചാർജ്ജുചെയ്യുന്നില്ല"</string>
+    <string name="battery_info_status_not_charging" msgid="8523453668342598579">"പ്ലഗ് ഇൻ ചെയ്‌തു, ഇപ്പോൾ ചാർജ് ചെയ്യാനാവില്ല"</string>
     <string name="battery_info_status_full" msgid="2824614753861462808">"നിറഞ്ഞു"</string>
     <string name="disabled_by_admin_summary_text" msgid="6750513964908334617">"അഡ്‌മിൻ നിയന്ത്രിക്കുന്നത്"</string>
     <string name="enabled_by_admin" msgid="5302986023578399263">"അഡ്‌മിൻ പ്രവർത്തനക്ഷമമാക്കി"</string>
@@ -375,7 +388,6 @@
     <string name="screen_zoom_summary_custom" msgid="5611979864124160447">"ഇഷ്ടാനുസൃതം ( <xliff:g id="DENSITYDPI">%d</xliff:g> )"</string>
     <string name="help_feedback_label" msgid="6815040660801785649">"സഹായവും പ്രതികരണവും"</string>
     <string name="content_description_menu_button" msgid="8182594799812351266">"മെനു"</string>
-    <string name="time_zone_gmt" msgid="2587097992671450782">"GMT"</string>
     <string name="retail_demo_reset_message" msgid="118771671364131297">"ഡെമോ ‌മോഡിൽ ഫാക്ടറി റീസെറ്റിന് പാസ്‌വേഡ് നൽകുക"</string>
     <string name="retail_demo_reset_next" msgid="8356731459226304963">"അടുത്തത്"</string>
     <string name="retail_demo_reset_title" msgid="696589204029930100">"പാസ്‌വേഡ് ആവശ്യമാണ്"</string>

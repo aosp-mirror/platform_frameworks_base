@@ -18,7 +18,6 @@ package android.view.accessibility;
 
 import android.annotation.IntDef;
 import android.annotation.Nullable;
-import android.annotation.TestApi;
 import android.content.Context;
 import android.os.Bundle;
 import android.os.Message;
@@ -40,9 +39,7 @@ import java.lang.ref.WeakReference;
  * <p>
  * <strong>Note:</strong> This class should only be needed in exceptional situations where a
  * {@link View} cannot otherwise synchronously meet the request for accessibility data.
- * @hide
  */
-@TestApi
 public abstract class AccessibilityRequestPreparer {
     public static final int REQUEST_TYPE_EXTRA_DATA = 0x00000001;
 

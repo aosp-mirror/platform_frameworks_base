@@ -48,15 +48,17 @@ public final class TextClassification {
     @NonNull private final EntityConfidence<String> mEntityConfidence;
     @NonNull private final List<String> mEntities;
     private int mLogType;
+    @NonNull private final String mVersionInfo;
 
     private TextClassification(
-            @NonNull String text,
-            Drawable icon,
-            String label,
-            Intent intent,
-            OnClickListener onClickListener,
+            @Nullable String text,
+            @Nullable Drawable icon,
+            @Nullable String label,
+            @Nullable Intent intent,
+            @Nullable OnClickListener onClickListener,
             @NonNull EntityConfidence<String> entityConfidence,
-            int logType) {
+            int logType,
+            @NonNull String versionInfo) {
         mText = text;
         mIcon = icon;
         mLabel = label;
@@ -65,12 +67,13 @@ public final class TextClassification {
         mEntityConfidence = new EntityConfidence<>(entityConfidence);
         mEntities = mEntityConfidence.getEntities();
         mLogType = logType;
+        mVersionInfo = versionInfo;
     }
 
     /**
      * Gets the classified text.
      */
-    @NonNull
+    @Nullable
     public String getText() {
         return mText;
     }
@@ -145,6 +148,15 @@ public final class TextClassification {
         return mLogType;
     }
 
+    /**
+     * Returns information about the classifier model used to generate this TextClassification.
+     * @hide
+     */
+    @NonNull
+    public String getVersionInfo() {
+        return mVersionInfo;
+    }
+
     @Override
     public String toString() {
         return String.format("TextClassification {"
@@ -179,12 +191,13 @@ public final class TextClassification {
         @NonNull private final EntityConfidence<String> mEntityConfidence =
                 new EntityConfidence<>();
         private int mLogType;
+        @NonNull private String mVersionInfo = "";
 
         /**
          * Sets the classified text.
          */
-        public Builder setText(@NonNull String text) {
-            mText = Preconditions.checkNotNull(text);
+        public Builder setText(@Nullable String text) {
+            mText = text;
             return this;
         }
 
@@ -197,7 +210,7 @@ public final class TextClassification {
          */
         public Builder setEntityType(
                 @NonNull @EntityType String type,
-                @FloatRange(from = 0.0, to = 1.0)float confidenceScore) {
+                @FloatRange(from = 0.0, to = 1.0) float confidenceScore) {
             mEntityConfidence.setEntityType(type, confidenceScore);
             return this;
         }
@@ -244,11 +257,21 @@ public final class TextClassification {
         }
 
         /**
+         * Sets information about the classifier model used to generate this TextClassification.
+         * @hide
+         */
+        Builder setVersionInfo(@NonNull String versionInfo) {
+            mVersionInfo = Preconditions.checkNotNull(versionInfo);
+            return this;
+        }
+
+        /**
          * Builds and returns a {@link TextClassification} object.
          */
         public TextClassification build() {
             return new TextClassification(
-                    mText, mIcon, mLabel, mIntent, mOnClickListener, mEntityConfidence, mLogType);
+                    mText, mIcon, mLabel, mIntent, mOnClickListener, mEntityConfidence,
+                    mLogType, mVersionInfo);
         }
     }
 }

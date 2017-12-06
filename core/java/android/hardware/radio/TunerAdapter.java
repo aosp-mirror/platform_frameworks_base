@@ -18,32 +18,37 @@ package android.hardware.radio;
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.graphics.Bitmap;
 import android.os.RemoteException;
 import android.util.Log;
 
 import java.util.List;
+import java.util.Map;
 
 /**
  * Implements the RadioTuner interface by forwarding calls to radio service.
  */
 class TunerAdapter extends RadioTuner {
-    private static final String TAG = "radio.TunerAdapter";
+    private static final String TAG = "BroadcastRadio.TunerAdapter";
 
     @NonNull private final ITuner mTuner;
     private boolean mIsClosed = false;
 
-    TunerAdapter(ITuner tuner) {
+    private @RadioManager.Band int mBand;
+
+    TunerAdapter(ITuner tuner, @RadioManager.Band int band) {
         if (tuner == null) {
             throw new NullPointerException();
         }
         mTuner = tuner;
+        mBand = band;
     }
 
     @Override
     public void close() {
         synchronized (mTuner) {
             if (mIsClosed) {
-                Log.d(TAG, "Tuner is already closed");
+                Log.v(TAG, "Tuner is already closed");
                 return;
             }
             mIsClosed = true;
@@ -59,6 +64,7 @@ class TunerAdapter extends RadioTuner {
     public int setConfiguration(RadioManager.BandConfig config) {
         try {
             mTuner.setConfiguration(config);
+            mBand = config.getType();
             return RadioManager.STATUS_OK;
         } catch (IllegalArgumentException e) {
             Log.e(TAG, "Can't set configuration", e);
@@ -138,7 +144,7 @@ class TunerAdapter extends RadioTuner {
     @Override
     public int tune(int channel, int subChannel) {
         try {
-            mTuner.tune(channel, subChannel);
+            mTuner.tune(ProgramSelector.createAmFmSelector(mBand, channel, subChannel));
         } catch (IllegalStateException e) {
             Log.e(TAG, "Can't tune", e);
             return RadioManager.STATUS_INVALID_OPERATION;
@@ -150,6 +156,15 @@ class TunerAdapter extends RadioTuner {
             return RadioManager.STATUS_DEAD_OBJECT;
         }
         return RadioManager.STATUS_OK;
+    }
+
+    @Override
+    public void tune(@NonNull ProgramSelector selector) {
+        try {
+            mTuner.tune(selector);
+        } catch (RemoteException e) {
+            throw new RuntimeException("service died", e);
+        }
     }
 
     @Override
@@ -167,6 +182,15 @@ class TunerAdapter extends RadioTuner {
     }
 
     @Override
+    public void cancelAnnouncement() {
+        try {
+            mTuner.cancelAnnouncement();
+        } catch (RemoteException e) {
+            throw new RuntimeException("service died", e);
+        }
+    }
+
+    @Override
     public int getProgramInformation(RadioManager.ProgramInfo[] info) {
         if (info == null || info.length != 1) {
             throw new IllegalArgumentException("The argument must be an array of length 1");
@@ -181,6 +205,15 @@ class TunerAdapter extends RadioTuner {
     }
 
     @Override
+    public @Nullable Bitmap getMetadataImage(int id) {
+        try {
+            return mTuner.getImage(id);
+        } catch (RemoteException e) {
+            throw new RuntimeException("service died", e);
+        }
+    }
+
+    @Override
     public boolean startBackgroundScan() {
         try {
             return mTuner.startBackgroundScan();
@@ -190,9 +223,10 @@ class TunerAdapter extends RadioTuner {
     }
 
     @Override
-    public @NonNull List<RadioManager.ProgramInfo> getProgramList(@Nullable String filter) {
+    public @NonNull List<RadioManager.ProgramInfo>
+            getProgramList(@Nullable Map<String, String> vendorFilter) {
         try {
-            return mTuner.getProgramList(filter);
+            return mTuner.getProgramList(vendorFilter);
         } catch (RemoteException e) {
             throw new RuntimeException("service died", e);
         }
@@ -227,7 +261,11 @@ class TunerAdapter extends RadioTuner {
 
     @Override
     public boolean hasControl() {
-        // TODO(b/36863239): forward to mTuner
-        throw new RuntimeException("Not implemented");
+        try {
+            // don't rely on mIsClosed, as tuner might get closed internally
+            return !mTuner.isClosed();
+        } catch (RemoteException e) {
+            return false;
+        }
     }
 }

@@ -21,24 +21,8 @@
 <resources xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
     <string name="byteShort" msgid="8340973892742019101">"B"</string>
-    <string name="kilobyteShort" msgid="7542884022844556968">"kB"</string>
-    <string name="megabyteShort" msgid="6355851576770428922">"MB"</string>
-    <string name="gigabyteShort" msgid="3259882455212193214">"GB"</string>
-    <string name="terabyteShort" msgid="231613018159186962">"TB"</string>
     <string name="petabyteShort" msgid="5637816680144990219">"PB"</string>
     <string name="fileSizeSuffix" msgid="8897567456150907538">"<xliff:g id="NUMBER">%1$s</xliff:g> <xliff:g id="UNIT">%2$s</xliff:g>"</string>
-    <string name="durationDays" msgid="6652371460511178259">"<xliff:g id="DAYS">%1$d</xliff:g> giorni"</string>
-    <string name="durationDayHours" msgid="2713107458736744435">"<xliff:g id="DAYS">%1$d</xliff:g> giorno <xliff:g id="HOURS">%2$d</xliff:g> ore"</string>
-    <string name="durationDayHour" msgid="7293789639090958917">"<xliff:g id="DAYS">%1$d</xliff:g> giorno <xliff:g id="HOURS">%2$d</xliff:g> ora"</string>
-    <string name="durationHours" msgid="4266858287167358988">"<xliff:g id="HOURS">%1$d</xliff:g> ore"</string>
-    <string name="durationHourMinutes" msgid="9029176248692041549">"<xliff:g id="HOURS">%1$d</xliff:g> ora <xliff:g id="MINUTES">%2$d</xliff:g> minuti"</string>
-    <string name="durationHourMinute" msgid="2741677355177402539">"<xliff:g id="HOURS">%1$d</xliff:g> ora <xliff:g id="MINUTES">%2$d</xliff:g> minuto"</string>
-    <string name="durationMinutes" msgid="3134226679883579347">"<xliff:g id="MINUTES">%1$d</xliff:g> minuti"</string>
-    <string name="durationMinute" msgid="7155301744174623818">"<xliff:g id="MINUTES">%1$d</xliff:g> min"</string>
-    <string name="durationMinuteSeconds" msgid="1424656185379003751">"<xliff:g id="MINUTES">%1$d</xliff:g> minuto <xliff:g id="SECONDS">%2$d</xliff:g> secondi"</string>
-    <string name="durationMinuteSecond" msgid="3989228718067466680">"<xliff:g id="MINUTES">%1$d</xliff:g> minuto <xliff:g id="SECONDS">%2$d</xliff:g> secondo"</string>
-    <string name="durationSeconds" msgid="8050088505238241405">"<xliff:g id="SECONDS">%1$d</xliff:g> secondi"</string>
-    <string name="durationSecond" msgid="985669622276420331">"<xliff:g id="SECONDS">%1$d</xliff:g> secondo"</string>
     <string name="untitled" msgid="4638956954852782576">"&lt;Senza nome&gt;"</string>
     <string name="emptyPhoneNumber" msgid="7694063042079676517">"(Nessun numero di telefono)"</string>
     <string name="unknownName" msgid="6867811765370350269">"Sconosciuto"</string>
@@ -95,11 +79,13 @@
     <string name="RestrictedOnAllVoiceTitle" msgid="158800171499150681">"Nessun servizio di telefonia/emergenza"</string>
     <string name="RestrictedStateContent" msgid="4278821484643362350">"Servizio temporaneamente non offerto dalla rete mobile nella tua località"</string>
     <string name="NetworkPreferenceSwitchTitle" msgid="4008877505368566980">"Impossibile raggiungere la rete"</string>
-    <string name="NetworkPreferenceSwitchSummary" msgid="4164230263214915351">"Per migliorare la ricezione, prova a modificare il tipo selezionato in Sistema &gt; Rete e Internet &gt; Reti mobili &gt; Tipo di rete preferito."</string>
+    <string name="NetworkPreferenceSwitchSummary" msgid="1203771446683319957">"Per migliorare la ricezione, prova a modificare il tipo selezionato in Impostazioni &gt; Rete e Internet &gt; Reti mobili &gt; Tipo di rete preferito."</string>
+    <string name="EmergencyCallWarningTitle" msgid="4790413876281901612">"Chiamate Wi‑Fi attive"</string>
+    <string name="EmergencyCallWarningSummary" msgid="8973232888021643293">"Per le chiamate di emergenza è necessaria una rete mobile."</string>
     <string name="notification_channel_network_alert" msgid="4427736684338074967">"Avvisi"</string>
     <string name="notification_channel_call_forward" msgid="2419697808481833249">"Deviazione chiamate"</string>
     <string name="notification_channel_emergency_callback" msgid="6686166232265733921">"Modalità di richiamata di emergenza"</string>
-    <string name="notification_channel_mobile_data_alert" msgid="6130875231721406231">"Avvisi relativi ai dati mobili"</string>
+    <string name="notification_channel_mobile_data_status" msgid="4575131690860945836">"Stato dati mobili"</string>
     <string name="notification_channel_sms" msgid="3441746047346135073">"SMS"</string>
     <string name="notification_channel_voice_mail" msgid="3954099424160511919">"Messaggi vocali"</string>
     <string name="notification_channel_wfc" msgid="2130802501654254801">"Chiamate Wi-Fi"</string>
@@ -1619,10 +1605,10 @@
     <string name="managed_profile_label_badge" msgid="2355652472854327647">"<xliff:g id="LABEL">%1$s</xliff:g> lavoro"</string>
     <string name="managed_profile_label_badge_2" msgid="5048136430082124036">"<xliff:g id="LABEL">%1$s</xliff:g> di lavoro (2°)"</string>
     <string name="managed_profile_label_badge_3" msgid="2808305070321719040">"<xliff:g id="LABEL">%1$s</xliff:g> di lavoro (3°)"</string>
-    <string name="lock_to_app_toast" msgid="6820571533009838261">"Per rimuovere il blocco, tieni premuti i pulsanti Indietro e Panoramica"</string>
-    <string name="lock_to_app_toast_locked" msgid="7849470948648628704">"Impossibile rimuovere il blocco per l\'app"</string>
-    <string name="lock_to_app_start" msgid="6643342070839862795">"Schermata bloccata"</string>
-    <string name="lock_to_app_exit" msgid="8598219838213787430">"Schermata sbloccata"</string>
+    <string name="lock_to_app_toast" msgid="6820571533009838261">"Per sganciare la schermata, tieni premuti i pulsanti Indietro e Panoramica"</string>
+    <string name="lock_to_app_toast_locked" msgid="7849470948648628704">"Impossibile sganciare l\'app"</string>
+    <string name="lock_to_app_start" msgid="6643342070839862795">"Schermata fissata"</string>
+    <string name="lock_to_app_exit" msgid="8598219838213787430">"Schermata sganciata"</string>
     <string name="lock_to_app_unlock_pin" msgid="2552556656504331634">"Richiedi il PIN per lo sblocco"</string>
     <string name="lock_to_app_unlock_pattern" msgid="4182192144797225137">"Richiedi sequenza di sblocco prima di sbloccare"</string>
     <string name="lock_to_app_unlock_password" msgid="6380979775916974414">"Richiedi password prima di sbloccare"</string>
@@ -1726,7 +1712,7 @@
     <string name="usb_mtp_launch_notification_title" msgid="8359219638312208932">"Connesso a <xliff:g id="PRODUCT_NAME">%1$s</xliff:g>"</string>
     <string name="usb_mtp_launch_notification_description" msgid="8541876176425411358">"Tocca per visualizzare i file"</string>
     <string name="pin_target" msgid="3052256031352291362">"Blocca"</string>
-    <string name="unpin_target" msgid="3556545602439143442">"Sblocca"</string>
+    <string name="unpin_target" msgid="3556545602439143442">"Sgancia"</string>
     <string name="app_info" msgid="6856026610594615344">"Informazioni app"</string>
     <string name="negative_duration" msgid="5688706061127375131">"−<xliff:g id="TIME">%1$s</xliff:g>"</string>
     <string name="demo_starting_message" msgid="5268556852031489931">"Avvio della demo…"</string>
@@ -1780,4 +1766,5 @@
     <string name="mmcc_imsi_unknown_in_hlr" msgid="6321202257374418726">"Scheda SIM non predisposta"</string>
     <string name="mmcc_illegal_ms" msgid="2769452751852211112">"Scheda SIM non consentita"</string>
     <string name="mmcc_illegal_me" msgid="4438696681169345015">"Telefono non consentito"</string>
+    <string name="popup_window_default_title" msgid="4874318849712115433">"Finestra popup"</string>
 </resources>

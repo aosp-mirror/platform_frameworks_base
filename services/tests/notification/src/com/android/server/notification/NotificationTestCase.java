@@ -27,7 +27,7 @@ public class NotificationTestCase {
     public final TestableContext mContext =
             new TestableContext(InstrumentationRegistry.getContext(), null);
 
-    protected Context getContext() {
+    protected TestableContext getContext() {
         return mContext;
     }
 }

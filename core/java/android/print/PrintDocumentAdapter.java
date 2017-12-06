@@ -268,7 +268,9 @@ public abstract class PrintDocumentAdapter {
          * Notifies that all the data was written.
          *
          * @param pages The pages that were written. Cannot be <code>null</code>
-         * or empty.
+         *        or empty. <br />
+         *        Returning {@link PageRange#ALL_PAGES} indicates that all pages that were
+         *        requested as the {@code pages} parameter in {@link #onWrite} were written.
          */
         public void onWriteFinished(PageRange[] pages) {
             /* do nothing - stub */

@@ -20,6 +20,7 @@ import static com.android.server.am.ActivityManagerDebugConfig.TAG_AM;
 import static com.android.server.am.ActivityManagerDebugConfig.TAG_WITH_CLASS_NAME;
 
 import android.app.IStopUserCallback;
+import android.os.Trace;
 import android.os.UserHandle;
 import android.util.ArrayMap;
 import android.util.Slog;
@@ -81,9 +82,18 @@ public final class UserState {
         if (newState == state) {
             return;
         }
-        Slog.i(TAG, "User " + mHandle.getIdentifier() + " state changed from "
+        final int userId = mHandle.getIdentifier();
+        if (state != STATE_BOOTING) {
+            Trace.asyncTraceEnd(Trace.TRACE_TAG_ACTIVITY_MANAGER,
+                    stateToString(state) + " " + userId, userId);
+        }
+        if (newState != STATE_SHUTDOWN) {
+            Trace.asyncTraceBegin(Trace.TRACE_TAG_ACTIVITY_MANAGER,
+                    stateToString(newState) + " " + userId, userId);
+        }
+        Slog.i(TAG, "User " + userId + " state changed from "
                 + stateToString(state) + " to " + stateToString(newState));
-        EventLogTags.writeAmUserStateChanged(mHandle.getIdentifier(), newState);
+        EventLogTags.writeAmUserStateChanged(userId, newState);
         lastState = state;
         state = newState;
     }

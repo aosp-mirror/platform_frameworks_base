@@ -64,7 +64,7 @@
     <string name="usb_debugging_message" msgid="2220143855912376496">"A impressão digital da chave RSA deste computador é:\n<xliff:g id="FINGERPRINT">%1$s</xliff:g>"</string>
     <string name="usb_debugging_always" msgid="303335496705863070">"Sempre permitir a partir deste computador"</string>
     <string name="usb_debugging_secondary_user_title" msgid="6353808721761220421">"Depuração USB não permitida"</string>
-    <string name="usb_debugging_secondary_user_message" msgid="8572228137833020196">"O usuário conectado a este dispositivo no momento não pode ativar a depuração USB. Para usar esse recurso, alterne para o usuário administrador."</string>
+    <string name="usb_debugging_secondary_user_message" msgid="6067122453571699801">"O usuário conectado a este dispositivo não pode ativar a depuração USB. Para usar esse recurso, mude para o usuário principal \"NAME\"."</string>
     <string name="compat_mode_on" msgid="6623839244840638213">"Zoom p/ preencher a tela"</string>
     <string name="compat_mode_off" msgid="4434467572461327898">"Ampliar p/ preencher tela"</string>
     <string name="screenshot_saving_ticker" msgid="7403652894056693515">"Salvando captura de tela..."</string>
@@ -355,10 +355,10 @@
     <string name="description_target_search" msgid="3091587249776033139">"Pesquisar"</string>
     <string name="description_direction_up" msgid="7169032478259485180">"Para <xliff:g id="TARGET_DESCRIPTION">%s</xliff:g>, deslize para cima."</string>
     <string name="description_direction_left" msgid="7207478719805562165">"Para <xliff:g id="TARGET_DESCRIPTION">%s</xliff:g>, deslize para a esquerda."</string>
-    <string name="zen_priority_introduction" msgid="7577965386868311310">"Você não será perturbado por sons e vibrações, exceto alarmes, lembretes, eventos e chamadas de pessoas especificadas. No entanto, você ouvirá tudo o que decidir reproduzir, como músicas, vídeos e jogos."</string>
-    <string name="zen_alarms_introduction" msgid="7034415210361973827">"Você não será perturbado por sons e vibrações, exceto alarmes. No entanto, você ouvirá tudo o que decidir reproduzir, como músicas, vídeos e jogos."</string>
+    <string name="zen_priority_introduction" msgid="1149025108714420281">"Você não será perturbado por sons e vibrações, exceto alarmes, lembretes, eventos e chamadas de pessoas especificadas. No entanto, você ouvirá tudo o que decidir reproduzir, como músicas, vídeos e jogos."</string>
+    <string name="zen_alarms_introduction" msgid="4934328096749380201">"Você não será perturbado por sons e vibrações, exceto alarmes. No entanto, você ouvirá tudo o que decidir reproduzir, como músicas, vídeos e jogos."</string>
     <string name="zen_priority_customize_button" msgid="7948043278226955063">"Personalizar"</string>
-    <string name="zen_silence_introduction_voice" msgid="2284540992298200729">"Isso bloqueia TODOS os sons e vibrações, incluindo alarmes, músicas, vídeos e jogos. Você ainda poderá fazer chamadas telefônicas."</string>
+    <string name="zen_silence_introduction_voice" msgid="3948778066295728085">"Isso bloqueia TODOS os sons e vibrações, incluindo alarmes, músicas, vídeos e jogos. Você ainda poderá fazer chamadas telefônicas."</string>
     <string name="zen_silence_introduction" msgid="3137882381093271568">"Isso bloqueia TODOS os sons e vibrações, incluindo alarmes, músicas, vídeos e jogos."</string>
     <string name="keyguard_more_overflow_text" msgid="9195222469041601365">"+<xliff:g id="NUMBER_OF_NOTIFICATIONS">%d</xliff:g>"</string>
     <string name="speed_bump_explanation" msgid="1288875699658819755">"Notificações menos urgentes abaixo"</string>
@@ -458,7 +458,7 @@
     <string name="monitoring_description_do_learn_more" msgid="1849514470437907421">"Saber mais"</string>
     <string name="monitoring_description_do_body_vpn" msgid="8255218762488901796">"Você está conectado a <xliff:g id="VPN_APP">%1$s</xliff:g>, que pode monitorar sua atividade na rede, incluindo e-mails, apps e websites."</string>
     <string name="monitoring_description_vpn_settings_separator" msgid="1933186756733474388">" "</string>
-    <string name="monitoring_description_vpn_settings" msgid="8869300202410505143">"Abrir configurações de VPN"</string>
+    <string name="monitoring_description_vpn_settings" msgid="6434859242636063861">"Abrir configurações de VPN"</string>
     <string name="monitoring_description_ca_cert_settings_separator" msgid="4987350385906393626">" "</string>
     <string name="monitoring_description_ca_cert_settings" msgid="5489969458872997092">"Abrir credenciais confiáveis"</string>
     <string name="monitoring_description_network_logging" msgid="7223505523384076027">"Seu administrador ativou o registro de rede, que monitora o tráfego no seu dispositivo.\n\nPara ver mais informações, entre em contato com o administrador."</string>
@@ -558,8 +558,8 @@
     <string name="notification_default_channel_desc" msgid="2506053815870808359">"Este app não tem categorias de notificação"</string>
     <string name="notification_unblockable_desc" msgid="3561016061737896906">"Notificações deste app não podem ser desativadas"</string>
     <plurals name="notification_num_channels_desc" formatted="false" msgid="5492793452274077663">
-      <item quantity="one">1 de <xliff:g id="NUMBER_1">%d</xliff:g> categoria de notificação deste app</item>
-      <item quantity="other">1 de <xliff:g id="NUMBER_1">%d</xliff:g> categorias de notificação deste app</item>
+      <item quantity="one">1 de <xliff:g id="NUMBER_1">%s</xliff:g> categoria de notificação deste app</item>
+      <item quantity="other">1 de <xliff:g id="NUMBER_1">%s</xliff:g> categorias de notificação deste app</item>
     </plurals>
     <string name="notification_channels_list_desc_2" msgid="6214732715833946441">"<xliff:g id="CHANNEL_NAME_1">%1$s</xliff:g>, <xliff:g id="CHANNEL_NAME_2">%2$s</xliff:g>"</string>
     <plurals name="notification_channels_list_desc_2_and_others" formatted="false" msgid="2747813553355336157">
@@ -587,8 +587,8 @@
       <item quantity="other">%d minutos</item>
     </plurals>
     <string name="battery_panel_title" msgid="7944156115535366613">"Uso da bateria"</string>
-    <string name="battery_detail_charging_summary" msgid="1279095653533044008">"A Economia de bateria não fica disponível durante o carregamento"</string>
-    <string name="battery_detail_switch_title" msgid="6285872470260795421">"Economia de bateria"</string>
+    <string name="battery_detail_charging_summary" msgid="4055327085770378335">"O recurso \"Economia de bateria\" não fica disponível durante o carregamento"</string>
+    <string name="battery_detail_switch_title" msgid="8763441006881907058">"Economia de bateria"</string>
     <string name="battery_detail_switch_summary" msgid="9049111149407626804">"Reduz o desempenho e os dados em segundo plano"</string>
     <string name="keyboard_key_button_template" msgid="6230056639734377300">"Botão <xliff:g id="NAME">%1$s</xliff:g>"</string>
     <string name="keyboard_key_home" msgid="2243500072071305073">"Home"</string>
@@ -728,9 +728,9 @@
     <string name="pip_phone_minimize" msgid="1079119422589131792">"Minimizar"</string>
     <string name="pip_phone_close" msgid="8416647892889710330">"Fechar"</string>
     <string name="pip_phone_dismiss_hint" msgid="6351678169095923899">"Arraste para baixo para dispensar"</string>
-    <string name="pip_menu_title" msgid="3328510504196964712">"Menu Picture-in-picture"</string>
+    <string name="pip_menu_title" msgid="4707292089961887657">"Menu"</string>
     <string name="pip_notification_title" msgid="3204024940158161322">"<xliff:g id="NAME">%s</xliff:g> está em picture-in-picture"</string>
-    <string name="pip_notification_message" msgid="4171698133469539591">"Se você não deseja que o <xliff:g id="NAME">%s</xliff:g> use este recurso, toque para abrir as configurações e desativá-lo."</string>
+    <string name="pip_notification_message" msgid="5619512781514343311">"Se você não deseja que o app <xliff:g id="NAME">%s</xliff:g> use este recurso, toque para abrir as configurações e desativá-lo."</string>
     <string name="pip_play" msgid="1417176722760265888">"Reproduzir"</string>
     <string name="pip_pause" msgid="8881063404466476571">"Pausar"</string>
     <string name="pip_skip_to_next" msgid="1948440006726306284">"Pular para a próxima"</string>
@@ -756,6 +756,7 @@
     <string name="tuner_menu" msgid="191640047241552081">"Menu"</string>
     <string name="tuner_app" msgid="3507057938640108777">"App <xliff:g id="APP">%1$s</xliff:g>"</string>
     <string name="notification_channel_alerts" msgid="4496839309318519037">"Alertas"</string>
+    <string name="notification_channel_battery" msgid="5786118169182888462">"Bateria"</string>
     <string name="notification_channel_screenshot" msgid="6314080179230000938">"Capturas de tela"</string>
     <string name="notification_channel_general" msgid="4525309436693914482">"Mensagens gerais"</string>
     <string name="notification_channel_storage" msgid="3077205683020695313">"Armazenamento"</string>
@@ -776,4 +777,5 @@
     <string name="running_foreground_services_title" msgid="381024150898615683">"Apps sendo executados em segundo plano"</string>
     <string name="running_foreground_services_msg" msgid="6326247670075574355">"Tocar para ver detalhes sobre a bateria e o uso de dados"</string>
     <string name="data_usage_disable_mobile" msgid="5116269981510015864">"Desativar os dados móveis?"</string>
+    <string name="touch_filtered_warning" msgid="8671693809204767551">"Como um app está ocultando uma solicitação de permissão, as configurações não podem verificar sua resposta."</string>
 </resources>

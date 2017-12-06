@@ -21,24 +21,8 @@
 <resources xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
     <string name="byteShort" msgid="8340973892742019101">"B"</string>
-    <string name="kilobyteShort" msgid="7542884022844556968">"kB"</string>
-    <string name="megabyteShort" msgid="6355851576770428922">"MB"</string>
-    <string name="gigabyteShort" msgid="3259882455212193214">"GB"</string>
-    <string name="terabyteShort" msgid="231613018159186962">"TB"</string>
     <string name="petabyteShort" msgid="5637816680144990219">"PB"</string>
     <string name="fileSizeSuffix" msgid="8897567456150907538">"<xliff:g id="NUMBER">%1$s</xliff:g> <xliff:g id="UNIT">%2$s</xliff:g>"</string>
-    <string name="durationDays" msgid="6652371460511178259">"<xliff:g id="DAYS">%1$d</xliff:g> दिवस"</string>
-    <string name="durationDayHours" msgid="2713107458736744435">"<xliff:g id="DAYS">%1$d</xliff:g> दिवस <xliff:g id="HOURS">%2$d</xliff:g> तास"</string>
-    <string name="durationDayHour" msgid="7293789639090958917">"<xliff:g id="DAYS">%1$d</xliff:g> दिवस <xliff:g id="HOURS">%2$d</xliff:g> तास"</string>
-    <string name="durationHours" msgid="4266858287167358988">"<xliff:g id="HOURS">%1$d</xliff:g> तास"</string>
-    <string name="durationHourMinutes" msgid="9029176248692041549">"<xliff:g id="HOURS">%1$d</xliff:g> ता <xliff:g id="MINUTES">%2$d</xliff:g> मि"</string>
-    <string name="durationHourMinute" msgid="2741677355177402539">"<xliff:g id="HOURS">%1$d</xliff:g> ता <xliff:g id="MINUTES">%2$d</xliff:g> मि"</string>
-    <string name="durationMinutes" msgid="3134226679883579347">"<xliff:g id="MINUTES">%1$d</xliff:g> मिनिटे"</string>
-    <string name="durationMinute" msgid="7155301744174623818">"<xliff:g id="MINUTES">%1$d</xliff:g> मिनिट"</string>
-    <string name="durationMinuteSeconds" msgid="1424656185379003751">"<xliff:g id="MINUTES">%1$d</xliff:g> मि <xliff:g id="SECONDS">%2$d</xliff:g> से"</string>
-    <string name="durationMinuteSecond" msgid="3989228718067466680">"<xliff:g id="MINUTES">%1$d</xliff:g> मि <xliff:g id="SECONDS">%2$d</xliff:g> से"</string>
-    <string name="durationSeconds" msgid="8050088505238241405">"<xliff:g id="SECONDS">%1$d</xliff:g> सेकंद"</string>
-    <string name="durationSecond" msgid="985669622276420331">"<xliff:g id="SECONDS">%1$d</xliff:g> सेकंद"</string>
     <string name="untitled" msgid="4638956954852782576">"&lt;अशीर्षकांकित&gt;"</string>
     <string name="emptyPhoneNumber" msgid="7694063042079676517">"(कोणताही फोन नंबर नाही)"</string>
     <string name="unknownName" msgid="6867811765370350269">"अज्ञात"</string>
@@ -52,7 +36,7 @@
     <string name="serviceDisabled" msgid="1937553226592516411">"सेवा अक्षम केली गेली आहे."</string>
     <string name="serviceRegistered" msgid="6275019082598102493">"नोंदणी यशस्वी झाली."</string>
     <string name="serviceErased" msgid="1288584695297200972">"मिटवणे यशस्वी झाले."</string>
-    <string name="passwordIncorrect" msgid="7612208839450128715">"अयोग्य संकेतशब्द."</string>
+    <string name="passwordIncorrect" msgid="7612208839450128715">"अयोग्य पासवर्ड."</string>
     <string name="mmiComplete" msgid="8232527495411698359">"MMI पूर्ण."</string>
     <string name="badPin" msgid="9015277645546710014">"आपण टाइप केलेला जुना पिन योग्य नाही."</string>
     <string name="badPuk" msgid="5487257647081132201">"आपण टाइप केलेला PUK योग्य नाही."</string>
@@ -75,7 +59,7 @@
     <string name="CfMmi" msgid="5123218989141573515">"कॉल फॉरवर्डिंग"</string>
     <string name="CwMmi" msgid="9129678056795016867">"कॉल प्रतीक्षा"</string>
     <string name="BaMmi" msgid="455193067926770581">"कॉल सोडून"</string>
-    <string name="PwdMmi" msgid="7043715687905254199">"संकेतशब्द बदल"</string>
+    <string name="PwdMmi" msgid="7043715687905254199">"पासवर्ड बदल"</string>
     <string name="PinMmi" msgid="3113117780361190304">"पिन बदल"</string>
     <string name="CnipMmi" msgid="3110534680557857162">"कॉल करण्‍याचा नंबर आहे"</string>
     <string name="CnirMmi" msgid="3062102121430548731">"कॉल करणारे नंबर प्रतिबंधित"</string>
@@ -95,11 +79,13 @@
     <string name="RestrictedOnAllVoiceTitle" msgid="158800171499150681">"व्हॉइस/आणीबाणी सेवा नाही"</string>
     <string name="RestrictedStateContent" msgid="4278821484643362350">"तुम्‍ही असलेल्‍या स्‍थानी मोबाइल नेटवर्क तात्‍पुरते उपलब्‍ध नाही"</string>
     <string name="NetworkPreferenceSwitchTitle" msgid="4008877505368566980">"नेटवर्कवर पोहोचूू शकत नाही"</string>
-    <string name="NetworkPreferenceSwitchSummary" msgid="4164230263214915351">"रीसेप्शन सुधारण्यासाठी सिस्टम &gt; नेटवर्क आणि इंटरनेट &gt; मोबाइल नेटवर्क &gt; अग्रमानांकित नेटवर्क प्रकार येथे निवडलेला प्रकार बदलून पहा."</string>
+    <string name="NetworkPreferenceSwitchSummary" msgid="1203771446683319957">"रीसेप्शन सुधारण्यासाठी, सेटिंग्ज &gt; नेटवर्क आणि इंटरनेट &gt; मोबाइल नेटवर्क &gt; अग्रमानांकित नेटवर्क प्रकार बदलून पहा."</string>
+    <string name="EmergencyCallWarningTitle" msgid="4790413876281901612">"वाय-फाय कॉलिंग चालू आहे"</string>
+    <string name="EmergencyCallWarningSummary" msgid="8973232888021643293">"आपात्कालीन कॉलसाठी मोबाइल नेटवर्क असणे आवश्यक आहे."</string>
     <string name="notification_channel_network_alert" msgid="4427736684338074967">"अलर्ट"</string>
     <string name="notification_channel_call_forward" msgid="2419697808481833249">"कॉल फॉरवर्डिंग"</string>
     <string name="notification_channel_emergency_callback" msgid="6686166232265733921">"इमर्जन्सी कॉलबॅक मोड"</string>
-    <string name="notification_channel_mobile_data_alert" msgid="6130875231721406231">"मोबाइल डेटा अलर्ट"</string>
+    <string name="notification_channel_mobile_data_status" msgid="4575131690860945836">"मोबाइल डेटा स्थिती"</string>
     <string name="notification_channel_sms" msgid="3441746047346135073">"SMS संदेश"</string>
     <string name="notification_channel_voice_mail" msgid="3954099424160511919">"व्हॉइसमेल संदेश"</string>
     <string name="notification_channel_wfc" msgid="2130802501654254801">"वाय-फाय कॉलिंग"</string>
@@ -205,9 +191,9 @@
     <string name="reboot_to_update_title" msgid="6212636802536823850">"Android सिस्टम अपडेट"</string>
     <string name="reboot_to_update_prepare" msgid="6305853831955310890">"अपडेट करण्याची तयारी करत आहे…"</string>
     <string name="reboot_to_update_package" msgid="3871302324500927291">"अपडेट पॅकेज प्रक्रिया करत आहे…"</string>
-    <string name="reboot_to_update_reboot" msgid="6428441000951565185">"रीस्टार्ट करीत आहे..."</string>
+    <string name="reboot_to_update_reboot" msgid="6428441000951565185">"रीस्टार्ट करत आहे..."</string>
     <string name="reboot_to_reset_title" msgid="4142355915340627490">"फॅक्‍टरी डेटा रीसेट"</string>
-    <string name="reboot_to_reset_message" msgid="2432077491101416345">"रीस्टार्ट करीत आहे..."</string>
+    <string name="reboot_to_reset_message" msgid="2432077491101416345">"रीस्टार्ट करत आहे..."</string>
     <string name="shutdown_progress" msgid="2281079257329981203">"बंद होत आहे…"</string>
     <string name="shutdown_confirm" product="tablet" msgid="3385745179555731470">"आपला टॅबलेट बंद होईल."</string>
     <string name="shutdown_confirm" product="tv" msgid="476672373995075359">"आपला टीव्ही बंद होईल."</string>
@@ -228,7 +214,7 @@
     <string name="bugreport_title" msgid="2667494803742548533">"बग रीपोर्ट घ्या"</string>
     <string name="bugreport_message" msgid="398447048750350456">"ई-मेल संदेश म्हणून पाठविण्यासाठी, हे तुमच्या सद्य डिव्हाइस स्थितीविषयी माहिती संकलित करेल. बग रीपोर्ट सुरू करण्यापासून तो पाठविण्यापर्यंत थोडा वेळ लागेल; कृपया धीर धरा."</string>
     <string name="bugreport_option_interactive_title" msgid="8635056131768862479">"परस्परसंवादी अहवाल"</string>
-    <string name="bugreport_option_interactive_summary" msgid="229299488536107968">"बहुतांश प्रसंगांमध्ये याचा वापर करा. ते आपल्याला अहवालाच्या प्रगतीचा मागोवा घेण्याची, समस्येविषयी आणखी तपाशील प्रविष्ट करण्याची आणि स्क्रीनशॉट घेण्याची अनुमती देते. ते कदाचित अहवाल देण्यासाठी बराच वेळ घेणारे कमी-वापरलेले विभाग वगळू शकते."</string>
+    <string name="bugreport_option_interactive_summary" msgid="229299488536107968">"बहुतांश प्रसंगांमध्ये याचा वापर करा. ते आपल्याला अहवालाच्या प्रगतीचा मागोवा घेण्याची, समस्येविषयी आणखी तपाशील एंटर करण्याची आणि स्क्रीनशॉट घेण्याची अनुमती देते. ते कदाचित अहवाल देण्यासाठी बराच वेळ घेणारे कमी-वापरलेले विभाग वगळू शकते."</string>
     <string name="bugreport_option_full_title" msgid="6354382025840076439">"संपूर्ण अहवाल"</string>
     <string name="bugreport_option_full_summary" msgid="7210859858969115745">"तुमचे डिव्हाइस प्रतिसाद देत नाही किंवा खूप धीमे असते किंवा तुम्हाला सर्व अहवाल विभागांची आवश्यकता असते तेव्हा कमीतकमी सिस्टम हस्तक्षेपासाठी या पर्यायाचा वापर करा. तुम्हाला आणखी तपशील एंटर करण्याची किंवा अतिरिक्त स्क्रीनशॉट घेण्याची अनुमती देत नाही."</string>
     <plurals name="bugreport_countdown" formatted="false" msgid="6878900193900090368">
@@ -464,13 +450,13 @@
     <string name="permdesc_changeWimaxState" product="tv" msgid="6022307083934827718">"WiMAX नेटवर्कवरून टीव्ही कनेक्ट करण्यासाठी आणि त्यावरून टीव्ही डिस्कनेक्ट करण्यासाठी अॅपला अनुमती देते."</string>
     <string name="permdesc_changeWimaxState" product="default" msgid="697025043004923798">"WiMAX नेटवर्कवर फोन कनेक्ट करण्यास आणि त्यावरून फोन डिस्कनेक्ट करण्यास अॅप ला अनुमती देते."</string>
     <string name="permlab_bluetooth" msgid="6127769336339276828">"ब्लूटूथ डीव्हाइससह जोडा"</string>
-    <string name="permdesc_bluetooth" product="tablet" msgid="3480722181852438628">"टॅबलेटवर ब्लूटूथ चे कॉंफिगरेशन पाहण्यासाठी आणि पेअर केलेल्या डीव्हाइससह कनेक्शन स्थापित करण्यासाठी आणि स्वीकारण्यासाठी, अॅप ला अनुमती देते."</string>
-    <string name="permdesc_bluetooth" product="tv" msgid="3974124940101104206">"टीव्हीवर ब्लूटूथचे कॉंफिगरेशन पाहण्यासाठी आणि जोडलेल्या डीव्हाइससह कनेक्शन स्थापित करण्यासाठी आणि स्वीकारण्यासाठी अॅपला अनुमती देते."</string>
-    <string name="permdesc_bluetooth" product="default" msgid="3207106324452312739">"फोनवर ब्लूटूथ चे कॉंफिगरेशन पाहण्यासाठी आणि पेअर केलेल्या डीव्हाइससह कनेक्शन स्थापित करण्यासाठी आणि स्वीकारण्यासाठी, अॅप ला अनुमती देते."</string>
+    <string name="permdesc_bluetooth" product="tablet" msgid="3480722181852438628">"टॅबलेटवर ब्लूटूथ चे कॉंफिगरेशन पाहण्यासाठी आणि पेअर केलेल्या डीव्हाइससह कनेक्शन इंस्टॉल करण्यासाठी आणि स्वीकारण्यासाठी, अॅप ला अनुमती देते."</string>
+    <string name="permdesc_bluetooth" product="tv" msgid="3974124940101104206">"टीव्हीवर ब्लूटूथचे कॉंफिगरेशन पाहण्यासाठी आणि जोडलेल्या डीव्हाइससह कनेक्शन इंस्टॉल करण्यासाठी आणि स्वीकारण्यासाठी अॅपला अनुमती देते."</string>
+    <string name="permdesc_bluetooth" product="default" msgid="3207106324452312739">"फोनवर ब्लूटूथ चे कॉंफिगरेशन पाहण्यासाठी आणि पेअर केलेल्या डीव्हाइससह कनेक्शन इंस्टॉल करण्यासाठी आणि स्वीकारण्यासाठी, अॅप ला अनुमती देते."</string>
     <string name="permlab_nfc" msgid="4423351274757876953">"फील्ड जवळील कम्युनिकेशन नियंत्रित करा"</string>
     <string name="permdesc_nfc" msgid="7120611819401789907">"फील्ड जवळील कम्युनिकेशन (NFC) टॅग, कार्डे आणि वाचक यांच्यासह संवाद करण्यासाठी अॅपला अनुमती देते."</string>
     <string name="permlab_disableKeyguard" msgid="3598496301486439258">"आपले स्क्रीन लॉक अक्षम करा"</string>
-    <string name="permdesc_disableKeyguard" msgid="6034203065077122992">"कीलॉक आणि कोणतीही संबद्ध संकेतशब्द सुरक्षितता अक्षम करण्यासाठी अॅप ला अनुमती देते. उदाहरणार्थ, येणारा फोन कॉल प्राप्त करताना फोन कीलॉक अक्षम करतो, नंतर जेव्हा कॉल समाप्त होतो तेव्हा तो कीलॉक पुन्हा-सक्षम करतो."</string>
+    <string name="permdesc_disableKeyguard" msgid="6034203065077122992">"कीलॉक आणि कोणतीही संबद्ध पासवर्ड सुरक्षितता अक्षम करण्यासाठी अॅप ला अनुमती देते. उदाहरणार्थ, येणारा फोन कॉल प्राप्त करताना फोन कीलॉक अक्षम करतो, नंतर जेव्हा कॉल समाप्त होतो तेव्हा तो कीलॉक पुन्हा-सक्षम करतो."</string>
     <string name="permlab_manageFingerprint" msgid="5640858826254575638">"फिंगरप्रिंट हार्डवेअर व्यवस्थापित करा"</string>
     <string name="permdesc_manageFingerprint" msgid="178208705828055464">"वापर करण्याकरिता फिंगरप्रिंट टेम्पलेट जोडण्यासाठी आणि हटविण्यासाठी पद्धती रद्द करण्यास अॅपला अनुमती देते."</string>
     <string name="permlab_useFingerprint" msgid="3150478619915124905">"फिंगरप्रिंट हार्डवेअर वापरा"</string>
@@ -553,15 +539,15 @@
     <string name="permdesc_bindCarrierServices" msgid="1391552602551084192">"वाहक सेवांवर प्रतिबद्ध करण्यासाठी होल्डरला अनुमती देते. सामान्य अॅप्ससाठी कधीही आवश्यकता नसावी."</string>
     <string name="permlab_access_notification_policy" msgid="4247510821662059671">"व्यत्यय आणू नका अॅक्सेस करा"</string>
     <string name="permdesc_access_notification_policy" msgid="3296832375218749580">"व्यत्यय आणू नका कॉन्फिगरेशन वाचण्यासाठी आणि लिहिण्यासाठी अॅपला अनुमती देते."</string>
-    <string name="policylab_limitPassword" msgid="4497420728857585791">"संकेतशब्द नियम सेट करा"</string>
+    <string name="policylab_limitPassword" msgid="4497420728857585791">"पासवर्ड नियम सेट करा"</string>
     <string name="policydesc_limitPassword" msgid="2502021457917874968">"स्क्रीन लॉक पासवर्ड आणि पिन मध्ये अनुमती दिलेले लांबी आणि वर्ण नियंत्रित करा."</string>
     <string name="policylab_watchLogin" msgid="5091404125971980158">"स्क्रीन अनलॉक प्रयत्नांचे परीक्षण करा"</string>
-    <string name="policydesc_watchLogin" product="tablet" msgid="3215729294215070072">"टाइप केलेल्या अयोग्य संकेतशब्दांच्या अंकांचे परीक्षण करा. स्क्रीन अनलॉक केली जाते, तेव्हा टॅबलेट लॉक करा किंवा बरेच संकेतशब्द टाइप केले असल्यास टॅबलेटचा सर्व डेटा मिटवा."</string>
-    <string name="policydesc_watchLogin" product="TV" msgid="2707817988309890256">"स्क्रीन अनलॉक करताना टाइप केलेल्या चुकीच्या संकेतशब्दांच्या संख्येचे परीक्षण करा आणि टीव्ही लॉक करा किंवा अनेक चुकीचे संकेतशब्द टाइप केले असल्यास टीव्हीचा सर्व डेटा मिटवा."</string>
-    <string name="policydesc_watchLogin" product="default" msgid="5712323091846761073">"टाइप केलेल्या अयोग्य संकेतशब्दांच्या अंकांचे परीक्षण करा. स्क्रीन अनलॉक केली जाते, तेव्हा फोन लॉक करा किंवा बरेच संकेतशब्द टाइप केले असल्यास फोनचा सर्व डेटा मिटवा."</string>
-    <string name="policydesc_watchLogin_secondaryUser" product="tablet" msgid="4280246270601044505">"स्क्रीन अनलॉक करताना टाइप केलेल्या चुकीच्या संकेतशब्दांच्या संख्येचे परीक्षण करा आणि टॅबलेट लॉक करा किंवा अनेक चुकीचे संकेतशब्द टाइप केले असल्यास या वापरकर्त्याचा सर्व डेटा मिटवा."</string>
-    <string name="policydesc_watchLogin_secondaryUser" product="TV" msgid="3484832653564483250">"स्क्रीन अनलॉक करताना टाइप केलेल्या चुकीच्या संकेतशब्दांच्या संख्येचे परीक्षण करा आणि टीव्ही लॉक करा किंवा अनेक चुकीचे संकेतशब्द टाइप केले असल्यास या वापरकर्त्याचा सर्व डेटा मिटवा."</string>
-    <string name="policydesc_watchLogin_secondaryUser" product="default" msgid="2185480427217127147">"टाइप केलेल्या अयोग्य संकेतशब्दांच्या अंकांचे परीक्षण करा. स्क्रीन अनलॉक केली जाते, तेव्हा फोन लॉक करा किंवा बरेच संकेतशब्द टाइप केले असल्यास या वापरकर्त्याचा सर्व डेटा मिटवा."</string>
+    <string name="policydesc_watchLogin" product="tablet" msgid="3215729294215070072">"टाइप केलेल्या अयोग्य पासवर्डांच्या अंकांचे परीक्षण करा. स्क्रीन अनलॉक केली जाते, तेव्हा टॅबलेट लॉक करा किंवा बरेच पासवर्ड टाइप केले असल्यास टॅबलेटचा सर्व डेटा मिटवा."</string>
+    <string name="policydesc_watchLogin" product="TV" msgid="2707817988309890256">"स्क्रीन अनलॉक करताना टाइप केलेल्या चुकीच्या पासवर्डांच्या संख्येचे परीक्षण करा आणि टीव्ही लॉक करा किंवा अनेक चुकीचे पासवर्ड टाइप केले असल्यास टीव्हीचा सर्व डेटा मिटवा."</string>
+    <string name="policydesc_watchLogin" product="default" msgid="5712323091846761073">"टाइप केलेल्या अयोग्य पासवर्डांच्या अंकांचे परीक्षण करा. स्क्रीन अनलॉक केली जाते, तेव्हा फोन लॉक करा किंवा बरेच पासवर्ड टाइप केले असल्यास फोनचा सर्व डेटा मिटवा."</string>
+    <string name="policydesc_watchLogin_secondaryUser" product="tablet" msgid="4280246270601044505">"स्क्रीन अनलॉक करताना टाइप केलेल्या चुकीच्या पासवर्डांच्या संख्येचे परीक्षण करा आणि टॅबलेट लॉक करा किंवा अनेक चुकीचे पासवर्ड टाइप केले असल्यास या वापरकर्त्याचा सर्व डेटा मिटवा."</string>
+    <string name="policydesc_watchLogin_secondaryUser" product="TV" msgid="3484832653564483250">"स्क्रीन अनलॉक करताना टाइप केलेल्या चुकीच्या पासवर्डांच्या संख्येचे परीक्षण करा आणि टीव्ही लॉक करा किंवा अनेक चुकीचे पासवर्ड टाइप केले असल्यास या वापरकर्त्याचा सर्व डेटा मिटवा."</string>
+    <string name="policydesc_watchLogin_secondaryUser" product="default" msgid="2185480427217127147">"टाइप केलेल्या अयोग्य पासवर्डांच्या अंकांचे परीक्षण करा. स्क्रीन अनलॉक केली जाते, तेव्हा फोन लॉक करा किंवा बरेच पासवर्ड टाइप केले असल्यास या वापरकर्त्याचा सर्व डेटा मिटवा."</string>
     <string name="policylab_resetPassword" msgid="4934707632423915395">"स्क्रीन लॉक बदला"</string>
     <string name="policydesc_resetPassword" msgid="1278323891710619128">"स्क्रीन लॉक बदला."</string>
     <string name="policylab_forceLock" msgid="2274085384704248431">"स्क्रीन लॉक करा"</string>
@@ -576,8 +562,8 @@
     <string name="policydesc_wipeData_secondaryUser" product="default" msgid="6787904546711590238">"कोणत्याही चेतावणी शिवाय या वापरकर्त्याचा या फोनवरील डेटा मिटवा."</string>
     <string name="policylab_setGlobalProxy" msgid="2784828293747791446">"डिव्हाइस समग्र प्रॉक्सी सेट करा"</string>
     <string name="policydesc_setGlobalProxy" msgid="8459859731153370499">"धोरण सक्षम असताना वापरण्यासाठी डिव्हाइस समग्र प्रॉक्सी सेट करा. फक्त डिव्हाइस मालक समग्र प्रॉक्सी सेट करु शकतो."</string>
-    <string name="policylab_expirePassword" msgid="5610055012328825874">"स्क्रीन लॉक संकेतशब्द कालबाह्यता सेट करा"</string>
-    <string name="policydesc_expirePassword" msgid="5367525762204416046">"लॉक-स्क्रीन संकेतशब्द किती वारंवार बदलणे आवश्यक आहे ते बदला."</string>
+    <string name="policylab_expirePassword" msgid="5610055012328825874">"स्क्रीन लॉक पासवर्ड कालबाह्यता सेट करा"</string>
+    <string name="policydesc_expirePassword" msgid="5367525762204416046">"लॉक-स्क्रीन पासवर्ड किती वारंवार बदलणे आवश्यक आहे ते बदला."</string>
     <string name="policylab_encryptedStorage" msgid="8901326199909132915">"स्टोरेज एंक्रिप्शन सेट करा"</string>
     <string name="policydesc_encryptedStorage" msgid="2637732115325316992">"स्टोअर केलेला अॅप डेटा एंक्रिप्ट केला जाणे आवश्यक आहे."</string>
     <string name="policylab_disableCamera" msgid="6395301023152297826">"कॅमेरे अक्षम करा"</string>
@@ -702,8 +688,8 @@
     <string name="keyguard_password_enter_puk_code" msgid="4800725266925845333">"PUK आणि नवीन पिन कोड टाइप करा"</string>
     <string name="keyguard_password_enter_puk_prompt" msgid="1341112146710087048">"PUK कोड"</string>
     <string name="keyguard_password_enter_pin_prompt" msgid="8027680321614196258">"नवीन पिन कोड"</string>
-    <string name="keyguard_password_entry_touch_hint" msgid="2644215452200037944"><font size="17">"संकेतशब्द टाइप करण्यासाठी टॅप करा"</font></string>
-    <string name="keyguard_password_enter_password_code" msgid="1054721668279049780">"अनलॉक करण्यासाठी संकेतशब्द टाइप करा"</string>
+    <string name="keyguard_password_entry_touch_hint" msgid="2644215452200037944"><font size="17">"पासवर्ड टाइप करण्यासाठी टॅप करा"</font></string>
+    <string name="keyguard_password_enter_password_code" msgid="1054721668279049780">"अनलॉक करण्यासाठी पासवर्ड टाइप करा"</string>
     <string name="keyguard_password_enter_pin_password_code" msgid="6391755146112503443">"अनलॉक करण्यासाठी पिन टाइप करा"</string>
     <string name="keyguard_password_wrong_pin_code" msgid="2422225591006134936">"अयोग्य पिन कोड."</string>
     <string name="keyguard_label_text" msgid="861796461028298424">"अनलॉक करण्यासाठी, मेनू दाबा नंतर 0."</string>
@@ -742,7 +728,7 @@
     <string name="lockscreen_sim_locked_message" msgid="8066660129206001039">"सिम कार्ड लॉक केलेले आहे."</string>
     <string name="lockscreen_sim_unlock_progress_dialog_message" msgid="595323214052881264">"सिम कार्ड अनलॉक करत आहे…"</string>
     <string name="lockscreen_too_many_failed_attempts_dialog_message" msgid="6481623830344107222">"तुम्ही आपला अनलॉक पॅटर्न <xliff:g id="NUMBER_0">%1$d</xliff:g> वेळा अयोग्यरितीने काढला. \n\n <xliff:g id="NUMBER_1">%2$d</xliff:g> सेकंदांमध्ये पुन्हा प्रयत्न करा."</string>
-    <string name="lockscreen_too_many_failed_password_attempts_dialog_message" msgid="2725973286239344555">"आपण आपला संकेतशब्द <xliff:g id="NUMBER_0">%1$d</xliff:g> वेळा अयोग्यरितीने टाइप केला आहे. \n\n <xliff:g id="NUMBER_1">%2$d</xliff:g> सेकंदांमध्ये पुन्हा प्रयत्न करा."</string>
+    <string name="lockscreen_too_many_failed_password_attempts_dialog_message" msgid="2725973286239344555">"आपण आपला पासवर्ड <xliff:g id="NUMBER_0">%1$d</xliff:g> वेळा अयोग्यरितीने टाइप केला आहे. \n\n <xliff:g id="NUMBER_1">%2$d</xliff:g> सेकंदांमध्ये पुन्हा प्रयत्न करा."</string>
     <string name="lockscreen_too_many_failed_pin_attempts_dialog_message" msgid="6216672706545696955">"आपण आपला पिन <xliff:g id="NUMBER_0">%1$d</xliff:g> वेळा अयोग्यरितीने टाइप केला आहे. \n\n <xliff:g id="NUMBER_1">%2$d</xliff:g> सेकंदांमध्ये पुन्हा प्रयत्न करा."</string>
     <string name="lockscreen_failed_attempts_almost_glogin" product="tablet" msgid="9191611984625460820">"तुम्ही आपला अनलॉक पॅटर्न <xliff:g id="NUMBER_0">%1$d</xliff:g> वेळा चुकीचा रेखांकित केला आहे. <xliff:g id="NUMBER_1">%2$d</xliff:g> अधिक अयशस्वी प्रयत्नांनंतर, तुमच्याला आपले Google साइन इन वापरून आपला टॅब्लेट अनलॉक करण्यास सांगितले जाईल.\n\n <xliff:g id="NUMBER_2">%3$d</xliff:g> सेकंदांमध्ये पुन्हा प्रयत्न करा."</string>
     <string name="lockscreen_failed_attempts_almost_glogin" product="tv" msgid="5316664559603394684">"तुम्ही <xliff:g id="NUMBER_0">%1$d</xliff:g> वेळा आपला अनलॉक पॅटर्न अयोग्यरीत्या काढला आहे. आणखी <xliff:g id="NUMBER_1">%2$d</xliff:g> अयशस्वी प्रयत्नांनंतर, तुमच्याला आपले Google साइन इन वापरून आपला टीव्ही अनलॉक करण्यास सांगितले जाईल.\n\n <xliff:g id="NUMBER_2">%3$d</xliff:g> सेकंदांनी पुन्हा प्रयत्न करा."</string>
@@ -759,10 +745,10 @@
     <string name="lockscreen_glogin_too_many_attempts" msgid="2751368605287288808">"बरेच पॅटर्न प्रयत्न"</string>
     <string name="lockscreen_glogin_instructions" msgid="3931816256100707784">"अनलॉक करण्यासाठी, आपल्या Google खात्यासह साइन इन करा."</string>
     <string name="lockscreen_glogin_username_hint" msgid="8846881424106484447">"वापरकर्तानाव (ईमेल)"</string>
-    <string name="lockscreen_glogin_password_hint" msgid="5958028383954738528">"संकेतशब्द"</string>
+    <string name="lockscreen_glogin_password_hint" msgid="5958028383954738528">"पासवर्ड"</string>
     <string name="lockscreen_glogin_submit_button" msgid="7130893694795786300">"साइन इन करा"</string>
     <string name="lockscreen_glogin_invalid_input" msgid="1364051473347485908">"अवैध वापरकर्तानाव किंवा पासवर्ड."</string>
-    <string name="lockscreen_glogin_account_recovery_hint" msgid="1696924763690379073">"आपले वापरकर्तानाव किंवा संकेतशब्द विसरलात?\n "<b>"google.com/accounts/recovery"</b>" ला भेट द्या."</string>
+    <string name="lockscreen_glogin_account_recovery_hint" msgid="1696924763690379073">"आपले वापरकर्तानाव किंवा पासवर्ड विसरलात?\n "<b>"google.com/accounts/recovery"</b>" ला भेट द्या."</string>
     <string name="lockscreen_glogin_checking_password" msgid="7114627351286933867">"तपासत आहे..."</string>
     <string name="lockscreen_unlock_label" msgid="737440483220667054">"अनलॉक करा"</string>
     <string name="lockscreen_sound_on_label" msgid="9068877576513425970">"ध्वनी सुरु"</string>
@@ -791,7 +777,7 @@
     <string name="keyguard_accessibility_pattern_unlock" msgid="1490840706075246612">"पॅटर्न अनलॉक."</string>
     <string name="keyguard_accessibility_face_unlock" msgid="4817282543351718535">"चेहरा अनलॉक."</string>
     <string name="keyguard_accessibility_pin_unlock" msgid="2469687111784035046">"पिन अनलॉक."</string>
-    <string name="keyguard_accessibility_password_unlock" msgid="7675777623912155089">"संकेतशब्द अनलॉक."</string>
+    <string name="keyguard_accessibility_password_unlock" msgid="7675777623912155089">"पासवर्ड अनलॉक."</string>
     <string name="keyguard_accessibility_pattern_area" msgid="7679891324509597904">"पॅटर्न क्षेत्र."</string>
     <string name="keyguard_accessibility_slide_area" msgid="6736064494019979544">"स्लाइड क्षेत्र."</string>
     <string name="password_keyboard_label_symbol_key" msgid="992280756256536042">"?123"</string>
@@ -843,7 +829,7 @@
     <string name="permdesc_addVoicemail" msgid="6604508651428252437">"आपल्या व्हॉइसमेल इनबॉक्समध्ये संदेश जोडण्यासाठी अॅप ला अनुमती देते."</string>
     <string name="permlab_writeGeolocationPermissions" msgid="5962224158955273932">"ब्राउझर भौगोलिक स्थान परवानग्या सुधारित करा"</string>
     <string name="permdesc_writeGeolocationPermissions" msgid="1083743234522638747">"ब्राउझरच्या भौगोलिक स्थान परवानग्या सुधारित करण्यासाठी अॅप ला अनुमती देते. दुर्भावनापूर्ण अॅप्स यादृच्छिक वेबसाइटवर स्थान माहिती पाठविण्यास अनुमती देण्यासाठी याचा वापर करू शकतात."</string>
-    <string name="save_password_message" msgid="767344687139195790">"ब्राउझरने हा संकेतशब्द लक्षात ठेवावा असे आपण इच्छिता?"</string>
+    <string name="save_password_message" msgid="767344687139195790">"ब्राउझरने हा पासवर्ड लक्षात ठेवावा असे आपण इच्छिता?"</string>
     <string name="save_password_notnow" msgid="6389675316706699758">"आत्ता नाही"</string>
     <string name="save_password_remember" msgid="6491879678996749466">"लक्षात ठेवा"</string>
     <string name="save_password_never" msgid="8274330296785855105">"कधीही नाही"</string>
@@ -994,7 +980,7 @@
     <string name="yes" msgid="5362982303337969312">"ठीक"</string>
     <string name="no" msgid="5141531044935541497">"रद्द करा"</string>
     <string name="dialog_alert_title" msgid="2049658708609043103">"लक्ष द्या"</string>
-    <string name="loading" msgid="7933681260296021180">"लोड करीत आहे..."</string>
+    <string name="loading" msgid="7933681260296021180">"लोड करत आहे..."</string>
     <string name="capital_on" msgid="1544682755514494298">"चालू"</string>
     <string name="capital_off" msgid="6815870386972805832">"बंद"</string>
     <string name="whichApplication" msgid="4533185947064773386">"याचा वापर करून क्रिया पूर्ण करा"</string>
@@ -1058,9 +1044,9 @@
     <string name="android_upgrading_fstrim" msgid="8036718871534640010">"संचयन ऑप्टिमाइझ करत आहे."</string>
     <string name="android_upgrading_notification_title" msgid="8428357096969413169">"Android अपडेट संपवत आहे..."</string>
     <string name="android_upgrading_notification_body" msgid="5761201379457064286">"श्रेणीसुधारणा पूर्ण होईपर्यंत काही अॅप्स योग्यरित्या कार्य करणार नाहीत"</string>
-    <string name="app_upgrading_toast" msgid="3008139776215597053">"<xliff:g id="APPLICATION">%1$s</xliff:g> श्रेणीसुधारित करीत आहे…"</string>
+    <string name="app_upgrading_toast" msgid="3008139776215597053">"<xliff:g id="APPLICATION">%1$s</xliff:g> श्रेणीसुधारित करत आहे…"</string>
     <string name="android_upgrading_apk" msgid="7904042682111526169">"<xliff:g id="NUMBER_1">%2$d</xliff:g> पैकी <xliff:g id="NUMBER_0">%1$d</xliff:g> अॅप ऑप्टिमाइझ करत आहे."</string>
-    <string name="android_preparing_apk" msgid="8162599310274079154">"<xliff:g id="APPNAME">%1$s</xliff:g> तयार करीत आहे."</string>
+    <string name="android_preparing_apk" msgid="8162599310274079154">"<xliff:g id="APPNAME">%1$s</xliff:g> तयार करत आहे."</string>
     <string name="android_upgrading_starting_apps" msgid="451464516346926713">"अॅप्स प्रारंभ करत आहे."</string>
     <string name="android_upgrading_complete" msgid="1405954754112999229">"बूट समाप्त होत आहे."</string>
     <string name="heavy_weight_notification" msgid="9087063985776626166">"<xliff:g id="APP">%1$s</xliff:g> चालत आहे"</string>
@@ -1074,7 +1060,7 @@
     <string name="dump_heap_notification" msgid="2618183274836056542">"<xliff:g id="PROC">%1$s</xliff:g> ने मेमेरी मर्यादा वाढविली"</string>
     <string name="dump_heap_notification_detail" msgid="6901391084243999274">"हीप डंप संकलित केला गेला आहे; सामायिक करण्यासाठी टॅप करा"</string>
     <string name="dump_heap_title" msgid="5864292264307651673">"हीप डंप सामायिक करायचे?"</string>
-    <string name="dump_heap_text" msgid="4809417337240334941">"<xliff:g id="PROC">%1$s</xliff:g> प्रक्रियेने त्याची <xliff:g id="SIZE">%2$s</xliff:g> ची प्रक्रिया मेमरी मर्यादा ओलांडली आहे. त्याच्या विकासकासह सामायिक करण्यासाठी आपल्याकरिता हीप डंप उपलब्ध आहे. सावधगिरी बाळगा: या हीप डंपमध्ये आपली कोणतीही वैयक्तिक माहिती असू शकते ज्यात अॅप्लिकेशन प्रवेश करू शकतो."</string>
+    <string name="dump_heap_text" msgid="4809417337240334941">"<xliff:g id="PROC">%1$s</xliff:g> प्रक्रियेने त्याची <xliff:g id="SIZE">%2$s</xliff:g> ची प्रक्रिया मेमरी मर्यादा ओलांडली आहे. त्याच्या विकासकासह सामायिक करण्यासाठी तुमच्यासाठी हीप डंप उपलब्ध आहे. सावधगिरी बाळगा: या हीप डंपमध्ये आपली कोणतीही वैयक्तिक माहिती असू शकते ज्यात अॅप्लिकेशन प्रवेश करू शकतो."</string>
     <string name="sendText" msgid="5209874571959469142">"मजकुरासाठी क्रिया निवडा"</string>
     <string name="volume_ringtone" msgid="6885421406845734650">"रिंगर व्हॉल्यूम"</string>
     <string name="volume_music" msgid="5421651157138628171">"मीडिया व्हॉल्यूम"</string>
@@ -1185,7 +1171,7 @@
     <string name="perm_costs_money" msgid="4902470324142151116">"यासाठी आपले पैसे खर्च होऊ शकतात"</string>
     <string name="dlg_ok" msgid="7376953167039865701">"ठीक"</string>
     <string name="usb_charging_notification_title" msgid="6895185153353640787">"USB हे डिव्हाइस चार्ज करत आहे"</string>
-    <string name="usb_supplying_notification_title" msgid="5310642257296510271">"USB संलग्न केलेल्या डिव्हाइसला पॉवरचा पुरवठा करीत आहे"</string>
+    <string name="usb_supplying_notification_title" msgid="5310642257296510271">"USB संलग्न केलेल्या डिव्हाइसला पॉवरचा पुरवठा करत आहे"</string>
     <string name="usb_mtp_notification_title" msgid="8396264943589760855">"स्थानांतरणासाठी USB"</string>
     <string name="usb_ptp_notification_title" msgid="1347328437083192112">"फोटो स्थानांतरणासाठी USB"</string>
     <string name="usb_midi_notification_title" msgid="4850904915889144654">"MIDI साठी USB"</string>
@@ -1210,11 +1196,11 @@
     <string name="fast_scroll_alphabet" msgid="5433275485499039199">" ABCDEFGHIJKLMNOPQRSTUVWXYZ"</string>
     <string name="fast_scroll_numeric_alphabet" msgid="4030170524595123610">" 0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ"</string>
     <string name="alert_windows_notification_channel_group_name" msgid="1463953341148606396">"इतर अ‍ॅप्सवर दाखवा"</string>
-    <string name="alert_windows_notification_channel_name" msgid="3116610965549449803">"<xliff:g id="NAME">%s</xliff:g> इतर अॅप्सवर प्रदर्शित करीत आहे"</string>
-    <string name="alert_windows_notification_title" msgid="3697657294867638947">"<xliff:g id="NAME">%s</xliff:g> अन्‍य अॅप्सवर प्रदर्शित करीत आहे"</string>
+    <string name="alert_windows_notification_channel_name" msgid="3116610965549449803">"<xliff:g id="NAME">%s</xliff:g> इतर अॅप्सवर प्रदर्शित करत आहे"</string>
+    <string name="alert_windows_notification_title" msgid="3697657294867638947">"<xliff:g id="NAME">%s</xliff:g> अन्‍य अॅप्सवर प्रदर्शित करत आहे"</string>
     <string name="alert_windows_notification_message" msgid="8917232109522912560">"<xliff:g id="NAME">%s</xliff:g> ने हे वैशिष्ट्य वापरू नये असे आपण इच्छित असल्यास, सेटिंग्ज उघडण्यासाठी टॅप करा आणि ते बंद करा."</string>
     <string name="alert_windows_notification_turn_off_action" msgid="3367294525884949878">"बंद करा"</string>
-    <string name="ext_media_checking_notification_title" msgid="5734005953288045806">"<xliff:g id="NAME">%s</xliff:g> तयार करीत आहे"</string>
+    <string name="ext_media_checking_notification_title" msgid="5734005953288045806">"<xliff:g id="NAME">%s</xliff:g> तयार करत आहे"</string>
     <string name="ext_media_checking_notification_message" msgid="4747432538578886744">"त्रुटींसाठी तपासत आहे"</string>
     <string name="ext_media_new_notification_message" msgid="7589986898808506239">"नवीन <xliff:g id="NAME">%s</xliff:g> आढळले"</string>
     <string name="ext_media_ready_notification_message" msgid="4083398150380114462">"फोटो आणि मीडिया स्थानांतरित करण्‍यासाठी"</string>
@@ -1250,7 +1236,7 @@
     <string name="ext_media_status_unmountable" msgid="805594039236667894">"दूषित झाले"</string>
     <string name="ext_media_status_unsupported" msgid="4691436711745681828">"समर्थित नसलेले"</string>
     <string name="ext_media_status_ejecting" msgid="5463887263101234174">"बाहेर काढत आहे…"</string>
-    <string name="ext_media_status_formatting" msgid="1085079556538644861">"फॉर्मेट करीत आहे..."</string>
+    <string name="ext_media_status_formatting" msgid="1085079556538644861">"फॉर्मेट करत आहे..."</string>
     <string name="ext_media_status_missing" msgid="5638633895221670766">"घातले नाही"</string>
     <string name="activity_list_empty" msgid="1675388330786841066">"कोणत्याही जुळणाऱ्या अॅक्टिव्हिटी आढळल्या नाहीत."</string>
     <string name="permlab_route_media_output" msgid="6243022988998972085">"मीडिया आउटपुट मार्गस्थ करा"</string>
@@ -1363,7 +1349,7 @@
     <string name="keyboardview_keycode_done" msgid="1992571118466679775">"पूर्ण झाले"</string>
     <string name="keyboardview_keycode_mode_change" msgid="4547387741906537519">"मोड बदल"</string>
     <string name="keyboardview_keycode_shift" msgid="2270748814315147690">"Shift"</string>
-    <string name="keyboardview_keycode_enter" msgid="2985864015076059467">"प्रविष्ट करा"</string>
+    <string name="keyboardview_keycode_enter" msgid="2985864015076059467">"एंटर करा"</string>
     <string name="activitychooserview_choose_application" msgid="2125168057199941199">"एक अ‍ॅप निवडा"</string>
     <string name="activitychooserview_choose_application_error" msgid="8624618365481126668">"<xliff:g id="APPLICATION_NAME">%s</xliff:g> लाँच करू शकलो नाही"</string>
     <string name="shareactionprovider_share_with" msgid="806688056141131819">"यांच्यासह सामायिक करा"</string>
@@ -1406,7 +1392,7 @@
     <string name="validity_period" msgid="8818886137545983110">"वैधता:"</string>
     <string name="issued_on" msgid="5895017404361397232">"रोजी जारी:"</string>
     <string name="expires_on" msgid="3676242949915959821">"रोजी मुदत संपेल:"</string>
-    <string name="serial_number" msgid="758814067660862493">"सीरीअल नंबर:"</string>
+    <string name="serial_number" msgid="758814067660862493">"सिरीअल नंबर:"</string>
     <string name="fingerprints" msgid="4516019619850763049">"फिंगरप्रिंट:"</string>
     <string name="sha256_fingerprint" msgid="4391271286477279263">"SHA-256 फिंगरप्रिंट:"</string>
     <string name="sha1_fingerprint" msgid="7930330235269404581">"SHA-1 फिंगरप्रिंट:"</string>
@@ -1435,7 +1421,7 @@
     <string name="media_route_chooser_extended_settings" msgid="87015534236701604">"सेटिंग्ज"</string>
     <string name="media_route_controller_disconnect" msgid="8966120286374158649">"‍डिस्कनेक्ट करा"</string>
     <string name="media_route_status_scanning" msgid="7279908761758293783">"स्कॅन करत आहे..."</string>
-    <string name="media_route_status_connecting" msgid="6422571716007825440">"कनेक्ट करीत आहे..."</string>
+    <string name="media_route_status_connecting" msgid="6422571716007825440">"कनेक्ट करत आहे..."</string>
     <string name="media_route_status_available" msgid="6983258067194649391">"उपलब्ध"</string>
     <string name="media_route_status_not_available" msgid="6739899962681886401">"उपलब्ध नाही"</string>
     <string name="media_route_status_in_use" msgid="4533786031090198063">"वापरात आहे"</string>
@@ -1446,15 +1432,15 @@
     <string name="display_manager_overlay_display_secure_suffix" msgid="6022119702628572080">", सुरक्षित"</string>
     <string name="kg_forgot_pattern_button_text" msgid="8852021467868220608">"पॅटर्न विसरलात"</string>
     <string name="kg_wrong_pattern" msgid="1850806070801358830">"चुकीचा पॅटर्न"</string>
-    <string name="kg_wrong_password" msgid="2333281762128113157">"चुकीचा संकेतशब्द"</string>
+    <string name="kg_wrong_password" msgid="2333281762128113157">"चुकीचा पासवर्ड"</string>
     <string name="kg_wrong_pin" msgid="1131306510833563801">"चुकीचा पिन"</string>
     <string name="kg_too_many_failed_attempts_countdown" msgid="6358110221603297548">"<xliff:g id="NUMBER">%1$d</xliff:g> सेकंदांमध्ये पुन्हा प्रयत्न करा."</string>
     <string name="kg_pattern_instructions" msgid="398978611683075868">"तुमचा पॅटर्न काढा"</string>
-    <string name="kg_sim_pin_instructions" msgid="2319508550934557331">"सिम पिन प्रविष्ट करा"</string>
-    <string name="kg_pin_instructions" msgid="2377242233495111557">"पिन प्रविष्ट करा"</string>
-    <string name="kg_password_instructions" msgid="5753646556186936819">"संकेतशब्द प्रविष्ट करा"</string>
-    <string name="kg_puk_enter_puk_hint" msgid="453227143861735537">"सिम आता अक्षम केले आहे. सुरु ठेवण्यासाठी PUK कोड प्रविष्ट करा. तपशीलांसाठी वाहकाशी संपर्क साधा."</string>
-    <string name="kg_puk_enter_pin_hint" msgid="7871604527429602024">"इच्छित पिन कोड प्रविष्ट करा"</string>
+    <string name="kg_sim_pin_instructions" msgid="2319508550934557331">"सिम पिन एंटर करा"</string>
+    <string name="kg_pin_instructions" msgid="2377242233495111557">"पिन एंटर करा"</string>
+    <string name="kg_password_instructions" msgid="5753646556186936819">"पासवर्ड एंटर करा"</string>
+    <string name="kg_puk_enter_puk_hint" msgid="453227143861735537">"सिम आता अक्षम केले आहे. सुरु ठेवण्यासाठी PUK कोड एंटर करा. तपशीलांसाठी वाहकाशी संपर्क साधा."</string>
+    <string name="kg_puk_enter_pin_hint" msgid="7871604527429602024">"इच्छित पिन कोड एंटर करा"</string>
     <string name="kg_enter_confirm_pin_hint" msgid="325676184762529976">"इच्छित पिन कोड ची पुष्टी करा"</string>
     <string name="kg_sim_unlock_progress_dialog_message" msgid="8950398016976865762">"सिम कार्ड अनलॉक करत आहे…"</string>
     <string name="kg_password_wrong_pin_code" msgid="1139324887413846912">"अयोग्य पिन कोड."</string>
@@ -1465,13 +1451,13 @@
     <string name="kg_login_too_many_attempts" msgid="6486842094005698475">"बरेच पॅटर्न प्रयत्न"</string>
     <string name="kg_login_instructions" msgid="1100551261265506448">"अनलॉक करण्यासाठी, आपल्या Google खात्यासह साइन इन करा."</string>
     <string name="kg_login_username_hint" msgid="5718534272070920364">"वापरकर्तानाव (ईमेल)"</string>
-    <string name="kg_login_password_hint" msgid="9057289103827298549">"संकेतशब्द"</string>
+    <string name="kg_login_password_hint" msgid="9057289103827298549">"पासवर्ड"</string>
     <string name="kg_login_submit_button" msgid="5355904582674054702">"साइन इन करा"</string>
     <string name="kg_login_invalid_input" msgid="5754664119319872197">"अवैध वापरकर्तानाव किंवा पासवर्ड."</string>
-    <string name="kg_login_account_recovery_hint" msgid="5690709132841752974">"आपले वापरकर्तानाव किंवा संकेतशब्द विसरलात?\n "<b>"google.com/accounts/recovery"</b>" ला भेट द्या."</string>
+    <string name="kg_login_account_recovery_hint" msgid="5690709132841752974">"आपले वापरकर्तानाव किंवा पासवर्ड विसरलात?\n "<b>"google.com/accounts/recovery"</b>" ला भेट द्या."</string>
     <string name="kg_login_checking_password" msgid="1052685197710252395">"खाते तपासत आहे…"</string>
     <string name="kg_too_many_failed_pin_attempts_dialog_message" msgid="8276745642049502550">"आपण आपला पिन <xliff:g id="NUMBER_0">%1$d</xliff:g> वेळा अयोग्यरितीने टाइप केला आहे. \n\n <xliff:g id="NUMBER_1">%2$d</xliff:g> सेकंदांमध्ये पुन्हा प्रयत्न करा."</string>
-    <string name="kg_too_many_failed_password_attempts_dialog_message" msgid="7813713389422226531">"आपण आपला संकेतशब्द <xliff:g id="NUMBER_0">%1$d</xliff:g> वेळा अयोग्यरितीने टाइप केला आहे. \n\n <xliff:g id="NUMBER_1">%2$d</xliff:g> सेकंदांमध्ये पुन्हा प्रयत्न करा."</string>
+    <string name="kg_too_many_failed_password_attempts_dialog_message" msgid="7813713389422226531">"आपण आपला पासवर्ड <xliff:g id="NUMBER_0">%1$d</xliff:g> वेळा अयोग्यरितीने टाइप केला आहे. \n\n <xliff:g id="NUMBER_1">%2$d</xliff:g> सेकंदांमध्ये पुन्हा प्रयत्न करा."</string>
     <string name="kg_too_many_failed_pattern_attempts_dialog_message" msgid="74089475965050805">"तुम्ही आपला अनलॉक पॅटर्न <xliff:g id="NUMBER_0">%1$d</xliff:g> वेळा अयोग्यरितीने काढला. \n\n <xliff:g id="NUMBER_1">%2$d</xliff:g> सेकंदांमध्ये पुन्हा प्रयत्न करा."</string>
     <string name="kg_failed_attempts_almost_at_wipe" product="tablet" msgid="1575557200627128949">"आपण <xliff:g id="NUMBER_0">%1$d</xliff:g> वेळा टॅबलेट अनलॉक करण्याचा अयोग्यपणे प्रयत्न केला. <xliff:g id="NUMBER_1">%2$d</xliff:g> आणखी अयशस्वी प्रयत्नांनंतर, टॅबलेट फॅक्टरी डीफॉल्टवर रीसेट केला जाईल आणि वापरकर्ता डेटा गमावेल."</string>
     <string name="kg_failed_attempts_almost_at_wipe" product="tv" msgid="5621231220154419413">"आपण <xliff:g id="NUMBER_0">%1$d</xliff:g> वेळा टीव्ही अनलॉक करण्याचा अयोग्यरित्या प्रयत्न केला. आणखी <xliff:g id="NUMBER_1">%2$d</xliff:g> अयशस्वी प्रयत्नांनंतर, टीव्ही फॅक्टरी डीफॉल्टवर रीसेट केला जाईल आणि सर्व वापरकर्ता डेटा गमावेल."</string>
@@ -1496,7 +1482,7 @@
     <string name="accessibility_magnification_chooser_text" msgid="1227146738764986237">"मोठे करणे"</string>
     <string name="user_switched" msgid="3768006783166984410">"वर्तमान वापरकर्ता <xliff:g id="NAME">%1$s</xliff:g>."</string>
     <string name="user_switching_message" msgid="2871009331809089783">"<xliff:g id="NAME">%1$s</xliff:g> वर स्विच करत आहे…"</string>
-    <string name="user_logging_out_message" msgid="8939524935808875155">"<xliff:g id="NAME">%1$s</xliff:g> लॉग आउट करीत आहे…"</string>
+    <string name="user_logging_out_message" msgid="8939524935808875155">"<xliff:g id="NAME">%1$s</xliff:g> लॉग आउट करत आहे…"</string>
     <string name="owner_name" msgid="2716755460376028154">"मालक"</string>
     <string name="error_message_title" msgid="4510373083082500195">"एरर"</string>
     <string name="error_message_change_not_allowed" msgid="1238035947357923497">"या बदलास आपल्या प्रशासकाद्वारे अनुमती नाही"</string>
@@ -1592,7 +1578,7 @@
     <string name="print_service_installed_title" msgid="2246317169444081628">"<xliff:g id="NAME">%s</xliff:g> सेवा स्‍थापित केली"</string>
     <string name="print_service_installed_message" msgid="5897362931070459152">"सक्षम करण्यासाठी टॅप करा"</string>
     <string name="restr_pin_enter_admin_pin" msgid="8641662909467236832">"प्रशासक पिन एंटर करा"</string>
-    <string name="restr_pin_enter_pin" msgid="3395953421368476103">"पिन प्रविष्ट करा"</string>
+    <string name="restr_pin_enter_pin" msgid="3395953421368476103">"पिन एंटर करा"</string>
     <string name="restr_pin_incorrect" msgid="8571512003955077924">"चुकीचा"</string>
     <string name="restr_pin_enter_old_pin" msgid="1462206225512910757">"वर्तमान पिन"</string>
     <string name="restr_pin_enter_new_pin" msgid="5959606691619959184">"नवीन पिन"</string>
@@ -1765,7 +1751,7 @@
     <string name="autofill_save_title_with_3types" msgid="6943161834231458441">"&lt;b&gt;<xliff:g id="LABEL">%4$s</xliff:g>&lt;/b&gt;मध्ये <xliff:g id="TYPE_0">%1$s</xliff:g>, <xliff:g id="TYPE_1">%2$s</xliff:g> आणि <xliff:g id="TYPE_2">%3$s</xliff:g> सेव्ह करायची?"</string>
     <string name="autofill_save_yes" msgid="6398026094049005921">"सेव्ह करा"</string>
     <string name="autofill_save_no" msgid="2625132258725581787">"नाही, नको"</string>
-    <string name="autofill_save_type_password" msgid="5288448918465971568">"संकेतशब्द"</string>
+    <string name="autofill_save_type_password" msgid="5288448918465971568">"पासवर्ड"</string>
     <string name="autofill_save_type_address" msgid="4936707762193009542">"पत्ता"</string>
     <string name="autofill_save_type_credit_card" msgid="7127694776265563071">"क्रेडिट कार्ड"</string>
     <string name="autofill_save_type_username" msgid="239040540379769562">"वापरकर्तानाव"</string>
@@ -1780,4 +1766,5 @@
     <string name="mmcc_imsi_unknown_in_hlr" msgid="6321202257374418726">"सिमसाठी तरतूद नाही"</string>
     <string name="mmcc_illegal_ms" msgid="2769452751852211112">"सिमला अनुमती नाही"</string>
     <string name="mmcc_illegal_me" msgid="4438696681169345015">"फोनला अनुमती नाही"</string>
+    <string name="popup_window_default_title" msgid="4874318849712115433">"पॉपअप विंडो"</string>
 </resources>

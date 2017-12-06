@@ -176,7 +176,7 @@ public class SystemServicesProxy {
         public void onTaskStackChangedBackground() { }
         public void onTaskStackChanged() { }
         public void onTaskSnapshotChanged(int taskId, TaskSnapshot snapshot) { }
-        public void onActivityPinned(String packageName, int taskId) { }
+        public void onActivityPinned(String packageName, int userId, int taskId) { }
         public void onActivityUnpinned() { }
         public void onPinnedActivityRestartAttempt(boolean clearedTask) { }
         public void onPinnedStackAnimationStarted() { }
@@ -231,9 +231,10 @@ public class SystemServicesProxy {
         }
 
         @Override
-        public void onActivityPinned(String packageName, int taskId) throws RemoteException {
+        public void onActivityPinned(String packageName, int userId, int taskId)
+                throws RemoteException {
             mHandler.removeMessages(H.ON_ACTIVITY_PINNED);
-            mHandler.obtainMessage(H.ON_ACTIVITY_PINNED, taskId, 0, packageName).sendToTarget();
+            mHandler.obtainMessage(H.ON_ACTIVITY_PINNED, userId, taskId, packageName).sendToTarget();
         }
 
         @Override
@@ -1387,7 +1388,8 @@ public class SystemServicesProxy {
                     }
                     case ON_ACTIVITY_PINNED: {
                         for (int i = mTaskStackListeners.size() - 1; i >= 0; i--) {
-                            mTaskStackListeners.get(i).onActivityPinned((String) msg.obj, msg.arg1);
+                            mTaskStackListeners.get(i).onActivityPinned((String) msg.obj, msg.arg1,
+                                    msg.arg2);
                         }
                         break;
                     }

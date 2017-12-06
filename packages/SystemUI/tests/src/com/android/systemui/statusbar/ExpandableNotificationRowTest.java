@@ -134,4 +134,16 @@ public class ExpandableNotificationRowTest extends SysuiTestCase {
         row.setAboveShelf(false);
         verify(listener).onAboveShelfStateChanged(false);
     }
+
+    @Test
+    public void testClickSound() throws Exception {
+        Assert.assertTrue("Should play sounds by default.", mGroup.isSoundEffectsEnabled());
+        mGroup.setDark(true /* dark */, false /* fade */, 0 /* delay */);
+        mGroup.setSecureStateProvider(()-> false);
+        Assert.assertFalse("Shouldn't play sounds when dark and trusted.",
+                mGroup.isSoundEffectsEnabled());
+        mGroup.setSecureStateProvider(()-> true);
+        Assert.assertTrue("Should always play sounds when not trusted.",
+                mGroup.isSoundEffectsEnabled());
+    }
 }

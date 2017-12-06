@@ -18,6 +18,7 @@ package com.android.internal.os;
 import android.app.ActivityManager;
 import android.os.BatteryStats;
 import android.support.test.filters.SmallTest;
+import android.view.Display;
 
 import junit.framework.TestCase;
 
@@ -74,7 +75,7 @@ public class BatteryStatsSensorTest extends TestCase {
 
         // Plugged-in (battery=off, sensor=off)
         curr = 1000 * (clocks.realtime = clocks.uptime = 100);
-        bi.updateTimeBasesLocked(false, false, curr, curr);
+        bi.updateTimeBasesLocked(false, Display.STATE_ON, curr, curr);
 
 
         // Start sensor (battery=off, sensor=on)
@@ -110,7 +111,7 @@ public class BatteryStatsSensorTest extends TestCase {
 
         // Unplugged (battery=on, sensor=off)
         curr = 1000 * (clocks.realtime = clocks.uptime = 100);
-        bi.updateTimeBasesLocked(true, false, curr, curr);
+        bi.updateTimeBasesLocked(true, Display.STATE_ON, curr, curr);
 
         // Start sensor (battery=on, sensor=on)
         curr = 1000 * (clocks.realtime = clocks.uptime = 200);
@@ -145,7 +146,7 @@ public class BatteryStatsSensorTest extends TestCase {
 
         // On battery (battery=on, sensor=off)
         curr = 1000 * (clocks.realtime = clocks.uptime = 100);
-        bi.updateTimeBasesLocked(true, false, curr, curr);
+        bi.updateTimeBasesLocked(true, Display.STATE_ON, curr, curr);
         bi.noteUidProcessStateLocked(UID, ActivityManager.PROCESS_STATE_IMPORTANT_FOREGROUND);
 
         // Start sensor (battery=on, sensor=on)
@@ -154,7 +155,7 @@ public class BatteryStatsSensorTest extends TestCase {
 
         // Off battery (battery=off, sensor=on)
         curr = 1000 * (clocks.realtime = clocks.uptime = 305);
-        bi.updateTimeBasesLocked(false, false, curr, curr);
+        bi.updateTimeBasesLocked(false, Display.STATE_ON, curr, curr);
 
         // Stop sensor while off battery (battery=off, sensor=off)
         curr = 1000 * (clocks.realtime = clocks.uptime = 409);
@@ -191,7 +192,7 @@ public class BatteryStatsSensorTest extends TestCase {
 
         // Plugged-in (battery=off, sensor=off)
         curr = 1000 * (clocks.realtime = clocks.uptime = 100);
-        bi.updateTimeBasesLocked(false, false, curr, curr);
+        bi.updateTimeBasesLocked(false, Display.STATE_ON, curr, curr);
 
         // Start sensor (battery=off, sensor=on)
         curr = 1000 * (clocks.realtime = clocks.uptime = 200);
@@ -209,7 +210,7 @@ public class BatteryStatsSensorTest extends TestCase {
 
         // Unplug (battery=on, sensor=on)
         curr = 1000 * (clocks.realtime = clocks.uptime = 305);
-        bi.updateTimeBasesLocked(true, false, curr, curr);
+        bi.updateTimeBasesLocked(true, Display.STATE_ON, curr, curr);
 
         //Test situation
         curr = 1000 * (clocks.realtime = clocks.uptime = 410);
@@ -243,7 +244,7 @@ public class BatteryStatsSensorTest extends TestCase {
         long curr = 0; // realtime in us
         // Entire test is on-battery
         curr = 1000 * (clocks.realtime = clocks.uptime = 1000);
-        bi.updateTimeBasesLocked(true, false, curr, curr);
+        bi.updateTimeBasesLocked(true, Display.STATE_ON, curr, curr);
 
         // See below for a diagram of events.
 
@@ -488,7 +489,7 @@ public class BatteryStatsSensorTest extends TestCase {
         bi.noteStartSensorLocked(UID, SENSOR_ID);
 
         clocks.realtime += 111;
-        clocks.uptime += 1111;
+        clocks.uptime += 111;
 
         // Timebase and timer was on so times have increased.
         assertEquals(111_000, timer.getTotalTimeLocked(1000*clocks.realtime, which));

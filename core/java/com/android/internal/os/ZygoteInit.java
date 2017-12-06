@@ -45,7 +45,7 @@ import android.system.OsConstants;
 import android.system.StructCapUserData;
 import android.system.StructCapUserHeader;
 import android.text.Hyphenator;
-import android.util.BootTimingsTraceLog;
+import android.util.TimingsTraceLog;
 import android.util.EventLog;
 import android.util.Log;
 import android.util.Slog;
@@ -56,7 +56,6 @@ import com.android.internal.logging.MetricsLogger;
 
 import com.android.internal.util.Preconditions;
 import dalvik.system.DexFile;
-import dalvik.system.PathClassLoader;
 import dalvik.system.VMRuntime;
 import dalvik.system.ZygoteHooks;
 
@@ -121,7 +120,7 @@ public class ZygoteInit {
 
     private static boolean sPreloadComplete;
 
-    static void preload(BootTimingsTraceLog bootTimingsTraceLog) {
+    static void preload(TimingsTraceLog bootTimingsTraceLog) {
         Log.d(TAG, "begin preload");
         bootTimingsTraceLog.traceBegin("BeginIcuCachePinning");
         beginIcuCachePinning();
@@ -154,7 +153,7 @@ public class ZygoteInit {
         Preconditions.checkState(!sPreloadComplete);
         Log.i(TAG, "Lazily preloading resources.");
 
-        preload(new BootTimingsTraceLog("ZygoteInitTiming_lazy", Trace.TRACE_TAG_DALVIK));
+        preload(new TimingsTraceLog("ZygoteInitTiming_lazy", Trace.TRACE_TAG_DALVIK));
     }
 
     private static void beginIcuCachePinning() {
@@ -521,15 +520,12 @@ public class ZygoteInit {
      * namespace, i.e., this classloader can access platform-private native libraries. The
      * classloader will use java.library.path as the native library path.
      */
-    static PathClassLoader createPathClassLoader(String classPath, int targetSdkVersion) {
-      String libraryPath = System.getProperty("java.library.path");
+    static ClassLoader createPathClassLoader(String classPath, int targetSdkVersion) {
+        String libraryPath = System.getProperty("java.library.path");
 
-      return PathClassLoaderFactory.createClassLoader(classPath,
-                                                      libraryPath,
-                                                      libraryPath,
-                                                      ClassLoader.getSystemClassLoader(),
-                                                      targetSdkVersion,
-                                                      true /* isNamespaceShared */);
+        return ClassLoaderFactory.createClassLoader(classPath, libraryPath, libraryPath,
+                ClassLoader.getSystemClassLoader(), targetSdkVersion, true /* isNamespaceShared */,
+                null /* classLoaderName */);
     }
 
     /**
@@ -542,7 +538,7 @@ public class ZygoteInit {
                 .asInterface(ServiceManager.getService("installd"));
         final String instructionSet = VMRuntime.getRuntime().vmInstructionSet();
 
-        String sharedLibraries = "";
+        String classPathForElement = "";
         for (String classPathElement : classPathElements) {
             // System server is fully AOTed and never profiled
             // for profile guided compilation.
@@ -574,10 +570,12 @@ public class ZygoteInit {
                 final String compilerFilter = systemServerFilter;
                 final String uuid = StorageManager.UUID_PRIVATE_INTERNAL;
                 final String seInfo = null;
+                final String classLoaderContext =
+                        getSystemServerClassLoaderContext(classPathForElement);
                 try {
                     installd.dexopt(classPathElement, Process.SYSTEM_UID, packageName,
                             instructionSet, dexoptNeeded, outputPath, dexFlags, compilerFilter,
-                            uuid, sharedLibraries, seInfo, false /* downgrade */);
+                            uuid, classLoaderContext, seInfo, false /* downgrade */);
                 } catch (RemoteException | ServiceSpecificException e) {
                     // Ignore (but log), we need this on the classpath for fallback mode.
                     Log.w(TAG, "Failed compiling classpath element for system server: "
@@ -585,11 +583,33 @@ public class ZygoteInit {
                 }
             }
 
-            if (!sharedLibraries.isEmpty()) {
-                sharedLibraries += ":";
-            }
-            sharedLibraries += classPathElement;
+            classPathForElement = encodeSystemServerClassPath(
+                    classPathForElement, classPathElement);
         }
+    }
+
+    /**
+     * Encodes the system server class loader context in a format that is accepted by dexopt.
+     * This assumes the system server is always loaded with a {@link dalvik.system.PathClassLoader}.
+     *
+     * Note that ideally we would use the {@code DexoptUtils} to compute this. However we have no
+     * dependency here on the server so we hard code the logic again.
+     */
+    private static String getSystemServerClassLoaderContext(String classPath) {
+        return classPath == null ? "PCL[]" : "PCL[" + classPath + "]";
+    }
+
+    /**
+     * Encodes the class path in a format accepted by dexopt.
+     * @param classPath the old class path (may be empty).
+     * @param newElement the new class path elements
+     * @return the class path encoding resulted from appending {@code newElement} to
+     * {@code classPath}.
+     */
+    private static String encodeSystemServerClassPath(String classPath, String newElement) {
+        return (classPath == null || classPath.isEmpty())
+                ? newElement
+                : classPath + ":" + newElement;
     }
 
     /**
@@ -707,7 +727,7 @@ public class ZygoteInit {
             }
 
             String bootTimeTag = Process.is64Bit() ? "Zygote64Timing" : "Zygote32Timing";
-            BootTimingsTraceLog bootTimingsTraceLog = new BootTimingsTraceLog(bootTimeTag,
+            TimingsTraceLog bootTimingsTraceLog = new TimingsTraceLog(bootTimeTag,
                     Trace.TRACE_TAG_DALVIK);
             bootTimingsTraceLog.traceBegin("ZygoteInit");
             RuntimeInit.enableDdms();

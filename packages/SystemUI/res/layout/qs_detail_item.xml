@@ -26,7 +26,7 @@
 
     <ImageView
         android:id="@android:id/icon"
-        android:layout_width="@dimen/qs_detail_item_icon_size"
+        android:layout_width="@dimen/qs_detail_item_icon_width"
         android:layout_height="@dimen/qs_detail_item_icon_size"
         android:layout_marginStart="@dimen/qs_detail_item_icon_marginStart"
         android:layout_marginEnd="@dimen/qs_detail_item_icon_marginEnd"

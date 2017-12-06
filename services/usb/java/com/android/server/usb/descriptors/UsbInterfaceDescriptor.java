@@ -15,13 +15,16 @@
  */
 package com.android.server.usb.descriptors;
 
+import com.android.server.usb.descriptors.report.ReportCanvas;
+import com.android.server.usb.descriptors.report.UsbStrings;
+
 /**
  * @hide
  * A common super-class for all USB Interface Descritor subtypes.
  * see usb11.pdf section 9.6.3
  */
 public class UsbInterfaceDescriptor extends UsbDescriptor {
-    private static final String TAG = "Interface";
+    private static final String TAG = "UsbInterfaceDescriptor";
 
     protected byte mInterfaceNumber;  // 2:1 Number of Interface
     protected byte mAlternateSetting; // 3:1 Value used to select alternative setting
@@ -33,6 +36,7 @@ public class UsbInterfaceDescriptor extends UsbDescriptor {
 
     UsbInterfaceDescriptor(int length, byte type) {
         super(length, type);
+        mHierarchyLevel = 3;
     }
 
     @Override
@@ -74,5 +78,28 @@ public class UsbInterfaceDescriptor extends UsbDescriptor {
 
     public byte getDescrIndex() {
         return mDescrIndex;
+    }
+
+    @Override
+    public void report(ReportCanvas canvas) {
+        super.report(canvas);
+
+        byte usbClass = getUsbClass();
+        byte usbSubclass = getUsbSubclass();
+        byte protocol = getProtocol();
+        String className = UsbStrings.getClassName(usbClass);
+        String subclassName = "";
+        if (usbClass == UsbDescriptor.CLASSID_AUDIO) {
+            subclassName = UsbStrings.getAudioSubclassName(usbSubclass);
+        }
+
+        canvas.openList();
+        canvas.writeListItem("Interface #" + getInterfaceNumber());
+        canvas.writeListItem("Class: " + ReportCanvas.getHexString(usbClass) + ": " + className);
+        canvas.writeListItem("Subclass: "
+                + ReportCanvas.getHexString(usbSubclass) + ": " + subclassName);
+        canvas.writeListItem("Protocol: " + protocol + ": " + ReportCanvas.getHexString(protocol));
+        canvas.writeListItem("Endpoints: " + getNumEndpoints());
+        canvas.closeList();
     }
 }

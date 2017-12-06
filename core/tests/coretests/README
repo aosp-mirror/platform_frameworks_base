@@ -28,7 +28,7 @@ To run a test or set of tests, first build the FrameworksCoreTests package:
 
 Next, install the resulting APK and run tests as you would normal JUnit tests:
 
-  adb install out/target/product/.../data/app/FrameworksCoreTests/FrameworksCoreTests.apk
+  adb install -r ${ANDROID_PRODUCT_OUT}/data/app/FrameworksCoreTests/FrameworksCoreTests.apk
   adb shell am instrument -w \
     com.android.frameworks.coretests/android.support.test.runner.AndroidJUnitRunner
 

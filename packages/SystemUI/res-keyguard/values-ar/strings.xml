@@ -29,8 +29,7 @@
     <string name="keyguard_password_enter_password_code" msgid="595980919238127672">"اكتب كلمة المرور لإلغاء التأمين"</string>
     <string name="keyguard_password_enter_pin_password_code" msgid="7504123374204446086">"اكتب رمز رقم التعريف الشخصي لإلغاء التأمين"</string>
     <string name="keyguard_password_wrong_pin_code" msgid="6535018036285012028">"رمز رقم التعريف الشخصي غير صحيح."</string>
-    <!-- no translation found for keyguard_sim_error_message_short (592109500618448312) -->
-    <skip />
+    <string name="keyguard_sim_error_message_short" msgid="592109500618448312">"بطاقة غير صالحة."</string>
     <string name="keyguard_charged" msgid="2222329688813033109">"تم الشحن"</string>
     <string name="keyguard_plugged_in" msgid="89308975354638682">"جارٍ الشحن"</string>
     <string name="keyguard_plugged_in_charging_fast" msgid="8869226755413795173">"الشحن سريعًا"</string>
@@ -111,8 +110,8 @@
       <item quantity="other">‏رمز PUK لشريحة SIM غير صحيح، ويتبقى لديك <xliff:g id="NUMBER_1">%d</xliff:g> من المحاولات تصبح بعدها شريحة SIM غير صالحة للاستخدام بشكل دائم.</item>
       <item quantity="one">‏رمز PUK لشريحة SIM غير صالح، ويتبقى لديك محاولة واحدة (<xliff:g id="NUMBER_0">%d</xliff:g>)، تصبح بعدها شريحة SIM غير صالحة للاستخدام بشكل دائم.</item>
     </plurals>
-    <string name="kg_password_pin_failed" msgid="8769990811451236223">"‏أخفقت عملية \"رقم التعريف الشخصي\" لشريحة SIM"</string>
-    <string name="kg_password_puk_failed" msgid="1331621440873439974">"‏أخفقت عملية PUK لشريحة SIM"</string>
+    <string name="kg_password_pin_failed" msgid="8769990811451236223">"‏تعذّر إتمام عملية \"رقم التعريف الشخصي\" لشريحة SIM"</string>
+    <string name="kg_password_puk_failed" msgid="1331621440873439974">"‏تعذّر إتمام عملية PUK لشريحة SIM"</string>
     <string name="kg_pin_accepted" msgid="7637293533973802143">"تم قبول الرمز"</string>
     <string name="keyguard_carrier_default" msgid="4274828292998453695">"لا تتوفر خدمة."</string>
     <string name="accessibility_ime_switch_button" msgid="2695096475319405612">"تبديل أسلوب الإدخال"</string>

@@ -29,8 +29,7 @@
     <string name="keyguard_password_enter_password_code" msgid="595980919238127672">"అన్‌లాక్ చేయడానికి పాస్‌వర్డ్‌ను టైప్ చేయండి"</string>
     <string name="keyguard_password_enter_pin_password_code" msgid="7504123374204446086">"అన్‌లాక్ చేయడానికి పిన్ టైప్ చేయండి"</string>
     <string name="keyguard_password_wrong_pin_code" msgid="6535018036285012028">"పిన్ కోడ్ తప్పు."</string>
-    <!-- no translation found for keyguard_sim_error_message_short (592109500618448312) -->
-    <skip />
+    <string name="keyguard_sim_error_message_short" msgid="592109500618448312">"చెల్లని కార్డ్."</string>
     <string name="keyguard_charged" msgid="2222329688813033109">"ఛార్జ్ చేయబడింది"</string>
     <string name="keyguard_plugged_in" msgid="89308975354638682">"ఛార్జ్ అవుతోంది"</string>
     <string name="keyguard_plugged_in_charging_fast" msgid="8869226755413795173">"వేగంగా ఛార్జ్ అవుతోంది"</string>

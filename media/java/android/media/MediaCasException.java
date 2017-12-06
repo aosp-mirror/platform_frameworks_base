@@ -16,60 +16,29 @@
 
 package android.media;
 
-import android.os.ServiceSpecificException;
+import android.hardware.cas.V1_0.Status;
 
 /**
  * Base class for MediaCas exceptions
  */
 public class MediaCasException extends Exception {
-
-    /** @hide */
-    public static final int DRM_ERROR_BASE = -2000;
-    /** @hide */
-    public static final int ERROR_DRM_UNKNOWN                        = DRM_ERROR_BASE;
-    /** @hide */
-    public static final int ERROR_DRM_NO_LICENSE                     = DRM_ERROR_BASE - 1;
-    /** @hide */
-    public static final int ERROR_DRM_LICENSE_EXPIRED                = DRM_ERROR_BASE - 2;
-    /** @hide */
-    public static final int ERROR_DRM_SESSION_NOT_OPENED             = DRM_ERROR_BASE - 3;
-    /** @hide */
-    public static final int ERROR_DRM_DECRYPT_UNIT_NOT_INITIALIZED   = DRM_ERROR_BASE - 4;
-    /** @hide */
-    public static final int ERROR_DRM_DECRYPT                        = DRM_ERROR_BASE - 5;
-    /** @hide */
-    public static final int ERROR_DRM_CANNOT_HANDLE                  = DRM_ERROR_BASE - 6;
-    /** @hide */
-    public static final int ERROR_DRM_TAMPER_DETECTED                = DRM_ERROR_BASE - 7;
-    /** @hide */
-    public static final int ERROR_DRM_NOT_PROVISIONED                = DRM_ERROR_BASE - 8;
-    /** @hide */
-    public static final int ERROR_DRM_DEVICE_REVOKED                 = DRM_ERROR_BASE - 9;
-    /** @hide */
-    public static final int ERROR_DRM_RESOURCE_BUSY                  = DRM_ERROR_BASE - 10;
-    /** @hide */
-    public static final int ERROR_DRM_INSUFFICIENT_OUTPUT_PROTECTION = DRM_ERROR_BASE - 11;
-    /** @hide */
-    public static final int ERROR_DRM_LAST_USED_ERRORCODE            = DRM_ERROR_BASE - 11;
-    /** @hide */
-    public static final int ERROR_DRM_VENDOR_MAX                     = DRM_ERROR_BASE - 500;
-    /** @hide */
-    public static final int ERROR_DRM_VENDOR_MIN                     = DRM_ERROR_BASE - 999;
-
-    /** @hide */
-    public MediaCasException(String detailMessage) {
+    private MediaCasException(String detailMessage) {
         super(detailMessage);
     }
 
-    static void throwExceptions(ServiceSpecificException e) throws MediaCasException {
-        if (e.errorCode == ERROR_DRM_NOT_PROVISIONED) {
-            throw new NotProvisionedException(e.getMessage());
-        } else if (e.errorCode == ERROR_DRM_RESOURCE_BUSY) {
-            throw new ResourceBusyException(e.getMessage());
-        } else if (e.errorCode == ERROR_DRM_DEVICE_REVOKED) {
-            throw new DeniedByServerException(e.getMessage());
+    static void throwExceptionIfNeeded(int error) throws MediaCasException {
+        if (error == Status.OK) {
+            return;
+        }
+
+        if (error == Status.ERROR_CAS_NOT_PROVISIONED) {
+            throw new NotProvisionedException(null);
+        } else if (error == Status.ERROR_CAS_RESOURCE_BUSY) {
+            throw new ResourceBusyException(null);
+        } else if (error == Status.ERROR_CAS_DEVICE_REVOKED) {
+            throw new DeniedByServerException(null);
         } else {
-            MediaCasStateException.throwExceptions(e);
+            MediaCasStateException.throwExceptionIfNeeded(error);
         }
     }
 

@@ -17,8 +17,8 @@
 package com.android.commands.bmgr;
 
 import android.app.backup.BackupManager;
-import android.app.backup.BackupManagerMonitor;
 import android.app.backup.BackupProgress;
+import android.app.backup.BackupTransport;
 import android.app.backup.IBackupManager;
 import android.app.backup.IBackupObserver;
 import android.app.backup.IRestoreObserver;
@@ -30,8 +30,11 @@ import android.content.pm.IPackageManager;
 import android.content.pm.PackageInfo;
 import android.os.RemoteException;
 import android.os.ServiceManager;
+import android.os.SystemClock;
 import android.os.UserHandle;
-import android.util.Log;
+import android.util.ArraySet;
+
+import com.android.internal.annotations.GuardedBy;
 
 import java.util.ArrayList;
 import java.util.HashSet;
@@ -94,6 +97,11 @@ public final class Bmgr {
 
         if ("backup".equals(op)) {
             doBackup();
+            return;
+        }
+
+        if ("init".equals(op)) {
+            doInit();
             return;
         }
 
@@ -204,7 +212,7 @@ public final class Bmgr {
         System.out.println("Performing full transport backup");
 
         String pkg;
-        ArrayList<String> allPkgs = new ArrayList<String>();
+        ArraySet<String> allPkgs = new ArraySet<String>();
         while ((pkg = nextArg()) != null) {
             allPkgs.add(pkg);
         }
@@ -218,11 +226,59 @@ public final class Bmgr {
         }
     }
 
-    class BackupObserver extends IBackupObserver.Stub {
-        boolean done = false;
+    // IBackupObserver generically usable for any backup/init operation
+    abstract class Observer extends IBackupObserver.Stub {
+        private final Object trigger = new Object();
+
+        @GuardedBy("trigger")
+        private volatile boolean done = false;
 
         @Override
         public void onUpdate(String currentPackage, BackupProgress backupProgress) {
+        }
+
+        @Override
+        public void onResult(String currentPackage, int status) {
+        }
+
+        @Override
+        public void backupFinished(int status) {
+            synchronized (trigger) {
+                done = true;
+                trigger.notify();
+            }
+        }
+
+        public boolean done() {
+            return this.done;
+        }
+
+        // Wait forever
+        public void waitForCompletion() {
+            waitForCompletion(0);
+        }
+
+        // Wait for a given time and then give up
+        public void waitForCompletion(long timeout) {
+            // The backupFinished() callback will throw the 'done' flag; we
+            // just sit and wait on that notification.
+            final long targetTime = SystemClock.elapsedRealtime() + timeout;
+            synchronized (trigger) {
+                // Wait until either we're done, or we've reached a stated positive timeout
+                while (!done && (timeout <= 0 || SystemClock.elapsedRealtime() < targetTime)) {
+                    try {
+                        trigger.wait(1000L);
+                    } catch (InterruptedException ex) {
+                    }
+                }
+            }
+        }
+    }
+
+    class BackupObserver extends Observer {
+        @Override
+        public void onUpdate(String currentPackage, BackupProgress backupProgress) {
+            super.onUpdate(currentPackage, backupProgress);
             System.out.println(
                 "Package " + currentPackage + " with progress: " + backupProgress.bytesTransferred
                     + "/" + backupProgress.bytesExpected);
@@ -230,33 +286,17 @@ public final class Bmgr {
 
         @Override
         public void onResult(String currentPackage, int status) {
+            super.onResult(currentPackage, status);
             System.out.println("Package " + currentPackage + " with result: "
                     + convertBackupStatusToString(status));
         }
 
         @Override
         public void backupFinished(int status) {
+            super.backupFinished(status);
             System.out.println("Backup finished with result: "
                     + convertBackupStatusToString(status));
-            synchronized (this) {
-                done = true;
-                this.notify();
-            }
         }
-
-        public void waitForCompletion() {
-            // The backupFinished() callback will throw the 'done' flag; we
-            // just sit and wait on that notification.
-            synchronized (this) {
-                while (!this.done) {
-                    try {
-                        this.wait();
-                    } catch (InterruptedException ex) {
-                    }
-                }
-            }
-        }
-
     }
 
     private static String convertBackupStatusToString(int errorCode) {
@@ -270,7 +310,8 @@ public final class Bmgr {
             case BackupManager.ERROR_TRANSPORT_ABORTED:
                 return "Transport error";
             case BackupManager.ERROR_TRANSPORT_PACKAGE_REJECTED:
-                return "Transport rejected package";
+                return "Transport rejected package because it wasn't able to process it"
+                        + " at the time";
             case BackupManager.ERROR_AGENT_FAILURE:
                 return "Agent error";
             case BackupManager.ERROR_TRANSPORT_QUOTA_EXCEEDED:
@@ -348,7 +389,9 @@ public final class Bmgr {
             } else if (pkg.equals("--incremental")) {
                 nonIncrementalBackup = false;
             } else {
-                allPkgs.add(pkg);
+                if (!allPkgs.contains(pkg)) {
+                    allPkgs.add(pkg);
+                }
             }
         }
         if (backupAll) {
@@ -463,6 +506,39 @@ public final class Bmgr {
         try {
             mBmgr.clearBackupData(transport, pkg);
             System.out.println("Wiped backup data for " + pkg + " on " + transport);
+        } catch (RemoteException e) {
+            System.err.println(e.toString());
+            System.err.println(BMGR_NOT_RUNNING_ERR);
+        }
+    }
+
+    class InitObserver extends Observer {
+        public int result = BackupTransport.TRANSPORT_ERROR;
+
+        @Override
+        public void backupFinished(int status) {
+            super.backupFinished(status);
+            result = status;
+        }
+    }
+
+    private void doInit() {
+        ArraySet<String> transports = new ArraySet<>();
+        String transport;
+        while ((transport = nextArg()) != null) {
+            transports.add(transport);
+        }
+        if (transports.size() == 0) {
+            showUsage();
+            return;
+        }
+
+        InitObserver observer = new InitObserver();
+        try {
+            System.out.println("Initializing transports: " + transports);
+            mBmgr.initializeTransports(transports.toArray(new String[transports.size()]), observer);
+            observer.waitForCompletion(30*1000L);
+            System.out.println("Initialization result: " + observer.result);
         } catch (RemoteException e) {
             System.err.println(e.toString());
             System.err.println(BMGR_NOT_RUNNING_ERR);

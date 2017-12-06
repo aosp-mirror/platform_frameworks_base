@@ -16,19 +16,23 @@
 
 #include "xml/XmlDom.h"
 
-#include <sstream>
 #include <string>
 
+#include "flatten/XmlFlattener.h"
+#include "io/StringInputStream.h"
 #include "test/Test.h"
 
-namespace aapt {
+using ::aapt::io::StringInputStream;
+using ::testing::Eq;
+using ::testing::NotNull;
+using ::testing::SizeIs;
+using ::testing::StrEq;
 
-constexpr const char* kXmlPreamble =
-    "<?xml version=\"1.0\" encoding=\"utf-8\"?>\n";
+namespace aapt {
+namespace xml {
 
 TEST(XmlDomTest, Inflate) {
-  std::stringstream in(kXmlPreamble);
-  in << R"(
+  std::string input = R"(<?xml version="1.0" encoding="utf-8"?>
       <Layout xmlns:android="http://schemas.android.com/apk/res/android"
           android:layout_width="match_parent"
           android:layout_height="wrap_content">
@@ -37,47 +41,112 @@ TEST(XmlDomTest, Inflate) {
             android:layout_height="wrap_content" />
       </Layout>)";
 
-  const Source source("test.xml");
   StdErrDiagnostics diag;
-  std::unique_ptr<xml::XmlResource> doc = xml::Inflate(&in, &diag, source);
-  ASSERT_NE(doc, nullptr);
+  StringInputStream in(input);
+  std::unique_ptr<XmlResource> doc = Inflate(&in, &diag, Source("test.xml"));
+  ASSERT_THAT(doc, NotNull());
 
-  xml::Namespace* ns = xml::NodeCast<xml::Namespace>(doc->root.get());
-  ASSERT_NE(ns, nullptr);
-  EXPECT_EQ(ns->namespace_uri, xml::kSchemaAndroid);
-  EXPECT_EQ(ns->namespace_prefix, "android");
+  Element* el = doc->root.get();
+  EXPECT_THAT(el->namespace_decls, SizeIs(1u));
+  EXPECT_THAT(el->namespace_decls[0].uri, StrEq(xml::kSchemaAndroid));
+  EXPECT_THAT(el->namespace_decls[0].prefix, StrEq("android"));
+}
+
+TEST(XmlDomTest, BinaryInflate) {
+  std::unique_ptr<IAaptContext> context = test::ContextBuilder().Build();
+  std::unique_ptr<XmlResource> doc = util::make_unique<XmlResource>();
+  doc->root = util::make_unique<Element>();
+  doc->root->name = "Layout";
+  doc->root->line_number = 2u;
+
+  NamespaceDecl decl;
+  decl.uri = kSchemaAndroid;
+  decl.prefix = "android";
+  decl.line_number = 2u;
+  doc->root->namespace_decls.push_back(decl);
+
+  BigBuffer buffer(4096);
+  XmlFlattener flattener(&buffer, {});
+  ASSERT_TRUE(flattener.Consume(context.get(), doc.get()));
+
+  auto block = util::Copy(buffer);
+  std::unique_ptr<XmlResource> new_doc =
+      Inflate(block.get(), buffer.size(), context->GetDiagnostics(), Source("test.xml"));
+  ASSERT_THAT(new_doc, NotNull());
+
+  EXPECT_THAT(new_doc->root->name, StrEq("Layout"));
+  EXPECT_THAT(new_doc->root->line_number, Eq(2u));
+  ASSERT_THAT(new_doc->root->namespace_decls, SizeIs(1u));
+  EXPECT_THAT(new_doc->root->namespace_decls[0].uri, StrEq(kSchemaAndroid));
+  EXPECT_THAT(new_doc->root->namespace_decls[0].prefix, StrEq("android"));
+  EXPECT_THAT(new_doc->root->namespace_decls[0].line_number, Eq(2u));
 }
 
 // Escaping is handled after parsing of the values for resource-specific values.
 TEST(XmlDomTest, ForwardEscapes) {
-  std::unique_ptr<xml::XmlResource> doc = test::BuildXmlDom(R"(
+  std::unique_ptr<XmlResource> doc = test::BuildXmlDom(R"(
       <element value="\?hello" pattern="\\d{5}">\\d{5}</element>)");
 
-  xml::Element* el = xml::FindRootElement(doc->root.get());
-  ASSERT_NE(nullptr, el);
+  Element* el = doc->root.get();
 
-  xml::Attribute* attr = el->FindAttribute({}, "pattern");
-  ASSERT_NE(nullptr, attr);
-  EXPECT_EQ("\\\\d{5}", attr->value);
+  Attribute* attr = el->FindAttribute({}, "pattern");
+  ASSERT_THAT(attr, NotNull());
+  EXPECT_THAT(attr->value, Eq("\\\\d{5}"));
 
   attr = el->FindAttribute({}, "value");
-  ASSERT_NE(nullptr, attr);
-  EXPECT_EQ("\\?hello", attr->value);
+  ASSERT_THAT(attr, NotNull());
+  EXPECT_THAT(attr->value, Eq("\\?hello"));
 
-  xml::Text* text = xml::NodeCast<xml::Text>(el->children[0].get());
-  ASSERT_NE(nullptr, text);
-  EXPECT_EQ("\\\\d{5}", text->text);
+  ASSERT_THAT(el->children, SizeIs(1u));
+
+  Text* text = xml::NodeCast<xml::Text>(el->children[0].get());
+  ASSERT_THAT(text, NotNull());
+  EXPECT_THAT(text->text, Eq("\\\\d{5}"));
 }
 
 TEST(XmlDomTest, XmlEscapeSequencesAreParsed) {
-  std::unique_ptr<xml::XmlResource> doc = test::BuildXmlDom(R"(<element value="&quot;" />)");
-
-  xml::Element* el = xml::FindRootElement(doc.get());
-  ASSERT_NE(nullptr, el);
-
-  xml::Attribute* attr = el->FindAttribute({}, "value");
-  ASSERT_NE(nullptr, attr);
-  EXPECT_EQ("\"", attr->value);
+  std::unique_ptr<XmlResource> doc = test::BuildXmlDom(R"(<element value="&quot;" />)");
+  Attribute* attr = doc->root->FindAttribute({}, "value");
+  ASSERT_THAT(attr, NotNull());
+  EXPECT_THAT(attr->value, Eq("\""));
 }
 
+class TestVisitor : public PackageAwareVisitor {
+ public:
+  using PackageAwareVisitor::Visit;
+
+  void Visit(Element* el) override {
+    if (el->name == "View1") {
+      EXPECT_THAT(TransformPackageAlias("one", "local"),
+                  Eq(make_value(ExtractedPackage{"com.one", false})));
+    } else if (el->name == "View2") {
+      EXPECT_THAT(TransformPackageAlias("one", "local"),
+                  Eq(make_value(ExtractedPackage{"com.one", false})));
+      EXPECT_THAT(TransformPackageAlias("two", "local"),
+                  Eq(make_value(ExtractedPackage{"com.two", false})));
+    } else if (el->name == "View3") {
+      EXPECT_THAT(TransformPackageAlias("one", "local"),
+                  Eq(make_value(ExtractedPackage{"com.one", false})));
+      EXPECT_THAT(TransformPackageAlias("two", "local"),
+                  Eq(make_value(ExtractedPackage{"com.two", false})));
+      EXPECT_THAT(TransformPackageAlias("three", "local"),
+                  Eq(make_value(ExtractedPackage{"com.three", false})));
+    }
+  }
+};
+
+TEST(XmlDomTest, PackageAwareXmlVisitor) {
+  std::unique_ptr<XmlResource> doc = test::BuildXmlDom(R"(
+      <View1 xmlns:one="http://schemas.android.com/apk/res/com.one">
+        <View2 xmlns:two="http://schemas.android.com/apk/res/com.two">
+          <View3 xmlns:three="http://schemas.android.com/apk/res/com.three" />
+        </View2>
+      </View1>)");
+
+  Debug::DumpXml(doc.get());
+  TestVisitor visitor;
+  doc->root->Accept(&visitor);
+}
+
+}  // namespace xml
 }  // namespace aapt

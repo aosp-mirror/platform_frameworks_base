@@ -21,24 +21,8 @@
 <resources xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
     <string name="byteShort" msgid="8340973892742019101">"বাইট"</string>
-    <string name="kilobyteShort" msgid="7542884022844556968">"kB"</string>
-    <string name="megabyteShort" msgid="6355851576770428922">"MB"</string>
-    <string name="gigabyteShort" msgid="3259882455212193214">"GB"</string>
-    <string name="terabyteShort" msgid="231613018159186962">"TB"</string>
     <string name="petabyteShort" msgid="5637816680144990219">"PB"</string>
     <string name="fileSizeSuffix" msgid="8897567456150907538">"<xliff:g id="NUMBER">%1$s</xliff:g> <xliff:g id="UNIT">%2$s</xliff:g>"</string>
-    <string name="durationDays" msgid="6652371460511178259">"<xliff:g id="DAYS">%1$d</xliff:g> দিন"</string>
-    <string name="durationDayHours" msgid="2713107458736744435">"<xliff:g id="DAYS">%1$d</xliff:g> দিন <xliff:g id="HOURS">%2$d</xliff:g> ঘণ্টা"</string>
-    <string name="durationDayHour" msgid="7293789639090958917">"<xliff:g id="DAYS">%1$d</xliff:g> দিন <xliff:g id="HOURS">%2$d</xliff:g> ঘণ্টা"</string>
-    <string name="durationHours" msgid="4266858287167358988">"<xliff:g id="HOURS">%1$d</xliff:g> ঘণ্টা"</string>
-    <string name="durationHourMinutes" msgid="9029176248692041549">"<xliff:g id="HOURS">%1$d</xliff:g> ঘণ্টা <xliff:g id="MINUTES">%2$d</xliff:g> মিনিট"</string>
-    <string name="durationHourMinute" msgid="2741677355177402539">"<xliff:g id="HOURS">%1$d</xliff:g> ঘণ্টা <xliff:g id="MINUTES">%2$d</xliff:g> মিনিট"</string>
-    <string name="durationMinutes" msgid="3134226679883579347">"<xliff:g id="MINUTES">%1$d</xliff:g> মিনিট"</string>
-    <string name="durationMinute" msgid="7155301744174623818">"<xliff:g id="MINUTES">%1$d</xliff:g> মিনিট"</string>
-    <string name="durationMinuteSeconds" msgid="1424656185379003751">"<xliff:g id="MINUTES">%1$d</xliff:g> মিনিট <xliff:g id="SECONDS">%2$d</xliff:g> সেকেন্ড"</string>
-    <string name="durationMinuteSecond" msgid="3989228718067466680">"<xliff:g id="MINUTES">%1$d</xliff:g> মিনিট <xliff:g id="SECONDS">%2$d</xliff:g> সেকেন্ড"</string>
-    <string name="durationSeconds" msgid="8050088505238241405">"<xliff:g id="SECONDS">%1$d</xliff:g> সেকেন্ড"</string>
-    <string name="durationSecond" msgid="985669622276420331">"<xliff:g id="SECONDS">%1$d</xliff:g> সেকেন্ড"</string>
     <string name="untitled" msgid="4638956954852782576">"&lt;শিরোনামহীন&gt;"</string>
     <string name="emptyPhoneNumber" msgid="7694063042079676517">"(কোনো ফোন নম্বর নেই)"</string>
     <string name="unknownName" msgid="6867811765370350269">"অজানা"</string>
@@ -95,11 +79,13 @@
     <string name="RestrictedOnAllVoiceTitle" msgid="158800171499150681">"কোনো ভয়েস/জরুরী পরিষেবা নেই"</string>
     <string name="RestrictedStateContent" msgid="4278821484643362350">"সাময়িকভাবে মোবাইল নেটওয়ার্ক আপনার অবস্থানে এই পরিষেবা দিচ্ছে না"</string>
     <string name="NetworkPreferenceSwitchTitle" msgid="4008877505368566980">"নেটওয়ার্কের সিগন্যাল নেই"</string>
-    <string name="NetworkPreferenceSwitchSummary" msgid="4164230263214915351">"রিসেপশন উন্নত করতে সিস্টেম &gt; নেটওয়ার্ক এবং ইন্টারনেট &gt; মোবাইল নেটওয়ার্ক &gt; পছন্দের নেটওয়ার্কের ধরণ এ গিয়ে নির্বাচিত নেটওয়ার্কের ধরণ পরিবর্তন করে দেখুন।"</string>
+    <string name="NetworkPreferenceSwitchSummary" msgid="1203771446683319957">"রিসেপশন উন্নত করতে সেটিংস &gt; নেটওয়ার্ক এবং ইন্টারনেট &gt; মোবাইল নেটওয়ার্ক &gt; পছন্দের নেটওয়ার্কের ধরণ এ গিয়ে নির্বাচিত নেটওয়ার্কের ধরণ পরিবর্তন করে দেখুন।"</string>
+    <string name="EmergencyCallWarningTitle" msgid="4790413876281901612">"ওয়াই-ফাই কলিং সক্রিয় আছে"</string>
+    <string name="EmergencyCallWarningSummary" msgid="8973232888021643293">"জরুরি কলের জন্য মোবাইল নেটওয়ার্ক থাকতে হবে।"</string>
     <string name="notification_channel_network_alert" msgid="4427736684338074967">"সতর্কতা"</string>
     <string name="notification_channel_call_forward" msgid="2419697808481833249">"কল ফরওয়ার্ড করা"</string>
     <string name="notification_channel_emergency_callback" msgid="6686166232265733921">"জরুরি কলব্যাক মোড"</string>
-    <string name="notification_channel_mobile_data_alert" msgid="6130875231721406231">"মোবাইল ডেটার সতর্কবার্তা"</string>
+    <string name="notification_channel_mobile_data_status" msgid="4575131690860945836">"মোবাইল ডেটার স্থিতি"</string>
     <string name="notification_channel_sms" msgid="3441746047346135073">"এসএমএস মেসেজ"</string>
     <string name="notification_channel_voice_mail" msgid="3954099424160511919">"ভয়েসমেল মেসেজ"</string>
     <string name="notification_channel_wfc" msgid="2130802501654254801">"ওয়াই-ফাই কলিং"</string>
@@ -982,7 +968,7 @@
     <string name="editTextMenuTitle" msgid="4909135564941815494">"পাঠ্য ক্রিয়াগুলি"</string>
     <string name="email" msgid="4560673117055050403">"ইমেল"</string>
     <string name="dial" msgid="4204975095406423102">"ফোন করুন"</string>
-    <string name="map" msgid="6068210738233985748">"মানচিত্র"</string>
+    <string name="map" msgid="6068210738233985748">"ম্যাপ"</string>
     <string name="browse" msgid="6993590095938149861">"ব্রাউজার"</string>
     <string name="low_internal_storage_view_title" msgid="5576272496365684834">"স্টোরেজ পূর্ণ হতে চলেছে"</string>
     <string name="low_internal_storage_view_text" msgid="6640505817617414371">"কিছু কিছু সিস্টেম ক্রিয়াকলাপ কাজ নাও করতে পারে"</string>
@@ -1074,7 +1060,7 @@
     <string name="dump_heap_notification" msgid="2618183274836056542">"<xliff:g id="PROC">%1$s</xliff:g> মেমরি সীমা অতিক্রম করেছে"</string>
     <string name="dump_heap_notification_detail" msgid="6901391084243999274">"অনেক ডেটা সংগ্রহ করা হয়েছে; শেয়ার করার জন্য ট্যাপ করুন"</string>
     <string name="dump_heap_title" msgid="5864292264307651673">"হিপ ডাম্প শেয়ার করবেন?"</string>
-    <string name="dump_heap_text" msgid="4809417337240334941">"<xliff:g id="PROC">%1$s</xliff:g> প্রক্রিয়াটি তার <xliff:g id="SIZE">%2$s</xliff:g> এর মেমরি সীমা অতিক্রম করেছে৷ তার বিকাশকারীর সাথে শেয়ার করার জন্য একটি হিপ ডাম্প উপলব্ধ৷ সতর্কতা অবলম্বন করুন: এই হিপ ডাম্পে অ্যাপ্লিকেশানটির অ্যাক্সেস আছে এমন আপনার যেকোন ব্যক্তিগত তথ্য থাকতে পারে৷"</string>
+    <string name="dump_heap_text" msgid="4809417337240334941">"<xliff:g id="PROC">%1$s</xliff:g> প্রক্রিয়াটি তার <xliff:g id="SIZE">%2$s</xliff:g> এর মেমরি সীমা অতিক্রম করেছে৷ তার ডেভেলপারের সাথে শেয়ার করার জন্য একটি হিপ ডাম্প উপলব্ধ৷ সতর্কতা অবলম্বন করুন: এই হিপ ডাম্পে অ্যাপ্লিকেশানটির অ্যাক্সেস আছে এমন আপনার যেকোন ব্যক্তিগত তথ্য থাকতে পারে৷"</string>
     <string name="sendText" msgid="5209874571959469142">"পাঠ্যের জন্য একটি কাজ বেছে নিন"</string>
     <string name="volume_ringtone" msgid="6885421406845734650">"রিং ভলিউম"</string>
     <string name="volume_music" msgid="5421651157138628171">"মিডিয়ার ভলিউম"</string>
@@ -1740,7 +1726,7 @@
     <string name="app_category_image" msgid="4867854544519846048">"ফটো ও ছবিগুলি"</string>
     <string name="app_category_social" msgid="5842783057834965912">"সামাজিক ও যোগাযোগ"</string>
     <string name="app_category_news" msgid="7496506240743986873">"খবর ও পত্রিকাগুলি"</string>
-    <string name="app_category_maps" msgid="5878491404538024367">"মানচিত্র ও নেভিগেশান"</string>
+    <string name="app_category_maps" msgid="5878491404538024367">"ম্যাপ ও নেভিগেশান"</string>
     <string name="app_category_productivity" msgid="3742083261781538852">"উৎপাদনশীলতা"</string>
     <string name="device_storage_monitor_notification_channel" msgid="3295871267414816228">"ডিভাইসের স্টোরেজ"</string>
     <string name="adb_debugging_notification_channel_tv" msgid="5537766997350092316">"USB ডিবাগিং"</string>
@@ -1780,4 +1766,5 @@
     <string name="mmcc_imsi_unknown_in_hlr" msgid="6321202257374418726">"সিম প্রস্তুত নয়"</string>
     <string name="mmcc_illegal_ms" msgid="2769452751852211112">"সিম অনুমোদিত নয়"</string>
     <string name="mmcc_illegal_me" msgid="4438696681169345015">"ফোন অনুমোদিত নয়"</string>
+    <string name="popup_window_default_title" msgid="4874318849712115433">"পপ-আপ উইন্ডো"</string>
 </resources>

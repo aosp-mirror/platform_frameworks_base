@@ -17,7 +17,6 @@
 
 #include <SkBitmap.h>
 #include <SkColorSpace.h>
-#include <SkColorTable.h>
 #include <SkImage.h>
 #include <SkImageInfo.h>
 #include <SkPixelRef.h>
@@ -46,32 +45,31 @@ typedef void (*FreeFunc)(void* addr, void* context);
 
 class ANDROID_API Bitmap : public SkPixelRef {
 public:
-    static sk_sp<Bitmap> allocateHeapBitmap(SkBitmap* bitmap, sk_sp<SkColorTable> ctable);
+    static sk_sp<Bitmap> allocateHeapBitmap(SkBitmap* bitmap);
     static sk_sp<Bitmap> allocateHeapBitmap(const SkImageInfo& info);
 
     static sk_sp<Bitmap> allocateHardwareBitmap(SkBitmap& bitmap);
 
-    static sk_sp<Bitmap> allocateAshmemBitmap(SkBitmap* bitmap, sk_sp<SkColorTable> ctable);
+    static sk_sp<Bitmap> allocateAshmemBitmap(SkBitmap* bitmap);
     static sk_sp<Bitmap> allocateAshmemBitmap(size_t allocSize, const SkImageInfo& info,
-        size_t rowBytes, sk_sp<SkColorTable> ctable);
+        size_t rowBytes);
 
     static sk_sp<Bitmap> createFrom(sp<GraphicBuffer> graphicBuffer);
 
     static sk_sp<Bitmap> createFrom(const SkImageInfo&, SkPixelRef&);
 
-    Bitmap(void* address, size_t allocSize, const SkImageInfo& info, size_t rowBytes,
-            sk_sp<SkColorTable> ctable);
+    Bitmap(void* address, size_t allocSize, const SkImageInfo& info, size_t rowBytes);
     Bitmap(void* address, void* context, FreeFunc freeFunc,
-            const SkImageInfo& info, size_t rowBytes, sk_sp<SkColorTable> ctable);
+            const SkImageInfo& info, size_t rowBytes);
     Bitmap(void* address, int fd, size_t mappedSize, const SkImageInfo& info,
-            size_t rowBytes, sk_sp<SkColorTable> ctable);
+            size_t rowBytes);
     Bitmap(GraphicBuffer* buffer, const SkImageInfo& info);
 
     int rowBytesAsPixels() const {
         return rowBytes() >> SkColorTypeShiftPerPixel(mInfo.colorType());
     }
 
-    void reconfigure(const SkImageInfo& info, size_t rowBytes, sk_sp<SkColorTable> ctable);
+    void reconfigure(const SkImageInfo& info, size_t rowBytes);
     void reconfigure(const SkImageInfo& info);
     void setColorSpace(sk_sp<SkColorSpace> colorSpace);
     void setAlphaType(SkAlphaType alphaType);
@@ -91,10 +89,6 @@ public:
     }
 
     void getBounds(SkRect* bounds) const;
-
-    bool readyToDraw() const {
-        return this->colorType() != kIndex_8_SkColorType || this->colorTable();
-    }
 
     bool isHardware() const {
         return mPixelStorageType == PixelStorageType::Hardware;

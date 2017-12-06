@@ -22,6 +22,7 @@ import static android.content.pm.ActivityInfo.CONFIG_ORIENTATION;
 import static android.content.pm.ActivityInfo.CONFIG_SCREEN_SIZE;
 import static android.content.pm.ActivityInfo.SCREEN_ORIENTATION_BEHIND;
 import static android.content.pm.ActivityInfo.SCREEN_ORIENTATION_UNSET;
+import static android.os.Build.VERSION_CODES.O_MR1;
 import static android.view.Display.DEFAULT_DISPLAY;
 import static android.view.WindowManager.LayoutParams.FLAG_DISMISS_KEYGUARD;
 import static android.view.WindowManager.LayoutParams.FLAG_SECURE;
@@ -62,6 +63,7 @@ import android.util.Slog;
 import android.view.IApplicationToken;
 import android.view.SurfaceControl;
 import android.view.WindowManager;
+import android.view.WindowManager.LayoutParams;
 import android.view.WindowManagerPolicy.StartingSurface;
 
 import com.android.internal.util.ToBooleanFunction;
@@ -71,6 +73,8 @@ import com.android.server.wm.WindowManagerService.H;
 import java.io.PrintWriter;
 import java.util.ArrayDeque;
 import java.util.ArrayList;
+
+import static android.os.Build.VERSION_CODES.O;
 
 class AppTokenList extends ArrayList<AppWindowToken> {
 }
@@ -364,10 +368,10 @@ class AppWindowToken extends WindowToken implements WindowManagerService.AppFree
 
             boolean runningAppAnimation = false;
 
+            if (mAppAnimator.animation == AppWindowAnimator.sDummyAnimation) {
+                mAppAnimator.setNullAnimation();
+            }
             if (transit != AppTransition.TRANSIT_UNSET) {
-                if (mAppAnimator.animation == AppWindowAnimator.sDummyAnimation) {
-                    mAppAnimator.setNullAnimation();
-                }
                 if (mService.applyAnimationLocked(this, lp, transit, visible, isVoiceInteraction)) {
                     delayed = runningAppAnimation = true;
                 }
@@ -466,6 +470,20 @@ class AppWindowToken extends WindowToken implements WindowManagerService.AppFree
         }
 
         return delayed;
+    }
+
+    /**
+     * @return The to top most child window for which {@link LayoutParams#isFullscreen()} returns
+     *         true.
+     */
+    WindowState getTopFullscreenWindow() {
+        for (int i = mChildren.size() - 1; i >= 0; i--) {
+            final WindowState win = mChildren.get(i);
+            if (win != null && win.mAttrs.isFullscreen()) {
+                return win;
+            }
+        }
+        return null;
     }
 
     WindowState findMainWindow() {
@@ -1291,6 +1309,15 @@ class AppWindowToken extends WindowToken implements WindowManagerService.AppFree
      */
     @Override
     int getOrientation(int candidate) {
+        // We do not allow non-fullscreen apps to influence orientation starting in O-MR1. While we
+        // do throw an exception in {@link Activity#onCreate} and
+        // {@link Activity#setRequestedOrientation}, we also ignore the orientation here so that
+        // other calculations aren't affected.
+        if (!fillsParent() && mTargetSdk >= O_MR1) {
+            // Can't specify orientation if app doesn't fill parent.
+            return SCREEN_ORIENTATION_UNSET;
+        }
+
         if (candidate == SCREEN_ORIENTATION_BEHIND) {
             // Allow app to specify orientation regardless of its visibility state if the current
             // candidate want us to use orientation behind. I.e. the visible app on-top of this one
@@ -1731,6 +1758,9 @@ class AppWindowToken extends WindowToken implements WindowManagerService.AppFree
         }
         if (mRemovingFromDisplay) {
             pw.println(prefix + "mRemovingFromDisplay=" + mRemovingFromDisplay);
+        }
+        if (mAppAnimator.isAnimating()) {
+            mAppAnimator.dump(pw, prefix + "  ");
         }
     }
 

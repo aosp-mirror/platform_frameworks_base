@@ -169,7 +169,10 @@ public class SettingsDrawerActivity extends Activity {
         finish();
     }
 
-    public void setTileEnabled(ComponentName component, boolean enabled) {
+    /**
+     * @return whether or not the enabled state actually changed.
+     */
+    public boolean setTileEnabled(ComponentName component, boolean enabled) {
         PackageManager pm = getPackageManager();
         int state = pm.getComponentEnabledSetting(component);
         boolean isEnabled = state == PackageManager.COMPONENT_ENABLED_STATE_ENABLED;
@@ -183,7 +186,9 @@ public class SettingsDrawerActivity extends Activity {
                             ? PackageManager.COMPONENT_ENABLED_STATE_ENABLED
                             : PackageManager.COMPONENT_ENABLED_STATE_DISABLED,
                     PackageManager.DONT_KILL_APP);
+            return true;
         }
+        return false;
     }
 
     /**

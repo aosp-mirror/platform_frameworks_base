@@ -76,11 +76,12 @@ public class Handler {
     /**
      * Callback interface you can use when instantiating a Handler to avoid
      * having to implement your own subclass of Handler.
-     *
-     * @param msg A {@link android.os.Message Message} object
-     * @return True if no further handling is desired
      */
     public interface Callback {
+        /**
+         * @param msg A {@link android.os.Message Message} object
+         * @return True if no further handling is desired
+         */
         public boolean handleMessage(Message msg);
     }
     

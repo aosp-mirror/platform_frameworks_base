@@ -15,7 +15,11 @@
  */
 package com.android.server.usb.descriptors;
 
+// Framework builds and Android Studio builds use different imports for NonNull.
+// This one for Framework builds
 import android.annotation.NonNull;
+// this one in the AndroidStudio project
+// import android.support.annotation.NonNull;
 
 /**
  * @hide
@@ -23,7 +27,7 @@ import android.annotation.NonNull;
  * but with the capability to "back up" in situations where the parser discovers that a
  * UsbDescriptor has overrun its length.
  */
-public class ByteStream {
+public final class ByteStream {
     private static final String TAG = "ByteStream";
 
     /** The byte array being wrapped */
@@ -104,6 +108,20 @@ public class ByteStream {
     }
 
     /**
+     * @return the next byte from the stream and advances the stream and the read count. Note
+     * that this is an unsigned byte encoded in a Java int.
+     * @throws IndexOutOfBoundsException
+     */
+    public int getUnsignedByte() {
+        if (available() > 0) {
+            mReadCount++;
+            return mBytes[mIndex++] & 0x000000FF;
+        } else {
+            throw new IndexOutOfBoundsException();
+        }
+    }
+
+    /**
      * Reads 2 bytes in *little endian format* from the stream and composes a 16-bit integer.
      * As we are storing the 2-byte value in a 4-byte integer, the upper 2 bytes are always
      * 0, essentially making the returned value *unsigned*.
@@ -111,11 +129,11 @@ public class ByteStream {
      * next 2 bytes in the stream.
      * @throws IndexOutOfBoundsException
      */
-    public int unpackUsbWord() {
+    public int unpackUsbShort() {
         if (available() >= 2) {
-            int b0 = getByte();
-            int b1 = getByte();
-            return ((b1 << 8) & 0x0000FF00) | (b0 & 0x000000FF);
+            int b0 = getUnsignedByte();
+            int b1 = getUnsignedByte();
+            return (b1 << 8) | b0;
         } else {
             throw new IndexOutOfBoundsException();
         }
@@ -131,15 +149,31 @@ public class ByteStream {
      */
     public int unpackUsbTriple() {
         if (available() >= 3) {
-            int b0 = getByte();
-            int b1 = getByte();
-            int b2 = getByte();
-            return ((b2 << 16) & 0x00FF0000) | ((b1 << 8) & 0x0000FF00) | (b0 & 0x000000FF);
+            int b0 = getUnsignedByte();
+            int b1 = getUnsignedByte();
+            int b2 = getUnsignedByte();
+            return (b2 << 16) | (b1 << 8) | b0;
         } else {
             throw new IndexOutOfBoundsException();
         }
     }
 
+    /**
+     * Reads 4 bytes in *little endian format* from the stream and composes a 32-bit integer.
+     * @return The 32-bit integer encoded by the next 4 bytes in the stream.
+     * @throws IndexOutOfBoundsException
+     */
+    public int unpackUsbInt() {
+        if (available() >= 4) {
+            int b0 = getUnsignedByte();
+            int b1 = getUnsignedByte();
+            int b2 = getUnsignedByte();
+            int b3 = getUnsignedByte();
+            return (b3 << 24) | (b2 << 16) | (b1 << 8) | b0;
+        } else {
+            throw new IndexOutOfBoundsException();
+        }
+    }
     /**
      * Advances the logical position in the stream. Affects the running count also.
      * @param numBytes The number of bytes to advance.

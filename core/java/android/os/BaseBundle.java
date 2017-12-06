@@ -16,11 +16,16 @@
 
 package android.os;
 
+import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.util.ArrayMap;
 import android.util.Log;
 import android.util.MathUtils;
 import android.util.Slog;
+import android.util.SparseArray;
+
+import com.android.internal.annotations.VisibleForTesting;
+import com.android.internal.util.IndentingPrintWriter;
 
 import java.io.Serializable;
 import java.util.ArrayList;
@@ -91,7 +96,8 @@ public class BaseBundle {
     private ClassLoader mClassLoader;
 
     /** {@hide} */
-    int mFlags;
+    @VisibleForTesting
+    public int mFlags;
 
     /**
      * Constructs a new, empty Bundle that uses a specific ClassLoader for
@@ -215,59 +221,72 @@ public class BaseBundle {
      */
     /* package */ void unparcel() {
         synchronized (this) {
-            final Parcel parcelledData = mParcelledData;
-            if (parcelledData == null) {
-                if (DEBUG) Log.d(TAG, "unparcel "
-                        + Integer.toHexString(System.identityHashCode(this))
-                        + ": no parcelled data");
-                return;
-            }
-
-            if (LOG_DEFUSABLE && sShouldDefuse && (mFlags & FLAG_DEFUSABLE) == 0) {
-                Slog.wtf(TAG, "Attempting to unparcel a Bundle while in transit; this may "
-                        + "clobber all data inside!", new Throwable());
-            }
-
-            if (isEmptyParcel()) {
-                if (DEBUG) Log.d(TAG, "unparcel "
-                        + Integer.toHexString(System.identityHashCode(this)) + ": empty");
-                if (mMap == null) {
-                    mMap = new ArrayMap<>(1);
-                } else {
-                    mMap.erase();
-                }
-                mParcelledData = null;
-                return;
-            }
-
-            int N = parcelledData.readInt();
-            if (DEBUG) Log.d(TAG, "unparcel " + Integer.toHexString(System.identityHashCode(this))
-                    + ": reading " + N + " maps");
-            if (N < 0) {
-                return;
-            }
-            ArrayMap<String, Object> map = mMap;
-            if (map == null) {
-                map = new ArrayMap<>(N);
+            final Parcel source = mParcelledData;
+            if (source != null) {
+                initializeFromParcelLocked(source, /*recycleParcel=*/ true);
             } else {
-                map.erase();
-                map.ensureCapacity(N);
-            }
-            try {
-                parcelledData.readArrayMapInternal(map, N, mClassLoader);
-            } catch (BadParcelableException e) {
-                if (sShouldDefuse) {
-                    Log.w(TAG, "Failed to parse Bundle, but defusing quietly", e);
-                    map.erase();
-                } else {
-                    throw e;
+                if (DEBUG) {
+                    Log.d(TAG, "unparcel "
+                            + Integer.toHexString(System.identityHashCode(this))
+                            + ": no parcelled data");
                 }
-            } finally {
-                mMap = map;
-                parcelledData.recycle();
-                mParcelledData = null;
             }
-            if (DEBUG) Log.d(TAG, "unparcel " + Integer.toHexString(System.identityHashCode(this))
+        }
+    }
+
+    private void initializeFromParcelLocked(@NonNull Parcel parcelledData, boolean recycleParcel) {
+        if (LOG_DEFUSABLE && sShouldDefuse && (mFlags & FLAG_DEFUSABLE) == 0) {
+            Slog.wtf(TAG, "Attempting to unparcel a Bundle while in transit; this may "
+                    + "clobber all data inside!", new Throwable());
+        }
+
+        if (isEmptyParcel(parcelledData)) {
+            if (DEBUG) {
+                Log.d(TAG, "unparcel "
+                        + Integer.toHexString(System.identityHashCode(this)) + ": empty");
+            }
+            if (mMap == null) {
+                mMap = new ArrayMap<>(1);
+            } else {
+                mMap.erase();
+            }
+            mParcelledData = null;
+            return;
+        }
+
+        final int count = parcelledData.readInt();
+        if (DEBUG) {
+            Log.d(TAG, "unparcel " + Integer.toHexString(System.identityHashCode(this))
+                    + ": reading " + count + " maps");
+        }
+        if (count < 0) {
+            return;
+        }
+        ArrayMap<String, Object> map = mMap;
+        if (map == null) {
+            map = new ArrayMap<>(count);
+        } else {
+            map.erase();
+            map.ensureCapacity(count);
+        }
+        try {
+            parcelledData.readArrayMapInternal(map, count, mClassLoader);
+        } catch (BadParcelableException e) {
+            if (sShouldDefuse) {
+                Log.w(TAG, "Failed to parse Bundle, but defusing quietly", e);
+                map.erase();
+            } else {
+                throw e;
+            }
+        } finally {
+            mMap = map;
+            if (recycleParcel) {
+                recycleParcel(parcelledData);
+            }
+            mParcelledData = null;
+        }
+        if (DEBUG) {
+            Log.d(TAG, "unparcel " + Integer.toHexString(System.identityHashCode(this))
                     + " final map: " + mMap);
         }
     }
@@ -283,7 +302,20 @@ public class BaseBundle {
      * @hide
      */
     public boolean isEmptyParcel() {
-        return mParcelledData == NoImagePreloadHolder.EMPTY_PARCEL;
+        return isEmptyParcel(mParcelledData);
+    }
+
+    /**
+     * @hide
+     */
+    private static boolean isEmptyParcel(Parcel p) {
+        return p == NoImagePreloadHolder.EMPTY_PARCEL;
+    }
+
+    private static void recycleParcel(Parcel p) {
+        if (p != null && !isEmptyParcel(p)) {
+            p.recycle();
+        }
     }
 
     /** @hide */
@@ -1473,6 +1505,10 @@ public class BaseBundle {
      * @param parcel The parcel to copy this bundle to.
      */
     void writeToParcelInner(Parcel parcel, int flags) {
+        // If the parcel has a read-write helper, we can't just copy the blob, so unparcel it first.
+        if (parcel.hasReadWriteHelper()) {
+            unparcel();
+        }
         // Keep implementation in sync with writeToParcel() in
         // frameworks/native/libs/binder/PersistableBundle.cpp.
         final ArrayMap<String, Object> map;
@@ -1541,6 +1577,15 @@ public class BaseBundle {
                     + Integer.toHexString(magic));
         }
 
+        if (parcel.hasReadWriteHelper()) {
+            // If the parcel has a read-write helper, then we can't lazily-unparcel it, so just
+            // unparcel right away.
+            synchronized (this) {
+                initializeFromParcelLocked(parcel, /*recycleParcel=*/ false);
+            }
+            return;
+        }
+
         // Advance within this Parcel
         int offset = parcel.dataPosition();
         parcel.setDataPosition(MathUtils.addOrThrow(offset, length));
@@ -1554,5 +1599,50 @@ public class BaseBundle {
         p.setDataPosition(0);
 
         mParcelledData = p;
+    }
+
+    /** {@hide} */
+    public static void dumpStats(IndentingPrintWriter pw, String key, Object value) {
+        final Parcel tmp = Parcel.obtain();
+        tmp.writeValue(value);
+        final int size = tmp.dataPosition();
+        tmp.recycle();
+
+        // We only really care about logging large values
+        if (size > 1024) {
+            pw.println(key + " [size=" + size + "]");
+            if (value instanceof BaseBundle) {
+                dumpStats(pw, (BaseBundle) value);
+            } else if (value instanceof SparseArray) {
+                dumpStats(pw, (SparseArray) value);
+            }
+        }
+    }
+
+    /** {@hide} */
+    public static void dumpStats(IndentingPrintWriter pw, SparseArray array) {
+        pw.increaseIndent();
+        if (array == null) {
+            pw.println("[null]");
+            return;
+        }
+        for (int i = 0; i < array.size(); i++) {
+            dumpStats(pw, "0x" + Integer.toHexString(array.keyAt(i)), array.valueAt(i));
+        }
+        pw.decreaseIndent();
+    }
+
+    /** {@hide} */
+    public static void dumpStats(IndentingPrintWriter pw, BaseBundle bundle) {
+        pw.increaseIndent();
+        if (bundle == null) {
+            pw.println("[null]");
+            return;
+        }
+        final ArrayMap<String, Object> map = bundle.getMap();
+        for (int i = 0; i < map.size(); i++) {
+            dumpStats(pw, map.keyAt(i), map.valueAt(i));
+        }
+        pw.decreaseIndent();
     }
 }

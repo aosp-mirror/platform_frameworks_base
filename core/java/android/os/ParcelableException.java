@@ -52,10 +52,12 @@ public final class ParcelableException extends RuntimeException implements Parce
         final String msg = in.readString();
         try {
             final Class<?> clazz = Class.forName(name, true, Parcelable.class.getClassLoader());
-            return (Throwable) clazz.getConstructor(String.class).newInstance(msg);
+            if (Throwable.class.isAssignableFrom(clazz)) {
+                return (Throwable) clazz.getConstructor(String.class).newInstance(msg);
+            }
         } catch (ReflectiveOperationException e) {
-            throw new RuntimeException(name + ": " + msg);
         }
+        return new RuntimeException(name + ": " + msg);
     }
 
     /** {@hide} */

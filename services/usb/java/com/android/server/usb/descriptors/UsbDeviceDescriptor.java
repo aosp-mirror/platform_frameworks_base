@@ -15,13 +15,20 @@
  */
 package com.android.server.usb.descriptors;
 
+import com.android.server.usb.descriptors.report.ReportCanvas;
+import com.android.server.usb.descriptors.report.UsbStrings;
+
 /**
  * @hide
  * A USB Device Descriptor.
  * see usb11.pdf section 9.6.1
  */
-/* public */ public class UsbDeviceDescriptor extends UsbDescriptor {
-    private static final String TAG = "Device";
+public final class UsbDeviceDescriptor extends UsbDescriptor {
+    private static final String TAG = "UsbDeviceDescriptor";
+
+    public static final int USBSPEC_1_0 = 0x0100;
+    public static final int USBSPEC_1_1 = 0x0110;
+    public static final int USBSPEC_2_0 = 0x0200;
 
     private int mSpec;          // 2:2 bcdUSB 2 BCD USB Specification Number - BCD
     private byte mDevClass;     // 4:1 class code
@@ -39,6 +46,7 @@ package com.android.server.usb.descriptors;
 
     UsbDeviceDescriptor(int length, byte type) {
         super(length, type);
+        mHierarchyLevel = 1;
     }
 
     public int getSpec() {
@@ -91,19 +99,50 @@ package com.android.server.usb.descriptors;
 
     @Override
     public int parseRawDescriptors(ByteStream stream) {
-        mSpec = stream.unpackUsbWord();
+        mSpec = stream.unpackUsbShort();
         mDevClass = stream.getByte();
         mDevSubClass = stream.getByte();
         mProtocol = stream.getByte();
         mPacketSize = stream.getByte();
-        mVendorID = stream.unpackUsbWord();
-        mProductID = stream.unpackUsbWord();
-        mDeviceRelease = stream.unpackUsbWord();
+        mVendorID = stream.unpackUsbShort();
+        mProductID = stream.unpackUsbShort();
+        mDeviceRelease = stream.unpackUsbShort();
         mMfgIndex = stream.getByte();
         mProductIndex = stream.getByte();
         mSerialNum = stream.getByte();
         mNumConfigs = stream.getByte();
 
         return mLength;
+    }
+
+    @Override
+    public void report(ReportCanvas canvas) {
+        super.report(canvas);
+
+        canvas.openList();
+
+        int spec = getSpec();
+        canvas.writeListItem("Spec: " + ReportCanvas.getBCDString(spec));
+
+        byte devClass = getDevClass();
+        String classStr = UsbStrings.getClassName(devClass);
+        byte devSubClass = getDevSubClass();
+        String subClasStr = UsbStrings.getClassName(devSubClass);
+        canvas.writeListItem("Class " + devClass + ": " + classStr + " Subclass"
+                + devSubClass + ": " + subClasStr);
+        canvas.writeListItem("Vendor ID: " + ReportCanvas.getHexString(getVendorID())
+                + " Product ID: " + ReportCanvas.getHexString(getProductID())
+                + " Product Release: " + ReportCanvas.getBCDString(getDeviceRelease()));
+
+        byte mfgIndex = getMfgIndex();
+        String manufacturer =
+                UsbDescriptor.getUsbDescriptorString(canvas.getConnection(), mfgIndex);
+        byte productIndex = getProductIndex();
+        String product =
+                UsbDescriptor.getUsbDescriptorString(canvas.getConnection(), productIndex);
+
+        canvas.writeListItem("Manufacturer " + mfgIndex + ": " + manufacturer
+                + " Product " + productIndex + ": " + product);
+        canvas.closeList();
     }
 }

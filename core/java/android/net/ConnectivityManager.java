@@ -1772,14 +1772,8 @@ public class ConnectivityManager {
         // ignored
     }
 
-    /**
-     * Return quota status for the current active network, or {@code null} if no
-     * network is active. Quota status can change rapidly, so these values
-     * shouldn't be cached.
-     *
-     * @hide
-     */
-    @RequiresPermission(android.Manifest.permission.ACCESS_NETWORK_STATE)
+    /** {@hide} */
+    @Deprecated
     public NetworkQuotaInfo getActiveNetworkQuotaInfo() {
         try {
             return mService.getActiveNetworkQuotaInfo();

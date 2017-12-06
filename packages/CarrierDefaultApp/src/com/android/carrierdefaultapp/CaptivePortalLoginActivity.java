@@ -82,6 +82,7 @@ public class CaptivePortalLoginActivity extends Activity {
     private MyWebViewClient mWebViewClient;
     private boolean mLaunchBrowser = false;
     private Thread mTestingThread = null;
+    private boolean mReload = false;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -291,9 +292,13 @@ public class CaptivePortalLoginActivity extends Activity {
                 mCm.bindProcessToNetwork(network);
                 mNetwork = network;
                 runOnUiThreadIfNotFinishing(() -> {
-                    // Start initial page load so WebView finishes loading proxy settings.
-                    // Actual load of mUrl is initiated by MyWebViewClient.
-                    mWebView.loadData("", "text/html", null);
+                    if (mReload) {
+                        mWebView.reload();
+                    } else {
+                        // Start initial page load so WebView finishes loading proxy settings.
+                        // Actual load of mUrl is initiated by MyWebViewClient.
+                        mWebView.loadData("", "text/html", null);
+                    }
                 });
             }
 
@@ -305,6 +310,12 @@ public class CaptivePortalLoginActivity extends Activity {
                     // HTTP error page in the absence of network connection.
                     mWebView.loadUrl(mUrl.toString());
                 });
+            }
+
+            @Override
+            public void onLost(Network lostNetwork) {
+                if (DBG) logd("Network lost");
+                mReload = true;
             }
         };
         logd("request Network for captive portal");

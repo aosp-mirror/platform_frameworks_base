@@ -43,7 +43,8 @@ namespace renderthread {
 
 CacheManager::CacheManager(const DisplayInfo& display)
         : mMaxSurfaceArea(display.w * display.h) {
-    mVectorDrawableAtlas.reset(new VectorDrawableAtlas);
+    mVectorDrawableAtlas = new skiapipeline::VectorDrawableAtlas(mMaxSurfaceArea/2,
+            skiapipeline::VectorDrawableAtlas::StorageMode::allowSharedSurface);
 }
 
 void CacheManager::reset(GrContext* context) {
@@ -61,7 +62,7 @@ void CacheManager::reset(GrContext* context) {
 void CacheManager::destroy() {
     // cleanup any caches here as the GrContext is about to go away...
     mGrContext.reset(nullptr);
-    mVectorDrawableAtlas.reset(new VectorDrawableAtlas);
+    mVectorDrawableAtlas = new skiapipeline::VectorDrawableAtlas(mMaxSurfaceArea/2);
 }
 
 void CacheManager::updateContextCacheSizes() {
@@ -104,7 +105,7 @@ void CacheManager::trimMemory(TrimMemoryMode mode) {
 
     switch (mode) {
         case TrimMemoryMode::Complete:
-            mVectorDrawableAtlas.reset(new VectorDrawableAtlas);
+            mVectorDrawableAtlas = new skiapipeline::VectorDrawableAtlas(mMaxSurfaceArea/2);
             mGrContext->freeGpuResources();
             break;
         case TrimMemoryMode::UiHidden:
@@ -121,24 +122,14 @@ void CacheManager::trimStaleResources() {
     mGrContext->purgeResourcesNotUsedInMs(std::chrono::seconds(30));
 }
 
-VectorDrawableAtlas* CacheManager::acquireVectorDrawableAtlas() {
+sp<skiapipeline::VectorDrawableAtlas> CacheManager::acquireVectorDrawableAtlas() {
     LOG_ALWAYS_FATAL_IF(mVectorDrawableAtlas.get() == nullptr);
     LOG_ALWAYS_FATAL_IF(mGrContext == nullptr);
 
     /**
-     * TODO LIST:
-     *    1) compute the atlas based on the surfaceArea surface
-     *    2) identify a way to reuse cache entries
-     *    3) add ability to repack the cache?
-     *    4) define memory conditions where we clear the cache (e.g. surface->reset())
+     * TODO: define memory conditions where we clear the cache (e.g. surface->reset())
      */
-
-    return mVectorDrawableAtlas.release();
-}
-void CacheManager::releaseVectorDrawableAtlas(VectorDrawableAtlas* atlas) {
-    LOG_ALWAYS_FATAL_IF(mVectorDrawableAtlas.get() != nullptr);
-    mVectorDrawableAtlas.reset(atlas);
-    mVectorDrawableAtlas->isNewAtlas = false;
+    return mVectorDrawableAtlas;
 }
 
 void CacheManager::dumpMemoryUsage(String8& log, const RenderState* renderState) {

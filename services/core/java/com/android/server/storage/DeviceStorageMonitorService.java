@@ -29,6 +29,7 @@ import android.os.Binder;
 import android.os.Environment;
 import android.os.FileObserver;
 import android.os.Handler;
+import android.os.HandlerThread;
 import android.os.Message;
 import android.os.ResultReceiver;
 import android.os.ServiceManager;
@@ -154,20 +155,8 @@ public class DeviceStorageMonitorService extends SystemService {
 
     private static final String TV_NOTIFICATION_CHANNEL_ID = "devicestoragemonitor.tv";
 
-    /**
-     * Handler that checks the amount of disk space on the device and sends a
-     * notification if the device runs low on disk space
-     */
-    private final Handler mHandler = new Handler(IoThread.get().getLooper()) {
-        @Override
-        public void handleMessage(Message msg) {
-            switch (msg.what) {
-                case MSG_CHECK:
-                    check();
-                    return;
-            }
-        }
-    };
+    private final HandlerThread mHandlerThread;
+    private final Handler mHandler;
 
     private State findOrCreateState(UUID uuid) {
         State state = mStates.get(uuid);
@@ -256,6 +245,20 @@ public class DeviceStorageMonitorService extends SystemService {
 
     public DeviceStorageMonitorService(Context context) {
         super(context);
+
+        mHandlerThread = new HandlerThread(TAG, android.os.Process.THREAD_PRIORITY_BACKGROUND);
+        mHandlerThread.start();
+
+        mHandler = new Handler(mHandlerThread.getLooper()) {
+            @Override
+            public void handleMessage(Message msg) {
+                switch (msg.what) {
+                    case MSG_CHECK:
+                        check();
+                        return;
+                }
+            }
+        };
     }
 
     private static boolean isBootImageOnDisk() {

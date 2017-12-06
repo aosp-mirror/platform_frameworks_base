@@ -64,6 +64,7 @@ import android.view.ViewStub;
 import android.widget.AdapterView.OnItemClickListener;
 
 import com.android.internal.R;
+import com.android.internal.util.NotificationColorUtil;
 import com.android.internal.util.Preconditions;
 
 import libcore.util.Objects;
@@ -75,6 +76,7 @@ import java.lang.annotation.Target;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.Stack;
 import java.util.concurrent.Executor;
 
 /**
@@ -118,6 +120,7 @@ public class RemoteViews implements Parcelable, Filter {
     private static final int TEXT_VIEW_DRAWABLE_COLOR_FILTER_ACTION_TAG = 17;
     private static final int SET_REMOTE_INPUTS_ACTION_TAG = 18;
     private static final int LAYOUT_PARAM_ACTION_TAG = 19;
+    private static final int OVERRIDE_TEXT_COLORS_TAG = 20;
 
     /**
      * Application that hosts the remote views.
@@ -152,6 +155,12 @@ public class RemoteViews implements Parcelable, Filter {
      * RemoteViews.
      */
     private boolean mIsRoot = true;
+
+    /**
+     * Whether reapply is disallowed on this remoteview. This maybe be true if some actions modify
+     * the layout in a way that isn't recoverable, since views are being removed.
+     */
+    private boolean mReapplyDisallowed;
 
     /**
      * Constants to whether or not this RemoteViews is composed of a landscape and portrait
@@ -212,6 +221,37 @@ public class RemoteViews implements Parcelable, Filter {
             Bitmap bitmap = cache.get(i);
             cache.set(i, Icon.scaleDownIfNecessary(bitmap, maxWidth, maxHeight));
         }
+    }
+
+    /**
+     * Override all text colors in this layout and replace them by the given text color.
+     *
+     * @param textColor The color to use.
+     *
+     * @hide
+     */
+    public void overrideTextColors(int textColor) {
+        addAction(new OverrideTextColorsAction(textColor));
+    }
+
+    /**
+     * Set that it is disallowed to reapply another remoteview with the same layout as this view.
+     * This should be done if an action is destroying the view tree of the base layout.
+     *
+     * @hide
+     */
+    public void setReapplyDisallowed() {
+        mReapplyDisallowed = true;
+    }
+
+    /**
+     * @return Whether it is disallowed to reapply another remoteview with the same layout as this
+     * view. True if this remoteview has actions that destroyed view tree of the base layout.
+     *
+     * @hide
+     */
+    public boolean isReapplyDisallowed() {
+        return mReapplyDisallowed;
     }
 
     /**
@@ -2223,6 +2263,52 @@ public class RemoteViews implements Parcelable, Filter {
     }
 
     /**
+     * Helper action to override all textViewColors
+     */
+    private class OverrideTextColorsAction extends Action {
+
+        private final int textColor;
+
+        public OverrideTextColorsAction(int textColor) {
+            this.textColor = textColor;
+        }
+
+        public OverrideTextColorsAction(Parcel parcel) {
+            textColor = parcel.readInt();
+        }
+
+        public void writeToParcel(Parcel dest, int flags) {
+            dest.writeInt(OVERRIDE_TEXT_COLORS_TAG);
+            dest.writeInt(textColor);
+        }
+
+        @Override
+        public void apply(View root, ViewGroup rootParent, OnClickHandler handler) {
+            // Let's traverse the viewtree and override all textColors!
+            Stack<View> viewsToProcess = new Stack<>();
+            viewsToProcess.add(root);
+            while (!viewsToProcess.isEmpty()) {
+                View v = viewsToProcess.pop();
+                if (v instanceof TextView) {
+                    TextView textView = (TextView) v;
+                    textView.setText(NotificationColorUtil.clearColorSpans(textView.getText()));
+                    textView.setTextColor(textColor);
+                }
+                if (v instanceof ViewGroup) {
+                    ViewGroup viewGroup = (ViewGroup) v;
+                    for (int i = 0; i < viewGroup.getChildCount(); i++) {
+                        viewsToProcess.push(viewGroup.getChildAt(i));
+                    }
+                }
+            }
+        }
+
+        public String getActionName() {
+            return "OverrideTextColorsAction";
+        }
+    }
+
+    /**
      * Simple class used to keep track of memory usage in a RemoteViews.
      *
      */
@@ -2417,6 +2503,9 @@ public class RemoteViews implements Parcelable, Filter {
                         case LAYOUT_PARAM_ACTION_TAG:
                             mActions.add(new LayoutParamAction(parcel));
                             break;
+                        case OVERRIDE_TEXT_COLORS_TAG:
+                            mActions.add(new OverrideTextColorsAction(parcel));
+                            break;
                         default:
                             throw new ActionException("Tag " + tag + " not found");
                     }
@@ -2429,13 +2518,21 @@ public class RemoteViews implements Parcelable, Filter {
             mApplication = mPortrait.mApplication;
             mLayoutId = mPortrait.getLayoutId();
         }
+        mReapplyDisallowed = parcel.readInt() == 0;
 
         // setup the memory usage statistics
         mMemoryUsageCounter = new MemoryUsageCounter();
         recalculateMemoryUsage();
     }
 
-
+    /**
+     * Returns a deep copy of the RemoteViews object. The RemoteView may not be
+     * attached to another RemoteView -- it must be the root of a hierarchy.
+     *
+     * @throws IllegalStateException if this is not the root of a RemoteView
+     *         hierarchy
+     */
+    @Override
     public RemoteViews clone() {
         synchronized (this) {
             Preconditions.checkState(mIsRoot, "RemoteView has been attached to another RemoteView. "
@@ -3731,6 +3828,7 @@ public class RemoteViews implements Parcelable, Filter {
             // Both RemoteViews already share the same package and user
             mPortrait.writeToParcel(dest, flags | PARCELABLE_ELIDE_DUPLICATES);
         }
+        dest.writeInt(mReapplyDisallowed ? 1 : 0);
     }
 
     private static ApplicationInfo getApplicationInfo(String packageName, int userId) {

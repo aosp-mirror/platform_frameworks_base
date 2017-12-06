@@ -33,6 +33,7 @@ import android.graphics.drawable.Icon;
 import android.graphics.drawable.VectorDrawable;
 import android.text.SpannableStringBuilder;
 import android.text.Spanned;
+import android.text.style.BackgroundColorSpan;
 import android.text.style.CharacterStyle;
 import android.text.style.ForegroundColorSpan;
 import android.text.style.TextAppearanceSpan;
@@ -240,6 +241,45 @@ public class NotificationColorUtil {
         return span;
     }
 
+    /**
+     * Clears all color spans of a text
+     * @param charSequence the input text
+     * @return the same text but without color spans
+     */
+    public static CharSequence clearColorSpans(CharSequence charSequence) {
+        if (charSequence instanceof Spanned) {
+            Spanned ss = (Spanned) charSequence;
+            Object[] spans = ss.getSpans(0, ss.length(), Object.class);
+            SpannableStringBuilder builder = new SpannableStringBuilder(ss.toString());
+            for (Object span : spans) {
+                Object resultSpan = span;
+                if (resultSpan instanceof CharacterStyle) {
+                    resultSpan = ((CharacterStyle) span).getUnderlying();
+                }
+                if (resultSpan instanceof TextAppearanceSpan) {
+                    TextAppearanceSpan originalSpan = (TextAppearanceSpan) resultSpan;
+                    if (originalSpan.getTextColor() != null) {
+                        resultSpan = new TextAppearanceSpan(
+                                originalSpan.getFamily(),
+                                originalSpan.getTextStyle(),
+                                originalSpan.getTextSize(),
+                                null,
+                                originalSpan.getLinkTextColor());
+                    }
+                } else if (resultSpan instanceof ForegroundColorSpan
+                        || (resultSpan instanceof BackgroundColorSpan)) {
+                    continue;
+                } else {
+                    resultSpan = span;
+                }
+                builder.setSpan(resultSpan, ss.getSpanStart(span), ss.getSpanEnd(span),
+                        ss.getSpanFlags(span));
+            }
+            return builder;
+        }
+        return charSequence;
+    }
+
     private int processColor(int color) {
         return Color.argb(Color.alpha(color),
                 255 - Color.red(color),
@@ -360,20 +400,28 @@ public class NotificationColorUtil {
         return findContrastColorAgainstDark(color, Color.BLACK, true /* fg */, 12);
     }
 
-    /**
-     * Finds a text color with sufficient contrast over bg that has the same hue as the original
-     * color, assuming it is for large text.
+     /**
+     * Finds a large text color with sufficient contrast over bg that has the same or darker hue as
+     * the original color, depending on the value of {@code isBgDarker}.
+     *
+     * @param isBgDarker {@code true} if {@code bg} is darker than {@code color}.
      */
-    public static int ensureLargeTextContrast(int color, int bg) {
-        return findContrastColor(color, bg, true, 3);
+    public static int ensureLargeTextContrast(int color, int bg, boolean isBgDarker) {
+        return isBgDarker
+                ? findContrastColorAgainstDark(color, bg, true, 3)
+                : findContrastColor(color, bg, true, 3);
     }
 
     /**
-     * Finds a text color with sufficient contrast over bg that has the same hue as the original
-     * color.
+     * Finds a text color with sufficient contrast over bg that has the same or darker hue as the
+     * original color, depending on the value of {@code isBgDarker}.
+     *
+     * @param isBgDarker {@code true} if {@code bg} is darker than {@code color}.
      */
-    private static int ensureTextContrast(int color, int bg) {
-        return findContrastColor(color, bg, true, 4.5);
+    private static int ensureTextContrast(int color, int bg, boolean isBgDarker) {
+        return isBgDarker
+                ? findContrastColorAgainstDark(color, bg, true, 4.5)
+                : findContrastColor(color, bg, true, 4.5);
     }
 
     /** Finds a background color for a text view with given text color and hint text color, that
@@ -402,22 +450,37 @@ public class NotificationColorUtil {
 
     /**
      * Resolves a Notification's color such that it has enough contrast to be used as the
+     * color for the Notification's action and header text on a background that is lighter than
+     * {@code notificationColor}.
+     *
+     * @see {@link #resolveContrastColor(Context, int, boolean)}
+     */
+    public static int resolveContrastColor(Context context, int notificationColor,
+            int backgroundColor) {
+        return NotificationColorUtil.resolveContrastColor(context, notificationColor,
+                backgroundColor, false /* isDark */);
+    }
+
+    /**
+     * Resolves a Notification's color such that it has enough contrast to be used as the
      * color for the Notification's action and header text.
      *
      * @param notificationColor the color of the notification or {@link Notification#COLOR_DEFAULT}
      * @param backgroundColor the background color to ensure the contrast against.
+     * @param isDark whether or not the {@code notificationColor} will be placed on a background
+     *               that is darker than the color itself
      * @return a color of the same hue with enough contrast against the backgrounds.
      */
     public static int resolveContrastColor(Context context, int notificationColor,
-            int backgroundColor) {
+            int backgroundColor, boolean isDark) {
         final int resolvedColor = resolveColor(context, notificationColor);
 
         final int actionBg = context.getColor(
                 com.android.internal.R.color.notification_action_list);
 
         int color = resolvedColor;
-        color = NotificationColorUtil.ensureLargeTextContrast(color, actionBg);
-        color = NotificationColorUtil.ensureTextContrast(color, backgroundColor);
+        color = NotificationColorUtil.ensureLargeTextContrast(color, actionBg, isDark);
+        color = NotificationColorUtil.ensureTextContrast(color, backgroundColor, isDark);
 
         if (color != resolvedColor) {
             if (DEBUG){

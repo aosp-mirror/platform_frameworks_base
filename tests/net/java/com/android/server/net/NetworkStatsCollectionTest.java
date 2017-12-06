@@ -17,25 +17,38 @@
 package com.android.server.net;
 
 import static android.net.ConnectivityManager.TYPE_MOBILE;
+import static android.net.NetworkStats.SET_ALL;
 import static android.net.NetworkStats.SET_DEFAULT;
 import static android.net.NetworkStats.TAG_NONE;
 import static android.net.NetworkStats.UID_ALL;
+import static android.net.NetworkStatsHistory.FIELD_ALL;
 import static android.net.NetworkTemplate.buildTemplateMobileAll;
+import static android.os.Process.myUid;
 import static android.text.format.DateUtils.HOUR_IN_MILLIS;
 import static android.text.format.DateUtils.MINUTE_IN_MILLIS;
 
+import static com.android.server.net.NetworkStatsCollection.multiplySafe;
+
 import android.content.res.Resources;
+import android.net.ConnectivityManager;
 import android.net.NetworkIdentity;
 import android.net.NetworkStats;
+import android.net.NetworkStatsHistory;
 import android.net.NetworkTemplate;
 import android.os.Process;
 import android.os.UserHandle;
+import android.telephony.SubscriptionPlan;
 import android.telephony.TelephonyManager;
-import android.support.test.filters.SmallTest;
 import android.test.AndroidTestCase;
 import android.test.MoreAsserts;
+import android.test.suitebuilder.annotation.SmallTest;
+import android.text.format.DateUtils;
+import android.util.RecurrenceRule;
 
 import com.android.frameworks.tests.net.R;
+
+import libcore.io.IoUtils;
+import libcore.io.Streams;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
@@ -44,9 +57,12 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.io.InputStream;
 import java.io.OutputStream;
-
-import libcore.io.IoUtils;
-import libcore.io.Streams;
+import java.time.Clock;
+import java.time.Instant;
+import java.time.ZoneId;
+import java.time.ZonedDateTime;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * Tests for {@link NetworkStatsCollection}.
@@ -57,12 +73,29 @@ public class NetworkStatsCollectionTest extends AndroidTestCase {
     private static final String TEST_FILE = "test.bin";
     private static final String TEST_IMSI = "310260000000000";
 
+    private static final long TIME_A = 1326088800000L; // UTC: Monday 9th January 2012 06:00:00 AM
+    private static final long TIME_B = 1326110400000L; // UTC: Monday 9th January 2012 12:00:00 PM
+    private static final long TIME_C = 1326132000000L; // UTC: Monday 9th January 2012 06:00:00 PM
+
+    private static Clock sOriginalClock;
+
     @Override
     public void setUp() throws Exception {
         super.setUp();
+        sOriginalClock = RecurrenceRule.sClock;
 
         // ignore any device overlay while testing
         NetworkTemplate.forceAllNetworkTypes();
+    }
+
+    @Override
+    protected void tearDown() throws Exception {
+        super.tearDown();
+        RecurrenceRule.sClock = sOriginalClock;
+    }
+
+    private void setClock(Instant instant) {
+        RecurrenceRule.sClock = Clock.fixed(instant, ZoneId.systemDefault());
     }
 
     public void testReadLegacyNetwork() throws Exception {
@@ -198,11 +231,11 @@ public class NetworkStatsCollectionTest extends AndroidTestCase {
                 collection.getRelevantUids(NetworkStatsAccess.Level.DEVICE));
 
         // Verify security check in getHistory.
-        assertNotNull(collection.getHistory(buildTemplateMobileAll(TEST_IMSI), myUid, SET_DEFAULT,
-                TAG_NONE, 0, NetworkStatsAccess.Level.DEFAULT));
+        assertNotNull(collection.getHistory(buildTemplateMobileAll(TEST_IMSI), null, myUid, SET_DEFAULT,
+                TAG_NONE, 0, 0L, 0L, NetworkStatsAccess.Level.DEFAULT, myUid));
         try {
-            collection.getHistory(buildTemplateMobileAll(TEST_IMSI), otherUidInSameUser,
-                    SET_DEFAULT, TAG_NONE, 0, NetworkStatsAccess.Level.DEFAULT);
+            collection.getHistory(buildTemplateMobileAll(TEST_IMSI), null, otherUidInSameUser,
+                    SET_DEFAULT, TAG_NONE, 0, 0L, 0L, NetworkStatsAccess.Level.DEFAULT, myUid);
             fail("Should have thrown SecurityException for accessing different UID");
         } catch (SecurityException e) {
             // expected
@@ -215,6 +248,257 @@ public class NetworkStatsCollectionTest extends AndroidTestCase {
                 NetworkStatsAccess.Level.USER);
         assertSummaryTotal(collection, buildTemplateMobileAll(TEST_IMSI), 32 + 64 + 128 + 256, 0, 0,
                 0, NetworkStatsAccess.Level.DEVICE);
+    }
+
+    public void testAugmentPlan() throws Exception {
+        final File testFile = new File(getContext().getFilesDir(), TEST_FILE);
+        stageFile(R.raw.netstats_v1, testFile);
+
+        final NetworkStatsCollection emptyCollection = new NetworkStatsCollection(30 * MINUTE_IN_MILLIS);
+        final NetworkStatsCollection collection = new NetworkStatsCollection(30 * MINUTE_IN_MILLIS);
+        collection.readLegacyNetwork(testFile);
+
+        // We're in the future, but not that far off
+        setClock(Instant.parse("2012-06-01T00:00:00.00Z"));
+
+        // Test a bunch of plans that should result in no augmentation
+        final List<SubscriptionPlan> plans = new ArrayList<>();
+
+        // No plan
+        plans.add(null);
+        // No usage anchor
+        plans.add(SubscriptionPlan.Builder
+                .createRecurringMonthly(ZonedDateTime.parse("2011-01-14T00:00:00.00Z")).build());
+        // Usage anchor far in past
+        plans.add(SubscriptionPlan.Builder
+                .createRecurringMonthly(ZonedDateTime.parse("2011-01-14T00:00:00.00Z"))
+                .setDataUsage(1000L, TIME_A - DateUtils.YEAR_IN_MILLIS).build());
+        // Usage anchor far in future
+        plans.add(SubscriptionPlan.Builder
+                .createRecurringMonthly(ZonedDateTime.parse("2011-01-14T00:00:00.00Z"))
+                .setDataUsage(1000L, TIME_A + DateUtils.YEAR_IN_MILLIS).build());
+        // Usage anchor near but outside cycle
+        plans.add(SubscriptionPlan.Builder
+                .createNonrecurring(ZonedDateTime.parse("2012-01-09T09:00:00.00Z"),
+                        ZonedDateTime.parse("2012-01-09T15:00:00.00Z"))
+                .setDataUsage(1000L, TIME_C).build());
+
+        for (SubscriptionPlan plan : plans) {
+            int i;
+            NetworkStatsHistory history;
+
+            // Empty collection should be untouched
+            history = getHistory(emptyCollection, plan, TIME_A, TIME_C);
+            assertEquals(0L, history.getTotalBytes());
+
+            // Normal collection should be untouched
+            history = getHistory(collection, plan, TIME_A, TIME_C); i = 0;
+            assertEntry(100647, 197, 23649, 185, history.getValues(i++, null));
+            assertEntry(100647, 196, 23648, 185, history.getValues(i++, null));
+            assertEntry(18323, 76, 15032, 76, history.getValues(i++, null));
+            assertEntry(18322, 75, 15031, 75, history.getValues(i++, null));
+            assertEntry(527798, 761, 78570, 652, history.getValues(i++, null));
+            assertEntry(527797, 760, 78570, 651, history.getValues(i++, null));
+            assertEntry(10747, 50, 16838, 55, history.getValues(i++, null));
+            assertEntry(10747, 49, 16838, 54, history.getValues(i++, null));
+            assertEntry(89191, 151, 18021, 140, history.getValues(i++, null));
+            assertEntry(89190, 150, 18020, 139, history.getValues(i++, null));
+            assertEntry(3821, 22, 4525, 26, history.getValues(i++, null));
+            assertEntry(3820, 22, 4524, 26, history.getValues(i++, null));
+            assertEntry(91686, 159, 18575, 146, history.getValues(i++, null));
+            assertEntry(91685, 159, 18575, 146, history.getValues(i++, null));
+            assertEntry(8289, 35, 6863, 38, history.getValues(i++, null));
+            assertEntry(8289, 35, 6863, 38, history.getValues(i++, null));
+            assertEntry(113914, 174, 18364, 157, history.getValues(i++, null));
+            assertEntry(113913, 173, 18364, 157, history.getValues(i++, null));
+            assertEntry(11378, 49, 9261, 49, history.getValues(i++, null));
+            assertEntry(11377, 48, 9261, 49, history.getValues(i++, null));
+            assertEntry(201765, 328, 41808, 291, history.getValues(i++, null));
+            assertEntry(201765, 328, 41807, 290, history.getValues(i++, null));
+            assertEntry(106106, 218, 39917, 201, history.getValues(i++, null));
+            assertEntry(106105, 217, 39917, 201, history.getValues(i++, null));
+            assertEquals(history.size(), i);
+
+            // Slice from middle should be untouched
+            history = getHistory(collection, plan, TIME_B - HOUR_IN_MILLIS,
+                    TIME_B + HOUR_IN_MILLIS); i = 0;
+            assertEntry(3821, 22, 4525, 26, history.getValues(i++, null));
+            assertEntry(3820, 22, 4524, 26, history.getValues(i++, null));
+            assertEntry(91686, 159, 18575, 146, history.getValues(i++, null));
+            assertEntry(91685, 159, 18575, 146, history.getValues(i++, null));
+            assertEquals(history.size(), i);
+        }
+
+        // Lower anchor in the middle of plan
+        {
+            int i;
+            NetworkStatsHistory history;
+
+            final SubscriptionPlan plan = SubscriptionPlan.Builder
+                    .createNonrecurring(ZonedDateTime.parse("2012-01-09T09:00:00.00Z"),
+                            ZonedDateTime.parse("2012-01-09T15:00:00.00Z"))
+                    .setDataUsage(200000L, TIME_B).build();
+
+            // Empty collection should be augmented
+            history = getHistory(emptyCollection, plan, TIME_A, TIME_C);
+            assertEquals(200000L, history.getTotalBytes());
+
+            // Normal collection should be augmented
+            history = getHistory(collection, plan, TIME_A, TIME_C); i = 0;
+            assertEntry(100647, 197, 23649, 185, history.getValues(i++, null));
+            assertEntry(100647, 196, 23648, 185, history.getValues(i++, null));
+            assertEntry(18323, 76, 15032, 76, history.getValues(i++, null));
+            assertEntry(18322, 75, 15031, 75, history.getValues(i++, null));
+            assertEntry(527798, 761, 78570, 652, history.getValues(i++, null));
+            assertEntry(527797, 760, 78570, 651, history.getValues(i++, null));
+            // Cycle point; start data normalization
+            assertEntry(7507, 0, 11763, 0, history.getValues(i++, null));
+            assertEntry(7507, 0, 11763, 0, history.getValues(i++, null));
+            assertEntry(62309, 0, 12589, 0, history.getValues(i++, null));
+            assertEntry(62309, 0, 12588, 0, history.getValues(i++, null));
+            assertEntry(2669, 0, 3161, 0, history.getValues(i++, null));
+            assertEntry(2668, 0, 3160, 0, history.getValues(i++, null));
+            // Anchor point; end data normalization
+            assertEntry(91686, 159, 18575, 146, history.getValues(i++, null));
+            assertEntry(91685, 159, 18575, 146, history.getValues(i++, null));
+            assertEntry(8289, 35, 6863, 38, history.getValues(i++, null));
+            assertEntry(8289, 35, 6863, 38, history.getValues(i++, null));
+            assertEntry(113914, 174, 18364, 157, history.getValues(i++, null));
+            assertEntry(113913, 173, 18364, 157, history.getValues(i++, null));
+            // Cycle point
+            assertEntry(11378, 49, 9261, 49, history.getValues(i++, null));
+            assertEntry(11377, 48, 9261, 49, history.getValues(i++, null));
+            assertEntry(201765, 328, 41808, 291, history.getValues(i++, null));
+            assertEntry(201765, 328, 41807, 290, history.getValues(i++, null));
+            assertEntry(106106, 218, 39917, 201, history.getValues(i++, null));
+            assertEntry(106105, 217, 39917, 201, history.getValues(i++, null));
+            assertEquals(history.size(), i);
+
+            // Slice from middle should be augmented
+            history = getHistory(collection, plan, TIME_B - HOUR_IN_MILLIS,
+                    TIME_B + HOUR_IN_MILLIS); i = 0;
+            assertEntry(2669, 0, 3161, 0, history.getValues(i++, null));
+            assertEntry(2668, 0, 3160, 0, history.getValues(i++, null));
+            assertEntry(91686, 159, 18575, 146, history.getValues(i++, null));
+            assertEntry(91685, 159, 18575, 146, history.getValues(i++, null));
+            assertEquals(history.size(), i);
+        }
+
+        // Higher anchor in the middle of plan
+        {
+            int i;
+            NetworkStatsHistory history;
+
+            final SubscriptionPlan plan = SubscriptionPlan.Builder
+                    .createNonrecurring(ZonedDateTime.parse("2012-01-09T09:00:00.00Z"),
+                            ZonedDateTime.parse("2012-01-09T15:00:00.00Z"))
+                    .setDataUsage(400000L, TIME_B + MINUTE_IN_MILLIS).build();
+
+            // Empty collection should be augmented
+            history = getHistory(emptyCollection, plan, TIME_A, TIME_C);
+            assertEquals(400000L, history.getTotalBytes());
+
+            // Normal collection should be augmented
+            history = getHistory(collection, plan, TIME_A, TIME_C); i = 0;
+            assertEntry(100647, 197, 23649, 185, history.getValues(i++, null));
+            assertEntry(100647, 196, 23648, 185, history.getValues(i++, null));
+            assertEntry(18323, 76, 15032, 76, history.getValues(i++, null));
+            assertEntry(18322, 75, 15031, 75, history.getValues(i++, null));
+            assertEntry(527798, 761, 78570, 652, history.getValues(i++, null));
+            assertEntry(527797, 760, 78570, 651, history.getValues(i++, null));
+            // Cycle point; start data normalization
+            assertEntry(15015, 0, 23526, 0, history.getValues(i++, null));
+            assertEntry(15015, 0, 23526, 0, history.getValues(i++, null));
+            assertEntry(124619, 0, 25179, 0, history.getValues(i++, null));
+            assertEntry(124618, 0, 25177, 0, history.getValues(i++, null));
+            assertEntry(5338, 0, 6322, 0, history.getValues(i++, null));
+            assertEntry(5337, 0, 6320, 0, history.getValues(i++, null));
+            // Anchor point; end data normalization
+            assertEntry(91686, 159, 18575, 146, history.getValues(i++, null));
+            assertEntry(91685, 159, 18575, 146, history.getValues(i++, null));
+            assertEntry(8289, 35, 6863, 38, history.getValues(i++, null));
+            assertEntry(8289, 35, 6863, 38, history.getValues(i++, null));
+            assertEntry(113914, 174, 18364, 157, history.getValues(i++, null));
+            assertEntry(113913, 173, 18364, 157, history.getValues(i++, null));
+            // Cycle point
+            assertEntry(11378, 49, 9261, 49, history.getValues(i++, null));
+            assertEntry(11377, 48, 9261, 49, history.getValues(i++, null));
+            assertEntry(201765, 328, 41808, 291, history.getValues(i++, null));
+            assertEntry(201765, 328, 41807, 290, history.getValues(i++, null));
+            assertEntry(106106, 218, 39917, 201, history.getValues(i++, null));
+            assertEntry(106105, 217, 39917, 201, history.getValues(i++, null));
+
+            // Slice from middle should be augmented
+            history = getHistory(collection, plan, TIME_B - HOUR_IN_MILLIS,
+                    TIME_B + HOUR_IN_MILLIS); i = 0;
+            assertEntry(5338, 0, 6322, 0, history.getValues(i++, null));
+            assertEntry(5337, 0, 6320, 0, history.getValues(i++, null));
+            assertEntry(91686, 159, 18575, 146, history.getValues(i++, null));
+            assertEntry(91685, 159, 18575, 146, history.getValues(i++, null));
+            assertEquals(history.size(), i);
+        }
+    }
+
+    public void testAugmentPlanGigantic() throws Exception {
+        // We're in the future, but not that far off
+        setClock(Instant.parse("2012-06-01T00:00:00.00Z"));
+
+        // Create a simple history with a ton of measured usage
+        final NetworkStatsCollection large = new NetworkStatsCollection(HOUR_IN_MILLIS);
+        final NetworkIdentitySet ident = new NetworkIdentitySet();
+        ident.add(new NetworkIdentity(ConnectivityManager.TYPE_MOBILE, -1, TEST_IMSI, null,
+                false, true));
+        large.recordData(ident, UID_ALL, SET_ALL, TAG_NONE, TIME_A, TIME_B,
+                new NetworkStats.Entry(12_730_893_164L, 1, 0, 0, 0));
+
+        // Verify untouched total
+        assertEquals(12_730_893_164L, getHistory(large, null, TIME_A, TIME_C).getTotalBytes());
+
+        // Verify anchor that might cause overflows
+        final SubscriptionPlan plan = SubscriptionPlan.Builder
+                .createRecurringMonthly(ZonedDateTime.parse("2012-01-09T00:00:00.00Z"))
+                .setDataUsage(4_939_212_390L, TIME_B).build();
+        assertEquals(4_939_212_386L, getHistory(large, plan, TIME_A, TIME_C).getTotalBytes());
+    }
+
+    public void testRounding() throws Exception {
+        final NetworkStatsCollection coll = new NetworkStatsCollection(HOUR_IN_MILLIS);
+
+        // Special values should remain unchanged
+        for (long time : new long[] {
+                Long.MIN_VALUE, Long.MAX_VALUE, SubscriptionPlan.TIME_UNKNOWN
+        }) {
+            assertEquals(time, coll.roundUp(time));
+            assertEquals(time, coll.roundDown(time));
+        }
+
+        assertEquals(TIME_A, coll.roundUp(TIME_A));
+        assertEquals(TIME_A, coll.roundDown(TIME_A));
+
+        assertEquals(TIME_A + HOUR_IN_MILLIS, coll.roundUp(TIME_A + 1));
+        assertEquals(TIME_A, coll.roundDown(TIME_A + 1));
+
+        assertEquals(TIME_A, coll.roundUp(TIME_A - 1));
+        assertEquals(TIME_A - HOUR_IN_MILLIS, coll.roundDown(TIME_A - 1));
+    }
+
+    public void testMultiplySafe() {
+        assertEquals(25, multiplySafe(50, 1, 2));
+        assertEquals(100, multiplySafe(50, 2, 1));
+
+        assertEquals(-10, multiplySafe(30, -1, 3));
+        assertEquals(0, multiplySafe(30, 0, 3));
+        assertEquals(10, multiplySafe(30, 1, 3));
+        assertEquals(20, multiplySafe(30, 2, 3));
+        assertEquals(30, multiplySafe(30, 3, 3));
+        assertEquals(40, multiplySafe(30, 4, 3));
+
+        assertEquals(100_000_000_000L,
+                multiplySafe(300_000_000_000L, 10_000_000_000L, 30_000_000_000L));
+        assertEquals(100_000_000_010L,
+                multiplySafe(300_000_000_000L, 10_000_000_001L, 30_000_000_000L));
+        assertEquals(823_202_048L,
+                multiplySafe(4_939_212_288L, 2_121_815_528L, 12_730_893_165L));
     }
 
     /**
@@ -235,28 +519,50 @@ public class NetworkStatsCollectionTest extends AndroidTestCase {
         }
     }
 
+    private static NetworkStatsHistory getHistory(NetworkStatsCollection collection,
+            SubscriptionPlan augmentPlan, long start, long end) {
+        return collection.getHistory(buildTemplateMobileAll(TEST_IMSI), augmentPlan, UID_ALL,
+                SET_ALL, TAG_NONE, FIELD_ALL, start, end, NetworkStatsAccess.Level.DEVICE, myUid());
+    }
+
     private static void assertSummaryTotal(NetworkStatsCollection collection,
             NetworkTemplate template, long rxBytes, long rxPackets, long txBytes, long txPackets,
             @NetworkStatsAccess.Level int accessLevel) {
-        final NetworkStats.Entry entry = collection.getSummary(
-                template, Long.MIN_VALUE, Long.MAX_VALUE, accessLevel)
+        final NetworkStats.Entry actual = collection.getSummary(
+                template, Long.MIN_VALUE, Long.MAX_VALUE, accessLevel, myUid())
                 .getTotal(null);
-        assertEntry(entry, rxBytes, rxPackets, txBytes, txPackets);
+        assertEntry(rxBytes, rxPackets, txBytes, txPackets, actual);
     }
 
     private static void assertSummaryTotalIncludingTags(NetworkStatsCollection collection,
             NetworkTemplate template, long rxBytes, long rxPackets, long txBytes, long txPackets) {
-        final NetworkStats.Entry entry = collection.getSummary(
-                template, Long.MIN_VALUE, Long.MAX_VALUE, NetworkStatsAccess.Level.DEVICE)
+        final NetworkStats.Entry actual = collection.getSummary(
+                template, Long.MIN_VALUE, Long.MAX_VALUE, NetworkStatsAccess.Level.DEVICE, myUid())
                 .getTotalIncludingTags(null);
-        assertEntry(entry, rxBytes, rxPackets, txBytes, txPackets);
+        assertEntry(rxBytes, rxPackets, txBytes, txPackets, actual);
     }
 
-    private static void assertEntry(
-            NetworkStats.Entry entry, long rxBytes, long rxPackets, long txBytes, long txPackets) {
-        assertEquals("unexpected rxBytes", rxBytes, entry.rxBytes);
-        assertEquals("unexpected rxPackets", rxPackets, entry.rxPackets);
-        assertEquals("unexpected txBytes", txBytes, entry.txBytes);
-        assertEquals("unexpected txPackets", txPackets, entry.txPackets);
+    private static void assertEntry(long rxBytes, long rxPackets, long txBytes, long txPackets,
+            NetworkStats.Entry actual) {
+        assertEntry(new NetworkStats.Entry(rxBytes, rxPackets, txBytes, txPackets, 0L), actual);
+    }
+
+    private static void assertEntry(long rxBytes, long rxPackets, long txBytes, long txPackets,
+            NetworkStatsHistory.Entry actual) {
+        assertEntry(new NetworkStats.Entry(rxBytes, rxPackets, txBytes, txPackets, 0L), actual);
+    }
+
+    private static void assertEntry(NetworkStats.Entry expected,
+            NetworkStatsHistory.Entry actual) {
+        assertEntry(expected, new NetworkStats.Entry(actual.rxBytes, actual.rxPackets,
+                actual.txBytes, actual.txPackets, 0L));
+    }
+
+    private static void assertEntry(NetworkStats.Entry expected,
+            NetworkStats.Entry actual) {
+        assertEquals("unexpected rxBytes", expected.rxBytes, actual.rxBytes);
+        assertEquals("unexpected rxPackets", expected.rxPackets, actual.rxPackets);
+        assertEquals("unexpected txBytes", expected.txBytes, actual.txBytes);
+        assertEquals("unexpected txPackets", expected.txPackets, actual.txPackets);
     }
 }

@@ -68,7 +68,7 @@
     <string name="usb_debugging_message" msgid="2220143855912376496">"‏الملف المرجعي الرئيسي لـ RSA في هذا الكمبيوتر هو:\n<xliff:g id="FINGERPRINT">%1$s</xliff:g>"</string>
     <string name="usb_debugging_always" msgid="303335496705863070">"السماح دائمًا من هذا الكمبيوتر"</string>
     <string name="usb_debugging_secondary_user_title" msgid="6353808721761220421">"‏لا يُسمح بتصحيح أخطاء USB"</string>
-    <string name="usb_debugging_secondary_user_message" msgid="8572228137833020196">"‏لا يمكن للمستخدم الذي يسجّل دخوله حاليًا إلى هذا الجهاز تشغيل تصحيح أخطاء USB. لاستخدام هذه الميزة، يمكنك التبديل إلى مستخدم مشرف."</string>
+    <string name="usb_debugging_secondary_user_message" msgid="6067122453571699801">"‏لا يمكن للمستخدم الذي يسجّل دخوله حاليًا إلى هذا الجهاز تشغيل تصحيح أخطاء USB. لاستخدام هذه الميزة، يمكنك التبديل إلى المستخدم الأساسي."</string>
     <string name="compat_mode_on" msgid="6623839244840638213">"تكبير/تصغير لملء الشاشة"</string>
     <string name="compat_mode_off" msgid="4434467572461327898">"توسيع بملء الشاشة"</string>
     <string name="screenshot_saving_ticker" msgid="7403652894056693515">"جارٍ حفظ لقطة الشاشة..."</string>
@@ -169,7 +169,7 @@
     <string name="accessibility_battery_level_charging" msgid="1147587904439319646">"جارٍ شحن البطارية، <xliff:g id="BATTERY_PERCENTAGE">%d</xliff:g> بالمائة."</string>
     <string name="accessibility_settings_button" msgid="799583911231893380">"إعدادات النظام."</string>
     <string name="accessibility_notifications_button" msgid="4498000369779421892">"الإشعارات."</string>
-    <string name="accessibility_overflow_action" msgid="5681882033274783311">"الاطلاع على جميع الإشعارات"</string>
+    <string name="accessibility_overflow_action" msgid="5681882033274783311">"الاطّلاع على جميع الإشعارات"</string>
     <string name="accessibility_remove_notification" msgid="3603099514902182350">"محو الإشعار."</string>
     <string name="accessibility_gps_enabled" msgid="3511469499240123019">"‏تم تمكين GPS."</string>
     <string name="accessibility_gps_acquiring" msgid="8959333351058967158">"‏الحصول على GPS."</string>
@@ -361,10 +361,10 @@
     <string name="description_target_search" msgid="3091587249776033139">"بحث"</string>
     <string name="description_direction_up" msgid="7169032478259485180">"تمرير لأعلى لـ <xliff:g id="TARGET_DESCRIPTION">%s</xliff:g>."</string>
     <string name="description_direction_left" msgid="7207478719805562165">"تمرير لليسار لـ <xliff:g id="TARGET_DESCRIPTION">%s</xliff:g>."</string>
-    <string name="zen_priority_introduction" msgid="7577965386868311310">"لن يتم إزعاجك بالأصوات والاهتزاز، عدا من التنبيهات والتذكيرات والأحداث والمتصلين الذين تحددهم. وسيظل بإمكانك سماع أي عناصر أخرى تختار تشغيلها، بما في ذلك الموسيقى ومقاطع الفيديو والألعاب."</string>
-    <string name="zen_alarms_introduction" msgid="7034415210361973827">"لن يتم إزعاجك بالأصوات والاهتزاز، عدا من التنبيهات. وسيظل بإمكانك سماع أي عناصر أخرى تختار تشغيلها، بما في ذلك الموسيقى ومقاطع الفيديو والألعاب."</string>
+    <string name="zen_priority_introduction" msgid="1149025108714420281">"لن يتم إزعاجك بالأصوات والاهتزاز، باستثناء المُنبِّهات والتذكيرات والأحداث والمتصلين الذين تحددهم. وسيظل بإمكانك سماع أي عناصر أخرى تختار تشغيلها، بما في ذلك الموسيقى ومقاطع الفيديو والألعاب."</string>
+    <string name="zen_alarms_introduction" msgid="4934328096749380201">"لن يتم إزعاجك بالأصوات والاهتزاز، باستثناء المُنبِّهات. وسيظل بإمكانك سماع أي عناصر أخرى تختار تشغيلها، بما في ذلك الموسيقى ومقاطع الفيديو والألعاب."</string>
     <string name="zen_priority_customize_button" msgid="7948043278226955063">"تخصيص"</string>
-    <string name="zen_silence_introduction_voice" msgid="2284540992298200729">"سيؤدي هذا إلى حظر جميع الأصوات والاهتزازات، بما في ذلك ما يرد من التنبيهات والموسيقى والفيديو والألعاب. إلا أنه سيظل بإمكانك إجراء مكالمات هاتفية."</string>
+    <string name="zen_silence_introduction_voice" msgid="3948778066295728085">"سيؤدي هذا إلى منع صدور جميع الأصوات والاهتزازات، بما في ذلك المُنبِّهات والموسيقى ومقاطع الفيديو والألعاب. وسيظل بإمكانك إجراء مكالمات هاتفية."</string>
     <string name="zen_silence_introduction" msgid="3137882381093271568">"سيؤدي هذا إلى حظر جميع الأصوات والاهتزازات، بما في ذلك ما يرد من التنبيهات والموسيقى والفيديو والألعاب."</string>
     <string name="keyguard_more_overflow_text" msgid="9195222469041601365">"+<xliff:g id="NUMBER_OF_NOTIFICATIONS">%d</xliff:g>"</string>
     <string name="speed_bump_explanation" msgid="1288875699658819755">"الإشعارات الأقل إلحاحًا أدناه"</string>
@@ -464,7 +464,7 @@
     <string name="monitoring_description_do_learn_more" msgid="1849514470437907421">"مزيد من المعلومات"</string>
     <string name="monitoring_description_do_body_vpn" msgid="8255218762488901796">"لقد اتصلت بتطبيق <xliff:g id="VPN_APP">%1$s</xliff:g>، الذي يمكن أن يراقب نشاط الشبكة، بما في ذلك رسائل البريد الإلكتروني والتطبيقات والمواقع الإلكترونية."</string>
     <string name="monitoring_description_vpn_settings_separator" msgid="1933186756733474388">" "</string>
-    <string name="monitoring_description_vpn_settings" msgid="8869300202410505143">"‏فتح إعدادات الشبكة الافتراضية الخاصة (VPN)"</string>
+    <string name="monitoring_description_vpn_settings" msgid="6434859242636063861">"‏فتح إعدادات الشبكة الافتراضية الخاصة (VPN)"</string>
     <string name="monitoring_description_ca_cert_settings_separator" msgid="4987350385906393626">" "</string>
     <string name="monitoring_description_ca_cert_settings" msgid="5489969458872997092">"فتح بيانات الاعتماد الموثوق بها"</string>
     <string name="monitoring_description_network_logging" msgid="7223505523384076027">"شغَّل المشرف ميزة تسجيل بيانات الشبكة، والتي يتم من خلالها مراقبة حركة البيانات على جهازك.\n\nللحصول على المزيد من المعلومات، اتصل بالمشرف."</string>
@@ -480,7 +480,7 @@
     <string name="keyguard_indication_trust_managed" msgid="8319646760022357585">"<xliff:g id="TRUST_AGENT">%1$s</xliff:g> قيد التشغيل"</string>
     <string name="keyguard_indication_trust_disabled" msgid="7412534203633528135">"سيظل الجهاز مقفلاً إلى أن يتم إلغاء قفله يدويًا"</string>
     <string name="hidden_notifications_title" msgid="7139628534207443290">"الحصول على الإشعارات بشكل أسرع"</string>
-    <string name="hidden_notifications_text" msgid="2326409389088668981">"الاطلاع عليها قبل إلغاء القفل"</string>
+    <string name="hidden_notifications_text" msgid="2326409389088668981">"الاطّلاع عليها قبل إلغاء القفل"</string>
     <string name="hidden_notifications_cancel" msgid="3690709735122344913">"لا، شكرًا"</string>
     <string name="hidden_notifications_setup" msgid="41079514801976810">"إعداد"</string>
     <string name="zen_mode_and_condition" msgid="4462471036429759903">"<xliff:g id="ZEN_MODE">%1$s</xliff:g>. <xliff:g id="EXIT_CONDITION">%2$s</xliff:g>"</string>
@@ -564,12 +564,12 @@
     <string name="notification_default_channel_desc" msgid="2506053815870808359">"لا يحتوي هذا التطبيق على فئات إشعار"</string>
     <string name="notification_unblockable_desc" msgid="3561016061737896906">"لا يمكن إيقاف الإشعارات من هذا التطبيق"</string>
     <plurals name="notification_num_channels_desc" formatted="false" msgid="5492793452274077663">
-      <item quantity="zero">1 من إجمالي <xliff:g id="NUMBER_1">%d</xliff:g> فئة إشعار من هذا التطبيق</item>
-      <item quantity="two">1 من إجمالي فئتي إشعار (<xliff:g id="NUMBER_1">%d</xliff:g>) من هذا التطبيق</item>
-      <item quantity="few">1 من إجمالي <xliff:g id="NUMBER_1">%d</xliff:g> فئات إشعار من هذا التطبيق</item>
-      <item quantity="many">1 من إجمالي <xliff:g id="NUMBER_1">%d</xliff:g> فئة إشعار من هذا التطبيق</item>
-      <item quantity="other">1 من إجمالي <xliff:g id="NUMBER_1">%d</xliff:g> فئة إشعار من هذا التطبيق</item>
-      <item quantity="one">1 من إجمالي <xliff:g id="NUMBER_0">%d</xliff:g> فئة إشعار من هذا التطبيق</item>
+      <item quantity="zero">1 من إجمالي <xliff:g id="NUMBER_1">%s</xliff:g> فئة إشعار من هذا التطبيق</item>
+      <item quantity="two">1 من إجمالي فئتي إشعار (<xliff:g id="NUMBER_1">%s</xliff:g>) من هذا التطبيق</item>
+      <item quantity="few">1 من إجمالي <xliff:g id="NUMBER_1">%s</xliff:g> فئات إشعار من هذا التطبيق</item>
+      <item quantity="many">1 من إجمالي <xliff:g id="NUMBER_1">%s</xliff:g> فئة إشعار من هذا التطبيق</item>
+      <item quantity="other">1 من إجمالي <xliff:g id="NUMBER_1">%s</xliff:g> فئة إشعار من هذا التطبيق</item>
+      <item quantity="one">1 من إجمالي <xliff:g id="NUMBER_0">%s</xliff:g> فئة إشعار من هذا التطبيق</item>
     </plurals>
     <string name="notification_channels_list_desc_2" msgid="6214732715833946441">"<xliff:g id="CHANNEL_NAME_1">%1$s</xliff:g>، <xliff:g id="CHANNEL_NAME_2">%2$s</xliff:g>"</string>
     <plurals name="notification_channels_list_desc_2_and_others" formatted="false" msgid="2747813553355336157">
@@ -609,8 +609,8 @@
       <item quantity="one">دقيقة واحدة</item>
     </plurals>
     <string name="battery_panel_title" msgid="7944156115535366613">"استخدام البطارية"</string>
-    <string name="battery_detail_charging_summary" msgid="1279095653533044008">"وضع توفير شحن البطارية غير متاح أثناء الشحن."</string>
-    <string name="battery_detail_switch_title" msgid="6285872470260795421">"توفير شحن البطارية"</string>
+    <string name="battery_detail_charging_summary" msgid="4055327085770378335">"توفير شحن البطارية غير متاح أثناء الشحن"</string>
+    <string name="battery_detail_switch_title" msgid="8763441006881907058">"توفير شحن البطارية"</string>
     <string name="battery_detail_switch_summary" msgid="9049111149407626804">"لخفض مستوى الأداء وبيانات الخلفية"</string>
     <string name="keyboard_key_button_template" msgid="6230056639734377300">"الزر <xliff:g id="NAME">%1$s</xliff:g>"</string>
     <string name="keyboard_key_home" msgid="2243500072071305073">"Home"</string>
@@ -750,9 +750,9 @@
     <string name="pip_phone_minimize" msgid="1079119422589131792">"تصغير"</string>
     <string name="pip_phone_close" msgid="8416647892889710330">"إغلاق"</string>
     <string name="pip_phone_dismiss_hint" msgid="6351678169095923899">"اسحب لأسفل للإلغاء"</string>
-    <string name="pip_menu_title" msgid="3328510504196964712">"قائمة صورة داخل صورة"</string>
+    <string name="pip_menu_title" msgid="4707292089961887657">"القائمة"</string>
     <string name="pip_notification_title" msgid="3204024940158161322">"<xliff:g id="NAME">%s</xliff:g> يظهر في صورة داخل صورة"</string>
-    <string name="pip_notification_message" msgid="4171698133469539591">"إذا كنت لا تريد أن يستخدم <xliff:g id="NAME">%s</xliff:g> هذه الميزة، فانقر لفتح الإعدادات، ثم اختر تعطيلها."</string>
+    <string name="pip_notification_message" msgid="5619512781514343311">"إذا كنت لا تريد أن يستخدم <xliff:g id="NAME">%s</xliff:g> هذه الميزة، فانقر لفتح الإعدادات، ثم أوقِف تشغيل هذه الميزة."</string>
     <string name="pip_play" msgid="1417176722760265888">"تشغيل"</string>
     <string name="pip_pause" msgid="8881063404466476571">"إيقاف مؤقت"</string>
     <string name="pip_skip_to_next" msgid="1948440006726306284">"التخطي إلى التالي"</string>
@@ -778,6 +778,7 @@
     <string name="tuner_menu" msgid="191640047241552081">"القائمة"</string>
     <string name="tuner_app" msgid="3507057938640108777">"تطبيق <xliff:g id="APP">%1$s</xliff:g>"</string>
     <string name="notification_channel_alerts" msgid="4496839309318519037">"التنبيهات"</string>
+    <string name="notification_channel_battery" msgid="5786118169182888462">"البطارية"</string>
     <string name="notification_channel_screenshot" msgid="6314080179230000938">"لقطات الشاشة"</string>
     <string name="notification_channel_general" msgid="4525309436693914482">"رسائل عامة"</string>
     <string name="notification_channel_storage" msgid="3077205683020695313">"سعة التخزين"</string>
@@ -798,4 +799,5 @@
     <string name="running_foreground_services_title" msgid="381024150898615683">"التطبيقات التي تعمل في الخلفية"</string>
     <string name="running_foreground_services_msg" msgid="6326247670075574355">"انقر للحصول على تفاصيل حول البطارية واستخدام البيانات"</string>
     <string name="data_usage_disable_mobile" msgid="5116269981510015864">"هل تريد إيقاف تشغيل بيانات الجوال؟"</string>
+    <string name="touch_filtered_warning" msgid="8671693809204767551">"لا يمكن للإعدادات التحقق من ردك لأن هناك تطبيقًا يحجب طلب الإذن."</string>
 </resources>

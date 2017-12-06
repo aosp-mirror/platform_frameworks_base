@@ -113,8 +113,8 @@ public final class CompanionDeviceManager {
      *
      * <p>If your app needs to be excluded from battery optimizations (run in the background)
      * or to have unrestricted data access (use data in the background) you can declare that
-     * you use the {@link android.Manifest.permission#RUN_IN_BACKGROUND} and {@link
-     * android.Manifest.permission#USE_DATA_IN_BACKGROUND} respectively. Note that these
+     * you use the {@link android.Manifest.permission#REQUEST_COMPANION_RUN_IN_BACKGROUND} and {@link
+     * android.Manifest.permission#REQUEST_COMPANION_USE_DATA_IN_BACKGROUND} respectively. Note that these
      * special capabilities have a negative effect on the device's battery and user's data
      * usage, therefore you should requested them when absolutely necessary.</p>
      *

@@ -70,7 +70,6 @@ import android.util.ArraySet;
 import android.util.Log;
 import android.util.TypedValue;
 import android.view.KeyEvent;
-import android.view.MotionEvent;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.view.View.OnFocusChangeListener;
@@ -101,6 +100,7 @@ import com.android.printspooler.util.ApprovedPrintServices;
 import com.android.printspooler.util.MediaSizeUtils;
 import com.android.printspooler.util.MediaSizeUtils.MediaSizeComparator;
 import com.android.printspooler.util.PageRangeUtils;
+import com.android.printspooler.widget.ClickInterceptSpinner;
 import com.android.printspooler.widget.PrintContentView;
 import com.android.printspooler.widget.PrintContentView.OptionsStateChangeListener;
 import com.android.printspooler.widget.PrintContentView.OptionsStateController;
@@ -200,7 +200,7 @@ public class PrintActivity extends Activity implements RemotePrintDocument.Updat
     private TextView mPageRangeTitle;
     private EditText mPageRangeEditText;
 
-    private Spinner mDestinationSpinner;
+    private ClickInterceptSpinner mDestinationSpinner;
     private DestinationAdapter mDestinationSpinnerAdapter;
     private boolean mShowDestinationPrompt;
 
@@ -1383,19 +1383,14 @@ public class PrintActivity extends Activity implements RemotePrintDocument.Updat
             mSummaryCopies.setEnabled(false);
             mSummaryPaperSize.setEnabled(false);
 
-            mDestinationSpinner.setOnTouchListener(new View.OnTouchListener() {
-                @Override
-                public boolean onTouch(View v, MotionEvent event) {
-                    mShowDestinationPrompt = false;
-                    mSummaryCopies.setEnabled(true);
-                    mSummaryPaperSize.setEnabled(true);
-                    updateOptionsUi();
+            mDestinationSpinner.setPerformClickListener((v) -> {
+                mShowDestinationPrompt = false;
+                mSummaryCopies.setEnabled(true);
+                mSummaryPaperSize.setEnabled(true);
+                updateOptionsUi();
 
-                    mDestinationSpinner.setOnTouchListener(null);
-                    mDestinationSpinnerAdapter.notifyDataSetChanged();
-
-                    return false;
-                }
+                mDestinationSpinner.setPerformClickListener(null);
+                mDestinationSpinnerAdapter.notifyDataSetChanged();
             });
         }
     }

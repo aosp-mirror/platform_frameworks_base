@@ -21,24 +21,8 @@
 <resources xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
     <string name="byteShort" msgid="8340973892742019101">"பை."</string>
-    <string name="kilobyteShort" msgid="7542884022844556968">"கி.பை."</string>
-    <string name="megabyteShort" msgid="6355851576770428922">"மெ.பை."</string>
-    <string name="gigabyteShort" msgid="3259882455212193214">"ஜி.பை."</string>
-    <string name="terabyteShort" msgid="231613018159186962">"டெ.பை."</string>
     <string name="petabyteShort" msgid="5637816680144990219">"பெ.பை."</string>
     <string name="fileSizeSuffix" msgid="8897567456150907538">"<xliff:g id="NUMBER">%1$s</xliff:g> <xliff:g id="UNIT">%2$s</xliff:g>"</string>
-    <string name="durationDays" msgid="6652371460511178259">"<xliff:g id="DAYS">%1$d</xliff:g> நாட்கள்"</string>
-    <string name="durationDayHours" msgid="2713107458736744435">"<xliff:g id="DAYS">%1$d</xliff:g> நாள் <xliff:g id="HOURS">%2$d</xliff:g> ம.நே."</string>
-    <string name="durationDayHour" msgid="7293789639090958917">"<xliff:g id="DAYS">%1$d</xliff:g> நாள் <xliff:g id="HOURS">%2$d</xliff:g> ம.நே."</string>
-    <string name="durationHours" msgid="4266858287167358988">"<xliff:g id="HOURS">%1$d</xliff:g> ம.நே."</string>
-    <string name="durationHourMinutes" msgid="9029176248692041549">"<xliff:g id="HOURS">%1$d</xliff:g> ம.நே. <xliff:g id="MINUTES">%2$d</xliff:g> நிமி."</string>
-    <string name="durationHourMinute" msgid="2741677355177402539">"<xliff:g id="HOURS">%1$d</xliff:g> மநே <xliff:g id="MINUTES">%2$d</xliff:g> நிமி"</string>
-    <string name="durationMinutes" msgid="3134226679883579347">"<xliff:g id="MINUTES">%1$d</xliff:g> நிமிடங்கள்"</string>
-    <string name="durationMinute" msgid="7155301744174623818">"<xliff:g id="MINUTES">%1$d</xliff:g> நிமி."</string>
-    <string name="durationMinuteSeconds" msgid="1424656185379003751">"<xliff:g id="MINUTES">%1$d</xliff:g> நிமி <xliff:g id="SECONDS">%2$d</xliff:g> வி"</string>
-    <string name="durationMinuteSecond" msgid="3989228718067466680">"<xliff:g id="MINUTES">%1$d</xliff:g> நிமி <xliff:g id="SECONDS">%2$d</xliff:g> வி"</string>
-    <string name="durationSeconds" msgid="8050088505238241405">"<xliff:g id="SECONDS">%1$d</xliff:g> வினாடிகள்"</string>
-    <string name="durationSecond" msgid="985669622276420331">"<xliff:g id="SECONDS">%1$d</xliff:g> வினாடி"</string>
     <string name="untitled" msgid="4638956954852782576">"&lt;பெயரிடப்படாதது&gt;"</string>
     <string name="emptyPhoneNumber" msgid="7694063042079676517">"(தொலைபேசி எண் இல்லை)"</string>
     <string name="unknownName" msgid="6867811765370350269">"அறியப்படாதவர்"</string>
@@ -95,11 +79,13 @@
     <string name="RestrictedOnAllVoiceTitle" msgid="158800171499150681">"குரல்/அவசரச் சேவை இல்லை"</string>
     <string name="RestrictedStateContent" msgid="4278821484643362350">"தற்காலிகமாக உங்கள் இருப்பிடத்தில் மொபைல் நெட்வொர்க் வழங்கவில்லை"</string>
     <string name="NetworkPreferenceSwitchTitle" msgid="4008877505368566980">"நெட்வொர்க்குடன் இணைக்க முடியவில்லை"</string>
-    <string name="NetworkPreferenceSwitchSummary" msgid="4164230263214915351">"பெறுதலை மேம்படுத்த, சாதனம் &gt; நெட்வொர்க் &amp; இணையம் &gt; மொபைல் நெட்வொர்க்குகள் &gt; விரும்பும் நெட்வொர்க் வகை என்பதற்குச் சென்று, தேர்ந்தெடுத்த வகையை மாற்றவும்."</string>
+    <string name="NetworkPreferenceSwitchSummary" msgid="1203771446683319957">"பெறுதலை மேம்படுத்த, அமைப்புகள் &gt; நெட்வொர்க் &amp; இணையம் &gt; மொபைல் நெட்வொர்க்குகள் &gt; விரும்பும் நெட்வொர்க் வகை என்பதற்குச் சென்று, தேர்ந்தெடுத்த வகையை மாற்றவும்."</string>
+    <string name="EmergencyCallWarningTitle" msgid="4790413876281901612">"வைஃபை அழைப்பு இயக்கத்தில் உள்ளது"</string>
+    <string name="EmergencyCallWarningSummary" msgid="8973232888021643293">"அவசர அழைப்புகளுக்கு, மொபைல் நெட்வொர்க் தேவை."</string>
     <string name="notification_channel_network_alert" msgid="4427736684338074967">"விழிப்பூட்டல்கள்"</string>
     <string name="notification_channel_call_forward" msgid="2419697808481833249">"அழைப்புப் பகிர்வு"</string>
     <string name="notification_channel_emergency_callback" msgid="6686166232265733921">"அவசரகாலத் திரும்ப அழைக்கும் பயன்முறை"</string>
-    <string name="notification_channel_mobile_data_alert" msgid="6130875231721406231">"மொபைல் டேட்டா விழிப்பூட்டல்கள்"</string>
+    <string name="notification_channel_mobile_data_status" msgid="4575131690860945836">"மொபைல் டேட்டாவின் நிலை"</string>
     <string name="notification_channel_sms" msgid="3441746047346135073">"SMS செய்திகள்"</string>
     <string name="notification_channel_voice_mail" msgid="3954099424160511919">"குரலஞ்சல் செய்திகள்"</string>
     <string name="notification_channel_wfc" msgid="2130802501654254801">"வைஃபை அழைப்பு"</string>
@@ -324,7 +310,7 @@
     <string name="permlab_subscribedFeedsRead" msgid="4756609637053353318">"குழுசேர்ந்த ஊட்டங்களைப் படித்தல்"</string>
     <string name="permdesc_subscribedFeedsRead" msgid="5557058907906144505">"தற்போது ஒத்திசைந்த ஊட்டங்களைப் பற்றிய விவரங்களைப் பெற பயன்பாட்டை அனுமதிக்கிறது."</string>
     <string name="permlab_sendSms" msgid="7544599214260982981">"SMS செய்திகளை அனுப்புதல் மற்றும் பார்த்தல்"</string>
-    <string name="permdesc_sendSms" msgid="7094729298204937667">"SMS செய்திகளை அனுப்ப பயன்பாட்டை அனுமதிக்கிறது. இதற்கு எதிர்பாராத கட்டணங்கள் விதிக்கப்படலாம். தீங்கு விளைவிக்கும் பயன்பாடுகள் உங்களின் உறுதிப்படுத்தல் எதுவுமின்றி செய்திகளை அனுப்பி உங்களுக்குக் கட்டணம் விதிக்கலாம்."</string>
+    <string name="permdesc_sendSms" msgid="7094729298204937667">"SMS செய்திகளை அனுப்ப பயன்பாட்டை அனுமதிக்கிறது. இதற்கு எதிர்பாராத பேமெண்ட்கள் விதிக்கப்படலாம். தீங்கு விளைவிக்கும் பயன்பாடுகள் உங்களின் உறுதிப்படுத்தல் எதுவுமின்றி செய்திகளை அனுப்பி உங்களுக்குக் கட்டணம் விதிக்கலாம்."</string>
     <string name="permlab_readSms" msgid="8745086572213270480">"உங்கள் உரைச் செய்திகளை (SMS அல்லது MMS) படித்தல்"</string>
     <string name="permdesc_readSms" product="tablet" msgid="4741697454888074891">"இந்தப் பயன்பாடு உங்கள் டேப்லெட்டில் சேமிக்கப்பட்டுள்ள எல்லா SMS (உரை) செய்திகளையும் படிக்கலாம்."</string>
     <string name="permdesc_readSms" product="tv" msgid="5796670395641116592">"இந்தப் பயன்பாடு உங்கள் டிவியில் சேமிக்கப்பட்டுள்ள எல்லா SMS (உரை) செய்திகளையும் படிக்கலாம்."</string>
@@ -1119,7 +1105,7 @@
     <string name="wifi_no_internet" msgid="8451173622563841546">"வைஃபை இணைய அணுகல் கொண்டிருக்கவில்லை"</string>
     <string name="wifi_no_internet_detailed" msgid="8083079241212301741">"விருப்பங்களுக்கு, தட்டவும்"</string>
     <string name="network_switch_metered" msgid="4671730921726992671">"<xliff:g id="NETWORK_TYPE">%1$s</xliff:g>க்கு மாற்றப்பட்டது"</string>
-    <string name="network_switch_metered_detail" msgid="5325661434777870353">"<xliff:g id="PREVIOUS_NETWORK">%2$s</xliff:g> இல் இணைய அணுகல் இல்லாததால், சாதனமானது <xliff:g id="NEW_NETWORK">%1$s</xliff:g>ஐப் பயன்படுத்துகிறது. கட்டணங்கள் விதிக்கப்படலாம்."</string>
+    <string name="network_switch_metered_detail" msgid="5325661434777870353">"<xliff:g id="PREVIOUS_NETWORK">%2$s</xliff:g> இல் இணைய அணுகல் இல்லாததால், சாதனமானது <xliff:g id="NEW_NETWORK">%1$s</xliff:g>ஐப் பயன்படுத்துகிறது. பேமெண்ட்கள் விதிக்கப்படலாம்."</string>
     <string name="network_switch_metered_toast" msgid="5779283181685974304">"<xliff:g id="PREVIOUS_NETWORK">%1$s</xliff:g> இலிருந்து <xliff:g id="NEW_NETWORK">%2$s</xliff:g>க்கு மாற்றப்பட்டது"</string>
   <string-array name="network_switch_type_name">
     <item msgid="3979506840912951943">"மொபைல் டேட்டா"</item>
@@ -1184,7 +1170,7 @@
     <string name="no_permissions" msgid="7283357728219338112">"அனுமதிகள் தேவையில்லை"</string>
     <string name="perm_costs_money" msgid="4902470324142151116">"இதனால் நீங்கள் கட்டணம் செலுத்த வேண்டியிருக்கலாம்"</string>
     <string name="dlg_ok" msgid="7376953167039865701">"சரி"</string>
-    <string name="usb_charging_notification_title" msgid="6895185153353640787">"இந்தச் சாதனத்தை USB சார்ஜ் செய்கிறது"</string>
+    <string name="usb_charging_notification_title" msgid="6895185153353640787">"சாதனம் USB சார்ஜிங் செய்யப்படுகிறது"</string>
     <string name="usb_supplying_notification_title" msgid="5310642257296510271">"இணைத்துள்ள சாதனத்திற்கு USB சக்தி அளிக்கிறது"</string>
     <string name="usb_mtp_notification_title" msgid="8396264943589760855">"USB, கோப்புப் பரிமாற்றத்துக்கு மட்டும்"</string>
     <string name="usb_ptp_notification_title" msgid="1347328437083192112">"USB, படப் பரிமாற்றத்துக்கு மட்டும்"</string>
@@ -1780,4 +1766,5 @@
     <string name="mmcc_imsi_unknown_in_hlr" msgid="6321202257374418726">"சிம் அமைக்கப்படவில்லை"</string>
     <string name="mmcc_illegal_ms" msgid="2769452751852211112">"சிம் அனுமதிக்கப்படவில்லை"</string>
     <string name="mmcc_illegal_me" msgid="4438696681169345015">"ஃபோன் அனுமதிக்கப்படவில்லை"</string>
+    <string name="popup_window_default_title" msgid="4874318849712115433">"பாப்அப் சாளரம்"</string>
 </resources>

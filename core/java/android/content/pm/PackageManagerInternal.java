@@ -20,7 +20,6 @@ import android.content.ComponentName;
 import android.content.Intent;
 import android.content.pm.PackageManager.ApplicationInfoFlags;
 import android.content.pm.PackageManager.ComponentInfoFlags;
-import android.content.pm.PackageManager.NameNotFoundException;
 import android.content.pm.PackageManager.PackageInfoFlags;
 import android.content.pm.PackageManager.ResolveInfoFlags;
 import android.os.Bundle;
@@ -372,4 +371,16 @@ public abstract class PackageManagerInternal {
 
     /** Whether the binder caller can access instant apps. */
     public abstract boolean canAccessInstantApps(int callingUid, int userId);
+
+    /**
+     * Returns {@code true} if a given package has instant application meta-data.
+     * Otherwise, returns {@code false}. Meta-data is state (eg. cookie, app icon, etc)
+     * associated with an instant app. It may be kept after the instant app has been uninstalled.
+     */
+    public abstract boolean hasInstantApplicationMetadata(String packageName, int userId);
+
+    /**
+     * Updates a package last used time.
+     */
+    public abstract void notifyPackageUse(String packageName, int reason);
 }

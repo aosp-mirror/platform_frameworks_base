@@ -23,12 +23,14 @@
 
 #include "android-base/errors.h"
 #include "android-base/macros.h"
+#include "android-base/utf8.h"
 #include "androidfw/StringPiece.h"
 #include "ziparchive/zip_writer.h"
 
 #include "util/Files.h"
 
-using android::StringPiece;
+using ::android::StringPiece;
+using ::android::base::SystemErrorCodeToString;
 
 namespace aapt {
 
@@ -58,11 +60,11 @@ class DirectoryWriter : public IArchiveWriter {
 
     std::string full_path = dir_;
     file::AppendPath(&full_path, path);
-    file::mkdirs(file::GetStem(full_path));
+    file::mkdirs(file::GetStem(full_path).to_string());
 
-    file_ = {fopen(full_path.data(), "wb"), fclose};
+    file_ = {::android::base::utf8::fopen(full_path.c_str(), "wb"), fclose};
     if (!file_) {
-      error_ = android::base::SystemErrorCodeToString(errno);
+      error_ = SystemErrorCodeToString(errno);
       return false;
     }
     return true;
@@ -74,7 +76,7 @@ class DirectoryWriter : public IArchiveWriter {
     }
 
     if (fwrite(data, 1, len, file_.get()) != static_cast<size_t>(len)) {
-      error_ = android::base::SystemErrorCodeToString(errno);
+      error_ = SystemErrorCodeToString(errno);
       file_.reset(nullptr);
       return false;
     }
@@ -121,9 +123,9 @@ class ZipFileWriter : public IArchiveWriter {
   ZipFileWriter() = default;
 
   bool Open(const StringPiece& path) {
-    file_ = {fopen(path.data(), "w+b"), fclose};
+    file_ = {::android::base::utf8::fopen(path.to_string().c_str(), "w+b"), fclose};
     if (!file_) {
-      error_ = android::base::SystemErrorCodeToString(errno);
+      error_ = SystemErrorCodeToString(errno);
       return false;
     }
     writer_ = util::make_unique<ZipWriter>(file_.get());

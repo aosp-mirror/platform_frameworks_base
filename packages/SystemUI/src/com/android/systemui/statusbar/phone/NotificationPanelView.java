@@ -32,6 +32,7 @@ import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Paint;
 import android.graphics.Rect;
+import android.os.PowerManager;
 import android.util.AttributeSet;
 import android.util.FloatProperty;
 import android.util.MathUtils;
@@ -108,6 +109,7 @@ public class NotificationPanelView extends PanelView implements
                     return object.mDarkAmount;
                 }
             };
+    private final PowerManager mPowerManager;
 
     private KeyguardAffordanceHelper mAffordanceHelper;
     private KeyguardUserSwitcher mKeyguardUserSwitcher;
@@ -153,7 +155,6 @@ public class NotificationPanelView extends PanelView implements
     protected int mQsMinExpansionHeight;
     protected int mQsMaxExpansionHeight;
     private int mQsPeekHeight;
-    private boolean mQsOverscrollExpansionEnabled;
     private boolean mStackScrollerOverscrolling;
     private boolean mQsExpansionFromOverscroll;
     private float mLastOverscroll;
@@ -243,8 +244,7 @@ public class NotificationPanelView extends PanelView implements
         super(context, attrs);
         setWillNotDraw(!DEBUG);
         mFalsingManager = FalsingManager.getInstance(context);
-        mQsOverscrollExpansionEnabled =
-                getResources().getBoolean(R.bool.config_enableQuickSettingsOverscrollExpansion);
+        mPowerManager = context.getSystemService(PowerManager.class);
     }
 
     public void setStatusBar(StatusBar bar) {
@@ -509,7 +509,8 @@ public class NotificationPanelView extends PanelView implements
             if (row.isRemoved()) {
                 continue;
             }
-            availableSpace -= child.getMinHeight() + notificationPadding;
+            availableSpace -= child.getMinHeight(true /* ignoreTemporaryStates */)
+                    + notificationPadding;
             if (availableSpace >= 0 && count < maximum) {
                 count++;
             } else if (availableSpace > -shelfSize) {
@@ -673,7 +674,7 @@ public class NotificationPanelView extends PanelView implements
             return true;
         }
 
-        if (mQsOverscrollExpansionEnabled && !isFullyCollapsed() && onQsIntercept(event)) {
+        if (!isFullyCollapsed() && onQsIntercept(event)) {
             return true;
         }
         return super.onInterceptTouchEvent(event);
@@ -848,8 +849,7 @@ public class NotificationPanelView extends PanelView implements
         }
         handled |= mHeadsUpTouchHelper.onTouchEvent(event);
 
-        if (mQsOverscrollExpansionEnabled && !mHeadsUpTouchHelper.isTrackingHeadsUp()
-                && handleQsTouch(event)) {
+        if (!mHeadsUpTouchHelper.isTrackingHeadsUp() && handleQsTouch(event)) {
             return true;
         }
         if (event.getActionMasked() == MotionEvent.ACTION_DOWN && isFullyCollapsed()) {
@@ -1033,10 +1033,6 @@ public class NotificationPanelView extends PanelView implements
 
     @Override
     public void onOverscrollTopChanged(float amount, boolean isRubberbanded) {
-        if (!mQsOverscrollExpansionEnabled) {
-            return;
-        }
-
         cancelQsAnimation();
         if (!mQsExpansionEnabled) {
             amount = 0f;
@@ -1051,10 +1047,6 @@ public class NotificationPanelView extends PanelView implements
 
     @Override
     public void flingTopOverscroll(float velocity, boolean open) {
-        if (!mQsOverscrollExpansionEnabled) {
-            return;
-        }
-
         mLastOverscroll = 0f;
         mQsExpansionFromOverscroll = false;
         setQsExpansion(mQsExpansionHeight);
@@ -1986,6 +1978,11 @@ public class NotificationPanelView extends PanelView implements
 
     @Override
     protected void startUnlockHintAnimation() {
+        if (mPowerManager.isPowerSaveMode()) {
+            onUnlockHintStarted();
+            onUnlockHintFinished();
+            return;
+        }
         super.startUnlockHintAnimation();
         startHighlightIconAnimation(getCenterIcon());
     }

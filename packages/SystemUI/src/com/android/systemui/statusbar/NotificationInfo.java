@@ -126,7 +126,7 @@ public class NotificationInfo extends LinearLayout implements NotificationGuts.G
                             | PackageManager.MATCH_DIRECT_BOOT_UNAWARE
                             | PackageManager.MATCH_DIRECT_BOOT_AWARE);
             if (info != null) {
-                mAppUid = info.uid;
+                mAppUid = sbn.getUid();
                 mAppName = String.valueOf(pm.getApplicationLabel(info));
                 pkgicon = pm.getApplicationIcon(info);
             }

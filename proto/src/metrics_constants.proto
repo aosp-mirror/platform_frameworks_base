@@ -33,7 +33,7 @@ message MetricsEvent {
     // The view became hidden.
     TYPE_CLOSE = 2;
 
-    // The view switched to detail mode (most relevant for quick settings tiles)
+    // The view switched to detail mode (most relevant for quick settings tiles and notifications)
     TYPE_DETAIL = 3;
 
     // The view or control was activated.
@@ -62,6 +62,17 @@ message MetricsEvent {
 
     // The action failed
     TYPE_FAILURE = 11;
+
+    // Type for APP_TRANSITION_REPORTED_DRAWN event: The activity was started without restoring from
+    // a bundle.
+    TYPE_TRANSITION_REPORTED_DRAWN_NO_BUNDLE = 12;
+
+    // Type for APP_TRANSITION_REPORTED_DRAWN event: The activity was started with restoring from
+    // a bundle.
+    TYPE_TRANSITION_REPORTED_DRAWN_WITH_BUNDLE = 13;
+
+    // The view switched to summary mode (most relevant for notifications)
+    TYPE_COLLAPSE = 14;
   }
 
   // Types of alerts, as bit field values
@@ -148,6 +159,16 @@ message MetricsEvent {
 
     // An external camera was used
     CAMERA_EXTERNAL_USED = 2;
+  }
+
+  // TextClassifier entity types.
+  enum TextClassifierEntityType {
+    TEXT_CLASSIFIER_TYPE_UNKNOWN = 1;
+    TEXT_CLASSIFIER_TYPE_OTHER = 2;
+    TEXT_CLASSIFIER_TYPE_EMAIL = 3;
+    TEXT_CLASSIFIER_TYPE_PHONE = 4;
+    TEXT_CLASSIFIER_TYPE_ADDRESS = 5;
+    TEXT_CLASSIFIER_TYPE_URL = 6;
   }
 
   // Known visual elements: views or controls.
@@ -3519,6 +3540,7 @@ message MetricsEvent {
     NOTIFICATION_SNOOZED_CRITERIA = 832;
 
     // FIELD - The context (source) from which an action is performed
+    // For QS, this is a boolean of whether the panel is expanded
     FIELD_CONTEXT = 833;
 
     // ACTION: Settings advanced button is expanded
@@ -3558,7 +3580,7 @@ message MetricsEvent {
     STORAGE_FILES = 841;
 
     // FIELD - Rank of the clicked Settings search result
-    FIELD_SETTINGS_SERACH_RESULT_RANK = 842;
+    FIELD_SETTINGS_SEARCH_RESULT_RANK = 842;
 
     // OPEN: Settings > Apps > Default Apps > Assist >  Default assist
     DEFAULT_ASSIST_PICKER = 843;
@@ -3829,7 +3851,7 @@ message MetricsEvent {
     // Tag of a field for the length of the filter text
     FIELD_AUTOFILL_FILTERTEXT_LEN = 911;
 
-    // An autofill authentification succeeded
+    // An autofill authentication succeeded
     // Package: Package of app that was autofilled
     AUTOFILL_AUTHENTICATED = 912;
 
@@ -4043,6 +4065,7 @@ message MetricsEvent {
     ASSIST_GESTURE_PRIMED = 998;
 
     // ACTION: Assist gesture triggered
+    //  SUBTYPE: 1 is for SCREEN_ON, 2 is for SCREEN_OFF
     // CATEGORY: GLOBAL_SYSTEM_UI
     // OS: O DR
     ASSIST_GESTURE_TRIGGERED = 999;
@@ -4051,10 +4074,10 @@ message MetricsEvent {
     ACTION_SETTINGS_UPDATE_DEFAULT_APP = 1000;
 
     // FIELD - Query length when Settings search result is clicked
-    FIELD_SETTINGS_SERACH_QUERY_LENGTH = 1001;
+    FIELD_SETTINGS_SEARCH_QUERY_LENGTH = 1001;
 
     // FIELD - Number of results when Settings search result is clicked
-    FIELD_SETTINGS_SERACH_RESULT_COUNT = 1002;
+    FIELD_SETTINGS_SEARCH_RESULT_COUNT = 1002;
 
     // OPEN: Settings > Display > Ambient Display
     // CATEGORY: SETTINGS
@@ -4230,6 +4253,316 @@ message MetricsEvent {
     // CATEGORY: SETTINGS
     // OS: O MR
     ACTION_MOBILE_NETWORK_DATA_USAGE = 1082;
+
+    // FIELD - State of asynchronous ranking when Settings search result is clicked
+    // CATEGORY: SETTINGS
+    // OS: O MR
+    FIELD_SETTINGS_SEARCH_RESULT_ASYNC_RANKING_STATE = 1083;
+
+    // ACTION: Settings > Connected devices > SMS Mirroring
+    // CATEGORY: SETTINGS
+    // OS: O MR
+    ACTION_SETTINGS_SMS_MIRRORING = 1084;
+
+    // ACTION: Chooser picked a ranked target.
+    // CATEGORY: GLOBAL_SYSTEM_UI
+    // OS: O MR
+    ACTION_TARGET_SELECTED = 1085;
+
+    // FIELD - is category used in Chooser: 1.
+    // Type: int encoded boolean
+    // CATEGORY: GLOBAL_SYSTEM_UI
+    // OS: O MR
+    FIELD_IS_CATEGORY_USED = 1086;
+
+    // FIELD - ranked position of selected target for Chooser.
+    // CATEGORY: GLOBAL_SYSTEM_UI
+    // OS: O MR
+    FIELD_RANKED_POSITION = 1087;
+
+    // OPEN: Settings > Data plan usage
+    // CATEGORY: SETTINGS
+    // OS: O MR
+    DATA_PLAN_USAGE_SUMMARY = 1088;
+
+    // FIELD: The numeric preference value (of type int) when it is changed in Settings
+    FIELD_SETTINGS_PREFERENCE_CHANGE_INT_VALUE = 1089;
+
+    // ACTION: Logged when the app has notified that it has fully drawn. See
+    // Activity.reportFullyDrawn().
+    APP_TRANSITION_REPORTED_DRAWN = 1090;
+
+    // FIELD: The delay of the activity reporting to be fully drawn measured from the beginning of
+    // the app transition.
+    APP_TRANSITION_REPORTED_DRAWN_MS = 1091;
+
+    // OPEN: Settings > Storage > Photos & Videos
+    // CATEGORY: SETTINGS
+    // OS: O MR
+    APPLICATIONS_STORAGE_PHOTOS = 1092;
+
+    // ACTION: Logged when the status bar icons change.
+    // OS: O MR
+    STATUS_BAR_ICONS_CHANGED = 1093;
+
+    // FIELD: Bitfield indicating which icons are shown.
+    // OS: O MR
+    FIELD_STATUS_ICONS = 1094;
+
+    // FIELD: Number of status icons currently shown.
+    // OS: O MR
+    FIELD_NUM_STATUS_ICONS = 1095;
+
+    // ACTION: Logged when user tries to pair a Bluetooth device without name from Settings app
+    // CATEGORY: SETTINGS
+    // OS: O MR
+    ACTION_SETTINGS_BLUETOOTH_PAIR_DEVICES_WITHOUT_NAMES = 1096;
+
+    // FIELD - Whether smart suggestion ranking was enabled or not
+    // Type: int encoded boolean
+    // CATEGORY: SETTINGS
+    // OS: O MR
+    FIELD_SETTINGS_SMART_SUGGESTIONS_ENABLED = 1097;
+
+    // ACTION: The device boots
+    ACTION_BOOT = 1098;
+
+    // FIELD: A string value representing some state of the platform, e.g., boot reason
+    FIELD_PLATFORM_REASON = 1099;
+
+    // CATEGORY: The category for all actions relating to selection session logging.
+    // OS: O MR
+    TEXT_SELECTION_SESSION = 1100;
+
+    // ACTION: A selection session started (i.e. the selection handles appeared)
+    // CATEGORY: TEXT_SELECTION_SESSION
+    // OS: O MR
+    ACTION_TEXT_SELECTION_START = 1101;
+
+    // ACTION: The user modified the selection (e.g. by dragging the handles)
+    // CATEGORY: TEXT_SELECTION_SESSION
+    // OS: O MR
+    ACTION_TEXT_SELECTION_MODIFY = 1102;
+
+    // ACTION: The user modified the selection by pressing the "select all" button.
+    // CATEGORY: TEXT_SELECTION_SESSION
+    // OS: O MR
+    ACTION_TEXT_SELECTION_SELECT_ALL = 1103;
+
+    // ACTION: The user modified the selection by pressing on a word in a multi word selection
+    // CATEGORY: TEXT_SELECTION_SESSION
+    // OS: O MR
+    ACTION_TEXT_SELECTION_RESET = 1104;
+
+    // ACTION: Smart selection made a single word prediction
+    // CATEGORY: TEXT_SELECTION_SESSION
+    // OS: O MR
+    ACTION_TEXT_SELECTION_SMART_SINGLE = 1105;
+
+    // ACTION: Smart selection made a multi word prediction
+    // CATEGORY: TEXT_SELECTION_SESSION
+    // OS: O MR
+    ACTION_TEXT_SELECTION_SMART_MULTI = 1106;
+
+    // ACTION: The app made an automatic selection on the user's behalf (not smart selection)
+    // CATEGORY: TEXT_SELECTION_SESSION
+    // OS: O MR
+    ACTION_TEXT_SELECTION_AUTO = 1107;
+
+    // ACTION: A selection session ended with the user typing over the text
+    // CATEGORY: TEXT_SELECTION_SESSION
+    // OS: O MR
+    ACTION_TEXT_SELECTION_OVERTYPE = 1108;
+
+    // ACTION: A selection session ended with the user copying the text
+    // CATEGORY: TEXT_SELECTION_SESSION
+    // OS: O MR
+    ACTION_TEXT_SELECTION_COPY = 1109;
+
+    // ACTION: A selection session ended with the user pasting over the text
+    // CATEGORY: TEXT_SELECTION_SESSION
+    // OS: O MR
+    ACTION_TEXT_SELECTION_PASTE = 1110;
+
+    // ACTION: A selection session ended with the user cutting the text
+    // CATEGORY: TEXT_SELECTION_SESSION
+    // OS: O MR
+    ACTION_TEXT_SELECTION_CUT = 1111;
+
+    // ACTION: A selection session ended with the user pressing the share button
+    // CATEGORY: TEXT_SELECTION_SESSION
+    // OS: O MR
+    ACTION_TEXT_SELECTION_SHARE = 1112;
+
+    // ACTION: A selection session ended with the user pressing the smart share button
+    // CATEGORY: TEXT_SELECTION_SESSION
+    // OS: O MR
+    ACTION_TEXT_SELECTION_SMART_SHARE = 1113;
+
+    // ACTION: A selection session ended with the user dragging the text
+    // CATEGORY: TEXT_SELECTION_SESSION
+    // OS: O MR
+    ACTION_TEXT_SELECTION_DRAG = 1114;
+
+    // ACTION: A selection session ended with the user abandoning the selection
+    // CATEGORY: TEXT_SELECTION_SESSION
+    // OS: O MR
+    ACTION_TEXT_SELECTION_ABANDON = 1115;
+
+    // ACTION: A selection session ended with the user picking an unhandled action bar item
+    // CATEGORY: TEXT_SELECTION_SESSION
+    // OS: O MR
+    ACTION_TEXT_SELECTION_OTHER = 1116;
+
+    // FIELD: Time in milliseconds from the start of the session to this event
+    // CATEGORY: TEXT_SELECTION_SESSION
+    // OS: O MR
+    FIELD_SELECTION_SINCE_START = 1117;
+
+    // FIELD: time in milliseconds between the last event in the session and this one
+    // CATEGORY: TEXT_SELECTION_SESSION
+    // OS: O MR
+    FIELD_SELECTION_SINCE_PREVIOUS = 1118;
+
+    // FIELD: a random uid for a selection session (lasting from select start to end)
+    // CATEGORY: TEXT_SELECTION_SESSION
+    // OS: O MR
+    FIELD_SELECTION_SESSION_ID = 1119;
+
+    // FIELD: the sequence number of the event in the session
+    // CATEGORY: TEXT_SELECTION_SESSION
+    // OS: O MR
+    FIELD_SELECTION_SESSION_INDEX = 1120;
+
+    // FIELD: a concatenation of the widget type and ML model version.
+    // CATEGORY: TEXT_SELECTION_SESSION
+    // OS: O MR
+    FIELD_SELECTION_VERSION_TAG = 1121;
+
+    // FIELD: text select start offset in words (as defined by the ICU BreakIterator), stored as two
+    //        packed 16bit integers. (start in MSBs, end in LSBs)
+    // CATEGORY: TEXT_SELECTION_SESSION
+    // OS: O MR
+    FIELD_SELECTION_RANGE = 1122;
+
+    // FIELD: smart text selection start offset in words (as defined by the ICU BreakIterator),
+    //        stored as two packed 16bit integers. (start in MSBs, end in LSBs)
+    // CATEGORY: TEXT_SELECTION_SESSION
+    // OS: O MR
+    FIELD_SELECTION_SMART_RANGE = 1123;
+
+    // The value of an autofillable and savable view was reset
+    // Package: Package of app that was autofilled
+    // OS: O MR
+    // Tag FIELD_AUTOFILL_SERVICE: Package of service that processed the request
+    // Tag FIELD_AUTOFILL_PREVIOUS_LENGTH: the previous length of the value
+    AUTOFILL_VALUE_RESET = 1124;
+
+    // Tag of AUTOFILL_VALUE_RESET
+    // OS: O MR
+    FIELD_AUTOFILL_PREVIOUS_LENGTH = 1125;
+
+    // An autofill dataset authentication succeeded
+    // Package: Package of app that was autofilled
+    // OS: O MR
+    // Tag FIELD_AUTOFILL_SERVICE: Package of service that processed the request
+    AUTOFILL_DATASET_AUTHENTICATED = 1126;
+
+    // An autofill service provided an invalid dataset authentication
+    // Package: Package of app that was autofilled
+    // OS: O MR
+    // Tag FIELD_AUTOFILL_SERVICE: Package of service that processed the request
+    AUTOFILL_INVALID_DATASET_AUTHENTICATION = 1127;
+
+    // An autofill service provided an invalid authentication extra
+    // Package: Package of app that was autofilled
+    // OS: O MR
+    // Tag FIELD_AUTOFILL_SERVICE: Package of service that processed the request
+    AUTOFILL_INVALID_AUTHENTICATION = 1128;
+
+    // An autofill service used a custom description (using RemoteViews) in the Save affordance
+    // Package: Package of app that is autofilled
+    // OS: O MR
+    // Tag FIELD_AUTOFILL_SERVICE: Package of service that processed the request
+    // Tag FIELD_AUTOFILL_SAVE_TYPE: Type of save object passed by the service
+    AUTOFILL_SAVE_CUSTOM_DESCRIPTION = 1129;
+
+    // FIELD - Type of save object passed by the service when the Save UI is shown
+    // OS: O MR
+    FIELD_AUTOFILL_SAVE_TYPE = 1130;
+
+    // An autofill service used a custom subtitle (String) in the Save affordance
+    // Package: Package of app that is autofilled
+    // OS: O MR
+    // Tag FIELD_AUTOFILL_SERVICE: Package of service that processed the request
+    // Tag FIELD_AUTOFILL_SAVE_TYPE: Type of save object passed by the service
+    AUTOFILL_SAVE_CUSTOM_SUBTITLE = 1131;
+
+    // User tapped a link in the custom description of the Save affordance provided by an autofill service
+    // Package: Package of app that is autofilled
+    // OS: O MR
+    // Type TYPE_UNKNOWN: The link was not properly set by the service
+    // Type TYPE_OPEN: The link launched an activity
+    // Type TYPE_FAILURE: The link could not launc an activity
+    // Tag FIELD_AUTOFILL_SERVICE: Package of service that processed the request
+    // Tag FIELD_AUTOFILL_SAVE_TYPE: Type of save object passed by the service
+    AUTOFILL_SAVE_LINK_TAPPED = 1132;
+
+    // Result of the validation on save when an autofill service provided a validator
+    // Package: Package of app that is autofilled
+    // OS: O MR
+    // Type TYPE_FAILURE: The validation could not be performed due to an error
+    // Type TYPE_SUCCESS: The validation passed
+    // Type TYPE_DISMISS: The validation failed
+    // Tag FIELD_AUTOFILL_SERVICE: Package of service that processed the request
+    // Tag FIELD_AUTOFILL_SAVE_TYPE: Type of save object passed by the service
+    AUTOFILL_SAVE_VALIDATION = 1133;
+
+    // Result of an operation in the autofill save affordance after the user tapped a link in the custom description
+    // provided by the autofill service
+    // Package: Package of app that is autofilled
+    // OS: O MR
+    // Type TYPE_OPEN: The save affordance was restored
+    // Type TYPE_DISMISS: The save affordcance was destroyed
+    // Type TYPE_FAILURE: An invalid opperation was reported by the app's AutofillManager
+    AUTOFILL_PENDING_SAVE_UI_OPERATION = 1134;
+
+    // Autofill service called API that disables itself
+    // Package: Package of the autofill service
+    // OS: O MR
+    AUTOFILL_SERVICE_DISABLED_SELF = 1135;
+
+    // Counter showing how long it took (in ms) to show the autofill UI after a field was focused
+    // Tag FIELD_AUTOFILL_SERVICE: Package of service that processed the request
+    // Package: Package of the autofill service
+    // OS: O MR
+    AUTOFILL_UI_LATENCY = 1136;
+
+    // Action: the snooze leave-behind was shown after the user clicked the snooze icon
+    // OS: O MR
+    NOTIFICATION_SNOOZE_CLICKED = 1137;
+
+    // Action: user selected a notification snooze duration from the drop down
+    // OS: O MR
+    NOTIFICATION_SELECT_SNOOZE = 1138;
+
+    // attached to NOTIFICATION_SNOOZED and NOTIFICATION_SELECT_SNOOZE events
+    // OS: O MR
+    FIELD_NOTIFICATION_SNOOZE_DURATION_MS = 1139;
+
+    // attached to NOTIFICATION_SELECT_SNOOZE events to indicate the option selected
+    // OS: O MR
+    FIELD_NOTIFICATION_SNOOZE_INDEX = 1140;
+
+    // Action: user tapped undo on the notification snooze leave-behind
+    // OS: O MR
+    NOTIFICATION_UNDO_SNOOZE = 1141;
+
+    // Action: user togged the visibility of the notification snooze options drop down
+    // OS: O MR
+    NOTIFICATION_SNOOZE_OPTIONS = 1142;
+
+    // ---- End O-MR1 Constants, all O-MR1 constants go above this line ----
 
     // Add new aosp constants above this line.
     // END OF AOSP CONSTANTS

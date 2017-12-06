@@ -30,8 +30,7 @@ public class CustomEditTextPreference extends EditTextPreference {
 
     private CustomPreferenceDialogFragment mFragment;
 
-    public CustomEditTextPreference(Context context, AttributeSet attrs, int defStyleAttr,
-            int defStyleRes) {
+    public CustomEditTextPreference(Context context, AttributeSet attrs, int defStyleAttr, int defStyleRes) {
         super(context, attrs, defStyleAttr, defStyleRes);
     }
 

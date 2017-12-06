@@ -70,6 +70,8 @@
                 android:textSize="16sp"
                 android:textColor="#eeffffff"
                 android:layout_marginTop="4dp"
+                android:ellipsize="end"
+                android:maxLines="7"
             />
         </LinearLayout>
     </LinearLayout>

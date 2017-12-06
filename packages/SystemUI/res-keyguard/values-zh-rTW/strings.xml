@@ -29,8 +29,7 @@
     <string name="keyguard_password_enter_password_code" msgid="595980919238127672">"輸入密碼即可解鎖"</string>
     <string name="keyguard_password_enter_pin_password_code" msgid="7504123374204446086">"輸入 PIN 碼即可解鎖"</string>
     <string name="keyguard_password_wrong_pin_code" msgid="6535018036285012028">"PIN 碼不正確。"</string>
-    <!-- no translation found for keyguard_sim_error_message_short (592109500618448312) -->
-    <skip />
+    <string name="keyguard_sim_error_message_short" msgid="592109500618448312">"卡片無效。"</string>
     <string name="keyguard_charged" msgid="2222329688813033109">"充電完成"</string>
     <string name="keyguard_plugged_in" msgid="89308975354638682">"充電中"</string>
     <string name="keyguard_plugged_in_charging_fast" msgid="8869226755413795173">"快速充電中"</string>

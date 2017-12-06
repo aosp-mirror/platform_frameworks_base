@@ -69,6 +69,7 @@ import android.os.Bundle;
 import android.os.Process;
 import android.os.UserHandle;
 import android.os.UserManager;
+import android.platform.test.annotations.Presubmit;
 import android.provider.Settings;
 import android.security.KeyChain;
 import android.telephony.TelephonyManager;
@@ -112,6 +113,7 @@ import java.util.concurrent.TimeUnit;
  * runtest -c com.android.server.devicepolicy.DevicePolicyManagerTest frameworks-services
  */
 @SmallTest
+@Presubmit
 public class DevicePolicyManagerTest extends DpmTestBase {
     private static final List<String> OWNER_SETUP_PERMISSIONS = Arrays.asList(
             permission.MANAGE_DEVICE_ADMINS, permission.MANAGE_PROFILE_AND_DEVICE_OWNERS,
@@ -2309,11 +2311,6 @@ public class DevicePolicyManagerTest extends DpmTestBase {
         // restore to the debuggable build state
         getServices().buildMock.isDebuggable = true;
 
-        // Always return the default (second arg) when getting system property for long type
-        when(getServices().systemProperties.getLong(anyString(), anyLong())).thenAnswer(
-                invocation -> invocation.getArguments()[1]
-        );
-
         // reset to default (0 means the admin is not participating, so default should be returned)
         dpm.setRequiredStrongAuthTimeout(admin1, 0);
 
@@ -3656,7 +3653,8 @@ public class DevicePolicyManagerTest extends DpmTestBase {
 
         // test reset password with token
         when(getServices().lockPatternUtils.setLockCredentialWithToken(eq(password),
-                eq(LockPatternUtils.CREDENTIAL_TYPE_PASSWORD), eq(handle), eq(token),
+                eq(LockPatternUtils.CREDENTIAL_TYPE_PASSWORD),
+                eq(DevicePolicyManager.PASSWORD_QUALITY_UNSPECIFIED), eq(handle), eq(token),
                 eq(UserHandle.USER_SYSTEM)))
                 .thenReturn(true);
         assertTrue(dpm.resetPasswordWithToken(admin1, password, token, 0));

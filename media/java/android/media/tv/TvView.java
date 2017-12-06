@@ -22,6 +22,7 @@ import android.annotation.Nullable;
 import android.annotation.RequiresPermission;
 import android.annotation.SystemApi;
 import android.content.Context;
+import android.content.pm.PackageManager;
 import android.graphics.Canvas;
 import android.graphics.PorterDuff;
 import android.graphics.Rect;
@@ -199,6 +200,7 @@ public class TvView extends ViewGroup {
      * @hide
      */
     @SystemApi
+    @RequiresPermission(android.Manifest.permission.CHANGE_HDMI_CEC_ACTIVE_SOURCE)
     public void setMain() {
         synchronized (sMainTvViewLock) {
             sMainTvView = new WeakReference<>(this);
@@ -679,7 +681,8 @@ public class TvView extends ViewGroup {
         // Other app may have shown its own main TvView.
         // Set main again to regain main session.
         synchronized (sMainTvViewLock) {
-            if (hasFocus && this == sMainTvView.get() && mSession != null) {
+            if (hasFocus && this == sMainTvView.get() && mSession != null
+                    && checkChangeHdmiCecActiveSourcePermission()) {
                 mSession.setMain();
             }
         }
@@ -845,6 +848,12 @@ public class TvView extends ViewGroup {
         getMatrix().mapRect(frameF);
         frameF.round(frame);
         return frame;
+    }
+
+    private boolean checkChangeHdmiCecActiveSourcePermission() {
+        return getContext().checkSelfPermission(
+                android.Manifest.permission.CHANGE_HDMI_CEC_ACTIVE_SOURCE)
+                        == PackageManager.PERMISSION_GRANTED;
     }
 
     /**
@@ -1079,7 +1088,8 @@ public class TvView extends ViewGroup {
                 mPendingAppPrivateCommands.clear();
 
                 synchronized (sMainTvViewLock) {
-                    if (hasWindowFocus() && TvView.this == sMainTvView.get()) {
+                    if (hasWindowFocus() && TvView.this == sMainTvView.get()
+                            && checkChangeHdmiCecActiveSourcePermission()) {
                         mSession.setMain();
                     }
                 }

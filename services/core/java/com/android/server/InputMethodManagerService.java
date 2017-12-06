@@ -50,6 +50,7 @@ import org.xmlpull.v1.XmlPullParserException;
 import org.xmlpull.v1.XmlSerializer;
 
 import android.annotation.BinderThread;
+import android.annotation.ColorInt;
 import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
@@ -213,8 +214,7 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
             Context.BIND_AUTO_CREATE
             | Context.BIND_NOT_VISIBLE
             | Context.BIND_NOT_FOREGROUND
-            | Context.BIND_IMPORTANT_BACKGROUND
-            | Context.BIND_SHOWING_UI;
+            | Context.BIND_IMPORTANT_BACKGROUND;
 
     /**
      * Binding flags used only while the {@link InputMethodService} is showing window.
@@ -222,7 +222,8 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
     private static final int IME_VISIBLE_BIND_FLAGS =
             Context.BIND_AUTO_CREATE
             | Context.BIND_TREAT_LIKE_ACTIVITY
-            | Context.BIND_FOREGROUND_SERVICE;
+            | Context.BIND_FOREGROUND_SERVICE
+            | Context.BIND_SHOWING_UI;
 
     @Retention(SOURCE)
     @IntDef({HardKeyboardBehavior.WIRELESS_AFFORDANCE, HardKeyboardBehavior.WIRED_AFFORDANCE})
@@ -230,6 +231,13 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
         int WIRELESS_AFFORDANCE = 0;
         int WIRED_AFFORDANCE = 1;
     }
+
+    /**
+     * A protected broadcast intent action for internal use for {@link PendingIntent} in
+     * the notification.
+     */
+    private static final String ACTION_SHOW_INPUT_METHOD_PICKER =
+            "com.android.server.InputMethodManagerService.SHOW_INPUT_METHOD_PICKER";
 
     final Context mContext;
     final Resources mRes;
@@ -836,6 +844,16 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
                 }
             } else if (Intent.ACTION_LOCALE_CHANGED.equals(action)) {
                 onActionLocaleChanged();
+            } else if (ACTION_SHOW_INPUT_METHOD_PICKER.equals(action)) {
+                // ACTION_SHOW_INPUT_METHOD_PICKER action is a protected-broadcast and it is
+                // guaranteed to be send only from the system, so that there is no need for extra
+                // security check such as
+                // {@link #canShowInputMethodPickerLocked(IInputMethodClient)}.
+                mHandler.obtainMessage(
+                        MSG_SHOW_IM_SUBTYPE_PICKER,
+                        InputMethodManager.SHOW_IM_PICKER_MODE_INCLUDE_AUXILIARY_SUBTYPES,
+                        0 /* arg2 */)
+                        .sendToTarget();
             } else {
                 Slog.w(TAG, "Unexpected intent " + intent);
             }
@@ -1285,6 +1303,8 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
 
         Bundle extras = new Bundle();
         extras.putBoolean(Notification.EXTRA_ALLOW_DURING_SETUP, true);
+        @ColorInt final int accentColor = mContext.getColor(
+                com.android.internal.R.color.system_notification_accent_color);
         mImeSwitcherNotification =
                 new Notification.Builder(mContext, SystemNotificationChannels.VIRTUAL_KEYBOARD)
                         .setSmallIcon(com.android.internal.R.drawable.ic_notification_ime_default)
@@ -1292,9 +1312,10 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
                         .setOngoing(true)
                         .addExtras(extras)
                         .setCategory(Notification.CATEGORY_SYSTEM)
-                        .setColor(com.android.internal.R.color.system_notification_accent_color);
+                        .setColor(accentColor);
 
-        Intent intent = new Intent(Settings.ACTION_SHOW_INPUT_METHOD_PICKER);
+        Intent intent = new Intent(ACTION_SHOW_INPUT_METHOD_PICKER)
+                .setPackage(mContext.getPackageName());
         mImeSwitchPendingIntent = PendingIntent.getBroadcast(mContext, 0, intent, 0);
 
         mShowOngoingImeSwitcherForPhones = false;
@@ -1445,6 +1466,7 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
                 broadcastFilter.addAction(Intent.ACTION_USER_REMOVED);
                 broadcastFilter.addAction(Intent.ACTION_SETTING_RESTORED);
                 broadcastFilter.addAction(Intent.ACTION_LOCALE_CHANGED);
+                broadcastFilter.addAction(ACTION_SHOW_INPUT_METHOD_PICKER);
                 mContext.registerReceiver(new ImmsBroadcastReceiver(), broadcastFilter);
 
                 final String defaultImiId = mSettings.getSelectedInputMethod();
@@ -2791,6 +2813,27 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
         return res;
     }
 
+    private boolean canShowInputMethodPickerLocked(IInputMethodClient client) {
+        final int uid = Binder.getCallingUid();
+        if (UserHandle.getAppId(uid) == Process.SYSTEM_UID) {
+            return true;
+        } else if (mCurClient != null && client != null
+                && mCurClient.client.asBinder() == client.asBinder()) {
+            return true;
+        } else if (mCurIntent != null && InputMethodUtils.checkIfPackageBelongsToUid(
+                mAppOpsManager,
+                uid,
+                mCurIntent.getComponent().getPackageName())) {
+            return true;
+        } else if (mContext.checkCallingPermission(
+                android.Manifest.permission.WRITE_SECURE_SETTINGS)
+                == PackageManager.PERMISSION_GRANTED) {
+            return true;
+        }
+
+        return false;
+    }
+
     @Override
     public void showInputMethodPickerFromClient(
             IInputMethodClient client, int auxiliarySubtypeMode) {
@@ -2798,10 +2841,10 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
             return;
         }
         synchronized (mMethodMap) {
-            if (mCurClient == null || client == null
-                    || mCurClient.client.asBinder() != client.asBinder()) {
+            if(!canShowInputMethodPickerLocked(client)) {
                 Slog.w(TAG, "Ignoring showInputMethodPickerFromClient of uid "
                         + Binder.getCallingUid() + ": " + client);
+                return;
             }
 
             // Always call subtype picker, because subtype picker is a superset of input method

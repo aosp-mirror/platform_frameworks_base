@@ -242,9 +242,9 @@
         <!-- Additional flag from base permission type: this permission can be automatically
             granted to the setup wizard app -->
         <flag name="setup" value="0x800" />
-        <!-- Additional flag from base permission type: this permission can be granted to ephemeral
+        <!-- Additional flag from base permission type: this permission can be granted to instant
              apps -->
-        <flag name="ephemeral" value="0x1000" />
+        <flag name="instant" value="0x1000" />
         <!-- Additional flag from base permission type: this permission can only be granted to apps
              that target runtime permissions ({@link android.os.Build.VERSION_CODES#M} and above)
              -->
@@ -560,6 +560,35 @@
          <code>android.view.LayoutParams.FLAG_SHOW_WHEN_LOCKED</code> flag
          to be set for all windows of this activity -->
     <attr name="showForAllUsers" format="boolean" />
+
+    <!-- Specifies whether an {@link android.app.Activity} should be shown on top of the the lock screen
+         whenever the lockscreen is up and the activity is resumed. Normally an activity will be
+         transitioned to the stopped state if it is started while the lockscreen is up, but with
+         this flag set the activity will remain in the resumed state visible on-top of the lock
+         screen.
+
+         <p>This should be used instead of {@link android.view.WindowManager.LayoutParams#FLAG_SHOW_WHEN_LOCKED}
+         flag set for Windows. When using the Window flag during activity startup, there may not be
+         time to add it before the system stops your activity for being behind the lock-screen.
+         This leads to a double life-cycle as it is then restarted.</p> -->
+    <attr name="showWhenLocked" format="boolean" />
+
+    <!-- Specifies whether the screen should be turned on when the {@link android.app.Activity} is resumed.
+         Normally an activity will be transitioned to the stopped state if it is started while the
+         screen if off, but with this flag set the activity will cause the screen to turn on if the
+         activity will be visible and resumed due to the screen coming on. The screen will not be
+         turned on if the activity won't be visible after the screen is turned on. This flag is
+         normally used in conjunction with the {@link android.R.attr#showWhenLocked} flag to make
+         sure the activity is visible after the screen is turned on when the lockscreen is up. In
+         addition, if this flag is set and the activity calls
+         {@link android.app.KeyguardManager#requestDismissKeyguard}
+         the screen will turn on.
+
+         <p>This should be used instead of {@link android.view.WindowManager.LayoutParams#FLAG_TURN_SCREEN_ON}
+         flag set for Windows. When using the Window flag during activity startup, there may not be
+         time to add it before the system stops your activity because the screen has not yet turned
+         on. This leads to a double life-cycle as it is then restarted.</p> -->
+    <attr name="turnScreenOn" format="boolean" />
 
     <!-- Specify the authorities under which this content provider can be
          found.  Multiple authorities may be supplied by separating them
@@ -1022,6 +1051,22 @@
          <p>The default value of this attribute is <code>false</code>. -->
     <attr name="isolatedSplits" format="boolean" />
 
+    <!-- The classname of the classloader used to load the application's classes
+         from its APK. The APK in question can either be the 'base' APK or any
+         of the application's 'split' APKs if it's using a feature split.
+
+         <p>
+         The supported values for this attribute are
+         <code>dalvik.system.PathClassLoader</code> and
+         <code>dalvik.system.DelegateLastClassLoader</code>. If unspecified,
+         the default value of this attribute is <code>dalvik.system.PathClassLoader</code>.
+
+         If an unknown classloader is provided, a PackageParserException with cause
+         <code>PackageManager.INSTALL_PARSE_FAILED_MANIFEST_MALFORMED</code> will be
+         thrown and the app will not be installed.
+         -->
+    <attr name="classLoader" format="string" />
+
     <!-- If set to <code>true</code>, indicates to the platform that this APK is
          a 'feature' split and that it implicitly depends on the base APK. This distinguishes
          this split APK from a 'configuration' split, which provides resource overrides
@@ -1456,6 +1501,9 @@
             <enum name="productivity" value="7" />
         </attr>
 
+        <!-- Declares the kind of classloader this application's classes must be loaded with -->
+        <attr name="classLoader" />
+
     </declare-styleable>
     <!-- The <code>permission</code> tag declares a security permission that can be
          used to control access from other packages to specific components or
@@ -1731,6 +1779,11 @@
          the library at build time while it offers apps to share code defined in such
          libraries. Hence, static libraries are strictly required.
 
+         <p>On devices running O MR1 or higher, if the library is singed with multiple
+         signing certificates you must to specify the SHA-256 hashes of the additional
+         certificates via adding
+         {@link #AndroidManifestAdditionalCertificate additional-certificate} tags.
+
          <p>This appears as a child tag of the
          {@link #AndroidManifestApplication application} tag. -->
     <declare-styleable name="AndroidManifestUsesStaticLibrary" parent="AndroidManifestApplication">
@@ -1740,6 +1793,17 @@
         <attr name="version" />
         <!-- The SHA-256 digest of the library signing certificate. -->
         <attr name="certDigest" format="string" />
+    </declare-styleable>
+
+    <!-- The <code>additional-certificate</code> specifies the SHA-256 digest of a static
+         shared library's additional signing certificate. You need to use this tag if the
+         library is singed with more than one certificate.
+
+         <p>This appears as a child tag of the
+         {@link #AndroidManifestUsesStaticLibrary uses-static-library} tag. -->
+    <declare-styleable name="AndroidManifestAdditionalCertificate" parent="AndroidManifestUsesStaticLibrary">
+        <!-- The SHA-256 digest of the library signing certificate. -->
+        <attr name="certDigest" />
     </declare-styleable>
 
     <!-- The <code>supports-screens</code> specifies the screen dimensions an
@@ -2093,6 +2157,10 @@
         <attr name="maxAspectRatio" />
         <attr name="lockTaskMode" />
         <attr name="showForAllUsers" />
+
+        <attr name="showWhenLocked" />
+        <attr name="turnScreenOn" />
+
         <attr name="directBootAware" />
         <!-- @hide This activity is always focusable regardless of if it is in a task/stack whose
              activities are normally not focusable.

@@ -64,12 +64,12 @@
     <string name="usb_debugging_message" msgid="2220143855912376496">"कम्प्युटरको RSA कुञ्जी औंलाछाप:\n<xliff:g id="FINGERPRINT">%1$s</xliff:g>"</string>
     <string name="usb_debugging_always" msgid="303335496705863070">"यो कम्प्युटरबाट सधैँ अनुमति दिनुहोस्"</string>
     <string name="usb_debugging_secondary_user_title" msgid="6353808721761220421">"USB डिबग गर्न अनुमति छैन"</string>
-    <string name="usb_debugging_secondary_user_message" msgid="8572228137833020196">"हालैमा यस यन्त्रमा साइन इन भएको प्रयोगकर्ताले USB डिबगिङ सक्रिय गर्न सक्दैन। यो सुविधा प्रयोग गर्न, कृपया अर्को प्रबन्ध प्रयोगकर्तामा स्विच गर्नुहोस्।"</string>
+    <string name="usb_debugging_secondary_user_message" msgid="6067122453571699801">"हाल यस यन्त्रमा साइन इन हुनुभएको प्रयोगकर्ताले USB डिबग सक्रिय गर्न सक्नुहुन्न। यो सुविधाको प्रयोग गर्न प्राथमिक प्रयोगकर्तामा बदल्नुहोस्‌।"</string>
     <string name="compat_mode_on" msgid="6623839244840638213">"स्क्रिन भर्न जुम गर्नुहोस्"</string>
     <string name="compat_mode_off" msgid="4434467572461327898">"स्क्रिन भर्न तन्काउनुहोस्"</string>
     <string name="screenshot_saving_ticker" msgid="7403652894056693515">"स्क्रिनसट बचत गर्दै…"</string>
     <string name="screenshot_saving_title" msgid="8242282144535555697">"स्क्रिनसट बचत गर्दै…"</string>
-    <string name="screenshot_saving_text" msgid="2419718443411738818">"स्क्रिनसट बचत हुँदै छ।"</string>
+    <string name="screenshot_saving_text" msgid="2419718443411738818">"स्क्रिनसट बचत हुँदैछ।"</string>
     <string name="screenshot_saved_title" msgid="6461865960961414961">"स्क्रिनसट क्याप्चर गरियो।"</string>
     <string name="screenshot_saved_text" msgid="2685605830386712477">"आफ्नो स्क्रिनसट हेर्न ट्याप गर्नुहोस्।"</string>
     <string name="screenshot_failed_title" msgid="705781116746922771">"स्क्रिनसट क्याप्चर गर्न सकिएन।"</string>
@@ -353,10 +353,10 @@
     <string name="description_target_search" msgid="3091587249776033139">"खोज्नुहोस्"</string>
     <string name="description_direction_up" msgid="7169032478259485180">"<xliff:g id="TARGET_DESCRIPTION">%s</xliff:g>को लागि माथि धिसार्नुहोस्"</string>
     <string name="description_direction_left" msgid="7207478719805562165">"स्लाइड <xliff:g id="TARGET_DESCRIPTION">%s</xliff:g>को लागि बायाँ।"</string>
-    <string name="zen_priority_introduction" msgid="7577965386868311310">"तपाईंलाई अलार्म, रिमाइन्डर, कार्यक्रम र तपाईंले निर्दिष्ट गर्नुभएका कलरहरू बाहेकका ध्वनि र कम्पनहरूले बाधा पुऱ्याउने छैनन्। तपाईंले अझै संगीत, भिडियो र खेलहरू लगायत आफूले प्ले गर्न छनौट गरेका जुनसुकै कुरा सुन्न सक्नुहुन्छ।"</string>
-    <string name="zen_alarms_introduction" msgid="7034415210361973827">"तपाईंलाई अलार्म बाहेकका ध्वनि र कम्पनहरूले बाधा पुऱ्याउने छैनन्। तपाईंले अझै संगीत, भिडियो र खेलहरू लगायत आफूले प्ले गर्न छनौट गरेका जुनसुकै कुरा पनि सुन्न सक्नुहुन्छ।"</string>
+    <string name="zen_priority_introduction" msgid="1149025108714420281">"तपाईंलाई अलार्म, रिमाइन्डर, कार्यक्रम र तपाईंले निर्दिष्ट गर्नुभएका कलरहरू बाहेकका ध्वनि र कम्पनहरूले बाधा पुऱ्याउने छैनन्। तपाईंले अझै संगीत, भिडियो र खेलहरू लगायत आफूले प्ले गर्न छनौट गरेका जुनसुकै कुरा सुन्न सक्नुहुनेछ।"</string>
+    <string name="zen_alarms_introduction" msgid="4934328096749380201">"तपाईंलाई अलार्महरू बाहेकका ध्वनि र कम्पनहरूले बाधा पुऱ्याउने छैनन्। तपाईंले अझै संगीत, भिडियो र खेलहरू लगायत आफूले प्ले गर्न छनौट गरेका जुनसुकै कुरा सुन्न सक्नुहुनेछ।"</string>
     <string name="zen_priority_customize_button" msgid="7948043278226955063">"आफू अनुकूल बनाउनुहोस्"</string>
-    <string name="zen_silence_introduction_voice" msgid="2284540992298200729">"यसले अलार्म, संगीत, भिडियो, र खेलहरू लगायतका सबै ध्वनि र कम्पन रोक्छ। तपाईं अझै पनि फोन कल गर्न सक्षम हुनुहुन्छ।"</string>
+    <string name="zen_silence_introduction_voice" msgid="3948778066295728085">"यसले अलार्म, संगीत, भिडियो, र खेलहरू लगायत सबैका ध्वनि र कम्पनहरूमाथि रोक लगाउँछ। तपाईं अझै पनि फोन कलहरू गर्न सक्नुहुनेछ।"</string>
     <string name="zen_silence_introduction" msgid="3137882381093271568">"यसले अलार्म, संगीत, भिडियोहरू र खेलहरूसहित सबै ध्वनिहरू र कम्पनहरूलाई रोक्छ।"</string>
     <string name="keyguard_more_overflow_text" msgid="9195222469041601365">"+<xliff:g id="NUMBER_OF_NOTIFICATIONS">%d</xliff:g>"</string>
     <string name="speed_bump_explanation" msgid="1288875699658819755">"तल कम जरुरी सूचनाहरू"</string>
@@ -456,7 +456,7 @@
     <string name="monitoring_description_do_learn_more" msgid="1849514470437907421">"थप जान्नुहोस्"</string>
     <string name="monitoring_description_do_body_vpn" msgid="8255218762488901796">"तपाईं <xliff:g id="VPN_APP">%1$s</xliff:g> मा जोडिनुभएको छ जसले इमेल, अनुप्रयोग र वेबसाइटहरू लगायत तपाईंको नेटवर्क सम्बन्धी गतिविधिको अनुगमन गर्न सक्छ।"</string>
     <string name="monitoring_description_vpn_settings_separator" msgid="1933186756733474388">" "</string>
-    <string name="monitoring_description_vpn_settings" msgid="8869300202410505143">"VPN सम्बन्धी सेटिङहरू खोल्नुहोस्"</string>
+    <string name="monitoring_description_vpn_settings" msgid="6434859242636063861">"VPN सम्बन्धी सेटिङहरू खोल्नुहोस्"</string>
     <string name="monitoring_description_ca_cert_settings_separator" msgid="4987350385906393626">" "</string>
     <string name="monitoring_description_ca_cert_settings" msgid="5489969458872997092">"खुला विश्वसनीय प्रमाणहरू"</string>
     <string name="monitoring_description_network_logging" msgid="7223505523384076027">"तपाईँको प्रशासकले तपाईँको यन्त्रमा ट्राफिकको अनुगमन गर्ने नेटवर्कको लगिङलाई सक्रिय पार्नुभएको छ।\n\nथप जानकारीका लागि आफ्नो प्रशासकलाई सम्पर्क गर्नुहोस्।"</string>
@@ -556,8 +556,8 @@
     <string name="notification_default_channel_desc" msgid="2506053815870808359">"यस अनुप्रयोगमा सूचना सम्बन्धी कोटीहरू छैनन्"</string>
     <string name="notification_unblockable_desc" msgid="3561016061737896906">"यस अनुप्रयोगका सूचनाहरूलाई निष्क्रिय पार्न सकिँदैन"</string>
     <plurals name="notification_num_channels_desc" formatted="false" msgid="5492793452274077663">
-      <item quantity="other">यस अनुप्रयोगका <xliff:g id="NUMBER_1">%d</xliff:g> सूचना कोटिहरू मध्ये १</item>
-      <item quantity="one"> यस अनुप्रयोगको <xliff:g id="NUMBER_0">%d</xliff:g> सूचना कोटी मध्ये १</item>
+      <item quantity="other">यस अनुप्रयोगका <xliff:g id="NUMBER_1">%s</xliff:g> सूचना कोटिहरू मध्ये १</item>
+      <item quantity="one"> यस अनुप्रयोगको <xliff:g id="NUMBER_0">%s</xliff:g> सूचना कोटी मध्ये १</item>
     </plurals>
     <string name="notification_channels_list_desc_2" msgid="6214732715833946441">"<xliff:g id="CHANNEL_NAME_1">%1$s</xliff:g>, <xliff:g id="CHANNEL_NAME_2">%2$s</xliff:g>"</string>
     <plurals name="notification_channels_list_desc_2_and_others" formatted="false" msgid="2747813553355336157">
@@ -585,8 +585,8 @@
       <item quantity="one">%d मिनेट</item>
     </plurals>
     <string name="battery_panel_title" msgid="7944156115535366613">"ब्याट्री उपयोग"</string>
-    <string name="battery_detail_charging_summary" msgid="1279095653533044008">"चार्ज गर्ने समयमा ब्याट्री सेभर उपलब्ध छैन"</string>
-    <string name="battery_detail_switch_title" msgid="6285872470260795421">"ब्याट्री सेभर"</string>
+    <string name="battery_detail_charging_summary" msgid="4055327085770378335">"चार्ज गर्ने समयमा ब्याट्री सेवर उपलब्ध छैन"</string>
+    <string name="battery_detail_switch_title" msgid="8763441006881907058">"ब्याट्री सेवर"</string>
     <string name="battery_detail_switch_summary" msgid="9049111149407626804">"कार्यसम्पादन र पृष्ठभूमि डेटा घटाउँछ"</string>
     <string name="keyboard_key_button_template" msgid="6230056639734377300">"<xliff:g id="NAME">%1$s</xliff:g> बटन"</string>
     <string name="keyboard_key_home" msgid="2243500072071305073">"Home"</string>
@@ -726,9 +726,9 @@
     <string name="pip_phone_minimize" msgid="1079119422589131792">"सानो बनाउनुहोस्"</string>
     <string name="pip_phone_close" msgid="8416647892889710330">"बन्द गर्नुहोस्"</string>
     <string name="pip_phone_dismiss_hint" msgid="6351678169095923899">"खारेज गर्न तल तान्नुहोस्"</string>
-    <string name="pip_menu_title" msgid="3328510504196964712">"तस्बिर मेनुमा तस्बिर"</string>
+    <string name="pip_menu_title" msgid="4707292089961887657">"मेनु"</string>
     <string name="pip_notification_title" msgid="3204024940158161322">"<xliff:g id="NAME">%s</xliff:g> Picture-in-picture मा छ"</string>
-    <string name="pip_notification_message" msgid="4171698133469539591">"तपाईं <xliff:g id="NAME">%s</xliff:g> ले यो सुविधा प्रयोग नगरोस् भन्ने चाहनुहुन्छ भने ट्याप गरेर सेटिङहरू खोल्नुहोस् र यसलाई निष्क्रिय पार्नुहोस्।"</string>
+    <string name="pip_notification_message" msgid="5619512781514343311">"तपाईं <xliff:g id="NAME">%s</xliff:g> ले सुविधा प्रयोग नगरोस् भन्ने चाहनुहुन्छ भने ट्याप गरेर सेटिङहरू खोल्नुहोस् र यसलाई निष्क्रिय पार्नुहोस्।"</string>
     <string name="pip_play" msgid="1417176722760265888">"प्ले गर्नुहोस्"</string>
     <string name="pip_pause" msgid="8881063404466476571">"पज गर्नुहोस्"</string>
     <string name="pip_skip_to_next" msgid="1948440006726306284">"अर्कोमा जानुहोस्"</string>
@@ -754,6 +754,7 @@
     <string name="tuner_menu" msgid="191640047241552081">"मेनु"</string>
     <string name="tuner_app" msgid="3507057938640108777">"<xliff:g id="APP">%1$s</xliff:g> अनुप्रयोग"</string>
     <string name="notification_channel_alerts" msgid="4496839309318519037">"अलर्टहरू"</string>
+    <string name="notification_channel_battery" msgid="5786118169182888462">"ब्याट्री"</string>
     <string name="notification_channel_screenshot" msgid="6314080179230000938">"स्क्रिनशटहरू"</string>
     <string name="notification_channel_general" msgid="4525309436693914482">"सामान्य सन्देशहरू"</string>
     <string name="notification_channel_storage" msgid="3077205683020695313">"भण्डारण"</string>
@@ -774,4 +775,5 @@
     <string name="running_foreground_services_title" msgid="381024150898615683">"पृष्ठभूमिमा चल्ने अनुप्रयोगहरू"</string>
     <string name="running_foreground_services_msg" msgid="6326247670075574355">"ब्याट्री र डेटाका प्रयोग सम्बन्धी विवरणहरूका लागि ट्याप गर्नुहोस्"</string>
     <string name="data_usage_disable_mobile" msgid="5116269981510015864">"मोबाइल डेटा निष्क्रिय पार्ने हो?"</string>
+    <string name="touch_filtered_warning" msgid="8671693809204767551">"कुनै अनुप्रयोगको कारणले अनुमतिसम्बन्धी अनुरोध बुझ्न गाह्रो भइरहेकोले सेटिङहरूले तपाईंको प्रतिक्रिया प्रमाणित गर्न सक्दैनन्।"</string>
 </resources>

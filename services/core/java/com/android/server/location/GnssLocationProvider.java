@@ -23,6 +23,7 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.content.pm.PackageManager;
 import android.database.Cursor;
 import android.hardware.location.GeofenceHardware;
 import android.hardware.location.GeofenceHardwareImpl;
@@ -1054,8 +1055,15 @@ public class GnssLocationProvider implements LocationProviderInterface {
                 // download tasks overrun.
                 synchronized (mLock) {
                     if (mDownloadXtraWakeLock.isHeld()) {
-                        mDownloadXtraWakeLock.release();
-                        if (DEBUG) Log.d(TAG, "WakeLock released by handleDownloadXtraData()");
+                        // This wakelock may have time-out, if a timeout was specified.
+                        // Catch (and ignore) any timeout exceptions.
+                        try {
+                            mDownloadXtraWakeLock.release();
+                            if (DEBUG) Log.d(TAG, "WakeLock released by handleDownloadXtraData()");
+                        } catch (Exception e) {
+                            Log.i(TAG, "Wakelock timeout & release race exception in "
+                                    + "handleDownloadXtraData()", e);
+                        }
                     } else {
                         Log.e(TAG, "WakeLock expired before release in "
                                 + "handleDownloadXtraData()");
@@ -2304,6 +2312,12 @@ public class GnssLocationProvider implements LocationProviderInterface {
             NetworkRequest.Builder networkRequestBuilder = new NetworkRequest.Builder();
             networkRequestBuilder.addTransportType(NetworkCapabilities.TRANSPORT_CELLULAR);
             networkRequestBuilder.addTransportType(NetworkCapabilities.TRANSPORT_WIFI);
+            // On watches, Bluetooth is the most important network type.
+            boolean isWatch =
+                mContext.getPackageManager().hasSystemFeature(PackageManager.FEATURE_WATCH);
+            if (isWatch) {
+                networkRequestBuilder.addTransportType(NetworkCapabilities.TRANSPORT_BLUETOOTH);
+            }
             NetworkRequest networkRequest = networkRequestBuilder.build();
             mConnMgr.registerNetworkCallback(networkRequest, mNetworkConnectivityCallback);
 

@@ -19,12 +19,14 @@ package com.android.server.locksettings;
 import static android.Manifest.permission.ACCESS_KEYGUARD_SECURE_STORAGE;
 import static android.Manifest.permission.READ_CONTACTS;
 import static android.content.Context.KEYGUARD_SERVICE;
+import static android.content.pm.PackageManager.PERMISSION_GRANTED;
 
 import static com.android.internal.widget.LockPatternUtils.StrongAuthTracker.STRONG_AUTH_REQUIRED_AFTER_LOCKOUT;
 import static com.android.internal.widget.LockPatternUtils.SYNTHETIC_PASSWORD_ENABLED_KEY;
 import static com.android.internal.widget.LockPatternUtils.SYNTHETIC_PASSWORD_HANDLE_KEY;
 import static com.android.internal.widget.LockPatternUtils.USER_FRP;
 import static com.android.internal.widget.LockPatternUtils.frpCredentialEnabled;
+import static com.android.internal.widget.LockPatternUtils.userOwnsFrpCredential;
 
 import android.annotation.UserIdInt;
 import android.app.ActivityManager;
@@ -72,10 +74,12 @@ import android.security.KeyStore;
 import android.security.keystore.AndroidKeyStoreProvider;
 import android.security.keystore.KeyProperties;
 import android.security.keystore.KeyProtection;
+import android.security.keystore.UserNotAuthenticatedException;
 import android.service.gatekeeper.GateKeeperResponse;
 import android.service.gatekeeper.IGateKeeperService;
 import android.text.TextUtils;
 import android.util.ArrayMap;
+import android.util.EventLog;
 import android.util.Log;
 import android.util.Slog;
 
@@ -150,7 +154,8 @@ public class LockSettingsService extends ILockSettings.Stub {
 
     private final Injector mInjector;
     private final Context mContext;
-    private final Handler mHandler;
+    @VisibleForTesting
+    protected final Handler mHandler;
     @VisibleForTesting
     protected final LockSettingsStorage mStorage;
     private final LockSettingsStrongAuth mStrongAuth;
@@ -189,6 +194,14 @@ public class LockSettingsService extends ILockSettings.Stub {
             AndroidKeyStoreProvider.install();
             mLockSettingsService = new LockSettingsService(getContext());
             publishBinderService("lock_settings", mLockSettingsService);
+        }
+
+        @Override
+        public void onBootPhase(int phase) {
+            super.onBootPhase(phase);
+            if (phase == PHASE_ACTIVITY_MANAGER_READY) {
+                mLockSettingsService.migrateOldDataAfterSystemReady();
+            }
         }
 
         @Override
@@ -363,7 +376,7 @@ public class LockSettingsService extends ILockSettings.Stub {
         }
 
         public SyntheticPasswordManager getSyntheticPasswordManager(LockSettingsStorage storage) {
-            return new SyntheticPasswordManager(storage, getUserManager());
+            return new SyntheticPasswordManager(getContext(), storage, getUserManager());
         }
 
         public int binderGetCallingUid() {
@@ -492,12 +505,34 @@ public class LockSettingsService extends ILockSettings.Stub {
         maybeShowEncryptionNotificationForUser(userId);
     }
 
+    /**
+     * Check if profile got unlocked but the keystore is still locked. This happens on full disk
+     * encryption devices since the profile may not yet be running when we consider unlocking it
+     * during the normal flow. In this case unlock the keystore for the profile.
+     */
+    private void ensureProfileKeystoreUnlocked(int userId) {
+        final KeyStore ks = KeyStore.getInstance();
+        if (ks.state(userId) == KeyStore.State.LOCKED
+                && tiedManagedProfileReadyToUnlock(mUserManager.getUserInfo(userId))) {
+            Slog.i(TAG, "Managed profile got unlocked, will unlock its keystore");
+            try {
+                // If boot took too long and the password in vold got expired, parent keystore will
+                // be still locked, we ignore this case since the user will be prompted to unlock
+                // the device after boot.
+                unlockChildProfile(userId, true /* ignoreUserNotAuthenticated */);
+            } catch (RemoteException e) {
+                Slog.e(TAG, "Failed to unlock child profile");
+            }
+        }
+    }
+
     public void onUnlockUser(final int userId) {
         // Perform tasks which require locks in LSS on a handler, as we are callbacks from
         // ActivityManager.unlockUser()
         mHandler.post(new Runnable() {
             @Override
             public void run() {
+                ensureProfileKeystoreUnlocked(userId);
                 // Hide notification first, as tie managed profile lock takes time
                 hideEncryptionNotification(new UserHandle(userId));
 
@@ -550,6 +585,10 @@ public class LockSettingsService extends ILockSettings.Stub {
 
     @Override // binder interface
     public void systemReady() {
+        if (mContext.checkCallingOrSelfPermission(PERMISSION) != PERMISSION_GRANTED) {
+            EventLog.writeEvent(0x534e4554, "28251513", getCallingUid(), "");  // SafetyNet
+        }
+        checkWritePermission(UserHandle.USER_SYSTEM);
         migrateOldData();
         try {
             getGateKeeperService();
@@ -560,6 +599,7 @@ public class LockSettingsService extends ILockSettings.Stub {
         mDeviceProvisionedObserver.onSystemReady();
         // TODO: maybe skip this for split system user mode.
         mStorage.prefetchUser(UserHandle.USER_SYSTEM);
+        mStrongAuth.systemReady();
     }
 
     private void migrateOldData() {
@@ -720,12 +760,87 @@ public class LockSettingsService extends ILockSettings.Stub {
         }
     }
 
+    private void migrateOldDataAfterSystemReady() {
+        try {
+            // Migrate the FRP credential to the persistent data block
+            if (LockPatternUtils.frpCredentialEnabled(mContext)
+                    && !getBoolean("migrated_frp", false, 0)) {
+                migrateFrpCredential();
+                setBoolean("migrated_frp", true, 0);
+                Slog.i(TAG, "Migrated migrated_frp.");
+            }
+        } catch (RemoteException e) {
+            Slog.e(TAG, "Unable to migrateOldDataAfterSystemReady", e);
+        }
+    }
+
+    /**
+     * Migrate the credential for the FRP credential owner user if the following are satisfied:
+     * - the user has a secure credential
+     * - the FRP credential is not set up
+     * - the credential is based on a synthetic password.
+     */
+    private void migrateFrpCredential() throws RemoteException {
+        if (mStorage.readPersistentDataBlock() != PersistentData.NONE) {
+            return;
+        }
+        for (UserInfo userInfo : mUserManager.getUsers()) {
+            if (userOwnsFrpCredential(mContext, userInfo) && isUserSecure(userInfo.id)) {
+                synchronized (mSpManager) {
+                    if (isSyntheticPasswordBasedCredentialLocked(userInfo.id)) {
+                        int actualQuality = (int) getLong(LockPatternUtils.PASSWORD_TYPE_KEY,
+                                DevicePolicyManager.PASSWORD_QUALITY_UNSPECIFIED, userInfo.id);
+
+                        mSpManager.migrateFrpPasswordLocked(
+                                getSyntheticPasswordHandleLocked(userInfo.id),
+                                userInfo,
+                                redactActualQualityToMostLenientEquivalentQuality(actualQuality));
+                    }
+                }
+                return;
+            }
+        }
+    }
+
+    /**
+     * Returns the lowest password quality that still presents the same UI for entering it.
+     *
+     * For the FRP credential, we do not want to leak the actual quality of the password, only what
+     * kind of UI it requires. However, when migrating, we only know the actual quality, not the
+     * originally requested quality; since this is only used to determine what input variant to
+     * present to the user, we just assume the lowest possible quality was requested.
+     */
+    private int redactActualQualityToMostLenientEquivalentQuality(int quality) {
+        switch (quality) {
+            case DevicePolicyManager.PASSWORD_QUALITY_ALPHABETIC:
+            case DevicePolicyManager.PASSWORD_QUALITY_ALPHANUMERIC:
+            case DevicePolicyManager.PASSWORD_QUALITY_COMPLEX:
+                return DevicePolicyManager.PASSWORD_QUALITY_ALPHABETIC;
+            case DevicePolicyManager.PASSWORD_QUALITY_NUMERIC:
+            case DevicePolicyManager.PASSWORD_QUALITY_NUMERIC_COMPLEX:
+                return DevicePolicyManager.PASSWORD_QUALITY_NUMERIC;
+            case DevicePolicyManager.PASSWORD_QUALITY_UNSPECIFIED:
+            case DevicePolicyManager.PASSWORD_QUALITY_SOMETHING:
+            case DevicePolicyManager.PASSWORD_QUALITY_MANAGED:
+            case DevicePolicyManager.PASSWORD_QUALITY_BIOMETRIC_WEAK:
+            default:
+                return quality;
+        }
+    }
+
     private final void checkWritePermission(int userId) {
         mContext.enforceCallingOrSelfPermission(PERMISSION, "LockSettingsWrite");
     }
 
     private final void checkPasswordReadPermission(int userId) {
         mContext.enforceCallingOrSelfPermission(PERMISSION, "LockSettingsRead");
+    }
+
+    private final void checkPasswordHavePermission(int userId) {
+        if (mContext.checkCallingOrSelfPermission(PERMISSION) != PERMISSION_GRANTED) {
+            EventLog.writeEvent(0x534e4554, "28251513", getCallingUid(), "");  // SafetyNet
+        }
+        mContext.enforceCallingOrSelfPermission(PERMISSION, "LockSettingsHave");
     }
 
     private final void checkReadPermission(String requestedKey, int userId) {
@@ -803,7 +918,7 @@ public class LockSettingsService extends ILockSettings.Stub {
     }
 
     @Override
-    public boolean getBoolean(String key, boolean defaultValue, int userId) throws RemoteException {
+    public boolean getBoolean(String key, boolean defaultValue, int userId) {
         checkReadPermission(key, userId);
         String value = getStringUnchecked(key, null, userId);
         return TextUtils.isEmpty(value) ?
@@ -811,14 +926,14 @@ public class LockSettingsService extends ILockSettings.Stub {
     }
 
     @Override
-    public long getLong(String key, long defaultValue, int userId) throws RemoteException {
+    public long getLong(String key, long defaultValue, int userId) {
         checkReadPermission(key, userId);
         String value = getStringUnchecked(key, null, userId);
         return TextUtils.isEmpty(value) ? defaultValue : Long.parseLong(value);
     }
 
     @Override
-    public String getString(String key, String defaultValue, int userId) throws RemoteException {
+    public String getString(String key, String defaultValue, int userId) {
         checkReadPermission(key, userId);
         return getStringUnchecked(key, defaultValue, userId);
     }
@@ -857,6 +972,7 @@ public class LockSettingsService extends ILockSettings.Stub {
 
     @Override
     public boolean havePassword(int userId) throws RemoteException {
+        checkPasswordHavePermission(userId);
         synchronized (mSpManager) {
             if (isSyntheticPasswordBasedCredentialLocked(userId)) {
                 long handle = getSyntheticPasswordHandleLocked(userId);
@@ -870,6 +986,7 @@ public class LockSettingsService extends ILockSettings.Stub {
 
     @Override
     public boolean havePattern(int userId) throws RemoteException {
+        checkPasswordHavePermission(userId);
         synchronized (mSpManager) {
             if (isSyntheticPasswordBasedCredentialLocked(userId)) {
                 long handle = getSyntheticPasswordHandleLocked(userId);
@@ -935,7 +1052,8 @@ public class LockSettingsService extends ILockSettings.Stub {
         return new String(decryptionResult, StandardCharsets.UTF_8);
     }
 
-    private void unlockChildProfile(int profileHandle) throws RemoteException {
+    private void unlockChildProfile(int profileHandle, boolean ignoreUserNotAuthenticated)
+            throws RemoteException {
         try {
             doVerifyCredential(getDecryptedPasswordForTiedProfile(profileHandle),
                     LockPatternUtils.CREDENTIAL_TYPE_PASSWORD,
@@ -946,6 +1064,8 @@ public class LockSettingsService extends ILockSettings.Stub {
                 | BadPaddingException | CertificateException | IOException e) {
             if (e instanceof FileNotFoundException) {
                 Slog.i(TAG, "Child profile key not found");
+            } else if (ignoreUserNotAuthenticated && e instanceof UserNotAuthenticatedException) {
+                Slog.i(TAG, "Parent keystore seems locked, ignoring");
             } else {
                 Slog.e(TAG, "Failed to decrypt child profile key", e);
             }
@@ -989,17 +1109,21 @@ public class LockSettingsService extends ILockSettings.Stub {
                 final List<UserInfo> profiles = mUserManager.getProfiles(userId);
                 for (UserInfo pi : profiles) {
                     // Unlock managed profile with unified lock
-                    if (pi.isManagedProfile()
-                            && !mLockPatternUtils.isSeparateProfileChallengeEnabled(pi.id)
-                            && mStorage.hasChildProfileLock(pi.id)
-                            && mUserManager.isUserRunning(pi.id)) {
-                        unlockChildProfile(pi.id);
+                    if (tiedManagedProfileReadyToUnlock(pi)) {
+                        unlockChildProfile(pi.id, false /* ignoreUserNotAuthenticated */);
                     }
                 }
             }
         } catch (RemoteException e) {
             Log.d(TAG, "Failed to unlock child profile", e);
         }
+    }
+
+    private boolean tiedManagedProfileReadyToUnlock(UserInfo userInfo) {
+        return userInfo.isManagedProfile()
+                && !mLockPatternUtils.isSeparateProfileChallengeEnabled(userInfo.id)
+                && mStorage.hasChildProfileLock(userInfo.id)
+                && mUserManager.isUserRunning(userInfo.id);
     }
 
     private Map<Integer, String> getDecryptedPasswordsForAllTiedProfiles(int userId) {
@@ -1019,12 +1143,13 @@ public class LockSettingsService extends ILockSettings.Stub {
                 continue;
             }
             try {
-                result.put(userId, getDecryptedPasswordForTiedProfile(userId));
+                result.put(managedUserId, getDecryptedPasswordForTiedProfile(managedUserId));
             } catch (KeyStoreException | UnrecoverableKeyException | NoSuchAlgorithmException
                     | NoSuchPaddingException | InvalidKeyException
                     | InvalidAlgorithmParameterException | IllegalBlockSizeException
                     | BadPaddingException | CertificateException | IOException e) {
-                // ignore
+                Slog.e(TAG, "getDecryptedPasswordsForAllTiedProfiles failed for user " +
+                    managedUserId, e);
             }
         }
         return result;
@@ -1132,12 +1257,6 @@ public class LockSettingsService extends ILockSettings.Stub {
             fixateNewestUserKeyAuth(userId);
             synchronizeUnifiedWorkChallengeForProfiles(userId, null);
             notifyActivePasswordMetricsAvailable(null, userId);
-
-            if (mStorage.getPersistentDataBlock() != null
-                    && LockPatternUtils.userOwnsFrpCredential(mUserManager.getUserInfo(userId))) {
-                // If owner, write to persistent storage for FRP
-                mStorage.writePersistentDataBlock(PersistentData.TYPE_NONE, userId, 0, null);
-            }
             return;
         }
         if (credential == null) {
@@ -1190,12 +1309,6 @@ public class LockSettingsService extends ILockSettings.Stub {
             // Refresh the auth token
             doVerifyCredential(credential, credentialType, true, 0, userId, null /* progressCallback */);
             synchronizeUnifiedWorkChallengeForProfiles(userId, null);
-            if (mStorage.getPersistentDataBlock() != null
-                    && LockPatternUtils.userOwnsFrpCredential(mUserManager.getUserInfo(userId))) {
-                // If owner, write to persistent storage for FRP
-                mStorage.writePersistentDataBlock(PersistentData.TYPE_GATEKEEPER, userId,
-                        requestedQuality, willStore.toBytes());
-            }
         } else {
             throw new RemoteException("Failed to enroll " +
                     (credentialType == LockPatternUtils.CREDENTIAL_TYPE_PASSWORD ? "password"
@@ -1444,18 +1557,12 @@ public class LockSettingsService extends ILockSettings.Stub {
             return response;
         }
 
-        final CredentialHash storedHash;
         if (userId == USER_FRP) {
-            PersistentData data = mStorage.readPersistentDataBlock();
-            if (data.type != PersistentData.TYPE_GATEKEEPER) {
-                Slog.wtf(TAG, "Expected PersistentData.TYPE_GATEKEEPER, but was: " + data.type);
-                return VerifyCredentialResponse.ERROR;
-            }
-            return verifyFrpCredential(credential, credentialType, data, progressCallback);
-        } else {
-            storedHash = mStorage.readCredentialHash(userId);
+            Slog.wtf(TAG, "Unexpected FRP credential type, should be SP based.");
+            return VerifyCredentialResponse.ERROR;
         }
 
+        final CredentialHash storedHash = mStorage.readCredentialHash(userId);
         if (storedHash.type != credentialType) {
             Slog.wtf(TAG, "doVerifyCredential type mismatch with stored credential??"
                     + " stored: " + storedHash.type + " passed in: " + credentialType);
@@ -1483,29 +1590,6 @@ public class LockSettingsService extends ILockSettings.Stub {
             }
         }
 
-        return response;
-    }
-
-    private VerifyCredentialResponse verifyFrpCredential(String credential, int credentialType,
-            PersistentData data, ICheckCredentialProgressCallback progressCallback)
-            throws RemoteException {
-        CredentialHash storedHash = CredentialHash.fromBytes(data.payload);
-        if (storedHash.type != credentialType) {
-            Slog.wtf(TAG, "doVerifyCredential type mismatch with stored credential??"
-                    + " stored: " + storedHash.type + " passed in: " + credentialType);
-            return VerifyCredentialResponse.ERROR;
-        }
-        if (ArrayUtils.isEmpty(storedHash.hash) || TextUtils.isEmpty(credential)) {
-            Slog.e(TAG, "Stored hash or credential is empty");
-            return VerifyCredentialResponse.ERROR;
-        }
-        VerifyCredentialResponse response = VerifyCredentialResponse.fromGateKeeperResponse(
-                getGateKeeperService().verifyChallenge(data.userId, 0 /* challenge */,
-                        storedHash.hash, credential.getBytes()));
-        if (progressCallback != null
-                && response.getResponseCode() == VerifyCredentialResponse.RESPONSE_OK) {
-            progressCallback.onCredentialVerified();
-        }
         return response;
     }
 
@@ -1655,6 +1739,10 @@ public class LockSettingsService extends ILockSettings.Stub {
         return response;
     }
 
+    /**
+     * Call this method to notify DPMS regarding the latest password metric. This should be called
+     * when the user is authenticating or when a new password is being set.
+     */
     private void notifyActivePasswordMetricsAvailable(String password, @UserIdInt int userId) {
         final PasswordMetrics metrics;
         if (password == null) {
@@ -1932,7 +2020,8 @@ public class LockSettingsService extends ILockSettings.Stub {
      *     This is the untrusted credential reset, OR the user sets a new lockscreen password
      *     FOR THE FIRST TIME on a SP-enabled device. New credential and new SID will be created
      */
-    private AuthenticationToken initializeSyntheticPasswordLocked(byte[] credentialHash,
+    @VisibleForTesting
+    protected AuthenticationToken initializeSyntheticPasswordLocked(byte[] credentialHash,
             String credential, int credentialType, int requestedQuality,
             int userId) throws RemoteException {
         Slog.i(TAG, "Initialize SyntheticPassword for user: " + userId);
@@ -1964,11 +2053,8 @@ public class LockSettingsService extends ILockSettings.Stub {
     }
 
     private long getSyntheticPasswordHandleLocked(int userId) {
-        try {
-            return getLong(SYNTHETIC_PASSWORD_HANDLE_KEY, 0, userId);
-        } catch (RemoteException e) {
-            return SyntheticPasswordManager.DEFAULT_HANDLE;
-        }
+        return getLong(SYNTHETIC_PASSWORD_HANDLE_KEY,
+                SyntheticPasswordManager.DEFAULT_HANDLE, userId);
     }
 
     private boolean isSyntheticPasswordBasedCredentialLocked(int userId) throws RemoteException {
@@ -1983,7 +2069,8 @@ public class LockSettingsService extends ILockSettings.Stub {
       return enabled != 0 && handle != SyntheticPasswordManager.DEFAULT_HANDLE;
     }
 
-    private boolean shouldMigrateToSyntheticPasswordLocked(int userId) throws RemoteException {
+    @VisibleForTesting
+    protected boolean shouldMigrateToSyntheticPasswordLocked(int userId) throws RemoteException {
         long handle = getSyntheticPasswordHandleLocked(userId);
         // This is a global setting
         long enabled = getLong(SYNTHETIC_PASSWORD_ENABLED_KEY,
@@ -2018,6 +2105,10 @@ public class LockSettingsService extends ILockSettings.Stub {
             authResult = mSpManager.unwrapPasswordBasedSyntheticPassword(
                     getGateKeeperService(), handle, userCredential, userId);
 
+            if (authResult.credentialType != credentialType) {
+                Slog.e(TAG, "Credential type mismatch.");
+                return VerifyCredentialResponse.ERROR;
+            }
             response = authResult.gkResponse;
             // credential has matched
             if (response.getResponseCode() == VerifyCredentialResponse.RESPONSE_OK) {
@@ -2113,6 +2204,8 @@ public class LockSettingsService extends ILockSettings.Stub {
         }
         setLong(SYNTHETIC_PASSWORD_HANDLE_KEY, newHandle, userId);
         synchronizeUnifiedWorkChallengeForProfiles(userId, profilePasswords);
+
+        notifyActivePasswordMetricsAvailable(credential, userId);
         return newHandle;
     }
 
@@ -2137,6 +2230,14 @@ public class LockSettingsService extends ILockSettings.Stub {
                 getGateKeeperService(), handle, savedCredential, userId);
         VerifyCredentialResponse response = authResult.gkResponse;
         AuthenticationToken auth = authResult.authToken;
+
+        // If existing credential is provided, then it must match.
+        if (savedCredential != null && auth == null) {
+            throw new RemoteException("Failed to enroll " +
+                    (credentialType == LockPatternUtils.CREDENTIAL_TYPE_PASSWORD ? "password"
+                            : "pattern"));
+        }
+
         if (auth != null) {
             // We are performing a trusted credential change i.e. a correct existing credential
             // is provided
@@ -2154,13 +2255,13 @@ public class LockSettingsService extends ILockSettings.Stub {
                     userId);
             synchronizeUnifiedWorkChallengeForProfiles(userId, null);
             mSpManager.destroyPasswordBasedSyntheticPassword(handle, userId);
+
+            notifyActivePasswordMetricsAvailable(credential, userId);
         } else /* response == null || responseCode == VerifyCredentialResponse.RESPONSE_RETRY */ {
             Slog.w(TAG, "spBasedSetLockCredentialInternalLocked: " +
                     (response != null ? "rate limit exceeded" : "failed"));
             return;
         }
-        notifyActivePasswordMetricsAvailable(credential, userId);
-
     }
 
     @Override
@@ -2266,6 +2367,17 @@ public class LockSettingsService extends ILockSettings.Stub {
                 Slog.w(TAG, "Invalid escrow token supplied");
                 return false;
             }
+            if (result.gkResponse.getResponseCode() != VerifyCredentialResponse.RESPONSE_OK) {
+                // Most likely, an untrusted credential reset happened in the past which
+                // changed the synthetic password
+                Slog.e(TAG, "Obsolete token: synthetic password derived but it fails GK "
+                        + "verification.");
+                return false;
+            }
+            // Update PASSWORD_TYPE_KEY since it's needed by notifyActivePasswordMetricsAvailable()
+            // called by setLockCredentialWithAuthTokenLocked().
+            // TODO: refactor usage of PASSWORD_TYPE_KEY b/65239740
+            setLong(LockPatternUtils.PASSWORD_TYPE_KEY, requestedQuality, userId);
             long oldHandle = getSyntheticPasswordHandleLocked(userId);
             setLockCredentialWithAuthTokenLocked(credential, type, result.authToken,
                     requestedQuality, userId);
@@ -2387,12 +2499,13 @@ public class LockSettingsService extends ILockSettings.Stub {
                 if (isProvisioned()) {
                     Slog.i(TAG, "Reporting device setup complete to IGateKeeperService");
                     reportDeviceSetupComplete();
+                    clearFrpCredentialIfOwnerNotSecure();
                 }
             }
         }
 
         public void onSystemReady() {
-            if (frpCredentialEnabled()) {
+            if (frpCredentialEnabled(mContext)) {
                 updateRegistration();
             } else {
                 // If we don't intend to use frpCredentials and we're not provisioned yet, send
@@ -2411,6 +2524,23 @@ public class LockSettingsService extends ILockSettings.Stub {
                 getGateKeeperService().reportDeviceSetupComplete();
             } catch (RemoteException e) {
                 Slog.e(TAG, "Failure reporting to IGateKeeperService", e);
+            }
+        }
+
+        /**
+         * Clears the FRP credential if the user that controls it does not have a secure
+         * lockscreen.
+         */
+        private void clearFrpCredentialIfOwnerNotSecure() {
+            List<UserInfo> users = mUserManager.getUsers();
+            for (UserInfo user : users) {
+                if (userOwnsFrpCredential(mContext, user)) {
+                    if (!isUserSecure(user.id)) {
+                        mStorage.writePersistentDataBlock(PersistentData.TYPE_NONE, user.id,
+                                0, null);
+                    }
+                    return;
+                }
             }
         }
 

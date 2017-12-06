@@ -25,11 +25,6 @@
 // Defines
 ///////////////////////////////////////////////////////////////////////////////
 
-#define DEFAULT_TEXT_SMALL_CACHE_WIDTH 1024
-#define DEFAULT_TEXT_SMALL_CACHE_HEIGHT 512
-#define DEFAULT_TEXT_LARGE_CACHE_WIDTH 2048
-#define DEFAULT_TEXT_LARGE_CACHE_HEIGHT 512
-
 #ifdef TEXTURE_BORDER_SIZE
   #if TEXTURE_BORDER_SIZE != 1
     #error TEXTURE_BORDER_SIZE other than 1 is not currently supported

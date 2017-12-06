@@ -530,33 +530,25 @@ void SkiaCanvas::drawVertices(const SkVertices* vertices, SkBlendMode mode, cons
 // ----------------------------------------------------------------------------
 
 void SkiaCanvas::drawBitmap(Bitmap& bitmap, float left, float top, const SkPaint* paint) {
-    SkBitmap skBitmap;
-    bitmap.getSkBitmap(&skBitmap);
-    mCanvas->drawBitmap(skBitmap, left, top, paint);
+    mCanvas->drawImage(bitmap.makeImage(), left, top, paint);
 }
 
 void SkiaCanvas::drawBitmap(Bitmap& hwuiBitmap, const SkMatrix& matrix, const SkPaint* paint) {
-    SkBitmap bitmap;
-    hwuiBitmap.getSkBitmap(&bitmap);
     SkAutoCanvasRestore acr(mCanvas, true);
     mCanvas->concat(matrix);
-    mCanvas->drawBitmap(bitmap, 0, 0, paint);
+    mCanvas->drawImage(hwuiBitmap.makeImage(), 0, 0, paint);
 }
 
 void SkiaCanvas::drawBitmap(Bitmap& hwuiBitmap, float srcLeft, float srcTop,
                             float srcRight, float srcBottom, float dstLeft, float dstTop,
                             float dstRight, float dstBottom, const SkPaint* paint) {
-    SkBitmap bitmap;
-    hwuiBitmap.getSkBitmap(&bitmap);
     SkRect srcRect = SkRect::MakeLTRB(srcLeft, srcTop, srcRight, srcBottom);
     SkRect dstRect = SkRect::MakeLTRB(dstLeft, dstTop, dstRight, dstBottom);
-    mCanvas->drawBitmapRect(bitmap, srcRect, dstRect, paint);
+    mCanvas->drawImageRect(hwuiBitmap.makeImage(), srcRect, dstRect, paint);
 }
 
 void SkiaCanvas::drawBitmapMesh(Bitmap& hwuiBitmap, int meshWidth, int meshHeight,
         const float* vertices, const int* colors, const SkPaint* paint) {
-    SkBitmap bitmap;
-    hwuiBitmap.getSkBitmap(&bitmap);
     const int ptCount = (meshWidth + 1) * (meshHeight + 1);
     const int indexCount = meshWidth * meshHeight * 6;
     uint32_t flags = SkVertices::kHasTexCoords_BuilderFlag;
@@ -573,8 +565,8 @@ void SkiaCanvas::drawBitmapMesh(Bitmap& hwuiBitmap, int meshWidth, int meshHeigh
 
     // cons up texture coordinates and indices
     {
-        const SkScalar w = SkIntToScalar(bitmap.width());
-        const SkScalar h = SkIntToScalar(bitmap.height());
+        const SkScalar w = SkIntToScalar(hwuiBitmap.width());
+        const SkScalar h = SkIntToScalar(hwuiBitmap.height());
         const SkScalar dx = w / meshWidth;
         const SkScalar dy = h / meshHeight;
 
@@ -635,7 +627,7 @@ void SkiaCanvas::drawBitmapMesh(Bitmap& hwuiBitmap, int meshWidth, int meshHeigh
         tmpPaint = *paint;
     }
 
-    sk_sp<SkImage> image = SkMakeImageFromRasterBitmap(bitmap, kNever_SkCopyPixelsMode);
+    sk_sp<SkImage> image = hwuiBitmap.makeImage();
     tmpPaint.setShader(image->makeShader(SkShader::kClamp_TileMode, SkShader::kClamp_TileMode));
 
     mCanvas->drawVertices(builder.detach(), SkBlendMode::kModulate, tmpPaint);
@@ -644,11 +636,8 @@ void SkiaCanvas::drawBitmapMesh(Bitmap& hwuiBitmap, int meshWidth, int meshHeigh
 void SkiaCanvas::drawNinePatch(Bitmap& hwuiBitmap, const Res_png_9patch& chunk,
         float dstLeft, float dstTop, float dstRight, float dstBottom, const SkPaint* paint) {
 
-    SkBitmap bitmap;
-    hwuiBitmap.getSkBitmap(&bitmap);
-
     SkCanvas::Lattice lattice;
-    NinePatchUtils::SetLatticeDivs(&lattice, chunk, bitmap.width(), bitmap.height());
+    NinePatchUtils::SetLatticeDivs(&lattice, chunk, hwuiBitmap.width(), hwuiBitmap.height());
 
     lattice.fFlags = nullptr;
     int numFlags = 0;
@@ -665,7 +654,7 @@ void SkiaCanvas::drawNinePatch(Bitmap& hwuiBitmap, const Res_png_9patch& chunk,
 
     lattice.fBounds = nullptr;
     SkRect dst = SkRect::MakeLTRB(dstLeft, dstTop, dstRight, dstBottom);
-    mCanvas->drawBitmapLattice(bitmap, lattice, dst, paint);
+    mCanvas->drawImageLattice(hwuiBitmap.makeImage().get(), lattice, dst, paint);
 }
 
 void SkiaCanvas::drawVectorDrawable(VectorDrawableRoot* vectorDrawable) {

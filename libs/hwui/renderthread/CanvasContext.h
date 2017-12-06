@@ -29,7 +29,6 @@
 #include "RenderNode.h"
 #include "thread/Task.h"
 #include "thread/TaskProcessor.h"
-#include "utils/RingBuffer.h"
 #include "renderthread/RenderTask.h"
 #include "renderthread/RenderThread.h"
 
@@ -163,8 +162,8 @@ public:
     void addRenderNode(RenderNode* node, bool placeFront);
     void removeRenderNode(RenderNode* node);
 
-    void setContentDrawBounds(int left, int top, int right, int bottom) {
-        mContentDrawBounds.set(left, top, right, bottom);
+    void setContentDrawBounds(const Rect& bounds) {
+        mContentDrawBounds = bounds;
     }
 
     RenderState& getRenderState() {
@@ -253,8 +252,6 @@ private:
     std::vector< sp<RenderNode> > mRenderNodes;
 
     FrameInfo* mCurrentFrameInfo = nullptr;
-    // Ring buffer large enough for 2 seconds worth of frames
-    RingBuffer<FrameInfo, 120> mFrames;
     std::string mName;
     JankTracker mJankTracker;
     FrameInfoVisualizer mProfiler;

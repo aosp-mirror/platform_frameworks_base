@@ -70,12 +70,6 @@ bool EndsWith(const android::StringPiece& str, const android::StringPiece& suffi
 android::StringPiece TrimWhitespace(const android::StringPiece& str);
 
 /**
- * UTF-16 isspace(). It basically checks for lower range characters that are
- * whitespace.
- */
-inline bool isspace16(char16_t c) { return c < 0x0080 && isspace(c); }
-
-/**
  * Returns an iterator to the first character that is not alpha-numeric and that
  * is not in the allowedChars set.
  */
@@ -103,6 +97,16 @@ bool IsJavaPackageName(const android::StringPiece& str);
  */
 Maybe<std::string> GetFullyQualifiedClassName(const android::StringPiece& package,
                                               const android::StringPiece& class_name);
+
+template <typename T>
+typename std::enable_if<std::is_arithmetic<T>::value, int>::type compare(const T& a, const T& b) {
+  if (a < b) {
+    return -1;
+  } else if (a > b) {
+    return 1;
+  }
+  return 0;
+}
 
 /**
  * Makes a std::unique_ptr<> with the template parameter inferred by the compiler.
@@ -224,6 +228,12 @@ class Tokenizer {
  public:
   class iterator {
    public:
+    using reference = android::StringPiece&;
+    using value_type = android::StringPiece;
+    using difference_type = size_t;
+    using pointer = android::StringPiece*;
+    using iterator_category = std::forward_iterator_tag;
+
     iterator(const iterator&) = default;
     iterator& operator=(const iterator&) = default;
 
@@ -246,9 +256,13 @@ class Tokenizer {
 
   Tokenizer(android::StringPiece str, char sep);
 
-  iterator begin() { return begin_; }
+  iterator begin() const {
+    return begin_;
+  }
 
-  iterator end() { return end_; }
+  iterator end() const {
+    return end_;
+  }
 
  private:
   const iterator begin_;

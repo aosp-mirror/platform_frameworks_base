@@ -1054,7 +1054,7 @@ please see styles_device_defaults.xml.
     </style>
 
     <style name="Widget.Material.MediaRouteButton" parent ="Widget.Material.ActionButton">
-        <item name="externalRouteEnabledDrawable">@drawable/ic_media_route_material_dark</item>
+        <item name="externalRouteEnabledDrawable">@drawable/ic_media_route_dark_material</item>
         <item name="contentDescription">@string/media_route_button_content_description</item>
     </style>
 
@@ -1204,8 +1204,8 @@ please see styles_device_defaults.xml.
     <style name="Widget.Material.Light.ActionBar.Solid" parent="Widget.Material.ActionBar.Solid" />
     <style name="Widget.Material.Light.FastScroll" parent="Widget.Material.FastScroll"/>
 
-    <style name="Widget.Material.Light.MediaRouteButton" parent ="Widget.Material.MediaRouteButton">
-        <item name="externalRouteEnabledDrawable">@drawable/ic_media_route_material_light</item>
+    <style name="Widget.Material.Light.MediaRouteButton" parent="Widget.Material.MediaRouteButton">
+        <item name="externalRouteEnabledDrawable">@drawable/ic_media_route_light_material</item>
     </style>
 
     <!-- Animation Styles -->

@@ -485,6 +485,7 @@ public final class Downloads {
          * partition. This option is only used by system apps and so it requires
          * android.permission.ACCESS_CACHE_FILESYSTEM permission.
          */
+        @Deprecated
         public static final int DESTINATION_SYSTEMCACHE_PARTITION = 5;
 
         /**

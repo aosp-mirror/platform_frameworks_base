@@ -96,6 +96,7 @@ import static android.content.pm.ActivityInfo.RESIZE_MODE_RESIZEABLE_AND_PIPABLE
 import static android.content.pm.ActivityInfo.RESIZE_MODE_RESIZEABLE_VIA_SDK_VERSION;
 import static android.content.pm.ApplicationInfo.PRIVATE_FLAG_PRIVILEGED;
 import static android.os.Trace.TRACE_TAG_ACTIVITY_MANAGER;
+import static android.provider.Settings.Global.DEVELOPMENT_FORCE_RESIZABLE_ACTIVITIES;
 import static android.provider.Settings.Secure.USER_SETUP_COMPLETE;
 import static android.view.Display.DEFAULT_DISPLAY;
 
@@ -1045,8 +1046,7 @@ final class TaskRecord extends ConfigurationContainer implements TaskWindowConta
         }
         // We need to provide the current orientation of the display on which this task resides,
         // not the orientation of the task.
-        final int orientation =
-                getStack().mActivityContainer.mActivityDisplay.getConfiguration().orientation;
+        final int orientation = getStack().getDisplay().getConfiguration().orientation;
         return setLastThumbnailLocked(thumbnail, taskWidth, taskHeight, orientation);
     }
 
@@ -1112,19 +1112,6 @@ final class TaskRecord extends ConfigurationContainer implements TaskWindowConta
         return intent != null ? intent : affinityIntent;
     }
 
-    /**
-     * @return Whether there are only fullscreen activities in this task.
-     */
-    boolean containsOnlyFullscreenActivities() {
-        for (int i = 0; i < mActivities.size(); i++) {
-            final ActivityRecord r = mActivities.get(i);
-            if (!r.finishing && !r.fullscreen) {
-                return false;
-            }
-        }
-        return true;
-    }
-
     /** Returns the first non-finishing activity from the root. */
     ActivityRecord getRootActivity() {
         for (int i = 0; i < mActivities.size(); i++) {
@@ -1138,9 +1125,13 @@ final class TaskRecord extends ConfigurationContainer implements TaskWindowConta
     }
 
     ActivityRecord getTopActivity() {
+        return getTopActivity(true /* includeOverlays */);
+    }
+
+    ActivityRecord getTopActivity(boolean includeOverlays) {
         for (int i = mActivities.size() - 1; i >= 0; --i) {
             final ActivityRecord r = mActivities.get(i);
-            if (r.finishing) {
+            if (r.finishing || (!includeOverlays && r.mTaskOverlay)) {
                 continue;
             }
             return r;
@@ -1294,7 +1285,6 @@ final class TaskRecord extends ConfigurationContainer implements TaskWindowConta
             // created controller for the activity we are starting yet.
             mWindowContainerController.positionChildAt(appController, index);
         }
-        r.onOverrideConfigurationSent();
 
         // Make sure the list of display UID whitelists is updated
         // now that this record is in a new task.
@@ -1581,8 +1571,9 @@ final class TaskRecord extends ConfigurationContainer implements TaskWindowConta
         // A task can not be docked even if it is considered resizeable because it only supports
         // picture-in-picture mode but has a non-resizeable resizeMode
         return mService.mSupportsSplitScreenMultiWindow
-                && isResizeable(false /* checkSupportsPip */)
-                && !ActivityInfo.isPreserveOrientationMode(mResizeMode);
+                && (mService.mForceResizableActivities
+                        || (isResizeable(false /* checkSupportsPip */)
+                                && !ActivityInfo.isPreserveOrientationMode(mResizeMode)));
     }
 
     /**
@@ -1593,7 +1584,8 @@ final class TaskRecord extends ConfigurationContainer implements TaskWindowConta
      */
     boolean canBeLaunchedOnDisplay(int displayId) {
         return mService.mStackSupervisor.canPlaceEntityOnDisplay(displayId,
-                isResizeable(false /* checkSupportsPip */));
+                isResizeable(false /* checkSupportsPip */), -1 /* don't check PID */,
+                -1 /* don't check UID */, null /* activityInfo */);
     }
 
     /**

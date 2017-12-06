@@ -23,15 +23,16 @@ import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.app.Activity;
 import android.content.IntentSender;
+import android.content.pm.ParceledListSlice;
 import android.os.Bundle;
 import android.os.Parcel;
 import android.os.Parcelable;
 import android.view.autofill.AutofillId;
-import android.view.autofill.AutofillManager;
 import android.widget.RemoteViews;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.List;
 
 /**
  * Response for a {@link
@@ -41,7 +42,7 @@ import java.util.Arrays;
  */
 public final class FillResponse implements Parcelable {
 
-    private final @Nullable ArrayList<Dataset> mDatasets;
+    private final @Nullable ParceledListSlice<Dataset> mDatasets;
     private final @Nullable SaveInfo mSaveInfo;
     private final @Nullable Bundle mClientState;
     private final @Nullable RemoteViews mPresentation;
@@ -51,7 +52,7 @@ public final class FillResponse implements Parcelable {
     private int mRequestId;
 
     private FillResponse(@NonNull Builder builder) {
-        mDatasets = builder.mDatasets;
+        mDatasets = (builder.mDatasets != null) ? new ParceledListSlice<>(builder.mDatasets) : null;
         mSaveInfo = builder.mSaveInfo;
         mClientState = builder.mCLientState;
         mPresentation = builder.mPresentation;
@@ -67,8 +68,8 @@ public final class FillResponse implements Parcelable {
     }
 
     /** @hide */
-    public @Nullable ArrayList<Dataset> getDatasets() {
-        return mDatasets;
+    public @Nullable List<Dataset> getDatasets() {
+        return (mDatasets != null) ? mDatasets.getList() : null;
     }
 
     /** @hide */
@@ -143,13 +144,16 @@ public final class FillResponse implements Parcelable {
          * for the user to trigger your authentication flow.
          *
          * <p>When a user triggers autofill, the system launches the provided intent
-         * whose extras will have the {@link AutofillManager#EXTRA_ASSIST_STRUCTURE screen
+         * whose extras will have the
+         * {@link android.view.autofill.AutofillManager#EXTRA_ASSIST_STRUCTURE screen
          * content} and your {@link android.view.autofill.AutofillManager#EXTRA_CLIENT_STATE
          * client state}. Once you complete your authentication flow you should set the
-         * {@link Activity} result to {@link android.app.Activity#RESULT_OK} and provide the fully
-         * populated {@link FillResponse response} by setting it to the {@link
-         * AutofillManager#EXTRA_AUTHENTICATION_RESULT} extra.
-         * For example, if you provided an empty {@link FillResponse resppnse} because the
+         * {@link Activity} result to {@link android.app.Activity#RESULT_OK} and set the
+         * {@link android.view.autofill.AutofillManager#EXTRA_AUTHENTICATION_RESULT} extra
+         * with the fully populated {@link FillResponse response} (or {@code null} if the screen
+         * cannot be autofilled).
+         *
+         * <p>For example, if you provided an empty {@link FillResponse response} because the
          * user's data was locked and marked that the response needs an authentication then
          * in the response returned if authentication succeeds you need to provide all
          * available data sets some of which may need to be further authenticated, for
@@ -168,7 +172,7 @@ public final class FillResponse implements Parcelable {
          * @param ids id of Views that when focused will display the authentication UI affordance.
          *
          * @return This builder.
-         * @throw {@link IllegalArgumentException} if {@code ids} is {@code null} or empty, or if
+         * @throws IllegalArgumentException if {@code ids} is {@code null} or empty, or if
          * neither {@code authentication} nor {@code presentation} is non-{@code null}.
          *
          * @see android.app.PendingIntent#getIntentSender()
@@ -205,12 +209,14 @@ public final class FillResponse implements Parcelable {
         /**
          * Adds a new {@link Dataset} to this response.
          *
-         * <p><b>Note: </b> the total number of datasets is limited by the Binder transaction size,
-         * so it's recommended to keep it small (in the range of 10-20 at most) and use pagination
-         * by adding a fake
-         * {@link Dataset.Builder#setAuthentication(IntentSender) authenticated dataset}
-         * at the end with a presentation string like "Next 10" that would return a new
-         * {@link FillResponse} with the next 10 datasets, and so on.
+         * <p><b>Note: </b> on Android {@link android.os.Build.VERSION_CODES#O}, the total number of
+         * datasets is limited by the Binder transaction size, so it's recommended to keep it
+         * small (in the range of 10-20 at most) and use pagination by adding a fake
+         * {@link Dataset.Builder#setAuthentication(IntentSender) authenticated dataset} at the end
+         * with a presentation string like "Next 10" that would return a new {@link FillResponse}
+         * with the next 10 datasets, and so on. This limitation was lifted on
+         * Android {@link android.os.Build.VERSION_CODES#O_MR1}, although the Binder transaction
+         * size can still be reached if each dataset itself is too big.
          *
          * @return This builder.
          */
@@ -298,7 +304,7 @@ public final class FillResponse implements Parcelable {
         // TODO: create a dump() method instead
         return new StringBuilder(
                 "FillResponse : [mRequestId=" + mRequestId)
-                .append(", datasets=").append(mDatasets)
+                .append(", datasets=").append(mDatasets == null ? "N/A" : mDatasets.getList())
                 .append(", saveInfo=").append(mSaveInfo)
                 .append(", clientState=").append(mClientState != null)
                 .append(", hasPresentation=").append(mPresentation != null)
@@ -320,7 +326,7 @@ public final class FillResponse implements Parcelable {
 
     @Override
     public void writeToParcel(Parcel parcel, int flags) {
-        parcel.writeTypedArrayList(mDatasets, flags);
+        parcel.writeParcelable(mDatasets, flags);
         parcel.writeParcelable(mSaveInfo, flags);
         parcel.writeParcelable(mClientState, flags);
         parcel.writeParcelableArray(mAuthenticationIds, flags);
@@ -338,7 +344,8 @@ public final class FillResponse implements Parcelable {
             // the system obeys the contract of the builder to avoid attacks
             // using specially crafted parcels.
             final Builder builder = new Builder();
-            final ArrayList<Dataset> datasets = parcel.readTypedArrayList(null);
+            final ParceledListSlice<Dataset> datasetSlice = parcel.readParcelable(null);
+            final List<Dataset> datasets = (datasetSlice != null) ? datasetSlice.getList() : null;
             final int datasetCount = (datasets != null) ? datasets.size() : 0;
             for (int i = 0; i < datasetCount; i++) {
                 builder.addDataset(datasets.get(i));

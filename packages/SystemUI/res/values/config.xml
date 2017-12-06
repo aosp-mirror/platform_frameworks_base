@@ -347,26 +347,6 @@
     <!-- Whether or not a background should be drawn behind a notification. -->
     <bool name="config_drawNotificationBackground">true</bool>
 
-    <!-- Whether or not the edit icon on the quick settings header is shown. -->
-    <bool name="config_showQuickSettingsEditingIcon">true</bool>
-
-    <!-- Whether or not the multi-user switcher should be visible even if the quick settings are
-         not expanded. If there are not multiple users on the system, the switcher will still
-         hide itself. -->
-    <bool name="config_alwaysShowMultiUserSwitcher">false</bool>
-
-    <!-- Whether or not the expand indicator is visible for manually expanding the quick settings
-         panel. -->
-    <bool name="config_showQuickSettingsExpandIndicator">true</bool>
-
-    <!-- Whether or not to display the row of quick settings icons separate from the full quick
-         settings panel. -->
-    <bool name="config_showQuickSettingsRow">true</bool>
-
-    <!-- Whether or not the quick settings should be revealed on an overscroll of the
-         notifications panel. -->
-    <bool name="config_enableQuickSettingsOverscrollExpansion">true</bool>
-
     <!-- Whether or the notifications can be shown and dismissed with a drag. -->
     <bool name="config_enableNotificationShadeDrag">true</bool>
 
@@ -433,4 +413,23 @@
          one bar higher than they actually are -->
     <bool name="config_inflateSignalStrength">false</bool>
 
+    <!-- Should we vibrate on an icon animation of the shelf. This should only be active if the
+     vibrator is capable of subtle vibrations -->
+    <bool name="config_vibrateOnIconAnimation">false</bool>
+
+    <!-- If true, enable the advance anti-falsing classifier on the lockscreen. On some devices it
+         does not work well, particularly with noisy touchscreens. Note that disabling it may
+         increase the rate of unintentional unlocks. -->
+    <bool name="config_lockscreenAntiFalsingClassifierEnabled">true</bool>
+
+    <!-- Snooze: default notificaiton snooze time. -->
+    <integer name="config_notification_snooze_time_default">60</integer>
+
+    <!-- Snooze: List of snooze values in integer minutes. -->
+    <integer-array name="config_notification_snooze_times">
+        <item>15</item>
+        <item>30</item>
+        <item>60</item>
+        <item>120</item>
+    </integer-array>
 </resources>

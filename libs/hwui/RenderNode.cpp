@@ -241,7 +241,8 @@ void RenderNode::pushLayerUpdate(TreeInfo& info) {
     if (CC_LIKELY(layerType != LayerType::RenderLayer)
             || CC_UNLIKELY(!isRenderable())
             || CC_UNLIKELY(properties().getWidth() == 0)
-            || CC_UNLIKELY(properties().getHeight() == 0)) {
+            || CC_UNLIKELY(properties().getHeight() == 0)
+            || CC_UNLIKELY(!properties().fitsOnLayer())) {
         if (CC_UNLIKELY(hasLayer())) {
             renderthread::CanvasContext::destroyLayer(this);
         }

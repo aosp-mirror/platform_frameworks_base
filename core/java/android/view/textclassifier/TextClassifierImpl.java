@@ -24,11 +24,11 @@ import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.content.pm.ResolveInfo;
 import android.graphics.drawable.Drawable;
-import android.icu.text.BreakIterator;
 import android.net.Uri;
 import android.os.LocaleList;
 import android.os.ParcelFileDescriptor;
 import android.provider.Browser;
+import android.provider.Settings;
 import android.text.Spannable;
 import android.text.TextUtils;
 import android.text.method.WordIterator;
@@ -46,6 +46,7 @@ import com.android.internal.util.Preconditions;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.text.BreakIterator;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
@@ -70,7 +71,7 @@ import java.util.regex.Pattern;
  */
 final class TextClassifierImpl implements TextClassifier {
 
-    private static final String LOG_TAG = "TextClassifierImpl";
+    private static final String LOG_TAG = DEFAULT_LOG_TAG;
     private static final String MODEL_DIR = "/etc/textclassifier/";
     private static final String MODEL_FILE_REGEX = "textclassifier\\.smartselection\\.(.*)\\.model";
     private static final String UPDATED_MODEL_FILE_PATH =
@@ -86,7 +87,11 @@ final class TextClassifierImpl implements TextClassifier {
     @GuardedBy("mSmartSelectionLock") // Do not access outside this lock.
     private Locale mLocale;
     @GuardedBy("mSmartSelectionLock") // Do not access outside this lock.
+    private int mVersion;
+    @GuardedBy("mSmartSelectionLock") // Do not access outside this lock.
     private SmartSelection mSmartSelection;
+
+    private TextClassifierConstants mSettings;
 
     TextClassifierImpl(Context context) {
         mContext = Preconditions.checkNotNull(context);
@@ -108,8 +113,7 @@ final class TextClassifierImpl implements TextClassifier {
                 if (start <= end
                         && start >= 0 && end <= string.length()
                         && start <= selectionStartIndex && end >= selectionEndIndex) {
-                    final TextSelection.Builder tsBuilder = new TextSelection.Builder(start, end)
-                            .setLogSource(LOG_TAG);
+                    final TextSelection.Builder tsBuilder = new TextSelection.Builder(start, end);
                     final SmartSelection.ClassificationResult[] results =
                             smartSelection.classifyText(
                                     string, start, end,
@@ -118,7 +122,10 @@ final class TextClassifierImpl implements TextClassifier {
                     for (int i = 0; i < size; i++) {
                         tsBuilder.setEntityType(results[i].mCollection, results[i].mScore);
                     }
-                    return tsBuilder.build();
+                    return tsBuilder
+                            .setLogSource(LOG_TAG)
+                            .setVersionInfo(getVersionInfo())
+                            .build();
                 } else {
                     // We can not trust the result. Log the issue and ignore the result.
                     Log.d(LOG_TAG, "Got bad indices for input text. Ignoring result.");
@@ -184,6 +191,15 @@ final class TextClassifierImpl implements TextClassifier {
         }
     }
 
+    @Override
+    public TextClassifierConstants getSettings() {
+        if (mSettings == null) {
+            mSettings = TextClassifierConstants.loadFromString(Settings.Global.getString(
+                    mContext.getContentResolver(), Settings.Global.TEXT_CLASSIFIER_CONSTANTS));
+        }
+        return mSettings;
+    }
+
     private SmartSelection getSmartSelection(LocaleList localeList) throws FileNotFoundException {
         synchronized (mSmartSelectionLock) {
             localeList = localeList == null ? LocaleList.getEmptyLocaleList() : localeList;
@@ -199,6 +215,16 @@ final class TextClassifierImpl implements TextClassifier {
                 mLocale = locale;
             }
             return mSmartSelection;
+        }
+    }
+
+    @NonNull
+    private String getVersionInfo() {
+        synchronized (mSmartSelectionLock) {
+            if (mLocale != null) {
+                return String.format("%s_v%d", mLocale.toLanguageTag(), mVersion);
+            }
+            return "";
         }
     }
 
@@ -256,9 +282,11 @@ final class TextClassifierImpl implements TextClassifier {
         final int factoryVersion = SmartSelection.getVersion(factoryFd.getFd());
         if (updateVersion > factoryVersion) {
             closeAndLogError(factoryFd);
+            mVersion = updateVersion;
             return updateFd;
         } else {
             closeAndLogError(updateFd);
+            mVersion = factoryVersion;
             return factoryFd;
         }
     }
@@ -374,7 +402,7 @@ final class TextClassifierImpl implements TextClassifier {
                 builder.setLabel(label != null ? label.toString() : null);
             }
         }
-        return builder.build();
+        return builder.setVersionInfo(getVersionInfo()).build();
     }
 
     private static int getHintFlags(CharSequence text, int start, int end) {

@@ -36,10 +36,13 @@ class IGraphicBufferProducer;
 struct MediaCodec;
 struct PersistentSurface;
 class Surface;
-namespace media {
-class IDescrambler;
-};
-using namespace media;
+namespace hardware {
+namespace cas {
+namespace native {
+namespace V1_0 {
+struct IDescrambler;
+}}}}
+using hardware::cas::native::V1_0::IDescrambler;
 
 struct JMediaCodec : public AHandler {
     JMediaCodec(

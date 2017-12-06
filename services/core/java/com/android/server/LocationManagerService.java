@@ -325,58 +325,13 @@ public class LocationManagerService extends ILocationManager.Stub {
             ActivityManager.OnUidImportanceListener uidImportanceListener
                     = new ActivityManager.OnUidImportanceListener() {
                 @Override
-                public void onUidImportance(int uid, int importance) {
-                    boolean foreground = isImportanceForeground(importance);
-                    HashSet<String> affectedProviders = new HashSet<>(mRecordsByProvider.size());
-                    synchronized (mLock) {
-                        for (Entry<String, ArrayList<UpdateRecord>> entry
-                                : mRecordsByProvider.entrySet()) {
-                            String provider = entry.getKey();
-                            for (UpdateRecord record : entry.getValue()) {
-                                if (record.mReceiver.mIdentity.mUid == uid
-                                        && record.mIsForegroundUid != foreground) {
-                                    if (D) Log.d(TAG, "request from uid " + uid + " is now "
-                                            + (foreground ? "foreground" : "background)"));
-                                    record.mIsForegroundUid = foreground;
-
-                                    if (!isThrottlingExemptLocked(record.mReceiver.mIdentity)) {
-                                        affectedProviders.add(provider);
-                                    }
-                                }
-                            }
+                public void onUidImportance(final int uid, final int importance) {
+                    mLocationHandler.post(new Runnable() {
+                        @Override
+                        public void run() {
+                            onUidImportanceChanged(uid, importance);
                         }
-                        for (String provider : affectedProviders) {
-                            applyRequirementsLocked(provider);
-                        }
-
-                        for (Entry<IGnssMeasurementsListener, Identity> entry
-                                : mGnssMeasurementsListeners.entrySet()) {
-                            if (entry.getValue().mUid == uid) {
-                                if (D) Log.d(TAG, "gnss measurements listener from uid " + uid
-                                    + " is now " + (foreground ? "foreground" : "background)"));
-                                if (foreground || isThrottlingExemptLocked(entry.getValue())) {
-                                    mGnssMeasurementsProvider.addListener(entry.getKey());
-                                } else {
-                                    mGnssMeasurementsProvider.removeListener(entry.getKey());
-                                }
-                            }
-                        }
-
-                        for (Entry<IGnssNavigationMessageListener, Identity> entry
-                            : mGnssNavigationMessageListeners.entrySet()) {
-                            if (entry.getValue().mUid == uid) {
-                                if (D) Log.d(TAG, "gnss navigation message listener from uid "
-                                    + uid + " is now "
-                                    + (foreground ? "foreground" : "background)"));
-                                if (foreground || isThrottlingExemptLocked(entry.getValue())) {
-                                    mGnssNavigationMessageProvider.addListener(entry.getKey());
-                                } else {
-                                    mGnssNavigationMessageProvider.removeListener(entry.getKey());
-                                }
-                            }
-                        }
-                    }
-
+                    });
                 }
             };
             mActivityManager.addOnUidImportanceListener(uidImportanceListener,
@@ -454,6 +409,59 @@ public class LocationManagerService extends ILocationManager.Stub {
                 }
             }
         }, UserHandle.ALL, intentFilter, null, mLocationHandler);
+    }
+
+    private void onUidImportanceChanged(int uid, int importance) {
+        boolean foreground = isImportanceForeground(importance);
+        HashSet<String> affectedProviders = new HashSet<>(mRecordsByProvider.size());
+        synchronized (mLock) {
+            for (Entry<String, ArrayList<UpdateRecord>> entry
+                : mRecordsByProvider.entrySet()) {
+                String provider = entry.getKey();
+                for (UpdateRecord record : entry.getValue()) {
+                    if (record.mReceiver.mIdentity.mUid == uid
+                        && record.mIsForegroundUid != foreground) {
+                        if (D) Log.d(TAG, "request from uid " + uid + " is now "
+                            + (foreground ? "foreground" : "background)"));
+                        record.mIsForegroundUid = foreground;
+
+                        if (!isThrottlingExemptLocked(record.mReceiver.mIdentity)) {
+                            affectedProviders.add(provider);
+                        }
+                    }
+                }
+            }
+            for (String provider : affectedProviders) {
+                applyRequirementsLocked(provider);
+            }
+
+            for (Entry<IGnssMeasurementsListener, Identity> entry
+                : mGnssMeasurementsListeners.entrySet()) {
+                if (entry.getValue().mUid == uid) {
+                    if (D) Log.d(TAG, "gnss measurements listener from uid " + uid
+                        + " is now " + (foreground ? "foreground" : "background)"));
+                    if (foreground || isThrottlingExemptLocked(entry.getValue())) {
+                        mGnssMeasurementsProvider.addListener(entry.getKey());
+                    } else {
+                        mGnssMeasurementsProvider.removeListener(entry.getKey());
+                    }
+                }
+            }
+
+            for (Entry<IGnssNavigationMessageListener, Identity> entry
+                : mGnssNavigationMessageListeners.entrySet()) {
+                if (entry.getValue().mUid == uid) {
+                    if (D) Log.d(TAG, "gnss navigation message listener from uid "
+                        + uid + " is now "
+                        + (foreground ? "foreground" : "background)"));
+                    if (foreground || isThrottlingExemptLocked(entry.getValue())) {
+                        mGnssNavigationMessageProvider.addListener(entry.getKey());
+                    } else {
+                        mGnssNavigationMessageProvider.removeListener(entry.getKey());
+                    }
+                }
+            }
+        }
     }
 
     private static boolean isImportanceForeground(int importance) {

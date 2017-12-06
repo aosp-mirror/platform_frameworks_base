@@ -36,6 +36,8 @@ import static junit.framework.Assert.assertTrue;
 public class ZoneGetterTest {
     private static final String TIME_ZONE_LONDON_ID = "Europe/London";
     private static final String TIME_ZONE_LA_ID = "America/Los_Angeles";
+    private static final String TIME_ZONE_ALGIERS_ID = "Africa/Algiers";
+    private static final String TIME_ZONE_CEUTA_ID = "Africa/Ceuta";
     private Locale mLocaleEnUs;
     private Calendar mCalendar;
 
@@ -56,6 +58,16 @@ public class ZoneGetterTest {
     public void getTimeZoneOffsetAndName_setLosAngeles_returnPacificDaylightTime() {
         // Check it will ends with 'Pacific Daylight Time', not 'Los_Angeles'
         testTimeZoneOffsetAndNameInner(TIME_ZONE_LA_ID, "Pacific Daylight Time");
+    }
+
+    @Test
+    public void getTimeZoneOffsetAndName_setAlgiers_returnCentralEuropeanStandardTime() {
+        testTimeZoneOffsetAndNameInner(TIME_ZONE_ALGIERS_ID, "Central European Standard Time");
+    }
+
+    @Test
+    public void getTimeZoneOffsetAndName_setCeuta_returnCentralEuropeanSummerTime() {
+        testTimeZoneOffsetAndNameInner(TIME_ZONE_CEUTA_ID, "Central European Summer Time");
     }
 
     @Test

@@ -433,8 +433,13 @@ public class BitmapFactory {
         static void validate(Options opts) {
             if (opts == null) return;
 
-            if (opts.inMutable && opts.inPreferredConfig == Bitmap.Config.HARDWARE) {
+            if (opts.inBitmap != null && opts.inBitmap.getConfig() == Bitmap.Config.HARDWARE) {
                 throw new IllegalArgumentException("Bitmaps with Config.HARWARE are always immutable");
+            }
+
+            if (opts.inMutable && opts.inPreferredConfig == Bitmap.Config.HARDWARE) {
+                throw new IllegalArgumentException("Bitmaps with Config.HARDWARE cannot be " +
+                        "decoded into - they are immutable");
             }
 
             if (opts.inPreferredColorSpace != null) {

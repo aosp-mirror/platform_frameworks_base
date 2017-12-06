@@ -66,7 +66,7 @@
     <string name="usb_debugging_message" msgid="2220143855912376496">"Цифровой отпечаток ключа RSA:\n<xliff:g id="FINGERPRINT">%1$s</xliff:g>"</string>
     <string name="usb_debugging_always" msgid="303335496705863070">"Всегда разрешать отладку с этого компьютера"</string>
     <string name="usb_debugging_secondary_user_title" msgid="6353808721761220421">"Отладка по USB запрещена"</string>
-    <string name="usb_debugging_secondary_user_message" msgid="8572228137833020196">"В текущем аккаунте нельзя включить отладку по USB. Перейдите в аккаунт администратора."</string>
+    <string name="usb_debugging_secondary_user_message" msgid="6067122453571699801">"В этом аккаунте нельзя включить отладку по USB. Перейдите в аккаунт основного пользователя."</string>
     <string name="compat_mode_on" msgid="6623839244840638213">"Подогнать по размерам экрана"</string>
     <string name="compat_mode_off" msgid="4434467572461327898">"Растянуть на весь экран"</string>
     <string name="screenshot_saving_ticker" msgid="7403652894056693515">"Сохранение..."</string>
@@ -202,7 +202,7 @@
     <string name="accessibility_quick_settings_airplane_on" msgid="6406141469157599296">"Режим полета включен."</string>
     <string name="accessibility_quick_settings_airplane_changed_off" msgid="66846307818850664">"Режим полета отключен."</string>
     <string name="accessibility_quick_settings_airplane_changed_on" msgid="8983005603505087728">"Режим полета включен."</string>
-    <string name="accessibility_quick_settings_dnd_priority_on" msgid="1448402297221249355">"Режим \"Не беспокоить\" включен. Будут показаны только важные оповещения."</string>
+    <string name="accessibility_quick_settings_dnd_priority_on" msgid="1448402297221249355">"Режим \"Не беспокоить\" включен. Будут показаны только важные уведомления."</string>
     <string name="accessibility_quick_settings_dnd_none_on" msgid="6882582132662613537">"Не беспокоить, полная тишина."</string>
     <string name="accessibility_quick_settings_dnd_alarms_on" msgid="9152834845587554157">"Не беспокоить – только будильник."</string>
     <string name="accessibility_quick_settings_dnd" msgid="6607873236717185815">"Не беспокоить."</string>
@@ -359,13 +359,13 @@
     <string name="description_target_search" msgid="3091587249776033139">"Поиск"</string>
     <string name="description_direction_up" msgid="7169032478259485180">"Проведите вверх, чтобы <xliff:g id="TARGET_DESCRIPTION">%s</xliff:g>."</string>
     <string name="description_direction_left" msgid="7207478719805562165">"Проведите влево, чтобы <xliff:g id="TARGET_DESCRIPTION">%s</xliff:g>."</string>
-    <string name="zen_priority_introduction" msgid="7577965386868311310">"Вас не будут отвлекать звуки и вибрация, за исключением сигналов будильника, напоминаний, уведомлений о мероприятиях и звонков от помеченных контактов. Вы по-прежнему будете слышать включенную вами музыку, видео, игры и т. д."</string>
-    <string name="zen_alarms_introduction" msgid="7034415210361973827">"Вас не будут отвлекать звуки и вибрация, за исключением сигналов будильника. Вы по-прежнему будете слышать включенную вами музыку, видео, игры и т. д."</string>
+    <string name="zen_priority_introduction" msgid="1149025108714420281">"Вас не будут отвлекать звуки и вибрация, за исключением сигналов будильника, напоминаний, уведомлений о мероприятиях и звонков от помеченных контактов. Вы по-прежнему будете слышать включенную вами музыку, видео, игры и т. д."</string>
+    <string name="zen_alarms_introduction" msgid="4934328096749380201">"Вас не будут отвлекать звуки и вибрация, за исключением сигналов будильника. Вы по-прежнему будете слышать включенную вами музыку, видео, игры и т. д."</string>
     <string name="zen_priority_customize_button" msgid="7948043278226955063">"Настроить"</string>
-    <string name="zen_silence_introduction_voice" msgid="2284540992298200729">"В этом режиме будут отключены вибросигнал и все звуки (в том числе для будильника, музыкального проигрывателя, игр и видео). При этом вы сможете разговаривать по телефону."</string>
+    <string name="zen_silence_introduction_voice" msgid="3948778066295728085">"Этот режим заблокирует все звуки и вибрацию, в том числе для будильника, музыки, видео и игр. Вы сможете разговаривать по телефону."</string>
     <string name="zen_silence_introduction" msgid="3137882381093271568">"В этом режиме будут отключены вибросигнал и все звуки (в том числе для будильника, музыкального проигрывателя, игр и видео)."</string>
     <string name="keyguard_more_overflow_text" msgid="9195222469041601365">"+<xliff:g id="NUMBER_OF_NOTIFICATIONS">%d</xliff:g>"</string>
-    <string name="speed_bump_explanation" msgid="1288875699658819755">"Показать менее важные оповещения"</string>
+    <string name="speed_bump_explanation" msgid="1288875699658819755">"Показать менее важные уведомления"</string>
     <string name="notification_tap_again" msgid="7590196980943943842">"Нажмите ещё раз, чтобы открыть"</string>
     <string name="keyguard_unlock" msgid="8043466894212841998">"Проведите вверх, чтобы разблокировать"</string>
     <string name="do_disclosure_generic" msgid="5615898451805157556">"Этим устройством управляет ваша организация"</string>
@@ -462,7 +462,7 @@
     <string name="monitoring_description_do_learn_more" msgid="1849514470437907421">"Подробнее…"</string>
     <string name="monitoring_description_do_body_vpn" msgid="8255218762488901796">"Запущено приложение \"<xliff:g id="VPN_APP">%1$s</xliff:g>\". Оно может отслеживать ваши действия в сети, включая работу с электронной почтой, приложениями и сайтами."</string>
     <string name="monitoring_description_vpn_settings_separator" msgid="1933186756733474388">" "</string>
-    <string name="monitoring_description_vpn_settings" msgid="8869300202410505143">"Открыть настройки VPN"</string>
+    <string name="monitoring_description_vpn_settings" msgid="6434859242636063861">"Открыть настройки VPN"</string>
     <string name="monitoring_description_ca_cert_settings_separator" msgid="4987350385906393626">" "</string>
     <string name="monitoring_description_ca_cert_settings" msgid="5489969458872997092">"Открыть надежные сертификаты"</string>
     <string name="monitoring_description_network_logging" msgid="7223505523384076027">"Администратор включил ведение сетевого журнала, чтобы отслеживать трафик на вашем устройстве.\n\nДля получения подробной информации обращайтесь к администратору."</string>
@@ -558,14 +558,14 @@
     <string name="power_notification_controls_description" msgid="4372459941671353358">"С помощью этой функции вы можете устанавливать уровень важности уведомлений от 0 до 5 для каждого приложения.\n\n"<b>"Уровень 5"</b>\n"‒ Помещать уведомления в начало списка.\n‒ Показывать полноэкранные уведомления.\n‒ Показывать всплывающие уведомления.\nУровень 4\n"<b></b>\n"‒ Не показывать полноэкранные уведомления.\n‒ Показывать всплывающие уведомления.\nУровень 3\n"<b></b>\n"‒ Не показывать полноэкранные уведомления.\n‒ Не показывать всплывающие уведомления.\nУровень 2\n"<b></b>\n"‒ Не показывать полноэкранные уведомления.\n‒ Не показывать всплывающие уведомления.\n‒ Не использовать звук и вибрацию.\nУровень 1\n"<b></b>\n"‒ Не показывать полноэкранные уведомления.\n‒ Не показывать всплывающие уведомления.\n‒ Не использовать звук и вибрацию.\n‒ Не показывать на экране блокировки и в строке состояния.\n‒ Помещать уведомления в конец списка.\nУровень 0\n"<b></b>\n"‒ Блокировать все уведомления приложения."</string>
     <string name="notification_header_default_channel" msgid="7506845022070889909">"Уведомления"</string>
     <string name="notification_channel_disabled" msgid="2139193533791840539">"Вы больше не будете получать эти уведомления"</string>
-    <string name="notification_num_channels" msgid="2048144408999179471">"Категорий оповещений: <xliff:g id="NUMBER">%d</xliff:g>"</string>
+    <string name="notification_num_channels" msgid="2048144408999179471">"Категорий уведомлений: <xliff:g id="NUMBER">%d</xliff:g>"</string>
     <string name="notification_default_channel_desc" msgid="2506053815870808359">"В приложении нет категорий уведомлений"</string>
     <string name="notification_unblockable_desc" msgid="3561016061737896906">"Уведомления этого приложения нельзя отключить"</string>
     <plurals name="notification_num_channels_desc" formatted="false" msgid="5492793452274077663">
-      <item quantity="one">1 из <xliff:g id="NUMBER_1">%d</xliff:g> категории уведомлений этого приложения</item>
-      <item quantity="few">1 из <xliff:g id="NUMBER_1">%d</xliff:g> категорий уведомлений этого приложения</item>
-      <item quantity="many">1 из <xliff:g id="NUMBER_1">%d</xliff:g> категорий уведомлений этого приложения</item>
-      <item quantity="other">1 из <xliff:g id="NUMBER_1">%d</xliff:g> категории уведомлений этого приложения</item>
+      <item quantity="one">1 из <xliff:g id="NUMBER_1">%s</xliff:g> категории уведомлений этого приложения</item>
+      <item quantity="few">1 из <xliff:g id="NUMBER_1">%s</xliff:g> категорий уведомлений этого приложения</item>
+      <item quantity="many">1 из <xliff:g id="NUMBER_1">%s</xliff:g> категорий уведомлений этого приложения</item>
+      <item quantity="other">1 из <xliff:g id="NUMBER_1">%s</xliff:g> категории уведомлений этого приложения</item>
     </plurals>
     <string name="notification_channels_list_desc_2" msgid="6214732715833946441">"<xliff:g id="CHANNEL_NAME_1">%1$s</xliff:g>, <xliff:g id="CHANNEL_NAME_2">%2$s</xliff:g>"</string>
     <plurals name="notification_channels_list_desc_2_and_others" formatted="false" msgid="2747813553355336157">
@@ -599,8 +599,8 @@
       <item quantity="other">%d минуты</item>
     </plurals>
     <string name="battery_panel_title" msgid="7944156115535366613">"Уровень заряда"</string>
-    <string name="battery_detail_charging_summary" msgid="1279095653533044008">"Режим энергосбережения нельзя включить во время зарядки"</string>
-    <string name="battery_detail_switch_title" msgid="6285872470260795421">"Режим энергосбережения"</string>
+    <string name="battery_detail_charging_summary" msgid="4055327085770378335">"Режим энергосбережения нельзя включить во время зарядки"</string>
+    <string name="battery_detail_switch_title" msgid="8763441006881907058">"Режим энергосбережения"</string>
     <string name="battery_detail_switch_summary" msgid="9049111149407626804">"Ограничивает производительность и фоновую передачу данных"</string>
     <string name="keyboard_key_button_template" msgid="6230056639734377300">"Кнопка <xliff:g id="NAME">%1$s</xliff:g>"</string>
     <string name="keyboard_key_home" msgid="2243500072071305073">"Главный экран"</string>
@@ -740,9 +740,9 @@
     <string name="pip_phone_minimize" msgid="1079119422589131792">"Свернуть"</string>
     <string name="pip_phone_close" msgid="8416647892889710330">"Закрыть"</string>
     <string name="pip_phone_dismiss_hint" msgid="6351678169095923899">"Чтобы закрыть, потяните вниз"</string>
-    <string name="pip_menu_title" msgid="3328510504196964712">"Меню \"Картинка в картинке\""</string>
+    <string name="pip_menu_title" msgid="4707292089961887657">"Меню"</string>
     <string name="pip_notification_title" msgid="3204024940158161322">"<xliff:g id="NAME">%s</xliff:g> находится в режиме \"Картинка в картинке\""</string>
-    <string name="pip_notification_message" msgid="4171698133469539591">"Чтобы отключить эту функцию для приложения \"<xliff:g id="NAME">%s</xliff:g>\", перейдите в настройки."</string>
+    <string name="pip_notification_message" msgid="5619512781514343311">"Чтобы отключить эту функцию для приложения \"<xliff:g id="NAME">%s</xliff:g>\", перейдите в настройки."</string>
     <string name="pip_play" msgid="1417176722760265888">"Воспроизвести"</string>
     <string name="pip_pause" msgid="8881063404466476571">"Приостановить"</string>
     <string name="pip_skip_to_next" msgid="1948440006726306284">"Перейти к следующему"</string>
@@ -768,6 +768,7 @@
     <string name="tuner_menu" msgid="191640047241552081">"Меню"</string>
     <string name="tuner_app" msgid="3507057938640108777">"Приложение \"<xliff:g id="APP">%1$s</xliff:g>\""</string>
     <string name="notification_channel_alerts" msgid="4496839309318519037">"Уведомления"</string>
+    <string name="notification_channel_battery" msgid="5786118169182888462">"Батарея"</string>
     <string name="notification_channel_screenshot" msgid="6314080179230000938">"Скриншоты"</string>
     <string name="notification_channel_general" msgid="4525309436693914482">"Сообщения"</string>
     <string name="notification_channel_storage" msgid="3077205683020695313">"Хранилище"</string>
@@ -788,4 +789,5 @@
     <string name="running_foreground_services_title" msgid="381024150898615683">"Приложения, работающие в фоновом режиме"</string>
     <string name="running_foreground_services_msg" msgid="6326247670075574355">"Нажмите, чтобы проверить энергопотребление и трафик"</string>
     <string name="data_usage_disable_mobile" msgid="5116269981510015864">"Отключить мобильный Интернет?"</string>
+    <string name="touch_filtered_warning" msgid="8671693809204767551">"Невозможно принять ваше согласие, поскольку запрос скрыт другим приложением."</string>
 </resources>

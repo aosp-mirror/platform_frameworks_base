@@ -184,7 +184,11 @@ public class QSDetailItems extends FrameLayout {
             }
             view.setVisibility(mItemsVisible ? VISIBLE : INVISIBLE);
             final ImageView iv = (ImageView) view.findViewById(android.R.id.icon);
-            iv.setImageResource(item.icon);
+            if (item.iconDrawable != null) {
+                iv.setImageDrawable(item.iconDrawable);
+            } else {
+                iv.setImageResource(item.icon);
+            }
             iv.getOverlay().clear();
             if (item.overlay != null) {
                 item.overlay.setBounds(0, 0, mQsDetailIconOverlaySize, mQsDetailIconOverlaySize);
@@ -254,6 +258,7 @@ public class QSDetailItems extends FrameLayout {
 
     public static class Item {
         public int icon;
+        public Drawable iconDrawable;
         public Drawable overlay;
         public CharSequence line1;
         public CharSequence line2;

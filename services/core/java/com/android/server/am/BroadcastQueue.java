@@ -1445,20 +1445,19 @@ public final class BroadcastQueue {
         r.receiverTime = now;
         r.anrCount++;
 
-        // Current receiver has passed its expiration date.
-        if (r.nextReceiver <= 0) {
-            Slog.w(TAG, "Timeout on receiver with nextReceiver <= 0");
-            return;
-        }
-
         ProcessRecord app = null;
         String anrMessage = null;
 
-        Object curReceiver = r.receivers.get(r.nextReceiver-1);
-        r.delivery[r.nextReceiver-1] = BroadcastRecord.DELIVERY_TIMEOUT;
-        Slog.w(TAG, "Receiver during timeout: " + curReceiver);
+        Object curReceiver;
+        if (r.nextReceiver > 0) {
+            curReceiver = r.receivers.get(r.nextReceiver-1);
+            r.delivery[r.nextReceiver-1] = BroadcastRecord.DELIVERY_TIMEOUT;
+        } else {
+            curReceiver = r.curReceiver;
+        }
+        Slog.w(TAG, "Receiver during timeout of " + r + " : " + curReceiver);
         logBroadcastReceiverDiscardLocked(r);
-        if (curReceiver instanceof BroadcastFilter) {
+        if (curReceiver != null && curReceiver instanceof BroadcastFilter) {
             BroadcastFilter bf = (BroadcastFilter)curReceiver;
             if (bf.receiverList.pid != 0
                     && bf.receiverList.pid != ActivityManagerService.MY_PID) {
@@ -1498,25 +1497,29 @@ public final class BroadcastQueue {
         else return x;
     }
 
-    private final void addBroadcastToHistoryLocked(BroadcastRecord r) {
-        if (r.callingUid < 0) {
+    private final void addBroadcastToHistoryLocked(BroadcastRecord original) {
+        if (original.callingUid < 0) {
             // This was from a registerReceiver() call; ignore it.
             return;
         }
-        r.finishTime = SystemClock.uptimeMillis();
+        original.finishTime = SystemClock.uptimeMillis();
 
         if (Trace.isTagEnabled(Trace.TRACE_TAG_ACTIVITY_MANAGER)) {
             Trace.asyncTraceEnd(Trace.TRACE_TAG_ACTIVITY_MANAGER,
-                createBroadcastTraceTitle(r, BroadcastRecord.DELIVERY_DELIVERED),
-                System.identityHashCode(r));
+                createBroadcastTraceTitle(original, BroadcastRecord.DELIVERY_DELIVERED),
+                System.identityHashCode(original));
         }
 
-        mBroadcastHistory[mHistoryNext] = r;
+        // Note sometimes (only for sticky broadcasts?) we reuse BroadcastRecords,
+        // So don't change the incoming record directly.
+        final BroadcastRecord historyRecord = original.maybeStripForHistory();
+
+        mBroadcastHistory[mHistoryNext] = historyRecord;
         mHistoryNext = ringAdvance(mHistoryNext, 1, MAX_BROADCAST_HISTORY);
 
-        mBroadcastSummaryHistory[mSummaryHistoryNext] = r.intent;
-        mSummaryHistoryEnqueueTime[mSummaryHistoryNext] = r.enqueueClockTime;
-        mSummaryHistoryDispatchTime[mSummaryHistoryNext] = r.dispatchClockTime;
+        mBroadcastSummaryHistory[mSummaryHistoryNext] = historyRecord.intent;
+        mSummaryHistoryEnqueueTime[mSummaryHistoryNext] = historyRecord.enqueueClockTime;
+        mSummaryHistoryDispatchTime[mSummaryHistoryNext] = historyRecord.dispatchClockTime;
         mSummaryHistoryFinishTime[mSummaryHistoryNext] = System.currentTimeMillis();
         mSummaryHistoryNext = ringAdvance(mSummaryHistoryNext, 1, MAX_BROADCAST_SUMMARY_HISTORY);
     }

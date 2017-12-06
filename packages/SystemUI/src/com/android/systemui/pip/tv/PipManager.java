@@ -127,6 +127,10 @@ public class PipManager implements BasePipManager {
     private PipNotification mPipNotification;
     private ParceledListSlice mCustomActions;
 
+    // Keeps track of the IME visibility to adjust the PiP when the IME is visible
+    private boolean mImeVisible;
+    private int mImeHeightAdjustment;
+
     private final PinnedStackListener mPinnedStackListener = new PinnedStackListener();
 
     private final Runnable mResizePinnedStackRunnable = new Runnable() {
@@ -175,7 +179,22 @@ public class PipManager implements BasePipManager {
         public void onListenerRegistered(IPinnedStackController controller) {}
 
         @Override
-        public void onImeVisibilityChanged(boolean imeVisible, int imeHeight) {}
+        public void onImeVisibilityChanged(boolean imeVisible, int imeHeight) {
+            if (mState == STATE_PIP) {
+                if (mImeVisible != imeVisible) {
+                    if (imeVisible) {
+                        // Save the IME height adjustment, and offset to not occlude the IME
+                        mPipBounds.offset(0, -imeHeight);
+                        mImeHeightAdjustment = imeHeight;
+                    } else {
+                        // Apply the inverse adjustment when the IME is hidden
+                        mPipBounds.offset(0, mImeHeightAdjustment);
+                    }
+                    mImeVisible = imeVisible;
+                    resizePinnedStack(STATE_PIP);
+                }
+            }
+        }
 
         @Override
         public void onMinimizedStateChanged(boolean isMinimized) {}
@@ -633,7 +652,7 @@ public class PipManager implements BasePipManager {
         }
 
         @Override
-        public void onActivityPinned(String packageName, int taskId) {
+        public void onActivityPinned(String packageName, int userId, int taskId) {
             if (DEBUG) Log.d(TAG, "onActivityPinned()");
 
             StackInfo stackInfo = getPinnedStackInfo();

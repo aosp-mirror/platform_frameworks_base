@@ -204,7 +204,10 @@ final class FillUi {
                 return;
             }
             if (count <= 0) {
-                if (sDebug) Slog.d(TAG, "No dataset matches filter: " + mFilterText);
+                if (sDebug) {
+                    final int size = mFilterText == null ? 0 : mFilterText.length();
+                    Slog.d(TAG, "No dataset matches filter with " + size + " chars");
+                }
                 mCallback.requestHideFillUi();
             } else {
                 if (updateContentSize()) {
@@ -226,6 +229,13 @@ final class FillUi {
     public void setFilterText(@Nullable String filterText) {
         throwIfDestroyed();
         if (mAdapter == null) {
+            // ViewState doesn't not support filtering - typically when it's for an authenticated
+            // FillResponse.
+            if (TextUtils.isEmpty(filterText)) {
+                mCallback.requestShowFillUi(mContentWidth, mContentHeight, mWindowPresenter);
+            } else {
+                mCallback.requestHideFillUi();
+            }
             return;
         }
 
@@ -507,8 +517,9 @@ final class FillUi {
                         final ViewItem item = mAllItems.get(i);
                         final String value = item.getValue();
                         // No value, i.e. null, matches any filter
-                        if (value == null
-                                || value.toLowerCase().startsWith(constraintLowerCase)) {
+                        if ((value == null && item.mDataset.getAuthentication() == null)
+                                || (value != null
+                                        && value.toLowerCase().startsWith(constraintLowerCase))) {
                             filteredItems.add(item);
                         }
                     }
@@ -522,9 +533,11 @@ final class FillUi {
                     final boolean resultCountChanged;
                     final int oldItemCount = mFilteredItems.size();
                     mFilteredItems.clear();
-                    @SuppressWarnings("unchecked")
-                    final List<ViewItem> items = (List<ViewItem>) results.values;
-                    mFilteredItems.addAll(items);
+                    if (results.count > 0) {
+                        @SuppressWarnings("unchecked")
+                        final List<ViewItem> items = (List<ViewItem>) results.values;
+                        mFilteredItems.addAll(items);
+                    }
                     resultCountChanged = (oldItemCount != mFilteredItems.size());
                     if (resultCountChanged) {
                         announceSearchResultIfNeeded();

@@ -126,6 +126,7 @@ public class BoundsAnimationControllerTests extends WindowTestsBase {
         boolean mMovedToFullscreen;
         boolean mAnimationStarted;
         boolean mSchedulePipModeChangedOnStart;
+        boolean mForcePipModeChangedCallback;
         boolean mAnimationEnded;
         Rect mAnimationEndFinalStackBounds;
         boolean mSchedulePipModeChangedOnEnd;
@@ -140,6 +141,7 @@ public class BoundsAnimationControllerTests extends WindowTestsBase {
             mAnimationStarted = false;
             mAnimationEnded = false;
             mAnimationEndFinalStackBounds = null;
+            mForcePipModeChangedCallback = false;
             mSchedulePipModeChangedOnStart = false;
             mSchedulePipModeChangedOnEnd = false;
             mStackBounds = from;
@@ -148,10 +150,11 @@ public class BoundsAnimationControllerTests extends WindowTestsBase {
         }
 
         @Override
-        public void onAnimationStart(boolean schedulePipModeChangedCallback) {
+        public void onAnimationStart(boolean schedulePipModeChangedCallback, boolean forceUpdate) {
             mAwaitingAnimationStart = false;
             mAnimationStarted = true;
             mSchedulePipModeChangedOnStart = schedulePipModeChangedCallback;
+            mForcePipModeChangedCallback = forceUpdate;
         }
 
         @Override
@@ -232,7 +235,7 @@ public class BoundsAnimationControllerTests extends WindowTestsBase {
             return this;
         }
 
-        BoundsAnimationDriver restart(Rect to) {
+        BoundsAnimationDriver restart(Rect to, boolean expectStartedAndPipModeChangedCallback) {
             if (mAnimator == null) {
                 throw new IllegalArgumentException("Call start() to start a new animation");
             }
@@ -251,8 +254,15 @@ public class BoundsAnimationControllerTests extends WindowTestsBase {
                 assertSame(oldAnimator, mAnimator);
             }
 
-            // No animation start for replacing animation
-            assertTrue(!mTarget.mAnimationStarted);
+            if (expectStartedAndPipModeChangedCallback) {
+                // Replacing animation with pending pip mode changed callback, ensure we update
+                assertTrue(mTarget.mAnimationStarted);
+                assertTrue(mTarget.mSchedulePipModeChangedOnStart);
+                assertTrue(mTarget.mForcePipModeChangedCallback);
+            } else {
+                // No animation start for replacing animation
+                assertTrue(!mTarget.mAnimationStarted);
+            }
             mTarget.mAnimationStarted = true;
             return this;
         }
@@ -467,7 +477,7 @@ public class BoundsAnimationControllerTests extends WindowTestsBase {
         mDriver.start(BOUNDS_FULL, BOUNDS_FLOATING)
                 .expectStarted(!SCHEDULE_PIP_MODE_CHANGED)
                 .update(0.25f)
-                .restart(BOUNDS_FLOATING)
+                .restart(BOUNDS_FLOATING, false /* expectStartedAndPipModeChangedCallback */)
                 .end()
                 .expectEnded(SCHEDULE_PIP_MODE_CHANGED, !MOVE_TO_FULLSCREEN);
     }
@@ -478,7 +488,8 @@ public class BoundsAnimationControllerTests extends WindowTestsBase {
         mDriver.start(BOUNDS_FULL, BOUNDS_FLOATING)
                 .expectStarted(!SCHEDULE_PIP_MODE_CHANGED)
                 .update(0.25f)
-                .restart(BOUNDS_SMALLER_FLOATING)
+                .restart(BOUNDS_SMALLER_FLOATING,
+                        false /* expectStartedAndPipModeChangedCallback */)
                 .end()
                 .expectEnded(SCHEDULE_PIP_MODE_CHANGED, !MOVE_TO_FULLSCREEN);
     }
@@ -486,10 +497,12 @@ public class BoundsAnimationControllerTests extends WindowTestsBase {
     @UiThreadTest
     @Test
     public void testFullscreenToFloatingCancelFromAnimationToFullscreenBounds() throws Exception {
+        // When animating from fullscreen and the animation is interruped, we expect the animation
+        // start callback to be made, with a forced pip mode change callback
         mDriver.start(BOUNDS_FULL, BOUNDS_FLOATING)
                 .expectStarted(!SCHEDULE_PIP_MODE_CHANGED)
                 .update(0.25f)
-                .restart(BOUNDS_FULL)
+                .restart(BOUNDS_FULL, true /* expectStartedAndPipModeChangedCallback */)
                 .end()
                 .expectEnded(!SCHEDULE_PIP_MODE_CHANGED, MOVE_TO_FULLSCREEN);
     }
@@ -512,7 +525,7 @@ public class BoundsAnimationControllerTests extends WindowTestsBase {
         mDriver.start(BOUNDS_FLOATING, BOUNDS_FULL)
                 .expectStarted(SCHEDULE_PIP_MODE_CHANGED)
                 .update(0.25f)
-                .restart(BOUNDS_FULL)
+                .restart(BOUNDS_FULL, false /* expectStartedAndPipModeChangedCallback */)
                 .end()
                 .expectEnded(!SCHEDULE_PIP_MODE_CHANGED, MOVE_TO_FULLSCREEN);
     }
@@ -523,7 +536,8 @@ public class BoundsAnimationControllerTests extends WindowTestsBase {
         mDriver.start(BOUNDS_FLOATING, BOUNDS_FULL)
                 .expectStarted(SCHEDULE_PIP_MODE_CHANGED)
                 .update(0.25f)
-                .restart(BOUNDS_SMALLER_FLOATING)
+                .restart(BOUNDS_SMALLER_FLOATING,
+                        false /* expectStartedAndPipModeChangedCallback */)
                 .end()
                 .expectEnded(SCHEDULE_PIP_MODE_CHANGED, !MOVE_TO_FULLSCREEN);
     }

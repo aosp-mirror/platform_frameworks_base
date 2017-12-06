@@ -205,13 +205,17 @@ public class PowerProfile {
     private static final String TAG_ARRAYITEM = "value";
     private static final String ATTR_NAME = "name";
 
+    private static final Object sLock = new Object();
+
     public PowerProfile(Context context) {
         // Read the XML file for the given profile (normally only one per
         // device)
-        if (sPowerMap.size() == 0) {
-            readPowerValuesFromXml(context);
+        synchronized (sLock) {
+            if (sPowerMap.size() == 0) {
+                readPowerValuesFromXml(context);
+            }
+            initCpuClusters();
         }
-        initCpuClusters();
     }
 
     private void readPowerValuesFromXml(Context context) {

@@ -27,6 +27,7 @@ import android.content.IntentFilter;
 import android.content.ServiceConnection;
 import android.content.pm.PackageManager;
 import android.database.ContentObserver;
+import android.location.LocationManager;
 import android.net.INetworkRecommendationProvider;
 import android.net.INetworkScoreCache;
 import android.net.INetworkScoreService;
@@ -109,6 +110,16 @@ public class NetworkScoreService extends INetworkScoreService.Stub {
 
             if (Intent.ACTION_USER_UNLOCKED.equals(action)) {
                 onUserUnlocked(userId);
+            }
+        }
+    };
+
+    private BroadcastReceiver mLocationModeReceiver = new BroadcastReceiver() {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            final String action = intent.getAction();
+            if (LocationManager.MODE_CHANGED_ACTION.equals(action)) {
+                refreshBinding();
             }
         }
     };
@@ -241,6 +252,10 @@ public class NetworkScoreService extends INetworkScoreService.Stub {
                 mUserIntentReceiver, UserHandle.SYSTEM, filter, null /* broadcastPermission*/,
                 null /* scheduler */);
         mHandler = new ServiceHandler(looper);
+        IntentFilter locationModeFilter = new IntentFilter(LocationManager.MODE_CHANGED_ACTION);
+        mContext.registerReceiverAsUser(
+                mLocationModeReceiver, UserHandle.SYSTEM, locationModeFilter,
+                null /* broadcastPermission*/, mHandler);
         mContentObserver = new DispatchingContentObserver(context, mHandler);
         mServiceConnProducer = serviceConnProducer;
     }
@@ -625,13 +640,13 @@ public class NetworkScoreService extends INetworkScoreService.Stub {
         }
     }
 
-    private boolean callerCanRequestScores() {
+    private boolean canCallerRequestScores() {
         // REQUEST_NETWORK_SCORES is a signature only permission.
         return mContext.checkCallingOrSelfPermission(permission.REQUEST_NETWORK_SCORES) ==
                  PackageManager.PERMISSION_GRANTED;
     }
 
-    private boolean callerCanScoreNetworks() {
+    private boolean canCallerScoreNetworks() {
         return mContext.checkCallingOrSelfPermission(permission.SCORE_NETWORKS) ==
                 PackageManager.PERMISSION_GRANTED;
     }
@@ -639,7 +654,7 @@ public class NetworkScoreService extends INetworkScoreService.Stub {
     @Override
     public boolean clearScores() {
         // Only the active scorer or the system should be allowed to flush all scores.
-        if (isCallerActiveScorer(getCallingUid()) || callerCanRequestScores()) {
+        if (isCallerActiveScorer(getCallingUid()) || canCallerRequestScores()) {
             final long token = Binder.clearCallingIdentity();
             try {
                 clearInternal();
@@ -656,7 +671,7 @@ public class NetworkScoreService extends INetworkScoreService.Stub {
     @Override
     public boolean setActiveScorer(String packageName) {
         // Only the system can set the active scorer
-        if (!isCallerSystemProcess(getCallingUid()) && !callerCanScoreNetworks()) {
+        if (!isCallerSystemProcess(getCallingUid()) && !canCallerScoreNetworks()) {
             throw new SecurityException(
                     "Caller is neither the system process or a network scorer.");
         }
@@ -690,11 +705,17 @@ public class NetworkScoreService extends INetworkScoreService.Stub {
      */
     @Override
     public String getActiveScorerPackage() {
-        synchronized (mServiceConnectionLock) {
-            if (mServiceConnection != null) {
-                return mServiceConnection.getPackageName();
+        if (canCallerRequestScores() || canCallerScoreNetworks()) {
+            synchronized (mServiceConnectionLock) {
+                if (mServiceConnection != null) {
+                    return mServiceConnection.getPackageName();
+                }
             }
+        } else {
+            throw new SecurityException(
+                    "Caller is not a network scorer/requester.");
         }
+
         return null;
     }
 
@@ -704,7 +725,7 @@ public class NetworkScoreService extends INetworkScoreService.Stub {
     @Override
     public NetworkScorerAppData getActiveScorer() {
         // Only the system can access this data.
-        if (isCallerSystemProcess(getCallingUid()) || callerCanRequestScores()) {
+        if (isCallerSystemProcess(getCallingUid()) || canCallerRequestScores()) {
             synchronized (mServiceConnectionLock) {
                 if (mServiceConnection != null) {
                     return mServiceConnection.getAppData();
@@ -725,7 +746,7 @@ public class NetworkScoreService extends INetworkScoreService.Stub {
     @Override
     public List<NetworkScorerAppData> getAllValidScorers() {
         // Only the system can access this data.
-        if (!isCallerSystemProcess(getCallingUid()) && !callerCanRequestScores()) {
+        if (!isCallerSystemProcess(getCallingUid()) && !canCallerRequestScores()) {
             throw new SecurityException(
                     "Caller is neither the system process nor a score requester.");
         }
@@ -736,7 +757,7 @@ public class NetworkScoreService extends INetworkScoreService.Stub {
     @Override
     public void disableScoring() {
         // Only the active scorer or the system should be allowed to disable scoring.
-        if (!isCallerActiveScorer(getCallingUid()) && !callerCanRequestScores()) {
+        if (!isCallerActiveScorer(getCallingUid()) && !canCallerRequestScores()) {
             throw new SecurityException(
                     "Caller is neither the active scorer nor the scorer manager.");
         }

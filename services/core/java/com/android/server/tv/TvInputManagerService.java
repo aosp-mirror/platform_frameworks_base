@@ -1218,6 +1218,12 @@ public final class TvInputManagerService extends SystemService {
 
         @Override
         public void setMainSession(IBinder sessionToken, int userId) {
+            if (mContext.checkCallingPermission(
+                    android.Manifest.permission.CHANGE_HDMI_CEC_ACTIVE_SOURCE)
+                    != PackageManager.PERMISSION_GRANTED) {
+                throw new SecurityException(
+                        "The caller does not have CHANGE_HDMI_CEC_ACTIVE_SOURCE permission");
+            }
             if (DEBUG) {
                 Slog.d(TAG, "setMainSession(sessionToken=" + sessionToken + ")");
             }

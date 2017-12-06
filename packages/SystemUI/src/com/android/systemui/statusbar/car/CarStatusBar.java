@@ -51,7 +51,14 @@ import com.android.systemui.statusbar.phone.NavigationBarView;
 import com.android.systemui.statusbar.phone.StatusBar;
 import com.android.systemui.statusbar.policy.BatteryController;
 import com.android.systemui.statusbar.policy.UserSwitcherController;
+import com.android.keyguard.KeyguardUpdateMonitor;
+import com.android.systemui.classifier.FalsingLog;
+import com.android.systemui.classifier.FalsingManager;
+import com.android.systemui.Prefs;
 
+import java.io.FileDescriptor;
+import java.io.PrintWriter;
+import java.util.Map;
 /**
  * A status bar (and navigation bar) tailored for the automotive use case.
  */
@@ -69,8 +76,10 @@ public class CarStatusBar extends StatusBar implements
     private Drawable mNotificationPanelBackground;
 
     private ConnectedDeviceSignalController mConnectedDeviceSignalController;
+    private ViewGroup mNavigationBarWindow;
     private CarNavigationBarView mNavigationBarView;
 
+    private final Object mQueueLock = new Object();
     @Override
     public void start() {
         super.start();
@@ -88,6 +97,11 @@ public class CarStatusBar extends StatusBar implements
     public void destroy() {
         mCarBatteryController.stopListening();
         mConnectedDeviceSignalController.stopListening();
+
+        if (mNavigationBarWindow != null) {
+            mWindowManager.removeViewImmediate(mNavigationBarWindow);
+            mNavigationBarView = null;
+        }
 
         super.destroy();
     }
@@ -145,10 +159,19 @@ public class CarStatusBar extends StatusBar implements
         // SystemUI requires that the navigation bar view have a parent. Since the regular
         // StatusBar inflates navigation_bar_window as this parent view, use the same view for the
         // CarNavigationBarView.
-        ViewGroup navigationBarWindow = (ViewGroup) View.inflate(mContext,
+        mNavigationBarWindow = (ViewGroup) View.inflate(mContext,
                 R.layout.navigation_bar_window, null);
-        View.inflate(mContext, R.layout.car_navigation_bar, navigationBarWindow);
-        mNavigationBarView = (CarNavigationBarView) navigationBarWindow.getChildAt(0);
+        if (mNavigationBarWindow == null) {
+            Log.e(TAG, "CarStatusBar failed inflate for R.layout.navigation_bar_window");
+        }
+
+
+        View.inflate(mContext, R.layout.car_navigation_bar, mNavigationBarWindow);
+        mNavigationBarView = (CarNavigationBarView) mNavigationBarWindow.getChildAt(0);
+        if (mNavigationBarView == null) {
+            Log.e(TAG, "CarStatusBar failed inflate for R.layout.car_navigation_bar");
+        }
+
 
         mController = new CarNavigationBarController(mContext, mNavigationBarView,
                 this /* ActivityStarter*/);
@@ -160,18 +183,59 @@ public class CarStatusBar extends StatusBar implements
                         | WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE
                         | WindowManager.LayoutParams.FLAG_NOT_TOUCH_MODAL
                         | WindowManager.LayoutParams.FLAG_WATCH_OUTSIDE_TOUCH
-                        | WindowManager.LayoutParams.FLAG_SPLIT_TOUCH
-                        | WindowManager.LayoutParams.FLAG_HARDWARE_ACCELERATED,
+                        | WindowManager.LayoutParams.FLAG_SPLIT_TOUCH,
                 PixelFormat.TRANSLUCENT);
         lp.setTitle("CarNavigationBar");
         lp.windowAnimations = 0;
 
-        mWindowManager.addView(navigationBarWindow, lp);
+        mWindowManager.addView(mNavigationBarWindow, lp);
+    }
+
+    @Override
+    public void dump(FileDescriptor fd, PrintWriter pw, String[] args) {
+        //When executing dump() funciton simultaneously, we need to serialize them
+        //to get mStackScroller's position correctly.
+        synchronized (mQueueLock) {
+            pw.println("  mStackScroller: " + viewInfo(mStackScroller));
+            pw.println("  mStackScroller: " + viewInfo(mStackScroller)
+                    + " scroll " + mStackScroller.getScrollX()
+                    + "," + mStackScroller.getScrollY());
+        }
+
+        pw.print("  mTaskStackListener="); pw.println(mTaskStackListener);
+        pw.print("  mController=");
+        pw.println(mController);
+        pw.print("  mFullscreenUserSwitcher="); pw.println(mFullscreenUserSwitcher);
+        pw.print("  mCarBatteryController=");
+        pw.println(mCarBatteryController);
+        pw.print("  mBatteryMeterView=");
+        pw.println(mBatteryMeterView);
+        pw.print("  mConnectedDeviceSignalController=");
+        pw.println(mConnectedDeviceSignalController);
+        pw.print("  mNavigationBarView=");
+        pw.println(mNavigationBarView);
+
+        if (KeyguardUpdateMonitor.getInstance(mContext) != null) {
+            KeyguardUpdateMonitor.getInstance(mContext).dump(fd, pw, args);
+        }
+
+        FalsingManager.getInstance(mContext).dump(pw);
+        FalsingLog.dump(pw);
+
+        pw.println("SharedPreferences:");
+        for (Map.Entry<String, ?> entry : Prefs.getAll(mContext).entrySet()) {
+            pw.print("  "); pw.print(entry.getKey()); pw.print("="); pw.println(entry.getValue());
+        }
     }
 
     @Override
     public NavigationBarView getNavigationBarView() {
         return mNavigationBarView;
+    }
+
+    @Override
+    public View getNavigationBarWindow() {
+        return mNavigationBarWindow;
     }
 
     @Override

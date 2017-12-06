@@ -113,7 +113,7 @@ public class ActivityManagerServiceTest {
     private static final int[] UID_RECORD_CHANGES = {
         UidRecord.CHANGE_PROCSTATE,
         UidRecord.CHANGE_GONE,
-        UidRecord.CHANGE_GONE_IDLE,
+        UidRecord.CHANGE_GONE | UidRecord.CHANGE_IDLE,
         UidRecord.CHANGE_IDLE,
         UidRecord.CHANGE_ACTIVE
     };
@@ -417,7 +417,7 @@ public class ActivityManagerServiceTest {
                 // delivered to this observer.
                 final int[] changesToVerify = {
                     UidRecord.CHANGE_IDLE,
-                    UidRecord.CHANGE_GONE_IDLE
+                    UidRecord.CHANGE_GONE | UidRecord.CHANGE_IDLE
                 };
                 verifyObserverReceivedChanges(observerToTest, changesToVerify, changeItems,
                         (observer, changeItem) -> {
@@ -439,7 +439,7 @@ public class ActivityManagerServiceTest {
                 // delivered to this observer.
                 final int[] changesToVerify = {
                         UidRecord.CHANGE_GONE,
-                        UidRecord.CHANGE_GONE_IDLE
+                        UidRecord.CHANGE_GONE | UidRecord.CHANGE_IDLE
                 };
                 verifyObserverReceivedChanges(observerToTest, changesToVerify, changeItems,
                         (observer, changeItem) -> {
@@ -585,7 +585,7 @@ public class ActivityManagerServiceTest {
         for (int i = 0; i < pendingItemsForUids.size(); ++i) {
             final UidRecord.ChangeItem item = pendingItemsForUids.get(i);
             final UidRecord validateUidRecord = mAms.mValidateUids.get(item.uid);
-            if (item.change == UidRecord.CHANGE_GONE || item.change == UidRecord.CHANGE_GONE_IDLE) {
+            if ((item.change & UidRecord.CHANGE_GONE) != 0) {
                 assertNull("validateUidRecord should be null since the change is either "
                         + "CHANGE_GONE or CHANGE_GONE_IDLE", validateUidRecord);
             } else {
@@ -614,7 +614,8 @@ public class ActivityManagerServiceTest {
             final UidRecord.ChangeItem item = pendingItemsForUids.get(i);
             // Assign CHANGE_GONE_IDLE to some items and CHANGE_GONE to the others, using even/odd
             // distribution for this assignment.
-            item.change = (i % 2) == 0 ? UidRecord.CHANGE_GONE_IDLE : UidRecord.CHANGE_GONE;
+            item.change = (i % 2) == 0 ? (UidRecord.CHANGE_GONE | UidRecord.CHANGE_IDLE)
+                    : UidRecord.CHANGE_GONE;
         }
         mAms.mPendingUidChanges.addAll(pendingItemsForUids);
         mAms.dispatchUidsChanged();
@@ -653,8 +654,7 @@ public class ActivityManagerServiceTest {
             mAms.enqueueUidChangeLocked(uidRecord, uid, changeToDispatch);
             // Verify there is no effect on curProcStateSeq.
             assertEquals(curProcstateSeq, uidRecord.curProcStateSeq);
-            if (changeToDispatch == UidRecord.CHANGE_GONE
-                    || changeToDispatch == UidRecord.CHANGE_GONE_IDLE) {
+            if ((changeToDispatch & UidRecord.CHANGE_GONE) != 0) {
                 // Since the change is CHANGE_GONE or CHANGE_GONE_IDLE, verify that
                 // lastProcStateSeqDispatchedToObservers is not updated.
                 assertNotEquals(uidRecord.curProcStateSeq,

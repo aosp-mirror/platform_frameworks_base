@@ -498,12 +498,15 @@ public class WindowManagerService extends IWindowManager.Stub
      */
     Runnable mWaitingForDrawnCallback;
 
+    /** List of window currently causing non-system overlay windows to be hidden. */
+    private ArrayList<WindowState> mHidingNonSystemOverlayWindows = new ArrayList<>();
+
     /**
      * Stores for each user whether screencapture is disabled
      * This array is essentially a cache for all userId for
      * {@link android.app.admin.DevicePolicyManager#getScreenCaptureDisabled}
      */
-    SparseArray<Boolean> mScreenCaptureDisabled = new SparseArray<>();
+    private SparseArray<Boolean> mScreenCaptureDisabled = new SparseArray<>();
 
     IInputMethodManager mInputMethodManager;
 
@@ -1460,6 +1463,9 @@ public class WindowManagerService extends IWindowManager.Stub
                 }
             }
 
+            final boolean hideSystemAlertWindows = !mHidingNonSystemOverlayWindows.isEmpty();
+            win.setForceHideNonSystemOverlayWindowIfNeeded(hideSystemAlertWindows);
+
             final AppWindowToken aToken = token.asAppWindowToken();
             if (type == TYPE_APPLICATION_STARTING && aToken != null) {
                 aToken.startingWindow = win;
@@ -1733,6 +1739,7 @@ public class WindowManagerService extends IWindowManager.Stub
         }
         mPendingRemove.remove(win);
         mResizingWindows.remove(win);
+        updateNonSystemOverlayWindowsVisibilityIfNeeded(win, false /* surfaceShown */);
         mWindowsChanged = true;
         if (DEBUG_WINDOW_MOVEMENT) Slog.v(TAG_WM, "Final remove of window: " + win);
 
@@ -2020,10 +2027,14 @@ public class WindowManagerService extends IWindowManager.Stub
                 Slog.i(TAG_WM, "Relayout " + win + ": oldVis=" + oldVisibility
                         + " newVis=" + viewVisibility, stack);
             }
-            if (viewVisibility == View.VISIBLE &&
-                    (win.mAppToken == null || win.mAttrs.type == TYPE_APPLICATION_STARTING
-                            || !win.mAppToken.isClientHidden())) {
 
+            // We should only relayout if the view is visible, it is a starting window, or the
+            // associated appToken is not hidden.
+            final boolean shouldRelayout = viewVisibility == View.VISIBLE &&
+                (win.mAppToken == null || win.mAttrs.type == TYPE_APPLICATION_STARTING
+                    || !win.mAppToken.isClientHidden());
+
+            if (shouldRelayout) {
                 Trace.traceBegin(TRACE_TAG_WINDOW_MANAGER, "relayoutWindow: viewVisibility_1");
 
                 // We are about to create a surface, but we didn't run a layout yet. So better run
@@ -2179,8 +2190,18 @@ public class WindowManagerService extends IWindowManager.Stub
             // and needs process it before handling the corresponding window frame. the variable
             // {@code mergedConfiguration} is an out parameter that will be passed back to the
             // client over IPC and checked there.
-            win.getMergedConfiguration(mergedConfiguration);
-            win.setReportedConfiguration(mergedConfiguration);
+            // Note: in the cases where the window is tied to an activity, we should not send a
+            // configuration update when the window has requested to be hidden. Doing so can lead
+            // to the client erroneously accepting a configuration that would have otherwise caused
+            // an activity restart. We instead hand back the last reported
+            // {@link MergedConfiguration}.
+            if (shouldRelayout) {
+                win.getMergedConfiguration(mergedConfiguration);
+            } else {
+                win.getLastReportedMergedConfiguration(mergedConfiguration);
+            }
+
+            win.setLastReportedMergedConfiguration(mergedConfiguration);
 
             outFrame.set(win.mCompatFrame);
             outOverscanInsets.set(win.mOverscanInsets);
@@ -2340,7 +2361,7 @@ public class WindowManagerService extends IWindowManager.Stub
         // artifacts when we unfreeze the display if some different animation
         // is running.
         Trace.traceBegin(TRACE_TAG_WINDOW_MANAGER, "WM#applyAnimationLocked");
-        if (okToAnimate()) {
+        if (atoken.okToAnimate()) {
             final DisplayContent displayContent = atoken.getTask().getDisplayContent();
             final DisplayInfo displayInfo = displayContent.getDisplayInfo();
             final int width = displayInfo.appWidth;
@@ -2354,6 +2375,7 @@ public class WindowManagerService extends IWindowManager.Stub
             final Rect displayFrame = new Rect(0, 0,
                     displayInfo.logicalWidth, displayInfo.logicalHeight);
             final Rect insets = new Rect();
+            final Rect stableInsets = new Rect();
             Rect surfaceInsets = null;
             final boolean freeform = win != null && win.inFreeformWorkspace();
             if (win != null) {
@@ -2368,6 +2390,7 @@ public class WindowManagerService extends IWindowManager.Stub
                 }
                 surfaceInsets = win.getAttrs().surfaceInsets;
                 insets.set(win.mContentInsets);
+                stableInsets.set(win.mStableInsets);
             }
 
             if (atoken.mLaunchTaskBehind) {
@@ -2382,7 +2405,7 @@ public class WindowManagerService extends IWindowManager.Stub
             final Configuration displayConfig = displayContent.getConfiguration();
             Animation a = mAppTransition.loadAnimation(lp, transit, enter, displayConfig.uiMode,
                     displayConfig.orientation, frame, displayFrame, insets, surfaceInsets,
-                    isVoiceInteraction, freeform, atoken.getTask().mTaskId);
+                    stableInsets, isVoiceInteraction, freeform, atoken.getTask().mTaskId);
             if (a != null) {
                 if (DEBUG_ANIM) logWithStack(TAG, "Loaded animation " + a + " for " + atoken);
                 final int containingWidth = frame.width();
@@ -2414,14 +2437,6 @@ public class WindowManagerService extends IWindowManager.Stub
                 + ", uid=" + Binder.getCallingUid() + " requires " + permission;
         Slog.w(TAG_WM, msg);
         return false;
-    }
-
-    boolean okToDisplay() {
-        return !mDisplayFrozen && mDisplayEnabled && mPolicy.isScreenOn();
-    }
-
-    boolean okToAnimate() {
-        return okToDisplay() && mPolicy.okToAnimate();
     }
 
     @Override
@@ -2690,7 +2705,9 @@ public class WindowManagerService extends IWindowManager.Stub
         synchronized(mWindowMap) {
             boolean prepared = mAppTransition.prepareAppTransitionLocked(transit, alwaysKeepCurrent,
                     flags, forceOverride);
-            if (prepared && okToAnimate()) {
+            // TODO (multidisplay): associate app transitions with displays
+            final DisplayContent dc = mRoot.getDisplayContent(DEFAULT_DISPLAY);
+            if (prepared && dc != null && dc.okToAnimate()) {
                 mSkipAppTransitionAnimation = false;
             }
         }
@@ -2977,10 +2994,9 @@ public class WindowManagerService extends IWindowManager.Stub
     }
 
     public void setKeyguardGoingAway(boolean keyguardGoingAway) {
-// TODO: Use of this can be removed. Revert ag/I8369723d6a77f2c602f1ef080371fa7cd9ee094e
-//        synchronized (mWindowMap) {
-//            mKeyguardGoingAway = keyguardGoingAway;
-//        }
+        synchronized (mWindowMap) {
+            mKeyguardGoingAway = keyguardGoingAway;
+        }
     }
 
     // -------------------------------------------------------------
@@ -3599,7 +3615,6 @@ public class WindowManagerService extends IWindowManager.Stub
     }
 
     private void updateCircularDisplayMaskIfNeeded() {
-        // we're fullscreen and not hosted in an ActivityView
         if (mContext.getResources().getConfiguration().isScreenRound()
                 && mContext.getResources().getBoolean(
                 com.android.internal.R.bool.config_windowShowCircularMask)) {
@@ -5809,7 +5824,7 @@ public class WindowManagerService extends IWindowManager.Stub
         // If the screen is currently frozen or off, then keep
         // it frozen/off until this window draws at its new
         // orientation.
-        if (!okToDisplay() && mWindowsFreezingScreen != WINDOWS_FREEZING_SCREENS_TIMEOUT) {
+        if (!w.mToken.okToDisplay() && mWindowsFreezingScreen != WINDOWS_FREEZING_SCREENS_TIMEOUT) {
             if (DEBUG_ORIENTATION) Slog.v(TAG_WM, "Changing surface while display frozen: " + w);
             w.setOrientationChanging(true);
             w.mLastFreezeDuration = 0;
@@ -6025,7 +6040,7 @@ public class WindowManagerService extends IWindowManager.Stub
             return;
         }
 
-        if (!displayContent.isReady() || !mPolicy.isScreenOn() || !okToAnimate()) {
+        if (!displayContent.isReady() || !mPolicy.isScreenOn() || !displayContent.okToAnimate()) {
             // No need to freeze the screen before the display is ready,  if the screen is off,
             // or we can't currently animate.
             return;
@@ -6061,7 +6076,8 @@ public class WindowManagerService extends IWindowManager.Stub
             Debug.startMethodTracing(file.toString(), 8 * 1024 * 1024);
         }
 
-        if (CUSTOM_SCREEN_ROTATION) {
+        // TODO(multidisplay): rotation on non-default displays
+        if (CUSTOM_SCREEN_ROTATION && displayContent.isDefaultDisplay) {
             mExitAnimId = exitAnim;
             mEnterAnimId = enterAnim;
             ScreenRotationAnimation screenRotationAnimation =
@@ -6073,7 +6089,6 @@ public class WindowManagerService extends IWindowManager.Stub
             // Check whether the current screen contains any secure content.
             boolean isSecure = displayContent.hasSecureWindowOnScreen();
 
-            // TODO(multidisplay): rotation on main screen only.
             displayContent.updateDisplayInfo();
             screenRotationAnimation = new ScreenRotationAnimation(mContext, displayContent,
                     mFxSession, inTransaction, mPolicy.isDefaultOrientationForced(), isSecure,
@@ -6526,6 +6541,21 @@ public class WindowManagerService extends IWindowManager.Stub
             ArrayList<WindowState> windows) {
         mRoot.dumpWindowsNoHeader(pw, dumpAll, windows);
 
+        if (!mHidingNonSystemOverlayWindows.isEmpty()) {
+            pw.println();
+            pw.println("  Hiding System Alert Windows:");
+            for (int i = mHidingNonSystemOverlayWindows.size() - 1; i >= 0; i--) {
+                final WindowState w = mHidingNonSystemOverlayWindows.get(i);
+                pw.print("  #"); pw.print(i); pw.print(' ');
+                pw.print(w);
+                if (dumpAll) {
+                    pw.println(":");
+                    w.dump(pw, "    ", true);
+                } else {
+                    pw.println();
+                }
+            }
+        }
         if (mPendingRemove.size() > 0) {
             pw.println();
             pw.println("  Remove pending for:");
@@ -7405,11 +7435,6 @@ public class WindowManagerService extends IWindowManager.Stub
         }
 
         @Override
-        public boolean isKeyguardGoingAway() {
-            return WindowManagerService.this.mKeyguardGoingAway;
-        }
-
-        @Override
         public boolean isKeyguardShowingAndNotOccluded() {
             return WindowManagerService.this.isKeyguardShowingAndNotOccluded();
         }
@@ -7649,5 +7674,29 @@ public class WindowManagerService extends IWindowManager.Stub
 
     boolean hasWideColorGamutSupport() {
         return mHasWideColorGamutSupport;
+    }
+
+    void updateNonSystemOverlayWindowsVisibilityIfNeeded(WindowState win, boolean surfaceShown) {
+        if (!win.hideNonSystemOverlayWindowsWhenVisible()) {
+            return;
+        }
+        final boolean systemAlertWindowsHidden = !mHidingNonSystemOverlayWindows.isEmpty();
+        if (surfaceShown) {
+            if (!mHidingNonSystemOverlayWindows.contains(win)) {
+                mHidingNonSystemOverlayWindows.add(win);
+            }
+        } else {
+            mHidingNonSystemOverlayWindows.remove(win);
+        }
+
+        final boolean hideSystemAlertWindows = !mHidingNonSystemOverlayWindows.isEmpty();
+
+        if (systemAlertWindowsHidden == hideSystemAlertWindows) {
+            return;
+        }
+
+        mRoot.forAllWindows((w) -> {
+            w.setForceHideNonSystemOverlayWindowIfNeeded(hideSystemAlertWindows);
+        }, false /* traverseTopToBottom */);
     }
 }

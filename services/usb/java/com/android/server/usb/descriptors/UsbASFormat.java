@@ -15,19 +15,30 @@
  */
 package com.android.server.usb.descriptors;
 
+import com.android.server.usb.descriptors.report.ReportCanvas;
+import com.android.server.usb.descriptors.report.UsbStrings;
+
 /**
  * @hide
  * An audio class-specific Format Interface.
  *   Subclasses: UsbACFormatI and UsbACFormatII.
  * see audio10.pdf section 4.5.3 & & Frmts10.pdf
  */
-public abstract class UsbASFormat extends UsbACInterface {
-    private static final String TAG = "ASFormat";
+public class UsbASFormat extends UsbACInterface {
+    private static final String TAG = "UsbASFormat";
 
     private final byte mFormatType;   // 3:1 FORMAT_TYPE_*
 
-    public static final byte FORMAT_TYPE_I = 1;
-    public static final byte FORMAT_TYPE_II = 2;
+    public static final byte FORMAT_TYPE_I      = 1;
+    public static final byte FORMAT_TYPE_II     = 2;
+    // these showed up in USB 2.0
+    public static final byte FORMAT_TYPE_III    = 3;
+    public static final byte FORMAT_TYPE_IV     = 4;
+
+    // "extended" formats
+    public static final byte EXT_FORMAT_TYPE_I      = (byte) 0x81;
+    public static final byte EXT_FORMAT_TYPE_II     = (byte) 0x82;
+    public static final byte EXT_FORMAT_TYPE_III    = (byte) 0x83;
 
     public UsbASFormat(int length, byte type, byte subtype, byte formatType, byte mSubclass) {
         super(length, type, subtype, mSubclass);
@@ -38,27 +49,59 @@ public abstract class UsbASFormat extends UsbACInterface {
         return mFormatType;
     }
 
+    public int[] getSampleRates() {
+        return null;
+    }
+
+    public int[] getBitDepths() {
+        return null;
+    }
+
+    public int[] getChannelCounts() {
+        return null;
+    }
+
     /**
      * Allocates the audio-class format subtype associated with the format type read from the
      * stream.
      */
-    public static UsbDescriptor allocDescriptor(ByteStream stream, int length, byte type,
+    public static UsbDescriptor allocDescriptor(UsbDescriptorParser parser,
+                                                ByteStream stream, int length, byte type,
             byte subtype, byte subclass) {
 
         byte formatType = stream.getByte();
-        //TODO
-        // There is an issue parsing format descriptors on (some) USB 2.0 pro-audio interfaces
-        // Since we don't need this info for headset detection, just skip these descriptors
-        // for now to avoid the (low) possibility of an IndexOutOfBounds exception.
-        switch (formatType) {
-//            case FORMAT_TYPE_I:
-//                return new UsbASFormatI(length, type, subtype, formatType, subclass);
-//
-//            case FORMAT_TYPE_II:
-//                return new UsbASFormatII(length, type, subtype, formatType, subclass);
+        int acInterfaceSpec = parser.getACInterfaceSpec();
 
+        switch (formatType) {
+            case FORMAT_TYPE_I:
+                if (acInterfaceSpec == UsbDeviceDescriptor.USBSPEC_2_0) {
+                    return new Usb20ASFormatI(length, type, subtype, formatType, subclass);
+                } else {
+                    return new Usb10ASFormatI(length, type, subtype, formatType, subclass);
+                }
+
+            case FORMAT_TYPE_II:
+                if (acInterfaceSpec == UsbDeviceDescriptor.USBSPEC_2_0) {
+                    return new Usb20ASFormatII(length, type, subtype, formatType, subclass);
+                } else {
+                    return new Usb10ASFormatII(length, type, subtype, formatType, subclass);
+                }
+
+            // USB 2.0 Exclusive Format Types
+            case FORMAT_TYPE_III:
+                return new Usb20ASFormatIII(length, type, subtype, formatType, subclass);
+
+            case FORMAT_TYPE_IV:
+                //TODO - implement this type.
             default:
-                return null;
+                return new UsbASFormat(length, type, subtype, formatType, subclass);
         }
+    }
+
+    @Override
+    public void report(ReportCanvas canvas) {
+        super.report(canvas);
+
+        canvas.writeParagraph(UsbStrings.getFormatName(getFormatType()), /*emphasis*/false);
     }
 }

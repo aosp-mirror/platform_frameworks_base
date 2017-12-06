@@ -97,6 +97,24 @@ public class AppWindowTokenTests extends WindowTestsBase {
     }
 
     @Test
+    public void testGetTopFullscreenWindow() throws Exception {
+        final WindowTestUtils.TestAppWindowToken token =
+                new WindowTestUtils.TestAppWindowToken(mDisplayContent);
+
+        assertNull(token.getTopFullscreenWindow());
+
+        final WindowState window1 = createWindow(null, TYPE_BASE_APPLICATION, token, "window1");
+        final WindowState window11 = createWindow(null, TYPE_APPLICATION, token, "window11");
+        final WindowState window12 = createWindow(null, TYPE_APPLICATION, token, "window12");
+        assertEquals(window12, token.getTopFullscreenWindow());
+        window12.mAttrs.width = 500;
+        assertEquals(window11, token.getTopFullscreenWindow());
+        window11.mAttrs.width = 500;
+        assertEquals(window1, token.getTopFullscreenWindow());
+        token.removeImmediately();
+    }
+
+    @Test
     public void testLandscapeSeascapeRotationByApp() throws Exception {
         // Some plumbing to get the service ready for rotation updates.
         sWm.mDisplayReady = true;
@@ -175,7 +193,7 @@ public class AppWindowTokenTests extends WindowTestsBase {
         token.setOrientation(SCREEN_ORIENTATION_LANDSCAPE);
 
         token.setFillsParent(false);
-        // Can specify orientation if app doesn't fill parent.
+        // Can specify orientation if app doesn't fill parent. Allowed for SDK <= 25.
         assertEquals(SCREEN_ORIENTATION_LANDSCAPE, token.getOrientation());
 
         token.setFillsParent(true);

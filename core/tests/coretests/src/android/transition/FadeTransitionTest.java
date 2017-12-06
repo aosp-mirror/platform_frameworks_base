@@ -16,21 +16,23 @@
 
 package android.transition;
 
+import android.animation.Animator;
 import android.animation.AnimatorSetActivity;
 import android.app.Activity;
+import android.graphics.Bitmap;
+import android.graphics.drawable.BitmapDrawable;
 import android.test.ActivityInstrumentationTestCase2;
 import android.test.suitebuilder.annotation.SmallTest;
 import android.transition.Transition.TransitionListener;
-import android.transition.TransitionListenerAdapter;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.FrameLayout;
+import android.widget.ImageView;
 
 import com.android.frameworks.coretests.R;
 
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
-
-import static android.support.test.espresso.Espresso.onView;
 
 public class FadeTransitionTest extends ActivityInstrumentationTestCase2<AnimatorSetActivity> {
     Activity mActivity;
@@ -127,6 +129,43 @@ public class FadeTransitionTest extends ActivityInstrumentationTestCase2<Animato
         assertTrue(outLatch.endLatch.await(800, TimeUnit.MILLISECONDS));
         assertEquals(1.0f, square1.getTransitionAlpha());
         assertEquals(View.INVISIBLE, square1.getVisibility());
+    }
+
+    @SmallTest
+    public void testSnapshotView() throws Throwable {
+        final View square1 = mActivity.findViewById(R.id.square1);
+
+        final CountDownLatch disappearCalled = new CountDownLatch(1);
+        final Fade fadeOut = new Fade(Fade.MODE_OUT) {
+            @Override
+            public Animator onDisappear(ViewGroup sceneRoot, View view,
+                    TransitionValues startValues,
+                    TransitionValues endValues) {
+                assertNotSame(square1, view);
+                assertTrue(view instanceof ImageView);
+                ImageView imageView = (ImageView) view;
+                BitmapDrawable background = (BitmapDrawable) imageView.getDrawable();
+                Bitmap bitmap = background.getBitmap();
+                assertEquals(Bitmap.Config.HARDWARE, bitmap.getConfig());
+                Bitmap copy = bitmap.copy(Bitmap.Config.ARGB_8888, false);
+                assertEquals(0xFFFF0000, copy.getPixel(1, 1));
+                disappearCalled.countDown();
+                return super.onDisappear(sceneRoot, view, startValues, endValues);
+            }
+        };
+
+        runTestOnUiThread(new Runnable() {
+            @Override
+            public void run() {
+                ViewGroup container = mActivity.findViewById(R.id.container);
+                TransitionManager.beginDelayedTransition(container, fadeOut);
+                container.removeView(square1);
+                FrameLayout parent = new FrameLayout(mActivity);
+                parent.addView(square1);
+            }
+        });
+
+        assertTrue(disappearCalled.await(1, TimeUnit.SECONDS));
     }
 
     public TransitionLatch setVisibilityInTransition(final Transition transition, int viewId,

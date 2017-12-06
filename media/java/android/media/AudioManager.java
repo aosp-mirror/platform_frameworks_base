@@ -16,12 +16,12 @@
 
 package android.media;
 
-import android.Manifest;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.RequiresPermission;
 import android.annotation.SdkConstant;
 import android.annotation.SdkConstant.SdkConstantType;
+import android.annotation.SuppressLint;
 import android.annotation.SystemApi;
 import android.annotation.SystemService;
 import android.app.NotificationManager;
@@ -396,6 +396,19 @@ public class AudioManager {
      * @see #adjustStreamVolume(int, int, int)
      */
     public static final int ADJUST_TOGGLE_MUTE = 101;
+
+    /** @hide */
+    public static final String adjustToString(int adj) {
+        switch (adj) {
+            case ADJUST_RAISE: return "ADJUST_RAISE";
+            case ADJUST_LOWER: return "ADJUST_LOWER";
+            case ADJUST_SAME: return "ADJUST_SAME";
+            case ADJUST_MUTE: return "ADJUST_MUTE";
+            case ADJUST_UNMUTE: return "ADJUST_UNMUTE";
+            case ADJUST_TOGGLE_MUTE: return "ADJUST_TOGGLE_MUTE";
+            default: return new StringBuilder("unknown adjust mode ").append(adj).toString();
+        }
+    }
 
     // Flags should be powers of 2!
 
@@ -2364,8 +2377,8 @@ public class AudioManager {
      *      usecases such as voice memo recording, or speech recognition.
      *      Use {@link #AUDIOFOCUS_GAIN} for a focus request of unknown duration such
      *      as the playback of a song or a video.
-     * @param flags 0 or a combination of {link #AUDIOFOCUS_FLAG_DELAY_OK}
-     *     and {@link #AUDIOFOCUS_FLAG_PAUSES_ON_DUCKABLE_LOSS}.
+     * @param flags 0 or a combination of {link #AUDIOFOCUS_FLAG_DELAY_OK},
+     *     {@link #AUDIOFOCUS_FLAG_PAUSES_ON_DUCKABLE_LOSS} and {@link #AUDIOFOCUS_FLAG_LOCK}.
      *     <br>Use 0 when not using any flags for the request, which behaves like
      *     {@link #requestAudioFocus(OnAudioFocusChangeListener, int, int)}, where either audio
      *     focus is granted immediately, or the grant request fails because the system is in a
@@ -2377,6 +2390,7 @@ public class AudioManager {
      * @throws IllegalArgumentException
      */
     @SystemApi
+    @RequiresPermission(android.Manifest.permission.MODIFY_PHONE_STATE)
     public int requestAudioFocus(OnAudioFocusChangeListener l,
             @NonNull AudioAttributes requestAttributes,
             int durationHint,
@@ -2416,6 +2430,10 @@ public class AudioManager {
      * @deprecated use {@link #requestAudioFocus(AudioFocusRequest, AudioPolicy)}
      */
     @SystemApi
+    @RequiresPermission(anyOf= {
+            android.Manifest.permission.MODIFY_PHONE_STATE,
+            android.Manifest.permission.MODIFY_AUDIO_ROUTING
+    })
     public int requestAudioFocus(OnAudioFocusChangeListener l,
             @NonNull AudioAttributes requestAttributes,
             int durationHint,
@@ -2474,6 +2492,7 @@ public class AudioManager {
      * @throws IllegalArgumentException when trying to lock focus without an AudioPolicy
      */
     @SystemApi
+    @RequiresPermission(android.Manifest.permission.MODIFY_AUDIO_ROUTING)
     public int requestAudioFocus(@NonNull AudioFocusRequest afr, @Nullable AudioPolicy ap) {
         if (afr == null) {
             throw new NullPointerException("Illegal null AudioFocusRequest");
@@ -2571,6 +2590,7 @@ public class AudioManager {
      * @throws NullPointerException if the {@link AudioFocusInfo} or {@link AudioPolicy} are null.
      */
     @SystemApi
+    @RequiresPermission(android.Manifest.permission.MODIFY_AUDIO_ROUTING)
     public int dispatchAudioFocusChange(@NonNull AudioFocusInfo afi, int focusChange,
             @NonNull AudioPolicy ap) {
         if (afi == null) {
@@ -2622,6 +2642,8 @@ public class AudioManager {
      * @deprecated use {@link #abandonAudioFocusRequest(AudioFocusRequest)}
      */
     @SystemApi
+    @SuppressLint("Doclava125") // no permission enforcement, but only "undoes" what would have been
+                                // done by a matching requestAudioFocus
     public int abandonAudioFocus(OnAudioFocusChangeListener l, AudioAttributes aa) {
         int status = AUDIOFOCUS_REQUEST_FAILED;
         unregisterAudioFocusRequest(l);
@@ -3036,7 +3058,11 @@ public class AudioManager {
 
     private final IPlaybackConfigDispatcher mPlayCb = new IPlaybackConfigDispatcher.Stub() {
         @Override
-        public void dispatchPlaybackConfigChange(List<AudioPlaybackConfiguration> configs) {
+        public void dispatchPlaybackConfigChange(List<AudioPlaybackConfiguration> configs,
+                boolean flush) {
+            if (flush) {
+                Binder.flushPendingCommands();
+            }
             synchronized(mPlaybackCallbackLock) {
                 if (mPlaybackCallbackList != null) {
                     for (int i=0 ; i < mPlaybackCallbackList.size() ; i++) {
@@ -3833,6 +3859,7 @@ public class AudioManager {
      * @hide
      */
     @SystemApi
+    @SuppressLint("Doclava125") // FIXME is this still used?
     public boolean isHdmiSystemAudioSupported() {
         try {
             return getService().isHdmiSystemAudioSupported();

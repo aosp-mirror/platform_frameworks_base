@@ -15,13 +15,15 @@
  */
 package com.android.server.usb.descriptors;
 
+import com.android.server.usb.descriptors.report.ReportCanvas;
+
 /**
  * @hide
  * A USB HID (Human Interface Descriptor).
  * see HID1_11.pdf - 6.2.1
  */
-public class UsbHIDDescriptor extends UsbDescriptor {
-    private static final String TAG = "HID";
+public final class UsbHIDDescriptor extends UsbDescriptor {
+    private static final String TAG = "UsbHIDDescriptor";
 
     private int mRelease;           // 2:2 the HID Class Specification release.
     private byte mCountryCode;      // 4:1 country code of the localized hardware.
@@ -35,6 +37,7 @@ public class UsbHIDDescriptor extends UsbDescriptor {
 
     public UsbHIDDescriptor(int length, byte type) {
         super(length, type);
+        mHierarchyLevel = 3;
     }
 
     public int getRelease() {
@@ -59,12 +62,24 @@ public class UsbHIDDescriptor extends UsbDescriptor {
 
     @Override
     public int parseRawDescriptors(ByteStream stream) {
-        mRelease = stream.unpackUsbWord();
+        mRelease = stream.unpackUsbShort();
         mCountryCode = stream.getByte();
         mNumDescriptors = stream.getByte();
         mDescriptorType = stream.getByte();
-        mDescriptorLen = stream.unpackUsbWord();
+        mDescriptorLen = stream.unpackUsbShort();
 
         return mLength;
+    }
+
+    @Override
+    public void report(ReportCanvas canvas) {
+        super.report(canvas);
+
+        canvas.openList();
+        canvas.writeListItem("Spec: " + ReportCanvas.getBCDString(getRelease()));
+        canvas.writeListItem("Type: " + ReportCanvas.getBCDString(getDescriptorType()));
+        canvas.writeListItem("" + getNumDescriptors() + " Descriptors Len: "
+                + getDescriptorLen());
+        canvas.closeList();
     }
 }

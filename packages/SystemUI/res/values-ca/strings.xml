@@ -64,7 +64,7 @@
     <string name="usb_debugging_message" msgid="2220143855912376496">"L\'empremta digital de la clau de l\'RSA de l\'equip és:\n<xliff:g id="FINGERPRINT">%1$s</xliff:g>"</string>
     <string name="usb_debugging_always" msgid="303335496705863070">"Dona sempre permís des d\'aquest equip"</string>
     <string name="usb_debugging_secondary_user_title" msgid="6353808721761220421">"No es permet la depuració USB"</string>
-    <string name="usb_debugging_secondary_user_message" msgid="8572228137833020196">"L\'usuari que té iniciada la sessió al dispositiu en aquest moment no pot activar la depuració USB. Per utilitzar aquesta funció, cal canviar a l\'usuari administrador."</string>
+    <string name="usb_debugging_secondary_user_message" msgid="6067122453571699801">"L\'usuari que té iniciada la sessió al dispositiu en aquest moment no pot activar la depuració per USB. Per utilitzar aquesta funció, cal canviar a l\'usuari principal."</string>
     <string name="compat_mode_on" msgid="6623839244840638213">"Zoom per omplir pantalla"</string>
     <string name="compat_mode_off" msgid="4434467572461327898">"Estira per omplir pant."</string>
     <string name="screenshot_saving_ticker" msgid="7403652894056693515">"S\'està desant captura de pantalla..."</string>
@@ -353,10 +353,10 @@
     <string name="description_target_search" msgid="3091587249776033139">"Cerca"</string>
     <string name="description_direction_up" msgid="7169032478259485180">"Llisca cap amunt per <xliff:g id="TARGET_DESCRIPTION">%s</xliff:g>."</string>
     <string name="description_direction_left" msgid="7207478719805562165">"Llisca cap a l\'esquerra per <xliff:g id="TARGET_DESCRIPTION">%s</xliff:g>."</string>
-    <string name="zen_priority_introduction" msgid="7577965386868311310">"No t\'interromprà cap so ni cap vibració, tret dels de les alarmes, recordatoris, esdeveniments i trucades de les persones que especifiquis. Continuaràs sentint tot allò que decideixis reproduir, com ara música, vídeos i jocs."</string>
-    <string name="zen_alarms_introduction" msgid="7034415210361973827">"No t\'interromprà cap so ni cap vibració, tret dels de les alarmes. Continuaràs sentint tot allò que decideixis reproduir, com ara música, vídeos i jocs."</string>
+    <string name="zen_priority_introduction" msgid="1149025108714420281">"No t\'interromprà cap so ni cap vibració, tret dels de les alarmes, recordatoris, esdeveniments i trucades de les persones que especifiquis. Continuaràs sentint tot allò que decideixis reproduir, com ara música, vídeos i jocs."</string>
+    <string name="zen_alarms_introduction" msgid="4934328096749380201">"No t\'interromprà cap so ni cap vibració, tret dels de les alarmes. Continuaràs sentint tot allò que decideixis reproduir, com ara música, vídeos i jocs."</string>
     <string name="zen_priority_customize_button" msgid="7948043278226955063">"Personalitza"</string>
-    <string name="zen_silence_introduction_voice" msgid="2284540992298200729">"Es bloquejaran TOTS els sons i totes les vibracions, inclosos els de vídeos, jocs, alarmes i música. Encara podràs fer trucades."</string>
+    <string name="zen_silence_introduction_voice" msgid="3948778066295728085">"Es bloquejaran TOTS els sons i totes les vibracions, inclosos els de vídeos, jocs, alarmes i música. Encara podràs fer trucades."</string>
     <string name="zen_silence_introduction" msgid="3137882381093271568">"Es bloquejaran TOTS els sons i totes les vibracions, inclosos els de vídeos, jocs, alarmes i música."</string>
     <string name="keyguard_more_overflow_text" msgid="9195222469041601365">"+<xliff:g id="NUMBER_OF_NOTIFICATIONS">%d</xliff:g>"</string>
     <string name="speed_bump_explanation" msgid="1288875699658819755">"Notificacions menys urgents a continuació"</string>
@@ -407,7 +407,7 @@
     <string name="battery_saver_notification_title" msgid="237918726750955859">"Estalvi de bateria activat"</string>
     <string name="battery_saver_notification_text" msgid="820318788126672692">"Redueix el rendiment i l\'ús de les dades en segon pla."</string>
     <string name="battery_saver_notification_action_text" msgid="109158658238110382">"Desactiva l\'estalvi de bateria"</string>
-    <string name="media_projection_dialog_text" msgid="3071431025448218928">"<xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g> començarà a enregistrar tot el que es mostri a la pantalla."</string>
+    <string name="media_projection_dialog_text" msgid="3071431025448218928">"<xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g> començarà a gravar tot el que es mostri a la pantalla."</string>
     <string name="media_projection_remember_text" msgid="3103510882172746752">"No ho tornis a mostrar"</string>
     <string name="clear_all_notifications_text" msgid="814192889771462828">"Esborra-ho tot"</string>
     <string name="media_projection_action_text" msgid="8470872969457985954">"Comença ara"</string>
@@ -456,7 +456,7 @@
     <string name="monitoring_description_do_learn_more" msgid="1849514470437907421">"Més informació"</string>
     <string name="monitoring_description_do_body_vpn" msgid="8255218762488901796">"Estàs connectat a <xliff:g id="VPN_APP">%1$s</xliff:g>, que pot supervisar la teva activitat a la xarxa, com els correus electrònics, les aplicacions i els llocs web."</string>
     <string name="monitoring_description_vpn_settings_separator" msgid="1933186756733474388">" "</string>
-    <string name="monitoring_description_vpn_settings" msgid="8869300202410505143">"Obre la configuració de la VPN"</string>
+    <string name="monitoring_description_vpn_settings" msgid="6434859242636063861">"Obre la configuració de la VPN"</string>
     <string name="monitoring_description_ca_cert_settings_separator" msgid="4987350385906393626">" "</string>
     <string name="monitoring_description_ca_cert_settings" msgid="5489969458872997092">"Obre les credencials de confiança"</string>
     <string name="monitoring_description_network_logging" msgid="7223505523384076027">"L\'administrador ha activat el registre de xarxa, que supervisa el trànsit del teu dispositiu.\n\nPer obtenir més informació, contacta amb l\'administrador."</string>
@@ -556,8 +556,8 @@
     <string name="notification_default_channel_desc" msgid="2506053815870808359">"Aquesta aplicació no té categories de notificació"</string>
     <string name="notification_unblockable_desc" msgid="3561016061737896906">"Les notificacions d\'aquesta aplicació no es poden desactivar"</string>
     <plurals name="notification_num_channels_desc" formatted="false" msgid="5492793452274077663">
-      <item quantity="other">1 de <xliff:g id="NUMBER_1">%d</xliff:g> categories de notificació d\'aquesta aplicació</item>
-      <item quantity="one">1 de <xliff:g id="NUMBER_0">%d</xliff:g> categoria de notificació d\'aquesta aplicació</item>
+      <item quantity="other">1 de <xliff:g id="NUMBER_1">%s</xliff:g> categories de notificació d\'aquesta aplicació</item>
+      <item quantity="one">1 de <xliff:g id="NUMBER_0">%s</xliff:g> categoria de notificació d\'aquesta aplicació</item>
     </plurals>
     <string name="notification_channels_list_desc_2" msgid="6214732715833946441">"<xliff:g id="CHANNEL_NAME_1">%1$s</xliff:g>, <xliff:g id="CHANNEL_NAME_2">%2$s</xliff:g>"</string>
     <plurals name="notification_channels_list_desc_2_and_others" formatted="false" msgid="2747813553355336157">
@@ -584,9 +584,9 @@
       <item quantity="other">%d minuts</item>
       <item quantity="one">%d minut</item>
     </plurals>
-    <string name="battery_panel_title" msgid="7944156115535366613">"Ús de la bateria"</string>
-    <string name="battery_detail_charging_summary" msgid="1279095653533044008">"La funció Estalvi de bateria no està disponible durant la càrrega"</string>
-    <string name="battery_detail_switch_title" msgid="6285872470260795421">"Estalvi de bateria"</string>
+    <string name="battery_panel_title" msgid="7944156115535366613">"Consum de la bateria"</string>
+    <string name="battery_detail_charging_summary" msgid="4055327085770378335">"La funció Estalvi de bateria no està disponible durant la càrrega"</string>
+    <string name="battery_detail_switch_title" msgid="8763441006881907058">"Estalvi de bateria"</string>
     <string name="battery_detail_switch_summary" msgid="9049111149407626804">"Redueix el rendiment i les dades en segon pla"</string>
     <string name="keyboard_key_button_template" msgid="6230056639734377300">"Botó <xliff:g id="NAME">%1$s</xliff:g>"</string>
     <string name="keyboard_key_home" msgid="2243500072071305073">"Inici"</string>
@@ -726,9 +726,9 @@
     <string name="pip_phone_minimize" msgid="1079119422589131792">"Minimitza"</string>
     <string name="pip_phone_close" msgid="8416647892889710330">"Tanca"</string>
     <string name="pip_phone_dismiss_hint" msgid="6351678169095923899">"Arrossega cap avall per ignorar-ho"</string>
-    <string name="pip_menu_title" msgid="3328510504196964712">"Menú per a Pantalla en pantalla"</string>
+    <string name="pip_menu_title" msgid="4707292089961887657">"Menú"</string>
     <string name="pip_notification_title" msgid="3204024940158161322">"<xliff:g id="NAME">%s</xliff:g> està en pantalla en pantalla"</string>
-    <string name="pip_notification_message" msgid="4171698133469539591">"Si no vols que <xliff:g id="NAME">%s</xliff:g> utilitzi aquesta funció, toca per obrir la configuració i desactiva-la."</string>
+    <string name="pip_notification_message" msgid="5619512781514343311">"Si no vols que <xliff:g id="NAME">%s</xliff:g> utilitzi aquesta funció, toca per obrir la configuració i desactiva-la."</string>
     <string name="pip_play" msgid="1417176722760265888">"Reprodueix"</string>
     <string name="pip_pause" msgid="8881063404466476571">"Posa en pausa"</string>
     <string name="pip_skip_to_next" msgid="1948440006726306284">"Ves al següent"</string>
@@ -754,6 +754,7 @@
     <string name="tuner_menu" msgid="191640047241552081">"Menú"</string>
     <string name="tuner_app" msgid="3507057938640108777">"Aplicació <xliff:g id="APP">%1$s</xliff:g>"</string>
     <string name="notification_channel_alerts" msgid="4496839309318519037">"Alertes"</string>
+    <string name="notification_channel_battery" msgid="5786118169182888462">"Bateria"</string>
     <string name="notification_channel_screenshot" msgid="6314080179230000938">"Captures de pantalla"</string>
     <string name="notification_channel_general" msgid="4525309436693914482">"Missatges generals"</string>
     <string name="notification_channel_storage" msgid="3077205683020695313">"Emmagatzematge"</string>
@@ -774,4 +775,5 @@
     <string name="running_foreground_services_title" msgid="381024150898615683">"Aplicacions que s\'estan executant en segon pla"</string>
     <string name="running_foreground_services_msg" msgid="6326247670075574355">"Toca per obtenir informació sobre l\'ús de dades i de bateria"</string>
     <string name="data_usage_disable_mobile" msgid="5116269981510015864">"Vols desactivar les dades mòbils?"</string>
+    <string name="touch_filtered_warning" msgid="8671693809204767551">"Com que hi ha una aplicació que oculta una sol·licitud de permís, no es pot verificar la teva resposta des de la configuració."</string>
 </resources>

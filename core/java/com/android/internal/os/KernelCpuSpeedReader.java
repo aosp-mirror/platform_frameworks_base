@@ -38,8 +38,8 @@ public class KernelCpuSpeedReader {
     private static final String TAG = "KernelCpuSpeedReader";
 
     private final String mProcFile;
-    private final long[] mLastSpeedTimes;
-    private final long[] mDeltaSpeedTimes;
+    private final long[] mLastSpeedTimesMs;
+    private final long[] mDeltaSpeedTimesMs;
 
     // How long a CPU jiffy is in milliseconds.
     private final long mJiffyMillis;
@@ -50,8 +50,8 @@ public class KernelCpuSpeedReader {
     public KernelCpuSpeedReader(int cpuNumber, int numSpeedSteps) {
         mProcFile = String.format("/sys/devices/system/cpu/cpu%d/cpufreq/stats/time_in_state",
                 cpuNumber);
-        mLastSpeedTimes = new long[numSpeedSteps];
-        mDeltaSpeedTimes = new long[numSpeedSteps];
+        mLastSpeedTimesMs = new long[numSpeedSteps];
+        mDeltaSpeedTimesMs = new long[numSpeedSteps];
         long jiffyHz = Os.sysconf(OsConstants._SC_CLK_TCK);
         mJiffyMillis = 1000/jiffyHz;
     }
@@ -67,27 +67,27 @@ public class KernelCpuSpeedReader {
             TextUtils.SimpleStringSplitter splitter = new TextUtils.SimpleStringSplitter(' ');
             String line;
             int speedIndex = 0;
-            while (speedIndex < mLastSpeedTimes.length && (line = reader.readLine()) != null) {
+            while (speedIndex < mLastSpeedTimesMs.length && (line = reader.readLine()) != null) {
                 splitter.setString(line);
-                Long.parseLong(splitter.next());
+                splitter.next();
 
                 long time = Long.parseLong(splitter.next()) * mJiffyMillis;
-                if (time < mLastSpeedTimes[speedIndex]) {
+                if (time < mLastSpeedTimesMs[speedIndex]) {
                     // The stats reset when the cpu hotplugged. That means that the time
                     // we read is offset from 0, so the time is the delta.
-                    mDeltaSpeedTimes[speedIndex] = time;
+                    mDeltaSpeedTimesMs[speedIndex] = time;
                 } else {
-                    mDeltaSpeedTimes[speedIndex] = time - mLastSpeedTimes[speedIndex];
+                    mDeltaSpeedTimesMs[speedIndex] = time - mLastSpeedTimesMs[speedIndex];
                 }
-                mLastSpeedTimes[speedIndex] = time;
+                mLastSpeedTimesMs[speedIndex] = time;
                 speedIndex++;
             }
         } catch (IOException e) {
             Slog.e(TAG, "Failed to read cpu-freq: " + e.getMessage());
-            Arrays.fill(mDeltaSpeedTimes, 0);
+            Arrays.fill(mDeltaSpeedTimesMs, 0);
         } finally {
             StrictMode.setThreadPolicy(policy);
         }
-        return mDeltaSpeedTimes;
+        return mDeltaSpeedTimesMs;
     }
 }

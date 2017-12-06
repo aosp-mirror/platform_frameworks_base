@@ -20,8 +20,6 @@ import android.app.ActivityManager;
 import android.app.ApplicationErrorReport;
 import android.app.ContentProviderHolder;
 import android.app.IApplicationThread;
-import android.app.IActivityContainer;
-import android.app.IActivityContainerCallback;
 import android.app.IActivityController;
 import android.app.IAppTask;
 import android.app.IInstrumentationWatcher;
@@ -277,8 +275,8 @@ interface IActivityManager {
     int checkGrantUriPermission(int callingUid, in String targetPkg, in Uri uri,
             int modeFlags, int userId);
     // Cause the specified process to dump the specified heap.
-    boolean dumpHeap(in String process, int userId, boolean managed, in String path,
-            in ParcelFileDescriptor fd);
+    boolean dumpHeap(in String process, int userId, boolean managed, boolean mallocInfo,
+            boolean runGc, in String path, in ParcelFileDescriptor fd);
     int startActivities(in IApplicationThread caller, in String callingPackage,
             in Intent[] intents, in String[] resolvedTypes, in IBinder resultTo,
             in Bundle options, int userId);
@@ -310,7 +308,15 @@ interface IActivityManager {
     boolean shouldUpRecreateTask(in IBinder token, in String destAffinity);
     boolean navigateUpTo(in IBinder token, in Intent target, int resultCode,
             in Intent resultData);
-    void setLockScreenShown(boolean showing);
+    /**
+     * Informs ActivityManagerService that the keyguard is showing.
+     *
+     * @param showing True if the keyguard is showing, false otherwise.
+     * @param secondaryDisplayShowing The displayId of the secondary display on which the keyguard
+     *        is showing, or INVALID_DISPLAY if there is no such display. Only meaningful if
+     *        showing is true.
+     */
+    void setLockScreenShown(boolean showing, int secondaryDisplayShowing);
     boolean finishActivityAffinity(in IBinder token);
     // This is not public because you need to be very careful in how you
     // manage your activity to make sure it is always the uid you expect.
@@ -355,8 +361,6 @@ interface IActivityManager {
     void killUid(int appId, int userId, in String reason);
     void setUserIsMonkey(boolean monkey);
     void hang(in IBinder who, boolean allowRestart);
-    IActivityContainer createVirtualActivityContainer(in IBinder parentActivityToken,
-            in IActivityContainerCallback callback);
     void moveTaskToStack(int taskId, int stackId, boolean toTop);
     /**
      * Resizes the input stack id to the given bounds.
@@ -380,7 +384,7 @@ interface IActivityManager {
     boolean convertFromTranslucent(in IBinder token);
     boolean convertToTranslucent(in IBinder token, in Bundle options);
     void notifyActivityDrawn(in IBinder token);
-    void reportActivityFullyDrawn(in IBinder token);
+    void reportActivityFullyDrawn(in IBinder token, boolean restoredFromBundle);
     void restart();
     void performIdleMaintenance();
     void takePersistableUriPermission(in Uri uri, int modeFlags, int userId);
@@ -412,9 +416,6 @@ interface IActivityManager {
     void stopSystemLockTaskMode();
     void finishVoiceTask(in IVoiceInteractionSession session);
     boolean isTopOfTask(in IBinder token);
-    boolean requestVisibleBehind(in IBinder token, boolean visible);
-    boolean isBackgroundVisibleBehind(in IBinder token);
-    void backgroundResourcesReleased(in IBinder token);
     void notifyLaunchTaskBehindComplete(in IBinder token);
     int startActivityFromRecents(int taskId, in Bundle options);
     void notifyEnterAnimationComplete(in IBinder token);
@@ -439,7 +440,7 @@ interface IActivityManager {
 
     // Start of M transactions
     void notifyCleartextNetwork(int uid, in byte[] firstPacket);
-    IActivityContainer createStackOnDisplay(int displayId);
+    int createStackOnDisplay(int displayId);
     int getFocusedStackId();
     void setTaskResizeable(int taskId, int resizeableMode);
     boolean requestAssistContextExtras(int requestType, in IResultReceiver receiver,
@@ -636,4 +637,7 @@ interface IActivityManager {
     // side. If so, make sure they are using the correct transaction ids and arguments.
     // If a transaction which will also be used on the native side is being inserted, add it
     // alongside with other transactions of this kind at the top of this file.
+
+     void setShowWhenLocked(in IBinder token, boolean showWhenLocked);
+     void setTurnScreenOn(in IBinder token, boolean turnScreenOn);
 }

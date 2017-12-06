@@ -35,6 +35,7 @@ import android.graphics.RectF;
 import android.graphics.drawable.Drawable;
 import android.os.Handler;
 import android.os.SystemClock;
+import android.util.ArraySet;
 import android.util.Log;
 import android.util.MutableBoolean;
 import android.util.Pair;
@@ -75,6 +76,7 @@ import com.android.systemui.recents.misc.SystemServicesProxy.TaskStackListener;
 import com.android.systemui.recents.model.RecentsTaskLoadPlan;
 import com.android.systemui.recents.model.RecentsTaskLoader;
 import com.android.systemui.recents.model.Task;
+import com.android.systemui.recents.model.Task.TaskKey;
 import com.android.systemui.recents.model.TaskGrouping;
 import com.android.systemui.recents.model.TaskStack;
 import com.android.systemui.recents.model.ThumbnailData;
@@ -109,6 +111,8 @@ public class RecentsImpl implements ActivityOptions.OnAnimationFinishedListener 
     // duration, then we will toggle recents after this duration.
     private final static int FAST_ALT_TAB_DELAY_MS = 225;
 
+    private final static ArraySet<TaskKey> EMPTY_SET = new ArraySet<>();
+
     public final static String RECENTS_PACKAGE = "com.android.systemui";
     public final static String RECENTS_ACTIVITY = "com.android.systemui.recents.RecentsActivity";
 
@@ -128,6 +132,10 @@ public class RecentsImpl implements ActivityOptions.OnAnimationFinishedListener 
             // Preloads the next task
             RecentsConfiguration config = Recents.getConfiguration();
             if (config.svelteLevel == RecentsConfiguration.SVELTE_NONE) {
+                Rect windowRect = getWindowRect(null /* windowRectOverride */);
+                if (windowRect.isEmpty()) {
+                    return;
+                }
 
                 // Load the next task only if we aren't svelte
                 SystemServicesProxy ssp = Recents.getSystemServices();
@@ -135,38 +143,37 @@ public class RecentsImpl implements ActivityOptions.OnAnimationFinishedListener 
                 RecentsTaskLoader loader = Recents.getTaskLoader();
                 RecentsTaskLoadPlan plan = loader.createLoadPlan(mContext);
                 loader.preloadTasks(plan, -1, false /* includeFrontMostExcludedTask */);
+                TaskStack stack = plan.getTaskStack();
+                RecentsActivityLaunchState launchState = new RecentsActivityLaunchState();
+                RecentsTaskLoadPlan.Options launchOpts = new RecentsTaskLoadPlan.Options();
 
-                // This callback is made when a new activity is launched and the old one is paused
-                // so ignore the current activity and try and preload the thumbnail for the
-                // previous one.
-                VisibilityReport visibilityReport;
-                synchronized (mDummyStackView) {
-                    mDummyStackView.getStack().removeAllTasks(false /* notifyStackChanges */);
-                    mDummyStackView.setTasks(plan.getTaskStack(), false /* allowNotify */);
-                    updateDummyStackViewLayout(plan.getTaskStack(),
-                            getWindowRect(null /* windowRectOverride */));
+                synchronized (mBackgroundLayoutAlgorithm) {
+                    // This callback is made when a new activity is launched and the old one is
+                    // paused so ignore the current activity and try and preload the thumbnail for
+                    // the previous one.
+                    updateDummyStackViewLayout(mBackgroundLayoutAlgorithm, stack, windowRect);
 
                     // Launched from app is always the worst case (in terms of how many
                     // thumbnails/tasks visible)
-                    RecentsActivityLaunchState launchState = new RecentsActivityLaunchState();
                     launchState.launchedFromApp = true;
-                    mDummyStackView.updateLayoutAlgorithm(true /* boundScroll */, launchState);
-                    visibilityReport = mDummyStackView.computeStackVisibilityReport();
-                }
+                    mBackgroundLayoutAlgorithm.update(plan.getTaskStack(), EMPTY_SET, launchState);
+                    VisibilityReport visibilityReport =
+                            mBackgroundLayoutAlgorithm.computeStackVisibilityReport(
+                                    stack.getStackTasks());
 
-                RecentsTaskLoadPlan.Options launchOpts = new RecentsTaskLoadPlan.Options();
-                launchOpts.runningTaskId = runningTaskInfo != null ? runningTaskInfo.id : -1;
-                launchOpts.numVisibleTasks = visibilityReport.numVisibleTasks;
-                launchOpts.numVisibleTaskThumbnails = visibilityReport.numVisibleThumbnails;
-                launchOpts.onlyLoadForCache = true;
-                launchOpts.onlyLoadPausedActivities = true;
-                launchOpts.loadThumbnails = true;
+                    launchOpts.runningTaskId = runningTaskInfo != null ? runningTaskInfo.id : -1;
+                    launchOpts.numVisibleTasks = visibilityReport.numVisibleTasks;
+                    launchOpts.numVisibleTaskThumbnails = visibilityReport.numVisibleThumbnails;
+                    launchOpts.onlyLoadForCache = true;
+                    launchOpts.onlyLoadPausedActivities = true;
+                    launchOpts.loadThumbnails = true;
+                }
                 loader.loadTasks(mContext, plan, launchOpts);
             }
         }
 
         @Override
-        public void onActivityPinned(String packageName, int taskId) {
+        public void onActivityPinned(String packageName, int userId, int taskId) {
             // Check this is for the right user
             if (!checkCurrentUserId(mContext, false /* debug */)) {
                 return;
@@ -229,17 +236,15 @@ public class RecentsImpl implements ActivityOptions.OnAnimationFinishedListener 
     boolean mLaunchedWhileDocking;
 
     // Task launching
-    Rect mTaskStackBounds = new Rect();
+    Rect mTmpBounds = new Rect();
     TaskViewTransform mTmpTransform = new TaskViewTransform();
-    int mStatusBarHeight;
-    int mNavBarHeight;
-    int mNavBarWidth;
     int mTaskBarHeight;
 
     // Header (for transition)
     TaskViewHeader mHeaderBar;
     final Object mHeaderBarLock = new Object();
-    protected TaskStackView mDummyStackView;
+    private TaskStackView mDummyStackView;
+    private TaskStackLayoutAlgorithm mBackgroundLayoutAlgorithm;
 
     // Variables to keep track of if we need to start recents after binding
     protected boolean mTriggeredFromAltTab;
@@ -258,6 +263,7 @@ public class RecentsImpl implements ActivityOptions.OnAnimationFinishedListener 
     public RecentsImpl(Context context) {
         mContext = context;
         mHandler = new Handler();
+        mBackgroundLayoutAlgorithm = new TaskStackLayoutAlgorithm(context, null);
 
         // Initialize the static foreground thread
         ForegroundThread.get();
@@ -287,8 +293,9 @@ public class RecentsImpl implements ActivityOptions.OnAnimationFinishedListener 
 
     public void onConfigurationChanged() {
         reloadResources();
-        synchronized (mDummyStackView) {
-            mDummyStackView.reloadOnConfigurationChange();
+        mDummyStackView.reloadOnConfigurationChange();
+        synchronized (mBackgroundLayoutAlgorithm) {
+            mBackgroundLayoutAlgorithm.reloadOnConfigurationChange(mContext);
         }
     }
 
@@ -373,6 +380,12 @@ public class RecentsImpl implements ActivityOptions.OnAnimationFinishedListener 
     }
 
     public void toggleRecents(int growTarget) {
+        // Skip preloading if the task is locked
+        SystemServicesProxy ssp = Recents.getSystemServices();
+        if (ssp.isScreenPinningActive()) {
+            return;
+        }
+
         // Skip this toggle if we are already waiting to trigger recents via alt-tab
         if (mFastAltTabTrigger.isDozing()) {
             return;
@@ -388,7 +401,6 @@ public class RecentsImpl implements ActivityOptions.OnAnimationFinishedListener 
         mTriggeredFromAltTab = false;
 
         try {
-            SystemServicesProxy ssp = Recents.getSystemServices();
             MutableBoolean isHomeStackVisible = new MutableBoolean(true);
             long elapsedTime = SystemClock.elapsedRealtime() - mLastToggleTime;
 
@@ -451,11 +463,16 @@ public class RecentsImpl implements ActivityOptions.OnAnimationFinishedListener 
     }
 
     public void preloadRecents() {
+        // Skip preloading if the task is locked
+        SystemServicesProxy ssp = Recents.getSystemServices();
+        if (ssp.isScreenPinningActive()) {
+            return;
+        }
+
         // Preload only the raw task list into a new load plan (which will be consumed by the
         // RecentsActivity) only if there is a task to animate to.  Post this to ensure that we
         // don't block the touch feedback on the nav bar button which triggers this.
         mHandler.post(() -> {
-            SystemServicesProxy ssp = Recents.getSystemServices();
             MutableBoolean isHomeStackVisible = new MutableBoolean(true);
             if (!ssp.isRecentsActivityVisible(isHomeStackVisible)) {
                 ActivityManager.RunningTaskInfo runningTask = ssp.getRunningTask();
@@ -663,7 +680,7 @@ public class RecentsImpl implements ActivityOptions.OnAnimationFinishedListener 
 
         mWaitingForTransitionStart = waitingForTransitionStart;
         if (!waitingForTransitionStart && mToggleFollowingTransitionStart) {
-            toggleRecents(DividerView.INVALID_RECENTS_GROW_TARGET);
+            mHandler.post(() -> toggleRecents(DividerView.INVALID_RECENTS_GROW_TARGET));
         }
         mToggleFollowingTransitionStart = false;
     }
@@ -697,12 +714,6 @@ public class RecentsImpl implements ActivityOptions.OnAnimationFinishedListener 
     private void reloadResources() {
         Resources res = mContext.getResources();
 
-        mStatusBarHeight = res.getDimensionPixelSize(
-                com.android.internal.R.dimen.status_bar_height);
-        mNavBarHeight = res.getDimensionPixelSize(
-                com.android.internal.R.dimen.navigation_bar_height);
-        mNavBarWidth = res.getDimensionPixelSize(
-                com.android.internal.R.dimen.navigation_bar_width);
         mTaskBarHeight = TaskStackLayoutAlgorithm.getDimensionForDevice(mContext,
                 R.dimen.recents_task_view_header_height,
                 R.dimen.recents_task_view_header_height,
@@ -718,7 +729,8 @@ public class RecentsImpl implements ActivityOptions.OnAnimationFinishedListener 
         mHeaderBar.setLayoutDirection(res.getConfiguration().getLayoutDirection());
     }
 
-    private void updateDummyStackViewLayout(TaskStack stack, Rect windowRect) {
+    private void updateDummyStackViewLayout(TaskStackLayoutAlgorithm stackLayout,
+            TaskStack stack, Rect windowRect) {
         SystemServicesProxy ssp = Recents.getSystemServices();
         Rect displayRect = ssp.getDisplayRect();
         Rect systemInsets = new Rect();
@@ -734,18 +746,14 @@ public class RecentsImpl implements ActivityOptions.OnAnimationFinishedListener 
         calculateWindowStableInsets(systemInsets, windowRect, displayRect);
         windowRect.offsetTo(0, 0);
 
-        synchronized (mDummyStackView) {
-            TaskStackLayoutAlgorithm stackLayout = mDummyStackView.getStackAlgorithm();
-
-            // Rebind the header bar and draw it for the transition
-            stackLayout.setSystemInsets(systemInsets);
-            if (stack != null) {
-                stackLayout.getTaskStackBounds(displayRect, windowRect, systemInsets.top,
-                        systemInsets.left, systemInsets.right, mTaskStackBounds);
-                stackLayout.reset();
-                stackLayout.initialize(displayRect, windowRect, mTaskStackBounds,
-                        TaskStackLayoutAlgorithm.StackState.getStackStateForStack(stack));
-            }
+        // Rebind the header bar and draw it for the transition
+        stackLayout.setSystemInsets(systemInsets);
+        if (stack != null) {
+            stackLayout.getTaskStackBounds(displayRect, windowRect, systemInsets.top,
+                    systemInsets.left, systemInsets.right, mTmpBounds);
+            stackLayout.reset();
+            stackLayout.initialize(displayRect, windowRect, mTmpBounds,
+                    TaskStackLayoutAlgorithm.StackState.getStackStateForStack(stack));
         }
     }
 
@@ -767,26 +775,23 @@ public class RecentsImpl implements ActivityOptions.OnAnimationFinishedListener 
     private void updateHeaderBarLayout(TaskStack stack, Rect windowRectOverride) {
         Rect windowRect = getWindowRect(windowRectOverride);
         int taskViewWidth = 0;
-        boolean useGridLayout = false;
-        synchronized (mDummyStackView) {
-            useGridLayout = mDummyStackView.useGridLayout();
-            updateDummyStackViewLayout(stack, windowRect);
-            if (stack != null) {
-                TaskStackLayoutAlgorithm stackLayout = mDummyStackView.getStackAlgorithm();
-                mDummyStackView.getStack().removeAllTasks(false /* notifyStackChanges */);
-                mDummyStackView.setTasks(stack, false /* allowNotifyStackChanges */);
-                // Get the width of a task view so that we know how wide to draw the header bar.
-                if (useGridLayout) {
-                    TaskGridLayoutAlgorithm gridLayout = mDummyStackView.getGridAlgorithm();
-                    gridLayout.initialize(windowRect);
-                    taskViewWidth = (int) gridLayout.getTransform(0 /* taskIndex */,
-                            stack.getTaskCount(), new TaskViewTransform(),
-                            stackLayout).rect.width();
-                } else {
-                    Rect taskViewBounds = stackLayout.getUntransformedTaskViewBounds();
-                    if (!taskViewBounds.isEmpty()) {
-                        taskViewWidth = taskViewBounds.width();
-                    }
+        boolean useGridLayout = mDummyStackView.useGridLayout();
+        updateDummyStackViewLayout(mDummyStackView.getStackAlgorithm(), stack, windowRect);
+        if (stack != null) {
+            TaskStackLayoutAlgorithm stackLayout = mDummyStackView.getStackAlgorithm();
+            mDummyStackView.getStack().removeAllTasks(false /* notifyStackChanges */);
+            mDummyStackView.setTasks(stack, false /* allowNotifyStackChanges */);
+            // Get the width of a task view so that we know how wide to draw the header bar.
+            if (useGridLayout) {
+                TaskGridLayoutAlgorithm gridLayout = mDummyStackView.getGridAlgorithm();
+                gridLayout.initialize(windowRect);
+                taskViewWidth = (int) gridLayout.getTransform(0 /* taskIndex */,
+                        stack.getTaskCount(), new TaskViewTransform(),
+                        stackLayout).rect.width();
+            } else {
+                Rect taskViewBounds = stackLayout.getUntransformedTaskViewBounds();
+                if (!taskViewBounds.isEmpty()) {
+                    taskViewWidth = taskViewBounds.width();
                 }
             }
         }
@@ -866,20 +871,15 @@ public class RecentsImpl implements ActivityOptions.OnAnimationFinishedListener 
     private Pair<ActivityOptions, AppTransitionAnimationSpecsFuture>
             getThumbnailTransitionActivityOptions(ActivityManager.RunningTaskInfo runningTask,
                     Rect windowOverrideRect) {
+        final boolean isLowRamDevice = Recents.getConfiguration().isLowRamDevice;
         if (runningTask != null && runningTask.stackId == FREEFORM_WORKSPACE_STACK_ID) {
             ArrayList<AppTransitionAnimationSpec> specs = new ArrayList<>();
-            ArrayList<Task> tasks;
-            TaskStackLayoutAlgorithm stackLayout;
-            TaskStackViewScroller stackScroller;
+            ArrayList<Task> tasks = mDummyStackView.getStack().getStackTasks();
+            TaskStackLayoutAlgorithm stackLayout = mDummyStackView.getStackAlgorithm();
+            TaskStackViewScroller stackScroller = mDummyStackView.getScroller();
 
-            synchronized (mDummyStackView) {
-                tasks = mDummyStackView.getStack().getStackTasks();
-                stackLayout = mDummyStackView.getStackAlgorithm();
-                stackScroller = mDummyStackView.getScroller();
-
-                mDummyStackView.updateLayoutAlgorithm(true /* boundScroll */);
-                mDummyStackView.updateToInitialState();
-            }
+            mDummyStackView.updateLayoutAlgorithm(true /* boundScroll */);
+            mDummyStackView.updateToInitialState();
 
             for (int i = tasks.size() - 1; i >= 0; i--) {
                 Task task = tasks.get(i);
@@ -896,8 +896,11 @@ public class RecentsImpl implements ActivityOptions.OnAnimationFinishedListener 
             AppTransitionAnimationSpec[] specsArray = new AppTransitionAnimationSpec[specs.size()];
             specs.toArray(specsArray);
 
+            // For low end ram devices, wait for transition flag is reset when Recents entrance
+            // animation is complete instead of when the transition animation starts
             return new Pair<>(ActivityOptions.makeThumbnailAspectScaleDownAnimation(mDummyStackView,
-                    specsArray, mHandler, mResetToggleFlagListener, this), null);
+                    specsArray, mHandler, isLowRamDevice ? null : mResetToggleFlagListener, this),
+                    null);
         } else {
             // Update the destination rect
             Task toTask = new Task();
@@ -916,9 +919,11 @@ public class RecentsImpl implements ActivityOptions.OnAnimationFinishedListener 
                                 toTask.key.id, thumbnail, rect));
                     });
 
+            // For low end ram devices, wait for transition flag is reset when Recents entrance
+            // animation is complete instead of when the transition animation starts
             return new Pair<>(ActivityOptions.makeMultiThumbFutureAspectScaleAnimation(mContext,
-                    mHandler, future.getFuture(), mResetToggleFlagListener, false /* scaleUp */),
-                    future);
+                    mHandler, future.getFuture(), isLowRamDevice ? null : mResetToggleFlagListener,
+                    false /* scaleUp */), future);
         }
     }
 
@@ -1037,10 +1042,8 @@ public class RecentsImpl implements ActivityOptions.OnAnimationFinishedListener 
         updateHeaderBarLayout(stack, windowOverrideRect);
 
         // Prepare the dummy stack for the transition
-        TaskStackLayoutAlgorithm.VisibilityReport stackVr;
-        synchronized (mDummyStackView) {
-            stackVr = mDummyStackView.computeStackVisibilityReport();
-        }
+        TaskStackLayoutAlgorithm.VisibilityReport stackVr =
+                mDummyStackView.computeStackVisibilityReport();
 
         // Update the remaining launch state
         launchState.launchedNumVisibleTasks = stackVr.numVisibleTasks;

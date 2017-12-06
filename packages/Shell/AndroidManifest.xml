@@ -62,6 +62,7 @@
     <!-- Internal permissions granted to the shell. -->
     <uses-permission android:name="android.permission.FORCE_BACK" />
     <uses-permission android:name="android.permission.BATTERY_STATS" />
+    <uses-permission android:name="android.permission.PACKAGE_USAGE_STATS" />
     <uses-permission android:name="android.permission.INTERNAL_SYSTEM_WINDOW" />
     <uses-permission android:name="android.permission.INJECT_EVENTS" />
     <uses-permission android:name="android.permission.RETRIEVE_WINDOW_CONTENT" />
@@ -114,9 +115,12 @@
     <uses-permission android:name="android.permission.GET_APP_OPS_STATS" />
     <uses-permission android:name="android.permission.VIBRATE" />
     <uses-permission android:name="android.permission.MANAGE_ACTIVITY_STACKS" />
+    <uses-permission android:name="android.permission.ACTIVITY_EMBEDDING" />
     <uses-permission android:name="android.permission.CONNECTIVITY_INTERNAL" />
     <uses-permission android:name="android.permission.CHANGE_COMPONENT_ENABLED_STATE" />
     <uses-permission android:name="android.permission.MANAGE_AUTO_FILL" />
+    <uses-permission android:name="android.permission.NETWORK_SETTINGS" />
+    <uses-permission android:name="android.permission.CHANGE_WIFI_STATE" />
     <!-- Permission needed to rename bugreport notifications (so they're not shown as Shell) -->
     <uses-permission android:name="android.permission.SUBSTITUTE_NOTIFICATION_APP_NAME" />
     <!-- Permission needed to hold a wakelock in dumpstate.cpp (drop_root_user()) -->

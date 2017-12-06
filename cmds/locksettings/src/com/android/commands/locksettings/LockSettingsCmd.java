@@ -33,6 +33,12 @@ public final class LockSettingsCmd extends BaseCommand {
             "       locksettings set-pin [--old OLD_CREDENTIAL] NEW_PIN\n" +
             "       locksettings set-password [--old OLD_CREDENTIAL] NEW_PASSWORD\n" +
             "       locksettings clear [--old OLD_CREDENTIAL]\n" +
+            "       locksettings verify [--old OLD_CREDENTIAL]\n" +
+            "       locksettings set-disabled DISABLED\n" +
+            "       locksettings get-disabled\n" +
+            "\n" +
+            "flags: \n" +
+            "       --user USER_ID: specify the user, default value is current user\n" +
             "\n" +
             "locksettings set-pattern: sets a pattern\n" +
             "    A pattern is specified by a non-separated list of numbers that index the cell\n" +
@@ -44,7 +50,13 @@ public final class LockSettingsCmd extends BaseCommand {
             "\n" +
             "locksettings set-password: sets a password\n" +
             "\n" +
-            "locksettings clear: clears the unlock credential\n";
+            "locksettings clear: clears the unlock credential\n" +
+            "\n" +
+            "locksettings verify: verifies the credential and unlocks the user\n" +
+            "\n" +
+            "locksettings set-disabled: sets whether the lock screen should be disabled\n" +
+            "\n" +
+            "locksettings get-disabled: retrieves whether the lock screen is disabled\n";
 
     public static void main(String[] args) {
         (new LockSettingsCmd()).run(args);

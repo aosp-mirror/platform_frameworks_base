@@ -29,20 +29,22 @@ oneway interface IBackupObserver {
      * This method could be called several times for packages with full data backup.
      * It will tell how much of backup data is already saved and how much is expected.
      *
-     * @param currentBackupPackage The name of the package that now being backuped.
+     * @param currentBackupPackage The name of the package that now being backed up.
      * @param backupProgress Current progress of backup for the package.
      */
     void onUpdate(String currentPackage, in BackupProgress backupProgress);
 
     /**
-     * The backup of single package has completed.  This method will be called at most one time
-     * for each package and could be not called if backup is failed before and
-     * backupFinished() is called.
+     * Backup of one package or initialization of one transport has completed.  This
+     * method will be called at most one time for each package or transport, and might not
+     * be not called if the operation fails before backupFinished(); for example, if the
+     * requested package/transport does not exist.
      *
-     * @param currentBackupPackage The name of the package that was backuped.
+     * @param target The name of the package that was backed up, or of the transport
+     *                  that was initialized
      * @param status Zero on success; a nonzero error code if the backup operation failed.
      */
-    void onResult(String currentPackage, int status);
+    void onResult(String target, int status);
 
     /**
      * The backup process has completed.  This method will always be called,

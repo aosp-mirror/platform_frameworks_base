@@ -36,6 +36,7 @@ import android.test.suitebuilder.annotation.SmallTest;
 
 import com.android.internal.messages.nano.SystemMessageProto.SystemMessage;
 import com.android.systemui.SysuiTestCase;
+import com.android.systemui.util.NotificationChannels;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -108,23 +109,13 @@ public class PowerNotificationWarningsTest extends SysuiTestCase {
     }
 
     @Test
-    public void testShowLowBatteryNotification_Silent() {
-        mPowerNotificationWarnings.showLowBatteryWarning(false);
-        ArgumentCaptor<Notification> captor = ArgumentCaptor.forClass(Notification.class);
-        verify(mMockNotificationManager)
-                .notifyAsUser(anyString(), eq(SystemMessage.NOTE_POWER_LOW),
-                        captor.capture(), any());
-        assertEquals(null, captor.getValue().sound);
-    }
-
-    @Test
-    public void testShowLowBatteryNotification_Sound() {
+    public void testShowLowBatteryNotification_BatteryChannel() {
         mPowerNotificationWarnings.showLowBatteryWarning(true);
         ArgumentCaptor<Notification> captor = ArgumentCaptor.forClass(Notification.class);
         verify(mMockNotificationManager)
                 .notifyAsUser(anyString(), eq(SystemMessage.NOTE_POWER_LOW),
                         captor.capture(), any());
-        assertNotEqual(null, captor.getValue().sound);
+        assertTrue(captor.getValue().getChannelId() == NotificationChannels.BATTERY);
     }
 
     @Test

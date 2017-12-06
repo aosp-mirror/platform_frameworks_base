@@ -20,7 +20,6 @@ import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.os.Bundle;
-import android.os.CancellationSignal;
 import android.os.Parcel;
 import android.os.Parcelable;
 import android.view.View;
@@ -38,7 +37,7 @@ import java.util.List;
  * interesting for saving and what are the possible ways to fill the inputs on
  * the screen if applicable.
  *
- * @see AutofillService#onFillRequest(FillRequest, CancellationSignal, FillCallback)
+ * @see AutofillService#onFillRequest(FillRequest, android.os.CancellationSignal, FillCallback)
  */
 public final class FillRequest implements Parcelable {
 
@@ -61,9 +60,8 @@ public final class FillRequest implements Parcelable {
      * <p>An explicit autofill request is triggered when the
      * {@link android.view.autofill.AutofillManager#requestAutofill(View)} or
      * {@link android.view.autofill.AutofillManager#requestAutofill(View, int, android.graphics.Rect)}
-     * is called. For example, standard {@link android.widget.TextView} views that use
-     * an {@link android.widget.Editor} shows an {@code AUTOFILL} option in the overflow menu that
-     * triggers such request.
+     * is called. For example, standard {@link android.widget.TextView} views show an
+     * {@code AUTOFILL} option in the overflow menu that triggers such request.
      */
     public static final int FLAG_MANUAL_REQUEST = 0x1;
 
@@ -123,9 +121,14 @@ public final class FillRequest implements Parcelable {
         return mContexts;
     }
 
+    @Override
+    public String toString() {
+        return "FillRequest: [id=" + mId + ", flags=" + mFlags + ", ctxts= " + mContexts + "]";
+    }
+
     /**
      * Gets the extra client state returned from the last {@link
-     * AutofillService#onFillRequest(FillRequest, CancellationSignal, FillCallback)
+     * AutofillService#onFillRequest(FillRequest, android.os.CancellationSignal, FillCallback)
      * fill request}, so the service can use it for state management.
      *
      * <p>Once a {@link AutofillService#onSaveRequest(SaveRequest, SaveCallback)

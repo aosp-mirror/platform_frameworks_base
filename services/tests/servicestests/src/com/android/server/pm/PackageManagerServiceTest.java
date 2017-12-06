@@ -47,7 +47,7 @@ public class PackageManagerServiceTest extends AndroidTestCase {
         }
 
         public void sendPackageAddedForNewUsers(String packageName,
-            boolean isSystem, int appId, int... userIds) {
+            boolean sendBootComplete, boolean includeStopped, int appId, int... userIds) {
         }
       }
 

@@ -16,10 +16,14 @@
 
 package android.database.sqlite;
 
+import android.annotation.IntRange;
 import android.content.Context;
 import android.database.DatabaseErrorHandler;
+import android.database.SQLException;
 import android.database.sqlite.SQLiteDatabase.CursorFactory;
+import android.os.FileUtils;
 import android.util.Log;
+
 import java.io.File;
 
 /**
@@ -43,24 +47,14 @@ import java.io.File;
 public abstract class SQLiteOpenHelper {
     private static final String TAG = SQLiteOpenHelper.class.getSimpleName();
 
-    // When true, getReadableDatabase returns a read-only database if it is just being opened.
-    // The database handle is reopened in read/write mode when getWritableDatabase is called.
-    // We leave this behavior disabled in production because it is inefficient and breaks
-    // many applications.  For debugging purposes it can be useful to turn on strict
-    // read-only semantics to catch applications that call getReadableDatabase when they really
-    // wanted getWritableDatabase.
-    private static final boolean DEBUG_STRICT_READONLY = false;
-
     private final Context mContext;
     private final String mName;
-    private final CursorFactory mFactory;
     private final int mNewVersion;
     private final int mMinimumSupportedVersion;
 
     private SQLiteDatabase mDatabase;
     private boolean mIsInitializing;
-    private boolean mEnableWriteAheadLogging;
-    private final DatabaseErrorHandler mErrorHandler;
+    private final SQLiteDatabase.OpenParams.Builder mOpenParamsBuilder;
 
     /**
      * Create a helper object to create, open, and/or manage a database.
@@ -130,10 +124,12 @@ public abstract class SQLiteOpenHelper {
 
         mContext = context;
         mName = name;
-        mFactory = factory;
         mNewVersion = version;
-        mErrorHandler = errorHandler;
         mMinimumSupportedVersion = Math.max(0, minimumSupportedVersion);
+        mOpenParamsBuilder = new SQLiteDatabase.OpenParams.Builder();
+        mOpenParamsBuilder.setCursorFactory(factory);
+        mOpenParamsBuilder.setErrorHandler(errorHandler);
+        mOpenParamsBuilder.addOpenFlags(SQLiteDatabase.CREATE_IF_NECESSARY);
     }
 
     /**
@@ -157,7 +153,7 @@ public abstract class SQLiteOpenHelper {
      */
     public void setWriteAheadLoggingEnabled(boolean enabled) {
         synchronized (this) {
-            if (mEnableWriteAheadLogging != enabled) {
+            if (mOpenParamsBuilder.isWriteAheadLoggingEnabled() != enabled) {
                 if (mDatabase != null && mDatabase.isOpen() && !mDatabase.isReadOnly()) {
                     if (enabled) {
                         mDatabase.enableWriteAheadLogging();
@@ -165,8 +161,56 @@ public abstract class SQLiteOpenHelper {
                         mDatabase.disableWriteAheadLogging();
                     }
                 }
-                mEnableWriteAheadLogging = enabled;
+                mOpenParamsBuilder.setWriteAheadLoggingEnabled(enabled);
             }
+        }
+    }
+
+    /**
+     * Configures <a href="https://sqlite.org/malloc.html#lookaside">lookaside memory allocator</a>
+     *
+     * <p>This method should be called from the constructor of the subclass,
+     * before opening the database, since lookaside memory configuration can only be changed
+     * when no connection is using it
+     *
+     * <p>SQLite default settings will be used, if this method isn't called.
+     * Use {@code setLookasideConfig(0,0)} to disable lookaside
+     *
+     * <p><strong>Note:</strong> Provided slotSize/slotCount configuration is just a recommendation.
+     * The system may choose different values depending on a device, e.g. lookaside allocations
+     * can be disabled on low-RAM devices
+     *
+     * @param slotSize The size in bytes of each lookaside slot.
+     * @param slotCount The total number of lookaside memory slots per database connection.
+     */
+    public void setLookasideConfig(@IntRange(from = 0) final int slotSize,
+            @IntRange(from = 0) final int slotCount) {
+        synchronized (this) {
+            if (mDatabase != null && mDatabase.isOpen()) {
+                throw new IllegalStateException(
+                        "Lookaside memory config cannot be changed after opening the database");
+            }
+            mOpenParamsBuilder.setLookasideConfig(slotSize, slotCount);
+        }
+    }
+
+    /**
+     * Sets the maximum number of milliseconds that SQLite connection is allowed to be idle
+     * before it is closed and removed from the pool.
+     *
+     * <p>This method should be called from the constructor of the subclass,
+     * before opening the database
+     *
+     * @param idleConnectionTimeoutMs timeout in milliseconds. Use {@link Long#MAX_VALUE} value
+     * to allow unlimited idle connections.
+     */
+    public void setIdleConnectionTimeout(@IntRange(from = 0) final long idleConnectionTimeoutMs) {
+        synchronized (this) {
+            if (mDatabase != null && mDatabase.isOpen()) {
+                throw new IllegalStateException(
+                        "Connection timeout setting cannot be changed after opening the database");
+            }
+            mOpenParamsBuilder.setIdleConnectionTimeout(idleConnectionTimeoutMs);
         }
     }
 
@@ -243,27 +287,22 @@ public abstract class SQLiteOpenHelper {
                     db.reopenReadWrite();
                 }
             } else if (mName == null) {
-                db = SQLiteDatabase.create(null);
+                db = SQLiteDatabase.createInMemory(mOpenParamsBuilder.build());
             } else {
+                final File filePath = mContext.getDatabasePath(mName);
+                SQLiteDatabase.OpenParams params = mOpenParamsBuilder.build();
                 try {
-                    if (DEBUG_STRICT_READONLY && !writable) {
-                        final String path = mContext.getDatabasePath(mName).getPath();
-                        db = SQLiteDatabase.openDatabase(path, mFactory,
-                                SQLiteDatabase.OPEN_READONLY, mErrorHandler);
-                    } else {
-                        db = mContext.openOrCreateDatabase(mName, mEnableWriteAheadLogging ?
-                                Context.MODE_ENABLE_WRITE_AHEAD_LOGGING : 0,
-                                mFactory, mErrorHandler);
-                    }
-                } catch (SQLiteException ex) {
+                    db = SQLiteDatabase.openDatabase(filePath, params);
+                    // Keep pre-O-MR1 behavior by resetting file permissions to 660
+                    setFilePermissionsForDb(filePath.getPath());
+                } catch (SQLException ex) {
                     if (writable) {
                         throw ex;
                     }
                     Log.e(TAG, "Couldn't open " + mName
                             + " for writing (will try read-only):", ex);
-                    final String path = mContext.getDatabasePath(mName).getPath();
-                    db = SQLiteDatabase.openDatabase(path, mFactory,
-                            SQLiteDatabase.OPEN_READONLY, mErrorHandler);
+                    params = params.toBuilder().addOpenFlags(SQLiteDatabase.OPEN_READONLY).build();
+                    db = SQLiteDatabase.openDatabase(filePath, params);
                 }
             }
 
@@ -321,6 +360,11 @@ public abstract class SQLiteOpenHelper {
                 db.close();
             }
         }
+    }
+
+    private static void setFilePermissionsForDb(String dbPath) {
+        int perms = FileUtils.S_IRUSR | FileUtils.S_IWUSR | FileUtils.S_IRGRP | FileUtils.S_IWGRP;
+        FileUtils.setPermissions(dbPath, perms, -1, -1);
     }
 
     /**

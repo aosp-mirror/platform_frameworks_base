@@ -136,7 +136,7 @@ public class TelephonyManager {
 
 
     /** @hide */
-    static public final int KEY_TYPE_EPDDG = 1;
+    static public final int KEY_TYPE_EPDG = 1;
 
     /** @hide */
     static public final int KEY_TYPE_WLAN = 2;
@@ -764,12 +764,15 @@ public class TelephonyManager {
      * The {@link #EXTRA_LAUNCH_VOICEMAIL_SETTINGS_INTENT} extra is a
      * {@link android.app.PendingIntent} that will launch the voicemail settings. This extra is only
      * available when the voicemail number is not set.
+     * The {@link #EXTRA_IS_REFRESH} extra indicates whether the notification is a refresh or a new
+     * notification.
      *
      * @see #EXTRA_PHONE_ACCOUNT_HANDLE
      * @see #EXTRA_NOTIFICATION_COUNT
      * @see #EXTRA_VOICEMAIL_NUMBER
      * @see #EXTRA_CALL_VOICEMAIL_INTENT
      * @see #EXTRA_LAUNCH_VOICEMAIL_SETTINGS_INTENT
+     * @see #EXTRA_IS_REFRESH
      */
     public static final String ACTION_SHOW_VOICEMAIL_NOTIFICATION =
             "android.telephony.action.SHOW_VOICEMAIL_NOTIFICATION";
@@ -807,6 +810,15 @@ public class TelephonyManager {
      */
     public static final String EXTRA_LAUNCH_VOICEMAIL_SETTINGS_INTENT =
             "android.telephony.extra.LAUNCH_VOICEMAIL_SETTINGS_INTENT";
+
+    /**
+     * Boolean value representing whether the {@link
+     * TelephonyManager#ACTION_SHOW_VOICEMAIL_NOTIFICATION} is new or a refresh of an existing
+     * notification. Notification refresh happens after reboot or connectivity changes. The user has
+     * already been notified for the voicemail so it should not alert the user, and should not be
+     * shown again if the user has dismissed it.
+     */
+    public static final String EXTRA_IS_REFRESH = "android.telephony.extra.IS_REFRESH";
 
     /**
      * {@link android.telecom.Connection} event used to indicate that an IMS call has be
@@ -2366,31 +2378,73 @@ public class TelephonyManager {
      * Requires Permission:
      *   {@link android.Manifest.permission#READ_PHONE_STATE READ_PHONE_STATE}
      * @param keyType whether the key is being used for wlan or epdg. Valid key types are
-     *        {@link TelephonyManager#KEY_TYPE_EPDDG} or
+     *        {@link TelephonyManager#KEY_TYPE_EPDG} or
      *        {@link TelephonyManager#KEY_TYPE_WLAN}.
      * @return ImsiEncryptionInfo Carrier specific information that will be used to encrypt the
      *         IMSI and IMPI. This includes the public key and the key identifier. This information
-     *         will be stored in the device keystore.
+     *         will be stored in the device keystore. The system will return a null when no key was
+     *         found, and the carrier does not require a key. The system will throw the following
+     *         exceptions:
+     *         1. IllegalArgumentException when an invalid key is sent.
+     *         2. RuntimeException if the key is required but not found; and also if there was an
+     *         internal exception.
      * @hide
      */
     public ImsiEncryptionInfo getCarrierInfoForImsiEncryption(int keyType) {
         try {
             IPhoneSubInfo info = getSubscriberInfo();
-            if (info == null) return null;
-            int subId = getSubId(SubscriptionManager.getDefaultDataSubscriptionId());
-            if (keyType != KEY_TYPE_EPDDG && keyType != KEY_TYPE_WLAN) {
-                throw new IllegalArgumentException("Invalid key type");
+            if (info == null) {
+                throw new RuntimeException("IMSI error: Subscriber Info is null");
             }
-            return info.getCarrierInfoForImsiEncryption(subId, keyType,
-                    mContext.getOpPackageName());
+            int subId = getSubId(SubscriptionManager.getDefaultDataSubscriptionId());
+            if (keyType != KEY_TYPE_EPDG && keyType != KEY_TYPE_WLAN) {
+                throw new IllegalArgumentException("IMSI error: Invalid key type");
+            }
+            ImsiEncryptionInfo imsiEncryptionInfo = info.getCarrierInfoForImsiEncryption(
+                    subId, keyType, mContext.getOpPackageName());
+            if (imsiEncryptionInfo  == null
+                    && isImsiEncryptionRequired(subId, keyType)) {
+                Rlog.e(TAG, "IMSI error: key is required but not found");
+                throw new RuntimeException("IMSI error: key is required but not found");
+            }
+            return imsiEncryptionInfo;
         } catch (RemoteException ex) {
-            Rlog.e(TAG, "getCarrierInfoForImsiEncryption RemoteException", ex);
-            return null;
+            Rlog.e(TAG, "getCarrierInfoForImsiEncryption RemoteException" + ex);
+            throw new RuntimeException("IMSI error: Remote Exception");
         } catch (NullPointerException ex) {
             // This could happen before phone restarts due to crashing
-            Rlog.e(TAG, "getCarrierInfoForImsiEncryption NullPointerException", ex);
-            return null;
+            Rlog.e(TAG, "getCarrierInfoForImsiEncryption NullPointerException" + ex);
+            throw new RuntimeException("IMSI error: Null Pointer exception");
         }
+    }
+
+   /**
+     * @param keyAvailability bitmask that defines the availabilty of keys for a type.
+     * @param keyType the key type which is being checked. (WLAN, EPDG)
+     * @return true if the digit at position keyType is 1, else false.
+     * @hide
+     */
+    private static boolean isKeyEnabled(int keyAvailability, int keyType) {
+        int returnValue = (keyAvailability >> (keyType - 1)) & 1;
+        return (returnValue == 1) ? true : false;
+    }
+
+    /**
+     * If Carrier requires Imsi to be encrypted.
+     * @hide
+     */
+    private boolean isImsiEncryptionRequired(int subId, int keyType) {
+        CarrierConfigManager configManager =
+                (CarrierConfigManager) mContext.getSystemService(Context.CARRIER_CONFIG_SERVICE);
+        if (configManager == null) {
+            return false;
+        }
+        PersistableBundle pb = configManager.getConfigForSubId(subId);
+        if (pb == null) {
+            return false;
+        }
+        int keyAvailability = pb.getInt(CarrierConfigManager.IMSI_KEY_AVAILABILITY_INT);
+        return isKeyEnabled(keyAvailability, keyType);
     }
 
     /**

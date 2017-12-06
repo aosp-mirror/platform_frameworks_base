@@ -19,17 +19,23 @@ package com.android.systemui.recents.views;
 import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
 import android.animation.ObjectAnimator;
+import android.animation.TimeInterpolator;
+import android.animation.ValueAnimator;
 import android.content.Context;
 import android.util.FloatProperty;
 import android.util.Log;
 import android.util.MutableFloat;
 import android.util.Property;
+import android.view.ViewConfiguration;
 import android.view.ViewDebug;
 import android.widget.OverScroller;
 
 import com.android.systemui.Interpolators;
 import com.android.systemui.R;
+import com.android.systemui.recents.Recents;
 import com.android.systemui.recents.misc.Utilities;
+import com.android.systemui.recents.views.lowram.TaskStackLowRamLayoutAlgorithm;
+import com.android.systemui.statusbar.FlingAnimationUtils;
 
 import java.io.PrintWriter;
 
@@ -76,12 +82,18 @@ public class TaskStackViewScroller {
     ObjectAnimator mScrollAnimator;
     float mFinalAnimatedScroll;
 
+    final FlingAnimationUtils mFlingAnimationUtils;
+
     public TaskStackViewScroller(Context context, TaskStackViewScrollerCallbacks cb,
             TaskStackLayoutAlgorithm layoutAlgorithm) {
         mContext = context;
         mCb = cb;
         mScroller = new OverScroller(context);
+        if (Recents.getConfiguration().isLowRamDevice) {
+            mScroller.setFriction(0.06f);
+        }
         mLayoutAlgorithm = layoutAlgorithm;
+        mFlingAnimationUtils = new FlingAnimationUtils(context, 0.3f);
     }
 
     /** Resets the task scroller. */
@@ -186,6 +198,47 @@ public class TaskStackViewScroller {
         return Float.compare(getScrollAmountOutOfBounds(mStackScrollP), 0f) != 0;
     }
 
+    /**
+     * Scrolls the closest task and snaps into place. Only used in recents for low ram devices.
+     * @param velocity of scroll
+     */
+    void scrollToClosestTask(int velocity) {
+        float stackScroll = getStackScroll();
+
+        // Skip if not in low ram layout and if the scroll is out of min and max bounds
+        if (!Recents.getConfiguration().isLowRamDevice || stackScroll < mLayoutAlgorithm.mMinScrollP
+                || stackScroll > mLayoutAlgorithm.mMaxScrollP) {
+            return;
+        }
+        TaskStackLowRamLayoutAlgorithm algorithm = mLayoutAlgorithm.mTaskStackLowRamLayoutAlgorithm;
+
+        float flingThreshold = ViewConfiguration.get(mContext).getScaledMinimumFlingVelocity();
+        if (Math.abs(velocity) > flingThreshold) {
+            int minY = algorithm.percentageToScroll(mLayoutAlgorithm.mMinScrollP);
+            int maxY = algorithm.percentageToScroll(mLayoutAlgorithm.mMaxScrollP);
+
+            // Calculate the fling and snap to closest task from final y position, computeScroll()
+            // never runs when cancelled with animateScroll() and the overscroll is not calculated
+            // here
+            fling(0 /* downScrollP */, 0 /* downY */, algorithm.percentageToScroll(stackScroll),
+                    -velocity, minY, maxY, 0 /* overscroll */);
+            float pos = algorithm.scrollToPercentage(mScroller.getFinalY());
+
+            float newScrollP = algorithm.getClosestTaskP(pos, mLayoutAlgorithm.mNumStackTasks,
+                    velocity);
+            ValueAnimator animator = ObjectAnimator.ofFloat(stackScroll, newScrollP);
+            mFlingAnimationUtils.apply(animator, algorithm.percentageToScroll(stackScroll),
+                    algorithm.percentageToScroll(newScrollP), velocity);
+            animateScroll(newScrollP, (int) animator.getDuration(), animator.getInterpolator(),
+                    null /* postRunnable */);
+        } else {
+            float newScrollP = algorithm.getClosestTaskP(stackScroll,
+                    mLayoutAlgorithm.mNumStackTasks, velocity);
+            animateScroll(newScrollP, 300, Interpolators.ACCELERATE_DECELERATE,
+                    null /* postRunnable */);
+        }
+    }
+
     /** Animates the stack scroll into bounds */
     ObjectAnimator animateBoundScroll() {
         // TODO: Take duration for snap back
@@ -207,6 +260,21 @@ public class TaskStackViewScroller {
 
     /** Animates the stack scroll */
     void animateScroll(float newScroll, int duration, final Runnable postRunnable) {
+        animateScroll(newScroll, duration, Interpolators.LINEAR_OUT_SLOW_IN, postRunnable);
+    }
+
+    /** Animates the stack scroll with time interpolator */
+    void animateScroll(float newScroll, int duration, TimeInterpolator interpolator,
+            final Runnable postRunnable) {
+        ObjectAnimator an = ObjectAnimator.ofFloat(this, STACK_SCROLL, getStackScroll(), newScroll);
+        an.setDuration(duration);
+        an.setInterpolator(interpolator);
+        animateScroll(newScroll, an, postRunnable);
+    }
+
+    /** Animates the stack scroll with animator */
+    private void animateScroll(float newScroll, ObjectAnimator animator,
+            final Runnable postRunnable) {
         // Finish any current scrolling animations
         if (mScrollAnimator != null && mScrollAnimator.isRunning()) {
             setStackScroll(mFinalAnimatedScroll);
@@ -217,9 +285,7 @@ public class TaskStackViewScroller {
 
         if (Float.compare(mStackScrollP, newScroll) != 0) {
             mFinalAnimatedScroll = newScroll;
-            mScrollAnimator = ObjectAnimator.ofFloat(this, STACK_SCROLL, getStackScroll(), newScroll);
-            mScrollAnimator.setDuration(duration);
-            mScrollAnimator.setInterpolator(Interpolators.LINEAR_OUT_SLOW_IN);
+            mScrollAnimator = animator;
             mScrollAnimator.addListener(new AnimatorListenerAdapter() {
                 @Override
                 public void onAnimationEnd(Animator animation) {

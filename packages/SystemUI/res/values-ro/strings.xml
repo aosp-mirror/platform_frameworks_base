@@ -65,7 +65,7 @@
     <string name="usb_debugging_message" msgid="2220143855912376496">"Amprenta digitală din cheia RSA a computerului este:\n<xliff:g id="FINGERPRINT">%1$s</xliff:g>"</string>
     <string name="usb_debugging_always" msgid="303335496705863070">"Permiteți întotdeauna de pe acest computer"</string>
     <string name="usb_debugging_secondary_user_title" msgid="6353808721761220421">"Remedierea erorilor prin USB nu este permisă"</string>
-    <string name="usb_debugging_secondary_user_message" msgid="8572228137833020196">"Utilizatorul conectat momentan pe acest dispozitiv nu poate activa remedierea erorilor prin USB. Pentru a folosi această funcție, comutați la utilizatorul Administrator."</string>
+    <string name="usb_debugging_secondary_user_message" msgid="6067122453571699801">"Utilizatorul conectat momentan pe acest dispozitiv nu poate activa remedierea erorilor prin USB. Pentru a folosi această funcție, comutați la utilizatorul principal."</string>
     <string name="compat_mode_on" msgid="6623839244840638213">"Zoom pt. a umple ecranul"</string>
     <string name="compat_mode_off" msgid="4434467572461327898">"Înt. pt. a umple ecranul"</string>
     <string name="screenshot_saving_ticker" msgid="7403652894056693515">"Se salv. captura de ecran..."</string>
@@ -357,10 +357,10 @@
     <string name="description_target_search" msgid="3091587249776033139">"Căutați"</string>
     <string name="description_direction_up" msgid="7169032478259485180">"Glisați în sus pentru <xliff:g id="TARGET_DESCRIPTION">%s</xliff:g>."</string>
     <string name="description_direction_left" msgid="7207478719805562165">"Glisați spre stânga pentru <xliff:g id="TARGET_DESCRIPTION">%s</xliff:g>."</string>
-    <string name="zen_priority_introduction" msgid="7577965386868311310">"Se vor anunța prin sunete și vibrații numai alarmele, mementourile, evenimentele și apelanții specificați de dvs. Totuși, veți auzi tot ce alegeți să redați, inclusiv muzică, videoclipuri și jocuri."</string>
-    <string name="zen_alarms_introduction" msgid="7034415210361973827">"Se vor anunța prin sunete și vibrații numai alarmele. Totuși, veți auzi tot ce alegeți să redați, inclusiv muzică, videoclipuri și jocuri."</string>
+    <string name="zen_priority_introduction" msgid="1149025108714420281">"Se vor anunța prin sunete și vibrații numai alarmele, mementourile, evenimentele și apelanții specificați de dvs. Totuși, veți auzi tot ce alegeți să redați, inclusiv muzică, videoclipuri și jocuri."</string>
+    <string name="zen_alarms_introduction" msgid="4934328096749380201">"Se vor anunța prin sunete și vibrații numai alarmele. Totuși, veți auzi tot ce alegeți să redați, inclusiv muzică, videoclipuri și jocuri."</string>
     <string name="zen_priority_customize_button" msgid="7948043278226955063">"Personalizați"</string>
-    <string name="zen_silence_introduction_voice" msgid="2284540992298200729">"Această opțiune blochează TOATE sunetele și vibrațiile, inclusiv cele ale alarmelor, muzicii, videoclipurilor și jocurilor. Totuși, veți putea iniția apeluri."</string>
+    <string name="zen_silence_introduction_voice" msgid="3948778066295728085">"Această opțiune blochează TOATE sunetele și vibrațiile, inclusiv cele ale alarmelor, muzicii, videoclipurilor și jocurilor. Totuși, veți putea iniția apeluri."</string>
     <string name="zen_silence_introduction" msgid="3137882381093271568">"Această opțiune blochează TOATE sunetele și vibrațiile, inclusiv cele ale alarmelor, muzicii, videoclipurilor și jocurilor."</string>
     <string name="keyguard_more_overflow_text" msgid="9195222469041601365">"+<xliff:g id="NUMBER_OF_NOTIFICATIONS">%d</xliff:g>"</string>
     <string name="speed_bump_explanation" msgid="1288875699658819755">"Notificările mai puțin urgente mai jos"</string>
@@ -460,7 +460,7 @@
     <string name="monitoring_description_do_learn_more" msgid="1849514470437907421">"Aflați mai multe"</string>
     <string name="monitoring_description_do_body_vpn" msgid="8255218762488901796">"V-ați conectat la aplicația <xliff:g id="VPN_APP">%1$s</xliff:g>, care vă poate monitoriza activitatea în rețea, inclusiv e-mailurile, aplicațiile și site-urile accesate."</string>
     <string name="monitoring_description_vpn_settings_separator" msgid="1933186756733474388">" "</string>
-    <string name="monitoring_description_vpn_settings" msgid="8869300202410505143">"Deschideți Setări VPN"</string>
+    <string name="monitoring_description_vpn_settings" msgid="6434859242636063861">"Deschideți Setări VPN"</string>
     <string name="monitoring_description_ca_cert_settings_separator" msgid="4987350385906393626">" "</string>
     <string name="monitoring_description_ca_cert_settings" msgid="5489969458872997092">"Deschideți datele de conectare de încredere"</string>
     <string name="monitoring_description_network_logging" msgid="7223505523384076027">"Administratorul dvs. a activat înregistrarea în jurnal pentru rețea, funcție ce monitorizează traficul de pe dispozitivul dvs.\n\nPentru mai multe informații, contactați administratorul."</string>
@@ -560,9 +560,9 @@
     <string name="notification_default_channel_desc" msgid="2506053815870808359">"Această aplicație nu are categorii de notificare"</string>
     <string name="notification_unblockable_desc" msgid="3561016061737896906">"Notificările din această aplicație nu pot fi dezactivate"</string>
     <plurals name="notification_num_channels_desc" formatted="false" msgid="5492793452274077663">
-      <item quantity="few">1 din <xliff:g id="NUMBER_1">%d</xliff:g> categorii de notificare din această aplicație</item>
-      <item quantity="other">1 din <xliff:g id="NUMBER_1">%d</xliff:g> de categorii de notificare din această aplicație</item>
-      <item quantity="one">1 din <xliff:g id="NUMBER_0">%d</xliff:g> categorie de notificare din această aplicație</item>
+      <item quantity="few">1 din <xliff:g id="NUMBER_1">%s</xliff:g> categorii de notificare din această aplicație</item>
+      <item quantity="other">1 din <xliff:g id="NUMBER_1">%s</xliff:g> de categorii de notificare din această aplicație</item>
+      <item quantity="one">1 din <xliff:g id="NUMBER_0">%s</xliff:g> categorie de notificare din această aplicație</item>
     </plurals>
     <string name="notification_channels_list_desc_2" msgid="6214732715833946441">"<xliff:g id="CHANNEL_NAME_1">%1$s</xliff:g>, <xliff:g id="CHANNEL_NAME_2">%2$s</xliff:g>"</string>
     <plurals name="notification_channels_list_desc_2_and_others" formatted="false" msgid="2747813553355336157">
@@ -593,8 +593,8 @@
       <item quantity="one">%d minut</item>
     </plurals>
     <string name="battery_panel_title" msgid="7944156115535366613">"Utilizarea bateriei"</string>
-    <string name="battery_detail_charging_summary" msgid="1279095653533044008">"Economisirea bateriei nu este disponibilă pe durata încărcării"</string>
-    <string name="battery_detail_switch_title" msgid="6285872470260795421">"Economisirea bateriei"</string>
+    <string name="battery_detail_charging_summary" msgid="4055327085770378335">"Economisirea bateriei nu este disponibilă pe durata încărcării"</string>
+    <string name="battery_detail_switch_title" msgid="8763441006881907058">"Economisirea energiei"</string>
     <string name="battery_detail_switch_summary" msgid="9049111149407626804">"Reduce performanța și datele de fundal"</string>
     <string name="keyboard_key_button_template" msgid="6230056639734377300">"Butonul <xliff:g id="NAME">%1$s</xliff:g>"</string>
     <string name="keyboard_key_home" msgid="2243500072071305073">"La început"</string>
@@ -734,9 +734,9 @@
     <string name="pip_phone_minimize" msgid="1079119422589131792">"Minimizați"</string>
     <string name="pip_phone_close" msgid="8416647892889710330">"Închideți"</string>
     <string name="pip_phone_dismiss_hint" msgid="6351678169095923899">"Trageți în jos pentru a închide"</string>
-    <string name="pip_menu_title" msgid="3328510504196964712">"Meniul picture-in-picture"</string>
+    <string name="pip_menu_title" msgid="4707292089961887657">"Meniu"</string>
     <string name="pip_notification_title" msgid="3204024940158161322">"<xliff:g id="NAME">%s</xliff:g> este în modul picture-in-picture"</string>
-    <string name="pip_notification_message" msgid="4171698133469539591">"Dacă nu doriți ca <xliff:g id="NAME">%s</xliff:g> să utilizeze această funcție, atingeți pentru a deschide setările și dezactivați-o."</string>
+    <string name="pip_notification_message" msgid="5619512781514343311">"Dacă nu doriți ca <xliff:g id="NAME">%s</xliff:g> să utilizeze această funcție, atingeți pentru a deschide setările și dezactivați-o."</string>
     <string name="pip_play" msgid="1417176722760265888">"Redați"</string>
     <string name="pip_pause" msgid="8881063404466476571">"Întrerupeți"</string>
     <string name="pip_skip_to_next" msgid="1948440006726306284">"Treceți la următorul"</string>
@@ -762,6 +762,7 @@
     <string name="tuner_menu" msgid="191640047241552081">"Meniu"</string>
     <string name="tuner_app" msgid="3507057938640108777">"Aplicația <xliff:g id="APP">%1$s</xliff:g>"</string>
     <string name="notification_channel_alerts" msgid="4496839309318519037">"Alerte"</string>
+    <string name="notification_channel_battery" msgid="5786118169182888462">"Baterie"</string>
     <string name="notification_channel_screenshot" msgid="6314080179230000938">"Capturi de ecran"</string>
     <string name="notification_channel_general" msgid="4525309436693914482">"Mesaje generale"</string>
     <string name="notification_channel_storage" msgid="3077205683020695313">"Stocare"</string>
@@ -782,4 +783,5 @@
     <string name="running_foreground_services_title" msgid="381024150898615683">"Aplicațiile rulează în fundal"</string>
     <string name="running_foreground_services_msg" msgid="6326247670075574355">"Atingeți pentru mai multe detalii privind bateria și utilizarea datelor"</string>
     <string name="data_usage_disable_mobile" msgid="5116269981510015864">"Dezactivați datele mobile?"</string>
+    <string name="touch_filtered_warning" msgid="8671693809204767551">"Deoarece o aplicație acoperă o solicitare de permisiune, Setările nu vă pot verifica răspunsul."</string>
 </resources>

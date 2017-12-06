@@ -57,7 +57,8 @@ public class HighResThumbnailLoaderTest extends SysuiTestCase {
     @Before
     public void setUp() throws Exception {
         MockitoAnnotations.initMocks(this);
-        mLoader = new HighResThumbnailLoader(mMockSystemServicesProxy, Looper.getMainLooper());
+        mLoader = new HighResThumbnailLoader(mMockSystemServicesProxy, Looper.getMainLooper(),
+                false);
         mTask.key = new TaskKey(0, 0, null, 0, 0, 0);
         when(mMockSystemServicesProxy.getTaskThumbnail(anyInt(), anyBoolean()))
                 .thenReturn(mThumbnailData);

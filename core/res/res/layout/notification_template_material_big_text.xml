@@ -45,7 +45,11 @@
             android:orientation="vertical"
             >
             <include layout="@layout/notification_template_part_line1" />
-            <include layout="@layout/notification_template_progress" />
+            <include layout="@layout/notification_template_progress"
+                android:layout_width="match_parent"
+                android:layout_height="@dimen/notification_progress_bar_height"
+                android:layout_marginTop="@dimen/notification_progress_margin_top"
+                android:layout_marginBottom="6dp"/>
             <com.android.internal.widget.ImageFloatingTextView android:id="@+id/big_text"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"

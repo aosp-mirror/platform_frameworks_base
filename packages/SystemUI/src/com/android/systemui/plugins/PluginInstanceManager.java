@@ -136,11 +136,12 @@ public class PluginInstanceManager<T extends Plugin> {
         return disableAny;
     }
 
-    public void disableAll() {
+    public boolean disableAll() {
         ArrayList<PluginInfo> plugins = new ArrayList<>(mPluginHandler.mPlugins);
         for (int i = 0; i < plugins.size(); i++) {
             disable(plugins.get(i));
         }
+        return plugins.size() != 0;
     }
 
     private void disable(PluginInfo info) {
@@ -182,6 +183,7 @@ public class PluginInstanceManager<T extends Plugin> {
                     if (DEBUG) Log.d(TAG, "onPluginConnected");
                     PluginPrefs.setHasPlugins(mContext);
                     PluginInfo<T> info = (PluginInfo<T>) msg.obj;
+                    mManager.handleWtfs();
                     if (!(msg.obj instanceof PluginFragment)) {
                         // Only call onDestroy for plugins that aren't fragments, as fragments
                         // will get the onCreate as part of the fragment lifecycle.

@@ -64,6 +64,7 @@ import android.view.DisplayAdjustments;
 import android.view.View;
 import android.view.ViewDebug;
 import android.view.WindowManager;
+import android.view.autofill.AutofillManager.AutofillClient;
 import android.view.textclassifier.TextClassificationManager;
 
 import java.io.File;
@@ -2934,6 +2935,7 @@ public abstract class Context {
             WIFI_AWARE_SERVICE,
             WIFI_P2P_SERVICE,
             WIFI_SCANNING_SERVICE,
+            //@hide: LOWPAN_SERVICE,
             //@hide: WIFI_RTT_SERVICE,
             //@hide: ETHERNET_SERVICE,
             WIFI_RTT_SERVICE,
@@ -2989,7 +2991,8 @@ public abstract class Context {
             SHORTCUT_SERVICE,
             //@hide: CONTEXTHUB_SERVICE,
             SYSTEM_HEALTH_SERVICE,
-            //@hide: INCIDENT_SERVICE
+            //@hide: INCIDENT_SERVICE,
+            COMPANION_DEVICE_SERVICE
     })
     @Retention(RetentionPolicy.SOURCE)
     public @interface ServiceName {}
@@ -3461,6 +3464,18 @@ public abstract class Context {
      */
     @SystemApi
     public static final String WIFI_RTT_SERVICE = "rttmanager";
+
+    /**
+     * Use with {@link #getSystemService} to retrieve a {@link
+     * android.net.lowpan.LowpanManager} for handling management of
+     * LoWPAN access.
+     *
+     * @see #getSystemService
+     * @see android.net.lowpan.LowpanManager
+     *
+     * @hide
+     */
+    public static final String LOWPAN_SERVICE = "lowpan";
 
     /**
      * Use with {@link #getSystemService} to retrieve a {@link
@@ -3949,7 +3964,7 @@ public abstract class Context {
      * @see #getSystemService
      * @hide
      */
-    public static final String RADIO_SERVICE = "radio";
+    public static final String RADIO_SERVICE = "broadcastradio";
 
     /**
      * Use with {@link #getSystemService} to retrieve a
@@ -4750,6 +4765,19 @@ public abstract class Context {
      */
     public Handler getMainThreadHandler() {
         throw new RuntimeException("Not implemented. Must override in a subclass.");
+    }
+
+    /**
+     * @hide
+     */
+    public AutofillClient getAutofillClient() {
+        return null;
+    }
+
+    /**
+     * @hide
+     */
+    public void setAutofillClient(AutofillClient client) {
     }
 
     /**

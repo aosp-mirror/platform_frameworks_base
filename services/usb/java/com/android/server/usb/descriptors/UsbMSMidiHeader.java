@@ -15,13 +15,15 @@
  */
 package com.android.server.usb.descriptors;
 
+import com.android.server.usb.descriptors.report.ReportCanvas;
+
 /**
  * @hide
  * An audio class-specific Midi Streaming Interface.
  * see midi10.pdf section 6.1.2.1
  */
-public class UsbMSMidiHeader extends UsbACInterface {
-    private static final String TAG = "MSMidiHeader";
+public final class UsbMSMidiHeader extends UsbACInterface {
+    private static final String TAG = "UsbMSMidiHeader";
 
     public UsbMSMidiHeader(int length, byte type, byte subtype, byte subclass) {
         super(length, type, subtype, subclass);
@@ -32,5 +34,14 @@ public class UsbMSMidiHeader extends UsbACInterface {
         // TODO - read data memebers
         stream.advance(mLength - stream.getReadCount());
         return mLength;
+    }
+
+    @Override
+    public void report(ReportCanvas canvas) {
+        super.report(canvas);
+
+        canvas.writeHeader(3, "MS Midi Header: " + ReportCanvas.getHexString(getType())
+                + " SubType: " + ReportCanvas.getHexString(getSubclass())
+                + " Length: " + getLength());
     }
 }

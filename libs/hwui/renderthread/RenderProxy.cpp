@@ -21,6 +21,7 @@
 #include "Properties.h"
 #include "Readback.h"
 #include "Rect.h"
+#include "pipeline/skia/VectorDrawableAtlas.h"
 #include "renderthread/CanvasContext.h"
 #include "renderthread/EglManager.h"
 #include "renderthread/RenderTask.h"
@@ -427,11 +428,11 @@ CREATE_BRIDGE4(dumpProfileInfo, CanvasContext* context, RenderThread* thread,
     if (args->dumpFlags & DumpFlags::FrameStats) {
         args->context->dumpFrames(args->fd);
     }
+    if (args->dumpFlags & DumpFlags::JankStats) {
+        args->thread->globalProfileData()->dump(args->fd);
+    }
     if (args->dumpFlags & DumpFlags::Reset) {
         args->context->resetFrameStats();
-    }
-    if (args->dumpFlags & DumpFlags::JankStats) {
-        args->thread->jankTracker().dump(args->fd);
     }
     return nullptr;
 }
@@ -458,7 +459,7 @@ void RenderProxy::resetProfileInfo() {
 
 CREATE_BRIDGE2(frameTimePercentile, RenderThread* thread, int percentile) {
     return reinterpret_cast<void*>(static_cast<uintptr_t>(
-        args->thread->jankTracker().findPercentile(args->percentile)));
+        args->thread->globalProfileData()->findPercentile(args->percentile)));
 }
 
 uint32_t RenderProxy::frameTimePercentile(int p) {
@@ -483,7 +484,7 @@ void RenderProxy::dumpGraphicsMemory(int fd) {
 }
 
 CREATE_BRIDGE2(setProcessStatsBuffer, RenderThread* thread, int fd) {
-    args->thread->jankTracker().switchStorageToAshmem(args->fd);
+    args->thread->globalProfileData().switchStorageToAshmem(args->fd);
     close(args->fd);
     return nullptr;
 }
@@ -497,7 +498,7 @@ void RenderProxy::setProcessStatsBuffer(int fd) {
 }
 
 CREATE_BRIDGE1(rotateProcessStatsBuffer, RenderThread* thread) {
-    args->thread->jankTracker().rotateStorage();
+    args->thread->globalProfileData().rotateStorage();
     return nullptr;
 }
 
@@ -550,20 +551,8 @@ void RenderProxy::drawRenderNode(RenderNode* node) {
     staticPostAndWait(task);
 }
 
-CREATE_BRIDGE5(setContentDrawBounds, CanvasContext* context, int left, int top,
-        int right, int bottom) {
-    args->context->setContentDrawBounds(args->left, args->top, args->right, args->bottom);
-    return nullptr;
-}
-
 void RenderProxy::setContentDrawBounds(int left, int top, int right, int bottom) {
-    SETUP_TASK(setContentDrawBounds);
-    args->context = mContext;
-    args->left = left;
-    args->top = top;
-    args->right = right;
-    args->bottom = bottom;
-    staticPostAndWait(task);
+    mDrawFrameTask.setContentDrawBounds(left, top, right, bottom);
 }
 
 CREATE_BRIDGE1(serializeDisplayListTree, CanvasContext* context) {
@@ -716,6 +705,19 @@ void RenderProxy::disableVsync() {
 
 void RenderProxy::post(RenderTask* task) {
     mRenderThread.queue(task);
+}
+
+CREATE_BRIDGE1(repackVectorDrawableAtlas, RenderThread* thread) {
+    args->thread->cacheManager().acquireVectorDrawableAtlas()->repackIfNeeded(
+            args->thread->getGrContext());
+    return nullptr;
+}
+
+void RenderProxy::repackVectorDrawableAtlas() {
+    RenderThread& thread = RenderThread::getInstance();
+    SETUP_TASK(repackVectorDrawableAtlas);
+    args->thread = &thread;
+    thread.queue(task);
 }
 
 void* RenderProxy::postAndWait(MethodInvokeRenderTask* task) {

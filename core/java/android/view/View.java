@@ -127,6 +127,7 @@ import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Calendar;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
@@ -1078,6 +1079,29 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      * <a href="#attr_android:autofillHint"> {@code android:autofillHint}</a> (in which case the
      * value should be <code>{@value #AUTOFILL_HINT_CREDIT_CARD_EXPIRATION_DATE}</code>).
      *
+     * <p>When annotating a view with this hint, it's recommended to use a date autofill value to
+     * avoid ambiguity when the autofill service provides a value for it. To understand why a
+     * value can be ambiguous, consider "April of 2020", which could be represented as either of
+     * the following options:
+     *
+     * <ul>
+     *   <li>{@code "04/2020"}
+     *   <li>{@code "4/2020"}
+     *   <li>{@code "2020/04"}
+     *   <li>{@code "2020/4"}
+     *   <li>{@code "April/2020"}
+     *   <li>{@code "Apr/2020"}
+     * </ul>
+     *
+     * <p>You define a date autofill value for the view by overriding the following methods:
+     *
+     * <ol>
+     *   <li>{@link #getAutofillType()} to return {@link #AUTOFILL_TYPE_DATE}.
+     *   <li>{@link #getAutofillValue()} to return a
+     *       {@link AutofillValue#forDate(long) date autofillvalue}.
+     *   <li>{@link #autofill(AutofillValue)} to expect a data autofillvalue.
+     * </ol>
+     *
      * <p>See {@link #setAutofillHints(String...)} for more info about autofill hints.
      */
     public static final String AUTOFILL_HINT_CREDIT_CARD_EXPIRATION_DATE =
@@ -1089,6 +1113,22 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      * <p>Can be used with either {@link #setAutofillHints(String[])} or
      * <a href="#attr_android:autofillHint"> {@code android:autofillHint}</a> (in which case the
      * value should be <code>{@value #AUTOFILL_HINT_CREDIT_CARD_EXPIRATION_MONTH}</code>).
+     *
+     * <p>When annotating a view with this hint, it's recommended to use a text autofill value
+     * whose value is the numerical representation of the month, starting on {@code 1} to avoid
+     * ambiguity when the autofill service provides a value for it. To understand why a
+     * value can be ambiguous, consider "January", which could be represented as either of
+     *
+     * <ul>
+     *   <li>{@code "1"}: recommended way.
+     *   <li>{@code "0"}: if following the {@link Calendar#MONTH} convention.
+     *   <li>{@code "January"}: full name, in English.
+     *   <li>{@code "jan"}: abbreviated name, in English.
+     *   <li>{@code "Janeiro"}: full name, in another language.
+     * </ul>
+     *
+     * <p>Another recommended approach is to use a date autofill value - see
+     * {@link #AUTOFILL_HINT_CREDIT_CARD_EXPIRATION_DATE} for more details.
      *
      * <p>See {@link #setAutofillHints(String...)} for more info about autofill hints.
      */
@@ -7450,7 +7490,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      *       {@link ViewStructure#setAutofillOptions(CharSequence[])}.
      * </ul>
      *
-     * <p><b>NOTE:</b> the {@code left} and {@code top} values set in
+     * <p><b>Note:</b> The {@code left} and {@code top} values set in
      * {@link ViewStructure#setDimens(int, int, int, int, int, int)} must be relative to the next
      * {@link ViewGroup#isImportantForAutofill()} predecessor view included in the structure.
      *
@@ -7618,6 +7658,10 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      *   <li>Call
      *    {@link android.view.autofill.AutofillManager#notifyValueChanged(View, int, AutofillValue)}
      *       when the value of a virtual child changed.
+     *   <li>Call
+     *    {@link
+     *    android.view.autofill.AutofillManager#notifyViewVisibilityChanged(View, int, boolean)}
+     *       when the visibility of a virtual child changed.
      *   <li>Call {@link AutofillManager#commit()} when the autofill context of the view structure
      *       changed and the current context should be committed (for example, when the user tapped
      *       a {@code SUBMIT} button in an HTML page).
@@ -7688,6 +7732,10 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      * {@link AutofillManager#notifyValueChanged(View)} must happen <b>after</b> the value was
      * changed to the autofilled value. If not, the view will not be considered autofilled.
      *
+     * <p><b>Note:</b> After this method is called, the value returned by
+     * {@link #getAutofillValue()} must be equal to the {@code value} passed to it, otherwise the
+     * view will not be highlighted as autofilled.
+     *
      * @param value value to be autofilled.
      */
     public void autofill(@SuppressWarnings("unused") AutofillValue value) {
@@ -7711,7 +7759,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      * <b>after</b> the value was changed to the autofilled value. If not, the child will not be
      * considered autofilled.
      *
-     * <p><b>NOTE:</b> to indicate that a virtual view was autofilled,
+     * <p><b>Note:</b> To indicate that a virtual view was autofilled,
      * <code>?android:attr/autofilledHighlight</code> should be drawn over it until the data
      * changes.
      *
@@ -7780,8 +7828,8 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
     /**
      * Gets the {@link View}'s current autofill value.
      *
-     * <p>By default returns {@code null}, but views should override it to properly support the
-     * Autofill Framework.
+     * <p>By default returns {@code null}, but subclasses should override it and return an
+     * appropriate value to properly support the Autofill Framework.
      *
      * @see #onProvideAutofillStructure(ViewStructure, int)
      * @see #autofill(AutofillValue)
@@ -7833,7 +7881,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      *       be {@link #IMPORTANT_FOR_AUTOFILL_YES_EXCLUDE_DESCENDANTS}.
      * </ol>
      *
-     * <p><b>NOTE:</strong> setting the mode as does {@link #IMPORTANT_FOR_AUTOFILL_NO} or
+     * <p><b>Note:</b> Setting the mode as {@link #IMPORTANT_FOR_AUTOFILL_NO} or
      * {@link #IMPORTANT_FOR_AUTOFILL_NO_EXCLUDE_DESCENDANTS} does not guarantee the view (and its
      * children) will be always be considered not important; for example, when the user explicitly
      * makes an autofill request, all views are considered important. See
@@ -8078,10 +8126,6 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
             boolean forAutofill, @AutofillFlags int flags) {
         if (forAutofill) {
             structure.setAutofillId(getAutofillId());
-            if (!isLaidOut()) {
-                Log.w(VIEW_LOG_TAG, "dispatchProvideAutofillStructure(): not laid out, ignoring");
-                return;
-            }
             onProvideAutofillStructure(structure, flags);
             onProvideAutofillVirtualStructure(structure, flags);
         } else if (!isAssistBlocked()) {
@@ -9711,6 +9755,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      * @param hasTransientState true if this view has transient state
      */
     public void setHasTransientState(boolean hasTransientState) {
+        final boolean oldHasTransientState = hasTransientState();
         mTransientStateCount = hasTransientState ? mTransientStateCount + 1 :
                 mTransientStateCount - 1;
         if (mTransientStateCount < 0) {
@@ -9722,9 +9767,10 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
             // update flag if we've just incremented up from 0 or decremented down to 0
             mPrivateFlags2 = (mPrivateFlags2 & ~PFLAG2_HAS_TRANSIENT_STATE) |
                     (hasTransientState ? PFLAG2_HAS_TRANSIENT_STATE : 0);
-            if (mParent != null) {
+            final boolean newHasTransientState = hasTransientState();
+            if (mParent != null && newHasTransientState != oldHasTransientState) {
                 try {
-                    mParent.childHasTransientStateChanged(this, hasTransientState);
+                    mParent.childHasTransientStateChanged(this, newHasTransientState);
                 } catch (AbstractMethodError e) {
                     Log.e(VIEW_LOG_TAG, mParent.getClass().getSimpleName() +
                             " does not fully implement ViewParent", e);
@@ -10180,6 +10226,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      *
      * @hide
      */
+    @TestApi
     public final void setFocusedInCluster() {
         setFocusedInCluster(findKeyboardNavigationCluster());
     }
@@ -12157,7 +12204,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
                 // If the view is in the background but still part of the hierarchy this is called
                 // with isVisible=false. Hence visibility==false requires further checks
                 if (isVisible) {
-                    afm.notifyViewVisibilityChange(this, true);
+                    afm.notifyViewVisibilityChanged(this, true);
                 } else {
                     if (mVisibilityChangeForAutofillHandler == null) {
                         mVisibilityChangeForAutofillHandler =
@@ -13246,6 +13293,9 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
                     && ((privateFlags & PFLAG_FOCUSED) != 0)) {
                 /* Give up focus if we are no longer focusable */
                 clearFocus();
+                if (mParent instanceof ViewGroup) {
+                    ((ViewGroup) mParent).clearFocusedInCluster();
+                }
             } else if (((old & FOCUSABLE) == NOT_FOCUSABLE)
                     && ((privateFlags & PFLAG_FOCUSED) == 0)) {
                 /*
@@ -13293,7 +13343,12 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
             requestLayout();
 
             if (((mViewFlags & VISIBILITY_MASK) == GONE)) {
-                if (hasFocus()) clearFocus();
+                if (hasFocus()) {
+                    clearFocus();
+                    if (mParent instanceof ViewGroup) {
+                        ((ViewGroup) mParent).clearFocusedInCluster();
+                    }
+                }
                 clearAccessibilityFocus();
                 destroyDrawingCache();
                 if (mParent instanceof View) {
@@ -13321,7 +13376,12 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
             if (((mViewFlags & VISIBILITY_MASK) == INVISIBLE)) {
                 // root view becoming invisible shouldn't clear focus and accessibility focus
                 if (getRootView() != this) {
-                    if (hasFocus()) clearFocus();
+                    if (hasFocus()) {
+                        clearFocus();
+                        if (mParent instanceof ViewGroup) {
+                            ((ViewGroup) mParent).clearFocusedInCluster();
+                        }
+                    }
                     clearAccessibilityFocus();
                 }
             }
@@ -17684,6 +17744,11 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
                 setAutofilled(baseState.mIsAutofilled);
             }
             if ((baseState.mSavedData & BaseSavedState.AUTOFILL_ID) != 0) {
+                // It can happen that views have the same view id and the restoration path will not
+                // be able to distinguish between them. The autofill id needs to be unique though.
+                // Hence prevent the same autofill view id from being restored multiple times.
+                ((BaseSavedState) state).mSavedData &= ~BaseSavedState.AUTOFILL_ID;
+
                 mAutofillViewId = baseState.mAutofillViewId;
             }
         }
@@ -25012,7 +25077,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
 
         @Override
         public void handleMessage(Message msg) {
-            mAfm.notifyViewVisibilityChange(mView, mView.isShown());
+            mAfm.notifyViewVisibilityChanged(mView, mView.isShown());
         }
     }
 

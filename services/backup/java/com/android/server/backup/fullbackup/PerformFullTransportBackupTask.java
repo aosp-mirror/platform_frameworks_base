@@ -277,7 +277,7 @@ public class PerformFullTransportBackupTask extends FullBackupTask implements Ba
                             + "; ignoring");
                 }
                 int monitoringEvent;
-                if (!backupManagerService.isEnabled()) {
+                if (backupManagerService.isProvisioned()) {
                     monitoringEvent = BackupManagerMonitor.LOG_EVENT_ID_BACKUP_DISABLED;
                 } else {
                     monitoringEvent = BackupManagerMonitor.LOG_EVENT_ID_DEVICE_NOT_PROVISIONED;

@@ -16,9 +16,6 @@
 
 package android.database.sqlite;
 
-import dalvik.system.BlockGuard;
-import dalvik.system.CloseGuard;
-
 import android.database.Cursor;
 import android.database.CursorWindow;
 import android.database.DatabaseUtils;
@@ -32,11 +29,14 @@ import android.util.Log;
 import android.util.LruCache;
 import android.util.Printer;
 
+import dalvik.system.BlockGuard;
+import dalvik.system.CloseGuard;
+
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.Map;
-import java.util.regex.Pattern;
+
 
 /**
  * Represents a SQLite database connection.
@@ -118,7 +118,8 @@ public final class SQLiteConnection implements CancellationSignal.OnCancelListen
     private int mCancellationSignalAttachCount;
 
     private static native long nativeOpen(String path, int openFlags, String label,
-            boolean enableTrace, boolean enableProfile);
+            boolean enableTrace, boolean enableProfile, int lookasideSlotSize,
+            int lookasideSlotCount);
     private static native void nativeClose(long connectionPtr);
     private static native void nativeRegisterCustomFunction(long connectionPtr,
             SQLiteCustomFunction function);
@@ -208,8 +209,8 @@ public final class SQLiteConnection implements CancellationSignal.OnCancelListen
     private void open() {
         mConnectionPtr = nativeOpen(mConfiguration.path, mConfiguration.openFlags,
                 mConfiguration.label,
-                SQLiteDebug.DEBUG_SQL_STATEMENTS, SQLiteDebug.DEBUG_SQL_TIME);
-
+                SQLiteDebug.DEBUG_SQL_STATEMENTS, SQLiteDebug.DEBUG_SQL_TIME,
+                mConfiguration.lookasideSlotSize, mConfiguration.lookasideSlotCount);
         setPageSize();
         setForeignKeyModeFromConfiguration();
         setWalModeFromConfiguration();

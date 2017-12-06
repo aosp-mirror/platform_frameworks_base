@@ -50,6 +50,7 @@ public class BatteryMeterDrawableBase extends Drawable {
     protected final Paint mTextPaint;
     protected final Paint mBoltPaint;
     protected final Paint mPlusPaint;
+    protected float mButtonHeightFraction;
 
     private int mLevel = -1;
     private boolean mCharging;
@@ -66,7 +67,6 @@ public class BatteryMeterDrawableBase extends Drawable {
     private final int mIntrinsicWidth;
     private final int mIntrinsicHeight;
 
-    private float mButtonHeightFraction;
     private float mSubpixelSmoothingLeft;
     private float mSubpixelSmoothingRight;
     private float mTextHeight, mWarningTextHeight;
@@ -293,16 +293,19 @@ public class BatteryMeterDrawableBase extends Drawable {
     @Override
     public void draw(Canvas c) {
         final int level = mLevel;
+        final Rect bounds = getBounds();
 
         if (level == -1) return;
 
         float drawFrac = (float) level / 100f;
         final int height = mHeight;
-        final int width = (int) (ASPECT_RATIO * mHeight);
+        final int width = (int) (getAspectRatio() * mHeight);
         final int px = (mWidth - width) / 2;
         final int buttonHeight = Math.round(height * mButtonHeightFraction);
+        final int left = mPadding.left + bounds.left;
+        final int top = bounds.bottom - mPadding.bottom - height;
 
-        mFrame.set(mPadding.left, mPadding.top, width + mPadding.left, height + mPadding.top);
+        mFrame.set(left, top, width + left, height + top);
         mFrame.offset(px, 0);
 
         // button-frame: area above the battery body
@@ -329,7 +332,7 @@ public class BatteryMeterDrawableBase extends Drawable {
 
         // define the battery shape
         mShapePath.reset();
-        final float radius = RADIUS_RATIO * (mFrame.height() + buttonHeight);
+        final float radius = getRadiusRatio() * (mFrame.height() + buttonHeight);
         mShapePath.setFillType(FillType.WINDING);
         mShapePath.addRoundRect(mFrame, radius, radius, Direction.CW);
         mShapePath.addRect(mButtonFrame, Direction.CW);
@@ -468,5 +471,13 @@ public class BatteryMeterDrawableBase extends Drawable {
 
     public int getCriticalLevel() {
         return mCriticalLevel;
+    }
+
+    protected float getAspectRatio() {
+        return ASPECT_RATIO;
+    }
+
+    protected float getRadiusRatio() {
+        return RADIUS_RATIO;
     }
 }

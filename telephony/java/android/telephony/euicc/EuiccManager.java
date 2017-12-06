@@ -154,6 +154,14 @@ public class EuiccManager {
             "android.telephony.euicc.extra.EMBEDDED_SUBSCRIPTION_RESOLUTION_CALLBACK_INTENT";
 
     /**
+     * Key for an extra set on the {@link #ACTION_PROVISION_EMBEDDED_SUBSCRIPTION} intent for
+     * whether the user choses to use eUICC to set up network in SUW.
+     * @hide
+     */
+    public static final String EXTRA_FORCE_PROVISION =
+            "android.telephony.euicc.extra.FORCE_PROVISION";
+
+    /**
      * Optional meta-data attribute for a carrier app providing an icon to use to represent the
      * carrier. If not provided, the app's launcher icon will be used as a fallback.
      */

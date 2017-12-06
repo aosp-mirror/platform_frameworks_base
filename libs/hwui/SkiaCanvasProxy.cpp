@@ -151,7 +151,8 @@ void SkiaCanvasProxy::onDrawBitmapNine(const SkBitmap& bitmap, const SkIRect& ce
 void SkiaCanvasProxy::onDrawImage(const SkImage* image, SkScalar left, SkScalar top,
         const SkPaint* paint) {
     SkBitmap skiaBitmap;
-    if (image->asLegacyBitmap(&skiaBitmap, SkImage::kRO_LegacyBitmapMode)) {
+    SkPixmap pixmap;
+    if (image->peekPixels(&pixmap) && skiaBitmap.installPixels(pixmap)) {
         onDrawBitmap(skiaBitmap, left, top, paint);
     }
 }
@@ -159,7 +160,8 @@ void SkiaCanvasProxy::onDrawImage(const SkImage* image, SkScalar left, SkScalar 
 void SkiaCanvasProxy::onDrawImageRect(const SkImage* image, const SkRect* srcPtr, const SkRect& dst,
         const SkPaint* paint, SrcRectConstraint constraint) {
     SkBitmap skiaBitmap;
-    if (image->asLegacyBitmap(&skiaBitmap, SkImage::kRO_LegacyBitmapMode)) {
+    SkPixmap pixmap;
+    if (image->peekPixels(&pixmap) && skiaBitmap.installPixels(pixmap)) {
         sk_sp<Bitmap> bitmap = Bitmap::createFrom(skiaBitmap.info(), *skiaBitmap.pixelRef());
         SkRect src = (srcPtr) ? *srcPtr : SkRect::MakeWH(image->width(), image->height());
         mCanvas->drawBitmap(*bitmap, src.fLeft, src.fTop, src.fRight, src.fBottom,

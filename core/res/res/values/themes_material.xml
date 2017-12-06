@@ -214,7 +214,7 @@ please see themes_device_defaults.xml.
         <!-- Scrollbar attributes -->
         <item name="scrollbarFadeDuration">250</item>
         <item name="scrollbarDefaultDelayBeforeFade">400</item>
-        <item name="scrollbarSize">10dp</item>
+        <item name="scrollbarSize">@dimen/config_scrollbarSize</item>
         <item name="scrollbarThumbHorizontal">@drawable/scrollbar_handle_material</item>
         <item name="scrollbarThumbVertical">@drawable/config_scrollbarThumbVertical</item>
         <item name="scrollbarTrackHorizontal">@null</item>
@@ -582,7 +582,7 @@ please see themes_device_defaults.xml.
         <!-- Scrollbar attributes -->
         <item name="scrollbarFadeDuration">250</item>
         <item name="scrollbarDefaultDelayBeforeFade">400</item>
-        <item name="scrollbarSize">10dp</item>
+        <item name="scrollbarSize">@dimen/config_scrollbarSize</item>
         <item name="scrollbarThumbHorizontal">@drawable/scrollbar_handle_material</item>
         <item name="scrollbarThumbVertical">@drawable/config_scrollbarThumbVertical</item>
         <item name="scrollbarTrackHorizontal">@null</item>

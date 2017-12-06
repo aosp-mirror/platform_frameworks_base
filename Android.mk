@@ -102,7 +102,9 @@ aidl_files := \
 	frameworks/base/core/java/android/print/PrinterInfo.aidl \
 	frameworks/base/core/java/android/print/PrintJobId.aidl \
 	frameworks/base/core/java/android/printservice/recommendation/RecommendationInfo.aidl \
+	frameworks/base/core/java/android/hardware/radio/ProgramSelector.aidl \
 	frameworks/base/core/java/android/hardware/radio/RadioManager.aidl \
+	frameworks/base/core/java/android/hardware/radio/RadioMetadata.aidl \
 	frameworks/base/core/java/android/hardware/usb/UsbDevice.aidl \
 	frameworks/base/core/java/android/hardware/usb/UsbInterface.aidl \
 	frameworks/base/core/java/android/hardware/usb/UsbEndpoint.aidl \
@@ -118,6 +120,7 @@ aidl_files := \
 	frameworks/base/core/java/android/os/DropBoxManager.aidl \
 	frameworks/base/core/java/android/os/Bundle.aidl \
 	frameworks/base/core/java/android/os/Debug.aidl \
+	frameworks/base/core/java/android/os/SharedMemory.aidl \
 	frameworks/base/core/java/android/os/StrictMode.aidl \
 	frameworks/base/core/java/android/accessibilityservice/AccessibilityServiceInfo.aidl \
 	frameworks/base/core/java/android/net/Network.aidl \
@@ -266,12 +269,17 @@ non_base_dirs := \
   ../opt/net/voip/src/java/android/net/rtp \
   ../opt/net/voip/src/java/android/net/sip \
 
+framework_base_android_test_mock_src_files := \
+  $(call all-java-files-under, test-runner/src/android/test/mock)
+
+framework_base_android_test_runner_excluding_mock_src_files := \
+  $(filter-out $(framework_base_android_test_mock_src_files), $(call all-java-files-under, test-runner/src))
+
 # Find all files in specific directories (relative to frameworks/base)
 # to document and check apis
 files_to_check_apis := \
   $(call find-other-java-files, \
     legacy-test/src \
-    test-runner/src \
     $(non_base_dirs) \
   )
 
@@ -294,7 +302,9 @@ files_to_check_apis_generated := \
 # FRAMEWORKS_BASE_SUBDIRS comes from build/core/pathmap.mk
 files_to_document := \
   $(files_to_check_apis) \
-  $(call find-other-java-files,$(addprefix ../../, $(FRAMEWORKS_DATA_BINDING_JAVA_SRC_DIRS)))
+  $(call find-other-java-files,\
+    $(addprefix ../../, $(FRAMEWORKS_DATA_BINDING_JAVA_SRC_DIRS)) \
+    test-runner/src)
 
 # These are relative to frameworks/base
 html_dirs := \
@@ -313,6 +323,8 @@ framework_docs_LOCAL_SRC_FILES := \
 
 # These are relative to frameworks/base
 framework_docs_LOCAL_API_CHECK_SRC_FILES := \
+  $(framework_base_android_test_mock_src_files) \
+  $(framework_base_android_test_runner_excluding_mock_src_files) \
   $(files_to_check_apis) \
   $(common_src_files) \
 
@@ -338,7 +350,8 @@ framework_docs_LOCAL_API_CHECK_JAVA_LIBRARIES := \
 	ext \
 	icu4j \
 	framework \
-	voip-common
+	voip-common \
+	android.test.mock \
 
 # Platform docs can refer to Support Library APIs, but we don't actually build
 # them as part of the docs target, so we need to include them on the classpath.
@@ -385,7 +398,8 @@ framework_docs_LOCAL_DROIDDOC_OPTIONS := \
     -since $(SRC_API_DIR)/24.txt 24 \
     -since $(SRC_API_DIR)/25.txt 25 \
     -since $(SRC_API_DIR)/26.txt 26 \
-    -werror -hide 111 -hide 113 -hide 121 \
+    -since $(SRC_API_DIR)/27.txt 27 \
+    -werror -lerror -hide 111 -hide 113 -hide 121 -hide 125 -hide 126 -hide 127 -hide 128 \
     -overview $(LOCAL_PATH)/core/java/overview.html \
 
 framework_docs_LOCAL_API_CHECK_ADDITIONAL_JAVA_DIR:= \

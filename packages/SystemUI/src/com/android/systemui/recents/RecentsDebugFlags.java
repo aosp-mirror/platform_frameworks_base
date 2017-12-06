@@ -41,6 +41,8 @@ public class RecentsDebugFlags implements TunerService.Tunable {
         private static final boolean EnableFastToggleTimeout = false;
         // Overrides the Tuner flags and enables the paging via the Recents button
         private static final boolean EnablePaging = false;
+        // Disables enter and exit transitions for other tasks for low ram devices
+        public static final boolean DisableRecentsLowRamEnterExitAnimation = false;
 
         // Enables us to create mock recents tasks
         public static final boolean EnableMockTasks = false;

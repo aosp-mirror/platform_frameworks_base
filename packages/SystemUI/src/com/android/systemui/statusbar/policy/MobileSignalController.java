@@ -346,7 +346,7 @@ public class MobileSignalController extends SignalController<
         if (isCarrierNetworkChangeActive()) {
             return false;
         }
-        if (isCdma()) {
+        if (isCdma() && mServiceState != null) {
             final int iconMode = mServiceState.getCdmaEriIconMode();
             return mServiceState.getCdmaEriIconIndex() != EriInfo.ROAMING_INDICATOR_OFF
                     && (iconMode == EriInfo.ROAMING_ICON_MODE_NORMAL
@@ -521,10 +521,12 @@ public class MobileSignalController extends SignalController<
                         + " dataState=" + state.getDataRegState());
             }
             mServiceState = state;
-            mDataNetType = state.getDataNetworkType();
-            if (mDataNetType == TelephonyManager.NETWORK_TYPE_LTE && mServiceState != null &&
-                    mServiceState.isUsingCarrierAggregation()) {
-                mDataNetType = TelephonyManager.NETWORK_TYPE_LTE_CA;
+            if (state != null) {
+                mDataNetType = state.getDataNetworkType();
+                if (mDataNetType == TelephonyManager.NETWORK_TYPE_LTE && mServiceState != null &&
+                        mServiceState.isUsingCarrierAggregation()) {
+                    mDataNetType = TelephonyManager.NETWORK_TYPE_LTE_CA;
+                }
             }
             updateTelephony();
         }

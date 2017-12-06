@@ -113,6 +113,17 @@ public class AudioSystem
     public static final int MODE_IN_COMMUNICATION   = 3;
     public static final int NUM_MODES               = 4;
 
+    public static String modeToString(int mode) {
+        switch (mode) {
+            case MODE_CURRENT: return "MODE_CURRENT";
+            case MODE_IN_CALL: return "MODE_IN_CALL";
+            case MODE_IN_COMMUNICATION: return "MODE_IN_COMMUNICATION";
+            case MODE_INVALID: return "MODE_INVALID";
+            case MODE_NORMAL: return "MODE_NORMAL";
+            case MODE_RINGTONE: return "MODE_RINGTONE";
+            default: return "unknown mode (" + mode + ")";
+        }
+    }
 
     /* Routing bits for the former setRouting/getRouting API */
     /** @deprecated */
@@ -287,6 +298,7 @@ public class AudioSystem
         /**
          * Callback for recording activity notifications events
          * @param event
+         * @param uid uid of the client app performing the recording
          * @param session
          * @param source
          * @param recordingFormat an array of ints containing respectively the client and device
@@ -298,9 +310,10 @@ public class AudioSystem
          *          4: device channel mask
          *          5: device sample rate
          *          6: patch handle
+         * @param packName package name of the client app performing the recording. NOT SUPPORTED
          */
-        void onRecordingConfigurationChanged(int event, int session, int source,
-                int[] recordingFormat);
+        void onRecordingConfigurationChanged(int event, int uid, int session, int source,
+                int[] recordingFormat, String packName);
     }
 
     private static AudioRecordingCallback sRecordingCallback;
@@ -318,17 +331,18 @@ public class AudioSystem
      * @param session
      * @param source
      * @param recordingFormat see
-     *     {@link AudioRecordingCallback#onRecordingConfigurationChanged(int, int, int, int[])} for
-     *     the description of the record format.
+     *     {@link AudioRecordingCallback#onRecordingConfigurationChanged(int, int, int, int, int[])}
+     *     for the description of the record format.
      */
-    private static void recordingCallbackFromNative(int event, int session, int source,
+    private static void recordingCallbackFromNative(int event, int uid, int session, int source,
             int[] recordingFormat) {
         AudioRecordingCallback cb = null;
         synchronized (AudioSystem.class) {
             cb = sRecordingCallback;
         }
         if (cb != null) {
-            cb.onRecordingConfigurationChanged(event, session, source, recordingFormat);
+            // TODO receive package name from native
+            cb.onRecordingConfigurationChanged(event, uid, session, source, recordingFormat, "");
         }
     }
 
@@ -494,6 +508,14 @@ public class AudioSystem
     public static final int DEVICE_STATE_UNAVAILABLE = 0;
     public static final int DEVICE_STATE_AVAILABLE = 1;
     private static final int NUM_DEVICE_STATES = 1;
+
+    public static String deviceStateToString(int state) {
+        switch (state) {
+            case DEVICE_STATE_UNAVAILABLE: return "DEVICE_STATE_UNAVAILABLE";
+            case DEVICE_STATE_AVAILABLE: return "DEVICE_STATE_AVAILABLE";
+            default: return "unknown state (" + state + ")";
+        }
+    }
 
     public static final String DEVICE_OUT_EARPIECE_NAME = "earpiece";
     public static final String DEVICE_OUT_SPEAKER_NAME = "speaker";
@@ -690,6 +712,27 @@ public class AudioSystem
     public static final int NUM_FORCE_CONFIG = 15;
     public static final int FORCE_DEFAULT = FORCE_NONE;
 
+    public static String forceUseConfigToString(int config) {
+        switch (config) {
+            case FORCE_NONE: return "FORCE_NONE";
+            case FORCE_SPEAKER: return "FORCE_SPEAKER";
+            case FORCE_HEADPHONES: return "FORCE_HEADPHONES";
+            case FORCE_BT_SCO: return "FORCE_BT_SCO";
+            case FORCE_BT_A2DP: return "FORCE_BT_A2DP";
+            case FORCE_WIRED_ACCESSORY: return "FORCE_WIRED_ACCESSORY";
+            case FORCE_BT_CAR_DOCK: return "FORCE_BT_CAR_DOCK";
+            case FORCE_BT_DESK_DOCK: return "FORCE_BT_DESK_DOCK";
+            case FORCE_ANALOG_DOCK: return "FORCE_ANALOG_DOCK";
+            case FORCE_DIGITAL_DOCK: return "FORCE_DIGITAL_DOCK";
+            case FORCE_NO_BT_A2DP: return "FORCE_NO_BT_A2DP";
+            case FORCE_SYSTEM_ENFORCED: return "FORCE_SYSTEM_ENFORCED";
+            case FORCE_HDMI_SYSTEM_AUDIO_ENFORCED: return "FORCE_HDMI_SYSTEM_AUDIO_ENFORCED";
+            case FORCE_ENCODED_SURROUND_NEVER: return "FORCE_ENCODED_SURROUND_NEVER";
+            case FORCE_ENCODED_SURROUND_ALWAYS: return "FORCE_ENCODED_SURROUND_ALWAYS";
+            default: return "unknown config (" + config + ")" ;
+        }
+    }
+
     // usage for setForceUse, must match audio_policy_force_use_t
     public static final int FOR_COMMUNICATION = 0;
     public static final int FOR_MEDIA = 1;
@@ -699,6 +742,19 @@ public class AudioSystem
     public static final int FOR_HDMI_SYSTEM_AUDIO = 5;
     public static final int FOR_ENCODED_SURROUND = 6;
     private static final int NUM_FORCE_USE = 7;
+
+    public static String forceUseUsageToString(int usage) {
+        switch (usage) {
+            case FOR_COMMUNICATION: return "FOR_COMMUNICATION";
+            case FOR_MEDIA: return "FOR_MEDIA";
+            case FOR_RECORD: return "FOR_RECORD";
+            case FOR_DOCK: return "FOR_DOCK";
+            case FOR_SYSTEM: return "FOR_SYSTEM";
+            case FOR_HDMI_SYSTEM_AUDIO: return "FOR_HDMI_SYSTEM_AUDIO";
+            case FOR_ENCODED_SURROUND: return "FOR_ENCODED_SURROUND";
+            default: return "unknown usage (" + usage + ")" ;
+        }
+    }
 
     // usage for AudioRecord.startRecordingSync(), must match AudioSystem::sync_event_t
     public static final int SYNC_EVENT_NONE = 0;

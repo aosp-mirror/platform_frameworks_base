@@ -54,19 +54,19 @@ TEST(ResourceValuesTest, ArrayEquals) {
   StringPool pool;
 
   Array a;
-  a.items.push_back(util::make_unique<String>(pool.MakeRef("one")));
-  a.items.push_back(util::make_unique<String>(pool.MakeRef("two")));
+  a.elements.push_back(util::make_unique<String>(pool.MakeRef("one")));
+  a.elements.push_back(util::make_unique<String>(pool.MakeRef("two")));
 
   Array b;
-  b.items.push_back(util::make_unique<String>(pool.MakeRef("une")));
-  b.items.push_back(util::make_unique<String>(pool.MakeRef("deux")));
+  b.elements.push_back(util::make_unique<String>(pool.MakeRef("une")));
+  b.elements.push_back(util::make_unique<String>(pool.MakeRef("deux")));
 
   Array c;
-  c.items.push_back(util::make_unique<String>(pool.MakeRef("uno")));
+  c.elements.push_back(util::make_unique<String>(pool.MakeRef("uno")));
 
   Array d;
-  d.items.push_back(util::make_unique<String>(pool.MakeRef("one")));
-  d.items.push_back(util::make_unique<String>(pool.MakeRef("two")));
+  d.elements.push_back(util::make_unique<String>(pool.MakeRef("one")));
+  d.elements.push_back(util::make_unique<String>(pool.MakeRef("two")));
 
   EXPECT_FALSE(a.Equals(&b));
   EXPECT_FALSE(a.Equals(&c));
@@ -78,8 +78,8 @@ TEST(ResourceValuesTest, ArrayClone) {
   StringPool pool;
 
   Array a;
-  a.items.push_back(util::make_unique<String>(pool.MakeRef("one")));
-  a.items.push_back(util::make_unique<String>(pool.MakeRef("two")));
+  a.elements.push_back(util::make_unique<String>(pool.MakeRef("one")));
+  a.elements.push_back(util::make_unique<String>(pool.MakeRef("two")));
 
   std::unique_ptr<Array> b(a.Clone(&pool));
   EXPECT_TRUE(a.Equals(b.get()));
@@ -188,6 +188,54 @@ TEST(ResourcesValuesTest, EmptyReferenceFlattens) {
 
   EXPECT_EQ(android::Res_value::TYPE_REFERENCE, value.dataType);
   EXPECT_EQ(0x0u, value.data);
+}
+
+TEST(ResourcesValuesTest, AttributeMatches) {
+  constexpr const uint32_t TYPE_DIMENSION = android::ResTable_map::TYPE_DIMENSION;
+  constexpr const uint32_t TYPE_ENUM = android::ResTable_map::TYPE_ENUM;
+  constexpr const uint32_t TYPE_FLAGS = android::ResTable_map::TYPE_FLAGS;
+  constexpr const uint32_t TYPE_INTEGER = android::ResTable_map::TYPE_INTEGER;
+  constexpr const uint8_t TYPE_INT_DEC = android::Res_value::TYPE_INT_DEC;
+
+  Attribute attr1(false /*weak*/, TYPE_DIMENSION);
+  EXPECT_FALSE(attr1.Matches(*ResourceUtils::TryParseColor("#7fff00")));
+  EXPECT_TRUE(attr1.Matches(*ResourceUtils::TryParseFloat("23dp")));
+  EXPECT_TRUE(attr1.Matches(*ResourceUtils::TryParseReference("@android:string/foo")));
+
+  Attribute attr2(false /*weak*/, TYPE_INTEGER | TYPE_ENUM);
+  attr2.min_int = 0;
+  attr2.symbols.push_back(Attribute::Symbol{Reference(test::ParseNameOrDie("android:id/foo")),
+                                            static_cast<uint32_t>(-1)});
+  EXPECT_FALSE(attr2.Matches(*ResourceUtils::TryParseColor("#7fff00")));
+  EXPECT_TRUE(attr2.Matches(BinaryPrimitive(TYPE_INT_DEC, static_cast<uint32_t>(-1))));
+  EXPECT_TRUE(attr2.Matches(BinaryPrimitive(TYPE_INT_DEC, 1u)));
+  EXPECT_FALSE(attr2.Matches(BinaryPrimitive(TYPE_INT_DEC, static_cast<uint32_t>(-2))));
+
+  Attribute attr3(false /*weak*/, TYPE_INTEGER | TYPE_FLAGS);
+  attr3.max_int = 100;
+  attr3.symbols.push_back(
+      Attribute::Symbol{Reference(test::ParseNameOrDie("android:id/foo")), 0x01u});
+  attr3.symbols.push_back(
+      Attribute::Symbol{Reference(test::ParseNameOrDie("android:id/bar")), 0x02u});
+  attr3.symbols.push_back(
+      Attribute::Symbol{Reference(test::ParseNameOrDie("android:id/baz")), 0x04u});
+  attr3.symbols.push_back(
+      Attribute::Symbol{Reference(test::ParseNameOrDie("android:id/bat")), 0x80u});
+  EXPECT_FALSE(attr3.Matches(*ResourceUtils::TryParseColor("#7fff00")));
+  EXPECT_TRUE(attr3.Matches(BinaryPrimitive(TYPE_INT_DEC, 0x01u | 0x02u)));
+  EXPECT_TRUE(attr3.Matches(BinaryPrimitive(TYPE_INT_DEC, 0x01u | 0x02u | 0x80u)));
+
+  // Not a flag, but a value less than max_int.
+  EXPECT_TRUE(attr3.Matches(BinaryPrimitive(TYPE_INT_DEC, 0x08u)));
+
+  // Not a flag and greater than max_int.
+  EXPECT_FALSE(attr3.Matches(BinaryPrimitive(TYPE_INT_DEC, 127u)));
+
+  Attribute attr4(false /*weak*/, TYPE_ENUM);
+  attr4.symbols.push_back(
+      Attribute::Symbol{Reference(test::ParseNameOrDie("android:id/foo")), 0x01u});
+  EXPECT_TRUE(attr4.Matches(BinaryPrimitive(TYPE_INT_DEC, 0x01u)));
+  EXPECT_FALSE(attr4.Matches(BinaryPrimitive(TYPE_INT_DEC, 0x02u)));
 }
 
 } // namespace aapt
