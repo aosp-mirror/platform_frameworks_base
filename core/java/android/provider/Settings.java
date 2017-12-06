@@ -10543,6 +10543,15 @@ public final class Settings {
             SOFT_AP_TIMEOUT_ENABLED
         };
 
+        /**
+         * Global settings that shouldn't be persisted.
+         *
+         * @hide
+         */
+        public static final String[] TRANSIENT_SETTINGS = {
+                LOCATION_GLOBAL_KILL_SWITCH,
+        };
+
         /** @hide */
         public static final String[] LEGACY_RESTORE_SETTINGS = {
         };

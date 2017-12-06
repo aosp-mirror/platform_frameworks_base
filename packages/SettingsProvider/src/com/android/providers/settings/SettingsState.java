@@ -33,6 +33,7 @@ import android.os.Message;
 import android.os.SystemClock;
 import android.os.UserHandle;
 import android.provider.Settings;
+import android.provider.Settings.Global;
 import android.providers.settings.GlobalSettingsProto;
 import android.providers.settings.SettingsOperationProto;
 import android.text.TextUtils;
@@ -46,6 +47,7 @@ import android.util.Xml;
 import android.util.proto.ProtoOutputStream;
 
 import com.android.internal.annotations.GuardedBy;
+import com.android.internal.util.ArrayUtils;
 import com.android.server.LocalServices;
 
 import libcore.io.IoUtils;
@@ -194,6 +196,51 @@ final class SettingsState {
 
     @GuardedBy("mLock")
     private int mNextHistoricalOpIdx;
+
+    public static final int SETTINGS_TYPE_GLOBAL = 0;
+    public static final int SETTINGS_TYPE_SYSTEM = 1;
+    public static final int SETTINGS_TYPE_SECURE = 2;
+    public static final int SETTINGS_TYPE_SSAID = 3;
+
+    public static final int SETTINGS_TYPE_MASK = 0xF0000000;
+    public static final int SETTINGS_TYPE_SHIFT = 28;
+
+    public static int makeKey(int type, int userId) {
+        return (type << SETTINGS_TYPE_SHIFT) | userId;
+    }
+
+    public static int getTypeFromKey(int key) {
+        return key >>> SETTINGS_TYPE_SHIFT;
+    }
+
+    public static int getUserIdFromKey(int key) {
+        return key & ~SETTINGS_TYPE_MASK;
+    }
+
+    public static String settingTypeToString(int type) {
+        switch (type) {
+            case SETTINGS_TYPE_GLOBAL: {
+                return "SETTINGS_GLOBAL";
+            }
+            case SETTINGS_TYPE_SECURE: {
+                return "SETTINGS_SECURE";
+            }
+            case SETTINGS_TYPE_SYSTEM: {
+                return "SETTINGS_SYSTEM";
+            }
+            case SETTINGS_TYPE_SSAID: {
+                return "SETTINGS_SSAID";
+            }
+            default: {
+                return "UNKNOWN";
+            }
+        }
+    }
+
+    public static String keyToString(int key) {
+        return "Key[user=" + getUserIdFromKey(key) + ";type="
+                + settingTypeToString(getTypeFromKey(key)) + "]";
+    }
 
     public SettingsState(Context context, Object lock, File file, int key,
             int maxBytesPerAppPackage, Looper looper) {
@@ -604,6 +651,13 @@ final class SettingsState {
                 for (int i = 0; i < settingCount; i++) {
                     Setting setting = settings.valueAt(i);
 
+                    if (setting.isTransient()) {
+                        if (DEBUG_PERSISTENCE) {
+                            Slog.i(LOG_TAG, "[SKIPPED PERSISTING]" + setting.getName());
+                        }
+                        continue;
+                    }
+
                     writeSingleSetting(mVersion, serializer, setting.getId(), setting.getName(),
                             setting.getValue(), setting.getDefaultValue(), setting.getPackageName(),
                             setting.getTag(), setting.isDefaultFromSystem());
@@ -912,6 +966,14 @@ final class SettingsState {
         /** @return whether the value changed */
         public boolean reset() {
             return update(this.defaultValue, false, packageName, null, true);
+        }
+
+        public boolean isTransient() {
+            switch (getTypeFromKey(getKey())) {
+                case SETTINGS_TYPE_GLOBAL:
+                    return ArrayUtils.contains(Global.TRANSIENT_SETTINGS, getName());
+            }
+            return false;
         }
 
         public boolean update(String value, boolean setDefault, String packageName, String tag,
