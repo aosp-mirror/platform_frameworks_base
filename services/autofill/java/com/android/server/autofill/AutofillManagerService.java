@@ -610,6 +610,21 @@ public final class AutofillManagerService extends SystemService {
         }
 
         @Override
+        public boolean isFieldClassificationEnabled() throws RemoteException {
+            UserHandle user = getCallingUserHandle();
+            int uid = getCallingUid();
+
+            synchronized (mLock) {
+                AutofillManagerServiceImpl service = peekServiceForUserLocked(user.getIdentifier());
+                if (service != null) {
+                    return service.isFieldClassificationEnabled();
+                }
+            }
+
+            return false;
+        }
+
+        @Override
         public boolean restoreSession(int sessionId, IBinder activityToken, IBinder appCallback)
                 throws RemoteException {
             activityToken = Preconditions.checkNotNull(activityToken, "activityToken");

@@ -5330,11 +5330,12 @@ public final class Settings {
         /**
          * Experimental autofill feature.
          *
-         * <p>TODO(b/67867469): remove once feature is finished
+         * <p>TODO(b/67867469): document (or remove) once feature is finished
          * @hide
          */
         @TestApi
-        public static final String AUTOFILL_FEATURE_FIELD_DETECTION = "autofill_field_detection";
+        public static final String AUTOFILL_FEATURE_FIELD_CLASSIFICATION =
+                "autofill_field_classification";
 
         /**
          * Experimental autofill feature.

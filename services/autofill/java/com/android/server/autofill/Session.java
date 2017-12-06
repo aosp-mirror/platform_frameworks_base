@@ -65,7 +65,7 @@ import android.service.autofill.SaveInfo;
 import android.service.autofill.SaveRequest;
 import android.service.autofill.UserData;
 import android.service.autofill.ValueFinder;
-import android.service.autofill.FieldsClassificationScorer;
+import android.service.autofill.EditDistanceScorer;
 import android.util.ArrayMap;
 import android.util.ArraySet;
 import android.util.LocalLog;
@@ -501,7 +501,7 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
         }
 
         // TODO(b/67867469): remove once feature is finished
-        if (response.getFieldClassificationIds() != null && !mService.isFieldDetectionEnabled()) {
+        if (response.getFieldClassificationIds() != null && !mService.isFieldClassificationEnabled()) {
             Slog.w(TAG, "Ignoring " + response + " because field detection is disabled");
             processNullResponseLocked(requestFlags);
             return;
@@ -1124,10 +1124,10 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
             return;
         }
         String remoteId = null;
-        int topScore = 0;
+        float topScore = 0;
         for (int i = 0; i < userValues.length; i++) {
             final String value = userValues[i];
-            final int score = FieldsClassificationScorer.getScore(currentValue, value);
+            final float score = userData.getScorer().getScore(currentValue, value);
             if (score > topScore) {
                 topScore = score;
                 remoteId = remoteIds[i];

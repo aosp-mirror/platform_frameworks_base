@@ -56,4 +56,5 @@ interface IAutoFillManager {
     void onPendingSaveUi(int operation, IBinder token);
     UserData getUserData();
     void setUserData(in UserData userData);
+    boolean isFieldClassificationEnabled();
 }

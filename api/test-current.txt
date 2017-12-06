@@ -425,7 +425,7 @@ package android.provider {
 
   public static final class Settings.Secure extends android.provider.Settings.NameValueTable {
     field public static final java.lang.String ACCESSIBILITY_DISPLAY_MAGNIFICATION_ENABLED = "accessibility_display_magnification_enabled";
-    field public static final java.lang.String AUTOFILL_FEATURE_FIELD_DETECTION = "autofill_field_detection";
+    field public static final java.lang.String AUTOFILL_FEATURE_FIELD_CLASSIFICATION = "autofill_field_classification";
     field public static final java.lang.String AUTOFILL_SERVICE = "autofill_service";
     field public static final java.lang.String DISABLED_PRINT_SERVICES = "disabled_print_services";
     field public static final deprecated java.lang.String ENABLED_NOTIFICATION_POLICY_ACCESS_PACKAGES = "enabled_notification_policy_access_packages";
@@ -457,9 +457,17 @@ package android.service.autofill {
     method public void apply(android.service.autofill.ValueFinder, android.widget.RemoteViews, int) throws java.lang.Exception;
   }
 
+  public final class EditDistanceScorer extends android.service.autofill.InternalScorer implements android.os.Parcelable android.service.autofill.Scorer {
+    method public int describeContents();
+    method public static android.service.autofill.EditDistanceScorer getInstance();
+    method public float getScore(android.view.autofill.AutofillValue, java.lang.String);
+    method public void writeToParcel(android.os.Parcel, int);
+    field public static final android.os.Parcelable.Creator<android.service.autofill.EditDistanceScorer> CREATOR;
+  }
+
   public final class FieldClassification implements android.os.Parcelable {
     method public int describeContents();
-    method public android.service.autofill.FieldClassification.Match getTopMatch();
+    method public java.util.List<android.service.autofill.FieldClassification.Match> getMatches();
     method public void writeToParcel(android.os.Parcel, int);
     field public static final android.os.Parcelable.Creator<android.service.autofill.FieldClassification> CREATOR;
   }
@@ -467,13 +475,9 @@ package android.service.autofill {
   public static final class FieldClassification.Match implements android.os.Parcelable {
     method public int describeContents();
     method public java.lang.String getRemoteId();
-    method public int getScore();
+    method public float getScore();
     method public void writeToParcel(android.os.Parcel, int);
     field public static final android.os.Parcelable.Creator<android.service.autofill.FieldClassification.Match> CREATOR;
-  }
-
-  public final class FieldsClassificationScorer {
-    method public static int getScore(android.view.autofill.AutofillValue, java.lang.String);
   }
 
   public static final class FillEventHistory.Event {
@@ -490,6 +494,11 @@ package android.service.autofill {
 
   public abstract class InternalSanitizer implements android.os.Parcelable android.service.autofill.Sanitizer {
     ctor public InternalSanitizer();
+  }
+
+  public abstract class InternalScorer implements android.os.Parcelable android.service.autofill.Scorer {
+    ctor public InternalScorer();
+    method public abstract float getScore(android.view.autofill.AutofillValue, java.lang.String);
   }
 
   public abstract class InternalTransformation implements android.os.Parcelable android.service.autofill.Transformation {
@@ -509,6 +518,9 @@ package android.service.autofill {
     method public boolean isValid(android.service.autofill.ValueFinder);
   }
 
+  public abstract interface Scorer {
+  }
+
   public final class TextValueSanitizer extends android.service.autofill.InternalSanitizer implements android.os.Parcelable android.service.autofill.Sanitizer {
     method public android.view.autofill.AutofillValue sanitize(android.view.autofill.AutofillValue);
   }
@@ -524,7 +536,7 @@ package android.service.autofill {
   }
 
   public static final class UserData.Builder {
-    ctor public UserData.Builder(java.lang.String, java.lang.String);
+    ctor public UserData.Builder(android.service.autofill.Scorer, java.lang.String, java.lang.String);
     method public android.service.autofill.UserData.Builder add(java.lang.String, java.lang.String);
     method public android.service.autofill.UserData build();
   }
@@ -978,6 +990,7 @@ package android.view.autofill {
 
   public final class AutofillManager {
     method public android.service.autofill.UserData getUserData();
+    method public boolean isFieldClassificationEnabled();
     method public void setUserData(android.service.autofill.UserData);
   }
 
