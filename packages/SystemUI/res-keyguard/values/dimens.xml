@@ -42,9 +42,22 @@
     <dimen name="eca_overlap">-10dip</dimen>
 
     <!-- Default clock parameters -->
-    <dimen name="bottom_text_spacing_digital">-1dp</dimen>
-    <dimen name="widget_label_font_size">14sp</dimen>
-    <dimen name="widget_big_font_size">72dp</dimen>
+    <dimen name="bottom_text_spacing_digital">-10dp</dimen>
+    <!-- Slice header -->
+    <dimen name="widget_title_font_size">28sp</dimen>
+    <!-- Slice subtitle  -->
+    <dimen name="widget_label_font_size">16sp</dimen>
+    <!-- Clock without header -->
+    <dimen name="widget_big_font_size">64dp</dimen>
+    <!-- Clock with header -->
+    <dimen name="widget_small_font_size">22dp</dimen>
+    <!-- Dash between clock and header -->
+    <dimen name="widget_vertical_padding">16dp</dimen>
+    <!-- Subtitle paddings -->
+    <dimen name="widget_separator_thickness">2dp</dimen>
+    <dimen name="widget_horizontal_padding">8dp</dimen>
+    <dimen name="widget_icon_size">16dp</dimen>
+    <dimen name="widget_icon_padding">4dp</dimen>
 
     <!-- The y translation to apply at the start in appear animations. -->
     <dimen name="appear_y_translation_start">32dp</dimen>

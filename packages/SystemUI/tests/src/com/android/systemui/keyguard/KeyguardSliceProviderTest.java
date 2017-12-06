@@ -16,11 +16,10 @@
 
 package com.android.systemui.keyguard;
 
-import android.app.slice.Slice;
-import android.app.slice.SliceItem;
-import android.app.slice.SliceQuery;
+import androidx.app.slice.Slice;
 import android.content.Intent;
 import android.net.Uri;
+import android.os.Debug;
 import android.os.Handler;
 import android.support.test.filters.SmallTest;
 import android.testing.AndroidTestingRunner;
@@ -33,6 +32,9 @@ import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+
+import androidx.app.slice.SliceItem;
+import androidx.app.slice.core.SliceQuery;
 
 @SmallTest
 @RunWith(AndroidTestingRunner.class)
@@ -63,7 +65,8 @@ public class KeyguardSliceProviderTest extends SysuiTestCase {
     @Test
     public void returnsValidSlice() {
         Slice slice = mProvider.onBindSlice(Uri.parse(KeyguardSliceProvider.KEYGUARD_SLICE_URI));
-        SliceItem text = SliceQuery.find(slice, SliceItem.FORMAT_TEXT, Slice.HINT_TITLE,
+        SliceItem text = SliceQuery.find(slice, android.app.slice.SliceItem.FORMAT_TEXT,
+                android.app.slice.Slice.HINT_TITLE,
                 null /* nonHints */);
         Assert.assertNotNull("Slice must provide a title.", text);
     }
@@ -78,9 +81,10 @@ public class KeyguardSliceProviderTest extends SysuiTestCase {
 
     @Test
     public void updatesClock() {
+        mProvider.mUpdateClockInvokations = 0;
         mProvider.mIntentReceiver.onReceive(getContext(), new Intent(Intent.ACTION_TIME_TICK));
         TestableLooper.get(this).processAllMessages();
-        Assert.assertEquals("Clock should have been updated.", 2 /* expected */,
+        Assert.assertEquals("Clock should have been updated.", 1 /* expected */,
                 mProvider.mUpdateClockInvokations);
     }
 

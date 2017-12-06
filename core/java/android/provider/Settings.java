@@ -5778,6 +5778,14 @@ public final class Settings {
             "touch_exploration_granted_accessibility_services";
 
         /**
+         * Uri of the slice that's presented on the keyguard.
+         * Defaults to a slice with the date and next alarm.
+         *
+         * @hide
+         */
+        public static final String KEYGUARD_SLICE_URI = "keyguard_slice_uri";
+
+        /**
          * Whether to speak passwords while in accessibility mode.
          *
          * @deprecated The speaking of passwords is controlled by individual accessibility services.
