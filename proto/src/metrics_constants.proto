@@ -5129,6 +5129,12 @@ message MetricsEvent {
     // OS: P
     FUELGAUGE_SMART_BATTERY = 1281;
 
+    // ACTION: User tapped Screenshot in the power menu.
+    // CATEGORY: GLOBAL_SYSTEM_UI
+    // OS: P
+    ACTION_SCREENSHOT_POWER_MENU = 1282;
+
+
     // ---- End P Constants, all P constants go above this line ----
     // Add new aosp constants above this line.
     // END OF AOSP CONSTANTS

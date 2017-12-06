@@ -484,6 +484,9 @@
     <!-- label for item that logouts the current user -->
     <string name="global_action_logout">End session</string>
 
+    <!-- label for screenshot item in power menu -->
+    <string name="global_action_screenshot">Screenshot</string>
+
     <!-- Take bug report menu title [CHAR LIMIT=NONE] -->
     <string name="bugreport_title">Take bug report</string>
     <!-- Message in bugreport dialog describing what it does [CHAR LIMIT=NONE] -->
@@ -4800,13 +4803,10 @@
     <!--Battery saver warning. STOPSHIP: Remove it eventually. -->
     <string name="battery_saver_warning_title" translatable="false">Extreme battery saver</string>
 
-
     <!-- Label for the uninstall button on the harmful app warning dialog. -->
     <string name="harmful_app_warning_uninstall">Uninstall</string>
     <!-- Label for the launch anyway button on the harmful app warning dialog. -->
     <string name="harmful_app_warning_launch_anyway">Launch anyway</string>
     <!-- Title for the harmful app warning dialog. -->
     <string name="harmful_app_warning_title">Uninstall harmful app?</string>
-
-
 </resources>
