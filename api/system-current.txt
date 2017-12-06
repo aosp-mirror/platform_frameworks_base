@@ -4293,6 +4293,7 @@ package android.telephony {
     method public java.lang.String getCdmaMin(int);
     method public int getCurrentPhoneType();
     method public int getCurrentPhoneType(int);
+    method public int getDataActivationState();
     method public deprecated boolean getDataEnabled();
     method public deprecated boolean getDataEnabled(int);
     method public int getSimApplicationState();
@@ -4300,6 +4301,7 @@ package android.telephony {
     method public java.util.List<android.telephony.TelephonyHistogram> getTelephonyHistograms();
     method public android.telephony.UiccSlotInfo[] getUiccSlotsInfo();
     method public android.os.Bundle getVisualVoicemailSettings();
+    method public int getVoiceActivationState();
     method public boolean handlePinMmi(java.lang.String);
     method public boolean handlePinMmiForSubscriber(int, java.lang.String);
     method public boolean isDataConnectivityPossible();
@@ -4311,10 +4313,12 @@ package android.telephony {
     method public deprecated boolean isVisualVoicemailEnabled(android.telecom.PhoneAccountHandle);
     method public boolean needsOtaServiceProvisioning();
     method public int setAllowedCarriers(int, java.util.List<android.service.carrier.CarrierIdentifier>);
+    method public void setDataActivationState(int);
     method public deprecated void setDataEnabled(int, boolean);
     method public boolean setRadio(boolean);
     method public boolean setRadioPower(boolean);
     method public deprecated void setVisualVoicemailEnabled(android.telecom.PhoneAccountHandle, boolean);
+    method public void setVoiceActivationState(int);
     method public deprecated void silenceRinger();
     method public boolean supplyPin(java.lang.String);
     method public int[] supplyPinReportResult(java.lang.String);
@@ -4333,6 +4337,11 @@ package android.telephony {
     field public static final java.lang.String EXTRA_SIM_STATE = "android.telephony.extra.SIM_STATE";
     field public static final java.lang.String EXTRA_VISUAL_VOICEMAIL_ENABLED_BY_USER_BOOL = "android.telephony.extra.VISUAL_VOICEMAIL_ENABLED_BY_USER_BOOL";
     field public static final java.lang.String EXTRA_VOICEMAIL_SCRAMBLED_PIN_STRING = "android.telephony.extra.VOICEMAIL_SCRAMBLED_PIN_STRING";
+    field public static final int SIM_ACTIVATION_STATE_ACTIVATED = 2; // 0x2
+    field public static final int SIM_ACTIVATION_STATE_ACTIVATING = 1; // 0x1
+    field public static final int SIM_ACTIVATION_STATE_DEACTIVATED = 3; // 0x3
+    field public static final int SIM_ACTIVATION_STATE_RESTRICTED = 4; // 0x4
+    field public static final int SIM_ACTIVATION_STATE_UNKNOWN = 0; // 0x0
     field public static final int SIM_STATE_LOADED = 10; // 0xa
     field public static final int SIM_STATE_PRESENT = 11; // 0xb
   }
