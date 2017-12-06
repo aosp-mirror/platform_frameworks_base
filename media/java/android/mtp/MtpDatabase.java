@@ -423,6 +423,12 @@ public class MtpDatabase implements AutoCloseable {
         }
     }
 
+    private void doScanDirectory(String path) {
+        String[] scanPath;
+        scanPath = new String[] { path };
+        mMediaScanner.scanDirectories(scanPath);
+    }
+
     private Cursor createObjectQuery(int storageID, int format, int parent) throws RemoteException {
         String where;
         String[] whereArgs;
