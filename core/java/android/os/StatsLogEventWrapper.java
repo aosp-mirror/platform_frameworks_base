@@ -33,6 +33,8 @@ public final class StatsLogEventWrapper implements Parcelable {
     private static final int EVENT_TYPE_LIST = 3;
     private static final int EVENT_TYPE_FLOAT = 4;
 
+    // Keep this in sync with system/core/logcat/event.logtags
+    private static final int STATS_BUFFER_TAG_ID = 1937006964;
     /**
      * Creates a log_event that is binary-encoded as implemented in
      * system/core/liblog/log_event_list.c; this allows us to use the same parsing logic in statsd
@@ -46,9 +48,14 @@ public final class StatsLogEventWrapper implements Parcelable {
      */
     public StatsLogEventWrapper(int tag, int fields) {
         // Write four bytes from tag, starting with least-significant bit.
-        write4Bytes(tag);
+        // For pulled data, this tag number is not really used. We use the same tag number as
+        // pushed ones to be consistent.
+        write4Bytes(STATS_BUFFER_TAG_ID);
         mStorage.write(EVENT_TYPE_LIST); // This is required to start the log entry.
         mStorage.write(fields); // Indicate number of elements in this list.
+        mStorage.write(EVENT_TYPE_INT);
+        // The first element is the real atom tag number
+        write4Bytes(tag);
     }
 
     /**

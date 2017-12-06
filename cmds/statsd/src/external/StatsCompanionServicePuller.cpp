@@ -49,15 +49,15 @@ bool StatsCompanionServicePuller::Pull(const int tagId, vector<shared_ptr<LogEve
             return false;
         }
         data->clear();
-        long timestamp = time(nullptr);
+        int timestamp = time(nullptr);
         for (const StatsLogEventWrapper& it : returned_value) {
             log_msg tmp;
             tmp.entry_v1.len = it.bytes.size();
             // Manually set the header size to 28 bytes to match the pushed log events.
             tmp.entry.hdr_size = kLogMsgHeaderSize;
+            tmp.entry_v1.sec = timestamp;
             // And set the received bytes starting after the 28 bytes reserved for header.
             std::copy(it.bytes.begin(), it.bytes.end(), tmp.buf + kLogMsgHeaderSize);
-            tmp.entry_v1.sec = timestamp;
             data->push_back(make_shared<LogEvent>(tmp));
         }
         ALOGD("StatsCompanionServicePuller::pull succeeded for %d", tagId);
