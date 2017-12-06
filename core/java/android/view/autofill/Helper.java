@@ -18,11 +18,6 @@ package android.view.autofill;
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
-import android.os.Bundle;
-
-import java.util.Arrays;
-import java.util.Objects;
-import java.util.Set;
 
 /** @hide */
 public final class Helper {
@@ -31,37 +26,20 @@ public final class Helper {
     public static boolean sDebug = false;
     public static boolean sVerbose = false;
 
-    public static final String REDACTED = "[REDACTED]";
-
-    static StringBuilder append(StringBuilder builder, Bundle bundle) {
-        if (bundle == null || !sDebug) {
-            builder.append("N/A");
-        } else if (!sVerbose) {
-            builder.append(REDACTED);
-        } else {
-            final Set<String> keySet = bundle.keySet();
-            builder.append("[Bundle with ").append(keySet.size()).append(" extras:");
-            for (String key : keySet) {
-                final Object value = bundle.get(key);
-                builder.append(' ').append(key).append('=');
-                builder.append((value instanceof Object[])
-                        ? Arrays.toString((Objects[]) value) : value);
-            }
-            builder.append(']');
-        }
-        return builder;
-    }
-
     /**
      * Appends {@code value} to the {@code builder} redacting its contents.
      */
     public static void appendRedacted(@NonNull StringBuilder builder,
             @Nullable CharSequence value) {
-        if (value == null) {
-            builder.append("null");
-        } else {
-            builder.append(value.length()).append("_chars");
-        }
+        builder.append(getRedacted(value));
+    }
+
+    /**
+     * Gets the redacted version of a value.
+     */
+    @NonNull
+    public static String getRedacted(@Nullable CharSequence value) {
+        return (value == null) ? "null" : value.length() + "_chars";
     }
 
     /**

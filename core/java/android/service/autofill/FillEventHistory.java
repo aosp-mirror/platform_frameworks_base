@@ -16,6 +16,8 @@
 
 package android.service.autofill;
 
+import static android.view.autofill.Helper.sVerbose;
+
 import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
@@ -24,8 +26,10 @@ import android.content.IntentSender;
 import android.os.Bundle;
 import android.os.Parcel;
 import android.os.Parcelable;
+import android.service.autofill.FieldClassification.Match;
 import android.util.ArrayMap;
 import android.util.ArraySet;
+import android.util.Log;
 import android.view.autofill.AutofillId;
 import android.view.autofill.AutofillManager;
 
@@ -35,6 +39,7 @@ import com.android.internal.util.Preconditions;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
@@ -57,6 +62,8 @@ import java.util.Set;
  * the history will clear out after some pre-defined time).
  */
 public final class FillEventHistory implements Parcelable {
+    private static final String TAG = "FillEventHistory";
+
     /**
      * Not in parcel. The ID of the autofill session that created the {@link FillResponse}.
      */
@@ -123,34 +130,35 @@ public final class FillEventHistory implements Parcelable {
     }
 
     @Override
-    public void writeToParcel(Parcel dest, int flags) {
-        dest.writeBundle(mClientState);
+    public void writeToParcel(Parcel parcel, int flags) {
+        parcel.writeBundle(mClientState);
         if (mEvents == null) {
-            dest.writeInt(0);
+            parcel.writeInt(0);
         } else {
-            dest.writeInt(mEvents.size());
+            parcel.writeInt(mEvents.size());
 
             int numEvents = mEvents.size();
             for (int i = 0; i < numEvents; i++) {
                 Event event = mEvents.get(i);
-                dest.writeInt(event.mEventType);
-                dest.writeString(event.mDatasetId);
-                dest.writeBundle(event.mClientState);
-                dest.writeStringList(event.mSelectedDatasetIds);
-                dest.writeArraySet(event.mIgnoredDatasetIds);
-                dest.writeTypedList(event.mChangedFieldIds);
-                dest.writeStringList(event.mChangedDatasetIds);
+                parcel.writeInt(event.mEventType);
+                parcel.writeString(event.mDatasetId);
+                parcel.writeBundle(event.mClientState);
+                parcel.writeStringList(event.mSelectedDatasetIds);
+                parcel.writeArraySet(event.mIgnoredDatasetIds);
+                parcel.writeTypedList(event.mChangedFieldIds);
+                parcel.writeStringList(event.mChangedDatasetIds);
 
-                dest.writeTypedList(event.mManuallyFilledFieldIds);
+                parcel.writeTypedList(event.mManuallyFilledFieldIds);
                 if (event.mManuallyFilledFieldIds != null) {
                     final int size = event.mManuallyFilledFieldIds.size();
                     for (int j = 0; j < size; j++) {
-                        dest.writeStringList(event.mManuallyFilledDatasetIds.get(j));
+                        parcel.writeStringList(event.mManuallyFilledDatasetIds.get(j));
                     }
                 }
-                dest.writeString(event.mDetectedRemoteId);
-                if (event.mDetectedRemoteId != null) {
-                    dest.writeInt(event.mDetectedFieldScore);
+                final AutofillId[] detectedFields = event.mDetectedFieldIds;
+                parcel.writeParcelableArray(detectedFields, flags);
+                if (detectedFields != null) {
+                    parcel.writeParcelableArray(event.mDetectedMatches, flags);
                 }
             }
         }
@@ -242,8 +250,8 @@ public final class FillEventHistory implements Parcelable {
         @Nullable private final ArrayList<AutofillId> mManuallyFilledFieldIds;
         @Nullable private final ArrayList<ArrayList<String>> mManuallyFilledDatasetIds;
 
-        @Nullable private final String mDetectedRemoteId;
-        private final int mDetectedFieldScore;
+        @Nullable private final AutofillId[] mDetectedFieldIds;
+        @Nullable private final Match[] mDetectedMatches;
 
         /**
          * Returns the type of the event.
@@ -347,37 +355,33 @@ public final class FillEventHistory implements Parcelable {
         }
 
         /**
-         * Gets the results of the last fields classification request.
-         *
-         * @return map of edit-distance match ({@code 0} means full match,
-         * {@code 1} means 1 character different, etc...) by remote id (as set on
-         * {@link UserData.Builder#add(String, android.view.autofill.AutofillValue)}),
-         * or {@code null} if none of the user-input values
-         * matched the requested detection.
+         * Gets the <a href="#FieldsClassification">fields classification</a> results.
          *
          * <p><b>Note: </b>Only set on events of type {@link #TYPE_CONTEXT_COMMITTED}, when the
          * service requested {@link FillResponse.Builder#setFieldClassificationIds(AutofillId...)
-         * fields detection}.
+         * fields classification}.
          *
          * TODO(b/67867469):
          *  - improve javadoc
-         *  - refine score meaning (for example, should 1 be different of -1?)
-         *  - mention when it's set
-         *  - unhide
          *  - unhide / remove testApi
-         *  - add @NonNull / check it / add unit tests
-         *  - add link to AutofillService #FieldsClassification anchor
          *
          * @hide
          */
         @TestApi
-        @NonNull public Map<String, Integer> getFieldsClassification() {
-            if (mDetectedRemoteId == null || mDetectedFieldScore == -1) {
+        @NonNull public Map<AutofillId, FieldClassification> getFieldsClassification() {
+            if (mDetectedFieldIds == null) {
                 return Collections.emptyMap();
             }
-
-            final ArrayMap<String, Integer> map = new ArrayMap<>(1);
-            map.put(mDetectedRemoteId, mDetectedFieldScore);
+            final int size = mDetectedFieldIds.length;
+            final ArrayMap<AutofillId, FieldClassification> map = new ArrayMap<>(size);
+            for (int i = 0; i < size; i++) {
+                final AutofillId id = mDetectedFieldIds[i];
+                final Match match = mDetectedMatches[i];
+                if (sVerbose) {
+                    Log.v(TAG, "getFieldsClassification[" + i + "]: id=" + id + ", match=" + match);
+                }
+                map.put(id, new FieldClassification(match));
+            }
             return map;
         }
 
@@ -464,7 +468,7 @@ public final class FillEventHistory implements Parcelable {
          *
          * @hide
          */
-        // TODO(b/67867469): document detection field parameters once stable
+        // TODO(b/67867469): document field classification parameters once stable
         public Event(int eventType, @Nullable String datasetId, @Nullable Bundle clientState,
                 @Nullable List<String> selectedDatasetIds,
                 @Nullable ArraySet<String> ignoredDatasetIds,
@@ -472,7 +476,7 @@ public final class FillEventHistory implements Parcelable {
                 @Nullable ArrayList<String> changedDatasetIds,
                 @Nullable ArrayList<AutofillId> manuallyFilledFieldIds,
                 @Nullable ArrayList<ArrayList<String>> manuallyFilledDatasetIds,
-                @Nullable String detectedRemoteId, int detectedFieldScore) {
+                @Nullable AutofillId[] detectedFieldIds, @Nullable Match[] detectedMaches) {
             mEventType = Preconditions.checkArgumentInRange(eventType, 0, TYPE_CONTEXT_COMMITTED,
                     "eventType");
             mDatasetId = datasetId;
@@ -495,8 +499,9 @@ public final class FillEventHistory implements Parcelable {
             }
             mManuallyFilledFieldIds = manuallyFilledFieldIds;
             mManuallyFilledDatasetIds = manuallyFilledDatasetIds;
-            mDetectedRemoteId = detectedRemoteId;
-            mDetectedFieldScore = detectedFieldScore;
+
+            mDetectedFieldIds = detectedFieldIds;
+            mDetectedMatches = detectedMaches;
         }
 
         @Override
@@ -509,8 +514,8 @@ public final class FillEventHistory implements Parcelable {
                     + ", changedDatasetsIds=" + mChangedDatasetIds
                     + ", manuallyFilledFieldIds=" + mManuallyFilledFieldIds
                     + ", manuallyFilledDatasetIds=" + mManuallyFilledDatasetIds
-                    + ", detectedRemoteId=" + mDetectedRemoteId
-                    + ", detectedFieldScore=" + mDetectedFieldScore
+                    + ", detectedFieldIds=" + Arrays.toString(mDetectedFieldIds)
+                    + ", detectedMaches =" + Arrays.toString(mDetectedMatches)
                     + "]";
         }
     }
@@ -546,15 +551,17 @@ public final class FillEventHistory implements Parcelable {
                         } else {
                             manuallyFilledDatasetIds = null;
                         }
-                        final String detectedRemoteId = parcel.readString();
-                        final int detectedFieldScore = detectedRemoteId == null ? -1
-                                : parcel.readInt();
+                        final AutofillId[] detectedFieldIds = parcel.readParcelableArray(null,
+                                AutofillId.class);
+                        final Match[] detectedMatches = (detectedFieldIds != null)
+                                ? parcel.readParcelableArray(null, Match.class)
+                                : null;
 
                         selection.addEvent(new Event(eventType, datasetId, clientState,
                                 selectedDatasetIds, ignoredDatasets,
                                 changedFieldIds, changedDatasetIds,
                                 manuallyFilledFieldIds, manuallyFilledDatasetIds,
-                                detectedRemoteId, detectedFieldScore));
+                                detectedFieldIds, detectedMatches));
                     }
                     return selection;
                 }
