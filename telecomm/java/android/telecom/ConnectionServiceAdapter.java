@@ -628,4 +628,17 @@ final class ConnectionServiceAdapter implements DeathRecipient {
             }
         }
     }
+
+    /**
+     * Notifies Telecom that the {@link ConnectionService} has released the call resource.
+     */
+    void onConnectionServiceFocusReleased() {
+        for (IConnectionServiceAdapter adapter : mAdapters) {
+            try {
+                Log.d(this, "onConnectionServiceFocusReleased");
+                adapter.onConnectionServiceFocusReleased(Log.getExternalSession());
+            } catch (RemoteException ignored) {
+            }
+        }
+    }
 }

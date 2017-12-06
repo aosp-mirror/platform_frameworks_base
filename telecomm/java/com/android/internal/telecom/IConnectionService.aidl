@@ -100,4 +100,8 @@ oneway interface IConnectionService {
 
     void respondToRttUpgradeRequest(String callId, in ParcelFileDescriptor fromInCall,
     in ParcelFileDescriptor toInCall, in Session.Info sessionInfo);
+
+    void connectionServiceFocusLost(in Session.Info sessionInfo);
+
+    void connectionServiceFocusGained(in Session.Info sessionInfo);
 }
