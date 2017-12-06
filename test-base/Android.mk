@@ -16,8 +16,11 @@
 
 LOCAL_PATH:= $(call my-dir)
 
-# Generate the stub source files for legacy.test.stubs
-# ====================================================
+# For unbundled build we'll use the prebuilt jar from prebuilts/sdk.
+ifeq (,$(TARGET_BUILD_APPS)$(filter true,$(TARGET_BUILD_PDK)))
+
+# Generate the stub source files for android.test.base.stubs
+# ==========================================================
 include $(CLEAR_VARS)
 
 LOCAL_SRC_FILES := \
@@ -106,6 +109,8 @@ update-android-test-base-api: $(ANDROID_TEST_BASE_OUTPUT_API_FILE) | $(ACP)
 	$(hide) $(ACP) $(ANDROID_TEST_BASE_OUTPUT_API_FILE) $(ANDROID_TEST_BASE_API_FILE)
 	@echo Copying removed.txt
 	$(hide) $(ACP) $(ANDROID_TEST_BASE_OUTPUT_REMOVED_API_FILE) $(ANDROID_TEST_BASE_REMOVED_API_FILE)
+
+endif  # not TARGET_BUILD_APPS not TARGET_BUILD_PDK=true
 
 ifeq ($(HOST_OS),linux)
 # Build the legacy-performance-test-hostdex library
