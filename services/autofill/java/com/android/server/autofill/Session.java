@@ -128,6 +128,9 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
     /** uid the session is for */
     public final int uid;
 
+    /** Flags used to start the session */
+    public final int mFlags;
+
     @GuardedBy("mLock")
     @NonNull private IBinder mActivityToken;
 
@@ -441,8 +444,10 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
             @NonNull Context context, @NonNull HandlerCaller handlerCaller, int userId,
             @NonNull Object lock, int sessionId, int uid, @NonNull IBinder activityToken,
             @NonNull IBinder client, boolean hasCallback, @NonNull LocalLog uiLatencyHistory,
-            @NonNull ComponentName serviceComponentName, @NonNull ComponentName componentName) {
+            @NonNull ComponentName serviceComponentName, @NonNull ComponentName componentName,
+            int flags) {
         id = sessionId;
+        mFlags = flags;
         this.uid = uid;
         mStartTime = SystemClock.elapsedRealtime();
         mService = service;
@@ -456,7 +461,8 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
         mComponentName = componentName;
         mClient = IAutoFillManagerClient.Stub.asInterface(client);
 
-        writeLog(MetricsEvent.AUTOFILL_SESSION_STARTED);
+        mMetricsLogger.write(newLogMaker(MetricsEvent.AUTOFILL_SESSION_STARTED)
+                .addTaggedData(MetricsEvent.FIELD_FLAGS, flags));
     }
 
     /**
@@ -505,8 +511,9 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
             }
         }
 
-        // TODO(b/67867469): remove once feature is finished
-        if (response.getFieldClassificationIds() != null && !mService.isFieldClassificationEnabled()) {
+        final AutofillId[] fieldClassificationIds = response.getFieldClassificationIds();
+        // TODO(b/67867469): remove once feature is finished (or use method from AFM to check)
+        if (fieldClassificationIds != null && !mService.isFieldClassificationEnabled()) {
             Slog.w(TAG, "Ignoring " + response + " because field detection is disabled");
             processNullResponseLocked(requestFlags);
             return;
@@ -548,6 +555,10 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
                 .setType(MetricsEvent.TYPE_SUCCESS)
                 .addTaggedData(MetricsEvent.FIELD_AUTOFILL_NUM_DATASETS,
                         response.getDatasets() == null ? 0 : response.getDatasets().size());
+        if (fieldClassificationIds != null) {
+            log.addTaggedData(MetricsEvent.FIELD_AUTOFILL_NUM_FIELD_CLASSIFICATION_IDS,
+                    fieldClassificationIds.length);
+        }
         mMetricsLogger.write(log);
     }
 
@@ -1106,7 +1117,7 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
         mService.logContextCommitted(id, mClientState, mSelectedDatasetIds, ignoredDatasets,
                 changedFieldIds, changedDatasetIds,
                 manuallyFilledFieldIds, manuallyFilledDatasetIds,
-                detectedFieldIds, detectedMatches);
+                detectedFieldIds, detectedMatches, mComponentName.getPackageName());
     }
 
     /**
@@ -2115,6 +2126,7 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
         final String prefix2 = prefix + "  ";
         pw.print(prefix); pw.print("id: "); pw.println(id);
         pw.print(prefix); pw.print("uid: "); pw.println(uid);
+        pw.print(prefix); pw.print("flags: "); pw.println(mFlags);
         pw.print(prefix); pw.print("mComponentName: "); pw.println(mComponentName);
         pw.print(prefix); pw.print("mActivityToken: "); pw.println(mActivityToken);
         pw.print(prefix); pw.print("mStartTime: "); pw.println(mStartTime);
