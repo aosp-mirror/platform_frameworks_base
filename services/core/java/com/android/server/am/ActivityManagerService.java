@@ -250,6 +250,7 @@ import android.app.assist.AssistStructure;
 import android.app.backup.IBackupManager;
 import android.app.servertransaction.ConfigurationChangeItem;
 import android.app.usage.UsageEvents;
+import android.app.usage.UsageStats;
 import android.app.usage.UsageStatsManagerInternal;
 import android.appwidget.AppWidgetManager;
 import android.content.ActivityNotFoundException;
@@ -20168,6 +20169,11 @@ public class ActivityManagerService extends IActivityManager.Stub
             // Instrumentation can kill and relaunch even persistent processes
             forceStopPackageLocked(ii.targetPackage, -1, true, false, true, true, false, userId,
                     "start instr");
+            // Inform usage stats to make the target package active
+            if (mUsageStatsService != null) {
+                mUsageStatsService.reportEvent(ii.targetPackage, userId,
+                        UsageEvents.Event.SYSTEM_INTERACTION);
+            }
             ProcessRecord app = addAppLocked(ai, defProcess, false, abiOverride);
             app.instr = activeInstr;
             activeInstr.mFinished = false;
