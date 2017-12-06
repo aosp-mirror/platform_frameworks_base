@@ -32,6 +32,7 @@ import android.content.ComponentName;
 import android.content.Context;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageManager;
+import android.content.pm.PackageManager.NameNotFoundException;
 import android.content.pm.ServiceInfo;
 import android.graphics.Rect;
 import android.graphics.drawable.Drawable;
@@ -43,6 +44,7 @@ import android.os.Looper;
 import android.os.RemoteCallbackList;
 import android.os.RemoteException;
 import android.os.SystemClock;
+import android.os.UserHandle;
 import android.os.UserManager;
 import android.provider.Settings;
 import android.service.autofill.AutofillService;
@@ -463,12 +465,42 @@ final class AutofillManagerServiceImpl {
             sessionId = sRandom.nextInt();
         } while (sessionId == NO_SESSION || mSessions.indexOfKey(sessionId) >= 0);
 
+        assertCallerLocked(componentName);
+
         final Session newSession = new Session(this, mUi, mContext, mHandlerCaller, mUserId, mLock,
                 sessionId, uid, activityToken, appCallbackToken, hasCallback,
                 mUiLatencyHistory, mInfo.getServiceInfo().getComponentName(), componentName);
         mSessions.put(newSession.id, newSession);
 
         return newSession;
+    }
+
+    /**
+     * Asserts the component is owned by the caller.
+     */
+    private void assertCallerLocked(@NonNull ComponentName componentName) {
+        final PackageManager pm = mContext.getPackageManager();
+        final int callingUid = Binder.getCallingUid();
+        final int packageUid;
+        try {
+            packageUid = pm.getPackageUidAsUser(componentName.getPackageName(),
+                    UserHandle.getCallingUserId());
+        } catch (NameNotFoundException e) {
+            throw new SecurityException("Could not verify UID for " + componentName);
+        }
+        if (callingUid != packageUid) {
+            final String[] packages = pm.getPackagesForUid(callingUid);
+            final String callingPackage = packages != null ? packages[0] : "uid-" + callingUid;
+            Slog.w(TAG, "App (package=" + callingPackage + ", UID=" + callingUid
+                    + ") passed component (" + componentName + ") owned by UID " + packageUid);
+            mMetricsLogger.write(
+                    Helper.newLogMaker(MetricsEvent.AUTOFILL_FORGED_COMPONENT_ATTEMPT,
+                            callingPackage, getServicePackageName())
+                    .addTaggedData(MetricsEvent.FIELD_AUTOFILL_FORGED_COMPONENT_NAME,
+                            componentName == null ? "null" : componentName.flattenToShortString()));
+
+            throw new SecurityException("Invalid component: " + componentName);
+        }
     }
 
     /**

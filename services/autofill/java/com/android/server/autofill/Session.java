@@ -236,10 +236,15 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
                 structure.ensureData();
 
                 // Sanitize structure before it's sent to service.
-                if (!mComponentName.equals(structure.getActivityComponent())) {
+                final ComponentName componentNameFromApp = structure.getActivityComponent();
+                if (!mComponentName.equals(componentNameFromApp)) {
                     Slog.w(TAG, "Activity " + mComponentName + " forged different component on "
-                            + "AssistStructure: " + structure.getActivityComponent());
+                            + "AssistStructure: " + componentNameFromApp);
                     structure.setActivityComponent(mComponentName);
+                    mMetricsLogger.write(newLogMaker(MetricsEvent.AUTOFILL_FORGED_COMPONENT_ATTEMPT)
+                            .addTaggedData(MetricsEvent.FIELD_AUTOFILL_FORGED_COMPONENT_NAME,
+                                    componentNameFromApp == null ? "null"
+                                            : componentNameFromApp.flattenToShortString()));
                 }
                 structure.sanitizeForParceling(true);
 
@@ -1675,7 +1680,7 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
                 break;
             case ACTION_VIEW_ENTERED:
                 if (sVerbose && virtualBounds != null) {
-                    Slog.w(TAG, "entered on virtual child " + id + ": " + virtualBounds);
+                    Slog.v(TAG, "entered on virtual child " + id + ": " + virtualBounds);
                 }
                 requestNewFillResponseIfNecessaryLocked(id, viewState, flags);
 
