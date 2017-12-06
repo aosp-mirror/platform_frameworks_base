@@ -4905,8 +4905,9 @@ public class Intent implements Parcelable, Cloneable {
      * <li>Enumeration of features here is not meant to restrict capabilities of the quick viewer.
      * Quick viewer can implement features not listed below.
      * <li>Features included at this time are: {@link QuickViewConstants#FEATURE_VIEW},
-     * {@link QuickViewConstants#FEATURE_EDIT}, {@link QuickViewConstants#FEATURE_DOWNLOAD},
-     * {@link QuickViewConstants#FEATURE_SEND}, {@link QuickViewConstants#FEATURE_PRINT}.
+     * {@link QuickViewConstants#FEATURE_EDIT}, {@link QuickViewConstants#FEATURE_DELETE},
+     * {@link QuickViewConstants#FEATURE_DOWNLOAD}, {@link QuickViewConstants#FEATURE_SEND},
+     * {@link QuickViewConstants#FEATURE_PRINT}.
      * <p>
      * Requirements:
      * <li>Quick viewer shouldn't show a feature if the feature is absent in
