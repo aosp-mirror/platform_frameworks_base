@@ -21,15 +21,23 @@ import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
 import android.content.pm.dex.ArtManager;
 import android.os.Binder;
+import android.os.Environment;
 import android.os.Handler;
+import android.os.ParcelFileDescriptor;
 import android.os.RemoteException;
 import android.content.pm.IPackageManager;
 import android.content.pm.dex.ISnapshotRuntimeProfileCallback;
 import android.os.SystemProperties;
+import android.os.UserHandle;
 import android.util.Slog;
 
+import com.android.internal.annotations.GuardedBy;
 import com.android.internal.os.BackgroundThread;
 import com.android.internal.util.Preconditions;
+import com.android.server.pm.Installer;
+import com.android.server.pm.Installer.InstallerException;
+import java.io.File;
+import java.io.FileNotFoundException;
 
 /**
  * A system service that provides access to runtime and compiler artifacts.
@@ -50,10 +58,16 @@ public class ArtManagerService extends android.content.pm.dex.IArtManager.Stub {
     private static boolean DEBUG_IGNORE_PERMISSIONS = false;
 
     private final IPackageManager mPackageManager;
+    private final Object mInstallLock;
+    @GuardedBy("mInstallLock")
+    private final Installer mInstaller;
+
     private final Handler mHandler;
 
-    public ArtManagerService(IPackageManager pm) {
+    public ArtManagerService(IPackageManager pm, Installer installer, Object installLock) {
         mPackageManager = pm;
+        mInstaller = installer;
+        mInstallLock = installLock;
         mHandler = new Handler(BackgroundThread.getHandler().getLooper());
     }
 
@@ -105,8 +119,53 @@ public class ArtManagerService extends android.content.pm.dex.IArtManager.Stub {
             return;
         }
 
-        // All good, move forward and get the profile.
-        postError(callback, packageName, ArtManager.SNAPSHOT_FAILED_INTERNAL_ERROR);
+        // All good, create the profile snapshot.
+        createProfileSnapshot(packageName, codePath, callback, info);
+        // Destroy the snapshot, we no longer need it.
+        destroyProfileSnapshot(packageName, codePath);
+    }
+
+    private void createProfileSnapshot(String packageName, String codePath,
+            ISnapshotRuntimeProfileCallback callback, PackageInfo info) {
+        // Ask the installer to snapshot the profile.
+        synchronized (mInstallLock) {
+            try {
+                if (!mInstaller.createProfileSnapshot(UserHandle.getAppId(info.applicationInfo.uid),
+                        packageName, codePath)) {
+                    postError(callback, packageName, ArtManager.SNAPSHOT_FAILED_INTERNAL_ERROR);
+                    return;
+                }
+            } catch (InstallerException e) {
+                postError(callback, packageName, ArtManager.SNAPSHOT_FAILED_INTERNAL_ERROR);
+                return;
+            }
+        }
+
+        // Open the snapshot and invoke the callback.
+        File snapshotProfile = Environment.getProfileSnapshotPath(packageName, codePath);
+        ParcelFileDescriptor fd;
+        try {
+            fd = ParcelFileDescriptor.open(snapshotProfile, ParcelFileDescriptor.MODE_READ_ONLY);
+            postSuccess(packageName, fd, callback);
+        } catch (FileNotFoundException e) {
+            Slog.w(TAG, "Could not open snapshot profile for " + packageName + ":" + codePath, e);
+            postError(callback, packageName, ArtManager.SNAPSHOT_FAILED_INTERNAL_ERROR);
+        }
+    }
+
+    private void destroyProfileSnapshot(String packageName, String codePath) {
+        if (DEBUG) {
+            Slog.d(TAG, "Destroying profile snapshot for" + packageName + ":" + codePath);
+        }
+
+        synchronized (mInstallLock) {
+            try {
+                mInstaller.destroyProfileSnapshot(packageName, codePath);
+            } catch (InstallerException e) {
+                Slog.e(TAG, "Failed to destroy profile snapshot for " +
+                    packageName + ":" + codePath, e);
+            }
+        }
     }
 
     @Override
@@ -123,11 +182,30 @@ public class ArtManagerService extends android.content.pm.dex.IArtManager.Stub {
      */
     private void postError(ISnapshotRuntimeProfileCallback callback, String packageName,
             int errCode) {
+        if (DEBUG) {
+            Slog.d(TAG, "Failed to snapshot profile for " + packageName + " with error: " +
+                    errCode);
+        }
         mHandler.post(() -> {
             try {
                 callback.onError(errCode);
             } catch (RemoteException e) {
                 Slog.w(TAG, "Failed to callback after profile snapshot for " + packageName, e);
+            }
+        });
+    }
+
+    private void postSuccess(String packageName, ParcelFileDescriptor fd,
+            ISnapshotRuntimeProfileCallback callback) {
+        if (DEBUG) {
+            Slog.d(TAG, "Successfully snapshot profile for " + packageName);
+        }
+        mHandler.post(() -> {
+            try {
+                callback.onSuccess(fd);
+            } catch (RemoteException e) {
+                Slog.w(TAG,
+                        "Failed to call onSuccess after profile snapshot for " + packageName, e);
             }
         });
     }

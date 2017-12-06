@@ -291,8 +291,9 @@ public class Environment {
     }
 
     /** {@hide} */
-    public static File getReferenceProfile(String packageName) {
-        return buildPath(getDataDirectory(), "misc", "profiles", "ref", packageName);
+    public static File getProfileSnapshotPath(String packageName, String codePath) {
+        return buildPath(buildPath(getDataDirectory(), "misc", "profiles", "ref", packageName,
+                "primary.prof.snapshot"));
     }
 
     /** {@hide} */
