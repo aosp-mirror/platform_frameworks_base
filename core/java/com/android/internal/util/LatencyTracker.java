@@ -1,20 +1,18 @@
 /*
- * Copyright (C) 2016 The Android Open Source Project
+ * Copyright (C) 2017 The Android Open Source Project
  *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
+ * Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file
+ * except in compliance with the License. You may obtain a copy of the License at
  *
  *      http://www.apache.org/licenses/LICENSE-2.0
  *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License
+ * Unless required by applicable law or agreed to in writing, software distributed under the
+ * License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied. See the License for the specific language governing
+ * permissions and limitations under the License.
  */
 
-package com.android.keyguard;
+package com.android.internal.util;
 
 import android.content.BroadcastReceiver;
 import android.content.Context;
@@ -28,7 +26,7 @@ import android.util.EventLog;
 import android.util.Log;
 import android.util.SparseLongArray;
 
-import com.android.systemui.EventLogTags;
+import com.android.internal.logging.EventLogTags;
 
 /**
  * Class to track various latencies in SystemUI. It then outputs the latency to logcat so these
@@ -76,13 +74,19 @@ public class LatencyTracker {
      */
     public static final int ACTION_TURN_ON_SCREEN = 5;
 
+    /**
+     * Time it takes to rotate the screen.
+     */
+    public static final int ACTION_ROTATE_SCREEN = 6;
+
     private static final String[] NAMES = new String[] {
             "expand panel",
             "toggle recents",
             "fingerprint wake-and-unlock",
             "check credential",
             "check credential unlocked",
-            "turn on screen" };
+            "turn on screen",
+            "rotate the screen"};
 
     private static LatencyTracker sLatencyTracker;
 
