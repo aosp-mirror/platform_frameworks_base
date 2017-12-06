@@ -1,49 +1,51 @@
 package com.android.server.notification;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
 import static org.mockito.Mockito.spy;
 
 import android.content.Intent;
 import android.net.Uri;
-import android.os.Looper;
 import android.service.notification.Condition;
 import android.service.notification.ScheduleCalendar;
 import android.service.notification.ZenModeConfig;
-import android.support.test.InstrumentationRegistry;
-import android.test.ServiceTestCase;
-import android.testing.TestableContext;
+import android.support.test.filters.SmallTest;
+import android.support.test.runner.AndroidJUnit4;
 
 import org.junit.Before;
-import org.junit.Rule;
 import org.junit.Test;
+import org.junit.runner.RunWith;
 import org.mockito.MockitoAnnotations;
 
 import java.util.Calendar;
 import java.util.GregorianCalendar;
 
-public class ScheduleConditionProviderTest extends ServiceTestCase<ScheduleConditionProvider> {
+@RunWith(AndroidJUnit4.class)
+@SmallTest
+public class ScheduleConditionProviderTest extends NotificationTestCase {
 
     ScheduleConditionProvider mService;
-
-    @Rule
-    public final TestableContext mContext =
-            new TestableContext(InstrumentationRegistry.getContext(), null);
-
-    public ScheduleConditionProviderTest() {
-        super(ScheduleConditionProvider.class);
-    }
 
     @Before
     public void setUp() throws Exception {
         MockitoAnnotations.initMocks(this);
-        if (Looper.myLooper() == null) {
-            Looper.prepare();
-        }
 
         Intent startIntent =
                 new Intent("com.android.server.notification.ScheduleConditionProvider");
         startIntent.setPackage("android");
-        bindService(startIntent);
-        mService = spy(getService());
+        ScheduleConditionProvider service = new ScheduleConditionProvider();
+        service.attach(
+                getContext(),
+                null,               // ActivityThread not actually used in Service
+                ScheduleConditionProvider.class.getName(),
+                null,               // token not needed when not talking with the activity manager
+                null,
+                null                // mocked services don't talk with the activity manager
+                );
+        service.onCreate();
+        service.onBind(startIntent);
+        mService = spy(service);
    }
 
     @Test
