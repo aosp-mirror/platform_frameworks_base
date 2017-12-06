@@ -16,8 +16,8 @@
 
 package com.android.keyguard;
 
-import static com.android.internal.util.LatencyTracker.ACTION_CHECK_CREDENTIAL;
-import static com.android.internal.util.LatencyTracker.ACTION_CHECK_CREDENTIAL_UNLOCKED;
+import static com.android.keyguard.LatencyTracker.ACTION_CHECK_CREDENTIAL;
+import static com.android.keyguard.LatencyTracker.ACTION_CHECK_CREDENTIAL_UNLOCKED;
 
 import android.content.Context;
 import android.os.AsyncTask;
@@ -29,7 +29,6 @@ import android.view.KeyEvent;
 import android.view.View;
 import android.widget.LinearLayout;
 
-import com.android.internal.util.LatencyTracker;
 import com.android.internal.widget.LockPatternChecker;
 import com.android.internal.widget.LockPatternUtils;
 

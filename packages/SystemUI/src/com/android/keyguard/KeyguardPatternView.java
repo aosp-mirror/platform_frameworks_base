@@ -15,8 +15,8 @@
  */
 package com.android.keyguard;
 
-import static com.android.internal.util.LatencyTracker.ACTION_CHECK_CREDENTIAL;
-import static com.android.internal.util.LatencyTracker.ACTION_CHECK_CREDENTIAL_UNLOCKED;
+import static com.android.keyguard.LatencyTracker.ACTION_CHECK_CREDENTIAL;
+import static com.android.keyguard.LatencyTracker.ACTION_CHECK_CREDENTIAL_UNLOCKED;
 
 import android.content.Context;
 import android.graphics.Rect;
@@ -33,7 +33,6 @@ import android.view.animation.AnimationUtils;
 import android.view.animation.Interpolator;
 import android.widget.LinearLayout;
 
-import com.android.internal.util.LatencyTracker;
 import com.android.internal.widget.LockPatternChecker;
 import com.android.internal.widget.LockPatternUtils;
 import com.android.internal.widget.LockPatternView;
