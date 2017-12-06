@@ -19,6 +19,7 @@ package com.android.server.devicepolicy;
 import static android.Manifest.permission.BIND_DEVICE_ADMIN;
 import static android.Manifest.permission.MANAGE_CA_CERTIFICATES;
 import static android.app.ActivityManager.LOCK_TASK_MODE_NONE;
+import static android.app.ActivityManager.USER_OP_SUCCESS;
 import static android.app.admin.DevicePolicyManager.CODE_ACCOUNTS_NOT_EMPTY;
 import static android.app.admin.DevicePolicyManager.CODE_ADD_MANAGED_PROFILE_DISALLOWED;
 import static android.app.admin.DevicePolicyManager.CODE_CANNOT_ADD_MANAGED_PROFILE;
@@ -8399,6 +8400,90 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
             } finally {
                 mInjector.binderRestoreCallingIdentity(id);
             }
+        }
+    }
+
+    @Override
+    public boolean stopUser(ComponentName who, UserHandle userHandle) {
+        Preconditions.checkNotNull(who, "ComponentName is null");
+
+        synchronized (this) {
+            getActiveAdminForCallerLocked(who, DeviceAdminInfo.USES_POLICY_DEVICE_OWNER);
+        }
+
+        final int userId = userHandle.getIdentifier();
+        if (isManagedProfile(userId)) {
+            Log.w(LOG_TAG, "Managed profile cannot be stopped");
+            return false;
+        }
+
+        final long id = mInjector.binderClearCallingIdentity();
+        try {
+            return mInjector.getIActivityManager().stopUser(userId, true /*force*/, null)
+                    == USER_OP_SUCCESS;
+        } catch (RemoteException e) {
+            // Same process, should not happen.
+            return false;
+        } finally {
+            mInjector.binderRestoreCallingIdentity(id);
+        }
+    }
+
+    @Override
+    public boolean logoutUser(ComponentName who) {
+        Preconditions.checkNotNull(who, "ComponentName is null");
+
+        final int callingUserId = mInjector.userHandleGetCallingUserId();
+        synchronized (this) {
+            getActiveAdminForCallerLocked(who, DeviceAdminInfo.USES_POLICY_PROFILE_OWNER);
+            if (!isUserAffiliatedWithDeviceLocked(callingUserId)) {
+                throw new SecurityException("Admin " + who +
+                        " is neither the device owner or affiliated user's profile owner.");
+            }
+        }
+
+        if (isManagedProfile(callingUserId)) {
+            Log.w(LOG_TAG, "Managed profile cannot be logout");
+            return false;
+        }
+
+        final long id = mInjector.binderClearCallingIdentity();
+        try {
+            if (!mInjector.getIActivityManager().switchUser(UserHandle.USER_SYSTEM)) {
+                Log.w(LOG_TAG, "Failed to switch to primary user");
+                return false;
+            }
+            return mInjector.getIActivityManager().stopUser(callingUserId, true /*force*/, null)
+                    == USER_OP_SUCCESS;
+        } catch (RemoteException e) {
+            // Same process, should not happen.
+            return false;
+        } finally {
+            mInjector.binderRestoreCallingIdentity(id);
+        }
+    }
+
+    @Override
+    public List<UserHandle> getSecondaryUsers(ComponentName who) {
+        Preconditions.checkNotNull(who, "ComponentName is null");
+        synchronized (this) {
+            getActiveAdminForCallerLocked(who, DeviceAdminInfo.USES_POLICY_DEVICE_OWNER);
+        }
+
+        final long id = mInjector.binderClearCallingIdentity();
+        try {
+            final List<UserInfo> userInfos = mInjector.getUserManager().getUsers(true
+                    /*excludeDying*/);
+            final List<UserHandle> userHandles = new ArrayList<>();
+            for (UserInfo userInfo : userInfos) {
+                UserHandle userHandle = userInfo.getUserHandle();
+                if (!userHandle.isSystem() && !isManagedProfile(userHandle.getIdentifier())) {
+                    userHandles.add(userInfo.getUserHandle());
+                }
+            }
+            return userHandles;
+        } finally {
+            mInjector.binderRestoreCallingIdentity(id);
         }
     }
 
