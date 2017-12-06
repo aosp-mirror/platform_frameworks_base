@@ -17,8 +17,11 @@
 package android.app.slice;
 
 import android.annotation.SystemService;
+import android.app.slice.ISliceListener.Stub;
 import android.content.Context;
+import android.net.Uri;
 import android.os.Handler;
+import android.os.RemoteException;
 import android.os.ServiceManager;
 import android.os.ServiceManager.ServiceNotFoundException;
 
@@ -35,5 +38,94 @@ public class SliceManager {
         mContext = context;
         mService = ISliceManager.Stub.asInterface(
                 ServiceManager.getServiceOrThrow(Context.SLICE_SERVICE));
+    }
+
+    /**
+     */
+    public void addSliceListener(Uri uri, SliceListener listener, SliceSpec[] specs) {
+        try {
+            mService.addSliceListener(uri, mContext.getPackageName(), listener.mStub, specs);
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    /**
+     */
+    public void removeSliceListener(Uri uri, SliceListener listener) {
+        try {
+            mService.removeSliceListener(uri, mContext.getPackageName(), listener.mStub);
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    /**
+     */
+    public void pinSlice(Uri uri, SliceSpec[] specs) {
+        try {
+            mService.pinSlice(mContext.getPackageName(), uri, specs);
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    /**
+     */
+    public void unpinSlice(Uri uri) {
+        try {
+            mService.unpinSlice(mContext.getPackageName(), uri);
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    /**
+     */
+    public boolean hasSliceAccess() {
+        try {
+            return mService.hasSliceAccess(mContext.getPackageName());
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    /**
+     */
+    public SliceSpec[] getPinnedSpecs(Uri uri) {
+        try {
+            return mService.getPinnedSpecs(uri, mContext.getPackageName());
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    /**
+     */
+    public abstract static class SliceListener {
+        private final Handler mHandler;
+
+        /**
+         */
+        public SliceListener() {
+            this(Handler.getMain());
+        }
+
+        /**
+         */
+        public SliceListener(Handler h) {
+            mHandler = h;
+        }
+
+        /**
+         */
+        public abstract void onSliceUpdated(Slice s);
+
+        private final ISliceListener.Stub mStub = new Stub() {
+            @Override
+            public void onSliceUpdated(Slice s) throws RemoteException {
+                mHandler.post(() -> SliceListener.this.onSliceUpdated(s));
+            }
+        };
     }
 }

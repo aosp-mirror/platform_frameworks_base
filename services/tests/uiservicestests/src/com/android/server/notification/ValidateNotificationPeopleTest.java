@@ -30,9 +30,11 @@ import org.junit.runner.RunWith;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertEquals;
 
+import com.android.server.UiServiceTestCase;
+
 @SmallTest
 @RunWith(AndroidJUnit4.class)
-public class ValidateNotificationPeopleTest extends NotificationTestCase {
+public class ValidateNotificationPeopleTest extends UiServiceTestCase {
 
     @Test
     public void testNoExtra() throws Exception {

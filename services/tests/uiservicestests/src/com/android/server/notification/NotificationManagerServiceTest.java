@@ -83,6 +83,7 @@ import android.util.ArrayMap;
 import android.util.AtomicFile;
 
 import com.android.internal.statusbar.NotificationVisibility;
+import com.android.server.UiServiceTestCase;
 import com.android.server.lights.Light;
 import com.android.server.lights.LightsManager;
 import com.android.server.notification.NotificationManagerService.NotificationAssistants;
@@ -108,7 +109,7 @@ import java.util.Map;
 @SmallTest
 @RunWith(AndroidTestingRunner.class)
 @RunWithLooper
-public class NotificationManagerServiceTest extends NotificationTestCase {
+public class NotificationManagerServiceTest extends UiServiceTestCase {
     private static final String TEST_CHANNEL_ID = "NotificationManagerServiceTestChannelId";
     private final int mUid = Binder.getCallingUid();
     private NotificationManagerService mService;

@@ -97,6 +97,7 @@ aidl_files := \
 	frameworks/base/core/java/android/app/admin/SystemUpdatePolicy.aidl \
 	frameworks/base/core/java/android/app/admin/PasswordMetrics.aidl \
 	frameworks/base/core/java/android/app/slice/ISliceManager.aidl \
+	frameworks/base/core/java/android/app/slice/ISliceListener.aidl \
 	frameworks/base/core/java/android/print/PrintDocumentInfo.aidl \
 	frameworks/base/core/java/android/print/PageRange.aidl \
 	frameworks/base/core/java/android/print/PrintAttributes.aidl \

@@ -103,6 +103,11 @@ public final class SliceSpec implements Parcelable {
         return mType.equals(other.mType) && mRevision == other.mRevision;
     }
 
+    @Override
+    public String toString() {
+        return String.format("SliceSpec{%s,%d}", mType, mRevision);
+    }
+
     public static final Creator<SliceSpec> CREATOR = new Creator<SliceSpec>() {
         @Override
         public SliceSpec createFromParcel(Parcel source) {

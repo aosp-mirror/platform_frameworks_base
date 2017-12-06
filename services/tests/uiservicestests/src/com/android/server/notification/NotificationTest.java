@@ -33,6 +33,8 @@ import android.os.Build;
 import android.support.test.filters.SmallTest;
 import android.support.test.runner.AndroidJUnit4;
 
+import com.android.server.UiServiceTestCase;
+
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -41,7 +43,7 @@ import org.mockito.MockitoAnnotations;
 
 @RunWith(AndroidJUnit4.class)
 @SmallTest
-public class NotificationTest extends NotificationTestCase {
+public class NotificationTest extends UiServiceTestCase {
 
     @Mock
     ActivityManager mAm;

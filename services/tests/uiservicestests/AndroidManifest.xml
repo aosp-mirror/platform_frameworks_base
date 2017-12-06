@@ -28,6 +28,9 @@
 
     <application>
         <uses-library android:name="android.test.runner" />
+
+        <provider android:name=".DummyProvider"
+            android:authorities="com.android.services.uitests" />
     </application>
 
     <instrumentation

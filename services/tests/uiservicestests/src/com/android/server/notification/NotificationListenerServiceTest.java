@@ -37,6 +37,8 @@ import android.service.notification.SnoozeCriterion;
 import android.support.test.runner.AndroidJUnit4;
 import android.test.suitebuilder.annotation.SmallTest;
 
+import com.android.server.UiServiceTestCase;
+
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
@@ -45,7 +47,7 @@ import java.util.List;
 
 @SmallTest
 @RunWith(AndroidJUnit4.class)
-public class NotificationListenerServiceTest extends NotificationTestCase {
+public class NotificationListenerServiceTest extends UiServiceTestCase {
 
     private String[] mKeys = new String[] { "key", "key1", "key2", "key3"};
 

@@ -58,13 +58,13 @@ import android.provider.Settings;
 import android.service.notification.StatusBarNotification;
 import android.support.test.runner.AndroidJUnit4;
 import android.test.suitebuilder.annotation.SmallTest;
-import android.util.Slog;
 import android.view.accessibility.AccessibilityEvent;
 import android.view.accessibility.AccessibilityManager;
 import android.view.accessibility.IAccessibilityManager;
 import android.view.accessibility.IAccessibilityManagerClient;
 
 import com.android.internal.util.IntPair;
+import com.android.server.UiServiceTestCase;
 import com.android.server.lights.Light;
 
 import org.junit.Before;
@@ -74,12 +74,10 @@ import org.mockito.ArgumentMatcher;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
-import org.mockito.invocation.InvocationOnMock;
-import org.mockito.stubbing.Answer;
 
 @SmallTest
 @RunWith(AndroidJUnit4.class)
-public class BuzzBeepBlinkTest extends NotificationTestCase {
+public class BuzzBeepBlinkTest extends UiServiceTestCase {
 
     @Mock AudioManager mAudioManager;
     @Mock Vibrator mVibrator;

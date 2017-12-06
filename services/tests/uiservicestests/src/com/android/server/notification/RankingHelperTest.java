@@ -65,6 +65,7 @@ import android.util.ArrayMap;
 import android.util.Xml;
 
 import com.android.internal.util.FastXmlSerializer;
+import com.android.server.UiServiceTestCase;
 
 import org.json.JSONArray;
 import org.json.JSONObject;
@@ -90,7 +91,7 @@ import java.util.concurrent.ThreadLocalRandom;
 
 @SmallTest
 @RunWith(AndroidJUnit4.class)
-public class RankingHelperTest extends NotificationTestCase {
+public class RankingHelperTest extends UiServiceTestCase {
     private static final String PKG = "com.android.server.notification";
     private static final int UID = 0;
     private static final UserHandle USER = UserHandle.of(0);

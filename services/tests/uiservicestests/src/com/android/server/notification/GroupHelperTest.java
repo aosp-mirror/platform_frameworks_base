@@ -38,6 +38,8 @@ import android.service.notification.StatusBarNotification;
 import android.support.test.runner.AndroidJUnit4;
 import android.test.suitebuilder.annotation.SmallTest;
 
+import com.android.server.UiServiceTestCase;
+
 import java.util.ArrayList;
 import java.util.LinkedHashSet;
 import java.util.List;
@@ -45,7 +47,7 @@ import java.util.Map;
 
 @SmallTest
 @RunWith(AndroidJUnit4.class)
-public class GroupHelperTest extends NotificationTestCase {
+public class GroupHelperTest extends UiServiceTestCase {
     private @Mock GroupHelper.Callback mCallback;
 
     private GroupHelper mGroupHelper;

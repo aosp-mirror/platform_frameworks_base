@@ -31,12 +31,14 @@ import android.service.notification.Adjustment;
 import android.service.notification.SnoozeCriterion;
 import android.service.notification.StatusBarNotification;
 
+import com.android.server.UiServiceTestCase;
+
 import org.junit.Test;
 
 import java.util.ArrayList;
 import java.util.Objects;
 
-public class NotificationAdjustmentExtractorTest extends NotificationTestCase {
+public class NotificationAdjustmentExtractorTest extends UiServiceTestCase {
 
     @Test
     public void testExtractsAdjustment() {

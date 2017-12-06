@@ -27,6 +27,8 @@ import android.support.test.filters.FlakyTest;
 import android.support.test.runner.AndroidJUnit4;
 import android.test.suitebuilder.annotation.SmallTest;
 
+import com.android.server.UiServiceTestCase;
+
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -36,7 +38,7 @@ import java.util.GregorianCalendar;
 
 @SmallTest
 @RunWith(AndroidJUnit4.class)
-public class ScheduleCalendarTest extends NotificationTestCase {
+public class ScheduleCalendarTest extends UiServiceTestCase {
 
     private ScheduleCalendar mScheduleCalendar;
     private ZenModeConfig.ScheduleInfo mScheduleInfo;

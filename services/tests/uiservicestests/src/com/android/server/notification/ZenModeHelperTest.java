@@ -32,6 +32,8 @@ import android.test.suitebuilder.annotation.SmallTest;
 import android.testing.AndroidTestingRunner;
 import android.testing.TestableLooper;
 
+import com.android.server.UiServiceTestCase;
+
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -41,7 +43,7 @@ import org.mockito.MockitoAnnotations;
 @SmallTest
 @RunWith(AndroidTestingRunner.class)
 @TestableLooper.RunWithLooper
-public class ZenModeHelperTest extends NotificationTestCase {
+public class ZenModeHelperTest extends UiServiceTestCase {
 
     @Mock ConditionProviders mConditionProviders;
     private TestableLooper mTestableLooper;
