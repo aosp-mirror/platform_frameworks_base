@@ -26,7 +26,6 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.pm.ParceledListSlice;
 import android.graphics.Region;
-import android.hardware.fingerprint.FingerprintManager;
 import android.os.Handler;
 import android.os.IBinder;
 import android.os.Looper;
@@ -51,8 +50,6 @@ import com.android.internal.os.SomeArgs;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.util.List;
-
-import static android.content.pm.PackageManager.FEATURE_FINGERPRINT;
 
 /**
  * Accessibility services should only be used to assist users with disabilities in using
@@ -394,7 +391,7 @@ public abstract class AccessibilityService extends Service {
     public static final int SHOW_MODE_AUTO = 0;
     public static final int SHOW_MODE_HIDDEN = 1;
 
-    private int mConnectionId;
+    private int mConnectionId = AccessibilityInteractionClient.NO_ID;
 
     private AccessibilityServiceInfo mInfo;
 
@@ -612,7 +609,7 @@ public abstract class AccessibilityService extends Service {
 
     /**
      * Get the controller for fingerprint gestures. This feature requires {@link
-     * AccessibilityServiceInfo#CAPABILITY_CAN_CAPTURE_FINGERPRINT_GESTURES}.
+     * AccessibilityServiceInfo#CAPABILITY_CAN_REQUEST_FINGERPRINT_GESTURES}.
      *
      *<strong>Note: </strong> The service must be connected before this method is called.
      *
@@ -1612,7 +1609,7 @@ public abstract class AccessibilityService extends Service {
 
         private final Callbacks mCallback;
 
-        private int mConnectionId;
+        private int mConnectionId = AccessibilityInteractionClient.NO_ID;
 
         public IAccessibilityServiceClientWrapper(Context context, Looper looper,
                 Callbacks callback) {
@@ -1707,7 +1704,8 @@ public abstract class AccessibilityService extends Service {
                     if (event != null) {
                         // Send the event to AccessibilityCache via AccessibilityInteractionClient
                         AccessibilityInteractionClient.getInstance().onAccessibilityEvent(event);
-                        if (serviceWantsEvent) {
+                        if (serviceWantsEvent
+                                && (mConnectionId != AccessibilityInteractionClient.NO_ID)) {
                             // Send the event to AccessibilityService
                             mCallback.onAccessibilityEvent(event);
                         }
@@ -1721,7 +1719,9 @@ public abstract class AccessibilityService extends Service {
                 } return;
 
                 case DO_ON_INTERRUPT: {
-                    mCallback.onInterrupt();
+                    if (mConnectionId != AccessibilityInteractionClient.NO_ID) {
+                        mCallback.onInterrupt();
+                    }
                 } return;
 
                 case DO_INIT: {
@@ -1746,8 +1746,10 @@ public abstract class AccessibilityService extends Service {
                 } return;
 
                 case DO_ON_GESTURE: {
-                    final int gestureId = message.arg1;
-                    mCallback.onGesture(gestureId);
+                    if (mConnectionId != AccessibilityInteractionClient.NO_ID) {
+                        final int gestureId = message.arg1;
+                        mCallback.onGesture(gestureId);
+                    }
                 } return;
 
                 case DO_CLEAR_ACCESSIBILITY_CACHE: {
@@ -1779,37 +1781,51 @@ public abstract class AccessibilityService extends Service {
                 } return;
 
                 case DO_ON_MAGNIFICATION_CHANGED: {
-                    final SomeArgs args = (SomeArgs) message.obj;
-                    final Region region = (Region) args.arg1;
-                    final float scale = (float) args.arg2;
-                    final float centerX = (float) args.arg3;
-                    final float centerY = (float) args.arg4;
-                    mCallback.onMagnificationChanged(region, scale, centerX, centerY);
+                    if (mConnectionId != AccessibilityInteractionClient.NO_ID) {
+                        final SomeArgs args = (SomeArgs) message.obj;
+                        final Region region = (Region) args.arg1;
+                        final float scale = (float) args.arg2;
+                        final float centerX = (float) args.arg3;
+                        final float centerY = (float) args.arg4;
+                        mCallback.onMagnificationChanged(region, scale, centerX, centerY);
+                    }
                 } return;
 
                 case DO_ON_SOFT_KEYBOARD_SHOW_MODE_CHANGED: {
-                    final int showMode = (int) message.arg1;
-                    mCallback.onSoftKeyboardShowModeChanged(showMode);
+                    if (mConnectionId != AccessibilityInteractionClient.NO_ID) {
+                        final int showMode = (int) message.arg1;
+                        mCallback.onSoftKeyboardShowModeChanged(showMode);
+                    }
                 } return;
 
                 case DO_GESTURE_COMPLETE: {
-                    final boolean successfully = message.arg2 == 1;
-                    mCallback.onPerformGestureResult(message.arg1, successfully);
+                    if (mConnectionId != AccessibilityInteractionClient.NO_ID) {
+                        final boolean successfully = message.arg2 == 1;
+                        mCallback.onPerformGestureResult(message.arg1, successfully);
+                    }
                 } return;
                 case DO_ON_FINGERPRINT_ACTIVE_CHANGED: {
-                    mCallback.onFingerprintCapturingGesturesChanged(message.arg1 == 1);
+                    if (mConnectionId != AccessibilityInteractionClient.NO_ID) {
+                        mCallback.onFingerprintCapturingGesturesChanged(message.arg1 == 1);
+                    }
                 } return;
                 case DO_ON_FINGERPRINT_GESTURE: {
-                    mCallback.onFingerprintGesture(message.arg1);
+                    if (mConnectionId != AccessibilityInteractionClient.NO_ID) {
+                        mCallback.onFingerprintGesture(message.arg1);
+                    }
                 } return;
 
                 case (DO_ACCESSIBILITY_BUTTON_CLICKED): {
-                    mCallback.onAccessibilityButtonClicked();
+                    if (mConnectionId != AccessibilityInteractionClient.NO_ID) {
+                        mCallback.onAccessibilityButtonClicked();
+                    }
                 } return;
 
                 case (DO_ACCESSIBILITY_BUTTON_AVAILABILITY_CHANGED): {
-                    final boolean available = (message.arg1 != 0);
-                    mCallback.onAccessibilityButtonAvailabilityChanged(available);
+                    if (mConnectionId != AccessibilityInteractionClient.NO_ID) {
+                        final boolean available = (message.arg1 != 0);
+                        mCallback.onAccessibilityButtonAvailabilityChanged(available);
+                    }
                 } return;
 
                 default :

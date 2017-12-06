@@ -19,9 +19,7 @@
 #include <jni.h>
 #include <android/bitmap.h>
 #include <SkBitmap.h>
-#include <SkColorTable.h>
 #include <SkImageInfo.h>
-#include <SkPixelRef.h>
 
 namespace android {
 

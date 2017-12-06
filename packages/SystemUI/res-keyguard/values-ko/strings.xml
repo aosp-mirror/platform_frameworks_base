@@ -29,8 +29,7 @@
     <string name="keyguard_password_enter_password_code" msgid="595980919238127672">"잠금 해제하려면 비밀번호 입력"</string>
     <string name="keyguard_password_enter_pin_password_code" msgid="7504123374204446086">"잠금 해제하려면 PIN 입력"</string>
     <string name="keyguard_password_wrong_pin_code" msgid="6535018036285012028">"잘못된 PIN 코드입니다."</string>
-    <!-- no translation found for keyguard_sim_error_message_short (592109500618448312) -->
-    <skip />
+    <string name="keyguard_sim_error_message_short" msgid="592109500618448312">"유효하지 않은 카드"</string>
     <string name="keyguard_charged" msgid="2222329688813033109">"충전됨"</string>
     <string name="keyguard_plugged_in" msgid="89308975354638682">"충전 중"</string>
     <string name="keyguard_plugged_in_charging_fast" msgid="8869226755413795173">"고속 충전 중"</string>

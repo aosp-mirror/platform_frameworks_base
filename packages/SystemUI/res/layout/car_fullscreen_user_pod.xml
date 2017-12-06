@@ -20,10 +20,7 @@
     android:orientation="vertical"
     android:layout_width="wrap_content"
     android:layout_height="wrap_content"
-    android:layout_marginLeft="@dimen/car_fullscreen_user_pod_margin_side"
-    android:layout_marginRight="@dimen/car_fullscreen_user_pod_margin_side"
-    android:gravity="center"
-    android:layout_weight="1" >
+    android:gravity="center" >
 
     <ImageView android:id="@+id/user_avatar"
         android:layout_gravity="center"
@@ -31,10 +28,14 @@
         android:layout_height="@dimen/car_fullscreen_user_pod_image_avatar_height" />
 
     <TextView android:id="@+id/user_name"
-        android:layout_width="wrap_content"
+        android:layout_width="@dimen/car_fullscreen_user_pod_width"
         android:layout_height="wrap_content"
-        android:layout_marginTop="@dimen/car_fullscreen_user_pod_margin_above_text"
+        android:layout_marginTop="@dimen/car_fullscreen_user_pod_margin_name_top"
+        android:layout_marginBottom="@dimen/car_fullscreen_user_pod_margin_name_bottom"
         android:textSize="@dimen/car_fullscreen_user_pod_text_size"
         android:textColor="@color/qs_user_detail_name"
+        android:ellipsize="end"
+        android:singleLine="true"
+        android:gravity="center_horizontal"
         android:layout_gravity="center_horizontal" />
 </LinearLayout>

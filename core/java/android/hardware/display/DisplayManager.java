@@ -18,13 +18,16 @@ package android.hardware.display;
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.annotation.SystemApi;
 import android.annotation.SystemService;
 import android.content.Context;
+import android.graphics.Point;
 import android.media.projection.MediaProjection;
 import android.os.Handler;
 import android.util.SparseArray;
 import android.view.Display;
 import android.view.Surface;
+import android.view.WindowManagerPolicy;
 
 import java.util.ArrayList;
 
@@ -236,6 +239,13 @@ public final class DisplayManager {
      * keyguard is shown but is insecure.
      *
      * <p>
+     * This might be used in a case when the content of a virtual display is captured and sent to an
+     * external hardware display that is not visible to the system directly. This flag will allow
+     * the continued display of content while other displays will be covered by a keyguard which
+     * doesn't require providing credentials to unlock. This means that there is either no password
+     * or other authentication method set, or the device is in a trusted state -
+     * {@link android.service.trust.TrustAgentService} has available and active trust agent.
+     * </p><p>
      * This flag can only be applied to private displays as defined by the
      * {@link Display#FLAG_PRIVATE} display flag. It is mutually exclusive with
      * {@link #VIRTUAL_DISPLAY_FLAG_PUBLIC}. If both flags are specified then this flag's behavior
@@ -243,8 +253,11 @@ public final class DisplayManager {
      * </p>
      *
      * @see #createVirtualDisplay
+     * @see WindowManagerPolicy#isKeyguardSecure(int)
+     * @see WindowManagerPolicy#isKeyguardTrustedLw()
      * @hide
      */
+    // TODO: Update name and documentation and un-hide the flag. Don't change the value before that.
     public static final int VIRTUAL_DISPLAY_FLAG_CAN_SHOW_WITH_INSECURE_KEYGUARD = 1 << 5;
 
     /**
@@ -264,6 +277,19 @@ public final class DisplayManager {
      * @hide
      */
     public static final int VIRTUAL_DISPLAY_FLAG_ROTATES_WITH_CONTENT = 1 << 7;
+
+    /**
+     * Virtual display flag: Indicates that the contents will be destroyed once
+     * the display is removed.
+     *
+     * Public virtual displays without this flag will move their content to main display
+     * stack once they're removed. Private vistual displays will always destroy their
+     * content on removal even without this flag.
+     *
+     * @see #createVirtualDisplay
+     * @hide
+     */
+    public static final int VIRTUAL_DISPLAY_FLAG_DESTROY_CONTENT_ON_REMOVAL = 1 << 8;
 
     /** @hide */
     public DisplayManager(Context context) {
@@ -572,6 +598,20 @@ public final class DisplayManager {
             @Nullable String uniqueId) {
         return mGlobal.createVirtualDisplay(mContext, projection,
                 name, width, height, densityDpi, surface, flags, callback, handler, uniqueId);
+    }
+
+    /**
+     * Gets the stable device display size, in pixels.
+     *
+     * This should really only be used for things like server-side filtering of available
+     * applications. Most applications don't need the level of stability guaranteed by this and
+     * should instead query either the size of the display they're currently running on or the
+     * size of the default display.
+     * @hide
+     */
+    @SystemApi
+    public Point getStableDisplaySize() {
+        return mGlobal.getStableDisplaySize();
     }
 
     /**

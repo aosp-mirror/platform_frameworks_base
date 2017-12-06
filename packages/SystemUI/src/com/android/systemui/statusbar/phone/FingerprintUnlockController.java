@@ -32,6 +32,8 @@ import com.android.systemui.keyguard.KeyguardViewMediator;
 import com.android.systemui.keyguard.ScreenLifecycle;
 import com.android.systemui.keyguard.WakefulnessLifecycle;
 
+import java.io.PrintWriter;
+
 /**
  * Controller which coordinates all the fingerprint unlocking actions with the UI.
  */
@@ -81,6 +83,11 @@ public class FingerprintUnlockController extends KeyguardUpdateMonitorCallback {
      * not allowed.
      */
     public static final int MODE_DISMISS_BOUNCER = 6;
+
+    /**
+     * Mode in which fingerprint wakes and unlocks the device from a dream.
+     */
+    public static final int MODE_WAKE_AND_UNLOCK_FROM_DREAM = 7;
 
     /**
      * How much faster we collapse the lockscreen when authenticating with fingerprint.
@@ -191,6 +198,8 @@ public class FingerprintUnlockController extends KeyguardUpdateMonitorCallback {
     }
 
     public void startWakeAndUnlock(int mode) {
+        // TODO(b/62444020): remove when this bug is fixed
+        Log.v(TAG, "startWakeAndUnlock(" + mode + ")");
         boolean wasDeviceInteractive = mUpdateMonitor.isDeviceInteractive();
         mMode = mode;
         mHasScreenTurnedOnSinceAuthenticating = false;
@@ -228,16 +237,19 @@ public class FingerprintUnlockController extends KeyguardUpdateMonitorCallback {
                 }
                 Trace.endSection();
                 break;
+            case MODE_WAKE_AND_UNLOCK_FROM_DREAM:
             case MODE_WAKE_AND_UNLOCK_PULSING:
             case MODE_WAKE_AND_UNLOCK:
                 if (mMode == MODE_WAKE_AND_UNLOCK_PULSING) {
                     Trace.beginSection("MODE_WAKE_AND_UNLOCK_PULSING");
                     mStatusBar.updateMediaMetaData(false /* metaDataChanged */,
                             true /* allowEnterAnimation */);
-                } else {
+                } else if (mMode == MODE_WAKE_AND_UNLOCK){
                     Trace.beginSection("MODE_WAKE_AND_UNLOCK");
-
                     mDozeScrimController.abortDoze();
+                } else {
+                    Trace.beginSection("MODE_WAKE_AND_UNLOCK_FROM_DREAM");
+                    mUpdateMonitor.awakenFromDream();
                 }
                 mStatusBarWindowManager.setStatusBarFocusable(false);
                 mKeyguardViewMediator.onWakeAndUnlocking();
@@ -264,6 +276,7 @@ public class FingerprintUnlockController extends KeyguardUpdateMonitorCallback {
 
     @Override
     public void onStartedGoingToSleep(int why) {
+        resetMode();
         mPendingAuthenticatedUserId = -1;
     }
 
@@ -296,6 +309,7 @@ public class FingerprintUnlockController extends KeyguardUpdateMonitorCallback {
 
     private int calculateMode() {
         boolean unlockingAllowed = mUpdateMonitor.isUnlockingWithFingerprintAllowed();
+        boolean deviceDreaming = mUpdateMonitor.isDreaming();
 
         if (!mUpdateMonitor.isDeviceInteractive()) {
             if (!mStatusBarKeyguardViewManager.isShowing()) {
@@ -307,6 +321,9 @@ public class FingerprintUnlockController extends KeyguardUpdateMonitorCallback {
             } else {
                 return MODE_SHOW_BOUNCER;
             }
+        }
+        if (unlockingAllowed && deviceDreaming) {
+            return MODE_WAKE_AND_UNLOCK_FROM_DREAM;
         }
         if (mStatusBarKeyguardViewManager.isShowing()) {
             if (mStatusBarKeyguardViewManager.isBouncerShowing() && unlockingAllowed) {
@@ -346,6 +363,10 @@ public class FingerprintUnlockController extends KeyguardUpdateMonitorCallback {
     }
 
     public void finishKeyguardFadingAway() {
+        resetMode();
+    }
+
+    private void resetMode() {
         mMode = MODE_NONE;
         mStatusBarWindowManager.setForceDozeBrightness(false);
         if (mStatusBar.getNavigationBarView() != null) {
@@ -374,5 +395,11 @@ public class FingerprintUnlockController extends KeyguardUpdateMonitorCallback {
 
     public boolean hasScreenTurnedOnSinceAuthenticating() {
         return mHasScreenTurnedOnSinceAuthenticating;
+    }
+
+    public void dump(PrintWriter pw) {
+        pw.println(" FingerprintUnlockController:");
+        pw.print("   mMode="); pw.println(mMode);
+        pw.print("   mWakeLock="); pw.println(mWakeLock);
     }
 }

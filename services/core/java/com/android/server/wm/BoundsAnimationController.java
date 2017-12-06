@@ -21,7 +21,6 @@ import static com.android.server.wm.WindowManagerDebugConfig.TAG_WITH_CLASS_NAME
 import static com.android.server.wm.WindowManagerDebugConfig.TAG_WM;
 
 import android.animation.AnimationHandler;
-import android.animation.AnimationHandler.AnimationFrameCallbackProvider;
 import android.animation.Animator;
 import android.animation.ValueAnimator;
 import android.annotation.IntDef;
@@ -32,13 +31,11 @@ import android.os.IBinder;
 import android.os.Debug;
 import android.util.ArrayMap;
 import android.util.Slog;
-import android.view.Choreographer;
 import android.view.animation.AnimationUtils;
 import android.view.animation.Interpolator;
 import android.view.WindowManagerInternal;
 
 import com.android.internal.annotations.VisibleForTesting;
-import com.android.internal.graphics.SfVsyncFrameCallbackProvider;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
@@ -142,9 +139,6 @@ public class BoundsAnimationController {
         // True if this this animation was canceled and will be replaced the another animation from
         // the same {@link #BoundsAnimationTarget} target.
         private boolean mSkipFinalResize;
-        // True if this animation replaced a previous animation of the same
-        // {@link #BoundsAnimationTarget} target.
-        private final boolean mSkipAnimationStart;
         // True if this animation was canceled by the user, not as a part of a replacing animation
         private boolean mSkipAnimationEnd;
 
@@ -159,6 +153,7 @@ public class BoundsAnimationController {
 
         // Whether to schedule PiP mode changes on animation start/end
         private @SchedulePipModeChangedState int mSchedulePipModeChangedState;
+        private @SchedulePipModeChangedState int mPrevSchedulePipModeChangedState;
 
         // Depending on whether we are animating from
         // a smaller to a larger size
@@ -171,14 +166,14 @@ public class BoundsAnimationController {
 
         BoundsAnimator(BoundsAnimationTarget target, Rect from, Rect to,
                 @SchedulePipModeChangedState int schedulePipModeChangedState,
-                boolean moveFromFullscreen, boolean moveToFullscreen,
-                boolean replacingExistingAnimation) {
+                @SchedulePipModeChangedState int prevShedulePipModeChangedState,
+                boolean moveFromFullscreen, boolean moveToFullscreen) {
             super();
             mTarget = target;
             mFrom.set(from);
             mTo.set(to);
-            mSkipAnimationStart = replacingExistingAnimation;
             mSchedulePipModeChangedState = schedulePipModeChangedState;
+            mPrevSchedulePipModeChangedState = prevShedulePipModeChangedState;
             mMoveFromFullscreen = moveFromFullscreen;
             mMoveToFullscreen = moveToFullscreen;
             addUpdateListener(this);
@@ -200,7 +195,7 @@ public class BoundsAnimationController {
         @Override
         public void onAnimationStart(Animator animation) {
             if (DEBUG) Slog.d(TAG, "onAnimationStart: mTarget=" + mTarget
-                    + " mSkipAnimationStart=" + mSkipAnimationStart
+                    + " mPrevSchedulePipModeChangedState=" + mPrevSchedulePipModeChangedState
                     + " mSchedulePipModeChangedState=" + mSchedulePipModeChangedState);
             mFinishAnimationAfterTransition = false;
             mTmpRect.set(mFrom.left, mFrom.top, mFrom.left + mFrozenTaskWidth,
@@ -210,18 +205,26 @@ public class BoundsAnimationController {
             // running
             updateBooster();
 
-            // Ensure that we have prepared the target for animation before
-            // we trigger any size changes, so it can swap surfaces
-            // in to appropriate modes, or do as it wishes otherwise.
-            if (!mSkipAnimationStart) {
+            // Ensure that we have prepared the target for animation before we trigger any size
+            // changes, so it can swap surfaces in to appropriate modes, or do as it wishes
+            // otherwise.
+            if (mPrevSchedulePipModeChangedState == NO_PIP_MODE_CHANGED_CALLBACKS) {
                 mTarget.onAnimationStart(mSchedulePipModeChangedState ==
-                        SCHEDULE_PIP_MODE_CHANGED_ON_START);
+                        SCHEDULE_PIP_MODE_CHANGED_ON_START, false /* forceUpdate */);
 
                 // When starting an animation from fullscreen, pause here and wait for the
                 // windows-drawn signal before we start the rest of the transition down into PiP.
                 if (mMoveFromFullscreen) {
                     pause();
                 }
+            } else if (mPrevSchedulePipModeChangedState == SCHEDULE_PIP_MODE_CHANGED_ON_END &&
+                    mSchedulePipModeChangedState == SCHEDULE_PIP_MODE_CHANGED_ON_START) {
+                // We are replacing a running animation into PiP, but since it hasn't completed, the
+                // client will not currently receive any picture-in-picture mode change callbacks.
+                // However, we still need to report to them that they are leaving PiP, so this will
+                // force an update via a mode changed callback.
+                mTarget.onAnimationStart(true /* schedulePipModeChangedCallback */,
+                        true /* forceUpdate */);
             }
 
             // Immediately update the task bounds if they have to become larger, but preserve
@@ -388,6 +391,8 @@ public class BoundsAnimationController {
             boolean moveFromFullscreen, boolean moveToFullscreen) {
         final BoundsAnimator existing = mRunningAnimations.get(target);
         final boolean replacing = existing != null;
+        @SchedulePipModeChangedState int prevSchedulePipModeChangedState =
+                NO_PIP_MODE_CHANGED_CALLBACKS;
 
         if (DEBUG) Slog.d(TAG, "animateBounds: target=" + target + " from=" + from + " to=" + to
                 + " schedulePipModeChangedState=" + schedulePipModeChangedState
@@ -402,6 +407,9 @@ public class BoundsAnimationController {
 
                 return existing;
             }
+
+            // Save the previous state
+            prevSchedulePipModeChangedState = existing.mSchedulePipModeChangedState;
 
             // Update the PiP callback states if we are replacing the animation
             if (existing.mSchedulePipModeChangedState == SCHEDULE_PIP_MODE_CHANGED_ON_START) {
@@ -428,7 +436,8 @@ public class BoundsAnimationController {
             existing.cancel();
         }
         final BoundsAnimator animator = new BoundsAnimator(target, from, to,
-                schedulePipModeChangedState, moveFromFullscreen, moveToFullscreen, replacing);
+                schedulePipModeChangedState, prevSchedulePipModeChangedState,
+                moveFromFullscreen, moveToFullscreen);
         mRunningAnimations.put(target, animator);
         animator.setFloatValues(0f, 1f);
         animator.setDuration((animationDuration != -1 ? animationDuration

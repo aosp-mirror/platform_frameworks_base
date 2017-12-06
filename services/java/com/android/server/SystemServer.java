@@ -45,7 +45,7 @@ import android.os.SystemProperties;
 import android.os.Trace;
 import android.os.UserHandle;
 import android.os.storage.IStorageManager;
-import android.util.BootTimingsTraceLog;
+import android.util.TimingsTraceLog;
 import android.util.DisplayMetrics;
 import android.util.EventLog;
 import android.util.Slog;
@@ -98,7 +98,7 @@ import com.android.server.pm.UserManagerService;
 import com.android.server.policy.PhoneWindowManager;
 import com.android.server.power.PowerManagerService;
 import com.android.server.power.ShutdownThread;
-import com.android.server.radio.RadioService;
+import com.android.server.broadcastradio.BroadcastRadioService;
 import com.android.server.restrictions.RestrictionsManagerService;
 import com.android.server.security.KeyAttestationApplicationIdProviderService;
 import com.android.server.security.KeyChainSystemService;
@@ -121,7 +121,6 @@ import java.io.File;
 import java.io.IOException;
 import java.util.Locale;
 import java.util.Timer;
-import java.util.TimerTask;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.Future;
 
@@ -135,8 +134,8 @@ public final class SystemServer {
     // Tag for timing measurement of non-main asynchronous operations.
     private static final String SYSTEM_SERVER_TIMING_ASYNC_TAG = SYSTEM_SERVER_TIMING_TAG + "Async";
 
-    private static final BootTimingsTraceLog BOOT_TIMINGS_TRACE_LOG
-            = new BootTimingsTraceLog(SYSTEM_SERVER_TIMING_TAG, Trace.TRACE_TAG_SYSTEM_SERVER);
+    private static final TimingsTraceLog BOOT_TIMINGS_TRACE_LOG
+            = new TimingsTraceLog(SYSTEM_SERVER_TIMING_TAG, Trace.TRACE_TAG_SYSTEM_SERVER);
 
     private static final String ENCRYPTING_STATE = "trigger_restart_min_framework";
     private static final String ENCRYPTED_STATE = "1";
@@ -171,6 +170,8 @@ public final class SystemServer {
             "com.android.server.wifi.aware.WifiAwareService";
     private static final String WIFI_P2P_SERVICE_CLASS =
             "com.android.server.wifi.p2p.WifiP2pService";
+    private static final String LOWPAN_SERVICE_CLASS =
+            "com.android.server.lowpan.LowpanService";
     private static final String ETHERNET_SERVICE_CLASS =
             "com.android.server.ethernet.EthernetService";
     private static final String JOB_SCHEDULER_SERVICE_CLASS =
@@ -189,6 +190,8 @@ public final class SystemServer {
             "com.google.android.clockwork.connectivity.WearConnectivityService";
     private static final String WEAR_DISPLAY_SERVICE_CLASS =
             "com.google.android.clockwork.display.WearDisplayService";
+    private static final String WEAR_LEFTY_SERVICE_CLASS =
+            "com.google.android.clockwork.lefty.WearLeftyService";
     private static final String WEAR_TIME_SERVICE_CLASS =
             "com.google.android.clockwork.time.WearTimeService";
     private static final String ACCOUNT_SERVICE_CLASS =
@@ -634,7 +637,7 @@ public final class SystemServer {
         // Start sensor service in a separate thread. Completion should be checked
         // before using it.
         mSensorServiceStart = SystemServerInitThreadPool.get().submit(() -> {
-            BootTimingsTraceLog traceLog = new BootTimingsTraceLog(
+            TimingsTraceLog traceLog = new TimingsTraceLog(
                     SYSTEM_SERVER_TIMING_ASYNC_TAG, Trace.TRACE_TAG_SYSTEM_SERVER);
             traceLog.traceBegin(START_SENSOR_SERVICE);
             startSensorService();
@@ -715,8 +718,7 @@ public final class SystemServer {
         boolean disableVrManager = SystemProperties.getBoolean("config.disable_vrmanager", false);
         boolean disableCameraService = SystemProperties.getBoolean("config.disable_cameraservice",
                 false);
-        // TODO(b/36863239): Remove when transitioned from native service.
-        boolean enableRadioService = SystemProperties.getBoolean("config.enable_java_radio", false);
+        boolean enableLeftyService = SystemProperties.getBoolean("config.enable_lefty", false);
 
         boolean isEmulator = SystemProperties.get("ro.kernel.qemu").equals("1");
 
@@ -734,7 +736,7 @@ public final class SystemServer {
             mZygotePreload = SystemServerInitThreadPool.get().submit(() -> {
                 try {
                     Slog.i(TAG, SECONDARY_ZYGOTE_PRELOAD);
-                    BootTimingsTraceLog traceLog = new BootTimingsTraceLog(
+                    TimingsTraceLog traceLog = new TimingsTraceLog(
                             SYSTEM_SERVER_TIMING_ASYNC_TAG, Trace.TRACE_TAG_SYSTEM_SERVER);
                     traceLog.traceBegin(SECONDARY_ZYGOTE_PRELOAD);
                     if (!Process.zygoteProcess.preloadDefault(Build.SUPPORTED_32_BIT_ABIS[0])) {
@@ -827,9 +829,11 @@ public final class SystemServer {
             // because it need to connect to SensorManager. This have to start
             // after START_SENSOR_SERVICE is done.
             SystemServerInitThreadPool.get().submit(() -> {
-                traceBeginAndSlog(START_HIDL_SERVICES);
+                TimingsTraceLog traceLog = new TimingsTraceLog(
+                        SYSTEM_SERVER_TIMING_ASYNC_TAG, Trace.TRACE_TAG_SYSTEM_SERVER);
+                traceLog.traceBegin(START_HIDL_SERVICES);
                 startHidlServices();
-                traceEnd();
+                traceLog.traceEnd();
             }, START_HIDL_SERVICES);
 
             if (!disableVrManager) {
@@ -1104,6 +1108,13 @@ public final class SystemServer {
                     traceEnd();
                 }
 
+                if (context.getPackageManager().hasSystemFeature(
+                        PackageManager.FEATURE_LOWPAN)) {
+                    traceBeginAndSlog("StartLowpan");
+                    mSystemServiceManager.startService(LOWPAN_SERVICE_CLASS);
+                    traceEnd();
+                }
+
                 if (mPackageManager.hasSystemFeature(PackageManager.FEATURE_ETHERNET) ||
                     mPackageManager.hasSystemFeature(PackageManager.FEATURE_USB_HOST)) {
                     traceBeginAndSlog("StartEthernet");
@@ -1212,10 +1223,9 @@ public final class SystemServer {
             mSystemServiceManager.startService(AudioService.Lifecycle.class);
             traceEnd();
 
-            if (enableRadioService &&
-                    mPackageManager.hasSystemFeature(PackageManager.FEATURE_RADIO)) {
-                traceBeginAndSlog("StartRadioService");
-                mSystemServiceManager.startService(RadioService.class);
+            if (mPackageManager.hasSystemFeature(PackageManager.FEATURE_BROADCAST_RADIO)) {
+                traceBeginAndSlog("StartBroadcastRadioService");
+                mSystemServiceManager.startService(BroadcastRadioService.class);
                 traceEnd();
             }
 
@@ -1319,11 +1329,13 @@ public final class SystemServer {
                     traceEnd();
                 }
 
-                if (mPackageManager.hasSystemFeature(PackageManager.FEATURE_VOICE_RECOGNIZERS)) {
-                    traceBeginAndSlog("StartVoiceRecognitionManager");
-                    mSystemServiceManager.startService(VOICE_RECOGNITION_MANAGER_SERVICE_CLASS);
-                    traceEnd();
-                }
+                // We need to always start this service, regardless of whether the
+                // FEATURE_VOICE_RECOGNIZERS feature is set, because it needs to take care
+                // of initializing various settings.  It will internally modify its behavior
+                // based on that feature.
+                traceBeginAndSlog("StartVoiceRecognitionManager");
+                mSystemServiceManager.startService(VOICE_RECOGNITION_MANAGER_SERVICE_CLASS);
+                traceEnd();
 
                 if (GestureLauncherService.isGestureLauncherEnabled(context.getResources())) {
                     traceBeginAndSlog("StartGestureLauncher");
@@ -1520,6 +1532,12 @@ public final class SystemServer {
                 mSystemServiceManager.startService(WEAR_DISPLAY_SERVICE_CLASS);
                 mSystemServiceManager.startService(WEAR_TIME_SERVICE_CLASS);
                 traceEnd();
+
+                if (enableLeftyService) {
+                    traceBeginAndSlog("StartWearLeftyService");
+                    mSystemServiceManager.startService(WEAR_LEFTY_SERVICE_CLASS);
+                    traceEnd();
+                }
             }
         }
 
@@ -1683,7 +1701,7 @@ public final class SystemServer {
             if (!mOnlyCore) {
                 webviewPrep = SystemServerInitThreadPool.get().submit(() -> {
                     Slog.i(TAG, WEBVIEW_PREPARATION);
-                    BootTimingsTraceLog traceLog = new BootTimingsTraceLog(
+                    TimingsTraceLog traceLog = new TimingsTraceLog(
                             SYSTEM_SERVER_TIMING_ASYNC_TAG, Trace.TRACE_TAG_SYSTEM_SERVER);
                     traceLog.traceBegin(WEBVIEW_PREPARATION);
                     ConcurrentUtils.waitForFutureNoInterrupt(mZygotePreload, "Zygote preload");

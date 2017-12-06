@@ -64,14 +64,14 @@
     <string name="usb_debugging_message" msgid="2220143855912376496">"Tietokoneen RSA-avaintunnistetiedosto on:\n<xliff:g id="FINGERPRINT">%1$s</xliff:g>"</string>
     <string name="usb_debugging_always" msgid="303335496705863070">"Salli aina tällä tietokoneella"</string>
     <string name="usb_debugging_secondary_user_title" msgid="6353808721761220421">"USB-vianetsintää ei sallita"</string>
-    <string name="usb_debugging_secondary_user_message" msgid="8572228137833020196">"Laitteelle tällä hetkellä kirjautunut käyttäjä ei voi ottaa USB-vianetsintää käyttöön. Vaihda käyttäjäksi järjestelmänvalvoja käyttääksesi tätä ominaisuutta."</string>
+    <string name="usb_debugging_secondary_user_message" msgid="6067122453571699801">"Laitteelle tällä hetkellä kirjautunut käyttäjä ei voi ottaa USB-vianetsintää käyttöön. Vaihda käyttäjäksi ensisijainen käyttäjä, jotta voit käyttää tätä ominaisuutta."</string>
     <string name="compat_mode_on" msgid="6623839244840638213">"Zoomaa koko näyttöön"</string>
     <string name="compat_mode_off" msgid="4434467572461327898">"Venytä koko näyttöön"</string>
     <string name="screenshot_saving_ticker" msgid="7403652894056693515">"Tallennetaan kuvakaappausta..."</string>
     <string name="screenshot_saving_title" msgid="8242282144535555697">"Tallennetaan kuvakaappausta..."</string>
     <string name="screenshot_saving_text" msgid="2419718443411738818">"Kuvakaappausta tallennetaan."</string>
     <string name="screenshot_saved_title" msgid="6461865960961414961">"Kuvakaappaus tallennettu"</string>
-    <string name="screenshot_saved_text" msgid="2685605830386712477">"Tarkastele kuvakaappausta napauttamalla."</string>
+    <string name="screenshot_saved_text" msgid="2685605830386712477">"Tarkastele kuvakaappausta napauttamalla"</string>
     <string name="screenshot_failed_title" msgid="705781116746922771">"Kuvakaappausta ei voitu tallentaa"</string>
     <string name="screenshot_failed_to_save_unknown_text" msgid="7887826345701753830">"Kuvakaappausta tallennettaessa tapahtui virhe."</string>
     <string name="screenshot_failed_to_save_text" msgid="2592658083866306296">"Kuvakaappauksen tallentaminen epäonnistui, sillä tallennustilaa ei ole riittävästi."</string>
@@ -353,10 +353,10 @@
     <string name="description_target_search" msgid="3091587249776033139">"Haku"</string>
     <string name="description_direction_up" msgid="7169032478259485180">"Liu\'uta ylös ja <xliff:g id="TARGET_DESCRIPTION">%s</xliff:g>."</string>
     <string name="description_direction_left" msgid="7207478719805562165">"Liu\'uta vasemmalle ja <xliff:g id="TARGET_DESCRIPTION">%s</xliff:g>."</string>
-    <string name="zen_priority_introduction" msgid="7577965386868311310">"Äänet ja värinät eivät häiritse sinua, paitsi jos ne ovat hälytyksiä, muistutuksia, tapahtumia tai määrittämiäsi soittajia. Kuulet edelleen kaiken valitsemasi sisällön, kuten musiikin, videot ja pelit."</string>
-    <string name="zen_alarms_introduction" msgid="7034415210361973827">"Äänet ja värinät eivät häiritse sinua, paitsi jos ne ovat hälytyksiä. Kuulet edelleen kaiken valitsemasi sisällön, kuten musiikin, videot ja pelit."</string>
+    <string name="zen_priority_introduction" msgid="1149025108714420281">"Äänet ja värinät eivät häiritse sinua, paitsi jos ne ovat hälytyksiä, muistutuksia, tapahtumia tai määrittämiäsi soittajia. Kuulet edelleen kaiken valitsemasi sisällön, kuten musiikin, videot ja pelit."</string>
+    <string name="zen_alarms_introduction" msgid="4934328096749380201">"Äänet ja värinät eivät häiritse sinua, paitsi jos ne ovat hälytyksiä. Kuulet edelleen kaiken valitsemasi sisällön, kuten musiikin, videot ja pelit."</string>
     <string name="zen_priority_customize_button" msgid="7948043278226955063">"Muokkaa"</string>
-    <string name="zen_silence_introduction_voice" msgid="2284540992298200729">"Tämä estää KAIKKI äänet ja värinät, mukaan lukien hälytysten, musiikin, videoiden ja pelien äänet ja värinät. Voit kuitenkin soittaa puheluita."</string>
+    <string name="zen_silence_introduction_voice" msgid="3948778066295728085">"Tämä estää kaikki äänet ja värinät, mukaan lukien hälytysten, musiikin, videoiden ja pelien äänet ja värinät. Voit kuitenkin soittaa puheluita."</string>
     <string name="zen_silence_introduction" msgid="3137882381093271568">"Tämä estää KAIKKI äänet ja värinät, mukaan lukien hälytysten, musiikin, videoiden ja pelien äänet ja värinät."</string>
     <string name="keyguard_more_overflow_text" msgid="9195222469041601365">"+<xliff:g id="NUMBER_OF_NOTIFICATIONS">%d</xliff:g>"</string>
     <string name="speed_bump_explanation" msgid="1288875699658819755">"Vähemmän kiireelliset ilmoitukset ovat alla"</string>
@@ -456,7 +456,7 @@
     <string name="monitoring_description_do_learn_more" msgid="1849514470437907421">"Lisätietoja"</string>
     <string name="monitoring_description_do_body_vpn" msgid="8255218762488901796">"Olet yhteydessä sovellukseen <xliff:g id="VPN_APP">%1$s</xliff:g>, joka voi valvoa verkkotoimintaasi, esimerkiksi sähköposteja, sovelluksia ja verkkosivustoja."</string>
     <string name="monitoring_description_vpn_settings_separator" msgid="1933186756733474388">" "</string>
-    <string name="monitoring_description_vpn_settings" msgid="8869300202410505143">"Avaa VPN-asetukset"</string>
+    <string name="monitoring_description_vpn_settings" msgid="6434859242636063861">"Avaa VPN-asetukset"</string>
     <string name="monitoring_description_ca_cert_settings_separator" msgid="4987350385906393626">" "</string>
     <string name="monitoring_description_ca_cert_settings" msgid="5489969458872997092">"Avaa luotetut todennustiedot"</string>
     <string name="monitoring_description_network_logging" msgid="7223505523384076027">"Järjestelmänvalvoja on ottanut käyttöön verkkolokitietojen tallentamisen. Sen avulla seurataan laitteellasi tapahtuvaa liikennettä.\n\nPyydä lisätietoja järjestelmänvalvojalta."</string>
@@ -556,8 +556,8 @@
     <string name="notification_default_channel_desc" msgid="2506053815870808359">"Tällä sovelluksella ei ole ilmoitusluokkia."</string>
     <string name="notification_unblockable_desc" msgid="3561016061737896906">"Tämän sovelluksen ilmoituksia ei voi poistaa käytöstä."</string>
     <plurals name="notification_num_channels_desc" formatted="false" msgid="5492793452274077663">
-      <item quantity="other">Tämä sovellus: 1/<xliff:g id="NUMBER_1">%d</xliff:g> ilmoitusluokkaa</item>
-      <item quantity="one">Tämä sovellus: 1/<xliff:g id="NUMBER_0">%d</xliff:g> ilmoitusluokkaa</item>
+      <item quantity="other">Tämä sovellus: 1/<xliff:g id="NUMBER_1">%s</xliff:g> ilmoitusluokkaa</item>
+      <item quantity="one">Tämä sovellus: 1/<xliff:g id="NUMBER_0">%s</xliff:g> ilmoitusluokkaa</item>
     </plurals>
     <string name="notification_channels_list_desc_2" msgid="6214732715833946441">"<xliff:g id="CHANNEL_NAME_1">%1$s</xliff:g>, <xliff:g id="CHANNEL_NAME_2">%2$s</xliff:g>"</string>
     <plurals name="notification_channels_list_desc_2_and_others" formatted="false" msgid="2747813553355336157">
@@ -585,8 +585,8 @@
       <item quantity="one">%d minuutti</item>
     </plurals>
     <string name="battery_panel_title" msgid="7944156115535366613">"Akun käyttö"</string>
-    <string name="battery_detail_charging_summary" msgid="1279095653533044008">"Virransäästö ei ole käytettävissä latauksen aikana."</string>
-    <string name="battery_detail_switch_title" msgid="6285872470260795421">"Virransäästö"</string>
+    <string name="battery_detail_charging_summary" msgid="4055327085770378335">"Virransäästö ei ole käytettävissä latauksen aikana."</string>
+    <string name="battery_detail_switch_title" msgid="8763441006881907058">"Virransäästö"</string>
     <string name="battery_detail_switch_summary" msgid="9049111149407626804">"Rajoittaa suorituskykyä ja taustatiedonsiirtoa."</string>
     <string name="keyboard_key_button_template" msgid="6230056639734377300">"Painike <xliff:g id="NAME">%1$s</xliff:g>"</string>
     <string name="keyboard_key_home" msgid="2243500072071305073">"Home"</string>
@@ -726,9 +726,9 @@
     <string name="pip_phone_minimize" msgid="1079119422589131792">"Pienennä"</string>
     <string name="pip_phone_close" msgid="8416647892889710330">"Sulje"</string>
     <string name="pip_phone_dismiss_hint" msgid="6351678169095923899">"Hylkää vetämällä alas."</string>
-    <string name="pip_menu_title" msgid="3328510504196964712">"Kuva kuvassa ‑valikko"</string>
+    <string name="pip_menu_title" msgid="4707292089961887657">"Valikko"</string>
     <string name="pip_notification_title" msgid="3204024940158161322">"<xliff:g id="NAME">%s</xliff:g> on kuva kuvassa ‑tilassa"</string>
-    <string name="pip_notification_message" msgid="4171698133469539591">"Jos et halua, että <xliff:g id="NAME">%s</xliff:g> voi käyttää tätä ominaisuutta, avaa asetukset napauttamalla ja poista se käytöstä."</string>
+    <string name="pip_notification_message" msgid="5619512781514343311">"Jos et halua, että <xliff:g id="NAME">%s</xliff:g> voi käyttää tätä ominaisuutta, avaa asetukset napauttamalla ja poista se käytöstä."</string>
     <string name="pip_play" msgid="1417176722760265888">"Toista"</string>
     <string name="pip_pause" msgid="8881063404466476571">"Keskeytä"</string>
     <string name="pip_skip_to_next" msgid="1948440006726306284">"Siirry seuraavaan"</string>
@@ -754,6 +754,7 @@
     <string name="tuner_menu" msgid="191640047241552081">"Valikko"</string>
     <string name="tuner_app" msgid="3507057938640108777">"<xliff:g id="APP">%1$s</xliff:g> sovellus"</string>
     <string name="notification_channel_alerts" msgid="4496839309318519037">"Ilmoitukset"</string>
+    <string name="notification_channel_battery" msgid="5786118169182888462">"Akku"</string>
     <string name="notification_channel_screenshot" msgid="6314080179230000938">"Kuvakaappaukset"</string>
     <string name="notification_channel_general" msgid="4525309436693914482">"Yleiset viestit"</string>
     <string name="notification_channel_storage" msgid="3077205683020695313">"Tallennustila"</string>
@@ -774,4 +775,5 @@
     <string name="running_foreground_services_title" msgid="381024150898615683">"Sovelluksia käynnissä taustalla"</string>
     <string name="running_foreground_services_msg" msgid="6326247670075574355">"Katso lisätietoja akun ja datan käytöstä napauttamalla"</string>
     <string name="data_usage_disable_mobile" msgid="5116269981510015864">"Poistetaanko mobiilidata käytöstä?"</string>
+    <string name="touch_filtered_warning" msgid="8671693809204767551">"Sovellus peittää käyttöoikeuspyynnön, joten Asetukset ei voi vahvistaa valintaasi."</string>
 </resources>

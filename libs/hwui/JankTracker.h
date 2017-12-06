@@ -17,6 +17,8 @@
 #define JANKTRACKER_H_
 
 #include "FrameInfo.h"
+#include "ProfileData.h"
+#include "ProfileDataContainer.h"
 #include "renderthread/TimeLord.h"
 #include "utils/RingBuffer.h"
 
@@ -28,31 +30,6 @@
 
 namespace android {
 namespace uirenderer {
-
-enum JankType {
-    kMissedVsync = 0,
-    kHighInputLatency,
-    kSlowUI,
-    kSlowSync,
-    kSlowRT,
-
-    // must be last
-    NUM_BUCKETS,
-};
-
-// Try to keep as small as possible, should match ASHMEM_SIZE in
-// GraphicsStatsService.java
-struct ProfileData {
-    std::array<uint32_t, NUM_BUCKETS> jankTypeCounts;
-    // See comments on kBucket* constants for what this holds
-    std::array<uint32_t, 57> frameCounts;
-    // Holds a histogram of frame times in 50ms increments from 150ms to 5s
-    std::array<uint16_t, 97> slowFrameCounts;
-
-    uint32_t totalFrameCount;
-    uint32_t jankFrameCount;
-    nsecs_t statStartTime;
-};
 
 enum class JankTrackerType {
     // The default, means there's no description set
@@ -72,31 +49,27 @@ struct ProfileDataDescription {
 // TODO: Replace DrawProfiler with this
 class JankTracker {
 public:
-    explicit JankTracker(const DisplayInfo& displayInfo);
-    ~JankTracker();
+    explicit JankTracker(ProfileDataContainer* globalData, const DisplayInfo& displayInfo);
 
     void setDescription(JankTrackerType type, const std::string&& name) {
         mDescription.type = type;
         mDescription.name = name;
     }
 
-    void addFrame(const FrameInfo& frame);
+    FrameInfo* startFrame() { return &mFrames.next(); }
+    void finishFrame(const FrameInfo& frame);
 
-    void dump(int fd) { dumpData(fd, &mDescription, mData); }
+    void dumpStats(int fd) { dumpData(fd, &mDescription, mData.get()); }
+    void dumpFrames(int fd);
     void reset();
 
-    void rotateStorage();
-    void switchStorageToAshmem(int ashmemfd);
-
-    uint32_t findPercentile(int p) { return findPercentile(mData, p); }
-    static int32_t frameTimeForFrameCountIndex(uint32_t index);
-    static int32_t frameTimeForSlowFrameCountIndex(uint32_t index);
+    // Exposed for FrameInfoVisualizer
+    // TODO: Figure out a better way to handle this
+    RingBuffer<FrameInfo, 120>& frames() { return mFrames; }
 
 private:
-    void freeData();
     void setFrameInterval(nsecs_t frameIntervalNanos);
 
-    static uint32_t findPercentile(const ProfileData* data, int p);
     static void dumpData(int fd, const ProfileDataDescription* description, const ProfileData* data);
 
     std::array<int64_t, NUM_BUCKETS> mThresholds;
@@ -109,9 +82,12 @@ private:
     // This is only used if we are in pipelined mode and are using HWC2,
     // otherwise it's 0.
     nsecs_t mDequeueTimeForgiveness = 0;
-    ProfileData* mData;
-    bool mIsMapped = false;
+    ProfileDataContainer mData;
+    ProfileDataContainer* mGlobalData;
     ProfileDataDescription mDescription;
+
+    // Ring buffer large enough for 2 seconds worth of frames
+    RingBuffer<FrameInfo, 120> mFrames;
 };
 
 } /* namespace uirenderer */

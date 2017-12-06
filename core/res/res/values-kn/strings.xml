@@ -21,24 +21,8 @@
 <resources xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
     <string name="byteShort" msgid="8340973892742019101">"B"</string>
-    <string name="kilobyteShort" msgid="7542884022844556968">"kB"</string>
-    <string name="megabyteShort" msgid="6355851576770428922">"MB"</string>
-    <string name="gigabyteShort" msgid="3259882455212193214">"GB"</string>
-    <string name="terabyteShort" msgid="231613018159186962">"TB"</string>
     <string name="petabyteShort" msgid="5637816680144990219">"PB"</string>
     <string name="fileSizeSuffix" msgid="8897567456150907538">"<xliff:g id="NUMBER">%1$s</xliff:g> <xliff:g id="UNIT">%2$s</xliff:g>"</string>
-    <string name="durationDays" msgid="6652371460511178259">"<xliff:g id="DAYS">%1$d</xliff:g> ದಿನಗಳು"</string>
-    <string name="durationDayHours" msgid="2713107458736744435">"<xliff:g id="DAYS">%1$d</xliff:g> ದಿನ <xliff:g id="HOURS">%2$d</xliff:g> ಗಂಟೆಗಳು"</string>
-    <string name="durationDayHour" msgid="7293789639090958917">"<xliff:g id="DAYS">%1$d</xliff:g> ದಿನ <xliff:g id="HOURS">%2$d</xliff:g> ಗಂ"</string>
-    <string name="durationHours" msgid="4266858287167358988">"<xliff:g id="HOURS">%1$d</xliff:g> ಗಂಟೆಗಳು"</string>
-    <string name="durationHourMinutes" msgid="9029176248692041549">"<xliff:g id="HOURS">%1$d</xliff:g> ಗಂಟೆ <xliff:g id="MINUTES">%2$d</xliff:g> ನಿಮಿಷಗಳು"</string>
-    <string name="durationHourMinute" msgid="2741677355177402539">"<xliff:g id="HOURS">%1$d</xliff:g> ಗಂಟೆ <xliff:g id="MINUTES">%2$d</xliff:g> ನಿಮಿಷ"</string>
-    <string name="durationMinutes" msgid="3134226679883579347">"<xliff:g id="MINUTES">%1$d</xliff:g> ನಿಮಿಷಗಳು"</string>
-    <string name="durationMinute" msgid="7155301744174623818">"<xliff:g id="MINUTES">%1$d</xliff:g> ನಿಮಿಷ"</string>
-    <string name="durationMinuteSeconds" msgid="1424656185379003751">"<xliff:g id="MINUTES">%1$d</xliff:g> ನಿಮಿ <xliff:g id="SECONDS">%2$d</xliff:g> ಸೆಕೆಂಡುಗಳು"</string>
-    <string name="durationMinuteSecond" msgid="3989228718067466680">"<xliff:g id="MINUTES">%1$d</xliff:g> ನಿಮಿ <xliff:g id="SECONDS">%2$d</xliff:g> ಸೆ"</string>
-    <string name="durationSeconds" msgid="8050088505238241405">"<xliff:g id="SECONDS">%1$d</xliff:g> ಸೆಕೆಂಡುಗಳು"</string>
-    <string name="durationSecond" msgid="985669622276420331">"<xliff:g id="SECONDS">%1$d</xliff:g> ಸೆಕೆಂಡುಗಳು"</string>
     <string name="untitled" msgid="4638956954852782576">"&lt;ಶೀರ್ಷಿಕೆ ರಹಿತ&gt;"</string>
     <string name="emptyPhoneNumber" msgid="7694063042079676517">"(ಯಾವುದೇ ಫೋನ್ ಸಂಖ್ಯೆಯಿಲ್ಲ)"</string>
     <string name="unknownName" msgid="6867811765370350269">"ಅಪರಿಚಿತ"</string>
@@ -95,11 +79,13 @@
     <string name="RestrictedOnAllVoiceTitle" msgid="158800171499150681">"ಧ್ವನಿ/ತುರ್ತು ಸೇವೆ ಇಲ್ಲ"</string>
     <string name="RestrictedStateContent" msgid="4278821484643362350">"ತಾತ್ಕಾಲಿಕವಾಗಿ ಮೊಬೈಲ್ ನೆಟ್‌ವರ್ಕ್‌ನಿಂದ ನಿಮ್ಮ ಸ್ಥಳದಲ್ಲಿ ಒದಗಿಸುತ್ತಿಲ್ಲ"</string>
     <string name="NetworkPreferenceSwitchTitle" msgid="4008877505368566980">"ನೆಟ್‌ವರ್ಕ್ ತಲುಪಲು ಸಾಧ್ಯವಿಲ್ಲ"</string>
-    <string name="NetworkPreferenceSwitchSummary" msgid="4164230263214915351">"ನೆಟ್‌ವರ್ಕ್ ಸಂಪರ್ಕ ಪಡೆಯುವುದನ್ನು ಸುಧಾರಿಸಲು, ಆಯ್ಕೆ ಮಾಡಿರುವ ವಿಧವನ್ನು ಸಿಸ್ಟಂ &gt; ನೆಟ್‌ವರ್ಕ್ ಮತ್ತು ಇಂಟರ್ನೆಟ್ &gt; ಮೊಬೈಲ್ ನೆಟ್‌ವರ್ಕ್‌ಗಳು &gt; ಆದ್ಯತೆಯ ನೆಟ್‌ವರ್ಕ್ ವಿಧದಲ್ಲಿ ಬದಲಿಸಿ ನೋಡಿ."</string>
+    <string name="NetworkPreferenceSwitchSummary" msgid="1203771446683319957">"ನೆಟ್‌ವರ್ಕ್ ಸಂಪರ್ಕ ಪಡೆಯುವುದನ್ನು ಸುಧಾರಿಸಲು, ಆಯ್ಕೆ ಮಾಡಿರುವ ವಿಧವನ್ನು ಸೆಟ್ಟಿಂಗ್‌ಗಳು &gt; ನೆಟ್‌ವರ್ಕ್ ಮತ್ತು ಇಂಟರ್ನೆಟ್ &gt; ಮೊಬೈಲ್ ನೆಟ್‌ವರ್ಕ್‌ಗಳು &gt; ಆದ್ಯತೆಯ ನೆಟ್‌ವರ್ಕ್ ವಿಧದಲ್ಲಿ ಬದಲಿಸಿ ನೋಡಿ."</string>
+    <string name="EmergencyCallWarningTitle" msgid="4790413876281901612">"ವೈ‑ಫೈ ಕರೆಮಾಡುವಿಕೆ ಸಕ್ರಿಯವಾಗಿದೆ"</string>
+    <string name="EmergencyCallWarningSummary" msgid="8973232888021643293">"ತುರ್ತು ಕರೆಗಳನ್ನು ಮಾಡಲು ಮೊಬೈಲ್ ನೆಟ್‌ವರ್ಕ್ ಅಗತ್ಯವಿದೆ."</string>
     <string name="notification_channel_network_alert" msgid="4427736684338074967">"ಎಚ್ಚರಿಕೆಗಳು"</string>
     <string name="notification_channel_call_forward" msgid="2419697808481833249">"ಕರೆ ಫಾರ್ವರ್ಡ್‌ ಮಾಡುವಿಕೆ"</string>
     <string name="notification_channel_emergency_callback" msgid="6686166232265733921">"ತುರ್ತು ಕಾಲ್‌ಬ್ಯಾಕ್‌ ಮೋಡ್‌"</string>
-    <string name="notification_channel_mobile_data_alert" msgid="6130875231721406231">"ಮೊಬೈಲ್ ಡೇಟಾ ಎಚ್ಚರಿಕೆಗಳು"</string>
+    <string name="notification_channel_mobile_data_status" msgid="4575131690860945836">"ಮೊಬೈಲ್ ಡೇಟಾ ಸ್ಥಿತಿ"</string>
     <string name="notification_channel_sms" msgid="3441746047346135073">"ಎಸ್‌ಎಂಎಸ್ ಸಂದೇಶಗಳು"</string>
     <string name="notification_channel_voice_mail" msgid="3954099424160511919">"ಧ್ವನಿಮೇಲ್ ಸಂದೇಶಗಳು"</string>
     <string name="notification_channel_wfc" msgid="2130802501654254801">"ವೈ-ಫೈ ಕರೆ ಮಾಡುವಿಕೆ"</string>
@@ -1780,4 +1766,5 @@
     <string name="mmcc_imsi_unknown_in_hlr" msgid="6321202257374418726">"ಸಿಮ್ ಸಿದ್ಧವಾಗಿಲ್ಲ"</string>
     <string name="mmcc_illegal_ms" msgid="2769452751852211112">"ಸಿಮ್‌ಗೆ ಅನುಮತಿಯಿಲ್ಲ"</string>
     <string name="mmcc_illegal_me" msgid="4438696681169345015">"ಫೋನ್‌ಗೆ ಅನುಮತಿಯಿಲ್ಲ"</string>
+    <string name="popup_window_default_title" msgid="4874318849712115433">"ಪಾಪ್‌ಅಪ್ ವಿಂಡೋ"</string>
 </resources>

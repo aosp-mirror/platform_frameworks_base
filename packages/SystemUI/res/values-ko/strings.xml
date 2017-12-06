@@ -64,7 +64,7 @@
     <string name="usb_debugging_message" msgid="2220143855912376496">"컴퓨터 RSA 키 지문:\n<xliff:g id="FINGERPRINT">%1$s</xliff:g>"</string>
     <string name="usb_debugging_always" msgid="303335496705863070">"이 컴퓨터에서 항상 허용"</string>
     <string name="usb_debugging_secondary_user_title" msgid="6353808721761220421">"USB 디버깅이 허용되지 않음"</string>
-    <string name="usb_debugging_secondary_user_message" msgid="8572228137833020196">"현재 이 기기에 로그인한 사용자는 USB 디버깅을 사용할 수 없습니다. 이 기능을 사용하려면 관리자로 전환하세요."</string>
+    <string name="usb_debugging_secondary_user_message" msgid="6067122453571699801">"현재 이 기기에 로그인한 사용자는 USB 디버깅을 사용 설정할 수 없습니다. 이 기능을 사용하려면 기본 사용자로 전환하세요."</string>
     <string name="compat_mode_on" msgid="6623839244840638213">"전체화면 모드로 확대"</string>
     <string name="compat_mode_off" msgid="4434467572461327898">"전체화면 모드로 확대"</string>
     <string name="screenshot_saving_ticker" msgid="7403652894056693515">"캡쳐화면 저장 중..."</string>
@@ -355,10 +355,10 @@
     <string name="description_target_search" msgid="3091587249776033139">"검색"</string>
     <string name="description_direction_up" msgid="7169032478259485180">"<xliff:g id="TARGET_DESCRIPTION">%s</xliff:g>하려면 위로 슬라이드"</string>
     <string name="description_direction_left" msgid="7207478719805562165">"<xliff:g id="TARGET_DESCRIPTION">%s</xliff:g>하려면 왼쪽으로 슬라이드"</string>
-    <string name="zen_priority_introduction" msgid="7577965386868311310">"알람, 알림, 일정 및 지정한 발신자부터 받은 연락을 제외하고 소리와 진동을 끕니다. 음악, 동영상, 게임 등에서 재생하도록 선택한 소리는 정상적으로 들립니다."</string>
-    <string name="zen_alarms_introduction" msgid="7034415210361973827">"알람을 제외하고 소리와 진동을 끕니다. 음악, 동영상, 게임 등에서 재생하도록 선택한 소리는 정상적으로 들립니다."</string>
+    <string name="zen_priority_introduction" msgid="1149025108714420281">"알람, 알림, 일정 및 지정한 발신자로부터 받은 전화를 제외한 소리와 진동을 끕니다. 음악, 동영상, 게임 등 재생하도록 선택한 소리는 정상적으로 들립니다."</string>
+    <string name="zen_alarms_introduction" msgid="4934328096749380201">"알람을 제외한 소리와 진동을 끕니다. 음악, 동영상, 게임 등 재생하도록 선택한 소리는 정상적으로 들립니다."</string>
     <string name="zen_priority_customize_button" msgid="7948043278226955063">"맞춤설정"</string>
-    <string name="zen_silence_introduction_voice" msgid="2284540992298200729">"알람, 음악, 동영상, 게임을 포함하여 모든 소리와 진동을 끕니다. 전화는 걸 수 있습니다."</string>
+    <string name="zen_silence_introduction_voice" msgid="3948778066295728085">"알람, 음악, 동영상, 게임을 비롯한 모든 소리와 진동을 끕니다. 이 경우에도 전화는 걸 수 있습니다."</string>
     <string name="zen_silence_introduction" msgid="3137882381093271568">"알람, 음악, 동영상, 게임을 포함하여 모든 소리와 진동을 끕니다."</string>
     <string name="keyguard_more_overflow_text" msgid="9195222469041601365">"+<xliff:g id="NUMBER_OF_NOTIFICATIONS">%d</xliff:g>"</string>
     <string name="speed_bump_explanation" msgid="1288875699658819755">"아래에 덜 급한 알림 표시"</string>
@@ -458,7 +458,7 @@
     <string name="monitoring_description_do_learn_more" msgid="1849514470437907421">"자세히 알아보기"</string>
     <string name="monitoring_description_do_body_vpn" msgid="8255218762488901796">"<xliff:g id="VPN_APP">%1$s</xliff:g>에 연결되었습니다. 이 앱은 이메일, 앱, 웹사이트와 같은 내 네트워크 활동을 모니터링할 수 있습니다."</string>
     <string name="monitoring_description_vpn_settings_separator" msgid="1933186756733474388">" "</string>
-    <string name="monitoring_description_vpn_settings" msgid="8869300202410505143">"공개 VPN 설정"</string>
+    <string name="monitoring_description_vpn_settings" msgid="6434859242636063861">"공개 VPN 설정"</string>
     <string name="monitoring_description_ca_cert_settings_separator" msgid="4987350385906393626">" "</string>
     <string name="monitoring_description_ca_cert_settings" msgid="5489969458872997092">"신뢰할 수 있는 사용자 인증 정보 열기"</string>
     <string name="monitoring_description_network_logging" msgid="7223505523384076027">"관리자가 기기에서 발생하는 트래픽을 모니터링하는 네트워크 로깅을 사용 설정했습니다.\n\n자세한 정보는 관리자에게 문의하세요."</string>
@@ -558,8 +558,8 @@
     <string name="notification_default_channel_desc" msgid="2506053815870808359">"이 앱에는 알림 카테고리가 없습니다."</string>
     <string name="notification_unblockable_desc" msgid="3561016061737896906">"이 앱의 알림을 사용 중지할 수 없습니다."</string>
     <plurals name="notification_num_channels_desc" formatted="false" msgid="5492793452274077663">
-      <item quantity="other">이 앱에서 <xliff:g id="NUMBER_1">%d</xliff:g>개의 알림 카테고리 중 1개가 정의됨</item>
-      <item quantity="one">이 앱에서 <xliff:g id="NUMBER_0">%d</xliff:g>개의 알림 카테고리 중 1개가 정의됨</item>
+      <item quantity="other">이 앱에서 <xliff:g id="NUMBER_1">%s</xliff:g>개의 알림 카테고리 중 1개가 정의됨</item>
+      <item quantity="one">이 앱에서 <xliff:g id="NUMBER_0">%s</xliff:g>개의 알림 카테고리 중 1개가 정의됨</item>
     </plurals>
     <string name="notification_channels_list_desc_2" msgid="6214732715833946441">"<xliff:g id="CHANNEL_NAME_1">%1$s</xliff:g>, <xliff:g id="CHANNEL_NAME_2">%2$s</xliff:g>"</string>
     <plurals name="notification_channels_list_desc_2_and_others" formatted="false" msgid="2747813553355336157">
@@ -587,8 +587,8 @@
       <item quantity="one">%d분</item>
     </plurals>
     <string name="battery_panel_title" msgid="7944156115535366613">"배터리 사용량"</string>
-    <string name="battery_detail_charging_summary" msgid="1279095653533044008">"충전하는 동안 배터리 세이버는 사용할 수 없습니다."</string>
-    <string name="battery_detail_switch_title" msgid="6285872470260795421">"배터리 세이버"</string>
+    <string name="battery_detail_charging_summary" msgid="4055327085770378335">"충전 중에는 배터리 세이버를 사용할 수 없습니다."</string>
+    <string name="battery_detail_switch_title" msgid="8763441006881907058">"배터리 세이버"</string>
     <string name="battery_detail_switch_summary" msgid="9049111149407626804">"성능 및 백그라운드 데이터를 줄입니다."</string>
     <string name="keyboard_key_button_template" msgid="6230056639734377300">"<xliff:g id="NAME">%1$s</xliff:g> 버튼"</string>
     <string name="keyboard_key_home" msgid="2243500072071305073">"Home"</string>
@@ -728,9 +728,9 @@
     <string name="pip_phone_minimize" msgid="1079119422589131792">"최소화"</string>
     <string name="pip_phone_close" msgid="8416647892889710330">"닫기"</string>
     <string name="pip_phone_dismiss_hint" msgid="6351678169095923899">"아래로 드래그하여 닫기"</string>
-    <string name="pip_menu_title" msgid="3328510504196964712">"PIP 메뉴"</string>
+    <string name="pip_menu_title" msgid="4707292089961887657">"메뉴"</string>
     <string name="pip_notification_title" msgid="3204024940158161322">"<xliff:g id="NAME">%s</xliff:g>에서 PIP 사용 중"</string>
-    <string name="pip_notification_message" msgid="4171698133469539591">"<xliff:g id="NAME">%s</xliff:g>에서 이 기능이 사용되는 것을 원하지 않는 경우 탭하여 설정을 열고 기능을 사용 중지하세요."</string>
+    <string name="pip_notification_message" msgid="5619512781514343311">"<xliff:g id="NAME">%s</xliff:g>에서 이 기능이 사용되는 것을 원하지 않는 경우 탭하여 설정을 열고 기능을 사용 중지하세요."</string>
     <string name="pip_play" msgid="1417176722760265888">"재생"</string>
     <string name="pip_pause" msgid="8881063404466476571">"일시중지"</string>
     <string name="pip_skip_to_next" msgid="1948440006726306284">"다음으로 건너뛰기"</string>
@@ -756,6 +756,7 @@
     <string name="tuner_menu" msgid="191640047241552081">"메뉴"</string>
     <string name="tuner_app" msgid="3507057938640108777">"<xliff:g id="APP">%1$s</xliff:g> 앱"</string>
     <string name="notification_channel_alerts" msgid="4496839309318519037">"알림"</string>
+    <string name="notification_channel_battery" msgid="5786118169182888462">"배터리"</string>
     <string name="notification_channel_screenshot" msgid="6314080179230000938">"스크린샷"</string>
     <string name="notification_channel_general" msgid="4525309436693914482">"일반 메시지"</string>
     <string name="notification_channel_storage" msgid="3077205683020695313">"저장공간"</string>
@@ -776,4 +777,5 @@
     <string name="running_foreground_services_title" msgid="381024150898615683">"백그라운드에서 실행 중인 앱"</string>
     <string name="running_foreground_services_msg" msgid="6326247670075574355">"탭하여 배터리 및 데이터 사용량 확인"</string>
     <string name="data_usage_disable_mobile" msgid="5116269981510015864">"모바일 데이터를 사용 중지하시겠습니까?"</string>
+    <string name="touch_filtered_warning" msgid="8671693809204767551">"앱이 권한 요청을 가리고 있기 때문에 설정에서 내 응답을 확인할 수 없습니다."</string>
 </resources>

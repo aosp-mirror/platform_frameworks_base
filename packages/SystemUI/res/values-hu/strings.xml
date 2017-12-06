@@ -64,7 +64,7 @@
     <string name="usb_debugging_message" msgid="2220143855912376496">"A számítógép RSA kulcs ujjlenyomata:\n<xliff:g id="FINGERPRINT">%1$s</xliff:g>"</string>
     <string name="usb_debugging_always" msgid="303335496705863070">"Mindig engedélyezze erről a számítógépről"</string>
     <string name="usb_debugging_secondary_user_title" msgid="6353808721761220421">"Az USB hibakeresése nem engedélyezett"</string>
-    <string name="usb_debugging_secondary_user_message" msgid="8572228137833020196">"Az eszközre jelenleg bejelentkezett felhasználó nem kapcsolhatja be az USB hibakeresését. A funkció használatához váltson rendszergazda felhasználóra."</string>
+    <string name="usb_debugging_secondary_user_message" msgid="6067122453571699801">"Az eszközre jelenleg bejelentkezett felhasználó nem engedélyezheti az USB-hibakeresést. A funkció használatához váltson az elsődleges felhasználóra."</string>
     <string name="compat_mode_on" msgid="6623839244840638213">"Nagyítás a kitöltéshez"</string>
     <string name="compat_mode_off" msgid="4434467572461327898">"Nyújtás kitöltéshez"</string>
     <string name="screenshot_saving_ticker" msgid="7403652894056693515">"Képernyőkép mentése..."</string>
@@ -353,10 +353,10 @@
     <string name="description_target_search" msgid="3091587249776033139">"Keresés"</string>
     <string name="description_direction_up" msgid="7169032478259485180">"A(z) <xliff:g id="TARGET_DESCRIPTION">%s</xliff:g> művelethez csúsztassa felfelé."</string>
     <string name="description_direction_left" msgid="7207478719805562165">"A(z) <xliff:g id="TARGET_DESCRIPTION">%s</xliff:g> művelethez csúsztassa balra."</string>
-    <string name="zen_priority_introduction" msgid="7577965386868311310">"Az Ön által meghatározott ébresztéseken, emlékeztetőkön, eseményeken és hívókon kívül nem fogja Önt más hang vagy rezgés megzavarni. Továbbra is lesz hangjuk azoknak a tartalmaknak, amelyeket Ön elindít, például zenék, videók és játékok."</string>
-    <string name="zen_alarms_introduction" msgid="7034415210361973827">"Az ébresztéseken kívül nem fogja Önt más hang és rezgés megzavarni. Továbbra is lesz hangjuk azoknak a tartalmaknak, amelyeket Ön elindít, például zenék, videók és játékok."</string>
+    <string name="zen_priority_introduction" msgid="1149025108714420281">"Az Ön által meghatározott ébresztéseken, emlékeztetőkön, eseményeken és hívókon kívül nem fogja Önt más hang vagy rezgés megzavarni. Továbbra is lesz hangjuk azoknak a tartalmaknak, amelyeket Ön elindít, például zenék, videók és játékok."</string>
+    <string name="zen_alarms_introduction" msgid="4934328096749380201">"Az ébresztéseken kívül nem fogja Önt más hang és rezgés megzavarni. Továbbra is lesz hangjuk azoknak a tartalmaknak, amelyeket Ön elindít, például zenék, videók és játékok."</string>
     <string name="zen_priority_customize_button" msgid="7948043278226955063">"Személyre szabás"</string>
-    <string name="zen_silence_introduction_voice" msgid="2284540992298200729">"Ez letiltja az ÖSSZES hanghatást és rezgést, beleértve az ébresztések, zeneszámok, videók és játékok hangjait is. Telefonhívást továbbra is indíthat majd."</string>
+    <string name="zen_silence_introduction_voice" msgid="3948778066295728085">"Ez letiltja az ÖSSZES hangot és rezgést, beleértve az ébresztések, zeneszámok, videók és játékok hangjait is. Telefonhívást továbbra is indíthat majd."</string>
     <string name="zen_silence_introduction" msgid="3137882381093271568">"Ez letiltja az ÖSSZES hanghatást és rezgést, beleértve az ébresztések, zeneszámok, videók és játékok hangjait is."</string>
     <string name="keyguard_more_overflow_text" msgid="9195222469041601365">"+<xliff:g id="NUMBER_OF_NOTIFICATIONS">%d</xliff:g>"</string>
     <string name="speed_bump_explanation" msgid="1288875699658819755">"A kevésbé sürgős értesítések lentebb vannak"</string>
@@ -456,7 +456,7 @@
     <string name="monitoring_description_do_learn_more" msgid="1849514470437907421">"További információ"</string>
     <string name="monitoring_description_do_body_vpn" msgid="8255218762488901796">"Ön kapcsolódik ehhez: <xliff:g id="VPN_APP">%1$s</xliff:g>, amely figyelheti hálózati tevékenységét, köztük a levelezést, az alkalmazás- és webhelyhasználatot."</string>
     <string name="monitoring_description_vpn_settings_separator" msgid="1933186756733474388">" "</string>
-    <string name="monitoring_description_vpn_settings" msgid="8869300202410505143">"VPN-beállítások megnyitása"</string>
+    <string name="monitoring_description_vpn_settings" msgid="6434859242636063861">"VPN-beállítások megnyitása"</string>
     <string name="monitoring_description_ca_cert_settings_separator" msgid="4987350385906393626">" "</string>
     <string name="monitoring_description_ca_cert_settings" msgid="5489969458872997092">"Megbízható hitelesítési adatok megnyitása"</string>
     <string name="monitoring_description_network_logging" msgid="7223505523384076027">"A rendszergazda bekapcsolta az eszköz forgalmát figyelő hálózati naplózást.\n\nHa további információra van szüksége, forduljon a rendszergazdához."</string>
@@ -556,8 +556,8 @@
     <string name="notification_default_channel_desc" msgid="2506053815870808359">"Az alkalmazás nem rendelkezik értesítési kategóriákkal"</string>
     <string name="notification_unblockable_desc" msgid="3561016061737896906">"Az alkalmazástól érkező értesítések nem kapcsolhatók ki"</string>
     <plurals name="notification_num_channels_desc" formatted="false" msgid="5492793452274077663">
-      <item quantity="other"><xliff:g id="NUMBER_1">%d</xliff:g>/1 értesítési kategória az alkalmazásból</item>
-      <item quantity="one"><xliff:g id="NUMBER_0">%d</xliff:g>/1 értesítési kategória az alkalmazásból</item>
+      <item quantity="other"><xliff:g id="NUMBER_1">%s</xliff:g>/1 értesítési kategória az alkalmazásból</item>
+      <item quantity="one"><xliff:g id="NUMBER_0">%s</xliff:g>/1 értesítési kategória az alkalmazásból</item>
     </plurals>
     <string name="notification_channels_list_desc_2" msgid="6214732715833946441">"<xliff:g id="CHANNEL_NAME_1">%1$s</xliff:g>, <xliff:g id="CHANNEL_NAME_2">%2$s</xliff:g>"</string>
     <plurals name="notification_channels_list_desc_2_and_others" formatted="false" msgid="2747813553355336157">
@@ -585,8 +585,8 @@
       <item quantity="one">%d perc</item>
     </plurals>
     <string name="battery_panel_title" msgid="7944156115535366613">"Akkumulátorhasználat"</string>
-    <string name="battery_detail_charging_summary" msgid="1279095653533044008">"Az Akkumulátorkímélő módot töltés közben nem lehet használni"</string>
-    <string name="battery_detail_switch_title" msgid="6285872470260795421">"Akkumulátorkímélő mód"</string>
+    <string name="battery_detail_charging_summary" msgid="4055327085770378335">"Az Akkumulátorkímélő módot töltés közben nem lehet használni"</string>
+    <string name="battery_detail_switch_title" msgid="8763441006881907058">"Akkumulátorkímélő mód"</string>
     <string name="battery_detail_switch_summary" msgid="9049111149407626804">"Csökkenti a teljesítményt és a háttéradatok használatát"</string>
     <string name="keyboard_key_button_template" msgid="6230056639734377300">"<xliff:g id="NAME">%1$s</xliff:g> gomb"</string>
     <string name="keyboard_key_home" msgid="2243500072071305073">"Kezdőképernyő"</string>
@@ -726,9 +726,9 @@
     <string name="pip_phone_minimize" msgid="1079119422589131792">"Kis méret"</string>
     <string name="pip_phone_close" msgid="8416647892889710330">"Bezárás"</string>
     <string name="pip_phone_dismiss_hint" msgid="6351678169095923899">"Elvetéshez húzza lefelé"</string>
-    <string name="pip_menu_title" msgid="3328510504196964712">"Kép a képben menü"</string>
+    <string name="pip_menu_title" msgid="4707292089961887657">"Menü"</string>
     <string name="pip_notification_title" msgid="3204024940158161322">"A(z) <xliff:g id="NAME">%s</xliff:g> kép a képben funkciót használ"</string>
-    <string name="pip_notification_message" msgid="4171698133469539591">"Ha nem szeretné, hogy a(z) <xliff:g id="NAME">%s</xliff:g> használja ezt a funkciót, koppintson a beállítások megnyitásához, és kapcsolja ki."</string>
+    <string name="pip_notification_message" msgid="5619512781514343311">"Ha nem szeretné, hogy a(z) <xliff:g id="NAME">%s</xliff:g> használja ezt a funkciót, koppintson a beállítások megnyitásához, és kapcsolja ki."</string>
     <string name="pip_play" msgid="1417176722760265888">"Lejátszás"</string>
     <string name="pip_pause" msgid="8881063404466476571">"Szüneteltetés"</string>
     <string name="pip_skip_to_next" msgid="1948440006726306284">"Ugrás a következőre"</string>
@@ -754,6 +754,7 @@
     <string name="tuner_menu" msgid="191640047241552081">"Menü"</string>
     <string name="tuner_app" msgid="3507057938640108777">"<xliff:g id="APP">%1$s</xliff:g> alkalmazás"</string>
     <string name="notification_channel_alerts" msgid="4496839309318519037">"Értesítések"</string>
+    <string name="notification_channel_battery" msgid="5786118169182888462">"Akkumulátor"</string>
     <string name="notification_channel_screenshot" msgid="6314080179230000938">"Képernyőképek"</string>
     <string name="notification_channel_general" msgid="4525309436693914482">"Általános üzenetek"</string>
     <string name="notification_channel_storage" msgid="3077205683020695313">"Tárhely"</string>
@@ -774,4 +775,5 @@
     <string name="running_foreground_services_title" msgid="381024150898615683">"A háttérben még futnak alkalmazások"</string>
     <string name="running_foreground_services_msg" msgid="6326247670075574355">"Koppintson az akkumulátor- és adathasználat részleteinek megtekintéséhez"</string>
     <string name="data_usage_disable_mobile" msgid="5116269981510015864">"Kikapcsolja a mobiladatokat?"</string>
+    <string name="touch_filtered_warning" msgid="8671693809204767551">"Mivel az egyik alkalmazás eltakarja az engedélykérést, a Beállítások alkalmazás nem tudja ellenőrizni az Ön válaszát."</string>
 </resources>

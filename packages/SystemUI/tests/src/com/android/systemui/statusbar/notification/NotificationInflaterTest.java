@@ -185,7 +185,9 @@ public class NotificationInflaterTest extends SysuiTestCase {
         countDownLatch.await();
     }
 
+    /* Cancelling requires us to be on the UI thread otherwise we might have a race */
     @Test
+    @UiThreadTest
     public void testSupersedesExistingTask() throws Exception {
         mNotificationInflater.inflateNotificationViews();
         mNotificationInflater.setIsLowPriority(true);
@@ -197,6 +199,18 @@ public class NotificationInflaterTest extends SysuiTestCase {
                 asyncInflationTask.getReInflateFlags(),
                 NotificationInflater.FLAG_REINFLATE_ALL);
         runningTask.abort();
+    }
+
+    @Test
+    public void doesntReapplyDisallowedRemoteView() throws Exception {
+        mBuilder.setStyle(new Notification.MediaStyle());
+        RemoteViews mediaView = mBuilder.createContentView();
+        mBuilder.setStyle(new Notification.DecoratedCustomViewStyle());
+        mBuilder.setCustomContentView(new RemoteViews(getContext().getPackageName(),
+                R.layout.custom_view_dark));
+        RemoteViews decoratedMediaView = mBuilder.createContentView();
+        Assert.assertFalse("The decorated media style doesn't allow a view to be reapplied!",
+                NotificationInflater.canReapplyRemoteView(mediaView, decoratedMediaView));
     }
 
     public static void runThenWaitForInflation(Runnable block,

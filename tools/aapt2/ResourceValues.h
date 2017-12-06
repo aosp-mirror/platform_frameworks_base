@@ -264,7 +264,7 @@ struct Attribute : public BaseValue<Attribute> {
   Attribute* Clone(StringPool* new_pool) const override;
   void PrintMask(std::ostream* out) const;
   void Print(std::ostream* out) const override;
-  bool Matches(const Item* item, DiagMessage* out_msg) const;
+  bool Matches(const Item& item, DiagMessage* out_msg = nullptr) const;
 };
 
 struct Style : public BaseValue<Style> {
@@ -292,7 +292,7 @@ struct Style : public BaseValue<Style> {
 };
 
 struct Array : public BaseValue<Array> {
-  std::vector<std::unique_ptr<Item>> items;
+  std::vector<std::unique_ptr<Item>> elements;
 
   bool Equals(const Value* value) const override;
   Array* Clone(StringPool* new_pool) const override;

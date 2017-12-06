@@ -17,5 +17,5 @@
 <resources>
     <!-- Bounds [left top right bottom] on screen for picture-in-picture (PIP) windows,
          when the PIP menu is shown with settings. -->
-    <string translatable="false" name="pip_settings_bounds">"778 54 1258 324"</string>
+    <string translatable="false" name="pip_settings_bounds">"778 756 1258 1026"</string>
 </resources>

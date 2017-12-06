@@ -98,6 +98,11 @@ public class PageIndicator extends View {
     protected void onDraw(Canvas canvas) {
         super.onDraw(canvas);
 
+        // Don't draw anything unless there's multiple pages to scroll through.  No need to clear
+        // any previous dots, since onDraw provides a canvas that's already cleared.
+        if (mPageCount <= 1)
+            return;
+
         int x = canvas.getWidth() / 2 - (mPageCount / 2) * mStep;
         int y = canvas.getHeight() / 2;
 

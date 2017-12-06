@@ -1926,6 +1926,9 @@ public final class ActiveServices {
             if (r.restartDelay == 0) {
                 r.restartCount++;
                 r.restartDelay = minDuration;
+            } else if (r.crashCount > 1) {
+                r.restartDelay = mAm.mConstants.BOUND_SERVICE_CRASH_RESTART_DURATION
+                        * (r.crashCount - 1);
             } else {
                 // If it has been a "reasonably long time" since the service
                 // was started, then reset our restart duration back to
@@ -2157,6 +2160,15 @@ public final class ActiveServices {
             if (isolated) {
                 r.isolatedProc = app;
             }
+        }
+
+        if (r.fgRequired) {
+            if (DEBUG_FOREGROUND_SERVICE) {
+                Slog.v(TAG, "Whitelisting " + UserHandle.formatUid(r.appInfo.uid)
+                        + " for fg-service launch");
+            }
+            mAm.tempWhitelistUidLocked(r.appInfo.uid,
+                    SERVICE_START_FOREGROUND_TIMEOUT, "fg-service-launch");
         }
 
         if (!mPendingServices.contains(r)) {
@@ -3129,8 +3141,9 @@ public final class ActiveServices {
 
             // Any services running in the application may need to be placed
             // back in the pending list.
-            if (allowRestart && sr.crashCount >= 2 && (sr.serviceInfo.applicationInfo.flags
-                    &ApplicationInfo.FLAG_PERSISTENT) == 0) {
+            if (allowRestart && sr.crashCount >= mAm.mConstants.BOUND_SERVICE_MAX_CRASH_RETRY
+                    && (sr.serviceInfo.applicationInfo.flags
+                        &ApplicationInfo.FLAG_PERSISTENT) == 0) {
                 Slog.w(TAG, "Service crashed " + sr.crashCount
                         + " times, stopping: " + sr);
                 EventLog.writeEvent(EventLogTags.AM_SERVICE_CRASHED_TOO_MUCH,

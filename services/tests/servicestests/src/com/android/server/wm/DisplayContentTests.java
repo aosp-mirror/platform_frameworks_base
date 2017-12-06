@@ -17,11 +17,16 @@
 package com.android.server.wm;
 
 import static android.app.ActivityManager.StackId.PINNED_STACK_ID;
+import static android.content.pm.ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE;
+import static android.content.pm.ActivityInfo.SCREEN_ORIENTATION_PORTRAIT;
+import static android.content.pm.ActivityInfo.SCREEN_ORIENTATION_UNSPECIFIED;
 import static android.view.Display.DEFAULT_DISPLAY;
 import static android.view.WindowManager.LayoutParams.TYPE_APPLICATION;
 import static android.view.WindowManager.LayoutParams.TYPE_APPLICATION_ATTACHED_DIALOG;
 import static android.view.WindowManager.LayoutParams.TYPE_BASE_APPLICATION;
+import static android.view.WindowManager.LayoutParams.TYPE_STATUS_BAR;
 import static android.view.WindowManager.LayoutParams.TYPE_VOICE_INTERACTION;
+
 import static com.android.server.wm.WindowContainer.POSITION_TOP;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
@@ -30,6 +35,7 @@ import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
+import android.annotation.SuppressLint;
 import android.content.res.Configuration;
 import android.os.SystemClock;
 import android.platform.test.annotations.Presubmit;
@@ -376,6 +382,31 @@ public class DisplayContentTests extends WindowTestsBase {
         sWm.getDisplaysInFocusOrder(orderedDisplayIds);
         // Make sure that display that is marked for removal is not reported.
         assertEquals(-1, orderedDisplayIds.indexOfValue(dc.getDisplayId()));
+    }
+
+    @Test
+    @SuppressLint("InlinedApi")
+    public void testOrientationDefinedByKeyguard() {
+        final DisplayContent dc = createNewDisplay();
+        // Create a window that requests landscape orientation. It will define device orientation
+        // by default.
+        final WindowState window = createWindow(null /* parent */, TYPE_BASE_APPLICATION, dc, "w");
+        window.mAppToken.setOrientation(SCREEN_ORIENTATION_LANDSCAPE);
+
+        final WindowState keyguard = createWindow(null, TYPE_STATUS_BAR, dc, "keyguard");
+        keyguard.mHasSurface = true;
+        keyguard.mAttrs.screenOrientation = SCREEN_ORIENTATION_UNSPECIFIED;
+
+        assertEquals("Screen orientation must be defined by the app window by default",
+                SCREEN_ORIENTATION_LANDSCAPE, dc.getOrientation());
+
+        keyguard.mAttrs.screenOrientation = SCREEN_ORIENTATION_PORTRAIT;
+        assertEquals("Visible keyguard must influence device orientation",
+                SCREEN_ORIENTATION_PORTRAIT, dc.getOrientation());
+
+        sWm.setKeyguardGoingAway(true);
+        assertEquals("Keyguard that is going away must not influence device orientation",
+                SCREEN_ORIENTATION_LANDSCAPE, dc.getOrientation());
     }
 
     private static void verifySizes(DisplayContent displayContent, int expectedBaseWidth,

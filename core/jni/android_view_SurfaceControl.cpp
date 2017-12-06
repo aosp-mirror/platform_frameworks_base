@@ -246,7 +246,7 @@ static jobject nativeScreenshotBitmap(JNIEnv* env, jclass clazz,
 
     auto bitmap = new Bitmap(
             (void*) screenshot->getPixels(), (void*) screenshot.get(), DeleteScreenshot,
-            screenshotInfo, rowBytes, nullptr);
+            screenshotInfo, rowBytes);
     screenshot.release();
     bitmap->setImmutable();
     return bitmap::createBitmap(env, bitmap,

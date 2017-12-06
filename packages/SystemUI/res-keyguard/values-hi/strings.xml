@@ -29,8 +29,7 @@
     <string name="keyguard_password_enter_password_code" msgid="595980919238127672">"अनलॉक करने के लिए पासवर्ड लिखें"</string>
     <string name="keyguard_password_enter_pin_password_code" msgid="7504123374204446086">"अनलॉक करने के लिए पिन लिखें"</string>
     <string name="keyguard_password_wrong_pin_code" msgid="6535018036285012028">"गलत पिन कोड."</string>
-    <!-- no translation found for keyguard_sim_error_message_short (592109500618448312) -->
-    <skip />
+    <string name="keyguard_sim_error_message_short" msgid="592109500618448312">"गलत कार्ड."</string>
     <string name="keyguard_charged" msgid="2222329688813033109">"चार्ज हो गई है"</string>
     <string name="keyguard_plugged_in" msgid="89308975354638682">"चार्ज हो रही है"</string>
     <string name="keyguard_plugged_in_charging_fast" msgid="8869226755413795173">"तेज़ी से चार्ज हो रही है"</string>
@@ -132,5 +131,5 @@
       <item quantity="one">डिवाइस को <xliff:g id="NUMBER_1">%d</xliff:g> घंटों से अनलॉक नहीं किया गया है. पासवर्ड की पुष्टि करें.</item>
       <item quantity="other">डिवाइस को <xliff:g id="NUMBER_1">%d</xliff:g> घंटों से अनलॉक नहीं किया गया है. पासवर्ड की पुष्टि करें.</item>
     </plurals>
-    <string name="fingerprint_not_recognized" msgid="348813995267914625">"अंगुली की पहचान नहीं हो सकी"</string>
+    <string name="fingerprint_not_recognized" msgid="348813995267914625">"उंगली की पहचान नहीं हो सकी"</string>
 </resources>

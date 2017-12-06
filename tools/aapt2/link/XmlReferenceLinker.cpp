@@ -144,7 +144,9 @@ class XmlVisitor : public xml::PackageAwareVisitor {
     xml::PackageAwareVisitor::Visit(el);
   }
 
-  bool HasError() { return error_ || reference_visitor_.HasError(); }
+  bool HasError() {
+    return error_ || reference_visitor_.HasError();
+  }
 
  private:
   DISALLOW_COPY_AND_ASSIGN(XmlVisitor);

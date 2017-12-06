@@ -24,7 +24,7 @@
     <string name="status_bar_recent_remove_item_title" msgid="6026395868129852968">"Fjern fra listen"</string>
     <string name="status_bar_recent_inspect_item_title" msgid="7793624864528818569">"Info om appen"</string>
     <string name="status_bar_no_recent_apps" msgid="7374907845131203189">"De sist brukte skjermene dine vises her"</string>
-    <string name="status_bar_accessibility_dismiss_recents" msgid="4576076075226540105">"Avvis nylige apper"</string>
+    <string name="status_bar_accessibility_dismiss_recents" msgid="4576076075226540105">"Avvis nylig brukte apper"</string>
     <plurals name="status_bar_accessibility_recent_apps" formatted="false" msgid="9138535907802238759">
       <item quantity="other">%d skjermer i oversikten</item>
       <item quantity="one">1 skjerm i oversikten</item>
@@ -64,7 +64,7 @@
     <string name="usb_debugging_message" msgid="2220143855912376496">"Datamaskinens nøkkelfingeravtrykk for RSA er:\n<xliff:g id="FINGERPRINT">%1$s</xliff:g>"</string>
     <string name="usb_debugging_always" msgid="303335496705863070">"Tillat alltid fra denne datamaskinen"</string>
     <string name="usb_debugging_secondary_user_title" msgid="6353808721761220421">"USB-feilsøking er ikke tillatt"</string>
-    <string name="usb_debugging_secondary_user_message" msgid="8572228137833020196">"Brukeren som for øyeblikket er logget på denne enheten, kan ikke slå på USB-feilsøking. For å bruke denne funksjonen, bytt til en administratorbruker."</string>
+    <string name="usb_debugging_secondary_user_message" msgid="6067122453571699801">"Brukeren som for øyeblikket er logget på denne enheten, kan ikke slå på USB-feilsøking. For å bruke denne funksjonen, bytt til hovedbrukeren."</string>
     <string name="compat_mode_on" msgid="6623839244840638213">"Zoom for å fylle skjermen"</string>
     <string name="compat_mode_off" msgid="4434467572461327898">"Strekk for å fylle skjerm"</string>
     <string name="screenshot_saving_ticker" msgid="7403652894056693515">"Lagrer skjermdumpen …"</string>
@@ -353,10 +353,10 @@
     <string name="description_target_search" msgid="3091587249776033139">"Søk"</string>
     <string name="description_direction_up" msgid="7169032478259485180">"Dra opp for å <xliff:g id="TARGET_DESCRIPTION">%s</xliff:g>."</string>
     <string name="description_direction_left" msgid="7207478719805562165">"Dra til venstre for å <xliff:g id="TARGET_DESCRIPTION">%s</xliff:g>."</string>
-    <string name="zen_priority_introduction" msgid="7577965386868311310">"Du blir ikke forstyrret av lyder og vibrasjoner, med unntak av alarmer, påminnelser, aktiviteter og oppringere du angir. Du kan fremdeles høre alt du velger å spille av, for eksempel musikk, videoer og spill."</string>
-    <string name="zen_alarms_introduction" msgid="7034415210361973827">"Du blir ikke forstyrret av lyder og vibrasjoner, med unntak av alarmer. Du kan fremdeles høre alt du velger å spille av, for eksempel musikk, videoer og spill."</string>
+    <string name="zen_priority_introduction" msgid="1149025108714420281">"Du blir ikke forstyrret av lyder og vibrasjoner, med unntak av alarmer, påminnelser, aktiviteter og oppringere du angir. Du kan fremdeles høre alt du velger å spille av, for eksempel musikk, videoer og spill."</string>
+    <string name="zen_alarms_introduction" msgid="4934328096749380201">"Du blir ikke forstyrret av lyder og vibrasjoner, med unntak av alarmer. Du kan fremdeles høre alt du velger å spille av, for eksempel musikk, videoer og spill."</string>
     <string name="zen_priority_customize_button" msgid="7948043278226955063">"Tilpass"</string>
-    <string name="zen_silence_introduction_voice" msgid="2284540992298200729">"Dette blokkerer ALLE lyder og vibrasjoner, inkludert fra alarmer, musikk, videoer og spill. Du kan fremdeles ringe."</string>
+    <string name="zen_silence_introduction_voice" msgid="3948778066295728085">"Dette blokkerer ALLE lyder og vibrasjoner, inkludert fra alarmer, musikk, videoer og spill. Du kan fremdeles ringe."</string>
     <string name="zen_silence_introduction" msgid="3137882381093271568">"Dette blokkerer ALLE lyder og vibrasjoner, inkludert fra alarmer, musikk, videoer og spill."</string>
     <string name="keyguard_more_overflow_text" msgid="9195222469041601365">"+<xliff:g id="NUMBER_OF_NOTIFICATIONS">%d</xliff:g>"</string>
     <string name="speed_bump_explanation" msgid="1288875699658819755">"Mindre presserende varsler nedenfor"</string>
@@ -456,7 +456,7 @@
     <string name="monitoring_description_do_learn_more" msgid="1849514470437907421">"Finn ut mer"</string>
     <string name="monitoring_description_do_body_vpn" msgid="8255218762488901796">"Enheten er koblet til <xliff:g id="VPN_APP">%1$s</xliff:g>, som kan overvåke nettverksaktiviteten din, inkludert e-post, apper og nettsteder."</string>
     <string name="monitoring_description_vpn_settings_separator" msgid="1933186756733474388">" "</string>
-    <string name="monitoring_description_vpn_settings" msgid="8869300202410505143">"Åpne VPN-innstillingene"</string>
+    <string name="monitoring_description_vpn_settings" msgid="6434859242636063861">"Åpne VPN-innstillingene"</string>
     <string name="monitoring_description_ca_cert_settings_separator" msgid="4987350385906393626">" "</string>
     <string name="monitoring_description_ca_cert_settings" msgid="5489969458872997092">"Åpne pålitelig legitimasjon"</string>
     <string name="monitoring_description_network_logging" msgid="7223505523384076027">"Administratoren din har slått på loggføring av nettverk, som overvåker trafikken på enheten din.\n\nKontakt administratoren for mer informasjon."</string>
@@ -556,8 +556,8 @@
     <string name="notification_default_channel_desc" msgid="2506053815870808359">"Denne appen har ikke varselkategorier"</string>
     <string name="notification_unblockable_desc" msgid="3561016061737896906">"Varsler fra denne appen kan ikke slås av"</string>
     <plurals name="notification_num_channels_desc" formatted="false" msgid="5492793452274077663">
-      <item quantity="other">1 av <xliff:g id="NUMBER_1">%d</xliff:g> varselkategorier fra denne appen</item>
-      <item quantity="one">1 av <xliff:g id="NUMBER_0">%d</xliff:g> varselkategori fra denne appen</item>
+      <item quantity="other">1 av <xliff:g id="NUMBER_1">%s</xliff:g> varselkategorier fra denne appen</item>
+      <item quantity="one">1 av <xliff:g id="NUMBER_0">%s</xliff:g> varselkategori fra denne appen</item>
     </plurals>
     <string name="notification_channels_list_desc_2" msgid="6214732715833946441">"<xliff:g id="CHANNEL_NAME_1">%1$s</xliff:g>, <xliff:g id="CHANNEL_NAME_2">%2$s</xliff:g>"</string>
     <plurals name="notification_channels_list_desc_2_and_others" formatted="false" msgid="2747813553355336157">
@@ -585,8 +585,8 @@
       <item quantity="one">%d minutt</item>
     </plurals>
     <string name="battery_panel_title" msgid="7944156115535366613">"Batteribruk"</string>
-    <string name="battery_detail_charging_summary" msgid="1279095653533044008">"Batterisparing er ikke tilgjengelig under lading"</string>
-    <string name="battery_detail_switch_title" msgid="6285872470260795421">"Batterisparing"</string>
+    <string name="battery_detail_charging_summary" msgid="4055327085770378335">"Batterisparing er ikke tilgjengelig under lading"</string>
+    <string name="battery_detail_switch_title" msgid="8763441006881907058">"Batterisparing"</string>
     <string name="battery_detail_switch_summary" msgid="9049111149407626804">"Reduserer ytelsen og begrenser bakgrunnsdataene"</string>
     <string name="keyboard_key_button_template" msgid="6230056639734377300">"<xliff:g id="NAME">%1$s</xliff:g>-knappen"</string>
     <string name="keyboard_key_home" msgid="2243500072071305073">"Startskjerm"</string>
@@ -726,9 +726,9 @@
     <string name="pip_phone_minimize" msgid="1079119422589131792">"Minimer"</string>
     <string name="pip_phone_close" msgid="8416647892889710330">"Lukk"</string>
     <string name="pip_phone_dismiss_hint" msgid="6351678169095923899">"Dra ned for å avvise"</string>
-    <string name="pip_menu_title" msgid="3328510504196964712">"Bilde-i-bilde-meny"</string>
+    <string name="pip_menu_title" msgid="4707292089961887657">"Meny"</string>
     <string name="pip_notification_title" msgid="3204024940158161322">"<xliff:g id="NAME">%s</xliff:g> er i bilde-i-bilde"</string>
-    <string name="pip_notification_message" msgid="4171698133469539591">"Hvis du ikke vil at <xliff:g id="NAME">%s</xliff:g> skal bruke denne funksjonen, kan du trykke for å åpne innstillingene og slå den av."</string>
+    <string name="pip_notification_message" msgid="5619512781514343311">"Hvis du ikke vil at <xliff:g id="NAME">%s</xliff:g> skal bruke denne funksjonen, kan du trykke for å åpne innstillingene og slå den av."</string>
     <string name="pip_play" msgid="1417176722760265888">"Spill av"</string>
     <string name="pip_pause" msgid="8881063404466476571">"Sett på pause"</string>
     <string name="pip_skip_to_next" msgid="1948440006726306284">"Hopp til neste"</string>
@@ -754,6 +754,7 @@
     <string name="tuner_menu" msgid="191640047241552081">"Meny"</string>
     <string name="tuner_app" msgid="3507057938640108777">"<xliff:g id="APP">%1$s</xliff:g>-appen"</string>
     <string name="notification_channel_alerts" msgid="4496839309318519037">"Varsler"</string>
+    <string name="notification_channel_battery" msgid="5786118169182888462">"Batteri"</string>
     <string name="notification_channel_screenshot" msgid="6314080179230000938">"Skjermdumper"</string>
     <string name="notification_channel_general" msgid="4525309436693914482">"Generelle meldinger"</string>
     <string name="notification_channel_storage" msgid="3077205683020695313">"Lagring"</string>
@@ -774,4 +775,5 @@
     <string name="running_foreground_services_title" msgid="381024150898615683">"Apper kjører i bakgrunnen"</string>
     <string name="running_foreground_services_msg" msgid="6326247670075574355">"Trykk for detaljer om batteri- og databruk"</string>
     <string name="data_usage_disable_mobile" msgid="5116269981510015864">"Vil du slå av mobildata?"</string>
+    <string name="touch_filtered_warning" msgid="8671693809204767551">"Fordi en app skjuler tillatelsesforespørselen, kan ikke Innstillinger bekrefte svaret ditt."</string>
 </resources>

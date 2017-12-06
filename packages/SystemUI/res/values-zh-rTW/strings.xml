@@ -64,7 +64,7 @@
     <string name="usb_debugging_message" msgid="2220143855912376496">"這台電腦的 RSA 金鑰指紋如下：\n<xliff:g id="FINGERPRINT">%1$s</xliff:g>"</string>
     <string name="usb_debugging_always" msgid="303335496705863070">"一律允許透過這台電腦進行"</string>
     <string name="usb_debugging_secondary_user_title" msgid="6353808721761220421">"無權使用 USB 偵錯功能"</string>
-    <string name="usb_debugging_secondary_user_message" msgid="8572228137833020196">"這部裝置目前的登入者無法啟用 USB 偵錯功能。如要使用這項功能，請切換成管理員使用者。"</string>
+    <string name="usb_debugging_secondary_user_message" msgid="6067122453571699801">"目前登入這個裝置的使用者無法啟用 USB 偵錯功能。如要使用這項功能，請切換到主要使用者。"</string>
     <string name="compat_mode_on" msgid="6623839244840638213">"放大為全螢幕"</string>
     <string name="compat_mode_off" msgid="4434467572461327898">"放大為全螢幕"</string>
     <string name="screenshot_saving_ticker" msgid="7403652894056693515">"正在儲存螢幕擷取畫面…"</string>
@@ -353,10 +353,10 @@
     <string name="description_target_search" msgid="3091587249776033139">"搜尋"</string>
     <string name="description_direction_up" msgid="7169032478259485180">"向上滑動即可<xliff:g id="TARGET_DESCRIPTION">%s</xliff:g>。"</string>
     <string name="description_direction_left" msgid="7207478719805562165">"向左滑動即可<xliff:g id="TARGET_DESCRIPTION">%s</xliff:g>。"</string>
-    <string name="zen_priority_introduction" msgid="7577965386868311310">"裝置不會發出音效或震動造成干擾，但會保留鬧鐘、提醒、活動和你指定的來電者響鈴。如果你選擇播放特定音樂、影片和遊戲等內容，還是可以聽見相關音訊。"</string>
-    <string name="zen_alarms_introduction" msgid="7034415210361973827">"裝置不會發出音效或震動造成干擾，但會保留鬧鐘響鈴。如果你選擇播放特定音樂、影片和遊戲等內容，還是可以聽見相關音訊。"</string>
+    <string name="zen_priority_introduction" msgid="1149025108714420281">"裝置不會發出音效或震動造成干擾，但是會保留與鬧鐘、提醒、活動和指定來電者有關的設定。如果你選擇播放音樂、影片和遊戲等內容，還是可以聽見相關音訊。"</string>
+    <string name="zen_alarms_introduction" msgid="4934328096749380201">"裝置不會發出音效或震動造成干擾，但是會保留鬧鐘響鈴。如果你選擇播放音樂、影片和遊戲等內容，還是可以聽見相關音訊。"</string>
     <string name="zen_priority_customize_button" msgid="7948043278226955063">"自訂"</string>
-    <string name="zen_silence_introduction_voice" msgid="2284540992298200729">"這會封鎖「所有」聲音和震動干擾，包括鬧鐘、音樂、影片和遊戲在內，但你仍然可以撥打電話。"</string>
+    <string name="zen_silence_introduction_voice" msgid="3948778066295728085">"這會封鎖「所有」音效和震動干擾，包括鬧鐘、音樂、影片和遊戲在內，但你仍然可以撥打電話。"</string>
     <string name="zen_silence_introduction" msgid="3137882381093271568">"這會封鎖「所有」聲音和震動干擾，包括鬧鐘、音樂、影片和遊戲在內。"</string>
     <string name="keyguard_more_overflow_text" msgid="9195222469041601365">"還有 <xliff:g id="NUMBER_OF_NOTIFICATIONS">%d</xliff:g> 則通知"</string>
     <string name="speed_bump_explanation" msgid="1288875699658819755">"較不緊急的通知會顯示在下方"</string>
@@ -456,7 +456,7 @@
     <string name="monitoring_description_do_learn_more" msgid="1849514470437907421">"瞭解詳情"</string>
     <string name="monitoring_description_do_body_vpn" msgid="8255218762488901796">"由於你已連結至「<xliff:g id="VPN_APP">%1$s</xliff:g>」，你的網路活動 (包括收發電子郵件、使用應用程式及瀏覽網站) 可能會受到這個應用程式監控。"</string>
     <string name="monitoring_description_vpn_settings_separator" msgid="1933186756733474388">" "</string>
-    <string name="monitoring_description_vpn_settings" msgid="8869300202410505143">"開啟 VPN 設定"</string>
+    <string name="monitoring_description_vpn_settings" msgid="6434859242636063861">"開啟 VPN 設定"</string>
     <string name="monitoring_description_ca_cert_settings_separator" msgid="4987350385906393626">" "</string>
     <string name="monitoring_description_ca_cert_settings" msgid="5489969458872997092">"開啟信任的憑證"</string>
     <string name="monitoring_description_network_logging" msgid="7223505523384076027">"你的管理員已啟用網路紀錄功能，可監控你裝置的流量。\n\n如需詳細資訊，請與你的管理員聯絡。"</string>
@@ -556,8 +556,8 @@
     <string name="notification_default_channel_desc" msgid="2506053815870808359">"這個應用程式沒有通知類別"</string>
     <string name="notification_unblockable_desc" msgid="3561016061737896906">"無法關閉這個應用程式發出的通知"</string>
     <plurals name="notification_num_channels_desc" formatted="false" msgid="5492793452274077663">
-      <item quantity="other">在 <xliff:g id="NUMBER_1">%d</xliff:g> 個通知類別中，有 1 個類別是來自這個應用程式</item>
-      <item quantity="one">在 <xliff:g id="NUMBER_0">%d</xliff:g> 個通知類別中，有 1 個類別是來自這個應用程式</item>
+      <item quantity="other">在 <xliff:g id="NUMBER_1">%s</xliff:g> 個通知類別中，有 1 個類別是來自這個應用程式</item>
+      <item quantity="one">在 <xliff:g id="NUMBER_0">%s</xliff:g> 個通知類別中，有 1 個類別是來自這個應用程式</item>
     </plurals>
     <string name="notification_channels_list_desc_2" msgid="6214732715833946441">"<xliff:g id="CHANNEL_NAME_1">%1$s</xliff:g>、<xliff:g id="CHANNEL_NAME_2">%2$s</xliff:g>"</string>
     <plurals name="notification_channels_list_desc_2_and_others" formatted="false" msgid="2747813553355336157">
@@ -585,8 +585,8 @@
       <item quantity="one">%d 分鐘</item>
     </plurals>
     <string name="battery_panel_title" msgid="7944156115535366613">"電池用量"</string>
-    <string name="battery_detail_charging_summary" msgid="1279095653533044008">"充電時無法使用節約耗電量模式"</string>
-    <string name="battery_detail_switch_title" msgid="6285872470260795421">"節約耗電量"</string>
+    <string name="battery_detail_charging_summary" msgid="4055327085770378335">"充電時無法使用節約耗電量模式"</string>
+    <string name="battery_detail_switch_title" msgid="8763441006881907058">"節約耗電量"</string>
     <string name="battery_detail_switch_summary" msgid="9049111149407626804">"降低效能並限制背景資料傳輸"</string>
     <string name="keyboard_key_button_template" msgid="6230056639734377300">"<xliff:g id="NAME">%1$s</xliff:g> 按鈕"</string>
     <string name="keyboard_key_home" msgid="2243500072071305073">"Home 鍵"</string>
@@ -726,9 +726,9 @@
     <string name="pip_phone_minimize" msgid="1079119422589131792">"最小化"</string>
     <string name="pip_phone_close" msgid="8416647892889710330">"關閉"</string>
     <string name="pip_phone_dismiss_hint" msgid="6351678169095923899">"向下拖曳即可關閉"</string>
-    <string name="pip_menu_title" msgid="3328510504196964712">"子母畫面選單"</string>
+    <string name="pip_menu_title" msgid="4707292089961887657">"選單"</string>
     <string name="pip_notification_title" msgid="3204024940158161322">"「<xliff:g id="NAME">%s</xliff:g>」目前在子母畫面中"</string>
-    <string name="pip_notification_message" msgid="4171698133469539591">"如果你不想讓「<xliff:g id="NAME">%s</xliff:g>」使用這項功能，請輕觸開啟設定頁面，然後停用此功能。"</string>
+    <string name="pip_notification_message" msgid="5619512781514343311">"如果你不想讓「<xliff:g id="NAME">%s</xliff:g>」使用這項功能，請輕觸開啟設定頁面，然後停用此功能。"</string>
     <string name="pip_play" msgid="1417176722760265888">"播放"</string>
     <string name="pip_pause" msgid="8881063404466476571">"暫停"</string>
     <string name="pip_skip_to_next" msgid="1948440006726306284">"跳到下一個"</string>
@@ -754,6 +754,7 @@
     <string name="tuner_menu" msgid="191640047241552081">"選單"</string>
     <string name="tuner_app" msgid="3507057938640108777">"「<xliff:g id="APP">%1$s</xliff:g>」應用程式"</string>
     <string name="notification_channel_alerts" msgid="4496839309318519037">"快訊"</string>
+    <string name="notification_channel_battery" msgid="5786118169182888462">"電池"</string>
     <string name="notification_channel_screenshot" msgid="6314080179230000938">"螢幕擷取畫面"</string>
     <string name="notification_channel_general" msgid="4525309436693914482">"一般訊息"</string>
     <string name="notification_channel_storage" msgid="3077205683020695313">"儲存空間"</string>
@@ -774,4 +775,5 @@
     <string name="running_foreground_services_title" msgid="381024150898615683">"在背景執行的應用程式"</string>
     <string name="running_foreground_services_msg" msgid="6326247670075574355">"輕觸即可查看電池和數據用量詳情"</string>
     <string name="data_usage_disable_mobile" msgid="5116269981510015864">"要關閉行動數據嗎？"</string>
+    <string name="touch_filtered_warning" msgid="8671693809204767551">"由於某個應用程式覆蓋了權限要求畫面，因此「設定」應用程式無法驗證你的回應。"</string>
 </resources>

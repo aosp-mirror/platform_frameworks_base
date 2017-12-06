@@ -184,8 +184,15 @@ public class KeyguardIndicationController {
         mVisible = visible;
         mIndicationArea.setVisibility(visible ? View.VISIBLE : View.GONE);
         if (visible) {
-            hideTransientIndication();
+            // If this is called after an error message was already shown, we should not clear it.
+            // Otherwise the error message won't be shown
+            if  (!mHandler.hasMessages(MSG_HIDE_TRANSIENT)) {
+                hideTransientIndication();
+            }
             updateIndication();
+        } else if (!visible) {
+            // If we unlock and return to keyguard quickly, previous error should not be shown
+            hideTransientIndication();
         }
     }
 
@@ -389,7 +396,6 @@ public class KeyguardIndicationController {
                 hideTransientIndication();
             } else if (msg.what == MSG_CLEAR_FP_MSG) {
                 mLockIcon.setTransientFpError(false);
-                hideTransientIndication();
             }
         }
     };
@@ -443,10 +449,10 @@ public class KeyguardIndicationController {
             int errorColor = Utils.getColorError(mContext);
             if (mStatusBarKeyguardViewManager.isBouncerShowing()) {
                 mStatusBarKeyguardViewManager.showBouncerMessage(helpString, errorColor);
-            } else if (updateMonitor.isDeviceInteractive()
-                    || mDozing && updateMonitor.isScreenOn()) {
+            } else if (updateMonitor.isScreenOn()) {
                 mLockIcon.setTransientFpError(true);
                 showTransientIndication(helpString, errorColor);
+                hideTransientIndicationDelayed(TRANSIENT_FP_ERROR_TIMEOUT);
                 mHandler.removeMessages(MSG_CLEAR_FP_MSG);
                 mHandler.sendMessageDelayed(mHandler.obtainMessage(MSG_CLEAR_FP_MSG),
                         TRANSIENT_FP_ERROR_TIMEOUT);
@@ -459,7 +465,8 @@ public class KeyguardIndicationController {
         @Override
         public void onFingerprintError(int msgId, String errString) {
             KeyguardUpdateMonitor updateMonitor = KeyguardUpdateMonitor.getInstance(mContext);
-            if (!updateMonitor.isUnlockingWithFingerprintAllowed()
+            if ((!updateMonitor.isUnlockingWithFingerprintAllowed()
+                    && msgId != FingerprintManager.FINGERPRINT_ERROR_LOCKOUT_PERMANENT)
                     || msgId == FingerprintManager.FINGERPRINT_ERROR_CANCELED) {
                 return;
             }
@@ -472,7 +479,7 @@ public class KeyguardIndicationController {
                 if (mLastSuccessiveErrorMessage != msgId) {
                     mStatusBarKeyguardViewManager.showBouncerMessage(errString, errorColor);
                 }
-            } else if (updateMonitor.isDeviceInteractive()) {
+            } else if (updateMonitor.isScreenOn()) {
                 showTransientIndication(errString, errorColor);
                 // We want to keep this message around in case the screen was off
                 hideTransientIndicationDelayed(HIDE_DELAY_MS);

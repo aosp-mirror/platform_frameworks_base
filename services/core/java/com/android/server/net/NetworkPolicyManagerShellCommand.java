@@ -19,26 +19,17 @@ package com.android.server.net;
 import static android.net.NetworkPolicyManager.POLICY_ALLOW_METERED_BACKGROUND;
 import static android.net.NetworkPolicyManager.POLICY_NONE;
 import static android.net.NetworkPolicyManager.POLICY_REJECT_METERED_BACKGROUND;
-import static android.net.wifi.WifiInfo.removeDoubleQuotes;
-
-import static com.android.server.net.NetworkPolicyManagerService.newWifiPolicy;
-import static com.android.server.net.NetworkPolicyManagerService.TAG;
-
-import java.io.PrintWriter;
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
 
 import android.content.Context;
 import android.net.INetworkPolicyManager;
-import android.net.NetworkPolicy;
-import android.net.NetworkTemplate;
+import android.net.NetworkPolicyManager;
 import android.net.wifi.WifiConfiguration;
 import android.net.wifi.WifiManager;
 import android.os.RemoteException;
 import android.os.ShellCommand;
-import android.util.Log;
+
+import java.io.PrintWriter;
+import java.util.List;
 
 class NetworkPolicyManagerShellCommand extends ShellCommand {
 
@@ -90,7 +81,7 @@ class NetworkPolicyManagerShellCommand extends ShellCommand {
         pw.println("    Adds a UID to the blacklist for restrict background usage.");
         pw.println("  get restrict-background");
         pw.println("    Gets the global restrict background usage status.");
-        pw.println("  list wifi-networks [BOOLEAN]");
+        pw.println("  list wifi-networks [true|false]");
         pw.println("    Lists all saved wifi networks and whether they are metered or not.");
         pw.println("    If a boolean argument is passed, filters just the metered (or unmetered)");
         pw.println("    networks.");
@@ -102,7 +93,7 @@ class NetworkPolicyManagerShellCommand extends ShellCommand {
         pw.println("    Removes a UID from the whitelist for restrict background usage.");
         pw.println("  remove restrict-background-blacklist UID");
         pw.println("    Removes a UID from the blacklist for restrict background usage.");
-        pw.println("  set metered-network ID BOOLEAN");
+        pw.println("  set metered-network ID [undefined|true|false]");
         pw.println("    Toggles whether the given wi-fi network is metered.");
         pw.println("  set restrict-background BOOLEAN");
         pw.println("    Sets the global restrict background usage status.");
@@ -276,107 +267,60 @@ class NetworkPolicyManagerShellCommand extends ShellCommand {
         return resetUidPolicy("not blacklisted", POLICY_REJECT_METERED_BACKGROUND);
     }
 
-    private int listWifiNetworks() throws RemoteException {
+    private int listWifiNetworks() {
         final PrintWriter pw = getOutPrintWriter();
         final String arg = getNextArg();
-        final Boolean filter = arg == null ? null : Boolean.valueOf(arg);
-        for (NetworkPolicy policy : getWifiPolicies()) {
-            if (filter != null && filter.booleanValue() != policy.metered) {
-                continue;
+        final int match;
+        if (arg == null) {
+            match = WifiConfiguration.METERED_OVERRIDE_NONE;
+        } else if (Boolean.parseBoolean(arg)) {
+            match = WifiConfiguration.METERED_OVERRIDE_METERED;
+        } else {
+            match = WifiConfiguration.METERED_OVERRIDE_NOT_METERED;
+        }
+
+        final List<WifiConfiguration> configs = mWifiManager.getConfiguredNetworks();
+        for (WifiConfiguration config : configs) {
+            if (arg == null || config.meteredOverride == match) {
+                pw.print(NetworkPolicyManager.resolveNetworkId(config));
+                pw.print(';');
+                pw.println(overrideToString(config.meteredOverride));
             }
-            pw.print(getNetworkId(policy));
-            pw.print(';');
-            pw.println(policy.metered);
         }
         return 0;
     }
 
     private int setMeteredWifiNetwork() throws RemoteException {
         final PrintWriter pw = getOutPrintWriter();
-        final String id = getNextArg();
-        if (id == null) {
-            pw.println("Error: didn't specify ID");
+        final String networkId = getNextArg();
+        if (networkId == null) {
+            pw.println("Error: didn't specify networkId");
             return -1;
         }
         final String arg = getNextArg();
         if (arg == null) {
-            pw.println("Error: didn't specify BOOLEAN");
+            pw.println("Error: didn't specify meteredOverride");
             return -1;
         }
-        final boolean metered = Boolean.valueOf(arg);
-        final NetworkPolicy[] policies = mInterface.getNetworkPolicies(null);
-        boolean changed = false;
-        // First try to find a policy with such id
-        for (NetworkPolicy policy : policies) {
-            if (policy.template.isMatchRuleMobile() || policy.metered == metered) {
-                continue;
-            }
-            final String networkId = getNetworkId(policy);
-            if (id.equals(networkId)) {
-                Log.i(TAG, "Changing " + networkId + " metered status to " + metered);
-                policy.metered = metered;
-                changed = true;
-            }
-        }
-        if (changed) {
-            mInterface.setNetworkPolicies(policies);
-            return 0;
-        }
-        // Policy not found: check if there is a saved wi-fi with such id.
-        for (WifiConfiguration config : mWifiManager.getConfiguredNetworks()) {
-            final String ssid = removeDoubleQuotes(config.SSID);
-            if (id.equals(ssid)) {
-                final NetworkPolicy policy = newPolicy(ssid);
-                policy.metered = true;
-                Log.i(TAG, "Creating new policy for " + ssid + ": " + policy);
-                final NetworkPolicy[] newPolicies = new NetworkPolicy[policies.length + 1];
-                System.arraycopy(policies, 0, newPolicies, 0, policies.length);
-                newPolicies[newPolicies.length - 1] = policy;
-                mInterface.setNetworkPolicies(newPolicies);
-                return 0;
-            }
-        }
-        pw.print("Error: didn't find network with SSID "); pw.println(id);
+        mInterface.setWifiMeteredOverride(NetworkPolicyManager.resolveNetworkId(networkId),
+                stringToOverride(arg));
         return -1;
     }
 
-    private List<NetworkPolicy> getWifiPolicies() throws RemoteException {
-        // First gets a list of saved wi-fi networks.
-        final List<WifiConfiguration> configs = mWifiManager.getConfiguredNetworks();
-        final int size = configs != null ? configs.size() : 0;
-        final Set<String> ssids = new HashSet<>(size);
-        if (configs != null) {
-            for (WifiConfiguration config : configs) {
-                ssids.add(removeDoubleQuotes(config.SSID));
-            }
+    private static String overrideToString(int override) {
+        switch (override) {
+            case WifiConfiguration.METERED_OVERRIDE_METERED: return "true";
+            case WifiConfiguration.METERED_OVERRIDE_NOT_METERED: return "false";
+            default: return "none";
         }
-
-        // Then gets the saved policies.
-        final NetworkPolicy[] policies = mInterface.getNetworkPolicies(null);
-        final List<NetworkPolicy> wifiPolicies = new ArrayList<NetworkPolicy>(policies.length);
-        for (NetworkPolicy policy: policies) {
-            if (!policy.template.isMatchRuleMobile()) {
-                wifiPolicies.add(policy);
-                final String netId = getNetworkId(policy);
-                ssids.remove(netId);
-            }
-        }
-        // Finally, creates new default policies for saved WI-FIs not policied yet.
-        for (String ssid : ssids) {
-            final NetworkPolicy policy = newPolicy(ssid);
-            wifiPolicies.add(policy);
-        }
-        return wifiPolicies;
     }
 
-    private NetworkPolicy newPolicy(String ssid) {
-        final NetworkTemplate template = NetworkTemplate.buildTemplateWifi(ssid);
-        final NetworkPolicy policy = newWifiPolicy(template, false);
-        return policy;
-    }
-
-    private String getNetworkId(NetworkPolicy policy) {
-        return removeDoubleQuotes(policy.template.getNetworkId());
+    private static int stringToOverride(String override) {
+        switch (override) {
+            case "true": return WifiConfiguration.METERED_OVERRIDE_METERED;
+            case "false": return WifiConfiguration.METERED_OVERRIDE_NOT_METERED;
+            default: return WifiConfiguration.METERED_OVERRIDE_NONE;
+        }
     }
 
     private int getNextBooleanArg() {

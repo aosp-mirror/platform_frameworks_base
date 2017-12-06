@@ -134,7 +134,8 @@ public class BatteryStatsDurationTimerTest extends TestCase {
                 null, BatteryStats.WAKE_TYPE_PARTIAL, null, timeBase);
         summary.startRunningLocked(3100);
         summary.readSummaryFromParcelLocked(summaryParcel);
-        // The new one shouldn't be running, and therefore 0 for current time
+        // The new one shouldn't be running, and therefore 0 for current time if using
+        // summary parcel
         assertFalse(summary.isRunningLocked());
         assertEquals(0, summary.getCurrentDurationMsLocked(6300));
         // The new one should have the max and total durations that we had when we wrote it
@@ -149,10 +150,10 @@ public class BatteryStatsDurationTimerTest extends TestCase {
         // Read full - Should be the same as the summary as far as DurationTimer is concerned.
         final BatteryStatsImpl.DurationTimer full = new BatteryStatsImpl.DurationTimer(clocks,
                 null, BatteryStats.WAKE_TYPE_PARTIAL, null, timeBase, fullParcel);
-        // The new one shouldn't be running, and therefore 0 for current time
+        // The new one shouldn't be running
         assertFalse(full.isRunningLocked());
-        assertEquals(0, full.getCurrentDurationMsLocked(6300));
-        // The new one should have the max and total durations that we had when we wrote it
+        // The new one should have the current, max and total durations that we had when we wrote it
+        assertEquals(1200, full.getCurrentDurationMsLocked(6300));
         assertEquals(1200, full.getMaxDurationMsLocked(6301));
         assertEquals(1200, full.getTotalDurationMsLocked(6302));
 

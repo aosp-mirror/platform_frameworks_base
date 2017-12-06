@@ -44,7 +44,6 @@ final class HdmiLogger {
     private static final long ERROR_LOG_DURATTION_MILLIS = 20 * 1000;  // 20s
 
     private static final boolean DEBUG = Log.isLoggable(TAG, Log.DEBUG);
-    private static final boolean IS_USER_BUILD = "user".equals(Build.TYPE);
 
     private static final ThreadLocal<HdmiLogger> sLogger = new ThreadLocal<>();
 

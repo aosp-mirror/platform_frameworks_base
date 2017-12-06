@@ -18,9 +18,6 @@
 
 #include <string>
 
-#include <gmock/gmock.h>
-#include <gtest/gtest.h>
-
 #include "androidfw/ResourceTypes.h"
 
 #include "test/Test.h"
@@ -29,15 +26,16 @@
 namespace aapt {
 namespace {
 
-using android::ResTable_config;
+using ::android::ResTable_config;
 using configuration::Abi;
 using configuration::AndroidSdk;
-using configuration::Configuration;
+using configuration::Artifact;
+using configuration::PostProcessingConfiguration;
 using configuration::DeviceFeature;
 using configuration::GlTexture;
 using configuration::Locale;
 using configuration::AndroidManifest;
-using testing::ElementsAre;
+using ::testing::ElementsAre;
 using xml::Element;
 using xml::NodeCast;
 
@@ -130,11 +128,16 @@ class ConfigurationParserTest : public ConfigurationParser, public ::testing::Te
   StdErrDiagnostics diag_;
 };
 
+TEST_F(ConfigurationParserTest, ForPath_NoFile) {
+  auto result = ConfigurationParser::ForPath("./does_not_exist.xml");
+  EXPECT_FALSE(result);
+}
+
 TEST_F(ConfigurationParserTest, ValidateFile) {
   auto parser = ConfigurationParser::ForContents(kValidConfig).WithDiagnostics(&diag_);
   auto result = parser.Parse();
   ASSERT_TRUE(result);
-  Configuration& value = result.value();
+  PostProcessingConfiguration& value = result.value();
   EXPECT_EQ(2ul, value.artifacts.size());
   ASSERT_TRUE(value.artifact_format);
   EXPECT_EQ(
@@ -185,13 +188,13 @@ TEST_F(ConfigurationParserTest, ArtifactAction) {
 
   auto doc = test::BuildXmlDom(xml);
 
-  Configuration config;
-  bool ok = artifact_handler_(&config, NodeCast<Element>(doc.get()->root.get()), &diag_);
+  PostProcessingConfiguration config;
+  bool ok = artifact_handler_(&config, NodeCast<Element>(doc->root.get()), &diag_);
   ASSERT_TRUE(ok);
 
   EXPECT_EQ(1ul, config.artifacts.size());
 
-  auto& artifact = config.artifacts.begin()->second;
+  auto& artifact = config.artifacts.front();
   EXPECT_EQ("", artifact.name); // TODO: make this fail.
   EXPECT_EQ("arm", artifact.abi_group.value());
   EXPECT_EQ("large", artifact.screen_density_group.value());
@@ -199,6 +202,21 @@ TEST_F(ConfigurationParserTest, ArtifactAction) {
   EXPECT_EQ("19", artifact.android_sdk_group.value());
   EXPECT_EQ("dxt1", artifact.gl_texture_group.value());
   EXPECT_EQ("low-latency", artifact.device_feature_group.value());
+
+  // Perform a second action to ensure we get 2 artifacts.
+  static constexpr const char* second = R"xml(
+    <artifact
+        abi-group="other"
+        screen-density-group="large"
+        locale-group="europe"
+        android-sdk-group="19"
+        gl-texture-group="dxt1"
+        device-feature-group="low-latency"/>)xml";
+  doc = test::BuildXmlDom(second);
+
+  ok = artifact_handler_(&config, NodeCast<Element>(doc.get()->root.get()), &diag_);
+  ASSERT_TRUE(ok);
+  EXPECT_EQ(2ul, config.artifacts.size());
 }
 
 TEST_F(ConfigurationParserTest, ArtifactFormatAction) {
@@ -209,7 +227,7 @@ TEST_F(ConfigurationParserTest, ArtifactFormatAction) {
 
   auto doc = test::BuildXmlDom(xml);
 
-  Configuration config;
+  PostProcessingConfiguration config;
   bool ok = artifact_format_handler_(&config, NodeCast<Element>(doc.get()->root.get()), &diag_);
   ASSERT_TRUE(ok);
   ASSERT_TRUE(config.artifact_format);
@@ -232,7 +250,7 @@ TEST_F(ConfigurationParserTest, AbiGroupAction) {
 
   auto doc = test::BuildXmlDom(xml);
 
-  Configuration config;
+  PostProcessingConfiguration config;
   bool ok = abi_group_handler_(&config, NodeCast<Element>(doc.get()->root.get()), &diag_);
   ASSERT_TRUE(ok);
 
@@ -255,7 +273,7 @@ TEST_F(ConfigurationParserTest, ScreenDensityGroupAction) {
 
   auto doc = test::BuildXmlDom(xml);
 
-  Configuration config;
+  PostProcessingConfiguration config;
   bool ok =
       screen_density_group_handler_(&config, NodeCast<Element>(doc.get()->root.get()), &diag_);
   ASSERT_TRUE(ok);
@@ -285,7 +303,7 @@ TEST_F(ConfigurationParserTest, LocaleGroupAction) {
 
   auto doc = test::BuildXmlDom(xml);
 
-  Configuration config;
+  PostProcessingConfiguration config;
   bool ok = locale_group_handler_(&config, NodeCast<Element>(doc.get()->root.get()), &diag_);
   ASSERT_TRUE(ok);
 
@@ -321,7 +339,7 @@ TEST_F(ConfigurationParserTest, AndroidSdkGroupAction) {
 
   auto doc = test::BuildXmlDom(xml);
 
-  Configuration config;
+  PostProcessingConfiguration config;
   bool ok = android_sdk_group_handler_(&config, NodeCast<Element>(doc.get()->root.get()), &diag_);
   ASSERT_TRUE(ok);
 
@@ -353,7 +371,7 @@ TEST_F(ConfigurationParserTest, GlTextureGroupAction) {
 
   auto doc = test::BuildXmlDom(xml);
 
-  Configuration config;
+  PostProcessingConfiguration config;
   bool ok = gl_texture_group_handler_(&config, NodeCast<Element>(doc.get()->root.get()), &diag_);
   ASSERT_TRUE(ok);
 
@@ -382,7 +400,7 @@ TEST_F(ConfigurationParserTest, DeviceFeatureGroupAction) {
 
   auto doc = test::BuildXmlDom(xml);
 
-  Configuration config;
+  PostProcessingConfiguration config;
   bool ok
       = device_feature_group_handler_(&config, NodeCast<Element>(doc.get()->root.get()), &diag_);
   ASSERT_TRUE(ok);
@@ -395,6 +413,56 @@ TEST_F(ConfigurationParserTest, DeviceFeatureGroupAction) {
   DeviceFeature low_latency = "android.hardware.audio.low_latency";
   DeviceFeature pro = "android.hardware.audio.pro";
   ASSERT_THAT(out, ElementsAre(low_latency, pro));
+}
+
+TEST(ArtifactTest, Simple) {
+  StdErrDiagnostics diag;
+  Artifact x86;
+  x86.abi_group = {"x86"};
+
+  auto x86_result = x86.ToArtifactName("something.{abi}.apk", &diag);
+  ASSERT_TRUE(x86_result);
+  EXPECT_EQ(x86_result.value(), "something.x86.apk");
+
+  Artifact arm;
+  arm.abi_group = {"armeabi-v7a"};
+
+  auto arm_result = arm.ToArtifactName("app.{abi}.apk", &diag);
+  ASSERT_TRUE(arm_result);
+  EXPECT_EQ(arm_result.value(), "app.armeabi-v7a.apk");
+}
+
+TEST(ArtifactTest, Complex) {
+  StdErrDiagnostics diag;
+  Artifact artifact;
+  artifact.abi_group = {"mips64"};
+  artifact.screen_density_group = {"ldpi"};
+  artifact.device_feature_group = {"df1"};
+  artifact.gl_texture_group = {"glx1"};
+  artifact.locale_group = {"en-AU"};
+  artifact.android_sdk_group = {"26"};
+
+  auto result =
+      artifact.ToArtifactName("app.{density}_{locale}_{feature}_{gl}.sdk{sdk}.{abi}.apk", &diag);
+  ASSERT_TRUE(result);
+  EXPECT_EQ(result.value(), "app.ldpi_en-AU_df1_glx1.sdk26.mips64.apk");
+}
+
+TEST(ArtifactTest, Missing) {
+  StdErrDiagnostics diag;
+  Artifact x86;
+  x86.abi_group = {"x86"};
+
+  EXPECT_FALSE(x86.ToArtifactName("something.{density}.apk", &diag));
+  EXPECT_FALSE(x86.ToArtifactName("something.apk", &diag));
+}
+
+TEST(ArtifactTest, Empty) {
+  StdErrDiagnostics diag;
+  Artifact artifact;
+
+  EXPECT_FALSE(artifact.ToArtifactName("something.{density}.apk", &diag));
+  EXPECT_TRUE(artifact.ToArtifactName("something.apk", &diag));
 }
 
 }  // namespace

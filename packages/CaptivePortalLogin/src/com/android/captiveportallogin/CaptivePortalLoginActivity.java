@@ -62,6 +62,7 @@ import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.util.Objects;
 import java.util.Random;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 public class CaptivePortalLoginActivity extends Activity {
     private static final String TAG = CaptivePortalLoginActivity.class.getSimpleName();
@@ -87,6 +88,8 @@ public class CaptivePortalLoginActivity extends Activity {
     private ConnectivityManager mCm;
     private boolean mLaunchBrowser = false;
     private MyWebViewClient mWebViewClient;
+    // Ensures that done() happens once exactly, handling concurrent callers with atomic operations.
+    private final AtomicBoolean isDone = new AtomicBoolean(false);
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -183,12 +186,12 @@ public class CaptivePortalLoginActivity extends Activity {
     }
 
     private void done(Result result) {
+        if (isDone.getAndSet(true)) {
+            // isDone was already true: done() already called
+            return;
+        }
         if (DBG) {
             Log.d(TAG, String.format("Result %s for %s", result.name(), mUrl.toString()));
-        }
-        if (mNetworkCallback != null) {
-            mCm.unregisterNetworkCallback(mNetworkCallback);
-            mNetworkCallback = null;
         }
         logMetricsEvent(result.metricsEvent);
         switch (result) {
@@ -249,8 +252,8 @@ public class CaptivePortalLoginActivity extends Activity {
     public void onDestroy() {
         super.onDestroy();
         if (mNetworkCallback != null) {
+            // mNetworkCallback is not null if mUrl is not null.
             mCm.unregisterNetworkCallback(mNetworkCallback);
-            mNetworkCallback = null;
         }
         if (mLaunchBrowser) {
             // Give time for this network to become default. After 500ms just proceed.

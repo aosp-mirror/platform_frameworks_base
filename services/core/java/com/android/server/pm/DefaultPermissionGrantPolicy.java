@@ -18,6 +18,7 @@ package com.android.server.pm;
 
 import android.Manifest;
 import android.annotation.NonNull;
+import android.app.ActivityManager;
 import android.app.DownloadManager;
 import android.app.admin.DevicePolicyManager;
 import android.companion.CompanionDeviceManager;
@@ -582,6 +583,21 @@ final class DefaultPermissionGrantPolicy {
                 }
             }
 
+            if (ActivityManager.isLowRamDeviceStatic()) {
+                // Allow voice search on low-ram devices
+                Intent globalSearchIntent = new Intent("android.search.action.GLOBAL_SEARCH");
+                PackageParser.Package globalSearchPickerPackage =
+                    getDefaultSystemHandlerActivityPackageLPr(globalSearchIntent, userId);
+
+                if (globalSearchPickerPackage != null
+                        && doesPackageSupportRuntimePermissions(globalSearchPickerPackage)) {
+                    grantRuntimePermissionsLPw(globalSearchPickerPackage,
+                        MICROPHONE_PERMISSIONS, true, userId);
+                    grantRuntimePermissionsLPw(globalSearchPickerPackage,
+                        LOCATION_PERMISSIONS, true, userId);
+                }
+            }
+
             // Voice recognition
             Intent voiceRecoIntent = new Intent("android.speech.RecognitionService");
             voiceRecoIntent.addCategory(Intent.CATEGORY_DEFAULT);
@@ -624,14 +640,25 @@ final class DefaultPermissionGrantPolicy {
                 grantRuntimePermissionsLPw(musicPackage, STORAGE_PERMISSIONS, userId);
             }
 
+            // Home
+            Intent homeIntent = new Intent(Intent.ACTION_MAIN);
+            homeIntent.addCategory(Intent.CATEGORY_HOME);
+            homeIntent.addCategory(Intent.CATEGORY_LAUNCHER_APP);
+            PackageParser.Package homePackage = getDefaultSystemHandlerActivityPackageLPr(
+                    homeIntent, userId);
+            if (homePackage != null
+                    && doesPackageSupportRuntimePermissions(homePackage)) {
+                grantRuntimePermissionsLPw(homePackage, LOCATION_PERMISSIONS, false, userId);
+            }
+
             // Watches
             if (mService.hasSystemFeature(PackageManager.FEATURE_WATCH, 0)) {
                 // Home application on watches
-                Intent homeIntent = new Intent(Intent.ACTION_MAIN);
-                homeIntent.addCategory(Intent.CATEGORY_HOME_MAIN);
+                Intent wearHomeIntent = new Intent(Intent.ACTION_MAIN);
+                wearHomeIntent.addCategory(Intent.CATEGORY_HOME_MAIN);
 
                 PackageParser.Package wearHomePackage = getDefaultSystemHandlerActivityPackageLPr(
-                        homeIntent, userId);
+                        wearHomeIntent, userId);
 
                 if (wearHomePackage != null
                         && doesPackageSupportRuntimePermissions(wearHomePackage)) {

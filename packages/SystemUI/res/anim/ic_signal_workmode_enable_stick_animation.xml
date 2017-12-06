@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="utf-8"?>
+<set
+    xmlns:android="http://schemas.android.com/apk/res/android" >
+    <set
+        android:ordering="sequentially" >
+        <objectAnimator
+            android:duration="83"
+            android:propertyName="scaleY"
+            android:valueFrom="1.0"
+            android:valueTo="1.0"
+            android:valueType="floatType"
+            android:interpolator="@android:interpolator/linear" />
+        <objectAnimator
+            android:duration="250"
+            android:propertyName="scaleY"
+            android:valueFrom="1.0"
+            android:valueTo="0.0"
+            android:valueType="floatType"
+            android:interpolator="@android:interpolator/fast_out_slow_in" />
+    </set>
+</set>

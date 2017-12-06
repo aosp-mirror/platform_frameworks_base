@@ -1059,6 +1059,9 @@ public class NotificationUsageStats {
         private static final int EVENT_TYPE_CLICK = 2;
         private static final int EVENT_TYPE_REMOVE = 3;
         private static final int EVENT_TYPE_DISMISS = 4;
+
+        private static final int IDLE_CONNECTION_TIMEOUT_MS = 30000;
+
         private static long sLastPruneMs;
 
         private static long sNumWrites;
@@ -1138,6 +1141,12 @@ public class NotificationUsageStats {
                             COL_AIRTIME_EXPANDED_MS + " INT," +
                             COL_EXPAND_COUNT + " INT" +
                             ")");
+                }
+
+                @Override
+                public void onConfigure(SQLiteDatabase db) {
+                    // Memory optimization - close idle connections after 30s of inactivity
+                    setIdleConnectionTimeout(IDLE_CONNECTION_TIMEOUT_MS);
                 }
 
                 @Override

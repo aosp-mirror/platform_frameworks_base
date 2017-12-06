@@ -44,7 +44,7 @@
     <string name="battery_saver_start_action" msgid="5576697451677486320">"बैटरी बचाएँ"</string>
     <string name="status_bar_settings_settings_button" msgid="3023889916699270224">"सेटिंग"</string>
     <string name="status_bar_settings_wifi_button" msgid="1733928151698311923">"वाई-फ़ाई"</string>
-    <string name="status_bar_settings_auto_rotation" msgid="3790482541357798421">"स्‍क्रीन अपनेआप घुमाएं"</string>
+    <string name="status_bar_settings_auto_rotation" msgid="3790482541357798421">"स्‍क्रीन अपने आप घुमाएं"</string>
     <string name="status_bar_settings_mute_label" msgid="554682549917429396">"म्यूट करें"</string>
     <string name="status_bar_settings_auto_brightness_label" msgid="511453614962324674">"स्वत:"</string>
     <string name="status_bar_settings_notifications" msgid="397146176280905137">"सूचनाएं"</string>
@@ -64,7 +64,7 @@
     <string name="usb_debugging_message" msgid="2220143855912376496">"कंप्यूटर का RSA कुंजी फ़िंगरप्रिंट है:\n<xliff:g id="FINGERPRINT">%1$s</xliff:g>"</string>
     <string name="usb_debugging_always" msgid="303335496705863070">"इस कंप्यूटर से हमेशा अनुमति दें"</string>
     <string name="usb_debugging_secondary_user_title" msgid="6353808721761220421">"USB डीबगिंग की अनुमति नहीं है"</string>
-    <string name="usb_debugging_secondary_user_message" msgid="8572228137833020196">"अभी इस डिवाइस में जिस उपयोगकर्ता ने साइन इन किया है वो USB डीबगिंग चालू नहीं कर सकता. इस सुविधा का इस्तेमाल करने के लिए, कृपया किसी एडमिन उपयोगकर्ता में बदलें."</string>
+    <string name="usb_debugging_secondary_user_message" msgid="6067122453571699801">"अभी इस डिवाइस में जिस उपयोगकर्ता ने साइन इन किया है, वो USB डीबगिंग चालू नहीं कर सकता. इस सुविधा का इस्तेमाल करने के लिए, प्राथमिक उपयोगकर्ता में बदलें."</string>
     <string name="compat_mode_on" msgid="6623839244840638213">"स्‍क्रीन भरने के लिए ज़ूम करें"</string>
     <string name="compat_mode_off" msgid="4434467572461327898">"स्‍क्रीन भरने के लिए खींचें"</string>
     <string name="screenshot_saving_ticker" msgid="7403652894056693515">"स्क्रीनशॉट सहेजा जा रहा है..."</string>
@@ -334,7 +334,7 @@
     <string name="recents_lock_to_app_button_label" msgid="6942899049072506044">"स्क्रीन पिन करना"</string>
     <string name="recents_search_bar_label" msgid="8074997400187836677">"सर्च"</string>
     <string name="recents_launch_error_message" msgid="2969287838120550506">"<xliff:g id="APP">%s</xliff:g> प्रारंभ नहीं किया जा सका."</string>
-    <string name="recents_launch_disabled_message" msgid="1624523193008871793">"<xliff:g id="APP">%s</xliff:g> को सुरक्षित-मोड में अक्षम किया गया."</string>
+    <string name="recents_launch_disabled_message" msgid="1624523193008871793">"<xliff:g id="APP">%s</xliff:g> को सुरक्षित-मोड में बंद किया गया."</string>
     <string name="recents_stack_action_button_label" msgid="6593727103310426253">"Clear all"</string>
     <string name="recents_drag_hint_message" msgid="2649739267073203985">"स्क्रीन के दो हिस्से में बंट जाने, स्पिल्ट स्क्रीन, का इस्तेमाल करने के लिए यहां खींचें और छोडें"</string>
     <string name="recents_multistack_add_stack_dialog_split_horizontal" msgid="8848514474543427332">"क्षैतिज रूप से विभाजित करें"</string>
@@ -353,10 +353,10 @@
     <string name="description_target_search" msgid="3091587249776033139">"सर्च करें"</string>
     <string name="description_direction_up" msgid="7169032478259485180">"<xliff:g id="TARGET_DESCRIPTION">%s</xliff:g> के लिए ऊपर स्‍लाइड करें."</string>
     <string name="description_direction_left" msgid="7207478719805562165">"<xliff:g id="TARGET_DESCRIPTION">%s</xliff:g> के लिए बाएं स्‍लाइड करें."</string>
-    <string name="zen_priority_introduction" msgid="7577965386868311310">"आपको अलार्म, रिमाइंडर, इवेंट और चुनिंदा कॉल करने वालों के अलावा किसी और तरह से (आवाज़ करके और थरथरा कर ) परेशान नहीं किया जाएगा. आप फिर भी संगीत, वीडियो और गेम सहित अपना चुना हुआ सब कुछ सुन सकते हैं."</string>
-    <string name="zen_alarms_introduction" msgid="7034415210361973827">"आपको अलार्म छोड़कर दूसरी ध्‍वनियों और कंपनों से परेशान नहीं किया जाएगा. आपको अभी भी संगीत, वीडियो और गेम सहित वह सब कुछ सुनाई देगा जो आपने चलाने के लिए चुना है."</string>
+    <string name="zen_priority_introduction" msgid="1149025108714420281">"आपको अलार्म, रिमाइंडर, इवेंट और चुनिंदा कॉल करने वालों के अलावा किसी और तरह से (आवाज़ करके और थरथरा कर ) परेशान नहीं किया जाएगा. आप फिर भी संगीत, वीडियो और गेम सहित अपना चुना हुआ सब कुछ सुन सकते हैं."</string>
+    <string name="zen_alarms_introduction" msgid="4934328096749380201">"आपको अलार्म छोड़कर दूसरी आवाज़ों और कंपनों से परेशान नहीं किया जाएगा. आपको अभी भी संगीत, वीडियो और गेम सहित वह सब कुछ सुनाई देगा जो आपने चलाने के लिए चुना है."</string>
     <string name="zen_priority_customize_button" msgid="7948043278226955063">"अपनी पसंद के मुताबिक बनाएं"</string>
-    <string name="zen_silence_introduction_voice" msgid="2284540992298200729">"इससे अलार्म, संगीत, वीडियो और गेम सहित सभी आवाज़ और कंपन (वाइब्रेशन) रोक दिए जाते हैं. आप तब भी फ़ोन काॅल कर सकेंगे."</string>
+    <string name="zen_silence_introduction_voice" msgid="3948778066295728085">"इससे अलार्म, संगीत, वीडियो और गेम सहित सभी आवाज़ और कंपन (वाइब्रेशन) रोक दिए जाते हैं. आप तब भी फ़ोन काॅल कर सकेंगे."</string>
     <string name="zen_silence_introduction" msgid="3137882381093271568">"इससे अलार्म, संगीत, वीडियो और गेम सहित सभी आवाज़ और कंपन (वाइब्रेशन) रोक दिए जाते हैं."</string>
     <string name="keyguard_more_overflow_text" msgid="9195222469041601365">"+<xliff:g id="NUMBER_OF_NOTIFICATIONS">%d</xliff:g>"</string>
     <string name="speed_bump_explanation" msgid="1288875699658819755">"कम अत्यावश्यक सूचनाएं नीचे दी गई हैं"</string>
@@ -456,7 +456,7 @@
     <string name="monitoring_description_do_learn_more" msgid="1849514470437907421">"ज़्यादा जानें"</string>
     <string name="monitoring_description_do_body_vpn" msgid="8255218762488901796">"आप <xliff:g id="VPN_APP">%1$s</xliff:g> से कनेक्‍ट हैं, जो ईमेल, ऐप्लिकेशन और वेबसाइट सहित आपकी नेटवर्क गतिविधि को मॉनिटर कर सकता है."</string>
     <string name="monitoring_description_vpn_settings_separator" msgid="1933186756733474388">" "</string>
-    <string name="monitoring_description_vpn_settings" msgid="8869300202410505143">"VPN सेटिंग खोलें"</string>
+    <string name="monitoring_description_vpn_settings" msgid="6434859242636063861">"VPN सेटिंग खोलें"</string>
     <string name="monitoring_description_ca_cert_settings_separator" msgid="4987350385906393626">" "</string>
     <string name="monitoring_description_ca_cert_settings" msgid="5489969458872997092">"भरोसेमंद क्रेडेंशियल खोलें"</string>
     <string name="monitoring_description_network_logging" msgid="7223505523384076027">"आपके एडमिन ने नेटवर्क लॉग करना चालू कर दिया है, जो आपके डिवाइस पर ट्रैफ़िक की निगरानी करता है.\n\nअधिक जानकारी के लिए अपने एडमिन से संपर्क करें."</string>
@@ -556,8 +556,8 @@
     <string name="notification_default_channel_desc" msgid="2506053815870808359">"इस ऐप्लिकेशन में सूचना श्रेणियां नहीं हैं"</string>
     <string name="notification_unblockable_desc" msgid="3561016061737896906">"इस ऐप की सूचनाएं बंद नहीं की जा सकती"</string>
     <plurals name="notification_num_channels_desc" formatted="false" msgid="5492793452274077663">
-      <item quantity="one">इस ऐप की <xliff:g id="NUMBER_1">%d</xliff:g> सूचना श्रेणियों में से 1 श्रेणी</item>
-      <item quantity="other">इस ऐप की <xliff:g id="NUMBER_1">%d</xliff:g> सूचना श्रेणियों में से 1 श्रेणी</item>
+      <item quantity="one">इस ऐप की <xliff:g id="NUMBER_1">%s</xliff:g> सूचना श्रेणियों में से 1 श्रेणी</item>
+      <item quantity="other">इस ऐप की <xliff:g id="NUMBER_1">%s</xliff:g> सूचना श्रेणियों में से 1 श्रेणी</item>
     </plurals>
     <string name="notification_channels_list_desc_2" msgid="6214732715833946441">"<xliff:g id="CHANNEL_NAME_1">%1$s</xliff:g>, <xliff:g id="CHANNEL_NAME_2">%2$s</xliff:g>"</string>
     <plurals name="notification_channels_list_desc_2_and_others" formatted="false" msgid="2747813553355336157">
@@ -585,8 +585,8 @@
       <item quantity="other">%d मिनट</item>
     </plurals>
     <string name="battery_panel_title" msgid="7944156115535366613">"बैटरी उपयोग"</string>
-    <string name="battery_detail_charging_summary" msgid="1279095653533044008">"चार्ज किए जाने के दौरान बैटरी सेवर उपलब्ध नहीं है"</string>
-    <string name="battery_detail_switch_title" msgid="6285872470260795421">"बैटरी सेवर"</string>
+    <string name="battery_detail_charging_summary" msgid="4055327085770378335">"चार्ज करते समय बैटरी सेवर उपलब्ध नहीं होता"</string>
+    <string name="battery_detail_switch_title" msgid="8763441006881907058">"बैटरी सेवर"</string>
     <string name="battery_detail_switch_summary" msgid="9049111149407626804">"निष्‍पादन और पृष्ठभूमि डेटा को कम करता है"</string>
     <string name="keyboard_key_button_template" msgid="6230056639734377300">"बटन <xliff:g id="NAME">%1$s</xliff:g>"</string>
     <string name="keyboard_key_home" msgid="2243500072071305073">"Home"</string>
@@ -726,9 +726,9 @@
     <string name="pip_phone_minimize" msgid="1079119422589131792">"छोटा करें"</string>
     <string name="pip_phone_close" msgid="8416647892889710330">"बंद करें"</string>
     <string name="pip_phone_dismiss_hint" msgid="6351678169095923899">"खारिज करने के लिए नीचे खींचें और छोड़ें"</string>
-    <string name="pip_menu_title" msgid="3328510504196964712">"पिक्चर में पिक्चर मेन्यू"</string>
+    <string name="pip_menu_title" msgid="4707292089961887657">"मेन्यू"</string>
     <string name="pip_notification_title" msgid="3204024940158161322">"<xliff:g id="NAME">%s</xliff:g> पिक्चर में पिक्चर के अंदर है"</string>
-    <string name="pip_notification_message" msgid="4171698133469539591">"अगर आप नहीं चाहते कि <xliff:g id="NAME">%s</xliff:g> इस सुविधा का उपयोग करे, तो सेटिंग खोलने और उसे बंद करने के लिए टैप करें."</string>
+    <string name="pip_notification_message" msgid="5619512781514343311">"अगर आप नहीं चाहते कि <xliff:g id="NAME">%s</xliff:g> इस सुविधा का उपयोग करे, तो सेटिंग खोलने के लिए टैप करें और उसे बंद करें ."</string>
     <string name="pip_play" msgid="1417176722760265888">"चलाएं"</string>
     <string name="pip_pause" msgid="8881063404466476571">"रोकें"</string>
     <string name="pip_skip_to_next" msgid="1948440006726306284">"अगले पर जाएं"</string>
@@ -754,6 +754,7 @@
     <string name="tuner_menu" msgid="191640047241552081">"मेन्यू"</string>
     <string name="tuner_app" msgid="3507057938640108777">"<xliff:g id="APP">%1$s</xliff:g> ऐप"</string>
     <string name="notification_channel_alerts" msgid="4496839309318519037">"सूचनाएं"</string>
+    <string name="notification_channel_battery" msgid="5786118169182888462">"बैटरी"</string>
     <string name="notification_channel_screenshot" msgid="6314080179230000938">"स्‍क्रीनशॉट"</string>
     <string name="notification_channel_general" msgid="4525309436693914482">"सामान्य संदेश"</string>
     <string name="notification_channel_storage" msgid="3077205683020695313">"जगह"</string>
@@ -774,4 +775,5 @@
     <string name="running_foreground_services_title" msgid="381024150898615683">"बैकग्राउंड में चल रहे ऐप्लिकेशन"</string>
     <string name="running_foreground_services_msg" msgid="6326247670075574355">"बैटरी और डेटा खर्च की जानकारी के लिए छूएं"</string>
     <string name="data_usage_disable_mobile" msgid="5116269981510015864">"मोबाइल डेटा बंद करना चाहते हैं?"</string>
+    <string name="touch_filtered_warning" msgid="8671693809204767551">"ऐप की वजह से मंज़ूरी के अनुरोध को समझने में दिक्कत हो रही है, इसलिए सेटिंग से आपके जवाब की पुष्टि नहीं हो पा रही है."</string>
 </resources>

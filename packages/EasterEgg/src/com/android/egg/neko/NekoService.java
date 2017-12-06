@@ -15,15 +15,15 @@
 package com.android.egg.neko;
 
 import android.app.Notification;
+import android.app.NotificationChannel;
 import android.app.NotificationManager;
 import android.app.job.JobInfo;
 import android.app.job.JobParameters;
 import android.app.job.JobScheduler;
 import android.app.job.JobService;
-import android.content.BroadcastReceiver;
 import android.content.ComponentName;
 import android.content.Context;
-import android.content.Intent;
+import android.net.Uri;
 import android.os.Bundle;
 
 import java.util.List;
@@ -33,6 +33,9 @@ import com.android.egg.R;
 
 import java.util.Random;
 
+import static com.android.egg.neko.Cat.PURR;
+import static com.android.egg.neko.NekoLand.CHAN_ID;
+
 public class NekoService extends JobService {
 
     private static final String TAG = "NekoService";
@@ -40,6 +43,7 @@ public class NekoService extends JobService {
     public static int JOB_ID = 42;
 
     public static int CAT_NOTIFICATION = 1;
+    public static int DEBUG_NOTIFICATION = 1234;
 
     public static float CAT_CAPTURE_PROB = 1.0f; // generous
 
@@ -49,6 +53,18 @@ public class NekoService extends JobService {
     public static long INTERVAL_FLEX = 5 * MINUTES;
 
     public static float INTERVAL_JITTER_FRAC = 0.25f;
+
+    private static void setupNotificationChannels(Context context) {
+        NotificationManager noman = context.getSystemService(NotificationManager.class);
+        NotificationChannel eggChan = new NotificationChannel(CHAN_ID,
+                context.getString(R.string.notification_channel_name),
+                NotificationManager.IMPORTANCE_DEFAULT);
+        eggChan.setSound(Uri.EMPTY, Notification.AUDIO_ATTRIBUTES_DEFAULT); // cats are quiet
+        eggChan.setVibrationPattern(PURR); // not totally quiet though
+        eggChan.setBlockableSystem(true); // unlike a real cat, you can push this one off your lap
+        eggChan.setLockscreenVisibility(Notification.VISIBILITY_PUBLIC); // cats sit in the window
+        noman.createNotificationChannel(eggChan);
+    }
 
     @Override
     public boolean onStartJob(JobParameters params) {
@@ -64,8 +80,9 @@ public class NekoService extends JobService {
             final Notification.Builder builder
                     = cat.buildNotification(this)
                         .setContentTitle("DEBUG")
+                        .setChannel(NekoLand.CHAN_ID)
                         .setContentText("Ran job: " + params);
-            noman.notify(1, builder.build());
+            noman.notify(DEBUG_NOTIFICATION, builder.build());
         }
 
         final PrefState prefs = new PrefState(this);
@@ -111,6 +128,8 @@ public class NekoService extends JobService {
     }
 
     public static void registerJob(Context context, long intervalMinutes) {
+        setupNotificationChannels(context);
+
         JobScheduler jss = context.getSystemService(JobScheduler.class);
         jss.cancel(JOB_ID);
         long interval = intervalMinutes * MINUTES;
@@ -126,12 +145,13 @@ public class NekoService extends JobService {
 
         if (NekoLand.DEBUG_NOTIFICATIONS) {
             NotificationManager noman = context.getSystemService(NotificationManager.class);
-            noman.notify(500, new Notification.Builder(context)
+            noman.notify(DEBUG_NOTIFICATION, new Notification.Builder(context)
                     .setSmallIcon(R.drawable.stat_icon)
                     .setContentTitle(String.format("Job scheduled in %d min", (interval / MINUTES)))
                     .setContentText(String.valueOf(jobInfo))
                     .setPriority(Notification.PRIORITY_MIN)
                     .setCategory(Notification.CATEGORY_SERVICE)
+                    .setChannel(NekoLand.CHAN_ID)
                     .setShowWhen(true)
                     .build());
         }

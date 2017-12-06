@@ -57,16 +57,24 @@ public class HapticFeedbackConstants {
     public static final int CONTEXT_CLICK = 6;
 
     /**
-     * The user has released a virtual or software keyboard key.
-     * @hide
+     * The user has pressed a virtual or software keyboard key.
      */
-    public static final int VIRTUAL_KEY_RELEASE = 7;
+    public static final int KEYBOARD_PRESS = KEYBOARD_TAP;
+
+    /**
+     * The user has released a virtual keyboard key.
+     */
+    public static final int KEYBOARD_RELEASE = 7;
+
+    /**
+     * The user has released a virtual key.
+     */
+    public static final int VIRTUAL_KEY_RELEASE = 8;
 
     /**
      * The user has performed a selection/insertion handle move on text field.
-     * @hide
      */
-    public static final int TEXT_HANDLE_MOVE = 8;
+    public static final int TEXT_HANDLE_MOVE = 9;
 
     /**
      * The phone has booted with safe mode enabled.

@@ -26,15 +26,14 @@ import android.net.ScoredNetwork;
 import android.os.Handler;
 import android.os.Process;
 import android.util.Log;
+import android.util.LruCache;
 
 import com.android.internal.annotations.GuardedBy;
 import com.android.internal.util.Preconditions;
 
 import java.io.FileDescriptor;
 import java.io.PrintWriter;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 /**
  * {@link INetworkScoreCache} implementation for Wifi Networks.
@@ -50,18 +49,21 @@ public class WifiNetworkScoreCache extends INetworkScoreCache.Stub {
     // scorer to provide an RSSI threshold below which a network should not be used.
     public static final int INVALID_NETWORK_SCORE = Byte.MIN_VALUE;
 
+    /** Default number entries to be stored in the {@link LruCache}. */
+    private static final int DEFAULT_MAX_CACHE_SIZE = 100;
+
     // See {@link #CacheListener}.
     @Nullable
-    @GuardedBy("mCacheLock")
+    @GuardedBy("mLock")
     private CacheListener mListener;
 
     private final Context mContext;
-    private final Object mCacheLock = new Object();
+    private final Object mLock = new Object();
 
     // The key is of the form "<ssid>"<bssid>
     // TODO: What about SSIDs that can't be encoded as UTF-8?
-    private final Map<String, ScoredNetwork> mNetworkCache;
-
+    @GuardedBy("mLock")
+    private final LruCache<String, ScoredNetwork> mCache;
 
     public WifiNetworkScoreCache(Context context) {
         this(context, null /* listener */);
@@ -74,9 +76,14 @@ public class WifiNetworkScoreCache extends INetworkScoreCache.Stub {
      * @param listener CacheListener for cache updates
      */
     public WifiNetworkScoreCache(Context context, @Nullable CacheListener listener) {
+        this(context, listener, DEFAULT_MAX_CACHE_SIZE);
+    }
+
+    public WifiNetworkScoreCache(
+            Context context, @Nullable CacheListener listener, int maxCacheSize) {
         mContext = context.getApplicationContext();
         mListener = listener;
-        mNetworkCache = new HashMap<>();
+        mCache = new LruCache<>(maxCacheSize);
     }
 
     @Override public final void updateScores(List<ScoredNetwork> networks) {
@@ -89,7 +96,7 @@ public class WifiNetworkScoreCache extends INetworkScoreCache.Stub {
 
         boolean changed = false;
 
-        synchronized(mNetworkCache) {
+        synchronized(mLock) {
             for (ScoredNetwork network : networks) {
                 String networkKey = buildNetworkKey(network);
                 if (networkKey == null) {
@@ -98,12 +105,10 @@ public class WifiNetworkScoreCache extends INetworkScoreCache.Stub {
                     }
                     continue;
                 }
-                mNetworkCache.put(networkKey, network);
+                mCache.put(networkKey, network);
                 changed = true;
             }
-        }
 
-        synchronized (mCacheLock) {
             if (mListener != null && changed) {
                 mListener.post(networks);
             }
@@ -111,8 +116,8 @@ public class WifiNetworkScoreCache extends INetworkScoreCache.Stub {
     }
 
     @Override public final void clearScores() {
-        synchronized (mNetworkCache) {
-            mNetworkCache.clear();
+        synchronized (mLock) {
+            mCache.evictAll();
         }
     }
 
@@ -138,7 +143,6 @@ public class WifiNetworkScoreCache extends INetworkScoreCache.Stub {
     }
 
     public int getNetworkScore(ScanResult result) {
-
         int score = INVALID_NETWORK_SCORE;
 
         ScoredNetwork network = getScoredNetwork(result);
@@ -164,7 +168,6 @@ public class WifiNetworkScoreCache extends INetworkScoreCache.Stub {
     }
 
     public int getNetworkScore(ScanResult result, boolean isActiveNetwork) {
-
         int score = INVALID_NETWORK_SCORE;
 
         ScoredNetwork network = getScoredNetwork(result);
@@ -185,8 +188,8 @@ public class WifiNetworkScoreCache extends INetworkScoreCache.Stub {
         String key = buildNetworkKey(result);
         if (key == null) return null;
 
-        synchronized(mNetworkCache) {
-            ScoredNetwork network = mNetworkCache.get(key);
+        synchronized(mLock) {
+            ScoredNetwork network = mCache.get(key);
             return network;
         }
     }
@@ -201,8 +204,8 @@ public class WifiNetworkScoreCache extends INetworkScoreCache.Stub {
             }
             return null;
         }
-        synchronized (mNetworkCache) {
-            return mNetworkCache.get(key);
+        synchronized (mLock) {
+            return mCache.get(key);
         }
     }
 
@@ -248,33 +251,35 @@ public class WifiNetworkScoreCache extends INetworkScoreCache.Stub {
                 mContext.getPackageName(), Process.myUid());
         writer.println(header);
         writer.println("  All score curves:");
-        for (ScoredNetwork score : mNetworkCache.values()) {
-            writer.println("    " + score);
-        }
-        writer.println("  Current network scores:");
-        WifiManager wifiManager = (WifiManager) mContext.getSystemService(Context.WIFI_SERVICE);
-        for (ScanResult scanResult : wifiManager.getScanResults()) {
-            writer.println("    " + buildNetworkKey(scanResult) + ": " + getNetworkScore(scanResult));
+        synchronized (mLock) {
+            for (ScoredNetwork score : mCache.snapshot().values()) {
+                writer.println("    " + score);
+            }
+            writer.println("  Network scores for latest ScanResults:");
+            WifiManager wifiManager = (WifiManager) mContext.getSystemService(Context.WIFI_SERVICE);
+            for (ScanResult scanResult : wifiManager.getScanResults()) {
+                writer.println(
+                        "    " + buildNetworkKey(scanResult) + ": " + getNetworkScore(scanResult));
+            }
         }
     }
 
     /** Registers a CacheListener instance, replacing the previous listener if it existed. */
     public void registerListener(CacheListener listener) {
-        synchronized (mCacheLock) {
+        synchronized (mLock) {
             mListener = listener;
         }
     }
 
     /** Removes the registered CacheListener. */
     public void unregisterListener() {
-        synchronized (mCacheLock) {
+        synchronized (mLock) {
             mListener = null;
         }
     }
 
     /** Listener for updates to the cache inside WifiNetworkScoreCache. */
     public abstract static class CacheListener {
-
         private Handler mHandler;
 
         /**

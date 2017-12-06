@@ -80,22 +80,22 @@ struct Dummy {
 
 TEST(MaybeTest, MakeNothing) {
   Maybe<int> val = make_nothing<int>();
-  AAPT_EXPECT_FALSE(val);
+  EXPECT_FALSE(val);
 
   Maybe<std::string> val2 = make_nothing<std::string>();
-  AAPT_EXPECT_FALSE(val2);
+  EXPECT_FALSE(val2);
 
   val2 = make_nothing<std::string>();
-  AAPT_EXPECT_FALSE(val2);
+  EXPECT_FALSE(val2);
 }
 
 TEST(MaybeTest, MakeSomething) {
   Maybe<int> val = make_value(23);
-  AAPT_ASSERT_TRUE(val);
+  ASSERT_TRUE(val);
   EXPECT_EQ(23, val.value());
 
   Maybe<std::string> val2 = make_value(std::string("hey"));
-  AAPT_ASSERT_TRUE(val2);
+  ASSERT_TRUE(val2);
   EXPECT_EQ(std::string("hey"), val2.value());
 }
 

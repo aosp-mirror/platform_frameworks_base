@@ -911,6 +911,12 @@ public class SyncStorageEngine extends Handler {
         }
     }
 
+    public int getAuthorityCount() {
+        synchronized (mAuthorities) {
+            return mAuthorities.size();
+        }
+    }
+
     public AuthorityInfo getAuthority(int authorityId) {
         synchronized (mAuthorities) {
             return mAuthorities.get(authorityId);

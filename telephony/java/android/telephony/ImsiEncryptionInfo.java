@@ -36,6 +36,7 @@ public final class ImsiEncryptionInfo implements Parcelable {
 
     private static final String LOG_TAG = "ImsiEncryptionInfo";
 
+
     private final String mcc;
     private final String mnc;
     private final PublicKey publicKey;

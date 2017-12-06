@@ -40,12 +40,16 @@
     <string name="connected_via_passpoint" msgid="2826205693803088747">"%1$s හරහා සම්බන්ධ විය"</string>
     <string name="available_via_passpoint" msgid="1617440946846329613">"%1$s හරහා ලබා ගැනීමට හැකිය"</string>
     <string name="wifi_connected_no_internet" msgid="3149853966840874992">"සම්බන්ධයි, අන්තර්ජාලය නැත"</string>
+    <string name="wifi_ap_unable_to_handle_new_sta" msgid="5348824313514404541">"ප්‍රවේශ ලක්ෂ්‍ය තාවකාලිකව පිරී ඇත"</string>
+    <string name="connected_via_carrier" msgid="7583780074526041912">"%1$s හරහා සම්බන්ධ විය"</string>
+    <string name="available_via_carrier" msgid="1469036129740799053">"%1$s හරහා ලබා ගැනීමට හැකිය"</string>
     <string name="speed_label_very_slow" msgid="1867055264243608530">"ඉතා මන්දගාමී"</string>
     <string name="speed_label_slow" msgid="813109590815810235">"මන්දගාමී"</string>
     <string name="speed_label_okay" msgid="2331665440671174858">"හරි"</string>
     <string name="speed_label_medium" msgid="3175763313268941953">"මධ්‍යම"</string>
     <string name="speed_label_fast" msgid="7715732164050975057">"වේගවත්"</string>
     <string name="speed_label_very_fast" msgid="2265363430784523409">"ඉතා වේගවත්"</string>
+    <string name="preference_summary_default_combination" msgid="8532964268242666060">"<xliff:g id="STATE">%1$s</xliff:g> / <xliff:g id="DESCRIPTION">%2$s</xliff:g>"</string>
     <string name="bluetooth_disconnected" msgid="6557104142667339895">"විසන්ධි වුණි"</string>
     <string name="bluetooth_disconnecting" msgid="8913264760027764974">"විසන්ධි වෙමින්…"</string>
     <string name="bluetooth_connecting" msgid="8555009514614320497">"සම්බන්ධ වෙමින්…"</string>
@@ -101,6 +105,8 @@
     <string name="accessibility_wifi_two_bars" msgid="3569851234710034416">"Wifi තීරු දෙකයි."</string>
     <string name="accessibility_wifi_three_bars" msgid="8134185644861380311">"WiFi තීරු තුනයි."</string>
     <string name="accessibility_wifi_signal_full" msgid="7061045677694702">"Wifi සංඥාව පිරී ඇත."</string>
+    <string name="accessibility_wifi_security_type_none" msgid="1223747559986205423">"විවෘත ජාලය"</string>
+    <string name="accessibility_wifi_security_type_secured" msgid="862921720418885331">"ආරක්ෂිත ජාලය"</string>
     <string name="process_kernel_label" msgid="3916858646836739323">"Android OS"</string>
     <string name="data_usage_uninstalled_apps" msgid="614263770923231598">"ඉවත් කළ යෙදුම්"</string>
     <string name="data_usage_uninstalled_apps_users" msgid="7986294489899813194">"යෙදුම් සහ පරිශීලකයින් ඉවත් කරන ලදි"</string>
@@ -187,6 +193,7 @@
     <string name="wifi_allow_scan_with_traffic" msgid="3601853081178265786">"Wi‑Fi රෝම් පරිලෝකන වෙතට සැමවිට අවසර දෙන්න"</string>
     <string name="mobile_data_always_on" msgid="8774857027458200434">"ජංගම දත්ත සැමවිට ක්‍රියාකාරීය"</string>
     <string name="tethering_hardware_offload" msgid="7470077827090325814">"ටෙදරින් දෘඪාංග ත්වරණය"</string>
+    <string name="bluetooth_show_devices_without_names" msgid="4708446092962060176">"නම් නොමැති බ්ලූටූත් උපාංග පෙන්වන්න"</string>
     <string name="bluetooth_disable_absolute_volume" msgid="2660673801947898809">"නිරපේක්ෂ හඩ පරිමාව අබල කරන්න"</string>
     <string name="bluetooth_enable_inband_ringing" msgid="3291686366721786740">"කලාපය තුළ නාද වීම සබල කරන්න"</string>
     <string name="bluetooth_select_avrcp_version_string" msgid="3750059931120293633">"බ්ලූටූත් AVRCP අනුවාදය"</string>
@@ -202,6 +209,12 @@
     <string name="bluetooth_select_a2dp_codec_ldac_playback_quality" msgid="3619694372407843405">"බ්ලූටූත් ශ්‍රව්‍ය LDAC පසුධාවන ගුණත්වය"</string>
     <string name="bluetooth_select_a2dp_codec_ldac_playback_quality_dialog_title" msgid="3181967377574368400">"බ්ලූටූත් ශ්‍රව්‍ය LDAC කොඩෙක් තෝරන්න:\nපසුධාවන ගුණත්වය"</string>
     <string name="bluetooth_select_a2dp_codec_streaming_label" msgid="5347862512596240506">"ප්‍රවාහ කරමින්: <xliff:g id="STREAMING_PARAMETER">%1$s</xliff:g>"</string>
+    <string name="select_private_dns_configuration_title" msgid="3700456559305263922">"පුද්ගලික DNS"</string>
+    <string name="select_private_dns_configuration_dialog_title" msgid="9221994415765826811">"පුද්ගලික DNS ප්‍රකාරය තෝරන්න"</string>
+    <string name="private_dns_mode_off" msgid="8236575187318721684">"ක්‍රියාවිරහිතයි"</string>
+    <string name="private_dns_mode_opportunistic" msgid="7608409735589131766">"අවස්ථාවාදී"</string>
+    <string name="private_dns_mode_provider" msgid="8354935160639360804">"පුද්ගලික DNS සැපයුම්කරු සත්කාරක නම"</string>
+    <string name="private_dns_mode_provider_hostname_hint" msgid="2487492386970928143">"DNS සැපයුම්කරුගේ සත්කාරක නම ඇතුළු කරන්න"</string>
     <string name="wifi_display_certification_summary" msgid="1155182309166746973">"නොරැහැන් සංදර්ශක සහතිකය සඳහා විකල්ප පෙන්වන්න"</string>
     <string name="wifi_verbose_logging_summary" msgid="6615071616111731958">"Wi‑Fi ලොග් මට්ටම වැඩි කරන්න, Wi‑Fi තෝරනයෙහි SSID RSSI අනුව පෙන්වන්න"</string>
     <string name="wifi_aggressive_handover_summary" msgid="7266329646559808827">"සබල විට Wi‑Fi සිග්නලය අඩු විට Wi‑Fi දත්ත සම්බන්ධතාවය ජංගම වෙත භාර දීමට වඩා ආක්‍රමණික වේ"</string>
@@ -226,6 +239,7 @@
     <string name="dev_settings_warning_message" msgid="2298337781139097964">"මෙම සැකසීම් වර්ධක භාවිතය සඳහා පමණි. ඔබගේ උපාංගයේ සහ යෙදුම්වල අක්‍රිය වීමට හෝ වැරදි ක්‍රියා කෙරුමකට ඒවා බලපෑ හැක."</string>
     <string name="verify_apps_over_usb_title" msgid="4177086489869041953">"USB ඔස්සේ යෙදුම් සත්‍යාපනය කරගන්න"</string>
     <string name="verify_apps_over_usb_summary" msgid="9164096969924529200">"ADB/ADT හරහා ස්ථාපනය වූ යෙදුම්, විනාශකාරී ක්‍රියාවන් ඇත්දැයි පරික්ෂාකර බලන්න."</string>
+    <string name="bluetooth_show_devices_without_names_summary" msgid="2351196058115755520">"නම් නොමැති බ්ලූටූත් උපාංග (MAC ලිපින පමණි) සංදර්ශනය කරනු ඇත"</string>
     <string name="bluetooth_disable_absolute_volume_summary" msgid="6031284410786545957">"පිළිගත නොහැකි ලෙස වැඩි හඩ පරිමාව හෝ පාලනය නොමැති වීම යනාදී දුරස්ථ උපාංග සමගින් වන හඬ පරිමා ගැටලුවලදී බ්ලූටූත් නිරපේක්ෂ හඬ පරිමා විශේෂාංගය අබල කරයි."</string>
     <string name="bluetooth_enable_inband_ringing_summary" msgid="2787866074741784975">"දුරකථනයේ නාද රටාවලට බ්ලූටූත් මත වාදනය වීමට ඉඩ දෙන්න"</string>
     <string name="enable_terminal_title" msgid="95572094356054120">"අභ්‍යන්තර අන්තය"</string>
@@ -345,12 +359,11 @@
     <string name="power_discharging_duration_short" msgid="4192244429001842403">"<xliff:g id="LEVEL">^1</xliff:g> - ඉතිරි <xliff:g id="TIME">^2</xliff:g>"</string>
     <string name="power_charging" msgid="1779532561355864267">"<xliff:g id="LEVEL">%1$s</xliff:g> - <xliff:g id="STATE">%2$s</xliff:g>"</string>
     <string name="power_charging_duration" msgid="4676999980973411875">"<xliff:g id="LEVEL">^1</xliff:g> - <xliff:g id="TIME">^2</xliff:g> සම්පූර්ණයෙන් ආරෝපණය වන තෙක්"</string>
-    <string name="power_charging_duration_short" msgid="1098603958472207920">"<xliff:g id="LEVEL">^1</xliff:g> - <xliff:g id="TIME">^2</xliff:g>"</string>
     <string name="battery_info_status_unknown" msgid="196130600938058547">"නොදනී"</string>
     <string name="battery_info_status_charging" msgid="1705179948350365604">"ආරෝපණය වෙමින්"</string>
     <string name="battery_info_status_charging_lower" msgid="8689770213898117994">"ආරෝපණය වේ"</string>
     <string name="battery_info_status_discharging" msgid="310932812698268588">"ආරෝපණය නොවේ"</string>
-    <string name="battery_info_status_not_charging" msgid="2820070506621483576">"ආරෝපණය නොවෙමින්"</string>
+    <string name="battery_info_status_not_charging" msgid="8523453668342598579">"පේනුගත කර ඇත, මේ අවස්ථාවේදී ආරෝපණය කළ නොහැකිය"</string>
     <string name="battery_info_status_full" msgid="2824614753861462808">"පූර්ණ"</string>
     <string name="disabled_by_admin_summary_text" msgid="6750513964908334617">"පරිපාලක විසින් පාලනය කරන ලදී"</string>
     <string name="enabled_by_admin" msgid="5302986023578399263">"පරිපාලක විසින් සබල කර ඇත"</string>
@@ -375,7 +388,6 @@
     <string name="screen_zoom_summary_custom" msgid="5611979864124160447">"අභිරුචි (<xliff:g id="DENSITYDPI">%d</xliff:g>)"</string>
     <string name="help_feedback_label" msgid="6815040660801785649">"උදව් සහ ප්‍රතිපෝෂණ"</string>
     <string name="content_description_menu_button" msgid="8182594799812351266">"මෙනුව"</string>
-    <string name="time_zone_gmt" msgid="2587097992671450782">"GMT"</string>
     <string name="retail_demo_reset_message" msgid="118771671364131297">"ආදර්ශන ප්‍රකාර කර්මාන්තශාලා යළි සැකසීමට මුරපදය ඇ. ක."</string>
     <string name="retail_demo_reset_next" msgid="8356731459226304963">"ඊළඟ"</string>
     <string name="retail_demo_reset_title" msgid="696589204029930100">"මුරපදය අවශ්‍යයි"</string>

@@ -40,12 +40,16 @@
     <string name="connected_via_passpoint" msgid="2826205693803088747">"‏منسلک بذریعہ ‎%1$s"</string>
     <string name="available_via_passpoint" msgid="1617440946846329613">"‏دستیاب بذریعہ ‎%1$s"</string>
     <string name="wifi_connected_no_internet" msgid="3149853966840874992">"منسلک، انٹرنیٹ نہیں ہے"</string>
+    <string name="wifi_ap_unable_to_handle_new_sta" msgid="5348824313514404541">"رسائی پوائنٹ عارضی طور پر فُل ہے"</string>
+    <string name="connected_via_carrier" msgid="7583780074526041912">"‏منسلک بذریعہ ‎%1$s"</string>
+    <string name="available_via_carrier" msgid="1469036129740799053">"‏دستیاب بذریعہ ‎%1$s"</string>
     <string name="speed_label_very_slow" msgid="1867055264243608530">"بہت سست"</string>
     <string name="speed_label_slow" msgid="813109590815810235">"سست"</string>
     <string name="speed_label_okay" msgid="2331665440671174858">"ٹھیک ہے"</string>
     <string name="speed_label_medium" msgid="3175763313268941953">"متوسط"</string>
     <string name="speed_label_fast" msgid="7715732164050975057">"تیز"</string>
     <string name="speed_label_very_fast" msgid="2265363430784523409">"بہت تیز"</string>
+    <string name="preference_summary_default_combination" msgid="8532964268242666060">"<xliff:g id="STATE">%1$s</xliff:g> / <xliff:g id="DESCRIPTION">%2$s</xliff:g>"</string>
     <string name="bluetooth_disconnected" msgid="6557104142667339895">"منقطع"</string>
     <string name="bluetooth_disconnecting" msgid="8913264760027764974">"منقطع کیا جارہا ہے…"</string>
     <string name="bluetooth_connecting" msgid="8555009514614320497">"مربوط ہو رہا ہے…"</string>
@@ -101,6 +105,8 @@
     <string name="accessibility_wifi_two_bars" msgid="3569851234710034416">"‏Wifi دو بارز۔"</string>
     <string name="accessibility_wifi_three_bars" msgid="8134185644861380311">"‏Wifi تین بارز۔"</string>
     <string name="accessibility_wifi_signal_full" msgid="7061045677694702">"‏Wifi سگنل پورا ہے۔"</string>
+    <string name="accessibility_wifi_security_type_none" msgid="1223747559986205423">"اوپن نیٹ ورک"</string>
+    <string name="accessibility_wifi_security_type_secured" msgid="862921720418885331">"محفوظ نیٹ ورک"</string>
     <string name="process_kernel_label" msgid="3916858646836739323">"Android OS"</string>
     <string name="data_usage_uninstalled_apps" msgid="614263770923231598">"ہٹائی گئی ایپس"</string>
     <string name="data_usage_uninstalled_apps_users" msgid="7986294489899813194">"ہٹائی گئی ایپس اور صارفین"</string>
@@ -187,6 +193,7 @@
     <string name="wifi_allow_scan_with_traffic" msgid="3601853081178265786">"‏ہمیشہ Wi‑Fi روم اسکینز کی اجازت دیں"</string>
     <string name="mobile_data_always_on" msgid="8774857027458200434">"موبائل ڈیٹا ہمیشہ فعال رکھیں"</string>
     <string name="tethering_hardware_offload" msgid="7470077827090325814">"ٹیدرنگ ہارڈویئر سرعت کاری"</string>
+    <string name="bluetooth_show_devices_without_names" msgid="4708446092962060176">"بغیر نام والے بلوٹوتھ آلات دکھائیں"</string>
     <string name="bluetooth_disable_absolute_volume" msgid="2660673801947898809">"مطلق والیوم کو غیر فعال کریں"</string>
     <string name="bluetooth_enable_inband_ringing" msgid="3291686366721786740">"ان بینڈ رنگنگ فعال کریں"</string>
     <string name="bluetooth_select_avrcp_version_string" msgid="3750059931120293633">"‏بلوٹوتھ AVRCP ورژن"</string>
@@ -202,6 +209,12 @@
     <string name="bluetooth_select_a2dp_codec_ldac_playback_quality" msgid="3619694372407843405">"‏بلوٹوتھ آڈیو LDAC کوڈیک: پلے بیک کا معیار"</string>
     <string name="bluetooth_select_a2dp_codec_ldac_playback_quality_dialog_title" msgid="3181967377574368400">"‏بلوٹوتھ آڈیو LDAC کوڈیک منتخب کریں:\nپلے بیک کا معیار"</string>
     <string name="bluetooth_select_a2dp_codec_streaming_label" msgid="5347862512596240506">"سلسلہ بندی: <xliff:g id="STREAMING_PARAMETER">%1$s</xliff:g>"</string>
+    <string name="select_private_dns_configuration_title" msgid="3700456559305263922">"‏نجی DNS"</string>
+    <string name="select_private_dns_configuration_dialog_title" msgid="9221994415765826811">"‏نجی DNS وضع منتخب کریں"</string>
+    <string name="private_dns_mode_off" msgid="8236575187318721684">"آف"</string>
+    <string name="private_dns_mode_opportunistic" msgid="7608409735589131766">"موقع پرست"</string>
+    <string name="private_dns_mode_provider" msgid="8354935160639360804">"‏نجی DNS فراہم کنندہ میزبان کا نام"</string>
+    <string name="private_dns_mode_provider_hostname_hint" msgid="2487492386970928143">"‏DNS فراہم کنندہ کے میزبان کا نام درج کریں"</string>
     <string name="wifi_display_certification_summary" msgid="1155182309166746973">"وائرلیس ڈسپلے سرٹیفیکیشن کیلئے اختیارات دکھائیں"</string>
     <string name="wifi_verbose_logging_summary" msgid="6615071616111731958">"‏Wi‑Fi لاگنگ لیول میں اضافہ کریں، Wi‑Fi منتخب کنندہ میں فی SSID RSSI دکھائیں"</string>
     <string name="wifi_aggressive_handover_summary" msgid="7266329646559808827">"‏فعال کئے جانے پر، جب Wi‑Fi سگنل کمزور ہوگا، تو Wi‑Fi موبائل پر ڈیٹا کنکشن بھیجنے کیلئے مزید جارحانہ کارروائی کرے گا"</string>
@@ -226,6 +239,7 @@
     <string name="dev_settings_warning_message" msgid="2298337781139097964">"یہ ترتیبات صرف ڈویلپمنٹ استعمال کے ارادے سے ہیں۔ ان سے آپ کا آلہ اور اس پر موجود ایپلیکیشنز بریک ہو سکتی یا غلط برتاؤ کر سکتی ہیں۔"</string>
     <string name="verify_apps_over_usb_title" msgid="4177086489869041953">"‏USB پر ایپس کی توثیق کریں"</string>
     <string name="verify_apps_over_usb_summary" msgid="9164096969924529200">"‏نقصان دہ رویے کے مدنظر ADB/ADT کی معرفت انسٹال شدہ ایپس کی جانچ کریں۔"</string>
+    <string name="bluetooth_show_devices_without_names_summary" msgid="2351196058115755520">"‏بغیر نام والے بلوٹوتھ آلات (صرف MAC پتے) ڈسپلے کئے جائیں گے"</string>
     <string name="bluetooth_disable_absolute_volume_summary" msgid="6031284410786545957">"ریموٹ آلات کے ساتھ والیوم کے مسائل مثلاً نا قابل قبول حد تک بلند والیوم یا کنٹرول نہ ہونے کی صورت میں بلو ٹوتھ مطلق والیوم والی خصوصیت کو غیر فعال کریں۔"</string>
     <string name="bluetooth_enable_inband_ringing_summary" msgid="2787866074741784975">"فون پر موجود رنگ ٹونز کو بلوٹوتھ ہیڈ سیٹز پر چلنے دیں"</string>
     <string name="enable_terminal_title" msgid="95572094356054120">"مقامی ٹرمینل"</string>
@@ -345,12 +359,11 @@
     <string name="power_discharging_duration_short" msgid="4192244429001842403">"<xliff:g id="LEVEL">^1</xliff:g> - <xliff:g id="TIME">^2</xliff:g> باقی ہے"</string>
     <string name="power_charging" msgid="1779532561355864267">"‎<xliff:g id="LEVEL">%1$s</xliff:g> - <xliff:g id="STATE">%2$s</xliff:g>‎"</string>
     <string name="power_charging_duration" msgid="4676999980973411875">"<xliff:g id="LEVEL">^1</xliff:g> - <xliff:g id="TIME">^2</xliff:g> پوری طرح چارج ہونے تک"</string>
-    <string name="power_charging_duration_short" msgid="1098603958472207920">"<xliff:g id="LEVEL">^1</xliff:g> - <xliff:g id="TIME">^2</xliff:g>"</string>
     <string name="battery_info_status_unknown" msgid="196130600938058547">"نامعلوم"</string>
     <string name="battery_info_status_charging" msgid="1705179948350365604">"چارج ہو رہا ہے"</string>
     <string name="battery_info_status_charging_lower" msgid="8689770213898117994">"چارج ہو رہا ہے"</string>
     <string name="battery_info_status_discharging" msgid="310932812698268588">"چارج نہیں ہو رہا ہے"</string>
-    <string name="battery_info_status_not_charging" msgid="2820070506621483576">"چارج نہیں ہو رہا ہے"</string>
+    <string name="battery_info_status_not_charging" msgid="8523453668342598579">"پلگ ان ہے، ابھی چارج نہیں کر سکتے"</string>
     <string name="battery_info_status_full" msgid="2824614753861462808">"مکمل"</string>
     <string name="disabled_by_admin_summary_text" msgid="6750513964908334617">"کنٹرول کردہ بذریعہ منتظم"</string>
     <string name="enabled_by_admin" msgid="5302986023578399263">"منتظم کی طرف سے فعال کردہ"</string>
@@ -375,7 +388,6 @@
     <string name="screen_zoom_summary_custom" msgid="5611979864124160447">"حسب ضرورت (<xliff:g id="DENSITYDPI">%d</xliff:g>)"</string>
     <string name="help_feedback_label" msgid="6815040660801785649">"مدد اور تاثرات"</string>
     <string name="content_description_menu_button" msgid="8182594799812351266">"مینو"</string>
-    <string name="time_zone_gmt" msgid="2587097992671450782">"GMT"</string>
     <string name="retail_demo_reset_message" msgid="118771671364131297">"ڈیمو موڈ میں فیکٹری ری سیٹ کیلئے پاس ورڈ درج کریں"</string>
     <string name="retail_demo_reset_next" msgid="8356731459226304963">"اگلا"</string>
     <string name="retail_demo_reset_title" msgid="696589204029930100">"پاس ورڈ درکار ہے"</string>

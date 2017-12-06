@@ -16,6 +16,8 @@
 
 package com.android.server.wm;
 
+import static android.Manifest.permission.DEVICE_POWER;
+import static android.Manifest.permission.HIDE_NON_SYSTEM_OVERLAY_WINDOWS;
 import static android.Manifest.permission.INTERNAL_SYSTEM_WINDOW;
 import static android.content.pm.PackageManager.PERMISSION_GRANTED;
 import static android.os.Trace.TRACE_TAG_WINDOW_MANAGER;
@@ -82,6 +84,8 @@ public class Session extends IWindowSession.Stub
     // Set of visible alert window surfaces connected to this session.
     private final Set<WindowSurfaceController> mAlertWindowSurfaces = new HashSet<>();
     final boolean mCanAddInternalSystemWindow;
+    final boolean mCanHideNonSystemOverlayWindows;
+    final boolean mCanAcquireSleepToken;
     private AlertWindowNotification mAlertWindowNotification;
     private boolean mShowingAlertWindowNotificationAllowed;
     private boolean mClientDead = false;
@@ -99,6 +103,10 @@ public class Session extends IWindowSession.Stub
         mLastReportedAnimatorScale = service.getCurrentAnimatorScale();
         mCanAddInternalSystemWindow = service.mContext.checkCallingOrSelfPermission(
                 INTERNAL_SYSTEM_WINDOW) == PERMISSION_GRANTED;
+        mCanHideNonSystemOverlayWindows = service.mContext.checkCallingOrSelfPermission(
+                HIDE_NON_SYSTEM_OVERLAY_WINDOWS) == PERMISSION_GRANTED;
+        mCanAcquireSleepToken = service.mContext.checkCallingOrSelfPermission(DEVICE_POWER)
+                == PERMISSION_GRANTED;
         mShowingAlertWindowNotificationAllowed = mService.mShowAlertWindowNotifications;
         StringBuilder sb = new StringBuilder();
         sb.append("Session{");
@@ -710,5 +718,9 @@ public class Session extends IWindowSession.Stub
     @Override
     public String toString() {
         return mStringName;
+    }
+
+    boolean hasAlertWindowSurfaces() {
+        return !mAlertWindowSurfaces.isEmpty();
     }
 }

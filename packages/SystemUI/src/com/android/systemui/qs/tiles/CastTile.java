@@ -91,9 +91,9 @@ public class CastTile extends QSTileImpl<BooleanState> {
     }
 
     @Override
-    public void setListening(boolean listening) {
+    public void handleSetListening(boolean listening) {
         if (mController == null) return;
-        if (DEBUG) Log.d(TAG, "setListening " + listening);
+        if (DEBUG) Log.d(TAG, "handleSetListening " + listening);
         if (listening) {
             mController.addCallback(mCallback);
             mKeyguard.addCallback(mCallback);

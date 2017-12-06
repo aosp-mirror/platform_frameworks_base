@@ -40,12 +40,16 @@
     <string name="connected_via_passpoint" msgid="2826205693803088747">"%1$s মাধ্যমে সংযুক্ত হয়েছে"</string>
     <string name="available_via_passpoint" msgid="1617440946846329613">"%1$s এর মাধ্যমে উপলব্ধ"</string>
     <string name="wifi_connected_no_internet" msgid="3149853966840874992">"সংযুক্ত, ইন্টারনেট নেই"</string>
+    <string name="wifi_ap_unable_to_handle_new_sta" msgid="5348824313514404541">"এই মুহূর্তে অ্যাক্সেস পয়েন্টের কোনও কানেকশন ফাঁকা নেই"</string>
+    <string name="connected_via_carrier" msgid="7583780074526041912">"%1$s এর মাধ্যমে সংযুক্ত হয়েছে"</string>
+    <string name="available_via_carrier" msgid="1469036129740799053">"%1$s এর মাধ্যমে পাওয়া যাচ্ছে"</string>
     <string name="speed_label_very_slow" msgid="1867055264243608530">"খুব ধীরে"</string>
     <string name="speed_label_slow" msgid="813109590815810235">"ধীরে"</string>
     <string name="speed_label_okay" msgid="2331665440671174858">"ঠিক আছে"</string>
     <string name="speed_label_medium" msgid="3175763313268941953">"মাঝারি"</string>
     <string name="speed_label_fast" msgid="7715732164050975057">"দ্রুত"</string>
     <string name="speed_label_very_fast" msgid="2265363430784523409">"খুব দ্রুত"</string>
+    <string name="preference_summary_default_combination" msgid="8532964268242666060">"<xliff:g id="STATE">%1$s</xliff:g> / <xliff:g id="DESCRIPTION">%2$s</xliff:g>"</string>
     <string name="bluetooth_disconnected" msgid="6557104142667339895">"সংযোগ বিচ্ছিন্ন করা হয়েছে"</string>
     <string name="bluetooth_disconnecting" msgid="8913264760027764974">"সংযোগ বিচ্ছিন্ন হচ্ছে..."</string>
     <string name="bluetooth_connecting" msgid="8555009514614320497">"সংযুক্ত হচ্ছে..."</string>
@@ -74,7 +78,7 @@
     <string name="bluetooth_a2dp_profile_summary_connected" msgid="963376081347721598">"মিডিয়া অডিওতে সংযুক্ত রয়েছে"</string>
     <string name="bluetooth_headset_profile_summary_connected" msgid="7661070206715520671">"ফোন অডিওতে সংযুক্ত"</string>
     <string name="bluetooth_opp_profile_summary_connected" msgid="2611913495968309066">"ফাইল স্থানান্তর সার্ভারের সঙ্গে সংযুক্ত"</string>
-    <string name="bluetooth_map_profile_summary_connected" msgid="8191407438851351713">"মানচিত্রে সংযুক্ত"</string>
+    <string name="bluetooth_map_profile_summary_connected" msgid="8191407438851351713">"ম্যাপে সংযুক্ত"</string>
     <string name="bluetooth_sap_profile_summary_connected" msgid="8561765057453083838">"SAP -তে সংযুক্ত হয়েছে"</string>
     <string name="bluetooth_opp_profile_summary_not_connected" msgid="1267091356089086285">"ফাইল স্থানান্তর সার্ভারের সঙ্গে সংযুক্ত নয়"</string>
     <string name="bluetooth_hid_profile_summary_connected" msgid="3381760054215168689">"ইনপুট ডিভাইসে সংযুক্ত"</string>
@@ -101,6 +105,8 @@
     <string name="accessibility_wifi_two_bars" msgid="3569851234710034416">"ওয়াই ফাই এ দুইটি দণ্ড৷"</string>
     <string name="accessibility_wifi_three_bars" msgid="8134185644861380311">"ওয়াই ফাই এ তিনটি দণ্ড৷"</string>
     <string name="accessibility_wifi_signal_full" msgid="7061045677694702">"ওয়াই ফাই এ সম্পূর্ণ সিগন্যাল৷"</string>
+    <string name="accessibility_wifi_security_type_none" msgid="1223747559986205423">"খোলা নেটওয়ার্ক"</string>
+    <string name="accessibility_wifi_security_type_secured" msgid="862921720418885331">"সুরক্ষিত নেটওয়ার্ক"</string>
     <string name="process_kernel_label" msgid="3916858646836739323">"Android OS"</string>
     <string name="data_usage_uninstalled_apps" msgid="614263770923231598">"সরানো অ্যাপ্লিকেশানগুলি"</string>
     <string name="data_usage_uninstalled_apps_users" msgid="7986294489899813194">"সরানো অ্যাপ্লিকেশানগুলি এবং ব্যবহারকারীগণ"</string>
@@ -187,6 +193,7 @@
     <string name="wifi_allow_scan_with_traffic" msgid="3601853081178265786">"সর্বদা ওয়াই ফাই রোম স্ক্যানকে অনুমতি দিন"</string>
     <string name="mobile_data_always_on" msgid="8774857027458200434">"মোবাইল ডেটা সব সময় সক্রিয় থাক"</string>
     <string name="tethering_hardware_offload" msgid="7470077827090325814">"টিথারিং হার্ডওয়্যার অ্যাক্সিলারেশন"</string>
+    <string name="bluetooth_show_devices_without_names" msgid="4708446092962060176">"নামহীন ব্লুটুথ ডিভাইসগুলি দেখুন"</string>
     <string name="bluetooth_disable_absolute_volume" msgid="2660673801947898809">"চূড়ান্ত ভলিউম অক্ষম করুন"</string>
     <string name="bluetooth_enable_inband_ringing" msgid="3291686366721786740">"ইন-ব্যান্ড রিং করা সক্ষম করুন"</string>
     <string name="bluetooth_select_avrcp_version_string" msgid="3750059931120293633">"ব্লুটুথ AVRCP ভার্সন"</string>
@@ -202,6 +209,12 @@
     <string name="bluetooth_select_a2dp_codec_ldac_playback_quality" msgid="3619694372407843405">"ব্লুটুথ অডিও LDAC কোডেক: প্লেব্যাক গুণমান"</string>
     <string name="bluetooth_select_a2dp_codec_ldac_playback_quality_dialog_title" msgid="3181967377574368400">"ব্লুটুথ অডিও LDAC কোডেক বেছে নিন:\nপ্লেব্যাক গুণমান"</string>
     <string name="bluetooth_select_a2dp_codec_streaming_label" msgid="5347862512596240506">"স্ট্রিমিং: <xliff:g id="STREAMING_PARAMETER">%1$s</xliff:g>"</string>
+    <string name="select_private_dns_configuration_title" msgid="3700456559305263922">"ব্যক্তিগত ডিএনএস"</string>
+    <string name="select_private_dns_configuration_dialog_title" msgid="9221994415765826811">"ব্যক্তিগত ডিএনএস মোড বেছে নিন"</string>
+    <string name="private_dns_mode_off" msgid="8236575187318721684">"বন্ধ আছে"</string>
+    <string name="private_dns_mode_opportunistic" msgid="7608409735589131766">"সুবিধাবাদী"</string>
+    <string name="private_dns_mode_provider" msgid="8354935160639360804">"ব্যক্তিগত ডিএনএস প্রদানকারীর হোস্টনেম"</string>
+    <string name="private_dns_mode_provider_hostname_hint" msgid="2487492386970928143">"ডিএনএস প্রদানকারীর হোস্টনেম লিখুন"</string>
     <string name="wifi_display_certification_summary" msgid="1155182309166746973">"ওয়্যারলেস প্রদর্শন সার্টিফিকেশন জন্য বিকল্পগুলি দেখান"</string>
     <string name="wifi_verbose_logging_summary" msgid="6615071616111731958">"ওয়াই-ফাই লগিং স্তর বাড়ান, ওয়াই-ফাই চয়নকারীতে SSID RSSI অনুযায়ী দেখান"</string>
     <string name="wifi_aggressive_handover_summary" msgid="7266329646559808827">"সক্ষম করা থাকলে, ওয়াই ফাই সিগন্যালের মান খারাপ হলে ডেটা সংযোগ মোবাইলের কাছে হস্তান্তর করার জন্য ওয়াই ফাই আরো বেশি তৎপর হবে।"</string>
@@ -226,6 +239,7 @@
     <string name="dev_settings_warning_message" msgid="2298337781139097964">"এইসব সেটিংস কেবলমাত্র উন্নত করার উদ্দেশ্য। সেগুলি কারণে আপনার ডিভাইস ভেঙ্গে এবং অ্যাপ্লিকেশানগুলি ভালো ভাবে কাজ করা নাও কারতে পারে।"</string>
     <string name="verify_apps_over_usb_title" msgid="4177086489869041953">"USB এর অ্যাপ্লিকেশনগুলি যাচাই করুন"</string>
     <string name="verify_apps_over_usb_summary" msgid="9164096969924529200">"ক্ষতিকারক ক্রিয়াকলাপ করছে কিনা তার জন্য ADB/ADT মারফত ইনস্টল করা অ্যাপ্লিকেশানগুলি চেক করুন।"</string>
+    <string name="bluetooth_show_devices_without_names_summary" msgid="2351196058115755520">"নামহীন ব্লুটুথ ডিভাইসগুলি দেখানো হবে (শুধুমাত্র MAC ঠিকানা)"</string>
     <string name="bluetooth_disable_absolute_volume_summary" msgid="6031284410786545957">"অপ্রত্যাশিত উচ্চ ভলিউম বা নিয়ন্ত্রণের অভাবের মত দূরবর্তী ডিভাইসের ভলিউম সমস্যাগুলির ক্ষেত্রে, ব্লুটুথ চুড়ান্ত ভলিউম বৈশিষ্ট্য অক্ষম করে৷"</string>
     <string name="bluetooth_enable_inband_ringing_summary" msgid="2787866074741784975">"ফোনের রিংটোন ব্লুটুথ হেডসেটে শোনা সক্ষম করুন"</string>
     <string name="enable_terminal_title" msgid="95572094356054120">"স্থানীয় টার্মিনাল"</string>
@@ -345,12 +359,11 @@
     <string name="power_discharging_duration_short" msgid="4192244429001842403">"<xliff:g id="LEVEL">^1</xliff:g> - <xliff:g id="TIME">^2</xliff:g> বাকী আছে"</string>
     <string name="power_charging" msgid="1779532561355864267">"<xliff:g id="LEVEL">%1$s</xliff:g> - <xliff:g id="STATE">%2$s</xliff:g>"</string>
     <string name="power_charging_duration" msgid="4676999980973411875">"<xliff:g id="LEVEL">^1</xliff:g> - সম্পূর্ণ চার্জ হতে <xliff:g id="TIME">^2</xliff:g> লাগবে"</string>
-    <string name="power_charging_duration_short" msgid="1098603958472207920">"<xliff:g id="LEVEL">^1</xliff:g> - <xliff:g id="TIME">^2</xliff:g>"</string>
     <string name="battery_info_status_unknown" msgid="196130600938058547">"অজানা"</string>
     <string name="battery_info_status_charging" msgid="1705179948350365604">"চার্জ হচ্ছে"</string>
     <string name="battery_info_status_charging_lower" msgid="8689770213898117994">"চার্জ হচ্ছে"</string>
     <string name="battery_info_status_discharging" msgid="310932812698268588">"চার্জ হচ্ছে না"</string>
-    <string name="battery_info_status_not_charging" msgid="2820070506621483576">"চার্জ হচ্ছে না"</string>
+    <string name="battery_info_status_not_charging" msgid="8523453668342598579">"প্লাগ-ইন করা হয়েছে কিন্তু এখনই চার্জ করা যাবে না"</string>
     <string name="battery_info_status_full" msgid="2824614753861462808">"পূর্ণ"</string>
     <string name="disabled_by_admin_summary_text" msgid="6750513964908334617">"প্রশাসকের দ্বারা নিয়ন্ত্রিত"</string>
     <string name="enabled_by_admin" msgid="5302986023578399263">"প্রশাসক দ্বারা সক্ষম করা হয়েছে"</string>
@@ -375,7 +388,6 @@
     <string name="screen_zoom_summary_custom" msgid="5611979864124160447">"কাস্টম (<xliff:g id="DENSITYDPI">%d</xliff:g>)"</string>
     <string name="help_feedback_label" msgid="6815040660801785649">"সহায়তা ও মতামত"</string>
     <string name="content_description_menu_button" msgid="8182594799812351266">"মেনু"</string>
-    <string name="time_zone_gmt" msgid="2587097992671450782">"GMT"</string>
     <string name="retail_demo_reset_message" msgid="118771671364131297">"ডেমো মোডে ফ্যাক্টরি রিসেট করতে পাসওয়ার্ড দিন"</string>
     <string name="retail_demo_reset_next" msgid="8356731459226304963">"পরবর্তী"</string>
     <string name="retail_demo_reset_title" msgid="696589204029930100">"পাসওয়ার্ড আবশ্যক"</string>

@@ -254,6 +254,16 @@ public class NetworkFactory extends Handler {
         }
     }
 
+    /**
+     * Post a command, on this NetworkFactory Handler, to re-evaluate all
+     * oustanding requests. Can be called from a factory implementation.
+     */
+    protected void reevaluateAllRequests() {
+        post(() -> {
+            evalRequests();
+        });
+    }
+
     // override to do simple mode (request independent)
     protected void startNetwork() { }
     protected void stopNetwork() { }

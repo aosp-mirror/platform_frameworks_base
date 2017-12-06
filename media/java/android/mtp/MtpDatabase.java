@@ -52,6 +52,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
 public class MtpDatabase implements AutoCloseable {
     private static final String TAG = "MtpDatabase";
 
+    private final Context mUserContext;
     private final Context mContext;
     private final String mPackageName;
     private final ContentProviderClient mMediaProvider;
@@ -159,13 +160,14 @@ public class MtpDatabase implements AutoCloseable {
         }
     };
 
-    public MtpDatabase(Context context, String volumeName, String storagePath,
+    public MtpDatabase(Context context, Context userContext, String volumeName, String storagePath,
             String[] subDirectories) {
         native_setup();
 
         mContext = context;
+        mUserContext = userContext;
         mPackageName = context.getPackageName();
-        mMediaProvider = context.getContentResolver()
+        mMediaProvider = userContext.getContentResolver()
                 .acquireContentProviderClient(MediaStore.AUTHORITY);
         mVolumeName = volumeName;
         mMediaStoragePath = storagePath;
@@ -610,6 +612,7 @@ public class MtpDatabase implements AutoCloseable {
             MtpConstants.FORMAT_XML_DOCUMENT,
             MtpConstants.FORMAT_FLAC,
             MtpConstants.FORMAT_DNG,
+            MtpConstants.FORMAT_HEIF,
         };
     }
 
@@ -720,6 +723,7 @@ public class MtpDatabase implements AutoCloseable {
             case MtpConstants.FORMAT_PNG:
             case MtpConstants.FORMAT_BMP:
             case MtpConstants.FORMAT_DNG:
+            case MtpConstants.FORMAT_HEIF:
                 return IMAGE_PROPERTIES;
             default:
                 return FILE_PROPERTIES;
@@ -1155,7 +1159,7 @@ public class MtpDatabase implements AutoCloseable {
 
     private void sessionEnded() {
         if (mDatabaseModified) {
-            mContext.sendBroadcast(new Intent(MediaStore.ACTION_MTP_SESSION_END));
+            mUserContext.sendBroadcast(new Intent(MediaStore.ACTION_MTP_SESSION_END));
             mDatabaseModified = false;
         }
     }

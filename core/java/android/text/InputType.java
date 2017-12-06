@@ -182,9 +182,9 @@ public interface InputType {
      * want the IME to correct typos.
      * Note the contrast with {@link #TYPE_TEXT_FLAG_AUTO_CORRECT} and
      * {@link #TYPE_TEXT_FLAG_AUTO_COMPLETE}:
-     * {@code TYPE_TEXT_FLAG_NO_SUGGESTIONS} means the IME should never
+     * {@code TYPE_TEXT_FLAG_NO_SUGGESTIONS} means the IME does not need to
      * show an interface to display suggestions. Most IMEs will also take this to
-     * mean they should not try to auto-correct what the user is typing.
+     * mean they do not need to try to auto-correct what the user is typing.
      */
     public static final int TYPE_TEXT_FLAG_NO_SUGGESTIONS = 0x00080000;
 

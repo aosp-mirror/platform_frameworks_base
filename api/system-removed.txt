@@ -9,12 +9,20 @@ package android.app {
     method public static deprecated int getMaxNumPictureInPictureActions();
   }
 
+  public abstract deprecated class EphemeralResolverService extends android.app.InstantAppResolverService {
+    ctor public EphemeralResolverService();
+    method public abstract deprecated java.util.List<android.content.pm.EphemeralResolveInfo> onEphemeralResolveInfoList(int[], int);
+    method public android.content.pm.EphemeralResolveInfo onGetEphemeralIntentFilter(java.lang.String);
+    method public java.util.List<android.content.pm.EphemeralResolveInfo> onGetEphemeralResolveInfo(int[]);
+  }
+
   public class KeyguardManager {
     method public deprecated void dismissKeyguard(android.app.Activity, android.app.KeyguardManager.KeyguardDismissCallback, android.os.Handler);
   }
 
   public class Notification implements android.os.Parcelable {
     method public deprecated java.lang.String getChannel();
+    method public static java.lang.Class<? extends android.app.Notification.Style> getNotificationStyleClass(java.lang.String);
     method public deprecated long getTimeout();
     method public deprecated void setLatestEventInfo(android.content.Context, java.lang.CharSequence, java.lang.CharSequence, android.app.PendingIntent);
   }
@@ -29,25 +37,8 @@ package android.app {
   }
 
   public final deprecated class PictureInPictureArgs implements android.os.Parcelable {
-    ctor public deprecated PictureInPictureArgs();
-    ctor public deprecated PictureInPictureArgs(float, java.util.List<android.app.RemoteAction>);
     method public static android.app.PictureInPictureArgs convert(android.app.PictureInPictureParams);
     method public static android.app.PictureInPictureParams convert(android.app.PictureInPictureArgs);
-    method public void copyOnlySet(android.app.PictureInPictureArgs);
-    method public java.util.List<android.app.RemoteAction> getActions();
-    method public float getAspectRatio();
-    method public android.util.Rational getAspectRatioRational();
-    method public android.graphics.Rect getSourceRectHint();
-    method public android.graphics.Rect getSourceRectHintInsets();
-    method public boolean hasSetActions();
-    method public boolean hasSetAspectRatio();
-    method public boolean hasSourceBoundsHint();
-    method public boolean hasSourceBoundsHintInsets();
-    method public deprecated void setActions(java.util.List<android.app.RemoteAction>);
-    method public deprecated void setAspectRatio(float);
-    method public deprecated void setSourceRectHint(android.graphics.Rect);
-    method public deprecated void setSourceRectHintInsets(android.graphics.Rect);
-    method public void truncateActions(int);
     field public static final android.os.Parcelable.Creator<android.app.PictureInPictureArgs> CREATOR;
   }
 
@@ -59,10 +50,6 @@ package android.app {
     method public android.app.PictureInPictureArgs.Builder setSourceRectHint(android.graphics.Rect);
   }
 
-  public final class RecoverableSecurityException extends java.lang.SecurityException implements android.os.Parcelable {
-    method public deprecated void showAsNotification(android.content.Context);
-  }
-
 }
 
 package android.app.admin {
@@ -70,6 +57,8 @@ package android.app.admin {
   public class DevicePolicyManager {
     method public deprecated android.os.UserHandle createAndInitializeUser(android.content.ComponentName, java.lang.String, java.lang.String, android.content.ComponentName, android.os.Bundle);
     method public deprecated android.os.UserHandle createUser(android.content.ComponentName, java.lang.String);
+    method public deprecated java.lang.String getDeviceInitializerApp();
+    method public deprecated android.content.ComponentName getDeviceInitializerComponent();
   }
 
 }
@@ -104,7 +93,35 @@ package android.content {
   }
 
   public class Intent implements java.lang.Cloneable android.os.Parcelable {
+    field public static final deprecated java.lang.String ACTION_DEVICE_INITIALIZATION_WIZARD = "android.intent.action.DEVICE_INITIALIZATION_WIZARD";
+    field public static final deprecated java.lang.String ACTION_EPHEMERAL_RESOLVER_SETTINGS = "android.intent.action.EPHEMERAL_RESOLVER_SETTINGS";
+    field public static final deprecated java.lang.String ACTION_INSTALL_EPHEMERAL_PACKAGE = "android.intent.action.INSTALL_EPHEMERAL_PACKAGE";
+    field public static final deprecated java.lang.String ACTION_MASTER_CLEAR = "android.intent.action.MASTER_CLEAR";
+    field public static final deprecated java.lang.String ACTION_RESOLVE_EPHEMERAL_PACKAGE = "android.intent.action.RESOLVE_EPHEMERAL_PACKAGE";
+    field public static final deprecated java.lang.String ACTION_SERVICE_STATE = "android.intent.action.SERVICE_STATE";
+    field public static final deprecated java.lang.String EXTRA_CDMA_DEFAULT_ROAMING_INDICATOR = "cdmaDefaultRoamingIndicator";
+    field public static final deprecated java.lang.String EXTRA_CDMA_ROAMING_INDICATOR = "cdmaRoamingIndicator";
+    field public static final deprecated java.lang.String EXTRA_CSS_INDICATOR = "cssIndicator";
+    field public static final deprecated java.lang.String EXTRA_DATA_OPERATOR_ALPHA_LONG = "data-operator-alpha-long";
+    field public static final deprecated java.lang.String EXTRA_DATA_OPERATOR_ALPHA_SHORT = "data-operator-alpha-short";
+    field public static final deprecated java.lang.String EXTRA_DATA_OPERATOR_NUMERIC = "data-operator-numeric";
+    field public static final deprecated java.lang.String EXTRA_DATA_RADIO_TECH = "dataRadioTechnology";
+    field public static final deprecated java.lang.String EXTRA_DATA_REG_STATE = "dataRegState";
+    field public static final deprecated java.lang.String EXTRA_DATA_ROAMING_TYPE = "dataRoamingType";
+    field public static final deprecated java.lang.String EXTRA_EMERGENCY_ONLY = "emergencyOnly";
+    field public static final deprecated java.lang.String EXTRA_IS_DATA_ROAMING_FROM_REGISTRATION = "isDataRoamingFromRegistration";
+    field public static final deprecated java.lang.String EXTRA_IS_USING_CARRIER_AGGREGATION = "isUsingCarrierAggregation";
+    field public static final deprecated java.lang.String EXTRA_LTE_EARFCN_RSRP_BOOST = "LteEarfcnRsrpBoost";
+    field public static final deprecated java.lang.String EXTRA_MANUAL = "manual";
+    field public static final deprecated java.lang.String EXTRA_NETWORK_ID = "networkId";
+    field public static final deprecated java.lang.String EXTRA_OPERATOR_ALPHA_LONG = "operator-alpha-long";
+    field public static final deprecated java.lang.String EXTRA_OPERATOR_ALPHA_SHORT = "operator-alpha-short";
+    field public static final deprecated java.lang.String EXTRA_OPERATOR_NUMERIC = "operator-numeric";
     field public static final deprecated java.lang.String EXTRA_QUICK_VIEW_ADVANCED = "android.intent.extra.QUICK_VIEW_ADVANCED";
+    field public static final deprecated java.lang.String EXTRA_SYSTEM_ID = "systemId";
+    field public static final deprecated java.lang.String EXTRA_VOICE_RADIO_TECH = "radioTechnology";
+    field public static final deprecated java.lang.String EXTRA_VOICE_REG_STATE = "voiceRegState";
+    field public static final deprecated java.lang.String EXTRA_VOICE_ROAMING_TYPE = "voiceRoamingType";
   }
 
 }
@@ -117,6 +134,35 @@ package android.content.pm {
 
   public class ComponentInfo extends android.content.pm.PackageItemInfo {
     field public deprecated boolean encryptionAware;
+  }
+
+  public final deprecated class EphemeralIntentFilter implements android.os.Parcelable {
+    ctor public EphemeralIntentFilter(java.lang.String, java.util.List<android.content.IntentFilter>);
+    method public java.util.List<android.content.IntentFilter> getFilters();
+    method public java.lang.String getSplitName();
+    field public static final android.os.Parcelable.Creator<android.content.pm.EphemeralIntentFilter> CREATOR;
+  }
+
+  public final deprecated class EphemeralResolveInfo implements android.os.Parcelable {
+    ctor public deprecated EphemeralResolveInfo(android.net.Uri, java.lang.String, java.util.List<android.content.IntentFilter>);
+    ctor public deprecated EphemeralResolveInfo(android.content.pm.EphemeralResolveInfo.EphemeralDigest, java.lang.String, java.util.List<android.content.pm.EphemeralIntentFilter>);
+    ctor public EphemeralResolveInfo(android.content.pm.EphemeralResolveInfo.EphemeralDigest, java.lang.String, java.util.List<android.content.pm.EphemeralIntentFilter>, int);
+    ctor public EphemeralResolveInfo(java.lang.String, java.lang.String, java.util.List<android.content.pm.EphemeralIntentFilter>);
+    method public byte[] getDigestBytes();
+    method public int getDigestPrefix();
+    method public deprecated java.util.List<android.content.IntentFilter> getFilters();
+    method public java.util.List<android.content.pm.EphemeralIntentFilter> getIntentFilters();
+    method public java.lang.String getPackageName();
+    method public int getVersionCode();
+    field public static final android.os.Parcelable.Creator<android.content.pm.EphemeralResolveInfo> CREATOR;
+    field public static final java.lang.String SHA_ALGORITHM = "SHA-256";
+  }
+
+  public static final class EphemeralResolveInfo.EphemeralDigest implements android.os.Parcelable {
+    ctor public EphemeralResolveInfo.EphemeralDigest(java.lang.String);
+    method public byte[][] getDigestBytes();
+    method public int[] getDigestPrefix();
+    field public static final android.os.Parcelable.Creator<android.content.pm.EphemeralResolveInfo.EphemeralDigest> CREATOR;
   }
 
   public class PackageInfo implements android.os.Parcelable {
@@ -264,16 +310,51 @@ package android.net {
 
 }
 
+package android.net.wifi {
+
+  public class ScanResult implements android.os.Parcelable {
+    field public boolean untrusted;
+  }
+
+  public class WifiConnectionStatistics implements android.os.Parcelable {
+    ctor public WifiConnectionStatistics();
+    ctor public WifiConnectionStatistics(android.net.wifi.WifiConnectionStatistics);
+    method public void incrementOrAddUntrusted(java.lang.String, int, int);
+    field public static final android.os.Parcelable.Creator<android.net.wifi.WifiConnectionStatistics> CREATOR;
+    field public int num24GhzConnected;
+    field public int num5GhzConnected;
+    field public int numAutoJoinAttempt;
+    field public int numAutoRoamAttempt;
+    field public int numWifiManagerJoinAttempt;
+    field public java.util.HashMap<java.lang.String, android.net.wifi.WifiNetworkConnectionStatistics> untrustedNetworkHistory;
+  }
+
+  public class WifiManager {
+    method public deprecated java.util.List<android.net.wifi.BatchedScanResult> getBatchedScanResults();
+    method public android.net.wifi.WifiConnectionStatistics getConnectionStatistics();
+    method public deprecated boolean isBatchedScanSupported();
+    method public deprecated boolean setWifiApEnabled(android.net.wifi.WifiConfiguration, boolean);
+    method public deprecated boolean startLocationRestrictedScan(android.os.WorkSource);
+  }
+
+}
+
 package android.os {
 
   public class BatteryManager {
     ctor public BatteryManager();
   }
 
+  public class Build {
+    field public static final boolean PERMISSIONS_REVIEW_REQUIRED;
+  }
+
   public final class PowerManager {
     method public void goToSleep(long);
+    method public deprecated boolean isScreenBrightnessBoosted();
     method public deprecated void userActivity(long, boolean);
     method public void wakeUp(long);
+    field public static final deprecated java.lang.String ACTION_SCREEN_BRIGHTNESS_BOOST_CHANGED = "android.os.action.SCREEN_BRIGHTNESS_BOOST_CHANGED";
   }
 
   public class RecoverySystem {
@@ -295,18 +376,8 @@ package android.os {
 package android.os.storage {
 
   public class StorageManager {
-    method public deprecated void allocateBytes(java.io.File, long, int) throws java.io.IOException;
-    method public deprecated long getAllocatableBytes(java.io.File, int) throws java.io.IOException;
-    method public deprecated long getCacheQuotaBytes(java.io.File) throws java.io.IOException;
-    method public deprecated long getCacheQuotaBytes() throws java.io.IOException;
-    method public deprecated long getCacheSizeBytes(java.io.File) throws java.io.IOException;
-    method public deprecated long getCacheSizeBytes() throws java.io.IOException;
-    method public deprecated long getExternalCacheQuotaBytes() throws java.io.IOException;
-    method public deprecated long getExternalCacheSizeBytes() throws java.io.IOException;
     method public android.os.storage.StorageVolume getPrimaryVolume();
     method public android.os.storage.StorageVolume[] getVolumeList();
-    method public deprecated boolean isCacheBehaviorAtomic(java.io.File) throws java.io.IOException;
-    method public deprecated void setCacheBehaviorAtomic(java.io.File, boolean) throws java.io.IOException;
   }
 
 }
@@ -350,11 +421,8 @@ package android.provider {
     field public static final java.lang.String CREATED = "created";
     field public static final java.lang.String DATE = "date";
     field public static final java.lang.String FAVICON = "favicon";
-    field public static final java.lang.String THUMBNAIL = "thumbnail";
     field public static final java.lang.String TITLE = "title";
-    field public static final java.lang.String TOUCH_ICON = "touch_icon";
     field public static final java.lang.String URL = "url";
-    field public static final java.lang.String USER_ENTERED = "user_entered";
     field public static final java.lang.String VISITS = "visits";
   }
 
@@ -441,6 +509,26 @@ package android.provider {
 
   public static final class Telephony.Sms.Intents {
     field public static final java.lang.String SMS_EMERGENCY_CB_RECEIVED_ACTION = "android.provider.Telephony.SMS_EMERGENCY_CB_RECEIVED";
+  }
+
+}
+
+package android.service.notification {
+
+  public abstract class NotificationListenerService extends android.app.Service {
+    method public android.service.notification.StatusBarNotification[] getActiveNotifications(int);
+    method public android.service.notification.StatusBarNotification[] getActiveNotifications(java.lang.String[], int);
+    method public void registerAsSystemService(android.content.Context, android.content.ComponentName, int) throws android.os.RemoteException;
+    method public final void setOnNotificationPostedTrim(int);
+    method public final void snoozeNotification(java.lang.String, java.lang.String);
+    method public void unregisterAsSystemService() throws android.os.RemoteException;
+    field public static final int TRIM_FULL = 0; // 0x0
+    field public static final int TRIM_LIGHT = 1; // 0x1
+  }
+
+  public static class NotificationListenerService.Ranking {
+    method public java.util.List<java.lang.String> getAdditionalPeople();
+    method public java.util.List<android.service.notification.SnoozeCriterion> getSnoozeCriteria();
   }
 
 }

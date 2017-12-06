@@ -14,6 +14,9 @@
 
 package com.android.systemui.statusbar.phone;
 
+import static android.app.StatusBarManager.DISABLE_NOTIFICATION_ICONS;
+import static android.app.StatusBarManager.DISABLE_SYSTEM_INFO;
+
 import static com.android.systemui.statusbar.phone.StatusBar.reinflateSignalCluster;
 
 import android.annotation.Nullable;
@@ -144,15 +147,15 @@ public class CollapsedStatusBarFragment extends Fragment implements CommandQueue
         final int old1 = mDisabled1;
         final int diff1 = state1 ^ old1;
         mDisabled1 = state1;
-        if ((diff1 & StatusBarManager.DISABLE_SYSTEM_INFO) != 0) {
-            if ((state1 & StatusBarManager.DISABLE_SYSTEM_INFO) != 0) {
+        if ((diff1 & DISABLE_SYSTEM_INFO) != 0) {
+            if ((state1 & DISABLE_SYSTEM_INFO) != 0) {
                 hideSystemIconArea(animate);
             } else {
                 showSystemIconArea(animate);
             }
         }
-        if ((diff1 & StatusBarManager.DISABLE_NOTIFICATION_ICONS) != 0) {
-            if ((state1 & StatusBarManager.DISABLE_NOTIFICATION_ICONS) != 0) {
+        if ((diff1 & DISABLE_NOTIFICATION_ICONS) != 0) {
+            if ((state1 & DISABLE_NOTIFICATION_ICONS) != 0) {
                 hideNotificationIconArea(animate);
             } else {
                 showNotificationIconArea(animate);
@@ -164,22 +167,28 @@ public class CollapsedStatusBarFragment extends Fragment implements CommandQueue
         if (!mStatusBarComponent.isLaunchTransitionFadingAway()
                 && !mKeyguardMonitor.isKeyguardFadingAway()
                 && shouldHideNotificationIcons()) {
-            state |= StatusBarManager.DISABLE_NOTIFICATION_ICONS;
-            state |= StatusBarManager.DISABLE_SYSTEM_INFO;
+            state |= DISABLE_NOTIFICATION_ICONS;
+            state |= DISABLE_SYSTEM_INFO;
         }
         if (mNetworkController != null && EncryptionHelper.IS_DATA_ENCRYPTED) {
             if (mNetworkController.hasEmergencyCryptKeeperText()) {
-                state |= StatusBarManager.DISABLE_NOTIFICATION_ICONS;
+                state |= DISABLE_NOTIFICATION_ICONS;
             }
             if (!mNetworkController.isRadioOn()) {
-                state |= StatusBarManager.DISABLE_SYSTEM_INFO;
+                state |= DISABLE_SYSTEM_INFO;
             }
         }
         return state;
     }
 
     private boolean shouldHideNotificationIcons() {
-        return !mStatusBar.isClosed() && mStatusBarComponent.hideStatusBarIconsWhenExpanded();
+        if (!mStatusBar.isClosed() && mStatusBarComponent.hideStatusBarIconsWhenExpanded()) {
+            return true;
+        }
+        if (mStatusBarComponent.hideStatusBarIconsForBouncer()) {
+            return true;
+        }
+        return false;
     }
 
     public void hideSystemIconArea(boolean animate) {

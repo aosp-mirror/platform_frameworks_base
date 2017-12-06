@@ -47,9 +47,11 @@ public class BadgeExtractor implements NotificationSignalExtractor {
         if (!userWantsBadges || !appCanShowBadge) {
             record.setShowBadge(false);
         } else {
-            record.setShowBadge(mConfig.getNotificationChannel(record.sbn.getPackageName(),
-                    record.sbn.getUid(), record.getChannel().getId(), false).canShowBadge()
-                    && appCanShowBadge);
+            if (record.getChannel() != null) {
+                record.setShowBadge(record.getChannel().canShowBadge() && appCanShowBadge);
+            } else {
+                record.setShowBadge(appCanShowBadge);
+            }
         }
 
         return null;

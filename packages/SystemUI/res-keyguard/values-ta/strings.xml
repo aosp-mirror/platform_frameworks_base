@@ -29,8 +29,7 @@
     <string name="keyguard_password_enter_password_code" msgid="595980919238127672">"திறக்க, கடவுச்சொல்லை உள்ளிடவும்"</string>
     <string name="keyguard_password_enter_pin_password_code" msgid="7504123374204446086">"திறக்க, பின்னை உள்ளிடவும்"</string>
     <string name="keyguard_password_wrong_pin_code" msgid="6535018036285012028">"தவறான பின் குறியீடு."</string>
-    <!-- no translation found for keyguard_sim_error_message_short (592109500618448312) -->
-    <skip />
+    <string name="keyguard_sim_error_message_short" msgid="592109500618448312">"செல்லாத சிம் கார்டு."</string>
     <string name="keyguard_charged" msgid="2222329688813033109">"சார்ஜ் செய்யப்பட்டது"</string>
     <string name="keyguard_plugged_in" msgid="89308975354638682">"சார்ஜ் ஆகிறது"</string>
     <string name="keyguard_plugged_in_charging_fast" msgid="8869226755413795173">"வேகமாகச் சார்ஜாகிறது"</string>

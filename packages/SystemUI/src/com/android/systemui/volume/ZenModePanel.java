@@ -41,6 +41,7 @@ import android.util.ArraySet;
 import android.util.AttributeSet;
 import android.util.Log;
 import android.util.MathUtils;
+import android.util.Slog;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -53,6 +54,7 @@ import android.widget.RadioButton;
 import android.widget.RadioGroup;
 import android.widget.TextView;
 
+import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.logging.MetricsLogger;
 import com.android.internal.logging.nano.MetricsProto.MetricsEvent;
 import com.android.systemui.Prefs;
@@ -116,8 +118,6 @@ public class ZenModePanel extends FrameLayout {
 
     private Callback mCallback;
     private ZenModeController mController;
-    private boolean mCountdownConditionSupported;
-    private boolean mRequestingConditions;
     private Condition mExitCondition;
     private int mBucketIndex = -1;
     private boolean mExpanded;
@@ -126,8 +126,6 @@ public class ZenModePanel extends FrameLayout {
     private int mAttachedZen;
     private boolean mAttached;
     private Condition mSessionExitCondition;
-    private Condition[] mConditions;
-    private Condition mTimeCondition;
     private boolean mVoiceCapable;
 
     protected int mZenModeConditionLayoutId;
@@ -155,8 +153,6 @@ public class ZenModePanel extends FrameLayout {
 
     public void dump(FileDescriptor fd, PrintWriter pw, String[] args) {
         pw.println("ZenModePanel state:");
-        pw.print("  mCountdownConditionSupported="); pw.println(mCountdownConditionSupported);
-        pw.print("  mRequestingConditions="); pw.println(mRequestingConditions);
         pw.print("  mAttached="); pw.println(mAttached);
         pw.print("  mHidden="); pw.println(mHidden);
         pw.print("  mExpanded="); pw.println(mExpanded);
@@ -292,7 +288,6 @@ public class ZenModePanel extends FrameLayout {
 
     private void onAttach() {
         setExpanded(true);
-        mAttached = true;
         mAttachedZen = mController.getZen();
         ZenRule manualRule = mController.getManualRule();
         mExitCondition = manualRule != null ? manualRule.condition : null;
@@ -304,21 +299,24 @@ public class ZenModePanel extends FrameLayout {
         mController.addCallback(mZenCallback);
         setSessionExitCondition(copy(mExitCondition));
         updateWidgets();
-        setRequestingConditions(!mHidden);
-        ensureSelection();
+        setAttached(true);
     }
 
     private void onDetach() {
         if (DEBUG) Log.d(mTag, "onDetach");
         setExpanded(false);
         checkForAttachedZenChange();
-        mAttached = false;
+        setAttached(false);
         mAttachedZen = -1;
         mSessionZen = -1;
         mController.removeCallback(mZenCallback);
         setSessionExitCondition(null);
-        setRequestingConditions(false);
         mTransitionHelper.clear();
+    }
+
+    @VisibleForTesting
+    void setAttached(boolean attached) {
+        mAttached = attached;
     }
 
     @Override
@@ -342,7 +340,6 @@ public class ZenModePanel extends FrameLayout {
         if (mHidden == hidden) return;
         if (DEBUG) Log.d(mTag, "hidden=" + hidden);
         mHidden = hidden;
-        setRequestingConditions(mAttached && !mHidden);
         updateWidgets();
     }
 
@@ -365,29 +362,6 @@ public class ZenModePanel extends FrameLayout {
         fireExpanded();
     }
 
-    /** Start or stop requesting relevant zen mode exit conditions */
-    private void setRequestingConditions(final boolean requesting) {
-        if (mRequestingConditions == requesting) return;
-        if (DEBUG) Log.d(mTag, "setRequestingConditions " + requesting);
-        mRequestingConditions = requesting;
-        if (mRequestingConditions) {
-            mTimeCondition = parseExistingTimeCondition(mContext, mExitCondition);
-            if (mTimeCondition != null) {
-                mBucketIndex = -1;
-            } else {
-                mBucketIndex = DEFAULT_BUCKET_INDEX;
-                mTimeCondition = ZenModeConfig.toTimeCondition(mContext,
-                        MINUTE_BUCKETS[mBucketIndex], ActivityManager.getCurrentUser());
-            }
-            if (DEBUG) Log.d(mTag, "Initial bucket index: " + mBucketIndex);
-
-            mConditions = null; // reset conditions
-            handleUpdateConditions();
-        } else {
-            hideAllConditions();
-        }
-    }
-
     protected void addZenConditions(int count) {
         for (int i = 0; i < count; i++) {
             final View rb = mInflater.inflate(mZenModeButtonLayoutId, mEdit, false);
@@ -401,9 +375,7 @@ public class ZenModePanel extends FrameLayout {
 
     public void init(ZenModeController controller) {
         mController = controller;
-        mCountdownConditionSupported = mController.isCountdownConditionSupported();
-        final int countdownDelta = mCountdownConditionSupported ? COUNTDOWN_CONDITION_COUNT : 0;
-        final int minConditions = 1 /*forever*/ + countdownDelta;
+        final int minConditions = 1 /*forever*/ + COUNTDOWN_CONDITION_COUNT;
         addZenConditions(minConditions);
         mSessionZen = getSelectedZen(-1);
         handleUpdateManualRule(mController.getManualRule());
@@ -426,10 +398,6 @@ public class ZenModePanel extends FrameLayout {
         return isForever(condition) ? null : getConditionId(condition);
     }
 
-    private static boolean sameConditionId(Condition lhs, Condition rhs) {
-        return lhs == null ? rhs == null : rhs != null && lhs.id.equals(rhs.id);
-    }
-
     private static Condition copy(Condition condition) {
         return condition == null ? null : condition.copy();
     }
@@ -438,17 +406,24 @@ public class ZenModePanel extends FrameLayout {
         mCallback = callback;
     }
 
-    private void handleUpdateManualRule(ZenRule rule) {
+    @VisibleForTesting
+    void handleUpdateManualRule(ZenRule rule) {
         final int zen = rule != null ? rule.zenMode : Global.ZEN_MODE_OFF;
         handleUpdateZen(zen);
         final Condition c = rule == null ? null
                 : rule.condition != null ? rule.condition
                 : createCondition(rule.conditionId);
-        handleExitConditionChanged(c);
+        handleUpdateConditions(c);
+        setExitCondition(c);
     }
 
     private Condition createCondition(Uri conditionId) {
-        if (ZenModeConfig.isValidCountdownConditionId(conditionId)) {
+        if (ZenModeConfig.isValidCountdownToAlarmConditionId(conditionId)) {
+            long time = ZenModeConfig.tryParseCountdownConditionId(conditionId);
+            Condition c = ZenModeConfig.toNextAlarmCondition(
+                    mContext, time, ActivityManager.getCurrentUser());
+            return c;
+        } else if (ZenModeConfig.isValidCountdownConditionId(conditionId)) {
             long time = ZenModeConfig.tryParseCountdownConditionId(conditionId);
             int mins = (int) ((time - System.currentTimeMillis() + DateUtils.MINUTE_IN_MILLIS / 2)
                     / DateUtils.MINUTE_IN_MILLIS);
@@ -466,48 +441,10 @@ public class ZenModePanel extends FrameLayout {
         }
         mZenButtons.setSelectedValue(zen, false /* fromClick */);
         updateWidgets();
-        handleUpdateConditions();
-        if (mExpanded) {
-            final Condition selected = getSelectedCondition();
-            if (!Objects.equals(mExitCondition, selected)) {
-                select(selected);
-            }
-        }
     }
 
-    private void handleExitConditionChanged(Condition exitCondition) {
-        setExitCondition(exitCondition);
-        if (DEBUG) Log.d(mTag, "handleExitConditionChanged " + mExitCondition);
-        if (exitCondition == null) return;
-        final int N = getVisibleConditions();
-        for (int i = 0; i < N; i++) {
-            final ConditionTag tag = getConditionTagAt(i);
-            if (tag != null && sameConditionId(tag.condition, mExitCondition)) {
-                bind(exitCondition, mZenRadioGroupContent.getChildAt(i), i);
-                tag.rb.setChecked(true);
-                return;
-            }
-        }
-        if (mCountdownConditionSupported && ZenModeConfig.isValidCountdownConditionId(
-                exitCondition.id)) {
-            bind(exitCondition, mZenRadioGroupContent.getChildAt(COUNTDOWN_CONDITION_INDEX),
-                    COUNTDOWN_CONDITION_INDEX);
-            getConditionTagAt(COUNTDOWN_CONDITION_INDEX).rb.setChecked(true);
-        }
-    }
-
-    private Condition getSelectedCondition() {
-        final int N = getVisibleConditions();
-        for (int i = 0; i < N; i++) {
-            final ConditionTag tag = getConditionTagAt(i);
-            if (tag != null && tag.rb.isChecked()) {
-                return tag.condition;
-            }
-        }
-        return null;
-    }
-
-    private int getSelectedZen(int defValue) {
+    @VisibleForTesting
+    int getSelectedZen(int defValue) {
         final Object zen = mZenButtons.getSelectedValue();
         return zen != null ? (Integer) zen : defValue;
     }
@@ -575,54 +512,63 @@ public class ZenModePanel extends FrameLayout {
         return getResources().getString(warningRes, template);
     }
 
-    private static Condition parseExistingTimeCondition(Context context, Condition condition) {
-        if (condition == null) return null;
-        final long time = ZenModeConfig.tryParseCountdownConditionId(condition.id);
-        if (time == 0) return null;
-        final long now = System.currentTimeMillis();
-        final long span = time - now;
-        if (span <= 0 || span > MAX_BUCKET_MINUTES * MINUTES_MS) return null;
-        return ZenModeConfig.toTimeCondition(context,
-                time, Math.round(span / (float) MINUTES_MS), ActivityManager.getCurrentUser(),
-                false /*shortVersion*/);
-    }
-
-    private void handleUpdateConditions() {
+    @VisibleForTesting
+    void handleUpdateConditions(Condition c) {
         if (mTransitionHelper.isTransitioning()) {
             return;
         }
-        final int conditionCount = mConditions == null ? 0 : mConditions.length;
-        if (DEBUG) Log.d(mTag, "handleUpdateConditions conditionCount=" + conditionCount);
         // forever
         bind(forever(), mZenRadioGroupContent.getChildAt(FOREVER_CONDITION_INDEX),
                 FOREVER_CONDITION_INDEX);
-        // countdown
-        if (mCountdownConditionSupported && mTimeCondition != null) {
-            bind(mTimeCondition, mZenRadioGroupContent.getChildAt(COUNTDOWN_CONDITION_INDEX),
-                    COUNTDOWN_CONDITION_INDEX);
-        }
-        // countdown until alarm
-        if (mCountdownConditionSupported) {
-            Condition nextAlarmCondition = getTimeUntilNextAlarmCondition();
-            if (nextAlarmCondition != null) {
-                mZenRadioGroup.getChildAt(
-                        COUNTDOWN_ALARM_CONDITION_INDEX).setVisibility(View.VISIBLE);
-                mZenRadioGroupContent.getChildAt(
-                        COUNTDOWN_ALARM_CONDITION_INDEX).setVisibility(View.VISIBLE);
-                bind(nextAlarmCondition,
-                        mZenRadioGroupContent.getChildAt(COUNTDOWN_ALARM_CONDITION_INDEX),
-                        COUNTDOWN_ALARM_CONDITION_INDEX);
+        if (c == null) {
+            bindGenericCountdown();
+            bindNextAlarm(getTimeUntilNextAlarmCondition());
+        } else if (isForever(c)) {
+
+            getConditionTagAt(FOREVER_CONDITION_INDEX).rb.setChecked(true);
+            bindGenericCountdown();
+            bindNextAlarm(getTimeUntilNextAlarmCondition());
+        } else {
+            if (isAlarm(c)) {
+                bindGenericCountdown();
+                bindNextAlarm(c);
+                getConditionTagAt(COUNTDOWN_ALARM_CONDITION_INDEX).rb.setChecked(true);
+            } else if (isCountdown(c)) {
+                bindNextAlarm(getTimeUntilNextAlarmCondition());
+                bind(c, mZenRadioGroupContent.getChildAt(COUNTDOWN_CONDITION_INDEX),
+                        COUNTDOWN_CONDITION_INDEX);
+                getConditionTagAt(COUNTDOWN_CONDITION_INDEX).rb.setChecked(true);
             } else {
-                mZenRadioGroup.getChildAt(COUNTDOWN_ALARM_CONDITION_INDEX).setVisibility(View.GONE);
-                mZenRadioGroupContent.getChildAt(
-                        COUNTDOWN_ALARM_CONDITION_INDEX).setVisibility(View.GONE);
+                Slog.wtf(TAG, "Invalid manual condition: " + c);
             }
         }
-        // ensure something is selected
-        if (mExpanded) {
-            ensureSelection();
-        }
         mZenConditions.setVisibility(mSessionZen != Global.ZEN_MODE_OFF ? View.VISIBLE : View.GONE);
+    }
+
+    private void bindGenericCountdown() {
+        mBucketIndex = DEFAULT_BUCKET_INDEX;
+        Condition countdown = ZenModeConfig.toTimeCondition(mContext,
+                MINUTE_BUCKETS[mBucketIndex], ActivityManager.getCurrentUser());
+        // don't change the hour condition while the user is viewing the panel
+        if (!mAttached || getConditionTagAt(COUNTDOWN_CONDITION_INDEX).condition == null) {
+            bind(countdown, mZenRadioGroupContent.getChildAt(COUNTDOWN_CONDITION_INDEX),
+                    COUNTDOWN_CONDITION_INDEX);
+        }
+    }
+
+    private void bindNextAlarm(Condition c) {
+        View alarmContent = mZenRadioGroupContent.getChildAt(COUNTDOWN_ALARM_CONDITION_INDEX);
+        ConditionTag tag = (ConditionTag) alarmContent.getTag();
+        // Don't change the alarm condition while the user is viewing the panel
+        if (c != null && (!mAttached || tag == null || tag.condition == null)) {
+            bind(c, alarmContent, COUNTDOWN_ALARM_CONDITION_INDEX);
+        }
+
+        tag = (ConditionTag) alarmContent.getTag();
+        boolean showAlarm = tag != null && tag.condition != null;
+        mZenRadioGroup.getChildAt(COUNTDOWN_ALARM_CONDITION_INDEX).setVisibility(
+                showAlarm ? View.VISIBLE : View.INVISIBLE);
+        alarmContent.setVisibility(showAlarm ? View.VISIBLE : View.INVISIBLE);
     }
 
     private Condition forever() {
@@ -637,7 +583,6 @@ public class ZenModePanel extends FrameLayout {
     // Returns a time condition if the next alarm is within the next week.
     private Condition getTimeUntilNextAlarmCondition() {
         GregorianCalendar weekRange = new GregorianCalendar();
-        final long now = weekRange.getTimeInMillis();
         setToMidnight(weekRange);
         weekRange.add(Calendar.DATE, 6);
         final long nextAlarmMs = mController.getNextAlarm();
@@ -647,9 +592,8 @@ public class ZenModePanel extends FrameLayout {
             setToMidnight(nextAlarm);
 
             if (weekRange.compareTo(nextAlarm) >= 0) {
-                return ZenModeConfig.toTimeCondition(mContext, nextAlarmMs,
-                        Math.round((nextAlarmMs - now) / (float) MINUTES_MS),
-                        ActivityManager.getCurrentUser(), true);
+                return ZenModeConfig.toNextAlarmCondition(mContext, nextAlarmMs,
+                        ActivityManager.getCurrentUser());
             }
         }
         return null;
@@ -662,11 +606,13 @@ public class ZenModePanel extends FrameLayout {
         calendar.set(Calendar.MILLISECOND, 0);
     }
 
-    private ConditionTag getConditionTagAt(int index) {
+    @VisibleForTesting
+    ConditionTag getConditionTagAt(int index) {
         return (ConditionTag) mZenRadioGroupContent.getChildAt(index).getTag();
     }
 
-    private int getVisibleConditions() {
+    @VisibleForTesting
+    int getVisibleConditions() {
         int rt = 0;
         final int N = mZenRadioGroupContent.getChildCount();
         for (int i = 0; i < N; i++) {
@@ -682,34 +628,8 @@ public class ZenModePanel extends FrameLayout {
         }
     }
 
-    private void ensureSelection() {
-        // are we left without anything selected?  if so, set a default
-        final int visibleConditions = getVisibleConditions();
-        if (visibleConditions == 0) return;
-        for (int i = 0; i < visibleConditions; i++) {
-            final ConditionTag tag = getConditionTagAt(i);
-            if (tag != null && tag.rb.isChecked()) {
-                if (DEBUG) Log.d(mTag, "Not selecting a default, checked=" + tag.condition);
-                return;
-            }
-        }
-        final ConditionTag foreverTag = getConditionTagAt(FOREVER_CONDITION_INDEX);
-        if (foreverTag == null) return;
-        if (DEBUG) Log.d(mTag, "Selecting a default");
-        final int favoriteIndex = mPrefs.getMinuteIndex();
-        if (mExitCondition != null && mExitCondition.equals(mTimeCondition)) {
-            getConditionTagAt(COUNTDOWN_CONDITION_INDEX).rb.setChecked(true);
-        } else if (favoriteIndex == -1 || !mCountdownConditionSupported ||
-                mAttachedZen != Global.ZEN_MODE_OFF) {
-            foreverTag.rb.setChecked(true);
-        } else {
-            mTimeCondition = ZenModeConfig.toTimeCondition(mContext,
-                    MINUTE_BUCKETS[favoriteIndex], ActivityManager.getCurrentUser());
-            mBucketIndex = favoriteIndex;
-            bind(mTimeCondition, mZenRadioGroupContent.getChildAt(COUNTDOWN_CONDITION_INDEX),
-                    COUNTDOWN_CONDITION_INDEX);
-            getConditionTagAt(COUNTDOWN_CONDITION_INDEX).rb.setChecked(true);
-        }
+    private static boolean isAlarm(Condition c) {
+        return c != null && ZenModeConfig.isValidCountdownToAlarmConditionId(c.id);
     }
 
     private static boolean isCountdown(Condition c) {
@@ -877,10 +797,9 @@ public class ZenModePanel extends FrameLayout {
             newCondition = ZenModeConfig.toTimeCondition(mContext,
                     MINUTE_BUCKETS[mBucketIndex], ActivityManager.getCurrentUser());
         }
-        mTimeCondition = newCondition;
-        bind(mTimeCondition, row, rowId);
+        bind(newCondition, row, rowId);
         tag.rb.setChecked(true);
-        select(mTimeCondition);
+        select(newCondition);
         announceConditionSelection(tag);
     }
 
@@ -902,7 +821,7 @@ public class ZenModePanel extends FrameLayout {
         setExitCondition(condition);
         if (realConditionId == null) {
             mPrefs.setMinuteIndex(-1);
-        } else if (isCountdown(condition) && mBucketIndex != -1) {
+        } else if ((isAlarm(condition) || isCountdown(condition)) && mBucketIndex != -1) {
             mPrefs.setMinuteIndex(mBucketIndex);
         }
         setSessionExitCondition(copy(condition));
@@ -951,7 +870,8 @@ public class ZenModePanel extends FrameLayout {
     }
 
     // used as the view tag on condition rows
-    private static class ConditionTag {
+    @VisibleForTesting
+    static class ConditionTag {
         RadioButton rb;
         View lines;
         TextView line1;

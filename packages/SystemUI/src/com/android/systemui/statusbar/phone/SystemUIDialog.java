@@ -49,6 +49,8 @@ public class SystemUIDialog extends AlertDialog {
         WindowManager.LayoutParams attrs = getWindow().getAttributes();
         attrs.setTitle(getClass().getSimpleName());
         getWindow().setAttributes(attrs);
+
+        registerDismissListener(this);
     }
 
     public void setShowForAllUsers(boolean show) {

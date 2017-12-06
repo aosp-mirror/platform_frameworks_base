@@ -3408,7 +3408,7 @@ public class MediaPlayer extends PlayerBase
     private static void postEventFromNative(Object mediaplayer_ref,
                                             int what, int arg1, int arg2, Object obj)
     {
-        MediaPlayer mp = (MediaPlayer)((WeakReference)mediaplayer_ref).get();
+        final MediaPlayer mp = (MediaPlayer)((WeakReference)mediaplayer_ref).get();
         if (mp == null) {
             return;
         }
@@ -3416,8 +3416,14 @@ public class MediaPlayer extends PlayerBase
         switch (what) {
         case MEDIA_INFO:
             if (arg1 == MEDIA_INFO_STARTED_AS_NEXT) {
-                // this acquires the wakelock if needed, and sets the client side state
-                mp.start();
+                new Thread(new Runnable() {
+                    @Override
+                    public void run() {
+                        // this acquires the wakelock if needed, and sets the client side state
+                        mp.start();
+                    }
+                }).start();
+                Thread.yield();
             }
             break;
 

@@ -20,6 +20,7 @@ import android.annotation.IntDef;
 import android.content.Intent;
 import android.content.res.Configuration;
 import android.content.res.Configuration.NativeConfig;
+import android.content.res.TypedArray;
 import android.os.Parcel;
 import android.os.Parcelable;
 import android.util.Printer;
@@ -440,6 +441,21 @@ public class ActivityInfo extends ComponentInfo
     public static final int FLAG_SUPPORTS_PICTURE_IN_PICTURE = 0x400000;
 
     /**
+     * Bit in {@link #flags} indicating if the activity should be shown when locked.
+     * See {@link android.R.attr#showWhenLocked}
+     * @hide
+     */
+    public static final int FLAG_SHOW_WHEN_LOCKED = 0x800000;
+
+    /**
+     * Bit in {@link #flags} indicating if the screen should turn on when starting the activity.
+     * See {@link android.R.attr#turnScreenOn}
+     * @hide
+     */
+    public static final int FLAG_TURN_SCREEN_ON = 0x1000000;
+
+
+    /**
      * @hide Bit in {@link #flags}: If set, this component will only be seen
      * by the system user.  Only works with broadcast receivers.  Set from the
      * android.R.attr#systemUserOnly attribute.
@@ -460,6 +476,7 @@ public class ActivityInfo extends ComponentInfo
      * thrown. Set from the {@link android.R.attr#allowEmbedded} attribute.
      */
     public static final int FLAG_ALLOW_EMBEDDED = 0x80000000;
+
     /**
      * Options that have been set in the activity declaration in the
      * manifest.
@@ -976,9 +993,17 @@ public class ActivityInfo extends ComponentInfo
      * Returns true if the activity's orientation is fixed.
      * @hide
      */
-    boolean isFixedOrientation() {
+    public boolean isFixedOrientation() {
         return isFixedOrientationLandscape() || isFixedOrientationPortrait()
                 || screenOrientation == SCREEN_ORIENTATION_LOCKED;
+    }
+
+    /**
+     * Returns true if the specified orientation is considered fixed.
+     * @hide
+     */
+    static public boolean isFixedOrientation(int orientation) {
+        return isFixedOrientationLandscape(orientation) || isFixedOrientationPortrait(orientation);
     }
 
     /**
@@ -1071,12 +1096,12 @@ public class ActivityInfo extends ComponentInfo
     }
 
     /** @hide */
-    public void dump(Printer pw, String prefix, int flags) {
+    public void dump(Printer pw, String prefix, int dumpFlags) {
         super.dumpFront(pw, prefix);
         if (permission != null) {
             pw.println(prefix + "permission=" + permission);
         }
-        if ((flags&DUMP_FLAG_DETAILS) != 0) {
+        if ((dumpFlags & DUMP_FLAG_DETAILS) != 0) {
             pw.println(prefix + "taskAffinity=" + taskAffinity
                     + " targetActivity=" + targetActivity
                     + " persistableMode=" + persistableModeToString());
@@ -1095,7 +1120,7 @@ public class ActivityInfo extends ComponentInfo
         if (uiOptions != 0) {
             pw.println(prefix + " uiOptions=0x" + Integer.toHexString(uiOptions));
         }
-        if ((flags&DUMP_FLAG_DETAILS) != 0) {
+        if ((dumpFlags & DUMP_FLAG_DETAILS) != 0) {
             pw.println(prefix + "lockTaskLaunchMode="
                     + lockTaskLaunchModeToString(lockTaskLaunchMode));
         }
@@ -1111,7 +1136,7 @@ public class ActivityInfo extends ComponentInfo
         if (maxAspectRatio != 0) {
             pw.println(prefix + "maxAspectRatio=" + maxAspectRatio);
         }
-        super.dumpBack(pw, prefix, flags);
+        super.dumpBack(pw, prefix, dumpFlags);
     }
 
     public String toString() {
@@ -1158,6 +1183,25 @@ public class ActivityInfo extends ComponentInfo
         dest.writeInt(rotationAnimation);
         dest.writeInt(colorMode);
         dest.writeFloat(maxAspectRatio);
+    }
+
+    /**
+     * Determines whether the {@link Activity} is considered translucent or floating.
+     * @hide
+     */
+    public static boolean isTranslucentOrFloating(TypedArray attributes) {
+        final boolean isTranslucent =
+                attributes.getBoolean(com.android.internal.R.styleable.Window_windowIsTranslucent,
+                        false);
+        final boolean isSwipeToDismiss = !attributes.hasValue(
+                com.android.internal.R.styleable.Window_windowIsTranslucent)
+                && attributes.getBoolean(
+                        com.android.internal.R.styleable.Window_windowSwipeToDismiss, false);
+        final boolean isFloating =
+                attributes.getBoolean(com.android.internal.R.styleable.Window_windowIsFloating,
+                        false);
+
+        return isFloating || isTranslucent || isSwipeToDismiss;
     }
 
     public static final Parcelable.Creator<ActivityInfo> CREATOR

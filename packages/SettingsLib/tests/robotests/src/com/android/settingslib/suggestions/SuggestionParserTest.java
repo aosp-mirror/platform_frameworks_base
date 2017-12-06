@@ -83,7 +83,7 @@ public class SuggestionParserTest {
 
         mSuggestionParser = new SuggestionParser(mContext, mPrefs,
                 Arrays.asList(mMultipleCategory, mExclusiveCategory, mExpiredExclusiveCategory),
-                "0,0");
+                "0");
 
         ResolveInfo info1 = TileUtilsTest.newInfo(true, null);
         info1.activityInfo.packageName = "pkg";
@@ -109,17 +109,12 @@ public class SuggestionParserTest {
     }
 
     @Test
-    public void testDismissSuggestion_withoutSmartSuggestion() {
-        assertThat(mSuggestionParser.dismissSuggestion(mSuggestion, false)).isTrue();
+    public void dismissSuggestion_shouldDismiss() {
+        assertThat(mSuggestionParser.dismissSuggestion(mSuggestion)).isTrue();
     }
 
     @Test
-    public void testDismissSuggestion_withSmartSuggestion() {
-        assertThat(mSuggestionParser.dismissSuggestion(mSuggestion, true)).isFalse();
-    }
-
-    @Test
-    public void testGetSuggestions_withoutSmartSuggestions() {
+    public void testGetSuggestions_withoutSmartSuggestions_shouldDismiss() {
         readAndDismissSuggestion(false);
         mSuggestionParser.readSuggestions(mMultipleCategory, mSuggestionsAfterDismiss, false);
         assertThat(mSuggestionsBeforeDismiss).hasSize(2);
@@ -128,11 +123,10 @@ public class SuggestionParserTest {
     }
 
     @Test
-    public void testGetSuggestions_withSmartSuggestions() {
+    public void testGetSuggestions_withSmartSuggestions_shouldDismiss() {
         readAndDismissSuggestion(true);
         assertThat(mSuggestionsBeforeDismiss).hasSize(2);
-        assertThat(mSuggestionsAfterDismiss).hasSize(2);
-        assertThat(mSuggestionsBeforeDismiss).isEqualTo(mSuggestionsAfterDismiss);
+        assertThat(mSuggestionsAfterDismiss).hasSize(1);
     }
 
     @Test
@@ -191,19 +185,15 @@ public class SuggestionParserTest {
     }
 
     @Test
-    public void isSuggestionDismissed_mismatchRule_shouldDismiss() {
+    public void isSuggestionDismissed_dismissedSuggestion_shouldReturnTrue() {
         final Tile suggestion = new Tile();
         suggestion.metaData = new Bundle();
         suggestion.metaData.putString(SuggestionParser.META_DATA_DISMISS_CONTROL, "1,2,3");
         suggestion.intent = new Intent().setComponent(new ComponentName("pkg", "cls"));
 
         // Dismiss suggestion when smart suggestion is not enabled.
-        mSuggestionParser.dismissSuggestion(suggestion, false /* isSmartSuggestionEnabled */);
-        final String suggestionKey = suggestion.intent.getComponent().flattenToShortString();
-        // And point to last rule in dismiss control
-        mPrefs.edit().putInt(suggestionKey + SuggestionParser.DISMISS_INDEX, 2).apply();
+        mSuggestionParser.dismissSuggestion(suggestion);
 
-        // Turn on smart suggestion, and check if suggestion is enabled.
         assertThat(mSuggestionParser.isDismissed(suggestion, true /* isSmartSuggestionEnabled */))
                 .isTrue();
     }
@@ -215,7 +205,7 @@ public class SuggestionParserTest {
                 mMultipleCategory, mSuggestionsBeforeDismiss, isSmartSuggestionEnabled);
 
         final Tile suggestion = mSuggestionsBeforeDismiss.get(0);
-        if (mSuggestionParser.dismissSuggestion(suggestion, isSmartSuggestionEnabled)) {
+        if (mSuggestionParser.dismissSuggestion(suggestion)) {
             RuntimeEnvironment.getRobolectricPackageManager().removeResolveInfosForIntent(
                     new Intent(Intent.ACTION_MAIN).addCategory(mMultipleCategory.category),
                     suggestion.intent.getComponent().getPackageName());

@@ -17,8 +17,12 @@ package com.android.settingslib.bluetooth;
 
 import static com.google.common.truth.Truth.assertThat;
 
+import static org.mockito.Matchers.any;
+import static org.mockito.Matchers.anyString;
 import static org.mockito.Mockito.doAnswer;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.spy;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import android.bluetooth.BluetoothAdapter;
@@ -42,6 +46,10 @@ import org.robolectric.annotation.Config;
 @Config(manifest = TestConfig.MANIFEST_PATH, sdk = TestConfig.SDK_VERSION, resourceDir =
         "../../res")
 public class CachedBluetoothDeviceTest {
+    private final static String DEVICE_NAME = "TestName";
+    private final static String DEVICE_ALIAS = "TestAlias";
+    private final static String DEVICE_ADDRESS = "AA:BB:CC:DD:EE:FF";
+    private final static String DEVICE_ALIAS_NEW = "TestAliasNew";
     @Mock
     private LocalBluetoothAdapter mAdapter;
     @Mock
@@ -62,6 +70,7 @@ public class CachedBluetoothDeviceTest {
     public void setUp() {
         MockitoAnnotations.initMocks(this);
         mContext = RuntimeEnvironment.application;
+        when(mDevice.getAddress()).thenReturn(DEVICE_ADDRESS);
         when(mAdapter.getBluetoothState()).thenReturn(BluetoothAdapter.STATE_ON);
         when(mHfpProfile.isProfileReady()).thenReturn(true);
         when(mA2dpProfile.isProfileReady()).thenReturn(true);
@@ -151,5 +160,50 @@ public class CachedBluetoothDeviceTest {
         // Disconnect all profiles and test connection state summary
         mCachedDevice.onProfileStateChanged(mPanProfile, BluetoothProfile.STATE_DISCONNECTED);
         assertThat(mCachedDevice.getConnectionSummary()).isNull();
+    }
+
+    @Test
+    public void testDeviceName_testAliasNameAvailable() {
+        when(mDevice.getAliasName()).thenReturn(DEVICE_ALIAS);
+        when(mDevice.getName()).thenReturn(DEVICE_NAME);
+        CachedBluetoothDevice cachedBluetoothDevice =
+                new CachedBluetoothDevice(mContext, mAdapter, mProfileManager, mDevice);
+        // Verify alias is returned on getName
+        assertThat(cachedBluetoothDevice.getName()).isEqualTo(DEVICE_ALIAS);
+        // Verify device is visible
+        assertThat(cachedBluetoothDevice.hasHumanReadableName()).isTrue();
+    }
+
+    @Test
+    public void testDeviceName_testNameNotAvailable() {
+        CachedBluetoothDevice cachedBluetoothDevice =
+                new CachedBluetoothDevice(mContext, mAdapter, mProfileManager, mDevice);
+        // Verify device address is returned on getName
+        assertThat(cachedBluetoothDevice.getName()).isEqualTo(DEVICE_ADDRESS);
+        // Verify device is not visible
+        assertThat(cachedBluetoothDevice.hasHumanReadableName()).isFalse();
+    }
+
+    @Test
+    public void testDeviceName_testRenameDevice() {
+        final String[] alias = {DEVICE_ALIAS};
+        doAnswer(invocation -> alias[0]).when(mDevice).getAliasName();
+        doAnswer(invocation -> {
+            alias[0] = (String) invocation.getArguments()[0];
+            return true;
+        }).when(mDevice).setAlias(anyString());
+        when(mDevice.getName()).thenReturn(DEVICE_NAME);
+        CachedBluetoothDevice cachedBluetoothDevice =
+                new CachedBluetoothDevice(mContext, mAdapter, mProfileManager, mDevice);
+        // Verify alias is returned on getName
+        assertThat(cachedBluetoothDevice.getName()).isEqualTo(DEVICE_ALIAS);
+        // Verify null name does not get set
+        cachedBluetoothDevice.setName(null);
+        verify(mDevice, never()).setAlias(any());
+        // Verify new name is set properly
+        cachedBluetoothDevice.setName(DEVICE_ALIAS_NEW);
+        verify(mDevice).setAlias(DEVICE_ALIAS_NEW);
+        // Verify new alias is returned on getName
+        assertThat(cachedBluetoothDevice.getName()).isEqualTo(DEVICE_ALIAS_NEW);
     }
 }

@@ -20,6 +20,7 @@ import static android.net.NetworkStats.TAG_NONE;
 import static android.net.TrafficStats.KB_IN_BYTES;
 import static android.net.TrafficStats.MB_IN_BYTES;
 import static android.text.format.DateUtils.YEAR_IN_MILLIS;
+
 import static com.android.internal.util.Preconditions.checkNotNull;
 
 import android.annotation.Nullable;
@@ -28,6 +29,7 @@ import android.net.NetworkStats.NonMonotonicObserver;
 import android.net.NetworkStatsHistory;
 import android.net.NetworkTemplate;
 import android.net.TrafficStats;
+import android.os.Binder;
 import android.os.DropBoxManager;
 import android.service.NetworkStatsRecorderProto;
 import android.util.Log;
@@ -38,6 +40,9 @@ import android.util.proto.ProtoOutputStream;
 import com.android.internal.net.VpnInfo;
 import com.android.internal.util.FileRotator;
 import com.android.internal.util.IndentingPrintWriter;
+
+import libcore.io.IoUtils;
+
 import com.google.android.collect.Sets;
 
 import java.io.ByteArrayOutputStream;
@@ -51,8 +56,6 @@ import java.lang.ref.WeakReference;
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Map;
-
-import libcore.io.IoUtils;
 
 /**
  * Logic to record deltas between periodic {@link NetworkStats} snapshots into
@@ -150,7 +153,7 @@ public class NetworkStatsRecorder {
 
     public NetworkStats.Entry getTotalSinceBootLocked(NetworkTemplate template) {
         return mSinceBoot.getSummary(template, Long.MIN_VALUE, Long.MAX_VALUE,
-                NetworkStatsAccess.Level.DEVICE).getTotal(null);
+                NetworkStatsAccess.Level.DEVICE, Binder.getCallingUid()).getTotal(null);
     }
 
     public NetworkStatsCollection getSinceBoot() {

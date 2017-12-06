@@ -40,7 +40,6 @@ import android.os.UserHandle;
 import android.provider.Settings.Global;
 import android.service.notification.StatusBarNotification;
 import android.service.notification.ZenModeConfig;
-import android.util.ArraySet;
 import android.util.Log;
 
 import java.lang.annotation.Retention;
@@ -205,7 +204,12 @@ public class NotificationManager {
     public static final int IMPORTANCE_NONE = 0;
 
     /**
-     * Min notification importance: only shows in the shade, below the fold.
+     * Min notification importance: only shows in the shade, below the fold.  This should
+     * not be used with {@link Service#startForeground(int, Notification) Service.startForeground}
+     * since a foreground service is supposed to be something the user cares about so it does
+     * not make semantic sense to mark its notification as minimum importance.  If you do this
+     * as of Android version {@link android.os.Build.VERSION_CODES#O}, the system will show
+     * a higher-priority notification about your app running in the background.
      */
     public static final int IMPORTANCE_MIN = 1;
 
@@ -309,7 +313,9 @@ public class NotificationManager {
         }
         if (localLOGV) Log.v(TAG, pkg + ": notify(" + id + ", " + notification + ")");
         notification.reduceImageSizes(mContext);
-        final Notification copy = Builder.maybeCloneStrippedForDelivery(notification);
+        ActivityManager am = (ActivityManager) mContext.getSystemService(Context.ACTIVITY_SERVICE);
+        boolean isLowRam = am.isLowRamDevice();
+        final Notification copy = Builder.maybeCloneStrippedForDelivery(notification, isLowRam);
         try {
             service.enqueueNotificationWithTag(pkg, mContext.getOpPackageName(), tag, id,
                     copy, user.getIdentifier());
@@ -415,12 +421,16 @@ public class NotificationManager {
      * Creates a notification channel that notifications can be posted to.
      *
      * This can also be used to restore a deleted channel and to update an existing channel's
-     * name and description.
+     * name, description, and/or importance.
      *
      * <p>The name and description should only be changed if the locale changes
      * or in response to the user renaming this channel. For example, if a user has a channel
      * named 'John Doe' that represents messages from a 'John Doe', and 'John Doe' changes his name
      * to 'John Smith,' the channel can be renamed to match.
+     *
+     * <p>The importance of an existing channel will only be changed if the new importance is lower
+     * than the current value and the user has not altered any settings on this channel.
+     *
      * All other fields are ignored for channels that already exist.
      *
      * @param channel  the channel to create.  Note that the created channel may differ from this
@@ -744,14 +754,14 @@ public class NotificationManager {
     }
 
     /**
-     * Checks the ability to read/modify notification policy for the calling package.
+     * Checks the ability to read/modify notification do not disturb policy for the calling package.
      *
      * <p>
      * Returns true if the calling package can read/modify notification policy.
      *
      * <p>
-     * Request policy access by sending the user to the activity that matches the system intent
-     * action {@link android.provider.Settings#ACTION_NOTIFICATION_POLICY_ACCESS_SETTINGS}.
+     * Apps can request policy access by sending the user to the activity that matches the system
+     * intent action {@link android.provider.Settings#ACTION_NOTIFICATION_POLICY_ACCESS_SETTINGS}.
      *
      * <p>
      * Use {@link #ACTION_NOTIFICATION_POLICY_ACCESS_GRANTED_CHANGED} to listen for
@@ -766,11 +776,56 @@ public class NotificationManager {
         }
     }
 
+    /**
+     * Checks whether the user has approved a given
+     * {@link android.service.notification.NotificationListenerService}.
+     *
+     * <p>
+     * The listener service must belong to the calling app.
+     *
+     * <p>
+     * Apps can request notification listener access by sending the user to the activity that
+     * matches the system intent action
+     * {@link android.provider.Settings#ACTION_NOTIFICATION_LISTENER_SETTINGS}.
+     */
+    public boolean isNotificationListenerAccessGranted(ComponentName listener) {
+        INotificationManager service = getService();
+        try {
+            return service.isNotificationListenerAccessGranted(listener);
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    /**
+     * @hide
+     */
+    public boolean isNotificationAssistantAccessGranted(ComponentName assistant) {
+        INotificationManager service = getService();
+        try {
+            return service.isNotificationAssistantAccessGranted(assistant);
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
     /** @hide */
     public boolean isNotificationPolicyAccessGrantedForPackage(String pkg) {
         INotificationManager service = getService();
         try {
             return service.isNotificationPolicyAccessGrantedForPackage(pkg);
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    /**
+     * @hide
+     */
+    public List<String> getEnabledNotificationListenerPackages() {
+        INotificationManager service = getService();
+        try {
+            return service.getEnabledNotificationListenerPackages();
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
@@ -822,21 +877,34 @@ public class NotificationManager {
     }
 
     /** @hide */
-    public ArraySet<String> getPackagesRequestingNotificationPolicyAccess() {
+    public void setNotificationListenerAccessGranted(ComponentName listener, boolean granted) {
         INotificationManager service = getService();
         try {
-            final String[] pkgs = service.getPackagesRequestingNotificationPolicyAccess();
-            if (pkgs != null && pkgs.length > 0) {
-                final ArraySet<String> rt = new ArraySet<>(pkgs.length);
-                for (int i = 0; i < pkgs.length; i++) {
-                    rt.add(pkgs[i]);
-                }
-                return rt;
-            }
+            service.setNotificationListenerAccessGranted(listener, granted);
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
-        return new ArraySet<>();
+    }
+
+    /** @hide */
+    public void setNotificationListenerAccessGrantedForUser(ComponentName listener, int userId,
+            boolean granted) {
+        INotificationManager service = getService();
+        try {
+            service.setNotificationListenerAccessGrantedForUser(listener, userId, granted);
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    /** @hide */
+    public List<ComponentName> getEnabledNotificationListeners(int userId) {
+        INotificationManager service = getService();
+        try {
+            return service.getEnabledNotificationListeners(userId);
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
     }
 
     private Context mContext;

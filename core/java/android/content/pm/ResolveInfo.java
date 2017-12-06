@@ -282,7 +282,7 @@ public class ResolveInfo implements Parcelable {
     }
 
     /** @hide */
-    public void dump(Printer pw, String prefix, int flags) {
+    public void dump(Printer pw, String prefix, int dumpFlags) {
         if (filter != null) {
             pw.println(prefix + "Filter:");
             filter.dump(pw, prefix + "  ");
@@ -302,13 +302,13 @@ public class ResolveInfo implements Parcelable {
         }
         if (activityInfo != null) {
             pw.println(prefix + "ActivityInfo:");
-            activityInfo.dump(pw, prefix + "  ", flags);
+            activityInfo.dump(pw, prefix + "  ", dumpFlags);
         } else if (serviceInfo != null) {
             pw.println(prefix + "ServiceInfo:");
-            serviceInfo.dump(pw, prefix + "  ", flags);
+            serviceInfo.dump(pw, prefix + "  ", dumpFlags);
         } else if (providerInfo != null) {
             pw.println(prefix + "ProviderInfo:");
-            providerInfo.dump(pw, prefix + "  ", flags);
+            providerInfo.dump(pw, prefix + "  ", dumpFlags);
         }
     }
 

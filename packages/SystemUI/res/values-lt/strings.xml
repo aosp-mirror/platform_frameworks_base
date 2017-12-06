@@ -66,7 +66,7 @@
     <string name="usb_debugging_message" msgid="2220143855912376496">"Šio kompiuterio RSA rakto kontrolinis kodas yra:\n<xliff:g id="FINGERPRINT">%1$s</xliff:g>"</string>
     <string name="usb_debugging_always" msgid="303335496705863070">"Visada leisti iš šio kompiuterio"</string>
     <string name="usb_debugging_secondary_user_title" msgid="6353808721761220421">"USB derinimas neleidžiamas"</string>
-    <string name="usb_debugging_secondary_user_message" msgid="8572228137833020196">"Šiuo metu prie įrenginio prisijungęs naudotojas negali įjungti USB derinimo. Norėdami naudoti šią funkciją, perjunkite į pagrindinį administratoriaus naudotoją."</string>
+    <string name="usb_debugging_secondary_user_message" msgid="6067122453571699801">"Šiuo metu prie įrenginio prisijungęs naudotojas negali įjungti USB derinimo. Kad galėtumėte naudoti šią funkciją, perjunkite į pagrindinį naudotoją."</string>
     <string name="compat_mode_on" msgid="6623839244840638213">"Keisti mast., kad atit. ekr."</string>
     <string name="compat_mode_off" msgid="4434467572461327898">"Ištempti, kad atit. ekr."</string>
     <string name="screenshot_saving_ticker" msgid="7403652894056693515">"Išsaugoma ekrano kopija..."</string>
@@ -357,10 +357,10 @@
     <string name="description_target_search" msgid="3091587249776033139">"Paieška"</string>
     <string name="description_direction_up" msgid="7169032478259485180">"Slyskite aukštyn link <xliff:g id="TARGET_DESCRIPTION">%s</xliff:g>."</string>
     <string name="description_direction_left" msgid="7207478719805562165">"Slyskite į kairę link <xliff:g id="TARGET_DESCRIPTION">%s</xliff:g>."</string>
-    <string name="zen_priority_introduction" msgid="7577965386868311310">"Jūsų netrikdys garsai ir vibravimas, išskyrus nurodytų signalų, priminimų, įvykių ir skambintojų garsus. Vis tiek girdėsite viską, ką pasirinksite leisti, įskaitant muziką, vaizdo įrašus ir žaidimus."</string>
-    <string name="zen_alarms_introduction" msgid="7034415210361973827">"Jūsų netrikdys garsai ir vibravimas, išskyrus signalus. Vis tiek girdėsite viską, ką pasirinksite leisti, įskaitant muziką, vaizdo įrašus ir žaidimus."</string>
+    <string name="zen_priority_introduction" msgid="1149025108714420281">"Jūsų netrikdys garsai ir vibravimas, išskyrus nurodytų signalų, priminimų, įvykių ir skambintojų garsus. Vis tiek girdėsite viską, ką pasirinksite leisti, įskaitant muziką, vaizdo įrašus ir žaidimus."</string>
+    <string name="zen_alarms_introduction" msgid="4934328096749380201">"Jūsų netrikdys garsai ir vibravimas, išskyrus signalus. Vis tiek girdėsite viską, ką pasirinksite leisti, įskaitant muziką, vaizdo įrašus ir žaidimus."</string>
     <string name="zen_priority_customize_button" msgid="7948043278226955063">"Tinkinti"</string>
-    <string name="zen_silence_introduction_voice" msgid="2284540992298200729">"Taip bus užblokuoti VISI garsai ir vibravimas, įskaitant signalų, muzikos, vaizdo įrašų ir žaidimų garsus ir vibravimą. Vis tiek galėsite skambinti telefonu."</string>
+    <string name="zen_silence_introduction_voice" msgid="3948778066295728085">"Taip bus užblokuoti VISI garsai ir vibravimas, įskaitant signalų, muzikos, vaizdo įrašų bei žaidimų garsus ir vibravimą. Vis tiek galėsite skambinti telefonu."</string>
     <string name="zen_silence_introduction" msgid="3137882381093271568">"Taip bus užblokuoti VISI garsai ir vibravimas, įskaitant signalų, muzikos, vaizdo įrašų ir žaidimų garsus ir vibravimą."</string>
     <string name="keyguard_more_overflow_text" msgid="9195222469041601365">"+<xliff:g id="NUMBER_OF_NOTIFICATIONS">%d</xliff:g>"</string>
     <string name="speed_bump_explanation" msgid="1288875699658819755">"Mažiau skubūs pranešimai toliau"</string>
@@ -460,7 +460,7 @@
     <string name="monitoring_description_do_learn_more" msgid="1849514470437907421">"Sužinoti daugiau"</string>
     <string name="monitoring_description_do_body_vpn" msgid="8255218762488901796">"Esate prisijungę prie programos „<xliff:g id="VPN_APP">%1$s</xliff:g>“, kuri gali stebėti tinklo veiklą, įskaitant el. laiškus, programas ir svetaines."</string>
     <string name="monitoring_description_vpn_settings_separator" msgid="1933186756733474388">" "</string>
-    <string name="monitoring_description_vpn_settings" msgid="8869300202410505143">"Atidaryti VPN nustatymus"</string>
+    <string name="monitoring_description_vpn_settings" msgid="6434859242636063861">"Atidaryti VPN nustatymus"</string>
     <string name="monitoring_description_ca_cert_settings_separator" msgid="4987350385906393626">" "</string>
     <string name="monitoring_description_ca_cert_settings" msgid="5489969458872997092">"Atidaryti patikimų prisijungimo duomenų puslapį"</string>
     <string name="monitoring_description_network_logging" msgid="7223505523384076027">"Administratorius įjungė tinklo duomenų įrašymą į žurnalą. Įjungus šią funkciją stebimas srautas jūsų įrenginyje.\n\nJei reikia daugiau informacijos, susisiekite su administratoriumi."</string>
@@ -560,10 +560,10 @@
     <string name="notification_default_channel_desc" msgid="2506053815870808359">"Šioje programoje nėra pranešimų kategorijų"</string>
     <string name="notification_unblockable_desc" msgid="3561016061737896906">"Šios programos pranešimų negalima išjungti"</string>
     <plurals name="notification_num_channels_desc" formatted="false" msgid="5492793452274077663">
-      <item quantity="one">1 iš <xliff:g id="NUMBER_1">%d</xliff:g> šios programos pranešimų kategorijos</item>
-      <item quantity="few">1 iš <xliff:g id="NUMBER_1">%d</xliff:g> šios programos pranešimų kategorijų</item>
-      <item quantity="many">1 iš <xliff:g id="NUMBER_1">%d</xliff:g> šios programos pranešimų kategorijos</item>
-      <item quantity="other">1 iš <xliff:g id="NUMBER_1">%d</xliff:g> šios programos pranešimų kategorijų</item>
+      <item quantity="one">1 iš <xliff:g id="NUMBER_1">%s</xliff:g> šios programos pranešimų kategorijos</item>
+      <item quantity="few">1 iš <xliff:g id="NUMBER_1">%s</xliff:g> šios programos pranešimų kategorijų</item>
+      <item quantity="many">1 iš <xliff:g id="NUMBER_1">%s</xliff:g> šios programos pranešimų kategorijos</item>
+      <item quantity="other">1 iš <xliff:g id="NUMBER_1">%s</xliff:g> šios programos pranešimų kategorijų</item>
     </plurals>
     <string name="notification_channels_list_desc_2" msgid="6214732715833946441">"„<xliff:g id="CHANNEL_NAME_1">%1$s</xliff:g>“, „<xliff:g id="CHANNEL_NAME_2">%2$s</xliff:g>“"</string>
     <plurals name="notification_channels_list_desc_2_and_others" formatted="false" msgid="2747813553355336157">
@@ -597,8 +597,8 @@
       <item quantity="other">%d minučių</item>
     </plurals>
     <string name="battery_panel_title" msgid="7944156115535366613">"Akum. energ. vartoj."</string>
-    <string name="battery_detail_charging_summary" msgid="1279095653533044008">"Akumuliatoriaus tausojimo priemonė nepasiekiama įkraunant"</string>
-    <string name="battery_detail_switch_title" msgid="6285872470260795421">"Akumuliatoriaus tausojimo priemonė"</string>
+    <string name="battery_detail_charging_summary" msgid="4055327085770378335">"Akumuliatoriaus tausojimo priemonė nepasiekiama įkraunant"</string>
+    <string name="battery_detail_switch_title" msgid="8763441006881907058">"Akumuliatoriaus tausojimo priemonė"</string>
     <string name="battery_detail_switch_summary" msgid="9049111149407626804">"Sumažinamas našumas ir foninių duomenų naudojimas"</string>
     <string name="keyboard_key_button_template" msgid="6230056639734377300">"Mygtukas <xliff:g id="NAME">%1$s</xliff:g>"</string>
     <string name="keyboard_key_home" msgid="2243500072071305073">"Pagrindinis"</string>
@@ -738,9 +738,9 @@
     <string name="pip_phone_minimize" msgid="1079119422589131792">"Sumažinti"</string>
     <string name="pip_phone_close" msgid="8416647892889710330">"Uždaryti"</string>
     <string name="pip_phone_dismiss_hint" msgid="6351678169095923899">"Nuvilkite žemyn, kad atsisakytumėte"</string>
-    <string name="pip_menu_title" msgid="3328510504196964712">"Vaizdo vaizde meniu"</string>
+    <string name="pip_menu_title" msgid="4707292089961887657">"Meniu"</string>
     <string name="pip_notification_title" msgid="3204024940158161322">"<xliff:g id="NAME">%s</xliff:g> rodom. vaizdo vaizde"</string>
-    <string name="pip_notification_message" msgid="4171698133469539591">"Jei nenorite, kad <xliff:g id="NAME">%s</xliff:g> naudotų šią funkciją, palietę atidarykite nustatymus ir išjunkite ją."</string>
+    <string name="pip_notification_message" msgid="5619512781514343311">"Jei nenorite, kad „<xliff:g id="NAME">%s</xliff:g>“ naudotų šią funkciją, palietę atidarykite nustatymus ir išjunkite ją."</string>
     <string name="pip_play" msgid="1417176722760265888">"Leisti"</string>
     <string name="pip_pause" msgid="8881063404466476571">"Pristabdyti"</string>
     <string name="pip_skip_to_next" msgid="1948440006726306284">"Praleisti ir eiti į kitą"</string>
@@ -766,6 +766,7 @@
     <string name="tuner_menu" msgid="191640047241552081">"Meniu"</string>
     <string name="tuner_app" msgid="3507057938640108777">"Programa „<xliff:g id="APP">%1$s</xliff:g>“"</string>
     <string name="notification_channel_alerts" msgid="4496839309318519037">"Įspėjimai"</string>
+    <string name="notification_channel_battery" msgid="5786118169182888462">"Akumuliatorius"</string>
     <string name="notification_channel_screenshot" msgid="6314080179230000938">"Ekrano kopijos"</string>
     <string name="notification_channel_general" msgid="4525309436693914482">"Bendrieji pranešimai"</string>
     <string name="notification_channel_storage" msgid="3077205683020695313">"Saugykla"</string>
@@ -786,4 +787,5 @@
     <string name="running_foreground_services_title" msgid="381024150898615683">"Programos, veikiančios fone"</string>
     <string name="running_foreground_services_msg" msgid="6326247670075574355">"Palieskite ir sužinokite išsamios informacijos apie akumuliatoriaus bei duomenų naudojimą"</string>
     <string name="data_usage_disable_mobile" msgid="5116269981510015864">"Išjungti mobiliojo ryšio duomenis?"</string>
+    <string name="touch_filtered_warning" msgid="8671693809204767551">"Kadangi programa užstoja leidimo užklausą, nustatymuose negalima patvirtinti jūsų atsakymo."</string>
 </resources>

@@ -119,6 +119,23 @@ public class SparseLongArray implements Cloneable {
     }
 
     /**
+     * @hide
+     * Remove a range of mappings as a batch.
+     *
+     * @param index Index to begin at
+     * @param size Number of mappings to remove
+     *
+     * <p>For indices outside of the range <code>0...size()-1</code>,
+     * the behavior is undefined.</p>
+     */
+    public void removeAtRange(int index, int size) {
+        size = Math.min(size, mSize - index);
+        System.arraycopy(mKeys, index + size, mKeys, index, mSize - (index + size));
+        System.arraycopy(mValues, index + size, mValues, index, mSize - (index + size));
+        mSize -= size;
+    }
+
+    /**
      * Removes the mapping at the given index.
      */
     public void removeAt(int index) {

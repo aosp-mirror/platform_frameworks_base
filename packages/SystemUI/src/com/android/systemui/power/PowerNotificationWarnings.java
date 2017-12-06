@@ -17,6 +17,7 @@
 package com.android.systemui.power;
 
 import android.app.Notification;
+import android.app.NotificationChannel;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
 import android.content.BroadcastReceiver;
@@ -40,6 +41,7 @@ import android.support.annotation.VisibleForTesting;
 import android.util.Slog;
 
 import com.android.internal.messages.nano.SystemMessageProto.SystemMessage;
+import com.android.internal.notification.SystemNotificationChannels;
 import com.android.settingslib.Utils;
 import com.android.systemui.R;
 import com.android.systemui.SystemUI;
@@ -172,8 +174,9 @@ public class PowerNotificationWarnings implements PowerUI.WarningsUI {
     private void showWarningNotification() {
         final int textRes = R.string.battery_low_percent_format;
         final String percentage = NumberFormat.getPercentInstance().format((double) mBatteryLevel / 100.0);
+
         final Notification.Builder nb =
-                new Notification.Builder(mContext, NotificationChannels.ALERTS)
+                new Notification.Builder(mContext, NotificationChannels.BATTERY)
                         .setSmallIcon(R.drawable.ic_power_low)
                         // Bump the notification when the bucket dropped.
                         .setWhen(mBucketDroppedNegativeTimeMs)
@@ -190,10 +193,8 @@ public class PowerNotificationWarnings implements PowerUI.WarningsUI {
         nb.addAction(0,
                 mContext.getString(R.string.battery_saver_start_action),
                 pendingBroadcast(ACTION_START_SAVER));
-        if (mPlaySound) {
-            attachLowBatterySound(nb);
-            mPlaySound = false;
-        }
+        nb.setOnlyAlertOnce(!mPlaySound);
+        mPlaySound = false;
         SystemUI.overrideNotificationAppName(mContext, nb);
         final Notification n = nb.build();
         mNoMan.cancelAsUser(TAG_BATTERY, SystemMessage.NOTE_BAD_CHARGER, UserHandle.ALL);
@@ -334,41 +335,10 @@ public class PowerNotificationWarnings implements PowerUI.WarningsUI {
     public void showLowBatteryWarning(boolean playSound) {
         Slog.i(TAG,
                 "show low battery warning: level=" + mBatteryLevel
-                + " [" + mBucket + "] playSound=" + playSound);
+                        + " [" + mBucket + "] playSound=" + playSound);
         mPlaySound = playSound;
         mWarning = true;
         updateNotification();
-    }
-
-    private void attachLowBatterySound(Notification.Builder b) {
-        final ContentResolver cr = mContext.getContentResolver();
-
-        final int silenceAfter = Settings.Global.getInt(cr,
-                Settings.Global.LOW_BATTERY_SOUND_TIMEOUT, 0);
-        final long offTime = SystemClock.elapsedRealtime() - mScreenOffTime;
-        if (silenceAfter > 0
-                && mScreenOffTime > 0
-                && offTime > silenceAfter) {
-            Slog.i(TAG, "screen off too long (" + offTime + "ms, limit " + silenceAfter
-                    + "ms): not waking up the user with low battery sound");
-            return;
-        }
-
-        if (DEBUG) {
-            Slog.d(TAG, "playing low battery sound. pick-a-doop!"); // WOMP-WOMP is deprecated
-        }
-
-        if (Settings.Global.getInt(cr, Settings.Global.POWER_SOUNDS_ENABLED, 1) == 1) {
-            final String soundPath = Settings.Global.getString(cr,
-                    Settings.Global.LOW_BATTERY_SOUND);
-            if (soundPath != null) {
-                final Uri soundUri = Uri.parse("file://" + soundPath);
-                if (soundUri != null) {
-                    b.setSound(soundUri, AUDIO_ATTRIBUTES);
-                    if (DEBUG) Slog.d(TAG, "playing sound " + soundUri);
-                }
-            }
-        }
     }
 
     @Override

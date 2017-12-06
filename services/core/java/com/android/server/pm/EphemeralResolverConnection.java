@@ -56,9 +56,9 @@ final class EphemeralResolverConnection implements DeathRecipient {
     private static final String TAG = "PackageManager";
     // This is running in a critical section and the timeout must be sufficiently low
     private static final long BIND_SERVICE_TIMEOUT_MS =
-            ("eng".equals(Build.TYPE)) ? 500 : 300;
+            Build.IS_ENG ? 500 : 300;
     private static final long CALL_SERVICE_TIMEOUT_MS =
-            ("eng".equals(Build.TYPE)) ? 200 : 100;
+            Build.IS_ENG ? 200 : 100;
     private static final boolean DEBUG_EPHEMERAL = Build.IS_DEBUGGABLE;
 
     private final Object mLock = new Object();
@@ -69,8 +69,12 @@ final class EphemeralResolverConnection implements DeathRecipient {
     /** Intent used to bind to the service */
     private final Intent mIntent;
 
+    private static final int STATE_IDLE    = 0; // no bind operation is ongoing
+    private static final int STATE_BINDING = 1; // someone is binding and waiting
+    private static final int STATE_PENDING = 2; // a bind is pending, but the caller is not waiting
+
     @GuardedBy("mLock")
-    private volatile boolean mIsBinding;
+    private int mBindState = STATE_IDLE;
     @GuardedBy("mLock")
     private IInstantAppResolver mRemoteInstance;
 
@@ -137,23 +141,17 @@ final class EphemeralResolverConnection implements DeathRecipient {
 
     private IInstantAppResolver getRemoteInstanceLazy(String token)
             throws ConnectionException, TimeoutException, InterruptedException {
-        synchronized (mLock) {
-            if (mRemoteInstance != null) {
-                return mRemoteInstance;
-            }
-            long binderToken = Binder.clearCallingIdentity();
-            try {
-                bindLocked(token);
-            } finally {
-                Binder.restoreCallingIdentity(binderToken);
-            }
-            return mRemoteInstance;
+        long binderToken = Binder.clearCallingIdentity();
+        try {
+            return bind(token);
+        } finally {
+            Binder.restoreCallingIdentity(binderToken);
         }
     }
 
     private void waitForBindLocked(String token) throws TimeoutException, InterruptedException {
         final long startMillis = SystemClock.uptimeMillis();
-        while (mIsBinding) {
+        while (mBindState != STATE_IDLE) {
             if (mRemoteInstance != null) {
                 break;
             }
@@ -166,40 +164,81 @@ final class EphemeralResolverConnection implements DeathRecipient {
         }
     }
 
-    private void bindLocked(String token)
+    private IInstantAppResolver bind(String token)
             throws ConnectionException, TimeoutException, InterruptedException {
-        if (DEBUG_EPHEMERAL && mIsBinding && mRemoteInstance == null) {
-            Slog.i(TAG, "[" + token + "] Previous bind timed out; waiting for connection");
-        }
-        try {
-            waitForBindLocked(token);
-        } catch (TimeoutException e) {
-            if (DEBUG_EPHEMERAL) {
-                Slog.i(TAG, "[" + token + "] Previous connection never established; rebinding");
+        boolean doUnbind = false;
+        synchronized (mLock) {
+            if (mRemoteInstance != null) {
+                return mRemoteInstance;
             }
-            mContext.unbindService(mServiceConnection);
+
+            if (mBindState == STATE_PENDING) {
+                // there is a pending bind, let's see if we can use it.
+                if (DEBUG_EPHEMERAL) {
+                    Slog.i(TAG, "[" + token + "] Previous bind timed out; waiting for connection");
+                }
+                try {
+                    waitForBindLocked(token);
+                    if (mRemoteInstance != null) {
+                        return mRemoteInstance;
+                    }
+                } catch (TimeoutException e) {
+                    // nope, we might have to try a rebind.
+                    doUnbind = true;
+                }
+            }
+
+            if (mBindState == STATE_BINDING) {
+                // someone was binding when we called bind(), or they raced ahead while we were
+                // waiting in the PENDING case; wait for their result instead. Last chance!
+                if (DEBUG_EPHEMERAL) {
+                    Slog.i(TAG, "[" + token + "] Another thread is binding; waiting for connection");
+                }
+                waitForBindLocked(token);
+                // if the other thread's bindService() returned false, we could still have null.
+                if (mRemoteInstance != null) {
+                    return mRemoteInstance;
+                }
+                throw new ConnectionException(ConnectionException.FAILURE_BIND);
+            }
+            mBindState = STATE_BINDING; // our time to shine! :)
         }
-        if (mRemoteInstance != null) {
-            return;
-        }
-        mIsBinding = true;
-        if (DEBUG_EPHEMERAL) {
-            Slog.v(TAG, "[" + token + "] Binding to instant app resolver");
-        }
+
+        // only one thread can be here at a time (the one that set STATE_BINDING)
         boolean wasBound = false;
+        IInstantAppResolver instance = null;
         try {
+            if (doUnbind) {
+                if (DEBUG_EPHEMERAL) {
+                    Slog.i(TAG, "[" + token + "] Previous connection never established; rebinding");
+                }
+                mContext.unbindService(mServiceConnection);
+            }
+            if (DEBUG_EPHEMERAL) {
+                Slog.v(TAG, "[" + token + "] Binding to instant app resolver");
+            }
             final int flags = Context.BIND_AUTO_CREATE | Context.BIND_FOREGROUND_SERVICE;
             wasBound = mContext
                     .bindServiceAsUser(mIntent, mServiceConnection, flags, UserHandle.SYSTEM);
             if (wasBound) {
-                waitForBindLocked(token);
+                synchronized (mLock) {
+                    waitForBindLocked(token);
+                    instance = mRemoteInstance;
+                    return instance;
+                }
             } else {
                 Slog.w(TAG, "[" + token + "] Failed to bind to: " + mIntent);
                 throw new ConnectionException(ConnectionException.FAILURE_BIND);
             }
         } finally {
-            mIsBinding = wasBound && mRemoteInstance == null;
-            mLock.notifyAll();
+            synchronized (mLock) {
+                if (wasBound && instance == null) {
+                    mBindState = STATE_PENDING;
+                } else {
+                    mBindState = STATE_IDLE;
+                }
+                mLock.notifyAll();
+            }
         }
     }
 
@@ -255,7 +294,9 @@ final class EphemeralResolverConnection implements DeathRecipient {
             }
             synchronized (mLock) {
                 mRemoteInstance = IInstantAppResolver.Stub.asInterface(service);
-                mIsBinding = false;
+                if (mBindState == STATE_PENDING) {
+                    mBindState = STATE_IDLE;
+                }
                 try {
                     service.linkToDeath(EphemeralResolverConnection.this, 0 /*flags*/);
                 } catch (RemoteException e) {

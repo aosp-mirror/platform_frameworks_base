@@ -17,6 +17,7 @@
 package com.android.systemui.keyguard;
 
 import static android.provider.Settings.System.SCREEN_OFF_TIMEOUT;
+import static android.view.Display.INVALID_DISPLAY;
 
 import static com.android.internal.telephony.IccCardConstants.State.ABSENT;
 import static com.android.internal.widget.LockPatternUtils.StrongAuthTracker.SOME_AUTH_REQUIRED_AFTER_USER_REQUEST;
@@ -238,6 +239,9 @@ public class KeyguardViewMediator extends SystemUI {
     // cached value of whether we are showing (need to know this to quickly
     // answer whether the input should be restricted)
     private boolean mShowing;
+
+    // display id of the secondary display on which we have put a keyguard window
+    private int mSecondaryDisplayShowing = INVALID_DISPLAY;
 
     /** Cached value of #isInputRestricted */
     private boolean mInputRestricted;
@@ -560,9 +564,6 @@ public class KeyguardViewMediator extends SystemUI {
             }
 
             tryKeyguardDone();
-            if (strongAuth) {
-                mUpdateMonitor.reportSuccessfulStrongAuthUnlockAttempt();
-            }
         }
 
         @Override
@@ -591,9 +592,6 @@ public class KeyguardViewMediator extends SystemUI {
             mStatusBarKeyguardViewManager.startPreHideAnimation(mHideAnimationFinishedRunnable);
             mHandler.sendEmptyMessageDelayed(KEYGUARD_DONE_PENDING_TIMEOUT,
                     KEYGUARD_DONE_PENDING_TIMEOUT_MS);
-            if (strongAuth) {
-                mUpdateMonitor.reportSuccessfulStrongAuthUnlockAttempt();
-            }
             Trace.endSection();
         }
 
@@ -652,6 +650,13 @@ public class KeyguardViewMediator extends SystemUI {
             }
             return KeyguardSecurityView.PROMPT_REASON_NONE;
         }
+
+        @Override
+        public void onSecondaryDisplayShowingChanged(int displayId) {
+            synchronized (KeyguardViewMediator.this) {
+                setShowingLocked(mShowing, displayId, false);
+            }
+        }
     };
 
     public void userActivity() {
@@ -676,7 +681,7 @@ public class KeyguardViewMediator extends SystemUI {
         filter.addAction(Intent.ACTION_SHUTDOWN);
         mContext.registerReceiver(mBroadcastReceiver, filter);
 
-        mKeyguardDisplayManager = new KeyguardDisplayManager(mContext);
+        mKeyguardDisplayManager = new KeyguardDisplayManager(mContext, mViewMediatorCallback);
 
         mAlarmManager = (AlarmManager) mContext.getSystemService(Context.ALARM_SERVICE);
 
@@ -691,7 +696,8 @@ public class KeyguardViewMediator extends SystemUI {
                 com.android.keyguard.R.bool.config_enableKeyguardService)) {
             setShowingLocked(!shouldWaitForProvisioning()
                     && !mLockPatternUtils.isLockScreenDisabled(
-                            KeyguardUpdateMonitor.getCurrentUser()), true /* forceCallbacks */);
+                            KeyguardUpdateMonitor.getCurrentUser()),
+                    mSecondaryDisplayShowing, true /* forceCallbacks */);
         }
 
         mStatusBarKeyguardViewManager =
@@ -1234,6 +1240,12 @@ public class KeyguardViewMediator extends SystemUI {
      * Enable the keyguard if the settings are appropriate.
      */
     private void doKeyguardLocked(Bundle options) {
+        if (KeyguardUpdateMonitor.CORE_APPS_ONLY) {
+            // Don't show keyguard during half-booted cryptkeeper stage.
+            if (DEBUG) Log.d(TAG, "doKeyguard: not showing because booting to cryptkeeper");
+            return;
+        }
+
         // if another app is disabling us, don't show
         if (!mExternallyEnabled) {
             if (DEBUG) Log.d(TAG, "doKeyguard: not showing because externally disabled");
@@ -1288,7 +1300,6 @@ public class KeyguardViewMediator extends SystemUI {
                 // Without this, settings is not enabled until the lock screen first appears
                 setShowingLocked(false);
                 hideLocked();
-                mUpdateMonitor.reportSuccessfulStrongAuthUnlockAttempt();
                 return;
             }
         }
@@ -1695,10 +1706,10 @@ public class KeyguardViewMediator extends SystemUI {
         playSound(mTrustedSoundId);
     }
 
-    private void updateActivityLockScreenState(boolean showing) {
+    private void updateActivityLockScreenState(boolean showing, int secondaryDisplayShowing) {
         mUiOffloadThread.submit(() -> {
             try {
-                ActivityManager.getService().setLockScreenShown(showing);
+                ActivityManager.getService().setLockScreenShown(showing, secondaryDisplayShowing);
             } catch (RemoteException e) {
             }
         });
@@ -2061,30 +2072,39 @@ public class KeyguardViewMediator extends SystemUI {
     }
 
     private void setShowingLocked(boolean showing) {
-        setShowingLocked(showing, false /* forceCallbacks */);
+        setShowingLocked(showing, mSecondaryDisplayShowing, false /* forceCallbacks */);
     }
 
-    private void setShowingLocked(boolean showing, boolean forceCallbacks) {
-        if (showing != mShowing || forceCallbacks) {
+    private void setShowingLocked(
+            boolean showing, int secondaryDisplayShowing, boolean forceCallbacks) {
+        final boolean notifyDefaultDisplayCallbacks = showing != mShowing || forceCallbacks;
+        if (notifyDefaultDisplayCallbacks || secondaryDisplayShowing != mSecondaryDisplayShowing) {
             mShowing = showing;
-            int size = mKeyguardStateCallbacks.size();
-            for (int i = size - 1; i >= 0; i--) {
-                IKeyguardStateCallback callback = mKeyguardStateCallbacks.get(i);
-                try {
-                    callback.onShowingStateChanged(showing);
-                } catch (RemoteException e) {
-                    Slog.w(TAG, "Failed to call onShowingStateChanged", e);
-                    if (e instanceof DeadObjectException) {
-                        mKeyguardStateCallbacks.remove(callback);
-                    }
+            mSecondaryDisplayShowing = secondaryDisplayShowing;
+            if (notifyDefaultDisplayCallbacks) {
+                notifyDefaultDisplayCallbacks(showing);
+            }
+            updateActivityLockScreenState(showing, secondaryDisplayShowing);
+        }
+    }
+
+    private void notifyDefaultDisplayCallbacks(boolean showing) {
+        int size = mKeyguardStateCallbacks.size();
+        for (int i = size - 1; i >= 0; i--) {
+            IKeyguardStateCallback callback = mKeyguardStateCallbacks.get(i);
+            try {
+                callback.onShowingStateChanged(showing);
+            } catch (RemoteException e) {
+                Slog.w(TAG, "Failed to call onShowingStateChanged", e);
+                if (e instanceof DeadObjectException) {
+                    mKeyguardStateCallbacks.remove(callback);
                 }
             }
-            updateInputRestrictedLocked();
-            mUiOffloadThread.submit(() -> {
-                mTrustManager.reportKeyguardShowingChanged();
-            });
-            updateActivityLockScreenState(showing);
         }
+        updateInputRestrictedLocked();
+        mUiOffloadThread.submit(() -> {
+            mTrustManager.reportKeyguardShowingChanged();
+        });
     }
 
     private void notifyTrustedChangedLocked(boolean trusted) {

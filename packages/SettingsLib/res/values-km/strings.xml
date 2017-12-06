@@ -40,12 +40,16 @@
     <string name="connected_via_passpoint" msgid="2826205693803088747">"បានភ្ជាប់តាមរយៈ %1$s"</string>
     <string name="available_via_passpoint" msgid="1617440946846329613">"មានតាមរយៈ %1$s"</string>
     <string name="wifi_connected_no_internet" msgid="3149853966840874992">"បានភ្ជាប់ ប៉ុន្តែគ្មានអ៊ីនធឺណិតទេ"</string>
+    <string name="wifi_ap_unable_to_handle_new_sta" msgid="5348824313514404541">"ចំណុចចូលប្រើពេញជាបណ្តោះអាសន្ន"</string>
+    <string name="connected_via_carrier" msgid="7583780074526041912">"បានភ្ជាប់តាមរយៈ %1$s"</string>
+    <string name="available_via_carrier" msgid="1469036129740799053">"មានតាមរយៈ %1$s"</string>
     <string name="speed_label_very_slow" msgid="1867055264243608530">"យឺតណាស់"</string>
     <string name="speed_label_slow" msgid="813109590815810235">"យឺត"</string>
     <string name="speed_label_okay" msgid="2331665440671174858">"យល់ព្រម"</string>
     <string name="speed_label_medium" msgid="3175763313268941953">"មធ្យម"</string>
     <string name="speed_label_fast" msgid="7715732164050975057">"លឿន"</string>
     <string name="speed_label_very_fast" msgid="2265363430784523409">"លឿន​ណាស់"</string>
+    <string name="preference_summary_default_combination" msgid="8532964268242666060">"<xliff:g id="STATE">%1$s</xliff:g> / <xliff:g id="DESCRIPTION">%2$s</xliff:g>"</string>
     <string name="bluetooth_disconnected" msgid="6557104142667339895">"បាន​ផ្ដាច់"</string>
     <string name="bluetooth_disconnecting" msgid="8913264760027764974">"កំពុង​ផ្ដាច់…"</string>
     <string name="bluetooth_connecting" msgid="8555009514614320497">"កំពុង​ត​ភ្ជាប់​…"</string>
@@ -101,6 +105,8 @@
     <string name="accessibility_wifi_two_bars" msgid="3569851234710034416">"Wifi ពីរកាំ"</string>
     <string name="accessibility_wifi_three_bars" msgid="8134185644861380311">"Wifi បីកាំ"</string>
     <string name="accessibility_wifi_signal_full" msgid="7061045677694702">"សេវា Wifi ពេញ"</string>
+    <string name="accessibility_wifi_security_type_none" msgid="1223747559986205423">"បើក​បណ្ដាញ"</string>
+    <string name="accessibility_wifi_security_type_secured" msgid="862921720418885331">"បណ្តាញ​ដែល​មានសុវត្ថិភាព"</string>
     <string name="process_kernel_label" msgid="3916858646836739323">"ប្រព័ន្ធ​ប្រតិបត្តិការ Android"</string>
     <string name="data_usage_uninstalled_apps" msgid="614263770923231598">"កម្មវិធី​ដែល​បាន​លុប"</string>
     <string name="data_usage_uninstalled_apps_users" msgid="7986294489899813194">"បាន​លុប​កម្មវិធី និង​អ្នកប្រើ"</string>
@@ -187,6 +193,7 @@
     <string name="wifi_allow_scan_with_traffic" msgid="3601853081178265786">"តែងតែ​អនុញ្ញាត​​​ការវិភាគ​រ៉ូម​វ៉ាយហ្វាយ"</string>
     <string name="mobile_data_always_on" msgid="8774857027458200434">"ទិន្នន័យទូរសព្ទចល័តដំណើរការជានិច្ច"</string>
     <string name="tethering_hardware_offload" msgid="7470077827090325814">"ការ​បង្កើនល្បឿន​ផ្នែករឹងសម្រាប់​ការភ្ជាប់"</string>
+    <string name="bluetooth_show_devices_without_names" msgid="4708446092962060176">"បង្ហាញ​ឧបករណ៍​ប្ល៊ូធូស​គ្មានឈ្មោះ"</string>
     <string name="bluetooth_disable_absolute_volume" msgid="2660673801947898809">"បិទកម្រិតសំឡេងលឺខ្លាំង"</string>
     <string name="bluetooth_enable_inband_ringing" msgid="3291686366721786740">"បើក​ការ​រោទ៍​ក្នុងបណ្តាញ"</string>
     <string name="bluetooth_select_avrcp_version_string" msgid="3750059931120293633">"កំណែប្ល៊ូធូស AVRCP"</string>
@@ -202,6 +209,12 @@
     <string name="bluetooth_select_a2dp_codec_ldac_playback_quality" msgid="3619694372407843405">"កូឌិកប្រភេទ LDAC នៃសំឡេង​ប៊្លូធូស៖ គុណភាព​ចាក់​សំឡេង"</string>
     <string name="bluetooth_select_a2dp_codec_ldac_playback_quality_dialog_title" msgid="3181967377574368400">"ជ្រើសរើស​កូឌិក​ប្រភេទ​ LDAC នៃសំឡេង​ប៊្លូធូស៖\nគុណភាព​ចាក់​សំឡេង"</string>
     <string name="bluetooth_select_a2dp_codec_streaming_label" msgid="5347862512596240506">"កំពុង​ចាក់៖ <xliff:g id="STREAMING_PARAMETER">%1$s</xliff:g>"</string>
+    <string name="select_private_dns_configuration_title" msgid="3700456559305263922">"DNS ឯកជន"</string>
+    <string name="select_private_dns_configuration_dialog_title" msgid="9221994415765826811">"ជ្រើសរើសមុខងារ DNS ឯកជន"</string>
+    <string name="private_dns_mode_off" msgid="8236575187318721684">"បិទ"</string>
+    <string name="private_dns_mode_opportunistic" msgid="7608409735589131766">"Opportunistic"</string>
+    <string name="private_dns_mode_provider" msgid="8354935160639360804">"ឈ្មោះម៉ាស៊ីនក្រុមហ៊ុនផ្ដល់សេវា DNS ឯកជន"</string>
+    <string name="private_dns_mode_provider_hostname_hint" msgid="2487492386970928143">"បញ្ចូលឈ្មោះម៉ាស៊ីនរបស់ក្រុមហ៊ុនផ្ដល់សេវា DNS"</string>
     <string name="wifi_display_certification_summary" msgid="1155182309166746973">"បង្ហាញ​ជម្រើស​សម្រាប់​វិញ្ញាបនបត្រ​បង្ហាញ​ឥត​ខ្សែ"</string>
     <string name="wifi_verbose_logging_summary" msgid="6615071616111731958">"បង្កើនកម្រិតកំណត់ហេតុវ៉ាយហ្វាយបង្ហាញក្នុង SSID RSSI ក្នុងកម្មវិធីជ្រើស​វ៉ាយហ្វាយ"</string>
     <string name="wifi_aggressive_handover_summary" msgid="7266329646559808827">"នៅពេលដែលបើក នោះ Wi‑Fi នឹងផ្តល់ការតភ្ជាប់ទិន្នន័យយ៉ាងគំហុកទៅបណ្តាញទូរសព្ទចល័ត នៅពេលរលកសញ្ញា Wi‑Fi ចុះខ្សោយ។"</string>
@@ -226,6 +239,7 @@
     <string name="dev_settings_warning_message" msgid="2298337781139097964">"ការ​កំណត់​ទាំង​នេះ​សម្រាប់​តែ​ការ​ប្រើ​ក្នុង​ការ​អភិវឌ្ឍ​ប៉ុណ្ណោះ។ ពួក​វា​អាច​ធ្វើ​ឲ្យ​ឧបករណ៍ និង​កម្មវិធី​របស់​អ្នក​ខូច ឬ​ដំណើរ​មិន​ត្រឹមត្រូវ។"</string>
     <string name="verify_apps_over_usb_title" msgid="4177086489869041953">"ផ្ទៀងផ្ទាត់​កម្មវិធី​តាម​យូអេសប៊ី"</string>
     <string name="verify_apps_over_usb_summary" msgid="9164096969924529200">"ពិនិត្យ​កម្មវិធី​បាន​ដំឡើង​តាម​រយៈ ADB/ADT សម្រាប់​ឥរិយាបថ​ដែល​គ្រោះ​ថ្នាក់។"</string>
+    <string name="bluetooth_show_devices_without_names_summary" msgid="2351196058115755520">"​ឧបករណ៍​ប្ល៊ូធូសគ្មានឈ្មោះ​ (អាសយដ្ឋាន MAC តែប៉ុណ្ណោះ) នឹង​បង្ហាញ"</string>
     <string name="bluetooth_disable_absolute_volume_summary" msgid="6031284410786545957">"បិទលក្ខណៈពិសេសកម្រិតសំឡេងលឺខ្លាំងពេលភ្ជាប់ប៊្លូធូសក្នុងករណីមានបញ្ហាជាមួយឧបករណ៍បញ្ជាពីចម្ងាយ ដូចជាកម្រិតសំឡេងលឺខ្លាំងដែលមិនអាចទទួលយកបាន ឬខ្វះការគ្រប់គ្រង។"</string>
     <string name="bluetooth_enable_inband_ringing_summary" msgid="2787866074741784975">"អនុញ្ញាត​ឲ្យ​សំឡេង​រោទ៍​នៅ​លើ​ទូរសព្ទ​បញ្ចេញសំឡេង​តាម​រយៈ​កាស​ប្ល៊ូធូស"</string>
     <string name="enable_terminal_title" msgid="95572094356054120">"ស្ថានីយ​មូលដ្ឋាន"</string>
@@ -345,12 +359,11 @@
     <string name="power_discharging_duration_short" msgid="4192244429001842403">"<xliff:g id="LEVEL">^1</xliff:g> - នៅសល់ <xliff:g id="TIME">^2</xliff:g>"</string>
     <string name="power_charging" msgid="1779532561355864267">"<xliff:g id="LEVEL">%1$s</xliff:g> - <xliff:g id="STATE">%2$s</xliff:g>"</string>
     <string name="power_charging_duration" msgid="4676999980973411875">"<xliff:g id="LEVEL">^1</xliff:g> - <xliff:g id="TIME">^2</xliff:g> រហូតដល់សាកពេញ"</string>
-    <string name="power_charging_duration_short" msgid="1098603958472207920">"<xliff:g id="LEVEL">^1</xliff:g> - <xliff:g id="TIME">^2</xliff:g>"</string>
     <string name="battery_info_status_unknown" msgid="196130600938058547">"មិន​ស្គាល់"</string>
     <string name="battery_info_status_charging" msgid="1705179948350365604">"កំពុងបញ្ចូល​ថ្ម"</string>
     <string name="battery_info_status_charging_lower" msgid="8689770213898117994">"កំពុង​សាក​ថ្ម"</string>
     <string name="battery_info_status_discharging" msgid="310932812698268588">"មិនកំពុង​បញ្ចូល​ថ្ម"</string>
-    <string name="battery_info_status_not_charging" msgid="2820070506621483576">"មិន​បញ្ចូលថ្ម"</string>
+    <string name="battery_info_status_not_charging" msgid="8523453668342598579">"ដោត​សាកថ្ម​រួចហើយ ប៉ុន្តែ​​សាកថ្ម​មិន​ចូលទេឥឡូវនេះ"</string>
     <string name="battery_info_status_full" msgid="2824614753861462808">"ពេញ"</string>
     <string name="disabled_by_admin_summary_text" msgid="6750513964908334617">"គ្រប់គ្រងដោយអ្នកគ្រប់គ្រង"</string>
     <string name="enabled_by_admin" msgid="5302986023578399263">"បើកដោយ​អ្នកគ្រប់គ្រង"</string>
@@ -375,7 +388,6 @@
     <string name="screen_zoom_summary_custom" msgid="5611979864124160447">"ផ្ទាល់ខ្លួន (<xliff:g id="DENSITYDPI">%d</xliff:g>)"</string>
     <string name="help_feedback_label" msgid="6815040660801785649">"ជំនួយ និងមតិស្ថាបនា"</string>
     <string name="content_description_menu_button" msgid="8182594799812351266">"ម៉ឺនុយ"</string>
-    <string name="time_zone_gmt" msgid="2587097992671450782">"GMT"</string>
     <string name="retail_demo_reset_message" msgid="118771671364131297">"បញ្ចូល​ពាក្យ​សម្ងាត់ ដើម្បី​កំណត់ឧបករណ៍​​ឡើង​វិញ​ដូចពេលចេញ​ពី​រោងចក្រ នៅក្នុង​មុខងារ​សាកល្បង"</string>
     <string name="retail_demo_reset_next" msgid="8356731459226304963">"បន្ទាប់"</string>
     <string name="retail_demo_reset_title" msgid="696589204029930100">"តម្រូវ​ឲ្យ​មានពាក្យ​សម្ងាត់"</string>

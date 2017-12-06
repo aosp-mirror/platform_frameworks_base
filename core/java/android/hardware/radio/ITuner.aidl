@@ -16,11 +16,15 @@
 
 package android.hardware.radio;
 
+import android.graphics.Bitmap;
+import android.hardware.radio.ProgramSelector;
 import android.hardware.radio.RadioManager;
 
 /** {@hide} */
 interface ITuner {
     void close();
+
+    boolean isClosed();
 
     /**
      * @throws IllegalArgumentException if config is not valid or null
@@ -50,28 +54,33 @@ interface ITuner {
      * @throws IllegalArgumentException if invalid arguments are passed
      * @throws IllegalStateException if called out of sequence
      */
-    void tune(int channel, int subChannel);
+    void tune(in ProgramSelector selector);
 
     /**
      * @throws IllegalStateException if called out of sequence
      */
     void cancel();
 
+    void cancelAnnouncement();
+
     RadioManager.ProgramInfo getProgramInformation();
 
+    Bitmap getImage(int id);
+
     /**
-     * @returns {@code true} if the scan was properly scheduled,
+     * @return {@code true} if the scan was properly scheduled,
      *          {@code false} if the scan feature is unavailable
      */
     boolean startBackgroundScan();
 
     /**
-     * @returns the list, or null if scan is in progress
+     * @param vendorFilter Vendor-specific filter, must be Map<String, String>
+     * @return the list, or null if scan is in progress
      * @throws IllegalArgumentException if invalid arguments are passed
      * @throws IllegalStateException if the scan has not been started, client may
      *         call startBackgroundScan to fix this.
      */
-    List<RadioManager.ProgramInfo> getProgramList(String filter);
+    List<RadioManager.ProgramInfo> getProgramList(in Map vendorFilter);
 
     /**
      * @throws IllegalStateException if the switch is not supported at current

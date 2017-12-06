@@ -35,7 +35,6 @@ import android.hardware.SensorEvent;
 import android.hardware.SensorEventListener;
 import android.hardware.TriggerEvent;
 import android.hardware.TriggerEventListener;
-import android.hardware.display.DisplayManager;
 import android.location.LocationRequest;
 import android.location.Location;
 import android.location.LocationListener;
@@ -76,7 +75,6 @@ import android.util.SparseArray;
 import android.util.SparseBooleanArray;
 import android.util.TimeUtils;
 import android.util.Xml;
-import android.view.Display;
 
 import com.android.internal.app.IBatteryStats;
 import com.android.internal.os.AtomicFile;
@@ -122,14 +120,12 @@ public class DeviceIdleController extends SystemService
     private ConnectivityService mConnectivityService;
     private AlarmManagerService.LocalService mLocalAlarmManager;
     private INetworkPolicyManager mNetworkPolicyManager;
-    private DisplayManager mDisplayManager;
     private SensorManager mSensorManager;
     private Sensor mMotionSensor;
     private LocationManager mLocationManager;
     private LocationRequest mLocationRequest;
     private Intent mIdleIntent;
     private Intent mLightIdleIntent;
-    private Display mCurDisplay;
     private AnyMotionDetector mAnyMotionDetector;
     private boolean mLightEnabled;
     private boolean mDeepEnabled;
@@ -404,19 +400,11 @@ public class DeviceIdleController extends SystemService
         }
     };
 
-    private final DisplayManager.DisplayListener mDisplayListener
-            = new DisplayManager.DisplayListener() {
-        @Override public void onDisplayAdded(int displayId) {
-        }
-
-        @Override public void onDisplayRemoved(int displayId) {
-        }
-
-        @Override public void onDisplayChanged(int displayId) {
-            if (displayId == Display.DEFAULT_DISPLAY) {
-                synchronized (DeviceIdleController.this) {
-                    updateDisplayLocked();
-                }
+    private final BroadcastReceiver mInteractivityReceiver = new BroadcastReceiver() {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            synchronized (DeviceIdleController.this) {
+                updateInteractivityLocked();
             }
         }
     };
@@ -1411,8 +1399,6 @@ public class DeviceIdleController extends SystemService
                 mLocalAlarmManager = getLocalService(AlarmManagerService.LocalService.class);
                 mNetworkPolicyManager = INetworkPolicyManager.Stub.asInterface(
                         ServiceManager.getService(Context.NETWORK_POLICY_SERVICE));
-                mDisplayManager = (DisplayManager) getContext().getSystemService(
-                        Context.DISPLAY_SERVICE);
                 mSensorManager = (SensorManager) getContext().getSystemService(Context.SENSOR_SERVICE);
                 int sigMotionSensorId = getContext().getResources().getInteger(
                         com.android.internal.R.integer.config_autoPowerModeAnyMotionSensor);
@@ -1467,11 +1453,16 @@ public class DeviceIdleController extends SystemService
                 filter.addAction(ConnectivityManager.CONNECTIVITY_ACTION);
                 getContext().registerReceiver(mReceiver, filter);
 
+                filter = new IntentFilter();
+                filter.addAction(Intent.ACTION_SCREEN_OFF);
+                filter.addAction(Intent.ACTION_SCREEN_ON);
+                getContext().registerReceiver(mInteractivityReceiver, filter);
+
                 mLocalActivityManager.setDeviceIdleWhitelist(mPowerSaveWhitelistAllAppIdArray);
                 mLocalPowerManager.setDeviceIdleWhitelist(mPowerSaveWhitelistAllAppIdArray);
                 mLocalAlarmManager.setDeviceIdleUserWhitelist(mPowerSaveWhitelistUserAppIdArray);
-                mDisplayManager.registerDisplayListener(mDisplayListener, null);
-                updateDisplayLocked();
+
+                updateInteractivityLocked();
             }
             updateConnectivityState(null);
         }
@@ -1837,13 +1828,12 @@ public class DeviceIdleController extends SystemService
         }
     }
 
-    void updateDisplayLocked() {
-        mCurDisplay = mDisplayManager.getDisplay(Display.DEFAULT_DISPLAY);
-        // We consider any situation where the display is showing something to be it on,
-        // because if there is anything shown we are going to be updating it at some
-        // frequency so can't be allowed to go into deep sleeps.
-        boolean screenOn = mCurDisplay.getState() == Display.STATE_ON;
-        if (DEBUG) Slog.d(TAG, "updateDisplayLocked: screenOn=" + screenOn);
+    void updateInteractivityLocked() {
+        // The interactivity state from the power manager tells us whether the display is
+        // in a state that we need to keep things running so they will update at a normal
+        // frequency.
+        boolean screenOn = mPowerManager.isInteractive();
+        if (DEBUG) Slog.d(TAG, "updateInteractivityLocked: screenOn=" + screenOn);
         if (!screenOn && mScreenOn) {
             mScreenOn = false;
             if (!mForceIdle) {
@@ -3095,7 +3085,6 @@ public class DeviceIdleController extends SystemService
             pw.print("  mDeepEnabled="); pw.println(mDeepEnabled);
             pw.print("  mForceIdle="); pw.println(mForceIdle);
             pw.print("  mMotionSensor="); pw.println(mMotionSensor);
-            pw.print("  mCurDisplay="); pw.println(mCurDisplay);
             pw.print("  mScreenOn="); pw.println(mScreenOn);
             pw.print("  mNetworkConnected="); pw.println(mNetworkConnected);
             pw.print("  mCharging="); pw.println(mCharging);

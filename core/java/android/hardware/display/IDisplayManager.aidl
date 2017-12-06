@@ -16,6 +16,7 @@
 
 package android.hardware.display;
 
+import android.graphics.Point;
 import android.hardware.display.IDisplayManagerCallback;
 import android.hardware.display.IVirtualDisplayCallback;
 import android.hardware.display.WifiDisplay;
@@ -77,4 +78,7 @@ interface IDisplayManager {
 
     // No permissions required but must be same Uid as the creator.
     void releaseVirtualDisplay(in IVirtualDisplayCallback token);
+
+    // Get a stable metric for the device's display size. No permissions required.
+    Point getStableDisplaySize();
 }

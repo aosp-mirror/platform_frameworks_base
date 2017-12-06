@@ -18,12 +18,15 @@ package android.database;
 
 import static android.database.DatabaseUtils.InsertHelper.TABLE_INFO_PRAGMA_COLUMNNAME_INDEX;
 import static android.database.DatabaseUtils.InsertHelper.TABLE_INFO_PRAGMA_DEFAULT_INDEX;
+
 import android.content.ContentValues;
 import android.content.Context;
 import android.database.sqlite.SQLiteDatabase;
+import android.database.sqlite.SQLiteDebug;
 import android.database.sqlite.SQLiteException;
-import android.os.Handler;
 import android.os.Parcel;
+import android.support.test.InstrumentationRegistry;
+import android.support.test.uiautomator.UiDevice;
 import android.test.AndroidTestCase;
 import android.test.PerformanceTestCase;
 import android.test.suitebuilder.annotation.LargeTest;
@@ -40,6 +43,9 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Locale;
 
+/**
+ * Usage:  bit FrameworksCoreTests:android.database.DatabaseGeneralTest
+ */
 public class DatabaseGeneralTest extends AndroidTestCase implements PerformanceTestCase {
     private static final String TAG = "DatabaseGeneralTest";
 
@@ -68,7 +74,7 @@ public class DatabaseGeneralTest extends AndroidTestCase implements PerformanceT
     @Override
     protected void tearDown() throws Exception {
         mDatabase.close();
-        mDatabaseFile.delete();
+        SQLiteDatabase.deleteDatabase(mDatabaseFile);
         super.tearDown();
     }
 
@@ -1044,6 +1050,52 @@ public class DatabaseGeneralTest extends AndroidTestCase implements PerformanceT
         }
     }
 
+    @SmallTest
+    public void testOpenDatabaseLookasideConfig() {
+        // First check that lookaside is active
+        verifyLookasideStats(false);
+        // Reopen test db with lookaside disabled
+        mDatabase.close();
+        SQLiteDatabase.OpenParams params = new SQLiteDatabase.OpenParams.Builder()
+                .setLookasideConfig(0, 0).build();
+        mDatabase = SQLiteDatabase.openDatabase(mDatabaseFile, params);
+        verifyLookasideStats(true);
+    }
+
+    @SmallTest
+    public void testOpenParamsSetLookasideConfigValidation() {
+        try {
+            SQLiteDatabase.OpenParams params = new SQLiteDatabase.OpenParams.Builder()
+                    .setLookasideConfig(-1, 0).build();
+            fail("Negative slot size should be rejected");
+        } catch (IllegalArgumentException expected) {
+        }
+        try {
+            SQLiteDatabase.OpenParams params = new SQLiteDatabase.OpenParams.Builder()
+                    .setLookasideConfig(0, -10).build();
+            fail("Negative slot count should be rejected");
+        } catch (IllegalArgumentException expected) {
+        }
+    }
+
+    void verifyLookasideStats(boolean expectDisabled) {
+        boolean dbStatFound = false;
+        SQLiteDebug.PagerStats info = SQLiteDebug.getDatabaseInfo();
+        for (SQLiteDebug.DbStats dbStat : info.dbStats) {
+            if (dbStat.dbName.endsWith(mDatabaseFile.getName())) {
+                dbStatFound = true;
+                Log.i(TAG, "Lookaside for " + dbStat.dbName + " " + dbStat.lookaside);
+                if (expectDisabled) {
+                    assertTrue("lookaside slots count should be zero", dbStat.lookaside == 0);
+                } else {
+                    assertTrue("lookaside slots count should be greater than zero",
+                            dbStat.lookaside > 0);
+                }
+            }
+        }
+        assertTrue("No dbstat found for " + mDatabaseFile.getName(), dbStatFound);
+    }
+
     @LargeTest
     public void testDefaultDatabaseErrorHandler() {
         DefaultDatabaseErrorHandler errorHandler = new DefaultDatabaseErrorHandler();
@@ -1135,4 +1187,38 @@ public class DatabaseGeneralTest extends AndroidTestCase implements PerformanceT
             fail("unexpected");
         }
     }
+
+    @MediumTest
+    public void testCloseIdleConnection() throws Exception {
+        mDatabase.close();
+        SQLiteDatabase.OpenParams params = new SQLiteDatabase.OpenParams.Builder()
+                .setIdleConnectionTimeout(1000).build();
+        mDatabase = SQLiteDatabase.openDatabase(mDatabaseFile, params);
+        // Wait a bit and check that connection is still open
+        Thread.sleep(100);
+        String output = executeShellCommand("dumpsys dbinfo " + getContext().getPackageName());
+        assertTrue("Connection #0 should be open. Output: " + output,
+                output.contains("Connection #0:"));
+
+        // Now cause idle timeout and check that connection is closed
+        Thread.sleep(1000);
+        output = executeShellCommand("dumpsys dbinfo " + getContext().getPackageName());
+        assertFalse("Connection #0 should be closed. Output: " + output,
+                output.contains("Connection #0:"));
+    }
+
+    @SmallTest
+    public void testSetIdleConnectionTimeoutValidation() throws Exception {
+        try {
+            new SQLiteDatabase.OpenParams.Builder().setIdleConnectionTimeout(-1).build();
+            fail("Negative timeout should be rejected");
+        } catch (IllegalArgumentException expected) {
+        }
+    }
+
+    private String executeShellCommand(String cmd) throws Exception {
+        return UiDevice.getInstance(
+                InstrumentationRegistry.getInstrumentation()).executeShellCommand(cmd);
+    }
+
 }

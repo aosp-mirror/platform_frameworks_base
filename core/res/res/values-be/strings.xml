@@ -27,18 +27,6 @@
     <string name="terabyteShort" msgid="231613018159186962">"Тб"</string>
     <string name="petabyteShort" msgid="5637816680144990219">"Пб"</string>
     <string name="fileSizeSuffix" msgid="8897567456150907538">"<xliff:g id="NUMBER">%1$s</xliff:g> <xliff:g id="UNIT">%2$s</xliff:g>"</string>
-    <string name="durationDays" msgid="6652371460511178259">"<xliff:g id="DAYS">%1$d</xliff:g> сут"</string>
-    <string name="durationDayHours" msgid="2713107458736744435">"<xliff:g id="DAYS">%1$d</xliff:g> дз. <xliff:g id="HOURS">%2$d</xliff:g> гадз"</string>
-    <string name="durationDayHour" msgid="7293789639090958917">"<xliff:g id="DAYS">%1$d</xliff:g> дз. <xliff:g id="HOURS">%2$d</xliff:g> гадз"</string>
-    <string name="durationHours" msgid="4266858287167358988">"<xliff:g id="HOURS">%1$d</xliff:g> гадз"</string>
-    <string name="durationHourMinutes" msgid="9029176248692041549">"<xliff:g id="HOURS">%1$d</xliff:g> гадз <xliff:g id="MINUTES">%2$d</xliff:g> хв"</string>
-    <string name="durationHourMinute" msgid="2741677355177402539">"<xliff:g id="HOURS">%1$d</xliff:g> гадз <xliff:g id="MINUTES">%2$d</xliff:g> хв"</string>
-    <string name="durationMinutes" msgid="3134226679883579347">"<xliff:g id="MINUTES">%1$d</xliff:g> хв"</string>
-    <string name="durationMinute" msgid="7155301744174623818">"<xliff:g id="MINUTES">%1$d</xliff:g> хвіліна"</string>
-    <string name="durationMinuteSeconds" msgid="1424656185379003751">"<xliff:g id="MINUTES">%1$d</xliff:g> хв <xliff:g id="SECONDS">%2$d</xliff:g> с"</string>
-    <string name="durationMinuteSecond" msgid="3989228718067466680">"<xliff:g id="MINUTES">%1$d</xliff:g> хв <xliff:g id="SECONDS">%2$d</xliff:g> с"</string>
-    <string name="durationSeconds" msgid="8050088505238241405">"<xliff:g id="SECONDS">%1$d</xliff:g> с"</string>
-    <string name="durationSecond" msgid="985669622276420331">"<xliff:g id="SECONDS">%1$d</xliff:g> секунда"</string>
     <string name="untitled" msgid="4638956954852782576">"&lt;Без назвы&gt;"</string>
     <string name="emptyPhoneNumber" msgid="7694063042079676517">"(Няма нумара тэлефона)"</string>
     <string name="unknownName" msgid="6867811765370350269">"Невядома"</string>
@@ -92,15 +80,12 @@
     <string name="serviceNotProvisioned" msgid="8614830180508686666">"Служба не прадастаўляецца."</string>
     <string name="CLIRPermanent" msgid="3377371145926835671">"Вы не можаце змяніць налады ідэнтыфікатара абанента, якi тэлефануе."</string>
     <string name="RestrictedOnDataTitle" msgid="1322504692764166532">"Няма сэрвісу перадачы даных"</string>
-    <string name="RestrictedOnEmergencyTitle" msgid="1236071219598685236">"Няма сэрвісу экстранных выклікаў"</string>
+    <string name="RestrictedOnEmergencyTitle" msgid="3646729271176394091">"Немагчыма выклікаць экстраную дапамогу"</string>
     <string name="RestrictedOnNormalTitle" msgid="3179574012752700984">"Няма сэрвісу галасавых выклікаў"</string>
     <string name="RestrictedOnAllVoiceTitle" msgid="158800171499150681">"Няма сэрвісу галасавых / экстранных выклікаў"</string>
-    <string name="RestrictedOnDataContent" msgid="8997474569390996587">"Ваш аператар часова прыпыніў працу сэрвісу перадачы даных у гэтым месцы"</string>
-    <string name="RestrictedOnEmergencyContent" msgid="4573217945494650061">"Ваш аператар часова прыпыніў працу сэрвісу экстранных выклікаў у гэтым месцы"</string>
-    <string name="RestrictedOnNormalContent" msgid="1579434198284512182">"Ваш аператар часова прыпыніў працу сэрвісу галасавых выклікаў у гэтым месцы"</string>
-    <string name="RestrictedOnAllVoiceContent" msgid="5243580774142557047">"Ваш аператар часова прыпыніў працу сэрвісу галасавых і экстранных выклікаў у гэтым месцы"</string>
+    <string name="RestrictedStateContent" msgid="4278821484643362350">"Часова не прапаноўваецца сеткай мабільнай сувязі ў вашым месцазанходжанні"</string>
     <string name="NetworkPreferenceSwitchTitle" msgid="4008877505368566980">"Немагчыма падключыцца да сеткі"</string>
-    <string name="NetworkPreferenceSwitchSummary" msgid="4164230263214915351">"Каб палепшыць якасць прыёму, паспрабуйце змяніць тып, выбраны ў меню \"Сістэма &gt; Сетка і інтэрнэт &gt; Мабільныя сеткі &gt; Прыярытэтны тып сеткі\"."</string>
+    <string name="NetworkPreferenceSwitchSummary" msgid="1203771446683319957">"Каб палепшыць якасць прыёму, паспрабуйце змяніць тып, выбраны ў меню \"Налады &gt; Сетка і інтэрнэт &gt; Мабільныя сеткі &gt; Прыярытэтны тып сеткі\"."</string>
     <string name="notification_channel_network_alert" msgid="4427736684338074967">"Абвесткі"</string>
     <string name="notification_channel_call_forward" msgid="2419697808481833249">"Пераадрасацыя выкліку"</string>
     <string name="notification_channel_emergency_callback" msgid="6686166232265733921">"Рэжым экстраннага зваротнага выкліку"</string>
@@ -136,7 +121,7 @@
     <string name="roamingTextSearching" msgid="8360141885972279963">"Пошук службы"</string>
     <string name="wfcRegErrorTitle" msgid="2301376280632110664">"Wi-Fi-тэлефанія"</string>
   <string-array name="wfcOperatorErrorAlertMessages">
-    <item msgid="2254967670088539682">"Каб рабіць выклікі і адпраўляць паведамленні па Wi-Fi, спачатку папрасіце свайго аператара наладзіць гэту паслугу. Затым зноў уключыце Wi-Fi-тэлефанію ў меню Налады."</item>
+    <item msgid="3910386316304772394">"Каб рабіць выклікі і адпраўляць паведамленні па Wi-Fi, спачатку папрасіце свайго аператара наладзіць гэту паслугу. Затым зноў уключыце Wi-Fi-тэлефанію ў меню Налады. (Код памылкі: <xliff:g id="CODE">%1$s</xliff:g>)"</item>
   </string-array>
   <string-array name="wfcOperatorErrorNotificationMessages">
     <item msgid="6177300162212449033">"Зарэгіструйцеся ў свайго аператара"</item>
@@ -1153,6 +1138,13 @@
       <item quantity="many">адкрытых сетак Wi-Fi даступна</item>
       <item quantity="other">адкрытай сеткі Wi-Fi даступна</item>
     </plurals>
+    <string name="wifi_available_title" msgid="3817100557900599505">"Падключыцеся да адкрытай сеткі Wi-Fi"</string>
+    <string name="wifi_available_title_connecting" msgid="1557292688310330032">"Ідзе падключэнне да адкрытай сеткі Wi‑Fi"</string>
+    <string name="wifi_available_title_connected" msgid="7542672851522241548">"Выканана падключэнне да адкрытай сеткі Wi‑Fi"</string>
+    <string name="wifi_available_title_failed_to_connect" msgid="6861772233582618132">"Не атрымалася падключыцца да адкрытай сеткі Wi‑Fi"</string>
+    <string name="wifi_available_content_failed_to_connect" msgid="3377406637062802645">"Дакраніцеся, каб убачыць усе сеткі"</string>
+    <string name="wifi_available_action_connect" msgid="2635699628459488788">"Падключыцца"</string>
+    <string name="wifi_available_action_all_networks" msgid="1100098935861622985">"Усе сеткі"</string>
     <string name="wifi_available_sign_in" msgid="9157196203958866662">"Уваход у сетку Wi-Fi"</string>
     <string name="network_available_sign_in" msgid="1848877297365446605">"Увайдзіце ў сетку"</string>
     <!-- no translation found for network_available_sign_in_detailed (8000081941447976118) -->
@@ -1250,8 +1242,7 @@
     <string name="select_keyboard_layout_notification_message" msgid="8084622969903004900">"Дакраніцеся, каб выбраць мову і раскладку"</string>
     <string name="fast_scroll_alphabet" msgid="5433275485499039199">" АБВГДЕЁЖЗІЙКЛМНОПРСТУЎФХЦЧШ\'ЫЬЭЮЯ"</string>
     <string name="fast_scroll_numeric_alphabet" msgid="4030170524595123610">" 0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ"</string>
-    <!-- no translation found for alert_windows_notification_channel_group_name (1463953341148606396) -->
-    <skip />
+    <string name="alert_windows_notification_channel_group_name" msgid="1463953341148606396">"Паказваць паверх іншых праграм"</string>
     <string name="alert_windows_notification_channel_name" msgid="3116610965549449803">"<xliff:g id="NAME">%s</xliff:g> паказваецца паверх іншых праграм"</string>
     <string name="alert_windows_notification_title" msgid="3697657294867638947">"<xliff:g id="NAME">%s</xliff:g> паказв. паверх іншых праграм"</string>
     <string name="alert_windows_notification_message" msgid="8917232109522912560">"Калі вы не хочаце, каб праграма <xliff:g id="NAME">%s</xliff:g> выкарыстоўвала гэту функцыю, дакраніцеся, каб адкрыць налады і адключыць гэта."</string>
@@ -1846,9 +1837,11 @@
     <string name="etws_primary_default_message_tsunami" msgid="1887685943498368548">"Неадкладна эвакуіруйцеся з прыбярэжных раёнаў у больш бяспечнае месца, напрыклад на ўзвышша."</string>
     <string name="etws_primary_default_message_earthquake_and_tsunami" msgid="998797956848445862">"Заставайцеся спакойнымі і пашукайце прытулак паблізу."</string>
     <string name="etws_primary_default_message_test" msgid="2709597093560037455">"Праверка экстранных паведамленняў"</string>
+    <string name="notification_reply_button_accessibility" msgid="3621714652387814344">"Адказаць"</string>
     <string name="etws_primary_default_message_others" msgid="6293148756130398971"></string>
     <string name="mmcc_authentication_reject" msgid="7729819349669603406">"SIM-карта не дапускаецца"</string>
     <string name="mmcc_imsi_unknown_in_hlr" msgid="6321202257374418726">"SIM-карты няма"</string>
     <string name="mmcc_illegal_ms" msgid="2769452751852211112">"SIM-карта не дапускаецца"</string>
     <string name="mmcc_illegal_me" msgid="4438696681169345015">"Тэлефон не дапускаецца"</string>
+    <string name="popup_window_default_title" msgid="4874318849712115433">"Выплыўное акно"</string>
 </resources>

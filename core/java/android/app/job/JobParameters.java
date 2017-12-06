@@ -45,6 +45,18 @@ public class JobParameters implements Parcelable {
     /** @hide */
     public static final int REASON_DEVICE_IDLE = 4;
 
+    /** @hide */
+    public static String getReasonName(int reason) {
+        switch (reason) {
+            case REASON_CANCELED: return "canceled";
+            case REASON_CONSTRAINTS_NOT_SATISFIED: return "constraints";
+            case REASON_PREEMPT: return "preempt";
+            case REASON_TIMEOUT: return "timeout";
+            case REASON_DEVICE_IDLE: return "device_idle";
+            default: return "unknown:" + reason;
+        }
+    }
+
     private final int jobId;
     private final PersistableBundle extras;
     private final Bundle transientExtras;

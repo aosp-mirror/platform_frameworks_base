@@ -143,6 +143,11 @@ public final class BluetoothLeScanner {
      * the PendingIntent. Use this method of scanning if your process is not always running and it
      * should be started when scan results are available.
      * <p>
+     * An app must hold
+     * {@link android.Manifest.permission#ACCESS_COARSE_LOCATION ACCESS_COARSE_LOCATION} or
+     * {@link android.Manifest.permission#ACCESS_FINE_LOCATION ACCESS_FINE_LOCATION} permission
+     * in order to get results.
+     * <p>
      * When the PendingIntent is delivered, the Intent passed to the receiver or activity
      * will contain one or more of the extras {@link #EXTRA_CALLBACK_TYPE},
      * {@link #EXTRA_ERROR_CODE} and {@link #EXTRA_LIST_SCAN_RESULT} to indicate the result of

@@ -34,7 +34,7 @@
     <string name="print_preview" msgid="8010217796057763343">"मुद्रण पूर्वावलोकन"</string>
     <string name="install_for_print_preview" msgid="6366303997385509332">"पूर्वावलोकनासाठी पीडीएफ व्ह्यूअर इंस्टॉल करा"</string>
     <string name="printing_app_crashed" msgid="854477616686566398">"प्रिंटिंग अ‍ॅप क्रॅश झाले"</string>
-    <string name="generating_print_job" msgid="3119608742651698916">"मुद्रण कार्य व्‍युत्‍पन्न करीत आहे"</string>
+    <string name="generating_print_job" msgid="3119608742651698916">"मुद्रण कार्य व्‍युत्‍पन्न करत आहे"</string>
     <string name="save_as_pdf" msgid="5718454119847596853">"पीडीएफ म्‍हणून सेव्ह करा"</string>
     <string name="all_printers" msgid="5018829726861876202">"सर्व प्रिंटर..."</string>
     <string name="print_dialog" msgid="32628687461331979">"मुद्रण संवाद"</string>
@@ -79,8 +79,8 @@
       <item quantity="one"><xliff:g id="COUNT_1">%1$s</xliff:g> प्रिंटर शोधण्यासाठी इंस्टॉल करा</item>
       <item quantity="other"><xliff:g id="COUNT_1">%1$s</xliff:g> प्रिंटर शोधण्यासाठी इंस्टॉल करा</item>
     </plurals>
-    <string name="printing_notification_title_template" msgid="295903957762447362">"<xliff:g id="PRINT_JOB_NAME">%1$s</xliff:g> मुद्रण करीत आहे"</string>
-    <string name="cancelling_notification_title_template" msgid="1821759594704703197">"<xliff:g id="PRINT_JOB_NAME">%1$s</xliff:g> रद्द करीत आहे"</string>
+    <string name="printing_notification_title_template" msgid="295903957762447362">"<xliff:g id="PRINT_JOB_NAME">%1$s</xliff:g> मुद्रण करत आहे"</string>
+    <string name="cancelling_notification_title_template" msgid="1821759594704703197">"<xliff:g id="PRINT_JOB_NAME">%1$s</xliff:g> रद्द करत आहे"</string>
     <string name="failed_notification_title_template" msgid="2256217208186530973">"प्रिंटर एरर <xliff:g id="PRINT_JOB_NAME">%1$s</xliff:g>"</string>
     <string name="blocked_notification_title_template" msgid="1175435827331588646">"प्रिंटरने <xliff:g id="PRINT_JOB_NAME">%1$s</xliff:g> अवरोधित केले"</string>
     <string name="cancel" msgid="4373674107267141885">"रद्द करा"</string>

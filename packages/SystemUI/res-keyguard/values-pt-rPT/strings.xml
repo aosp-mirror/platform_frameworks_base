@@ -29,8 +29,7 @@
     <string name="keyguard_password_enter_password_code" msgid="595980919238127672">"Introduza a palavra-passe para desbloquear"</string>
     <string name="keyguard_password_enter_pin_password_code" msgid="7504123374204446086">"Introduza o PIN para desbloquear"</string>
     <string name="keyguard_password_wrong_pin_code" msgid="6535018036285012028">"Código PIN incorreto."</string>
-    <!-- no translation found for keyguard_sim_error_message_short (592109500618448312) -->
-    <skip />
+    <string name="keyguard_sim_error_message_short" msgid="592109500618448312">"Cartão inválido."</string>
     <string name="keyguard_charged" msgid="2222329688813033109">"Carregada"</string>
     <string name="keyguard_plugged_in" msgid="89308975354638682">"A carregar…"</string>
     <string name="keyguard_plugged_in_charging_fast" msgid="8869226755413795173">"A carregar rapidamente…"</string>
@@ -118,7 +117,7 @@
     <string name="kg_prompt_reason_switch_profiles_pattern" msgid="3398054847288438444">"É necessário um padrão quando muda de perfil"</string>
     <string name="kg_prompt_reason_switch_profiles_pin" msgid="7426368139226961699">"É necessário um PIN quando muda de perfil"</string>
     <string name="kg_prompt_reason_switch_profiles_password" msgid="8383831046318421845">"É necessária uma palavra-passe quando muda de perfil"</string>
-    <string name="kg_prompt_reason_device_admin" msgid="3452168247888906179">"Dispositivo bloqueado pelo administrador"</string>
+    <string name="kg_prompt_reason_device_admin" msgid="3452168247888906179">"Dispositivo bloqueado pelo gestor"</string>
     <string name="kg_prompt_reason_user_request" msgid="8236951765212462286">"O dispositivo foi bloqueado manualmente"</string>
     <plurals name="kg_prompt_reason_time_pattern" formatted="false" msgid="71299470072448533">
       <item quantity="one">O dispositivo não é desbloqueado há <xliff:g id="NUMBER_0">%d</xliff:g> hora. Confirme o padrão.</item>

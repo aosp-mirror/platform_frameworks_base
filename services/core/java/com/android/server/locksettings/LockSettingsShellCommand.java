@@ -36,6 +36,8 @@ class LockSettingsShellCommand extends ShellCommand {
     private static final String COMMAND_CLEAR = "clear";
     private static final String COMMAND_SP = "sp";
     private static final String COMMAND_SET_DISABLED = "set-disabled";
+    private static final String COMMAND_VERIFY = "verify";
+    private static final String COMMAND_GET_DISABLED = "get-disabled";
 
     private int mCurrentUserId;
     private final LockPatternUtils mLockPatternUtils;
@@ -76,6 +78,12 @@ class LockSettingsShellCommand extends ShellCommand {
                 case COMMAND_SET_DISABLED:
                     runSetDisabled();
                     break;
+                case COMMAND_VERIFY:
+                    runVerify();
+                    break;
+                case COMMAND_GET_DISABLED:
+                    runGetDisabled();
+                    break;
                 default:
                     getErrPrintWriter().println("Unknown command: " + cmd);
                     break;
@@ -86,6 +94,11 @@ class LockSettingsShellCommand extends ShellCommand {
             e.printStackTrace(getErrPrintWriter());
             return -1;
         }
+    }
+
+    private void runVerify() {
+        // The command is only run if the credential is correct.
+        getOutPrintWriter().println("Lock credential verified successfully");
     }
 
     @Override
@@ -147,21 +160,36 @@ class LockSettingsShellCommand extends ShellCommand {
         getOutPrintWriter().println("Lock screen disabled set to " + disabled);
     }
 
-    private boolean checkCredential() throws RemoteException, RequestThrottledException {
+    private void runGetDisabled() {
+        boolean isLockScreenDisabled = mLockPatternUtils.isLockScreenDisabled(mCurrentUserId);
+        getOutPrintWriter().println(isLockScreenDisabled);
+    }
+
+    private boolean checkCredential() throws RemoteException {
         final boolean havePassword = mLockPatternUtils.isLockPasswordEnabled(mCurrentUserId);
         final boolean havePattern = mLockPatternUtils.isLockPatternEnabled(mCurrentUserId);
         if (havePassword || havePattern) {
-            boolean result;
-            if (havePassword) {
-                result = mLockPatternUtils.checkPassword(mOld, mCurrentUserId);
-            } else {
-                result = mLockPatternUtils.checkPattern(stringToPattern(mOld),
-                        mCurrentUserId);
+            if (mLockPatternUtils.isManagedProfileWithUnifiedChallenge(mCurrentUserId)) {
+                getOutPrintWriter().println("Profile uses unified challenge");
+                return false;
             }
-            if (result) {
-                return true;
-            } else {
-                getOutPrintWriter().println("Old password '" + mOld + "' didn't match");
+
+            try {
+                final boolean result;
+                if (havePassword) {
+                    result = mLockPatternUtils.checkPassword(mOld, mCurrentUserId);
+                } else {
+                    result = mLockPatternUtils.checkPattern(stringToPattern(mOld), mCurrentUserId);
+                }
+                if (!result) {
+                    if (!mLockPatternUtils.isManagedProfileWithUnifiedChallenge(mCurrentUserId)) {
+                        mLockPatternUtils.reportFailedPasswordAttempt(mCurrentUserId);
+                    }
+                    getOutPrintWriter().println("Old password '" + mOld + "' didn't match");
+                }
+                return result;
+            } catch (RequestThrottledException e) {
+                getOutPrintWriter().println("Request throttled");
                 return false;
             }
         } else {

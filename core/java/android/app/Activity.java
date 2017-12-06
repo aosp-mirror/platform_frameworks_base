@@ -16,6 +16,8 @@
 
 package android.app;
 
+import static android.os.Build.VERSION_CODES.O_MR1;
+
 import static java.lang.Character.MIN_VALUE;
 
 import android.annotation.CallSuper;
@@ -112,6 +114,7 @@ import android.view.WindowManager;
 import android.view.WindowManagerGlobal;
 import android.view.accessibility.AccessibilityEvent;
 import android.view.autofill.AutofillManager;
+import android.view.autofill.AutofillManager.AutofillClient;
 import android.view.autofill.AutofillPopupWindow;
 import android.view.autofill.IAutofillWindowPresenter;
 import android.widget.AdapterView;
@@ -539,9 +542,9 @@ import java.util.List;
  * <ul>
  *     <li> <p>When creating a new document, the backing database entry or file for
  *             it is created immediately.  For example, if the user chooses to write
- *             a new e-mail, a new entry for that e-mail is created as soon as they
+ *             a new email, a new entry for that email is created as soon as they
  *             start entering data, so that if they go to any other activity after
- *             that point this e-mail will now appear in the list of drafts.</p>
+ *             that point this email will now appear in the list of drafts.</p>
  *     <li> <p>When an activity's <code>onPause()</code> method is called, it should
  *             commit to the backing content provider or file any changes the user
  *             has made.  This ensures that those changes will be seen by any other
@@ -759,6 +762,11 @@ public class Activity extends ContextThemeWrapper
     boolean mStartedActivity;
     private boolean mDestroyed;
     private boolean mDoReportFullyDrawn = true;
+    private boolean mRestoredFromBundle;
+
+    /** {@code true} if the activity lifecycle is in a state which supports picture-in-picture.
+     * This only affects the client-side exception, the actual state check still happens in AMS. */
+    private boolean mCanEnterPictureInPicture = false;
     /** true if the activity is going through a transient pause */
     /*package*/ boolean mTemporaryPause = false;
     /** true if the activity is being destroyed in order to recreate it with a new configuration */
@@ -798,10 +806,6 @@ public class Activity extends ContextThemeWrapper
     // we must have a handler before the FragmentController is constructed
     final Handler mHandler = new Handler();
     final FragmentController mFragments = FragmentController.createController(new HostCallbacks());
-
-    // Most recent call to requestVisibleBehind().
-    @Deprecated
-    boolean mVisibleBehind;
 
     private static final class ManagedCursor {
         ManagedCursor(Cursor cursor) {
@@ -944,6 +948,18 @@ public class Activity extends ContextThemeWrapper
         return mAutofillManager;
     }
 
+    @Override
+    protected void attachBaseContext(Context newBase) {
+        super.attachBaseContext(newBase);
+        newBase.setAutofillClient(this);
+    }
+
+    /** @hide */
+    @Override
+    public final AutofillClient getAutofillClient() {
+        return this;
+    }
+
     /**
      * Called when the activity is starting.  This is where most initialization
      * should go: calling {@link #setContentView(int)} to inflate the
@@ -974,6 +990,18 @@ public class Activity extends ContextThemeWrapper
     @CallSuper
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         if (DEBUG_LIFECYCLE) Slog.v(TAG, "onCreate " + this + ": " + savedInstanceState);
+
+        if (getApplicationInfo().targetSdkVersion >= O_MR1 && mActivityInfo.isFixedOrientation()) {
+            final TypedArray ta = obtainStyledAttributes(com.android.internal.R.styleable.Window);
+            final boolean isTranslucentOrFloating = ActivityInfo.isTranslucentOrFloating(ta);
+            ta.recycle();
+
+            if (isTranslucentOrFloating) {
+                throw new IllegalStateException(
+                        "Only fullscreen opaque activities can request orientation");
+            }
+        }
+
         if (mLastNonConfigurationInstances != null) {
             mFragments.restoreLoaderNonConfig(mLastNonConfigurationInstances.loaders);
         }
@@ -1002,6 +1030,7 @@ public class Activity extends ContextThemeWrapper
         if (mVoiceInteractor != null) {
             mVoiceInteractor.attachActivity(this);
         }
+        mRestoredFromBundle = savedInstanceState != null;
         mCalled = true;
     }
 
@@ -1847,8 +1876,18 @@ public class Activity extends ContextThemeWrapper
         getApplication().dispatchActivityStopped(this);
         mTranslucentCallback = null;
         mCalled = true;
-        if (isFinishing() && mAutoFillResetNeeded) {
-            getAutofillManager().commit();
+
+        if (isFinishing()) {
+            if (mAutoFillResetNeeded) {
+                getAutofillManager().commit();
+            } else if (mIntent != null
+                    && mIntent.hasExtra(AutofillManager.EXTRA_RESTORE_SESSION_TOKEN)) {
+                // Activity was launched when user tapped a link in the Autofill Save UI - since
+                // user launched another activity, the Save UI should not be restored when this
+                // activity is finished.
+                getAutofillManager().onPendingSaveUi(AutofillManager.PENDING_UI_OPERATION_CANCEL,
+                        mIntent.getIBinderExtra(AutofillManager.EXTRA_RESTORE_SESSION_TOKEN));
+            }
         }
     }
 
@@ -1938,7 +1977,7 @@ public class Activity extends ContextThemeWrapper
         if (mDoReportFullyDrawn) {
             mDoReportFullyDrawn = false;
             try {
-                ActivityManager.getService().reportActivityFullyDrawn(mToken);
+                ActivityManager.getService().reportActivityFullyDrawn(mToken, mRestoredFromBundle);
             } catch (RemoteException e) {
             }
         }
@@ -2078,6 +2117,10 @@ public class Activity extends ContextThemeWrapper
         try {
             if (params == null) {
                 throw new IllegalArgumentException("Expected non-null picture-in-picture params");
+            }
+            if (!mCanEnterPictureInPicture) {
+                throw new IllegalStateException("Activity must be resumed to enter"
+                        + " picture-in-picture");
             }
             return ActivityManagerNative.getDefault().enterPictureInPictureMode(mToken, params);
         } catch (RemoteException e) {
@@ -5480,6 +5523,13 @@ public class Activity extends ContextThemeWrapper
         } else {
             mParent.finishFromChild(this);
         }
+
+        // Activity was launched when user tapped a link in the Autofill Save UI - Save UI must
+        // be restored now.
+        if (mIntent != null && mIntent.hasExtra(AutofillManager.EXTRA_RESTORE_SESSION_TOKEN)) {
+            getAutofillManager().onPendingSaveUi(AutofillManager.PENDING_UI_OPERATION_RESTORE,
+                    mIntent.getIBinderExtra(AutofillManager.EXTRA_RESTORE_SESSION_TOKEN));
+        }
     }
 
     /**
@@ -6214,6 +6264,11 @@ public class Activity extends ContextThemeWrapper
         }
 
         mHandler.getLooper().dump(new PrintWriterPrinter(writer), prefix);
+
+        final AutofillManager afm = getAutofillManager();
+        if (afm != null) {
+            afm.dump(prefix, writer);
+        }
     }
 
     /**
@@ -6445,10 +6500,6 @@ public class Activity extends ContextThemeWrapper
     @Deprecated
     @SystemApi
     public boolean isBackgroundVisibleBehind() {
-        try {
-            return ActivityManager.getService().isBackgroundVisibleBehind(mToken);
-        } catch (RemoteException e) {
-        }
         return false;
     }
 
@@ -6949,25 +7000,29 @@ public class Activity extends ContextThemeWrapper
         return mParent != null ? mParent.getActivityToken() : mToken;
     }
 
-    final void performCreateCommon() {
+    final void performCreate(Bundle icicle) {
+        performCreate(icicle, null);
+    }
+
+    final void performCreate(Bundle icicle, PersistableBundle persistentState) {
+        mCanEnterPictureInPicture = true;
+        restoreHasCurrentPermissionRequest(icicle);
+        if (persistentState != null) {
+            onCreate(icicle, persistentState);
+        } else {
+            onCreate(icicle);
+        }
+        mActivityTransitionState.readState(icicle);
+
         mVisibleFromClient = !mWindow.getWindowStyle().getBoolean(
                 com.android.internal.R.styleable.Window_windowNoDisplay, false);
         mFragments.dispatchActivityCreated();
         mActivityTransitionState.setEnterActivityOptions(this, getActivityOptions());
     }
 
-    final void performCreate(Bundle icicle) {
-        restoreHasCurrentPermissionRequest(icicle);
-        onCreate(icicle);
-        mActivityTransitionState.readState(icicle);
-        performCreateCommon();
-    }
-
-    final void performCreate(Bundle icicle, PersistableBundle persistentState) {
-        restoreHasCurrentPermissionRequest(icicle);
-        onCreate(icicle, persistentState);
-        mActivityTransitionState.readState(icicle);
-        performCreateCommon();
+    final void performNewIntent(Intent intent) {
+        mCanEnterPictureInPicture = true;
+        onNewIntent(intent);
     }
 
     final void performStart() {
@@ -7013,6 +7068,7 @@ public class Activity extends ContextThemeWrapper
     }
 
     final void performRestart() {
+        mCanEnterPictureInPicture = true;
         mFragments.noteStateNotSaved();
 
         if (mToken != null && mParent == null) {
@@ -7117,6 +7173,9 @@ public class Activity extends ContextThemeWrapper
     final void performStop(boolean preserveWindow) {
         mDoReportFullyDrawn = false;
         mFragments.doLoaderStop(mChangingConfigurations /*retain*/);
+
+        // Disallow entering picture-in-picture after the activity has been stopped
+        mCanEnterPictureInPicture = false;
 
         if (!mStopped) {
             if (mWindow != null) {
@@ -7539,6 +7598,53 @@ public class Activity extends ContextThemeWrapper
             ActivityManager.getService().setDisablePreviewScreenshots(mToken, disable);
         } catch (RemoteException e) {
             Log.e(TAG, "Failed to call setDisablePreviewScreenshots", e);
+        }
+    }
+
+    /**
+     * Specifies whether an {@link Activity} should be shown on top of the the lock screen whenever
+     * the lockscreen is up and the activity is resumed. Normally an activity will be transitioned
+     * to the stopped state if it is started while the lockscreen is up, but with this flag set the
+     * activity will remain in the resumed state visible on-top of the lock screen. This value can
+     * be set as a manifest attribute using {@link android.R.attr#showWhenLocked}.
+     *
+     * @param showWhenLocked {@code true} to show the {@link Activity} on top of the lock screen;
+     *                                   {@code false} otherwise.
+     * @see #setTurnScreenOn(boolean)
+     * @see android.R.attr#turnScreenOn
+     * @see android.R.attr#showWhenLocked
+     */
+    public void setShowWhenLocked(boolean showWhenLocked) {
+        try {
+            ActivityManager.getService().setShowWhenLocked(mToken, showWhenLocked);
+        } catch (RemoteException e) {
+            Log.e(TAG, "Failed to call setShowWhenLocked", e);
+        }
+    }
+
+    /**
+     * Specifies whether the screen should be turned on when the {@link Activity} is resumed.
+     * Normally an activity will be transitioned to the stopped state if it is started while the
+     * screen if off, but with this flag set the activity will cause the screen to turn on if the
+     * activity will be visible and resumed due to the screen coming on. The screen will not be
+     * turned on if the activity won't be visible after the screen is turned on. This flag is
+     * normally used in conjunction with the {@link android.R.attr#showWhenLocked} flag to make sure
+     * the activity is visible after the screen is turned on when the lockscreen is up. In addition,
+     * if this flag is set and the activity calls {@link
+     * KeyguardManager#requestDismissKeyguard(Activity, KeyguardManager.KeyguardDismissCallback)}
+     * the screen will turn on.
+     *
+     * @param turnScreenOn {@code true} to turn on the screen; {@code false} otherwise.
+     *
+     * @see #setShowWhenLocked(boolean)
+     * @see android.R.attr#turnScreenOn
+     * @see android.R.attr#showWhenLocked
+     */
+    public void setTurnScreenOn(boolean turnScreenOn) {
+        try {
+            ActivityManager.getService().setTurnScreenOn(mToken, turnScreenOn);
+        } catch (RemoteException e) {
+            Log.e(TAG, "Failed to call setTurnScreenOn", e);
         }
     }
 

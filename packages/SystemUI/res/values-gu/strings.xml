@@ -64,7 +64,7 @@
     <string name="usb_debugging_message" msgid="2220143855912376496">"કમ્પ્યુટરની RSA મુખ્ય ફિંગરપ્રિંટ આ છે:\n<xliff:g id="FINGERPRINT">%1$s</xliff:g>"</string>
     <string name="usb_debugging_always" msgid="303335496705863070">"હંમેશા આ કમ્પ્યુટરથી મંજૂરી આપો"</string>
     <string name="usb_debugging_secondary_user_title" msgid="6353808721761220421">"USB ડીબગિંગની મંજૂરી નથી"</string>
-    <string name="usb_debugging_secondary_user_message" msgid="8572228137833020196">"આ ઉપકરણમાં હાલમાં સાઇન ઇન થયેલ વપરાશકર્તા USB ડીબગિંગ ચાલુ કરી શકતાં નથી. આ સુવિધાનો ઉપયોગ કરવા માટે, એડમિન વપરાશકર્તા પર સ્વિચ કરો."</string>
+    <string name="usb_debugging_secondary_user_message" msgid="6067122453571699801">"હાલમાં આ ઉપકરણમાં સાઇન ઇન થયેલ વપરાશકર્તા USB ડિબગીંગ ચાલુ કરી શકતા નથી. આ સુવિધાનો ઉપયોગ કરવા માટે પ્રાથમિક વપરાશકર્તા પર સ્વિચ કરો."</string>
     <string name="compat_mode_on" msgid="6623839244840638213">"સ્ક્રીન ભરવા માટે ઝૂમ કરો"</string>
     <string name="compat_mode_off" msgid="4434467572461327898">"સ્ક્રીન ભરવા માટે ખેંચો"</string>
     <string name="screenshot_saving_ticker" msgid="7403652894056693515">"સ્ક્રીનશોટ સાચવી રહ્યું છે…"</string>
@@ -353,10 +353,10 @@
     <string name="description_target_search" msgid="3091587249776033139">"શોધો"</string>
     <string name="description_direction_up" msgid="7169032478259485180">"<xliff:g id="TARGET_DESCRIPTION">%s</xliff:g> માટે ઉપર સ્લાઇડ કરો."</string>
     <string name="description_direction_left" msgid="7207478719805562165">"<xliff:g id="TARGET_DESCRIPTION">%s</xliff:g> માટે ડાબે સ્લાઇડ કરો."</string>
-    <string name="zen_priority_introduction" msgid="7577965386868311310">"અલાર્મ, રિમાઇન્ડર, ઇવેન્ટ અને તમે ઉલ્લેખ કરો તે કૉલર સિવાય તમને ધ્વનિ કે વાઇબ્રેશન દ્વારા ખલેલ પહોંચાડવામાં આવશે નહીં. સંગીત, વીડિઓ અને રમતો સહિત તમે જે કંઈપણ ચલાવવાનું પસંદ કરશો તે સંભળાતું રહેશે."</string>
-    <string name="zen_alarms_introduction" msgid="7034415210361973827">"તમને ધ્વનિ કે વાઇબ્રેશનો દ્વારા ખલેલ પહોંચાડવામાં આવશે નહીં, સિવાય કે અલાર્મ. તમે સંગીત, વીડિયો અને રમતો સહિત તમે જે કંઈપણ ચલાવવાનું પસંદ કરો તે હજુ પણ સંભળાશે."</string>
+    <string name="zen_priority_introduction" msgid="1149025108714420281">"અલાર્મ, રિમાઇન્ડર, ઇવેન્ટ અને તમે ઉલ્લેખ કરો તે કૉલર સિવાય તમને ધ્વનિ કે વાઇબ્રેશન દ્વારા ખલેલ પહોંચાડવામાં આવશે નહીં. સંગીત, વીડિઓ અને રમતો સહિત તમે જે કંઈપણ ચલાવવાનું પસંદ કરશો તે સંભળાતું રહેશે."</string>
+    <string name="zen_alarms_introduction" msgid="4934328096749380201">"અલાર્મ સિવાય તમને ધ્વનિ કે વાઇબ્રેશન દ્વારા ખલેલ પહોંચાડવામાં આવશે નહીં. સંગીત, વીડિઓ અને રમતો સહિત તમે જે કંઈપણ ચલાવવાનું પસંદ કરશો તે સંભળાતું રહેશે."</string>
     <string name="zen_priority_customize_button" msgid="7948043278226955063">"કસ્ટમાઇઝ કરો"</string>
-    <string name="zen_silence_introduction_voice" msgid="2284540992298200729">"આ એલાર્મ્સ, સંગીત, વિડિઓઝ અને રમતો સહિત તમામ ધ્વનિઓ અને વાઇબ્રેશન્સને અવરોધિત કરે છે.  તમે હજુ પણ ફોન કૉલ્સ કરવા માટે સમર્થ હશો."</string>
+    <string name="zen_silence_introduction_voice" msgid="3948778066295728085">"આ અલાર્મ, સંગીત, વીડિઓ અને રમતો સહિત બધા ધ્વનિ કે વાઇબ્રેશનને અવરોધિત કરે છે. ફોન કૉલ કરવા માટે તમે હજી પણ સમર્થ રહેશો."</string>
     <string name="zen_silence_introduction" msgid="3137882381093271568">"એલાર્મ્સ, સંગીત, વિડિઓઝ અને રમતો સહિત તમામ ધ્વનિઓ અને વાઇબ્રેશન્સને આ અવરોધિત કરે છે."</string>
     <string name="keyguard_more_overflow_text" msgid="9195222469041601365">"+<xliff:g id="NUMBER_OF_NOTIFICATIONS">%d</xliff:g>"</string>
     <string name="speed_bump_explanation" msgid="1288875699658819755">"નીચે ઓછી તાકીદની સૂચનાઓ"</string>
@@ -456,7 +456,7 @@
     <string name="monitoring_description_do_learn_more" msgid="1849514470437907421">"વધુ જાણો"</string>
     <string name="monitoring_description_do_body_vpn" msgid="8255218762488901796">"તમે <xliff:g id="VPN_APP">%1$s</xliff:g> સાથે કનેક્ટ થયાં છો, જે ઇમેઇલ્સ, ઍપ્લિકેશનો અને વેબસાઇટ્સ સહિત તમારી નેટવર્ક પ્રવૃત્તિને મૉનિટર કરી શકે છે."</string>
     <string name="monitoring_description_vpn_settings_separator" msgid="1933186756733474388">" "</string>
-    <string name="monitoring_description_vpn_settings" msgid="8869300202410505143">"VPN સેટિંગ્સ ખોલો"</string>
+    <string name="monitoring_description_vpn_settings" msgid="6434859242636063861">"VPNની સેટિંગ્સ ખોલો"</string>
     <string name="monitoring_description_ca_cert_settings_separator" msgid="4987350385906393626">" "</string>
     <string name="monitoring_description_ca_cert_settings" msgid="5489969458872997092">"વિશ્વસનીય ઓળખપત્ર ખોલો"</string>
     <string name="monitoring_description_network_logging" msgid="7223505523384076027">"તમારા વ્યવસ્થાપકે નેટવર્ક લૉગિંગ ચાલુ કર્યુ છે, જે તમારા ઉપકરણ પર ટ્રાફિકનું નિરીક્ષણ કરે છે.\n\nવધુ માહિતી માટે, તમારા વ્યવસ્થાપકનો સંપર્ક કરો."</string>
@@ -556,8 +556,8 @@
     <string name="notification_default_channel_desc" msgid="2506053815870808359">"આ ઍપ્લિકેશનમાં સૂચના કૅટેગરી નથી"</string>
     <string name="notification_unblockable_desc" msgid="3561016061737896906">"આ ઍપ્લિકેશનની સૂચનાઓ બંધ કરી શકાતી નથી"</string>
     <plurals name="notification_num_channels_desc" formatted="false" msgid="5492793452274077663">
-      <item quantity="one">આ ઍપ્લિકેશનમાંની <xliff:g id="NUMBER_1">%d</xliff:g> સૂચના કૅટેગરીમાંથી 1</item>
-      <item quantity="other">આ ઍપ્લિકેશનમાંની <xliff:g id="NUMBER_1">%d</xliff:g> સૂચના કૅટેગરીમાંથી 1</item>
+      <item quantity="one">આ ઍપ્લિકેશનમાંની <xliff:g id="NUMBER_1">%s</xliff:g> સૂચના કૅટેગરીમાંથી 1</item>
+      <item quantity="other">આ ઍપ્લિકેશનમાંની <xliff:g id="NUMBER_1">%s</xliff:g> સૂચના કૅટેગરીમાંથી 1</item>
     </plurals>
     <string name="notification_channels_list_desc_2" msgid="6214732715833946441">"<xliff:g id="CHANNEL_NAME_1">%1$s</xliff:g>, <xliff:g id="CHANNEL_NAME_2">%2$s</xliff:g>"</string>
     <plurals name="notification_channels_list_desc_2_and_others" formatted="false" msgid="2747813553355336157">
@@ -585,8 +585,8 @@
       <item quantity="other">%d મિનિટ</item>
     </plurals>
     <string name="battery_panel_title" msgid="7944156115535366613">"બૅટરી વપરાશ"</string>
-    <string name="battery_detail_charging_summary" msgid="1279095653533044008">"ચાર્જિંગ દરમિયાન બૅટરી સેવર ઉપલબ્ધ નથી"</string>
-    <string name="battery_detail_switch_title" msgid="6285872470260795421">"બૅટરી સેવર"</string>
+    <string name="battery_detail_charging_summary" msgid="4055327085770378335">"ચાર્જિંગ દરમિયાન બૅટરી સેવર ઉપલબ્ધ હોતું નથી"</string>
+    <string name="battery_detail_switch_title" msgid="8763441006881907058">"બૅટરી સેવર"</string>
     <string name="battery_detail_switch_summary" msgid="9049111149407626804">"પ્રદર્શન અને બૅકગ્રાઉન્ડ ડેટા ઘટાડે છે"</string>
     <string name="keyboard_key_button_template" msgid="6230056639734377300">"બટન <xliff:g id="NAME">%1$s</xliff:g>"</string>
     <string name="keyboard_key_home" msgid="2243500072071305073">"Home"</string>
@@ -726,9 +726,9 @@
     <string name="pip_phone_minimize" msgid="1079119422589131792">"નાનું કરો"</string>
     <string name="pip_phone_close" msgid="8416647892889710330">"બંધ કરો"</string>
     <string name="pip_phone_dismiss_hint" msgid="6351678169095923899">"છોડી દેવા માટે નીચે ખેંચો"</string>
-    <string name="pip_menu_title" msgid="3328510504196964712">"ચિત્રમાં ચિત્ર મેનૂ"</string>
+    <string name="pip_menu_title" msgid="4707292089961887657">"મેનૂ"</string>
     <string name="pip_notification_title" msgid="3204024940158161322">"<xliff:g id="NAME">%s</xliff:g> ચિત્રમાં-ચિત્રની અંદર છે"</string>
-    <string name="pip_notification_message" msgid="4171698133469539591">"જો તમે નથી ઇચ્છતા કે <xliff:g id="NAME">%s</xliff:g> આ સુવિધાનો ઉપયોગ કરે, તો સેટિંગ્સ ખોલવા માટે ટૅપ કરો અને તેને બંધ કરો."</string>
+    <string name="pip_notification_message" msgid="5619512781514343311">"જો તમે નથી ઈચ્છતા કે <xliff:g id="NAME">%s</xliff:g> આ સુવિધાનો ઉપયોગ કરે, તો સેટિંગ્સ ખોલવા માટે ટૅપ કરો અને તે સુવિધાને બંધ કરો."</string>
     <string name="pip_play" msgid="1417176722760265888">"ચલાવો"</string>
     <string name="pip_pause" msgid="8881063404466476571">"થોભાવો"</string>
     <string name="pip_skip_to_next" msgid="1948440006726306284">"આગલા પર જાઓ"</string>
@@ -754,6 +754,7 @@
     <string name="tuner_menu" msgid="191640047241552081">"મેનૂ"</string>
     <string name="tuner_app" msgid="3507057938640108777">"<xliff:g id="APP">%1$s</xliff:g> ઍપ્લિકેશન"</string>
     <string name="notification_channel_alerts" msgid="4496839309318519037">"ચેતવણીઓ"</string>
+    <string name="notification_channel_battery" msgid="5786118169182888462">"બૅટરી"</string>
     <string name="notification_channel_screenshot" msgid="6314080179230000938">"સ્ક્રીનશૉટ"</string>
     <string name="notification_channel_general" msgid="4525309436693914482">"સામાન્ય સંદેશા"</string>
     <string name="notification_channel_storage" msgid="3077205683020695313">"સ્ટોરેજ"</string>
@@ -774,4 +775,5 @@
     <string name="running_foreground_services_title" msgid="381024150898615683">"પૃષ્ઠભૂમિમાં ચાલી રહેલ ઍપ્લિકેશનો"</string>
     <string name="running_foreground_services_msg" msgid="6326247670075574355">"બૅટરી અને ડેટા વપરાશ વિશેની વિગતો માટે ટૅપ કરો"</string>
     <string name="data_usage_disable_mobile" msgid="5116269981510015864">"મોબાઇલ ડેટા બંધ કરીએ?"</string>
+    <string name="touch_filtered_warning" msgid="8671693809204767551">"એક ઍપ પરવાનગી વિનંતીને અસ્પષ્ટ કરતી હોવાને કારણે, સેટિંગ્સ તમારા પ્રતિસાદને ચકાસી શકતી નથી."</string>
 </resources>

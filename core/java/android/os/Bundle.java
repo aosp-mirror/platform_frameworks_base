@@ -22,6 +22,8 @@ import android.util.Size;
 import android.util.SizeF;
 import android.util.SparseArray;
 
+import com.android.internal.annotations.VisibleForTesting;
+
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
@@ -32,15 +34,29 @@ import java.util.List;
  * @see PersistableBundle
  */
 public final class Bundle extends BaseBundle implements Cloneable, Parcelable {
-    private static final int FLAG_HAS_FDS = 1 << 8;
-    private static final int FLAG_HAS_FDS_KNOWN = 1 << 9;
-    private static final int FLAG_ALLOW_FDS = 1 << 10;
+    @VisibleForTesting
+    static final int FLAG_HAS_FDS = 1 << 8;
+
+    @VisibleForTesting
+    static final int FLAG_HAS_FDS_KNOWN = 1 << 9;
+
+    @VisibleForTesting
+    static final int FLAG_ALLOW_FDS = 1 << 10;
 
     public static final Bundle EMPTY;
+
+    /**
+     * Special extras used to denote extras have been stripped off.
+     * @hide
+     */
+    public static final Bundle STRIPPED;
 
     static {
         EMPTY = new Bundle();
         EMPTY.mMap = ArrayMap.EMPTY;
+
+        STRIPPED = new Bundle();
+        STRIPPED.putInt("STRIPPED", 1);
     }
 
     /**
@@ -56,20 +72,42 @@ public final class Bundle extends BaseBundle implements Cloneable, Parcelable {
      * will be unparcelled on first contact, using the assigned ClassLoader.
      *
      * @param parcelledData a Parcel containing a Bundle
+     *
+     * @hide
      */
-    Bundle(Parcel parcelledData) {
+    @VisibleForTesting
+    public Bundle(Parcel parcelledData) {
         super(parcelledData);
-        mFlags = FLAG_HAS_FDS_KNOWN | FLAG_ALLOW_FDS;
-        if (mParcelledData.hasFileDescriptors()) {
-            mFlags |= FLAG_HAS_FDS;
-        }
+        mFlags = FLAG_ALLOW_FDS;
+        maybePrefillHasFds();
     }
 
-    /* package */ Bundle(Parcel parcelledData, int length) {
+    /**
+     * Constructor from a parcel for when the length is known *and is not stored in the parcel.*
+     * The other constructor that takes a parcel assumes the length is in the parcel.
+     *
+     * @hide
+     */
+    @VisibleForTesting
+    public Bundle(Parcel parcelledData, int length) {
         super(parcelledData, length);
-        mFlags = FLAG_HAS_FDS_KNOWN | FLAG_ALLOW_FDS;
-        if (mParcelledData.hasFileDescriptors()) {
-            mFlags |= FLAG_HAS_FDS;
+        mFlags = FLAG_ALLOW_FDS;
+        maybePrefillHasFds();
+    }
+
+    /**
+     * If {@link #mParcelledData} is not null, copy the HAS FDS bit from it because it's fast.
+     * Otherwise (if {@link #mParcelledData} is already null), leave {@link #FLAG_HAS_FDS_KNOWN}
+     * unset, because scanning a map is slower.  We'll do it lazily in
+     * {@link #hasFileDescriptors()}.
+     */
+    private void maybePrefillHasFds() {
+        if (mParcelledData != null) {
+            if (mParcelledData.hasFileDescriptors()) {
+                mFlags |= FLAG_HAS_FDS | FLAG_HAS_FDS_KNOWN;
+            } else {
+                mFlags |= FLAG_HAS_FDS_KNOWN;
+            }
         }
     }
 
@@ -1204,10 +1242,8 @@ public final class Bundle extends BaseBundle implements Cloneable, Parcelable {
      */
     public void readFromParcel(Parcel parcel) {
         super.readFromParcelInner(parcel);
-        mFlags = FLAG_HAS_FDS_KNOWN | FLAG_ALLOW_FDS;
-        if (mParcelledData.hasFileDescriptors()) {
-            mFlags |= FLAG_HAS_FDS;
-        }
+        mFlags = FLAG_ALLOW_FDS;
+        maybePrefillHasFds();
     }
 
     @Override

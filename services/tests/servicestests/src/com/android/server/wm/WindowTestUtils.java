@@ -32,6 +32,7 @@ import static android.content.pm.ActivityInfo.SCREEN_ORIENTATION_UNSPECIFIED;
 import static android.content.res.Configuration.EMPTY;
 import static com.android.server.wm.WindowContainer.POSITION_TOP;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 
 /**
  * A collection of static functions that can be referenced by other test packages to provide access
@@ -51,7 +52,10 @@ public class WindowTestUtils {
      * Retrieves an instance of a mock {@link WindowManagerService}.
      */
     public static WindowManagerService getMockWindowManagerService() {
-        return mock(WindowManagerService.class);
+        final WindowManagerService service = mock(WindowManagerService.class);
+        final WindowHashMap windowMap = new WindowHashMap();
+        when(service.getWindowManagerLock()).thenReturn(windowMap);
+        return service;
     }
 
     /**

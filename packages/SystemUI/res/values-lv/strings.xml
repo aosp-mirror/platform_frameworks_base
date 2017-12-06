@@ -65,7 +65,7 @@
     <string name="usb_debugging_message" msgid="2220143855912376496">"Datora RSA atslēgas ciparfails: \n<xliff:g id="FINGERPRINT">%1$s</xliff:g>"</string>
     <string name="usb_debugging_always" msgid="303335496705863070">"Vienmēr atļaut no šī datora"</string>
     <string name="usb_debugging_secondary_user_title" msgid="6353808721761220421">"USB atkļūdošana nav atļauta"</string>
-    <string name="usb_debugging_secondary_user_message" msgid="8572228137833020196">"Lietotājs, kurš pašlaik ir pierakstījies šajā ierīcē, nevar iespējot USB atkļūdošanu. Lai izmantotu šo funkciju, pārslēdzieties uz lietotāju, kam ir administratora tiesības."</string>
+    <string name="usb_debugging_secondary_user_message" msgid="6067122453571699801">"Lietotājs, kurš pašlaik ir pierakstījies šajā ierīcē, nevar iespējot USB atkļūdošanu. Lai izmantotu šo funkciju, pārslēdzieties uz galveno lietotāju."</string>
     <string name="compat_mode_on" msgid="6623839244840638213">"Tālumm., lai aizp. ekr."</string>
     <string name="compat_mode_off" msgid="4434467572461327898">"Stiepiet, lai aizp. ekr."</string>
     <string name="screenshot_saving_ticker" msgid="7403652894056693515">"Saglabā ekrānuzņēmumu…"</string>
@@ -355,10 +355,10 @@
     <string name="description_target_search" msgid="3091587249776033139">"Meklēt"</string>
     <string name="description_direction_up" msgid="7169032478259485180">"Velciet uz augšu, lai veiktu šādu darbību: <xliff:g id="TARGET_DESCRIPTION">%s</xliff:g>."</string>
     <string name="description_direction_left" msgid="7207478719805562165">"Velciet pa kreisi, lai veiktu šādu darbību: <xliff:g id="TARGET_DESCRIPTION">%s</xliff:g>."</string>
-    <string name="zen_priority_introduction" msgid="7577965386868311310">"Jūs netraucēs skaņas un vibrācija, izņemot signālus, atgādinājumus, pasākumus un zvanītājus, ko būsiet norādījis. Jūs joprojām dzirdēsiet atskaņošanai izvēlētos vienumus, tostarp mūziku, videoklipus un spēles."</string>
-    <string name="zen_alarms_introduction" msgid="7034415210361973827">"Jūs netraucēs skaņas un vibrācija, izņemot signālus. Jūs joprojām dzirdēsiet atskaņošanai izvēlētos vienumus, tostarp mūziku, videoklipus un spēles."</string>
+    <string name="zen_priority_introduction" msgid="1149025108714420281">"Jūs netraucēs skaņas un vibrācija, izņemot signālus, atgādinājumus, pasākumus un zvanītājus, ko būsiet norādījis. Jūs joprojām dzirdēsiet atskaņošanai izvēlētos vienumus, tostarp mūziku, videoklipus un spēles."</string>
+    <string name="zen_alarms_introduction" msgid="4934328096749380201">"Jūs netraucēs skaņas un vibrācija, izņemot signālus. Jūs joprojām dzirdēsiet atskaņošanai izvēlētos vienumus, tostarp mūziku, videoklipus un spēles."</string>
     <string name="zen_priority_customize_button" msgid="7948043278226955063">"Pielāgot"</string>
-    <string name="zen_silence_introduction_voice" msgid="2284540992298200729">"Tiks bloķētas VISAS skaņas un vibrosignāli, tostarp modinātāja, mūzikas, videoklipu un spēļu skaņas un signāli. Jūs joprojām varēsiet veikt tālruņa zvanus."</string>
+    <string name="zen_silence_introduction_voice" msgid="3948778066295728085">"Tiks bloķētas VISAS skaņas un vibrosignāli, tostarp modinātāja, mūzikas, videoklipu un spēļu skaņas un signāli. Jūs joprojām varēsiet veikt tālruņa zvanus."</string>
     <string name="zen_silence_introduction" msgid="3137882381093271568">"Tiks bloķētas VISAS skaņas un vibrosignāli, tostarp modinātāja, mūzikas, videoklipu un spēļu skaņas un signāli."</string>
     <string name="keyguard_more_overflow_text" msgid="9195222469041601365">"+<xliff:g id="NUMBER_OF_NOTIFICATIONS">%d</xliff:g>"</string>
     <string name="speed_bump_explanation" msgid="1288875699658819755">"Mazāk steidzami paziņojumi tiek rādīti tālāk"</string>
@@ -458,7 +458,7 @@
     <string name="monitoring_description_do_learn_more" msgid="1849514470437907421">"Uzzināt vairāk"</string>
     <string name="monitoring_description_do_body_vpn" msgid="8255218762488901796">"Ir izveidots savienojums ar lietotni <xliff:g id="VPN_APP">%1$s</xliff:g>, kas var pārraudzīt jūsu darbības tīklā, tostarp e-pasta ziņojumus, lietotnes un vietnes."</string>
     <string name="monitoring_description_vpn_settings_separator" msgid="1933186756733474388">" "</string>
-    <string name="monitoring_description_vpn_settings" msgid="8869300202410505143">"Atvērt VPN iestatījumus"</string>
+    <string name="monitoring_description_vpn_settings" msgid="6434859242636063861">"Atvērt VPN iestatījumus"</string>
     <string name="monitoring_description_ca_cert_settings_separator" msgid="4987350385906393626">" "</string>
     <string name="monitoring_description_ca_cert_settings" msgid="5489969458872997092">"Atvērt uzticamo akreditācijas datu sadaļu"</string>
     <string name="monitoring_description_network_logging" msgid="7223505523384076027">"Administrators ir ieslēdzis tīkla reģistrēšanu, kuru izmanto, lai pārraudzītu datplūsmu jūsu ierīcē.\n\nLai iegūtu plašāku informāciju, sazinieties ar administratoru."</string>
@@ -558,9 +558,9 @@
     <string name="notification_default_channel_desc" msgid="2506053815870808359">"Paziņojumu kategorijas šajā lietotnē nav pieejamas."</string>
     <string name="notification_unblockable_desc" msgid="3561016061737896906">"Paziņojumus no šīs lietotnes nevar izslēgt"</string>
     <plurals name="notification_num_channels_desc" formatted="false" msgid="5492793452274077663">
-      <item quantity="zero">1 no <xliff:g id="NUMBER_1">%d</xliff:g> šīs lietotnes paziņojumu kategorijām.</item>
-      <item quantity="one">1 no <xliff:g id="NUMBER_1">%d</xliff:g> šīs lietotnes paziņojumu kategorijas.</item>
-      <item quantity="other">1 no <xliff:g id="NUMBER_1">%d</xliff:g> šīs lietotnes paziņojumu kategorijām.</item>
+      <item quantity="zero">1 no <xliff:g id="NUMBER_1">%s</xliff:g> šīs lietotnes paziņojumu kategorijām.</item>
+      <item quantity="one">1 no <xliff:g id="NUMBER_1">%s</xliff:g> šīs lietotnes paziņojumu kategorijas.</item>
+      <item quantity="other">1 no <xliff:g id="NUMBER_1">%s</xliff:g> šīs lietotnes paziņojumu kategorijām.</item>
     </plurals>
     <string name="notification_channels_list_desc_2" msgid="6214732715833946441">"<xliff:g id="CHANNEL_NAME_1">%1$s</xliff:g>, <xliff:g id="CHANNEL_NAME_2">%2$s</xliff:g>"</string>
     <plurals name="notification_channels_list_desc_2_and_others" formatted="false" msgid="2747813553355336157">
@@ -591,8 +591,8 @@
       <item quantity="other">%d minūtes</item>
     </plurals>
     <string name="battery_panel_title" msgid="7944156115535366613">"Akumulatora lietojums"</string>
-    <string name="battery_detail_charging_summary" msgid="1279095653533044008">"Akumulatora jaudas taupīšanas režīms uzlādes laikā nav pieejams."</string>
-    <string name="battery_detail_switch_title" msgid="6285872470260795421">"Akumulatora jaudas taupīšanas režīms"</string>
+    <string name="battery_detail_charging_summary" msgid="4055327085770378335">"Akumulatora jaudas taupīšanas režīms nav pieejams uzlādes laikā."</string>
+    <string name="battery_detail_switch_title" msgid="8763441006881907058">"Akumulatora jaudas taupīšanas režīms"</string>
     <string name="battery_detail_switch_summary" msgid="9049111149407626804">"Samazina veiktspēju un fona datus."</string>
     <string name="keyboard_key_button_template" msgid="6230056639734377300">"Poga <xliff:g id="NAME">%1$s</xliff:g>"</string>
     <string name="keyboard_key_home" msgid="2243500072071305073">"Sākumvietas taustiņš"</string>
@@ -732,9 +732,9 @@
     <string name="pip_phone_minimize" msgid="1079119422589131792">"Minimizēt"</string>
     <string name="pip_phone_close" msgid="8416647892889710330">"Aizvērt"</string>
     <string name="pip_phone_dismiss_hint" msgid="6351678169095923899">"Velciet lejup, lai noraidītu"</string>
-    <string name="pip_menu_title" msgid="3328510504196964712">"Izvēlne attēlam attēlā"</string>
+    <string name="pip_menu_title" msgid="4707292089961887657">"Izvēlne"</string>
     <string name="pip_notification_title" msgid="3204024940158161322">"<xliff:g id="NAME">%s</xliff:g> ir attēlā attēlā"</string>
-    <string name="pip_notification_message" msgid="4171698133469539591">"Ja nevēlaties lietotnē <xliff:g id="NAME">%s</xliff:g> izmantot šo funkciju, pieskarieties, lai atvērtu iestatījumus un funkciju izslēgtu."</string>
+    <string name="pip_notification_message" msgid="5619512781514343311">"Ja nevēlaties lietotnē <xliff:g id="NAME">%s</xliff:g> izmantot šo funkciju, pieskarieties, lai atvērtu iestatījumus un izslēgtu funkciju."</string>
     <string name="pip_play" msgid="1417176722760265888">"Atskaņot"</string>
     <string name="pip_pause" msgid="8881063404466476571">"Apturēt"</string>
     <string name="pip_skip_to_next" msgid="1948440006726306284">"Pāriet uz nākamo"</string>
@@ -760,6 +760,7 @@
     <string name="tuner_menu" msgid="191640047241552081">"Izvēlne"</string>
     <string name="tuner_app" msgid="3507057938640108777">"<xliff:g id="APP">%1$s</xliff:g> lietotne"</string>
     <string name="notification_channel_alerts" msgid="4496839309318519037">"Brīdinājumi"</string>
+    <string name="notification_channel_battery" msgid="5786118169182888462">"Akumulators"</string>
     <string name="notification_channel_screenshot" msgid="6314080179230000938">"Ekrānuzņēmumi"</string>
     <string name="notification_channel_general" msgid="4525309436693914482">"Vispārīgi ziņojumi"</string>
     <string name="notification_channel_storage" msgid="3077205683020695313">"Krātuve"</string>
@@ -780,4 +781,5 @@
     <string name="running_foreground_services_title" msgid="381024150898615683">"Lietotnes, kas darbojas fonā"</string>
     <string name="running_foreground_services_msg" msgid="6326247670075574355">"Pieskarieties, lai skatītu detalizētu informāciju par akumulatora un datu lietojumu"</string>
     <string name="data_usage_disable_mobile" msgid="5116269981510015864">"Vai izslēgt mobilos datus?"</string>
+    <string name="touch_filtered_warning" msgid="8671693809204767551">"Lietotne Iestatījumi nevar verificēt jūsu atbildi, jo cita lietotne aizsedz atļaujas pieprasījumu."</string>
 </resources>

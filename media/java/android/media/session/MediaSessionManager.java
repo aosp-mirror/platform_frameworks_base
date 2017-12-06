@@ -546,18 +546,23 @@ public final class MediaSessionManager {
         private final IActiveSessionsListener.Stub mStub = new IActiveSessionsListener.Stub() {
             @Override
             public void onActiveSessionsChanged(final List<MediaSession.Token> tokens) {
-                if (mHandler != null) {
-                    mHandler.post(new Runnable() {
+                final Handler handler = mHandler;
+                if (handler != null) {
+                    handler.post(new Runnable() {
                         @Override
                         public void run() {
-                            if (mListener != null) {
+                            final Context context = mContext;
+                            if (context != null) {
                                 ArrayList<MediaController> controllers
                                         = new ArrayList<MediaController>();
                                 int size = tokens.size();
                                 for (int i = 0; i < size; i++) {
-                                    controllers.add(new MediaController(mContext, tokens.get(i)));
+                                    controllers.add(new MediaController(context, tokens.get(i)));
                                 }
-                                mListener.onActiveSessionsChanged(controllers);
+                                final OnActiveSessionsChangedListener listener = mListener;
+                                if (listener != null) {
+                                    listener.onActiveSessionsChanged(controllers);
+                                }
                             }
                         }
                     });
@@ -566,8 +571,8 @@ public final class MediaSessionManager {
         };
 
         private void release() {
-            mContext = null;
             mListener = null;
+            mContext = null;
             mHandler = null;
         }
     }

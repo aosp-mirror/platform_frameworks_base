@@ -150,6 +150,7 @@ android.app.-$Lambda$CsyQO--8YdRe5wlajUCi-L98enA$1
 android.app.-$Lambda$CsyQO--8YdRe5wlajUCi-L98enA$2
 android.app.-$Lambda$CsyQO--8YdRe5wlajUCi-L98enA$3
 android.app.-$Lambda$FilBqgnXJrN9Mgyks1XHeAxzSTk
+android.app.-$Lambda$aS31cHIhRx41653CMnd4gZqshIQ
 android.app.-$Lambda$c44uHH2WE4sJvw5tZZB6gRzEaHI
 android.app.-$Lambda$c44uHH2WE4sJvw5tZZB6gRzEaHI$1
 android.app.-$Lambda$vZ1qb742P9hE4drBY-TrOZB_qKo
@@ -256,6 +257,7 @@ android.app.BroadcastOptions
 android.app.ContentProviderHolder
 android.app.ContentProviderHolder$1
 android.app.ContextImpl
+android.app.ContextImpl$1
 android.app.ContextImpl$ApplicationContentResolver
 android.app.DatePickerDialog$OnDateSetListener
 android.app.DexLoadReporter
@@ -370,6 +372,8 @@ android.app.IntentService
 android.app.IntentService$ServiceHandler
 android.app.JobSchedulerImpl
 android.app.KeyguardManager
+android.app.KeyguardManager$1
+android.app.KeyguardManager$KeyguardDismissCallback
 android.app.ListActivity
 android.app.ListFragment
 android.app.ListFragment$1
@@ -542,6 +546,9 @@ android.app.SystemServiceRegistry$8
 android.app.SystemServiceRegistry$80
 android.app.SystemServiceRegistry$81
 android.app.SystemServiceRegistry$82
+android.app.SystemServiceRegistry$83
+android.app.SystemServiceRegistry$84
+android.app.SystemServiceRegistry$85
 android.app.SystemServiceRegistry$9
 android.app.SystemServiceRegistry$CachedServiceFetcher
 android.app.SystemServiceRegistry$ServiceFetcher
@@ -554,7 +561,10 @@ android.app.UserSwitchObserver
 android.app.Vr2dDisplayProperties
 android.app.VrManager
 android.app.WaitResult
+android.app.WallpaperColors
+android.app.WallpaperColors$1
 android.app.WallpaperInfo
+android.app.WallpaperInfo$1
 android.app.WallpaperManager
 android.app.WallpaperManager$Globals
 android.app.admin.DeviceAdminInfo
@@ -634,6 +644,8 @@ android.app.job.JobServiceEngine
 android.app.job.JobServiceEngine$JobHandler
 android.app.job.JobServiceEngine$JobInterface
 android.app.job.JobWorkItem
+android.app.job.JobWorkItem$1
+android.app.timezone.RulesManager
 android.app.trust.IStrongAuthTracker
 android.app.trust.IStrongAuthTracker$Stub
 android.app.trust.IStrongAuthTracker$Stub$Proxy
@@ -1136,6 +1148,7 @@ android.content.res.GradientColor
 android.content.res.ObbInfo
 android.content.res.ObbInfo$1
 android.content.res.ObbScanner
+android.content.res.ResourceId
 android.content.res.Resources
 android.content.res.Resources$NotFoundException
 android.content.res.Resources$Theme
@@ -1189,6 +1202,7 @@ android.database.MergeCursor$1
 android.database.Observable
 android.database.SQLException
 android.database.StaleDataException
+android.database.sqlite.-$Lambda$gPaS7kMbZ8xtrrEx06GlwJ2iDWE
 android.database.sqlite.DatabaseObjectNotClosedException
 android.database.sqlite.SQLiteAbortException
 android.database.sqlite.SQLiteCantOpenDatabaseException
@@ -1201,6 +1215,7 @@ android.database.sqlite.SQLiteConnection$PreparedStatementCache
 android.database.sqlite.SQLiteConnectionPool
 android.database.sqlite.SQLiteConnectionPool$AcquiredConnectionStatus
 android.database.sqlite.SQLiteConnectionPool$ConnectionWaiter
+android.database.sqlite.SQLiteConnectionPool$IdleConnectionHandler
 android.database.sqlite.SQLiteConstraintException
 android.database.sqlite.SQLiteCursor
 android.database.sqlite.SQLiteCursorDriver
@@ -1210,6 +1225,8 @@ android.database.sqlite.SQLiteDatabase$1
 android.database.sqlite.SQLiteDatabase$2
 android.database.sqlite.SQLiteDatabase$CursorFactory
 android.database.sqlite.SQLiteDatabase$CustomFunction
+android.database.sqlite.SQLiteDatabase$OpenParams
+android.database.sqlite.SQLiteDatabase$OpenParams$Builder
 android.database.sqlite.SQLiteDatabaseConfiguration
 android.database.sqlite.SQLiteDatabaseCorruptException
 android.database.sqlite.SQLiteDatabaseLockedException
@@ -1270,6 +1287,7 @@ android.graphics.Canvas$NoImagePreloadHolder
 android.graphics.CanvasProperty
 android.graphics.Color
 android.graphics.ColorFilter
+android.graphics.ColorFilter$NoImagePreloadHolder
 android.graphics.ColorMatrix
 android.graphics.ColorMatrixColorFilter
 android.graphics.ColorSpace
@@ -1295,6 +1313,7 @@ android.graphics.ImageFormat
 android.graphics.Insets
 android.graphics.Interpolator
 android.graphics.Interpolator$Result
+android.graphics.LeakyTypefaceStorage
 android.graphics.LightingColorFilter
 android.graphics.LinearGradient
 android.graphics.MaskFilter
@@ -1344,6 +1363,7 @@ android.graphics.Region$1
 android.graphics.Region$Op
 android.graphics.RegionIterator
 android.graphics.Shader
+android.graphics.Shader$NoImagePreloadHolder
 android.graphics.Shader$TileMode
 android.graphics.SumPathEffect
 android.graphics.SurfaceTexture
@@ -1857,6 +1877,7 @@ android.hardware.soundtrigger.SoundTrigger$ConfidenceLevel$1
 android.hardware.soundtrigger.SoundTrigger$GenericRecognitionEvent
 android.hardware.soundtrigger.SoundTrigger$GenericRecognitionEvent$1
 android.hardware.soundtrigger.SoundTrigger$GenericSoundModel
+android.hardware.soundtrigger.SoundTrigger$GenericSoundModel$1
 android.hardware.soundtrigger.SoundTrigger$Keyphrase
 android.hardware.soundtrigger.SoundTrigger$Keyphrase$1
 android.hardware.soundtrigger.SoundTrigger$KeyphraseRecognitionEvent
@@ -1881,6 +1902,7 @@ android.hardware.usb.IUsbManager$Stub
 android.hardware.usb.IUsbManager$Stub$Proxy
 android.hardware.usb.UsbAccessory
 android.hardware.usb.UsbDevice
+android.hardware.usb.UsbDevice$1
 android.hardware.usb.UsbDeviceConnection
 android.hardware.usb.UsbManager
 android.hardware.usb.UsbPort
@@ -2018,6 +2040,16 @@ android.icu.impl.SimpleFormatterImpl
 android.icu.impl.SoftCache
 android.icu.impl.StandardPlural
 android.icu.impl.StringPrepDataReader
+android.icu.impl.TextTrieMap
+android.icu.impl.TextTrieMap$Node
+android.icu.impl.TimeZoneNamesFactoryImpl
+android.icu.impl.TimeZoneNamesImpl
+android.icu.impl.TimeZoneNamesImpl$MZ2TZsCache
+android.icu.impl.TimeZoneNamesImpl$MZMapEntry
+android.icu.impl.TimeZoneNamesImpl$TZ2MZsCache
+android.icu.impl.TimeZoneNamesImpl$ZNames
+android.icu.impl.TimeZoneNamesImpl$ZNames$NameTypeIndex
+android.icu.impl.TimeZoneNamesImpl$ZNamesLoader
 android.icu.impl.Trie
 android.icu.impl.Trie$DataManipulate
 android.icu.impl.Trie$DefaultGetFoldingOffset
@@ -2262,6 +2294,9 @@ android.icu.text.SimpleDateFormat
 android.icu.text.SimpleDateFormat$PatternItem
 android.icu.text.StringPrep
 android.icu.text.StringPrepParseException
+android.icu.text.TimeZoneNames
+android.icu.text.TimeZoneNames$Cache
+android.icu.text.TimeZoneNames$Factory
 android.icu.text.TimeZoneNames$NameType
 android.icu.text.UCharacterIterator
 android.icu.text.UFieldPosition
@@ -2277,6 +2312,7 @@ android.icu.text.UnicodeSet$Filter
 android.icu.text.UnicodeSet$GeneralCategoryMaskFilter
 android.icu.text.UnicodeSet$IntPropertyFilter
 android.icu.text.UnicodeSet$UnicodeSetIterator2
+android.icu.text.UnicodeSetSpanner
 android.icu.util.BasicTimeZone
 android.icu.util.ByteArrayWrapper
 android.icu.util.BytesTrie
@@ -2603,6 +2639,7 @@ android.media.MediaRouter$RouteInfo$1
 android.media.MediaRouter$SimpleCallback
 android.media.MediaRouter$Static
 android.media.MediaRouter$Static$1
+android.media.MediaRouter$Static$1$1
 android.media.MediaRouter$Static$Client
 android.media.MediaRouter$Static$Client$1
 android.media.MediaRouter$VolumeCallback
@@ -2632,6 +2669,7 @@ android.media.Rating
 android.media.Rating$1
 android.media.RemoteDisplay
 android.media.ResampleInputStream
+android.media.Ringtone$MyOnCompletionListener
 android.media.SoundPool
 android.media.SoundPool$Builder
 android.media.SoundPool$EventHandler
@@ -2835,6 +2873,7 @@ android.net.IpPrefix
 android.net.IpPrefix$1
 android.net.IpSecConfig
 android.net.IpSecManager
+android.net.IpSecManager$SpiUnavailableException
 android.net.LinkAddress
 android.net.LinkAddress$1
 android.net.LinkProperties
@@ -2941,6 +2980,7 @@ android.net.http.AndroidHttpClient$LoggingConfiguration
 android.net.http.HttpResponseCache
 android.net.http.SslCertificate
 android.net.http.X509TrustManagerExtensions
+android.net.lowpan.LowpanManager
 android.net.metrics.ApfProgramEvent
 android.net.metrics.ApfProgramEvent$1
 android.net.metrics.ApfStats
@@ -3113,6 +3153,7 @@ android.opengl.Visibility
 android.os.-$Lambda$-dncxFEc2F2bgG2fsIoC6FC6WNE
 android.os.-$Lambda$-dncxFEc2F2bgG2fsIoC6FC6WNE$1
 android.os.-$Lambda$6x30vPJhBKUfNY8tswxuZo3DCe0
+android.os.-$Lambda$BcGBlsGjMZMF6Ej78rWJ608MYSM
 android.os.AsyncResult
 android.os.AsyncTask
 android.os.AsyncTask$1
@@ -3150,6 +3191,7 @@ android.os.BatteryStats$Uid
 android.os.BatteryStats$Uid$Pid
 android.os.BatteryStats$Uid$Pkg
 android.os.BatteryStats$Uid$Pkg$Serv
+android.os.BatteryStats$Uid$Proc
 android.os.BatteryStats$Uid$Sensor
 android.os.BatteryStats$Uid$Wakelock
 android.os.Binder
@@ -3269,6 +3311,7 @@ android.os.OperationCanceledException
 android.os.Parcel
 android.os.Parcel$1
 android.os.Parcel$2
+android.os.Parcel$ReadWriteHelper
 android.os.ParcelFileDescriptor
 android.os.ParcelFileDescriptor$1
 android.os.ParcelFileDescriptor$2
@@ -3283,6 +3326,7 @@ android.os.Parcelable
 android.os.Parcelable$ClassLoaderCreator
 android.os.Parcelable$Creator
 android.os.ParcelableException
+android.os.ParcelableException$1
 android.os.ParcelableParcel
 android.os.ParcelableParcel$1
 android.os.PatternMatcher
@@ -3324,7 +3368,10 @@ android.os.ServiceManager$ServiceNotFoundException
 android.os.ServiceManagerNative
 android.os.ServiceManagerProxy
 android.os.ServiceSpecificException
+android.os.SharedMemory
+android.os.SharedMemory$1
 android.os.ShellCallback
+android.os.ShellCallback$1
 android.os.StatFs
 android.os.StrictMode
 android.os.StrictMode$1
@@ -3460,6 +3507,7 @@ android.printservice.PrintServiceInfo$1
 android.printservice.recommendation.IRecommendationsChangeListener
 android.provider.-$Lambda$87WmhkvObehVg0OMBzwa_MTVV8g
 android.provider.-$Lambda$a7Jyr6j_Mb70hHJ2ssL1AAhKh4c
+android.provider.-$Lambda$asz6VwQ86PPY-v8JLMb7rx-pSqg
 android.provider.BaseColumns
 android.provider.BlockedNumberContract
 android.provider.BlockedNumberContract$BlockedNumbers
@@ -3831,6 +3879,7 @@ android.system.StructPasswd
 android.system.StructPollfd
 android.system.StructStat
 android.system.StructStatVfs
+android.system.StructTimespec
 android.system.StructTimeval
 android.system.StructUcred
 android.system.StructUtsname
@@ -3899,6 +3948,8 @@ android.telecom.TelecomManager
 android.telecom.VideoProfile
 android.telecom.VideoProfile$1
 android.telephony.CarrierConfigManager
+android.telephony.CellIdentityLte
+android.telephony.CellIdentityLte$1
 android.telephony.CellIdentityWcdma
 android.telephony.CellIdentityWcdma$1
 android.telephony.CellInfo
@@ -3906,10 +3957,13 @@ android.telephony.CellInfo$1
 android.telephony.CellInfoCdma
 android.telephony.CellInfoGsm
 android.telephony.CellInfoLte
+android.telephony.CellInfoLte$1
 android.telephony.CellInfoWcdma
 android.telephony.CellInfoWcdma$1
 android.telephony.CellLocation
 android.telephony.CellSignalStrength
+android.telephony.CellSignalStrengthLte
+android.telephony.CellSignalStrengthLte$1
 android.telephony.CellSignalStrengthWcdma
 android.telephony.CellSignalStrengthWcdma$1
 android.telephony.ClientRequestStats
@@ -3947,6 +4001,7 @@ android.telephony.TelephonyManager$MultiSimVariants
 android.telephony.VisualVoicemailSmsFilterSettings
 android.telephony.VoLteServiceState
 android.telephony.VoLteServiceState$1
+android.telephony.euicc.EuiccManager
 android.telephony.gsm.GsmCellLocation
 android.telephony.ims.stub.ImsConfigImplBase
 android.telephony.ims.stub.ImsEcbmImplBase
@@ -4018,6 +4073,7 @@ android.text.TextDirectionHeuristics$TextDirectionHeuristicImpl
 android.text.TextDirectionHeuristics$TextDirectionHeuristicInternal
 android.text.TextDirectionHeuristics$TextDirectionHeuristicLocale
 android.text.TextLine
+android.text.TextLine$DecorationInfo
 android.text.TextPaint
 android.text.TextUtils
 android.text.TextUtils$1
@@ -4083,6 +4139,7 @@ android.text.style.SpellCheckSpan
 android.text.style.StrikethroughSpan
 android.text.style.StyleSpan
 android.text.style.SuggestionSpan
+android.text.style.SuggestionSpan$1
 android.text.style.TabStopSpan
 android.text.style.TextAppearanceSpan
 android.text.style.TtsSpan
@@ -4179,7 +4236,6 @@ android.util.Base64
 android.util.Base64$Coder
 android.util.Base64$Decoder
 android.util.Base64$Encoder
-android.util.BootTimingsTraceLog
 android.util.ByteStringUtils
 android.util.ContainerHelpers
 android.util.DebugUtils
@@ -4205,6 +4261,7 @@ android.util.LocalLog$ReadOnlyLocalLog
 android.util.Log
 android.util.Log$1
 android.util.Log$ImmediateLogWriter
+android.util.Log$PreloadHolder
 android.util.Log$TerribleFailure
 android.util.Log$TerribleFailureHandler
 android.util.LogPrinter
@@ -4255,6 +4312,7 @@ android.util.TimeFormatException
 android.util.TimeUtils
 android.util.TimedRemoteCaller
 android.util.TimingLogger
+android.util.TimingsTraceLog
 android.util.TrustedTime
 android.util.TypedValue
 android.util.Xml
@@ -4278,11 +4336,15 @@ android.view.-$Lambda$6k_RnLLpNi5zg27ubDxN4lDdBbk$1
 android.view.-$Lambda$6k_RnLLpNi5zg27ubDxN4lDdBbk$2
 android.view.-$Lambda$6k_RnLLpNi5zg27ubDxN4lDdBbk$3
 android.view.-$Lambda$P6MTGFSudLpwrqb6oVD8FdorW1c
+android.view.-$Lambda$XmA8Y30pNAdQP9ujRlGx1qfDHH8
 android.view.-$Lambda$iU_USrtPm1XIm5H9QYQvXfBGDE4
 android.view.-$Lambda$iU_USrtPm1XIm5H9QYQvXfBGDE4$1
 android.view.AbsSavedState
 android.view.AbsSavedState$1
 android.view.AbsSavedState$2
+android.view.AccessibilityInteractionController
+android.view.AccessibilityInteractionController$AccessibilityNodePrefetcher
+android.view.AccessibilityInteractionController$PrivateHandler
 android.view.ActionMode
 android.view.ActionMode$Callback
 android.view.ActionMode$Callback2
@@ -4293,6 +4355,7 @@ android.view.AppTransitionAnimationSpec$1
 android.view.Choreographer
 android.view.Choreographer$1
 android.view.Choreographer$2
+android.view.Choreographer$3
 android.view.Choreographer$CallbackQueue
 android.view.Choreographer$CallbackRecord
 android.view.Choreographer$FrameCallback
@@ -4451,6 +4514,7 @@ android.view.SurfaceView$1
 android.view.SurfaceView$2
 android.view.SurfaceView$3
 android.view.SurfaceView$4
+android.view.SurfaceView$SurfaceControlWithBackground
 android.view.TextureView
 android.view.TextureView$1
 android.view.TextureView$SurfaceTextureListener
@@ -4485,6 +4549,7 @@ android.view.View$DeclaredOnClickListener
 android.view.View$ForegroundInfo
 android.view.View$ListenerInfo
 android.view.View$MatchIdPredicate
+android.view.View$MatchLabelForPredicate
 android.view.View$MeasureSpec
 android.view.View$OnApplyWindowInsetsListener
 android.view.View$OnAttachStateChangeListener
@@ -4502,6 +4567,7 @@ android.view.View$OnSystemUiVisibilityChangeListener
 android.view.View$OnTouchListener
 android.view.View$PerformClick
 android.view.View$ScrollabilityCache
+android.view.View$SendViewScrolledAccessibilityEvent
 android.view.View$TintInfo
 android.view.View$TooltipInfo
 android.view.View$TransformationInfo
@@ -4542,6 +4608,7 @@ android.view.ViewRootImpl
 android.view.ViewRootImpl$1
 android.view.ViewRootImpl$2
 android.view.ViewRootImpl$4
+android.view.ViewRootImpl$AccessibilityInteractionConnection
 android.view.ViewRootImpl$AccessibilityInteractionConnectionManager
 android.view.ViewRootImpl$ActivityConfigCallback
 android.view.ViewRootImpl$AsyncInputStage
@@ -4556,6 +4623,7 @@ android.view.ViewRootImpl$InvalidateOnAnimationRunnable
 android.view.ViewRootImpl$NativePostImeInputStage
 android.view.ViewRootImpl$NativePreImeInputStage
 android.view.ViewRootImpl$QueuedInputEvent
+android.view.ViewRootImpl$SendWindowContentChangedAccessibilityEvent
 android.view.ViewRootImpl$SyntheticInputStage
 android.view.ViewRootImpl$SyntheticJoystickHandler
 android.view.ViewRootImpl$SyntheticKeyboardHandler
@@ -4626,6 +4694,7 @@ android.view.WindowManagerPolicy$ScreenOnListener
 android.view.WindowManagerPolicy$StartingSurface
 android.view.WindowManagerPolicy$WindowManagerFuncs
 android.view.WindowManagerPolicy$WindowState
+android.view.accessibility.-$Lambda$T3m_l9_RA18vCOcakSWp1lZCy5g$1
 android.view.accessibility.AccessibilityEvent
 android.view.accessibility.AccessibilityEvent$1
 android.view.accessibility.AccessibilityEventSource
@@ -4637,6 +4706,7 @@ android.view.accessibility.AccessibilityManager$HighTextContrastChangeListener
 android.view.accessibility.AccessibilityManager$MyCallback
 android.view.accessibility.AccessibilityManager$TouchExplorationStateChangeListener
 android.view.accessibility.AccessibilityNodeInfo
+android.view.accessibility.AccessibilityNodeInfo$1
 android.view.accessibility.AccessibilityNodeInfo$AccessibilityAction
 android.view.accessibility.AccessibilityNodeProvider
 android.view.accessibility.AccessibilityRecord
@@ -4649,6 +4719,8 @@ android.view.accessibility.IAccessibilityInteractionConnection
 android.view.accessibility.IAccessibilityInteractionConnection$Stub
 android.view.accessibility.IAccessibilityInteractionConnection$Stub$Proxy
 android.view.accessibility.IAccessibilityInteractionConnectionCallback
+android.view.accessibility.IAccessibilityInteractionConnectionCallback$Stub
+android.view.accessibility.IAccessibilityInteractionConnectionCallback$Stub$Proxy
 android.view.accessibility.IAccessibilityManager
 android.view.accessibility.IAccessibilityManager$Stub
 android.view.accessibility.IAccessibilityManager$Stub$Proxy
@@ -4740,6 +4812,7 @@ android.view.textclassifier.TextClassificationManager
 android.view.textclassifier.TextClassifier
 android.view.textclassifier.TextClassifier$1
 android.view.textclassifier.TextClassifierImpl
+android.view.textclassifier.logging.SmartSelectionEventTracker
 android.view.textservice.SpellCheckerInfo
 android.view.textservice.SpellCheckerInfo$1
 android.view.textservice.SpellCheckerSession
@@ -4802,6 +4875,7 @@ android.webkit.WebViewFactory$MissingWebViewPackageException
 android.webkit.WebViewFactory$RelroFileCreator
 android.webkit.WebViewFactoryProvider
 android.webkit.WebViewFactoryProvider$Statics
+android.webkit.WebViewLibraryLoader
 android.webkit.WebViewProvider
 android.webkit.WebViewProvider$ScrollDelegate
 android.webkit.WebViewProvider$ViewDelegate
@@ -4991,6 +5065,7 @@ android.widget.PopupWindow$PopupDecorView
 android.widget.PopupWindow$PopupDecorView$1
 android.widget.ProgressBar
 android.widget.ProgressBar$1
+android.widget.ProgressBar$AccessibilityEventSender
 android.widget.ProgressBar$ProgressTintInfo
 android.widget.ProgressBar$RefreshData
 android.widget.ProgressBar$RefreshProgressRunnable
@@ -5009,6 +5084,7 @@ android.widget.RelativeLayout
 android.widget.RelativeLayout$DependencyGraph
 android.widget.RelativeLayout$DependencyGraph$Node
 android.widget.RelativeLayout$LayoutParams
+android.widget.RelativeLayout$TopToBottomLeftToRightComparator
 android.widget.RemoteViews
 android.widget.RemoteViews$1
 android.widget.RemoteViews$2
@@ -5050,7 +5126,9 @@ android.widget.SectionIndexer
 android.widget.SeekBar
 android.widget.SeekBar$OnSeekBarChangeListener
 android.widget.SelectionActionModeHelper
+android.widget.SelectionActionModeHelper$SelectionMetricsLogger
 android.widget.SelectionActionModeHelper$SelectionTracker
+android.widget.SelectionActionModeHelper$SelectionTracker$LogAbandonRunnable
 android.widget.SelectionActionModeHelper$TextClassificationHelper
 android.widget.SimpleCursorAdapter
 android.widget.Space
@@ -5112,6 +5190,7 @@ android.widget.Toolbar$2
 android.widget.Toolbar$ExpandedActionViewMenuPresenter
 android.widget.Toolbar$LayoutParams
 android.widget.Toolbar$OnMenuItemClickListener
+android.widget.Toolbar$SavedState$1
 android.widget.VideoView
 android.widget.ViewAnimator
 android.widget.ViewFlipper
@@ -5238,8 +5317,8 @@ com.android.internal.app.IVoiceInteractionSessionShowCallback$Stub
 com.android.internal.app.IVoiceInteractor
 com.android.internal.app.IVoiceInteractor$Stub
 com.android.internal.app.NightDisplayController
+com.android.internal.app.NightDisplayController$1
 com.android.internal.app.NightDisplayController$Callback
-com.android.internal.app.NightDisplayController$LocalTime
 com.android.internal.app.ProcessMap
 com.android.internal.app.ResolverActivity
 com.android.internal.app.ToolbarActionBar
@@ -5360,10 +5439,12 @@ com.android.internal.os.BatteryStatsImpl$Uid$2
 com.android.internal.os.BatteryStatsImpl$Uid$3
 com.android.internal.os.BatteryStatsImpl$Uid$Pkg
 com.android.internal.os.BatteryStatsImpl$Uid$Pkg$Serv
+com.android.internal.os.BatteryStatsImpl$Uid$Proc
 com.android.internal.os.BatteryStatsImpl$Uid$Sensor
 com.android.internal.os.BatteryStatsImpl$Uid$Wakelock
 com.android.internal.os.BinderInternal
 com.android.internal.os.BinderInternal$GcWatcher
+com.android.internal.os.ClassLoaderFactory
 com.android.internal.os.FuseAppLoop
 com.android.internal.os.FuseAppLoop$1
 com.android.internal.os.FuseUnavailableMountException
@@ -5398,6 +5479,7 @@ com.android.internal.os.RuntimeInit$1
 com.android.internal.os.RuntimeInit$Arguments
 com.android.internal.os.RuntimeInit$KillApplicationHandler
 com.android.internal.os.RuntimeInit$LoggingHandler
+com.android.internal.os.RuntimeInit$MethodAndArgsCaller
 com.android.internal.os.SamplingProfilerIntegration
 com.android.internal.os.SomeArgs
 com.android.internal.os.Zygote
@@ -5417,6 +5499,7 @@ com.android.internal.policy.DividerSnapAlgorithm
 com.android.internal.policy.DividerSnapAlgorithm$SnapTarget
 com.android.internal.policy.DockedDividerUtils
 com.android.internal.policy.IKeyguardDismissCallback
+com.android.internal.policy.IKeyguardDismissCallback$Stub
 com.android.internal.policy.IKeyguardDrawnCallback
 com.android.internal.policy.IKeyguardDrawnCallback$Stub
 com.android.internal.policy.IKeyguardDrawnCallback$Stub$Proxy
@@ -5436,6 +5519,7 @@ com.android.internal.policy.PhoneWindow
 com.android.internal.policy.PhoneWindow$1
 com.android.internal.policy.PhoneWindow$ActionMenuPresenterCallback
 com.android.internal.policy.PhoneWindow$PanelFeatureState
+com.android.internal.policy.PhoneWindow$PanelFeatureState$SavedState$1
 com.android.internal.policy.PhoneWindow$PhoneWindowMenuCallback
 com.android.internal.policy.PhoneWindow$RotationWatcher
 com.android.internal.policy.PhoneWindow$RotationWatcher$1
@@ -6151,9 +6235,12 @@ com.android.org.bouncycastle.crypto.generators.PKCS12ParametersGenerator
 com.android.org.bouncycastle.crypto.io.MacInputStream
 com.android.org.bouncycastle.crypto.macs.HMac
 com.android.org.bouncycastle.crypto.params.KeyParameter
+com.android.org.bouncycastle.jcajce.provider.asymmetric.DH
 com.android.org.bouncycastle.jcajce.provider.asymmetric.DH$Mappings
 com.android.org.bouncycastle.jcajce.provider.asymmetric.DSA$Mappings
+com.android.org.bouncycastle.jcajce.provider.asymmetric.EC
 com.android.org.bouncycastle.jcajce.provider.asymmetric.EC$Mappings
+com.android.org.bouncycastle.jcajce.provider.asymmetric.RSA
 com.android.org.bouncycastle.jcajce.provider.asymmetric.RSA$Mappings
 com.android.org.bouncycastle.jcajce.provider.asymmetric.X509$Mappings
 com.android.org.bouncycastle.jcajce.provider.asymmetric.dh.KeyFactorySpi
@@ -6236,9 +6323,12 @@ com.android.org.bouncycastle.util.Pack
 com.android.org.bouncycastle.util.Strings
 com.android.org.bouncycastle.util.Strings$1
 com.android.org.bouncycastle.util.io.Streams
+com.android.org.conscrypt.AbstractConscryptSocket
+com.android.org.conscrypt.AbstractConscryptSocket$1
 com.android.org.conscrypt.AbstractOpenSSLSession
 com.android.org.conscrypt.AbstractSessionContext
 com.android.org.conscrypt.AbstractSessionContext$1
+com.android.org.conscrypt.ActiveSession
 com.android.org.conscrypt.AddressUtils
 com.android.org.conscrypt.ArrayUtils
 com.android.org.conscrypt.ByteArray
@@ -6247,7 +6337,13 @@ com.android.org.conscrypt.CertificatePriorityComparator
 com.android.org.conscrypt.ChainStrengthAnalyzer
 com.android.org.conscrypt.ClientSessionContext
 com.android.org.conscrypt.ClientSessionContext$HostAndPort
+com.android.org.conscrypt.Conscrypt
+com.android.org.conscrypt.ConscryptFileDescriptorSocket
+com.android.org.conscrypt.ConscryptFileDescriptorSocket$SSLInputStream
+com.android.org.conscrypt.ConscryptFileDescriptorSocket$SSLOutputStream
 com.android.org.conscrypt.CryptoUpcalls
+com.android.org.conscrypt.DefaultSSLContextImpl
+com.android.org.conscrypt.DelegatingExtendedSSLSession
 com.android.org.conscrypt.EvpMdRef$MD5
 com.android.org.conscrypt.EvpMdRef$SHA1
 com.android.org.conscrypt.EvpMdRef$SHA256
@@ -6255,6 +6351,7 @@ com.android.org.conscrypt.FileClientSessionCache
 com.android.org.conscrypt.FileClientSessionCache$CacheFile
 com.android.org.conscrypt.FileClientSessionCache$Impl
 com.android.org.conscrypt.Hex
+com.android.org.conscrypt.InternalUtil
 com.android.org.conscrypt.JSSEProvider
 com.android.org.conscrypt.KeyManagerFactoryImpl
 com.android.org.conscrypt.KeyManagerImpl
@@ -6268,6 +6365,7 @@ com.android.org.conscrypt.NativeRef$EVP_CIPHER_CTX
 com.android.org.conscrypt.NativeRef$EVP_MD_CTX
 com.android.org.conscrypt.NativeRef$EVP_PKEY
 com.android.org.conscrypt.NativeRef$HMAC_CTX
+com.android.org.conscrypt.NativeRef$SSL_SESSION
 com.android.org.conscrypt.OpenSSLBIOInputStream
 com.android.org.conscrypt.OpenSSLCipher
 com.android.org.conscrypt.OpenSSLCipher$EVP_CIPHER
@@ -6316,13 +6414,21 @@ com.android.org.conscrypt.OpenSSLX509CertificateFactory$1
 com.android.org.conscrypt.OpenSSLX509CertificateFactory$2
 com.android.org.conscrypt.OpenSSLX509CertificateFactory$Parser
 com.android.org.conscrypt.OpenSSLX509CertificateFactory$ParsingException
+com.android.org.conscrypt.PeerInfoProvider
+com.android.org.conscrypt.PeerInfoProvider$1
 com.android.org.conscrypt.Platform
+com.android.org.conscrypt.Preconditions
 com.android.org.conscrypt.SSLClientSessionCache
 com.android.org.conscrypt.SSLParametersImpl
 com.android.org.conscrypt.SSLParametersImpl$AliasChooser
 com.android.org.conscrypt.SSLParametersImpl$PSKCallbacks
 com.android.org.conscrypt.SSLUtils
+com.android.org.conscrypt.SSLUtils$SessionType
 com.android.org.conscrypt.ServerSessionContext
+com.android.org.conscrypt.SslSessionWrapper
+com.android.org.conscrypt.SslSessionWrapper$Impl
+com.android.org.conscrypt.SslSessionWrapper$Impl$1
+com.android.org.conscrypt.SslWrapper
 com.android.org.conscrypt.TrustManagerFactoryImpl
 com.android.org.conscrypt.TrustManagerImpl
 com.android.org.conscrypt.TrustManagerImpl$ExtendedKeyUsagePKIXCertPathChecker
@@ -6409,6 +6515,7 @@ dalvik.system.CloseGuard$Reporter
 dalvik.system.CloseGuard$Tracker
 dalvik.system.DalvikLogHandler
 dalvik.system.DalvikLogging
+dalvik.system.DelegateLastClassLoader
 dalvik.system.DexClassLoader
 dalvik.system.DexFile
 dalvik.system.DexFile$DFEnum
@@ -6602,6 +6709,10 @@ java.lang.Package
 java.lang.Process
 java.lang.ProcessBuilder
 java.lang.ProcessEnvironment
+java.lang.ProcessEnvironment$ExternalData
+java.lang.ProcessEnvironment$StringEnvironment
+java.lang.ProcessEnvironment$Value
+java.lang.ProcessEnvironment$Variable
 java.lang.Readable
 java.lang.ReflectiveOperationException
 java.lang.Runnable
@@ -6642,6 +6753,9 @@ java.lang.Throwable$WrappedPrintStream
 java.lang.Throwable$WrappedPrintWriter
 java.lang.TypeNotPresentException
 java.lang.UNIXProcess
+java.lang.UNIXProcess$1
+java.lang.UNIXProcess$ProcessReaperThreadFactory
+java.lang.UNIXProcess$ProcessReaperThreadFactory$1
 java.lang.UnsatisfiedLinkError
 java.lang.UnsupportedOperationException
 java.lang.VMClassLoader
@@ -6667,9 +6781,25 @@ java.lang.invoke.MethodType
 java.lang.invoke.MethodType$ConcurrentWeakInternSet
 java.lang.invoke.MethodType$ConcurrentWeakInternSet$WeakEntry
 java.lang.invoke.MethodTypeForm
+java.lang.invoke.Transformers$AlwaysThrow
 java.lang.invoke.Transformers$BindTo
+java.lang.invoke.Transformers$CatchException
+java.lang.invoke.Transformers$CollectArguments
 java.lang.invoke.Transformers$Collector
+java.lang.invoke.Transformers$Constant
 java.lang.invoke.Transformers$Construct
+java.lang.invoke.Transformers$DropArguments
+java.lang.invoke.Transformers$ExplicitCastArguments
+java.lang.invoke.Transformers$FilterArguments
+java.lang.invoke.Transformers$FilterReturnValue
+java.lang.invoke.Transformers$FoldArguments
+java.lang.invoke.Transformers$GuardWithTest
+java.lang.invoke.Transformers$InsertArguments
+java.lang.invoke.Transformers$Invoker
+java.lang.invoke.Transformers$PermuteArguments
+java.lang.invoke.Transformers$ReferenceArrayElementGetter
+java.lang.invoke.Transformers$ReferenceArrayElementSetter
+java.lang.invoke.Transformers$ReferenceIdentity
 java.lang.invoke.Transformers$Spreader
 java.lang.invoke.Transformers$Transformer
 java.lang.invoke.Transformers$VarargsCollector
@@ -7056,12 +7186,14 @@ java.text.RuleBasedCollator
 java.text.SimpleDateFormat
 java.text.StringCharacterIterator
 java.time.DateTimeException
+java.time.format.DateTimeParseException
 java.util.-$Lambda$4EqhxufgNKat19m0CB0-toH_lzo
 java.util.-$Lambda$4EqhxufgNKat19m0CB0-toH_lzo$1
 java.util.-$Lambda$4EqhxufgNKat19m0CB0-toH_lzo$2
 java.util.-$Lambda$4EqhxufgNKat19m0CB0-toH_lzo$3
 java.util.-$Lambda$4EqhxufgNKat19m0CB0-toH_lzo$4
 java.util.-$Lambda$4EqhxufgNKat19m0CB0-toH_lzo$5
+java.util.-$Lambda$Hazqao1eYCE_pmZR5Jlrc2GvLhk
 java.util.-$Lambda$aUGKT4ItCOku5-JSG-x8Aqj2pJw
 java.util.-$Lambda$aUGKT4ItCOku5-JSG-x8Aqj2pJw$1
 java.util.-$Lambda$aUGKT4ItCOku5-JSG-x8Aqj2pJw$2
@@ -7600,8 +7732,12 @@ java.util.logging.SimpleFormatter
 java.util.logging.StreamHandler
 java.util.logging.XMLFormatter
 java.util.prefs.AbstractPreferences
+java.util.prefs.BackingStoreException
 java.util.prefs.FileSystemPreferences
+java.util.prefs.FileSystemPreferences$1
+java.util.prefs.FileSystemPreferencesFactory
 java.util.prefs.Preferences
+java.util.prefs.PreferencesFactory
 java.util.regex.MatchResult
 java.util.regex.Matcher
 java.util.regex.Matcher$OffsetBasedMatchResult
@@ -7749,6 +7885,7 @@ javax.crypto.NoSuchPaddingException
 javax.crypto.NullCipher
 javax.crypto.SecretKey
 javax.crypto.ShortBufferException
+javax.crypto.spec.GCMParameterSpec
 javax.crypto.spec.IvParameterSpec
 javax.crypto.spec.OAEPParameterSpec
 javax.crypto.spec.PBEParameterSpec
@@ -8355,6 +8492,7 @@ sun.security.action.GetPropertyAction
 sun.security.jca.GetInstance
 sun.security.jca.GetInstance$Instance
 sun.security.jca.JCAUtil
+sun.security.jca.JCAUtil$CachedSecureRandomHolder
 sun.security.jca.ProviderConfig
 sun.security.jca.ProviderConfig$2
 sun.security.jca.ProviderList
@@ -8490,8 +8628,10 @@ sun.util.calendar.BaseCalendar$Date
 sun.util.calendar.CalendarDate
 sun.util.calendar.CalendarSystem
 sun.util.calendar.CalendarUtils
+sun.util.calendar.Era
 sun.util.calendar.Gregorian
 sun.util.calendar.Gregorian$Date
+sun.util.calendar.ImmutableGregorianDate
 sun.util.calendar.JulianCalendar
 sun.util.calendar.LocalGregorianCalendar
 sun.util.locale.BaseLocale

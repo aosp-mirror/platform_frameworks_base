@@ -64,7 +64,7 @@
     <string name="usb_debugging_message" msgid="2220143855912376496">"Ordenagailuaren RSA gakoaren hatz-marka hau da:\n<xliff:g id="FINGERPRINT">%1$s</xliff:g>"</string>
     <string name="usb_debugging_always" msgid="303335496705863070">"Onartu beti ordenagailu honetatik"</string>
     <string name="usb_debugging_secondary_user_title" msgid="6353808721761220421">"Ez da onartzen USB arazketa"</string>
-    <string name="usb_debugging_secondary_user_message" msgid="8572228137833020196">"Gailu honetan saioa hasita duen erabiltzaileak ezin du USB arazketa aktibatu. Eginbide hori erabiltzeko, aldatu administratzaile-erabiltzailera."</string>
+    <string name="usb_debugging_secondary_user_message" msgid="6067122453571699801">"Gailu honetan saioa hasita duen erabiltzaileak ezin du aktibatu USB arazketa. Eginbide hori erabiltzeko, aldatu erabiltzaile nagusira."</string>
     <string name="compat_mode_on" msgid="6623839244840638213">"Handiagotu pantaila betetzeko"</string>
     <string name="compat_mode_off" msgid="4434467572461327898">"Luzatu pantaila betetzeko"</string>
     <string name="screenshot_saving_ticker" msgid="7403652894056693515">"Pantaila-argazkia gordetzen…"</string>
@@ -355,10 +355,10 @@
     <string name="description_target_search" msgid="3091587249776033139">"Bilatu"</string>
     <string name="description_direction_up" msgid="7169032478259485180">"Lerratu gora hau egiteko: <xliff:g id="TARGET_DESCRIPTION">%s</xliff:g>."</string>
     <string name="description_direction_left" msgid="7207478719805562165">"Lerratu ezkerrera hau egiteko: <xliff:g id="TARGET_DESCRIPTION">%s</xliff:g>."</string>
-    <string name="zen_priority_introduction" msgid="7577965386868311310">"Gailuak ez du egingo ez soinurik ez dardararik, baina alarmak, gertaeren abisu-tonuak eta aukeratzen dituzun deitzaileen dei-tonuak joko ditu. Bestalde, zuk erreproduzitutako guztia entzungo duzu, besteak beste, musika, bideoak eta jokoak."</string>
-    <string name="zen_alarms_introduction" msgid="7034415210361973827">"Gailuak ez du egingo ez soinurik ez dardararik, baina alarmak joko ditu. Hala ere, zuk erreproduzitutako guztia entzun ahal izango duzu, besteak beste, musika, bideoak eta jokoak."</string>
+    <string name="zen_priority_introduction" msgid="1149025108714420281">"Gailuak ez du egingo ez soinurik ez dardararik, baina alarmak, gertaera eta abisuen tonuak, eta aukeratzen dituzun deitzaileen dei-tonuak joko ditu. Bestalde, zuk erreproduzitutako guztia entzungo duzu, besteak beste, musika, bideoak eta jokoak."</string>
+    <string name="zen_alarms_introduction" msgid="4934328096749380201">"Gailuak ez du egingo ez soinurik ez dardararik, baina alarmak joko ditu. Hala ere, zuk erreproduzitutako guztia entzun ahal izango duzu, besteak beste, musika, bideoak eta jokoak."</string>
     <string name="zen_priority_customize_button" msgid="7948043278226955063">"Pertsonalizatu"</string>
-    <string name="zen_silence_introduction_voice" msgid="2284540992298200729">"Soinu eta dardara GUZTIAK blokeatuko dira, besteak beste, alarmak, musika, bideoak eta jokoak. Telefono-deiak egiteko aukera izaten jarraituko duzu."</string>
+    <string name="zen_silence_introduction_voice" msgid="3948778066295728085">"Soinu eta dardara GUZTIAK blokeatuko dira, besteak beste, alarmak, musika, bideoak eta jokoak. Telefono-deiak egiteko aukera izaten jarraituko duzu."</string>
     <string name="zen_silence_introduction" msgid="3137882381093271568">"Soinu eta dardara GUZTIAK blokeatuko dira, besteak beste, alarmak, musika, bideoak eta jokoak."</string>
     <string name="keyguard_more_overflow_text" msgid="9195222469041601365">"+<xliff:g id="NUMBER_OF_NOTIFICATIONS">%d</xliff:g>"</string>
     <string name="speed_bump_explanation" msgid="1288875699658819755">"Horren premiazkoak ez diren jakinarazpenak daude behean"</string>
@@ -458,7 +458,7 @@
     <string name="monitoring_description_do_learn_more" msgid="1849514470437907421">"Informazio gehiago"</string>
     <string name="monitoring_description_do_body_vpn" msgid="8255218762488901796">"<xliff:g id="VPN_APP">%1$s</xliff:g> aplikaziora konektatuta zaude eta hark sareko jarduerak gainbegira ditzake, mezu elektronikoak, aplikazioak eta webguneak barne."</string>
     <string name="monitoring_description_vpn_settings_separator" msgid="1933186756733474388">" "</string>
-    <string name="monitoring_description_vpn_settings" msgid="8869300202410505143">"Ireki VPN ezarpenak"</string>
+    <string name="monitoring_description_vpn_settings" msgid="6434859242636063861">"Ireki VPN ezarpenak"</string>
     <string name="monitoring_description_ca_cert_settings_separator" msgid="4987350385906393626">" "</string>
     <string name="monitoring_description_ca_cert_settings" msgid="5489969458872997092">"Ireki kredentzial fidagarriak"</string>
     <string name="monitoring_description_network_logging" msgid="7223505523384076027">"Administratzaileak sare-erregistroak aktibatu ditu; horrela, zure gailuko trafikoa gainbegira dezake.\n\nInformazio gehiago lortzeko, jarri administratzailearekin harremanetan."</string>
@@ -558,8 +558,8 @@
     <string name="notification_default_channel_desc" msgid="2506053815870808359">"Aplikazio honek ez du jakinarazpen-kategoriarik"</string>
     <string name="notification_unblockable_desc" msgid="3561016061737896906">"Ezin dira desaktibatu aplikazio honen jakinarazpenak"</string>
     <plurals name="notification_num_channels_desc" formatted="false" msgid="5492793452274077663">
-      <item quantity="other">Aplikazio honen 1/<xliff:g id="NUMBER_1">%d</xliff:g> jakinarazpen-kategoria</item>
-      <item quantity="one">Aplikazio honen 1/<xliff:g id="NUMBER_0">%d</xliff:g> jakinarazpen-kategoria</item>
+      <item quantity="other">Aplikazio honen 1/<xliff:g id="NUMBER_1">%s</xliff:g> jakinarazpen-kategoria</item>
+      <item quantity="one">Aplikazio honen 1/<xliff:g id="NUMBER_0">%s</xliff:g> jakinarazpen-kategoria</item>
     </plurals>
     <string name="notification_channels_list_desc_2" msgid="6214732715833946441">"<xliff:g id="CHANNEL_NAME_1">%1$s</xliff:g>, <xliff:g id="CHANNEL_NAME_2">%2$s</xliff:g>"</string>
     <plurals name="notification_channels_list_desc_2_and_others" formatted="false" msgid="2747813553355336157">
@@ -587,8 +587,8 @@
       <item quantity="one">%d minutu</item>
     </plurals>
     <string name="battery_panel_title" msgid="7944156115535366613">"Bateriaren erabilera"</string>
-    <string name="battery_detail_charging_summary" msgid="1279095653533044008">"Bateria-aurrezlea ez dago erabilgarri gailua kargatzen ari denean"</string>
-    <string name="battery_detail_switch_title" msgid="6285872470260795421">"Bateria-aurrezlea"</string>
+    <string name="battery_detail_charging_summary" msgid="4055327085770378335">"Bateria-aurrezlea ez dago erabilgarri gailua kargatzen ari denean"</string>
+    <string name="battery_detail_switch_title" msgid="8763441006881907058">"Bateria-aurrezlea"</string>
     <string name="battery_detail_switch_summary" msgid="9049111149407626804">"Errendimendua eta atzeko planoko datuen erabilera murrizten ditu"</string>
     <string name="keyboard_key_button_template" msgid="6230056639734377300">"<xliff:g id="NAME">%1$s</xliff:g> botoia"</string>
     <string name="keyboard_key_home" msgid="2243500072071305073">"Hasiera"</string>
@@ -728,9 +728,9 @@
     <string name="pip_phone_minimize" msgid="1079119422589131792">"Minimizatu"</string>
     <string name="pip_phone_close" msgid="8416647892889710330">"Itxi"</string>
     <string name="pip_phone_dismiss_hint" msgid="6351678169095923899">"Baztertzeko, arrastatu behera"</string>
-    <string name="pip_menu_title" msgid="3328510504196964712">"Pantaila txiki gainjarriaren menua"</string>
+    <string name="pip_menu_title" msgid="4707292089961887657">"Menua"</string>
     <string name="pip_notification_title" msgid="3204024940158161322">"Pantaila txiki gainjarrian dago <xliff:g id="NAME">%s</xliff:g>"</string>
-    <string name="pip_notification_message" msgid="4171698133469539591">"Ez baduzu nahi <xliff:g id="NAME">%s</xliff:g> zerbitzuak eginbide hori erabiltzea, sakatu hau ezarpenak ireki eta aukera desaktibatzeko."</string>
+    <string name="pip_notification_message" msgid="5619512781514343311">"Ez baduzu nahi <xliff:g id="NAME">%s</xliff:g> zerbitzuak eginbide hori erabiltzea, sakatu hau ezarpenak ireki eta aukera desaktibatzeko."</string>
     <string name="pip_play" msgid="1417176722760265888">"Erreproduzitu"</string>
     <string name="pip_pause" msgid="8881063404466476571">"Pausatu"</string>
     <string name="pip_skip_to_next" msgid="1948440006726306284">"Saltatu hurrengora"</string>
@@ -756,6 +756,7 @@
     <string name="tuner_menu" msgid="191640047241552081">"Menua"</string>
     <string name="tuner_app" msgid="3507057938640108777">"<xliff:g id="APP">%1$s</xliff:g> aplikazioa"</string>
     <string name="notification_channel_alerts" msgid="4496839309318519037">"Abisuak"</string>
+    <string name="notification_channel_battery" msgid="5786118169182888462">"Bateria"</string>
     <string name="notification_channel_screenshot" msgid="6314080179230000938">"Pantaila-argazkiak"</string>
     <string name="notification_channel_general" msgid="4525309436693914482">"Mezu orokorrak"</string>
     <string name="notification_channel_storage" msgid="3077205683020695313">"Memoria"</string>
@@ -776,4 +777,5 @@
     <string name="running_foreground_services_title" msgid="381024150898615683">"Aplikazioak exekutatzen ari dira atzeko planoan"</string>
     <string name="running_foreground_services_msg" msgid="6326247670075574355">"Sakatu bateria eta datuen erabilerari buruzko xehetasunak ikusteko"</string>
     <string name="data_usage_disable_mobile" msgid="5116269981510015864">"Datu-konexioa desaktibatu nahi duzu?"</string>
+    <string name="touch_filtered_warning" msgid="8671693809204767551">"Aplikazio bat baimen-eskaera oztopatzen ari denez, ezarpenek ezin dute egiaztatu erantzuna."</string>
 </resources>

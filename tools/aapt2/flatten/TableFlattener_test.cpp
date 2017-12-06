@@ -26,6 +26,9 @@
 
 using namespace android;
 
+using ::testing::IsNull;
+using ::testing::NotNull;
+
 namespace aapt {
 
 class TableFlattenerTest : public ::testing::Test {
@@ -235,13 +238,12 @@ TEST_F(TableFlattenerTest, FlattenMinMaxAttributes) {
   ResourceTable result;
   ASSERT_TRUE(Flatten(context_.get(), {}, table.get(), &result));
 
-  Attribute* actualAttr =
-      test::GetValue<Attribute>(&result, "android:attr/foo");
-  ASSERT_NE(nullptr, actualAttr);
-  EXPECT_EQ(attr.IsWeak(), actualAttr->IsWeak());
-  EXPECT_EQ(attr.type_mask, actualAttr->type_mask);
-  EXPECT_EQ(attr.min_int, actualAttr->min_int);
-  EXPECT_EQ(attr.max_int, actualAttr->max_int);
+  Attribute* actual_attr = test::GetValue<Attribute>(&result, "android:attr/foo");
+  ASSERT_THAT(actual_attr, NotNull());
+  EXPECT_EQ(attr.IsWeak(), actual_attr->IsWeak());
+  EXPECT_EQ(attr.type_mask, actual_attr->type_mask);
+  EXPECT_EQ(attr.min_int, actual_attr->min_int);
+  EXPECT_EQ(attr.max_int, actual_attr->max_int);
 }
 
 static std::unique_ptr<ResourceTable> BuildTableWithSparseEntries(
@@ -303,15 +305,13 @@ TEST_F(TableFlattenerTest, FlattenSparseEntryWithMinSdkO) {
 
   auto value = test::GetValueForConfig<BinaryPrimitive>(&sparse_table, "android:string/foo_0",
                                                         sparse_config);
-  ASSERT_NE(nullptr, value);
+  ASSERT_THAT(value, NotNull());
   EXPECT_EQ(0u, value->value.data);
 
-  ASSERT_EQ(nullptr, test::GetValueForConfig<BinaryPrimitive>(&sparse_table, "android:string/foo_1",
-                                                              sparse_config));
+  ASSERT_THAT(test::GetValueForConfig<BinaryPrimitive>(&sparse_table, "android:string/foo_1", sparse_config), IsNull());
 
-  value = test::GetValueForConfig<BinaryPrimitive>(&sparse_table, "android:string/foo_4",
-                                                   sparse_config);
-  ASSERT_NE(nullptr, value);
+  value = test::GetValueForConfig<BinaryPrimitive>(&sparse_table, "android:string/foo_4", sparse_config);
+  ASSERT_THAT(value, NotNull());
   EXPECT_EQ(4u, value->value.data);
 }
 
@@ -372,7 +372,7 @@ TEST_F(TableFlattenerTest, FlattenSharedLibrary) {
 
   Maybe<ResourceTable::SearchResult> search_result =
       result.FindResource(test::ParseNameOrDie("lib:id/foo"));
-  AAPT_ASSERT_TRUE(search_result);
+  ASSERT_TRUE(search_result);
   EXPECT_EQ(0x00u, search_result.value().package->id.value());
 
   auto iter = result.included_packages_.find(0x00);
@@ -398,7 +398,7 @@ TEST_F(TableFlattenerTest, FlattenTableReferencingSharedLibraries) {
   ASSERT_TRUE(Flatten(context.get(), {}, table.get(), &result));
 
   const DynamicRefTable* dynamic_ref_table = result.getDynamicRefTableForCookie(1);
-  ASSERT_NE(nullptr, dynamic_ref_table);
+  ASSERT_THAT(dynamic_ref_table, NotNull());
 
   const KeyedVector<String16, uint8_t>& entries = dynamic_ref_table->entries();
 
@@ -423,7 +423,7 @@ TEST_F(TableFlattenerTest, PackageWithNonStandardIdHasDynamicRefTable) {
   ASSERT_TRUE(Flatten(context.get(), {}, table.get(), &result));
 
   const DynamicRefTable* dynamic_ref_table = result.getDynamicRefTableForCookie(1);
-  ASSERT_NE(nullptr, dynamic_ref_table);
+  ASSERT_THAT(dynamic_ref_table, NotNull());
 
   const KeyedVector<String16, uint8_t>& entries = dynamic_ref_table->entries();
   ssize_t idx = entries.indexOfKey(android::String16("app"));

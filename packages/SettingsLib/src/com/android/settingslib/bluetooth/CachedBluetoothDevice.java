@@ -50,8 +50,11 @@ public class CachedBluetoothDevice implements Comparable<CachedBluetoothDevice> 
     private final LocalBluetoothAdapter mLocalAdapter;
     private final LocalBluetoothProfileManager mProfileManager;
     private final BluetoothDevice mDevice;
+    //TODO: consider remove, BluetoothDevice.getName() is already cached
     private String mName;
+    // Need this since there is no method for getting RSSI
     private short mRssi;
+    //TODO: consider remove, BluetoothDevice.getBluetoothClass() is already cached
     private BluetoothClass mBtClass;
     private HashMap<LocalBluetoothProfile, Integer> mProfileConnectionState;
 
@@ -65,7 +68,7 @@ public class CachedBluetoothDevice implements Comparable<CachedBluetoothDevice> 
     // Device supports PANU but not NAP: remove PanProfile after device disconnects from NAP
     private boolean mLocalNapRoleConnected;
 
-    private boolean mVisible;
+    private boolean mJustDiscovered;
 
     private int mMessageRejectionCount;
 
@@ -359,7 +362,6 @@ public class CachedBluetoothDevice implements Comparable<CachedBluetoothDevice> 
         migrateMessagePermissionChoice();
         fetchMessageRejectionCount();
 
-        mVisible = false;
         dispatchAttributesChanged();
     }
 
@@ -394,10 +396,12 @@ public class CachedBluetoothDevice implements Comparable<CachedBluetoothDevice> 
     }
 
     /**
-     * user changes the device name
+     * User changes the device name
+     * @param name new alias name to be set, should never be null
      */
     public void setName(String name) {
-        if (!mName.equals(name)) {
+        // Prevent mName to be set to null if setName(null) is called
+        if (name != null && !TextUtils.equals(name, mName)) {
             mName = name;
             mDevice.setAlias(name);
             dispatchAttributesChanged();
@@ -419,6 +423,14 @@ public class CachedBluetoothDevice implements Comparable<CachedBluetoothDevice> 
     }
 
     /**
+     * Checks if device has a human readable name besides MAC address
+     * @return true if device's alias name is not null nor empty, false otherwise
+     */
+    public boolean hasHumanReadableName() {
+        return !TextUtils.isEmpty(mDevice.getAliasName());
+    }
+
+    /**
      * Get battery level from remote device
      * @return battery level in percentage [0-100], or {@link BluetoothDevice#BATTERY_LEVEL_UNKNOWN}
      */
@@ -430,13 +442,9 @@ public class CachedBluetoothDevice implements Comparable<CachedBluetoothDevice> 
         dispatchAttributesChanged();
     }
 
-    public boolean isVisible() {
-        return mVisible;
-    }
-
-    public void setVisible(boolean visible) {
-        if (mVisible != visible) {
-            mVisible = visible;
+    public void setJustDiscovered(boolean justDiscovered) {
+        if (mJustDiscovered != justDiscovered) {
+            mJustDiscovered = justDiscovered;
             dispatchAttributesChanged();
         }
     }
@@ -499,7 +507,7 @@ public class CachedBluetoothDevice implements Comparable<CachedBluetoothDevice> 
         ParcelUuid[] localUuids = mLocalAdapter.getUuids();
         if (localUuids == null) return false;
 
-        /**
+        /*
          * Now we know if the device supports PBAP, update permissions...
          */
         processPhonebookAccess();
@@ -660,8 +668,8 @@ public class CachedBluetoothDevice implements Comparable<CachedBluetoothDevice> 
             (getBondState() == BluetoothDevice.BOND_BONDED ? 1 : 0);
         if (comparison != 0) return comparison;
 
-        // Visible above not visible
-        comparison = (another.mVisible ? 1 : 0) - (mVisible ? 1 : 0);
+        // Just discovered above discovered in the past
+        comparison = (another.mJustDiscovered ? 1 : 0) - (mJustDiscovered ? 1 : 0);
         if (comparison != 0) return comparison;
 
         // Stronger signal above weaker signal

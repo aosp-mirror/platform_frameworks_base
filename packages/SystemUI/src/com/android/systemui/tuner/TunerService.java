@@ -68,12 +68,6 @@ public abstract class TunerService {
                 enabled ? PackageManager.COMPONENT_ENABLED_STATE_ENABLED
                         : PackageManager.COMPONENT_ENABLED_STATE_DISABLED,
                 PackageManager.DONT_KILL_APP);
-
-        userContext(context).getPackageManager().setComponentEnabledSetting(
-                new ComponentName(context, TunerActivity.ACTIVITY_ALIAS_NAME),
-                enabled ? PackageManager.COMPONENT_ENABLED_STATE_ENABLED
-                        : PackageManager.COMPONENT_ENABLED_STATE_DISABLED,
-                PackageManager.DONT_KILL_APP);
     }
 
     public static final boolean isTunerEnabled(Context context) {

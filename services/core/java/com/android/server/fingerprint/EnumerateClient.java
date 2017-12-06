@@ -95,7 +95,7 @@ public abstract class EnumerateClient extends ClientMonitor {
         } catch (RemoteException e) {
             Slog.w(TAG, "Failed to notify enumerated:", e);
         }
-        return fingerId == 0; // done when id hits 0
+        return remaining == 0;
     }
 
     @Override

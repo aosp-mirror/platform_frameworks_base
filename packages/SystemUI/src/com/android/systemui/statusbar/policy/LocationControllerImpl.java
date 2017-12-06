@@ -39,8 +39,6 @@ import com.android.systemui.util.Utils;
 import java.util.ArrayList;
 import java.util.List;
 
-import static com.android.settingslib.Utils.updateLocationMode;
-
 /**
  * A controller to manage changes of location related states and update the views accordingly.
  */
@@ -108,13 +106,12 @@ public class LocationControllerImpl extends BroadcastReceiver implements Locatio
         final ContentResolver cr = mContext.getContentResolver();
         // When enabling location, a user consent dialog will pop up, and the
         // setting won't be fully enabled until the user accepts the agreement.
-        int currentMode = Settings.Secure.getIntForUser(cr, Settings.Secure.LOCATION_MODE,
-                Settings.Secure.LOCATION_MODE_OFF, currentUserId);
         int mode = enabled
                 ? Settings.Secure.LOCATION_MODE_PREVIOUS : Settings.Secure.LOCATION_MODE_OFF;
         // QuickSettings always runs as the owner, so specifically set the settings
         // for the current foreground user.
-        return updateLocationMode(mContext, currentMode, mode, currentUserId);
+        return Settings.Secure
+                .putIntForUser(cr, Settings.Secure.LOCATION_MODE, mode, currentUserId);
     }
 
     /**

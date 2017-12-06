@@ -55,7 +55,6 @@ import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Set;
 
 import static com.android.server.Watchdog.NATIVE_STACKS_OF_INTEREST;
@@ -409,10 +408,9 @@ class AppErrors {
                         final Set<String> cats = task.intent.getCategories();
                         if (cats != null && cats.contains(Intent.CATEGORY_LAUNCHER)) {
                             mService.startActivityInPackage(task.mCallingUid,
-                                    task.mCallingPackage, task.intent,
-                                    null, null, null, 0, 0,
-                                    ActivityOptions.makeBasic().toBundle(),
-                                    task.userId, null, null, "AppErrors");
+                                    task.mCallingPackage, task.intent, null, null, null, 0, 0,
+                                    ActivityOptions.makeBasic().toBundle(), task.userId, null,
+                                    "AppErrors");
                         }
                     }
                 }
@@ -594,20 +592,46 @@ class AppErrors {
 
     boolean handleAppCrashLocked(ProcessRecord app, String reason,
             String shortMsg, String longMsg, String stackTrace, AppErrorDialog.Data data) {
-        long now = SystemClock.uptimeMillis();
-        boolean showBackground = Settings.Secure.getInt(mContext.getContentResolver(),
+        final long now = SystemClock.uptimeMillis();
+        final boolean showBackground = Settings.Secure.getInt(mContext.getContentResolver(),
                 Settings.Secure.ANR_SHOW_BACKGROUND, 0) != 0;
+
+        final boolean procIsBoundForeground =
+            (app.curProcState == ActivityManager.PROCESS_STATE_BOUND_FOREGROUND_SERVICE);
 
         Long crashTime;
         Long crashTimePersistent;
+        boolean tryAgain = false;
+
         if (!app.isolated) {
             crashTime = mProcessCrashTimes.get(app.info.processName, app.uid);
             crashTimePersistent = mProcessCrashTimesPersistent.get(app.info.processName, app.uid);
         } else {
             crashTime = crashTimePersistent = null;
         }
-        if (crashTime != null && now < crashTime+ProcessList.MIN_CRASH_INTERVAL) {
-            // This process loses!
+
+        // Bump up the crash count of any services currently running in the proc.
+        for (int i = app.services.size() - 1; i >= 0; i--) {
+            // Any services running in the application need to be placed
+            // back in the pending list.
+            ServiceRecord sr = app.services.valueAt(i);
+            // If the service was restarted a while ago, then reset crash count, else increment it.
+            if (now > sr.restartTime + ProcessList.MIN_CRASH_INTERVAL) {
+                sr.crashCount = 1;
+            } else {
+                sr.crashCount++;
+            }
+            // Allow restarting for started or bound foreground services that are crashing.
+            // This includes wallpapers.
+            if (sr.crashCount < mService.mConstants.BOUND_SERVICE_MAX_CRASH_RETRY
+                    && (sr.isForeground || procIsBoundForeground)) {
+                tryAgain = true;
+            }
+        }
+
+        if (crashTime != null && now < crashTime + ProcessList.MIN_CRASH_INTERVAL) {
+            // The process crashed again very quickly. If it was a bound foreground service, let's
+            // try to restart again in a while, otherwise the process loses!
             Slog.w(TAG, "Process " + app.info.processName
                     + " has crashed too many times: killing!");
             EventLog.writeEvent(EventLogTags.AM_PROCESS_CRASHED_TOO_MUCH,
@@ -632,7 +656,7 @@ class AppErrors {
                 // Don't let services in this process be restarted and potentially
                 // annoy the user repeatedly.  Unless it is persistent, since those
                 // processes run critical code.
-                mService.removeProcessLocked(app, false, false, "crash");
+                mService.removeProcessLocked(app, false, tryAgain, "crash");
                 mService.mStackSupervisor.resumeFocusedStackTopActivityLocked();
                 if (!showBackground) {
                     return false;
@@ -651,21 +675,8 @@ class AppErrors {
             }
         }
 
-        boolean procIsBoundForeground =
-                (app.curProcState == ActivityManager.PROCESS_STATE_BOUND_FOREGROUND_SERVICE);
-        // Bump up the crash count of any services currently running in the proc.
-        for (int i=app.services.size()-1; i>=0; i--) {
-            // Any services running in the application need to be placed
-            // back in the pending list.
-            ServiceRecord sr = app.services.valueAt(i);
-            sr.crashCount++;
-
-            // Allow restarting for started or bound foreground services that are crashing the
-            // first time. This includes wallpapers.
-            if ((data != null) && (sr.crashCount <= 1)
-                    && (sr.isForeground || procIsBoundForeground)) {
-                data.isRestartableForService = true;
-            }
+        if (data != null && tryAgain) {
+            data.isRestartableForService = true;
         }
 
         // If the crashing process is what we consider to be the "home process" and it has been
@@ -691,7 +702,7 @@ class AppErrors {
 
         if (!app.isolated) {
             // XXX Can't keep track of crash times for isolated processes,
-            // because they don't have a perisistent identity.
+            // because they don't have a persistent identity.
             mProcessCrashTimes.put(app.info.processName, app.uid, now);
             mProcessCrashTimesPersistent.put(app.info.processName, app.uid, now);
         }

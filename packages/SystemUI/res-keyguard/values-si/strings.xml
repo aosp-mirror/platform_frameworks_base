@@ -29,8 +29,7 @@
     <string name="keyguard_password_enter_password_code" msgid="595980919238127672">"අගුළු ඇරීමට මුරපදය ටයිප් කරන්න"</string>
     <string name="keyguard_password_enter_pin_password_code" msgid="7504123374204446086">"අගුළු හැරීමට PIN එක ටයිප් කරන්න"</string>
     <string name="keyguard_password_wrong_pin_code" msgid="6535018036285012028">"වැරදි PIN කේතයකි."</string>
-    <!-- no translation found for keyguard_sim_error_message_short (592109500618448312) -->
-    <skip />
+    <string name="keyguard_sim_error_message_short" msgid="592109500618448312">"වලංගු නොවන කාඩ්පත."</string>
     <string name="keyguard_charged" msgid="2222329688813033109">"අරෝපිතයි"</string>
     <string name="keyguard_plugged_in" msgid="89308975354638682">"ආරෝපණය වෙමින්"</string>
     <string name="keyguard_plugged_in_charging_fast" msgid="8869226755413795173">"වේගයෙන් ආරෝපණය වෙමින්"</string>

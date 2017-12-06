@@ -16,6 +16,57 @@
 
 package com.android.server;
 
+import android.Manifest;
+import android.app.ActivityManager;
+import android.app.ActivityThread;
+import android.app.AppGlobals;
+import android.app.AppOpsManager;
+import android.content.Context;
+import android.content.pm.ApplicationInfo;
+import android.content.pm.IPackageManager;
+import android.content.pm.PackageManager;
+import android.content.pm.PackageManagerInternal;
+import android.content.pm.UserInfo;
+import android.media.AudioAttributes;
+import android.os.AsyncTask;
+import android.os.Binder;
+import android.os.Bundle;
+import android.os.Handler;
+import android.os.IBinder;
+import android.os.Process;
+import android.os.RemoteException;
+import android.os.ResultReceiver;
+import android.os.ServiceManager;
+import android.os.ShellCallback;
+import android.os.ShellCommand;
+import android.os.UserHandle;
+import android.os.UserManager;
+import android.os.storage.StorageManagerInternal;
+import android.util.ArrayMap;
+import android.util.ArraySet;
+import android.util.AtomicFile;
+import android.util.Log;
+import android.util.Slog;
+import android.util.SparseArray;
+import android.util.SparseIntArray;
+import android.util.TimeUtils;
+import android.util.Xml;
+
+import com.android.internal.app.IAppOpsCallback;
+import com.android.internal.app.IAppOpsService;
+import com.android.internal.os.Zygote;
+import com.android.internal.util.ArrayUtils;
+import com.android.internal.util.DumpUtils;
+import com.android.internal.util.FastXmlSerializer;
+import com.android.internal.util.Preconditions;
+import com.android.internal.util.XmlUtils;
+
+import libcore.util.EmptyArray;
+
+import org.xmlpull.v1.XmlPullParser;
+import org.xmlpull.v1.XmlPullParserException;
+import org.xmlpull.v1.XmlSerializer;
+
 import java.io.File;
 import java.io.FileDescriptor;
 import java.io.FileInputStream;
@@ -31,54 +82,6 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
-
-import android.Manifest;
-import android.app.ActivityManager;
-import android.app.ActivityThread;
-import android.app.AppGlobals;
-import android.app.AppOpsManager;
-import android.content.Context;
-import android.content.pm.ApplicationInfo;
-import android.content.pm.IPackageManager;
-import android.content.pm.PackageManager;
-import android.content.pm.PackageManagerInternal;
-import android.media.AudioAttributes;
-import android.os.AsyncTask;
-import android.os.Binder;
-import android.os.Bundle;
-import android.os.Handler;
-import android.os.IBinder;
-import android.os.Process;
-import android.os.RemoteException;
-import android.os.ResultReceiver;
-import android.os.ServiceManager;
-import android.os.ShellCallback;
-import android.os.ShellCommand;
-import android.os.UserHandle;
-import android.os.storage.StorageManagerInternal;
-import android.util.ArrayMap;
-import android.util.ArraySet;
-import android.util.AtomicFile;
-import android.util.Log;
-import android.util.Slog;
-import android.util.SparseArray;
-import android.util.SparseIntArray;
-import android.util.TimeUtils;
-import android.util.Xml;
-
-import com.android.internal.app.IAppOpsService;
-import com.android.internal.app.IAppOpsCallback;
-import com.android.internal.os.Zygote;
-import com.android.internal.util.ArrayUtils;
-import com.android.internal.util.DumpUtils;
-import com.android.internal.util.FastXmlSerializer;
-import com.android.internal.util.Preconditions;
-import com.android.internal.util.XmlUtils;
-
-import libcore.util.EmptyArray;
-import org.xmlpull.v1.XmlPullParser;
-import org.xmlpull.v1.XmlPullParserException;
-import org.xmlpull.v1.XmlSerializer;
 
 public class AppOpsService extends IAppOpsService.Stub {
     static final String TAG = "AppOps";
@@ -2526,37 +2529,55 @@ public class AppOpsService extends IAppOpsService.Stub {
                 perUserRestrictions = new SparseArray<>();
             }
 
-            if (perUserRestrictions != null) {
-                boolean[] userRestrictions = perUserRestrictions.get(userId);
-                if (userRestrictions == null && restricted) {
-                    userRestrictions = new boolean[AppOpsManager._NUM_OP];
-                    perUserRestrictions.put(userId, userRestrictions);
-                }
-                if (userRestrictions != null && userRestrictions[code] != restricted) {
-                    userRestrictions[code] = restricted;
-                    if (!restricted && isDefault(userRestrictions)) {
-                        perUserRestrictions.remove(userId);
-                        userRestrictions = null;
-                    }
-                    changed = true;
-                }
+            int[] users;
+            if (userId == UserHandle.USER_ALL) {
+                List<UserInfo> liveUsers = UserManager.get(mContext).getUsers(false);
 
-                if (userRestrictions != null) {
-                    final boolean noExcludedPackages = ArrayUtils.isEmpty(excludedPackages);
-                    if (perUserExcludedPackages == null && !noExcludedPackages) {
-                        perUserExcludedPackages = new SparseArray<>();
+                users = new int[liveUsers.size()];
+                for (int i = 0; i < liveUsers.size(); i++) {
+                    users[i] = liveUsers.get(i).id;
+                }
+            } else {
+                users = new int[]{userId};
+            }
+
+            if (perUserRestrictions != null) {
+                int numUsers = users.length;
+
+                for (int i = 0; i < numUsers; i++) {
+                    int thisUserId = users[i];
+
+                    boolean[] userRestrictions = perUserRestrictions.get(thisUserId);
+                    if (userRestrictions == null && restricted) {
+                        userRestrictions = new boolean[AppOpsManager._NUM_OP];
+                        perUserRestrictions.put(thisUserId, userRestrictions);
                     }
-                    if (perUserExcludedPackages != null && !Arrays.equals(excludedPackages,
-                            perUserExcludedPackages.get(userId))) {
-                        if (noExcludedPackages) {
-                            perUserExcludedPackages.remove(userId);
-                            if (perUserExcludedPackages.size() <= 0) {
-                                perUserExcludedPackages = null;
-                            }
-                        } else {
-                            perUserExcludedPackages.put(userId, excludedPackages);
+                    if (userRestrictions != null && userRestrictions[code] != restricted) {
+                        userRestrictions[code] = restricted;
+                        if (!restricted && isDefault(userRestrictions)) {
+                            perUserRestrictions.remove(thisUserId);
+                            userRestrictions = null;
                         }
                         changed = true;
+                    }
+
+                    if (userRestrictions != null) {
+                        final boolean noExcludedPackages = ArrayUtils.isEmpty(excludedPackages);
+                        if (perUserExcludedPackages == null && !noExcludedPackages) {
+                            perUserExcludedPackages = new SparseArray<>();
+                        }
+                        if (perUserExcludedPackages != null && !Arrays.equals(excludedPackages,
+                                perUserExcludedPackages.get(thisUserId))) {
+                            if (noExcludedPackages) {
+                                perUserExcludedPackages.remove(thisUserId);
+                                if (perUserExcludedPackages.size() <= 0) {
+                                    perUserExcludedPackages = null;
+                                }
+                            } else {
+                                perUserExcludedPackages.put(thisUserId, excludedPackages);
+                            }
+                            changed = true;
+                        }
                     }
                 }
             }

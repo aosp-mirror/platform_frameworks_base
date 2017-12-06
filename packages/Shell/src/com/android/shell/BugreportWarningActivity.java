@@ -64,7 +64,7 @@ public class BugreportWarningActivity extends AlertActivity
 
         final int state = getWarningState(this, STATE_UNKNOWN);
         final boolean checked;
-        if (Build.TYPE.equals("user")) {
+        if (Build.IS_USER) {
             checked = state == STATE_HIDE; // Only checks if specifically set to.
         } else {
             checked = state != STATE_SHOW; // Checks by default.

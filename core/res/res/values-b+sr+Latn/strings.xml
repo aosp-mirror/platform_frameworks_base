@@ -27,18 +27,6 @@
     <string name="terabyteShort" msgid="231613018159186962">"TB"</string>
     <string name="petabyteShort" msgid="5637816680144990219">"PB"</string>
     <string name="fileSizeSuffix" msgid="8897567456150907538">"<xliff:g id="NUMBER">%1$s</xliff:g> <xliff:g id="UNIT">%2$s</xliff:g>"</string>
-    <string name="durationDays" msgid="6652371460511178259">"<xliff:g id="DAYS">%1$d</xliff:g> dana"</string>
-    <string name="durationDayHours" msgid="2713107458736744435">"<xliff:g id="DAYS">%1$d</xliff:g> dan <xliff:g id="HOURS">%2$d</xliff:g> s"</string>
-    <string name="durationDayHour" msgid="7293789639090958917">"<xliff:g id="DAYS">%1$d</xliff:g> dan <xliff:g id="HOURS">%2$d</xliff:g> s"</string>
-    <string name="durationHours" msgid="4266858287167358988">"<xliff:g id="HOURS">%1$d</xliff:g> s"</string>
-    <string name="durationHourMinutes" msgid="9029176248692041549">"<xliff:g id="HOURS">%1$d</xliff:g> s <xliff:g id="MINUTES">%2$d</xliff:g> min"</string>
-    <string name="durationHourMinute" msgid="2741677355177402539">"<xliff:g id="HOURS">%1$d</xliff:g> s <xliff:g id="MINUTES">%2$d</xliff:g> min"</string>
-    <string name="durationMinutes" msgid="3134226679883579347">"<xliff:g id="MINUTES">%1$d</xliff:g> min"</string>
-    <string name="durationMinute" msgid="7155301744174623818">"<xliff:g id="MINUTES">%1$d</xliff:g> min"</string>
-    <string name="durationMinuteSeconds" msgid="1424656185379003751">"<xliff:g id="MINUTES">%1$d</xliff:g> min <xliff:g id="SECONDS">%2$d</xliff:g> sek"</string>
-    <string name="durationMinuteSecond" msgid="3989228718067466680">"<xliff:g id="MINUTES">%1$d</xliff:g> min <xliff:g id="SECONDS">%2$d</xliff:g> sek"</string>
-    <string name="durationSeconds" msgid="8050088505238241405">"<xliff:g id="SECONDS">%1$d</xliff:g> sek"</string>
-    <string name="durationSecond" msgid="985669622276420331">"<xliff:g id="SECONDS">%1$d</xliff:g> sek"</string>
     <string name="untitled" msgid="4638956954852782576">"&lt;Bez naslova&gt;"</string>
     <string name="emptyPhoneNumber" msgid="7694063042079676517">"(Nema broja telefona)"</string>
     <string name="unknownName" msgid="6867811765370350269">"Nepoznato"</string>
@@ -91,15 +79,12 @@
     <string name="serviceNotProvisioned" msgid="8614830180508686666">"Usluga nije dobavljena."</string>
     <string name="CLIRPermanent" msgid="3377371145926835671">"Ne možete da promenite podešavanje ID-a korisnika."</string>
     <string name="RestrictedOnDataTitle" msgid="1322504692764166532">"Nema usluge prenosa podataka"</string>
-    <string name="RestrictedOnEmergencyTitle" msgid="1236071219598685236">"Nema usluge za hitne pozive"</string>
+    <string name="RestrictedOnEmergencyTitle" msgid="3646729271176394091">"Hitni pozivi nisu mogući"</string>
     <string name="RestrictedOnNormalTitle" msgid="3179574012752700984">"Nema glasovne usluge"</string>
     <string name="RestrictedOnAllVoiceTitle" msgid="158800171499150681">"Nema glasovne usluge/usluge za hitne pozive"</string>
-    <string name="RestrictedOnDataContent" msgid="8997474569390996587">"Mobilni operater je privremeno suspendovao uslugu prenosa podataka na ovoj lokaciji"</string>
-    <string name="RestrictedOnEmergencyContent" msgid="4573217945494650061">"Mobilni operater je privremeno suspendovao hitne pozive na ovoj lokaciji"</string>
-    <string name="RestrictedOnNormalContent" msgid="1579434198284512182">"Mobilni operater je privremeno suspendovao glasovne pozive na ovoj lokaciji"</string>
-    <string name="RestrictedOnAllVoiceContent" msgid="5243580774142557047">"Mobilni operater je privremeno suspendovao glasovne i hitne pozive na ovoj lokaciji"</string>
+    <string name="RestrictedStateContent" msgid="4278821484643362350">"Privremeno je onemogućeno na mobilnoj mreži na vašoj lokaciji"</string>
     <string name="NetworkPreferenceSwitchTitle" msgid="4008877505368566980">"Povezivanje sa mrežom nije uspelo"</string>
-    <string name="NetworkPreferenceSwitchSummary" msgid="4164230263214915351">"Da biste poboljšali prijem, probajte da promenite izabrani tip u odeljku Sistem &gt; Mreža i internet &gt; Mobilne mreže &gt; Željeni tip mreže."</string>
+    <string name="NetworkPreferenceSwitchSummary" msgid="1203771446683319957">"Da biste poboljšali prijem, probajte da promenite izabrani tip u odeljku Podešavanja &gt; Mreža i internet &gt; Mobilne mreže &gt; Željeni tip mreže."</string>
     <string name="notification_channel_network_alert" msgid="4427736684338074967">"Obaveštenja"</string>
     <string name="notification_channel_call_forward" msgid="2419697808481833249">"Preusmeravanje poziva"</string>
     <string name="notification_channel_emergency_callback" msgid="6686166232265733921">"Režim za hitan povratni poziv"</string>
@@ -135,7 +120,7 @@
     <string name="roamingTextSearching" msgid="8360141885972279963">"Pretraživanje usluge"</string>
     <string name="wfcRegErrorTitle" msgid="2301376280632110664">"Pozivanje preko Wi-Fi-ja"</string>
   <string-array name="wfcOperatorErrorAlertMessages">
-    <item msgid="2254967670088539682">"Da biste upućivali pozive i slali poruke preko Wi-Fi-ja, prvo zatražite od mobilnog operatera da vam omogući ovu uslugu. Zatim u Podešavanjima ponovo uključite Pozivanje preko Wi-Fi-ja."</item>
+    <item msgid="3910386316304772394">"Da biste upućivali pozive i slali poruke preko Wi-Fi-ja, prvo zatražite od mobilnog operatera da vam omogući ovu uslugu. Zatim u Podešavanjima ponovo uključite Pozivanje preko Wi-Fi-ja. (kôd greške: <xliff:g id="CODE">%1$s</xliff:g>)"</item>
   </string-array>
   <string-array name="wfcOperatorErrorNotificationMessages">
     <item msgid="6177300162212449033">"Registrujte se kod mobilnog operatera"</item>
@@ -1131,6 +1116,13 @@
       <item quantity="few">Otvorene Wi-Fi mreže su dostupne</item>
       <item quantity="other">Otvorene Wi-Fi mreže su dostupne</item>
     </plurals>
+    <string name="wifi_available_title" msgid="3817100557900599505">"Povežite se sa otvorenom Wi‑Fi mrežom"</string>
+    <string name="wifi_available_title_connecting" msgid="1557292688310330032">"Povezujete se sa otvorenom Wi‑Fi mrežom"</string>
+    <string name="wifi_available_title_connected" msgid="7542672851522241548">"Povezali ste se sa Wi‑Fi mrežom"</string>
+    <string name="wifi_available_title_failed_to_connect" msgid="6861772233582618132">"Povezivanje sa Wi‑Fi mrežom nije uspelo"</string>
+    <string name="wifi_available_content_failed_to_connect" msgid="3377406637062802645">"Dodirnite da biste videli sve mreže"</string>
+    <string name="wifi_available_action_connect" msgid="2635699628459488788">"Poveži"</string>
+    <string name="wifi_available_action_all_networks" msgid="1100098935861622985">"Sve mreže"</string>
     <string name="wifi_available_sign_in" msgid="9157196203958866662">"Prijavljivanje na Wi-Fi mrežu"</string>
     <string name="network_available_sign_in" msgid="1848877297365446605">"Prijavite se na mrežu"</string>
     <!-- no translation found for network_available_sign_in_detailed (8000081941447976118) -->
@@ -1212,7 +1204,7 @@
     <string name="usb_notification_message" msgid="3370903770828407960">"Dodirnite za još opcija."</string>
     <string name="usb_unsupported_audio_accessory_title" msgid="2256529893240208458">"Dodatna oprema za audio sadržaj nije podržana"</string>
     <string name="usb_unsupported_audio_accessory_message" msgid="7811865061127547035">"Dodirnite za više informacija"</string>
-    <string name="adb_active_notification_title" msgid="6729044778949189918">"Otklanjanje grešaka sa USB-a je uspostavljeno"</string>
+    <string name="adb_active_notification_title" msgid="6729044778949189918">"Otklanjanje grešaka sa USB-a je omogućeno"</string>
     <string name="adb_active_notification_message" msgid="4948470599328424059">"Dodirnite da biste onemogućili otklanjanje grešaka sa USB-a."</string>
     <string name="adb_active_notification_message" product="tv" msgid="8470296818270110396">"Izaberite da biste onemogućili otklanjanja grešaka sa USB-a."</string>
     <string name="taking_remote_bugreport_notification_title" msgid="6742483073875060934">"Izveštaj o grešci se generiše…"</string>
@@ -1228,8 +1220,7 @@
     <string name="select_keyboard_layout_notification_message" msgid="8084622969903004900">"Dodirnite da biste izabrali jezik i raspored"</string>
     <string name="fast_scroll_alphabet" msgid="5433275485499039199">" ABCDEFGHIJKLMNOPQRSTUVWXYZ"</string>
     <string name="fast_scroll_numeric_alphabet" msgid="4030170524595123610">" 0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ"</string>
-    <!-- no translation found for alert_windows_notification_channel_group_name (1463953341148606396) -->
-    <skip />
+    <string name="alert_windows_notification_channel_group_name" msgid="1463953341148606396">"Prikaz preko drugih aplikacija"</string>
     <string name="alert_windows_notification_channel_name" msgid="3116610965549449803">"Aplikacija <xliff:g id="NAME">%s</xliff:g> se prikazuje preko drugih aplikacija"</string>
     <string name="alert_windows_notification_title" msgid="3697657294867638947">"<xliff:g id="NAME">%s</xliff:g> se prikazuje preko drugih aplik."</string>
     <string name="alert_windows_notification_message" msgid="8917232109522912560">"Ako ne želite ovu funkciju za <xliff:g id="NAME">%s</xliff:g>, dodirnite da biste otvorili podešavanja i isključili je."</string>
@@ -1812,9 +1803,11 @@
     <string name="etws_primary_default_message_tsunami" msgid="1887685943498368548">"Odmah se sklonite iz priobalnih regiona i oblasti pored reka na neko bezbednije mesto, na primer, na neko uzvišenje."</string>
     <string name="etws_primary_default_message_earthquake_and_tsunami" msgid="998797956848445862">"Ostanite mirni i potražite sklonište u okolini."</string>
     <string name="etws_primary_default_message_test" msgid="2709597093560037455">"Testiranje poruka u hitnim slučajevima"</string>
+    <string name="notification_reply_button_accessibility" msgid="3621714652387814344">"Odgovori"</string>
     <string name="etws_primary_default_message_others" msgid="6293148756130398971"></string>
     <string name="mmcc_authentication_reject" msgid="7729819349669603406">"SIM kartica nije dozvoljena"</string>
     <string name="mmcc_imsi_unknown_in_hlr" msgid="6321202257374418726">"SIM kartica nije podešena"</string>
     <string name="mmcc_illegal_ms" msgid="2769452751852211112">"SIM kartica nije dozvoljena"</string>
     <string name="mmcc_illegal_me" msgid="4438696681169345015">"Telefon nije dozvoljen"</string>
+    <string name="popup_window_default_title" msgid="4874318849712115433">"Iskačući prozor"</string>
 </resources>

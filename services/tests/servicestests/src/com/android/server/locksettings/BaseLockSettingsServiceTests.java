@@ -20,21 +20,26 @@ import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.anyBoolean;
 import static org.mockito.Matchers.anyInt;
 import static org.mockito.Matchers.eq;
+import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 import android.app.IActivityManager;
 import android.app.NotificationManager;
 import android.app.admin.DevicePolicyManager;
+import android.app.trust.TrustManager;
 import android.content.ComponentName;
 import android.content.pm.UserInfo;
 import android.os.FileUtils;
 import android.os.IProgressListener;
+import android.os.RemoteException;
 import android.os.UserManager;
 import android.os.storage.StorageManager;
+import android.os.storage.IStorageManager;
 import android.security.KeyStore;
 import android.test.AndroidTestCase;
 
+import com.android.internal.widget.ILockSettings;
 import com.android.internal.widget.LockPatternUtils;
 
 import org.mockito.invocation.InvocationOnMock;
@@ -64,10 +69,10 @@ public class BaseLockSettingsServiceTests extends AndroidTestCase {
     LockSettingsStorageTestable mStorage;
 
     LockPatternUtils mLockPatternUtils;
-    MockGateKeeperService mGateKeeperService;
+    FakeGateKeeperService mGateKeeperService;
     NotificationManager mNotificationManager;
     UserManager mUserManager;
-    MockStorageManager mStorageManager;
+    FakeStorageManager mStorageManager;
     IActivityManager mActivityManager;
     DevicePolicyManager mDevicePolicyManager;
     KeyStore mKeyStore;
@@ -77,16 +82,15 @@ public class BaseLockSettingsServiceTests extends AndroidTestCase {
     protected void setUp() throws Exception {
         super.setUp();
 
-        mLockPatternUtils = mock(LockPatternUtils.class);
-        mGateKeeperService = new MockGateKeeperService();
+        mGateKeeperService = new FakeGateKeeperService();
         mNotificationManager = mock(NotificationManager.class);
         mUserManager = mock(UserManager.class);
-        mStorageManager = new MockStorageManager();
+        mStorageManager = new FakeStorageManager();
         mActivityManager = mock(IActivityManager.class);
         mDevicePolicyManager = mock(DevicePolicyManager.class);
 
         mContext = new MockLockSettingsContext(getContext(), mUserManager, mNotificationManager,
-                mDevicePolicyManager, mock(StorageManager.class));
+                mDevicePolicyManager, mock(StorageManager.class), mock(TrustManager.class));
         mStorage = new LockSettingsStorageTestable(mContext,
                 new File(getContext().getFilesDir(), "locksettings"));
         File storageDir = mStorage.mStorageDir;
@@ -96,9 +100,16 @@ public class BaseLockSettingsServiceTests extends AndroidTestCase {
             storageDir.mkdirs();
         }
 
-        mSpManager = new MockSyntheticPasswordManager(mStorage, mGateKeeperService, mUserManager);
-        mService = new LockSettingsServiceTestable(mContext, mLockPatternUtils,
-                mStorage, mGateKeeperService, mKeyStore, mStorageManager, mActivityManager,
+        mLockPatternUtils = new LockPatternUtils(mContext) {
+            @Override
+            public ILockSettings getLockSettings() {
+                return mService;
+            }
+        };
+        mSpManager = new MockSyntheticPasswordManager(mContext, mStorage, mGateKeeperService,
+                mUserManager);
+        mService = new LockSettingsServiceTestable(mContext, mLockPatternUtils, mStorage,
+                mGateKeeperService, mKeyStore, setUpStorageManagerMock(), mActivityManager,
                 mSpManager);
         when(mUserManager.getUserInfo(eq(PRIMARY_USER_ID))).thenReturn(PRIMARY_USER_INFO);
         mPrimaryUserProfiles.add(PRIMARY_USER_INFO);
@@ -118,8 +129,6 @@ public class BaseLockSettingsServiceTests extends AndroidTestCase {
                 return true;
             }
         });
-
-        when(mLockPatternUtils.getLockSettings()).thenReturn(mService);
 
         // Adding a fake Device Owner app which will enable escrow token support in LSS.
         when(mDevicePolicyManager.getDeviceOwnerComponentOnAnyUser()).thenReturn(
@@ -143,6 +152,33 @@ public class BaseLockSettingsServiceTests extends AndroidTestCase {
         when(mUserManager.isUserRunning(eq(profileId))).thenReturn(false);
         when(mUserManager.isUserUnlocked(eq(profileId))).thenReturn(false);
         return userInfo;
+    }
+
+    private IStorageManager setUpStorageManagerMock() throws RemoteException {
+        final IStorageManager sm = mock(IStorageManager.class);
+
+        doAnswer(new Answer<Void>() {
+            @Override
+            public Void answer(InvocationOnMock invocation) throws Throwable {
+                Object[] args = invocation.getArguments();
+                mStorageManager.addUserKeyAuth((int) args[0] /* userId */,
+                        (int) args[1] /* serialNumber */,
+                        (byte[]) args[2] /* token */,
+                        (byte[]) args[3] /* secret */);
+                return null;
+            }
+        }).when(sm).addUserKeyAuth(anyInt(), anyInt(), any(), any());
+
+        doAnswer(
+                new Answer<Void>() {
+            @Override
+            public Void answer(InvocationOnMock invocation) throws Throwable {
+                Object[] args = invocation.getArguments();
+                mStorageManager.fixateNewestUserKeyAuth((int) args[0] /* userId */);
+                return null;
+            }
+        }).when(sm).fixateNewestUserKeyAuth(anyInt());
+        return sm;
     }
 
     @Override

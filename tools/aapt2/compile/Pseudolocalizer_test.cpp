@@ -97,6 +97,11 @@ TEST(PseudolocalizerTest, PlaintextBidi) {
       "\xe2\x80\x8f\xE2\x80\xaehello\xE2\x80\xac\xe2\x80\x8f\n"
       "  \xe2\x80\x8f\xE2\x80\xaeworld\xE2\x80\xac\xe2\x80\x8f\n",
       Pseudolocalizer::Method::kBidi));
+  EXPECT_TRUE(
+      SimpleHelper("hello\\nworld\\n",
+                   "\xe2\x80\x8f\xE2\x80\xaehello\xE2\x80\xac\xe2\x80\x8f\\n"
+                   "\xe2\x80\x8f\xE2\x80\xaeworld\xE2\x80\xac\xe2\x80\x8f\\n",
+                   Pseudolocalizer::Method::kBidi));
 }
 
 TEST(PseudolocalizerTest, SimpleICU) {

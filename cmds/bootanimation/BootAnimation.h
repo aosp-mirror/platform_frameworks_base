@@ -93,22 +93,27 @@ public:
         Font clockFont;
     };
 
-    // Callback will be called during initialization after we have loaded
-    // the animation and be provided with all parts in animation.
-    typedef std::function<void(const Vector<Animation::Part>& parts)> InitCallback;
+    // All callbacks will be called from this class's internal thread.
+    class Callbacks : public RefBase {
+    public:
+        // Will be called during initialization after we have loaded
+        // the animation and be provided with all parts in animation.
+        virtual void init(const Vector<Animation::Part>& /*parts*/) {}
 
-    // Callback will be called while animation is playing before each part is
-    // played. It will be provided with the part and play count for it.
-    // It will be provided with the partNumber for the part about to be played,
-    // as well as a reference to the part itself. It will also be provided with
-    // which play of that part is about to start, some parts are repeated
-    // multiple times.
-    typedef std::function<void(int partNumber, const Animation::Part& part, int playNumber)>
-            PlayPartCallback;
+        // Will be called while animation is playing before each part is
+        // played. It will be provided with the part and play count for it.
+        // It will be provided with the partNumber for the part about to be played,
+        // as well as a reference to the part itself. It will also be provided with
+        // which play of that part is about to start, some parts are repeated
+        // multiple times.
+        virtual void playPart(int /*partNumber*/, const Animation::Part& /*part*/,
+                              int /*playNumber*/) {}
 
-    // Callbacks may be null and will be called from this class's internal
-    // thread.
-    BootAnimation(InitCallback initCallback, PlayPartCallback partCallback);
+        // Will be called when animation is done and thread is shutting down.
+        virtual void shutdown() {}
+    };
+
+    BootAnimation(sp<Callbacks> callbacks);
 
     sp<SurfaceComposerClient> session() const;
 
@@ -170,8 +175,7 @@ private:
     String8     mZipFileName;
     SortedVector<String8> mLoadedFiles;
     sp<TimeCheckThread> mTimeCheckThread = nullptr;
-    InitCallback mInitCallback = nullptr;
-    PlayPartCallback mPlayPartCallback = nullptr;
+    sp<Callbacks> mCallbacks;
 };
 
 // ---------------------------------------------------------------------------

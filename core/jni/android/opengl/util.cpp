@@ -623,9 +623,6 @@ void util_multiplyMV(JNIEnv *env, jclass clazz,
 static int checkFormat(SkColorType colorType, int format, int type)
 {
     switch(colorType) {
-        case kIndex_8_SkColorType:
-            if (format == GL_PALETTE8_RGBA8_OES)
-                return 0;
         case kN32_SkColorType:
         case kAlpha_8_SkColorType:
             if (type == GL_UNSIGNED_BYTE)
@@ -657,8 +654,6 @@ static int getInternalFormat(SkColorType colorType)
             return GL_RGBA;
         case kN32_SkColorType:
             return GL_RGBA;
-        case kIndex_8_SkColorType:
-            return GL_PALETTE8_RGBA8_OES;
         case kRGB_565_SkColorType:
             return GL_RGB;
         default:
@@ -675,8 +670,6 @@ static int getType(SkColorType colorType)
             return GL_UNSIGNED_SHORT_4_4_4_4;
         case kN32_SkColorType:
             return GL_UNSIGNED_BYTE;
-        case kIndex_8_SkColorType:
-            return -1; // No type for compressed data.
         case kRGB_565_SkColorType:
             return GL_UNSIGNED_SHORT_5_6_5;
         default:
@@ -720,28 +713,10 @@ static jint util_texImage2D(JNIEnv *env, jclass clazz,
     const int h = bitmap.height();
     const void* p = bitmap.getPixels();
     if (internalformat == GL_PALETTE8_RGBA8_OES) {
-        if (sizeof(SkPMColor) != sizeof(uint32_t)) {
-            err = -1;
-            goto error;
-        }
-        const size_t size = bitmap.getSize();
-        const size_t palette_size = 256*sizeof(SkPMColor);
-        const size_t imageSize = size + palette_size;
-        void* const data = malloc(imageSize);
-        if (data) {
-            void* const pixels = (char*)data + palette_size;
-            SkColorTable* ctable = bitmap.getColorTable();
-            memcpy(data, ctable->readColors(), ctable->count() * sizeof(SkPMColor));
-            memcpy(pixels, p, size);
-            glCompressedTexImage2D(target, level, internalformat, w, h, border, imageSize, data);
-            free(data);
-        } else {
-            err = -1;
-        }
+        err = -1;
     } else {
         glTexImage2D(target, level, internalformat, w, h, border, internalformat, type, p);
     }
-error:
     return err;
 }
 

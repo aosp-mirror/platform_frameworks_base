@@ -40,12 +40,16 @@
     <string name="connected_via_passpoint" msgid="2826205693803088747">"Tilkoblet via %1$s"</string>
     <string name="available_via_passpoint" msgid="1617440946846329613">"Tilgjengelig via %1$s"</string>
     <string name="wifi_connected_no_internet" msgid="3149853966840874992">"Tilkoblet – ingen Internett-forbindelse"</string>
+    <string name="wifi_ap_unable_to_handle_new_sta" msgid="5348824313514404541">"Tilgangspunktet er midlertidig fullt"</string>
+    <string name="connected_via_carrier" msgid="7583780074526041912">"Tilkoblet via %1$s"</string>
+    <string name="available_via_carrier" msgid="1469036129740799053">"Tilgjengelig via %1$s"</string>
     <string name="speed_label_very_slow" msgid="1867055264243608530">"Veldig treg"</string>
     <string name="speed_label_slow" msgid="813109590815810235">"Treg"</string>
     <string name="speed_label_okay" msgid="2331665440671174858">"Ok"</string>
     <string name="speed_label_medium" msgid="3175763313268941953">"Middels"</string>
     <string name="speed_label_fast" msgid="7715732164050975057">"Rask"</string>
     <string name="speed_label_very_fast" msgid="2265363430784523409">"Veldig rask"</string>
+    <string name="preference_summary_default_combination" msgid="8532964268242666060">"<xliff:g id="STATE">%1$s</xliff:g> / <xliff:g id="DESCRIPTION">%2$s</xliff:g>"</string>
     <string name="bluetooth_disconnected" msgid="6557104142667339895">"Frakoblet"</string>
     <string name="bluetooth_disconnecting" msgid="8913264760027764974">"Kobler fra…"</string>
     <string name="bluetooth_connecting" msgid="8555009514614320497">"Kobler til…"</string>
@@ -101,6 +105,8 @@
     <string name="accessibility_wifi_two_bars" msgid="3569851234710034416">"Wi-Fi-signal med to stolper."</string>
     <string name="accessibility_wifi_three_bars" msgid="8134185644861380311">"Wi-Fi-signal med tre stolper."</string>
     <string name="accessibility_wifi_signal_full" msgid="7061045677694702">"Wi-Fi-signalet er ved full styrke."</string>
+    <string name="accessibility_wifi_security_type_none" msgid="1223747559986205423">"Åpent nettverk"</string>
+    <string name="accessibility_wifi_security_type_secured" msgid="862921720418885331">"Sikkert nettverk"</string>
     <string name="process_kernel_label" msgid="3916858646836739323">"Android-operativsystem"</string>
     <string name="data_usage_uninstalled_apps" msgid="614263770923231598">"Fjernede apper"</string>
     <string name="data_usage_uninstalled_apps_users" msgid="7986294489899813194">"Fjernede apper og brukere"</string>
@@ -187,6 +193,7 @@
     <string name="wifi_allow_scan_with_traffic" msgid="3601853081178265786">"Tillat alltid skanning for Wi-Fi-roaming"</string>
     <string name="mobile_data_always_on" msgid="8774857027458200434">"Mobildata er alltid aktiv"</string>
     <string name="tethering_hardware_offload" msgid="7470077827090325814">"Maskinvareakselerasjon for internettdeling"</string>
+    <string name="bluetooth_show_devices_without_names" msgid="4708446092962060176">"Vis Bluetooth-enheter uten navn"</string>
     <string name="bluetooth_disable_absolute_volume" msgid="2660673801947898809">"Slå av funksjonen for absolutt volum"</string>
     <string name="bluetooth_enable_inband_ringing" msgid="3291686366721786740">"Slå på innenbåndsringing"</string>
     <string name="bluetooth_select_avrcp_version_string" msgid="3750059931120293633">"Bluetooth AVRCP-versjon"</string>
@@ -202,6 +209,12 @@
     <string name="bluetooth_select_a2dp_codec_ldac_playback_quality" msgid="3619694372407843405">"LDAC-kodek for Bluetooth-lyd: Avspillingskvalitet"</string>
     <string name="bluetooth_select_a2dp_codec_ldac_playback_quality_dialog_title" msgid="3181967377574368400">"Velg LDAC-kodek for Bluetooth-lyd:\nAvspillingskvalitet"</string>
     <string name="bluetooth_select_a2dp_codec_streaming_label" msgid="5347862512596240506">"Strømming: <xliff:g id="STREAMING_PARAMETER">%1$s</xliff:g>"</string>
+    <string name="select_private_dns_configuration_title" msgid="3700456559305263922">"Privat DNS"</string>
+    <string name="select_private_dns_configuration_dialog_title" msgid="9221994415765826811">"Velg Privat DNS-modus"</string>
+    <string name="private_dns_mode_off" msgid="8236575187318721684">"Av"</string>
+    <string name="private_dns_mode_opportunistic" msgid="7608409735589131766">"Opportunistisk"</string>
+    <string name="private_dns_mode_provider" msgid="8354935160639360804">"Vertsnavn for privat DNS-leverandør"</string>
+    <string name="private_dns_mode_provider_hostname_hint" msgid="2487492386970928143">"Skriv inn vertsnavnet til DNS-leverandøren"</string>
     <string name="wifi_display_certification_summary" msgid="1155182309166746973">"Vis alternativer for sertifisering av trådløs skjerm"</string>
     <string name="wifi_verbose_logging_summary" msgid="6615071616111731958">"Øk Wi-Fi-loggenivå – vis per SSID RSSI i Wi-Fi-velgeren"</string>
     <string name="wifi_aggressive_handover_summary" msgid="7266329646559808827">"Hvis dette slås på, overfører Wi-Fi-nettverket datatilkoblingen til mobil mer aggressivt når Wi-Fi-signalet er svakt"</string>
@@ -226,6 +239,7 @@
     <string name="dev_settings_warning_message" msgid="2298337781139097964">"Disse innstillingene er bare beregnet for bruk under programutvikling. De kan forårsake problemer med enheten din og tilhørende apper."</string>
     <string name="verify_apps_over_usb_title" msgid="4177086489869041953">"Bekreft apper via USB"</string>
     <string name="verify_apps_over_usb_summary" msgid="9164096969924529200">"Sjekk apper som er installert via ADB/ADT for skadelig adferd."</string>
+    <string name="bluetooth_show_devices_without_names_summary" msgid="2351196058115755520">"Bluetooth-enheter uten navn (bare MAC-adresser) vises"</string>
     <string name="bluetooth_disable_absolute_volume_summary" msgid="6031284410786545957">"Slår av funksjonen for absolutt volum via Bluetooth i tilfelle det oppstår volumrelaterte problemer med eksterne enheter, for eksempel uakseptabelt høyt volum eller mangel på kontroll."</string>
     <string name="bluetooth_enable_inband_ringing_summary" msgid="2787866074741784975">"Tillater at ringelyder på telefonen spilles av på Bluetooth-hodetelefoner"</string>
     <string name="enable_terminal_title" msgid="95572094356054120">"Lokal terminal"</string>
@@ -345,12 +359,11 @@
     <string name="power_discharging_duration_short" msgid="4192244429001842403">"<xliff:g id="LEVEL">^1</xliff:g> – <xliff:g id="TIME">^2</xliff:g> gjenstår"</string>
     <string name="power_charging" msgid="1779532561355864267">"<xliff:g id="LEVEL">%1$s</xliff:g> – <xliff:g id="STATE">%2$s</xliff:g>"</string>
     <string name="power_charging_duration" msgid="4676999980973411875">"<xliff:g id="LEVEL">^1</xliff:g> – <xliff:g id="TIME">^2</xliff:g> til det er fulladet"</string>
-    <string name="power_charging_duration_short" msgid="1098603958472207920">"<xliff:g id="LEVEL">^1</xliff:g> – <xliff:g id="TIME">^2</xliff:g>"</string>
     <string name="battery_info_status_unknown" msgid="196130600938058547">"Ukjent"</string>
     <string name="battery_info_status_charging" msgid="1705179948350365604">"Lader"</string>
     <string name="battery_info_status_charging_lower" msgid="8689770213898117994">"lader"</string>
     <string name="battery_info_status_discharging" msgid="310932812698268588">"Lader ikke"</string>
-    <string name="battery_info_status_not_charging" msgid="2820070506621483576">"Lader ikke"</string>
+    <string name="battery_info_status_not_charging" msgid="8523453668342598579">"Laderen er koblet til – kan ikke lade akkurat nå"</string>
     <string name="battery_info_status_full" msgid="2824614753861462808">"Fullt"</string>
     <string name="disabled_by_admin_summary_text" msgid="6750513964908334617">"Kontrollert av administratoren"</string>
     <string name="enabled_by_admin" msgid="5302986023578399263">"Slått på av administratoren"</string>
@@ -375,7 +388,6 @@
     <string name="screen_zoom_summary_custom" msgid="5611979864124160447">"Egendefinert (<xliff:g id="DENSITYDPI">%d</xliff:g>)"</string>
     <string name="help_feedback_label" msgid="6815040660801785649">"Hjelp og tilbakemelding"</string>
     <string name="content_description_menu_button" msgid="8182594799812351266">"Meny"</string>
-    <string name="time_zone_gmt" msgid="2587097992671450782">"GMT"</string>
     <string name="retail_demo_reset_message" msgid="118771671364131297">"Skriv inn passordet for å tilbakestille til fabrikkstandard i demomodus"</string>
     <string name="retail_demo_reset_next" msgid="8356731459226304963">"Neste"</string>
     <string name="retail_demo_reset_title" msgid="696589204029930100">"Passord er obligatorisk"</string>

@@ -19,7 +19,6 @@ package android.telecom;
 import android.annotation.IntDef;
 import android.annotation.Nullable;
 import android.annotation.SystemApi;
-import android.annotation.TestApi;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Handler;
@@ -1147,8 +1146,8 @@ public final class Call {
                 return new String(mReadBuffer, 0, numRead);
             } catch (IOException e) {
                 Log.w(this, "Exception encountered when reading from InputStreamReader: %s", e);
+                return null;
             }
-            return null;
         }
 
         /**
@@ -1156,12 +1155,14 @@ public final class Call {
          * be read.
          * @return A string containing text entered by the user, or {@code null} if the user has
          * not entered any new text yet.
-         * @hide
          */
-        @TestApi
         public String readImmediately() throws IOException {
             if (mReceiveStream.ready()) {
-                return read();
+                int numRead = mReceiveStream.read(mReadBuffer, 0, READ_BUFFER_SIZE);
+                if (numRead < 0) {
+                    return null;
+                }
+                return new String(mReadBuffer, 0, numRead);
             } else {
                 return null;
             }

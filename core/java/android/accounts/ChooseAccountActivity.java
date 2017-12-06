@@ -16,12 +16,17 @@
 package android.accounts;
 
 import android.app.Activity;
+import android.app.ActivityManager;
 import android.content.Context;
 import android.content.pm.PackageManager;
 import android.content.res.Resources;
 import android.graphics.drawable.Drawable;
 import android.os.Bundle;
+import android.os.IBinder;
 import android.os.Parcelable;
+import android.os.RemoteException;
+import android.os.Process;
+import android.os.UserHandle;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -45,6 +50,8 @@ public class ChooseAccountActivity extends Activity {
     private Parcelable[] mAccounts = null;
     private AccountManagerResponse mAccountManagerResponse = null;
     private Bundle mResult;
+    private int mCallingUid;
+    private String mCallingPackage;
 
     private HashMap<String, AuthenticatorDescription> mTypeToAuthDescription
             = new HashMap<String, AuthenticatorDescription>();
@@ -52,9 +59,6 @@ public class ChooseAccountActivity extends Activity {
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        // TODO This activity is only used by getAuthTokenByFeatures and can not see
-        // VISIBILITY_USER_MANAGED_NOT_VISIBLE accounts. It should be moved to account managed
-        // service.
         mAccounts = getIntent().getParcelableArrayExtra(AccountManager.KEY_ACCOUNTS);
         mAccountManagerResponse =
                 getIntent().getParcelableExtra(AccountManager.KEY_ACCOUNT_MANAGER_RESPONSE);
@@ -64,6 +68,28 @@ public class ChooseAccountActivity extends Activity {
             setResult(RESULT_CANCELED);
             finish();
             return;
+        }
+
+        try {
+            IBinder activityToken = getActivityToken();
+            mCallingUid = ActivityManager.getService().getLaunchedFromUid(activityToken);
+            mCallingPackage = ActivityManager.getService().getLaunchedFromPackage(
+                    activityToken);
+        } catch (RemoteException re) {
+            // Couldn't figure out caller details
+            Log.w(getClass().getSimpleName(), "Unable to get caller identity \n" + re);
+        }
+
+        if (UserHandle.isSameApp(mCallingUid, Process.SYSTEM_UID) &&
+            getIntent().getStringExtra(AccountManager.KEY_ANDROID_PACKAGE_NAME) != null) {
+            mCallingPackage = getIntent().getStringExtra(
+                AccountManager.KEY_ANDROID_PACKAGE_NAME);
+        }
+
+        if (!UserHandle.isSameApp(mCallingUid, Process.SYSTEM_UID) &&
+                getIntent().getStringExtra(AccountManager.KEY_ANDROID_PACKAGE_NAME) != null) {
+            Log.w(getClass().getSimpleName(),
+                "Non-system Uid: " + mCallingUid + " tried to override packageName \n");
         }
 
         getAuthDescriptions();
@@ -120,6 +146,14 @@ public class ChooseAccountActivity extends Activity {
 
     protected void onListItemClick(ListView l, View v, int position, long id) {
         Account account = (Account) mAccounts[position];
+        // Mark account as visible since user chose it.
+        AccountManager am = AccountManager.get(this);
+        Integer oldVisibility = am.getAccountVisibility(account, mCallingPackage);
+        if (oldVisibility != null
+                && oldVisibility == AccountManager.VISIBILITY_USER_MANAGED_NOT_VISIBLE) {
+            am.setAccountVisibility(account, mCallingPackage,
+                AccountManager.VISIBILITY_USER_MANAGED_VISIBLE);
+        }
         Log.d(TAG, "selected account " + account);
         Bundle bundle = new Bundle();
         bundle.putString(AccountManager.KEY_ACCOUNT_NAME, account.name);

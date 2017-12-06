@@ -131,9 +131,6 @@ public class NavigationBarInflaterView extends FrameLayout
         mRot90.setId(R.id.rot90);
         addView(mRot90);
         updateAlternativeOrder();
-        if (getParent() instanceof NavigationBarView) {
-            ((NavigationBarView) getParent()).updateRotatedViews();
-        }
     }
 
     protected String getDefaultLayout() {

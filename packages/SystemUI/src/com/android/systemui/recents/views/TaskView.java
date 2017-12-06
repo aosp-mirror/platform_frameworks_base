@@ -416,7 +416,8 @@ public class TaskView extends FixedSizeFrameLayout implements Task.TaskCallbacks
      */
     boolean shouldClipViewInStack() {
         // Never clip for freeform tasks or if invisible
-        if (mTask.isFreeformTask() || getVisibility() != View.VISIBLE) {
+        if (mTask.isFreeformTask() || getVisibility() != View.VISIBLE ||
+                Recents.getConfiguration().isLowRamDevice) {
             return false;
         }
         return mClipViewInStack;
@@ -684,6 +685,9 @@ public class TaskView extends FixedSizeFrameLayout implements Task.TaskCallbacks
 
     @Override
     public boolean onLongClick(View v) {
+        if (!Recents.getConfiguration().dragToSplitEnabled) {
+            return false;
+        }
         SystemServicesProxy ssp = Recents.getSystemServices();
         boolean inBounds = false;
         Rect clipBounds = new Rect(mViewBounds.mClipBounds);

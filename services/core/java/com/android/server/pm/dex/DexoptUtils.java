@@ -20,6 +20,7 @@ import android.content.pm.ApplicationInfo;
 import android.util.Slog;
 import android.util.SparseArray;
 
+import com.android.internal.os.ClassLoaderFactory;
 import com.android.server.pm.PackageDexOptimizer;
 
 import java.io.File;
@@ -67,7 +68,7 @@ public final class DexoptUtils {
         // The base class loader context contains only the shared library.
         String sharedLibrariesClassPath = encodeClasspath(sharedLibraries);
         String baseApkContextClassLoader = encodeClassLoader(
-                sharedLibrariesClassPath, "dalvik.system.PathClassLoader");
+                sharedLibrariesClassPath, info.classLoaderName);
 
         if (info.getSplitCodePaths() == null) {
             // The application has no splits.
@@ -98,7 +99,7 @@ public final class DexoptUtils {
             String classpath = sharedLibrariesAndBaseClassPath;
             for (int i = 1; i < classLoaderContexts.length; i++) {
                 classLoaderContexts[i] = pathsWithCode[i]
-                        ? encodeClassLoader(classpath, "dalvik.system.PathClassLoader") : null;
+                        ? encodeClassLoader(classpath, info.classLoaderName) : null;
                 // Note that the splits with no code are not removed from the classpath computation.
                 // i.e. split_n might get the split_n-1 in its classpath dependency even
                 // if split_n-1 has no code.
@@ -122,10 +123,10 @@ public final class DexoptUtils {
             String[] splitClassLoaderEncodingCache = new String[splitRelativeCodePaths.length];
             for (int i = 0; i < splitRelativeCodePaths.length; i++) {
                 splitClassLoaderEncodingCache[i] = encodeClassLoader(splitRelativeCodePaths[i],
-                        "dalvik.system.PathClassLoader");
+                        info.splitClassLoaderNames[i]);
             }
             String splitDependencyOnBase = encodeClassLoader(
-                    sharedLibrariesAndBaseClassPath, "dalvik.system.PathClassLoader");
+                    sharedLibrariesAndBaseClassPath, info.classLoaderName);
             SparseArray<int[]> splitDependencies = info.splitDependencies;
 
             // Note that not all splits have dependencies (e.g. configuration splits)
@@ -144,7 +145,7 @@ public final class DexoptUtils {
             // We also need to add the class loader of the current split which should
             // come first in the context.
             for (int i = 1; i < classLoaderContexts.length; i++) {
-                String splitClassLoader = encodeClassLoader("", "dalvik.system.PathClassLoader");
+                String splitClassLoader = encodeClassLoader("", info.splitClassLoaderNames[i - 1]);
                 if (pathsWithCode[i]) {
                     // If classLoaderContexts[i] is null it means that the split does not have
                     // any dependency. In this case its context equals its declared class loader.
@@ -248,8 +249,10 @@ public final class DexoptUtils {
             return classpath;
         }
         String classLoaderDexoptEncoding = classLoaderName;
-        if ("dalvik.system.PathClassLoader".equals(classLoaderName)) {
+        if (ClassLoaderFactory.isPathClassLoaderName(classLoaderName)) {
             classLoaderDexoptEncoding = "PCL";
+        } else if (ClassLoaderFactory.isDelegateLastClassLoaderName(classLoaderName)) {
+            classLoaderDexoptEncoding = "DLC";
         } else {
             Slog.wtf(TAG, "Unsupported classLoaderName: " + classLoaderName);
         }
@@ -315,7 +318,7 @@ public final class DexoptUtils {
         // is fine (they come over binder). Even if something changes we expect the sizes to be
         // very small and it shouldn't matter much.
         for (int i = 1; i < classLoadersNames.size(); i++) {
-            if (!isValidClassLoaderName(classLoadersNames.get(i))) {
+            if (!ClassLoaderFactory.isValidClassLoaderName(classLoadersNames.get(i))) {
                 return null;
             }
             String classpath = encodeClasspath(classPaths.get(i).split(File.pathSeparator));
@@ -325,7 +328,7 @@ public final class DexoptUtils {
 
         // Now compute the class loader context for each dex file from the first classpath.
         String loadingClassLoader = classLoadersNames.get(0);
-        if (!isValidClassLoaderName(loadingClassLoader)) {
+        if (!ClassLoaderFactory.isValidClassLoaderName(loadingClassLoader)) {
             return null;
         }
         String[] loadedDexPaths = classPaths.get(0).split(File.pathSeparator);
@@ -339,11 +342,6 @@ public final class DexoptUtils {
             currentLoadedDexPathClasspath = encodeClasspath(currentLoadedDexPathClasspath, dexPath);
         }
         return loadedDexPathsContext;
-    }
-
-    // AOSP-only hack.
-    private static boolean isValidClassLoaderName(String name) {
-        return "dalvik.system.PathClassLoader".equals(name) || "dalvik.system.DexClassLoader".equals(name);
     }
 
     /**

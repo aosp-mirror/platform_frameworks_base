@@ -38,8 +38,9 @@ public class ExtensionControllerImpl implements ExtensionController {
 
     public static final int SORT_ORDER_PLUGIN  = 0;
     public static final int SORT_ORDER_TUNER   = 1;
-    public static final int SORT_ORDER_UI_MODE = 2;
-    public static final int SORT_ORDER_DEFAULT = 3;
+    public static final int SORT_ORDER_FEATURE = 2;
+    public static final int SORT_ORDER_UI_MODE = 3;
+    public static final int SORT_ORDER_DEFAULT = 4;
 
     private final Context mDefaultContext;
 
@@ -92,9 +93,17 @@ public class ExtensionControllerImpl implements ExtensionController {
             return this;
         }
 
+        @Override
         public ExtensionController.ExtensionBuilder<T> withUiMode(int uiMode,
                 Supplier<T> supplier) {
             mExtension.addUiMode(uiMode, supplier);
+            return this;
+        }
+
+        @Override
+        public ExtensionController.ExtensionBuilder<T> withFeature(String feature,
+                Supplier<T> supplier) {
+            mExtension.addFeature(feature, supplier);
             return this;
         }
 
@@ -107,7 +116,7 @@ public class ExtensionControllerImpl implements ExtensionController {
 
         @Override
         public ExtensionController.Extension build() {
-            // Manually sort, plugins first, tuners second, defaults last.
+            // Sort items in ascending order
             Collections.sort(mExtension.mProducers, Comparator.comparingInt(Item::sortOrder));
             mExtension.notifyChanged();
             return mExtension;
@@ -186,6 +195,10 @@ public class ExtensionControllerImpl implements ExtensionController {
 
         public void addUiMode(int uiMode, Supplier<T> mode) {
             mProducers.add(new UiModeItem(uiMode, mode));
+        }
+
+        public void addFeature(String feature, Supplier<T> mode) {
+            mProducers.add(new FeatureItem<>(feature, mode));
         }
 
         private class PluginItem<P extends Plugin> implements Item<T>, PluginListener<P> {
@@ -274,7 +287,8 @@ public class ExtensionControllerImpl implements ExtensionController {
             public UiModeItem(int uiMode, Supplier<T> supplier) {
                 mDesiredUiMode = uiMode;
                 mSupplier = supplier;
-                mUiMode = mDefaultContext.getResources().getConfiguration().uiMode;
+                mUiMode = mDefaultContext.getResources().getConfiguration().uiMode
+                        & Configuration.UI_MODE_TYPE_MASK;
                 Dependency.get(ConfigurationController.class).addCallback(this);
             }
 
@@ -301,6 +315,32 @@ public class ExtensionControllerImpl implements ExtensionController {
             @Override
             public int sortOrder() {
                 return SORT_ORDER_UI_MODE;
+            }
+        }
+
+        private class FeatureItem<T> implements Item<T> {
+            private final String mFeature;
+            private final Supplier<T> mSupplier;
+
+            public FeatureItem(String feature, Supplier<T> supplier) {
+                mSupplier = supplier;
+                mFeature = feature;
+            }
+
+            @Override
+            public T get() {
+                return mDefaultContext.getPackageManager().hasSystemFeature(mFeature)
+                        ? mSupplier.get() : null;
+            }
+
+            @Override
+            public void destroy() {
+
+            }
+
+            @Override
+            public int sortOrder() {
+                return SORT_ORDER_FEATURE;
             }
         }
 

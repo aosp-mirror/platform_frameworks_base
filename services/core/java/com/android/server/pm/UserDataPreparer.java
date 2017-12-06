@@ -99,8 +99,7 @@ class UserDataPreparer {
         } catch (Exception e) {
             logCriticalInfo(Log.WARN, "Destroying user " + userId + " on volume " + volumeUuid
                     + " because we failed to prepare: " + e);
-            destroyUserDataLI(volumeUuid, userId,
-                    StorageManager.FLAG_STORAGE_DE | StorageManager.FLAG_STORAGE_CE);
+            destroyUserDataLI(volumeUuid, userId, flags);
 
             if (allowRecover) {
                 // Try one last time; if we fail again we're really in trouble

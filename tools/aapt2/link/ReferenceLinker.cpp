@@ -109,18 +109,15 @@ class ReferenceLinkerVisitor : public ValueVisitor {
         entry.value->Accept(this);
 
         // Now verify that the type of this item is compatible with the
-        // attribute it
-        // is defined for. We pass `nullptr` as the DiagMessage so that this
-        // check is
-        // fast and we avoid creating a DiagMessage when the match is
-        // successful.
-        if (!symbol->attribute->Matches(entry.value.get(), nullptr)) {
+        // attribute it is defined for. We pass `nullptr` as the DiagMessage so that this
+        // check is fast and we avoid creating a DiagMessage when the match is successful.
+        if (!symbol->attribute->Matches(*entry.value, nullptr)) {
           // The actual type of this item is incompatible with the attribute.
           DiagMessage msg(entry.key.GetSource());
 
           // Call the matches method again, this time with a DiagMessage so we
           // fill in the actual error message.
-          symbol->attribute->Matches(entry.value.get(), &msg);
+          symbol->attribute->Matches(*entry.value, &msg);
           context_->GetDiagnostics()->Error(msg);
           error_ = true;
         }

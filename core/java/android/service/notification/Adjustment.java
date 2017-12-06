@@ -17,7 +17,7 @@ package android.service.notification;
 
 import android.annotation.SystemApi;
 import android.annotation.TestApi;
-import android.app.NotificationChannel;
+import android.app.Notification;
 import android.os.Bundle;
 import android.os.Parcel;
 import android.os.Parcelable;
@@ -48,6 +48,12 @@ public final class Adjustment implements Parcelable {
      * {@link NotificationAssistantService#onNotificationSnoozedUntilContext}.
      */
     public static final String KEY_SNOOZE_CRITERIA = "key_snooze_criteria";
+    /**
+     * Data type: String. Used to change what {@link Notification#getGroup() group} a notification
+     * belongs to.
+     * @hide
+     */
+    public static final String KEY_GROUP_KEY = "key_group_key";
 
     /**
      * Create a notification adjustment.
@@ -145,5 +151,12 @@ public final class Adjustment implements Parcelable {
         }
         dest.writeBundle(mSignals);
         dest.writeInt(mUser);
+    }
+
+    @Override
+    public String toString() {
+        return "Adjustment{"
+                + "mSignals=" + mSignals
+                + '}';
     }
 }

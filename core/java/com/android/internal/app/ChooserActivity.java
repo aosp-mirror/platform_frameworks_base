@@ -100,7 +100,7 @@ public class ChooserActivity extends ResolverActivity {
     private static final boolean DEBUG = false;
 
     private static final int QUERY_TARGET_SERVICE_LIMIT = 5;
-    private static final int WATCHDOG_TIMEOUT_MILLIS = 5000;
+    private static final int WATCHDOG_TIMEOUT_MILLIS = 2000;
 
     private Bundle mReplacementExtras;
     private IntentSender mChosenComponentSender;
@@ -1450,11 +1450,16 @@ public class ChooserActivity extends ResolverActivity {
                         getFirstRowPosition(rowPosition + 1));
                 int serviceSpacing = holder.row.getContext().getResources()
                         .getDimensionPixelSize(R.dimen.chooser_service_spacing);
-                int top = rowPosition == 0 ? serviceSpacing : 0;
-                if (nextStartType != ChooserListAdapter.TARGET_SERVICE) {
-                    setVertPadding(holder, top, serviceSpacing);
+                if (rowPosition == 0 && nextStartType != ChooserListAdapter.TARGET_SERVICE) {
+                    // if the row is the only row for target service
+                    setVertPadding(holder, 0, 0);
                 } else {
-                    setVertPadding(holder, top, 0);
+                    int top = rowPosition == 0 ? serviceSpacing : 0;
+                    if (nextStartType != ChooserListAdapter.TARGET_SERVICE) {
+                        setVertPadding(holder, top, serviceSpacing);
+                    } else {
+                        setVertPadding(holder, top, 0);
+                    }
                 }
             } else {
                 holder.row.setBackgroundColor(Color.TRANSPARENT);
@@ -1470,10 +1475,8 @@ public class ChooserActivity extends ResolverActivity {
             }
 
             final int oldHeight = holder.row.getLayoutParams().height;
-            int measuredRowHeight = holder.measuredRowHeight + holder.row.getPaddingTop()
-                    + holder.row.getPaddingBottom();
             holder.row.getLayoutParams().height = Math.max(1,
-                    (int) (measuredRowHeight * getRowScale(rowPosition)));
+                    (int) (holder.measuredRowHeight * getRowScale(rowPosition)));
             if (holder.row.getLayoutParams().height != oldHeight) {
                 holder.row.requestLayout();
             }
@@ -1582,8 +1585,8 @@ public class ChooserActivity extends ResolverActivity {
                 } catch (RemoteException e) {
                     Log.e(TAG, "Querying ChooserTargetService " + name + " failed.", e);
                     mChooserActivity.unbindService(this);
-                    destroy();
                     mChooserActivity.mServiceConnections.remove(this);
+                    destroy();
                 }
             }
         }
@@ -1599,7 +1602,6 @@ public class ChooserActivity extends ResolverActivity {
                 }
 
                 mChooserActivity.unbindService(this);
-                destroy();
                 mChooserActivity.mServiceConnections.remove(this);
                 if (mChooserActivity.mServiceConnections.isEmpty()) {
                     mChooserActivity.mChooserHandler.removeMessages(
@@ -1607,6 +1609,7 @@ public class ChooserActivity extends ResolverActivity {
                     mChooserActivity.sendVoiceChoicesIfNeeded();
                 }
                 mConnectedComponent = null;
+                destroy();
             }
         }
 

@@ -101,7 +101,7 @@ public class AppLaunch extends InstrumentationTestCase {
     private static final String PROFILE_COMPILE_SUCCESS = "Success";
     private static final String THIS_TIME = "ThisTime:";
     private static final String LAUNCH_ITERATION = "LAUNCH_ITERATION - %d";
-    private static final String TRACE_ITERATION = "TRACE_ITERATION - %d";
+    private static final String TRACE_ITERATION = "TRACE_ITERATION-%d";
     private static final String LAUNCH_ITERATION_PREFIX = "LAUNCH_ITERATION";
     private static final String TRACE_ITERATION_PREFIX = "TRACE_ITERATION";
     private static final String LAUNCH_ORDER_CYCLIC = "cyclic";

@@ -46,7 +46,8 @@ public interface NavBarButtonProvider extends Plugin {
 
         void setVertical(boolean vertical);
 
-        void setCarMode(boolean carMode);
+        default void setCarMode(boolean carMode) {
+        }
 
         void setDarkIntensity(float intensity);
     }
