@@ -21,26 +21,27 @@ import static com.android.server.am.ActivityManagerDebugConfig.TAG_WITH_CLASS_NA
 
 import android.app.ActivityOptions;
 import android.content.pm.ActivityInfo;
-import android.graphics.Point;
 import android.graphics.Rect;
 import android.util.Slog;
 import android.view.Gravity;
 import com.android.internal.annotations.VisibleForTesting;
+import com.android.server.am.LaunchParamsController.LaunchParams;
+import com.android.server.am.LaunchParamsController.LaunchParamsModifier;
 
 import java.util.ArrayList;
 
 /**
  * Determines where a launching task should be positioned and sized on the display.
  *
- * The positioner is fairly simple. For the new task it tries default position based on the gravity
+ * The modifier is fairly simple. For the new task it tries default position based on the gravity
  * and compares corners of the task with corners of existing tasks. If some two pairs of corners are
  * sufficiently close enough, it shifts the bounds of the new task and tries again. When it exhausts
  * all possible shifts, it gives up and puts the task in the original position.
  *
  * Note that the only gravities of concern are the corners and the center.
  */
-class LaunchingTaskPositioner implements LaunchingBoundsController.LaunchingBoundsPositioner {
-    private static final String TAG = TAG_WITH_CLASS_NAME ? "LaunchingTaskPositioner" : TAG_AM;
+class TaskLaunchParamsModifier implements LaunchParamsModifier {
+    private static final String TAG = TAG_WITH_CLASS_NAME ? "TaskLaunchParamsModifier" : TAG_AM;
 
     // Determines how close window frames/corners have to be to call them colliding.
     private static final int BOUNDS_CONFLICT_MIN_DISTANCE = 4;
@@ -70,17 +71,15 @@ class LaunchingTaskPositioner implements LaunchingBoundsController.LaunchingBoun
     private final Rect mTmpProposal = new Rect();
     private final Rect mTmpOriginal = new Rect();
 
-    private final Point mDisplaySize = new Point();
-
     /**
      * Tries to set task's bound in a way that it won't collide with any other task. By colliding
      * we mean that two tasks have left-top corner very close to each other, so one might get
      * obfuscated by the other one.
      */
     @Override
-    public int onCalculateBounds(TaskRecord task, ActivityInfo.WindowLayout layout,
-            ActivityRecord activity, ActivityRecord source,
-            ActivityOptions options, Rect current, Rect result) {
+    public int onCalculate(TaskRecord task, ActivityInfo.WindowLayout layout,
+                           ActivityRecord activity, ActivityRecord source, ActivityOptions options,
+                           LaunchParams currentParams, LaunchParams outParams) {
         // We can only apply positioning if we're in a freeform stack.
         if (task == null || task.getStack() == null || !task.inFreeformWindowingMode()) {
             return RESULT_SKIP;
@@ -90,9 +89,11 @@ class LaunchingTaskPositioner implements LaunchingBoundsController.LaunchingBoun
 
         mAvailableRect.set(task.getParent().getBounds());
 
+        final Rect resultBounds = outParams.mBounds;
+
         if (layout == null) {
             positionCenter(tasks, mAvailableRect, getFreeformWidth(mAvailableRect),
-                    getFreeformHeight(mAvailableRect), result);
+                    getFreeformHeight(mAvailableRect), resultBounds);
             return RESULT_CONTINUE;
         }
 
@@ -102,22 +103,22 @@ class LaunchingTaskPositioner implements LaunchingBoundsController.LaunchingBoun
         int horizontalGravity = layout.gravity & Gravity.HORIZONTAL_GRAVITY_MASK;
         if (verticalGravity == Gravity.TOP) {
             if (horizontalGravity == Gravity.RIGHT) {
-                positionTopRight(tasks, mAvailableRect, width, height, result);
+                positionTopRight(tasks, mAvailableRect, width, height, resultBounds);
             } else {
-                positionTopLeft(tasks, mAvailableRect, width, height, result);
+                positionTopLeft(tasks, mAvailableRect, width, height, resultBounds);
             }
         } else if (verticalGravity == Gravity.BOTTOM) {
             if (horizontalGravity == Gravity.RIGHT) {
-                positionBottomRight(tasks, mAvailableRect, width, height, result);
+                positionBottomRight(tasks, mAvailableRect, width, height, resultBounds);
             } else {
-                positionBottomLeft(tasks, mAvailableRect, width, height, result);
+                positionBottomLeft(tasks, mAvailableRect, width, height, resultBounds);
             }
         } else {
             // Some fancy gravity setting that we don't support yet. We just put the activity in the
             // center.
             Slog.w(TAG, "Received unsupported gravity: " + layout.gravity
                     + ", positioning in the center instead.");
-            positionCenter(tasks, mAvailableRect, width, height, result);
+            positionCenter(tasks, mAvailableRect, width, height, resultBounds);
         }
 
         return RESULT_CONTINUE;

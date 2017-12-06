@@ -96,7 +96,6 @@ import android.os.Bundle;
 import android.os.IBinder;
 import android.os.RemoteException;
 import android.os.SystemClock;
-import android.os.Trace;
 import android.os.UserHandle;
 import android.os.UserManager;
 import android.service.voice.IVoiceInteractionSession;
@@ -109,6 +108,7 @@ import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.app.HeavyWeightSwitcherActivity;
 import com.android.internal.app.IVoiceInteractor;
 import com.android.server.am.ActivityStackSupervisor.PendingActivityLaunch;
+import com.android.server.am.LaunchParamsController.LaunchParams;
 import com.android.server.pm.InstantAppResolver;
 
 import java.io.PrintWriter;
@@ -144,7 +144,7 @@ class ActivityStarter {
     private boolean mLaunchTaskBehind;
     private int mLaunchFlags;
 
-    private Rect mLaunchBounds = new Rect();
+    private LaunchParams mLaunchParams = new LaunchParams();
 
     private ActivityRecord mNotTop;
     private boolean mDoResume;
@@ -412,7 +412,7 @@ class ActivityStarter {
         mLaunchFlags = starter.mLaunchFlags;
         mLaunchMode = starter.mLaunchMode;
 
-        mLaunchBounds.set(starter.mLaunchBounds);
+        mLaunchParams.set(starter.mLaunchParams);
 
         mNotTop = starter.mNotTop;
         mDoResume = starter.mDoResume;
@@ -1147,6 +1147,18 @@ class ActivityStarter {
             preferredLaunchDisplayId = mOptions.getLaunchDisplayId();
         }
 
+        // windowing mode and preferred launch display values from {@link LaunchParams} take
+        // priority over those specified in {@link ActivityOptions}.
+        if (!mLaunchParams.isEmpty()) {
+            if (mLaunchParams.hasPreferredDisplay()) {
+                preferredLaunchDisplayId = mLaunchParams.mPreferredDisplayId;
+            }
+
+            if (mLaunchParams.hasWindowingMode()) {
+                preferredWindowingMode = mLaunchParams.mWindowingMode;
+            }
+        }
+
         if (reusedActivity != null) {
             // When the flags NEW_TASK and CLEAR_TASK are set, then the task gets reused but
             // still needs to be a lock task mode violation since the task gets cleared out and
@@ -1371,7 +1383,7 @@ class ActivityStarter {
         mLaunchFlags = 0;
         mLaunchMode = INVALID_LAUNCH_MODE;
 
-        mLaunchBounds.setEmpty();
+        mLaunchParams.reset();
 
         mNotTop = null;
         mDoResume = false;
@@ -1418,10 +1430,10 @@ class ActivityStarter {
 
         mPreferredDisplayId = getPreferedDisplayId(mSourceRecord, mStartActivity, options);
 
-        mLaunchBounds.setEmpty();
+        mLaunchParams.reset();
 
-        mSupervisor.getLaunchingBoundsController().calculateBounds(inTask, null /*layout*/, r,
-                sourceRecord, options, mLaunchBounds);
+        mSupervisor.getLaunchParamsController().calculate(inTask, null /*layout*/, r, sourceRecord,
+                options, mLaunchParams);
 
         mLaunchMode = r.launchMode;
 
@@ -1931,7 +1943,7 @@ class ActivityStarter {
                     mVoiceInteractor, !mLaunchTaskBehind /* toTop */, mStartActivity, mSourceRecord,
                     mOptions);
             addOrReparentStartingActivity(task, "setTaskFromReuseOrCreateNewTask - mReuseTask");
-            updateBounds(mStartActivity.getTask(), mLaunchBounds);
+            updateBounds(mStartActivity.getTask(), mLaunchParams.mBounds);
 
             if (DEBUG_TASKS) Slog.v(TAG_TASKS, "Starting new activity " + mStartActivity
                     + " in new task " + mStartActivity.getTask());
@@ -2095,7 +2107,7 @@ class ActivityStarter {
             return START_TASK_TO_FRONT;
         }
 
-        if (!mLaunchBounds.isEmpty()) {
+        if (!mLaunchParams.mBounds.isEmpty()) {
             // TODO: Shouldn't we already know what stack to use by the time we get here?
             ActivityStack stack = mSupervisor.getLaunchStack(null, null, mInTask, ON_TOP);
             if (stack != mInTask.getStack()) {
@@ -2104,7 +2116,7 @@ class ActivityStarter {
                 mTargetStack = mInTask.getStack();
             }
 
-            updateBounds(mInTask, mLaunchBounds);
+            updateBounds(mInTask, mLaunchParams.mBounds);
         }
 
         mTargetStack.moveTaskToFrontLocked(

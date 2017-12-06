@@ -19,23 +19,25 @@ package com.android.server.am;
 import android.app.ActivityOptions;
 import android.content.pm.ActivityInfo;
 import android.graphics.Rect;
-import com.android.server.am.LaunchingBoundsController.LaunchingBoundsPositioner;
+
+import com.android.server.am.LaunchParamsController.LaunchParams;
+import com.android.server.am.LaunchParamsController.LaunchParamsModifier;
 
 /**
- * An implementation of {@link LaunchingBoundsPositioner}, which applies the launch bounds specified
+ * An implementation of {@link LaunchParamsModifier}, which applies the launch bounds specified
  * inside {@link ActivityOptions#getLaunchBounds()}.
  */
-public class LaunchingActivityPositioner implements LaunchingBoundsPositioner {
+public class ActivityLaunchParamsModifier implements LaunchParamsModifier {
     private final ActivityStackSupervisor mSupervisor;
 
-    LaunchingActivityPositioner(ActivityStackSupervisor activityStackSupervisor) {
+    ActivityLaunchParamsModifier(ActivityStackSupervisor activityStackSupervisor) {
         mSupervisor = activityStackSupervisor;
     }
 
     @Override
-    public int onCalculateBounds(TaskRecord task, ActivityInfo.WindowLayout layout,
-            ActivityRecord activity, ActivityRecord source,
-            ActivityOptions options, Rect current, Rect result) {
+    public int onCalculate(TaskRecord task, ActivityInfo.WindowLayout layout,
+            ActivityRecord activity, ActivityRecord source, ActivityOptions options,
+            LaunchParams currentParams, LaunchParams outParams) {
         // We only care about figuring out bounds for activities.
         if (activity == null) {
             return RESULT_SKIP;
@@ -43,7 +45,7 @@ public class LaunchingActivityPositioner implements LaunchingBoundsPositioner {
 
         // Activity must be resizeable in the specified task.
         if (!(mSupervisor.canUseActivityOptionsLaunchBounds(options)
-            && (activity.isResizeable() || (task != null && task.isResizeable())))) {
+                && (activity.isResizeable() || (task != null && task.isResizeable())))) {
             return RESULT_SKIP;
         }
 
@@ -54,7 +56,7 @@ public class LaunchingActivityPositioner implements LaunchingBoundsPositioner {
             return RESULT_SKIP;
         }
 
-        result.set(bounds);
+        outParams.mBounds.set(bounds);
 
         // When this is the most explicit position specification so we should not allow further
         // modification of the position.
