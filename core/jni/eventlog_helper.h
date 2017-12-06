@@ -155,11 +155,6 @@ public:
             return;
         }
 
-        ScopedIntArrayRO tags(env);
-        if (jTags != nullptr) {
-            tags.reset(jTags);
-        }
-
         while (1) {
             log_msg log_msg;
             int ret = android_logger_list_read(logger_list.get(), &log_msg);
@@ -187,6 +182,7 @@ public:
 
             if (jTags != nullptr) {
                 bool found = false;
+                ScopedIntArrayRO tags(env, jTags);
                 for (size_t i = 0; !found && i < tags.size(); ++i) {
                     found = (tag == tags[i]);
                 }
