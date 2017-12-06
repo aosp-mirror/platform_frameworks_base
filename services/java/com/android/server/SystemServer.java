@@ -70,7 +70,6 @@ import com.android.server.coverage.CoverageService;
 import com.android.server.devicepolicy.DevicePolicyManagerService;
 import com.android.server.display.DisplayManagerService;
 import com.android.server.display.NightDisplayService;
-import com.android.server.display.NightDisplayServiceCmc623;
 import com.android.server.dreams.DreamManagerService;
 import com.android.server.emergency.EmergencyAffordanceService;
 import com.android.server.fingerprint.FingerprintService;
@@ -1288,7 +1287,7 @@ public final class SystemServer {
 
             if (NightDisplayController.isAvailable(context)) {
                 traceBeginAndSlog("StartNightDisplay");
-                mSystemServiceManager.startService(NightDisplayServiceCmc623.class);
+                mSystemServiceManager.startService(NightDisplayService.class);
                 traceEnd();
             }
 
