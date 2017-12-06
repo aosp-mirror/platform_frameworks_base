@@ -5112,6 +5112,7 @@ public class StatusBar extends SystemUI implements DemoMode,
 
     public void notifyFpAuthModeChanged() {
         updateDozing();
+        updateScrimController();
     }
 
     private void updateDozing() {
