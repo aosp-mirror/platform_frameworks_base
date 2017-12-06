@@ -166,12 +166,6 @@
             android:layout_height="wrap_content"
             android:text="@string/display_output"
             android:textSize="30dp"/>
-        <Button
-            android:id="@+id/display_perf"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="@string/display_perf"
-            android:textSize="30dp"/>
 
         <Space
             android:layout_width="1dp"
@@ -179,6 +173,7 @@
 
         <TextView
             android:id="@+id/report_text"
+            android:gravity="center"
             android:layout_width="match_parent"
             android:layout_height="wrap_content" />
 

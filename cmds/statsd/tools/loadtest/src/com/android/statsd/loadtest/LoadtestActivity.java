@@ -65,8 +65,9 @@ import android.widget.Toast;
 public class LoadtestActivity extends Activity {
 
     private static final String TAG = "StatsdLoadtest";
-    private static final String TYPE = "type";
-    private static final String ALARM = "push_alarm";
+    public static final String TYPE = "type";
+    private static final String PUSH_ALARM = "push_alarm";
+    public static final String PERF_ALARM = "perf_alarm";
     private static final String START = "start";
     private static final String STOP = "stop";
 
@@ -74,7 +75,7 @@ public class LoadtestActivity extends Activity {
         @Override
         public void onReceive(Context context, Intent intent) {
             Intent activityIntent = new Intent(context, LoadtestActivity.class);
-            activityIntent.putExtra(TYPE, ALARM);
+            activityIntent.putExtra(TYPE, PUSH_ALARM);
             context.startActivity(activityIntent);
          }
     }
@@ -104,6 +105,9 @@ public class LoadtestActivity extends Activity {
     private EditText mDurationText;
     private TextView mReportText;
     private CheckBox mPlaceboCheckBox;
+
+    /** When the load test started. */
+    private long mStartedTimeMillis;
 
     /** For measuring perf data. */
     private PerfData mPerfData;
@@ -180,7 +184,7 @@ public class LoadtestActivity extends Activity {
             @Override
             public void onClick(View view) {
                 if (mStarted) {
-                    stopLoadtest(true);
+                    stopLoadtest();
                 } else {
                     startLoadtest();
                 }
@@ -194,20 +198,11 @@ public class LoadtestActivity extends Activity {
             }
         });
 
-        findViewById(R.id.display_perf).setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                mPerfData.publishData(LoadtestActivity.this, mPlacebo, mReplication, mBucketMins,
-                    mPeriodSecs, mBurst);
-            }
-        });
-
         mAlarmMgr = (AlarmManager) getSystemService(Context.ALARM_SERVICE);
         mStatsManager = (StatsManager) getSystemService("stats");
         mPowerManager = (PowerManager) getSystemService(Context.POWER_SERVICE);
         mFactory = new ConfigFactory(this);
-        mPerfData = new PerfData();
-        stopLoadtest(false);
+        stopLoadtest();
         mReportText.setText("");
     }
 
@@ -218,14 +213,17 @@ public class LoadtestActivity extends Activity {
             return;
         }
         switch (type) {
-            case ALARM:
-              onAlarm(intent);
-              break;
+            case PERF_ALARM:
+                onPerfAlarm();
+                break;
+            case PUSH_ALARM:
+                onAlarm();
+                break;
             case START:
                 startLoadtest();
                 break;
-          case STOP:
-                stopLoadtest(true);
+            case STOP:
+                stopLoadtest();
                 break;
             default:
                 throw new IllegalArgumentException("Unknown type: " + type);
@@ -235,12 +233,23 @@ public class LoadtestActivity extends Activity {
     @Override
     public void onDestroy() {
         Log.d(TAG, "Destroying");
-        stopLoadtest(false);
+        mPerfData.onDestroy();
+        stopLoadtest();
         clearConfigs();
         super.onDestroy();
     }
 
-    private void onAlarm(Intent intent) {
+    private void onPerfAlarm() {
+        if (mPerfData != null) {
+            mPerfData.onAlarm(this);
+        }
+        // Piggy-back on that alarm to show the elapsed time.
+        long elapsedTimeMins = (long) Math.floor(
+            (SystemClock.elapsedRealtime() - mStartedTimeMillis) / 60 / 1000);
+        mReportText.setText("Loadtest in progress. Elapsed time = " + elapsedTimeMins + " min(s)");
+    }
+
+    private void onAlarm() {
         Log.d(TAG, "ON ALARM");
 
         // Set the next task.
@@ -259,7 +268,7 @@ public class LoadtestActivity extends Activity {
     /** Schedules the next cycle of pushing atoms into logd. */
     private void scheduleNext() {
         Intent intent = new Intent(this, PusherAlarmReceiver.class);
-        intent.putExtra(TYPE, ALARM);
+        intent.putExtra(TYPE, PUSH_ALARM);
         mPushPendingIntent = PendingIntent.getBroadcast(this, 0, intent, 0);
         long nextTime =  SystemClock.elapsedRealtime() + mPeriodSecs * 1000;
         mAlarmMgr.setExact(AlarmManager.ELAPSED_REALTIME_WAKEUP, nextTime, mPushPendingIntent);
@@ -271,7 +280,7 @@ public class LoadtestActivity extends Activity {
         }
 
         // Clean up the state.
-        stopLoadtest(false);
+        stopLoadtest();
 
         // Prepare to push a sequence of atoms to logd.
         mPusher = new SequencePusher(mBurst, mPlacebo);
@@ -291,15 +300,17 @@ public class LoadtestActivity extends Activity {
         // Log atoms.
         scheduleNext();
 
-        // Reset battery data.
-        mPerfData.resetData(this);
+        // Start tracking performance.
+        mPerfData = new PerfData(this, mPlacebo, mReplication, mBucketMins, mPeriodSecs, mBurst);
+        mPerfData.startRecording(this);
 
-        mReportText.setText("");
+        mReportText.setText("Loadtest in progress.");
+        mStartedTimeMillis = SystemClock.elapsedRealtime();
 
         updateStarted(true);
     }
 
-    private synchronized void stopLoadtest(boolean publishPerfData) {
+    private synchronized void stopLoadtest() {
         if (mPushPendingIntent != null) {
             Log.d(TAG, "Canceling pre-existing push alarm");
             mAlarmMgr.cancel(mPushPendingIntent);
@@ -314,12 +325,17 @@ public class LoadtestActivity extends Activity {
             mWakeLock.release();
             mWakeLock = null;
         }
-        fetchAndDisplayData();
+        if (mPerfData != null) {
+            mPerfData.stopRecording(this);
+            mPerfData.onDestroy();
+            mPerfData = null;
+        }
+
+        long elapsedTimeMins = (long) Math.floor(
+            (SystemClock.elapsedRealtime() - mStartedTimeMillis) / 60 / 1000);
+        mReportText.setText("Loadtest ended. Elapsed time = " + elapsedTimeMins + " min(s)");
         clearConfigs();
         updateStarted(false);
-        if (publishPerfData) {
-            mPerfData.publishData(this, mPlacebo, mReplication, mBucketMins, mPeriodSecs, mBurst);
-        }
     }
 
     private synchronized void updateStarted(boolean started) {
