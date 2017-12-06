@@ -339,7 +339,7 @@ public class BatterySaverPolicy extends ContentObserver {
         }
 
         mVibrationDisabled = parser.getBoolean(KEY_VIBRATION_DISABLED, true);
-        mAnimationDisabled = parser.getBoolean(KEY_ANIMATION_DISABLED, true);
+        mAnimationDisabled = parser.getBoolean(KEY_ANIMATION_DISABLED, false);
         mSoundTriggerDisabled = parser.getBoolean(KEY_SOUNDTRIGGER_DISABLED, true);
         mFullBackupDeferred = parser.getBoolean(KEY_FULLBACKUP_DEFERRED, true);
         mKeyValueBackupDeferred = parser.getBoolean(KEY_KEYVALUE_DEFERRED, true);
