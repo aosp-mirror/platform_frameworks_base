@@ -266,7 +266,6 @@ public class FingerprintUnlockController extends KeyguardUpdateMonitorCallback {
     }
 
     private void showBouncer() {
-        mScrimController.transitionTo(ScrimState.BOUNCER);
         mStatusBarKeyguardViewManager.animateCollapsePanels(
                 FINGERPRINT_COLLAPSE_SPEEDUP_FACTOR);
         mPendingShowBouncer = false;
