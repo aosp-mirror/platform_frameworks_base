@@ -21,6 +21,8 @@ import android.os.Parcelable;
 
 /**
  * Data about a brightness settings change.
+ *
+ * {@see DisplayManager.getBrightnessEvents()}
  * TODO make this SystemAPI
  * @hide
  */
@@ -31,7 +33,9 @@ public final class BrightnessChangeEvent implements Parcelable {
     /** Timestamp of the change {@see System.currentTimeMillis()} */
     public long timeStamp;
 
-    /** Package name of focused activity when brightness was changed. */
+    /** Package name of focused activity when brightness was changed.
+     *  This will be null if the caller of {@see DisplayManager.getBrightnessEvents()}
+     *  does not have access to usage stats {@see UsageStatsManager} */
     public String packageName;
 
     /** User id of of the user running when brightness was changed.
@@ -57,6 +61,20 @@ public final class BrightnessChangeEvent implements Parcelable {
     public int lastBrightness;
 
     public BrightnessChangeEvent() {
+    }
+
+    /** @hide */
+    public BrightnessChangeEvent(BrightnessChangeEvent other) {
+        this.brightness = other.brightness;
+        this.timeStamp = other.timeStamp;
+        this.packageName = other.packageName;
+        this.userId = other.userId;
+        this.luxValues = other.luxValues;
+        this.luxTimestamps = other.luxTimestamps;
+        this.batteryLevel = other.batteryLevel;
+        this.nightMode = other.nightMode;
+        this.colorTemperature = other.colorTemperature;
+        this.lastBrightness = other.lastBrightness;
     }
 
     private BrightnessChangeEvent(Parcel source) {

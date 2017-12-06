@@ -16,8 +16,10 @@
 
 package android.hardware.display;
 
+import android.Manifest;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.annotation.RequiresPermission;
 import android.annotation.SystemApi;
 import android.annotation.SystemService;
 import android.app.KeyguardManager;
@@ -619,8 +621,9 @@ public final class DisplayManager {
      * Fetch {@link BrightnessChangeEvent}s.
      * @hide until we make it a system api.
      */
+    @RequiresPermission(Manifest.permission.BRIGHTNESS_SLIDER_USAGE)
     public List<BrightnessChangeEvent> getBrightnessEvents() {
-        return mGlobal.getBrightnessEvents();
+        return mGlobal.getBrightnessEvents(mContext.getOpPackageName());
     }
 
     /**
