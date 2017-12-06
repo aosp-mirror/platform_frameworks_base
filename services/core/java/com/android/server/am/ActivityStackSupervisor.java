@@ -298,9 +298,6 @@ public class ActivityStackSupervisor extends ConfigurationContainer implements D
 
     private LaunchingBoundsController mLaunchingBoundsController;
 
-    /** Counter for next free stack ID to use for dynamic activity stacks. */
-    private int mNextFreeStackId = 0;
-
     /**
      * Maps the task identifier that activities are currently being started in to the userId of the
      * task. Each time a new task is created, the entry for the userId of the task is incremented
@@ -2902,16 +2899,6 @@ public class ActivityStackSupervisor extends ConfigurationContainer implements D
                 pr.waitingToKill = "remove task";
             }
         }
-    }
-
-    int getNextStackId() {
-        while (true) {
-            if (getStack(mNextFreeStackId) == null) {
-                break;
-            }
-            mNextFreeStackId++;
-        }
-        return mNextFreeStackId;
     }
 
     /**
