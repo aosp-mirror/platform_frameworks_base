@@ -3406,6 +3406,14 @@ public abstract class Context {
     public static final String NETWORKMANAGEMENT_SERVICE = "network_management";
 
     /**
+     * Use with {@link #getSystemService} to retrieve a
+     * {@link com.android.server.slice.SliceManagerService} for managing slices.
+     * @hide
+     * @see #getSystemService
+     */
+    public static final String SLICE_SERVICE = "slice";
+
+    /**
      * Use with {@link #getSystemService} to retrieve a {@link
      * android.app.usage.NetworkStatsManager} for querying network usage stats.
      *
