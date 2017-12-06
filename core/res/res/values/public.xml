@@ -2858,6 +2858,7 @@
       <public name="versionMajor" />
       <!-- @hide @SystemApi -->
       <public name="isVrOnly"/>
+      <public name="widgetFeatures" />
     </public-group>
 
     <public-group type="style" first-id="0x010302e0">
