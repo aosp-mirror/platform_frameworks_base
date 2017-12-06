@@ -30,7 +30,7 @@ public:
 
     ~CombinationConditionTracker();
 
-    bool init(const std::vector<Condition>& allConditionConfig,
+    bool init(const std::vector<Predicate>& allConditionConfig,
               const std::vector<sp<ConditionTracker>>& allConditionTrackers,
               const std::unordered_map<std::string, int>& conditionNameIndexMap,
               std::vector<bool>& stack) override;
@@ -47,7 +47,7 @@ public:
 
 private:
     LogicalOperation mLogicalOperation;
-    // Store index of the children Conditions.
+    // Store index of the children Predicates.
     // We don't store string name of the Children, because we want to get rid of the hash map to
     // map the name to object. We don't want to store smart pointers to children, because it
     // increases the risk of circular dependency and memory leak.

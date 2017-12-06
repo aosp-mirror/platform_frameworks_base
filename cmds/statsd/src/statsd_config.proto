@@ -75,7 +75,7 @@ message AtomMatcher {
     }
 }
 
-message SimpleCondition {
+message SimplePredicate {
     optional string start = 1;
 
     optional string stop = 2;
@@ -93,17 +93,17 @@ message SimpleCondition {
     repeated KeyMatcher dimension = 6;
 }
 
-message Condition {
+message Predicate {
     optional string name = 1;
 
     message Combination {
         optional LogicalOperation operation = 1;
 
-        repeated string condition = 2;
+        repeated string predicate = 2;
     }
 
     oneof contents {
-        SimpleCondition simple_condition = 2;
+        SimplePredicate simple_predicate = 2;
         Combination combination = 3;
     }
 }
@@ -232,7 +232,7 @@ message StatsdConfig {
 
     repeated AtomMatcher atom_matcher = 7;
 
-    repeated Condition condition = 8;
+    repeated Predicate predicate = 8;
 
     repeated Alert alert = 9;
 }
