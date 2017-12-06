@@ -5028,8 +5028,33 @@ message MetricsEvent {
     // OS: P
     SCREEN_LOCK_SETTINGS = 1265;
 
-    // ---- End P Constants, all P constants go above this line ----
+    // OPEN: Settings > Sound > Do Not Disturb > Turn on automatically > Delete rule (trash can icon)
+    // CATEGORY: SETTINGS
+    // OS: P
+    NOTIFICATION_ZEN_MODE_DELETE_RULE_DIALOG = 1266;
 
+    // OPEN: Settings > Sound > Do Not Disturb > Turn on automatically > Select rule ("Event") > Rule name > OK
+    // CATEGORY: SETTINGS
+    // OS: P
+    ACTION_ZEN_MODE_RULE_NAME_CHANGE_OK = 1267;
+
+    // OPEN: Settings > Sound > Do Not Disturb > TURN ON NOW/TURN OFF NOW
+    // CATEGORY: SETTINGS
+    // OS: P
+    ACTION_ZEN_TOGGLE_DND_BUTTON = 1268;
+
+    // OPEN: Settings > Sound > Do Not Disturb > Turn on automatically > Add rule > Event/Time
+    // OPEN: Settings > Sound > Do Not Disturb > Turn on automatically > Select rule ("Event") > Rule name
+    // CATEGORY: SETTINGS
+    // OS: P
+    NOTIFICATION_ZEN_MODE_RULE_NAME_DIALOG = 1269;
+
+    // OPEN: Settings > Sound > Do Not Disturb > Turn on automatically > Add rule
+    // CATEGORY: SETTINGS
+    // OS: P
+    NOTIFICATION_ZEN_MODE_RULE_SELECTION_DIALOG = 1270;
+
+    // ---- End P Constants, all P constants go above this line ----
     // Add new aosp constants above this line.
     // END OF AOSP CONSTANTS
   }
