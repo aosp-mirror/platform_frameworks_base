@@ -810,7 +810,7 @@ public class ActivityManager {
      * impose on your application to let the overall system work best.  The
      * returned value is in megabytes; the baseline Android memory class is
      * 16 (which happens to be the Java heap limit of those devices); some
-     * device with more memory may return 24 or even higher numbers.
+     * devices with more memory may return 24 or even higher numbers.
      */
     public int getMemoryClass() {
         return staticGetMemoryClass();
@@ -837,7 +837,7 @@ public class ActivityManager {
      * constrained devices, or it may be significantly larger on devices with
      * a large amount of available RAM.
      *
-     * <p>The is the size of the application's Dalvik heap if it has
+     * <p>This is the size of the application's Dalvik heap if it has
      * specified <code>android:largeHeap="true"</code> in its manifest.
      */
     public int getLargeMemoryClass() {
