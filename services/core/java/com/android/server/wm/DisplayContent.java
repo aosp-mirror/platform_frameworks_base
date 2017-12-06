@@ -49,6 +49,7 @@ import static android.view.WindowManager.LayoutParams.PRIVATE_FLAG_KEYGUARD;
 import static android.view.WindowManager.LayoutParams.TYPE_APPLICATION;
 import static android.view.WindowManager.LayoutParams.TYPE_APPLICATION_STARTING;
 import static android.view.WindowManager.LayoutParams.TYPE_BOOT_PROGRESS;
+import static android.view.WindowManager.LayoutParams.TYPE_DOCK_DIVIDER;
 import static android.view.WindowManager.LayoutParams.TYPE_DRAWN_APPLICATION;
 import static android.view.WindowManager.LayoutParams.TYPE_DREAM;
 import static android.view.WindowManager.LayoutParams.TYPE_INPUT_METHOD;
@@ -3173,6 +3174,21 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
          */
         SurfaceControl mAppAnimationLayer = null;
 
+        /**
+         * Given that the split-screen divider does not have an AppWindowToken, it
+         * will have to live inside of a "NonAppWindowContainer", in particular
+         * {@link DisplayContent#mAboveAppWindowsContainers}. However, in visual Z order
+         * it will need to be interleaved with some of our children, appearing on top of
+         * both docked stacks but underneath any assistant stacks.
+         *
+         * To solve this problem we have this anchor control, which will always exist so
+         * we can always assign it the correct value in our {@link #assignChildLayers}.
+         * Likewise since it always exists, {@link AboveAppWindowContainers} can always
+         * assign the divider a layer relative to it. This way we prevent linking lifecycle
+         * events between the two containers.
+         */
+        SurfaceControl mSplitScreenDividerAnchor = null;
+
         // Cached reference to some special stacks we tend to get a lot so we don't need to loop
         // through the list to find them.
         private TaskStack mHomeStack = null;
@@ -3489,42 +3505,48 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
 
         @Override
         void assignChildLayers(SurfaceControl.Transaction t) {
+
+            final int HOME_STACK_STATE = 0;
+            final int NORMAL_STACK_STATE = 1;
+            final int ALWAYS_ON_TOP_STATE = 2;
+
             int layer = 0;
+            for (int state = 0; state <= ALWAYS_ON_TOP_STATE; state++) {
+                for (int i = 0; i < mChildren.size(); i++) {
+                    final TaskStack s = mChildren.get(i);
+                    if (state == HOME_STACK_STATE && s.isActivityTypeHome()) {
+                        s.assignLayer(t, layer++);
+                    } else if (state == NORMAL_STACK_STATE && !s.isActivityTypeHome()
+                            && !s.isAlwaysOnTop()) {
+                        s.assignLayer(t, layer++);
+                        if (s.inSplitScreenWindowingMode() && mSplitScreenDividerAnchor != null) {
+                            t.setLayer(mSplitScreenDividerAnchor, layer++);
+                        }
+                    } else if (state == ALWAYS_ON_TOP_STATE && s.isAlwaysOnTop()) {
+                        s.assignLayer(t, layer++);
+                    }
+                }
+                // The appropriate place for App-Transitions to occur is right
+                // above all other animations but still below things in the Picture-and-Picture
+                // windowing mode.
+                if (state == NORMAL_STACK_STATE && mAppAnimationLayer != null) {
+                    t.setLayer(mAppAnimationLayer, layer++);
+                }
+            }
+            for (int i = 0; i < mChildren.size(); i++) {
+                final TaskStack s = mChildren.get(i);
+                s.assignChildLayers(t);
+            }
 
-            // We allow stacks to change visual order from the AM specified order due to
-            // Z-boosting during animations. However we must take care to ensure TaskStacks
-            // which are marked as alwaysOnTop remain that way.
-            for (int i = 0; i < mChildren.size(); i++) {
-                final TaskStack s = mChildren.get(i);
-                s.assignChildLayers();
-                if (!s.needsZBoost() && !s.isAlwaysOnTop()) {
-                    s.assignLayer(t, layer++);
-                }
-            }
-            for (int i = 0; i < mChildren.size(); i++) {
-                final TaskStack s = mChildren.get(i);
-                if (s.needsZBoost() && !s.isAlwaysOnTop()) {
-                    s.assignLayer(t, layer++);
-                }
-            }
-            for (int i = 0; i < mChildren.size(); i++) {
-                final TaskStack s = mChildren.get(i);
-                if (s.isAlwaysOnTop()) {
-                    s.assignLayer(t, layer++);
-                }
-            }
-
-            // The appropriate place for App-Transitions to occur is right
-            // above all other animations but still below things in the Picture-and-Picture
-            // windowing mode.
-            if (mAppAnimationLayer != null) {
-                t.setLayer(mAppAnimationLayer, layer++);
-            }
         }
 
         @Override
         SurfaceControl getAppAnimationLayer() {
             return mAppAnimationLayer;
+        }
+
+        SurfaceControl getSplitScreenDividerAnchor() {
+            return mSplitScreenDividerAnchor;
         }
 
         @Override
@@ -3534,11 +3556,18 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
                 mAppAnimationLayer = makeChildSurface(null)
                         .setName("animationLayer")
                         .build();
-                getPendingTransaction().show(mAppAnimationLayer);
+                mSplitScreenDividerAnchor = makeChildSurface(null)
+                        .setName("splitScreenDividerAnchor")
+                        .build();
+                getPendingTransaction()
+                        .show(mAppAnimationLayer)
+                        .show(mSplitScreenDividerAnchor);
                 scheduleAnimation();
             } else {
                 mAppAnimationLayer.destroy();
                 mAppAnimationLayer = null;
+                mSplitScreenDividerAnchor.destroy();
+                mSplitScreenDividerAnchor = null;
             }
         }
     }
@@ -3553,6 +3582,12 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
                     && imeContainer.getSurfaceControl() != null;
             for (int j = 0; j < mChildren.size(); ++j) {
                 final WindowToken wt = mChildren.get(j);
+
+                // See {@link mSplitScreenDividerAnchor}
+                if (wt.windowType == TYPE_DOCK_DIVIDER) {
+                    wt.assignRelativeLayer(t, mTaskStackContainers.getSplitScreenDividerAnchor(), 1);
+                    continue;
+                }
                 wt.assignLayer(t, j);
                 wt.assignChildLayers(t);
 
