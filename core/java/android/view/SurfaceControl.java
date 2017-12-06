@@ -702,7 +702,7 @@ public class SurfaceControl implements Parcelable {
      */
     @Deprecated
     public static void mergeToGlobalTransaction(Transaction t) {
-        synchronized(sGlobalTransaction) {
+        synchronized(SurfaceControl.class) {
             sGlobalTransaction.merge(t);
         }
     }
