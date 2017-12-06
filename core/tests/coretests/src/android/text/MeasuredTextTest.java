@@ -17,6 +17,7 @@
 package android.text;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotEquals;
 import static org.junit.Assert.assertNotNull;
 
 import android.content.Context;
@@ -71,6 +72,7 @@ public class MeasuredTextTest {
         assertEquals(0, mt.getWidths().size());
         assertEquals(0, mt.getSpanEndCache().size());
         assertEquals(0, mt.getFontMetrics().size());
+        assertEquals(0, mt.getNativePtr());
 
         // Recycle it
         MeasuredText mt2 = MeasuredText.buildForBidi("_VVV_", 1, 4, RTL, mt);
@@ -82,6 +84,7 @@ public class MeasuredTextTest {
         assertEquals(0, mt2.getWidths().size());
         assertEquals(0, mt2.getSpanEndCache().size());
         assertEquals(0, mt2.getFontMetrics().size());
+        assertEquals(0, mt2.getNativePtr());
 
         mt2.recycle();
     }
@@ -103,6 +106,7 @@ public class MeasuredTextTest {
         assertEquals(10, mt.getWidths().get(2), 0);
         assertEquals(0, mt.getSpanEndCache().size());
         assertEquals(0, mt.getFontMetrics().size());
+        assertEquals(0, mt.getNativePtr());
 
         // Recycle it
         MeasuredText mt2 = MeasuredText.buildForMeasurement(PAINT, "_VVV_", 1, 4, RTL, mt);
@@ -118,6 +122,41 @@ public class MeasuredTextTest {
         assertEquals(5, mt2.getWidths().get(2), 0);
         assertEquals(0, mt2.getSpanEndCache().size());
         assertEquals(0, mt2.getFontMetrics().size());
+        assertEquals(0, mt2.getNativePtr());
+
+        mt2.recycle();
+    }
+
+    @Test
+    public void buildForStaticLayout() {
+        MeasuredText mt = null;
+
+        mt = MeasuredText.buildForStaticLayout(PAINT, "XXX", 0, 3, LTR, null);
+        assertNotNull(mt);
+        assertNotNull(mt.getChars());
+        assertEquals("XXX", charsToString(mt.getChars()));
+        assertEquals(Layout.DIR_LEFT_TO_RIGHT, mt.getParagraphDir());
+        assertNotNull(mt.getDirections(0, 3));
+        assertEquals(0, mt.getWholeWidth(), 0);
+        assertEquals(0, mt.getWidths().size());
+        assertEquals(1, mt.getSpanEndCache().size());
+        assertEquals(3, mt.getSpanEndCache().get(0));
+        assertNotEquals(0, mt.getFontMetrics().size());
+        assertNotEquals(0, mt.getNativePtr());
+
+        // Recycle it
+        MeasuredText mt2 = MeasuredText.buildForStaticLayout(PAINT, "_VVV_", 1, 4, RTL, mt);
+        assertEquals(mt2, mt);
+        assertNotNull(mt2.getChars());
+        assertEquals("VVV", charsToString(mt.getChars()));
+        assertEquals(Layout.DIR_RIGHT_TO_LEFT, mt2.getParagraphDir());
+        assertNotNull(mt2.getDirections(0, 3));
+        assertEquals(0, mt2.getWholeWidth(), 0);
+        assertEquals(0, mt2.getWidths().size());
+        assertEquals(1, mt2.getSpanEndCache().size());
+        assertEquals(4, mt2.getSpanEndCache().get(0));
+        assertNotEquals(0, mt2.getFontMetrics().size());
+        assertNotEquals(0, mt2.getNativePtr());
 
         mt2.recycle();
     }

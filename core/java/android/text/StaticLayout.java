@@ -48,6 +48,18 @@ import java.util.Arrays;
  * Canvas.drawText()} directly.</p>
  */
 public class StaticLayout extends Layout {
+    /*
+     * The break iteration is done in native code. The protocol for using the native code is as
+     * follows.
+     *
+     * First, call nInit to setup native line breaker object. Then, for each paragraph, do the
+     * following:
+     *
+     *   - Create MeasuredText by MeasuredText.buildForStaticLayout which measures in native.
+     *   - Run nComputeLineBreaks() to obtain line breaks for the paragraph.
+     *
+     * After all paragraphs, call finish() to release expensive buffers.
+     */
 
     static final String TAG = "StaticLayout";
 
@@ -724,10 +736,11 @@ public class StaticLayout extends Layout {
                 }
 
                 measured = MeasuredText.buildForStaticLayout(
-                        paint, source, paraStart, paraEnd, textDir, nativePtr, measured);
+                        paint, source, paraStart, paraEnd, textDir, measured);
                 final char[] chs = measured.getChars();
                 final int[] spanEndCache = measured.getSpanEndCache().getRawArray();
                 final int[] fmCache = measured.getFontMetrics().getRawArray();
+                // TODO: Stop keeping duplicated width copy in native and Java.
                 widths.resize(chs.length);
 
                 // measurement has to be done before performing line breaking
@@ -739,6 +752,7 @@ public class StaticLayout extends Layout {
 
                         // Inputs
                         chs,
+                        measured.getNativePtr(),
                         paraEnd - paraStart,
                         firstWidth,
                         firstWidthLineCount,
@@ -873,18 +887,14 @@ public class StaticLayout extends Layout {
 
             if ((bufEnd == bufStart || source.charAt(bufEnd - 1) == CHAR_NEW_LINE)
                     && mLineCount < mMaximumVisibleLineCount) {
-                measured = MeasuredText.buildForStaticLayout(
-                        paint, source, bufEnd, bufEnd, textDir, nativePtr, measured);
-
                 paint.getFontMetricsInt(fm);
-
                 v = out(source,
                         bufEnd, bufEnd, fm.ascent, fm.descent,
                         fm.top, fm.bottom,
                         v,
                         spacingmult, spacingadd, null,
                         null, fm, 0,
-                        needMultiply, measured, bufEnd,
+                        needMultiply, null, bufEnd,
                         includepad, trackpad, addLastLineSpacing, null,
                         null, bufStart, ellipsize,
                         ellipsizedWidth, 0, paint, false);
@@ -902,7 +912,7 @@ public class StaticLayout extends Layout {
     private int out(final CharSequence text, final int start, final int end, int above, int below,
             int top, int bottom, int v, final float spacingmult, final float spacingadd,
             final LineHeightSpan[] chooseHt, final int[] chooseHtv, final Paint.FontMetricsInt fm,
-            final int flags, final boolean needMultiply, final MeasuredText measured,
+            final int flags, final boolean needMultiply, @Nullable final MeasuredText measured,
             final int bufEnd, final boolean includePad, final boolean trackPad,
             final boolean addLastLineLineSpacing, final char[] chs, final float[] widths,
             final int widthStart, final TextUtils.TruncateAt ellipsize, final float ellipsisWidth,
@@ -911,7 +921,7 @@ public class StaticLayout extends Layout {
         final int off = j * mColumns;
         final int want = off + mColumns + TOP;
         int[] lines = mLines;
-        final int dir = measured.getParagraphDir();
+        final int dir = (start == end) ? Layout.DIR_LEFT_TO_RIGHT : measured.getParagraphDir();
 
         if (want >= lines.length) {
             final int[] grow = ArrayUtils.newUnpaddedIntArray(GrowingArrayUtils.growSize(want));
@@ -938,7 +948,11 @@ public class StaticLayout extends Layout {
         lines[off + TAB] |= flags & TAB_MASK;
         lines[off + HYPHEN] = flags;
         lines[off + DIR] |= dir << DIR_SHIFT;
-        mLineDirections[j] = measured.getDirections(start - widthStart, end - widthStart);
+        if (start == end) {
+            mLineDirections[j] = Layout.DIRS_ALL_LEFT_TO_RIGHT;
+        } else {
+            mLineDirections[j] = measured.getDirections(start - widthStart, end - widthStart);
+        }
 
         final boolean firstLine = (j == 0);
         final boolean currentLineIsTheLastVisibleOne = (j + 1 == mMaximumVisibleLineCount);
@@ -1415,33 +1429,6 @@ public class StaticLayout extends Layout {
                 mMaxLineHeight : super.getHeight();
     }
 
-    /**
-     * Measurement and break iteration is done in native code. The protocol for using
-     * the native code is as follows.
-     *
-     * First, call nInit to setup native line breaker object. Then, for each paragraph, do the
-     * following:
-     *
-     *   - Call one of the following methods for each run within the paragraph depending on the type
-     *     of run:
-     *     + addStyleRun (a text run, to be measured in native code)
-     *     + addReplacementRun (a replacement run, width is given)
-     *
-     *   - Run nComputeLineBreaks() to obtain line breaks for the paragraph.
-     *
-     * After all paragraphs, call finish() to release expensive buffers.
-     */
-
-    /* package */ static void addStyleRun(long nativePtr, TextPaint paint, int start, int end,
-            boolean isRtl) {
-        nAddStyleRun(nativePtr, paint.getNativeInstance(), start, end, isRtl);
-    }
-
-    /* package */ static void addReplacementRun(long nativePtr, TextPaint paint, int start, int end,
-            float width) {
-        nAddReplacementRun(nativePtr, paint.getNativeInstance(), start, end, width);
-    }
-
     @FastNative
     private static native long nInit(
             @BreakStrategy int breakStrategy,
@@ -1453,17 +1440,6 @@ public class StaticLayout extends Layout {
 
     @CriticalNative
     private static native void nFinish(long nativePtr);
-
-    @CriticalNative
-    private static native void nAddStyleRun(
-            /* non-zero */ long nativePtr, /* non-zero */ long nativePaint,
-            @IntRange(from = 0) int start, @IntRange(from = 0) int end, boolean isRtl);
-
-    @CriticalNative
-    private static native void nAddReplacementRun(
-            /* non-zero */ long nativePtr, /* non-zero */ long nativePaint,
-            @IntRange(from = 0) int start, @IntRange(from = 0) int end,
-            @FloatRange(from = 0.0f) float width);
 
     // populates LineBreaks and returns the number of breaks found
     //
@@ -1477,6 +1453,7 @@ public class StaticLayout extends Layout {
 
             // Inputs
             @NonNull char[] text,
+            /* Non Zero */ long measuredTextPtr,
             @IntRange(from = 0) int length,
             @FloatRange(from = 0.0f) float firstWidth,
             @IntRange(from = 0) int firstWidthLineCount,
