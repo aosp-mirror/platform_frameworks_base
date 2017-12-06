@@ -136,9 +136,8 @@ public final class BluetoothHidDevice implements BluetoothProfile {
         }
 
         @Override
-        public void onAppStatusChanged(BluetoothDevice pluggedDevice,
-                BluetoothHidDeviceAppConfiguration config, boolean registered) {
-            mCallback.onAppStatusChanged(pluggedDevice, config, registered);
+        public void onAppStatusChanged(BluetoothDevice pluggedDevice, boolean registered) {
+            mCallback.onAppStatusChanged(pluggedDevice, registered);
         }
 
         @Override
@@ -349,7 +348,7 @@ public final class BluetoothHidDevice implements BluetoothProfile {
      * Device are only possible when application is registered. Only one
      * application can be registered at time. When no longer used, application
      * should be unregistered using
-     * {@link #unregisterApp(BluetoothHidDeviceAppConfiguration)}.
+     * {@link #unregisterApp()}.
      * The registration status should be tracked by the application by handling callback from
      * BluetoothHidDeviceCallback#onAppStatusChanged. The app registration status is not related
      * to the return value of this method.
@@ -382,11 +381,9 @@ public final class BluetoothHidDevice implements BluetoothProfile {
         final IBluetoothHidDevice service = mService;
         if (service != null) {
             try {
-                BluetoothHidDeviceAppConfiguration config =
-                        new BluetoothHidDeviceAppConfiguration();
                 BluetoothHidDeviceCallbackWrapper cbw =
                         new BluetoothHidDeviceCallbackWrapper(callback);
-                result = service.registerApp(config, sdp, inQos, outQos, cbw);
+                result = service.registerApp(sdp, inQos, outQos, cbw);
             } catch (RemoteException e) {
                 Log.e(TAG, e.toString());
             }
@@ -407,13 +404,9 @@ public final class BluetoothHidDevice implements BluetoothProfile {
      * BluetoothHidDeviceCallback#onAppStatusChanged. The app registration status is not related
      * to the return value of this method.
      *
-     * @param config {@link BluetoothHidDeviceAppConfiguration} object as obtained from {@link
-     * BluetoothHidDeviceCallback#onAppStatusChanged(BluetoothDevice,
-     * BluetoothHidDeviceAppConfiguration,
-     * boolean)}
      * @return true if the command is successfully sent; otherwise false.
      */
-    public boolean unregisterApp(BluetoothHidDeviceAppConfiguration config) {
+    public boolean unregisterApp() {
         Log.v(TAG, "unregisterApp()");
 
         boolean result = false;
@@ -421,7 +414,7 @@ public final class BluetoothHidDevice implements BluetoothProfile {
         final IBluetoothHidDevice service = mService;
         if (service != null) {
             try {
-                result = service.unregisterApp(config);
+                result = service.unregisterApp();
             } catch (RemoteException e) {
                 Log.e(TAG, e.toString());
             }
