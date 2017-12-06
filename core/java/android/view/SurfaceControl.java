@@ -1126,7 +1126,9 @@ public class SurfaceControl implements Parcelable {
     }
 
     /**
-     * Copy the current screen contents into a bitmap and return it.
+     * Copy the current screen contents into a hardware bitmap and return it.
+     * Note: If you want to modify the Bitmap in software, you will need to copy the Bitmap into
+     * a software Bitmap using {@link Bitmap#copy(Bitmap.Config, boolean)}
      *
      * CAVEAT: Versions of screenshot that return a {@link Bitmap} can
      * be extremely slow; avoid use unless absolutely necessary; prefer
@@ -1151,7 +1153,7 @@ public class SurfaceControl implements Parcelable {
      * screenshots in its native portrait orientation by default, so this is
      * useful for returning screenshots that are independent of device
      * orientation.
-     * @return Returns a Bitmap containing the screen contents, or null
+     * @return Returns a hardware Bitmap containing the screen contents, or null
      * if an error occurs. Make sure to call Bitmap.recycle() as soon as
      * possible, once its content is not needed anymore.
      */
@@ -1179,7 +1181,7 @@ public class SurfaceControl implements Parcelable {
     }
 
     /**
-     * Like {@link SurfaceControl#screenshot(int, int, int, int, boolean)} but
+     * Like {@link SurfaceControl#screenshot(Rect, int, int, int, int, boolean, int)} but
      * includes all Surfaces in the screenshot. This will also update the orientation so it
      * sends the correct coordinates to SF based on the rotation value.
      *
@@ -1236,7 +1238,7 @@ public class SurfaceControl implements Parcelable {
     }
 
     /**
-     * Captures a layer and its children into the provided {@link Surface}.
+     * Captures a layer and its children and returns a {@link GraphicBuffer} with the content.
      *
      * @param layerHandleToken The root layer to capture.
      * @param sourceCrop       The portion of the root surface to capture; caller may pass in 'new
