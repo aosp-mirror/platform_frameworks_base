@@ -149,6 +149,34 @@ public class KeyValueListParser {
     }
 
     /**
+     * Get the value for key as an integer array.
+     *
+     * The value should be encoded as "0:1:2:3:4"
+     *
+     * @param key The key to lookup.
+     * @param def The value to return if the key was not found.
+     * @return the int[] value associated with the key.
+     */
+    public int[] getIntArray(String key, int[] def) {
+        String value = mValues.get(key);
+        if (value != null) {
+            try {
+                String[] parts = value.split(":");
+                if (parts.length > 0) {
+                    int[] ret = new int[parts.length];
+                    for (int i = 0; i < parts.length; i++) {
+                        ret[i] = Integer.parseInt(parts[i]);
+                    }
+                    return ret;
+                }
+            } catch (NumberFormatException e) {
+                // fallthrough
+            }
+        }
+        return def;
+    }
+
+    /**
      * @return the number of keys.
      */
     public int size() {

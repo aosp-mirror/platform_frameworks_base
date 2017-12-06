@@ -9570,8 +9570,8 @@ public final class Settings {
          * The following keys are supported:
          *
          * <pre>
-         * screen_brightness_array         (string)
-         * dimming_scrim_array             (string)
+         * screen_brightness_array         (int[])
+         * dimming_scrim_array             (int[])
          * prox_screen_off_delay           (long)
          * prox_cooldown_trigger           (long)
          * prox_cooldown_period            (long)
@@ -11123,7 +11123,7 @@ public final class Settings {
          *
          * <pre>
          * default               (int)
-         * options_array         (string)
+         * options_array         (int[])
          * </pre>
          *
          * All delays in integer minutes. Array order is respected.

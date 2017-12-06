@@ -30,8 +30,6 @@ import android.util.Log;
 
 import com.android.systemui.R;
 
-import java.util.Arrays;
-
 /**
  * Class to store the policy for AOD, which comes from
  * {@link android.provider.Settings.Global}
@@ -102,20 +100,6 @@ public class AlwaysOnDisplayPolicy {
         mSettingsObserver.observe();
     }
 
-    private int[] parseIntArray(final String key, final int[] defaultArray) {
-        final String value = mParser.getString(key, null);
-        if (value != null) {
-            try {
-                return Arrays.stream(value.split(":")).map(String::trim).mapToInt(
-                        Integer::parseInt).toArray();
-            } catch (NumberFormatException e) {
-                return defaultArray;
-            }
-        } else {
-            return defaultArray;
-        }
-    }
-
     private final class SettingsObserver extends ContentObserver {
         private final Uri ALWAYS_ON_DISPLAY_CONSTANTS_URI
                 = Settings.Global.getUriFor(Settings.Global.ALWAYS_ON_DISPLAY_CONSTANTS);
@@ -154,10 +138,10 @@ public class AlwaysOnDisplayPolicy {
                         DEFAULT_PROX_COOLDOWN_TRIGGER_MS);
                 proxCooldownPeriodMs = mParser.getLong(KEY_PROX_COOLDOWN_PERIOD_MS,
                         DEFAULT_PROX_COOLDOWN_PERIOD_MS);
-                screenBrightnessArray = parseIntArray(KEY_SCREEN_BRIGHTNESS_ARRAY,
+                screenBrightnessArray = mParser.getIntArray(KEY_SCREEN_BRIGHTNESS_ARRAY,
                         resources.getIntArray(
                                 R.array.config_doze_brightness_sensor_to_brightness));
-                dimmingScrimArray = parseIntArray(KEY_DIMMING_SCRIM_ARRAY,
+                dimmingScrimArray = mParser.getIntArray(KEY_DIMMING_SCRIM_ARRAY,
                         resources.getIntArray(
                                 R.array.config_doze_brightness_sensor_to_scrim_opacity));
             }
