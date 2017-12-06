@@ -104,6 +104,7 @@ public class StatusBarTest extends SysuiTestCase {
     PowerManager mPowerManager;
     SystemServicesProxy mSystemServicesProxy;
     NotificationPanelView mNotificationPanelView;
+    ScrimController mScrimController;
     IStatusBarService mBarService;
     ArrayList<Entry> mNotificationList;
     private DisplayMetrics mDisplayMetrics = new DisplayMetrics();
@@ -131,6 +132,7 @@ public class StatusBarTest extends SysuiTestCase {
         mNotificationPanelView = mock(NotificationPanelView.class);
         when(mNotificationPanelView.getLayoutParams()).thenReturn(new LayoutParams(0, 0));
         mNotificationList = mock(ArrayList.class);
+        mScrimController = mock(ScrimController.class);
         IPowerManager powerManagerService = mock(IPowerManager.class);
         HandlerThread handlerThread = new HandlerThread("TestThread");
         handlerThread.start();
@@ -143,7 +145,7 @@ public class StatusBarTest extends SysuiTestCase {
         mStatusBar = new TestableStatusBar(mStatusBarKeyguardViewManager, mUnlockMethodCache,
                 mKeyguardIndicationController, mStackScroller, mHeadsUpManager,
                 mNotificationData, mPowerManager, mSystemServicesProxy, mNotificationPanelView,
-                mBarService);
+                mBarService, mScrimController);
         mStatusBar.mContext = mContext;
         mStatusBar.mComponents = mContext.getComponents();
         doAnswer(invocation -> {
@@ -532,12 +534,21 @@ public class StatusBarTest extends SysuiTestCase {
         mStatusBar.updateKeyguardState(false, false);
     }
 
+    @Test
+    public void testFingerprintNotification_UpdatesScrims() {
+        mStatusBar.mStatusBarWindowManager = mock(StatusBarWindowManager.class);
+        mStatusBar.mFingerprintUnlockController = mock(FingerprintUnlockController.class);
+        mStatusBar.mDozeScrimController = mock(DozeScrimController.class);
+        mStatusBar.notifyFpAuthModeChanged();
+        verify(mScrimController).transitionTo(any(), any());
+    }
+
     static class TestableStatusBar extends StatusBar {
         public TestableStatusBar(StatusBarKeyguardViewManager man,
                 UnlockMethodCache unlock, KeyguardIndicationController key,
                 NotificationStackScrollLayout stack, HeadsUpManager hum, NotificationData nd,
                 PowerManager pm, SystemServicesProxy ssp, NotificationPanelView panelView,
-                IStatusBarService barService) {
+                IStatusBarService barService, ScrimController scrimController) {
             mStatusBarKeyguardViewManager = man;
             mUnlockMethodCache = unlock;
             mKeyguardIndicationController = key;
@@ -550,7 +561,7 @@ public class StatusBarTest extends SysuiTestCase {
             mNotificationPanel = panelView;
             mBarService = barService;
             mWakefulnessLifecycle = createAwakeWakefulnessLifecycle();
-            mScrimController = mock(ScrimController.class);
+            mScrimController = scrimController;
         }
 
         private WakefulnessLifecycle createAwakeWakefulnessLifecycle() {
