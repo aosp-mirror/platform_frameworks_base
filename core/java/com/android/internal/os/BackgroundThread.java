@@ -35,7 +35,7 @@ public final class BackgroundThread extends HandlerThread {
         if (sInstance == null) {
             sInstance = new BackgroundThread();
             sInstance.start();
-            sInstance.getLooper().setTraceTag(Trace.TRACE_TAG_ACTIVITY_MANAGER);
+            sInstance.getLooper().setTraceTag(Trace.TRACE_TAG_SYSTEM_SERVER);
             sHandler = new Handler(sInstance.getLooper());
         }
     }
