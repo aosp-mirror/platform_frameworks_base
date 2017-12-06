@@ -1907,22 +1907,14 @@ public abstract class Layout {
 
     private static float measurePara(TextPaint paint, CharSequence text, int start, int end,
             TextDirectionHeuristic textDir) {
-        MeasuredText mt = MeasuredText.obtain();
+        MeasuredText mt = null;
         TextLine tl = TextLine.obtain();
         try {
-            mt.setPara(text, start, end, textDir);
-            Directions directions;
-            int dir;
-            if (mt.mEasy) {
-                directions = DIRS_ALL_LEFT_TO_RIGHT;
-                dir = Layout.DIR_LEFT_TO_RIGHT;
-            } else {
-                directions = AndroidBidi.directions(mt.mDir, mt.mLevels,
-                    0, mt.mChars, 0, mt.mLen);
-                dir = mt.mDir;
-            }
-            char[] chars = mt.mChars;
-            int len = mt.mLen;
+            mt = MeasuredText.buildForBidi(text, start, end, textDir, mt);
+            final char[] chars = mt.getChars();
+            final int len = chars.length;
+            final Directions directions = mt.getDirections(0, len);
+            final int dir = mt.getParagraphDir();
             boolean hasTabs = false;
             TabStops tabStops = null;
             // leading margins should be taken into account when measuring a paragraph
@@ -1955,7 +1947,9 @@ public abstract class Layout {
             return margin + Math.abs(tl.metrics(null));
         } finally {
             TextLine.recycle(tl);
-            MeasuredText.recycle(mt);
+            if (mt != null) {
+                mt.recycle();
+            }
         }
     }
 
@@ -2271,6 +2265,11 @@ public abstract class Layout {
     private TextDirectionHeuristic mTextDir;
     private SpanSet<LineBackgroundSpan> mLineBackgroundSpans;
     private int mJustificationMode;
+
+    /** @hide */
+    @IntDef({DIR_LEFT_TO_RIGHT, DIR_RIGHT_TO_LEFT})
+    @Retention(RetentionPolicy.SOURCE)
+    public @interface Direction {}
 
     public static final int DIR_LEFT_TO_RIGHT = 1;
     public static final int DIR_RIGHT_TO_LEFT = -1;
