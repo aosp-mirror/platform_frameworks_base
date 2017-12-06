@@ -86,7 +86,6 @@ import android.content.IntentSender;
 import android.content.pm.ActivityInfo;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.AuxiliaryResolveInfo;
-import android.content.pm.IPackageManager;
 import android.content.pm.PackageManager;
 import android.content.pm.ResolveInfo;
 import android.content.pm.UserInfo;
@@ -673,7 +672,8 @@ class ActivityStarter {
                 auxiliaryResponse.failureIntent, callingPackage, verificationBundle,
                 resolvedType, userId, auxiliaryResponse.packageName, auxiliaryResponse.splitName,
                 auxiliaryResponse.installFailureActivity, auxiliaryResponse.versionCode,
-                auxiliaryResponse.token, auxiliaryResponse.needsPhaseTwo);
+                auxiliaryResponse.token, auxiliaryResponse.resolveInfo.getExtras(),
+                auxiliaryResponse.needsPhaseTwo);
     }
 
     void postStartActivityProcessing(ActivityRecord r, int result, ActivityStack targetStack) {
