@@ -61,29 +61,38 @@ TEST_F(SystemPropertiesParserTest, HasSwapInfo) {
     SystemPropertiesParser parser;
     SystemPropertiesProto expected;
 
-    expected.set_aaudio_hw_burst_min_usec(2000);
-    expected.set_aaudio_mmap_exclusive_policy(2);
-    expected.set_dalvik_vm_appimageformat("lz4");
-    expected.set_gsm_operator_isroaming(false);
-    expected.set_init_svc_vendor_imsqmidaemon(SystemPropertiesProto_Status_STATUS_RUNNING);
-    expected.set_init_svc_vendor_init_radio_sh(SystemPropertiesProto_Status_STATUS_STOPPED);
-    expected.set_net_dns1("2001:4860:4860::8844");
-    expected.add_net_tcp_buffersize_wifi(524288);
-    expected.add_net_tcp_buffersize_wifi(2097152);
-    expected.add_net_tcp_buffersize_wifi(4194304);
-    expected.add_net_tcp_buffersize_wifi(262144);
-    expected.add_net_tcp_buffersize_wifi(524288);
-    expected.add_net_tcp_buffersize_wifi(1048576);
-    expected.set_nfc_initialized(true);
-    expected.set_persist_radio_vt_enable(1);
-    expected.add_ro_boot_boottime("1BLL:85");
-    expected.add_ro_boot_boottime("1BLE:898");
-    expected.add_ro_boot_boottime("2BLL:0");
-    expected.add_ro_boot_boottime("2BLE:862");
-    expected.add_ro_boot_boottime("SW:6739");
-    expected.add_ro_boot_boottime("KL:340");
-    expected.set_ro_bootimage_build_date_utc(1509394807LL);
-    expected.set_ro_bootimage_build_fingerprint("google/marlin/marlin:P/MASTER/jinyithu10301320:eng/dev-keys");
+    SystemPropertiesProto::Aaudio* aaudio = expected.mutable_aaudio();
+    aaudio->set_hw_burst_min_usec(2000);
+    aaudio->set_mmap_exclusive_policy(2);
+
+    SystemPropertiesProto::DalvikVm* dalvikVm = expected.mutable_dalvik_vm();
+    dalvikVm->set_appimageformat("lz4");
+
+    expected.set_drm_64bit_enabled(false);
+
+    SystemPropertiesProto::InitSvc* initSvc = expected.mutable_init_svc();
+    initSvc->set_adbd(SystemPropertiesProto_InitSvc_Status_STATUS_RUNNING);
+    initSvc->set_lmkd(SystemPropertiesProto_InitSvc_Status_STATUS_STOPPED);
+
+    expected.set_media_mediadrmservice_enable(true);
+
+    SystemPropertiesProto::Ro* ro = expected.mutable_ro();
+
+    SystemPropertiesProto::Ro::Boot* boot = ro->mutable_boot();
+    boot->add_boottime("1BLL:85");
+    boot->add_boottime("1BLE:898");
+    boot->add_boottime("2BLL:0");
+    boot->add_boottime("2BLE:862");
+    boot->add_boottime("SW:6739");
+    boot->add_boottime("KL:340");
+
+    SystemPropertiesProto::Ro::BootImage* bootimage = ro->mutable_bootimage();
+    bootimage->set_build_date_utc(1509394807LL);
+    bootimage->set_build_fingerprint("google/marlin/marlin:P/MASTER/jinyithu10301320:eng/dev-keys");
+
+    SystemPropertiesProto::Ro::Hardware* hardware = ro->mutable_hardware();
+    hardware->set_value("marlin");
+    hardware->set_power("marlin-profile");
 
     int fd = open(testFile.c_str(), O_RDONLY);
     ASSERT_TRUE(fd != -1);
