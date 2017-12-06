@@ -60,6 +60,9 @@ LOCAL_JARJAR_RULES := $(LOCAL_PATH)/jarjar-rules.txt
 
 include $(BUILD_STATIC_JAVA_LIBRARY)
 
+# For unbundled build we'll use the prebuilt jar from prebuilts/sdk.
+ifeq (,$(TARGET_BUILD_APPS)$(filter true,$(TARGET_BUILD_PDK)))
+
 # Generate the stub source files for android.test.base.stubs
 # ==========================================================
 include $(CLEAR_VARS)
@@ -150,6 +153,8 @@ update-android-test-base-api: $(ANDROID_TEST_BASE_OUTPUT_API_FILE) | $(ACP)
 	$(hide) $(ACP) $(ANDROID_TEST_BASE_OUTPUT_API_FILE) $(ANDROID_TEST_BASE_API_FILE)
 	@echo Copying removed.txt
 	$(hide) $(ACP) $(ANDROID_TEST_BASE_OUTPUT_REMOVED_API_FILE) $(ANDROID_TEST_BASE_REMOVED_API_FILE)
+
+endif  # not TARGET_BUILD_APPS not TARGET_BUILD_PDK=true
 
 # Build the legacy-android-test library
 # =====================================
