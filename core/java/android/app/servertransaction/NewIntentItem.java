@@ -16,9 +16,7 @@
 
 package android.app.servertransaction;
 
-import static android.app.servertransaction.ActivityLifecycleItem.PAUSED;
-import static android.app.servertransaction.ActivityLifecycleItem.RESUMED;
-
+import android.app.ClientTransactionHandler;
 import android.os.IBinder;
 import android.os.Parcel;
 import android.os.Parcelable;
@@ -42,18 +40,20 @@ public class NewIntentItem extends ClientTransactionItem {
         mPause = pause;
     }
 
-    @Override
+    // TODO(lifecycler): Switch new intent handling to this scheme.
+    /*@Override
     public int getPreExecutionState() {
-        return PAUSED;
+        return ON_PAUSE;
     }
 
     @Override
     public int getPostExecutionState() {
-        return RESUMED;
-    }
+        return ON_RESUME;
+    }*/
 
     @Override
-    public void execute(android.app.ClientTransactionHandler client, IBinder token) {
+    public void execute(ClientTransactionHandler client, IBinder token,
+            PendingTransactionActions pendingActions) {
         Trace.traceBegin(Trace.TRACE_TAG_ACTIVITY_MANAGER, "activityNewIntent");
         client.handleNewIntent(token, mIntents, mPause);
         Trace.traceEnd(Trace.TRACE_TAG_ACTIVITY_MANAGER);
@@ -104,5 +104,10 @@ public class NewIntentItem extends ClientTransactionItem {
         result = 31 * result + (mPause ? 1 : 0);
         result = 31 * result + mIntents.hashCode();
         return result;
+    }
+
+    @Override
+    public String toString() {
+        return "NewIntentItem{pause=" + mPause + ",intents=" + mIntents + "}";
     }
 }

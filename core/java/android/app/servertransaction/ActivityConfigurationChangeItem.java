@@ -19,6 +19,7 @@ package android.app.servertransaction;
 import static android.os.Trace.TRACE_TAG_ACTIVITY_MANAGER;
 import static android.view.Display.INVALID_DISPLAY;
 
+import android.app.ClientTransactionHandler;
 import android.content.res.Configuration;
 import android.os.IBinder;
 import android.os.Parcel;
@@ -37,7 +38,8 @@ public class ActivityConfigurationChangeItem extends ClientTransactionItem {
     }
 
     @Override
-    public void execute(android.app.ClientTransactionHandler client, IBinder token) {
+    public void execute(ClientTransactionHandler client, IBinder token,
+            PendingTransactionActions pendingActions) {
         // TODO(lifecycler): detect if PIP or multi-window mode changed and report it here.
         Trace.traceBegin(TRACE_TAG_ACTIVITY_MANAGER, "activityConfigChanged");
         client.handleActivityConfigurationChanged(token, mConfiguration, INVALID_DISPLAY);
@@ -84,5 +86,10 @@ public class ActivityConfigurationChangeItem extends ClientTransactionItem {
     @Override
     public int hashCode() {
         return mConfiguration.hashCode();
+    }
+
+    @Override
+    public String toString() {
+        return "ActivityConfigurationChange{config=" + mConfiguration + "}";
     }
 }

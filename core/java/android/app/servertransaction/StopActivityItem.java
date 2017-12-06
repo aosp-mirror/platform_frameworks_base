@@ -22,7 +22,6 @@ import android.app.ClientTransactionHandler;
 import android.os.IBinder;
 import android.os.Parcel;
 import android.os.Trace;
-import android.util.Slog;
 
 /**
  * Request to move an activity to stopped state.
@@ -35,32 +34,28 @@ public class StopActivityItem extends ActivityLifecycleItem {
     private final boolean mShowWindow;
     private final int mConfigChanges;
 
-    private int mLifecycleSeq;
-
     public StopActivityItem(boolean showWindow, int configChanges) {
         mShowWindow = showWindow;
         mConfigChanges = configChanges;
     }
 
     @Override
-    public void prepare(ClientTransactionHandler client, IBinder token) {
-        mLifecycleSeq = client.getLifecycleSeq();
-        if (DEBUG_ORDER) {
-            Slog.d(TAG, "Stop transaction for " + client + " received seq: "
-                    + mLifecycleSeq);
-        }
-    }
-
-    @Override
-    public void execute(ClientTransactionHandler client, IBinder token) {
+    public void execute(ClientTransactionHandler client, IBinder token,
+            PendingTransactionActions pendingActions) {
         Trace.traceBegin(TRACE_TAG_ACTIVITY_MANAGER, "activityStop");
-        client.handleStopActivity(token, mShowWindow, mConfigChanges, mLifecycleSeq);
+        client.handleStopActivity(token, mShowWindow, mConfigChanges, pendingActions);
         Trace.traceEnd(TRACE_TAG_ACTIVITY_MANAGER);
     }
 
     @Override
+    public void postExecute(ClientTransactionHandler client, IBinder token,
+            PendingTransactionActions pendingActions) {
+        client.reportStop(pendingActions);
+    }
+
+    @Override
     public int getTargetState() {
-        return STOPPED;
+        return ON_STOP;
     }
 
 
@@ -108,5 +103,11 @@ public class StopActivityItem extends ActivityLifecycleItem {
         result = 31 * result + (mShowWindow ? 1 : 0);
         result = 31 * result + mConfigChanges;
         return result;
+    }
+
+    @Override
+    public String toString() {
+        return "StopActivityItem{showWindow=" + mShowWindow + ",configChanges=" + mConfigChanges
+                + "}";
     }
 }

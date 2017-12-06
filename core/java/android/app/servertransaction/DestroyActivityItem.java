@@ -38,7 +38,8 @@ public class DestroyActivityItem extends ActivityLifecycleItem {
     }
 
     @Override
-    public void execute(ClientTransactionHandler client, IBinder token) {
+    public void execute(ClientTransactionHandler client, IBinder token,
+            PendingTransactionActions pendingActions) {
         Trace.traceBegin(TRACE_TAG_ACTIVITY_MANAGER, "activityDestroy");
         client.handleDestroyActivity(token, mFinished, mConfigChanges,
                 false /* getNonConfigInstance */);
@@ -47,7 +48,7 @@ public class DestroyActivityItem extends ActivityLifecycleItem {
 
     @Override
     public int getTargetState() {
-        return DESTROYED;
+        return ON_DESTROY;
     }
 
 
@@ -95,5 +96,11 @@ public class DestroyActivityItem extends ActivityLifecycleItem {
         result = 31 * result + (mFinished ? 1 : 0);
         result = 31 * result + mConfigChanges;
         return result;
+    }
+
+    @Override
+    public String toString() {
+        return "DestroyActivityItem{finished=" + mFinished + ",mConfigChanges="
+                + mConfigChanges + "}";
     }
 }

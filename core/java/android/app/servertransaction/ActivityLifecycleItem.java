@@ -27,16 +27,19 @@ import java.lang.annotation.RetentionPolicy;
  */
 public abstract class ActivityLifecycleItem extends ClientTransactionItem {
 
-    static final boolean DEBUG_ORDER = false;
-
-    @IntDef({UNDEFINED, RESUMED, PAUSED, STOPPED, DESTROYED})
+    @IntDef({UNDEFINED, PRE_ON_CREATE, ON_CREATE, ON_START, ON_RESUME, ON_PAUSE, ON_STOP,
+            ON_DESTROY, ON_RESTART})
     @Retention(RetentionPolicy.SOURCE)
-    @interface LifecycleState{}
+    public @interface LifecycleState{}
     public static final int UNDEFINED = -1;
-    public static final int RESUMED = 0;
-    public static final int PAUSED = 1;
-    public static final int STOPPED = 2;
-    public static final int DESTROYED = 3;
+    public static final int PRE_ON_CREATE = 0;
+    public static final int ON_CREATE = 1;
+    public static final int ON_START = 2;
+    public static final int ON_RESUME = 3;
+    public static final int ON_PAUSE = 4;
+    public static final int ON_STOP = 5;
+    public static final int ON_DESTROY = 6;
+    public static final int ON_RESTART = 7;
 
     /** A final lifecycle state that an activity should reach. */
     @LifecycleState
