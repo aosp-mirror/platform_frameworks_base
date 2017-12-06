@@ -15,6 +15,7 @@
  */
 
 #include <sys/stat.h>
+#include <cinttypes>
 
 #include <queue>
 #include <unordered_map>
@@ -725,6 +726,30 @@ static bool LoadStableIdMap(IDiagnostics* diag, const std::string& path,
   return true;
 }
 
+static int32_t FindFrameworkAssetManagerCookie(const android::AssetManager& assets) {
+  using namespace android;
+
+  // Find the system package (0x01). AAPT always generates attributes with the type 0x01, so
+  // we're looking for the first attribute resource in the system package.
+  const ResTable& table = assets.getResources(true);
+  Res_value val;
+  ssize_t idx = table.getResource(0x01010000, &val, true);
+  if (idx != NO_ERROR) {
+    // Try as a bag.
+    const ResTable::bag_entry* entry;
+    ssize_t cnt = table.lockBag(0x01010000, &entry);
+    if (cnt >= 0) {
+      idx = entry->stringBlock;
+    }
+    table.unlockBag(entry);
+  }
+
+  if (idx < 0) {
+    return 0;
+  }
+  return table.getTableCookie(idx);
+}
+
 class LinkCommand {
  public:
   LinkCommand(LinkContext* context, const LinkOptions& options)
@@ -734,7 +759,65 @@ class LinkCommand {
         file_collection_(util::make_unique<io::FileCollection>()) {
   }
 
+  void ExtractCompileSdkVersions(android::AssetManager* assets) {
+    using namespace android;
+
+    int32_t cookie = FindFrameworkAssetManagerCookie(*assets);
+    if (cookie == 0) {
+      // No Framework assets loaded. Not a failure.
+      return;
+    }
+
+    std::unique_ptr<Asset> manifest(
+        assets->openNonAsset(cookie, kAndroidManifestPath, Asset::AccessMode::ACCESS_BUFFER));
+    if (manifest == nullptr) {
+      // No errors.
+      return;
+    }
+
+    std::string error;
+    std::unique_ptr<xml::XmlResource> manifest_xml =
+        xml::Inflate(manifest->getBuffer(true /*wordAligned*/), manifest->getLength(), &error);
+    if (manifest_xml == nullptr) {
+      // No errors.
+      return;
+    }
+
+    xml::Attribute* attr = manifest_xml->root->FindAttribute(xml::kSchemaAndroid, "versionCode");
+    if (attr != nullptr) {
+      Maybe<std::string>& compile_sdk_version = options_.manifest_fixer_options.compile_sdk_version;
+      if (BinaryPrimitive* prim = ValueCast<BinaryPrimitive>(attr->compiled_value.get())) {
+        switch (prim->value.dataType) {
+          case Res_value::TYPE_INT_DEC:
+            compile_sdk_version = StringPrintf("%" PRId32, static_cast<int32_t>(prim->value.data));
+            break;
+          case Res_value::TYPE_INT_HEX:
+            compile_sdk_version = StringPrintf("%" PRIx32, prim->value.data);
+            break;
+          default:
+            break;
+        }
+      } else if (String* str = ValueCast<String>(attr->compiled_value.get())) {
+        compile_sdk_version = *str->value;
+      } else {
+        compile_sdk_version = attr->value;
+      }
+    }
+
+    attr = manifest_xml->root->FindAttribute(xml::kSchemaAndroid, "versionName");
+    if (attr != nullptr) {
+      Maybe<std::string>& compile_sdk_version_codename =
+          options_.manifest_fixer_options.compile_sdk_version_codename;
+      if (String* str = ValueCast<String>(attr->compiled_value.get())) {
+        compile_sdk_version_codename = *str->value;
+      } else {
+        compile_sdk_version_codename = attr->value;
+      }
+    }
+  }
+
   // Creates a SymbolTable that loads symbols from the various APKs.
+  // Pre-condition: context_->GetCompilationPackage() needs to be set.
   bool LoadSymbolsFromIncludePaths() {
     auto asset_source = util::make_unique<AssetManagerSymbolSource>();
     for (const std::string& path : options_.include_paths) {
@@ -802,6 +885,17 @@ class LinkCommand {
       } else if (entry.first == kAppPackageId) {
         // Capture the included base feature package.
         included_feature_base_ = entry.second;
+      } else if (entry.first == kFrameworkPackageId) {
+        // Try to embed which version of the framework we're compiling against.
+        // First check if we should use compileSdkVersion at all. Otherwise compilation may fail
+        // when linking our synthesized 'android:compileSdkVersion' attribute.
+        std::unique_ptr<SymbolTable::Symbol> symbol = asset_source->FindByName(
+            ResourceName("android", ResourceType::kAttr, "compileSdkVersion"));
+        if (symbol != nullptr && symbol->is_public) {
+          // The symbol is present and public, extract the android:versionName and
+          // android:versionCode from the framework AndroidManifest.xml.
+          ExtractCompileSdkVersions(asset_source->GetAssetManager());
+        }
       }
     }
 
@@ -1535,6 +1629,12 @@ class LinkCommand {
       context_->SetCompilationPackage(app_info.package);
     }
 
+    // Now that the compilation package is set, load the dependencies. This will also extract
+    // the Android framework's versionCode and versionName, if they exist.
+    if (!LoadSymbolsFromIncludePaths()) {
+      return 1;
+    }
+
     ManifestFixer manifest_fixer(options_.manifest_fixer_options);
     if (!manifest_fixer.Consume(context_, manifest_xml.get())) {
       return 1;
@@ -1561,10 +1661,6 @@ class LinkCommand {
             DiagMessage() << "package 'android' can only be built as a regular app");
         return 1;
       }
-    }
-
-    if (!LoadSymbolsFromIncludePaths()) {
-      return 1;
     }
 
     TableMergerOptions table_merger_options;

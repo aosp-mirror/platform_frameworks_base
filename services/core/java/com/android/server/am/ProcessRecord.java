@@ -730,7 +730,7 @@ final class ProcessRecord {
     /*
      *  Return true if package has been added false if not
      */
-    public boolean addPackage(String pkg, int versionCode, ProcessStatsService tracker) {
+    public boolean addPackage(String pkg, long versionCode, ProcessStatsService tracker) {
         if (!pkgList.containsKey(pkg)) {
             ProcessStats.ProcessStateHolder holder = new ProcessStats.ProcessStateHolder(
                     versionCode);

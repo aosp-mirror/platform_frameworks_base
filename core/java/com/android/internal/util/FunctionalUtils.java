@@ -32,7 +32,7 @@ public class FunctionalUtils {
      */
     @FunctionalInterface
     public interface ThrowingRunnable {
-        void run() throws Exception;
+        void runOrThrow() throws Exception;
     }
 
     /**
@@ -43,7 +43,7 @@ public class FunctionalUtils {
      */
     @FunctionalInterface
     public interface ThrowingSupplier<T> {
-        T get() throws Exception;
+        T getOrThrow() throws Exception;
     }
 
     /**

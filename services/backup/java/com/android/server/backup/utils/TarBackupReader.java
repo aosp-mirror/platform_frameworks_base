@@ -422,7 +422,7 @@ public class TarBackupReader {
                                     LOG_EVENT_CATEGORY_BACKUP_MANAGER_POLICY,
                                     null);
                             policy = RestorePolicy.ACCEPT;
-                        } else if (pkgInfo.versionCode >= info.version) {
+                        } else if (pkgInfo.getLongVersionCode() >= info.version) {
                             Slog.i(TAG, "Sig + version match; taking data");
                             policy = RestorePolicy.ACCEPT;
                             mMonitor = BackupManagerMonitorUtils.monitorEvent(
@@ -439,7 +439,7 @@ public class TarBackupReader {
                                 Slog.i(TAG, "Data version " + info.version
                                         + " is newer than installed "
                                         + "version "
-                                        + pkgInfo.versionCode
+                                        + pkgInfo.getLongVersionCode()
                                         + " - requiring apk");
                                 policy = RestorePolicy.ACCEPT_IF_APK;
                             } else {

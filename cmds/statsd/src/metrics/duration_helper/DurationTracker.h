@@ -63,8 +63,7 @@ public:
     DurationTracker(const ConfigKey& key, const string& name, const HashableDimensionKey& eventKey,
                     sp<ConditionWizard> wizard, int conditionIndex, bool nesting,
                     uint64_t currentBucketStartNs, uint64_t bucketSizeNs,
-                    const std::vector<sp<AnomalyTracker>>& anomalyTrackers,
-                    std::vector<DurationBucket>& bucket)
+                    const std::vector<sp<AnomalyTracker>>& anomalyTrackers)
         : mConfigKey(key),
           mName(name),
           mEventKey(eventKey),
@@ -73,7 +72,6 @@ public:
           mBucketSizeNs(bucketSizeNs),
           mNested(nesting),
           mCurrentBucketStartTimeNs(currentBucketStartNs),
-          mBucket(bucket),
           mDuration(0),
           mCurrentBucketNum(0),
           mAnomalyTrackers(anomalyTrackers){};
@@ -91,7 +89,9 @@ public:
 
     // Flush stale buckets if needed, and return true if the tracker has no on-going duration
     // events, so that the owner can safely remove the tracker.
-    virtual bool flushIfNeeded(uint64_t timestampNs) = 0;
+    virtual bool flushIfNeeded(
+            uint64_t timestampNs,
+            std::unordered_map<HashableDimensionKey, std::vector<DurationBucket>>* output) = 0;
 
     // Predict the anomaly timestamp given the current status.
     virtual int64_t predictAnomalyTimestampNs(const AnomalyTracker& anomalyTracker,
@@ -158,8 +158,6 @@ protected:
     const bool mNested;
 
     uint64_t mCurrentBucketStartTimeNs;
-
-    std::vector<DurationBucket>& mBucket;  // where to write output
 
     int64_t mDuration;  // current recorded duration result
 

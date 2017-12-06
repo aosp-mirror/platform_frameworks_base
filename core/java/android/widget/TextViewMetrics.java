@@ -37,29 +37,4 @@ public final class TextViewMetrics {
      * Long press on TextView - drag and drop started.
      */
     public static final int SUBTYPE_LONG_PRESS_DRAG_AND_DROP = 2;
-
-    /**
-     * Assist menu item (shown or clicked) - classification: other.
-     */
-    public static final int SUBTYPE_ASSIST_MENU_ITEM_OTHER = 0;
-
-    /**
-     * Assist menu item (shown or clicked) - classification: email.
-     */
-    public static final int SUBTYPE_ASSIST_MENU_ITEM_EMAIL = 1;
-
-    /**
-     * Assist menu item (shown or clicked) - classification: phone.
-     */
-    public static final int SUBTYPE_ASSIST_MENU_ITEM_PHONE = 2;
-
-    /**
-     * Assist menu item (shown or clicked) - classification: address.
-     */
-    public static final int SUBTYPE_ASSIST_MENU_ITEM_ADDRESS = 3;
-
-    /**
-     * Assist menu item (shown or clicked) - classification: url.
-     */
-    public static final int SUBTYPE_ASSIST_MENU_ITEM_URL = 4;
 }

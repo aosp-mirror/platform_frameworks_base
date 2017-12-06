@@ -227,7 +227,7 @@ public class HelpUtils {
                 // cache the version code
                 PackageInfo info = context.getPackageManager().getPackageInfo(
                         context.getPackageName(), 0);
-                sCachedVersionCode = Integer.toString(info.versionCode);
+                sCachedVersionCode = Long.toString(info.getLongVersionCode());
 
                 // append the version code to the uri
                 builder.appendQueryParameter(PARAM_VERSION, sCachedVersionCode);

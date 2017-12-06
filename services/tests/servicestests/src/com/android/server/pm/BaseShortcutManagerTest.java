@@ -1075,6 +1075,7 @@ public abstract class BaseShortcutManagerTest extends InstrumentationTestCase {
         final PackageInfo ret = new PackageInfo();
         ret.packageName = pi.packageName;
         ret.versionCode = pi.versionCode;
+        ret.versionCodeMajor = pi.versionCodeMajor;
         ret.lastUpdateTime = pi.lastUpdateTime;
 
         ret.applicationInfo = new ApplicationInfo(pi.applicationInfo);

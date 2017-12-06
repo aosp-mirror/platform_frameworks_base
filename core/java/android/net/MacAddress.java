@@ -33,8 +33,6 @@ import java.util.Random;
  *
  * This class only supports 48 bits long addresses and does not support 64 bits long addresses.
  * Instances of this class are immutable.
- *
- * @hide
  */
 public final class MacAddress implements Parcelable {
 
@@ -280,9 +278,8 @@ public final class MacAddress implements Parcelable {
             throw new IllegalArgumentException(addr + " was not a valid MAC address");
         }
         long longAddr = 0;
-        int index = ETHER_ADDR_LEN;
-        while (index-- > 0) {
-            int x = Integer.valueOf(parts[index], 16);
+        for (int i = 0; i < parts.length; i++) {
+            int x = Integer.valueOf(parts[i], 16);
             if (x < 0 || 0xff < x) {
                 throw new IllegalArgumentException(addr + "was not a valid MAC address");
             }

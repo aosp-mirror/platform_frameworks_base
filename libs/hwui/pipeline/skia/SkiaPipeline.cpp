@@ -161,14 +161,18 @@ void SkiaPipeline::renderLayersImpl(const LayerUpdateQueue& layers, bool opaque,
 
 bool SkiaPipeline::createOrUpdateLayer(RenderNode* node, const DamageAccumulator& damageAccumulator,
                                        bool wideColorGamut) {
+    // compute the size of the surface (i.e. texture) to be allocated for this layer
+    const int surfaceWidth = ceilf(node->getWidth() / float(LAYER_SIZE)) * LAYER_SIZE;
+    const int surfaceHeight = ceilf(node->getHeight() / float(LAYER_SIZE)) * LAYER_SIZE;
+
     SkSurface* layer = node->getLayerSurface();
-    if (!layer || layer->width() != node->getWidth() || layer->height() != node->getHeight()) {
+    if (!layer || layer->width() != surfaceWidth || layer->height() != surfaceHeight) {
         SkImageInfo info;
         if (wideColorGamut) {
-            info = SkImageInfo::Make(node->getWidth(), node->getHeight(), kRGBA_F16_SkColorType,
+            info = SkImageInfo::Make(surfaceWidth, surfaceHeight, kRGBA_F16_SkColorType,
                                      kPremul_SkAlphaType);
         } else {
-            info = SkImageInfo::MakeN32Premul(node->getWidth(), node->getHeight());
+            info = SkImageInfo::MakeN32Premul(surfaceWidth, surfaceHeight);
         }
         SkSurfaceProps props(0, kUnknown_SkPixelGeometry);
         SkASSERT(mRenderThread.getGrContext() != nullptr);

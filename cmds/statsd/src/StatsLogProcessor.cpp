@@ -86,7 +86,9 @@ void StatsLogProcessor::OnLogEvent(const LogEvent& msg) {
     // pass the event to metrics managers.
     for (auto& pair : mMetricsManagers) {
         pair.second->onLogEvent(msg);
-        flushIfNecessary(msg.GetTimestampNs(), pair.first, pair.second);
+        // TODO: THIS CHECK FAILS BECAUSE ONCE UIDMAP SIZE EXCEEDS LIMIT, DROPPING METRICS DATA
+        // DOESN'T HELP. FIX THIS.
+        // flushIfNecessary(msg.GetTimestampNs(), pair.first, pair.second);
     }
 
     // Hard-coded logic to update the isolated uid's in the uid-map.

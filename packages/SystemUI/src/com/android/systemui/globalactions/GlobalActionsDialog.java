@@ -19,6 +19,7 @@ import static com.android.internal.widget.LockPatternUtils.StrongAuthTracker.STR
 import android.app.ActivityManager;
 import android.app.Dialog;
 import android.app.WallpaperManager;
+import android.app.admin.DevicePolicyManager;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.DialogInterface;
@@ -112,11 +113,13 @@ class GlobalActionsDialog implements DialogInterface.OnDismissListener,
     private static final String GLOBAL_ACTION_KEY_VOICEASSIST = "voiceassist";
     private static final String GLOBAL_ACTION_KEY_ASSIST = "assist";
     private static final String GLOBAL_ACTION_KEY_RESTART = "restart";
+    private static final String GLOBAL_ACTION_KEY_LOGOUT = "logout";
 
     private final Context mContext;
     private final GlobalActionsManager mWindowManagerFuncs;
     private final AudioManager mAudioManager;
     private final IDreamManager mDreamManager;
+    private final DevicePolicyManager mDevicePolicyManager;
 
     private ArrayList<Action> mItems;
     private ActionsDialog mDialog;
@@ -132,6 +135,7 @@ class GlobalActionsDialog implements DialogInterface.OnDismissListener,
     private boolean mIsWaitingForEcmExit = false;
     private boolean mHasTelephony;
     private boolean mHasVibrator;
+    private boolean mHasLogoutButton;
     private final boolean mShowSilentToggle;
     private final EmergencyAffordanceManager mEmergencyAffordanceManager;
 
@@ -144,6 +148,8 @@ class GlobalActionsDialog implements DialogInterface.OnDismissListener,
         mAudioManager = (AudioManager) mContext.getSystemService(Context.AUDIO_SERVICE);
         mDreamManager = IDreamManager.Stub.asInterface(
                 ServiceManager.getService(DreamService.DREAM_SERVICE));
+        mDevicePolicyManager = (DevicePolicyManager) mContext.getSystemService(
+                Context.DEVICE_POLICY_SERVICE);
 
         // receive broadcasts
         IntentFilter filter = new IntentFilter();
@@ -289,6 +295,7 @@ class GlobalActionsDialog implements DialogInterface.OnDismissListener,
                 R.array.config_globalActionsList);
 
         ArraySet<String> addedKeys = new ArraySet<String>();
+        mHasLogoutButton = false;
         for (int i = 0; i < defaultActions.length; i++) {
             String actionKey = defaultActions[i];
             if (addedKeys.contains(actionKey)) {
@@ -325,6 +332,12 @@ class GlobalActionsDialog implements DialogInterface.OnDismissListener,
                 mItems.add(getAssistAction());
             } else if (GLOBAL_ACTION_KEY_RESTART.equals(actionKey)) {
                 mItems.add(new RestartAction());
+            } else if (GLOBAL_ACTION_KEY_LOGOUT.equals(actionKey)) {
+                if (mDevicePolicyManager.isLogoutButtonEnabled()
+                        && getCurrentUser().id != UserHandle.USER_SYSTEM) {
+                    mItems.add(new LogoutAction());
+                    mHasLogoutButton = true;
+                }
             } else {
                 Log.e(TAG, "Invalid global action key " + actionKey);
             }
@@ -487,6 +500,37 @@ class GlobalActionsDialog implements DialogInterface.OnDismissListener,
                     R.string.bugreport_status,
                     Build.VERSION.RELEASE,
                     Build.ID);
+        }
+    }
+
+    private final class LogoutAction extends SinglePressAction {
+        private LogoutAction() {
+            super(R.drawable.ic_logout, R.string.global_action_logout);
+        }
+
+        @Override
+        public boolean showDuringKeyguard() {
+            return true;
+        }
+
+        @Override
+        public boolean showBeforeProvisioning() {
+            return false;
+        }
+
+        @Override
+        public void onPress() {
+            // Add a little delay before executing, to give the dialog a chance to go away before
+            // switching user
+            mHandler.postDelayed(() -> {
+                try {
+                    ActivityManager.getService().switchUser(UserHandle.USER_SYSTEM);
+                    ActivityManager.getService().stopUser(getCurrentUser().id, true /*force*/,
+                            null);
+                } catch (RemoteException re) {
+                    Log.e(TAG, "Couldn't logout user " + re);
+                }
+            }, 500);
         }
     }
 
@@ -764,7 +808,10 @@ class GlobalActionsDialog implements DialogInterface.OnDismissListener,
         public View getView(int position, View convertView, ViewGroup parent) {
             Action action = getItem(position);
             View view = action.create(mContext, convertView, parent, LayoutInflater.from(mContext));
-            if (position == 2) {
+            // When there is no logout button, only power off and restart should be in white
+            // background, thus setting division view at third item; with logout button being the
+            // third item, set the division view at fourth item instead.
+            if (position == (mHasLogoutButton ? 3 : 2)) {
                 HardwareUiLayout.get(parent).setDivisionView(view);
             }
             return view;

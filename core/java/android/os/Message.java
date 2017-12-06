@@ -109,7 +109,9 @@ public final class Message implements Parcelable {
     // sometimes we store linked lists of these things
     /*package*/ Message next;
 
-    private static final Object sPoolSync = new Object();
+
+    /** @hide */
+    public static final Object sPoolSync = new Object();
     private static Message sPool;
     private static int sPoolSize = 0;
 
@@ -370,6 +372,12 @@ public final class Message implements Parcelable {
         return callback;
     }
 
+    /** @hide */
+    public Message setCallback(Runnable r) {
+        callback = r;
+        return this;
+    }
+
     /**
      * Obtains a Bundle of arbitrary data associated with this
      * event, lazily creating it if necessary. Set this value by calling
@@ -408,6 +416,16 @@ public final class Message implements Parcelable {
      */
     public void setData(Bundle data) {
         this.data = data;
+    }
+
+    /**
+     * Chainable setter for {@link #what}
+     *
+     * @hide
+     */
+    public Message setWhat(int what) {
+        this.what = what;
+        return this;
     }
 
     /**

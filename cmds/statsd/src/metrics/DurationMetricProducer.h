@@ -50,7 +50,8 @@ public:
     void finish() override;
 
     // TODO: Implement this later.
-    virtual void notifyAppUpgrade(const string& apk, const int uid, const int version) override{};
+    virtual void notifyAppUpgrade(const string& apk, const int uid, const int64_t version)
+            override{};
     // TODO: Implement this later.
     virtual void notifyAppRemoved(const string& apk, const int uid) override{};
 
@@ -106,7 +107,7 @@ private:
 
     // Helper function to create a duration tracker given the metric aggregation type.
     std::unique_ptr<DurationTracker> createDurationTracker(
-            const HashableDimensionKey& eventKey, std::vector<DurationBucket>& bucket) const;
+            const HashableDimensionKey& eventKey) const;
 
     // Util function to check whether the specified dimension hits the guardrail.
     bool hitGuardRailLocked(const HashableDimensionKey& newKey);

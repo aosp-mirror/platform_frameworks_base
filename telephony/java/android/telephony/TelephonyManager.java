@@ -6641,6 +6641,7 @@ public class TelephonyManager {
      * @return PRLVersion or null if error.
      * @hide
      */
+    @SystemApi
     public String getCdmaPrlVersion() {
         return getCdmaPrlVersion(getSubId());
     }

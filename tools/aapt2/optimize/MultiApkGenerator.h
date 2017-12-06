@@ -17,6 +17,10 @@
 #ifndef AAPT2_APKSPLITTER_H
 #define AAPT2_APKSPLITTER_H
 
+#include <memory>
+#include <string>
+#include <unordered_set>
+
 #include "Diagnostics.h"
 #include "LoadedApk.h"
 #include "configuration/ConfigurationParser.h"
@@ -27,6 +31,7 @@ struct MultiApkGeneratorOptions {
   std::string out_dir;
   configuration::PostProcessingConfiguration config;
   TableFlattenerOptions table_flattener_options;
+  std::unordered_set<std::string> kept_artifacts;
 };
 
 /**

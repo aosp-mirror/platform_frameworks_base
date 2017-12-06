@@ -100,6 +100,8 @@ class Element : public Node {
   Attribute* FindAttribute(const android::StringPiece& ns, const android::StringPiece& name);
   const Attribute* FindAttribute(const android::StringPiece& ns,
                                  const android::StringPiece& name) const;
+  Attribute* FindOrCreateAttribute(const android::StringPiece& ns,
+                                   const android::StringPiece& name);
 
   Element* FindChild(const android::StringPiece& ns, const android::StringPiece& name);
   const Element* FindChild(const android::StringPiece& ns, const android::StringPiece& name) const;

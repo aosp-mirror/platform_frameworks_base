@@ -577,7 +577,7 @@ public class PackageManagerSettingsTests {
                 new Settings(context.getFilesDir(), pmInt.getPermissionSettings(), lock);
         pkg.usesStaticLibraries = new ArrayList<>(
                 Arrays.asList("foo.bar1", "foo.bar2", "foo.bar3"));
-        pkg.usesStaticLibrariesVersions = new int[] {2, 4, 6};
+        pkg.usesStaticLibrariesVersions = new long[] {2, 4, 6};
         settings.insertPackageSettingLPw(ps, pkg);
         assertEquals(pkg, ps.pkg);
         assertArrayEquals(pkg.usesStaticLibraries.toArray(new String[0]), ps.usesStaticLibraries);
@@ -598,6 +598,11 @@ public class PackageManagerSettingsTests {
     }
 
     private void assertArrayEquals(int[] a, int[] b) {
+        assertTrue("Expected: " + Arrays.toString(a) + ", actual: " + Arrays.toString(b),
+                Arrays.equals(a, b));
+    }
+
+    private void assertArrayEquals(long[] a, long[] b) {
         assertTrue("Expected: " + Arrays.toString(a) + ", actual: " + Arrays.toString(b),
                 Arrays.equals(a, b));
     }

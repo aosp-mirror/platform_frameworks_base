@@ -137,6 +137,10 @@ bool MultiApkGenerator::FromBaseApk(const MultiApkGeneratorOptions& options) {
   const StringPiece ext = file::GetExtension(apk_name);
   const std::string base_name = apk_name.substr(0, apk_name.rfind(ext.to_string()));
 
+  std::unordered_set<std::string> artifacts_to_keep = options.kept_artifacts;
+  std::unordered_set<std::string> filtered_artifacts;
+  std::unordered_set<std::string> kept_artifacts;
+
   // For now, just write out the stripped APK since ABI splitting doesn't modify anything else.
   for (const Artifact& artifact : config.artifacts) {
     SourcePathDiagnostics diag{{apk_name}, context_->GetDiagnostics()};
@@ -162,6 +166,20 @@ bool MultiApkGenerator::FromBaseApk(const MultiApkGeneratorOptions& options) {
 
     ContextWrapper wrapped_context{context_};
     wrapped_context.SetSource({artifact_name});
+
+    if (!options.kept_artifacts.empty()) {
+      const auto& it = artifacts_to_keep.find(artifact_name);
+      if (it == artifacts_to_keep.end()) {
+        filtered_artifacts.insert(artifact_name);
+        if (context_->IsVerbose()) {
+          context_->GetDiagnostics()->Note(DiagMessage(artifact_name) << "skipping artifact");
+        }
+        continue;
+      } else {
+        artifacts_to_keep.erase(it);
+        kept_artifacts.insert(artifact_name);
+      }
+    }
 
     std::unique_ptr<ResourceTable> table =
         FilterTable(artifact, config, *apk_->GetResourceTable(), &wrapped_context, &filters);
@@ -195,6 +213,30 @@ bool MultiApkGenerator::FromBaseApk(const MultiApkGeneratorOptions& options) {
                               &filters, writer.get(), manifest.get())) {
       return false;
     }
+  }
+
+  // Make sure all of the requested artifacts were valid. If there are any kept artifacts left,
+  // either the config or the command line was wrong.
+  if (!artifacts_to_keep.empty()) {
+    context_->GetDiagnostics()->Error(
+        DiagMessage() << "The configuration and command line to filter artifacts do not match");
+
+    context_->GetDiagnostics()->Error(DiagMessage() << kept_artifacts.size() << " kept:");
+    for (const auto& artifact : kept_artifacts) {
+      context_->GetDiagnostics()->Error(DiagMessage() << "  " << artifact);
+    }
+
+    context_->GetDiagnostics()->Error(DiagMessage() << filtered_artifacts.size() << " filtered:");
+    for (const auto& artifact : filtered_artifacts) {
+      context_->GetDiagnostics()->Error(DiagMessage() << "  " << artifact);
+    }
+
+    context_->GetDiagnostics()->Error(DiagMessage() << artifacts_to_keep.size() << " missing:");
+    for (const auto& artifact : artifacts_to_keep) {
+      context_->GetDiagnostics()->Error(DiagMessage() << "  " << artifact);
+    }
+
+    return false;
   }
 
   return true;

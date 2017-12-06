@@ -21,7 +21,7 @@ import android.util.Log;
 import android.util.StatsLog;
 
 import com.android.internal.os.StatsdConfigProto.Bucket;
-import com.android.internal.os.StatsdConfigProto.Condition;
+import com.android.internal.os.StatsdConfigProto.Predicate;
 import com.android.internal.os.StatsdConfigProto.CountMetric;
 import com.android.internal.os.StatsdConfigProto.DurationMetric;
 import com.android.internal.os.StatsdConfigProto.EventConditionLink;
@@ -31,7 +31,7 @@ import com.android.internal.os.StatsdConfigProto.ValueMetric;
 import com.android.internal.os.StatsdConfigProto.KeyMatcher;
 import com.android.internal.os.StatsdConfigProto.KeyValueMatcher;
 import com.android.internal.os.StatsdConfigProto.AtomMatcher;
-import com.android.internal.os.StatsdConfigProto.SimpleCondition;
+import com.android.internal.os.StatsdConfigProto.SimplePredicate;
 import com.android.internal.os.StatsdConfigProto.StatsdConfig;
 
 import java.io.InputStream;
@@ -113,9 +113,9 @@ public class ConfigFactory {
                 addValueMetric(metric, i, bucketMillis, config);
                 numMetrics++;
             }
-            // conditions
-            for (Condition condition : mTemplate.getConditionList()) {
-              addCondition(condition, i, config);
+            // predicates
+            for (Predicate predicate : mTemplate.getPredicateList()) {
+              addPredicate(predicate, i, config);
             }
             // matchers
             for (AtomMatcher matcher : mTemplate.getAtomMatcherList()) {
@@ -254,30 +254,30 @@ public class ConfigFactory {
     }
 
     /**
-     * Creates a {@link Condition} based on the template. Makes sure that all names
-     * are appended with the provided suffix. Then adds that condition to the config.
+     * Creates a {@link Predicate} based on the template. Makes sure that all names
+     * are appended with the provided suffix. Then adds that predicate to the config.
      */
-    private void addCondition(Condition template, int suffix, StatsdConfig.Builder config) {
-        Condition.Builder condition = template.toBuilder()
+    private void addPredicate(Predicate template, int suffix, StatsdConfig.Builder config) {
+        Predicate.Builder predicate = template.toBuilder()
             .setName(template.getName() + suffix);
         if (template.hasCombination()) {
-            Condition.Combination.Builder cb = template.getCombination().toBuilder()
-                .clearCondition();
-            for (String child : template.getCombination().getConditionList()) {
-                cb.addCondition(child + suffix);
+            Predicate.Combination.Builder cb = template.getCombination().toBuilder()
+                .clearPredicate();
+            for (String child : template.getCombination().getPredicateList()) {
+                cb.addPredicate(child + suffix);
             }
-            condition.setCombination(cb.build());
+            predicate.setCombination(cb.build());
         }
-        if (template.hasSimpleCondition()) {
-            SimpleCondition.Builder sc = template.getSimpleCondition().toBuilder()
-                .setStart(template.getSimpleCondition().getStart() + suffix)
-                .setStop(template.getSimpleCondition().getStop() + suffix);
-            if (template.getSimpleCondition().hasStopAll()) {
-                sc.setStopAll(template.getSimpleCondition().getStopAll() + suffix);
+        if (template.hasSimplePredicate()) {
+            SimplePredicate.Builder sc = template.getSimplePredicate().toBuilder()
+                .setStart(template.getSimplePredicate().getStart() + suffix)
+                .setStop(template.getSimplePredicate().getStop() + suffix);
+            if (template.getSimplePredicate().hasStopAll()) {
+                sc.setStopAll(template.getSimplePredicate().getStopAll() + suffix);
             }
-            condition.setSimpleCondition(sc.build());
+            predicate.setSimplePredicate(sc.build());
         }
-        config.addCondition(condition);
+        config.addPredicate(predicate);
     }
 
     /**

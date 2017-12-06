@@ -37,18 +37,19 @@ namespace os {
 namespace statsd {
 
 const ConfigKey kConfigKey(0, "test");
+const string eventKey = "event";
 
 TEST(MaxDurationTrackerTest, TestSimpleMaxDuration) {
     sp<MockConditionWizard> wizard = new NaggyMock<MockConditionWizard>();
 
-    vector<DurationBucket> buckets;
+    unordered_map<HashableDimensionKey, vector<DurationBucket>> buckets;
     ConditionKey key1;
 
     uint64_t bucketStartTimeNs = 10000000000;
     uint64_t bucketSizeNs = 30 * 1000 * 1000 * 1000LL;
 
-    MaxDurationTracker tracker(kConfigKey, "metric", "event", wizard, -1, false, bucketStartTimeNs,
-                               bucketSizeNs, {}, buckets);
+    MaxDurationTracker tracker(kConfigKey, "metric", eventKey, wizard, -1, false, bucketStartTimeNs,
+                               bucketSizeNs, {});
 
     tracker.noteStart("1", true, bucketStartTimeNs, key1);
     // Event starts again. This would not change anything as it already starts.
@@ -60,50 +61,53 @@ TEST(MaxDurationTrackerTest, TestSimpleMaxDuration) {
     tracker.noteStart("2", true, bucketStartTimeNs + 20, key1);
     tracker.noteStop("2", bucketStartTimeNs + 40, false /*stop all*/);
 
-    tracker.flushIfNeeded(bucketStartTimeNs + bucketSizeNs + 1);
-    EXPECT_EQ(1u, buckets.size());
-    EXPECT_EQ(20ULL, buckets[0].mDuration);
+    tracker.flushIfNeeded(bucketStartTimeNs + bucketSizeNs + 1, &buckets);
+    EXPECT_TRUE(buckets.find(eventKey) != buckets.end());
+    EXPECT_EQ(1u, buckets[eventKey].size());
+    EXPECT_EQ(20ULL, buckets[eventKey][0].mDuration);
 }
 
 TEST(MaxDurationTrackerTest, TestStopAll) {
     sp<MockConditionWizard> wizard = new NaggyMock<MockConditionWizard>();
 
-    vector<DurationBucket> buckets;
+    unordered_map<HashableDimensionKey, vector<DurationBucket>> buckets;
     ConditionKey key1;
 
     uint64_t bucketStartTimeNs = 10000000000;
     uint64_t bucketSizeNs = 30 * 1000 * 1000 * 1000LL;
 
-    MaxDurationTracker tracker(kConfigKey, "metric", "event", wizard, -1, false, bucketStartTimeNs,
-                               bucketSizeNs, {}, buckets);
+    MaxDurationTracker tracker(kConfigKey, "metric", eventKey, wizard, -1, false, bucketStartTimeNs,
+                               bucketSizeNs, {});
 
     tracker.noteStart("1", true, bucketStartTimeNs + 1, key1);
 
     // Another event starts in this bucket.
     tracker.noteStart("2", true, bucketStartTimeNs + 20, key1);
-    tracker.flushIfNeeded(bucketStartTimeNs + bucketSizeNs + 40);
+    tracker.flushIfNeeded(bucketStartTimeNs + bucketSizeNs + 40, &buckets);
     tracker.noteStopAll(bucketStartTimeNs + bucketSizeNs + 40);
     EXPECT_TRUE(tracker.mInfos.empty());
-    EXPECT_EQ(1u, buckets.size());
-    EXPECT_EQ(bucketSizeNs - 1, buckets[0].mDuration);
 
-    tracker.flushIfNeeded(bucketStartTimeNs + 3 * bucketSizeNs + 40);
-    EXPECT_EQ(2u, buckets.size());
-    EXPECT_EQ(bucketSizeNs - 1, buckets[0].mDuration);
-    EXPECT_EQ(40ULL, buckets[1].mDuration);
+    EXPECT_TRUE(buckets.find(eventKey) != buckets.end());
+    EXPECT_EQ(1u, buckets[eventKey].size());
+    EXPECT_EQ(bucketSizeNs - 1, buckets[eventKey][0].mDuration);
+
+    tracker.flushIfNeeded(bucketStartTimeNs + 3 * bucketSizeNs + 40, &buckets);
+    EXPECT_EQ(2u, buckets[eventKey].size());
+    EXPECT_EQ(bucketSizeNs - 1, buckets[eventKey][0].mDuration);
+    EXPECT_EQ(40ULL, buckets[eventKey][1].mDuration);
 }
 
 TEST(MaxDurationTrackerTest, TestCrossBucketBoundary) {
     sp<MockConditionWizard> wizard = new NaggyMock<MockConditionWizard>();
 
-    vector<DurationBucket> buckets;
+    unordered_map<HashableDimensionKey, vector<DurationBucket>> buckets;
     ConditionKey key1;
 
     uint64_t bucketStartTimeNs = 10000000000;
     uint64_t bucketSizeNs = 30 * 1000 * 1000 * 1000LL;
 
-    MaxDurationTracker tracker(kConfigKey, "metric", "event", wizard, -1, false, bucketStartTimeNs,
-                               bucketSizeNs, {}, buckets);
+    MaxDurationTracker tracker(kConfigKey, "metric", eventKey, wizard, -1, false, bucketStartTimeNs,
+                               bucketSizeNs, {});
 
     // The event starts.
     tracker.noteStart("", true, bucketStartTimeNs + 1, key1);
@@ -112,25 +116,26 @@ TEST(MaxDurationTrackerTest, TestCrossBucketBoundary) {
     tracker.noteStart("", true, bucketStartTimeNs + bucketSizeNs + 1, key1);
 
     // The event stops at early 4th bucket.
-    tracker.flushIfNeeded(bucketStartTimeNs + (3 * bucketSizeNs) + 20);
+    tracker.flushIfNeeded(bucketStartTimeNs + (3 * bucketSizeNs) + 20, &buckets);
     tracker.noteStop("", bucketStartTimeNs + (3 * bucketSizeNs) + 20, false /*stop all*/);
-    EXPECT_EQ(3u, buckets.size());
-    EXPECT_EQ((unsigned long long)(bucketSizeNs - 1), buckets[0].mDuration);
-    EXPECT_EQ((unsigned long long)bucketSizeNs, buckets[1].mDuration);
-    EXPECT_EQ((unsigned long long)bucketSizeNs, buckets[2].mDuration);
+    EXPECT_TRUE(buckets.find(eventKey) != buckets.end());
+    EXPECT_EQ(3u, buckets[eventKey].size());
+    EXPECT_EQ((unsigned long long)(bucketSizeNs - 1), buckets[eventKey][0].mDuration);
+    EXPECT_EQ((unsigned long long)bucketSizeNs, buckets[eventKey][1].mDuration);
+    EXPECT_EQ((unsigned long long)bucketSizeNs, buckets[eventKey][2].mDuration);
 }
 
 TEST(MaxDurationTrackerTest, TestCrossBucketBoundary_nested) {
     sp<MockConditionWizard> wizard = new NaggyMock<MockConditionWizard>();
 
-    vector<DurationBucket> buckets;
+    unordered_map<HashableDimensionKey, vector<DurationBucket>> buckets;
     ConditionKey key1;
 
     uint64_t bucketStartTimeNs = 10000000000;
     uint64_t bucketSizeNs = 30 * 1000 * 1000 * 1000LL;
 
-    MaxDurationTracker tracker(kConfigKey, "metric", "event", wizard, -1, true, bucketStartTimeNs,
-                               bucketSizeNs, {}, buckets);
+    MaxDurationTracker tracker(kConfigKey, "metric", eventKey, wizard, -1, true, bucketStartTimeNs,
+                               bucketSizeNs, {});
 
     // 2 starts
     tracker.noteStart("", true, bucketStartTimeNs + 1, key1);
@@ -138,20 +143,21 @@ TEST(MaxDurationTrackerTest, TestCrossBucketBoundary_nested) {
     // one stop
     tracker.noteStop("", bucketStartTimeNs + 20, false /*stop all*/);
 
-    tracker.flushIfNeeded(bucketStartTimeNs + (2 * bucketSizeNs) + 1);
+    tracker.flushIfNeeded(bucketStartTimeNs + (2 * bucketSizeNs) + 1, &buckets);
 
-    EXPECT_EQ(2u, buckets.size());
-    EXPECT_EQ(bucketSizeNs - 1, buckets[0].mDuration);
-    EXPECT_EQ(bucketSizeNs, buckets[1].mDuration);
+    EXPECT_TRUE(buckets.find(eventKey) != buckets.end());
+    EXPECT_EQ(2u, buckets[eventKey].size());
+    EXPECT_EQ(bucketSizeNs - 1, buckets[eventKey][0].mDuration);
+    EXPECT_EQ(bucketSizeNs, buckets[eventKey][1].mDuration);
 
     // real stop now.
     tracker.noteStop("", bucketStartTimeNs + (2 * bucketSizeNs) + 5, false);
-    tracker.flushIfNeeded(bucketStartTimeNs + (3 * bucketSizeNs) + 1);
+    tracker.flushIfNeeded(bucketStartTimeNs + (3 * bucketSizeNs) + 1, &buckets);
 
-    EXPECT_EQ(3u, buckets.size());
-    EXPECT_EQ(bucketSizeNs - 1, buckets[0].mDuration);
-    EXPECT_EQ(bucketSizeNs, buckets[1].mDuration);
-    EXPECT_EQ(5ULL, buckets[2].mDuration);
+    EXPECT_EQ(3u, buckets[eventKey].size());
+    EXPECT_EQ(bucketSizeNs - 1, buckets[eventKey][0].mDuration);
+    EXPECT_EQ(bucketSizeNs, buckets[eventKey][1].mDuration);
+    EXPECT_EQ(5ULL, buckets[eventKey][2].mDuration);
 }
 
 TEST(MaxDurationTrackerTest, TestMaxDurationWithCondition) {
@@ -163,15 +169,15 @@ TEST(MaxDurationTrackerTest, TestMaxDurationWithCondition) {
     EXPECT_CALL(*wizard, query(_, key1))  // #4
             .WillOnce(Return(ConditionState::kFalse));
 
-    vector<DurationBucket> buckets;
+    unordered_map<HashableDimensionKey, vector<DurationBucket>> buckets;
 
     uint64_t bucketStartTimeNs = 10000000000;
     uint64_t eventStartTimeNs = bucketStartTimeNs + 1;
     uint64_t bucketSizeNs = 30 * 1000 * 1000 * 1000LL;
     int64_t durationTimeNs = 2 * 1000;
 
-    MaxDurationTracker tracker(kConfigKey, "metric", "event", wizard, 1, false, bucketStartTimeNs,
-                               bucketSizeNs, {}, buckets);
+    MaxDurationTracker tracker(kConfigKey, "metric", eventKey, wizard, 1, false, bucketStartTimeNs,
+                               bucketSizeNs, {});
     EXPECT_TRUE(tracker.mAnomalyTrackers.empty());
 
     tracker.noteStart("2:maps", true, eventStartTimeNs, key1);
@@ -180,9 +186,10 @@ TEST(MaxDurationTrackerTest, TestMaxDurationWithCondition) {
 
     tracker.noteStop("2:maps", eventStartTimeNs + durationTimeNs, false);
 
-    tracker.flushIfNeeded(bucketStartTimeNs + bucketSizeNs + 1);
-    EXPECT_EQ(1u, buckets.size());
-    EXPECT_EQ(5ULL, buckets[0].mDuration);
+    tracker.flushIfNeeded(bucketStartTimeNs + bucketSizeNs + 1, &buckets);
+    EXPECT_TRUE(buckets.find(eventKey) != buckets.end());
+    EXPECT_EQ(1u, buckets[eventKey].size());
+    EXPECT_EQ(5ULL, buckets[eventKey][0].mDuration);
 }
 
 TEST(MaxDurationTrackerTest, TestAnomalyDetection) {
@@ -193,7 +200,7 @@ TEST(MaxDurationTrackerTest, TestAnomalyDetection) {
     alert.set_number_of_buckets(2);
     alert.set_refractory_period_secs(1);
 
-    vector<DurationBucket> buckets;
+    unordered_map<HashableDimensionKey, vector<DurationBucket>> buckets;
     sp<MockConditionWizard> wizard = new NaggyMock<MockConditionWizard>();
     ConditionKey key1;
     key1["APP_BACKGROUND"] = "1:maps|";
@@ -202,8 +209,8 @@ TEST(MaxDurationTrackerTest, TestAnomalyDetection) {
     uint64_t bucketSizeNs = 30 * NS_PER_SEC;
 
     sp<AnomalyTracker> anomalyTracker = new AnomalyTracker(alert);
-    MaxDurationTracker tracker(kConfigKey, "metric", "event", wizard, -1, true, bucketStartTimeNs,
-                               bucketSizeNs, {anomalyTracker}, buckets);
+    MaxDurationTracker tracker(kConfigKey, "metric", eventKey, wizard, -1, true, bucketStartTimeNs,
+                               bucketSizeNs, {anomalyTracker});
 
     tracker.noteStart("1", true, eventStartTimeNs, key1);
     tracker.noteStop("1", eventStartTimeNs + 10, false);
@@ -211,7 +218,7 @@ TEST(MaxDurationTrackerTest, TestAnomalyDetection) {
     EXPECT_EQ(10LL, tracker.mDuration);
 
     tracker.noteStart("2", true, eventStartTimeNs + 20, key1);
-    tracker.flushIfNeeded(eventStartTimeNs + 2 * bucketSizeNs + 3 * NS_PER_SEC);
+    tracker.flushIfNeeded(eventStartTimeNs + 2 * bucketSizeNs + 3 * NS_PER_SEC, &buckets);
     tracker.noteStop("2", eventStartTimeNs + 2 * bucketSizeNs + 3 * NS_PER_SEC, false);
     EXPECT_EQ((long long)(4 * NS_PER_SEC + 1LL), tracker.mDuration);
     EXPECT_EQ(anomalyTracker->mLastAlarmTimestampNs,

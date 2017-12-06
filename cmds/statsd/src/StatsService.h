@@ -54,9 +54,9 @@ public:
     virtual Status statsCompanionReady();
     virtual Status informAnomalyAlarmFired();
     virtual Status informPollAlarmFired();
-    virtual Status informAllUidData(const vector<int32_t>& uid, const vector<int32_t>& version,
+    virtual Status informAllUidData(const vector<int32_t>& uid, const vector<int64_t>& version,
                                     const vector<String16>& app);
-    virtual Status informOnePackage(const String16& app, int32_t uid, int32_t version);
+    virtual Status informOnePackage(const String16& app, int32_t uid, int64_t version);
     virtual Status informOnePackageRemoved(const String16& app, int32_t uid);
     virtual Status writeDataToDisk();
 

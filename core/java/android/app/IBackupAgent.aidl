@@ -79,7 +79,7 @@ oneway interface IBackupAgent {
      *        passed here as a convenience to the agent.
      */
     void doRestore(in ParcelFileDescriptor data,
-            int appVersionCode, in ParcelFileDescriptor newState,
+            long appVersionCode, in ParcelFileDescriptor newState,
             int token, IBackupManager callbackBinder);
 
     /**

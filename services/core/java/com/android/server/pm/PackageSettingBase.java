@@ -75,7 +75,7 @@ public abstract class PackageSettingBase extends SettingBase {
     String resourcePathString;
 
     String[] usesStaticLibraries;
-    int[] usesStaticLibrariesVersions;
+    long[] usesStaticLibrariesVersions;
 
     /**
      * The path under which native libraries have been unpacked. This path is
@@ -105,7 +105,7 @@ public abstract class PackageSettingBase extends SettingBase {
     long timeStamp;
     long firstInstallTime;
     long lastUpdateTime;
-    int versionCode;
+    long versionCode;
 
     boolean uidError;
 
@@ -149,9 +149,9 @@ public abstract class PackageSettingBase extends SettingBase {
     PackageSettingBase(String name, String realName, File codePath, File resourcePath,
             String legacyNativeLibraryPathString, String primaryCpuAbiString,
             String secondaryCpuAbiString, String cpuAbiOverrideString,
-            int pVersionCode, int pkgFlags, int pkgPrivateFlags,
+            long pVersionCode, int pkgFlags, int pkgPrivateFlags,
             String parentPackageName, List<String> childPackageNames,
-            String[] usesStaticLibraries, int[] usesStaticLibrariesVersions) {
+            String[] usesStaticLibraries, long[] usesStaticLibrariesVersions) {
         super(pkgFlags, pkgPrivateFlags);
         this.name = name;
         this.realName = realName;
@@ -180,7 +180,7 @@ public abstract class PackageSettingBase extends SettingBase {
 
     void init(File codePath, File resourcePath, String legacyNativeLibraryPathString,
               String primaryCpuAbiString, String secondaryCpuAbiString,
-              String cpuAbiOverrideString, int pVersionCode) {
+              String cpuAbiOverrideString, long pVersionCode) {
         this.codePath = codePath;
         this.codePathString = codePath.toString();
         this.resourcePath = resourcePath;

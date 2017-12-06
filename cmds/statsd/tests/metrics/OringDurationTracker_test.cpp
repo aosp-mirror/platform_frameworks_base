@@ -35,6 +35,7 @@ namespace os {
 namespace statsd {
 
 const ConfigKey kConfigKey(0, "test");
+const string eventKey = "event";
 
 TEST(OringDurationTrackerTest, TestDurationOverlap) {
     sp<MockConditionWizard> wizard = new NaggyMock<MockConditionWizard>();
@@ -42,15 +43,15 @@ TEST(OringDurationTrackerTest, TestDurationOverlap) {
     ConditionKey key1;
     key1["APP_BACKGROUND"] = "1:maps|";
 
-    vector<DurationBucket> buckets;
+    unordered_map<HashableDimensionKey, vector<DurationBucket>> buckets;
 
     uint64_t bucketStartTimeNs = 10000000000;
     uint64_t eventStartTimeNs = bucketStartTimeNs + 1;
     uint64_t bucketSizeNs = 30 * 1000 * 1000 * 1000LL;
     uint64_t durationTimeNs = 2 * 1000;
 
-    OringDurationTracker tracker(kConfigKey, "metric", "event", wizard, 1, false, bucketStartTimeNs,
-                                 bucketSizeNs, {}, buckets);
+    OringDurationTracker tracker(kConfigKey, "metric", eventKey, wizard, 1, false,
+                                 bucketStartTimeNs, bucketSizeNs, {});
 
     tracker.noteStart("2:maps", true, eventStartTimeNs, key1);
     EXPECT_EQ((long long)eventStartTimeNs, tracker.mLastStartTime);
@@ -58,9 +59,11 @@ TEST(OringDurationTrackerTest, TestDurationOverlap) {
     EXPECT_EQ((long long)eventStartTimeNs, tracker.mLastStartTime);
 
     tracker.noteStop("2:maps", eventStartTimeNs + durationTimeNs, false);
-    tracker.flushIfNeeded(eventStartTimeNs + bucketSizeNs + 1);
-    EXPECT_EQ(1u, buckets.size());
-    EXPECT_EQ(durationTimeNs, buckets[0].mDuration);
+    tracker.flushIfNeeded(eventStartTimeNs + bucketSizeNs + 1, &buckets);
+    EXPECT_TRUE(buckets.find(eventKey) != buckets.end());
+
+    EXPECT_EQ(1u, buckets[eventKey].size());
+    EXPECT_EQ(durationTimeNs, buckets[eventKey][0].mDuration);
 }
 
 TEST(OringDurationTrackerTest, TestDurationNested) {
@@ -69,14 +72,14 @@ TEST(OringDurationTrackerTest, TestDurationNested) {
     ConditionKey key1;
     key1["APP_BACKGROUND"] = "1:maps|";
 
-    vector<DurationBucket> buckets;
+    unordered_map<HashableDimensionKey, vector<DurationBucket>> buckets;
 
     uint64_t bucketStartTimeNs = 10000000000;
     uint64_t eventStartTimeNs = bucketStartTimeNs + 1;
     uint64_t bucketSizeNs = 30 * 1000 * 1000 * 1000LL;
 
-    OringDurationTracker tracker(kConfigKey, "metric", "event", wizard, 1, true, bucketStartTimeNs,
-                                 bucketSizeNs, {}, buckets);
+    OringDurationTracker tracker(kConfigKey, "metric", eventKey, wizard, 1, true, bucketStartTimeNs,
+                                 bucketSizeNs, {});
 
     tracker.noteStart("2:maps", true, eventStartTimeNs, key1);
     tracker.noteStart("2:maps", true, eventStartTimeNs + 10, key1);  // overlapping wl
@@ -84,9 +87,10 @@ TEST(OringDurationTrackerTest, TestDurationNested) {
     tracker.noteStop("2:maps", eventStartTimeNs + 2000, false);
     tracker.noteStop("2:maps", eventStartTimeNs + 2003, false);
 
-    tracker.flushIfNeeded(bucketStartTimeNs + bucketSizeNs + 1);
-    EXPECT_EQ(1u, buckets.size());
-    EXPECT_EQ(2003ULL, buckets[0].mDuration);
+    tracker.flushIfNeeded(bucketStartTimeNs + bucketSizeNs + 1, &buckets);
+    EXPECT_TRUE(buckets.find(eventKey) != buckets.end());
+    EXPECT_EQ(1u, buckets[eventKey].size());
+    EXPECT_EQ(2003ULL, buckets[eventKey][0].mDuration);
 }
 
 TEST(OringDurationTrackerTest, TestStopAll) {
@@ -95,23 +99,24 @@ TEST(OringDurationTrackerTest, TestStopAll) {
     ConditionKey key1;
     key1["APP_BACKGROUND"] = "1:maps|";
 
-    vector<DurationBucket> buckets;
+    unordered_map<HashableDimensionKey, vector<DurationBucket>> buckets;
 
     uint64_t bucketStartTimeNs = 10000000000;
     uint64_t eventStartTimeNs = bucketStartTimeNs + 1;
     uint64_t bucketSizeNs = 30 * 1000 * 1000 * 1000LL;
 
-    OringDurationTracker tracker(kConfigKey, "metric", "event", wizard, 1, true, bucketStartTimeNs,
-                                 bucketSizeNs, {}, buckets);
+    OringDurationTracker tracker(kConfigKey, "metric", eventKey, wizard, 1, true, bucketStartTimeNs,
+                                 bucketSizeNs, {});
 
     tracker.noteStart("2:maps", true, eventStartTimeNs, key1);
     tracker.noteStart("3:maps", true, eventStartTimeNs + 10, key1);  // overlapping wl
 
     tracker.noteStopAll(eventStartTimeNs + 2003);
 
-    tracker.flushIfNeeded(bucketStartTimeNs + bucketSizeNs + 1);
-    EXPECT_EQ(1u, buckets.size());
-    EXPECT_EQ(2003ULL, buckets[0].mDuration);
+    tracker.flushIfNeeded(bucketStartTimeNs + bucketSizeNs + 1, &buckets);
+    EXPECT_TRUE(buckets.find(eventKey) != buckets.end());
+    EXPECT_EQ(1u, buckets[eventKey].size());
+    EXPECT_EQ(2003ULL, buckets[eventKey][0].mDuration);
 }
 
 TEST(OringDurationTrackerTest, TestCrossBucketBoundary) {
@@ -120,32 +125,33 @@ TEST(OringDurationTrackerTest, TestCrossBucketBoundary) {
     ConditionKey key1;
     key1["APP_BACKGROUND"] = "1:maps|";
 
-    vector<DurationBucket> buckets;
+    unordered_map<HashableDimensionKey, vector<DurationBucket>> buckets;
 
     uint64_t bucketStartTimeNs = 10000000000;
     uint64_t eventStartTimeNs = bucketStartTimeNs + 1;
     uint64_t bucketSizeNs = 30 * 1000 * 1000 * 1000LL;
     uint64_t durationTimeNs = 2 * 1000;
 
-    OringDurationTracker tracker(kConfigKey, "metric", "event", wizard, 1, true, bucketStartTimeNs,
-                                 bucketSizeNs, {}, buckets);
+    OringDurationTracker tracker(kConfigKey, "metric", eventKey, wizard, 1, true, bucketStartTimeNs,
+                                 bucketSizeNs, {});
 
     tracker.noteStart("2:maps", true, eventStartTimeNs, key1);
     EXPECT_EQ((long long)eventStartTimeNs, tracker.mLastStartTime);
-    tracker.flushIfNeeded(eventStartTimeNs + 2 * bucketSizeNs);
+    tracker.flushIfNeeded(eventStartTimeNs + 2 * bucketSizeNs, &buckets);
     tracker.noteStart("2:maps", true, eventStartTimeNs + 2 * bucketSizeNs, key1);
     EXPECT_EQ((long long)(bucketStartTimeNs + 2 * bucketSizeNs), tracker.mLastStartTime);
 
-    EXPECT_EQ(2u, buckets.size());
-    EXPECT_EQ(bucketSizeNs - 1, buckets[0].mDuration);
-    EXPECT_EQ(bucketSizeNs, buckets[1].mDuration);
+    EXPECT_EQ(2u, buckets[eventKey].size());
+    EXPECT_EQ(bucketSizeNs - 1, buckets[eventKey][0].mDuration);
+    EXPECT_EQ(bucketSizeNs, buckets[eventKey][1].mDuration);
 
     tracker.noteStop("2:maps", eventStartTimeNs + 2 * bucketSizeNs + 10, false);
     tracker.noteStop("2:maps", eventStartTimeNs + 2 * bucketSizeNs + 12, false);
-    tracker.flushIfNeeded(eventStartTimeNs + 2 * bucketSizeNs + 12);
-    EXPECT_EQ(2u, buckets.size());
-    EXPECT_EQ(bucketSizeNs - 1, buckets[0].mDuration);
-    EXPECT_EQ(bucketSizeNs, buckets[1].mDuration);
+    tracker.flushIfNeeded(eventStartTimeNs + 2 * bucketSizeNs + 12, &buckets);
+    EXPECT_TRUE(buckets.find(eventKey) != buckets.end());
+    EXPECT_EQ(2u, buckets[eventKey].size());
+    EXPECT_EQ(bucketSizeNs - 1, buckets[eventKey][0].mDuration);
+    EXPECT_EQ(bucketSizeNs, buckets[eventKey][1].mDuration);
 }
 
 TEST(OringDurationTrackerTest, TestDurationConditionChange) {
@@ -157,15 +163,15 @@ TEST(OringDurationTrackerTest, TestDurationConditionChange) {
     EXPECT_CALL(*wizard, query(_, key1))  // #4
             .WillOnce(Return(ConditionState::kFalse));
 
-    vector<DurationBucket> buckets;
+    unordered_map<HashableDimensionKey, vector<DurationBucket>> buckets;
 
     uint64_t bucketStartTimeNs = 10000000000;
     uint64_t eventStartTimeNs = bucketStartTimeNs + 1;
     uint64_t bucketSizeNs = 30 * 1000 * 1000 * 1000LL;
     uint64_t durationTimeNs = 2 * 1000;
 
-    OringDurationTracker tracker(kConfigKey, "metric", "event", wizard, 1, false, bucketStartTimeNs,
-                                 bucketSizeNs, {}, buckets);
+    OringDurationTracker tracker(kConfigKey, "metric", eventKey, wizard, 1, false,
+                                 bucketStartTimeNs, bucketSizeNs, {});
 
     tracker.noteStart("2:maps", true, eventStartTimeNs, key1);
 
@@ -173,9 +179,10 @@ TEST(OringDurationTrackerTest, TestDurationConditionChange) {
 
     tracker.noteStop("2:maps", eventStartTimeNs + durationTimeNs, false);
 
-    tracker.flushIfNeeded(bucketStartTimeNs + bucketSizeNs + 1);
-    EXPECT_EQ(1u, buckets.size());
-    EXPECT_EQ(5ULL, buckets[0].mDuration);
+    tracker.flushIfNeeded(bucketStartTimeNs + bucketSizeNs + 1, &buckets);
+    EXPECT_TRUE(buckets.find(eventKey) != buckets.end());
+    EXPECT_EQ(1u, buckets[eventKey].size());
+    EXPECT_EQ(5ULL, buckets[eventKey][0].mDuration);
 }
 
 TEST(OringDurationTrackerTest, TestDurationConditionChange2) {
@@ -189,15 +196,15 @@ TEST(OringDurationTrackerTest, TestDurationConditionChange2) {
             .WillOnce(Return(ConditionState::kFalse))
             .WillOnce(Return(ConditionState::kTrue));
 
-    vector<DurationBucket> buckets;
+    unordered_map<HashableDimensionKey, vector<DurationBucket>> buckets;
 
     uint64_t bucketStartTimeNs = 10000000000;
     uint64_t eventStartTimeNs = bucketStartTimeNs + 1;
     uint64_t bucketSizeNs = 30 * 1000 * 1000 * 1000LL;
     uint64_t durationTimeNs = 2 * 1000;
 
-    OringDurationTracker tracker(kConfigKey, "metric", "event", wizard, 1, false, bucketStartTimeNs,
-                                 bucketSizeNs, {}, buckets);
+    OringDurationTracker tracker(kConfigKey, "metric", eventKey, wizard, 1, false,
+                                 bucketStartTimeNs, bucketSizeNs, {});
 
     tracker.noteStart("2:maps", true, eventStartTimeNs, key1);
     // condition to false; record duration 5n
@@ -207,9 +214,10 @@ TEST(OringDurationTrackerTest, TestDurationConditionChange2) {
     // 2nd duration: 1000ns
     tracker.noteStop("2:maps", eventStartTimeNs + durationTimeNs, false);
 
-    tracker.flushIfNeeded(bucketStartTimeNs + bucketSizeNs + 1);
-    EXPECT_EQ(1u, buckets.size());
-    EXPECT_EQ(1005ULL, buckets[0].mDuration);
+    tracker.flushIfNeeded(bucketStartTimeNs + bucketSizeNs + 1, &buckets);
+    EXPECT_TRUE(buckets.find(eventKey) != buckets.end());
+    EXPECT_EQ(1u, buckets[eventKey].size());
+    EXPECT_EQ(1005ULL, buckets[eventKey][0].mDuration);
 }
 
 TEST(OringDurationTrackerTest, TestDurationConditionChangeNested) {
@@ -221,14 +229,14 @@ TEST(OringDurationTrackerTest, TestDurationConditionChangeNested) {
     EXPECT_CALL(*wizard, query(_, key1))  // #4
             .WillOnce(Return(ConditionState::kFalse));
 
-    vector<DurationBucket> buckets;
+    unordered_map<HashableDimensionKey, vector<DurationBucket>> buckets;
 
     uint64_t bucketStartTimeNs = 10000000000;
     uint64_t eventStartTimeNs = bucketStartTimeNs + 1;
     uint64_t bucketSizeNs = 30 * 1000 * 1000 * 1000LL;
 
-    OringDurationTracker tracker(kConfigKey, "metric", "event", wizard, 1, true, bucketStartTimeNs,
-                                 bucketSizeNs, {}, buckets);
+    OringDurationTracker tracker(kConfigKey, "metric", eventKey, wizard, 1, true, bucketStartTimeNs,
+                                 bucketSizeNs, {});
 
     tracker.noteStart("2:maps", true, eventStartTimeNs, key1);
     tracker.noteStart("2:maps", true, eventStartTimeNs + 2, key1);
@@ -239,9 +247,10 @@ TEST(OringDurationTrackerTest, TestDurationConditionChangeNested) {
 
     tracker.noteStop("2:maps", eventStartTimeNs + 2003, false);
 
-    tracker.flushIfNeeded(bucketStartTimeNs + bucketSizeNs + 1);
-    EXPECT_EQ(1u, buckets.size());
-    EXPECT_EQ(15ULL, buckets[0].mDuration);
+    tracker.flushIfNeeded(bucketStartTimeNs + bucketSizeNs + 1, &buckets);
+    EXPECT_TRUE(buckets.find(eventKey) != buckets.end());
+    EXPECT_EQ(1u, buckets[eventKey].size());
+    EXPECT_EQ(15ULL, buckets[eventKey][0].mDuration);
 }
 
 TEST(OringDurationTrackerTest, TestPredictAnomalyTimestamp) {
@@ -252,7 +261,7 @@ TEST(OringDurationTrackerTest, TestPredictAnomalyTimestamp) {
     alert.set_number_of_buckets(2);
     alert.set_refractory_period_secs(1);
 
-    vector<DurationBucket> buckets;
+    unordered_map<HashableDimensionKey, vector<DurationBucket>> buckets;
     sp<MockConditionWizard> wizard = new NaggyMock<MockConditionWizard>();
     ConditionKey key1;
     key1["APP_BACKGROUND"] = "1:maps|";
@@ -261,8 +270,8 @@ TEST(OringDurationTrackerTest, TestPredictAnomalyTimestamp) {
     uint64_t bucketSizeNs = 30 * NS_PER_SEC;
 
     sp<AnomalyTracker> anomalyTracker = new AnomalyTracker(alert);
-    OringDurationTracker tracker(kConfigKey, "metric", "event", wizard, 1, true, bucketStartTimeNs,
-                                 bucketSizeNs, {anomalyTracker}, buckets);
+    OringDurationTracker tracker(kConfigKey, "metric", eventKey, wizard, 1, true, bucketStartTimeNs,
+                                 bucketSizeNs, {anomalyTracker});
 
     // Nothing in the past bucket.
     tracker.noteStart("", true, eventStartTimeNs, key1);
@@ -270,7 +279,7 @@ TEST(OringDurationTrackerTest, TestPredictAnomalyTimestamp) {
               tracker.predictAnomalyTimestampNs(*anomalyTracker, eventStartTimeNs));
 
     tracker.noteStop("", eventStartTimeNs + 3, false);
-    EXPECT_EQ(0u, buckets.size());
+    EXPECT_EQ(0u, buckets[eventKey].size());
 
     uint64_t event1StartTimeNs = eventStartTimeNs + 10;
     tracker.noteStart("1", true, event1StartTimeNs, key1);
@@ -279,11 +288,13 @@ TEST(OringDurationTrackerTest, TestPredictAnomalyTimestamp) {
               tracker.predictAnomalyTimestampNs(*anomalyTracker, event1StartTimeNs));
 
     uint64_t event1StopTimeNs = eventStartTimeNs + bucketSizeNs + 10;
-    tracker.flushIfNeeded(event1StopTimeNs);
+    tracker.flushIfNeeded(event1StopTimeNs, &buckets);
     tracker.noteStop("1", event1StopTimeNs, false);
-    EXPECT_EQ(1u, buckets.size());
+
+    EXPECT_TRUE(buckets.find(eventKey) != buckets.end());
+    EXPECT_EQ(1u, buckets[eventKey].size());
     EXPECT_EQ(3ULL + bucketStartTimeNs + bucketSizeNs - eventStartTimeNs - 10,
-              buckets[0].mDuration);
+              buckets[eventKey][0].mDuration);
 
     const int64_t bucket0Duration = 3ULL + bucketStartTimeNs + bucketSizeNs - eventStartTimeNs - 10;
     const int64_t bucket1Duration = eventStartTimeNs + 10 - bucketStartTimeNs;
@@ -312,7 +323,7 @@ TEST(OringDurationTrackerTest, TestAnomalyDetection) {
     alert.set_number_of_buckets(2);
     alert.set_refractory_period_secs(1);
 
-    vector<DurationBucket> buckets;
+    unordered_map<HashableDimensionKey, vector<DurationBucket>> buckets;
     sp<MockConditionWizard> wizard = new NaggyMock<MockConditionWizard>();
     ConditionKey key1;
     key1["APP_BACKGROUND"] = "1:maps|";
@@ -321,8 +332,8 @@ TEST(OringDurationTrackerTest, TestAnomalyDetection) {
     uint64_t bucketSizeNs = 30 * NS_PER_SEC;
 
     sp<AnomalyTracker> anomalyTracker = new AnomalyTracker(alert);
-    OringDurationTracker tracker(kConfigKey, "metric", "event", wizard, 1, true /*nesting*/,
-                                 bucketStartTimeNs, bucketSizeNs, {anomalyTracker}, buckets);
+    OringDurationTracker tracker(kConfigKey, "metric", eventKey, wizard, 1, true /*nesting*/,
+                                 bucketStartTimeNs, bucketSizeNs, {anomalyTracker});
 
     tracker.noteStart("", true, eventStartTimeNs, key1);
     tracker.noteStop("", eventStartTimeNs + 10, false);
@@ -336,7 +347,7 @@ TEST(OringDurationTrackerTest, TestAnomalyDetection) {
     EXPECT_EQ(1u, anomalyTracker->mAlarms.size());
     EXPECT_EQ((long long)(51ULL * NS_PER_SEC),
               (long long)(anomalyTracker->mAlarms.begin()->second->timestampSec * NS_PER_SEC));
-    tracker.flushIfNeeded(eventStartTimeNs + 2 * bucketSizeNs + 25);
+    tracker.flushIfNeeded(eventStartTimeNs + 2 * bucketSizeNs + 25, &buckets);
     tracker.noteStop("", eventStartTimeNs + 2 * bucketSizeNs + 25, false);
     EXPECT_EQ(anomalyTracker->getSumOverPastBuckets("event"), (long long)(bucketSizeNs));
     EXPECT_EQ((long long)(eventStartTimeNs + 2 * bucketSizeNs + 25),

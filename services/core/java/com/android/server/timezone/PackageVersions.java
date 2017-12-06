@@ -21,10 +21,10 @@ package com.android.server.timezone;
  */
 final class PackageVersions {
 
-    final int mUpdateAppVersion;
-    final int mDataAppVersion;
+    final long mUpdateAppVersion;
+    final long mDataAppVersion;
 
-    PackageVersions(int updateAppVersion, int dataAppVersion) {
+    PackageVersions(long updateAppVersion, long dataAppVersion) {
         this.mUpdateAppVersion = updateAppVersion;
         this.mDataAppVersion = dataAppVersion;
     }
@@ -48,8 +48,8 @@ final class PackageVersions {
 
     @Override
     public int hashCode() {
-        int result = mUpdateAppVersion;
-        result = 31 * result + mDataAppVersion;
+        int result = Long.hashCode(mUpdateAppVersion);
+        result = 31 * result + Long.hashCode(mDataAppVersion);
         return result;
     }
 

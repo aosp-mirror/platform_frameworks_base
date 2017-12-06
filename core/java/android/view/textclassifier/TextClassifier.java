@@ -37,7 +37,7 @@ import java.lang.annotation.RetentionPolicy;
 public interface TextClassifier {
 
     /** @hide */
-    String DEFAULT_LOG_TAG = "TextClassifierImpl";
+    String DEFAULT_LOG_TAG = "androidtc";
 
     String TYPE_UNKNOWN = "";
     String TYPE_OTHER = "other";

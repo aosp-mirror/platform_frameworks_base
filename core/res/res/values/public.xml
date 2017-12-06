@@ -2854,6 +2854,10 @@
       <public name="compileSdkVersionCodename" />
       <public name="screenReaderFocusable" />
       <public name="buttonCornerRadius" />
+      <public name="versionCodeMajor" />
+      <public name="versionMajor" />
+      <!-- @hide @SystemApi -->
+      <public name="isVrOnly"/>
     </public-group>
 
     <public-group type="style" first-id="0x010302e0">

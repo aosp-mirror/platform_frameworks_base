@@ -156,9 +156,10 @@ public class SystemImpl implements SystemInterface {
         return mWebViewProviderPackages;
     }
 
-    public int getFactoryPackageVersion(String packageName) throws NameNotFoundException {
+    public long getFactoryPackageVersion(String packageName) throws NameNotFoundException {
         PackageManager pm = AppGlobals.getInitialApplication().getPackageManager();
-        return pm.getPackageInfo(packageName, PackageManager.MATCH_FACTORY_ONLY).versionCode;
+        return pm.getPackageInfo(packageName, PackageManager.MATCH_FACTORY_ONLY)
+                .getLongVersionCode();
     }
 
     /**

@@ -164,12 +164,6 @@ interface IWifiManager
     void enableAggressiveHandover(int enabled);
     int getAggressiveHandover();
 
-    void setAllowScansWithTraffic(int enabled);
-    int getAllowScansWithTraffic();
-
-    boolean setEnableAutoJoinWhenAssociated(boolean enabled);
-    boolean getEnableAutoJoinWhenAssociated();
-
     void enableWifiConnectivityManager(boolean enabled);
 
     WifiConnectionStatistics getConnectionStatistics();

@@ -70,14 +70,14 @@ bool handleMetricWithConditions(
         unordered_map<int, std::vector<int>>& conditionToMetricMap) {
     auto condition_it = conditionTrackerMap.find(condition);
     if (condition_it == conditionTrackerMap.end()) {
-        ALOGW("cannot find Condition \"%s\" in the config", condition.c_str());
+        ALOGW("cannot find Predicate \"%s\" in the config", condition.c_str());
         return false;
     }
 
     for (const auto& link : links) {
         auto it = conditionTrackerMap.find(link.condition());
         if (it == conditionTrackerMap.end()) {
-            ALOGW("cannot find Condition \"%s\" in the config", link.condition().c_str());
+            ALOGW("cannot find Predicate \"%s\" in the config", link.condition().c_str());
             return false;
         }
         allConditionTrackers[condition_it->second]->setSliced(true);
@@ -142,31 +142,31 @@ bool initConditions(const ConfigKey& key, const StatsdConfig& config,
                     unordered_map<string, int>& conditionTrackerMap,
                     vector<sp<ConditionTracker>>& allConditionTrackers,
                     unordered_map<int, std::vector<int>>& trackerToConditionMap) {
-    vector<Condition> conditionConfigs;
-    const int conditionTrackerCount = config.condition_size();
+    vector<Predicate> conditionConfigs;
+    const int conditionTrackerCount = config.predicate_size();
     conditionConfigs.reserve(conditionTrackerCount);
     allConditionTrackers.reserve(conditionTrackerCount);
 
     for (int i = 0; i < conditionTrackerCount; i++) {
-        const Condition& condition = config.condition(i);
+        const Predicate& condition = config.predicate(i);
         int index = allConditionTrackers.size();
         switch (condition.contents_case()) {
-            case Condition::ContentsCase::kSimpleCondition: {
+            case Predicate::ContentsCase::kSimplePredicate: {
                 allConditionTrackers.push_back(new SimpleConditionTracker(
-                        key, condition.name(), index, condition.simple_condition(), logTrackerMap));
+                        key, condition.name(), index, condition.simple_predicate(), logTrackerMap));
                 break;
             }
-            case Condition::ContentsCase::kCombination: {
+            case Predicate::ContentsCase::kCombination: {
                 allConditionTrackers.push_back(
                         new CombinationConditionTracker(condition.name(), index));
                 break;
             }
             default:
-                ALOGE("Condition \"%s\" malformed", condition.name().c_str());
+                ALOGE("Predicate \"%s\" malformed", condition.name().c_str());
                 return false;
         }
         if (conditionTrackerMap.find(condition.name()) != conditionTrackerMap.end()) {
-            ALOGE("Duplicate Condition found!");
+            ALOGE("Duplicate Predicate found!");
             return false;
         }
         conditionTrackerMap[condition.name()] = index;
@@ -254,43 +254,43 @@ bool initMetrics(const ConfigKey& key, const StatsdConfig& config,
             return false;
         }
 
-        const Condition& durationWhat = config.condition(what_it->second);
+        const Predicate& durationWhat = config.predicate(what_it->second);
 
-        if (durationWhat.contents_case() != Condition::ContentsCase::kSimpleCondition) {
+        if (durationWhat.contents_case() != Predicate::ContentsCase::kSimplePredicate) {
             ALOGE("DurationMetric's \"what\" must be a simple condition");
             return false;
         }
 
-        const auto& simpleCondition = durationWhat.simple_condition();
+        const auto& simplePredicate = durationWhat.simple_predicate();
 
-        bool nesting = simpleCondition.count_nesting();
+        bool nesting = simplePredicate.count_nesting();
 
         int trackerIndices[3] = {-1, -1, -1};
-        if (!simpleCondition.has_start() ||
-            !handleMetricWithLogTrackers(simpleCondition.start(), metricIndex,
+        if (!simplePredicate.has_start() ||
+            !handleMetricWithLogTrackers(simplePredicate.start(), metricIndex,
                                          metric.dimension_size() > 0, allAtomMatchers,
                                          logTrackerMap, trackerToMetricMap, trackerIndices[0])) {
             ALOGE("Duration metrics must specify a valid the start event matcher");
             return false;
         }
 
-        if (simpleCondition.has_stop() &&
-            !handleMetricWithLogTrackers(simpleCondition.stop(), metricIndex,
+        if (simplePredicate.has_stop() &&
+            !handleMetricWithLogTrackers(simplePredicate.stop(), metricIndex,
                                          metric.dimension_size() > 0, allAtomMatchers,
                                          logTrackerMap, trackerToMetricMap, trackerIndices[1])) {
             return false;
         }
 
-        if (simpleCondition.has_stop_all() &&
-            !handleMetricWithLogTrackers(simpleCondition.stop_all(), metricIndex,
+        if (simplePredicate.has_stop_all() &&
+            !handleMetricWithLogTrackers(simplePredicate.stop_all(), metricIndex,
                                          metric.dimension_size() > 0, allAtomMatchers,
                                          logTrackerMap, trackerToMetricMap, trackerIndices[2])) {
             return false;
         }
 
         vector<KeyMatcher> internalDimension;
-        internalDimension.insert(internalDimension.begin(), simpleCondition.dimension().begin(),
-                                 simpleCondition.dimension().end());
+        internalDimension.insert(internalDimension.begin(), simplePredicate.dimension().begin(),
+                                 simplePredicate.dimension().end());
 
         int conditionIndex = -1;
 

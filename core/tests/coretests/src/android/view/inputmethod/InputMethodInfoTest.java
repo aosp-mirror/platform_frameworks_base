@@ -68,6 +68,17 @@ public class InputMethodInfoTest {
         assertThat(clone.supportsSwitchingToNextInputMethod(), is(true));
     }
 
+    @Test
+    public void testIsVrOnly() throws Exception {
+        final InputMethodInfo imi = buildInputMethodForTest(R.xml.ime_meta_vr_only);
+
+        assertThat(imi.isVrOnly(), is(true));
+
+        final InputMethodInfo clone = cloneViaParcel(imi);
+
+        assertThat(clone.isVrOnly(), is(true));
+    }
+
     private InputMethodInfo buildInputMethodForTest(final @XmlRes int metaDataRes)
             throws Exception {
         final Context context = InstrumentationRegistry.getContext();

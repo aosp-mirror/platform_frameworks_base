@@ -118,7 +118,7 @@ main(int argc, const char** argv)
 
 #else
 int
-main(int argc, char** argv)
+main(int, char**)
 {
     printf ("test_backup_helper built without the tests\n");
     return 0;

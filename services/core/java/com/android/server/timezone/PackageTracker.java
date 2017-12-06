@@ -445,8 +445,8 @@ public class PackageTracker {
     }
 
     private PackageVersions lookupInstalledPackageVersions() {
-        int updatePackageVersion;
-        int dataPackageVersion;
+        long updatePackageVersion;
+        long dataPackageVersion;
         try {
             updatePackageVersion =
                     mPackageManagerHelper.getInstalledPackageVersion(mUpdateAppPackageName);

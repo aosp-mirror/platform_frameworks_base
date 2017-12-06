@@ -27,6 +27,7 @@ import android.service.procstats.ProcessStatsProto;
 import android.service.procstats.ProcessStatsServiceDumpProto;
 import android.util.ArrayMap;
 import android.util.AtomicFile;
+import android.util.LongSparseArray;
 import android.util.Slog;
 import android.util.SparseArray;
 import android.util.TimeUtils;
@@ -120,12 +121,12 @@ public final class ProcessStatsService extends IProcessStats.Stub {
     }
 
     public ProcessState getProcessStateLocked(String packageName,
-            int uid, int versionCode, String processName) {
+            int uid, long versionCode, String processName) {
         return mProcessStats.getProcessStateLocked(packageName, uid, versionCode, processName);
     }
 
     public ServiceState getServiceStateLocked(String packageName, int uid,
-            int versionCode, String processName, String className) {
+            long versionCode, String processName, String className) {
         return mProcessStats.getServiceStateLocked(packageName, uid, versionCode, processName,
                 className);
     }
@@ -150,12 +151,13 @@ public final class ProcessStatsService extends IProcessStats.Stub {
             }
             mProcessStats.mMemFactor = memFactor;
             mProcessStats.mStartTime = now;
-            final ArrayMap<String, SparseArray<SparseArray<ProcessStats.PackageState>>> pmap
+            final ArrayMap<String, SparseArray<LongSparseArray<ProcessStats.PackageState>>> pmap
                     = mProcessStats.mPackages.getMap();
             for (int ipkg=pmap.size()-1; ipkg>=0; ipkg--) {
-                final SparseArray<SparseArray<ProcessStats.PackageState>> uids = pmap.valueAt(ipkg);
+                final SparseArray<LongSparseArray<ProcessStats.PackageState>> uids =
+                        pmap.valueAt(ipkg);
                 for (int iuid=uids.size()-1; iuid>=0; iuid--) {
-                    final SparseArray<ProcessStats.PackageState> vers = uids.valueAt(iuid);
+                    final LongSparseArray<ProcessStats.PackageState> vers = uids.valueAt(iuid);
                     for (int iver=vers.size()-1; iver>=0; iver--) {
                         final ProcessStats.PackageState pkg = vers.valueAt(iver);
                         final ArrayMap<String, ServiceState> services = pkg.mServices;
@@ -308,17 +310,17 @@ public final class ProcessStatsService extends IProcessStats.Stub {
                             Slog.w(TAG, "  Uid " + uids.keyAt(iu) + ": " + uids.valueAt(iu));
                         }
                     }
-                    ArrayMap<String, SparseArray<SparseArray<ProcessStats.PackageState>>> pkgMap
+                    ArrayMap<String, SparseArray<LongSparseArray<ProcessStats.PackageState>>> pkgMap
                             = stats.mPackages.getMap();
                     final int NPKG = pkgMap.size();
                     for (int ip=0; ip<NPKG; ip++) {
                         Slog.w(TAG, "Package: " + pkgMap.keyAt(ip));
-                        SparseArray<SparseArray<ProcessStats.PackageState>> uids
+                        SparseArray<LongSparseArray<ProcessStats.PackageState>> uids
                                 = pkgMap.valueAt(ip);
                         final int NUID = uids.size();
                         for (int iu=0; iu<NUID; iu++) {
                             Slog.w(TAG, "  Uid: " + uids.keyAt(iu));
-                            SparseArray<ProcessStats.PackageState> vers = uids.valueAt(iu);
+                            LongSparseArray<ProcessStats.PackageState> vers = uids.valueAt(iu);
                             final int NVERS = vers.size();
                             for (int iv=0; iv<NVERS; iv++) {
                                 Slog.w(TAG, "    Vers: " + vers.keyAt(iv));

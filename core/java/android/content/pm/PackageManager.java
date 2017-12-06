@@ -42,6 +42,7 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.IntentSender;
 import android.content.pm.PackageParser.PackageParserException;
+import android.content.pm.dex.ArtManager;
 import android.content.res.Resources;
 import android.content.res.XmlResourceParser;
 import android.graphics.Rect;
@@ -2634,11 +2635,20 @@ public abstract class PackageManager {
 
     /**
      * Extra field name for the version code of a package pending verification.
+     * @deprecated Use {@link #EXTRA_VERIFICATION_LONG_VERSION_CODE} instead.
+     * @hide
+     */
+    @Deprecated
+    public static final String EXTRA_VERIFICATION_VERSION_CODE
+            = "android.content.pm.extra.VERIFICATION_VERSION_CODE";
+
+    /**
+     * Extra field name for the long version code of a package pending verification.
      *
      * @hide
      */
-    public static final String EXTRA_VERIFICATION_VERSION_CODE
-            = "android.content.pm.extra.VERIFICATION_VERSION_CODE";
+    public static final String EXTRA_VERIFICATION_LONG_VERSION_CODE =
+            "android.content.pm.extra.VERIFICATION_LONG_VERSION_CODE";
 
     /**
      * Extra field name for the ID of a intent filter pending verification.
@@ -5842,4 +5852,14 @@ public abstract class PackageManager {
     @SystemApi
     public abstract void registerDexModule(String dexModulePath,
             @Nullable DexModuleRegisterCallback callback);
+
+    /**
+     * Returns the {@link ArtManager} associated with this package manager.
+     *
+     * @hide
+     */
+    @SystemApi
+    public @NonNull ArtManager getArtManager() {
+        throw new UnsupportedOperationException("getArtManager not implemented in subclass");
+    }
 }

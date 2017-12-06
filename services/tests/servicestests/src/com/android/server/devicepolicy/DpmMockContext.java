@@ -103,7 +103,7 @@ public class DpmMockContext extends MockContext {
             long callingIdentity = clearCallingIdentity();
             Throwable throwableToPropagate = null;
             try {
-                action.run();
+                action.runOrThrow();
             } catch (Throwable throwable) {
                 throwableToPropagate = throwable;
             } finally {

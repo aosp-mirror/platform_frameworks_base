@@ -30,21 +30,21 @@ namespace statsd {
 
 const ConfigKey kConfigKey(0, "test");
 
-SimpleCondition getWakeLockHeldCondition(bool countNesting, bool defaultFalse,
+SimplePredicate getWakeLockHeldCondition(bool countNesting, bool defaultFalse,
                                          bool outputSlicedUid) {
-    SimpleCondition simpleCondition;
-    simpleCondition.set_start("WAKE_LOCK_ACQUIRE");
-    simpleCondition.set_stop("WAKE_LOCK_RELEASE");
-    simpleCondition.set_stop_all("RELEASE_ALL");
+    SimplePredicate simplePredicate;
+    simplePredicate.set_start("WAKE_LOCK_ACQUIRE");
+    simplePredicate.set_stop("WAKE_LOCK_RELEASE");
+    simplePredicate.set_stop_all("RELEASE_ALL");
     if (outputSlicedUid) {
-        KeyMatcher* keyMatcher = simpleCondition.add_dimension();
+        KeyMatcher* keyMatcher = simplePredicate.add_dimension();
         keyMatcher->set_key(1);
     }
 
-    simpleCondition.set_count_nesting(countNesting);
-    simpleCondition.set_initial_value(defaultFalse ? SimpleCondition_InitialValue_FALSE
-                                                       : SimpleCondition_InitialValue_UNKNOWN);
-    return simpleCondition;
+    simplePredicate.set_count_nesting(countNesting);
+    simplePredicate.set_initial_value(defaultFalse ? SimplePredicate_InitialValue_FALSE
+                                                       : SimplePredicate_InitialValue_UNKNOWN);
+    return simplePredicate;
 }
 
 void makeWakeLockEvent(LogEvent* event, int uid, const string& wl, int acquire) {
@@ -68,18 +68,18 @@ map<string, HashableDimensionKey> getWakeLockQueryKey(int key, int uid,
 }
 
 TEST(SimpleConditionTrackerTest, TestNonSlicedCondition) {
-    SimpleCondition simpleCondition;
-    simpleCondition.set_start("SCREEN_TURNED_ON");
-    simpleCondition.set_stop("SCREEN_TURNED_OFF");
-    simpleCondition.set_count_nesting(false);
-    simpleCondition.set_initial_value(SimpleCondition_InitialValue_UNKNOWN);
+    SimplePredicate simplePredicate;
+    simplePredicate.set_start("SCREEN_TURNED_ON");
+    simplePredicate.set_stop("SCREEN_TURNED_OFF");
+    simplePredicate.set_count_nesting(false);
+    simplePredicate.set_initial_value(SimplePredicate_InitialValue_UNKNOWN);
 
     unordered_map<string, int> trackerNameIndexMap;
     trackerNameIndexMap["SCREEN_TURNED_ON"] = 0;
     trackerNameIndexMap["SCREEN_TURNED_OFF"] = 1;
 
     SimpleConditionTracker conditionTracker(kConfigKey, "SCREEN_IS_ON", 0 /*tracker index*/,
-                                            simpleCondition, trackerNameIndexMap);
+                                            simplePredicate, trackerNameIndexMap);
 
     LogEvent event(1 /*tagId*/, 0 /*timestamp*/);
 
@@ -87,11 +87,11 @@ TEST(SimpleConditionTrackerTest, TestNonSlicedCondition) {
     matcherState.push_back(MatchingState::kNotMatched);
     matcherState.push_back(MatchingState::kNotMatched);
 
-    vector<sp<ConditionTracker>> allConditions;
+    vector<sp<ConditionTracker>> allPredicates;
     vector<ConditionState> conditionCache(1, ConditionState::kNotEvaluated);
     vector<bool> changedCache(1, false);
 
-    conditionTracker.evaluateCondition(event, matcherState, allConditions, conditionCache,
+    conditionTracker.evaluateCondition(event, matcherState, allPredicates, conditionCache,
                                        changedCache);
     // not matched start or stop. condition doesn't change
     EXPECT_EQ(ConditionState::kUnknown, conditionCache[0]);
@@ -104,7 +104,7 @@ TEST(SimpleConditionTrackerTest, TestNonSlicedCondition) {
     conditionCache[0] = ConditionState::kNotEvaluated;
     changedCache[0] = false;
 
-    conditionTracker.evaluateCondition(event, matcherState, allConditions, conditionCache,
+    conditionTracker.evaluateCondition(event, matcherState, allPredicates, conditionCache,
                                        changedCache);
     // now condition should change to true.
     EXPECT_EQ(ConditionState::kTrue, conditionCache[0]);
@@ -117,7 +117,7 @@ TEST(SimpleConditionTrackerTest, TestNonSlicedCondition) {
     conditionCache[0] = ConditionState::kNotEvaluated;
     changedCache[0] = false;
 
-    conditionTracker.evaluateCondition(event, matcherState, allConditions, conditionCache,
+    conditionTracker.evaluateCondition(event, matcherState, allPredicates, conditionCache,
                                        changedCache);
     EXPECT_EQ(ConditionState::kTrue, conditionCache[0]);
     EXPECT_FALSE(changedCache[0]);
@@ -129,7 +129,7 @@ TEST(SimpleConditionTrackerTest, TestNonSlicedCondition) {
     conditionCache[0] = ConditionState::kNotEvaluated;
     changedCache[0] = false;
 
-    conditionTracker.evaluateCondition(event, matcherState, allConditions, conditionCache,
+    conditionTracker.evaluateCondition(event, matcherState, allPredicates, conditionCache,
                                        changedCache);
 
     // condition changes to false.
@@ -143,7 +143,7 @@ TEST(SimpleConditionTrackerTest, TestNonSlicedCondition) {
     conditionCache[0] = ConditionState::kNotEvaluated;
     changedCache[0] = false;
 
-    conditionTracker.evaluateCondition(event, matcherState, allConditions, conditionCache,
+    conditionTracker.evaluateCondition(event, matcherState, allPredicates, conditionCache,
                                        changedCache);
     // condition should still be false. not changed.
     EXPECT_EQ(ConditionState::kFalse, conditionCache[0]);
@@ -151,17 +151,17 @@ TEST(SimpleConditionTrackerTest, TestNonSlicedCondition) {
 }
 
 TEST(SimpleConditionTrackerTest, TestNonSlicedConditionNestCounting) {
-    SimpleCondition simpleCondition;
-    simpleCondition.set_start("SCREEN_TURNED_ON");
-    simpleCondition.set_stop("SCREEN_TURNED_OFF");
-    simpleCondition.set_count_nesting(true);
+    SimplePredicate simplePredicate;
+    simplePredicate.set_start("SCREEN_TURNED_ON");
+    simplePredicate.set_stop("SCREEN_TURNED_OFF");
+    simplePredicate.set_count_nesting(true);
 
     unordered_map<string, int> trackerNameIndexMap;
     trackerNameIndexMap["SCREEN_TURNED_ON"] = 0;
     trackerNameIndexMap["SCREEN_TURNED_OFF"] = 1;
 
     SimpleConditionTracker conditionTracker(kConfigKey, "SCREEN_IS_ON",
-                                            0 /*condition tracker index*/, simpleCondition,
+                                            0 /*condition tracker index*/, simplePredicate,
                                             trackerNameIndexMap);
 
     LogEvent event(1 /*tagId*/, 0 /*timestamp*/);
@@ -170,11 +170,11 @@ TEST(SimpleConditionTrackerTest, TestNonSlicedConditionNestCounting) {
     vector<MatchingState> matcherState;
     matcherState.push_back(MatchingState::kMatched);
     matcherState.push_back(MatchingState::kNotMatched);
-    vector<sp<ConditionTracker>> allConditions;
+    vector<sp<ConditionTracker>> allPredicates;
     vector<ConditionState> conditionCache(1, ConditionState::kNotEvaluated);
     vector<bool> changedCache(1, false);
 
-    conditionTracker.evaluateCondition(event, matcherState, allConditions, conditionCache,
+    conditionTracker.evaluateCondition(event, matcherState, allPredicates, conditionCache,
                                        changedCache);
 
     EXPECT_EQ(ConditionState::kTrue, conditionCache[0]);
@@ -187,7 +187,7 @@ TEST(SimpleConditionTrackerTest, TestNonSlicedConditionNestCounting) {
     conditionCache[0] = ConditionState::kNotEvaluated;
     changedCache[0] = false;
 
-    conditionTracker.evaluateCondition(event, matcherState, allConditions, conditionCache,
+    conditionTracker.evaluateCondition(event, matcherState, allPredicates, conditionCache,
                                        changedCache);
 
     EXPECT_EQ(ConditionState::kTrue, conditionCache[0]);
@@ -200,7 +200,7 @@ TEST(SimpleConditionTrackerTest, TestNonSlicedConditionNestCounting) {
     conditionCache[0] = ConditionState::kNotEvaluated;
     changedCache[0] = false;
 
-    conditionTracker.evaluateCondition(event, matcherState, allConditions, conditionCache,
+    conditionTracker.evaluateCondition(event, matcherState, allPredicates, conditionCache,
                                        changedCache);
     // result should still be true
     EXPECT_EQ(ConditionState::kTrue, conditionCache[0]);
@@ -213,7 +213,7 @@ TEST(SimpleConditionTrackerTest, TestNonSlicedConditionNestCounting) {
     conditionCache[0] = ConditionState::kNotEvaluated;
     changedCache[0] = false;
 
-    conditionTracker.evaluateCondition(event, matcherState, allConditions, conditionCache,
+    conditionTracker.evaluateCondition(event, matcherState, allPredicates, conditionCache,
                                        changedCache);
     // result should still be true
     EXPECT_EQ(ConditionState::kFalse, conditionCache[0]);
@@ -221,7 +221,7 @@ TEST(SimpleConditionTrackerTest, TestNonSlicedConditionNestCounting) {
 }
 
 TEST(SimpleConditionTrackerTest, TestSlicedCondition) {
-    SimpleCondition simpleCondition = getWakeLockHeldCondition(
+    SimplePredicate simplePredicate = getWakeLockHeldCondition(
             true /*nesting*/, true /*default to false*/, true /*output slice by uid*/);
     string conditionName = "WL_HELD_BY_UID2";
 
@@ -231,7 +231,7 @@ TEST(SimpleConditionTrackerTest, TestSlicedCondition) {
     trackerNameIndexMap["RELEASE_ALL"] = 2;
 
     SimpleConditionTracker conditionTracker(kConfigKey, conditionName,
-                                            0 /*condition tracker index*/, simpleCondition,
+                                            0 /*condition tracker index*/, simplePredicate,
                                             trackerNameIndexMap);
     int uid = 111;
 
@@ -243,11 +243,11 @@ TEST(SimpleConditionTrackerTest, TestSlicedCondition) {
     matcherState.push_back(MatchingState::kMatched);
     matcherState.push_back(MatchingState::kNotMatched);
     matcherState.push_back(MatchingState::kNotMatched);
-    vector<sp<ConditionTracker>> allConditions;
+    vector<sp<ConditionTracker>> allPredicates;
     vector<ConditionState> conditionCache(1, ConditionState::kNotEvaluated);
     vector<bool> changedCache(1, false);
 
-    conditionTracker.evaluateCondition(event, matcherState, allConditions, conditionCache,
+    conditionTracker.evaluateCondition(event, matcherState, allPredicates, conditionCache,
                                        changedCache);
 
     EXPECT_EQ(1UL, conditionTracker.mSlicedConditionState.size());
@@ -257,7 +257,7 @@ TEST(SimpleConditionTrackerTest, TestSlicedCondition) {
     const auto queryKey = getWakeLockQueryKey(1, uid, conditionName);
     conditionCache[0] = ConditionState::kNotEvaluated;
 
-    conditionTracker.isConditionMet(queryKey, allConditions, conditionCache);
+    conditionTracker.isConditionMet(queryKey, allPredicates, conditionCache);
     EXPECT_EQ(ConditionState::kTrue, conditionCache[0]);
 
     // another wake lock acquired by this uid
@@ -268,7 +268,7 @@ TEST(SimpleConditionTrackerTest, TestSlicedCondition) {
     matcherState.push_back(MatchingState::kNotMatched);
     conditionCache[0] = ConditionState::kNotEvaluated;
     changedCache[0] = false;
-    conditionTracker.evaluateCondition(event2, matcherState, allConditions, conditionCache,
+    conditionTracker.evaluateCondition(event2, matcherState, allPredicates, conditionCache,
                                        changedCache);
     EXPECT_FALSE(changedCache[0]);
 
@@ -280,7 +280,7 @@ TEST(SimpleConditionTrackerTest, TestSlicedCondition) {
     matcherState.push_back(MatchingState::kMatched);
     conditionCache[0] = ConditionState::kNotEvaluated;
     changedCache[0] = false;
-    conditionTracker.evaluateCondition(event3, matcherState, allConditions, conditionCache,
+    conditionTracker.evaluateCondition(event3, matcherState, allPredicates, conditionCache,
                                        changedCache);
     // nothing changes, because wake lock 2 is still held for this uid
     EXPECT_FALSE(changedCache[0]);
@@ -292,19 +292,19 @@ TEST(SimpleConditionTrackerTest, TestSlicedCondition) {
     matcherState.push_back(MatchingState::kMatched);
     conditionCache[0] = ConditionState::kNotEvaluated;
     changedCache[0] = false;
-    conditionTracker.evaluateCondition(event4, matcherState, allConditions, conditionCache,
+    conditionTracker.evaluateCondition(event4, matcherState, allPredicates, conditionCache,
                                        changedCache);
     EXPECT_EQ(0UL, conditionTracker.mSlicedConditionState.size());
     EXPECT_TRUE(changedCache[0]);
 
     // query again
     conditionCache[0] = ConditionState::kNotEvaluated;
-    conditionTracker.isConditionMet(queryKey, allConditions, conditionCache);
+    conditionTracker.isConditionMet(queryKey, allPredicates, conditionCache);
     EXPECT_EQ(ConditionState::kFalse, conditionCache[0]);
 }
 
 TEST(SimpleConditionTrackerTest, TestSlicedWithNoOutputDim) {
-    SimpleCondition simpleCondition = getWakeLockHeldCondition(
+    SimplePredicate simplePredicate = getWakeLockHeldCondition(
             true /*nesting*/, true /*default to false*/, false /*slice output by uid*/);
     string conditionName = "WL_HELD";
 
@@ -314,7 +314,7 @@ TEST(SimpleConditionTrackerTest, TestSlicedWithNoOutputDim) {
     trackerNameIndexMap["RELEASE_ALL"] = 2;
 
     SimpleConditionTracker conditionTracker(kConfigKey, conditionName,
-                                            0 /*condition tracker index*/, simpleCondition,
+                                            0 /*condition tracker index*/, simplePredicate,
                                             trackerNameIndexMap);
     int uid1 = 111;
     string uid1_wl1 = "wl1_1";
@@ -329,11 +329,11 @@ TEST(SimpleConditionTrackerTest, TestSlicedWithNoOutputDim) {
     matcherState.push_back(MatchingState::kMatched);
     matcherState.push_back(MatchingState::kNotMatched);
     matcherState.push_back(MatchingState::kNotMatched);
-    vector<sp<ConditionTracker>> allConditions;
+    vector<sp<ConditionTracker>> allPredicates;
     vector<ConditionState> conditionCache(1, ConditionState::kNotEvaluated);
     vector<bool> changedCache(1, false);
 
-    conditionTracker.evaluateCondition(event, matcherState, allConditions, conditionCache,
+    conditionTracker.evaluateCondition(event, matcherState, allPredicates, conditionCache,
                                        changedCache);
 
     EXPECT_EQ(1UL, conditionTracker.mSlicedConditionState.size());
@@ -343,7 +343,7 @@ TEST(SimpleConditionTrackerTest, TestSlicedWithNoOutputDim) {
     map<string, HashableDimensionKey> queryKey;
     conditionCache[0] = ConditionState::kNotEvaluated;
 
-    conditionTracker.isConditionMet(queryKey, allConditions, conditionCache);
+    conditionTracker.isConditionMet(queryKey, allPredicates, conditionCache);
     EXPECT_EQ(ConditionState::kTrue, conditionCache[0]);
 
     // another wake lock acquired by this uid
@@ -354,7 +354,7 @@ TEST(SimpleConditionTrackerTest, TestSlicedWithNoOutputDim) {
     matcherState.push_back(MatchingState::kNotMatched);
     conditionCache[0] = ConditionState::kNotEvaluated;
     changedCache[0] = false;
-    conditionTracker.evaluateCondition(event2, matcherState, allConditions, conditionCache,
+    conditionTracker.evaluateCondition(event2, matcherState, allPredicates, conditionCache,
                                        changedCache);
     EXPECT_FALSE(changedCache[0]);
 
@@ -366,7 +366,7 @@ TEST(SimpleConditionTrackerTest, TestSlicedWithNoOutputDim) {
     matcherState.push_back(MatchingState::kMatched);
     conditionCache[0] = ConditionState::kNotEvaluated;
     changedCache[0] = false;
-    conditionTracker.evaluateCondition(event3, matcherState, allConditions, conditionCache,
+    conditionTracker.evaluateCondition(event3, matcherState, allPredicates, conditionCache,
                                        changedCache);
     // nothing changes, because uid2 is still holding wl.
     EXPECT_FALSE(changedCache[0]);
@@ -378,19 +378,19 @@ TEST(SimpleConditionTrackerTest, TestSlicedWithNoOutputDim) {
     matcherState.push_back(MatchingState::kMatched);
     conditionCache[0] = ConditionState::kNotEvaluated;
     changedCache[0] = false;
-    conditionTracker.evaluateCondition(event4, matcherState, allConditions, conditionCache,
+    conditionTracker.evaluateCondition(event4, matcherState, allPredicates, conditionCache,
                                        changedCache);
     EXPECT_EQ(0UL, conditionTracker.mSlicedConditionState.size());
     EXPECT_TRUE(changedCache[0]);
 
     // query again
     conditionCache[0] = ConditionState::kNotEvaluated;
-    conditionTracker.isConditionMet(queryKey, allConditions, conditionCache);
+    conditionTracker.isConditionMet(queryKey, allPredicates, conditionCache);
     EXPECT_EQ(ConditionState::kFalse, conditionCache[0]);
 }
 
 TEST(SimpleConditionTrackerTest, TestStopAll) {
-    SimpleCondition simpleCondition = getWakeLockHeldCondition(
+    SimplePredicate simplePredicate = getWakeLockHeldCondition(
             true /*nesting*/, true /*default to false*/, true /*output slice by uid*/);
     string conditionName = "WL_HELD_BY_UID3";
 
@@ -400,7 +400,7 @@ TEST(SimpleConditionTrackerTest, TestStopAll) {
     trackerNameIndexMap["RELEASE_ALL"] = 2;
 
     SimpleConditionTracker conditionTracker(kConfigKey, conditionName,
-                                            0 /*condition tracker index*/, simpleCondition,
+                                            0 /*condition tracker index*/, simplePredicate,
                                             trackerNameIndexMap);
     int uid1 = 111;
     int uid2 = 222;
@@ -413,11 +413,11 @@ TEST(SimpleConditionTrackerTest, TestStopAll) {
     matcherState.push_back(MatchingState::kMatched);
     matcherState.push_back(MatchingState::kNotMatched);
     matcherState.push_back(MatchingState::kNotMatched);
-    vector<sp<ConditionTracker>> allConditions;
+    vector<sp<ConditionTracker>> allPredicates;
     vector<ConditionState> conditionCache(1, ConditionState::kNotEvaluated);
     vector<bool> changedCache(1, false);
 
-    conditionTracker.evaluateCondition(event, matcherState, allConditions, conditionCache,
+    conditionTracker.evaluateCondition(event, matcherState, allPredicates, conditionCache,
                                        changedCache);
 
     EXPECT_EQ(1UL, conditionTracker.mSlicedConditionState.size());
@@ -427,7 +427,7 @@ TEST(SimpleConditionTrackerTest, TestStopAll) {
     const auto queryKey = getWakeLockQueryKey(1, uid1, conditionName);
     conditionCache[0] = ConditionState::kNotEvaluated;
 
-    conditionTracker.isConditionMet(queryKey, allConditions, conditionCache);
+    conditionTracker.isConditionMet(queryKey, allPredicates, conditionCache);
     EXPECT_EQ(ConditionState::kTrue, conditionCache[0]);
 
     // another wake lock acquired by uid2
@@ -439,7 +439,7 @@ TEST(SimpleConditionTrackerTest, TestStopAll) {
     matcherState.push_back(MatchingState::kNotMatched);
     conditionCache[0] = ConditionState::kNotEvaluated;
     changedCache[0] = false;
-    conditionTracker.evaluateCondition(event2, matcherState, allConditions, conditionCache,
+    conditionTracker.evaluateCondition(event2, matcherState, allPredicates, conditionCache,
                                        changedCache);
     EXPECT_EQ(2UL, conditionTracker.mSlicedConditionState.size());
     EXPECT_TRUE(changedCache[0]);
@@ -448,7 +448,7 @@ TEST(SimpleConditionTrackerTest, TestStopAll) {
     const auto queryKey2 = getWakeLockQueryKey(1, uid2, conditionName);
     conditionCache[0] = ConditionState::kNotEvaluated;
 
-    conditionTracker.isConditionMet(queryKey, allConditions, conditionCache);
+    conditionTracker.isConditionMet(queryKey, allPredicates, conditionCache);
     EXPECT_EQ(ConditionState::kTrue, conditionCache[0]);
 
 
@@ -461,7 +461,7 @@ TEST(SimpleConditionTrackerTest, TestStopAll) {
 
     conditionCache[0] = ConditionState::kNotEvaluated;
     changedCache[0] = false;
-    conditionTracker.evaluateCondition(event3, matcherState, allConditions, conditionCache,
+    conditionTracker.evaluateCondition(event3, matcherState, allPredicates, conditionCache,
                                        changedCache);
     EXPECT_TRUE(changedCache[0]);
     EXPECT_EQ(0UL, conditionTracker.mSlicedConditionState.size());
@@ -470,14 +470,14 @@ TEST(SimpleConditionTrackerTest, TestStopAll) {
     const auto queryKey3 = getWakeLockQueryKey(1, uid1, conditionName);
     conditionCache[0] = ConditionState::kNotEvaluated;
 
-    conditionTracker.isConditionMet(queryKey, allConditions, conditionCache);
+    conditionTracker.isConditionMet(queryKey, allPredicates, conditionCache);
     EXPECT_EQ(ConditionState::kFalse, conditionCache[0]);
 
     // TEST QUERY
     const auto queryKey4 = getWakeLockQueryKey(1, uid2, conditionName);
     conditionCache[0] = ConditionState::kNotEvaluated;
 
-    conditionTracker.isConditionMet(queryKey, allConditions, conditionCache);
+    conditionTracker.isConditionMet(queryKey, allPredicates, conditionCache);
     EXPECT_EQ(ConditionState::kFalse, conditionCache[0]);
 }
 

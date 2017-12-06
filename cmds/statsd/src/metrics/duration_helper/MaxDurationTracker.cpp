@@ -28,10 +28,9 @@ MaxDurationTracker::MaxDurationTracker(const ConfigKey& key, const string& name,
                                        const HashableDimensionKey& eventKey,
                                        sp<ConditionWizard> wizard, int conditionIndex, bool nesting,
                                        uint64_t currentBucketStartNs, uint64_t bucketSizeNs,
-                                       const std::vector<sp<AnomalyTracker>>& anomalyTrackers,
-                                       std::vector<DurationBucket>& bucket)
+                                       const std::vector<sp<AnomalyTracker>>& anomalyTrackers)
     : DurationTracker(key, name, eventKey, wizard, conditionIndex, nesting, currentBucketStartNs,
-                      bucketSizeNs, anomalyTrackers, bucket) {
+                      bucketSizeNs, anomalyTrackers) {
 }
 
 bool MaxDurationTracker::hitGuardRail(const HashableDimensionKey& newKey) {
@@ -145,7 +144,8 @@ void MaxDurationTracker::noteStopAll(const uint64_t eventTime) {
     }
 }
 
-bool MaxDurationTracker::flushIfNeeded(uint64_t eventTime) {
+bool MaxDurationTracker::flushIfNeeded(
+        uint64_t eventTime, unordered_map<HashableDimensionKey, vector<DurationBucket>>* output) {
     if (mCurrentBucketStartTimeNs + mBucketSizeNs > eventTime) {
         return false;
     }
@@ -202,7 +202,7 @@ bool MaxDurationTracker::flushIfNeeded(uint64_t eventTime) {
 
     if (mDuration != 0) {
         info.mDuration = mDuration;
-        mBucket.push_back(info);
+        (*output)[mEventKey].push_back(info);
         addPastBucketToAnomalyTrackers(info.mDuration, info.mBucketNum);
         VLOG("  final duration for last bucket: %lld", (long long)mDuration);
     }
@@ -215,7 +215,7 @@ bool MaxDurationTracker::flushIfNeeded(uint64_t eventTime) {
             info.mBucketEndNs = endTime + mBucketSizeNs * i;
             info.mBucketNum = mCurrentBucketNum + i;
             info.mDuration = mBucketSizeNs;
-            mBucket.push_back(info);
+            (*output)[mEventKey].push_back(info);
             addPastBucketToAnomalyTrackers(info.mDuration, info.mBucketNum);
             VLOG("  filling gap bucket with duration %lld", (long long)mBucketSizeNs);
         }

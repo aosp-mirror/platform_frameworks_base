@@ -122,16 +122,16 @@ void DurationMetricProducer::startNewProtoOutputStreamLocked(long long startTime
 }
 
 unique_ptr<DurationTracker> DurationMetricProducer::createDurationTracker(
-        const HashableDimensionKey& eventKey, vector<DurationBucket>& bucket) const {
+        const HashableDimensionKey& eventKey) const {
     switch (mMetric.aggregation_type()) {
         case DurationMetric_AggregationType_SUM:
             return make_unique<OringDurationTracker>(
                     mConfigKey, mMetric.name(), eventKey, mWizard, mConditionTrackerIndex, mNested,
-                    mCurrentBucketStartTimeNs, mBucketSizeNs, mAnomalyTrackers, bucket);
+                    mCurrentBucketStartTimeNs, mBucketSizeNs, mAnomalyTrackers);
         case DurationMetric_AggregationType_MAX_SPARSE:
             return make_unique<MaxDurationTracker>(
                     mConfigKey, mMetric.name(), eventKey, mWizard, mConditionTrackerIndex, mNested,
-                    mCurrentBucketStartTimeNs, mBucketSizeNs, mAnomalyTrackers, bucket);
+                    mCurrentBucketStartTimeNs, mBucketSizeNs, mAnomalyTrackers);
     }
 }
 
@@ -179,13 +179,6 @@ std::unique_ptr<std::vector<uint8_t>> DurationMetricProducer::onDumpReportLocked
             continue;
         }
 
-        // If there is no duration bucket info for this key, don't include it in the report.
-        // For example, duration started, but condition is never turned to true.
-        // TODO: Only add the key to the map when we add duration buckets info for it.
-        if (pair.second.size() == 0) {
-            continue;
-        }
-
         long long wrapperToken =
                 mProto->start(FIELD_TYPE_MESSAGE | FIELD_COUNT_REPEATED | FIELD_ID_DATA);
 
@@ -228,7 +221,7 @@ std::unique_ptr<std::vector<uint8_t>> DurationMetricProducer::onDumpReportLocked
                   (long long)mCurrentBucketStartTimeNs);
     std::unique_ptr<std::vector<uint8_t>> buffer = serializeProtoLocked();
     startNewProtoOutputStreamLocked(endTime);
-    // TODO: Properly clear the old buckets.
+    mPastBuckets.clear();
     return buffer;
 }
 
@@ -238,7 +231,7 @@ void DurationMetricProducer::flushIfNeededLocked(const uint64_t& eventTime) {
     }
     VLOG("flushing...........");
     for (auto it = mCurrentSlicedDuration.begin(); it != mCurrentSlicedDuration.end();) {
-        if (it->second->flushIfNeeded(eventTime)) {
+        if (it->second->flushIfNeeded(eventTime, &mPastBuckets)) {
             VLOG("erase bucket for key %s", it->first.c_str());
             it = mCurrentSlicedDuration.erase(it);
         } else {
@@ -290,7 +283,7 @@ void DurationMetricProducer::onMatchedLogEventInternalLocked(
         if (hitGuardRailLocked(eventKey)) {
             return;
         }
-        mCurrentSlicedDuration[eventKey] = createDurationTracker(eventKey, mPastBuckets[eventKey]);
+        mCurrentSlicedDuration[eventKey] = createDurationTracker(eventKey);
     }
 
     auto it = mCurrentSlicedDuration.find(eventKey);

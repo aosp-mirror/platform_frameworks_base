@@ -868,11 +868,40 @@ static jobject nativeGetHdrCapabilities(JNIEnv* env, jclass clazz, jobject token
             capabilities.getDesiredMaxAverageLuminance(), capabilities.getDesiredMinLuminance());
 }
 
+static jlong nativeReadFromParcel(JNIEnv* env, jclass clazz, jobject parcelObj) {
+    Parcel* parcel = parcelForJavaObject(env, parcelObj);
+    if (parcel == NULL) {
+        doThrowNPE(env);
+        return 0;
+    }
+    sp<SurfaceControl> surface = SurfaceControl::readFromParcel(parcel);
+    if (surface == nullptr) {
+        return 0;
+    }
+    surface->incStrong((void *)nativeCreate);
+    return reinterpret_cast<jlong>(surface.get());
+}
+
+static void nativeWriteToParcel(JNIEnv* env, jclass clazz,
+        jlong nativeObject, jobject parcelObj) {
+    Parcel* parcel = parcelForJavaObject(env, parcelObj);
+    if (parcel == NULL) {
+        doThrowNPE(env);
+        return;
+    }
+    SurfaceControl* const self = reinterpret_cast<SurfaceControl *>(nativeObject);
+    self->writeToParcel(parcel);
+}
+
 // ----------------------------------------------------------------------------
 
 static const JNINativeMethod sSurfaceControlMethods[] = {
     {"nativeCreate", "(Landroid/view/SurfaceSession;Ljava/lang/String;IIIIJII)J",
             (void*)nativeCreate },
+    {"nativeReadFromParcel", "(Landroid/os/Parcel;)J",
+            (void*)nativeReadFromParcel },
+    {"nativeWriteToParcel", "(JLandroid/os/Parcel;)V",
+            (void*)nativeWriteToParcel },
     {"nativeRelease", "(J)V",
             (void*)nativeRelease },
     {"nativeDestroy", "(J)V",

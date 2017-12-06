@@ -14542,7 +14542,7 @@ public class ActivityManagerService extends IActivityManager.Stub
                 try {
                     PackageInfo pi = pm.getPackageInfo(pkg, 0, UserHandle.getCallingUserId());
                     if (pi != null) {
-                        sb.append(" v").append(pi.versionCode);
+                        sb.append(" v").append(pi.getLongVersionCode());
                         if (pi.versionName != null) {
                             sb.append(" (").append(pi.versionName).append(")");
                         }
@@ -23824,7 +23824,13 @@ public class ActivityManagerService extends IActivityManager.Stub
      */
     @Override
     public boolean startUserInBackground(final int userId) {
-        return mUserController.startUser(userId, /* foreground */ false);
+        return startUserInBackgroundWithListener(userId, null);
+    }
+
+    @Override
+    public boolean startUserInBackgroundWithListener(final int userId,
+                @Nullable IProgressListener unlockListener) {
+        return mUserController.startUser(userId, /* foreground */ false, unlockListener);
     }
 
     @Override

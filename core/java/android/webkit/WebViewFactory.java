@@ -265,10 +265,10 @@ public final class WebViewFactory {
                     + "packageName mismatch, expected: "
                     + chosen.packageName + " actual: " + toUse.packageName);
         }
-        if (chosen.versionCode > toUse.versionCode) {
+        if (chosen.getLongVersionCode() > toUse.getLongVersionCode()) {
             throw new MissingWebViewPackageException("Failed to verify WebView provider, "
-                    + "version code is lower than expected: " + chosen.versionCode
-                    + " actual: " + toUse.versionCode);
+                    + "version code is lower than expected: " + chosen.getLongVersionCode()
+                    + " actual: " + toUse.getLongVersionCode());
         }
         if (getWebViewLibrary(toUse.applicationInfo) == null) {
             throw new MissingWebViewPackageException("Tried to load an invalid WebView provider: "
@@ -401,7 +401,7 @@ public final class WebViewFactory {
                 Trace.traceEnd(Trace.TRACE_TAG_WEBVIEW);
             }
             Log.i(LOGTAG, "Loading " + sPackageInfo.packageName + " version " +
-                    sPackageInfo.versionName + " (code " + sPackageInfo.versionCode + ")");
+                    sPackageInfo.versionName + " (code " + sPackageInfo.getLongVersionCode() + ")");
 
             Trace.traceBegin(Trace.TRACE_TAG_WEBVIEW, "WebViewFactory.getChromiumProviderClass()");
             try {

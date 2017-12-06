@@ -1245,7 +1245,7 @@ class PackageManagerShellCommand extends ShellCommand {
         final PrintWriter pw = getOutPrintWriter();
         int flags = 0;
         int userId = UserHandle.USER_ALL;
-        int versionCode = PackageManager.VERSION_CODE_HIGHEST;
+        long versionCode = PackageManager.VERSION_CODE_HIGHEST;
 
         String opt;
         while ((opt = getNextOption()) != null) {
@@ -1257,7 +1257,7 @@ class PackageManagerShellCommand extends ShellCommand {
                     userId = UserHandle.parseUserArg(getNextArgRequired());
                     break;
                 case "--versionCode":
-                    versionCode = Integer.parseInt(getNextArgRequired());
+                    versionCode = Long.parseLong(getNextArgRequired());
                     break;
                 default:
                     pw.println("Error: Unknown option: " + opt);

@@ -37,17 +37,15 @@ public final class TextSelection {
     private final int mStartIndex;
     private final int mEndIndex;
     @NonNull private final EntityConfidence<String> mEntityConfidence;
-    @NonNull private final String mLogSource;
-    @NonNull private final String mVersionInfo;
+    @NonNull private final String mSignature;
 
     private TextSelection(
-            int startIndex, int endIndex, @NonNull EntityConfidence<String> entityConfidence,
-            @NonNull String logSource, @NonNull String versionInfo) {
+            int startIndex, int endIndex, @NonNull Map<String, Float> entityConfidence,
+            @NonNull String signature) {
         mStartIndex = startIndex;
         mEndIndex = endIndex;
         mEntityConfidence = new EntityConfidence<>(entityConfidence);
-        mLogSource = logSource;
-        mVersionInfo = versionInfo;
+        mSignature = signature;
     }
 
     /**
@@ -95,27 +93,21 @@ public final class TextSelection {
     }
 
     /**
-     * Returns a tag for the source classifier used to generate this result.
-     * @hide
+     * Returns the signature for this object.
+     * The TextClassifier that generates this object may use it as a way to internally identify
+     * this object.
      */
     @NonNull
-    public String getSourceClassifier() {
-        return mLogSource;
-    }
-
-    /**
-     * Returns information about the classifier model used to generate this TextSelection.
-     * @hide
-     */
-    @NonNull
-    public String getVersionInfo() {
-        return mVersionInfo;
+    public String getSignature() {
+        return mSignature;
     }
 
     @Override
     public String toString() {
-        return String.format(Locale.US,
-                "TextSelection {%d, %d, %s}", mStartIndex, mEndIndex, mEntityConfidence);
+        return String.format(
+                Locale.US,
+                "TextSelection {startIndex=%d, endIndex=%d, entities=%s, signature=%s}",
+                mStartIndex, mEndIndex, mEntityConfidence, mSignature);
     }
 
     /**
@@ -126,8 +118,7 @@ public final class TextSelection {
         private final int mStartIndex;
         private final int mEndIndex;
         @NonNull private final Map<String, Float> mEntityConfidence = new ArrayMap<>();
-        @NonNull private String mLogSource = "";
-        @NonNull private String mVersionInfo = "";
+        @NonNull private String mSignature = "";
 
         /**
          * Creates a builder used to build {@link TextSelection} objects.
@@ -157,20 +148,13 @@ public final class TextSelection {
         }
 
         /**
-         * Sets a tag for the source classifier used to generate this result.
-         * @hide
+         * Sets a signature for the TextSelection object.
+         *
+         * The TextClassifier that generates the TextSelection object may use it as a way to
+         * internally identify the TextSelection object.
          */
-        Builder setLogSource(@NonNull String logSource) {
-            mLogSource = Preconditions.checkNotNull(logSource);
-            return this;
-        }
-
-        /**
-         * Sets information about the classifier model used to generate this TextSelection.
-         * @hide
-         */
-        Builder setVersionInfo(@NonNull String versionInfo) {
-            mVersionInfo = Preconditions.checkNotNull(versionInfo);
+        public Builder setSignature(@NonNull String signature) {
+            mSignature = Preconditions.checkNotNull(signature);
             return this;
         }
 
@@ -179,8 +163,7 @@ public final class TextSelection {
          */
         public TextSelection build() {
             return new TextSelection(
-                    mStartIndex, mEndIndex, new EntityConfidence<>(mEntityConfidence),  mLogSource,
-                    mVersionInfo);
+                    mStartIndex, mEndIndex, mEntityConfidence, mSignature);
         }
     }
 

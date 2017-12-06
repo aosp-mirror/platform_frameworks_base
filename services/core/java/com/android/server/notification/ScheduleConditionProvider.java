@@ -29,8 +29,8 @@ import android.os.Binder;
 import android.provider.Settings;
 import android.service.notification.Condition;
 import android.service.notification.IConditionProvider;
+import android.service.notification.ScheduleCalendar;
 import android.service.notification.ZenModeConfig;
-import android.service.notification.ZenModeConfig.ScheduleInfo;
 import android.text.TextUtils;
 import android.util.ArrayMap;
 import android.util.ArraySet;
@@ -45,7 +45,6 @@ import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.List;
-import java.util.TimeZone;
 
 /**
  * Built-in zen condition provider for daily scheduled time-based conditions.
@@ -134,7 +133,7 @@ public class ScheduleConditionProvider extends SystemConditionProviderService {
             return;
         }
         synchronized (mSubscriptions) {
-            mSubscriptions.put(conditionId, toScheduleCalendar(conditionId));
+            mSubscriptions.put(conditionId, ZenModeConfig.toScheduleCalendar(conditionId));
         }
         evaluateSubscriptions();
     }
@@ -241,15 +240,6 @@ public class ScheduleConditionProvider extends SystemConditionProviderService {
 
     private boolean meetsSchedule(ScheduleCalendar cal, long time) {
         return cal != null && cal.isInSchedule(time);
-    }
-
-    private static ScheduleCalendar toScheduleCalendar(Uri conditionId) {
-        final ScheduleInfo schedule = ZenModeConfig.tryParseScheduleConditionId(conditionId);
-        if (schedule == null || schedule.days == null || schedule.days.length == 0) return null;
-        final ScheduleCalendar sc = new ScheduleCalendar();
-        sc.setSchedule(schedule);
-        sc.setTimeZone(TimeZone.getDefault());
-        return sc;
     }
 
     private void setRegistered(boolean registered) {

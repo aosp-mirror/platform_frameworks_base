@@ -551,7 +551,7 @@ status_t StatsService::cmd_dump_memory_info(FILE* out) {
     return NO_ERROR;
 }
 
-Status StatsService::informAllUidData(const vector<int32_t>& uid, const vector<int32_t>& version,
+Status StatsService::informAllUidData(const vector<int32_t>& uid, const vector<int64_t>& version,
                                       const vector<String16>& app) {
     VLOG("StatsService::informAllUidData was called");
 
@@ -566,7 +566,7 @@ Status StatsService::informAllUidData(const vector<int32_t>& uid, const vector<i
     return Status::ok();
 }
 
-Status StatsService::informOnePackage(const String16& app, int32_t uid, int32_t version) {
+Status StatsService::informOnePackage(const String16& app, int32_t uid, int64_t version) {
     VLOG("StatsService::informOnePackage was called");
 
     if (IPCThreadState::self()->getCallingUid() != AID_SYSTEM) {
