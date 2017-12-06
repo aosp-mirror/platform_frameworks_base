@@ -63,6 +63,7 @@ import static android.app.ActivityManager.START_PERMISSION_DENIED;
 import static android.app.ActivityManager.START_INTENT_NOT_RESOLVED;
 
 import com.android.internal.os.BatteryStatsImpl;
+import com.android.server.am.ActivityStarter.Factory;
 
 /**
  * Tests for the {@link ActivityStarter} class.

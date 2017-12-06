@@ -101,6 +101,7 @@ import android.os.UserManager;
 import android.service.voice.IVoiceInteractionSession;
 import android.text.TextUtils;
 import android.util.EventLog;
+import android.util.Pools.SynchronizedPool;
 import android.util.Slog;
 
 import com.android.internal.annotations.VisibleForTesting;
@@ -130,7 +131,6 @@ class ActivityStarter {
     private final ActivityManagerService mService;
     private final ActivityStackSupervisor mSupervisor;
     private final ActivityStartInterceptor mInterceptor;
-
     private final ActivityStartController mController;
 
     // Share state variable among methods when starting an activity.
@@ -208,17 +208,33 @@ class ActivityStarter {
          *                   this instance.
          * @return an {@link ActivityStarter}
          */
-        ActivityStarter obtainStarter();
+        ActivityStarter obtain();
+
+        /**
+         * Recycles a starter for reuse.
+         */
+        void recycle(ActivityStarter starter);
     }
 
     /**
      * Default implementation of {@link StarterFactory}.
      */
     static class DefaultFactory implements Factory {
+        /**
+         * The maximum count of starters that should be active at one time:
+         * 1. last ran starter (for logging and post activity processing)
+         * 2. current running starter
+         * 3. starter from re-entry in (2)
+         */
+        private final int MAX_STARTER_COUNT = 3;
+
         private ActivityStartController mController;
         private ActivityManagerService mService;
         private ActivityStackSupervisor mSupervisor;
         private ActivityStartInterceptor mInterceptor;
+
+        private SynchronizedPool<ActivityStarter> mStarterPool =
+                new SynchronizedPool<>(MAX_STARTER_COUNT);
 
         DefaultFactory(ActivityManagerService service,
                 ActivityStackSupervisor supervisor, ActivityStartInterceptor interceptor) {
@@ -233,9 +249,20 @@ class ActivityStarter {
         }
 
         @Override
-        public ActivityStarter obtainStarter() {
-            // TODO(b/64750076): Investigate recycling instances to reduce object creation overhead.
-            return new ActivityStarter(mController, mService, mSupervisor, mInterceptor);
+        public ActivityStarter obtain() {
+            ActivityStarter starter = mStarterPool.acquire();
+
+            if (starter == null) {
+                starter = new ActivityStarter(mController, mService, mSupervisor, mInterceptor);
+            }
+
+            return starter;
+        }
+
+        @Override
+        public void recycle(ActivityStarter starter) {
+            starter.reset(true /* clearRequest*/);
+            mStarterPool.release(starter);
         }
     }
 
@@ -288,6 +315,76 @@ class ActivityStarter {
          * {@see ActivityStarter#startActivityMayWait}.
          */
         boolean mayWait;
+
+        /**
+         * Sets values back to the initial state, clearing any held references.
+         */
+        void reset() {
+            caller = null;
+            intent = null;
+            ephemeralIntent = null;
+            resolvedType = null;
+            activityInfo = null;
+            resolveInfo = null;
+            voiceSession = null;
+            voiceInteractor = null;
+            resultTo = null;
+            resultWho = null;
+            requestCode = 0;
+            callingPid = 0;
+            callingUid = 0;
+            callingPackage = null;
+            realCallingPid = 0;
+            realCallingUid = 0;
+            startFlags = 0;
+            activityOptions = null;
+            ignoreTargetSecurity = false;
+            componentSpecified = false;
+            outActivity = null;
+            inTask = null;
+            reason = null;
+            profilerInfo = null;
+            globalConfig = null;
+            waitOptions = null;
+            userId = 0;
+            waitResult = null;
+            mayWait = false;
+        }
+
+        /**
+         * Adopts all values from passed in request.
+         */
+        void set(Request request) {
+            caller = request.caller;
+            intent = request.intent;
+            ephemeralIntent = request.ephemeralIntent;
+            resolvedType = request.resolvedType;
+            activityInfo = request.activityInfo;
+            resolveInfo = request.resolveInfo;
+            voiceSession = request.voiceSession;
+            voiceInteractor = request.voiceInteractor;
+            resultTo = request.resultTo;
+            resultWho = request.resultWho;
+            requestCode = request.requestCode;
+            callingPid = request.callingPid;
+            callingUid = request.callingUid;
+            callingPackage = request.callingPackage;
+            realCallingPid = request.realCallingPid;
+            realCallingUid = request.realCallingUid;
+            startFlags = request.startFlags;
+            activityOptions = request.activityOptions;
+            ignoreTargetSecurity = request.ignoreTargetSecurity;
+            componentSpecified = request.componentSpecified;
+            outActivity = request.outActivity;
+            inTask = request.inTask;
+            reason = request.reason;
+            profilerInfo = request.profilerInfo;
+            globalConfig = request.globalConfig;
+            waitOptions = request.waitOptions;
+            userId = request.userId;
+            waitResult = request.waitResult;
+            mayWait = request.mayWait;
+        }
     }
 
     ActivityStarter(ActivityStartController controller, ActivityManagerService service,
@@ -296,6 +393,52 @@ class ActivityStarter {
         mService = service;
         mSupervisor = supervisor;
         mInterceptor = interceptor;
+        reset(true);
+    }
+
+    /**
+     * Effectively duplicates the starter passed in. All state and request values will be
+     * mirrored.
+     * @param starter
+     */
+    void set(ActivityStarter starter) {
+        mStartActivity = starter.mStartActivity;
+        mIntent = starter.mIntent;
+        mCallingUid = starter.mCallingUid;
+        mOptions = starter.mOptions;
+
+        mLaunchTaskBehind = starter.mLaunchTaskBehind;
+        mLaunchFlags = starter.mLaunchFlags;
+        mLaunchMode = starter.mLaunchMode;
+
+        mLaunchBounds.set(starter.mLaunchBounds);
+
+        mNotTop = starter.mNotTop;
+        mDoResume = starter.mDoResume;
+        mStartFlags = starter.mStartFlags;
+        mSourceRecord = starter.mSourceRecord;
+        mPreferredDisplayId = starter.mPreferredDisplayId;
+
+        mInTask = starter.mInTask;
+        mAddingToTask = starter.mAddingToTask;
+        mReuseTask = starter.mReuseTask;
+
+        mNewTaskInfo = starter.mNewTaskInfo;
+        mNewTaskIntent = starter.mNewTaskIntent;
+        mSourceStack = starter.mSourceStack;
+
+        mTargetStack = starter.mTargetStack;
+        mMovedToFront = starter.mMovedToFront;
+        mNoAnimation = starter.mNoAnimation;
+        mKeepCurTransition = starter.mKeepCurTransition;
+        mAvoidMoveToFront = starter.mAvoidMoveToFront;
+
+        mVoiceSession = starter.mVoiceSession;
+        mVoiceInteractor = starter.mVoiceInteractor;
+
+        mIntentDelivered = starter.mIntentDelivered;
+
+        mRequest.set(starter.mRequest);
     }
 
     ActivityRecord getStartActivity() {
@@ -313,25 +456,47 @@ class ActivityStarter {
      * @return The starter result.
      */
     int execute() {
-        // TODO(b/64750076): Look into passing request directly to these methods to allow
-        // for transactional diffs and preprocessing.
-        if (mRequest.mayWait) {
-            return startActivityMayWait(mRequest.caller, mRequest.callingUid,
-                    mRequest.callingPackage, mRequest.intent, mRequest.resolvedType,
-                    mRequest.voiceSession, mRequest.voiceInteractor, mRequest.resultTo,
-                    mRequest.resultWho, mRequest.requestCode, mRequest.startFlags,
-                    mRequest.profilerInfo, mRequest.waitResult, mRequest.globalConfig,
-                    mRequest.waitOptions, mRequest.ignoreTargetSecurity, mRequest.userId,
-                    mRequest.inTask, mRequest.reason);
-        } else {
-            return startActivity(mRequest.caller, mRequest.intent, mRequest.ephemeralIntent,
-                    mRequest.resolvedType, mRequest.activityInfo, mRequest.resolveInfo,
-                    mRequest.voiceSession, mRequest.voiceInteractor, mRequest.resultTo,
-                    mRequest.resultWho, mRequest.requestCode, mRequest.callingPid,
-                    mRequest.callingUid, mRequest.callingPackage, mRequest.realCallingPid,
-                    mRequest.realCallingUid, mRequest.startFlags, mRequest.activityOptions,
-                    mRequest.ignoreTargetSecurity, mRequest.componentSpecified,
-                    mRequest.outActivity, mRequest.inTask, mRequest.reason);
+        try {
+            // TODO(b/64750076): Look into passing request directly to these methods to allow
+            // for transactional diffs and preprocessing.
+            if (mRequest.mayWait) {
+                return startActivityMayWait(mRequest.caller, mRequest.callingUid,
+                        mRequest.callingPackage, mRequest.intent, mRequest.resolvedType,
+                        mRequest.voiceSession, mRequest.voiceInteractor, mRequest.resultTo,
+                        mRequest.resultWho, mRequest.requestCode, mRequest.startFlags,
+                        mRequest.profilerInfo, mRequest.waitResult, mRequest.globalConfig,
+                        mRequest.waitOptions, mRequest.ignoreTargetSecurity, mRequest.userId,
+                        mRequest.inTask, mRequest.reason);
+            } else {
+                return startActivity(mRequest.caller, mRequest.intent, mRequest.ephemeralIntent,
+                        mRequest.resolvedType, mRequest.activityInfo, mRequest.resolveInfo,
+                        mRequest.voiceSession, mRequest.voiceInteractor, mRequest.resultTo,
+                        mRequest.resultWho, mRequest.requestCode, mRequest.callingPid,
+                        mRequest.callingUid, mRequest.callingPackage, mRequest.realCallingPid,
+                        mRequest.realCallingUid, mRequest.startFlags, mRequest.activityOptions,
+                        mRequest.ignoreTargetSecurity, mRequest.componentSpecified,
+                        mRequest.outActivity, mRequest.inTask, mRequest.reason);
+            }
+        } finally {
+            onExecutionComplete();
+        }
+    }
+
+    /**
+     * Starts an activity based on the provided {@link ActivityRecord} and environment parameters.
+     * Note that this method is called internally as well as part of {@link #startActivity}.
+     *
+     * @return The start result.
+     */
+    int startResolvedActivity(final ActivityRecord r, ActivityRecord sourceRecord,
+            IVoiceInteractionSession voiceSession, IVoiceInteractor voiceInteractor,
+            int startFlags, boolean doResume, ActivityOptions options, TaskRecord inTask,
+            ActivityRecord[] outActivity) {
+        try {
+            return startActivity(r, sourceRecord, voiceSession, voiceInteractor, startFlags,
+                    doResume, options, inTask, outActivity);
+        } finally {
+            onExecutionComplete();
         }
     }
 
@@ -367,6 +532,14 @@ class ActivityStarter {
     static int getExternalResult(int result) {
         // Aborted results are treated as successes externally, but we must track them internally.
         return result != START_ABORTED ? result : START_SUCCESS;
+    }
+
+    /**
+     * Called when execution is complete. Sets state indicating completion and proceeds with
+     * recycling if appropriate.
+     */
+    private void onExecutionComplete() {
+        mController.onExecutionComplete(this);
     }
 
     private int startActivity(IApplicationThread caller, Intent intent, Intent ephemeralIntent,
@@ -651,7 +824,7 @@ class ActivityStarter {
 
         mController.doPendingActivityLaunches(false);
 
-        return startResolvedActivity(r, sourceRecord, voiceSession, voiceInteractor, startFlags,
+        return startActivity(r, sourceRecord, voiceSession, voiceInteractor, startFlags,
                 true /* doResume */, options, inTask, outActivity);
     }
 
@@ -924,16 +1097,10 @@ class ActivityStarter {
         }
     }
 
-    /**
-     * Starts an activity based on the provided {@link ActivityRecord} and environment parameters.
-     * Note that this method is called internally as well as part of {@link #startActivity}.
-     *
-     * @return The start result.
-     */
-    int startResolvedActivity(final ActivityRecord r, ActivityRecord sourceRecord,
-        IVoiceInteractionSession voiceSession, IVoiceInteractor voiceInteractor,
-        int startFlags, boolean doResume, ActivityOptions options, TaskRecord inTask,
-        ActivityRecord[] outActivity) {
+    private int startActivity(final ActivityRecord r, ActivityRecord sourceRecord,
+                IVoiceInteractionSession voiceSession, IVoiceInteractor voiceInteractor,
+                int startFlags, boolean doResume, ActivityOptions options, TaskRecord inTask,
+                ActivityRecord[] outActivity) {
         int result = START_CANCELED;
         try {
             mService.mWindowManager.deferSurfaceLayout();
@@ -1189,9 +1356,57 @@ class ActivityStarter {
         return START_SUCCESS;
     }
 
+    /**
+     * Resets the {@link ActivityStarter} state.
+     * @param clearRequest whether the request should be reset to default values.
+     */
+    void reset(boolean clearRequest) {
+        mStartActivity = null;
+        mIntent = null;
+        mCallingUid = -1;
+        mOptions = null;
+
+        mLaunchTaskBehind = false;
+        mLaunchFlags = 0;
+        mLaunchMode = INVALID_LAUNCH_MODE;
+
+        mLaunchBounds.setEmpty();
+
+        mNotTop = null;
+        mDoResume = false;
+        mStartFlags = 0;
+        mSourceRecord = null;
+        mPreferredDisplayId = INVALID_DISPLAY;
+
+        mInTask = null;
+        mAddingToTask = false;
+        mReuseTask = null;
+
+        mNewTaskInfo = null;
+        mNewTaskIntent = null;
+        mSourceStack = null;
+
+        mTargetStack = null;
+        mMovedToFront = false;
+        mNoAnimation = false;
+        mKeepCurTransition = false;
+        mAvoidMoveToFront = false;
+
+        mVoiceSession = null;
+        mVoiceInteractor = null;
+
+        mIntentDelivered = false;
+
+        if (clearRequest) {
+            mRequest.reset();
+        }
+    }
+
     private void setInitialState(ActivityRecord r, ActivityOptions options, TaskRecord inTask,
             boolean doResume, int startFlags, ActivityRecord sourceRecord,
             IVoiceInteractionSession voiceSession, IVoiceInteractor voiceInteractor) {
+        reset(false /* clearRequest */);
+
         mStartActivity = r;
         mIntent = r.intent;
         mOptions = options;

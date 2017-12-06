@@ -19,6 +19,7 @@ package com.android.server.am;
 import static android.app.WindowConfiguration.ACTIVITY_TYPE_STANDARD;
 import static android.app.WindowConfiguration.WINDOWING_MODE_FULLSCREEN;
 
+import android.content.Intent;
 import android.platform.test.annotations.Presubmit;
 import android.support.test.filters.SmallTest;
 import android.support.test.runner.AndroidJUnit4;
@@ -61,14 +62,13 @@ public class ActivityStartControllerTests extends ActivityTestsBase {
         mController = new ActivityStartController(mService, mService.mStackSupervisor, mFactory);
         mStarter = spy(new ActivityStarter(mController, mService, mService.mStackSupervisor,
                 mock(ActivityStartInterceptor.class)));
-        doReturn(mStarter).when(mFactory).obtainStarter();
+        doReturn(mStarter).when(mFactory).obtain();
     }
 
     /**
      * Ensures that pending launches are processed.
      */
     @Test
-    @Presubmit
     public void testPendingActivityLaunches() {
         final Random random = new Random();
 
@@ -87,5 +87,21 @@ public class ActivityStartControllerTests extends ActivityTestsBase {
 
         verify(mStarter, times(1)).startResolvedActivity(eq(activity), eq(source), eq(null),
                 eq(null), eq(startFlags), eq(resume), eq(null), eq(null), eq(null));
+    }
+
+
+    /**
+     * Ensures instances are recycled after execution.
+     */
+    @Test
+    public void testRecycling() throws Exception {
+        final Intent intent = new Intent();
+        final ActivityStarter optionStarter = new ActivityStarter(mController, mService,
+                mService.mStackSupervisor, mock(ActivityStartInterceptor.class));
+        optionStarter
+                .setIntent(intent)
+                .setReason("Test")
+                .execute();
+        verify(mFactory, times(1)).recycle(eq(optionStarter));
     }
 }
