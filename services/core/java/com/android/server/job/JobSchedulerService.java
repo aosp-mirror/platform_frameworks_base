@@ -1721,16 +1721,29 @@ public final class JobSchedulerService extends com.android.server.SystemService
 
         // If the app is in a non-active standby bucket, make sure we've waited
         // an appropriate amount of time since the last invocation
-        if (mHeartbeat < mNextBucketHeartbeat[job.getStandbyBucket()]) {
-            // TODO: log/trace that we're deferring the job due to bucketing if we hit this
-            if (job.getWhenStandbyDeferred() == 0) {
-                if (DEBUG_STANDBY) {
-                    Slog.v(TAG, "Bucket deferral: " + mHeartbeat + " < "
-                            + mNextBucketHeartbeat[job.getStandbyBucket()] + " for " + job);
+        final int bucket = job.getStandbyBucket();
+        if (mHeartbeat < mNextBucketHeartbeat[bucket]) {
+            // Only skip this job if it's still waiting for the end of its (initial) nominal
+            // bucket interval.  Once it's waited that long, we let it go ahead and clear.
+            // The final (NEVER) bucket is special; we never age those apps' jobs into
+            // runnability.
+            if (bucket >= mConstants.STANDBY_BEATS.length
+                    || (mHeartbeat < job.getBaseHeartbeat() + mConstants.STANDBY_BEATS[bucket])) {
+                // TODO: log/trace that we're deferring the job due to bucketing if we hit this
+                if (job.getWhenStandbyDeferred() == 0) {
+                    if (DEBUG_STANDBY) {
+                        Slog.v(TAG, "Bucket deferral: " + mHeartbeat + " < "
+                                + mNextBucketHeartbeat[job.getStandbyBucket()] + " for " + job);
+                    }
+                    job.setWhenStandbyDeferred(sElapsedRealtimeClock.millis());
                 }
-                job.setWhenStandbyDeferred(sElapsedRealtimeClock.millis());
+                return false;
+            } else {
+                if (DEBUG_STANDBY) {
+                    Slog.v(TAG, "Bucket deferred job aged into runnability at "
+                            + mHeartbeat + " : " + job);
+                }
             }
-            return false;
         }
 
         // The expensive check last: validate that the defined package+service is
