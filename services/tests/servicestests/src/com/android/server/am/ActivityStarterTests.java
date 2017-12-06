@@ -166,10 +166,9 @@ public class ActivityStarterTests extends ActivityTestsBase {
      * Excercises how the {@link ActivityStarter} reacts to various preconditions. The caller
      * provides a bitmask of all the set conditions (such as {@link #PRECONDITION_NO_CALLER_APP})
      * and the launch flags specified in the intent. The method constructs a call to
-     * {@link ActivityStarter#startActivityLocked} based on these preconditions and ensures the
-     * result matches the expected. It is important to note that the method also checks side effects
-     * of the start, such as ensuring {@link ActivityOptions#abort()} is called in the relevant
-     * scenarios.
+     * {@link ActivityStarter#execute} based on these preconditions and ensures the result matches
+     * the expected. It is important to note that the method also checks side effects of the start,
+     * such as ensuring {@link ActivityOptions#abort()} is called in the relevant scenarios.
      * @param preconditions A bitmask representing the preconditions for the launch
      * @param launchFlags The launch flags to be provided by the launch {@link Intent}.
      * @param expectedResult The expected result from the launch.
@@ -254,14 +253,13 @@ public class ActivityStarterTests extends ActivityTestsBase {
         final int requestCode = containsConditions(preconditions, PRECONDITION_REQUEST_CODE)
                 ? 1 : 0;
 
-        final int result = starter.startActivityLocked(caller, intent,
-                null /*ephemeralIntent*/, null /*resolvedType*/, aInfo, null /*rInfo*/,
-                null /*voiceSession*/, null /*voiceInteractor*/, resultTo,
-                null /*resultWho*/, requestCode, 0 /*callingPid*/, 0 /*callingUid*/,
-                null /*callingPackage*/, 0 /*realCallingPid*/, 0 /*realCallingUid*/,
-                0 /*startFlags*/, null /*options*/, false /*ignoreTargetSecurity*/,
-                false /*componentSpecified*/, null /*outActivity*/,
-                null /*inTask*/, "testLaunchActivityPermissionDenied");
+        final int result = starter.setCaller(caller)
+                .setIntent(intent)
+                .setActivityInfo(aInfo)
+                .setResultTo(resultTo)
+                .setRequestCode(requestCode)
+                .setReason("testLaunchActivityPermissionDenied")
+                .execute();
 
         // In some cases the expected result internally is different than the published result. We
         // must use ActivityStarter#getExternalResult to translate.
@@ -269,15 +267,18 @@ public class ActivityStarterTests extends ActivityTestsBase {
 
         // Ensure that {@link ActivityOptions} are aborted with unsuccessful result.
         if (expectedResult != START_SUCCESS) {
+            final ActivityStarter optionStarter = new ActivityStarter(mController, mService,
+                    mService.mStackSupervisor, mock(ActivityStartInterceptor.class));
             final ActivityOptions options = spy(ActivityOptions.makeBasic());
-            final int optionResult = starter.startActivityLocked(caller, intent,
-                    null /*ephemeralIntent*/, null /*resolvedType*/, aInfo, null /*rInfo*/,
-                    null /*voiceSession*/, null /*voiceInteractor*/, resultTo,
-                    null /*resultWho*/, requestCode, 0 /*callingPid*/, 0 /*callingUid*/,
-                    null /*callingPackage*/, 0 /*realCallingPid*/, 0 /*realCallingUid*/,
-                    0 /*startFlags*/, options /*options*/, false /*ignoreTargetSecurity*/,
-                    false /*componentSpecified*/, null /*outActivity*/,
-                    null /*inTask*/, "testLaunchActivityPermissionDenied");
+
+            final int optionResult = optionStarter.setCaller(caller)
+                    .setIntent(intent)
+                    .setActivityInfo(aInfo)
+                    .setResultTo(resultTo)
+                    .setRequestCode(requestCode)
+                    .setReason("testLaunchActivityPermissionDenied")
+                    .setActivityOptions(options)
+                    .execute();
             verify(options, times(1)).abort();
         }
     }

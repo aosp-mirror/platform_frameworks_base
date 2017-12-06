@@ -19,31 +19,16 @@ package com.android.server.am;
 import static android.app.WindowConfiguration.ACTIVITY_TYPE_STANDARD;
 import static android.app.WindowConfiguration.WINDOWING_MODE_FULLSCREEN;
 
-import android.app.ActivityOptions;
-import android.app.IApplicationThread;
-import android.content.Intent;
-import android.content.pm.ActivityInfo;
-import android.content.pm.ResolveInfo;
-import android.os.IBinder;
 import android.platform.test.annotations.Presubmit;
-import android.service.voice.IVoiceInteractionSession;
 import android.support.test.filters.SmallTest;
 import android.support.test.runner.AndroidJUnit4;
 
-import com.android.internal.app.IVoiceInteractor;
 import com.android.server.am.ActivityStackSupervisor.PendingActivityLaunch;
 import com.android.server.am.ActivityStarter.Factory;
 
 import org.junit.runner.RunWith;
 import org.junit.Test;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
-import static org.mockito.Mockito.any;
-import static org.mockito.Mockito.anyBoolean;
-import static org.mockito.Mockito.anyInt;
-import static org.mockito.Mockito.anyObject;
-import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.eq;
 import static org.mockito.Mockito.mock;
@@ -73,59 +58,10 @@ public class ActivityStartControllerTests extends ActivityTestsBase {
         super.setUp();
         mService = createActivityManagerService();
         mFactory = mock(Factory.class);
-        mStarter = mock(ActivityStarter.class);
-        doReturn(mStarter).when(mFactory).getStarter(any(), any(), any(), any());
         mController = new ActivityStartController(mService, mService.mStackSupervisor, mFactory);
-    }
-
-    /**
-     * Ensures that the starter is correctly invoked on
-     * {@link ActivityStartController#startActivity}
-     */
-    @Test
-    @Presubmit
-    public void testStartActivity() {
-        final Random random = new Random();
-
-        final IApplicationThread applicationThread = mock(IApplicationThread.class);
-        final Intent intent = mock(Intent.class);
-        final Intent ephemeralIntent = mock(Intent.class);
-        final String resolvedType = "TestType";
-        final ActivityInfo aInfo = mock(ActivityInfo.class);
-        final ResolveInfo rInfo = mock(ResolveInfo.class);
-        final IVoiceInteractionSession voiceInteractionSession =
-                mock(IVoiceInteractionSession.class);
-        final IVoiceInteractor voiceInteractor = mock(IVoiceInteractor.class);
-        final IBinder resultTo = mock(IBinder.class);
-        final String resultWho = "resultWho";
-        final int requestCode = random.nextInt();
-        final int callingPid = random.nextInt();
-        final int callingUid = random.nextInt();
-        final String callingPackage = "callingPackage";
-        final int realCallingPid = random.nextInt();
-        final int realCallingUid = random.nextInt();
-        final int startFlags = random.nextInt();
-        final ActivityOptions options = mock(ActivityOptions.class);
-        final boolean ignoreTargetSecurity = random.nextBoolean();
-        final boolean componentSpecified = random.nextBoolean();
-        final ActivityRecord[] outActivity = new ActivityRecord[1];
-        final TaskRecord inTask = mock(TaskRecord.class);
-        final String reason ="reason";
-
-        mController.startActivity(applicationThread, intent, ephemeralIntent, resolvedType,
-                aInfo, rInfo, voiceInteractionSession, voiceInteractor, resultTo, resultWho,
-                requestCode, callingPid, callingUid, callingPackage, realCallingPid, realCallingUid,
-                startFlags, options, ignoreTargetSecurity, componentSpecified, outActivity, inTask,
-                reason);
-
-        // The starter should receive a start command with the originally provided parameters
-        verify(mStarter, times(1)).startActivityLocked(eq(applicationThread), eq(intent),
-                eq(ephemeralIntent), eq(resolvedType), eq(aInfo), eq(rInfo),
-                eq(voiceInteractionSession), eq(voiceInteractor), eq(resultTo), eq(resultWho),
-                eq(requestCode), eq(callingPid), eq(callingUid), eq(callingPackage),
-                eq(realCallingPid), eq(realCallingUid), eq(startFlags), eq(options),
-                eq(ignoreTargetSecurity), eq(componentSpecified), eq(outActivity), eq(inTask),
-                eq(reason));
+        mStarter = spy(new ActivityStarter(mController, mService, mService.mStackSupervisor,
+                mock(ActivityStartInterceptor.class)));
+        doReturn(mStarter).when(mFactory).obtainStarter();
     }
 
     /**
@@ -149,7 +85,7 @@ public class ActivityStartControllerTests extends ActivityTestsBase {
         final boolean resume = random.nextBoolean();
         mController.doPendingActivityLaunches(resume);
 
-        verify(mStarter, times(1)).startActivity(eq(activity), eq(source), eq(null),
+        verify(mStarter, times(1)).startResolvedActivity(eq(activity), eq(source), eq(null),
                 eq(null), eq(startFlags), eq(resume), eq(null), eq(null), eq(null));
     }
 }
