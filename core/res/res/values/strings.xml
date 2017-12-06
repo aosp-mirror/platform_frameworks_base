@@ -4034,6 +4034,14 @@
     shortcut enabled.-->
     <string name="leave_accessibility_shortcut_on">Use Shortcut</string>
 
+    <!-- Title of Color Inversion feature shown in the warning dialog about the accessibility
+    shortcut. -->
+    <string name="color_inversion_feature_name">Color Inversion</string>
+
+    <!-- Title of Color Correction feature, which is mostly used to help users who are colorblind,
+     shown in the warning dialog about the accessibility shortcut. -->
+    <string name="color_correction_feature_name">Color Correction</string>
+
     <!-- Text in toast to alert the user that the accessibility shortcut turned on an accessibility
     service.-->
     <string name="accessibility_shortcut_enabling_service">Accessibility Shortcut turned
