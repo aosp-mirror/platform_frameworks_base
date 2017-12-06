@@ -2400,8 +2400,7 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
         private void announceNewUserIfNeeded() {
             synchronized (mLock) {
                 UserState userState = getCurrentUserStateLocked();
-                if (userState.isHandlingAccessibilityEvents()
-                        && userState.isObservedEventType(AccessibilityEvent.TYPE_ANNOUNCEMENT)) {
+                if (userState.isHandlingAccessibilityEvents()) {
                     UserManager userManager = (UserManager) mContext.getSystemService(
                             Context.USER_SERVICE);
                     String message = mContext.getString(R.string.user_switched,
@@ -3158,21 +3157,13 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
             if (mWindowsForAccessibilityCallback == null) {
                 return;
             }
-            final int userId;
-            synchronized (mLock) {
-                userId = mCurrentUserId;
-                final UserState userState = getUserStateLocked(userId);
-                if (!userState.isObservedEventType(AccessibilityEvent.TYPE_WINDOWS_CHANGED)) {
-                    return;
-                }
-            }
             final long identity = Binder.clearCallingIdentity();
             try {
                 // Let the client know the windows changed.
                 AccessibilityEvent event = AccessibilityEvent.obtain(
                         AccessibilityEvent.TYPE_WINDOWS_CHANGED);
                 event.setEventTime(SystemClock.uptimeMillis());
-                sendAccessibilityEvent(event, userId);
+                sendAccessibilityEvent(event, mCurrentUserId);
             } finally {
                 Binder.restoreCallingIdentity(identity);
             }
@@ -3375,10 +3366,6 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
 
         public UserState(int userId) {
             mUserId = userId;
-        }
-
-        public boolean isObservedEventType(@AccessibilityEvent.EventType int type) {
-            return (mLastSentRelevantEventTypes & type) != 0;
         }
 
         public int getClientState() {

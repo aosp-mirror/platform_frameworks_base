@@ -504,8 +504,7 @@ public class Toast {
         private void trySendAccessibilityEvent() {
             AccessibilityManager accessibilityManager =
                     AccessibilityManager.getInstance(mView.getContext());
-            if (!accessibilityManager.isObservedEventType(
-                    AccessibilityEvent.TYPE_NOTIFICATION_STATE_CHANGED)) {
+            if (!accessibilityManager.isEnabled()) {
                 return;
             }
             // treat toasts as notifications since they are used to

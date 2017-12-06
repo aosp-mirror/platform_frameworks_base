@@ -24,7 +24,6 @@ import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.SdkConstant;
 import android.annotation.SystemService;
-import android.annotation.TestApi;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.pm.PackageManager;
@@ -188,7 +187,6 @@ public final class AccessibilityManager {
      *
      * @hide
      */
-    @TestApi
     public interface AccessibilityServicesStateChangeListener {
 
         /**
@@ -454,18 +452,6 @@ public final class AccessibilityManager {
     }
 
     /**
-     * Returns whether there are observers registered for this event type. If
-     * this method returns false you shuold not generate events of this type
-     * to conserve resources.
-     *
-     * @param type The event type.
-     * @return Whether the event is being observed.
-     */
-    public boolean isObservedEventType(@AccessibilityEvent.EventType int type) {
-        return mIsEnabled && (mRelevantEventTypes & type) != 0;
-    }
-
-    /**
      * Requests feedback interruption from all accessibility services.
      */
     public void interrupt() {
@@ -697,7 +683,6 @@ public final class AccessibilityManager {
      *                for a callback on the process's main handler.
      * @hide
      */
-    @TestApi
     public void addAccessibilityServicesStateChangeListener(
             @NonNull AccessibilityServicesStateChangeListener listener, @Nullable Handler handler) {
         synchronized (mLock) {
@@ -713,7 +698,6 @@ public final class AccessibilityManager {
      *
      * @hide
      */
-    @TestApi
     public void removeAccessibilityServicesStateChangeListener(
             @NonNull AccessibilityServicesStateChangeListener listener) {
         // Final CopyOnWriteArrayList - no lock needed.
