@@ -893,6 +893,15 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      */
     private static boolean sAutoFocusableOffUIThreadWontNotifyParents;
 
+    /**
+     * Prior to P things like setScaleX() allowed passing float values that were bogus such as
+     * Float.NaN. If the app is targetting P or later then passing these values will result in an
+     * exception being thrown. If the app is targetting an earlier SDK version, then we will
+     * silently clamp these values to avoid crashes elsewhere when the rendering code hits
+     * these bogus values.
+     */
+    private static boolean sThrowOnInvalidFloatProperties;
+
     /** @hide */
     @IntDef({NOT_FOCUSABLE, FOCUSABLE, FOCUSABLE_AUTO})
     @Retention(RetentionPolicy.SOURCE)
@@ -4751,6 +4760,8 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
 
             sUseDefaultFocusHighlight = context.getResources().getBoolean(
                     com.android.internal.R.bool.config_useDefaultFocusHighlight);
+
+            sThrowOnInvalidFloatProperties = targetSdkVersion >= Build.VERSION_CODES.P;
 
             sCompatibilityDone = true;
         }
@@ -14272,7 +14283,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      */
     public void setScaleX(float scaleX) {
         if (scaleX != getScaleX()) {
-            requireIsFinite(scaleX, "scaleX");
+            scaleX = sanitizeFloatPropertyValue(scaleX, "scaleX");
             invalidateViewProperty(true, false);
             mRenderNode.setScaleX(scaleX);
             invalidateViewProperty(false, true);
@@ -14309,7 +14320,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      */
     public void setScaleY(float scaleY) {
         if (scaleY != getScaleY()) {
-            requireIsFinite(scaleY, "scaleY");
+            scaleY = sanitizeFloatPropertyValue(scaleY, "scaleY");
             invalidateViewProperty(true, false);
             mRenderNode.setScaleY(scaleY);
             invalidateViewProperty(false, true);
@@ -14859,13 +14870,41 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
         }
     }
 
-    private static void requireIsFinite(float transform, String propertyName) {
-        if (Float.isNaN(transform)) {
-            throw new IllegalArgumentException("Cannot set '" + propertyName + "' to Float.NaN");
+    private static float sanitizeFloatPropertyValue(float value, String propertyName) {
+        return sanitizeFloatPropertyValue(value, propertyName, -Float.MAX_VALUE, Float.MAX_VALUE);
+    }
+
+    private static float sanitizeFloatPropertyValue(float value, String propertyName,
+            float min, float max) {
+        // The expected "nothing bad happened" path
+        if (value >= min && value <= max) return value;
+
+        if (value < min || value == Float.NEGATIVE_INFINITY) {
+            if (sThrowOnInvalidFloatProperties) {
+                throw new IllegalArgumentException("Cannot set '" + propertyName + "' to "
+                        + value + ", the value must be >= " + min);
+            }
+            return min;
         }
-        if (Float.isInfinite(transform)) {
-            throw new IllegalArgumentException("Cannot set '" + propertyName + "' to infinity");
+
+        if (value > max || value == Float.POSITIVE_INFINITY) {
+            if (sThrowOnInvalidFloatProperties) {
+                throw new IllegalArgumentException("Cannot set '" + propertyName + "' to "
+                        + value + ", the value must be <= " + max);
+            }
+            return max;
         }
+
+        if (Float.isNaN(value)) {
+            if (sThrowOnInvalidFloatProperties) {
+                throw new IllegalArgumentException(
+                        "Cannot set '" + propertyName + "' to Float.NaN");
+            }
+            return 0; // Unclear which direction this NaN went so... 0?
+        }
+
+        // Shouldn't be possible to reach this.
+        throw new IllegalStateException("How do you get here?? " + value);
     }
 
     /**
@@ -14954,7 +14993,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      */
     public void setElevation(float elevation) {
         if (elevation != getElevation()) {
-            requireIsFinite(elevation, "elevation");
+            elevation = sanitizeFloatPropertyValue(elevation, "elevation");
             invalidateViewProperty(true, false);
             mRenderNode.setElevation(elevation);
             invalidateViewProperty(false, true);
@@ -15047,7 +15086,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      */
     public void setTranslationZ(float translationZ) {
         if (translationZ != getTranslationZ()) {
-            requireIsFinite(translationZ, "translationZ");
+            translationZ = sanitizeFloatPropertyValue(translationZ, "translationZ");
             invalidateViewProperty(true, false);
             mRenderNode.setTranslationZ(translationZ);
             invalidateViewProperty(false, true);
