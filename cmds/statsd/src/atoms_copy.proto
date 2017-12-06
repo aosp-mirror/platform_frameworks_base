@@ -99,7 +99,11 @@ message Atom {
  * resulted in a particular bit of work being done.
  */
 message WorkSource {
-    // TODO
+    // The uid for a given element in the attribution chain.
+    repeated int32 uid = 1;
+    // The (optional) string tag for an element in the attribution chain. If the
+    // element has no tag, it is encoded as an empty string.
+    repeated string tag = 2;
 }
 
 /*
@@ -404,8 +408,10 @@ message WakelockStateChanged {
     optional string tag = 3;
 
     enum State {
-        OFF = 0;
-        ON = 1;
+        RELEASE = 0;
+        ACQUIRE = 1;
+        CHANGE_RELEASE = 2;
+        CHANGE_ACQUIRE = 3;
     }
     optional State state = 4;
 }
