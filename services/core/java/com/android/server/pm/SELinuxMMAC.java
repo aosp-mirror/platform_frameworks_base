@@ -60,8 +60,10 @@ public final class SELinuxMMAC {
     // to synchronize access during policy load and access attempts.
     private static List<Policy> sPolicies = new ArrayList<>();
 
-    // Required MAC permissions files.
-    private static List<File> sMacPermissions = new ArrayList<>();
+    /** Path to MAC permissions on system image */
+    private static final File[] MAC_PERMISSIONS =
+    { new File(Environment.getRootDirectory(), "/etc/selinux/plat_mac_permissions.xml"),
+      new File(Environment.getVendorDirectory(), "/etc/selinux/nonplat_mac_permissions.xml") };
 
     // Append privapp to existing seinfo label
     private static final String PRIVILEGED_APP_STR = ":privapp";
@@ -74,11 +76,11 @@ public final class SELinuxMMAC {
 
     /**
      * Load the mac_permissions.xml file containing all seinfo assignments used to
-     * label apps. The loaded mac_permissions.xml files are plat_mac_permissions.xml and
-     * vendor_mac_permissions.xml, on /system and /vendor partitions, respectively.
-     * odm_mac_permissions.xml on /odm partition is optional. For further guidance on
+     * label apps. The loaded mac_permissions.xml file is determined by the
+     * MAC_PERMISSIONS class variable which is set at class load time which itself
+     * is based on the USE_OVERRIDE_POLICY class variable. For further guidance on
      * the proper structure of a mac_permissions.xml file consult the source code
-     * located at system/sepolicy/private/mac_permissions.xml.
+     * located at system/sepolicy/mac_permissions.xml.
      *
      * @return boolean indicating if policy was correctly loaded. A value of false
      *         typically indicates a structural problem with the xml or incorrectly
@@ -91,42 +93,10 @@ public final class SELinuxMMAC {
 
         FileReader policyFile = null;
         XmlPullParser parser = Xml.newPullParser();
-
-        synchronized (sMacPermissions) {
-            // Only initialize it once.
-            if (sMacPermissions.isEmpty()) {
-                // Platform mac permissions.
-                sMacPermissions.add(new File(
-                    Environment.getRootDirectory(), "/etc/selinux/plat_mac_permissions.xml"));
-
-                // Vendor mac permissions.
-                // The filename has been renamed from nonplat_mac_permissions to
-                // vendor_mac_permissions. Either of them should exist.
-                File vendorMacPermission = new File(
-                    Environment.getVendorDirectory(), "/etc/selinux/vendor_mac_permissions.xml");
-                if (vendorMacPermission.exists()) {
-                    sMacPermissions.add(vendorMacPermission);
-                } else {
-                    // For backward compatibility.
-                    sMacPermissions.add(new File(Environment.getVendorDirectory(),
-                                                 "/etc/selinux/nonplat_mac_permissions.xml"));
-                }
-
-                // ODM mac permissions (optional).
-                File odmMacPermission = new File(
-                    Environment.getOdmDirectory(), "/etc/selinux/odm_mac_permissions.xml");
-                if (odmMacPermission.exists()) {
-                    sMacPermissions.add(odmMacPermission);
-                }
-            }
-        }
-
-        final int count = sMacPermissions.size();
-        for (int i = 0; i < count; ++i) {
-            File macPermission = sMacPermissions.get(i);
+        for (int i = 0; i < MAC_PERMISSIONS.length; i++) {
             try {
-                policyFile = new FileReader(macPermission);
-                Slog.d(TAG, "Using policy file " + macPermission);
+                policyFile = new FileReader(MAC_PERMISSIONS[i]);
+                Slog.d(TAG, "Using policy file " + MAC_PERMISSIONS[i]);
 
                 parser.setInput(policyFile);
                 parser.nextTag();
@@ -150,13 +120,13 @@ public final class SELinuxMMAC {
                 StringBuilder sb = new StringBuilder("Exception @");
                 sb.append(parser.getPositionDescription());
                 sb.append(" while parsing ");
-                sb.append(macPermission);
+                sb.append(MAC_PERMISSIONS[i]);
                 sb.append(":");
                 sb.append(ex);
                 Slog.w(TAG, sb.toString());
                 return false;
             } catch (IOException ioe) {
-                Slog.w(TAG, "Exception parsing " + macPermission, ioe);
+                Slog.w(TAG, "Exception parsing " + MAC_PERMISSIONS[i], ioe);
                 return false;
             } finally {
                 IoUtils.closeQuietly(policyFile);
