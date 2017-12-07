@@ -271,8 +271,6 @@ package android.test.suitebuilder {
   public deprecated class TestSuiteBuilder {
     ctor public TestSuiteBuilder(java.lang.Class);
     ctor public TestSuiteBuilder(java.lang.String, java.lang.ClassLoader);
-    method public android.test.suitebuilder.TestSuiteBuilder addRequirements(java.util.List<com.android.internal.util.Predicate<android.test.suitebuilder.TestMethod>>);
-    method public final android.test.suitebuilder.TestSuiteBuilder addRequirements(com.android.internal.util.Predicate<android.test.suitebuilder.TestMethod>...);
     method public final junit.framework.TestSuite build();
     method public android.test.suitebuilder.TestSuiteBuilder excludePackages(java.lang.String...);
     method protected java.lang.String getSuiteName();
