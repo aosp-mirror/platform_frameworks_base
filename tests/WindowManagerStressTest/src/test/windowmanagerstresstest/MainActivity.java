@@ -24,6 +24,7 @@ import android.os.SystemClock;
 import android.util.Log;
 import android.util.MergedConfiguration;
 import android.view.Display;
+import android.view.DisplayCutout;
 import android.view.IWindowSession;
 import android.view.Surface;
 import android.view.View;
@@ -103,7 +104,8 @@ public class MainActivity extends Activity {
                         WindowManagerGlobal.getWindowSession().relayout(window,
                                 window.mSeq, mLayoutParams, -1, -1, View.VISIBLE, 0, mTmpRect,
                                 mTmpRect, mTmpRect, mTmpRect, mTmpRect, mTmpRect, mTmpRect,
-                                new MergedConfiguration(), new Surface());
+                                new DisplayCutout.ParcelableWrapper(), new MergedConfiguration(),
+                                new Surface());
                     } catch (RemoteException e) {
                         e.printStackTrace();
                     }

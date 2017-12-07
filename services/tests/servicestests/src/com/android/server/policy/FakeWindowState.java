@@ -20,6 +20,7 @@ import android.annotation.Nullable;
 import android.graphics.Point;
 import android.graphics.Rect;
 import android.view.Display;
+import android.view.DisplayCutout;
 import android.view.IApplicationToken;
 import android.view.WindowManager;
 
@@ -33,6 +34,8 @@ public class FakeWindowState implements WindowManagerPolicy.WindowState {
     public final Rect decorFrame = new Rect();
     public final Rect stableFrame = new Rect();
     public Rect outsetFrame = new Rect();
+
+    public DisplayCutout displayCutout;
 
     public WindowManager.LayoutParams attrs;
     public int displayId;
@@ -56,7 +59,7 @@ public class FakeWindowState implements WindowManagerPolicy.WindowState {
     @Override
     public void computeFrameLw(Rect parentFrame, Rect displayFrame, Rect overlayFrame,
             Rect contentFrame, Rect visibleFrame, Rect decorFrame, Rect stableFrame,
-            @Nullable Rect outsetFrame) {
+            @Nullable Rect outsetFrame, DisplayCutout displayCutout) {
         this.parentFrame.set(parentFrame);
         this.displayFrame.set(displayFrame);
         this.overscanFrame.set(overlayFrame);
@@ -65,6 +68,7 @@ public class FakeWindowState implements WindowManagerPolicy.WindowState {
         this.decorFrame.set(decorFrame);
         this.stableFrame.set(stableFrame);
         this.outsetFrame = outsetFrame == null ? null : new Rect(outsetFrame);
+        this.displayCutout = displayCutout;
     }
 
     @Override

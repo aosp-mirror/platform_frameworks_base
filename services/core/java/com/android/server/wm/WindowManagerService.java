@@ -191,6 +191,7 @@ import android.util.TypedValue;
 import android.util.proto.ProtoOutputStream;
 import android.view.AppTransitionAnimationSpec;
 import android.view.Display;
+import android.view.DisplayCutout;
 import android.view.DisplayInfo;
 import android.view.Gravity;
 import android.view.IAppTransitionAnimationSpecsFuture;
@@ -1136,9 +1137,9 @@ public class WindowManagerService extends IWindowManager.Stub
     }
 
     public int addWindow(Session session, IWindow client, int seq,
-            WindowManager.LayoutParams attrs, int viewVisibility, int displayId,
+            LayoutParams attrs, int viewVisibility, int displayId,
             Rect outContentInsets, Rect outStableInsets, Rect outOutsets,
-            InputChannel outInputChannel) {
+            DisplayCutout.ParcelableWrapper outDisplayCutout, InputChannel outInputChannel) {
         int[] appOp = new int[1];
         int res = mPolicy.checkAddPermission(attrs, appOp);
         if (res != WindowManagerGlobal.ADD_OKAY) {
@@ -1473,7 +1474,7 @@ public class WindowManagerService extends IWindowManager.Stub
                 taskBounds = null;
             }
             if (mPolicy.getInsetHintLw(win.mAttrs, taskBounds, displayFrames, outContentInsets,
-                    outStableInsets, outOutsets)) {
+                    outStableInsets, outOutsets, outDisplayCutout)) {
                 res |= WindowManagerGlobal.ADD_FLAG_ALWAYS_CONSUME_NAV_BAR;
             }
 
@@ -1853,11 +1854,12 @@ public class WindowManagerService extends IWindowManager.Stub
     }
 
     public int relayoutWindow(Session session, IWindow client, int seq,
-            WindowManager.LayoutParams attrs, int requestedWidth,
+            LayoutParams attrs, int requestedWidth,
             int requestedHeight, int viewVisibility, int flags,
             Rect outFrame, Rect outOverscanInsets, Rect outContentInsets,
             Rect outVisibleInsets, Rect outStableInsets, Rect outOutsets, Rect outBackdropFrame,
-            MergedConfiguration mergedConfiguration, Surface outSurface) {
+            DisplayCutout.ParcelableWrapper outCutout, MergedConfiguration mergedConfiguration,
+            Surface outSurface) {
         int result = 0;
         boolean configChanged;
         final boolean hasStatusBarPermission =
@@ -2142,6 +2144,7 @@ public class WindowManagerService extends IWindowManager.Stub
             win.mLastRelayoutContentInsets.set(win.mContentInsets);
             outVisibleInsets.set(win.mVisibleInsets);
             outStableInsets.set(win.mStableInsets);
+            outCutout.set(win.mDisplayCutout);
             outOutsets.set(win.mOutsets);
             outBackdropFrame.set(win.getBackdropFrame(win.mFrame));
             if (localLOGV) Slog.v(

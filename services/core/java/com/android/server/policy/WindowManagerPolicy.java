@@ -77,6 +77,7 @@ import android.os.RemoteException;
 import android.util.Slog;
 import android.util.proto.ProtoOutputStream;
 import android.view.Display;
+import android.view.DisplayCutout;
 import android.view.IApplicationToken;
 import android.view.IWindowManager;
 import android.view.InputEventReceiver;
@@ -210,10 +211,11 @@ public interface WindowManagerPolicy extends WindowManagerPolicyConstants {
          * @param stableFrame The frame around which stable system decoration is positioned.
          * @param outsetFrame The frame that includes areas that aren't part of the surface but we
          * want to treat them as such.
+         * @param displayCutout the display displayCutout
          */
         public void computeFrameLw(Rect parentFrame, Rect displayFrame,
                 Rect overlayFrame, Rect contentFrame, Rect visibleFrame, Rect decorFrame,
-                Rect stableFrame, @Nullable Rect outsetFrame);
+                Rect stableFrame, @Nullable Rect outsetFrame, DisplayCutout displayCutout);
 
         /**
          * Retrieve the current frame of the window that has been assigned by
@@ -1144,12 +1146,13 @@ public interface WindowManagerPolicy extends WindowManagerPolicyConstants {
      * @param outStableInsets The areas covered by stable system windows irrespective of their
      *                        current visibility. Expressed as positive insets.
      * @param outOutsets The areas that are not real display, but we would like to treat as such.
+     * @param outDisplayCutout The area that has been cut away from the display.
      * @return Whether to always consume the navigation bar.
      *         See {@link #isNavBarForcedShownLw(WindowState)}.
      */
     default boolean getInsetHintLw(WindowManager.LayoutParams attrs, Rect taskBounds,
             DisplayFrames displayFrames, Rect outContentInsets, Rect outStableInsets,
-            Rect outOutsets) {
+            Rect outOutsets, DisplayCutout.ParcelableWrapper outDisplayCutout) {
         return false;
     }
 

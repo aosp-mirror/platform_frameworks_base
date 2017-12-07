@@ -42,7 +42,6 @@ import static android.view.WindowManager.LayoutParams.LAST_SUB_WINDOW;
 import static android.view.WindowManager.LayoutParams.MATCH_PARENT;
 import static android.view.WindowManager.LayoutParams.PRIVATE_FLAG_COMPATIBLE_WINDOW;
 import static android.view.WindowManager.LayoutParams.PRIVATE_FLAG_HIDE_NON_SYSTEM_OVERLAY_WINDOWS;
-import static android.view.WindowManager.LayoutParams.PRIVATE_FLAG_IS_ROUNDED_CORNERS_OVERLAY;
 import static android.view.WindowManager.LayoutParams.PRIVATE_FLAG_LAYOUT_CHILD_WINDOW_IN_PARENT_FRAME;
 import static android.view.WindowManager.LayoutParams.PRIVATE_FLAG_NO_MOVE_ANIMATION;
 import static android.view.WindowManager.LayoutParams.PRIVATE_FLAG_WILL_NOT_REPLACE_ON_RELAUNCH;
@@ -145,6 +144,7 @@ import android.util.MergedConfiguration;
 import android.util.Slog;
 import android.util.TimeUtils;
 import android.util.proto.ProtoOutputStream;
+import android.view.DisplayCutout;
 import android.view.DisplayInfo;
 import android.view.Gravity;
 import android.view.IApplicationToken;
@@ -320,6 +320,11 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
     final Rect mOutsets = new Rect();
     private final Rect mLastOutsets = new Rect();
     private boolean mOutsetsChanged = false;
+
+    /** Part of the display that has been cut away. See {@link DisplayCutout}. */
+    DisplayCutout mDisplayCutout = DisplayCutout.NO_CUTOUT;
+    private DisplayCutout mLastDisplayCutout = DisplayCutout.NO_CUTOUT;
+    private boolean mDisplayCutoutChanged;
 
     /**
      * Set to true if we are waiting for this window to receive its
@@ -773,7 +778,7 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
     @Override
     public void computeFrameLw(Rect parentFrame, Rect displayFrame, Rect overscanFrame,
             Rect contentFrame, Rect visibleFrame, Rect decorFrame, Rect stableFrame,
-            Rect outsetFrame) {
+            Rect outsetFrame, DisplayCutout displayCutout) {
         if (mWillReplaceWindow && (mAnimatingExit || !mReplacingRemoveRequested)) {
             // This window is being replaced and either already got information that it's being
             // removed or we are still waiting for some information. Because of this we don't
@@ -1010,6 +1015,10 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
         mVisibleFrame.offset(-layoutXDiff, -layoutYDiff);
         mStableFrame.offset(-layoutXDiff, -layoutYDiff);
 
+        // TODO(roosa): Figure out what frame exactly this needs to be calculated with.
+        mDisplayCutout = displayCutout.calculateRelativeTo(mFrame);
+
+
         mCompatFrame.set(mFrame);
         if (mEnforceSizeCompat) {
             // If there is a size compatibility scale being applied to the
@@ -1150,8 +1159,9 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
         mOutsetsChanged |= !mLastOutsets.equals(mOutsets);
         mFrameSizeChanged |= (mLastFrame.width() != mFrame.width()) ||
                 (mLastFrame.height() != mFrame.height());
+        mDisplayCutoutChanged |= !mLastDisplayCutout.equals(mDisplayCutout);
         return mOverscanInsetsChanged || mContentInsetsChanged || mVisibleInsetsChanged
-                || mOutsetsChanged || mFrameSizeChanged;
+                || mOutsetsChanged || mFrameSizeChanged || mDisplayCutoutChanged;
     }
 
     /**
@@ -1196,6 +1206,7 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
                 || winAnimator.mSurfaceResized
                 || mOutsetsChanged
                 || mFrameSizeChanged
+                || mDisplayCutoutChanged
                 || configChanged
                 || dragResizingChanged
                 || !isResizedWhileNotDragResizingReported()
@@ -1215,7 +1226,8 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
                         + " dragResizingChanged=" + dragResizingChanged
                         + " resizedWhileNotDragResizingReported="
                         + isResizedWhileNotDragResizingReported()
-                        + " reportOrientationChanged=" + mReportOrientationChanged);
+                        + " reportOrientationChanged=" + mReportOrientationChanged
+                        + " displayCutoutChanged=" + mDisplayCutoutChanged);
             }
 
             // If it's a dead window left on screen, and the configuration changed, there is nothing
@@ -2850,6 +2862,7 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
             final boolean reportDraw = mWinAnimator.mDrawState == DRAW_PENDING;
             final boolean reportOrientation = mReportOrientationChanged;
             final int displayId = getDisplayId();
+            final DisplayCutout displayCutout = mDisplayCutout;
             if (mAttrs.type != WindowManager.LayoutParams.TYPE_APPLICATION_STARTING
                     && mClient instanceof IWindow.Stub) {
                 // To prevent deadlock simulate one-way call if win.mClient is a local object.
@@ -2859,7 +2872,7 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
                         try {
                             dispatchResized(frame, overscanInsets, contentInsets, visibleInsets,
                                     stableInsets, outsets, reportDraw, mergedConfiguration,
-                                    reportOrientation, displayId);
+                                    reportOrientation, displayId, displayCutout);
                         } catch (RemoteException e) {
                             // Not a remote call, RemoteException won't be raised.
                         }
@@ -2867,7 +2880,8 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
                 });
             } else {
                 dispatchResized(frame, overscanInsets, contentInsets, visibleInsets, stableInsets,
-                        outsets, reportDraw, mergedConfiguration, reportOrientation, displayId);
+                        outsets, reportDraw, mergedConfiguration, reportOrientation, displayId,
+                        displayCutout);
             }
 
             //TODO (multidisplay): Accessibility supported only for the default display.
@@ -2881,6 +2895,7 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
             mStableInsetsChanged = false;
             mOutsetsChanged = false;
             mFrameSizeChanged = false;
+            mDisplayCutoutChanged = false;
             mResizedWhileNotDragResizingReported = true;
             mWinAnimator.mSurfaceResized = false;
             mReportOrientationChanged = false;
@@ -2923,14 +2938,16 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
 
     private void dispatchResized(Rect frame, Rect overscanInsets, Rect contentInsets,
             Rect visibleInsets, Rect stableInsets, Rect outsets, boolean reportDraw,
-            MergedConfiguration mergedConfiguration, boolean reportOrientation, int displayId)
+            MergedConfiguration mergedConfiguration, boolean reportOrientation, int displayId,
+            DisplayCutout displayCutout)
             throws RemoteException {
         final boolean forceRelayout = isDragResizeChanged() || mResizedWhileNotDragResizing
                 || reportOrientation;
 
         mClient.resized(frame, overscanInsets, contentInsets, visibleInsets, stableInsets, outsets,
                 reportDraw, mergedConfiguration, getBackdropFrame(frame), forceRelayout,
-                mPolicy.isNavBarForcedShownLw(this), displayId);
+                mPolicy.isNavBarForcedShownLw(this), displayId,
+                new DisplayCutout.ParcelableWrapper(displayCutout));
         mDragResizingChangeReported = true;
     }
 
@@ -3247,6 +3264,7 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
                     pw.print(" stable="); mStableInsets.printShortString(pw);
                     pw.print(" surface="); mAttrs.surfaceInsets.printShortString(pw);
                     pw.print(" outsets="); mOutsets.printShortString(pw);
+                    pw.print(" cutout=" + mDisplayCutout);
                     pw.println();
             pw.print(prefix); pw.print("Lst insets: overscan=");
                     mLastOverscanInsets.printShortString(pw);
@@ -3255,6 +3273,7 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
                     pw.print(" stable="); mLastStableInsets.printShortString(pw);
                     pw.print(" physical="); mLastOutsets.printShortString(pw);
                     pw.print(" outset="); mLastOutsets.printShortString(pw);
+                    pw.print(" cutout=" + mLastDisplayCutout);
                     pw.println();
         }
         pw.print(prefix); pw.print(mWinAnimator); pw.println(":");
@@ -4279,6 +4298,7 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
         mLastVisibleInsets.set(mVisibleInsets);
         mLastStableInsets.set(mStableInsets);
         mLastOutsets.set(mOutsets);
+        mLastDisplayCutout = mDisplayCutout;
     }
 
     // TODO: Hack to work around the number of states AppWindowToken needs to access without having

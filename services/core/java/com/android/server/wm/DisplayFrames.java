@@ -21,8 +21,10 @@ import static android.view.Surface.ROTATION_270;
 import static android.view.Surface.ROTATION_90;
 import static com.android.server.wm.proto.DisplayFramesProto.STABLE_BOUNDS;
 
+import android.annotation.NonNull;
 import android.graphics.Rect;
 import android.util.proto.ProtoOutputStream;
+import android.view.DisplayCutout;
 import android.view.DisplayInfo;
 
 import java.io.PrintWriter;
@@ -94,6 +96,14 @@ public class DisplayFrames {
     /** During layout, the current screen borders along which input method windows are placed. */
     public final Rect mDock = new Rect();
 
+    /** Definition of the cutout */
+    @NonNull public DisplayCutout mDisplayCutout = DisplayCutout.NO_CUTOUT;
+
+    /**
+     * During layout, the frame that is display-cutout safe, i.e. that does not intersect with it.
+     */
+    public final Rect mDisplayCutoutSafe = new Rect();
+
     private final Rect mDisplayInfoOverscan = new Rect();
     private final Rect mRotatedDisplayInfoOverscan = new Rect();
     public int mDisplayWidth;
@@ -152,7 +162,9 @@ public class DisplayFrames {
         mStable.set(mUnrestricted);
         mStableFullscreen.set(mUnrestricted);
         mCurrent.set(mUnrestricted);
-
+        mDisplayCutout = DisplayCutout.NO_CUTOUT;
+        mDisplayCutoutSafe.set(Integer.MIN_VALUE, Integer.MIN_VALUE,
+                Integer.MAX_VALUE, Integer.MAX_VALUE);
     }
 
     public int getInputMethodWindowVisibleHeight() {
@@ -182,6 +194,7 @@ public class DisplayFrames {
         dumpFrame(mUnrestricted, "mUnrestricted", myPrefix, pw);
         dumpFrame(mDisplayInfoOverscan, "mDisplayInfoOverscan", myPrefix, pw);
         dumpFrame(mRotatedDisplayInfoOverscan, "mRotatedDisplayInfoOverscan", myPrefix, pw);
+        pw.println(myPrefix + "mDisplayCutout=" + mDisplayCutout);
     }
 
     private void dumpFrame(Rect frame, String name, String prefix, PrintWriter pw) {
