@@ -2944,10 +2944,10 @@ public class ActivityManager {
         /**
          * Constant for {@link #importance}: This process is running an
          * application that can not save its state, and thus can't be killed
-         * while in the background.
-         * @hide
+         * while in the background.  This will be used with apps that have
+         * {@link android.R.attr#cantSaveState} set on their application tag.
          */
-        public static final int IMPORTANCE_CANT_SAVE_STATE= 270;
+        public static final int IMPORTANCE_CANT_SAVE_STATE = 270;
 
         /**
          * Constant for {@link #importance}: This process is contains services
@@ -2995,7 +2995,7 @@ public class ActivityManager {
                 return IMPORTANCE_CACHED;
             } else if (procState >= PROCESS_STATE_SERVICE) {
                 return IMPORTANCE_SERVICE;
-            } else if (procState > PROCESS_STATE_HEAVY_WEIGHT) {
+            } else if (procState == PROCESS_STATE_HEAVY_WEIGHT) {
                 return IMPORTANCE_CANT_SAVE_STATE;
             } else if (procState >= PROCESS_STATE_TRANSIENT_BACKGROUND) {
                 return IMPORTANCE_PERCEPTIBLE;
@@ -3051,7 +3051,7 @@ public class ActivityManager {
                 return PROCESS_STATE_HOME;
             } else if (importance >= IMPORTANCE_SERVICE) {
                 return PROCESS_STATE_SERVICE;
-            } else if (importance > IMPORTANCE_CANT_SAVE_STATE) {
+            } else if (importance == IMPORTANCE_CANT_SAVE_STATE) {
                 return PROCESS_STATE_HEAVY_WEIGHT;
             } else if (importance >= IMPORTANCE_PERCEPTIBLE) {
                 return PROCESS_STATE_TRANSIENT_BACKGROUND;
