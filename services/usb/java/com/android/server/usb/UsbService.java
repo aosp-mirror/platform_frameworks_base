@@ -304,6 +304,13 @@ public class UsbService extends IUsbManager.Stub {
         return null;
     }
 
+    /* Returns a dup of the control file descriptor for the given function. */
+    @Override
+    public ParcelFileDescriptor getControlFd(long function) {
+        mContext.enforceCallingOrSelfPermission(android.Manifest.permission.ACCESS_MTP, null);
+        return mDeviceManager.getControlFd(function);
+    }
+
     @Override
     public void setDevicePackage(UsbDevice device, String packageName, int userId) {
         device = Preconditions.checkNotNull(device);
