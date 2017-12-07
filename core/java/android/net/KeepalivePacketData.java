@@ -16,13 +16,13 @@
 
 package android.net;
 
-import static android.net.util.NetworkConstants.IPV4_HEADER_MIN_LEN;
-import static android.net.util.NetworkConstants.UDP_HEADER_LEN;
-
 import android.system.OsConstants;
 import android.net.ConnectivityManager;
-import android.net.NetworkUtils;
 import android.net.util.IpUtils;
+import android.os.Parcel;
+import android.os.Parcelable;
+import android.system.OsConstants;
+import android.util.Log;
 
 import java.net.Inet4Address;
 import java.net.Inet6Address;
@@ -38,9 +38,8 @@ import static android.net.ConnectivityManager.PacketKeepalive.*;
  *
  * @hide
  */
-public class KeepalivePacketData {
-    /** Protocol of the packet to send; one of the OsConstants.ETH_P_* values. */
-    public final int protocol;
+public class KeepalivePacketData implements Parcelable {
+    private static final String TAG = "KeepalivePacketData";
 
     /** Source IP address */
     public final InetAddress srcAddress;
@@ -54,54 +53,57 @@ public class KeepalivePacketData {
     /** Destination port */
     public final int dstPort;
 
-    /** Destination MAC address. Can change if routing changes. */
-    public byte[] dstMac;
-
     /** Packet data. A raw byte string of packet data, not including the link-layer header. */
-    public final byte[] data;
+    private final byte[] mPacket;
 
+    private static final int IPV4_HEADER_LENGTH = 20;
+    private static final int UDP_HEADER_LENGTH = 8;
+
+    // This should only be constructed via static factory methods, such as
+    // nattKeepalivePacket
     protected KeepalivePacketData(InetAddress srcAddress, int srcPort,
             InetAddress dstAddress, int dstPort, byte[] data) throws InvalidPacketException {
         this.srcAddress = srcAddress;
         this.dstAddress = dstAddress;
         this.srcPort = srcPort;
         this.dstPort = dstPort;
-        this.data = data;
+        this.mPacket = data;
 
         // Check we have two IP addresses of the same family.
-        if (srcAddress == null || dstAddress == null ||
-                !srcAddress.getClass().getName().equals(dstAddress.getClass().getName())) {
-            throw new InvalidPacketException(ERROR_INVALID_IP_ADDRESS);
-        }
-
-        // Set the protocol.
-        if (this.dstAddress instanceof Inet4Address) {
-            this.protocol = OsConstants.ETH_P_IP;
-        } else if (this.dstAddress instanceof Inet6Address) {
-            this.protocol = OsConstants.ETH_P_IPV6;
-        } else {
+        if (srcAddress == null || dstAddress == null || !srcAddress.getClass().getName()
+                .equals(dstAddress.getClass().getName())) {
+            Log.e(TAG, "Invalid or mismatched InetAddresses in KeepalivePacketData");
             throw new InvalidPacketException(ERROR_INVALID_IP_ADDRESS);
         }
 
         // Check the ports.
         if (!IpUtils.isValidUdpOrTcpPort(srcPort) || !IpUtils.isValidUdpOrTcpPort(dstPort)) {
+            Log.e(TAG, "Invalid ports in KeepalivePacketData");
             throw new InvalidPacketException(ERROR_INVALID_PORT);
         }
     }
 
     public static class InvalidPacketException extends Exception {
-        final public int error;
+        public final int error;
         public InvalidPacketException(int error) {
             this.error = error;
         }
     }
 
-    /**
-     * Creates an IPsec NAT-T keepalive packet with the specified parameters.
-     */
+    public byte[] getPacket() {
+        return mPacket.clone();
+    }
+
     public static KeepalivePacketData nattKeepalivePacket(
-            InetAddress srcAddress, int srcPort,
-            InetAddress dstAddress, int dstPort) throws InvalidPacketException {
+            InetAddress srcAddress, int srcPort, InetAddress dstAddress, int dstPort)
+            throws InvalidPacketException {
+
+        // FIXME: remove this and actually support IPv6 keepalives
+        if (srcAddress instanceof Inet6Address && dstAddress instanceof Inet6Address) {
+            // Optimistically returning an IPv6 Keepalive Packet with no data,
+            // which currently only works on cellular
+            return new KeepalivePacketData(srcAddress, srcPort, dstAddress, dstPort, new byte[0]);
+        }
 
         if (!(srcAddress instanceof Inet4Address) || !(dstAddress instanceof Inet4Address)) {
             throw new InvalidPacketException(ERROR_INVALID_IP_ADDRESS);
@@ -111,7 +113,7 @@ public class KeepalivePacketData {
             throw new InvalidPacketException(ERROR_INVALID_PORT);
         }
 
-        int length = IPV4_HEADER_MIN_LEN + UDP_HEADER_LEN + 1;
+        int length = IPV4_HEADER_LENGTH + UDP_HEADER_LENGTH + 1;
         ByteBuffer buf = ByteBuffer.allocate(length);
         buf.order(ByteOrder.BIG_ENDIAN);
         buf.putShort((short) 0x4500);             // IP version and TOS
@@ -130,8 +132,43 @@ public class KeepalivePacketData {
         buf.putShort((short) 0);                  // UDP checksum
         buf.put((byte) 0xff);                     // NAT-T keepalive
         buf.putShort(ipChecksumOffset, IpUtils.ipChecksum(buf, 0));
-        buf.putShort(udpChecksumOffset, IpUtils.udpChecksum(buf, 0, IPV4_HEADER_MIN_LEN));
+        buf.putShort(udpChecksumOffset, IpUtils.udpChecksum(buf, 0, IPV4_HEADER_LENGTH));
 
         return new KeepalivePacketData(srcAddress, srcPort, dstAddress, dstPort, buf.array());
     }
+
+    /* Parcelable Implementation */
+    public int describeContents() {
+        return 0;
+    }
+
+    /** Write to parcel */
+    public void writeToParcel(Parcel out, int flags) {
+        out.writeString(srcAddress.getHostAddress());
+        out.writeString(dstAddress.getHostAddress());
+        out.writeInt(srcPort);
+        out.writeInt(dstPort);
+        out.writeByteArray(mPacket);
+    }
+
+    private KeepalivePacketData(Parcel in) {
+        srcAddress = NetworkUtils.numericToInetAddress(in.readString());
+        dstAddress = NetworkUtils.numericToInetAddress(in.readString());
+        srcPort = in.readInt();
+        dstPort = in.readInt();
+        mPacket = in.createByteArray();
+    }
+
+    /** Parcelable Creator */
+    public static final Parcelable.Creator<KeepalivePacketData> CREATOR =
+            new Parcelable.Creator<KeepalivePacketData>() {
+                public KeepalivePacketData createFromParcel(Parcel in) {
+                    return new KeepalivePacketData(in);
+                }
+
+                public KeepalivePacketData[] newArray(int size) {
+                    return new KeepalivePacketData[size];
+                }
+            };
+
 }
