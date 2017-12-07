@@ -649,21 +649,18 @@ public class StatusBar extends SystemUI implements DemoMode,
             .Callback() {
         @Override
         public void onFinished() {
-            notifyKeyguardState();
-        }
-
-        @Override
-        public void onCancelled() {
-            notifyKeyguardState();
-        }
-
-        private void notifyKeyguardState() {
             if (mStatusBarKeyguardViewManager == null) {
                 Log.w(TAG, "Tried to notify keyguard visibility when "
                         + "mStatusBarKeyguardViewManager was null");
                 return;
             }
             mStatusBarKeyguardViewManager.onKeyguardFadedAway();
+        }
+
+        @Override
+        public void onCancelled() {
+            // Transition was cancelled because another one took over.
+            // Nothing to do in here but wait.
         }
     };
 
