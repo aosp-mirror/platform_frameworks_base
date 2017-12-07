@@ -2729,13 +2729,13 @@ public abstract class CameraMetadata<TKey> {
     //
 
     /**
-     * <p>Scene change is not detected within AF regions.</p>
+     * <p>Scene change is not detected within the AF region(s).</p>
      * @see CaptureResult#CONTROL_AF_SCENE_CHANGE
      */
     public static final int CONTROL_AF_SCENE_CHANGE_NOT_DETECTED = 0;
 
     /**
-     * <p>Scene change is detected within AF regions.</p>
+     * <p>Scene change is detected within the AF region(s).</p>
      * @see CaptureResult#CONTROL_AF_SCENE_CHANGE
      */
     public static final int CONTROL_AF_SCENE_CHANGE_DETECTED = 1;
