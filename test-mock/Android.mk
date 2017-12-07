@@ -18,32 +18,6 @@ LOCAL_PATH:= $(call my-dir)
 
 android_test_mock_source_files := $(call all-java-files-under, src/android/test/mock)
 
-# Build the repackaged.android.test.mock library
-# ==============================================
-include $(CLEAR_VARS)
-
-LOCAL_SRC_FILES := $(call all-java-files-under, src)
-
-LOCAL_JAVA_LIBRARIES := core-oj core-libart framework legacy-test
-
-LOCAL_JARJAR_RULES := $(LOCAL_PATH)/../legacy-test/jarjar-rules.txt
-
-LOCAL_MODULE:= repackaged.android.test.mock
-
-include $(BUILD_STATIC_JAVA_LIBRARY)
-
-# Build the android.test.mock library
-# ===================================
-include $(CLEAR_VARS)
-
-LOCAL_SRC_FILES := $(call all-java-files-under, src)
-
-LOCAL_JAVA_LIBRARIES := core-oj core-libart framework
-
-LOCAL_MODULE:= android.test.mock
-
-include $(BUILD_JAVA_LIBRARY)
-
 # Generate the stub source files for android.test.mock.stubs
 # ==========================================================
 include $(CLEAR_VARS)
