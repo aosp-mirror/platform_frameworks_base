@@ -112,6 +112,14 @@ public:
     void noteMatcherMatched(const ConfigKey& key, const std::string& name);
 
     /**
+     * Report that an anomaly detection alert has been declared.
+     *
+     * [key]: The config key that this alert belongs to.
+     * [name]: The name of the alert.
+     */
+    void noteAnomalyDeclared(const ConfigKey& key, const std::string& name);
+
+    /**
      * Report an atom event has been logged.
      */
     void noteAtomLogged(int atomId, int32_t timeSec);
@@ -183,6 +191,10 @@ private:
     // StatsCompanionService.
     int mAnomalyAlarmRegisteredStats = 0;
 
+    // Stores the number of times an anomaly detection alert has been declared
+    // (per config, per alert name).
+    std::map<const ConfigKey, std::map<const std::string, int>> mAlertStats;
+
     // Stores how many times a matcher have been matched.
     std::map<const ConfigKey, std::map<const std::string, int>> mMatcherStats;
 
@@ -190,7 +202,8 @@ private:
 
     void resetInternalLocked();
 
-    void addSubStatsToConfig(const ConfigKey& key, StatsdStatsReport_ConfigStats& configStats);
+    void addSubStatsToConfigLocked(const ConfigKey& key,
+                                   StatsdStatsReport_ConfigStats& configStats);
 
     void noteDataDropped(const ConfigKey& key, int32_t timeSec);
 

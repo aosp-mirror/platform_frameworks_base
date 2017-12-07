@@ -111,7 +111,7 @@ sp<AnomalyTracker> DurationMetricProducer::createAnomalyTracker(const Alert &ale
         return nullptr;
     }
     // TODO: return a DurationAnomalyTracker (which should sublclass AnomalyTracker)
-    return new AnomalyTracker(alert);
+    return new AnomalyTracker(alert, mConfigKey);
 }
 
 void DurationMetricProducer::startNewProtoOutputStreamLocked(long long startTime) {

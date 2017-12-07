@@ -193,6 +193,11 @@ message StatsdStatsReport {
         optional int32 max_tuple_counts = 2;
     }
 
+    message AlertStats {
+        optional string name = 1;
+        optional int32 declared_times = 2;
+    }
+
     message ConfigStats {
         optional int32 uid = 1;
         optional string name = 2;
@@ -210,6 +215,7 @@ message StatsdStatsReport {
         repeated MatcherStats matcher_stats = 13;
         repeated ConditionStats condition_stats = 14;
         repeated MetricStats metric_stats = 15;
+        repeated AlertStats alert_stats = 16;
     }
 
     repeated ConfigStats config_stats = 3;

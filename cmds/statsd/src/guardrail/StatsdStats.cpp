@@ -41,9 +41,6 @@ using std::vector;
 const int FIELD_ID_BEGIN_TIME = 1;
 const int FIELD_ID_END_TIME = 2;
 const int FIELD_ID_CONFIG_STATS = 3;
-const int FIELD_ID_MATCHER_STATS = 4;
-const int FIELD_ID_CONDITION_STATS = 5;
-const int FIELD_ID_METRIC_STATS = 6;
 const int FIELD_ID_ATOM_STATS = 7;
 const int FIELD_ID_UIDMAP_STATS = 8;
 const int FIELD_ID_ANOMALY_ALARM_STATS = 9;
@@ -104,11 +101,12 @@ void StatsdStats::noteConfigRemovedInternalLocked(const ConfigKey& key) {
     if (it != mConfigStats.end()) {
         int32_t nowTimeSec = time(nullptr);
         it->second.set_deletion_time_sec(nowTimeSec);
-        // Add condition stats, metrics stats, matcher stats
-        addSubStatsToConfig(key, it->second);
+        // Add condition stats, metrics stats, matcher stats, alert stats
+        addSubStatsToConfigLocked(key, it->second);
         // Remove them after they are added to the config stats.
         mMatcherStats.erase(key);
         mMetricsStats.erase(key);
+        mAlertStats.erase(key);
         mConditionStats.erase(key);
         mIceBox.push_back(it->second);
         mConfigStats.erase(it);
@@ -222,6 +220,12 @@ void StatsdStats::noteMatcherMatched(const ConfigKey& key, const string& name) {
     matcherStats[name]++;
 }
 
+void StatsdStats::noteAnomalyDeclared(const ConfigKey& key, const string& name) {
+    lock_guard<std::mutex> lock(mLock);
+    auto& alertStats = mAlertStats[key];
+    alertStats[name]++;
+}
+
 void StatsdStats::noteRegisteredAnomalyAlarmChanged() {
     lock_guard<std::mutex> lock(mLock);
     mAnomalyAlarmRegisteredStats++;
@@ -254,6 +258,7 @@ void StatsdStats::resetInternalLocked() {
     mConditionStats.clear();
     mMetricsStats.clear();
     std::fill(mPushedAtomStats.begin(), mPushedAtomStats.end(), 0);
+    mAlertStats.clear();
     mAnomalyAlarmRegisteredStats = 0;
     mMatcherStats.clear();
     for (auto& config : mConfigStats) {
@@ -263,10 +268,11 @@ void StatsdStats::resetInternalLocked() {
         config.second.clear_matcher_stats();
         config.second.clear_condition_stats();
         config.second.clear_metric_stats();
+        config.second.clear_alert_stats();
     }
 }
 
-void StatsdStats::addSubStatsToConfig(const ConfigKey& key,
+void StatsdStats::addSubStatsToConfigLocked(const ConfigKey& key,
                                       StatsdStatsReport_ConfigStats& configStats) {
     // Add matcher stats
     if (mMatcherStats.find(key) != mMatcherStats.end()) {
@@ -296,6 +302,16 @@ void StatsdStats::addSubStatsToConfig(const ConfigKey& key,
             output->set_name(stats.first);
             output->set_max_tuple_counts(stats.second);
             VLOG("metrics %s max output tuple size %d", stats.first.c_str(), stats.second);
+        }
+    }
+    // Add anomaly detection alert stats
+    if (mAlertStats.find(key) != mAlertStats.end()) {
+        const auto& alertStats = mAlertStats[key];
+        for (const auto& stats : alertStats) {
+            auto output = configStats.add_alert_stats();
+            output->set_name(stats.first);
+            output->set_declared_times(stats.second);
+            VLOG("alert %s declared %d times", stats.first.c_str(), stats.second);
         }
     }
 }
@@ -367,7 +383,7 @@ void StatsdStats::dumpStats(std::vector<uint8_t>* output, bool reset) {
             }
         }
 
-        addSubStatsToConfig(pair.first, configStats);
+        addSubStatsToConfigLocked(pair.first, configStats);
 
         const int numBytes = configStats.ByteSize();
         vector<char> buffer(numBytes);
@@ -379,6 +395,7 @@ void StatsdStats::dumpStats(std::vector<uint8_t>* output, bool reset) {
         configStats.clear_matcher_stats();
         configStats.clear_condition_stats();
         configStats.clear_metric_stats();
+        configStats.clear_alert_stats();
     }
 
     VLOG("********Atom stats***********");

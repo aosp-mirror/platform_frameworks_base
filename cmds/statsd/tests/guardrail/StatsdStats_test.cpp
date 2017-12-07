@@ -118,6 +118,10 @@ TEST(StatsdStatsTest, TestSubStats) {
     stats.noteMetricDimensionSize(key, "metric1", 201);
     stats.noteMetricDimensionSize(key, "metric1", 202);
 
+    stats.noteAnomalyDeclared(key, "alert1");
+    stats.noteAnomalyDeclared(key, "alert1");
+    stats.noteAnomalyDeclared(key, "alert2");
+
     // broadcast-> 2
     stats.noteBroadcastSent(key);
     stats.noteBroadcastSent(key);
@@ -142,7 +146,6 @@ TEST(StatsdStatsTest, TestSubStats) {
     EXPECT_EQ(3, configReport.dump_report_time_sec_size());
 
     EXPECT_EQ(2, configReport.matcher_stats_size());
-
     // matcher1 is the first in the list
     if (!configReport.matcher_stats(0).name().compare("matcher1")) {
         EXPECT_EQ(2, configReport.matcher_stats(0).matched_times());
@@ -157,6 +160,13 @@ TEST(StatsdStatsTest, TestSubStats) {
         EXPECT_EQ("matcher1", configReport.matcher_stats(1).name());
     }
 
+    EXPECT_EQ(2, configReport.alert_stats_size());
+    bool alert1first = !configReport.alert_stats(0).name().compare("alert1");
+    EXPECT_EQ("alert1", configReport.alert_stats(alert1first ? 0 : 1).name());
+    EXPECT_EQ(2, configReport.alert_stats(alert1first ? 0 : 1).declared_times());
+    EXPECT_EQ("alert2", configReport.alert_stats(alert1first ? 1 : 0).name());
+    EXPECT_EQ(1, configReport.alert_stats(alert1first ? 1 : 0).declared_times());
+
     EXPECT_EQ(1, configReport.condition_stats_size());
     EXPECT_EQ("condition1", configReport.condition_stats(0).name());
     EXPECT_EQ(250, configReport.condition_stats(0).max_tuple_counts());
@@ -169,6 +179,7 @@ TEST(StatsdStatsTest, TestSubStats) {
     stats.noteMatcherMatched(key, "matcher99");
     stats.noteConditionDimensionSize(key, "condition99", 300);
     stats.noteMetricDimensionSize(key, "metric99", 270);
+    stats.noteAnomalyDeclared(key, "alert99");
 
     // now the config stats should only contain the stats about the new event.
     stats.dumpStats(&output, false);
@@ -187,6 +198,10 @@ TEST(StatsdStatsTest, TestSubStats) {
     EXPECT_EQ(1, configReport2.metric_stats_size());
     EXPECT_EQ("metric99", configReport2.metric_stats(0).name());
     EXPECT_EQ(270, configReport2.metric_stats(0).max_tuple_counts());
+
+    EXPECT_EQ(1, configReport2.alert_stats_size());
+    EXPECT_EQ("alert99", configReport2.alert_stats(0).name());
+    EXPECT_EQ(1, configReport2.alert_stats(0).declared_times());
 }
 
 TEST(StatsdStatsTest, TestAtomLog) {
