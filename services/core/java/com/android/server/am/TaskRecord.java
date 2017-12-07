@@ -193,6 +193,11 @@ class TaskRecord extends ConfigurationContainer implements TaskWindowContainerLi
     // Do not move the stack as a part of reparenting
     static final int REPARENT_LEAVE_STACK_IN_PLACE = 2;
 
+    /**
+     * The factory used to create {@link TaskRecord}. This allows OEM subclass {@link TaskRecord}.
+     */
+    private static TaskRecordFactory sTaskRecordFactory;
+
     final int taskId;       // Unique identifier for this task.
     String affinity;        // The affinity name for this task, or null; may change identity.
     String rootAffinity;    // Initial base affinity, or null; does not change from initial root.
@@ -312,6 +317,10 @@ class TaskRecord extends ConfigurationContainer implements TaskWindowContainerLi
 
     private TaskWindowContainerController mWindowContainerController;
 
+    /**
+     * Don't use constructor directly. Use {@link #create(ActivityManagerService, int, ActivityInfo,
+     * Intent, TaskDescription)} instead.
+     */
     TaskRecord(ActivityManagerService service, int _taskId, ActivityInfo info, Intent _intent,
             IVoiceInteractionSession _voiceSession, IVoiceInteractor _voiceInteractor) {
         mService = service;
@@ -331,6 +340,10 @@ class TaskRecord extends ConfigurationContainer implements TaskWindowContainerLi
         mService.mTaskChangeNotificationController.notifyTaskCreated(_taskId, realActivity);
     }
 
+    /**
+     * Don't use constructor directly. Use {@link #create(ActivityManagerService, int, ActivityInfo,
+     * Intent, IVoiceInteractionSession, IVoiceInteractor)} instead.
+     */
     TaskRecord(ActivityManagerService service, int _taskId, ActivityInfo info, Intent _intent,
             TaskDescription _taskDescription) {
         mService = service;
@@ -357,7 +370,10 @@ class TaskRecord extends ConfigurationContainer implements TaskWindowContainerLi
         mService.mTaskChangeNotificationController.notifyTaskCreated(_taskId, realActivity);
     }
 
-    private TaskRecord(ActivityManagerService service, int _taskId, Intent _intent,
+    /**
+     * Don't use constructor directly. This is only used by XML parser.
+     */
+    TaskRecord(ActivityManagerService service, int _taskId, Intent _intent,
             Intent _affinityIntent, String _affinity, String _rootAffinity,
             ComponentName _realActivity, ComponentName _origActivity, boolean _rootWasReset,
             boolean _autoRemoveRecents, boolean _askedCompatMode, int _userId,
@@ -1632,278 +1648,6 @@ class TaskRecord extends ConfigurationContainer implements TaskWindowContainerLi
         updateTaskDescription();
     }
 
-    void saveToXml(XmlSerializer out) throws IOException, XmlPullParserException {
-        if (DEBUG_RECENTS) Slog.i(TAG_RECENTS, "Saving task=" + this);
-
-        out.attribute(null, ATTR_TASKID, String.valueOf(taskId));
-        if (realActivity != null) {
-            out.attribute(null, ATTR_REALACTIVITY, realActivity.flattenToShortString());
-        }
-        out.attribute(null, ATTR_REALACTIVITY_SUSPENDED, String.valueOf(realActivitySuspended));
-        if (origActivity != null) {
-            out.attribute(null, ATTR_ORIGACTIVITY, origActivity.flattenToShortString());
-        }
-        // Write affinity, and root affinity if it is different from affinity.
-        // We use the special string "@" for a null root affinity, so we can identify
-        // later whether we were given a root affinity or should just make it the
-        // same as the affinity.
-        if (affinity != null) {
-            out.attribute(null, ATTR_AFFINITY, affinity);
-            if (!affinity.equals(rootAffinity)) {
-                out.attribute(null, ATTR_ROOT_AFFINITY, rootAffinity != null ? rootAffinity : "@");
-            }
-        } else if (rootAffinity != null) {
-            out.attribute(null, ATTR_ROOT_AFFINITY, rootAffinity != null ? rootAffinity : "@");
-        }
-        out.attribute(null, ATTR_ROOTHASRESET, String.valueOf(rootWasReset));
-        out.attribute(null, ATTR_AUTOREMOVERECENTS, String.valueOf(autoRemoveRecents));
-        out.attribute(null, ATTR_ASKEDCOMPATMODE, String.valueOf(askedCompatMode));
-        out.attribute(null, ATTR_USERID, String.valueOf(userId));
-        out.attribute(null, ATTR_USER_SETUP_COMPLETE, String.valueOf(mUserSetupComplete));
-        out.attribute(null, ATTR_EFFECTIVE_UID, String.valueOf(effectiveUid));
-        out.attribute(null, ATTR_LASTTIMEMOVED, String.valueOf(mLastTimeMoved));
-        out.attribute(null, ATTR_NEVERRELINQUISH, String.valueOf(mNeverRelinquishIdentity));
-        if (lastDescription != null) {
-            out.attribute(null, ATTR_LASTDESCRIPTION, lastDescription.toString());
-        }
-        if (lastTaskDescription != null) {
-            lastTaskDescription.saveToXml(out);
-        }
-        out.attribute(null, ATTR_TASK_AFFILIATION_COLOR, String.valueOf(mAffiliatedTaskColor));
-        out.attribute(null, ATTR_TASK_AFFILIATION, String.valueOf(mAffiliatedTaskId));
-        out.attribute(null, ATTR_PREV_AFFILIATION, String.valueOf(mPrevAffiliateTaskId));
-        out.attribute(null, ATTR_NEXT_AFFILIATION, String.valueOf(mNextAffiliateTaskId));
-        out.attribute(null, ATTR_CALLING_UID, String.valueOf(mCallingUid));
-        out.attribute(null, ATTR_CALLING_PACKAGE, mCallingPackage == null ? "" : mCallingPackage);
-        out.attribute(null, ATTR_RESIZE_MODE, String.valueOf(mResizeMode));
-        out.attribute(null, ATTR_SUPPORTS_PICTURE_IN_PICTURE,
-                String.valueOf(mSupportsPictureInPicture));
-        if (mLastNonFullscreenBounds != null) {
-            out.attribute(
-                    null, ATTR_NON_FULLSCREEN_BOUNDS, mLastNonFullscreenBounds.flattenToString());
-        }
-        out.attribute(null, ATTR_MIN_WIDTH, String.valueOf(mMinWidth));
-        out.attribute(null, ATTR_MIN_HEIGHT, String.valueOf(mMinHeight));
-        out.attribute(null, ATTR_PERSIST_TASK_VERSION, String.valueOf(PERSIST_TASK_VERSION));
-
-        if (affinityIntent != null) {
-            out.startTag(null, TAG_AFFINITYINTENT);
-            affinityIntent.saveToXml(out);
-            out.endTag(null, TAG_AFFINITYINTENT);
-        }
-
-        out.startTag(null, TAG_INTENT);
-        intent.saveToXml(out);
-        out.endTag(null, TAG_INTENT);
-
-        final ArrayList<ActivityRecord> activities = mActivities;
-        final int numActivities = activities.size();
-        for (int activityNdx = 0; activityNdx < numActivities; ++activityNdx) {
-            final ActivityRecord r = activities.get(activityNdx);
-            if (r.info.persistableMode == ActivityInfo.PERSIST_ROOT_ONLY || !r.isPersistable() ||
-                    ((r.intent.getFlags() & FLAG_ACTIVITY_NEW_DOCUMENT
-                            | FLAG_ACTIVITY_RETAIN_IN_RECENTS) == FLAG_ACTIVITY_NEW_DOCUMENT) &&
-                            activityNdx > 0) {
-                // Stop at first non-persistable or first break in task (CLEAR_WHEN_TASK_RESET).
-                break;
-            }
-            out.startTag(null, TAG_ACTIVITY);
-            r.saveToXml(out);
-            out.endTag(null, TAG_ACTIVITY);
-        }
-    }
-
-    static TaskRecord restoreFromXml(XmlPullParser in, ActivityStackSupervisor stackSupervisor)
-            throws IOException, XmlPullParserException {
-        Intent intent = null;
-        Intent affinityIntent = null;
-        ArrayList<ActivityRecord> activities = new ArrayList<>();
-        ComponentName realActivity = null;
-        boolean realActivitySuspended = false;
-        ComponentName origActivity = null;
-        String affinity = null;
-        String rootAffinity = null;
-        boolean hasRootAffinity = false;
-        boolean rootHasReset = false;
-        boolean autoRemoveRecents = false;
-        boolean askedCompatMode = false;
-        int taskType = 0;
-        int userId = 0;
-        boolean userSetupComplete = true;
-        int effectiveUid = -1;
-        String lastDescription = null;
-        long lastTimeOnTop = 0;
-        boolean neverRelinquishIdentity = true;
-        int taskId = INVALID_TASK_ID;
-        final int outerDepth = in.getDepth();
-        TaskDescription taskDescription = new TaskDescription();
-        int taskAffiliation = INVALID_TASK_ID;
-        int taskAffiliationColor = 0;
-        int prevTaskId = INVALID_TASK_ID;
-        int nextTaskId = INVALID_TASK_ID;
-        int callingUid = -1;
-        String callingPackage = "";
-        int resizeMode = RESIZE_MODE_FORCE_RESIZEABLE;
-        boolean supportsPictureInPicture = false;
-        Rect bounds = null;
-        int minWidth = INVALID_MIN_SIZE;
-        int minHeight = INVALID_MIN_SIZE;
-        int persistTaskVersion = 0;
-
-        for (int attrNdx = in.getAttributeCount() - 1; attrNdx >= 0; --attrNdx) {
-            final String attrName = in.getAttributeName(attrNdx);
-            final String attrValue = in.getAttributeValue(attrNdx);
-            if (TaskPersister.DEBUG) Slog.d(TaskPersister.TAG, "TaskRecord: attribute name=" +
-                    attrName + " value=" + attrValue);
-            if (ATTR_TASKID.equals(attrName)) {
-                if (taskId == INVALID_TASK_ID) taskId = Integer.parseInt(attrValue);
-            } else if (ATTR_REALACTIVITY.equals(attrName)) {
-                realActivity = ComponentName.unflattenFromString(attrValue);
-            } else if (ATTR_REALACTIVITY_SUSPENDED.equals(attrName)) {
-                realActivitySuspended = Boolean.valueOf(attrValue);
-            } else if (ATTR_ORIGACTIVITY.equals(attrName)) {
-                origActivity = ComponentName.unflattenFromString(attrValue);
-            } else if (ATTR_AFFINITY.equals(attrName)) {
-                affinity = attrValue;
-            } else if (ATTR_ROOT_AFFINITY.equals(attrName)) {
-                rootAffinity = attrValue;
-                hasRootAffinity = true;
-            } else if (ATTR_ROOTHASRESET.equals(attrName)) {
-                rootHasReset = Boolean.parseBoolean(attrValue);
-            } else if (ATTR_AUTOREMOVERECENTS.equals(attrName)) {
-                autoRemoveRecents = Boolean.parseBoolean(attrValue);
-            } else if (ATTR_ASKEDCOMPATMODE.equals(attrName)) {
-                askedCompatMode = Boolean.parseBoolean(attrValue);
-            } else if (ATTR_USERID.equals(attrName)) {
-                userId = Integer.parseInt(attrValue);
-            } else if (ATTR_USER_SETUP_COMPLETE.equals(attrName)) {
-                userSetupComplete = Boolean.parseBoolean(attrValue);
-            } else if (ATTR_EFFECTIVE_UID.equals(attrName)) {
-                effectiveUid = Integer.parseInt(attrValue);
-            } else if (ATTR_TASKTYPE.equals(attrName)) {
-                taskType = Integer.parseInt(attrValue);
-            } else if (ATTR_LASTDESCRIPTION.equals(attrName)) {
-                lastDescription = attrValue;
-            } else if (ATTR_LASTTIMEMOVED.equals(attrName)) {
-                lastTimeOnTop = Long.parseLong(attrValue);
-            } else if (ATTR_NEVERRELINQUISH.equals(attrName)) {
-                neverRelinquishIdentity = Boolean.parseBoolean(attrValue);
-            } else if (attrName.startsWith(TaskDescription.ATTR_TASKDESCRIPTION_PREFIX)) {
-                taskDescription.restoreFromXml(attrName, attrValue);
-            } else if (ATTR_TASK_AFFILIATION.equals(attrName)) {
-                taskAffiliation = Integer.parseInt(attrValue);
-            } else if (ATTR_PREV_AFFILIATION.equals(attrName)) {
-                prevTaskId = Integer.parseInt(attrValue);
-            } else if (ATTR_NEXT_AFFILIATION.equals(attrName)) {
-                nextTaskId = Integer.parseInt(attrValue);
-            } else if (ATTR_TASK_AFFILIATION_COLOR.equals(attrName)) {
-                taskAffiliationColor = Integer.parseInt(attrValue);
-            } else if (ATTR_CALLING_UID.equals(attrName)) {
-                callingUid = Integer.parseInt(attrValue);
-            } else if (ATTR_CALLING_PACKAGE.equals(attrName)) {
-                callingPackage = attrValue;
-            } else if (ATTR_RESIZE_MODE.equals(attrName)) {
-                resizeMode = Integer.parseInt(attrValue);
-            } else if (ATTR_SUPPORTS_PICTURE_IN_PICTURE.equals(attrName)) {
-                supportsPictureInPicture = Boolean.parseBoolean(attrValue);
-            } else if (ATTR_NON_FULLSCREEN_BOUNDS.equals(attrName)) {
-                bounds = Rect.unflattenFromString(attrValue);
-            } else if (ATTR_MIN_WIDTH.equals(attrName)) {
-                minWidth = Integer.parseInt(attrValue);
-            } else if (ATTR_MIN_HEIGHT.equals(attrName)) {
-                minHeight = Integer.parseInt(attrValue);
-            } else if (ATTR_PERSIST_TASK_VERSION.equals(attrName)) {
-                persistTaskVersion = Integer.parseInt(attrValue);
-            } else {
-                Slog.w(TAG, "TaskRecord: Unknown attribute=" + attrName);
-            }
-        }
-
-        int event;
-        while (((event = in.next()) != XmlPullParser.END_DOCUMENT) &&
-                (event != XmlPullParser.END_TAG || in.getDepth() >= outerDepth)) {
-            if (event == XmlPullParser.START_TAG) {
-                final String name = in.getName();
-                if (TaskPersister.DEBUG) Slog.d(TaskPersister.TAG, "TaskRecord: START_TAG name=" +
-                        name);
-                if (TAG_AFFINITYINTENT.equals(name)) {
-                    affinityIntent = Intent.restoreFromXml(in);
-                } else if (TAG_INTENT.equals(name)) {
-                    intent = Intent.restoreFromXml(in);
-                } else if (TAG_ACTIVITY.equals(name)) {
-                    ActivityRecord activity = ActivityRecord.restoreFromXml(in, stackSupervisor);
-                    if (TaskPersister.DEBUG) Slog.d(TaskPersister.TAG, "TaskRecord: activity=" +
-                            activity);
-                    if (activity != null) {
-                        activities.add(activity);
-                    }
-                } else {
-                    Slog.e(TAG, "restoreTask: Unexpected name=" + name);
-                    XmlUtils.skipCurrentTag(in);
-                }
-            }
-        }
-        if (!hasRootAffinity) {
-            rootAffinity = affinity;
-        } else if ("@".equals(rootAffinity)) {
-            rootAffinity = null;
-        }
-        if (effectiveUid <= 0) {
-            Intent checkIntent = intent != null ? intent : affinityIntent;
-            effectiveUid = 0;
-            if (checkIntent != null) {
-                IPackageManager pm = AppGlobals.getPackageManager();
-                try {
-                    ApplicationInfo ai = pm.getApplicationInfo(
-                            checkIntent.getComponent().getPackageName(),
-                            PackageManager.MATCH_UNINSTALLED_PACKAGES
-                                    | PackageManager.MATCH_DISABLED_COMPONENTS, userId);
-                    if (ai != null) {
-                        effectiveUid = ai.uid;
-                    }
-                } catch (RemoteException e) {
-                }
-            }
-            Slog.w(TAG, "Updating task #" + taskId + " for " + checkIntent
-                    + ": effectiveUid=" + effectiveUid);
-        }
-
-        if (persistTaskVersion < 1) {
-            // We need to convert the resize mode of home activities saved before version one if
-            // they are marked as RESIZE_MODE_RESIZEABLE to RESIZE_MODE_RESIZEABLE_VIA_SDK_VERSION
-            // since we didn't have that differentiation before version 1 and the system didn't
-            // resize home activities before then.
-            if (taskType == 1 /* old home type */ && resizeMode == RESIZE_MODE_RESIZEABLE) {
-                resizeMode = RESIZE_MODE_RESIZEABLE_VIA_SDK_VERSION;
-            }
-        } else {
-            // This activity has previously marked itself explicitly as both resizeable and
-            // supporting picture-in-picture.  Since there is no longer a requirement for
-            // picture-in-picture activities to be resizeable, we can mark this simply as
-            // resizeable and supporting picture-in-picture separately.
-            if (resizeMode == RESIZE_MODE_RESIZEABLE_AND_PIPABLE_DEPRECATED) {
-                resizeMode = RESIZE_MODE_RESIZEABLE;
-                supportsPictureInPicture = true;
-            }
-        }
-
-        final TaskRecord task = new TaskRecord(stackSupervisor.mService, taskId, intent,
-                affinityIntent, affinity, rootAffinity, realActivity, origActivity, rootHasReset,
-                autoRemoveRecents, askedCompatMode, userId, effectiveUid, lastDescription,
-                activities, lastTimeOnTop, neverRelinquishIdentity, taskDescription,
-                taskAffiliation, prevTaskId, nextTaskId, taskAffiliationColor, callingUid,
-                callingPackage, resizeMode, supportsPictureInPicture, realActivitySuspended,
-                userSetupComplete, minWidth, minHeight);
-        task.updateOverrideConfiguration(bounds);
-
-        for (int activityNdx = activities.size() - 1; activityNdx >=0; --activityNdx) {
-            activities.get(activityNdx).setTask(task);
-        }
-
-        if (DEBUG_RECENTS) Slog.d(TAG_RECENTS, "Restored task=" + task);
-        return task;
-    }
-
     private void adjustForMinimalTaskDimensions(Rect bounds) {
         if (bounds == null) {
             return;
@@ -2318,6 +2062,384 @@ class TaskRecord extends ConfigurationContainer implements TaskWindowContainerLi
         void reset() {
             numRunning = numActivities = 0;
             top = base = null;
+        }
+    }
+
+    /**
+     * Saves this {@link TaskRecord} to XML using given serializer.
+     */
+    void saveToXml(XmlSerializer out) throws IOException, XmlPullParserException {
+        if (DEBUG_RECENTS) Slog.i(TAG_RECENTS, "Saving task=" + this);
+
+        out.attribute(null, ATTR_TASKID, String.valueOf(taskId));
+        if (realActivity != null) {
+            out.attribute(null, ATTR_REALACTIVITY, realActivity.flattenToShortString());
+        }
+        out.attribute(null, ATTR_REALACTIVITY_SUSPENDED, String.valueOf(realActivitySuspended));
+        if (origActivity != null) {
+            out.attribute(null, ATTR_ORIGACTIVITY, origActivity.flattenToShortString());
+        }
+        // Write affinity, and root affinity if it is different from affinity.
+        // We use the special string "@" for a null root affinity, so we can identify
+        // later whether we were given a root affinity or should just make it the
+        // same as the affinity.
+        if (affinity != null) {
+            out.attribute(null, ATTR_AFFINITY, affinity);
+            if (!affinity.equals(rootAffinity)) {
+                out.attribute(null, ATTR_ROOT_AFFINITY, rootAffinity != null ? rootAffinity : "@");
+            }
+        } else if (rootAffinity != null) {
+            out.attribute(null, ATTR_ROOT_AFFINITY, rootAffinity != null ? rootAffinity : "@");
+        }
+        out.attribute(null, ATTR_ROOTHASRESET, String.valueOf(rootWasReset));
+        out.attribute(null, ATTR_AUTOREMOVERECENTS, String.valueOf(autoRemoveRecents));
+        out.attribute(null, ATTR_ASKEDCOMPATMODE, String.valueOf(askedCompatMode));
+        out.attribute(null, ATTR_USERID, String.valueOf(userId));
+        out.attribute(null, ATTR_USER_SETUP_COMPLETE, String.valueOf(mUserSetupComplete));
+        out.attribute(null, ATTR_EFFECTIVE_UID, String.valueOf(effectiveUid));
+        out.attribute(null, ATTR_LASTTIMEMOVED, String.valueOf(mLastTimeMoved));
+        out.attribute(null, ATTR_NEVERRELINQUISH, String.valueOf(mNeverRelinquishIdentity));
+        if (lastDescription != null) {
+            out.attribute(null, ATTR_LASTDESCRIPTION, lastDescription.toString());
+        }
+        if (lastTaskDescription != null) {
+            lastTaskDescription.saveToXml(out);
+        }
+        out.attribute(null, ATTR_TASK_AFFILIATION_COLOR, String.valueOf(mAffiliatedTaskColor));
+        out.attribute(null, ATTR_TASK_AFFILIATION, String.valueOf(mAffiliatedTaskId));
+        out.attribute(null, ATTR_PREV_AFFILIATION, String.valueOf(mPrevAffiliateTaskId));
+        out.attribute(null, ATTR_NEXT_AFFILIATION, String.valueOf(mNextAffiliateTaskId));
+        out.attribute(null, ATTR_CALLING_UID, String.valueOf(mCallingUid));
+        out.attribute(null, ATTR_CALLING_PACKAGE, mCallingPackage == null ? "" : mCallingPackage);
+        out.attribute(null, ATTR_RESIZE_MODE, String.valueOf(mResizeMode));
+        out.attribute(null, ATTR_SUPPORTS_PICTURE_IN_PICTURE,
+                String.valueOf(mSupportsPictureInPicture));
+        if (mLastNonFullscreenBounds != null) {
+            out.attribute(
+                    null, ATTR_NON_FULLSCREEN_BOUNDS, mLastNonFullscreenBounds.flattenToString());
+        }
+        out.attribute(null, ATTR_MIN_WIDTH, String.valueOf(mMinWidth));
+        out.attribute(null, ATTR_MIN_HEIGHT, String.valueOf(mMinHeight));
+        out.attribute(null, ATTR_PERSIST_TASK_VERSION, String.valueOf(PERSIST_TASK_VERSION));
+
+        if (affinityIntent != null) {
+            out.startTag(null, TAG_AFFINITYINTENT);
+            affinityIntent.saveToXml(out);
+            out.endTag(null, TAG_AFFINITYINTENT);
+        }
+
+        out.startTag(null, TAG_INTENT);
+        intent.saveToXml(out);
+        out.endTag(null, TAG_INTENT);
+
+        final ArrayList<ActivityRecord> activities = mActivities;
+        final int numActivities = activities.size();
+        for (int activityNdx = 0; activityNdx < numActivities; ++activityNdx) {
+            final ActivityRecord r = activities.get(activityNdx);
+            if (r.info.persistableMode == ActivityInfo.PERSIST_ROOT_ONLY || !r.isPersistable() ||
+                    ((r.intent.getFlags() & FLAG_ACTIVITY_NEW_DOCUMENT
+                            | FLAG_ACTIVITY_RETAIN_IN_RECENTS) == FLAG_ACTIVITY_NEW_DOCUMENT) &&
+                            activityNdx > 0) {
+                // Stop at first non-persistable or first break in task (CLEAR_WHEN_TASK_RESET).
+                break;
+            }
+            out.startTag(null, TAG_ACTIVITY);
+            r.saveToXml(out);
+            out.endTag(null, TAG_ACTIVITY);
+        }
+    }
+
+    @VisibleForTesting
+    static TaskRecordFactory getTaskRecordFactory() {
+        if (sTaskRecordFactory == null) {
+            setTaskRecordFactory(new TaskRecordFactory());
+        }
+        return sTaskRecordFactory;
+    }
+
+    static void setTaskRecordFactory(TaskRecordFactory factory) {
+        sTaskRecordFactory = factory;
+    }
+
+    static TaskRecord create(ActivityManagerService service, int taskId, ActivityInfo info,
+            Intent intent, IVoiceInteractionSession voiceSession,
+            IVoiceInteractor voiceInteractor) {
+        return getTaskRecordFactory().create(
+                service, taskId, info, intent, voiceSession, voiceInteractor);
+    }
+
+    static TaskRecord create(ActivityManagerService service, int taskId, ActivityInfo info,
+            Intent intent, TaskDescription taskDescription) {
+        return getTaskRecordFactory().create(service, taskId, info, intent, taskDescription);
+    }
+
+    static TaskRecord restoreFromXml(XmlPullParser in, ActivityStackSupervisor stackSupervisor)
+            throws IOException, XmlPullParserException {
+        return getTaskRecordFactory().restoreFromXml(in, stackSupervisor);
+    }
+
+    /**
+     * A factory class used to create {@link TaskRecord} or its subclass if any. This can be
+     * specified when system boots by setting it with
+     * {@link #setTaskRecordFactory(TaskRecordFactory)}.
+     */
+    static class TaskRecordFactory {
+
+        TaskRecord create(ActivityManagerService service, int taskId, ActivityInfo info,
+                Intent intent, IVoiceInteractionSession voiceSession,
+                IVoiceInteractor voiceInteractor) {
+            return new TaskRecord(
+                    service, taskId, info, intent, voiceSession, voiceInteractor);
+        }
+
+        TaskRecord create(ActivityManagerService service, int taskId, ActivityInfo info,
+                Intent intent, TaskDescription taskDescription) {
+            return new TaskRecord(service, taskId, info, intent, taskDescription);
+        }
+
+        /**
+         * Should only be used when we're restoring {@link TaskRecord} from storage.
+         */
+        TaskRecord create(ActivityManagerService service, int taskId, Intent intent,
+                Intent affinityIntent, String affinity, String rootAffinity,
+                ComponentName realActivity, ComponentName origActivity, boolean rootWasReset,
+                boolean autoRemoveRecents, boolean askedCompatMode, int userId,
+                int effectiveUid, String lastDescription, ArrayList<ActivityRecord> activities,
+                long lastTimeMoved, boolean neverRelinquishIdentity,
+                TaskDescription lastTaskDescription, int taskAffiliation, int prevTaskId,
+                int nextTaskId, int taskAffiliationColor, int callingUid, String callingPackage,
+                int resizeMode, boolean supportsPictureInPicture, boolean realActivitySuspended,
+                boolean userSetupComplete, int minWidth, int minHeight) {
+            return new TaskRecord(service, taskId, intent, affinityIntent, affinity,
+                    rootAffinity, realActivity, origActivity, rootWasReset, autoRemoveRecents,
+                    askedCompatMode, userId, effectiveUid, lastDescription, activities,
+                    lastTimeMoved, neverRelinquishIdentity, lastTaskDescription, taskAffiliation,
+                    prevTaskId, nextTaskId, taskAffiliationColor, callingUid, callingPackage,
+                    resizeMode, supportsPictureInPicture, realActivitySuspended, userSetupComplete,
+                    minWidth, minHeight);
+        }
+
+        TaskRecord restoreFromXml(XmlPullParser in, ActivityStackSupervisor stackSupervisor)
+                throws IOException, XmlPullParserException {
+            Intent intent = null;
+            Intent affinityIntent = null;
+            ArrayList<ActivityRecord> activities = new ArrayList<>();
+            ComponentName realActivity = null;
+            boolean realActivitySuspended = false;
+            ComponentName origActivity = null;
+            String affinity = null;
+            String rootAffinity = null;
+            boolean hasRootAffinity = false;
+            boolean rootHasReset = false;
+            boolean autoRemoveRecents = false;
+            boolean askedCompatMode = false;
+            int taskType = 0;
+            int userId = 0;
+            boolean userSetupComplete = true;
+            int effectiveUid = -1;
+            String lastDescription = null;
+            long lastTimeOnTop = 0;
+            boolean neverRelinquishIdentity = true;
+            int taskId = INVALID_TASK_ID;
+            final int outerDepth = in.getDepth();
+            TaskDescription taskDescription = new TaskDescription();
+            int taskAffiliation = INVALID_TASK_ID;
+            int taskAffiliationColor = 0;
+            int prevTaskId = INVALID_TASK_ID;
+            int nextTaskId = INVALID_TASK_ID;
+            int callingUid = -1;
+            String callingPackage = "";
+            int resizeMode = RESIZE_MODE_FORCE_RESIZEABLE;
+            boolean supportsPictureInPicture = false;
+            Rect bounds = null;
+            int minWidth = INVALID_MIN_SIZE;
+            int minHeight = INVALID_MIN_SIZE;
+            int persistTaskVersion = 0;
+
+            for (int attrNdx = in.getAttributeCount() - 1; attrNdx >= 0; --attrNdx) {
+                final String attrName = in.getAttributeName(attrNdx);
+                final String attrValue = in.getAttributeValue(attrNdx);
+                if (TaskPersister.DEBUG) Slog.d(TaskPersister.TAG, "TaskRecord: attribute name=" +
+                        attrName + " value=" + attrValue);
+                switch (attrName) {
+                    case ATTR_TASKID:
+                        if (taskId == INVALID_TASK_ID) taskId = Integer.parseInt(attrValue);
+                        break;
+                    case ATTR_REALACTIVITY:
+                        realActivity = ComponentName.unflattenFromString(attrValue);
+                        break;
+                    case ATTR_REALACTIVITY_SUSPENDED:
+                        realActivitySuspended = Boolean.valueOf(attrValue);
+                        break;
+                    case ATTR_ORIGACTIVITY:
+                        origActivity = ComponentName.unflattenFromString(attrValue);
+                        break;
+                    case ATTR_AFFINITY:
+                        affinity = attrValue;
+                        break;
+                    case ATTR_ROOT_AFFINITY:
+                        rootAffinity = attrValue;
+                        hasRootAffinity = true;
+                        break;
+                    case ATTR_ROOTHASRESET:
+                        rootHasReset = Boolean.parseBoolean(attrValue);
+                        break;
+                    case ATTR_AUTOREMOVERECENTS:
+                        autoRemoveRecents = Boolean.parseBoolean(attrValue);
+                        break;
+                    case ATTR_ASKEDCOMPATMODE:
+                        askedCompatMode = Boolean.parseBoolean(attrValue);
+                        break;
+                    case ATTR_USERID:
+                        userId = Integer.parseInt(attrValue);
+                        break;
+                    case ATTR_USER_SETUP_COMPLETE:
+                        userSetupComplete = Boolean.parseBoolean(attrValue);
+                        break;
+                    case ATTR_EFFECTIVE_UID:
+                        effectiveUid = Integer.parseInt(attrValue);
+                        break;
+                    case ATTR_TASKTYPE:
+                        taskType = Integer.parseInt(attrValue);
+                        break;
+                    case ATTR_LASTDESCRIPTION:
+                        lastDescription = attrValue;
+                        break;
+                    case ATTR_LASTTIMEMOVED:
+                        lastTimeOnTop = Long.parseLong(attrValue);
+                        break;
+                    case ATTR_NEVERRELINQUISH:
+                        neverRelinquishIdentity = Boolean.parseBoolean(attrValue);
+                        break;
+                    case ATTR_TASK_AFFILIATION:
+                        taskAffiliation = Integer.parseInt(attrValue);
+                        break;
+                    case ATTR_PREV_AFFILIATION:
+                        prevTaskId = Integer.parseInt(attrValue);
+                        break;
+                    case ATTR_NEXT_AFFILIATION:
+                        nextTaskId = Integer.parseInt(attrValue);
+                        break;
+                    case ATTR_TASK_AFFILIATION_COLOR:
+                        taskAffiliationColor = Integer.parseInt(attrValue);
+                        break;
+                    case ATTR_CALLING_UID:
+                        callingUid = Integer.parseInt(attrValue);
+                        break;
+                    case ATTR_CALLING_PACKAGE:
+                        callingPackage = attrValue;
+                        break;
+                    case ATTR_RESIZE_MODE:
+                        resizeMode = Integer.parseInt(attrValue);
+                        break;
+                    case ATTR_SUPPORTS_PICTURE_IN_PICTURE:
+                        supportsPictureInPicture = Boolean.parseBoolean(attrValue);
+                        break;
+                    case ATTR_NON_FULLSCREEN_BOUNDS:
+                        bounds = Rect.unflattenFromString(attrValue);
+                        break;
+                    case ATTR_MIN_WIDTH:
+                        minWidth = Integer.parseInt(attrValue);
+                        break;
+                    case ATTR_MIN_HEIGHT:
+                        minHeight = Integer.parseInt(attrValue);
+                        break;
+                    case ATTR_PERSIST_TASK_VERSION:
+                        persistTaskVersion = Integer.parseInt(attrValue);
+                        break;
+                    default:
+                        if (attrName.startsWith(TaskDescription.ATTR_TASKDESCRIPTION_PREFIX)) {
+                            taskDescription.restoreFromXml(attrName, attrValue);
+                        } else {
+                            Slog.w(TAG, "TaskRecord: Unknown attribute=" + attrName);
+                        }
+                }
+            }
+
+            int event;
+            while (((event = in.next()) != XmlPullParser.END_DOCUMENT) &&
+                    (event != XmlPullParser.END_TAG || in.getDepth() >= outerDepth)) {
+                if (event == XmlPullParser.START_TAG) {
+                    final String name = in.getName();
+                    if (TaskPersister.DEBUG) Slog.d(TaskPersister.TAG,
+                            "TaskRecord: START_TAG name=" + name);
+                    if (TAG_AFFINITYINTENT.equals(name)) {
+                        affinityIntent = Intent.restoreFromXml(in);
+                    } else if (TAG_INTENT.equals(name)) {
+                        intent = Intent.restoreFromXml(in);
+                    } else if (TAG_ACTIVITY.equals(name)) {
+                        ActivityRecord activity =
+                                ActivityRecord.restoreFromXml(in, stackSupervisor);
+                        if (TaskPersister.DEBUG) Slog.d(TaskPersister.TAG, "TaskRecord: activity=" +
+                                activity);
+                        if (activity != null) {
+                            activities.add(activity);
+                        }
+                    } else {
+                        Slog.e(TAG, "restoreTask: Unexpected name=" + name);
+                        XmlUtils.skipCurrentTag(in);
+                    }
+                }
+            }
+            if (!hasRootAffinity) {
+                rootAffinity = affinity;
+            } else if ("@".equals(rootAffinity)) {
+                rootAffinity = null;
+            }
+            if (effectiveUid <= 0) {
+                Intent checkIntent = intent != null ? intent : affinityIntent;
+                effectiveUid = 0;
+                if (checkIntent != null) {
+                    IPackageManager pm = AppGlobals.getPackageManager();
+                    try {
+                        ApplicationInfo ai = pm.getApplicationInfo(
+                                checkIntent.getComponent().getPackageName(),
+                                PackageManager.MATCH_UNINSTALLED_PACKAGES
+                                        | PackageManager.MATCH_DISABLED_COMPONENTS, userId);
+                        if (ai != null) {
+                            effectiveUid = ai.uid;
+                        }
+                    } catch (RemoteException e) {
+                    }
+                }
+                Slog.w(TAG, "Updating task #" + taskId + " for " + checkIntent
+                        + ": effectiveUid=" + effectiveUid);
+            }
+
+            if (persistTaskVersion < 1) {
+                // We need to convert the resize mode of home activities saved before version one if
+                // they are marked as RESIZE_MODE_RESIZEABLE to
+                // RESIZE_MODE_RESIZEABLE_VIA_SDK_VERSION since we didn't have that differentiation
+                // before version 1 and the system didn't resize home activities before then.
+                if (taskType == 1 /* old home type */ && resizeMode == RESIZE_MODE_RESIZEABLE) {
+                    resizeMode = RESIZE_MODE_RESIZEABLE_VIA_SDK_VERSION;
+                }
+            } else {
+                // This activity has previously marked itself explicitly as both resizeable and
+                // supporting picture-in-picture.  Since there is no longer a requirement for
+                // picture-in-picture activities to be resizeable, we can mark this simply as
+                // resizeable and supporting picture-in-picture separately.
+                if (resizeMode == RESIZE_MODE_RESIZEABLE_AND_PIPABLE_DEPRECATED) {
+                    resizeMode = RESIZE_MODE_RESIZEABLE;
+                    supportsPictureInPicture = true;
+                }
+            }
+
+            final TaskRecord task = create(stackSupervisor.mService, taskId, intent, affinityIntent,
+                    affinity, rootAffinity, realActivity, origActivity, rootHasReset,
+                    autoRemoveRecents, askedCompatMode, userId, effectiveUid, lastDescription,
+                    activities, lastTimeOnTop, neverRelinquishIdentity, taskDescription,
+                    taskAffiliation, prevTaskId, nextTaskId, taskAffiliationColor, callingUid,
+                    callingPackage, resizeMode, supportsPictureInPicture, realActivitySuspended,
+                    userSetupComplete, minWidth, minHeight);
+            task.updateOverrideConfiguration(bounds);
+
+            for (int activityNdx = activities.size() - 1; activityNdx >=0; --activityNdx) {
+                activities.get(activityNdx).setTask(task);
+            }
+
+            if (DEBUG_RECENTS) Slog.d(TAG_RECENTS, "Restored task=" + task);
+            return task;
         }
     }
 }

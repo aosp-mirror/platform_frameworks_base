@@ -5022,8 +5022,8 @@ class ActivityStack<T extends StackWindowController> extends ConfigurationContai
             IVoiceInteractionSession voiceSession, IVoiceInteractor voiceInteractor,
             boolean toTop, ActivityRecord activity, ActivityRecord source,
             ActivityOptions options) {
-        final TaskRecord task = new TaskRecord(mService, taskId, info, intent, voiceSession,
-                voiceInteractor);
+        final TaskRecord task = TaskRecord.create(
+                mService, taskId, info, intent, voiceSession, voiceInteractor);
         // add the task to stack first, mTaskPositioner might need the stack association
         addTask(task, toTop, "createTaskRecord");
         final boolean isLockscreenShown = mService.mStackSupervisor.getKeyguardController()
