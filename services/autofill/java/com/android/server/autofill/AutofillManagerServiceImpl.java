@@ -769,7 +769,8 @@ final class AutofillManagerServiceImpl {
         pw.print(prefix); pw.print("Default component: ");
             pw.println(mContext.getString(R.string.config_defaultAutofillService));
         pw.print(prefix); pw.print("Disabled: "); pw.println(mDisabled);
-        pw.print(prefix); pw.print("Field detection: "); pw.println(isFieldDetectionEnabled());
+        pw.print(prefix); pw.print("Field classification enabled: ");
+            pw.println(isFieldClassificationEnabled());
         pw.print(prefix); pw.print("Setup complete: "); pw.println(mSetupComplete);
         pw.print(prefix); pw.print("Last prune: "); pw.println(mLastPrune);
 
@@ -1026,10 +1027,10 @@ final class AutofillManagerServiceImpl {
         return false;
     }
 
-    // TODO(b/67867469): remove once feature is finished
-    boolean isFieldDetectionEnabled() {
+    boolean isFieldClassificationEnabled() {
         return Settings.Secure.getIntForUser(
-                mContext.getContentResolver(), Settings.Secure.AUTOFILL_FEATURE_FIELD_DETECTION, 0,
+                mContext.getContentResolver(),
+                Settings.Secure.AUTOFILL_FEATURE_FIELD_CLASSIFICATION, 0,
                 mUserId) == 1;
     }
 

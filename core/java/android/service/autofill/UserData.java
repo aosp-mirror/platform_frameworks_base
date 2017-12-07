@@ -56,14 +56,21 @@ public final class UserData implements Parcelable {
     private static final int DEFAULT_MIN_VALUE_LENGTH = 5;
     private static final int DEFAULT_MAX_VALUE_LENGTH = 100;
 
+    private final InternalScorer mScorer;
     private final String[] mRemoteIds;
     private final String[] mValues;
 
     private UserData(Builder builder) {
+        mScorer = builder.mScorer;
         mRemoteIds = new String[builder.mRemoteIds.size()];
         builder.mRemoteIds.toArray(mRemoteIds);
         mValues = new String[builder.mValues.size()];
         builder.mValues.toArray(mValues);
+    }
+
+    /** @hide */
+    public InternalScorer getScorer() {
+        return mScorer;
     }
 
     /** @hide */
@@ -78,6 +85,7 @@ public final class UserData implements Parcelable {
 
     /** @hide */
     public void dump(String prefix, PrintWriter pw) {
+        pw.print(prefix); pw.print("Scorer: "); pw.println(mScorer);
         // Cannot disclose remote ids or values because they could contain PII
         pw.print(prefix); pw.print("Remote ids size: "); pw.println(mRemoteIds.length);
         for (int i = 0; i < mRemoteIds.length; i++) {
@@ -109,6 +117,7 @@ public final class UserData implements Parcelable {
      */
     @TestApi
     public static final class Builder {
+        private final InternalScorer mScorer;
         private final ArrayList<String> mRemoteIds;
         private final ArrayList<String> mValues;
         private boolean mDestroyed;
@@ -117,11 +126,19 @@ public final class UserData implements Parcelable {
          * Creates a new builder for the user data used for <a href="#FieldsClassification">fields
          * classification</a>.
          *
-         * @throws IllegalArgumentException if {@code remoteId} or {@code value} are empty or if the
-         * length of {@code value} is lower than {@link UserData#getMinValueLength()}
-         * or higher than {@link UserData#getMaxValueLength()}.
+         * @throws IllegalArgumentException if any of the following occurs:
+         * <ol>
+         *   <li>{@code remoteId} is empty
+         *   <li>{@code value} is empty
+         *   <li>the length of {@code value} is lower than {@link UserData#getMinValueLength()}
+         *   <li>the length of {@code value} is higher than {@link UserData#getMaxValueLength()}
+         *   <li>{@code scorer} is not instance of a class provided by the Android System.
+         * </ol>
          */
-        public Builder(@NonNull String remoteId, @NonNull String value) {
+        public Builder(@NonNull Scorer scorer, @NonNull String remoteId, @NonNull String value) {
+            Preconditions.checkArgument((scorer instanceof InternalScorer),
+                    "not provided by Android System: " + scorer);
+            mScorer = (InternalScorer) scorer;
             checkValidRemoteId(remoteId);
             checkValidValue(value);
             final int capacity = getMaxUserDataSize();
@@ -206,8 +223,9 @@ public final class UserData implements Parcelable {
     public String toString() {
         if (!sDebug) return super.toString();
 
-        // Cannot disclose keys or values because they could contain PII
-        final StringBuilder builder = new StringBuilder("UserData: [remoteIds=");
+        final StringBuilder builder = new StringBuilder("UserData: [scorer=").append(mScorer);
+        // Cannot disclose remote ids or values because they could contain PII
+        builder.append(", remoteIds=");
         Helper.appendRedacted(builder, mRemoteIds);
         builder.append(", values=");
         Helper.appendRedacted(builder, mValues);
@@ -225,6 +243,7 @@ public final class UserData implements Parcelable {
 
     @Override
     public void writeToParcel(Parcel parcel, int flags) {
+        parcel.writeParcelable(mScorer, flags);
         parcel.writeStringArray(mRemoteIds);
         parcel.writeStringArray(mValues);
     }
@@ -236,9 +255,10 @@ public final class UserData implements Parcelable {
             // Always go through the builder to ensure the data ingested by
             // the system obeys the contract of the builder to avoid attacks
             // using specially crafted parcels.
+            final InternalScorer scorer = parcel.readParcelable(null);
             final String[] remoteIds = parcel.readStringArray();
             final String[] values = parcel.readStringArray();
-            final Builder builder = new Builder(remoteIds[0], values[0]);
+            final Builder builder = new Builder(scorer, remoteIds[0], values[0]);
             for (int i = 1; i < remoteIds.length; i++) {
                 builder.add(remoteIds[i], values[i]);
             }
@@ -268,14 +288,14 @@ public final class UserData implements Parcelable {
     }
 
     /**
-     * Gets the minimum length of values passed to {@link Builder#Builder(String, String)}.
+     * Gets the minimum length of values passed to {@link Builder#Builder(Scorer, String, String)}.
      */
     public static int getMinValueLength() {
         return getInt(AUTOFILL_USER_DATA_MIN_VALUE_LENGTH, DEFAULT_MIN_VALUE_LENGTH);
     }
 
     /**
-     * Gets the maximum length of values passed to {@link Builder#Builder(String, String)}.
+     * Gets the maximum length of values passed to {@link Builder#Builder(Scorer, String, String)}.
      */
     public static int getMaxValueLength() {
         return getInt(AUTOFILL_USER_DATA_MAX_VALUE_LENGTH, DEFAULT_MAX_VALUE_LENGTH);

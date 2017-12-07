@@ -420,7 +420,7 @@ public class SettingsBackupTest {
                  Settings.Secure.ACCESSIBILITY_SOFT_KEYBOARD_MODE,
                  // TODO(b/67867469): Move autofill settings below to
                  // BACKUP_BLACKLISTED_SYSTEM_SETTINGS once feature is moved out of experimental
-                 Settings.Secure.AUTOFILL_FEATURE_FIELD_DETECTION,
+                 Settings.Secure.AUTOFILL_FEATURE_FIELD_CLASSIFICATION,
                  Settings.Secure.AUTOFILL_USER_DATA_MAX_FIELD_CLASSIFICATION_IDS_SIZE,
                  Settings.Secure.AUTOFILL_USER_DATA_MAX_USER_DATA_SIZE,
                  Settings.Secure.AUTOFILL_USER_DATA_MAX_VALUE_LENGTH,

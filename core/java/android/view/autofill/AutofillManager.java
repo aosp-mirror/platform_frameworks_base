@@ -1057,6 +1057,23 @@ public final class AutofillManager {
     }
 
     /**
+     * TODO(b/67867469):
+     * - proper javadoc
+     * - mention this method in other places
+     * - unhide / remove testApi
+     * @hide
+     */
+    @TestApi
+    public boolean isFieldClassificationEnabled() {
+        try {
+            return mService.isFieldClassificationEnabled();
+        } catch (RemoteException e) {
+            e.rethrowFromSystemServer();
+            return false;
+        }
+    }
+
+    /**
      * Returns {@code true} if autofill is supported by the current device and
      * is supported for this user.
      *
