@@ -19,9 +19,7 @@ package com.android.server.accessibility;
 import static android.provider.Settings.Secure.SHOW_MODE_AUTO;
 
 import android.accessibilityservice.AccessibilityServiceInfo;
-import android.accessibilityservice.GestureDescription;
 import android.accessibilityservice.IAccessibilityServiceClient;
-import android.accessibilityservice.IAccessibilityServiceConnection;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
@@ -39,7 +37,6 @@ import com.android.server.accessibility.AccessibilityManagerService.UserState;
 import com.android.server.wm.WindowManagerInternal;
 
 import java.lang.ref.WeakReference;
-import java.util.List;
 import java.util.Set;
 
 /**
@@ -50,7 +47,7 @@ import java.util.Set;
  * passed to the service it represents as soon it is bound. It also serves as the
  * connection for the service.
  */
-class AccessibilityServiceConnection extends AccessibilityClientConnection {
+class AccessibilityServiceConnection extends AbstractAccessibilityServiceConnection {
     private static final String LOG_TAG = "AccessibilityServiceConnection";
     /*
      Holding a weak reference so there isn't a loop of references. UserState keeps lists of bound

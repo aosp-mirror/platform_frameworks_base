@@ -71,7 +71,7 @@ import java.util.Set;
  * This class represents an accessibility client - either an AccessibilityService or a UiAutomation.
  * It is responsible for behavior common to both types of clients.
  */
-abstract class AccessibilityClientConnection extends IAccessibilityServiceConnection.Stub
+abstract class AbstractAccessibilityServiceConnection extends IAccessibilityServiceConnection.Stub
         implements ServiceConnection, IBinder.DeathRecipient, KeyEventDispatcher.KeyEventFilter,
         FingerprintGestureDispatcher.FingerprintGestureClient {
     private static final boolean DEBUG = false;
@@ -238,7 +238,7 @@ abstract class AccessibilityClientConnection extends IAccessibilityServiceConnec
                 int flags);
     }
 
-    public AccessibilityClientConnection(Context context, ComponentName componentName,
+    public AbstractAccessibilityServiceConnection(Context context, ComponentName componentName,
             AccessibilityServiceInfo accessibilityServiceInfo, int id, Handler mainHandler,
             Object lock, SecurityPolicy securityPolicy, SystemSupport systemSupport,
             WindowManagerInternal windowManagerInternal,
@@ -337,6 +337,11 @@ abstract class AccessibilityClientConnection extends IAccessibilityServiceConnec
         synchronized (mLock) {
             return mAccessibilityServiceInfo;
         }
+    }
+
+    int getRelevantEventTypes() {
+        return (mUsesAccessibilityCache ? AccessibilityCache.CACHE_CRITICAL_EVENTS_MASK : 0)
+                | mEventTypes;
     }
 
     @Override
@@ -954,13 +959,15 @@ abstract class AccessibilityClientConnection extends IAccessibilityServiceConnec
 
     public void notifyAccessibilityEvent(AccessibilityEvent event) {
         synchronized (mLock) {
+            final int eventType = event.getEventType();
+
             final boolean serviceWantsEvent = wantsEventLocked(event);
-            if (!serviceWantsEvent && !mUsesAccessibilityCache &&
-                    ((AccessibilityCache.CACHE_CRITICAL_EVENTS_MASK & event.getEventType()) == 0)) {
+            final boolean requiredForCacheConsistency = mUsesAccessibilityCache
+                    && ((AccessibilityCache.CACHE_CRITICAL_EVENTS_MASK & eventType) != 0);
+            if (!serviceWantsEvent && !requiredForCacheConsistency) {
                 return;
             }
 
-            final int eventType = event.getEventType();
             // Make a copy since during dispatch it is possible the event to
             // be modified to remove its source if the receiving service does
             // not have permission to access the window content.
@@ -1224,6 +1231,10 @@ abstract class AccessibilityClientConnection extends IAccessibilityServiceConnec
             }
         }
         return windowId;
+    }
+
+    public ComponentName getComponentName() {
+        return mComponentName;
     }
 
     private final class InvocationHandler extends Handler {
