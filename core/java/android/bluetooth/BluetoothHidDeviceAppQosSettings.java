@@ -20,15 +20,14 @@ import android.os.Parcel;
 import android.os.Parcelable;
 
 /**
- * Represents the Quality of Service (QoS) settings for a Bluetooth HID Device
- * application.
+ * Represents the Quality of Service (QoS) settings for a Bluetooth HID Device application.
  *
- * The BluetoothHidDevice framework will update the L2CAP QoS settings for the
- * app during registration.
+ * <p>The BluetoothHidDevice framework will update the L2CAP QoS settings for the app during
+ * registration.
  *
- * {@see BluetoothHidDevice}
+ * <p>{@see BluetoothHidDevice}
  *
- * {@hide}
+ * <p>{@hide}
  */
 public final class BluetoothHidDeviceAppQosSettings implements Parcelable {
 
@@ -46,13 +45,12 @@ public final class BluetoothHidDeviceAppQosSettings implements Parcelable {
     public static final int MAX = (int) 0xffffffff;
 
     /**
-     * Create a BluetoothHidDeviceAppQosSettings object for the Bluetooth L2CAP channel.
-     * The QoS Settings is optional.
-     * Recommended to use BluetoothHidDeviceAppQosSettings.Builder.
-     * {@see <a href="https://www.bluetooth.com/specifications/profiles-overview">
-     *     https://www.bluetooth.com/specifications/profiles-overview
-     *     </a>
-     *     Bluetooth HID Specfication v1.1.1 Section 5.2 and Appendix D }
+     * Create a BluetoothHidDeviceAppQosSettings object for the Bluetooth L2CAP channel. The QoS
+     * Settings is optional. Recommended to use BluetoothHidDeviceAppQosSettings.Builder. {@see <a
+     * href="https://www.bluetooth.com/specifications/profiles-overview">
+     * https://www.bluetooth.com/specifications/profiles-overview </a> Bluetooth HID Specfication
+     * v1.1.1 Section 5.2 and Appendix D }
+     *
      * @param serviceType L2CAP service type
      * @param tokenRate L2CAP token rate
      * @param tokenBucketSize L2CAP token bucket size
@@ -123,13 +121,11 @@ public final class BluetoothHidDeviceAppQosSettings implements Parcelable {
     /** @return an int array representation of this instance */
     public int[] toArray() {
         return new int[] {
-                serviceType, tokenRate, tokenBucketSize, peakBandwidth, latency, delayVariation
+            serviceType, tokenRate, tokenBucketSize, peakBandwidth, latency, delayVariation
         };
     }
 
-    /**
-     * A helper to build the BluetoothHidDeviceAppQosSettings object.
-     */
+    /** A helper to build the BluetoothHidDeviceAppQosSettings object. */
     public static class Builder {
         // Optional parameters - initialized to default values
         private int mServiceType = SERVICE_BEST_EFFORT;
@@ -141,8 +137,9 @@ public final class BluetoothHidDeviceAppQosSettings implements Parcelable {
 
         /**
          * Set the service type.
+         *
          * @param val service type. Should be one of {SERVICE_NO_TRAFFIC, SERVICE_BEST_EFFORT,
-         * SERVICE_GUARANTEED}, with SERVICE_BEST_EFFORT being the default one.
+         *     SERVICE_GUARANTEED}, with SERVICE_BEST_EFFORT being the default one.
          * @return BluetoothHidDeviceAppQosSettings Builder with specified service type.
          */
         public Builder serviceType(int val) {
@@ -151,6 +148,7 @@ public final class BluetoothHidDeviceAppQosSettings implements Parcelable {
         }
         /**
          * Set the token rate.
+         *
          * @param val token rate
          * @return BluetoothHidDeviceAppQosSettings Builder with specified token rate.
          */
@@ -161,6 +159,7 @@ public final class BluetoothHidDeviceAppQosSettings implements Parcelable {
 
         /**
          * Set the bucket size.
+         *
          * @param val bucket size
          * @return BluetoothHidDeviceAppQosSettings Builder with specified bucket size.
          */
@@ -171,6 +170,7 @@ public final class BluetoothHidDeviceAppQosSettings implements Parcelable {
 
         /**
          * Set the peak bandwidth.
+         *
          * @param val peak bandwidth
          * @return BluetoothHidDeviceAppQosSettings Builder with specified peak bandwidth.
          */
@@ -180,6 +180,7 @@ public final class BluetoothHidDeviceAppQosSettings implements Parcelable {
         }
         /**
          * Set the latency.
+         *
          * @param val latency
          * @return BluetoothHidDeviceAppQosSettings Builder with specified latency.
          */
@@ -190,6 +191,7 @@ public final class BluetoothHidDeviceAppQosSettings implements Parcelable {
 
         /**
          * Set the delay variation.
+         *
          * @param val delay variation
          * @return BluetoothHidDeviceAppQosSettings Builder with specified delay variation.
          */
@@ -200,6 +202,7 @@ public final class BluetoothHidDeviceAppQosSettings implements Parcelable {
 
         /**
          * Build the BluetoothHidDeviceAppQosSettings object.
+         *
          * @return BluetoothHidDeviceAppQosSettings object with current settings.
          */
         public BluetoothHidDeviceAppQosSettings build() {
