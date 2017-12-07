@@ -17,12 +17,11 @@
 package com.android.server.backup.params;
 
 public class ClearRetryParams {
-
     public String transportName;
     public String packageName;
 
-    public ClearRetryParams(String transport, String pkg) {
-        transportName = transport;
-        packageName = pkg;
+    public ClearRetryParams(String transportName, String packageName) {
+        this.transportName = transportName;
+        this.packageName = packageName;
     }
 }

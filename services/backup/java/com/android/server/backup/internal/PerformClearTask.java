@@ -23,46 +23,54 @@ import android.util.Slog;
 
 import com.android.internal.backup.IBackupTransport;
 import com.android.server.backup.RefactoredBackupManagerService;
+import com.android.server.backup.transport.TransportClient;
 
 import java.io.File;
 
 public class PerformClearTask implements Runnable {
-
-    private RefactoredBackupManagerService backupManagerService;
-    IBackupTransport mTransport;
-    PackageInfo mPackage;
+    private final RefactoredBackupManagerService mBackupManagerService;
+    private final TransportClient mTransportClient;
+    private final PackageInfo mPackage;
+    private final OnTaskFinishedListener mListener;
 
     PerformClearTask(RefactoredBackupManagerService backupManagerService,
-            IBackupTransport transport, PackageInfo packageInfo) {
-        this.backupManagerService = backupManagerService;
-        mTransport = transport;
+            TransportClient transportClient, PackageInfo packageInfo,
+            OnTaskFinishedListener listener) {
+        mBackupManagerService = backupManagerService;
+        mTransportClient = transportClient;
         mPackage = packageInfo;
+        mListener = listener;
     }
 
     public void run() {
+        String callerLogString = "PerformClearTask.run()";
+        IBackupTransport transport = null;
         try {
             // Clear the on-device backup state to ensure a full backup next time
-            File stateDir = new File(backupManagerService.getBaseStateDir(),
-                    mTransport.transportDirName());
+            File stateDir = new File(mBackupManagerService.getBaseStateDir(),
+                    mTransportClient.getTransportDirName());
             File stateFile = new File(stateDir, mPackage.packageName);
             stateFile.delete();
 
+            transport = mTransportClient.connectOrThrow(callerLogString);
             // Tell the transport to remove all the persistent storage for the app
             // TODO - need to handle failures
-            mTransport.clearBackupData(mPackage);
+            transport.clearBackupData(mPackage);
         } catch (Exception e) {
             Slog.e(TAG, "Transport threw clearing data for " + mPackage + ": " + e.getMessage());
         } finally {
-            try {
-                // TODO - need to handle failures
-                mTransport.finishBackup();
-            } catch (Exception e) {
-                // Nothing we can do here, alas
-                Slog.e(TAG, "Unable to mark clear operation finished: " + e.getMessage());
+            if (transport != null) {
+                try {
+                    // TODO - need to handle failures
+                    transport.finishBackup();
+                } catch (Exception e) {
+                    // Nothing we can do here, alas
+                    Slog.e(TAG, "Unable to mark clear operation finished: " + e.getMessage());
+                }
             }
-
+            mListener.onFinished(callerLogString);
             // Last but not least, release the cpu
-            backupManagerService.getWakelock().release();
+            mBackupManagerService.getWakelock().release();
         }
     }
 }
