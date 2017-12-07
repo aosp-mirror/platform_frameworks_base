@@ -39,5 +39,6 @@
     </activity>
     <receiver android:name=".LoadtestActivity$PusherAlarmReceiver" />
     <receiver android:name=".LoadtestActivity$StopperAlarmReceiver"/>
+    <receiver android:name=".PerfData$PerfAlarmReceiver"/>
   </application>
 </manifest>

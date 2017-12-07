@@ -16,147 +16,86 @@
 package com.android.statsd.loadtest;
 
 import android.annotation.Nullable;
-import android.app.Activity;
 import android.app.AlarmManager;
 import android.app.PendingIntent;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
-import android.os.Bundle;
-import android.os.Environment;
+import android.os.SystemClock;
 import android.util.Log;
-import android.os.Debug;
 
-import java.io.BufferedReader;
-import java.io.Closeable;
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileOutputStream;
-import java.io.FileWriter;
-import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.io.IOException;
-import java.text.SimpleDateFormat;
-import java.util.Date;
+import java.util.HashSet;
+import java.util.Set;
 
 /** Prints some information about the device via Dumpsys in order to evaluate health metrics. */
-public class PerfData {
+public class PerfData extends PerfDataRecorder {
 
-    private static final String TAG = "PerfData";
-    private static final String DUMP_FILENAME = TAG + "_dump.tmp";
+    private static final String TAG = "loadtest.PerfData";
 
-    public void resetData(Context context) {
-        runDumpsysStats(context, "batterystats", "--reset");
+    /** Polling period for performance snapshots like memory. */
+    private static final long POLLING_PERIOD_MILLIS = 1 * 60 * 1000;
+
+    public final static class PerfAlarmReceiver extends BroadcastReceiver {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            Intent activityIntent = new Intent(context, LoadtestActivity.class);
+            activityIntent.putExtra(LoadtestActivity.TYPE, LoadtestActivity.PERF_ALARM);
+            context.startActivity(activityIntent);
+         }
     }
 
-    public void publishData(Context context, boolean placebo, int replication, long bucketMins,
-        long periodSecs, int burst) {
-        publishBatteryData(context, placebo, replication, bucketMins, periodSecs, burst);
+    private AlarmManager mAlarmMgr;
+
+    /** Used to periodically poll some dumpsys data. */
+    private PendingIntent mPendingIntent;
+
+    private final Set<PerfDataRecorder> mRecorders;
+
+    public PerfData(Context context, boolean placebo, int replication, long bucketMins,
+        long periodSecs,  int burst) {
+        super(placebo, replication, bucketMins, periodSecs, burst);
+        mRecorders = new HashSet();
+        mRecorders.add(new BatteryDataRecorder(placebo, replication, bucketMins, periodSecs, burst));
+        mRecorders.add(new MemoryDataRecorder(placebo, replication, bucketMins, periodSecs, burst));
+        mAlarmMgr = (AlarmManager) context.getSystemService(Context.ALARM_SERVICE);
     }
 
-    private void publishBatteryData(Context context, boolean placebo, int replication,
-        long bucketMins, long periodSecs, int burst) {
-        // Don't use --checkin.
-        runDumpsysStats(context, "batterystats");
-        writeBatteryData(context, placebo, replication, bucketMins, periodSecs, burst);
-    }
-
-    private void runDumpsysStats(Context context, String cmd, String... args) {
-        boolean success = false;
-        // Call dumpsys Dump statistics to a file.
-        FileOutputStream fo = null;
-        try {
-            fo = context.openFileOutput(DUMP_FILENAME, Context.MODE_PRIVATE);
-            if (!Debug.dumpService(cmd, fo.getFD(), args)) {
-                Log.w(TAG, "Dumpsys failed.");
-            }
-            success = true;
-        } catch (IOException | SecurityException | NullPointerException e) {
-            // SecurityException may occur when trying to dump multi-user info.
-            // NPE can occur during dumpService  (root cause unknown).
-            throw new RuntimeException(e);
-        } finally {
-            closeQuietly(fo);
+    public void onDestroy() {
+        if (mPendingIntent != null) {
+            mAlarmMgr.cancel(mPendingIntent);
+            mPendingIntent = null;
         }
     }
 
-    private String readDumpFile(Context context) {
-        StringBuilder sb = new StringBuilder();
-        FileInputStream fi = null;
-        BufferedReader br = null;
-        try {
-            fi = context.openFileInput(DUMP_FILENAME);
-            br = new BufferedReader(new InputStreamReader(fi));
-            String line = br.readLine();
-            while (line != null) {
-                sb.append(line);
-                sb.append(System.lineSeparator());
-                line = br.readLine();
-            }
-        } catch (IOException e) {
-            throw new RuntimeException(e);
-        } finally {
-            closeQuietly(br);
-        }
-        return sb.toString();
-    }
+    @Override
+    public void startRecording(Context context) {
+        Intent intent = new Intent(context, PerfAlarmReceiver.class);
+        intent.putExtra(LoadtestActivity.TYPE, LoadtestActivity.PERF_ALARM);
+        mPendingIntent = PendingIntent.getBroadcast(context, 0, intent, 0);
+        mAlarmMgr.setInexactRepeating(AlarmManager.ELAPSED_REALTIME_WAKEUP, -1 /* now */,
+            POLLING_PERIOD_MILLIS, mPendingIntent);
 
-    private static void closeQuietly(@Nullable Closeable c) {
-        if (c != null) {
-            try {
-                c.close();
-            } catch (IOException ignore) {
-            }
+        for (PerfDataRecorder recorder : mRecorders) {
+            recorder.startRecording(context);
         }
     }
 
-    public void writeBatteryData(Context context, boolean placebo, int replication, long bucketMins,
-        long periodSecs, int burst) {
-        BatteryStatsParser parser = new BatteryStatsParser();
-        FileInputStream fi = null;
-        BufferedReader br = null;
-        String suffix = new SimpleDateFormat("YYYY_MM_dd_HH_mm_ss").format(new Date());
-        File batteryDataFile = new File(getStorageDir(), "battery_" + suffix + ".csv");
-        Log.d(TAG, "Writing battery data to " + batteryDataFile.getAbsolutePath());
-
-        FileWriter writer = null;
-        try {
-            fi = context.openFileInput(DUMP_FILENAME);
-            writer = new FileWriter(batteryDataFile);
-            writer.append("time,battery_level"
-                + getColumnName(placebo, replication, bucketMins, periodSecs, burst) + "\n");
-            br = new BufferedReader(new InputStreamReader(fi));
-            String line = br.readLine();
-            while (line != null) {
-                String recordLine = parser.parseLine(line);
-                if (recordLine != null) {
-                    writer.append(recordLine);
-                }
-                line = br.readLine();
-            }
-            writer.flush();
-        } catch (IOException e) {
-            throw new RuntimeException(e);
-        } finally {
-            closeQuietly(writer);
-            closeQuietly(br);
+    @Override
+    public void onAlarm(Context context) {
+        for (PerfDataRecorder recorder : mRecorders) {
+            recorder.onAlarm(context);
         }
     }
 
-    private File getStorageDir() {
-        File file = new File(Environment.getExternalStoragePublicDirectory(
-            Environment.DIRECTORY_DOCUMENTS), "loadtest");
-        if (!file.mkdirs()) {
-            Log.e(TAG, "Directory not created");
+    @Override
+    public void stopRecording(Context context) {
+        if (mPendingIntent != null) {
+            mAlarmMgr.cancel(mPendingIntent);
+            mPendingIntent = null;
         }
-        return file;
-    }
 
-    private String getColumnName(boolean placebo, int replication, long bucketMins, long periodSecs,
-        int burst) {
-        if (placebo) {
-            return "_placebo_p=" + periodSecs;
+        for (PerfDataRecorder recorder : mRecorders) {
+            recorder.stopRecording(context);
         }
-        return "_r=" + replication + "_bkt=" + bucketMins + "_p=" + periodSecs + "_bst=" + burst;
     }
 }

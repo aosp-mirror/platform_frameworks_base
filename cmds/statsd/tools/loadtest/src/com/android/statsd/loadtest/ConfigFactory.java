@@ -18,7 +18,6 @@ package com.android.statsd.loadtest;
 import android.content.Context;
 import android.content.res.Resources;
 import android.util.Log;
-import android.util.StatsLog;
 
 import com.android.internal.os.StatsdConfigProto.Bucket;
 import com.android.internal.os.StatsdConfigProto.Predicate;
@@ -45,7 +44,7 @@ import java.util.List;
 public class ConfigFactory {
     public static final String CONFIG_NAME = "LOADTEST";
 
-    private static final String TAG = "ConfigFactory";
+    private static final String TAG = "loadtest.ConfigFactory";
 
     private final StatsdConfig mTemplate;
 
