@@ -3115,6 +3115,15 @@ package android.net.wifi.aware {
 
 }
 
+package android.net.wifi.rtt {
+
+  public class WifiRttManager {
+    method public void cancelRanging(android.os.WorkSource);
+    method public void startRanging(android.os.WorkSource, android.net.wifi.rtt.RangingRequest, android.net.wifi.rtt.RangingResultCallback, android.os.Handler);
+  }
+
+}
+
 package android.nfc {
 
   public final class NfcAdapter {
