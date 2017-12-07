@@ -18,6 +18,7 @@ package com.android.server.usage;
 
 import static android.app.usage.UsageEvents.Event.NOTIFICATION_SEEN;
 import static android.app.usage.UsageEvents.Event.USER_INTERACTION;
+import static android.app.usage.UsageStatsManager.REASON_PREDICTED;
 import static android.app.usage.UsageStatsManager.STANDBY_BUCKET_ACTIVE;
 import static android.app.usage.UsageStatsManager.STANDBY_BUCKET_FREQUENT;
 import static android.app.usage.UsageStatsManager.STANDBY_BUCKET_RARE;
@@ -363,5 +364,30 @@ public class AppStandbyControllerTests {
         controller.forceIdleState(PACKAGE_1, USER_ID, true);
         reportEvent(controller, NOTIFICATION_SEEN, mInjector.mElapsedRealtime);
         assertEquals(STANDBY_BUCKET_WORKING_SET, getStandbyBucket(controller));
+    }
+
+    @Test
+    public void testPredictionTimedout() throws Exception {
+        AppStandbyController controller = setupController();
+        setChargingState(controller, false);
+        controller.setAppStandbyBucket(PACKAGE_1, USER_ID, STANDBY_BUCKET_ACTIVE,
+                REASON_PREDICTED + "CTS", 1 * HOUR_MS);
+
+        // Fast forward 12 hours
+        mInjector.mElapsedRealtime += WORKING_SET_THRESHOLD;
+        controller.checkIdleStates(USER_ID);
+        // Should still be in predicted bucket, since prediction timeout is 1 day since prediction
+        assertEquals(STANDBY_BUCKET_ACTIVE, getStandbyBucket(controller));
+        // Fast forward two more hours
+        mInjector.mElapsedRealtime += 2 * HOUR_MS;
+        controller.checkIdleStates(USER_ID);
+        // Should have now applied prediction timeout
+        assertEquals(STANDBY_BUCKET_WORKING_SET, getStandbyBucket(controller));
+
+        // Fast forward RARE bucket
+        mInjector.mElapsedRealtime += RARE_THRESHOLD;
+        controller.checkIdleStates(USER_ID);
+        // Should continue to apply prediction timeout
+        assertEquals(STANDBY_BUCKET_RARE, getStandbyBucket(controller));
     }
 }
