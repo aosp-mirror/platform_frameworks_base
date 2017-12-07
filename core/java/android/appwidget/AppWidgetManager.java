@@ -677,6 +677,34 @@ public class AppWidgetManager {
     }
 
     /**
+     * Updates the info for the supplied AppWidget provider.
+     *
+     * <p>
+     * The manifest entry of the provider should contain an additional meta-data tag similar to
+     * {@link #META_DATA_APPWIDGET_PROVIDER} which should point to any additional definitions for
+     * the provider.
+     *
+     * <p>
+     * This is persisted across device reboots and app updates. If this meta-data key is not
+     * present in the manifest entry, the info reverts to default.
+     *
+     * @param provider {@link ComponentName} for the {@link
+     *    android.content.BroadcastReceiver BroadcastReceiver} provider for your AppWidget.
+     * @param metaDataKey key for the meta-data tag pointing to the new provider info. Use null
+     *    to reset any previously set info.
+     */
+    public void updateAppWidgetProviderInfo(ComponentName provider, @Nullable String metaDataKey) {
+        if (mService == null) {
+            return;
+        }
+        try {
+            mService.updateAppWidgetProviderInfo(provider, metaDataKey);
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    /**
      * Notifies the specified collection view in all the specified AppWidget instances
      * to invalidate their data.
      *
