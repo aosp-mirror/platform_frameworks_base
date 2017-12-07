@@ -52,23 +52,6 @@ endif
 
 include $(BUILD_JAVA_LIBRARY)
 
-# native library
-# =============================================================
-
-include $(CLEAR_VARS)
-
-LOCAL_SRC_FILES :=
-LOCAL_SHARED_LIBRARIES :=
-
-# include all the jni subdirs to collect their sources
-include $(wildcard $(LOCAL_PATH)/*/jni/Android.mk)
-
-LOCAL_CFLAGS += -DEGL_EGLEXT_PROTOTYPES -DGL_GLEXT_PROTOTYPES
-
-LOCAL_MODULE:= libandroid_servers
-
-include $(BUILD_SHARED_LIBRARY)
-
 # =============================================================
 
 ifeq (,$(ONE_SHOT_MAKEFILE))
