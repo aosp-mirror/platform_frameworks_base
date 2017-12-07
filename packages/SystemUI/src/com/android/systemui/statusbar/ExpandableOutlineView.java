@@ -80,10 +80,21 @@ public abstract class ExpandableOutlineView extends ExpandableView {
     private final ViewOutlineProvider mProvider = new ViewOutlineProvider() {
         @Override
         public void getOutline(View view, Outline outline) {
-            Path clipPath = getClipPath();
-            if (clipPath != null && clipPath.isConvex()) {
-                // The path might not be convex in border cases where the view is small and clipped
-                outline.setConvexPath(clipPath);
+            if (!mCustomOutline && mCurrentTopRoundness == 0.0f
+                    && mCurrentBottomRoundness == 0.0f && !mAlwaysRoundBothCorners) {
+                int translation = mShouldTranslateContents ? (int) getTranslation() : 0;
+                int left = Math.max(translation + mCurrentSidePaddings, mCurrentSidePaddings);
+                int top = mClipTopAmount + mBackgroundTop;
+                int right = getWidth() - mCurrentSidePaddings + Math.min(translation, 0);
+                int bottom = Math.max(getActualHeight() - mClipBottomAmount, top);
+                outline.setRect(left, top, right, bottom);
+            } else {
+                Path clipPath = getClipPath();
+                if (clipPath != null && clipPath.isConvex()) {
+                    // The path might not be convex in border cases where the view is small and
+                    // clipped
+                    outline.setConvexPath(clipPath);
+                }
             }
             outline.setAlpha(mOutlineAlpha);
         }
