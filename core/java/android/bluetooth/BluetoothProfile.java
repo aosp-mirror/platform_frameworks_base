@@ -153,8 +153,6 @@ public interface BluetoothProfile {
 
     /**
      * HID Device
-     *
-     * @hide
      */
     public static final int HID_DEVICE = 19;
 
