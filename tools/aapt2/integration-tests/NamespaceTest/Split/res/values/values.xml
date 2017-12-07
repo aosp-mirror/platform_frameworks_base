@@ -15,15 +15,11 @@
 -->
 
 <resources>
-    <string name="app_name">Namespace App</string>
-    <bool name="always_true">true</bool>
+    <string name="activity_name">Namespace Split</string>
 
-    <style name="AppTheme" parent="com.android.aapt.namespace.libone:style/Theme">
-        <item name="android:colorPrimary">#3F51B5</item>
-        <item name="android:colorPrimaryDark">#303F9F</item>
-        <item name="android:colorAccent">#FF4081</item>
-        <item name="com.android.aapt.namespace.libone:theme_attr">
-            @com.android.aapt.namespace.libtwo:string/public_string
-        </item>
+    <style name="ActivityTheme" parent="com.android.aapt.namespace.libone:style/Theme">
+        <item name="android:colorPrimary">#FF9800</item>
+        <item name="android:colorPrimaryDark">#E65100</item>
+        <item name="android:colorAccent">#FFD180</item>
     </style>
 </resources>

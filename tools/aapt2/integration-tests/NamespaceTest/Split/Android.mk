@@ -19,11 +19,10 @@ LOCAL_PATH := $(call my-dir)
 include $(CLEAR_VARS)
 LOCAL_USE_AAPT2 := true
 LOCAL_AAPT_NAMESPACES := true
-LOCAL_PACKAGE_NAME := AaptTestNamespace_App
-LOCAL_EXPORT_PACKAGE_RESOURCES := true
+LOCAL_PACKAGE_NAME := AaptTestNamespace_Split
 LOCAL_MODULE_TAGS := tests
 LOCAL_SRC_FILES := $(call all-java-files-under,src)
-LOCAL_STATIC_ANDROID_LIBRARIES := \
-    AaptTestNamespace_LibOne \
-    AaptTestNamespace_LibTwo
+LOCAL_APK_LIBRARIES := AaptTestNamespace_App
+LOCAL_RES_LIBRARIES := AaptTestNamespace_App
+LOCAL_AAPT_FLAGS := --package-id 0x80 --rename-manifest-package com.android.aapt.namespace.app
 include $(BUILD_PACKAGE)
