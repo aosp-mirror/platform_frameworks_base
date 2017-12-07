@@ -151,6 +151,9 @@ import android.security.IKeyChainAliasCallback;
 import android.security.IKeyChainService;
 import android.security.KeyChain;
 import android.security.KeyChain.KeyChainConnection;
+import android.security.keystore.KeyGenParameterSpec;
+import android.security.keystore.ParcelableKeyGenParameterSpec;
+import android.security.KeyStore;
 import android.service.persistentdata.PersistentDataBlockManager;
 import android.telephony.TelephonyManager;
 import android.text.TextUtils;
@@ -5017,6 +5020,54 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
             Thread.currentThread().interrupt();
         } finally {
             Binder.restoreCallingIdentity(id);
+        }
+        return false;
+    }
+
+    @Override
+    public boolean generateKeyPair(ComponentName who, String callerPackage, String algorithm,
+            ParcelableKeyGenParameterSpec parcelableKeySpec) {
+        enforceCanManageScope(who, callerPackage, DeviceAdminInfo.USES_POLICY_PROFILE_OWNER,
+                DELEGATION_CERT_INSTALL);
+        final KeyGenParameterSpec keySpec = parcelableKeySpec.getSpec();
+        if (TextUtils.isEmpty(keySpec.getKeystoreAlias())) {
+            throw new IllegalArgumentException("Empty alias provided.");
+        }
+        // As the caller will be granted access to the key, ensure no UID was specified, as
+        // it will not have the desired effect.
+        if (keySpec.getUid() != KeyStore.UID_SELF) {
+            Log.e(LOG_TAG, "Only the caller can be granted access to the generated keypair.");
+            return false;
+        }
+        final int callingUid = mInjector.binderGetCallingUid();
+
+        final UserHandle userHandle = mInjector.binderGetCallingUserHandle();
+        final long id = mInjector.binderClearCallingIdentity();
+        try {
+            try (KeyChainConnection keyChainConnection =
+                    KeyChain.bindAsUser(mContext, userHandle)) {
+                IKeyChainService keyChain = keyChainConnection.getService();
+                final boolean generationResult = keyChain.generateKeyPair(algorithm, parcelableKeySpec);
+                if (!generationResult) {
+                    Log.e(LOG_TAG, "KeyChain failed to generate a keypair.");
+                    return false;
+                }
+
+                // Set a grant for the caller here so that when the client calls
+                // requestPrivateKey, it will be able to get the key from Keystore.
+                // Note the use of the calling  UID, since the request for the private
+                // key will come from the client's process, so the grant has to be for
+                // that UID.
+                keyChain.setGrant(callingUid, keySpec.getKeystoreAlias(), true);
+                return true;
+            }
+        } catch (RemoteException e) {
+            Log.e(LOG_TAG, "KeyChain error while generating a keypair", e);
+        } catch (InterruptedException e) {
+            Log.w(LOG_TAG, "Interrupted while generating keypair", e);
+            Thread.currentThread().interrupt();
+        } finally {
+            mInjector.binderRestoreCallingIdentity(id);
         }
         return false;
     }

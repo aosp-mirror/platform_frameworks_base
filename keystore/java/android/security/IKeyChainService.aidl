@@ -16,6 +16,7 @@
 package android.security;
 
 import android.content.pm.StringParceledListSlice;
+import android.security.keystore.ParcelableKeyGenParameterSpec;
 
 /**
  * Caller is required to ensure that {@link KeyStore#unlock
@@ -30,6 +31,8 @@ interface IKeyChainService {
     byte[] getCaCertificates(String alias);
     boolean isUserSelectable(String alias);
     void setUserSelectable(String alias, boolean isUserSelectable);
+
+    boolean generateKeyPair(in String algorithm, in ParcelableKeyGenParameterSpec spec);
 
     // APIs used by CertInstaller and DevicePolicyManager
     String installCaCertificate(in byte[] caCertificate);

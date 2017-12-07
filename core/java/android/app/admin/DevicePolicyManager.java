@@ -57,7 +57,12 @@ import android.os.RemoteException;
 import android.os.UserHandle;
 import android.os.UserManager;
 import android.provider.ContactsContract.Directory;
+import android.security.AttestedKeyPair;
 import android.security.Credentials;
+import android.security.KeyChain;
+import android.security.KeyChainException;
+import android.security.keystore.KeyGenParameterSpec;
+import android.security.keystore.ParcelableKeyGenParameterSpec;
 import android.service.restrictions.RestrictionsReceiver;
 import android.telephony.TelephonyManager;
 import android.util.ArraySet;
@@ -75,6 +80,7 @@ import java.lang.annotation.RetentionPolicy;
 import java.net.InetSocketAddress;
 import java.net.Proxy;
 import java.security.KeyFactory;
+import java.security.KeyPair;
 import java.security.NoSuchAlgorithmException;
 import java.security.PrivateKey;
 import java.security.cert.Certificate;
@@ -3940,6 +3946,50 @@ public class DevicePolicyManager {
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
+    }
+
+    /**
+     * Called by a device or profile owner, or delegated certificate installer, to generate a
+     * new private/public key pair. If the device supports key generation via secure hardware,
+     * this method is useful for creating a key in KeyChain that never left the secure hardware.
+     *
+     * Access to the key is controlled the same way as in {@link #installKeyPair}.
+     * @param admin Which {@link DeviceAdminReceiver} this request is associated with, or
+     *            {@code null} if calling from a delegated certificate installer.
+     * @param algorithm The key generation algorithm, see {@link java.security.KeyPairGenerator}.
+     * @param keySpec Specification of the key to generate, see
+     * {@link java.security.KeyPairGenerator}.
+     * @return A non-null {@code AttestedKeyPair} if the key generation succeeded, null otherwise.
+     * @throws SecurityException if {@code admin} is not {@code null} and not a device or profile
+     *         owner.
+     * @throws IllegalArgumentException if the alias in {@code keySpec} is empty, or if the
+     *         algorithm specification in {@code keySpec} is not {@code RSAKeyGenParameterSpec}
+     *         or {@code ECGenParameterSpec}.
+     */
+    public AttestedKeyPair generateKeyPair(@Nullable ComponentName admin,
+            @NonNull String algorithm, @NonNull KeyGenParameterSpec keySpec) {
+        throwIfParentInstance("generateKeyPair");
+        try {
+            final ParcelableKeyGenParameterSpec parcelableSpec =
+                    new ParcelableKeyGenParameterSpec(keySpec);
+            final boolean success = mService.generateKeyPair(
+                    admin, mContext.getPackageName(), algorithm, parcelableSpec);
+            if (!success) {
+                Log.e(TAG, "Error generating key via DevicePolicyManagerService.");
+                return null;
+            }
+
+            final KeyPair keyPair = KeyChain.getKeyPair(mContext, keySpec.getKeystoreAlias());
+            return new AttestedKeyPair(keyPair, null);
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        } catch (KeyChainException e) {
+            Log.w(TAG, "Failed to generate key", e);
+        } catch (InterruptedException e) {
+            Log.w(TAG, "Interrupted while generating key", e);
+            Thread.currentThread().interrupt();
+        }
+        return null;
     }
 
     /**
