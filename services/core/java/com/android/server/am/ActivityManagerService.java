@@ -14288,14 +14288,20 @@ public class ActivityManagerService extends IActivityManager.Stub
             return err;
         }
 
-        synchronized(this) {
-            r.requestedVrComponent = (enabled) ? packageName : null;
+        // Clear the binder calling uid since this path may call moveToTask().
+        final long callingId = Binder.clearCallingIdentity();
+        try {
+            synchronized(this) {
+                r.requestedVrComponent = (enabled) ? packageName : null;
 
-            // Update associated state if this activity is currently focused
-            if (r == mStackSupervisor.getResumedActivityLocked()) {
-                applyUpdateVrModeLocked(r);
+                // Update associated state if this activity is currently focused
+                if (r == mStackSupervisor.getResumedActivityLocked()) {
+                    applyUpdateVrModeLocked(r);
+                }
+                return 0;
             }
-            return 0;
+        } finally {
+            Binder.restoreCallingIdentity(callingId);
         }
     }
 
