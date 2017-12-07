@@ -41,7 +41,7 @@ import java.util.List;
  *
  * @hide RTT_API
  */
-@SystemService(Context.WIFI_RTT2_SERVICE)
+@SystemService(Context.WIFI_RTT_RANGING_SERVICE)
 public class WifiRttManager {
     private static final String TAG = "WifiRttManager";
     private static final boolean VDBG = false;
