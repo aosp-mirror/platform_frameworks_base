@@ -618,7 +618,7 @@ final class ActivityRecord extends ConfigurationContainer implements AppWindowCo
                             + ", displayId=" + displayId + ", config=" + config);
 
             service.mLifecycleManager.scheduleTransaction(app.thread, appToken,
-                    new MoveToDisplayItem(displayId, config));
+                    MoveToDisplayItem.obtain(displayId, config));
         } catch (RemoteException e) {
             // If process died, whatever.
         }
@@ -636,7 +636,7 @@ final class ActivityRecord extends ConfigurationContainer implements AppWindowCo
                     + config);
 
             service.mLifecycleManager.scheduleTransaction(app.thread, appToken,
-                    new ActivityConfigurationChangeItem(config));
+                    ActivityConfigurationChangeItem.obtain(config));
         } catch (RemoteException e) {
             // If process died, whatever.
         }
@@ -663,7 +663,7 @@ final class ActivityRecord extends ConfigurationContainer implements AppWindowCo
     private void scheduleMultiWindowModeChanged(Configuration overrideConfig) {
         try {
             service.mLifecycleManager.scheduleTransaction(app.thread, appToken,
-                    new MultiWindowModeChangeItem(mLastReportedMultiWindowMode,
+                    MultiWindowModeChangeItem.obtain(mLastReportedMultiWindowMode,
                             overrideConfig));
         } catch (Exception e) {
             // If process died, I don't care.
@@ -691,7 +691,7 @@ final class ActivityRecord extends ConfigurationContainer implements AppWindowCo
     private void schedulePictureInPictureModeChanged(Configuration overrideConfig) {
         try {
             service.mLifecycleManager.scheduleTransaction(app.thread, appToken,
-                    new PipModeChangeItem(mLastReportedPictureInPictureMode,
+                    PipModeChangeItem.obtain(mLastReportedPictureInPictureMode,
                             overrideConfig));
         } catch (Exception e) {
             // If process died, no one cares.
@@ -1380,7 +1380,7 @@ final class ActivityRecord extends ConfigurationContainer implements AppWindowCo
                 ArrayList<ReferrerIntent> ar = new ArrayList<>(1);
                 ar.add(rintent);
                 service.mLifecycleManager.scheduleTransaction(app.thread, appToken,
-                        new NewIntentItem(ar, state == PAUSED));
+                        NewIntentItem.obtain(ar, state == PAUSED));
                 unsent = false;
             } catch (RemoteException e) {
                 Slog.w(TAG, "Exception thrown sending new intent to " + this, e);
@@ -1603,7 +1603,7 @@ final class ActivityRecord extends ConfigurationContainer implements AppWindowCo
             sleeping = false;
             app.pendingUiClean = true;
             service.mLifecycleManager.scheduleTransaction(app.thread, appToken,
-                    new WindowVisibilityItem(true /* showWindow */));
+                    WindowVisibilityItem.obtain(true /* showWindow */));
             // The activity may be waiting for stop, but that is no longer appropriate for it.
             mStackSupervisor.mStoppingActivities.remove(this);
             mStackSupervisor.mGoingToSleepActivities.remove(this);

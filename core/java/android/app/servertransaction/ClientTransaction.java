@@ -37,7 +37,7 @@ import java.util.Objects;
  * @see ActivityLifecycleItem
  * @hide
  */
-public class ClientTransaction implements Parcelable {
+public class ClientTransaction implements Parcelable, ObjectPoolItem {
 
     /** A list of individual callbacks to a client. */
     private List<ClientTransactionItem> mActivityCallbacks;
@@ -53,11 +53,6 @@ public class ClientTransaction implements Parcelable {
 
     /** Target client activity. Might be null if the entire transaction is targeting an app. */
     private IBinder mActivityToken;
-
-    public ClientTransaction(IApplicationThread client, IBinder activityToken) {
-        mClient = client;
-        mActivityToken = activityToken;
-    }
 
     /**
      * Add a message to the end of the sequence of callbacks.
@@ -124,6 +119,41 @@ public class ClientTransaction implements Parcelable {
      */
     public void schedule() throws RemoteException {
         mClient.scheduleTransaction(this);
+    }
+
+
+    // ObjectPoolItem implementation
+
+    private ClientTransaction() {}
+
+    /** Obtain an instance initialized with provided params. */
+    public static ClientTransaction obtain(IApplicationThread client, IBinder activityToken) {
+        ClientTransaction instance = ObjectPool.obtain(ClientTransaction.class);
+        if (instance == null) {
+            instance = new ClientTransaction();
+        }
+        instance.mClient = client;
+        instance.mActivityToken = activityToken;
+
+        return instance;
+    }
+
+    @Override
+    public void recycle() {
+        if (mActivityCallbacks != null) {
+            int size = mActivityCallbacks.size();
+            for (int i = 0; i < size; i++) {
+                mActivityCallbacks.get(i).recycle();
+            }
+            mActivityCallbacks.clear();
+        }
+        if (mLifecycleStateRequest != null) {
+            mLifecycleStateRequest.recycle();
+            mLifecycleStateRequest = null;
+        }
+        mClient = null;
+        mActivityToken = null;
+        ObjectPool.recycle(this);
     }
 
 

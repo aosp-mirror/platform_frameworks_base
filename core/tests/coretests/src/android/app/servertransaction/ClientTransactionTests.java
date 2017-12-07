@@ -42,7 +42,7 @@ public class ClientTransactionTests {
         ClientTransactionHandler clientTransactionHandler = mock(ClientTransactionHandler.class);
         IBinder token = mock(IBinder.class);
 
-        ClientTransaction transaction = new ClientTransaction(null /* client */,
+        ClientTransaction transaction = ClientTransaction.obtain(null /* client */,
                 token /* activityToken */);
         transaction.addCallback(callback1);
         transaction.addCallback(callback2);

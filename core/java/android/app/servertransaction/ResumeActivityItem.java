@@ -33,21 +33,9 @@ public class ResumeActivityItem extends ActivityLifecycleItem {
 
     private static final String TAG = "ResumeActivityItem";
 
-    private final int mProcState;
-    private final boolean mUpdateProcState;
-    private final boolean mIsForward;
-
-    public ResumeActivityItem(boolean isForward) {
-        mProcState = ActivityManager.PROCESS_STATE_UNKNOWN;
-        mUpdateProcState = false;
-        mIsForward = isForward;
-    }
-
-    public ResumeActivityItem(int procState, boolean isForward) {
-        mProcState = procState;
-        mUpdateProcState = true;
-        mIsForward = isForward;
-    }
+    private int mProcState;
+    private boolean mUpdateProcState;
+    private boolean mIsForward;
 
     @Override
     public void preExecute(ClientTransactionHandler client, IBinder token) {
@@ -78,6 +66,45 @@ public class ResumeActivityItem extends ActivityLifecycleItem {
     @Override
     public int getTargetState() {
         return ON_RESUME;
+    }
+
+
+    // ObjectPoolItem implementation
+
+    private ResumeActivityItem() {}
+
+    /** Obtain an instance initialized with provided params. */
+    public static ResumeActivityItem obtain(int procState, boolean isForward) {
+        ResumeActivityItem instance = ObjectPool.obtain(ResumeActivityItem.class);
+        if (instance == null) {
+            instance = new ResumeActivityItem();
+        }
+        instance.mProcState = procState;
+        instance.mUpdateProcState = true;
+        instance.mIsForward = isForward;
+
+        return instance;
+    }
+
+    /** Obtain an instance initialized with provided params. */
+    public static ResumeActivityItem obtain(boolean isForward) {
+        ResumeActivityItem instance = ObjectPool.obtain(ResumeActivityItem.class);
+        if (instance == null) {
+            instance = new ResumeActivityItem();
+        }
+        instance.mProcState = ActivityManager.PROCESS_STATE_UNKNOWN;
+        instance.mUpdateProcState = false;
+        instance.mIsForward = isForward;
+
+        return instance;
+    }
+
+    @Override
+    public void recycle() {
+        mProcState = ActivityManager.PROCESS_STATE_UNKNOWN;
+        mUpdateProcState = false;
+        mIsForward = false;
+        ObjectPool.recycle(this);
     }
 
 

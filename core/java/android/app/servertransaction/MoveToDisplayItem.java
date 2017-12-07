@@ -24,19 +24,16 @@ import android.os.IBinder;
 import android.os.Parcel;
 import android.os.Trace;
 
+import java.util.Objects;
+
 /**
  * Activity move to a different display message.
  * @hide
  */
 public class MoveToDisplayItem extends ClientTransactionItem {
 
-    private final int mTargetDisplayId;
-    private final Configuration mConfiguration;
-
-    public MoveToDisplayItem(int targetDisplayId, Configuration configuration) {
-        mTargetDisplayId = targetDisplayId;
-        mConfiguration = configuration;
-    }
+    private int mTargetDisplayId;
+    private Configuration mConfiguration;
 
     @Override
     public void execute(ClientTransactionHandler client, IBinder token,
@@ -44,6 +41,30 @@ public class MoveToDisplayItem extends ClientTransactionItem {
         Trace.traceBegin(TRACE_TAG_ACTIVITY_MANAGER, "activityMovedToDisplay");
         client.handleActivityConfigurationChanged(token, mConfiguration, mTargetDisplayId);
         Trace.traceEnd(TRACE_TAG_ACTIVITY_MANAGER);
+    }
+
+
+    // ObjectPoolItem implementation
+
+    private MoveToDisplayItem() {}
+
+    /** Obtain an instance initialized with provided params. */
+    public static MoveToDisplayItem obtain(int targetDisplayId, Configuration configuration) {
+        MoveToDisplayItem instance = ObjectPool.obtain(MoveToDisplayItem.class);
+        if (instance == null) {
+            instance = new MoveToDisplayItem();
+        }
+        instance.mTargetDisplayId = targetDisplayId;
+        instance.mConfiguration = configuration;
+
+        return instance;
+    }
+
+    @Override
+    public void recycle() {
+        mTargetDisplayId = 0;
+        mConfiguration = null;
+        ObjectPool.recycle(this);
     }
 
 
@@ -82,7 +103,7 @@ public class MoveToDisplayItem extends ClientTransactionItem {
         }
         final MoveToDisplayItem other = (MoveToDisplayItem) o;
         return mTargetDisplayId == other.mTargetDisplayId
-                && mConfiguration.equals(other.mConfiguration);
+                && Objects.equals(mConfiguration, other.mConfiguration);
     }
 
     @Override

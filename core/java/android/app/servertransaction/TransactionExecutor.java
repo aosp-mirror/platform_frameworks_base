@@ -243,8 +243,6 @@ public class TransactionExecutor {
     }
 
     private static void log(String message) {
-        if (DEBUG_RESOLVER) {
-            Slog.d(TAG, message);
-        }
+        if (DEBUG_RESOLVER) Slog.d(TAG, message);
     }
 }

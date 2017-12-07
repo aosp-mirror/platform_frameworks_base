@@ -25,17 +25,15 @@ import android.os.IBinder;
 import android.os.Parcel;
 import android.os.Trace;
 
+import java.util.Objects;
+
 /**
  * Activity configuration changed callback.
  * @hide
  */
 public class ActivityConfigurationChangeItem extends ClientTransactionItem {
 
-    private final Configuration mConfiguration;
-
-    public ActivityConfigurationChangeItem(Configuration configuration) {
-        mConfiguration = configuration;
-    }
+    private Configuration mConfiguration;
 
     @Override
     public void execute(ClientTransactionHandler client, IBinder token,
@@ -44,6 +42,29 @@ public class ActivityConfigurationChangeItem extends ClientTransactionItem {
         Trace.traceBegin(TRACE_TAG_ACTIVITY_MANAGER, "activityConfigChanged");
         client.handleActivityConfigurationChanged(token, mConfiguration, INVALID_DISPLAY);
         Trace.traceEnd(TRACE_TAG_ACTIVITY_MANAGER);
+    }
+
+
+    // ObjectPoolItem implementation
+
+    private ActivityConfigurationChangeItem() {}
+
+    /** Obtain an instance initialized with provided params. */
+    public static ActivityConfigurationChangeItem obtain(Configuration config) {
+        ActivityConfigurationChangeItem instance =
+                ObjectPool.obtain(ActivityConfigurationChangeItem.class);
+        if (instance == null) {
+            instance = new ActivityConfigurationChangeItem();
+        }
+        instance.mConfiguration = config;
+
+        return instance;
+    }
+
+    @Override
+    public void recycle() {
+        mConfiguration = null;
+        ObjectPool.recycle(this);
     }
 
 
@@ -80,7 +101,7 @@ public class ActivityConfigurationChangeItem extends ClientTransactionItem {
             return false;
         }
         final ActivityConfigurationChangeItem other = (ActivityConfigurationChangeItem) o;
-        return mConfiguration.equals(other.mConfiguration);
+        return Objects.equals(mConfiguration, other.mConfiguration);
     }
 
     @Override

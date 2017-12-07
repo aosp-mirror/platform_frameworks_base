@@ -29,11 +29,7 @@ import android.os.Trace;
  */
 public class WindowVisibilityItem extends ClientTransactionItem {
 
-    private final boolean mShowWindow;
-
-    public WindowVisibilityItem(boolean showWindow) {
-        mShowWindow = showWindow;
-    }
+    private boolean mShowWindow;
 
     @Override
     public void execute(ClientTransactionHandler client, IBinder token,
@@ -41,6 +37,28 @@ public class WindowVisibilityItem extends ClientTransactionItem {
         Trace.traceBegin(TRACE_TAG_ACTIVITY_MANAGER, "activityShowWindow");
         client.handleWindowVisibility(token, mShowWindow);
         Trace.traceEnd(TRACE_TAG_ACTIVITY_MANAGER);
+    }
+
+
+    // ObjectPoolItem implementation
+
+    private WindowVisibilityItem() {}
+
+    /** Obtain an instance initialized with provided params. */
+    public static WindowVisibilityItem obtain(boolean showWindow) {
+        WindowVisibilityItem instance = ObjectPool.obtain(WindowVisibilityItem.class);
+        if (instance == null) {
+            instance = new WindowVisibilityItem();
+        }
+        instance.mShowWindow = showWindow;
+
+        return instance;
+    }
+
+    @Override
+    public void recycle() {
+        mShowWindow = false;
+        ObjectPool.recycle(this);
     }
 
 

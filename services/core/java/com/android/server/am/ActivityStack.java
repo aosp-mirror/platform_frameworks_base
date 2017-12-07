@@ -1430,7 +1430,7 @@ class ActivityStack<T extends StackWindowController> extends ConfigurationContai
                 mService.updateUsageStats(prev, false);
 
                 mService.mLifecycleManager.scheduleTransaction(prev.app.thread, prev.appToken,
-                        new PauseActivityItem(prev.finishing, userLeaving,
+                        PauseActivityItem.obtain(prev.finishing, userLeaving,
                                 prev.configChangeFlags, pauseImmediately));
             } catch (Exception e) {
                 // Ignore exception, if process died other code will cleanup.
@@ -2061,7 +2061,7 @@ class ActivityStack<T extends StackWindowController> extends ConfigurationContai
                         if (DEBUG_VISIBILITY) Slog.v(TAG_VISIBILITY,
                                 "Scheduling invisibility: " + r);
                         mService.mLifecycleManager.scheduleTransaction(r.app.thread, r.appToken,
-                                new WindowVisibilityItem(false /* showWindow */));
+                                WindowVisibilityItem.obtain(false /* showWindow */));
                     }
 
                     // Reset the flag indicating that an app can enter picture-in-picture once the
@@ -2589,13 +2589,13 @@ class ActivityStack<T extends StackWindowController> extends ConfigurationContai
                             if (DEBUG_RESULTS) Slog.v(TAG_RESULTS,
                                     "Delivering results to " + next + ": " + a);
                             mService.mLifecycleManager.scheduleTransaction(next.app.thread,
-                                    next.appToken, new ActivityResultItem(a));
+                                    next.appToken, ActivityResultItem.obtain(a));
                         }
                     }
 
                     if (next.newIntents != null) {
                         mService.mLifecycleManager.scheduleTransaction(next.app.thread,
-                                next.appToken, new NewIntentItem(next.newIntents,
+                                next.appToken, NewIntentItem.obtain(next.newIntents,
                                         false /* andPause */));
                     }
 
@@ -2614,7 +2614,7 @@ class ActivityStack<T extends StackWindowController> extends ConfigurationContai
                     next.app.forceProcessStateUpTo(mService.mTopProcessState);
                     next.clearOptionsLocked();
                     mService.mLifecycleManager.scheduleTransaction(next.app.thread, next.appToken,
-                            new ResumeActivityItem(next.app.repProcState,
+                            ResumeActivityItem.obtain(next.app.repProcState,
                                     mService.isNextTransitionForward()));
 
                     if (DEBUG_STATES) Slog.d(TAG_STATES, "resumeTopActivityLocked: Resumed "
@@ -3266,7 +3266,7 @@ class ActivityStack<T extends StackWindowController> extends ConfigurationContai
                 list.add(new ResultInfo(resultWho, requestCode,
                         resultCode, data));
                 mService.mLifecycleManager.scheduleTransaction(r.app.thread, r.appToken,
-                        new ActivityResultItem(list));
+                        ActivityResultItem.obtain(list));
                 return;
             } catch (Exception e) {
                 Slog.w(TAG, "Exception thrown sending result to " + r, e);
@@ -3395,7 +3395,7 @@ class ActivityStack<T extends StackWindowController> extends ConfigurationContai
                 EventLogTags.writeAmStopActivity(
                         r.userId, System.identityHashCode(r), r.shortComponentName);
                 mService.mLifecycleManager.scheduleTransaction(r.app.thread, r.appToken,
-                        new StopActivityItem(r.visible, r.configChangeFlags));
+                        StopActivityItem.obtain(r.visible, r.configChangeFlags));
                 if (shouldSleepOrShutDownActivities()) {
                     r.setSleeping(true);
                 }
@@ -4201,7 +4201,7 @@ class ActivityStack<T extends StackWindowController> extends ConfigurationContai
             try {
                 if (DEBUG_SWITCH) Slog.i(TAG_SWITCH, "Destroying: " + r);
                 mService.mLifecycleManager.scheduleTransaction(r.app.thread, r.appToken,
-                        new DestroyActivityItem(r.finishing, r.configChangeFlags));
+                        DestroyActivityItem.obtain(r.finishing, r.configChangeFlags));
             } catch (Exception e) {
                 // We can just ignore exceptions here...  if the process
                 // has crashed, our death notification will clean things

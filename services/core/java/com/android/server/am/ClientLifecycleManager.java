@@ -43,6 +43,7 @@ class ClientLifecycleManager {
      */
     void scheduleTransaction(ClientTransaction transaction) throws RemoteException {
         transaction.schedule();
+        transaction.recycle();
     }
 
     /**
@@ -100,7 +101,7 @@ class ClientLifecycleManager {
      */
     private static ClientTransaction transactionWithState(@NonNull IApplicationThread client,
             @NonNull IBinder activityToken, @NonNull ActivityLifecycleItem stateRequest) {
-        final ClientTransaction clientTransaction = new ClientTransaction(client, activityToken);
+        final ClientTransaction clientTransaction = ClientTransaction.obtain(client, activityToken);
         clientTransaction.setLifecycleStateRequest(stateRequest);
         return clientTransaction;
     }
@@ -113,7 +114,7 @@ class ClientLifecycleManager {
      */
     private static ClientTransaction transactionWithCallback(@NonNull IApplicationThread client,
             IBinder activityToken, @NonNull ClientTransactionItem callback) {
-        final ClientTransaction clientTransaction = new ClientTransaction(client, activityToken);
+        final ClientTransaction clientTransaction = ClientTransaction.obtain(client, activityToken);
         clientTransaction.addCallback(callback);
         return clientTransaction;
     }

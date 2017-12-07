@@ -2557,8 +2557,8 @@ public final class ActivityThread extends ClientTransactionHandler {
                 + " req=" + requestCode + " res=" + resultCode + " data=" + data);
         ArrayList<ResultInfo> list = new ArrayList<ResultInfo>();
         list.add(new ResultInfo(id, requestCode, resultCode, data));
-        final ClientTransaction clientTransaction = new ClientTransaction(mAppThread, token);
-        clientTransaction.addCallback(new ActivityResultItem(list));
+        final ClientTransaction clientTransaction = ClientTransaction.obtain(mAppThread, token);
+        clientTransaction.addCallback(ActivityResultItem.obtain(list));
         try {
             mAppThread.scheduleTransaction(clientTransaction);
         } catch (RemoteException e) {

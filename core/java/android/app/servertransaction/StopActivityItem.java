@@ -31,13 +31,8 @@ public class StopActivityItem extends ActivityLifecycleItem {
 
     private static final String TAG = "StopActivityItem";
 
-    private final boolean mShowWindow;
-    private final int mConfigChanges;
-
-    public StopActivityItem(boolean showWindow, int configChanges) {
-        mShowWindow = showWindow;
-        mConfigChanges = configChanges;
-    }
+    private boolean mShowWindow;
+    private int mConfigChanges;
 
     @Override
     public void execute(ClientTransactionHandler client, IBinder token,
@@ -56,6 +51,30 @@ public class StopActivityItem extends ActivityLifecycleItem {
     @Override
     public int getTargetState() {
         return ON_STOP;
+    }
+
+
+    // ObjectPoolItem implementation
+
+    private StopActivityItem() {}
+
+    /** Obtain an instance initialized with provided params. */
+    public static StopActivityItem obtain(boolean showWindow, int configChanges) {
+        StopActivityItem instance = ObjectPool.obtain(StopActivityItem.class);
+        if (instance == null) {
+            instance = new StopActivityItem();
+        }
+        instance.mShowWindow = showWindow;
+        instance.mConfigChanges = configChanges;
+
+        return instance;
+    }
+
+    @Override
+    public void recycle() {
+        mShowWindow = false;
+        mConfigChanges = 0;
+        ObjectPool.recycle(this);
     }
 
 

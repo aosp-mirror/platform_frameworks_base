@@ -1400,9 +1400,9 @@ public class ActivityStackSupervisor extends ConfigurationContainer implements D
 
 
                 // Create activity launch transaction.
-                final ClientTransaction clientTransaction = new ClientTransaction(app.thread,
+                final ClientTransaction clientTransaction = ClientTransaction.obtain(app.thread,
                         r.appToken);
-                clientTransaction.addCallback(new LaunchActivityItem(new Intent(r.intent),
+                clientTransaction.addCallback(LaunchActivityItem.obtain(new Intent(r.intent),
                         System.identityHashCode(r), r.info,
                         // TODO: Have this take the merged configuration instead of separate global
                         // and override configs.
@@ -1415,9 +1415,9 @@ public class ActivityStackSupervisor extends ConfigurationContainer implements D
                 // Set desired final state.
                 final ActivityLifecycleItem lifecycleItem;
                 if (andResume) {
-                    lifecycleItem = new ResumeActivityItem(mService.isNextTransitionForward());
+                    lifecycleItem = ResumeActivityItem.obtain(mService.isNextTransitionForward());
                 } else {
-                    lifecycleItem = new PauseActivityItem();
+                    lifecycleItem = PauseActivityItem.obtain();
                 }
                 clientTransaction.setLifecycleStateRequest(lifecycleItem);
 

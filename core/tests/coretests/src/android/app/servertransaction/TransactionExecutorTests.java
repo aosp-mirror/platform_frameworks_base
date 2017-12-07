@@ -38,6 +38,7 @@ import static org.mockito.Mockito.when;
 import android.app.ActivityThread.ActivityClientRecord;
 import android.app.ClientTransactionHandler;
 import android.os.IBinder;
+import android.platform.test.annotations.Presubmit;
 import android.support.test.filters.SmallTest;
 import android.support.test.runner.AndroidJUnit4;
 
@@ -51,6 +52,7 @@ import java.util.ArrayList;
 /** Test {@link TransactionExecutor} logic. */
 @RunWith(AndroidJUnit4.class)
 @SmallTest
+@Presubmit
 public class TransactionExecutorTests {
 
     private TransactionExecutor mExecutor;
@@ -171,7 +173,7 @@ public class TransactionExecutorTests {
         ActivityLifecycleItem stateRequest = mock(ActivityLifecycleItem.class);
         IBinder token = mock(IBinder.class);
 
-        ClientTransaction transaction = new ClientTransaction(null /* client */,
+        ClientTransaction transaction = ClientTransaction.obtain(null /* client */,
                 token /* activityToken */);
         transaction.addCallback(callback1);
         transaction.addCallback(callback2);
@@ -188,10 +190,10 @@ public class TransactionExecutorTests {
 
     @Test
     public void testRequiredStateResolution() {
-        ActivityResultItem activityResultItem = new ActivityResultItem(new ArrayList<>());
+        ActivityResultItem activityResultItem = ActivityResultItem.obtain(new ArrayList<>());
 
         IBinder token = mock(IBinder.class);
-        ClientTransaction transaction = new ClientTransaction(null /* client */,
+        ClientTransaction transaction = ClientTransaction.obtain(null /* client */,
                 token /* activityToken */);
         transaction.addCallback(activityResultItem);
 
