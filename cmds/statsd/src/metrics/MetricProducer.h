@@ -137,7 +137,7 @@ protected:
     // that StatsLogReport wants.
     std::unordered_map<HashableDimensionKey, std::vector<KeyValuePair>> mDimensionKeyMap;
 
-    std::vector<EventConditionLink> mConditionLinks;
+    std::vector<MetricConditionLink> mConditionLinks;
 
     std::vector<sp<AnomalyTracker>> mAnomalyTrackers;
 
@@ -149,7 +149,7 @@ protected:
      * [eventKey]: the extracted dimension key for the final output. if the metric doesn't have
      *             dimensions, it will be DEFAULT_DIMENSION_KEY
      * [conditionKey]: the keys of conditions which should be used to query the condition for this
-     *                 target event (from EventConditionLink). This is passed to individual metrics
+     *                 target event (from MetricConditionLink). This is passed to individual metrics
      *                 because DurationMetric needs it to be cached.
      * [condition]: whether condition is met. If condition is sliced, this is the result coming from
      *              query with ConditionWizard; If condition is not sliced, this is the
