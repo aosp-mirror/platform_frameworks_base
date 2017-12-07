@@ -570,11 +570,12 @@ public class TextClock extends TextView {
                 mFormatChangeObserver = new FormatChangeObserver(getHandler());
             }
             final ContentResolver resolver = getContext().getContentResolver();
+            Uri uri = Settings.System.getUriFor(Settings.System.TIME_12_24);
             if (mShowCurrentUserTime) {
-                resolver.registerContentObserver(Settings.System.CONTENT_URI, true,
+                resolver.registerContentObserver(uri, true,
                         mFormatChangeObserver, UserHandle.USER_ALL);
             } else {
-                resolver.registerContentObserver(Settings.System.CONTENT_URI, true,
+                resolver.registerContentObserver(uri, true,
                         mFormatChangeObserver);
             }
         }
