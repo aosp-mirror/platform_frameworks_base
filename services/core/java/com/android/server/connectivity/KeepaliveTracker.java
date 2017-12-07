@@ -129,7 +129,7 @@ public class KeepaliveTracker {
                     .append("->")
                     .append(IpUtils.addressAndPortToString(mPacket.dstAddress, mPacket.dstPort))
                     .append(" interval=" + mInterval)
-                    .append(" data=" + HexDump.toHexString(mPacket.data))
+                    .append(" packetData=" + HexDump.toHexString(mPacket.getPacket()))
                     .append(" uid=").append(mUid).append(" pid=").append(mPid)
                     .append(" ]")
                     .toString();
@@ -172,7 +172,7 @@ public class KeepaliveTracker {
         }
 
         private int checkInterval() {
-            return mInterval >= 20 ? SUCCESS : ERROR_INVALID_INTERVAL;
+            return mInterval >= 10 ? SUCCESS : ERROR_INVALID_INTERVAL;
         }
 
         private int isValid() {
