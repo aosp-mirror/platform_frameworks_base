@@ -369,8 +369,6 @@ public final class PublishConfig implements Parcelable {
          *
          * @return The builder to facilitate chaining
          *         {@code builder.setXXX(..).setXXX(..)}.
-         *
-         * @hide
          */
         public Builder setRangingEnabled(boolean enable) {
             mEnableRanging = enable;
