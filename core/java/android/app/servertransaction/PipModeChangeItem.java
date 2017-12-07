@@ -16,6 +16,7 @@
 
 package android.app.servertransaction;
 
+import android.app.ClientTransactionHandler;
 import android.content.res.Configuration;
 import android.os.IBinder;
 import android.os.Parcel;
@@ -37,7 +38,8 @@ public class PipModeChangeItem extends ClientTransactionItem {
     }
 
     @Override
-    public void execute(android.app.ClientTransactionHandler client, IBinder token) {
+    public void execute(ClientTransactionHandler client, IBinder token,
+            PendingTransactionActions pendingActions) {
         client.handlePictureInPictureModeChanged(token, mIsInPipMode, mOverrideConfig);
     }
 
@@ -85,5 +87,11 @@ public class PipModeChangeItem extends ClientTransactionItem {
         result = 31 * result + (mIsInPipMode ? 1 : 0);
         result = 31 * result + mOverrideConfig.hashCode();
         return result;
+    }
+
+    @Override
+    public String toString() {
+        return "PipModeChangeItem{isInPipMode=" + mIsInPipMode
+                + ",overrideConfig=" + mOverrideConfig + "}";
     }
 }

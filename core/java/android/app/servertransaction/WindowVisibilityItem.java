@@ -18,6 +18,7 @@ package android.app.servertransaction;
 
 import static android.os.Trace.TRACE_TAG_ACTIVITY_MANAGER;
 
+import android.app.ClientTransactionHandler;
 import android.os.IBinder;
 import android.os.Parcel;
 import android.os.Trace;
@@ -35,7 +36,8 @@ public class WindowVisibilityItem extends ClientTransactionItem {
     }
 
     @Override
-    public void execute(android.app.ClientTransactionHandler client, IBinder token) {
+    public void execute(ClientTransactionHandler client, IBinder token,
+            PendingTransactionActions pendingActions) {
         Trace.traceBegin(TRACE_TAG_ACTIVITY_MANAGER, "activityShowWindow");
         client.handleWindowVisibility(token, mShowWindow);
         Trace.traceEnd(TRACE_TAG_ACTIVITY_MANAGER);
@@ -81,5 +83,10 @@ public class WindowVisibilityItem extends ClientTransactionItem {
     @Override
     public int hashCode() {
         return 17 + 31 * (mShowWindow ? 1 : 0);
+    }
+
+    @Override
+    public String toString() {
+        return "WindowVisibilityItem{showWindow=" + mShowWindow + "}";
     }
 }

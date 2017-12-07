@@ -46,6 +46,7 @@ import android.os.ParcelFileDescriptor;
 import android.os.Parcelable;
 import android.os.PersistableBundle;
 import android.os.RemoteException;
+import android.platform.test.annotations.Presubmit;
 import android.support.test.filters.SmallTest;
 import android.support.test.runner.AndroidJUnit4;
 
@@ -63,7 +64,7 @@ import java.util.Map;
 /** Test parcelling and unparcelling of transactions and transaction items. */
 @RunWith(AndroidJUnit4.class)
 @SmallTest
-// TODO(lifecycler): Add to presubmit after checking for flakiness.
+@Presubmit
 public class TransactionParcelTests {
 
     private Parcel mParcel;
@@ -230,7 +231,7 @@ public class TransactionParcelTests {
         LaunchActivityItem item = new LaunchActivityItem(intent, ident, activityInfo,
                 config(), overrideConfig, compat, referrer, null /* voiceInteractor */,
                 procState, bundle, persistableBundle, resultInfoList(), referrerIntentList(),
-                true /* notResumed */, true /* isForward */, null /* profilerInfo */);
+                true /* isForward */, null /* profilerInfo */);
         writeAndPrepareForReading(item);
 
         // Read from parcel and assert

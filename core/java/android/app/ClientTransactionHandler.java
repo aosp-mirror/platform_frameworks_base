@@ -16,15 +16,12 @@
 package android.app;
 
 import android.app.servertransaction.ClientTransaction;
-import android.content.Intent;
-import android.content.pm.ActivityInfo;
+import android.app.servertransaction.PendingTransactionActions;
+import android.content.pm.ApplicationInfo;
 import android.content.res.CompatibilityInfo;
 import android.content.res.Configuration;
-import android.os.Bundle;
 import android.os.IBinder;
-import android.os.PersistableBundle;
 
-import com.android.internal.app.IVoiceInteractor;
 import com.android.internal.content.ReferrerIntent;
 
 import java.util.List;
@@ -40,7 +37,7 @@ public abstract class ClientTransactionHandler {
 
     /** Prepare and schedule transaction for execution. */
     void scheduleTransaction(ClientTransaction transaction) {
-        transaction.prepare(this);
+        transaction.preExecute(this);
         sendMessage(ActivityThread.H.EXECUTE_TRANSACTION, transaction);
     }
 
@@ -49,9 +46,6 @@ public abstract class ClientTransactionHandler {
 
     // Prepare phase related logic and handlers. Methods that inform about about pending changes or
     // do other internal bookkeeping.
-
-    /** Get current lifecycle request number to maintain correct ordering. */
-    public abstract int getLifecycleSeq();
 
     /** Set pending config in case it will be updated by other transaction item. */
     public abstract void updatePendingConfiguration(Configuration config);
@@ -69,15 +63,21 @@ public abstract class ClientTransactionHandler {
 
     /** Pause the activity. */
     public abstract void handlePauseActivity(IBinder token, boolean finished, boolean userLeaving,
-            int configChanges, boolean dontReport, int seq);
+            int configChanges, boolean dontReport, PendingTransactionActions pendingActions);
 
     /** Resume the activity. */
     public abstract void handleResumeActivity(IBinder token, boolean clearHide, boolean isForward,
-            boolean reallyResume, int seq, String reason);
+            String reason);
 
     /** Stop the activity. */
     public abstract void handleStopActivity(IBinder token, boolean show, int configChanges,
-            int seq);
+            PendingTransactionActions pendingActions);
+
+    /** Report that activity was stopped to server. */
+    public abstract void reportStop(PendingTransactionActions pendingActions);
+
+    /** Restart the activity after it was stopped. */
+    public abstract void performRestartActivity(IBinder token, boolean start);
 
     /** Deliver activity (override) configuration change. */
     public abstract void handleActivityConfigurationChanged(IBinder activityToken,
@@ -102,13 +102,23 @@ public abstract class ClientTransactionHandler {
     public abstract void handleWindowVisibility(IBinder token, boolean show);
 
     /** Perform activity launch. */
-    public abstract void handleLaunchActivity(IBinder token, Intent intent, int ident,
-            ActivityInfo info, Configuration overrideConfig, CompatibilityInfo compatInfo,
-            String referrer, IVoiceInteractor voiceInteractor, Bundle state,
-            PersistableBundle persistentState, List<ResultInfo> pendingResults,
-            List<ReferrerIntent> pendingNewIntents, boolean notResumed, boolean isForward,
-            ProfilerInfo profilerInfo);
+    public abstract Activity handleLaunchActivity(ActivityThread.ActivityClientRecord r,
+            PendingTransactionActions pendingActions);
+
+    /** Perform activity start. */
+    public abstract void handleStartActivity(ActivityThread.ActivityClientRecord r,
+            PendingTransactionActions pendingActions);
+
+    /** Get package info. */
+    public abstract LoadedApk getPackageInfoNoCheck(ApplicationInfo ai,
+            CompatibilityInfo compatInfo);
 
     /** Deliver app configuration change notification. */
     public abstract void handleConfigurationChanged(Configuration config);
+
+    /**
+     * Get {@link android.app.ActivityThread.ActivityClientRecord} instance that corresponds to the
+     * provided token.
+     */
+    public abstract ActivityThread.ActivityClientRecord getActivityClient(IBinder token);
 }

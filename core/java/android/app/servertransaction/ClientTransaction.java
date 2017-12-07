@@ -16,6 +16,7 @@
 
 package android.app.servertransaction;
 
+import android.annotation.Nullable;
 import android.app.ClientTransactionHandler;
 import android.app.IApplicationThread;
 import android.os.IBinder;
@@ -69,6 +70,23 @@ public class ClientTransaction implements Parcelable {
         mActivityCallbacks.add(activityCallback);
     }
 
+    /** Get the list of callbacks. */
+    @Nullable
+    List<ClientTransactionItem> getCallbacks() {
+        return mActivityCallbacks;
+    }
+
+    /** Get the target activity. */
+    @Nullable
+    public IBinder getActivityToken() {
+        return mActivityToken;
+    }
+
+    /** Get the target state lifecycle request. */
+    ActivityLifecycleItem getLifecycleStateRequest() {
+        return mLifecycleStateRequest;
+    }
+
     /**
      * Set the lifecycle state in which the client should be after executing the transaction.
      * @param stateRequest A lifecycle request initialized with right parameters.
@@ -82,44 +100,27 @@ public class ClientTransaction implements Parcelable {
      * @param clientTransactionHandler Handler on the client side that will executed all operations
      *                                 requested by transaction items.
      */
-    public void prepare(android.app.ClientTransactionHandler clientTransactionHandler) {
+    public void preExecute(android.app.ClientTransactionHandler clientTransactionHandler) {
         if (mActivityCallbacks != null) {
             final int size = mActivityCallbacks.size();
             for (int i = 0; i < size; ++i) {
-                mActivityCallbacks.get(i).prepare(clientTransactionHandler, mActivityToken);
+                mActivityCallbacks.get(i).preExecute(clientTransactionHandler, mActivityToken);
             }
         }
         if (mLifecycleStateRequest != null) {
-            mLifecycleStateRequest.prepare(clientTransactionHandler, mActivityToken);
-        }
-    }
-
-    /**
-     * Execute the transaction.
-     * @param clientTransactionHandler Handler on the client side that will execute all operations
-     *                                 requested by transaction items.
-     */
-    public void execute(android.app.ClientTransactionHandler clientTransactionHandler) {
-        if (mActivityCallbacks != null) {
-            final int size = mActivityCallbacks.size();
-            for (int i = 0; i < size; ++i) {
-                mActivityCallbacks.get(i).execute(clientTransactionHandler, mActivityToken);
-            }
-        }
-        if (mLifecycleStateRequest != null) {
-            mLifecycleStateRequest.execute(clientTransactionHandler, mActivityToken);
+            mLifecycleStateRequest.preExecute(clientTransactionHandler, mActivityToken);
         }
     }
 
     /**
      * Schedule the transaction after it was initialized. It will be send to client and all its
      * individual parts will be applied in the following sequence:
-     * 1. The client calls {@link #prepare(ClientTransactionHandler)}, which triggers all work that
-     *    needs to be done before actually scheduling the transaction for callbacks and lifecycle
-     *    state request.
+     * 1. The client calls {@link #preExecute(ClientTransactionHandler)}, which triggers all work
+     *    that needs to be done before actually scheduling the transaction for callbacks and
+     *    lifecycle state request.
      * 2. The transaction message is scheduled.
-     * 3. The client calls {@link #execute(ClientTransactionHandler)}, which executes all callbacks
-     *    and necessary lifecycle transitions.
+     * 3. The client calls {@link TransactionExecutor#execute(ClientTransaction)}, which executes
+     *    all callbacks and necessary lifecycle transitions.
      */
     public void schedule() throws RemoteException {
         mClient.scheduleTransaction(this);

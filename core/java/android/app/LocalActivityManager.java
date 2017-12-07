@@ -22,6 +22,7 @@ import android.os.Binder;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.Window;
+
 import com.android.internal.content.ReferrerIntent;
 
 import java.util.ArrayList;
@@ -161,12 +162,12 @@ public class LocalActivityManager {
             case CREATED:
                 if (desiredState == STARTED) {
                     if (localLOGV) Log.v(TAG, r.id + ": restarting");
-                    mActivityThread.performRestartActivity(r);
+                    mActivityThread.performRestartActivity(r, true /* start */);
                     r.curState = STARTED;
                 }
                 if (desiredState == RESUMED) {
                     if (localLOGV) Log.v(TAG, r.id + ": restarting and resuming");
-                    mActivityThread.performRestartActivity(r);
+                    mActivityThread.performRestartActivity(r, true /* start */);
                     mActivityThread.performResumeActivity(r, true, "moveToState-CREATED");
                     r.curState = RESUMED;
                 }
@@ -207,7 +208,7 @@ public class LocalActivityManager {
     private void performPause(LocalActivityRecord r, boolean finishing) {
         final boolean needState = r.instanceState == null;
         final Bundle instanceState = mActivityThread.performPauseActivity(
-                r, finishing, needState, "performPause");
+                r, finishing, needState, "performPause", null /* pendingActions */);
         if (needState) {
             r.instanceState = instanceState;
         }
@@ -361,7 +362,8 @@ public class LocalActivityManager {
             performPause(r, finish);
         }
         if (localLOGV) Log.v(TAG, r.id + ": destroying");
-        mActivityThread.performDestroyActivity(r, finish);
+        mActivityThread.performDestroyActivity(r, finish, 0 /* configChanges */,
+                false /* getNonConfigInstance */);
         r.activity = null;
         r.window = null;
         if (finish) {
@@ -625,7 +627,8 @@ public class LocalActivityManager {
         for (int i=0; i<N; i++) {
             LocalActivityRecord r = mActivityArray.get(i);
             if (localLOGV) Log.v(TAG, r.id + ": destroying");
-            mActivityThread.performDestroyActivity(r, finishing);
+            mActivityThread.performDestroyActivity(r, finishing, 0 /* configChanges */,
+                    false /* getNonConfigInstance */);
         }
         mActivities.clear();
         mActivityArray.clear();

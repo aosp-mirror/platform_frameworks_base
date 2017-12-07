@@ -33,13 +33,25 @@ public interface BaseClientRequest {
      * @param client Target client handler.
      * @param token  Target activity token.
      */
-    default void prepare(ClientTransactionHandler client, IBinder token) {
+    default void preExecute(ClientTransactionHandler client, IBinder token) {
     }
 
     /**
      * Execute the request.
      * @param client Target client handler.
      * @param token Target activity token.
+     * @param pendingActions Container that may have data pending to be used.
      */
-    void execute(ClientTransactionHandler client, IBinder token);
+    void execute(ClientTransactionHandler client, IBinder token,
+            PendingTransactionActions pendingActions);
+
+    /**
+     * Perform all actions that need to happen after execution, e.g. report the result to server.
+     * @param client Target client handler.
+     * @param token Target activity token.
+     * @param pendingActions Container that may have data pending to be used.
+     */
+    default void postExecute(ClientTransactionHandler client, IBinder token,
+            PendingTransactionActions pendingActions) {
+    }
 }

@@ -16,6 +16,13 @@
 
 package android.app;
 
+import static android.app.servertransaction.ActivityLifecycleItem.ON_CREATE;
+import static android.app.servertransaction.ActivityLifecycleItem.ON_DESTROY;
+import static android.app.servertransaction.ActivityLifecycleItem.ON_PAUSE;
+import static android.app.servertransaction.ActivityLifecycleItem.ON_RESUME;
+import static android.app.servertransaction.ActivityLifecycleItem.ON_START;
+import static android.app.servertransaction.ActivityLifecycleItem.ON_STOP;
+import static android.app.servertransaction.ActivityLifecycleItem.PRE_ON_CREATE;
 import static android.view.Display.INVALID_DISPLAY;
 
 import android.annotation.NonNull;
@@ -23,8 +30,12 @@ import android.annotation.Nullable;
 import android.app.assist.AssistContent;
 import android.app.assist.AssistStructure;
 import android.app.backup.BackupAgent;
+import android.app.servertransaction.ActivityLifecycleItem.LifecycleState;
 import android.app.servertransaction.ActivityResultItem;
 import android.app.servertransaction.ClientTransaction;
+import android.app.servertransaction.PendingTransactionActions;
+import android.app.servertransaction.PendingTransactionActions.StopInfo;
+import android.app.servertransaction.TransactionExecutor;
 import android.content.BroadcastReceiver;
 import android.content.ComponentCallbacks2;
 import android.content.ComponentName;
@@ -84,7 +95,6 @@ import android.os.StrictMode;
 import android.os.SystemClock;
 import android.os.SystemProperties;
 import android.os.Trace;
-import android.os.TransactionTooLargeException;
 import android.os.UserHandle;
 import android.provider.BlockedNumberContract;
 import android.provider.CalendarContract;
@@ -102,7 +112,6 @@ import android.util.DisplayMetrics;
 import android.util.EventLog;
 import android.util.Log;
 import android.util.LogPrinter;
-import android.util.LogWriter;
 import android.util.Pair;
 import android.util.PrintWriterPrinter;
 import android.util.Slog;
@@ -122,6 +131,7 @@ import android.view.WindowManagerGlobal;
 import android.webkit.WebView;
 
 import com.android.internal.annotations.GuardedBy;
+import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.app.IVoiceInteractor;
 import com.android.internal.content.ReferrerIntent;
 import com.android.internal.os.BinderInternal;
@@ -129,7 +139,6 @@ import com.android.internal.os.RuntimeInit;
 import com.android.internal.os.SomeArgs;
 import com.android.internal.util.ArrayUtils;
 import com.android.internal.util.FastPrintWriter;
-import com.android.internal.util.IndentingPrintWriter;
 import com.android.org.conscrypt.OpenSSLSocketImpl;
 import com.android.org.conscrypt.TrustedCertificateStore;
 import com.android.server.am.proto.MemInfoProto;
@@ -190,7 +199,7 @@ public final class ActivityThread extends ClientTransactionHandler {
     private static final boolean DEBUG_BACKUP = false;
     public static final boolean DEBUG_CONFIGURATION = false;
     private static final boolean DEBUG_SERVICE = false;
-    private static final boolean DEBUG_MEMORY_TRIM = false;
+    public static final boolean DEBUG_MEMORY_TRIM = false;
     private static final boolean DEBUG_PROVIDER = false;
     private static final boolean DEBUG_ORDER = false;
     private static final long MIN_TIME_BETWEEN_GCS = 5*1000;
@@ -205,10 +214,6 @@ public final class ActivityThread extends ClientTransactionHandler {
     public static final int SERVICE_DONE_EXECUTING_START = 1;
     /** Type for IActivityManager.serviceDoneExecuting: done stopping (destroying) service */
     public static final int SERVICE_DONE_EXECUTING_STOP = 2;
-
-    // Details for pausing activity.
-    private static final int USER_LEAVING = 1;
-    private static final int DONT_REPORT = 2;
 
     // Whether to invoke an activity callback after delivering new configuration.
     private static final boolean REPORT_TO_ACTIVITY = true;
@@ -289,12 +294,8 @@ public final class ActivityThread extends ClientTransactionHandler {
     final ArrayList<ActivityClientRecord> mRelaunchingActivities = new ArrayList<>();
     @GuardedBy("mResourcesManager")
     Configuration mPendingConfiguration = null;
-    // Because we merge activity relaunch operations we can't depend on the ordering provided by
-    // the handler messages. We need to introduce secondary ordering mechanism, which will allow
-    // us to drop certain events, if we know that they happened before relaunch we already executed.
-    // This represents the order of receiving the request from AM.
-    @GuardedBy("mResourcesManager")
-    int mLifecycleSeq = 0;
+    // An executor that performs multi-step transactions.
+    private final TransactionExecutor mTransactionExecutor = new TransactionExecutor(this);
 
     private final ResourcesManager mResourcesManager;
 
@@ -342,8 +343,9 @@ public final class ActivityThread extends ClientTransactionHandler {
 
     Bundle mCoreSettings = null;
 
-    static final class ActivityClientRecord {
-        IBinder token;
+    /** Activity client record, used for bookkeeping for the real {@link Activity} instance. */
+    public static final class ActivityClientRecord {
+        public IBinder token;
         int ident;
         Intent intent;
         String referrer;
@@ -355,6 +357,7 @@ public final class ActivityThread extends ClientTransactionHandler {
         Activity parent;
         String embeddedID;
         Activity.NonConfigurationInstances lastNonConfigurationInstances;
+        // TODO(lifecycler): Use mLifecycleState instead.
         boolean paused;
         boolean stopped;
         boolean hideForNow;
@@ -371,13 +374,13 @@ public final class ActivityThread extends ClientTransactionHandler {
 
         ActivityInfo activityInfo;
         CompatibilityInfo compatInfo;
-        LoadedApk packageInfo;
+        public LoadedApk packageInfo;
 
         List<ResultInfo> pendingResults;
         List<ReferrerIntent> pendingIntents;
 
         boolean startsNotResumed;
-        boolean isForward;
+        public final boolean isForward;
         int pendingConfigChanges;
         boolean onlyLocalRequest;
 
@@ -385,15 +388,42 @@ public final class ActivityThread extends ClientTransactionHandler {
         WindowManager mPendingRemoveWindowManager;
         boolean mPreserveWindow;
 
-        // Set for relaunch requests, indicates the order number of the relaunch operation, so it
-        // can be compared with other lifecycle operations.
-        int relaunchSeq = 0;
+        @LifecycleState
+        private int mLifecycleState = PRE_ON_CREATE;
 
-        // Can only be accessed from the UI thread. This represents the latest processed message
-        // that is related to lifecycle events/
-        int lastProcessedSeq = 0;
+        @VisibleForTesting
+        public ActivityClientRecord() {
+            this.isForward = false;
+            init();
+        }
 
-        ActivityClientRecord() {
+        public ActivityClientRecord(IBinder token, Intent intent, int ident,
+                ActivityInfo info, Configuration overrideConfig, CompatibilityInfo compatInfo,
+                String referrer, IVoiceInteractor voiceInteractor, Bundle state,
+                PersistableBundle persistentState, List<ResultInfo> pendingResults,
+                List<ReferrerIntent> pendingNewIntents, boolean isForward,
+                ProfilerInfo profilerInfo, ClientTransactionHandler client) {
+            this.token = token;
+            this.ident = ident;
+            this.intent = intent;
+            this.referrer = referrer;
+            this.voiceInteractor = voiceInteractor;
+            this.activityInfo = info;
+            this.compatInfo = compatInfo;
+            this.state = state;
+            this.persistentState = persistentState;
+            this.pendingResults = pendingResults;
+            this.pendingIntents = pendingNewIntents;
+            this.isForward = isForward;
+            this.profilerInfo = profilerInfo;
+            this.overrideConfig = overrideConfig;
+            this.packageInfo = client.getPackageInfoNoCheck(activityInfo.applicationInfo,
+                    compatInfo);
+            init();
+        }
+
+        /** Common initializer for all constructors. */
+        private void init() {
             parent = null;
             embeddedID = null;
             paused = false;
@@ -408,6 +438,38 @@ public final class ActivityThread extends ClientTransactionHandler {
                 activity.mMainThread.handleActivityConfigurationChanged(token, overrideConfig,
                         newDisplayId);
             };
+        }
+
+        /** Get the current lifecycle state. */
+        public int getLifecycleState() {
+            return mLifecycleState;
+        }
+
+        /** Update the current lifecycle state for internal bookkeeping. */
+        public void setState(@LifecycleState int newLifecycleState) {
+            mLifecycleState = newLifecycleState;
+            switch (mLifecycleState) {
+                case ON_CREATE:
+                    paused = true;
+                    stopped = true;
+                    break;
+                case ON_START:
+                    paused = true;
+                    stopped = false;
+                    break;
+                case ON_RESUME:
+                    paused = false;
+                    stopped = false;
+                    break;
+                case ON_PAUSE:
+                    paused = true;
+                    stopped = false;
+                    break;
+                case ON_STOP:
+                    paused = true;
+                    stopped = true;
+                    break;
+            }
         }
 
         public boolean isPreHoneycomb() {
@@ -1315,13 +1377,6 @@ public final class ActivityThread extends ClientTransactionHandler {
         mAppThread.updateProcessState(processState, fromIpc);
     }
 
-    @Override
-    public int getLifecycleSeq() {
-        synchronized (mResourcesManager) {
-            return mLifecycleSeq++;
-        }
-    }
-
     class H extends Handler {
         public static final int BIND_APPLICATION        = 110;
         public static final int EXIT_APPLICATION        = 111;
@@ -1586,7 +1641,7 @@ public final class ActivityThread extends ClientTransactionHandler {
                             (String[]) ((SomeArgs) msg.obj).arg2);
                     break;
                 case EXECUTE_TRANSACTION:
-                    ((ClientTransaction) msg.obj).execute(ActivityThread.this);
+                    mTransactionExecutor.execute(((ClientTransaction) msg.obj));
                     break;
             }
             Object obj = msg.obj;
@@ -1796,6 +1851,7 @@ public final class ActivityThread extends ClientTransactionHandler {
                 registerPackage);
     }
 
+    @Override
     public final LoadedApk getPackageInfoNoCheck(ApplicationInfo ai,
             CompatibilityInfo compatInfo) {
         return getPackageInfo(ai, compatInfo, null, false, true, false);
@@ -2479,11 +2535,19 @@ public final class ActivityThread extends ClientTransactionHandler {
                     + ", comp=" + name
                     + ", token=" + token);
         }
-        return performLaunchActivity(r, null);
+        // TODO(lifecycler): Can't switch to use #handleLaunchActivity() because it will try to
+        // call #reportSizeConfigurations(), but the server might not know anything about the
+        // activity if it was launched from LocalAcvitivyManager.
+        return performLaunchActivity(r);
     }
 
     public final Activity getActivity(IBinder token) {
         return mActivities.get(token).activity;
+    }
+
+    @Override
+    public ActivityClientRecord getActivityClient(IBinder token) {
+        return mActivities.get(token);
     }
 
     public final void sendActivityResult(
@@ -2553,9 +2617,8 @@ public final class ActivityThread extends ClientTransactionHandler {
         sendMessage(H.CLEAN_UP_CONTEXT, cci);
     }
 
-    private Activity performLaunchActivity(ActivityClientRecord r, Intent customIntent) {
-        // System.out.println("##### [" + System.currentTimeMillis() + "] ActivityThread.performLaunchActivity(" + r + ")");
-
+    /**  Core implementation of activity launch. */
+    private Activity performLaunchActivity(ActivityClientRecord r) {
         ActivityInfo aInfo = r.activityInfo;
         if (r.packageInfo == null) {
             r.packageInfo = getPackageInfo(aInfo.applicationInfo, r.compatInfo,
@@ -2625,9 +2688,6 @@ public final class ActivityThread extends ClientTransactionHandler {
                         r.embeddedID, r.lastNonConfigurationInstances, config,
                         r.referrer, r.voiceInteractor, window, r.configCallback);
 
-                if (customIntent != null) {
-                    activity.mIntent = customIntent;
-                }
                 r.lastNonConfigurationInstances = null;
                 checkAndBlockForNetworkAccess();
                 activity.mStartedActivity = false;
@@ -2648,37 +2708,8 @@ public final class ActivityThread extends ClientTransactionHandler {
                         " did not call through to super.onCreate()");
                 }
                 r.activity = activity;
-                r.stopped = true;
-                if (!r.activity.mFinished) {
-                    activity.performStart();
-                    r.stopped = false;
-                }
-                if (!r.activity.mFinished) {
-                    if (r.isPersistable()) {
-                        if (r.state != null || r.persistentState != null) {
-                            mInstrumentation.callActivityOnRestoreInstanceState(activity, r.state,
-                                    r.persistentState);
-                        }
-                    } else if (r.state != null) {
-                        mInstrumentation.callActivityOnRestoreInstanceState(activity, r.state);
-                    }
-                }
-                if (!r.activity.mFinished) {
-                    activity.mCalled = false;
-                    if (r.isPersistable()) {
-                        mInstrumentation.callActivityOnPostCreate(activity, r.state,
-                                r.persistentState);
-                    } else {
-                        mInstrumentation.callActivityOnPostCreate(activity, r.state);
-                    }
-                    if (!activity.mCalled) {
-                        throw new SuperNotCalledException(
-                            "Activity " + r.intent.getComponent().toShortString() +
-                            " did not call through to super.onPostCreate()");
-                    }
-                }
             }
-            r.paused = true;
+            r.setState(ON_CREATE);
 
             mActivities.put(r.token, r);
 
@@ -2694,6 +2725,60 @@ public final class ActivityThread extends ClientTransactionHandler {
         }
 
         return activity;
+    }
+
+    @Override
+    public void handleStartActivity(ActivityClientRecord r,
+            PendingTransactionActions pendingActions) {
+        final Activity activity = r.activity;
+        if (r.activity == null) {
+            // TODO(lifecycler): What do we do in this case?
+            return;
+        }
+        if (!r.stopped) {
+            throw new IllegalStateException("Can't start activity that is not stopped.");
+        }
+        if (r.activity.mFinished) {
+            // TODO(lifecycler): How can this happen?
+            return;
+        }
+
+        // Start
+        activity.performStart();
+        r.setState(ON_START);
+
+        if (pendingActions == null) {
+            // No more work to do.
+            return;
+        }
+
+        // Restore instance state
+        if (pendingActions.shouldRestoreInstanceState()) {
+            if (r.isPersistable()) {
+                if (r.state != null || r.persistentState != null) {
+                    mInstrumentation.callActivityOnRestoreInstanceState(activity, r.state,
+                            r.persistentState);
+                }
+            } else if (r.state != null) {
+                mInstrumentation.callActivityOnRestoreInstanceState(activity, r.state);
+            }
+        }
+
+        // Call postOnCreate()
+        if (pendingActions.shouldCallOnPostCreate()) {
+            activity.mCalled = false;
+            if (r.isPersistable()) {
+                mInstrumentation.callActivityOnPostCreate(activity, r.state,
+                        r.persistentState);
+            } else {
+                mInstrumentation.callActivityOnPostCreate(activity, r.state);
+            }
+            if (!activity.mCalled) {
+                throw new SuperNotCalledException(
+                        "Activity " + r.intent.getComponent().toShortString()
+                                + " did not call through to super.onPostCreate()");
+            }
+        }
     }
 
     /**
@@ -2742,38 +2827,12 @@ public final class ActivityThread extends ClientTransactionHandler {
         return appContext;
     }
 
+    /**
+     * Extended implementation of activity launch. Used when server requests a launch or relaunch.
+     */
     @Override
-    public void handleLaunchActivity(IBinder token, Intent intent, int ident, ActivityInfo info,
-            Configuration overrideConfig, CompatibilityInfo compatInfo, String referrer,
-            IVoiceInteractor voiceInteractor, Bundle state, PersistableBundle persistentState,
-            List<ResultInfo> pendingResults, List<ReferrerIntent> pendingNewIntents,
-            boolean notResumed, boolean isForward, ProfilerInfo profilerInfo) {
-        ActivityClientRecord r = new ActivityClientRecord();
-
-        r.token = token;
-        r.ident = ident;
-        r.intent = intent;
-        r.referrer = referrer;
-        r.voiceInteractor = voiceInteractor;
-        r.activityInfo = info;
-        r.compatInfo = compatInfo;
-        r.state = state;
-        r.persistentState = persistentState;
-
-        r.pendingResults = pendingResults;
-        r.pendingIntents = pendingNewIntents;
-
-        r.startsNotResumed = notResumed;
-        r.isForward = isForward;
-
-        r.profilerInfo = profilerInfo;
-
-        r.overrideConfig = overrideConfig;
-        r.packageInfo = getPackageInfoNoCheck(r.activityInfo.applicationInfo, r.compatInfo);
-        handleLaunchActivity(r, null /* customIntent */, "LAUNCH_ACTIVITY");
-    }
-
-    private void handleLaunchActivity(ActivityClientRecord r, Intent customIntent, String reason) {
+    public Activity handleLaunchActivity(ActivityClientRecord r,
+            PendingTransactionActions pendingActions) {
         // If we are getting ready to gc after going to the background, well
         // we are back active so skip it.
         unscheduleGcIdler();
@@ -2796,44 +2855,28 @@ public final class ActivityThread extends ClientTransactionHandler {
         }
         WindowManagerGlobal.initialize();
 
-        Activity a = performLaunchActivity(r, customIntent);
+        final Activity a = performLaunchActivity(r);
 
         if (a != null) {
             r.createdConfig = new Configuration(mConfiguration);
             reportSizeConfigurations(r);
-            Bundle oldState = r.state;
-            handleResumeActivity(r.token, false, r.isForward,
-                    !r.activity.mFinished && !r.startsNotResumed, r.lastProcessedSeq, reason);
-
-            if (!r.activity.mFinished && r.startsNotResumed) {
-                // The activity manager actually wants this one to start out paused, because it
-                // needs to be visible but isn't in the foreground. We accomplish this by going
-                // through the normal startup (because activities expect to go through onResume()
-                // the first time they run, before their window is displayed), and then pausing it.
-                // However, in this case we do -not- need to do the full pause cycle (of freezing
-                // and such) because the activity manager assumes it can just retain the current
-                // state it has.
-                performPauseActivityIfNeeded(r, reason);
-
-                // We need to keep around the original state, in case we need to be created again.
-                // But we only do this for pre-Honeycomb apps, which always save their state when
-                // pausing, so we can not have them save their state when restarting from a paused
-                // state. For HC and later, we want to (and can) let the state be saved as the
-                // normal part of stopping the activity.
-                if (r.isPreHoneycomb()) {
-                    r.state = oldState;
-                }
+            if (!r.activity.mFinished && pendingActions != null) {
+                pendingActions.setOldState(r.state);
+                pendingActions.setRestoreInstanceState(true);
+                pendingActions.setCallOnPostCreate(true);
             }
         } else {
             // If there was an error, for any reason, tell the activity manager to stop us.
             try {
                 ActivityManager.getService()
-                    .finishActivity(r.token, Activity.RESULT_CANCELED, null,
-                            Activity.DONT_FINISH_TASK_WITH_ACTIVITY);
+                        .finishActivity(r.token, Activity.RESULT_CANCELED, null,
+                                Activity.DONT_FINISH_TASK_WITH_ACTIVITY);
             } catch (RemoteException ex) {
                 throw ex.rethrowFromSystemServer();
             }
         }
+
+        return a;
     }
 
     private void reportSizeConfigurations(ActivityClientRecord r) {
@@ -3477,8 +3520,7 @@ public final class ActivityThread extends ClientTransactionHandler {
         //Slog.i(TAG, "Running services: " + mServices);
     }
 
-    public final ActivityClientRecord performResumeActivity(IBinder token,
-            boolean clearHide, String reason) {
+    ActivityClientRecord performResumeActivity(IBinder token, boolean clearHide, String reason) {
         ActivityClientRecord r = mActivities.get(token);
         if (localLOGV) Slog.v(TAG, "Performing resume of " + r
                 + " finished=" + r.activity.mFinished);
@@ -3518,10 +3560,9 @@ public final class ActivityThread extends ClientTransactionHandler {
                 EventLog.writeEvent(LOG_AM_ON_RESUME_CALLED, UserHandle.myUserId(),
                         r.activity.getComponentName().getClassName(), reason);
 
-                r.paused = false;
-                r.stopped = false;
                 r.state = null;
                 r.persistentState = null;
+                r.setState(ON_RESUME);
             } catch (Exception e) {
                 if (!mInstrumentation.onException(r.activity, e)) {
                     throw new RuntimeException(
@@ -3553,19 +3594,14 @@ public final class ActivityThread extends ClientTransactionHandler {
 
     @Override
     public void handleResumeActivity(IBinder token, boolean clearHide, boolean isForward,
-            boolean reallyResume, int seq, String reason) {
-        ActivityClientRecord r = mActivities.get(token);
-        if (!checkAndUpdateLifecycleSeq(seq, r, "resumeActivity")) {
-            return;
-        }
-
+            String reason) {
         // If we are getting ready to gc after going to the background, well
         // we are back active so skip it.
         unscheduleGcIdler();
         mSomeActivitiesChanged = true;
 
         // TODO Push resumeArgs into the activity for consideration
-        r = performResumeActivity(token, clearHide, reason);
+        final ActivityClientRecord r = performResumeActivity(token, clearHide, reason);
 
         if (r != null) {
             final Activity a = r.activity;
@@ -3677,16 +3713,6 @@ public final class ActivityThread extends ClientTransactionHandler {
                 Looper.myQueue().addIdleHandler(new Idler());
             }
             r.onlyLocalRequest = false;
-
-            // Tell the activity manager we have resumed.
-            if (reallyResume) {
-                try {
-                    ActivityManager.getService().activityResumed(token);
-                } catch (RemoteException ex) {
-                    throw ex.rethrowFromSystemServer();
-                }
-            }
-
         } else {
             // If an exception was thrown when trying to resume, then
             // just end this activity.
@@ -3757,21 +3783,17 @@ public final class ActivityThread extends ClientTransactionHandler {
     }
 
     @Override
-    public void handlePauseActivity(IBinder token, boolean finished,
-            boolean userLeaving, int configChanges, boolean dontReport, int seq) {
+    public void handlePauseActivity(IBinder token, boolean finished, boolean userLeaving,
+            int configChanges, boolean dontReport, PendingTransactionActions pendingActions) {
         ActivityClientRecord r = mActivities.get(token);
-        if (DEBUG_ORDER) Slog.d(TAG, "handlePauseActivity " + r + ", seq: " + seq);
-        if (!checkAndUpdateLifecycleSeq(seq, r, "pauseActivity")) {
-            return;
-        }
         if (r != null) {
-            //Slog.v(TAG, "userLeaving=" + userLeaving + " handling pause of " + r);
             if (userLeaving) {
                 performUserLeavingActivity(r);
             }
 
             r.activity.mConfigChangeFlags |= configChanges;
-            performPauseActivity(token, finished, r.isPreHoneycomb(), "handlePauseActivity");
+            performPauseActivity(token, finished, r.isPreHoneycomb(), "handlePauseActivity",
+                    pendingActions);
 
             // Make sure any pending writes are now committed.
             if (r.isPreHoneycomb()) {
@@ -3795,13 +3817,15 @@ public final class ActivityThread extends ClientTransactionHandler {
     }
 
     final Bundle performPauseActivity(IBinder token, boolean finished,
-            boolean saveState, String reason) {
+            boolean saveState, String reason, PendingTransactionActions pendingActions) {
         ActivityClientRecord r = mActivities.get(token);
-        return r != null ? performPauseActivity(r, finished, saveState, reason) : null;
+        return r != null
+                ? performPauseActivity(r, finished, saveState, reason, pendingActions)
+                : null;
     }
 
-    final Bundle performPauseActivity(ActivityClientRecord r, boolean finished,
-            boolean saveState, String reason) {
+    private Bundle performPauseActivity(ActivityClientRecord r, boolean finished, boolean saveState,
+            String reason, PendingTransactionActions pendingActions) {
         if (r.paused) {
             if (r.activity.mFinished) {
                 // If we are finishing, we won't call onResume() in certain cases.
@@ -3835,6 +3859,18 @@ public final class ActivityThread extends ClientTransactionHandler {
             listeners.get(i).onPaused(r.activity);
         }
 
+        final Bundle oldState = pendingActions != null ? pendingActions.getOldState() : null;
+        if (oldState != null) {
+            // We need to keep around the original state, in case we need to be created again.
+            // But we only do this for pre-Honeycomb apps, which always save their state when
+            // pausing, so we can not have them save their state when restarting from a paused
+            // state. For HC and later, we want to (and can) let the state be saved as the
+            // normal part of stopping the activity.
+            if (r.isPreHoneycomb()) {
+                r.state = oldState;
+            }
+        }
+
         return !r.activity.mFinished && saveState ? r.state : null;
     }
 
@@ -3861,43 +3897,12 @@ public final class ActivityThread extends ClientTransactionHandler {
                         + safeToComponentShortString(r.intent) + ": " + e.toString(), e);
             }
         }
-        r.paused = true;
+        r.setState(ON_PAUSE);
     }
 
     final void performStopActivity(IBinder token, boolean saveState, String reason) {
         ActivityClientRecord r = mActivities.get(token);
         performStopActivityInner(r, null, false, saveState, reason);
-    }
-
-    private static class StopInfo implements Runnable {
-        ActivityClientRecord activity;
-        Bundle state;
-        PersistableBundle persistentState;
-        CharSequence description;
-
-        @Override public void run() {
-            // Tell activity manager we have been stopped.
-            try {
-                if (DEBUG_MEMORY_TRIM) Slog.v(TAG, "Reporting activity stopped: " + activity);
-                ActivityManager.getService().activityStopped(
-                    activity.token, state, persistentState, description);
-            } catch (RemoteException ex) {
-                // Dump statistics about bundle to help developers debug
-                final LogWriter writer = new LogWriter(Log.WARN, TAG);
-                final IndentingPrintWriter pw = new IndentingPrintWriter(writer, "  ");
-                pw.println("Bundle stats:");
-                Bundle.dumpStats(pw, state);
-                pw.println("PersistableBundle stats:");
-                Bundle.dumpStats(pw, persistentState);
-
-                if (ex instanceof TransactionTooLargeException
-                        && activity.packageInfo.getTargetSdkVersion() < Build.VERSION_CODES.N) {
-                    Log.e(TAG, "App sent too much data in instance state, so it was ignored", ex);
-                    return;
-                }
-                throw ex.rethrowFromSystemServer();
-            }
-        }
     }
 
     private static final class ProviderRefCount {
@@ -3930,8 +3935,8 @@ public final class ActivityThread extends ClientTransactionHandler {
      * For the client, we want to call onStop()/onStart() to indicate when
      * the activity's UI visibility changes.
      */
-    private void performStopActivityInner(ActivityClientRecord r,
-            StopInfo info, boolean keepShown, boolean saveState, String reason) {
+    private void performStopActivityInner(ActivityClientRecord r, StopInfo info, boolean keepShown,
+            boolean saveState, String reason) {
         if (localLOGV) Slog.v(TAG, "Performing stop of " + r);
         if (r != null) {
             if (!keepShown && r.stopped) {
@@ -3956,7 +3961,7 @@ public final class ActivityThread extends ClientTransactionHandler {
                     // First create a thumbnail for the activity...
                     // For now, don't create the thumbnail here; we are
                     // doing that by doing a screen snapshot.
-                    info.description = r.activity.onCreateDescription();
+                    info.setDescription(r.activity.onCreateDescription());
                 } catch (Exception e) {
                     if (!mInstrumentation.onException(r.activity, e)) {
                         throw new RuntimeException(
@@ -3986,7 +3991,7 @@ public final class ActivityThread extends ClientTransactionHandler {
                                 + ": " + e.toString(), e);
                     }
                 }
-                r.stopped = true;
+                r.setState(ON_STOP);
                 EventLog.writeEvent(LOG_AM_ON_STOP_CALLED, UserHandle.myUserId(),
                         r.activity.getComponentName().getClassName(), reason);
             }
@@ -4022,15 +4027,13 @@ public final class ActivityThread extends ClientTransactionHandler {
     }
 
     @Override
-    public void handleStopActivity(IBinder token, boolean show, int configChanges, int seq) {
-        ActivityClientRecord r = mActivities.get(token);
-        if (!checkAndUpdateLifecycleSeq(seq, r, "stopActivity")) {
-            return;
-        }
+    public void handleStopActivity(IBinder token, boolean show, int configChanges,
+            PendingTransactionActions pendingActions) {
+        final ActivityClientRecord r = mActivities.get(token);
         r.activity.mConfigChangeFlags |= configChanges;
 
-        StopInfo info = new StopInfo();
-        performStopActivityInner(r, info, show, true, "handleStopActivity");
+        final StopInfo stopInfo = new StopInfo();
+        performStopActivityInner(r, stopInfo, show, true, "handleStopActivity");
 
         if (localLOGV) Slog.v(
             TAG, "Finishing stop of " + r + ": show=" + show
@@ -4043,37 +4046,32 @@ public final class ActivityThread extends ClientTransactionHandler {
             QueuedWork.waitToFinish();
         }
 
-        // Schedule the call to tell the activity manager we have
-        // stopped.  We don't do this immediately, because we want to
-        // have a chance for any other pending work (in particular memory
-        // trim requests) to complete before you tell the activity
-        // manager to proceed and allow us to go fully into the background.
-        info.activity = r;
-        info.state = r.state;
-        info.persistentState = r.persistentState;
-        mH.post(info);
+        stopInfo.setActivity(r);
+        stopInfo.setState(r.state);
+        stopInfo.setPersistentState(r.persistentState);
+        pendingActions.setStopInfo(stopInfo);
         mSomeActivitiesChanged = true;
     }
 
-    private static boolean checkAndUpdateLifecycleSeq(int seq, ActivityClientRecord r,
-            String action) {
-        if (r == null) {
-            return true;
-        }
-        if (seq < r.lastProcessedSeq) {
-            if (DEBUG_ORDER) Slog.d(TAG, action + " for " + r + " ignored, because seq=" + seq
-                    + " < mCurrentLifecycleSeq=" + r.lastProcessedSeq);
-            return false;
-        }
-        r.lastProcessedSeq = seq;
-        return true;
+    /**
+     * Schedule the call to tell the activity manager we have stopped.  We don't do this
+     * immediately, because we want to have a chance for any other pending work (in particular
+     * memory trim requests) to complete before you tell the activity manager to proceed and allow
+     * us to go fully into the background.
+     */
+    @Override
+    public void reportStop(PendingTransactionActions pendingActions) {
+        mH.post(pendingActions.getStopInfo());
     }
 
-    final void performRestartActivity(IBinder token) {
+    @Override
+    public void performRestartActivity(IBinder token, boolean start) {
         ActivityClientRecord r = mActivities.get(token);
         if (r.stopped) {
-            r.activity.performRestart();
-            r.stopped = false;
+            r.activity.performRestart(start);
+            if (start) {
+                r.setState(ON_START);
+            }
         }
     }
 
@@ -4093,8 +4091,8 @@ public final class ActivityThread extends ClientTransactionHandler {
             // we are back active so skip it.
             unscheduleGcIdler();
 
-            r.activity.performRestart();
-            r.stopped = false;
+            r.activity.performRestart(true /* start */);
+            r.setState(ON_START);
         }
         if (r.activity.mDecor != null) {
             if (false) Slog.v(
@@ -4132,7 +4130,7 @@ public final class ActivityThread extends ClientTransactionHandler {
                                 + ": " + e.toString(), e);
                     }
                 }
-                r.stopped = true;
+                r.setState(ON_STOP);
                 EventLog.writeEvent(LOG_AM_ON_STOP_CALLED, UserHandle.myUserId(),
                         r.activity.getComponentName().getClassName(), "sleeping");
             }
@@ -4150,8 +4148,8 @@ public final class ActivityThread extends ClientTransactionHandler {
             }
         } else {
             if (r.stopped && r.activity.mVisibleFromServer) {
-                r.activity.performRestart();
-                r.stopped = false;
+                r.activity.performRestart(true /* start */);
+                r.setState(ON_START);
             }
         }
     }
@@ -4268,11 +4266,8 @@ public final class ActivityThread extends ClientTransactionHandler {
         }
     }
 
-    public final ActivityClientRecord performDestroyActivity(IBinder token, boolean finishing) {
-        return performDestroyActivity(token, finishing, 0, false);
-    }
-
-    private ActivityClientRecord performDestroyActivity(IBinder token, boolean finishing,
+    /** Core implementation of activity destroy call. */
+    ActivityClientRecord performDestroyActivity(IBinder token, boolean finishing,
             int configChanges, boolean getNonConfigInstance) {
         ActivityClientRecord r = mActivities.get(token);
         Class<? extends Activity> activityClass = null;
@@ -4299,7 +4294,7 @@ public final class ActivityThread extends ClientTransactionHandler {
                                 + ": " + e.toString(), e);
                     }
                 }
-                r.stopped = true;
+                r.setState(ON_STOP);
                 EventLog.writeEvent(LOG_AM_ON_STOP_CALLED, UserHandle.myUserId(),
                         r.activity.getComponentName().getClassName(), "destroy");
             }
@@ -4336,6 +4331,7 @@ public final class ActivityThread extends ClientTransactionHandler {
                             + ": " + e.toString(), e);
                 }
             }
+            r.setState(ON_DESTROY);
         }
         mActivities.remove(token);
         StrictMode.decrementExpectedActivityCount(activityClass);
@@ -4496,10 +4492,7 @@ public final class ActivityThread extends ClientTransactionHandler {
                 target.overrideConfig = overrideConfig;
             }
             target.pendingConfigChanges |= configChanges;
-            target.relaunchSeq = getLifecycleSeq();
         }
-        if (DEBUG_ORDER) Slog.d(TAG, "relaunchActivity " + ActivityThread.this + ", target "
-                + target + " operation received seq: " + target.relaunchSeq);
     }
 
     private void handleRelaunchActivity(ActivityClientRecord tmp) {
@@ -4544,12 +4537,6 @@ public final class ActivityThread extends ClientTransactionHandler {
             }
         }
 
-        if (tmp.lastProcessedSeq > tmp.relaunchSeq) {
-            Slog.wtf(TAG, "For some reason target: " + tmp + " has lower sequence: "
-                    + tmp.relaunchSeq + " than current sequence: " + tmp.lastProcessedSeq);
-        } else {
-            tmp.lastProcessedSeq = tmp.relaunchSeq;
-        }
         if (tmp.createdConfig != null) {
             // If the activity manager is passing us its current config,
             // assume that is really what we want regardless of what we
@@ -4590,9 +4577,6 @@ public final class ActivityThread extends ClientTransactionHandler {
         r.activity.mConfigChangeFlags |= configChanges;
         r.onlyLocalRequest = tmp.onlyLocalRequest;
         r.mPreserveWindow = tmp.mPreserveWindow;
-        r.lastProcessedSeq = tmp.lastProcessedSeq;
-        r.relaunchSeq = tmp.relaunchSeq;
-        Intent currentIntent = r.activity.mIntent;
 
         r.activity.mChangingConfigurations = true;
 
@@ -4618,7 +4602,8 @@ public final class ActivityThread extends ClientTransactionHandler {
 
         // Need to ensure state is saved.
         if (!r.paused) {
-            performPauseActivity(r.token, false, r.isPreHoneycomb(), "handleRelaunchActivity");
+            performPauseActivity(r.token, false, r.isPreHoneycomb(), "handleRelaunchActivity",
+                    null /* pendingActions */);
         }
         if (r.state == null && !r.stopped && !r.isPreHoneycomb()) {
             callCallActivityOnSaveInstanceState(r);
@@ -4648,7 +4633,15 @@ public final class ActivityThread extends ClientTransactionHandler {
         r.startsNotResumed = tmp.startsNotResumed;
         r.overrideConfig = tmp.overrideConfig;
 
-        handleLaunchActivity(r, currentIntent, "handleRelaunchActivity");
+        // TODO(lifecycler): Move relaunch to lifecycler.
+        PendingTransactionActions pendingActions = new PendingTransactionActions();
+        handleLaunchActivity(r, pendingActions);
+        handleStartActivity(r, pendingActions);
+        handleResumeActivity(r.token, false /* clearHide */, r.isForward, "relaunch");
+        if (r.startsNotResumed) {
+            performPauseActivity(r, false /* finished */, r.isPreHoneycomb(), "relaunch",
+                    pendingActions);
+        }
 
         if (!tmp.onlyLocalRequest) {
             try {

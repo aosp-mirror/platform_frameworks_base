@@ -18,6 +18,7 @@ package android.app.servertransaction;
 
 import static android.os.Trace.TRACE_TAG_ACTIVITY_MANAGER;
 
+import android.app.ActivityThread.ActivityClientRecord;
 import android.app.ClientTransactionHandler;
 import android.app.ProfilerInfo;
 import android.app.ResultInfo;
@@ -42,7 +43,7 @@ import java.util.Objects;
  * Request to launch an activity.
  * @hide
  */
-public class LaunchActivityItem extends ActivityLifecycleItem {
+public class LaunchActivityItem extends ClientTransactionItem {
 
     private final Intent mIntent;
     private final int mIdent;
@@ -57,8 +58,6 @@ public class LaunchActivityItem extends ActivityLifecycleItem {
     private final PersistableBundle mPersistentState;
     private final List<ResultInfo> mPendingResults;
     private final List<ReferrerIntent> mPendingNewIntents;
-    // TODO(lifecycler): use lifecycle request instead of this param.
-    private final boolean mNotResumed;
     private final boolean mIsForward;
     private final ProfilerInfo mProfilerInfo;
 
@@ -66,8 +65,7 @@ public class LaunchActivityItem extends ActivityLifecycleItem {
             Configuration curConfig, Configuration overrideConfig, CompatibilityInfo compatInfo,
             String referrer, IVoiceInteractor voiceInteractor, int procState, Bundle state,
             PersistableBundle persistentState, List<ResultInfo> pendingResults,
-            List<ReferrerIntent> pendingNewIntents, boolean notResumed, boolean isForward,
-            ProfilerInfo profilerInfo) {
+            List<ReferrerIntent> pendingNewIntents, boolean isForward, ProfilerInfo profilerInfo) {
         mIntent = intent;
         mIdent = ident;
         mInfo = info;
@@ -81,29 +79,26 @@ public class LaunchActivityItem extends ActivityLifecycleItem {
         mPersistentState = persistentState;
         mPendingResults = pendingResults;
         mPendingNewIntents = pendingNewIntents;
-        mNotResumed = notResumed;
         mIsForward = isForward;
         mProfilerInfo = profilerInfo;
     }
 
     @Override
-    public void prepare(ClientTransactionHandler client, IBinder token) {
+    public void preExecute(ClientTransactionHandler client, IBinder token) {
         client.updateProcessState(mProcState, false);
         client.updatePendingConfiguration(mCurConfig);
     }
 
     @Override
-    public void execute(ClientTransactionHandler client, IBinder token) {
+    public void execute(ClientTransactionHandler client, IBinder token,
+            PendingTransactionActions pendingActions) {
         Trace.traceBegin(TRACE_TAG_ACTIVITY_MANAGER, "activityStart");
-        client.handleLaunchActivity(token, mIntent, mIdent, mInfo, mOverrideConfig, mCompatInfo,
-                mReferrer, mVoiceInteractor, mState, mPersistentState, mPendingResults,
-                mPendingNewIntents, mNotResumed, mIsForward, mProfilerInfo);
+        ActivityClientRecord r = new ActivityClientRecord(token, mIntent, mIdent, mInfo,
+                mOverrideConfig, mCompatInfo, mReferrer, mVoiceInteractor, mState, mPersistentState,
+                mPendingResults, mPendingNewIntents, mIsForward,
+                mProfilerInfo, client);
+        client.handleLaunchActivity(r, pendingActions);
         Trace.traceEnd(TRACE_TAG_ACTIVITY_MANAGER);
-    }
-
-    @Override
-    public int getTargetState() {
-        return mNotResumed ? PAUSED : RESUMED;
     }
 
 
@@ -125,7 +120,6 @@ public class LaunchActivityItem extends ActivityLifecycleItem {
         dest.writePersistableBundle(mPersistentState);
         dest.writeTypedList(mPendingResults, flags);
         dest.writeTypedList(mPendingNewIntents, flags);
-        dest.writeBoolean(mNotResumed);
         dest.writeBoolean(mIsForward);
         dest.writeTypedObject(mProfilerInfo, flags);
     }
@@ -145,7 +139,6 @@ public class LaunchActivityItem extends ActivityLifecycleItem {
         mPersistentState = in.readPersistableBundle(getClass().getClassLoader());
         mPendingResults = in.createTypedArrayList(ResultInfo.CREATOR);
         mPendingNewIntents = in.createTypedArrayList(ReferrerIntent.CREATOR);
-        mNotResumed = in.readBoolean();
         mIsForward = in.readBoolean();
         mProfilerInfo = in.readTypedObject(ProfilerInfo.CREATOR);
     }
@@ -179,7 +172,7 @@ public class LaunchActivityItem extends ActivityLifecycleItem {
                 && areBundlesEqual(mPersistentState, other.mPersistentState)
                 && Objects.equals(mPendingResults, other.mPendingResults)
                 && Objects.equals(mPendingNewIntents, other.mPendingNewIntents)
-                && mNotResumed == other.mNotResumed && mIsForward == other.mIsForward
+                && mIsForward == other.mIsForward
                 && Objects.equals(mProfilerInfo, other.mProfilerInfo);
     }
 
@@ -197,7 +190,6 @@ public class LaunchActivityItem extends ActivityLifecycleItem {
         result = 31 * result + (mPersistentState != null ? mPersistentState.size() : 0);
         result = 31 * result + Objects.hashCode(mPendingResults);
         result = 31 * result + Objects.hashCode(mPendingNewIntents);
-        result = 31 * result + (mNotResumed ? 1 : 0);
         result = 31 * result + (mIsForward ? 1 : 0);
         result = 31 * result + Objects.hashCode(mProfilerInfo);
         return result;
@@ -228,5 +220,15 @@ public class LaunchActivityItem extends ActivityLifecycleItem {
             }
         }
         return true;
+    }
+
+    @Override
+    public String toString() {
+        return "LaunchActivityItem{intent=" + mIntent + ",ident=" + mIdent + ",info=" + mInfo
+                + ",curConfig=" + mCurConfig + ",overrideConfig=" + mOverrideConfig
+                + ",referrer=" + mReferrer + ",procState=" + mProcState + ",state=" + mState
+                + ",persistentState=" + mPersistentState + ",pendingResults=" + mPendingResults
+                + ",pendingNewIntents=" + mPendingNewIntents + ",profilerInfo=" + mProfilerInfo
+                + "}";
     }
 }

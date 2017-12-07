@@ -18,6 +18,7 @@ package android.app.servertransaction;
 
 import static android.os.Trace.TRACE_TAG_ACTIVITY_MANAGER;
 
+import android.app.ClientTransactionHandler;
 import android.content.res.Configuration;
 import android.os.IBinder;
 import android.os.Parcel;
@@ -38,7 +39,8 @@ public class MoveToDisplayItem extends ClientTransactionItem {
     }
 
     @Override
-    public void execute(android.app.ClientTransactionHandler client, IBinder token) {
+    public void execute(ClientTransactionHandler client, IBinder token,
+            PendingTransactionActions pendingActions) {
         Trace.traceBegin(TRACE_TAG_ACTIVITY_MANAGER, "activityMovedToDisplay");
         client.handleActivityConfigurationChanged(token, mConfiguration, mTargetDisplayId);
         Trace.traceEnd(TRACE_TAG_ACTIVITY_MANAGER);
@@ -89,5 +91,11 @@ public class MoveToDisplayItem extends ClientTransactionItem {
         result = 31 * result + mTargetDisplayId;
         result = 31 * result + mConfiguration.hashCode();
         return result;
+    }
+
+    @Override
+    public String toString() {
+        return "MoveToDisplayItem{targetDisplayId=" + mTargetDisplayId
+                + ",configuration=" + mConfiguration + "}";
     }
 }

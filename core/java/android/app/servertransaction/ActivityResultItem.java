@@ -16,9 +16,10 @@
 
 package android.app.servertransaction;
 
-import static android.app.servertransaction.ActivityLifecycleItem.PAUSED;
+import static android.app.servertransaction.ActivityLifecycleItem.ON_PAUSE;
 import static android.os.Trace.TRACE_TAG_ACTIVITY_MANAGER;
 
+import android.app.ClientTransactionHandler;
 import android.app.ResultInfo;
 import android.os.IBinder;
 import android.os.Parcel;
@@ -41,11 +42,12 @@ public class ActivityResultItem extends ClientTransactionItem {
 
     @Override
     public int getPreExecutionState() {
-        return PAUSED;
+        return ON_PAUSE;
     }
 
     @Override
-    public void execute(android.app.ClientTransactionHandler client, IBinder token) {
+    public void execute(ClientTransactionHandler client, IBinder token,
+            PendingTransactionActions pendingActions) {
         Trace.traceBegin(TRACE_TAG_ACTIVITY_MANAGER, "activityDeliverResult");
         client.handleSendResult(token, mResultInfoList);
         Trace.traceEnd(TRACE_TAG_ACTIVITY_MANAGER);
@@ -91,5 +93,10 @@ public class ActivityResultItem extends ClientTransactionItem {
     @Override
     public int hashCode() {
         return mResultInfoList.hashCode();
+    }
+
+    @Override
+    public String toString() {
+        return "ActivityResultItem{resultInfoList=" + mResultInfoList + "}";
     }
 }

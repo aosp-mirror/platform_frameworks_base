@@ -16,6 +16,7 @@
 
 package android.app.servertransaction;
 
+import android.app.ClientTransactionHandler;
 import android.content.res.Configuration;
 import android.os.IBinder;
 import android.os.Parcel;
@@ -38,7 +39,8 @@ public class MultiWindowModeChangeItem extends ClientTransactionItem {
     }
 
     @Override
-    public void execute(android.app.ClientTransactionHandler client, IBinder token) {
+    public void execute(ClientTransactionHandler client, IBinder token,
+            PendingTransactionActions pendingActions) {
         client.handleMultiWindowModeChanged(token, mIsInMultiWindowMode, mOverrideConfig);
     }
 
@@ -88,5 +90,11 @@ public class MultiWindowModeChangeItem extends ClientTransactionItem {
         result = 31 * result + (mIsInMultiWindowMode ? 1 : 0);
         result = 31 * result + mOverrideConfig.hashCode();
         return result;
+    }
+
+    @Override
+    public String toString() {
+        return "MultiWindowModeChangeItem{isInMultiWindowMode=" + mIsInMultiWindowMode
+                + ",overrideConfig=" + mOverrideConfig + "}";
     }
 }

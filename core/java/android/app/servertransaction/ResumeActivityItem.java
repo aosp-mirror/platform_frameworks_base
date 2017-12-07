@@ -18,11 +18,12 @@ package android.app.servertransaction;
 
 import static android.os.Trace.TRACE_TAG_ACTIVITY_MANAGER;
 
+import android.app.ActivityManager;
 import android.app.ClientTransactionHandler;
 import android.os.IBinder;
 import android.os.Parcel;
+import android.os.RemoteException;
 import android.os.Trace;
-import android.util.Slog;
 
 /**
  * Request to move an activity to resumed state.
@@ -33,36 +34,50 @@ public class ResumeActivityItem extends ActivityLifecycleItem {
     private static final String TAG = "ResumeActivityItem";
 
     private final int mProcState;
+    private final boolean mUpdateProcState;
     private final boolean mIsForward;
 
-    private int mLifecycleSeq;
+    public ResumeActivityItem(boolean isForward) {
+        mProcState = ActivityManager.PROCESS_STATE_UNKNOWN;
+        mUpdateProcState = false;
+        mIsForward = isForward;
+    }
 
     public ResumeActivityItem(int procState, boolean isForward) {
         mProcState = procState;
+        mUpdateProcState = true;
         mIsForward = isForward;
     }
 
     @Override
-    public void prepare(ClientTransactionHandler client, IBinder token) {
-        mLifecycleSeq = client.getLifecycleSeq();
-        if (DEBUG_ORDER) {
-            Slog.d(TAG, "Resume transaction for " + client + " received seq: "
-                    + mLifecycleSeq);
+    public void preExecute(ClientTransactionHandler client, IBinder token) {
+        if (mUpdateProcState) {
+            client.updateProcessState(mProcState, false);
         }
-        client.updateProcessState(mProcState, false);
     }
 
     @Override
-    public void execute(ClientTransactionHandler client, IBinder token) {
+    public void execute(ClientTransactionHandler client, IBinder token,
+            PendingTransactionActions pendingActions) {
         Trace.traceBegin(TRACE_TAG_ACTIVITY_MANAGER, "activityResume");
-        client.handleResumeActivity(token, true /* clearHide */, mIsForward,
-                true /* reallyResume */, mLifecycleSeq, "RESUME_ACTIVITY");
+        client.handleResumeActivity(token, true /* clearHide */, mIsForward, "RESUME_ACTIVITY");
         Trace.traceEnd(TRACE_TAG_ACTIVITY_MANAGER);
     }
 
     @Override
+    public void postExecute(ClientTransactionHandler client, IBinder token,
+            PendingTransactionActions pendingActions) {
+        try {
+            // TODO(lifecycler): Use interface callback instead of AMS.
+            ActivityManager.getService().activityResumed(token);
+        } catch (RemoteException ex) {
+            throw ex.rethrowFromSystemServer();
+        }
+    }
+
+    @Override
     public int getTargetState() {
-        return RESUMED;
+        return ON_RESUME;
     }
 
 
@@ -72,12 +87,14 @@ public class ResumeActivityItem extends ActivityLifecycleItem {
     @Override
     public void writeToParcel(Parcel dest, int flags) {
         dest.writeInt(mProcState);
+        dest.writeBoolean(mUpdateProcState);
         dest.writeBoolean(mIsForward);
     }
 
     /** Read from Parcel. */
     private ResumeActivityItem(Parcel in) {
         mProcState = in.readInt();
+        mUpdateProcState = in.readBoolean();
         mIsForward = in.readBoolean();
     }
 
@@ -101,14 +118,22 @@ public class ResumeActivityItem extends ActivityLifecycleItem {
             return false;
         }
         final ResumeActivityItem other = (ResumeActivityItem) o;
-        return mProcState == other.mProcState && mIsForward == other.mIsForward;
+        return mProcState == other.mProcState && mUpdateProcState == other.mUpdateProcState
+                && mIsForward == other.mIsForward;
     }
 
     @Override
     public int hashCode() {
         int result = 17;
         result = 31 * result + mProcState;
+        result = 31 * result + (mUpdateProcState ? 1 : 0);
         result = 31 * result + (mIsForward ? 1 : 0);
         return result;
+    }
+
+    @Override
+    public String toString() {
+        return "ResumeActivityItem{procState=" + mProcState
+                + ",updateProcState=" + mUpdateProcState + ",isForward=" + mIsForward + "}";
     }
 }

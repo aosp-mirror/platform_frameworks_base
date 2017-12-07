@@ -16,6 +16,7 @@
 
 package android.app.servertransaction;
 
+import android.app.ClientTransactionHandler;
 import android.content.res.Configuration;
 import android.os.IBinder;
 import android.os.Parcel;
@@ -33,12 +34,13 @@ public class ConfigurationChangeItem extends ClientTransactionItem {
     }
 
     @Override
-    public void prepare(android.app.ClientTransactionHandler client, IBinder token) {
+    public void preExecute(android.app.ClientTransactionHandler client, IBinder token) {
         client.updatePendingConfiguration(mConfiguration);
     }
 
     @Override
-    public void execute(android.app.ClientTransactionHandler client, IBinder token) {
+    public void execute(ClientTransactionHandler client, IBinder token,
+            PendingTransactionActions pendingActions) {
         client.handleConfigurationChanged(mConfiguration);
     }
 
@@ -81,5 +83,10 @@ public class ConfigurationChangeItem extends ClientTransactionItem {
     @Override
     public int hashCode() {
         return mConfiguration.hashCode();
+    }
+
+    @Override
+    public String toString() {
+        return "ConfigurationChangeItem{config=" + mConfiguration + "}";
     }
 }
