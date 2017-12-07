@@ -28,8 +28,8 @@ uiautomator_internal_removed_api_file := \
 include $(CLEAR_VARS)
 LOCAL_SRC_FILES := $(uiautomator.core_src_files)
 LOCAL_MODULE := uiautomator.core
-LOCAL_JAVA_LIBRARIES := android.test.runner
-LOCAL_STATIC_JAVA_LIBRARIES := junit legacy-android-test
+LOCAL_JAVA_LIBRARIES := android.test.runner android.test.base
+LOCAL_STATIC_JAVA_LIBRARIES := junit
 include $(BUILD_STATIC_JAVA_LIBRARY)
 
 ###############################################

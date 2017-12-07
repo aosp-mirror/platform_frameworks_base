@@ -12,7 +12,7 @@ LOCAL_SRC_FILES := $(call all-subdir-java-files) \
 
 LOCAL_STATIC_JAVA_LIBRARIES := android-support-test
 
-LOCAL_JAVA_LIBRARIES := legacy-android-test
+LOCAL_JAVA_LIBRARIES := android.test.base
 
 LOCAL_PACKAGE_NAME := SettingsProviderTest
 

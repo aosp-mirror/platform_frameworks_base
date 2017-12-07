@@ -9,7 +9,7 @@ LOCAL_SRC_FILES := $(call all-java-files-under, src)
 LOCAL_PACKAGE_NAME := ServiceCrashTest
 
 LOCAL_CERTIFICATE := platform
-LOCAL_JAVA_LIBRARIES := legacy-android-test
+LOCAL_JAVA_LIBRARIES := android.test.base
 
 LOCAL_STATIC_JAVA_LIBRARIES := compatibility-device-util android-support-test
 

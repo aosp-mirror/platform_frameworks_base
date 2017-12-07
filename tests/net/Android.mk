@@ -21,7 +21,9 @@ LOCAL_STATIC_JAVA_LIBRARIES := \
     services.net
 
 LOCAL_JAVA_LIBRARIES := \
-    android.test.runner
+    android.test.runner \
+    android.test.base \
+    android.test.mock
 
 LOCAL_PACKAGE_NAME := FrameworksNetTests
 LOCAL_COMPATIBILITY_SUITE := device-tests
