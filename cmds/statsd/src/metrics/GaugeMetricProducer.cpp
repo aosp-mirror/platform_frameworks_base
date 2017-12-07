@@ -203,7 +203,7 @@ void GaugeMetricProducer::onConditionChangedLocked(const bool conditionMet,
         return;
     }
     for (const auto& data : allData) {
-        onMatchedLogEvent(0, *data, false /*scheduledPull*/);
+        onMatchedLogEventLocked(0, *data, false /*scheduledPull*/);
     }
     flushIfNeededLocked(eventTime);
 }
@@ -227,7 +227,7 @@ void GaugeMetricProducer::onDataPulled(const std::vector<std::shared_ptr<LogEven
     std::lock_guard<std::mutex> lock(mMutex);
 
     for (const auto& data : allData) {
-        onMatchedLogEvent(0, *data, true /*scheduledPull*/);
+        onMatchedLogEventLocked(0, *data, true /*scheduledPull*/);
     }
 }
 
