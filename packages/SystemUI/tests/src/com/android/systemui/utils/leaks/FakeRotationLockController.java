@@ -49,4 +49,9 @@ public class FakeRotationLockController extends BaseLeakChecker<RotationLockCont
     public void setRotationLocked(boolean locked) {
 
     }
+
+    @Override
+    public void setRotationLockedAtAngle(boolean locked, int rotation) {
+
+    }
 }
