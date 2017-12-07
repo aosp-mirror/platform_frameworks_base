@@ -111,6 +111,23 @@
                 android:text="@string/screen_off"/>
         </LinearLayout>
 
+        <LinearLayout android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal">
+
+            <Button
+                android:id="@+id/custom_start"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/custom_start" />
+
+            <Button
+                android:id="@+id/custom_stop"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/custom_stop" />
+        </LinearLayout>
+
         <Button android:id="@+id/dump"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"

@@ -624,7 +624,7 @@ genrule {
     name: "framework-statslog-gen",
     tools: ["stats-log-api-gen"],
     cmd: "$(location stats-log-api-gen) --java $(out)",
-    out: ["android/util/StatsLog.java"],
+    out: ["android/util/StatsLogInternal.java"],
 }
 
 gensrcs {
