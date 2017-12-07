@@ -18,7 +18,6 @@ package android.os;
 
 import java.util.Map;
 
-import android.util.Log;
 
 /**
  * Java API for libvintf.
@@ -40,13 +39,24 @@ public class VintfObject {
      * Verify that the given metadata for an OTA package is compatible with
      * this device.
      *
-     * @param packageInfo a list of serialized form of HalMaanifest's /
+     * @param packageInfo a list of serialized form of HalManifest's /
      * CompatibilityMatri'ces (XML).
      * @return = 0 if success (compatible)
      *         > 0 if incompatible
      *         < 0 if any error (mount partition fails, illformed XML, etc.)
      */
     public static native int verify(String[] packageInfo);
+
+    /**
+     * Verify Vintf compatibility on the device without checking AVB
+     * (Android Verified Boot). It is useful to verify a running system
+     * image where AVB check is irrelevant.
+     *
+     * @return = 0 if success (compatible)
+     *         > 0 if incompatible
+     *         < 0 if any error (mount partition fails, illformed XML, etc.)
+     */
+    public static native int verifyWithoutAvb();
 
     /// ---------- CTS Device Info
 
