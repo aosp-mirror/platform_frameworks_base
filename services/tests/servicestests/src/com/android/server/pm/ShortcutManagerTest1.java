@@ -7912,4 +7912,35 @@ public class ShortcutManagerTest1 extends BaseShortcutManagerTest {
                     .forAllShortcuts(si -> assertTrue(si.isReturnedByServer()));
         });
     }
+
+    public void testIsForegroundDefaultLauncher_true() {
+        final ComponentName defaultLauncher = new ComponentName("default", "launcher");
+        final int uid = 1024;
+
+        setDefaultLauncher(UserHandle.USER_SYSTEM, defaultLauncher);
+        makeUidForeground(uid);
+
+        assertTrue(mInternal.isForegroundDefaultLauncher("default", uid));
+    }
+
+
+    public void testIsForegroundDefaultLauncher_defaultButNotForeground() {
+        final ComponentName defaultLauncher = new ComponentName("default", "launcher");
+        final int uid = 1024;
+
+        setDefaultLauncher(UserHandle.USER_SYSTEM, defaultLauncher);
+        makeUidBackground(uid);
+
+        assertFalse(mInternal.isForegroundDefaultLauncher("default", uid));
+    }
+
+    public void testIsForegroundDefaultLauncher_foregroundButNotDefault() {
+        final ComponentName defaultLauncher = new ComponentName("default", "launcher");
+        final int uid = 1024;
+
+        setDefaultLauncher(UserHandle.USER_SYSTEM, defaultLauncher);
+        makeUidForeground(uid);
+
+        assertFalse(mInternal.isForegroundDefaultLauncher("another", uid));
+    }
 }
