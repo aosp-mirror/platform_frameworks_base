@@ -15,7 +15,7 @@
 -->
 
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-        package="com.android.frameworks.tests.notification">
+        package="com.android.frameworks.tests.uiservices">
 
     <uses-permission android:name="android.permission.INTERACT_ACROSS_USERS" />
     <uses-permission android:name="android.permission.INTERACT_ACROSS_USERS_FULL" />
@@ -32,6 +32,6 @@
 
     <instrumentation
         android:name="android.testing.TestableInstrumentation"
-        android:targetPackage="com.android.frameworks.tests.notification"
+        android:targetPackage="com.android.frameworks.tests.uiservices"
         android:label="Notification Tests" />
 </manifest>
