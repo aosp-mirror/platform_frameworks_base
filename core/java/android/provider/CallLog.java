@@ -224,6 +224,12 @@ public class CallLog {
         public static final int FEATURES_WIFI = 0x8;
 
         /**
+         * Indicates the call underwent Assisted Dialing.
+         * @hide
+         */
+        public static final Integer FEATURES_ASSISTED_DIALING_USED = 0x10;
+
+        /**
          * The phone number as the user entered it.
          * <P>Type: TEXT</P>
          */
