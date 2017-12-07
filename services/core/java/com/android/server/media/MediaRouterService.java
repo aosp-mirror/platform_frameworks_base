@@ -21,6 +21,9 @@ import com.android.server.Watchdog;
 
 import android.annotation.NonNull;
 import android.app.ActivityManager;
+import android.bluetooth.BluetoothA2dp;
+import android.bluetooth.BluetoothDevice;
+import android.bluetooth.BluetoothProfile;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
@@ -96,13 +99,16 @@ public final class MediaRouterService extends IMediaRouterService.Stub
     private final ArrayMap<IBinder, ClientRecord> mAllClientRecords =
             new ArrayMap<IBinder, ClientRecord>();
     private int mCurrentUserId = -1;
-    private boolean mGlobalBluetoothA2dpOn = false;
     private final IAudioService mAudioService;
     private final AudioPlayerStateMonitor mAudioPlayerStateMonitor;
     private final Handler mHandler = new Handler();
-    private final AudioRoutesInfo mAudioRoutesInfo = new AudioRoutesInfo();
     private final IntArray mActivePlayerMinPriorityQueue = new IntArray();
     private final IntArray mActivePlayerUidMinPriorityQueue = new IntArray();
+
+    private final BroadcastReceiver mReceiver = new MediaRouterServiceBroadcastReceiver();
+    BluetoothDevice mBluetoothDevice;
+    int mAudioRouteMainType = AudioRoutesInfo.MAIN_SPEAKER;
+    boolean mGlobalBluetoothA2dpOn = false;
 
     public MediaRouterService(Context context) {
         mContext = context;
@@ -110,7 +116,6 @@ public final class MediaRouterService extends IMediaRouterService.Stub
 
         mAudioService = IAudioService.Stub.asInterface(
                 ServiceManager.getService(Context.AUDIO_SERVICE));
-
         mAudioPlayerStateMonitor = AudioPlayerStateMonitor.getInstance();
         mAudioPlayerStateMonitor.registerListener(
                 new AudioPlayerStateMonitor.OnAudioPlayerActiveStateChangedListener() {
@@ -170,44 +175,30 @@ public final class MediaRouterService extends IMediaRouterService.Stub
                 @Override
                 public void dispatchAudioRoutesChanged(final AudioRoutesInfo newRoutes) {
                     synchronized (mLock) {
-                        if (newRoutes.mainType != mAudioRoutesInfo.mainType) {
+                        if (newRoutes.mainType != mAudioRouteMainType) {
                             if ((newRoutes.mainType & (AudioRoutesInfo.MAIN_HEADSET
                                     | AudioRoutesInfo.MAIN_HEADPHONES
                                     | AudioRoutesInfo.MAIN_USB)) == 0) {
                                 // headset was plugged out.
-                                mGlobalBluetoothA2dpOn = newRoutes.bluetoothName != null;
+                                mGlobalBluetoothA2dpOn = mBluetoothDevice != null;
                             } else {
                                 // headset was plugged in.
                                 mGlobalBluetoothA2dpOn = false;
                             }
-                            mAudioRoutesInfo.mainType = newRoutes.mainType;
+                            mAudioRouteMainType = newRoutes.mainType;
                         }
-                        if (!TextUtils.equals(
-                                newRoutes.bluetoothName, mAudioRoutesInfo.bluetoothName)) {
-                            if (newRoutes.bluetoothName == null) {
-                                // BT was disconnected.
-                                mGlobalBluetoothA2dpOn = false;
-                            } else {
-                                // BT was connected or changed.
-                                mGlobalBluetoothA2dpOn = true;
-                            }
-                            mAudioRoutesInfo.bluetoothName = newRoutes.bluetoothName;
-                        }
-                        // Although a Bluetooth device is connected before a new audio playback is
-                        // started, dispatchAudioRoutChanged() can be called after
-                        // onAudioPlayerActiveStateChanged(). That causes restoreBluetoothA2dp()
-                        // is called before mGlobalBluetoothA2dpOn is updated.
-                        // Calling restoreBluetoothA2dp() here could prevent that.
-                        restoreBluetoothA2dp();
+                        // The new audio routes info could be delivered with several seconds delay.
+                        // In order to avoid such delay, Bluetooth device info will be updated
+                        // via MediaRouterServiceBroadcastReceiver.
                     }
                 }
             });
         } catch (RemoteException e) {
             Slog.w(TAG, "RemoteException in the audio service.");
         }
-        synchronized (mLock) {
-            mGlobalBluetoothA2dpOn = (audioRoutes != null && audioRoutes.bluetoothName != null);
-        }
+
+        IntentFilter intentFilter = new IntentFilter(BluetoothA2dp.ACTION_CONNECTION_STATE_CHANGED);
+        context.registerReceiverAsUser(mReceiver, UserHandle.ALL, intentFilter, null, null);
     }
 
     public void systemRunning() {
@@ -415,14 +406,12 @@ public final class MediaRouterService extends IMediaRouterService.Stub
 
     void restoreBluetoothA2dp() {
         try {
-            boolean btConnected = false;
             boolean a2dpOn = false;
             synchronized (mLock) {
-                btConnected = mAudioRoutesInfo.bluetoothName != null;
                 a2dpOn = mGlobalBluetoothA2dpOn;
             }
             // We don't need to change a2dp status when bluetooth is not connected.
-            if (btConnected) {
+            if (mBluetoothDevice != null) {
                 Slog.v(TAG, "restoreBluetoothA2dp(" + a2dpOn + ")");
                 mAudioService.setBluetoothA2dpOn(a2dpOn);
             }
@@ -659,6 +648,25 @@ public final class MediaRouterService extends IMediaRouterService.Stub
             }
         }
         return false;
+    }
+
+    final class MediaRouterServiceBroadcastReceiver extends BroadcastReceiver {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            if (intent.getAction().equals(BluetoothA2dp.ACTION_CONNECTION_STATE_CHANGED)) {
+                int state = intent.getIntExtra(BluetoothProfile.EXTRA_STATE,
+                        BluetoothProfile.STATE_DISCONNECTED);
+                if (state == BluetoothProfile.STATE_DISCONNECTED) {
+                    mGlobalBluetoothA2dpOn = false;
+                    mBluetoothDevice = null;
+                } else if (state == BluetoothProfile.STATE_CONNECTED) {
+                    mGlobalBluetoothA2dpOn = true;
+                    mBluetoothDevice = intent.getParcelableExtra(BluetoothDevice.EXTRA_DEVICE);
+                    // To ensure that BT A2DP is on, call restoreBluetoothA2dp().
+                    restoreBluetoothA2dp();
+                }
+            }
+        }
     }
 
     /**
