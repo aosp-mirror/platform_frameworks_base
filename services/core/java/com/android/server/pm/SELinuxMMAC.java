@@ -59,6 +59,8 @@ public final class SELinuxMMAC {
     // All policy stanzas read from mac_permissions.xml. This is also the lock
     // to synchronize access during policy load and access attempts.
     private static List<Policy> sPolicies = new ArrayList<>();
+    /** Whether or not the policy files have been read */
+    private static boolean sPolicyRead;
 
     /** Path to MAC permissions on system image */
     private static final File[] MAC_PERMISSIONS =
@@ -88,6 +90,12 @@ public final class SELinuxMMAC {
      *         were loaded successfully; no partial loading is possible.
      */
     public static boolean readInstallPolicy() {
+        synchronized (sPolicies) {
+            if (sPolicyRead) {
+                return true;
+            }
+        }
+
         // Temp structure to hold the rules while we parse the xml file
         List<Policy> policies = new ArrayList<>();
 
@@ -142,7 +150,9 @@ public final class SELinuxMMAC {
         }
 
         synchronized (sPolicies) {
-            sPolicies = policies;
+            sPolicies.clear();
+            sPolicies.addAll(policies);
+            sPolicyRead = true;
 
             if (DEBUG_POLICY_ORDER) {
                 for (Policy policy : sPolicies) {
@@ -280,6 +290,12 @@ public final class SELinuxMMAC {
      */
     public static void assignSeInfoValue(PackageParser.Package pkg) {
         synchronized (sPolicies) {
+            if (!sPolicyRead) {
+                if (DEBUG_POLICY) {
+                    Slog.d(TAG, "Policy not read");
+                }
+                return;
+            }
             for (Policy policy : sPolicies) {
                 String seInfo = policy.getMatchedSeInfo(pkg);
                 if (seInfo != null) {
