@@ -382,6 +382,8 @@ public class KeyguardManager {
     }
 
     /**
+     * @deprecated Use {@link #isKeyguardLocked()} instead.
+     *
      * If keyguard screen is showing or in restricted key input mode (i.e. in
      * keyguard password emergency screen). When in such mode, certain keys,
      * such as the Home key and the right soft keys, don't work.
@@ -389,11 +391,7 @@ public class KeyguardManager {
      * @return true if in keyguard restricted input mode.
      */
     public boolean inKeyguardRestrictedInputMode() {
-        try {
-            return mWM.inKeyguardRestrictedInputMode();
-        } catch (RemoteException ex) {
-            return false;
-        }
+        return isKeyguardLocked();
     }
 
     /**

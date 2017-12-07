@@ -25,7 +25,7 @@ import android.os.PowerManager;
 import android.os.SystemClock;
 
 import com.android.keyguard.KeyguardUpdateMonitor;
-import com.android.keyguard.LatencyTracker;
+import com.android.internal.util.LatencyTracker;
 import com.android.systemui.statusbar.phone.FingerprintUnlockController;
 import com.android.systemui.statusbar.phone.StatusBar;
 

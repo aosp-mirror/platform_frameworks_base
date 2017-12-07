@@ -29,6 +29,7 @@ import com.android.internal.util.IndentingPrintWriter;
 
 import android.Manifest;
 import android.annotation.NonNull;
+import android.app.AppOpsManager;
 import android.content.Context;
 import android.content.pm.PackageManager;
 import android.content.pm.ParceledListSlice;
@@ -1752,14 +1753,30 @@ public final class DisplayManagerService extends SystemService {
         }
 
         @Override // Binder call
-        public ParceledListSlice<BrightnessChangeEvent> getBrightnessEvents() {
+        public ParceledListSlice<BrightnessChangeEvent> getBrightnessEvents(String callingPackage) {
             mContext.enforceCallingOrSelfPermission(
                     Manifest.permission.BRIGHTNESS_SLIDER_USAGE,
                     "Permission to read brightness events.");
-            int userId = UserHandle.getUserId(Binder.getCallingUid());
+
+            final int callingUid = Binder.getCallingUid();
+            AppOpsManager appOpsManager = mContext.getSystemService(AppOpsManager.class);
+            final int mode = appOpsManager.checkOp(AppOpsManager.OP_GET_USAGE_STATS,
+                    callingUid, callingPackage);
+            final boolean hasUsageStats;
+            if (mode == AppOpsManager.MODE_DEFAULT) {
+                // The default behavior here is to check if PackageManager has given the app
+                // permission.
+                hasUsageStats = mContext.checkCallingPermission(
+                        Manifest.permission.PACKAGE_USAGE_STATS)
+                        == PackageManager.PERMISSION_GRANTED;
+            } else {
+                hasUsageStats = mode == AppOpsManager.MODE_ALLOWED;
+            }
+
+            final int userId = UserHandle.getUserId(callingUid);
             final long token = Binder.clearCallingIdentity();
             try {
-                return mBrightnessTracker.getEvents(userId);
+                return mBrightnessTracker.getEvents(userId, hasUsageStats);
             } finally {
                 Binder.restoreCallingIdentity(token);
             }

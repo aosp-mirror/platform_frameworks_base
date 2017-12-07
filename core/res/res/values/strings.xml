@@ -4034,6 +4034,14 @@
     shortcut enabled.-->
     <string name="leave_accessibility_shortcut_on">Use Shortcut</string>
 
+    <!-- Title of Color Inversion feature shown in the warning dialog about the accessibility
+    shortcut. -->
+    <string name="color_inversion_feature_name">Color Inversion</string>
+
+    <!-- Title of Color Correction feature, which is mostly used to help users who are colorblind,
+     shown in the warning dialog about the accessibility shortcut. -->
+    <string name="color_correction_feature_name">Color Correction</string>
+
     <!-- Text in toast to alert the user that the accessibility shortcut turned on an accessibility
     service.-->
     <string name="accessibility_shortcut_enabling_service">Accessibility Shortcut turned
@@ -4465,6 +4473,9 @@
 
     <!-- Zen mode - name of default automatic calendar event-based rule. [CHAR LIMIT=40] -->
     <string name="zen_mode_default_events_name">Event</string>
+
+    <!-- Zen mode - name of default automatic calendar time-based rule that is triggered every night (when sleeping). [CHAR LIMIT=40] -->
+    <string name="zen_mode_default_every_night_name">Sleeping</string>
 
     <!-- Indication that the current volume and other effects (vibration) are being suppressed by a third party, such as a notification listener. [CHAR LIMIT=30] -->
     <string name="muted_by">Muted by <xliff:g id="third_party">%1$s</xliff:g></string>

@@ -174,13 +174,10 @@ public class SettingsProvider extends ContentProvider {
             Settings.NameValueTable.VALUE
     };
 
-    public static final int SETTINGS_TYPE_GLOBAL = 0;
-    public static final int SETTINGS_TYPE_SYSTEM = 1;
-    public static final int SETTINGS_TYPE_SECURE = 2;
-    public static final int SETTINGS_TYPE_SSAID = 3;
-
-    public static final int SETTINGS_TYPE_MASK = 0xF0000000;
-    public static final int SETTINGS_TYPE_SHIFT = 28;
+    public static final int SETTINGS_TYPE_GLOBAL = SettingsState.SETTINGS_TYPE_GLOBAL;
+    public static final int SETTINGS_TYPE_SYSTEM = SettingsState.SETTINGS_TYPE_SYSTEM;
+    public static final int SETTINGS_TYPE_SECURE = SettingsState.SETTINGS_TYPE_SECURE;
+    public static final int SETTINGS_TYPE_SSAID = SettingsState.SETTINGS_TYPE_SSAID;
 
     private static final Bundle NULL_SETTING_BUNDLE = Bundle.forPair(
             Settings.NameValueTable.VALUE, null);
@@ -278,40 +275,23 @@ public class SettingsProvider extends ContentProvider {
     private volatile IPackageManager mPackageManager;
 
     public static int makeKey(int type, int userId) {
-        return (type << SETTINGS_TYPE_SHIFT) | userId;
+        return SettingsState.makeKey(type, userId);
     }
 
     public static int getTypeFromKey(int key) {
-        return key >>> SETTINGS_TYPE_SHIFT;
+        return SettingsState.getTypeFromKey(key);
     }
 
     public static int getUserIdFromKey(int key) {
-        return key & ~SETTINGS_TYPE_MASK;
+        return SettingsState.getUserIdFromKey(key);
     }
 
     public static String settingTypeToString(int type) {
-        switch (type) {
-            case SETTINGS_TYPE_GLOBAL: {
-                return "SETTINGS_GLOBAL";
-            }
-            case SETTINGS_TYPE_SECURE: {
-                return "SETTINGS_SECURE";
-            }
-            case SETTINGS_TYPE_SYSTEM: {
-                return "SETTINGS_SYSTEM";
-            }
-            case SETTINGS_TYPE_SSAID: {
-                return "SETTINGS_SSAID";
-            }
-            default: {
-                return "UNKNOWN";
-            }
-        }
+        return SettingsState.settingTypeToString(type);
     }
 
     public static String keyToString(int key) {
-        return "Key[user=" + getUserIdFromKey(key) + ";type="
-                + settingTypeToString(getTypeFromKey(key)) + "]";
+        return SettingsState.keyToString(key);
     }
 
     @Override

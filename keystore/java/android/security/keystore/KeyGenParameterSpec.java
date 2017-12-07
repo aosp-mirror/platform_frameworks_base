@@ -195,7 +195,7 @@ import javax.security.auth.x500.X500Principal;
  * <pre> {@code
  * KeyGenerator keyGenerator = KeyGenerator.getInstance(
  *         KeyProperties.KEY_ALGORITHM_AES, "AndroidKeyStore");
- * keyGenerator.initialize(
+ * keyGenerator.init(
  *         new KeyGenParameterSpec.Builder("key2",
  *                 KeyProperties.PURPOSE_ENCRYPT | KeyProperties.PURPOSE_DECRYPT)
  *                 .setBlockModes(KeyProperties.BLOCK_MODE_GCM)
@@ -219,7 +219,7 @@ import javax.security.auth.x500.X500Principal;
  * <pre> {@code
  * KeyGenerator keyGenerator = KeyGenerator.getInstance(
  *         KeyProperties.KEY_ALGORITHM_HMAC_SHA256, "AndroidKeyStore");
- * keyGenerator.initialize(
+ * keyGenerator.init(
  *         new KeyGenParameterSpec.Builder("key2", KeyProperties.PURPOSE_SIGN).build());
  * SecretKey key = keyGenerator.generateKey();
  * Mac mac = Mac.getInstance("HmacSHA256");

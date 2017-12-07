@@ -46,6 +46,7 @@ import java.util.Arrays;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.GregorianCalendar;
+import java.util.List;
 import java.util.Locale;
 import java.util.Objects;
 import java.util.TimeZone;
@@ -65,11 +66,13 @@ public class ZenModeConfig implements Parcelable {
     public static final int MAX_SOURCE = SOURCE_STAR;
     private static final int DEFAULT_SOURCE = SOURCE_CONTACT;
 
+    public static final String EVENTS_DEFAULT_RULE_ID = "EVENTS_DEFAULT_RULE";
+    public static final String EVERY_NIGHT_DEFAULT_RULE_ID = "EVERY_NIGHT_DEFAULT_RULE";
+    public static final List<String> DEFAULT_RULE_IDS = Arrays.asList(EVERY_NIGHT_DEFAULT_RULE_ID,
+            EVENTS_DEFAULT_RULE_ID);
+
     public static final int[] ALL_DAYS = { Calendar.SUNDAY, Calendar.MONDAY, Calendar.TUESDAY,
             Calendar.WEDNESDAY, Calendar.THURSDAY, Calendar.FRIDAY, Calendar.SATURDAY };
-    public static final int[] WEEKNIGHT_DAYS = { Calendar.SUNDAY, Calendar.MONDAY, Calendar.TUESDAY,
-            Calendar.WEDNESDAY, Calendar.THURSDAY };
-    public static final int[] WEEKEND_DAYS = { Calendar.FRIDAY, Calendar.SATURDAY };
 
     public static final int[] MINUTE_BUCKETS = generateMinuteBuckets();
     private static final int SECONDS_MS = 1000;
@@ -530,6 +533,13 @@ public class ZenModeConfig implements Parcelable {
         rt.creationTime = safeLong(parser, RULE_ATT_CREATION_TIME, 0);
         rt.enabler = parser.getAttributeValue(null, RULE_ATT_ENABLER);
         rt.condition = readConditionXml(parser);
+
+        // all default rules and user created rules updated to zenMode important interruptions
+        if (rt.zenMode != Global.ZEN_MODE_IMPORTANT_INTERRUPTIONS
+                && Condition.isValidId(rt.conditionId, SYSTEM_AUTHORITY)) {
+            Slog.i(TAG, "Updating zenMode of automatic rule " + rt.name);
+            rt.zenMode = Global.ZEN_MODE_IMPORTANT_INTERRUPTIONS;
+        }
         return rt;
     }
 

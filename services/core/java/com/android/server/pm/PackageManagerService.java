@@ -3038,7 +3038,7 @@ public class PackageManagerService extends IPackageManager.Stub
             }
 
             mInstallerService = new PackageInstallerService(context, this);
-            mArtManagerService = new ArtManagerService(this);
+            mArtManagerService = new ArtManagerService(this, mInstaller, mInstallLock);
             final Pair<ComponentName, String> instantAppResolverComponent =
                     getInstantAppResolverLPr();
             if (instantAppResolverComponent != null) {
@@ -9495,7 +9495,7 @@ public class PackageManagerService extends IPackageManager.Stub
                     if (expectedCertDigests.length != libCertDigests.length) {
                         throw new PackageManagerException(INSTALL_FAILED_MISSING_SHARED_LIBRARY,
                                 "Package " + packageName + " requires differently signed" +
-                                        " static sDexLoadReporter.java:45.19hared library; failing!");
+                                        " static shared library; failing!");
                     }
 
                     // Use a predictable order as signature order may vary

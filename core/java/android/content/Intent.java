@@ -4461,6 +4461,16 @@ public class Intent implements Parcelable, Cloneable {
     public static final String EXTRA_INSTANT_APP_ACTION = "android.intent.extra.INSTANT_APP_ACTION";
 
     /**
+     * A {@link Bundle} of metadata that describes the instanta application that needs to be
+     * installed. This data is populated from the response to
+     * {@link android.content.pm.InstantAppResolveInfo#getExtras()} as provided by the registered
+     * instant application resolver.
+     * @hide
+     */
+    public static final String EXTRA_INSTANT_APP_EXTRAS =
+            "android.intent.extra.INSTANT_APP_EXTRAS";
+
+    /**
      * The version code of the app to install components from.
      * @deprecated Use {@link #EXTRA_LONG_VERSION_CODE).
      * @hide

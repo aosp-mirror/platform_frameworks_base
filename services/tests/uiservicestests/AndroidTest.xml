@@ -13,16 +13,16 @@
      See the License for the specific language governing permissions and
      limitations under the License.
 -->
-<configuration description="Runs Frameworks Notification Tests.">
+<configuration description="Runs Frameworks UI Services Tests.">
     <target_preparer class="com.android.tradefed.targetprep.TestAppInstallSetup">
-        <option name="test-file-name" value="FrameworksNotificationTests.apk" />
+        <option name="test-file-name" value="FrameworksUiServicesTests.apk" />
     </target_preparer>
 
     <option name="test-suite-tag" value="apct" />
     <option name="test-suite-tag" value="framework-base-presubmit" />
-    <option name="test-tag" value="FrameworksNotificationTests" />
+    <option name="test-tag" value="FrameworksUiServicesTests" />
     <test class="com.android.tradefed.testtype.AndroidJUnitTest" >
-        <option name="package" value="com.android.frameworks.tests.notification" />
+        <option name="package" value="com.android.frameworks.tests.uiservices" />
         <option name="runner" value="android.testing.TestableInstrumentation" />
     </test>
 </configuration>

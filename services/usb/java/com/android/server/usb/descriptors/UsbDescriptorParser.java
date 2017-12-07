@@ -32,7 +32,7 @@ public final class UsbDescriptorParser {
 
     // Descriptor Objects
     private static final int DESCRIPTORS_ALLOC_SIZE = 128;
-    private ArrayList<UsbDescriptor> mDescriptors = new ArrayList<UsbDescriptor>();
+    private final ArrayList<UsbDescriptor> mDescriptors;
 
     private UsbDeviceDescriptor mDeviceDescriptor;
     private UsbConfigDescriptor mCurConfigDescriptor;
@@ -45,6 +45,28 @@ public final class UsbDescriptorParser {
 
     public UsbDescriptorParser(String deviceAddr) {
         mDeviceAddr = deviceAddr;
+        mDescriptors = new ArrayList<UsbDescriptor>(DESCRIPTORS_ALLOC_SIZE);
+    }
+
+    /**
+     * Connect this parser to an existing set of already parsed descriptors.
+     * This is useful for reporting.
+     */
+    public UsbDescriptorParser(String deviceAddr, ArrayList<UsbDescriptor> descriptors) {
+        mDeviceAddr = deviceAddr;
+        mDescriptors = descriptors;
+        //TODO some error checking here....
+        mDeviceDescriptor = (UsbDeviceDescriptor) descriptors.get(0);
+    }
+
+    /**
+     * Connect this parser to an byte array containing unparsed (raw) device descriptors
+     * to be parsed (and parse them). Useful for parsing a stored descriptor buffer.
+     */
+    public UsbDescriptorParser(String deviceAddr, byte[] rawDescriptors) {
+        mDeviceAddr = deviceAddr;
+        mDescriptors = new ArrayList<UsbDescriptor>(DESCRIPTORS_ALLOC_SIZE);
+        parseDescriptors(rawDescriptors);
     }
 
     public String getDeviceAddr() {
@@ -196,8 +218,6 @@ public final class UsbDescriptorParser {
         if (DEBUG) {
             Log.d(TAG, "parseDescriptors() - start");
         }
-        // This will allow us to (probably) alloc mDescriptors just once.
-        mDescriptors = new ArrayList<UsbDescriptor>(DESCRIPTORS_ALLOC_SIZE);
 
         ByteStream stream = new ByteStream(descriptors);
         while (stream.available() > 0) {
@@ -241,7 +261,7 @@ public final class UsbDescriptorParser {
             ? parseDescriptors(rawDescriptors) : false;
     }
 
-    private byte[] getRawDescriptors() {
+    public byte[] getRawDescriptors() {
         return getRawDescriptors_native(mDeviceAddr);
     }
 

@@ -63,4 +63,21 @@ public interface ServiceConnection {
      */
     default void onBindingDied(ComponentName name) {
     }
+
+    /**
+     * Called when the service being bound has returned {@code null} from its
+     * {@link android.app.Service#onBind(Intent) onBind()} method.  This indicates
+     * that the attempting service binding represented by this ServiceConnection
+     * will never become usable.
+     *
+     * <p class="note">The app which requested the binding must still call
+     * {@link Context#unbindService(ServiceConnection)} to release the tracking
+     * resources associated with this ServiceConnection even if this callback was
+     * invoked following {@link Context#bindService Context.bindService() bindService()}.
+     *
+     * @param name The concrete component name of the service whose binding
+     *     has been rejected by the Service implementation.
+     */
+    default void onNullBinding(ComponentName name) {
+    }
 }

@@ -250,6 +250,7 @@ import android.app.assist.AssistStructure;
 import android.app.backup.IBackupManager;
 import android.app.servertransaction.ConfigurationChangeItem;
 import android.app.usage.UsageEvents;
+import android.app.usage.UsageStats;
 import android.app.usage.UsageStatsManagerInternal;
 import android.appwidget.AppWidgetManager;
 import android.content.ActivityNotFoundException;
@@ -4522,9 +4523,18 @@ public class ActivityManagerService extends IActivityManager.Stub
         userId = mUserController.handleIncomingUser(Binder.getCallingPid(), Binder.getCallingUid(),
                 userId, false, ALLOW_FULL_ONLY, "startActivity", null);
         // TODO: Switch to user app stacks here.
-        return mActivityStartController.startActivityMayWait(caller, -1, callingPackage,
-                intent, resolvedType, null, null, resultTo, resultWho, requestCode, startFlags,
-                profilerInfo, null, null, bOptions, false, userId, null, "startActivityAsUser");
+        return mActivityStartController.obtainStarter(intent, "startActivityAsUser")
+                .setCaller(caller)
+                .setCallingPackage(callingPackage)
+                .setResolvedType(resolvedType)
+                .setResultTo(resultTo)
+                .setResultWho(resultWho)
+                .setRequestCode(requestCode)
+                .setStartFlags(startFlags)
+                .setProfilerInfo(profilerInfo)
+                .setMayWait(bOptions, userId)
+                .execute();
+
     }
 
     @Override
@@ -4585,11 +4595,17 @@ public class ActivityManagerService extends IActivityManager.Stub
 
         // TODO: Switch to user app stacks here.
         try {
-            int ret = mActivityStartController.startActivityMayWait(null, targetUid,
-                    targetPackage, intent, resolvedType, null, null, resultTo, resultWho,
-                    requestCode, startFlags, null, null, null, bOptions, ignoreTargetSecurity,
-                    userId, null, "startActivityAsCaller");
-            return ret;
+            return mActivityStartController.obtainStarter(intent, "startActivityAsCaller")
+                    .setCallingUid(targetUid)
+                    .setCallingPackage(targetPackage)
+                    .setResolvedType(resolvedType)
+                    .setResultTo(resultTo)
+                    .setResultWho(resultWho)
+                    .setRequestCode(requestCode)
+                    .setStartFlags(startFlags)
+                    .setMayWait(bOptions, userId)
+                    .setIgnoreTargetSecurity(ignoreTargetSecurity)
+                    .execute();
         } catch (SecurityException e) {
             // XXX need to figure out how to propagate to original app.
             // A SecurityException here is generally actually a fault of the original
@@ -4615,9 +4631,18 @@ public class ActivityManagerService extends IActivityManager.Stub
                 userId, false, ALLOW_FULL_ONLY, "startActivityAndWait", null);
         WaitResult res = new WaitResult();
         // TODO: Switch to user app stacks here.
-        mActivityStartController.startActivityMayWait(caller, -1, callingPackage, intent,
-                resolvedType, null, null, resultTo, resultWho, requestCode, startFlags,
-                profilerInfo, res, null, bOptions, false, userId, null, "startActivityAndWait");
+        mActivityStartController.obtainStarter(intent, "startActivityAndWait")
+                .setCaller(caller)
+                .setCallingPackage(callingPackage)
+                .setResolvedType(resolvedType)
+                .setResultTo(resultTo)
+                .setResultWho(resultWho)
+                .setRequestCode(requestCode)
+                .setStartFlags(startFlags)
+                .setMayWait(bOptions, userId)
+                .setProfilerInfo(profilerInfo)
+                .setWaitResult(res)
+                .execute();
         return res;
     }
 
@@ -4629,10 +4654,17 @@ public class ActivityManagerService extends IActivityManager.Stub
         userId = mUserController.handleIncomingUser(Binder.getCallingPid(), Binder.getCallingUid(),
                 userId, false, ALLOW_FULL_ONLY, "startActivityWithConfig", null);
         // TODO: Switch to user app stacks here.
-        int ret = mActivityStartController.startActivityMayWait(caller, -1, callingPackage, intent,
-                resolvedType, null, null, resultTo, resultWho, requestCode, startFlags, null, null,
-                config, bOptions, false, userId, null, "startActivityWithConfig");
-        return ret;
+        return mActivityStartController.obtainStarter(intent, "startActivityWithConfig")
+                .setCaller(caller)
+                .setCallingPackage(callingPackage)
+                .setResolvedType(resolvedType)
+                .setResultTo(resultTo)
+                .setResultWho(resultWho)
+                .setRequestCode(requestCode)
+                .setStartFlags(startFlags)
+                .setGlobalConfiguration(config)
+                .setMayWait(bOptions, userId)
+                .execute();
     }
 
     @Override
@@ -4678,9 +4710,16 @@ public class ActivityManagerService extends IActivityManager.Stub
         userId = mUserController.handleIncomingUser(callingPid, callingUid, userId, false,
                 ALLOW_FULL_ONLY, "startVoiceActivity", null);
         // TODO: Switch to user app stacks here.
-        return mActivityStartController.startActivityMayWait(null, callingUid, callingPackage,
-                intent, resolvedType, session, interactor, null, null, 0, startFlags, profilerInfo,
-                null, null, bOptions, false, userId, null, "startVoiceActivity");
+        return mActivityStartController.obtainStarter(intent, "startVoiceActivity")
+                .setCallingUid(callingUid)
+                .setCallingPackage(callingPackage)
+                .setResolvedType(resolvedType)
+                .setVoiceSession(session)
+                .setVoiceInteractor(interactor)
+                .setStartFlags(startFlags)
+                .setProfilerInfo(profilerInfo)
+                .setMayWait(bOptions, userId)
+                .execute();
     }
 
     @Override
@@ -4689,9 +4728,13 @@ public class ActivityManagerService extends IActivityManager.Stub
         enforceCallingPermission(BIND_VOICE_INTERACTION, "startAssistantActivity()");
         userId = mUserController.handleIncomingUser(callingPid, callingUid, userId, false,
                 ALLOW_FULL_ONLY, "startAssistantActivity", null);
-        return mActivityStartController.startActivityMayWait(null, callingUid, callingPackage,
-                intent, resolvedType, null, null, null, null, 0, 0, null, null, null, bOptions,
-                false, userId, null, "startAssistantActivity");
+
+        return mActivityStartController.obtainStarter(intent, "startAssistantActivity")
+                .setCallingUid(callingUid)
+                .setCallingPackage(callingPackage)
+                .setResolvedType(resolvedType)
+                .setMayWait(bOptions, userId)
+                .execute();
     }
 
     @Override
@@ -4731,9 +4774,12 @@ public class ActivityManagerService extends IActivityManager.Stub
                 intent.setFlags(FLAG_ACTIVITY_NEW_TASK);
                 intent.setComponent(recentsComponent);
                 intent.putExtras(options);
-                return mActivityStartController.startActivityMayWait(null, recentsUid,
-                        recentsPackage, intent, null, null, null, null, null, 0, 0, null, null,
-                        null, activityOptions, false, userId, null, "startRecentsActivity");
+
+                return mActivityStartController.obtainStarter(intent, "startRecentsActivity")
+                        .setCallingUid(recentsUid)
+                        .setCallingPackage(recentsPackage)
+                        .setMayWait(activityOptions, userId)
+                        .execute();
             }
         } finally {
             Binder.restoreCallingIdentity(origId);
@@ -4906,11 +4952,22 @@ public class ActivityManagerService extends IActivityManager.Stub
             }
 
             final long origId = Binder.clearCallingIdentity();
-            int res = mActivityStartController.startActivity(r.app.thread, intent,
-                    null /*ephemeralIntent*/, r.resolvedType, aInfo, null /*rInfo*/, null,
-                    null, resultTo != null ? resultTo.appToken : null, resultWho, requestCode, -1,
-                    r.launchedFromUid, r.launchedFromPackage, -1, r.launchedFromUid, 0, options,
-                    false, false, null, null, "startNextMatchingActivity");
+            // TODO(b/64750076): Check if calling pid should really be -1.
+            final int res = mActivityStartController
+                    .obtainStarter(intent, "startNextMatchingActivity")
+                    .setCaller(r.app.thread)
+                    .setResolvedType(r.resolvedType)
+                    .setActivityInfo(aInfo)
+                    .setResultTo(resultTo != null ? resultTo.appToken : null)
+                    .setResultWho(resultWho)
+                    .setRequestCode(requestCode)
+                    .setCallingPid(-1)
+                    .setCallingUid(r.launchedFromUid)
+                    .setCallingPackage(r.launchedFromPackage)
+                    .setRealCallingPid(-1)
+                    .setRealCallingUid(r.launchedFromUid)
+                    .setActivityOptions(options)
+                    .execute();
             Binder.restoreCallingIdentity(origId);
 
             r.finishing = wasFinishing;
@@ -9964,7 +10021,7 @@ public class ActivityManagerService extends IActivityManager.Stub
                     }
                 }
 
-                TaskRecord task = new TaskRecord(this,
+                TaskRecord task = TaskRecord.create(this,
                         mStackSupervisor.getNextTaskIdForUserLocked(r.userId),
                         ainfo, intent, description);
                 if (!mRecentTasks.addToBottom(task)) {
@@ -20168,6 +20225,11 @@ public class ActivityManagerService extends IActivityManager.Stub
             // Instrumentation can kill and relaunch even persistent processes
             forceStopPackageLocked(ii.targetPackage, -1, true, false, true, true, false, userId,
                     "start instr");
+            // Inform usage stats to make the target package active
+            if (mUsageStatsService != null) {
+                mUsageStatsService.reportEvent(ii.targetPackage, userId,
+                        UsageEvents.Event.SYSTEM_INTERACTION);
+            }
             ProcessRecord app = addAppLocked(ai, defProcess, false, abiOverride);
             app.instr = activeInstr;
             activeInstr.mFinished = false;

@@ -13,8 +13,6 @@ const uint64_t FIELD_TYPE_SHIFT = 32;
 // TODO: packed is not supported yet.
 //
 const uint64_t FIELD_COUNT_SHIFT = 40;
-const uint64_t FIELD_COUNT_MASK = 0x0fULL << FIELD_COUNT_SHIFT;
-const uint64_t FIELD_COUNT_UNKNOWN = 0;
 const uint64_t FIELD_COUNT_SINGLE = 1ULL << FIELD_COUNT_SHIFT;
 const uint64_t FIELD_COUNT_REPEATED = 2ULL << FIELD_COUNT_SHIFT;
 const uint64_t FIELD_COUNT_PACKED = 5ULL << FIELD_COUNT_SHIFT;

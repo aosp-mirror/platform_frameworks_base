@@ -29,7 +29,6 @@ import android.content.ContentResolver;
 import android.os.Parcel;
 import android.os.Parcelable;
 import android.provider.Settings;
-import android.util.ArraySet;
 import android.util.Log;
 import android.view.autofill.Helper;
 
@@ -79,10 +78,16 @@ public final class UserData implements Parcelable {
 
     /** @hide */
     public void dump(String prefix, PrintWriter pw) {
-        // Cannot disclose remote ids because they could contain PII
+        // Cannot disclose remote ids or values because they could contain PII
         pw.print(prefix); pw.print("Remote ids size: "); pw.println(mRemoteIds.length);
+        for (int i = 0; i < mRemoteIds.length; i++) {
+            pw.print(prefix); pw.print(prefix); pw.print(i); pw.print(": ");
+            pw.println(Helper.getRedacted(mRemoteIds[i]));
+        }
+        pw.print(prefix); pw.print("Values size: "); pw.println(mValues.length);
         for (int i = 0; i < mValues.length; i++) {
-            pw.print(prefix); pw.print(prefix); pw.print(i); pw.print(": "); pw.println(mValues[i]);
+            pw.print(prefix); pw.print(prefix); pw.print(i); pw.print(": ");
+            pw.println(Helper.getRedacted(mValues[i]));
         }
     }
 
@@ -104,7 +109,7 @@ public final class UserData implements Parcelable {
      */
     @TestApi
     public static final class Builder {
-        private final ArraySet<String> mRemoteIds;
+        private final ArrayList<String> mRemoteIds;
         private final ArrayList<String> mValues;
         private boolean mDestroyed;
 
@@ -120,7 +125,7 @@ public final class UserData implements Parcelable {
             checkValidRemoteId(remoteId);
             checkValidValue(value);
             final int capacity = getMaxUserDataSize();
-            mRemoteIds = new ArraySet<>(capacity);
+            mRemoteIds = new ArrayList<>(capacity);
             mValues = new ArrayList<>(capacity);
             mRemoteIds.add(remoteId);
             mValues.add(value);
@@ -149,10 +154,14 @@ public final class UserData implements Parcelable {
             Preconditions.checkState(!mRemoteIds.contains(remoteId),
                     // Don't include remoteId on message because it could contain PII
                     "already has entry with same remoteId");
+            Preconditions.checkState(!mValues.contains(value),
+                    // Don't include remoteId on message because it could contain PII
+                    "already has entry with same value");
             Preconditions.checkState(mRemoteIds.size() < getMaxUserDataSize(),
                     "already added " + mRemoteIds.size() + " elements");
             mRemoteIds.add(remoteId);
             mValues.add(value);
+
             return this;
         }
 

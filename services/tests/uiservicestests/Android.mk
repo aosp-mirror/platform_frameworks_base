@@ -1,5 +1,5 @@
 #########################################################################
-# Build FrameworksNotificationTests package
+# Build FrameworksUiServicesTests package
 #########################################################################
 
 LOCAL_PATH:= $(call my-dir)
@@ -30,7 +30,7 @@ LOCAL_JAVA_LIBRARIES := android.test.runner
 LOCAL_JACK_FLAGS := --multi-dex native
 LOCAL_DX_FLAGS := --multi-dex
 
-LOCAL_PACKAGE_NAME := FrameworksNotificationTests
+LOCAL_PACKAGE_NAME := FrameworksUiServicesTests
 LOCAL_COMPATIBILITY_SUITE := device-tests
 
 LOCAL_CERTIFICATE := platform

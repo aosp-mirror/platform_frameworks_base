@@ -16,8 +16,6 @@
 
 package com.android.systemui.statusbar.phone;
 
-import static com.android.systemui.statusbar.notification.NotificationUtils.isHapticFeedbackDisabled;
-
 import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
 import android.animation.ObjectAnimator;
@@ -25,7 +23,9 @@ import android.animation.ValueAnimator;
 import android.content.Context;
 import android.content.res.Configuration;
 import android.content.res.Resources;
+import android.database.ContentObserver;
 import android.os.AsyncTask;
+import android.os.Handler;
 import android.os.SystemClock;
 import android.os.UserHandle;
 import android.os.VibrationEffect;
@@ -42,7 +42,7 @@ import android.view.animation.Interpolator;
 import android.widget.FrameLayout;
 
 import com.android.internal.logging.nano.MetricsProto.MetricsEvent;
-import com.android.keyguard.LatencyTracker;
+import com.android.internal.util.LatencyTracker;
 import com.android.systemui.DejankUtils;
 import com.android.systemui.Interpolators;
 import com.android.systemui.R;
@@ -50,7 +50,6 @@ import com.android.systemui.classifier.FalsingManager;
 import com.android.systemui.doze.DozeLog;
 import com.android.systemui.statusbar.FlingAnimationUtils;
 import com.android.systemui.statusbar.StatusBarState;
-import com.android.systemui.statusbar.notification.NotificationUtils;
 import com.android.systemui.statusbar.policy.HeadsUpManager;
 
 import java.io.FileDescriptor;
@@ -66,6 +65,7 @@ public abstract class PanelView extends FrameLayout {
     private LockscreenGestureLogger mLockscreenGestureLogger = new LockscreenGestureLogger();
     private boolean mPanelUpdateWhenAnimatorEnds;
     private boolean mVibrateOnOpening;
+    private boolean mVibrationEnabled;
 
     private final void logf(String fmt, Object... args) {
         Log.v(TAG, (mViewName != null ? (mViewName + ": ") : "") + String.format(fmt, args));
@@ -108,6 +108,12 @@ public abstract class PanelView extends FrameLayout {
     private FlingAnimationUtils mFlingAnimationUtilsDismissing;
     private FalsingManager mFalsingManager;
     private final Vibrator mVibrator;
+    final private ContentObserver mVibrationObserver = new ContentObserver(Handler.getMain()) {
+        @Override
+        public void onChange(boolean selfChange) {
+            updateHapticFeedBackEnabled();
+        }
+    };
 
     /**
      * Whether an instant expand request is currently pending and we are just waiting for layout.
@@ -212,6 +218,15 @@ public abstract class PanelView extends FrameLayout {
         mVibrator = mContext.getSystemService(Vibrator.class);
         mVibrateOnOpening = mContext.getResources().getBoolean(
                 R.bool.config_vibrateOnIconAnimation);
+        mContext.getContentResolver().registerContentObserver(
+                Settings.System.getUriFor(Settings.System.HAPTIC_FEEDBACK_ENABLED), true,
+                mVibrationObserver);
+        mVibrationObserver.onChange(false /* selfChange */);
+    }
+
+    public void updateHapticFeedBackEnabled() {
+        mVibrationEnabled = Settings.System.getIntForUser(mContext.getContentResolver(),
+                Settings.System.HAPTIC_FEEDBACK_ENABLED, 0, UserHandle.USER_CURRENT) != 0;
     }
 
     protected void loadDimens() {
@@ -403,7 +418,7 @@ public abstract class PanelView extends FrameLayout {
         runPeekAnimation(INITIAL_OPENING_PEEK_DURATION, getOpeningHeight(),
                 false /* collapseWhenFinished */);
         notifyBarPanelExpansionChanged();
-        if (mVibrateOnOpening && !isHapticFeedbackDisabled(mContext)) {
+        if (mVibrateOnOpening && mVibrationEnabled) {
             AsyncTask.execute(() ->
                     mVibrator.vibrate(VibrationEffect.get(VibrationEffect.EFFECT_TICK, false)));
         }

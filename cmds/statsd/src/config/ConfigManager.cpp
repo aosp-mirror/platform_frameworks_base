@@ -214,7 +214,8 @@ StatsdConfig build_fake_config() {
     int UID_PROCESS_STATE_UID_KEY = 1;
 
     int KERNEL_WAKELOCK_TAG_ID = 1004;
-    int KERNEL_WAKELOCK_NAME_KEY = 4;
+    int KERNEL_WAKELOCK_COUNT_KEY = 2;
+    int KERNEL_WAKELOCK_NAME_KEY = 1;
 
     int DEVICE_TEMPERATURE_TAG_ID = 33;
     int DEVICE_TEMPERATURE_KEY = 1;
@@ -338,7 +339,7 @@ StatsdConfig build_fake_config() {
     ValueMetric* valueMetric = config.add_value_metric();
     valueMetric->set_name("METRIC_6");
     valueMetric->set_what("KERNEL_WAKELOCK");
-    valueMetric->set_value_field(1);
+    valueMetric->set_value_field(KERNEL_WAKELOCK_COUNT_KEY);
     valueMetric->set_condition("SCREEN_IS_ON");
     keyMatcher = valueMetric->add_dimension();
     keyMatcher->set_key(KERNEL_WAKELOCK_NAME_KEY);

@@ -17,15 +17,17 @@
 package android.appwidget;
 
 import android.annotation.NonNull;
+import android.app.PendingIntent;
+import android.content.ComponentName;
 import android.content.Context;
 import android.content.pm.ActivityInfo;
 import android.content.pm.PackageManager;
 import android.content.res.ResourceId;
 import android.content.res.Resources;
 import android.graphics.drawable.Drawable;
+import android.os.Bundle;
 import android.os.Parcel;
 import android.os.Parcelable;
-import android.content.ComponentName;
 import android.os.UserHandle;
 import android.util.DisplayMetrics;
 import android.util.TypedValue;
@@ -67,6 +69,23 @@ public class AppWidgetProviderInfo implements Parcelable {
      * Indicates that the widget can be displayed within a space reserved for the search box.
      */
     public static final int WIDGET_CATEGORY_SEARCHBOX = 4;
+
+    /**
+     * The widget can be reconfigured anytime after it is bound by starting the
+     * {@link #configure} activity.
+     *
+     * @see #widgetFeatures
+     */
+    public static final int WIDGET_FEATURE_RECONFIGURABLE = 1;
+
+    /**
+     * The widget is added directly by the app, and the host may hide this widget when providing
+     * the user with the list of available widgets to choose from.
+     *
+     * @see AppWidgetManager#requestPinAppWidget(ComponentName, Bundle, PendingIntent)
+     * @see #widgetFeatures
+     */
+    public static final int WIDGET_FEATURE_HIDE_FROM_PICKER = 2;
 
     /**
      * Identity of this AppWidget component.  This component should be a {@link
@@ -209,6 +228,15 @@ public class AppWidgetProviderInfo implements Parcelable {
      */
     public int widgetCategory;
 
+    /**
+     * Flags indicating various features supported by the widget. These are hints to the widget
+     * host, and do not actually change the behavior of the widget.
+     *
+     * @see #WIDGET_FEATURE_RECONFIGURABLE
+     * @see #WIDGET_FEATURE_HIDE_FROM_PICKER
+     */
+    public int widgetFeatures;
+
     /** @hide */
     public ActivityInfo providerInfo;
 
@@ -221,9 +249,7 @@ public class AppWidgetProviderInfo implements Parcelable {
      */
     @SuppressWarnings("deprecation")
     public AppWidgetProviderInfo(Parcel in) {
-        if (0 != in.readInt()) {
-            this.provider = new ComponentName(in);
-        }
+        this.provider = in.readTypedObject(ComponentName.CREATOR);
         this.minWidth = in.readInt();
         this.minHeight = in.readInt();
         this.minResizeWidth = in.readInt();
@@ -231,16 +257,15 @@ public class AppWidgetProviderInfo implements Parcelable {
         this.updatePeriodMillis = in.readInt();
         this.initialLayout = in.readInt();
         this.initialKeyguardLayout = in.readInt();
-        if (0 != in.readInt()) {
-            this.configure = new ComponentName(in);
-        }
+        this.configure = in.readTypedObject(ComponentName.CREATOR);
         this.label = in.readString();
         this.icon = in.readInt();
         this.previewImage = in.readInt();
         this.autoAdvanceViewId = in.readInt();
         this.resizeMode = in.readInt();
         this.widgetCategory = in.readInt();
-        this.providerInfo = in.readParcelable(null);
+        this.providerInfo = in.readTypedObject(ActivityInfo.CREATOR);
+        this.widgetFeatures = in.readInt();
     }
 
     /**
@@ -308,13 +333,8 @@ public class AppWidgetProviderInfo implements Parcelable {
 
     @Override
     @SuppressWarnings("deprecation")
-    public void writeToParcel(android.os.Parcel out, int flags) {
-        if (this.provider != null) {
-            out.writeInt(1);
-            this.provider.writeToParcel(out, flags);
-        } else {
-            out.writeInt(0);
-        }
+    public void writeToParcel(Parcel out, int flags) {
+        out.writeTypedObject(this.provider, flags);
         out.writeInt(this.minWidth);
         out.writeInt(this.minHeight);
         out.writeInt(this.minResizeWidth);
@@ -322,19 +342,15 @@ public class AppWidgetProviderInfo implements Parcelable {
         out.writeInt(this.updatePeriodMillis);
         out.writeInt(this.initialLayout);
         out.writeInt(this.initialKeyguardLayout);
-        if (this.configure != null) {
-            out.writeInt(1);
-            this.configure.writeToParcel(out, flags);
-        } else {
-            out.writeInt(0);
-        }
+        out.writeTypedObject(this.configure, flags);
         out.writeString(this.label);
         out.writeInt(this.icon);
         out.writeInt(this.previewImage);
         out.writeInt(this.autoAdvanceViewId);
         out.writeInt(this.resizeMode);
         out.writeInt(this.widgetCategory);
-        out.writeParcelable(this.providerInfo, flags);
+        out.writeTypedObject(this.providerInfo, flags);
+        out.writeInt(this.widgetFeatures);
     }
 
     @Override
@@ -357,6 +373,7 @@ public class AppWidgetProviderInfo implements Parcelable {
         that.resizeMode = this.resizeMode;
         that.widgetCategory = this.widgetCategory;
         that.providerInfo = this.providerInfo;
+        that.widgetFeatures = this.widgetFeatures;
         return that;
     }
 

@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2012 Google Inc.
+ * Copyright 2017 Google Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
@@ -14,7 +14,7 @@
  * the License.
  */
 
-package com.android.server.policy;
+package com.android.internal.accessibility;
 
 import android.accessibilityservice.AccessibilityServiceInfo;
 import android.app.ActivityManager;
@@ -35,6 +35,7 @@ import android.os.UserHandle;
 import android.os.Vibrator;
 import android.provider.Settings;
 import android.text.TextUtils;
+import android.util.ArrayMap;
 import android.util.Slog;
 import android.view.Window;
 import android.view.WindowManager;
@@ -43,20 +44,30 @@ import android.view.accessibility.AccessibilityManager;
 import android.widget.Toast;
 import com.android.internal.R;
 
-import java.util.List;
+import java.util.Collections;
+import java.util.Map;
 
 import static android.view.WindowManager.LayoutParams.TYPE_KEYGUARD_DIALOG;
+
+import static com.android.internal.util.ArrayUtils.convertToLongArray;
 
 /**
  * Class to help manage the accessibility shortcut
  */
 public class AccessibilityShortcutController {
     private static final String TAG = "AccessibilityShortcutController";
+
+    // Dummy component names for framework features
+    public static final ComponentName COLOR_INVERSION_COMPONENT_NAME =
+            new ComponentName("com.android.server.accessibility", "ColorInversion");
+    public static final ComponentName DALTONIZER_COMPONENT_NAME =
+            new ComponentName("com.android.server.accessibility", "Daltonizer");
+
     private static final AudioAttributes VIBRATION_ATTRIBUTES = new AudioAttributes.Builder()
             .setContentType(AudioAttributes.CONTENT_TYPE_SONIFICATION)
             .setUsage(AudioAttributes.USAGE_ASSISTANCE_ACCESSIBILITY)
             .build();
-
+    private static Map<ComponentName, ToggleableFrameworkFeatureInfo> sFrameworkShortcutFeaturesMap;
 
     private final Context mContext;
     private AlertDialog mAlertDialog;
@@ -67,6 +78,15 @@ public class AccessibilityShortcutController {
     // Visible for testing
     public FrameworkObjectProvider mFrameworkObjectProvider = new FrameworkObjectProvider();
 
+    /**
+     * Get the component name string for the service or feature currently assigned to the
+     * accessiblity shortcut
+     *
+     * @param context A valid context
+     * @param userId The user ID of interest
+     * @return The flattened component name string of the service selected by the user, or the
+     *         string for the default service if the user has not made a selection
+     */
     public static String getTargetServiceComponentNameString(
             Context context, int userId) {
         final String currentShortcutServiceId = Settings.Secure.getStringForUser(
@@ -76,6 +96,29 @@ public class AccessibilityShortcutController {
             return currentShortcutServiceId;
         }
         return context.getString(R.string.config_defaultAccessibilityService);
+    }
+
+    /**
+     * @return An immutable map from dummy component names to feature info for toggling a framework
+     *         feature
+     */
+    public static Map<ComponentName, ToggleableFrameworkFeatureInfo>
+        getFrameworkShortcutFeaturesMap() {
+        if (sFrameworkShortcutFeaturesMap == null) {
+            Map<ComponentName, ToggleableFrameworkFeatureInfo> featuresMap = new ArrayMap<>(2);
+            featuresMap.put(COLOR_INVERSION_COMPONENT_NAME,
+                    new ToggleableFrameworkFeatureInfo(
+                            Settings.Secure.ACCESSIBILITY_DISPLAY_INVERSION_ENABLED,
+                            "1" /* Value to enable */, "0" /* Value to disable */,
+                            R.string.color_inversion_feature_name));
+            featuresMap.put(DALTONIZER_COMPONENT_NAME,
+                    new ToggleableFrameworkFeatureInfo(
+                            Settings.Secure.ACCESSIBILITY_DISPLAY_DALTONIZER_ENABLED,
+                            "1" /* Value to enable */, "0" /* Value to disable */,
+                            R.string.color_correction_feature_name));
+            sFrameworkShortcutFeaturesMap = Collections.unmodifiableMap(featuresMap);
+        }
+        return sFrameworkShortcutFeaturesMap;
     }
 
     public AccessibilityShortcutController(Context context, Handler handler, int initialUserId) {
@@ -160,8 +203,8 @@ public class AccessibilityShortcutController {
         if ((vibrator != null) && vibrator.hasVibrator()) {
             // Don't check if haptics are disabled, as we need to alert the user that their
             // way of interacting with the phone may change if they activate the shortcut
-            long[] vibePattern = PhoneWindowManager.getLongIntArray(mContext.getResources(),
-                    R.array.config_longPressVibePattern);
+            long[] vibePattern = convertToLongArray(
+                    mContext.getResources().getIntArray(R.array.config_longPressVibePattern));
             vibrator.vibrate(vibePattern, -1, VIBRATION_ATTRIBUTES);
         }
 
@@ -187,22 +230,24 @@ public class AccessibilityShortcutController {
             }
 
             // Show a toast alerting the user to what's happening
-            final AccessibilityServiceInfo serviceInfo = getInfoForTargetService();
-            if (serviceInfo == null) {
+            final String serviceName = getShortcutFeatureDescription(false /* no summary */);
+            if (serviceName == null) {
                 Slog.e(TAG, "Accessibility shortcut set to invalid service");
                 return;
             }
-            String toastMessageFormatString = mContext.getString(isServiceEnabled(serviceInfo)
-                    ? R.string.accessibility_shortcut_disabling_service
-                    : R.string.accessibility_shortcut_enabling_service);
-            String toastMessage = String.format(toastMessageFormatString,
-                    serviceInfo.getResolveInfo()
-                            .loadLabel(mContext.getPackageManager()).toString());
-            Toast warningToast = mFrameworkObjectProvider.makeToastFromText(
-                    mContext, toastMessage, Toast.LENGTH_LONG);
-            warningToast.getWindowParams().privateFlags |=
-                    WindowManager.LayoutParams.PRIVATE_FLAG_SHOW_FOR_ALL_USERS;
-            warningToast.show();
+            // For accessibility services, show a toast explaining what we're doing.
+            final AccessibilityServiceInfo serviceInfo = getInfoForTargetService();
+            if (serviceInfo != null) {
+                String toastMessageFormatString = mContext.getString(isServiceEnabled(serviceInfo)
+                        ? R.string.accessibility_shortcut_disabling_service
+                        : R.string.accessibility_shortcut_enabling_service);
+                String toastMessage = String.format(toastMessageFormatString, serviceName);
+                Toast warningToast = mFrameworkObjectProvider.makeToastFromText(
+                        mContext, toastMessage, Toast.LENGTH_LONG);
+                warningToast.getWindowParams().privateFlags |=
+                        WindowManager.LayoutParams.PRIVATE_FLAG_SHOW_FOR_ALL_USERS;
+                warningToast.show();
+            }
 
             mFrameworkObjectProvider.getAccessibilityManagerInstance(mContext)
                     .performAccessibilityShortcut();
@@ -210,18 +255,18 @@ public class AccessibilityShortcutController {
     }
 
     private AlertDialog createShortcutWarningDialog(int userId) {
-        final AccessibilityServiceInfo serviceInfo = getInfoForTargetService();
+        final String serviceDescription = getShortcutFeatureDescription(true /* Include summary */);
 
-        if (serviceInfo == null) {
+        if (serviceDescription == null) {
             return null;
         }
 
         final String warningMessage = String.format(
                 mContext.getString(R.string.accessibility_shortcut_toogle_warning),
-                serviceInfo.getResolveInfo().loadLabel(mContext.getPackageManager()).toString());
+                serviceDescription);
         final AlertDialog alertDialog = mFrameworkObjectProvider.getAlertDialogBuilder(
                 // Use SystemUI context so we pick up any theme set in a vendor overlay
-                ActivityThread.currentActivityThread().getSystemUiContext())
+                mFrameworkObjectProvider.getSystemUiContext())
                 .setTitle(R.string.accessibility_shortcut_warning_dialog_title)
                 .setMessage(warningMessage)
                 .setCancelable(false)
@@ -253,6 +298,34 @@ public class AccessibilityShortcutController {
                         ComponentName.unflattenFromString(currentShortcutServiceString));
     }
 
+    private String getShortcutFeatureDescription(boolean includeSummary) {
+        final String currentShortcutServiceString = getTargetServiceComponentNameString(
+                mContext, UserHandle.USER_CURRENT);
+        if (currentShortcutServiceString == null) {
+            return null;
+        }
+        final ComponentName targetComponentName =
+                ComponentName.unflattenFromString(currentShortcutServiceString);
+        final ToggleableFrameworkFeatureInfo frameworkFeatureInfo =
+                getFrameworkShortcutFeaturesMap().get(targetComponentName);
+        if (frameworkFeatureInfo != null) {
+            return frameworkFeatureInfo.getLabel(mContext);
+        }
+        final AccessibilityServiceInfo serviceInfo = mFrameworkObjectProvider
+                .getAccessibilityManagerInstance(mContext).getInstalledServiceInfoWithComponentName(
+                        targetComponentName);
+        if (serviceInfo == null) {
+            return null;
+        }
+        final PackageManager pm = mContext.getPackageManager();
+        String label = serviceInfo.getResolveInfo().loadLabel(pm).toString();
+        String summary = serviceInfo.loadSummary(pm).toString();
+        if (!includeSummary || TextUtils.isEmpty(summary)) {
+            return label;
+        }
+        return String.format("%s\n%s", label, summary);
+    }
+
     private boolean isServiceEnabled(AccessibilityServiceInfo serviceInfo) {
         AccessibilityManager accessibilityManager =
                 mFrameworkObjectProvider.getAccessibilityManagerInstance(mContext);
@@ -262,6 +335,51 @@ public class AccessibilityShortcutController {
 
     private boolean hasFeatureLeanback() {
         return mContext.getPackageManager().hasSystemFeature(PackageManager.FEATURE_LEANBACK);
+    }
+
+    /**
+     * Immutable class to hold info about framework features that can be controlled by shortcut
+     */
+    public static class ToggleableFrameworkFeatureInfo {
+        private final String mSettingKey;
+        private final String mSettingOnValue;
+        private final String mSettingOffValue;
+        private final int mLabelStringResourceId;
+        // These go to the settings wrapper
+        private int mIconDrawableId;
+
+        ToggleableFrameworkFeatureInfo(String settingKey, String settingOnValue,
+                String settingOffValue, int labelStringResourceId) {
+            mSettingKey = settingKey;
+            mSettingOnValue = settingOnValue;
+            mSettingOffValue = settingOffValue;
+            mLabelStringResourceId = labelStringResourceId;
+        }
+
+        /**
+         * @return The settings key to toggle between two values
+         */
+        public String getSettingKey() {
+            return mSettingKey;
+        }
+
+        /**
+         * @return The value to write to settings to turn the feature on
+         */
+        public String getSettingOnValue() {
+            return mSettingOnValue;
+        }
+
+        /**
+         * @return The value to write to settings to turn the feature off
+         */
+        public String getSettingOffValue() {
+            return mSettingOffValue;
+        }
+
+        public String getLabel(Context context) {
+            return context.getString(mLabelStringResourceId);
+        }
     }
 
     // Class to allow mocking of static framework calls
@@ -276,6 +394,10 @@ public class AccessibilityShortcutController {
 
         public Toast makeToastFromText(Context context, CharSequence charSequence, int duration) {
             return Toast.makeText(context, charSequence, duration);
+        }
+
+        public Context getSystemUiContext() {
+            return ActivityThread.currentActivityThread().getSystemUiContext();
         }
     }
 }

@@ -79,7 +79,7 @@ private:
     void setFdEvents(int events);
 
     const char* getInputChannelName() {
-        return mInputConsumer.getChannel()->getName().string();
+        return mInputConsumer.getChannel()->getName().c_str();
     }
 
     virtual int handleEvent(int receiveFd, int events, void* data);

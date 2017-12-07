@@ -65,6 +65,12 @@ class ActivityDisplay extends ConfigurationContainer<ActivityStack> {
     static final int POSITION_TOP = Integer.MAX_VALUE;
     static final int POSITION_BOTTOM = Integer.MIN_VALUE;
 
+
+    /**
+     * Counter for next free stack ID to use for dynamic activity stacks. Unique across displays.
+     */
+    private static int sNextFreeStackId = 0;
+
     private ActivityStackSupervisor mSupervisor;
     /** Actual Display this object tracks. */
     int mDisplayId;
@@ -231,6 +237,10 @@ class ActivityDisplay extends ConfigurationContainer<ActivityStack> {
         return getOrCreateStack(windowingMode, activityType, onTop);
     }
 
+    private int getNextStackId() {
+        return sNextFreeStackId++;
+    }
+
     /**
      * Creates a stack matching the input windowing mode and activity type on this display.
      * @param windowingMode The windowing mode the stack should be created in. If
@@ -278,7 +288,7 @@ class ActivityDisplay extends ConfigurationContainer<ActivityStack> {
             }
         }
 
-        final int stackId = mSupervisor.getNextStackId();
+        final int stackId = getNextStackId();
         return createStackUnchecked(windowingMode, activityType, stackId, onTop);
     }
 

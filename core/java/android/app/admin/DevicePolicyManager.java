@@ -6219,7 +6219,7 @@ public class DevicePolicyManager {
      * @return {@code true} if the user was removed, {@code false} otherwise.
      * @throws SecurityException if {@code admin} is not a device owner.
      */
-    public boolean removeUser(@NonNull ComponentName admin, UserHandle userHandle) {
+    public boolean removeUser(@NonNull ComponentName admin, @NonNull UserHandle userHandle) {
         throwIfParentInstance("removeUser");
         try {
             return mService.removeUser(admin, userHandle);
@@ -6230,6 +6230,7 @@ public class DevicePolicyManager {
 
     /**
      * Called by a device owner to switch the specified user to the foreground.
+     * <p> This cannot be used to switch to a managed profile.
      *
      * @param admin Which {@link DeviceAdminReceiver} this request is associated with.
      * @param userHandle the user to switch to; null will switch to primary.
@@ -6241,6 +6242,65 @@ public class DevicePolicyManager {
         throwIfParentInstance("switchUser");
         try {
             return mService.switchUser(admin, userHandle);
+        } catch (RemoteException re) {
+            throw re.rethrowFromSystemServer();
+        }
+    }
+
+    /**
+     * Called by a device owner to stop the specified secondary user.
+     * <p> This cannot be used to stop the primary user or a managed profile.
+     *
+     * @param admin Which {@link DeviceAdminReceiver} this request is associated with.
+     * @param userHandle the user to be stopped.
+     * @return {@code true} if the user can be stopped, {@code false} otherwise.
+     * @throws SecurityException if {@code admin} is not a device owner.
+     */
+    public boolean stopUser(@NonNull ComponentName admin, @NonNull UserHandle userHandle) {
+        throwIfParentInstance("stopUser");
+        try {
+            return mService.stopUser(admin, userHandle);
+        } catch (RemoteException re) {
+            throw re.rethrowFromSystemServer();
+        }
+    }
+
+    /**
+     * Called by a profile owner that is affiliated with the device owner to stop the calling user
+     * and switch back to primary.
+     * <p> This has no effect when called on a managed profile.
+     *
+     * @param admin Which {@link DeviceAdminReceiver} this request is associated with.
+     * @return {@code true} if the exit was successful, {@code false} otherwise.
+     * @throws SecurityException if {@code admin} is not a profile owner affiliated with the device
+     * owner.
+     */
+    public boolean logoutUser(@NonNull ComponentName admin) {
+        throwIfParentInstance("logoutUser");
+        try {
+            return mService.logoutUser(admin);
+        } catch (RemoteException re) {
+            throw re.rethrowFromSystemServer();
+        }
+    }
+
+    /**
+     * Called by a device owner to list all secondary users on the device, excluding managed
+     * profiles.
+     * <p> Used for various user management APIs, including {@link #switchUser}, {@link #removeUser}
+     * and {@link #stopUser}.
+     *
+     * @param admin Which {@link DeviceAdminReceiver} this request is associated with.
+     * @return list of other {@link UserHandle}s on the device.
+     * @throws SecurityException if {@code admin} is not a device owner.
+     * @see #switchUser
+     * @see #removeUser
+     * @see #stopUser
+     */
+    public List<UserHandle> getSecondaryUsers(@NonNull ComponentName admin) {
+        throwIfParentInstance("getSecondaryUsers");
+        try {
+            return mService.getSecondaryUsers(admin);
         } catch (RemoteException re) {
             throw re.rethrowFromSystemServer();
         }

@@ -117,6 +117,9 @@ bool matchesSimple(const SimpleAtomMatcher& simpleMatcher, const LogEvent& event
                     allMatched = false;
                     break;
                 }
+            } else {
+                allMatched = false;
+                break;
             }
         } else if (matcherCase == KeyValueMatcher::ValueMatcherCase::kEqInt ||
                    matcherCase == KeyValueMatcher::ValueMatcherCase::kLtInt ||
@@ -153,6 +156,9 @@ bool matchesSimple(const SimpleAtomMatcher& simpleMatcher, const LogEvent& event
                         break;
                     }
                 }
+            } else {
+                allMatched = false;
+                break;
             }
         } else if (matcherCase == KeyValueMatcher::ValueMatcherCase::kEqBool) {
             // Boolean fields
@@ -163,6 +169,9 @@ bool matchesSimple(const SimpleAtomMatcher& simpleMatcher, const LogEvent& event
                     allMatched = false;
                     break;
                 }
+            } else {
+                allMatched = false;
+                break;
             }
         } else if (matcherCase == KeyValueMatcher::ValueMatcherCase::kLtFloat ||
                    matcherCase == KeyValueMatcher::ValueMatcherCase::kGtFloat) {
@@ -181,6 +190,9 @@ bool matchesSimple(const SimpleAtomMatcher& simpleMatcher, const LogEvent& event
                         break;
                     }
                 }
+            } else {
+                allMatched = false;
+                break;
             }
         } else {
             // If value matcher is not present, assume that we match.

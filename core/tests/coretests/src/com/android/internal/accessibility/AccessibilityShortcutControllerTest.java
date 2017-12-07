@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.android.server.policy;
+package com.android.internal.accessibility;
 
 import android.accessibilityservice.AccessibilityServiceInfo;
 import android.app.AlertDialog;
@@ -22,6 +22,7 @@ import android.content.ComponentName;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.pm.ApplicationInfo;
+import android.content.pm.PackageManager;
 import android.content.pm.ResolveInfo;
 import android.content.res.Resources;
 import android.os.Handler;
@@ -38,7 +39,7 @@ import android.view.accessibility.IAccessibilityManager;
 import android.widget.Toast;
 import com.android.internal.R;
 import com.android.internal.util.test.FakeSettingsProvider;
-import com.android.server.policy.AccessibilityShortcutController.FrameworkObjectProvider;
+import com.android.internal.accessibility.AccessibilityShortcutController.FrameworkObjectProvider;
 
 import org.junit.After;
 import org.junit.Before;
@@ -50,6 +51,7 @@ import org.mockito.MockitoAnnotations;
 
 import java.lang.reflect.Field;
 import java.util.Collections;
+import java.util.Map;
 
 import static android.provider.Settings.Secure.ACCESSIBILITY_SHORTCUT_DIALOG_SHOWN;
 import static android.provider.Settings.Secure.ACCESSIBILITY_SHORTCUT_ENABLED;
@@ -58,7 +60,10 @@ import static android.provider.Settings.Secure.ACCESSIBILITY_SHORTCUT_TARGET_SER
 import static junit.framework.Assert.assertEquals;
 import static junit.framework.Assert.assertFalse;
 import static junit.framework.Assert.assertTrue;
+
+import static org.junit.Assert.fail;
 import static org.mockito.AdditionalMatchers.aryEq;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Matchers.anyBoolean;
 import static org.mockito.Matchers.anyInt;
 import static org.mockito.Matchers.anyObject;
@@ -72,6 +77,7 @@ import static org.mockito.Mockito.when;
 @RunWith(AndroidJUnit4.class)
 public class AccessibilityShortcutControllerTest {
     private static final String SERVICE_NAME_STRING = "fake.package/fake.service.name";
+    private static final String SERVICE_NAME_SUMMARY = "Summary";
     private static final long VIBRATOR_PATTERN_1 = 100L;
     private static final long VIBRATOR_PATTERN_2 = 150L;
     private static final int[] VIBRATOR_PATTERN_INT = {(int) VIBRATOR_PATTERN_1,
@@ -95,6 +101,7 @@ public class AccessibilityShortcutControllerTest {
     private @Mock Toast mToast;
     private @Mock Vibrator mVibrator;
     private @Mock ApplicationInfo mApplicationInfo;
+    private @Mock PackageManager mPackageManager;
 
     private MockContentResolver mContentResolver;
     private WindowManager.LayoutParams mLayoutParams = new WindowManager.LayoutParams();
@@ -108,6 +115,10 @@ public class AccessibilityShortcutControllerTest {
         when(mContext.getResources()).thenReturn(mResources);
         when(mContext.getApplicationInfo()).thenReturn(mApplicationInfo);
         when(mContext.getSystemService(Context.VIBRATOR_SERVICE)).thenReturn(mVibrator);
+        when(mContext.getPackageManager()).thenReturn(mPackageManager);
+
+        // We're not checking the text. Just prevent us crashing when getting text.
+        when(mPackageManager.getText(any(), anyInt(), any())).thenReturn("text");
 
         mContentResolver = new MockContentResolver(mContext);
         mContentResolver.addProvider(Settings.AUTHORITY, new FakeSettingsProvider());
@@ -125,6 +136,7 @@ public class AccessibilityShortcutControllerTest {
                 .thenReturn(mAlertDialogBuilder);
         when(mFrameworkObjectProvider.makeToastFromText(eq(mContext), anyObject(), anyInt()))
                 .thenReturn(mToast);
+        when(mFrameworkObjectProvider.getSystemUiContext()).thenReturn(mContext);
 
         when(mResources.getString(anyInt())).thenReturn("Howdy %s");
         when(mResources.getIntArray(anyInt())).thenReturn(VIBRATOR_PATTERN_INT);
@@ -134,6 +146,7 @@ public class AccessibilityShortcutControllerTest {
         when(mServiceInfo.getResolveInfo()).thenReturn(resolveInfo);
         when(mServiceInfo.getComponentName())
                 .thenReturn(ComponentName.unflattenFromString(SERVICE_NAME_STRING));
+        when(mServiceInfo.loadSummary(any())).thenReturn(SERVICE_NAME_SUMMARY);
 
         when(mAlertDialogBuilder.setTitle(anyInt())).thenReturn(mAlertDialogBuilder);
         when(mAlertDialogBuilder.setCancelable(anyBoolean())).thenReturn(mAlertDialogBuilder);
@@ -369,6 +382,33 @@ public class AccessibilityShortcutControllerTest {
         verify(mAccessibilityManagerService).performAccessibilityShortcut();
     }
 
+    @Test
+    public void getFrameworkFeatureMap_shouldBeNonNullAndUnmodifiable() {
+        Map<ComponentName, AccessibilityShortcutController.ToggleableFrameworkFeatureInfo>
+                frameworkFeatureMap =
+                AccessibilityShortcutController.getFrameworkShortcutFeaturesMap();
+        assertTrue("Framework features not supported", frameworkFeatureMap.size() > 0);
+
+        try {
+            frameworkFeatureMap.clear();
+            fail("Framework feature map should be unmodifieable");
+        } catch (UnsupportedOperationException e) {
+            // Expected
+        }
+    }
+
+    @Test
+    public void testOnAccessibilityShortcut_forFrameworkFeature_callsServiceWithNoToast()
+            throws Exception {
+        configureShortcutEnabled(ENABLED_EXCEPT_LOCK_SCREEN);
+        configureFirstFrameworkFeature();
+        Settings.Secure.putInt(mContentResolver, ACCESSIBILITY_SHORTCUT_DIALOG_SHOWN, 1);
+        getController().performAccessibilityShortcut();
+
+        verifyZeroInteractions(mToast);
+        verify(mAccessibilityManagerService).performAccessibilityShortcut();
+    }
+
     private void configureNoShortcutService() {
         Settings.Secure.putString(mContentResolver, ACCESSIBILITY_SHORTCUT_TARGET_SERVICE, "");
     }
@@ -376,6 +416,14 @@ public class AccessibilityShortcutControllerTest {
     private void configureValidShortcutService() {
         Settings.Secure.putString(
                 mContentResolver, ACCESSIBILITY_SHORTCUT_TARGET_SERVICE, SERVICE_NAME_STRING);
+    }
+
+    private void configureFirstFrameworkFeature() {
+        ComponentName featureComponentName =
+                (ComponentName) AccessibilityShortcutController.getFrameworkShortcutFeaturesMap()
+                        .keySet().toArray()[0];
+        Settings.Secure.putString(mContentResolver, ACCESSIBILITY_SHORTCUT_TARGET_SERVICE,
+                featureComponentName.flattenToString());
     }
 
     private void configureShortcutEnabled(int enabledValue) {

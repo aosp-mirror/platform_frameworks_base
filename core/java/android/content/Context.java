@@ -2801,10 +2801,17 @@ public abstract class Context {
      * example, if this Context is an Activity that is stopped, the service will
      * not be required to continue running until the Activity is resumed.
      *
-     * <p>This function will throw {@link SecurityException} if you do not
+     * <p>If the service does not support binding, it may return {@code null} from
+     * its {@link android.app.Service#onBind(Intent) onBind()} method.  If it does, then
+     * the ServiceConnection's
+     * {@link ServiceConnection#onNullBinding(ComponentName) onNullBinding()} method
+     * will be invoked instead of
+     * {@link ServiceConnection#onServiceConnected(ComponentName, IBinder) onServiceConnected()}.
+     *
+     * <p>This method will throw {@link SecurityException} if the calling app does not
      * have permission to bind to the given service.
      *
-     * <p class="note">Note: this method <em>can not be called from a
+     * <p class="note">Note: this method <em>cannot be called from a
      * {@link BroadcastReceiver} component</em>.  A pattern you can use to
      * communicate from a BroadcastReceiver to a Service is to call
      * {@link #startService} with the arguments containing the command to be
@@ -2827,8 +2834,8 @@ public abstract class Context {
      *          {@link #BIND_WAIVE_PRIORITY}.
      * @return If you have successfully bound to the service, {@code true} is returned;
      *         {@code false} is returned if the connection is not made so you will not
-     *         receive the service object. However, you should still call
-     *         {@link #unbindService} to release the connection.
+     *         receive the service object. You should still call {@link #unbindService}
+     *         to release the connection even if this method returned {@code false}.
      *
      * @throws SecurityException If the caller does not have permission to access the service
      * or the service can not be found.
@@ -3404,6 +3411,14 @@ public abstract class Context {
      * @hide
      */
     public static final String NETWORKMANAGEMENT_SERVICE = "network_management";
+
+    /**
+     * Use with {@link #getSystemService} to retrieve a
+     * {@link com.android.server.slice.SliceManagerService} for managing slices.
+     * @hide
+     * @see #getSystemService
+     */
+    public static final String SLICE_SERVICE = "slice";
 
     /**
      * Use with {@link #getSystemService} to retrieve a {@link

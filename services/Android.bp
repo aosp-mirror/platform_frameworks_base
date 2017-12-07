@@ -1,0 +1,8 @@
+// native library
+// =============================================================
+
+cc_library_shared {
+    name: "libandroid_servers",
+    defaults: ["libservices.core-libs"],
+    whole_static_libs: ["libservices.core"],
+}

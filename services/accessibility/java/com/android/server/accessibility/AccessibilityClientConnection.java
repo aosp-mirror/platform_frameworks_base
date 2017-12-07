@@ -20,7 +20,9 @@ import static android.accessibilityservice.AccessibilityServiceInfo.DEFAULT;
 import static android.view.Display.DEFAULT_DISPLAY;
 import static android.view.WindowManager.LayoutParams.TYPE_ACCESSIBILITY_OVERLAY;
 
+import android.accessibilityservice.AccessibilityService;
 import android.accessibilityservice.AccessibilityServiceInfo;
+import android.accessibilityservice.GestureDescription;
 import android.accessibilityservice.IAccessibilityServiceClient;
 import android.accessibilityservice.IAccessibilityServiceConnection;
 import android.annotation.NonNull;
@@ -47,6 +49,7 @@ import android.view.MagnificationSpec;
 import android.view.View;
 import android.view.accessibility.AccessibilityCache;
 import android.view.accessibility.AccessibilityEvent;
+import android.view.accessibility.AccessibilityInteractionClient;
 import android.view.accessibility.AccessibilityNodeInfo;
 import android.view.accessibility.AccessibilityWindowInfo;
 import android.view.accessibility.IAccessibilityInteractionConnection;
@@ -62,7 +65,6 @@ import java.io.FileDescriptor;
 import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -104,7 +106,7 @@ abstract class AccessibilityClientConnection extends IAccessibilityServiceConnec
 
     int mFeedbackType;
 
-    final Set<String> mPackageNames = new HashSet<>();
+    Set<String> mPackageNames = new HashSet<>();
 
     boolean mIsDefault;
 
@@ -282,98 +284,40 @@ abstract class AccessibilityClientConnection extends IAccessibilityServiceConnec
         return true;
     }
 
-    boolean setDynamicallyConfigurableProperties(AccessibilityServiceInfo info) {
-        boolean somethingChanged = false;
-
-        if (mEventTypes != info.eventTypes) {
-            mEventTypes = info.eventTypes;
-            somethingChanged = true;
+    public void setDynamicallyConfigurableProperties(AccessibilityServiceInfo info) {
+        mEventTypes = info.eventTypes;
+        mFeedbackType = info.feedbackType;
+        String[] packageNames = info.packageNames;
+        if (packageNames != null) {
+            mPackageNames.addAll(Arrays.asList(packageNames));
         }
-
-        if (mFeedbackType != info.feedbackType) {
-            mFeedbackType = info.feedbackType;
-            somethingChanged = true;
-        }
-
-        final String[] oldPackageNames = mPackageNames.toArray(new String[mPackageNames.size()]);
-        if (!Arrays.equals(oldPackageNames, info.packageNames)) {
-            mPackageNames.clear();
-            if (info.packageNames != null) {
-                Collections.addAll(mPackageNames, info.packageNames);
-            }
-            somethingChanged = true;
-        }
-
-        if (mNotificationTimeout != info.notificationTimeout) {
-            mNotificationTimeout = info.notificationTimeout;
-            somethingChanged = true;
-        }
-
-        final boolean newIsDefault = (info.flags & DEFAULT) != 0;
-        if (mIsDefault != newIsDefault) {
-            mIsDefault = newIsDefault;
-            somethingChanged = true;
-        }
+        mNotificationTimeout = info.notificationTimeout;
+        mIsDefault = (info.flags & DEFAULT) != 0;
 
         if (supportsFlagForNotImportantViews(info)) {
-            somethingChanged |= updateFetchFlag(info.flags,
-                    AccessibilityServiceInfo.FLAG_INCLUDE_NOT_IMPORTANT_VIEWS);
-        }
-
-        somethingChanged |= updateFetchFlag(info.flags,
-                AccessibilityServiceInfo.FLAG_REPORT_VIEW_IDS);
-
-        final boolean newRequestTouchExplorationMode = (info.flags
-                & AccessibilityServiceInfo.FLAG_REQUEST_TOUCH_EXPLORATION_MODE) != 0;
-        if (mRequestTouchExplorationMode != newRequestTouchExplorationMode) {
-            mRequestTouchExplorationMode = newRequestTouchExplorationMode;
-            somethingChanged = true;
-        }
-
-        final boolean newRequestFilterKeyEvents = (info.flags
-                & AccessibilityServiceInfo.FLAG_REQUEST_FILTER_KEY_EVENTS) != 0;
-        if (mRequestFilterKeyEvents != newRequestFilterKeyEvents) {
-            mRequestFilterKeyEvents = newRequestFilterKeyEvents;
-            somethingChanged = true;
-        }
-
-        final boolean newRetrieveInteractiveWindows = (info.flags
-                & AccessibilityServiceInfo.FLAG_RETRIEVE_INTERACTIVE_WINDOWS) != 0;
-        if (mRetrieveInteractiveWindows != newRetrieveInteractiveWindows) {
-            mRetrieveInteractiveWindows = newRetrieveInteractiveWindows;
-            somethingChanged = true;
-        }
-
-        final boolean newCaptureFingerprintGestures = (info.flags
-                & AccessibilityServiceInfo.FLAG_REQUEST_FINGERPRINT_GESTURES) != 0;
-        if (mCaptureFingerprintGestures != newCaptureFingerprintGestures) {
-            mCaptureFingerprintGestures = newCaptureFingerprintGestures;
-            somethingChanged = true;
-        }
-
-        final boolean newRequestAccessibilityButton = (info.flags
-                & AccessibilityServiceInfo.FLAG_REQUEST_ACCESSIBILITY_BUTTON) != 0;
-        if (mRequestAccessibilityButton != newRequestAccessibilityButton) {
-            mRequestAccessibilityButton = newRequestAccessibilityButton;
-            somethingChanged = true;
-        }
-
-        return somethingChanged;
-    }
-
-    private boolean updateFetchFlag(int allFlags, int flagToUpdate) {
-        if ((allFlags & flagToUpdate) != 0) {
-            if ((mFetchFlags & flagToUpdate) == 0) {
-                mFetchFlags |= flagToUpdate;
-                return true;
+            if ((info.flags & AccessibilityServiceInfo.FLAG_INCLUDE_NOT_IMPORTANT_VIEWS) != 0) {
+                mFetchFlags |= AccessibilityNodeInfo.FLAG_INCLUDE_NOT_IMPORTANT_VIEWS;
+            } else {
+                mFetchFlags &= ~AccessibilityNodeInfo.FLAG_INCLUDE_NOT_IMPORTANT_VIEWS;
             }
+        }
+
+        if ((info.flags & AccessibilityServiceInfo.FLAG_REPORT_VIEW_IDS) != 0) {
+            mFetchFlags |= AccessibilityNodeInfo.FLAG_REPORT_VIEW_IDS;
         } else {
-            if ((mFetchFlags & flagToUpdate) != 0) {
-                mFetchFlags &= ~flagToUpdate;
-                return true;
-            }
+            mFetchFlags &= ~AccessibilityNodeInfo.FLAG_REPORT_VIEW_IDS;
         }
-        return false;
+
+        mRequestTouchExplorationMode = (info.flags
+                & AccessibilityServiceInfo.FLAG_REQUEST_TOUCH_EXPLORATION_MODE) != 0;
+        mRequestFilterKeyEvents = (info.flags
+                & AccessibilityServiceInfo.FLAG_REQUEST_FILTER_KEY_EVENTS) != 0;
+        mRetrieveInteractiveWindows = (info.flags
+                & AccessibilityServiceInfo.FLAG_RETRIEVE_INTERACTIVE_WINDOWS) != 0;
+        mCaptureFingerprintGestures = (info.flags
+                & AccessibilityServiceInfo.FLAG_REQUEST_FINGERPRINT_GESTURES) != 0;
+        mRequestAccessibilityButton = (info.flags
+                & AccessibilityServiceInfo.FLAG_REQUEST_ACCESSIBILITY_BUTTON) != 0;
     }
 
     protected boolean supportsFlagForNotImportantViews(AccessibilityServiceInfo info) {
@@ -405,15 +349,14 @@ abstract class AccessibilityClientConnection extends IAccessibilityServiceConnec
                 // If the XML manifest had data to configure the service its info
                 // should be already set. In such a case update only the dynamically
                 // configurable properties.
-                final boolean serviceInfoChanged;
                 AccessibilityServiceInfo oldInfo = mAccessibilityServiceInfo;
                 if (oldInfo != null) {
                     oldInfo.updateDynamicallyConfigurableProperties(info);
-                    serviceInfoChanged = setDynamicallyConfigurableProperties(oldInfo);
+                    setDynamicallyConfigurableProperties(oldInfo);
                 } else {
-                    serviceInfoChanged = setDynamicallyConfigurableProperties(info);
+                    setDynamicallyConfigurableProperties(info);
                 }
-                mSystemSupport.onClientChange(serviceInfoChanged);
+                mSystemSupport.onClientChange(true);
             }
         } finally {
             Binder.restoreCallingIdentity(identity);

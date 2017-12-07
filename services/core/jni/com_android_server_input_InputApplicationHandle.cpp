@@ -65,11 +65,11 @@ bool NativeInputApplicationHandle::updateInfo() {
             gInputApplicationHandleClassInfo.name));
     if (nameObj) {
         const char* nameStr = env->GetStringUTFChars(nameObj, NULL);
-        mInfo->name.setTo(nameStr);
+        mInfo->name = nameStr;
         env->ReleaseStringUTFChars(nameObj, nameStr);
         env->DeleteLocalRef(nameObj);
     } else {
-        mInfo->name.setTo("<null>");
+        mInfo->name = "<null>";
     }
 
     mInfo->dispatchingTimeout = env->GetLongField(obj,

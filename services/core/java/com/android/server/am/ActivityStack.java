@@ -3899,12 +3899,19 @@ class ActivityStack<T extends StackWindowController> extends ConfigurationContai
                 try {
                     ActivityInfo aInfo = AppGlobals.getPackageManager().getActivityInfo(
                             destIntent.getComponent(), 0, srec.userId);
-                    int res = mService.getActivityStartController().startActivity(
-                            srec.app.thread, destIntent, null /*ephemeralIntent*/, null, aInfo,
-                            null /*rInfo*/, null, null, parent.appToken, null, 0, -1,
-                            parent.launchedFromUid, parent.launchedFromPackage, -1,
-                            parent.launchedFromUid, 0, null, false, true, null, null,
-                            "navigateUpTo");
+                    // TODO(b/64750076): Check if calling pid should really be -1.
+                    final int res = mService.getActivityStartController()
+                            .obtainStarter(destIntent, "navigateUpTo")
+                            .setCaller(srec.app.thread)
+                            .setActivityInfo(aInfo)
+                            .setResultTo(parent.appToken)
+                            .setCallingPid(-1)
+                            .setCallingUid(parent.launchedFromUid)
+                            .setCallingPackage(parent.launchedFromPackage)
+                            .setRealCallingPid(-1)
+                            .setRealCallingUid(parent.launchedFromUid)
+                            .setComponentSpecified(true)
+                            .execute();
                     foundParentInTask = res == ActivityManager.START_SUCCESS;
                 } catch (RemoteException e) {
                     foundParentInTask = false;
@@ -5015,8 +5022,8 @@ class ActivityStack<T extends StackWindowController> extends ConfigurationContai
             IVoiceInteractionSession voiceSession, IVoiceInteractor voiceInteractor,
             boolean toTop, ActivityRecord activity, ActivityRecord source,
             ActivityOptions options) {
-        final TaskRecord task = new TaskRecord(mService, taskId, info, intent, voiceSession,
-                voiceInteractor);
+        final TaskRecord task = TaskRecord.create(
+                mService, taskId, info, intent, voiceSession, voiceInteractor);
         // add the task to stack first, mTaskPositioner might need the stack association
         addTask(task, toTop, "createTaskRecord");
         final boolean isLockscreenShown = mService.mStackSupervisor.getKeyguardController()

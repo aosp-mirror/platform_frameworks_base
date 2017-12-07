@@ -16,10 +16,12 @@
 
 package com.android.server.usage;
 
+import static android.app.usage.UsageStatsManager.REASON_DEFAULT;
 import static android.app.usage.UsageStatsManager.REASON_FORCED;
 import static android.app.usage.UsageStatsManager.REASON_TIMEOUT;
 import static android.app.usage.UsageStatsManager.REASON_USAGE;
 import static android.app.usage.UsageStatsManager.STANDBY_BUCKET_ACTIVE;
+import static android.app.usage.UsageStatsManager.STANDBY_BUCKET_EXEMPTED;
 import static android.app.usage.UsageStatsManager.STANDBY_BUCKET_FREQUENT;
 import static android.app.usage.UsageStatsManager.STANDBY_BUCKET_RARE;
 import static android.app.usage.UsageStatsManager.STANDBY_BUCKET_WORKING_SET;
@@ -378,8 +380,12 @@ public class AppStandbyController {
                     Slog.d(TAG, "   Checking idle state for " + packageName);
                 }
                 if (isSpecial) {
+                    synchronized (mAppIdleLock) {
+                        mAppIdleHistory.setAppStandbyBucket(packageName, userId, elapsedRealtime,
+                                STANDBY_BUCKET_EXEMPTED, REASON_DEFAULT);
+                    }
                     maybeInformListeners(packageName, userId, elapsedRealtime,
-                            STANDBY_BUCKET_ACTIVE);
+                            STANDBY_BUCKET_EXEMPTED);
                 } else {
                     synchronized (mAppIdleLock) {
                         String bucketingReason = mAppIdleHistory.getAppStandbyReason(packageName,
@@ -389,7 +395,8 @@ public class AppStandbyController {
                             continue;
                         }
                         // If the bucket was moved up due to usage, let the timeouts apply.
-                        if (REASON_USAGE.equals(bucketingReason)
+                        if (REASON_DEFAULT.equals(bucketingReason)
+                                || REASON_USAGE.equals(bucketingReason)
                                 || REASON_TIMEOUT.equals(bucketingReason)) {
                             int oldBucket = mAppIdleHistory.getAppStandbyBucket(packageName, userId,
                                     elapsedRealtime);
@@ -886,6 +893,11 @@ public class AppStandbyController {
                 String packageName = pi.packageName;
                 if (pi.applicationInfo != null && pi.applicationInfo.isSystemApp()) {
                     mAppIdleHistory.reportUsage(packageName, userId, elapsedRealtime);
+                    if (isAppSpecial(packageName, UserHandle.getAppId(pi.applicationInfo.uid),
+                            userId)) {
+                        mAppIdleHistory.setAppStandbyBucket(packageName, userId, elapsedRealtime,
+                                STANDBY_BUCKET_EXEMPTED, REASON_DEFAULT);
+                    }
                 }
             }
         }

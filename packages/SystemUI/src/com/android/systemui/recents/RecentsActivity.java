@@ -46,7 +46,7 @@ import com.android.internal.colorextraction.ColorExtractor;
 import com.android.internal.content.PackageMonitor;
 import com.android.internal.logging.MetricsLogger;
 import com.android.internal.logging.nano.MetricsProto.MetricsEvent;
-import com.android.keyguard.LatencyTracker;
+import com.android.internal.util.LatencyTracker;
 import com.android.systemui.DejankUtils;
 import com.android.systemui.Dependency;
 import com.android.systemui.Interpolators;

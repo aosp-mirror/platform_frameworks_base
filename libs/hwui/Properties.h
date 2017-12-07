@@ -255,6 +255,9 @@ public:
 
     static bool skpCaptureEnabled;
 
+    // For experimentation b/68769804
+    ANDROID_API static bool enableRTAnimations;
+
     // Used for testing only to change the render pipeline.
     static void overrideRenderPipelineType(RenderPipelineType);
 

@@ -82,9 +82,6 @@ public class NotificationShelf extends ActivatableNotificationView implements
     private boolean mNoAnimationsInThisFrame;
     private boolean mAnimationsEnabled = true;
     private boolean mShowNotificationShelf;
-    private boolean mVibrationOnAnimation;
-    private boolean mUserTouchingScreen;
-    private boolean mTouchActive;
     private float mFirstElementRoundness;
 
     public NotificationShelf(Context context, AttributeSet attrs) {
@@ -102,23 +99,11 @@ public class NotificationShelf extends ActivatableNotificationView implements
         setClipChildren(false);
         setClipToPadding(false);
         mShelfIcons.setShowAllIcons(false);
-        mVibrationOnAnimation = mContext.getResources().getBoolean(
-                R.bool.config_vibrateOnIconAnimation);
-        updateVibrationOnAnimation();
         mViewInvertHelper = new ViewInvertHelper(mShelfIcons,
                 NotificationPanelView.DOZE_ANIMATION_DURATION);
         mShelfState = new ShelfState();
         setBottomRoundness(1.0f, false /* animate */);
         initDimens();
-    }
-
-    private void updateVibrationOnAnimation() {
-        mShelfIcons.setVibrateOnAnimation(mVibrationOnAnimation && mTouchActive);
-    }
-
-    public void setTouchActive(boolean touchActive) {
-        mTouchActive = touchActive;
-        updateVibrationOnAnimation();
     }
 
     public void bind(AmbientState ambientState, NotificationStackScrollLayout hostLayout) {

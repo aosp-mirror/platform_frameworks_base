@@ -239,6 +239,7 @@ import android.view.autofill.AutofillManagerInternal;
 import android.view.inputmethod.InputMethodManagerInternal;
 
 import com.android.internal.R;
+import com.android.internal.accessibility.AccessibilityShortcutController;
 import com.android.internal.annotations.GuardedBy;
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.logging.MetricsLogger;
@@ -246,6 +247,7 @@ import com.android.internal.policy.IKeyguardDismissCallback;
 import com.android.internal.policy.IShortcutService;
 import com.android.internal.policy.PhoneWindow;
 import com.android.internal.statusbar.IStatusBarService;
+import com.android.internal.util.ArrayUtils;
 import com.android.internal.util.ScreenShapeHelper;
 import com.android.internal.widget.PointerLocationView;
 import com.android.server.GestureLauncherService;
@@ -3379,7 +3381,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
     }
 
     boolean keyguardOn() {
-        return isKeyguardShowingAndNotOccluded() || inKeyguardRestrictedKeyInputMode();
+        return isKeyguardShowingAndNotOccluded();
     }
 
     private static final int[] WINDOW_TYPES_WHERE_HOME_DOESNT_WORK = {
@@ -6870,13 +6872,6 @@ public class PhoneWindowManager implements WindowManagerPolicy {
         return mKeyguardOccluded;
     }
 
-    /** {@inheritDoc} */
-    @Override
-    public boolean inKeyguardRestrictedKeyInputMode() {
-        if (mKeyguardDelegate == null) return false;
-        return mKeyguardDelegate.isInputRestricted();
-    }
-
     @Override
     public void dismissKeyguardLw(IKeyguardDismissCallback callback) {
         if (mKeyguardDelegate != null && mKeyguardDelegate.isShowing()) {
@@ -7213,15 +7208,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
     }
 
     static long[] getLongIntArray(Resources r, int resid) {
-        int[] ar = r.getIntArray(resid);
-        if (ar == null) {
-            return null;
-        }
-        long[] out = new long[ar.length];
-        for (int i=0; i<ar.length; i++) {
-            out[i] = ar[i];
-        }
-        return out;
+        return ArrayUtils.convertToLongArray(r.getIntArray(resid));
     }
 
     private void bindKeyguard() {

@@ -71,7 +71,7 @@ private:
     uint32_t mNextPublishedSeq;
 
     const char* getInputChannelName() {
-        return mInputPublisher.getChannel()->getName().string();
+        return mInputPublisher.getChannel()->getName().c_str();
     }
 
     virtual int handleEvent(int receiveFd, int events, void* data);

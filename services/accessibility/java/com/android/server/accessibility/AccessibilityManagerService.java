@@ -100,7 +100,8 @@ import com.android.internal.content.PackageMonitor;
 import com.android.internal.util.DumpUtils;
 import com.android.internal.util.IntPair;
 import com.android.server.LocalServices;
-import com.android.server.policy.AccessibilityShortcutController;
+import com.android.internal.accessibility.AccessibilityShortcutController;
+import com.android.internal.accessibility.AccessibilityShortcutController.ToggleableFrameworkFeatureInfo;
 import com.android.server.wm.WindowManagerInternal;
 
 import org.xmlpull.v1.XmlPullParserException;
@@ -1897,8 +1898,11 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
         if (userState.mServiceToEnableWithShortcut == null) {
             return;
         }
-        boolean shortcutServiceIsInstalled = false;
-        for (int i = 0; i < userState.mInstalledServices.size(); i++) {
+        boolean shortcutServiceIsInstalled =
+                AccessibilityShortcutController.getFrameworkShortcutFeaturesMap()
+                        .containsKey(userState.mServiceToEnableWithShortcut);
+        for (int i = 0; !shortcutServiceIsInstalled && (i < userState.mInstalledServices.size());
+                i++) {
             if (userState.mInstalledServices.get(i).getComponentName()
                     .equals(userState.mServiceToEnableWithShortcut)) {
                 shortcutServiceIsInstalled = true;
@@ -1909,7 +1913,8 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
             final long identity = Binder.clearCallingIdentity();
             try {
                 Settings.Secure.putStringForUser(mContext.getContentResolver(),
-                        Settings.Secure.ACCESSIBILITY_SHORTCUT_TARGET_SERVICE, null, userState.mUserId);
+                        Settings.Secure.ACCESSIBILITY_SHORTCUT_TARGET_SERVICE, null,
+                        userState.mUserId);
 
                 Settings.Secure.putIntForUser(mContext.getContentResolver(),
                         Settings.Secure.ACCESSIBILITY_SHORTCUT_ENABLED, 0, userState.mUserId);
@@ -2117,11 +2122,25 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
             throw new SecurityException(
                     "performAccessibilityShortcut requires the WRITE_SECURE_SETTINGS permission");
         }
+        final Map<ComponentName, ToggleableFrameworkFeatureInfo> frameworkFeatureMap =
+                AccessibilityShortcutController.getFrameworkShortcutFeaturesMap();
         synchronized(mLock) {
-            UserState userState = getUserStateLocked(mCurrentUserId);
-            ComponentName serviceName = userState.mServiceToEnableWithShortcut;
+            final UserState userState = getUserStateLocked(mCurrentUserId);
+            final ComponentName serviceName = userState.mServiceToEnableWithShortcut;
             if (serviceName == null) {
                 return;
+            }
+            if (frameworkFeatureMap.containsKey(serviceName)) {
+                // Toggle the requested framework feature
+                ToggleableFrameworkFeatureInfo featureInfo = frameworkFeatureMap.get(serviceName);
+                SettingStringHelper setting = new SettingStringHelper(mContext.getContentResolver(),
+                        featureInfo.getSettingKey(), mCurrentUserId);
+                // Assuming that the default state will be to have the feature off
+                if (!TextUtils.equals(featureInfo.getSettingOnValue(), setting.read())) {
+                    setting.write(featureInfo.getSettingOnValue());
+                } else {
+                    setting.write(featureInfo.getSettingOffValue());
+                }
             }
             final long identity = Binder.clearCallingIdentity();
             try {
@@ -2400,8 +2419,7 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
         private void announceNewUserIfNeeded() {
             synchronized (mLock) {
                 UserState userState = getCurrentUserStateLocked();
-                if (userState.isHandlingAccessibilityEvents()
-                        && userState.isObservedEventType(AccessibilityEvent.TYPE_ANNOUNCEMENT)) {
+                if (userState.isHandlingAccessibilityEvents()) {
                     UserManager userManager = (UserManager) mContext.getSystemService(
                             Context.USER_SERVICE);
                     String message = mContext.getString(R.string.user_switched,
@@ -3158,21 +3176,13 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
             if (mWindowsForAccessibilityCallback == null) {
                 return;
             }
-            final int userId;
-            synchronized (mLock) {
-                userId = mCurrentUserId;
-                final UserState userState = getUserStateLocked(userId);
-                if (!userState.isObservedEventType(AccessibilityEvent.TYPE_WINDOWS_CHANGED)) {
-                    return;
-                }
-            }
             final long identity = Binder.clearCallingIdentity();
             try {
                 // Let the client know the windows changed.
                 AccessibilityEvent event = AccessibilityEvent.obtain(
                         AccessibilityEvent.TYPE_WINDOWS_CHANGED);
                 event.setEventTime(SystemClock.uptimeMillis());
-                sendAccessibilityEvent(event, userId);
+                sendAccessibilityEvent(event, mCurrentUserId);
             } finally {
                 Binder.restoreCallingIdentity(identity);
             }
@@ -3375,10 +3385,6 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
 
         public UserState(int userId) {
             mUserId = userId;
-        }
-
-        public boolean isObservedEventType(@AccessibilityEvent.EventType int type) {
-            return (mLastSentRelevantEventTypes & type) != 0;
         }
 
         public int getClientState() {
