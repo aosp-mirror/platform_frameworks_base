@@ -10,6 +10,7 @@ package android.test.mock {
     ctor public MockContentProvider(android.content.Context, java.lang.String, java.lang.String, android.content.pm.PathPermission[]);
     method public android.content.ContentProviderResult[] applyBatch(java.util.ArrayList<android.content.ContentProviderOperation>);
     method public int delete(android.net.Uri, java.lang.String, java.lang.String[]);
+    method public final android.content.IContentProvider getIContentProvider();
     method public java.lang.String getType(android.net.Uri);
     method public android.net.Uri insert(android.net.Uri, android.content.ContentValues);
     method public boolean onCreate();
@@ -41,8 +42,8 @@ package android.test.mock {
     method public int checkPermission(java.lang.String, int, int, android.os.IBinder);
     method public int checkSelfPermission(java.lang.String);
     method public int checkUriPermission(android.net.Uri, int, int, int);
-    method public int checkUriPermission(android.net.Uri, java.lang.String, java.lang.String, int, int, int);
     method public int checkUriPermission(android.net.Uri, int, int, int, android.os.IBinder);
+    method public int checkUriPermission(android.net.Uri, java.lang.String, java.lang.String, int, int, int);
     method public void clearWallpaper();
     method public android.content.Context createApplicationContext(android.content.pm.ApplicationInfo, int) throws android.content.pm.PackageManager.NameNotFoundException;
     method public android.content.Context createConfigurationContext(android.content.res.Configuration);

@@ -1585,8 +1585,10 @@ public final class TvInputManager {
      * @param info The TV input which will use the acquired Hardware.
      * @return Hardware on success, {@code null} otherwise.
      *
+     * @hide
      * @removed
      */
+    @SystemApi
     @RequiresPermission(android.Manifest.permission.TV_INPUT_HARDWARE)
     public Hardware acquireTvInputHardware(int deviceId, final HardwareCallback callback,
             TvInputInfo info) {
