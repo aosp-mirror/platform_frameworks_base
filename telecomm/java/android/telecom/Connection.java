@@ -401,8 +401,14 @@ public abstract class Connection extends Conferenceable {
     @TestApi
     public static final int PROPERTY_IS_RTT = 1 << 8;
 
+    /**
+     * Set by the framework to indicate that a connection is using assisted dialing.
+     * @hide
+     */
+    public static final int PROPERTY_ASSISTED_DIALING_USED = 1 << 9;
+
     //**********************************************************************************************
-    // Next PROPERTY value: 1<<9
+    // Next PROPERTY value: 1<<10
     //**********************************************************************************************
 
     /**
