@@ -1,10 +1,13 @@
 package android.os;
 
+import android.annotation.Nullable;
 import android.os.WorkSourceProto;
 import android.util.Log;
 import android.util.proto.ProtoOutputStream;
 
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Objects;
 
 /**
  * Describes the source of some work that may be done by someone else.
@@ -18,6 +21,8 @@ public class WorkSource implements Parcelable {
     int mNum;
     int[] mUids;
     String[] mNames;
+
+    private ArrayList<WorkChain> mChains;
 
     /**
      * Internal statics to avoid object allocations in some operations.
@@ -39,6 +44,7 @@ public class WorkSource implements Parcelable {
      */
     public WorkSource() {
         mNum = 0;
+        mChains = null;
     }
 
     /**
@@ -48,6 +54,7 @@ public class WorkSource implements Parcelable {
     public WorkSource(WorkSource orig) {
         if (orig == null) {
             mNum = 0;
+            mChains = null;
             return;
         }
         mNum = orig.mNum;
@@ -58,6 +65,16 @@ public class WorkSource implements Parcelable {
             mUids = null;
             mNames = null;
         }
+
+        if (orig.mChains != null) {
+            // Make a copy of all WorkChains that exist on |orig| since they are mutable.
+            mChains = new ArrayList<>(orig.mChains.size());
+            for (WorkChain chain : orig.mChains) {
+                mChains.add(new WorkChain(chain));
+            }
+        } else {
+            mChains = null;
+        }
     }
 
     /** @hide */
@@ -65,6 +82,7 @@ public class WorkSource implements Parcelable {
         mNum = 1;
         mUids = new int[] { uid, 0 };
         mNames = null;
+        mChains = null;
     }
 
     /** @hide */
@@ -75,12 +93,21 @@ public class WorkSource implements Parcelable {
         mNum = 1;
         mUids = new int[] { uid, 0 };
         mNames = new String[] { name, null };
+        mChains = null;
     }
 
     WorkSource(Parcel in) {
         mNum = in.readInt();
         mUids = in.createIntArray();
         mNames = in.createStringArray();
+
+        int numChains = in.readInt();
+        if (numChains > 0) {
+            mChains = new ArrayList<>(numChains);
+            in.readParcelableList(mChains, WorkChain.class.getClassLoader());
+        } else {
+            mChains = null;
+        }
     }
 
     /** @hide */
@@ -99,7 +126,8 @@ public class WorkSource implements Parcelable {
     }
 
     /**
-     * Clear names from this WorkSource.  Uids are left intact.
+     * Clear names from this WorkSource. Uids are left intact. WorkChains if any, are left
+     * intact.
      *
      * <p>Useful when combining with another WorkSource that doesn't have names.
      * @hide
@@ -127,11 +155,16 @@ public class WorkSource implements Parcelable {
      */
     public void clear() {
         mNum = 0;
+        if (mChains != null) {
+            mChains.clear();
+        }
     }
 
     @Override
     public boolean equals(Object o) {
-        return o instanceof WorkSource && !diff((WorkSource)o);
+        return o instanceof WorkSource
+            && !diff((WorkSource) o)
+            && Objects.equals(mChains, ((WorkSource) o).mChains);
     }
 
     @Override
@@ -145,6 +178,11 @@ public class WorkSource implements Parcelable {
                 result = ((result << 4) | (result >>> 28)) ^ mNames[i].hashCode();
             }
         }
+
+        if (mChains != null) {
+            result = ((result << 4) | (result >>> 28)) ^ mChains.hashCode();
+        }
+
         return result;
     }
 
@@ -153,6 +191,8 @@ public class WorkSource implements Parcelable {
      * @param other The WorkSource to compare against.
      * @return If there is a difference, true is returned.
      */
+    // TODO: This is a public API so it cannot be renamed. Because it is used in several places,
+    // we keep its semantics the same and ignore any differences in WorkChains (if any).
     public boolean diff(WorkSource other) {
         int N = mNum;
         if (N != other.mNum) {
@@ -175,12 +215,15 @@ public class WorkSource implements Parcelable {
 
     /**
      * Replace the current contents of this work source with the given
-     * work source.  If <var>other</var> is null, the current work source
+     * work source.  If {@code other} is null, the current work source
      * will be made empty.
      */
     public void set(WorkSource other) {
         if (other == null) {
             mNum = 0;
+            if (mChains != null) {
+                mChains.clear();
+            }
             return;
         }
         mNum = other.mNum;
@@ -203,6 +246,18 @@ public class WorkSource implements Parcelable {
             mUids = null;
             mNames = null;
         }
+
+        if (other.mChains != null) {
+            if (mChains != null) {
+                mChains.clear();
+            } else {
+                mChains = new ArrayList<>(other.mChains.size());
+            }
+
+            for (WorkChain chain : other.mChains) {
+                mChains.add(new WorkChain(chain));
+            }
+        }
     }
 
     /** @hide */
@@ -211,6 +266,7 @@ public class WorkSource implements Parcelable {
         if (mUids == null) mUids = new int[2];
         mUids[0] = uid;
         mNames = null;
+        mChains.clear();
     }
 
     /** @hide */
@@ -225,9 +281,21 @@ public class WorkSource implements Parcelable {
         }
         mUids[0] = uid;
         mNames[0] = name;
+        mChains.clear();
     }
 
-    /** @hide */
+    /**
+     * Legacy API, DO NOT USE: Only deals with flat UIDs and tags. No chains are transferred, and no
+     * differences in chains are returned. This will be removed once its callers have been
+     * rewritten.
+     *
+     * NOTE: This is currently only used in GnssLocationProvider.
+     *
+     * @hide
+     * @deprecated for internal use only. WorkSources are opaque and no external callers should need
+     *     to be aware of internal differences.
+     */
+    @Deprecated
     public WorkSource[] setReturningDiffs(WorkSource other) {
         synchronized (sTmpWorkSource) {
             sNewbWork = null;
@@ -251,11 +319,34 @@ public class WorkSource implements Parcelable {
      */
     public boolean add(WorkSource other) {
         synchronized (sTmpWorkSource) {
-            return updateLocked(other, false, false);
+            boolean uidAdded = updateLocked(other, false, false);
+
+            boolean chainAdded = false;
+            if (other.mChains != null) {
+                // NOTE: This is quite an expensive operation, especially if the number of chains
+                // is large. We could look into optimizing it if it proves problematic.
+                if (mChains == null) {
+                    mChains = new ArrayList<>(other.mChains.size());
+                }
+
+                for (WorkChain wc : other.mChains) {
+                    if (!mChains.contains(wc)) {
+                        mChains.add(new WorkChain(wc));
+                    }
+                }
+            }
+
+            return uidAdded || chainAdded;
         }
     }
 
-    /** @hide */
+    /**
+     * Legacy API: DO NOT USE. Only in use from unit tests.
+     *
+     * @hide
+     * @deprecated meant for unit testing use only. Will be removed in a future API revision.
+     */
+    @Deprecated
     public WorkSource addReturningNewbs(WorkSource other) {
         synchronized (sTmpWorkSource) {
             sNewbWork = null;
@@ -311,22 +402,14 @@ public class WorkSource implements Parcelable {
         return true;
     }
 
-    /** @hide */
-    public WorkSource addReturningNewbs(int uid) {
-        synchronized (sTmpWorkSource) {
-            sNewbWork = null;
-            sTmpWorkSource.mUids[0] = uid;
-            updateLocked(sTmpWorkSource, false, true);
-            return sNewbWork;
-        }
-    }
-
     public boolean remove(WorkSource other) {
         if (mNum <= 0 || other.mNum <= 0) {
             return false;
         }
+
+        boolean uidRemoved = false;
         if (mNames == null && other.mNames == null) {
-            return removeUids(other);
+            uidRemoved = removeUids(other);
         } else {
             if (mNames == null) {
                 throw new IllegalArgumentException("Other " + other + " has names, but target "
@@ -336,8 +419,44 @@ public class WorkSource implements Parcelable {
                 throw new IllegalArgumentException("Target " + this + " has names, but other "
                         + other + " does not");
             }
-            return removeUidsAndNames(other);
+            uidRemoved = removeUidsAndNames(other);
         }
+
+        boolean chainRemoved = false;
+        if (other.mChains != null) {
+            if (mChains != null) {
+                chainRemoved = mChains.removeAll(other.mChains);
+            }
+        } else if (mChains != null) {
+            mChains.clear();
+            chainRemoved = true;
+        }
+
+        return uidRemoved || chainRemoved;
+    }
+
+    /**
+     * Create a new {@code WorkChain} associated with this WorkSource and return it.
+     *
+     * @hide
+     */
+    public WorkChain createWorkChain() {
+        if (mChains == null) {
+            mChains = new ArrayList<>(4);
+        }
+
+        final WorkChain wc = new WorkChain();
+        mChains.add(wc);
+
+        return wc;
+    }
+
+    /**
+     * @return the list of {@code WorkChains} associated with this {@code WorkSource}.
+     * @hide
+     */
+    public ArrayList<WorkChain> getWorkChains() {
+        return mChains;
     }
 
     private boolean removeUids(WorkSource other) {
@@ -648,6 +767,167 @@ public class WorkSource implements Parcelable {
         }
     }
 
+    /**
+     * Represents an attribution chain for an item of work being performed. An attribution chain is
+     * an indexed list of {code (uid, tag)} nodes. The node at {@code index == 0} is the initiator
+     * of the work, and the node at the highest index performs the work. Nodes at other indices
+     * are intermediaries that facilitate the work. Examples :
+     *
+     * (1) Work being performed by uid=2456 (no chaining):
+     * <pre>
+     * WorkChain {
+     *   mUids = { 2456 }
+     *   mTags = { null }
+     *   mSize = 1;
+     * }
+     * </pre>
+     *
+     * (2) Work being performed by uid=2456 (from component "c1") on behalf of uid=5678:
+     *
+     * <pre>
+     * WorkChain {
+     *   mUids = { 5678, 2456 }
+     *   mTags = { null, "c1" }
+     *   mSize = 1
+     * }
+     * </pre>
+     *
+     * Attribution chains are mutable, though the only operation that can be performed on them
+     * is the addition of a new node at the end of the attribution chain to represent
+     *
+     * @hide
+     */
+    public static class WorkChain implements Parcelable {
+        private int mSize;
+        private int[] mUids;
+        private String[] mTags;
+
+        // @VisibleForTesting
+        public WorkChain() {
+            mSize = 0;
+            mUids = new int[4];
+            mTags = new String[4];
+        }
+
+        // @VisibleForTesting
+        public WorkChain(WorkChain other) {
+            mSize = other.mSize;
+            mUids = other.mUids.clone();
+            mTags = other.mTags.clone();
+        }
+
+        private WorkChain(Parcel in) {
+            mSize = in.readInt();
+            mUids = in.createIntArray();
+            mTags = in.createStringArray();
+        }
+
+        /**
+         * Append a node whose uid is {@code uid} and whose optional tag is {@code tag} to this
+         * {@code WorkChain}.
+         */
+        public WorkChain addNode(int uid, @Nullable String tag) {
+            if (mSize == mUids.length) {
+                resizeArrays();
+            }
+
+            mUids[mSize] = uid;
+            mTags[mSize] = tag;
+            mSize++;
+
+            return this;
+        }
+
+        // TODO: The following three trivial getters are purely for testing and will be removed
+        // once we have higher level logic in place, e.g for serializing this WorkChain to a proto,
+        // diffing it etc.
+        //
+        // @VisibleForTesting
+        public int[] getUids() {
+            return mUids;
+        }
+        // @VisibleForTesting
+        public String[] getTags() {
+            return mTags;
+        }
+        // @VisibleForTesting
+        public int getSize() {
+            return mSize;
+        }
+
+        private void resizeArrays() {
+            final int newSize = mSize * 2;
+            int[] uids = new int[newSize];
+            String[] tags = new String[newSize];
+
+            System.arraycopy(mUids, 0, uids, 0, mSize);
+            System.arraycopy(mTags, 0, tags, 0, mSize);
+
+            mUids = uids;
+            mTags = tags;
+        }
+
+        @Override
+        public String toString() {
+            StringBuilder result = new StringBuilder("WorkChain{");
+            for (int i = 0; i < mSize; ++i) {
+                if (i != 0) {
+                    result.append(", ");
+                }
+                result.append("(");
+                result.append(mUids[i]);
+                if (mTags[i] != null) {
+                    result.append(", ");
+                    result.append(mTags[i]);
+                }
+                result.append(")");
+            }
+
+            result.append("}");
+            return result.toString();
+        }
+
+        @Override
+        public int hashCode() {
+            return (mSize + 31 * Arrays.hashCode(mUids)) * 31 + Arrays.hashCode(mTags);
+        }
+
+        @Override
+        public boolean equals(Object o) {
+            if (o instanceof WorkChain) {
+                WorkChain other = (WorkChain) o;
+
+                return mSize == other.mSize
+                    && Arrays.equals(mUids, other.mUids)
+                    && Arrays.equals(mTags, other.mTags);
+            }
+
+            return false;
+        }
+
+        @Override
+        public int describeContents() {
+            return 0;
+        }
+
+        @Override
+        public void writeToParcel(Parcel dest, int flags) {
+            dest.writeInt(mSize);
+            dest.writeIntArray(mUids);
+            dest.writeStringArray(mTags);
+        }
+
+        public static final Parcelable.Creator<WorkChain> CREATOR =
+                new Parcelable.Creator<WorkChain>() {
+                    public WorkChain createFromParcel(Parcel in) {
+                        return new WorkChain(in);
+                    }
+                    public WorkChain[] newArray(int size) {
+                        return new WorkChain[size];
+                    }
+                };
+    }
+
     @Override
     public int describeContents() {
         return 0;
@@ -658,6 +938,13 @@ public class WorkSource implements Parcelable {
         dest.writeInt(mNum);
         dest.writeIntArray(mUids);
         dest.writeStringArray(mNames);
+
+        if (mChains == null) {
+            dest.writeInt(-1);
+        } else {
+            dest.writeInt(mChains.size());
+            dest.writeParcelableList(mChains, flags);
+        }
     }
 
     @Override
@@ -674,6 +961,17 @@ public class WorkSource implements Parcelable {
                 result.append(mNames[i]);
             }
         }
+
+        if (mChains != null) {
+            result.append(" chains=");
+            for (int i = 0; i < mChains.size(); ++i) {
+                if (i != 0) {
+                    result.append(", ");
+                }
+                result.append(mChains.get(i));
+            }
+        }
+
         result.append("}");
         return result.toString();
     }
