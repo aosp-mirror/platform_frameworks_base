@@ -49,14 +49,16 @@ import java.util.List;
 public final class FillResponse implements Parcelable {
 
     /**
-     * Must be set in the last response to generate
-     * {@link FillEventHistory.Event#TYPE_CONTEXT_COMMITTED} events.
+     * Flag used to generate {@link FillEventHistory.Event events} of type
+     * {@link FillEventHistory.Event#TYPE_CONTEXT_COMMITTED}&mdash;if this flag is not passed to
+     * {@link Builder#setFlags(int)}, these events are not generated.
      */
     public static final int FLAG_TRACK_CONTEXT_COMMITED = 0x1;
 
     /**
-     * Used in conjunction to {@link FillResponse.Builder#disableAutofill(long)} to disable autofill
-     * only for the activiy associated with the {@link FillResponse}, instead of the whole app.
+     * Flag used to change the behavior of {@link FillResponse.Builder#disableAutofill(long)}&mdash;
+     * when this flag is passed to {@link Builder#setFlags(int)}, autofill is disabled only for the
+     * activiy that generated the {@link FillRequest}, not the whole app.
      */
     public static final int FLAG_DISABLE_ACTIVITY_ONLY = 0x2;
 
@@ -329,18 +331,15 @@ public final class FillResponse implements Parcelable {
         }
 
         /**
-         * Sets a {@link Bundle state} that will be passed to subsequent APIs that
-         * manipulate this response. For example, they are passed to subsequent
-         * calls to {@link AutofillService#onFillRequest(FillRequest, android.os.CancellationSignal,
-         * FillCallback)} and {@link AutofillService#onSaveRequest(SaveRequest, SaveCallback)}.
-         * You can use this to store intermediate state that is persistent across multiple
-         * fill requests and the subsequent save request.
+         * Sets a bundle with state that is passed to subsequent APIs that manipulate this response.
+         *
+         * <p>You can use this bundle to store intermediate state that is passed to subsequent calls
+         * to {@link AutofillService#onFillRequest(FillRequest, android.os.CancellationSignal,
+         * FillCallback)} and {@link AutofillService#onSaveRequest(SaveRequest, SaveCallback)}, and
+         * you can also retrieve it by calling {@link FillEventHistory.Event#getClientState()}.
          *
          * <p>If this method is called on multiple {@link FillResponse} objects for the same
          * screen, just the latest bundle is passed back to the service.
-         *
-         * <p>Once a {@link AutofillService#onSaveRequest(SaveRequest, SaveCallback)
-         * save request} is made the client state is cleared.
          *
          * @param clientState The custom client state.
          * @return This builder.
