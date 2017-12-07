@@ -1,0 +1,9 @@
+package android.test.mock {
+
+  public class MockContext extends android.content.Context {
+    method public android.content.SharedPreferences getSharedPreferences(java.io.File, int);
+    method public java.io.File getSharedPreferencesPath(java.lang.String);
+  }
+
+}
+
