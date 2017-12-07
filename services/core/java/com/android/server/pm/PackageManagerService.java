@@ -17,6 +17,7 @@
 package com.android.server.pm;
 
 import static android.Manifest.permission.DELETE_PACKAGES;
+import static android.Manifest.permission.SET_HARMFUL_APP_WARNINGS;
 import static android.Manifest.permission.INSTALL_PACKAGES;
 import static android.Manifest.permission.MANAGE_PROFILE_AND_DEVICE_OWNERS;
 import static android.Manifest.permission.READ_EXTERNAL_STORAGE;
@@ -167,7 +168,6 @@ import android.content.pm.PackageList;
 import android.content.pm.PackageManager;
 import android.content.pm.PackageManagerInternal;
 import android.content.pm.PackageManager.LegacyPackageDeleteObserver;
-import android.content.pm.PackageManager.PackageInfoFlags;
 import android.content.pm.PackageManagerInternal.PackageListObserver;
 import android.content.pm.PackageParser;
 import android.content.pm.PackageParser.ActivityIntentInfo;
@@ -18267,7 +18267,8 @@ public class PackageManagerService extends IPackageManager.Stub
                     null /*enabledComponents*/,
                     null /*disabledComponents*/,
                     ps.readUserState(nextUserId).domainVerificationStatus,
-                    0, PackageManager.INSTALL_REASON_UNKNOWN);
+                    0, PackageManager.INSTALL_REASON_UNKNOWN,
+                    null /*harmfulAppWarning*/);
         }
         mSettings.writeKernelMappingLPr(ps);
     }
@@ -23578,6 +23579,47 @@ Slog.v(TAG, ":: stepped forward, applying functor at tag " + parser.getName());
             }
         }
         return unusedPackages;
+    }
+
+    @Override
+    public void setHarmfulAppWarning(@NonNull String packageName, @Nullable CharSequence warning,
+            int userId) {
+        final int callingUid = Binder.getCallingUid();
+        final int callingAppId = UserHandle.getAppId(callingUid);
+
+        mPermissionManager.enforceCrossUserPermission(callingUid, userId,
+                true /*requireFullPermission*/, true /*checkShell*/, "setHarmfulAppInfo");
+
+        if (callingAppId != Process.SYSTEM_UID && callingAppId != Process.ROOT_UID &&
+                checkUidPermission(SET_HARMFUL_APP_WARNINGS, callingUid) != PERMISSION_GRANTED) {
+            throw new SecurityException("Caller must have the "
+                    + SET_HARMFUL_APP_WARNINGS + " permission.");
+        }
+
+        synchronized(mPackages) {
+            mSettings.setHarmfulAppWarningLPw(packageName, warning, userId);
+            scheduleWritePackageRestrictionsLocked(userId);
+        }
+    }
+
+    @Nullable
+    @Override
+    public CharSequence getHarmfulAppWarning(@NonNull String packageName, int userId) {
+        final int callingUid = Binder.getCallingUid();
+        final int callingAppId = UserHandle.getAppId(callingUid);
+
+        mPermissionManager.enforceCrossUserPermission(callingUid, userId,
+                true /*requireFullPermission*/, true /*checkShell*/, "getHarmfulAppInfo");
+
+        if (callingAppId != Process.SYSTEM_UID && callingAppId != Process.ROOT_UID &&
+                checkUidPermission(SET_HARMFUL_APP_WARNINGS, callingUid) != PERMISSION_GRANTED) {
+            throw new SecurityException("Caller must have the "
+                    + SET_HARMFUL_APP_WARNINGS + " permission.");
+        }
+
+        synchronized(mPackages) {
+            return mSettings.getHarmfulAppWarningLPr(packageName, userId);
+        }
     }
 }
 

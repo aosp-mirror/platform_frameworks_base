@@ -1174,4 +1174,20 @@ public class MockPackageManager extends PackageManager {
     public ArtManager getArtManager() {
         throw new UnsupportedOperationException();
     }
+
+    /**
+     * @hide
+     */
+    @Override
+    public void setHarmfulAppWarning(String packageName, CharSequence warning) {
+        throw new UnsupportedOperationException();
+    }
+
+    /**
+     * @hide
+     */
+    @Override
+    public CharSequence getHarmfulAppWarning(String packageName) {
+        throw new UnsupportedOperationException();
+    }
 }

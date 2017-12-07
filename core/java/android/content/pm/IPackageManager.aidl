@@ -652,4 +652,8 @@ interface IPackageManager {
     String getInstantAppAndroidId(String packageName, int userId);
 
     IArtManager getArtManager();
+
+    void setHarmfulAppWarning(String packageName, CharSequence warning, int userId);
+
+    CharSequence getHarmfulAppWarning(String packageName, int userId);
 }

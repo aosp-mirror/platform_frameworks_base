@@ -153,6 +153,7 @@ package android {
     field public static final java.lang.String SET_ALWAYS_FINISH = "android.permission.SET_ALWAYS_FINISH";
     field public static final java.lang.String SET_ANIMATION_SCALE = "android.permission.SET_ANIMATION_SCALE";
     field public static final java.lang.String SET_DEBUG_APP = "android.permission.SET_DEBUG_APP";
+    field public static final java.lang.String SET_HARMFUL_APP_WARNINGS = "android.permission.SET_HARMFUL_APP_WARNINGS";
     field public static final java.lang.String SET_MEDIA_KEY_LISTENER = "android.permission.SET_MEDIA_KEY_LISTENER";
     field public static final java.lang.String SET_ORIENTATION = "android.permission.SET_ORIENTATION";
     field public static final java.lang.String SET_POINTER_SPEED = "android.permission.SET_POINTER_SPEED";
@@ -896,6 +897,7 @@ package android.content.pm {
     method public abstract java.util.List<android.content.IntentFilter> getAllIntentFilters(java.lang.String);
     method public android.content.pm.dex.ArtManager getArtManager();
     method public abstract java.lang.String getDefaultBrowserPackageNameAsUser(int);
+    method public java.lang.CharSequence getHarmfulAppWarning(java.lang.String);
     method public abstract java.util.List<android.content.pm.PackageInfo> getInstalledPackagesAsUser(int, int);
     method public abstract android.graphics.drawable.Drawable getInstantAppIcon(java.lang.String);
     method public abstract android.content.ComponentName getInstantAppInstallerComponent();
@@ -912,6 +914,7 @@ package android.content.pm {
     method public abstract void removeOnPermissionsChangeListener(android.content.pm.PackageManager.OnPermissionsChangedListener);
     method public abstract void revokeRuntimePermission(java.lang.String, java.lang.String, android.os.UserHandle);
     method public abstract boolean setDefaultBrowserPackageNameAsUser(java.lang.String, int);
+    method public void setHarmfulAppWarning(java.lang.String, java.lang.CharSequence);
     method public abstract void setUpdateAvailable(java.lang.String, boolean);
     method public abstract boolean updateIntentVerificationStatusAsUser(java.lang.String, int, int);
     method public abstract void updatePermissionFlags(java.lang.String, java.lang.String, int, int, android.os.UserHandle);

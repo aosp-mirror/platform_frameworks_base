@@ -52,6 +52,7 @@ public class PackageUserState {
     public int appLinkGeneration;
     public int categoryHint = ApplicationInfo.CATEGORY_UNDEFINED;
     public int installReason;
+    public String harmfulAppWarning;
 
     public ArraySet<String> disabledComponents;
     public ArraySet<String> enabledComponents;
@@ -87,6 +88,7 @@ public class PackageUserState {
         enabledComponents = ArrayUtils.cloneOrNull(o.enabledComponents);
         overlayPaths =
             o.overlayPaths == null ? null : Arrays.copyOf(o.overlayPaths, o.overlayPaths.length);
+        harmfulAppWarning = o.harmfulAppWarning;
     }
 
     /**
@@ -246,6 +248,11 @@ public class PackageUserState {
                     return false;
                 }
             }
+        }
+        if (harmfulAppWarning == null && oldState.harmfulAppWarning != null
+                || (harmfulAppWarning != null
+                        && !harmfulAppWarning.equals(oldState.harmfulAppWarning))) {
+            return false;
         }
         return true;
     }
