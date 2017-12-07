@@ -439,6 +439,19 @@ import com.android.internal.os.SomeArgs;
  *
  *  save(username, password);
  *
+ * <a name="Privacy"></a>
+ * <h3>Privacy</h3>
+ *
+ * <p>The {@link #onFillRequest(FillRequest, CancellationSignal, FillCallback)} method is called
+ * without the user content. The Android system strips some properties of the
+ * {@link android.app.assist.AssistStructure.ViewNode view nodes} passed to this call, but not all
+ * of them. For example, the data provided in the {@link android.view.ViewStructure.HtmlInfo}
+ * objects set by {@link android.webkit.WebView} is never stripped out.
+ *
+ * <p>Because this data could contain PII (Personally Identifiable Information, such as username or
+ * email address), the service should only use it locally (i.e., in the app's process) for
+ * heuristics purposes, but it should not be sent to external servers.
+ *
  * </pre>
  */
 public abstract class AutofillService extends Service {
