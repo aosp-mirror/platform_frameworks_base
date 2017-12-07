@@ -16,8 +16,6 @@
 
 package com.android.systemui.statusbar.phone;
 
-import static com.android.systemui.statusbar.notification.NotificationUtils.isHapticFeedbackDisabled;
-
 import android.content.Context;
 import android.content.res.Configuration;
 import android.graphics.Canvas;
@@ -120,8 +118,6 @@ public class NotificationIconContainer extends AlphaOptimizedFrameLayout {
     private float mVisualOverflowAdaption;
     private boolean mDisallowNextAnimation;
     private boolean mAnimationsEnabled = true;
-    private boolean mVibrateOnAnimation;
-    private Vibrator mVibrator;
     private ArrayMap<String, ArrayList<StatusBarIcon>> mReplacingIcons;
     private int mDarkOffsetX;
 
@@ -129,7 +125,6 @@ public class NotificationIconContainer extends AlphaOptimizedFrameLayout {
         super(context, attrs);
         initDimens();
         setWillNotDraw(!DEBUG);
-        mVibrator = mContext.getSystemService(Vibrator.class);
     }
 
     private void initDimens() {
@@ -497,10 +492,6 @@ public class NotificationIconContainer extends AlphaOptimizedFrameLayout {
         return width - (getWidth() - getActualPaddingStart() - getActualPaddingEnd()) > 0;
     }
 
-    public void setVibrateOnAnimation(boolean vibrateOnAnimation) {
-        mVibrateOnAnimation = vibrateOnAnimation;
-    }
-
     public int getIconSize() {
         return mIconSize;
     }
@@ -608,37 +599,12 @@ public class NotificationIconContainer extends AlphaOptimizedFrameLayout {
                 } else {
                     super.applyToView(view);
                 }
-                boolean wasInShelf = icon.isInShelf();
                 boolean inShelf = iconAppearAmount == 1.0f;
                 icon.setIsInShelf(inShelf);
-                if (shouldVibrateChange(wasInShelf != inShelf)) {
-                    AsyncTask.execute(
-                            () -> mVibrator.vibrate(VibrationEffect.get(
-                                    VibrationEffect.EFFECT_TICK)));
-                }
             }
             justAdded = false;
             justReplaced = false;
             needsCannedAnimation = false;
-        }
-
-        private boolean shouldVibrateChange(boolean inShelfChanged) {
-            if (!mVibrateOnAnimation) {
-                return false;
-            }
-            if (justAdded) {
-                return false;
-            }
-            if (!mAnimationsEnabled) {
-                return false;
-            }
-            if (!inShelfChanged) {
-                return false;
-            }
-            if (isHapticFeedbackDisabled(mContext)) {
-                return false;
-            }
-            return true;
         }
 
         public boolean hasCustomTransformHeight() {
