@@ -128,11 +128,8 @@ public final class FillRequest implements Parcelable {
 
     /**
      * Gets the extra client state returned from the last {@link
-     * AutofillService#onFillRequest(FillRequest, android.os.CancellationSignal, FillCallback)
-     * fill request}, so the service can use it for state management.
-     *
-     * <p>Once a {@link AutofillService#onSaveRequest(SaveRequest, SaveCallback)
-     * save request} is made, the client state is cleared.
+     * AutofillService#onFillRequest(FillRequest, CancellationSignal, FillCallback)}
+     * fill request}.
      *
      * @return The client state.
      */
