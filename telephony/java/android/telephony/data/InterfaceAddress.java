@@ -78,6 +78,23 @@ public final class InterfaceAddress implements Parcelable {
      */
     public int getNetworkPrefixLength() { return mPrefixLength; }
 
+    @Override
+    public boolean equals (Object o) {
+        if (this == o) return true;
+
+        if (o == null || !(o instanceof InterfaceAddress)) {
+            return false;
+        }
+
+        InterfaceAddress other = (InterfaceAddress) o;
+        return this.mInetAddress.equals(other.mInetAddress)
+                && this.mPrefixLength == other.mPrefixLength;
+    }
+
+    @Override
+    public int hashCode() {
+        return mInetAddress.hashCode() * 31 + mPrefixLength * 37;
+    }
 
     @Override
     public int describeContents() {

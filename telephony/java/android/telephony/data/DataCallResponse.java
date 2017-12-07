@@ -116,7 +116,6 @@ public final class DataCallResponse implements Parcelable {
      */
     public int getSuggestedRetryTime() { return mSuggestedRetryTime; }
 
-
     /**
      * @return The unique id of the data connection.
      */
@@ -183,13 +182,54 @@ public final class DataCallResponse implements Parcelable {
            .append(" active=").append(mActive)
            .append(" type=").append(mType)
            .append(" ifname=").append(mIfname)
-           .append(" mtu=").append(mMtu)
            .append(" addresses=").append(mAddresses)
            .append(" dnses=").append(mDnses)
            .append(" gateways=").append(mGateways)
            .append(" pcscf=").append(mPcscfs)
+           .append(" mtu=").append(mMtu)
            .append("}");
         return sb.toString();
+    }
+
+    @Override
+    public boolean equals (Object o) {
+        if (this == o) return true;
+
+        if (o == null || !(o instanceof DataCallResponse)) {
+            return false;
+        }
+
+        DataCallResponse other = (DataCallResponse) o;
+        return this.mStatus == other.mStatus
+                && this.mSuggestedRetryTime == other.mSuggestedRetryTime
+                && this.mCid == other.mCid
+                && this.mActive == other.mActive
+                && this.mType.equals(other.mType)
+                && this.mIfname.equals(other.mIfname)
+                && mAddresses.size() == other.mAddresses.size()
+                && mAddresses.containsAll(other.mAddresses)
+                && mDnses.size() == other.mDnses.size()
+                && mDnses.containsAll(other.mDnses)
+                && mGateways.size() == other.mGateways.size()
+                && mGateways.containsAll(other.mGateways)
+                && mPcscfs.size() == other.mPcscfs.size()
+                && mPcscfs.containsAll(other.mPcscfs)
+                && mMtu == other.mMtu;
+    }
+
+    @Override
+    public int hashCode() {
+        return mStatus * 31
+                + mSuggestedRetryTime * 37
+                + mCid * 41
+                + mActive * 43
+                + mType.hashCode() * 47
+                + mIfname.hashCode() * 53
+                + mAddresses.hashCode() * 59
+                + mDnses.hashCode() * 61
+                + mGateways.hashCode() * 67
+                + mPcscfs.hashCode() * 71
+                + mMtu * 73;
     }
 
     @Override
