@@ -34,14 +34,14 @@
     <string name="status_bar_latest_events_title" msgid="6594767438577593172">"বিজ্ঞপ্তিগুলি"</string>
     <string name="battery_low_title" msgid="6456385927409742437">"ব্যাটারি কম"</string>
     <string name="battery_low_percent_format" msgid="2900940511201380775">"<xliff:g id="PERCENTAGE">%s</xliff:g> অবশিষ্ট আছে"</string>
-    <string name="battery_low_percent_format_saver_started" msgid="6859235584035338833">"<xliff:g id="PERCENTAGE">%s</xliff:g> অবশিষ্ট আছে৷ ব্যাটারি সাশ্রয়কারী চালু আছে৷"</string>
+    <string name="battery_low_percent_format_saver_started" msgid="7879389868952879166">"<xliff:g id="PERCENTAGE">%s</xliff:g> অবশিষ্ট আছে। ব্যাটারি সেভার চালু আছে।"</string>
     <string name="invalid_charger" msgid="4549105996740522523">"USB চার্জিং সমর্থিত নয়৷\nকেবলমাত্র সরবহারকৃত চার্জার ব্যবহার করুন৷"</string>
     <string name="invalid_charger_title" msgid="3515740382572798460">"USB চার্জিং সমর্থিত নয়।"</string>
     <string name="invalid_charger_text" msgid="5474997287953892710">"শুধুমাত্র সরবরাহকৃত চার্জার ব্যবহার করুন।"</string>
     <string name="battery_low_why" msgid="4553600287639198111">"সেটিংস"</string>
-    <string name="battery_saver_confirmation_title" msgid="5299585433050361634">"ব্যাটারি সঞ্চয়কারী চালু করবেন?"</string>
+    <string name="battery_saver_confirmation_title" msgid="2052100465684817154">"ব্যাটারি সেভার চালু করবেন?"</string>
     <string name="battery_saver_confirmation_ok" msgid="7507968430447930257">"চালু করুন"</string>
-    <string name="battery_saver_start_action" msgid="5576697451677486320">"ব্যাটারি সঞ্চয়কারী চালু"</string>
+    <string name="battery_saver_start_action" msgid="8187820911065797519">"ব্যাটারি সেভার চালু করুন"</string>
     <string name="status_bar_settings_settings_button" msgid="3023889916699270224">"সেটিংস"</string>
     <string name="status_bar_settings_wifi_button" msgid="1733928151698311923">"ওয়াই-ফাই"</string>
     <string name="status_bar_settings_auto_rotation" msgid="3790482541357798421">"স্বতঃ-ঘূর্ণায়মান স্ক্রিন"</string>
@@ -243,8 +243,6 @@
     <string name="data_usage_disabled_dialog_title" msgid="3932437232199671967">"ডেট বিরতি দেওয়া হয়েছে"</string>
     <string name="data_usage_disabled_dialog" msgid="4919541636934603816">"আপনার সেট করা ডেটার সীমা ফুরিয়ে গেছে। আপনি এখন আর মোবাইল ডেটা ব্যবহার করতে পারবেন না।\n\nযদি আপনি আবার শুরু করেন, ডেটা ব্যবহারের জন্য মূল্য প্রযোজ্য হতে পারে।"</string>
     <string name="data_usage_disabled_dialog_enable" msgid="1412395410306390593">"পুনঃসূচনা করুন"</string>
-    <string name="status_bar_settings_signal_meter_disconnected" msgid="1940231521274147771">"কোনো ইন্টারনেট সংযোগ নেই"</string>
-    <string name="status_bar_settings_signal_meter_wifi_nossid" msgid="6557486452774597820">"ওয়াই-ফাই সংযুক্ত হয়েছে"</string>
     <string name="gps_notification_searching_text" msgid="8574247005642736060">"GPS এর জন্য অনুসন্ধান করা হচ্ছে"</string>
     <string name="gps_notification_found_text" msgid="4619274244146446464">"GPS এর দ্বারা সেট করা অবস্থান"</string>
     <string name="accessibility_location_active" msgid="2427290146138169014">"অবস্থান অনুরোধ সক্রিয় রয়েছে"</string>
@@ -401,9 +399,9 @@
     <string name="user_remove_user_title" msgid="4681256956076895559">"ব্যবহারকারী সরাবেন?"</string>
     <string name="user_remove_user_message" msgid="1453218013959498039">"এই ব্যবহারকারীর সমস্ত অ্যাপ্লিকেশান ও ডেটা মুছে ফেলা হবে।"</string>
     <string name="user_remove_user_remove" msgid="7479275741742178297">"সরান"</string>
-    <string name="battery_saver_notification_title" msgid="237918726750955859">"ব্যাটারি সেভার চালু রয়েছে"</string>
+    <string name="battery_saver_notification_title" msgid="8614079794522291840">"ব্যাটারি সেভার চালু আছে"</string>
     <string name="battery_saver_notification_text" msgid="820318788126672692">"কার্য-সম্পাদনা ও পশ্চাদপট ডেটাকে কমিয়ে দেয়"</string>
-    <string name="battery_saver_notification_action_text" msgid="109158658238110382">"ব্যাটারি সঞ্চয়কারী বন্ধ করুন"</string>
+    <string name="battery_saver_notification_action_text" msgid="132118784269455533">"ব্যাটারি সেভার বন্ধ করুন"</string>
     <string name="media_projection_dialog_text" msgid="3071431025448218928">"<xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g> আপনার স্ক্রীনে দেখানো সব কিছু ক্যাপচার করা শুরু করবে।"</string>
     <string name="media_projection_remember_text" msgid="3103510882172746752">"আর দেখাবেন না"</string>
     <string name="clear_all_notifications_text" msgid="814192889771462828">"সবকিছু সাফ করুন"</string>
@@ -582,8 +580,8 @@
       <item quantity="other">%d মিনিট</item>
     </plurals>
     <string name="battery_panel_title" msgid="7944156115535366613">"ব্যাটারির ব্যবহার"</string>
-    <string name="battery_detail_charging_summary" msgid="4055327085770378335">"চার্জ করার সময় ব্যাটারি সেভার কাজ করে না"</string>
-    <string name="battery_detail_switch_title" msgid="8763441006881907058">"ব্যাটারি সেভার"</string>
+    <string name="battery_detail_charging_summary" msgid="1279095653533044008">"চার্জ করার সময় ব্যাটারি সেভার উপলব্ধ নয়"</string>
+    <string name="battery_detail_switch_title" msgid="6285872470260795421">"ব্যাটারি সেভার"</string>
     <string name="battery_detail_switch_summary" msgid="9049111149407626804">"কার্য-সম্পাদনা ও পশ্চাদপট ডেটাকে কমিয়ে দেয়"</string>
     <string name="keyboard_key_button_template" msgid="6230056639734377300">"<xliff:g id="NAME">%1$s</xliff:g> বোতাম"</string>
     <string name="keyboard_key_home" msgid="2243500072071305073">"হোম"</string>
@@ -732,10 +730,10 @@
     <string name="pip_skip_to_prev" msgid="1955311326688637914">"পিছনে যাওয়ার জন্য এড়িয়ে যান"</string>
     <string name="thermal_shutdown_title" msgid="4458304833443861111">"আপনার ফোন গরম হওয়ার জন্য বন্ধ হয়ে গেছে"</string>
     <string name="thermal_shutdown_message" msgid="9006456746902370523">"আপনার ফোন এখন ঠিক-ঠাক চলছে"</string>
-    <string name="thermal_shutdown_dialog_message" msgid="566347880005304139">"আপনার ফোন খুব বেশি গরম হয়েছিল বলে ঠান্ডা হওয়ার জন্য বন্ধ হয়ে গেছে। আপনার ফোন ঠিক-ঠাক ভাবে চলছে না।\n\nআপনার ফোন খুব বেশি গরম হয়ে যাবে যদি আপনি:\n	•এমন অ্যাপ ব্যবহার করলে যেটি আপনার ডিভাইসের রিসোর্স বেশি ব্যবহার করে (যেমন গেমিং, ভিডিও বা নেভিগেশন অ্যাপ)\n	• বড় ফাইল ডাউনলোড বা আপলোড করলে\n	• বেশি তাপমাত্রায় আপনার ফোন ব্যবহার করলে"</string>
+    <string name="thermal_shutdown_dialog_message" msgid="566347880005304139">"আপনার ফোন খুব বেশি গরম হয়েছিল বলে ঠাণ্ডা হওয়ার জন্য বন্ধ হয়ে গেছে। আপনার ফোন ঠিক-ঠাক ভাবে চলছে না।\n\nআপনার ফোন খুব বেশি গরম হয়ে যাবে যদি আপনি:\n	•এমন অ্যাপ ব্যবহার করলে যেটি আপনার ডিভাইসের রিসোর্স বেশি ব্যবহার করে (যেমন গেমিং, ভিডিও বা নেভিগেশন অ্যাপ)\n	• বড় ফাইল ডাউনলোড বা আপলোড করলে\n	• বেশি তাপমাত্রায় আপনার ফোন ব্যবহার করলে"</string>
     <string name="high_temp_title" msgid="4589508026407318374">"ফোনটি গরম হচ্ছে"</string>
-    <string name="high_temp_notif_message" msgid="5642466103153429279">"ফোনটি ঠান্ডা হওয়ার সময় কিছু বৈশিষ্ট্য সীমিত হতে পারে"</string>
-    <string name="high_temp_dialog_message" msgid="6840700639374113553">"আপনার ফোনটি নিজে থেকেই ঠান্ডা হওয়ার চেষ্টা করবে৷ আপনি তবুও আপনার ফোন ব্যবহার করতে পারেন, কিন্তু এটি একটু ধীরে চলতে পারে৷\n\nআপনার ফোনটি পুরোপুরি ঠান্ডা হয়ে গেলে এটি স্বাভাবিকভাবে চলবে৷"</string>
+    <string name="high_temp_notif_message" msgid="5642466103153429279">"ফোনটি ঠাণ্ডা হওয়ার সময় কিছু বৈশিষ্ট্য সীমিত হতে পারে"</string>
+    <string name="high_temp_dialog_message" msgid="6840700639374113553">"আপনার ফোনটি নিজে থেকেই ঠাণ্ডা হওয়ার চেষ্টা করবে৷ আপনি তবুও আপনার ফোন ব্যবহার করতে পারেন, কিন্তু এটি একটু ধীরে চলতে পারে৷\n\nআপনার ফোনটি পুরোপুরি ঠাণ্ডা হয়ে গেলে এটি স্বাভাবিকভাবে চলবে৷"</string>
     <string name="lockscreen_shortcut_left" msgid="2182769107618938629">"বাঁদিকের শর্টকাট"</string>
     <string name="lockscreen_shortcut_right" msgid="3328683699505226536">"ডানদিকের শর্টকাট"</string>
     <string name="lockscreen_unlock_left" msgid="2043092136246951985">"বাঁদিকের শর্টকাট দিয়েও আনলক করা যায়"</string>
@@ -758,7 +756,8 @@
     <string name="instant_apps" msgid="6647570248119804907">"ঝটপট অ্যাপ"</string>
     <string name="instant_apps_message" msgid="8116608994995104836">"ঝটপট অ্যাপ ইনস্টল করার প্রয়োজন হয় না।"</string>
     <string name="app_info" msgid="6856026610594615344">"অ্যাপের তথ্য"</string>
-    <string name="go_to_web" msgid="1106022723459948514">"ওয়েবে যান"</string>
+    <!-- no translation found for go_to_web (2650669128861626071) -->
+    <skip />
     <string name="mobile_data" msgid="7094582042819250762">"মোবাইল ডেটা"</string>
     <string name="wifi_is_off" msgid="1838559392210456893">"ওয়াই ফাই বন্ধ আছে"</string>
     <string name="bt_is_off" msgid="2640685272289706392">"ব্লুটুথ বন্ধ আছে"</string>

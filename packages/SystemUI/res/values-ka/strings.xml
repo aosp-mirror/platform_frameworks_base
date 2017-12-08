@@ -756,7 +756,8 @@
     <string name="instant_apps" msgid="6647570248119804907">"მყისიერი აპები"</string>
     <string name="instant_apps_message" msgid="8116608994995104836">"მყისიერი აპები ინსტალაციას არ საჭიროებს."</string>
     <string name="app_info" msgid="6856026610594615344">"აპის შესახებ"</string>
-    <string name="go_to_web" msgid="1106022723459948514">"ვებზე გადასვლა"</string>
+    <!-- no translation found for go_to_web (2650669128861626071) -->
+    <skip />
     <string name="mobile_data" msgid="7094582042819250762">"მობილური ინტერნეტი"</string>
     <string name="wifi_is_off" msgid="1838559392210456893">"Wi-Fi გამორთულია"</string>
     <string name="bt_is_off" msgid="2640685272289706392">"Bluetooth გამორთულია"</string>
