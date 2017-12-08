@@ -4006,6 +4006,19 @@ message MetricsEvent {
     // OS: O
     FIELD_NOTIFICATION_GROUP_SUMMARY = 947;
 
+    // An app attempted to forge a different component name in the AssisStructure that would be
+    // passed to the autofill service.
+    // OS: O (security patch)
+    // Package: Real package of the app being autofilled
+    // Tag FIELD_AUTOFILL_SERVICE: Package of the autofill service that processed the request
+    // TAG FIELD_AUTOFILL_FORGED_COMPONENT_NAME: Component name being forged
+    AUTOFILL_FORGED_COMPONENT_ATTEMPT = 948;
+
+    // FIELD - The component that an app tried tro forged.
+    // Type: string
+    // OS: O (security patch)
+    FIELD_AUTOFILL_FORGED_COMPONENT_NAME = 949;
+
     // ---- End O Constants, all O constants go above this line ----
 
     // OPEN: Settings > System > Languages & input > Advanced > Lift to open camera
