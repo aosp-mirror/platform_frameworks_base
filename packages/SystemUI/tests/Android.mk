@@ -54,11 +54,15 @@ LOCAL_STATIC_JAVA_LIBRARIES := \
     mockito-target-minus-junit4 \
     SystemUI-proto \
     SystemUI-tags \
-    legacy-android-test \
     testables \
     truth-prebuilt \
 
-LOCAL_JAVA_LIBRARIES := android.test.runner telephony-common android.car
+LOCAL_JAVA_LIBRARIES := \
+    android.test.runner \
+    telephony-common \
+    android.car \
+    android.test.base \
+
 
 LOCAL_AAPT_FLAGS := --extra-packages com.android.systemui:com.android.keyguard
 
