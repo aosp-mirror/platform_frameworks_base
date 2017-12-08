@@ -93,12 +93,8 @@ abstract class RippleComponent {
 
     protected final void onHotspotBoundsChanged() {
         if (!mHasMaxRadius) {
-            final float halfWidth = mBounds.width() / 2.0f;
-            final float halfHeight = mBounds.height() / 2.0f;
-            final float targetRadius = (float) Math.sqrt(halfWidth * halfWidth
-                    + halfHeight * halfHeight);
-
-            onTargetRadiusChanged(targetRadius);
+            mTargetRadius = getTargetRadius(mBounds);
+            onTargetRadiusChanged(mTargetRadius);
         }
     }
 

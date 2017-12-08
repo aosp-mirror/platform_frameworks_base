@@ -30,6 +30,7 @@ import android.view.DisplayListCanvas;
 import android.view.RenderNodeAnimator;
 import android.view.animation.AnimationUtils;
 import android.view.animation.LinearInterpolator;
+import android.view.animation.PathInterpolator;
 
 import java.util.ArrayList;
 
@@ -38,18 +39,14 @@ import java.util.ArrayList;
  */
 class RippleForeground extends RippleComponent {
     private static final TimeInterpolator LINEAR_INTERPOLATOR = new LinearInterpolator();
-    private static final TimeInterpolator DECELERATE_INTERPOLATOR = new LogDecelerateInterpolator(
-            400f, 1.4f, 0);
+    // Matches R.interpolator.fast_out_slow_in but as we have no context we can't just import that
+    private static final TimeInterpolator DECELERATE_INTERPOLATOR =
+            new PathInterpolator(0.4f, 0f, 0.2f, 1f);
 
-    // Pixel-based accelerations and velocities.
-    private static final float WAVE_TOUCH_DOWN_ACCELERATION = 2048;
-    private static final float WAVE_OPACITY_DECAY_VELOCITY = 3;
-
-    // Bounded ripple animation properties.
-    private static final int BOUNDED_ORIGIN_EXIT_DURATION = 300;
-    private static final int BOUNDED_RADIUS_EXIT_DURATION = 800;
-    private static final int BOUNDED_OPACITY_EXIT_DURATION = 400;
-    private static final float MAX_BOUNDED_RADIUS = 350;
+    // Time it takes for the ripple to expand
+    private static final int RIPPLE_ENTER_DURATION = 225;
+    // Time it takes for the ripple to slide from the touch to the center point
+    private static final int RIPPLE_ORIGIN_DURATION = 225;
 
     private static final int OPACITY_ENTER_DURATION = 75;
     private static final int OPACITY_EXIT_DURATION = 150;
@@ -70,9 +67,6 @@ class RippleForeground extends RippleComponent {
     // Target values for tween animations.
     private float mTargetX = 0;
     private float mTargetY = 0;
-
-    /** Ripple target radius used when bounded. Not used for clamping. */
-    private float mBoundedRadius = 0;
 
     // Software rendering properties.
     private float mOpacity = 0;
@@ -107,19 +101,13 @@ class RippleForeground extends RippleComponent {
     private float mStartRadius = 0;
 
     public RippleForeground(RippleDrawable owner, Rect bounds, float startingX, float startingY,
-            boolean isBounded, boolean forceSoftware) {
+            boolean forceSoftware) {
         super(owner, bounds);
 
         mForceSoftware = forceSoftware;
         mStartingX = startingX;
         mStartingY = startingY;
 
-        if (isBounded) {
-            mBoundedRadius = MAX_BOUNDED_RADIUS * 0.9f
-                    + (float) (MAX_BOUNDED_RADIUS * Math.random() * 0.1);
-        } else {
-            mBoundedRadius = 0;
-        }
         // Take 60% of the maximum of the width and height, then divided half to get the radius.
         mStartRadius = Math.max(bounds.width(), bounds.height()) * 0.3f;
     }
@@ -127,6 +115,7 @@ class RippleForeground extends RippleComponent {
     @Override
     protected void onTargetRadiusChanged(float targetRadius) {
         clampStartingPosition();
+        switchToUiThreadAnimation();
     }
 
     private void drawSoftware(Canvas c, Paint p) {
@@ -228,16 +217,14 @@ class RippleForeground extends RippleComponent {
         }
         mRunningSwAnimators.clear();
 
-        final int duration = getRadiusDuration();
-
         final ObjectAnimator tweenRadius = ObjectAnimator.ofFloat(this, TWEEN_RADIUS, 1);
-        tweenRadius.setDuration(duration);
+        tweenRadius.setDuration(RIPPLE_ENTER_DURATION);
         tweenRadius.setInterpolator(DECELERATE_INTERPOLATOR);
         tweenRadius.start();
         mRunningSwAnimators.add(tweenRadius);
 
         final ObjectAnimator tweenOrigin = ObjectAnimator.ofFloat(this, TWEEN_ORIGIN, 1);
-        tweenOrigin.setDuration(duration);
+        tweenOrigin.setDuration(RIPPLE_ORIGIN_DURATION);
         tweenOrigin.setInterpolator(DECELERATE_INTERPOLATOR);
         tweenOrigin.start();
         mRunningSwAnimators.add(tweenOrigin);
@@ -267,20 +254,18 @@ class RippleForeground extends RippleComponent {
         final Paint paint = mOwner.getRipplePaint();
         mPropPaint = CanvasProperty.createPaint(paint);
 
-        final int radiusDuration = getRadiusDuration();
-
         final RenderNodeAnimator radius = new RenderNodeAnimator(mPropRadius, mTargetRadius);
-        radius.setDuration(radiusDuration);
+        radius.setDuration(RIPPLE_ORIGIN_DURATION);
         radius.setInterpolator(DECELERATE_INTERPOLATOR);
         mPendingHwAnimators.add(radius);
 
         final RenderNodeAnimator x = new RenderNodeAnimator(mPropX, mTargetX);
-        x.setDuration(radiusDuration);
+        x.setDuration(RIPPLE_ORIGIN_DURATION);
         x.setInterpolator(DECELERATE_INTERPOLATOR);
         mPendingHwAnimators.add(x);
 
         final RenderNodeAnimator y = new RenderNodeAnimator(mPropY, mTargetY);
-        y.setDuration(radiusDuration);
+        y.setDuration(RIPPLE_ORIGIN_DURATION);
         y.setInterpolator(DECELERATE_INTERPOLATOR);
         mPendingHwAnimators.add(y);
 
@@ -331,12 +316,6 @@ class RippleForeground extends RippleComponent {
 
     private float getCurrentY() {
         return MathUtils.lerp(mClampedStartingY - mBounds.exactCenterY(), mTargetY, mTweenY);
-    }
-
-    private int getRadiusDuration() {
-        final float remainingRadius = mTargetRadius - getCurrentRadius();
-        return (int) (1000 * Math.sqrt(remainingRadius / WAVE_TOUCH_DOWN_ACCELERATION *
-                mDensityScale) + 0.5);
     }
 
     private float getCurrentRadius() {
@@ -402,6 +381,14 @@ class RippleForeground extends RippleComponent {
         }
     }
 
+    private void clearHwProps() {
+        mPropPaint = null;
+        mPropRadius = null;
+        mPropX = null;
+        mPropY = null;
+        mUsingProperties = false;
+    }
+
     private final AnimatorListenerAdapter mAnimationListener = new AnimatorListenerAdapter() {
         @Override
         public void onAnimationEnd(Animator animator) {
@@ -410,39 +397,20 @@ class RippleForeground extends RippleComponent {
             pruneSwFinished();
 
             if (mRunningHwAnimators.isEmpty()) {
-                mPropPaint = null;
-                mPropRadius = null;
-                mPropX = null;
-                mPropY = null;
+                clearHwProps();
             }
         }
     };
 
-    /**
-    * Interpolator with a smooth log deceleration.
-    */
-    private static final class LogDecelerateInterpolator implements TimeInterpolator {
-        private final float mBase;
-        private final float mDrift;
-        private final float mTimeScale;
-        private final float mOutputScale;
-
-        public LogDecelerateInterpolator(float base, float timeScale, float drift) {
-            mBase = base;
-            mDrift = drift;
-            mTimeScale = 1f / timeScale;
-
-            mOutputScale = 1f / computeLog(1f);
+    private void switchToUiThreadAnimation() {
+        for (int i = 0; i < mRunningHwAnimators.size(); i++) {
+            Animator animator = mRunningHwAnimators.get(i);
+            animator.removeListener(mAnimationListener);
+            animator.end();
         }
-
-        private float computeLog(float t) {
-            return 1f - (float) Math.pow(mBase, -t * mTimeScale) + (mDrift * t);
-        }
-
-        @Override
-        public float getInterpolation(float t) {
-            return computeLog(t) * mOutputScale;
-        }
+        mRunningHwAnimators.clear();
+        clearHwProps();
+        invalidateSelf();
     }
 
     /**
