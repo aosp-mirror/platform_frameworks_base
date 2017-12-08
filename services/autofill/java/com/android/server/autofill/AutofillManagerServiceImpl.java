@@ -36,6 +36,7 @@ import android.content.pm.PackageManager.NameNotFoundException;
 import android.content.pm.ServiceInfo;
 import android.graphics.Rect;
 import android.graphics.drawable.Drawable;
+import android.metrics.LogMaker;
 import android.os.AsyncTask;
 import android.os.Binder;
 import android.os.Bundle;
@@ -352,7 +353,7 @@ final class AutofillManagerServiceImpl {
         pruneAbandonedSessionsLocked();
 
         final Session newSession = createSessionByTokenLocked(activityToken, uid, appCallbackToken,
-                hasCallback, componentName);
+                hasCallback, componentName, flags);
         if (newSession == null) {
             return NO_SESSION;
         }
@@ -453,7 +454,7 @@ final class AutofillManagerServiceImpl {
 
     private Session createSessionByTokenLocked(@NonNull IBinder activityToken, int uid,
             @NonNull IBinder appCallbackToken, boolean hasCallback,
-            @NonNull ComponentName componentName) {
+            @NonNull ComponentName componentName, int flags) {
         // use random ids so that one app cannot know that another app creates sessions
         int sessionId;
         int tries = 0;
@@ -471,7 +472,7 @@ final class AutofillManagerServiceImpl {
 
         final Session newSession = new Session(this, mUi, mContext, mHandlerCaller, mUserId, mLock,
                 sessionId, uid, activityToken, appCallbackToken, hasCallback,
-                mUiLatencyHistory, mInfo.getServiceInfo().getComponentName(), componentName);
+                mUiLatencyHistory, mInfo.getServiceInfo().getComponentName(), componentName, flags);
         mSessions.put(newSession.id, newSession);
 
         return newSession;
@@ -716,7 +717,8 @@ final class AutofillManagerServiceImpl {
             @Nullable ArrayList<AutofillId> manuallyFilledFieldIds,
             @Nullable ArrayList<ArrayList<String>> manuallyFilledDatasetIds,
             @Nullable ArrayList<AutofillId> detectedFieldIdsList,
-            @Nullable ArrayList<Match> detectedMatchesList) {
+            @Nullable ArrayList<Match> detectedMatchesList,
+            @NonNull String appPackageName) {
 
         synchronized (mLock) {
             if (isValidEventLocked("logDatasetNotSelected()", sessionId)) {
@@ -727,6 +729,19 @@ final class AutofillManagerServiceImpl {
                     detectedFieldIdsList.toArray(detectedFieldsIds);
                     detectedMatches = new Match[detectedMatchesList.size()];
                     detectedMatchesList.toArray(detectedMatches);
+
+                    final int size = detectedMatchesList.size();
+                    float totalScore = 0;
+                    for (int i = 0; i < size; i++) {
+                        totalScore += detectedMatches[i].getScore();
+                    }
+                    final int averageScore = (int) ((totalScore * 100) / size);
+                    mMetricsLogger.write(
+                            Helper.newLogMaker(MetricsEvent.AUTOFILL_FIELD_CLASSIFICATION_MATCHES,
+                                    appPackageName, getServicePackageName())
+                            .setCounterValue(size)
+                            .addTaggedData(MetricsEvent.FIELD_AUTOFILL_MATCH_SCORE, averageScore));
+
                 }
                 mEventHistory.addEvent(new Event(Event.TYPE_CONTEXT_COMMITTED, null,
                         clientState, selectedDatasets, ignoredDatasets,
@@ -776,6 +791,11 @@ final class AutofillManagerServiceImpl {
         synchronized (mLock) {
             if (isCalledByServiceLocked("setUserData", callingUid)) {
                 mUserData = userData;
+                // Log it
+                int numberFields = mUserData == null ? 0: mUserData.getRemoteIds().length;
+                mMetricsLogger.write(Helper.newLogMaker(MetricsEvent.AUTOFILL_USERDATA_UPDATED,
+                        getServicePackageName(), null)
+                        .setCounterValue(numberFields));
             }
         }
     }
@@ -1013,10 +1033,12 @@ final class AutofillManagerServiceImpl {
                 expiration = Long.MAX_VALUE;
             }
             mDisabledActivities.put(componentName, expiration);
-            int intDuration = duration > Integer.MAX_VALUE ? Integer.MAX_VALUE : (int) duration;
-            mMetricsLogger.write(Helper.newLogMaker(MetricsEvent.AUTOFILL_SERVICE_DISABLED_ACTIVITY,
-                    componentName.getPackageName(), getServicePackageName())
-                    .addTaggedData(MetricsEvent.FIELD_CLASS_NAME, componentName.getClassName())
+            final int intDuration = duration > Integer.MAX_VALUE ? Integer.MAX_VALUE : (int) duration;
+            // NOTE: not using Helper.newLogMaker() because we're setting the componentName instead
+            // of package name
+            mMetricsLogger.write(new LogMaker(MetricsEvent.AUTOFILL_SERVICE_DISABLED_ACTIVITY)
+                    .setComponentName(componentName)
+                    .addTaggedData(MetricsEvent.FIELD_AUTOFILL_SERVICE, getServicePackageName())
                     .setCounterValue(intDuration));
         }
     }
@@ -1034,7 +1056,8 @@ final class AutofillManagerServiceImpl {
                 if (expiration >= elapsedTime) return true;
                 // Restriction expired - clean it up.
                 if (sVerbose) {
-                    Slog.v(TAG, "Removing " + componentName.toShortString() + " from disabled list");
+                    Slog.v(TAG, "Removing " + componentName.toShortString()
+                        + " from disabled list");
                 }
                 mDisabledActivities.remove(componentName);
             }
