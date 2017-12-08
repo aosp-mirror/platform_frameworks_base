@@ -24,11 +24,8 @@ import android.net.wifi.aware.PeerHandle;
 import android.os.Parcel;
 import android.os.Parcelable;
 
-import libcore.util.HexEncoding;
-
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
-import java.util.Arrays;
 import java.util.Objects;
 
 /**
@@ -127,13 +124,13 @@ public class ResponderConfig implements Parcelable {
      * peerHandle field) ise used to identify the Responder.
      * TODO: convert to MacAddress
      */
-    public byte[] macAddress;
+    public MacAddress macAddress;
 
     /**
      * The peer identifier of a Wi-Fi Aware Responder. Will be null if a MAC Address (the macAddress
      * field) is used to identify the Responder.
      */
-    public final PeerHandle peerHandle;
+    public PeerHandle peerHandle;
 
     /**
      * The device type of the Responder.
@@ -194,9 +191,13 @@ public class ResponderConfig implements Parcelable {
      * @param preamble        The preamble used by the Responder, specified using
      *                        {@link PreambleType}.
      */
-    public ResponderConfig(@NonNull byte[] macAddress, @ResponderType int responderType,
+    public ResponderConfig(@NonNull MacAddress macAddress, @ResponderType int responderType,
             boolean supports80211mc, @ChannelWidth int channelWidth, int frequency, int centerFreq0,
             int centerFreq1, @PreambleType int preamble) {
+        if (macAddress == null) {
+            throw new IllegalArgumentException(
+                    "Invalid ResponderConfig - must specify a MAC address");
+        }
         this.macAddress = macAddress;
         this.peerHandle = null;
         this.responderType = responderType;
@@ -248,10 +249,7 @@ public class ResponderConfig implements Parcelable {
      * Point (AP), which can be obtained from {@link android.net.wifi.WifiManager#getScanResults()}.
      */
     public static ResponderConfig fromScanResult(ScanResult scanResult) {
-        byte[] macAddress = null;
-        if (scanResult.BSSID != null) {
-            macAddress = MacAddress.byteAddrFromStringAddr(scanResult.BSSID);
-        }
+        MacAddress macAddress = MacAddress.fromString(scanResult.BSSID);
         int responderType = RESPONDER_AP;
         boolean supports80211mc = scanResult.is80211mcResponder();
         int channelWidth = translcateScanResultChannelWidth(scanResult.channelWidth);
@@ -275,7 +273,7 @@ public class ResponderConfig implements Parcelable {
      * Creates a Responder configuration from a MAC address corresponding to a Wi-Fi Aware
      * Responder. The Responder parameters are set to defaults.
      */
-    public static ResponderConfig fromWifiAwarePeerMacAddressWithDefaults(byte[] macAddress) {
+    public static ResponderConfig fromWifiAwarePeerMacAddressWithDefaults(MacAddress macAddress) {
         /* Note: the parameters are those of the Aware discovery channel (channel 6). A Responder
          * is expected to be brought up and available to negotiate a maximum accuracy channel
          * (i.e. Band 5 @ 80MHz). A Responder is brought up on the peer by starting an Aware
@@ -323,11 +321,16 @@ public class ResponderConfig implements Parcelable {
 
     @Override
     public void writeToParcel(Parcel dest, int flags) {
-        dest.writeByteArray(macAddress);
-        if (peerHandle == null) {
-            dest.writeInt(0);
+        if (macAddress == null) {
+            dest.writeBoolean(false);
         } else {
-            dest.writeInt(1);
+            dest.writeBoolean(true);
+            macAddress.writeToParcel(dest, flags);
+        }
+        if (peerHandle == null) {
+            dest.writeBoolean(false);
+        } else {
+            dest.writeBoolean(true);
             dest.writeInt(peerHandle.peerId);
         }
         dest.writeInt(responderType);
@@ -347,10 +350,14 @@ public class ResponderConfig implements Parcelable {
 
         @Override
         public ResponderConfig createFromParcel(Parcel in) {
-            byte[] macAddress = in.createByteArray();
-            int peerHandleFlag = in.readInt();
+            boolean macAddressPresent = in.readBoolean();
+            MacAddress macAddress = null;
+            if (macAddressPresent) {
+                macAddress = MacAddress.CREATOR.createFromParcel(in);
+            }
+            boolean peerHandlePresent = in.readBoolean();
             PeerHandle peerHandle = null;
-            if (peerHandleFlag == 1) {
+            if (peerHandlePresent) {
                 peerHandle = new PeerHandle(in.readInt());
             }
             int responderType = in.readInt();
@@ -383,7 +390,7 @@ public class ResponderConfig implements Parcelable {
 
         ResponderConfig lhs = (ResponderConfig) o;
 
-        return Arrays.equals(macAddress, lhs.macAddress) && Objects.equals(peerHandle,
+        return Objects.equals(macAddress, lhs.macAddress) && Objects.equals(peerHandle,
                 lhs.peerHandle) && responderType == lhs.responderType
                 && supports80211mc == lhs.supports80211mc && channelWidth == lhs.channelWidth
                 && frequency == lhs.frequency && centerFreq0 == lhs.centerFreq0
@@ -399,8 +406,7 @@ public class ResponderConfig implements Parcelable {
     /** @hide */
     @Override
     public String toString() {
-        return new StringBuffer("ResponderConfig: macAddress=").append(
-                macAddress == null ? "<null>" : new String(HexEncoding.encode(macAddress))).append(
+        return new StringBuffer("ResponderConfig: macAddress=").append(macAddress).append(
                 ", peerHandle=").append(peerHandle == null ? "<null>" : peerHandle.peerId).append(
                 ", responderType=").append(responderType).append(", supports80211mc=").append(
                 supports80211mc).append(", channelWidth=").append(channelWidth).append(

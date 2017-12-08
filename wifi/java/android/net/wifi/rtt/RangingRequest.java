@@ -17,6 +17,7 @@
 package android.net.wifi.rtt;
 
 import android.annotation.NonNull;
+import android.net.MacAddress;
 import android.net.wifi.ScanResult;
 import android.net.wifi.aware.AttachCallback;
 import android.net.wifi.aware.DiscoverySessionCallback;
@@ -168,7 +169,7 @@ public final class RangingRequest implements Parcelable {
          * @param peerMacAddress The MAC address of the Wi-Fi Aware peer.
          * @return The builder, to facilitate chaining {@code builder.setXXX(..).setXXX(..)}.
          */
-        public Builder addWifiAwarePeer(@NonNull byte[] peerMacAddress) {
+        public Builder addWifiAwarePeer(@NonNull MacAddress peerMacAddress) {
             if (peerMacAddress == null) {
                 throw new IllegalArgumentException("Null peer MAC address");
             }
