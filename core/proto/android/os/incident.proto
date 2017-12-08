@@ -45,12 +45,21 @@ import "frameworks/base/libs/incident/proto/android/section.proto";
 
 package android.os;
 
+// This field contains internal metadata associated with an incident report,
+// such as the section ids and privacy policy specs from caller as well as how long
+// and how many bytes a section takes, etc.
+message IncidentMetadata {
+
+}
+
 // privacy field options must not be set at this level because all
 // the sections are able to be controlled and configured by section ids.
 // Instead privacy field options need to be configured in each section proto message.
 message IncidentProto {
-    // Incident header
+    // Incident header from callers
     repeated IncidentHeaderProto header = 1;
+    // Internal metadata of incidentd
+    optional IncidentMetadata metadata = 2;
 
     // Device information
     optional SystemPropertiesProto system_properties = 1000 [
