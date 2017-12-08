@@ -17,6 +17,7 @@
 package android.content.pm;
 
 import android.annotation.SystemApi;
+import android.annotation.TestApi;
 import android.os.Parcel;
 import android.os.Parcelable;
 import android.text.TextUtils;
@@ -150,6 +151,7 @@ public class PermissionInfo extends PackageItemInfo implements Parcelable {
      *
      * @hide
      */
+    @TestApi
     public static final int PROTECTION_FLAG_VENDOR_PRIVILEGED = 0x8000;
 
     /**
