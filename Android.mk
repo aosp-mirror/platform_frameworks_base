@@ -656,6 +656,10 @@ checkbuild: doc-comment-check-docs
 # Check comment when you are updating the API
 update-api: doc-comment-check-docs
 
+# Generate API diffs as part of docs builds
+docs: offline-sdk-referenceonly-diff
+docs: offline-system-sdk-referenceonly-diff
+
 # ====  static html in the sdk ==================================
 include $(CLEAR_VARS)
 
