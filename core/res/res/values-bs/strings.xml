@@ -214,6 +214,8 @@
     <string name="global_action_power_off" msgid="4471879440839879722">"Isključi telefon"</string>
     <string name="global_action_emergency" msgid="7112311161137421166">"Hitno"</string>
     <string name="global_action_bug_report" msgid="7934010578922304799">"Izvještaj o greškama"</string>
+    <!-- no translation found for global_action_logout (935179188218826050) -->
+    <skip />
     <string name="bugreport_title" msgid="2667494803742548533">"Kreirajte izvještaj o greškama"</string>
     <string name="bugreport_message" msgid="398447048750350456">"Ovim će se prikupljati informacije o trenutnom stanju uređaja, koji će biti poslani kao e-poruka. Može malo potrajati dok se izvještaj o greškama ne kreira i bude spreman za slanje. Budite strpljivi."</string>
     <string name="bugreport_option_interactive_title" msgid="8635056131768862479">"Interaktivni izvještaj"</string>
@@ -1026,9 +1028,9 @@
     <string name="whichEditApplication" msgid="144727838241402655">"Uredi koristeći"</string>
     <string name="whichEditApplicationNamed" msgid="1775815530156447790">"Uredi koristeći %1$s"</string>
     <string name="whichEditApplicationLabel" msgid="7183524181625290300">"Uredi"</string>
-    <string name="whichSendApplication" msgid="6902512414057341668">"Podijeli koristeći"</string>
-    <string name="whichSendApplicationNamed" msgid="2799370240005424391">"Podijeli koristeći %1$s"</string>
-    <string name="whichSendApplicationLabel" msgid="4579076294675975354">"Podijeli"</string>
+    <string name="whichSendApplication" msgid="6902512414057341668">"Dijeli koristeći"</string>
+    <string name="whichSendApplicationNamed" msgid="2799370240005424391">"Dijeli koristeći %1$s"</string>
+    <string name="whichSendApplicationLabel" msgid="4579076294675975354">"Dijeli"</string>
     <string name="whichSendToApplication" msgid="8272422260066642057">"Pošalji koristeći"</string>
     <string name="whichSendToApplicationNamed" msgid="7768387871529295325">"Pošalji koristeći %1$s"</string>
     <string name="whichSendToApplicationLabel" msgid="8878962419005813500">"Pošalji"</string>
@@ -1353,7 +1355,7 @@
     <string name="progress_erasing" product="default" msgid="6596988875507043042">"Brisanje SD kartice..."</string>
     <string name="share" msgid="1778686618230011964">"Podijelite"</string>
     <string name="find" msgid="4808270900322985960">"Pronađi"</string>
-    <string name="websearch" msgid="4337157977400211589">"Internet pretraga"</string>
+    <string name="websearch" msgid="4337157977400211589">"Internet pretraživanje"</string>
     <string name="find_next" msgid="5742124618942193978">"Nađi sljedeći"</string>
     <string name="find_previous" msgid="2196723669388360506">"Nađi prethodni"</string>
     <string name="gpsNotifTicker" msgid="5622683912616496172">"Korisnik <xliff:g id="NAME">%s</xliff:g> je poslao zahtjev za utvrđivanje lokacije"</string>
@@ -1397,7 +1399,7 @@
     <string name="activitychooserview_choose_application" msgid="2125168057199941199">"Odaberite aplikaciju"</string>
     <string name="activitychooserview_choose_application_error" msgid="8624618365481126668">"Aplikacija <xliff:g id="APPLICATION_NAME">%s</xliff:g> se ne može pokrenuti."</string>
     <string name="shareactionprovider_share_with" msgid="806688056141131819">"Podijeliti sa"</string>
-    <string name="shareactionprovider_share_with_application" msgid="5627411384638389738">"Podijeli koristeći aplikaciju <xliff:g id="APPLICATION_NAME">%s</xliff:g>"</string>
+    <string name="shareactionprovider_share_with_application" msgid="5627411384638389738">"Dijeli koristeći aplikaciju <xliff:g id="APPLICATION_NAME">%s</xliff:g>"</string>
     <string name="content_description_sliding_handle" msgid="415975056159262248">"Klizni regulator. Dodirnite &amp; držite."</string>
     <string name="description_target_unlock_tablet" msgid="3833195335629795055">"Prevucite za otključavanje ekrana."</string>
     <string name="action_bar_home_description" msgid="5293600496601490216">"Vratite se na početnu stranicu"</string>
@@ -1524,6 +1526,10 @@
     <string name="accessibility_shortcut_toogle_warning" msgid="7256507885737444807">"Kada je prečica uključena, pritiskom na oba dugmeta za podešavanje jačine zvuka u trajanju od 3 sekunde pokrenut će se funkcija za pristupačnost.\n\n Trenutna funkcija za pristupačnost je:\n <xliff:g id="SERVICE_NAME">%1$s</xliff:g>\n\n Funkciju možete promijeniti ako odete u Postavke &gt; Pristupačnost."</string>
     <string name="disable_accessibility_shortcut" msgid="627625354248453445">"Isključi prečicu"</string>
     <string name="leave_accessibility_shortcut_on" msgid="7653111894438512680">"Koristi prečicu"</string>
+    <!-- no translation found for color_inversion_feature_name (4231186527799958644) -->
+    <skip />
+    <!-- no translation found for color_correction_feature_name (6779391426096954933) -->
+    <skip />
     <string name="accessibility_shortcut_enabling_service" msgid="7771852911861522636">"Prečica za pristupačnost je uključila uslugu <xliff:g id="SERVICE_NAME">%1$s</xliff:g>"</string>
     <string name="accessibility_shortcut_disabling_service" msgid="2747243438223109821">"Prečica za pristupačnost je isključila uslugu <xliff:g id="SERVICE_NAME">%1$s</xliff:g>"</string>
     <string name="accessibility_button_prompt_text" msgid="4234556536456854251">"Odaberite funkciju koja će se koristiti kada dodirnete dugme Pristupačnost:"</string>
@@ -1719,6 +1725,8 @@
     <string name="zen_mode_default_weeknights_name" msgid="3081318299464998143">"Radni dan uvečer"</string>
     <string name="zen_mode_default_weekends_name" msgid="2786495801019345244">"Vikend"</string>
     <string name="zen_mode_default_events_name" msgid="8158334939013085363">"Događaj"</string>
+    <!-- no translation found for zen_mode_default_every_night_name (3012363838882944175) -->
+    <skip />
     <string name="muted_by" msgid="6147073845094180001">"Ton isključila aplikacija <xliff:g id="THIRD_PARTY">%1$s</xliff:g>"</string>
     <string name="system_error_wipe_data" msgid="6608165524785354962">"Postoji problem u vašem uređaju i može biti nestabilan dok ga ne vratite na fabričke postavke."</string>
     <string name="system_error_manufacturer" msgid="8086872414744210668">"Postoji problem u vašem uređaju. Za više informacija obratite se proizvođaču."</string>

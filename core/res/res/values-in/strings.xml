@@ -212,6 +212,8 @@
     <string name="global_action_power_off" msgid="4471879440839879722">"Matikan perangkat"</string>
     <string name="global_action_emergency" msgid="7112311161137421166">"Darurat"</string>
     <string name="global_action_bug_report" msgid="7934010578922304799">"Laporan bug"</string>
+    <!-- no translation found for global_action_logout (935179188218826050) -->
+    <skip />
     <string name="bugreport_title" msgid="2667494803742548533">"Ambil laporan bug"</string>
     <string name="bugreport_message" msgid="398447048750350456">"Ini akan mengumpulkan informasi status perangkat Anda saat ini, untuk dikirimkan sebagai pesan email. Harap bersabar, mungkin perlu waktu untuk memulai laporan bug hingga siap dikirim."</string>
     <string name="bugreport_option_interactive_title" msgid="8635056131768862479">"Laporan interaktif"</string>
@@ -1498,6 +1500,10 @@
     <string name="accessibility_shortcut_toogle_warning" msgid="7256507885737444807">"Saat pintasan aktif, menekan kedua tombol volume selama 3 detik akan memulai fitur aksesibilitas.\n\n Fitur aksesibilitas saat ini:\n <xliff:g id="SERVICE_NAME">%1$s</xliff:g>\n\n Anda dapat mengubah fitur di Setelan &gt; Aksesibilitas."</string>
     <string name="disable_accessibility_shortcut" msgid="627625354248453445">"Nonaktifkan Pintasan"</string>
     <string name="leave_accessibility_shortcut_on" msgid="7653111894438512680">"Gunakan Pintasan"</string>
+    <!-- no translation found for color_inversion_feature_name (4231186527799958644) -->
+    <skip />
+    <!-- no translation found for color_correction_feature_name (6779391426096954933) -->
+    <skip />
     <string name="accessibility_shortcut_enabling_service" msgid="7771852911861522636">"Pintasan Aksesibilitas mengaktifkan <xliff:g id="SERVICE_NAME">%1$s</xliff:g>"</string>
     <string name="accessibility_shortcut_disabling_service" msgid="2747243438223109821">"Pintasan Aksesibilitas menonaktifkan <xliff:g id="SERVICE_NAME">%1$s</xliff:g>"</string>
     <string name="accessibility_button_prompt_text" msgid="4234556536456854251">"Pilih fitur yang akan digunakan saat menge-tap tombol Aksesibilitas:"</string>
@@ -1684,6 +1690,8 @@
     <string name="zen_mode_default_weeknights_name" msgid="3081318299464998143">"Malam hari kerja"</string>
     <string name="zen_mode_default_weekends_name" msgid="2786495801019345244">"Akhir pekan"</string>
     <string name="zen_mode_default_events_name" msgid="8158334939013085363">"Acara"</string>
+    <!-- no translation found for zen_mode_default_every_night_name (3012363838882944175) -->
+    <skip />
     <string name="muted_by" msgid="6147073845094180001">"Dinonaktifkan oleh <xliff:g id="THIRD_PARTY">%1$s</xliff:g>"</string>
     <string name="system_error_wipe_data" msgid="6608165524785354962">"Ada masalah dengan perangkat. Hal ini mungkin membuat perangkat jadi tidak stabil dan perlu dikembalikan ke setelan pabrik."</string>
     <string name="system_error_manufacturer" msgid="8086872414744210668">"Ada masalah dengan perangkat. Hubungi produsen perangkat untuk informasi selengkapnya."</string>
