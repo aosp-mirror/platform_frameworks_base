@@ -23,6 +23,7 @@ import static org.junit.Assert.assertTrue;
 
 import android.service.notification.ScheduleCalendar;
 import android.service.notification.ZenModeConfig;
+import android.support.test.filters.FlakyTest;
 import android.support.test.runner.AndroidJUnit4;
 import android.test.suitebuilder.annotation.SmallTest;
 
@@ -257,6 +258,7 @@ public class ScheduleCalendarTest extends NotificationTestCase {
     }
 
     @Test
+    @FlakyTest
     public void testIsInSchedule_inScheduleOvernight() {
         Calendar cal = new GregorianCalendar();
         cal.set(Calendar.HOUR_OF_DAY, 23);
@@ -273,6 +275,7 @@ public class ScheduleCalendarTest extends NotificationTestCase {
     }
 
     @Test
+    @FlakyTest
     public void testIsInSchedule_inScheduleSingleDay() {
         Calendar cal = new GregorianCalendar();
         cal.set(Calendar.HOUR_OF_DAY, 14);
