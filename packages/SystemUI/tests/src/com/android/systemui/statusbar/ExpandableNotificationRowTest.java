@@ -50,7 +50,7 @@ public class ExpandableNotificationRowTest extends SysuiTestCase {
     @Test
     public void testGroupSummaryNotShowingIconWhenPublic() {
         mGroup.setSensitive(true, true);
-        mGroup.setHideSensitive(true, false, 0, 0);
+        mGroup.setHideSensitiveForIntrinsicHeight(true);
         Assert.assertTrue(mGroup.isSummaryWithChildren());
         Assert.assertFalse(mGroup.isShowingIcon());
     }
