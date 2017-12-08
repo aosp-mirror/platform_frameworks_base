@@ -18,6 +18,7 @@ package android.util;
 
 import static junit.framework.Assert.assertEquals;
 import static junit.framework.Assert.assertFalse;
+import static junit.framework.Assert.assertNotNull;
 import static junit.framework.Assert.assertTrue;
 
 import android.content.Context;
@@ -59,7 +60,7 @@ public class FeatureFlagUtilsTest {
 
     @Test
     public void testGetFlag_enabled_shouldReturnTrue() {
-        SystemProperties.set(FeatureFlagUtils.FFLAG_PREFIX + TEST_FEATURE_NAME, "true");
+        FeatureFlagUtils.getAllFeatureFlags().put(TEST_FEATURE_NAME, "true");
 
         assertTrue(FeatureFlagUtils.isEnabled(mContext, TEST_FEATURE_NAME));
     }
@@ -96,7 +97,11 @@ public class FeatureFlagUtilsTest {
 
     @Test
     public void testGetFlag_notSet_shouldReturnFalse() {
-        assertFalse(FeatureFlagUtils.isEnabled(mContext, TEST_FEATURE_NAME));
+        assertFalse(FeatureFlagUtils.isEnabled(mContext, TEST_FEATURE_NAME + "does_not_exist"));
     }
 
+    @Test
+    public void getAllFeatureFlags_shouldNotBeNull() {
+        assertNotNull(FeatureFlagUtils.getAllFeatureFlags());
+    }
 }
