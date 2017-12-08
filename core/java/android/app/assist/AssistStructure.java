@@ -2054,6 +2054,16 @@ public class AssistStructure implements Parcelable {
         return mActivityComponent;
     }
 
+    /**
+     * Called by Autofill server when app forged a different value.
+     *
+     * @hide
+     */
+    public void setActivityComponent(ComponentName componentName) {
+        ensureData();
+        mActivityComponent = componentName;
+    }
+
     /** @hide */
     public int getFlags() {
         return mFlags;
