@@ -30,6 +30,8 @@ namespace android {
 namespace os {
 namespace statsd {
 
+const ConfigKey kConfigKey(0, "test");
+
 void AddValueToBucket(const std::vector<std::pair<string, long>>& key_value_pair_list,
                       std::shared_ptr<DimToValMap> bucket) {
     for (auto itr = key_value_pair_list.begin(); itr != key_value_pair_list.end(); itr++) {
@@ -51,7 +53,7 @@ TEST(AnomalyTrackerTest, TestConsecutiveBuckets) {
     alert.set_refractory_period_secs(2 * bucketSizeNs / NS_PER_SEC);
     alert.set_trigger_if_sum_gt(2);
 
-    AnomalyTracker anomalyTracker(alert);
+    AnomalyTracker anomalyTracker(alert, kConfigKey);
 
     std::shared_ptr<DimToValMap> bucket0 = MockBucket({{"a", 1}, {"b", 2}, {"c", 1}});
     int64_t eventTimestamp0 = 10;
@@ -168,7 +170,7 @@ TEST(AnomalyTrackerTest, TestSparseBuckets) {
     alert.set_refractory_period_secs(2 * bucketSizeNs / NS_PER_SEC);
     alert.set_trigger_if_sum_gt(2);
 
-    AnomalyTracker anomalyTracker(alert);
+    AnomalyTracker anomalyTracker(alert, kConfigKey);
 
     std::shared_ptr<DimToValMap> bucket9 = MockBucket({{"a", 1}, {"b", 2}, {"c", 1}});
     std::shared_ptr<DimToValMap> bucket16 = MockBucket({{"b", 4}});

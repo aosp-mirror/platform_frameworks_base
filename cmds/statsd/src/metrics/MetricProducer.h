@@ -94,7 +94,7 @@ public:
     }
 
     virtual sp<AnomalyTracker> createAnomalyTracker(const Alert &alert) {
-        return new AnomalyTracker(alert);
+        return new AnomalyTracker(alert, mConfigKey);
     }
 
     void addAnomalyTracker(sp<AnomalyTracker> tracker) {

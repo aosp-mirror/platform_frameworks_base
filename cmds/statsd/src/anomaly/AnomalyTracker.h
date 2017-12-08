@@ -18,6 +18,7 @@
 
 #include <gtest/gtest_prod.h>
 #include "AnomalyMonitor.h"
+#include "config/ConfigKey.h"
 #include "frameworks/base/cmds/statsd/src/statsd_config.pb.h"  // Alert
 #include "stats_util.h"  // HashableDimensionKey and DimToValMap
 
@@ -35,7 +36,7 @@ using std::shared_ptr;
 // Does NOT allow negative values.
 class AnomalyTracker : public virtual RefBase {
 public:
-    AnomalyTracker(const Alert& alert);
+    AnomalyTracker(const Alert& alert, const ConfigKey& configKey);
 
     virtual ~AnomalyTracker();
 
@@ -107,8 +108,12 @@ public:
 
 protected:
     void flushPastBuckets(const int64_t& currBucketNum);
+
     // statsd_config.proto Alert message that defines this tracker.
     const Alert mAlert;
+
+    // A reference to the Alert's config key.
+    const ConfigKey& mConfigKey;
 
     // Number of past buckets. One less than the total number of buckets needed
     // for the anomaly detection (since the current bucket is not in the past).

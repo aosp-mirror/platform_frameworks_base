@@ -18,6 +18,7 @@
 #include "Log.h"
 
 #include "anomaly/AnomalyMonitor.h"
+#include "guardrail/StatsdStats.h"
 
 namespace android {
 namespace os {
@@ -76,10 +77,7 @@ void AnomalyMonitor::remove(sp<const AnomalyAlarm> alarm) {
     if (!wasPresent) return;
     if (mPq.empty()) {
         if (DEBUG) ALOGD("Queue is empty. Cancel any alarm.");
-        mRegisteredAlarmTimeSec = 0;
-        if (mStatsCompanionService != nullptr) {
-            mStatsCompanionService->cancelAnomalyAlarm();
-        }
+        cancelRegisteredAlarmTime_l();
         return;
     }
     uint32_t soonestAlarmTimeSec = mPq.top()->timestampSec;
@@ -106,10 +104,7 @@ unordered_set<sp<const AnomalyAlarm>, SpHash<AnomalyAlarm>> AnomalyMonitor::popS
     if (!oldAlarms.empty()) {
         if (mPq.empty()) {
             if (DEBUG) ALOGD("Queue is empty. Cancel any alarm.");
-            mRegisteredAlarmTimeSec = 0;
-            if (mStatsCompanionService != nullptr) {
-                mStatsCompanionService->cancelAnomalyAlarm();
-            }
+            cancelRegisteredAlarmTime_l();
         } else {
             // Always update the registered alarm in this case (unlike remove()).
             updateRegisteredAlarmTime_l(mPq.top()->timestampSec);
@@ -123,6 +118,16 @@ void AnomalyMonitor::updateRegisteredAlarmTime_l(uint32_t timestampSec) {
     mRegisteredAlarmTimeSec = timestampSec;
     if (mStatsCompanionService != nullptr) {
         mStatsCompanionService->setAnomalyAlarm(secToMs(mRegisteredAlarmTimeSec));
+        StatsdStats::getInstance().noteRegisteredAnomalyAlarmChanged();
+    }
+}
+
+void AnomalyMonitor::cancelRegisteredAlarmTime_l() {
+    if (DEBUG) ALOGD("Cancelling reg alarm.");
+    mRegisteredAlarmTimeSec = 0;
+    if (mStatsCompanionService != nullptr) {
+        mStatsCompanionService->cancelAnomalyAlarm();
+        StatsdStats::getInstance().noteRegisteredAnomalyAlarmChanged();
     }
 }
 
