@@ -21,6 +21,7 @@ import android.annotation.StringDef;
 import android.app.PendingIntent;
 import android.app.RemoteInput;
 import android.graphics.drawable.Icon;
+import android.os.Bundle;
 import android.os.Parcel;
 import android.os.Parcelable;
 import android.text.TextUtils;
@@ -47,12 +48,15 @@ import java.util.List;
  * <li>{@link #FORMAT_INT}</li>
  * <li>{@link #FORMAT_TIMESTAMP}</li>
  * <li>{@link #FORMAT_REMOTE_INPUT}</li>
+ * <li>{@link #FORMAT_BUNDLE}</li>
  *
  * The hints that a {@link SliceItem} are a set of strings which annotate
  * the content. The hints that are guaranteed to be understood by the system
  * are defined on {@link Slice}.
  */
 public final class SliceItem implements Parcelable {
+
+    private static final String TAG = "SliceItem";
 
     /**
      * @hide
@@ -65,6 +69,7 @@ public final class SliceItem implements Parcelable {
             FORMAT_INT,
             FORMAT_TIMESTAMP,
             FORMAT_REMOTE_INPUT,
+            FORMAT_BUNDLE,
     })
     @Retention(RetentionPolicy.SOURCE)
     public @interface SliceType {}
@@ -105,6 +110,10 @@ public final class SliceItem implements Parcelable {
      * A {@link SliceItem} that contains a {@link RemoteInput}.
      */
     public static final String FORMAT_REMOTE_INPUT = "input";
+    /**
+     * A {@link SliceItem} that contains a {@link Bundle}.
+     */
+    public static final String FORMAT_BUNDLE = "bundle";
 
     /**
      * @hide
@@ -143,20 +152,6 @@ public final class SliceItem implements Parcelable {
     }
 
     /**
-     * @hide
-     */
-    public void addHint(@Slice.SliceHint String hint) {
-        mHints = ArrayUtils.appendElement(String.class, mHints, hint);
-    }
-
-    /**
-     * @hide
-     */
-    public void removeHint(String hint) {
-        ArrayUtils.removeElement(String.class, mHints, hint);
-    }
-
-    /**
      * Get the format of this SliceItem.
      * <p>
      * The format will be one of the following types supported by the platform:
@@ -167,6 +162,7 @@ public final class SliceItem implements Parcelable {
      * <li>{@link #FORMAT_INT}</li>
      * <li>{@link #FORMAT_TIMESTAMP}</li>
      * <li>{@link #FORMAT_REMOTE_INPUT}</li>
+     * <li>{@link #FORMAT_BUNDLE}</li>
      * @see #getSubType() ()
      */
     public String getFormat() {
@@ -190,6 +186,13 @@ public final class SliceItem implements Parcelable {
      */
     public CharSequence getText() {
         return (CharSequence) mObj;
+    }
+
+    /**
+     * @return The parcelable held by this {@link #FORMAT_BUNDLE} SliceItem
+     */
+    public Bundle getBundle() {
+        return (Bundle) mObj;
     }
 
     /**
@@ -321,6 +324,7 @@ public final class SliceItem implements Parcelable {
             case FORMAT_SLICE:
             case FORMAT_IMAGE:
             case FORMAT_REMOTE_INPUT:
+            case FORMAT_BUNDLE:
                 ((Parcelable) obj).writeToParcel(dest, flags);
                 break;
             case FORMAT_ACTION:
@@ -357,6 +361,8 @@ public final class SliceItem implements Parcelable {
                 return in.readLong();
             case FORMAT_REMOTE_INPUT:
                 return RemoteInput.CREATOR.createFromParcel(in);
+            case FORMAT_BUNDLE:
+                return Bundle.CREATOR.createFromParcel(in);
         }
         throw new RuntimeException("Unsupported type " + type);
     }
