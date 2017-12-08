@@ -11,8 +11,9 @@ LOCAL_SRC_FILES := \
 LOCAL_STATIC_JAVA_LIBRARIES := \
     android-support-test \
     apct-perftests-utils \
-    guava \
-    legacy-android-test
+    guava
+
+LOCAL_JAVA_LIBRARIES := android.test.base
 
 LOCAL_PACKAGE_NAME := CorePerfTests
 

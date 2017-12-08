@@ -22,7 +22,7 @@ LOCAL_JAVA_LIBRARIES := \
     android.test.runner \
     com.android.nfc_extras
 
-LOCAL_STATIC_JAVA_LIBRARIES := junit legacy-android-test
+LOCAL_STATIC_JAVA_LIBRARIES := junit
 
 # Include all test java files.
 LOCAL_SRC_FILES := $(call all-java-files-under, src)
