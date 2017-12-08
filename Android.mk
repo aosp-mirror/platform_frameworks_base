@@ -486,6 +486,10 @@ LOCAL_APIDIFF_NEWAPI := $(LOCAL_PATH)/../../$(basename $(INTERNAL_PLATFORM_API_F
 
 include $(BUILD_APIDIFF)
 
+# Hack to get diffs included in docs output
+out_zip := $(OUT_DOCS)/$(LOCAL_MODULE)-docs.zip
+$(out_zip): $(full_target)
+
 # ====  System API diff ===========================
 include $(CLEAR_VARS)
 
@@ -511,6 +515,10 @@ LOCAL_APIDIFF_OLDAPI := $(LOCAL_PATH)/../../$(SRC_SYSTEM_API_DIR)/$(last_release
 LOCAL_APIDIFF_NEWAPI := $(LOCAL_PATH)/../../$(basename $(INTERNAL_PLATFORM_SYSTEM_API_FILE))
 
 include $(BUILD_APIDIFF)
+
+# Hack to get diffs included in docs output
+out_zip := $(OUT_DOCS)/$(LOCAL_MODULE)-docs.zip
+$(out_zip): $(full_target)
 
 # ====  the api stubs and current.xml ===========================
 include $(CLEAR_VARS)
@@ -655,10 +663,6 @@ $(full_target): $(gen)
 checkbuild: doc-comment-check-docs
 # Check comment when you are updating the API
 update-api: doc-comment-check-docs
-
-# Generate API diffs as part of docs builds
-docs: offline-sdk-referenceonly-diff
-docs: offline-system-sdk-referenceonly-diff
 
 # ====  static html in the sdk ==================================
 include $(CLEAR_VARS)
