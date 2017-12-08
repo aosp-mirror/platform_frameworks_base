@@ -2947,7 +2947,7 @@ public abstract class Context {
             //@hide: LOWPAN_SERVICE,
             //@hide: WIFI_RTT_SERVICE,
             //@hide: ETHERNET_SERVICE,
-            WIFI_RTT_SERVICE,
+            WIFI_RTT_RANGING_SERVICE,
             NSD_SERVICE,
             AUDIO_SERVICE,
             FINGERPRINT_SERVICE,
@@ -3496,7 +3496,7 @@ public abstract class Context {
      * @see android.net.wifi.rtt.WifiRttManager
      * @hide
      */
-    public static final String WIFI_RTT2_SERVICE = "rttmanager2";
+    public static final String WIFI_RTT_RANGING_SERVICE = "rttmanager2";
 
     /**
      * Use with {@link #getSystemService} to retrieve a {@link

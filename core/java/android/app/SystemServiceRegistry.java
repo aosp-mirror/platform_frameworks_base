@@ -618,12 +618,13 @@ final class SystemServiceRegistry {
                         ConnectivityThread.getInstanceLooper());
             }});
 
-        registerService(Context.WIFI_RTT2_SERVICE, WifiRttManager.class,
+        registerService(Context.WIFI_RTT_RANGING_SERVICE, WifiRttManager.class,
                 new CachedServiceFetcher<WifiRttManager>() {
                     @Override
                     public WifiRttManager createService(ContextImpl ctx)
                             throws ServiceNotFoundException {
-                        IBinder b = ServiceManager.getServiceOrThrow(Context.WIFI_RTT2_SERVICE);
+                        IBinder b = ServiceManager.getServiceOrThrow(
+                                Context.WIFI_RTT_RANGING_SERVICE);
                         IWifiRttManager service = IWifiRttManager.Stub.asInterface(b);
                         return new WifiRttManager(ctx.getOuterContext(), service);
                     }});
