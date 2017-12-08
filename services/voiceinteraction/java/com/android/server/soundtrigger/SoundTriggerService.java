@@ -66,6 +66,7 @@ public class SoundTriggerService extends SystemService {
     private SoundTriggerDbHelper mDbHelper;
     private SoundTriggerHelper mSoundTriggerHelper;
     private final TreeMap<UUID, SoundModel> mLoadedModels;
+    private Object mCallbacksLock;
     private final TreeMap<UUID, LocalSoundTriggerRecognitionStatusCallback> mIntentCallbacks;
     private PowerManager.WakeLock mWakelock;
 
@@ -75,6 +76,7 @@ public class SoundTriggerService extends SystemService {
         mServiceStub = new SoundTriggerServiceStub();
         mLocalSoundTriggerService = new LocalSoundTriggerService(context);
         mLoadedModels = new TreeMap<UUID, SoundModel>();
+        mCallbacksLock = new Object();
         mIntentCallbacks = new TreeMap<UUID, LocalSoundTriggerRecognitionStatusCallback>();
         mLock = new Object();
     }
@@ -211,7 +213,9 @@ public class SoundTriggerService extends SystemService {
                 // don't know if the other model is loaded.
                 if (oldModel != null && !oldModel.equals(soundModel)) {
                     mSoundTriggerHelper.unloadGenericSoundModel(soundModel.uuid);
-                    mIntentCallbacks.remove(soundModel.uuid);
+                    synchronized (mCallbacksLock) {
+                        mIntentCallbacks.remove(soundModel.uuid);
+                    }
                 }
                 mLoadedModels.put(soundModel.uuid, soundModel);
             }
@@ -240,7 +244,9 @@ public class SoundTriggerService extends SystemService {
                 // don't know if the other model is loaded.
                 if (oldModel != null && !oldModel.equals(soundModel)) {
                     mSoundTriggerHelper.unloadKeyphraseSoundModel(soundModel.keyphrases[0].id);
-                    mIntentCallbacks.remove(soundModel.uuid);
+                    synchronized (mCallbacksLock) {
+                        mIntentCallbacks.remove(soundModel.uuid);
+                    }
                 }
                 mLoadedModels.put(soundModel.uuid, soundModel);
             }
@@ -262,8 +268,10 @@ public class SoundTriggerService extends SystemService {
                     Slog.e(TAG, soundModelId + " is not loaded");
                     return STATUS_ERROR;
                 }
-                LocalSoundTriggerRecognitionStatusCallback callback = mIntentCallbacks.get(
-                        soundModelId.getUuid());
+                LocalSoundTriggerRecognitionStatusCallback callback = null;
+                synchronized (mCallbacksLock) {
+                    callback = mIntentCallbacks.get(soundModelId.getUuid());
+                }
                 if (callback != null) {
                     Slog.e(TAG, soundModelId + " is already running");
                     return STATUS_ERROR;
@@ -291,7 +299,9 @@ public class SoundTriggerService extends SystemService {
                     Slog.e(TAG, "Failed to start model: " + ret);
                     return ret;
                 }
-                mIntentCallbacks.put(soundModelId.getUuid(), callback);
+                synchronized (mCallbacksLock) {
+                    mIntentCallbacks.put(soundModelId.getUuid(), callback);
+                }
             }
             return STATUS_OK;
         }
@@ -310,8 +320,10 @@ public class SoundTriggerService extends SystemService {
                     Slog.e(TAG, soundModelId + " is not loaded");
                     return STATUS_ERROR;
                 }
-                LocalSoundTriggerRecognitionStatusCallback callback = mIntentCallbacks.get(
-                        soundModelId.getUuid());
+                LocalSoundTriggerRecognitionStatusCallback callback = null;
+                synchronized (mCallbacksLock) {
+                     callback = mIntentCallbacks.get(soundModelId.getUuid());
+                }
                 if (callback == null) {
                     Slog.e(TAG, soundModelId + " is not running");
                     return STATUS_ERROR;
@@ -334,7 +346,9 @@ public class SoundTriggerService extends SystemService {
                     Slog.e(TAG, "Failed to stop model: " + ret);
                     return ret;
                 }
-                mIntentCallbacks.remove(soundModelId.getUuid());
+                synchronized (mCallbacksLock) {
+                    mIntentCallbacks.remove(soundModelId.getUuid());
+                }
             }
             return STATUS_OK;
         }
@@ -379,14 +393,14 @@ public class SoundTriggerService extends SystemService {
         public boolean isRecognitionActive(ParcelUuid parcelUuid) {
             enforceCallingPermission(Manifest.permission.MANAGE_SOUND_TRIGGER);
             if (!isInitialized()) return false;
-            synchronized (mLock) {
+            synchronized (mCallbacksLock) {
                 LocalSoundTriggerRecognitionStatusCallback callback =
                         mIntentCallbacks.get(parcelUuid.getUuid());
                 if (callback == null) {
                     return false;
                 }
-                return mSoundTriggerHelper.isRecognitionRequested(parcelUuid.getUuid());
             }
+            return mSoundTriggerHelper.isRecognitionRequested(parcelUuid.getUuid());
         }
     }
 
@@ -513,7 +527,7 @@ public class SoundTriggerService extends SystemService {
 
         private void removeCallback(boolean releaseWakeLock) {
             mCallbackIntent = null;
-            synchronized (mLock) {
+            synchronized (mCallbacksLock) {
                 mIntentCallbacks.remove(mUuid);
                 if (releaseWakeLock) {
                     mWakelock.release();
@@ -523,7 +537,7 @@ public class SoundTriggerService extends SystemService {
     }
 
     private void grabWakeLock() {
-        synchronized (mLock) {
+        synchronized (mCallbacksLock) {
             if (mWakelock == null) {
                 PowerManager pm = ((PowerManager) mContext.getSystemService(Context.POWER_SERVICE));
                 mWakelock = pm.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK, TAG);
@@ -537,7 +551,7 @@ public class SoundTriggerService extends SystemService {
         public void onSendFinished(PendingIntent pendingIntent, Intent intent, int resultCode,
                 String resultData, Bundle resultExtras) {
             // We're only ever invoked when the callback is done, so release the lock.
-            synchronized (mLock) {
+            synchronized (mCallbacksLock) {
                 mWakelock.release();
             }
         }
