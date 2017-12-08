@@ -122,4 +122,7 @@
 
     <!-- Persian keyboard layout label. [CHAR LIMIT=35] -->
     <string name="keyboard_layout_persian">Persian</string>
+
+    <!-- Azerbaijani keyboard layout label. [CHAR LIMIT=35] -->
+    <string name="keyboard_layout_azerbaijani">Azerbaijani</string>
 </resources>

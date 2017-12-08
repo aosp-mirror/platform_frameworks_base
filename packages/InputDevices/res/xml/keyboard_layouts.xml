@@ -155,4 +155,8 @@
     <keyboard-layout android:name="keyboard_layout_persian"
             android:label="@string/keyboard_layout_persian"
             android:keyboardLayout="@raw/keyboard_layout_persian" />
+
+    <keyboard-layout android:name="keyboard_layout_azerbaijani"
+            android:label="@string/keyboard_layout_azerbaijani"
+            android:keyboardLayout="@raw/keyboard_layout_azerbaijani" />
 </keyboard-layouts>
