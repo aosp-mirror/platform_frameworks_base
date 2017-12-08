@@ -81,4 +81,7 @@ public abstract class ShortcutServiceInternal {
             @Nullable IntentSender resultIntent, int userId);
 
     public abstract boolean isRequestPinItemSupported(int callingUserId, int requestType);
+
+    public abstract boolean isForegroundDefaultLauncher(@NonNull String callingPackage,
+            int callingUid);
 }

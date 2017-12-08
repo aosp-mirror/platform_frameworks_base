@@ -2739,6 +2739,26 @@ public class ShortcutService extends IShortcutService.Stub {
         public boolean isRequestPinItemSupported(int callingUserId, int requestType) {
             return ShortcutService.this.isRequestPinItemSupported(callingUserId, requestType);
         }
+
+        @Override
+        public boolean isForegroundDefaultLauncher(@NonNull String callingPackage, int callingUid) {
+            Preconditions.checkNotNull(callingPackage);
+
+            final int userId = UserHandle.getUserId(callingUid);
+            final ComponentName defaultLauncher = getDefaultLauncher(userId);
+            if (defaultLauncher == null) {
+                return false;
+            }
+            if (!callingPackage.equals(defaultLauncher.getPackageName())) {
+                return false;
+            }
+            synchronized (mLock) {
+                if (!isUidForegroundLocked(callingUid)) {
+                    return false;
+                }
+            }
+            return true;
+        }
     }
 
     final BroadcastReceiver mReceiver = new BroadcastReceiver() {

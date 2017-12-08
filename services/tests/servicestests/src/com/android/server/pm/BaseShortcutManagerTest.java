@@ -2121,22 +2121,30 @@ public abstract class BaseShortcutManagerTest extends InstrumentationTestCase {
                 PACKAGE_FALLBACK_LAUNCHER_PRIORITY);
     }
 
-    protected void makeCallerForeground() {
+    protected void makeUidForeground(int uid) {
         try {
             mService.mUidObserver.onUidStateChanged(
-                    mInjectedCallingUid, ActivityManager.PROCESS_STATE_FOREGROUND_SERVICE, 0);
+                    uid, ActivityManager.PROCESS_STATE_FOREGROUND_SERVICE, 0);
+        } catch (RemoteException e) {
+            e.rethrowAsRuntimeException();
+        }
+    }
+
+    protected void makeCallerForeground() {
+        makeUidForeground(mInjectedCallingUid);
+    }
+
+    protected void makeUidBackground(int uid) {
+        try {
+            mService.mUidObserver.onUidStateChanged(
+                    uid, ActivityManager.PROCESS_STATE_TOP_SLEEPING, 0);
         } catch (RemoteException e) {
             e.rethrowAsRuntimeException();
         }
     }
 
     protected void makeCallerBackground() {
-        try {
-            mService.mUidObserver.onUidStateChanged(
-                    mInjectedCallingUid, ActivityManager.PROCESS_STATE_TOP_SLEEPING, 0);
-        } catch (RemoteException e) {
-            e.rethrowAsRuntimeException();
-        }
+        makeUidBackground(mInjectedCallingUid);
     }
 
     protected void publishManifestShortcutsAsCaller(int resId) {
