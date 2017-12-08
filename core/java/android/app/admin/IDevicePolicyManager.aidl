@@ -370,6 +370,6 @@ interface IDevicePolicyManager {
 
     boolean clearApplicationUserData(in ComponentName admin, in String packageName, in IPackageDataObserver callback);
 
-    void setLogoutButtonEnabled(in ComponentName admin, boolean enabled);
-    boolean isLogoutButtonEnabled();
+    void setLogoutEnabled(in ComponentName admin, boolean enabled);
+    boolean isLogoutEnabled();
 }
