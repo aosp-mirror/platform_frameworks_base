@@ -18,6 +18,7 @@ package com.android.server.usage;
 
 import static android.app.usage.UsageStatsManager.REASON_DEFAULT;
 import static android.app.usage.UsageStatsManager.REASON_FORCED;
+import static android.app.usage.UsageStatsManager.REASON_PREDICTED;
 import static android.app.usage.UsageStatsManager.REASON_TIMEOUT;
 import static android.app.usage.UsageStatsManager.REASON_USAGE;
 import static android.app.usage.UsageStatsManager.STANDBY_BUCKET_ACTIVE;
@@ -117,6 +118,9 @@ public class AppStandbyController {
             STANDBY_BUCKET_FREQUENT,
             STANDBY_BUCKET_RARE
     };
+
+    // Expiration time for predicted bucket
+    private static final long PREDICTION_TIMEOUT = 12 * ONE_HOUR;
 
     // To name the lock for stack traces
     static class Lock {}
@@ -388,25 +392,27 @@ public class AppStandbyController {
                             STANDBY_BUCKET_EXEMPTED);
                 } else {
                     synchronized (mAppIdleLock) {
-                        String bucketingReason = mAppIdleHistory.getAppStandbyReason(packageName,
+                        AppIdleHistory.AppUsageHistory app =
+                                mAppIdleHistory.getAppUsageHistory(packageName,
                                 userId, elapsedRealtime);
                         // If the bucket was forced by the developer, leave it alone
-                        if (REASON_FORCED.equals(bucketingReason)) {
+                        if (REASON_FORCED.equals(app.bucketingReason)) {
                             continue;
                         }
+                        boolean predictionLate = false;
                         // If the bucket was moved up due to usage, let the timeouts apply.
-                        if (REASON_DEFAULT.equals(bucketingReason)
-                                || REASON_USAGE.equals(bucketingReason)
-                                || REASON_TIMEOUT.equals(bucketingReason)) {
-                            int oldBucket = mAppIdleHistory.getAppStandbyBucket(packageName, userId,
-                                    elapsedRealtime);
+                        if (REASON_DEFAULT.equals(app.bucketingReason)
+                                || REASON_USAGE.equals(app.bucketingReason)
+                                || REASON_TIMEOUT.equals(app.bucketingReason)
+                                || (predictionLate = predictionTimedOut(app, elapsedRealtime))) {
+                            int oldBucket = app.currentBucket;
                             int newBucket = getBucketForLocked(packageName, userId,
                                     elapsedRealtime);
                             if (DEBUG) {
                                 Slog.d(TAG, "     Old bucket=" + oldBucket
                                         + ", newBucket=" + newBucket);
                             }
-                            if (oldBucket < newBucket) {
+                            if (oldBucket < newBucket || predictionLate) {
                                 mAppIdleHistory.setAppStandbyBucket(packageName, userId,
                                         elapsedRealtime, newBucket, REASON_TIMEOUT);
                                 maybeInformListeners(packageName, userId, elapsedRealtime,
@@ -422,6 +428,14 @@ public class AppStandbyController {
                     + (mInjector.elapsedRealtime() - elapsedRealtime));
         }
         return true;
+    }
+
+    private boolean predictionTimedOut(AppIdleHistory.AppUsageHistory app, long elapsedRealtime) {
+        return app.bucketingReason != null
+                && app.bucketingReason.startsWith(REASON_PREDICTED)
+                && app.lastPredictedTime > 0
+                && mAppIdleHistory.getElapsedTime(elapsedRealtime)
+                    - app.lastPredictedTime > PREDICTION_TIMEOUT;
     }
 
     private void maybeInformListeners(String packageName, int userId,
