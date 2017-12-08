@@ -265,6 +265,14 @@ public class LauncherApps {
 
         /**
          * Include pinned shortcuts in the result.
+         *
+         * <p>If you are the selected assistant app, and wishes to fetch all shortcuts that the
+         * user owns on the launcher (or by other launchers, in case the user has multiple), use
+         * {@link #FLAG_MATCH_PINNED_BY_ANY_LAUNCHER} instead.
+         *
+         * <p>If you're a regular launcher app, there's no way to get shortcuts pinned by other
+         * launchers, and {@link #FLAG_MATCH_PINNED_BY_ANY_LAUNCHER} will be ignored. So use this
+         * flag to get own pinned shortcuts.
          */
         public static final int FLAG_MATCH_PINNED = 1 << 1;
 
@@ -285,8 +293,15 @@ public class LauncherApps {
          * Include all pinned shortcuts by any launchers, not just by the caller,
          * in the result.
          *
-         * The caller must be the selected assistant app to use this flag, or have the system
+         * <p>The caller must be the selected assistant app to use this flag, or have the system
          * {@code ACCESS_SHORTCUTS} permission.
+         *
+         * <p>If you are the selected assistant app, and wishes to fetch all shortcuts that the
+         * user owns on the launcher (or by other launchers, in case the user has multiple), use
+         * {@link #FLAG_MATCH_PINNED_BY_ANY_LAUNCHER} instead.
+         *
+         * <p>If you're a regular launcher app (or any app that's not the selected assistant app)
+         * then this flag will be ignored.
          */
         public static final int FLAG_MATCH_PINNED_BY_ANY_LAUNCHER = 1 << 10;
 
