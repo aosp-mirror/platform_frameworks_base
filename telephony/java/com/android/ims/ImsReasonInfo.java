@@ -111,6 +111,16 @@ public class ImsReasonInfo implements Parcelable {
     // and this capability is not supported by the network.
     public static final int CODE_IMEI_NOT_ACCEPTED = 243;
 
+    //STK CC errors
+    public static final int CODE_DIAL_MODIFIED_TO_USSD = 244;
+    public static final int CODE_DIAL_MODIFIED_TO_SS = 245;
+    public static final int CODE_DIAL_MODIFIED_TO_DIAL = 246;
+    public static final int CODE_DIAL_MODIFIED_TO_DIAL_VIDEO = 247;
+    public static final int CODE_DIAL_VIDEO_MODIFIED_TO_DIAL = 248;
+    public static final int CODE_DIAL_VIDEO_MODIFIED_TO_DIAL_VIDEO = 249;
+    public static final int CODE_DIAL_VIDEO_MODIFIED_TO_SS = 250;
+    public static final int CODE_DIAL_VIDEO_MODIFIED_TO_USSD = 251;
+
     /**
      * STATUSCODE (SIP response code) (IMS -> Telephony)
      */
@@ -217,6 +227,11 @@ public class ImsReasonInfo implements Parcelable {
     public static final int CODE_UT_OPERATION_NOT_ALLOWED = 803;
     public static final int CODE_UT_NETWORK_ERROR = 804;
     public static final int CODE_UT_CB_PASSWORD_MISMATCH = 821;
+    //STK CC errors
+    public static final int CODE_UT_SS_MODIFIED_TO_DIAL = 822;
+    public static final int CODE_UT_SS_MODIFIED_TO_USSD = 823;
+    public static final int CODE_UT_SS_MODIFIED_TO_SS = 824;
+    public static final int CODE_UT_SS_MODIFIED_TO_DIAL_VIDEO = 825;
 
     /**
      * ECBM
