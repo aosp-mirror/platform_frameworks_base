@@ -24,6 +24,8 @@ import static com.android.systemui.statusbar.phone.StatusBar.SYSTEM_DIALOG_REASO
 
 import android.app.ActivityManager;
 import android.app.ActivityOptions;
+import android.app.KeyguardManager;
+import android.app.trust.TrustManager;
 import android.content.ActivityNotFoundException;
 import android.content.Context;
 import android.content.Intent;
@@ -32,6 +34,7 @@ import android.graphics.Bitmap;
 import android.graphics.Rect;
 import android.graphics.RectF;
 import android.graphics.drawable.Drawable;
+import android.os.AsyncTask.Status;
 import android.os.Handler;
 import android.os.SystemClock;
 import android.util.ArraySet;
@@ -225,6 +228,7 @@ public class RecentsImpl implements ActivityOptions.OnAnimationFinishedListener 
         }
     };
 
+    private TrustManager mTrustManager;
     protected Context mContext;
     protected Handler mHandler;
     TaskStackListenerImpl mTaskStackListener;
@@ -271,6 +275,8 @@ public class RecentsImpl implements ActivityOptions.OnAnimationFinishedListener 
         // Initialize the static configuration resources
         mDummyStackView = new TaskStackView(mContext);
         reloadResources();
+
+        mTrustManager = (TrustManager) mContext.getSystemService(Context.TRUST_SERVICE);
     }
 
     public void onBootCompleted() {
@@ -309,8 +315,7 @@ public class RecentsImpl implements ActivityOptions.OnAnimationFinishedListener 
      * {@link Recents#onBusEvent(ScreenPinningRequestEvent)}.
      */
     public void onStartScreenPinning(Context context, int taskId) {
-        SystemUIApplication app = (SystemUIApplication) context;
-        StatusBar statusBar = app.getComponent(StatusBar.class);
+        final StatusBar statusBar = getStatusBar();
         if (statusBar != null) {
             statusBar.showScreenPinningRequest(taskId, false);
         }
@@ -350,8 +355,8 @@ public class RecentsImpl implements ActivityOptions.OnAnimationFinishedListener 
             if (forceVisible || !ssp.isRecentsActivityVisible(isHomeStackVisible)) {
                 ActivityManager.RunningTaskInfo runningTask =
                         ActivityManagerWrapper.getInstance().getRunningTask();
-                startRecentsActivity(runningTask, isHomeStackVisible.value || fromHome, animate,
-                        growTarget);
+                startRecentsActivityAndDismissKeyguardIfNeeded(runningTask,
+                        isHomeStackVisible.value || fromHome, animate, growTarget);
             }
         } catch (ActivityNotFoundException e) {
             Log.e(TAG, "Failed to launch RecentsActivity", e);
@@ -442,8 +447,8 @@ public class RecentsImpl implements ActivityOptions.OnAnimationFinishedListener 
                 // Otherwise, start the recents activity
                 ActivityManager.RunningTaskInfo runningTask =
                         ActivityManagerWrapper.getInstance().getRunningTask();
-                startRecentsActivity(runningTask, isHomeStackVisible.value, true /* animate */,
-                        growTarget);
+                startRecentsActivityAndDismissKeyguardIfNeeded(runningTask,
+                        isHomeStackVisible.value, true /* animate */, growTarget);
 
                 // Only close the other system windows if we are actually showing recents
                 ActivityManagerWrapper.getInstance().closeSystemWindows(
@@ -459,6 +464,12 @@ public class RecentsImpl implements ActivityOptions.OnAnimationFinishedListener 
         // Skip preloading if the task is locked
         SystemServicesProxy ssp = Recents.getSystemServices();
         if (ssp.isScreenPinningActive()) {
+            return;
+        }
+
+        // Skip preloading recents when keyguard is showing
+        final StatusBar statusBar = getStatusBar();
+        if (statusBar != null && statusBar.isKeyguardShowing()) {
             return;
         }
 
@@ -942,9 +953,27 @@ public class RecentsImpl implements ActivityOptions.OnAnimationFinishedListener 
     }
 
     /**
-     * Shows the recents activity
+     * Shows the recents activity after dismissing the keyguard if visible
      */
-    protected void startRecentsActivity(ActivityManager.RunningTaskInfo runningTask,
+    protected void startRecentsActivityAndDismissKeyguardIfNeeded(
+            final ActivityManager.RunningTaskInfo runningTask, final boolean isHomeStackVisible,
+            final boolean animate, final int growTarget) {
+        // Preload only if device for current user is unlocked
+        final StatusBar statusBar = getStatusBar();
+        if (statusBar != null && statusBar.isKeyguardShowing()) {
+            statusBar.executeRunnableDismissingKeyguard(() -> {
+                    // Flush trustmanager before checking device locked per user when preloading
+                    mTrustManager.reportKeyguardShowingChanged();
+                    mHandler.post(() -> startRecentsActivity(runningTask, isHomeStackVisible,
+                            animate, growTarget));
+                }, null,  true /* dismissShade */, false /* afterKeyguardGone */,
+                true /* deferred */);
+        } else {
+            startRecentsActivity(runningTask, isHomeStackVisible, animate, growTarget);
+        }
+    }
+
+    private void startRecentsActivity(ActivityManager.RunningTaskInfo runningTask,
             boolean isHomeStackVisible, boolean animate, int growTarget) {
         RecentsTaskLoader loader = Recents.getTaskLoader();
         RecentsActivityLaunchState launchState = Recents.getConfiguration().getLaunchState();
@@ -1031,6 +1060,10 @@ public class RecentsImpl implements ActivityOptions.OnAnimationFinishedListener 
                 result, displayRect.width(), displayRect.height(),
                 Recents.getSystemServices().getDockedDividerSize(mContext));
         return result;
+    }
+
+    private StatusBar getStatusBar() {
+        return ((SystemUIApplication) mContext).getComponent(StatusBar.class);
     }
 
     /**
