@@ -21,6 +21,7 @@ import static android.content.pm.ActivityInfo.SCREEN_ORIENTATION_UNSET;
 import static android.content.pm.ActivityInfo.SCREEN_ORIENTATION_UNSPECIFIED;
 import static com.android.server.wm.proto.WindowContainerProto.CONFIGURATION_CONTAINER;
 import static com.android.server.wm.proto.WindowContainerProto.ORIENTATION;
+import static com.android.server.wm.proto.WindowContainerProto.VISIBLE;
 import static android.view.SurfaceControl.Transaction;
 
 import android.annotation.CallSuper;
@@ -809,6 +810,7 @@ class WindowContainer<E extends WindowContainer> extends ConfigurationContainer<
         final long token = proto.start(fieldId);
         super.writeToProto(proto, CONFIGURATION_CONTAINER, trim);
         proto.write(ORIENTATION, mOrientation);
+        proto.write(VISIBLE, isVisible());
         proto.end(token);
     }
 

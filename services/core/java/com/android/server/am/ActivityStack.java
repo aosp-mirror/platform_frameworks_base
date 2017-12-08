@@ -483,10 +483,12 @@ class ActivityStack<T extends StackWindowController> extends ConfigurationContai
 
     @Override
     public void setWindowingMode(int windowingMode) {
-        setWindowingMode(windowingMode, false /* animate */, true /* showRecents */);
+        setWindowingMode(windowingMode, false /* animate */, true /* showRecents */,
+                true /* sendNonResizeableNotification */);
     }
 
-    void setWindowingMode(int preferredWindowingMode, boolean animate, boolean showRecents) {
+    void setWindowingMode(int preferredWindowingMode, boolean animate, boolean showRecents,
+            boolean sendNonResizeableNotification) {
         final int currentMode = getWindowingMode();
         final ActivityDisplay display = getDisplay();
         final TaskRecord topTask = topTask();
@@ -505,7 +507,8 @@ class ActivityStack<T extends StackWindowController> extends ConfigurationContai
         final boolean alreadyInSplitScreenMode = display.hasSplitScreenPrimaryStack();
 
         // Take any required action due to us not supporting the preferred windowing mode.
-        if (windowingMode != preferredWindowingMode && isActivityTypeStandardOrUndefined()) {
+        if (sendNonResizeableNotification
+                && windowingMode != preferredWindowingMode && isActivityTypeStandardOrUndefined()) {
             if (alreadyInSplitScreenMode
                     && (preferredWindowingMode == WINDOWING_MODE_SPLIT_SCREEN_PRIMARY
                     || preferredWindowingMode == WINDOWING_MODE_SPLIT_SCREEN_SECONDARY)) {
@@ -524,8 +527,9 @@ class ActivityStack<T extends StackWindowController> extends ConfigurationContai
         final WindowManagerService wm = mService.mWindowManager;
         final ActivityRecord topActivity = getTopActivity();
 
-        if (windowingMode != WINDOWING_MODE_FULLSCREEN && topActivity != null
-                && topActivity.isNonResizableOrForcedResizable() && !topActivity.noDisplay) {
+        if (sendNonResizeableNotification && windowingMode != WINDOWING_MODE_FULLSCREEN
+                && topActivity != null && topActivity.isNonResizableOrForcedResizable()
+                && !topActivity.noDisplay) {
             // Inform the user that they are starting an app that may not work correctly in
             // multi-window mode.
             final String packageName = topActivity.appInfo.packageName;
