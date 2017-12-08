@@ -57,31 +57,30 @@ std::unique_ptr<LoadedApk> LoadedApk::LoadApkFromPath(const StringPiece& path, I
 
 std::unique_ptr<LoadedApk> LoadedApk::LoadProtoApkFromFileCollection(
     const Source& source, unique_ptr<io::IFileCollection> collection, IDiagnostics* diag) {
+  std::unique_ptr<ResourceTable> table;
+
   io::IFile* table_file = collection->FindFile(kProtoResourceTablePath);
-  if (table_file == nullptr) {
-    diag->Error(DiagMessage(source) << "failed to find " << kProtoResourceTablePath);
-    return {};
-  }
+  if (table_file != nullptr) {
+    pb::ResourceTable pb_table;
+    std::unique_ptr<io::InputStream> in = table_file->OpenInputStream();
+    if (in == nullptr) {
+      diag->Error(DiagMessage(source) << "failed to open " << kProtoResourceTablePath);
+      return {};
+    }
 
-  std::unique_ptr<io::InputStream> in = table_file->OpenInputStream();
-  if (in == nullptr) {
-    diag->Error(DiagMessage(source) << "failed to open " << kProtoResourceTablePath);
-    return {};
-  }
+    io::ZeroCopyInputAdaptor adaptor(in.get());
+    if (!pb_table.ParseFromZeroCopyStream(&adaptor)) {
+      diag->Error(DiagMessage(source) << "failed to read " << kProtoResourceTablePath);
+      return {};
+    }
 
-  pb::ResourceTable pb_table;
-  io::ZeroCopyInputAdaptor adaptor(in.get());
-  if (!pb_table.ParseFromZeroCopyStream(&adaptor)) {
-    diag->Error(DiagMessage(source) << "failed to read " << kProtoResourceTablePath);
-    return {};
-  }
-
-  std::string error;
-  std::unique_ptr<ResourceTable> table = util::make_unique<ResourceTable>();
-  if (!DeserializeTableFromPb(pb_table, collection.get(), table.get(), &error)) {
-    diag->Error(DiagMessage(source)
-                << "failed to deserialize " << kProtoResourceTablePath << ": " << error);
-    return {};
+    std::string error;
+    table = util::make_unique<ResourceTable>();
+    if (!DeserializeTableFromPb(pb_table, collection.get(), table.get(), &error)) {
+      diag->Error(DiagMessage(source)
+                  << "failed to deserialize " << kProtoResourceTablePath << ": " << error);
+      return {};
+    }
   }
 
   io::IFile* manifest_file = collection->FindFile(kAndroidManifestPath);
@@ -103,6 +102,7 @@ std::unique_ptr<LoadedApk> LoadedApk::LoadProtoApkFromFileCollection(
     return {};
   }
 
+  std::string error;
   std::unique_ptr<xml::XmlResource> manifest = DeserializeXmlResourceFromPb(pb_node, &error);
   if (manifest == nullptr) {
     diag->Error(DiagMessage(source)
@@ -115,24 +115,21 @@ std::unique_ptr<LoadedApk> LoadedApk::LoadProtoApkFromFileCollection(
 
 std::unique_ptr<LoadedApk> LoadedApk::LoadBinaryApkFromFileCollection(
     const Source& source, unique_ptr<io::IFileCollection> collection, IDiagnostics* diag) {
+  std::unique_ptr<ResourceTable> table;
+
   io::IFile* table_file = collection->FindFile(kApkResourceTablePath);
-  if (table_file == nullptr) {
-    diag->Error(DiagMessage(source) << "failed to find " << kApkResourceTablePath);
-
-    return {};
-  }
-
-  std::unique_ptr<io::IData> data = table_file->OpenAsData();
-  if (data == nullptr) {
-    diag->Error(DiagMessage(source) << "failed to open " << kApkResourceTablePath);
-    return {};
-  }
-
-  std::unique_ptr<ResourceTable> table = util::make_unique<ResourceTable>();
-  BinaryResourceParser parser(diag, table.get(), source, data->data(), data->size(),
-                              collection.get());
-  if (!parser.Parse()) {
-    return {};
+  if (table_file != nullptr) {
+    table = util::make_unique<ResourceTable>();
+    std::unique_ptr<io::IData> data = table_file->OpenAsData();
+    if (data == nullptr) {
+      diag->Error(DiagMessage(source) << "failed to open " << kApkResourceTablePath);
+      return {};
+    }
+    BinaryResourceParser parser(diag, table.get(), source, data->data(), data->size(),
+                                collection.get());
+    if (!parser.Parse()) {
+      return {};
+    }
   }
 
   io::IFile* manifest_file = collection->FindFile(kAndroidManifestPath);
