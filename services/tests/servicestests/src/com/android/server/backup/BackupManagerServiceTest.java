@@ -117,7 +117,7 @@ public class BackupManagerServiceTest {
                 "dataManagementLabel");
 
         verify(mTransportManager)
-                .describeTransport(
+                .updateTransportAttributes(
                         eq(TRANSPORT_COMPONENT),
                         eq(TRANSPORT_NAME),
                         eq(configurationIntent),
@@ -247,7 +247,7 @@ public class BackupManagerServiceTest {
                 null);
 
         verify(mTransportManager)
-                .describeTransport(
+                .updateTransportAttributes(
                         eq(TRANSPORT_COMPONENT),
                         eq(TRANSPORT_NAME),
                         eq(configurationIntent),
@@ -274,7 +274,7 @@ public class BackupManagerServiceTest {
                 "dataManagementLabel");
 
         verify(mTransportManager)
-                .describeTransport(
+                .updateTransportAttributes(
                         eq(TRANSPORT_COMPONENT),
                         eq(TRANSPORT_NAME),
                         eq(configurationIntent),
