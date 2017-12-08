@@ -216,6 +216,8 @@
     <string name="global_action_power_off" msgid="4471879440839879722">"Вимкнути"</string>
     <string name="global_action_emergency" msgid="7112311161137421166">"Екстрений виклик"</string>
     <string name="global_action_bug_report" msgid="7934010578922304799">"Звіт про помилки"</string>
+    <!-- no translation found for global_action_logout (935179188218826050) -->
+    <skip />
     <string name="bugreport_title" msgid="2667494803742548533">"Звіт про помилку"</string>
     <string name="bugreport_message" msgid="398447048750350456">"Інформація про поточний стан вашого пристрою буде зібрана й надіслана електронною поштою. Підготовка звіту триватиме певний час."</string>
     <string name="bugreport_option_interactive_title" msgid="8635056131768862479">"Інтерактивний звіт"</string>
@@ -1546,6 +1548,10 @@
     <string name="accessibility_shortcut_toogle_warning" msgid="7256507885737444807">"Коли ярлик увімкнено, після натискання обох клавіш гучності й утримування їх протягом 3 секунд увімкнеться функція спеціальних можливостей.\n\n Поточна функція спеціальних можливостей:\n <xliff:g id="SERVICE_NAME">%1$s</xliff:g>\n\n Цю функцію можна змінити в меню \"Налаштування\" &gt; \"Спеціальні можливості\"."</string>
     <string name="disable_accessibility_shortcut" msgid="627625354248453445">"Вимкнути ярлик"</string>
     <string name="leave_accessibility_shortcut_on" msgid="7653111894438512680">"Використовувати ярлик"</string>
+    <!-- no translation found for color_inversion_feature_name (4231186527799958644) -->
+    <skip />
+    <!-- no translation found for color_correction_feature_name (6779391426096954933) -->
+    <skip />
     <string name="accessibility_shortcut_enabling_service" msgid="7771852911861522636">"Ярлик спеціальних можливостей увімкнув <xliff:g id="SERVICE_NAME">%1$s</xliff:g>"</string>
     <string name="accessibility_shortcut_disabling_service" msgid="2747243438223109821">"Ярлик спеціальних можливостей вимкнув <xliff:g id="SERVICE_NAME">%1$s</xliff:g>"</string>
     <string name="accessibility_button_prompt_text" msgid="4234556536456854251">"Виберіть функцію для кнопки спеціальних можливостей:"</string>
@@ -1750,6 +1756,8 @@
     <string name="zen_mode_default_weeknights_name" msgid="3081318299464998143">"Увечері в будні"</string>
     <string name="zen_mode_default_weekends_name" msgid="2786495801019345244">"На вихідних"</string>
     <string name="zen_mode_default_events_name" msgid="8158334939013085363">"Подія"</string>
+    <!-- no translation found for zen_mode_default_every_night_name (3012363838882944175) -->
+    <skip />
     <string name="muted_by" msgid="6147073845094180001">"<xliff:g id="THIRD_PARTY">%1$s</xliff:g> вимикає звук"</string>
     <string name="system_error_wipe_data" msgid="6608165524785354962">"Через внутрішню помилку ваш пристрій може працювати нестабільно. Відновіть заводські налаштування."</string>
     <string name="system_error_manufacturer" msgid="8086872414744210668">"На пристрої сталася внутрішня помилка. Зв’яжіться з виробником пристрою, щоб дізнатися більше."</string>

@@ -212,6 +212,8 @@
     <string name="global_action_power_off" msgid="4471879440839879722">"კვების გამორთვა"</string>
     <string name="global_action_emergency" msgid="7112311161137421166">"საგანგებო სამსახურები"</string>
     <string name="global_action_bug_report" msgid="7934010578922304799">"ხარვეზის შესახებ ანგარიში"</string>
+    <!-- no translation found for global_action_logout (935179188218826050) -->
+    <skip />
     <string name="bugreport_title" msgid="2667494803742548533">"შექმენით შეცდომის ანგარიში"</string>
     <string name="bugreport_message" msgid="398447048750350456">"იგი შეაგროვებს ინფორმაციას თქვენი მოწყობილობის ამჟამინდელი მდგომარეობის შესახებ, რათა ის ელფოსტის შეტყობინების სახით გააგზავნოს. ხარვეზის ანგარიშის მომზადებასა და შეტყობინების გაგზავნას გარკვეული დრო სჭირდება. გთხოვთ, მოითმინოთ."</string>
     <string name="bugreport_option_interactive_title" msgid="8635056131768862479">"ინტერაქტიული ანგარიში"</string>
@@ -1051,7 +1053,7 @@
     <string name="screen_compat_mode_hint" msgid="1064524084543304459">"ხელახალი გააქტიურება განყოფილებაში: სისტემის პარამეტრები &gt; აპები &gt; ჩამოტვირთულები."</string>
     <string name="unsupported_display_size_message" msgid="6545327290756295232">"<xliff:g id="APP_NAME">%1$s</xliff:g>-ის მიერ ეკრანის ამჟამინდელი პარამეტრები მხარდაუჭერელია და შეიძლება არასათანადოდ იმუშაოს."</string>
     <string name="unsupported_display_size_show" msgid="7969129195360353041">"ყოველთვის ჩვენება"</string>
-    <string name="unsupported_compile_sdk_message" msgid="4253168368781441759">"<xliff:g id="APP_NAME">%1$s</xliff:g> შექმნილია Android-ის ოპერატიული სისტემის არათავსებადი ვერსიისთვის და შეიძლება გაუმართავად იმუშაოს. შესაძლოა ხელმისაწვდომი იყოს აპის განახლებული ვერსია."</string>
+    <string name="unsupported_compile_sdk_message" msgid="4253168368781441759">"<xliff:g id="APP_NAME">%1$s</xliff:g> შექმნილია Android-ის ოპერაციული სისტემის არათავსებადი ვერსიისთვის და შეიძლება გაუმართავად იმუშაოს. შესაძლოა ხელმისაწვდომი იყოს აპის განახლებული ვერსია."</string>
     <string name="unsupported_compile_sdk_show" msgid="2681877855260970231">"ყოველთვის ჩვენება"</string>
     <string name="unsupported_compile_sdk_check_update" msgid="3312723623323216101">"განახლების შემოწმება"</string>
     <string name="smv_application" msgid="3307209192155442829">"აპმა <xliff:g id="APPLICATION">%1$s</xliff:g> (პროცესი <xliff:g id="PROCESS">%2$s</xliff:g>) დაარღვია საკუთარი StrictMode დებულება."</string>
@@ -1498,6 +1500,10 @@
     <string name="accessibility_shortcut_toogle_warning" msgid="7256507885737444807">"მალსახმობის ჩართვის შემთხვევაში, ხმის ორივე ღილაკზე 3 წამის განმავლობაში დაჭერით მარტივი წვდომის ფუნქცია ჩაირთვება.\n\n მარტივი წვდომის ამჟამინდელი ფუნქციაა:\n <xliff:g id="SERVICE_NAME">%1$s</xliff:g>\n\n ამ ფუნქციის შეცვლა შეგიძლიათ აქ: პარამეტრები &gt; მარტივი წვდომა."</string>
     <string name="disable_accessibility_shortcut" msgid="627625354248453445">"მალსახმობის გამორთვა"</string>
     <string name="leave_accessibility_shortcut_on" msgid="7653111894438512680">"მალსახმობის გამოყენება"</string>
+    <!-- no translation found for color_inversion_feature_name (4231186527799958644) -->
+    <skip />
+    <!-- no translation found for color_correction_feature_name (6779391426096954933) -->
+    <skip />
     <string name="accessibility_shortcut_enabling_service" msgid="7771852911861522636">"მარტივი წვდომის მალსახმობმა ჩართო <xliff:g id="SERVICE_NAME">%1$s</xliff:g>"</string>
     <string name="accessibility_shortcut_disabling_service" msgid="2747243438223109821">"მარტივი წვდომის მალსახმობმა გამორთო <xliff:g id="SERVICE_NAME">%1$s</xliff:g>"</string>
     <string name="accessibility_button_prompt_text" msgid="4234556536456854251">"აირჩიეთ მარტივი წვდომის ღილაკზე შეხებისას გამოსაყენებელი ფუნქცია:"</string>
@@ -1684,6 +1690,8 @@
     <string name="zen_mode_default_weeknights_name" msgid="3081318299464998143">"სამუშაო კვირის ღამე"</string>
     <string name="zen_mode_default_weekends_name" msgid="2786495801019345244">"შაბათ-კვირა"</string>
     <string name="zen_mode_default_events_name" msgid="8158334939013085363">"მოვლენა"</string>
+    <!-- no translation found for zen_mode_default_every_night_name (3012363838882944175) -->
+    <skip />
     <string name="muted_by" msgid="6147073845094180001">"დადუმებულია <xliff:g id="THIRD_PARTY">%1$s</xliff:g>-ის მიერ"</string>
     <string name="system_error_wipe_data" msgid="6608165524785354962">"ფიქსირდება თქვენი მ ოწყობილობის შიდა პრობლემა და შეიძლება არასტაბილური იყოს, სანამ ქარხნულ მონაცემების არ განაახლებთ."</string>
     <string name="system_error_manufacturer" msgid="8086872414744210668">"ფიქსირდება თქვენი მოწყობილობის შიდა პრობლემა. დეტალებისათვის, მიმართეთ თქვენს მწარმოებელს."</string>
