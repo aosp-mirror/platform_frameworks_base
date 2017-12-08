@@ -59,7 +59,6 @@ class Task extends WindowContainer<AppWindowToken> {
     final int mTaskId;
     final int mUserId;
     private boolean mDeferRemoval = false;
-    final WindowManagerService mService;
 
     final Rect mPreparedFrozenBounds = new Rect();
     final Configuration mPreparedFrozenMergedConfig = new Configuration();
@@ -102,10 +101,10 @@ class Task extends WindowContainer<AppWindowToken> {
     Task(int taskId, TaskStack stack, int userId, WindowManagerService service, int resizeMode,
             boolean supportsPictureInPicture, TaskDescription taskDescription,
             TaskWindowContainerController controller) {
+        super(service);
         mTaskId = taskId;
         mStack = stack;
         mUserId = userId;
-        mService = service;
         mResizeMode = resizeMode;
         mSupportsPictureInPicture = supportsPictureInPicture;
         setController(controller);

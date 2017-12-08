@@ -48,6 +48,10 @@ public class DimmerTests extends WindowTestsBase {
         final SurfaceControl mControl = mock(SurfaceControl.class);
         final SurfaceControl.Transaction mTransaction = mock(SurfaceControl.Transaction.class);
 
+        TestWindowContainer() {
+            super(sWm);
+        }
+
         @Override
         SurfaceControl getSurfaceControl() {
             return mControl;
@@ -65,6 +69,10 @@ public class DimmerTests extends WindowTestsBase {
         final SurfaceControl mHostControl = mock(SurfaceControl.class);
         final SurfaceControl.Transaction mHostTransaction = mock(SurfaceControl.Transaction.class);
 
+        MockSurfaceBuildingContainer() {
+            super(sWm);
+        }
+
         class MockSurfaceBuilder extends SurfaceControl.Builder {
             MockSurfaceBuilder(SurfaceSession ss) {
                 super(ss);
@@ -77,6 +85,7 @@ public class DimmerTests extends WindowTestsBase {
                 return sc;
             }
         }
+
 
         @Override
         SurfaceControl.Builder makeChildSurface(WindowContainer child) {

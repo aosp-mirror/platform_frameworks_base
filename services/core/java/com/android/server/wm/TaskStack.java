@@ -75,9 +75,6 @@ public class TaskStack extends WindowContainer<Task> implements
     /** Unique identifier */
     final int mStackId;
 
-    /** The service */
-    private final WindowManagerService mService;
-
     /** The display this stack sits under. */
     // TODO: Track parent marks like this in WindowContainer.
     private DisplayContent mDisplayContent;
@@ -151,7 +148,7 @@ public class TaskStack extends WindowContainer<Task> implements
     final Rect mTmpDimBoundsRect = new Rect();
 
     TaskStack(WindowManagerService service, int stackId, StackWindowController controller) {
-        mService = service;
+        super(service);
         mStackId = stackId;
         setController(controller);
         mDockedStackMinimizeThickness = service.mContext.getResources().getDimensionPixelSize(

@@ -46,9 +46,6 @@ import java.io.PrintWriter;
 class WindowToken extends WindowContainer<WindowState> {
     private static final String TAG = TAG_WITH_CLASS_NAME ? "WindowToken" : TAG_WM;
 
-    // The window manager!
-    protected final WindowManagerService mService;
-
     // The actual token.
     final IBinder token;
 
@@ -107,7 +104,7 @@ class WindowToken extends WindowContainer<WindowState> {
 
     WindowToken(WindowManagerService service, IBinder _token, int type, boolean persistOnEmpty,
             DisplayContent dc, boolean ownerCanManageAppTokens) {
-        mService = service;
+        super(service);
         token = _token;
         windowType = type;
         mPersistOnEmpty = persistOnEmpty;
