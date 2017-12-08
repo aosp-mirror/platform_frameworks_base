@@ -715,14 +715,14 @@ final class AutofillManagerServiceImpl {
             @Nullable ArrayList<String> changedDatasetIds,
             @Nullable ArrayList<AutofillId> manuallyFilledFieldIds,
             @Nullable ArrayList<ArrayList<String>> manuallyFilledDatasetIds,
-            @NonNull ArrayList<AutofillId> detectedFieldIdsList,
-            @NonNull ArrayList<Match> detectedMatchesList) {
+            @Nullable ArrayList<AutofillId> detectedFieldIdsList,
+            @Nullable ArrayList<Match> detectedMatchesList) {
 
         synchronized (mLock) {
             if (isValidEventLocked("logDatasetNotSelected()", sessionId)) {
                 AutofillId[] detectedFieldsIds = null;
                 Match[] detectedMatches = null;
-                if (!detectedFieldIdsList.isEmpty()) {
+                if (detectedFieldIdsList != null) {
                     detectedFieldsIds = new AutofillId[detectedFieldIdsList.size()];
                     detectedFieldIdsList.toArray(detectedFieldsIds);
                     detectedMatches = new Match[detectedMatchesList.size()];
