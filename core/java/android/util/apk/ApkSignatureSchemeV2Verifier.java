@@ -917,18 +917,6 @@ public class ApkSignatureSchemeV2Verifier {
         }
     }
 
-    public static class SignatureNotFoundException extends Exception {
-        private static final long serialVersionUID = 1L;
-
-        public SignatureNotFoundException(String message) {
-            super(message);
-        }
-
-        public SignatureNotFoundException(String message, Throwable cause) {
-            super(message, cause);
-        }
-    }
-
     /**
      * {@link DataDigester} that updates multiple {@link MessageDigest}s whenever data is feeded.
      */
