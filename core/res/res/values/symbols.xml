@@ -1031,9 +1031,11 @@
   <java-symbol type="string" name="stk_cc_ss_to_dial" />
   <java-symbol type="string" name="stk_cc_ss_to_ss" />
   <java-symbol type="string" name="stk_cc_ss_to_ussd" />
+  <java-symbol type="string" name="stk_cc_ss_to_dial_video" />
   <java-symbol type="string" name="stk_cc_ussd_to_dial" />
   <java-symbol type="string" name="stk_cc_ussd_to_ss" />
   <java-symbol type="string" name="stk_cc_ussd_to_ussd" />
+  <java-symbol type="string" name="stk_cc_ussd_to_dial_video" />
   <java-symbol type="string" name="safe_media_volume_warning" />
   <java-symbol type="string" name="media_route_status_scanning" />
   <java-symbol type="string" name="media_route_status_connecting" />
