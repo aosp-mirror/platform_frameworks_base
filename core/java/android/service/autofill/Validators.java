@@ -33,6 +33,8 @@ public final class Validators {
     /**
      * Creates a validator that is only valid if all {@code validators} are valid.
      *
+     * <p>Used to represent an {@code AND} boolean operation in a chain of validators.
+     *
      * @throws IllegalArgumentException if any element of {@code validators} is an instance of a
      * class that is not provided by the Android System.
      */
@@ -44,6 +46,8 @@ public final class Validators {
     /**
      * Creates a validator that is valid if any of the {@code validators} is valid.
      *
+     * <p>Used to represent an {@code OR} boolean operation in a chain of validators.
+     *
      * @throws IllegalArgumentException if any element of {@code validators} is an instance of a
      * class that is not provided by the Android System.
      */
@@ -53,7 +57,9 @@ public final class Validators {
     }
 
     /**
-     * Creates a validator that is valid only if {@code validator} is not.
+     * Creates a validator that is valid when {@code validator} is not, and vice versa.
+     *
+     * <p>Used to represent a {@code NOT} boolean operation in a chain of validators.
      *
      * @throws IllegalArgumentException if {@code validator} is an instance of a class that is not
      * provided by the Android System.
