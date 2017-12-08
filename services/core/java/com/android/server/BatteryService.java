@@ -421,7 +421,9 @@ public final class BatteryService extends SystemService {
         boolean logOutlier = false;
         long dischargeDuration = 0;
 
-        mBatteryLevelCritical = (mHealthInfo.batteryLevel <= mCriticalBatteryLevel);
+        mBatteryLevelCritical =
+            mHealthInfo.batteryStatus != BatteryManager.BATTERY_STATUS_UNKNOWN
+            && mHealthInfo.batteryLevel <= mCriticalBatteryLevel;
         if (mHealthInfo.chargerAcOnline) {
             mPlugType = BatteryManager.BATTERY_PLUGGED_AC;
         } else if (mHealthInfo.chargerUsbOnline) {
@@ -509,6 +511,8 @@ public final class BatteryService extends SystemService {
             if (!mBatteryLevelLow) {
                 // Should we now switch in to low battery mode?
                 if (mPlugType == BATTERY_PLUGGED_NONE
+                        && mHealthInfo.batteryStatus !=
+                           BatteryManager.BATTERY_STATUS_UNKNOWN
                         && mHealthInfo.batteryLevel <= mLowBatteryWarningLevel) {
                     mBatteryLevelLow = true;
                 }
