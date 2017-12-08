@@ -16,7 +16,7 @@
 
 package android.net.util;
 
-import static android.net.util.BlockingSocketReader.DEFAULT_RECV_BUF_SIZE;
+import static android.net.util.PacketReader.DEFAULT_RECV_BUF_SIZE;
 import static android.system.OsConstants.*;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
@@ -53,13 +53,13 @@ import org.junit.Test;
 import libcore.io.IoBridge;
 
 /**
- * Tests for BlockingSocketReader.
+ * Tests for PacketReader.
  *
  * @hide
  */
 @RunWith(AndroidJUnit4.class)
 @SmallTest
-public class BlockingSocketReaderTest {
+public class PacketReaderTest {
     static final InetAddress LOOPBACK6 = Inet6Address.getLoopbackAddress();
     static final StructTimeval TIMEO = StructTimeval.fromMillis(500);
 
@@ -69,9 +69,9 @@ public class BlockingSocketReaderTest {
     protected byte[] mLastRecvBuf;
     protected boolean mStopped;
     protected HandlerThread mHandlerThread;
-    protected BlockingSocketReader mReceiver;
+    protected PacketReader mReceiver;
 
-    class UdpLoopbackReader extends BlockingSocketReader {
+    class UdpLoopbackReader extends PacketReader {
         public UdpLoopbackReader(Handler h) {
             super(h);
         }
@@ -121,7 +121,7 @@ public class BlockingSocketReaderTest {
         mLastRecvBuf = null;
         mStopped = false;
 
-        mHandlerThread = new HandlerThread(BlockingSocketReaderTest.class.getSimpleName());
+        mHandlerThread = new HandlerThread(PacketReaderTest.class.getSimpleName());
         mHandlerThread.start();
     }
 
@@ -188,8 +188,8 @@ public class BlockingSocketReaderTest {
         mReceiver = null;
     }
 
-    class NullBlockingSocketReader extends BlockingSocketReader {
-        public NullBlockingSocketReader(Handler h, int recvbufsize) {
+    class NullPacketReader extends PacketReader {
+        public NullPacketReader(Handler h, int recvbufsize) {
             super(h, recvbufsize);
         }
 
@@ -202,7 +202,7 @@ public class BlockingSocketReaderTest {
         final Handler h = mHandlerThread.getThreadHandler();
 
         for (int i : new int[]{-1, 0, 1, DEFAULT_RECV_BUF_SIZE-1}) {
-            final BlockingSocketReader b = new NullBlockingSocketReader(h, i);
+            final PacketReader b = new NullPacketReader(h, i);
             assertEquals(DEFAULT_RECV_BUF_SIZE, b.recvBufSize());
         }
     }

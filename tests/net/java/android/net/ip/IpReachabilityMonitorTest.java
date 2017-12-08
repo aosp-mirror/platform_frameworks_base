@@ -18,10 +18,12 @@ package android.net.ip;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.fail;
-import static org.mockito.Mockito.any;
-import static org.mockito.Mockito.anyInt;
+import static org.mockito.Mockito.anyString;
+import static org.mockito.Mockito.when;
 
 import android.net.util.SharedLog;
+import android.os.Handler;
+import android.os.Looper;
 import android.support.test.filters.SmallTest;
 import android.support.test.runner.AndroidJUnit4;
 
@@ -42,14 +44,18 @@ public class IpReachabilityMonitorTest {
     @Mock IpReachabilityMonitor.Callback mCallback;
     @Mock IpReachabilityMonitor.Dependencies mDependencies;
     @Mock SharedLog mLog;
+    Handler mHandler;
 
     @Before
     public void setUp() {
         MockitoAnnotations.initMocks(this);
+        when(mLog.forSubComponent(anyString())).thenReturn(mLog);
+        mHandler = new Handler(Looper.getMainLooper());
     }
 
     IpReachabilityMonitor makeMonitor() {
-        return new IpReachabilityMonitor("fake0", 1, mLog, mCallback, null, mDependencies);
+        return new IpReachabilityMonitor(
+                "fake0", 1, mHandler, mLog, mCallback, null, mDependencies);
     }
 
     @Test
