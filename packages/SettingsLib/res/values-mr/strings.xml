@@ -97,7 +97,7 @@
     <string name="bluetooth_pairing_will_share_phonebook" msgid="4982239145676394429">"कनेक्‍ट केल्यावर पेअरींग तुमचे संपर्क आणि कॉल इतिहास यामध्ये अॅक्सेस देते."</string>
     <string name="bluetooth_pairing_error_message" msgid="3748157733635947087">"<xliff:g id="DEVICE_NAME">%1$s</xliff:g> शी जोडू शकलो नाही."</string>
     <string name="bluetooth_pairing_pin_error_message" msgid="8337234855188925274">"अयोग्य पिन किंवा पासकीमुळे <xliff:g id="DEVICE_NAME">%1$s</xliff:g> सह जोडू शकलो नाही."</string>
-    <string name="bluetooth_pairing_device_down_error_message" msgid="7870998403045801381">"<xliff:g id="DEVICE_NAME">%1$s</xliff:g> शी संप्रेषण करू शकत नाही."</string>
+    <string name="bluetooth_pairing_device_down_error_message" msgid="7870998403045801381">"<xliff:g id="DEVICE_NAME">%1$s</xliff:g> शी संवाद प्रस्थापित करू शकत नाही."</string>
     <string name="bluetooth_pairing_rejected_error_message" msgid="1648157108520832454">"<xliff:g id="DEVICE_NAME">%1$s</xliff:g> द्वारे पेअरींग नाकारले."</string>
     <string name="bluetooth_talkback_computer" msgid="4875089335641234463">"संगणक"</string>
     <string name="bluetooth_talkback_headset" msgid="5140152177885220949">"हेडसेट"</string>

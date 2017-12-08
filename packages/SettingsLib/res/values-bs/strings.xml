@@ -225,7 +225,7 @@
     <string name="wifi_display_certification_summary" msgid="1155182309166746973">"Pokaži opcije za certifikaciju Bežičnog prikaza"</string>
     <string name="wifi_verbose_logging_summary" msgid="6615071616111731958">"Povećajte nivo Wi-Fi zapisivanja, pokazati po SSID RSSI Wi-Fi Picker"</string>
     <string name="wifi_aggressive_handover_summary" msgid="7266329646559808827">"Kada je omogućeno, Wi-Fi veza će u slučaju slabog signala agresivnije predavati vezu za prijenos podataka na mobilnu vezu"</string>
-    <string name="wifi_allow_scan_with_traffic_summary" msgid="2575101424972686310">"Dozvoli/Zabrani Wi-Fi lutajuće skeniranje na osnovu količine podatkovnog prometa prisutnog na sučelju"</string>
+    <string name="wifi_allow_scan_with_traffic_summary" msgid="2575101424972686310">"Dozvoli/Zabrani Wi-Fi lutajuće skeniranje na osnovu količine podatkovnog prometa prisutnog na interfejsu"</string>
     <string name="select_logd_size_title" msgid="7433137108348553508">"Veličine bafera za zapisnik"</string>
     <string name="select_logd_size_dialog_title" msgid="1206769310236476760">"Odaberite veličine za Logger prema međumemoriji evidencije"</string>
     <string name="dev_logpersist_clear_warning_title" msgid="684806692440237967">"Želite li izbrisati trajnu pohranu zapisivača?"</string>
