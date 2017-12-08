@@ -20,6 +20,7 @@ import android.os.WorkSource.WorkChain;
 
 import junit.framework.TestCase;
 
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -217,5 +218,108 @@ public class WorkSourceTest extends TestCase {
         assertEquals(1, ws2.size());
         assertEquals(20, ws2.get(0));
         assertEquals("foo", ws2.getName(0));
+    }
+
+    public void testDiffChains_noChanges() {
+        // WorkSources with no chains.
+        assertEquals(null, WorkSource.diffChains(new WorkSource(), new WorkSource()));
+
+        // WorkSources with the same chains.
+        WorkSource ws1 = new WorkSource();
+        ws1.createWorkChain().addNode(50, "tag");
+        ws1.createWorkChain().addNode(60, "tag2");
+
+        WorkSource ws2 = new WorkSource();
+        ws2.createWorkChain().addNode(50, "tag");
+        ws2.createWorkChain().addNode(60, "tag2");
+
+        assertEquals(null, WorkSource.diffChains(ws1, ws1));
+        assertEquals(null, WorkSource.diffChains(ws2, ws1));
+    }
+
+    public void testDiffChains_noChains() {
+        // Diffs against a worksource with no chains.
+        WorkSource ws1 = new WorkSource();
+        WorkSource ws2 = new WorkSource();
+        ws2.createWorkChain().addNode(70, "tag");
+        ws2.createWorkChain().addNode(60, "tag2");
+
+        // The "old" work source has no chains, so "newChains" should be non-null.
+        ArrayList<WorkChain>[] diffs = WorkSource.diffChains(ws1, ws2);
+        assertNotNull(diffs[0]);
+        assertNull(diffs[1]);
+        assertEquals(2, diffs[0].size());
+        assertEquals(ws2.getWorkChains(), diffs[0]);
+
+        // The "new" work source has no chains, so "oldChains" should be non-null.
+        diffs = WorkSource.diffChains(ws2, ws1);
+        assertNull(diffs[0]);
+        assertNotNull(diffs[1]);
+        assertEquals(2, diffs[1].size());
+        assertEquals(ws2.getWorkChains(), diffs[1]);
+    }
+
+    public void testDiffChains_onlyAdditionsOrRemovals() {
+        WorkSource ws1 = new WorkSource();
+        WorkSource ws2 = new WorkSource();
+        ws2.createWorkChain().addNode(70, "tag");
+        ws2.createWorkChain().addNode(60, "tag2");
+
+        // Both work sources have WorkChains : test the case where changes were only added
+        // or were only removed.
+        ws1.createWorkChain().addNode(70, "tag");
+
+        // The "new" work source only contains additions (60, "tag2") in this case.
+        ArrayList<WorkChain>[] diffs = WorkSource.diffChains(ws1, ws2);
+        assertNotNull(diffs[0]);
+        assertNull(diffs[1]);
+        assertEquals(1, diffs[0].size());
+        assertEquals(new WorkChain().addNode(60, "tag2"), diffs[0].get(0));
+
+        // The "new" work source only contains removals (60, "tag2") in this case.
+        diffs = WorkSource.diffChains(ws2, ws1);
+        assertNull(diffs[0]);
+        assertNotNull(diffs[1]);
+        assertEquals(1, diffs[1].size());
+        assertEquals(new WorkChain().addNode(60, "tag2"), diffs[1].get(0));
+    }
+
+
+    public void testDiffChains_generalCase() {
+        WorkSource ws1 = new WorkSource();
+        WorkSource ws2 = new WorkSource();
+
+        // Both work sources have WorkChains, test the case where chains were added AND removed.
+        ws1.createWorkChain().addNode(0, "tag0");
+        ws2.createWorkChain().addNode(0, "tag0_changed");
+        ArrayList<WorkChain>[] diffs = WorkSource.diffChains(ws1, ws2);
+        assertNotNull(diffs[0]);
+        assertNotNull(diffs[1]);
+        assertEquals(ws2.getWorkChains(), diffs[0]);
+        assertEquals(ws1.getWorkChains(), diffs[1]);
+
+        // Give both WorkSources a chain in common; it should not be a part of any diffs.
+        ws1.createWorkChain().addNode(1, "tag1");
+        ws2.createWorkChain().addNode(1, "tag1");
+        diffs = WorkSource.diffChains(ws1, ws2);
+        assertNotNull(diffs[0]);
+        assertNotNull(diffs[1]);
+        assertEquals(1, diffs[0].size());
+        assertEquals(1, diffs[1].size());
+        assertEquals(new WorkChain().addNode(0, "tag0_changed"), diffs[0].get(0));
+        assertEquals(new WorkChain().addNode(0, "tag0"), diffs[1].get(0));
+
+        // Finally, test the case where more than one chain was added / removed.
+        ws1.createWorkChain().addNode(2, "tag2");
+        ws2.createWorkChain().addNode(2, "tag2_changed");
+        diffs = WorkSource.diffChains(ws1, ws2);
+        assertNotNull(diffs[0]);
+        assertNotNull(diffs[1]);
+        assertEquals(2, diffs[0].size());
+        assertEquals(2, diffs[1].size());
+        assertEquals(new WorkChain().addNode(0, "tag0_changed"), diffs[0].get(0));
+        assertEquals(new WorkChain().addNode(2, "tag2_changed"), diffs[0].get(1));
+        assertEquals(new WorkChain().addNode(0, "tag0"), diffs[1].get(0));
+        assertEquals(new WorkChain().addNode(2, "tag2"), diffs[1].get(1));
     }
 }
