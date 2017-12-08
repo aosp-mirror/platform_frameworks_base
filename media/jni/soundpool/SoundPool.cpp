@@ -24,7 +24,6 @@
 #define USE_SHARED_MEM_BUFFER
 
 #include <media/AudioTrack.h>
-#include <media/mediaplayer.h>
 #include "SoundPool.h"
 #include "SoundPoolThread.h"
 #include <media/AudioPolicyHelper.h>
