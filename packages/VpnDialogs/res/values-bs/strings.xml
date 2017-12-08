@@ -24,7 +24,7 @@
     <string name="data_transmitted" msgid="7988167672982199061">"Poslano:"</string>
     <string name="data_received" msgid="4062776929376067820">"Primljeno:"</string>
     <string name="data_value_format" msgid="2192466557826897580">"Broj bajtova: <xliff:g id="NUMBER_0">%1$s</xliff:g>/Broj paketa: <xliff:g id="NUMBER_1">%2$s</xliff:g>"</string>
-    <string name="always_on_disconnected_title" msgid="1906740176262776166">"Ne može se povezati na stalno uključen VPN"</string>
+    <string name="always_on_disconnected_title" msgid="1906740176262776166">"Nije se moguće povezati na stalno uključen VPN"</string>
     <string name="always_on_disconnected_message" msgid="555634519845992917">"Aplikacija <xliff:g id="VPN_APP_0">%1$s</xliff:g> je postavljena da ostane povezana sve vrijeme, ali se trenutno ne može povezati. Telefon će koristiti javnu mrežu dok se ponovo ne mogne povezati s aplikacijom <xliff:g id="VPN_APP_1">%1$s</xliff:g>."</string>
     <string name="always_on_disconnected_message_lockdown" msgid="4232225539869452120">"Aplikacija <xliff:g id="VPN_APP">%1$s</xliff:g> je postavljena da ostane povezana sve vrijeme, ali se trenutno ne može povezati. Nećete biti imati vezu dok se VPN ne mogne ponovo povezati."</string>
     <string name="always_on_disconnected_message_separator" msgid="3310614409322581371">" "</string>
