@@ -200,6 +200,7 @@ message ScreenRotationAnimationProto {
 message WindowContainerProto {
   optional ConfigurationContainerProto configuration_container = 1;
   optional int32 orientation = 2;
+  optional bool visible = 3;
 }
 
 /* represents ConfigurationContainer */
