@@ -184,6 +184,17 @@ public class LocationManager {
     public static final String MODE_CHANGED_ACTION = "android.location.MODE_CHANGED";
 
     /**
+     * Broadcast intent action when {@link android.provider.Settings.Secure#LOCATION_MODE} is
+     * about to be changed through Settings app or Quick Settings.
+     * For use with the {@link android.provider.Settings.Secure#LOCATION_MODE} API.
+     * If you're interacting with {@link #isProviderEnabled(String)}, use
+     * {@link #PROVIDERS_CHANGED_ACTION} instead.
+     *
+     * @hide
+     */
+    public static final String MODE_CHANGING_ACTION = "com.android.settings.location.MODE_CHANGING";
+
+    /**
      * Broadcast intent action indicating that the GPS has either started or
      * stopped receiving GPS fixes. An intent extra provides this state as a
      * boolean, where {@code true} means that the GPS is actively receiving fixes.
