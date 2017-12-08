@@ -16,6 +16,7 @@
 
 package com.android.ims;
 
+import android.os.Handler;
 import android.os.Message;
 
 /**
@@ -188,4 +189,18 @@ public interface ImsUtInterface {
      * Updates the configuration of the COLP supplementary service.
      */
     public void updateCOLP(boolean enable, Message result);
+
+    /**
+     * Register for UNSOL_ON_SS indications.
+     * @param handler the {@link Handler} that is notified when there is an ss indication.
+     * @param event  Supplimentary service indication event.
+     * @param Object user object.
+     */
+    public void registerForSuppServiceIndication(Handler handler, int event, Object object);
+
+    /**
+     * Deregister for UNSOL_ON_SS indications.
+     * @param handler the {@link Handler} that is notified when there is an ss indication.
+     */
+    public void unregisterForSuppServiceIndication(Handler handler);
 }

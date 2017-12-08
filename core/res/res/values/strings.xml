@@ -4422,7 +4422,9 @@
     <string name="stk_cc_ussd_to_dial">USSD request is modified to DIAL request.</string>
     <string name="stk_cc_ussd_to_ss">USSD request is modified to SS request.</string>
     <string name="stk_cc_ussd_to_ussd">USSD request is modified to new USSD request.</string>
+    <string name="stk_cc_ussd_to_dial_video">USSD request is modified to Video DIAL request.</string>
     <string name="stk_cc_ss_to_dial">SS request is modified to DIAL request.</string>
+    <string name="stk_cc_ss_to_dial_video">SS request is modified to Video DIAL request.</string>
     <string name="stk_cc_ss_to_ussd">SS request is modified to USSD request.</string>
     <string name="stk_cc_ss_to_ss">SS request is modified to new SS request.</string>
 
