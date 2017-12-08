@@ -5605,7 +5605,16 @@ public final class ActivityThread extends ClientTransactionHandler {
 
         // Continue loading instrumentation.
         if (ii != null) {
-            final ApplicationInfo instrApp = new ApplicationInfo();
+            ApplicationInfo instrApp;
+            try {
+                instrApp = getPackageManager().getApplicationInfo(ii.packageName, 0,
+                        UserHandle.myUserId());
+            } catch (RemoteException e) {
+                instrApp = null;
+            }
+            if (instrApp == null) {
+                instrApp = new ApplicationInfo();
+            }
             ii.copyTo(instrApp);
             instrApp.initForUser(UserHandle.myUserId());
             final LoadedApk pi = getPackageInfo(instrApp, data.compatInfo,
