@@ -38,6 +38,7 @@ import android.net.metrics.ApfProgramEvent;
 import android.net.metrics.ApfStats;
 import android.net.metrics.IpConnectivityLog;
 import android.net.metrics.RaEvent;
+import android.net.util.InterfaceParams;
 import android.system.ErrnoException;
 import android.system.Os;
 import android.system.PacketSocketAddress;
@@ -56,7 +57,6 @@ import java.lang.Thread;
 import java.net.Inet4Address;
 import java.net.Inet6Address;
 import java.net.InetAddress;
-import java.net.NetworkInterface;
 import java.net.SocketException;
 import java.net.UnknownHostException;
 import java.nio.ByteBuffer;
@@ -247,7 +247,7 @@ public class ApfFilter {
 
     private final ApfCapabilities mApfCapabilities;
     private final IpClient.Callback mIpClientCallback;
-    private final NetworkInterface mNetworkInterface;
+    private final InterfaceParams mInterfaceParams;
     private final IpConnectivityLog mMetricsLog;
 
     @VisibleForTesting
@@ -269,11 +269,11 @@ public class ApfFilter {
     private int mIPv4PrefixLength;
 
     @VisibleForTesting
-    ApfFilter(ApfConfiguration config, NetworkInterface networkInterface,
+    ApfFilter(ApfConfiguration config, InterfaceParams ifParams,
             IpClient.Callback ipClientCallback, IpConnectivityLog log) {
         mApfCapabilities = config.apfCapabilities;
         mIpClientCallback = ipClientCallback;
-        mNetworkInterface = networkInterface;
+        mInterfaceParams = ifParams;
         mMulticastFilter = config.multicastFilter;
         mDrop802_3Frames = config.ieee802_3Filter;
 
@@ -287,7 +287,7 @@ public class ApfFilter {
     }
 
     private void log(String s) {
-        Log.d(TAG, "(" + mNetworkInterface.getName() + "): " + s);
+        Log.d(TAG, "(" + mInterfaceParams.name + "): " + s);
     }
 
     @GuardedBy("this")
@@ -332,14 +332,14 @@ public class ApfFilter {
     void maybeStartFilter() {
         FileDescriptor socket;
         try {
-            mHardwareAddress = mNetworkInterface.getHardwareAddress();
+            mHardwareAddress = mInterfaceParams.macAddr.toByteArray();
             synchronized(this) {
                 // Install basic filters
                 installNewProgramLocked();
             }
             socket = Os.socket(AF_PACKET, SOCK_RAW, ETH_P_IPV6);
-            PacketSocketAddress addr = new PacketSocketAddress((short) ETH_P_IPV6,
-                    mNetworkInterface.getIndex());
+            PacketSocketAddress addr = new PacketSocketAddress(
+                    (short) ETH_P_IPV6, mInterfaceParams.index);
             Os.bind(socket, addr);
             NetworkUtils.attachRaFilter(socket, mApfCapabilities.apfPacketFormat);
         } catch(SocketException|ErrnoException e) {
@@ -1168,10 +1168,10 @@ public class ApfFilter {
      * filtering using APF programs.
      */
     public static ApfFilter maybeCreate(ApfConfiguration config,
-            NetworkInterface networkInterface, IpClient.Callback ipClientCallback) {
-        if (config == null) return null;
+            InterfaceParams ifParams, IpClient.Callback ipClientCallback) {
+        if (config == null || ifParams == null) return null;
         ApfCapabilities apfCapabilities =  config.apfCapabilities;
-        if (apfCapabilities == null || networkInterface == null) return null;
+        if (apfCapabilities == null) return null;
         if (apfCapabilities.apfVersionSupported == 0) return null;
         if (apfCapabilities.maximumApfProgramSize < 512) {
             Log.e(TAG, "Unacceptably small APF limit: " + apfCapabilities.maximumApfProgramSize);
@@ -1186,7 +1186,7 @@ public class ApfFilter {
             Log.e(TAG, "Unsupported APF version: " + apfCapabilities.apfVersionSupported);
             return null;
         }
-        return new ApfFilter(config, networkInterface, ipClientCallback, new IpConnectivityLog());
+        return new ApfFilter(config, ifParams, ipClientCallback, new IpConnectivityLog());
     }
 
     public synchronized void shutdown() {

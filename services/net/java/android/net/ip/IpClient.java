@@ -35,6 +35,7 @@ import android.net.apf.ApfFilter;
 import android.net.dhcp.DhcpClient;
 import android.net.metrics.IpConnectivityLog;
 import android.net.metrics.IpManagerEvent;
+import android.net.util.InterfaceParams;
 import android.net.util.MultinetworkPolicyTracker;
 import android.net.util.NetdService;
 import android.net.util.NetworkConstants;
@@ -63,7 +64,6 @@ import java.io.PrintWriter;
 import java.net.Inet4Address;
 import java.net.Inet6Address;
 import java.net.InetAddress;
-import java.net.NetworkInterface;
 import java.net.SocketException;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -556,7 +556,7 @@ public class IpClient extends StateMachine {
     private final IpConnectivityLog mMetricsLog = new IpConnectivityLog();
     private final InterfaceController mInterfaceCtrl;
 
-    private NetworkInterface mNetworkInterface;
+    private InterfaceParams mInterfaceParams;
 
     /**
      * Non-final member variables accessed only from within our StateMachine.
@@ -722,7 +722,12 @@ public class IpClient extends StateMachine {
             return;
         }
 
-        getNetworkInterface();
+        mInterfaceParams = InterfaceParams.getByName(mInterfaceName);
+        if (mInterfaceParams == null) {
+            logError("Failed to find InterfaceParams for " + mInterfaceName);
+            // TODO: call doImmediateProvisioningFailure() with an error code
+            // indicating something like "interface not ready".
+        }
 
         mCallback.setNeighborDiscoveryOffload(true);
         sendMessage(CMD_START, new ProvisioningConfiguration(req));
@@ -858,7 +863,7 @@ public class IpClient extends StateMachine {
     protected String getLogRecString(Message msg) {
         final String logLine = String.format(
                 "%s/%d %d %d %s [%s]",
-                mInterfaceName, mNetworkInterface == null ? -1 : mNetworkInterface.getIndex(),
+                mInterfaceName, (mInterfaceParams == null) ? -1 : mInterfaceParams.index,
                 msg.arg1, msg.arg2, Objects.toString(msg.obj), mMsgStateLogger);
 
         final String richerLogLine = getWhatToString(msg.what) + " " + logLine;
@@ -887,15 +892,6 @@ public class IpClient extends StateMachine {
         final String msg = "ERROR " + String.format(fmt, args);
         Log.e(mTag, msg);
         mLog.log(msg);
-    }
-
-    private void getNetworkInterface() {
-        try {
-            mNetworkInterface = NetworkInterface.getByName(mInterfaceName);
-        } catch (SocketException | NullPointerException e) {
-            // TODO: throw new IllegalStateException.
-            logError("Failed to get interface object: %s", e);
-        }
     }
 
     // This needs to be called with care to ensure that our LinkProperties
@@ -1218,7 +1214,7 @@ public class IpClient extends StateMachine {
             }
         } else {
             // Start DHCPv4.
-            mDhcpClient = DhcpClient.makeDhcpClient(mContext, IpClient.this, mInterfaceName);
+            mDhcpClient = DhcpClient.makeDhcpClient(mContext, IpClient.this, mInterfaceParams);
             mDhcpClient.registerForPreDhcpNotification();
             mDhcpClient.sendMessage(DhcpClient.CMD_START_DHCP);
         }
@@ -1245,7 +1241,7 @@ public class IpClient extends StateMachine {
         try {
             mIpReachabilityMonitor = new IpReachabilityMonitor(
                     mContext,
-                    mInterfaceName,
+                    mInterfaceParams,
                     getHandler(),
                     mLog,
                     new IpReachabilityMonitor.Callback() {
@@ -1447,7 +1443,7 @@ public class IpClient extends StateMachine {
                     mContext.getResources().getBoolean(R.bool.config_apfDrop802_3Frames);
             apfConfig.ethTypeBlackList =
                     mContext.getResources().getIntArray(R.array.config_apfEthTypeBlackList);
-            mApfFilter = ApfFilter.maybeCreate(apfConfig, mNetworkInterface, mCallback);
+            mApfFilter = ApfFilter.maybeCreate(apfConfig, mInterfaceParams, mCallback);
             // TODO: investigate the effects of any multicast filtering racing/interfering with the
             // rest of this IP configuration startup.
             if (mApfFilter == null) {
@@ -1515,7 +1511,7 @@ public class IpClient extends StateMachine {
         private ConnectivityPacketTracker createPacketTracker() {
             try {
                 return new ConnectivityPacketTracker(
-                        getHandler(), mNetworkInterface, mConnectivityPacketLog);
+                        getHandler(), mInterfaceParams, mConnectivityPacketLog);
             } catch (IllegalArgumentException e) {
                 return null;
             }
