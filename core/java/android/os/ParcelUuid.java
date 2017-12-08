@@ -17,6 +17,7 @@
 package android.os;
 
 import java.util.UUID;
+import static java.util.Objects.requireNonNull;
 
 /**
  * This class is a Parcelable wrapper around {@link UUID} which is an
@@ -34,7 +35,7 @@ public final class ParcelUuid implements Parcelable {
      * @param uuid UUID
      */
     public ParcelUuid(UUID uuid) {
-        mUuid = uuid;
+        mUuid = requireNonNull(uuid);
     }
 
     /**
