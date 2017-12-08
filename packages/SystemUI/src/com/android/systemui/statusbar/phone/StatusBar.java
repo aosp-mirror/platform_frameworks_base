@@ -659,8 +659,7 @@ public class StatusBar extends SystemUI implements DemoMode,
 
         @Override
         public void onCancelled() {
-            // Transition was cancelled because another one took over.
-            // Nothing to do in here but wait.
+            onFinished();
         }
     };
 
@@ -4123,14 +4122,10 @@ public class StatusBar extends SystemUI implements DemoMode,
                 .setStartDelay(0)
                 .setDuration(FADE_KEYGUARD_DURATION_PULSING)
                 .setInterpolator(ScrimController.KEYGUARD_FADE_OUT_INTERPOLATOR)
-                .setListener(new AnimatorListenerAdapter() {
-                    @Override
-                    public void onAnimationEnd(Animator animation) {
-                        hideKeyguard();
-                        mStatusBarKeyguardViewManager.onKeyguardFadedAway();
-                    }
-                })
-                .start();
+                .withEndAction(()-> {
+                    hideKeyguard();
+                    mStatusBarKeyguardViewManager.onKeyguardFadedAway();
+                }).start();
     }
 
     /**

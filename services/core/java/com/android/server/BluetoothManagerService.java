@@ -1628,7 +1628,7 @@ class BluetoothManagerService extends IBluetoothManager.Stub {
 
                         //Do enable request
                         try {
-                            if (mQuietEnable) {
+                            if (!mQuietEnable) {
                                 if (!mBluetooth.enable()) {
                                     Slog.e(TAG, "IBluetooth.enable() returned false");
                                 }
