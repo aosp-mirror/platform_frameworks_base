@@ -21,6 +21,8 @@ import android.content.res.Configuration;
 import android.os.IBinder;
 import android.os.Parcel;
 
+import java.util.Objects;
+
 /**
  * Multi-window mode change message.
  * @hide
@@ -29,19 +31,38 @@ import android.os.Parcel;
 // communicate multi-window mode change with WindowConfiguration.
 public class MultiWindowModeChangeItem extends ClientTransactionItem {
 
-    private final boolean mIsInMultiWindowMode;
-    private final Configuration mOverrideConfig;
-
-    public MultiWindowModeChangeItem(boolean isInMultiWindowMode,
-            Configuration overrideConfig) {
-        mIsInMultiWindowMode = isInMultiWindowMode;
-        mOverrideConfig = overrideConfig;
-    }
+    private boolean mIsInMultiWindowMode;
+    private Configuration mOverrideConfig;
 
     @Override
     public void execute(ClientTransactionHandler client, IBinder token,
             PendingTransactionActions pendingActions) {
         client.handleMultiWindowModeChanged(token, mIsInMultiWindowMode, mOverrideConfig);
+    }
+
+
+    // ObjectPoolItem implementation
+
+    private MultiWindowModeChangeItem() {}
+
+    /** Obtain an instance initialized with provided params. */
+    public static MultiWindowModeChangeItem obtain(boolean isInMultiWindowMode,
+            Configuration overrideConfig) {
+        MultiWindowModeChangeItem instance = ObjectPool.obtain(MultiWindowModeChangeItem.class);
+        if (instance == null) {
+            instance = new MultiWindowModeChangeItem();
+        }
+        instance.mIsInMultiWindowMode = isInMultiWindowMode;
+        instance.mOverrideConfig = overrideConfig;
+
+        return instance;
+    }
+
+    @Override
+    public void recycle() {
+        mIsInMultiWindowMode = false;
+        mOverrideConfig = null;
+        ObjectPool.recycle(this);
     }
 
 
@@ -81,7 +102,7 @@ public class MultiWindowModeChangeItem extends ClientTransactionItem {
         }
         final MultiWindowModeChangeItem other = (MultiWindowModeChangeItem) o;
         return mIsInMultiWindowMode == other.mIsInMultiWindowMode
-                && mOverrideConfig.equals(other.mOverrideConfig);
+                && Objects.equals(mOverrideConfig, other.mOverrideConfig);
     }
 
     @Override

@@ -27,6 +27,7 @@ import android.os.Parcelable;
 import android.os.Trace;
 
 import java.util.List;
+import java.util.Objects;
 
 /**
  * Activity result delivery callback.
@@ -34,11 +35,7 @@ import java.util.List;
  */
 public class ActivityResultItem extends ClientTransactionItem {
 
-    private final List<ResultInfo> mResultInfoList;
-
-    public ActivityResultItem(List<ResultInfo> resultInfos) {
-        mResultInfoList = resultInfos;
-    }
+    private List<ResultInfo> mResultInfoList;
 
     @Override
     public int getPreExecutionState() {
@@ -51,6 +48,28 @@ public class ActivityResultItem extends ClientTransactionItem {
         Trace.traceBegin(TRACE_TAG_ACTIVITY_MANAGER, "activityDeliverResult");
         client.handleSendResult(token, mResultInfoList);
         Trace.traceEnd(TRACE_TAG_ACTIVITY_MANAGER);
+    }
+
+
+    // ObjectPoolItem implementation
+
+    private ActivityResultItem() {}
+
+    /** Obtain an instance initialized with provided params. */
+    public static ActivityResultItem obtain(List<ResultInfo> resultInfoList) {
+        ActivityResultItem instance = ObjectPool.obtain(ActivityResultItem.class);
+        if (instance == null) {
+            instance = new ActivityResultItem();
+        }
+        instance.mResultInfoList = resultInfoList;
+
+        return instance;
+    }
+
+    @Override
+    public void recycle() {
+        mResultInfoList = null;
+        ObjectPool.recycle(this);
     }
 
 
@@ -87,7 +106,7 @@ public class ActivityResultItem extends ClientTransactionItem {
             return false;
         }
         final ActivityResultItem other = (ActivityResultItem) o;
-        return mResultInfoList.equals(other.mResultInfoList);
+        return Objects.equals(mResultInfoList, other.mResultInfoList);
     }
 
     @Override

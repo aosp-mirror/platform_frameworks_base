@@ -45,43 +45,21 @@ import java.util.Objects;
  */
 public class LaunchActivityItem extends ClientTransactionItem {
 
-    private final Intent mIntent;
-    private final int mIdent;
-    private final ActivityInfo mInfo;
-    private final Configuration mCurConfig;
-    private final Configuration mOverrideConfig;
-    private final CompatibilityInfo mCompatInfo;
-    private final String mReferrer;
-    private final IVoiceInteractor mVoiceInteractor;
-    private final int mProcState;
-    private final Bundle mState;
-    private final PersistableBundle mPersistentState;
-    private final List<ResultInfo> mPendingResults;
-    private final List<ReferrerIntent> mPendingNewIntents;
-    private final boolean mIsForward;
-    private final ProfilerInfo mProfilerInfo;
-
-    public LaunchActivityItem(Intent intent, int ident, ActivityInfo info,
-            Configuration curConfig, Configuration overrideConfig, CompatibilityInfo compatInfo,
-            String referrer, IVoiceInteractor voiceInteractor, int procState, Bundle state,
-            PersistableBundle persistentState, List<ResultInfo> pendingResults,
-            List<ReferrerIntent> pendingNewIntents, boolean isForward, ProfilerInfo profilerInfo) {
-        mIntent = intent;
-        mIdent = ident;
-        mInfo = info;
-        mCurConfig = curConfig;
-        mOverrideConfig = overrideConfig;
-        mCompatInfo = compatInfo;
-        mReferrer = referrer;
-        mVoiceInteractor = voiceInteractor;
-        mProcState = procState;
-        mState = state;
-        mPersistentState = persistentState;
-        mPendingResults = pendingResults;
-        mPendingNewIntents = pendingNewIntents;
-        mIsForward = isForward;
-        mProfilerInfo = profilerInfo;
-    }
+    private Intent mIntent;
+    private int mIdent;
+    private ActivityInfo mInfo;
+    private Configuration mCurConfig;
+    private Configuration mOverrideConfig;
+    private CompatibilityInfo mCompatInfo;
+    private String mReferrer;
+    private IVoiceInteractor mVoiceInteractor;
+    private int mProcState;
+    private Bundle mState;
+    private PersistableBundle mPersistentState;
+    private List<ResultInfo> mPendingResults;
+    private List<ReferrerIntent> mPendingNewIntents;
+    private boolean mIsForward;
+    private ProfilerInfo mProfilerInfo;
 
     @Override
     public void preExecute(ClientTransactionHandler client, IBinder token) {
@@ -102,6 +80,35 @@ public class LaunchActivityItem extends ClientTransactionItem {
     }
 
 
+    // ObjectPoolItem implementation
+
+    private LaunchActivityItem() {}
+
+    /** Obtain an instance initialized with provided params. */
+    public static LaunchActivityItem obtain(Intent intent, int ident, ActivityInfo info,
+            Configuration curConfig, Configuration overrideConfig, CompatibilityInfo compatInfo,
+            String referrer, IVoiceInteractor voiceInteractor, int procState, Bundle state,
+            PersistableBundle persistentState, List<ResultInfo> pendingResults,
+            List<ReferrerIntent> pendingNewIntents, boolean isForward, ProfilerInfo profilerInfo) {
+        LaunchActivityItem instance = ObjectPool.obtain(LaunchActivityItem.class);
+        if (instance == null) {
+            instance = new LaunchActivityItem();
+        }
+        setValues(instance, intent, ident, info, curConfig, overrideConfig, compatInfo, referrer,
+                voiceInteractor, procState, state, persistentState, pendingResults,
+                pendingNewIntents, isForward, profilerInfo);
+
+        return instance;
+    }
+
+    @Override
+    public void recycle() {
+        setValues(this, null, 0, null, null, null, null, null, null, 0, null, null, null, null,
+                false, null);
+        ObjectPool.recycle(this);
+    }
+
+
     // Parcelable implementation
 
     /** Write from Parcel. */
@@ -114,7 +121,7 @@ public class LaunchActivityItem extends ClientTransactionItem {
         dest.writeTypedObject(mOverrideConfig, flags);
         dest.writeTypedObject(mCompatInfo, flags);
         dest.writeString(mReferrer);
-        dest.writeStrongBinder(mVoiceInteractor != null ? mVoiceInteractor.asBinder() : null);
+        dest.writeStrongInterface(mVoiceInteractor);
         dest.writeInt(mProcState);
         dest.writeBundle(mState);
         dest.writePersistableBundle(mPersistentState);
@@ -126,21 +133,16 @@ public class LaunchActivityItem extends ClientTransactionItem {
 
     /** Read from Parcel. */
     private LaunchActivityItem(Parcel in) {
-        mIntent = in.readTypedObject(Intent.CREATOR);
-        mIdent = in.readInt();
-        mInfo = in.readTypedObject(ActivityInfo.CREATOR);
-        mCurConfig = in.readTypedObject(Configuration.CREATOR);
-        mOverrideConfig = in.readTypedObject(Configuration.CREATOR);
-        mCompatInfo = in.readTypedObject(CompatibilityInfo.CREATOR);
-        mReferrer = in.readString();
-        mVoiceInteractor = (IVoiceInteractor) in.readStrongBinder();
-        mProcState = in.readInt();
-        mState = in.readBundle(getClass().getClassLoader());
-        mPersistentState = in.readPersistableBundle(getClass().getClassLoader());
-        mPendingResults = in.createTypedArrayList(ResultInfo.CREATOR);
-        mPendingNewIntents = in.createTypedArrayList(ReferrerIntent.CREATOR);
-        mIsForward = in.readBoolean();
-        mProfilerInfo = in.readTypedObject(ProfilerInfo.CREATOR);
+        setValues(this, in.readTypedObject(Intent.CREATOR), in.readInt(),
+                in.readTypedObject(ActivityInfo.CREATOR), in.readTypedObject(Configuration.CREATOR),
+                in.readTypedObject(Configuration.CREATOR),
+                in.readTypedObject(CompatibilityInfo.CREATOR), in.readString(),
+                IVoiceInteractor.Stub.asInterface(in.readStrongBinder()), in.readInt(),
+                in.readBundle(getClass().getClassLoader()),
+                in.readPersistableBundle(getClass().getClassLoader()),
+                in.createTypedArrayList(ResultInfo.CREATOR),
+                in.createTypedArrayList(ReferrerIntent.CREATOR), in.readBoolean(),
+                in.readTypedObject(ProfilerInfo.CREATOR));
     }
 
     public static final Creator<LaunchActivityItem> CREATOR =
@@ -163,7 +165,9 @@ public class LaunchActivityItem extends ClientTransactionItem {
             return false;
         }
         final LaunchActivityItem other = (LaunchActivityItem) o;
-        return mIntent.filterEquals(other.mIntent) && mIdent == other.mIdent
+        final boolean intentsEqual = (mIntent == null && other.mIntent == null)
+                || (mIntent != null && mIntent.filterEquals(other.mIntent));
+        return intentsEqual && mIdent == other.mIdent
                 && activityInfoEqual(other.mInfo) && Objects.equals(mCurConfig, other.mCurConfig)
                 && Objects.equals(mOverrideConfig, other.mOverrideConfig)
                 && Objects.equals(mCompatInfo, other.mCompatInfo)
@@ -196,7 +200,11 @@ public class LaunchActivityItem extends ClientTransactionItem {
     }
 
     private boolean activityInfoEqual(ActivityInfo other) {
-        return mInfo.flags == other.flags && mInfo.maxAspectRatio == other.maxAspectRatio
+        if (mInfo == null) {
+            return other == null;
+        }
+        return other != null && mInfo.flags == other.flags
+                && mInfo.maxAspectRatio == other.maxAspectRatio
                 && Objects.equals(mInfo.launchToken, other.launchToken)
                 && Objects.equals(mInfo.getComponentName(), other.getComponentName());
     }
@@ -230,5 +238,29 @@ public class LaunchActivityItem extends ClientTransactionItem {
                 + ",persistentState=" + mPersistentState + ",pendingResults=" + mPendingResults
                 + ",pendingNewIntents=" + mPendingNewIntents + ",profilerInfo=" + mProfilerInfo
                 + "}";
+    }
+
+    // Using the same method to set and clear values to make sure we don't forget anything
+    private static void setValues(LaunchActivityItem instance, Intent intent, int ident,
+            ActivityInfo info, Configuration curConfig, Configuration overrideConfig,
+            CompatibilityInfo compatInfo, String referrer, IVoiceInteractor voiceInteractor,
+            int procState, Bundle state, PersistableBundle persistentState,
+            List<ResultInfo> pendingResults, List<ReferrerIntent> pendingNewIntents,
+            boolean isForward, ProfilerInfo profilerInfo) {
+        instance.mIntent = intent;
+        instance.mIdent = ident;
+        instance.mInfo = info;
+        instance.mCurConfig = curConfig;
+        instance.mOverrideConfig = overrideConfig;
+        instance.mCompatInfo = compatInfo;
+        instance.mReferrer = referrer;
+        instance.mVoiceInteractor = voiceInteractor;
+        instance.mProcState = procState;
+        instance.mState = state;
+        instance.mPersistentState = persistentState;
+        instance.mPendingResults = pendingResults;
+        instance.mPendingNewIntents = pendingNewIntents;
+        instance.mIsForward = isForward;
+        instance.mProfilerInfo = profilerInfo;
     }
 }

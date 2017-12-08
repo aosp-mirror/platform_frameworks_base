@@ -16,7 +16,9 @@
 
 package android.app.servertransaction;
 
-import static android.content.res.Configuration.ORIENTATION_LANDSCAPE;
+import static android.app.servertransaction.TestUtils.config;
+import static android.app.servertransaction.TestUtils.referrerIntentList;
+import static android.app.servertransaction.TestUtils.resultInfoList;
 
 import static junit.framework.Assert.assertEquals;
 import static junit.framework.Assert.assertTrue;
@@ -57,7 +59,6 @@ import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
@@ -77,7 +78,7 @@ public class TransactionParcelTests {
     @Test
     public void testConfigurationChange() {
         // Write to parcel
-        ConfigurationChangeItem item = new ConfigurationChangeItem(config());
+        ConfigurationChangeItem item = ConfigurationChangeItem.obtain(config());
         writeAndPrepareForReading(item);
 
         // Read from parcel and assert
@@ -90,7 +91,7 @@ public class TransactionParcelTests {
     @Test
     public void testActivityConfigChange() {
         // Write to parcel
-        ActivityConfigurationChangeItem item = new ActivityConfigurationChangeItem(config());
+        ActivityConfigurationChangeItem item = ActivityConfigurationChangeItem.obtain(config());
         writeAndPrepareForReading(item);
 
         // Read from parcel and assert
@@ -104,7 +105,7 @@ public class TransactionParcelTests {
     @Test
     public void testMoveToDisplay() {
         // Write to parcel
-        MoveToDisplayItem item = new MoveToDisplayItem(4 /* targetDisplayId */, config());
+        MoveToDisplayItem item = MoveToDisplayItem.obtain(4 /* targetDisplayId */, config());
         writeAndPrepareForReading(item);
 
         // Read from parcel and assert
@@ -117,7 +118,7 @@ public class TransactionParcelTests {
     @Test
     public void testNewIntent() {
         // Write to parcel
-        NewIntentItem item = new NewIntentItem(referrerIntentList(), true /* pause */);
+        NewIntentItem item = NewIntentItem.obtain(referrerIntentList(), true /* pause */);
         writeAndPrepareForReading(item);
 
         // Read from parcel and assert
@@ -130,7 +131,7 @@ public class TransactionParcelTests {
     @Test
     public void testActivityResult() {
         // Write to parcel
-        ActivityResultItem item = new ActivityResultItem(resultInfoList());
+        ActivityResultItem item = ActivityResultItem.obtain(resultInfoList());
         writeAndPrepareForReading(item);
 
         // Read from parcel and assert
@@ -143,7 +144,7 @@ public class TransactionParcelTests {
     @Test
     public void testPipModeChange() {
         // Write to parcel
-        PipModeChangeItem item = new PipModeChangeItem(true /* isInPipMode */, config());
+        PipModeChangeItem item = PipModeChangeItem.obtain(true /* isInPipMode */, config());
         writeAndPrepareForReading(item);
 
         // Read from parcel and assert
@@ -156,7 +157,7 @@ public class TransactionParcelTests {
     @Test
     public void testMultiWindowModeChange() {
         // Write to parcel
-        MultiWindowModeChangeItem item = new MultiWindowModeChangeItem(
+        MultiWindowModeChangeItem item = MultiWindowModeChangeItem.obtain(
                 true /* isInMultiWindowMode */, config());
         writeAndPrepareForReading(item);
 
@@ -171,7 +172,7 @@ public class TransactionParcelTests {
     @Test
     public void testWindowVisibilityChange() {
         // Write to parcel
-        WindowVisibilityItem item = new WindowVisibilityItem(true /* showWindow */);
+        WindowVisibilityItem item = WindowVisibilityItem.obtain(true /* showWindow */);
         writeAndPrepareForReading(item);
 
         // Read from parcel and assert
@@ -181,7 +182,7 @@ public class TransactionParcelTests {
         assertTrue(item.equals(result));
 
         // Check different value
-        item = new WindowVisibilityItem(false);
+        item = WindowVisibilityItem.obtain(false);
 
         mParcel = Parcel.obtain();
         writeAndPrepareForReading(item);
@@ -195,7 +196,7 @@ public class TransactionParcelTests {
 
     @Test
     public void testDestroy() {
-        DestroyActivityItem item = new DestroyActivityItem(true /* finished */,
+        DestroyActivityItem item = DestroyActivityItem.obtain(true /* finished */,
                 135 /* configChanges */);
         writeAndPrepareForReading(item);
 
@@ -228,7 +229,7 @@ public class TransactionParcelTests {
         PersistableBundle persistableBundle = new PersistableBundle();
         persistableBundle.putInt("k", 4);
 
-        LaunchActivityItem item = new LaunchActivityItem(intent, ident, activityInfo,
+        LaunchActivityItem item = LaunchActivityItem.obtain(intent, ident, activityInfo,
                 config(), overrideConfig, compat, referrer, null /* voiceInteractor */,
                 procState, bundle, persistableBundle, resultInfoList(), referrerIntentList(),
                 true /* isForward */, null /* profilerInfo */);
@@ -244,8 +245,8 @@ public class TransactionParcelTests {
     @Test
     public void testPause() {
         // Write to parcel
-        PauseActivityItem item = new PauseActivityItem(true /* finished */, true /* userLeaving */,
-                135 /* configChanges */, true /* dontReport */);
+        PauseActivityItem item = PauseActivityItem.obtain(true /* finished */,
+                true /* userLeaving */, 135 /* configChanges */, true /* dontReport */);
         writeAndPrepareForReading(item);
 
         // Read from parcel and assert
@@ -258,7 +259,8 @@ public class TransactionParcelTests {
     @Test
     public void testResume() {
         // Write to parcel
-        ResumeActivityItem item = new ResumeActivityItem(27 /* procState */, true /* isForward */);
+        ResumeActivityItem item = ResumeActivityItem.obtain(27 /* procState */,
+                true /* isForward */);
         writeAndPrepareForReading(item);
 
         // Read from parcel and assert
@@ -271,7 +273,8 @@ public class TransactionParcelTests {
     @Test
     public void testStop() {
         // Write to parcel
-        StopActivityItem item = new StopActivityItem(true /* showWindow */, 14 /* configChanges */);
+        StopActivityItem item = StopActivityItem.obtain(true /* showWindow */,
+                14 /* configChanges */);
         writeAndPrepareForReading(item);
 
         // Read from parcel and assert
@@ -284,16 +287,17 @@ public class TransactionParcelTests {
     @Test
     public void testClientTransaction() {
         // Write to parcel
-        WindowVisibilityItem callback1 = new WindowVisibilityItem(true);
-        ActivityConfigurationChangeItem callback2 = new ActivityConfigurationChangeItem(config());
+        WindowVisibilityItem callback1 = WindowVisibilityItem.obtain(true);
+        ActivityConfigurationChangeItem callback2 = ActivityConfigurationChangeItem.obtain(
+                config());
 
-        StopActivityItem lifecycleRequest = new StopActivityItem(true /* showWindow */,
+        StopActivityItem lifecycleRequest = StopActivityItem.obtain(true /* showWindow */,
                 78 /* configChanges */);
 
         IApplicationThread appThread = new StubAppThread();
         Binder activityToken = new Binder();
 
-        ClientTransaction transaction = new ClientTransaction(appThread, activityToken);
+        ClientTransaction transaction = ClientTransaction.obtain(appThread, activityToken);
         transaction.addCallback(callback1);
         transaction.addCallback(callback2);
         transaction.setLifecycleStateRequest(lifecycleRequest);
@@ -310,13 +314,14 @@ public class TransactionParcelTests {
     @Test
     public void testClientTransactionCallbacksOnly() {
         // Write to parcel
-        WindowVisibilityItem callback1 = new WindowVisibilityItem(true);
-        ActivityConfigurationChangeItem callback2 = new ActivityConfigurationChangeItem(config());
+        WindowVisibilityItem callback1 = WindowVisibilityItem.obtain(true);
+        ActivityConfigurationChangeItem callback2 = ActivityConfigurationChangeItem.obtain(
+                config());
 
         IApplicationThread appThread = new StubAppThread();
         Binder activityToken = new Binder();
 
-        ClientTransaction transaction = new ClientTransaction(appThread, activityToken);
+        ClientTransaction transaction = ClientTransaction.obtain(appThread, activityToken);
         transaction.addCallback(callback1);
         transaction.addCallback(callback2);
 
@@ -332,13 +337,13 @@ public class TransactionParcelTests {
     @Test
     public void testClientTransactionLifecycleOnly() {
         // Write to parcel
-        StopActivityItem lifecycleRequest = new StopActivityItem(true /* showWindow */,
+        StopActivityItem lifecycleRequest = StopActivityItem.obtain(true /* showWindow */,
                 78 /* configChanges */);
 
         IApplicationThread appThread = new StubAppThread();
         Binder activityToken = new Binder();
 
-        ClientTransaction transaction = new ClientTransaction(appThread, activityToken);
+        ClientTransaction transaction = ClientTransaction.obtain(appThread, activityToken);
         transaction.setLifecycleStateRequest(lifecycleRequest);
 
         writeAndPrepareForReading(transaction);
@@ -348,49 +353,6 @@ public class TransactionParcelTests {
 
         assertEquals(transaction.hashCode(), result.hashCode());
         assertTrue(transaction.equals(result));
-    }
-
-    private static List<ResultInfo> resultInfoList() {
-        String resultWho1 = "resultWho1";
-        int requestCode1 = 7;
-        int resultCode1 = 4;
-        Intent data1 = new Intent("action1");
-        ResultInfo resultInfo1 = new ResultInfo(resultWho1, requestCode1, resultCode1, data1);
-
-        String resultWho2 = "resultWho2";
-        int requestCode2 = 8;
-        int resultCode2 = 6;
-        Intent data2 = new Intent("action2");
-        ResultInfo resultInfo2 = new ResultInfo(resultWho2, requestCode2, resultCode2, data2);
-
-        List<ResultInfo> resultInfoList = new ArrayList<>();
-        resultInfoList.add(resultInfo1);
-        resultInfoList.add(resultInfo2);
-
-        return resultInfoList;
-    }
-
-    private static List<ReferrerIntent> referrerIntentList() {
-        Intent intent1 = new Intent("action1");
-        ReferrerIntent referrerIntent1 = new ReferrerIntent(intent1, "referrer1");
-
-        Intent intent2 = new Intent("action2");
-        ReferrerIntent referrerIntent2 = new ReferrerIntent(intent2, "referrer2");
-
-        List<ReferrerIntent> referrerIntents = new ArrayList<>();
-        referrerIntents.add(referrerIntent1);
-        referrerIntents.add(referrerIntent2);
-
-        return referrerIntents;
-    }
-
-    private static Configuration config() {
-        Configuration config = new Configuration();
-        config.densityDpi = 10;
-        config.fontScale = 0.3f;
-        config.screenHeightDp = 15;
-        config.orientation = ORIENTATION_LANDSCAPE;
-        return config;
     }
 
     /** Write to {@link #mParcel} and reset its position to prepare for reading from the start. */

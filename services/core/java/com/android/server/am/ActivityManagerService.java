@@ -20680,7 +20680,7 @@ public class ActivityManagerService extends IActivityManager.Stub
                     if (DEBUG_CONFIGURATION) Slog.v(TAG_CONFIGURATION, "Sending to proc "
                             + app.processName + " new config " + configCopy);
                     mLifecycleManager.scheduleTransaction(app.thread,
-                            new ConfigurationChangeItem(configCopy));
+                            ConfigurationChangeItem.obtain(configCopy));
                 }
             } catch (Exception e) {
                 Slog.e(TAG_CONFIGURATION, "Failed to schedule configuration change", e);

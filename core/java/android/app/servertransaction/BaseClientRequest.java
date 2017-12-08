@@ -24,7 +24,7 @@ import android.os.IBinder;
  * Each of them can be prepared before scheduling and, eventually, executed.
  * @hide
  */
-public interface BaseClientRequest {
+public interface BaseClientRequest extends ObjectPoolItem {
 
     /**
      * Prepare the client request before scheduling.

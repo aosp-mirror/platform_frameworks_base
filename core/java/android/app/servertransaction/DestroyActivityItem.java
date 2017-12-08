@@ -29,13 +29,8 @@ import android.os.Trace;
  */
 public class DestroyActivityItem extends ActivityLifecycleItem {
 
-    private final boolean mFinished;
-    private final int mConfigChanges;
-
-    public DestroyActivityItem(boolean finished, int configChanges) {
-        mFinished = finished;
-        mConfigChanges = configChanges;
-    }
+    private boolean mFinished;
+    private int mConfigChanges;
 
     @Override
     public void execute(ClientTransactionHandler client, IBinder token,
@@ -49,6 +44,30 @@ public class DestroyActivityItem extends ActivityLifecycleItem {
     @Override
     public int getTargetState() {
         return ON_DESTROY;
+    }
+
+
+    // ObjectPoolItem implementation
+
+    private DestroyActivityItem() {}
+
+    /** Obtain an instance initialized with provided params. */
+    public static DestroyActivityItem obtain(boolean finished, int configChanges) {
+        DestroyActivityItem instance = ObjectPool.obtain(DestroyActivityItem.class);
+        if (instance == null) {
+            instance = new DestroyActivityItem();
+        }
+        instance.mFinished = finished;
+        instance.mConfigChanges = configChanges;
+
+        return instance;
+    }
+
+    @Override
+    public void recycle() {
+        mFinished = false;
+        mConfigChanges = 0;
+        ObjectPool.recycle(this);
     }
 
 

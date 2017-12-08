@@ -33,23 +33,10 @@ public class PauseActivityItem extends ActivityLifecycleItem {
 
     private static final String TAG = "PauseActivityItem";
 
-    private final boolean mFinished;
-    private final boolean mUserLeaving;
-    private final int mConfigChanges;
-    private final boolean mDontReport;
-
-    public PauseActivityItem() {
-        this(false /* finished */, false /* userLeaving */, 0 /* configChanges */,
-                true /* dontReport */);
-    }
-
-    public PauseActivityItem(boolean finished, boolean userLeaving, int configChanges,
-            boolean dontReport) {
-        mFinished = finished;
-        mUserLeaving = userLeaving;
-        mConfigChanges = configChanges;
-        mDontReport = dontReport;
-    }
+    private boolean mFinished;
+    private boolean mUserLeaving;
+    private int mConfigChanges;
+    private boolean mDontReport;
 
     @Override
     public void execute(ClientTransactionHandler client, IBinder token,
@@ -77,6 +64,49 @@ public class PauseActivityItem extends ActivityLifecycleItem {
         } catch (RemoteException ex) {
             throw ex.rethrowFromSystemServer();
         }
+    }
+
+
+    // ObjectPoolItem implementation
+
+    private PauseActivityItem() {}
+
+    /** Obtain an instance initialized with provided params. */
+    public static PauseActivityItem obtain(boolean finished, boolean userLeaving, int configChanges,
+            boolean dontReport) {
+        PauseActivityItem instance = ObjectPool.obtain(PauseActivityItem.class);
+        if (instance == null) {
+            instance = new PauseActivityItem();
+        }
+        instance.mFinished = finished;
+        instance.mUserLeaving = userLeaving;
+        instance.mConfigChanges = configChanges;
+        instance.mDontReport = dontReport;
+
+        return instance;
+    }
+
+    /** Obtain an instance initialized with default params. */
+    public static PauseActivityItem obtain() {
+        PauseActivityItem instance = ObjectPool.obtain(PauseActivityItem.class);
+        if (instance == null) {
+            instance = new PauseActivityItem();
+        }
+        instance.mFinished = false;
+        instance.mUserLeaving = false;
+        instance.mConfigChanges = 0;
+        instance.mDontReport = true;
+
+        return instance;
+    }
+
+    @Override
+    public void recycle() {
+        mFinished = false;
+        mUserLeaving = false;
+        mConfigChanges = 0;
+        mDontReport = false;
+        ObjectPool.recycle(this);
     }
 
     // Parcelable implementation
