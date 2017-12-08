@@ -17,6 +17,9 @@
 package com.android.server.policy;
 
 import static android.view.Surface.ROTATION_0;
+import static android.view.Surface.ROTATION_180;
+import static android.view.Surface.ROTATION_270;
+import static android.view.Surface.ROTATION_90;
 import static android.view.ViewGroup.LayoutParams.MATCH_PARENT;
 import static android.view.WindowManager.LayoutParams.TYPE_NAVIGATION_BAR;
 import static android.view.WindowManager.LayoutParams.TYPE_STATUS_BAR;
@@ -54,6 +57,7 @@ public class PhoneWindowManagerTestBase {
 
     static final int STATUS_BAR_HEIGHT = 10;
     static final int NAV_BAR_HEIGHT = 15;
+    static final int DISPLAY_CUTOUT_HEIGHT = 8;
 
     TestablePhoneWindowManager mPolicy;
     TestContextWrapper mContext;
@@ -76,10 +80,17 @@ public class PhoneWindowManagerTestBase {
 
         mPolicy = TestablePhoneWindowManager.create(mContext);
 
+        setRotation(ROTATION_0);
+    }
+
+    public void setRotation(int rotation) {
         DisplayInfo info = new DisplayInfo();
-        info.logicalWidth = DISPLAY_WIDTH;
-        info.logicalHeight = DISPLAY_HEIGHT;
-        info.rotation = ROTATION_0;
+
+        final boolean flippedDimensions = rotation == ROTATION_90 || rotation == ROTATION_270;
+        info.logicalWidth = flippedDimensions ? DISPLAY_HEIGHT : DISPLAY_WIDTH;
+        info.logicalHeight = flippedDimensions ? DISPLAY_WIDTH : DISPLAY_HEIGHT;
+        info.rotation = rotation;
+
         mFrames = new DisplayFrames(Display.DEFAULT_DISPLAY, info);
     }
 
@@ -95,7 +106,7 @@ public class PhoneWindowManagerTestBase {
 
     public void addNavigationBar() {
         mNavigationBar = new FakeWindowState();
-        mNavigationBar.attrs = new WindowManager.LayoutParams(MATCH_PARENT, STATUS_BAR_HEIGHT,
+        mNavigationBar.attrs = new WindowManager.LayoutParams(MATCH_PARENT, NAV_BAR_HEIGHT,
                 TYPE_NAVIGATION_BAR, 0 /* flags */, PixelFormat.TRANSLUCENT);
         mNavigationBar.attrs.gravity = Gravity.BOTTOM;
 
@@ -104,11 +115,16 @@ public class PhoneWindowManagerTestBase {
         mPolicy.mLastSystemUiFlags |= View.NAVIGATION_BAR_TRANSPARENT;
     }
 
+    public void addDisplayCutout() {
+        mPolicy.mEmulateDisplayCutout = true;
+    }
+
     /** Asserts that {@code actual} is inset by the given amounts from the full display rect. */
     public void assertInsetBy(Rect actual, int expectedInsetLeft, int expectedInsetTop,
             int expectedInsetRight, int expectedInsetBottom) {
         assertEquals(new Rect(expectedInsetLeft, expectedInsetTop,
-                DISPLAY_WIDTH - expectedInsetRight, DISPLAY_HEIGHT - expectedInsetBottom), actual);
+                mFrames.mDisplayWidth - expectedInsetRight,
+                mFrames.mDisplayHeight - expectedInsetBottom), actual);
     }
 
     /**
@@ -181,6 +197,11 @@ public class PhoneWindowManagerTestBase {
                 policy[0].mAccessibilityManager = new AccessibilityManager(context,
                         mock(IAccessibilityManager.class), UserHandle.USER_CURRENT);
                 policy[0].mSystemGestures = mock(SystemGesturesPointerEventListener.class);
+                policy[0].mNavigationBarCanMove = true;
+                policy[0].mPortraitRotation = ROTATION_0;
+                policy[0].mLandscapeRotation = ROTATION_90;
+                policy[0].mUpsideDownRotation = ROTATION_180;
+                policy[0].mSeascapeRotation = ROTATION_270;
                 policy[0].onConfigurationChanged();
             });
             return policy[0];

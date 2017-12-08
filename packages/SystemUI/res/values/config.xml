@@ -337,6 +337,7 @@
         <item>com.android.systemui.LatencyTester</item>
         <item>com.android.systemui.globalactions.GlobalActionsComponent</item>
         <item>com.android.systemui.RoundedCorners</item>
+        <item>com.android.systemui.EmulatedDisplayCutout</item>
     </string-array>
 
     <!-- SystemUI vender service, used in config_systemUIServiceComponents. -->

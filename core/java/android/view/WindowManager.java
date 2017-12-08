@@ -1268,6 +1268,35 @@ public interface WindowManager extends ViewManager {
         }, formatToHexString = true)
         public int flags;
 
+        /** @hide */
+        @Retention(RetentionPolicy.SOURCE)
+        @IntDef(
+            flag = true,
+            value = {
+                    LayoutParams.FLAG2_LAYOUT_IN_DISPLAY_CUTOUT_AREA,
+            })
+        @interface Flags2 {}
+
+        /**
+         * Window flag: allow placing the window within the area that overlaps with the
+         * display cutout.
+         *
+         * <p>
+         * The window must correctly position its contents to take the display cutout into account.
+         *
+         * @see DisplayCutout
+         * @hide for now
+         */
+        public static final long FLAG2_LAYOUT_IN_DISPLAY_CUTOUT_AREA = 0x00000001;
+
+        /**
+         * Various behavioral options/flags.  Default is none.
+         *
+         * @see #FLAG2_LAYOUT_IN_DISPLAY_CUTOUT_AREA
+         * @hide for now
+         */
+        @Flags2 public long flags2;
+
         /**
          * If the window has requested hardware acceleration, but this is not
          * allowed in the process it is in, then still render it as if it is

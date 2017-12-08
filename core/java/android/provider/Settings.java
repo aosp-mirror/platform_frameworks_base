@@ -10164,6 +10164,16 @@ public final class Settings {
         public static final String POLICY_CONTROL = "policy_control";
 
         /**
+         * {@link android.view.DisplayCutout DisplayCutout} emulation mode.
+         *
+         * @hide
+         */
+        public static final String EMULATE_DISPLAY_CUTOUT = "emulate_display_cutout";
+
+        /** @hide */ public static final int EMULATE_DISPLAY_CUTOUT_OFF = 0;
+        /** @hide */ public static final int EMULATE_DISPLAY_CUTOUT_ON = 1;
+
+        /**
          * Defines global zen mode.  ZEN_MODE_OFF, ZEN_MODE_IMPORTANT_INTERRUPTIONS,
          * or ZEN_MODE_NO_INTERRUPTIONS.
          *
