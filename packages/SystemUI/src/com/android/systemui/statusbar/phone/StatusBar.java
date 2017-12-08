@@ -659,8 +659,7 @@ public class StatusBar extends SystemUI implements DemoMode,
 
         @Override
         public void onCancelled() {
-            // Transition was cancelled because another one took over.
-            // Nothing to do in here but wait.
+            onFinished();
         }
     };
 

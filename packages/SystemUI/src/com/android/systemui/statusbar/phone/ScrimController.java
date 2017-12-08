@@ -204,12 +204,15 @@ public class ScrimController implements ViewTreeObserver.OnPreDrawListener,
             throw new IllegalArgumentException("Cannot change to UNINITIALIZED.");
         }
 
+        final ScrimState oldState = mState;
+        mState = state;
+
         if (mCallback != null) {
             mCallback.onCancelled();
         }
         mCallback = callback;
 
-        state.prepare(mState);
+        state.prepare(oldState);
         mScreenBlankingCallbackCalled = false;
         mAnimationDelay = 0;
         mBlankScreen = state.getBlanksScreen();
@@ -227,8 +230,6 @@ public class ScrimController implements ViewTreeObserver.OnPreDrawListener,
         if (mKeyguardFadeoutAnimation != null) {
             mKeyguardFadeoutAnimation.cancel();
         }
-
-        mState = state;
 
         // Do not let the device sleep until we're done with all animations
         if (!mWakeLockHeld) {
@@ -310,7 +311,6 @@ public class ScrimController implements ViewTreeObserver.OnPreDrawListener,
                     mCurrentInFrontAlpha = 0;
                 }
             } else {
-                Log.w(TAG, "Invalid state, cannot set panel expansion when: " + mState);
                 return;
             }
 
