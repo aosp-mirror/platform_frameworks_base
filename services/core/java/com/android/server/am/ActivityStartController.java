@@ -105,7 +105,8 @@ public class ActivityStartController {
     /**
      * TODO(b/64750076): Capture information necessary for dump and
      * {@link #postStartActivityProcessingForLastStarter} rather than keeping the entire object
-     * around */
+     * around
+     */
     private ActivityStarter mLastStarter;
 
     ActivityStartController(ActivityManagerService service) {
@@ -130,10 +131,16 @@ public class ActivityStartController {
      *         considered invalid and no longer modified or used.
      */
     ActivityStarter obtainStarter(Intent intent, String reason) {
-        final ActivityStarter starter = mFactory.obtainStarter();
-        mLastStarter = starter;
+        return mFactory.obtain().setIntent(intent).setReason(reason);
+    }
 
-        return starter.setIntent(intent).setReason(reason);
+    void onExecutionComplete(ActivityStarter starter) {
+        if (mLastStarter == null) {
+            mLastStarter = mFactory.obtain();
+        }
+
+        mLastStarter.set(starter);
+        mFactory.recycle(starter);
     }
 
     /**
@@ -142,6 +149,10 @@ public class ActivityStartController {
      */
     void postStartActivityProcessingForLastStarter(ActivityRecord r, int result,
             ActivityStack targetStack) {
+        if (mLastStarter == null) {
+            return;
+        }
+
         mLastStarter.postStartActivityProcessing(r, result, targetStack);
     }
 
