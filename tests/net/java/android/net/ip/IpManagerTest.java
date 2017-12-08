@@ -69,6 +69,8 @@ import java.util.Set;
 
 /**
  * Tests for IpManager.
+ *
+ * TODO: Rename to IpClientTest.
  */
 @RunWith(AndroidJUnit4.class)
 @SmallTest
@@ -111,6 +113,10 @@ public class IpManagerTest {
         verify(mNMService, times(1)).registerObserver(arg.capture());
         mObserver = arg.getValue();
         reset(mNMService);
+        final LinkProperties emptyLp = new LinkProperties();
+        emptyLp.setInterfaceName(ifname);
+        verify(mCb, timeout(100)).onLinkPropertiesChange(eq(emptyLp));
+        reset(mCb);
         return ipm;
     }
 
