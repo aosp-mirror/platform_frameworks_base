@@ -11555,8 +11555,8 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
 
         long ident = mInjector.binderClearCallingIdentity();
         try {
-            return ActivityManager.getService().clearApplicationUserData(packageName, callback,
-                    userId);
+            return ActivityManager.getService().clearApplicationUserData(packageName, false,
+                    callback, userId);
         } catch(RemoteException re) {
             // Same process, should not happen.
         } catch (SecurityException se) {

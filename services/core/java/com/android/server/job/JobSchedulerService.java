@@ -1984,6 +1984,11 @@ public final class JobSchedulerService extends com.android.server.SystemService
         }
 
         @Override
+        public void cancelJobsForUid(int uid, String reason) {
+            JobSchedulerService.this.cancelJobsForUid(uid, reason);
+        }
+
+        @Override
         public void addBackingUpUid(int uid) {
             synchronized (mLock) {
                 // No need to actually do anything here, since for a full backup the

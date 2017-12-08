@@ -947,7 +947,7 @@ public class PerformUnifiedRestoreTask implements BackupRestoreTask {
                     // We also need to wipe the current target's data, as it's probably
                     // in an incoherent state.
                     backupManagerService.clearApplicationDataSynchronous(
-                            mCurrentPackage.packageName);
+                            mCurrentPackage.packageName, false);
 
                     // Schedule the next state based on the nature of our failure
                     if (status == BackupTransport.TRANSPORT_ERROR) {
@@ -1115,7 +1115,7 @@ public class PerformUnifiedRestoreTask implements BackupRestoreTask {
         // If the agent fails restore, it might have put the app's data
         // into an incoherent state.  For consistency we wipe its data
         // again in this case before continuing with normal teardown
-        backupManagerService.clearApplicationDataSynchronous(mCurrentPackage.packageName);
+        backupManagerService.clearApplicationDataSynchronous(mCurrentPackage.packageName, false);
         keyValueAgentCleanup();
     }
 

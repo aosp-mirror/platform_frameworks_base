@@ -2613,7 +2613,7 @@ public class ActivityManager {
             Manifest.permission.ACCESS_INSTANT_APPS})
     public boolean clearApplicationUserData(String packageName, IPackageDataObserver observer) {
         try {
-            return getService().clearApplicationUserData(packageName,
+            return getService().clearApplicationUserData(packageName, false,
                     observer, UserHandle.myUserId());
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();

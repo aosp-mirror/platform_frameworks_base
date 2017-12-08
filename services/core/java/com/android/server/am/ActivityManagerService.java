@@ -401,6 +401,7 @@ import com.android.internal.util.FastPrintWriter;
 import com.android.internal.util.FastXmlSerializer;
 import com.android.internal.util.MemInfoReader;
 import com.android.internal.util.Preconditions;
+import com.android.server.AlarmManagerInternal;
 import com.android.server.AppOpsService;
 import com.android.server.AttributeCache;
 import com.android.server.DeviceIdleController;
@@ -471,6 +472,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicLong;
 
 import dalvik.system.VMRuntime;
+
 import libcore.io.IoUtils;
 import libcore.util.EmptyArray;
 
@@ -5948,7 +5950,7 @@ public class ActivityManagerService extends IActivityManager.Stub
     }
 
     @Override
-    public boolean clearApplicationUserData(final String packageName,
+    public boolean clearApplicationUserData(final String packageName, boolean keepState,
             final IPackageDataObserver observer, int userId) {
         enforceNotIsolatedCaller("clearApplicationUserData");
         int uid = Binder.getCallingUid();
@@ -6052,14 +6054,27 @@ public class ActivityManagerService extends IActivityManager.Stub
                 pm.clearApplicationUserData(packageName, localObserver, resolvedUserId);
 
                 if (appInfo != null) {
-                    synchronized (this) {
-                        // Remove all permissions granted from/to this package
-                        removeUriPermissionsForPackageLocked(packageName, resolvedUserId, true);
+                    // Restore already established notification state and permission grants,
+                    // so it told us to keep those intact -- it's about to emplace app data
+                    // that is appropriate for those bits of system state.
+                    if (!keepState) {
+                        synchronized (this) {
+                            // Remove all permissions granted from/to this package
+                            removeUriPermissionsForPackageLocked(packageName, resolvedUserId, true);
+                        }
+
+                        // Reset notification state
+                        INotificationManager inm = NotificationManager.getService();
+                        inm.clearData(packageName, appInfo.uid, uid == appInfo.uid);
                     }
 
-                    // Reset notification settings.
-                    INotificationManager inm = NotificationManager.getService();
-                    inm.clearData(packageName, appInfo.uid, uid == appInfo.uid);
+                    // Clear its scheduled jobs
+                    JobSchedulerInternal js = LocalServices.getService(JobSchedulerInternal.class);
+                    js.cancelJobsForUid(appInfo.uid, "clear data");
+
+                    // Clear its pending alarms
+                    AlarmManagerInternal ami = LocalServices.getService(AlarmManagerInternal.class);
+                    ami.removeAlarmsForUid(uid);
                 }
             } catch (RemoteException e) {
             }

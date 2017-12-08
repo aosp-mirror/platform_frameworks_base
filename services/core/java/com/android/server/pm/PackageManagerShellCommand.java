@@ -1374,7 +1374,7 @@ class PackageManagerShellCommand extends ShellCommand {
         }
 
         ClearDataObserver obs = new ClearDataObserver();
-        ActivityManager.getService().clearApplicationUserData(pkg, obs, userId);
+        ActivityManager.getService().clearApplicationUserData(pkg, false, obs, userId);
         synchronized (obs) {
             while (!obs.finished) {
                 try {
