@@ -1766,8 +1766,8 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
         updateBounds();
     }
 
-    void getContentRect(Rect out) {
-        out.set(mDisplayFrames.mContent);
+    void getStableRect(Rect out) {
+        out.set(mDisplayFrames.mStable);
     }
 
     TaskStack createStack(int stackId, boolean onTop, StackWindowController controller) {
