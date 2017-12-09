@@ -41,11 +41,14 @@ static jlong createDump(JNIEnv*, jobject, jint fd, jboolean isProto) {
 static void addToDump(JNIEnv* env, jobject, jlong dumpPtr, jstring jpath, jstring jpackage,
         jint versionCode, jlong startTime, jlong endTime, jbyteArray jdata) {
     std::string path;
+    const ProfileData* data = nullptr;
     LOG_ALWAYS_FATAL_IF(jdata == nullptr && jpath == nullptr, "Path and data can't both be null");
-    ScopedNullableByteArrayRO buffer(env, jdata);
-    if (buffer.size() != -1) {
+    ScopedByteArrayRO buffer{env};
+    if (jdata != nullptr) {
+        buffer.reset(jdata);
         LOG_ALWAYS_FATAL_IF(buffer.size() != sizeof(ProfileData),
-                "Buffer size %zd doesn't match expected %zu!", buffer.size(), sizeof(ProfileData));
+                "Buffer size %zu doesn't match expected %zu!", buffer.size(), sizeof(ProfileData));
+        data = reinterpret_cast<const ProfileData*>(buffer.get());
     }
     if (jpath != nullptr) {
         ScopedUtfChars pathChars(env, jpath);
@@ -58,8 +61,7 @@ static void addToDump(JNIEnv* env, jobject, jlong dumpPtr, jstring jpath, jstrin
     LOG_ALWAYS_FATAL_IF(!dump, "null passed for dump pointer");
 
     const std::string package(packageChars.c_str(), packageChars.size());
-    GraphicsStatsService::addToDump(dump, path, package, versionCode, startTime, endTime,
-                                    reinterpret_cast<const ProfileData*>(buffer.get()));
+    GraphicsStatsService::addToDump(dump, path, package, versionCode, startTime, endTime, data);
 }
 
 static void addFileToDump(JNIEnv* env, jobject, jlong dumpPtr, jstring jpath) {
