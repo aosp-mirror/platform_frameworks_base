@@ -81,12 +81,16 @@ public final class ParcelableKeyGenParameterSpec implements Parcelable {
         }
         out.writeByteArray(mSpec.getCertificateSubject().getEncoded());
         out.writeByteArray(mSpec.getCertificateSerialNumber().toByteArray());
-        writeOptionalDate(out, mSpec.getCertificateNotBefore());
-        writeOptionalDate(out, mSpec.getCertificateNotAfter());
+        out.writeLong(mSpec.getCertificateNotBefore().getTime());
+        out.writeLong(mSpec.getCertificateNotAfter().getTime());
         writeOptionalDate(out, mSpec.getKeyValidityStart());
         writeOptionalDate(out, mSpec.getKeyValidityForOriginationEnd());
         writeOptionalDate(out, mSpec.getKeyValidityForConsumptionEnd());
-        out.writeStringArray(mSpec.getDigests());
+        if (mSpec.isDigestsSpecified()) {
+            out.writeStringArray(mSpec.getDigests());
+        } else {
+            out.writeStringArray(null);
+        }
         out.writeStringArray(mSpec.getEncryptionPaddings());
         out.writeStringArray(mSpec.getSignaturePaddings());
         out.writeStringArray(mSpec.getBlockModes());
@@ -111,9 +115,15 @@ public final class ParcelableKeyGenParameterSpec implements Parcelable {
     private ParcelableKeyGenParameterSpec(Parcel in) {
         String keystoreAlias = in.readString();
         int purposes = in.readInt();
-        KeyGenParameterSpec.Builder builder = new KeyGenParameterSpec.Builder(keystoreAlias, purposes);
+        KeyGenParameterSpec.Builder builder = new KeyGenParameterSpec.Builder(
+                keystoreAlias, purposes);
         builder.setUid(in.readInt());
-        builder.setKeySize(in.readInt());
+        // KeySize is -1 by default, if the KeyGenParameterSpec previously parcelled had the default
+        // value, do not set it as this will cause setKeySize to throw.
+        int keySize = in.readInt();
+        if (keySize >= 0) {
+            builder.setKeySize(keySize);
+        }
 
         int keySpecType = in.readInt();
         AlgorithmParameterSpec algorithmSpec = null;
@@ -128,17 +138,22 @@ public final class ParcelableKeyGenParameterSpec implements Parcelable {
             algorithmSpec = new ECGenParameterSpec(stdName);
         } else {
             throw new IllegalArgumentException(
-                    String.format("Unknown algorithm parameter spec: %d", algorithmSpec));
+                    String.format("Unknown algorithm parameter spec: %d", keySpecType));
         }
-        builder.setAlgorithmParameterSpec(algorithmSpec);
+        if (algorithmSpec != null) {
+            builder.setAlgorithmParameterSpec(algorithmSpec);
+        }
         builder.setCertificateSubject(new X500Principal(in.createByteArray()));
         builder.setCertificateSerialNumber(new BigInteger(in.createByteArray()));
-        builder.setCertificateNotBefore(readDateOrNull(in));
-        builder.setCertificateNotAfter(readDateOrNull(in));
+        builder.setCertificateNotBefore(new Date(in.readLong()));
+        builder.setCertificateNotAfter(new Date(in.readLong()));
         builder.setKeyValidityStart(readDateOrNull(in));
         builder.setKeyValidityForOriginationEnd(readDateOrNull(in));
         builder.setKeyValidityForConsumptionEnd(readDateOrNull(in));
-        builder.setDigests(in.createStringArray());
+        String[] digests = in.createStringArray();
+        if (digests != null) {
+            builder.setDigests(digests);
+        }
         builder.setEncryptionPaddings(in.createStringArray());
         builder.setSignaturePaddings(in.createStringArray());
         builder.setBlockModes(in.createStringArray());
