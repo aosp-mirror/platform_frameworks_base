@@ -179,12 +179,11 @@ TEST(ResourceUtilsTest, ParseStyleParentReference) {
 }
 
 TEST(ResourceUtilsTest, ParseEmptyFlag) {
-  std::unique_ptr<Attribute> attr =
-      test::AttributeBuilder(false)
-          .SetTypeMask(ResTable_map::TYPE_FLAGS)
-          .AddItem("one", 0x01)
-          .AddItem("two", 0x02)
-          .Build();
+  std::unique_ptr<Attribute> attr = test::AttributeBuilder()
+                                        .SetTypeMask(ResTable_map::TYPE_FLAGS)
+                                        .AddItem("one", 0x01)
+                                        .AddItem("two", 0x02)
+                                        .Build();
 
   std::unique_ptr<BinaryPrimitive> result = ResourceUtils::TryParseFlagSymbol(attr.get(), "");
   ASSERT_THAT(result, NotNull());

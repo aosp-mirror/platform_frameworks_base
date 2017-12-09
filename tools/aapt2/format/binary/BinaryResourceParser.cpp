@@ -504,8 +504,8 @@ std::unique_ptr<Style> BinaryResourceParser::ParseStyle(const ResourceNameRef& n
 std::unique_ptr<Attribute> BinaryResourceParser::ParseAttr(const ResourceNameRef& name,
                                                            const ConfigDescription& config,
                                                            const ResTable_map_entry* map) {
-  const bool is_weak = (util::DeviceToHost16(map->flags) & ResTable_entry::FLAG_WEAK) != 0;
-  std::unique_ptr<Attribute> attr = util::make_unique<Attribute>(is_weak);
+  std::unique_ptr<Attribute> attr = util::make_unique<Attribute>();
+  attr->SetWeak((util::DeviceToHost16(map->flags) & ResTable_entry::FLAG_WEAK) != 0);
 
   // First we must discover what type of attribute this is. Find the type mask.
   auto type_mask_iter = std::find_if(begin(map), end(map), [](const ResTable_map& entry) -> bool {

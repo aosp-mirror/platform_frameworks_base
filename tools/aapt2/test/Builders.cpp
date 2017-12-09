@@ -156,12 +156,17 @@ std::unique_ptr<BinaryPrimitive> BuildPrimitive(uint8_t type, uint32_t data) {
   return util::make_unique<BinaryPrimitive>(value);
 }
 
-AttributeBuilder::AttributeBuilder(bool weak) : attr_(util::make_unique<Attribute>(weak)) {
-  attr_->type_mask = android::ResTable_map::TYPE_ANY;
+AttributeBuilder::AttributeBuilder()
+    : attr_(util::make_unique<Attribute>(android::ResTable_map::TYPE_ANY)) {
 }
 
 AttributeBuilder& AttributeBuilder::SetTypeMask(uint32_t typeMask) {
   attr_->type_mask = typeMask;
+  return *this;
+}
+
+AttributeBuilder& AttributeBuilder::SetWeak(bool weak) {
+  attr_->SetWeak(weak);
   return *this;
 }
 

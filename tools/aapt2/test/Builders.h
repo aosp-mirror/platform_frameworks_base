@@ -113,8 +113,9 @@ class ValueBuilder {
 
 class AttributeBuilder {
  public:
-  explicit AttributeBuilder(bool weak = false);
+  AttributeBuilder();
   AttributeBuilder& SetTypeMask(uint32_t typeMask);
+  AttributeBuilder& SetWeak(bool weak);
   AttributeBuilder& AddItem(const android::StringPiece& name, uint32_t value);
   std::unique_ptr<Attribute> Build();
 

@@ -57,7 +57,7 @@ TEST(JavaClassGeneratorTest, TransformInvalidJavaIdentifierCharacter) {
           .SetPackageId("android", 0x01)
           .AddSimple("android:id/hey-man", ResourceId(0x01020000))
           .AddValue("android:attr/cool.attr", ResourceId(0x01010000),
-                    test::AttributeBuilder(false).Build())
+                    test::AttributeBuilder().Build())
           .AddValue("android:styleable/hey.dude", ResourceId(0x01030000),
                     test::StyleableBuilder()
                         .AddItem("android:attr/cool.attr", ResourceId(0x01010000))
@@ -229,10 +229,8 @@ TEST(JavaClassGeneratorTest, EmitOtherPackagesAttributesInStyleable) {
       test::ResourceTableBuilder()
           .SetPackageId("android", 0x01)
           .SetPackageId("com.lib", 0x02)
-          .AddValue("android:attr/bar", ResourceId(0x01010000),
-                    test::AttributeBuilder(false).Build())
-          .AddValue("com.lib:attr/bar", ResourceId(0x02010000),
-                    test::AttributeBuilder(false).Build())
+          .AddValue("android:attr/bar", ResourceId(0x01010000), test::AttributeBuilder().Build())
+          .AddValue("com.lib:attr/bar", ResourceId(0x02010000), test::AttributeBuilder().Build())
           .AddValue("android:styleable/foo", ResourceId(0x01030000),
                     test::StyleableBuilder()
                         .AddItem("android:attr/bar", ResourceId(0x01010000))
@@ -290,7 +288,7 @@ TEST(JavaClassGeneratorTest, CommentsForSimpleResourcesArePresent) {
 TEST(JavaClassGeneratorTest, CommentsForEnumAndFlagAttributesArePresent) {}
 
 TEST(JavaClassGeneratorTest, CommentsForStyleablesAndNestedAttributesArePresent) {
-  Attribute attr(false);
+  Attribute attr;
   attr.SetComment(StringPiece("This is an attribute"));
 
   Styleable styleable;
@@ -375,7 +373,7 @@ TEST(JavaClassGeneratorTest, StyleableAndIndicesAreColocated) {
 }
 
 TEST(JavaClassGeneratorTest, CommentsForRemovedAttributesAreNotPresentInClass) {
-  Attribute attr(false);
+  Attribute attr;
   attr.SetComment(StringPiece("removed"));
 
   std::unique_ptr<ResourceTable> table =
@@ -413,7 +411,7 @@ TEST(JavaClassGeneratorTest, GenerateOnResourcesLoadedCallbackForSharedLibrary) 
   std::unique_ptr<ResourceTable> table =
       test::ResourceTableBuilder()
           .SetPackageId("android", 0x00)
-          .AddValue("android:attr/foo", ResourceId(0x00010000), util::make_unique<Attribute>(false))
+          .AddValue("android:attr/foo", ResourceId(0x00010000), util::make_unique<Attribute>())
           .AddValue("android:id/foo", ResourceId(0x00020000), util::make_unique<Id>())
           .AddValue(
               "android:style/foo", ResourceId(0x00030000),

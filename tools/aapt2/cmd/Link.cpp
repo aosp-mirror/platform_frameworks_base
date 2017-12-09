@@ -388,10 +388,8 @@ ResourceFileFlattener::ResourceFileFlattener(const ResourceFileFlattenerOptions&
   // generated from the attribute definitions themselves (b/62028956).
   if (const SymbolTable::Symbol* s = symm->FindById(R::attr::paddingHorizontal)) {
     std::vector<ReplacementAttr> replacements{
-        {"paddingLeft", R::attr::paddingLeft,
-         Attribute(false, android::ResTable_map::TYPE_DIMENSION)},
-        {"paddingRight", R::attr::paddingRight,
-         Attribute(false, android::ResTable_map::TYPE_DIMENSION)},
+        {"paddingLeft", R::attr::paddingLeft, Attribute(android::ResTable_map::TYPE_DIMENSION)},
+        {"paddingRight", R::attr::paddingRight, Attribute(android::ResTable_map::TYPE_DIMENSION)},
     };
     rules_[R::attr::paddingHorizontal] =
         util::make_unique<DegradeToManyRule>(std::move(replacements));
@@ -399,10 +397,8 @@ ResourceFileFlattener::ResourceFileFlattener(const ResourceFileFlattenerOptions&
 
   if (const SymbolTable::Symbol* s = symm->FindById(R::attr::paddingVertical)) {
     std::vector<ReplacementAttr> replacements{
-        {"paddingTop", R::attr::paddingTop,
-         Attribute(false, android::ResTable_map::TYPE_DIMENSION)},
-        {"paddingBottom", R::attr::paddingBottom,
-         Attribute(false, android::ResTable_map::TYPE_DIMENSION)},
+        {"paddingTop", R::attr::paddingTop, Attribute(android::ResTable_map::TYPE_DIMENSION)},
+        {"paddingBottom", R::attr::paddingBottom, Attribute(android::ResTable_map::TYPE_DIMENSION)},
     };
     rules_[R::attr::paddingVertical] =
         util::make_unique<DegradeToManyRule>(std::move(replacements));
@@ -411,9 +407,9 @@ ResourceFileFlattener::ResourceFileFlattener(const ResourceFileFlattenerOptions&
   if (const SymbolTable::Symbol* s = symm->FindById(R::attr::layout_marginHorizontal)) {
     std::vector<ReplacementAttr> replacements{
         {"layout_marginLeft", R::attr::layout_marginLeft,
-         Attribute(false, android::ResTable_map::TYPE_DIMENSION)},
+         Attribute(android::ResTable_map::TYPE_DIMENSION)},
         {"layout_marginRight", R::attr::layout_marginRight,
-         Attribute(false, android::ResTable_map::TYPE_DIMENSION)},
+         Attribute(android::ResTable_map::TYPE_DIMENSION)},
     };
     rules_[R::attr::layout_marginHorizontal] =
         util::make_unique<DegradeToManyRule>(std::move(replacements));
@@ -422,9 +418,9 @@ ResourceFileFlattener::ResourceFileFlattener(const ResourceFileFlattenerOptions&
   if (const SymbolTable::Symbol* s = symm->FindById(R::attr::layout_marginVertical)) {
     std::vector<ReplacementAttr> replacements{
         {"layout_marginTop", R::attr::layout_marginTop,
-         Attribute(false, android::ResTable_map::TYPE_DIMENSION)},
+         Attribute(android::ResTable_map::TYPE_DIMENSION)},
         {"layout_marginBottom", R::attr::layout_marginBottom,
-         Attribute(false, android::ResTable_map::TYPE_DIMENSION)},
+         Attribute(android::ResTable_map::TYPE_DIMENSION)},
     };
     rules_[R::attr::layout_marginVertical] =
         util::make_unique<DegradeToManyRule>(std::move(replacements));

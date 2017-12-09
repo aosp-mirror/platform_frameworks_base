@@ -17,6 +17,7 @@
 #include "ResourceParser.h"
 
 #include <functional>
+#include <limits>
 #include <sstream>
 
 #include "android-base/logging.h"
@@ -987,8 +988,7 @@ bool ResourceParser::ParseAttrImpl(xml::XmlPullParser* parser,
     type_mask = ParseFormatAttribute(maybe_format.value());
     if (type_mask == 0) {
       diag_->Error(DiagMessage(source_.WithLine(parser->line_number()))
-                   << "invalid attribute format '" << maybe_format.value()
-                   << "'");
+                   << "invalid attribute format '" << maybe_format.value() << "'");
       return false;
     }
   }
@@ -1000,8 +1000,7 @@ bool ResourceParser::ParseAttrImpl(xml::XmlPullParser* parser,
     if (!min_str.empty()) {
       std::u16string min_str16 = util::Utf8ToUtf16(min_str);
       android::Res_value value;
-      if (android::ResTable::stringToInt(min_str16.data(), min_str16.size(),
-                                         &value)) {
+      if (android::ResTable::stringToInt(min_str16.data(), min_str16.size(), &value)) {
         maybe_min = static_cast<int32_t>(value.data);
       }
     }
@@ -1018,8 +1017,7 @@ bool ResourceParser::ParseAttrImpl(xml::XmlPullParser* parser,
     if (!max_str.empty()) {
       std::u16string max_str16 = util::Utf8ToUtf16(max_str);
       android::Res_value value;
-      if (android::ResTable::stringToInt(max_str16.data(), max_str16.size(),
-                                         &value)) {
+      if (android::ResTable::stringToInt(max_str16.data(), max_str16.size(), &value)) {
         maybe_max = static_cast<int32_t>(value.data);
       }
     }
@@ -1061,8 +1059,7 @@ bool ResourceParser::ParseAttrImpl(xml::XmlPullParser* parser,
     const Source item_source = source_.WithLine(parser->line_number());
     const std::string& element_namespace = parser->element_namespace();
     const std::string& element_name = parser->element_name();
-    if (element_namespace.empty() &&
-        (element_name == "flag" || element_name == "enum")) {
+    if (element_namespace.empty() && (element_name == "flag" || element_name == "enum")) {
       if (element_name == "enum") {
         if (type_mask & android::ResTable_map::TYPE_FLAGS) {
           diag_->Error(DiagMessage(item_source)
@@ -1120,17 +1117,12 @@ bool ResourceParser::ParseAttrImpl(xml::XmlPullParser* parser,
     return false;
   }
 
-  std::unique_ptr<Attribute> attr = util::make_unique<Attribute>(weak);
+  std::unique_ptr<Attribute> attr = util::make_unique<Attribute>(
+      type_mask ? type_mask : uint32_t{android::ResTable_map::TYPE_ANY});
+  attr->SetWeak(weak);
   attr->symbols = std::vector<Attribute::Symbol>(items.begin(), items.end());
-  attr->type_mask =
-      type_mask ? type_mask : uint32_t(android::ResTable_map::TYPE_ANY);
-  if (maybe_min) {
-    attr->min_int = maybe_min.value();
-  }
-
-  if (maybe_max) {
-    attr->max_int = maybe_max.value();
-  }
+  attr->min_int = maybe_min.value_or_default(std::numeric_limits<int32_t>::min());
+  attr->max_int = maybe_max.value_or_default(std::numeric_limits<int32_t>::max());
   out_resource->value = std::move(attr);
   return true;
 }
@@ -1445,11 +1437,9 @@ bool ResourceParser::ParseDeclareStyleable(xml::XmlPullParser* parser,
     const std::string& element_namespace = parser->element_namespace();
     const std::string& element_name = parser->element_name();
     if (element_namespace.empty() && element_name == "attr") {
-      Maybe<StringPiece> maybe_name =
-          xml::FindNonEmptyAttribute(parser, "name");
+      Maybe<StringPiece> maybe_name = xml::FindNonEmptyAttribute(parser, "name");
       if (!maybe_name) {
-        diag_->Error(DiagMessage(item_source)
-                     << "<attr> tag must have a 'name' attribute");
+        diag_->Error(DiagMessage(item_source) << "<attr> tag must have a 'name' attribute");
         error = true;
         continue;
       }
@@ -1457,8 +1447,7 @@ bool ResourceParser::ParseDeclareStyleable(xml::XmlPullParser* parser,
       // If this is a declaration, the package name may be in the name. Separate
       // these out.
       // Eg. <attr name="android:text" />
-      Maybe<Reference> maybe_ref =
-          ResourceUtils::ParseXmlAttributeName(maybe_name.value());
+      Maybe<Reference> maybe_ref = ResourceUtils::ParseXmlAttributeName(maybe_name.value());
       if (!maybe_ref) {
         diag_->Error(DiagMessage(item_source) << "<attr> tag has invalid name '"
                                               << maybe_name.value() << "'");
