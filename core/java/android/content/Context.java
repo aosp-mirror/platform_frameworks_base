@@ -2913,7 +2913,7 @@ public abstract class Context {
             @Nullable String profileFile, @Nullable Bundle arguments);
 
     /** @hide */
-    @StringDef({
+    @StringDef(suffix = { "_SERVICE" }, value = {
             POWER_SERVICE,
             WINDOW_SERVICE,
             LAYOUT_INFLATER_SERVICE,

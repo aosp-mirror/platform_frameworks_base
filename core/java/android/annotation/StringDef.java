@@ -46,6 +46,11 @@ import static java.lang.annotation.RetentionPolicy.SOURCE;
 @Retention(SOURCE)
 @Target({ANNOTATION_TYPE})
 public @interface StringDef {
+    /** Defines the constant prefix for this element */
+    String[] prefix() default {};
+    /** Defines the constant suffix for this element */
+    String[] suffix() default {};
+
     /** Defines the allowed constants for this element */
     String[] value() default {};
 }

@@ -1650,7 +1650,7 @@ public final class TvContract {
         public static final String CONTENT_ITEM_TYPE = "vnd.android.cursor.item/channel";
 
         /** @hide */
-        @StringDef({
+        @StringDef(prefix = { "TYPE_" }, value = {
                 TYPE_OTHER,
                 TYPE_NTSC,
                 TYPE_PAL,
@@ -1863,7 +1863,7 @@ public final class TvContract {
         public static final String TYPE_PREVIEW = "TYPE_PREVIEW";
 
         /** @hide */
-        @StringDef({
+        @StringDef(prefix = { "SERVICE_TYPE_" }, value = {
                 SERVICE_TYPE_OTHER,
                 SERVICE_TYPE_AUDIO_VIDEO,
                 SERVICE_TYPE_AUDIO,
@@ -1881,7 +1881,7 @@ public final class TvContract {
         public static final String SERVICE_TYPE_AUDIO = "SERVICE_TYPE_AUDIO";
 
         /** @hide */
-        @StringDef({
+        @StringDef(prefix = { "VIDEO_FORMAT_" }, value = {
                 VIDEO_FORMAT_240P,
                 VIDEO_FORMAT_360P,
                 VIDEO_FORMAT_480I,
@@ -1930,7 +1930,7 @@ public final class TvContract {
         public static final String VIDEO_FORMAT_4320P = "VIDEO_FORMAT_4320P";
 
         /** @hide */
-        @StringDef({
+        @StringDef(prefix = { "VIDEO_RESOLUTION_" }, value = {
                 VIDEO_RESOLUTION_SD,
                 VIDEO_RESOLUTION_ED,
                 VIDEO_RESOLUTION_HD,

@@ -52,7 +52,9 @@ import static java.lang.annotation.RetentionPolicy.SOURCE;
 @Target({ANNOTATION_TYPE})
 public @interface IntDef {
     /** Defines the constant prefix for this element */
-    String[] prefix() default "";
+    String[] prefix() default {};
+    /** Defines the constant suffix for this element */
+    String[] suffix() default {};
 
     /** Defines the allowed constants for this element */
     long[] value() default {};
