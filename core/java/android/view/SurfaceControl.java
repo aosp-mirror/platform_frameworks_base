@@ -18,11 +18,18 @@ package android.view;
 
 import static android.view.Surface.ROTATION_270;
 import static android.view.Surface.ROTATION_90;
+import static android.graphics.Matrix.MSCALE_X;
+import static android.graphics.Matrix.MSCALE_Y;
+import static android.graphics.Matrix.MSKEW_X;
+import static android.graphics.Matrix.MSKEW_Y;
+import static android.graphics.Matrix.MTRANS_X;
+import static android.graphics.Matrix.MTRANS_Y;
 
 import android.annotation.Size;
 import android.graphics.Bitmap;
 import android.graphics.GraphicBuffer;
 import android.graphics.PixelFormat;
+import android.graphics.Matrix;
 import android.graphics.Rect;
 import android.graphics.Region;
 import android.os.IBinder;
@@ -862,6 +869,22 @@ public class SurfaceControl implements Parcelable {
         }
     }
 
+    /**
+     * Sets the transform and position of a {@link SurfaceControl} from a 3x3 transformation matrix.
+     *
+     * @param matrix The matrix to apply.
+     * @param float9 An array of 9 floats to be used to extract the values from the matrix.
+     */
+    public void setMatrix(Matrix matrix, float[] float9) {
+        checkNotReleased();
+        matrix.getValues(float9);
+        synchronized (SurfaceControl.class) {
+            sGlobalTransaction.setMatrix(this, float9[MSCALE_X], float9[MSKEW_Y],
+                    float9[MSKEW_X], float9[MSCALE_Y]);
+            sGlobalTransaction.setPosition(this, float9[MTRANS_X], float9[MTRANS_Y]);
+        }
+    }
+
     public void setWindowCrop(Rect crop) {
         checkNotReleased();
         synchronized (SurfaceControl.class) {
@@ -1345,6 +1368,14 @@ public class SurfaceControl implements Parcelable {
             sc.checkNotReleased();
             nativeSetMatrix(mNativeObject, sc.mNativeObject,
                     dsdx, dtdx, dtdy, dsdy);
+            return this;
+        }
+
+        public Transaction setMatrix(SurfaceControl sc, Matrix matrix, float[] float9) {
+            matrix.getValues(float9);
+            setMatrix(sc, float9[MSCALE_X], float9[MSKEW_Y],
+                    float9[MSKEW_X], float9[MSCALE_Y]);
+            setPosition(sc, float9[MTRANS_X], float9[MTRANS_Y]);
             return this;
         }
 

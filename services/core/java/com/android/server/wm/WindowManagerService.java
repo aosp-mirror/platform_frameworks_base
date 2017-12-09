@@ -769,6 +769,7 @@ public class WindowManagerService extends IWindowManager.Stub
     int mTransactionSequence;
 
     final WindowAnimator mAnimator;
+    final SurfaceAnimationRunner mSurfaceAnimationRunner;
 
     final BoundsAnimationController mBoundsAnimationController;
 
@@ -1082,6 +1083,7 @@ public class WindowManagerService extends IWindowManager.Stub
         mHoldingScreenWakeLock.setReferenceCounted(false);
 
         mAnimator = new WindowAnimator(this);
+        mSurfaceAnimationRunner = new SurfaceAnimationRunner();
 
         mAllowTheaterModeWakeFromLayout = context.getResources().getBoolean(
                 com.android.internal.R.bool.config_allowTheaterModeWakeFromWindowLayout);

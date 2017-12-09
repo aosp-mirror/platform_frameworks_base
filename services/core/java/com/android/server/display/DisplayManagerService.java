@@ -76,6 +76,7 @@ import com.android.server.LocalServices;
 import com.android.server.SystemService;
 import com.android.server.UiThread;
 import com.android.server.wm.WindowManagerInternal;
+import com.android.server.wm.SurfaceAnimationThread;
 
 import java.io.FileDescriptor;
 import java.io.PrintWriter;
@@ -291,6 +292,8 @@ public final class DisplayManagerService extends SystemService {
         Process.setThreadGroupAndCpuset(DisplayThread.get().getThreadId(),
                 Process.THREAD_GROUP_TOP_APP);
         Process.setThreadGroupAndCpuset(AnimationThread.get().getThreadId(),
+                Process.THREAD_GROUP_TOP_APP);
+        Process.setThreadGroupAndCpuset(SurfaceAnimationThread.get().getThreadId(),
                 Process.THREAD_GROUP_TOP_APP);
     }
 

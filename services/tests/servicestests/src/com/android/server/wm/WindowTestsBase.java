@@ -185,6 +185,7 @@ class WindowTestsBase {
     void waitUntilHandlersIdle() {
         sWm.mH.runWithScissors(() -> { }, 0);
         sWm.mAnimationHandler.runWithScissors(() -> { }, 0);
+        SurfaceAnimationThread.getHandler().runWithScissors(() -> { }, 0);
     }
 
     private WindowToken createWindowToken(
