@@ -3695,8 +3695,9 @@ public class AccessibilityNodeInfo implements Parcelable {
 
         if (DEBUG) {
             builder.append("; sourceNodeId: " + mSourceNodeId);
-            builder.append("; accessibilityViewId: " + getAccessibilityViewId(mSourceNodeId));
-            builder.append("; virtualDescendantId: " + getVirtualDescendantId(mSourceNodeId));
+            builder.append("; windowId: " + mWindowId);
+            builder.append("; accessibilityViewId: ").append(getAccessibilityViewId(mSourceNodeId));
+            builder.append("; virtualDescendantId: ").append(getVirtualDescendantId(mSourceNodeId));
             builder.append("; mParentNodeId: " + mParentNodeId);
             builder.append("; traversalBefore: ").append(mTraversalBefore);
             builder.append("; traversalAfter: ").append(mTraversalAfter);
@@ -3726,8 +3727,8 @@ public class AccessibilityNodeInfo implements Parcelable {
             builder.append("]");
         }
 
-        builder.append("; boundsInParent: " + mBoundsInParent);
-        builder.append("; boundsInScreen: " + mBoundsInScreen);
+        builder.append("; boundsInParent: ").append(mBoundsInParent);
+        builder.append("; boundsInScreen: ").append(mBoundsInScreen);
 
         builder.append("; packageName: ").append(mPackageName);
         builder.append("; className: ").append(mClassName);
