@@ -19,7 +19,6 @@ package android.service.autofill;
 import static android.view.autofill.Helper.sDebug;
 
 import android.annotation.NonNull;
-import android.annotation.TestApi;
 import android.os.Parcel;
 import android.os.Parcelable;
 import android.view.autofill.Helper;
@@ -31,15 +30,10 @@ import com.google.android.collect.Lists;
 import java.util.List;
 
 /**
- * Gets the <a href="#FieldsClassification">fields classification</a> results for a given field.
- *
- * TODO(b/67867469):
- * - improve javadoc
- * - unhide / remove testApi
- *
- * @hide
+ * Represents the <a href="AutofillService.html#FieldClassification">field classification</a>
+ * results for a given field.
  */
-@TestApi
+// TODO(b/70291841): let caller handle Parcelable...
 public final class FieldClassification implements Parcelable {
 
     private final Match mMatch;
@@ -79,7 +73,7 @@ public final class FieldClassification implements Parcelable {
 
     @Override
     public void writeToParcel(Parcel parcel, int flags) {
-        parcel.writeParcelable(mMatch, flags);
+        mMatch.writeToParcel(parcel);
     }
 
     public static final Parcelable.Creator<FieldClassification> CREATOR =
@@ -87,7 +81,7 @@ public final class FieldClassification implements Parcelable {
 
         @Override
         public FieldClassification createFromParcel(Parcel parcel) {
-            return new FieldClassification(parcel.readParcelable(null));
+            return new FieldClassification(Match.readFromParcel(parcel));
         }
 
         @Override
@@ -97,16 +91,12 @@ public final class FieldClassification implements Parcelable {
     };
 
     /**
-     * Gets the score of a {@link UserData} entry for the field.
+     * Represents the score of a {@link UserData} entry for the field.
      *
-     * TODO(b/67867469):
-     * - improve javadoc
-     * - unhide / remove testApi
-     *
-     * @hide
+     * <p>The score is defined by {@link #getScore()} and the entry is identified by
+     * {@link #getRemoteId()}.
      */
-    @TestApi
-    public static final class Match implements Parcelable {
+    public static final class Match {
 
         private final String mRemoteId;
         private final float mScore;
@@ -126,26 +116,19 @@ public final class FieldClassification implements Parcelable {
         }
 
         /**
-         * Gets a score between the value of this field and the value of the {@link UserData} entry.
+         * Gets a classification score for the value of this field compared to the value of the
+         * {@link UserData} entry.
          *
-         * <p>The score is based in a case-insensitive comparisson of all characters from both the
-         * field value and the user data entry, and it ranges from {@code 0} to {@code 1000000}:
+         * <p>The score is based in a comparison of the field value and the user data entry, and it
+         * ranges from {@code 0.0F} to {@code 1.0F}:
          * <ul>
-         *   <li>{@code 1.0} represents a full match ({@code 100%}).
-         *   <li>{@code 0.0} represents a full mismatch ({@code 0%}).
+         *   <li>{@code 1.0F} represents a full match ({@code 100%}).
+         *   <li>{@code 0.0F} represents a full mismatch ({@code 0%}).
          *   <li>Any other value is a partial match.
          * </ul>
          *
-         * <p>How the score is calculated depends on the algorithm used by the Android System.
-         * For example, if the user  data is {@code "abc"} and the field value us {@code " abc"},
-         * the result could be:
-         * <ul>
-         *   <li>{@code 1.0} if the algorithm trims the values.
-         *   <li>{@code 0.0} if the algorithm compares the values sequentially.
-         *   <li>{@code 0.75} if the algorithm consideres that 3/4 (75%) of the characters match.
-         * </ul>
-         *
-         * <p>Currently, the autofill service cannot configure the algorithm.
+         * <p>How the score is calculated depends on the algorithm used by the {@link Scorer}
+         * implementation.
          */
         public float getScore() {
             return mScore;
@@ -160,33 +143,31 @@ public final class FieldClassification implements Parcelable {
             return string.append(", score=").append(mScore).toString();
         }
 
-        /////////////////////////////////////
-        // Parcelable "contract" methods. //
-        /////////////////////////////////////
-
-        @Override
-        public int describeContents() {
-            return 0;
-        }
-
-        @Override
-        public void writeToParcel(Parcel parcel, int flags) {
+        private void writeToParcel(@NonNull Parcel parcel) {
             parcel.writeString(mRemoteId);
             parcel.writeFloat(mScore);
         }
 
-        @SuppressWarnings("hiding")
-        public static final Parcelable.Creator<Match> CREATOR = new Parcelable.Creator<Match>() {
+        private static Match readFromParcel(@NonNull Parcel parcel) {
+            return new Match(parcel.readString(), parcel.readFloat());
+        }
 
-            @Override
-            public Match createFromParcel(Parcel parcel) {
-                return new Match(parcel.readString(), parcel.readFloat());
+        /** @hide */
+        public static Match[] readArrayFromParcel(@NonNull Parcel parcel) {
+            final int length = parcel.readInt();
+            final Match[] matches = new Match[length];
+            for (int i = 0; i < length; i++) {
+                matches[i] = readFromParcel(parcel);
             }
+            return matches;
+        }
 
-            @Override
-            public Match[] newArray(int size) {
-                return new Match[size];
+        /** @hide */
+        public static void writeArrayToParcel(@NonNull Parcel parcel, @NonNull Match[] matches) {
+            parcel.writeInt(matches.length);
+            for (int i = 0; i < matches.length; i++) {
+                matches[i].writeToParcel(parcel);
             }
-        };
+        }
     }
 }

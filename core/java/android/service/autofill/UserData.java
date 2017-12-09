@@ -23,7 +23,6 @@ import static android.view.autofill.Helper.sDebug;
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
-import android.annotation.TestApi;
 import android.app.ActivityThread;
 import android.content.ContentResolver;
 import android.os.Parcel;
@@ -38,15 +37,9 @@ import java.io.PrintWriter;
 import java.util.ArrayList;
 
 /**
- * Class used by service to improve autofillable fields detection by tracking the meaning of fields
- * manually edited by the user (when they match values provided by the service).
- *
- * TODO(b/67867469):
- *  - improve javadoc / add link to section on AutofillService
- *  - unhide / remove testApi
- * @hide
+ * Defines the user data used for
+ * <a href="AutofillService.html#FieldClassification">field classification</a>.
  */
-@TestApi
 public final class UserData implements Parcelable {
 
     private static final String TAG = "UserData";
@@ -110,12 +103,7 @@ public final class UserData implements Parcelable {
 
     /**
      * A builder for {@link UserData} objects.
-     *
-     * TODO(b/67867469): unhide / remove testApi
-     *
-     * @hide
      */
-    @TestApi
     public static final class Builder {
         private final InternalScorer mScorer;
         private final ArrayList<String> mRemoteIds;
@@ -123,7 +111,7 @@ public final class UserData implements Parcelable {
         private boolean mDestroyed;
 
         /**
-         * Creates a new builder for the user data used for <a href="#FieldsClassification">fields
+         * Creates a new builder for the user data used for <a href="#FieldClassification">field
          * classification</a>.
          *
          * @throws IllegalArgumentException if any of the following occurs:
@@ -288,14 +276,16 @@ public final class UserData implements Parcelable {
     }
 
     /**
-     * Gets the minimum length of values passed to {@link Builder#Builder(Scorer, String, String)}.
+     * Gets the minimum length of values passed to the builder's constructor or
+     * or {@link Builder#add(String, String)}.
      */
     public static int getMinValueLength() {
         return getInt(AUTOFILL_USER_DATA_MIN_VALUE_LENGTH, DEFAULT_MIN_VALUE_LENGTH);
     }
 
     /**
-     * Gets the maximum length of values passed to {@link Builder#Builder(Scorer, String, String)}.
+     * Gets the maximum length of values passed to the builder's constructor or
+     * or {@link Builder#add(String, String)}.
      */
     public static int getMaxValueLength() {
         return getInt(AUTOFILL_USER_DATA_MAX_VALUE_LENGTH, DEFAULT_MAX_VALUE_LENGTH);

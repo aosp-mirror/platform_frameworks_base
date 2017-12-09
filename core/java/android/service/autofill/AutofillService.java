@@ -453,13 +453,46 @@ import com.android.internal.os.SomeArgs;
  * email address), the service should only use it locally (i.e., in the app's process) for
  * heuristics purposes, but it should not be sent to external servers.
  *
- * <a name="FieldsClassification"></a>
- * <h3>Metrics and fields classification</h3
+ * <a name="FieldClassification"></a>
+ * <h3>Metrics and field classification</h3
  *
- * <p>TODO(b/67867469): document it or remove this section; in particular, document the relationship
- * between set/getUserData(), FillResponse.setFieldClassificationIds(), and
- * FillEventHistory.getFieldsClassification.
+ * <p>The service can call {@link #getFillEventHistory()} to get metrics representing the user
+ * actions, and then use these metrics to improve its heuristics.
+ *
+ * <p>Prior to Android {@link android.os.Build.VERSION_CODES#P}, the metrics covered just the
+ * scenarios where the service knew how to autofill an activity, but Android
+ * {@link android.os.Build.VERSION_CODES#P} introduced a new mechanism called field classification,
+ * which allows the service to dinamically classify the meaning of fields based on the existing user
+ * data known by the service.
+ *
+ * <p>Typically, field classification can be used to detect fields that can be autofilled with
+ * user data that is not associated with a specific app&mdash;such as email and physical
+ * address. Once the service identifies that a such field was manually filled by the user, the
+ * service could use this signal to improve its heuristics, either locally (i.e., in the same
+ * device) or globally (i.e., by crowdsourcing the results back to the service's server so it can
+ * be used by other users).
+ *
+ * <p>The field classification workflow involves 4 steps:
+ *
+ * <ol>
+ *   <li>Set the user data through {@link AutofillManager#setUserData(UserData)}. This data is
+ *   cached until the system restarts (or the service is disabled), so it doesn't need to be set for
+ *   all requests.
+ *   <li>Identify which fields should be analysed by calling
+ *   {@link FillResponse.Builder#setFieldClassificationIds(AutofillId...)}.
+ *   <li>Verify the results through {@link FillEventHistory.Event#getFieldsClassification()}.
+ *   <li>Use the results to dynamically create {@link Dataset} or {@link SaveInfo} objects in future
+ *   requests.
+ * </ol>
+ *
+ * <p>The field classification is an expensive operation and should be used carefully, otherwise it
+ * can reach its rate limit and get blocked by the Android System. Ideally, it should be used just
+ * in cases where the service could not determine how an activity can be autofilled, but it has a
+ * strong suspicious that it could. For example, if an activity has four or more fields and one of
+ * them is a list, chances are that these are address fields (like address, city, state, and
+ * zip code).
  */
+// TODO(b/70407264): add code snippets above???
 public abstract class AutofillService extends Service {
     private static final String TAG = "AutofillService";
 

@@ -421,13 +421,6 @@ public class SettingsBackupTest {
     private static final Set<String> BACKUP_BLACKLISTED_SECURE_SETTINGS =
              newHashSet(
                  Settings.Secure.ACCESSIBILITY_SOFT_KEYBOARD_MODE,
-                 // TODO(b/67867469): Move autofill settings below to
-                 // BACKUP_BLACKLISTED_SYSTEM_SETTINGS once feature is moved out of experimental
-                 Settings.Secure.AUTOFILL_FEATURE_FIELD_CLASSIFICATION,
-                 Settings.Secure.AUTOFILL_USER_DATA_MAX_FIELD_CLASSIFICATION_IDS_SIZE,
-                 Settings.Secure.AUTOFILL_USER_DATA_MAX_USER_DATA_SIZE,
-                 Settings.Secure.AUTOFILL_USER_DATA_MAX_VALUE_LENGTH,
-                 Settings.Secure.AUTOFILL_USER_DATA_MIN_VALUE_LENGTH,
                  Settings.Secure.ALLOWED_GEOLOCATION_ORIGINS,
                  Settings.Secure.ALWAYS_ON_VPN_APP,
                  Settings.Secure.ALWAYS_ON_VPN_LOCKDOWN,
@@ -437,6 +430,11 @@ public class SettingsBackupTest {
                  Settings.Secure.ASSIST_DISCLOSURE_ENABLED,
                  Settings.Secure.ASSIST_SCREENSHOT_ENABLED,
                  Settings.Secure.ASSIST_STRUCTURE_ENABLED,
+                 Settings.Secure.AUTOFILL_FEATURE_FIELD_CLASSIFICATION,
+                 Settings.Secure.AUTOFILL_USER_DATA_MAX_FIELD_CLASSIFICATION_IDS_SIZE,
+                 Settings.Secure.AUTOFILL_USER_DATA_MAX_USER_DATA_SIZE,
+                 Settings.Secure.AUTOFILL_USER_DATA_MAX_VALUE_LENGTH,
+                 Settings.Secure.AUTOFILL_USER_DATA_MIN_VALUE_LENGTH,
                  Settings.Secure.AUTOFILL_SERVICE_SEARCH_URI,
                  Settings.Secure.AUTOMATIC_STORAGE_MANAGER_BYTES_CLEARED,
                  Settings.Secure.AUTOMATIC_STORAGE_MANAGER_ENABLED,

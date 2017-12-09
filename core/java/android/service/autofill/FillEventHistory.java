@@ -21,7 +21,6 @@ import static android.view.autofill.Helper.sVerbose;
 import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
-import android.annotation.TestApi;
 import android.content.IntentSender;
 import android.os.Bundle;
 import android.os.Parcel;
@@ -158,7 +157,7 @@ public final class FillEventHistory implements Parcelable {
                 final AutofillId[] detectedFields = event.mDetectedFieldIds;
                 parcel.writeParcelableArray(detectedFields, flags);
                 if (detectedFields != null) {
-                    parcel.writeParcelableArray(event.mDetectedMatches, flags);
+                    Match.writeArrayToParcel(parcel, event.mDetectedMatches);
                 }
             }
         }
@@ -208,6 +207,7 @@ public final class FillEventHistory implements Parcelable {
          *       ({@link #getIgnoredDatasetIds()}).
          *   <li>Which fields in the selected datasets were changed by the user after the dataset
          *       was selected ({@link #getChangedFields()}.
+         *   <li>Which fields match the {@link UserData} set by the service.
          * </ul>
          *
          * <p><b>Note: </b>This event is only generated when:
@@ -222,7 +222,6 @@ public final class FillEventHistory implements Parcelable {
          * <p>See {@link android.view.autofill.AutofillManager} for more information about autofill
          * contexts.
          */
-        // TODO(b/67867469): update with field detection behavior
         public static final int TYPE_CONTEXT_COMMITTED = 4;
 
         /** @hide */
@@ -356,19 +355,13 @@ public final class FillEventHistory implements Parcelable {
         }
 
         /**
-         * Gets the <a href="#FieldsClassification">fields classification</a> results.
+         * Gets the <a href="AutofillService.html#FieldClassification">field classification</a>
+         * results.
          *
          * <p><b>Note: </b>Only set on events of type {@link #TYPE_CONTEXT_COMMITTED}, when the
          * service requested {@link FillResponse.Builder#setFieldClassificationIds(AutofillId...)
-         * fields classification}.
-         *
-         * TODO(b/67867469):
-         *  - improve javadoc
-         *  - unhide / remove testApi
-         *
-         * @hide
+         * field classification}.
          */
-        @TestApi
         @NonNull public Map<AutofillId, FieldClassification> getFieldsClassification() {
             if (mDetectedFieldIds == null) {
                 return Collections.emptyMap();
@@ -462,6 +455,8 @@ public final class FillEventHistory implements Parcelable {
          * and belonged to datasets.
          * @param manuallyFilledDatasetIds The ids of datasets that had values matching the
          * respective entry on {@code manuallyFilledFieldIds}.
+         * @param detectedMatches the field classification matches.
+         *
          * @throws IllegalArgumentException If the length of {@code changedFieldIds} and
          * {@code changedDatasetIds} doesn't match.
          * @throws IllegalArgumentException If the length of {@code manuallyFilledFieldIds} and
@@ -469,7 +464,6 @@ public final class FillEventHistory implements Parcelable {
          *
          * @hide
          */
-        // TODO(b/67867469): document field classification parameters once stable
         public Event(int eventType, @Nullable String datasetId, @Nullable Bundle clientState,
                 @Nullable List<String> selectedDatasetIds,
                 @Nullable ArraySet<String> ignoredDatasetIds,
@@ -477,7 +471,7 @@ public final class FillEventHistory implements Parcelable {
                 @Nullable ArrayList<String> changedDatasetIds,
                 @Nullable ArrayList<AutofillId> manuallyFilledFieldIds,
                 @Nullable ArrayList<ArrayList<String>> manuallyFilledDatasetIds,
-                @Nullable AutofillId[] detectedFieldIds, @Nullable Match[] detectedMaches) {
+                @Nullable AutofillId[] detectedFieldIds, @Nullable Match[] detectedMatches) {
             mEventType = Preconditions.checkArgumentInRange(eventType, 0, TYPE_CONTEXT_COMMITTED,
                     "eventType");
             mDatasetId = datasetId;
@@ -502,7 +496,7 @@ public final class FillEventHistory implements Parcelable {
             mManuallyFilledDatasetIds = manuallyFilledDatasetIds;
 
             mDetectedFieldIds = detectedFieldIds;
-            mDetectedMatches = detectedMaches;
+            mDetectedMatches = detectedMatches;
         }
 
         @Override
@@ -555,7 +549,7 @@ public final class FillEventHistory implements Parcelable {
                         final AutofillId[] detectedFieldIds = parcel.readParcelableArray(null,
                                 AutofillId.class);
                         final Match[] detectedMatches = (detectedFieldIds != null)
-                                ? parcel.readParcelableArray(null, Match.class)
+                                ? Match.readArrayFromParcel(parcel)
                                 : null;
 
                         selection.addEvent(new Event(eventType, datasetId, clientState,
