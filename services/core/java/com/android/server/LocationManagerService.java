@@ -2254,6 +2254,64 @@ public class LocationManagerService extends ILocationManager.Stub {
         }
     }
 
+    /**
+     * Provides an interface to inject and set the last location if location is not available
+     * currently.
+     *
+     * This helps in cases where the product (Cars for example) has saved the last known location
+     * before powering off.  This interface lets the client inject the saved location while the GPS
+     * chipset is getting its first fix, there by improving user experience.
+     *
+     * @param location - Location object to inject
+     * @return true if update was successful, false if not
+     */
+    @Override
+    public boolean injectLocation(Location location) {
+        mContext.enforceCallingPermission(android.Manifest.permission.LOCATION_HARDWARE,
+                "Location Hardware permission not granted to inject location");
+        mContext.enforceCallingPermission(android.Manifest.permission.ACCESS_FINE_LOCATION,
+                "Access Fine Location permission not granted to inject Location");
+
+        if (location == null) {
+            if (D) {
+                Log.d(TAG, "injectLocation(): called with null location");
+            }
+            return false;
+        }
+        LocationProviderInterface p = null;
+        String provider = location.getProvider();
+        if (provider != null) {
+            p = mProvidersByName.get(provider);
+        }
+        if (p == null) {
+            if (D) {
+                Log.d(TAG, "injectLocation(): unknown provider");
+            }
+            return false;
+        }
+        synchronized (mLock) {
+            if (!isAllowedByCurrentUserSettingsLocked(provider)) {
+                if (D) {
+                    Log.d(TAG, "Location disabled in Settings for current user:" + mCurrentUserId);
+                }
+                return false;
+            } else {
+                // NOTE: If last location is already available, location is not injected.  If
+                // provider's normal source (like a GPS chipset) have already provided an output,
+                // there is no need to inject this location.
+                if (mLastLocation.get(provider) == null) {
+                    updateLastLocationLocked(location, provider);
+                } else {
+                    if (D) {
+                        Log.d(TAG, "injectLocation(): Location exists. Not updating");
+                    }
+                    return false;
+                }
+            }
+        }
+        return true;
+    }
+
     @Override
     public void requestGeofence(LocationRequest request, Geofence geofence, PendingIntent intent,
             String packageName) {
@@ -2614,30 +2672,18 @@ public class LocationManagerService extends ILocationManager.Stub {
 
     private void handleLocationChangedLocked(Location location, boolean passive) {
         if (D) Log.d(TAG, "incoming location: " + location);
-
         long now = SystemClock.elapsedRealtime();
         String provider = (passive ? LocationManager.PASSIVE_PROVIDER : location.getProvider());
-
         // Skip if the provider is unknown.
         LocationProviderInterface p = mProvidersByName.get(provider);
         if (p == null) return;
-
-        // Update last known locations
-        Location noGPSLocation = location.getExtraLocation(Location.EXTRA_NO_GPS_LOCATION);
-        Location lastNoGPSLocation;
+        updateLastLocationLocked(location, provider);
+        // mLastLocation should have been updated from the updateLastLocationLocked call above.
         Location lastLocation = mLastLocation.get(provider);
         if (lastLocation == null) {
-            lastLocation = new Location(provider);
-            mLastLocation.put(provider, lastLocation);
-        } else {
-            lastNoGPSLocation = lastLocation.getExtraLocation(Location.EXTRA_NO_GPS_LOCATION);
-            if (noGPSLocation == null && lastNoGPSLocation != null) {
-                // New location has no no-GPS location: adopt last no-GPS location. This is set
-                // directly into location because we do not want to notify COARSE clients.
-                location.setExtraLocation(Location.EXTRA_NO_GPS_LOCATION, lastNoGPSLocation);
-            }
+            Log.e(TAG, "handleLocationChangedLocked() updateLastLocation failed");
+            return;
         }
-        lastLocation.set(location);
 
         // Update last known coarse interval location if enough time has passed.
         Location lastLocationCoarseInterval = mLastLocationCoarseInterval.get(provider);
@@ -2653,7 +2699,7 @@ public class LocationManagerService extends ILocationManager.Stub {
         // Don't ever return a coarse location that is more recent than the allowed update
         // interval (i.e. don't allow an app to keep registering and unregistering for
         // location updates to overcome the minimum interval).
-        noGPSLocation =
+        Location noGPSLocation =
                 lastLocationCoarseInterval.getExtraLocation(Location.EXTRA_NO_GPS_LOCATION);
 
         // Skip if there are no UpdateRecords for this provider.
@@ -2776,6 +2822,30 @@ public class LocationManagerService extends ILocationManager.Stub {
             }
             applyRequirementsLocked(provider);
         }
+    }
+
+    /**
+     * Updates last location with the given location
+     *
+     * @param location             new location to update
+     * @param provider             Location provider to update for
+     */
+    private void updateLastLocationLocked(Location location, String provider) {
+        Location noGPSLocation = location.getExtraLocation(Location.EXTRA_NO_GPS_LOCATION);
+        Location lastNoGPSLocation;
+        Location lastLocation = mLastLocation.get(provider);
+        if (lastLocation == null) {
+            lastLocation = new Location(provider);
+            mLastLocation.put(provider, lastLocation);
+        } else {
+            lastNoGPSLocation = lastLocation.getExtraLocation(Location.EXTRA_NO_GPS_LOCATION);
+            if (noGPSLocation == null && lastNoGPSLocation != null) {
+                // New location has no no-GPS location: adopt last no-GPS location. This is set
+                // directly into location because we do not want to notify COARSE clients.
+                location.setExtraLocation(Location.EXTRA_NO_GPS_LOCATION, lastNoGPSLocation);
+            }
+        }
+        lastLocation.set(location);
     }
 
     private class LocationWorkerHandler extends Handler {
