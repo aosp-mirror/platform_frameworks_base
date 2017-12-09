@@ -55,6 +55,7 @@ import android.view.SurfaceControl;
 import android.view.SurfaceSession;
 import android.view.WindowManager;
 
+import com.android.internal.os.logging.MetricsLoggerWrapper;
 import com.android.internal.view.IInputContext;
 import com.android.internal.view.IInputMethodClient;
 import com.android.internal.view.IInputMethodManager;
@@ -508,8 +509,14 @@ class Session extends IWindowSession.Stub implements IBinder.DeathRecipient {
             // on-going notification for the user to control their visibility.
             if (visible) {
                 changed = mAlertWindowSurfaces.add(surfaceController);
+                if (changed) {
+                    MetricsLoggerWrapper.logAppOverlayEnter(mUid, mPackageName, true);
+                }
             } else {
                 changed = mAlertWindowSurfaces.remove(surfaceController);
+                if (changed) {
+                    MetricsLoggerWrapper.logAppOverlayExit(mUid, mPackageName, true);
+                }
             }
 
             if (changed) {
@@ -530,8 +537,14 @@ class Session extends IWindowSession.Stub implements IBinder.DeathRecipient {
 
         if (visible) {
             changed = mAppOverlaySurfaces.add(surfaceController);
+            if (changed) {
+                MetricsLoggerWrapper.logAppOverlayEnter(mUid, mPackageName, false);
+            }
         } else {
             changed = mAppOverlaySurfaces.remove(surfaceController);
+            if (changed) {
+                MetricsLoggerWrapper.logAppOverlayExit(mUid, mPackageName, false);
+            }
         }
 
         if (changed) {
