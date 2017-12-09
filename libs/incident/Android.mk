@@ -31,7 +31,6 @@ LOCAL_C_INCLUDES := \
 
 LOCAL_SRC_FILES := \
         ../../core/java/android/os/IIncidentManager.aidl \
-        ../../core/java/android/os/IIncidentReportCompletedListener.aidl \
         ../../core/java/android/os/IIncidentReportStatusListener.aidl \
         src/IncidentReportArgs.cpp
 

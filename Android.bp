@@ -214,7 +214,6 @@ java_library {
         "core/java/android/os/IDeviceIdleController.aidl",
         "core/java/android/os/IHardwarePropertiesManager.aidl",
         "core/java/android/os/IIncidentManager.aidl",
-        "core/java/android/os/IIncidentReportCompletedListener.aidl",
         "core/java/android/os/IIncidentReportStatusListener.aidl",
         "core/java/android/os/IMaintenanceActivityListener.aidl",
         "core/java/android/os/IMessenger.aidl",
