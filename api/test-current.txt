@@ -162,6 +162,10 @@ package android.content.pm {
     method public abstract boolean isPermissionReviewModeEnabled();
   }
 
+  public class PermissionInfo extends android.content.pm.PackageItemInfo implements android.os.Parcelable {
+    field public static final int PROTECTION_FLAG_VENDOR_PRIVILEGED = 32768; // 0x8000
+  }
+
   public final class ShortcutInfo implements android.os.Parcelable {
     method public boolean isVisibleToPublisher();
   }
