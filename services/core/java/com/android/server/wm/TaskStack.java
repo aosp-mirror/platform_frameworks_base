@@ -1114,12 +1114,12 @@ public class TaskStack extends WindowContainer<Task> implements
             return false;
         }
 
-        final Rect displayContentRect = mTmpRect;
+        final Rect displayStableRect = mTmpRect;
         final Rect contentBounds = mTmpRect2;
 
         // Calculate the content bounds excluding the area occupied by IME
-        getDisplayContent().getContentRect(displayContentRect);
-        contentBounds.set(displayContentRect);
+        getDisplayContent().getStableRect(displayStableRect);
+        contentBounds.set(displayStableRect);
         int imeTop = Math.max(imeWin.getFrameLw().top, contentBounds.top);
 
         imeTop += imeWin.getGivenContentInsetsLw().top;
@@ -1127,7 +1127,7 @@ public class TaskStack extends WindowContainer<Task> implements
             contentBounds.bottom = imeTop;
         }
 
-        final int yOffset = displayContentRect.bottom - contentBounds.bottom;
+        final int yOffset = displayStableRect.bottom - contentBounds.bottom;
 
         final int dividerWidth =
                 getDisplayContent().mDividerControllerLocked.getContentWidth();
@@ -1139,7 +1139,7 @@ public class TaskStack extends WindowContainer<Task> implements
             // occluded by IME. We shift its bottom up by the height of the IME, but
             // leaves at least 30% of the top stack visible.
             final int minTopStackBottom =
-                    getMinTopStackBottom(displayContentRect, getRawBounds().bottom);
+                    getMinTopStackBottom(displayStableRect, getRawBounds().bottom);
             final int bottom = Math.max(
                     getRawBounds().bottom - yOffset + dividerWidth - dividerWidthInactive,
                     minTopStackBottom);
@@ -1159,7 +1159,7 @@ public class TaskStack extends WindowContainer<Task> implements
             final int topBeforeImeAdjust =
                     getRawBounds().top - dividerWidth + dividerWidthInactive;
             final int minTopStackBottom =
-                    getMinTopStackBottom(displayContentRect,
+                    getMinTopStackBottom(displayStableRect,
                             getRawBounds().top - dividerWidth);
             final int top = Math.max(
                     getRawBounds().top - yOffset, minTopStackBottom + dividerWidthInactive);
