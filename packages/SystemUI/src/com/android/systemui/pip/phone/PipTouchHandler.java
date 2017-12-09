@@ -42,9 +42,8 @@ import android.view.accessibility.AccessibilityEvent;
 import android.view.accessibility.AccessibilityManager;
 import android.view.accessibility.AccessibilityNodeInfo;
 import android.view.accessibility.AccessibilityWindowInfo;
-
-import com.android.internal.logging.MetricsLogger;
 import com.android.internal.logging.nano.MetricsProto.MetricsEvent;
+import com.android.internal.os.logging.MetricsLoggerWrapper;
 import com.android.internal.policy.PipSnapAlgorithm;
 import com.android.systemui.R;
 import com.android.systemui.statusbar.FlingAnimationUtils;
@@ -62,10 +61,6 @@ public class PipTouchHandler {
     private static final boolean ENABLE_MINIMIZE = false;
     // Allow the PIP to be flung from anywhere on the screen to the bottom to be dismissed.
     private static final boolean ENABLE_FLING_DISMISS = false;
-
-    // These values are used for metrics and should never change
-    private static final int METRIC_VALUE_DISMISSED_BY_TAP = 0;
-    private static final int METRIC_VALUE_DISMISSED_BY_DRAG = 1;
 
     private static final int SHOW_DISMISS_AFFORDANCE_DELAY = 225;
 
@@ -163,8 +158,7 @@ public class PipTouchHandler {
         @Override
         public void onPipDismiss() {
             mMotionHelper.dismissPip();
-            MetricsLogger.action(mContext, MetricsEvent.ACTION_PICTURE_IN_PICTURE_DISMISSED,
-                    METRIC_VALUE_DISMISSED_BY_TAP);
+            MetricsLoggerWrapper.logPictureInPictureDismissByTap(mContext);
         }
 
         @Override
@@ -463,8 +457,7 @@ public class PipTouchHandler {
             return;
         }
         if (mIsMinimized != isMinimized) {
-            MetricsLogger.action(mContext, MetricsEvent.ACTION_PICTURE_IN_PICTURE_MINIMIZED,
-                    isMinimized);
+            MetricsLoggerWrapper.logPictureInPictureMinimize(mContext, isMinimized);
         }
         mIsMinimized = isMinimized;
         mSnapAlgorithm.setMinimized(isMinimized);
@@ -537,8 +530,7 @@ public class PipTouchHandler {
         mMenuState = menuState;
         updateMovementBounds(menuState);
         if (menuState != MENU_STATE_CLOSE) {
-            MetricsLogger.visibility(mContext, MetricsEvent.ACTION_PICTURE_IN_PICTURE_MENU,
-                    menuState == MENU_STATE_FULL);
+            MetricsLoggerWrapper.logPictureInPictureMenuVisible(mContext, menuState == MENU_STATE_FULL);
         }
     }
 
@@ -670,9 +662,7 @@ public class PipTouchHandler {
                 if (mMotionHelper.shouldDismissPip() || isFlingToBot) {
                     mMotionHelper.animateDismiss(mMotionHelper.getBounds(), vel.x,
                         vel.y, mUpdateScrimListener);
-                    MetricsLogger.action(mContext,
-                            MetricsEvent.ACTION_PICTURE_IN_PICTURE_DISMISSED,
-                            METRIC_VALUE_DISMISSED_BY_DRAG);
+                    MetricsLoggerWrapper.logPictureInPictureDismissByDrag(mContext);
                     return true;
                 }
             }
