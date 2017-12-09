@@ -1,0 +1,12 @@
+# See system/core/logcat/event.logtags for a description of the format of this file.
+
+# The java package name happens to be the same as frameworks/base/services/core
+# /java/com/android/server/EventLogTags.logtags. To avoid conflict, this file's name cannot
+# be EventLogTags.logtags because it generates a class with the same name.
+
+option java_package com.android.server;
+
+# -----------------------------
+# BootReceiver.java
+# -----------------------------
+81002 dropbox_file_copy (FileName|3),(Size|1),(Tag|3)
