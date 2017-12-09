@@ -269,6 +269,6 @@ public abstract class ScrollViewScenario extends Activity {
         mScrollView.setSmoothScrollingEnabled(false);
 
         setContentView(mScrollView);
-        mScrollView.restoreDefaultFocus();
+        mScrollView.post(() -> mScrollView.restoreDefaultFocus());
     }
 }
