@@ -17,6 +17,7 @@
 package android.hardware;
 
 import android.annotation.IntDef;
+import android.annotation.LongDef;
 import android.annotation.NonNull;
 import android.os.Parcel;
 import android.os.Parcelable;
@@ -70,7 +71,7 @@ public final class HardwareBuffer implements Parcelable, AutoCloseable {
 
     /** @hide */
     @Retention(RetentionPolicy.SOURCE)
-    @IntDef(flag = true, value = {USAGE_CPU_READ_RARELY, USAGE_CPU_READ_OFTEN,
+    @LongDef(flag = true, value = {USAGE_CPU_READ_RARELY, USAGE_CPU_READ_OFTEN,
             USAGE_CPU_WRITE_RARELY, USAGE_CPU_WRITE_OFTEN, USAGE_GPU_SAMPLED_IMAGE,
             USAGE_GPU_COLOR_OUTPUT, USAGE_PROTECTED_CONTENT, USAGE_VIDEO_ENCODE,
             USAGE_GPU_DATA_BUFFER, USAGE_SENSOR_DIRECT_DATA})
