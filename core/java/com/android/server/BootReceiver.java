@@ -33,6 +33,7 @@ import android.os.storage.StorageManager;
 import android.provider.Downloads;
 import android.text.TextUtils;
 import android.util.AtomicFile;
+import android.util.EventLog;
 import android.util.Slog;
 import android.util.Xml;
 
@@ -40,6 +41,7 @@ import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.logging.MetricsLogger;
 import com.android.internal.util.FastXmlSerializer;
 import com.android.internal.util.XmlUtils;
+import com.android.server.DropboxLogTags;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -297,6 +299,7 @@ public class BootReceiver extends BroadcastReceiver {
         Slog.i(TAG, "Copying " + filename + " to DropBox (" + tag + ")");
         db.addText(tag, headers + FileUtils.readTextFile(file, maxSize, "[[TRUNCATED]]\n") +
                 footers);
+        EventLog.writeEvent(DropboxLogTags.DROPBOX_FILE_COPY, filename, maxSize, tag);
     }
 
     private static void addAuditErrorsToDropBox(DropBoxManager db,
