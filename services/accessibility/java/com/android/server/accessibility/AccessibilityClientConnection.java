@@ -20,9 +20,7 @@ import static android.accessibilityservice.AccessibilityServiceInfo.DEFAULT;
 import static android.view.Display.DEFAULT_DISPLAY;
 import static android.view.WindowManager.LayoutParams.TYPE_ACCESSIBILITY_OVERLAY;
 
-import android.accessibilityservice.AccessibilityService;
 import android.accessibilityservice.AccessibilityServiceInfo;
-import android.accessibilityservice.GestureDescription;
 import android.accessibilityservice.IAccessibilityServiceClient;
 import android.accessibilityservice.IAccessibilityServiceConnection;
 import android.annotation.NonNull;
@@ -49,7 +47,6 @@ import android.view.MagnificationSpec;
 import android.view.View;
 import android.view.accessibility.AccessibilityCache;
 import android.view.accessibility.AccessibilityEvent;
-import android.view.accessibility.AccessibilityInteractionClient;
 import android.view.accessibility.AccessibilityNodeInfo;
 import android.view.accessibility.AccessibilityWindowInfo;
 import android.view.accessibility.IAccessibilityInteractionConnection;
@@ -58,6 +55,7 @@ import android.view.accessibility.IAccessibilityInteractionConnectionCallback;
 
 import com.android.internal.os.SomeArgs;
 import com.android.internal.util.DumpUtils;
+import com.android.server.accessibility.AccessibilityManagerService.RemoteAccessibilityConnection;
 import com.android.server.accessibility.AccessibilityManagerService.SecurityPolicy;
 import com.android.server.wm.WindowManagerInternal;
 
@@ -171,13 +169,13 @@ abstract class AccessibilityClientConnection extends IAccessibilityServiceConnec
         @NonNull MagnificationController getMagnificationController();
 
         /**
-         * Resolve a connection for a window id
+         * Resolve a connection wrapper for a window id
          *
          * @param windowId The id of the window of interest
          *
          * @return a connection to the window
          */
-        IAccessibilityInteractionConnection getConnectionLocked(int windowId);
+        RemoteAccessibilityConnection getConnectionLocked(int windowId);
 
         /**
          * Perform the specified accessibility action
@@ -416,28 +414,28 @@ abstract class AccessibilityClientConnection extends IAccessibilityServiceConnec
     }
 
     @Override
-    public boolean findAccessibilityNodeInfosByViewId(int accessibilityWindowId,
+    public String[] findAccessibilityNodeInfosByViewId(int accessibilityWindowId,
             long accessibilityNodeId, String viewIdResName, int interactionId,
             IAccessibilityInteractionConnectionCallback callback, long interrogatingTid)
             throws RemoteException {
         final int resolvedWindowId;
-        IAccessibilityInteractionConnection connection = null;
+        RemoteAccessibilityConnection connection;
         Region partialInteractiveRegion = Region.obtain();
         MagnificationSpec spec;
         synchronized (mLock) {
             mUsesAccessibilityCache = true;
             if (!isCalledForCurrentUserLocked()) {
-                return false;
+                return null;
             }
             resolvedWindowId = resolveAccessibilityWindowIdLocked(accessibilityWindowId);
             final boolean permissionGranted =
                     mSecurityPolicy.canGetAccessibilityNodeInfoLocked(this, resolvedWindowId);
             if (!permissionGranted) {
-                return false;
+                return null;
             } else {
                 connection = mSystemSupport.getConnectionLocked(resolvedWindowId);
                 if (connection == null) {
-                    return false;
+                    return null;
                 }
             }
             if (!mSecurityPolicy.computePartialInteractiveRegionForWindowLocked(
@@ -450,12 +448,14 @@ abstract class AccessibilityClientConnection extends IAccessibilityServiceConnec
         final int interrogatingPid = Binder.getCallingPid();
         callback = mSystemSupport.replaceCallbackIfNeeded(callback, resolvedWindowId, interactionId,
                 interrogatingPid, interrogatingTid);
+        final int callingUid = Binder.getCallingUid();
         final long identityToken = Binder.clearCallingIdentity();
         try {
-            connection.findAccessibilityNodeInfosByViewId(accessibilityNodeId, viewIdResName,
-                    partialInteractiveRegion, interactionId, callback, mFetchFlags,
+            connection.getRemote().findAccessibilityNodeInfosByViewId(accessibilityNodeId,
+                    viewIdResName, partialInteractiveRegion, interactionId, callback, mFetchFlags,
                     interrogatingPid, interrogatingTid, spec);
-            return true;
+            return mSecurityPolicy.computeValidReportedPackages(callingUid,
+                    connection.getPackageName(), connection.getUid());
         } catch (RemoteException re) {
             if (DEBUG) {
                 Slog.e(LOG_TAG, "Error findAccessibilityNodeInfoByViewId().");
@@ -463,36 +463,36 @@ abstract class AccessibilityClientConnection extends IAccessibilityServiceConnec
         } finally {
             Binder.restoreCallingIdentity(identityToken);
             // Recycle if passed to another process.
-            if (partialInteractiveRegion != null && Binder.isProxy(connection)) {
+            if (partialInteractiveRegion != null && Binder.isProxy(connection.getRemote())) {
                 partialInteractiveRegion.recycle();
             }
         }
-        return false;
+        return null;
     }
 
     @Override
-    public boolean findAccessibilityNodeInfosByText(int accessibilityWindowId,
+    public String[] findAccessibilityNodeInfosByText(int accessibilityWindowId,
             long accessibilityNodeId, String text, int interactionId,
             IAccessibilityInteractionConnectionCallback callback, long interrogatingTid)
             throws RemoteException {
         final int resolvedWindowId;
-        IAccessibilityInteractionConnection connection = null;
+        RemoteAccessibilityConnection connection;
         Region partialInteractiveRegion = Region.obtain();
         MagnificationSpec spec;
         synchronized (mLock) {
             mUsesAccessibilityCache = true;
             if (!isCalledForCurrentUserLocked()) {
-                return false;
+                return null;
             }
             resolvedWindowId = resolveAccessibilityWindowIdLocked(accessibilityWindowId);
             final boolean permissionGranted =
                     mSecurityPolicy.canGetAccessibilityNodeInfoLocked(this, resolvedWindowId);
             if (!permissionGranted) {
-                return false;
+                return null;
             } else {
                 connection = mSystemSupport.getConnectionLocked(resolvedWindowId);
                 if (connection == null) {
-                    return false;
+                    return null;
                 }
             }
             if (!mSecurityPolicy.computePartialInteractiveRegionForWindowLocked(
@@ -505,12 +505,14 @@ abstract class AccessibilityClientConnection extends IAccessibilityServiceConnec
         final int interrogatingPid = Binder.getCallingPid();
         callback = mSystemSupport.replaceCallbackIfNeeded(callback, resolvedWindowId, interactionId,
                 interrogatingPid, interrogatingTid);
+        final int callingUid = Binder.getCallingUid();
         final long identityToken = Binder.clearCallingIdentity();
         try {
-            connection.findAccessibilityNodeInfosByText(accessibilityNodeId, text,
-                    partialInteractiveRegion, interactionId, callback, mFetchFlags,
+            connection.getRemote().findAccessibilityNodeInfosByText(accessibilityNodeId,
+                    text, partialInteractiveRegion, interactionId, callback, mFetchFlags,
                     interrogatingPid, interrogatingTid, spec);
-            return true;
+            return mSecurityPolicy.computeValidReportedPackages(callingUid,
+                    connection.getPackageName(), connection.getUid());
         } catch (RemoteException re) {
             if (DEBUG) {
                 Slog.e(LOG_TAG, "Error calling findAccessibilityNodeInfosByText()");
@@ -518,36 +520,36 @@ abstract class AccessibilityClientConnection extends IAccessibilityServiceConnec
         } finally {
             Binder.restoreCallingIdentity(identityToken);
             // Recycle if passed to another process.
-            if (partialInteractiveRegion != null && Binder.isProxy(connection)) {
+            if (partialInteractiveRegion != null && Binder.isProxy(connection.getRemote())) {
                 partialInteractiveRegion.recycle();
             }
         }
-        return false;
+        return null;
     }
 
     @Override
-    public boolean findAccessibilityNodeInfoByAccessibilityId(
+    public String[] findAccessibilityNodeInfoByAccessibilityId(
             int accessibilityWindowId, long accessibilityNodeId, int interactionId,
             IAccessibilityInteractionConnectionCallback callback, int flags,
             long interrogatingTid, Bundle arguments) throws RemoteException {
         final int resolvedWindowId;
-        IAccessibilityInteractionConnection connection = null;
+        RemoteAccessibilityConnection connection;
         Region partialInteractiveRegion = Region.obtain();
         MagnificationSpec spec;
         synchronized (mLock) {
             mUsesAccessibilityCache = true;
             if (!isCalledForCurrentUserLocked()) {
-                return false;
+                return null;
             }
             resolvedWindowId = resolveAccessibilityWindowIdLocked(accessibilityWindowId);
             final boolean permissionGranted =
                     mSecurityPolicy.canGetAccessibilityNodeInfoLocked(this, resolvedWindowId);
             if (!permissionGranted) {
-                return false;
+                return null;
             } else {
                 connection = mSystemSupport.getConnectionLocked(resolvedWindowId);
                 if (connection == null) {
-                    return false;
+                    return null;
                 }
             }
             if (!mSecurityPolicy.computePartialInteractiveRegionForWindowLocked(
@@ -560,12 +562,14 @@ abstract class AccessibilityClientConnection extends IAccessibilityServiceConnec
         final int interrogatingPid = Binder.getCallingPid();
         callback = mSystemSupport.replaceCallbackIfNeeded(callback, resolvedWindowId, interactionId,
                 interrogatingPid, interrogatingTid);
+        final int callingUid = Binder.getCallingUid();
         final long identityToken = Binder.clearCallingIdentity();
         try {
-            connection.findAccessibilityNodeInfoByAccessibilityId(accessibilityNodeId,
-                    partialInteractiveRegion, interactionId, callback, mFetchFlags | flags,
-                    interrogatingPid, interrogatingTid, spec, arguments);
-            return true;
+            connection.getRemote().findAccessibilityNodeInfoByAccessibilityId(
+                    accessibilityNodeId, partialInteractiveRegion, interactionId, callback,
+                    mFetchFlags | flags, interrogatingPid, interrogatingTid, spec, arguments);
+            return mSecurityPolicy.computeValidReportedPackages(callingUid,
+                    connection.getPackageName(), connection.getUid());
         } catch (RemoteException re) {
             if (DEBUG) {
                 Slog.e(LOG_TAG, "Error calling findAccessibilityNodeInfoByAccessibilityId()");
@@ -573,36 +577,36 @@ abstract class AccessibilityClientConnection extends IAccessibilityServiceConnec
         } finally {
             Binder.restoreCallingIdentity(identityToken);
             // Recycle if passed to another process.
-            if (partialInteractiveRegion != null && Binder.isProxy(connection)) {
+            if (partialInteractiveRegion != null && Binder.isProxy(connection.getRemote())) {
                 partialInteractiveRegion.recycle();
             }
         }
-        return false;
+        return null;
     }
 
     @Override
-    public boolean findFocus(int accessibilityWindowId, long accessibilityNodeId,
+    public String[] findFocus(int accessibilityWindowId, long accessibilityNodeId,
             int focusType, int interactionId,
             IAccessibilityInteractionConnectionCallback callback, long interrogatingTid)
             throws RemoteException {
         final int resolvedWindowId;
-        IAccessibilityInteractionConnection connection = null;
+        RemoteAccessibilityConnection connection;
         Region partialInteractiveRegion = Region.obtain();
         MagnificationSpec spec;
         synchronized (mLock) {
             if (!isCalledForCurrentUserLocked()) {
-                return false;
+                return null;
             }
             resolvedWindowId = resolveAccessibilityWindowIdForFindFocusLocked(
                     accessibilityWindowId, focusType);
             final boolean permissionGranted =
                     mSecurityPolicy.canGetAccessibilityNodeInfoLocked(this, resolvedWindowId);
             if (!permissionGranted) {
-                return false;
+                return null;
             } else {
                 connection = mSystemSupport.getConnectionLocked(resolvedWindowId);
                 if (connection == null) {
-                    return false;
+                    return null;
                 }
             }
             if (!mSecurityPolicy.computePartialInteractiveRegionForWindowLocked(
@@ -615,12 +619,14 @@ abstract class AccessibilityClientConnection extends IAccessibilityServiceConnec
         final int interrogatingPid = Binder.getCallingPid();
         callback = mSystemSupport.replaceCallbackIfNeeded(callback, resolvedWindowId, interactionId,
                 interrogatingPid, interrogatingTid);
+        final int callingUid = Binder.getCallingUid();
         final long identityToken = Binder.clearCallingIdentity();
         try {
-            connection.findFocus(accessibilityNodeId, focusType, partialInteractiveRegion,
-                    interactionId, callback, mFetchFlags, interrogatingPid, interrogatingTid,
-                    spec);
-            return true;
+            connection.getRemote().findFocus(accessibilityNodeId, focusType,
+                    partialInteractiveRegion, interactionId, callback, mFetchFlags,
+                    interrogatingPid, interrogatingTid, spec);
+            return mSecurityPolicy.computeValidReportedPackages(callingUid,
+                    connection.getPackageName(), connection.getUid());
         } catch (RemoteException re) {
             if (DEBUG) {
                 Slog.e(LOG_TAG, "Error calling findFocus()");
@@ -628,35 +634,35 @@ abstract class AccessibilityClientConnection extends IAccessibilityServiceConnec
         } finally {
             Binder.restoreCallingIdentity(identityToken);
             // Recycle if passed to another process.
-            if (partialInteractiveRegion != null && Binder.isProxy(connection)) {
+            if (partialInteractiveRegion != null && Binder.isProxy(connection.getRemote())) {
                 partialInteractiveRegion.recycle();
             }
         }
-        return false;
+        return null;
     }
 
     @Override
-    public boolean focusSearch(int accessibilityWindowId, long accessibilityNodeId,
+    public String[] focusSearch(int accessibilityWindowId, long accessibilityNodeId,
             int direction, int interactionId,
             IAccessibilityInteractionConnectionCallback callback, long interrogatingTid)
             throws RemoteException {
         final int resolvedWindowId;
-        IAccessibilityInteractionConnection connection = null;
+        RemoteAccessibilityConnection connection;
         Region partialInteractiveRegion = Region.obtain();
         MagnificationSpec spec;
         synchronized (mLock) {
             if (!isCalledForCurrentUserLocked()) {
-                return false;
+                return null;
             }
             resolvedWindowId = resolveAccessibilityWindowIdLocked(accessibilityWindowId);
             final boolean permissionGranted =
                     mSecurityPolicy.canGetAccessibilityNodeInfoLocked(this, resolvedWindowId);
             if (!permissionGranted) {
-                return false;
+                return null;
             } else {
                 connection = mSystemSupport.getConnectionLocked(resolvedWindowId);
                 if (connection == null) {
-                    return false;
+                    return null;
                 }
             }
             if (!mSecurityPolicy.computePartialInteractiveRegionForWindowLocked(
@@ -669,12 +675,14 @@ abstract class AccessibilityClientConnection extends IAccessibilityServiceConnec
         final int interrogatingPid = Binder.getCallingPid();
         callback = mSystemSupport.replaceCallbackIfNeeded(callback, resolvedWindowId, interactionId,
                 interrogatingPid, interrogatingTid);
+        final int callingUid = Binder.getCallingUid();
         final long identityToken = Binder.clearCallingIdentity();
         try {
-            connection.focusSearch(accessibilityNodeId, direction, partialInteractiveRegion,
-                    interactionId, callback, mFetchFlags, interrogatingPid, interrogatingTid,
-                    spec);
-            return true;
+            connection.getRemote().focusSearch(accessibilityNodeId, direction,
+                    partialInteractiveRegion, interactionId, callback, mFetchFlags,
+                    interrogatingPid, interrogatingTid, spec);
+            return mSecurityPolicy.computeValidReportedPackages(callingUid,
+                    connection.getPackageName(), connection.getUid());
         } catch (RemoteException re) {
             if (DEBUG) {
                 Slog.e(LOG_TAG, "Error calling accessibilityFocusSearch()");
@@ -682,11 +690,11 @@ abstract class AccessibilityClientConnection extends IAccessibilityServiceConnec
         } finally {
             Binder.restoreCallingIdentity(identityToken);
             // Recycle if passed to another process.
-            if (partialInteractiveRegion != null && Binder.isProxy(connection)) {
+            if (partialInteractiveRegion != null && Binder.isProxy(connection.getRemote())) {
                 partialInteractiveRegion.recycle();
             }
         }
-        return false;
+        return null;
     }
 
     @Override

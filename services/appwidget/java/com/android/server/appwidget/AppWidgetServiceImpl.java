@@ -32,6 +32,7 @@ import android.app.PendingIntent;
 import android.app.admin.DevicePolicyManagerInternal;
 import android.app.admin.DevicePolicyManagerInternal.OnCrossProfileWidgetProvidersChangeListener;
 import android.appwidget.AppWidgetManager;
+import android.appwidget.AppWidgetManagerInternal;
 import android.appwidget.AppWidgetProviderInfo;
 import android.appwidget.PendingHostUpdate;
 import android.content.BroadcastReceiver;
@@ -100,6 +101,8 @@ import com.android.internal.appwidget.IAppWidgetHost;
 import com.android.internal.appwidget.IAppWidgetService;
 import com.android.internal.os.BackgroundThread;
 import com.android.internal.os.SomeArgs;
+import com.android.internal.util.ArrayUtils;
+import com.android.internal.util.CollectionUtils;
 import com.android.internal.util.DumpUtils;
 import com.android.internal.util.FastXmlSerializer;
 import com.android.internal.widget.IRemoteViewsFactory;
@@ -107,6 +110,7 @@ import com.android.server.LocalServices;
 import com.android.server.WidgetBackupProvider;
 import com.android.server.policy.IconUtilities;
 
+import libcore.util.EmptyArray;
 import org.xmlpull.v1.XmlPullParser;
 import org.xmlpull.v1.XmlPullParserException;
 import org.xmlpull.v1.XmlSerializer;
@@ -259,6 +263,8 @@ class AppWidgetServiceImpl extends IAppWidgetService.Stub implements WidgetBacku
         computeMaximumWidgetBitmapMemory();
         registerBroadcastReceiver();
         registerOnCrossProfileProvidersChangedListener();
+
+        LocalServices.addService(AppWidgetManagerInternal.class, new AppWidgetManagerLocal());
     }
 
     private void computeMaximumWidgetBitmapMemory() {
@@ -4627,6 +4633,26 @@ class AppWidgetServiceImpl extends IAppWidgetService.Stub implements WidgetBacku
                 oldId = theOldId;
                 newId = theNewId;
                 notified = false;
+            }
+        }
+    }
+
+    private class AppWidgetManagerLocal extends AppWidgetManagerInternal {
+        @Override
+        public ArraySet<String> getHostedWidgetPackages(int uid) {
+            synchronized (mLock) {
+                ArraySet<String> widgetPackages = null;
+                final int widgetCount = mWidgets.size();
+                for (int i = 0; i < widgetCount; i++) {
+                    final Widget widget = mWidgets.get(i);
+                    if  (widget.host.id.uid == uid) {
+                        if (widgetPackages == null) {
+                            widgetPackages = new ArraySet<>();
+                        }
+                        widgetPackages.add(widget.provider.id.componentName.getPackageName());
+                    }
+                }
+                return widgetPackages;
             }
         }
     }

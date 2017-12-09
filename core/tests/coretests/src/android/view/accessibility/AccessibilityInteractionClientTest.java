@@ -24,6 +24,7 @@ import android.os.Bundle;
 import android.os.RemoteException;
 import android.support.test.runner.AndroidJUnit4;
 
+import libcore.util.EmptyArray;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -73,7 +74,7 @@ public class AccessibilityInteractionClientTest {
         List<AccessibilityNodeInfo> mInfosToReturn;
 
         @Override
-        public boolean findAccessibilityNodeInfoByAccessibilityId(int accessibilityWindowId,
+        public String[] findAccessibilityNodeInfoByAccessibilityId(int accessibilityWindowId,
                 long accessibilityNodeId, int interactionId,
                 IAccessibilityInteractionConnectionCallback callback, int flags, long threadId,
                 Bundle arguments) {
@@ -82,7 +83,7 @@ public class AccessibilityInteractionClientTest {
             } catch (RemoteException e) {
                 throw new RuntimeException(e);
             }
-            return true;
+            return EmptyArray.STRING;
         }
     }
 }

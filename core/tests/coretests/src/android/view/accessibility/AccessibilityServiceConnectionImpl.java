@@ -31,35 +31,35 @@ import java.util.List;
 public class AccessibilityServiceConnectionImpl extends IAccessibilityServiceConnection.Stub {
     public void setServiceInfo(AccessibilityServiceInfo info) {}
 
-    public boolean findAccessibilityNodeInfoByAccessibilityId(int accessibilityWindowId,
+    public String[] findAccessibilityNodeInfoByAccessibilityId(int accessibilityWindowId,
             long accessibilityNodeId, int interactionId,
             IAccessibilityInteractionConnectionCallback callback, int flags, long threadId,
             Bundle arguments) {
-        return false;
+        return null;
     }
 
-    public boolean findAccessibilityNodeInfosByText(int accessibilityWindowId,
+    public String[] findAccessibilityNodeInfosByText(int accessibilityWindowId,
             long accessibilityNodeId, String text, int interactionId,
             IAccessibilityInteractionConnectionCallback callback, long threadId) {
-        return false;
+        return null;
     }
 
-    public boolean findAccessibilityNodeInfosByViewId(int accessibilityWindowId,
+    public String[] findAccessibilityNodeInfosByViewId(int accessibilityWindowId,
             long accessibilityNodeId, String viewId, int interactionId,
             IAccessibilityInteractionConnectionCallback callback, long threadId) {
-        return false;
+        return null;
     }
 
-    public boolean findFocus(int accessibilityWindowId, long accessibilityNodeId, int focusType,
+    public String[] findFocus(int accessibilityWindowId, long accessibilityNodeId, int focusType,
             int interactionId, IAccessibilityInteractionConnectionCallback callback,
             long threadId) {
-        return false;
+        return null;
     }
 
-    public boolean focusSearch(int accessibilityWindowId, long accessibilityNodeId, int direction,
+    public String[] focusSearch(int accessibilityWindowId, long accessibilityNodeId, int direction,
             int interactionId, IAccessibilityInteractionConnectionCallback callback,
             long threadId) {
-        return false;
+        return null;
     }
 
     public boolean performAccessibilityAction(int accessibilityWindowId, long accessibilityNodeId,
