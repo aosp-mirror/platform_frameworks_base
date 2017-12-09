@@ -163,10 +163,10 @@ public class IpClient extends StateMachine {
     // TODO: Find an lighter weight approach.
     private class LoggingCallbackWrapper extends Callback {
         private static final String PREFIX = "INVOKE ";
-        private final Callback mCallback;
+        private Callback mCallback;
 
         public LoggingCallbackWrapper(Callback callback) {
-            mCallback = (callback != null) ? callback : new Callback();
+            mCallback = callback;
         }
 
         private void log(String msg) {
@@ -1283,7 +1283,6 @@ public class IpClient extends StateMachine {
             stopAllIP();
 
             resetLinkProperties();
-            mCallback.onLinkPropertiesChange(new LinkProperties(mLinkProperties));
             if (mStartTimeMillis > 0) {
                 recordMetric(IpManagerEvent.COMPLETE_LIFECYCLE);
                 mStartTimeMillis = 0;
