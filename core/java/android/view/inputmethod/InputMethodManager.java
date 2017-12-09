@@ -24,6 +24,7 @@ import android.annotation.RequiresPermission;
 import android.annotation.SystemService;
 import android.content.Context;
 import android.graphics.Rect;
+import android.inputmethodservice.InputMethodService;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Handler;
@@ -735,7 +736,20 @@ public final class InputMethodManager {
         }
     }
 
+    /**
+     * @deprecated Use {@link InputMethodService#showStatusIcon(int)} instead. This method was
+     * intended for IME developers who should be accessing APIs through the service. APIs in this
+     * class are intended for app developers interacting with the IME.
+     */
+    @Deprecated
     public void showStatusIcon(IBinder imeToken, String packageName, int iconId) {
+        showStatusIconInternal(imeToken, packageName, iconId);
+    }
+
+    /**
+     * @hide
+     */
+    public void showStatusIconInternal(IBinder imeToken, String packageName, int iconId) {
         try {
             mService.updateStatusIcon(imeToken, packageName, iconId);
         } catch (RemoteException e) {
@@ -743,7 +757,20 @@ public final class InputMethodManager {
         }
     }
 
+    /**
+     * @deprecated Use {@link InputMethodService#hideStatusIcon()} instead. This method was
+     * intended for IME developers who should be accessing APIs through the service. APIs in
+     * this class are intended for app developers interacting with the IME.
+     */
+    @Deprecated
     public void hideStatusIcon(IBinder imeToken) {
+        hideStatusIconInternal(imeToken);
+    }
+
+    /**
+     * @hide
+     */
+    public void hideStatusIconInternal(IBinder imeToken) {
         try {
             mService.updateStatusIcon(imeToken, null, 0);
         } catch (RemoteException e) {
@@ -1120,7 +1147,6 @@ public final class InputMethodManager {
             }
         }
     }
-
 
     /**
      * This method toggles the input method window display.
@@ -1800,8 +1826,19 @@ public final class InputMethodManager {
      * when it was started, which allows it to perform this operation on
      * itself.
      * @param id The unique identifier for the new input method to be switched to.
+     * @deprecated Use {@link InputMethodService#setInputMethod(String)} instead. This method
+     * was intended for IME developers who should be accessing APIs through the service. APIs in
+     * this class are intended for app developers interacting with the IME.
      */
+    @Deprecated
     public void setInputMethod(IBinder token, String id) {
+        setInputMethodInternal(token, id);
+    }
+
+    /**
+     * @hide
+     */
+    public void setInputMethodInternal(IBinder token, String id) {
         try {
             mService.setInputMethod(token, id);
         } catch (RemoteException e) {
@@ -1817,8 +1854,21 @@ public final class InputMethodManager {
      * itself.
      * @param id The unique identifier for the new input method to be switched to.
      * @param subtype The new subtype of the new input method to be switched to.
+     * @deprecated Use
+     * {@link InputMethodService#setInputMethodAndSubtype(String, InputMethodSubtype)}
+     * instead. This method was intended for IME developers who should be accessing APIs through
+     * the service. APIs in this class are intended for app developers interacting with the IME.
      */
+    @Deprecated
     public void setInputMethodAndSubtype(IBinder token, String id, InputMethodSubtype subtype) {
+        setInputMethodAndSubtypeInternal(token, id, subtype);
+    }
+
+    /**
+     * @hide
+     */
+    public void setInputMethodAndSubtypeInternal(
+            IBinder token, String id, InputMethodSubtype subtype) {
         try {
             mService.setInputMethodAndSubtype(token, id, subtype);
         } catch (RemoteException e) {
@@ -1837,8 +1887,19 @@ public final class InputMethodManager {
      * @param flags Provides additional operating flags.  Currently may be
      * 0 or have the {@link #HIDE_IMPLICIT_ONLY},
      * {@link #HIDE_NOT_ALWAYS} bit set.
+     * @deprecated Use {@link InputMethodService#hideSoftInputFromInputMethod(int)}
+     * instead. This method was intended for IME developers who should be accessing APIs through
+     * the service. APIs in this class are intended for app developers interacting with the IME.
      */
+    @Deprecated
     public void hideSoftInputFromInputMethod(IBinder token, int flags) {
+        hideSoftInputFromInputMethodInternal(token, flags);
+    }
+
+    /**
+     * @hide
+     */
+    public void hideSoftInputFromInputMethodInternal(IBinder token, int flags) {
         try {
             mService.hideMySoftInput(token, flags);
         } catch (RemoteException e) {
@@ -1858,8 +1919,19 @@ public final class InputMethodManager {
      * @param flags Provides additional operating flags.  Currently may be
      * 0 or have the {@link #SHOW_IMPLICIT} or
      * {@link #SHOW_FORCED} bit set.
+     * @deprecated Use {@link InputMethodService#showSoftInputFromInputMethod(int)}
+     * instead. This method was intended for IME developers who should be accessing APIs through
+     * the service. APIs in this class are intended for app developers interacting with the IME.
      */
+    @Deprecated
     public void showSoftInputFromInputMethod(IBinder token, int flags) {
+        showSoftInputFromInputMethodInternal(token, flags);
+    }
+
+    /**
+     * @hide
+     */
+    public void showSoftInputFromInputMethodInternal(IBinder token, int flags) {
         try {
             mService.showMySoftInput(token, flags);
         } catch (RemoteException e) {
@@ -2239,8 +2311,19 @@ public final class InputMethodManager {
      * which allows it to perform this operation on itself.
      * @return true if the current input method and subtype was successfully switched to the last
      * used input method and subtype.
+     * @deprecated Use {@link InputMethodService#switchToLastInputMethod()} instead. This method
+     * was intended for IME developers who should be accessing APIs through the service. APIs in
+     * this class are intended for app developers interacting with the IME.
      */
+    @Deprecated
     public boolean switchToLastInputMethod(IBinder imeToken) {
+        return switchToLastInputMethodInternal(imeToken);
+    }
+
+    /**
+     * @hide
+     */
+    public boolean switchToLastInputMethodInternal(IBinder imeToken) {
         synchronized (mH) {
             try {
                 return mService.switchToLastInputMethod(imeToken);
@@ -2259,8 +2342,19 @@ public final class InputMethodManager {
      * belongs to the current IME
      * @return true if the current input method and subtype was successfully switched to the next
      * input method and subtype.
+     * @deprecated Use {@link InputMethodService#switchToNextInputMethod(boolean)} instead. This
+     * method was intended for IME developers who should be accessing APIs through the service.
+     * APIs in this class are intended for app developers interacting with the IME.
      */
+    @Deprecated
     public boolean switchToNextInputMethod(IBinder imeToken, boolean onlyCurrentIme) {
+        return switchToNextInputMethodInternal(imeToken, onlyCurrentIme);
+    }
+
+    /**
+     * @hide
+     */
+    public boolean switchToNextInputMethodInternal(IBinder imeToken, boolean onlyCurrentIme) {
         synchronized (mH) {
             try {
                 return mService.switchToNextInputMethod(imeToken, onlyCurrentIme);
@@ -2280,8 +2374,19 @@ public final class InputMethodManager {
      * between IMEs and subtypes.
      * @param imeToken Supplies the identifying token given to an input method when it was started,
      * which allows it to perform this operation on itself.
+     * @deprecated Use {@link InputMethodService#shouldOfferSwitchingToNextInputMethod()}
+     * instead. This method was intended for IME developers who should be accessing APIs through
+     * the service. APIs in this class are intended for app developers interacting with the IME.
      */
+    @Deprecated
     public boolean shouldOfferSwitchingToNextInputMethod(IBinder imeToken) {
+        return shouldOfferSwitchingToNextInputMethodInternal(imeToken);
+    }
+
+    /**
+     * @hide
+     */
+    public boolean shouldOfferSwitchingToNextInputMethodInternal(IBinder imeToken) {
         synchronized (mH) {
             try {
                 return mService.shouldOfferSwitchingToNextInputMethod(imeToken);
