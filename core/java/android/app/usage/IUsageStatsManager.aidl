@@ -19,6 +19,8 @@ package android.app.usage;
 import android.app.usage.UsageEvents;
 import android.content.pm.ParceledListSlice;
 
+import java.util.Map;
+
 /**
  * System private API for talking with the UsageStatsManagerService.
  *
@@ -38,4 +40,6 @@ interface IUsageStatsManager {
             in String[] annotations, String action);
     int getAppStandbyBucket(String packageName, String callingPackage, int userId);
     void setAppStandbyBucket(String packageName, int bucket, int userId);
+    Map getAppStandbyBuckets(String callingPackage, int userId);
+    void setAppStandbyBuckets(in Map appBuckets, int userId);
 }

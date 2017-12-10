@@ -324,11 +324,11 @@ public final class UsageStatsManager {
      * state of the app based on app usage patterns. Standby buckets determine how much an app will
      * be restricted from running background tasks such as jobs, alarms and certain PendingIntent
      * callbacks.
-     * Restrictions increase progressively from {@link #STANDBY_BUCKET_ACTIVE} to
+     * <p>Restrictions increase progressively from {@link #STANDBY_BUCKET_ACTIVE} to
      * {@link #STANDBY_BUCKET_RARE}, with {@link #STANDBY_BUCKET_ACTIVE} being the least
      * restrictive. The battery level of the device might also affect the restrictions.
      *
-     * @return the current standby bucket of the calling app.
+     * @return the current standby bucket of the calling app. One of STANDBY_BUCKET_* constants.
      */
     public @StandbyBuckets int getAppStandbyBucket() {
         try {
@@ -359,7 +359,13 @@ public final class UsageStatsManager {
 
     /**
      * {@hide}
-     * Changes the app standby state to the provided bucket.
+     * Changes an app's standby bucket to the provided value. The caller can only set the standby
+     * bucket for a different app than itself.
+     * @param packageName the package name of the app to set the bucket for. A SecurityException
+     *                    will be thrown if the package name is that of the caller.
+     * @param bucket the standby bucket to set it to, which should be one of STANDBY_BUCKET_*.
+     *               Setting a standby bucket outside of the range of STANDBY_BUCKET_ACTIVE to
+     *               STANDBY_BUCKET_NEVER will result in a SecurityException.
      */
     @SystemApi
     @RequiresPermission(android.Manifest.permission.CHANGE_APP_IDLE_STATE)
@@ -368,6 +374,39 @@ public final class UsageStatsManager {
             mService.setAppStandbyBucket(packageName, bucket, mContext.getUserId());
         } catch (RemoteException e) {
             // Nothing to do
+        }
+    }
+
+    /**
+     * {@hide}
+     * Returns the current standby bucket of every app that has a bucket assigned to it.
+     * The caller must hold the permission android.permission.PACKAGE_USAGE_STATS. The key of the
+     * returned Map is the package name and the value is the bucket assigned to the package.
+     * @see #getAppStandbyBucket()
+     */
+    @SystemApi
+    @RequiresPermission(android.Manifest.permission.PACKAGE_USAGE_STATS)
+    public Map<String, Integer> getAppStandbyBuckets() {
+        try {
+            return (Map<String, Integer>) mService.getAppStandbyBuckets(
+                    mContext.getOpPackageName(), mContext.getUserId());
+        } catch (RemoteException e) {
+        }
+        return Collections.EMPTY_MAP;
+    }
+
+    /**
+     * {@hide}
+     * Changes the app standby bucket for multiple apps at once. The Map is keyed by the package
+     * name and the value is one of STANDBY_BUCKET_*.
+     * @param appBuckets a map of package name to bucket value.
+     */
+    @SystemApi
+    @RequiresPermission(android.Manifest.permission.CHANGE_APP_IDLE_STATE)
+    public void setAppStandbyBuckets(Map<String, Integer> appBuckets) {
+        try {
+            mService.setAppStandbyBuckets(appBuckets, mContext.getUserId());
+        } catch (RemoteException e) {
         }
     }
 

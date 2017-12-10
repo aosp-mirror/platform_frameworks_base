@@ -68,7 +68,10 @@ import java.io.FileDescriptor;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.util.Arrays;
+import java.util.Collection;
+import java.util.Collections;
 import java.util.List;
+import java.util.Map;
 
 /**
  * A service that collects, aggregates, and persists application usage data.
@@ -735,6 +738,68 @@ public class UsageStatsService extends SystemService implements
                 mAppStandby.setAppStandbyBucket(packageName, userId, bucket,
                         UsageStatsManager.REASON_PREDICTED + ":" + callingUid,
                         SystemClock.elapsedRealtime());
+            } finally {
+                Binder.restoreCallingIdentity(token);
+            }
+        }
+
+        @Override
+        public Map getAppStandbyBuckets(String callingPackageName, int userId) {
+            final int callingUid = Binder.getCallingUid();
+            try {
+                userId = ActivityManager.getService().handleIncomingUser(
+                        Binder.getCallingPid(), callingUid, userId, false, false,
+                        "getAppStandbyBucket", null);
+            } catch (RemoteException re) {
+                throw re.rethrowFromSystemServer();
+            }
+            if (!hasPermission(callingPackageName)) {
+                throw new SecurityException(
+                        "Don't have permission to query app standby bucket");
+            }
+            final long token = Binder.clearCallingIdentity();
+            try {
+                return mAppStandby.getAppStandbyBuckets(userId,
+                        SystemClock.elapsedRealtime());
+            } finally {
+                Binder.restoreCallingIdentity(token);
+            }
+        }
+
+        @Override
+        public void setAppStandbyBuckets(Map appBuckets, int userId) {
+            getContext().enforceCallingPermission(Manifest.permission.CHANGE_APP_IDLE_STATE,
+                    "No permission to change app standby state");
+
+            final int callingUid = Binder.getCallingUid();
+            try {
+                userId = ActivityManager.getService().handleIncomingUser(
+                        Binder.getCallingPid(), callingUid, userId, false, true,
+                        "setAppStandbyBucket", null);
+            } catch (RemoteException re) {
+                throw re.rethrowFromSystemServer();
+            }
+            final long token = Binder.clearCallingIdentity();
+            try {
+                final long elapsedRealtime = SystemClock.elapsedRealtime();
+                Map<String, Integer> buckets = (Map<String, Integer>) appBuckets;
+                for (Map.Entry<String, Integer> entry: buckets.entrySet()) {
+                    String packageName = entry.getKey();
+                    int bucket = entry.getValue();
+                    if (bucket < UsageStatsManager.STANDBY_BUCKET_ACTIVE
+                            || bucket > UsageStatsManager.STANDBY_BUCKET_NEVER) {
+                        throw new IllegalArgumentException(
+                                "Cannot set the standby bucket to " + bucket);
+                    }
+                    // Caller cannot set their own standby state
+                    if (mPackageManagerInternal.getPackageUid(packageName,
+                            PackageManager.MATCH_ANY_USER, userId) == callingUid) {
+                        throw new IllegalArgumentException("Cannot set your own standby bucket");
+                    }
+                    mAppStandby.setAppStandbyBucket(packageName, userId, bucket,
+                            UsageStatsManager.REASON_PREDICTED + ":" + callingUid,
+                            elapsedRealtime);
+                }
             } finally {
                 Binder.restoreCallingIdentity(token);
             }

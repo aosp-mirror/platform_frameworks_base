@@ -42,6 +42,8 @@ import java.io.FileOutputStream;
 import java.io.FileReader;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
+import java.util.HashMap;
+import java.util.Map;
 
 /**
  * Keeps track of recent active state changes in apps.
@@ -332,6 +334,16 @@ public class AppIdleHistory {
         AppUsageHistory appUsageHistory =
                 getPackageHistory(userHistory, packageName, elapsedRealtime, true);
         return appUsageHistory.currentBucket;
+    }
+
+    public Map<String, Integer> getAppStandbyBuckets(int userId, long elapsedRealtime) {
+        ArrayMap<String, AppUsageHistory> userHistory = getUserHistory(userId);
+        int size = userHistory.size();
+        HashMap<String, Integer> buckets = new HashMap<>(size);
+        for (int i = 0; i < size; i++) {
+            buckets.put(userHistory.keyAt(i), userHistory.valueAt(i).currentBucket);
+        }
+        return buckets;
     }
 
     public String getAppStandbyReason(String packageName, int userId, long elapsedRealtime) {
