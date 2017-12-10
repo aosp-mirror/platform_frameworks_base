@@ -105,6 +105,11 @@ public:
      */
     void init();
 
+    /**
+     * Set timestamp if the original timestamp is missing.
+     */
+    void setTimestampNs(uint64_t timestampNs) {mTimestampNs = timestampNs;}
+
 private:
     /**
      * Don't copy, it's slower. If we really need this we can add it but let's try to

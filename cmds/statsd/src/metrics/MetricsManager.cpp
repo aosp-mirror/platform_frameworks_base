@@ -162,8 +162,7 @@ void MetricsManager::onLogEvent(const LogEvent& event) {
                 auto& metricList = pair->second;
                 for (const int metricIndex : metricList) {
                     // pushed metrics are never scheduled pulls
-                    mAllMetricProducers[metricIndex]->onMatchedLogEvent(i, event,
-                                                                        false /* schedulePull */);
+                    mAllMetricProducers[metricIndex]->onMatchedLogEvent(i, event);
                 }
             }
         }

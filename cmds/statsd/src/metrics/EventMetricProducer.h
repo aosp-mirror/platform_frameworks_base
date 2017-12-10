@@ -53,7 +53,7 @@ private:
     void onMatchedLogEventInternalLocked(
             const size_t matcherIndex, const HashableDimensionKey& eventKey,
             const std::map<std::string, HashableDimensionKey>& conditionKey, bool condition,
-            const LogEvent& event, bool scheduledPull) override;
+            const LogEvent& event) override;
 
     void onDumpReportLocked(const uint64_t dumpTimeNs,
                             android::util::ProtoOutputStream* protoOutput) override;

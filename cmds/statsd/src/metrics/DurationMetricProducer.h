@@ -57,7 +57,7 @@ protected:
     void onMatchedLogEventInternalLocked(
             const size_t matcherIndex, const HashableDimensionKey& eventKey,
             const std::map<std::string, HashableDimensionKey>& conditionKeys, bool condition,
-            const LogEvent& event, bool scheduledPull) override;
+            const LogEvent& event) override;
 
 private:
     void onDumpReportLocked(const uint64_t dumpTimeNs,

@@ -50,8 +50,8 @@ TEST(EventMetricProducerTest, TestNoCondition) {
     EventMetricProducer eventProducer(kConfigKey, metric, -1 /*-1 meaning no condition*/, wizard,
                                       bucketStartTimeNs);
 
-    eventProducer.onMatchedLogEvent(1 /*matcher index*/, event1, false /*pulled*/);
-    eventProducer.onMatchedLogEvent(1 /*matcher index*/, event2, false /*pulled*/);
+    eventProducer.onMatchedLogEvent(1 /*matcher index*/, event1);
+    eventProducer.onMatchedLogEvent(1 /*matcher index*/, event2);
 
     // TODO: get the report and check the content after the ProtoOutputStream change is done.
     // eventProducer.onDumpReport();
@@ -74,11 +74,11 @@ TEST(EventMetricProducerTest, TestEventsWithNonSlicedCondition) {
     EventMetricProducer eventProducer(kConfigKey, metric, 1, wizard, bucketStartTimeNs);
 
     eventProducer.onConditionChanged(true /*condition*/, bucketStartTimeNs);
-    eventProducer.onMatchedLogEvent(1 /*matcher index*/, event1, false /*pulled*/);
+    eventProducer.onMatchedLogEvent(1 /*matcher index*/, event1);
 
     eventProducer.onConditionChanged(false /*condition*/, bucketStartTimeNs + 2);
 
-    eventProducer.onMatchedLogEvent(1 /*matcher index*/, event2, false /*pulled*/);
+    eventProducer.onMatchedLogEvent(1 /*matcher index*/, event2);
 
     // TODO: get the report and check the content after the ProtoOutputStream change is done.
     // eventProducer.onDumpReport();
@@ -115,8 +115,8 @@ TEST(EventMetricProducerTest, TestEventsWithSlicedCondition) {
 
     EventMetricProducer eventProducer(kConfigKey, metric, 1, wizard, bucketStartTimeNs);
 
-    eventProducer.onMatchedLogEvent(1 /*matcher index*/, event1, false /*pulled*/);
-    eventProducer.onMatchedLogEvent(1 /*matcher index*/, event2, false /*pulled*/);
+    eventProducer.onMatchedLogEvent(1 /*matcher index*/, event1);
+    eventProducer.onMatchedLogEvent(1 /*matcher index*/, event2);
 
     // TODO: get the report and check the content after the ProtoOutputStream change is done.
     // eventProducer.onDumpReport();
