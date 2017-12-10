@@ -35,12 +35,12 @@ import java.util.Date;
 public abstract class PerfDataRecorder {
     private static final String TAG = "loadtest.PerfDataRecorder";
 
-    protected final String mFileSuffix;
+    protected final String mTimeAsString;
     protected final String mColumnSuffix;
 
     protected PerfDataRecorder(boolean placebo, int replication, long bucketMins, long periodSecs,
         int burst) {
-        mFileSuffix = new SimpleDateFormat("YYYY_MM_dd_HH_mm_ss").format(new Date());
+        mTimeAsString = new SimpleDateFormat("YYYY_MM_dd_HH_mm_ss").format(new Date());
         mColumnSuffix = getColumnSuffix(placebo, replication, bucketMins, periodSecs, burst);
     }
 
@@ -103,7 +103,7 @@ public abstract class PerfDataRecorder {
     /** Writes CSV data to a file. */
     protected void writeData(Context context, String filePrefix, String columnPrefix,
         StringBuilder sb) {
-        File dataFile = new File(getStorageDir(), filePrefix + mFileSuffix + ".csv");
+        File dataFile = new File(getStorageDir(), filePrefix + mTimeAsString + ".csv");
 
         FileWriter writer = null;
         try {
@@ -131,7 +131,7 @@ public abstract class PerfDataRecorder {
 
     private File getStorageDir() {
         File file = new File(Environment.getExternalStoragePublicDirectory(
-            Environment.DIRECTORY_DOCUMENTS), "loadtest");
+            Environment.DIRECTORY_DOCUMENTS), "loadtest/" + mTimeAsString);
         if (!file.mkdirs()) {
             Log.e(TAG, "Directory not created");
         }
