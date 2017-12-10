@@ -143,6 +143,11 @@ public final class Slice implements Parcelable {
      * OS and should not be cached by apps.
      */
     public static final String HINT_PARTIAL     = "partial";
+    /**
+     * A hint representing that this item is the max value possible for the slice containing this.
+     * Used to indicate the maximum integer value for a {@link #SUBTYPE_SLIDER}.
+     */
+    public static final String HINT_MAX = "max";
 
     /**
      * Key to retrieve an extra added to an intent when a control is changed.
@@ -158,6 +163,14 @@ public final class Slice implements Parcelable {
      * Subtype to tag the source (i.e. sender) of a {@link #SUBTYPE_MESSAGE}.
      */
     public static final String SUBTYPE_SOURCE = "source";
+    /**
+     * Subtype to tag an item as representing a color.
+     */
+    public static final String SUBTYPE_COLOR = "color";
+    /**
+     * Subtype to tag an item represents a slider.
+     */
+    public static final String SUBTYPE_SLIDER = "slider";
 
     private final SliceItem[] mItems;
     private final @SliceHint String[] mHints;
@@ -389,9 +402,31 @@ public final class Slice implements Parcelable {
          * Add a color to the slice being constructed
          * @param subType Optional template-specific type information
          * @see {@link SliceItem#getSubType()}
+         * @deprecated will be removed once supportlib updates
          */
         public Builder addColor(int color, @Nullable String subType, @SliceHint String... hints) {
-            mItems.add(new SliceItem(color, SliceItem.FORMAT_COLOR, subType, hints));
+            mItems.add(new SliceItem(color, SliceItem.FORMAT_INT, subType, hints));
+            return this;
+        }
+
+        /**
+         * Add a color to the slice being constructed
+         * @param subType Optional template-specific type information
+         * @see {@link SliceItem#getSubType()}
+         * @deprecated will be removed once supportlib updates
+         */
+        public Builder addColor(int color, @Nullable String subType,
+                @SliceHint List<String> hints) {
+            return addColor(color, subType, hints.toArray(new String[hints.size()]));
+        }
+
+        /**
+         * Add a color to the slice being constructed
+         * @param subType Optional template-specific type information
+         * @see {@link SliceItem#getSubType()}
+         */
+        public Builder addInt(int value, @Nullable String subType, @SliceHint String... hints) {
+            mItems.add(new SliceItem(value, SliceItem.FORMAT_INT, subType, hints));
             return this;
         }
 
@@ -400,9 +435,9 @@ public final class Slice implements Parcelable {
          * @param subType Optional template-specific type information
          * @see {@link SliceItem#getSubType()}
          */
-        public Builder addColor(int color, @Nullable String subType,
+        public Builder addInt(int value, @Nullable String subType,
                 @SliceHint List<String> hints) {
-            return addColor(color, subType, hints.toArray(new String[hints.size()]));
+            return addInt(value, subType, hints.toArray(new String[hints.size()]));
         }
 
         /**
