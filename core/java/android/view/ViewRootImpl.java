@@ -1602,7 +1602,7 @@ public final class ViewRootImpl implements ViewParent,
         if (!layoutInCutout) {
             // Window is either not laid out in cutout or the status bar inset takes care of
             // clearing the cutout, so we don't need to dispatch the cutout to the hierarchy.
-            insets = insets.consumeCutout();
+            insets = insets.consumeDisplayCutout();
         }
         host.dispatchApplyWindowInsets(insets);
     }

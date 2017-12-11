@@ -17,7 +17,7 @@
 
 package android.view;
 
-import android.annotation.NonNull;
+import android.annotation.Nullable;
 import android.graphics.Rect;
 
 /**
@@ -49,7 +49,7 @@ public final class WindowInsets {
     private boolean mSystemWindowInsetsConsumed = false;
     private boolean mWindowDecorInsetsConsumed = false;
     private boolean mStableInsetsConsumed = false;
-    private boolean mCutoutConsumed = false;
+    private boolean mDisplayCutoutConsumed = false;
 
     private static final Rect EMPTY_RECT = new Rect(0, 0, 0, 0);
 
@@ -80,8 +80,9 @@ public final class WindowInsets {
         mIsRound = isRound;
         mAlwaysConsumeNavBar = alwaysConsumeNavBar;
 
-        mCutoutConsumed = displayCutout == null;
-        mDisplayCutout = mCutoutConsumed ? DisplayCutout.NO_CUTOUT : displayCutout;
+        mDisplayCutoutConsumed = displayCutout == null;
+        mDisplayCutout = (mDisplayCutoutConsumed || displayCutout.isEmpty())
+                ? null : displayCutout;
     }
 
     /**
@@ -99,7 +100,7 @@ public final class WindowInsets {
         mIsRound = src.mIsRound;
         mAlwaysConsumeNavBar = src.mAlwaysConsumeNavBar;
         mDisplayCutout = src.mDisplayCutout;
-        mCutoutConsumed = src.mCutoutConsumed;
+        mDisplayCutoutConsumed = src.mDisplayCutoutConsumed;
     }
 
     /** @hide */
@@ -269,15 +270,16 @@ public final class WindowInsets {
      */
     public boolean hasInsets() {
         return hasSystemWindowInsets() || hasWindowDecorInsets() || hasStableInsets()
-                || mDisplayCutout.hasCutout();
+                || mDisplayCutout != null;
     }
 
     /**
-     * @return the display cutout
+     * Returns the display cutout if there is one.
+     *
+     * @return the display cutout or null if there is none
      * @see DisplayCutout
-     * @hide pending API
      */
-    @NonNull
+    @Nullable
     public DisplayCutout getDisplayCutout() {
         return mDisplayCutout;
     }
@@ -286,12 +288,11 @@ public final class WindowInsets {
      * Returns a copy of this WindowInsets with the cutout fully consumed.
      *
      * @return A modified copy of this WindowInsets
-     * @hide pending API
      */
-    public WindowInsets consumeCutout() {
+    public WindowInsets consumeDisplayCutout() {
         final WindowInsets result = new WindowInsets(this);
-        result.mDisplayCutout = DisplayCutout.NO_CUTOUT;
-        result.mCutoutConsumed = true;
+        result.mDisplayCutout = null;
+        result.mDisplayCutoutConsumed = true;
         return result;
     }
 
@@ -311,7 +312,7 @@ public final class WindowInsets {
      */
     public boolean isConsumed() {
         return mSystemWindowInsetsConsumed && mWindowDecorInsetsConsumed && mStableInsetsConsumed
-                && mCutoutConsumed;
+                && mDisplayCutoutConsumed;
     }
 
     /**
@@ -530,7 +531,7 @@ public final class WindowInsets {
         return "WindowInsets{systemWindowInsets=" + mSystemWindowInsets
                 + " windowDecorInsets=" + mWindowDecorInsets
                 + " stableInsets=" + mStableInsets
-                + (mDisplayCutout.hasCutout() ? " cutout=" + mDisplayCutout : "")
+                + (mDisplayCutout != null ? " cutout=" + mDisplayCutout : "")
                 + (isRound() ? " round" : "")
                 + "}";
     }

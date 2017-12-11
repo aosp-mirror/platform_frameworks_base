@@ -24,6 +24,7 @@ import android.graphics.Paint;
 import android.graphics.Path;
 import android.graphics.PixelFormat;
 import android.graphics.Point;
+import android.graphics.Region;
 import android.os.Handler;
 import android.os.Looper;
 import android.os.UserHandle;
@@ -36,7 +37,8 @@ import android.view.ViewGroup.LayoutParams;
 import android.view.WindowInsets;
 import android.view.WindowManager;
 
-import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
 
 /**
  * Emulates a display cutout by drawing its shape in an overlay as supplied by
@@ -85,6 +87,7 @@ public class EmulatedDisplayCutout extends SystemUI {
                 PixelFormat.TRANSLUCENT);
         lp.privateFlags |= WindowManager.LayoutParams.PRIVATE_FLAG_SHOW_FOR_ALL_USERS
                 | WindowManager.LayoutParams.PRIVATE_FLAG_IS_ROUNDED_CORNERS_OVERLAY;
+        lp.flags2 |= WindowManager.LayoutParams.FLAG2_LAYOUT_IN_DISPLAY_CUTOUT_AREA;
         lp.setTitle("EmulatedDisplayCutout");
         lp.gravity = Gravity.TOP;
         return lp;
@@ -102,9 +105,8 @@ public class EmulatedDisplayCutout extends SystemUI {
     };
 
     private static class CutoutView extends View {
-        private Paint mPaint = new Paint();
-        private Path mPath = new Path();
-        private ArrayList<Point> mBoundingPolygon = new ArrayList<>();
+        private final Paint mPaint = new Paint();
+        private final Path mBounds = new Path();
 
         CutoutView(Context context) {
             super(context);
@@ -112,28 +114,22 @@ public class EmulatedDisplayCutout extends SystemUI {
 
         @Override
         public WindowInsets onApplyWindowInsets(WindowInsets insets) {
-            insets.getDisplayCutout().getBoundingPolygon(mBoundingPolygon);
+            if (insets.getDisplayCutout() != null) {
+                insets.getDisplayCutout().getBounds().getBoundaryPath(mBounds);
+            } else {
+                mBounds.reset();
+            }
             invalidate();
-            return insets.consumeCutout();
+            return insets.consumeDisplayCutout();
         }
 
         @Override
         protected void onDraw(Canvas canvas) {
-            if (!mBoundingPolygon.isEmpty()) {
+            if (!mBounds.isEmpty()) {
                 mPaint.setColor(Color.DKGRAY);
                 mPaint.setStyle(Paint.Style.FILL);
 
-                mPath.reset();
-                for (int i = 0; i < mBoundingPolygon.size(); i++) {
-                    Point point = mBoundingPolygon.get(i);
-                    if (i == 0) {
-                        mPath.moveTo(point.x, point.y);
-                    } else {
-                        mPath.lineTo(point.x, point.y);
-                    }
-                }
-                mPath.close();
-                canvas.drawPath(mPath, mPaint);
+                canvas.drawPath(mBounds, mPaint);
             }
         }
     }
