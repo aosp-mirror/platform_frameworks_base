@@ -368,7 +368,7 @@ class Session extends IWindowSession.Stub implements IBinder.DeathRecipient {
 
         long ident = Binder.clearCallingIdentity();
         try {
-            return mService.startMovingTask(window, startX, startY);
+            return mService.mTaskPositioningController.startMovingTask(window, startX, startY);
         } finally {
             Binder.restoreCallingIdentity(ident);
         }
