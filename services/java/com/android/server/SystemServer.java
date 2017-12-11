@@ -1088,14 +1088,17 @@ public final class SystemServer {
             }
             traceEnd();
 
-            // Wifi Service must be started first for wifi-related services.
-            traceBeginAndSlog("StartWifi");
-            mSystemServiceManager.startService(WIFI_SERVICE_CLASS);
-            traceEnd();
-            traceBeginAndSlog("StartWifiScanning");
-            mSystemServiceManager.startService(
-                "com.android.server.wifi.scanner.WifiScanningService");
-            traceEnd();
+            if (context.getPackageManager().hasSystemFeature(
+                        PackageManager.FEATURE_WIFI)) {
+                // Wifi Service must be started first for wifi-related services.
+                traceBeginAndSlog("StartWifi");
+                mSystemServiceManager.startService(WIFI_SERVICE_CLASS);
+                traceEnd();
+                traceBeginAndSlog("StartWifiScanning");
+                mSystemServiceManager.startService(
+                    "com.android.server.wifi.scanner.WifiScanningService");
+                traceEnd();
+            }
 
             if (!disableRtt) {
                 traceBeginAndSlog("StartWifiRtt");
