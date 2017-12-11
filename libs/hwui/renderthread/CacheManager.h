@@ -61,7 +61,7 @@ private:
 
     CacheManager(const DisplayInfo& display);
 
-    void reset(GrContext* grContext);
+    void reset(sk_sp<GrContext> grContext);
     void destroy();
     void updateContextCacheSizes();
 

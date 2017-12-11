@@ -173,12 +173,12 @@ Readback& RenderThread::readback() {
     return *mReadback;
 }
 
-void RenderThread::setGrContext(GrContext* context) {
+void RenderThread::setGrContext(sk_sp<GrContext> context) {
     mCacheManager->reset(context);
-    if (mGrContext.get()) {
+    if (mGrContext) {
         mGrContext->releaseResourcesAndAbandonContext();
     }
-    mGrContext.reset(context);
+    mGrContext = std::move(context);
 }
 
 int RenderThread::displayEventReceiverCallback(int fd, int events, void* data) {

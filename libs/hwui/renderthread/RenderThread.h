@@ -88,7 +88,7 @@ public:
     const DisplayInfo& mainDisplayInfo() { return mDisplayInfo; }
 
     GrContext* getGrContext() const { return mGrContext.get(); }
-    void setGrContext(GrContext* cxt);
+    void setGrContext(sk_sp<GrContext> cxt);
 
     CacheManager& cacheManager() { return *mCacheManager; }
     VulkanManager& vulkanManager() { return *mVkManager; }

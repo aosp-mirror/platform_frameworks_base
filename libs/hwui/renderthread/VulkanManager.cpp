@@ -58,6 +58,7 @@ void VulkanManager::initialize() {
 
     mBackendContext.reset(GrVkBackendContext::Create(vkGetInstanceProcAddr, vkGetDeviceProcAddr,
                                                      &mPresentQueueIndex, canPresent));
+    LOG_ALWAYS_FATAL_IF(!mBackendContext.get());
 
     // Get all the addresses of needed vulkan functions
     VkInstance instance = mBackendContext->fInstance;
@@ -110,8 +111,9 @@ void VulkanManager::initialize() {
     GrContextOptions options;
     options.fDisableDistanceFieldPaths = true;
     mRenderThread.cacheManager().configureContext(&options);
-    mRenderThread.setGrContext(
-            GrContext::Create(kVulkan_GrBackend, (GrBackendContext)mBackendContext.get(), options));
+    sk_sp<GrContext> grContext(GrContext::MakeVulkan(mBackendContext, options));
+    LOG_ALWAYS_FATAL_IF(!grContext.get());
+    mRenderThread.setGrContext(grContext);
     DeviceInfo::initialize(mRenderThread.getGrContext()->caps()->maxRenderTargetSize());
 
     if (Properties::enablePartialUpdates && Properties::useBufferAge) {
