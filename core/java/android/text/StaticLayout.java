@@ -887,6 +887,7 @@ public class StaticLayout extends Layout {
 
             if ((bufEnd == bufStart || source.charAt(bufEnd - 1) == CHAR_NEW_LINE)
                     && mLineCount < mMaximumVisibleLineCount) {
+                measured = MeasuredText.buildForBidi(source, bufEnd, bufEnd, textDir, measured);
                 paint.getFontMetricsInt(fm);
                 v = out(source,
                         bufEnd, bufEnd, fm.ascent, fm.descent,
@@ -894,7 +895,7 @@ public class StaticLayout extends Layout {
                         v,
                         spacingmult, spacingadd, null,
                         null, fm, 0,
-                        needMultiply, null, bufEnd,
+                        needMultiply, measured, bufEnd,
                         includepad, trackpad, addLastLineSpacing, null,
                         null, bufStart, ellipsize,
                         ellipsizedWidth, 0, paint, false);
@@ -912,7 +913,7 @@ public class StaticLayout extends Layout {
     private int out(final CharSequence text, final int start, final int end, int above, int below,
             int top, int bottom, int v, final float spacingmult, final float spacingadd,
             final LineHeightSpan[] chooseHt, final int[] chooseHtv, final Paint.FontMetricsInt fm,
-            final int flags, final boolean needMultiply, @Nullable final MeasuredText measured,
+            final int flags, final boolean needMultiply, @NonNull final MeasuredText measured,
             final int bufEnd, final boolean includePad, final boolean trackPad,
             final boolean addLastLineLineSpacing, final char[] chs, final float[] widths,
             final int widthStart, final TextUtils.TruncateAt ellipsize, final float ellipsisWidth,
@@ -921,7 +922,7 @@ public class StaticLayout extends Layout {
         final int off = j * mColumns;
         final int want = off + mColumns + TOP;
         int[] lines = mLines;
-        final int dir = (start == end) ? Layout.DIR_LEFT_TO_RIGHT : measured.getParagraphDir();
+        final int dir = measured.getParagraphDir();
 
         if (want >= lines.length) {
             final int[] grow = ArrayUtils.newUnpaddedIntArray(GrowingArrayUtils.growSize(want));
@@ -948,11 +949,7 @@ public class StaticLayout extends Layout {
         lines[off + TAB] |= flags & TAB_MASK;
         lines[off + HYPHEN] = flags;
         lines[off + DIR] |= dir << DIR_SHIFT;
-        if (start == end) {
-            mLineDirections[j] = Layout.DIRS_ALL_LEFT_TO_RIGHT;
-        } else {
-            mLineDirections[j] = measured.getDirections(start - widthStart, end - widthStart);
-        }
+        mLineDirections[j] = measured.getDirections(start - widthStart, end - widthStart);
 
         final boolean firstLine = (j == 0);
         final boolean currentLineIsTheLastVisibleOne = (j + 1 == mMaximumVisibleLineCount);
