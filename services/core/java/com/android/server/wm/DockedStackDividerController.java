@@ -607,7 +607,7 @@ public class DockedStackDividerController {
         if (wasMinimized && mMinimizedDock && containsAppInDockedStack(openingApps)
                 && appTransition != TRANSIT_NONE &&
                 !AppTransition.isKeyguardGoingAwayTransit(appTransition)) {
-            mService.showRecentApps(true /* fromHome */);
+            mService.showRecentApps();
         }
     }
 

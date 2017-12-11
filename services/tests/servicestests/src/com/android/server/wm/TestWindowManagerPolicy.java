@@ -539,7 +539,7 @@ class TestWindowManagerPolicy implements WindowManagerPolicy {
     }
 
     @Override
-    public void showRecentApps(boolean fromHome) {
+    public void showRecentApps() {
 
     }
 

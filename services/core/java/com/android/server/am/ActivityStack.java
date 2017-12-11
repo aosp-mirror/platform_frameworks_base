@@ -606,7 +606,7 @@ class ActivityStack<T extends StackWindowController> extends ConfigurationContai
                         true /* onTop */);
                 recentStack.moveToFront("setWindowingMode");
                 // If task moved to docked stack - show recents if needed.
-                mService.mWindowManager.showRecentApps(false /* fromHome */);
+                mService.mWindowManager.showRecentApps();
             }
             wm.continueSurfaceLayout();
         }

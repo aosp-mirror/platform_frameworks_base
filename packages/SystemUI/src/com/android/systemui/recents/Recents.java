@@ -240,7 +240,7 @@ public class Recents extends SystemUI
      * Shows the Recents.
      */
     @Override
-    public void showRecentApps(boolean triggeredFromAltTab, boolean fromHome) {
+    public void showRecentApps(boolean triggeredFromAltTab) {
         // Ensure the device has been provisioned before allowing the user to interact with
         // recents
         if (!isUserSetup()) {
@@ -252,7 +252,7 @@ public class Recents extends SystemUI
         int currentUser = sSystemServicesProxy.getCurrentUser();
         if (sSystemServicesProxy.isSystemUser(currentUser)) {
             mImpl.showRecents(triggeredFromAltTab, false /* draggingInRecents */,
-                    true /* animate */, false /* reloadTasks */, fromHome, recentsGrowTarget);
+                    true /* animate */, recentsGrowTarget);
         } else {
             if (mSystemToUserCallbacks != null) {
                 IRecentsNonSystemUserCallbacks callbacks =
@@ -260,8 +260,7 @@ public class Recents extends SystemUI
                 if (callbacks != null) {
                     try {
                         callbacks.showRecents(triggeredFromAltTab, false /* draggingInRecents */,
-                                true /* animate */, false /* reloadTasks */, fromHome,
-                                recentsGrowTarget);
+                                true /* animate */, recentsGrowTarget);
                     } catch (RemoteException e) {
                         Log.e(TAG, "Callback failed", e);
                     }

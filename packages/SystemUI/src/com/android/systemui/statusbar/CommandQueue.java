@@ -116,7 +116,7 @@ public class CommandQueue extends IStatusBar.Stub {
         default void topAppWindowChanged(boolean visible) { }
         default void setImeWindowStatus(IBinder token, int vis, int backDisposition,
                 boolean showImeSwitcher) { }
-        default void showRecentApps(boolean triggeredFromAltTab, boolean fromHome) { }
+        default void showRecentApps(boolean triggeredFromAltTab) { }
         default void hideRecentApps(boolean triggeredFromAltTab, boolean triggeredFromHomeKey) { }
         default void toggleRecentApps() { }
         default void toggleSplitScreen() { }
@@ -268,11 +268,11 @@ public class CommandQueue extends IStatusBar.Stub {
         }
     }
 
-    public void showRecentApps(boolean triggeredFromAltTab, boolean fromHome) {
+    public void showRecentApps(boolean triggeredFromAltTab) {
         synchronized (mLock) {
             mHandler.removeMessages(MSG_SHOW_RECENT_APPS);
-            mHandler.obtainMessage(MSG_SHOW_RECENT_APPS,
-                    triggeredFromAltTab ? 1 : 0, fromHome ? 1 : 0, null).sendToTarget();
+            mHandler.obtainMessage(MSG_SHOW_RECENT_APPS, triggeredFromAltTab ? 1 : 0, 0,
+                    null).sendToTarget();
         }
     }
 
@@ -541,7 +541,7 @@ public class CommandQueue extends IStatusBar.Stub {
                     break;
                 case MSG_SHOW_RECENT_APPS:
                     for (int i = 0; i < mCallbacks.size(); i++) {
-                        mCallbacks.get(i).showRecentApps(msg.arg1 != 0, msg.arg2 != 0);
+                        mCallbacks.get(i).showRecentApps(msg.arg1 != 0);
                     }
                     break;
                 case MSG_HIDE_RECENT_APPS:
