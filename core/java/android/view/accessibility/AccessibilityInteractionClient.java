@@ -734,11 +734,14 @@ public final class AccessibilityInteractionClient
         if (info != null) {
             info.setConnectionId(connectionId);
             // Empty array means any package name is Okay
-            if (!ArrayUtils.isEmpty(packageNames)
-                    && !ArrayUtils.contains(packageNames, info.getPackageName().toString())) {
-                // If the node package not one of the valid ones, pick the top one - this
-                // is one of the packages running in the introspected UID.
-                info.setPackageName(packageNames[0]);
+            if (!ArrayUtils.isEmpty(packageNames)) {
+                CharSequence packageName = info.getPackageName();
+                if (packageName == null
+                        || !ArrayUtils.contains(packageNames, packageName.toString())) {
+                    // If the node package not one of the valid ones, pick the top one - this
+                    // is one of the packages running in the introspected UID.
+                    info.setPackageName(packageNames[0]);
+                }
             }
             info.setSealed(true);
             if (!bypassCache) {
