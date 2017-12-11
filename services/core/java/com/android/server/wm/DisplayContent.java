@@ -135,6 +135,7 @@ import android.os.Handler;
 import android.os.IBinder;
 import android.os.RemoteException;
 import android.os.SystemClock;
+import android.os.Trace;
 import android.util.DisplayMetrics;
 import android.util.MutableBoolean;
 import android.util.Slog;
@@ -178,20 +179,20 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
 
     /** The containers below are the only child containers the display can have. */
     // Contains all window containers that are related to apps (Activities)
-    private final TaskStackContainers mTaskStackContainers = new TaskStackContainers();
+    private final TaskStackContainers mTaskStackContainers = new TaskStackContainers(mService);
     // Contains all non-app window containers that should be displayed above the app containers
     // (e.g. Status bar)
     private final AboveAppWindowContainers mAboveAppWindowsContainers =
-            new AboveAppWindowContainers("mAboveAppWindowsContainers");
+            new AboveAppWindowContainers("mAboveAppWindowsContainers", mService);
     // Contains all non-app window containers that should be displayed below the app containers
     // (e.g. Wallpaper).
     private final NonAppWindowContainers mBelowAppWindowsContainers =
-            new NonAppWindowContainers("mBelowAppWindowsContainers");
+            new NonAppWindowContainers("mBelowAppWindowsContainers", mService);
     // Contains all IME window containers. Note that the z-ordering of the IME windows will depend
     // on the IME target. We mainly have this container grouping so we can keep track of all the IME
     // window containers together and move them in-sync if/when needed.
     private final NonAppWindowContainers mImeWindowsContainers =
-            new NonAppWindowContainers("mImeWindowsContainers");
+            new NonAppWindowContainers("mImeWindowsContainers", mService);
 
     private WindowState mTmpWindow;
     private WindowState mTmpWindow2;
@@ -316,8 +317,6 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
 
     /** Used for handing back size of display */
     private final Rect mTmpBounds = new Rect();
-
-    WindowManagerService mService;
 
     /** Remove this display when animation on it has completed. */
     private boolean mDeferredRemoval;
@@ -765,6 +764,7 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
      */
     DisplayContent(Display display, WindowManagerService service,
             WallpaperController wallpaperController) {
+        super(service);
         if (service.mRoot.getDisplayContent(display.getDisplayId()) != null) {
             throw new IllegalArgumentException("Display with ID=" + display.getDisplayId()
                     + " already exists=" + service.mRoot.getDisplayContent(display.getDisplayId())
@@ -777,7 +777,6 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
         display.getDisplayInfo(mDisplayInfo);
         display.getMetrics(mDisplayMetrics);
         isDefaultDisplay = mDisplayId == DEFAULT_DISPLAY;
-        mService = service;
         mDisplayFrames = new DisplayFrames(mDisplayId, mDisplayInfo);
         initializeDisplayBaseInfo();
         mDividerControllerLocked = new DockedStackDividerController(service, this);
@@ -1767,8 +1766,8 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
         updateBounds();
     }
 
-    void getContentRect(Rect out) {
-        out.set(mDisplayFrames.mContent);
+    void getStableRect(Rect out) {
+        out.set(mDisplayFrames.mStable);
     }
 
     TaskStack createStack(int stackId, boolean onTop, StackWindowController controller) {
@@ -2339,6 +2338,7 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
 
     /** Updates the layer assignment of windows on this display. */
     void assignWindowLayers(boolean setLayoutNeeded) {
+        Trace.traceBegin(Trace.TRACE_TAG_WINDOW_MANAGER, "assignWindowLayers");
         assignChildLayers(getPendingTransaction());
         if (setLayoutNeeded) {
             setLayoutNeeded();
@@ -2349,6 +2349,7 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
         // prepareSurfaces. This allows us to synchronize Z-ordering changes with
         // the hiding and showing of surfaces.
         scheduleAnimation();
+        Trace.traceEnd(Trace.TRACE_TAG_WINDOW_MANAGER);
     }
 
     // TODO: This should probably be called any time a visual change is made to the hierarchy like
@@ -3182,6 +3183,10 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
      */
     static class DisplayChildWindowContainer<E extends WindowContainer> extends WindowContainer<E> {
 
+        DisplayChildWindowContainer(WindowManagerService service) {
+            super(service);
+        }
+
         @Override
         boolean fillsParent() {
             return true;
@@ -3208,6 +3213,10 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
         private TaskStack mHomeStack = null;
         private TaskStack mPinnedStack = null;
         private TaskStack mSplitScreenPrimaryStack = null;
+
+        TaskStackContainers(WindowManagerService service) {
+            super(service);
+        }
 
         /**
          * Returns the topmost stack on the display that is compatible with the input windowing mode
@@ -3516,34 +3525,36 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
 
         @Override
         void assignChildLayers(SurfaceControl.Transaction t) {
-            final int NORMAL_STACK_STATE = 0;
-            final int BOOSTED_STATE = 1;
-            final int ALWAYS_ON_TOP_STATE = 2;
+            int layer = 0;
 
             // We allow stacks to change visual order from the AM specified order due to
             // Z-boosting during animations. However we must take care to ensure TaskStacks
             // which are marked as alwaysOnTop remain that way.
-            int layer = 0;
-            for (int state = 0; state <= ALWAYS_ON_TOP_STATE; state++) {
-                for (int i = 0; i < mChildren.size(); i++) {
-                    final TaskStack s = mChildren.get(i);
-                    layer++;
-                    if (state == NORMAL_STACK_STATE) {
-                        s.assignLayer(t, layer);
-                    } else if (state == BOOSTED_STATE && s.needsZBoost()) {
-                        s.assignLayer(t, layer);
-                    } else if (state == ALWAYS_ON_TOP_STATE &&
-                            s.isAlwaysOnTop()) {
-                        s.assignLayer(t, layer);
-                    }
-                    s.assignChildLayers(t);
+            for (int i = 0; i < mChildren.size(); i++) {
+                final TaskStack s = mChildren.get(i);
+                s.assignChildLayers();
+                if (!s.needsZBoost() && !s.isAlwaysOnTop()) {
+                    s.assignLayer(t, layer++);
                 }
-                // The appropriate place for App-Transitions to occur is right
-                // above all other animations but still below things in the Picture-and-Picture
-                // windowing mode.
-                if (state == BOOSTED_STATE && mAnimationLayer != null) {
-                    t.setLayer(mAnimationLayer, layer + 1);
+            }
+            for (int i = 0; i < mChildren.size(); i++) {
+                final TaskStack s = mChildren.get(i);
+                if (s.needsZBoost() && !s.isAlwaysOnTop()) {
+                    s.assignLayer(t, layer++);
                 }
+            }
+            for (int i = 0; i < mChildren.size(); i++) {
+                final TaskStack s = mChildren.get(i);
+                if (s.isAlwaysOnTop()) {
+                    s.assignLayer(t, layer++);
+                }
+            }
+
+            // The appropriate place for App-Transitions to occur is right
+            // above all other animations but still below things in the Picture-and-Picture
+            // windowing mode.
+            if (mAnimationLayer != null) {
+                t.setLayer(mAnimationLayer, layer++);
             }
         }
 
@@ -3560,8 +3571,8 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
     }
 
     private final class AboveAppWindowContainers extends NonAppWindowContainers {
-        AboveAppWindowContainers(String name) {
-            super(name);
+        AboveAppWindowContainers(String name, WindowManagerService service) {
+            super(name, service);
         }
 
         void assignChildLayers(SurfaceControl.Transaction t, WindowContainer imeContainer) {
@@ -3577,14 +3588,12 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
 
                 if (needAssignIme && layer >= mService.mPolicy.getWindowLayerFromTypeLw(
                                 TYPE_INPUT_METHOD_DIALOG, true)) {
-                    t.setRelativeLayer(imeContainer.getSurfaceControl(),
-                            wt.getSurfaceControl(), -1);
+                    imeContainer.assignRelativeLayer(t, wt.getSurfaceControl(), -1);
                     needAssignIme = false;
                 }
             }
             if (needAssignIme) {
-                t.setRelativeLayer(imeContainer.getSurfaceControl(),
-                        getSurfaceControl(), Integer.MAX_VALUE);
+                imeContainer.assignRelativeLayer(t, getSurfaceControl(), Integer.MAX_VALUE);
             }
         }
     }
@@ -3618,7 +3627,8 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
         };
 
         private final String mName;
-        NonAppWindowContainers(String name) {
+        NonAppWindowContainers(String name, WindowManagerService service) {
+            super(service);
             mName = name;
         }
 
@@ -3712,8 +3722,6 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
 
     @Override
     void assignChildLayers(SurfaceControl.Transaction t) {
-        t.setLayer(mOverlayLayer, 1)
-                .setLayer(mWindowingLayer, 0);
 
         // These are layers as children of "mWindowingLayer"
         mBelowAppWindowsContainers.assignLayer(t, 0);
@@ -3737,8 +3745,7 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
         // place it in the AboveAppWindowContainers.
         if (imeTarget != null && !imeTarget.inSplitScreenWindowingMode()
                 && (imeTarget.getSurfaceControl() != null)) {
-            t.setRelativeLayer(mImeWindowsContainers.getSurfaceControl(),
-                    imeTarget.getSurfaceControl(),
+            mImeWindowsContainers.assignRelativeLayer(t, imeTarget.getSurfaceControl(),
                     // TODO: We need to use an extra level on the app surface to ensure
                     // this is always above SurfaceView but always below attached window.
                     1);

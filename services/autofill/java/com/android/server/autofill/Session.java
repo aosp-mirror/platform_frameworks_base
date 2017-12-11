@@ -65,7 +65,7 @@ import android.service.autofill.SaveInfo;
 import android.service.autofill.SaveRequest;
 import android.service.autofill.UserData;
 import android.service.autofill.ValueFinder;
-import android.service.autofill.FieldsClassificationScorer;
+import android.service.autofill.EditDistanceScorer;
 import android.util.ArrayMap;
 import android.util.ArraySet;
 import android.util.LocalLog;
@@ -127,6 +127,9 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
 
     /** uid the session is for */
     public final int uid;
+
+    /** Flags used to start the session */
+    public final int mFlags;
 
     @GuardedBy("mLock")
     @NonNull private IBinder mActivityToken;
@@ -238,10 +241,15 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
                 structure.ensureData();
 
                 // Sanitize structure before it's sent to service.
-                if (!mComponentName.equals(structure.getActivityComponent())) {
+                final ComponentName componentNameFromApp = structure.getActivityComponent();
+                if (!mComponentName.equals(componentNameFromApp)) {
                     Slog.w(TAG, "Activity " + mComponentName + " forged different component on "
-                            + "AssistStructure: " + structure.getActivityComponent());
+                            + "AssistStructure: " + componentNameFromApp);
                     structure.setActivityComponent(mComponentName);
+                    mMetricsLogger.write(newLogMaker(MetricsEvent.AUTOFILL_FORGED_COMPONENT_ATTEMPT)
+                            .addTaggedData(MetricsEvent.FIELD_AUTOFILL_FORGED_COMPONENT_NAME,
+                                    componentNameFromApp == null ? "null"
+                                            : componentNameFromApp.flattenToShortString()));
                 }
                 structure.sanitizeForParceling(true);
 
@@ -436,8 +444,10 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
             @NonNull Context context, @NonNull HandlerCaller handlerCaller, int userId,
             @NonNull Object lock, int sessionId, int uid, @NonNull IBinder activityToken,
             @NonNull IBinder client, boolean hasCallback, @NonNull LocalLog uiLatencyHistory,
-            @NonNull ComponentName serviceComponentName, @NonNull ComponentName componentName) {
+            @NonNull ComponentName serviceComponentName, @NonNull ComponentName componentName,
+            int flags) {
         id = sessionId;
+        mFlags = flags;
         this.uid = uid;
         mStartTime = SystemClock.elapsedRealtime();
         mService = service;
@@ -451,7 +461,8 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
         mComponentName = componentName;
         mClient = IAutoFillManagerClient.Stub.asInterface(client);
 
-        writeLog(MetricsEvent.AUTOFILL_SESSION_STARTED);
+        mMetricsLogger.write(newLogMaker(MetricsEvent.AUTOFILL_SESSION_STARTED)
+                .addTaggedData(MetricsEvent.FIELD_FLAGS, flags));
     }
 
     /**
@@ -500,8 +511,9 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
             }
         }
 
-        // TODO(b/67867469): remove once feature is finished
-        if (response.getFieldClassificationIds() != null && !mService.isFieldDetectionEnabled()) {
+        final AutofillId[] fieldClassificationIds = response.getFieldClassificationIds();
+        // TODO(b/67867469): remove once feature is finished (or use method from AFM to check)
+        if (fieldClassificationIds != null && !mService.isFieldClassificationEnabled()) {
             Slog.w(TAG, "Ignoring " + response + " because field detection is disabled");
             processNullResponseLocked(requestFlags);
             return;
@@ -543,6 +555,10 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
                 .setType(MetricsEvent.TYPE_SUCCESS)
                 .addTaggedData(MetricsEvent.FIELD_AUTOFILL_NUM_DATASETS,
                         response.getDatasets() == null ? 0 : response.getDatasets().size());
+        if (fieldClassificationIds != null) {
+            log.addTaggedData(MetricsEvent.FIELD_AUTOFILL_NUM_FIELD_CLASSIFICATION_IDS,
+                    fieldClassificationIds.length);
+        }
         mMetricsLogger.write(log);
     }
 
@@ -1101,7 +1117,7 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
         mService.logContextCommitted(id, mClientState, mSelectedDatasetIds, ignoredDatasets,
                 changedFieldIds, changedDatasetIds,
                 manuallyFilledFieldIds, manuallyFilledDatasetIds,
-                detectedFieldIds, detectedMatches);
+                detectedFieldIds, detectedMatches, mComponentName.getPackageName());
     }
 
     /**
@@ -1124,10 +1140,10 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
             return;
         }
         String remoteId = null;
-        int topScore = 0;
+        float topScore = 0;
         for (int i = 0; i < userValues.length; i++) {
             final String value = userValues[i];
-            final int score = FieldsClassificationScorer.getScore(currentValue, value);
+            final float score = userData.getScorer().getScore(currentValue, value);
             if (score > topScore) {
                 topScore = score;
                 remoteId = remoteIds[i];
@@ -1706,7 +1722,7 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
                 break;
             case ACTION_VIEW_ENTERED:
                 if (sVerbose && virtualBounds != null) {
-                    Slog.w(TAG, "entered on virtual child " + id + ": " + virtualBounds);
+                    Slog.v(TAG, "entered on virtual child " + id + ": " + virtualBounds);
                 }
                 requestNewFillResponseIfNecessaryLocked(id, viewState, flags);
 
@@ -2110,6 +2126,7 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
         final String prefix2 = prefix + "  ";
         pw.print(prefix); pw.print("id: "); pw.println(id);
         pw.print(prefix); pw.print("uid: "); pw.println(uid);
+        pw.print(prefix); pw.print("flags: "); pw.println(mFlags);
         pw.print(prefix); pw.print("mComponentName: "); pw.println(mComponentName);
         pw.print(prefix); pw.print("mActivityToken: "); pw.println(mActivityToken);
         pw.print(prefix); pw.print("mStartTime: "); pw.println(mStartTime);

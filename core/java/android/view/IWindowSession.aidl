@@ -22,6 +22,7 @@ import android.graphics.Rect;
 import android.graphics.Region;
 import android.os.Bundle;
 import android.util.MergedConfiguration;
+import android.view.DisplayCutout;
 import android.view.InputChannel;
 import android.view.IWindow;
 import android.view.IWindowId;
@@ -40,7 +41,8 @@ interface IWindowSession {
             out InputChannel outInputChannel);
     int addToDisplay(IWindow window, int seq, in WindowManager.LayoutParams attrs,
             in int viewVisibility, in int layerStackId, out Rect outContentInsets,
-            out Rect outStableInsets, out Rect outOutsets, out InputChannel outInputChannel);
+            out Rect outStableInsets, out Rect outOutsets,
+            out DisplayCutout.ParcelableWrapper displayCutout, out InputChannel outInputChannel);
     int addWithoutInputChannel(IWindow window, int seq, in WindowManager.LayoutParams attrs,
             in int viewVisibility, out Rect outContentInsets, out Rect outStableInsets);
     int addToDisplayWithoutInputChannel(IWindow window, int seq, in WindowManager.LayoutParams attrs,
@@ -96,6 +98,7 @@ interface IWindowSession {
             int flags, out Rect outFrame, out Rect outOverscanInsets,
             out Rect outContentInsets, out Rect outVisibleInsets, out Rect outStableInsets,
             out Rect outOutsets, out Rect outBackdropFrame,
+            out DisplayCutout.ParcelableWrapper displayCutout,
             out MergedConfiguration outMergedConfiguration, out Surface outSurface);
 
     /*

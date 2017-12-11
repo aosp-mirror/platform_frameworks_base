@@ -24,7 +24,7 @@ namespace android {
 namespace os {
 namespace statsd {
 
-// Held by MetricProducer, to query a condition state with input defined in EventConditionLink.
+// Held by MetricProducer, to query a condition state with input defined in MetricConditionLink.
 class ConditionWizard : public virtual android::RefBase {
 public:
     ConditionWizard(){};  // for testing

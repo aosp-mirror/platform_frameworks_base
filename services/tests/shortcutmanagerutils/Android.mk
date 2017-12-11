@@ -21,7 +21,8 @@ LOCAL_SRC_FILES := \
 
 LOCAL_JAVA_LIBRARIES := \
     mockito-target \
-    legacy-android-test
+    legacy-android-test \
+    android.test.runner.stubs
 
 LOCAL_MODULE_TAGS := optional
 

@@ -19,10 +19,13 @@ package android.app.servertransaction;
 import static android.os.Trace.TRACE_TAG_ACTIVITY_MANAGER;
 import static android.view.Display.INVALID_DISPLAY;
 
+import android.app.ClientTransactionHandler;
 import android.content.res.Configuration;
 import android.os.IBinder;
 import android.os.Parcel;
 import android.os.Trace;
+
+import java.util.Objects;
 
 /**
  * Activity configuration changed callback.
@@ -30,18 +33,38 @@ import android.os.Trace;
  */
 public class ActivityConfigurationChangeItem extends ClientTransactionItem {
 
-    private final Configuration mConfiguration;
-
-    public ActivityConfigurationChangeItem(Configuration configuration) {
-        mConfiguration = configuration;
-    }
+    private Configuration mConfiguration;
 
     @Override
-    public void execute(android.app.ClientTransactionHandler client, IBinder token) {
+    public void execute(ClientTransactionHandler client, IBinder token,
+            PendingTransactionActions pendingActions) {
         // TODO(lifecycler): detect if PIP or multi-window mode changed and report it here.
         Trace.traceBegin(TRACE_TAG_ACTIVITY_MANAGER, "activityConfigChanged");
         client.handleActivityConfigurationChanged(token, mConfiguration, INVALID_DISPLAY);
         Trace.traceEnd(TRACE_TAG_ACTIVITY_MANAGER);
+    }
+
+
+    // ObjectPoolItem implementation
+
+    private ActivityConfigurationChangeItem() {}
+
+    /** Obtain an instance initialized with provided params. */
+    public static ActivityConfigurationChangeItem obtain(Configuration config) {
+        ActivityConfigurationChangeItem instance =
+                ObjectPool.obtain(ActivityConfigurationChangeItem.class);
+        if (instance == null) {
+            instance = new ActivityConfigurationChangeItem();
+        }
+        instance.mConfiguration = config;
+
+        return instance;
+    }
+
+    @Override
+    public void recycle() {
+        mConfiguration = null;
+        ObjectPool.recycle(this);
     }
 
 
@@ -78,11 +101,16 @@ public class ActivityConfigurationChangeItem extends ClientTransactionItem {
             return false;
         }
         final ActivityConfigurationChangeItem other = (ActivityConfigurationChangeItem) o;
-        return mConfiguration.equals(other.mConfiguration);
+        return Objects.equals(mConfiguration, other.mConfiguration);
     }
 
     @Override
     public int hashCode() {
         return mConfiguration.hashCode();
+    }
+
+    @Override
+    public String toString() {
+        return "ActivityConfigurationChange{config=" + mConfiguration + "}";
     }
 }

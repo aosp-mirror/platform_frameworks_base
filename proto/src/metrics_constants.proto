@@ -3953,6 +3953,10 @@ message MetricsEvent {
 
     // An autofill session was started
     // Package: Package of app that is autofilled
+    // NOTE: starting on OS MR1, it also added the following field:
+    // Tag FIELD_AUTOFILL_SERVICE: Package of service that processed the request
+    // NOTE: starting on OS P, it also added the following field:
+    // Tag FIELD_FLAGS - Flags used to start the session
     AUTOFILL_SESSION_STARTED = 906;
 
     // An autofill request was processed by a service
@@ -3960,7 +3964,11 @@ message MetricsEvent {
     // Type TYPE_FAILURE: The request failed
     // Package: Package of app that is autofilled
     // Tag FIELD_AUTOFILL_SERVICE: Package of service that processed the request
-    // Tag FIELD_AUTOFILL_NUM_DATASET: The number of datasets returned (only in success case)
+    // Tag FIELD_AUTOFILL_NUM_DATASETS: The number of datasets returned (only in success case)
+    // NOTE: starting on OS P, it also added:
+    // Type TYPE_CLOSE: Service returned a null response.
+    // Tag FIELD_AUTOFILL_NUM_FIELD_CLASSIFICATION_IDS: if service requested field classification,
+    // number of entries field ids in the request.
     AUTOFILL_REQUEST = 907;
 
     // Tag of a field for a package of an autofill service
@@ -4137,6 +4145,19 @@ message MetricsEvent {
     // Type: int encoded boolean
     // OS: O
     FIELD_NOTIFICATION_GROUP_SUMMARY = 947;
+
+    // An app attempted to forge a different component name in the AssisStructure that would be
+    // passed to the autofill service.
+    // OS: O (security patch)
+    // Package: Real package of the app being autofilled
+    // Tag FIELD_AUTOFILL_SERVICE: Package of the autofill service that processed the request
+    // TAG FIELD_AUTOFILL_FORGED_COMPONENT_NAME: Component name being forged
+    AUTOFILL_FORGED_COMPONENT_ATTEMPT = 948;
+
+    // FIELD - The component that an app tried tro forged.
+    // Type: string
+    // OS: O (security patch)
+    FIELD_AUTOFILL_FORGED_COMPONENT_NAME = 949;
 
     // ---- End O Constants, all O constants go above this line ----
 
@@ -4850,7 +4871,6 @@ message MetricsEvent {
     // Counter: duration (in ms) that autofill will be disabled
     // OS: P
     // Tag FIELD_AUTOFILL_SERVICE: Package of service that processed the request
-    // Tag FIELD_CLASS_NAME: Name of the Package of service that processed the request
     AUTOFILL_SERVICE_DISABLED_APP = 1231;
 
     // An autofill service asked to disable autofill for a given activity.
@@ -5053,6 +5073,26 @@ message MetricsEvent {
     // CATEGORY: SETTINGS
     // OS: P
     NOTIFICATION_ZEN_MODE_RULE_SELECTION_DIALOG = 1270;
+
+    // Tag of a field for the number of ids in an autofill field classification request.
+    FIELD_AUTOFILL_NUM_FIELD_CLASSIFICATION_IDS = 1271;
+
+    // An autofill service updated its user data
+    // Package: Package of the autofill service that updated the user data
+    // Counter: number of fields added (or 0 if reset)
+    // OS: P
+    AUTOFILL_USERDATA_UPDATED = 1272;
+
+    // Some data entered by the user matched the field classification requested by the service.
+    // Package: Package of app that is autofilled
+    // Counter: number of matches found
+    // OS: P
+    // Tag FIELD_AUTOFILL_SERVICE: Package of service that processed the request
+    // Tag FIELD_AUTOFILL_MATCH_SCORE: Average score of the matches, in the range of 0 to 100
+    AUTOFILL_FIELD_CLASSIFICATION_MATCHES = 1273;
+
+    // Tag used to report autofill field classification scores
+    FIELD_AUTOFILL_MATCH_SCORE = 1274;
 
     // ---- End P Constants, all P constants go above this line ----
     // Add new aosp constants above this line.

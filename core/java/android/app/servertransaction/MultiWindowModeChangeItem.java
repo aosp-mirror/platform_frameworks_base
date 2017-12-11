@@ -16,9 +16,12 @@
 
 package android.app.servertransaction;
 
+import android.app.ClientTransactionHandler;
 import android.content.res.Configuration;
 import android.os.IBinder;
 import android.os.Parcel;
+
+import java.util.Objects;
 
 /**
  * Multi-window mode change message.
@@ -28,18 +31,38 @@ import android.os.Parcel;
 // communicate multi-window mode change with WindowConfiguration.
 public class MultiWindowModeChangeItem extends ClientTransactionItem {
 
-    private final boolean mIsInMultiWindowMode;
-    private final Configuration mOverrideConfig;
+    private boolean mIsInMultiWindowMode;
+    private Configuration mOverrideConfig;
 
-    public MultiWindowModeChangeItem(boolean isInMultiWindowMode,
+    @Override
+    public void execute(ClientTransactionHandler client, IBinder token,
+            PendingTransactionActions pendingActions) {
+        client.handleMultiWindowModeChanged(token, mIsInMultiWindowMode, mOverrideConfig);
+    }
+
+
+    // ObjectPoolItem implementation
+
+    private MultiWindowModeChangeItem() {}
+
+    /** Obtain an instance initialized with provided params. */
+    public static MultiWindowModeChangeItem obtain(boolean isInMultiWindowMode,
             Configuration overrideConfig) {
-        mIsInMultiWindowMode = isInMultiWindowMode;
-        mOverrideConfig = overrideConfig;
+        MultiWindowModeChangeItem instance = ObjectPool.obtain(MultiWindowModeChangeItem.class);
+        if (instance == null) {
+            instance = new MultiWindowModeChangeItem();
+        }
+        instance.mIsInMultiWindowMode = isInMultiWindowMode;
+        instance.mOverrideConfig = overrideConfig;
+
+        return instance;
     }
 
     @Override
-    public void execute(android.app.ClientTransactionHandler client, IBinder token) {
-        client.handleMultiWindowModeChanged(token, mIsInMultiWindowMode, mOverrideConfig);
+    public void recycle() {
+        mIsInMultiWindowMode = false;
+        mOverrideConfig = null;
+        ObjectPool.recycle(this);
     }
 
 
@@ -79,7 +102,7 @@ public class MultiWindowModeChangeItem extends ClientTransactionItem {
         }
         final MultiWindowModeChangeItem other = (MultiWindowModeChangeItem) o;
         return mIsInMultiWindowMode == other.mIsInMultiWindowMode
-                && mOverrideConfig.equals(other.mOverrideConfig);
+                && Objects.equals(mOverrideConfig, other.mOverrideConfig);
     }
 
     @Override
@@ -88,5 +111,11 @@ public class MultiWindowModeChangeItem extends ClientTransactionItem {
         result = 31 * result + (mIsInMultiWindowMode ? 1 : 0);
         result = 31 * result + mOverrideConfig.hashCode();
         return result;
+    }
+
+    @Override
+    public String toString() {
+        return "MultiWindowModeChangeItem{isInMultiWindowMode=" + mIsInMultiWindowMode
+                + ",overrideConfig=" + mOverrideConfig + "}";
     }
 }

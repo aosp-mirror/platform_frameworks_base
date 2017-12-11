@@ -339,9 +339,9 @@
     <string name="recents_multistack_add_stack_dialog_split_horizontal" msgid="8848514474543427332">"Podjela po horizontali"</string>
     <string name="recents_multistack_add_stack_dialog_split_vertical" msgid="9075292233696180813">"Podjela po vertikali"</string>
     <string name="recents_multistack_add_stack_dialog_split_custom" msgid="4177837597513701943">"Prilagođena podjela"</string>
-    <string name="recents_accessibility_split_screen_top" msgid="9056056469282256287">"Podijeli ekran nagore"</string>
-    <string name="recents_accessibility_split_screen_left" msgid="8987144699630620019">"Podijeli ekran nalijevo"</string>
-    <string name="recents_accessibility_split_screen_right" msgid="275069779299592867">"Podijeli ekran nadesno"</string>
+    <string name="recents_accessibility_split_screen_top" msgid="9056056469282256287">"Dijeli ekran nagore"</string>
+    <string name="recents_accessibility_split_screen_left" msgid="8987144699630620019">"Dijeli ekran nalijevo"</string>
+    <string name="recents_accessibility_split_screen_right" msgid="275069779299592867">"Dijeli ekran nadesno"</string>
     <string name="expanded_header_battery_charged" msgid="5945855970267657951">"Napunjeno"</string>
     <string name="expanded_header_battery_charging" msgid="205623198487189724">"Punjenje"</string>
     <string name="expanded_header_battery_charging_with_time" msgid="457559884275395376">"Do kraja punjenja preostalo <xliff:g id="CHARGING_TIME">%s</xliff:g>"</string>
@@ -764,7 +764,8 @@
     <string name="instant_apps" msgid="6647570248119804907">"Instant-aplikacije"</string>
     <string name="instant_apps_message" msgid="8116608994995104836">"Za instant aplikacije nije potrebna instalacija"</string>
     <string name="app_info" msgid="6856026610594615344">"Informacije o aplikaciji"</string>
-    <string name="go_to_web" msgid="1106022723459948514">"Idite na internet"</string>
+    <!-- no translation found for go_to_web (2650669128861626071) -->
+    <skip />
     <string name="mobile_data" msgid="7094582042819250762">"Mobilni podaci"</string>
     <string name="wifi_is_off" msgid="1838559392210456893">"Wi-Fi veza je isključena"</string>
     <string name="bt_is_off" msgid="2640685272289706392">"Bluetooth je isključen"</string>

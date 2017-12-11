@@ -48,12 +48,14 @@ message Atom {
         SyncStateChanged sync_state_changed = 7;
         ScheduledJobStateChanged scheduled_job_state_changed = 8;
         ScreenBrightnessChanged screen_brightness_changed = 9;
-        // 10-20 are temporarily reserved for wakelocks etc.
         WakelockStateChanged wakelock_state_changed = 10;
-        UidWakelockStateChanged uid_wakelock_state_changed = 11;
-        LongPartialWakelockStateChanged long_partial_wakelock_state_changed = 12;
-        BatterySaverModeStateChanged battery_saver_mode_state_changed = 21;
-        DeviceIdleModeStateChanged device_idle_mode_state_changed = 22;
+        LongPartialWakelockStateChanged long_partial_wakelock_state_changed = 11;
+        MobileRadioPowerStateChanged mobile_radio_power_state_changed = 12;
+        WifiRadioPowerStateChanged wifi_radio_power_state_changed = 13;
+        // TODO: 14-19 are blank, but need not be
+        BatterySaverModeStateChanged battery_saver_mode_state_changed = 20;
+        DeviceIdleModeStateChanged device_idle_mode_state_changed = 21;
+        DeviceIdlingModeStateChanged device_idling_mode_state_changed = 22;
         AudioStateChanged audio_state_changed = 23;
         MediaCodecActivityChanged media_codec_activity_changed = 24;
         CameraStateChanged camera_state_changed = 25;
@@ -75,6 +77,8 @@ message Atom {
         SettingChanged setting_changed = 41;
         ActivityForegroundStateChanged activity_foreground_state_changed = 42;
         IsolatedUidChanged isolated_uid_changed = 43;
+        PacketWakeupOccurred packet_wakeup_occurred = 44;
+        DropboxErrorChanged dropbox_error_changed = 45;
         // TODO: Reorder the numbering so that the most frequent occur events occur in the first 15.
     }
 
@@ -91,6 +95,8 @@ message Atom {
         CpuTimePerFreqPulled cpu_time_per_freq_pulled = 1008;
         CpuTimePerUidPulled cpu_time_per_uid_pulled = 1009;
         CpuTimePerUidFreqPulled cpu_time_per_uid_freq_pulled = 1010;
+        WifiActivityEnergyInfoPulled wifi_activity_energy_info_pulled = 1011;
+        ModemActivityInfoPulled modem_activity_info_pulled = 1012;
     }
 }
 
@@ -99,7 +105,11 @@ message Atom {
  * resulted in a particular bit of work being done.
  */
 message WorkSource {
-    // TODO
+    // The uid for a given element in the attribution chain.
+    repeated int32 uid = 1;
+    // The (optional) string tag for an element in the attribution chain. If the
+    // element has no tag, it is encoded as an empty string.
+    repeated string tag = 2;
 }
 
 /*
@@ -143,6 +153,7 @@ message ScreenStateChanged {
         STATE_DOZE = 3;
         STATE_DOZE_SUSPEND = 4;
         STATE_VR = 5;
+        STATE_ON_SUSPEND = 6;
     }
     // New screen state.
     optional State display_state = 1;
@@ -175,12 +186,16 @@ message ProcessLifeCycleStateChanged {
     // TODO: What is this?
     optional string name = 2;
 
-    // The state.
-    // TODO: Use an enum.
-    optional int32 event = 3;
+    // What lifecycle state the process changed to.
+    // This enum is specific to atoms.proto.
+    enum Event {
+        PROCESS_FINISHED = 0;
+        PROCESS_STARTED = 1;
+        PROCESS_CRASHED = 2;
+        PROCESS_ANRED = 3;
+    }
+    optional Event event = 3;
 }
-
-
 
 /**
  * Logs when the ble scan state changes.
@@ -404,35 +419,12 @@ message WakelockStateChanged {
     optional string tag = 3;
 
     enum State {
-        OFF = 0;
-        ON = 1;
+        RELEASE = 0;
+        ACQUIRE = 1;
+        CHANGE_RELEASE = 2;
+        CHANGE_ACQUIRE = 3;
     }
     optional State state = 4;
-}
-
-/**
- * Logs when an app is holding a wakelock, regardless of the wakelock's name.
- *
- * Logged from:
- *   frameworks/base/core/java/com/android/internal/os/BatteryStatsImpl.java
- */
-message UidWakelockStateChanged {
-    // TODO: Add attribution instead of uid.
-    optional int32 uid = 1;
-
-    // Type of wakelock.
-    enum Type {
-        PARTIAL = 0;
-        FULL = 1;
-        WINDOW = 2;
-    }
-    optional Type type = 2;
-
-    enum State {
-        OFF = 0;
-        ON = 1;
-    }
-    optional State state = 3;
 }
 
 /**
@@ -476,11 +468,33 @@ message BatterySaverModeStateChanged {
  * Logs Doze mode state change.
  *
  * Logged from:
- *   frameworks/base/services/core/java/com/android/server/am/BatteryStatsService.java
+ *   frameworks/base/core/java/com/android/internal/os/BatteryStatsImpl.java
  */
 message DeviceIdleModeStateChanged {
     // TODO: Use the enum matching BatteryStats.DEVICE_IDLE_MODE_.
-    optional int32 state = 1;
+    enum State {
+        DEVICE_IDLE_MODE_OFF = 0;
+        DEVICE_IDLE_MODE_LIGHT = 1;
+        DEVICE_IDLE_MODE_DEEP = 2;
+    }
+    optional State state = 1;
+}
+
+
+/**
+ * Logs state change of Doze mode including maintenance windows.
+ *
+ * Logged from:
+ *   frameworks/base/core/java/com/android/internal/os/BatteryStatsImpl.java
+ */
+message DeviceIdlingModeStateChanged {
+    // TODO: Use the enum matching BatteryStats.DEVICE_IDLE_MODE_.
+    enum State {
+        DEVICE_IDLE_MODE_OFF = 0;
+        DEVICE_IDLE_MODE_LIGHT = 1;
+        DEVICE_IDLE_MODE_DEEP = 2;
+    }
+    optional State state = 1;
 }
 
 /**
@@ -580,6 +594,49 @@ message DeviceOnStatusChanged {
 message WakeupAlarmOccurred {
     // TODO: Add attribution instead of uid?
     optional int32 uid = 1;
+
+    // Name of the wakeup alarm.
+    optional string tag = 2;
+}
+
+/**
+ * Logs when an an app causes the mobile radio to change state.
+ * Changing from LOW to MEDIUM or HIGH can be considered the app waking the mobile radio.
+ *
+ * Logged from:
+ *   frameworks/base/core/java/com/android/internal/os/BatteryStatsImpl.java
+ */
+message MobileRadioPowerStateChanged {
+    // TODO: Add attribution instead of uid?
+    optional int32 uid = 1;
+
+    // TODO: Reference telephony/java/android/telephony/DataConnectionRealTimeInfo.java states.
+    enum PowerState {
+        DC_POWER_STATE_LOW = 1;
+        DC_POWER_STATE_MEDIUM = 2;
+        DC_POWER_STATE_HIGH = 3;
+    }
+    optional PowerState power_state = 2;
+}
+
+/**
+ * Logs when an an app causes the wifi radio to change state.
+ * Changing from LOW to MEDIUM or HIGH can be considered the app waking the wifi radio.
+ *
+ * Logged from:
+ *   frameworks/base/core/java/com/android/internal/os/BatteryStatsImpl.java
+ */
+message WifiRadioPowerStateChanged {
+    // TODO: Add attribution instead of uid?
+    optional int32 uid = 1;
+
+    // TODO: Reference telephony/java/android/telephony/DataConnectionRealTimeInfo.java states.
+    enum PowerState {
+        DC_POWER_STATE_LOW = 1;
+        DC_POWER_STATE_MEDIUM = 2;
+        DC_POWER_STATE_HIGH = 3;
+    }
+    optional PowerState power_state = 2;
 }
 
 /**
@@ -699,7 +756,7 @@ message SettingChanged {
     optional int32 user = 7;
 }
 
-/*
+/**
  * Logs activity going to foreground or background
  *
  * Logged from:
@@ -714,6 +771,34 @@ message ActivityForegroundStateChanged {
     optional string pkg_name = 2;
     optional string class_name = 3;
     optional Activity activity = 4;
+}
+
+/**
+ * Logs when an error is written to dropbox.
+ * Logged from:
+ *      frameworks/base/services/core/java/com/android/server/am/ActivityManagerService.java
+ */
+message DropboxErrorChanged {
+    // The uid if available. -1 means not available.
+    optional int32 uid = 1;
+
+    // Tag used when recording this error to dropbox. Contains data_ or system_ prefix.
+    optional string tag = 2;
+
+    // The name of the process.
+    optional string process_name = 3;
+
+    // The pid if available. -1 means not available.
+    optional int32 pid = 4;
+
+    // 1 indicates is instant app. -1 indicates Not applicable.
+    optional int32 is_instant_app = 5;
+
+    // The activity name if available.
+    optional string activity_name = 6;
+
+    // 1 indicates in foreground. -1 indicates not available.
+    optional int32 is_foreground = 7;
 }
 
 /**
@@ -811,7 +896,7 @@ message KernelWakelockPulled {
     optional int64 time = 4;
 }
 
-/*
+/**
  * Pulls PowerStatePlatformSleepState.
  *
  * Definition here:
@@ -871,7 +956,7 @@ message IsolatedUidChanged {
     optional int32 is_create = 3;
 }
 
-/*
+/**
  * Pulls Cpu time per frequency.
  * Note: this should be pulled for gauge metric only, without condition.
  * The puller keeps internal state of last values. It should not be pulled by
@@ -888,7 +973,7 @@ message CpuTimePerFreqPulled {
     optional uint64 time = 3;
 }
 
-/*
+/**
  * Pulls Cpu Time Per Uid.
  * Note that isolated process uid time should be attributed to host uids.
  */
@@ -907,4 +992,86 @@ message CpuTimePerUidFreqPulled {
     optional uint64 uid = 1;
     optional uint64 freq_idx = 2;
     optional uint64 time_ms = 3;
+}
+
+/*
+ * Logs the reception of an incoming network packet causing the main system to wake up for
+ * processing that packet. These events are notified by the kernel via Netlink NFLOG to Netd
+ * and processed by WakeupController.cpp.
+ */
+message PacketWakeupOccurred {
+    // The uid owning the socket into which the packet was delivered, or -1 if the packet was
+    // delivered nowhere.
+    optional int32 uid = 1;
+    // The interface name on which the packet was received.
+    optional string iface = 2;
+    // The ethertype value of the packet.
+    optional int32 ethertype = 3;
+    // String representation of the destination MAC address of the packet.
+    optional string destination_hardware_address = 4;
+    // String representation of the source address of the packet if this was an IP packet.
+    optional string source_ip = 5;
+    // String representation of the destination address of the packet if this was an IP packet.
+    optional string destination_ip = 6;
+    // The value of the protocol field if this was an IPv4 packet or the value of the Next Header
+    // field if this was an IPv6 packet. The range of possible values is the same for both IP
+    // families.
+    optional int32 ip_next_header = 7;
+    // The source port if this was a TCP or UDP packet.
+    optional int32 source_port = 8;
+    // The destination port if this was a TCP or UDP packet.
+    optional int32 destination_port = 9;
+}
+
+/**
+ * Pulls Wifi Controller Activity Energy Info
+ */
+message WifiActivityEnergyInfoPulled {
+    // timestamp(wall clock) of record creation
+    optional uint64 timestamp_ms = 1;
+    // stack reported state
+    // TODO: replace this with proto enum
+    optional int32 stack_state = 2;
+    // tx time in ms
+    optional uint64 controller_tx_time_ms = 3;
+    // rx time in ms
+    optional uint64 controller_rx_time_ms = 4;
+    // idle time in ms
+    optional uint64 controller_idle_time_ms = 5;
+    // product of current(mA), voltage(V) and time(ms)
+    optional uint64 controller_energy_used = 6;
+}
+
+/**
+ * Pulls Modem Activity Energy Info
+ */
+message ModemActivityInfoPulled {
+    // timestamp(wall clock) of record creation
+    optional uint64 timestamp_ms = 1;
+    // sleep time in ms.
+    optional uint64 sleep_time_ms = 2;
+    // idle time in ms
+    optional uint64 controller_idle_time_ms = 3;
+    /**
+     * Tx power index
+     * index 0 = tx_power < 0dBm
+     * index 1 = 0dBm < tx_power < 5dBm
+     * index 2 = 5dBm < tx_power < 15dBm
+     * index 3 = 15dBm < tx_power < 20dBm
+     * index 4 = tx_power > 20dBm
+     */
+    // tx time in ms at power level 0
+    optional uint64 controller_tx_time_pl0_ms = 4;
+    // tx time in ms at power level 1
+    optional uint64 controller_tx_time_pl1_ms = 5;
+    // tx time in ms at power level 2
+    optional uint64 controller_tx_time_pl2_ms = 6;
+    // tx time in ms at power level 3
+    optional uint64 controller_tx_time_pl3_ms = 7;
+    // tx time in ms at power level 4
+    optional uint64 controller_tx_time_pl4_ms = 8;
+    // rx time in ms at power level 5
+    optional uint64 controller_rx_time_ms = 9;
+    // product of current(mA), voltage(V) and time(ms)
+    optional uint64 energy_used = 10;
 }

@@ -60,29 +60,25 @@ private:
 
     std::unordered_map<ConfigKey, long> mLastBroadcastTimes;
 
+    // Tracks when we last checked the bytes consumed for each config key.
+    std::unordered_map<ConfigKey, long> mLastByteSizeTimes;
+
     sp<UidMap> mUidMap;  // Reference to the UidMap to lookup app name and version for each uid.
 
     sp<AnomalyMonitor> mAnomalyMonitor;
 
-    /* Max *serialized* size of the logs kept in memory before flushing through binder call.
-       Proto lite does not implement the SpaceUsed() function which gives the in memory byte size.
-       So we cap memory usage by limiting the serialized size. Note that protobuf's in memory size
-       is higher than its serialized size.
-     */
-    static const size_t kMaxSerializedBytes = 16 * 1024;
-
     /* Check if we should send a broadcast if approaching memory limits and if we're over, we
      * actually delete the data. */
-    void flushIfNecessary(uint64_t timestampNs,
-                          const ConfigKey& key,
-                          const unique_ptr<MetricsManager>& metricsManager);
+    void flushIfNecessary(uint64_t timestampNs, const ConfigKey& key,
+                          MetricsManager& metricsManager);
 
     // Function used to send a broadcast so that receiver for the config key can call getData
     // to retrieve the stored data.
     std::function<void(const ConfigKey& key)> mSendBroadcast;
 
-    /* Minimum period between two broadcasts in nanoseconds. Currently set to 60 seconds. */
-    static const unsigned long long kMinBroadcastPeriod = 60 * NS_PER_SEC;
+    FRIEND_TEST(StatsLogProcessorTest, TestRateLimitByteSize);
+    FRIEND_TEST(StatsLogProcessorTest, TestRateLimitBroadcast);
+    FRIEND_TEST(StatsLogProcessorTest, TestDropWhenByteSizeTooLarge);
 };
 
 }  // namespace statsd

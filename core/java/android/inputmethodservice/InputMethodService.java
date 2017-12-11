@@ -392,7 +392,7 @@ public class InputMethodService extends AbstractInputMethodService {
                 mWindow.setToken(token);
             }
         }
-        
+
         /**
          * {@inheritDoc}
          *
@@ -1064,7 +1064,89 @@ public class InputMethodService extends AbstractInputMethodService {
         }
         return mInputConnection;
     }
-    
+
+    /**
+     * Force switch to a new input method component. This can only be called
+     * from an application or a service which has a token of the currently active input method.
+     * @param id The unique identifier for the new input method to be switched to.
+     */
+    public void setInputMethod(String id) {
+        mImm.setInputMethodInternal(mToken, id);
+    }
+
+    /**
+     * Force switch to a new input method and subtype. This can only be called
+     * from an application or a service which has a token of the currently active input method.
+     * @param id The unique identifier for the new input method to be switched to.
+     * @param subtype The new subtype of the new input method to be switched to.
+     */
+    public void setInputMethodAndSubtype(String id, InputMethodSubtype subtype) {
+        mImm.setInputMethodAndSubtypeInternal(mToken, id, subtype);
+    }
+
+    /**
+     * Close/hide the input method's soft input area, so the user no longer
+     * sees it or can interact with it.  This can only be called
+     * from the currently active input method, as validated by the given token.
+     *
+     * @param flags Provides additional operating flags.  Currently may be
+     * 0 or have the {@link InputMethodManager#HIDE_IMPLICIT_ONLY},
+     * {@link InputMethodManager#HIDE_NOT_ALWAYS} bit set.
+     */
+    public void hideSoftInputFromInputMethod(int flags) {
+        mImm.hideSoftInputFromInputMethodInternal(mToken, flags);
+    }
+
+    /**
+     * Show the input method's soft input area, so the user
+     * sees the input method window and can interact with it.
+     * This can only be called from the currently active input method,
+     * as validated by the given token.
+     *
+     * @param flags Provides additional operating flags.  Currently may be
+     * 0 or have the {@link InputMethodManager#SHOW_IMPLICIT} or
+     * {@link InputMethodManager#SHOW_FORCED} bit set.
+     */
+    public void showSoftInputFromInputMethod(int flags) {
+        mImm.showSoftInputFromInputMethodInternal(mToken, flags);
+    }
+
+    /**
+     * Force switch to the last used input method and subtype. If the last input method didn't have
+     * any subtypes, the framework will simply switch to the last input method with no subtype
+     * specified.
+     * @return true if the current input method and subtype was successfully switched to the last
+     * used input method and subtype.
+     */
+    public boolean switchToLastInputMethod() {
+        return mImm.switchToLastInputMethodInternal(mToken);
+    }
+
+    /**
+     * Force switch to the next input method and subtype. If there is no IME enabled except
+     * current IME and subtype, do nothing.
+     * @param onlyCurrentIme if true, the framework will find the next subtype which
+     * belongs to the current IME
+     * @return true if the current input method and subtype was successfully switched to the next
+     * input method and subtype.
+     */
+    public boolean switchToNextInputMethod(boolean onlyCurrentIme) {
+        return mImm.switchToNextInputMethodInternal(mToken, onlyCurrentIme);
+    }
+
+    /**
+     * Returns true if the current IME needs to offer the users ways to switch to a next input
+     * method (e.g. a globe key.).
+     * When an IME sets supportsSwitchingToNextInputMethod and this method returns true,
+     * the IME has to offer ways to to invoke {@link #switchToNextInputMethod} accordingly.
+     * <p> Note that the system determines the most appropriate next input method
+     * and subtype in order to provide the consistent user experience in switching
+     * between IMEs and subtypes.
+     */
+    public boolean shouldOfferSwitchingToNextInputMethod() {
+        return mImm.shouldOfferSwitchingToNextInputMethodInternal(mToken);
+    }
+
     public boolean getCurrentInputStarted() {
         return mInputStarted;
     }

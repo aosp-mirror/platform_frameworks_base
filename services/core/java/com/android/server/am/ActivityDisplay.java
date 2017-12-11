@@ -433,7 +433,9 @@ class ActivityDisplay extends ConfigurationContainer<ActivityStack> {
                         || !otherStack.affectedBySplitScreenResize()) {
                     continue;
                 }
-                otherStack.setWindowingMode(WINDOWING_MODE_SPLIT_SCREEN_SECONDARY);
+                otherStack.setWindowingMode(WINDOWING_MODE_SPLIT_SCREEN_SECONDARY,
+                        false /* animate */, false /* showRecents */,
+                        false /* sendNonResizeableNotification */);
             }
         } finally {
             mSupervisor.mWindowManager.continueSurfaceLayout();

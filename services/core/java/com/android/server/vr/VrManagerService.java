@@ -59,6 +59,7 @@ import android.util.ArraySet;
 import android.util.Slog;
 import android.util.SparseArray;
 import com.android.server.wm.WindowManagerInternal;
+import android.view.inputmethod.InputMethodManagerInternal;
 
 import com.android.internal.R;
 import com.android.internal.util.DumpUtils;
@@ -606,6 +607,14 @@ public class VrManagerService extends SystemService implements EnabledComponentC
         public void setStandbyEnabled(boolean standby) {
             enforceCallerPermissionAnyOf(Manifest.permission.ACCESS_VR_MANAGER);
             VrManagerService.this.setStandbyEnabled(standby);
+        }
+
+        @Override
+        public void setVrInputMethod(ComponentName componentName) {
+            enforceCallerPermissionAnyOf(Manifest.permission.RESTRICTED_VR_ACCESS);
+            InputMethodManagerInternal imm =
+                    LocalServices.getService(InputMethodManagerInternal.class);
+            imm.startVrInputMethodNoCheck(componentName);
         }
 
         @Override

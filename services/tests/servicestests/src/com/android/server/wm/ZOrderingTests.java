@@ -16,23 +16,6 @@
 
 package com.android.server.wm;
 
-import java.util.HashMap;
-import java.util.LinkedList;
-
-import org.junit.After;
-import org.junit.Assert;
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
-
-import android.view.SurfaceControl;
-import android.view.SurfaceSession;
-import android.util.Log;
-
-import android.platform.test.annotations.Presubmit;
-import android.support.test.filters.SmallTest;
-import android.support.test.runner.AndroidJUnit4;
-
 import static android.app.WindowConfiguration.ACTIVITY_TYPE_ASSISTANT;
 import static android.app.WindowConfiguration.ACTIVITY_TYPE_STANDARD;
 import static android.app.WindowConfiguration.WINDOWING_MODE_FULLSCREEN;
@@ -42,10 +25,23 @@ import static android.view.WindowManager.LayoutParams.TYPE_APPLICATION_ATTACHED_
 import static android.view.WindowManager.LayoutParams.TYPE_APPLICATION_MEDIA;
 import static android.view.WindowManager.LayoutParams.TYPE_APPLICATION_MEDIA_OVERLAY;
 import static android.view.WindowManager.LayoutParams.TYPE_BASE_APPLICATION;
-import static android.view.WindowManager.LayoutParams.TYPE_SYSTEM_OVERLAY;
 import static android.view.WindowManager.LayoutParams.TYPE_NAVIGATION_BAR_PANEL;
 import static android.view.WindowManager.LayoutParams.TYPE_STATUS_BAR_PANEL;
 import static android.view.WindowManager.LayoutParams.TYPE_STATUS_BAR_SUB_PANEL;
+import static android.view.WindowManager.LayoutParams.TYPE_SYSTEM_OVERLAY;
+
+import android.platform.test.annotations.Presubmit;
+import android.support.test.filters.SmallTest;
+import android.support.test.runner.AndroidJUnit4;
+import android.view.SurfaceControl;
+import android.view.SurfaceSession;
+
+import org.junit.After;
+import org.junit.Test;
+import org.junit.runner.RunWith;
+
+import java.util.HashMap;
+import java.util.LinkedList;
 
 /**
  * Tests for the {@link WindowLayersController} class.
@@ -79,7 +75,7 @@ public class ZOrderingTests extends WindowTestsBase {
         }
 
         int getLayer(SurfaceControl sc) {
-            return mLayersForControl.get(sc);
+            return mLayersForControl.getOrDefault(sc, 0);
         }
 
         SurfaceControl getRelativeLayer(SurfaceControl sc) {
@@ -125,6 +121,7 @@ public class ZOrderingTests extends WindowTestsBase {
         // would miss construction of the top-level layers.
         mTransaction = new LayerRecordingTransaction();
         sWm.mSurfaceBuilderFactory = new HierarchyRecordingBuilderFactory();
+        sWm.mTransactionFactory = () -> mTransaction;
     }
 
     @After

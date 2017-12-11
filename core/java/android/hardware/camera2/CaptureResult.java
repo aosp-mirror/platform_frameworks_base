@@ -2185,10 +2185,16 @@ public class CaptureResult extends CameraMetadata<CaptureResult.Key<?>> {
             new Key<Boolean>("android.control.enableZsl", boolean.class);
 
     /**
-     * <p>Whether scene change is detected within AF regions.</p>
-     * <p>When AF detects a scene change within current AF regions, it will be set to DETECTED. Otherwise,
-     * it will be set to NOT_DETECTED. This value will remain NOT_DETECTED if afMode is AF_MODE_OFF or
-     * AF_MODE_EDOF.</p>
+     * <p>Whether a significant scene change is detected within the currently-set AF
+     * region(s).</p>
+     * <p>When the camera focus routine detects a change in the scene it is looking at,
+     * such as a large shift in camera viewpoint, significant motion in the scene, or a
+     * significant illumination change, this value will be set to DETECTED for a single capture
+     * result. Otherwise the value will be NOT_DETECTED. The threshold for detection is similar
+     * to what would trigger a new passive focus scan to begin in CONTINUOUS autofocus modes.</p>
+     * <p>afSceneChange may be DETECTED only if afMode is AF_MODE_CONTINUOUS_VIDEO or
+     * AF_MODE_CONTINUOUS_PICTURE. In other AF modes, afSceneChange must be NOT_DETECTED.</p>
+     * <p>This key will be available if the camera device advertises this key via {@link android.hardware.camera2.CameraCharacteristics#getAvailableCaptureResultKeys }.</p>
      * <p><b>Possible values:</b>
      * <ul>
      *   <li>{@link #CONTROL_AF_SCENE_CHANGE_NOT_DETECTED NOT_DETECTED}</li>

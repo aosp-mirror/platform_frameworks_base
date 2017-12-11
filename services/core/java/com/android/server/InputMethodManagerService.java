@@ -108,6 +108,8 @@ import android.os.SystemClock;
 import android.os.UserHandle;
 import android.os.UserManager;
 import android.provider.Settings;
+import android.service.vr.IVrManager;
+import android.service.vr.IVrStateCallbacks;
 import android.text.TextUtils;
 import android.text.style.SuggestionSpan;
 import android.util.ArrayMap;
@@ -189,6 +191,7 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
     static final int MSG_CREATE_SESSION = 1050;
 
     static final int MSG_START_INPUT = 2000;
+    static final int MSG_START_VR_INPUT = 2010;
 
     static final int MSG_UNBIND_CLIENT = 3000;
     static final int MSG_BIND_CLIENT = 3010;
@@ -314,6 +317,28 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
             method = _method;
             session = _session;
             channel = _channel;
+        }
+    }
+
+    /**
+     * VR state callback.
+     * Listens for when VR mode finishes.
+     */
+    private final IVrStateCallbacks mVrStateCallbacks = new IVrStateCallbacks.Stub() {
+        @Override
+        public void onVrStateChanged(boolean enabled) {
+            if (!enabled) {
+                restoreNonVrImeFromSettingsNoCheck();
+            }
+        }
+    };
+
+    private void restoreNonVrImeFromSettingsNoCheck() {
+        // switch back to non-VR InputMethod from settings.
+        synchronized (mMethodMap) {
+            final String lastInputId = mSettings.getSelectedInputMethod();
+            setInputMethodLocked(lastInputId,
+                    mSettings.getSelectedInputMethodSubtypeId(lastInputId));
         }
     }
 
@@ -863,6 +888,30 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
     }
 
     /**
+     * Start a VR InputMethod that matches IME with package name of {@param component}.
+     * Note: This method is called from {@link VrManager}.
+     */
+    private void startVrInputMethodNoCheck(@Nullable ComponentName component) {
+        if (component == null) {
+            // clear the current VR-only IME (if any) and restore normal IME.
+            restoreNonVrImeFromSettingsNoCheck();
+            return;
+        }
+
+        synchronized (mMethodMap) {
+            String packageName = component.getPackageName();
+            for (InputMethodInfo info : mMethodList) {
+                if (TextUtils.equals(info.getPackageName(), packageName) && info.isVrOnly()) {
+                    // set this is as current inputMethod without updating settings.
+                    setInputMethodEnabled(info.getId(), true);
+                    setInputMethodLocked(info.getId(), NOT_A_SUBTYPE_ID);
+                    break;
+                }
+            }
+        }
+    }
+
+    /**
      * Handles {@link Intent#ACTION_LOCALE_CHANGED}.
      *
      * <p>Note: For historical reasons, {@link Intent#ACTION_LOCALE_CHANGED} has been sent to all
@@ -1338,6 +1387,15 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
         mFileManager = new InputMethodFileManager(mMethodMap, userId);
         mSwitchingController = InputMethodSubtypeSwitchingController.createInstanceLocked(
                 mSettings, context);
+        // Register VR-state listener.
+        IVrManager vrManager = (IVrManager) ServiceManager.getService(Context.VR_SERVICE);
+        if (vrManager != null) {
+            try {
+                vrManager.registerListener(mVrStateCallbacks);
+            } catch (RemoteException e) {
+                Slog.e(TAG, "Failed to register VR mode state listener.");
+            }
+        }
     }
 
     private void resetDefaultImeLocked(Context context) {
@@ -1562,12 +1620,27 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
 
     @Override
     public List<InputMethodInfo> getInputMethodList() {
+        return getInputMethodList(false /* isVrOnly */);
+    }
+
+    public List<InputMethodInfo> getVrInputMethodList() {
+        return getInputMethodList(true /* isVrOnly */);
+    }
+
+    private List<InputMethodInfo> getInputMethodList(final boolean isVrOnly) {
         // TODO: Make this work even for non-current users?
         if (!calledFromValidUser()) {
             return Collections.emptyList();
         }
         synchronized (mMethodMap) {
-            return new ArrayList<>(mMethodList);
+            ArrayList<InputMethodInfo> methodList = new ArrayList<>();
+            for (InputMethodInfo info : mMethodList) {
+
+                if (info.isVrOnly() == isVrOnly) {
+                    methodList.add(info);
+                }
+            }
+            return methodList;
         }
     }
 
@@ -3356,6 +3429,9 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
             case MSG_SET_INTERACTIVE:
                 handleSetInteractive(msg.arg1 != 0);
                 return true;
+            case MSG_START_VR_INPUT:
+                startVrInputMethodNoCheck((ComponentName) msg.obj);
+                return true;
             case MSG_SWITCH_IME:
                 handleSwitchInputMethod(msg.arg1 != 0);
                 return true;
@@ -3876,8 +3952,12 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
 
     private void setSelectedInputMethodAndSubtypeLocked(InputMethodInfo imi, int subtypeId,
             boolean setSubtypeOnly) {
-        // Update the history of InputMethod and Subtype
-        mSettings.saveCurrentInputMethodAndSubtypeToHistory(mCurMethodId, mCurrentSubtype);
+        // Updates to InputMethod are transient in VR mode. Its not included in history.
+        final boolean isVrInput = imi != null && imi.isVrOnly();
+        if (!isVrInput) {
+            // Update the history of InputMethod and Subtype
+            mSettings.saveCurrentInputMethodAndSubtypeToHistory(mCurMethodId, mCurrentSubtype);
+        }
 
         mCurUserActionNotificationSequenceNumber =
                 Math.max(mCurUserActionNotificationSequenceNumber + 1, 1);
@@ -3890,6 +3970,11 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
             executeOrSendMessage(mCurClient.client, mCaller.obtainMessageIO(
                     MSG_SET_USER_ACTION_NOTIFICATION_SEQUENCE_NUMBER,
                     mCurUserActionNotificationSequenceNumber, mCurClient));
+        }
+
+        if (isVrInput) {
+            // Updates to InputMethod are transient in VR mode. Any changes to Settings are skipped.
+            return;
         }
 
         // Set Subtype here
@@ -4350,6 +4435,11 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
         public void hideCurrentInputMethod() {
             mHandler.removeMessages(MSG_HIDE_CURRENT_INPUT_METHOD);
             mHandler.sendEmptyMessage(MSG_HIDE_CURRENT_INPUT_METHOD);
+        }
+
+        @Override
+        public void startVrInputMethodNoCheck(@Nullable ComponentName componentName) {
+            mHandler.sendMessage(mHandler.obtainMessage(MSG_START_VR_INPUT, componentName));
         }
     }
 

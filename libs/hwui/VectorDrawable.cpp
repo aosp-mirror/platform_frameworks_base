@@ -166,7 +166,7 @@ void FullPath::draw(SkCanvas* outCanvas, bool useStagingData) {
 
     if (needsFill) {
         paint.setStyle(SkPaint::Style::kFill_Style);
-        paint.setAntiAlias(true);
+        paint.setAntiAlias(mAntiAlias);
         outCanvas->drawPath(renderPath, paint);
     }
 
@@ -182,7 +182,7 @@ void FullPath::draw(SkCanvas* outCanvas, bool useStagingData) {
     }
     if (needsStroke) {
         paint.setStyle(SkPaint::Style::kStroke_Style);
-        paint.setAntiAlias(true);
+        paint.setAntiAlias(mAntiAlias);
         paint.setStrokeJoin(SkPaint::Join(properties.getStrokeLineJoin()));
         paint.setStrokeCap(SkPaint::Cap(properties.getStrokeLineCap()));
         paint.setStrokeMiter(properties.getStrokeMiterLimit());

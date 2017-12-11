@@ -13,7 +13,7 @@
      See the License for the specific language governing permissions and
      limitations under the License.
 -->
-<com.android.systemui.HardwareUiLayout
+<com.android.systemui.volume.VolumeUiLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
@@ -21,18 +21,19 @@
     android:clipChildren="false" >
     <RelativeLayout
         android:id="@+id/volume_dialog"
-        android:layout_width="@dimen/volume_dialog_panel_width"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_gravity="center_vertical|end"
         android:paddingTop="@dimen/volume_row_padding_bottom"
-        android:layout_margin="12dp"
-        android:background="?android:attr/actionBarItemBackground"
-        android:translationZ="8dp" >
+        android:background="@drawable/rounded_full_bg_bottom"
+        android:translationZ="8dp"
+        android:clipChildren="false" >
 
         <LinearLayout
             android:id="@+id/volume_dialog_content"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
+            android:clipChildren="false"
+            android:clipToPadding="false"
             android:orientation="vertical" >
 
             <LinearLayout
@@ -42,7 +43,55 @@
                 android:orientation="vertical" >
                 <!-- volume rows added and removed here! :-) -->
             </LinearLayout>
-        </LinearLayout>
 
+            <!-- special row for ringer mode -->
+            <RelativeLayout
+                android:id="@+id/ringer_mode"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:background="@drawable/rounded_bg_full"
+                android:clipChildren="false"
+                android:clipToPadding="false"
+                android:layout_margin="10dp">
+
+                <com.android.keyguard.AlphaOptimizedImageButton
+                    android:id="@+id/ringer_icon"
+                    style="@style/VolumeButtons"
+                    android:background="?android:selectableItemBackgroundBorderless"
+                    android:layout_width="@dimen/volume_button_size"
+                    android:layout_height="@dimen/volume_button_size"
+                    android:layout_alignParentStart="true"
+                    android:layout_centerVertical="true"
+                    android:soundEffectsEnabled="false" />
+
+                <TextView
+                    android:id="@+id/ringer_title"
+                    android:text="@string/stream_ring"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:ellipsize="end"
+                    android:maxLines="1"
+                    android:layout_alignParentStart="true"
+                    android:layout_centerVertical="true"
+                    android:layout_toEndOf="@+id/ringer_icon"
+                    android:layout_marginStart="64dp"
+                    android:textColor="?android:attr/colorControlNormal"
+                    android:textAppearance="?android:attr/textAppearanceSmall"
+                    android:paddingStart="@dimen/volume_row_header_padding_start" />
+
+                <TextView
+                    android:id="@+id/ringer_status"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:ellipsize="end"
+                    android:layout_alignParentEnd="true"
+                    android:layout_centerVertical="true"
+                    android:layout_marginEnd="14dp"
+                    android:maxLines="1"
+                    android:textColor="?android:attr/colorControlNormal"
+                    android:textAppearance="?android:attr/textAppearanceSmall" />
+
+            </RelativeLayout>
+        </LinearLayout>
     </RelativeLayout>
-</com.android.systemui.HardwareUiLayout>
+</com.android.systemui.volume.VolumeUiLayout>

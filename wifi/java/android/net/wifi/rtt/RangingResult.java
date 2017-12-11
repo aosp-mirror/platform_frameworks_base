@@ -17,16 +17,15 @@
 package android.net.wifi.rtt;
 
 import android.annotation.IntDef;
+import android.annotation.NonNull;
+import android.net.MacAddress;
 import android.net.wifi.aware.PeerHandle;
 import android.os.Handler;
 import android.os.Parcel;
 import android.os.Parcelable;
 
-import libcore.util.HexEncoding;
-
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
-import java.util.Arrays;
 import java.util.List;
 import java.util.Objects;
 
@@ -62,7 +61,7 @@ public final class RangingResult implements Parcelable {
     public static final int STATUS_FAIL = 1;
 
     private final int mStatus;
-    private final byte[] mMac;
+    private final MacAddress mMac;
     private final PeerHandle mPeerHandle;
     private final int mDistanceMm;
     private final int mDistanceStdDevMm;
@@ -70,7 +69,7 @@ public final class RangingResult implements Parcelable {
     private final long mTimestamp;
 
     /** @hide */
-    public RangingResult(@RangeResultStatus int status, byte[] mac, int distanceMm,
+    public RangingResult(@RangeResultStatus int status, @NonNull MacAddress mac, int distanceMm,
             int distanceStdDevMm, int rssi, long timestamp) {
         mStatus = status;
         mMac = mac;
@@ -109,7 +108,7 @@ public final class RangingResult implements Parcelable {
      * Will return a {@code null} for results corresponding to requests issued using a {@code
      * PeerHandle}, i.e. using the {@link RangingRequest.Builder#addWifiAwarePeer(PeerHandle)} API.
      */
-    public byte[] getMacAddress() {
+    public MacAddress getMacAddress() {
         return mMac;
     }
 
@@ -193,7 +192,12 @@ public final class RangingResult implements Parcelable {
     @Override
     public void writeToParcel(Parcel dest, int flags) {
         dest.writeInt(mStatus);
-        dest.writeByteArray(mMac);
+        if (mMac == null) {
+            dest.writeBoolean(false);
+        } else {
+            dest.writeBoolean(true);
+            mMac.writeToParcel(dest, flags);
+        }
         if (mPeerHandle == null) {
             dest.writeBoolean(false);
         } else {
@@ -216,7 +220,11 @@ public final class RangingResult implements Parcelable {
         @Override
         public RangingResult createFromParcel(Parcel in) {
             int status = in.readInt();
-            byte[] mac = in.createByteArray();
+            boolean macAddressPresent = in.readBoolean();
+            MacAddress mac = null;
+            if (macAddressPresent) {
+                mac = MacAddress.CREATOR.createFromParcel(in);
+            }
             boolean peerHandlePresent = in.readBoolean();
             PeerHandle peerHandle = null;
             if (peerHandlePresent) {
@@ -240,11 +248,11 @@ public final class RangingResult implements Parcelable {
     @Override
     public String toString() {
         return new StringBuilder("RangingResult: [status=").append(mStatus).append(", mac=").append(
-                mMac == null ? "<null>" : new String(HexEncoding.encodeToString(mMac))).append(
-                ", peerHandle=").append(mPeerHandle == null ? "<null>" : mPeerHandle.peerId).append(
-                ", distanceMm=").append(mDistanceMm).append(", distanceStdDevMm=").append(
-                mDistanceStdDevMm).append(", rssi=").append(mRssi).append(", timestamp=").append(
-                mTimestamp).append("]").toString();
+                mMac).append(", peerHandle=").append(
+                mPeerHandle == null ? "<null>" : mPeerHandle.peerId).append(", distanceMm=").append(
+                mDistanceMm).append(", distanceStdDevMm=").append(mDistanceStdDevMm).append(
+                ", rssi=").append(mRssi).append(", timestamp=").append(mTimestamp).append(
+                "]").toString();
     }
 
     @Override
@@ -259,7 +267,7 @@ public final class RangingResult implements Parcelable {
 
         RangingResult lhs = (RangingResult) o;
 
-        return mStatus == lhs.mStatus && Arrays.equals(mMac, lhs.mMac) && Objects.equals(
+        return mStatus == lhs.mStatus && Objects.equals(mMac, lhs.mMac) && Objects.equals(
                 mPeerHandle, lhs.mPeerHandle) && mDistanceMm == lhs.mDistanceMm
                 && mDistanceStdDevMm == lhs.mDistanceStdDevMm && mRssi == lhs.mRssi
                 && mTimestamp == lhs.mTimestamp;

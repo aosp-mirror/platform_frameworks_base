@@ -59,10 +59,11 @@ public final class SaveRequest implements Parcelable {
     }
 
     /**
-     * Gets the latest client state extra returned from the service.
+     * Gets the latest client state bundle set by the service in a
+     * {@link FillResponse.Builder#setClientState(Bundle) fill response}.
      *
      * <p><b>Note:</b> Prior to Android {@link android.os.Build.VERSION_CODES#P}, only client state
-     * bundles set by {@link FillResponse.Builder#setClientState(Bundle)} where considered. On
+     * bundles set by {@link FillResponse.Builder#setClientState(Bundle)} were considered. On
      * Android {@link android.os.Build.VERSION_CODES#P} and higher, bundles set in the result of
      * an authenticated request through the
      * {@link android.view.autofill.AutofillManager#EXTRA_CLIENT_STATE} extra are

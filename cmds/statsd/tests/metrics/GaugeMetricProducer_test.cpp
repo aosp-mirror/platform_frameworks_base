@@ -33,6 +33,8 @@ namespace android {
 namespace os {
 namespace statsd {
 
+const ConfigKey kConfigKey(0, "test");
+
 TEST(GaugeMetricProducerTest, TestWithCondition) {
     int64_t bucketStartTimeNs = 10000000000;
     int64_t bucketSizeNs = 60 * 1000 * 1000 * 1000LL;
@@ -148,7 +150,7 @@ TEST(GaugeMetricProducerTest, TestAnomalyDetection) {
     alert.set_metric_name("1");
     alert.set_trigger_if_sum_gt(25);
     alert.set_number_of_buckets(2);
-    sp<AnomalyTracker> anomalyTracker = new AnomalyTracker(alert);
+    sp<AnomalyTracker> anomalyTracker = new AnomalyTracker(alert, kConfigKey);
     gaugeProducer.addAnomalyTracker(anomalyTracker);
 
     std::shared_ptr<LogEvent> event1 = std::make_shared<LogEvent>(1, bucketStartTimeNs + 1);

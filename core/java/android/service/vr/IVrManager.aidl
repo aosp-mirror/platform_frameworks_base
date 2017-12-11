@@ -17,6 +17,7 @@
 package android.service.vr;
 
 import android.app.Vr2dDisplayProperties;
+import android.content.ComponentName;
 import android.service.vr.IVrStateCallbacks;
 import android.service.vr.IPersistentVrStateCallbacks;
 
@@ -109,5 +110,13 @@ interface IVrManager {
      * @param standy True if the device is entering standby, false if it's exiting standby.
      */
     void setStandbyEnabled(boolean standby);
+
+    /**
+     * Start VR Input method for the given packageName in {@param componentName}.
+     * This method notifies InputMethodManagerService to use VR IME instead of
+     * regular phone IME.
+     */
+    void setVrInputMethod(in ComponentName componentName);
+
 }
 

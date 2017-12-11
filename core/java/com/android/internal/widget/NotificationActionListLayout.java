@@ -21,6 +21,7 @@ import android.content.Context;
 import android.content.res.Resources;
 import android.content.res.TypedArray;
 import android.graphics.drawable.Drawable;
+import android.graphics.drawable.RippleDrawable;
 import android.util.AttributeSet;
 import android.util.Pair;
 import android.view.Gravity;
@@ -203,6 +204,11 @@ public class NotificationActionListLayout extends LinearLayout {
     public void onViewAdded(View child) {
         super.onViewAdded(child);
         clearMeasureOrder();
+        // For some reason ripples + notification actions seem to be an unhappy combination
+        // b/69474443 so just turn them off for now.
+        if (child.getBackground() instanceof RippleDrawable) {
+            ((RippleDrawable)child.getBackground()).setForceSoftware(true);
+        }
     }
 
     @Override

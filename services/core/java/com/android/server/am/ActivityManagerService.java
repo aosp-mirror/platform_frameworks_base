@@ -8877,7 +8877,10 @@ public class ActivityManagerService extends IActivityManager.Stub
         final int callingAppId = UserHandle.getAppId(callingUid);
         if ((callingAppId == SYSTEM_UID) || (callingAppId == ROOT_UID)) {
             if ("com.android.settings.files".equals(grantUri.uri.getAuthority())) {
-                // Exempted authority for cropping user photos in Settings app
+                // Exempted authority for
+                // 1. cropping user photos and sharing a generated license html
+                //    file in Settings app
+                // 2. sharing a generated license html file in TvSettings app
             } else {
                 Slog.w(TAG, "For security reasons, the system cannot issue a Uri permission"
                         + " grant to " + grantUri + "; use startActivityAsCaller() instead");
@@ -10567,7 +10570,8 @@ public class ActivityManagerService extends IActivityManager.Stub
                 if (toTop) {
                     stack.moveToFront("setTaskWindowingModeSplitScreenPrimary", task);
                 }
-                stack.setWindowingMode(WINDOWING_MODE_SPLIT_SCREEN_PRIMARY, animate, showRecents);
+                stack.setWindowingMode(WINDOWING_MODE_SPLIT_SCREEN_PRIMARY, animate, showRecents,
+                        true /* sendNonResizeableNotification */);
                 return windowingMode != task.getWindowingMode();
             } finally {
                 Binder.restoreCallingIdentity(ident);
@@ -20676,7 +20680,7 @@ public class ActivityManagerService extends IActivityManager.Stub
                     if (DEBUG_CONFIGURATION) Slog.v(TAG_CONFIGURATION, "Sending to proc "
                             + app.processName + " new config " + configCopy);
                     mLifecycleManager.scheduleTransaction(app.thread,
-                            new ConfigurationChangeItem(configCopy));
+                            ConfigurationChangeItem.obtain(configCopy));
                 }
             } catch (Exception e) {
                 Slog.e(TAG_CONFIGURATION, "Failed to schedule configuration change", e);

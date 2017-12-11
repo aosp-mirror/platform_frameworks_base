@@ -16,9 +16,12 @@
 
 package android.app.servertransaction;
 
+import android.app.ClientTransactionHandler;
 import android.content.res.Configuration;
 import android.os.IBinder;
 import android.os.Parcel;
+
+import java.util.Objects;
 
 /**
  * App configuration change message.
@@ -26,21 +29,41 @@ import android.os.Parcel;
  */
 public class ConfigurationChangeItem extends ClientTransactionItem {
 
-    private final Configuration mConfiguration;
-
-    public ConfigurationChangeItem(Configuration configuration) {
-        mConfiguration = new Configuration(configuration);
-    }
+    private Configuration mConfiguration;
 
     @Override
-    public void prepare(android.app.ClientTransactionHandler client, IBinder token) {
+    public void preExecute(android.app.ClientTransactionHandler client, IBinder token) {
         client.updatePendingConfiguration(mConfiguration);
     }
 
     @Override
-    public void execute(android.app.ClientTransactionHandler client, IBinder token) {
+    public void execute(ClientTransactionHandler client, IBinder token,
+            PendingTransactionActions pendingActions) {
         client.handleConfigurationChanged(mConfiguration);
     }
+
+
+    // ObjectPoolItem implementation
+
+    private ConfigurationChangeItem() {}
+
+    /** Obtain an instance initialized with provided params. */
+    public static ConfigurationChangeItem obtain(Configuration config) {
+        ConfigurationChangeItem instance = ObjectPool.obtain(ConfigurationChangeItem.class);
+        if (instance == null) {
+            instance = new ConfigurationChangeItem();
+        }
+        instance.mConfiguration = config;
+
+        return instance;
+    }
+
+    @Override
+    public void recycle() {
+        mConfiguration = null;
+        ObjectPool.recycle(this);
+    }
+
 
     // Parcelable implementation
 
@@ -75,11 +98,16 @@ public class ConfigurationChangeItem extends ClientTransactionItem {
             return false;
         }
         final ConfigurationChangeItem other = (ConfigurationChangeItem) o;
-        return mConfiguration.equals(other.mConfiguration);
+        return Objects.equals(mConfiguration, other.mConfiguration);
     }
 
     @Override
     public int hashCode() {
         return mConfiguration.hashCode();
+    }
+
+    @Override
+    public String toString() {
+        return "ConfigurationChangeItem{config=" + mConfiguration + "}";
     }
 }

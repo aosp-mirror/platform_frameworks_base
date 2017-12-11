@@ -55,7 +55,7 @@ public @interface IntDef {
     String[] prefix() default "";
 
     /** Defines the allowed constants for this element */
-    long[] value() default {};
+    int[] value() default {};
 
     /** Defines whether the constants can be used as a flag, or just as an enum (the default) */
     boolean flag() default false;

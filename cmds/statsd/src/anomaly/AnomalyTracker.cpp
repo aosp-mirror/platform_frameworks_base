@@ -18,6 +18,7 @@
 #include "Log.h"
 
 #include "AnomalyTracker.h"
+#include "guardrail/StatsdStats.h"
 
 #include <android/os/IIncidentManager.h>
 #include <android/os/IncidentReportArgs.h>
@@ -31,8 +32,9 @@ namespace statsd {
 // TODO: Separate DurationAnomalyTracker as a separate subclass and let each MetricProducer
 //       decide and let which one it wants.
 // TODO: Get rid of bucketNumbers, and return to the original circular array method.
-AnomalyTracker::AnomalyTracker(const Alert& alert)
+AnomalyTracker::AnomalyTracker(const Alert& alert, const ConfigKey& configKey)
     : mAlert(alert),
+      mConfigKey(configKey),
       mNumOfPastBuckets(mAlert.number_of_buckets() - 1) {
     VLOG("AnomalyTracker() called");
     if (mAlert.number_of_buckets() <= 0) {
@@ -220,6 +222,8 @@ void AnomalyTracker::declareAnomaly(const uint64_t& timestampNs) {
     } else {
         ALOGW("An anomaly has occurred! (But informing incidentd not requested.)");
     }
+
+    StatsdStats::getInstance().noteAnomalyDeclared(mConfigKey, mAlert.name());
 }
 
 void AnomalyTracker::declareAnomalyIfAlarmExpired(const HashableDimensionKey& dimensionKey,

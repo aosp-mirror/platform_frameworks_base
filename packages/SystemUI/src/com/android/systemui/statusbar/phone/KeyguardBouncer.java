@@ -102,7 +102,7 @@ public class KeyguardBouncer {
             return;
         }
 
-        final int activeUserId = ActivityManager.getCurrentUser();
+        final int activeUserId = KeyguardUpdateMonitor.getCurrentUser();
         final boolean isSystemUser =
                 UserManager.isSplitSystemUser() && activeUserId == UserHandle.USER_SYSTEM;
         final boolean allowDismissKeyguard = !isSystemUser && activeUserId == keyguardUserId;

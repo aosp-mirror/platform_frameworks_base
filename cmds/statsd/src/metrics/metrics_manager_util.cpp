@@ -64,7 +64,7 @@ bool handleMetricWithLogTrackers(const string what, const int metricIndex,
 bool handleMetricWithConditions(
         const string condition, const int metricIndex,
         const unordered_map<string, int>& conditionTrackerMap,
-        const ::google::protobuf::RepeatedPtrField<::android::os::statsd::EventConditionLink>&
+        const ::google::protobuf::RepeatedPtrField<::android::os::statsd::MetricConditionLink>&
                 links,
         vector<sp<ConditionTracker>>& allConditionTrackers, int& conditionIndex,
         unordered_map<int, std::vector<int>>& conditionToMetricMap) {
@@ -232,7 +232,7 @@ bool initMetrics(const ConfigKey& key, const StatsdConfig& config,
             }
         } else {
             if (metric.links_size() > 0) {
-                ALOGW("metrics has a EventConditionLink but doesn't have a condition");
+                ALOGW("metrics has a MetricConditionLink but doesn't have a condition");
                 return false;
             }
         }
@@ -303,7 +303,7 @@ bool initMetrics(const ConfigKey& key, const StatsdConfig& config,
             }
         } else {
             if (metric.links_size() > 0) {
-                ALOGW("metrics has a EventConditionLink but doesn't have a condition");
+                ALOGW("metrics has a MetricConditionLink but doesn't have a condition");
                 return false;
             }
         }
@@ -340,7 +340,7 @@ bool initMetrics(const ConfigKey& key, const StatsdConfig& config,
             }
         } else {
             if (metric.links_size() > 0) {
-                ALOGW("metrics has a EventConditionLink but doesn't have a condition");
+                ALOGW("metrics has a MetricConditionLink but doesn't have a condition");
                 return false;
             }
         }
@@ -390,7 +390,7 @@ bool initMetrics(const ConfigKey& key, const StatsdConfig& config,
             }
         } else {
             if (metric.links_size() > 0) {
-                ALOGW("metrics has a EventConditionLink but doesn't have a condition");
+                ALOGW("metrics has a MetricConditionLink but doesn't have a condition");
                 return false;
             }
         }
@@ -439,7 +439,7 @@ bool initMetrics(const ConfigKey& key, const StatsdConfig& config,
             }
         } else {
             if (metric.links_size() > 0) {
-                ALOGW("metrics has a EventConditionLink but doesn't have a condition");
+                ALOGW("metrics has a MetricConditionLink but doesn't have a condition");
                 return false;
             }
         }

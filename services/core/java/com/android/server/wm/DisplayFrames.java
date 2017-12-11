@@ -21,11 +21,17 @@ import static android.view.Surface.ROTATION_270;
 import static android.view.Surface.ROTATION_90;
 import static com.android.server.wm.proto.DisplayFramesProto.STABLE_BOUNDS;
 
+import android.annotation.NonNull;
+import android.graphics.Point;
 import android.graphics.Rect;
 import android.util.proto.ProtoOutputStream;
+import android.view.DisplayCutout;
 import android.view.DisplayInfo;
 
+import com.android.internal.annotations.VisibleForTesting;
+
 import java.io.PrintWriter;
+import java.util.Arrays;
 
 /**
  * Container class for all the display frames that affect how we do window layout on a display.
@@ -94,6 +100,14 @@ public class DisplayFrames {
     /** During layout, the current screen borders along which input method windows are placed. */
     public final Rect mDock = new Rect();
 
+    /** Definition of the cutout */
+    @NonNull public DisplayCutout mDisplayCutout = DisplayCutout.NO_CUTOUT;
+
+    /**
+     * During layout, the frame that is display-cutout safe, i.e. that does not intersect with it.
+     */
+    public final Rect mDisplayCutoutSafe = new Rect();
+
     private final Rect mDisplayInfoOverscan = new Rect();
     private final Rect mRotatedDisplayInfoOverscan = new Rect();
     public int mDisplayWidth;
@@ -114,7 +128,7 @@ public class DisplayFrames {
                 info.overscanLeft, info.overscanTop, info.overscanRight, info.overscanBottom);
     }
 
-    public void onBeginLayout() {
+    public void onBeginLayout(boolean emulateDisplayCutout, int statusBarHeight) {
         switch (mRotation) {
             case ROTATION_90:
                 mRotatedDisplayInfoOverscan.left = mDisplayInfoOverscan.top;
@@ -152,11 +166,65 @@ public class DisplayFrames {
         mStable.set(mUnrestricted);
         mStableFullscreen.set(mUnrestricted);
         mCurrent.set(mUnrestricted);
-
+        mDisplayCutout = DisplayCutout.NO_CUTOUT;
+        mDisplayCutoutSafe.set(Integer.MIN_VALUE, Integer.MIN_VALUE,
+                Integer.MAX_VALUE, Integer.MAX_VALUE);
+        if (emulateDisplayCutout) {
+            setEmulatedDisplayCutout((int) (statusBarHeight * 0.8));
+        }
     }
 
     public int getInputMethodWindowVisibleHeight() {
         return mDock.bottom - mCurrent.bottom;
+    }
+
+    private void setEmulatedDisplayCutout(int height) {
+        final boolean swappedDimensions = mRotation == ROTATION_90 || mRotation == ROTATION_270;
+
+        final int screenWidth = swappedDimensions ? mDisplayHeight : mDisplayWidth;
+        final int screenHeight = swappedDimensions ? mDisplayWidth : mDisplayHeight;
+
+        final int widthTop = (int) (screenWidth * 0.3);
+        final int widthBottom = widthTop - height;
+
+        switch (mRotation) {
+            case ROTATION_90:
+                mDisplayCutout = DisplayCutout.fromBoundingPolygon(Arrays.asList(
+                        new Point(0, (screenWidth - widthTop) / 2),
+                        new Point(height, (screenWidth - widthBottom) / 2),
+                        new Point(height, (screenWidth + widthBottom) / 2),
+                        new Point(0, (screenWidth + widthTop) / 2)
+                )).calculateRelativeTo(mUnrestricted);
+                mDisplayCutoutSafe.left = height;
+                break;
+            case ROTATION_180:
+                mDisplayCutout = DisplayCutout.fromBoundingPolygon(Arrays.asList(
+                        new Point((screenWidth - widthTop) / 2, screenHeight),
+                        new Point((screenWidth - widthBottom) / 2, screenHeight - height),
+                        new Point((screenWidth + widthBottom) / 2, screenHeight - height),
+                        new Point((screenWidth + widthTop) / 2, screenHeight)
+                )).calculateRelativeTo(mUnrestricted);
+                mDisplayCutoutSafe.bottom = screenHeight - height;
+                break;
+            case ROTATION_270:
+                mDisplayCutout = DisplayCutout.fromBoundingPolygon(Arrays.asList(
+                        new Point(screenHeight, (screenWidth - widthTop) / 2),
+                        new Point(screenHeight - height, (screenWidth - widthBottom) / 2),
+                        new Point(screenHeight - height, (screenWidth + widthBottom) / 2),
+                        new Point(screenHeight, (screenWidth + widthTop) / 2)
+                )).calculateRelativeTo(mUnrestricted);
+                mDisplayCutoutSafe.right = screenHeight - height;
+                break;
+            default:
+                mDisplayCutout = DisplayCutout.fromBoundingPolygon(Arrays.asList(
+                        new Point((screenWidth - widthTop) / 2, 0),
+                        new Point((screenWidth - widthBottom) / 2, height),
+                        new Point((screenWidth + widthBottom) / 2, height),
+                        new Point((screenWidth + widthTop) / 2, 0)
+                )).calculateRelativeTo(mUnrestricted);
+                mDisplayCutoutSafe.top = height;
+                break;
+        }
     }
 
     public void writeToProto(ProtoOutputStream proto, long fieldId) {
@@ -182,6 +250,7 @@ public class DisplayFrames {
         dumpFrame(mUnrestricted, "mUnrestricted", myPrefix, pw);
         dumpFrame(mDisplayInfoOverscan, "mDisplayInfoOverscan", myPrefix, pw);
         dumpFrame(mRotatedDisplayInfoOverscan, "mRotatedDisplayInfoOverscan", myPrefix, pw);
+        pw.println(myPrefix + "mDisplayCutout=" + mDisplayCutout);
     }
 
     private void dumpFrame(Rect frame, String name, String prefix, PrintWriter pw) {

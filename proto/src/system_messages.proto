@@ -187,6 +187,12 @@ message SystemMessage {
     // to a Wi-Fi network
     NOTE_WIFI_WRONG_PASSWORD = 42;
 
+    // Inform the user that Wifi Wake will re-enable wifi when possible
+    NOTE_WIFI_WAKE_ONBOARD = 43;
+
+    // Inform the user that Wifi Wake has automatically re-enabled Wifi
+    NOTE_WIFI_WAKE_TURNED_BACK_ON = 44;
+
     // ADD_NEW_IDS_ABOVE_THIS_LINE
     // Legacy IDs with arbitrary values appear below
     // Legacy IDs existed as stable non-conflicting constants prior to the O release

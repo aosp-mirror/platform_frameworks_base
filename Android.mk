@@ -46,6 +46,7 @@ aidl_files := \
 	frameworks/base/telephony/java/android/telephony/NeighboringCellInfo.aidl \
 	frameworks/base/telephony/java/android/telephony/ModemActivityInfo.aidl \
 	frameworks/base/telephony/java/android/telephony/UiccAccessRule.aidl \
+	frameworks/base/telephony/java/android/telephony/data/DataCallResponse.aidl \
 	frameworks/base/telephony/java/android/telephony/data/DataProfile.aidl \
 	frameworks/base/telephony/java/android/telephony/euicc/DownloadableSubscription.aidl \
 	frameworks/base/telephony/java/android/telephony/euicc/EuiccInfo.aidl \
@@ -485,6 +486,10 @@ LOCAL_APIDIFF_NEWAPI := $(LOCAL_PATH)/../../$(basename $(INTERNAL_PLATFORM_API_F
 
 include $(BUILD_APIDIFF)
 
+# Hack to get diffs included in docs output
+out_zip := $(OUT_DOCS)/$(LOCAL_MODULE)-docs.zip
+$(out_zip): $(full_target)
+
 # ====  System API diff ===========================
 include $(CLEAR_VARS)
 
@@ -510,6 +515,10 @@ LOCAL_APIDIFF_OLDAPI := $(LOCAL_PATH)/../../$(SRC_SYSTEM_API_DIR)/$(last_release
 LOCAL_APIDIFF_NEWAPI := $(LOCAL_PATH)/../../$(basename $(INTERNAL_PLATFORM_SYSTEM_API_FILE))
 
 include $(BUILD_APIDIFF)
+
+# Hack to get diffs included in docs output
+out_zip := $(OUT_DOCS)/$(LOCAL_MODULE)-docs.zip
+$(out_zip): $(full_target)
 
 # ====  the api stubs and current.xml ===========================
 include $(CLEAR_VARS)

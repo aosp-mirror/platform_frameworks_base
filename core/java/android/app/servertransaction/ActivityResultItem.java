@@ -16,9 +16,10 @@
 
 package android.app.servertransaction;
 
-import static android.app.servertransaction.ActivityLifecycleItem.PAUSED;
+import static android.app.servertransaction.ActivityLifecycleItem.ON_PAUSE;
 import static android.os.Trace.TRACE_TAG_ACTIVITY_MANAGER;
 
+import android.app.ClientTransactionHandler;
 import android.app.ResultInfo;
 import android.os.IBinder;
 import android.os.Parcel;
@@ -26,6 +27,7 @@ import android.os.Parcelable;
 import android.os.Trace;
 
 import java.util.List;
+import java.util.Objects;
 
 /**
  * Activity result delivery callback.
@@ -33,22 +35,41 @@ import java.util.List;
  */
 public class ActivityResultItem extends ClientTransactionItem {
 
-    private final List<ResultInfo> mResultInfoList;
-
-    public ActivityResultItem(List<ResultInfo> resultInfos) {
-        mResultInfoList = resultInfos;
-    }
+    private List<ResultInfo> mResultInfoList;
 
     @Override
     public int getPreExecutionState() {
-        return PAUSED;
+        return ON_PAUSE;
     }
 
     @Override
-    public void execute(android.app.ClientTransactionHandler client, IBinder token) {
+    public void execute(ClientTransactionHandler client, IBinder token,
+            PendingTransactionActions pendingActions) {
         Trace.traceBegin(TRACE_TAG_ACTIVITY_MANAGER, "activityDeliverResult");
         client.handleSendResult(token, mResultInfoList);
         Trace.traceEnd(TRACE_TAG_ACTIVITY_MANAGER);
+    }
+
+
+    // ObjectPoolItem implementation
+
+    private ActivityResultItem() {}
+
+    /** Obtain an instance initialized with provided params. */
+    public static ActivityResultItem obtain(List<ResultInfo> resultInfoList) {
+        ActivityResultItem instance = ObjectPool.obtain(ActivityResultItem.class);
+        if (instance == null) {
+            instance = new ActivityResultItem();
+        }
+        instance.mResultInfoList = resultInfoList;
+
+        return instance;
+    }
+
+    @Override
+    public void recycle() {
+        mResultInfoList = null;
+        ObjectPool.recycle(this);
     }
 
 
@@ -85,11 +106,16 @@ public class ActivityResultItem extends ClientTransactionItem {
             return false;
         }
         final ActivityResultItem other = (ActivityResultItem) o;
-        return mResultInfoList.equals(other.mResultInfoList);
+        return Objects.equals(mResultInfoList, other.mResultInfoList);
     }
 
     @Override
     public int hashCode() {
         return mResultInfoList.hashCode();
+    }
+
+    @Override
+    public String toString() {
+        return "ActivityResultItem{resultInfoList=" + mResultInfoList + "}";
     }
 }

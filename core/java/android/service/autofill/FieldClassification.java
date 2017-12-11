@@ -26,6 +26,10 @@ import android.view.autofill.Helper;
 
 import com.android.internal.util.Preconditions;
 
+import com.google.android.collect.Lists;
+
+import java.util.List;
+
 /**
  * Gets the <a href="#FieldsClassification">fields classification</a> results for a given field.
  *
@@ -46,11 +50,15 @@ public final class FieldClassification implements Parcelable {
     }
 
     /**
-     * Gets the {@link Match} with the highest {@link Match#getScore() score} for the field.
+     * Gets the {@link Match matches} with the highest {@link Match#getScore() scores}.
+     *
+     * <p><b>Note:</b> There's no guarantee of how many matches will be returned. In fact,
+     * the Android System might return just the top match to minimize the impact of field
+     * classification in the device's health.
      */
     @NonNull
-    public Match getTopMatch() {
-        return mMatch;
+    public List<Match> getMatches() {
+        return Lists.newArrayList(mMatch);
     }
 
     @Override
@@ -101,10 +109,10 @@ public final class FieldClassification implements Parcelable {
     public static final class Match implements Parcelable {
 
         private final String mRemoteId;
-        private final int mScore;
+        private final float mScore;
 
         /** @hide */
-        public Match(String remoteId, int score) {
+        public Match(String remoteId, float score) {
             mRemoteId = Preconditions.checkNotNull(remoteId);
             mScore = score;
         }
@@ -123,8 +131,8 @@ public final class FieldClassification implements Parcelable {
          * <p>The score is based in a case-insensitive comparisson of all characters from both the
          * field value and the user data entry, and it ranges from {@code 0} to {@code 1000000}:
          * <ul>
-         *   <li>{@code 1000000} represents a full match ({@code 100.0000%}).
-         *   <li>{@code 0} represents a full mismatch ({@code 0.0000%}).
+         *   <li>{@code 1.0} represents a full match ({@code 100%}).
+         *   <li>{@code 0.0} represents a full mismatch ({@code 0%}).
          *   <li>Any other value is a partial match.
          * </ul>
          *
@@ -132,14 +140,14 @@ public final class FieldClassification implements Parcelable {
          * For example, if the user  data is {@code "abc"} and the field value us {@code " abc"},
          * the result could be:
          * <ul>
-         *   <li>{@code 1000000} if the algorithm trims the values.
-         *   <li>{@code 0} if the algorithm compares the values sequentially.
-         *   <li>{@code 750000} if the algorithm consideres that 3/4 (75%) of the characters match.
+         *   <li>{@code 1.0} if the algorithm trims the values.
+         *   <li>{@code 0.0} if the algorithm compares the values sequentially.
+         *   <li>{@code 0.75} if the algorithm consideres that 3/4 (75%) of the characters match.
          * </ul>
          *
          * <p>Currently, the autofill service cannot configure the algorithm.
          */
-        public int getScore() {
+        public float getScore() {
             return mScore;
         }
 
@@ -164,7 +172,7 @@ public final class FieldClassification implements Parcelable {
         @Override
         public void writeToParcel(Parcel parcel, int flags) {
             parcel.writeString(mRemoteId);
-            parcel.writeInt(mScore);
+            parcel.writeFloat(mScore);
         }
 
         @SuppressWarnings("hiding")
@@ -172,7 +180,7 @@ public final class FieldClassification implements Parcelable {
 
             @Override
             public Match createFromParcel(Parcel parcel) {
-                return new Match(parcel.readString(), parcel.readInt());
+                return new Match(parcel.readString(), parcel.readFloat());
             }
 
             @Override

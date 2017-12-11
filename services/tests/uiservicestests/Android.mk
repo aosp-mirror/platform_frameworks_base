@@ -25,7 +25,7 @@ LOCAL_STATIC_JAVA_LIBRARIES := \
     platform-test-annotations \
     testables
 
-LOCAL_JAVA_LIBRARIES := android.test.runner
+LOCAL_JAVA_LIBRARIES := android.test.runner android.test.base
 
 LOCAL_JACK_FLAGS := --multi-dex native
 LOCAL_DX_FLAGS := --multi-dex

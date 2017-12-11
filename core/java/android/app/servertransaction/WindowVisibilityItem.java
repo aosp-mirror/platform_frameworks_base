@@ -18,6 +18,7 @@ package android.app.servertransaction;
 
 import static android.os.Trace.TRACE_TAG_ACTIVITY_MANAGER;
 
+import android.app.ClientTransactionHandler;
 import android.os.IBinder;
 import android.os.Parcel;
 import android.os.Trace;
@@ -28,17 +29,36 @@ import android.os.Trace;
  */
 public class WindowVisibilityItem extends ClientTransactionItem {
 
-    private final boolean mShowWindow;
-
-    public WindowVisibilityItem(boolean showWindow) {
-        mShowWindow = showWindow;
-    }
+    private boolean mShowWindow;
 
     @Override
-    public void execute(android.app.ClientTransactionHandler client, IBinder token) {
+    public void execute(ClientTransactionHandler client, IBinder token,
+            PendingTransactionActions pendingActions) {
         Trace.traceBegin(TRACE_TAG_ACTIVITY_MANAGER, "activityShowWindow");
         client.handleWindowVisibility(token, mShowWindow);
         Trace.traceEnd(TRACE_TAG_ACTIVITY_MANAGER);
+    }
+
+
+    // ObjectPoolItem implementation
+
+    private WindowVisibilityItem() {}
+
+    /** Obtain an instance initialized with provided params. */
+    public static WindowVisibilityItem obtain(boolean showWindow) {
+        WindowVisibilityItem instance = ObjectPool.obtain(WindowVisibilityItem.class);
+        if (instance == null) {
+            instance = new WindowVisibilityItem();
+        }
+        instance.mShowWindow = showWindow;
+
+        return instance;
+    }
+
+    @Override
+    public void recycle() {
+        mShowWindow = false;
+        ObjectPool.recycle(this);
     }
 
 
@@ -81,5 +101,10 @@ public class WindowVisibilityItem extends ClientTransactionItem {
     @Override
     public int hashCode() {
         return 17 + 31 * (mShowWindow ? 1 : 0);
+    }
+
+    @Override
+    public String toString() {
+        return "WindowVisibilityItem{showWindow=" + mShowWindow + "}";
     }
 }

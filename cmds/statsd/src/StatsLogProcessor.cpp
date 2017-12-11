@@ -86,9 +86,7 @@ void StatsLogProcessor::OnLogEvent(const LogEvent& msg) {
     // pass the event to metrics managers.
     for (auto& pair : mMetricsManagers) {
         pair.second->onLogEvent(msg);
-        // TODO: THIS CHECK FAILS BECAUSE ONCE UIDMAP SIZE EXCEEDS LIMIT, DROPPING METRICS DATA
-        // DOESN'T HELP. FIX THIS.
-        // flushIfNecessary(msg.GetTimestampNs(), pair.first, pair.second);
+        flushIfNecessary(msg.GetTimestampNs(), pair.first, *(pair.second));
     }
 
     // Hard-coded logic to update the isolated uid's in the uid-map.
@@ -217,23 +215,32 @@ void StatsLogProcessor::OnConfigRemoved(const ConfigKey& key) {
     mLastBroadcastTimes.erase(key);
 }
 
-void StatsLogProcessor::flushIfNecessary(uint64_t timestampNs,
-                                         const ConfigKey& key,
-                                         const unique_ptr<MetricsManager>& metricsManager) {
+void StatsLogProcessor::flushIfNecessary(uint64_t timestampNs, const ConfigKey& key,
+                                         MetricsManager& metricsManager) {
     std::lock_guard<std::mutex> lock(mBroadcastTimesMutex);
 
-    size_t totalBytes = metricsManager->byteSize() + mUidMap->getBytesUsed();
-    // TODO: Find a way to test that the dropping and broadcasts are sent when memory is exceeded.
-    if (totalBytes > kMaxSerializedBytes) {  // Too late. We need to start clearing data.
+    auto lastCheckTime = mLastByteSizeTimes.find(key);
+    if (lastCheckTime != mLastByteSizeTimes.end()) {
+        if (timestampNs - lastCheckTime->second < StatsdStats::kMinByteSizeCheckPeriodNs) {
+            return;
+        }
+    }
+
+    // We suspect that the byteSize() computation is expensive, so we set a rate limit.
+    size_t totalBytes = metricsManager.byteSize();
+    mLastByteSizeTimes[key] = timestampNs;
+    if (totalBytes >
+        StatsdStats::kMaxMetricsBytesPerConfig) {  // Too late. We need to start clearing data.
         // We ignore the return value so we force each metric producer to clear its contents.
-        metricsManager->onDumpReport();
+        metricsManager.onDumpReport();
         StatsdStats::getInstance().noteDataDropped(key);
         VLOG("StatsD had to toss out metrics for %s", key.ToString().c_str());
-    } else if (totalBytes >
-               .9 * kMaxSerializedBytes) {  // Send broadcast so that receivers can pull data.
-        auto lastFlushNs = mLastBroadcastTimes.find(key);
-        if (lastFlushNs != mLastBroadcastTimes.end()) {
-            if (timestampNs - lastFlushNs->second < kMinBroadcastPeriod) {
+    } else if (totalBytes > .9 * StatsdStats::kMaxMetricsBytesPerConfig) {
+        // Send broadcast so that receivers can pull data.
+        auto lastBroadcastTime = mLastBroadcastTimes.find(key);
+        if (lastBroadcastTime != mLastBroadcastTimes.end()) {
+            if (timestampNs - lastBroadcastTime->second < StatsdStats::kMinBroadcastPeriodNs) {
+                VLOG("StatsD would've sent a broadcast but the rate limit stopped us.");
                 return;
             }
         }

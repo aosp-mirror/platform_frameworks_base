@@ -268,8 +268,13 @@ public class BackupHandler extends Handler {
 
             case MSG_RUN_CLEAR: {
                 ClearParams params = (ClearParams) msg.obj;
-                (new PerformClearTask(backupManagerService, params.transport,
-                        params.packageInfo)).run();
+                Runnable task =
+                        new PerformClearTask(
+                                backupManagerService,
+                                params.transportClient,
+                                params.packageInfo,
+                                params.listener);
+                task.run();
                 break;
             }
 

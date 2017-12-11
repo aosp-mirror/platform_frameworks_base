@@ -23,6 +23,7 @@ import android.os.ParcelFileDescriptor;
 import android.view.DragEvent;
 import android.view.KeyEvent;
 import android.view.MotionEvent;
+import android.view.DisplayCutout;
 
 import com.android.internal.os.IResultReceiver;
 import android.util.MergedConfiguration;
@@ -50,7 +51,8 @@ oneway interface IWindow {
     void resized(in Rect frame, in Rect overscanInsets, in Rect contentInsets,
             in Rect visibleInsets, in Rect stableInsets, in Rect outsets, boolean reportDraw,
             in MergedConfiguration newMergedConfiguration, in Rect backDropFrame,
-            boolean forceLayout, boolean alwaysConsumeNavBar, int displayId);
+            boolean forceLayout, boolean alwaysConsumeNavBar, int displayId,
+            in DisplayCutout.ParcelableWrapper displayCutout);
     void moved(int newX, int newY);
     void dispatchAppVisibility(boolean visible);
     void dispatchGetNewSurface();

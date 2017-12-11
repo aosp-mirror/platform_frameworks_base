@@ -62,7 +62,7 @@ bool initConditions(const ConfigKey& key, const StatsdConfig& config,
                     std::unordered_map<std::string, int>& conditionTrackerMap,
                     std::vector<sp<ConditionTracker>>& allConditionTrackers,
                     std::unordered_map<int, std::vector<int>>& trackerToConditionMap,
-                    std::unordered_map<int, std::vector<EventConditionLink>>& eventConditionLinks);
+                    std::unordered_map<int, std::vector<MetricConditionLink>>& eventConditionLinks);
 
 // Initialize MetricProducers.
 // input:
@@ -79,7 +79,7 @@ bool initMetrics(
         const ConfigKey& key, const StatsdConfig& config,
         const std::unordered_map<std::string, int>& logTrackerMap,
         const std::unordered_map<std::string, int>& conditionTrackerMap,
-        const std::unordered_map<int, std::vector<EventConditionLink>>& eventConditionLinks,
+        const std::unordered_map<int, std::vector<MetricConditionLink>>& eventConditionLinks,
         const vector<sp<LogMatchingTracker>>& allAtomMatchers,
         vector<sp<ConditionTracker>>& allConditionTrackers,
         std::vector<sp<MetricProducer>>& allMetricProducers,

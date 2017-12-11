@@ -5330,11 +5330,12 @@ public final class Settings {
         /**
          * Experimental autofill feature.
          *
-         * <p>TODO(b/67867469): remove once feature is finished
+         * <p>TODO(b/67867469): document (or remove) once feature is finished
          * @hide
          */
         @TestApi
-        public static final String AUTOFILL_FEATURE_FIELD_DETECTION = "autofill_field_detection";
+        public static final String AUTOFILL_FEATURE_FIELD_CLASSIFICATION =
+                "autofill_field_classification";
 
         /**
          * Experimental autofill feature.
@@ -9570,8 +9571,8 @@ public final class Settings {
          * The following keys are supported:
          *
          * <pre>
-         * screen_brightness_array         (string)
-         * dimming_scrim_array             (string)
+         * screen_brightness_array         (int[])
+         * dimming_scrim_array             (int[])
          * prox_screen_off_delay           (long)
          * prox_cooldown_trigger           (long)
          * prox_cooldown_period            (long)
@@ -10161,6 +10162,16 @@ public final class Settings {
          * @hide
          */
         public static final String POLICY_CONTROL = "policy_control";
+
+        /**
+         * {@link android.view.DisplayCutout DisplayCutout} emulation mode.
+         *
+         * @hide
+         */
+        public static final String EMULATE_DISPLAY_CUTOUT = "emulate_display_cutout";
+
+        /** @hide */ public static final int EMULATE_DISPLAY_CUTOUT_OFF = 0;
+        /** @hide */ public static final int EMULATE_DISPLAY_CUTOUT_ON = 1;
 
         /**
          * Defines global zen mode.  ZEN_MODE_OFF, ZEN_MODE_IMPORTANT_INTERRUPTIONS,
@@ -11123,7 +11134,7 @@ public final class Settings {
          *
          * <pre>
          * default               (int)
-         * options_array         (string)
+         * options_array         (int[])
          * </pre>
          *
          * All delays in integer minutes. Array order is respected.

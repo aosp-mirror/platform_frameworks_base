@@ -16,9 +16,12 @@
 
 package android.app.servertransaction;
 
+import android.app.ClientTransactionHandler;
 import android.content.res.Configuration;
 import android.os.IBinder;
 import android.os.Parcel;
+
+import java.util.Objects;
 
 /**
  * Picture in picture mode change message.
@@ -28,17 +31,37 @@ import android.os.Parcel;
 // communicate multi-window mode change with WindowConfiguration.
 public class PipModeChangeItem extends ClientTransactionItem {
 
-    private final boolean mIsInPipMode;
-    private final Configuration mOverrideConfig;
+    private boolean mIsInPipMode;
+    private Configuration mOverrideConfig;
 
-    public PipModeChangeItem(boolean isInPipMode, Configuration overrideConfig) {
-        mIsInPipMode = isInPipMode;
-        mOverrideConfig = overrideConfig;
+    @Override
+    public void execute(ClientTransactionHandler client, IBinder token,
+            PendingTransactionActions pendingActions) {
+        client.handlePictureInPictureModeChanged(token, mIsInPipMode, mOverrideConfig);
+    }
+
+
+    // ObjectPoolItem implementation
+
+    private PipModeChangeItem() {}
+
+    /** Obtain an instance initialized with provided params. */
+    public static PipModeChangeItem obtain(boolean isInPipMode, Configuration overrideConfig) {
+        PipModeChangeItem instance = ObjectPool.obtain(PipModeChangeItem.class);
+        if (instance == null) {
+            instance = new PipModeChangeItem();
+        }
+        instance.mIsInPipMode = isInPipMode;
+        instance.mOverrideConfig = overrideConfig;
+
+        return instance;
     }
 
     @Override
-    public void execute(android.app.ClientTransactionHandler client, IBinder token) {
-        client.handlePictureInPictureModeChanged(token, mIsInPipMode, mOverrideConfig);
+    public void recycle() {
+        mIsInPipMode = false;
+        mOverrideConfig = null;
+        ObjectPool.recycle(this);
     }
 
 
@@ -76,7 +99,8 @@ public class PipModeChangeItem extends ClientTransactionItem {
             return false;
         }
         final PipModeChangeItem other = (PipModeChangeItem) o;
-        return mIsInPipMode == other.mIsInPipMode && mOverrideConfig.equals(other.mOverrideConfig);
+        return mIsInPipMode == other.mIsInPipMode
+                && Objects.equals(mOverrideConfig, other.mOverrideConfig);
     }
 
     @Override
@@ -85,5 +109,11 @@ public class PipModeChangeItem extends ClientTransactionItem {
         result = 31 * result + (mIsInPipMode ? 1 : 0);
         result = 31 * result + mOverrideConfig.hashCode();
         return result;
+    }
+
+    @Override
+    public String toString() {
+        return "PipModeChangeItem{isInPipMode=" + mIsInPipMode
+                + ",overrideConfig=" + mOverrideConfig + "}";
     }
 }

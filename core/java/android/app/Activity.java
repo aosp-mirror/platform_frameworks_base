@@ -7070,7 +7070,13 @@ public class Activity extends ContextThemeWrapper
         mActivityTransitionState.enterReady(this);
     }
 
-    final void performRestart() {
+    /**
+     * Restart the activity.
+     * @param start Indicates whether the activity should also be started after restart.
+     *              The option to not start immediately is needed in case a transaction with
+     *              multiple lifecycle transitions is in progress.
+     */
+    final void performRestart(boolean start) {
         mCanEnterPictureInPicture = true;
         mFragments.noteStateNotSaved();
 
@@ -7108,12 +7114,14 @@ public class Activity extends ContextThemeWrapper
                     "Activity " + mComponent.toShortString() +
                     " did not call through to super.onRestart()");
             }
-            performStart();
+            if (start) {
+                performStart();
+            }
         }
     }
 
     final void performResume() {
-        performRestart();
+        performRestart(true /* start */);
 
         mFragments.execPendingActions();
 

@@ -44,7 +44,7 @@ public class WindowContainerControllerTests extends WindowTestsBase {
     @Test
     public void testCreation() throws Exception {
         final WindowContainerController controller = new WindowContainerController(null, sWm);
-        final WindowContainer container = new WindowContainer();
+        final WindowContainer container = new WindowContainer(sWm);
 
         container.setController(controller);
         assertEquals(controller, container.getController());
@@ -54,7 +54,7 @@ public class WindowContainerControllerTests extends WindowTestsBase {
     @Test
     public void testSetContainer() throws Exception {
         final WindowContainerController controller = new WindowContainerController(null, sWm);
-        final WindowContainer container = new WindowContainer();
+        final WindowContainer container = new WindowContainer(sWm);
 
         controller.setContainer(container);
         assertEquals(controller.mContainer, container);
@@ -62,7 +62,7 @@ public class WindowContainerControllerTests extends WindowTestsBase {
         // Assert we can't change the container to another one once set
         boolean gotException = false;
         try {
-            controller.setContainer(new WindowContainer());
+            controller.setContainer(new WindowContainer(sWm));
         } catch (IllegalArgumentException e) {
             gotException = true;
         }
@@ -76,7 +76,7 @@ public class WindowContainerControllerTests extends WindowTestsBase {
     @Test
     public void testRemoveContainer() throws Exception {
         final WindowContainerController controller = new WindowContainerController(null, sWm);
-        final WindowContainer container = new WindowContainer();
+        final WindowContainer container = new WindowContainer(sWm);
 
         controller.setContainer(container);
         assertEquals(controller.mContainer, container);
@@ -88,7 +88,7 @@ public class WindowContainerControllerTests extends WindowTestsBase {
     @Test
     public void testOnOverrideConfigurationChanged() throws Exception {
         final WindowContainerController controller = new WindowContainerController(null, sWm);
-        final WindowContainer container = new WindowContainer();
+        final WindowContainer container = new WindowContainer(sWm);
 
         controller.setContainer(container);
         assertEquals(controller.mContainer, container);

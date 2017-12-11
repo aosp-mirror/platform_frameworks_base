@@ -34,7 +34,7 @@ import static org.junit.Assert.assertTrue;
  * Test class for {@link StackWindowController}.
  *
  * Build/Install/Run:
- *  bit FrameworksServicesTests:com.android.server.wm.StackWindowControllerTests
+ *  atest FrameworksServicesTests:StackWindowControllerTests
  */
 @SmallTest
 @Presubmit
@@ -61,7 +61,6 @@ public class StackWindowControllerTests extends WindowTestsBase {
     }
 
     @Test
-    @Ignore("b/65379195")
     public void testRemoveContainer_deferRemoval() throws Exception {
         final StackWindowController stackController =
                 createStackControllerOnDisplay(mDisplayContent);

@@ -18,13 +18,12 @@ package com.android.statsd.loadtest;
 import android.content.Context;
 import android.content.res.Resources;
 import android.util.Log;
-import android.util.StatsLog;
 
 import com.android.internal.os.StatsdConfigProto.Bucket;
 import com.android.internal.os.StatsdConfigProto.Predicate;
 import com.android.internal.os.StatsdConfigProto.CountMetric;
 import com.android.internal.os.StatsdConfigProto.DurationMetric;
-import com.android.internal.os.StatsdConfigProto.EventConditionLink;
+import com.android.internal.os.StatsdConfigProto.MetricConditionLink;
 import com.android.internal.os.StatsdConfigProto.EventMetric;
 import com.android.internal.os.StatsdConfigProto.GaugeMetric;
 import com.android.internal.os.StatsdConfigProto.ValueMetric;
@@ -45,7 +44,7 @@ import java.util.List;
 public class ConfigFactory {
     public static final String CONFIG_NAME = "LOADTEST";
 
-    private static final String TAG = "ConfigFactory";
+    private static final String TAG = "loadtest.ConfigFactory";
 
     private final StatsdConfig mTemplate;
 
@@ -130,13 +129,13 @@ public class ConfigFactory {
     }
 
     /**
-     * Creates {@link EventConditionLink}s that are identical to the one passed to this method,
+     * Creates {@link MetricConditionLink}s that are identical to the one passed to this method,
      * except that the names are appended with the provided suffix.
      */
-    private List<EventConditionLink> getLinks(
-        List<EventConditionLink> links, int suffix) {
-        List<EventConditionLink> newLinks = new ArrayList();
-        for (EventConditionLink link : links) {
+    private List<MetricConditionLink> getLinks(
+        List<MetricConditionLink> links, int suffix) {
+        List<MetricConditionLink> newLinks = new ArrayList();
+        for (MetricConditionLink link : links) {
             newLinks.add(link.toBuilder()
                 .setCondition(link.getCondition() + suffix)
                 .build());
@@ -156,7 +155,7 @@ public class ConfigFactory {
             metric.setCondition(template.getCondition() + suffix);
         }
         if (template.getLinksCount() > 0) {
-            List<EventConditionLink> links = getLinks(template.getLinksList(), suffix);
+            List<MetricConditionLink> links = getLinks(template.getLinksList(), suffix);
             metric.clearLinks();
             metric.addAllLinks(links);
         }
@@ -182,7 +181,7 @@ public class ConfigFactory {
             metric.setCondition(template.getCondition() + suffix);
         }
         if (template.getLinksCount() > 0) {
-            List<EventConditionLink> links = getLinks(template.getLinksList(), suffix);
+            List<MetricConditionLink> links = getLinks(template.getLinksList(), suffix);
             metric.clearLinks();
             metric.addAllLinks(links);
         }
@@ -203,7 +202,7 @@ public class ConfigFactory {
             metric.setCondition(template.getCondition() + suffix);
         }
         if (template.getLinksCount() > 0) {
-            List<EventConditionLink> links = getLinks(template.getLinksList(), suffix);
+            List<MetricConditionLink> links = getLinks(template.getLinksList(), suffix);
             metric.clearLinks();
             metric.addAllLinks(links);
         }
@@ -224,7 +223,7 @@ public class ConfigFactory {
             metric.setCondition(template.getCondition() + suffix);
         }
         if (template.getLinksCount() > 0) {
-            List<EventConditionLink> links = getLinks(template.getLinksList(), suffix);
+            List<MetricConditionLink> links = getLinks(template.getLinksList(), suffix);
             metric.clearLinks();
             metric.addAllLinks(links);
         }
@@ -245,7 +244,7 @@ public class ConfigFactory {
             metric.setCondition(template.getCondition() + suffix);
         }
         if (template.getLinksCount() > 0) {
-            List<EventConditionLink> links = getLinks(template.getLinksList(), suffix);
+            List<MetricConditionLink> links = getLinks(template.getLinksList(), suffix);
             metric.clearLinks();
             metric.addAllLinks(links);
         }

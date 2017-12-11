@@ -42,8 +42,15 @@ public:
         mBounds.set(left, top, right, bottom);
         mRadius = radius;
 
+
+        // Reuse memory if previous outline was the same shape (rect or round rect).
+        if ( mPath.countVerbs() > 10) {
+            mPath.reset();
+        } else {
+            mPath.rewind();
+        }
+
         // update mPath to reflect new outline
-        mPath.reset();
         if (MathUtils::isPositive(radius)) {
             mPath.addRoundRect(SkRect::MakeLTRB(left, top, right, bottom), radius, radius);
         } else {

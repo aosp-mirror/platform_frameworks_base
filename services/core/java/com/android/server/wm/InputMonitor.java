@@ -390,12 +390,13 @@ final class InputMonitor implements InputManagerService.WindowManagerCallbacks {
             }
         }
 
-        final boolean inPositioning = (mService.mTaskPositioner != null);
+        final boolean inPositioning = mService.mTaskPositioningController.isPositioningLocked();
         if (inPositioning) {
             if (DEBUG_TASK_POSITIONING) {
                 Log.d(TAG_WM, "Inserting window handle for repositioning");
             }
-            final InputWindowHandle dragWindowHandle = mService.mTaskPositioner.mDragWindowHandle;
+            final InputWindowHandle dragWindowHandle =
+                    mService.mTaskPositioningController.getDragWindowHandleLocked();
             if (dragWindowHandle != null) {
                 addInputWindowHandle(dragWindowHandle);
             } else {

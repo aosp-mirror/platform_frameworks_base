@@ -37,7 +37,7 @@ ConditionState evaluateCombinationCondition(const std::vector<int>& children,
                                             const std::vector<ConditionState>& conditionCache);
 
 HashableDimensionKey getDimensionKeyForCondition(const LogEvent& event,
-                                                 const EventConditionLink& link);
+                                                 const MetricConditionLink& link);
 }  // namespace statsd
 }  // namespace os
 }  // namespace android

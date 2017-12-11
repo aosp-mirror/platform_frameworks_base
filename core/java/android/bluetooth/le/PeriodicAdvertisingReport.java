@@ -71,7 +71,7 @@ public final class PeriodicAdvertisingReport implements Parcelable {
     @Override
     public void writeToParcel(Parcel dest, int flags) {
         dest.writeInt(mSyncHandle);
-        dest.writeLong(mTxPower);
+        dest.writeInt(mTxPower);
         dest.writeInt(mRssi);
         dest.writeInt(mDataStatus);
         if (mData != null) {

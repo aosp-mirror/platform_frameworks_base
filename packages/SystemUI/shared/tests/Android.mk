@@ -38,7 +38,6 @@ LOCAL_STATIC_JAVA_LIBRARIES := \
     mockito-target-minus-junit4 \
     SystemUI-proto \
     SystemUI-tags \
-    legacy-android-test \
     testables \
     truth-prebuilt \
 

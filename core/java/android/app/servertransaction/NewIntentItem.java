@@ -16,9 +16,7 @@
 
 package android.app.servertransaction;
 
-import static android.app.servertransaction.ActivityLifecycleItem.PAUSED;
-import static android.app.servertransaction.ActivityLifecycleItem.RESUMED;
-
+import android.app.ClientTransactionHandler;
 import android.os.IBinder;
 import android.os.Parcel;
 import android.os.Parcelable;
@@ -27,6 +25,7 @@ import android.os.Trace;
 import com.android.internal.content.ReferrerIntent;
 
 import java.util.List;
+import java.util.Objects;
 
 /**
  * New intent message.
@@ -34,29 +33,50 @@ import java.util.List;
  */
 public class NewIntentItem extends ClientTransactionItem {
 
-    private final List<ReferrerIntent> mIntents;
-    private final boolean mPause;
+    private List<ReferrerIntent> mIntents;
+    private boolean mPause;
 
-    public NewIntentItem(List<ReferrerIntent> intents, boolean pause) {
-        mIntents = intents;
-        mPause = pause;
-    }
-
-    @Override
+    // TODO(lifecycler): Switch new intent handling to this scheme.
+    /*@Override
     public int getPreExecutionState() {
-        return PAUSED;
+        return ON_PAUSE;
     }
 
     @Override
     public int getPostExecutionState() {
-        return RESUMED;
-    }
+        return ON_RESUME;
+    }*/
 
     @Override
-    public void execute(android.app.ClientTransactionHandler client, IBinder token) {
+    public void execute(ClientTransactionHandler client, IBinder token,
+            PendingTransactionActions pendingActions) {
         Trace.traceBegin(Trace.TRACE_TAG_ACTIVITY_MANAGER, "activityNewIntent");
         client.handleNewIntent(token, mIntents, mPause);
         Trace.traceEnd(Trace.TRACE_TAG_ACTIVITY_MANAGER);
+    }
+
+
+    // ObjectPoolItem implementation
+
+    private NewIntentItem() {}
+
+    /** Obtain an instance initialized with provided params. */
+    public static NewIntentItem obtain(List<ReferrerIntent> intents, boolean pause) {
+        NewIntentItem instance = ObjectPool.obtain(NewIntentItem.class);
+        if (instance == null) {
+            instance = new NewIntentItem();
+        }
+        instance.mIntents = intents;
+        instance.mPause = pause;
+
+        return instance;
+    }
+
+    @Override
+    public void recycle() {
+        mIntents = null;
+        mPause = false;
+        ObjectPool.recycle(this);
     }
 
 
@@ -95,7 +115,7 @@ public class NewIntentItem extends ClientTransactionItem {
             return false;
         }
         final NewIntentItem other = (NewIntentItem) o;
-        return mPause == other.mPause && mIntents.equals(other.mIntents);
+        return mPause == other.mPause && Objects.equals(mIntents, other.mIntents);
     }
 
     @Override
@@ -104,5 +124,10 @@ public class NewIntentItem extends ClientTransactionItem {
         result = 31 * result + (mPause ? 1 : 0);
         result = 31 * result + mIntents.hashCode();
         return result;
+    }
+
+    @Override
+    public String toString() {
+        return "NewIntentItem{pause=" + mPause + ",intents=" + mIntents + "}";
     }
 }

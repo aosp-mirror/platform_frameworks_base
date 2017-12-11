@@ -21,13 +21,13 @@ import java.text.ParseException;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-public class BatteryStatsParser {
+public class BatteryStatsParser implements PerfParser {
 
     private static final Pattern LINE_PATTERN =
         Pattern.compile("\\s*\\+*(\\S*)\\s\\(\\d+\\)\\s(\\d\\d\\d)\\s.*");
     private static final Pattern TIME_PATTERN =
         Pattern.compile("(\\d+)?(h)?(\\d+)?(m)?(\\d+)?(s)?(\\d+)?(ms)?");
-    private static final String TAG = "BatteryStatsParser";
+    private static final String TAG = "loadtest.BatteryStatsParser";
 
     private boolean mHistoryStarted;
     private boolean mHistoryEnded;
@@ -35,6 +35,7 @@ public class BatteryStatsParser {
     public BatteryStatsParser() {
     }
 
+    @Override
     @Nullable
     public String parseLine(String line) {
         if (mHistoryEnded) {

@@ -20,18 +20,19 @@ LOCAL_CERTIFICATE := platform
 
 LOCAL_SRC_FILES := $(call all-java-files-under, src)
 
-LOCAL_JAVA_LIBRARIES := android.test.runner telephony-common
+LOCAL_JAVA_LIBRARIES := android.test.runner telephony-common android.test.base
 
 LOCAL_JACK_FLAGS := --multi-dex native
 
 LOCAL_PACKAGE_NAME := SettingsLibTests
 LOCAL_COMPATIBILITY_SUITE := device-tests
 
+LOCAL_USE_AAPT2 := true
+
 LOCAL_STATIC_JAVA_LIBRARIES := \
     android-support-test \
     espresso-core \
     mockito-target-minus-junit4 \
-    legacy-android-test \
     truth-prebuilt
 
 # Code coverage puts us over the dex limit, so enable multi-dex for coverage-enabled builds

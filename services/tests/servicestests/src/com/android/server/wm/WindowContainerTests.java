@@ -193,7 +193,7 @@ public class WindowContainerTests extends WindowTestsBase {
 
     @Test
     public void testRemoveImmediately_WithController() throws Exception {
-        final WindowContainer container = new WindowContainer();
+        final WindowContainer container = new WindowContainer(sWm);
         final WindowContainerController controller = new WindowContainerController(null, sWm);
 
         container.setController(controller);
@@ -208,7 +208,7 @@ public class WindowContainerTests extends WindowTestsBase {
     @Test
     public void testSetController() throws Exception {
         final WindowContainerController controller = new WindowContainerController(null, sWm);
-        final WindowContainer container = new WindowContainer();
+        final WindowContainer container = new WindowContainer(sWm);
 
         container.setController(controller);
         assertEquals(controller, container.getController());
@@ -587,6 +587,7 @@ public class WindowContainerTests extends WindowTestsBase {
 
         TestWindowContainer(int layer, boolean isAnimating, boolean isVisible,
             Integer orientation) {
+            super(sWm);
             mLayer = layer;
             mIsAnimating = isAnimating;
             mIsVisible = isVisible;

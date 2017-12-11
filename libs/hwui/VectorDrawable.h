@@ -124,6 +124,7 @@ public:
     virtual void onPropertyChanged(Properties* properties) = 0;
     virtual ~Node() {}
     virtual void syncProperties() = 0;
+    virtual void setAntiAlias(bool aa) = 0;
 
 protected:
     std::string mName;
@@ -354,6 +355,7 @@ public:
             }
         }
     }
+    virtual void setAntiAlias(bool aa) { mAntiAlias = aa; }
 
 protected:
     const SkPath& getUpdatedPath(bool useStagingData, SkPath* tempStagingPath) override;
@@ -365,6 +367,8 @@ private:
 
     // Intermediate data for drawing, render thread only
     SkPath mTrimmedSkPath;
+    // Default to use AntiAlias
+    bool mAntiAlias = true;
 };
 
 class ANDROID_API ClipPath : public Path {
@@ -373,6 +377,7 @@ public:
     ClipPath(const char* path, size_t strLength) : Path(path, strLength) {}
     ClipPath() : Path() {}
     void draw(SkCanvas* outCanvas, bool useStagingData) override;
+    virtual void setAntiAlias(bool aa) {}
 };
 
 class ANDROID_API Group : public Node {
@@ -473,6 +478,12 @@ public:
             if (mPropertyChangedListener) {
                 mPropertyChangedListener->onPropertyChanged();
             }
+        }
+    }
+
+    virtual void setAntiAlias(bool aa) {
+        for (auto& child : mChildren) {
+            child->setAntiAlias(aa);
         }
     }
 
@@ -640,6 +651,8 @@ public:
      * This should always be called from RT and it works with Skia pipeline only.
      */
     void updateCache(sp<skiapipeline::VectorDrawableAtlas>& atlas, GrContext* context);
+
+    void setAntiAlias(bool aa) { mRootNode->setAntiAlias(aa); }
 
 private:
     class Cache {

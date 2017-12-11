@@ -1,0 +1,4 @@
+java_library_static {
+    name: "services.net",
+    srcs: ["java/**/*.java"],
+}

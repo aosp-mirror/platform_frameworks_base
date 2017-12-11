@@ -79,7 +79,6 @@ import android.app.admin.DeviceAdminInfo;
 import android.app.admin.DeviceAdminReceiver;
 import android.app.admin.DevicePolicyManager;
 import android.app.admin.DevicePolicyManagerInternal;
-import android.app.admin.IDevicePolicyManager;
 import android.app.admin.NetworkEvent;
 import android.app.admin.PasswordMetrics;
 import android.app.admin.SecurityLog;
@@ -151,6 +150,9 @@ import android.security.IKeyChainAliasCallback;
 import android.security.IKeyChainService;
 import android.security.KeyChain;
 import android.security.KeyChain.KeyChainConnection;
+import android.security.keystore.KeyGenParameterSpec;
+import android.security.keystore.ParcelableKeyGenParameterSpec;
+import android.security.KeyStore;
 import android.service.persistentdata.PersistentDataBlockManager;
 import android.telephony.TelephonyManager;
 import android.text.TextUtils;
@@ -737,7 +739,7 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
         private static final String TAG_ORGANIZATION_NAME = "organization-name";
         private static final String ATTR_LAST_NETWORK_LOGGING_NOTIFICATION = "last-notification";
         private static final String ATTR_NUM_NETWORK_LOGGING_NOTIFICATIONS = "num-notifications";
-        private static final String TAG_IS_LOGOUT_BUTTON_ENABLED = "is_logout_button_enabled";
+        private static final String TAG_IS_LOGOUT_ENABLED = "is_logout_enabled";
 
         final DeviceAdminInfo info;
 
@@ -787,7 +789,7 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
         boolean requireAutoTime = false; // Can only be set by a device owner.
         boolean forceEphemeralUsers = false; // Can only be set by a device owner.
         boolean isNetworkLoggingEnabled = false; // Can only be set by a device owner.
-        boolean isLogoutButtonEnabled = false; // Can only be set by a device owner.
+        boolean isLogoutEnabled = false; // Can only be set by a device owner.
 
         // one notification after enabling + one more after reboots
         static final int DEF_MAXIMUM_NETWORK_LOGGING_NOTIFICATIONS_SHOWN = 2;
@@ -1105,10 +1107,10 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
                 out.text(organizationName);
                 out.endTag(null, TAG_ORGANIZATION_NAME);
             }
-            if (isLogoutButtonEnabled) {
-                out.startTag(null, TAG_IS_LOGOUT_BUTTON_ENABLED);
-                out.attribute(null, ATTR_VALUE, Boolean.toString(isLogoutButtonEnabled));
-                out.endTag(null, TAG_IS_LOGOUT_BUTTON_ENABLED);
+            if (isLogoutEnabled) {
+                out.startTag(null, TAG_IS_LOGOUT_ENABLED);
+                out.attribute(null, ATTR_VALUE, Boolean.toString(isLogoutEnabled));
+                out.endTag(null, TAG_IS_LOGOUT_ENABLED);
             }
         }
 
@@ -1283,8 +1285,8 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
                     } else {
                         Log.w(LOG_TAG, "Missing text when loading organization name");
                     }
-                } else if (TAG_IS_LOGOUT_BUTTON_ENABLED.equals(tag)) {
-                    isLogoutButtonEnabled = Boolean.parseBoolean(
+                } else if (TAG_IS_LOGOUT_ENABLED.equals(tag)) {
+                    isLogoutEnabled = Boolean.parseBoolean(
                             parser.getAttributeValue(null, ATTR_VALUE));
                 } else {
                     Slog.w(LOG_TAG, "Unknown admin tag: " + tag);
@@ -5017,6 +5019,54 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
             Thread.currentThread().interrupt();
         } finally {
             Binder.restoreCallingIdentity(id);
+        }
+        return false;
+    }
+
+    @Override
+    public boolean generateKeyPair(ComponentName who, String callerPackage, String algorithm,
+            ParcelableKeyGenParameterSpec parcelableKeySpec) {
+        enforceCanManageScope(who, callerPackage, DeviceAdminInfo.USES_POLICY_PROFILE_OWNER,
+                DELEGATION_CERT_INSTALL);
+        final KeyGenParameterSpec keySpec = parcelableKeySpec.getSpec();
+        if (TextUtils.isEmpty(keySpec.getKeystoreAlias())) {
+            throw new IllegalArgumentException("Empty alias provided.");
+        }
+        // As the caller will be granted access to the key, ensure no UID was specified, as
+        // it will not have the desired effect.
+        if (keySpec.getUid() != KeyStore.UID_SELF) {
+            Log.e(LOG_TAG, "Only the caller can be granted access to the generated keypair.");
+            return false;
+        }
+        final int callingUid = mInjector.binderGetCallingUid();
+
+        final UserHandle userHandle = mInjector.binderGetCallingUserHandle();
+        final long id = mInjector.binderClearCallingIdentity();
+        try {
+            try (KeyChainConnection keyChainConnection =
+                    KeyChain.bindAsUser(mContext, userHandle)) {
+                IKeyChainService keyChain = keyChainConnection.getService();
+                final boolean generationResult = keyChain.generateKeyPair(algorithm, parcelableKeySpec);
+                if (!generationResult) {
+                    Log.e(LOG_TAG, "KeyChain failed to generate a keypair.");
+                    return false;
+                }
+
+                // Set a grant for the caller here so that when the client calls
+                // requestPrivateKey, it will be able to get the key from Keystore.
+                // Note the use of the calling  UID, since the request for the private
+                // key will come from the client's process, so the grant has to be for
+                // that UID.
+                keyChain.setGrant(callingUid, keySpec.getKeystoreAlias(), true);
+                return true;
+            }
+        } catch (RemoteException e) {
+            Log.e(LOG_TAG, "KeyChain error while generating a keypair", e);
+        } catch (InterruptedException e) {
+            Log.w(LOG_TAG, "Interrupted while generating keypair", e);
+            Thread.currentThread().interrupt();
+        } finally {
+            mInjector.binderRestoreCallingIdentity(id);
         }
         return false;
     }
@@ -11530,35 +11580,35 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
     }
 
     @Override
-    public synchronized void setLogoutButtonEnabled(ComponentName admin, boolean enabled) {
+    public synchronized void setLogoutEnabled(ComponentName admin, boolean enabled) {
         if (!mHasFeature) {
             return;
         }
         Preconditions.checkNotNull(admin);
         getActiveAdminForCallerLocked(admin, DeviceAdminInfo.USES_POLICY_DEVICE_OWNER);
 
-        if (enabled == isLogoutButtonEnabledInternalLocked()) {
+        if (enabled == isLogoutEnabledInternalLocked()) {
             // already in the requested state
             return;
         }
         ActiveAdmin deviceOwner = getDeviceOwnerAdminLocked();
-        deviceOwner.isLogoutButtonEnabled = enabled;
+        deviceOwner.isLogoutEnabled = enabled;
         saveSettingsLocked(mInjector.userHandleGetCallingUserId());
     }
 
     @Override
-    public boolean isLogoutButtonEnabled() {
+    public boolean isLogoutEnabled() {
         if (!mHasFeature) {
             return false;
         }
         synchronized (this) {
-            return isLogoutButtonEnabledInternalLocked();
+            return isLogoutEnabledInternalLocked();
         }
     }
 
-    private boolean isLogoutButtonEnabledInternalLocked() {
+    private boolean isLogoutEnabledInternalLocked() {
         ActiveAdmin deviceOwner = getDeviceOwnerAdminLocked();
-        return (deviceOwner != null) && deviceOwner.isLogoutButtonEnabled;
+        return (deviceOwner != null) && deviceOwner.isLogoutEnabled;
     }
 
 }

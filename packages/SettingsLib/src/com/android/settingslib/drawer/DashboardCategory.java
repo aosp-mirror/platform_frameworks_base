@@ -75,23 +75,27 @@ public class DashboardCategory implements Parcelable {
      * Note: the returned list serves as a read-only list. If tiles needs to be added or removed
      * from the actual tiles list, it should be done through {@link #addTile}, {@link #removeTile}.
      */
-    public List<Tile> getTiles() {
-        return Collections.unmodifiableList(mTiles);
+    public synchronized List<Tile> getTiles() {
+        final List<Tile> result = new ArrayList<>(mTiles.size());
+        for (Tile tile : mTiles) {
+            result.add(tile);
+        }
+        return result;
     }
 
-    public void addTile(Tile tile) {
+    public synchronized void addTile(Tile tile) {
         mTiles.add(tile);
     }
 
-    public void addTile(int n, Tile tile) {
+    public synchronized void addTile(int n, Tile tile) {
         mTiles.add(n, tile);
     }
 
-    public void removeTile(Tile tile) {
+    public synchronized void removeTile(Tile tile) {
         mTiles.remove(tile);
     }
 
-    public void removeTile(int n) {
+    public synchronized void removeTile(int n) {
         mTiles.remove(n);
     }
 
@@ -103,7 +107,7 @@ public class DashboardCategory implements Parcelable {
         return mTiles.get(n);
     }
 
-    public boolean containsComponent(ComponentName component) {
+    public synchronized boolean containsComponent(ComponentName component) {
         for (Tile tile : mTiles) {
             if (TextUtils.equals(tile.intent.getComponent().getClassName(),
                     component.getClassName())) {
@@ -129,7 +133,7 @@ public class DashboardCategory implements Parcelable {
     /**
      * Sort priority value and package name for tiles in this category.
      */
-    public void sortTiles(String skipPackageName) {
+    public synchronized void sortTiles(String skipPackageName) {
         // Sort mTiles based on [priority, package within priority]
         Collections.sort(mTiles, (tile1, tile2) -> {
             final String package1 = tile1.intent.getComponent().getPackageName();

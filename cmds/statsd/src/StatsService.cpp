@@ -72,7 +72,7 @@ void CompanionDeathRecipient::binderDied(const wp<IBinder>& who) {
 
 // ======================================================================
 StatsService::StatsService(const sp<Looper>& handlerLooper)
-    : mAnomalyMonitor(new AnomalyMonitor(2))  // TODO: Put this comment somewhere better
+    : mAnomalyMonitor(new AnomalyMonitor(MIN_DIFF_TO_UPDATE_REGISTERED_ALARM_SECS))
 {
     mUidMap = new UidMap();
     mConfigManager = new ConfigManager();

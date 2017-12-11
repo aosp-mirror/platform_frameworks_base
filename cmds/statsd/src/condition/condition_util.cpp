@@ -94,17 +94,17 @@ ConditionState evaluateCombinationCondition(const std::vector<int>& children,
 }
 
 HashableDimensionKey getDimensionKeyForCondition(const LogEvent& event,
-                                                 const EventConditionLink& link) {
+                                                 const MetricConditionLink& link) {
     vector<KeyMatcher> eventKey;
-    eventKey.reserve(link.key_in_main().size());
+    eventKey.reserve(link.key_in_what().size());
 
-    for (const auto& key : link.key_in_main()) {
+    for (const auto& key : link.key_in_what()) {
         eventKey.push_back(key);
     }
 
     vector<KeyValuePair> dimensionKey = getDimensionKey(event, eventKey);
 
-    for (int i = 0; i < link.key_in_main_size(); i++) {
+    for (int i = 0; i < link.key_in_what_size(); i++) {
         auto& kv = dimensionKey[i];
         kv.set_key(link.key_in_condition(i).key());
     }

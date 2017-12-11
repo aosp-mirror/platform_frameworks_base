@@ -20,6 +20,7 @@ import static android.content.pm.ActivityInfo.COLOR_MODE_DEFAULT;
 
 import android.Manifest.permission;
 import android.annotation.IntDef;
+import android.annotation.LongDef;
 import android.annotation.NonNull;
 import android.annotation.RequiresPermission;
 import android.annotation.SystemApi;
@@ -1267,6 +1268,35 @@ public interface WindowManager extends ViewManager {
                     name = "DRAWS_SYSTEM_BAR_BACKGROUNDS")
         }, formatToHexString = true)
         public int flags;
+
+        /** @hide */
+        @Retention(RetentionPolicy.SOURCE)
+        @LongDef(
+            flag = true,
+            value = {
+                    LayoutParams.FLAG2_LAYOUT_IN_DISPLAY_CUTOUT_AREA,
+            })
+        @interface Flags2 {}
+
+        /**
+         * Window flag: allow placing the window within the area that overlaps with the
+         * display cutout.
+         *
+         * <p>
+         * The window must correctly position its contents to take the display cutout into account.
+         *
+         * @see DisplayCutout
+         * @hide for now
+         */
+        public static final long FLAG2_LAYOUT_IN_DISPLAY_CUTOUT_AREA = 0x00000001;
+
+        /**
+         * Various behavioral options/flags.  Default is none.
+         *
+         * @see #FLAG2_LAYOUT_IN_DISPLAY_CUTOUT_AREA
+         * @hide for now
+         */
+        @Flags2 public long flags2;
 
         /**
          * If the window has requested hardware acceleration, but this is not

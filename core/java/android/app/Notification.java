@@ -1941,6 +1941,7 @@ public class Notification implements Parcelable
         mSortKey = parcel.readString();
 
         extras = Bundle.setDefusable(parcel.readBundle(), true); // may be null
+        fixDuplicateExtras();
 
         actions = parcel.createTypedArray(Action.CREATOR); // may be null
 
@@ -2387,6 +2388,33 @@ public class Notification implements Parcelable
             return new Notification[size];
         }
     };
+
+    /**
+     * Parcelling creates multiple copies of objects in {@code extras}. Fix them.
+     * <p>
+     * For backwards compatibility {@code extras} holds some references to "real" member data such
+     * as {@link getLargeIcon()} which is mirrored by {@link #EXTRA_LARGE_ICON}. This is mostly
+     * fine as long as the object stays in one process.
+     * <p>
+     * However, once the notification goes into a parcel each reference gets marshalled separately,
+     * wasting memory. Especially with large images on Auto and TV, this is worth fixing.
+     */
+    private void fixDuplicateExtras() {
+        if (extras != null) {
+            fixDuplicateExtra(mSmallIcon, EXTRA_SMALL_ICON);
+            fixDuplicateExtra(mLargeIcon, EXTRA_LARGE_ICON);
+        }
+    }
+
+    /**
+     * If we find an extra that's exactly the same as one of the "real" fields but refers to a
+     * separate object, replace it with the field's version to avoid holding duplicate copies.
+     */
+    private void fixDuplicateExtra(@Nullable Parcelable original, @NonNull String extraName) {
+        if (original != null && extras.getParcelable(extraName) != null) {
+            extras.putParcelable(extraName, original);
+        }
+    }
 
     /**
      * Sets the {@link #contentView} field to be a view with the standard "Latest Event"

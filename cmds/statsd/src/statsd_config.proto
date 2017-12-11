@@ -112,10 +112,10 @@ message Bucket {
     optional int64 bucket_size_millis = 1;
 }
 
-message EventConditionLink {
+message MetricConditionLink {
     optional string condition = 1;
 
-    repeated KeyMatcher key_in_main = 2;
+    repeated KeyMatcher key_in_what = 2;
 
     repeated KeyMatcher key_in_condition = 3;
 }
@@ -127,7 +127,7 @@ message EventMetric {
 
     optional string condition = 3;
 
-    repeated EventConditionLink links = 4;
+    repeated MetricConditionLink links = 4;
 }
 
 message CountMetric {
@@ -141,7 +141,7 @@ message CountMetric {
 
     optional Bucket bucket = 5;
 
-    repeated EventConditionLink links = 6;
+    repeated MetricConditionLink links = 6;
 }
 
 message DurationMetric {
@@ -151,7 +151,7 @@ message DurationMetric {
 
     optional string condition = 3;
 
-    repeated EventConditionLink links = 4;
+    repeated MetricConditionLink links = 4;
 
     enum AggregationType {
         SUM = 1;
@@ -178,7 +178,7 @@ message GaugeMetric {
 
     optional Bucket bucket = 6;
 
-    repeated EventConditionLink links = 7;
+    repeated MetricConditionLink links = 7;
 }
 
 message ValueMetric {
@@ -194,7 +194,7 @@ message ValueMetric {
 
     optional Bucket bucket = 6;
 
-    repeated EventConditionLink links = 7;
+    repeated MetricConditionLink links = 7;
 
     enum AggregationType { SUM = 1; }
     optional AggregationType aggregation_type = 8 [default = SUM];

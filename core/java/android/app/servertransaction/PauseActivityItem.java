@@ -18,11 +18,12 @@ package android.app.servertransaction;
 
 import static android.os.Trace.TRACE_TAG_ACTIVITY_MANAGER;
 
+import android.app.ActivityManager;
 import android.app.ClientTransactionHandler;
 import android.os.IBinder;
 import android.os.Parcel;
+import android.os.RemoteException;
 import android.os.Trace;
-import android.util.Slog;
 
 /**
  * Request to move an activity to paused state.
@@ -32,43 +33,81 @@ public class PauseActivityItem extends ActivityLifecycleItem {
 
     private static final String TAG = "PauseActivityItem";
 
-    private final boolean mFinished;
-    private final boolean mUserLeaving;
-    private final int mConfigChanges;
-    private final boolean mDontReport;
-
-    private int mLifecycleSeq;
-
-    public PauseActivityItem(boolean finished, boolean userLeaving, int configChanges,
-            boolean dontReport) {
-        mFinished = finished;
-        mUserLeaving = userLeaving;
-        mConfigChanges = configChanges;
-        mDontReport = dontReport;
-    }
+    private boolean mFinished;
+    private boolean mUserLeaving;
+    private int mConfigChanges;
+    private boolean mDontReport;
 
     @Override
-    public void prepare(ClientTransactionHandler client, IBinder token) {
-        mLifecycleSeq = client.getLifecycleSeq();
-        if (DEBUG_ORDER) {
-            Slog.d(TAG, "Pause transaction for " + client + " received seq: "
-                    + mLifecycleSeq);
-        }
-    }
-
-    @Override
-    public void execute(ClientTransactionHandler client, IBinder token) {
+    public void execute(ClientTransactionHandler client, IBinder token,
+            PendingTransactionActions pendingActions) {
         Trace.traceBegin(TRACE_TAG_ACTIVITY_MANAGER, "activityPause");
         client.handlePauseActivity(token, mFinished, mUserLeaving, mConfigChanges, mDontReport,
-                mLifecycleSeq);
+                pendingActions);
         Trace.traceEnd(TRACE_TAG_ACTIVITY_MANAGER);
     }
 
     @Override
     public int getTargetState() {
-        return PAUSED;
+        return ON_PAUSE;
     }
 
+    @Override
+    public void postExecute(ClientTransactionHandler client, IBinder token,
+            PendingTransactionActions pendingActions) {
+        if (mDontReport) {
+            return;
+        }
+        try {
+            // TODO(lifecycler): Use interface callback instead of AMS.
+            ActivityManager.getService().activityPaused(token);
+        } catch (RemoteException ex) {
+            throw ex.rethrowFromSystemServer();
+        }
+    }
+
+
+    // ObjectPoolItem implementation
+
+    private PauseActivityItem() {}
+
+    /** Obtain an instance initialized with provided params. */
+    public static PauseActivityItem obtain(boolean finished, boolean userLeaving, int configChanges,
+            boolean dontReport) {
+        PauseActivityItem instance = ObjectPool.obtain(PauseActivityItem.class);
+        if (instance == null) {
+            instance = new PauseActivityItem();
+        }
+        instance.mFinished = finished;
+        instance.mUserLeaving = userLeaving;
+        instance.mConfigChanges = configChanges;
+        instance.mDontReport = dontReport;
+
+        return instance;
+    }
+
+    /** Obtain an instance initialized with default params. */
+    public static PauseActivityItem obtain() {
+        PauseActivityItem instance = ObjectPool.obtain(PauseActivityItem.class);
+        if (instance == null) {
+            instance = new PauseActivityItem();
+        }
+        instance.mFinished = false;
+        instance.mUserLeaving = false;
+        instance.mConfigChanges = 0;
+        instance.mDontReport = true;
+
+        return instance;
+    }
+
+    @Override
+    public void recycle() {
+        mFinished = false;
+        mUserLeaving = false;
+        mConfigChanges = 0;
+        mDontReport = false;
+        ObjectPool.recycle(this);
+    }
 
     // Parcelable implementation
 
@@ -121,5 +160,11 @@ public class PauseActivityItem extends ActivityLifecycleItem {
         result = 31 * result + mConfigChanges;
         result = 31 * result + (mDontReport ? 1 : 0);
         return result;
+    }
+
+    @Override
+    public String toString() {
+        return "PauseActivityItem{finished=" + mFinished + ",userLeaving=" + mUserLeaving
+                + ",configChanges=" + mConfigChanges + ",dontReport=" + mDontReport + "}";
     }
 }

@@ -836,7 +836,6 @@ public class InputMethodUtils {
         private final Resources mRes;
         private final ContentResolver mResolver;
         private final HashMap<String, InputMethodInfo> mMethodMap;
-        private final ArrayList<InputMethodInfo> mMethodList;
 
         /**
          * On-memory data store to emulate when {@link #mCopyOnWrite} is {@code true}.
@@ -906,7 +905,6 @@ public class InputMethodUtils {
             mRes = res;
             mResolver = resolver;
             mMethodMap = methodMap;
-            mMethodList = methodList;
             switchCurrentUser(userId, copyOnWrite);
         }
 
@@ -1087,7 +1085,7 @@ public class InputMethodUtils {
             final ArrayList<InputMethodInfo> res = new ArrayList<>();
             for (Pair<String, ArrayList<String>> ims: imsList) {
                 InputMethodInfo info = mMethodMap.get(ims.first);
-                if (info != null) {
+                if (info != null && !info.isVrOnly()) {
                     res.add(info);
                 }
             }

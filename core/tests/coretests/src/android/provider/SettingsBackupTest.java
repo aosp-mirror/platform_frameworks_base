@@ -194,6 +194,7 @@ public class SettingsBackupTest {
                     Settings.Global.DROPBOX_RESERVE_PERCENT,
                     Settings.Global.DROPBOX_TAG_PREFIX,
                     Settings.Global.EMERGENCY_AFFORDANCE_NEEDED,
+                    Settings.Global.EMULATE_DISPLAY_CUTOUT,
                     Settings.Global.ENABLE_ACCESSIBILITY_GLOBAL_GESTURE_ENABLED,
                     Settings.Global.ENABLE_CACHE_QUOTA_CALCULATION,
                     Settings.Global.ENABLE_CELLULAR_ON_BOOT,
@@ -420,7 +421,7 @@ public class SettingsBackupTest {
                  Settings.Secure.ACCESSIBILITY_SOFT_KEYBOARD_MODE,
                  // TODO(b/67867469): Move autofill settings below to
                  // BACKUP_BLACKLISTED_SYSTEM_SETTINGS once feature is moved out of experimental
-                 Settings.Secure.AUTOFILL_FEATURE_FIELD_DETECTION,
+                 Settings.Secure.AUTOFILL_FEATURE_FIELD_CLASSIFICATION,
                  Settings.Secure.AUTOFILL_USER_DATA_MAX_FIELD_CLASSIFICATION_IDS_SIZE,
                  Settings.Secure.AUTOFILL_USER_DATA_MAX_USER_DATA_SIZE,
                  Settings.Secure.AUTOFILL_USER_DATA_MAX_VALUE_LENGTH,

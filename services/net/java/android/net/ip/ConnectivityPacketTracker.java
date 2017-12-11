@@ -19,7 +19,7 @@ package android.net.ip;
 import static android.system.OsConstants.*;
 
 import android.net.NetworkUtils;
-import android.net.util.BlockingSocketReader;
+import android.net.util.PacketReader;
 import android.net.util.ConnectivityPacketSummary;
 import android.os.Handler;
 import android.system.ErrnoException;
@@ -65,7 +65,7 @@ public class ConnectivityPacketTracker {
 
     private final String mTag;
     private final LocalLog mLog;
-    private final BlockingSocketReader mPacketListener;
+    private final PacketReader mPacketListener;
     private boolean mRunning;
     private String mDisplayName;
 
@@ -101,7 +101,7 @@ public class ConnectivityPacketTracker {
         mDisplayName = null;
     }
 
-    private final class PacketListener extends BlockingSocketReader {
+    private final class PacketListener extends PacketReader {
         private final int mIfIndex;
         private final byte mHwAddr[];
 

@@ -114,7 +114,11 @@ import android.app.ResultInfo;
 import android.app.WaitResult;
 import android.app.WindowConfiguration.ActivityType;
 import android.app.WindowConfiguration.WindowingMode;
+import android.app.servertransaction.ActivityLifecycleItem;
+import android.app.servertransaction.ClientTransaction;
 import android.app.servertransaction.LaunchActivityItem;
+import android.app.servertransaction.PauseActivityItem;
+import android.app.servertransaction.ResumeActivityItem;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
@@ -1235,9 +1239,16 @@ public class ActivityStackSupervisor extends ConfigurationContainer implements D
 
     ResolveInfo resolveIntent(Intent intent, String resolvedType, int userId, int flags) {
         synchronized (mService) {
-            return mService.getPackageManagerInternalLocked().resolveIntent(intent, resolvedType,
-                    PackageManager.MATCH_INSTANT | PackageManager.MATCH_DEFAULT_ONLY | flags
-                    | ActivityManagerService.STOCK_PM_FLAGS, userId, true);
+            try {
+                Trace.traceBegin(TRACE_TAG_ACTIVITY_MANAGER, "resolveIntent");
+                return mService.getPackageManagerInternalLocked().resolveIntent(
+                        intent, resolvedType, PackageManager.MATCH_INSTANT
+                                | PackageManager.MATCH_DEFAULT_ONLY | flags
+                                | ActivityManagerService.STOCK_PM_FLAGS, userId, true);
+
+            } finally {
+                Trace.traceEnd(TRACE_TAG_ACTIVITY_MANAGER);
+            }
         }
     }
 
@@ -1393,16 +1404,33 @@ public class ActivityStackSupervisor extends ConfigurationContainer implements D
                 r.setLastReportedConfiguration(mergedConfiguration);
 
                 logIfTransactionTooLarge(r.intent, r.icicle);
-                mService.mLifecycleManager.scheduleTransaction(app.thread, r.appToken,
-                        new LaunchActivityItem(new Intent(r.intent),
+
+
+                // Create activity launch transaction.
+                final ClientTransaction clientTransaction = ClientTransaction.obtain(app.thread,
+                        r.appToken);
+                clientTransaction.addCallback(LaunchActivityItem.obtain(new Intent(r.intent),
                         System.identityHashCode(r), r.info,
                         // TODO: Have this take the merged configuration instead of separate global
                         // and override configs.
                         mergedConfiguration.getGlobalConfiguration(),
                         mergedConfiguration.getOverrideConfiguration(), r.compat,
                         r.launchedFromPackage, task.voiceInteractor, app.repProcState, r.icicle,
-                        r.persistentState, results, newIntents, !andResume,
-                        mService.isNextTransitionForward(), profilerInfo));
+                        r.persistentState, results, newIntents, mService.isNextTransitionForward(),
+                        profilerInfo));
+
+                // Set desired final state.
+                final ActivityLifecycleItem lifecycleItem;
+                if (andResume) {
+                    lifecycleItem = ResumeActivityItem.obtain(mService.isNextTransitionForward());
+                } else {
+                    lifecycleItem = PauseActivityItem.obtain();
+                }
+                clientTransaction.setLifecycleStateRequest(lifecycleItem);
+
+                // Schedule transaction.
+                mService.mLifecycleManager.scheduleTransaction(clientTransaction);
+
 
                 if ((app.info.privateFlags & ApplicationInfo.PRIVATE_FLAG_CANT_SAVE_STATE) != 0) {
                     // This may be a heavy-weight process!  Note that the package
