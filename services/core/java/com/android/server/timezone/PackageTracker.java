@@ -22,11 +22,14 @@ import android.app.timezone.RulesUpdaterContract;
 import android.content.Context;
 import android.content.pm.PackageManager;
 import android.os.Environment;
+import android.os.FileUtils;
+import android.os.SystemClock;
 import android.provider.TimeZoneRulesDataContract;
 import android.util.Slog;
 
 import java.io.File;
 import java.io.PrintWriter;
+import java.time.Clock;
 
 /**
  * Monitors the installed applications associated with time zone updates. If the app packages are
@@ -58,7 +61,7 @@ public class PackageTracker {
     private final IntentHelper mIntentHelper;
     private final ConfigHelper mConfigHelper;
     private final PackageStatusStorage mPackageStatusStorage;
-    private final ClockHelper mClockHelper;
+    private final Clock mElapsedRealtimeClock;
 
     // False if tracking is disabled.
     private boolean mTrackingEnabled;
@@ -91,15 +94,15 @@ public class PackageTracker {
 
     /** Creates the {@link PackageTracker} for normal use. */
     static PackageTracker create(Context context) {
+        Clock elapsedRealtimeClock = SystemClock.elapsedRealtimeClock();
         PackageTrackerHelperImpl helperImpl = new PackageTrackerHelperImpl(context);
-        // TODO(nfuller): Switch to FileUtils.createDir() when available. http://b/31008728
-        File storageDir = new File(Environment.getDataSystemDirectory(), "timezone");
+        File storageDir = FileUtils.createDir(Environment.getDataSystemDirectory(), "timezone");
         if (!storageDir.exists()) {
             storageDir.mkdir();
         }
 
         return new PackageTracker(
-                helperImpl /* clock */,
+                elapsedRealtimeClock /* elapsedRealtimeClock */,
                 helperImpl /* configHelper */,
                 helperImpl /* packageManagerHelper */,
                 new PackageStatusStorage(storageDir),
@@ -107,10 +110,10 @@ public class PackageTracker {
     }
 
     // A constructor that can be used by tests to supply mocked / faked dependencies.
-    PackageTracker(ClockHelper clockHelper, ConfigHelper configHelper,
+    PackageTracker(Clock elapsedRealtimeClock, ConfigHelper configHelper,
             PackageManagerHelper packageManagerHelper, PackageStatusStorage packageStatusStorage,
             IntentHelper intentHelper) {
-        mClockHelper = clockHelper;
+        mElapsedRealtimeClock = elapsedRealtimeClock;
         mConfigHelper = configHelper;
         mPackageManagerHelper = packageManagerHelper;
         mPackageStatusStorage = packageStatusStorage;
@@ -425,7 +428,7 @@ public class PackageTracker {
     }
 
     private void setCheckInProgress() {
-        mLastTriggerTimestamp = mClockHelper.currentTimestamp();
+        mLastTriggerTimestamp = mElapsedRealtimeClock.millis();
     }
 
     private void setCheckComplete() {
@@ -441,7 +444,7 @@ public class PackageTracker {
             return false;
         }
         // Risk of overflow, but highly unlikely given the implementation and not problematic.
-        return mClockHelper.currentTimestamp() > mLastTriggerTimestamp + mCheckTimeAllowedMillis;
+        return mElapsedRealtimeClock.millis() > mLastTriggerTimestamp + mCheckTimeAllowedMillis;
     }
 
     private PackageVersions lookupInstalledPackageVersions() {
