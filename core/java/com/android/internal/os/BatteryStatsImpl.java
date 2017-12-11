@@ -10938,6 +10938,7 @@ public class BatteryStatsImpl extends BatteryStats {
         final int numWakelocks = partialTimers == null ? 0 : partialTimers.size();
         final int numClusters = mPowerProfile.getNumCpuClusters();
         mWakeLockAllocationsUs = null;
+        final long startTimeMs = mClocks.uptimeMillis();
         mKernelUidCpuFreqTimeReader.readDelta((uid, cpuFreqTimeMs) -> {
             uid = mapUid(uid);
             if (Process.isIsolated(uid)) {
@@ -11002,6 +11003,11 @@ public class BatteryStatsImpl extends BatteryStats {
                 }
             }
         });
+
+        final long elapsedTimeMs = mClocks.uptimeMillis() - startTimeMs;
+        if (DEBUG_ENERGY_CPU || elapsedTimeMs >= 100) {
+            Slog.d(TAG, "Reading cpu freq times took " + elapsedTimeMs + "ms");
+        }
 
         if (mWakeLockAllocationsUs != null) {
             for (int i = 0; i < numWakelocks; ++i) {
