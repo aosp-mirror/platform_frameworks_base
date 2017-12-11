@@ -742,6 +742,82 @@ public class ContextHubService extends IContextHubService.Stub {
         return mClientManager.registerClient(clientCallback, contextHubId);
     }
 
+    /**
+     * Loads a nanoapp binary at the specified Context hub.
+     *
+     * @param contextHubId the ID of the hub to load the binary
+     * @param transactionCallback the client-facing transaction callback interface
+     * @param nanoAppBinary the binary to load
+     *
+     * @throws RemoteException
+     */
+    @Override
+    public void loadNanoAppOnHub(
+            int contextHubId, IContextHubTransactionCallback transactionCallback,
+            NanoAppBinary nanoAppBinary) throws RemoteException {
+        checkPermissions();
+        if (!checkHalProxyAndContextHubId(
+                contextHubId, transactionCallback, ContextHubTransaction.TYPE_LOAD_NANOAPP)) {
+            return;
+        }
+        if (nanoAppBinary == null) {
+            Log.e(TAG, "NanoAppBinary cannot be null in loadNanoAppOnHub");
+            transactionCallback.onTransactionComplete(
+                    ContextHubTransaction.TRANSACTION_FAILED_BAD_PARAMS);
+            return;
+        }
+
+        ContextHubServiceTransaction transaction = mTransactionManager.createLoadTransaction(
+                contextHubId, nanoAppBinary, transactionCallback);
+        addTransaction(transaction);
+    }
+
+    /**
+     * Unloads a nanoapp from the specified Context Hub.
+     *
+     * @param contextHubId the ID of the hub to unload the nanoapp
+     * @param transactionCallback the client-facing transaction callback interface
+     * @param nanoAppId the ID of the nanoapp to unload
+     *
+     * @throws RemoteException
+     */
+    @Override
+    public void unloadNanoAppFromHub(
+            int contextHubId, IContextHubTransactionCallback transactionCallback, long nanoAppId)
+            throws RemoteException {
+        checkPermissions();
+        if (!checkHalProxyAndContextHubId(
+                contextHubId, transactionCallback, ContextHubTransaction.TYPE_UNLOAD_NANOAPP)) {
+            return;
+        }
+
+        ContextHubServiceTransaction transaction = mTransactionManager.createUnloadTransaction(
+                contextHubId, nanoAppId, transactionCallback);
+        addTransaction(transaction);
+    }
+
+    /**
+     * Queries for a list of nanoapps from the specified Context hub.
+     *
+     * @param contextHubId the ID of the hub to query
+     * @param transactionCallback the client-facing transaction callback interface
+     *
+     * @throws RemoteException
+     */
+    @Override
+    public void queryNanoApps(int contextHubId, IContextHubTransactionCallback transactionCallback)
+            throws RemoteException {
+        checkPermissions();
+        if (!checkHalProxyAndContextHubId(
+                contextHubId, transactionCallback, ContextHubTransaction.TYPE_QUERY_NANOAPPS)) {
+            return;
+        }
+
+        ContextHubServiceTransaction transaction =
+                mTransactionManager.createQueryTransaction(contextHubId, transactionCallback);
+        addTransaction(transaction);
+    }
+
     @Override
     protected void dump(FileDescriptor fd, PrintWriter pw, String[] args) {
         if (!DumpUtils.checkDumpPermission(mContext, TAG, pw)) return;
@@ -795,6 +871,42 @@ public class ContextHubService extends IContextHubService.Stub {
         }
         mCallbacksList.finishBroadcast();
         return 0;
+    }
+
+    /**
+     * Validates the HAL proxy state and context hub ID to see if we can start the transaction.
+     *
+     * @param contextHubId    the ID of the hub to start the transaction
+     * @param callback        the client transaction callback interface
+     * @param transactionType the type of the transaction
+     *
+     * @return {@code true} if mContextHubProxy and contextHubId is valid, {@code false} otherwise
+     */
+    private boolean checkHalProxyAndContextHubId(
+            int contextHubId, IContextHubTransactionCallback callback,
+            @ContextHubTransaction.Type int transactionType) {
+        if (mContextHubProxy == null) {
+            try {
+                callback.onTransactionComplete(
+                        ContextHubTransaction.TRANSACTION_FAILED_HAL_UNAVAILABLE);
+            } catch (RemoteException e) {
+                Log.e(TAG, "RemoteException while calling onTransactionComplete", e);
+            }
+            return false;
+        }
+        if (!isValidContextHubId(contextHubId)) {
+            Log.e(TAG, "Cannot start "
+                    + ContextHubTransaction.typeToString(transactionType, false /* upperCase */)
+                    + " transaction for invalid hub ID " + contextHubId);
+            try {
+                callback.onTransactionComplete(ContextHubTransaction.TRANSACTION_FAILED_BAD_PARAMS);
+            } catch (RemoteException e) {
+                Log.e(TAG, "RemoteException while calling onTransactionComplete", e);
+            }
+            return false;
+        }
+
+        return true;
     }
 
     private int addAppInstance(int hubHandle, int appInstanceHandle, long appId, int appVersion) {
