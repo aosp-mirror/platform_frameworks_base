@@ -380,8 +380,6 @@ public class StatusBarKeyguardViewManager implements RemoteInputController.Callb
                 mStatusBar.fadeKeyguardWhilePulsing();
                 wakeAndUnlockDejank();
             } else {
-                mFingerprintUnlockController.startKeyguardFadingAway();
-                mStatusBar.setKeyguardFadingAway(startTime, delay, fadeoutDuration);
                 boolean staying = mStatusBar.hideKeyguard();
                 if (!staying) {
                     mStatusBarWindowManager.setKeyguardFadingAway(true);
