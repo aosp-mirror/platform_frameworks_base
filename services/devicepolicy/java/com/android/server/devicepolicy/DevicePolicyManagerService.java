@@ -150,7 +150,6 @@ import android.provider.ContactsContract.QuickContact;
 import android.provider.ContactsInternal;
 import android.provider.Settings;
 import android.provider.Settings.Global;
-import android.security.Credentials;
 import android.security.IKeyChainAliasCallback;
 import android.security.IKeyChainService;
 import android.security.KeyChain;
@@ -159,7 +158,6 @@ import android.security.keymaster.KeymasterCertificateChain;
 import android.security.keystore.KeyGenParameterSpec;
 import android.security.keystore.ParcelableKeyGenParameterSpec;
 import android.security.KeyStore;
-import android.security.keystore.AttestationUtils;
 import android.service.persistentdata.PersistentDataBlockManager;
 import android.telephony.TelephonyManager;
 import android.text.TextUtils;
@@ -11641,10 +11639,14 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
 
         final long id = mInjector.binderClearCallingIdentity();
         try {
-            //STOPSHIP add support for COMP, DO, edge cases when device is rebooted/work mode off,
+            //STOPSHIP add support for COMP, edge cases when device is rebooted/work mode off,
             //transfer callbacks and broadcast
-            if (isProfileOwner(admin, callingUserId)) {
-                transferProfileOwner(admin, target, callingUserId);
+            synchronized (this) {
+                if (isProfileOwner(admin, callingUserId)) {
+                    transferProfileOwnerLocked(admin, target, callingUserId);
+                } else if (isDeviceOwner(admin, callingUserId)) {
+                    transferDeviceOwnerLocked(admin, target, callingUserId);
+                }
             }
         } finally {
             mInjector.binderRestoreCallingIdentity(id);
@@ -11654,15 +11656,25 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
     /**
      * Transfers the profile owner for user with id profileOwnerUserId from admin to target.
      */
-    private void transferProfileOwner(ComponentName admin, ComponentName target,
+    private void transferProfileOwnerLocked(ComponentName admin, ComponentName target,
             int profileOwnerUserId) {
-        synchronized (this) {
-            transferActiveAdminUncheckedLocked(target, admin, profileOwnerUserId);
-            mOwners.transferProfileOwner(target, profileOwnerUserId);
-            Slog.i(LOG_TAG, "Profile owner set: " + target + " on user " + profileOwnerUserId);
-            mOwners.writeProfileOwner(profileOwnerUserId);
-            mDeviceAdminServiceController.startServiceForOwner(
-                    target.getPackageName(), profileOwnerUserId, "transfer-profile-owner");
-        }
+        transferActiveAdminUncheckedLocked(target, admin, profileOwnerUserId);
+        mOwners.transferProfileOwner(target, profileOwnerUserId);
+        Slog.i(LOG_TAG, "Profile owner set: " + target + " on user " + profileOwnerUserId);
+        mOwners.writeProfileOwner(profileOwnerUserId);
+        mDeviceAdminServiceController.startServiceForOwner(
+                target.getPackageName(), profileOwnerUserId, "transfer-profile-owner");
+    }
+
+    /**
+     * Transfers the device owner for user with id userId from admin to target.
+     */
+    private void transferDeviceOwnerLocked(ComponentName admin, ComponentName target, int userId) {
+        transferActiveAdminUncheckedLocked(target, admin, userId);
+        mOwners.transferDeviceOwner(target);
+        Slog.i(LOG_TAG, "Device owner set: " + target + " on user " + userId);
+        mOwners.writeDeviceOwner();
+        mDeviceAdminServiceController.startServiceForOwner(
+                target.getPackageName(), userId, "transfer-device-owner");
     }
 }

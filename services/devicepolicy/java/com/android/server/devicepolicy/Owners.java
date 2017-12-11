@@ -288,6 +288,17 @@ class Owners {
         }
     }
 
+    void transferDeviceOwner(ComponentName target) {
+        synchronized (mLock) {
+            // We don't set a name because it's not used anyway.
+            // See DevicePolicyManagerService#getDeviceOwnerName
+            mDeviceOwner = new OwnerInfo(null, target,
+                    mDeviceOwner.userRestrictionsMigrated, mDeviceOwner.remoteBugreportUri,
+                    mDeviceOwner.remoteBugreportHash);
+            pushToPackageManagerLocked();
+        }
+    }
+
     ComponentName getProfileOwnerComponent(int userId) {
         synchronized (mLock) {
             OwnerInfo profileOwner = mProfileOwners.get(userId);
