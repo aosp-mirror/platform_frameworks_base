@@ -546,6 +546,7 @@ java_library {
         "core/java/android/webkit/EventLogTags.logtags",
         "core/java/com/android/internal/logging/EventLogTags.logtags",
         "core/java/com/android/server/DropboxLogTags.logtags",
+        "core/java/org/chromium/arc/EventLogTags.logtags",
 
         ":framework-statslog-gen",
     ],
