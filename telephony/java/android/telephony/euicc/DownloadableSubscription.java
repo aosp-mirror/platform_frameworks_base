@@ -53,6 +53,8 @@ public final class DownloadableSubscription implements Parcelable {
     @Nullable
     public final String encodedActivationCode;
 
+    @Nullable private String confirmationCode;
+
     // see getCarrierName and setCarrierName
     @Nullable
     private String carrierName;
@@ -66,6 +68,7 @@ public final class DownloadableSubscription implements Parcelable {
 
     private DownloadableSubscription(Parcel in) {
         encodedActivationCode = in.readString();
+        confirmationCode = in.readString();
         carrierName = in.readString();
         accessRules = in.createTypedArray(UiccAccessRule.CREATOR);
     }
@@ -80,6 +83,21 @@ public final class DownloadableSubscription implements Parcelable {
     public static DownloadableSubscription forActivationCode(String encodedActivationCode) {
         Preconditions.checkNotNull(encodedActivationCode, "Activation code may not be null");
         return new DownloadableSubscription(encodedActivationCode);
+    }
+
+    /**
+     * Sets the confirmation code.
+     */
+    public void setConfirmationCode(String confirmationCode) {
+        this.confirmationCode = confirmationCode;
+    }
+
+    /**
+     * Returns the confirmation code.
+     */
+    @Nullable
+    public String getConfirmationCode() {
+        return confirmationCode;
     }
 
     /**
@@ -134,6 +152,7 @@ public final class DownloadableSubscription implements Parcelable {
     @Override
     public void writeToParcel(Parcel dest, int flags) {
         dest.writeString(encodedActivationCode);
+        dest.writeString(confirmationCode);
         dest.writeString(carrierName);
         dest.writeTypedArray(accessRules, flags);
     }
