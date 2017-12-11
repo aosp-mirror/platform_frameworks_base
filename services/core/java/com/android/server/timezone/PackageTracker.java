@@ -28,6 +28,7 @@ import android.provider.TimeZoneRulesDataContract;
 import android.util.Slog;
 
 import java.io.File;
+import java.io.IOException;
 import java.io.PrintWriter;
 import java.time.Clock;
 
@@ -97,10 +98,6 @@ public class PackageTracker {
         Clock elapsedRealtimeClock = SystemClock.elapsedRealtimeClock();
         PackageTrackerHelperImpl helperImpl = new PackageTrackerHelperImpl(context);
         File storageDir = FileUtils.createDir(Environment.getDataSystemDirectory(), "timezone");
-        if (!storageDir.exists()) {
-            storageDir.mkdir();
-        }
-
         return new PackageTracker(
                 elapsedRealtimeClock /* elapsedRealtimeClock */,
                 helperImpl /* configHelper */,
@@ -121,11 +118,11 @@ public class PackageTracker {
     }
 
     @VisibleForTesting(visibility = VisibleForTesting.Visibility.PACKAGE)
-    protected synchronized void start() {
+    protected synchronized boolean start() {
         mTrackingEnabled = mConfigHelper.isTrackingEnabled();
         if (!mTrackingEnabled) {
             Slog.i(TAG, "Time zone updater / data package tracking explicitly disabled.");
-            return;
+            return false;
         }
 
         mUpdateAppPackageName = mConfigHelper.getUpdateAppPackageName();
@@ -143,6 +140,14 @@ public class PackageTracker {
         mCheckTriggered = false;
         mCheckFailureCount = 0;
 
+        // Initialize the storage, as needed.
+        try {
+            mPackageStatusStorage.initialize();
+        } catch (IOException e) {
+            Slog.w(TAG, "PackageTracker storage could not be initialized.", e);
+            return false;
+        }
+
         // Initialize the intent helper.
         mIntentHelper.initialize(mUpdateAppPackageName, mDataAppPackageName, this);
 
@@ -152,6 +157,7 @@ public class PackageTracker {
         mIntentHelper.scheduleReliabilityTrigger(mDelayBeforeReliabilityCheckMillis);
 
         Slog.i(TAG, "Time zone updater / data package tracking enabled");
+        return true;
     }
 
     /**

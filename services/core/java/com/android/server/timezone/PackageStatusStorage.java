@@ -82,12 +82,16 @@ final class PackageStatusStorage {
 
     PackageStatusStorage(File storageDir) {
         mPackageStatusFile = new AtomicFile(new File(storageDir, "package-status.xml"));
+    }
+
+    /**
+     * Initialize any storage, as needed.
+     *
+     * @throws IOException if the storage could not be initialized
+     */
+    void initialize() throws IOException {
         if (!mPackageStatusFile.getBaseFile().exists()) {
-            try {
-                insertInitialPackageStatus();
-            } catch (IOException e) {
-                throw new IllegalStateException(e);
-            }
+            insertInitialPackageStatus();
         }
     }
 
@@ -342,13 +346,13 @@ final class PackageStatusStorage {
     }
 
     /** Only used during tests to force a known table state. */
-    public void forceCheckStateForTests(int checkStatus, PackageVersions packageVersions) {
+    public void forceCheckStateForTests(int checkStatus, PackageVersions packageVersions)
+            throws IOException {
         synchronized (this) {
             try {
-                int optimisticLockId = getCurrentOptimisticLockId();
-                writePackageStatusWithOptimisticLockCheck(optimisticLockId, optimisticLockId,
-                        checkStatus, packageVersions);
-            } catch (IOException | ParseException e) {
+                final int initialOptimisticLockId = (int) System.currentTimeMillis();
+                writePackageStatusLocked(checkStatus, initialOptimisticLockId, packageVersions);
+            } catch (IOException e) {
                 throw new IllegalStateException(e);
             }
         }
