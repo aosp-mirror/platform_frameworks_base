@@ -26853,7 +26853,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
         if (mAttachInfo == null || mTooltipInfo == null) {
             return false;
         }
-        if ((mViewFlags & ENABLED_MASK) != ENABLED) {
+        if (fromLongClick && (mViewFlags & ENABLED_MASK) != ENABLED) {
             return false;
         }
         if (TextUtils.isEmpty(mTooltipInfo.mTooltipText)) {
@@ -26900,7 +26900,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
         }
         switch(event.getAction()) {
             case MotionEvent.ACTION_HOVER_MOVE:
-                if ((mViewFlags & TOOLTIP) != TOOLTIP || (mViewFlags & ENABLED_MASK) != ENABLED) {
+                if ((mViewFlags & TOOLTIP) != TOOLTIP) {
                     break;
                 }
                 if (!mTooltipInfo.mTooltipFromLongClick) {
