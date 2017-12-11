@@ -448,7 +448,7 @@ public class StackScrollAlgorithm {
                 childState.height = Math.max(row.getIntrinsicHeight(), childState.height);
                 childState.hidden = false;
                 ExpandableViewState topState = resultState.getViewStateForView(topHeadsUpEntry);
-                if (!isTopEntry && (!mIsExpanded
+                if (topState != null && !isTopEntry && (!mIsExpanded
                         || unmodifiedEndLocation < topState.yTranslation + topState.height)) {
                     // Ensure that a headsUp doesn't vertically extend further than the heads-up at
                     // the top most z-position
