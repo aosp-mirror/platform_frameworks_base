@@ -26,6 +26,7 @@ import static com.android.server.autofill.Helper.sVerbose;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.app.ActivityManager;
+import android.app.ActivityManagerInternal;
 import android.app.AppGlobals;
 import android.app.IActivityManager;
 import android.content.ComponentName;
@@ -69,6 +70,7 @@ import com.android.internal.annotations.GuardedBy;
 import com.android.internal.logging.MetricsLogger;
 import com.android.internal.logging.nano.MetricsProto.MetricsEvent;
 import com.android.internal.os.HandlerCaller;
+import com.android.server.LocalServices;
 import com.android.server.autofill.ui.AutoFillUI;
 
 import java.io.PrintWriter;
@@ -417,16 +419,17 @@ final class AutofillManagerServiceImpl {
      * Asserts the component is owned by the caller.
      */
     private void assertCallerLocked(@NonNull ComponentName componentName) {
+        final String packageName = componentName.getPackageName();
         final PackageManager pm = mContext.getPackageManager();
         final int callingUid = Binder.getCallingUid();
         final int packageUid;
         try {
-            packageUid = pm.getPackageUidAsUser(componentName.getPackageName(),
-                    UserHandle.getCallingUserId());
+            packageUid = pm.getPackageUidAsUser(packageName, UserHandle.getCallingUserId());
         } catch (NameNotFoundException e) {
             throw new SecurityException("Could not verify UID for " + componentName);
         }
-        if (callingUid != packageUid) {
+        if (callingUid != packageUid && !LocalServices.getService(ActivityManagerInternal.class)
+                .hasRunningActivity(callingUid, packageName)) {
             final String[] packages = pm.getPackagesForUid(callingUid);
             final String callingPackage = packages != null ? packages[0] : "uid-" + callingUid;
             Slog.w(TAG, "App (package=" + callingPackage + ", UID=" + callingUid
