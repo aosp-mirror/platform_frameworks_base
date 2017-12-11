@@ -1335,8 +1335,7 @@ public final class BatteryStatsService extends IBatteryStats.Stub
                                         null, mStats.mHandler, null, mUserManagerUserInfoProvider);
                                 checkinStats.readSummaryFromParcel(in);
                                 in.recycle();
-                                checkinStats.dumpProtoLocked(mContext, fd, apps, flags,
-                                        historyStart);
+                                checkinStats.dumpProtoLocked(mContext, fd, apps, flags);
                                 mStats.mCheckinFile.delete();
                                 return;
                             }
@@ -1349,7 +1348,7 @@ public final class BatteryStatsService extends IBatteryStats.Stub
             }
             if (DBG) Slog.d(TAG, "begin dumpProtoLocked from UID " + Binder.getCallingUid());
             synchronized (mStats) {
-                mStats.dumpProtoLocked(mContext, fd, apps, flags, historyStart);
+                mStats.dumpProtoLocked(mContext, fd, apps, flags);
                 if (writeData) {
                     mStats.writeAsyncLocked();
                 }

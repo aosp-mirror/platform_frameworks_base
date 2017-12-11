@@ -6742,7 +6742,7 @@ public abstract class BatteryStats implements Parcelable {
 
     /** Dump #STATS_SINCE_CHARGED batterystats data to a proto. @hide */
     public void dumpProtoLocked(Context context, FileDescriptor fd, List<ApplicationInfo> apps,
-            int flags, long historyStart) {
+            int flags) {
         final ProtoOutputStream proto = new ProtoOutputStream(fd);
         final long bToken = proto.start(BatteryStatsServiceDumpProto.BATTERYSTATS);
         prepareForDumpLocked();
@@ -6752,13 +6752,7 @@ public abstract class BatteryStats implements Parcelable {
         proto.write(BatteryStatsProto.START_PLATFORM_VERSION, getStartPlatformVersion());
         proto.write(BatteryStatsProto.END_PLATFORM_VERSION, getEndPlatformVersion());
 
-        long now = getHistoryBaseTime() + SystemClock.elapsedRealtime();
-
-        if ((flags & (DUMP_INCLUDE_HISTORY | DUMP_HISTORY_ONLY)) != 0) {
-            if (startIteratingHistoryLocked()) {
-                // TODO: implement dumpProtoHistoryLocked(proto);
-            }
-        }
+        // History intentionally not included in proto dump.
 
         if ((flags & (DUMP_HISTORY_ONLY | DUMP_DAILY_ONLY)) == 0) {
             final BatteryStatsHelper helper = new BatteryStatsHelper(context, false,
