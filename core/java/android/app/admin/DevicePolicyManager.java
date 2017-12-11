@@ -8585,32 +8585,31 @@ public class DevicePolicyManager {
     }
 
     /**
-     * Called by a device owner to specify whether a logout button is enabled for all secondary
-     * users. The system may show a logout button that stops the user and switches back to the
-     * primary user.
+     * Called by a device owner to specify whether logout is enabled for all secondary users. The
+     * system may show a logout button that stops the user and switches back to the primary user.
      *
      * @param admin Which {@link DeviceAdminReceiver} this request is associated with.
-     * @param enabled whether logout button should be enabled or not.
+     * @param enabled whether logout should be enabled or not.
      * @throws SecurityException if {@code admin} is not a device owner.
      */
-    public void setLogoutButtonEnabled(@NonNull ComponentName admin, boolean enabled) {
-        throwIfParentInstance("setLogoutButtonEnabled");
+    public void setLogoutEnabled(@NonNull ComponentName admin, boolean enabled) {
+        throwIfParentInstance("setLogoutEnabled");
         try {
-            mService.setLogoutButtonEnabled(admin, enabled);
+            mService.setLogoutEnabled(admin, enabled);
         } catch (RemoteException re) {
             throw re.rethrowFromSystemServer();
         }
     }
 
     /**
-     * Returns whether logout button is enabled by a device owner.
+     * Returns whether logout is enabled by a device owner.
      *
-     * @return {@code true} if logout button is enabled by device owner, {@code false} otherwise.
+     * @return {@code true} if logout is enabled by device owner, {@code false} otherwise.
      */
-    public boolean isLogoutButtonEnabled() {
-        throwIfParentInstance("isLogoutButtonEnabled");
+    public boolean isLogoutEnabled() {
+        throwIfParentInstance("isLogoutEnabled");
         try {
-            return mService.isLogoutButtonEnabled();
+            return mService.isLogoutEnabled();
         } catch (RemoteException re) {
             throw re.rethrowFromSystemServer();
         }
