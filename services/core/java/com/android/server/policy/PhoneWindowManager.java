@@ -321,11 +321,6 @@ public class PhoneWindowManager implements WindowManagerPolicy {
     static final int LONG_PRESS_BACK_NOTHING = 0;
     static final int LONG_PRESS_BACK_GO_TO_VOICE_ASSIST = 1;
 
-    // Number of presses needed before we induce panic press behavior on the back button
-    static final int PANIC_PRESS_BACK_COUNT = 4;
-    static final int PANIC_PRESS_BACK_NOTHING = 0;
-    static final int PANIC_PRESS_BACK_HOME = 1;
-
     // These need to match the documentation/constant in
     // core/res/res/values/config.xml
     static final int LONG_PRESS_HOME_NOTHING = 0;
@@ -520,7 +515,6 @@ public class PhoneWindowManager implements WindowManagerPolicy {
     volatile boolean mBackKeyHandled;
     volatile boolean mBeganFromNonInteractive;
     volatile int mPowerKeyPressCounter;
-    volatile int mBackKeyPressCounter;
     volatile boolean mEndCallKeyHandled;
     volatile boolean mCameraGestureTriggeredDuringGoingToSleep;
     volatile boolean mGoingToSleep;
@@ -582,7 +576,6 @@ public class PhoneWindowManager implements WindowManagerPolicy {
     int mDoublePressOnPowerBehavior;
     int mTriplePressOnPowerBehavior;
     int mLongPressOnBackBehavior;
-    int mPanicPressOnBackBehavior;
     int mShortPressOnSleepBehavior;
     int mShortPressOnWindowBehavior;
     volatile boolean mAwake;
@@ -800,16 +793,15 @@ public class PhoneWindowManager implements WindowManagerPolicy {
     private static final int MSG_SHOW_PICTURE_IN_PICTURE_MENU = 17;
     private static final int MSG_BACK_LONG_PRESS = 18;
     private static final int MSG_DISPOSE_INPUT_CONSUMER = 19;
-    private static final int MSG_BACK_DELAYED_PRESS = 20;
-    private static final int MSG_ACCESSIBILITY_SHORTCUT = 21;
-    private static final int MSG_BUGREPORT_TV = 22;
-    private static final int MSG_ACCESSIBILITY_TV = 23;
-    private static final int MSG_DISPATCH_BACK_KEY_TO_AUTOFILL = 24;
-    private static final int MSG_SYSTEM_KEY_PRESS = 25;
-    private static final int MSG_HANDLE_ALL_APPS = 26;
-    private static final int MSG_LAUNCH_ASSIST = 27;
-    private static final int MSG_LAUNCH_ASSIST_LONG_PRESS = 28;
-    private static final int MSG_POWER_VERY_LONG_PRESS = 29;
+    private static final int MSG_ACCESSIBILITY_SHORTCUT = 20;
+    private static final int MSG_BUGREPORT_TV = 21;
+    private static final int MSG_ACCESSIBILITY_TV = 22;
+    private static final int MSG_DISPATCH_BACK_KEY_TO_AUTOFILL = 23;
+    private static final int MSG_SYSTEM_KEY_PRESS = 24;
+    private static final int MSG_HANDLE_ALL_APPS = 25;
+    private static final int MSG_LAUNCH_ASSIST = 26;
+    private static final int MSG_LAUNCH_ASSIST_LONG_PRESS = 27;
+    private static final int MSG_POWER_VERY_LONG_PRESS = 28;
 
     private static final int MSG_REQUEST_TRANSIENT_BARS_ARG_STATUS = 0;
     private static final int MSG_REQUEST_TRANSIENT_BARS_ARG_NAVIGATION = 1;
@@ -887,14 +879,9 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                     break;
                 case MSG_BACK_LONG_PRESS:
                     backLongPress();
-                    finishBackKeyPress();
                     break;
                 case MSG_DISPOSE_INPUT_CONSUMER:
                     disposeInputConsumer((InputConsumer) msg.obj);
-                    break;
-                case MSG_BACK_DELAYED_PRESS:
-                    backMultiPressAction(msg.arg1);
-                    finishBackKeyPress();
                     break;
                 case MSG_ACCESSIBILITY_SHORTCUT:
                     accessibilityShortcutActivated();
@@ -1181,14 +1168,6 @@ public class PhoneWindowManager implements WindowManagerPolicy {
         // Reset back key state for long press
         mBackKeyHandled = false;
 
-        // Cancel multi-press detection timeout.
-        if (hasPanicPressOnBackBehavior()) {
-            if (mBackKeyPressCounter != 0
-                    && mBackKeyPressCounter < PANIC_PRESS_BACK_COUNT) {
-                mHandler.removeMessages(MSG_BACK_DELAYED_PRESS);
-            }
-        }
-
         if (hasLongPressOnBackBehavior()) {
             Message msg = mHandler.obtainMessage(MSG_BACK_LONG_PRESS);
             msg.setAsynchronous(true);
@@ -1201,21 +1180,6 @@ public class PhoneWindowManager implements WindowManagerPolicy {
     private boolean interceptBackKeyUp(KeyEvent event) {
         // Cache handled state
         boolean handled = mBackKeyHandled;
-
-        if (hasPanicPressOnBackBehavior()) {
-            // Check for back key panic press
-            ++mBackKeyPressCounter;
-
-            final long eventTime = event.getDownTime();
-
-            if (mBackKeyPressCounter <= PANIC_PRESS_BACK_COUNT) {
-                // This could be a multi-press.  Wait a little bit longer to confirm.
-                Message msg = mHandler.obtainMessage(MSG_BACK_DELAYED_PRESS,
-                    mBackKeyPressCounter, 0, eventTime);
-                msg.setAsynchronous(true);
-                mHandler.sendMessageDelayed(msg, ViewConfiguration.getMultiPressTimeout());
-            }
-        }
 
         // Reset back long press state
         cancelPendingBackKeyAction();
@@ -1394,10 +1358,6 @@ public class PhoneWindowManager implements WindowManagerPolicy {
         }
     }
 
-    private void finishBackKeyPress() {
-        mBackKeyPressCounter = 0;
-    }
-
     private void cancelPendingPowerKeyAction() {
         if (!mPowerKeyHandled) {
             mPowerKeyHandled = true;
@@ -1412,18 +1372,6 @@ public class PhoneWindowManager implements WindowManagerPolicy {
         if (!mBackKeyHandled) {
             mBackKeyHandled = true;
             mHandler.removeMessages(MSG_BACK_LONG_PRESS);
-        }
-    }
-
-    private void backMultiPressAction(int count) {
-        if (count >= PANIC_PRESS_BACK_COUNT) {
-            switch (mPanicPressOnBackBehavior) {
-                case PANIC_PRESS_BACK_NOTHING:
-                    break;
-                case PANIC_PRESS_BACK_HOME:
-                    launchHomeFromHotKey();
-                    break;
-            }
         }
     }
 
@@ -1640,10 +1588,6 @@ public class PhoneWindowManager implements WindowManagerPolicy {
 
     private boolean hasLongPressOnBackBehavior() {
         return mLongPressOnBackBehavior != LONG_PRESS_BACK_NOTHING;
-    }
-
-    private boolean hasPanicPressOnBackBehavior() {
-        return mPanicPressOnBackBehavior != PANIC_PRESS_BACK_NOTHING;
     }
 
     private void interceptScreenshotChord() {
@@ -2036,8 +1980,6 @@ public class PhoneWindowManager implements WindowManagerPolicy {
 
         mLongPressOnBackBehavior = mContext.getResources().getInteger(
                 com.android.internal.R.integer.config_longPressOnBackBehavior);
-        mPanicPressOnBackBehavior = mContext.getResources().getInteger(
-                com.android.internal.R.integer.config_backPanicBehavior);
 
         mShortPressOnPowerBehavior = mContext.getResources().getInteger(
                 com.android.internal.R.integer.config_shortPressOnPowerBehavior);
@@ -8296,9 +8238,6 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                 pw.print("mLongPressOnBackBehavior=");
                 pw.println(longPressOnBackBehaviorToString(mLongPressOnBackBehavior));
         pw.print(prefix);
-                pw.print("mPanicPressOnBackBehavior=");
-                pw.println(panicPressOnBackBehaviorToString(mPanicPressOnBackBehavior));
-        pw.print(prefix);
                 pw.print("mLongPressOnHomeBehavior=");
                 pw.println(longPressOnHomeBehaviorToString(mLongPressOnHomeBehavior));
         pw.print(prefix);
@@ -8493,17 +8432,6 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                 return "LONG_PRESS_BACK_NOTHING";
             case LONG_PRESS_BACK_GO_TO_VOICE_ASSIST:
                 return "LONG_PRESS_BACK_GO_TO_VOICE_ASSIST";
-            default:
-                return Integer.toString(behavior);
-        }
-    }
-
-    private static String panicPressOnBackBehaviorToString(int behavior) {
-        switch (behavior) {
-            case PANIC_PRESS_BACK_NOTHING:
-                return "PANIC_PRESS_BACK_NOTHING";
-            case PANIC_PRESS_BACK_HOME:
-                return "PANIC_PRESS_BACK_HOME";
             default:
                 return Integer.toString(behavior);
         }
