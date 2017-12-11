@@ -431,7 +431,7 @@ class RootWindowContainer extends WindowContainer<DisplayContent> {
             if (w.mAppOp == OP_NONE) {
                 return;
             }
-            final int mode = mService.mAppOps.checkOpNoThrow(w.mAppOp, w.getOwningUid(),
+            final int mode = mService.mAppOps.noteOpNoThrow(w.mAppOp, w.getOwningUid(),
                     w.getOwningPackage());
             w.setAppOpVisibilityLw(mode == MODE_ALLOWED || mode == MODE_DEFAULT);
         }, false /* traverseTopToBottom */);

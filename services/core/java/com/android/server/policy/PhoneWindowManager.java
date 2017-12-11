@@ -2499,7 +2499,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
 
         // check if user has enabled this operation. SecurityException will be thrown if this app
         // has not been allowed by the user
-        final int mode = mAppOpsManager.checkOpNoThrow(outAppOp[0], callingUid, attrs.packageName);
+        final int mode = mAppOpsManager.noteOpNoThrow(outAppOp[0], callingUid, attrs.packageName);
         switch (mode) {
             case AppOpsManager.MODE_ALLOWED:
             case AppOpsManager.MODE_IGNORED:

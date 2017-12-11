@@ -160,7 +160,7 @@ public class AppOpsManager {
     public static final int OP_WRITE_ICC_SMS = 22;
     /** @hide */
     public static final int OP_WRITE_SETTINGS = 23;
-    /** @hide */
+    /** @hide Required to draw on top of other apps. */
     public static final int OP_SYSTEM_ALERT_WINDOW = 24;
     /** @hide */
     public static final int OP_ACCESS_NOTIFICATIONS = 25;
