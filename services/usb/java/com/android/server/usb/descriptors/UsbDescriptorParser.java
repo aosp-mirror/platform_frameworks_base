@@ -26,7 +26,7 @@ import java.util.ArrayList;
  */
 public final class UsbDescriptorParser {
     private static final String TAG = "UsbDescriptorParser";
-    private static final boolean DEBUG = false;
+    private static final boolean DEBUG = true;
 
     private final String mDeviceAddr;
 
@@ -289,10 +289,15 @@ public final class UsbDescriptorParser {
      */
     public UsbDevice toAndroidUsbDevice() {
         if (mDeviceDescriptor == null) {
+            Log.e(TAG, "toAndroidUsbDevice() ERROR - No Device Descriptor");
             return null;
         }
 
-        return mDeviceDescriptor.toAndroid(this);
+        UsbDevice device = mDeviceDescriptor.toAndroid(this);
+        if (device == null) {
+            Log.e(TAG, "toAndroidUsbDevice() ERROR Creating Device");
+        }
+        return device;
     }
 
     /**

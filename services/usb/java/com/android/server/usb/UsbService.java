@@ -496,7 +496,7 @@ public class UsbService extends IUsbManager.Stub {
                     mDeviceManager.dump(pw);
                 }
                 if (mHostManager != null) {
-                    mHostManager.dump(pw);
+                    mHostManager.dump(pw, args);
                 }
                 if (mPortManager != null) {
                     mPortManager.dump(pw);
@@ -504,7 +504,7 @@ public class UsbService extends IUsbManager.Stub {
                 mAlsaManager.dump(pw);
 
                 mSettingsManager.dump(pw);
-            } else if (args.length == 4 && "set-port-roles".equals(args[0])) {
+            } else if ("set-port-roles".equals(args[0]) && args.length == 4) {
                 final String portId = args[1];
                 final int powerRole;
                 switch (args[2]) {
@@ -546,7 +546,7 @@ public class UsbService extends IUsbManager.Stub {
                     pw.println();
                     mPortManager.dump(pw);
                 }
-            } else if (args.length == 3 && "add-port".equals(args[0])) {
+            } else if ("add-port".equals(args[0]) && args.length == 3) {
                 final String portId = args[1];
                 final int supportedModes;
                 switch (args[2]) {
@@ -571,7 +571,7 @@ public class UsbService extends IUsbManager.Stub {
                     pw.println();
                     mPortManager.dump(pw);
                 }
-            } else if (args.length == 5 && "connect-port".equals(args[0])) {
+            } else if ("connect-port".equals(args[0]) && args.length == 5) {
                 final String portId = args[1];
                 final int mode;
                 final boolean canChangeMode = args[2].endsWith("?");
@@ -618,30 +618,32 @@ public class UsbService extends IUsbManager.Stub {
                     pw.println();
                     mPortManager.dump(pw);
                 }
-            } else if (args.length == 2 && "disconnect-port".equals(args[0])) {
+            } else if ("disconnect-port".equals(args[0]) && args.length == 2) {
                 final String portId = args[1];
                 if (mPortManager != null) {
                     mPortManager.disconnectSimulatedPort(portId, pw);
                     pw.println();
                     mPortManager.dump(pw);
                 }
-            } else if (args.length == 2 && "remove-port".equals(args[0])) {
+            } else if ("remove-port".equals(args[0]) && args.length == 2) {
                 final String portId = args[1];
                 if (mPortManager != null) {
                     mPortManager.removeSimulatedPort(portId, pw);
                     pw.println();
                     mPortManager.dump(pw);
                 }
-            } else if (args.length == 1 && "reset".equals(args[0])) {
+            } else if ("reset".equals(args[0]) && args.length == 1) {
                 if (mPortManager != null) {
                     mPortManager.resetSimulation(pw);
                     pw.println();
                     mPortManager.dump(pw);
                 }
-            } else if (args.length == 1 && "ports".equals(args[0])) {
+            } else if ("ports".equals(args[0]) && args.length == 1) {
                 if (mPortManager != null) {
                     mPortManager.dump(pw);
                 }
+            } else if ("dump-descriptors".equals(args[0])) {
+                mHostManager.dumpDescriptors(pw, args);
             } else {
                 pw.println("Dump current USB state or issue command:");
                 pw.println("  ports");
@@ -678,6 +680,12 @@ public class UsbService extends IUsbManager.Stub {
                 pw.println("  dumpsys usb add-port \"matrix\" ufp");
                 pw.println("  dumpsys usb connect-port \"matrix\" ufp sink device");
                 pw.println("  dumpsys usb reset");
+                pw.println();
+                pw.println("Example USB device descriptors:");
+                pw.println("  dumpsys usb dump-descriptors -dump-short");
+                pw.println("  dumpsys usb dump-descriptors -dump-tree");
+                pw.println("  dumpsys usb dump-descriptors -dump-list");
+                pw.println("  dumpsys usb dump-descriptors -dump-raw");
             }
         } finally {
             Binder.restoreCallingIdentity(ident);
