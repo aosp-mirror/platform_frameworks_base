@@ -42,6 +42,7 @@ import android.os.Binder;
 import android.os.Bundle;
 import android.os.IBinder;
 import android.os.Looper;
+import android.os.Process;
 import android.os.RemoteCallbackList;
 import android.os.RemoteException;
 import android.os.SystemClock;
@@ -491,7 +492,10 @@ final class AutofillManagerServiceImpl {
         } catch (NameNotFoundException e) {
             throw new SecurityException("Could not verify UID for " + componentName);
         }
-        if (callingUid != packageUid) {
+        // TODO(b/70506888): allow all system UIDs to call it is too broad, we should call
+        // something like am.isActivityRunningInProcess(componentName, callingPid), but there is
+        // no such API yet.
+        if (callingUid != packageUid && Process.isApplicationUid(callingUid)) {
             final String[] packages = pm.getPackagesForUid(callingUid);
             final String callingPackage = packages != null ? packages[0] : "uid-" + callingUid;
             Slog.w(TAG, "App (package=" + callingPackage + ", UID=" + callingUid
