@@ -17,6 +17,10 @@
 package com.android.internal.widget;
 
 import android.app.trust.IStrongAuthTracker;
+import android.os.Bundle;
+import android.security.recoverablekeystore.KeyEntryRecoveryData;
+import android.security.recoverablekeystore.KeyStoreRecoveryData;
+import android.security.recoverablekeystore.KeyStoreRecoveryMetadata;
 import com.android.internal.widget.ICheckCredentialProgressCallback;
 import com.android.internal.widget.VerifyCredentialResponse;
 
@@ -52,4 +56,22 @@ interface ILockSettings {
     boolean setLockCredentialWithToken(String credential, int type, long tokenHandle,
             in byte[] token, int requestedQuality, int userId);
     void unlockUserWithToken(long tokenHandle, in byte[] token, int userId);
+
+    // RecoverableKeyStoreLoader methods.
+    // {@code ServiceSpecificException} may be thrown to signal an error, which caller can
+    // convert to  {@code RecoverableKeyStoreLoader}.
+    void initRecoveryService(in String rootCertificateAlias, in byte[] signedPublicKeyList,
+            int userId);
+    KeyStoreRecoveryData getRecoveryData(in byte[] account, int userId);
+    void setServerParameters(long serverParameters, int userId);
+    void setRecoveryStatus(in String packageName, in String[] aliases, int status, int userId);
+    void setRecoverySecretTypes(in int[] secretTypes, int userId);
+    int[] getRecoverySecretTypes(int userId);
+    int[] getPendingRecoverySecretTypes(int userId);
+    void recoverySecretAvailable(in KeyStoreRecoveryMetadata recoverySecret, int userId);
+    byte[] startRecoverySession(in String sessionId,
+            in byte[] verifierPublicKey, in byte[] vaultParams, in byte[] vaultChallenge,
+            in List<KeyStoreRecoveryMetadata> secrets, int userId);
+    void recoverKeys(in String sessionId, in byte[] recoveryKeyBlob,
+            in List<KeyEntryRecoveryData> applicationKeys, int userId);
 }
