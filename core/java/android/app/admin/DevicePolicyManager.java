@@ -4062,6 +4062,52 @@ public class DevicePolicyManager {
         return null;
     }
 
+
+    /**
+     * Called by a device or profile owner, or delegated certificate installer, to associate
+     * certificates with a key pair that was generated using {@link #generateKeyPair}, and
+     * set whether the key is available for the user to choose in the certificate selection
+     * prompt.
+     *
+     * @param admin Which {@link DeviceAdminReceiver} this request is associated with, or
+     *            {@code null} if calling from a delegated certificate installer.
+     * @param alias The private key alias under which to install the certificate. The {@code alias}
+     *        should denote an existing private key. If a certificate with that alias already
+     *        exists, it will be overwritten.
+     * @param certs The certificate chain to install. The chain should start with the leaf
+     *        certificate and include the chain of trust in order. This will be returned by
+     *        {@link android.security.KeyChain#getCertificateChain}.
+     * @param isUserSelectable {@code true} to indicate that a user can select this key via the
+     *        certificate selection prompt, {@code false} to indicate that this key can only be
+     *        granted access by implementing
+     *        {@link android.app.admin.DeviceAdminReceiver#onChoosePrivateKeyAlias}.
+     * @return {@code true} if the provided {@code alias} exists and the certificates has been
+     *        successfully associated with it, {@code false} otherwise.
+     * @throws SecurityException if {@code admin} is not {@code null} and not a device or profile
+     *         owner, or {@code admin} is null but the calling application is not a delegated
+     *         certificate installer.
+     */
+    public boolean setKeyPairCertificate(@Nullable ComponentName admin,
+            @NonNull String alias, @NonNull List<Certificate> certs, boolean isUserSelectable) {
+        throwIfParentInstance("setKeyPairCertificate");
+        try {
+            final byte[] pemCert = Credentials.convertToPem(certs.get(0));
+            byte[] pemChain = null;
+            if (certs.size() > 1) {
+                pemChain = Credentials.convertToPem(
+                        certs.subList(1, certs.size()).toArray(new Certificate[0]));
+            }
+            return mService.setKeyPairCertificate(admin, mContext.getPackageName(), alias, pemCert,
+                    pemChain, isUserSelectable);
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        } catch (CertificateException | IOException e) {
+            Log.w(TAG, "Could not pem-encode certificate", e);
+        }
+        return false;
+    }
+
+
     /**
      * @return the alias of a given CA certificate in the certificate store, or {@code null} if it
      * doesn't exist.

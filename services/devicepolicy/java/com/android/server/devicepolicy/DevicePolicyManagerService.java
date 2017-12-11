@@ -4998,6 +4998,33 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
     }
 
     @Override
+    public boolean setKeyPairCertificate(ComponentName who, String callerPackage, String alias,
+            byte[] cert, byte[] chain, boolean isUserSelectable) {
+        enforceCanManageScope(who, callerPackage, DeviceAdminInfo.USES_POLICY_PROFILE_OWNER,
+                DELEGATION_CERT_INSTALL);
+
+        final int callingUid = mInjector.binderGetCallingUid();
+        final long id = mInjector.binderClearCallingIdentity();
+        try (final KeyChainConnection keyChainConnection =
+                KeyChain.bindAsUser(mContext, UserHandle.getUserHandleForUid(callingUid))) {
+            IKeyChainService keyChain = keyChainConnection.getService();
+            if (!keyChain.setKeyPairCertificate(alias, cert, chain)) {
+                return false;
+            }
+            keyChain.setUserSelectable(alias, isUserSelectable);
+            return true;
+        } catch (InterruptedException e) {
+            Log.w(LOG_TAG, "Interrupted while setting keypair certificate", e);
+            Thread.currentThread().interrupt();
+        } catch (RemoteException e) {
+            Log.e(LOG_TAG, "Failed setting keypair certificate", e);
+        } finally {
+            mInjector.binderRestoreCallingIdentity(id);
+        }
+        return false;
+    }
+
+    @Override
     public void choosePrivateKeyAlias(final int uid, final Uri uri, final String alias,
             final IBinder response) {
         // Caller UID needs to be trusted, so we restrict this method to SYSTEM_UID callers.

@@ -71,4 +71,9 @@ abstract class BaseIDevicePolicyManager extends IDevicePolicyManager.Stub {
     public boolean isUsingUnifiedPassword(ComponentName who) {
         return true;
     }
+
+    public boolean setKeyPairCertificate(ComponentName who, String callerPackage, String alias,
+            byte[] cert, byte[] chain, boolean isUserSelectable) {
+        return false;
+    }
 }
