@@ -307,7 +307,6 @@ files_to_check_apis_generated := \
 files_to_document := \
   $(files_to_check_apis) \
   $(call find-other-java-files,\
-    $(addprefix ../../, $(FRAMEWORKS_DATA_BINDING_JAVA_SRC_DIRS)) \
     test-runner/src)
 
 # These are relative to frameworks/base
