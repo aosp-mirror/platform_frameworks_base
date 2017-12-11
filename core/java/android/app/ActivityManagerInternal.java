@@ -268,4 +268,9 @@ public abstract class ActivityManagerInternal {
      * @param token The IApplicationToken for the activity
      */
     public abstract void setFocusedActivity(IBinder token);
+
+    /**
+     * Returns {@code true} if {@code uid} is running an activity from {@code packageName}.
+     */
+    public abstract boolean hasRunningActivity(int uid, @Nullable String packageName);
 }
