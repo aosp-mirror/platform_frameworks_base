@@ -74,7 +74,7 @@ public class DefaultNetworkEvent {
             j.add("final_score=" + finalScore);
         }
         j.add(String.format("duration=%.0fs", durationMs / 1000.0));
-        j.add(String.format("validation=%4.1f%%", (validatedMs * 100.0) / durationMs));
+        j.add(String.format("validation=%04.1f%%", (validatedMs * 100.0) / durationMs));
         return j.toString();
     }
 
