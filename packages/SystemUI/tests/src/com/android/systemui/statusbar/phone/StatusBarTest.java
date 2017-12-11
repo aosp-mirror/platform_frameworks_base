@@ -26,6 +26,7 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
@@ -107,6 +108,7 @@ public class StatusBarTest extends SysuiTestCase {
     ScrimController mScrimController;
     IStatusBarService mBarService;
     ArrayList<Entry> mNotificationList;
+    FingerprintUnlockController mFingerprintUnlockController;
     private DisplayMetrics mDisplayMetrics = new DisplayMetrics();
 
     @Before
@@ -133,6 +135,7 @@ public class StatusBarTest extends SysuiTestCase {
         when(mNotificationPanelView.getLayoutParams()).thenReturn(new LayoutParams(0, 0));
         mNotificationList = mock(ArrayList.class);
         mScrimController = mock(ScrimController.class);
+        mFingerprintUnlockController = mock(FingerprintUnlockController.class);
         IPowerManager powerManagerService = mock(IPowerManager.class);
         HandlerThread handlerThread = new HandlerThread("TestThread");
         handlerThread.start();
@@ -145,7 +148,7 @@ public class StatusBarTest extends SysuiTestCase {
         mStatusBar = new TestableStatusBar(mStatusBarKeyguardViewManager, mUnlockMethodCache,
                 mKeyguardIndicationController, mStackScroller, mHeadsUpManager,
                 mNotificationData, mPowerManager, mSystemServicesProxy, mNotificationPanelView,
-                mBarService, mScrimController);
+                mBarService, mScrimController, mFingerprintUnlockController);
         mStatusBar.mContext = mContext;
         mStatusBar.mComponents = mContext.getComponents();
         doAnswer(invocation -> {
@@ -538,10 +541,18 @@ public class StatusBarTest extends SysuiTestCase {
     @Test
     public void testFingerprintNotification_UpdatesScrims() {
         mStatusBar.mStatusBarWindowManager = mock(StatusBarWindowManager.class);
-        mStatusBar.mFingerprintUnlockController = mock(FingerprintUnlockController.class);
         mStatusBar.mDozeScrimController = mock(DozeScrimController.class);
         mStatusBar.notifyFpAuthModeChanged();
         verify(mScrimController).transitionTo(any(), any());
+    }
+
+    @Test
+    public void testFingerprintUnlock_UpdatesScrims() {
+        // Simulate unlocking from AoD with fingerprint.
+        when(mFingerprintUnlockController.getMode())
+                .thenReturn(FingerprintUnlockController.MODE_WAKE_AND_UNLOCK);
+        mStatusBar.updateScrimController();
+        verify(mScrimController).transitionTo(eq(ScrimState.UNLOCKED), any());
     }
 
     static class TestableStatusBar extends StatusBar {
@@ -549,7 +560,8 @@ public class StatusBarTest extends SysuiTestCase {
                 UnlockMethodCache unlock, KeyguardIndicationController key,
                 NotificationStackScrollLayout stack, HeadsUpManager hum, NotificationData nd,
                 PowerManager pm, SystemServicesProxy ssp, NotificationPanelView panelView,
-                IStatusBarService barService, ScrimController scrimController) {
+                IStatusBarService barService, ScrimController scrimController,
+                FingerprintUnlockController fingerprintUnlockController) {
             mStatusBarKeyguardViewManager = man;
             mUnlockMethodCache = unlock;
             mKeyguardIndicationController = key;
@@ -563,6 +575,7 @@ public class StatusBarTest extends SysuiTestCase {
             mBarService = barService;
             mWakefulnessLifecycle = createAwakeWakefulnessLifecycle();
             mScrimController = scrimController;
+            mFingerprintUnlockController = fingerprintUnlockController;
         }
 
         private WakefulnessLifecycle createAwakeWakefulnessLifecycle() {
