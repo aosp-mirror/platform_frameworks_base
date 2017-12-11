@@ -644,6 +644,11 @@ public final class ContentService extends IContentService.Stub {
         int userId = UserHandle.getCallingUserId();
         final int callingUid = Binder.getCallingUid();
 
+        if (request.isPeriodic()) {
+            mContext.enforceCallingOrSelfPermission(Manifest.permission.WRITE_SYNC_SETTINGS,
+                    "no permission to write the sync settings");
+        }
+
         long identityToken = clearCallingIdentity();
         try {
             SyncStorageEngine.EndPoint info;
@@ -653,8 +658,6 @@ public final class ContentService extends IContentService.Stub {
             info = new SyncStorageEngine.EndPoint(account, provider, userId);
             if (request.isPeriodic()) {
                 // Remove periodic sync.
-                mContext.enforceCallingOrSelfPermission(Manifest.permission.WRITE_SYNC_SETTINGS,
-                        "no permission to write the sync settings");
                 getSyncManager().removePeriodicSync(info, extras,
                         "cancelRequest() by uid=" + callingUid);
             }
