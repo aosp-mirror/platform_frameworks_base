@@ -150,13 +150,16 @@ import android.provider.ContactsContract.QuickContact;
 import android.provider.ContactsInternal;
 import android.provider.Settings;
 import android.provider.Settings.Global;
+import android.security.Credentials;
 import android.security.IKeyChainAliasCallback;
 import android.security.IKeyChainService;
 import android.security.KeyChain;
 import android.security.KeyChain.KeyChainConnection;
+import android.security.keymaster.KeymasterCertificateChain;
 import android.security.keystore.KeyGenParameterSpec;
 import android.security.keystore.ParcelableKeyGenParameterSpec;
 import android.security.KeyStore;
+import android.security.keystore.AttestationUtils;
 import android.service.persistentdata.PersistentDataBlockManager;
 import android.telephony.TelephonyManager;
 import android.text.TextUtils;
@@ -4913,19 +4916,22 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
 
     @Override
     public boolean generateKeyPair(ComponentName who, String callerPackage, String algorithm,
-            ParcelableKeyGenParameterSpec parcelableKeySpec) {
+            ParcelableKeyGenParameterSpec parcelableKeySpec,
+            KeymasterCertificateChain attestationChain) {
         enforceCanManageScope(who, callerPackage, DeviceAdminInfo.USES_POLICY_PROFILE_OWNER,
                 DELEGATION_CERT_INSTALL);
         final KeyGenParameterSpec keySpec = parcelableKeySpec.getSpec();
         if (TextUtils.isEmpty(keySpec.getKeystoreAlias())) {
             throw new IllegalArgumentException("Empty alias provided.");
         }
+        final String alias = keySpec.getKeystoreAlias();
         // As the caller will be granted access to the key, ensure no UID was specified, as
         // it will not have the desired effect.
         if (keySpec.getUid() != KeyStore.UID_SELF) {
             Log.e(LOG_TAG, "Only the caller can be granted access to the generated keypair.");
             return false;
         }
+
         final int callingUid = mInjector.binderGetCallingUid();
 
         final UserHandle userHandle = mInjector.binderGetCallingUserHandle();
@@ -4934,7 +4940,16 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
             try (KeyChainConnection keyChainConnection =
                     KeyChain.bindAsUser(mContext, userHandle)) {
                 IKeyChainService keyChain = keyChainConnection.getService();
-                final boolean generationResult = keyChain.generateKeyPair(algorithm, parcelableKeySpec);
+
+                // Copy the provided keySpec, excluding the attestation challenge, which will be
+                // used later for requesting key attestation record.
+                final KeyGenParameterSpec noAttestationSpec =
+                    new KeyGenParameterSpec.Builder(keySpec)
+                        .setAttestationChallenge(null)
+                        .build();
+
+                final boolean generationResult = keyChain.generateKeyPair(algorithm,
+                    new ParcelableKeyGenParameterSpec(noAttestationSpec));
                 if (!generationResult) {
                     Log.e(LOG_TAG, "KeyChain failed to generate a keypair.");
                     return false;
@@ -4945,7 +4960,19 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
                 // Note the use of the calling  UID, since the request for the private
                 // key will come from the client's process, so the grant has to be for
                 // that UID.
-                keyChain.setGrant(callingUid, keySpec.getKeystoreAlias(), true);
+                keyChain.setGrant(callingUid, alias, true);
+
+                final byte[] attestationChallenge = keySpec.getAttestationChallenge();
+                if (attestationChallenge != null) {
+                    final boolean attestationResult = keyChain.attestKey(
+                            alias, attestationChallenge, attestationChain);
+                    if (!attestationResult) {
+                        Log.e(LOG_TAG, String.format(
+                                "Attestation for %s failed, deleting key.", alias));
+                        keyChain.removeKeyPair(alias);
+                        return false;
+                    }
+                }
                 return true;
             }
         } catch (RemoteException e) {
