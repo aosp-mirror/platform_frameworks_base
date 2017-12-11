@@ -202,11 +202,11 @@ public class ContextHubService extends IContextHubService.Stub {
         return new IContextHubClientCallback.Stub() {
             @Override
             public void onMessageFromNanoApp(NanoAppMessage message) {
-                int nanoAppInstanceId = mNanoAppStateManager.getNanoAppInstanceId(
+                int nanoAppHandle = mNanoAppStateManager.getNanoAppHandle(
                         contextHubId, message.getNanoAppId());
 
                 onMessageReceiptOldApi(
-                        message.getMessageType(), contextHubId, nanoAppInstanceId,
+                        message.getMessageType(), contextHubId, nanoAppHandle,
                         message.getMessageBody());
             }
 
@@ -403,17 +403,17 @@ public class ContextHubService extends IContextHubService.Stub {
     }
 
     @Override
-    public int unloadNanoApp(int nanoAppInstanceHandle) throws RemoteException {
+    public int unloadNanoApp(int nanoAppHandle) throws RemoteException {
         checkPermissions();
         if (mContextHubProxy == null) {
             return -1;
         }
 
         NanoAppInstanceInfo info =
-                mNanoAppStateManager.getNanoAppInstanceInfo(nanoAppInstanceHandle);
+                mNanoAppStateManager.getNanoAppInstanceInfo(nanoAppHandle);
         if (info == null) {
-            Log.e(TAG, "Cannot find app with handle " + nanoAppInstanceHandle);
-            return -1; //means failed
+            Log.e(TAG, "Cannot find nanoapp with handle " + nanoAppHandle);
+            return -1;
         }
 
         int contextHubId = info.getContexthubId();
@@ -434,11 +434,10 @@ public class ContextHubService extends IContextHubService.Stub {
     }
 
     @Override
-    public NanoAppInstanceInfo getNanoAppInstanceInfo(
-            int nanoAppInstanceHandle) throws RemoteException {
+    public NanoAppInstanceInfo getNanoAppInstanceInfo(int nanoAppHandle) throws RemoteException {
         checkPermissions();
 
-        return mNanoAppStateManager.getNanoAppInstanceInfo(nanoAppInstanceHandle);
+        return mNanoAppStateManager.getNanoAppInstanceInfo(nanoAppHandle);
     }
 
     @Override
@@ -524,7 +523,7 @@ public class ContextHubService extends IContextHubService.Stub {
                 success = (client.sendMessageToNanoApp(message) ==
                         ContextHubTransaction.TRANSACTION_SUCCESS);
             } else {
-                Log.e(TAG, "Failed to send nanoapp message - nanoapp with instance ID "
+                Log.e(TAG, "Failed to send nanoapp message - nanoapp with handle "
                         + nanoAppHandle + " does not exist.");
             }
         }
@@ -556,9 +555,9 @@ public class ContextHubService extends IContextHubService.Stub {
 
         byte[] data = new byte[5];
         data[0] = (byte) result;
-        int instanceId = mNanoAppStateManager.getNanoAppInstanceId(
+        int nanoAppHandle = mNanoAppStateManager.getNanoAppHandle(
                 contextHubId, nanoAppBinary.getNanoAppId());
-        ByteBuffer.wrap(data, 1, 4).order(ByteOrder.nativeOrder()).putInt(instanceId);
+        ByteBuffer.wrap(data, 1, 4).order(ByteOrder.nativeOrder()).putInt(nanoAppHandle);
 
         onMessageReceiptOldApi(MSG_LOAD_NANO_APP, contextHubId, OS_APP_INSTANCE, data);
     }

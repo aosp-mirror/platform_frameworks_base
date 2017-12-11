@@ -48,24 +48,24 @@ import java.util.List;
     private static final boolean ENABLE_LOG_DEBUG = true;
 
     /*
-     * Service cache maintaining of instance ID to nanoapp infos.
+     * Service cache maintaining of handle to nanoapp infos.
      */
     private final HashMap<Integer, NanoAppInstanceInfo> mNanoAppHash = new HashMap<>();
 
     /*
-     * The next instance ID to use.
+     * The next nanoapp handle to use.
      */
-    private int mNextInstanceId = 0;
+    private int mNextHandle = 0;
 
     /**
-     * @param instanceId the instance ID of the nanoapp
-     * @return the NanoAppInstanceInfo for the given nanoapp, null if the nanoapp does not exist in
-     *         the cache
+     * @param nanoAppHandle the nanoapp handle
+     * @return the NanoAppInstanceInfo for the given nanoapp, or null if the nanoapp does not exist
+     *         in the cache
      */
     @Nullable
     /* package */
-    synchronized NanoAppInstanceInfo getNanoAppInstanceInfo(int instanceId) {
-        return mNanoAppHash.get(instanceId);
+    synchronized NanoAppInstanceInfo getNanoAppInstanceInfo(int nanoAppHandle) {
+        return mNanoAppHash.get(nanoAppHandle);
     }
 
     /**
@@ -79,10 +79,10 @@ import java.util.List;
     /**
      * @param contextHubId the ID of the hub to search for the instance
      * @param nanoAppId the unique 64-bit ID of the nanoapp
-     * @return the instance ID of the nanoapp, -1 if the nanoapp is not in the cache
+     * @return the nanoapp handle, -1 if the nanoapp is not in the cache
      */
     /* package */
-    synchronized int getNanoAppInstanceId(int contextHubId, long nanoAppId) {
+    synchronized int getNanoAppHandle(int contextHubId, long nanoAppId) {
         for (NanoAppInstanceInfo info : mNanoAppHash.values()) {
             if (info.getContexthubId() == contextHubId && info.getAppId() == nanoAppId) {
                 return info.getHandle();
@@ -95,7 +95,7 @@ import java.util.List;
     /**
      * Adds a nanoapp instance to the cache.
      *
-     * If the cache already contained the nanoapp, the entry is removed and a new instance ID is
+     * If the cache already contained the nanoapp, the entry is removed and a new nanoapp handle is
      * generated.
      *
      * @param contextHubId the ID of the hub the nanoapp is loaded in
@@ -110,20 +110,20 @@ import java.util.List;
             return;
         }
 
-        int instanceId = mNextInstanceId;
+        int nanoAppHandle = mNextHandle;
         for (int i = 0; i <= Integer.MAX_VALUE; i++) {
-            if (!mNanoAppHash.containsKey(instanceId)) {
-                mNanoAppHash.put(instanceId, new NanoAppInstanceInfo(
-                        instanceId, nanoAppId, nanoAppVersion, contextHubId));
-                mNextInstanceId = (instanceId == Integer.MAX_VALUE) ? 0 : instanceId + 1;
+            if (!mNanoAppHash.containsKey(nanoAppHandle)) {
+                mNanoAppHash.put(nanoAppHandle, new NanoAppInstanceInfo(
+                        nanoAppHandle, nanoAppId, nanoAppVersion, contextHubId));
+                mNextHandle = (nanoAppHandle == Integer.MAX_VALUE) ? 0 : nanoAppHandle + 1;
                 break;
             }
-            instanceId = (instanceId == Integer.MAX_VALUE) ? 0 : instanceId + 1;
+            nanoAppHandle = (nanoAppHandle == Integer.MAX_VALUE) ? 0 : nanoAppHandle + 1;
         }
 
         if (ENABLE_LOG_DEBUG) {
-            Log.v(TAG, "Added app instance " + instanceId + " to hub " + contextHubId
-                    + ": ID=0x" + Long.toHexString(nanoAppId)
+            Log.v(TAG, "Added app instance with handle " + nanoAppHandle + " to hub "
+                    + contextHubId + ": ID=0x" + Long.toHexString(nanoAppId)
                     + ", version=0x" + Integer.toHexString(nanoAppVersion));
         }
     }
@@ -135,8 +135,8 @@ import java.util.List;
      */
     /* package */
     synchronized void removeNanoAppInstance(int contextHubId, long nanoAppId) {
-        int instanceId = getNanoAppInstanceId(contextHubId, nanoAppId);
-        mNanoAppHash.remove(instanceId);
+        int nanoAppHandle = getNanoAppHandle(contextHubId, nanoAppId);
+        mNanoAppHash.remove(nanoAppHandle);
     }
 
     /**
@@ -153,11 +153,11 @@ import java.util.List;
             nanoAppIdSet.add(appInfo.appId);
         }
 
-        for (int instanceId : mNanoAppHash.keySet()) {
-            NanoAppInstanceInfo info = mNanoAppHash.get(instanceId);
+        for (int nanoAppHandle : mNanoAppHash.keySet()) {
+            NanoAppInstanceInfo info = mNanoAppHash.get(nanoAppHandle);
             if (info.getContexthubId() == contextHubId &&
                     !nanoAppIdSet.contains(info.getAppId())) {
-                mNanoAppHash.remove(instanceId);
+                mNanoAppHash.remove(nanoAppHandle);
             }
         }
     }
@@ -171,17 +171,17 @@ import java.util.List;
      * @param nanoAppVersion the version of the nanoapp
      */
     private void handleQueryAppEntry(int contextHubId, long nanoAppId, int nanoAppVersion) {
-        int instanceId = getNanoAppInstanceId(contextHubId, nanoAppId);
-        if (instanceId == -1) {
+        int nanoAppHandle = getNanoAppHandle(contextHubId, nanoAppId);
+        if (nanoAppHandle == -1) {
             addNanoAppInstance(contextHubId, nanoAppId, nanoAppVersion);
         } else {
-            NanoAppInstanceInfo info = mNanoAppHash.get(instanceId);
+            NanoAppInstanceInfo info = mNanoAppHash.get(nanoAppHandle);
             if (info.getAppVersion() != nanoAppVersion) {
-                mNanoAppHash.put(instanceId, new NanoAppInstanceInfo(
-                        instanceId, nanoAppId, nanoAppVersion, contextHubId));
+                mNanoAppHash.put(nanoAppHandle, new NanoAppInstanceInfo(
+                        nanoAppHandle, nanoAppId, nanoAppVersion, contextHubId));
                 if (ENABLE_LOG_DEBUG) {
-                    Log.v(TAG, "Updated app instance " + instanceId + " at hub " + contextHubId
-                            + ": ID=0x" + Long.toHexString(nanoAppId)
+                    Log.v(TAG, "Updated app instance with handle " + nanoAppHandle + " at hub "
+                            + contextHubId + ": ID=0x" + Long.toHexString(nanoAppId)
                             + ", version=0x" + Integer.toHexString(nanoAppVersion));
                 }
             }
