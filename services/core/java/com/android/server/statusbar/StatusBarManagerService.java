@@ -319,6 +319,16 @@ public class StatusBarManagerService extends IStatusBarService.Stub {
         }
 
         @Override
+        public void showChargingAnimation(int batteryLevel) {
+            if (mBar != null) {
+                try {
+                    mBar.showChargingAnimation(batteryLevel);
+                } catch (RemoteException ex){
+                }
+            }
+        }
+
+        @Override
         public void showPictureInPictureMenu() {
             if (mBar != null) {
                 try {

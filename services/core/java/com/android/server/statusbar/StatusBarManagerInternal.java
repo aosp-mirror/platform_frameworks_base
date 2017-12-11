@@ -37,6 +37,8 @@ public interface StatusBarManagerInternal {
     void dismissKeyboardShortcutsMenu();
     void toggleKeyboardShortcutsMenu(int deviceId);
 
+    void showChargingAnimation(int batteryLevel);
+
     /**
      * Show picture-in-picture menu.
      */

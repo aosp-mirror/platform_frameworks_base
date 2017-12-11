@@ -19,15 +19,6 @@ package com.android.server.power;
 import android.annotation.UserIdInt;
 import android.app.ActivityManagerInternal;
 import android.app.AppOpsManager;
-
-import com.android.internal.app.IAppOpsService;
-import com.android.internal.app.IBatteryStats;
-import com.android.internal.logging.MetricsLogger;
-import com.android.internal.logging.nano.MetricsProto.MetricsEvent;
-import com.android.server.EventLogTags;
-import com.android.server.LocalServices;
-import com.android.server.policy.WindowManagerPolicy;
-
 import android.app.trust.TrustManager;
 import android.content.BroadcastReceiver;
 import android.content.Context;
@@ -53,6 +44,15 @@ import android.provider.Settings;
 import android.util.EventLog;
 import android.util.Slog;
 import android.view.inputmethod.InputMethodManagerInternal;
+
+import com.android.internal.app.IAppOpsService;
+import com.android.internal.app.IBatteryStats;
+import com.android.internal.logging.MetricsLogger;
+import com.android.internal.logging.nano.MetricsProto.MetricsEvent;
+import com.android.server.EventLogTags;
+import com.android.server.LocalServices;
+import com.android.server.statusbar.StatusBarManagerInternal;
+import com.android.server.policy.WindowManagerPolicy;
 
 /**
  * Sends broadcasts about important power state changes.
@@ -96,6 +96,7 @@ final class Notifier {
     private final ActivityManagerInternal mActivityManagerInternal;
     private final InputManagerInternal mInputManagerInternal;
     private final InputMethodManagerInternal mInputMethodManagerInternal;
+    private final StatusBarManagerInternal mStatusBarManagerInternal;
     private final TrustManager mTrustManager;
 
     private final NotifierHandler mHandler;
@@ -142,6 +143,7 @@ final class Notifier {
         mActivityManagerInternal = LocalServices.getService(ActivityManagerInternal.class);
         mInputManagerInternal = LocalServices.getService(InputManagerInternal.class);
         mInputMethodManagerInternal = LocalServices.getService(InputMethodManagerInternal.class);
+        mStatusBarManagerInternal = LocalServices.getService(StatusBarManagerInternal.class);
         mTrustManager = mContext.getSystemService(TrustManager.class);
 
         mHandler = new NotifierHandler(looper);
@@ -545,9 +547,19 @@ final class Notifier {
     }
 
     /**
-     * Called when wireless charging has started so as to provide user feedback.
+     * Called when profile screen lock timeout has expired.
      */
-    public void onWirelessChargingStarted() {
+    public void onProfileTimeout(@UserIdInt int userId) {
+        final Message msg = mHandler.obtainMessage(MSG_PROFILE_TIMED_OUT);
+        msg.setAsynchronous(true);
+        msg.arg1 = userId;
+        mHandler.sendMessage(msg);
+    }
+
+    /**
+     * Called when wireless charging has started so as to provide user feedback (sound and visual).
+     */
+    public void onWirelessChargingStarted(int batteryLevel) {
         if (DEBUG) {
             Slog.d(TAG, "onWirelessChargingStarted");
         }
@@ -555,16 +567,7 @@ final class Notifier {
         mSuspendBlocker.acquire();
         Message msg = mHandler.obtainMessage(MSG_WIRELESS_CHARGING_STARTED);
         msg.setAsynchronous(true);
-        mHandler.sendMessage(msg);
-    }
-
-    /**
-     * Called when profile screen lock timeout has expired.
-     */
-    public void onProfileTimeout(@UserIdInt int userId) {
-        final Message msg = mHandler.obtainMessage(MSG_PROFILE_TIMED_OUT);
-        msg.setAsynchronous(true);
-        msg.arg1 = userId;
+        msg.arg1 = batteryLevel;
         mHandler.sendMessage(msg);
     }
 
@@ -715,7 +718,11 @@ final class Notifier {
                 }
             }
         }
+    }
 
+    private void showWirelessChargingStarted(int batteryLevel) {
+        playWirelessChargingStartedSound();
+        mStatusBarManagerInternal.showChargingAnimation(batteryLevel);
         mSuspendBlocker.release();
     }
 
@@ -738,7 +745,7 @@ final class Notifier {
                     sendNextBroadcast();
                     break;
                 case MSG_WIRELESS_CHARGING_STARTED:
-                    playWirelessChargingStartedSound();
+                    showWirelessChargingStarted(msg.arg1);
                     break;
                 case MSG_SCREEN_BRIGHTNESS_BOOST_CHANGED:
                     sendBrightnessBoostChangedBroadcast();
