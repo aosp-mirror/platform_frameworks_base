@@ -16,11 +16,11 @@
 package com.android.server.power.batterysaver;
 
 import android.content.Context;
+import android.os.PowerManager;
 import android.provider.Settings;
 import android.provider.Settings.Global;
 import android.util.Slog;
 
-import com.android.server.power.BatterySaverPolicy;
 import com.android.server.power.batterysaver.BatterySaverController.Plugin;
 
 public class BatterySaverLocationPlugin implements Plugin {
@@ -53,7 +53,7 @@ public class BatterySaverLocationPlugin implements Plugin {
     private void updateLocationState(BatterySaverController caller) {
         final boolean kill =
                 (caller.getBatterySaverPolicy().getGpsMode()
-                        == BatterySaverPolicy.GPS_MODE_ALL_DISABLED_WHEN_SCREEN_OFF) &&
+                        == PowerManager.LOCATION_MODE_ALL_DISABLED_WHEN_SCREEN_OFF) &&
                 caller.isEnabled() && !caller.isInteractive();
 
         if (DEBUG) {
