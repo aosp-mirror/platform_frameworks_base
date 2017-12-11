@@ -16,9 +16,13 @@
 
 package android.content.pm;
 
+import android.annotation.IntDef;
 import android.annotation.Nullable;
 import android.os.Parcel;
 import android.os.Parcelable;
+
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
 
 /**
  * Overall information about the contents of a package.  This corresponds
@@ -330,8 +334,29 @@ public class PackageInfo implements Parcelable {
     /** @hide */
     public int overlayPriority;
 
-    /** @hide */
-    public boolean isStaticOverlay;
+    /**
+     * Flag for use with {@link #mOverlayFlags}. Marks the overlay as static, meaning it cannot
+     * be enabled/disabled at runtime.
+     */
+    static final int FLAG_OVERLAY_STATIC = 1 << 1;
+
+    /**
+     * Flag for use with {@link #mOverlayFlags}. Marks the overlay as trusted (not 3rd party).
+     */
+    static final int FLAG_OVERLAY_TRUSTED = 1 << 2;
+
+    @IntDef(flag = true, prefix = "FLAG_OVERLAY_", value = {
+            FLAG_OVERLAY_STATIC,
+            FLAG_OVERLAY_TRUSTED
+    })
+    @Retention(RetentionPolicy.SOURCE)
+    @interface OverlayFlags {}
+
+    /**
+     * Modifiers that affect the state of this overlay. See {@link #FLAG_OVERLAY_STATIC},
+     * {@link #FLAG_OVERLAY_TRUSTED}.
+     */
+    @OverlayFlags int mOverlayFlags;
 
     /**
      * The user-visible SDK version (ex. 26) of the framework against which the application claims
@@ -357,6 +382,23 @@ public class PackageInfo implements Parcelable {
     public String compileSdkVersionCodename;
 
     public PackageInfo() {
+    }
+
+    /**
+     * Returns true if the package is a valid Runtime Overlay package.
+     * @hide
+     */
+    public boolean isOverlayPackage() {
+        return overlayTarget != null && (mOverlayFlags & FLAG_OVERLAY_TRUSTED) != 0;
+    }
+
+    /**
+     * Returns true if the package is a valid static Runtime Overlay package. Static overlays
+     * are not updatable outside of a system update and are safe to load in the system process.
+     * @hide
+     */
+    public boolean isStaticOverlayPackage() {
+        return overlayTarget != null && (mOverlayFlags & FLAG_OVERLAY_STATIC) != 0;
     }
 
     @Override
@@ -410,8 +452,8 @@ public class PackageInfo implements Parcelable {
         dest.writeString(restrictedAccountType);
         dest.writeString(requiredAccountType);
         dest.writeString(overlayTarget);
-        dest.writeInt(isStaticOverlay ? 1 : 0);
         dest.writeInt(overlayPriority);
+        dest.writeInt(mOverlayFlags);
         dest.writeInt(compileSdkVersion);
         dest.writeString(compileSdkVersionCodename);
     }
@@ -465,8 +507,8 @@ public class PackageInfo implements Parcelable {
         restrictedAccountType = source.readString();
         requiredAccountType = source.readString();
         overlayTarget = source.readString();
-        isStaticOverlay = source.readInt() != 0;
         overlayPriority = source.readInt();
+        mOverlayFlags = source.readInt();
         compileSdkVersion = source.readInt();
         compileSdkVersionCodename = source.readString();
 
