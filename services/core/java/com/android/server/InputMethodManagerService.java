@@ -889,7 +889,7 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
 
     /**
      * Start a VR InputMethod that matches IME with package name of {@param component}.
-     * Note: This method is called from {@link VrManager}.
+     * Note: This method is called from {@link android.app.VrManager}.
      */
     private void startVrInputMethodNoCheck(@Nullable ComponentName component) {
         if (component == null) {
@@ -903,7 +903,7 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
             for (InputMethodInfo info : mMethodList) {
                 if (TextUtils.equals(info.getPackageName(), packageName) && info.isVrOnly()) {
                     // set this is as current inputMethod without updating settings.
-                    setInputMethodEnabled(info.getId(), true);
+                    setInputMethodEnabledLocked(info.getId(), true);
                     setInputMethodLocked(info.getId(), NOT_A_SUBTYPE_ID);
                     break;
                 }
