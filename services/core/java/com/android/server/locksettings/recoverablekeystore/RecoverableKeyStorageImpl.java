@@ -16,44 +16,40 @@
 
 package com.android.server.locksettings.recoverablekeystore;
 
+import android.security.keystore.AndroidKeyStoreProvider;
 import android.security.keystore.KeyProtection;
 
 import java.io.IOException;
 import java.security.KeyStore;
 import java.security.KeyStoreException;
 import java.security.NoSuchAlgorithmException;
+import java.security.NoSuchProviderException;
 import java.security.UnrecoverableEntryException;
-import java.security.cert.CertificateException;
 
 import javax.crypto.SecretKey;
 
 /**
- * Implementation of {@link RecoverableKeyStorage}.
+ * Implementation of {@link RecoverableKeyStorage} for a specific application.
  *
  * <p>Persists wrapped keys to disk, and loads raw keys into AndroidKeyStore.
  *
  * @hide
  */
 public class RecoverableKeyStorageImpl implements RecoverableKeyStorage {
-    private static final String ANDROID_KEY_STORE_PROVIDER = "AndroidKeyStore";
-
     private final KeyStore mKeyStore;
 
     /**
-     * A new instance.
+     * A new instance, storing recoverable keys for the given {@code userId}.
      *
      * @throws KeyStoreException if unable to load AndroidKeyStore.
+     * @throws NoSuchProviderException if AndroidKeyStore is not in this version of Android. Should
+     *     never occur.
      *
      * @hide
      */
-    public static RecoverableKeyStorageImpl newInstance() throws KeyStoreException {
-        KeyStore keyStore = KeyStore.getInstance(ANDROID_KEY_STORE_PROVIDER);
-        try {
-            keyStore.load(/*param=*/ null);
-        } catch (CertificateException | IOException | NoSuchAlgorithmException e) {
-            // Should never happen.
-            throw new KeyStoreException("Unable to load keystore.", e);
-        }
+    public static RecoverableKeyStorageImpl newInstance(int userId) throws KeyStoreException,
+            NoSuchProviderException {
+        KeyStore keyStore = AndroidKeyStoreProvider.getKeyStoreForUid(userId);
         return new RecoverableKeyStorageImpl(keyStore);
     }
 
@@ -75,8 +71,7 @@ public class RecoverableKeyStorageImpl implements RecoverableKeyStorage {
     }
 
     /**
-     * Imports {@code key} into AndroidKeyStore, keyed by the application's uid and the
-     * {@code alias}.
+     * Imports {@code key} into the application's AndroidKeyStore, keyed by {@code alias}.
      *
      * @param alias The alias of the key.
      * @param key The key.
@@ -93,7 +88,7 @@ public class RecoverableKeyStorageImpl implements RecoverableKeyStorage {
     }
 
     /**
-     * Loads a key handle from AndroidKeyStore.
+     * Loads a key handle from the application's AndroidKeyStore.
      *
      * @param alias Alias of the key to load.
      * @return The key handle.
@@ -104,7 +99,18 @@ public class RecoverableKeyStorageImpl implements RecoverableKeyStorage {
     @Override
     public SecretKey loadFromAndroidKeyStore(String alias)
             throws KeyStoreException, NoSuchAlgorithmException, UnrecoverableEntryException {
-        return ((KeyStore.SecretKeyEntry) mKeyStore.getEntry(alias, /*protParam=*/ null))
-                .getSecretKey();
+        return ((SecretKey) mKeyStore.getKey(alias, /*password=*/ null));
+    }
+
+    /**
+     * Removes the entry with the given {@code alias} from the application's AndroidKeyStore.
+     *
+     * @throws KeyStoreException if an error occurred deleting the key from AndroidKeyStore.
+     *
+     * @hide
+     */
+    @Override
+    public void removeFromAndroidKeyStore(String alias) throws KeyStoreException {
+        mKeyStore.deleteEntry(alias);
     }
 }
