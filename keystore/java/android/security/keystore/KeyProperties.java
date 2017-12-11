@@ -39,13 +39,12 @@ public abstract class KeyProperties {
      * @hide
      */
     @Retention(RetentionPolicy.SOURCE)
-    @IntDef(flag = true,
-            value = {
-                PURPOSE_ENCRYPT,
-                PURPOSE_DECRYPT,
-                PURPOSE_SIGN,
-                PURPOSE_VERIFY,
-                })
+    @IntDef(flag = true, prefix = { "PURPOSE_" }, value = {
+            PURPOSE_ENCRYPT,
+            PURPOSE_DECRYPT,
+            PURPOSE_SIGN,
+            PURPOSE_VERIFY,
+    })
     public @interface PurposeEnum {}
 
     /**
@@ -126,7 +125,7 @@ public abstract class KeyProperties {
      * @hide
      */
     @Retention(RetentionPolicy.SOURCE)
-    @StringDef({
+    @StringDef(prefix = { "KEY_" }, value = {
         KEY_ALGORITHM_RSA,
         KEY_ALGORITHM_EC,
         KEY_ALGORITHM_AES,
@@ -267,7 +266,7 @@ public abstract class KeyProperties {
      * @hide
      */
     @Retention(RetentionPolicy.SOURCE)
-    @StringDef({
+    @StringDef(prefix = { "BLOCK_MODE_" }, value = {
         BLOCK_MODE_ECB,
         BLOCK_MODE_CBC,
         BLOCK_MODE_CTR,
@@ -354,7 +353,7 @@ public abstract class KeyProperties {
      * @hide
      */
     @Retention(RetentionPolicy.SOURCE)
-    @StringDef({
+    @StringDef(prefix = { "ENCRYPTION_PADDING_" }, value = {
         ENCRYPTION_PADDING_NONE,
         ENCRYPTION_PADDING_PKCS7,
         ENCRYPTION_PADDING_RSA_PKCS1,
@@ -437,7 +436,7 @@ public abstract class KeyProperties {
      * @hide
      */
     @Retention(RetentionPolicy.SOURCE)
-    @StringDef({
+    @StringDef(prefix = { "SIGNATURE_PADDING_" }, value = {
         SIGNATURE_PADDING_RSA_PKCS1,
         SIGNATURE_PADDING_RSA_PSS,
         })
@@ -497,7 +496,7 @@ public abstract class KeyProperties {
      * @hide
      */
     @Retention(RetentionPolicy.SOURCE)
-    @StringDef({
+    @StringDef(prefix = { "DIGEST_" }, value = {
         DIGEST_NONE,
         DIGEST_MD5,
         DIGEST_SHA1,
@@ -647,11 +646,12 @@ public abstract class KeyProperties {
      * @hide
      */
     @Retention(RetentionPolicy.SOURCE)
-    @IntDef({
-        ORIGIN_GENERATED,
-        ORIGIN_IMPORTED,
-        ORIGIN_UNKNOWN,
-        })
+    @IntDef(prefix = { "ORIGIN_" }, value = {
+            ORIGIN_GENERATED,
+            ORIGIN_IMPORTED,
+            ORIGIN_UNKNOWN,
+    })
+
     public @interface OriginEnum {}
 
     /** Key was generated inside AndroidKeyStore. */

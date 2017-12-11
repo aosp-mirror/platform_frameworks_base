@@ -29,6 +29,8 @@ import android.widget.RemoteViews;
 
 import com.android.internal.util.ArrayUtils;
 
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
 import java.util.Arrays;
 import java.util.List;
 
@@ -55,8 +57,16 @@ public final class SliceItem implements Parcelable {
     /**
      * @hide
      */
-    @StringDef({FORMAT_SLICE, FORMAT_TEXT, FORMAT_IMAGE, FORMAT_ACTION, FORMAT_COLOR,
-            FORMAT_TIMESTAMP, FORMAT_REMOTE_INPUT})
+    @StringDef(prefix = { "FORMAT_" }, value = {
+            FORMAT_SLICE,
+            FORMAT_TEXT,
+            FORMAT_IMAGE,
+            FORMAT_ACTION,
+            FORMAT_COLOR,
+            FORMAT_TIMESTAMP,
+            FORMAT_REMOTE_INPUT,
+    })
+    @Retention(RetentionPolicy.SOURCE)
     public @interface SliceType {}
 
     /**

@@ -37,6 +37,8 @@ import android.os.RemoteException;
 import com.android.internal.util.ArrayUtils;
 import com.android.internal.util.Preconditions;
 
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -53,9 +55,21 @@ public final class Slice implements Parcelable {
     /**
      * @hide
      */
-    @StringDef({HINT_TITLE, HINT_LIST, HINT_LIST_ITEM, HINT_LARGE, HINT_ACTIONS, HINT_SELECTED,
-            HINT_NO_TINT, HINT_PARTIAL})
-    public @interface SliceHint{ }
+    @StringDef(prefix = { "HINT_" }, value = {
+            HINT_TITLE,
+            HINT_LIST,
+            HINT_LIST_ITEM,
+            HINT_LARGE,
+            HINT_ACTIONS,
+            HINT_SELECTED,
+            HINT_NO_TINT,
+            HINT_HIDDEN,
+            HINT_TOGGLE,
+            HINT_HORIZONTAL,
+            HINT_PARTIAL,
+    })
+    @Retention(RetentionPolicy.SOURCE)
+    public @interface SliceHint {}
 
     /**
      * The meta-data key that allows an activity to easily be linked directly to a slice.

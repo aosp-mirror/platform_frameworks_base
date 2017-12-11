@@ -83,7 +83,10 @@ public class SmsMessage {
     public static final int MAX_USER_DATA_SEPTETS_WITH_HEADER = 153;
 
     /** @hide */
-    @StringDef({FORMAT_3GPP, FORMAT_3GPP2})
+    @StringDef(prefix = { "FORMAT_" }, value = {
+            FORMAT_3GPP,
+            FORMAT_3GPP2
+    })
     @Retention(RetentionPolicy.SOURCE)
     public @interface Format {}
 
