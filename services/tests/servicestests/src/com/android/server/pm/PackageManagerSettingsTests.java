@@ -206,8 +206,8 @@ public class PackageManagerSettingsTests {
             new File(InstrumentationRegistry.getContext().getFilesDir(), "com.android.bar-1");
     private static final File UPDATED_CODE_PATH =
             new File(InstrumentationRegistry.getContext().getFilesDir(), "com.android.bar-2");
-    private static final int INITIAL_VERSION_CODE = 10023;
-    private static final int UPDATED_VERSION_CODE = 10025;
+    private static final long INITIAL_VERSION_CODE = 10023L;
+    private static final long UPDATED_VERSION_CODE = 10025L;
 
     @Test
     public void testPackageStateCopy01() {

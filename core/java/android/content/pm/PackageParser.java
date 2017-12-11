@@ -6454,6 +6454,7 @@ public class PackageParser {
             mAdoptPermissions = dest.createStringArrayList();
             mAppMetaData = dest.readBundle();
             mVersionCode = dest.readInt();
+            mVersionCodeMajor = dest.readInt();
             mVersionName = dest.readString();
             if (mVersionName != null) {
                 mVersionName = mVersionName.intern();
@@ -6600,6 +6601,7 @@ public class PackageParser {
             dest.writeStringList(mAdoptPermissions);
             dest.writeBundle(mAppMetaData);
             dest.writeInt(mVersionCode);
+            dest.writeInt(mVersionCodeMajor);
             dest.writeString(mVersionName);
             dest.writeString(mSharedUserId);
             dest.writeInt(mSharedUserLabel);

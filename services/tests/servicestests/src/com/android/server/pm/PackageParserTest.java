@@ -520,6 +520,10 @@ public class PackageParserTest {
 
         pkg.featureGroups = new ArrayList<>();
         pkg.featureGroups.add(new FeatureGroupInfo());
+
+        pkg.mCompileSdkVersionCodename = "foo23";
+        pkg.mCompileSdkVersion = 100;
+        pkg.mVersionCodeMajor = 100;
     }
 
     private static void assertAllFieldsExist(PackageParser.Package pkg) throws Exception {
