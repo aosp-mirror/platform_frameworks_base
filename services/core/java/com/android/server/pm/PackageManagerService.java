@@ -14629,14 +14629,13 @@ public class PackageManagerService extends IPackageManager.Stub
         if (getInstantAppPackageName(Binder.getCallingUid()) != null) {
             return null;
         }
-        // writer
-        synchronized (mPackages) {
-            if (!isExternalMediaAvailable()) {
+        if (!isExternalMediaAvailable()) {
                 // If the external storage is no longer mounted at this point,
                 // the caller may not have been able to delete all of this
                 // packages files and can not delete any more.  Bail.
-                return null;
-            }
+            return null;
+        }
+        synchronized (mPackages) {
             final ArrayList<PackageCleanItem> pkgs = mSettings.mPackagesToBeCleaned;
             if (lastPackage != null) {
                 pkgs.remove(lastPackage);
