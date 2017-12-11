@@ -229,6 +229,15 @@ public class ScrimControllerTest extends SysuiTestCase {
         verify(mWakeLock, times(1)).release();
     }
 
+    @Test
+    public void testCallbackInvokedOnSameStateTransition() {
+        mScrimController.transitionTo(ScrimState.UNLOCKED);
+        mScrimController.finishAnimationsImmediately();
+        ScrimController.Callback callback = mock(ScrimController.Callback.class);
+        mScrimController.transitionTo(ScrimState.UNLOCKED, callback);
+        verify(callback, times(1)).onFinished();
+    }
+
     private void assertScrimTint(ScrimView scrimView, boolean tinted) {
         final boolean viewIsTinted = scrimView.getTint() != Color.TRANSPARENT;
         final String name = scrimView == mScrimInFront ? "front" : "back";
