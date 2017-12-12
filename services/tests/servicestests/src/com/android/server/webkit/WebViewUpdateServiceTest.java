@@ -202,10 +202,10 @@ public class WebViewUpdateServiceTest {
 
     private static PackageInfo createPackageInfo(String packageName, boolean enabled, boolean valid,
             boolean installed, Signature[] signatures, long updateTime, boolean hidden,
-            int versionCode, boolean isSystemApp) {
+            long versionCode, boolean isSystemApp) {
         PackageInfo p = createPackageInfo(packageName, enabled, valid, installed, signatures,
                 updateTime, hidden);
-        p.versionCode = versionCode;
+        p.setLongVersionCode(versionCode);
         p.applicationInfo.versionCode = versionCode;
         if (isSystemApp) p.applicationInfo.flags |= ApplicationInfo.FLAG_SYSTEM;
         return p;
@@ -1495,7 +1495,7 @@ public class WebViewUpdateServiceTest {
     public void testGetCurrentWebViewPackage() {
         PackageInfo firstPackage = createPackageInfo("first", true /* enabled */,
                         true /* valid */, true /* installed */);
-        firstPackage.versionCode = 100;
+        firstPackage.setLongVersionCode(100);
         firstPackage.versionName = "first package version";
         WebViewProviderInfo[] packages = new WebViewProviderInfo[] {
             new WebViewProviderInfo(firstPackage.packageName, "", true, false, null)};
