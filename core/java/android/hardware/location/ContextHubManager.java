@@ -271,7 +271,7 @@ public final class ContextHubManager {
         throw new UnsupportedOperationException("TODO: Implement this");
     }
 
-    /*
+    /**
      * Helper function to generate a stub for a non-query transaction callback.
      *
      * @param transaction the transaction to unblock when complete
@@ -297,7 +297,7 @@ public final class ContextHubManager {
         };
     }
 
-   /*
+   /**
     * Helper function to generate a stub for a query transaction callback.
     *
     * @param transaction the transaction to unblock when complete
@@ -392,7 +392,17 @@ public final class ContextHubManager {
      */
     @RequiresPermission(android.Manifest.permission.LOCATION_HARDWARE)
     public ContextHubTransaction<Void> enableNanoApp(ContextHubInfo hubInfo, long nanoAppId) {
-        throw new UnsupportedOperationException("TODO: Implement this");
+        ContextHubTransaction<Void> transaction =
+                new ContextHubTransaction<>(ContextHubTransaction.TYPE_ENABLE_NANOAPP);
+        IContextHubTransactionCallback callback = createTransactionCallback(transaction);
+
+        try {
+            mService.enableNanoApp(hubInfo.getId(), callback, nanoAppId);
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+
+        return transaction;
     }
 
     /**

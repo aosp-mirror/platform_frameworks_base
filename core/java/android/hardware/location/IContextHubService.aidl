@@ -70,6 +70,11 @@ interface IContextHubService {
             int contextHubId, in IContextHubTransactionCallback transactionCallback,
             long nanoAppId);
 
+    // Enables a nanoapp at the specified hub
+    void enableNanoApp(
+            int contextHubId, in IContextHubTransactionCallback transactionCallback,
+            long nanoAppId);
+
     // Queries for a list of nanoapps
     void queryNanoApps(int contextHubId, in IContextHubTransactionCallback transactionCallback);
 }
