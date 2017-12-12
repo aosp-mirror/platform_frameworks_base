@@ -121,6 +121,8 @@ import java.util.function.BiConsumer;
 @SmallTest
 public class ShortcutManagerTest1 extends BaseShortcutManagerTest {
 
+    private static final boolean SKIP_FOR_BUG_67325252 = true;
+
     /**
      * Test for the first launch path, no settings file available.
      */
@@ -722,6 +724,10 @@ public class ShortcutManagerTest1 extends BaseShortcutManagerTest {
     }
 
     public void testCleanupDanglingBitmaps() throws Exception {
+        if (SKIP_FOR_BUG_67325252) {
+            return;
+        }
+
         assertBitmapDirectories(USER_0, EMPTY_STRINGS);
         assertBitmapDirectories(USER_10, EMPTY_STRINGS);
 
