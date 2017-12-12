@@ -964,6 +964,9 @@ public final class PhoneAccount implements Parcelable {
         if (hasCapabilities(CAPABILITY_SIM_SUBSCRIPTION)) {
             sb.append("SimSub ");
         }
+        if (hasCapabilities(CAPABILITY_RTT)) {
+            sb.append("Rtt");
+        }
         return sb.toString();
     }
 
