@@ -417,7 +417,17 @@ public final class ContextHubManager {
      */
     @RequiresPermission(android.Manifest.permission.LOCATION_HARDWARE)
     public ContextHubTransaction<Void> disableNanoApp(ContextHubInfo hubInfo, long nanoAppId) {
-        throw new UnsupportedOperationException("TODO: Implement this");
+        ContextHubTransaction<Void> transaction =
+                new ContextHubTransaction<>(ContextHubTransaction.TYPE_DISABLE_NANOAPP);
+        IContextHubTransactionCallback callback = createTransactionCallback(transaction);
+
+        try {
+            mService.disableNanoApp(hubInfo.getId(), callback, nanoAppId);
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+
+        return transaction;
     }
 
     /**

@@ -217,6 +217,41 @@ import java.util.concurrent.atomic.AtomicInteger;
     }
 
     /**
+     * Creates a transaction for disabling a nanoapp.
+     *
+     * @param contextHubId       the ID of the hub to disable the nanoapp on
+     * @param nanoAppId          the ID of the nanoapp to disable
+     * @param onCompleteCallback the client on complete callback
+     * @return the generated transaction
+     */
+    /* package */ ContextHubServiceTransaction createDisableTransaction(
+            int contextHubId, long nanoAppId, IContextHubTransactionCallback onCompleteCallback) {
+        return new ContextHubServiceTransaction(
+                mNextAvailableId.getAndIncrement(), ContextHubTransaction.TYPE_DISABLE_NANOAPP) {
+            @Override
+            /* package */ int onTransact() {
+                try {
+                    return mContextHubProxy.disableNanoApp(
+                            contextHubId, nanoAppId, this.getTransactionId());
+                } catch (RemoteException e) {
+                    Log.e(TAG, "RemoteException while trying to disable nanoapp with ID 0x" +
+                            Long.toHexString(nanoAppId), e);
+                    return Result.UNKNOWN_FAILURE;
+                }
+            }
+
+            @Override
+            /* package */ void onTransactionComplete(@ContextHubTransaction.Result int result) {
+                try {
+                    onCompleteCallback.onTransactionComplete(result);
+                } catch (RemoteException e) {
+                    Log.e(TAG, "RemoteException while calling client onTransactionComplete", e);
+                }
+            }
+        };
+    }
+
+    /**
      * Creates a transaction for querying for a list of nanoapps.
      *
      * @param contextHubId       the ID of the hub to query

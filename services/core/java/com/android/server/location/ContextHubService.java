@@ -718,6 +718,30 @@ public class ContextHubService extends IContextHubService.Stub {
     }
 
     /**
+     * Disables a nanoapp at the specified Context Hub.
+     *
+     * @param contextHubId        the ID of the hub to disable the nanoapp
+     * @param transactionCallback the client-facing transaction callback interface
+     * @param nanoAppId           the ID of the nanoapp to disable
+     *
+     * @throws IllegalStateException if the transaction queue is full
+     */
+    @Override
+    public void disableNanoApp(
+            int contextHubId, IContextHubTransactionCallback transactionCallback, long nanoAppId)
+            throws RemoteException {
+        checkPermissions();
+        if (!checkHalProxyAndContextHubId(
+                contextHubId, transactionCallback, ContextHubTransaction.TYPE_DISABLE_NANOAPP)) {
+            return;
+        }
+
+        ContextHubServiceTransaction transaction = mTransactionManager.createDisableTransaction(
+                contextHubId, nanoAppId, transactionCallback);
+        mTransactionManager.addTransaction(transaction);
+    }
+
+    /**
      * Queries for a list of nanoapps from the specified Context hub.
      *
      * @param contextHubId        the ID of the hub to query

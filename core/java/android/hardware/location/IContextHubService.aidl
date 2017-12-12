@@ -75,6 +75,11 @@ interface IContextHubService {
             int contextHubId, in IContextHubTransactionCallback transactionCallback,
             long nanoAppId);
 
+    // Disables a nanoapp at the specified hub
+    void disableNanoApp(
+            int contextHubId, in IContextHubTransactionCallback transactionCallback,
+            long nanoAppId);
+
     // Queries for a list of nanoapps
     void queryNanoApps(int contextHubId, in IContextHubTransactionCallback transactionCallback);
 }
