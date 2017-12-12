@@ -161,10 +161,14 @@ class SaveImageInBackgroundTask extends AsyncTask<Void, Void, Void> {
         Matrix matrix = new Matrix();
         int overlayColor = 0x40FFFFFF;
 
+        // Bitmaps created for screenshots are hardware bitmaps. Copy to a software bitmap in order
+        // to update size for previews.
+        Bitmap swBitmap = data.image.copy(Bitmap.Config.ARGB_8888, true);
+
         Bitmap picture = Bitmap.createBitmap(previewWidth, previewHeight, Bitmap.Config.ARGB_8888);
         matrix.setTranslate((previewWidth - mImageWidth) / 2, (previewHeight - mImageHeight) / 2);
         c.setBitmap(picture);
-        c.drawBitmap(data.image, matrix, paint);
+        c.drawBitmap(swBitmap, matrix, paint);
         c.drawColor(overlayColor);
         c.setBitmap(null);
 
@@ -175,7 +179,7 @@ class SaveImageInBackgroundTask extends AsyncTask<Void, Void, Void> {
         matrix.postTranslate((iconSize - (scale * mImageWidth)) / 2,
                 (iconSize - (scale * mImageHeight)) / 2);
         c.setBitmap(icon);
-        c.drawBitmap(data.image, matrix, paint);
+        c.drawBitmap(swBitmap, matrix, paint);
         c.drawColor(overlayColor);
         c.setBitmap(null);
 
