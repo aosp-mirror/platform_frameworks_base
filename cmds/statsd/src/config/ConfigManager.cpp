@@ -369,7 +369,7 @@ StatsdConfig build_fake_config() {
     GaugeMetric* gaugeMetric = config.add_gauge_metric();
     gaugeMetric->set_name("METRIC_10");
     gaugeMetric->set_what("DEVICE_TEMPERATURE");
-    gaugeMetric->set_gauge_field(DEVICE_TEMPERATURE_KEY);
+    gaugeMetric->mutable_gauge_fields()->add_field_num(DEVICE_TEMPERATURE_KEY);
     gaugeMetric->mutable_bucket()->set_bucket_size_millis(60 * 1000L);
 
     // Event matchers............

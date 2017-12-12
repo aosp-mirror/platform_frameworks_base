@@ -370,15 +370,11 @@ bool initMetrics(const ConfigKey& key, const StatsdConfig& config,
 
         sp<LogMatchingTracker> atomMatcher = allAtomMatchers.at(trackerIndex);
         // If it is pulled atom, it should be simple matcher with one tagId.
-        int pullTagId = -1;
-        for (int tagId : atomMatcher->getTagIds()) {
-            if (statsPullerManager.PullerForMatcherExists(tagId)) {
-                if (atomMatcher->getTagIds().size() != 1) {
-                    return false;
-                }
-                pullTagId = tagId;
-            }
+        if (atomMatcher->getTagIds().size() != 1) {
+            return false;
         }
+        int atomTagId = *(atomMatcher->getTagIds().begin());
+        int pullTagId = statsPullerManager.PullerForMatcherExists(atomTagId) ? atomTagId : -1;
 
         int conditionIndex = -1;
         if (metric.has_condition()) {
@@ -404,7 +400,17 @@ bool initMetrics(const ConfigKey& key, const StatsdConfig& config,
     for (int i = 0; i < config.gauge_metric_size(); i++) {
         const GaugeMetric& metric = config.gauge_metric(i);
         if (!metric.has_what()) {
-            ALOGW("cannot find \"what\" in ValueMetric \"%s\"", metric.name().c_str());
+            ALOGW("cannot find \"what\" in GaugeMetric \"%s\"", metric.name().c_str());
+            return false;
+        }
+
+        if (((!metric.gauge_fields().has_include_all() ||
+              (metric.gauge_fields().has_include_all() &&
+               metric.gauge_fields().include_all() == false)) &&
+             metric.gauge_fields().field_num_size() == 0) ||
+            (metric.gauge_fields().has_include_all() && metric.gauge_fields().include_all() == true &&
+             metric.gauge_fields().field_num_size() > 0)) {
+            ALOGW("Incorrect field filter setting in GaugeMetric %s", metric.name().c_str());
             return false;
         }
 
@@ -419,15 +425,11 @@ bool initMetrics(const ConfigKey& key, const StatsdConfig& config,
 
         sp<LogMatchingTracker> atomMatcher = allAtomMatchers.at(trackerIndex);
         // If it is pulled atom, it should be simple matcher with one tagId.
-        int pullTagId = -1;
-        for (int tagId : atomMatcher->getTagIds()) {
-            if (statsPullerManager.PullerForMatcherExists(tagId)) {
-                if (atomMatcher->getTagIds().size() != 1) {
-                    return false;
-                }
-                pullTagId = tagId;
-            }
+        if (atomMatcher->getTagIds().size() != 1) {
+            return false;
         }
+        int atomTagId = *(atomMatcher->getTagIds().begin());
+        int pullTagId = statsPullerManager.PullerForMatcherExists(atomTagId) ? atomTagId : -1;
 
         int conditionIndex = -1;
         if (metric.has_condition()) {
@@ -444,8 +446,8 @@ bool initMetrics(const ConfigKey& key, const StatsdConfig& config,
             }
         }
 
-        sp<MetricProducer> gaugeProducer = new GaugeMetricProducer(key, metric, conditionIndex,
-                                                                   wizard, pullTagId, startTimeNs);
+        sp<MetricProducer> gaugeProducer = new GaugeMetricProducer(
+                key, metric, conditionIndex, wizard, pullTagId, atomTagId, startTimeNs);
         allMetricProducers.push_back(gaugeProducer);
     }
     return true;

@@ -35,6 +35,9 @@ HashableDimensionKey getHashableKey(std::vector<KeyValuePair> keys) {
             case KeyValuePair::ValueCase::kValueInt:
                 flattened += std::to_string(pair.value_int());
                 break;
+            case KeyValuePair::ValueCase::kValueLong:
+                flattened += std::to_string(pair.value_long());
+                break;
             case KeyValuePair::ValueCase::kValueBool:
                 flattened += std::to_string(pair.value_bool());
                 break;
