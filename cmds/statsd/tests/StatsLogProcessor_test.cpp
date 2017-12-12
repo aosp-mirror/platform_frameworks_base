@@ -32,6 +32,8 @@ namespace android {
 namespace os {
 namespace statsd {
 
+using android::util::ProtoOutputStream;
+
 #ifdef __ANDROID__
 
 /**
@@ -43,7 +45,7 @@ public:
     }
 
     MOCK_METHOD0(byteSize, size_t());
-    MOCK_METHOD0(onDumpReport, std::vector<std::unique_ptr<std::vector<uint8_t>>>());
+    MOCK_METHOD1(onDumpReport, void(ProtoOutputStream* output));
 };
 
 TEST(StatsLogProcessorTest, TestRateLimitByteSize) {
@@ -101,7 +103,7 @@ TEST(StatsLogProcessorTest, TestDropWhenByteSizeTooLarge) {
             .Times(1)
             .WillRepeatedly(Return(int(StatsdStats::kMaxMetricsBytesPerConfig * 1.2)));
 
-    EXPECT_CALL(mockMetricsManager, onDumpReport()).Times(1);
+    EXPECT_CALL(mockMetricsManager, onDumpReport(_)).Times(1);
 
     // Expect to call the onDumpReport and skip the broadcast.
     p.flushIfNecessary(1, key, mockMetricsManager);

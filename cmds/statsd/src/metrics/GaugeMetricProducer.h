@@ -56,8 +56,6 @@ public:
     // Handles when the pulled data arrives.
     void onDataPulled(const std::vector<std::shared_ptr<LogEvent>>& data) override;
 
-    void finish() override;
-
     // TODO: Implement this later.
     virtual void notifyAppUpgrade(const string& apk, const int uid, const int64_t version)
             override{};
@@ -71,8 +69,8 @@ protected:
             const LogEvent& event, bool scheduledPull) override;
 
 private:
-    // TODO: Pass a timestamp as a parameter in onDumpReport.
-    std::unique_ptr<std::vector<uint8_t>> onDumpReportLocked() override;
+    void onDumpReportLocked(const uint64_t dumpTimeNs,
+                            android::util::ProtoOutputStream* protoOutput) override;
 
     // Internal interface to handle condition change.
     void onConditionChangedLocked(const bool conditionMet, const uint64_t eventTime) override;
@@ -85,9 +83,6 @@ private:
 
     // Util function to flush the old packet.
     void flushIfNeededLocked(const uint64_t& eventTime);
-
-    // Util function to init/reset the proto output stream.
-    void startNewProtoOutputStreamLocked(long long timestamp);
 
     // The default bucket size for gauge metric is 1 second.
     static const uint64_t kDefaultGaugemBucketSizeNs = 1000 * 1000 * 1000;
