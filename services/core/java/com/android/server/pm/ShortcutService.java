@@ -330,7 +330,10 @@ public class ShortcutService extends IShortcutService.Stub {
                     | PackageManager.MATCH_DIRECT_BOOT_UNAWARE
                     | PackageManager.MATCH_UNINSTALLED_PACKAGES;
 
-    @GuardedBy("mLock")
+    /**
+     * Note we use a fine-grained lock for {@link #mUnlockedUsers} due to b/64303666.
+     */
+    @GuardedBy("mUnlockedUsers")
     final SparseBooleanArray mUnlockedUsers = new SparseBooleanArray();
 
     // Stats
@@ -600,7 +603,7 @@ public class ShortcutService extends IShortcutService.Stub {
         if (DEBUG) {
         Slog.d(TAG, "handleUnlockUser: user=" + userId);
         }
-        synchronized (mLock) {
+        synchronized (mUnlockedUsers) {
             mUnlockedUsers.put(userId, true);
         }
 
@@ -628,7 +631,9 @@ public class ShortcutService extends IShortcutService.Stub {
         synchronized (mLock) {
             unloadUserLocked(userId);
 
-            mUnlockedUsers.put(userId, false);
+            synchronized (mUnlockedUsers) {
+                mUnlockedUsers.put(userId, false);
+            }
         }
     }
 
@@ -1149,9 +1154,12 @@ public class ShortcutService extends IShortcutService.Stub {
     // Requires mLock held, but "Locked" prefix would look weired so we just say "L".
     protected boolean isUserUnlockedL(@UserIdInt int userId) {
         // First, check the local copy.
-        if (mUnlockedUsers.get(userId)) {
-            return true;
+        synchronized (mUnlockedUsers) {
+            if (mUnlockedUsers.get(userId)) {
+                return true;
+            }
         }
+        
         // If the local copy says the user is locked, check with AM for the actual state, since
         // the user might just have been unlocked.
         // Note we just don't use isUserUnlockingOrUnlocked() here, because it'll return false
