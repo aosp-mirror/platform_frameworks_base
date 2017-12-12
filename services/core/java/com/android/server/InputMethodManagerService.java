@@ -4655,6 +4655,8 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
                     return mService.handleShellCommandEnableDisableInputMethod(this, false);
                 case "set":
                     return mService.handleShellCommandSetInputMethod(this);
+                case "reset-ime":
+                    return mService.handleShellCommandResetInputMethod(this);
                 default:
                     return handleDefaultCommands(cmd);
             }
@@ -4679,6 +4681,9 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
                 pw.println("    disallows the given input method ID to be used.");
                 pw.println("  set <ID>");
                 pw.println("    switches to the given input method ID.");
+                pw.println("  reset-ime");
+                pw.println("    reset currently selected/enabled IMEs to the default ones as if");
+                pw.println("    the device is initially booted with the current locale.");
             }
         }
     }
@@ -4787,5 +4792,85 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
         pr.print(id);
         pr.println("  selected");
         return ShellCommandResult.SUCCESS;
+    }
+
+    /**
+     * Handles {@code adb shell ime reset-ime}.
+     * @param shellCommand {@link ShellCommand} object that is handling this command.
+     * @return Exit code of the command.
+     */
+    @BinderThread
+    @ShellCommandResult
+    @RequiresPermission(Manifest.permission.WRITE_SECURE_SETTINGS)
+    private int handleShellCommandResetInputMethod(@NonNull ShellCommand shellCommand) {
+        if (!calledFromValidUser()) {
+            shellCommand.getErrPrintWriter().print(
+                    "Must be called from the foreground user or with INTERACT_ACROSS_USERS_FULL");
+            return ShellCommandResult.FAILURE;
+        }
+        synchronized (mMethodMap) {
+            if (mContext.checkCallingOrSelfPermission(
+                    android.Manifest.permission.WRITE_SECURE_SETTINGS)
+                    != PackageManager.PERMISSION_GRANTED) {
+                shellCommand.getErrPrintWriter().print(
+                        "Caller must have WRITE_SECURE_SETTINGS permission");
+                throw new SecurityException(
+                        "Requires permission "
+                                + android.Manifest.permission.WRITE_SECURE_SETTINGS);
+            }
+            final String nextIme;
+            final List<InputMethodInfo> nextEnabledImes;
+            final long ident = Binder.clearCallingIdentity();
+            try {
+                synchronized (mMethodMap) {
+                    hideCurrentInputLocked(0, null);
+                    unbindCurrentMethodLocked(false);
+                    // Reset the current IME
+                    resetSelectedInputMethodAndSubtypeLocked(null);
+                    // Also reset the settings of the current IME
+                    mSettings.putSelectedInputMethod(null);
+                    // Disable all enabled IMEs.
+                    {
+                        final ArrayList<InputMethodInfo> enabledImes =
+                                mSettings.getEnabledInputMethodListLocked();
+                        final int N = enabledImes.size();
+                        for (int i = 0; i < N; ++i) {
+                            setInputMethodEnabledLocked(enabledImes.get(i).getId(), false);
+                        }
+                    }
+                    // Re-enable with default enabled IMEs.
+                    {
+                        final ArrayList<InputMethodInfo> defaultEnabledIme =
+                                InputMethodUtils.getDefaultEnabledImes(mContext, mMethodList);
+                        final int N = defaultEnabledIme.size();
+                        for (int i = 0; i < N; ++i) {
+                            setInputMethodEnabledLocked(defaultEnabledIme.get(i).getId(), true);
+                        }
+                    }
+                    updateInputMethodsFromSettingsLocked(true /* enabledMayChange */);
+                    InputMethodUtils.setNonSelectedSystemImesDisabledUntilUsed(mIPackageManager,
+                            mSettings.getEnabledInputMethodListLocked(),
+                            mSettings.getCurrentUserId(),
+                            mContext.getBasePackageName());
+                    nextIme = mSettings.getSelectedInputMethod();
+                    nextEnabledImes = getEnabledInputMethodList();
+                }
+            } finally {
+                Binder.restoreCallingIdentity(ident);
+            }
+            final PrintWriter pr = shellCommand.getOutPrintWriter();
+            pr.println("Reset current and enabled IMEs");
+            pr.println("Newly selected IME:");
+            pr.print("  "); pr.println(nextIme);
+            pr.println("Newly enabled IMEs:");
+            {
+                final int N = nextEnabledImes.size();
+                for (int i = 0; i < N; ++i) {
+                    pr.print("  ");
+                    pr.println(nextEnabledImes.get(i).getId());
+                }
+            }
+            return ShellCommandResult.SUCCESS;
+        }
     }
 }
