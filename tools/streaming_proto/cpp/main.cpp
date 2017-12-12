@@ -85,11 +85,17 @@ should_generate_fields_mapping(const DescriptorProto& message)
     return message.options().GetExtension(stream_msg).enable_fields_mapping();
 }
 
+static inline bool
+should_generate_fields_mapping_recursively(const DescriptorProto& message) {
+    return message.options().GetExtension(stream_msg).enable_fields_mapping_recursively();
+}
+
 static void
-write_message(stringstream& text, const DescriptorProto& message, const string& indent)
+write_message(stringstream& text, const DescriptorProto& message, const string& indent, bool genMapping)
 {
     int N;
     const string indented = indent + INDENT;
+    genMapping |= should_generate_fields_mapping_recursively(message);
 
     text << indent << "// message " << message.name() << endl;
     text << indent << "namespace " << message.name() << " {" << endl;
@@ -103,7 +109,7 @@ write_message(stringstream& text, const DescriptorProto& message, const string& 
     // Nested classes
     N = message.nested_type_size();
     for (int i=0; i<N; i++) {
-        write_message(text, message.nested_type(i), indented);
+        write_message(text, message.nested_type(i), indented, genMapping);
     }
 
     // Fields
@@ -112,7 +118,7 @@ write_message(stringstream& text, const DescriptorProto& message, const string& 
         write_field(text, message.field(i), indented);
     }
 
-    if (should_generate_fields_mapping(message)) {
+    if (genMapping | should_generate_fields_mapping(message)) {
         N = message.field_size();
         text << indented << "const int _FIELD_COUNT = " << N << ";" << endl;
         text << indented << "const char* _FIELD_NAMES[" << N << "] = {" << endl;
@@ -161,7 +167,7 @@ write_header_file(CodeGeneratorResponse* response, const FileDescriptorProto& fi
 
     N = file_descriptor.message_type_size();
     for (size_t i=0; i<N; i++) {
-        write_message(text, file_descriptor.message_type(i), "");
+        write_message(text, file_descriptor.message_type(i), "", false);
     }
 
     for (vector<string>::iterator it = namespaces.begin(); it != namespaces.end(); it++) {

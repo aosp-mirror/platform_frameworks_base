@@ -1,3 +1,4 @@
+[aac_drc_cut]: [123]
 [aaudio.hw_burst_min_usec]: [2000]
 [aaudio.mmap_exclusive_policy]: [2]
 [dalvik.vm.appimageformat]: [lz4]
@@ -10,4 +11,6 @@
 [ro.bootimage.build.fingerprint]: [google/marlin/marlin:P/MASTER/jinyithu10301320:eng/dev-keys]
 [ro.hardware]: [marlin]
 [ro.hardware.power]: [marlin-profile]
+[ro.product.cpu.abilist]: [arm64-v8a,armeabi-v7a,armeabi]
+[ro.product.vendor.brand]: [google]
 [ro.wifi.channels]: []
