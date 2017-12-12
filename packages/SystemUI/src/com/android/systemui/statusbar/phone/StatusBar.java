@@ -5148,7 +5148,15 @@ public class StatusBar extends SystemUI implements DemoMode,
         Trace.endSection();
     }
 
-    public void updateScrimController() {
+    @VisibleForTesting
+    void updateScrimController() {
+        Trace.beginSection("StatusBar#updateScrimController");
+
+        // We don't want to end up in KEYGUARD state when we're unlocking with
+        // fingerprint from doze. We should cross fade directly from black.
+        final boolean wakeAndUnlocking = mFingerprintUnlockController.getMode()
+                == FingerprintUnlockController.MODE_WAKE_AND_UNLOCK;
+
         if (mBouncerShowing) {
             mScrimController.transitionTo(ScrimState.BOUNCER);
         } else if (mLaunchCameraOnScreenTurningOn || isInLaunchTransition()) {
@@ -5159,11 +5167,12 @@ public class StatusBar extends SystemUI implements DemoMode,
             // Handled in DozeScrimController#setPulsing
         } else if (mDozing) {
             mScrimController.transitionTo(ScrimState.AOD);
-        } else if (mIsKeyguard) {
+        } else if (mIsKeyguard && !wakeAndUnlocking) {
             mScrimController.transitionTo(ScrimState.KEYGUARD);
         } else {
             mScrimController.transitionTo(ScrimState.UNLOCKED, mUnlockScrimCallback);
         }
+        Trace.endSection();
     }
 
     public boolean isKeyguardShowing() {
