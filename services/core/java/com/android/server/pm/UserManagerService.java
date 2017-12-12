@@ -27,6 +27,7 @@ import android.app.Activity;
 import android.app.ActivityManager;
 import android.app.ActivityManagerInternal;
 import android.app.ActivityManagerNative;
+import android.app.AppOpsManager;
 import android.app.IActivityManager;
 import android.app.IStopUserCallback;
 import android.app.KeyguardManager;
@@ -38,6 +39,7 @@ import android.content.IntentFilter;
 import android.content.IntentSender;
 import android.content.pm.PackageManager;
 import android.content.pm.PackageManager.NameNotFoundException;
+import android.content.pm.ShortcutServiceInternal;
 import android.content.pm.UserInfo;
 import android.content.res.Resources;
 import android.graphics.Bitmap;
@@ -386,7 +388,7 @@ public class UserManagerService extends IUserManager.Stub {
     /**
      * Start an {@link IntentSender} when user is unlocked after disabling quiet mode.
      *
-     * @see {@link #trySetQuietModeEnabled(boolean, int, IntentSender)}
+     * @see {@link #trySetQuietModeEnabled(String, boolean, int, IntentSender)}
      */
     private class DisableQuietModeUserUnlockedCallback extends IProgressListener.Stub {
         private final IntentSender mTarget;
@@ -784,14 +786,20 @@ public class UserManagerService extends IUserManager.Stub {
     }
 
     @Override
-    public boolean trySetQuietModeEnabled(
-            boolean enableQuietMode, int userHandle, @Nullable IntentSender target) {
+    public boolean trySetQuietModeEnabled(@NonNull String callingPackage, boolean enableQuietMode,
+            int userHandle, @Nullable IntentSender target) {
+        Preconditions.checkNotNull(callingPackage);
+
         if (enableQuietMode && target != null) {
             throw new IllegalArgumentException(
                     "target should only be specified when we are disabling quiet mode.");
         }
 
-        checkManageUsersPermission("trySetQuietModeEnabled");
+        if (!isAllowedToSetWorkMode(callingPackage, Binder.getCallingUid())) {
+            throw new SecurityException("Not allowed to call trySetQuietModeEnabled, "
+                    + "caller is foreground default launcher "
+                    + "nor with MANAGE_USERS/MODIFY_QUIET_MODE permission");
+        }
 
         final long identity = Binder.clearCallingIdentity();
         try {
@@ -813,6 +821,38 @@ public class UserManagerService extends IUserManager.Stub {
         } finally {
             Binder.restoreCallingIdentity(identity);
         }
+    }
+
+    /**
+     * An app can modify quiet mode if the caller meets one of the condition:
+     * <ul>
+     *     <li>Has system UID or root UID</li>
+     *     <li>Has {@link Manifest.permission#MODIFY_QUIET_MODE}</li>
+     *     <li>Has {@link Manifest.permission#MANAGE_USERS}</li>
+     * </ul>
+     */
+    private boolean isAllowedToSetWorkMode(String callingPackage, int callingUid) {
+        if (hasManageUsersPermission()) {
+            return true;
+        }
+
+        final boolean hasModifyQuietModePermission = ActivityManager.checkComponentPermission(
+                Manifest.permission.MODIFY_QUIET_MODE,
+                callingUid, -1, true) == PackageManager.PERMISSION_GRANTED;
+        if (hasModifyQuietModePermission) {
+            return true;
+        }
+
+        final ShortcutServiceInternal shortcutInternal =
+                LocalServices.getService(ShortcutServiceInternal.class);
+        if (shortcutInternal != null) {
+            boolean isForegroundLauncher =
+                    shortcutInternal.isForegroundDefaultLauncher(callingPackage, callingUid);
+            if (isForegroundLauncher) {
+                return true;
+            }
+        }
+        return false;
     }
 
     private void setQuietModeEnabled(

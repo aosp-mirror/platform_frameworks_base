@@ -2111,34 +2111,46 @@ public class UserManager {
     }
 
     /**
-     * @see {@link #trySetQuietModeEnabled(boolean, UserHandle, IntentSender)}
+     * Enables or disables quiet mode for a managed profile. If quiet mode is enabled, apps in a
+     * managed profile don't run, generate notifications, or consume data or battery.
+     * <p>
+     * If a user's credential is needed to turn off quiet mode, a confirm credential screen will be
+     * shown to the user.
+     * <p>
+     * The change may not happen instantly, however apps can listen for
+     * {@link Intent#ACTION_MANAGED_PROFILE_AVAILABLE} and
+     * {@link Intent#ACTION_MANAGED_PROFILE_UNAVAILABLE} broadcasts in order to be notified of
+     * the change of the quiet mode. Apps can also check the current state of quiet mode by
+     * calling {@link #isQuietModeEnabled(UserHandle)}.
+     * <p>
+     * The caller must either be the foreground default launcher or have one of these permissions:
+     * {@code MANAGE_USERS} or {@code MODIFY_QUIET_MODE}.
      *
-     * @hide
+     * @param enableQuietMode whether quiet mode should be enabled or disabled
+     * @param userHandle user handle of the profile
+     * @return {@code false} if user's credential is needed in order to turn off quiet mode,
+     *         {@code true} otherwise
+     * @throws SecurityException if the caller is invalid
+     * @throws IllegalArgumentException if {@code userHandle} is not a managed profile
+     *
+     * @see #isQuietModeEnabled(UserHandle)
      */
     public boolean trySetQuietModeEnabled(boolean enableQuietMode, @NonNull UserHandle userHandle) {
         return trySetQuietModeEnabled(enableQuietMode, userHandle, null);
     }
 
     /**
-     * Set quiet mode of a managed profile. If quiet mode is on, work apps don't run, generate
-     * notifications, or consume data or the battery. You also can’t access work apps or widgets.
-     * <p>
-     * If user credential is needed, confirm credential screen would be shown to user.
+     * Similar to {@link #trySetQuietModeEnabled(boolean, UserHandle)}, except you can specify
+     * a target to start when user is unlocked.
      *
-     * @param enableQuietMode Whether work mode should be enabled or disabled.
-     * @param userHandle The user handle of the profile.
-     * @param target The target to start once work mode is enabled.
-     * @return {@code false} confirm credential screen is shown in order turn off quiet mode,
-     *         {@code true} otherwise.
-     * @throws IllegalArgumentException if enableWorkMode is {@code false} while target is not null.
-     * @throws IllegalArgumentException if userHandle is not a managed profile.
+     * @see {@link #trySetQuietModeEnabled(boolean, UserHandle)}
      * @hide
      */
     public boolean trySetQuietModeEnabled(
             boolean enableQuietMode, @NonNull UserHandle userHandle, IntentSender target) {
         try {
             return mService.trySetQuietModeEnabled(
-                    enableQuietMode, userHandle.getIdentifier(), target);
+                    mContext.getPackageName(), enableQuietMode, userHandle.getIdentifier(), target);
         } catch (RemoteException re) {
             throw re.rethrowFromSystemServer();
         }
