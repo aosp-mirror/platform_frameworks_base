@@ -31,7 +31,7 @@ message GraphicsStatsProto {
     optional string package_name = 1;
 
     // The version code of the app
-    optional int32 version_code = 2;
+    optional int64 version_code = 2;
 
     // The start & end timestamps in UTC as
     // milliseconds since January 1, 1970
