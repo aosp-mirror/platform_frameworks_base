@@ -111,8 +111,9 @@ java_type(const FieldDescriptor* field)
             return JAVA_TYPE_UNKNOWN;
         case FieldDescriptor::TYPE_MESSAGE:
             // TODO: not the final package name
-            if (field->message_type()->full_name() == "android.os.statsd.WorkSource") {
-                return JAVA_TYPE_WORK_SOURCE;
+            if (field->message_type()->full_name() ==
+                "android.os.statsd.AttributionChain") {
+              return JAVA_TYPE_ATTRIBUTION_CHAIN;
             } else {
                 return JAVA_TYPE_OBJECT;
             }
@@ -136,138 +137,153 @@ java_type(const FieldDescriptor* field)
 }
 
 /**
+ * Gather the info about an atom proto.
+ */
+int collate_atom(const Descriptor *atom, AtomDecl *atomDecl,
+                 vector<java_type_t> *signature) {
+
+  int errorCount = 0;
+  // Build a sorted list of the fields. Descriptor has them in source file
+  // order.
+  map<int, const FieldDescriptor *> fields;
+  for (int j = 0; j < atom->field_count(); j++) {
+    const FieldDescriptor *field = atom->field(j);
+    fields[field->number()] = field;
+  }
+
+  // Check that the parameters start at 1 and go up sequentially.
+  int expectedNumber = 1;
+  for (map<int, const FieldDescriptor *>::const_iterator it = fields.begin();
+       it != fields.end(); it++) {
+    const int number = it->first;
+    const FieldDescriptor *field = it->second;
+    if (number != expectedNumber) {
+      print_error(field,
+                  "Fields must be numbered consecutively starting at 1:"
+                  " '%s' is %d but should be %d\n",
+                  field->name().c_str(), number, expectedNumber);
+      errorCount++;
+      expectedNumber = number;
+      continue;
+    }
+    expectedNumber++;
+  }
+
+  // Check that only allowed types are present. Remove any invalid ones.
+  for (map<int, const FieldDescriptor *>::const_iterator it = fields.begin();
+       it != fields.end(); it++) {
+    const FieldDescriptor *field = it->second;
+
+    java_type_t javaType = java_type(field);
+
+    if (javaType == JAVA_TYPE_UNKNOWN) {
+      print_error(field, "Unkown type for field: %s\n", field->name().c_str());
+      errorCount++;
+      continue;
+    } else if (javaType == JAVA_TYPE_OBJECT) {
+      // Allow attribution chain, but only at position 1.
+      print_error(field, "Message type not allowed for field: %s\n",
+                  field->name().c_str());
+      errorCount++;
+      continue;
+    } else if (javaType == JAVA_TYPE_BYTE_ARRAY) {
+      print_error(field, "Raw bytes type not allowed for field: %s\n",
+                  field->name().c_str());
+      errorCount++;
+      continue;
+    }
+  }
+
+  // Check that if there's an attribution chain, it's at position 1.
+  for (map<int, const FieldDescriptor *>::const_iterator it = fields.begin();
+       it != fields.end(); it++) {
+    int number = it->first;
+    if (number != 1) {
+      const FieldDescriptor *field = it->second;
+      java_type_t javaType = java_type(field);
+      if (javaType == JAVA_TYPE_ATTRIBUTION_CHAIN) {
+        print_error(
+            field,
+            "AttributionChain fields must have field id 1, in message: '%s'\n",
+            atom->name().c_str());
+        errorCount++;
+      }
+    }
+  }
+
+  // Build the type signature and the atom data.
+  for (map<int, const FieldDescriptor *>::const_iterator it = fields.begin();
+       it != fields.end(); it++) {
+    const FieldDescriptor *field = it->second;
+    java_type_t javaType = java_type(field);
+
+    AtomField atField(field->name(), javaType);
+    if (javaType == JAVA_TYPE_ENUM) {
+      // All enums are treated as ints when it comes to function signatures.
+      signature->push_back(JAVA_TYPE_INT);
+      const EnumDescriptor *enumDescriptor = field->enum_type();
+      for (int i = 0; i < enumDescriptor->value_count(); i++) {
+        atField.enumValues[enumDescriptor->value(i)->number()] =
+            enumDescriptor->value(i)->name().c_str();
+      }
+    } else {
+      signature->push_back(javaType);
+    }
+    atomDecl->fields.push_back(atField);
+  }
+
+  return errorCount;
+}
+
+/**
  * Gather the info about the atoms.
  */
-int
-collate_atoms(const Descriptor* descriptor, Atoms* atoms)
-{
-    int errorCount = 0;
-    const bool dbg = false;
+int collate_atoms(const Descriptor *descriptor, Atoms *atoms) {
+  int errorCount = 0;
+  const bool dbg = false;
 
-    for (int i=0; i<descriptor->field_count(); i++) {
-        const FieldDescriptor* atomField = descriptor->field(i);
-
-        if (dbg) {
-            printf("   %s (%d)\n", atomField->name().c_str(), atomField->number());
-        }
-
-        // StatsEvent only has one oneof, which contains only messages. Don't allow other types.
-        if (atomField->type() != FieldDescriptor::TYPE_MESSAGE) {
-            print_error(atomField,
-                    "Bad type for atom. StatsEvent can only have message type fields: %s\n",
-                    atomField->name().c_str());
-            errorCount++;
-            continue;
-        }
-
-        const Descriptor* atom = atomField->message_type();
-
-        // Build a sorted list of the fields. Descriptor has them in source file order.
-        map<int,const FieldDescriptor*> fields;
-        for (int j=0; j<atom->field_count(); j++) {
-            const FieldDescriptor* field = atom->field(j);
-            fields[field->number()] = field;
-        }
-
-        // Check that the parameters start at 1 and go up sequentially.
-        int expectedNumber = 1;
-        for (map<int,const FieldDescriptor*>::const_iterator it = fields.begin();
-                it != fields.end(); it++) {
-            const int number = it->first;
-            const FieldDescriptor* field = it->second;
-            if (number != expectedNumber) {
-                print_error(field, "Fields must be numbered consecutively starting at 1:"
-                        " '%s' is %d but should be %d\n",
-                        field->name().c_str(), number, expectedNumber);
-                errorCount++;
-                expectedNumber = number;
-                continue;
-            }
-            expectedNumber++;
-        }
-
-        // Check that only allowed types are present. Remove any invalid ones.
-        for (map<int,const FieldDescriptor*>::const_iterator it = fields.begin();
-                it != fields.end(); it++) {
-            const FieldDescriptor* field = it->second;
-
-            java_type_t javaType = java_type(field);
-
-            if (javaType == JAVA_TYPE_UNKNOWN) {
-                print_error(field, "Unkown type for field: %s\n", field->name().c_str());
-                errorCount++;
-                continue;
-            } else if (javaType == JAVA_TYPE_OBJECT) {
-                // Allow WorkSources, but only at position 1.
-                print_error(field, "Message type not allowed for field: %s\n",
-                        field->name().c_str());
-                errorCount++;
-                continue;
-            } else if (javaType == JAVA_TYPE_BYTE_ARRAY) {
-                print_error(field, "Raw bytes type not allowed for field: %s\n",
-                        field->name().c_str());
-                errorCount++;
-                continue;
-            }
-        }
-
-        // Check that if there's a WorkSource, it's at position 1.
-        for (map<int,const FieldDescriptor*>::const_iterator it = fields.begin();
-                it != fields.end(); it++) {
-            int number = it->first;
-            if (number != 1) {
-                const FieldDescriptor* field = it->second;
-                java_type_t javaType = java_type(field);
-                if (javaType == JAVA_TYPE_WORK_SOURCE) {
-                    print_error(field, "WorkSource fields must have field id 1, in message: '%s'\n",
-                           atom->name().c_str());
-                    errorCount++;
-                }
-            }
-        }
-
-        AtomDecl atomDecl(atomField->number(), atomField->name(), atom->name());
-
-        // Build the type signature and the atom data.
-        vector<java_type_t> signature;
-        for (map<int,const FieldDescriptor*>::const_iterator it = fields.begin();
-                it != fields.end(); it++) {
-            const FieldDescriptor* field = it->second;
-            java_type_t javaType = java_type(field);
-
-            AtomField atField(field->name(), javaType);
-            if (javaType == JAVA_TYPE_ENUM) {
-                // All enums are treated as ints when it comes to function signatures.
-                signature.push_back(JAVA_TYPE_INT);
-                const EnumDescriptor* enumDescriptor = field->enum_type();
-                for (int i = 0; i < enumDescriptor->value_count(); i++) {
-                    atField.enumValues[enumDescriptor->value(i)->number()] =
-                        enumDescriptor->value(i)->name().c_str();
-                }
-            } else {
-                signature.push_back(javaType);
-            }
-            atomDecl.fields.push_back(atField);
-        }
-
-        atoms->signatures.insert(signature);
-        atoms->decls.insert(atomDecl);
-    }
+  for (int i = 0; i < descriptor->field_count(); i++) {
+    const FieldDescriptor *atomField = descriptor->field(i);
 
     if (dbg) {
-        printf("signatures = [\n");
-        for (set<vector<java_type_t>>::const_iterator it = atoms->signatures.begin();
-                it != atoms->signatures.end(); it++) {
-            printf("   ");
-            for (vector<java_type_t>::const_iterator jt = it->begin(); jt != it->end(); jt++) {
-                printf(" %d", (int)*jt);
-            }
-            printf("\n");
-        }
-        printf("]\n");
+      printf("   %s (%d)\n", atomField->name().c_str(), atomField->number());
     }
 
-    return errorCount;
+    // StatsEvent only has one oneof, which contains only messages. Don't allow
+    // other types.
+    if (atomField->type() != FieldDescriptor::TYPE_MESSAGE) {
+      print_error(atomField,
+                  "Bad type for atom. StatsEvent can only have message type "
+                  "fields: %s\n",
+                  atomField->name().c_str());
+      errorCount++;
+      continue;
+    }
+
+    const Descriptor *atom = atomField->message_type();
+    AtomDecl atomDecl(atomField->number(), atomField->name(), atom->name());
+    vector<java_type_t> signature;
+    errorCount += collate_atom(atom, &atomDecl, &signature);
+    atoms->signatures.insert(signature);
+    atoms->decls.insert(atomDecl);
+  }
+
+  if (dbg) {
+    printf("signatures = [\n");
+    for (set<vector<java_type_t>>::const_iterator it =
+             atoms->signatures.begin();
+         it != atoms->signatures.end(); it++) {
+      printf("   ");
+      for (vector<java_type_t>::const_iterator jt = it->begin();
+           jt != it->end(); jt++) {
+        printf(" %d", (int)*jt);
+      }
+      printf("\n");
+    }
+    printf("]\n");
+  }
+
+  return errorCount;
 }
 
 }  // namespace stats_log_api_gen

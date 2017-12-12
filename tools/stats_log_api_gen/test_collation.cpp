@@ -64,7 +64,7 @@ set_contains_vector(const set<vector<java_type_t>>& s, int count, ...)
         } \
     } while(0)
 
-/** Expects that exactly one specific field has expected enum values. */ 
+/** Expects that exactly one specific field has expected enum values. */
 #define EXPECT_HAS_ENUM_FIELD(atom, field_name, values)        \
     do { \
         for (vector<AtomField>::const_iterator field = atom->fields.begin(); \
@@ -95,24 +95,25 @@ TEST(CollationTest, CollateStats) {
     EXPECT_SET_CONTAINS_SIGNATURE(atoms.signatures, JAVA_TYPE_INT, JAVA_TYPE_INT);
 
     // AllTypesAtom
-    EXPECT_SET_CONTAINS_SIGNATURE(atoms.signatures,
-                JAVA_TYPE_WORK_SOURCE, // WorkSource
-                JAVA_TYPE_DOUBLE, // double
-                JAVA_TYPE_FLOAT, // float
-                JAVA_TYPE_LONG, // int64
-                JAVA_TYPE_LONG, // uint64
-                JAVA_TYPE_INT, // int32
-                JAVA_TYPE_LONG, // fixed64
-                JAVA_TYPE_INT, // fixed32
-                JAVA_TYPE_BOOLEAN, // bool
-                JAVA_TYPE_STRING, // string
-                JAVA_TYPE_INT, // uint32
-                JAVA_TYPE_INT, // AnEnum
-                JAVA_TYPE_INT, // sfixed32
-                JAVA_TYPE_LONG, // sfixed64
-                JAVA_TYPE_INT, // sint32
-                JAVA_TYPE_LONG // sint64
-            );
+    EXPECT_SET_CONTAINS_SIGNATURE(
+        atoms.signatures,
+        JAVA_TYPE_ATTRIBUTION_CHAIN, // AttributionChain
+        JAVA_TYPE_DOUBLE,            // double
+        JAVA_TYPE_FLOAT,             // float
+        JAVA_TYPE_LONG,              // int64
+        JAVA_TYPE_LONG,              // uint64
+        JAVA_TYPE_INT,               // int32
+        JAVA_TYPE_LONG,              // fixed64
+        JAVA_TYPE_INT,               // fixed32
+        JAVA_TYPE_BOOLEAN,           // bool
+        JAVA_TYPE_STRING,            // string
+        JAVA_TYPE_INT,               // uint32
+        JAVA_TYPE_INT,               // AnEnum
+        JAVA_TYPE_INT,               // sfixed32
+        JAVA_TYPE_LONG,              // sfixed64
+        JAVA_TYPE_INT,               // sint32
+        JAVA_TYPE_LONG               // sint64
+    );
 
     set<AtomDecl>::const_iterator atom = atoms.decls.begin();
     EXPECT_EQ(1, atom->code);
@@ -187,13 +188,15 @@ TEST(CollationTest, FailOnSkippedFieldsMultiple) {
 }
 
 /**
- * Test that atoms that have a WorkSource not in the first position are rejected.
+ * Test that atoms that have an attribution chain not in the first position are
+ * rejected.
  */
-TEST(CollationTest, FailBadWorkSourcePosition) {
-    Atoms atoms;
-    int errorCount = collate_atoms(BadWorkSourcePosition::descriptor(), &atoms);
+TEST(CollationTest, FailBadAttributionChainPosition) {
+  Atoms atoms;
+  int errorCount =
+      collate_atoms(BadAttributionChainPosition::descriptor(), &atoms);
 
-    EXPECT_EQ(1, errorCount);
+  EXPECT_EQ(1, errorCount);
 }
 
 }  // namespace stats_log_api_gen
