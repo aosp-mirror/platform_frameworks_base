@@ -93,6 +93,7 @@ import android.hardware.input.InputManagerInternal;
 import android.inputmethodservice.InputMethodService;
 import android.net.Uri;
 import android.os.Binder;
+import android.os.Build;
 import android.os.Bundle;
 import android.os.Debug;
 import android.os.Environment;
@@ -2723,10 +2724,12 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
             /* @InputMethodClient.StartInputReason */ final int startInputReason,
             IInputMethodClient client, IBinder windowToken, int controlFlags, int softInputMode,
             int windowFlags, @Nullable EditorInfo attribute, IInputContext inputContext,
-            /* @InputConnectionInspector.missingMethods */ final int missingMethods) {
+            /* @InputConnectionInspector.missingMethods */ final int missingMethods,
+            int unverifiedTargetSdkVersion) {
         if (windowToken != null) {
             return windowGainedFocus(startInputReason, client, windowToken, controlFlags,
-                    softInputMode, windowFlags, attribute, inputContext, missingMethods);
+                    softInputMode, windowFlags, attribute, inputContext, missingMethods,
+                    unverifiedTargetSdkVersion);
         } else {
             return startInput(startInputReason, client, inputContext, missingMethods, attribute,
                     controlFlags);
@@ -2738,7 +2741,8 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
             IInputMethodClient client, IBinder windowToken, int controlFlags,
             /* @android.view.WindowManager.LayoutParams.SoftInputModeFlags */ int softInputMode,
             int windowFlags, EditorInfo attribute, IInputContext inputContext,
-            /* @InputConnectionInspector.missingMethods */  final int missingMethods) {
+            /* @InputConnectionInspector.missingMethods */  final int missingMethods,
+            int unverifiedTargetSdkVersion) {
         // Needs to check the validity before clearing calling identity
         final boolean calledFromValidUser = calledFromValidUser();
         InputBindResult res = null;
@@ -2754,7 +2758,8 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
                         + " attribute=" + attribute
                         + " controlFlags=#" + Integer.toHexString(controlFlags)
                         + " softInputMode=" + InputMethodClient.softInputModeToString(softInputMode)
-                        + " windowFlags=#" + Integer.toHexString(windowFlags));
+                        + " windowFlags=#" + Integer.toHexString(windowFlags)
+                        + " unverifiedTargetSdkVersion=" + unverifiedTargetSdkVersion);
 
                 ClientState cs = mClients.get(client.asBinder());
                 if (cs == null) {
@@ -2868,22 +2873,37 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
                         if ((softInputMode &
                                 WindowManager.LayoutParams.SOFT_INPUT_IS_FORWARD_NAVIGATION) != 0) {
                             if (DEBUG) Slog.v(TAG, "Window asks to show input going forward");
-                            if (attribute != null) {
-                                res = startInputUncheckedLocked(cs, inputContext,
-                                        missingMethods, attribute, controlFlags, startInputReason);
-                                didStart = true;
+                            if (InputMethodUtils.isSoftInputModeStateVisibleAllowed(
+                                    unverifiedTargetSdkVersion, controlFlags)) {
+                                if (attribute != null) {
+                                    res = startInputUncheckedLocked(cs, inputContext,
+                                            missingMethods, attribute, controlFlags,
+                                            startInputReason);
+                                    didStart = true;
+                                }
+                                showCurrentInputLocked(InputMethodManager.SHOW_IMPLICIT, null);
+                            } else {
+                                Slog.e(TAG, "SOFT_INPUT_STATE_VISIBLE is ignored because"
+                                        + " there is no focused view that also returns true from"
+                                        + " View#onCheckIsTextEditor()");
                             }
-                            showCurrentInputLocked(InputMethodManager.SHOW_IMPLICIT, null);
                         }
                         break;
                     case WindowManager.LayoutParams.SOFT_INPUT_STATE_ALWAYS_VISIBLE:
                         if (DEBUG) Slog.v(TAG, "Window asks to always show input");
-                        if (attribute != null) {
-                            res = startInputUncheckedLocked(cs, inputContext, missingMethods,
-                                    attribute, controlFlags, startInputReason);
-                            didStart = true;
+                        if (InputMethodUtils.isSoftInputModeStateVisibleAllowed(
+                                unverifiedTargetSdkVersion, controlFlags)) {
+                            if (attribute != null) {
+                                res = startInputUncheckedLocked(cs, inputContext, missingMethods,
+                                        attribute, controlFlags, startInputReason);
+                                didStart = true;
+                            }
+                            showCurrentInputLocked(InputMethodManager.SHOW_IMPLICIT, null);
+                        } else {
+                            Slog.e(TAG, "SOFT_INPUT_STATE_ALWAYS_VISIBLE is ignored because"
+                                    + " there is no focused view that also returns true from"
+                                    + " View#onCheckIsTextEditor()");
                         }
-                        showCurrentInputLocked(InputMethodManager.SHOW_IMPLICIT, null);
                         break;
                 }
 
