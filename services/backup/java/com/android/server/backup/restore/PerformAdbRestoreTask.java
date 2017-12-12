@@ -591,7 +591,7 @@ public class PerformAdbRestoreTask implements Runnable {
                                         Slog.d(TAG,
                                                 "Clearing app data preparatory to full restore");
                                     }
-                                    mBackupManagerService.clearApplicationDataSynchronous(pkg);
+                                    mBackupManagerService.clearApplicationDataSynchronous(pkg, true);
                                 } else {
                                     if (DEBUG) {
                                         Slog.d(TAG, "backup agent ("

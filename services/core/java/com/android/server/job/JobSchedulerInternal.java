@@ -44,6 +44,11 @@ public interface JobSchedulerInternal {
     List<JobInfo> getSystemScheduledPendingJobs();
 
     /**
+     * Cancel the jobs for a given uid (e.g. when app data is cleared)
+     */
+    void cancelJobsForUid(int uid, String reason);
+
+    /**
      * These are for activity manager to communicate to use what is currently performing backups.
      */
     void addBackingUpUid(int uid);

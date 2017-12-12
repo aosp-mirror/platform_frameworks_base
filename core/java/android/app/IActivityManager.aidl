@@ -207,7 +207,7 @@ interface IActivityManager {
     boolean moveActivityTaskToBack(in IBinder token, boolean nonRoot);
     void getMemoryInfo(out ActivityManager.MemoryInfo outInfo);
     List<ActivityManager.ProcessErrorStateInfo> getProcessesInErrorState();
-    boolean clearApplicationUserData(in String packageName,
+    boolean clearApplicationUserData(in String packageName, boolean keepState,
             in IPackageDataObserver observer, int userId);
     void forceStopPackage(in String packageName, int userId);
     boolean killPids(in int[] pids, in String reason, boolean secure);
