@@ -177,6 +177,7 @@ import android.content.pm.UserInfo;
 import android.content.pm.VerifierDeviceIdentity;
 import android.content.pm.VerifierInfo;
 import android.content.pm.VersionedPackage;
+import android.content.pm.dex.DexMetadataHelper;
 import android.content.pm.dex.IArtManager;
 import android.content.res.Resources;
 import android.database.ContentObserver;
@@ -18469,6 +18470,7 @@ public class PackageManagerService extends IPackageManager.Stub
         final PackageParser.Package pkg;
         try {
             pkg = pp.parsePackage(tmpPackageFile, parseFlags);
+            DexMetadataHelper.validatePackageDexMetadata(pkg);
         } catch (PackageParserException e) {
             res.setError("Failed parse during installPackageLI", e);
             return;
