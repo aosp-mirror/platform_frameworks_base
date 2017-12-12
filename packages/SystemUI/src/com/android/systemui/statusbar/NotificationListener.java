@@ -37,10 +37,13 @@ public class NotificationListener extends NotificationListenerWithPlugins {
     private static final String TAG = "NotificationListener";
 
     private final NotificationPresenter mPresenter;
+    private final NotificationRemoteInputManager mRemoteInputManager;
     private final Context mContext;
 
-    public NotificationListener(NotificationPresenter presenter, Context context) {
+    public NotificationListener(NotificationPresenter presenter,
+            NotificationRemoteInputManager remoteInputManager, Context context) {
         mPresenter = presenter;
+        mRemoteInputManager = remoteInputManager;
         mContext = context;
     }
 
@@ -69,7 +72,7 @@ public class NotificationListener extends NotificationListenerWithPlugins {
             mPresenter.getHandler().post(() -> {
                 processForRemoteInput(sbn.getNotification(), mContext);
                 String key = sbn.getKey();
-                mPresenter.getKeysKeptForRemoteInput().remove(key);
+                mRemoteInputManager.getKeysKeptForRemoteInput().remove(key);
                 boolean isUpdate = mPresenter.getNotificationData().get(key) != null;
                 // In case we don't allow child notifications, we ignore children of
                 // notifications that have a summary, since` we're not going to show them
