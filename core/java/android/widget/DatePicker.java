@@ -524,12 +524,13 @@ public class DatePicker extends FrameLayout {
         void setAutoFillChangeListener(OnDateChangedListener onDateChangedListener);
 
         void updateDate(int year, int month, int dayOfMonth);
-        void updateDate(long date);
 
         int getYear();
         int getMonth();
         int getDayOfMonth();
-        long getDate();
+
+        void autofill(AutofillValue value);
+        AutofillValue getAutofillValue();
 
         void setFirstDayOfWeek(int firstDayOfWeek);
         int getFirstDayOfWeek();
@@ -572,6 +573,7 @@ public class DatePicker extends FrameLayout {
         // The context
         protected Context mContext;
 
+        // NOTE: when subclasses change this variable, they must call resetAutofilledValue().
         protected Calendar mCurrentDate;
 
         // The current locale
@@ -581,6 +583,11 @@ public class DatePicker extends FrameLayout {
         protected OnDateChangedListener mOnDateChangedListener;
         protected OnDateChangedListener mAutoFillChangeListener;
         protected ValidationCallback mValidationCallback;
+
+        // The value that was passed to autofill() - it must be stored because it getAutofillValue()
+        // must return the exact same value that was autofilled, otherwise the widget will not be
+        // properly highlighted after autofill().
+        private long mAutofilledValue;
 
         public AbstractDatePickerDelegate(DatePicker delegator, Context context) {
             mDelegator = delegator;
@@ -612,16 +619,38 @@ public class DatePicker extends FrameLayout {
         }
 
         @Override
-        public void updateDate(long date) {
-            Calendar cal = Calendar.getInstance(mCurrentLocale);
-            cal.setTimeInMillis(date);
+        public final void autofill(AutofillValue value) {
+            if (value == null || !value.isDate()) {
+                Log.w(LOG_TAG, value + " could not be autofilled into " + this);
+                return;
+            }
+
+            final long time = value.getDateValue();
+
+            final Calendar cal = Calendar.getInstance(mCurrentLocale);
+            cal.setTimeInMillis(time);
             updateDate(cal.get(Calendar.YEAR), cal.get(Calendar.MONTH),
                     cal.get(Calendar.DAY_OF_MONTH));
+
+            // Must set mAutofilledValue *after* calling subclass method to make sure the value
+            // returned by getAutofillValue() matches it.
+            mAutofilledValue = time;
         }
 
         @Override
-        public long getDate() {
-            return mCurrentDate.getTimeInMillis();
+        public final AutofillValue getAutofillValue() {
+            final long time = mAutofilledValue != 0
+                    ? mAutofilledValue
+                    : mCurrentDate.getTimeInMillis();
+            return AutofillValue.forDate(time);
+        }
+
+        /**
+         * This method must be called every time the value of the year, month, and/or day is
+         * changed by a subclass method.
+         */
+        protected void resetAutofilledValue() {
+            mAutofilledValue = 0;
         }
 
         protected void onValidationChanged(boolean valid) {
@@ -777,12 +806,7 @@ public class DatePicker extends FrameLayout {
     public void autofill(AutofillValue value) {
         if (!isEnabled()) return;
 
-        if (!value.isDate()) {
-            Log.w(LOG_TAG, value + " could not be autofilled into " + this);
-            return;
-        }
-
-        mDelegate.updateDate(value.getDateValue());
+        mDelegate.autofill(value);
     }
 
     @Override
@@ -792,6 +816,6 @@ public class DatePicker extends FrameLayout {
 
     @Override
     public AutofillValue getAutofillValue() {
-        return isEnabled() ? AutofillValue.forDate(mDelegate.getDate()) : null;
+        return isEnabled() ? mDelegate.getAutofillValue() : null;
     }
 }

@@ -122,7 +122,7 @@ public abstract class InstantAppResolver {
             }
         }
         // Only log successful instant application resolution
-        if (resolutionStatus == RESOLUTION_SUCCESS) {
+        if (requestObj.resolveForStart && resolutionStatus == RESOLUTION_SUCCESS) {
             logMetrics(ACTION_INSTANT_APP_RESOLUTION_PHASE_ONE, startTime, token,
                     resolutionStatus);
         }
@@ -194,6 +194,7 @@ public abstract class InstantAppResolver {
                         requestObj.userId,
                         packageName,
                         splitName,
+                        requestObj.responseObj.installFailureActivity,
                         versionCode,
                         token,
                         false /*needsPhaseTwo*/);
@@ -239,6 +240,7 @@ public abstract class InstantAppResolver {
             int userId,
             @NonNull String instantAppPackageName,
             @Nullable String instantAppSplitName,
+            @Nullable ComponentName installFailureActivity,
             int versionCode,
             @Nullable String token,
             boolean needsPhaseTwo) {
@@ -260,15 +262,25 @@ public abstract class InstantAppResolver {
         // We have all of the data we need; just start the installer without a second phase
         if (!needsPhaseTwo) {
             // Intent that is launched if the package couldn't be installed for any reason.
-            if (failureIntent != null) {
+            if (failureIntent != null || installFailureActivity != null) {
                 try {
+                    final Intent onFailureIntent;
+                    if (installFailureActivity != null) {
+                        onFailureIntent = new Intent();
+                        onFailureIntent.setComponent(installFailureActivity);
+                        onFailureIntent.putExtra(Intent.EXTRA_SPLIT_NAME, instantAppSplitName);
+                        onFailureIntent.putExtra(Intent.EXTRA_INTENT, origIntent);
+                    } else {
+                        onFailureIntent = failureIntent;
+                    }
                     final IIntentSender failureIntentTarget = ActivityManager.getService()
                             .getIntentSender(
                                     ActivityManager.INTENT_SENDER_ACTIVITY, callingPackage,
                                     null /*token*/, null /*resultWho*/, 1 /*requestCode*/,
-                                    new Intent[] { failureIntent },
+                                    new Intent[] { onFailureIntent },
                                     new String[] { resolvedType },
-                                    PendingIntent.FLAG_CANCEL_CURRENT | PendingIntent.FLAG_ONE_SHOT
+                                    PendingIntent.FLAG_CANCEL_CURRENT
+                                            | PendingIntent.FLAG_ONE_SHOT
                                             | PendingIntent.FLAG_IMMUTABLE,
                                     null /*bOptions*/, userId);
                     intent.putExtra(Intent.EXTRA_EPHEMERAL_FAILURE,

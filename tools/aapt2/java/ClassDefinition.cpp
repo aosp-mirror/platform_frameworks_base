@@ -39,9 +39,23 @@ void MethodDefinition::WriteToStream(const StringPiece& prefix, bool final,
   *out << prefix << "}";
 }
 
+ClassDefinition::Result ClassDefinition::AddMember(std::unique_ptr<ClassMember> member) {
+  Result result = Result::kAdded;
+  auto iter = indexed_members_.find(member->GetName());
+  if (iter != indexed_members_.end()) {
+    // Overwrite the entry.
+    ordered_members_[iter->second].reset();
+    result = Result::kOverridden;
+  }
+
+  indexed_members_[member->GetName()] = ordered_members_.size();
+  ordered_members_.push_back(std::move(member));
+  return result;
+}
+
 bool ClassDefinition::empty() const {
-  for (const std::unique_ptr<ClassMember>& member : members_) {
-    if (!member->empty()) {
+  for (const std::unique_ptr<ClassMember>& member : ordered_members_) {
+    if (member != nullptr && !member->empty()) {
       return false;
     }
   }
@@ -50,7 +64,7 @@ bool ClassDefinition::empty() const {
 
 void ClassDefinition::WriteToStream(const StringPiece& prefix, bool final,
                                     std::ostream* out) const {
-  if (members_.empty() && !create_if_empty_) {
+  if (empty() && !create_if_empty_) {
     return;
   }
 
@@ -65,9 +79,14 @@ void ClassDefinition::WriteToStream(const StringPiece& prefix, bool final,
   std::string new_prefix = prefix.to_string();
   new_prefix.append(kIndent);
 
-  for (const std::unique_ptr<ClassMember>& member : members_) {
-    member->WriteToStream(new_prefix, final, out);
-    *out << "\n";
+  for (const std::unique_ptr<ClassMember>& member : ordered_members_) {
+    // There can be nullptr members when a member is added to the ClassDefinition
+    // and takes precedence over a previous member with the same name. The overridden member is
+    // set to nullptr.
+    if (member != nullptr) {
+      member->WriteToStream(new_prefix, final, out);
+      *out << "\n";
+    }
   }
 
   *out << prefix << "}";

@@ -16,9 +16,9 @@
 
 package android.net.wifi;
 
-import static org.junit.Assert.*;
-import static org.mockito.Mockito.timeout;
-import static org.mockito.Mockito.verify;
+import static com.google.common.truth.Truth.assertThat;
+
+import static org.junit.Assert.fail;
 import static org.mockito.Mockito.when;
 
 import android.content.Context;
@@ -34,12 +34,9 @@ import android.support.test.runner.AndroidJUnit4;
 
 import com.google.common.collect.ImmutableList;
 
-import org.junit.Rule;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.mockito.ArgumentCaptor;
-import org.mockito.Captor;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
@@ -54,7 +51,11 @@ import java.util.concurrent.TimeUnit;
 public class WifiNetworkScoreCacheTest {
 
     public static final String SSID = "ssid";
+    public static final String SSID2 = "ssid2";
+    public static final String SSID3 = "ssid3";
     public static final String FORMATTED_SSID = "\"" + SSID + "\"";
+    public static final String FORMATTED_SSID2 = "\"" + SSID2 + "\"";
+    public static final String FORMATTED_SSID3 = "\"" + SSID3 + "\"";
     public static final String BSSID = "AA:AA:AA:AA:AA:AA";
 
     public static final WifiKey VALID_KEY = new WifiKey(FORMATTED_SSID, BSSID);
@@ -120,13 +121,13 @@ public class WifiNetworkScoreCacheTest {
 
     @Test
     public void isScoredNetworkShouldReturnTrueAfterUpdateScoresIsCalled() {
-        assertTrue(mScoreCache.isScoredNetwork(VALID_SCAN_RESULT));
+        assertThat(mScoreCache.isScoredNetwork(VALID_SCAN_RESULT)).isTrue();
     }
 
     @Test
     public void isScoredNetworkShouldReturnFalseAfterClearScoresIsCalled() {
         mScoreCache.clearScores();
-        assertFalse(mScoreCache.isScoredNetwork(VALID_SCAN_RESULT));
+        assertThat(mScoreCache.isScoredNetwork(VALID_SCAN_RESULT)).isFalse();
     }
 
     @Test
@@ -137,19 +138,19 @@ public class WifiNetworkScoreCacheTest {
 
         mScoreCache.updateScores(ImmutableList.of(network2));
 
-        assertTrue(mScoreCache.isScoredNetwork(VALID_SCAN_RESULT));
-        assertTrue(mScoreCache.isScoredNetwork(result2));
+        assertThat(mScoreCache.isScoredNetwork(VALID_SCAN_RESULT)).isTrue();
+        assertThat(mScoreCache.isScoredNetwork(result2)).isTrue();
     }
 
     @Test
     public void hasScoreCurveShouldReturnTrue() {
-        assertTrue(mScoreCache.hasScoreCurve(VALID_SCAN_RESULT));
+        assertThat(mScoreCache.hasScoreCurve(VALID_SCAN_RESULT)).isTrue();
     }
 
     @Test
     public void hasScoreCurveShouldReturnFalseWhenNoCachedNetwork() {
         ScanResult unscored = buildScanResult("fake", BSSID);
-        assertFalse(mScoreCache.hasScoreCurve(unscored));
+        assertThat(mScoreCache.hasScoreCurve(unscored)).isFalse();
     }
 
     @Test
@@ -157,7 +158,7 @@ public class WifiNetworkScoreCacheTest {
         ScoredNetwork noCurve = buildScoredNetwork(VALID_KEY, null /* rssiCurve */);
         mScoreCache.updateScores(ImmutableList.of(noCurve));
 
-        assertFalse(mScoreCache.hasScoreCurve(VALID_SCAN_RESULT));
+        assertThat(mScoreCache.hasScoreCurve(VALID_SCAN_RESULT)).isFalse();
     }
 
     @Test
@@ -169,12 +170,12 @@ public class WifiNetworkScoreCacheTest {
 
         when(mockRssiCurve.lookupScore(rssi)).thenReturn(score);
 
-        assertEquals(score, mScoreCache.getNetworkScore(result));
+        assertThat(mScoreCache.getNetworkScore(result)).isEqualTo(score);
     }
 
     @Test
     public void getMeteredHintShouldReturnFalse() {
-        assertFalse(mScoreCache.getMeteredHint(VALID_SCAN_RESULT));
+        assertThat(mScoreCache.getMeteredHint(VALID_SCAN_RESULT)).isFalse();
     }
 
     @Test
@@ -184,7 +185,7 @@ public class WifiNetworkScoreCacheTest {
                     new NetworkKey(VALID_KEY), mockRssiCurve, true /* metered Hint */);
         mScoreCache.updateScores(ImmutableList.of(network));
 
-        assertTrue(mScoreCache.getMeteredHint(VALID_SCAN_RESULT));
+        assertThat(mScoreCache.getMeteredHint(VALID_SCAN_RESULT)).isTrue();
     }
 
     @Test
@@ -197,7 +198,28 @@ public class WifiNetworkScoreCacheTest {
         } catch (InterruptedException e) {
             fail("Interrupted Exception while waiting for listener to be invoked.");
         }
-        assertEquals("One network should be updated", 1, mUpdatedNetworksCaptor.size());
-        assertEquals(mValidScoredNetwork, mUpdatedNetworksCaptor.get(0));
+        // One network should be updated.
+        assertThat(mUpdatedNetworksCaptor.size()).isEqualTo(1);
+        assertThat(mUpdatedNetworksCaptor.get(0)).isEqualTo(mValidScoredNetwork);
+    }
+
+    @Test
+    public void leastRecentlyUsedScore_shouldBeEvictedFromCache() {
+        mScoreCache = new WifiNetworkScoreCache(mockContext, mCacheListener, 2 /* maxCacheSize */);
+
+        ScoredNetwork network1 = mValidScoredNetwork;
+        ScoredNetwork network2 = buildScoredNetwork(
+                new WifiKey(FORMATTED_SSID2, BSSID), mockRssiCurve);
+        ScoredNetwork network3 = buildScoredNetwork(
+                new WifiKey(FORMATTED_SSID3, BSSID), mockRssiCurve);
+        mScoreCache.updateScores(ImmutableList.of(network1));
+        mScoreCache.updateScores(ImmutableList.of(network2));
+
+        // First score should be evicted because max cache size has been reached.
+        mScoreCache.updateScores(ImmutableList.of(network3));
+
+        assertThat(mScoreCache.hasScoreCurve(buildScanResult(SSID2, BSSID))).isTrue();
+        assertThat(mScoreCache.hasScoreCurve(buildScanResult(SSID3, BSSID))).isTrue();
+        assertThat(mScoreCache.hasScoreCurve(VALID_SCAN_RESULT)).isFalse();
     }
 }

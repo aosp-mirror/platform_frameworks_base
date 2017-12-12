@@ -40,6 +40,11 @@ public class PackageManagerException extends Exception {
         this.error = error;
     }
 
+    public PackageManagerException(Throwable e) {
+        super(e);
+        this.error = PackageManager.INSTALL_FAILED_INTERNAL_ERROR;
+    }
+
     public static PackageManagerException from(PackageParserException e)
             throws PackageManagerException {
         throw new PackageManagerException(e.error, e.getMessage(), e.getCause());

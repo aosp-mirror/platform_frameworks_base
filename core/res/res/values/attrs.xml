@@ -69,6 +69,9 @@
         <!-- Max height of the autofill data set picker as a fraction of the screen height -->
         <attr name="autofillDatasetPickerMaxHeight" format="reference" />
 
+        <!-- Max height of the the autofill save custom subtitle as a fraction of the screen width/height -->
+        <attr name="autofillSaveCustomSubtitleMaxHeight" format="reference" />
+
         <!-- Default disabled alpha for widgets that set enabled/disabled alpha programmatically. -->
         <attr name="disabledAlpha" format="float" />
         <!-- The alpha applied to the foreground color to create the primary text color. -->
@@ -1888,6 +1891,7 @@
         <enum name="KEYCODE_SYSTEM_NAVIGATION_DOWN" value="281" />
         <enum name="KEYCODE_SYSTEM_NAVIGATION_LEFT" value="282" />
         <enum name="KEYCODE_SYSTEM_NAVIGATION_RIGHT" value="283" />
+        <enum name="KEYCODE_ALL_APPS" value="284" />
     </attr>
 
     <!-- ***************************************************************** -->
@@ -2052,6 +2056,14 @@
              Corresponds to {@link android.view.Window#setNavigationBarColor(int)}. -->
         <attr name="navigationBarColor" format="color" />
 
+        <!-- Shows a thin line of the specified color between the navigation bar and the app
+             content.
+             <p>For this to take effect, the window must be drawing the system bar backgrounds with
+             {@link android.R.attr#windowDrawsSystemBarBackgrounds} and the navigation bar must not
+             have been requested to be translucent with
+             {@link android.R.attr#windowTranslucentNavigation}. -->
+        <attr name="navigationBarDividerColor" format="color" />
+
         <!-- The duration, in milliseconds, of the window background fade duration
              when transitioning into or away from an Activity when called with an
              Activity Transition. Corresponds to
@@ -2084,6 +2096,16 @@
              {@link android.R.attr#windowBackground}.
              -->
         <attr name="windowSplashscreenContent" format="reference" />
+
+        <!-- If set, the navigation bar will be drawn such that it is
+             compatible with a light navigation bar background.
+             <p>For this to take effect, the window must be drawing the system bar backgrounds with
+             {@link android.R.attr#windowDrawsSystemBarBackgrounds} and the navigation bar must not
+             have been requested to be translucent with
+             {@link android.R.attr#windowTranslucentNavigation}.
+             Corresponds to setting {@link android.view.View#SYSTEM_UI_FLAG_LIGHT_NAVIGATION_BAR} on
+             the decor view. -->
+         <attr name="windowLightNavigationBar" format="boolean" />
     </declare-styleable>
 
     <!-- The set of attributes that describe a AlertDialog's theme. -->

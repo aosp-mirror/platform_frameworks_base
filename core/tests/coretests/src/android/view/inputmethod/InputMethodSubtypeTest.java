@@ -21,6 +21,7 @@ import android.test.InstrumentationTestCase;
 import android.test.suitebuilder.annotation.SmallTest;
 import android.view.inputmethod.InputMethodSubtype.InputMethodSubtypeBuilder;
 
+import java.util.Locale;
 import java.util.Objects;
 
 public class InputMethodSubtypeTest extends InstrumentationTestCase {
@@ -45,6 +46,38 @@ public class InputMethodSubtypeTest extends InstrumentationTestCase {
                 cloneViaParcel(createDummySubtype(localeString)).hashCode());
         assertEquals(createDummySubtype(localeString).hashCode(),
                 cloneViaParcel(cloneViaParcel(createDummySubtype(localeString))).hashCode());
+    }
+
+    @SmallTest
+    public void testLocaleObj_locale() {
+        final InputMethodSubtype usSubtype = createDummySubtype("en_US");
+        Locale localeObject = usSubtype.getLocaleObject();
+        assertEquals("en", localeObject.getLanguage());
+        assertEquals("US", localeObject.getCountry());
+
+        // The locale object should be cached.
+        assertTrue(localeObject == usSubtype.getLocaleObject());
+    }
+
+    @SmallTest
+    public void testLocaleObj_languageTag() {
+        final InputMethodSubtype usSubtype = createDummySubtypeUsingLanguageTag("en-US");
+        Locale localeObject = usSubtype.getLocaleObject();
+        assertNotNull(localeObject);
+        assertEquals("en", localeObject.getLanguage());
+        assertEquals("US", localeObject.getCountry());
+
+        // The locale object should be cached.
+        assertTrue(localeObject == usSubtype.getLocaleObject());
+    }
+
+    @SmallTest
+    public void testLocaleObj_emptyLocale() {
+        final InputMethodSubtype emptyLocaleSubtype = createDummySubtype("");
+        assertNull(emptyLocaleSubtype.getLocaleObject());
+        // It should continue returning null when called multiple times.
+        assertNull(emptyLocaleSubtype.getLocaleObject());
+        assertNull(emptyLocaleSubtype.getLocaleObject());
     }
 
     @SmallTest
@@ -94,11 +127,21 @@ public class InputMethodSubtypeTest extends InstrumentationTestCase {
         }
     }
 
-    private static final InputMethodSubtype createDummySubtype(final String locale) {
+    private static InputMethodSubtype createDummySubtype(final String locale) {
         final InputMethodSubtypeBuilder builder = new InputMethodSubtypeBuilder();
         return builder.setSubtypeNameResId(0)
                 .setSubtypeIconResId(0)
                 .setSubtypeLocale(locale)
+                .setIsAsciiCapable(true)
+                .build();
+    }
+
+    private static InputMethodSubtype createDummySubtypeUsingLanguageTag(
+            final String languageTag) {
+        final InputMethodSubtypeBuilder builder = new InputMethodSubtypeBuilder();
+        return builder.setSubtypeNameResId(0)
+                .setSubtypeIconResId(0)
+                .setLanguageTag(languageTag)
                 .setIsAsciiCapable(true)
                 .build();
     }

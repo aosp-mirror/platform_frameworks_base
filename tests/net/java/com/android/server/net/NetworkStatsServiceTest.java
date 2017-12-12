@@ -46,19 +46,17 @@ import static android.text.format.DateUtils.HOUR_IN_MILLIS;
 import static android.text.format.DateUtils.MINUTE_IN_MILLIS;
 import static android.text.format.DateUtils.WEEK_IN_MILLIS;
 
-import static com.android.server.net.NetworkStatsService.ACTION_NETWORK_STATS_POLL;
 import static com.android.internal.util.TestUtils.waitForIdleHandler;
+import static com.android.server.net.NetworkStatsService.ACTION_NETWORK_STATS_POLL;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
-import static org.mockito.Matchers.any;
-import static org.mockito.Matchers.anyInt;
-import static org.mockito.Matchers.anyLong;
-import static org.mockito.Mockito.when;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyInt;
+import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 import android.app.AlarmManager;
 import android.app.usage.NetworkStatsManager;
@@ -79,24 +77,21 @@ import android.net.NetworkTemplate;
 import android.os.ConditionVariable;
 import android.os.Handler;
 import android.os.HandlerThread;
-import android.os.INetworkManagementService;
 import android.os.IBinder;
+import android.os.INetworkManagementService;
 import android.os.Looper;
-import android.os.Messenger;
-import android.os.MessageQueue;
-import android.os.MessageQueue.IdleHandler;
 import android.os.Message;
+import android.os.Messenger;
 import android.os.PowerManager;
 import android.support.test.InstrumentationRegistry;
-import android.support.test.filters.SmallTest;
 import android.support.test.runner.AndroidJUnit4;
 import android.telephony.TelephonyManager;
-import android.test.AndroidTestCase;
+import android.test.suitebuilder.annotation.SmallTest;
+import android.util.Log;
 import android.util.TrustedTime;
 
 import com.android.internal.net.VpnInfo;
 import com.android.internal.util.test.BroadcastInterceptingContext;
-import com.android.server.net.NetworkStatsService;
 import com.android.server.net.NetworkStatsService.NetworkStatsSettings;
 import com.android.server.net.NetworkStatsService.NetworkStatsSettings.Config;
 
@@ -112,9 +107,7 @@ import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
 import java.io.File;
-import java.util.ArrayList;
 import java.util.Objects;
-import java.util.List;
 
 /**
  * Tests for {@link NetworkStatsService}.
@@ -983,7 +976,7 @@ public class NetworkStatsServiceTest {
 
         // verify summary API
         final NetworkStats stats = mSession.getSummaryForNetwork(template, start, end);
-        assertValues(stats, IFACE_ALL, UID_ALL, SET_DEFAULT, TAG_NONE, METERED_ALL, ROAMING_NO,
+        assertValues(stats, IFACE_ALL, UID_ALL, SET_ALL, TAG_NONE, METERED_ALL, ROAMING_ALL,
                 rxBytes, rxPackets, txBytes, txPackets, operations);
     }
 
@@ -1107,28 +1100,25 @@ public class NetworkStatsServiceTest {
             int tag, int metered, int roaming, long rxBytes, long rxPackets, long txBytes,
             long txPackets, int operations) {
         final NetworkStats.Entry entry = new NetworkStats.Entry();
-        List<Integer> sets = new ArrayList<>();
-        if (set == SET_DEFAULT || set == SET_ALL) {
-            sets.add(SET_DEFAULT);
-        }
-        if (set == SET_FOREGROUND || set == SET_ALL) {
-            sets.add(SET_FOREGROUND);
-        }
-
-        List<Integer> roamings = new ArrayList<>();
-        if (roaming == ROAMING_NO || roaming == ROAMING_ALL) {
-            roamings.add(ROAMING_NO);
-        }
-        if (roaming == ROAMING_YES || roaming == ROAMING_ALL) {
-            roamings.add(ROAMING_YES);
+        final int[] sets;
+        if (set == SET_ALL) {
+            sets = new int[] { SET_ALL, SET_DEFAULT, SET_FOREGROUND };
+        } else {
+            sets = new int[] { set };
         }
 
-        List<Integer> meterings = new ArrayList<>();
-        if (metered == METERED_NO || metered == METERED_ALL) {
-            meterings.add(METERED_NO);
+        final int[] roamings;
+        if (roaming == ROAMING_ALL) {
+            roamings = new int[] { ROAMING_ALL, ROAMING_YES, ROAMING_NO };
+        } else {
+            roamings = new int[] { roaming };
         }
-        if (metered == METERED_YES || metered == METERED_ALL) {
-            meterings.add(METERED_YES);
+
+        final int[] meterings;
+        if (metered == METERED_ALL) {
+            meterings = new int[] { METERED_ALL, METERED_YES, METERED_NO };
+        } else {
+            meterings = new int[] { metered };
         }
 
         for (int s : sets) {

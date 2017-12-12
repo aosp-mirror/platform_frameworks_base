@@ -29,11 +29,11 @@ import com.android.internal.annotations.VisibleForTesting;
  * sensor, as long as the device has a sensor capable of detecting gestures.
  * <p>
  * This capability must be declared by the service as
- * {@link AccessibilityServiceInfo#CAPABILITY_CAN_CAPTURE_FINGERPRINT_GESTURES}. It also requires
+ * {@link AccessibilityServiceInfo#CAPABILITY_CAN_REQUEST_FINGERPRINT_GESTURES}. It also requires
  * the permission {@link android.Manifest.permission#USE_FINGERPRINT}.
  * <p>
  * Because capturing fingerprint gestures may have side effects, services with the capability only
- * capture gestures when {@link AccessibilityServiceInfo#FLAG_CAPTURE_FINGERPRINT_GESTURES} is set.
+ * capture gestures when {@link AccessibilityServiceInfo#FLAG_REQUEST_FINGERPRINT_GESTURES} is set.
  * <p>
  * <strong>Note: </strong>The fingerprint sensor is used for authentication in critical use cases,
  * so services must carefully design their user's experience when performing gestures on the sensor.

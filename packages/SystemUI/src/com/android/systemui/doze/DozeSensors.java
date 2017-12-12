@@ -72,7 +72,7 @@ public class DozeSensors {
     public DozeSensors(Context context, AlarmManager alarmManager, SensorManager sensorManager,
             DozeParameters dozeParameters,
             AmbientDisplayConfiguration config, WakeLock wakeLock, Callback callback,
-            Consumer<Boolean> proxCallback) {
+            Consumer<Boolean> proxCallback, AlwaysOnDisplayPolicy policy) {
         mContext = context;
         mAlarmManager = alarmManager;
         mSensorManager = sensorManager;
@@ -112,7 +112,7 @@ public class DozeSensors {
                         true /* touchscreen */),
         };
 
-        mProxSensor = new ProxSensor();
+        mProxSensor = new ProxSensor(policy);
         mCallback = callback;
     }
 
@@ -206,17 +206,16 @@ public class DozeSensors {
 
     private class ProxSensor implements SensorEventListener {
 
-        static final long COOLDOWN_TRIGGER = 2 * 1000;
-        static final long COOLDOWN_PERIOD = 5 * 1000;
-
         boolean mRequested;
         boolean mRegistered;
         Boolean mCurrentlyFar;
         long mLastNear;
         final AlarmTimeout mCooldownTimer;
+        final AlwaysOnDisplayPolicy mPolicy;
 
 
-        public ProxSensor() {
+        public ProxSensor(AlwaysOnDisplayPolicy policy) {
+            mPolicy = policy;
             mCooldownTimer = new AlarmTimeout(mAlarmManager, this::updateRegistered,
                     "prox_cooldown", mHandler);
         }
@@ -264,11 +263,12 @@ public class DozeSensors {
                 // Sensor has been unregistered by the proxCallback. Do nothing.
             } else if (!mCurrentlyFar) {
                 mLastNear = now;
-            } else if (mCurrentlyFar && now - mLastNear < COOLDOWN_TRIGGER) {
+            } else if (mCurrentlyFar && now - mLastNear < mPolicy.proxCooldownTriggerMs) {
                 // If the last near was very recent, we might be using more power for prox
                 // wakeups than we're saving from turning of the screen. Instead, turn it off
                 // for a while.
-                mCooldownTimer.schedule(COOLDOWN_PERIOD, AlarmTimeout.MODE_IGNORE_IF_SCHEDULED);
+                mCooldownTimer.schedule(mPolicy.proxCooldownPeriodMs,
+                        AlarmTimeout.MODE_IGNORE_IF_SCHEDULED);
                 updateRegistered();
             }
         }

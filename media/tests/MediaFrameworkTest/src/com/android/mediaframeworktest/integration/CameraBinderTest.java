@@ -271,7 +271,7 @@ public class CameraBinderTest extends AndroidTestCase {
          * @see android.hardware.camera2.ICameraDeviceCallbacks#onRepeatingRequestError()
          */
         @Override
-        public void onRepeatingRequestError(long lastFrameNumber) {
+        public void onRepeatingRequestError(long lastFrameNumber, int repeatingRequestId) {
             // TODO Auto-generated method stub
         }
     }

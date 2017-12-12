@@ -20,7 +20,7 @@ import android.util.Log;
 
 /**
  * Automatic Gain Control (AGC).
- * <p>Automatic Gain Control (AGC) is an audio pre-processing which automatically normalizes the
+ * <p>Automatic Gain Control (AGC) is an audio pre-processor which automatically normalizes the
  * output of the captured signal by boosting or lowering input from the microphone to match a preset
  * level so that the output signal level is virtually constant.
  * AGC can be used by applications where the input signal dynamic range is not important but where

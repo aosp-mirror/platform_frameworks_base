@@ -1,0 +1,334 @@
+package android.test {
+
+  public abstract deprecated class ActivityInstrumentationTestCase<T extends android.app.Activity> extends android.test.ActivityTestCase {
+    ctor public ActivityInstrumentationTestCase(java.lang.String, java.lang.Class<T>);
+    ctor public ActivityInstrumentationTestCase(java.lang.String, java.lang.Class<T>, boolean);
+    method public T getActivity();
+    method public void testActivityTestCaseSetUpProperly() throws java.lang.Exception;
+  }
+
+  public abstract deprecated class ActivityInstrumentationTestCase2<T extends android.app.Activity> extends android.test.ActivityTestCase {
+    ctor public deprecated ActivityInstrumentationTestCase2(java.lang.String, java.lang.Class<T>);
+    ctor public ActivityInstrumentationTestCase2(java.lang.Class<T>);
+    method public T getActivity();
+    method public void setActivityInitialTouchMode(boolean);
+    method public void setActivityIntent(android.content.Intent);
+  }
+
+  public abstract deprecated class ActivityTestCase extends android.test.InstrumentationTestCase {
+    ctor public ActivityTestCase();
+    method protected android.app.Activity getActivity();
+    method protected void scrubClass(java.lang.Class<?>) throws java.lang.IllegalAccessException;
+    method protected void setActivity(android.app.Activity);
+  }
+
+  public abstract deprecated class ActivityUnitTestCase<T extends android.app.Activity> extends android.test.ActivityTestCase {
+    ctor public ActivityUnitTestCase(java.lang.Class<T>);
+    method public T getActivity();
+    method public int getFinishedActivityRequest();
+    method public int getRequestedOrientation();
+    method public android.content.Intent getStartedActivityIntent();
+    method public int getStartedActivityRequest();
+    method public boolean isFinishCalled();
+    method public void setActivityContext(android.content.Context);
+    method public void setApplication(android.app.Application);
+    method protected T startActivity(android.content.Intent, android.os.Bundle, java.lang.Object);
+  }
+
+  public deprecated class AndroidTestRunner extends junit.runner.BaseTestRunner {
+    ctor public AndroidTestRunner();
+    method public void addTestListener(junit.framework.TestListener);
+    method public void clearTestListeners();
+    method protected junit.framework.TestResult createTestResult();
+    method public java.util.List<junit.framework.TestCase> getTestCases();
+    method public java.lang.String getTestClassName();
+    method public junit.framework.TestResult getTestResult();
+    method protected java.lang.Class loadSuiteClass(java.lang.String) throws java.lang.ClassNotFoundException;
+    method protected void runFailed(java.lang.String);
+    method public void runTest();
+    method public void runTest(junit.framework.TestResult);
+    method public void setContext(android.content.Context);
+    method public deprecated void setInstrumentaiton(android.app.Instrumentation);
+    method public void setInstrumentation(android.app.Instrumentation);
+    method public void setTest(junit.framework.Test);
+    method public void setTestClassName(java.lang.String, java.lang.String);
+    method public void testEnded(java.lang.String);
+    method public void testFailed(int, junit.framework.Test, java.lang.Throwable);
+    method public void testStarted(java.lang.String);
+  }
+
+  public abstract deprecated class ApplicationTestCase<T extends android.app.Application> extends android.test.AndroidTestCase {
+    ctor public ApplicationTestCase(java.lang.Class<T>);
+    method protected final void createApplication();
+    method public T getApplication();
+    method public android.content.Context getSystemContext();
+    method protected final void terminateApplication();
+    method public final void testApplicationTestCaseSetUpProperly() throws java.lang.Exception;
+  }
+
+  public deprecated class AssertionFailedError extends java.lang.Error {
+    ctor public AssertionFailedError();
+    ctor public AssertionFailedError(java.lang.String);
+  }
+
+  public deprecated class ComparisonFailure extends android.test.AssertionFailedError {
+    ctor public ComparisonFailure(java.lang.String, java.lang.String, java.lang.String);
+  }
+
+  public deprecated class InstrumentationTestRunner extends android.app.Instrumentation implements android.test.TestSuiteProvider {
+    ctor public InstrumentationTestRunner();
+    method public junit.framework.TestSuite getAllTests();
+    method protected android.test.AndroidTestRunner getAndroidTestRunner();
+    method public android.os.Bundle getArguments();
+    method public java.lang.ClassLoader getLoader();
+    method public junit.framework.TestSuite getTestSuite();
+    field public static final java.lang.String REPORT_KEY_NAME_CLASS = "class";
+    field public static final java.lang.String REPORT_KEY_NAME_TEST = "test";
+    field public static final java.lang.String REPORT_KEY_NUM_CURRENT = "current";
+    field public static final java.lang.String REPORT_KEY_NUM_TOTAL = "numtests";
+    field public static final java.lang.String REPORT_KEY_STACK = "stack";
+    field public static final java.lang.String REPORT_VALUE_ID = "InstrumentationTestRunner";
+    field public static final int REPORT_VALUE_RESULT_ERROR = -1; // 0xffffffff
+    field public static final int REPORT_VALUE_RESULT_FAILURE = -2; // 0xfffffffe
+    field public static final int REPORT_VALUE_RESULT_OK = 0; // 0x0
+    field public static final int REPORT_VALUE_RESULT_START = 1; // 0x1
+  }
+
+  public deprecated class IsolatedContext extends android.content.ContextWrapper {
+    ctor public IsolatedContext(android.content.ContentResolver, android.content.Context);
+    method public java.util.List<android.content.Intent> getAndClearBroadcastIntents();
+  }
+
+  public class LoaderTestCase extends android.test.AndroidTestCase {
+    ctor public LoaderTestCase();
+    method public <T> T getLoaderResultSynchronously(android.content.Loader<T>);
+  }
+
+  public final deprecated class MoreAsserts {
+    method public static void assertAssignableFrom(java.lang.Class<?>, java.lang.Object);
+    method public static void assertAssignableFrom(java.lang.Class<?>, java.lang.Class<?>);
+    method public static java.util.regex.MatchResult assertContainsRegex(java.lang.String, java.lang.String, java.lang.String);
+    method public static java.util.regex.MatchResult assertContainsRegex(java.lang.String, java.lang.String);
+    method public static void assertContentsInAnyOrder(java.lang.String, java.lang.Iterable<?>, java.lang.Object...);
+    method public static void assertContentsInAnyOrder(java.lang.Iterable<?>, java.lang.Object...);
+    method public static void assertContentsInOrder(java.lang.String, java.lang.Iterable<?>, java.lang.Object...);
+    method public static void assertContentsInOrder(java.lang.Iterable<?>, java.lang.Object...);
+    method public static void assertEmpty(java.lang.String, java.lang.Iterable<?>);
+    method public static void assertEmpty(java.lang.Iterable<?>);
+    method public static void assertEmpty(java.lang.String, java.util.Map<?, ?>);
+    method public static void assertEmpty(java.util.Map<?, ?>);
+    method public static void assertEquals(java.lang.String, byte[], byte[]);
+    method public static void assertEquals(byte[], byte[]);
+    method public static void assertEquals(java.lang.String, int[], int[]);
+    method public static void assertEquals(int[], int[]);
+    method public static void assertEquals(java.lang.String, double[], double[]);
+    method public static void assertEquals(double[], double[]);
+    method public static void assertEquals(java.lang.String, java.lang.Object[], java.lang.Object[]);
+    method public static void assertEquals(java.lang.Object[], java.lang.Object[]);
+    method public static void assertEquals(java.lang.String, java.util.Set<? extends java.lang.Object>, java.util.Set<? extends java.lang.Object>);
+    method public static void assertEquals(java.util.Set<? extends java.lang.Object>, java.util.Set<? extends java.lang.Object>);
+    method public static java.util.regex.MatchResult assertMatchesRegex(java.lang.String, java.lang.String, java.lang.String);
+    method public static java.util.regex.MatchResult assertMatchesRegex(java.lang.String, java.lang.String);
+    method public static void assertNotContainsRegex(java.lang.String, java.lang.String, java.lang.String);
+    method public static void assertNotContainsRegex(java.lang.String, java.lang.String);
+    method public static void assertNotEmpty(java.lang.String, java.lang.Iterable<?>);
+    method public static void assertNotEmpty(java.lang.Iterable<?>);
+    method public static void assertNotEmpty(java.lang.String, java.util.Map<?, ?>);
+    method public static void assertNotEmpty(java.util.Map<?, ?>);
+    method public static void assertNotEqual(java.lang.String, java.lang.Object, java.lang.Object);
+    method public static void assertNotEqual(java.lang.Object, java.lang.Object);
+    method public static void assertNotMatchesRegex(java.lang.String, java.lang.String, java.lang.String);
+    method public static void assertNotMatchesRegex(java.lang.String, java.lang.String);
+    method public static void checkEqualsAndHashCodeMethods(java.lang.String, java.lang.Object, java.lang.Object, boolean);
+    method public static void checkEqualsAndHashCodeMethods(java.lang.Object, java.lang.Object, boolean);
+  }
+
+  public abstract deprecated class ProviderTestCase<T extends android.content.ContentProvider> extends android.test.InstrumentationTestCase {
+    ctor public ProviderTestCase(java.lang.Class<T>, java.lang.String);
+    method public android.test.mock.MockContentResolver getMockContentResolver();
+    method public android.test.IsolatedContext getMockContext();
+    method public T getProvider();
+    method public static <T extends android.content.ContentProvider> android.content.ContentResolver newResolverWithContentProviderFromSql(android.content.Context, java.lang.Class<T>, java.lang.String, java.lang.String, int, java.lang.String) throws java.lang.IllegalAccessException, java.lang.InstantiationException;
+  }
+
+  public abstract class ProviderTestCase2<T extends android.content.ContentProvider> extends android.test.AndroidTestCase {
+    ctor public ProviderTestCase2(java.lang.Class<T>, java.lang.String);
+    method public android.test.mock.MockContentResolver getMockContentResolver();
+    method public android.test.IsolatedContext getMockContext();
+    method public T getProvider();
+    method public static <T extends android.content.ContentProvider> android.content.ContentResolver newResolverWithContentProviderFromSql(android.content.Context, java.lang.String, java.lang.Class<T>, java.lang.String, java.lang.String, int, java.lang.String) throws java.lang.IllegalAccessException, java.lang.InstantiationException;
+  }
+
+  public deprecated class RenamingDelegatingContext extends android.content.ContextWrapper {
+    ctor public RenamingDelegatingContext(android.content.Context, java.lang.String);
+    ctor public RenamingDelegatingContext(android.content.Context, android.content.Context, java.lang.String);
+    method public java.lang.String getDatabasePrefix();
+    method public void makeExistingFilesAndDbsAccessible();
+    method public static <T extends android.content.ContentProvider> T providerWithRenamedContext(java.lang.Class<T>, android.content.Context, java.lang.String) throws java.lang.IllegalAccessException, java.lang.InstantiationException;
+    method public static <T extends android.content.ContentProvider> T providerWithRenamedContext(java.lang.Class<T>, android.content.Context, java.lang.String, boolean) throws java.lang.IllegalAccessException, java.lang.InstantiationException;
+  }
+
+  public abstract deprecated class ServiceTestCase<T extends android.app.Service> extends android.test.AndroidTestCase {
+    ctor public ServiceTestCase(java.lang.Class<T>);
+    method protected android.os.IBinder bindService(android.content.Intent);
+    method public android.app.Application getApplication();
+    method public T getService();
+    method public android.content.Context getSystemContext();
+    method public void setApplication(android.app.Application);
+    method protected void setupService();
+    method protected void shutdownService();
+    method protected void startService(android.content.Intent);
+    method public void testServiceTestCaseSetUpProperly() throws java.lang.Exception;
+  }
+
+  public abstract deprecated class SingleLaunchActivityTestCase<T extends android.app.Activity> extends android.test.InstrumentationTestCase {
+    ctor public SingleLaunchActivityTestCase(java.lang.String, java.lang.Class<T>);
+    method public T getActivity();
+    method public void testActivityTestCaseSetUpProperly() throws java.lang.Exception;
+  }
+
+  public deprecated class SyncBaseInstrumentation extends android.test.InstrumentationTestCase {
+    ctor public SyncBaseInstrumentation();
+    method protected void cancelSyncsandDisableAutoSync();
+    method protected void syncProvider(android.net.Uri, java.lang.String, java.lang.String) throws java.lang.Exception;
+  }
+
+  public abstract deprecated interface TestSuiteProvider {
+    method public abstract junit.framework.TestSuite getTestSuite();
+  }
+
+  public deprecated class TouchUtils {
+    ctor public TouchUtils();
+    method public static void clickView(android.test.InstrumentationTestCase, android.view.View);
+    method public static deprecated void drag(android.test.ActivityInstrumentationTestCase, float, float, float, float, int);
+    method public static void drag(android.test.InstrumentationTestCase, float, float, float, float, int);
+    method public static deprecated void dragQuarterScreenDown(android.test.ActivityInstrumentationTestCase);
+    method public static void dragQuarterScreenDown(android.test.InstrumentationTestCase, android.app.Activity);
+    method public static deprecated void dragQuarterScreenUp(android.test.ActivityInstrumentationTestCase);
+    method public static void dragQuarterScreenUp(android.test.InstrumentationTestCase, android.app.Activity);
+    method public static deprecated int dragViewBy(android.test.ActivityInstrumentationTestCase, android.view.View, int, int, int);
+    method public static deprecated int dragViewBy(android.test.InstrumentationTestCase, android.view.View, int, int, int);
+    method public static deprecated int dragViewTo(android.test.ActivityInstrumentationTestCase, android.view.View, int, int, int);
+    method public static int dragViewTo(android.test.InstrumentationTestCase, android.view.View, int, int, int);
+    method public static deprecated void dragViewToBottom(android.test.ActivityInstrumentationTestCase, android.view.View);
+    method public static void dragViewToBottom(android.test.InstrumentationTestCase, android.app.Activity, android.view.View);
+    method public static deprecated void dragViewToBottom(android.test.ActivityInstrumentationTestCase, android.view.View, int);
+    method public static void dragViewToBottom(android.test.InstrumentationTestCase, android.app.Activity, android.view.View, int);
+    method public static deprecated void dragViewToTop(android.test.ActivityInstrumentationTestCase, android.view.View);
+    method public static deprecated void dragViewToTop(android.test.ActivityInstrumentationTestCase, android.view.View, int);
+    method public static void dragViewToTop(android.test.InstrumentationTestCase, android.view.View);
+    method public static void dragViewToTop(android.test.InstrumentationTestCase, android.view.View, int);
+    method public static deprecated int dragViewToX(android.test.ActivityInstrumentationTestCase, android.view.View, int, int);
+    method public static int dragViewToX(android.test.InstrumentationTestCase, android.view.View, int, int);
+    method public static deprecated int dragViewToY(android.test.ActivityInstrumentationTestCase, android.view.View, int, int);
+    method public static int dragViewToY(android.test.InstrumentationTestCase, android.view.View, int, int);
+    method public static deprecated void longClickView(android.test.ActivityInstrumentationTestCase, android.view.View);
+    method public static void longClickView(android.test.InstrumentationTestCase, android.view.View);
+    method public static deprecated void scrollToBottom(android.test.ActivityInstrumentationTestCase, android.view.ViewGroup);
+    method public static void scrollToBottom(android.test.InstrumentationTestCase, android.app.Activity, android.view.ViewGroup);
+    method public static deprecated void scrollToTop(android.test.ActivityInstrumentationTestCase, android.view.ViewGroup);
+    method public static void scrollToTop(android.test.InstrumentationTestCase, android.app.Activity, android.view.ViewGroup);
+    method public static void tapView(android.test.InstrumentationTestCase, android.view.View);
+    method public static void touchAndCancelView(android.test.InstrumentationTestCase, android.view.View);
+  }
+
+  public deprecated class ViewAsserts {
+    method public static void assertBaselineAligned(android.view.View, android.view.View);
+    method public static void assertBottomAligned(android.view.View, android.view.View);
+    method public static void assertBottomAligned(android.view.View, android.view.View, int);
+    method public static void assertGroupContains(android.view.ViewGroup, android.view.View);
+    method public static void assertGroupIntegrity(android.view.ViewGroup);
+    method public static void assertGroupNotContains(android.view.ViewGroup, android.view.View);
+    method public static void assertHasScreenCoordinates(android.view.View, android.view.View, int, int);
+    method public static void assertHorizontalCenterAligned(android.view.View, android.view.View);
+    method public static void assertLeftAligned(android.view.View, android.view.View);
+    method public static void assertLeftAligned(android.view.View, android.view.View, int);
+    method public static void assertOffScreenAbove(android.view.View, android.view.View);
+    method public static void assertOffScreenBelow(android.view.View, android.view.View);
+    method public static void assertOnScreen(android.view.View, android.view.View);
+    method public static void assertRightAligned(android.view.View, android.view.View);
+    method public static void assertRightAligned(android.view.View, android.view.View, int);
+    method public static void assertTopAligned(android.view.View, android.view.View);
+    method public static void assertTopAligned(android.view.View, android.view.View, int);
+    method public static void assertVerticalCenterAligned(android.view.View, android.view.View);
+  }
+
+}
+
+package android.test.suitebuilder {
+
+  public deprecated class TestMethod {
+    ctor public TestMethod(java.lang.reflect.Method, java.lang.Class<? extends junit.framework.TestCase>);
+    ctor public TestMethod(java.lang.String, java.lang.Class<? extends junit.framework.TestCase>);
+    ctor public TestMethod(junit.framework.TestCase);
+    method public junit.framework.TestCase createTest() throws java.lang.IllegalAccessException, java.lang.InstantiationException, java.lang.reflect.InvocationTargetException;
+    method public <T extends java.lang.annotation.Annotation> T getAnnotation(java.lang.Class<T>);
+    method public java.lang.Class<? extends junit.framework.TestCase> getEnclosingClass();
+    method public java.lang.String getEnclosingClassname();
+    method public java.lang.String getName();
+  }
+
+  public deprecated class TestSuiteBuilder {
+    ctor public TestSuiteBuilder(java.lang.Class);
+    ctor public TestSuiteBuilder(java.lang.String, java.lang.ClassLoader);
+    method public final junit.framework.TestSuite build();
+    method public android.test.suitebuilder.TestSuiteBuilder excludePackages(java.lang.String...);
+    method protected java.lang.String getSuiteName();
+    method public final android.test.suitebuilder.TestSuiteBuilder includeAllPackagesUnderHere();
+    method public android.test.suitebuilder.TestSuiteBuilder includePackages(java.lang.String...);
+    method public android.test.suitebuilder.TestSuiteBuilder named(java.lang.String);
+  }
+
+  public static deprecated class TestSuiteBuilder.FailedToCreateTests extends junit.framework.TestCase {
+    ctor public TestSuiteBuilder.FailedToCreateTests(java.lang.Exception);
+    method public void testSuiteConstructionFailed();
+  }
+
+}
+
+package junit.runner {
+
+  public abstract class BaseTestRunner implements junit.framework.TestListener {
+    ctor public BaseTestRunner();
+    method public synchronized void addError(junit.framework.Test, java.lang.Throwable);
+    method public synchronized void addFailure(junit.framework.Test, junit.framework.AssertionFailedError);
+    method protected void clearStatus();
+    method public java.lang.String elapsedTimeAsString(long);
+    method public synchronized void endTest(junit.framework.Test);
+    method public java.lang.String extractClassName(java.lang.String);
+    method public static java.lang.String getFilteredTrace(java.lang.Throwable);
+    method public static java.lang.String getFilteredTrace(java.lang.String);
+    method public deprecated junit.runner.TestSuiteLoader getLoader();
+    method public static java.lang.String getPreference(java.lang.String);
+    method public static int getPreference(java.lang.String, int);
+    method protected static java.util.Properties getPreferences();
+    method public junit.framework.Test getTest(java.lang.String);
+    method public static deprecated boolean inVAJava();
+    method protected java.lang.Class<?> loadSuiteClass(java.lang.String) throws java.lang.ClassNotFoundException;
+    method protected java.lang.String processArguments(java.lang.String[]);
+    method protected abstract void runFailed(java.lang.String);
+    method public static void savePreferences() throws java.io.IOException;
+    method public void setLoading(boolean);
+    method public void setPreference(java.lang.String, java.lang.String);
+    method protected static void setPreferences(java.util.Properties);
+    method protected static boolean showStackRaw();
+    method public synchronized void startTest(junit.framework.Test);
+    method public abstract void testEnded(java.lang.String);
+    method public abstract void testFailed(int, junit.framework.Test, java.lang.Throwable);
+    method public abstract void testStarted(java.lang.String);
+    method public static java.lang.String truncate(java.lang.String);
+    method protected boolean useReloadingTestSuiteLoader();
+    field public static final java.lang.String SUITE_METHODNAME = "suite";
+  }
+
+  public abstract interface TestSuiteLoader {
+    method public abstract java.lang.Class load(java.lang.String) throws java.lang.ClassNotFoundException;
+    method public abstract java.lang.Class reload(java.lang.Class) throws java.lang.ClassNotFoundException;
+  }
+
+  public class Version {
+    method public static java.lang.String id();
+  }
+
+}
+

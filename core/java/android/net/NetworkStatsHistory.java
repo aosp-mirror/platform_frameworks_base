@@ -27,6 +27,7 @@ import static android.net.NetworkStatsHistory.Entry.UNKNOWN;
 import static android.net.NetworkStatsHistory.ParcelUtils.readLongArray;
 import static android.net.NetworkStatsHistory.ParcelUtils.writeLongArray;
 import static android.text.format.DateUtils.SECOND_IN_MILLIS;
+
 import static com.android.internal.util.ArrayUtils.total;
 
 import android.os.Parcel;
@@ -280,6 +281,24 @@ public class NetworkStatsHistory implements Parcelable {
         entry.txPackets = getLong(txPackets, i, UNKNOWN);
         entry.operations = getLong(operations, i, UNKNOWN);
         return entry;
+    }
+
+    public void setValues(int i, Entry entry) {
+        // Unwind old values
+        if (rxBytes != null) totalBytes -= rxBytes[i];
+        if (txBytes != null) totalBytes -= txBytes[i];
+
+        bucketStart[i] = entry.bucketStart;
+        setLong(activeTime, i, entry.activeTime);
+        setLong(rxBytes, i, entry.rxBytes);
+        setLong(rxPackets, i, entry.rxPackets);
+        setLong(txBytes, i, entry.txBytes);
+        setLong(txPackets, i, entry.txPackets);
+        setLong(operations, i, entry.operations);
+
+        // Apply new values
+        if (rxBytes != null) totalBytes += rxBytes[i];
+        if (txBytes != null) totalBytes += txBytes[i];
     }
 
     /**

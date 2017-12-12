@@ -54,6 +54,7 @@ public class DozeScrimController {
     private boolean mFullyPulsing;
 
     private float mAodFrontScrimOpacity = 0;
+    private Runnable mSetDozeInFrontAlphaDelayed;
 
     public DozeScrimController(ScrimController scrimController, Context context) {
         mContext = context;
@@ -69,8 +70,7 @@ public class DozeScrimController {
             mDozingAborted = false;
             abortAnimations();
             mScrimController.setDozeBehindAlpha(1f);
-            mScrimController.setDozeInFrontAlpha(
-                    mDozeParameters.getAlwaysOn() ? mAodFrontScrimOpacity : 1f);
+            setDozeInFrontAlpha(mDozeParameters.getAlwaysOn() ? mAodFrontScrimOpacity : 1f);
         } else {
             cancelPulsing();
             if (animate) {
@@ -83,7 +83,7 @@ public class DozeScrimController {
             } else {
                 abortAnimations();
                 mScrimController.setDozeBehindAlpha(0f);
-                mScrimController.setDozeInFrontAlpha(0f);
+                setDozeInFrontAlpha(0f);
             }
         }
     }
@@ -97,7 +97,7 @@ public class DozeScrimController {
         mAodFrontScrimOpacity = scrimOpacity;
         if (mDozing && !isPulsing() && !mDozingAborted && !mWakeAndUnlocking
                 && mDozeParameters.getAlwaysOn()) {
-            mScrimController.setDozeInFrontAlpha(mAodFrontScrimOpacity);
+            setDozeInFrontAlpha(mAodFrontScrimOpacity);
         }
     }
 
@@ -107,7 +107,7 @@ public class DozeScrimController {
         if (!mWakeAndUnlocking) {
             mWakeAndUnlocking = true;
             mScrimController.setDozeBehindAlpha(0f);
-            mScrimController.setDozeInFrontAlpha(0f);
+            setDozeInFrontAlpha(0f);
         }
     }
 
@@ -127,7 +127,7 @@ public class DozeScrimController {
         // be invoked when we're done so that the caller can drop the pulse wakelock.
         mPulseCallback = callback;
         mPulseReason = reason;
-        mScrimController.setDozeInFrontAlpha(1f);
+        setDozeInFrontAlpha(1f);
         mHandler.post(mPulseIn);
     }
 
@@ -138,9 +138,8 @@ public class DozeScrimController {
         cancelPulsing();
         if (mDozing && !mWakeAndUnlocking) {
             mScrimController.setDozeBehindAlpha(1f);
-            mScrimController.setDozeInFrontAlpha(
-                    mDozeParameters.getAlwaysOn() && !mDozingAborted ?
-                            mAodFrontScrimOpacity : 1f);
+            setDozeInFrontAlpha(mDozeParameters.getAlwaysOn() && !mDozingAborted
+                    ? mAodFrontScrimOpacity : 1f);
         }
     }
 
@@ -295,6 +294,25 @@ public class DozeScrimController {
                 : mScrimController.getDozeBehindAlpha();
     }
 
+    private void setDozeInFrontAlpha(float opacity) {
+        setDozeInFrontAlphaDelayed(opacity, 0 /* delay */);
+
+    }
+
+    private void setDozeInFrontAlphaDelayed(float opacity, long delayMs) {
+        if (mSetDozeInFrontAlphaDelayed != null) {
+            mHandler.removeCallbacks(mSetDozeInFrontAlphaDelayed);
+            mSetDozeInFrontAlphaDelayed = null;
+        }
+        if (delayMs <= 0) {
+            mScrimController.setDozeInFrontAlpha(opacity);
+        } else {
+            mHandler.postDelayed(mSetDozeInFrontAlphaDelayed = () -> {
+                setDozeInFrontAlpha(opacity);
+            }, delayMs);
+        }
+    }
+
     private final Runnable mPulseIn = new Runnable() {
         @Override
         public void run() {
@@ -364,7 +382,9 @@ public class DozeScrimController {
             // Signal that the pulse is all finished so we can turn the screen off now.
             DozeScrimController.this.pulseFinished();
             if (mDozeParameters.getAlwaysOn()) {
-                mScrimController.setDozeInFrontAlpha(mAodFrontScrimOpacity);
+                // Setting power states can happen after we push out the frame. Make sure we
+                // stay fully opaque until the power state request reaches the lower levels.
+                setDozeInFrontAlphaDelayed(mAodFrontScrimOpacity, 100);
             }
         }
     };

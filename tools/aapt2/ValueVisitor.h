@@ -80,7 +80,7 @@ struct ValueVisitor : public RawValueVisitor {
   }
 
   void VisitSubValues(Array* array) {
-    for (std::unique_ptr<Item>& item : array->items) {
+    for (std::unique_ptr<Item>& item : array->elements) {
       item->Accept(this);
     }
   }

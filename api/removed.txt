@@ -15,6 +15,7 @@ package android.app {
 
   public class Notification implements android.os.Parcelable {
     method public deprecated java.lang.String getChannel();
+    method public static java.lang.Class<? extends android.app.Notification.Style> getNotificationStyleClass(java.lang.String);
     method public deprecated long getTimeout();
     method public deprecated void setLatestEventInfo(android.content.Context, java.lang.CharSequence, java.lang.CharSequence, android.app.PendingIntent);
   }
@@ -24,31 +25,14 @@ package android.app {
     method public deprecated android.app.Notification.Builder setTimeout(long);
   }
 
-  public static final class Notification.TvExtender implements android.app.Notification.Extender {
-    method public deprecated java.lang.String getChannel();
-  }
-
   public final deprecated class PictureInPictureArgs implements android.os.Parcelable {
-    ctor public deprecated PictureInPictureArgs();
-    ctor public deprecated PictureInPictureArgs(float, java.util.List<android.app.RemoteAction>);
     method public static android.app.PictureInPictureArgs convert(android.app.PictureInPictureParams);
     method public static android.app.PictureInPictureParams convert(android.app.PictureInPictureArgs);
-    method public void copyOnlySet(android.app.PictureInPictureArgs);
-    method public java.util.List<android.app.RemoteAction> getActions();
-    method public float getAspectRatio();
-    method public android.util.Rational getAspectRatioRational();
-    method public android.graphics.Rect getSourceRectHint();
-    method public android.graphics.Rect getSourceRectHintInsets();
-    method public boolean hasSetActions();
-    method public boolean hasSetAspectRatio();
-    method public boolean hasSourceBoundsHint();
-    method public boolean hasSourceBoundsHintInsets();
-    method public deprecated void setActions(java.util.List<android.app.RemoteAction>);
-    method public deprecated void setAspectRatio(float);
-    method public deprecated void setSourceRectHint(android.graphics.Rect);
-    method public deprecated void setSourceRectHintInsets(android.graphics.Rect);
-    method public void truncateActions(int);
+    method public int describeContents();
+    method public void writeToParcel(android.os.Parcel, int);
+    field public static final int CONTENTS_FILE_DESCRIPTOR = 1; // 0x1
     field public static final android.os.Parcelable.Creator<android.app.PictureInPictureArgs> CREATOR;
+    field public static final int PARCELABLE_WRITE_RETURN_VALUE = 1; // 0x1
   }
 
   public static class PictureInPictureArgs.Builder {
@@ -59,10 +43,6 @@ package android.app {
     method public android.app.PictureInPictureArgs.Builder setSourceRectHint(android.graphics.Rect);
   }
 
-  public final class RecoverableSecurityException extends java.lang.SecurityException implements android.os.Parcelable {
-    method public deprecated void showAsNotification(android.content.Context);
-  }
-
 }
 
 package android.app.admin {
@@ -70,8 +50,6 @@ package android.app.admin {
   public class DevicePolicyManager {
     method public deprecated android.os.UserHandle createAndInitializeUser(android.content.ComponentName, java.lang.String, java.lang.String, android.content.ComponentName, android.os.Bundle);
     method public deprecated android.os.UserHandle createUser(android.content.ComponentName, java.lang.String);
-    method public deprecated java.lang.String getDeviceInitializerApp();
-    method public deprecated android.content.ComponentName getDeviceInitializerComponent();
   }
 
 }
@@ -103,6 +81,11 @@ package android.content {
   public abstract class Context {
     method public abstract android.content.SharedPreferences getSharedPreferences(java.io.File, int);
     method public abstract java.io.File getSharedPreferencesPath(java.lang.String);
+  }
+
+  public class ContextWrapper extends android.content.Context {
+    method public android.content.SharedPreferences getSharedPreferences(java.io.File, int);
+    method public java.io.File getSharedPreferencesPath(java.lang.String);
   }
 
   public class Intent implements java.lang.Cloneable android.os.Parcelable {
@@ -227,10 +210,6 @@ package android.media {
 
 package android.media.tv {
 
-  public final class TvInputManager {
-    method public android.media.tv.TvInputManager.Hardware acquireTvInputHardware(int, android.media.tv.TvInputManager.HardwareCallback, android.media.tv.TvInputInfo);
-  }
-
   public class TvView extends android.view.ViewGroup {
     method public void requestUnblockContent(android.media.tv.TvContentRating);
   }
@@ -253,8 +232,17 @@ package android.net {
     field public static final int BADGING_SD = 10; // 0xa
   }
 
-  public abstract class PskKeyManager {
+  public static abstract class NetworkBadging.Badging implements java.lang.annotation.Annotation {
+  }
+
+  public abstract class PskKeyManager implements javax.net.ssl.KeyManager {
     ctor public PskKeyManager();
+    method public java.lang.String chooseClientKeyIdentity(java.lang.String, java.net.Socket);
+    method public java.lang.String chooseClientKeyIdentity(java.lang.String, javax.net.ssl.SSLEngine);
+    method public java.lang.String chooseServerKeyIdentityHint(java.net.Socket);
+    method public java.lang.String chooseServerKeyIdentityHint(javax.net.ssl.SSLEngine);
+    method public javax.crypto.SecretKey getKey(java.lang.String, java.lang.String, java.net.Socket);
+    method public javax.crypto.SecretKey getKey(java.lang.String, java.lang.String, javax.net.ssl.SSLEngine);
     field public static final int MAX_IDENTITY_HINT_LENGTH_BYTES = 128; // 0x80
     field public static final int MAX_IDENTITY_LENGTH_BYTES = 128; // 0x80
     field public static final int MAX_KEY_LENGTH_BYTES = 256; // 0x100
@@ -270,10 +258,6 @@ package android.os {
 
   public class BatteryManager {
     ctor public BatteryManager();
-  }
-
-  public class Build {
-    field public static final boolean PERMISSIONS_REVIEW_REQUIRED;
   }
 
   public final class PowerManager {
@@ -301,18 +285,8 @@ package android.os {
 package android.os.storage {
 
   public class StorageManager {
-    method public deprecated void allocateBytes(java.io.File, long, int) throws java.io.IOException;
-    method public deprecated long getAllocatableBytes(java.io.File, int) throws java.io.IOException;
-    method public deprecated long getCacheQuotaBytes(java.io.File) throws java.io.IOException;
-    method public deprecated long getCacheQuotaBytes() throws java.io.IOException;
-    method public deprecated long getCacheSizeBytes(java.io.File) throws java.io.IOException;
-    method public deprecated long getCacheSizeBytes() throws java.io.IOException;
-    method public deprecated long getExternalCacheQuotaBytes() throws java.io.IOException;
-    method public deprecated long getExternalCacheSizeBytes() throws java.io.IOException;
     method public android.os.storage.StorageVolume getPrimaryVolume();
     method public android.os.storage.StorageVolume[] getVolumeList();
-    method public deprecated boolean isCacheBehaviorAtomic(java.io.File) throws java.io.IOException;
-    method public deprecated void setCacheBehaviorAtomic(java.io.File, boolean) throws java.io.IOException;
   }
 
 }
@@ -356,12 +330,11 @@ package android.provider {
     field public static final java.lang.String CREATED = "created";
     field public static final java.lang.String DATE = "date";
     field public static final java.lang.String FAVICON = "favicon";
-    field public static final java.lang.String THUMBNAIL = "thumbnail";
     field public static final java.lang.String TITLE = "title";
-    field public static final java.lang.String TOUCH_ICON = "touch_icon";
     field public static final java.lang.String URL = "url";
-    field public static final java.lang.String USER_ENTERED = "user_entered";
     field public static final java.lang.String VISITS = "visits";
+    field public static final java.lang.String _COUNT = "_count";
+    field public static final java.lang.String _ID = "_id";
   }
 
   public static class Browser.SearchColumns implements android.provider.BaseColumns {
@@ -369,18 +342,24 @@ package android.provider {
     field public static final java.lang.String DATE = "date";
     field public static final java.lang.String SEARCH = "search";
     field public static final deprecated java.lang.String URL = "url";
+    field public static final java.lang.String _COUNT = "_count";
+    field public static final java.lang.String _ID = "_id";
   }
 
-  public static final deprecated class ContactsContract.Contacts.StreamItems {
+  public static final deprecated class ContactsContract.Contacts.StreamItems implements android.provider.ContactsContract.StreamItemsColumns {
     field public static final deprecated java.lang.String CONTENT_DIRECTORY = "stream_items";
   }
 
-  public static final deprecated class ContactsContract.RawContacts.StreamItems implements android.provider.BaseColumns {
+  public static final deprecated class ContactsContract.RawContacts.StreamItems implements android.provider.BaseColumns android.provider.ContactsContract.StreamItemsColumns {
     field public static final deprecated java.lang.String CONTENT_DIRECTORY = "stream_items";
+    field public static final java.lang.String _COUNT = "_count";
+    field public static final java.lang.String _ID = "_id";
   }
 
-  public static final deprecated class ContactsContract.StreamItemPhotos implements android.provider.BaseColumns {
+  public static final deprecated class ContactsContract.StreamItemPhotos implements android.provider.BaseColumns android.provider.ContactsContract.StreamItemPhotosColumns {
     field public static final deprecated java.lang.String PHOTO = "photo";
+    field public static final java.lang.String _COUNT = "_count";
+    field public static final java.lang.String _ID = "_id";
   }
 
   protected static abstract deprecated interface ContactsContract.StreamItemPhotosColumns {
@@ -394,19 +373,23 @@ package android.provider {
     field public static final deprecated java.lang.String SYNC4 = "stream_item_photo_sync4";
   }
 
-  public static final deprecated class ContactsContract.StreamItems implements android.provider.BaseColumns {
+  public static final deprecated class ContactsContract.StreamItems implements android.provider.BaseColumns android.provider.ContactsContract.StreamItemsColumns {
     field public static final deprecated java.lang.String CONTENT_ITEM_TYPE = "vnd.android.cursor.item/stream_item";
     field public static final deprecated android.net.Uri CONTENT_LIMIT_URI;
     field public static final deprecated android.net.Uri CONTENT_PHOTO_URI;
     field public static final deprecated java.lang.String CONTENT_TYPE = "vnd.android.cursor.dir/stream_item";
     field public static final deprecated android.net.Uri CONTENT_URI;
     field public static final deprecated java.lang.String MAX_ITEMS = "max_items";
+    field public static final java.lang.String _COUNT = "_count";
+    field public static final java.lang.String _ID = "_id";
   }
 
-  public static final deprecated class ContactsContract.StreamItems.StreamItemPhotos implements android.provider.BaseColumns {
+  public static final deprecated class ContactsContract.StreamItems.StreamItemPhotos implements android.provider.BaseColumns android.provider.ContactsContract.StreamItemPhotosColumns {
     field public static final deprecated java.lang.String CONTENT_DIRECTORY = "photo";
     field public static final deprecated java.lang.String CONTENT_ITEM_TYPE = "vnd.android.cursor.item/stream_item_photo";
     field public static final deprecated java.lang.String CONTENT_TYPE = "vnd.android.cursor.dir/stream_item_photo";
+    field public static final java.lang.String _COUNT = "_count";
+    field public static final java.lang.String _ID = "_id";
   }
 
   protected static abstract deprecated interface ContactsContract.StreamItemsColumns {
@@ -461,9 +444,15 @@ package android.speech.tts {
 
 package android.test.mock {
 
+  public class MockContext extends android.content.Context {
+    method public android.content.SharedPreferences getSharedPreferences(java.io.File, int);
+    method public java.io.File getSharedPreferencesPath(java.lang.String);
+  }
+
   public deprecated class MockPackageManager extends android.content.pm.PackageManager {
     method public deprecated java.lang.String getDefaultBrowserPackageName(int);
     method public deprecated boolean setDefaultBrowserPackageName(java.lang.String, int);
+    method public boolean setInstantAppCookie(byte[]);
   }
 
 }
@@ -493,6 +482,7 @@ package android.text.style {
   public class RasterizerSpan extends android.text.style.CharacterStyle implements android.text.style.UpdateAppearance {
     ctor public RasterizerSpan(android.graphics.Rasterizer);
     method public android.graphics.Rasterizer getRasterizer();
+    method public void updateDrawState(android.text.TextPaint);
   }
 
 }
@@ -546,6 +536,11 @@ package android.webkit {
 }
 
 package android.widget {
+
+  public class ListView extends android.widget.AbsListView {
+    method protected <T extends android.view.View> T findViewTraversal(int);
+    method protected <T extends android.view.View> T findViewWithTagTraversal(java.lang.Object);
+  }
 
   public class TextView extends android.view.View implements android.view.ViewTreeObserver.OnPreDrawListener {
     method public static int getTextColor(android.content.Context, android.content.res.TypedArray, int);

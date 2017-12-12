@@ -68,7 +68,7 @@ class TaskSnapshotLoader {
         final File bitmapFile = reducedResolution
                 ? mPersister.getReducedResolutionBitmapFile(taskId, userId)
                 : mPersister.getBitmapFile(taskId, userId);
-        if (!protoFile.exists() || !bitmapFile.exists()) {
+        if (bitmapFile == null || !protoFile.exists() || !bitmapFile.exists()) {
             return null;
         }
         try {

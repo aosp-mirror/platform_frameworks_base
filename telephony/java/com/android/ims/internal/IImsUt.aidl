@@ -111,4 +111,15 @@ interface IImsUt {
      * Sets the listener.
      */
     void setListener(in IImsUtListener listener);
+
+    /**
+     * Retrieves the configuration of the call barring for specified service class.
+     */
+    int queryCallBarringForServiceClass(int cbType, int serviceClass);
+
+    /**
+     * Updates the configuration of the call barring for specified service class.
+     */
+    int updateCallBarringForServiceClass(int cbType, int action, in String[] barrList,
+            int serviceClass);
 }

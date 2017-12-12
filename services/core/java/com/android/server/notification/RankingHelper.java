@@ -20,6 +20,7 @@ import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.logging.MetricsLogger;
 import com.android.internal.logging.nano.MetricsProto;
 import com.android.internal.util.Preconditions;
+import com.android.internal.util.XmlUtils;
 
 import android.app.Notification;
 import android.app.NotificationChannel;
@@ -64,7 +65,7 @@ public class RankingHelper implements RankingConfig {
 
     private static final int XML_VERSION = 1;
 
-    private static final String TAG_RANKING = "ranking";
+    static final String TAG_RANKING = "ranking";
     private static final String TAG_PACKAGE = "package";
     private static final String TAG_CHANNEL = "channel";
     private static final String TAG_GROUP = "channelGroup";
@@ -169,7 +170,7 @@ public class RankingHelper implements RankingConfig {
             }
             if (type == XmlPullParser.START_TAG) {
                 if (TAG_PACKAGE.equals(tag)) {
-                    int uid = safeInt(parser, ATT_UID, Record.UNKNOWN_UID);
+                    int uid = XmlUtils.readIntAttribute(parser, ATT_UID, Record.UNKNOWN_UID);
                     String name = parser.getAttributeValue(null, ATT_NAME);
                     if (!TextUtils.isEmpty(name)) {
                         if (forRestore) {
@@ -182,14 +183,21 @@ public class RankingHelper implements RankingConfig {
                         }
 
                         Record r = getOrCreateRecord(name, uid,
-                                safeInt(parser, ATT_IMPORTANCE, DEFAULT_IMPORTANCE),
-                                safeInt(parser, ATT_PRIORITY, DEFAULT_PRIORITY),
-                                safeInt(parser, ATT_VISIBILITY, DEFAULT_VISIBILITY),
-                                safeBool(parser, ATT_SHOW_BADGE, DEFAULT_SHOW_BADGE));
-                        r.importance = safeInt(parser, ATT_IMPORTANCE, DEFAULT_IMPORTANCE);
-                        r.priority = safeInt(parser, ATT_PRIORITY, DEFAULT_PRIORITY);
-                        r.visibility = safeInt(parser, ATT_VISIBILITY, DEFAULT_VISIBILITY);
-                        r.showBadge = safeBool(parser, ATT_SHOW_BADGE, DEFAULT_SHOW_BADGE);
+                                XmlUtils.readIntAttribute(
+                                        parser, ATT_IMPORTANCE, DEFAULT_IMPORTANCE),
+                                XmlUtils.readIntAttribute(parser, ATT_PRIORITY, DEFAULT_PRIORITY),
+                                XmlUtils.readIntAttribute(
+                                        parser, ATT_VISIBILITY, DEFAULT_VISIBILITY),
+                                XmlUtils.readBooleanAttribute(
+                                        parser, ATT_SHOW_BADGE, DEFAULT_SHOW_BADGE));
+                        r.importance = XmlUtils.readIntAttribute(
+                                parser, ATT_IMPORTANCE, DEFAULT_IMPORTANCE);
+                        r.priority = XmlUtils.readIntAttribute(
+                                parser, ATT_PRIORITY, DEFAULT_PRIORITY);
+                        r.visibility = XmlUtils.readIntAttribute(
+                                parser, ATT_VISIBILITY, DEFAULT_VISIBILITY);
+                        r.showBadge = XmlUtils.readBooleanAttribute(
+                                parser, ATT_SHOW_BADGE, DEFAULT_SHOW_BADGE);
 
                         final int innerDepth = parser.getDepth();
                         while ((type = parser.next()) != XmlPullParser.END_DOCUMENT
@@ -214,12 +222,16 @@ public class RankingHelper implements RankingConfig {
                             if (TAG_CHANNEL.equals(tagName)) {
                                 String id = parser.getAttributeValue(null, ATT_ID);
                                 String channelName = parser.getAttributeValue(null, ATT_NAME);
-                                int channelImportance =
-                                        safeInt(parser, ATT_IMPORTANCE, DEFAULT_IMPORTANCE);
+                                int channelImportance = XmlUtils.readIntAttribute(
+                                        parser, ATT_IMPORTANCE, DEFAULT_IMPORTANCE);
                                 if (!TextUtils.isEmpty(id) && !TextUtils.isEmpty(channelName)) {
                                     NotificationChannel channel = new NotificationChannel(id,
                                             channelName, channelImportance);
-                                    channel.populateFromXml(parser);
+                                    if (forRestore) {
+                                        channel.populateFromXmlForRestore(parser, mContext);
+                                    } else {
+                                        channel.populateFromXml(parser);
+                                    }
                                     r.channels.put(id, channel);
                                 }
                             }
@@ -382,7 +394,11 @@ public class RankingHelper implements RankingConfig {
                     }
 
                     for (NotificationChannel channel : r.channels.values()) {
-                        if (!forBackup || (forBackup && !channel.isDeleted())) {
+                        if (forBackup) {
+                            if (!channel.isDeleted()) {
+                                channel.writeXmlForBackup(out, mContext);
+                            }
+                        } else {
                             channel.writeXml(out);
                         }
                     }
@@ -399,7 +415,7 @@ public class RankingHelper implements RankingConfig {
         for (int i = 0; i < N; i++) {
             mSignalExtractors[i].setConfig(this);
         }
-        mRankingHandler.requestSort(false);
+        mRankingHandler.requestSort();
     }
 
     public void sort(ArrayList<NotificationRecord> notificationList) {
@@ -419,8 +435,7 @@ public class RankingHelper implements RankingConfig {
                 record.setAuthoritativeRank(i);
                 final String groupKey = record.getGroupKey();
                 NotificationRecord existingProxy = mProxyByGroupTmp.get(groupKey);
-                if (existingProxy == null
-                        || record.getImportance() > existingProxy.getImportance()) {
+                if (existingProxy == null) {
                     mProxyByGroupTmp.put(groupKey, record);
                 }
             }
@@ -467,26 +482,6 @@ public class RankingHelper implements RankingConfig {
         return Collections.binarySearch(notificationList, target, mFinalComparator);
     }
 
-    private static boolean safeBool(XmlPullParser parser, String att, boolean defValue) {
-        final String value = parser.getAttributeValue(null, att);
-        if (TextUtils.isEmpty(value)) return defValue;
-        return Boolean.parseBoolean(value);
-    }
-
-    private static int safeInt(XmlPullParser parser, String att, int defValue) {
-        final String val = parser.getAttributeValue(null, att);
-        return tryParseInt(val, defValue);
-    }
-
-    private static int tryParseInt(String value, int defValue) {
-        if (TextUtils.isEmpty(value)) return defValue;
-        try {
-            return Integer.parseInt(value);
-        } catch (NumberFormatException e) {
-            return defValue;
-        }
-    }
-
     /**
      * Gets importance.
      */
@@ -531,7 +526,6 @@ public class RankingHelper implements RankingConfig {
             MetricsLogger.action(getChannelGroupLog(group.getId(), pkg));
         }
         r.groups.put(group.getId(), group);
-        updateConfig();
     }
 
     @Override
@@ -567,6 +561,13 @@ public class RankingHelper implements RankingConfig {
             existing.setDescription(channel.getDescription());
             existing.setBlockableSystem(channel.isBlockableSystem());
 
+            // Apps are allowed to downgrade channel importance if the user has not changed any
+            // fields on this channel yet.
+            if (existing.getUserLockedFields() == 0 &&
+                    channel.getImportance() < existing.getImportance()) {
+                existing.setImportance(channel.getImportance());
+            }
+
             updateConfig();
             return;
         }
@@ -589,7 +590,6 @@ public class RankingHelper implements RankingConfig {
         r.channels.put(channel.getId(), channel);
         MetricsLogger.action(getChannelLog(channel, pkg).setType(
                 MetricsProto.MetricsEvent.TYPE_OPEN));
-        updateConfig();
     }
 
     void clearLockedFields(NotificationChannel channel) {
@@ -597,7 +597,8 @@ public class RankingHelper implements RankingConfig {
     }
 
     @Override
-    public void updateNotificationChannel(String pkg, int uid, NotificationChannel updatedChannel) {
+    public void updateNotificationChannel(String pkg, int uid, NotificationChannel updatedChannel,
+            boolean fromUser) {
         Preconditions.checkNotNull(updatedChannel);
         Preconditions.checkNotNull(updatedChannel.getId());
         Record r = getOrCreateRecord(pkg, uid);
@@ -611,7 +612,11 @@ public class RankingHelper implements RankingConfig {
         if (updatedChannel.getLockscreenVisibility() == Notification.VISIBILITY_PUBLIC) {
             updatedChannel.setLockscreenVisibility(Ranking.VISIBILITY_NO_OVERRIDE);
         }
-        lockFieldsForUpdate(channel, updatedChannel);
+        updatedChannel.unlockFields(updatedChannel.getUserLockedFields());
+        updatedChannel.lockFields(channel.getUserLockedFields());
+        if (fromUser) {
+            lockFieldsForUpdate(channel, updatedChannel);
+        }
         r.channels.put(updatedChannel.getId(), updatedChannel);
 
         if (NotificationChannel.DEFAULT_CHANNEL_ID.equals(updatedChannel.getId())) {
@@ -661,7 +666,6 @@ public class RankingHelper implements RankingConfig {
             LogMaker lm = getChannelLog(channel, pkg);
             lm.setType(MetricsProto.MetricsEvent.TYPE_CLOSE);
             MetricsLogger.action(lm);
-            updateConfig();
         }
     }
 
@@ -675,7 +679,6 @@ public class RankingHelper implements RankingConfig {
             return;
         }
         r.channels.remove(channelId);
-        updateConfig();
     }
 
     @Override
@@ -692,7 +695,6 @@ public class RankingHelper implements RankingConfig {
                 r.channels.remove(key);
             }
         }
-        updateConfig();
     }
 
     public NotificationChannelGroup getNotificationChannelGroup(String groupId, String pkg,
@@ -755,7 +757,6 @@ public class RankingHelper implements RankingConfig {
                 deletedChannels.add(nc);
             }
         }
-        updateConfig();
         return deletedChannels;
     }
 
@@ -840,8 +841,6 @@ public class RankingHelper implements RankingConfig {
 
     @VisibleForTesting
     void lockFieldsForUpdate(NotificationChannel original, NotificationChannel update) {
-        update.unlockFields(update.getUserLockedFields());
-        update.lockFields(original.getUserLockedFields());
         if (original.canBypassDnd() != update.canBypassDnd()) {
             update.lockFields(NotificationChannel.USER_LOCKED_PRIORITY);
         }
@@ -1085,6 +1084,22 @@ public class RankingHelper implements RankingConfig {
         }
     }
 
+    protected void onLocaleChanged(Context context, int userId) {
+        synchronized (mRecords) {
+            int N = mRecords.size();
+            for (int i = 0; i < N; i++) {
+                Record record = mRecords.valueAt(i);
+                if (UserHandle.getUserId(record.uid) == userId) {
+                    if (record.channels.containsKey(NotificationChannel.DEFAULT_CHANNEL_ID)) {
+                        record.channels.get(NotificationChannel.DEFAULT_CHANNEL_ID).setName(
+                                context.getResources().getString(
+                                        R.string.default_notification_channel_label));
+                    }
+                }
+            }
+        }
+    }
+
     public void onPackagesChanged(boolean removingPackage, int changeUserId, String[] pkgList,
             int[] uidList) {
         if (pkgList == null || pkgList.length == 0) {
@@ -1170,7 +1185,7 @@ public class RankingHelper implements RankingConfig {
             changed |= oldValue != newValue;
         }
         if (changed) {
-            mRankingHandler.requestSort(false);
+            updateConfig();
         }
     }
 

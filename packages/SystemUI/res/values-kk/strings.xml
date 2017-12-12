@@ -64,7 +64,7 @@
     <string name="usb_debugging_message" msgid="2220143855912376496">"Бұл компьютердің  RSA перне саусақ таңбасы:\n<xliff:g id="FINGERPRINT">%1$s</xliff:g>"</string>
     <string name="usb_debugging_always" msgid="303335496705863070">"Осы компьютерден әрқашан рұқсат беру"</string>
     <string name="usb_debugging_secondary_user_title" msgid="6353808721761220421">"USB жөндеу рұқсат етілмеген"</string>
-    <string name="usb_debugging_secondary_user_message" msgid="8572228137833020196">"Осы құрылғыға қазір кірген пайдаланушы USB жөндеу мүмкіндігін қоса алмайды. Бұл мүмкіндікті пайдалану үшін әкімші пайдаланушыға ауысыңыз."</string>
+    <string name="usb_debugging_secondary_user_message" msgid="6067122453571699801">"Бұл құрылғыға жаңа кірген пайдаланушы USB түзетуін іске қосылмайды. Бұл мүмкіндікті пайдалану үшін негізгі пайдаланушыға ауысыңыз."</string>
     <string name="compat_mode_on" msgid="6623839244840638213">"Экранды толтыру үшін ұлғайту"</string>
     <string name="compat_mode_off" msgid="4434467572461327898">"Экранды толтыру үшін созу"</string>
     <string name="screenshot_saving_ticker" msgid="7403652894056693515">"Скриншотты сақтауда…"</string>
@@ -353,10 +353,10 @@
     <string name="description_target_search" msgid="3091587249776033139">"Іздеу"</string>
     <string name="description_direction_up" msgid="7169032478259485180">"<xliff:g id="TARGET_DESCRIPTION">%s</xliff:g> үшін жоғары сырғыту."</string>
     <string name="description_direction_left" msgid="7207478719805562165">"<xliff:g id="TARGET_DESCRIPTION">%s</xliff:g> үшін солға сырғыту."</string>
-    <string name="zen_priority_introduction" msgid="7577965386868311310">"Дабылдар, еске салғыштар, оқиғалар мен өзіңіз көрсеткен контактілердің қоңырауларынан басқа дыбыстар мен дірілдер мазаламайтын болады. Музыка, бейне және ойындар сияқты ойнатылатын мазмұндардың дыбысы өшірілмейді."</string>
-    <string name="zen_alarms_introduction" msgid="7034415210361973827">"Дабылдардан басқа ешқандай дыбыстар мен дірілдер мазаламайтын болады. Музыка, бейне және ойындар сияқты ойнатылатын мазмұндардың дыбысы өшірілмейді."</string>
+    <string name="zen_priority_introduction" msgid="1149025108714420281">"Дабылдар, еске салғыштар, оқиғалар мен өзіңіз көрсеткен контактілердің қоңырауларынан басқа дыбыстар мен дірілдер мазаламайтын болады. Музыка, бейне және ойындар сияқты ойнатылатын мазмұндарды ести алатын боласыз."</string>
+    <string name="zen_alarms_introduction" msgid="4934328096749380201">"Дабылдардан басқа ешқандай дыбыстар мен дірілдер мазаламайтын болады. Музыка, бейне және ойындар сияқты ойнатылатын мазмұндарды ести алатын боласыз."</string>
     <string name="zen_priority_customize_button" msgid="7948043278226955063">"Реттеу"</string>
-    <string name="zen_silence_introduction_voice" msgid="2284540992298200729">"БАРЛЫҚ, соның ішінде дабылдардың, музыканың, бейнелердің және ойындардың дыбыстары мен дірілдері өшіріледі. Бірақ телефон қоңыраулары шалына береді."</string>
+    <string name="zen_silence_introduction_voice" msgid="3948778066295728085">"Дабыл, музыка, бейнелер мен ойындарды қоса алғанда, барлық дыбыстар мен дірілдер бөгелетін болады. Қоңырау шала беруіңізге болады."</string>
     <string name="zen_silence_introduction" msgid="3137882381093271568">"БАРЛЫҚ, соның ішінде дабылдардың, музыканың, бейнелердің және ойындардың дыбыстары мен дірілдері өшіріледі."</string>
     <string name="keyguard_more_overflow_text" msgid="9195222469041601365">"+<xliff:g id="NUMBER_OF_NOTIFICATIONS">%d</xliff:g>"</string>
     <string name="speed_bump_explanation" msgid="1288875699658819755">"Шұғылдығы азырақ хабарландырулар төменде"</string>
@@ -456,7 +456,7 @@
     <string name="monitoring_description_do_learn_more" msgid="1849514470437907421">"Толығырақ"</string>
     <string name="monitoring_description_do_body_vpn" msgid="8255218762488901796">"Желідегі әрекеттерді, соның ішінде электрондық хабарларды, қолданбаларды және вебсайттарды бақылайтын <xliff:g id="VPN_APP">%1$s</xliff:g> қолданбасына қосылдыңыз."</string>
     <string name="monitoring_description_vpn_settings_separator" msgid="1933186756733474388">" "</string>
-    <string name="monitoring_description_vpn_settings" msgid="8869300202410505143">"VPN параметрлерін ашу"</string>
+    <string name="monitoring_description_vpn_settings" msgid="6434859242636063861">"VPN параметрлерін ашу"</string>
     <string name="monitoring_description_ca_cert_settings_separator" msgid="4987350385906393626">" "</string>
     <string name="monitoring_description_ca_cert_settings" msgid="5489969458872997092">"Сенімді тіркелу деректерін ашу"</string>
     <string name="monitoring_description_network_logging" msgid="7223505523384076027">"Әкімші құрылғыдағы трафикті қадағалау үшін желі журналын жүргізуді қосып қойған.\n\nТолығырақ ақпарат алу үшін әкімшімен хабарласыңыз."</string>
@@ -556,8 +556,8 @@
     <string name="notification_default_channel_desc" msgid="2506053815870808359">"Бұл қолданбада хабарландыру санаттары жоқ"</string>
     <string name="notification_unblockable_desc" msgid="3561016061737896906">"Бұл қолданбаның хабарландырулары өшірілмейді"</string>
     <plurals name="notification_num_channels_desc" formatted="false" msgid="5492793452274077663">
-      <item quantity="other">Осы қолданбадан <xliff:g id="NUMBER_1">%d</xliff:g> ішінен 1 хабарландыру санаты</item>
-      <item quantity="one">Осы қолданбадан <xliff:g id="NUMBER_0">%d</xliff:g> ішінен 1 хабарландыру санаты</item>
+      <item quantity="other">Осы қолданбадан <xliff:g id="NUMBER_1">%s</xliff:g> ішінен 1 хабарландыру санаты</item>
+      <item quantity="one">Осы қолданбадан <xliff:g id="NUMBER_0">%s</xliff:g> ішінен 1 хабарландыру санаты</item>
     </plurals>
     <string name="notification_channels_list_desc_2" msgid="6214732715833946441">"<xliff:g id="CHANNEL_NAME_1">%1$s</xliff:g>, <xliff:g id="CHANNEL_NAME_2">%2$s</xliff:g>"</string>
     <plurals name="notification_channels_list_desc_2_and_others" formatted="false" msgid="2747813553355336157">
@@ -585,8 +585,8 @@
       <item quantity="one">%d минут</item>
     </plurals>
     <string name="battery_panel_title" msgid="7944156115535366613">"Батареяны пайдалану"</string>
-    <string name="battery_detail_charging_summary" msgid="1279095653533044008">"Зарядтау кезінде Батарея үнемдегіш қол жетімді емес"</string>
-    <string name="battery_detail_switch_title" msgid="6285872470260795421">"Батарея үнемдегіш"</string>
+    <string name="battery_detail_charging_summary" msgid="4055327085770378335">"Зарядтау кезінде \"Battery saver\" функциясы қол жетімді емес"</string>
+    <string name="battery_detail_switch_title" msgid="8763441006881907058">"Battery saver"</string>
     <string name="battery_detail_switch_summary" msgid="9049111149407626804">"Өнімділікті және фондық деректерді азайтады"</string>
     <string name="keyboard_key_button_template" msgid="6230056639734377300">"<xliff:g id="NAME">%1$s</xliff:g> түймесі"</string>
     <string name="keyboard_key_home" msgid="2243500072071305073">"Home"</string>
@@ -726,9 +726,9 @@
     <string name="pip_phone_minimize" msgid="1079119422589131792">"Кішірейту"</string>
     <string name="pip_phone_close" msgid="8416647892889710330">"Жабу"</string>
     <string name="pip_phone_dismiss_hint" msgid="6351678169095923899">"Жабу үшін төмен қарай сүйреңіз"</string>
-    <string name="pip_menu_title" msgid="3328510504196964712">"\"Сурет ішіндегі сурет\" мәзірі"</string>
+    <string name="pip_menu_title" msgid="4707292089961887657">"Mәзір"</string>
     <string name="pip_notification_title" msgid="3204024940158161322">"<xliff:g id="NAME">%s</xliff:g> \"сурет ішіндегі сурет\" режимінде"</string>
-    <string name="pip_notification_message" msgid="4171698133469539591">"<xliff:g id="NAME">%s</xliff:g> деген пайдаланушының бұл функцияны пайдалануына жол бермеу үшін параметрлерді түртіп ашыңыз да, оларды өшіріңіз."</string>
+    <string name="pip_notification_message" msgid="5619512781514343311">"<xliff:g id="NAME">%s</xliff:g> деген пайдаланушының бұл мүмкіндікті пайдалануын қаламасаңыз, параметрлерді түртіп ашыңыз да, оларды өшіріңіз."</string>
     <string name="pip_play" msgid="1417176722760265888">"Ойнату"</string>
     <string name="pip_pause" msgid="8881063404466476571">"Кідірту"</string>
     <string name="pip_skip_to_next" msgid="1948440006726306284">"Келесіге өту"</string>
@@ -754,6 +754,7 @@
     <string name="tuner_menu" msgid="191640047241552081">"Mәзір"</string>
     <string name="tuner_app" msgid="3507057938640108777">"<xliff:g id="APP">%1$s</xliff:g> қолданбасы"</string>
     <string name="notification_channel_alerts" msgid="4496839309318519037">"Дабылдар"</string>
+    <string name="notification_channel_battery" msgid="5786118169182888462">"Батарея"</string>
     <string name="notification_channel_screenshot" msgid="6314080179230000938">"Скриншоттар"</string>
     <string name="notification_channel_general" msgid="4525309436693914482">"Жалпы хабарлар"</string>
     <string name="notification_channel_storage" msgid="3077205683020695313">"Жад"</string>
@@ -774,4 +775,5 @@
     <string name="running_foreground_services_title" msgid="381024150898615683">"Фонда жұмыс істеп тұрған қолданбалар"</string>
     <string name="running_foreground_services_msg" msgid="6326247670075574355">"Батарея мен деректер трафигі туралы білу үшін түртіңіз"</string>
     <string name="data_usage_disable_mobile" msgid="5116269981510015864">"Мобильдік деректер өшірілсін бе?"</string>
+    <string name="touch_filtered_warning" msgid="8671693809204767551">"Басқа қолданба рұқсат сұрауын жасырып тұрғандықтан, параметрлер жауабыңызды растай алмайды."</string>
 </resources>

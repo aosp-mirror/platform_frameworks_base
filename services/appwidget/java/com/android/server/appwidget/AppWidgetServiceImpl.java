@@ -68,6 +68,7 @@ import android.os.Message;
 import android.os.Process;
 import android.os.RemoteException;
 import android.os.SystemClock;
+import android.os.Trace;
 import android.os.UserHandle;
 import android.os.UserManager;
 import android.os.storage.StorageManager;
@@ -2644,9 +2645,14 @@ class AppWidgetServiceImpl extends IAppWidgetService.Stub implements WidgetBacku
             Slog.w(TAG, "User " + userId + " is no longer unlocked - exiting");
             return;
         }
+        long time = SystemClock.elapsedRealtime();
         synchronized (mLock) {
+            Trace.traceBegin(Trace.TRACE_TAG_ACTIVITY_MANAGER, "appwidget ensure");
             ensureGroupStateLoadedLocked(userId);
+            Trace.traceEnd(Trace.TRACE_TAG_ACTIVITY_MANAGER);
+            Trace.traceBegin(Trace.TRACE_TAG_ACTIVITY_MANAGER, "appwidget reload");
             reloadWidgetsMaskedStateForGroup(mSecurityPolicy.getGroupParent(userId));
+            Trace.traceEnd(Trace.TRACE_TAG_ACTIVITY_MANAGER);
 
             final int N = mProviders.size();
             for (int i = 0; i < N; i++) {
@@ -2658,13 +2664,18 @@ class AppWidgetServiceImpl extends IAppWidgetService.Stub implements WidgetBacku
                 }
 
                 if (provider.widgets.size() > 0) {
+                    Trace.traceBegin(Trace.TRACE_TAG_ACTIVITY_MANAGER,
+                            "appwidget init " + provider.info.provider.getPackageName());
                     sendEnableIntentLocked(provider);
                     int[] appWidgetIds = getWidgetIds(provider.widgets);
                     sendUpdateIntentLocked(provider, appWidgetIds);
                     registerForBroadcastsLocked(provider, appWidgetIds);
+                    Trace.traceEnd(Trace.TRACE_TAG_ACTIVITY_MANAGER);
                 }
             }
         }
+        Slog.i(TAG, "Async processing of onUserUnlocked u" + userId + " took "
+                + (SystemClock.elapsedRealtime() - time) + " ms");
     }
 
     // only call from initialization -- it assumes that the data structures are all empty

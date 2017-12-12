@@ -51,6 +51,7 @@ public class DefaultNetworkMetrics {
     // Information about the current status of the default network.
     @GuardedBy("this")
     private DefaultNetworkEvent mCurrentDefaultNetwork;
+    // True if the current default network has been validated.
     @GuardedBy("this")
     private boolean mIsCurrentlyValid;
     @GuardedBy("this")
@@ -71,6 +72,8 @@ public class DefaultNetworkMetrics {
             printEvent(localTimeMs, pw, ev);
         }
         mCurrentDefaultNetwork.updateDuration(timeMs);
+        // When printing default network events for bug reports, update validation time
+        // and refresh the last validation timestmap for future validation time updates.
         if (mIsCurrentlyValid) {
             updateValidationTime(timeMs);
             mLastValidationTimeMs = timeMs;
@@ -92,11 +95,13 @@ public class DefaultNetworkMetrics {
     }
 
     public synchronized void logDefaultNetworkValidity(long timeMs, boolean isValid) {
+        // Transition from valid to invalid: update validity duration since last update
         if (!isValid && mIsCurrentlyValid) {
             mIsCurrentlyValid = false;
             updateValidationTime(timeMs);
         }
 
+        // Transition from invalid to valid: simply mark the validation timestamp.
         if (isValid && !mIsCurrentlyValid) {
             mIsCurrentlyValid = true;
             mLastValidationTimeMs = timeMs;
@@ -114,6 +119,9 @@ public class DefaultNetworkMetrics {
     }
 
     private void logCurrentDefaultNetwork(long timeMs, NetworkAgentInfo oldNai) {
+        if (mIsCurrentlyValid) {
+            updateValidationTime(timeMs);
+        }
         DefaultNetworkEvent ev = mCurrentDefaultNetwork;
         ev.updateDuration(timeMs);
         ev.previousTransports = mLastTransports;
@@ -122,7 +130,6 @@ public class DefaultNetworkMetrics {
             // The system acquired a new default network.
             fillLinkInfo(ev, oldNai);
             ev.finalScore = oldNai.getCurrentScore();
-            ev.validatedMs = ev.durationMs;
         }
         // Only change transport of the previous default network if the event currently logged
         // corresponds to an existing default network, and not to the absence of a default network.
@@ -143,9 +150,10 @@ public class DefaultNetworkMetrics {
             fillLinkInfo(ev, newNai);
             ev.initialScore = newNai.getCurrentScore();
             if (newNai.lastValidated) {
-                mIsCurrentlyValid = true;
-                mLastValidationTimeMs = timeMs;
+                logDefaultNetworkValidity(timeMs, true);
             }
+        } else {
+            mIsCurrentlyValid = false;
         }
         mCurrentDefaultNetwork = ev;
     }

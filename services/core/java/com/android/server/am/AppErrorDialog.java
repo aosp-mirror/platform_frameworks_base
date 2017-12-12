@@ -21,6 +21,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.res.Resources;
+import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
@@ -32,8 +33,6 @@ import android.view.WindowManager;
 import android.widget.FrameLayout;
 import android.widget.TextView;
 
-import static com.android.server.am.ActivityManagerService.IS_USER_BUILD;
-
 final class AppErrorDialog extends BaseErrorDialog implements View.OnClickListener {
 
     private final ActivityManagerService mService;
@@ -41,7 +40,6 @@ final class AppErrorDialog extends BaseErrorDialog implements View.OnClickListen
     private final ProcessRecord mProc;
     private final boolean mRepeating;
     private final boolean mIsRestartable;
-
     private CharSequence mName;
 
     static int CANT_SHOW = -1;
@@ -111,20 +109,19 @@ final class AppErrorDialog extends BaseErrorDialog implements View.OnClickListen
         LayoutInflater.from(context).inflate(
                 com.android.internal.R.layout.app_error_dialog, frame, true);
 
-        boolean hasRestart = !mRepeating && mIsRestartable;
         final boolean hasReceiver = mProc.errorReportReceiver != null;
 
         final TextView restart = findViewById(com.android.internal.R.id.aerr_restart);
         restart.setOnClickListener(this);
-        restart.setVisibility(hasRestart ? View.VISIBLE : View.GONE);
+        restart.setVisibility(mIsRestartable ? View.VISIBLE : View.GONE);
         final TextView report = findViewById(com.android.internal.R.id.aerr_report);
         report.setOnClickListener(this);
         report.setVisibility(hasReceiver ? View.VISIBLE : View.GONE);
         final TextView close = findViewById(com.android.internal.R.id.aerr_close);
-        close.setVisibility(!hasRestart ? View.VISIBLE : View.GONE);
+        close.setVisibility(mRepeating ? View.VISIBLE : View.GONE);
         close.setOnClickListener(this);
 
-        boolean showMute = !IS_USER_BUILD && Settings.Global.getInt(context.getContentResolver(),
+        boolean showMute = !Build.IS_USER && Settings.Global.getInt(context.getContentResolver(),
                 Settings.Global.DEVELOPMENT_SETTINGS_ENABLED, 0) != 0;
         final TextView mute = findViewById(com.android.internal.R.id.aerr_mute);
         mute.setOnClickListener(this);

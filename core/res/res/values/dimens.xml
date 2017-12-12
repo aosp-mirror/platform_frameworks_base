@@ -438,15 +438,6 @@
     <!-- Width of the outline stroke used by the accessibility screen magnification indicator -->
     <dimen name="accessibility_magnification_indicator_width">4dip</dimen>
 
-    <!-- Width of the sliding KeyguardSecurityContainer (includes 2x keyguard_security_view_margin) -->
-    <dimen name="keyguard_security_width">320dp</dimen>
-
-    <!-- Height of the sliding KeyguardSecurityContainer (includes 2x keyguard_security_view_margin) -->
-    <dimen name="keyguard_security_height">400dp</dimen>
-
-    <!-- Margin around the various security views -->
-    <dimen name="keyguard_security_view_margin">8dp</dimen>
-
     <!-- Margin around the various security views -->
     <dimen name="keyguard_muliuser_selector_margin">8dp</dimen>
 
@@ -592,7 +583,32 @@
     <!-- The size of the right icon -->
     <dimen name="notification_right_icon_size">40dp</dimen>
 
+    <!-- The maximum height of any image in a remote view. This is applied to all images in custom remoteviews. -->
+    <dimen name="notification_custom_view_max_image_height_low_ram">208dp</dimen>
+    <!-- The maximum height of any image in a remote view. This is applied to all images in custom remoteviews. -->
+    <dimen name="notification_custom_view_max_image_width_low_ram">294dp</dimen>
+    <!-- The maximum height of a big picture in a notification. The images will be reduced to that height in case they are bigger. -->
+    <dimen name="notification_big_picture_max_height_low_ram">208dp</dimen>
+    <!-- The maximum width of a big picture in a notification. The images will be reduced to that width in case they are bigger. -->
+    <dimen name="notification_big_picture_max_width_low_ram">294dp</dimen>
+    <!-- The maximum height of a image in a media notification. The images will be reduced to that height in case they are bigger. -->
+    <dimen name="notification_media_image_max_height_low_ram">100dp</dimen>
+    <!-- The maximum width of a image in a media notification. The images will be reduced to that width in case they are bigger.-->
+    <dimen name="notification_media_image_max_width_low_ram">100dp</dimen>
+    <!-- The size of the right icon image when on low ram -->
+    <dimen name="notification_right_icon_size_low_ram">40dp</dimen>
+
     <!-- Max width/height of the autofill data set picker as a fraction of the screen width/height -->
     <dimen name="autofill_dataset_picker_max_size">90%</dimen>
+
+    <!-- Max height of the the autofill save custom subtitle as a fraction of the screen width/height -->
+    <dimen name="autofill_save_custom_subtitle_max_height">20%</dimen>
+
+    <!-- Max (absolute) dimensions (both width and height) of autofill service icon on autofill save affordance.
+      NOTE: the actual displayed size might is actually smaller than this and is hardcoded in the
+      autofill_save.xml layout; this dimension is just used to avoid a crash in the UI (if the icon provided
+      by the autofill service metadata is bigger than these dimentionsit will not be displayed).
+    -->
+    <dimen name="autofill_save_icon_max_size">300dp</dimen>
 
 </resources>

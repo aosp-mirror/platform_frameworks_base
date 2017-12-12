@@ -19,15 +19,12 @@ package android.app;
 import android.os.FileUtils;
 import android.os.RemoteException;
 import android.os.SystemProperties;
-import android.system.ErrnoException;
 import android.util.Slog;
 
 import com.android.internal.annotations.GuardedBy;
 
 import dalvik.system.BaseDexClassLoader;
 import dalvik.system.VMRuntime;
-
-import libcore.io.Libcore;
 
 import java.io.File;
 import java.io.IOException;
@@ -125,7 +122,6 @@ import java.util.Set;
         }
         String packageName = ActivityThread.currentPackageName();
         try {
-            // Notify only the paths of the first class loader for now.
             ActivityThread.getPackageManager().notifyDexLoad(
                     packageName, classLoadersNames, classPaths,
                     VMRuntime.getRuntime().vmInstructionSet());
@@ -156,23 +152,12 @@ import java.util.Set;
             return;
         }
 
-        File realDexPath;
-        try {
-            // Secondary dex profiles are stored in the oat directory, next to the real dex file
-            // and have the same name with 'cur.prof' appended. We use the realpath because that
-            // is what installd is using when processing the dex file.
-            // NOTE: Keep in sync with installd.
-            realDexPath = new File(Libcore.os.realpath(dexPath));
-        } catch (ErrnoException ex) {
-            Slog.e(TAG, "Failed to get the real path of secondary dex " + dexPath
-                    + ":" + ex.getMessage());
-            // Do not continue with registration if we could not retrieve the real path.
-            return;
-        }
-
+        // Secondary dex profiles are stored in the oat directory, next to dex file
+        // and have the same name with 'cur.prof' appended.
         // NOTE: Keep this in sync with installd expectations.
-        File secondaryProfileDir = new File(realDexPath.getParent(), "oat");
-        File secondaryProfile = new File(secondaryProfileDir, realDexPath.getName() + ".cur.prof");
+        File dexPathFile = new File(dexPath);
+        File secondaryProfileDir = new File(dexPathFile.getParent(), "oat");
+        File secondaryProfile = new File(secondaryProfileDir, dexPathFile.getName() + ".cur.prof");
 
         // Create the profile if not already there.
         // Returns true if the file was created, false if the file already exists.

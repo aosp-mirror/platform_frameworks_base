@@ -27,9 +27,9 @@ import static android.content.pm.ActivityInfo.RESIZE_MODE_RESIZEABLE_VIA_SDK_VER
 import static android.content.pm.ActivityInfo.RESIZE_MODE_UNRESIZEABLE;
 import static android.content.pm.ActivityInfo.SCREEN_ORIENTATION_UNSPECIFIED;
 import static android.content.pm.ApplicationInfo.FLAG_SUSPENDED;
-import static android.content.pm.ApplicationInfo.PRIVATE_FLAG_ACTIVITIES_RESIZE_MODE_UNRESIZEABLE;
 import static android.content.pm.ApplicationInfo.PRIVATE_FLAG_ACTIVITIES_RESIZE_MODE_RESIZEABLE;
 import static android.content.pm.ApplicationInfo.PRIVATE_FLAG_ACTIVITIES_RESIZE_MODE_RESIZEABLE_VIA_SDK_VERSION;
+import static android.content.pm.ApplicationInfo.PRIVATE_FLAG_ACTIVITIES_RESIZE_MODE_UNRESIZEABLE;
 import static android.content.pm.PackageManager.INSTALL_PARSE_FAILED_BAD_MANIFEST;
 import static android.content.pm.PackageManager.INSTALL_PARSE_FAILED_BAD_PACKAGE_NAME;
 import static android.content.pm.PackageManager.INSTALL_PARSE_FAILED_CERTIFICATE_ENCODING;
@@ -50,9 +50,11 @@ import android.app.ActivityManager;
 import android.content.ComponentName;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.content.pm.PackageParserCacheHelper.ReadHelper;
+import android.content.pm.PackageParserCacheHelper.WriteHelper;
+import android.content.pm.split.DefaultSplitAssetLoader;
 import android.content.pm.split.SplitAssetDependencyLoader;
 import android.content.pm.split.SplitAssetLoader;
-import android.content.pm.split.DefaultSplitAssetLoader;
 import android.content.res.AssetManager;
 import android.content.res.Configuration;
 import android.content.res.Resources;
@@ -64,6 +66,7 @@ import android.os.FileUtils;
 import android.os.Parcel;
 import android.os.Parcelable;
 import android.os.PatternMatcher;
+import android.os.SystemClock;
 import android.os.SystemProperties;
 import android.os.Trace;
 import android.os.UserHandle;
@@ -88,11 +91,13 @@ import android.view.Gravity;
 
 import com.android.internal.R;
 import com.android.internal.annotations.VisibleForTesting;
+import com.android.internal.os.ClassLoaderFactory;
 import com.android.internal.util.ArrayUtils;
 import com.android.internal.util.XmlUtils;
 
 import libcore.io.IoUtils;
 
+import libcore.util.EmptyArray;
 import org.xmlpull.v1.XmlPullParser;
 import org.xmlpull.v1.XmlPullParserException;
 
@@ -119,6 +124,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
 import java.util.UUID;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.zip.ZipEntry;
 
@@ -144,6 +150,8 @@ public class PackageParser {
     private static final boolean DEBUG_JAR = false;
     private static final boolean DEBUG_PARSER = false;
     private static final boolean DEBUG_BACKUP = false;
+    private static final boolean LOG_PARSE_TIMINGS = Build.IS_DEBUGGABLE;
+    private static final int LOG_PARSE_TIMINGS_THRESHOLD_MS = 100;
 
     private static final String PROPERTY_CHILD_PACKAGES_ENABLED =
             "persist.sys.child_packages_enabled";
@@ -229,6 +237,11 @@ public class PackageParser {
     }
 
     private static final boolean LOG_UNSAFE_BROADCASTS = false;
+
+    /**
+     * Total number of packages that were read from the cache.  We use it only for logging.
+     */
+    public static final AtomicInteger sCachedPackageReadCount = new AtomicInteger();
 
     // Set of broadcast actions that are safe for manifest receivers
     private static final Set<String> SAFE_BROADCASTS = new ArraySet<>();
@@ -500,11 +513,25 @@ public class PackageParser {
         }
     }
 
+    /**
+     * Cached parse state for new components.
+     *
+     * Allows reuse of the same parse argument records to avoid GC pressure.  Lifetime is carefully
+     * scoped to the parsing of a single application element.
+     */
+    private static class CachedComponentArgs {
+        ParseComponentArgs mActivityArgs;
+        ParseComponentArgs mActivityAliasArgs;
+        ParseComponentArgs mServiceArgs;
+        ParseComponentArgs mProviderArgs;
+    }
+
+    /**
+     * Cached state for parsing instrumentation to avoid GC pressure.
+     *
+     * Must be manually reset to null for each new manifest.
+     */
     private ParsePackageItemArgs mParseInstrumentationArgs;
-    private ParseComponentArgs mParseActivityArgs;
-    private ParseComponentArgs mParseActivityAliasArgs;
-    private ParseComponentArgs mParseServiceArgs;
-    private ParseComponentArgs mParseProviderArgs;
 
     /** If set to true, we will only allow package files that exactly match
      *  the DTD.  Otherwise, we try to get as much from the package as we
@@ -641,6 +668,7 @@ public class PackageParser {
         pi.sharedUserLabel = p.mSharedUserLabel;
         pi.applicationInfo = generateApplicationInfo(p, flags, state, userId);
         pi.installLocation = p.installLocation;
+        pi.isStub = p.isStub;
         pi.coreApp = p.coreApp;
         if ((pi.applicationInfo.flags&ApplicationInfo.FLAG_SYSTEM) != 0
                 || (pi.applicationInfo.flags&ApplicationInfo.FLAG_UPDATED_SYSTEM_APP) != 0) {
@@ -913,6 +941,7 @@ public class PackageParser {
         String[] configForSplits = null;
         String[] splitCodePaths = null;
         int[] splitRevisionCodes = null;
+        String[] splitClassLoaderNames = null;
         if (size > 0) {
             splitNames = new String[size];
             isFeatureSplits = new boolean[size];
@@ -965,14 +994,23 @@ public class PackageParser {
             return parsed;
         }
 
+        long parseTime = LOG_PARSE_TIMINGS ? SystemClock.uptimeMillis() : 0;
         if (packageFile.isDirectory()) {
             parsed = parseClusterPackage(packageFile, flags);
         } else {
             parsed = parseMonolithicPackage(packageFile, flags);
         }
 
+        long cacheTime = LOG_PARSE_TIMINGS ? SystemClock.uptimeMillis() : 0;
         cacheResult(packageFile, flags, parsed);
-
+        if (LOG_PARSE_TIMINGS) {
+            parseTime = cacheTime - parseTime;
+            cacheTime = SystemClock.uptimeMillis() - cacheTime;
+            if (parseTime + cacheTime > LOG_PARSE_TIMINGS_THRESHOLD_MS) {
+                Slog.i(TAG, "Parse times for '" + packageFile + "': parse=" + parseTime
+                        + "ms, update_cache=" + cacheTime + " ms");
+            }
+        }
         return parsed;
     }
 
@@ -995,21 +1033,45 @@ public class PackageParser {
     }
 
     @VisibleForTesting
-    protected Package fromCacheEntry(byte[] bytes) throws IOException {
-        Parcel p = Parcel.obtain();
+    protected Package fromCacheEntry(byte[] bytes) {
+        return fromCacheEntryStatic(bytes);
+    }
+
+    /** static version of {@link #fromCacheEntry} for unit tests. */
+    @VisibleForTesting
+    public static Package fromCacheEntryStatic(byte[] bytes) {
+        final Parcel p = Parcel.obtain();
         p.unmarshall(bytes, 0, bytes.length);
         p.setDataPosition(0);
 
+        final ReadHelper helper = new ReadHelper(p);
+        helper.startAndInstall();
+
         PackageParser.Package pkg = new PackageParser.Package(p);
+
         p.recycle();
+
+        sCachedPackageReadCount.incrementAndGet();
 
         return pkg;
     }
 
     @VisibleForTesting
-    protected byte[] toCacheEntry(Package pkg) throws IOException {
-        Parcel p = Parcel.obtain();
+    protected byte[] toCacheEntry(Package pkg) {
+        return toCacheEntryStatic(pkg);
+
+    }
+
+    /** static version of {@link #toCacheEntry} for unit tests. */
+    @VisibleForTesting
+    public static byte[] toCacheEntryStatic(Package pkg) {
+        final Parcel p = Parcel.obtain();
+        final WriteHelper helper = new WriteHelper(p);
+
         pkg.writeToParcel(p, 0 /* flags */);
+
+        helper.finishAndUninstall();
+
         byte[] serialized = p.marshall();
         p.recycle();
 
@@ -1059,12 +1121,12 @@ public class PackageParser {
         final String cacheKey = getCacheKey(packageFile, flags);
         final File cacheFile = new File(mCacheDir, cacheKey);
 
-        // If the cache is not up to date, return null.
-        if (!isCacheUpToDate(packageFile, cacheFile)) {
-            return null;
-        }
-
         try {
+            // If the cache is not up to date, return null.
+            if (!isCacheUpToDate(packageFile, cacheFile)) {
+                return null;
+            }
+
             final byte[] bytes = IoUtils.readFileAsByteArray(cacheFile.getAbsolutePath());
             Package p = fromCacheEntry(bytes);
             if (mCallback != null) {
@@ -1079,7 +1141,7 @@ public class PackageParser {
                 }
             }
             return p;
-        } catch (Exception e) {
+        } catch (Throwable e) {
             Slog.w(TAG, "Error reading package cache: ", e);
 
             // If something went wrong while reading the cache entry, delete the cache file
@@ -1097,32 +1159,30 @@ public class PackageParser {
             return;
         }
 
-        final String cacheKey = getCacheKey(packageFile, flags);
-        final File cacheFile = new File(mCacheDir, cacheKey);
-
-        if (cacheFile.exists()) {
-            if (!cacheFile.delete()) {
-                Slog.e(TAG, "Unable to delete cache file: " + cacheFile);
-            }
-        }
-
-        final byte[] cacheEntry;
         try {
-            cacheEntry = toCacheEntry(parsed);
-        } catch (IOException ioe) {
-            Slog.e(TAG, "Unable to serialize parsed package for: " + packageFile);
-            return;
-        }
+            final String cacheKey = getCacheKey(packageFile, flags);
+            final File cacheFile = new File(mCacheDir, cacheKey);
 
-        if (cacheEntry == null) {
-            return;
-        }
+            if (cacheFile.exists()) {
+                if (!cacheFile.delete()) {
+                    Slog.e(TAG, "Unable to delete cache file: " + cacheFile);
+                }
+            }
 
-        try (FileOutputStream fos = new FileOutputStream(cacheFile)) {
-            fos.write(cacheEntry);
-        } catch (IOException ioe) {
-            Slog.w(TAG, "Error writing cache entry.", ioe);
-            cacheFile.delete();
+            final byte[] cacheEntry = toCacheEntry(parsed);
+
+            if (cacheEntry == null) {
+                return;
+            }
+
+            try (FileOutputStream fos = new FileOutputStream(cacheFile)) {
+                fos.write(cacheEntry);
+            } catch (IOException ioe) {
+                Slog.w(TAG, "Error writing cache entry.", ioe);
+                cacheFile.delete();
+            }
+        } catch (Throwable e) {
+            Slog.w(TAG, "Error saving package cache.", e);
         }
     }
 
@@ -1174,6 +1234,7 @@ public class PackageParser {
                 pkg.splitPrivateFlags = new int[num];
                 pkg.applicationInfo.splitNames = pkg.splitNames;
                 pkg.applicationInfo.splitDependencies = splitDependencies;
+                pkg.applicationInfo.splitClassLoaderNames = new String[num];
 
                 for (int i = 0; i < num; i++) {
                     final AssetManager splitAssets = assetLoader.getSplitAssetManager(i);
@@ -1337,9 +1398,6 @@ public class PackageParser {
         parsePackageSplitNames(parser, attrs);
 
         mParseInstrumentationArgs = null;
-        mParseActivityArgs = null;
-        mParseServiceArgs = null;
-        mParseProviderArgs = null;
 
         int type;
 
@@ -1687,7 +1745,7 @@ public class PackageParser {
             }
 
             final AttributeSet attrs = parser;
-            return parseApkLite(apkPath, parser, attrs, flags, signatures, certificates);
+            return parseApkLite(apkPath, parser, attrs, signatures, certificates);
 
         } catch (XmlPullParserException | IOException | RuntimeException e) {
             Slog.w(TAG, "Failed to parse " + apkPath, e);
@@ -1774,7 +1832,7 @@ public class PackageParser {
     }
 
     private static ApkLite parseApkLite(String codePath, XmlPullParser parser, AttributeSet attrs,
-            int flags, Signature[] signatures, Certificate[][] certificates)
+            Signature[] signatures, Certificate[][] certificates)
             throws IOException, XmlPullParserException, PackageParserException {
         final Pair<String, String> packageSplit = parsePackageSplitNames(parser, attrs);
 
@@ -1866,18 +1924,6 @@ public class PackageParser {
                 configForSplit, usesSplitName, versionCode, revisionCode, installLocation,
                 verifiers, signatures, certificates, coreApp, debuggable, multiArch, use32bitAbi,
                 extractNativeLibs, isolatedSplits);
-    }
-
-    /**
-     * Temporary.
-     */
-    static public Signature stringToSignature(String str) {
-        final int N = str.length();
-        byte[] sig = new byte[N];
-        for (int i=0; i<N; i++) {
-            sig[i] = (byte)str.charAt(i);
-        }
-        return new Signature(sig);
     }
 
     /**
@@ -2046,9 +2092,6 @@ public class PackageParser {
             XmlResourceParser parser, int flags, String[] outError) throws XmlPullParserException,
             IOException {
         mParseInstrumentationArgs = null;
-        mParseActivityArgs = null;
-        mParseServiceArgs = null;
-        mParseProviderArgs = null;
 
         int type;
         boolean foundApp = false;
@@ -2782,14 +2825,14 @@ public class PackageParser {
                 com.android.internal.R.styleable.AndroidManifestUsesLibrary_name);
         final int version = sa.getInt(
                 com.android.internal.R.styleable.AndroidManifestUsesStaticLibrary_version, -1);
-        String certSha256 = sa.getNonResourceString(com.android.internal.R.styleable
+        String certSha256Digest = sa.getNonResourceString(com.android.internal.R.styleable
                 .AndroidManifestUsesStaticLibrary_certDigest);
         sa.recycle();
 
         // Since an APK providing a static shared lib can only provide the lib - fail if malformed
-        if (lname == null || version < 0 || certSha256 == null) {
+        if (lname == null || version < 0 || certSha256Digest == null) {
             outError[0] = "Bad uses-static-library declaration name: " + lname + " version: "
-                    + version + " certDigest" + certSha256;
+                    + version + " certDigest" + certSha256Digest;
             mParseError = PackageManager.INSTALL_PARSE_FAILED_MANIFEST_MALFORMED;
             XmlUtils.skipCurrentTag(parser);
             return false;
@@ -2806,16 +2849,73 @@ public class PackageParser {
         lname = lname.intern();
         // We allow ":" delimiters in the SHA declaration as this is the format
         // emitted by the certtool making it easy for developers to copy/paste.
-        certSha256 = certSha256.replace(":", "").toLowerCase();
+        certSha256Digest = certSha256Digest.replace(":", "").toLowerCase();
+
+        // Fot apps targeting O-MR1 we require explicit enumeration of all certs.
+        String[] additionalCertSha256Digests = EmptyArray.STRING;
+        if (pkg.applicationInfo.targetSdkVersion > Build.VERSION_CODES.O) {
+            additionalCertSha256Digests = parseAdditionalCertificates(res, parser, outError);
+            if (additionalCertSha256Digests == null) {
+                return false;
+            }
+        } else {
+            XmlUtils.skipCurrentTag(parser);
+        }
+
+        final String[] certSha256Digests = new String[additionalCertSha256Digests.length + 1];
+        certSha256Digests[0] = certSha256Digest;
+        System.arraycopy(additionalCertSha256Digests, 0, certSha256Digests,
+                1, additionalCertSha256Digests.length);
+
         pkg.usesStaticLibraries = ArrayUtils.add(pkg.usesStaticLibraries, lname);
         pkg.usesStaticLibrariesVersions = ArrayUtils.appendInt(
                 pkg.usesStaticLibrariesVersions, version, true);
-        pkg.usesStaticLibrariesCertDigests = ArrayUtils.appendElement(String.class,
-                pkg.usesStaticLibrariesCertDigests, certSha256, true);
-
-        XmlUtils.skipCurrentTag(parser);
+        pkg.usesStaticLibrariesCertDigests = ArrayUtils.appendElement(String[].class,
+                pkg.usesStaticLibrariesCertDigests, certSha256Digests, true);
 
         return true;
+    }
+
+    private String[] parseAdditionalCertificates(Resources resources, XmlResourceParser parser,
+            String[] outError) throws XmlPullParserException, IOException {
+        String[] certSha256Digests = EmptyArray.STRING;
+
+        int outerDepth = parser.getDepth();
+        int type;
+        while ((type = parser.next()) != XmlPullParser.END_DOCUMENT
+                && (type != XmlPullParser.END_TAG || parser.getDepth() > outerDepth)) {
+            if (type == XmlPullParser.END_TAG || type == XmlPullParser.TEXT) {
+                continue;
+            }
+
+            final String nodeName = parser.getName();
+            if (nodeName.equals("additional-certificate")) {
+                final TypedArray sa = resources.obtainAttributes(parser, com.android.internal.
+                        R.styleable.AndroidManifestAdditionalCertificate);
+                String certSha256Digest = sa.getNonResourceString(com.android.internal.
+                        R.styleable.AndroidManifestAdditionalCertificate_certDigest);
+                sa.recycle();
+
+                if (TextUtils.isEmpty(certSha256Digest)) {
+                    outError[0] = "Bad additional-certificate declaration with empty"
+                            + " certDigest:" + certSha256Digest;
+                    mParseError = PackageManager.INSTALL_PARSE_FAILED_MANIFEST_MALFORMED;
+                    XmlUtils.skipCurrentTag(parser);
+                    sa.recycle();
+                    return null;
+                }
+
+                // We allow ":" delimiters in the SHA declaration as this is the format
+                // emitted by the certtool making it easy for developers to copy/paste.
+                certSha256Digest = certSha256Digest.replace(":", "").toLowerCase();
+                certSha256Digests = ArrayUtils.appendElement(String.class,
+                        certSha256Digests, certSha256Digest);
+            } else {
+                XmlUtils.skipCurrentTag(parser);
+            }
+        }
+
+        return certSha256Digests;
     }
 
     private boolean parseUsesPermission(Package pkg, Resources res, XmlResourceParser parser)
@@ -2943,7 +3043,7 @@ public class PackageParser {
         if (procSeq == null || procSeq.length() <= 0) {
             return defProc;
         }
-        return buildCompoundName(pkg, procSeq, "process", outError);
+        return TextUtils.safeIntern(buildCompoundName(pkg, procSeq, "process", outError));
     }
 
     private static String buildTaskAffinityName(String pkg, String defProc,
@@ -3197,11 +3297,11 @@ public class PackageParser {
         perm.info.protectionLevel = PermissionInfo.fixProtectionLevel(perm.info.protectionLevel);
 
         if ((perm.info.protectionLevel&PermissionInfo.PROTECTION_MASK_FLAGS) != 0) {
-            if ( (perm.info.protectionLevel&PermissionInfo.PROTECTION_FLAG_EPHEMERAL) == 0
+            if ( (perm.info.protectionLevel&PermissionInfo.PROTECTION_FLAG_INSTANT) == 0
                     && (perm.info.protectionLevel&PermissionInfo.PROTECTION_FLAG_RUNTIME_ONLY) == 0
                     && (perm.info.protectionLevel&PermissionInfo.PROTECTION_MASK_BASE) !=
                     PermissionInfo.PROTECTION_SIGNATURE) {
-                outError[0] = "<permission>  protectionLevel specifies a non-ephemeral flag but is "
+                outError[0] = "<permission>  protectionLevel specifies a non-instnat flag but is "
                         + "not based on signature type";
                 mParseError = PackageManager.INSTALL_PARSE_FAILED_MANIFEST_MALFORMED;
                 return false;
@@ -3632,6 +3732,13 @@ public class PackageParser {
         ai.uiOptions = sa.getInt(
                 com.android.internal.R.styleable.AndroidManifestApplication_uiOptions, 0);
 
+        ai.classLoaderName = sa.getString(
+            com.android.internal.R.styleable.AndroidManifestApplication_classLoader);
+        if (ai.classLoaderName != null
+                && !ClassLoaderFactory.isValidClassLoaderName(ai.classLoaderName)) {
+            outError[0] = "Invalid class loader name: " + ai.classLoaderName;
+        }
+
         sa.recycle();
 
         if (outError[0] != null) {
@@ -3640,6 +3747,9 @@ public class PackageParser {
         }
 
         final int innerDepth = parser.getDepth();
+        // IMPORTANT: These must only be cached for a single <application> to avoid components
+        // getting added to the wrong package.
+        final CachedComponentArgs cachedArgs = new CachedComponentArgs();
         int type;
 
         while ((type = parser.next()) != XmlPullParser.END_DOCUMENT
@@ -3650,7 +3760,7 @@ public class PackageParser {
 
             String tagName = parser.getName();
             if (tagName.equals("activity")) {
-                Activity a = parseActivity(owner, res, parser, flags, outError, false,
+                Activity a = parseActivity(owner, res, parser, flags, outError, cachedArgs, false,
                         owner.baseHardwareAccelerated);
                 if (a == null) {
                     mParseError = PackageManager.INSTALL_PARSE_FAILED_MANIFEST_MALFORMED;
@@ -3660,7 +3770,8 @@ public class PackageParser {
                 owner.activities.add(a);
 
             } else if (tagName.equals("receiver")) {
-                Activity a = parseActivity(owner, res, parser, flags, outError, true, false);
+                Activity a = parseActivity(owner, res, parser, flags, outError, cachedArgs,
+                        true, false);
                 if (a == null) {
                     mParseError = PackageManager.INSTALL_PARSE_FAILED_MANIFEST_MALFORMED;
                     return false;
@@ -3669,7 +3780,7 @@ public class PackageParser {
                 owner.receivers.add(a);
 
             } else if (tagName.equals("service")) {
-                Service s = parseService(owner, res, parser, flags, outError);
+                Service s = parseService(owner, res, parser, flags, outError, cachedArgs);
                 if (s == null) {
                     mParseError = PackageManager.INSTALL_PARSE_FAILED_MANIFEST_MALFORMED;
                     return false;
@@ -3678,7 +3789,7 @@ public class PackageParser {
                 owner.services.add(s);
 
             } else if (tagName.equals("provider")) {
-                Provider p = parseProvider(owner, res, parser, flags, outError);
+                Provider p = parseProvider(owner, res, parser, flags, outError, cachedArgs);
                 if (p == null) {
                     mParseError = PackageManager.INSTALL_PARSE_FAILED_MANIFEST_MALFORMED;
                     return false;
@@ -3687,7 +3798,7 @@ public class PackageParser {
                 owner.providers.add(p);
 
             } else if (tagName.equals("activity-alias")) {
-                Activity a = parseActivityAlias(owner, res, parser, flags, outError);
+                Activity a = parseActivityAlias(owner, res, parser, flags, outError, cachedArgs);
                 if (a == null) {
                     mParseError = PackageManager.INSTALL_PARSE_FAILED_MANIFEST_MALFORMED;
                     return false;
@@ -3822,7 +3933,7 @@ public class PackageParser {
         // every activity info has had a chance to set it from its attributes.
         setMaxAspectRatio(owner);
 
-        modifySharedLibrariesForBackwardCompatibility(owner);
+        PackageBackwardCompatibility.modifySharedLibraries(owner);
 
         if (hasDomainURLs(owner)) {
             owner.applicationInfo.privateFlags |= ApplicationInfo.PRIVATE_FLAG_HAS_DOMAIN_URLS;
@@ -3831,18 +3942,6 @@ public class PackageParser {
         }
 
         return true;
-    }
-
-    private static void modifySharedLibrariesForBackwardCompatibility(Package owner) {
-        // "org.apache.http.legacy" is now a part of the boot classpath so it doesn't need
-        // to be an explicit dependency.
-        //
-        // A future change will remove this library from the boot classpath, at which point
-        // all apps that target SDK 21 and earlier will have it automatically added to their
-        // dependency lists.
-        owner.usesLibraries = ArrayUtils.remove(owner.usesLibraries, "org.apache.http.legacy");
-        owner.usesOptionalLibraries = ArrayUtils.remove(owner.usesOptionalLibraries,
-                "org.apache.http.legacy");
     }
 
     /**
@@ -3889,6 +3988,16 @@ public class PackageParser {
             owner.splitFlags[splitIndex] |= ApplicationInfo.FLAG_HAS_CODE;
         }
 
+        final String classLoaderName = sa.getString(
+                com.android.internal.R.styleable.AndroidManifestApplication_classLoader);
+        if (classLoaderName == null || ClassLoaderFactory.isValidClassLoaderName(classLoaderName)) {
+            owner.applicationInfo.splitClassLoaderNames[splitIndex] = classLoaderName;
+        } else {
+            outError[0] = "Invalid class loader name: " + classLoaderName;
+            mParseError = PackageManager.INSTALL_PARSE_FAILED_MANIFEST_MALFORMED;
+            return false;
+        }
+
         final int innerDepth = parser.getDepth();
         int type;
         while ((type = parser.next()) != XmlPullParser.END_DOCUMENT
@@ -3899,9 +4008,12 @@ public class PackageParser {
 
             ComponentInfo parsedComponent = null;
 
+            // IMPORTANT: These must only be cached for a single <application> to avoid components
+            // getting added to the wrong package.
+            final CachedComponentArgs cachedArgs = new CachedComponentArgs();
             String tagName = parser.getName();
             if (tagName.equals("activity")) {
-                Activity a = parseActivity(owner, res, parser, flags, outError, false,
+                Activity a = parseActivity(owner, res, parser, flags, outError, cachedArgs, false,
                         owner.baseHardwareAccelerated);
                 if (a == null) {
                     mParseError = PackageManager.INSTALL_PARSE_FAILED_MANIFEST_MALFORMED;
@@ -3912,7 +4024,8 @@ public class PackageParser {
                 parsedComponent = a.info;
 
             } else if (tagName.equals("receiver")) {
-                Activity a = parseActivity(owner, res, parser, flags, outError, true, false);
+                Activity a = parseActivity(owner, res, parser, flags, outError, cachedArgs,
+                        true, false);
                 if (a == null) {
                     mParseError = PackageManager.INSTALL_PARSE_FAILED_MANIFEST_MALFORMED;
                     return false;
@@ -3922,7 +4035,7 @@ public class PackageParser {
                 parsedComponent = a.info;
 
             } else if (tagName.equals("service")) {
-                Service s = parseService(owner, res, parser, flags, outError);
+                Service s = parseService(owner, res, parser, flags, outError, cachedArgs);
                 if (s == null) {
                     mParseError = PackageManager.INSTALL_PARSE_FAILED_MANIFEST_MALFORMED;
                     return false;
@@ -3932,7 +4045,7 @@ public class PackageParser {
                 parsedComponent = s.info;
 
             } else if (tagName.equals("provider")) {
-                Provider p = parseProvider(owner, res, parser, flags, outError);
+                Provider p = parseProvider(owner, res, parser, flags, outError, cachedArgs);
                 if (p == null) {
                     mParseError = PackageManager.INSTALL_PARSE_FAILED_MANIFEST_MALFORMED;
                     return false;
@@ -3942,7 +4055,7 @@ public class PackageParser {
                 parsedComponent = p.info;
 
             } else if (tagName.equals("activity-alias")) {
-                Activity a = parseActivityAlias(owner, res, parser, flags, outError);
+                Activity a = parseActivityAlias(owner, res, parser, flags, outError, cachedArgs);
                 if (a == null) {
                     mParseError = PackageManager.INSTALL_PARSE_FAILED_MANIFEST_MALFORMED;
                     return false;
@@ -4088,13 +4201,13 @@ public class PackageParser {
     }
 
     private Activity parseActivity(Package owner, Resources res,
-            XmlResourceParser parser, int flags, String[] outError,
+            XmlResourceParser parser, int flags, String[] outError, CachedComponentArgs cachedArgs,
             boolean receiver, boolean hardwareAccelerated)
             throws XmlPullParserException, IOException {
         TypedArray sa = res.obtainAttributes(parser, R.styleable.AndroidManifestActivity);
 
-        if (mParseActivityArgs == null) {
-            mParseActivityArgs = new ParseComponentArgs(owner, outError,
+        if (cachedArgs.mActivityArgs == null) {
+            cachedArgs.mActivityArgs = new ParseComponentArgs(owner, outError,
                     R.styleable.AndroidManifestActivity_name,
                     R.styleable.AndroidManifestActivity_label,
                     R.styleable.AndroidManifestActivity_icon,
@@ -4107,11 +4220,11 @@ public class PackageParser {
                     R.styleable.AndroidManifestActivity_enabled);
         }
 
-        mParseActivityArgs.tag = receiver ? "<receiver>" : "<activity>";
-        mParseActivityArgs.sa = sa;
-        mParseActivityArgs.flags = flags;
+        cachedArgs.mActivityArgs.tag = receiver ? "<receiver>" : "<activity>";
+        cachedArgs.mActivityArgs.sa = sa;
+        cachedArgs.mActivityArgs.flags = flags;
 
-        Activity a = new Activity(mParseActivityArgs, new ActivityInfo());
+        Activity a = new Activity(cachedArgs.mActivityArgs, new ActivityInfo());
         if (outError[0] != null) {
             sa.recycle();
             return null;
@@ -4287,6 +4400,15 @@ public class PackageParser {
 
             a.info.colorMode = sa.getInt(R.styleable.AndroidManifestActivity_colorMode,
                     ActivityInfo.COLOR_MODE_DEFAULT);
+
+            if (sa.getBoolean(R.styleable.AndroidManifestActivity_showWhenLocked, false)) {
+                a.info.flags |= ActivityInfo.FLAG_SHOW_WHEN_LOCKED;
+            }
+
+            if (sa.getBoolean(R.styleable.AndroidManifestActivity_turnScreenOn, false)) {
+                a.info.flags |= ActivityInfo.FLAG_TURN_SCREEN_ON;
+            }
+
         } else {
             a.info.launchMode = ActivityInfo.LAUNCH_MULTIPLE;
             a.info.configChanges = 0;
@@ -4600,7 +4722,8 @@ public class PackageParser {
     }
 
     private Activity parseActivityAlias(Package owner, Resources res,
-            XmlResourceParser parser, int flags, String[] outError)
+            XmlResourceParser parser, int flags, String[] outError,
+            CachedComponentArgs cachedArgs)
             throws XmlPullParserException, IOException {
         TypedArray sa = res.obtainAttributes(parser,
                 com.android.internal.R.styleable.AndroidManifestActivityAlias);
@@ -4621,8 +4744,8 @@ public class PackageParser {
             return null;
         }
 
-        if (mParseActivityAliasArgs == null) {
-            mParseActivityAliasArgs = new ParseComponentArgs(owner, outError,
+        if (cachedArgs.mActivityAliasArgs == null) {
+            cachedArgs.mActivityAliasArgs = new ParseComponentArgs(owner, outError,
                     com.android.internal.R.styleable.AndroidManifestActivityAlias_name,
                     com.android.internal.R.styleable.AndroidManifestActivityAlias_label,
                     com.android.internal.R.styleable.AndroidManifestActivityAlias_icon,
@@ -4633,11 +4756,11 @@ public class PackageParser {
                     0,
                     com.android.internal.R.styleable.AndroidManifestActivityAlias_description,
                     com.android.internal.R.styleable.AndroidManifestActivityAlias_enabled);
-            mParseActivityAliasArgs.tag = "<activity-alias>";
+            cachedArgs.mActivityAliasArgs.tag = "<activity-alias>";
         }
 
-        mParseActivityAliasArgs.sa = sa;
-        mParseActivityAliasArgs.flags = flags;
+        cachedArgs.mActivityAliasArgs.sa = sa;
+        cachedArgs.mActivityAliasArgs.flags = flags;
 
         Activity target = null;
 
@@ -4685,7 +4808,7 @@ public class PackageParser {
 
         info.encryptionAware = info.directBootAware = target.info.directBootAware;
 
-        Activity a = new Activity(mParseActivityAliasArgs, info);
+        Activity a = new Activity(cachedArgs.mActivityAliasArgs, info);
         if (outError[0] != null) {
             sa.recycle();
             return null;
@@ -4791,13 +4914,14 @@ public class PackageParser {
     }
 
     private Provider parseProvider(Package owner, Resources res,
-            XmlResourceParser parser, int flags, String[] outError)
+            XmlResourceParser parser, int flags, String[] outError,
+            CachedComponentArgs cachedArgs)
             throws XmlPullParserException, IOException {
         TypedArray sa = res.obtainAttributes(parser,
                 com.android.internal.R.styleable.AndroidManifestProvider);
 
-        if (mParseProviderArgs == null) {
-            mParseProviderArgs = new ParseComponentArgs(owner, outError,
+        if (cachedArgs.mProviderArgs == null) {
+            cachedArgs.mProviderArgs = new ParseComponentArgs(owner, outError,
                     com.android.internal.R.styleable.AndroidManifestProvider_name,
                     com.android.internal.R.styleable.AndroidManifestProvider_label,
                     com.android.internal.R.styleable.AndroidManifestProvider_icon,
@@ -4808,13 +4932,13 @@ public class PackageParser {
                     com.android.internal.R.styleable.AndroidManifestProvider_process,
                     com.android.internal.R.styleable.AndroidManifestProvider_description,
                     com.android.internal.R.styleable.AndroidManifestProvider_enabled);
-            mParseProviderArgs.tag = "<provider>";
+            cachedArgs.mProviderArgs.tag = "<provider>";
         }
 
-        mParseProviderArgs.sa = sa;
-        mParseProviderArgs.flags = flags;
+        cachedArgs.mProviderArgs.sa = sa;
+        cachedArgs.mProviderArgs.flags = flags;
 
-        Provider p = new Provider(mParseProviderArgs, new ProviderInfo());
+        Provider p = new Provider(cachedArgs.mProviderArgs, new ProviderInfo());
         if (outError[0] != null) {
             sa.recycle();
             return null;
@@ -5145,13 +5269,14 @@ public class PackageParser {
     }
 
     private Service parseService(Package owner, Resources res,
-            XmlResourceParser parser, int flags, String[] outError)
+            XmlResourceParser parser, int flags, String[] outError,
+            CachedComponentArgs cachedArgs)
             throws XmlPullParserException, IOException {
         TypedArray sa = res.obtainAttributes(parser,
                 com.android.internal.R.styleable.AndroidManifestService);
 
-        if (mParseServiceArgs == null) {
-            mParseServiceArgs = new ParseComponentArgs(owner, outError,
+        if (cachedArgs.mServiceArgs == null) {
+            cachedArgs.mServiceArgs = new ParseComponentArgs(owner, outError,
                     com.android.internal.R.styleable.AndroidManifestService_name,
                     com.android.internal.R.styleable.AndroidManifestService_label,
                     com.android.internal.R.styleable.AndroidManifestService_icon,
@@ -5162,13 +5287,13 @@ public class PackageParser {
                     com.android.internal.R.styleable.AndroidManifestService_process,
                     com.android.internal.R.styleable.AndroidManifestService_description,
                     com.android.internal.R.styleable.AndroidManifestService_enabled);
-            mParseServiceArgs.tag = "<service>";
+            cachedArgs.mServiceArgs.tag = "<service>";
         }
 
-        mParseServiceArgs.sa = sa;
-        mParseServiceArgs.flags = flags;
+        cachedArgs.mServiceArgs.sa = sa;
+        cachedArgs.mServiceArgs.flags = flags;
 
-        Service s = new Service(mParseServiceArgs, new ServiceInfo());
+        Service s = new Service(cachedArgs.mServiceArgs, new ServiceInfo());
         if (outError[0] != null) {
             sa.recycle();
             return null;
@@ -5753,7 +5878,7 @@ public class PackageParser {
         public ArrayList<String> usesLibraries = null;
         public ArrayList<String> usesStaticLibraries = null;
         public int[] usesStaticLibrariesVersions = null;
-        public String[] usesStaticLibrariesCertDigests = null;
+        public String[][] usesStaticLibrariesCertDigests = null;
         public ArrayList<String> usesOptionalLibraries = null;
         public String[] usesLibraryFiles = null;
 
@@ -5851,10 +5976,10 @@ public class PackageParser {
 
         public byte[] restrictUpdateHash;
 
-        /**
-         * Set if the app or any of its components are visible to Instant Apps.
-         */
+        /** Set if the app or any of its components are visible to instant applications. */
         public boolean visibleToInstantApps;
+        /** Whether or not the package is a stub and must be replaced by the full version. */
+        public boolean isStub;
 
         public Package(String packageName) {
             this.packageName = packageName;
@@ -6251,8 +6376,10 @@ public class PackageParser {
                 internStringArrayList(usesStaticLibraries);
                 usesStaticLibrariesVersions = new int[libCount];
                 dest.readIntArray(usesStaticLibrariesVersions);
-                usesStaticLibrariesCertDigests = new String[libCount];
-                dest.readStringArray(usesStaticLibrariesCertDigests);
+                usesStaticLibrariesCertDigests = new String[libCount][];
+                for (int i = 0; i < libCount; i++) {
+                    usesStaticLibrariesCertDigests[i] = dest.createStringArray();
+                }
             }
 
             preferredActivityFilters = new ArrayList<>();
@@ -6380,8 +6507,11 @@ public class PackageParser {
 
             dest.writeStringList(requestedPermissions);
             dest.writeStringList(protectedBroadcasts);
+
+            // TODO: This doesn't work: b/64295061
             dest.writeParcelable(parentPackage, flags);
             dest.writeParcelableList(childPackages, flags);
+
             dest.writeString(staticSharedLibName);
             dest.writeInt(staticSharedLibVersion);
             dest.writeStringList(libraryNames);
@@ -6395,7 +6525,9 @@ public class PackageParser {
                 dest.writeInt(usesStaticLibraries.size());
                 dest.writeStringList(usesStaticLibraries);
                 dest.writeIntArray(usesStaticLibrariesVersions);
-                dest.writeStringArray(usesStaticLibrariesCertDigests);
+                for (String[] usesStaticLibrariesCertDigest : usesStaticLibrariesCertDigests) {
+                    dest.writeStringArray(usesStaticLibrariesCertDigest);
+                }
             }
 
             dest.writeParcelableList(preferredActivityFilters, flags);
@@ -6859,6 +6991,11 @@ public class PackageParser {
             ai.privateFlags |= ApplicationInfo.PRIVATE_FLAG_INSTANT;
         } else {
             ai.privateFlags &= ~ApplicationInfo.PRIVATE_FLAG_INSTANT;
+        }
+        if (state.virtualPreload) {
+            ai.privateFlags |= ApplicationInfo.PRIVATE_FLAG_VIRTUAL_PRELOAD;
+        } else {
+            ai.privateFlags &= ~ApplicationInfo.PRIVATE_FLAG_VIRTUAL_PRELOAD;
         }
         if (state.hidden) {
             ai.privateFlags |= ApplicationInfo.PRIVATE_FLAG_HIDDEN;

@@ -140,8 +140,10 @@ public class RecentsTransitionHelper {
                         mHandler.postDelayed(mStartScreenPinningRunnable, 350);
                     }
 
-                    // Reset the state where we are waiting for the transition to start
-                    EventBus.getDefault().send(new SetWaitingForTransitionStartEvent(false));
+                    if (!Recents.getConfiguration().isLowRamDevice) {
+                        // Reset the state where we are waiting for the transition to start
+                        EventBus.getDefault().send(new SetWaitingForTransitionStartEvent(false));
+                    }
                 }
             };
         } else {
@@ -163,8 +165,10 @@ public class RecentsTransitionHelper {
                     EventBus.getDefault().send(new ExitRecentsWindowFirstAnimationFrameEvent());
                     stackView.cancelAllTaskViewAnimations();
 
-                    // Reset the state where we are waiting for the transition to start
-                    EventBus.getDefault().send(new SetWaitingForTransitionStartEvent(false));
+                    if (!Recents.getConfiguration().isLowRamDevice) {
+                        // Reset the state where we are waiting for the transition to start
+                        EventBus.getDefault().send(new SetWaitingForTransitionStartEvent(false));
+                    }
                 }
             };
         }
@@ -447,8 +451,12 @@ public class RecentsTransitionHelper {
 
         Rect taskRect = new Rect();
         transform.rect.round(taskRect);
-        if (stackView.getStack().getStackFrontMostTask(false /* includeFreeformTasks */) !=
-                taskView.getTask()) {
+        // Disable in for low ram devices because each task does in Recents does not have fullscreen
+        // height (stackView height) and when transitioning to fullscreen app, the code below would
+        // force the task thumbnail to full stackView height immediately causing the transition
+        // jarring.
+        if (!Recents.getConfiguration().isLowRamDevice && taskView.getTask() !=
+                stackView.getStack().getStackFrontMostTask(false /* includeFreeformTasks */)) {
             taskRect.bottom = taskRect.top + stackView.getMeasuredHeight();
         }
         return new AppTransitionAnimationSpec(taskView.getTask().key.id, b, taskRect);

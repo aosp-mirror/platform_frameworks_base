@@ -2825,17 +2825,30 @@
 
     <public type="string" name="paste_as_plain_text" id="0x01040019" />
 
-    <public-group type="attr" first-id="0x01010569">
-    </public-group>
+  <!-- ===============================================================
+       Resources added in version O MR1 of the platform
 
-    <public-group type="style" first-id="0x010302e0">
-    </public-group>
+       NOTE: add <public> elements within a <public-group> like so:
 
-    <public-group type="id" first-id="0x01020044">
-    </public-group>
+       <public-group type="attr" first-id="0x01010531">
+           <public name="exampleAttr1" />
+           <public name="exampleAttr2" />
+       </public-group>
 
-    <public-group type="string" first-id="0x0104001a">
-    </public-group>
+       To add a new public-group block, choose an id value that is 1 greater
+       than the last of that item above. For example, the last "attr" id
+       value above is 0x01010530, so the public-group of attrs below has
+       the id value of 0x01010531.
+       =============================================================== -->
+    <eat-comment />
+
+    <public type="attr" name="showWhenLocked" id="0x01010569" />
+    <public type="attr" name="turnScreenOn" id="0x0101056a" />
+    <public type="attr" name="classLoader" id="0x0101056b" />
+    <public type="attr" name="windowLightNavigationBar" id="0x0101056c" />
+    <public type="attr" name="navigationBarDividerColor" id="0x0101056d" />
+
+    <public type="string" name="autofill" id="0x0104001a"/>
 
   <!-- ===============================================================
        DO NOT ADD UN-GROUPED ITEMS HERE

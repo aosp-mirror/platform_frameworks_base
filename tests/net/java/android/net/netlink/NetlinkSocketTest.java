@@ -16,6 +16,8 @@
 
 package android.net.netlink;
 
+import static android.net.netlink.NetlinkSocket.DEFAULT_RECV_BUFSIZE;
+import static android.system.OsConstants.NETLINK_ROUTE;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
@@ -28,10 +30,12 @@ import android.support.test.runner.AndroidJUnit4;
 import android.support.test.filters.SmallTest;
 import android.system.ErrnoException;
 import android.system.NetlinkSocketAddress;
-import android.system.OsConstants;
+import android.system.Os;
 import android.util.Log;
+import libcore.io.IoUtils;
 
 import java.io.InterruptedIOException;
+import java.io.FileDescriptor;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 
@@ -46,29 +50,28 @@ public class NetlinkSocketTest {
 
     @Test
     public void testBasicWorkingGetNeighborsQuery() throws Exception {
-        NetlinkSocket s = new NetlinkSocket(OsConstants.NETLINK_ROUTE);
-        assertNotNull(s);
+        final FileDescriptor fd = NetlinkSocket.forProto(NETLINK_ROUTE);
+        assertNotNull(fd);
 
-        s.connectToKernel();
+        NetlinkSocket.connectToKernel(fd);
 
-        NetlinkSocketAddress localAddr = s.getLocalAddress();
+        final NetlinkSocketAddress localAddr = (NetlinkSocketAddress) Os.getsockname(fd);
         assertNotNull(localAddr);
         assertEquals(0, localAddr.getGroupsMask());
         assertTrue(0 != localAddr.getPortId());
 
         final int TEST_SEQNO = 5;
-        final byte[] request = RtNetlinkNeighborMessage.newGetNeighborsRequest(TEST_SEQNO);
-        assertNotNull(request);
+        final byte[] req = RtNetlinkNeighborMessage.newGetNeighborsRequest(TEST_SEQNO);
+        assertNotNull(req);
 
         final long TIMEOUT = 500;
-        assertTrue(s.sendMessage(request, 0, request.length, TIMEOUT));
+        assertEquals(req.length, NetlinkSocket.sendMessage(fd, req, 0, req.length, TIMEOUT));
 
         int neighMessageCount = 0;
         int doneMessageCount = 0;
 
         while (doneMessageCount == 0) {
-            ByteBuffer response = null;
-            response = s.recvMessage(TIMEOUT);
+            ByteBuffer response = NetlinkSocket.recvMessage(fd, DEFAULT_RECV_BUFSIZE, TIMEOUT);
             assertNotNull(response);
             assertTrue(StructNlMsgHdr.STRUCT_SIZE <= response.limit());
             assertEquals(0, response.position());
@@ -100,30 +103,6 @@ public class NetlinkSocketTest {
         // TODO: make sure this test passes sanely in airplane mode.
         assertTrue(neighMessageCount > 0);
 
-        s.close();
-    }
-
-    @Test
-    public void testRepeatedCloseCallsAreQuiet() throws Exception {
-        // Create a working NetlinkSocket.
-        NetlinkSocket s = new NetlinkSocket(OsConstants.NETLINK_ROUTE);
-        assertNotNull(s);
-        s.connectToKernel();
-        NetlinkSocketAddress localAddr = s.getLocalAddress();
-        assertNotNull(localAddr);
-        assertEquals(0, localAddr.getGroupsMask());
-        assertTrue(0 != localAddr.getPortId());
-        // Close once.
-        s.close();
-        // Test that it is closed.
-        boolean expectedErrorSeen = false;
-        try {
-            localAddr = s.getLocalAddress();
-        } catch (ErrnoException e) {
-            expectedErrorSeen = true;
-        }
-        assertTrue(expectedErrorSeen);
-        // Close once more.
-        s.close();
+        IoUtils.closeQuietly(fd);
     }
 }

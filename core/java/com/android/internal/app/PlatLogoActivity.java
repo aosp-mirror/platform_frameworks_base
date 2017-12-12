@@ -53,8 +53,7 @@ import android.widget.FrameLayout;
 import android.widget.ImageView;
 
 public class PlatLogoActivity extends Activity {
-    public static final boolean REVEAL_THE_NAME = false;
-    public static final boolean FINISH = false;
+    public static final boolean FINISH = true;
 
     FrameLayout mLayout;
     int mTapCount;
@@ -85,15 +84,18 @@ public class PlatLogoActivity extends Activity {
         im.setAlpha(0f);
 
         im.setBackground(new RippleDrawable(
-                ColorStateList.valueOf(0xFFFFFFFF),
+                ColorStateList.valueOf(0xFF776677),
                 getDrawable(com.android.internal.R.drawable.platlogo),
                 null));
-//        im.setOutlineProvider(new ViewOutlineProvider() {
-//            @Override
-//            public void getOutline(View view, Outline outline) {
-//                outline.setOval(0, 0, view.getWidth(), view.getHeight());
-//            }
-//        });
+        im.setOutlineProvider(new ViewOutlineProvider() {
+            @Override
+            public void getOutline(View view, Outline outline) {
+                final int w = view.getWidth();
+                final int h = view.getHeight();
+                outline.setOval((int)(w*.125), (int)(h*.125), (int)(w*.96), (int)(h*.96));
+            }
+        });
+        im.setElevation(12f*dp);
         im.setClickable(true);
         im.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -102,18 +104,6 @@ public class PlatLogoActivity extends Activity {
                     @Override
                     public boolean onLongClick(View v) {
                         if (mTapCount < 5) return false;
-
-                        if (REVEAL_THE_NAME) {
-                            final Drawable overlay = getDrawable(
-                                com.android.internal.R.drawable.platlogo_m);
-                            overlay.setBounds(0, 0, v.getMeasuredWidth(), v.getMeasuredHeight());
-                            im.getOverlay().clear();
-                            im.getOverlay().add(overlay);
-                            overlay.setAlpha(0);
-                            ObjectAnimator.ofInt(overlay, "alpha", 0, 255)
-                                .setDuration(500)
-                                .start();
-                        }
 
                         final ContentResolver cr = getContentResolver();
                         if (Settings.System.getLong(cr, Settings.System.EGG_MODE, 0)

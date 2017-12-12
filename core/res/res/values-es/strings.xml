@@ -21,24 +21,8 @@
 <resources xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
     <string name="byteShort" msgid="8340973892742019101">"B"</string>
-    <string name="kilobyteShort" msgid="7542884022844556968">"kB"</string>
-    <string name="megabyteShort" msgid="6355851576770428922">"MB"</string>
-    <string name="gigabyteShort" msgid="3259882455212193214">"GB"</string>
-    <string name="terabyteShort" msgid="231613018159186962">"TB"</string>
     <string name="petabyteShort" msgid="5637816680144990219">"PB"</string>
     <string name="fileSizeSuffix" msgid="8897567456150907538">"<xliff:g id="NUMBER">%1$s</xliff:g> <xliff:g id="UNIT">%2$s</xliff:g>"</string>
-    <string name="durationDays" msgid="6652371460511178259">"<xliff:g id="DAYS">%1$d</xliff:g> días"</string>
-    <string name="durationDayHours" msgid="2713107458736744435">"<xliff:g id="DAYS">%1$d</xliff:g> día <xliff:g id="HOURS">%2$d</xliff:g> h"</string>
-    <string name="durationDayHour" msgid="7293789639090958917">"<xliff:g id="DAYS">%1$d</xliff:g> día <xliff:g id="HOURS">%2$d</xliff:g> h"</string>
-    <string name="durationHours" msgid="4266858287167358988">"<xliff:g id="HOURS">%1$d</xliff:g> h"</string>
-    <string name="durationHourMinutes" msgid="9029176248692041549">"<xliff:g id="HOURS">%1$d</xliff:g> h <xliff:g id="MINUTES">%2$d</xliff:g> min"</string>
-    <string name="durationHourMinute" msgid="2741677355177402539">"<xliff:g id="HOURS">%1$d</xliff:g> h <xliff:g id="MINUTES">%2$d</xliff:g> min"</string>
-    <string name="durationMinutes" msgid="3134226679883579347">"<xliff:g id="MINUTES">%1$d</xliff:g> min"</string>
-    <string name="durationMinute" msgid="7155301744174623818">"<xliff:g id="MINUTES">%1$d</xliff:g> min"</string>
-    <string name="durationMinuteSeconds" msgid="1424656185379003751">"<xliff:g id="MINUTES">%1$d</xliff:g> min <xliff:g id="SECONDS">%2$d</xliff:g> s"</string>
-    <string name="durationMinuteSecond" msgid="3989228718067466680">"<xliff:g id="MINUTES">%1$d</xliff:g> min <xliff:g id="SECONDS">%2$d</xliff:g> s"</string>
-    <string name="durationSeconds" msgid="8050088505238241405">"<xliff:g id="SECONDS">%1$d</xliff:g> s"</string>
-    <string name="durationSecond" msgid="985669622276420331">"<xliff:g id="SECONDS">%1$d</xliff:g> s"</string>
     <string name="untitled" msgid="4638956954852782576">"&lt;Sin título&gt;"</string>
     <string name="emptyPhoneNumber" msgid="7694063042079676517">"(Sin número de teléfono)"</string>
     <string name="unknownName" msgid="6867811765370350269">"Desconocido"</string>
@@ -95,11 +79,13 @@
     <string name="RestrictedOnAllVoiceTitle" msgid="158800171499150681">"Sin servicio de emergencia ni de voz"</string>
     <string name="RestrictedStateContent" msgid="4278821484643362350">"La red móvil disponible en tu ubicación no ofrece esta opción de forma temporal"</string>
     <string name="NetworkPreferenceSwitchTitle" msgid="4008877505368566980">"No se puede establecer conexión con la red"</string>
-    <string name="NetworkPreferenceSwitchSummary" msgid="4164230263214915351">"Para mejorar la recepción, prueba a cambiar el tipo de red seleccionado en Sistema &gt; Red e Internet &gt; Redes móviles &gt; Tipo de red preferido."</string>
+    <string name="NetworkPreferenceSwitchSummary" msgid="1203771446683319957">"Para mejorar la recepción, prueba a cambiar el tipo seleccionado en Ajustes &gt; Red e Internet &gt; Redes móviles &gt; Tipo de red preferido."</string>
+    <string name="EmergencyCallWarningTitle" msgid="4790413876281901612">"La llamada por Wi‑Fi está activada"</string>
+    <string name="EmergencyCallWarningSummary" msgid="8973232888021643293">"Necesitas conectarte a una red móvil para hacer llamadas de emergencia."</string>
     <string name="notification_channel_network_alert" msgid="4427736684338074967">"Alertas"</string>
     <string name="notification_channel_call_forward" msgid="2419697808481833249">"Desvío de llamada"</string>
     <string name="notification_channel_emergency_callback" msgid="6686166232265733921">"Modo de devolución de llamada de emergencia"</string>
-    <string name="notification_channel_mobile_data_alert" msgid="6130875231721406231">"Alertas de datos móviles"</string>
+    <string name="notification_channel_mobile_data_status" msgid="4575131690860945836">"Estado de los datos móviles"</string>
     <string name="notification_channel_sms" msgid="3441746047346135073">"Mensajes SMS"</string>
     <string name="notification_channel_voice_mail" msgid="3954099424160511919">"Mensajes de voz"</string>
     <string name="notification_channel_wfc" msgid="2130802501654254801">"Llamada por Wi-Fi"</string>
@@ -206,7 +192,7 @@
     <string name="reboot_to_update_prepare" msgid="6305853831955310890">"Preparando para actualizar…"</string>
     <string name="reboot_to_update_package" msgid="3871302324500927291">"Procesando paquete de actualización…"</string>
     <string name="reboot_to_update_reboot" msgid="6428441000951565185">"Reiniciando…"</string>
-    <string name="reboot_to_reset_title" msgid="4142355915340627490">"Restablecer datos de fábrica"</string>
+    <string name="reboot_to_reset_title" msgid="4142355915340627490">"Restablecer estado de fábrica"</string>
     <string name="reboot_to_reset_message" msgid="2432077491101416345">"Reiniciando…"</string>
     <string name="shutdown_progress" msgid="2281079257329981203">"Apagando..."</string>
     <string name="shutdown_confirm" product="tablet" msgid="3385745179555731470">"El tablet se apagará."</string>
@@ -567,9 +553,9 @@
     <string name="policylab_forceLock" msgid="2274085384704248431">"Bloquear la pantalla"</string>
     <string name="policydesc_forceLock" msgid="1141797588403827138">"Controlar cómo y cuándo se bloquea la pantalla"</string>
     <string name="policylab_wipeData" msgid="3910545446758639713">"Borrar todos los datos"</string>
-    <string name="policydesc_wipeData" product="tablet" msgid="4306184096067756876">"Borrar los datos del tablet sin avisar restableciendo datos de fábrica"</string>
+    <string name="policydesc_wipeData" product="tablet" msgid="4306184096067756876">"Borrar los datos del tablet sin avisar restableciendo el estado de fábrica"</string>
     <string name="policydesc_wipeData" product="tv" msgid="5816221315214527028">"Borra los datos de la TV sin advertencia previa restableciendo la TV a los valores predeterminados de fábrica."</string>
-    <string name="policydesc_wipeData" product="default" msgid="5096895604574188391">"Borrar los datos del teléfono sin avisar restableciendo datos de fábrica"</string>
+    <string name="policydesc_wipeData" product="default" msgid="5096895604574188391">"Borrar los datos del teléfono sin avisar restableciendo el estado de fábrica"</string>
     <string name="policylab_wipeData_secondaryUser" msgid="8362863289455531813">"Borrar datos del usuario"</string>
     <string name="policydesc_wipeData_secondaryUser" product="tablet" msgid="6336255514635308054">"Borra los datos del usuario en este tablet sin avisar."</string>
     <string name="policydesc_wipeData_secondaryUser" product="tv" msgid="2086473496848351810">"Borra los datos del usuario en esta TV sin avisar."</string>
@@ -747,12 +733,12 @@
     <string name="lockscreen_failed_attempts_almost_glogin" product="tablet" msgid="9191611984625460820">"Has fallado <xliff:g id="NUMBER_0">%1$d</xliff:g> veces al dibujar el patrón de desbloqueo. Si fallas otras  <xliff:g id="NUMBER_1">%2$d</xliff:g> veces, deberás usar tus credenciales de acceso de Google para desbloquear el tablet.\n\n Inténtalo de nuevo dentro de <xliff:g id="NUMBER_2">%3$d</xliff:g> segundos."</string>
     <string name="lockscreen_failed_attempts_almost_glogin" product="tv" msgid="5316664559603394684">"Has dibujado el patrón de desbloqueo incorrectamente <xliff:g id="NUMBER_0">%1$d</xliff:g> veces. Si se producen <xliff:g id="NUMBER_1">%2$d</xliff:g> intentos incorrectos más, deberás desbloquear la TV iniciando sesión en Google.\n\n Vuelve a intentarlo dentro de <xliff:g id="NUMBER_2">%3$d</xliff:g> segundos."</string>
     <string name="lockscreen_failed_attempts_almost_glogin" product="default" msgid="2590227559763762751">"Has fallado <xliff:g id="NUMBER_0">%1$d</xliff:g> veces al dibujar el patrón de desbloqueo. Si fallas otras <xliff:g id="NUMBER_1">%2$d</xliff:g> veces, deberás usar tus credenciales de acceso de Google para desbloquear el teléfono.\n\n Inténtalo de nuevo dentro de <xliff:g id="NUMBER_2">%3$d</xliff:g> segundos."</string>
-    <string name="lockscreen_failed_attempts_almost_at_wipe" product="tablet" msgid="6128106399745755604">"Has intentado desbloquear el tablet <xliff:g id="NUMBER_0">%1$d</xliff:g> veces, pero no lo has conseguido. Si fallas <xliff:g id="NUMBER_1">%2$d</xliff:g> veces más, se restablecerán los datos de fábrica y se perderán todos los datos del usuario."</string>
+    <string name="lockscreen_failed_attempts_almost_at_wipe" product="tablet" msgid="6128106399745755604">"Has intentado desbloquear el tablet <xliff:g id="NUMBER_0">%1$d</xliff:g> veces, pero no lo has conseguido. Si fallas <xliff:g id="NUMBER_1">%2$d</xliff:g> veces más, se restablecerá el estado de fábrica y se perderán todos los datos del usuario."</string>
     <string name="lockscreen_failed_attempts_almost_at_wipe" product="tv" msgid="950408382418270260">"Has intentado desbloquear la TV incorrectamente <xliff:g id="NUMBER_0">%1$d</xliff:g> veces. Si se producen <xliff:g id="NUMBER_1">%2$d</xliff:g> intentos incorrectos más, la TV se restablecerá a los valores predeterminados de fábrica y se perderán todos los datos del usuario."</string>
-    <string name="lockscreen_failed_attempts_almost_at_wipe" product="default" msgid="8603565142156826565">"Has intentado desbloquear el teléfono <xliff:g id="NUMBER_0">%1$d</xliff:g> veces, pero no lo has conseguido. Si fallas <xliff:g id="NUMBER_1">%2$d</xliff:g> veces más, se restablecerán los datos de fábrica y se perderán todos los datos del usuario."</string>
-    <string name="lockscreen_failed_attempts_now_wiping" product="tablet" msgid="280873516493934365">"Has intentado desbloquear el tablet <xliff:g id="NUMBER">%d</xliff:g> veces, pero no lo has conseguido. Se restablecerán los datos de fábrica del dispositivo."</string>
+    <string name="lockscreen_failed_attempts_almost_at_wipe" product="default" msgid="8603565142156826565">"Has intentado desbloquear el teléfono <xliff:g id="NUMBER_0">%1$d</xliff:g> veces, pero no lo has conseguido. Si fallas <xliff:g id="NUMBER_1">%2$d</xliff:g> veces más, se restablecerá el estado de fábrica y se perderán todos los datos del usuario."</string>
+    <string name="lockscreen_failed_attempts_now_wiping" product="tablet" msgid="280873516493934365">"Has intentado desbloquear el tablet <xliff:g id="NUMBER">%d</xliff:g> veces, pero no lo has conseguido. Se restablecerá el estado de fábrica del dispositivo."</string>
     <string name="lockscreen_failed_attempts_now_wiping" product="tv" msgid="3195755534096192191">"Has intentando desbloquear la TV incorrectamente <xliff:g id="NUMBER">%d</xliff:g> veces. La TV se restablecerá a los valores predeterminados de fábrica."</string>
-    <string name="lockscreen_failed_attempts_now_wiping" product="default" msgid="3025504721764922246">"Has intentado desbloquear el teléfono <xliff:g id="NUMBER">%d</xliff:g> veces, pero no lo has conseguido. Se restablecerán los datos de fábrica del dispositivo."</string>
+    <string name="lockscreen_failed_attempts_now_wiping" product="default" msgid="3025504721764922246">"Has intentado desbloquear el teléfono <xliff:g id="NUMBER">%d</xliff:g> veces, pero no lo has conseguido. Se restablecerá el estado de fábrica del dispositivo."</string>
     <string name="lockscreen_too_many_failed_attempts_countdown" msgid="6251480343394389665">"Espera <xliff:g id="NUMBER">%d</xliff:g> segundos y vuelve a intentarlo."</string>
     <string name="lockscreen_forgot_pattern_button_text" msgid="2626999449610695930">"¿Has olvidado el patrón?"</string>
     <string name="lockscreen_glogin_forgot_pattern" msgid="2588521501166032747">"Desbloqueo de cuenta"</string>
@@ -1473,12 +1459,12 @@
     <string name="kg_too_many_failed_pin_attempts_dialog_message" msgid="8276745642049502550">"Has introducido un código PIN incorrecto <xliff:g id="NUMBER_0">%1$d</xliff:g> veces. \n\nInténtalo de nuevo en <xliff:g id="NUMBER_1">%2$d</xliff:g> segundos."</string>
     <string name="kg_too_many_failed_password_attempts_dialog_message" msgid="7813713389422226531">"Has introducido una contraseña incorrecta <xliff:g id="NUMBER_0">%1$d</xliff:g> veces. \n\nInténtalo de nuevo en <xliff:g id="NUMBER_1">%2$d</xliff:g> segundos."</string>
     <string name="kg_too_many_failed_pattern_attempts_dialog_message" msgid="74089475965050805">"Has fallado <xliff:g id="NUMBER_0">%1$d</xliff:g> veces al dibujar tu patrón de desbloqueo. \n\nInténtalo de nuevo en <xliff:g id="NUMBER_1">%2$d</xliff:g> segundos."</string>
-    <string name="kg_failed_attempts_almost_at_wipe" product="tablet" msgid="1575557200627128949">"Has intentado desbloquear el tablet <xliff:g id="NUMBER_0">%1$d</xliff:g> veces, pero no lo has conseguido. Si fallas otras <xliff:g id="NUMBER_1">%2$d</xliff:g> veces, se restablecerán los datos de fábrica y se perderán todos los datos del usuario."</string>
+    <string name="kg_failed_attempts_almost_at_wipe" product="tablet" msgid="1575557200627128949">"Has intentado desbloquear el tablet <xliff:g id="NUMBER_0">%1$d</xliff:g> veces, pero no lo has conseguido. Si fallas otras <xliff:g id="NUMBER_1">%2$d</xliff:g> veces, se restablecerá el estado de fábrica y se perderán todos los datos del usuario."</string>
     <string name="kg_failed_attempts_almost_at_wipe" product="tv" msgid="5621231220154419413">"Has intentado desbloquear la TV incorrectamente <xliff:g id="NUMBER_0">%1$d</xliff:g> veces. Si se producen <xliff:g id="NUMBER_1">%2$d</xliff:g> intentos incorrectos más, la TV se restablecerá a los valores predeterminados de fábrica y se perderán todos los datos del usuario."</string>
-    <string name="kg_failed_attempts_almost_at_wipe" product="default" msgid="4051015943038199910">"Has intentado desbloquear el teléfono <xliff:g id="NUMBER_0">%1$d</xliff:g> veces, pero no lo has conseguido. Si fallas otras <xliff:g id="NUMBER_1">%2$d</xliff:g> veces, se restablecerán los datos de fábrica y se perderán todos los datos del usuario."</string>
-    <string name="kg_failed_attempts_now_wiping" product="tablet" msgid="2072996269148483637">"Has intentado desbloquear el tablet <xliff:g id="NUMBER">%d</xliff:g> veces, pero no lo has conseguido. Se restablecerán los datos de fábrica del dispositivo."</string>
+    <string name="kg_failed_attempts_almost_at_wipe" product="default" msgid="4051015943038199910">"Has intentado desbloquear el teléfono <xliff:g id="NUMBER_0">%1$d</xliff:g> veces, pero no lo has conseguido. Si fallas otras <xliff:g id="NUMBER_1">%2$d</xliff:g> veces, se restablecerá el estado de fábrica y se perderán todos los datos del usuario."</string>
+    <string name="kg_failed_attempts_now_wiping" product="tablet" msgid="2072996269148483637">"Has intentado desbloquear el tablet <xliff:g id="NUMBER">%d</xliff:g> veces, pero no lo has conseguido. Se restablecerá el estado de fábrica del dispositivo."</string>
     <string name="kg_failed_attempts_now_wiping" product="tv" msgid="4987878286750741463">"Has intentando desbloquear la TV incorrectamente <xliff:g id="NUMBER">%d</xliff:g> veces. La TV se restablecerá a los valores predeterminados de fábrica."</string>
-    <string name="kg_failed_attempts_now_wiping" product="default" msgid="4817627474419471518">"Has intentado desbloquear el teléfono <xliff:g id="NUMBER">%d</xliff:g> veces, pero no lo has conseguido. Se restablecerán los datos de fábrica del dispositivo."</string>
+    <string name="kg_failed_attempts_now_wiping" product="default" msgid="4817627474419471518">"Has intentado desbloquear el teléfono <xliff:g id="NUMBER">%d</xliff:g> veces, pero no lo has conseguido. Se restablecerá el estado de fábrica del dispositivo."</string>
     <string name="kg_failed_attempts_almost_at_login" product="tablet" msgid="3253575572118914370">"Has fallado <xliff:g id="NUMBER_0">%1$d</xliff:g> veces al dibujar el patrón de desbloqueo. Si fallas otras <xliff:g id="NUMBER_1">%2$d</xliff:g> veces, deberás usar una cuenta de correo electrónico para desbloquear el tablet.\n\n Inténtalo de nuevo en <xliff:g id="NUMBER_2">%3$d</xliff:g> segundos."</string>
     <string name="kg_failed_attempts_almost_at_login" product="tv" msgid="4224651132862313471">"Has dibujado el patrón de desbloqueo incorrectamente <xliff:g id="NUMBER_0">%1$d</xliff:g> veces. Si se producen <xliff:g id="NUMBER_1">%2$d</xliff:g> intentos incorrectos más, deberás desbloquear la TV mediante una cuenta de correo electrónico.\n\n Vuelve a intentarlo dentro de <xliff:g id="NUMBER_2">%3$d</xliff:g> segundos."</string>
     <string name="kg_failed_attempts_almost_at_login" product="default" msgid="1437638152015574839">"Has fallado <xliff:g id="NUMBER_0">%1$d</xliff:g> veces al dibujar el patrón de desbloqueo. Si fallas otras <xliff:g id="NUMBER_1">%2$d</xliff:g> veces, deberás usar una cuenta de correo electrónico para desbloquear el teléfono.\n\n Inténtalo de nuevo en <xliff:g id="NUMBER_2">%3$d</xliff:g> segundos."</string>
@@ -1677,7 +1663,7 @@
     <string name="zen_mode_default_weekends_name" msgid="2786495801019345244">"Fin de semana"</string>
     <string name="zen_mode_default_events_name" msgid="8158334939013085363">"Evento"</string>
     <string name="muted_by" msgid="6147073845094180001">"Silenciado por <xliff:g id="THIRD_PARTY">%1$s</xliff:g>"</string>
-    <string name="system_error_wipe_data" msgid="6608165524785354962">"Se ha producido un problema interno en el dispositivo y es posible que este no sea estable hasta que restablezcas los datos de fábrica."</string>
+    <string name="system_error_wipe_data" msgid="6608165524785354962">"Se ha producido un problema interno en el dispositivo y es posible que este no sea estable hasta que restablezcas el estado de fábrica."</string>
     <string name="system_error_manufacturer" msgid="8086872414744210668">"Se ha producido un problema interno en el dispositivo. Ponte en contacto con el fabricante para obtener más información."</string>
     <string name="stk_cc_ussd_to_dial" msgid="5202342984749947872">"La solicitud USSD se ha modificado para la solicitud DIAL."</string>
     <string name="stk_cc_ussd_to_ss" msgid="2345360594181405482">"La solicitud USSD se ha modificado para la solicitud SS."</string>
@@ -1780,4 +1766,5 @@
     <string name="mmcc_imsi_unknown_in_hlr" msgid="6321202257374418726">"SIM no proporcionada"</string>
     <string name="mmcc_illegal_ms" msgid="2769452751852211112">"SIM no compatible"</string>
     <string name="mmcc_illegal_me" msgid="4438696681169345015">"Teléfono no compatible"</string>
+    <string name="popup_window_default_title" msgid="4874318849712115433">"Ventana emergente"</string>
 </resources>

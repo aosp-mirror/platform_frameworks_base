@@ -111,6 +111,7 @@ public class HeadsUpTouchHelper implements Gefingerpoken {
                     // flicker of one frame as it's not expanded yet.
                     mHeadsUpManager.unpinAll();
                     mPanel.clearNotificationEffects();
+                    endMotion();
                     return true;
                 }
                 break;

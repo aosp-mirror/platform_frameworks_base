@@ -118,24 +118,6 @@ public class OemLockManager {
     }
 
     /**
-     * Returns whether all parties other than the user allow OEM unlock meaning the user can
-     * directly control whether or not the device can be OEM unlocked.
-     *
-     * If this is true, {@link #isOemUnlockAllowedByUser} is the same as {@link #isOemUnlockAllowed}
-     *
-     * @return Whether the user can directly control whether the device can be OEM unlocked.
-     *
-     * @hide
-     */
-    public boolean canUserAllowOemUnlock() {
-        try {
-            return mService.canUserAllowOemUnlock();
-        } catch (RemoteException e) {
-            throw e.rethrowFromSystemServer();
-        }
-    }
-
-    /**
      * @return Whether the bootloader is able to OEM unlock the device.
      *
      * @hide

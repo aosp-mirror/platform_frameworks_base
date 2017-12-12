@@ -323,7 +323,7 @@ public class QSDetail extends LinearLayout {
             post(new Runnable() {
                 @Override
                 public void run() {
-                    handleShowingDetail(detail, x, y, true /* toggleQs */);
+                    handleShowingDetail(detail, x, y, false /* toggleQs */);
                 }
             });
         }

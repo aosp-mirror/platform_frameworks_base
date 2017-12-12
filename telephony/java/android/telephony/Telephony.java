@@ -1176,6 +1176,29 @@ public final class Telephony {
     }
 
     /**
+     * Base column for the table that contain Carrier Public key.
+     * @hide
+     */
+    public interface CarrierColumns extends BaseColumns {
+
+        public static final String MCC = "mcc";
+        public static final String MNC = "mnc";
+        public static final String KEY_TYPE = "key_type";
+        public static final String MVNO_TYPE = "mvno_type";
+        public static final String MVNO_MATCH_DATA = "mvno_match_data";
+        public static final String PUBLIC_KEY = "public_key";
+        public static final String KEY_IDENTIFIER = "key_identifier";
+        public static final String EXPIRATION_TIME = "expiration_time";
+        public static final String LAST_MODIFIED = "last_modified";
+
+        /**
+         * The {@code content://} style URL for this table.
+         * @hide
+         */
+        public static final Uri CONTENT_URI = Uri.parse("content://carrier_information/carrier");
+    }
+
+    /**
      * Base columns for tables that contain MMSs.
      */
     public interface BaseMmsColumns extends BaseColumns {

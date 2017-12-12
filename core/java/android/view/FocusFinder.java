@@ -530,7 +530,7 @@ public class FocusFinder {
      * axis distances.  Warning: this fudge factor is finely tuned, be sure to
      * run all focus tests if you dare tweak it.
      */
-    int getWeightedDistanceFor(int majorAxisDistance, int minorAxisDistance) {
+    long getWeightedDistanceFor(long majorAxisDistance, long minorAxisDistance) {
         return 13 * majorAxisDistance * majorAxisDistance
                 + minorAxisDistance * minorAxisDistance;
     }
@@ -574,10 +574,10 @@ public class FocusFinder {
         switch (direction) {
             case View.FOCUS_LEFT:
             case View.FOCUS_RIGHT:
-                return (rect2.bottom >= rect1.top) && (rect2.top <= rect1.bottom);
+                return (rect2.bottom > rect1.top) && (rect2.top < rect1.bottom);
             case View.FOCUS_UP:
             case View.FOCUS_DOWN:
-                return (rect2.right >= rect1.left) && (rect2.left <= rect1.right);
+                return (rect2.right > rect1.left) && (rect2.left < rect1.right);
         }
         throw new IllegalArgumentException("direction must be one of "
                 + "{FOCUS_UP, FOCUS_DOWN, FOCUS_LEFT, FOCUS_RIGHT}.");

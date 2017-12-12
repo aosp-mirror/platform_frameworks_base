@@ -26,21 +26,19 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.anyString;
-import static org.mockito.Matchers.any;
-import static org.mockito.Matchers.anyBoolean;
-import static org.mockito.Matchers.anyInt;
-import static org.mockito.Matchers.anyString;
 import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
-import static org.mockito.Mockito.when;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 import android.app.Notification;
 import android.app.trust.TrustManager;
+import android.content.Context;
 import android.hardware.fingerprint.FingerprintManager;
 import android.metrics.LogMaker;
+import android.os.Binder;
 import android.os.Handler;
 import android.os.HandlerThread;
 import android.os.IPowerManager;
@@ -51,20 +49,25 @@ import android.os.UserHandle;
 import android.service.notification.StatusBarNotification;
 import android.support.test.filters.SmallTest;
 import android.support.test.metricshelper.MetricsAsserts;
-import android.support.test.runner.AndroidJUnit4;
 import android.testing.AndroidTestingRunner;
+import android.testing.LayoutInflaterBuilder;
 import android.testing.TestableLooper;
 import android.testing.TestableLooper.MessageHandler;
 import android.testing.TestableLooper.RunWithLooper;
 import android.util.DisplayMetrics;
+import android.view.View;
 import android.view.ViewGroup.LayoutParams;
+import android.widget.FrameLayout;
 
 import com.android.internal.logging.MetricsLogger;
 import com.android.internal.logging.nano.MetricsProto.MetricsEvent;
 import com.android.internal.logging.testing.FakeMetricsLogger;
 import com.android.internal.statusbar.IStatusBarService;
 import com.android.keyguard.KeyguardHostView.OnDismissAction;
+import com.android.keyguard.KeyguardStatusView;
+import com.android.systemui.R;
 import com.android.systemui.SysuiTestCase;
+import com.android.systemui.assist.AssistManager;
 import com.android.systemui.keyguard.WakefulnessLifecycle;
 import com.android.systemui.recents.misc.SystemServicesProxy;
 import com.android.systemui.statusbar.ActivatableNotificationView;
@@ -73,7 +76,11 @@ import com.android.systemui.statusbar.KeyguardIndicationController;
 import com.android.systemui.statusbar.NotificationData;
 import com.android.systemui.statusbar.NotificationData.Entry;
 import com.android.systemui.statusbar.StatusBarState;
+import com.android.systemui.statusbar.policy.DateView;
+import com.android.systemui.statusbar.policy.DeviceProvisionedController;
 import com.android.systemui.statusbar.policy.HeadsUpManager;
+import com.android.systemui.statusbar.policy.KeyguardMonitor;
+import com.android.systemui.statusbar.policy.KeyguardMonitorImpl;
 import com.android.systemui.statusbar.stack.NotificationStackScrollLayout;
 
 import org.junit.Before;
@@ -106,12 +113,20 @@ public class StatusBarTest extends SysuiTestCase {
 
     @Before
     public void setup() throws Exception {
+        mContext.setTheme(R.style.Theme_SystemUI_Light);
+        mDependency.injectMockDependency(AssistManager.class);
+        mDependency.injectMockDependency(DeviceProvisionedController.class);
+        mDependency.injectTestDependency(KeyguardMonitor.class, mock(KeyguardMonitorImpl.class));
+        CommandQueue commandQueue = mock(CommandQueue.class);
+        when(commandQueue.asBinder()).thenReturn(new Binder());
+        mContext.putComponent(CommandQueue.class, commandQueue);
         mContext.addMockSystemService(TrustManager.class, mock(TrustManager.class));
         mContext.addMockSystemService(FingerprintManager.class, mock(FingerprintManager.class));
         mStatusBarKeyguardViewManager = mock(StatusBarKeyguardViewManager.class);
         mUnlockMethodCache = mock(UnlockMethodCache.class);
         mKeyguardIndicationController = mock(KeyguardIndicationController.class);
         mStackScroller = mock(NotificationStackScrollLayout.class);
+        when(mStackScroller.generateLayoutParams(any())).thenReturn(new LayoutParams(0, 0));
         mMetricsLogger = new FakeMetricsLogger();
         mHeadsUpManager = mock(HeadsUpManager.class);
         mNotificationData = mock(NotificationData.class);
@@ -133,6 +148,7 @@ public class StatusBarTest extends SysuiTestCase {
                 mNotificationData, mPowerManager, mSystemServicesProxy, mNotificationPanelView,
                 mBarService);
         mStatusBar.mContext = mContext;
+        mStatusBar.mComponents = mContext.getComponents();
         doAnswer(invocation -> {
             OnDismissAction onDismissAction = (OnDismissAction) invocation.getArguments()[0];
             onDismissAction.onDismiss();
@@ -484,6 +500,16 @@ public class StatusBarTest extends SysuiTestCase {
         mStatusBar.dump(null, new PrintWriter(new ByteArrayOutputStream()), null);
     }
 
+    @Test
+    @RunWithLooper(setAsMainLooper = true)
+    public void testUpdateKeyguardState_DoesNotCrash() {
+        mStatusBar.mStatusBarWindow = mock(StatusBarWindowView.class);
+        mStatusBar.mState = StatusBarState.KEYGUARD;
+        mStatusBar.mDozeScrimController = mock(DozeScrimController.class);
+        mStatusBar.mNotificationIconAreaController = mock(NotificationIconAreaController.class);
+        mStatusBar.updateKeyguardState(false, false);
+    }
+
     static class TestableStatusBar extends StatusBar {
         public TestableStatusBar(StatusBarKeyguardViewManager man,
                 UnlockMethodCache unlock, KeyguardIndicationController key,
@@ -502,6 +528,7 @@ public class StatusBarTest extends SysuiTestCase {
             mNotificationPanel = panelView;
             mBarService = barService;
             mWakefulnessLifecycle = createAwakeWakefulnessLifecycle();
+            mScrimController = mock(ScrimController.class);
         }
 
         private WakefulnessLifecycle createAwakeWakefulnessLifecycle() {
@@ -509,6 +536,11 @@ public class StatusBarTest extends SysuiTestCase {
             wakefulnessLifecycle.dispatchStartedWakingUp();
             wakefulnessLifecycle.dispatchFinishedWakingUp();
             return wakefulnessLifecycle;
+        }
+
+        @Override
+        protected void updateTheme() {
+            // Do nothing for now, until we have more mocking and StatusBar is smaller.
         }
 
         public void setBarStateForTest(int state) {

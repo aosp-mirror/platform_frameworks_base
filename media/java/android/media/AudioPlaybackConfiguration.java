@@ -212,8 +212,10 @@ public final class AudioPlaybackConfiguration implements Parcelable {
      * @hide
      */
     public void init() {
-        if (mIPlayerShell != null) {
-            mIPlayerShell.monitorDeath();
+        synchronized (this) {
+            if (mIPlayerShell != null) {
+                mIPlayerShell.monitorDeath();
+            }
         }
     }
 
@@ -322,7 +324,11 @@ public final class AudioPlaybackConfiguration implements Parcelable {
      */
     @SystemApi
     public PlayerProxy getPlayerProxy() {
-        return mIPlayerShell == null ? null : new PlayerProxy(this);
+        final IPlayerShell ips;
+        synchronized (this) {
+            ips = mIPlayerShell;
+        }
+        return ips == null ? null : new PlayerProxy(this);
     }
 
     /**
@@ -330,7 +336,11 @@ public final class AudioPlaybackConfiguration implements Parcelable {
      * @return the IPlayer interface for the associated player
      */
     IPlayer getIPlayer() {
-        return mIPlayerShell == null ? null : mIPlayerShell.getIPlayer();
+        final IPlayerShell ips;
+        synchronized (this) {
+            ips = mIPlayerShell;
+        }
+        return ips == null ? null : ips.getIPlayer();
     }
 
     /**
@@ -351,10 +361,14 @@ public final class AudioPlaybackConfiguration implements Parcelable {
      * @return true if the state changed, false otherwise
      */
     public boolean handleStateEvent(int event) {
-        final boolean changed = (mPlayerState != event);
-        mPlayerState = event;
-        if ((event == PLAYER_STATE_RELEASED) && (mIPlayerShell != null)) {
-            mIPlayerShell.release();
+        final boolean changed;
+        synchronized (this) {
+            changed = (mPlayerState != event);
+            mPlayerState = event;
+            if (changed && (event == PLAYER_STATE_RELEASED) && (mIPlayerShell != null)) {
+                mIPlayerShell.release();
+                mIPlayerShell = null;
+            }
         }
         return changed;
     }
@@ -447,7 +461,11 @@ public final class AudioPlaybackConfiguration implements Parcelable {
         dest.writeInt(mClientPid);
         dest.writeInt(mPlayerState);
         mPlayerAttr.writeToParcel(dest, 0);
-        dest.writeStrongInterface(mIPlayerShell == null ? null : mIPlayerShell.getIPlayer());
+        final IPlayerShell ips;
+        synchronized (this) {
+            ips = mIPlayerShell;
+        }
+        dest.writeStrongInterface(ips == null ? null : ips.getIPlayer());
     }
 
     private AudioPlaybackConfiguration(Parcel in) {
@@ -479,14 +497,17 @@ public final class AudioPlaybackConfiguration implements Parcelable {
     static final class IPlayerShell implements IBinder.DeathRecipient {
 
         final AudioPlaybackConfiguration mMonitor; // never null
-        private IPlayer mIPlayer;
+        private volatile IPlayer mIPlayer;
 
         IPlayerShell(@NonNull AudioPlaybackConfiguration monitor, @NonNull IPlayer iplayer) {
             mMonitor = monitor;
             mIPlayer = iplayer;
         }
 
-        void monitorDeath() {
+        synchronized void monitorDeath() {
+            if (mIPlayer == null) {
+                return;
+            }
             try {
                 mIPlayer.asBinder().linkToDeath(this, 0);
             } catch (RemoteException e) {
@@ -509,8 +530,13 @@ public final class AudioPlaybackConfiguration implements Parcelable {
             } else if (DEBUG) { Log.i(TAG, "IPlayerShell binderDied"); }
         }
 
-        void release() {
+        synchronized void release() {
+            if (mIPlayer == null) {
+                return;
+            }
             mIPlayer.asBinder().unlinkToDeath(this, 0);
+            mIPlayer = null;
+            Binder.flushPendingCommands();
         }
     }
 
@@ -532,7 +558,7 @@ public final class AudioPlaybackConfiguration implements Parcelable {
             case PLAYER_TYPE_HW_SOURCE: return "hardware source";
             case PLAYER_TYPE_EXTERNAL_PROXY: return "external proxy";
             default:
-                return "unknown player type - FIXME";
+                return "unknown player type " + type + " - FIXME";
         }
     }
 

@@ -310,6 +310,9 @@ bool ManifestFixer::BuildRules(xml::XmlActionExecutor* executor,
   manifest_action["meta-data"] = meta_data_action;
   manifest_action["uses-split"].Action(RequiredNameIsJavaPackage);
 
+  manifest_action["key-sets"]["key-set"]["public-key"];
+  manifest_action["key-sets"]["upgrade-key-set"];
+
   // Application actions.
   xml::XmlNodeAction& application_action = manifest_action["application"];
   application_action.Action(OptionalNameIsJavaClassName);

@@ -85,7 +85,7 @@ public class ZenModeConfig implements Parcelable {
     private static final boolean DEFAULT_ALLOW_SCREEN_ON = true;
 
     private static final int XML_VERSION = 2;
-    private static final String ZEN_TAG = "zen";
+    public static final String ZEN_TAG = "zen";
     private static final String ZEN_ATT_VERSION = "version";
     private static final String ZEN_ATT_USER = "user";
     private static final String ALLOW_TAG = "allow";
@@ -712,7 +712,8 @@ public class ZenModeConfig implements Parcelable {
             int userHandle, boolean shortVersion) {
         final int num;
         String summary, line1, line2;
-        final CharSequence formattedTime = getFormattedTime(context, time, userHandle);
+        final CharSequence formattedTime =
+                getFormattedTime(context, time, isToday(time), userHandle);
         final Resources res = context.getResources();
         if (minutes < 60) {
             // display as minutes
@@ -738,33 +739,43 @@ public class ZenModeConfig implements Parcelable {
             // display as day/time
             summary = line1 = line2 = res.getString(R.string.zen_mode_until, formattedTime);
         }
-        final Uri id = toCountdownConditionId(time);
+        final Uri id = toCountdownConditionId(time, false);
         return new Condition(id, summary, line1, line2, 0, Condition.STATE_TRUE,
                 Condition.FLAG_RELEVANT_NOW);
     }
 
-    public static Condition toNextAlarmCondition(Context context, long now, long alarm,
+    /**
+     * Converts countdown to alarm parameters into a condition with user facing summary
+     */
+    public static Condition toNextAlarmCondition(Context context, long alarm,
             int userHandle) {
-        final CharSequence formattedTime = getFormattedTime(context, alarm, userHandle);
+        boolean isSameDay = isToday(alarm);
+        final CharSequence formattedTime = getFormattedTime(context, alarm, isSameDay, userHandle);
         final Resources res = context.getResources();
-        final String line1 = res.getString(R.string.zen_mode_alarm, formattedTime);
-        final Uri id = toCountdownConditionId(alarm);
+        final String line1 = res.getString(R.string.zen_mode_until, formattedTime);
+        final Uri id = toCountdownConditionId(alarm, true);
         return new Condition(id, "", line1, "", 0, Condition.STATE_TRUE,
                 Condition.FLAG_RELEVANT_NOW);
     }
 
-    private static CharSequence getFormattedTime(Context context, long time, int userHandle) {
-        String skeleton = "EEE " + (DateFormat.is24HourFormat(context, userHandle) ? "Hm" : "hma");
+    private static CharSequence getFormattedTime(Context context, long time, boolean isSameDay,
+            int userHandle) {
+        String skeleton = (!isSameDay ? "EEE " : "")
+                + (DateFormat.is24HourFormat(context, userHandle) ? "Hm" : "hma");
+        final String pattern = DateFormat.getBestDateTimePattern(Locale.getDefault(), skeleton);
+        return DateFormat.format(pattern, time);
+    }
+
+    private static boolean isToday(long time) {
         GregorianCalendar now = new GregorianCalendar();
         GregorianCalendar endTime = new GregorianCalendar();
         endTime.setTimeInMillis(time);
         if (now.get(Calendar.YEAR) == endTime.get(Calendar.YEAR)
                 && now.get(Calendar.MONTH) == endTime.get(Calendar.MONTH)
                 && now.get(Calendar.DATE) == endTime.get(Calendar.DATE)) {
-            skeleton = DateFormat.is24HourFormat(context, userHandle) ? "Hm" : "hma";
+            return true;
         }
-        final String pattern = DateFormat.getBestDateTimePattern(Locale.getDefault(), skeleton);
-        return DateFormat.format(pattern, time);
+        return false;
     }
 
     // ==== Built-in system conditions ====
@@ -775,17 +786,24 @@ public class ZenModeConfig implements Parcelable {
 
     public static final String COUNTDOWN_PATH = "countdown";
 
-    public static Uri toCountdownConditionId(long time) {
+    public static final String IS_ALARM_PATH = "alarm";
+
+    /**
+     * Converts countdown condition parameters into a condition id.
+     */
+    public static Uri toCountdownConditionId(long time, boolean alarm) {
         return new Uri.Builder().scheme(Condition.SCHEME)
                 .authority(SYSTEM_AUTHORITY)
                 .appendPath(COUNTDOWN_PATH)
                 .appendPath(Long.toString(time))
+                .appendPath(IS_ALARM_PATH)
+                .appendPath(Boolean.toString(alarm))
                 .build();
     }
 
     public static long tryParseCountdownConditionId(Uri conditionId) {
         if (!Condition.isValidId(conditionId, SYSTEM_AUTHORITY)) return 0;
-        if (conditionId.getPathSegments().size() != 2
+        if (conditionId.getPathSegments().size() < 2
                 || !COUNTDOWN_PATH.equals(conditionId.getPathSegments().get(0))) return 0;
         try {
             return Long.parseLong(conditionId.getPathSegments().get(1));
@@ -795,8 +813,30 @@ public class ZenModeConfig implements Parcelable {
         }
     }
 
+    /**
+     * Returns whether this condition is a countdown condition.
+     */
     public static boolean isValidCountdownConditionId(Uri conditionId) {
         return tryParseCountdownConditionId(conditionId) != 0;
+    }
+
+    /**
+     * Returns whether this condition is a countdown to an alarm.
+     */
+    public static boolean isValidCountdownToAlarmConditionId(Uri conditionId) {
+        if (tryParseCountdownConditionId(conditionId) != 0) {
+            if (conditionId.getPathSegments().size() < 4
+                    || !IS_ALARM_PATH.equals(conditionId.getPathSegments().get(2))) {
+                return false;
+            }
+            try {
+                return Boolean.parseBoolean(conditionId.getPathSegments().get(3));
+            } catch (RuntimeException e) {
+                Slog.w(TAG, "Error parsing countdown alarm condition: " + conditionId, e);
+                return false;
+            }
+        }
+        return false;
     }
 
     // ==== Built-in system condition: schedule ====

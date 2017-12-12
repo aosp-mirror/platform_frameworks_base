@@ -21,6 +21,7 @@ import static com.android.server.wm.WindowManagerDebugConfig.TAG_WITH_CLASS_NAME
 import static com.android.server.wm.WindowManagerDebugConfig.TAG_WM;
 
 import android.annotation.TestApi;
+import android.app.ActivityManager;
 import android.app.ActivityManager.TaskSnapshot;
 import android.graphics.Bitmap;
 import android.graphics.Bitmap.CompressFormat;
@@ -52,7 +53,8 @@ class TaskSnapshotPersister {
     private static final String TAG = TAG_WITH_CLASS_NAME ? "TaskSnapshotPersister" : TAG_WM;
     private static final String SNAPSHOTS_DIRNAME = "snapshots";
     private static final String REDUCED_POSTFIX = "_reduced";
-    static final float REDUCED_SCALE = 0.5f;
+    static final float REDUCED_SCALE = ActivityManager.isLowRamDeviceStatic() ? 0.6f : 0.5f;
+    static final boolean DISABLE_FULL_SIZED_BITMAPS = ActivityManager.isLowRamDeviceStatic();
     private static final long DELAY_MS = 100;
     private static final int QUALITY = 95;
     private static final String PROTO_EXTENSION = ".proto";
@@ -183,6 +185,11 @@ class TaskSnapshotPersister {
     }
 
     File getBitmapFile(int taskId, int userId) {
+        // Full sized bitmaps are disabled on low ram devices
+        if (DISABLE_FULL_SIZED_BITMAPS) {
+            Slog.wtf(TAG, "This device does not support full sized resolution bitmaps.");
+            return null;
+        }
         return new File(getDirectory(userId), taskId + BITMAP_EXTENSION);
     }
 
@@ -197,11 +204,15 @@ class TaskSnapshotPersister {
 
     private void deleteSnapshot(int taskId, int userId) {
         final File protoFile = getProtoFile(taskId, userId);
-        final File bitmapFile = getBitmapFile(taskId, userId);
         final File bitmapReducedFile = getReducedResolutionBitmapFile(taskId, userId);
         protoFile.delete();
-        bitmapFile.delete();
         bitmapReducedFile.delete();
+
+        // Low ram devices do not have a full sized file to delete
+        if (!DISABLE_FULL_SIZED_BITMAPS) {
+            final File bitmapFile = getBitmapFile(taskId, userId);
+            bitmapFile.delete();
+        }
     }
 
     interface DirectoryResolver {
@@ -322,8 +333,6 @@ class TaskSnapshotPersister {
         }
 
         boolean writeBuffer() {
-            final File file = getBitmapFile(mTaskId, mUserId);
-            final File reducedFile = getReducedResolutionBitmapFile(mTaskId, mUserId);
             final Bitmap bitmap = Bitmap.createHardwareBitmap(mSnapshot.getSnapshot());
             if (bitmap == null) {
                 Slog.e(TAG, "Invalid task snapshot hw bitmap");
@@ -331,18 +340,33 @@ class TaskSnapshotPersister {
             }
 
             final Bitmap swBitmap = bitmap.copy(Config.ARGB_8888, false /* isMutable */);
-            final Bitmap reduced = Bitmap.createScaledBitmap(swBitmap,
-                    (int) (bitmap.getWidth() * REDUCED_SCALE),
-                    (int) (bitmap.getHeight() * REDUCED_SCALE), true /* filter */);
+            final File reducedFile = getReducedResolutionBitmapFile(mTaskId, mUserId);
+            final Bitmap reduced = mSnapshot.isReducedResolution()
+                    ? swBitmap
+                    : Bitmap.createScaledBitmap(swBitmap,
+                            (int) (bitmap.getWidth() * REDUCED_SCALE),
+                            (int) (bitmap.getHeight() * REDUCED_SCALE), true /* filter */);
             try {
-                FileOutputStream fos = new FileOutputStream(file);
-                swBitmap.compress(JPEG, QUALITY, fos);
-                fos.close();
                 FileOutputStream reducedFos = new FileOutputStream(reducedFile);
                 reduced.compress(JPEG, QUALITY, reducedFos);
                 reducedFos.close();
             } catch (IOException e) {
-                Slog.e(TAG, "Unable to open " + file + " or " + reducedFile +" for persisting.", e);
+                Slog.e(TAG, "Unable to open " + reducedFile +" for persisting.", e);
+                return false;
+            }
+
+            // For snapshots with reduced resolution, do not create or save full sized bitmaps
+            if (mSnapshot.isReducedResolution()) {
+                return true;
+            }
+
+            final File file = getBitmapFile(mTaskId, mUserId);
+            try {
+                FileOutputStream fos = new FileOutputStream(file);
+                swBitmap.compress(JPEG, QUALITY, fos);
+                fos.close();
+            } catch (IOException e) {
+                Slog.e(TAG, "Unable to open " + file + " for persisting.", e);
                 return false;
             }
             return true;

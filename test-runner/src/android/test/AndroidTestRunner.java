@@ -18,7 +18,6 @@ package android.test;
 
 import android.app.Instrumentation;
 import android.content.Context;
-import android.os.PerformanceCollector.PerformanceResultsWriter;
 
 import java.util.ArrayList;
 import junit.framework.Test;
@@ -49,7 +48,6 @@ public class AndroidTestRunner extends BaseTestRunner {
 
     private List<TestListener> mTestListeners = new ArrayList<>();
     private Instrumentation mInstrumentation;
-    private PerformanceResultsWriter mPerfWriter;
 
     @SuppressWarnings("unchecked")
     public void setTestClassName(String testClassName, String testMethodName) {
@@ -194,7 +192,6 @@ public class AndroidTestRunner extends BaseTestRunner {
         for (TestCase testCase : mTestCases) {
             setContextIfAndroidTestCase(testCase, mContext, testContext);
             setInstrumentationIfInstrumentationTestCase(testCase, mInstrumentation);
-            setPerformanceWriterIfPerformanceCollectorTestCase(testCase, mPerfWriter);
             testCase.run(mTestResult);
         }
     }
@@ -217,13 +214,6 @@ public class AndroidTestRunner extends BaseTestRunner {
         }
     }
 
-    private void setPerformanceWriterIfPerformanceCollectorTestCase(
-            Test test, PerformanceResultsWriter writer) {
-        if (PerformanceCollectorTestCase.class.isAssignableFrom(test.getClass())) {
-            ((PerformanceCollectorTestCase) test).setPerformanceResultsWriter(writer);
-        }
-    }
-
     public void setInstrumentation(Instrumentation instrumentation) {
         mInstrumentation = instrumentation;
     }
@@ -235,13 +225,6 @@ public class AndroidTestRunner extends BaseTestRunner {
     @Deprecated
     public void setInstrumentaiton(Instrumentation instrumentation) {
         setInstrumentation(instrumentation);
-    }
-
-    /**
-     * {@hide} Pending approval for public API.
-     */
-    public void setPerformanceResultsWriter(PerformanceResultsWriter writer) {
-        mPerfWriter = writer;
     }
 
     @Override

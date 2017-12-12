@@ -1493,6 +1493,12 @@ please see styles_device_defaults.xml.
         <item name="background">@drawable/autofill_dataset_picker_background</item>
     </style>
 
+    <!-- @hide -->
+    <style name="AutofillSaveAnimation">
+        <item name="android:windowEnterAnimation">@anim/slide_in_up</item>
+        <item name="android:windowExitAnimation">@anim/slide_out_down</item>
+    </style>
+
     <!-- The style for the container of media actions in a notification. -->
     <!-- @hide -->
     <style name="NotificationMediaActionContainer">

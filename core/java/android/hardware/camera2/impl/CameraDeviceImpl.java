@@ -1769,7 +1769,7 @@ public class CameraDeviceImpl extends CameraDevice
         }
 
         @Override
-        public void onRepeatingRequestError(long lastFrameNumber) {
+        public void onRepeatingRequestError(long lastFrameNumber, int repeatingRequestId) {
             if (DEBUG) {
                 Log.d(TAG, "Repeating request error received. Last frame number is " +
                         lastFrameNumber);
@@ -1782,7 +1782,10 @@ public class CameraDeviceImpl extends CameraDevice
                 }
 
                 checkEarlyTriggerSequenceComplete(mRepeatingRequestId, lastFrameNumber);
-                mRepeatingRequestId = REQUEST_ID_NONE;
+                // Check if there is already a new repeating request
+                if (mRepeatingRequestId == repeatingRequestId) {
+                    mRepeatingRequestId = REQUEST_ID_NONE;
+                }
             }
         }
 

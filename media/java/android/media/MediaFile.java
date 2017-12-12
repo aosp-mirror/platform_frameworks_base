@@ -80,8 +80,9 @@ public class MediaFile {
     public static final int FILE_TYPE_BMP     = 34;
     public static final int FILE_TYPE_WBMP    = 35;
     public static final int FILE_TYPE_WEBP    = 36;
+    public static final int FILE_TYPE_HEIF    = 37;
     private static final int FIRST_IMAGE_FILE_TYPE = FILE_TYPE_JPEG;
-    private static final int LAST_IMAGE_FILE_TYPE = FILE_TYPE_WEBP;
+    private static final int LAST_IMAGE_FILE_TYPE = FILE_TYPE_HEIF;
 
     // Raw image file types
     public static final int FILE_TYPE_DNG     = 300;
@@ -239,6 +240,8 @@ public class MediaFile {
         addFileType("BMP", FILE_TYPE_BMP, "image/x-ms-bmp", MtpConstants.FORMAT_BMP, true);
         addFileType("WBMP", FILE_TYPE_WBMP, "image/vnd.wap.wbmp", MtpConstants.FORMAT_DEFINED, false);
         addFileType("WEBP", FILE_TYPE_WEBP, "image/webp", MtpConstants.FORMAT_DEFINED, false);
+        addFileType("HEIC", FILE_TYPE_HEIF, "image/heif", MtpConstants.FORMAT_HEIF, true);
+        addFileType("HEIF", FILE_TYPE_HEIF, "image/heif", MtpConstants.FORMAT_HEIF, false);
 
         addFileType("DNG", FILE_TYPE_DNG, "image/x-adobe-dng", MtpConstants.FORMAT_DNG, true);
         addFileType("CR2", FILE_TYPE_CR2, "image/x-canon-cr2", MtpConstants.FORMAT_TIFF, false);

@@ -17,6 +17,7 @@
 #include <memory>
 #include <vector>
 
+#include "android-base/stringprintf.h"
 #include "androidfw/StringPiece.h"
 
 #include "Diagnostics.h"
@@ -26,6 +27,8 @@
 #include "SdkConstants.h"
 #include "ValueVisitor.h"
 #include "cmd/Util.h"
+#include "configuration/ConfigurationParser.h"
+#include "filter/AbiFilter.h"
 #include "flatten/TableFlattener.h"
 #include "flatten/XmlFlattener.h"
 #include "io/BigBufferInputStream.h"
@@ -33,14 +36,21 @@
 #include "optimize/ResourceDeduper.h"
 #include "optimize/VersionCollapser.h"
 #include "split/TableSplitter.h"
+#include "util/Files.h"
 
-using android::StringPiece;
+using ::aapt::configuration::Abi;
+using ::aapt::configuration::Artifact;
+using ::aapt::configuration::PostProcessingConfiguration;
+using ::android::StringPiece;
+using ::android::base::StringPrintf;
 
 namespace aapt {
 
 struct OptimizeOptions {
   // Path to the output APK.
-  std::string output_path;
+  Maybe<std::string> output_path;
+  // Path to the output APK directory for splits.
+  Maybe<std::string> output_dir;
 
   // Details of the app extracted from the AndroidManifest.xml
   AppInfo app_info;
@@ -55,6 +65,8 @@ struct OptimizeOptions {
   std::vector<SplitConstraints> split_constraints;
 
   TableFlattenerOptions table_flattener_options;
+
+  Maybe<PostProcessingConfiguration> configuration;
 };
 
 class OptimizeContext : public IAaptContext {
@@ -175,10 +187,52 @@ class OptimizeCommand {
       ++split_constraints_iter;
     }
 
-    std::unique_ptr<IArchiveWriter> writer =
-        CreateZipFileArchiveWriter(context_->GetDiagnostics(), options_.output_path);
-    if (!apk->WriteToArchive(context_, options_.table_flattener_options, writer.get())) {
-      return 1;
+    if (options_.configuration && options_.output_dir) {
+      PostProcessingConfiguration& config = options_.configuration.value();
+
+      // For now, just write out the stripped APK since ABI splitting doesn't modify anything else.
+      for (const Artifact& artifact : config.artifacts) {
+        if (artifact.abi_group) {
+          const std::string& group = artifact.abi_group.value();
+
+          auto abi_group = config.abi_groups.find(group);
+          // TODO: Remove validation when configuration parser ensures referential integrity.
+          if (abi_group == config.abi_groups.end()) {
+            context_->GetDiagnostics()->Note(
+                DiagMessage() << "could not find referenced ABI group '" << group << "'");
+            return 1;
+          }
+          FilterChain filters;
+          filters.AddFilter(AbiFilter::FromAbiList(abi_group->second));
+
+          const std::string& path = apk->GetSource().path;
+          const StringPiece ext = file::GetExtension(path);
+          const std::string name = path.substr(0, path.rfind(ext.to_string()));
+
+          // Name is hard coded for now since only one split dimension is supported.
+          // TODO: Incorporate name generation into the configuration objects.
+          const std::string file_name =
+              StringPrintf("%s.%s%s", name.c_str(), group.c_str(), ext.data());
+          std::string out = options_.output_dir.value();
+          file::AppendPath(&out, file_name);
+
+          std::unique_ptr<IArchiveWriter> writer =
+              CreateZipFileArchiveWriter(context_->GetDiagnostics(), out);
+
+          if (!apk->WriteToArchive(context_, options_.table_flattener_options, &filters,
+                                   writer.get())) {
+            return 1;
+          }
+        }
+      }
+    }
+
+    if (options_.output_path) {
+      std::unique_ptr<IArchiveWriter> writer =
+          CreateZipFileArchiveWriter(context_->GetDiagnostics(), options_.output_path.value());
+      if (!apk->WriteToArchive(context_, options_.table_flattener_options, writer.get())) {
+        return 1;
+      }
     }
 
     return 0;
@@ -214,8 +268,8 @@ class OptimizeCommand {
             if (file_ref->file == nullptr) {
               ResourceNameRef name(pkg->name, type->type, entry->name);
               context_->GetDiagnostics()->Warn(DiagMessage(file_ref->GetSource())
-                                                << "file for resource " << name << " with config '"
-                                                << config_value->config << "' not found");
+                                               << "file for resource " << name << " with config '"
+                                               << config_value->config << "' not found");
               continue;
             }
 
@@ -293,13 +347,16 @@ bool ExtractAppDataFromManifest(OptimizeContext* context, LoadedApk* apk,
 int Optimize(const std::vector<StringPiece>& args) {
   OptimizeContext context;
   OptimizeOptions options;
+  Maybe<std::string> config_path;
   Maybe<std::string> target_densities;
   std::vector<std::string> configs;
   std::vector<std::string> split_args;
   bool verbose = false;
   Flags flags =
       Flags()
-          .RequiredFlag("-o", "Path to the output APK.", &options.output_path)
+          .OptionalFlag("-o", "Path to the output APK.", &options.output_path)
+          .OptionalFlag("-d", "Path to the output directory (for splits).", &options.output_dir)
+          .OptionalFlag("-x", "Path to XML configuration file.", &config_path)
           .OptionalFlag(
               "--target-densities",
               "Comma separated list of the screen densities that the APK will be optimized for.\n"
@@ -365,6 +422,22 @@ int Optimize(const std::vector<StringPiece>& args) {
     options.split_constraints.push_back({});
     if (!ParseSplitParameter(split_arg, context.GetDiagnostics(), &options.split_paths.back(),
                              &options.split_constraints.back())) {
+      return 1;
+    }
+  }
+
+  if (config_path) {
+    if (!options.output_dir) {
+      context.GetDiagnostics()->Error(
+          DiagMessage() << "Output directory is required when using a configuration file");
+      return 1;
+    }
+    std::string& path = config_path.value();
+    Maybe<ConfigurationParser> for_path = ConfigurationParser::ForPath(path);
+    if (for_path) {
+      options.configuration = for_path.value().WithDiagnostics(context.GetDiagnostics()).Parse();
+    } else {
+      context.GetDiagnostics()->Error(DiagMessage() << "Could not parse config file " << path);
       return 1;
     }
   }

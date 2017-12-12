@@ -18,18 +18,18 @@ package android.telephony.ims.feature;
 
 import android.app.PendingIntent;
 import android.os.Message;
+import android.os.RemoteException;
 
 import com.android.ims.ImsCallProfile;
 import com.android.ims.internal.IImsCallSession;
 import com.android.ims.internal.IImsCallSessionListener;
 import com.android.ims.internal.IImsConfig;
 import com.android.ims.internal.IImsEcbm;
+import com.android.ims.internal.IImsMMTelFeature;
 import com.android.ims.internal.IImsMultiEndpoint;
 import com.android.ims.internal.IImsRegistrationListener;
 import com.android.ims.internal.IImsUt;
-
-import java.util.ArrayList;
-import java.util.List;
+import com.android.ims.internal.ImsCallSession;
 
 /**
  * Base implementation for MMTel.
@@ -40,6 +40,146 @@ import java.util.List;
  */
 
 public class MMTelFeature extends ImsFeature {
+
+    // Lock for feature synchronization
+    private final Object mLock = new Object();
+
+    private final IImsMMTelFeature mImsMMTelBinder = new IImsMMTelFeature.Stub() {
+
+        @Override
+        public int startSession(PendingIntent incomingCallIntent,
+                IImsRegistrationListener listener) throws RemoteException {
+            synchronized (mLock) {
+                return MMTelFeature.this.startSession(incomingCallIntent, listener);
+            }
+        }
+
+        @Override
+        public void endSession(int sessionId) throws RemoteException {
+            synchronized (mLock) {
+                MMTelFeature.this.endSession(sessionId);
+            }
+        }
+
+        @Override
+        public boolean isConnected(int callSessionType, int callType)
+                throws RemoteException {
+            synchronized (mLock) {
+                return MMTelFeature.this.isConnected(callSessionType, callType);
+            }
+        }
+
+        @Override
+        public boolean isOpened() throws RemoteException {
+            synchronized (mLock) {
+                return MMTelFeature.this.isOpened();
+            }
+        }
+
+        @Override
+        public int getFeatureStatus() throws RemoteException {
+            synchronized (mLock) {
+                return MMTelFeature.this.getFeatureState();
+            }
+        }
+
+        @Override
+        public void addRegistrationListener(IImsRegistrationListener listener)
+                throws RemoteException {
+            synchronized (mLock) {
+                MMTelFeature.this.addRegistrationListener(listener);
+            }
+        }
+
+        @Override
+        public void removeRegistrationListener(IImsRegistrationListener listener)
+                throws RemoteException {
+            synchronized (mLock) {
+                MMTelFeature.this.removeRegistrationListener(listener);
+            }
+        }
+
+        @Override
+        public ImsCallProfile createCallProfile(int sessionId, int callSessionType, int callType)
+                throws RemoteException {
+            synchronized (mLock) {
+                return MMTelFeature.this.createCallProfile(sessionId, callSessionType,  callType);
+            }
+        }
+
+        @Override
+        public IImsCallSession createCallSession(int sessionId, ImsCallProfile profile,
+                IImsCallSessionListener listener) throws RemoteException {
+            synchronized (mLock) {
+                return MMTelFeature.this.createCallSession(sessionId, profile, listener);
+            }
+        }
+
+        @Override
+        public IImsCallSession getPendingCallSession(int sessionId, String callId)
+                throws RemoteException {
+            synchronized (mLock) {
+                return MMTelFeature.this.getPendingCallSession(sessionId, callId);
+            }
+        }
+
+        @Override
+        public IImsUt getUtInterface() throws RemoteException {
+            synchronized (mLock) {
+                return MMTelFeature.this.getUtInterface();
+            }
+        }
+
+        @Override
+        public IImsConfig getConfigInterface() throws RemoteException {
+            synchronized (mLock) {
+                return MMTelFeature.this.getConfigInterface();
+            }
+        }
+
+        @Override
+        public void turnOnIms() throws RemoteException {
+            synchronized (mLock) {
+                MMTelFeature.this.turnOnIms();
+            }
+        }
+
+        @Override
+        public void turnOffIms() throws RemoteException {
+            synchronized (mLock) {
+                MMTelFeature.this.turnOffIms();
+            }
+        }
+
+        @Override
+        public IImsEcbm getEcbmInterface() throws RemoteException {
+            synchronized (mLock) {
+                return MMTelFeature.this.getEcbmInterface();
+            }
+        }
+
+        @Override
+        public void setUiTTYMode(int uiTtyMode, Message onComplete) throws RemoteException {
+            synchronized (mLock) {
+                MMTelFeature.this.setUiTTYMode(uiTtyMode, onComplete);
+            }
+        }
+
+        @Override
+        public IImsMultiEndpoint getMultiEndpointInterface() throws RemoteException {
+            synchronized (mLock) {
+                return MMTelFeature.this.getMultiEndpointInterface();
+            }
+        }
+    };
+
+    /**
+     * @hide
+     */
+    @Override
+    public final IImsMMTelFeature getBinder() {
+        return mImsMMTelBinder;
+    }
 
     /**
      * Notifies the MMTel feature that you would like to start a session. This should always be
@@ -135,7 +275,7 @@ public class MMTelFeature extends ImsFeature {
     }
 
     /**
-     * Creates a {@link ImsCallSession} with the specified call profile.
+     * Creates an {@link ImsCallSession} with the specified call profile.
      * Use other methods, if applicable, instead of interacting with
      * {@link ImsCallSession} directly.
      *
@@ -204,6 +344,11 @@ public class MMTelFeature extends ImsFeature {
      */
     public IImsMultiEndpoint getMultiEndpointInterface() {
         return null;
+    }
+
+    @Override
+    public void onFeatureReady() {
+
     }
 
     /**

@@ -288,7 +288,7 @@ public class MobileSignalController extends SignalController<
         String description = null;
         // Only send data sim callbacks to QS.
         if (mCurrentState.dataSim) {
-            qsTypeIcon = showDataIcon ? icons.mQsDataType : 0;
+            qsTypeIcon = (showDataIcon || mConfig.alwaysShowDataRatIcon) ? icons.mQsDataType : 0;
             qsIcon = new IconState(mCurrentState.enabled
                     && !mCurrentState.isEmergency, getQsCurrentIconId(), contentDescription);
             description = mCurrentState.isEmergency ? null : mCurrentState.networkName;
@@ -300,7 +300,7 @@ public class MobileSignalController extends SignalController<
                 && !mCurrentState.carrierNetworkChangeMode
                 && mCurrentState.activityOut;
         showDataIcon &= mCurrentState.isDefault || dataDisabled;
-        int typeIcon = showDataIcon ? icons.mDataType : 0;
+        int typeIcon = (showDataIcon || mConfig.alwaysShowDataRatIcon) ? icons.mDataType : 0;
         callback.setMobileDataIndicators(statusIcon, qsIcon, typeIcon, qsTypeIcon,
                 activityIn, activityOut, dataContentDescription, description, icons.mIsWide,
                 mSubscriptionInfo.getSubscriptionId(), mCurrentState.roaming);
@@ -346,7 +346,7 @@ public class MobileSignalController extends SignalController<
         if (isCarrierNetworkChangeActive()) {
             return false;
         }
-        if (isCdma()) {
+        if (isCdma() && mServiceState != null) {
             final int iconMode = mServiceState.getCdmaEriIconMode();
             return mServiceState.getCdmaEriIconIndex() != EriInfo.ROAMING_INDICATOR_OFF
                     && (iconMode == EriInfo.ROAMING_ICON_MODE_NORMAL
@@ -460,7 +460,7 @@ public class MobileSignalController extends SignalController<
         mCurrentState.roaming = isRoaming();
         if (isCarrierNetworkChangeActive()) {
             mCurrentState.iconGroup = TelephonyIcons.CARRIER_NETWORK_CHANGE;
-        } else if (isDataDisabled()) {
+        } else if (isDataDisabled() && !mConfig.alwaysShowDataRatIcon) {
             mCurrentState.iconGroup = TelephonyIcons.DATA_DISABLED;
         }
         if (isEmergencyOnly() != mCurrentState.isEmergency) {
@@ -521,10 +521,12 @@ public class MobileSignalController extends SignalController<
                         + " dataState=" + state.getDataRegState());
             }
             mServiceState = state;
-            mDataNetType = state.getDataNetworkType();
-            if (mDataNetType == TelephonyManager.NETWORK_TYPE_LTE && mServiceState != null &&
-                    mServiceState.isUsingCarrierAggregation()) {
-                mDataNetType = TelephonyManager.NETWORK_TYPE_LTE_CA;
+            if (state != null) {
+                mDataNetType = state.getDataNetworkType();
+                if (mDataNetType == TelephonyManager.NETWORK_TYPE_LTE && mServiceState != null &&
+                        mServiceState.isUsingCarrierAggregation()) {
+                    mDataNetType = TelephonyManager.NETWORK_TYPE_LTE_CA;
+                }
             }
             updateTelephony();
         }

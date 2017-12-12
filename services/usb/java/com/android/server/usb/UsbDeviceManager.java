@@ -92,14 +92,6 @@ public class UsbDeviceManager {
     private static final String USB_CONFIG_PROPERTY = "sys.usb.config";
 
     /**
-     * The property which stores the current build type (user/userdebug/eng).
-     */
-    private static final String BUILD_TYPE_PROPERTY = "ro.build.type";
-
-    private static final String BUILD_TYPE_USERDEBUG = "userdebug";
-    private static final String BUILD_TYPE_ENG = "eng";
-
-    /**
      * The non-persistent property which stores the current USB actual state.
      */
     private static final String USB_STATE_PROPERTY = "sys.usb.state";
@@ -179,7 +171,7 @@ public class UsbDeviceManager {
     private static Set<Integer> sBlackListedInterfaces;
 
     static {
-        sBlackListedInterfaces = new HashSet<Integer>();
+        sBlackListedInterfaces = new HashSet<>();
         sBlackListedInterfaces.add(UsbConstants.USB_CLASS_AUDIO);
         sBlackListedInterfaces.add(UsbConstants.USB_CLASS_COMM);
         sBlackListedInterfaces.add(UsbConstants.USB_CLASS_HID);
@@ -191,7 +183,7 @@ public class UsbDeviceManager {
         sBlackListedInterfaces.add(UsbConstants.USB_CLASS_CONTENT_SEC);
         sBlackListedInterfaces.add(UsbConstants.USB_CLASS_VIDEO);
         sBlackListedInterfaces.add(UsbConstants.USB_CLASS_WIRELESS_CONTROLLER);
-    };
+    }
 
     private class AdbSettingsObserver extends ContentObserver {
         public AdbSettingsObserver() {
@@ -225,44 +217,6 @@ public class UsbDeviceManager {
         }
     };
 
-    private final BroadcastReceiver mPortReceiver = new BroadcastReceiver() {
-        @Override
-        public void onReceive(Context context, Intent intent) {
-            UsbPort port = intent.getParcelableExtra(UsbManager.EXTRA_PORT);
-            UsbPortStatus status = intent.getParcelableExtra(UsbManager.EXTRA_PORT_STATUS);
-            mHandler.updateHostState(port, status);
-        }
-    };
-
-    private final BroadcastReceiver mChargingReceiver = new BroadcastReceiver() {
-        @Override
-        public void onReceive(Context context, Intent intent) {
-            int chargePlug = intent.getIntExtra(BatteryManager.EXTRA_PLUGGED, -1);
-            boolean usbCharging = chargePlug == BatteryManager.BATTERY_PLUGGED_USB;
-            mHandler.sendMessage(MSG_UPDATE_CHARGING_STATE, usbCharging);
-        }
-    };
-
-    private final BroadcastReceiver mHostReceiver = new BroadcastReceiver() {
-        @Override
-        public void onReceive(Context context, Intent intent) {
-            Iterator devices = ((UsbManager) context.getSystemService(Context.USB_SERVICE))
-                    .getDeviceList().entrySet().iterator();
-            if (intent.getAction().equals(UsbManager.ACTION_USB_DEVICE_ATTACHED)) {
-                mHandler.sendMessage(MSG_UPDATE_HOST_STATE, devices, true);
-            } else {
-                mHandler.sendMessage(MSG_UPDATE_HOST_STATE, devices, false);
-            }
-        }
-    };
-
-    private final BroadcastReceiver mLanguageChangedReceiver = new BroadcastReceiver() {
-        @Override
-        public void onReceive(Context context, Intent intent) {
-            mHandler.sendEmptyMessage(MSG_LOCALE_CHANGED);
-        }
-    };
-
     public UsbDeviceManager(Context context, UsbAlsaManager alsaManager,
             UsbSettingsManager settingsManager) {
         mContext = context;
@@ -287,17 +241,56 @@ public class UsbDeviceManager {
         if (secureAdbEnabled && !dataEncrypted) {
             mDebuggingManager = new UsbDebuggingManager(context);
         }
-        mContext.registerReceiver(mPortReceiver,
+
+        BroadcastReceiver portReceiver = new BroadcastReceiver() {
+            @Override
+            public void onReceive(Context context, Intent intent) {
+                UsbPort port = intent.getParcelableExtra(UsbManager.EXTRA_PORT);
+                UsbPortStatus status = intent.getParcelableExtra(UsbManager.EXTRA_PORT_STATUS);
+                mHandler.updateHostState(port, status);
+            }
+        };
+
+        BroadcastReceiver chargingReceiver = new BroadcastReceiver() {
+            @Override
+            public void onReceive(Context context, Intent intent) {
+                int chargePlug = intent.getIntExtra(BatteryManager.EXTRA_PLUGGED, -1);
+                boolean usbCharging = chargePlug == BatteryManager.BATTERY_PLUGGED_USB;
+                mHandler.sendMessage(MSG_UPDATE_CHARGING_STATE, usbCharging);
+            }
+        };
+
+        BroadcastReceiver hostReceiver = new BroadcastReceiver() {
+            @Override
+            public void onReceive(Context context, Intent intent) {
+                Iterator devices = ((UsbManager) context.getSystemService(Context.USB_SERVICE))
+                        .getDeviceList().entrySet().iterator();
+                if (intent.getAction().equals(UsbManager.ACTION_USB_DEVICE_ATTACHED)) {
+                    mHandler.sendMessage(MSG_UPDATE_HOST_STATE, devices, true);
+                } else {
+                    mHandler.sendMessage(MSG_UPDATE_HOST_STATE, devices, false);
+                }
+            }
+        };
+
+        BroadcastReceiver languageChangedReceiver = new BroadcastReceiver() {
+            @Override
+            public void onReceive(Context context, Intent intent) {
+                mHandler.sendEmptyMessage(MSG_LOCALE_CHANGED);
+            }
+        };
+
+        mContext.registerReceiver(portReceiver,
                 new IntentFilter(UsbManager.ACTION_USB_PORT_CHANGED));
-        mContext.registerReceiver(mChargingReceiver,
+        mContext.registerReceiver(chargingReceiver,
                 new IntentFilter(Intent.ACTION_BATTERY_CHANGED));
 
         IntentFilter filter =
                 new IntentFilter(UsbManager.ACTION_USB_DEVICE_ATTACHED);
         filter.addAction(UsbManager.ACTION_USB_DEVICE_DETACHED);
-        mContext.registerReceiver(mHostReceiver, filter);
+        mContext.registerReceiver(hostReceiver, filter);
 
-        mContext.registerReceiver(mLanguageChangedReceiver,
+        mContext.registerReceiver(languageChangedReceiver,
                 new IntentFilter(Intent.ACTION_LOCALE_CHANGED));
     }
 
@@ -326,7 +319,7 @@ public class UsbDeviceManager {
 
         // We do not show the USB notification if the primary volume supports mass storage.
         // The legacy mass storage UI will be used instead.
-        boolean massStorageSupported = false;
+        boolean massStorageSupported;
         final StorageManager storageManager = StorageManager.from(mContext);
         final StorageVolume primary = storageManager.getPrimaryVolume();
         massStorageSupported = primary != null && primary.allowMassStorage();
@@ -454,7 +447,7 @@ public class UsbDeviceManager {
                             SystemProperties.get(USB_STATE_PROPERTY));
                 }
 
-                /**
+                /*
                  * Use the normal bootmode persistent prop to maintain state of adb across
                  * all boot modes.
                  */
@@ -462,7 +455,7 @@ public class UsbDeviceManager {
                         SystemProperties.get(USB_PERSISTENT_CONFIG_PROPERTY),
                         UsbManager.USB_FUNCTION_ADB);
 
-                /**
+                /*
                  * Previous versions can set persist config to mtp/ptp but it does not
                  * get reset on OTA. Reset the property here instead.
                  */
@@ -652,10 +645,7 @@ public class UsbDeviceManager {
 
         private boolean isNormalBoot() {
             String bootMode = SystemProperties.get(BOOT_MODE_PROPERTY, "unknown");
-            if (bootMode.equals(NORMAL_BOOT) || bootMode.equals("unknown")) {
-                return true;
-            }
-            return false;
+            return bootMode.equals(NORMAL_BOOT) || bootMode.equals("unknown");
         }
 
         private boolean trySetEnabledFunctions(String functions, boolean forceRestart) {
@@ -1027,7 +1017,7 @@ public class UsbDeviceManager {
                             Slog.v(TAG, "Current user switched to " + msg.arg1
                                     + "; resetting USB host stack for MTP or PTP");
                             // avoid leaking sensitive data from previous user
-                            setEnabledFunctions(mCurrentFunctions, true, false);
+                            setEnabledFunctions(null, true, false);
                         }
                         mCurrentUser = msg.arg1;
                     }
@@ -1037,7 +1027,9 @@ public class UsbDeviceManager {
                     if (DEBUG) {
                         Slog.v(TAG, "Accessory mode enter timeout: " + mConnected);
                     }
-                    if (!mConnected) {
+                    if (!mConnected || !UsbManager.containsFunction(
+                            mCurrentFunctions,
+                            UsbManager.USB_FUNCTION_ACCESSORY)) {
                         notifyAccessoryModeExit();
                     }
                     break;
@@ -1325,25 +1317,21 @@ public class UsbDeviceManager {
                 String[] items = config.split(":");
                 if (items.length == 3 || items.length == 4) {
                     if (mOemModeMap == null) {
-                        mOemModeMap = new HashMap<String, HashMap<String,
-                                Pair<String, String>>>();
+                        mOemModeMap = new HashMap<>();
                     }
                     HashMap<String, Pair<String, String>> overrideMap
                             = mOemModeMap.get(items[0]);
                     if (overrideMap == null) {
-                        overrideMap = new HashMap<String,
-                                Pair<String, String>>();
+                        overrideMap = new HashMap<>();
                         mOemModeMap.put(items[0], overrideMap);
                     }
 
                     // Favoring the first combination if duplicate exists
                     if (!overrideMap.containsKey(items[1])) {
                         if (items.length == 3) {
-                            overrideMap.put(items[1],
-                                    new Pair<String, String>(items[2], ""));
+                            overrideMap.put(items[1], new Pair<>(items[2], ""));
                         } else {
-                            overrideMap.put(items[1],
-                                    new Pair<String, String>(items[2], items[3]));
+                            overrideMap.put(items[1], new Pair<>(items[2], items[3]));
                         }
                     }
                 }
@@ -1404,7 +1392,7 @@ public class UsbDeviceManager {
         String bootMode = SystemProperties.get(BOOT_MODE_PROPERTY, "unknown");
         String persistProp = USB_PERSISTENT_CONFIG_PROPERTY;
         if (!(bootMode.equals(NORMAL_BOOT) || bootMode.equals("unknown"))) {
-            if (functions == true) {
+            if (functions) {
                 persistProp = "persist.sys.usb." + bootMode + ".func";
             } else {
                 persistProp = "persist.sys.usb." + bootMode + ".config";

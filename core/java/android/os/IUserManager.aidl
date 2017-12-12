@@ -35,6 +35,10 @@ interface IUserManager {
      * DO NOT MOVE - UserManager.h depends on the ordering of this function.
      */
     int getCredentialOwnerProfile(int userHandle);
+    int getProfileParentId(int userHandle);
+    /*
+     * END OF DO NOT MOVE
+     */
 
     UserInfo createUser(in String name, int flags);
     UserInfo createProfileForUser(in String name, int flags, int userHandle,

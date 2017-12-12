@@ -23,8 +23,6 @@ import android.net.INetdEventCallback;
 import android.net.metrics.ApfProgramEvent;
 import android.net.metrics.IpConnectivityLog;
 import android.os.Binder;
-import android.os.IBinder;
-import android.os.Parcelable;
 import android.os.Process;
 import android.provider.Settings;
 import android.text.TextUtils;
@@ -322,22 +320,22 @@ final public class IpConnectivityMetrics extends SystemService {
         }
 
         @Override
-        public boolean registerNetdEventCallback(INetdEventCallback callback) {
+        public boolean addNetdEventCallback(int callerType, INetdEventCallback callback) {
             enforceNetdEventListeningPermission();
             if (mNetdListener == null) {
                 return false;
             }
-            return mNetdListener.registerNetdEventCallback(callback);
+            return mNetdListener.addNetdEventCallback(callerType, callback);
         }
 
         @Override
-        public boolean unregisterNetdEventCallback() {
+        public boolean removeNetdEventCallback(int callerType) {
             enforceNetdEventListeningPermission();
             if (mNetdListener == null) {
                 // if the service is null, we aren't registered anyway
                 return true;
             }
-            return mNetdListener.unregisterNetdEventCallback();
+            return mNetdListener.removeNetdEventCallback(callerType);
         }
     };
 

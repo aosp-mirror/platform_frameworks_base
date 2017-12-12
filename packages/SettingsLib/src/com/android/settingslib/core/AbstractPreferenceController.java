@@ -4,7 +4,6 @@ import android.content.Context;
 import android.support.v7.preference.Preference;
 import android.support.v7.preference.PreferenceGroup;
 import android.support.v7.preference.PreferenceScreen;
-import java.util.List;
 
 /**
  * A controller that manages event for preference.
@@ -37,17 +36,6 @@ public abstract class AbstractPreferenceController {
    */
   public void updateState(Preference preference) {
 
-  }
-
-  /**
-   * Updates non-indexable keys for search provider.
-   *
-   * Called by SearchIndexProvider#getNonIndexableKeys
-   */
-  public void updateNonIndexableKeys(List<String> keys) {
-      if (!isAvailable()) {
-          keys.add(getPreferenceKey());
-      }
   }
 
   /**

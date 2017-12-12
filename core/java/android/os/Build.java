@@ -757,8 +757,23 @@ public class Build {
 
         /**
          * O.
+         *
+         * <p>Applications targeting this or a later release will get these
+         * new changes in behavior:</p>
+         * <ul>
+         * <li>{@link android.R.attr#focusable} defaults to a new state ({@code auto}) where it will
+         * inherit the value of {@link android.R.attr#clickable} unless explicitly overridden.</li>
+         * <li>A default theme-appropriate focus-state highlight will be supplied to all Views
+         * which don't provide a focus-state drawable themselves. This can be disabled by setting
+         * {@link android.R.attr#defaultFocusHighlightEnabled} to false.</li>
+         * </ul>
          */
         public static final int O = 26;
+
+        /**
+         * O MR1.
+         */
+        public static final int O_MR1 = 27;
     }
 
     /** The type of build, like "user" or "eng". */
@@ -832,7 +847,9 @@ public class Build {
         if (IS_ENG) return true;
 
         if (IS_TREBLE_ENABLED) {
-            int result = VintfObject.verify(new String[0]);
+            // If we can run this code, the device should already pass AVB.
+            // So, we don't need to check AVB here.
+            int result = VintfObject.verifyWithoutAvb();
 
             if (result != 0) {
                 Slog.e(TAG, "Vendor interface is incompatible, error="

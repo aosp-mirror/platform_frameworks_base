@@ -132,8 +132,6 @@ import java.util.List;
  * <p>
  * When writing a {@link LayoutManager} you almost always want to use layout positions whereas when
  * writing an {@link Adapter}, you probably want to use adapter positions.
- *
- * @attr ref android.support.v7.recyclerview.R.styleable#RecyclerView_layoutManager
  */
 public class RecyclerView extends ViewGroup implements ScrollingView, NestedScrollingChild {
 
@@ -9590,11 +9588,6 @@ public class RecyclerView extends ViewGroup implements ScrollingView, NestedScro
 
         /**
          * Parse the xml attributes to get the most common properties used by layout managers.
-         *
-         * @attr ref android.support.v7.recyclerview.R.styleable#RecyclerView_android_orientation
-         * @attr ref android.support.v7.recyclerview.R.styleable#RecyclerView_spanCount
-         * @attr ref android.support.v7.recyclerview.R.styleable#RecyclerView_reverseLayout
-         * @attr ref android.support.v7.recyclerview.R.styleable#RecyclerView_stackFromEnd
          *
          * @return an object containing the properties as specified in the attrs.
          */

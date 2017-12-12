@@ -40,12 +40,16 @@
     <string name="connected_via_passpoint" msgid="2826205693803088747">"Conectată prin %1$s"</string>
     <string name="available_via_passpoint" msgid="1617440946846329613">"Disponibilă prin %1$s"</string>
     <string name="wifi_connected_no_internet" msgid="3149853966840874992">"Conectată, fără internet"</string>
+    <string name="wifi_ap_unable_to_handle_new_sta" msgid="5348824313514404541">"Punctul de acces este temporar plin"</string>
+    <string name="connected_via_carrier" msgid="7583780074526041912">"Conectată prin %1$s"</string>
+    <string name="available_via_carrier" msgid="1469036129740799053">"Disponibilă prin %1$s"</string>
     <string name="speed_label_very_slow" msgid="1867055264243608530">"Foarte lentă"</string>
     <string name="speed_label_slow" msgid="813109590815810235">"Lentă"</string>
     <string name="speed_label_okay" msgid="2331665440671174858">"Bine"</string>
     <string name="speed_label_medium" msgid="3175763313268941953">"Medie"</string>
     <string name="speed_label_fast" msgid="7715732164050975057">"Rapidă"</string>
     <string name="speed_label_very_fast" msgid="2265363430784523409">"Foarte rapidă"</string>
+    <string name="preference_summary_default_combination" msgid="8532964268242666060">"<xliff:g id="STATE">%1$s</xliff:g>/<xliff:g id="DESCRIPTION">%2$s</xliff:g>"</string>
     <string name="bluetooth_disconnected" msgid="6557104142667339895">"Deconectat"</string>
     <string name="bluetooth_disconnecting" msgid="8913264760027764974">"În curs de deconectare..."</string>
     <string name="bluetooth_connecting" msgid="8555009514614320497">"Se conectează..."</string>
@@ -101,6 +105,8 @@
     <string name="accessibility_wifi_two_bars" msgid="3569851234710034416">"Semnal Wi-Fi: două bare."</string>
     <string name="accessibility_wifi_three_bars" msgid="8134185644861380311">"Semnal Wi-Fi: trei bare."</string>
     <string name="accessibility_wifi_signal_full" msgid="7061045677694702">"Semnal Wi-Fi: complet."</string>
+    <string name="accessibility_wifi_security_type_none" msgid="1223747559986205423">"Rețea nesecurizată"</string>
+    <string name="accessibility_wifi_security_type_secured" msgid="862921720418885331">"Securizați rețeaua"</string>
     <string name="process_kernel_label" msgid="3916858646836739323">"Sistem de operare Android"</string>
     <string name="data_usage_uninstalled_apps" msgid="614263770923231598">"Aplicații eliminate"</string>
     <string name="data_usage_uninstalled_apps_users" msgid="7986294489899813194">"Aplicații și utilizatori eliminați"</string>
@@ -187,6 +193,7 @@
     <string name="wifi_allow_scan_with_traffic" msgid="3601853081178265786">"Se permite întotdeauna scanarea traficului Wi-Fi"</string>
     <string name="mobile_data_always_on" msgid="8774857027458200434">"Date mobile permanent active"</string>
     <string name="tethering_hardware_offload" msgid="7470077827090325814">"Accelerare hardware pentru tethering"</string>
+    <string name="bluetooth_show_devices_without_names" msgid="4708446092962060176">"Afișați dispozitivele Bluetooth fără nume"</string>
     <string name="bluetooth_disable_absolute_volume" msgid="2660673801947898809">"Dezactivați volumul absolut"</string>
     <string name="bluetooth_enable_inband_ringing" msgid="3291686366721786740">"Activați soneria în căști"</string>
     <string name="bluetooth_select_avrcp_version_string" msgid="3750059931120293633">"Versiunea AVRCP pentru Bluetooth"</string>
@@ -202,6 +209,12 @@
     <string name="bluetooth_select_a2dp_codec_ldac_playback_quality" msgid="3619694372407843405">"Codecul LDAC audio pentru Bluetooth: calitatea redării"</string>
     <string name="bluetooth_select_a2dp_codec_ldac_playback_quality_dialog_title" msgid="3181967377574368400">"Selectați codecul LDAC audio pentru Bluetooth:\ncalitatea redării"</string>
     <string name="bluetooth_select_a2dp_codec_streaming_label" msgid="5347862512596240506">"Transmitere în flux: <xliff:g id="STREAMING_PARAMETER">%1$s</xliff:g>"</string>
+    <string name="select_private_dns_configuration_title" msgid="3700456559305263922">"DNS privat"</string>
+    <string name="select_private_dns_configuration_dialog_title" msgid="9221994415765826811">"Selectați modul DNS privat"</string>
+    <string name="private_dns_mode_off" msgid="8236575187318721684">"Dezactivat"</string>
+    <string name="private_dns_mode_opportunistic" msgid="7608409735589131766">"Oportunist"</string>
+    <string name="private_dns_mode_provider" msgid="8354935160639360804">"Nume de gazdă al furnizorului de DNS privat"</string>
+    <string name="private_dns_mode_provider_hostname_hint" msgid="2487492386970928143">"Introduceți numele de gazdă al furnizorului de DNS"</string>
     <string name="wifi_display_certification_summary" msgid="1155182309166746973">"Afișați opțiunile pentru certificarea Ecran wireless"</string>
     <string name="wifi_verbose_logging_summary" msgid="6615071616111731958">"Măriți niv. de înr. prin Wi‑Fi, afișați în fcț. de SSID RSSI în Selectorul Wi‑Fi"</string>
     <string name="wifi_aggressive_handover_summary" msgid="7266329646559808827">"Când este activată, Wi-Fi va fi mai agresivă la predarea conexiunii de date către rețeaua mobilă când semnalul Wi-Fi este slab"</string>
@@ -226,6 +239,7 @@
     <string name="dev_settings_warning_message" msgid="2298337781139097964">"Aceste setări sunt destinate exclusiv utilizării pentru dezvoltare. Din cauza lor, este posibil ca dispozitivul dvs. și aplicațiile de pe acesta să nu mai funcționeze sau să funcționeze necorespunzător."</string>
     <string name="verify_apps_over_usb_title" msgid="4177086489869041953">"Verificați aplicațiile prin USB"</string>
     <string name="verify_apps_over_usb_summary" msgid="9164096969924529200">"Verificați aplicațiile instalate utilizând ADB/ADT, pentru a detecta un comportament dăunător."</string>
+    <string name="bluetooth_show_devices_without_names_summary" msgid="2351196058115755520">"Vor fi afișate dispozitivele Bluetooth fără nume (numai adresele MAC)"</string>
     <string name="bluetooth_disable_absolute_volume_summary" msgid="6031284410786545957">"Dezactivează funcția Bluetooth de volum absolut în cazul problemelor de volum apărute la dispozitivele la distanță, cum ar fi volumul mult prea ridicat sau lipsa de control asupra acestuia."</string>
     <string name="bluetooth_enable_inband_ringing_summary" msgid="2787866074741784975">"Permiteți ca tonurile de sonerie de pe telefon să fie redate prin căștile Bluetooth"</string>
     <string name="enable_terminal_title" msgid="95572094356054120">"Aplicație terminal locală"</string>
@@ -345,12 +359,11 @@
     <string name="power_discharging_duration_short" msgid="4192244429001842403">"<xliff:g id="LEVEL">^1</xliff:g> – timp rămas: <xliff:g id="TIME">^2</xliff:g>"</string>
     <string name="power_charging" msgid="1779532561355864267">"<xliff:g id="LEVEL">%1$s</xliff:g> - <xliff:g id="STATE">%2$s</xliff:g>"</string>
     <string name="power_charging_duration" msgid="4676999980973411875">"<xliff:g id="LEVEL">^1</xliff:g> - <xliff:g id="TIME">^2</xliff:g> până la încărcarea completă"</string>
-    <string name="power_charging_duration_short" msgid="1098603958472207920">"<xliff:g id="LEVEL">^1</xliff:g> – <xliff:g id="TIME">^2</xliff:g>"</string>
     <string name="battery_info_status_unknown" msgid="196130600938058547">"Necunoscut"</string>
     <string name="battery_info_status_charging" msgid="1705179948350365604">"Se încarcă"</string>
     <string name="battery_info_status_charging_lower" msgid="8689770213898117994">"se încarcă"</string>
     <string name="battery_info_status_discharging" msgid="310932812698268588">"Nu se încarcă"</string>
-    <string name="battery_info_status_not_charging" msgid="2820070506621483576">"Nu încarcă"</string>
+    <string name="battery_info_status_not_charging" msgid="8523453668342598579">"Conectat, nu se poate încărca chiar acum"</string>
     <string name="battery_info_status_full" msgid="2824614753861462808">"Complet"</string>
     <string name="disabled_by_admin_summary_text" msgid="6750513964908334617">"Controlată de administrator"</string>
     <string name="enabled_by_admin" msgid="5302986023578399263">"Activat de administrator"</string>
@@ -375,7 +388,6 @@
     <string name="screen_zoom_summary_custom" msgid="5611979864124160447">"Personalizat (<xliff:g id="DENSITYDPI">%d</xliff:g>)"</string>
     <string name="help_feedback_label" msgid="6815040660801785649">"Ajutor și feedback"</string>
     <string name="content_description_menu_button" msgid="8182594799812351266">"Meniu"</string>
-    <string name="time_zone_gmt" msgid="2587097992671450782">"GMT"</string>
     <string name="retail_demo_reset_message" msgid="118771671364131297">"Introduceți parola pentru a reveni la setările din fabrică în modul demo"</string>
     <string name="retail_demo_reset_next" msgid="8356731459226304963">"Înainte"</string>
     <string name="retail_demo_reset_title" msgid="696589204029930100">"Trebuie să introduceți o parolă"</string>

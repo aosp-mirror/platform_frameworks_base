@@ -37,6 +37,8 @@ public final class CategoryKey {
     public static final String CATEGORY_SECURITY_LOCKSCREEN =
             "com.android.settings.category.ia.lockscreen";
     public static final String CATEGORY_ACCOUNT = "com.android.settings.category.ia.accounts";
+    public static final String CATEGORY_ACCOUNT_DETAIL =
+            "com.android.settings.category.ia.account_detail";
     public static final String CATEGORY_SYSTEM = "com.android.settings.category.ia.system";
     public static final String CATEGORY_SYSTEM_LANGUAGE =
             "com.android.settings.category.ia.language";

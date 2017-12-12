@@ -34,6 +34,11 @@ import java.lang.annotation.RetentionPolicy;
  */
 public interface TextClassifier {
 
+    /** @hide */
+    String DEFAULT_LOG_TAG = "TextClassifierImpl";
+
+    /** @hide */
+    String TYPE_UNKNOWN = "";  // TODO: Make this public API.
     String TYPE_OTHER = "other";
     String TYPE_EMAIL = "email";
     String TYPE_PHONE = "phone";
@@ -43,7 +48,7 @@ public interface TextClassifier {
     /** @hide */
     @Retention(RetentionPolicy.SOURCE)
     @StringDef({
-            TYPE_OTHER, TYPE_EMAIL, TYPE_PHONE, TYPE_ADDRESS, TYPE_URL
+            TYPE_UNKNOWN, TYPE_OTHER, TYPE_EMAIL, TYPE_PHONE, TYPE_ADDRESS, TYPE_URL
     })
     @interface EntityType {}
 
@@ -147,4 +152,12 @@ public interface TextClassifier {
      */
     @WorkerThread
     default void logEvent(String source, String event) {}
+
+    /**
+     * Returns this TextClassifier's settings.
+     * @hide
+     */
+    default TextClassifierConstants getSettings() {
+        return TextClassifierConstants.DEFAULT;
+    }
 }

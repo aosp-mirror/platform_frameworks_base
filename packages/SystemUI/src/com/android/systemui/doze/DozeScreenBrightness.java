@@ -22,9 +22,9 @@ import android.hardware.SensorEvent;
 import android.hardware.SensorEventListener;
 import android.hardware.SensorManager;
 import android.os.Handler;
+import android.os.Trace;
 
 import com.android.internal.annotations.VisibleForTesting;
-import com.android.systemui.R;
 
 /**
  * Controls the screen brightness when dozing.
@@ -38,11 +38,16 @@ public class DozeScreenBrightness implements DozeMachine.Part, SensorEventListen
     private final Sensor mLightSensor;
     private final int[] mSensorToBrightness;
     private final int[] mSensorToScrimOpacity;
+
     private boolean mRegistered;
+    private int mDefaultDozeBrightness;
+    private boolean mPaused = false;
+    private int mLastSensorValue = -1;
 
     public DozeScreenBrightness(Context context, DozeMachine.Service service,
             SensorManager sensorManager, Sensor lightSensor, DozeHost host,
-            Handler handler) {
+            Handler handler, int defaultDozeBrightness, int[] sensorToBrightness,
+            int[] sensorToScrimOpacity) {
         mContext = context;
         mDozeService = service;
         mSensorManager = sensorManager;
@@ -50,10 +55,19 @@ public class DozeScreenBrightness implements DozeMachine.Part, SensorEventListen
         mDozeHost = host;
         mHandler = handler;
 
-        mSensorToBrightness = context.getResources().getIntArray(
-                R.array.config_doze_brightness_sensor_to_brightness);
-        mSensorToScrimOpacity = context.getResources().getIntArray(
-                R.array.config_doze_brightness_sensor_to_scrim_opacity);
+        mDefaultDozeBrightness = defaultDozeBrightness;
+        mSensorToBrightness = sensorToBrightness;
+        mSensorToScrimOpacity = sensorToScrimOpacity;
+    }
+
+    @VisibleForTesting
+    public DozeScreenBrightness(Context context, DozeMachine.Service service,
+            SensorManager sensorManager, Sensor lightSensor, DozeHost host,
+            Handler handler, AlwaysOnDisplayPolicy policy) {
+        this(context, service, sensorManager, lightSensor, host, handler,
+                context.getResources().getInteger(
+                        com.android.internal.R.integer.config_screenBrightnessDoze),
+                policy.screenBrightnessArray, policy.dimmingScrimArray);
     }
 
     @Override
@@ -67,7 +81,6 @@ public class DozeScreenBrightness implements DozeMachine.Part, SensorEventListen
                 setLightSensorEnabled(true);
                 break;
             case DOZE:
-            case DOZE_AOD_PAUSED:
                 setLightSensorEnabled(false);
                 resetBrightnessToDefault();
                 break;
@@ -75,18 +88,43 @@ public class DozeScreenBrightness implements DozeMachine.Part, SensorEventListen
                 setLightSensorEnabled(false);
                 break;
         }
+        if (newState != DozeMachine.State.FINISH) {
+            setPaused(newState == DozeMachine.State.DOZE_AOD_PAUSED);
+        }
     }
 
     @Override
     public void onSensorChanged(SensorEvent event) {
+        Trace.beginSection("DozeScreenBrightness.onSensorChanged" + event.values[0]);
+        try {
+            if (mRegistered) {
+                mLastSensorValue = (int) event.values[0];
+                updateBrightnessAndReady();
+            }
+        } finally {
+            Trace.endSection();
+        }
+    }
+
+    private void updateBrightnessAndReady() {
         if (mRegistered) {
-            int sensorValue = (int) event.values[0];
-            int brightness = computeBrightness(sensorValue);
-            if (brightness > 0) {
+            int brightness = computeBrightness(mLastSensorValue);
+            boolean brightnessReady = brightness > 0;
+            if (brightnessReady) {
                 mDozeService.setDozeScreenBrightness(brightness);
             }
 
-            int scrimOpacity = computeScrimOpacity(sensorValue);
+            int scrimOpacity = -1;
+            if (mPaused) {
+                // If AOD is paused, force the screen black until the
+                // sensor reports a new brightness. This ensures that when the screen comes on
+                // again, it will only show after the brightness sensor has stabilized,
+                // avoiding a potential flicker.
+                scrimOpacity = 255;
+            } else if (brightnessReady) {
+                // Only unblank scrim once brightness is ready.
+                scrimOpacity = computeScrimOpacity(mLastSensorValue);
+            }
             if (scrimOpacity >= 0) {
                 mDozeHost.setAodDimmingScrim(scrimOpacity / 255f);
             }
@@ -112,17 +150,29 @@ public class DozeScreenBrightness implements DozeMachine.Part, SensorEventListen
     }
 
     private void resetBrightnessToDefault() {
-        mDozeService.setDozeScreenBrightness(mContext.getResources().getInteger(
-                com.android.internal.R.integer.config_screenBrightnessDoze));
+        mDozeService.setDozeScreenBrightness(mDefaultDozeBrightness);
+        mDozeHost.setAodDimmingScrim(0f);
     }
 
     private void setLightSensorEnabled(boolean enabled) {
         if (enabled && !mRegistered && mLightSensor != null) {
+            // Wait until we get an event from the sensor until indicating ready.
             mRegistered = mSensorManager.registerListener(this, mLightSensor,
                     SensorManager.SENSOR_DELAY_NORMAL, mHandler);
+            mLastSensorValue = -1;
         } else if (!enabled && mRegistered) {
             mSensorManager.unregisterListener(this);
             mRegistered = false;
+            mLastSensorValue = -1;
+            // Sensor is not enabled, hence we use the default brightness and are always ready.
         }
     }
+
+    private void setPaused(boolean paused) {
+        if (mPaused != paused) {
+            mPaused = paused;
+            updateBrightnessAndReady();
+        }
+    }
+
 }

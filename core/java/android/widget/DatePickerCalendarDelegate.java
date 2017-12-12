@@ -22,11 +22,10 @@ import android.content.res.ColorStateList;
 import android.content.res.Configuration;
 import android.content.res.Resources;
 import android.content.res.TypedArray;
+import android.icu.text.DateFormat;
 import android.icu.text.DisplayContext;
-import android.icu.text.SimpleDateFormat;
 import android.icu.util.Calendar;
 import android.os.Parcelable;
-import android.text.format.DateFormat;
 import android.util.AttributeSet;
 import android.util.StateSet;
 import android.view.HapticFeedbackConstants;
@@ -62,8 +61,8 @@ class DatePickerCalendarDelegate extends DatePicker.AbstractDatePickerDelegate {
     private static final int[] ATTRS_DISABLED_ALPHA = new int[] {
             com.android.internal.R.attr.disabledAlpha};
 
-    private SimpleDateFormat mYearFormat;
-    private SimpleDateFormat mMonthDayFormat;
+    private DateFormat mYearFormat;
+    private DateFormat mMonthDayFormat;
 
     // Top-level container.
     private ViewGroup mContainer;
@@ -273,19 +272,16 @@ class DatePickerCalendarDelegate extends DatePicker.AbstractDatePickerDelegate {
     /**
      * Listener called when the user clicks on a header item.
      */
-    private final OnClickListener mOnHeaderClickListener = new OnClickListener() {
-        @Override
-        public void onClick(View v) {
-            tryVibrate();
+    private final OnClickListener mOnHeaderClickListener = v -> {
+        tryVibrate();
 
-            switch (v.getId()) {
-                case R.id.date_picker_header_year:
-                    setCurrentView(VIEW_YEAR);
-                    break;
-                case R.id.date_picker_header_date:
-                    setCurrentView(VIEW_MONTH_DAY);
-                    break;
-            }
+        switch (v.getId()) {
+            case R.id.date_picker_header_year:
+                setCurrentView(VIEW_YEAR);
+                break;
+            case R.id.date_picker_header_date:
+                setCurrentView(VIEW_MONTH_DAY);
+                break;
         }
     };
 
@@ -299,10 +295,9 @@ class DatePickerCalendarDelegate extends DatePicker.AbstractDatePickerDelegate {
         }
 
         // Update the date formatter.
-        final String datePattern = DateFormat.getBestDateTimePattern(locale, "EMMMd");
-        mMonthDayFormat = new SimpleDateFormat(datePattern, locale);
+        mMonthDayFormat = DateFormat.getInstanceForSkeleton("EMMMd", locale);
         mMonthDayFormat.setContext(DisplayContext.CAPITALIZATION_FOR_STANDALONE);
-        mYearFormat = new SimpleDateFormat("y", locale);
+        mYearFormat = DateFormat.getInstanceForSkeleton("y", locale);
 
         // Update the header text.
         onCurrentDateChanged(false);
@@ -344,14 +339,11 @@ class DatePickerCalendarDelegate extends DatePicker.AbstractDatePickerDelegate {
             case VIEW_YEAR:
                 final int year = mCurrentDate.get(Calendar.YEAR);
                 mYearPickerView.setYear(year);
-                mYearPickerView.post(new Runnable() {
-                    @Override
-                    public void run() {
-                        mYearPickerView.requestFocus();
-                        final View selected = mYearPickerView.getSelectedView();
-                        if (selected != null) {
-                            selected.requestFocus();
-                        }
+                mYearPickerView.post(() -> {
+                    mYearPickerView.requestFocus();
+                    final View selected = mYearPickerView.getSelectedView();
+                    if (selected != null) {
+                        selected.requestFocus();
                     }
                 });
 
@@ -368,12 +360,9 @@ class DatePickerCalendarDelegate extends DatePicker.AbstractDatePickerDelegate {
     }
 
     @Override
-    public void init(int year, int monthOfYear, int dayOfMonth,
+    public void init(int year, int month, int dayOfMonth,
             DatePicker.OnDateChangedListener callBack) {
-        mCurrentDate.set(Calendar.YEAR, year);
-        mCurrentDate.set(Calendar.MONTH, monthOfYear);
-        mCurrentDate.set(Calendar.DAY_OF_MONTH, dayOfMonth);
-
+        setDate(year, month, dayOfMonth);
         onDateChanged(false, false);
 
         mOnDateChangedListener = callBack;
@@ -381,11 +370,15 @@ class DatePickerCalendarDelegate extends DatePicker.AbstractDatePickerDelegate {
 
     @Override
     public void updateDate(int year, int month, int dayOfMonth) {
+        setDate(year, month, dayOfMonth);
+        onDateChanged(false, true);
+    }
+
+    private void setDate(int year, int month, int dayOfMonth) {
         mCurrentDate.set(Calendar.YEAR, year);
         mCurrentDate.set(Calendar.MONTH, month);
         mCurrentDate.set(Calendar.DAY_OF_MONTH, dayOfMonth);
-
-        onDateChanged(false, true);
+        resetAutofilledValue();
     }
 
     private void onDateChanged(boolean fromUser, boolean callbackToClient) {

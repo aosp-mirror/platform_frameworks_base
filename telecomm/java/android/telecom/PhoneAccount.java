@@ -86,13 +86,11 @@ public final class PhoneAccount implements Parcelable {
     /**
      * Boolean {@link PhoneAccount} extras key (see {@link PhoneAccount#getExtras()}) which
      * indicates whether this {@link PhoneAccount} is capable of supporting a request to handover a
-     * connection (see {@link android.telecom.Call#EVENT_REQUEST_HANDOVER}) to this
-     * {@link PhoneAccount} from a {@link PhoneAccount} specifying
-     * {@link #EXTRA_SUPPORTS_HANDOVER_FROM}.
+     * connection (see {@code android.telecom.Call#handoverTo()}) to this {@link PhoneAccount} from
+     * a {@link PhoneAccount} specifying {@link #EXTRA_SUPPORTS_HANDOVER_FROM}.
      * <p>
      * A handover request is initiated by the user from the default dialer app to indicate a desire
      * to handover a call from one {@link PhoneAccount}/{@link ConnectionService} to another.
-     * @hide
      */
     public static final String EXTRA_SUPPORTS_HANDOVER_TO =
             "android.telecom.extra.SUPPORTS_HANDOVER_TO";
@@ -113,12 +111,11 @@ public final class PhoneAccount implements Parcelable {
      * Boolean {@link PhoneAccount} extras key (see {@link PhoneAccount#getExtras()}) which
      * indicates whether this {@link PhoneAccount} is capable of supporting a request to handover a
      * connection from this {@link PhoneAccount} to another {@link PhoneAccount}.
-     * (see {@link android.telecom.Call#EVENT_REQUEST_HANDOVER}) which specifies
+     * (see {@code android.telecom.Call#handoverTo()}) which specifies
      * {@link #EXTRA_SUPPORTS_HANDOVER_TO}.
      * <p>
      * A handover request is initiated by the user from the default dialer app to indicate a desire
      * to handover a call from one {@link PhoneAccount}/{@link ConnectionService} to another.
-     * @hide
      */
     public static final String EXTRA_SUPPORTS_HANDOVER_FROM =
             "android.telecom.extra.SUPPORTS_HANDOVER_FROM";
@@ -132,7 +129,6 @@ public final class PhoneAccount implements Parcelable {
      * <p>
      * By default, Self-Managed {@link PhoneAccount}s do not log their calls to the call log.
      * Setting this extra to {@code true} provides a means for them to log their calls.
-     * @hide
      */
     public static final String EXTRA_LOG_SELF_MANAGED_CALLS =
             "android.telecom.extra.LOG_SELF_MANAGED_CALLS";
@@ -967,6 +963,9 @@ public final class PhoneAccount implements Parcelable {
         }
         if (hasCapabilities(CAPABILITY_SIM_SUBSCRIPTION)) {
             sb.append("SimSub ");
+        }
+        if (hasCapabilities(CAPABILITY_RTT)) {
+            sb.append("Rtt");
         }
         return sb.toString();
     }

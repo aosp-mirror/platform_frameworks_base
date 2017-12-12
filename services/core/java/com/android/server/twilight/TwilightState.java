@@ -18,7 +18,10 @@ package com.android.server.twilight;
 
 import android.text.format.DateFormat;
 
-import java.util.Calendar;
+import java.time.Instant;
+import java.time.LocalDateTime;
+import java.time.ZoneId;
+import java.util.TimeZone;
 
 /**
  * The twilight state, consisting of the sunrise and sunset times (in millis) for the current
@@ -45,12 +48,11 @@ public final class TwilightState {
     }
 
     /**
-     * Returns a new {@link Calendar} instance initialized to {@link #sunriseTimeMillis()}.
+     * Returns a new {@link LocalDateTime} instance initialized to {@link #sunriseTimeMillis()}.
      */
-    public Calendar sunrise() {
-        final Calendar sunrise = Calendar.getInstance();
-        sunrise.setTimeInMillis(mSunriseTimeMillis);
-        return sunrise;
+    public LocalDateTime sunrise() {
+        final ZoneId zoneId = TimeZone.getDefault().toZoneId();
+        return LocalDateTime.ofInstant(Instant.ofEpochMilli(mSunriseTimeMillis), zoneId);
     }
 
     /**
@@ -62,12 +64,11 @@ public final class TwilightState {
     }
 
     /**
-     * Returns a new {@link Calendar} instance initialized to {@link #sunsetTimeMillis()}.
+     * Returns a new {@link LocalDateTime} instance initialized to {@link #sunsetTimeMillis()}.
      */
-    public Calendar sunset() {
-        final Calendar sunset = Calendar.getInstance();
-        sunset.setTimeInMillis(mSunsetTimeMillis);
-        return sunset;
+    public LocalDateTime sunset() {
+        final ZoneId zoneId = TimeZone.getDefault().toZoneId();
+        return LocalDateTime.ofInstant(Instant.ofEpochMilli(mSunsetTimeMillis), zoneId);
     }
 
     /**

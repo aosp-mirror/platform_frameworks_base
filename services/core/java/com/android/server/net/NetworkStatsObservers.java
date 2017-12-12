@@ -17,28 +17,26 @@
 package com.android.server.net;
 
 import static android.net.TrafficStats.MB_IN_BYTES;
+
 import static com.android.internal.util.Preconditions.checkArgument;
 
 import android.app.usage.NetworkStatsManager;
 import android.net.DataUsageRequest;
 import android.net.NetworkStats;
-import android.net.NetworkStats.NonMonotonicObserver;
 import android.net.NetworkStatsHistory;
 import android.net.NetworkTemplate;
-import android.os.Binder;
 import android.os.Bundle;
-import android.os.Looper;
-import android.os.Message;
-import android.os.Messenger;
 import android.os.Handler;
 import android.os.HandlerThread;
 import android.os.IBinder;
+import android.os.Looper;
+import android.os.Message;
+import android.os.Messenger;
 import android.os.Process;
 import android.os.RemoteException;
 import android.util.ArrayMap;
-import android.util.IntArray;
-import android.util.SparseArray;
 import android.util.Slog;
+import android.util.SparseArray;
 
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.net.VpnInfo;
@@ -410,7 +408,7 @@ class NetworkStatsObservers {
          */
         private long getTotalBytesForNetworkUid(NetworkTemplate template, int uid) {
             try {
-                NetworkStatsHistory history = mCollection.getHistory(template, uid,
+                NetworkStatsHistory history = mCollection.getHistory(template, null, uid,
                         NetworkStats.SET_ALL, NetworkStats.TAG_NONE,
                         NetworkStatsHistory.FIELD_ALL,
                         Long.MIN_VALUE /* start */, Long.MAX_VALUE /* end */,

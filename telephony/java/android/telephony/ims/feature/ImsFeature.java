@@ -19,6 +19,7 @@ package android.telephony.ims.feature;
 import android.annotation.IntDef;
 import android.content.Context;
 import android.content.Intent;
+import android.os.IInterface;
 import android.os.RemoteException;
 import android.telephony.SubscriptionManager;
 import android.util.Log;
@@ -91,16 +92,11 @@ public abstract class ImsFeature {
     public static final int STATE_INITIALIZING = 1;
     public static final int STATE_READY = 2;
 
-    private List<INotifyFeatureRemoved> mRemovedListeners = new ArrayList<>();
     private final Set<IImsFeatureStatusCallback> mStatusCallbacks = Collections.newSetFromMap(
             new WeakHashMap<IImsFeatureStatusCallback, Boolean>());
     private @ImsState int mState = STATE_NOT_AVAILABLE;
     private int mSlotId = SubscriptionManager.INVALID_SIM_SLOT_INDEX;
     private Context mContext;
-
-    public interface INotifyFeatureRemoved {
-        void onFeatureRemoved(int slotId);
-    }
 
     public void setContext(Context context) {
         mContext = context;
@@ -108,26 +104,6 @@ public abstract class ImsFeature {
 
     public void setSlotId(int slotId) {
         mSlotId = slotId;
-    }
-
-    public void addFeatureRemovedListener(INotifyFeatureRemoved listener) {
-        synchronized (mRemovedListeners) {
-            mRemovedListeners.add(listener);
-        }
-    }
-
-    public void removeFeatureRemovedListener(INotifyFeatureRemoved listener) {
-        synchronized (mRemovedListeners) {
-            mRemovedListeners.remove(listener);
-        }
-    }
-
-    // Not final for testing.
-    public void notifyFeatureRemoved(int slotId) {
-        synchronized (mRemovedListeners) {
-            mRemovedListeners.forEach(l -> l.onFeatureRemoved(slotId));
-            onFeatureRemoved();
-        }
     }
 
     public int getFeatureState() {
@@ -212,7 +188,17 @@ public abstract class ImsFeature {
     }
 
     /**
+     * Called when the feature is ready to use.
+     */
+    public abstract void onFeatureReady();
+
+    /**
      * Called when the feature is being removed and must be cleaned up.
      */
     public abstract void onFeatureRemoved();
+
+    /**
+     * @return Binder instance
+     */
+    public abstract IInterface getBinder();
 }

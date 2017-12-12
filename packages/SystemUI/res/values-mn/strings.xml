@@ -62,7 +62,7 @@
     <string name="usb_debugging_message" msgid="2220143855912376496">"Компьютерийн RSA түлхүүрийн хурууны хээ :\n<xliff:g id="FINGERPRINT">%1$s</xliff:g>"</string>
     <string name="usb_debugging_always" msgid="303335496705863070">"Энэ компьютерээс орохыг байнга зөвшөөрөх"</string>
     <string name="usb_debugging_secondary_user_title" msgid="6353808721761220421">"USB алдаа засалт хийх боломжгүй"</string>
-    <string name="usb_debugging_secondary_user_message" msgid="8572228137833020196">"Энэ төхөөрөмжид нэвтэрсэн хэрэглэгч USB алдаа засалтыг асаах боломжгүй байна. Энэ функцийг ашиглахын тулд хэрэглэгчийг админ хэрэглэгч рүү шилжүүлнэ үү."</string>
+    <string name="usb_debugging_secondary_user_message" msgid="6067122453571699801">"Энэ төхөөрөмжид нэвтэрсэн хэрэглэгч USB дебаг хийх онцлогийг асаах боломжгүй байна. Энэ онцлогийг ашиглахын тулд үндсэн хэрэглэгч рүү сэлгэнэ үү."</string>
     <string name="compat_mode_on" msgid="6623839244840638213">"Дэлгэц дүүргэх бол өсгөнө үү"</string>
     <string name="compat_mode_off" msgid="4434467572461327898">"Дэлгэц дүүргэх бол татна уу"</string>
     <string name="screenshot_saving_ticker" msgid="7403652894056693515">"Дэлгэцийн агшинг хадгалж байна…"</string>
@@ -351,10 +351,10 @@
     <string name="description_target_search" msgid="3091587249776033139">"Хайх"</string>
     <string name="description_direction_up" msgid="7169032478259485180">"<xliff:g id="TARGET_DESCRIPTION">%s</xliff:g>-г гулсуулах."</string>
     <string name="description_direction_left" msgid="7207478719805562165">"<xliff:g id="TARGET_DESCRIPTION">%s</xliff:g> хийх зүүнлүү гулсуулах."</string>
-    <string name="zen_priority_introduction" msgid="7577965386868311310">"Танд сэрүүлэг, сануулга, үйл ажиллагаа, таны сонгосон дуудлага илгээгчээс бусад дуу, чичиргээ саад болохгүй. Та хөгжим, видео, тоглоом зэрэг тоглуулахыг хүссэн бүх зүйлээ сонсох боломжтой хэвээр байна."</string>
-    <string name="zen_alarms_introduction" msgid="7034415210361973827">"Танд сэрүүлгээс бусад дуу, чичиргээ саад болохгүй. Та хөгжим, видео, тоглоом зэрэг тоглуулахыг хүссэн бүх зүйлээ сонсох боломжтой хэвээр байна."</string>
+    <string name="zen_priority_introduction" msgid="1149025108714420281">"Танд сэрүүлэг, сануулга, арга хэмжээ, таны сонгосон дуудлага илгээгчээс бусад дуу, чичиргээ саад болохгүй. Та хөгжим, видео, тоглоом зэрэг тоглуулахыг хүссэн бүх зүйлээ сонсох боломжтой хэвээр байна."</string>
+    <string name="zen_alarms_introduction" msgid="4934328096749380201">"Танд сэрүүлгээс бусад дуу, чичиргээ саад болохгүй. Та хөгжим, видео, тоглоом зэрэг тоглуулахыг хүссэн бүх зүйлээ сонсох боломжтой хэвээр байна."</string>
     <string name="zen_priority_customize_button" msgid="7948043278226955063">"Тохируулах"</string>
-    <string name="zen_silence_introduction_voice" msgid="2284540992298200729">"Энэ нь сэрүүлэг, хөгжим, видео, тоглоом зэргийг оруулаад зэрэг БҮХ дуу, чичиргээг блоклодог. Та дуудлага хийх боломжтой хэвээр байна."</string>
+    <string name="zen_silence_introduction_voice" msgid="3948778066295728085">"Энэ нь сэрүүлэг, хөгжим, видео, тоглоом зэрэг БҮХ дуу, чичиргээг блоклодог. Та дуудлага хийх боломжтой хэвээр байна."</string>
     <string name="zen_silence_introduction" msgid="3137882381093271568">"Энэ нь сэрүүлэг, хөгжим, видео, тоглоом зэргийг оруулаад зэрэг БҮХ дуу, чичиргээг блоклодог."</string>
     <string name="keyguard_more_overflow_text" msgid="9195222469041601365">"+<xliff:g id="NUMBER_OF_NOTIFICATIONS">%d</xliff:g>"</string>
     <string name="speed_bump_explanation" msgid="1288875699658819755">"Яаралтай биш мэдэгдлүүдийг доор"</string>
@@ -454,7 +454,7 @@
     <string name="monitoring_description_do_learn_more" msgid="1849514470437907421">"Дэлгэрэнгүй үзэх"</string>
     <string name="monitoring_description_do_body_vpn" msgid="8255218762488901796">"Таны имэйл, апп, вэб хуудас зэрэг сүлжээний үйл ажиллагааг хянах боломжтой <xliff:g id="VPN_APP">%1$s</xliff:g>-д холбогдсон байна."</string>
     <string name="monitoring_description_vpn_settings_separator" msgid="1933186756733474388">" "</string>
-    <string name="monitoring_description_vpn_settings" msgid="8869300202410505143">"VPN тохиргоог нээх"</string>
+    <string name="monitoring_description_vpn_settings" msgid="6434859242636063861">"VPN тохиргоог нээх"</string>
     <string name="monitoring_description_ca_cert_settings_separator" msgid="4987350385906393626">" "</string>
     <string name="monitoring_description_ca_cert_settings" msgid="5489969458872997092">"Итгэмжлэгдсэн мандат үнэмлэхийг нээх"</string>
     <string name="monitoring_description_network_logging" msgid="7223505523384076027">"Таны админ төхөөрөмжийн ачааллыг хянадаг сүлжээний логийг асаасан байна.\n\nДэлгэрэнгүй мэдээлэл авах бол админтайгаа холбогдоно уу."</string>
@@ -556,8 +556,8 @@
     <string name="notification_default_channel_desc" msgid="2506053815870808359">"Энэ апп-д мэдэгдлийн категори алга"</string>
     <string name="notification_unblockable_desc" msgid="3561016061737896906">"Энэ аппын мэдэгдлийг унтраах боломжгүй"</string>
     <plurals name="notification_num_channels_desc" formatted="false" msgid="5492793452274077663">
-      <item quantity="other">Энэ аппын <xliff:g id="NUMBER_1">%d</xliff:g> мэдэгдлийн категорийн 1</item>
-      <item quantity="one">Энэ аппын <xliff:g id="NUMBER_0">%d</xliff:g> мэдэгдлийн категорийн 1</item>
+      <item quantity="other">Энэ аппын <xliff:g id="NUMBER_1">%s</xliff:g> мэдэгдлийн категорийн 1</item>
+      <item quantity="one">Энэ аппын <xliff:g id="NUMBER_0">%s</xliff:g> мэдэгдлийн категорийн 1</item>
     </plurals>
     <string name="notification_channels_list_desc_2" msgid="6214732715833946441">"<xliff:g id="CHANNEL_NAME_1">%1$s</xliff:g>, <xliff:g id="CHANNEL_NAME_2">%2$s</xliff:g>"</string>
     <plurals name="notification_channels_list_desc_2_and_others" formatted="false" msgid="2747813553355336157">
@@ -585,8 +585,8 @@
       <item quantity="one">%d минут</item>
     </plurals>
     <string name="battery_panel_title" msgid="7944156115535366613">"Тэжээл ашиглалт"</string>
-    <string name="battery_detail_charging_summary" msgid="1279095653533044008">"Цэнэглэх үед тэжээл хэмнэгч ажиллахгүй"</string>
-    <string name="battery_detail_switch_title" msgid="6285872470260795421">"Тэжээл хэмнэгч"</string>
+    <string name="battery_detail_charging_summary" msgid="4055327085770378335">"Цэнэглэх үед тэжээл хэмнэгч ажиллахгүй"</string>
+    <string name="battery_detail_switch_title" msgid="8763441006881907058">"Тэжээл хэмнэгч"</string>
     <string name="battery_detail_switch_summary" msgid="9049111149407626804">"Гүйцэтгэл болон дэвсгэрийн датаг багасгадаг"</string>
     <string name="keyboard_key_button_template" msgid="6230056639734377300">"<xliff:g id="NAME">%1$s</xliff:g> товчлуур"</string>
     <string name="keyboard_key_home" msgid="2243500072071305073">"Нүүр хуудас"</string>
@@ -726,9 +726,9 @@
     <string name="pip_phone_minimize" msgid="1079119422589131792">"Багасгах"</string>
     <string name="pip_phone_close" msgid="8416647892889710330">"Хаах"</string>
     <string name="pip_phone_dismiss_hint" msgid="6351678169095923899">"Хаахын тулд доош чирэх"</string>
-    <string name="pip_menu_title" msgid="3328510504196964712">"Дэлгэцэн доторх дэлгэцийн цэс"</string>
+    <string name="pip_menu_title" msgid="4707292089961887657">"Цэс"</string>
     <string name="pip_notification_title" msgid="3204024940158161322">"<xliff:g id="NAME">%s</xliff:g> дэлгэцэн доторх дэлгэцэд байна"</string>
-    <string name="pip_notification_message" msgid="4171698133469539591">"Та <xliff:g id="NAME">%s</xliff:g>-г энэ онцлогийг ашиглахыг хүсэхгүй байвал тохиргоог нээгээд, үүнийг унтраана уу."</string>
+    <string name="pip_notification_message" msgid="5619512781514343311">"Та <xliff:g id="NAME">%s</xliff:g>-д энэ онцлогийг ашиглуулахыг хүсэхгүй байвал тохиргоог нээгээд, үүнийг унтраана уу."</string>
     <string name="pip_play" msgid="1417176722760265888">"Тоглуулах"</string>
     <string name="pip_pause" msgid="8881063404466476571">"Түр зогсоох"</string>
     <string name="pip_skip_to_next" msgid="1948440006726306284">"Дараагийн медиад очих"</string>
@@ -754,6 +754,7 @@
     <string name="tuner_menu" msgid="191640047241552081">"Цэс"</string>
     <string name="tuner_app" msgid="3507057938640108777">"<xliff:g id="APP">%1$s</xliff:g> апп"</string>
     <string name="notification_channel_alerts" msgid="4496839309318519037">"Сануулга"</string>
+    <string name="notification_channel_battery" msgid="5786118169182888462">"Батерей"</string>
     <string name="notification_channel_screenshot" msgid="6314080179230000938">"Дэлгэцийн зураг дарах"</string>
     <string name="notification_channel_general" msgid="4525309436693914482">"Энгийн зурвас"</string>
     <string name="notification_channel_storage" msgid="3077205683020695313">"Хадгалах сан"</string>
@@ -774,4 +775,5 @@
     <string name="running_foreground_services_title" msgid="381024150898615683">"Цаана ажиллаж буй апп"</string>
     <string name="running_foreground_services_msg" msgid="6326247670075574355">"Батерей, дата ашиглалтын талаар дэлгэрэнгүйг харахын тулд товшино уу"</string>
     <string name="data_usage_disable_mobile" msgid="5116269981510015864">"Мобайл датаг унтраах уу?"</string>
+    <string name="touch_filtered_warning" msgid="8671693809204767551">"Апп нь зөвшөөрлийн хүсэлтийг танихгүй байгаа тул Тохиргооноос таны хариултыг баталгаажуулах боломжгүй байна."</string>
 </resources>

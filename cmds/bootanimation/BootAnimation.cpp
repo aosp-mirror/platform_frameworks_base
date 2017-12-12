@@ -96,11 +96,9 @@ static constexpr size_t TEXT_POS_LEN_MAX = 16;
 
 // ---------------------------------------------------------------------------
 
-BootAnimation::BootAnimation(InitCallback initCallback,
-                             PlayPartCallback partCallback)
+BootAnimation::BootAnimation(sp<Callbacks> callbacks)
         : Thread(false), mClockEnabled(true), mTimeIsAccurate(false),
-        mTimeFormat12Hour(false), mTimeCheckThread(NULL),
-        mInitCallback(initCallback), mPlayPartCallback(partCallback) {
+        mTimeFormat12Hour(false), mTimeCheckThread(NULL), mCallbacks(callbacks) {
     mSession = new SurfaceComposerClient();
 
     std::string powerCtl = android::base::GetProperty("sys.powerctl", "");
@@ -357,6 +355,8 @@ bool BootAnimation::android()
     initTexture(&mAndroid[0], mAssets, "images/android-logo-mask.png");
     initTexture(&mAndroid[1], mAssets, "images/android-logo-shine.png");
 
+    mCallbacks->init({});
+
     // clear screen
     glShadeModel(GL_FLAT);
     glDisable(GL_DITHER);
@@ -424,6 +424,7 @@ void BootAnimation::checkExit() {
     int exitnow = atoi(value);
     if (exitnow) {
         requestExit();
+        mCallbacks->shutdown();
     }
 }
 
@@ -777,9 +778,7 @@ bool BootAnimation::preloadZip(Animation& animation)
         }
     }
 
-    if (mInitCallback != nullptr) {
-        mInitCallback(animation.parts);
-    }
+    mCallbacks->init(animation.parts);
 
     zip->endIteration(cookie);
 
@@ -887,9 +886,7 @@ bool BootAnimation::playAnimation(const Animation& animation)
             if(exitPending() && !part.playUntilComplete)
                 break;
 
-            if (mPlayPartCallback != nullptr) {
-                mPlayPartCallback(i, part, r);
-            }
+            mCallbacks->playPart(i, part, r);
 
             glClearColor(
                     part.backgroundColor[0],

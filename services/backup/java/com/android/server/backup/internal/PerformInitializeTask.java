@@ -20,6 +20,8 @@ import static com.android.server.backup.RefactoredBackupManagerService.TAG;
 
 import android.app.AlarmManager;
 import android.app.backup.BackupTransport;
+import android.app.backup.IBackupObserver;
+import android.os.RemoteException;
 import android.os.SystemClock;
 import android.util.EventLog;
 import android.util.Slog;
@@ -29,20 +31,43 @@ import com.android.server.EventLogTags;
 import com.android.server.backup.RefactoredBackupManagerService;
 
 import java.io.File;
-import java.util.HashSet;
 
 public class PerformInitializeTask implements Runnable {
 
     private RefactoredBackupManagerService backupManagerService;
-    HashSet<String> mQueue;
+    String[] mQueue;
+    IBackupObserver mObserver;
 
-    PerformInitializeTask(RefactoredBackupManagerService backupManagerService,
-            HashSet<String> transportNames) {
+    public PerformInitializeTask(RefactoredBackupManagerService backupManagerService,
+            String[] transportNames, IBackupObserver observer) {
         this.backupManagerService = backupManagerService;
         mQueue = transportNames;
+        mObserver = observer;
+    }
+
+    private void notifyResult(String target, int status) {
+        try {
+            if (mObserver != null) {
+                mObserver.onResult(target, status);
+            }
+        } catch (RemoteException ignored) {
+            mObserver = null;       // don't try again
+        }
+    }
+
+    private void notifyFinished(int status) {
+        try {
+            if (mObserver != null) {
+                mObserver.backupFinished(status);
+            }
+        } catch (RemoteException ignored) {
+            mObserver = null;
+        }
     }
 
     public void run() {
+        // mWakelock is *acquired* when execution begins here
+        int result = BackupTransport.TRANSPORT_OK;
         try {
             for (String transportName : mQueue) {
                 IBackupTransport transport =
@@ -74,6 +99,7 @@ public class PerformInitializeTask implements Runnable {
                     synchronized (backupManagerService.getQueueLock()) {
                         backupManagerService.recordInitPendingLocked(false, transportName);
                     }
+                    notifyResult(transportName, BackupTransport.TRANSPORT_OK);
                 } else {
                     // If this didn't work, requeue this one and try again
                     // after a suitable interval
@@ -82,6 +108,9 @@ public class PerformInitializeTask implements Runnable {
                     synchronized (backupManagerService.getQueueLock()) {
                         backupManagerService.recordInitPendingLocked(true, transportName);
                     }
+                    notifyResult(transportName, status);
+                    result = status;
+
                     // do this via another alarm to make sure of the wakelock states
                     long delay = transport.requestBackupTime();
                     Slog.w(TAG, "Init failed on " + transportName + " resched in " + delay);
@@ -92,8 +121,10 @@ public class PerformInitializeTask implements Runnable {
             }
         } catch (Exception e) {
             Slog.e(TAG, "Unexpected error performing init", e);
+            result = BackupTransport.TRANSPORT_ERROR;
         } finally {
             // Done; release the wakelock
+            notifyFinished(result);
             backupManagerService.getWakelock().release();
         }
     }

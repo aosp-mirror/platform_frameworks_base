@@ -64,7 +64,7 @@
     <string name="usb_debugging_message" msgid="2220143855912376496">"Отпечатъкът на RSA ключа на компютъра е:\n<xliff:g id="FINGERPRINT">%1$s</xliff:g>"</string>
     <string name="usb_debugging_always" msgid="303335496705863070">"Винаги да се разрешава от този компютър"</string>
     <string name="usb_debugging_secondary_user_title" msgid="6353808721761220421">"Отстраняването на грешки през USB не е разрешено"</string>
-    <string name="usb_debugging_secondary_user_message" msgid="8572228137833020196">"Потребителят, който понастоящем е влязъл в това устройство, не може да включи функцията за отстраняване на грешки през USB. За да я използвате, моля, превключете към администратор."</string>
+    <string name="usb_debugging_secondary_user_message" msgid="6067122453571699801">"Потребителят, който понастоящем е влязъл в това устройство, не може да включи функцията за отстраняване на грешки през USB. За да я използвате, превключете към основния потребител."</string>
     <string name="compat_mode_on" msgid="6623839244840638213">"Мащаб – запълва екрана"</string>
     <string name="compat_mode_off" msgid="4434467572461327898">"Разпъване – запълва екрана"</string>
     <string name="screenshot_saving_ticker" msgid="7403652894056693515">"Екранната снимка се запазва..."</string>
@@ -353,10 +353,10 @@
     <string name="description_target_search" msgid="3091587249776033139">"Търсене"</string>
     <string name="description_direction_up" msgid="7169032478259485180">"Плъзнете нагоре за <xliff:g id="TARGET_DESCRIPTION">%s</xliff:g>."</string>
     <string name="description_direction_left" msgid="7207478719805562165">"Плъзнете наляво за <xliff:g id="TARGET_DESCRIPTION">%s</xliff:g>."</string>
-    <string name="zen_priority_introduction" msgid="7577965386868311310">"Няма да бъдете обезпокоявани от звуци и вибрирания освен от будилници, напомняния, събития и обаждания от посочени от вас контакти. Пак ще чувате всичко, което изберете да се пусне, включително музика, видеоклипове и игри."</string>
-    <string name="zen_alarms_introduction" msgid="7034415210361973827">"Няма да бъдете обезпокоявани от звуци и вибрирания освен от будилници. Пак ще чувате всичко, което изберете да се пусне, включително музика, видеоклипове и игри."</string>
+    <string name="zen_priority_introduction" msgid="1149025108714420281">"Няма да бъдете обезпокоявани от звуци и вибрирания освен от будилници, напомняния, събития и обаждания от посочени от вас контакти. Пак ще чувате всичко, което изберете да се пусне, включително музика, видеоклипове и игри."</string>
+    <string name="zen_alarms_introduction" msgid="4934328096749380201">"Няма да бъдете обезпокоявани от звуци и вибрирания освен от будилници. Ще чувате обаче всичко, което изберете пуснете, включително музика, видеоклипове и игри."</string>
     <string name="zen_priority_customize_button" msgid="7948043278226955063">"Персонализиране"</string>
-    <string name="zen_silence_introduction_voice" msgid="2284540992298200729">"Този режим блокира ВСИЧКИ звуци и вибрирания, включително от будилници, музика, видеоклипове и игри. Пак ще можете да извършвате телефонни обаждания."</string>
+    <string name="zen_silence_introduction_voice" msgid="3948778066295728085">"Този режим блокира ВСИЧКИ звуци и вибрирания, включително от будилници, музика, видеоклипове и игри. Пак ще можете да извършвате телефонни обаждания."</string>
     <string name="zen_silence_introduction" msgid="3137882381093271568">"Този режим блокира ВСИЧКИ звуци и вибрирания, включително от будилници, музика, видеоклипове и игри."</string>
     <string name="keyguard_more_overflow_text" msgid="9195222469041601365">"+<xliff:g id="NUMBER_OF_NOTIFICATIONS">%d</xliff:g>"</string>
     <string name="speed_bump_explanation" msgid="1288875699658819755">"Ппоказване на по-малко спешните известия по-долу"</string>
@@ -456,7 +456,7 @@
     <string name="monitoring_description_do_learn_more" msgid="1849514470437907421">"Научете повече"</string>
     <string name="monitoring_description_do_body_vpn" msgid="8255218762488901796">"Установена е връзка с приложението <xliff:g id="VPN_APP">%1$s</xliff:g>, което може да наблюдава активността ви в мрежата, вкл. имейли, приложения и уебсайтове."</string>
     <string name="monitoring_description_vpn_settings_separator" msgid="1933186756733474388">" "</string>
-    <string name="monitoring_description_vpn_settings" msgid="8869300202410505143">"Отваряне на настройките за VPN"</string>
+    <string name="monitoring_description_vpn_settings" msgid="6434859242636063861">"Отваряне на настройките за VPN"</string>
     <string name="monitoring_description_ca_cert_settings_separator" msgid="4987350385906393626">" "</string>
     <string name="monitoring_description_ca_cert_settings" msgid="5489969458872997092">"Отваряне на надеждните идентификационни данни"</string>
     <string name="monitoring_description_network_logging" msgid="7223505523384076027">"Администраторът ви е включил функцията за регистриране на мрежовата активност, която следи трафика на устройството ви.\n\nЗа повече информация се свържете с администратора си."</string>
@@ -556,8 +556,8 @@
     <string name="notification_default_channel_desc" msgid="2506053815870808359">"За това приложение няма категории на известията"</string>
     <string name="notification_unblockable_desc" msgid="3561016061737896906">"Известията от това приложение не могат да бъдат изключени"</string>
     <plurals name="notification_num_channels_desc" formatted="false" msgid="5492793452274077663">
-      <item quantity="other">1 от <xliff:g id="NUMBER_1">%d</xliff:g> категории известия от това приложение</item>
-      <item quantity="one">1 от <xliff:g id="NUMBER_0">%d</xliff:g> категория известия от това приложение</item>
+      <item quantity="other">1 от <xliff:g id="NUMBER_1">%s</xliff:g> категории известия от това приложение</item>
+      <item quantity="one">1 от <xliff:g id="NUMBER_0">%s</xliff:g> категория известия от това приложение</item>
     </plurals>
     <string name="notification_channels_list_desc_2" msgid="6214732715833946441">"„<xliff:g id="CHANNEL_NAME_1">%1$s</xliff:g>“, „<xliff:g id="CHANNEL_NAME_2">%2$s</xliff:g>“"</string>
     <plurals name="notification_channels_list_desc_2_and_others" formatted="false" msgid="2747813553355336157">
@@ -585,8 +585,8 @@
       <item quantity="one">%d минута</item>
     </plurals>
     <string name="battery_panel_title" msgid="7944156115535366613">"Ползв. на батерията"</string>
-    <string name="battery_detail_charging_summary" msgid="1279095653533044008">"Режимът за запазване на батерията не е налице при зареждане"</string>
-    <string name="battery_detail_switch_title" msgid="6285872470260795421">"Режим за запазване на батерията"</string>
+    <string name="battery_detail_charging_summary" msgid="4055327085770378335">"Режимът за запазване на батерията не работи при зареждане"</string>
+    <string name="battery_detail_switch_title" msgid="8763441006881907058">"Режим за запазване на батерията"</string>
     <string name="battery_detail_switch_summary" msgid="9049111149407626804">"Намалява ефективността и данните на заден план"</string>
     <string name="keyboard_key_button_template" msgid="6230056639734377300">"Бутон „<xliff:g id="NAME">%1$s</xliff:g>“"</string>
     <string name="keyboard_key_home" msgid="2243500072071305073">"Начало"</string>
@@ -726,9 +726,9 @@
     <string name="pip_phone_minimize" msgid="1079119422589131792">"Намаляване"</string>
     <string name="pip_phone_close" msgid="8416647892889710330">"Затваряне"</string>
     <string name="pip_phone_dismiss_hint" msgid="6351678169095923899">"Преместете надолу с плъзгане, за да отхвърлите"</string>
-    <string name="pip_menu_title" msgid="3328510504196964712">"Меню за режима „Картина в картината“"</string>
+    <string name="pip_menu_title" msgid="4707292089961887657">"Меню"</string>
     <string name="pip_notification_title" msgid="3204024940158161322">"<xliff:g id="NAME">%s</xliff:g> е в режима „Картина в картината“"</string>
-    <string name="pip_notification_message" msgid="4171698133469539591">"Ако не искате <xliff:g id="NAME">%s</xliff:g> да използва тази функция, докоснете, за да отворите настройките, и я изключете."</string>
+    <string name="pip_notification_message" msgid="5619512781514343311">"Ако не искате <xliff:g id="NAME">%s</xliff:g> да използва тази функция, докоснете, за да отворите настройките, и я изключете."</string>
     <string name="pip_play" msgid="1417176722760265888">"Пускане"</string>
     <string name="pip_pause" msgid="8881063404466476571">"Поставяне на пауза"</string>
     <string name="pip_skip_to_next" msgid="1948440006726306284">"Към следващия елемент"</string>
@@ -754,6 +754,7 @@
     <string name="tuner_menu" msgid="191640047241552081">"Меню"</string>
     <string name="tuner_app" msgid="3507057938640108777">"Приложение <xliff:g id="APP">%1$s</xliff:g>"</string>
     <string name="notification_channel_alerts" msgid="4496839309318519037">"Сигнали"</string>
+    <string name="notification_channel_battery" msgid="5786118169182888462">"Батерия"</string>
     <string name="notification_channel_screenshot" msgid="6314080179230000938">"Екранни снимки"</string>
     <string name="notification_channel_general" msgid="4525309436693914482">"Общи съобщения"</string>
     <string name="notification_channel_storage" msgid="3077205683020695313">"Хранилище"</string>
@@ -774,4 +775,5 @@
     <string name="running_foreground_services_title" msgid="381024150898615683">"Приложения, работещи на заден план"</string>
     <string name="running_foreground_services_msg" msgid="6326247670075574355">"Докоснете за информация относно използването на батерията и преноса на данни"</string>
     <string name="data_usage_disable_mobile" msgid="5116269981510015864">"Да се изключат ли мобилните данни?"</string>
+    <string name="touch_filtered_warning" msgid="8671693809204767551">"От Настройки не може да се получи потвърждение за отговора ви, защото заявката за разрешение се прикрива от приложение."</string>
 </resources>

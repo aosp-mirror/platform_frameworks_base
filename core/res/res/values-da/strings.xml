@@ -21,24 +21,8 @@
 <resources xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
     <string name="byteShort" msgid="8340973892742019101">"b"</string>
-    <string name="kilobyteShort" msgid="7542884022844556968">"kB"</string>
-    <string name="megabyteShort" msgid="6355851576770428922">"Mb"</string>
-    <string name="gigabyteShort" msgid="3259882455212193214">"GB"</string>
-    <string name="terabyteShort" msgid="231613018159186962">"Tb"</string>
     <string name="petabyteShort" msgid="5637816680144990219">"Pb"</string>
     <string name="fileSizeSuffix" msgid="8897567456150907538">"<xliff:g id="NUMBER">%1$s</xliff:g> <xliff:g id="UNIT">%2$s</xliff:g>"</string>
-    <string name="durationDays" msgid="6652371460511178259">"<xliff:g id="DAYS">%1$d</xliff:g> dage"</string>
-    <string name="durationDayHours" msgid="2713107458736744435">"<xliff:g id="DAYS">%1$d</xliff:g> dag <xliff:g id="HOURS">%2$d</xliff:g> t."</string>
-    <string name="durationDayHour" msgid="7293789639090958917">"<xliff:g id="DAYS">%1$d</xliff:g> dag <xliff:g id="HOURS">%2$d</xliff:g> t."</string>
-    <string name="durationHours" msgid="4266858287167358988">"<xliff:g id="HOURS">%1$d</xliff:g> timer"</string>
-    <string name="durationHourMinutes" msgid="9029176248692041549">"<xliff:g id="HOURS">%1$d</xliff:g> t. <xliff:g id="MINUTES">%2$d</xliff:g> min."</string>
-    <string name="durationHourMinute" msgid="2741677355177402539">"<xliff:g id="HOURS">%1$d</xliff:g> t. <xliff:g id="MINUTES">%2$d</xliff:g> min."</string>
-    <string name="durationMinutes" msgid="3134226679883579347">"<xliff:g id="MINUTES">%1$d</xliff:g> min."</string>
-    <string name="durationMinute" msgid="7155301744174623818">"<xliff:g id="MINUTES">%1$d</xliff:g> min."</string>
-    <string name="durationMinuteSeconds" msgid="1424656185379003751">"<xliff:g id="MINUTES">%1$d</xliff:g> min. <xliff:g id="SECONDS">%2$d</xliff:g> s"</string>
-    <string name="durationMinuteSecond" msgid="3989228718067466680">"<xliff:g id="MINUTES">%1$d</xliff:g> min. <xliff:g id="SECONDS">%2$d</xliff:g> s"</string>
-    <string name="durationSeconds" msgid="8050088505238241405">"<xliff:g id="SECONDS">%1$d</xliff:g> sek."</string>
-    <string name="durationSecond" msgid="985669622276420331">"<xliff:g id="SECONDS">%1$d</xliff:g> sek."</string>
     <string name="untitled" msgid="4638956954852782576">"&lt;Uden titel&gt;"</string>
     <string name="emptyPhoneNumber" msgid="7694063042079676517">"(Intet telefonnummer)"</string>
     <string name="unknownName" msgid="6867811765370350269">"Ukendt"</string>
@@ -95,11 +79,13 @@
     <string name="RestrictedOnAllVoiceTitle" msgid="158800171499150681">"Ingen tale- og nødtjenester"</string>
     <string name="RestrictedStateContent" msgid="4278821484643362350">"Tilbydes i øjeblikket ikke af mobilnetværket på din placering"</string>
     <string name="NetworkPreferenceSwitchTitle" msgid="4008877505368566980">"Der er ingen forbindelse til netværket"</string>
-    <string name="NetworkPreferenceSwitchSummary" msgid="4164230263214915351">"Hvis du vil forbedre signalet, kan du prøve at ændre den valgte netværkstype i System &gt; Netværk og internet &gt; Mobilnetværk &gt; Foretrukken netværkstype."</string>
+    <string name="NetworkPreferenceSwitchSummary" msgid="1203771446683319957">"Hvis du vil forbedre signalet, kan du prøve at ændre den valgte netværkstype i Indstillinger &gt; Netværk og internet &gt; Mobilnetværk &gt; Foretrukken netværkstype."</string>
+    <string name="EmergencyCallWarningTitle" msgid="4790413876281901612">"Wi‑Fi-opkald er aktiveret"</string>
+    <string name="EmergencyCallWarningSummary" msgid="8973232888021643293">"Nødopkald kræver adgang til et mobilnetværk."</string>
     <string name="notification_channel_network_alert" msgid="4427736684338074967">"Underretninger"</string>
     <string name="notification_channel_call_forward" msgid="2419697808481833249">"Viderestilling af opkald"</string>
     <string name="notification_channel_emergency_callback" msgid="6686166232265733921">"Nødtilbagekaldstilstand"</string>
-    <string name="notification_channel_mobile_data_alert" msgid="6130875231721406231">"Underretninger om mobildata"</string>
+    <string name="notification_channel_mobile_data_status" msgid="4575131690860945836">"Status for mobildata"</string>
     <string name="notification_channel_sms" msgid="3441746047346135073">"Sms-beskeder"</string>
     <string name="notification_channel_voice_mail" msgid="3954099424160511919">"Talebeskeder"</string>
     <string name="notification_channel_wfc" msgid="2130802501654254801">"Wi-Fi-opkald"</string>
@@ -1095,7 +1081,7 @@
     <string name="ringtone_silent" msgid="7937634392408977062">"Ingen"</string>
     <string name="ringtone_picker_title" msgid="3515143939175119094">"Ringetoner"</string>
     <string name="ringtone_picker_title_alarm" msgid="6473325356070549702">"Alarmlyde"</string>
-    <string name="ringtone_picker_title_notification" msgid="4837740874822788802">"Meddelelseslyde"</string>
+    <string name="ringtone_picker_title_notification" msgid="4837740874822788802">"Underretningslyde"</string>
     <string name="ringtone_unknown" msgid="3914515995813061520">"Ukendt"</string>
     <plurals name="wifi_available" formatted="false" msgid="7900333017752027322">
       <item quantity="one">Tilgængelige Wi-Fi-netværk</item>
@@ -1642,7 +1628,7 @@
       <item quantity="other">I %1$d min. (indtil kl. <xliff:g id="FORMATTEDTIME_1">%2$s</xliff:g>)</item>
     </plurals>
     <plurals name="zen_mode_duration_hours_summary" formatted="false" msgid="8152974162096743862">
-      <item quantity="one">I %1$d timer (indtil <xliff:g id="FORMATTEDTIME_1">%2$s</xliff:g>)</item>
+      <item quantity="one">I %1$d time (indtil <xliff:g id="FORMATTEDTIME_1">%2$s</xliff:g>)</item>
       <item quantity="other">I %1$d timer (indtil <xliff:g id="FORMATTEDTIME_1">%2$s</xliff:g>)</item>
     </plurals>
     <plurals name="zen_mode_duration_hours_summary_short" formatted="false" msgid="4787552595253082371">
@@ -1658,7 +1644,7 @@
       <item quantity="other">I %d min.</item>
     </plurals>
     <plurals name="zen_mode_duration_hours" formatted="false" msgid="3938821308277433854">
-      <item quantity="one">I %d timer</item>
+      <item quantity="one">I %d time</item>
       <item quantity="other">I %d timer</item>
     </plurals>
     <plurals name="zen_mode_duration_hours_short" formatted="false" msgid="6748277774662434217">
@@ -1780,4 +1766,5 @@
     <string name="mmcc_imsi_unknown_in_hlr" msgid="6321202257374418726">"SIM-kortet er ikke aktiveret"</string>
     <string name="mmcc_illegal_ms" msgid="2769452751852211112">"SIM-kortet har ikke adgangstilladelse"</string>
     <string name="mmcc_illegal_me" msgid="4438696681169345015">"Telefonen har ikke adgangstilladelse"</string>
+    <string name="popup_window_default_title" msgid="4874318849712115433">"Pop op-vindue"</string>
 </resources>

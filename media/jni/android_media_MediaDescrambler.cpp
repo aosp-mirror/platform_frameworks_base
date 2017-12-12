@@ -20,16 +20,19 @@
 
 #include "android_media_MediaDescrambler.h"
 #include "android_runtime/AndroidRuntime.h"
-#include "android_util_Binder.h"
+#include "android_os_HwRemoteBinder.h"
 #include "JNIHelp.h"
 
-#include <android/media/IDescrambler.h>
+#include <android/hardware/cas/native/1.0/BpHwDescrambler.h>
+#include <android/hardware/cas/native/1.0/BnHwDescrambler.h>
 #include <binder/MemoryDealer.h>
+#include <hidl/HidlSupport.h>
 #include <media/stagefright/foundation/ADebug.h>
 #include <nativehelper/ScopedLocalRef.h>
 
 namespace android {
-using media::MediaDescrambler::DescrambleInfo;
+
+using hardware::hidl_handle;
 
 struct fields_t {
     jfieldID context;
@@ -94,10 +97,9 @@ static status_t getBufferAndSize(
 }
 
 JDescrambler::JDescrambler(JNIEnv *env, jobject descramblerBinderObj) {
-    sp<IDescrambler> cas;
-    if (descramblerBinderObj != NULL) {
-        sp<IBinder> binder = ibinderForJavaObject(env, descramblerBinderObj);
-        mDescrambler = interface_cast<IDescrambler>(binder);
+    mDescrambler = GetDescrambler(env, descramblerBinderObj);
+    if (mDescrambler == NULL) {
+        jniThrowException(env, "java/lang/NullPointerException", NULL);
     }
 }
 
@@ -108,9 +110,23 @@ JDescrambler::~JDescrambler() {
     mDealer.clear();
 }
 
-void JDescrambler::ensureBufferCapacity(size_t neededSize) {
+// static
+sp<IDescrambler> JDescrambler::GetDescrambler(JNIEnv *env, jobject obj) {
+    if (obj != NULL) {
+        sp<hardware::IBinder> hwBinder =
+                JHwRemoteBinder::GetNativeContext(env, obj)->getBinder();
+
+        if (hwBinder != NULL) {
+            return hardware::fromBinder<
+                    IDescrambler, BpHwDescrambler, BnHwDescrambler>(hwBinder);
+        }
+    }
+    return NULL;
+}
+
+bool JDescrambler::ensureBufferCapacity(size_t neededSize) {
     if (mMem != NULL && mMem->size() >= neededSize) {
-        return;
+        return true;
     }
 
     ALOGV("ensureBufferCapacity: current size %zu, new size %zu",
@@ -122,49 +138,84 @@ void JDescrambler::ensureBufferCapacity(size_t neededSize) {
     neededSize = (neededSize + 65535) & ~65535;
     mDealer = new MemoryDealer(neededSize, "JDescrambler");
     mMem = mDealer->allocate(neededSize);
+
+    ssize_t offset;
+    size_t size;
+    sp<IMemoryHeap> heap = mMem->getMemory(&offset, &size);
+    if (heap == NULL) {
+        return false;
+    }
+
+    native_handle_t* nativeHandle = native_handle_create(1, 0);
+    if (!nativeHandle) {
+        ALOGE("ensureBufferCapacity: failed to create native handle");
+        return false;
+    }
+    nativeHandle->data[0] = heap->getHeapID();
+    mDescramblerSrcBuffer.heapBase = hidl_memory("ashmem",
+            hidl_handle(nativeHandle), heap->getSize());
+    mDescramblerSrcBuffer.offset = (uint64_t) offset;
+    mDescramblerSrcBuffer.size = (uint64_t) size;
+    return true;
 }
 
-Status JDescrambler::descramble(
+status_t JDescrambler::descramble(
         jbyte key,
-        size_t numSubSamples,
         ssize_t totalLength,
-        DescramblerPlugin::SubSample *subSamples,
+        const hidl_vec<SubSample>& subSamples,
         const void *srcPtr,
         jint srcOffset,
         void *dstPtr,
         jint dstOffset,
-        ssize_t *result) {
+        Status *status,
+        uint32_t *bytesWritten,
+        hidl_string *detailedError) {
     // TODO: IDescrambler::descramble() is re-entrant, however because we
     // only have 1 shared mem buffer, we can only do 1 descramble at a time.
     // Concurrency might be improved by allowing on-demand allocation of up
     // to 2 shared mem buffers.
     Mutex::Autolock autolock(mSharedMemLock);
 
-    ensureBufferCapacity(totalLength);
+    if (!ensureBufferCapacity(totalLength)) {
+        return NO_MEMORY;
+    }
 
     memcpy(mMem->pointer(),
             (const void*)((const uint8_t*)srcPtr + srcOffset), totalLength);
 
-    DescrambleInfo info;
-    info.dstType = DescrambleInfo::kDestinationTypeVmPointer;
-    info.numSubSamples = numSubSamples;
-    info.scramblingControl = (DescramblerPlugin::ScramblingControl) key;
-    info.subSamples = subSamples;
-    info.srcMem = mMem;
-    info.srcOffset = 0;
-    info.dstPtr = NULL;
-    info.dstOffset = 0;
+    DestinationBuffer dstBuffer;
+    dstBuffer.type = BufferType::SHARED_MEMORY;
+    dstBuffer.nonsecureMemory = mDescramblerSrcBuffer;
 
-    int32_t descrambleResult;
-    Status status = mDescrambler->descramble(info, &descrambleResult);
+    auto err = mDescrambler->descramble(
+            (ScramblingControl) key,
+            subSamples,
+            mDescramblerSrcBuffer,
+            0,
+            dstBuffer,
+            0,
+            [&status, &bytesWritten, &detailedError] (
+                    Status _status, uint32_t _bytesWritten,
+                    const hidl_string& _detailedError) {
+                *status = _status;
+                *bytesWritten = _bytesWritten;
+                *detailedError = _detailedError;
+            });
 
-    if (status.isOk()) {
-        *result = (descrambleResult <= totalLength) ? descrambleResult : -1;
-        if (*result > 0) {
-            memcpy((void*)((uint8_t*)dstPtr + dstOffset), mMem->pointer(), *result);
+    if (!err.isOk()) {
+        return FAILED_TRANSACTION;
+    }
+
+    if (*status == Status::OK) {
+        if (*bytesWritten > 0 && (ssize_t) *bytesWritten <= totalLength) {
+            memcpy((void*)((uint8_t*)dstPtr + dstOffset), mMem->pointer(), *bytesWritten);
+        } else {
+            // status seems OK but bytesWritten is invalid, we really
+            // have no idea what is wrong.
+            *status = Status::ERROR_CAS_UNKNOWN;
         }
     }
-    return status;
+    return OK;
 }
 
 }  // namespace android
@@ -191,10 +242,10 @@ static void android_media_MediaDescrambler_native_setup(
 
 static ssize_t getSubSampleInfo(JNIEnv *env, jint numSubSamples,
         jintArray numBytesOfClearDataObj, jintArray numBytesOfEncryptedDataObj,
-        DescramblerPlugin::SubSample **outSubSamples) {
+        hidl_vec<SubSample> *outSubSamples) {
 
-    if (numSubSamples <= 0 || numSubSamples >=
-            (signed)(INT32_MAX / sizeof(DescramblerPlugin::SubSample)) ) {
+    if (numSubSamples <= 0 ||
+            numSubSamples >= (signed)(INT32_MAX / sizeof(SubSample))) {
         // subSamples array may silently overflow if number of samples are
         // too large.  Use INT32_MAX as maximum allocation size may be less
         // than SIZE_MAX on some platforms.
@@ -215,24 +266,23 @@ static ssize_t getSubSampleInfo(JNIEnv *env, jint numSubSamples,
             ? NULL
             : env->GetIntArrayElements(numBytesOfEncryptedDataObj, &isCopy);
 
-    DescramblerPlugin::SubSample *subSamples =
-            new(std::nothrow) DescramblerPlugin::SubSample[numSubSamples];
-
+    outSubSamples->resize(numSubSamples);
+    SubSample *subSamples = outSubSamples->data();
     if (subSamples == NULL) {
         ALOGE("Failed to allocate SubSample array!");
         return -1;
     }
 
     for (jint i = 0; i < numSubSamples; ++i) {
-        subSamples[i].mNumBytesOfClearData =
+        subSamples[i].numBytesOfClearData =
             (numBytesOfClearData == NULL) ? 0 : numBytesOfClearData[i];
 
-        subSamples[i].mNumBytesOfEncryptedData =
+        subSamples[i].numBytesOfEncryptedData =
             (numBytesOfEncryptedData == NULL)
                 ? 0 : numBytesOfEncryptedData[i];
 
-        totalSize += subSamples[i].mNumBytesOfClearData +
-                subSamples[i].mNumBytesOfEncryptedData;
+        totalSize += subSamples[i].numBytesOfClearData +
+                subSamples[i].numBytesOfEncryptedData;
     }
 
     if (numBytesOfEncryptedData != NULL) {
@@ -248,11 +298,8 @@ static ssize_t getSubSampleInfo(JNIEnv *env, jint numSubSamples,
     }
 
     if (totalSize < 0) {
-        delete[] subSamples;
         return -1;
     }
-
-    *outSubSamples = subSamples;
 
     return totalSize;
 }
@@ -280,12 +327,6 @@ static jthrowable createServiceSpecificException(
             clazz.get(), ctor, serviceSpecificError, msgObj.get());
 }
 
-static void throwServiceSpecificException(
-        JNIEnv *env, int serviceSpecificError, const char *msg) {
-    jthrowable exception = createServiceSpecificException(env, serviceSpecificError, msg);
-    env->Throw(exception);
-}
-
 static jint android_media_MediaDescrambler_native_descramble(
         JNIEnv *env, jobject thiz, jbyte key, jint numSubSamples,
         jintArray numBytesOfClearDataObj, jintArray numBytesOfEncryptedDataObj,
@@ -293,11 +334,12 @@ static jint android_media_MediaDescrambler_native_descramble(
         jobject dstBuf, jint dstOffset, jint dstLimit) {
     sp<JDescrambler> descrambler = getDescrambler(env, thiz);
     if (descrambler == NULL) {
-        jniThrowException(env, "java/lang/IllegalStateException", NULL);
+        jniThrowException(env, "java/lang/IllegalStateException",
+                "Invalid descrambler object!");
         return -1;
     }
 
-    DescramblerPlugin::SubSample *subSamples = NULL;
+    hidl_vec<SubSample> subSamples;
     ssize_t totalLength = getSubSampleInfo(
             env, numSubSamples, numBytesOfClearDataObj,
             numBytesOfEncryptedDataObj, &subSamples);
@@ -307,7 +349,6 @@ static jint android_media_MediaDescrambler_native_descramble(
         return -1;
     }
 
-    ssize_t result = -1;
     void *srcPtr = NULL, *dstPtr = NULL;
     jbyteArray srcArray = NULL, dstArray = NULL;
     status_t err = getBufferAndSize(
@@ -329,13 +370,15 @@ static jint android_media_MediaDescrambler_native_descramble(
     }
 
     Status status;
-    if (err == OK) {
-        status = descrambler->descramble(
-                key, numSubSamples, totalLength, subSamples,
-                srcPtr, srcOffset, dstPtr, dstOffset, &result);
-    }
+    uint32_t bytesWritten;
+    hidl_string detailedError;
 
-    delete[] subSamples;
+    err = descrambler->descramble(
+            key, totalLength, subSamples,
+            srcPtr, srcOffset, dstPtr, dstOffset,
+            &status, &bytesWritten, &detailedError);
+
+    // Release byte array before throwing
     if (srcArray != NULL) {
         env->ReleaseByteArrayElements(srcArray, (jbyte *)srcPtr, 0);
     }
@@ -343,51 +386,17 @@ static jint android_media_MediaDescrambler_native_descramble(
         env->ReleaseByteArrayElements(dstArray, (jbyte *)dstPtr, 0);
     }
 
-    if (!status.isOk()) {
-        switch (status.exceptionCode()) {
-            case Status::EX_SECURITY:
-                jniThrowException(env, "java/lang/SecurityException",
-                        status.exceptionMessage());
-                break;
-            case Status::EX_BAD_PARCELABLE:
-                jniThrowException(env, "java/lang/BadParcelableException",
-                        status.exceptionMessage());
-                break;
-            case Status::EX_ILLEGAL_ARGUMENT:
-                jniThrowException(env, "java/lang/IllegalArgumentException",
-                        status.exceptionMessage());
-                break;
-            case Status::EX_NULL_POINTER:
-                jniThrowException(env, "java/lang/NullPointerException",
-                        status.exceptionMessage());
-                break;
-            case Status::EX_ILLEGAL_STATE:
-                jniThrowException(env, "java/lang/IllegalStateException",
-                        status.exceptionMessage());
-                break;
-            case Status::EX_NETWORK_MAIN_THREAD:
-                jniThrowException(env, "java/lang/NetworkOnMainThreadException",
-                        status.exceptionMessage());
-                break;
-            case Status::EX_UNSUPPORTED_OPERATION:
-                jniThrowException(env, "java/lang/UnsupportedOperationException",
-                        status.exceptionMessage());
-                break;
-            case Status::EX_SERVICE_SPECIFIC:
-                throwServiceSpecificException(env, status.serviceSpecificErrorCode(),
-                        status.exceptionMessage());
-                break;
-            default:
-            {
-                String8 msg;
-                msg.appendFormat("Unknown exception code: %d, msg: %s",
-                        status.exceptionCode(), status.exceptionMessage().string());
-                jniThrowException(env, "java/lang/RuntimeException", msg.string());
-                break;
-            }
-        }
+    if (err == NO_MEMORY) {
+        jniThrowException(env, "java/lang/OutOfMemoryError", NULL);
+    } else if (err == FAILED_TRANSACTION) {
+        jniThrowException(env, "android/os/RemoteException", NULL);
+    } else if (status != Status::OK) {
+        // Throw ServiceSpecific with cas error code and detailed msg,
+        // which will be re-thrown as MediaCasStateException.
+        env->Throw(createServiceSpecificException(
+                env, (int) status, detailedError.c_str()));
     }
-    return result;
+    return bytesWritten;
 }
 
 static const JNINativeMethod gMethods[] = {
@@ -395,7 +404,7 @@ static const JNINativeMethod gMethods[] = {
             (void *)android_media_MediaDescrambler_native_release },
     { "native_init", "()V",
             (void *)android_media_MediaDescrambler_native_init },
-    { "native_setup", "(Landroid/os/IBinder;)V",
+    { "native_setup", "(Landroid/os/IHwBinder;)V",
             (void *)android_media_MediaDescrambler_native_setup },
     { "native_descramble", "(BI[I[ILjava/nio/ByteBuffer;IILjava/nio/ByteBuffer;II)I",
             (void *)android_media_MediaDescrambler_native_descramble },

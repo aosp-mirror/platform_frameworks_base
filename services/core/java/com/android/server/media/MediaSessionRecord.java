@@ -462,18 +462,25 @@ public class MediaSessionRecord implements IBinder.DeathRecipient {
         mHandler.post(new Runnable() {
             @Override
             public void run() {
-                if (useSuggested) {
-                    if (AudioSystem.isStreamActive(stream, 0)) {
-                        mAudioManagerInternal.adjustSuggestedStreamVolumeForUid(stream, direction,
-                                flags, packageName, uid);
+                try {
+                    if (useSuggested) {
+                        if (AudioSystem.isStreamActive(stream, 0)) {
+                            mAudioManagerInternal.adjustSuggestedStreamVolumeForUid(stream,
+                                    direction, flags, packageName, uid);
+                        } else {
+                            mAudioManagerInternal.adjustSuggestedStreamVolumeForUid(
+                                    AudioManager.USE_DEFAULT_STREAM_TYPE, direction,
+                                    flags | previousFlagPlaySound, packageName, uid);
+                        }
                     } else {
-                        mAudioManagerInternal.adjustSuggestedStreamVolumeForUid(
-                                AudioManager.USE_DEFAULT_STREAM_TYPE, direction,
-                                flags | previousFlagPlaySound, packageName, uid);
+                        mAudioManagerInternal.adjustStreamVolumeForUid(stream, direction, flags,
+                                packageName, uid);
                     }
-                } else {
-                    mAudioManagerInternal.adjustStreamVolumeForUid(stream, direction, flags,
-                            packageName, uid);
+                } catch (IllegalArgumentException e) {
+                    Log.e(TAG, "Cannot adjust volume: direction=" + direction + ", stream="
+                            + stream + ", flags=" + flags + ", packageName=" + packageName
+                            + ", uid=" + uid + ", useSuggested=" + useSuggested
+                            + ", previousFlagPlaySound=" + previousFlagPlaySound, e);
                 }
             }
         });
@@ -777,6 +784,14 @@ public class MediaSessionRecord implements IBinder.DeathRecipient {
                 mService.enforcePhoneStatePermission(pid, uid);
             }
             mFlags = flags;
+            if ((flags & MediaSession.FLAG_EXCLUSIVE_GLOBAL_PRIORITY) != 0) {
+                final long token = Binder.clearCallingIdentity();
+                try {
+                    mService.setGlobalPrioritySession(MediaSessionRecord.this);
+                } finally {
+                    Binder.restoreCallingIdentity(token);
+                }
+            }
             mHandler.post(MessageHandler.MSG_UPDATE_SESSION_STATE);
         }
 

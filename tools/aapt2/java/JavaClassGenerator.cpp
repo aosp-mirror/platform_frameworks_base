@@ -299,24 +299,16 @@ void JavaClassGenerator::ProcessStyleable(const ResourceNameRef& name, const Res
       }
 
       const ResourceName& attr_name = entry.attr_ref->name.value();
-      styleable_comment << "<tr><td>";
-      styleable_comment << "<code>{@link #" << entry.field_name << " "
-                        << (!attr_name.package.empty()
-                                ? attr_name.package
-                                : context_->GetCompilationPackage())
-                        << ":" << attr_name.entry << "}</code>";
-      styleable_comment << "</td>";
-
-      styleable_comment << "<td>";
+      styleable_comment << "<tr><td><code>{@link #" << entry.field_name << " "
+                        << (!attr_name.package.empty() ? attr_name.package
+                                                       : context_->GetCompilationPackage())
+                        << ":" << attr_name.entry << "}</code></td>";
 
       // Only use the comment up until the first '.'. This is to stay compatible with
       // the way old AAPT did it (presumably to keep it short and to avoid including
       // annotations like @hide which would affect this Styleable).
-      auto iter = std::find(attr_comment_line.begin(), attr_comment_line.end(), '.');
-      if (iter != attr_comment_line.end()) {
-        attr_comment_line = attr_comment_line.substr(0, (iter - attr_comment_line.begin()) + 1);
-      }
-      styleable_comment << attr_comment_line << "</td></tr>\n";
+      styleable_comment << "<td>" << AnnotationProcessor::ExtractFirstSentence(attr_comment_line)
+                        << "</td></tr>\n";
     }
     styleable_comment << "</table>\n";
 

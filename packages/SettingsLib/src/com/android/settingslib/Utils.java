@@ -14,12 +14,12 @@ import android.content.res.TypedArray;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Color;
+import android.graphics.PorterDuff;
 import android.graphics.drawable.Drawable;
 import android.graphics.drawable.LayerDrawable;
 import android.net.ConnectivityManager;
 import android.net.NetworkBadging;
 import android.os.BatteryManager;
-import android.os.UserHandle;
 import android.os.UserManager;
 import android.print.PrintManager;
 import android.provider.Settings;
@@ -31,12 +31,6 @@ import com.android.settingslib.drawable.UserIconDrawable;
 import java.text.NumberFormat;
 
 public class Utils {
-    /** Broadcast intent action when the location mode is about to change. */
-    private static final String MODE_CHANGING_ACTION =
-            "com.android.settings.location.MODE_CHANGING";
-    private static final String CURRENT_MODE_KEY = "CURRENT_MODE";
-    private static final String NEW_MODE_KEY = "NEW_MODE";
-
     private static Signature[] sSystemSignature;
     private static String sPermissionControllerPackageName;
     private static String sServicesSystemSharedLibPackageName;
@@ -49,18 +43,6 @@ public class Utils {
           com.android.internal.R.drawable.ic_signal_wifi_badged_3_bars,
           com.android.internal.R.drawable.ic_signal_wifi_badged_4_bars
     };
-
-    public static boolean updateLocationMode(Context context, int oldMode, int newMode,
-            int userId) {
-        Intent intent = new Intent(MODE_CHANGING_ACTION);
-        intent.putExtra(CURRENT_MODE_KEY, oldMode);
-        intent.putExtra(NEW_MODE_KEY, newMode);
-        intent.addFlags(Intent.FLAG_RECEIVER_INCLUDE_BACKGROUND);
-        context.sendBroadcastAsUser(intent, UserHandle.of(userId),
-                android.Manifest.permission.WRITE_SECURE_SETTINGS);
-        return Settings.Secure.putIntForUser(context.getContentResolver(),
-                Settings.Secure.LOCATION_MODE, newMode, userId);
-    }
 
     /**
      * Return string resource that best describes combination of tethering
@@ -114,13 +96,12 @@ public class Utils {
     /**
      * Returns a circular icon for a user.
      */
-    public static UserIconDrawable getUserIcon(Context context, UserManager um, UserInfo user) {
+    public static Drawable getUserIcon(Context context, UserManager um, UserInfo user) {
         final int iconSize = UserIconDrawable.getSizeForList(context);
         if (user.isManagedProfile()) {
-            // We use predefined values for managed profiles
-            Bitmap b = BitmapFactory.decodeResource(context.getResources(),
-                    com.android.internal.R.drawable.ic_corp_icon);
-            return new UserIconDrawable(iconSize).setIcon(b).bake();
+            Drawable drawable = context.getDrawable(com.android.internal.R.drawable.ic_corp_icon);
+            drawable.setBounds(0, 0, iconSize, iconSize);
+            return drawable;
         }
         if (user.iconPath != null) {
             Bitmap icon = um.getUserIcon(user.id);

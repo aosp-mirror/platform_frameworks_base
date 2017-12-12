@@ -460,6 +460,11 @@ public class Binder implements IBinder {
      *
      * <p>If you want to call this, call transact().
      *
+     * <p>Implementations that are returning a result should generally use
+     * {@link Parcel#writeNoException() Parcel.writeNoException} and
+     * {@link Parcel#writeException(Exception) Parcel.writeException} to propagate
+     * exceptions back to the caller.</p>
+     *
      * @param code The action to perform.  This should
      * be a number between {@link #FIRST_CALL_TRANSACTION} and
      * {@link #LAST_CALL_TRANSACTION}.
@@ -716,13 +721,6 @@ public class Binder implements IBinder {
                 reply.writeException(e);
             }
             res = true;
-        } catch (OutOfMemoryError e) {
-            // Unconditionally log this, since this is generally unrecoverable.
-            Log.e(TAG, "Caught an OutOfMemoryError from the binder stub implementation.", e);
-            RuntimeException re = new RuntimeException("Out of memory", e);
-            reply.setDataPosition(0);
-            reply.writeException(re);
-            res = true;
         } finally {
             if (tracingEnabled) {
                 Trace.traceEnd(Trace.TRACE_TAG_ALWAYS);
@@ -767,6 +765,8 @@ final class BinderProxy implements IBinder {
         private static final int LOG_MAIN_INDEX_SIZE = 8;
         private static final int MAIN_INDEX_SIZE = 1 <<  LOG_MAIN_INDEX_SIZE;
         private static final int MAIN_INDEX_MASK = MAIN_INDEX_SIZE - 1;
+        // Debuggable builds will throw an AssertionError if the number of map entries exceeds:
+        private static final int CRASH_AT_SIZE = 5_000;
 
         /**
          * We next warn when we exceed this bucket size.
@@ -888,9 +888,14 @@ final class BinderProxy implements IBinder {
                 keyArray[size] = key;
             }
             if (size >= mWarnBucketSize) {
+                final int total_size = size();
                 Log.v(Binder.TAG, "BinderProxy map growth! bucket size = " + size
-                        + " total = " + size());
+                        + " total = " + total_size);
                 mWarnBucketSize += WARN_INCREMENT;
+                if (Build.IS_DEBUGGABLE && total_size > CRASH_AT_SIZE) {
+                    throw new AssertionError("Binder ProxyMap has too many entries. "
+                            + "BinderProxy leak?");
+                }
             }
         }
 

@@ -670,33 +670,6 @@ public final class BluetoothHeadset implements BluetoothProfile {
     }
 
     /**
-     * Get battery usage hint for Bluetooth Headset service.
-     * This is a monotonically increasing integer. Wraps to 0 at
-     * Integer.MAX_INT, and at boot.
-     * Current implementation returns the number of AT commands handled since
-     * boot. This is a good indicator for spammy headset/handsfree units that
-     * can keep the device awake by polling for cellular status updates. As a
-     * rule of thumb, each AT command prevents the CPU from sleeping for 500 ms
-     *
-     * @param device the bluetooth headset.
-     * @return monotonically increasing battery usage hint, or a negative error code on error
-     * @hide
-     */
-    public int getBatteryUsageHint(BluetoothDevice device) {
-        if (VDBG) log("getBatteryUsageHint()");
-        final IBluetoothHeadset service = mService;
-        if (service != null && isEnabled() && isValidDevice(device)) {
-            try {
-                return service.getBatteryUsageHint(device);
-            } catch (RemoteException e) {
-                Log.e(TAG, Log.getStackTraceString(new Throwable()));
-            }
-        }
-        if (service == null) Log.w(TAG, "Proxy not attached to service");
-        return -1;
-    }
-
-    /**
      * Indicates if current platform supports voice dialing over bluetooth SCO.
      *
      * @return true if voice dialing over bluetooth is supported, false otherwise.
@@ -705,49 +678,6 @@ public final class BluetoothHeadset implements BluetoothProfile {
     public static boolean isBluetoothVoiceDialingEnabled(Context context) {
         return context.getResources().getBoolean(
                 com.android.internal.R.bool.config_bluetooth_sco_off_call);
-    }
-
-    /**
-     * Accept the incoming connection.
-     * Note: This is an internal function and shouldn't be exposed
-     *
-     * @hide
-     */
-    public boolean acceptIncomingConnect(BluetoothDevice device) {
-        if (DBG) log("acceptIncomingConnect");
-        final IBluetoothHeadset service = mService;
-        if (service != null && isEnabled()) {
-            try {
-                return service.acceptIncomingConnect(device);
-            } catch (RemoteException e) {
-                Log.e(TAG, e.toString());
-            }
-        } else {
-            Log.w(TAG, "Proxy not attached to service");
-            if (DBG) Log.d(TAG, Log.getStackTraceString(new Throwable()));
-        }
-        return false;
-    }
-
-    /**
-     * Reject the incoming connection.
-     *
-     * @hide
-     */
-    public boolean rejectIncomingConnect(BluetoothDevice device) {
-        if (DBG) log("rejectIncomingConnect");
-        final IBluetoothHeadset service = mService;
-        if (service != null) {
-            try {
-                return service.rejectIncomingConnect(device);
-            } catch (RemoteException e) {
-                Log.e(TAG, e.toString());
-            }
-        } else {
-            Log.w(TAG, "Proxy not attached to service");
-            if (DBG) Log.d(TAG, Log.getStackTraceString(new Throwable()));
-        }
-        return false;
     }
 
     /**
@@ -1045,50 +975,6 @@ public final class BluetoothHeadset implements BluetoothProfile {
     }
 
     /**
-     * enable WBS codec setting.
-     *
-     * @return true if successful false if there was some error such as there is no connected
-     * headset
-     * @hide
-     */
-    public boolean enableWBS() {
-        final IBluetoothHeadset service = mService;
-        if (service != null && isEnabled()) {
-            try {
-                return service.enableWBS();
-            } catch (RemoteException e) {
-                Log.e(TAG, e.toString());
-            }
-        } else {
-            Log.w(TAG, "Proxy not attached to service");
-            if (DBG) Log.d(TAG, Log.getStackTraceString(new Throwable()));
-        }
-        return false;
-    }
-
-    /**
-     * disable WBS codec settting. It set NBS codec.
-     *
-     * @return true if successful false if there was some error such as there is no connected
-     * headset
-     * @hide
-     */
-    public boolean disableWBS() {
-        final IBluetoothHeadset service = mService;
-        if (service != null && isEnabled()) {
-            try {
-                return service.disableWBS();
-            } catch (RemoteException e) {
-                Log.e(TAG, e.toString());
-            }
-        } else {
-            Log.w(TAG, "Proxy not attached to service");
-            if (DBG) Log.d(TAG, Log.getStackTraceString(new Throwable()));
-        }
-        return false;
-    }
-
-    /**
      * check if in-band ringing is supported for this platform.
      *
      * @return true if in-band ringing is supported false if in-band ringing is not supported
@@ -1097,30 +983,6 @@ public final class BluetoothHeadset implements BluetoothProfile {
     public static boolean isInbandRingingSupported(Context context) {
         return context.getResources().getBoolean(
                 com.android.internal.R.bool.config_bluetooth_hfp_inband_ringing_support);
-    }
-
-    /**
-     * Send Headset the BIND response from AG to report change in the status of the
-     * HF indicators to the headset
-     *
-     * @param indId Assigned Number of the indicator (defined by SIG)
-     * @param indStatus possible values- false-Indicator is disabled, no value changes shall be
-     * sent for this indicator true-Indicator is enabled, value changes may be sent for this
-     * indicator
-     * @hide
-     */
-    public void bindResponse(int indId, boolean indStatus) {
-        final IBluetoothHeadset service = mService;
-        if (service != null && isEnabled()) {
-            try {
-                service.bindResponse(indId, indStatus);
-            } catch (RemoteException e) {
-                Log.e(TAG, e.toString());
-            }
-        } else {
-            Log.w(TAG, "Proxy not attached to service");
-            if (DBG) Log.d(TAG, Log.getStackTraceString(new Throwable()));
-        }
     }
 
     private final IBluetoothProfileServiceConnection mConnection =

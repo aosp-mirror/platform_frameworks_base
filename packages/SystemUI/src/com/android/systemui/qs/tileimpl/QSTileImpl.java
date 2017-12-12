@@ -17,12 +17,12 @@ package com.android.systemui.qs.tileimpl;
 import static com.android.internal.logging.nano.MetricsProto.MetricsEvent.ACTION_QS_CLICK;
 import static com.android.internal.logging.nano.MetricsProto.MetricsEvent.ACTION_QS_LONG_PRESS;
 import static com.android.internal.logging.nano.MetricsProto.MetricsEvent.ACTION_QS_SECONDARY_CLICK;
+import static com.android.internal.logging.nano.MetricsProto.MetricsEvent.FIELD_CONTEXT;
 import static com.android.internal.logging.nano.MetricsProto.MetricsEvent.FIELD_QS_POSITION;
 import static com.android.internal.logging.nano.MetricsProto.MetricsEvent.FIELD_QS_VALUE;
 import static com.android.internal.logging.nano.MetricsProto.MetricsEvent.TYPE_ACTION;
 import static com.android.settingslib.RestrictedLockUtils.EnforcedAdmin;
 
-import android.R.attr;
 import android.app.ActivityManager;
 import android.content.Context;
 import android.content.Intent;
@@ -32,10 +32,12 @@ import android.os.Handler;
 import android.os.Looper;
 import android.os.Message;
 import android.service.quicksettings.Tile;
+import android.text.format.DateUtils;
 import android.util.ArraySet;
 import android.util.Log;
 import android.util.SparseArray;
 
+import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.logging.MetricsLogger;
 import com.android.settingslib.RestrictedLockUtils;
 import com.android.settingslib.Utils;
@@ -45,6 +47,7 @@ import com.android.systemui.plugins.qs.DetailAdapter;
 import com.android.systemui.plugins.qs.QSIconView;
 import com.android.systemui.plugins.qs.QSTile;
 import com.android.systemui.plugins.qs.QSTile.State;
+import com.android.systemui.qs.PagedTileLayout.TilePage;
 import com.android.systemui.qs.QSHost;
 
 import java.util.ArrayList;
@@ -60,14 +63,18 @@ public abstract class QSTileImpl<TState extends State> implements QSTile {
     protected final String TAG = "Tile." + getClass().getSimpleName();
     protected static final boolean DEBUG = Log.isLoggable("Tile", Log.DEBUG);
 
+    private static final long DEFAULT_STALE_TIMEOUT = 10 * DateUtils.MINUTE_IN_MILLIS;
+
     protected final QSHost mHost;
     protected final Context mContext;
-    protected final H mHandler = new H(Dependency.get(Dependency.BG_LOOPER));
+    // @NonFinalForTesting
+    protected H mHandler = new H(Dependency.get(Dependency.BG_LOOPER));
     protected final Handler mUiHandler = new Handler(Looper.getMainLooper());
     private final ArraySet<Object> mListeners = new ArraySet<>();
     private final MetricsLogger mMetricsLogger = Dependency.get(MetricsLogger.class);
 
     private final ArrayList<Callback> mCallbacks = new ArrayList<>();
+    private final Object mStaleListener = new Object();
     protected TState mState = newTileState();
     private TState mTmpState = newTileState();
     private boolean mAnnounceNextStateChange;
@@ -93,6 +100,7 @@ public abstract class QSTileImpl<TState extends State> implements QSTile {
     protected QSTileImpl(QSHost host) {
         mHost = host;
         mContext = host.getContext();
+        handleStale(); // Tile was just created, must be stale.
     }
 
     /**
@@ -104,6 +112,7 @@ public abstract class QSTileImpl<TState extends State> implements QSTile {
             if (mListeners.add(listener) && mListeners.size() == 1) {
                 if (DEBUG) Log.d(TAG, "setListening " + true);
                 mHandler.obtainMessage(H.SET_LISTENING, 1, 0).sendToTarget();
+                refreshState(); // Ensure we get at least one refresh after listening.
             }
         } else {
             if (mListeners.remove(listener) && mListeners.size() == 0) {
@@ -111,6 +120,15 @@ public abstract class QSTileImpl<TState extends State> implements QSTile {
                 mHandler.obtainMessage(H.SET_LISTENING, 0, 0).sendToTarget();
             }
         }
+    }
+
+    protected long getStaleTimeout() {
+        return DEFAULT_STALE_TIMEOUT;
+    }
+
+    @VisibleForTesting
+    protected void handleStale() {
+        setListening(mStaleListener, true);
     }
 
     public String getTileSpec() {
@@ -180,7 +198,17 @@ public abstract class QSTileImpl<TState extends State> implements QSTile {
             logMaker.addTaggedData(FIELD_QS_VALUE, ((BooleanState) mState).value ? 1 : 0);
         }
         return logMaker.setSubtype(getMetricsCategory())
+                .addTaggedData(FIELD_CONTEXT, isFullQs())
                 .addTaggedData(FIELD_QS_POSITION, mHost.indexOf(mTileSpec));
+    }
+
+    private int isFullQs() {
+        for (Object listener : mListeners) {
+            if (TilePage.class.equals(listener.getClass())) {
+                return 1;
+            }
+        }
+        return 0;
     }
 
     public void showDetail(boolean show) {
@@ -261,6 +289,9 @@ public abstract class QSTileImpl<TState extends State> implements QSTile {
         if (changed) {
             handleStateChanged();
         }
+        mHandler.removeMessages(H.STALE);
+        mHandler.sendEmptyMessageDelayed(H.STALE, getStaleTimeout());
+        setListening(mStaleListener, false);
     }
 
     private void handleStateChanged() {
@@ -314,11 +345,11 @@ public abstract class QSTileImpl<TState extends State> implements QSTile {
         handleRefreshState(null);
     }
 
-    protected abstract void setListening(boolean listening);
+    protected abstract void handleSetListening(boolean listening);
 
     protected void handleDestroy() {
         if (mListeners.size() != 0) {
-            setListening(false);
+            handleSetListening(false);
         }
         mCallbacks.clear();
     }
@@ -368,8 +399,10 @@ public abstract class QSTileImpl<TState extends State> implements QSTile {
         private static final int REMOVE_CALLBACKS = 12;
         private static final int REMOVE_CALLBACK = 13;
         private static final int SET_LISTENING = 14;
+        private static final int STALE = 15;
 
-        private H(Looper looper) {
+        @VisibleForTesting
+        protected H(Looper looper) {
             super(looper);
         }
 
@@ -424,8 +457,11 @@ public abstract class QSTileImpl<TState extends State> implements QSTile {
                     name = "handleClearState";
                     handleClearState();
                 } else if (msg.what == SET_LISTENING) {
-                    name = "setListening";
-                    setListening(msg.arg1 != 0);
+                    name = "handleSetListening";
+                    handleSetListening(msg.arg1 != 0);
+                } else if (msg.what == STALE) {
+                    name = "handleStale";
+                    handleStale();
                 } else {
                     throw new IllegalArgumentException("Unknown msg: " + msg.what);
                 }
@@ -510,7 +546,7 @@ public abstract class QSTileImpl<TState extends State> implements QSTile {
         }
     }
 
-    protected class AnimationIcon extends ResourceIcon {
+    protected static class AnimationIcon extends ResourceIcon {
         private final int mAnimatedResId;
 
         public AnimationIcon(int resId, int staticResId) {

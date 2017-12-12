@@ -156,6 +156,14 @@ public interface IBinder {
      * caller returns immediately, without waiting for a result from the
      * callee. Applies only if the caller and callee are in different
      * processes.
+     *
+     * <p>The system provides special ordering semantics for multiple oneway calls
+     * being made to the same IBinder object: these calls will be dispatched in the
+     * other process one at a time, with the same order as the original calls.  These
+     * are still dispatched by the IPC thread pool, so may execute on different threads,
+     * but the next one will not be dispatched until the previous one completes.  This
+     * ordering is not guaranteed for calls on different IBinder objects or when mixing
+     * oneway and non-oneway calls on the same IBinder object.</p>
      */
     int FLAG_ONEWAY             = 0x00000001;
 

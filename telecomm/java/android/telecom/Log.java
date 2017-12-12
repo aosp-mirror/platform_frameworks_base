@@ -56,7 +56,7 @@ public class Log {
     public static boolean ERROR = isLoggable(android.util.Log.ERROR);
 
     private static final boolean FORCE_LOGGING = false; /* STOP SHIP if true */
-    private static final boolean USER_BUILD = Build.TYPE.equals("user");
+    private static final boolean USER_BUILD = Build.IS_USER;
 
     // Used to synchronize singleton logging lazy initialization
     private static final Object sSingletonSync = new Object();

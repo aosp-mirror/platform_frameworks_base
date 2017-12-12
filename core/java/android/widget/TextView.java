@@ -374,6 +374,8 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
     private static final int KEY_DOWN_HANDLED_BY_KEY_LISTENER = 1;
     private static final int KEY_DOWN_HANDLED_BY_MOVEMENT_METHOD = 2;
 
+    private static final int FLOATING_TOOLBAR_SELECT_ALL_REFRESH_DELAY = 500;
+
     // System wide time for last cut, copy or text changed action.
     static long sLastCutCopyOrTextChangedTime;
 
@@ -5674,7 +5676,7 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
         return mTransformation instanceof PasswordTransformationMethod;
     }
 
-    private static boolean isPasswordInputType(int inputType) {
+    static boolean isPasswordInputType(int inputType) {
         final int variation =
                 inputType & (EditorInfo.TYPE_MASK_CLASS | EditorInfo.TYPE_MASK_VARIATION);
         return variation
@@ -8339,7 +8341,9 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
     }
 
     private boolean suggestedSizeFitsInSpace(int suggestedSizeInPx, RectF availableSpace) {
-        final CharSequence text = getText();
+        final CharSequence text = mTransformed != null
+                ? mTransformed
+                : getText();
         final int maxLines = getMaxLines();
         if (mTempTextPaint == null) {
             mTempTextPaint = new TextPaint();
@@ -8405,7 +8409,8 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
 
         if (mMaxMode != LINES) {
             desired = Math.min(desired, mMaximum);
-        } else if (cap && linecount > mMaximum && layout instanceof DynamicLayout) {
+        } else if (cap && linecount > mMaximum && (layout instanceof DynamicLayout
+                || layout instanceof BoringLayout)) {
             desired = layout.getLineTop(mMaximum);
 
             if (dr != null) {
@@ -9360,7 +9365,7 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
             }
         }
 
-        if (mEditor != null) mEditor.sendOnTextChanged(start, after);
+        if (mEditor != null) mEditor.sendOnTextChanged(start, before, after);
     }
 
     /**
@@ -10318,7 +10323,16 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
             return;
         }
 
-        setText(value.getTextValue(), mBufferType, true, 0);
+        final CharSequence autofilledValue = value.getTextValue();
+
+        // First autofill it...
+        setText(autofilledValue, mBufferType, true, 0);
+
+        // ...then move cursor to the end.
+        final CharSequence text = getText();
+        if ((text instanceof Spannable)) {
+            Selection.setSelection((Spannable) text, text.length());
+        }
     }
 
     @Override
@@ -10862,6 +10876,7 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
     @Override
     public boolean performLongClick() {
         boolean handled = false;
+        boolean performedHapticFeedback = false;
 
         if (mEditor != null) {
             mEditor.mIsBeingLongClicked = true;
@@ -10869,6 +10884,7 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
 
         if (super.performLongClick()) {
             handled = true;
+            performedHapticFeedback = true;
         }
 
         if (mEditor != null) {
@@ -10877,7 +10893,9 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
         }
 
         if (handled) {
-            performHapticFeedback(HapticFeedbackConstants.LONG_PRESS);
+            if (!performedHapticFeedback) {
+              performHapticFeedback(HapticFeedbackConstants.LONG_PRESS);
+            }
             if (mEditor != null) mEditor.mDiscardNextActionUp = true;
         } else {
             MetricsLogger.action(
@@ -11138,6 +11156,10 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
     }
 
     boolean selectAllText() {
+        if (mEditor != null) {
+            // Hide the toolbar before changing the selection to avoid flickering.
+            mEditor.hideFloatingToolbar(FLOATING_TOOLBAR_SELECT_ALL_REFRESH_DELAY);
+        }
         final int length = mText.length();
         Selection.setSelection((Spannable) mText, 0, length);
         return length > 0;

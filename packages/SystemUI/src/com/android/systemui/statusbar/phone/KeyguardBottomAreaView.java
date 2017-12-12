@@ -72,7 +72,6 @@ import com.android.systemui.plugins.IntentButtonProvider;
 import com.android.systemui.plugins.IntentButtonProvider.IntentButton;
 import com.android.systemui.plugins.IntentButtonProvider.IntentButton.IconState;
 import com.android.systemui.plugins.PluginListener;
-import com.android.systemui.plugins.PluginManager;
 import com.android.systemui.plugins.ActivityStarter;
 import com.android.systemui.statusbar.CommandQueue;
 import com.android.systemui.statusbar.KeyguardAffordanceView;
@@ -82,10 +81,8 @@ import com.android.systemui.statusbar.policy.ExtensionController;
 import com.android.systemui.statusbar.policy.ExtensionController.Extension;
 import com.android.systemui.statusbar.policy.FlashlightController;
 import com.android.systemui.statusbar.policy.PreviewInflater;
-import com.android.systemui.tuner.LockscreenFragment;
 import com.android.systemui.tuner.LockscreenFragment.LockButtonFactory;
 import com.android.systemui.tuner.TunerService;
-import com.android.systemui.tuner.TunerService.Tunable;
 
 /**
  * Implementation for the bottom area of the Keyguard, including camera/phone affordance and status
@@ -510,6 +507,7 @@ public class KeyguardBottomAreaView extends FrameLayout implements View.OnClickL
                     // force the crossfade animation if an orientation change
                     // happens to occur during the launch.
                     ActivityOptions o = ActivityOptions.makeBasic();
+                    o.setDisallowEnterPictureInPictureWhileLaunching(true);
                     o.setRotationAnimationHint(
                             WindowManager.LayoutParams.ROTATION_ANIMATION_SEAMLESS);
                     try {

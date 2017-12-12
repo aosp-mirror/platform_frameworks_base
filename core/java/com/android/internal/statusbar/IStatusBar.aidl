@@ -32,6 +32,7 @@ oneway interface IStatusBar
     void animateExpandNotificationsPanel();
     void animateExpandSettingsPanel(String subPanel);
     void animateCollapsePanels();
+    void togglePanel();
 
     /**
      * Notifies the status bar of a System UI visibility flag change.
@@ -110,6 +111,13 @@ oneway interface IStatusBar
      * Shows the global actions menu.
      */
     void showGlobalActionsMenu();
+
+    /**
+     * Set whether the top app currently hides the statusbar.
+     *
+     * @param hidesStatusBar whether it is being hidden
+     */
+    void setTopAppHidesStatusBar(boolean hidesStatusBar);
 
     void addQsTile(in ComponentName tile);
     void remQsTile(in ComponentName tile);

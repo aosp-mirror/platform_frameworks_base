@@ -264,10 +264,10 @@ public class CameraDeviceUserShim implements ICameraDeviceUser {
         }
 
         @Override
-        public void onRepeatingRequestError(long lastFrameNumber) {
+        public void onRepeatingRequestError(long lastFrameNumber, int repeatingRequestId) {
+            Object[] objArray = new Object[] { lastFrameNumber, repeatingRequestId };
             Message msg = getHandler().obtainMessage(REPEATING_REQUEST_ERROR,
-                    /*arg1*/ (int) (lastFrameNumber & 0xFFFFFFFFL),
-                    /*arg2*/ (int) ( (lastFrameNumber >> 32) & 0xFFFFFFFFL));
+                    /*obj*/ objArray);
             getHandler().sendMessage(msg);
         }
 
@@ -329,9 +329,10 @@ public class CameraDeviceUserShim implements ICameraDeviceUser {
                             break;
                         }
                         case REPEATING_REQUEST_ERROR: {
-                            long lastFrameNumber = msg.arg2 & 0xFFFFFFFFL;
-                            lastFrameNumber = (lastFrameNumber << 32) | (msg.arg1 & 0xFFFFFFFFL);
-                            mCallbacks.onRepeatingRequestError(lastFrameNumber);
+                            Object[] objArray = (Object[]) msg.obj;
+                            long lastFrameNumber = (Long) objArray[0];
+                            int repeatingRequestId = (Integer) objArray[1];
+                            mCallbacks.onRepeatingRequestError(lastFrameNumber, repeatingRequestId);
                             break;
                         }
                         case REQUEST_QUEUE_EMPTY: {
@@ -504,12 +505,18 @@ public class CameraDeviceUserShim implements ICameraDeviceUser {
         if (mLegacyDevice.isClosed()) {
             String err = "Cannot end configure, device has been closed.";
             Log.e(TAG, err);
+            synchronized(mConfigureLock) {
+                mConfiguring = false;
+            }
             throw new ServiceSpecificException(ICameraService.ERROR_DISCONNECTED, err);
         }
 
         if (operatingMode != ICameraDeviceUser.NORMAL_MODE) {
             String err = "LEGACY devices do not support this operating mode";
             Log.e(TAG, err);
+            synchronized(mConfigureLock) {
+                mConfiguring = false;
+            }
             throw new ServiceSpecificException(ICameraService.ERROR_ILLEGAL_ARGUMENT, err);
         }
 

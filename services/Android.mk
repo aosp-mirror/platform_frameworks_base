@@ -7,7 +7,7 @@ include $(CLEAR_VARS)
 LOCAL_MODULE := services
 LOCAL_DEX_PREOPT_APP_IMAGE := true
 LOCAL_DEX_PREOPT_GENERATE_PROFILE := true
-LOCAL_DEX_PREOPT_PROFILE_CLASS_LISTING := $(LOCAL_PATH)/profile-classes
+LOCAL_DEX_PREOPT_PROFILE_CLASS_LISTING := $(LOCAL_PATH)/art-profile
 
 LOCAL_SRC_FILES := $(call all-java-files-under,java)
 
@@ -43,28 +43,14 @@ LOCAL_STATIC_JAVA_LIBRARIES := $(addprefix services.,$(services)) \
     android.hidl.base-V1.0-java \
     android.hardware.biometrics.fingerprint-V2.1-java
 
+LOCAL_JAVA_LIBRARIES := \
+    android.hidl.manager-V1.0-java
+
 ifeq ($(EMMA_INSTRUMENT_FRAMEWORK),true)
 LOCAL_EMMA_INSTRUMENT := true
 endif
 
 include $(BUILD_JAVA_LIBRARY)
-
-# native library
-# =============================================================
-
-include $(CLEAR_VARS)
-
-LOCAL_SRC_FILES :=
-LOCAL_SHARED_LIBRARIES :=
-
-# include all the jni subdirs to collect their sources
-include $(wildcard $(LOCAL_PATH)/*/jni/Android.mk)
-
-LOCAL_CFLAGS += -DEGL_EGLEXT_PROTOTYPES -DGL_GLEXT_PROTOTYPES
-
-LOCAL_MODULE:= libandroid_servers
-
-include $(BUILD_SHARED_LIBRARY)
 
 # =============================================================
 

@@ -31,7 +31,6 @@ import android.widget.RemoteViews;
  */
 @RemoteViews.RemoteView
 public class NotificationExpandButton extends ImageView {
-    private View mLabeledBy;
 
     public NotificationExpandButton(Context context) {
         super(context);
@@ -69,12 +68,5 @@ public class NotificationExpandButton extends ImageView {
     public void onInitializeAccessibilityNodeInfo(AccessibilityNodeInfo info) {
         super.onInitializeAccessibilityNodeInfo(info);
         info.setClassName(Button.class.getName());
-        if (mLabeledBy != null) {
-            info.setLabeledBy(mLabeledBy);
-        }
-    }
-
-    public void setLabeledBy(View labeledBy) {
-        mLabeledBy = labeledBy;
     }
 }

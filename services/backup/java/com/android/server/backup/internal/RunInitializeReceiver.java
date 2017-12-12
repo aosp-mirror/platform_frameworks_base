@@ -19,12 +19,10 @@ package com.android.server.backup.internal;
 import static com.android.server.backup.RefactoredBackupManagerService.DEBUG;
 import static com.android.server.backup.RefactoredBackupManagerService.RUN_INITIALIZE_ACTION;
 import static com.android.server.backup.RefactoredBackupManagerService.TAG;
-import static com.android.server.backup.internal.BackupHandler.MSG_RUN_INITIALIZE;
 
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
-import android.os.Message;
 import android.util.Slog;
 
 import com.android.server.backup.RefactoredBackupManagerService;
@@ -44,13 +42,15 @@ public class RunInitializeReceiver extends BroadcastReceiver {
                     Slog.v(TAG, "Running a device init");
                 }
 
+                String[] pendingInits = (String[]) backupManagerService.getPendingInits().toArray();
+                backupManagerService.clearPendingInits();
+                PerformInitializeTask initTask = new PerformInitializeTask(backupManagerService,
+                        pendingInits, null);
+
                 // Acquire the wakelock and pass it to the init thread.  it will
                 // be released once init concludes.
                 backupManagerService.getWakelock().acquire();
-
-                Message msg = backupManagerService.getBackupHandler().obtainMessage(
-                        MSG_RUN_INITIALIZE);
-                backupManagerService.getBackupHandler().sendMessage(msg);
+                backupManagerService.getBackupHandler().post(initTask);
             }
         }
     }

@@ -16,14 +16,12 @@
 
 package com.android.server.notification;
 
-import android.annotation.NonNull;
 import android.app.INotificationManager;
 import android.app.NotificationManager;
 import android.content.ComponentName;
-import android.content.ContentResolver;
 import android.content.Context;
+import android.content.pm.IPackageManager;
 import android.net.Uri;
-import android.os.Handler;
 import android.os.IBinder;
 import android.os.IInterface;
 import android.os.RemoteException;
@@ -32,12 +30,12 @@ import android.provider.Settings;
 import android.service.notification.Condition;
 import android.service.notification.ConditionProviderService;
 import android.service.notification.IConditionProvider;
-import android.text.TextUtils;
 import android.util.ArrayMap;
 import android.util.ArraySet;
 import android.util.Slog;
 
 import com.android.internal.R;
+import com.android.internal.annotations.VisibleForTesting;
 import com.android.server.notification.NotificationManagerService.DumpFilter;
 
 import java.io.PrintWriter;
@@ -45,6 +43,10 @@ import java.util.ArrayList;
 import java.util.Arrays;
 
 public class ConditionProviders extends ManagedServices {
+
+    @VisibleForTesting
+    static final String TAG_ENABLED_DND_APPS = "dnd_apps";
+
     private final ArrayList<ConditionRecord> mRecords = new ArrayList<>();
     private final ArraySet<String> mSystemConditionProviderNames;
     private final ArraySet<SystemConditionProviderService> mSystemConditionProviders
@@ -52,11 +54,12 @@ public class ConditionProviders extends ManagedServices {
 
     private Callback mCallback;
 
-    public ConditionProviders(Context context, Handler handler, UserProfiles userProfiles) {
-        super(context, handler, new Object(), userProfiles);
+    public ConditionProviders(Context context, UserProfiles userProfiles, IPackageManager pm) {
+        super(context, new Object(), userProfiles, pm);
         mSystemConditionProviderNames = safeSet(PropConfig.getStringArray(mContext,
                 "system.condition.providers",
                 R.array.config_system_condition_providers));
+        mApprovalLevel = APPROVAL_BY_PACKAGE;
     }
 
     public void setCallback(Callback callback) {
@@ -83,6 +86,7 @@ public class ConditionProviders extends ManagedServices {
         c.caption = "condition provider";
         c.serviceInterface = ConditionProviderService.SERVICE_INTERFACE;
         c.secureSettingName = Settings.Secure.ENABLED_NOTIFICATION_POLICY_ACCESS_PACKAGES;
+        c.xmlTag = TAG_ENABLED_DND_APPS;
         c.secondarySettingName = Settings.Secure.ENABLED_NOTIFICATION_LISTENERS;
         c.bindPermission = android.Manifest.permission.BIND_CONDITION_PROVIDER_SERVICE;
         c.settingsAction = Settings.ACTION_CONDITION_PROVIDER_SETTINGS;
@@ -164,7 +168,7 @@ public class ConditionProviders extends ManagedServices {
     }
 
     @Override
-    public void onPackagesChanged(boolean removingPackage, String[] pkgList) {
+    public void onPackagesChanged(boolean removingPackage, String[] pkgList, int[] uid) {
         if (removingPackage) {
             INotificationManager inm = NotificationManager.getService();
 
@@ -179,7 +183,12 @@ public class ConditionProviders extends ManagedServices {
                 }
             }
         }
-        super.onPackagesChanged(removingPackage, pkgList);
+        super.onPackagesChanged(removingPackage, pkgList, uid);
+    }
+
+    @Override
+    protected boolean isValidEntry(String packageOrComponent, int userId) {
+        return true;
     }
 
     public ManagedServiceInfo checkServiceToken(IConditionProvider provider) {
@@ -275,31 +284,6 @@ public class ConditionProviders extends ManagedServices {
             // ... and is associated with the in-process service
             r.info = checkServiceTokenLocked(provider);
         }
-    }
-
-    @Override
-    protected @NonNull ArraySet<ComponentName> loadComponentNamesFromSetting(String settingName,
-            int userId) {
-        final ContentResolver cr = mContext.getContentResolver();
-        String settingValue = Settings.Secure.getStringForUser(
-                cr,
-                settingName,
-                userId);
-        if (TextUtils.isEmpty(settingValue))
-            return new ArraySet<>();
-        String[] packages = settingValue.split(ENABLED_SERVICES_SEPARATOR);
-        ArraySet<ComponentName> result = new ArraySet<>(packages.length);
-        for (int i = 0; i < packages.length; i++) {
-            if (!TextUtils.isEmpty(packages[i])) {
-                final ComponentName component = ComponentName.unflattenFromString(packages[i]);
-                if (component != null) {
-                    result.addAll(queryPackageForServices(component.getPackageName(), userId));
-                } else {
-                    result.addAll(queryPackageForServices(packages[i], userId));
-                }
-            }
-        }
-        return result;
     }
 
     public boolean subscribeIfNecessary(ComponentName component, Uri conditionId) {

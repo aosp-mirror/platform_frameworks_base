@@ -102,9 +102,6 @@ public final class CellIdentityLte implements Parcelable {
      * @param alphal long alpha Operator Name String or Enhanced Operator Name String
      * @param alphas short alpha Operator Name String or Enhanced Operator Name String
      *
-     * @throws IllegalArgumentException if the input MCC is not a 3-digit code or the input MNC is
-     * not a 2 or 3-digit code.
-     *
      * @hide
      */
     public CellIdentityLte (int ci, int pci, int tac, int earfcn, String mccStr,
@@ -114,22 +111,29 @@ public final class CellIdentityLte implements Parcelable {
         mTac = tac;
         mEarfcn = earfcn;
 
+        // Only allow INT_MAX if unknown string mcc/mnc
         if (mccStr == null || mccStr.matches("^[0-9]{3}$")) {
             mMccStr = mccStr;
-        } else if (mccStr.isEmpty()) {
-            // If the mccStr parsed from Parcel is empty, set it as null.
+        } else if (mccStr.isEmpty() || mccStr.equals(String.valueOf(Integer.MAX_VALUE))) {
+            // If the mccStr is empty or unknown, set it as null.
             mMccStr = null;
         } else {
-            throw new IllegalArgumentException("invalid MCC format");
+            // TODO: b/69384059 Should throw IllegalArgumentException for the invalid MCC format
+            // after the bug got fixed.
+            mMccStr = null;
+            log("invalid MCC format: " + mccStr);
         }
 
         if (mncStr == null || mncStr.matches("^[0-9]{2,3}$")) {
             mMncStr = mncStr;
-        } else if (mncStr.isEmpty()) {
-            // If the mncStr parsed from Parcel is empty, set it as null.
+        } else if (mncStr.isEmpty() || mncStr.equals(String.valueOf(Integer.MAX_VALUE))) {
+            // If the mncStr is empty or unknown, set it as null.
             mMncStr = null;
         } else {
-            throw new IllegalArgumentException("invalid MNC format");
+            // TODO: b/69384059 Should throw IllegalArgumentException for the invalid MNC format
+            // after the bug got fixed.
+            mMncStr = null;
+            log("invalid MNC format: " + mncStr);
         }
 
         mAlphaLong = alphal;
@@ -209,7 +213,7 @@ public final class CellIdentityLte implements Parcelable {
      * @return a 5 or 6 character string (MCC+MNC), null if any field is unknown
      */
     public String getMobileNetworkOperator() {
-        return (mMncStr == null || mMncStr == null) ? null : mMccStr + mMncStr;
+        return (mMccStr == null || mMncStr == null) ? null : mMccStr + mMncStr;
     }
 
     /**

@@ -91,13 +91,13 @@ public class ServiceInfo extends ComponentInfo
     }
 
     /** @hide */
-    void dump(Printer pw, String prefix, int flags) {
+    void dump(Printer pw, String prefix, int dumpFlags) {
         super.dumpFront(pw, prefix);
         pw.println(prefix + "permission=" + permission);
         pw.println(prefix + "flags=0x" + Integer.toHexString(flags));
-        super.dumpBack(pw, prefix, flags);
+        super.dumpBack(pw, prefix, dumpFlags);
     }
-    
+
     public String toString() {
         return "ServiceInfo{"
             + Integer.toHexString(System.identityHashCode(this))

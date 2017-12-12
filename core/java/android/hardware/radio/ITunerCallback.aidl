@@ -17,10 +17,17 @@
 package android.hardware.radio;
 
 import android.hardware.radio.RadioManager;
+import android.hardware.radio.RadioMetadata;
 
 /** {@hide} */
 oneway interface ITunerCallback {
     void onError(int status);
     void onConfigurationChanged(in RadioManager.BandConfig config);
-    void onProgramInfoChanged(in RadioManager.ProgramInfo info);
+    void onCurrentProgramInfoChanged(in RadioManager.ProgramInfo info);
+    void onTrafficAnnouncement(boolean active);
+    void onEmergencyAnnouncement(boolean active);
+    void onAntennaState(boolean connected);
+    void onBackgroundScanAvailabilityChange(boolean isAvailable);
+    void onBackgroundScanComplete();
+    void onProgramListChanged();
 }

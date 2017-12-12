@@ -91,30 +91,25 @@ public class SuggestionParser {
 
     // Shared prefs keys for storing dismissed state.
     // Index into current dismissed state.
-    @VisibleForTesting
-    static final String DISMISS_INDEX = "_dismiss_index";
-    private static final String SETUP_TIME = "_setup_time";
+    public static final String SETUP_TIME = "_setup_time";
     private static final String IS_DISMISSED = "_is_dismissed";
 
-    private static final long MILLIS_IN_DAY = 24 * 60 * 60 * 1000;
-
     // Default dismiss control for smart suggestions.
-    private static final String DEFAULT_SMART_DISMISS_CONTROL = "0,10";
+    private static final String DEFAULT_SMART_DISMISS_CONTROL = "0";
 
     private final Context mContext;
     private final List<SuggestionCategory> mSuggestionList;
     private final ArrayMap<Pair<String, String>, Tile> mAddCache = new ArrayMap<>();
     private final SharedPreferences mSharedPrefs;
-    private final String mSmartDismissControl;
-
+    private final String mDefaultDismissControl;
 
     public SuggestionParser(Context context, SharedPreferences sharedPrefs, int orderXml,
-            String smartDismissControl) {
+            String defaultDismissControl) {
         this(
                 context,
                 sharedPrefs,
                 (List<SuggestionCategory>) new SuggestionOrderInflater(context).parse(orderXml),
-                smartDismissControl);
+                defaultDismissControl);
     }
 
     public SuggestionParser(Context context, SharedPreferences sharedPrefs, int orderXml) {
@@ -126,11 +121,11 @@ public class SuggestionParser {
             Context context,
             SharedPreferences sharedPrefs,
             List<SuggestionCategory> suggestionList,
-            String smartDismissControl) {
+            String defaultDismissControl) {
         mContext = context;
         mSuggestionList = suggestionList;
         mSharedPrefs = sharedPrefs;
-        mSmartDismissControl = smartDismissControl;
+        mDefaultDismissControl = defaultDismissControl;
     }
 
     public SuggestionList getSuggestions(boolean isSmartSuggestionEnabled) {
@@ -163,25 +158,16 @@ public class SuggestionParser {
         return suggestionList;
     }
 
-    public boolean dismissSuggestion(Tile suggestion) {
-        return dismissSuggestion(suggestion, false);
-    }
-
     /**
      * Dismisses a suggestion, returns true if the suggestion has no more dismisses left and should
      * be disabled.
      */
-    public boolean dismissSuggestion(Tile suggestion, boolean isSmartSuggestionEnabled) {
-        String keyBase = suggestion.intent.getComponent().flattenToShortString();
-        int index = mSharedPrefs.getInt(keyBase + DISMISS_INDEX, 0);
-        String dismissControl = getDismissControl(suggestion, isSmartSuggestionEnabled);
-        if (dismissControl == null || parseDismissString(dismissControl).length == index) {
-            return true;
-        }
+    public boolean dismissSuggestion(Tile suggestion) {
+        final String keyBase = suggestion.intent.getComponent().flattenToShortString();
         mSharedPrefs.edit()
                 .putBoolean(keyBase + IS_DISMISSED, true)
                 .commit();
-        return false;
+        return true;
     }
 
     @VisibleForTesting
@@ -209,7 +195,7 @@ public class SuggestionParser {
             intent.setPackage(category.pkg);
         }
         TileUtils.getTilesForIntent(mContext, new UserHandle(UserHandle.myUserId()), intent,
-                mAddCache, null, suggestions, true, false, false);
+                mAddCache, null, suggestions, true, false, false, true /* shouldUpdateTiles */);
         filterSuggestions(suggestions, countBefore, isSmartSuggestionEnabled);
         if (!category.multiple && suggestions.size() > (countBefore + 1)) {
             // If there are too many, remove them all and only re-add the one with the highest
@@ -359,32 +345,29 @@ public class SuggestionParser {
     @VisibleForTesting
     boolean isDismissed(Tile suggestion, boolean isSmartSuggestionEnabled) {
         String dismissControl = getDismissControl(suggestion, isSmartSuggestionEnabled);
-        if (dismissControl == null) {
-            return false;
-        }
         String keyBase = suggestion.intent.getComponent().flattenToShortString();
         if (!mSharedPrefs.contains(keyBase + SETUP_TIME)) {
             mSharedPrefs.edit()
                     .putLong(keyBase + SETUP_TIME, System.currentTimeMillis())
                     .commit();
         }
-        // Default to dismissed, so that we can have suggestions that only first appear after
-        // some number of days.
-        if (!mSharedPrefs.getBoolean(keyBase + IS_DISMISSED, true)) {
-            return false;
-        }
-        int index = mSharedPrefs.getInt(keyBase + DISMISS_INDEX, 0);
-        int[] dismissRules = parseDismissString(dismissControl);
-        if (dismissRules.length <= index) {
+        // Check if it's already manually dismissed
+        final boolean isDismissed = mSharedPrefs.getBoolean(keyBase + IS_DISMISSED, false);
+        if (isDismissed) {
             return true;
         }
-        int currentDismiss = dismissRules[index];
-        long time = getEndTime(mSharedPrefs.getLong(keyBase + SETUP_TIME, 0), currentDismiss);
-        if (System.currentTimeMillis() >= time) {
+        if (dismissControl == null) {
+            return false;
+        }
+        // Parse when suggestion should first appear. return true to artificially hide suggestion
+        // before then.
+        int firstAppearDay = parseDismissString(dismissControl);
+        long firstAppearDayInMs = getEndTime(mSharedPrefs.getLong(keyBase + SETUP_TIME, 0),
+                firstAppearDay);
+        if (System.currentTimeMillis() >= firstAppearDayInMs) {
             // Dismiss timeout has passed, undismiss it.
             mSharedPrefs.edit()
                     .putBoolean(keyBase + IS_DISMISSED, false)
-                    .putInt(keyBase + DISMISS_INDEX, index + 1)
                     .commit();
             return false;
         }
@@ -392,22 +375,22 @@ public class SuggestionParser {
     }
 
     private long getEndTime(long startTime, int daysDelay) {
-        long days = daysDelay * MILLIS_IN_DAY;
+        long days = daysDelay * DateUtils.DAY_IN_MILLIS;
         return startTime + days;
     }
 
-    private int[] parseDismissString(String dismissControl) {
-        String[] dismissStrs = dismissControl.split(",");
-        int[] dismisses = new int[dismissStrs.length];
-        for (int i = 0; i < dismissStrs.length; i++) {
-            dismisses[i] = Integer.parseInt(dismissStrs[i]);
-        }
-        return dismisses;
+    /**
+     * Parse the first int from a string formatted as "0,1,2..."
+     * The value means suggestion should first appear on Day X.
+     */
+    private int parseDismissString(String dismissControl) {
+        final String[] dismissStrs = dismissControl.split(",");
+        return Integer.parseInt(dismissStrs[0]);
     }
 
     private String getDismissControl(Tile suggestion, boolean isSmartSuggestionEnabled) {
         if (isSmartSuggestionEnabled) {
-            return mSmartDismissControl;
+            return mDefaultDismissControl;
         } else {
             return suggestion.metaData.getString(META_DATA_DISMISS_CONTROL);
         }

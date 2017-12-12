@@ -512,7 +512,7 @@ std::unique_ptr<BinaryPrimitive> MakeBool(bool val) {
 }
 
 std::unique_ptr<BinaryPrimitive> TryParseInt(const StringPiece& str) {
-  std::u16string str16 = util::Utf8ToUtf16(str);
+  std::u16string str16 = util::Utf8ToUtf16(util::TrimWhitespace(str));
   android::Res_value value;
   if (!android::ResTable::stringToInt(str16.data(), str16.size(), &value)) {
     return {};
@@ -521,7 +521,7 @@ std::unique_ptr<BinaryPrimitive> TryParseInt(const StringPiece& str) {
 }
 
 std::unique_ptr<BinaryPrimitive> TryParseFloat(const StringPiece& str) {
-  std::u16string str16 = util::Utf8ToUtf16(str);
+  std::u16string str16 = util::Utf8ToUtf16(util::TrimWhitespace(str));
   android::Res_value value;
   if (!android::ResTable::stringToFloat(str16.data(), str16.size(), &value)) {
     return {};
@@ -700,7 +700,7 @@ std::unique_ptr<Item> ParseBinaryResValue(const ResourceType& type, const Config
           spans++;
         }
         return util::make_unique<StyledString>(dst_pool->MakeRef(
-            style_str, StringPool::Context(StringPool::Context::kStylePriority, config)));
+            style_str, StringPool::Context(StringPool::Context::kNormalPriority, config)));
       } else {
         if (type != ResourceType::kString && util::StartsWith(str, "res/")) {
           // This must be a FileReference.

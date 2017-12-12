@@ -85,7 +85,7 @@ public final class ConnectivityController extends StateController implements
     @Override
     public void maybeStartTrackingJobLocked(JobStatus jobStatus, JobStatus lastJob) {
         if (jobStatus.hasConnectivityConstraint()) {
-            updateConstraintsSatisfied(jobStatus, null);
+            updateConstraintsSatisfied(jobStatus);
             mTrackedJobs.add(jobStatus);
             jobStatus.setTrackingController(JobStatus.TRACKING_CONNECTIVITY);
         }
@@ -99,23 +99,25 @@ public final class ConnectivityController extends StateController implements
         }
     }
 
-    private boolean updateConstraintsSatisfied(JobStatus jobStatus,
-            NetworkCapabilities capabilities) {
+    private boolean updateConstraintsSatisfied(JobStatus jobStatus) {
         final int jobUid = jobStatus.getSourceUid();
         final boolean ignoreBlocked = (jobStatus.getFlags() & JobInfo.FLAG_WILL_BE_FOREGROUND) != 0;
         final NetworkInfo info = mConnManager.getActiveNetworkInfoForUid(jobUid, ignoreBlocked);
-        if (capabilities == null) {
-            final Network network = mConnManager.getActiveNetworkForUid(jobUid, ignoreBlocked);
-            capabilities = mConnManager.getNetworkCapabilities(network);
-        }
+        final Network network = mConnManager.getActiveNetworkForUid(jobUid, ignoreBlocked);
+        final NetworkCapabilities capabilities = (network != null)
+                ? mConnManager.getNetworkCapabilities(network) : null;
 
-        final boolean validated = capabilities != null
+        final boolean validated = (capabilities != null)
                 && capabilities.hasCapability(NetworkCapabilities.NET_CAPABILITY_VALIDATED);
-        final boolean connected = info != null && info.isConnected();
+        final boolean connected = (info != null) && info.isConnected();
         final boolean connectionUsable = connected && validated;
-        final boolean metered = connected && info.isMetered();
-        final boolean unmetered = connected && !info.isMetered();
-        final boolean notRoaming = connected && !info.isRoaming();
+
+        final boolean metered = connected && (capabilities != null)
+                && !capabilities.hasCapability(NetworkCapabilities.NET_CAPABILITY_NOT_METERED);
+        final boolean unmetered = connected && (capabilities != null)
+                && capabilities.hasCapability(NetworkCapabilities.NET_CAPABILITY_NOT_METERED);
+        final boolean notRoaming = connected && (info != null)
+                && !info.isRoaming();
 
         boolean changed = false;
         changed |= jobStatus.setConnectivityConstraintSatisfied(connectionUsable);
@@ -148,13 +150,13 @@ public final class ConnectivityController extends StateController implements
      * @param uid only update jobs belonging to this UID, or {@code -1} to
      *            update all tracked jobs.
      */
-    private void updateTrackedJobs(int uid, NetworkCapabilities capabilities) {
+    private void updateTrackedJobs(int uid) {
         synchronized (mLock) {
             boolean changed = false;
             for (int i = mTrackedJobs.size()-1; i >= 0; i--) {
                 final JobStatus js = mTrackedJobs.valueAt(i);
                 if (uid == -1 || uid == js.getSourceUid()) {
-                    changed |= updateConstraintsSatisfied(js, capabilities);
+                    changed |= updateConstraintsSatisfied(js);
                 }
             }
             if (changed) {
@@ -187,7 +189,7 @@ public final class ConnectivityController extends StateController implements
             if (DEBUG) {
                 Slog.v(TAG, "onCapabilitiesChanged() : " + networkCapabilities);
             }
-            updateTrackedJobs(-1, networkCapabilities);
+            updateTrackedJobs(-1);
         }
 
         @Override
@@ -195,7 +197,7 @@ public final class ConnectivityController extends StateController implements
             if (DEBUG) {
                 Slog.v(TAG, "Network lost");
             }
-            updateTrackedJobs(-1, null);
+            updateTrackedJobs(-1);
         }
     };
 
@@ -205,7 +207,7 @@ public final class ConnectivityController extends StateController implements
             if (DEBUG) {
                 Slog.v(TAG, "Uid rules changed for " + uid);
             }
-            updateTrackedJobs(uid, null);
+            updateTrackedJobs(uid);
         }
 
         @Override
@@ -218,7 +220,7 @@ public final class ConnectivityController extends StateController implements
             if (DEBUG) {
                 Slog.v(TAG, "Background restriction change to " + restrictBackground);
             }
-            updateTrackedJobs(-1, null);
+            updateTrackedJobs(-1);
         }
 
         @Override
@@ -226,7 +228,7 @@ public final class ConnectivityController extends StateController implements
             if (DEBUG) {
                 Slog.v(TAG, "Uid policy changed for " + uid);
             }
-            updateTrackedJobs(uid, null);
+            updateTrackedJobs(uid);
         }
     };
 

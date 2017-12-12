@@ -1748,22 +1748,26 @@ public final class Debug
     public static final int MEMINFO_SHMEM = 4;
     /** @hide */
     public static final int MEMINFO_SLAB = 5;
+     /** @hide */
+    public static final int MEMINFO_SLAB_RECLAIMABLE = 6;
+     /** @hide */
+    public static final int MEMINFO_SLAB_UNRECLAIMABLE = 7;
     /** @hide */
-    public static final int MEMINFO_SWAP_TOTAL = 6;
+    public static final int MEMINFO_SWAP_TOTAL = 8;
     /** @hide */
-    public static final int MEMINFO_SWAP_FREE = 7;
+    public static final int MEMINFO_SWAP_FREE = 9;
     /** @hide */
-    public static final int MEMINFO_ZRAM_TOTAL = 8;
+    public static final int MEMINFO_ZRAM_TOTAL = 10;
     /** @hide */
-    public static final int MEMINFO_MAPPED = 9;
+    public static final int MEMINFO_MAPPED = 11;
     /** @hide */
-    public static final int MEMINFO_VM_ALLOC_USED = 10;
+    public static final int MEMINFO_VM_ALLOC_USED = 12;
     /** @hide */
-    public static final int MEMINFO_PAGE_TABLES = 11;
+    public static final int MEMINFO_PAGE_TABLES = 13;
     /** @hide */
-    public static final int MEMINFO_KERNEL_STACK = 12;
+    public static final int MEMINFO_KERNEL_STACK = 14;
     /** @hide */
-    public static final int MEMINFO_COUNT = 13;
+    public static final int MEMINFO_COUNT = 15;
 
     /**
      * Retrieves /proc/meminfo.  outSizes is filled with fields
@@ -1859,6 +1863,13 @@ public final class Debug
      * @hide
      */
     public static native void dumpNativeHeap(FileDescriptor fd);
+
+    /**
+     * Writes malloc info data to the specified file descriptor.
+     *
+     * @hide
+     */
+    public static native void dumpNativeMallocInfo(FileDescriptor fd);
 
     /**
       * Returns a count of the extant instances of a class.

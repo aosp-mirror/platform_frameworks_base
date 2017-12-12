@@ -25,6 +25,6 @@ import android.media.AudioPlaybackConfiguration;
  */
 oneway interface IPlaybackConfigDispatcher {
 
-    void dispatchPlaybackConfigChange(in List<AudioPlaybackConfiguration> configs);
+    void dispatchPlaybackConfigChange(in List<AudioPlaybackConfiguration> configs, in boolean flush);
 
 }

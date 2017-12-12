@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2015 The Android Open Source Project
+ * Copyright (C) 2017 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,5 +22,15 @@ import com.android.systemui.recents.events.EventBus;
  * This is sent when the stack action button should be hidden.
  */
 public class HideStackActionButtonEvent extends EventBus.Event {
-    // Simple event
+
+    // Whether or not to translate the stack action button when hiding it
+    public final boolean translate;
+
+    public HideStackActionButtonEvent() {
+        this(true);
+    }
+
+    public HideStackActionButtonEvent(boolean translate) {
+        this.translate = translate;
+    }
 }

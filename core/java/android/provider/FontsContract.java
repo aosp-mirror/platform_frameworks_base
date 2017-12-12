@@ -447,14 +447,14 @@ public class FontsContract {
         public FontRequestCallback() {}
 
         /**
-         * Called then a Typeface request done via {@link #requestFont} is complete. Note that this
+         * Called then a Typeface request done via {@link #requestFonts} is complete. Note that this
          * method will not be called if {@link #onTypefaceRequestFailed(int)} is called instead.
          * @param typeface  The Typeface object retrieved.
          */
         public void onTypefaceRetrieved(Typeface typeface) {}
 
         /**
-         * Called when a Typeface request done via {@link #requestFont}} fails.
+         * Called when a Typeface request done via {@link #requestFonts}} fails.
          * @param reason One of {@link #FAIL_REASON_PROVIDER_NOT_FOUND},
          *               {@link #FAIL_REASON_FONT_NOT_FOUND},
          *               {@link #FAIL_REASON_FONT_LOAD_ERROR},

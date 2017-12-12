@@ -66,7 +66,7 @@
     <string name="usb_debugging_message" msgid="2220143855912376496">"Digitálny odtlačok RSA počítača je:\n<xliff:g id="FINGERPRINT">%1$s</xliff:g>"</string>
     <string name="usb_debugging_always" msgid="303335496705863070">"Vždy povoliť z tohto počítača"</string>
     <string name="usb_debugging_secondary_user_title" msgid="6353808721761220421">"Ladenie cez USB nie je povolené"</string>
-    <string name="usb_debugging_secondary_user_message" msgid="8572228137833020196">"Používateľ, ktorý je práve prihlásený na tomto zariadení, nemôže zapnúť ladenie cez USB. Ak chcete použiť túto funkciu, prepnite na používateľa s oprávneniami správcu."</string>
+    <string name="usb_debugging_secondary_user_message" msgid="6067122453571699801">"Používateľ, ktorý je práve prihlásený v tomto zariadení, nemôže zapnúť ladenie USB. Ak chcete použiť túto funkciu, prepnite na hlavného používateľa."</string>
     <string name="compat_mode_on" msgid="6623839244840638213">"Priblížiť na celú obrazovku"</string>
     <string name="compat_mode_off" msgid="4434467572461327898">"Na celú obrazovku"</string>
     <string name="screenshot_saving_ticker" msgid="7403652894056693515">"Prebieha ukladanie snímky obrazovky..."</string>
@@ -359,10 +359,10 @@
     <string name="description_target_search" msgid="3091587249776033139">"Vyhľadávanie"</string>
     <string name="description_direction_up" msgid="7169032478259485180">"Prejdite prstom nahor: <xliff:g id="TARGET_DESCRIPTION">%s</xliff:g>."</string>
     <string name="description_direction_left" msgid="7207478719805562165">"Prejdite prstom doľava: <xliff:g id="TARGET_DESCRIPTION">%s</xliff:g>."</string>
-    <string name="zen_priority_introduction" msgid="7577965386868311310">"Nebudú vás vyrušovať zvuky ani vibrácie, iba budíky, pripomenutia, udalosti a volajúci, ktorých určíte. Budete naďalej počuť všetko, čo sa rozhodnete prehrať, ako napríklad hudbu, videá a hry."</string>
-    <string name="zen_alarms_introduction" msgid="7034415210361973827">"Nebudú vás vyrušovať zvuky ani vibrácie, iba budíky. Budete naďalej počuť všetko, čo sa rozhodnete prehrať, ako napríklad hudbu, videá a hry."</string>
+    <string name="zen_priority_introduction" msgid="1149025108714420281">"Nebudú vás vyrušovať zvuky ani vibrácie, iba budíky, pripomenutia, udalosti a volajúci, ktorých určíte. Budete naďalej počuť všetko, čo sa rozhodnete prehrať, ako napríklad hudbu, videá a hry."</string>
+    <string name="zen_alarms_introduction" msgid="4934328096749380201">"Nebudú vás vyrušovať zvuky ani vibrácie, iba budíky. Budete naďalej počuť všetko, čo sa rozhodnete prehrať, ako napríklad hudbu, videá a hry."</string>
     <string name="zen_priority_customize_button" msgid="7948043278226955063">"Prispôsobiť"</string>
-    <string name="zen_silence_introduction_voice" msgid="2284540992298200729">"Budú zablokované všetky zvuky a vibrácie vrátane budíkov, hudby, videí a hier. Stále však budete môcť telefonovať."</string>
+    <string name="zen_silence_introduction_voice" msgid="3948778066295728085">"Zablokujú sa VŠETKY zvuky a vibrácie vrátane budíkov, hudby, videí a hier. Stále však budete môcť telefonovať."</string>
     <string name="zen_silence_introduction" msgid="3137882381093271568">"Zablokujú sa tým VŠETKY zvuky a vibrácie vrátane zvukov budíkov, hudby, videí a hier."</string>
     <string name="keyguard_more_overflow_text" msgid="9195222469041601365">"+<xliff:g id="NUMBER_OF_NOTIFICATIONS">%d</xliff:g>"</string>
     <string name="speed_bump_explanation" msgid="1288875699658819755">"Menej naliehavé upozornenia sa nachádzajú nižšie"</string>
@@ -462,7 +462,7 @@
     <string name="monitoring_description_do_learn_more" msgid="1849514470437907421">"Ďalšie informácie"</string>
     <string name="monitoring_description_do_body_vpn" msgid="8255218762488901796">"Ste pripojený/-á k aplikácii <xliff:g id="VPN_APP">%1$s</xliff:g>, ktorá môže sledovať vašu aktivitu v sieti vrátane e-mailových správ, aplikácií a webových stránok."</string>
     <string name="monitoring_description_vpn_settings_separator" msgid="1933186756733474388">" "</string>
-    <string name="monitoring_description_vpn_settings" msgid="8869300202410505143">"Otvoriť Nastavenia pripojenia VPN"</string>
+    <string name="monitoring_description_vpn_settings" msgid="6434859242636063861">"Otvoriť nastavenia pripojenia VPN"</string>
     <string name="monitoring_description_ca_cert_settings_separator" msgid="4987350385906393626">" "</string>
     <string name="monitoring_description_ca_cert_settings" msgid="5489969458872997092">"Otvoriť dôveryhodné poverenia"</string>
     <string name="monitoring_description_network_logging" msgid="7223505523384076027">"Správca aktivoval zapisovanie do denníka siete, ktoré sleduje premávku na vašom zariadení.\n\nĎalšie informácie vám poskytne správca."</string>
@@ -562,10 +562,10 @@
     <string name="notification_default_channel_desc" msgid="2506053815870808359">"Táto aplikácia nemá kategórie upozornení"</string>
     <string name="notification_unblockable_desc" msgid="3561016061737896906">"Upozornenia z tejto aplikácie sa nedajú vypnúť"</string>
     <plurals name="notification_num_channels_desc" formatted="false" msgid="5492793452274077663">
-      <item quantity="few">1 z <xliff:g id="NUMBER_1">%d</xliff:g> kategórií upozornení z tejto aplikácie</item>
-      <item quantity="many">1 z <xliff:g id="NUMBER_1">%d</xliff:g> kategórie upozornení z tejto aplikácie</item>
-      <item quantity="other">1 z <xliff:g id="NUMBER_1">%d</xliff:g> kategórií upozornení z tejto aplikácie</item>
-      <item quantity="one">1 z <xliff:g id="NUMBER_0">%d</xliff:g> kategórie upozornení z tejto aplikácie</item>
+      <item quantity="few">1 z <xliff:g id="NUMBER_1">%s</xliff:g> kategórií upozornení z tejto aplikácie</item>
+      <item quantity="many">1 z <xliff:g id="NUMBER_1">%s</xliff:g> kategórie upozornení z tejto aplikácie</item>
+      <item quantity="other">1 z <xliff:g id="NUMBER_1">%s</xliff:g> kategórií upozornení z tejto aplikácie</item>
+      <item quantity="one">1 z <xliff:g id="NUMBER_0">%s</xliff:g> kategórie upozornení z tejto aplikácie</item>
     </plurals>
     <string name="notification_channels_list_desc_2" msgid="6214732715833946441">"<xliff:g id="CHANNEL_NAME_1">%1$s</xliff:g>, <xliff:g id="CHANNEL_NAME_2">%2$s</xliff:g>"</string>
     <plurals name="notification_channels_list_desc_2_and_others" formatted="false" msgid="2747813553355336157">
@@ -599,8 +599,8 @@
       <item quantity="one">%d minúta</item>
     </plurals>
     <string name="battery_panel_title" msgid="7944156115535366613">"Využitie batérie"</string>
-    <string name="battery_detail_charging_summary" msgid="1279095653533044008">"Počas nabíjania nie je Šetrič batérie k dispozícii"</string>
-    <string name="battery_detail_switch_title" msgid="6285872470260795421">"Šetrič batérie"</string>
+    <string name="battery_detail_charging_summary" msgid="4055327085770378335">"Počas nabíjania nie je Šetrič batérie k dispozícii"</string>
+    <string name="battery_detail_switch_title" msgid="8763441006881907058">"Šetrič batérie"</string>
     <string name="battery_detail_switch_summary" msgid="9049111149407626804">"Obmedzí výkonnosť a údaje na pozadí"</string>
     <string name="keyboard_key_button_template" msgid="6230056639734377300">"Tlačidlo <xliff:g id="NAME">%1$s</xliff:g>"</string>
     <string name="keyboard_key_home" msgid="2243500072071305073">"Domov"</string>
@@ -740,9 +740,9 @@
     <string name="pip_phone_minimize" msgid="1079119422589131792">"Minimalizovať"</string>
     <string name="pip_phone_close" msgid="8416647892889710330">"Zavrieť"</string>
     <string name="pip_phone_dismiss_hint" msgid="6351678169095923899">"Zrušíte presunutím nadol"</string>
-    <string name="pip_menu_title" msgid="3328510504196964712">"Ponuka režimu obraz v obraze"</string>
+    <string name="pip_menu_title" msgid="4707292089961887657">"Ponuka"</string>
     <string name="pip_notification_title" msgid="3204024940158161322">"<xliff:g id="NAME">%s</xliff:g> je v režime obraz v obraze"</string>
-    <string name="pip_notification_message" msgid="4171698133469539591">"Ak nechcete, aby aplikácia <xliff:g id="NAME">%s</xliff:g> používala túto funkciu, klepnutím otvorte nastavenia a vypnite ju."</string>
+    <string name="pip_notification_message" msgid="5619512781514343311">"Ak nechcete, aby aplikácia <xliff:g id="NAME">%s</xliff:g> používala túto funkciu, klepnutím otvorte nastavenia a vypnite ju."</string>
     <string name="pip_play" msgid="1417176722760265888">"Prehrať"</string>
     <string name="pip_pause" msgid="8881063404466476571">"Pozastaviť"</string>
     <string name="pip_skip_to_next" msgid="1948440006726306284">"Preskočiť na ďalšie"</string>
@@ -768,6 +768,7 @@
     <string name="tuner_menu" msgid="191640047241552081">"Ponuka"</string>
     <string name="tuner_app" msgid="3507057938640108777">"Aplikácia <xliff:g id="APP">%1$s</xliff:g>"</string>
     <string name="notification_channel_alerts" msgid="4496839309318519037">"Upozornenia"</string>
+    <string name="notification_channel_battery" msgid="5786118169182888462">"Batéria"</string>
     <string name="notification_channel_screenshot" msgid="6314080179230000938">"Snímky obrazovky"</string>
     <string name="notification_channel_general" msgid="4525309436693914482">"Všeobecné správy"</string>
     <string name="notification_channel_storage" msgid="3077205683020695313">"Úložisko"</string>
@@ -788,4 +789,5 @@
     <string name="running_foreground_services_title" msgid="381024150898615683">"Aplikácie sú spustené na pozadí"</string>
     <string name="running_foreground_services_msg" msgid="6326247670075574355">"Klepnutím zobrazíte podrobnosti o batérii a spotrebe dát"</string>
     <string name="data_usage_disable_mobile" msgid="5116269981510015864">"Vypnúť mobilné dáta?"</string>
+    <string name="touch_filtered_warning" msgid="8671693809204767551">"Nastavenia nemôžu overiť vašu odpoveď, pretože určitá aplikácia blokuje žiadosť o povolenie."</string>
 </resources>

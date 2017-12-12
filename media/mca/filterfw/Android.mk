@@ -26,6 +26,8 @@ LOCAL_ADDITIONAL_DEPENDENCIES := $(LOCAL_PATH)/Android.mk
 
 LOCAL_MODULE := libfilterfw
 
+LOCAL_CFLAGS := -Wall -Werror
+
 LOCAL_MODULE_TAGS := optional
 
 LOCAL_WHOLE_STATIC_LIBRARIES := libfilterfw_jni \

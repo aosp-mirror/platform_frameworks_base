@@ -276,6 +276,9 @@ public class AudioTrack extends PlayerBase
     private static final int AUDIO_OUTPUT_FLAG_FAST = 0x4;
     private static final int AUDIO_OUTPUT_FLAG_DEEP_BUFFER = 0x8;
 
+    // Size of HW_AV_SYNC track AV header.
+    private static final float HEADER_V2_SIZE_BYTES = 20.0f;
+
     //--------------------------------------------------------------------------
     // Member variables
     //--------------------
@@ -364,6 +367,10 @@ public class AudioTrack extends PlayerBase
      * HW_AV_SYNC track audio data bytes remaining to write after current AV sync header
      */
     private int mAvSyncBytesRemaining = 0;
+    /**
+     * Offset of the first sample of the audio in byte from start of HW_AV_SYNC track AV header.
+     */
+    private int mOffset = 0;
 
     //--------------------------------
     // Used exclusively by native code
@@ -602,6 +609,16 @@ public class AudioTrack extends PlayerBase
 
         mSampleRate = sampleRate[0];
         mSessionId = session[0];
+
+        if ((mAttributes.getFlags() & AudioAttributes.FLAG_HW_AV_SYNC) != 0) {
+            int frameSizeInBytes;
+            if (AudioFormat.isEncodingLinearFrames(mAudioFormat)) {
+                frameSizeInBytes = mChannelCount * AudioFormat.getBytesPerSample(mAudioFormat);
+            } else {
+                frameSizeInBytes = 1;
+            }
+            mOffset = ((int) Math.ceil(HEADER_V2_SIZE_BYTES / frameSizeInBytes)) * frameSizeInBytes;
+        }
 
         if (mDataLoadMode == MODE_STATIC) {
             mState = STATE_NO_STATIC_DATA;
@@ -2520,14 +2537,15 @@ public class AudioTrack extends PlayerBase
 
         // create timestamp header if none exists
         if (mAvSyncHeader == null) {
-            mAvSyncHeader = ByteBuffer.allocate(16);
+            mAvSyncHeader = ByteBuffer.allocate(mOffset);
             mAvSyncHeader.order(ByteOrder.BIG_ENDIAN);
-            mAvSyncHeader.putInt(0x55550001);
+            mAvSyncHeader.putInt(0x55550002);
         }
 
         if (mAvSyncBytesRemaining == 0) {
             mAvSyncHeader.putInt(4, sizeInBytes);
             mAvSyncHeader.putLong(8, timestamp);
+            mAvSyncHeader.putInt(16, mOffset);
             mAvSyncHeader.position(0);
             mAvSyncBytesRemaining = sizeInBytes;
         }

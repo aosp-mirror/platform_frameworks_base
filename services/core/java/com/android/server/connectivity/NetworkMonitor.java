@@ -1129,7 +1129,8 @@ public class NetworkMonitor extends StateMachine {
     }
 
     private void logNetworkEvent(int evtype) {
-        mMetricsLog.log(new NetworkEvent(mNetId, evtype));
+        int[] transports = mNetworkAgentInfo.networkCapabilities.getTransportTypes();
+        mMetricsLog.log(mNetId, transports, new NetworkEvent(evtype));
     }
 
     private int networkEventType(ValidationStage s, EvaluationResult r) {
@@ -1150,7 +1151,8 @@ public class NetworkMonitor extends StateMachine {
 
     private void maybeLogEvaluationResult(int evtype) {
         if (mEvaluationTimer.isRunning()) {
-            mMetricsLog.log(new NetworkEvent(mNetId, evtype, mEvaluationTimer.stop()));
+            int[] transports = mNetworkAgentInfo.networkCapabilities.getTransportTypes();
+            mMetricsLog.log(mNetId, transports, new NetworkEvent(evtype, mEvaluationTimer.stop()));
             mEvaluationTimer.reset();
         }
     }

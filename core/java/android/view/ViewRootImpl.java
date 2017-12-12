@@ -28,7 +28,6 @@ import static android.view.WindowManager.LayoutParams.TYPE_VOLUME_OVERLAY;
 import android.Manifest;
 import android.animation.LayoutTransition;
 import android.annotation.NonNull;
-import android.annotation.TestApi;
 import android.app.ActivityManager;
 import android.app.ActivityThread;
 import android.app.ResourcesManager;
@@ -214,11 +213,8 @@ public final class ViewRootImpl implements ViewParent,
 
     /**
      * Always assign focus if a focusable View is available.
-     *
-     * @hide
      */
-    @TestApi
-    public static boolean sAlwaysAssignFocus;
+    private static boolean sAlwaysAssignFocus;
 
     /**
      * This list must only be modified by the main thread, so a lock is only needed when changing
@@ -263,6 +259,9 @@ public final class ViewRootImpl implements ViewParent,
     // visibility to control drawing. The decor view visibility will get adjusted when the app get
     // stopped and that's when the app will stop drawing further frames.
     private boolean mForceDecorViewVisibility = false;
+    // Used for tracking app visibility updates separately in case we get double change. This will
+    // make sure that we always call relayout for the corresponding window.
+    private boolean mAppVisibilityChanged;
     int mOrigWindowType = -1;
 
     /** Whether the window had focus during the most recent traversal. */
@@ -1062,6 +1061,7 @@ public final class ViewRootImpl implements ViewParent,
     void handleAppVisibility(boolean visible) {
         if (mAppVisible != visible) {
             mAppVisible = visible;
+            mAppVisibilityChanged = true;
             scheduleTraversals();
             if (!mAppVisible) {
                 WindowManagerGlobal.trimForeground();
@@ -1604,7 +1604,11 @@ public final class ViewRootImpl implements ViewParent,
 
         final int viewVisibility = getHostVisibility();
         final boolean viewVisibilityChanged = !mFirst
-                && (mViewVisibility != viewVisibility || mNewSurfaceNeeded);
+                && (mViewVisibility != viewVisibility || mNewSurfaceNeeded
+                // Also check for possible double visibility update, which will make current
+                // viewVisibility value equal to mViewVisibility and we may miss it.
+                || mAppVisibilityChanged);
+        mAppVisibilityChanged = false;
         final boolean viewUserVisibilityChanged = !mFirst &&
                 ((mViewVisibility == View.VISIBLE) != (viewVisibility == View.VISIBLE));
 
@@ -7710,7 +7714,7 @@ public final class ViewRootImpl implements ViewParent,
         public void onAccessibilityStateChanged(boolean enabled) {
             if (enabled) {
                 ensureConnection();
-                if (mAttachInfo.mHasWindowFocus) {
+                if (mAttachInfo.mHasWindowFocus && (mView != null)) {
                     mView.sendAccessibilityEvent(AccessibilityEvent.TYPE_WINDOW_STATE_CHANGED);
                     View focusedView = mView.findFocus();
                     if (focusedView != null && focusedView != mView) {

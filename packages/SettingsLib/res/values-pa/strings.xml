@@ -40,12 +40,16 @@
     <string name="connected_via_passpoint" msgid="2826205693803088747">"%1$s ਰਾਹੀਂ ਕਨੈਕਟ ਕੀਤਾ"</string>
     <string name="available_via_passpoint" msgid="1617440946846329613">"%1$s ਰਾਹੀਂ ਉਪਲਬਧ"</string>
     <string name="wifi_connected_no_internet" msgid="3149853966840874992">"ਕਨੈਕਟ ਕੀਤਾ, ਕੋਈ ਇੰਟਰਨੈੱਟ ਨਹੀਂ"</string>
+    <string name="wifi_ap_unable_to_handle_new_sta" msgid="5348824313514404541">"ਐਕਸੈੱਸ ਪੁਆਇੰਟ ਅਸਥਾਈ ਤੌਰ \'ਤੇ ਸੰਪੂਰਨ ਰੁਝੇਂਵੇਂ ਵਿੱਚ ਹੈ"</string>
+    <string name="connected_via_carrier" msgid="7583780074526041912">"%1$s ਰਾਹੀਂ ਕਨੈਕਟ ਕੀਤਾ"</string>
+    <string name="available_via_carrier" msgid="1469036129740799053">"%1$s ਰਾਹੀਂ ਉਪਲਬਧ"</string>
     <string name="speed_label_very_slow" msgid="1867055264243608530">"ਬਹੁਤ ਹੌਲੀ"</string>
     <string name="speed_label_slow" msgid="813109590815810235">"ਹੌਲੀ"</string>
     <string name="speed_label_okay" msgid="2331665440671174858">"ਠੀਕ ਹੈ"</string>
     <string name="speed_label_medium" msgid="3175763313268941953">"ਔਸਤ"</string>
     <string name="speed_label_fast" msgid="7715732164050975057">"ਤੇਜ਼"</string>
     <string name="speed_label_very_fast" msgid="2265363430784523409">"ਬਹੁਤ ਤੇਜ਼"</string>
+    <string name="preference_summary_default_combination" msgid="8532964268242666060">"<xliff:g id="STATE">%1$s</xliff:g> / <xliff:g id="DESCRIPTION">%2$s</xliff:g>"</string>
     <string name="bluetooth_disconnected" msgid="6557104142667339895">"ਡਿਸਕਨੈਕਟ ਕੀਤਾ"</string>
     <string name="bluetooth_disconnecting" msgid="8913264760027764974">"ਡਿਸਕਨੈਕਟ ਕਰ ਰਿਹਾ ਹੈ..."</string>
     <string name="bluetooth_connecting" msgid="8555009514614320497">"ਕਨੈਕਟ ਕਰ ਰਿਹਾ ਹੈ…"</string>
@@ -101,6 +105,8 @@
     <string name="accessibility_wifi_two_bars" msgid="3569851234710034416">"Wifi ਦੋ ਬਾਰ।"</string>
     <string name="accessibility_wifi_three_bars" msgid="8134185644861380311">"Wifi ਤਿੰਨ ਬਾਰ।"</string>
     <string name="accessibility_wifi_signal_full" msgid="7061045677694702">"Wifi ਸਿਗਨਲ ਪੂਰਾ।"</string>
+    <string name="accessibility_wifi_security_type_none" msgid="1223747559986205423">"ਖੁੱਲ੍ਹਾ ਨੈੱਟਵਰਕ"</string>
+    <string name="accessibility_wifi_security_type_secured" msgid="862921720418885331">"ਸੁਰੱਖਿਅਤ ਨੈੱਟਵਰਕ"</string>
     <string name="process_kernel_label" msgid="3916858646836739323">"Android OS"</string>
     <string name="data_usage_uninstalled_apps" msgid="614263770923231598">"ਹਟਾਏ ਗਏ ਐਪਸ"</string>
     <string name="data_usage_uninstalled_apps_users" msgid="7986294489899813194">"ਹਟਾਏ ਗਏ ਐਪਸ ਅਤੇ ਉਪਭੋਗਤਾ"</string>
@@ -187,6 +193,7 @@
     <string name="wifi_allow_scan_with_traffic" msgid="3601853081178265786">"ਹਮੇਸ਼ਾਂ ਵਾਈ‑ਫਾਈ ਰੋਮ ਸਕੈਨਾਂ ਦੀ ਆਗਿਆ ਦਿਓ"</string>
     <string name="mobile_data_always_on" msgid="8774857027458200434">"ਮੋਬਾਈਲ ਡਾਟਾ ਹਮੇਸ਼ਾਂ ਕਿਰਿਆਸ਼ੀਲ"</string>
     <string name="tethering_hardware_offload" msgid="7470077827090325814">"ਟੈਦਰਿੰਗ ਹਾਰਡਵੇਅਰ ਐਕਸੈੱਲਰੇਸ਼ਨ"</string>
+    <string name="bluetooth_show_devices_without_names" msgid="4708446092962060176">"ਅਨਾਮ ਬਲੂਟੁੱਥ ਡੀਵਾਈਸਾਂ ਦਿਖਾਓ"</string>
     <string name="bluetooth_disable_absolute_volume" msgid="2660673801947898809">"ਪੂਰਨ ਵੌਲਿਊਮ ਨੂੰ ਅਯੋਗ ਬਣਾਓ"</string>
     <string name="bluetooth_enable_inband_ringing" msgid="3291686366721786740">"ਇਨ-ਬੈਂਡ ਘੰਟੀ ਵੱਜਣ ਨੂੰ ਚਾਲੂ ਕਰੋ"</string>
     <string name="bluetooth_select_avrcp_version_string" msgid="3750059931120293633">"ਬਲੂਟੁੱਥ AVRCP ਵਰਜਨ"</string>
@@ -202,6 +209,12 @@
     <string name="bluetooth_select_a2dp_codec_ldac_playback_quality" msgid="3619694372407843405">"ਬਲੂਟੁੱਥ ਔਡੀਓ LDAC ਕੋਡੇਕ: ਪਲੇਬੈਕ ਗੁਣਵੱਤਾ"</string>
     <string name="bluetooth_select_a2dp_codec_ldac_playback_quality_dialog_title" msgid="3181967377574368400">"ਬਲੂਟੁੱਥ ਔਡੀਓ LDAC ਕੋਡੇਕ ਚੁਣੋ:\nਪਲੇਬੈਕ ਗੁਣਵੱਤਾ"</string>
     <string name="bluetooth_select_a2dp_codec_streaming_label" msgid="5347862512596240506">"ਸਟ੍ਰੀਮਿੰਗ: <xliff:g id="STREAMING_PARAMETER">%1$s</xliff:g>"</string>
+    <string name="select_private_dns_configuration_title" msgid="3700456559305263922">"ਨਿੱਜੀ DNS"</string>
+    <string name="select_private_dns_configuration_dialog_title" msgid="9221994415765826811">"ਨਿੱਜੀ DNS ਮੋਡ ਚੁਣੋ"</string>
+    <string name="private_dns_mode_off" msgid="8236575187318721684">"ਬੰਦ"</string>
+    <string name="private_dns_mode_opportunistic" msgid="7608409735589131766">"ਮੌਕਾਪ੍ਰਸਤ"</string>
+    <string name="private_dns_mode_provider" msgid="8354935160639360804">"ਨਿੱਜੀ DNS ਪ੍ਰਦਾਨਕ ਹੋਸਟਨਾਮ"</string>
+    <string name="private_dns_mode_provider_hostname_hint" msgid="2487492386970928143">"DNS ਪ੍ਰਦਾਨਕ ਦਾ ਹੋਸਟਨਾਮ ਦਾਖਲ ਕਰੋ"</string>
     <string name="wifi_display_certification_summary" msgid="1155182309166746973">"ਵਾਇਰਲੈੱਸ ਡਿਸਪਲੇ ਪ੍ਰਮਾਣੀਕਰਨ ਲਈ ਚੋਣਾਂ ਪ੍ਰਦਰਸ਼ਿਤ ਕਰੋ"</string>
     <string name="wifi_verbose_logging_summary" msgid="6615071616111731958">"ਵਾਈ‑ਫਾਈ ਲੌਗਿੰਗ ਪੱਧਰ ਵਧਾਓ, ਵਾਈ‑ਫਾਈ Picker ਵਿੱਚ ਪ੍ਰਤੀ SSID RSSI ਦਿਖਾਓ"</string>
     <string name="wifi_aggressive_handover_summary" msgid="7266329646559808827">"ਜਦੋਂ ਯੋਗ ਬਣਾਇਆ ਹੋਵੇ, ਤਾਂ ਵਾਈ‑ਫਾਈ ਸਿਗਨਲ ਘੱਟ ਹੋਣ \'ਤੇ ਵਾਈ‑ਫਾਈ ਡਾਟਾ ਕਨੈਕਸ਼ਨ ਮੋਬਾਈਲ ਨੂੰ ਹੈਂਡ ਓਵਰ ਕਰਨ ਵਿੱਚ ਵੱਧ ਆਕਰਮਣਸ਼ੀਲ ਹੋਵੇਗਾ।"</string>
@@ -226,6 +239,7 @@
     <string name="dev_settings_warning_message" msgid="2298337781139097964">"ਇਹ ਸੈਟਿੰਗਾਂ ਕੇਵਲ ਵਿਕਾਸਕਾਰ ਦੀ ਵਰਤੋਂ ਲਈ ਹਨ। ਇਹ ਤੁਹਾਡੇ ਡੀਵਾਈਸ ਅਤੇ ਇਸਤੇ ਮੌਜੂਦ ਐਪਲੀਕੇਸ਼ਨ ਨੂੰ ਬ੍ਰੇਕ ਕਰਨ ਜਾਂ ਦੁਰਵਿਵਹਾਰ ਕਰਨ ਦਾ ਕਾਰਨ ਬਣ ਸਕਦੇ ਹਨ।"</string>
     <string name="verify_apps_over_usb_title" msgid="4177086489869041953">"USB ਤੇ ਐਪਾਂ ਦੀ ਜਾਂਚ ਕਰੋ"</string>
     <string name="verify_apps_over_usb_summary" msgid="9164096969924529200">"ਹਾਨੀਕਾਰਕ ਵਿਵਹਾਰ ਲਈ ADB/ADT ਰਾਹੀਂ ਸਥਾਪਤ ਕੀਤੀਆਂ ਐਪਾਂ ਦੀ ਜਾਂਚ ਕਰੋ।"</string>
+    <string name="bluetooth_show_devices_without_names_summary" msgid="2351196058115755520">"ਅਨਾਮ ਬਲੂਟੁੱਥ ਡੀਵਾਈਸਾਂ ਦਿਖਾਈਆਂ ਜਾਣਗੀਆਂ (ਸਿਰਫ਼ MAC ਪਤੇ)"</string>
     <string name="bluetooth_disable_absolute_volume_summary" msgid="6031284410786545957">"ਰਿਮੋਟ ਡੀਵਾਈਸਾਂ ਨਾਲ ਵੌਲਿਊਮ ਸਮੱਸਿਆਵਾਂ ਜਿਵੇਂ ਕਿ ਨਾ ਪਸੰਦ ਕੀਤੀ ਜਾਣ ਵਾਲੀ ਉੱਚੀ ਵੌਲਿਊਮ ਜਾਂ ਕੰਟਰੋਲ ਦੀ ਕਮੀ ਵਰਗੀ ਹਾਲਤ ਵਿੱਚ ਬਲੂਟੁੱਥ ਪੂਰਨ ਵੌਲਿਊਮ ਵਿਸ਼ੇਸ਼ਤਾ ਨੂੰ ਅਯੋਗ ਬਣਾਉਂਦਾ ਹੈ।"</string>
     <string name="bluetooth_enable_inband_ringing_summary" msgid="2787866074741784975">"ਤੁਹਾਡੇ ਫ਼ੋਨ ਦੀਆਂ ਰਿੰਗਟੋਨਾਂ ਨੂੰ ਬਲੂਟੁੱਥ ਹੈੱਡਸੈੱਟਾਂ \'ਤੇ ਚਲਾਉਣ ਦੀ ਇਜਾਜ਼ਤ ਦਿਓ"</string>
     <string name="enable_terminal_title" msgid="95572094356054120">"ਸਥਾਨਕ ਟਰਮੀਨਲ"</string>
@@ -345,12 +359,11 @@
     <string name="power_discharging_duration_short" msgid="4192244429001842403">"<xliff:g id="LEVEL">^1</xliff:g> - <xliff:g id="TIME">^2</xliff:g> ਬਾਕੀ"</string>
     <string name="power_charging" msgid="1779532561355864267">"<xliff:g id="LEVEL">%1$s</xliff:g> - <xliff:g id="STATE">%2$s</xliff:g>"</string>
     <string name="power_charging_duration" msgid="4676999980973411875">"ਪੂਰੀ ਤਰ੍ਹਾਂ ਚਾਰਜ ਹੋਣ ਤੱਕ <xliff:g id="LEVEL">^1</xliff:g> - <xliff:g id="TIME">^2</xliff:g>"</string>
-    <string name="power_charging_duration_short" msgid="1098603958472207920">"<xliff:g id="LEVEL">^1</xliff:g> - <xliff:g id="TIME">^2</xliff:g>"</string>
     <string name="battery_info_status_unknown" msgid="196130600938058547">"ਅਗਿਆਤ"</string>
     <string name="battery_info_status_charging" msgid="1705179948350365604">"ਚਾਰਜ ਹੋ ਰਿਹਾ ਹੈ"</string>
     <string name="battery_info_status_charging_lower" msgid="8689770213898117994">"ਚਾਰਜ ਕੀਤਾ ਜਾ ਰਿਹਾ ਹੈ"</string>
     <string name="battery_info_status_discharging" msgid="310932812698268588">"ਚਾਰਜ ਨਹੀਂ ਹੋ ਰਿਹਾ"</string>
-    <string name="battery_info_status_not_charging" msgid="2820070506621483576">"ਚਾਰਜ ਨਹੀਂ ਹੋ ਰਿਹਾ"</string>
+    <string name="battery_info_status_not_charging" msgid="8523453668342598579">"ਪਲੱਗ ਲੱਗਾ ਹੋਇਆ ਹੈ, ਇਸ ਸਮੇਂ ਚਾਰਜ ਨਹੀਂ ਹੋ ਸਕਦੀ"</string>
     <string name="battery_info_status_full" msgid="2824614753861462808">"ਪੂਰੀ"</string>
     <string name="disabled_by_admin_summary_text" msgid="6750513964908334617">"ਪ੍ਰਸ਼ਾਸਕ ਵੱਲੋਂ ਕੰਟਰੋਲ ਕੀਤੀ ਗਈ"</string>
     <string name="enabled_by_admin" msgid="5302986023578399263">"ਪ੍ਰਸ਼ਾਸਕ ਦੁਆਰਾ ਯੋਗ ਬਣਾਇਆ ਗਿਆ"</string>
@@ -375,7 +388,6 @@
     <string name="screen_zoom_summary_custom" msgid="5611979864124160447">"ਵਿਉਂਂਤੀ (<xliff:g id="DENSITYDPI">%d</xliff:g>)"</string>
     <string name="help_feedback_label" msgid="6815040660801785649">"ਮਦਦ &amp; ਫੀਡਬੈਕ"</string>
     <string name="content_description_menu_button" msgid="8182594799812351266">"ਮੀਨੂ"</string>
-    <string name="time_zone_gmt" msgid="2587097992671450782">"GMT"</string>
     <string name="retail_demo_reset_message" msgid="118771671364131297">"ਡੈਮੋ ਮੋਡ \'ਚ ਫੈਕਟਰੀ ਰੀਸੈੱਟ ਲਈ ਪਾਸਵਰਡ ਦਿਓ"</string>
     <string name="retail_demo_reset_next" msgid="8356731459226304963">"ਅੱਗੇ"</string>
     <string name="retail_demo_reset_title" msgid="696589204029930100">"ਪਾਸਵਰਡ ਦੀ ਲੋੜ ਹੈ"</string>

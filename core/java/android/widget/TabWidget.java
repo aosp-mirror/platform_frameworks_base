@@ -61,7 +61,10 @@ public class TabWidget extends LinearLayout implements OnFocusChangeListener {
     // This value will be set to 0 as soon as the first tab is added to TabHost.
     private int mSelectedTab = -1;
 
+    @Nullable
     private Drawable mLeftStrip;
+
+    @Nullable
     private Drawable mRightStrip;
 
     private boolean mDrawBottomStrips = true;
@@ -374,23 +377,36 @@ public class TabWidget extends LinearLayout implements OnFocusChangeListener {
         final Drawable leftStrip = mLeftStrip;
         final Drawable rightStrip = mRightStrip;
 
-        leftStrip.setState(selectedChild.getDrawableState());
-        rightStrip.setState(selectedChild.getDrawableState());
+        if (leftStrip != null) {
+            leftStrip.setState(selectedChild.getDrawableState());
+        }
+        if (rightStrip != null) {
+            rightStrip.setState(selectedChild.getDrawableState());
+        }
 
         if (mStripMoved) {
             final Rect bounds = mBounds;
             bounds.left = selectedChild.getLeft();
             bounds.right = selectedChild.getRight();
             final int myHeight = getHeight();
-            leftStrip.setBounds(Math.min(0, bounds.left - leftStrip.getIntrinsicWidth()),
-                    myHeight - leftStrip.getIntrinsicHeight(), bounds.left, myHeight);
-            rightStrip.setBounds(bounds.right, myHeight - rightStrip.getIntrinsicHeight(),
-                    Math.max(getWidth(), bounds.right + rightStrip.getIntrinsicWidth()), myHeight);
+            if (leftStrip != null) {
+                leftStrip.setBounds(Math.min(0, bounds.left - leftStrip.getIntrinsicWidth()),
+                        myHeight - leftStrip.getIntrinsicHeight(), bounds.left, myHeight);
+            }
+            if (rightStrip != null) {
+                rightStrip.setBounds(bounds.right, myHeight - rightStrip.getIntrinsicHeight(),
+                        Math.max(getWidth(), bounds.right + rightStrip.getIntrinsicWidth()),
+                        myHeight);
+            }
             mStripMoved = false;
         }
 
-        leftStrip.draw(canvas);
-        rightStrip.draw(canvas);
+        if (leftStrip != null) {
+            leftStrip.draw(canvas);
+        }
+        if (rightStrip != null) {
+            rightStrip.draw(canvas);
+        }
     }
 
     /**

@@ -23,14 +23,12 @@ import android.animation.PropertyValuesHolder;
 import android.animation.TimeAnimator;
 import android.animation.ValueAnimator;
 import android.animation.ValueAnimator.AnimatorUpdateListener;
-import android.annotation.ColorInt;
 import android.annotation.FloatRange;
 import android.annotation.Nullable;
 import android.content.Context;
 import android.content.res.Configuration;
 import android.content.res.Resources;
 import android.graphics.Canvas;
-import android.graphics.Color;
 import android.graphics.Paint;
 import android.graphics.PointF;
 import android.graphics.PorterDuff;
@@ -40,6 +38,7 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.service.notification.StatusBarNotification;
 import android.support.annotation.NonNull;
+import android.support.annotation.VisibleForTesting;
 import android.util.AttributeSet;
 import android.util.FloatProperty;
 import android.util.Log;
@@ -1082,6 +1081,20 @@ public class NotificationStackScrollLayout extends ViewGroup
 
     @Override
     public ExpandableView getChildAtPosition(float touchX, float touchY) {
+        return getChildAtPosition(touchX, touchY, true /* requireMinHeight */);
+
+    }
+
+    /**
+     * Get the child at a certain screen location.
+     *
+     * @param touchX the x coordinate
+     * @param touchY the y coordinate
+     * @param requireMinHeight Whether a minimum height is required for a child to be returned.
+     * @return the child at the given location.
+     */
+    private ExpandableView getChildAtPosition(float touchX, float touchY,
+            boolean requireMinHeight) {
         // find the view under the pointer, accounting for GONE views
         final int count = getChildCount();
         for (int childIdx = 0; childIdx < count; childIdx++) {
@@ -1100,7 +1113,7 @@ public class NotificationStackScrollLayout extends ViewGroup
             int left = 0;
             int right = getWidth();
 
-            if (bottom - top >= mMinInteractionHeight
+            if ((bottom - top >= mMinInteractionHeight || !requireMinHeight)
                     && touchY >= top && touchY <= bottom && touchX >= left && touchX <= right) {
                 if (slidingChild instanceof ExpandableNotificationRow) {
                     ExpandableNotificationRow row = (ExpandableNotificationRow) slidingChild;
@@ -3219,7 +3232,7 @@ public class NotificationStackScrollLayout extends ViewGroup
             case MotionEvent.ACTION_DOWN: {
                 final int y = (int) ev.getY();
                 mScrolledToTopOnFirstDown = isScrolledToTop();
-                if (getChildAtPosition(ev.getX(), y) == null) {
+                if (getChildAtPosition(ev.getX(), y, false /* requireMinHeight */) == null) {
                     setIsBeingDragged(false);
                     recycleVelocityTracker();
                     break;
@@ -3545,6 +3558,7 @@ public class NotificationStackScrollLayout extends ViewGroup
      * See {@link AmbientState#setDimmed}.
      */
     public void setDimmed(boolean dimmed, boolean animate) {
+        dimmed &= onKeyguard();
         mAmbientState.setDimmed(dimmed);
         if (animate && mAnimationsEnabled) {
             mDimmedNeedsAnimation = true;
@@ -3554,6 +3568,11 @@ public class NotificationStackScrollLayout extends ViewGroup
             setDimAmount(dimmed ? 1.0f : 0.0f);
         }
         requestChildrenUpdate();
+    }
+
+    @VisibleForTesting
+    boolean isDimmed() {
+        return mAmbientState.isDimmed();
     }
 
     private void setDimAmount(float dimAmount) {
@@ -4314,6 +4333,10 @@ public class NotificationStackScrollLayout extends ViewGroup
                 mAmbientState.getScrollY()));
     }
 
+    public void setTouchActive(boolean touchActive) {
+        mShelf.setTouchActive(touchActive);
+    }
+
     /**
      * A listener that is notified when some child locations might have changed.
      */
@@ -4535,7 +4558,10 @@ public class NotificationStackScrollLayout extends ViewGroup
                     anim.start();
                 }
             } else if (mMenuExposedView instanceof ExpandableNotificationRow) {
-                ((ExpandableNotificationRow) mMenuExposedView).resetTranslation();
+                ExpandableNotificationRow row = (ExpandableNotificationRow) mMenuExposedView;
+                if (!row.isRemoved()) {
+                    row.resetTranslation();
+                }
             }
             mMenuExposedView = null;
         }

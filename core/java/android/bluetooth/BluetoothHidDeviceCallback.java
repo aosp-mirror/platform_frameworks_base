@@ -19,50 +19,43 @@ package android.bluetooth;
 import android.util.Log;
 
 /**
- * The template class that applications use to call callback functions on
- * events from the HID host. Callback functions are wrapped in this class and
- * registered to the Android system during app registration.
+ * The template class that applications use to call callback functions on events from the HID host.
+ * Callback functions are wrapped in this class and registered to the Android system during app
+ * registration.
  *
- * {@see BluetoothHidDevice}
+ * <p>{@see BluetoothHidDevice}
  *
- * {@hide}
+ * <p>{@hide}
  */
 public abstract class BluetoothHidDeviceCallback {
 
     private static final String TAG = "BluetoothHidDevCallback";
 
     /**
-     * Callback called when application registration state changes. Usually it's
-     * called due to either
-     * {@link BluetoothHidDevice#registerApp
-     * (String, String, String, byte, byte[], BluetoothHidDeviceCallback)}
-     * or
-     * {@link BluetoothHidDevice#unregisterApp(BluetoothHidDeviceAppConfiguration)}
-     * , but can be also unsolicited in case e.g. Bluetooth was turned off in
-     * which case application is unregistered automatically.
+     * Callback called when application registration state changes. Usually it's called due to
+     * either {@link BluetoothHidDevice#registerApp (String, String, String, byte, byte[],
+     * BluetoothHidDeviceCallback)} or {@link BluetoothHidDevice#unregisterApp()} , but can be also
+     * unsolicited in case e.g. Bluetooth was turned off in which case application is unregistered
+     * automatically.
      *
      * @param pluggedDevice {@link BluetoothDevice} object which represents host that currently has
-     * Virtual Cable established with device. Only valid when application is registered, can be
-     * <code>null</code>.
-     * @param config {@link BluetoothHidDeviceAppConfiguration} object which represents token
-     * required to unregister application using
-     * {@link BluetoothHidDevice#unregisterApp(BluetoothHidDeviceAppConfiguration)}.
+     *     Virtual Cable established with device. Only valid when application is registered, can be
+     *     <code>null</code>.
      * @param registered <code>true</code> if application is registered, <code>false</code>
-     * otherwise.
+     *     otherwise.
      */
-    public void onAppStatusChanged(BluetoothDevice pluggedDevice,
-            BluetoothHidDeviceAppConfiguration config, boolean registered) {
-        Log.d(TAG, "onAppStatusChanged: pluggedDevice=" + pluggedDevice + " registered="
-                + registered);
+    public void onAppStatusChanged(BluetoothDevice pluggedDevice, boolean registered) {
+        Log.d(TAG,
+                "onAppStatusChanged: pluggedDevice=" + pluggedDevice + " registered=" + registered);
     }
 
     /**
-     * Callback called when connection state with remote host was changed.
-     * Application can assume than Virtual Cable is established when called with
-     * {@link BluetoothProfile#STATE_CONNECTED} <code>state</code>.
+     * Callback called when connection state with remote host was changed. Application can assume
+     * than Virtual Cable is established when called with {@link BluetoothProfile#STATE_CONNECTED}
+     * <code>state</code>.
      *
      * @param device {@link BluetoothDevice} object representing host device which connection state
-     * was changed.
+     *     was changed.
      * @param state Connection state as defined in {@link BluetoothProfile}.
      */
     public void onConnectionStateChanged(BluetoothDevice device, int state) {
@@ -70,14 +63,14 @@ public abstract class BluetoothHidDeviceCallback {
     }
 
     /**
-     * Callback called when GET_REPORT is received from remote host. Should be
-     * replied by application using
-     * {@link BluetoothHidDevice#replyReport(BluetoothDevice, byte, byte, byte[])}.
+     * Callback called when GET_REPORT is received from remote host. Should be replied by
+     * application using {@link BluetoothHidDevice#replyReport(BluetoothDevice, byte, byte,
+     * byte[])}.
      *
      * @param type Requested Report Type.
      * @param id Requested Report Id, can be 0 if no Report Id are defined in descriptor.
      * @param bufferSize Requested buffer size, application shall respond with at least given number
-     * of bytes.
+     *     of bytes.
      */
     public void onGetReport(BluetoothDevice device, byte type, byte id, int bufferSize) {
         Log.d(TAG, "onGetReport: device=" + device + " type=" + type + " id=" + id + " bufferSize="
@@ -85,9 +78,9 @@ public abstract class BluetoothHidDeviceCallback {
     }
 
     /**
-     * Callback called when SET_REPORT is received from remote host. In case
-     * received data are invalid, application shall respond with
-     * {@link BluetoothHidDevice#reportError(BluetoothDevice, byte)}.
+     * Callback called when SET_REPORT is received from remote host. In case received data are
+     * invalid, application shall respond with {@link
+     * BluetoothHidDevice#reportError(BluetoothDevice, byte)}.
      *
      * @param type Report Type.
      * @param id Report Id.
@@ -98,10 +91,9 @@ public abstract class BluetoothHidDeviceCallback {
     }
 
     /**
-     * Callback called when SET_PROTOCOL is received from remote host.
-     * Application shall use this information to send only reports valid for
-     * given protocol mode. By default,
-     * {@link BluetoothHidDevice#PROTOCOL_REPORT_MODE} shall be assumed.
+     * Callback called when SET_PROTOCOL is received from remote host. Application shall use this
+     * information to send only reports valid for given protocol mode. By default, {@link
+     * BluetoothHidDevice#PROTOCOL_REPORT_MODE} shall be assumed.
      *
      * @param protocol Protocol Mode.
      */
@@ -110,9 +102,8 @@ public abstract class BluetoothHidDeviceCallback {
     }
 
     /**
-     * Callback called when report data is received over interrupt channel.
-     * Report Type is assumed to be
-     * {@link BluetoothHidDevice#REPORT_TYPE_OUTPUT}.
+     * Callback called when report data is received over interrupt channel. Report Type is assumed
+     * to be {@link BluetoothHidDevice#REPORT_TYPE_OUTPUT}.
      *
      * @param reportId Report Id.
      * @param data Report data.
@@ -122,10 +113,8 @@ public abstract class BluetoothHidDeviceCallback {
     }
 
     /**
-     * Callback called when Virtual Cable is removed. This can be either due to
-     * {@link BluetoothHidDevice#unplug(BluetoothDevice)} or request from remote
-     * side. After this callback is received connection will be disconnected
-     * automatically.
+     * Callback called when Virtual Cable is removed. After this callback is
+     * received connection will be disconnected automatically.
      */
     public void onVirtualCableUnplug(BluetoothDevice device) {
         Log.d(TAG, "onVirtualCableUnplug: device=" + device);

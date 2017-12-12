@@ -40,12 +40,16 @@
     <string name="connected_via_passpoint" msgid="2826205693803088747">"Csatlakozva a következőn keresztül: %1$s"</string>
     <string name="available_via_passpoint" msgid="1617440946846329613">"Elérhető a következőn keresztül: %1$s"</string>
     <string name="wifi_connected_no_internet" msgid="3149853966840874992">"Csatlakozva, nincs internetelérés"</string>
+    <string name="wifi_ap_unable_to_handle_new_sta" msgid="5348824313514404541">"A hozzáférési pont átmenetileg megtelt"</string>
+    <string name="connected_via_carrier" msgid="7583780074526041912">"Csatlakozva a következőn keresztül: %1$s"</string>
+    <string name="available_via_carrier" msgid="1469036129740799053">"Elérhető a következőn keresztül: %1$s"</string>
     <string name="speed_label_very_slow" msgid="1867055264243608530">"Nagyon lassú"</string>
     <string name="speed_label_slow" msgid="813109590815810235">"Lassú"</string>
     <string name="speed_label_okay" msgid="2331665440671174858">"Rendben"</string>
     <string name="speed_label_medium" msgid="3175763313268941953">"Közepes"</string>
     <string name="speed_label_fast" msgid="7715732164050975057">"Gyors"</string>
     <string name="speed_label_very_fast" msgid="2265363430784523409">"Nagyon gyors"</string>
+    <string name="preference_summary_default_combination" msgid="8532964268242666060">"<xliff:g id="STATE">%1$s</xliff:g> / <xliff:g id="DESCRIPTION">%2$s</xliff:g>"</string>
     <string name="bluetooth_disconnected" msgid="6557104142667339895">"Szétkapcsolva"</string>
     <string name="bluetooth_disconnecting" msgid="8913264760027764974">"Szétkapcsolás..."</string>
     <string name="bluetooth_connecting" msgid="8555009514614320497">"Csatlakozás…"</string>
@@ -101,6 +105,8 @@
     <string name="accessibility_wifi_two_bars" msgid="3569851234710034416">"Wi-Fi-jel: két sáv."</string>
     <string name="accessibility_wifi_three_bars" msgid="8134185644861380311">"Wi-Fi-jel: három sáv."</string>
     <string name="accessibility_wifi_signal_full" msgid="7061045677694702">"Wi-Fi-jel: teljes."</string>
+    <string name="accessibility_wifi_security_type_none" msgid="1223747559986205423">"Nyílt hálózat"</string>
+    <string name="accessibility_wifi_security_type_secured" msgid="862921720418885331">"Biztonságos hálózat"</string>
     <string name="process_kernel_label" msgid="3916858646836739323">"Android OS"</string>
     <string name="data_usage_uninstalled_apps" msgid="614263770923231598">"Eltávolított alkalmazások"</string>
     <string name="data_usage_uninstalled_apps_users" msgid="7986294489899813194">"Eltávolított alkalmazások és felhasználók"</string>
@@ -187,6 +193,7 @@
     <string name="wifi_allow_scan_with_traffic" msgid="3601853081178265786">"Wi‑Fi-roaming ellenőrzésének engedélyezése mindig"</string>
     <string name="mobile_data_always_on" msgid="8774857027458200434">"A mobilhálózati kapcsolat mindig aktív"</string>
     <string name="tethering_hardware_offload" msgid="7470077827090325814">"Internetmegosztás hardveres gyorsítása"</string>
+    <string name="bluetooth_show_devices_without_names" msgid="4708446092962060176">"Név nélküli Bluetooth-eszközök megjelenítése"</string>
     <string name="bluetooth_disable_absolute_volume" msgid="2660673801947898809">"Abszolút hangerő funkció letiltása"</string>
     <string name="bluetooth_enable_inband_ringing" msgid="3291686366721786740">"Sávon belüli csörgetés engedélyezése"</string>
     <string name="bluetooth_select_avrcp_version_string" msgid="3750059931120293633">"A Bluetooth AVRCP-verziója"</string>
@@ -202,6 +209,12 @@
     <string name="bluetooth_select_a2dp_codec_ldac_playback_quality" msgid="3619694372407843405">"Bluetooth LDAC hangkodek: lejátszási minőség"</string>
     <string name="bluetooth_select_a2dp_codec_ldac_playback_quality_dialog_title" msgid="3181967377574368400">"Bluetooth LDAC hangkodek kiválasztása:\nlejátszási minőség"</string>
     <string name="bluetooth_select_a2dp_codec_streaming_label" msgid="5347862512596240506">"Streamelés: <xliff:g id="STREAMING_PARAMETER">%1$s</xliff:g>"</string>
+    <string name="select_private_dns_configuration_title" msgid="3700456559305263922">"Privát DNS"</string>
+    <string name="select_private_dns_configuration_dialog_title" msgid="9221994415765826811">"„Privát DNS” mód kiválasztása"</string>
+    <string name="private_dns_mode_off" msgid="8236575187318721684">"Ki"</string>
+    <string name="private_dns_mode_opportunistic" msgid="7608409735589131766">"Opportunista"</string>
+    <string name="private_dns_mode_provider" msgid="8354935160639360804">"Privát DNS-szolgáltató gazdagépneve"</string>
+    <string name="private_dns_mode_provider_hostname_hint" msgid="2487492386970928143">"Adja meg a DNS-szolgáltató gazdagépnevét"</string>
     <string name="wifi_display_certification_summary" msgid="1155182309166746973">"Vezeték nélküli kijelző tanúsítványával kapcsolatos lehetőségek megjelenítése"</string>
     <string name="wifi_verbose_logging_summary" msgid="6615071616111731958">"Wi‑Fi-naplózási szint növelése, RSSI/SSID megjelenítése a Wi‑Fi-választóban"</string>
     <string name="wifi_aggressive_handover_summary" msgid="7266329646559808827">"Ha engedélyezi, a Wi-Fi agresszívebben fogja átadni az adatkapcsolatot a mobilhálózatnak gyenge Wi-Fi-jel esetén"</string>
@@ -226,6 +239,7 @@
     <string name="dev_settings_warning_message" msgid="2298337781139097964">"Ezek a beállítások csak fejlesztői használatra szolgálnak. Használatuk esetén eszköze vagy alkalmazásai meghibásodhatnak, illetve nem várt módon viselkedhetnek."</string>
     <string name="verify_apps_over_usb_title" msgid="4177086489869041953">"USB-n keresztül telepített alkalmazások ellenőrzése"</string>
     <string name="verify_apps_over_usb_summary" msgid="9164096969924529200">"Az ADB/ADT útján telepített alkalmazások ellenőrzése kártékony viselkedésre."</string>
+    <string name="bluetooth_show_devices_without_names_summary" msgid="2351196058115755520">"Név nélküli Bluetooth-eszközök jelennek meg (csak MAC-címekkel)"</string>
     <string name="bluetooth_disable_absolute_volume_summary" msgid="6031284410786545957">"Letiltja a Bluetooth abszolút hangerő funkcióját a távoli eszközökkel kapcsolatos hangerőproblémák – például elfogadhatatlanul magas vagy nem vezérelhető hangerő – esetén."</string>
     <string name="bluetooth_enable_inband_ringing_summary" msgid="2787866074741784975">"A telefonon lévő csengőhangok Bluetooth-headseteken való lejátszásának engedélyezése"</string>
     <string name="enable_terminal_title" msgid="95572094356054120">"Helyi végpont"</string>
@@ -345,12 +359,11 @@
     <string name="power_discharging_duration_short" msgid="4192244429001842403">"<xliff:g id="LEVEL">^1</xliff:g> – <xliff:g id="TIME">^2</xliff:g> van hátra"</string>
     <string name="power_charging" msgid="1779532561355864267">"<xliff:g id="LEVEL">%1$s</xliff:g> – <xliff:g id="STATE">%2$s</xliff:g>"</string>
     <string name="power_charging_duration" msgid="4676999980973411875">"<xliff:g id="LEVEL">^1</xliff:g> - <xliff:g id="TIME">^2</xliff:g> a teljes feltöltésig"</string>
-    <string name="power_charging_duration_short" msgid="1098603958472207920">"<xliff:g id="LEVEL">^1</xliff:g> – <xliff:g id="TIME">^2</xliff:g>"</string>
     <string name="battery_info_status_unknown" msgid="196130600938058547">"Ismeretlen"</string>
     <string name="battery_info_status_charging" msgid="1705179948350365604">"Töltés"</string>
     <string name="battery_info_status_charging_lower" msgid="8689770213898117994">"töltés"</string>
     <string name="battery_info_status_discharging" msgid="310932812698268588">"Nem tölt"</string>
-    <string name="battery_info_status_not_charging" msgid="2820070506621483576">"Nem töltődik"</string>
+    <string name="battery_info_status_not_charging" msgid="8523453668342598579">"Csatlakoztatva, jelenleg nem tölt"</string>
     <string name="battery_info_status_full" msgid="2824614753861462808">"Feltöltve"</string>
     <string name="disabled_by_admin_summary_text" msgid="6750513964908334617">"Rendszergazda által irányítva"</string>
     <string name="enabled_by_admin" msgid="5302986023578399263">"A rendszergazda bekapcsolta"</string>
@@ -375,7 +388,6 @@
     <string name="screen_zoom_summary_custom" msgid="5611979864124160447">"Egyéni (<xliff:g id="DENSITYDPI">%d</xliff:g>)"</string>
     <string name="help_feedback_label" msgid="6815040660801785649">"Súgó és visszajelzés"</string>
     <string name="content_description_menu_button" msgid="8182594799812351266">"Menü"</string>
-    <string name="time_zone_gmt" msgid="2587097992671450782">"GMT"</string>
     <string name="retail_demo_reset_message" msgid="118771671364131297">"Írja be a jelszót a visszaállításhoz"</string>
     <string name="retail_demo_reset_next" msgid="8356731459226304963">"Következő"</string>
     <string name="retail_demo_reset_title" msgid="696589204029930100">"Jelszó szükséges"</string>

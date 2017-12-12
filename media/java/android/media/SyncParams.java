@@ -232,7 +232,7 @@ public final class SyncParams {
      *     the maximum deviation of the playback rate from the playback rate
      *     set. ({@code abs(actual_rate - set_rate) / set_rate})
      * @return this <code>SyncParams</code> instance.
-     * @throws InvalidArgumentException if the tolerance is negative, or not less than one
+     * @throws IllegalArgumentException if the tolerance is negative, or not less than one.
      */
     public SyncParams setTolerance(float tolerance) {
         if (tolerance < 0.f || tolerance >= 1.f) {

@@ -31,6 +31,7 @@ import android.app.ActivityThread;
 import android.app.AppOpsManager;
 import android.app.Application;
 import android.app.NotificationChannel;
+import android.app.NotificationManager;
 import android.app.SearchManager;
 import android.app.WallpaperManager;
 import android.content.ComponentName;
@@ -194,6 +195,24 @@ public final class Settings {
             "android.settings.AIRPLANE_MODE_SETTINGS";
 
     /**
+     * Activity Action: Show mobile data usage list.
+     * <p>
+     * Input: {@link EXTRA_NETWORK_TEMPLATE} and {@link EXTRA_SUB_ID} should be included to specify
+     * how and what mobile data statistics should be collected.
+     * <p>
+     * Output: Nothing
+     * @hide
+     */
+    @SdkConstant(SdkConstantType.ACTIVITY_INTENT_ACTION)
+    public static final String ACTION_MOBILE_DATA_USAGE =
+            "android.settings.MOBILE_DATA_USAGE";
+
+    /** @hide */
+    public static final String EXTRA_NETWORK_TEMPLATE = "network_template";
+    /** @hide */
+    public static final String EXTRA_SUB_ID = "sub_id";
+
+    /**
      * Activity Action: Modify Airplane mode settings using a voice command.
      * <p>
      * In some cases, a matching Activity may not exist, so ensure you safeguard against this.
@@ -291,10 +310,7 @@ public final class Settings {
 
     /**
      * Activity Action: Show settings to allow configuration of trusted external sources
-     * <p>
-     * In some cases, a matching Activity may not exist, so ensure you
-     * safeguard against this.
-     * <p>
+     *
      * Input: Optionally, the Intent's data URI can specify the application package name to
      * directly invoke the management GUI specific to the package name. For example
      * "package:com.my.app".
@@ -558,21 +574,6 @@ public final class Settings {
     @SdkConstant(SdkConstantType.ACTIVITY_INTENT_ACTION)
     public static final String ACTION_INPUT_METHOD_SUBTYPE_SETTINGS =
             "android.settings.INPUT_METHOD_SUBTYPE_SETTINGS";
-
-    /**
-     * Activity Action: Show a dialog to select input method.
-     * <p>
-     * In some cases, a matching Activity may not exist, so ensure you
-     * safeguard against this.
-     * <p>
-     * Input: Nothing.
-     * <p>
-     * Output: Nothing.
-     * @hide
-     */
-    @SdkConstant(SdkConstantType.ACTIVITY_INTENT_ACTION)
-    public static final String ACTION_SHOW_INPUT_METHOD_PICKER =
-            "android.settings.SHOW_INPUT_METHOD_PICKER";
 
     /**
      * Activity Action: Show settings to manage the user input dictionary.
@@ -4002,6 +4003,15 @@ public final class Settings {
         };
 
         /**
+         * Keys we no longer back up under the current schema, but want to continue to
+         * process when restoring historical backup datasets.
+         *
+         * @hide
+         */
+        public static final String[] LEGACY_RESTORE_SETTINGS = {
+        };
+
+        /**
          * These are all public system settings
          *
          * @hide
@@ -5163,17 +5173,39 @@ public final class Settings {
         public static final String ALLOW_MOCK_LOCATION = "mock_location";
 
         /**
-         * A 64-bit number (as a hex string) that is randomly
-         * generated when the user first sets up the device and should remain
-         * constant for the lifetime of the user's device. The value may
-         * change if a factory reset is performed on the device.
-         * <p class="note"><strong>Note:</strong> When a device has <a
-         * href="{@docRoot}about/versions/android-4.2.html#MultipleUsers">multiple users</a>
-         * (available on certain devices running Android 4.2 or higher), each user appears as a
-         * completely separate device, so the {@code ANDROID_ID} value is unique to each
-         * user.</p>
+         * On Android 8.0 (API level 26) and higher versions of the platform,
+         * a 64-bit number (expressed as a hexadecimal string), unique to
+         * each combination of app-signing key, user, and device.
+         * Values of {@code ANDROID_ID} are scoped by signing key and user.
+         * The value may change if a factory reset is performed on the
+         * device or if an APK signing key changes.
          *
-         * <p class="note"><strong>Note:</strong> If the caller is an Instant App the id is scoped
+         * For more information about how the platform handles {@code ANDROID_ID}
+         * in Android 8.0 (API level 26) and higher, see <a
+         * href="{@docRoot}preview/behavior-changes.html#privacy-all">
+         * Android 8.0 Behavior Changes</a>.
+         *
+         * <p class="note"><strong>Note:</strong> For apps that were installed
+         * prior to updating the device to a version of Android 8.0
+         * (API level 26) or higher, the value of {@code ANDROID_ID} changes
+         * if the app is uninstalled and then reinstalled after the OTA.
+         * To preserve values across uninstalls after an OTA to Android 8.0
+         * or higher, developers can use
+         * <a href="{@docRoot}guide/topics/data/keyvaluebackup.html">
+         * Key/Value Backup</a>.</p>
+         *
+         * <p>In versions of the platform lower than Android 8.0 (API level 26),
+         * a 64-bit number (expressed as a hexadecimal string) that is randomly
+         * generated when the user first sets up the device and should remain
+         * constant for the lifetime of the user's device.
+         *
+         * On devices that have
+         * <a href="{@docRoot}about/versions/android-4.2.html#MultipleUsers">
+         * multiple users</a>, each user appears as a
+         * completely separate device, so the {@code ANDROID_ID} value is
+         * unique to each user.</p>
+         *
+         * <p class="note"><strong>Note:</strong> If the caller is an Instant App the ID is scoped
          * to the Instant App, it is generated when the Instant App is first installed and reset if
          * the user clears the Instant App.
          */
@@ -5242,6 +5274,7 @@ public final class Settings {
          * Whether the current user has been set up via setup wizard (0 = false, 1 = true)
          * @hide
          */
+        @TestApi
         public static final String USER_SETUP_COMPLETE = "user_setup_complete";
 
         /**
@@ -6644,28 +6677,36 @@ public final class Settings {
         public static final String ASSIST_DISCLOSURE_ENABLED = "assist_disclosure_enabled";
 
         /**
-         * Name of the service components that the current user has explicitly allowed to
+         * Read only list of the service components that the current user has explicitly allowed to
          * see and assist with all of the user's notifications.
          *
+         * @deprecated Use
+         * {@link NotificationManager#isNotificationListenerAccessGranted(ComponentName)}.
          * @hide
          */
+        @Deprecated
         public static final String ENABLED_NOTIFICATION_ASSISTANT =
                 "enabled_notification_assistant";
 
         /**
-         * Names of the service components that the current user has explicitly allowed to
+         * Read only list of the service components that the current user has explicitly allowed to
          * see all of the user's notifications, separated by ':'.
          *
          * @hide
+         * @deprecated Use
+         * {@link NotificationManager#isNotificationAssistantAccessGranted(ComponentName)}.
          */
+        @Deprecated
         public static final String ENABLED_NOTIFICATION_LISTENERS = "enabled_notification_listeners";
 
         /**
-         * Names of the packages that the current user has explicitly allowed to
-         * manage notification policy configuration, separated by ':'.
+         * Read only list of the packages that the current user has explicitly allowed to
+         * manage do not disturb, separated by ':'.
          *
+         * @deprecated Use {@link NotificationManager#isNotificationPolicyAccessGranted()}.
          * @hide
          */
+        @Deprecated
         @TestApi
         public static final String ENABLED_NOTIFICATION_POLICY_ACCESS_PACKAGES =
                 "enabled_notification_policy_access_packages";
@@ -6904,8 +6945,9 @@ public final class Settings {
         public static final String NIGHT_DISPLAY_CUSTOM_END_TIME = "night_display_custom_end_time";
 
         /**
-         * Time in milliseconds (since epoch) when Night display was last activated. Use to decide
-         * whether to apply the current activated state after a reboot or user change.
+         * A String representing the LocalDateTime when Night display was last activated. Use to
+         * decide whether to apply the current activated state after a reboot or user change. In
+         * legacy cases, this is represented by the time in milliseconds (since epoch).
          * @hide
          */
         public static final String NIGHT_DISPLAY_LAST_ACTIVATED_TIME =
@@ -7102,7 +7144,6 @@ public final class Settings {
             AUTOFILL_SERVICE,
             ACCESSIBILITY_DISPLAY_MAGNIFICATION_SCALE,
             ENABLED_ACCESSIBILITY_SERVICES,
-            ENABLED_NOTIFICATION_LISTENERS,
             ENABLED_VR_LISTENERS,
             ENABLED_INPUT_METHODS,
             TOUCH_EXPLORATION_GRANTED_ACCESSIBILITY_SERVICES,
@@ -7182,6 +7223,13 @@ public final class Settings {
             SCREENSAVER_COMPONENTS,
             SCREENSAVER_ACTIVATE_ON_DOCK,
             SCREENSAVER_ACTIVATE_ON_SLEEP,
+        };
+
+        /** @hide */
+        public static final String[] LEGACY_RESTORE_SETTINGS = {
+                ENABLED_NOTIFICATION_LISTENERS,
+                ENABLED_NOTIFICATION_ASSISTANT,
+                ENABLED_NOTIFICATION_POLICY_ACCESS_PACKAGES
         };
 
         /**
@@ -7725,6 +7773,16 @@ public final class Settings {
          */
         public static final String CDMA_SUBSCRIPTION_MODE = "subscription_mode";
 
+        /**
+         * The default value for whether background data is enabled or not.
+         *
+         * Used by {@code NetworkPolicyManagerService}.
+         *
+         * @hide
+         */
+        public static final String DEFAULT_RESTRICT_BACKGROUND_DATA =
+                "default_restrict_background_data";
+
         /** Inactivity timeout to track mobile data activity.
         *
         * If set to a positive integer, it indicates the inactivity timeout value in seconds to
@@ -7990,6 +8048,8 @@ public final class Settings {
        public static final String NETSTATS_GLOBAL_ALERT_BYTES = "netstats_global_alert_bytes";
        /** {@hide} */
        public static final String NETSTATS_SAMPLE_ENABLED = "netstats_sample_enabled";
+       /** {@hide} */
+       public static final String NETSTATS_AUGMENT_ENABLED = "netstats_augment_enabled";
 
        /** {@hide} */
        public static final String NETSTATS_DEV_BUCKET_DURATION = "netstats_dev_bucket_duration";
@@ -8514,6 +8574,16 @@ public final class Settings {
          * @hide
          */
         public static final String NETWORK_SCORING_UI_ENABLED = "network_scoring_ui_enabled";
+
+        /**
+         * Value to specify how long in milliseconds to retain seen score cache curves to be used
+         * when generating SSID only bases score curves.
+         *
+         * Type: long
+         * @hide
+         */
+        public static final String SPEED_LABEL_CACHE_EVICTION_AGE_MILLIS =
+                "speed_label_cache_eviction_age_millis";
 
         /**
          * Value to specify if network recommendations from
@@ -9206,6 +9276,9 @@ public final class Settings {
         /** {@hide} */
         public static final String
                 BLUETOOTH_PAN_PRIORITY_PREFIX = "bluetooth_pan_priority_";
+        /** {@hide} */
+        public static final String
+                BLUETOOTH_HEARING_AID_PRIORITY_PREFIX = "bluetooth_hearing_aid_priority_";
 
         /**
          * Activity manager specific settings.
@@ -9227,9 +9300,11 @@ public final class Settings {
          * gc_min_interval                      (long)
          * full_pss_min_interval                (long)
          * full_pss_lowered_interval            (long)
-         * power_check_delay                    (long)
-         * wake_lock_min_check_duration         (long)
-         * cpu_min_check_duration               (long)
+         * power_check_interval                 (long)
+         * power_check_max_cpu_1                (int)
+         * power_check_max_cpu_2                (int)
+         * power_check_max_cpu_3                (int)
+         * power_check_max_cpu_4                (int)
          * service_usage_interaction_time       (long)
          * usage_stats_interaction_interval     (long)
          * service_restart_duration             (long)
@@ -9314,9 +9389,12 @@ public final class Settings {
 
         /**
          * Battery anomaly detection specific settings
-         * This is encoded as a key=value list, separated by commas. Ex:
+         * This is encoded as a key=value list, separated by commas.
+         * wakeup_blacklisted_tags is a string, encoded as a set of tags, encoded via
+         * {@link Uri#encode(String)}, separated by colons. Ex:
          *
-         * "anomaly_detection_enabled=true,wakelock_threshold=2000"
+         * "anomaly_detection_enabled=true,wakelock_threshold=2000,wakeup_alarm_enabled=true,"
+         * "wakeup_alarm_threshold=10,wakeup_blacklisted_tags=tag1:tag2:with%2Ccomma:with%3Acolon"
          *
          * The following keys are supported:
          *
@@ -9324,10 +9402,34 @@ public final class Settings {
          * anomaly_detection_enabled       (boolean)
          * wakelock_enabled                (boolean)
          * wakelock_threshold              (long)
+         * wakeup_alarm_enabled            (boolean)
+         * wakeup_alarm_threshold          (long)
+         * wakeup_blacklisted_tags         (string)
+         * bluetooth_scan_enabled          (boolean)
+         * bluetooth_scan_threshold        (long)
          * </pre>
          * @hide
          */
         public static final String ANOMALY_DETECTION_CONSTANTS = "anomaly_detection_constants";
+
+        /**
+         * Always on display(AOD) specific settings
+         * This is encoded as a key=value list, separated by commas. Ex:
+         *
+         * "prox_screen_off_delay=10000,screen_brightness_array=0:1:2:3:4"
+         *
+         * The following keys are supported:
+         *
+         * <pre>
+         * screen_brightness_array         (string)
+         * dimming_scrim_array             (string)
+         * prox_screen_off_delay           (long)
+         * prox_cooldown_trigger           (long)
+         * prox_cooldown_period            (long)
+         * </pre>
+         * @hide
+         */
+        public static final String ALWAYS_ON_DISPLAY_CONSTANTS = "always_on_display_constants";
 
         /**
          * App standby (app idle) specific settings.
@@ -9468,6 +9570,22 @@ public final class Settings {
         public static final String DEVICE_POLICY_CONSTANTS = "device_policy_constants";
 
         /**
+         * TextClassifier specific settings.
+         * This is encoded as a key=value list, separated by commas. Ex:
+         *
+         * <pre>
+         * smart_selection_dark_launch              (boolean)
+         * smart_selection_enabled_for_edit_text    (boolean)
+         * </pre>
+         *
+         * <p>
+         * Type: string
+         * @hide
+         * see also android.view.textclassifier.TextClassifierConstants
+         */
+        public static final String TEXT_CLASSIFIER_CONSTANTS = "text_classifier_constants";
+
+        /**
          * Get the key that retrieves a bluetooth headset's priority.
          * @hide
          */
@@ -9524,6 +9642,14 @@ public final class Settings {
          */
         public static final String getBluetoothPanPriorityKey(String address) {
             return BLUETOOTH_PAN_PRIORITY_PREFIX + address.toUpperCase(Locale.ROOT);
+        }
+
+        /**
+         * Get the key that retrieves a bluetooth hearing aid priority.
+         * @hide
+         */
+        public static final String getBluetoothHearingAidPriorityKey(String address) {
+            return BLUETOOTH_HEARING_AID_PRIORITY_PREFIX + address.toUpperCase(Locale.ROOT);
         }
 
         /**
@@ -9946,7 +10072,8 @@ public final class Settings {
         public static final String REQUIRE_PASSWORD_TO_DECRYPT = "require_password_to_decrypt";
 
         /**
-         * Whether the Volte is enabled
+         * Whether the Volte is enabled. If this setting is not set then we use the Carrier Config
+         * value {@link CarrierConfigManager#KEY_ENHANCED_4G_LTE_ON_BY_DEFAULT_BOOL}.
          * <p>
          * Type: int (0 for false, 1 for true)
          * @hide
@@ -10179,6 +10306,15 @@ public final class Settings {
                 "euicc_factory_reset_timeout_millis";
 
         /**
+         * Flag to set the timeout for when to refresh the storage settings cached data.
+         * Type: long
+         *
+         * @hide
+         */
+        public static final String STORAGE_SETTINGS_CLOBBER_THRESHOLD =
+                "storage_settings_clobber_threshold";
+
+        /**
          * Settings to backup. This is here so that it's in the same place as the settings
          * keys and easy to update.
          *
@@ -10216,6 +10352,10 @@ public final class Settings {
             BLUETOOTH_ON,
             PRIVATE_DNS_MODE,
             PRIVATE_DNS_SPECIFIER
+        };
+
+        /** @hide */
+        public static final String[] LEGACY_RESTORE_SETTINGS = {
         };
 
         private static final ContentProviderHolder sProviderHolder =
@@ -10740,6 +10880,7 @@ public final class Settings {
             INSTANT_APP_SETTINGS.add(ANIMATOR_DURATION_SCALE);
             INSTANT_APP_SETTINGS.add(DEBUG_VIEW_ATTRIBUTES);
             INSTANT_APP_SETTINGS.add(WTF_IS_FATAL);
+            INSTANT_APP_SETTINGS.add(SEND_ACTION_APP_ERROR);
         }
 
         /**
@@ -10773,6 +10914,26 @@ public final class Settings {
          */
         public static final String ENABLE_DELETION_HELPER_NO_THRESHOLD_TOGGLE =
                 "enable_deletion_helper_no_threshold_toggle";
+
+        /**
+         * The list of snooze options for notifications
+         * This is encoded as a key=value list, separated by commas. Ex:
+         *
+         * "default=60,options_array=15:30:60:120"
+         *
+         * The following keys are supported:
+         *
+         * <pre>
+         * default               (int)
+         * options_array         (string)
+         * </pre>
+         *
+         * All delays in integer minutes. Array order is respected.
+         * Options will be used in order up to the maximum allowed by the UI.
+         * @hide
+         */
+        public static final String NOTIFICATION_SNOOZE_OPTIONS =
+                "notification_snooze_options";
     }
 
     /**

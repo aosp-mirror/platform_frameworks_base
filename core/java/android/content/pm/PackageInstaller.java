@@ -27,6 +27,7 @@ import android.app.ActivityManager;
 import android.app.AppGlobals;
 import android.content.Intent;
 import android.content.IntentSender;
+import android.content.pm.PackageManager.DeleteFlags;
 import android.content.pm.PackageManager.InstallReason;
 import android.graphics.Bitmap;
 import android.net.Uri;
@@ -37,6 +38,7 @@ import android.os.Message;
 import android.os.Parcel;
 import android.os.ParcelFileDescriptor;
 import android.os.Parcelable;
+import android.os.ParcelableException;
 import android.os.RemoteException;
 import android.os.SystemProperties;
 import android.system.ErrnoException;
@@ -443,8 +445,24 @@ public class PackageInstaller {
      * @param statusReceiver Where to deliver the result.
      */
     public void uninstall(@NonNull String packageName, @NonNull IntentSender statusReceiver) {
-       uninstall(new VersionedPackage(packageName, PackageManager.VERSION_CODE_HIGHEST),
-               statusReceiver);
+        uninstall(packageName, 0 /*flags*/, statusReceiver);
+    }
+
+    /**
+     * Uninstall the given package, removing it completely from the device. This
+     * method is only available to the current "installer of record" for the
+     * package.
+     *
+     * @param packageName The package to uninstall.
+     * @param flags Flags for uninstall.
+     * @param statusReceiver Where to deliver the result.
+     *
+     * @hide
+     */
+    public void uninstall(@NonNull String packageName, @DeleteFlags int flags,
+            @NonNull IntentSender statusReceiver) {
+        uninstall(new VersionedPackage(packageName, PackageManager.VERSION_CODE_HIGHEST),
+                flags, statusReceiver);
     }
 
     /**
@@ -458,15 +476,34 @@ public class PackageInstaller {
      * @param versionedPackage The versioned package to uninstall.
      * @param statusReceiver Where to deliver the result.
      */
+    public void uninstall(@NonNull VersionedPackage versionedPackage,
+            @NonNull IntentSender statusReceiver) {
+        uninstall(versionedPackage, 0 /*flags*/, statusReceiver);
+    }
+
+    /**
+     * Uninstall the given package with a specific version code, removing it
+     * completely from the device. This method is only available to the current
+     * "installer of record" for the package. If the version code of the package
+     * does not match the one passed in the versioned package argument this
+     * method is a no-op. Use {@link PackageManager#VERSION_CODE_HIGHEST} to
+     * uninstall the latest version of the package.
+     *
+     * @param versionedPackage The versioned package to uninstall.
+     * @param flags Flags for uninstall.
+     * @param statusReceiver Where to deliver the result.
+     *
+     * @hide
+     */
     @RequiresPermission(anyOf = {
             Manifest.permission.DELETE_PACKAGES,
             Manifest.permission.REQUEST_DELETE_PACKAGES})
-    public void uninstall(@NonNull VersionedPackage versionedPackage,
+    public void uninstall(@NonNull VersionedPackage versionedPackage, @DeleteFlags int flags,
             @NonNull IntentSender statusReceiver) {
         Preconditions.checkNotNull(versionedPackage, "versionedPackage cannot be null");
         try {
             mInstaller.uninstall(versionedPackage, mInstallerPackageName,
-                    0, statusReceiver, mUserId);
+                    flags, statusReceiver, mUserId);
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
@@ -757,7 +794,7 @@ public class PackageInstaller {
          * @throws IOException if trouble opening the file for writing, such as
          *             lack of disk space or unavailable media.
          * @throws SecurityException if called after the session has been
-         *             committed or abandoned.
+         *             sealed or abandoned
          */
         public @NonNull OutputStream openWrite(@NonNull String name, long offsetBytes,
                 long lengthBytes) throws IOException {
@@ -882,7 +919,68 @@ public class PackageInstaller {
          */
         public void commit(@NonNull IntentSender statusReceiver) {
             try {
-                mSession.commit(statusReceiver);
+                mSession.commit(statusReceiver, false);
+            } catch (RemoteException e) {
+                throw e.rethrowFromSystemServer();
+            }
+        }
+
+        /**
+         * Attempt to commit a session that has been {@link #transfer(String) transferred}.
+         *
+         * <p>If the device reboots before the session has been finalized, you may commit the
+         * session again.
+         *
+         * <p>The caller of this method is responsible to ensure the safety of the session. As the
+         * session was created by another - usually less trusted - app, it is paramount that before
+         * committing <u>all</u> public and system {@link SessionInfo properties of the session}
+         * and <u>all</u> {@link #openRead(String) APKs} are verified by the caller. It might happen
+         * that new properties are added to the session with a new API revision. In this case the
+         * callers need to be updated.
+         *
+         * @param statusReceiver Callbacks called when the state of the session changes.
+         *
+         * @hide
+         */
+        @SystemApi
+        @RequiresPermission(android.Manifest.permission.INSTALL_PACKAGES)
+        public void commitTransferred(@NonNull IntentSender statusReceiver) {
+            try {
+                mSession.commit(statusReceiver, true);
+            } catch (RemoteException e) {
+                throw e.rethrowFromSystemServer();
+            }
+        }
+
+        /**
+         * Transfer the session to a new owner.
+         * <p>
+         * Only sessions that update the installing app can be transferred.
+         * <p>
+         * After the transfer to a package with a different uid all method calls on the session
+         * will cause {@link SecurityException}s.
+         * <p>
+         * Once this method is called, the session is sealed and no additional mutations beside
+         * committing it may be performed on the session.
+         *
+         * @param packageName The package of the new owner. Needs to hold the INSTALL_PACKAGES
+         *                    permission.
+         *
+         * @throws PackageManager.NameNotFoundException if the new owner could not be found.
+         * @throws SecurityException if called after the session has been committed or abandoned.
+         * @throws SecurityException if the session does not update the original installer
+         * @throws SecurityException if streams opened through
+         *                           {@link #openWrite(String, long, long) are still open.
+         */
+        public void transfer(@NonNull String packageName)
+                throws PackageManager.NameNotFoundException {
+            Preconditions.checkNotNull(packageName);
+
+            try {
+                mSession.transfer(packageName);
+            } catch (ParcelableException e) {
+                e.maybeRethrow(PackageManager.NameNotFoundException.class);
+                throw new RuntimeException(e);
             } catch (RemoteException e) {
                 throw e.rethrowFromSystemServer();
             }
@@ -1002,6 +1100,26 @@ public class PackageInstaller {
             abiOverride = source.readString();
             volumeUuid = source.readString();
             grantedRuntimePermissions = source.readStringArray();
+        }
+
+        /**
+         * Check if there are hidden options set.
+         *
+         * <p>Hidden options are those options that cannot be verified via public or system-api
+         * methods on {@link SessionInfo}.
+         *
+         * @return {@code true} if any hidden option is set.
+         *
+         * @hide
+         */
+        public boolean areHiddenOptionsSet() {
+            return (installFlags & (PackageManager.INSTALL_ALLOW_DOWNGRADE
+                    | PackageManager.INSTALL_DONT_KILL_APP
+                    | PackageManager.INSTALL_INSTANT_APP
+                    | PackageManager.INSTALL_FULL_APP
+                    | PackageManager.INSTALL_VIRTUAL_PRELOAD
+                    | PackageManager.INSTALL_ALLOCATE_AGGRESSIVE)) != installFlags
+                    || abiOverride != null || volumeUuid != null;
         }
 
         /**
@@ -1150,6 +1268,16 @@ public class PackageInstaller {
         }
 
         /**
+         * Sets the install as a virtual preload. Will only have effect when called
+         * by the verifier.
+         * {@hide}
+         */
+        @SystemApi
+        public void setInstallAsVirtualPreload() {
+            installFlags |= PackageManager.INSTALL_VIRTUAL_PRELOAD;
+        }
+
+        /**
          * Set the reason for installing this package.
          */
         public void setInstallReason(@InstallReason int installReason) {
@@ -1254,6 +1382,19 @@ public class PackageInstaller {
         public CharSequence appLabel;
 
         /** {@hide} */
+        public int installLocation;
+        /** {@hide} */
+        public Uri originatingUri;
+        /** {@hide} */
+        public int originatingUid;
+        /** {@hide} */
+        public Uri referrerUri;
+        /** {@hide} */
+        public String[] grantedRuntimePermissions;
+        /** {@hide} */
+        public int installFlags;
+
+        /** {@hide} */
         public SessionInfo() {
         }
 
@@ -1272,6 +1413,13 @@ public class PackageInstaller {
             appPackageName = source.readString();
             appIcon = source.readParcelable(null);
             appLabel = source.readString();
+
+            installLocation = source.readInt();
+            originatingUri = source.readParcelable(null);
+            originatingUid = source.readInt();
+            referrerUri = source.readParcelable(null);
+            grantedRuntimePermissions = source.readStringArray();
+            installFlags = source.readInt();
         }
 
         /**
@@ -1395,6 +1543,130 @@ public class PackageInstaller {
             return intent;
         }
 
+        /**
+         * Get the mode of the session as set in the constructor of the {@link SessionParams}.
+         *
+         * @return One of {@link SessionParams#MODE_FULL_INSTALL}
+         *         or {@link SessionParams#MODE_INHERIT_EXISTING}
+         */
+        public int getMode() {
+            return mode;
+        }
+
+        /**
+         * Get the value set in {@link SessionParams#setInstallLocation(int)}.
+         */
+        public int getInstallLocation() {
+            return installLocation;
+        }
+
+        /**
+         * Get the value as set in {@link SessionParams#setSize(long)}.
+         *
+         * <p>The value is a hint and does not have to match the actual size.
+         */
+        public long getSize() {
+            return sizeBytes;
+        }
+
+        /**
+         * Get the value set in {@link SessionParams#setOriginatingUri(Uri)}.
+         */
+        public @Nullable Uri getOriginatingUri() {
+            return originatingUri;
+        }
+
+        /**
+         * Get the value set in {@link SessionParams#setOriginatingUid(int)}.
+         */
+        public int getOriginatingUid() {
+            return originatingUid;
+        }
+
+        /**
+         * Get the value set in {@link SessionParams#setReferrerUri(Uri)}
+         */
+        public @Nullable Uri getReferrerUri() {
+            return referrerUri;
+        }
+
+        /**
+         * Get the value set in {@link SessionParams#setGrantedRuntimePermissions(String[])}.
+         *
+         * @hide
+         */
+        @SystemApi
+        public @Nullable String[] getGrantedRuntimePermissions() {
+            return grantedRuntimePermissions;
+        }
+
+        /**
+         * Get the value set in {@link SessionParams#setAllowDowngrade(boolean)}.
+         *
+         * @hide
+         */
+        @SystemApi
+        public boolean getAllowDowngrade() {
+            return (installFlags & PackageManager.INSTALL_ALLOW_DOWNGRADE) != 0;
+        }
+
+        /**
+         * Get the value set in {@link SessionParams#setDontKillApp(boolean)}.
+         *
+         * @hide
+         */
+        @SystemApi
+        public boolean getDontKillApp() {
+            return (installFlags & PackageManager.INSTALL_DONT_KILL_APP) != 0;
+        }
+
+        /**
+         * If {@link SessionParams#setInstallAsInstantApp(boolean)} was called with {@code true},
+         * return true. If it was called with {@code false} or if it was not called return false.
+         *
+         * @hide
+         *
+         * @see #getInstallAsFullApp
+         */
+        @SystemApi
+        public boolean getInstallAsInstantApp(boolean isInstantApp) {
+            return (installFlags & PackageManager.INSTALL_INSTANT_APP) != 0;
+        }
+
+        /**
+         * If {@link SessionParams#setInstallAsInstantApp(boolean)} was called with {@code false},
+         * return true. If it was called with {@code true} or if it was not called return false.
+         *
+         * @hide
+         *
+         * @see #getInstallAsInstantApp
+         */
+        @SystemApi
+        public boolean getInstallAsFullApp(boolean isInstantApp) {
+            return (installFlags & PackageManager.INSTALL_FULL_APP) != 0;
+        }
+
+        /**
+         * Get if {@link SessionParams#setInstallAsVirtualPreload()} was called.
+         *
+         * @hide
+         */
+        @SystemApi
+        public boolean getInstallAsVirtualPreload() {
+            return (installFlags & PackageManager.INSTALL_VIRTUAL_PRELOAD) != 0;
+        }
+
+        /**
+         * Get the value set in {@link SessionParams#setAllocateAggressive(boolean)}.
+         *
+         * @hide
+         */
+        @SystemApi
+        public boolean getAllocateAggressive() {
+            return (installFlags & PackageManager.INSTALL_ALLOCATE_AGGRESSIVE) != 0;
+        }
+
+
         /** {@hide} */
         @Deprecated
         public @Nullable Intent getDetailsIntent() {
@@ -1421,6 +1693,13 @@ public class PackageInstaller {
             dest.writeString(appPackageName);
             dest.writeParcelable(appIcon, flags);
             dest.writeString(appLabel != null ? appLabel.toString() : null);
+
+            dest.writeInt(installLocation);
+            dest.writeParcelable(originatingUri, flags);
+            dest.writeInt(originatingUid);
+            dest.writeParcelable(referrerUri, flags);
+            dest.writeStringArray(grantedRuntimePermissions);
+            dest.writeInt(installFlags);
         }
 
         public static final Parcelable.Creator<SessionInfo>

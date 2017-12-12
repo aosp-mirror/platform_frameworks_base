@@ -18,9 +18,7 @@ package com.android.server.media;
 
 import com.android.internal.util.DumpUtils;
 import com.android.server.Watchdog;
-import com.android.server.media.AudioPlaybackMonitor.OnAudioPlayerActiveStateChangedListener;
 
-import android.Manifest;
 import android.app.ActivityManager;
 import android.content.BroadcastReceiver;
 import android.content.Context;
@@ -96,9 +94,10 @@ public final class MediaRouterService extends IMediaRouterService.Stub
     private final ArrayMap<IBinder, ClientRecord> mAllClientRecords =
             new ArrayMap<IBinder, ClientRecord>();
     private int mCurrentUserId = -1;
-    private boolean mHasBluetoothRoute = false;
+    private boolean mGlobalBluetoothA2dpOn = false;
     private final IAudioService mAudioService;
     private final AudioPlaybackMonitor mAudioPlaybackMonitor;
+    private final AudioRoutesInfo mCurAudioRoutesInfo = new AudioRoutesInfo();
 
     public MediaRouterService(Context context) {
         mContext = context;
@@ -137,13 +136,39 @@ public final class MediaRouterService extends IMediaRouterService.Stub
             audioRoutes = mAudioService.startWatchingRoutes(new IAudioRoutesObserver.Stub() {
                 @Override
                 public void dispatchAudioRoutesChanged(final AudioRoutesInfo newRoutes) {
-                    mHasBluetoothRoute = newRoutes.bluetoothName != null;
+                    synchronized (mLock) {
+                        if (newRoutes.mainType != mCurAudioRoutesInfo.mainType) {
+                            if ((newRoutes.mainType & (AudioRoutesInfo.MAIN_HEADSET
+                                    | AudioRoutesInfo.MAIN_HEADPHONES
+                                    | AudioRoutesInfo.MAIN_USB)) == 0) {
+                                // headset was plugged out.
+                                mGlobalBluetoothA2dpOn = newRoutes.bluetoothName != null;
+                            } else {
+                                // headset was plugged in.
+                                mGlobalBluetoothA2dpOn = false;
+                            }
+                            mCurAudioRoutesInfo.mainType = newRoutes.mainType;
+                        }
+                        if (!TextUtils.equals(
+                                newRoutes.bluetoothName, mCurAudioRoutesInfo.bluetoothName)) {
+                            if (newRoutes.bluetoothName == null) {
+                                // BT was disconnected.
+                                mGlobalBluetoothA2dpOn = false;
+                            } else {
+                                // BT was connected or changed.
+                                mGlobalBluetoothA2dpOn = true;
+                            }
+                            mCurAudioRoutesInfo.bluetoothName = newRoutes.bluetoothName;
+                        }
+                    }
                 }
             });
         } catch (RemoteException e) {
             Slog.w(TAG, "RemoteException in the audio service.");
         }
-        mHasBluetoothRoute = (audioRoutes != null && audioRoutes.bluetoothName != null);
+        synchronized (mLock) {
+            mGlobalBluetoothA2dpOn = (audioRoutes != null && audioRoutes.bluetoothName != null);
+        }
     }
 
     public void systemRunning() {
@@ -346,7 +371,12 @@ public final class MediaRouterService extends IMediaRouterService.Stub
 
     void restoreBluetoothA2dp() {
         try {
-            mAudioService.setBluetoothA2dpOn(mHasBluetoothRoute);
+            boolean a2dpOn = false;
+            synchronized (mLock) {
+                a2dpOn = mGlobalBluetoothA2dpOn;
+            }
+            Slog.v(TAG, "restoreBluetoothA2dp(" + a2dpOn + ")");
+            mAudioService.setBluetoothA2dpOn(a2dpOn);
         } catch (RemoteException e) {
             Slog.w(TAG, "RemoteException while calling setBluetoothA2dpOn.");
         }
@@ -354,12 +384,14 @@ public final class MediaRouterService extends IMediaRouterService.Stub
 
     void restoreRoute(int uid) {
         ClientRecord clientRecord = null;
-        UserRecord userRecord = mUserRecords.get(UserHandle.getUserId(uid));
-        if (userRecord != null && userRecord.mClientRecords != null) {
-            for (ClientRecord cr : userRecord.mClientRecords) {
-                if (validatePackageName(uid, cr.mPackageName)) {
-                    clientRecord = cr;
-                    break;
+        synchronized (mLock) {
+            UserRecord userRecord = mUserRecords.get(UserHandle.getUserId(uid));
+            if (userRecord != null && userRecord.mClientRecords != null) {
+                for (ClientRecord cr : userRecord.mClientRecords) {
+                    if (validatePackageName(uid, cr.mPackageName)) {
+                        clientRecord = cr;
+                        break;
+                    }
                 }
             }
         }

@@ -74,6 +74,13 @@ public abstract class VrManagerInternal {
     public abstract void onScreenStateChanged(boolean isScreenOn);
 
     /**
+     * Set whether the keyguard is currently active/showing.
+     *
+     * @param isShowing is {@code true} if the keyguard is active/showing.
+     */
+    public abstract void onKeyguardStateChanged(boolean isShowing);
+
+    /**
      * Return NO_ERROR if the given package is installed on the device and enabled as a
      * VrListenerService for the given current user, or a negative error code indicating a failure.
      *

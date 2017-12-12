@@ -80,7 +80,7 @@ public class LinkifyTest {
 
         tv = new TextView(createUsEnglishContext());
         tv.setAutoLinkMask(Linkify.ALL);
-        tv.setText("Hey, foo@google.com, call 415-555-1212.");
+        tv.setText("Hey, foo@google.com, call +1-415-555-1212.");
 
         assertTrue(tv.getMovementMethod() instanceof LinkMovementMethod);
         assertTrue(tv.getUrls().length == 2);
@@ -93,7 +93,7 @@ public class LinkifyTest {
         tv = new TextView(createUsEnglishContext());
         tv.setAutoLinkMask(Linkify.ALL);
         tv.setLinksClickable(false);
-        tv.setText("Hey, foo@google.com, call 415-555-1212.");
+        tv.setText("Hey, foo@google.com, call +1-415-555-1212.");
 
         assertFalse(tv.getMovementMethod() instanceof LinkMovementMethod);
         assertTrue(tv.getUrls().length == 2);

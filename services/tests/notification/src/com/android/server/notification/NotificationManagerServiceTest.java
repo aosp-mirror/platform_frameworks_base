@@ -16,12 +16,15 @@
 
 package com.android.server.notification;
 
+import static android.app.NotificationManager.IMPORTANCE_HIGH;
 import static android.app.NotificationManager.IMPORTANCE_LOW;
 import static android.app.NotificationManager.IMPORTANCE_NONE;
+import static android.app.NotificationManager.IMPORTANCE_UNSPECIFIED;
 import static android.content.pm.PackageManager.PERMISSION_DENIED;
 
 import static junit.framework.Assert.assertEquals;
 import static junit.framework.Assert.assertFalse;
+import static junit.framework.Assert.assertNull;
 import static junit.framework.Assert.assertTrue;
 import static junit.framework.Assert.fail;
 
@@ -31,6 +34,7 @@ import static org.mockito.Matchers.anyString;
 import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.any;
 import static org.mockito.Mockito.anyInt;
+import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.reset;
@@ -38,6 +42,7 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import android.app.ActivityManager;
 import android.app.INotificationManager;
 import android.app.Notification;
 import android.app.NotificationChannel;
@@ -46,6 +51,7 @@ import android.app.NotificationManager;
 import android.companion.ICompanionDeviceManager;
 import android.content.ComponentName;
 import android.content.Context;
+import android.content.Intent;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.IPackageManager;
 import android.content.pm.PackageManager;
@@ -53,6 +59,7 @@ import android.content.pm.ParceledListSlice;
 import android.graphics.Color;
 import android.media.AudioManager;
 import android.os.Binder;
+import android.os.Build;
 import android.os.Process;
 import android.os.UserHandle;
 import android.provider.Settings.Secure;
@@ -62,19 +69,31 @@ import android.test.suitebuilder.annotation.SmallTest;
 import android.testing.AndroidTestingRunner;
 import android.testing.TestableLooper;
 import android.testing.TestableLooper.RunWithLooper;
+import android.util.ArrayMap;
+import android.util.AtomicFile;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
+import com.android.server.lights.Light;
+import com.android.server.lights.LightsManager;
+import com.android.server.notification.NotificationManagerService.NotificationAssistants;
+import com.android.server.notification.NotificationManagerService.NotificationListeners;
 
+import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
+import org.mockito.stubbing.Answer;
 
-import com.android.server.lights.Light;
-import com.android.server.lights.LightsManager;
+import java.io.BufferedInputStream;
+import java.io.ByteArrayInputStream;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+import java.util.Map;
 
 @SmallTest
 @RunWith(AndroidTestingRunner.class)
@@ -94,17 +113,26 @@ public class NotificationManagerServiceTest extends NotificationTestCase {
     private TestableLooper mTestableLooper;
     @Mock
     private RankingHelper mRankingHelper;
+    AtomicFile mPolicyFile;
+    File mFile;
     @Mock
     private NotificationUsageStats mUsageStats;
     @Mock
     private AudioManager mAudioManager;
+    @Mock
+    ActivityManager mActivityManager;
+    NotificationManagerService.WorkerHandler mHandler;
+
     private NotificationChannel mTestNotificationChannel = new NotificationChannel(
             TEST_CHANNEL_ID, TEST_CHANNEL_ID, NotificationManager.IMPORTANCE_DEFAULT);
     @Mock
-    private NotificationManagerService.NotificationListeners mNotificationListeners;
+    private NotificationListeners mListeners;
+    @Mock private NotificationAssistants mAssistants;
+    @Mock private ConditionProviders mConditionProviders;
     private ManagedServices.ManagedServiceInfo mListener;
     @Mock private ICompanionDeviceManager mCompanionMgr;
     @Mock SnoozeHelper mSnoozeHelper;
+    @Mock GroupHelper mGroupHelper;
 
     // Use a Testable subclass so we can simulate calls from the system without failing.
     private static class TestableNotificationManagerService extends NotificationManagerService {
@@ -137,6 +165,9 @@ public class NotificationManagerServiceTest extends NotificationTestCase {
 
         mNotificationManagerService = new TestableNotificationManagerService(mContext);
 
+        // Use this testable looper.
+        mTestableLooper = TestableLooper.get(this);
+        mHandler = mNotificationManagerService.new WorkerHandler(mTestableLooper.getLooper());
         // MockPackageManager - default returns ApplicationInfo with matching calling UID
         final ApplicationInfo applicationInfo = new ApplicationInfo();
         applicationInfo.uid = mUid;
@@ -147,28 +178,55 @@ public class NotificationManagerServiceTest extends NotificationTestCase {
         final LightsManager mockLightsManager = mock(LightsManager.class);
         when(mockLightsManager.getLight(anyInt())).thenReturn(mock(Light.class));
         when(mAudioManager.getRingerModeInternal()).thenReturn(AudioManager.RINGER_MODE_NORMAL);
-        // Use this testable looper.
-        mTestableLooper = TestableLooper.get(this);
 
-        mListener = mNotificationListeners.new ManagedServiceInfo(
+        // write to a test file; the system file isn't readable from tests
+        mFile = new File(mContext.getCacheDir(), "test.xml");
+        mFile.createNewFile();
+        final String preupgradeXml = "<notification-policy></notification-policy>";
+        mPolicyFile = new AtomicFile(mFile);
+        FileOutputStream fos = mPolicyFile.startWrite();
+        fos.write(preupgradeXml.getBytes());
+        mPolicyFile.finishWrite(fos);
+        FileInputStream fStream = new FileInputStream(mFile);
+
+        // Setup managed services
+        mListener = mListeners.new ManagedServiceInfo(
                 null, new ComponentName(PKG, "test_class"), mUid, true, null, 0);
-        when(mNotificationListeners.checkServiceTokenLocked(any())).thenReturn(mListener);
+        when(mListeners.checkServiceTokenLocked(any())).thenReturn(mListener);
+        ManagedServices.Config listenerConfig = new ManagedServices.Config();
+        listenerConfig.xmlTag = NotificationListeners.TAG_ENABLED_NOTIFICATION_LISTENERS;
+        when(mListeners.getConfig()).thenReturn(listenerConfig);
+        ManagedServices.Config assistantConfig = new ManagedServices.Config();
+        assistantConfig.xmlTag = NotificationAssistants.TAG_ENABLED_NOTIFICATION_ASSISTANTS;
+        when(mAssistants.getConfig()).thenReturn(assistantConfig);
+        ManagedServices.Config dndConfig = new ManagedServices.Config();
+        dndConfig.xmlTag = ConditionProviders.TAG_ENABLED_DND_APPS;
+        when(mConditionProviders.getConfig()).thenReturn(dndConfig);
+
         try {
-            mNotificationManagerService.init(mTestableLooper.getLooper(), mPackageManager,
-                    mPackageManagerClient, mockLightsManager, mNotificationListeners,
-                    mCompanionMgr, mSnoozeHelper, mUsageStats);
+            mNotificationManagerService.init(mTestableLooper.getLooper(),
+                    mPackageManager, mPackageManagerClient, mockLightsManager,
+                    mListeners, mAssistants, mConditionProviders,
+                    mCompanionMgr, mSnoozeHelper, mUsageStats, mPolicyFile, mActivityManager,
+                    mGroupHelper);
         } catch (SecurityException e) {
             if (!e.getMessage().contains("Permission Denial: not allowed to send broadcast")) {
                 throw e;
             }
         }
         mNotificationManagerService.setAudioManager(mAudioManager);
+
         // Tests call directly into the Binder.
         mBinderService = mNotificationManagerService.getBinderService();
         mInternalService = mNotificationManagerService.getInternalService();
 
         mBinderService.createNotificationChannels(
                 PKG, new ParceledListSlice(Arrays.asList(mTestNotificationChannel)));
+    }
+
+    @After
+    public void tearDown() throws Exception {
+        mFile.delete();
     }
 
     public void waitForIdle() throws Exception {
@@ -187,6 +245,7 @@ public class NotificationManagerServiceTest extends NotificationTestCase {
                 nb.build(), new UserHandle(mUid), null, 0);
         return new NotificationRecord(mContext, sbn, channel);
     }
+
     private NotificationRecord generateNotificationRecord(NotificationChannel channel) {
         return generateNotificationRecord(channel, null);
     }
@@ -205,6 +264,43 @@ public class NotificationManagerServiceTest extends NotificationTestCase {
         StatusBarNotification sbn = new StatusBarNotification(PKG, PKG, 1, "tag", mUid, 0,
                 nb.build(), new UserHandle(mUid), null, 0);
         return new NotificationRecord(mContext, sbn, channel);
+    }
+
+    private Map<String, Answer> getSignalExtractorSideEffects() {
+        Map<String, Answer> answers = new ArrayMap<>();
+
+        answers.put("override group key", invocationOnMock -> {
+            ((NotificationRecord) invocationOnMock.getArguments()[0])
+                    .setOverrideGroupKey("bananas");
+            return null;
+        });
+        answers.put("override people", invocationOnMock -> {
+            ((NotificationRecord) invocationOnMock.getArguments()[0])
+                    .setPeopleOverride(new ArrayList<>());
+            return null;
+        });
+        answers.put("snooze criteria", invocationOnMock -> {
+            ((NotificationRecord) invocationOnMock.getArguments()[0])
+                    .setSnoozeCriteria(new ArrayList<>());
+            return null;
+        });
+        answers.put("notification channel", invocationOnMock -> {
+            ((NotificationRecord) invocationOnMock.getArguments()[0])
+                    .updateNotificationChannel(new NotificationChannel("a", "", IMPORTANCE_LOW));
+            return null;
+        });
+        answers.put("badging", invocationOnMock -> {
+            NotificationRecord r = (NotificationRecord) invocationOnMock.getArguments()[0];
+            r.setShowBadge(!r.canShowBadge());
+            return null;
+        });
+        answers.put("package visibility", invocationOnMock -> {
+            ((NotificationRecord) invocationOnMock.getArguments()[0]).setPackageVisibilityOverride(
+                    Notification.VISIBILITY_SECRET);
+            return null;
+        });
+
+        return answers;
     }
 
     @Test
@@ -242,6 +338,42 @@ public class NotificationManagerServiceTest extends NotificationTestCase {
     }
 
     @Test
+    public void testCreateNotificationChannels_SecondCreateDoesNotChangeImportance()
+            throws Exception {
+        final NotificationChannel channel =
+                new NotificationChannel("id", "name", NotificationManager.IMPORTANCE_DEFAULT);
+        mBinderService.createNotificationChannels(PKG,
+                new ParceledListSlice(Arrays.asList(channel)));
+
+        // Recreating the channel doesn't throw, but ignores importance.
+        final NotificationChannel dupeChannel =
+                new NotificationChannel("id", "name", IMPORTANCE_HIGH);
+        mBinderService.createNotificationChannels(PKG,
+                new ParceledListSlice(Arrays.asList(dupeChannel)));
+        final NotificationChannel createdChannel =
+                mBinderService.getNotificationChannel(PKG, "id");
+        assertEquals(NotificationManager.IMPORTANCE_DEFAULT, createdChannel.getImportance());
+    }
+
+    @Test
+    public void testCreateNotificationChannels_SecondCreateAllowedToDowngradeImportance()
+            throws Exception {
+        final NotificationChannel channel =
+                new NotificationChannel("id", "name", NotificationManager.IMPORTANCE_DEFAULT);
+        mBinderService.createNotificationChannels(PKG,
+                new ParceledListSlice(Arrays.asList(channel)));
+
+        // Recreating with a lower importance is allowed to modify the channel.
+        final NotificationChannel dupeChannel =
+                new NotificationChannel("id", "name", NotificationManager.IMPORTANCE_LOW);
+        mBinderService.createNotificationChannels(PKG,
+                new ParceledListSlice(Arrays.asList(dupeChannel)));
+        final NotificationChannel createdChannel =
+                mBinderService.getNotificationChannel(PKG, "id");
+        assertEquals(NotificationManager.IMPORTANCE_LOW, createdChannel.getImportance());
+    }
+
+    @Test
     public void testCreateNotificationChannels_CannotDowngradeImportanceIfAlreadyUpdated()
             throws Exception {
         final NotificationChannel channel =
@@ -251,7 +383,7 @@ public class NotificationManagerServiceTest extends NotificationTestCase {
 
         // The user modifies importance directly, can no longer be changed by the app.
         final NotificationChannel updatedChannel =
-                new NotificationChannel("id", "name", NotificationManager.IMPORTANCE_HIGH);
+                new NotificationChannel("id", "name", IMPORTANCE_HIGH);
         mBinderService.updateNotificationChannelForPackage(PKG, mUid, updatedChannel);
 
         // Recreating with a lower importance leaves channel unchanged.
@@ -261,7 +393,7 @@ public class NotificationManagerServiceTest extends NotificationTestCase {
                 new ParceledListSlice(Arrays.asList(dupeChannel)));
         final NotificationChannel createdChannel =
                 mBinderService.getNotificationChannel(PKG, "id");
-        assertEquals(NotificationManager.IMPORTANCE_HIGH, createdChannel.getImportance());
+        assertEquals(IMPORTANCE_HIGH, createdChannel.getImportance());
     }
 
     @Test
@@ -270,7 +402,7 @@ public class NotificationManagerServiceTest extends NotificationTestCase {
         final NotificationChannel channel1 =
                 new NotificationChannel("id", "name", NotificationManager.IMPORTANCE_DEFAULT);
         final NotificationChannel channel2 =
-                new NotificationChannel("id", "name", NotificationManager.IMPORTANCE_HIGH);
+                new NotificationChannel("id", "name", IMPORTANCE_HIGH);
         mBinderService.createNotificationChannels(PKG,
                 new ParceledListSlice(Arrays.asList(channel1, channel2)));
         final NotificationChannel createdChannel =
@@ -283,7 +415,7 @@ public class NotificationManagerServiceTest extends NotificationTestCase {
         when(mPackageManager.isPackageSuspendedForUser(anyString(), anyInt())).thenReturn(true);
 
         NotificationChannel channel = new NotificationChannel("id", "name",
-                NotificationManager.IMPORTANCE_HIGH);
+                IMPORTANCE_HIGH);
         NotificationRecord r = generateNotificationRecord(channel);
         assertTrue(mNotificationManagerService.isBlocked(r, mUsageStats));
         verify(mUsageStats, times(1)).registerSuspendedByAdmin(eq(r));
@@ -294,11 +426,68 @@ public class NotificationManagerServiceTest extends NotificationTestCase {
         when(mPackageManager.isPackageSuspendedForUser(anyString(), anyInt())).thenReturn(false);
 
         NotificationChannel channel = new NotificationChannel("id", "name",
-                NotificationManager.IMPORTANCE_HIGH);
-        channel.setImportance(NotificationManager.IMPORTANCE_NONE);
+                NotificationManager.IMPORTANCE_NONE);
         NotificationRecord r = generateNotificationRecord(channel);
         assertTrue(mNotificationManagerService.isBlocked(r, mUsageStats));
         verify(mUsageStats, times(1)).registerBlocked(eq(r));
+
+        mBinderService.createNotificationChannels(
+                PKG, new ParceledListSlice(Arrays.asList(channel)));
+        final StatusBarNotification sbn = generateNotificationRecord(channel).sbn;
+        mBinderService.enqueueNotificationWithTag(PKG, "opPkg", "tag",
+                sbn.getId(), sbn.getNotification(), sbn.getUserId());
+        waitForIdle();
+        assertEquals(0, mBinderService.getActiveNotifications(sbn.getPackageName()).length);
+    }
+
+    @Test
+    public void testEnqueuedBlockedNotifications_appBlockedChannelForegroundService()
+            throws Exception {
+        when(mPackageManager.isPackageSuspendedForUser(anyString(), anyInt())).thenReturn(false);
+
+        NotificationChannel channel = new NotificationChannel("blocked", "name",
+                NotificationManager.IMPORTANCE_NONE);
+        mBinderService.createNotificationChannels(
+                PKG, new ParceledListSlice(Arrays.asList(channel)));
+
+        final StatusBarNotification sbn = generateNotificationRecord(channel).sbn;
+        sbn.getNotification().flags |= Notification.FLAG_FOREGROUND_SERVICE;
+        mBinderService.enqueueNotificationWithTag(PKG, "opPkg", "tag",
+                sbn.getId(), sbn.getNotification(), sbn.getUserId());
+        waitForIdle();
+        assertEquals(1, mBinderService.getActiveNotifications(sbn.getPackageName()).length);
+        assertEquals(IMPORTANCE_LOW,
+                mNotificationManagerService.getNotificationRecord(sbn.getKey()).getImportance());
+        assertEquals(IMPORTANCE_LOW,
+                mBinderService.getNotificationChannel(PKG, channel.getId()).getImportance());
+    }
+
+    @Test
+    public void testEnqueuedBlockedNotifications_userBlockedChannelForegroundService()
+            throws Exception {
+        when(mPackageManager.isPackageSuspendedForUser(anyString(), anyInt())).thenReturn(false);
+
+        NotificationChannel channel =
+                new NotificationChannel("blockedbyuser", "name", IMPORTANCE_HIGH);
+        mBinderService.createNotificationChannels(
+                PKG, new ParceledListSlice(Arrays.asList(channel)));
+
+        NotificationChannel update =
+                new NotificationChannel("blockedbyuser", "name", IMPORTANCE_NONE);
+        mBinderService.updateNotificationChannelForPackage(PKG, mUid, update);
+        waitForIdle();
+        assertEquals(IMPORTANCE_NONE,
+                mBinderService.getNotificationChannel(PKG, channel.getId()).getImportance());
+
+        final StatusBarNotification sbn = generateNotificationRecord(channel).sbn;
+        sbn.getNotification().flags |= Notification.FLAG_FOREGROUND_SERVICE;
+        mBinderService.enqueueNotificationWithTag(PKG, "opPkg", "tag",
+                sbn.getId(), sbn.getNotification(), sbn.getUserId());
+        waitForIdle();
+        assertEquals(0, mBinderService.getActiveNotifications(sbn.getPackageName()).length);
+        assertNull(mNotificationManagerService.getNotificationRecord(sbn.getKey()));
+        assertEquals(IMPORTANCE_NONE,
+                mBinderService.getNotificationChannel(PKG, channel.getId()).getImportance());
     }
 
     @Test
@@ -312,6 +501,21 @@ public class NotificationManagerServiceTest extends NotificationTestCase {
                 sbn.getId(), sbn.getNotification(), sbn.getUserId());
         waitForIdle();
         assertEquals(0, mBinderService.getActiveNotifications(sbn.getPackageName()).length);
+    }
+
+    @Test
+    public void testEnqueuedBlockedNotifications_blockedAppForegroundService() throws Exception {
+        when(mPackageManager.isPackageSuspendedForUser(anyString(), anyInt())).thenReturn(false);
+
+        mBinderService.setNotificationsEnabledForPackage(PKG, mUid, false);
+
+        final StatusBarNotification sbn = generateNotificationRecord(null).sbn;
+        sbn.getNotification().flags |= Notification.FLAG_FOREGROUND_SERVICE;
+        mBinderService.enqueueNotificationWithTag(PKG, "opPkg", "tag",
+                sbn.getId(), sbn.getNotification(), sbn.getUserId());
+        waitForIdle();
+        assertEquals(0, mBinderService.getActiveNotifications(sbn.getPackageName()).length);
+        assertNull(mNotificationManagerService.getNotificationRecord(sbn.getKey()));
     }
 
     @Test
@@ -510,6 +714,93 @@ public class NotificationManagerServiceTest extends NotificationTestCase {
     }
 
     @Test
+    public void testAppInitiatedCancelAllNotifications_CancelsNoClearFlag() throws Exception {
+        final StatusBarNotification sbn = generateNotificationRecord(null).sbn;
+        sbn.getNotification().flags |= Notification.FLAG_NO_CLEAR;
+        mBinderService.enqueueNotificationWithTag(PKG, "opPkg", "tag",
+                sbn.getId(), sbn.getNotification(), sbn.getUserId());
+        mBinderService.cancelAllNotifications(PKG, sbn.getUserId());
+        waitForIdle();
+        StatusBarNotification[] notifs =
+                mBinderService.getActiveNotifications(sbn.getPackageName());
+        assertEquals(0, notifs.length);
+    }
+
+    @Test
+    public void testCancelAllNotifications_CancelsNoClearFlag() throws Exception {
+        final NotificationRecord notif = generateNotificationRecord(
+                mTestNotificationChannel, 1, "group", true);
+        notif.getNotification().flags |= Notification.FLAG_NO_CLEAR;
+        mNotificationManagerService.addNotification(notif);
+        mNotificationManagerService.cancelAllNotificationsInt(mUid, 0, PKG, null, 0, 0, true,
+                notif.getUserId(), 0, null);
+        waitForIdle();
+        StatusBarNotification[] notifs =
+                mBinderService.getActiveNotifications(notif.sbn.getPackageName());
+        assertEquals(0, notifs.length);
+    }
+
+    @Test
+    public void testUserInitiatedCancelAllOnClearAll_NoClearFlag() throws Exception {
+        final NotificationRecord notif = generateNotificationRecord(
+                mTestNotificationChannel, 1, "group", true);
+        notif.getNotification().flags |= Notification.FLAG_NO_CLEAR;
+        mNotificationManagerService.addNotification(notif);
+
+        mNotificationManagerService.mNotificationDelegate.onClearAll(mUid, Binder.getCallingPid(),
+                notif.getUserId());
+        waitForIdle();
+        StatusBarNotification[] notifs =
+                mBinderService.getActiveNotifications(notif.sbn.getPackageName());
+        assertEquals(1, notifs.length);
+    }
+
+    @Test
+    public void testCancelAllCancelNotificationsFromListener_NoClearFlag() throws Exception {
+        final NotificationRecord parent = generateNotificationRecord(
+                mTestNotificationChannel, 1, "group", true);
+        final NotificationRecord child = generateNotificationRecord(
+                mTestNotificationChannel, 2, "group", false);
+        final NotificationRecord child2 = generateNotificationRecord(
+                mTestNotificationChannel, 3, "group", false);
+        child2.getNotification().flags |= Notification.FLAG_NO_CLEAR;
+        final NotificationRecord newGroup = generateNotificationRecord(
+                mTestNotificationChannel, 4, "group2", false);
+        mNotificationManagerService.addNotification(parent);
+        mNotificationManagerService.addNotification(child);
+        mNotificationManagerService.addNotification(child2);
+        mNotificationManagerService.addNotification(newGroup);
+        mNotificationManagerService.getBinderService().cancelNotificationsFromListener(null, null);
+        waitForIdle();
+        StatusBarNotification[] notifs =
+                mBinderService.getActiveNotifications(parent.sbn.getPackageName());
+        assertEquals(1, notifs.length);
+    }
+
+    @Test
+    public void testUserInitiatedCancelAllWithGroup_NoClearFlag() throws Exception {
+        final NotificationRecord parent = generateNotificationRecord(
+                mTestNotificationChannel, 1, "group", true);
+        final NotificationRecord child = generateNotificationRecord(
+                mTestNotificationChannel, 2, "group", false);
+        final NotificationRecord child2 = generateNotificationRecord(
+                mTestNotificationChannel, 3, "group", false);
+        child2.getNotification().flags |= Notification.FLAG_NO_CLEAR;
+        final NotificationRecord newGroup = generateNotificationRecord(
+                mTestNotificationChannel, 4, "group2", false);
+        mNotificationManagerService.addNotification(parent);
+        mNotificationManagerService.addNotification(child);
+        mNotificationManagerService.addNotification(child2);
+        mNotificationManagerService.addNotification(newGroup);
+        mNotificationManagerService.mNotificationDelegate.onClearAll(mUid, Binder.getCallingPid(),
+                parent.getUserId());
+        waitForIdle();
+        StatusBarNotification[] notifs =
+                mBinderService.getActiveNotifications(parent.sbn.getPackageName());
+        assertEquals(1, notifs.length);
+    }
+
+    @Test
     public void testRemoveForegroundServiceFlag_ImmediatelyAfterEnqueue() throws Exception {
         final StatusBarNotification sbn = generateNotificationRecord(null).sbn;
         sbn.getNotification().flags |= Notification.FLAG_FOREGROUND_SERVICE;
@@ -584,7 +875,7 @@ public class NotificationManagerServiceTest extends NotificationTestCase {
         mNotificationManagerService.setRankingHelper(mRankingHelper);
         when(mRankingHelper.getNotificationChannel(
                 anyString(), anyInt(), eq("foo"), anyBoolean())).thenReturn(
-                        new NotificationChannel("foo", "foo", NotificationManager.IMPORTANCE_HIGH));
+                        new NotificationChannel("foo", "foo", IMPORTANCE_HIGH));
 
         Notification.TvExtender tv = new Notification.TvExtender().setChannelId("foo");
         mBinderService.enqueueNotificationWithTag(PKG, "opPkg", "tag", 0,
@@ -622,13 +913,13 @@ public class NotificationManagerServiceTest extends NotificationTestCase {
                 eq(channel2.getId()), anyBoolean()))
                 .thenReturn(channel2);
 
-        reset(mNotificationListeners);
+        reset(mListeners);
         mBinderService.createNotificationChannels(PKG,
                 new ParceledListSlice(Arrays.asList(mTestNotificationChannel, channel2)));
-        verify(mNotificationListeners, times(1)).notifyNotificationChannelChanged(eq(PKG),
+        verify(mListeners, times(1)).notifyNotificationChannelChanged(eq(PKG),
                 eq(Process.myUserHandle()), eq(mTestNotificationChannel),
                 eq(NotificationListenerService.NOTIFICATION_CHANNEL_OR_GROUP_ADDED));
-        verify(mNotificationListeners, times(1)).notifyNotificationChannelChanged(eq(PKG),
+        verify(mListeners, times(1)).notifyNotificationChannelChanged(eq(PKG),
                 eq(Process.myUserHandle()), eq(channel2),
                 eq(NotificationListenerService.NOTIFICATION_CHANNEL_OR_GROUP_ADDED));
     }
@@ -642,13 +933,13 @@ public class NotificationManagerServiceTest extends NotificationTestCase {
         NotificationChannelGroup group1 = new NotificationChannelGroup("a", "b");
         NotificationChannelGroup group2 = new NotificationChannelGroup("n", "m");
 
-        reset(mNotificationListeners);
+        reset(mListeners);
         mBinderService.createNotificationChannelGroups(PKG,
                 new ParceledListSlice(Arrays.asList(group1, group2)));
-        verify(mNotificationListeners, times(1)).notifyNotificationChannelGroupChanged(eq(PKG),
+        verify(mListeners, times(1)).notifyNotificationChannelGroupChanged(eq(PKG),
                 eq(Process.myUserHandle()), eq(group1),
                 eq(NotificationListenerService.NOTIFICATION_CHANNEL_OR_GROUP_ADDED));
-        verify(mNotificationListeners, times(1)).notifyNotificationChannelGroupChanged(eq(PKG),
+        verify(mListeners, times(1)).notifyNotificationChannelGroupChanged(eq(PKG),
                 eq(Process.myUserHandle()), eq(group2),
                 eq(NotificationListenerService.NOTIFICATION_CHANNEL_OR_GROUP_ADDED));
     }
@@ -664,9 +955,9 @@ public class NotificationManagerServiceTest extends NotificationTestCase {
                 eq(mTestNotificationChannel.getId()), anyBoolean()))
                 .thenReturn(mTestNotificationChannel);
 
-        reset(mNotificationListeners);
+        reset(mListeners);
         mBinderService.updateNotificationChannelForPackage(PKG, 0, mTestNotificationChannel);
-        verify(mNotificationListeners, times(1)).notifyNotificationChannelChanged(eq(PKG),
+        verify(mListeners, times(1)).notifyNotificationChannelChanged(eq(PKG),
                 eq(Process.myUserHandle()), eq(mTestNotificationChannel),
                 eq(NotificationListenerService.NOTIFICATION_CHANNEL_OR_GROUP_UPDATED));
     }
@@ -680,9 +971,9 @@ public class NotificationManagerServiceTest extends NotificationTestCase {
         when(mRankingHelper.getNotificationChannel(eq(PKG), anyInt(),
                 eq(mTestNotificationChannel.getId()), anyBoolean()))
                 .thenReturn(mTestNotificationChannel);
-        reset(mNotificationListeners);
+        reset(mListeners);
         mBinderService.deleteNotificationChannel(PKG, mTestNotificationChannel.getId());
-        verify(mNotificationListeners, times(1)).notifyNotificationChannelChanged(eq(PKG),
+        verify(mListeners, times(1)).notifyNotificationChannelChanged(eq(PKG),
                 eq(Process.myUserHandle()), eq(mTestNotificationChannel),
                 eq(NotificationListenerService.NOTIFICATION_CHANNEL_OR_GROUP_DELETED));
     }
@@ -696,9 +987,9 @@ public class NotificationManagerServiceTest extends NotificationTestCase {
         mNotificationManagerService.setRankingHelper(mRankingHelper);
         when(mRankingHelper.getNotificationChannelGroup(eq(ncg.getId()), eq(PKG), anyInt()))
                 .thenReturn(ncg);
-        reset(mNotificationListeners);
+        reset(mListeners);
         mBinderService.deleteNotificationChannelGroup(PKG, ncg.getId());
-        verify(mNotificationListeners, times(1)).notifyNotificationChannelGroupChanged(eq(PKG),
+        verify(mListeners, times(1)).notifyNotificationChannelGroupChanged(eq(PKG),
                 eq(Process.myUserHandle()), eq(ncg),
                 eq(NotificationListenerService.NOTIFICATION_CHANNEL_OR_GROUP_DELETED));
     }
@@ -713,9 +1004,10 @@ public class NotificationManagerServiceTest extends NotificationTestCase {
         mBinderService.updateNotificationChannelFromPrivilegedListener(
                 null, PKG, Process.myUserHandle(), mTestNotificationChannel);
 
-        verify(mRankingHelper, times(1)).updateNotificationChannel(anyString(), anyInt(), any());
+        verify(mRankingHelper, times(1)).updateNotificationChannel(
+                anyString(), anyInt(), any(), anyBoolean());
 
-        verify(mNotificationListeners, never()).notifyNotificationChannelChanged(eq(PKG),
+        verify(mListeners, never()).notifyNotificationChannelChanged(eq(PKG),
                 eq(Process.myUserHandle()), eq(mTestNotificationChannel),
                 eq(NotificationListenerService.NOTIFICATION_CHANNEL_OR_GROUP_UPDATED));
     }
@@ -734,9 +1026,10 @@ public class NotificationManagerServiceTest extends NotificationTestCase {
             // pass
         }
 
-        verify(mRankingHelper, never()).updateNotificationChannel(anyString(), anyInt(), any());
+        verify(mRankingHelper, never()).updateNotificationChannel(
+                anyString(), anyInt(), any(), anyBoolean());
 
-        verify(mNotificationListeners, never()).notifyNotificationChannelChanged(eq(PKG),
+        verify(mListeners, never()).notifyNotificationChannelChanged(eq(PKG),
                 eq(Process.myUserHandle()), eq(mTestNotificationChannel),
                 eq(NotificationListenerService.NOTIFICATION_CHANNEL_OR_GROUP_UPDATED));
     }
@@ -750,7 +1043,7 @@ public class NotificationManagerServiceTest extends NotificationTestCase {
         mListener = mock(ManagedServices.ManagedServiceInfo.class);
         mListener.component = new ComponentName(PKG, PKG);
         when(mListener.enabledAndUserMatches(anyInt())).thenReturn(false);
-        when(mNotificationListeners.checkServiceTokenLocked(any())).thenReturn(mListener);
+        when(mListeners.checkServiceTokenLocked(any())).thenReturn(mListener);
 
         try {
             mBinderService.updateNotificationChannelFromPrivilegedListener(
@@ -760,9 +1053,10 @@ public class NotificationManagerServiceTest extends NotificationTestCase {
             // pass
         }
 
-        verify(mRankingHelper, never()).updateNotificationChannel(anyString(), anyInt(), any());
+        verify(mRankingHelper, never()).updateNotificationChannel(
+                anyString(), anyInt(), any(), anyBoolean());
 
-        verify(mNotificationListeners, never()).notifyNotificationChannelChanged(eq(PKG),
+        verify(mListeners, never()).notifyNotificationChannelChanged(eq(PKG),
                 eq(Process.myUserHandle()), eq(mTestNotificationChannel),
                 eq(NotificationListenerService.NOTIFICATION_CHANNEL_OR_GROUP_UPDATED));
     }
@@ -807,7 +1101,7 @@ public class NotificationManagerServiceTest extends NotificationTestCase {
         when(mCompanionMgr.getAssociations(PKG, mUid)).thenReturn(associations);
         mListener = mock(ManagedServices.ManagedServiceInfo.class);
         when(mListener.enabledAndUserMatches(anyInt())).thenReturn(false);
-        when(mNotificationListeners.checkServiceTokenLocked(any())).thenReturn(mListener);
+        when(mListeners.checkServiceTokenLocked(any())).thenReturn(mListener);
 
         try {
             mBinderService.getNotificationChannelsFromPrivilegedListener(
@@ -858,7 +1152,7 @@ public class NotificationManagerServiceTest extends NotificationTestCase {
         when(mCompanionMgr.getAssociations(PKG, mUid)).thenReturn(associations);
         mListener = mock(ManagedServices.ManagedServiceInfo.class);
         when(mListener.enabledAndUserMatches(anyInt())).thenReturn(false);
-        when(mNotificationListeners.checkServiceTokenLocked(any())).thenReturn(mListener);
+        when(mListeners.checkServiceTokenLocked(any())).thenReturn(mListener);
 
         try {
             mBinderService.getNotificationChannelGroupsFromPrivilegedListener(
@@ -1017,6 +1311,151 @@ public class NotificationManagerServiceTest extends NotificationTestCase {
     }
 
     @Test
+    public void testSetListenerAccess() throws Exception {
+        ComponentName c = ComponentName.unflattenFromString("package/Component");
+        try {
+            mBinderService.setNotificationListenerAccessGranted(c, true);
+        } catch (SecurityException e) {
+            if (!e.getMessage().contains("Permission Denial: not allowed to send broadcast")) {
+                throw e;
+            }
+        }
+
+        verify(mListeners, times(1)).setPackageOrComponentEnabled(
+                c.flattenToString(), 0, true, true);
+        verify(mConditionProviders, times(1)).setPackageOrComponentEnabled(
+                c.flattenToString(), 0, false, true);
+        verify(mAssistants, never()).setPackageOrComponentEnabled(
+                any(), anyInt(), anyBoolean(), anyBoolean());
+    }
+
+    @Test
+    public void testSetAssistantAccess() throws Exception {
+        ComponentName c = ComponentName.unflattenFromString("package/Component");
+        try {
+            mBinderService.setNotificationAssistantAccessGranted(c, true);
+        } catch (SecurityException e) {
+            if (!e.getMessage().contains("Permission Denial: not allowed to send broadcast")) {
+                throw e;
+            }
+        }
+
+        verify(mAssistants, times(1)).setPackageOrComponentEnabled(
+                c.flattenToString(), 0, true, true);
+        verify(mConditionProviders, times(1)).setPackageOrComponentEnabled(
+                c.flattenToString(), 0, false, true);
+        verify(mListeners, never()).setPackageOrComponentEnabled(
+                any(), anyInt(), anyBoolean(), anyBoolean());
+    }
+
+    @Test
+    public void testSetDndAccess() throws Exception {
+        ComponentName c = ComponentName.unflattenFromString("package/Component");
+        try {
+            mBinderService.setNotificationPolicyAccessGranted(c.getPackageName(), true);
+        } catch (SecurityException e) {
+            if (!e.getMessage().contains("Permission Denial: not allowed to send broadcast")) {
+                throw e;
+            }
+        }
+
+        verify(mConditionProviders, times(1)).setPackageOrComponentEnabled(
+                c.getPackageName(), 0, true, true);
+        verify(mAssistants, never()).setPackageOrComponentEnabled(
+                any(), anyInt(), anyBoolean(), anyBoolean());
+        verify(mListeners, never()).setPackageOrComponentEnabled(
+                any(), anyInt(), anyBoolean(), anyBoolean());
+    }
+
+    @Test
+    public void testSetListenerAccess_doesNothingOnLowRam() throws Exception {
+        when(mActivityManager.isLowRamDevice()).thenReturn(true);
+        ComponentName c = ComponentName.unflattenFromString("package/Component");
+        mBinderService.setNotificationListenerAccessGranted(c, true);
+
+        verify(mListeners, never()).setPackageOrComponentEnabled(
+                c.flattenToString(), 0, true, true);
+        verify(mConditionProviders, never()).setPackageOrComponentEnabled(
+                c.flattenToString(), 0, false, true);
+        verify(mAssistants, never()).setPackageOrComponentEnabled(
+                any(), anyInt(), anyBoolean(), anyBoolean());
+    }
+
+    @Test
+    public void testSetAssistantAccess_doesNothingOnLowRam() throws Exception {
+        when(mActivityManager.isLowRamDevice()).thenReturn(true);
+        ComponentName c = ComponentName.unflattenFromString("package/Component");
+        mBinderService.setNotificationAssistantAccessGranted(c, true);
+
+
+        verify(mListeners, never()).setPackageOrComponentEnabled(
+                c.flattenToString(), 0, true, true);
+        verify(mConditionProviders, never()).setPackageOrComponentEnabled(
+                c.flattenToString(), 0, false, true);
+        verify(mAssistants, never()).setPackageOrComponentEnabled(
+                any(), anyInt(), anyBoolean(), anyBoolean());
+    }
+
+    @Test
+    public void testSetDndAccess_doesNothingOnLowRam() throws Exception {
+        when(mActivityManager.isLowRamDevice()).thenReturn(true);
+        ComponentName c = ComponentName.unflattenFromString("package/Component");
+        mBinderService.setNotificationPolicyAccessGranted(c.getPackageName(), true);
+
+        verify(mListeners, never()).setPackageOrComponentEnabled(
+                c.flattenToString(), 0, true, true);
+        verify(mConditionProviders, never()).setPackageOrComponentEnabled(
+                c.flattenToString(), 0, false, true);
+        verify(mAssistants, never()).setPackageOrComponentEnabled(
+                any(), anyInt(), anyBoolean(), anyBoolean());
+    }
+
+    @Test
+    public void testOnlyAutogroupIfGroupChanged_noPriorNoti_autogroups() throws Exception {
+        NotificationRecord r = generateNotificationRecord(mTestNotificationChannel, 0, null, false);
+        mNotificationManagerService.addEnqueuedNotification(r);
+        NotificationManagerService.PostNotificationRunnable runnable =
+                mNotificationManagerService.new PostNotificationRunnable(r.getKey());
+        runnable.run();
+        waitForIdle();
+
+        verify(mGroupHelper, times(1)).onNotificationPosted(any(), anyBoolean());
+    }
+
+    @Test
+    public void testOnlyAutogroupIfGroupChanged_groupChanged_autogroups()
+            throws Exception {
+        NotificationRecord r =
+                generateNotificationRecord(mTestNotificationChannel, 0, "group", false);
+        mNotificationManagerService.addNotification(r);
+
+        r = generateNotificationRecord(mTestNotificationChannel, 0, null, false);
+        mNotificationManagerService.addEnqueuedNotification(r);
+        NotificationManagerService.PostNotificationRunnable runnable =
+                mNotificationManagerService.new PostNotificationRunnable(r.getKey());
+        runnable.run();
+        waitForIdle();
+
+        verify(mGroupHelper, times(1)).onNotificationPosted(any(), anyBoolean());
+    }
+
+    @Test
+    public void testOnlyAutogroupIfGroupChanged_noGroupChanged_autogroups()
+            throws Exception {
+        NotificationRecord r = generateNotificationRecord(mTestNotificationChannel, 0, "group",
+                false);
+        mNotificationManagerService.addNotification(r);
+        mNotificationManagerService.addEnqueuedNotification(r);
+
+        NotificationManagerService.PostNotificationRunnable runnable =
+                mNotificationManagerService.new PostNotificationRunnable(r.getKey());
+        runnable.run();
+        waitForIdle();
+
+        verify(mGroupHelper, never()).onNotificationPosted(any(), anyBoolean());
+    }
+
+    @Test
     public void testNoFakeColorizedPermission() throws Exception {
         when(mPackageManagerClient.checkPermission(any(), any())).thenReturn(PERMISSION_DENIED);
         Notification.Builder nb = new Notification.Builder(mContext,
@@ -1066,15 +1505,191 @@ public class NotificationManagerServiceTest extends NotificationTestCase {
         mNotificationManagerService.addNotification(otherPackage);
 
         // Same notifications are enqueued as posted, everything counts b/c id and tag don't match
-        assertEquals(40, mNotificationManagerService.getNotificationCountLocked(
-                PKG, new UserHandle(mUid).getIdentifier(), 0, null));
-        assertEquals(40, mNotificationManagerService.getNotificationCountLocked(
-                PKG, new UserHandle(mUid).getIdentifier(), 0, "tag2"));
-        assertEquals(2, mNotificationManagerService.getNotificationCountLocked(
-                "a", new UserHandle(mUid).getIdentifier(), 0, "banana"));
+        int userId = new UserHandle(mUid).getIdentifier();
+        assertEquals(40,
+                mNotificationManagerService.getNotificationCountLocked(PKG, userId, 0, null));
+        assertEquals(40,
+                mNotificationManagerService.getNotificationCountLocked(PKG, userId, 0, "tag2"));
+        assertEquals(2,
+                mNotificationManagerService.getNotificationCountLocked("a", userId, 0, "banana"));
 
         // exclude a known notification - it's excluded from only the posted list, not enqueued
-        assertEquals(39, mNotificationManagerService.getNotificationCountLocked(
-                PKG, new UserHandle(mUid).getIdentifier(), 0, "tag"));
+        assertEquals(39,
+                mNotificationManagerService.getNotificationCountLocked(PKG, userId, 0, "tag"));
+    }
+
+    @Test
+    public void testAddAutogroup_requestsSort() throws Exception {
+        RankingHandler rh = mock(RankingHandler.class);
+        mNotificationManagerService.setRankingHandler(rh);
+
+        final NotificationRecord r = generateNotificationRecord(mTestNotificationChannel);
+        mNotificationManagerService.addNotification(r);
+        mNotificationManagerService.addAutogroupKeyLocked(r.getKey());
+
+        verify(rh, times(1)).requestSort();
+    }
+
+    @Test
+    public void testRemoveAutogroup_requestsSort() throws Exception {
+        RankingHandler rh = mock(RankingHandler.class);
+        mNotificationManagerService.setRankingHandler(rh);
+
+        final NotificationRecord r = generateNotificationRecord(mTestNotificationChannel);
+        r.setOverrideGroupKey("TEST");
+        mNotificationManagerService.addNotification(r);
+        mNotificationManagerService.removeAutogroupKeyLocked(r.getKey());
+
+        verify(rh, times(1)).requestSort();
+    }
+
+    @Test
+    public void testReaddAutogroup_noSort() throws Exception {
+        RankingHandler rh = mock(RankingHandler.class);
+        mNotificationManagerService.setRankingHandler(rh);
+
+        final NotificationRecord r = generateNotificationRecord(mTestNotificationChannel);
+        r.setOverrideGroupKey("TEST");
+        mNotificationManagerService.addNotification(r);
+        mNotificationManagerService.addAutogroupKeyLocked(r.getKey());
+
+        verify(rh, never()).requestSort();
+    }
+
+    @Test
+    public void testHandleRankingSort_sendsUpdateOnSignalExtractorChange() throws Exception {
+        mNotificationManagerService.setRankingHelper(mRankingHelper);
+        NotificationManagerService.WorkerHandler handler = mock(
+                NotificationManagerService.WorkerHandler.class);
+        mNotificationManagerService.setHandler(handler);
+
+        Map<String, Answer> answers = getSignalExtractorSideEffects();
+        for (String message : answers.keySet()) {
+            mNotificationManagerService.clearNotifications();
+            final NotificationRecord r = generateNotificationRecord(mTestNotificationChannel);
+            mNotificationManagerService.addNotification(r);
+
+            doAnswer(answers.get(message)).when(mRankingHelper).extractSignals(r);
+
+            mNotificationManagerService.handleRankingSort();
+        }
+        verify(handler, times(answers.size())).scheduleSendRankingUpdate();
+    }
+
+    @Test
+    public void testHandleRankingSort_noUpdateWhenNoSignalChange() throws Exception {
+        mNotificationManagerService.setRankingHelper(mRankingHelper);
+        NotificationManagerService.WorkerHandler handler = mock(
+                NotificationManagerService.WorkerHandler.class);
+        mNotificationManagerService.setHandler(handler);
+
+        final NotificationRecord r = generateNotificationRecord(mTestNotificationChannel);
+        mNotificationManagerService.addNotification(r);
+
+        mNotificationManagerService.handleRankingSort();
+        verify(handler, never()).scheduleSendRankingUpdate();
+    }
+
+    @Test
+    public void testReadPolicyXml_readApprovedServicesFromXml() throws Exception {
+        final String preupgradeXml = "<notification-policy version=\"1\">"
+                + "<zen></zen>"
+                + "<ranking></ranking>"
+                + "<enabled_listeners>"
+                + "<service_listing approved=\"test\" user=\"0\" primary=\"true\" />"
+                + "</enabled_listeners>"
+                + "<enabled_assistants>"
+                + "<service_listing approved=\"test\" user=\"0\" primary=\"true\" />"
+                + "</enabled_assistants>"
+                + "<dnd_apps>"
+                + "<service_listing approved=\"test\" user=\"0\" primary=\"true\" />"
+                + "</dnd_apps>"
+                + "</notification-policy>";
+        mNotificationManagerService.readPolicyXml(
+                new BufferedInputStream(new ByteArrayInputStream(preupgradeXml.getBytes())), false);
+        verify(mListeners, times(1)).readXml(any());
+        verify(mConditionProviders, times(1)).readXml(any());
+        verify(mAssistants, times(1)).readXml(any());
+
+        // numbers are inflated for setup
+        verify(mListeners, times(1)).migrateToXml();
+        verify(mConditionProviders, times(1)).migrateToXml();
+        verify(mAssistants, times(1)).migrateToXml();
+    }
+
+    @Test
+    public void testReadPolicyXml_readApprovedServicesFromSettings() throws Exception {
+        final String preupgradeXml = "<notification-policy version=\"1\">"
+                + "<zen></zen>"
+                + "<ranking></ranking>"
+                + "</notification-policy>";
+        mNotificationManagerService.readPolicyXml(
+                new BufferedInputStream(new ByteArrayInputStream(preupgradeXml.getBytes())), false);
+        verify(mListeners, never()).readXml(any());
+        verify(mConditionProviders, never()).readXml(any());
+        verify(mAssistants, never()).readXml(any());
+
+        // numbers are inflated for setup
+        verify(mListeners, times(2)).migrateToXml();
+        verify(mConditionProviders, times(2)).migrateToXml();
+        verify(mAssistants, times(2)).migrateToXml();
+    }
+
+
+    @Test
+    public void testLocaleChangedCallsUpdateDefaultZenModeRules() throws Exception {
+        ZenModeHelper mZenModeHelper = mock(ZenModeHelper.class);
+        mNotificationManagerService.mZenModeHelper = mZenModeHelper;
+        mNotificationManagerService.mLocaleChangeReceiver.onReceive(mContext,
+                new Intent(Intent.ACTION_LOCALE_CHANGED));
+
+        verify(mZenModeHelper, times(1)).updateDefaultZenRules();
+    }
+
+    @Test
+    public void testBumpFGImportance_noChannelChangePreOApp() throws Exception {
+        String preOPkg = "preO";
+        int preOUid = 145;
+        final ApplicationInfo legacy = new ApplicationInfo();
+        legacy.targetSdkVersion = Build.VERSION_CODES.N_MR1;
+        when(mPackageManagerClient.getApplicationInfoAsUser(eq(preOPkg), anyInt(), anyInt()))
+                .thenReturn(legacy);
+        when(mPackageManagerClient.getPackageUidAsUser(eq(preOPkg), anyInt())).thenReturn(preOUid);
+        getContext().setMockPackageManager(mPackageManagerClient);
+
+        Notification.Builder nb = new Notification.Builder(mContext,
+                NotificationChannel.DEFAULT_CHANNEL_ID)
+                .setContentTitle("foo")
+                .setSmallIcon(android.R.drawable.sym_def_app_icon)
+                .setFlag(Notification.FLAG_FOREGROUND_SERVICE, true)
+                .setPriority(Notification.PRIORITY_MIN);
+
+        StatusBarNotification sbn = new StatusBarNotification(preOPkg, preOPkg, 9, "tag", preOUid,
+                0, nb.build(), new UserHandle(preOUid), null, 0);
+
+        mBinderService.enqueueNotificationWithTag(preOPkg, preOPkg, "tag",
+                sbn.getId(), sbn.getNotification(), sbn.getUserId());
+        waitForIdle();
+        assertEquals(IMPORTANCE_LOW,
+                mNotificationManagerService.getNotificationRecord(sbn.getKey()).getImportance());
+
+        nb = new Notification.Builder(mContext)
+                .setContentTitle("foo")
+                .setSmallIcon(android.R.drawable.sym_def_app_icon)
+                .setFlag(Notification.FLAG_FOREGROUND_SERVICE, true)
+                .setPriority(Notification.PRIORITY_MIN);
+
+        sbn = new StatusBarNotification(preOPkg, preOPkg, 9, "tag", preOUid,
+                0, nb.build(), new UserHandle(preOUid), null, 0);
+
+        mBinderService.enqueueNotificationWithTag(preOPkg, preOPkg, "tag",
+                sbn.getId(), sbn.getNotification(), sbn.getUserId());
+        waitForIdle();
+        assertEquals(IMPORTANCE_LOW,
+                mNotificationManagerService.getNotificationRecord(sbn.getKey()).getImportance());
+
+        NotificationChannel defaultChannel = mBinderService.getNotificationChannel(
+                preOPkg, NotificationChannel.DEFAULT_CHANNEL_ID);
+        assertEquals(IMPORTANCE_UNSPECIFIED, defaultChannel.getImportance());
     }
 }

@@ -33,6 +33,7 @@ import android.content.pm.PackageManager;
 import android.content.pm.ServiceInfo;
 import android.net.Uri;
 import android.os.Binder;
+import android.os.Build;
 import android.os.IBinder;
 import android.os.RemoteException;
 import android.os.SystemClock;
@@ -515,6 +516,22 @@ final class ServiceRecord extends Binder {
 
                                 localForegroundNoti = notiBuilder.build();
                             } catch (PackageManager.NameNotFoundException e) {
+                            }
+                        }
+                        if (nm.getNotificationChannel(localPackageName, appUid,
+                                localForegroundNoti.getChannelId()) == null) {
+                            int targetSdkVersion = Build.VERSION_CODES.O_MR1;
+                            try {
+                                final ApplicationInfo applicationInfo =
+                                        ams.mContext.getPackageManager().getApplicationInfoAsUser(
+                                                appInfo.packageName, 0, userId);
+                                targetSdkVersion = applicationInfo.targetSdkVersion;
+                            } catch (PackageManager.NameNotFoundException e) {
+                            }
+                            if (targetSdkVersion >= Build.VERSION_CODES.O_MR1) {
+                                throw new RuntimeException(
+                                        "invalid channel for service notification: "
+                                                + foregroundNoti);
                             }
                         }
                         if (localForegroundNoti.getSmallIcon() == null) {

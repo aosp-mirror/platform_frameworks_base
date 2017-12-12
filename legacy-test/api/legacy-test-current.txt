@@ -1,0 +1,227 @@
+package android.test {
+
+  public deprecated class AndroidTestCase extends junit.framework.TestCase {
+    ctor public AndroidTestCase();
+    method public void assertActivityRequiresPermission(java.lang.String, java.lang.String, java.lang.String);
+    method public void assertReadingContentUriRequiresPermission(android.net.Uri, java.lang.String);
+    method public void assertWritingContentUriRequiresPermission(android.net.Uri, java.lang.String);
+    method public android.content.Context getContext();
+    method protected void scrubClass(java.lang.Class<?>) throws java.lang.IllegalAccessException;
+    method public void setContext(android.content.Context);
+    method public void testAndroidTestCaseSetupProperly();
+    field protected android.content.Context mContext;
+  }
+
+  public abstract deprecated class FlakyTest implements java.lang.annotation.Annotation {
+  }
+
+  public deprecated class InstrumentationTestCase extends junit.framework.TestCase {
+    ctor public InstrumentationTestCase();
+    method public android.app.Instrumentation getInstrumentation();
+    method public deprecated void injectInsrumentation(android.app.Instrumentation);
+    method public void injectInstrumentation(android.app.Instrumentation);
+    method public final <T extends android.app.Activity> T launchActivity(java.lang.String, java.lang.Class<T>, android.os.Bundle);
+    method public final <T extends android.app.Activity> T launchActivityWithIntent(java.lang.String, java.lang.Class<T>, android.content.Intent);
+    method public void runTestOnUiThread(java.lang.Runnable) throws java.lang.Throwable;
+    method public void sendKeys(java.lang.String);
+    method public void sendKeys(int...);
+    method public void sendRepeatedKeys(int...);
+  }
+
+  public deprecated class InstrumentationTestSuite extends junit.framework.TestSuite {
+    ctor public InstrumentationTestSuite(android.app.Instrumentation);
+    ctor public InstrumentationTestSuite(java.lang.String, android.app.Instrumentation);
+    ctor public InstrumentationTestSuite(java.lang.Class, android.app.Instrumentation);
+    method public void addTestSuite(java.lang.Class);
+  }
+
+  public abstract deprecated interface PerformanceTestCase {
+    method public abstract boolean isPerformanceOnly();
+    method public abstract int startPerformance(android.test.PerformanceTestCase.Intermediates);
+  }
+
+  public static abstract interface PerformanceTestCase.Intermediates {
+    method public abstract void addIntermediate(java.lang.String);
+    method public abstract void addIntermediate(java.lang.String, long);
+    method public abstract void finishTiming(boolean);
+    method public abstract void setInternalIterations(int);
+    method public abstract void startTiming(boolean);
+  }
+
+  public abstract deprecated class UiThreadTest implements java.lang.annotation.Annotation {
+  }
+
+}
+
+package android.test.suitebuilder.annotation {
+
+  public abstract deprecated class LargeTest implements java.lang.annotation.Annotation {
+  }
+
+  public abstract deprecated class MediumTest implements java.lang.annotation.Annotation {
+  }
+
+  public abstract deprecated class SmallTest implements java.lang.annotation.Annotation {
+  }
+
+  public abstract deprecated class Smoke implements java.lang.annotation.Annotation {
+  }
+
+  public abstract deprecated class Suppress implements java.lang.annotation.Annotation {
+  }
+
+}
+
+package com.android.internal.util {
+
+  public abstract deprecated interface Predicate<T> {
+    method public abstract boolean apply(T);
+  }
+
+}
+
+package junit.framework {
+
+  public class Assert {
+    ctor protected Assert();
+    method public static void assertEquals(java.lang.String, java.lang.Object, java.lang.Object);
+    method public static void assertEquals(java.lang.Object, java.lang.Object);
+    method public static void assertEquals(java.lang.String, java.lang.String, java.lang.String);
+    method public static void assertEquals(java.lang.String, java.lang.String);
+    method public static void assertEquals(java.lang.String, double, double, double);
+    method public static void assertEquals(double, double, double);
+    method public static void assertEquals(java.lang.String, float, float, float);
+    method public static void assertEquals(float, float, float);
+    method public static void assertEquals(java.lang.String, long, long);
+    method public static void assertEquals(long, long);
+    method public static void assertEquals(java.lang.String, boolean, boolean);
+    method public static void assertEquals(boolean, boolean);
+    method public static void assertEquals(java.lang.String, byte, byte);
+    method public static void assertEquals(byte, byte);
+    method public static void assertEquals(java.lang.String, char, char);
+    method public static void assertEquals(char, char);
+    method public static void assertEquals(java.lang.String, short, short);
+    method public static void assertEquals(short, short);
+    method public static void assertEquals(java.lang.String, int, int);
+    method public static void assertEquals(int, int);
+    method public static void assertFalse(java.lang.String, boolean);
+    method public static void assertFalse(boolean);
+    method public static void assertNotNull(java.lang.Object);
+    method public static void assertNotNull(java.lang.String, java.lang.Object);
+    method public static void assertNotSame(java.lang.String, java.lang.Object, java.lang.Object);
+    method public static void assertNotSame(java.lang.Object, java.lang.Object);
+    method public static void assertNull(java.lang.Object);
+    method public static void assertNull(java.lang.String, java.lang.Object);
+    method public static void assertSame(java.lang.String, java.lang.Object, java.lang.Object);
+    method public static void assertSame(java.lang.Object, java.lang.Object);
+    method public static void assertTrue(java.lang.String, boolean);
+    method public static void assertTrue(boolean);
+    method public static void fail(java.lang.String);
+    method public static void fail();
+    method public static void failNotEquals(java.lang.String, java.lang.Object, java.lang.Object);
+    method public static void failNotSame(java.lang.String, java.lang.Object, java.lang.Object);
+    method public static void failSame(java.lang.String);
+    method public static java.lang.String format(java.lang.String, java.lang.Object, java.lang.Object);
+  }
+
+  public class AssertionFailedError extends java.lang.AssertionError {
+    ctor public AssertionFailedError();
+    ctor public AssertionFailedError(java.lang.String);
+  }
+
+  public class ComparisonFailure extends junit.framework.AssertionFailedError {
+    ctor public ComparisonFailure(java.lang.String, java.lang.String, java.lang.String);
+    method public java.lang.String getActual();
+    method public java.lang.String getExpected();
+  }
+
+  public abstract interface Protectable {
+    method public abstract void protect() throws java.lang.Throwable;
+  }
+
+  public abstract interface Test {
+    method public abstract int countTestCases();
+    method public abstract void run(junit.framework.TestResult);
+  }
+
+  public abstract class TestCase extends junit.framework.Assert implements junit.framework.Test {
+    ctor public TestCase();
+    ctor public TestCase(java.lang.String);
+    method public int countTestCases();
+    method protected junit.framework.TestResult createResult();
+    method public java.lang.String getName();
+    method public junit.framework.TestResult run();
+    method public void run(junit.framework.TestResult);
+    method public void runBare() throws java.lang.Throwable;
+    method protected void runTest() throws java.lang.Throwable;
+    method public void setName(java.lang.String);
+    method protected void setUp() throws java.lang.Exception;
+    method protected void tearDown() throws java.lang.Exception;
+  }
+
+  public class TestFailure {
+    ctor public TestFailure(junit.framework.Test, java.lang.Throwable);
+    method public java.lang.String exceptionMessage();
+    method public junit.framework.Test failedTest();
+    method public boolean isFailure();
+    method public java.lang.Throwable thrownException();
+    method public java.lang.String trace();
+    field protected junit.framework.Test fFailedTest;
+    field protected java.lang.Throwable fThrownException;
+  }
+
+  public abstract interface TestListener {
+    method public abstract void addError(junit.framework.Test, java.lang.Throwable);
+    method public abstract void addFailure(junit.framework.Test, junit.framework.AssertionFailedError);
+    method public abstract void endTest(junit.framework.Test);
+    method public abstract void startTest(junit.framework.Test);
+  }
+
+  public class TestResult {
+    ctor public TestResult();
+    method public synchronized void addError(junit.framework.Test, java.lang.Throwable);
+    method public synchronized void addFailure(junit.framework.Test, junit.framework.AssertionFailedError);
+    method public synchronized void addListener(junit.framework.TestListener);
+    method public void endTest(junit.framework.Test);
+    method public synchronized int errorCount();
+    method public synchronized java.util.Enumeration<junit.framework.TestFailure> errors();
+    method public synchronized int failureCount();
+    method public synchronized java.util.Enumeration<junit.framework.TestFailure> failures();
+    method public synchronized void removeListener(junit.framework.TestListener);
+    method protected void run(junit.framework.TestCase);
+    method public synchronized int runCount();
+    method public void runProtected(junit.framework.Test, junit.framework.Protectable);
+    method public synchronized boolean shouldStop();
+    method public void startTest(junit.framework.Test);
+    method public synchronized void stop();
+    method public synchronized boolean wasSuccessful();
+    field protected java.util.Vector<junit.framework.TestFailure> fErrors;
+    field protected java.util.Vector<junit.framework.TestFailure> fFailures;
+    field protected java.util.Vector<junit.framework.TestListener> fListeners;
+    field protected int fRunTests;
+  }
+
+  public class TestSuite implements junit.framework.Test {
+    ctor public TestSuite();
+    ctor public TestSuite(java.lang.Class<?>);
+    ctor public TestSuite(java.lang.Class<? extends junit.framework.TestCase>, java.lang.String);
+    ctor public TestSuite(java.lang.String);
+    ctor public TestSuite(java.lang.Class<?>...);
+    ctor public TestSuite(java.lang.Class<? extends junit.framework.TestCase>[], java.lang.String);
+    method public void addTest(junit.framework.Test);
+    method public void addTestSuite(java.lang.Class<? extends junit.framework.TestCase>);
+    method public int countTestCases();
+    method public static junit.framework.Test createTest(java.lang.Class<?>, java.lang.String);
+    method public java.lang.String getName();
+    method public static java.lang.reflect.Constructor<?> getTestConstructor(java.lang.Class<?>) throws java.lang.NoSuchMethodException;
+    method public void run(junit.framework.TestResult);
+    method public void runTest(junit.framework.Test, junit.framework.TestResult);
+    method public void setName(java.lang.String);
+    method public junit.framework.Test testAt(int);
+    method public int testCount();
+    method public java.util.Enumeration<junit.framework.Test> tests();
+    method public static junit.framework.Test warning(java.lang.String);
+  }
+
+}
+

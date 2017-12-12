@@ -75,6 +75,9 @@ jstring encodedFormatToString(JNIEnv* env, SkEncodedImageFormat format) {
         case SkEncodedImageFormat::kWEBP:
             mimeType = "image/webp";
             break;
+        case SkEncodedImageFormat::kHEIF:
+            mimeType = "image/heif";
+            break;
         case SkEncodedImageFormat::kWBMP:
             mimeType = "image/vnd.wap.wbmp";
             break;
@@ -130,27 +133,15 @@ static void scaleNinePatchChunk(android::Res_png_9patch* chunk, float scale,
     scaleDivRange(chunk->getYDivs(), chunk->numYDivs, scale, scaledHeight);
 }
 
-static SkColorType colorTypeForScaledOutput(SkColorType colorType) {
-    switch (colorType) {
-        case kUnknown_SkColorType:
-        case kIndex_8_SkColorType:
-            return kN32_SkColorType;
-        default:
-            break;
-    }
-    return colorType;
-}
-
 class ScaleCheckingAllocator : public SkBitmap::HeapAllocator {
 public:
     ScaleCheckingAllocator(float scale, int size)
             : mScale(scale), mSize(size) {
     }
 
-    virtual bool allocPixelRef(SkBitmap* bitmap, SkColorTable* ctable) {
+    virtual bool allocPixelRef(SkBitmap* bitmap) {
         // accounts for scale in final allocation, using eventual size and config
-        const int bytesPerPixel = SkColorTypeBytesPerPixel(
-                colorTypeForScaledOutput(bitmap->colorType()));
+        const int bytesPerPixel = SkColorTypeBytesPerPixel(bitmap->colorType());
         const int requestedSize = bytesPerPixel *
                 int(bitmap->width() * mScale + 0.5f) *
                 int(bitmap->height() * mScale + 0.5f);
@@ -159,7 +150,7 @@ public:
                     mSize, requestedSize);
             return false;
         }
-        return SkBitmap::HeapAllocator::allocPixelRef(bitmap, ctable);
+        return SkBitmap::HeapAllocator::allocPixelRef(bitmap);
     }
 private:
     const float mScale;
@@ -175,7 +166,7 @@ public:
     ~RecyclingPixelAllocator() {
     }
 
-    virtual bool allocPixelRef(SkBitmap* bitmap, SkColorTable* ctable) {
+    virtual bool allocPixelRef(SkBitmap* bitmap) {
         const SkImageInfo& info = bitmap->info();
         if (info.colorType() == kUnknown_SkColorType) {
             ALOGW("unable to reuse a bitmap as the target has an unknown bitmap configuration");
@@ -195,7 +186,7 @@ public:
             return false;
         }
 
-        mBitmap->reconfigure(info, bitmap->rowBytes(), sk_ref_sp(ctable));
+        mBitmap->reconfigure(info, bitmap->rowBytes());
         bitmap->setPixelRef(sk_ref_sp(mBitmap), 0, 0);
         return true;
     }
@@ -334,13 +325,7 @@ static jobject doDecode(JNIEnv* env, SkStreamRewindable* stream, jobject padding
         env->SetIntField(options, gOptions_heightFieldID, scaledHeight);
         env->SetObjectField(options, gOptions_mimeFieldID, mimeType);
 
-        SkColorType outColorType = decodeColorType;
-        // Scaling can affect the output color type
-        if (willScale || scale != 1.0f) {
-            outColorType = colorTypeForScaledOutput(outColorType);
-        }
-
-        jint configID = GraphicsJNI::colorTypeToLegacyBitmapConfig(outColorType);
+        jint configID = GraphicsJNI::colorTypeToLegacyBitmapConfig(decodeColorType);
         if (isHardware) {
             configID = GraphicsJNI::kHardware_LegacyBitmapConfig;
         }
@@ -397,24 +382,6 @@ static jobject doDecode(JNIEnv* env, SkStreamRewindable* stream, jobject padding
         decodeAllocator = &defaultAllocator;
     }
 
-    // Construct a color table for the decode if necessary
-    sk_sp<SkColorTable> colorTable(nullptr);
-    SkPMColor* colorPtr = nullptr;
-    int* colorCount = nullptr;
-    int maxColors = 256;
-    SkPMColor colors[256];
-    if (kIndex_8_SkColorType == decodeColorType) {
-        colorTable.reset(new SkColorTable(colors, maxColors));
-
-        // SkColorTable expects us to initialize all of the colors before creating an
-        // SkColorTable.  However, we are using SkBitmap with an Allocator to allocate
-        // memory for the decode, so we need to create the SkColorTable before decoding.
-        // It is safe for SkAndroidCodec to modify the colors because this SkBitmap is
-        // not being used elsewhere.
-        colorPtr = const_cast<SkPMColor*>(colorTable->readColors());
-        colorCount = &maxColors;
-    }
-
     SkAlphaType alphaType = codec->computeOutputAlphaType(requireUnpremultiplied);
 
     const SkImageInfo decodeInfo = SkImageInfo::Make(size.width(), size.height(),
@@ -437,7 +404,7 @@ static jobject doDecode(JNIEnv* env, SkStreamRewindable* stream, jobject padding
     }
     SkBitmap decodingBitmap;
     if (!decodingBitmap.setInfo(bitmapInfo) ||
-            !decodingBitmap.tryAllocPixels(decodeAllocator, colorTable.get())) {
+            !decodingBitmap.tryAllocPixels(decodeAllocator)) {
         // SkAndroidCodec should recommend a valid SkImageInfo, so setInfo()
         // should only only fail if the calculated value for rowBytes is too
         // large.
@@ -450,8 +417,6 @@ static jobject doDecode(JNIEnv* env, SkStreamRewindable* stream, jobject padding
     SkAndroidCodec::AndroidOptions codecOptions;
     codecOptions.fZeroInitialized = decodeAllocator == &defaultAllocator ?
             SkCodec::kYes_ZeroInitialized : SkCodec::kNo_ZeroInitialized;
-    codecOptions.fColorPtr = colorPtr;
-    codecOptions.fColorCount = colorCount;
     codecOptions.fSampleSize = sampleSize;
     SkCodec::Result result = codec->getAndroidPixels(decodeInfo, decodingBitmap.getPixels(),
             decodingBitmap.rowBytes(), &codecOptions);
@@ -518,13 +483,13 @@ static jobject doDecode(JNIEnv* env, SkStreamRewindable* stream, jobject padding
             outputAllocator = &defaultAllocator;
         }
 
-        SkColorType scaledColorType = colorTypeForScaledOutput(decodingBitmap.colorType());
+        SkColorType scaledColorType = decodingBitmap.colorType();
         // FIXME: If the alphaType is kUnpremul and the image has alpha, the
         // colors may not be correct, since Skia does not yet support drawing
         // to/from unpremultiplied bitmaps.
         outputBitmap.setInfo(
                 bitmapInfo.makeWH(scaledWidth, scaledHeight).makeColorType(scaledColorType));
-        if (!outputBitmap.tryAllocPixels(outputAllocator, NULL)) {
+        if (!outputBitmap.tryAllocPixels(outputAllocator)) {
             // This should only fail on OOM.  The recyclingAllocator should have
             // enough memory since we check this before decoding using the
             // scaleCheckingAllocator.
@@ -579,6 +544,9 @@ static jobject doDecode(JNIEnv* env, SkStreamRewindable* stream, jobject padding
 
     if (isHardware) {
         sk_sp<Bitmap> hardwareBitmap = Bitmap::allocateHardwareBitmap(outputBitmap);
+        if (!hardwareBitmap.get()) {
+            return nullObjectReturn("Failed to allocate a hardware bitmap");
+        }
         return bitmap::createBitmap(env, hardwareBitmap.release(), bitmapCreateFlags,
                 ninePatchChunk, ninePatchInsets, -1);
     }

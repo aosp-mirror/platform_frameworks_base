@@ -18,20 +18,19 @@ package android.media;
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.hardware.cas.V1_0.*;
 import android.media.MediaCasException.*;
 import android.os.Handler;
 import android.os.HandlerThread;
-import android.os.IBinder;
+import android.os.IHwBinder;
 import android.os.Looper;
 import android.os.Message;
-import android.os.Parcel;
-import android.os.Parcelable;
 import android.os.Process;
 import android.os.RemoteException;
-import android.os.ServiceManager;
-import android.os.ServiceSpecificException;
 import android.util.Log;
 import android.util.Singleton;
+
+import java.util.ArrayList;
 
 /**
  * MediaCas can be used to obtain keys for descrambling protected media streams, in
@@ -95,7 +94,6 @@ import android.util.Singleton;
  */
 public final class MediaCas implements AutoCloseable {
     private static final String TAG = "MediaCas";
-    private final ParcelableCasData mCasData = new ParcelableCasData();
     private ICas mICas;
     private EventListener mListener;
     private HandlerThread mHandlerThread;
@@ -105,8 +103,10 @@ public final class MediaCas implements AutoCloseable {
             new Singleton<IMediaCasService>() {
         @Override
         protected IMediaCasService create() {
-            return IMediaCasService.Stub.asInterface(
-                    ServiceManager.getService("media.cas"));
+            try {
+                return IMediaCasService.getService();
+            } catch (RemoteException e) {}
+            return null;
         }
     };
 
@@ -136,64 +136,20 @@ public final class MediaCas implements AutoCloseable {
         @Override
         public void handleMessage(Message msg) {
             if (msg.what == MSG_CAS_EVENT) {
-                mListener.onEvent(MediaCas.this, msg.arg1, msg.arg2, (byte[]) msg.obj);
+                mListener.onEvent(MediaCas.this, msg.arg1, msg.arg2,
+                        toBytes((ArrayList<Byte>) msg.obj));
             }
         }
     }
 
     private final ICasListener.Stub mBinder = new ICasListener.Stub() {
         @Override
-        public void onEvent(int event, int arg, @Nullable byte[] data)
+        public void onEvent(int event, int arg, @Nullable ArrayList<Byte> data)
                 throws RemoteException {
             mEventHandler.sendMessage(mEventHandler.obtainMessage(
                     EventHandler.MSG_CAS_EVENT, event, arg, data));
         }
     };
-
-    /**
-     * Class for parceling byte array data over ICas binder.
-     */
-    static class ParcelableCasData implements Parcelable {
-        private byte[] mData;
-        private int mOffset;
-        private int mLength;
-
-        ParcelableCasData() {
-            mData = null;
-            mOffset = mLength = 0;
-        }
-
-        private ParcelableCasData(Parcel in) {
-            this();
-        }
-
-        void set(@NonNull byte[] data, int offset, int length) {
-            mData = data;
-            mOffset = offset;
-            mLength = length;
-        }
-
-        @Override
-        public int describeContents() {
-            return 0;
-        }
-
-        @Override
-        public void writeToParcel(Parcel dest, int flags) {
-            dest.writeByteArray(mData, mOffset, mLength);
-        }
-
-        public static final Parcelable.Creator<ParcelableCasData> CREATOR
-                = new Parcelable.Creator<ParcelableCasData>() {
-            public ParcelableCasData createFromParcel(Parcel in) {
-                return new ParcelableCasData(in);
-            }
-
-            public ParcelableCasData[] newArray(int size) {
-                return new ParcelableCasData[size];
-            }
-        };
-    }
 
     /**
      * Describe a CAS plugin with its CA_system_ID and string name.
@@ -210,9 +166,9 @@ public final class MediaCas implements AutoCloseable {
             mName = null;
         }
 
-        PluginDescriptor(int CA_system_id, String name) {
-            mCASystemId = CA_system_id;
-            mName = name;
+        PluginDescriptor(@NonNull HidlCasPluginDescriptor descriptor) {
+            mCASystemId = descriptor.caSystemId;
+            mName = descriptor.name;
         }
 
         public int getSystemId() {
@@ -230,13 +186,38 @@ public final class MediaCas implements AutoCloseable {
         }
     }
 
+    private ArrayList<Byte> toByteArray(@NonNull byte[] data, int offset, int length) {
+        ArrayList<Byte> byteArray = new ArrayList<Byte>(length);
+        for (int i = 0; i < length; i++) {
+            byteArray.add(Byte.valueOf(data[offset + i]));
+        }
+        return byteArray;
+    }
+
+    private ArrayList<Byte> toByteArray(@Nullable byte[] data) {
+        if (data == null) {
+            return new ArrayList<Byte>();
+        }
+        return toByteArray(data, 0, data.length);
+    }
+
+    private byte[] toBytes(@NonNull ArrayList<Byte> byteArray) {
+        byte[] data = null;
+        if (byteArray != null) {
+            data = new byte[byteArray.size()];
+            for (int i = 0; i < data.length; i++) {
+                data[i] = byteArray.get(i);
+            }
+        }
+        return data;
+    }
     /**
      * Class for an open session with the CA system.
      */
     public final class Session implements AutoCloseable {
-        final byte[] mSessionId;
+        final ArrayList<Byte> mSessionId;
 
-        Session(@NonNull byte[] sessionId) {
+        Session(@NonNull ArrayList<Byte> sessionId) {
             mSessionId = sessionId;
         }
 
@@ -254,9 +235,8 @@ public final class MediaCas implements AutoCloseable {
             validateInternalStates();
 
             try {
-                mICas.setSessionPrivateData(mSessionId, data);
-            } catch (ServiceSpecificException e) {
-                MediaCasException.throwExceptions(e);
+                MediaCasException.throwExceptionIfNeeded(
+                        mICas.setSessionPrivateData(mSessionId, toByteArray(data, 0, data.length)));
             } catch (RemoteException e) {
                 cleanupAndRethrowIllegalState();
             }
@@ -279,10 +259,8 @@ public final class MediaCas implements AutoCloseable {
             validateInternalStates();
 
             try {
-                mCasData.set(data, offset, length);
-                mICas.processEcm(mSessionId, mCasData);
-            } catch (ServiceSpecificException e) {
-                MediaCasException.throwExceptions(e);
+                MediaCasException.throwExceptionIfNeeded(
+                        mICas.processEcm(mSessionId, toByteArray(data, offset, length)));
             } catch (RemoteException e) {
                 cleanupAndRethrowIllegalState();
             }
@@ -314,54 +292,19 @@ public final class MediaCas implements AutoCloseable {
             validateInternalStates();
 
             try {
-                mICas.closeSession(mSessionId);
-            } catch (ServiceSpecificException e) {
-                MediaCasStateException.throwExceptions(e);
+                MediaCasStateException.throwExceptionIfNeeded(
+                        mICas.closeSession(mSessionId));
             } catch (RemoteException e) {
                 cleanupAndRethrowIllegalState();
             }
         }
     }
 
-    Session createFromSessionId(byte[] sessionId) {
-        if (sessionId == null || sessionId.length == 0) {
+    Session createFromSessionId(@NonNull ArrayList<Byte> sessionId) {
+        if (sessionId == null || sessionId.size() == 0) {
             return null;
         }
         return new Session(sessionId);
-    }
-
-    /**
-     * Class for parceling CAS plugin descriptors over IMediaCasService binder.
-     */
-    static class ParcelableCasPluginDescriptor
-        extends PluginDescriptor implements Parcelable {
-
-        private ParcelableCasPluginDescriptor(int CA_system_id, String name) {
-            super(CA_system_id, name);
-        }
-
-        @Override
-        public int describeContents() {
-            return 0;
-        }
-
-        @Override
-        public void writeToParcel(Parcel dest, int flags) {
-            Log.w(TAG, "ParcelableCasPluginDescriptor.writeToParcel shouldn't be called!");
-        }
-
-        public static final Parcelable.Creator<ParcelableCasPluginDescriptor> CREATOR
-                = new Parcelable.Creator<ParcelableCasPluginDescriptor>() {
-            public ParcelableCasPluginDescriptor createFromParcel(Parcel in) {
-                int CA_system_id = in.readInt();
-                String name = in.readString();
-                return new ParcelableCasPluginDescriptor(CA_system_id, name);
-            }
-
-            public ParcelableCasPluginDescriptor[] newArray(int size) {
-                return new ParcelableCasPluginDescriptor[size];
-            }
-        };
     }
 
     /**
@@ -393,13 +336,14 @@ public final class MediaCas implements AutoCloseable {
 
         if (service != null) {
             try {
-                ParcelableCasPluginDescriptor[] descriptors = service.enumeratePlugins();
-                if (descriptors.length == 0) {
+                ArrayList<HidlCasPluginDescriptor> descriptors =
+                        service.enumeratePlugins();
+                if (descriptors.size() == 0) {
                     return null;
                 }
-                PluginDescriptor[] results = new PluginDescriptor[descriptors.length];
+                PluginDescriptor[] results = new PluginDescriptor[descriptors.size()];
                 for (int i = 0; i < results.length; i++) {
-                    results[i] = descriptors[i];
+                    results[i] = new PluginDescriptor(descriptors.get(i));
                 }
                 return results;
             } catch (RemoteException e) {
@@ -430,7 +374,7 @@ public final class MediaCas implements AutoCloseable {
         }
     }
 
-    IBinder getBinder() {
+    IHwBinder getBinder() {
         validateInternalStates();
 
         return mICas.asBinder();
@@ -497,14 +441,22 @@ public final class MediaCas implements AutoCloseable {
         validateInternalStates();
 
         try {
-            mICas.setPrivateData(data);
-        } catch (ServiceSpecificException e) {
-            MediaCasException.throwExceptions(e);
+            MediaCasException.throwExceptionIfNeeded(
+                    mICas.setPrivateData(toByteArray(data, 0, data.length)));
         } catch (RemoteException e) {
             cleanupAndRethrowIllegalState();
         }
     }
 
+    private class OpenSessionCallback implements ICas.openSessionCallback {
+        public Session mSession;
+        public int mStatus;
+        @Override
+        public void onValues(int status, ArrayList<Byte> sessionId) {
+            mStatus = status;
+            mSession = createFromSessionId(sessionId);
+        }
+    }
     /**
      * Open a session to descramble one or more streams scrambled by the
      * conditional access system.
@@ -519,9 +471,10 @@ public final class MediaCas implements AutoCloseable {
         validateInternalStates();
 
         try {
-            return createFromSessionId(mICas.openSession());
-        } catch (ServiceSpecificException e) {
-            MediaCasException.throwExceptions(e);
+            OpenSessionCallback cb = new OpenSessionCallback();
+            mICas.openSession(cb);
+            MediaCasException.throwExceptionIfNeeded(cb.mStatus);
+            return cb.mSession;
         } catch (RemoteException e) {
             cleanupAndRethrowIllegalState();
         }
@@ -544,10 +497,8 @@ public final class MediaCas implements AutoCloseable {
         validateInternalStates();
 
         try {
-            mCasData.set(data, offset, length);
-            mICas.processEmm(mCasData);
-        } catch (ServiceSpecificException e) {
-            MediaCasException.throwExceptions(e);
+            MediaCasException.throwExceptionIfNeeded(
+                    mICas.processEmm(toByteArray(data, offset, length)));
         } catch (RemoteException e) {
             cleanupAndRethrowIllegalState();
         }
@@ -585,9 +536,8 @@ public final class MediaCas implements AutoCloseable {
         validateInternalStates();
 
         try {
-            mICas.sendEvent(event, arg, data);
-        } catch (ServiceSpecificException e) {
-            MediaCasException.throwExceptions(e);
+            MediaCasException.throwExceptionIfNeeded(
+                    mICas.sendEvent(event, arg, toByteArray(data)));
         } catch (RemoteException e) {
             cleanupAndRethrowIllegalState();
         }
@@ -608,9 +558,8 @@ public final class MediaCas implements AutoCloseable {
         validateInternalStates();
 
         try {
-            mICas.provision(provisionString);
-        } catch (ServiceSpecificException e) {
-            MediaCasException.throwExceptions(e);
+            MediaCasException.throwExceptionIfNeeded(
+                    mICas.provision(provisionString));
         } catch (RemoteException e) {
             cleanupAndRethrowIllegalState();
         }
@@ -631,9 +580,8 @@ public final class MediaCas implements AutoCloseable {
         validateInternalStates();
 
         try {
-            mICas.refreshEntitlements(refreshType, refreshData);
-        } catch (ServiceSpecificException e) {
-            MediaCasException.throwExceptions(e);
+            MediaCasException.throwExceptionIfNeeded(
+                    mICas.refreshEntitlements(refreshType, toByteArray(refreshData)));
         } catch (RemoteException e) {
             cleanupAndRethrowIllegalState();
         }

@@ -16,10 +16,8 @@
 
 package com.android.server.media;
 
-import android.Manifest;
-import android.annotation.NonNull;
-import android.app.Activity;
 import android.app.ActivityManager;
+import android.app.INotificationManager;
 import android.app.KeyguardManager;
 import android.app.PendingIntent;
 import android.app.PendingIntent.CanceledException;
@@ -57,13 +55,11 @@ import android.os.Process;
 import android.os.RemoteException;
 import android.os.ResultReceiver;
 import android.os.ServiceManager;
-import android.os.SystemProperties;
 import android.os.UserHandle;
 import android.os.UserManager;
 import android.provider.Settings;
 import android.speech.RecognizerIntent;
 import android.text.TextUtils;
-import android.util.IntArray;
 import android.util.Log;
 import android.util.Slog;
 import android.util.SparseArray;
@@ -80,7 +76,6 @@ import com.android.server.Watchdog.Monitor;
 import java.io.FileDescriptor;
 import java.io.PrintWriter;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 
 /**
@@ -112,6 +107,8 @@ public class MediaSessionService extends SystemService implements Monitor {
     private AudioManagerInternal mAudioManagerInternal;
     private ContentResolver mContentResolver;
     private SettingsObserver mSettingsObserver;
+    private INotificationManager mNotificationManager;
+    private boolean mHasFeatureLeanback;
 
     // The FullUserRecord of the current users. (i.e. The foreground user that isn't a profile)
     // It's always not null after the MediaSessionService is started.
@@ -129,6 +126,8 @@ public class MediaSessionService extends SystemService implements Monitor {
         PowerManager pm = (PowerManager) context.getSystemService(Context.POWER_SERVICE);
         mMediaEventWakeLock = pm.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK, "handleMediaEvent");
         mLongPressTimeout = ViewConfiguration.getLongPressTimeout();
+        mNotificationManager = INotificationManager.Stub.asInterface(
+                ServiceManager.getService(Context.NOTIFICATION_SERVICE));
     }
 
     @Override
@@ -156,6 +155,8 @@ public class MediaSessionService extends SystemService implements Monitor {
         mContentResolver = getContext().getContentResolver();
         mSettingsObserver = new SettingsObserver();
         mSettingsObserver.observe();
+        mHasFeatureLeanback = getContext().getPackageManager().hasSystemFeature(
+                PackageManager.FEATURE_LEANBACK);
 
         updateUser();
     }
@@ -177,17 +178,6 @@ public class MediaSessionService extends SystemService implements Monitor {
                 return;
             }
             if ((record.getFlags() & MediaSession.FLAG_EXCLUSIVE_GLOBAL_PRIORITY) != 0) {
-                if (mGlobalPrioritySession != record) {
-                    Log.d(TAG, "Global priority session is changed from " + mGlobalPrioritySession
-                            + " to " + record);
-                    mGlobalPrioritySession = record;
-                    if (user != null && user.mPriorityStack.contains(record)) {
-                        // Handle the global priority session separately.
-                        // Otherwise, it will be the media button session even after it becomes
-                        // inactive because it has been the lastly played media app.
-                        user.mPriorityStack.removeSession(record);
-                    }
-                }
                 if (DEBUG_KEY_EVENT) {
                     Log.d(TAG, "Global priority session is updated, active=" + record.isActive());
                 }
@@ -203,10 +193,27 @@ public class MediaSessionService extends SystemService implements Monitor {
         }
     }
 
+    public void setGlobalPrioritySession(MediaSessionRecord record) {
+        synchronized (mLock) {
+            FullUserRecord user = getFullUserRecordLocked(record.getUserId());
+            if (mGlobalPrioritySession != record) {
+                Log.d(TAG, "Global priority session is changed from " + mGlobalPrioritySession
+                        + " to " + record);
+                mGlobalPrioritySession = record;
+                if (user != null && user.mPriorityStack.contains(record)) {
+                    // Handle the global priority session separately.
+                    // Otherwise, it can be the media button session regardless of the active state
+                    // because it or other system components might have been the lastly played media
+                    // app.
+                    user.mPriorityStack.removeSession(record);
+                }
+            }
+        }
+    }
+
     private List<MediaSessionRecord> getActiveSessionsLocked(int userId) {
-        List<MediaSessionRecord> records;
+        List<MediaSessionRecord> records = new ArrayList<>();
         if (userId == UserHandle.USER_ALL) {
-            records = new ArrayList<>();
             int size = mUserRecords.size();
             for (int i = 0; i < size; i++) {
                 records.addAll(mUserRecords.valueAt(i).mPriorityStack.getActiveSessions(userId));
@@ -215,9 +222,9 @@ public class MediaSessionService extends SystemService implements Monitor {
             FullUserRecord user = getFullUserRecordLocked(userId);
             if (user == null) {
                 Log.w(TAG, "getSessions failed. Unknown user " + userId);
-                return new ArrayList<>();
+                return records;
             }
-            records = user.mPriorityStack.getActiveSessions(userId);
+            records.addAll(user.mPriorityStack.getActiveSessions(userId));
         }
 
         // Return global priority session at the first whenever it's asked.
@@ -472,28 +479,11 @@ public class MediaSessionService extends SystemService implements Monitor {
             Log.d(TAG, "Checking if enabled notification listener " + compName);
         }
         if (compName != null) {
-            final String enabledNotifListeners = Settings.Secure.getStringForUser(mContentResolver,
-                    Settings.Secure.ENABLED_NOTIFICATION_LISTENERS,
-                    userId);
-            if (enabledNotifListeners != null) {
-                final String[] components = enabledNotifListeners.split(":");
-                for (int i = 0; i < components.length; i++) {
-                    final ComponentName component =
-                            ComponentName.unflattenFromString(components[i]);
-                    if (component != null) {
-                        if (compName.equals(component)) {
-                            if (DEBUG) {
-                                Log.d(TAG, "ok to get sessions. " + component +
-                                        " is authorized notification listener");
-                            }
-                            return true;
-                        }
-                    }
-                }
-            }
-            if (DEBUG) {
-                Log.d(TAG, "not ok to get sessions. " + compName +
-                        " is not in list of ENABLED_NOTIFICATION_LISTENERS for user " + userId);
+            try {
+                return mNotificationManager.isNotificationListenerAccessGrantedForUser(
+                        compName, userId);
+            } catch(RemoteException e) {
+                Log.w(TAG, "Dead NotificationManager in isEnabledNotificationListener", e);
             }
         }
         return false;
@@ -1379,6 +1369,10 @@ public class MediaSessionService extends SystemService implements Monitor {
                                     flags, packageName, TAG);
                         } catch (RemoteException e) {
                             Log.e(TAG, "Error adjusting default volume.", e);
+                        } catch (IllegalArgumentException e) {
+                            Log.e(TAG, "Cannot adjust volume: direction=" + direction
+                                    + ", suggestedStream=" + suggestedStream + ", flags=" + flags,
+                                    e);
                         }
                     }
                 });
@@ -1528,7 +1522,7 @@ public class MediaSessionService extends SystemService implements Monitor {
 
         private boolean isVoiceKey(int keyCode) {
             return keyCode == KeyEvent.KEYCODE_HEADSETHOOK
-                    || keyCode == KeyEvent.KEYCODE_MEDIA_PLAY_PAUSE;
+                    || (!mHasFeatureLeanback && keyCode == KeyEvent.KEYCODE_MEDIA_PLAY_PAUSE);
         }
 
         private boolean isUserSetupComplete() {

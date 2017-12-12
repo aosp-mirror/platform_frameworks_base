@@ -21,5 +21,6 @@ package android.bluetooth;
  */
 public class BluetoothCodecConfig {
     public boolean isMandatoryCodec() { return true; }
-    public String getCodecName() { return null;}
+    public String getCodecName() { return null; }
+    public int getCodecType() { return -1; }
 }

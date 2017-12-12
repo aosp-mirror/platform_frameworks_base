@@ -310,9 +310,45 @@ public class QSSecurityFooter implements OnClickListener, DialogInterface.OnClic
             vpnWarning.setMovementMethod(new LinkMovementMethod());
         }
 
+        // Note: if a new section is added, should update configSubtitleVisibility to include
+        // the handling of the subtitle
+        configSubtitleVisibility(managementMessage != null,
+                caCertsMessage != null,
+                networkLoggingMessage != null,
+                vpnMessage != null,
+                dialogView);
+
         mDialog.show();
         mDialog.getWindow().setLayout(ViewGroup.LayoutParams.MATCH_PARENT,
                 ViewGroup.LayoutParams.WRAP_CONTENT);
+    }
+
+    protected void configSubtitleVisibility(boolean showDeviceManagement, boolean showCaCerts,
+            boolean showNetworkLogging, boolean showVpn, View dialogView) {
+        // Device Management title should always been shown
+        // When there is a Device Management message, all subtitles should be shown
+        if (showDeviceManagement) {
+            return;
+        }
+        // Hide the subtitle if there is only 1 message shown
+        int mSectionCountExcludingDeviceMgt = 0;
+        if (showCaCerts) { mSectionCountExcludingDeviceMgt++; }
+        if (showNetworkLogging) { mSectionCountExcludingDeviceMgt++; }
+        if (showVpn) { mSectionCountExcludingDeviceMgt++; }
+
+        // No work needed if there is no sections or more than 1 section
+        if (mSectionCountExcludingDeviceMgt != 1) {
+            return;
+        }
+        if (showCaCerts) {
+            dialogView.findViewById(R.id.ca_certs_subtitle).setVisibility(View.GONE);
+        }
+        if (showNetworkLogging) {
+            dialogView.findViewById(R.id.network_logging_subtitle).setVisibility(View.GONE);
+        }
+        if (showVpn) {
+            dialogView.findViewById(R.id.vpn_subtitle).setVisibility(View.GONE);
+        }
     }
 
     private String getSettingsButton() {
@@ -320,7 +356,7 @@ public class QSSecurityFooter implements OnClickListener, DialogInterface.OnClic
     }
 
     private String getPositiveButton() {
-        return mContext.getString(R.string.quick_settings_done);
+        return mContext.getString(R.string.ok);
     }
 
     protected CharSequence getManagementMessage(boolean isDeviceManaged,

@@ -16,6 +16,10 @@
 
 package android.net.metrics;
 
+import android.net.MacAddress;
+
+import java.util.StringJoiner;
+
 /**
  * An event logged when NFLOG notifies userspace of a wakeup packet for
  * watched interfaces.
@@ -23,12 +27,35 @@ package android.net.metrics;
  */
 public class WakeupEvent {
     public String iface;
-    public long timestampMs;
     public int uid;
+    public int ethertype;
+    public MacAddress dstHwAddr;
+    public String srcIp;
+    public String dstIp;
+    public int ipNextHeader;
+    public int srcPort;
+    public int dstPort;
+    public long timestampMs;
 
     @Override
     public String toString() {
-        return String.format("WakeupEvent(%tT.%tL, %s, uid: %d)",
-                timestampMs, timestampMs, iface, uid);
+        StringJoiner j = new StringJoiner(", ", "WakeupEvent(", ")");
+        j.add(String.format("%tT.%tL", timestampMs, timestampMs));
+        j.add(iface);
+        j.add("uid: " + Integer.toString(uid));
+        j.add("eth=0x" + Integer.toHexString(ethertype));
+        j.add("dstHw=" + dstHwAddr);
+        if (ipNextHeader > 0) {
+            j.add("ipNxtHdr=" + ipNextHeader);
+            j.add("srcIp=" + srcIp);
+            j.add("dstIp=" + dstIp);
+            if (srcPort > -1) {
+                j.add("srcPort=" + srcPort);
+            }
+            if (dstPort > -1) {
+                j.add("dstPort=" + dstPort);
+            }
+        }
+        return j.toString();
     }
 }

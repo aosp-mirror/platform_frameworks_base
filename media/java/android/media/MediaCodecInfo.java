@@ -2095,6 +2095,7 @@ public final class MediaCodecInfo {
                             errors |= ERROR_UNRECOGNIZED;
                     }
                     switch (profileLevel.profile) {
+                        case CodecProfileLevel.AVCProfileConstrainedHigh:
                         case CodecProfileLevel.AVCProfileHigh:
                             BR *= 1250; break;
                         case CodecProfileLevel.AVCProfileHigh10:
@@ -2107,6 +2108,7 @@ public final class MediaCodecInfo {
                             errors |= ERROR_UNSUPPORTED;
                             supported = false;
                             // fall through - treat as base profile
+                        case CodecProfileLevel.AVCProfileConstrainedBaseline:
                         case CodecProfileLevel.AVCProfileBaseline:
                         case CodecProfileLevel.AVCProfileMain:
                             BR *= 1000; break;
@@ -2747,8 +2749,8 @@ public final class MediaCodecInfo {
                 mQualityRange = Utils
                         .parseIntRange(info.getString("quality-range"), mQualityRange);
             }
-            if (info.containsKey("feature-bitrate-control")) {
-                for (String mode: info.getString("feature-bitrate-control").split(",")) {
+            if (info.containsKey("feature-bitrate-modes")) {
+                for (String mode: info.getString("feature-bitrate-modes").split(",")) {
                     mBitControl |= parseBitrateMode(mode);
                 }
             }
@@ -2861,6 +2863,8 @@ public final class MediaCodecInfo {
         public static final int AVCProfileHigh10   = 0x10;
         public static final int AVCProfileHigh422  = 0x20;
         public static final int AVCProfileHigh444  = 0x40;
+        public static final int AVCProfileConstrainedBaseline = 0x10000;
+        public static final int AVCProfileConstrainedHigh     = 0x80000;
 
         // from OMX_VIDEO_AVCLEVELTYPE
         public static final int AVCLevel1       = 0x01;
@@ -3042,6 +3046,8 @@ public final class MediaCodecInfo {
         public static final int DolbyVisionProfileDvheStn = 0x20;
         public static final int DolbyVisionProfileDvheDth = 0x40;
         public static final int DolbyVisionProfileDvheDtb = 0x80;
+        public static final int DolbyVisionProfileDvheSt = 0x100;
+        public static final int DolbyVisionProfileDvavSe = 0x200;
 
         // from OMX_VIDEO_DOLBYVISIONLEVELTYPE
         public static final int DolbyVisionLevelHd24    = 0x1;

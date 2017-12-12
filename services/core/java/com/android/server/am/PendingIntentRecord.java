@@ -20,7 +20,6 @@ import static com.android.server.am.ActivityManagerDebugConfig.TAG_AM;
 import static com.android.server.am.ActivityManagerDebugConfig.TAG_WITH_CLASS_NAME;
 
 import android.app.ActivityManager;
-import android.app.IActivityContainer;
 import android.content.IIntentSender;
 import android.content.IIntentReceiver;
 import android.app.PendingIntent;
@@ -37,7 +36,6 @@ import android.util.Slog;
 import android.util.TimeUtils;
 
 import com.android.internal.os.IResultReceiver;
-import com.android.server.am.ActivityStackSupervisor.ActivityContainer;
 
 import java.io.PrintWriter;
 import java.lang.ref.WeakReference;
@@ -234,30 +232,23 @@ final class PendingIntentRecord extends IIntentSender.Stub {
     public void send(int code, Intent intent, String resolvedType, IBinder whitelistToken,
             IIntentReceiver finishedReceiver, String requiredPermission, Bundle options) {
         sendInner(code, intent, resolvedType, whitelistToken, finishedReceiver,
-                requiredPermission, null, null, 0, 0, 0, options, null);
+                requiredPermission, null, null, 0, 0, 0, options);
     }
 
     public int sendWithResult(int code, Intent intent, String resolvedType, IBinder whitelistToken,
             IIntentReceiver finishedReceiver, String requiredPermission, Bundle options) {
         return sendInner(code, intent, resolvedType, whitelistToken, finishedReceiver,
-                requiredPermission, null, null, 0, 0, 0, options, null);
+                requiredPermission, null, null, 0, 0, 0, options);
     }
 
     int sendInner(int code, Intent intent, String resolvedType, IBinder whitelistToken,
             IIntentReceiver finishedReceiver,
             String requiredPermission, IBinder resultTo, String resultWho, int requestCode,
-            int flagsMask, int flagsValues, Bundle options, IActivityContainer container) {
+            int flagsMask, int flagsValues, Bundle options) {
         if (intent != null) intent.setDefusable(true);
         if (options != null) options.setDefusable(true);
 
         synchronized (owner) {
-            final ActivityContainer activityContainer = (ActivityContainer)container;
-            if (activityContainer != null && activityContainer.mParentActivity != null &&
-                    activityContainer.mParentActivity.state
-                            != ActivityStack.ActivityState.RESUMED) {
-                // Cannot start a child activity if the parent is not resumed.
-                return ActivityManager.START_CANCELED;
-            }
             if (!canceled) {
                 sent = true;
                 if ((key.flags&PendingIntent.FLAG_ONE_SHOT) != 0) {
@@ -346,7 +337,7 @@ final class PendingIntentRecord extends IIntentSender.Stub {
                             } else {
                                 owner.startActivityInPackage(uid, key.packageName, finalIntent,
                                         resolvedType, resultTo, resultWho, requestCode, 0,
-                                        options, userId, container, null, "PendingIntentRecord");
+                                        options, userId, null, "PendingIntentRecord");
                             }
                         } catch (RuntimeException e) {
                             Slog.w(TAG, "Unable to send startActivity intent", e);

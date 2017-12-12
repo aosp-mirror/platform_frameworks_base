@@ -18,8 +18,7 @@
 
 namespace aapt {
 
-void SerializeStringPoolToPb(const StringPool& pool,
-                             pb::StringPool* out_pb_pool) {
+void SerializeStringPoolToPb(const StringPool& pool, pb::StringPool* out_pb_pool) {
   BigBuffer buffer(1024);
   StringPool::FlattenUtf8(&buffer, pool);
 
@@ -28,51 +27,47 @@ void SerializeStringPoolToPb(const StringPool& pool,
 
   size_t offset = 0;
   for (const BigBuffer::Block& block : buffer) {
-    data->insert(data->begin() + offset, block.buffer.get(),
-                 block.buffer.get() + block.size);
+    data->insert(data->begin() + offset, block.buffer.get(), block.buffer.get() + block.size);
     offset += block.size;
   }
 }
 
-void SerializeSourceToPb(const Source& source, StringPool* src_pool,
-                         pb::Source* out_pb_source) {
+void SerializeSourceToPb(const Source& source, StringPool* src_pool, pb::Source* out_pb_source) {
   StringPool::Ref ref = src_pool->MakeRef(source.path);
   out_pb_source->set_path_idx(static_cast<uint32_t>(ref.index()));
   if (source.line) {
-    out_pb_source->set_line_no(static_cast<uint32_t>(source.line.value()));
+    out_pb_source->mutable_position()->set_line_number(static_cast<uint32_t>(source.line.value()));
   }
 }
 
-void DeserializeSourceFromPb(const pb::Source& pb_source,
-                             const android::ResStringPool& src_pool,
+void DeserializeSourceFromPb(const pb::Source& pb_source, const android::ResStringPool& src_pool,
                              Source* out_source) {
   if (pb_source.has_path_idx()) {
     out_source->path = util::GetString(src_pool, pb_source.path_idx());
   }
 
-  if (pb_source.has_line_no()) {
-    out_source->line = static_cast<size_t>(pb_source.line_no());
+  if (pb_source.has_position()) {
+    out_source->line = static_cast<size_t>(pb_source.position().line_number());
   }
 }
 
 pb::SymbolStatus_Visibility SerializeVisibilityToPb(SymbolState state) {
   switch (state) {
     case SymbolState::kPrivate:
-      return pb::SymbolStatus_Visibility_Private;
+      return pb::SymbolStatus_Visibility_PRIVATE;
     case SymbolState::kPublic:
-      return pb::SymbolStatus_Visibility_Public;
+      return pb::SymbolStatus_Visibility_PUBLIC;
     default:
       break;
   }
-  return pb::SymbolStatus_Visibility_Unknown;
+  return pb::SymbolStatus_Visibility_UNKNOWN;
 }
 
-SymbolState DeserializeVisibilityFromPb(
-    pb::SymbolStatus_Visibility pb_visibility) {
+SymbolState DeserializeVisibilityFromPb(pb::SymbolStatus_Visibility pb_visibility) {
   switch (pb_visibility) {
-    case pb::SymbolStatus_Visibility_Private:
+    case pb::SymbolStatus_Visibility_PRIVATE:
       return SymbolState::kPrivate;
-    case pb::SymbolStatus_Visibility_Public:
+    case pb::SymbolStatus_Visibility_PUBLIC:
       return SymbolState::kPublic;
     default:
       break;
@@ -80,8 +75,7 @@ SymbolState DeserializeVisibilityFromPb(
   return SymbolState::kUndefined;
 }
 
-void SerializeConfig(const ConfigDescription& config,
-                     pb::ConfigDescription* out_pb_config) {
+void SerializeConfig(const ConfigDescription& config, pb::ConfigDescription* out_pb_config) {
   android::ResTable_config flat_config = config;
   flat_config.size = sizeof(flat_config);
   flat_config.swapHtoD();
@@ -99,8 +93,7 @@ bool DeserializeConfigDescriptionFromPb(const pb::ConfigDescription& pb_config,
     return false;
   }
 
-  config = reinterpret_cast<const android::ResTable_config*>(
-      pb_config.data().data());
+  config = reinterpret_cast<const android::ResTable_config*>(pb_config.data().data());
   out_config->copyFromDtoH(*config);
   return true;
 }
@@ -108,20 +101,20 @@ bool DeserializeConfigDescriptionFromPb(const pb::ConfigDescription& pb_config,
 pb::Reference_Type SerializeReferenceTypeToPb(Reference::Type type) {
   switch (type) {
     case Reference::Type::kResource:
-      return pb::Reference_Type_Ref;
+      return pb::Reference_Type_REFERENCE;
     case Reference::Type::kAttribute:
-      return pb::Reference_Type_Attr;
+      return pb::Reference_Type_ATTRIBUTE;
     default:
       break;
   }
-  return pb::Reference_Type_Ref;
+  return pb::Reference_Type_REFERENCE;
 }
 
 Reference::Type DeserializeReferenceTypeFromPb(pb::Reference_Type pb_type) {
   switch (pb_type) {
-    case pb::Reference_Type_Ref:
+    case pb::Reference_Type_REFERENCE:
       return Reference::Type::kResource;
-    case pb::Reference_Type_Attr:
+    case pb::Reference_Type_ATTRIBUTE:
       return Reference::Type::kAttribute;
     default:
       break;
@@ -132,32 +125,32 @@ Reference::Type DeserializeReferenceTypeFromPb(pb::Reference_Type pb_type) {
 pb::Plural_Arity SerializePluralEnumToPb(size_t plural_idx) {
   switch (plural_idx) {
     case Plural::Zero:
-      return pb::Plural_Arity_Zero;
+      return pb::Plural_Arity_ZERO;
     case Plural::One:
-      return pb::Plural_Arity_One;
+      return pb::Plural_Arity_ONE;
     case Plural::Two:
-      return pb::Plural_Arity_Two;
+      return pb::Plural_Arity_TWO;
     case Plural::Few:
-      return pb::Plural_Arity_Few;
+      return pb::Plural_Arity_FEW;
     case Plural::Many:
-      return pb::Plural_Arity_Many;
+      return pb::Plural_Arity_MANY;
     default:
       break;
   }
-  return pb::Plural_Arity_Other;
+  return pb::Plural_Arity_OTHER;
 }
 
 size_t DeserializePluralEnumFromPb(pb::Plural_Arity arity) {
   switch (arity) {
-    case pb::Plural_Arity_Zero:
+    case pb::Plural_Arity_ZERO:
       return Plural::Zero;
-    case pb::Plural_Arity_One:
+    case pb::Plural_Arity_ONE:
       return Plural::One;
-    case pb::Plural_Arity_Two:
+    case pb::Plural_Arity_TWO:
       return Plural::Two;
-    case pb::Plural_Arity_Few:
+    case pb::Plural_Arity_FEW:
       return Plural::Few;
-    case pb::Plural_Arity_Many:
+    case pb::Plural_Arity_MANY:
       return Plural::Many;
     default:
       break;

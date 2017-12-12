@@ -40,6 +40,14 @@ public:
             GLenum* outSrc, GLenum* outDst);
     void setFactors(GLenum src, GLenum dst);
 
+    bool  getEnabled() {
+        return mEnabled;
+    }
+    void getFactors(GLenum* src, GLenum* dst) {
+        *src = mSrcMode;
+        *dst = mDstMode;
+    }
+
     void dump();
 private:
     Blend();

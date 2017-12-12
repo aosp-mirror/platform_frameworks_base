@@ -32,7 +32,7 @@
     <string name="backup_enc_password_required" msgid="7889652203371654149">"Քանի որ ձեր սարքը գաղտնագրված է, դուք պետք է գաղտնագրեք նաև ձեր պահուստը: Խնդրում ենք ստորև սահմանել գաղտնաբառը՝"</string>
     <string name="restore_enc_password_text" msgid="6140898525580710823">"Եթե ​​վերականգնվող տվյալները գաղտնագրված են, խնդրում ենք մուտքագրել գաղտնաբառը ստորև`"</string>
     <string name="toast_backup_started" msgid="550354281452756121">"Պահուստավորումը սկսվում է..."</string>
-    <string name="toast_backup_ended" msgid="3818080769548726424">"Պահուստավորումն ավարտվեց"</string>
+    <string name="toast_backup_ended" msgid="3818080769548726424">"Պահուստավորումն ավարտված է"</string>
     <string name="toast_restore_started" msgid="7881679218971277385">"Վերականգնումը մեկնարկեց..."</string>
     <string name="toast_restore_ended" msgid="1764041639199696132">"Վերականգնումն ավարտվեց"</string>
     <string name="toast_timeout" msgid="5276598587087626877">"Գործողության ժամանակը սպառվեց"</string>

@@ -174,16 +174,6 @@ public class ButtonDispatcher {
         mCurrentView = currentView.findViewById(mId);
     }
 
-    public void setCarMode(boolean carMode) {
-        final int N = mViews.size();
-        for (int i = 0; i < N; i++) {
-            final View view = mViews.get(i);
-            if (view instanceof ButtonInterface) {
-                ((ButtonInterface) view).setCarMode(carMode);
-            }
-        }
-    }
-
     public void setVertical(boolean vertical) {
         mVertical = vertical;
         final int N = mViews.size();

@@ -21,6 +21,8 @@ LOCAL_MODULE := webview_zygote
 
 LOCAL_SRC_FILES := webview_zygote.cpp
 
+LOCAL_CFLAGS := -Wall -Werror
+
 LOCAL_SHARED_LIBRARIES := \
 	libandroid_runtime \
 	libbinder \

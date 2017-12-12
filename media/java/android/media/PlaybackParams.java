@@ -174,7 +174,7 @@ public final class PlaybackParams implements Parcelable {
      * Sets the pitch factor.
      * @param pitch
      * @return this <code>PlaybackParams</code> instance.
-     * @throws InvalidArgumentException if the pitch is negative
+     * @throws IllegalArgumentException if the pitch is negative.
      */
     public PlaybackParams setPitch(float pitch) {
         if (pitch < 0.f) {

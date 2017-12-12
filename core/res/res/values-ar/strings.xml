@@ -21,30 +21,14 @@
 <resources xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
     <string name="byteShort" msgid="8340973892742019101">"بايت"</string>
-    <string name="kilobyteShort" msgid="7542884022844556968">"كيلوبايت"</string>
-    <string name="megabyteShort" msgid="6355851576770428922">"ميغابايت"</string>
-    <string name="gigabyteShort" msgid="3259882455212193214">"غيغابايت"</string>
-    <string name="terabyteShort" msgid="231613018159186962">"تيرابايت"</string>
     <string name="petabyteShort" msgid="5637816680144990219">"بيتابايت"</string>
     <string name="fileSizeSuffix" msgid="8897567456150907538">"<xliff:g id="NUMBER">%1$s</xliff:g> <xliff:g id="UNIT">%2$s</xliff:g>"</string>
-    <string name="durationDays" msgid="6652371460511178259">"<xliff:g id="DAYS">%1$d</xliff:g> يوم"</string>
-    <string name="durationDayHours" msgid="2713107458736744435">"<xliff:g id="DAYS">%1$d</xliff:g> يوم <xliff:g id="HOURS">%2$d</xliff:g> ساعة"</string>
-    <string name="durationDayHour" msgid="7293789639090958917">"<xliff:g id="DAYS">%1$d</xliff:g> يوم <xliff:g id="HOURS">%2$d</xliff:g> ساعة"</string>
-    <string name="durationHours" msgid="4266858287167358988">"<xliff:g id="HOURS">%1$d</xliff:g> ساعة"</string>
-    <string name="durationHourMinutes" msgid="9029176248692041549">"<xliff:g id="HOURS">%1$d</xliff:g> ساعة <xliff:g id="MINUTES">%2$d</xliff:g> دقيقة"</string>
-    <string name="durationHourMinute" msgid="2741677355177402539">"<xliff:g id="HOURS">%1$d</xliff:g> ساعة <xliff:g id="MINUTES">%2$d</xliff:g> دقيقة"</string>
-    <string name="durationMinutes" msgid="3134226679883579347">"<xliff:g id="MINUTES">%1$d</xliff:g> دقيقة"</string>
-    <string name="durationMinute" msgid="7155301744174623818">"<xliff:g id="MINUTES">%1$d</xliff:g> دقيقة"</string>
-    <string name="durationMinuteSeconds" msgid="1424656185379003751">"<xliff:g id="MINUTES">%1$d</xliff:g> دقيقة <xliff:g id="SECONDS">%2$d</xliff:g> ثانية"</string>
-    <string name="durationMinuteSecond" msgid="3989228718067466680">"<xliff:g id="MINUTES">%1$d</xliff:g> دقيقة <xliff:g id="SECONDS">%2$d</xliff:g> ثانية"</string>
-    <string name="durationSeconds" msgid="8050088505238241405">"<xliff:g id="SECONDS">%1$d</xliff:g> ثانية"</string>
-    <string name="durationSecond" msgid="985669622276420331">"<xliff:g id="SECONDS">%1$d</xliff:g> ثانية"</string>
     <string name="untitled" msgid="4638956954852782576">"‏&lt;بلا عنوان&gt;"</string>
     <string name="emptyPhoneNumber" msgid="7694063042079676517">"(ليس هناك رقم هاتف)"</string>
     <string name="unknownName" msgid="6867811765370350269">"غير معروف"</string>
     <string name="defaultVoiceMailAlphaTag" msgid="2660020990097733077">"البريد الصوتي"</string>
     <string name="defaultMsisdnAlphaTag" msgid="2850889754919584674">"MSISDN1"</string>
-    <string name="mmiError" msgid="5154499457739052907">"‏حدثت مشكلة في الاتصال أو أن كود MMI غير صحيح."</string>
+    <string name="mmiError" msgid="5154499457739052907">"‏حدثت مشكلة في الاتصال أو أن رمز MMI غير صحيح."</string>
     <string name="mmiFdnError" msgid="5224398216385316471">"تم تقييد التشغيل لأرقام الاتصال الثابت فقط."</string>
     <string name="mmiErrorWhileRoaming" msgid="762488890299284230">"يتعذر تغيير إعدادات إعادة توجيه المكالمات من هاتفك أثناء التجوال."</string>
     <string name="serviceEnabled" msgid="8147278346414714315">"تم تمكين الخدمة."</string>
@@ -59,7 +43,7 @@
     <string name="mismatchPin" msgid="609379054496863419">"أرقام التعريف الشخصية التي كتبتها غير مطابقة."</string>
     <string name="invalidPin" msgid="3850018445187475377">"ادخل رقم تعريف شخصي مكون من ٤ إلى ٨ أرقام."</string>
     <string name="invalidPuk" msgid="8761456210898036513">"‏اكتب رمز PUK مكونًا من ٨ أرقام أو أكثر."</string>
-    <string name="needPuk" msgid="919668385956251611">"‏شريحة SIM مؤمّنة بكود PUK. اكتب كود PUK لإلغاء تأمينها."</string>
+    <string name="needPuk" msgid="919668385956251611">"‏شريحة SIM مؤمّنة برمز PUK. اكتب رمز PUK لإلغاء تأمينها."</string>
     <string name="needPuk2" msgid="4526033371987193070">"‏اكتب PUK2 لإلغاء تأمين شريحة SIM."</string>
     <string name="enablePin" msgid="209412020907207950">"‏محاولة غير ناجحة، مكّن قفل SIM/RUIM."</string>
     <plurals name="pinpuk_attempts" formatted="false" msgid="1251012001539225582">
@@ -99,11 +83,13 @@
     <string name="RestrictedOnAllVoiceTitle" msgid="158800171499150681">"لا تتوفر خدمة الصوت/الطوارئ"</string>
     <string name="RestrictedStateContent" msgid="4278821484643362350">"مؤقتا لا تقدمها شبكة الجوال في موقعك"</string>
     <string name="NetworkPreferenceSwitchTitle" msgid="4008877505368566980">"يتعذر الوصول إلى الشبكة"</string>
-    <string name="NetworkPreferenceSwitchSummary" msgid="4164230263214915351">"‏لتحسين الاستقبال، يمكنك تجربة تغيير النوع المحدّد في النظام &gt; الشبكة والإنترنت &gt; شبكات الجوّال &gt; نوع الشبكة المفضّل."</string>
+    <string name="NetworkPreferenceSwitchSummary" msgid="1203771446683319957">"‏لتحسين الاستقبال، يمكنك محاولة تغيير النوع المحدّد من خلال الإعدادات &gt; الشبكة والإنترنت &gt; شبكات الجوّال &gt; نوع الشبكة المفضّل."</string>
+    <string name="EmergencyCallWarningTitle" msgid="4790413876281901612">"‏الاتصال عبر Wi-Fi نشط"</string>
+    <string name="EmergencyCallWarningSummary" msgid="8973232888021643293">"تتطلب مكالمات الطوارئ شبكة جوّال."</string>
     <string name="notification_channel_network_alert" msgid="4427736684338074967">"التنبيهات"</string>
     <string name="notification_channel_call_forward" msgid="2419697808481833249">"إعادة توجيه المكالمة"</string>
     <string name="notification_channel_emergency_callback" msgid="6686166232265733921">"وضع معاودة الاتصال بالطوارئ"</string>
-    <string name="notification_channel_mobile_data_alert" msgid="6130875231721406231">"تنبيهات بيانات الجوّال"</string>
+    <string name="notification_channel_mobile_data_status" msgid="4575131690860945836">"حالة بيانات الجوّال"</string>
     <string name="notification_channel_sms" msgid="3441746047346135073">"‏الرسائل القصيرة SMS"</string>
     <string name="notification_channel_voice_mail" msgid="3954099424160511919">"رسائل البريد الصوتي"</string>
     <string name="notification_channel_wfc" msgid="2130802501654254801">"‏الاتصال عبر Wi-Fi"</string>
@@ -153,8 +139,8 @@
     <string name="cfTemplateForwardedTime" msgid="9206251736527085256">"<xliff:g id="BEARER_SERVICE_CODE">{0}</xliff:g>: <xliff:g id="DIALING_NUMBER">{1}</xliff:g> بعد <xliff:g id="TIME_DELAY">{2}</xliff:g> ثانية"</string>
     <string name="cfTemplateRegistered" msgid="5073237827620166285">"<xliff:g id="BEARER_SERVICE_CODE">{0}</xliff:g>: لم تتم إعادة التوجيه"</string>
     <string name="cfTemplateRegisteredTime" msgid="6781621964320635172">"<xliff:g id="BEARER_SERVICE_CODE">{0}</xliff:g>: لم تتم إعادة التوجيه"</string>
-    <string name="fcComplete" msgid="3118848230966886575">"اكتمل كود الميزة."</string>
-    <string name="fcError" msgid="3327560126588500777">"حدثت مشكلة بالاتصال أو أن كود الميزة غير صحيح."</string>
+    <string name="fcComplete" msgid="3118848230966886575">"اكتمل رمز الميزة."</string>
+    <string name="fcError" msgid="3327560126588500777">"حدثت مشكلة بالاتصال أو أن رمز الميزة غير صحيح."</string>
     <string name="httpErrorOk" msgid="1191919378083472204">"حسنًا"</string>
     <string name="httpError" msgid="7956392511146698522">"حدث خطأ في الشبكة."</string>
     <string name="httpErrorLookup" msgid="4711687456111963163">"‏تعذر العثور على عنوان URL."</string>
@@ -1916,4 +1902,5 @@
     <string name="mmcc_imsi_unknown_in_hlr" msgid="6321202257374418726">"‏لم يتم تقديم SIM"</string>
     <string name="mmcc_illegal_ms" msgid="2769452751852211112">"‏غير مسموح باستخدام SIM"</string>
     <string name="mmcc_illegal_me" msgid="4438696681169345015">"غير مسموح باستخدام الهاتف"</string>
+    <string name="popup_window_default_title" msgid="4874318849712115433">"نافذة منبثقة"</string>
 </resources>
