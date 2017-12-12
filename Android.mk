@@ -276,8 +276,8 @@ non_base_dirs := \
 framework_base_android_test_mock_src_files := \
   $(call all-java-files-under, test-mock/src/android/test/mock)
 
-framework_base_android_test_runner_excluding_mock_src_files := \
-  $(filter-out $(framework_base_android_test_mock_src_files), $(call all-java-files-under, test-runner/src))
+framework_base_android_test_runner_src_files := \
+  $(call all-java-files-under, test-runner/src)
 
 # Find all files in specific directories (relative to frameworks/base)
 # to document and check apis
@@ -327,7 +327,7 @@ framework_docs_LOCAL_SRC_FILES := \
 # These are relative to frameworks/base
 framework_docs_LOCAL_API_CHECK_SRC_FILES := \
   $(framework_base_android_test_mock_src_files) \
-  $(framework_base_android_test_runner_excluding_mock_src_files) \
+  $(framework_base_android_test_runner_src_files) \
   $(files_to_check_apis) \
   $(common_src_files) \
 
