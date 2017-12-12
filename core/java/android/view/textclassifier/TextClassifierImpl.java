@@ -382,7 +382,7 @@ final class TextClassifierImpl implements TextClassifier {
         }
 
         final String type = getHighestScoringType(classifications);
-        addActions(builder, IntentFactory.create(mContext, type, text));
+        addActions(builder, IntentFactory.create(mContext, type, classifiedText));
 
         return builder.setSignature(getSignature(text, start, end)).build();
     }
