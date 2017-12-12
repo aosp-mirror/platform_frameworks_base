@@ -38,7 +38,6 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.res.Resources;
 import android.graphics.Bitmap;
-import android.graphics.Canvas;
 import android.graphics.ColorMatrix;
 import android.graphics.ColorMatrixColorFilter;
 import android.graphics.Matrix;
@@ -58,10 +57,13 @@ import android.provider.MediaStore;
 import android.util.DisplayMetrics;
 import android.util.Slog;
 import android.view.Display;
+import android.view.DisplayListCanvas;
 import android.view.LayoutInflater;
 import android.view.MotionEvent;
+import android.view.RenderNode;
 import android.view.Surface;
 import android.view.SurfaceControl;
+import android.view.ThreadedRenderer;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.WindowManager;
@@ -153,7 +155,6 @@ class SaveImageInBackgroundTask extends AsyncTask<Void, Void, Void> {
         int previewWidth = data.previewWidth;
         int previewHeight = data.previewheight;
 
-        Canvas c = new Canvas();
         Paint paint = new Paint();
         ColorMatrix desat = new ColorMatrix();
         desat.setSaturation(0.25f);
@@ -161,27 +162,17 @@ class SaveImageInBackgroundTask extends AsyncTask<Void, Void, Void> {
         Matrix matrix = new Matrix();
         int overlayColor = 0x40FFFFFF;
 
-        // Bitmaps created for screenshots are hardware bitmaps. Copy to a software bitmap in order
-        // to update size for previews.
-        Bitmap swBitmap = data.image.copy(Bitmap.Config.ARGB_8888, true);
-
-        Bitmap picture = Bitmap.createBitmap(previewWidth, previewHeight, Bitmap.Config.ARGB_8888);
         matrix.setTranslate((previewWidth - mImageWidth) / 2, (previewHeight - mImageHeight) / 2);
-        c.setBitmap(picture);
-        c.drawBitmap(swBitmap, matrix, paint);
-        c.drawColor(overlayColor);
-        c.setBitmap(null);
+        Bitmap picture = generateAdjustedHwBitmap(data.image, previewWidth, previewHeight, matrix,
+                paint, overlayColor);
 
         // Note, we can't use the preview for the small icon, since it is non-square
         float scale = (float) iconSize / Math.min(mImageWidth, mImageHeight);
-        Bitmap icon = Bitmap.createBitmap(iconSize, iconSize, Bitmap.Config.ARGB_8888);
         matrix.setScale(scale, scale);
         matrix.postTranslate((iconSize - (scale * mImageWidth)) / 2,
                 (iconSize - (scale * mImageHeight)) / 2);
-        c.setBitmap(icon);
-        c.drawBitmap(swBitmap, matrix, paint);
-        c.drawColor(overlayColor);
-        c.setBitmap(null);
+        Bitmap icon = generateAdjustedHwBitmap(data.image, iconSize, iconSize, matrix, paint,
+                overlayColor);
 
         // Show the intermediate notification
         mTickerAddSpace = !mTickerAddSpace;
@@ -233,6 +224,22 @@ class SaveImageInBackgroundTask extends AsyncTask<Void, Void, Void> {
         mNotificationBuilder.setLargeIcon(icon.createAshmemBitmap());
         // But we still don't set it for the expanded view, allowing the smallIcon to show here.
         mNotificationStyle.bigLargeIcon((Bitmap) null);
+    }
+
+    /**
+     * Generates a new hardware bitmap with specified values, copying the content from the passed
+     * in bitmap.
+     */
+    private Bitmap generateAdjustedHwBitmap(Bitmap bitmap, int width, int height, Matrix matrix,
+            Paint paint, int color) {
+        RenderNode node = RenderNode.create("ScreenshotCanvas", null);
+        node.setLeftTopRightBottom(0, 0, width, height);
+        node.setClipToBounds(false);
+        DisplayListCanvas canvas = node.start(width, height);
+        canvas.drawColor(color);
+        canvas.drawBitmap(bitmap, matrix, paint);
+        node.end(canvas);
+        return ThreadedRenderer.createHardwareBitmap(node, width, height);
     }
 
     @Override
