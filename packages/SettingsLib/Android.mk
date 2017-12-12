@@ -13,8 +13,6 @@ LOCAL_SHARED_ANDROID_LIBRARIES := \
     android-support-v7-appcompat \
     android-support-v14-preference
 
-LOCAL_STATIC_JAVA_LIBRARY := legacy-android-test
-
 LOCAL_RESOURCE_DIR := $(LOCAL_PATH)/res
 
 LOCAL_JAR_EXCLUDE_FILES := none
