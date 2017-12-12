@@ -111,6 +111,11 @@ public final class Slice implements Parcelable {
      */
     public static final String HINT_HIDDEN = "hidden";
     /**
+     * Hint indicating this content should be shown instead of the normal content when the slice
+     * is in small format.
+     */
+    public static final String HINT_SUMMARY = "summary";
+    /**
      * Hint to indicate that this content has a toggle action associated with it. To indicate that
      * the toggle is on, use {@link #HINT_SELECTED}. When the toggle state changes, the intent
      * associated with it will be sent along with an extra {@link #EXTRA_TOGGLE_STATE} which can be
