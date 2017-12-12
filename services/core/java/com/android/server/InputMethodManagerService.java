@@ -49,12 +49,14 @@ import org.xmlpull.v1.XmlPullParser;
 import org.xmlpull.v1.XmlPullParserException;
 import org.xmlpull.v1.XmlSerializer;
 
+import android.Manifest;
 import android.annotation.BinderThread;
 import android.annotation.ColorInt;
 import android.annotation.IntDef;
 import android.annotation.MainThread;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.annotation.RequiresPermission;
 import android.annotation.UserIdInt;
 import android.app.ActivityManager;
 import android.app.ActivityManagerInternal;
@@ -104,6 +106,8 @@ import android.os.Process;
 import android.os.RemoteException;
 import android.os.ResultReceiver;
 import android.os.ServiceManager;
+import android.os.ShellCallback;
+import android.os.ShellCommand;
 import android.os.SystemClock;
 import android.os.UserHandle;
 import android.os.UserManager;
@@ -177,6 +181,13 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
     static final boolean DEBUG = false;
     static final boolean DEBUG_RESTORE = DEBUG || false;
     static final String TAG = "InputMethodManagerService";
+
+    @Retention(SOURCE)
+    @IntDef({ShellCommandResult.SUCCESS, ShellCommandResult.FAILURE})
+    private @interface ShellCommandResult {
+        int SUCCESS = 0;
+        int FAILURE = -1;
+    }
 
     static final int MSG_SHOW_IM_SUBTYPE_PICKER = 1;
     static final int MSG_SHOW_IM_SUBTYPE_ENABLER = 2;
@@ -3885,30 +3896,6 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
 
     // ----------------------------------------------------------------------
 
-    @Override
-    public boolean setInputMethodEnabled(String id, boolean enabled) {
-        // TODO: Make this work even for non-current users?
-        if (!calledFromValidUser()) {
-            return false;
-        }
-        synchronized (mMethodMap) {
-            if (mContext.checkCallingOrSelfPermission(
-                    android.Manifest.permission.WRITE_SECURE_SETTINGS)
-                    != PackageManager.PERMISSION_GRANTED) {
-                throw new SecurityException(
-                        "Requires permission "
-                        + android.Manifest.permission.WRITE_SECURE_SETTINGS);
-            }
-
-            long ident = Binder.clearCallingIdentity();
-            try {
-                return setInputMethodEnabledLocked(id, enabled);
-            } finally {
-                Binder.restoreCallingIdentity(ident);
-            }
-        }
-    }
-
     boolean setInputMethodEnabledLocked(String id, boolean enabled) {
         // Make sure this is a valid input method.
         InputMethodInfo imm = mMethodMap.get(id);
@@ -4632,5 +4619,173 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
         } else {
             p.println("No input method service.");
         }
+    }
+
+    @BinderThread
+    @Override
+    public void onShellCommand(@Nullable FileDescriptor in, @Nullable FileDescriptor out,
+            @Nullable FileDescriptor err,
+            @NonNull String[] args, @Nullable ShellCallback callback,
+            @NonNull ResultReceiver resultReceiver) throws RemoteException {
+        new ShellCommandImpl(this).exec(
+                this, in, out, err, args, callback, resultReceiver);
+    }
+
+    private static final class ShellCommandImpl extends ShellCommand {
+        @NonNull
+        final InputMethodManagerService mService;
+
+        ShellCommandImpl(InputMethodManagerService service) {
+            mService = service;
+        }
+
+        @BinderThread
+        @ShellCommandResult
+        @Override
+        public int onCommand(@Nullable String cmd) {
+            if (cmd == null) {
+                return handleDefaultCommands(cmd);
+            }
+            switch (cmd) {
+                case "list":
+                    return mService.handleShellCommandListInputMethods(this);
+                case "enable":
+                    return mService.handleShellCommandEnableDisableInputMethod(this, true);
+                case "disable":
+                    return mService.handleShellCommandEnableDisableInputMethod(this, false);
+                case "set":
+                    return mService.handleShellCommandSetInputMethod(this);
+                default:
+                    return handleDefaultCommands(cmd);
+            }
+        }
+
+        @BinderThread
+        @Override
+        public void onHelp() {
+            try (PrintWriter pw = getOutPrintWriter()) {
+                pw.println("InputMethodManagerService commands:");
+                pw.println("  help");
+                pw.println("    Prints this help text.");
+                pw.println("  dump [options]");
+                pw.println("    Synonym of dumpsys.");
+                pw.println("  list [-a] [-s]");
+                pw.println("    prints all enabled input methods.");
+                pw.println("     -a: see all input methods");
+                pw.println("     -s: only a single summary line of each");
+                pw.println("  enable <ID>");
+                pw.println("    allows the given input method ID to be used.");
+                pw.println("  disable <ID>");
+                pw.println("    disallows the given input method ID to be used.");
+                pw.println("  set <ID>");
+                pw.println("    switches to the given input method ID.");
+            }
+        }
+    }
+
+    // ----------------------------------------------------------------------
+    // Shell command handlers:
+
+    /**
+     * Handles {@code adb shell ime list}.
+     * @param shellCommand {@link ShellCommand} object that is handling this command.
+     * @return Exit code of the command.
+     */
+    @BinderThread
+    @ShellCommandResult
+    private int handleShellCommandListInputMethods(@NonNull ShellCommand shellCommand) {
+        boolean all = false;
+        boolean brief = false;
+        while (true) {
+            final String nextOption = shellCommand.getNextOption();
+            if (nextOption == null) {
+                break;
+            }
+            switch (nextOption) {
+                case "-a":
+                    all = true;
+                    break;
+                case "-s":
+                    brief = true;
+                    break;
+            }
+        }
+        final List<InputMethodInfo> methods = all ?
+                getInputMethodList() : getEnabledInputMethodList();
+        final PrintWriter pr = shellCommand.getOutPrintWriter();
+        final Printer printer = x -> pr.println(x);
+        final int N = methods.size();
+        for (int i = 0; i < N; ++i) {
+            if (brief) {
+                pr.println(methods.get(i).getId());
+            } else {
+                pr.print(methods.get(i).getId()); pr.println(":");
+                methods.get(i).dump(printer, "  ");
+            }
+        }
+        return ShellCommandResult.SUCCESS;
+    }
+
+    /**
+     * Handles {@code adb shell ime enable} and {@code adb shell ime disable}.
+     * @param shellCommand {@link ShellCommand} object that is handling this command.
+     * @param enabled {@code true} if the command was {@code adb shell ime enable}.
+     * @return Exit code of the command.
+     */
+    @BinderThread
+    @ShellCommandResult
+    @RequiresPermission(Manifest.permission.WRITE_SECURE_SETTINGS)
+    private int handleShellCommandEnableDisableInputMethod(
+            @NonNull ShellCommand shellCommand, boolean enabled) {
+        if (!calledFromValidUser()) {
+            shellCommand.getErrPrintWriter().print(
+                    "Must be called from the foreground user or with INTERACT_ACROSS_USERS_FULL");
+            return ShellCommandResult.FAILURE;
+        }
+        final String id = shellCommand.getNextArgRequired();
+
+        final boolean previouslyEnabled;
+        synchronized (mMethodMap) {
+            if (mContext.checkCallingOrSelfPermission(
+                    android.Manifest.permission.WRITE_SECURE_SETTINGS)
+                    != PackageManager.PERMISSION_GRANTED) {
+                shellCommand.getErrPrintWriter().print(
+                        "Caller must have WRITE_SECURE_SETTINGS permission");
+                throw new SecurityException(
+                        "Requires permission "
+                                + android.Manifest.permission.WRITE_SECURE_SETTINGS);
+            }
+
+            final long ident = Binder.clearCallingIdentity();
+            try {
+                previouslyEnabled = setInputMethodEnabledLocked(id, enabled);
+            } finally {
+                Binder.restoreCallingIdentity(ident);
+            }
+        }
+        final PrintWriter pr = shellCommand.getOutPrintWriter();
+        pr.print("Input method ");
+        pr.print(id);
+        pr.print(": ");
+        pr.print((enabled == previouslyEnabled) ? "already " : "now ");
+        pr.println(enabled ? "enabled" : "disabled");
+        return ShellCommandResult.SUCCESS;
+    }
+
+    /**
+     * Handles {@code adb shell ime set}.
+     * @param shellCommand {@link ShellCommand} object that is handling this command.
+     * @return Exit code of the command.
+     */
+    @BinderThread
+    @ShellCommandResult
+    private int handleShellCommandSetInputMethod(@NonNull ShellCommand shellCommand) {
+        final String id = shellCommand.getNextArgRequired();
+        setInputMethod(null, id);
+        final PrintWriter pr = shellCommand.getOutPrintWriter();
+        pr.print("Input method ");
+        pr.print(id);
+        pr.println("  selected");
+        return ShellCommandResult.SUCCESS;
     }
 }
