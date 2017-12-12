@@ -28,12 +28,8 @@ message BatteryStatsProto {
   optional int64 parcel_version = 2;
   optional string start_platform_version = 3;
   optional string end_platform_version = 4;
-  optional BatteryHistoryProto history = 5;
-  repeated UidProto uids = 6;
-  optional SystemProto system = 7;
-}
-
-message BatteryHistoryProto {
+  repeated UidProto uids = 5;
+  optional SystemProto system = 6;
 }
 
 message ControllerActivityProto {
