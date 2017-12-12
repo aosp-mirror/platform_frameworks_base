@@ -316,6 +316,7 @@
     <string name="quick_settings_more_settings" msgid="326112621462813682">"Дадатковыя налады"</string>
     <string name="quick_settings_done" msgid="3402999958839153376">"Гатова"</string>
     <string name="quick_settings_connected" msgid="1722253542984847487">"Падлучана"</string>
+    <string name="quick_settings_connected_battery_level" msgid="4136051440381328892">"Падключана, узровень зараду акумулятара: <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g>"</string>
     <string name="quick_settings_connecting" msgid="47623027419264404">"Падлучэнне..."</string>
     <string name="quick_settings_tethering_label" msgid="7153452060448575549">"Мадэм"</string>
     <string name="quick_settings_hotspot_label" msgid="6046917934974004879">"Кропка доступу"</string>
@@ -358,9 +359,10 @@
     <string name="description_target_search" msgid="3091587249776033139">"Пошук"</string>
     <string name="description_direction_up" msgid="7169032478259485180">"Правядзіце пальцам уверх, каб атрымаць <xliff:g id="TARGET_DESCRIPTION">%s</xliff:g>."</string>
     <string name="description_direction_left" msgid="7207478719805562165">"Правядзіце пальцам улева, каб атрымаць <xliff:g id="TARGET_DESCRIPTION">%s</xliff:g>."</string>
-    <string name="zen_priority_introduction" msgid="3070506961866919502">"Вас не будуць турбаваць гукі і вібрацыя, за выключэннем будзільнікаў, мерапрыемстваў, падзей і выбраных вамі абанентаў."</string>
+    <string name="zen_priority_introduction" msgid="1149025108714420281">"Вас не будуць турбаваць гукі і вібрацыя, за выключэннем будзільнікаў, напамінаў, падзей і выбраных вамі абанентаў. Вы будзеце чуць усё, што ўключыце, у тым ліку музыку, відэа і гульні."</string>
+    <string name="zen_alarms_introduction" msgid="4934328096749380201">"Вас не будуць турбаваць гукі і вібрацыя, за выключэннем будзільнікаў. Вы будзеце чуць усё, што ўключыце, у тым ліку музыку, відэа і гульні."</string>
     <string name="zen_priority_customize_button" msgid="7948043278226955063">"Дапасаваць"</string>
-    <string name="zen_silence_introduction_voice" msgid="2284540992298200729">"Гэта заблакіруе ЎСЕ гукі і вібрацыі, у тым ліку ад будзільнікаў, музыкі, відэа і гульняў. Вы па-ранейшаму зможаце тэлефанаваць."</string>
+    <string name="zen_silence_introduction_voice" msgid="3948778066295728085">"Гэта заблакіруе ЎСЕ гукі і вібрацыю, у тым ліку ад будзільнікаў, музыкі, відэа і гульняў. Вы па-ранейшаму зможаце рабіць тэлефонныя выклікі."</string>
     <string name="zen_silence_introduction" msgid="3137882381093271568">"Гэта заблакіруе ЎСЕ гукі і вібрацыі, у тым ліку ад будзільнікаў, музыкі, відэа і гульняў."</string>
     <string name="keyguard_more_overflow_text" msgid="9195222469041601365">"+<xliff:g id="NUMBER_OF_NOTIFICATIONS">%d</xliff:g>"</string>
     <string name="speed_bump_explanation" msgid="1288875699658819755">"Менш тэрміновыя апавяшчэнні ніжэй"</string>
@@ -480,7 +482,7 @@
     <string name="hidden_notifications_cancel" msgid="3690709735122344913">"Не, дзякуй"</string>
     <string name="hidden_notifications_setup" msgid="41079514801976810">"Наладзіць"</string>
     <string name="zen_mode_and_condition" msgid="4462471036429759903">"<xliff:g id="ZEN_MODE">%1$s</xliff:g>. <xliff:g id="EXIT_CONDITION">%2$s</xliff:g>"</string>
-    <string name="volume_zen_end_now" msgid="3179845345429841822">"Завяршыць зараз"</string>
+    <string name="volume_zen_end_now" msgid="6930243045593601084">"Адключыць"</string>
     <string name="accessibility_volume_expand" msgid="5946812790999244205">"Разгарнуць"</string>
     <string name="accessibility_volume_collapse" msgid="3609549593031810875">"Згарнуць"</string>
     <string name="screen_pinning_title" msgid="3273740381976175811">"Экран замацаваны"</string>
@@ -558,8 +560,7 @@
     <string name="notification_channel_disabled" msgid="2139193533791840539">"Вы больш не будзеце атрымліваць гэтыя апавяшчэнні"</string>
     <string name="notification_num_channels" msgid="2048144408999179471">"Катэгорый апавяшчэнняў: <xliff:g id="NUMBER">%d</xliff:g>"</string>
     <string name="notification_default_channel_desc" msgid="2506053815870808359">"У гэтай праграме няма катэгорый апавяшчэнняў"</string>
-    <!-- no translation found for notification_unblockable_desc (3561016061737896906) -->
-    <skip />
+    <string name="notification_unblockable_desc" msgid="3561016061737896906">"Апавяшчэнні ад гэтай праграмы нельга адключыць"</string>
     <plurals name="notification_num_channels_desc" formatted="false" msgid="5492793452274077663">
       <item quantity="one">1 з <xliff:g id="NUMBER_1">%d</xliff:g> катэгорыі апавяшчэнняў у гэтай праграме</item>
       <item quantity="few">1 з <xliff:g id="NUMBER_1">%d</xliff:g> катэгорый апавяшчэнняў у гэтай праграме</item>
@@ -585,8 +586,18 @@
     <string name="notification_menu_snooze_description" msgid="3653669438131034525">"параметры адкладвання апавяшчэнняў"</string>
     <string name="snooze_undo" msgid="6074877317002985129">"АДРАБІЦЬ"</string>
     <string name="snoozed_for_time" msgid="2390718332980204462">"Адкладзена на <xliff:g id="TIME_AMOUNT">%1$s</xliff:g>"</string>
-    <!-- no translation found for snoozeHourOptions (2124335842674413030) -->
-    <!-- no translation found for snoozeMinuteOptions (4127251700591510196) -->
+    <plurals name="snoozeHourOptions" formatted="false" msgid="2124335842674413030">
+      <item quantity="one">%d гадзіна</item>
+      <item quantity="few">%d гадзіны</item>
+      <item quantity="many">%d гадзін</item>
+      <item quantity="other">%d гадзіны</item>
+    </plurals>
+    <plurals name="snoozeMinuteOptions" formatted="false" msgid="4127251700591510196">
+      <item quantity="one">%d хвіліна</item>
+      <item quantity="few">%d хвіліны</item>
+      <item quantity="many">%d хвілін</item>
+      <item quantity="other">%d хвіліны</item>
+    </plurals>
     <string name="battery_panel_title" msgid="7944156115535366613">"Выкарыстанне зараду"</string>
     <string name="battery_detail_charging_summary" msgid="1279095653533044008">"Эканомія зараду акумулятара недаступная падчас зарадкі"</string>
     <string name="battery_detail_switch_title" msgid="6285872470260795421">"Эканомія зараду"</string>
@@ -731,7 +742,7 @@
     <string name="pip_phone_dismiss_hint" msgid="6351678169095923899">"Перацягніце ўніз, каб адхіліць"</string>
     <string name="pip_menu_title" msgid="3328510504196964712">"Меню \"Відарыс у відарысе\""</string>
     <string name="pip_notification_title" msgid="3204024940158161322">"<xliff:g id="NAME">%s</xliff:g> з’яўляецца відарысам у відарысе"</string>
-    <string name="pip_notification_message" msgid="4171698133469539591">"Калі вы не хочаце, каб праграма <xliff:g id="NAME">%s</xliff:g> выкарыстоўвала гэту функцыю, дакраніцеся, каб адкрыць налады і адключыць яе."</string>
+    <string name="pip_notification_message" msgid="5619512781514343311">"Калі вы не хочаце, каб праграма <xliff:g id="NAME">%s</xliff:g> выкарыстоўвала гэту функцыю, дакраніцеся, каб адкрыць налады і адключыць яе."</string>
     <string name="pip_play" msgid="1417176722760265888">"Прайграць"</string>
     <string name="pip_pause" msgid="8881063404466476571">"Прыпыніць"</string>
     <string name="pip_skip_to_next" msgid="1948440006726306284">"Перайсці да наступнага"</string>

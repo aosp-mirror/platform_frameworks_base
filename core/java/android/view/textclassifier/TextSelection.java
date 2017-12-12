@@ -35,15 +35,17 @@ public final class TextSelection {
     @NonNull private final EntityConfidence<String> mEntityConfidence;
     @NonNull private final List<String> mEntities;
     @NonNull private final String mLogSource;
+    @NonNull private final String mVersionInfo;
 
     private TextSelection(
             int startIndex, int endIndex, @NonNull EntityConfidence<String> entityConfidence,
-            @NonNull String logSource) {
+            @NonNull String logSource, @NonNull String versionInfo) {
         mStartIndex = startIndex;
         mEndIndex = endIndex;
         mEntityConfidence = new EntityConfidence<>(entityConfidence);
         mEntities = mEntityConfidence.getEntities();
         mLogSource = logSource;
+        mVersionInfo = versionInfo;
     }
 
     /**
@@ -94,8 +96,18 @@ public final class TextSelection {
      * Returns a tag for the source classifier used to generate this result.
      * @hide
      */
+    @NonNull
     public String getSourceClassifier() {
         return mLogSource;
+    }
+
+    /**
+     * Returns information about the classifier model used to generate this TextSelection.
+     * @hide
+     */
+    @NonNull
+    public String getVersionInfo() {
+        return mVersionInfo;
     }
 
     @Override
@@ -114,6 +126,7 @@ public final class TextSelection {
         @NonNull private final EntityConfidence<String> mEntityConfidence =
                 new EntityConfidence<>();
         @NonNull private String mLogSource = "";
+        @NonNull private String mVersionInfo = "";
 
         /**
          * Creates a builder used to build {@link TextSelection} objects.
@@ -152,10 +165,20 @@ public final class TextSelection {
         }
 
         /**
+         * Sets information about the classifier model used to generate this TextSelection.
+         * @hide
+         */
+        Builder setVersionInfo(@NonNull String versionInfo) {
+            mVersionInfo = Preconditions.checkNotNull(versionInfo);
+            return this;
+        }
+
+        /**
          * Builds and returns {@link TextSelection} object.
          */
         public TextSelection build() {
-            return new TextSelection(mStartIndex, mEndIndex, mEntityConfidence, mLogSource);
+            return new TextSelection(
+                    mStartIndex, mEndIndex, mEntityConfidence, mLogSource, mVersionInfo);
         }
     }
 }

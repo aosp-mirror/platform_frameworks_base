@@ -27,6 +27,7 @@ package com.android.internal.util;
  * strongly encouraged to state this fact clearly in their API documentation.
  *
  * @deprecated Use {@code java.util.function.Predicate} instead.
+ *             This must not be used outside frameworks/base/test-runner.
  */
 @Deprecated
 public interface Predicate<T> {

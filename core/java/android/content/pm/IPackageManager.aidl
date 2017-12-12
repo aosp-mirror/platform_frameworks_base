@@ -128,6 +128,7 @@ interface IPackageManager {
     String[] getPackagesForUid(int uid);
 
     String getNameForUid(int uid);
+    String[] getNamesForUids(in int[] uids);
 
     int getUidForSharedUser(String sharedUserName);
 

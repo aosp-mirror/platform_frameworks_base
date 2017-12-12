@@ -30,13 +30,14 @@ import android.support.test.runner.AndroidJUnit4;
 import android.test.mock.MockContentResolver;
 
 import com.android.internal.app.NightDisplayController;
-import com.android.internal.app.NightDisplayController.LocalTime;
 import com.android.internal.util.test.FakeSettingsProvider;
 import com.android.server.display.DisplayTransformManager;
 import com.android.server.display.NightDisplayService;
 import com.android.server.twilight.TwilightListener;
 import com.android.server.twilight.TwilightManager;
 import com.android.server.twilight.TwilightState;
+import java.time.LocalDateTime;
+import java.time.ZoneId;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -45,6 +46,7 @@ import org.mockito.Mockito;
 
 import java.util.Calendar;
 import java.util.HashMap;
+import java.time.LocalTime;
 import java.util.Map;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
@@ -926,11 +928,10 @@ public class NightDisplayServiceTest {
      */
     private void setActivated(boolean activated, int lastActivatedTimeOffset) {
         mNightDisplayController.setActivated(activated);
-
-        final Calendar c = Calendar.getInstance();
-        c.add(Calendar.MINUTE, lastActivatedTimeOffset);
-        Secure.putLongForUser(mContext.getContentResolver(),
-                Secure.NIGHT_DISPLAY_LAST_ACTIVATED_TIME, c.getTimeInMillis(), mUserId);
+        Secure.putStringForUser(mContext.getContentResolver(),
+                Secure.NIGHT_DISPLAY_LAST_ACTIVATED_TIME,
+                LocalDateTime.now().plusMinutes(lastActivatedTimeOffset).toString(),
+                mUserId);
     }
 
     /**
@@ -969,7 +970,7 @@ public class NightDisplayServiceTest {
     private static LocalTime getLocalTimeRelativeToNow(int offsetMinutes) {
         final Calendar c = Calendar.getInstance();
         c.add(Calendar.MINUTE, offsetMinutes);
-        return new LocalTime(c.get(Calendar.HOUR_OF_DAY), c.get(Calendar.MINUTE));
+        return LocalTime.of(c.get(Calendar.HOUR_OF_DAY), c.get(Calendar.MINUTE));
     }
 
     /**
@@ -984,13 +985,27 @@ public class NightDisplayServiceTest {
         final LocalTime sunset = getLocalTimeRelativeToNow(sunsetOffset);
         final LocalTime sunrise = getLocalTimeRelativeToNow(sunriseOffset);
 
-        final Calendar now = Calendar.getInstance();
-        long sunsetMillis = sunset.getDateTimeBefore(now).getTimeInMillis();
-        long sunriseMillis = sunrise.getDateTimeBefore(now).getTimeInMillis();
+        final LocalDateTime now = LocalDateTime.now();
+        final ZoneId zoneId = ZoneId.systemDefault();
+
+        long sunsetMillis = NightDisplayService.getDateTimeBefore(sunset, now)
+                .atZone(zoneId)
+                .toInstant()
+                .toEpochMilli();
+        long sunriseMillis = NightDisplayService.getDateTimeBefore(sunrise, now)
+                .atZone(zoneId)
+                .toInstant()
+                .toEpochMilli();
         if (sunsetMillis < sunriseMillis) {
-            sunsetMillis = sunset.getDateTimeAfter(now).getTimeInMillis();
+            sunsetMillis = NightDisplayService.getDateTimeAfter(sunset, now)
+                    .atZone(zoneId)
+                    .toInstant()
+                    .toEpochMilli();
         } else {
-            sunriseMillis = sunrise.getDateTimeAfter(now).getTimeInMillis();
+            sunriseMillis = NightDisplayService.getDateTimeAfter(sunrise, now)
+                    .atZone(zoneId)
+                    .toInstant()
+                    .toEpochMilli();
         }
 
         return new TwilightState(sunriseMillis, sunsetMillis);

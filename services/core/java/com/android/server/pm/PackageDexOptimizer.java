@@ -110,9 +110,9 @@ public class PackageDexOptimizer {
             return false;
         }
 
-        // We do not dexopt a priv-app package when pm.dexopt.priv-apps-oob is true.
+        // We do not dexopt a priv-app package when pm.dexopt.priv-apps is false.
         if (pkg.isPrivilegedApp()) {
-            return !SystemProperties.getBoolean("pm.dexopt.priv-apps-oob", false);
+            return SystemProperties.getBoolean("pm.dexopt.priv-apps", true);
         }
 
         return true;
@@ -128,6 +128,10 @@ public class PackageDexOptimizer {
     int performDexOpt(PackageParser.Package pkg, String[] sharedLibraries,
             String[] instructionSets, CompilerStats.PackageStats packageStats,
             PackageDexUsage.PackageUseInfo packageUseInfo, DexoptOptions options) {
+        if (pkg.applicationInfo.uid == -1) {
+            throw new IllegalArgumentException("Dexopt for " + pkg.packageName
+                    + " has invalid uid.");
+        }
         if (!canOptimizePackage(pkg)) {
             return DEX_OPT_SKIPPED;
         }
@@ -154,7 +158,13 @@ public class PackageDexOptimizer {
                 targetInstructionSets : getAppDexInstructionSets(pkg.applicationInfo);
         final String[] dexCodeInstructionSets = getDexCodeInstructionSets(instructionSets);
         final List<String> paths = pkg.getAllCodePaths();
-        final int sharedGid = UserHandle.getSharedAppGid(pkg.applicationInfo.uid);
+
+        int sharedGid = UserHandle.getSharedAppGid(pkg.applicationInfo.uid);
+        if (sharedGid == -1) {
+            Slog.wtf(TAG, "Well this is awkward; package " + pkg.applicationInfo.name + " had UID "
+                    + pkg.applicationInfo.uid, new Throwable());
+            sharedGid = android.os.Process.NOBODY_UID;
+        }
 
         // Get the class loader context dependencies.
         // For each code path in the package, this array contains the class loader context that
@@ -293,6 +303,9 @@ public class PackageDexOptimizer {
      */
     public int dexOptSecondaryDexPath(ApplicationInfo info, String path,
             PackageDexUsage.DexUseInfo dexUseInfo, DexoptOptions options) {
+        if (info.uid == -1) {
+            throw new IllegalArgumentException("Dexopt for path " + path + " has invalid uid.");
+        }
         synchronized (mInstallLock) {
             final long acquireTime = acquireWakeLockLI(info.uid);
             try {

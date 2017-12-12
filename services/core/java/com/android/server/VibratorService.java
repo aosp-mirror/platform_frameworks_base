@@ -373,10 +373,22 @@ public class VibratorService extends IVibratorService.Stub
             if (mCurrentVibration.hasLongerTimeout(newOneShot.getTiming())
                     && newOneShot.getAmplitude() == currentOneShot.getAmplitude()) {
                 if (DEBUG) {
-                    Slog.e(TAG, "Ignoring incoming vibration in favor of current vibration");
+                    Slog.d(TAG, "Ignoring incoming vibration in favor of current vibration");
                 }
                 return;
             }
+        }
+
+        // If the current vibration is repeating and the incoming one is non-repeating, then ignore
+        // the non-repeating vibration. This is so that we don't cancel vibrations that are meant
+        // to grab the attention of the user, like ringtones and alarms, in favor of one-shot
+        // vibrations that are likely quite short.
+        if (!isRepeatingVibration(effect)
+                && mCurrentVibration != null && isRepeatingVibration(mCurrentVibration.mEffect)) {
+            if (DEBUG) {
+                Slog.d(TAG, "Ignoring incoming vibration in favor of alarm vibration");
+            }
+            return;
         }
 
         Vibration vib = new Vibration(token, effect, usageHint, uid, opPkg);
@@ -402,6 +414,16 @@ public class VibratorService extends IVibratorService.Stub
         } finally {
             Binder.restoreCallingIdentity(ident);
         }
+    }
+
+    private static boolean isRepeatingVibration(VibrationEffect effect) {
+        if (effect instanceof VibrationEffect.Waveform) {
+            final VibrationEffect.Waveform waveform = (VibrationEffect.Waveform) effect;
+            if (waveform.getRepeatIndex() >= 0) {
+                return true;
+            }
+        }
+        return false;
     }
 
     private void addToPreviousVibrationsLocked(Vibration vib) {
@@ -727,6 +749,9 @@ public class VibratorService extends IVibratorService.Stub
                     noteVibratorOnLocked(vib.mUid, timeout);
                     return timeout;
                 }
+            }
+            if (!prebaked.shouldFallback()) {
+                return 0;
             }
             final int id = prebaked.getId();
             if (id < 0 || id >= mFallbackEffects.length || mFallbackEffects[id] == null) {

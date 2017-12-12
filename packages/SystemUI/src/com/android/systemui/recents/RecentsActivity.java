@@ -65,6 +65,7 @@ import com.android.systemui.recents.events.activity.IterateRecentsEvent;
 import com.android.systemui.recents.events.activity.LaunchTaskFailedEvent;
 import com.android.systemui.recents.events.activity.LaunchTaskSucceededEvent;
 import com.android.systemui.recents.events.activity.MultiWindowStateChangedEvent;
+import com.android.systemui.recents.events.activity.RecentsActivityStartingEvent;
 import com.android.systemui.recents.events.activity.ToggleRecentsEvent;
 import com.android.systemui.recents.events.component.ActivityUnpinnedEvent;
 import com.android.systemui.recents.events.component.RecentsVisibilityChangedEvent;
@@ -119,6 +120,7 @@ public class RecentsActivity extends Activity implements ViewTreeObserver.OnPreD
     private boolean mFinishedOnStartup;
     private boolean mIgnoreAltTabRelease;
     private boolean mIsVisible;
+    private boolean mRecentsStartRequested;
     private Configuration mLastConfig;
 
     // Top level views
@@ -183,6 +185,9 @@ public class RecentsActivity extends Activity implements ViewTreeObserver.OnPreD
             if (action.equals(Intent.ACTION_SCREEN_OFF)) {
                 // When the screen turns off, dismiss Recents to Home
                 dismissRecentsToHomeIfVisible(false);
+            } else if (action.equals(Intent.ACTION_USER_SWITCHED)) {
+                // When switching users, dismiss Recents to Home similar to screen off
+                finish();
             } else if (action.equals(Intent.ACTION_TIME_CHANGED)) {
                 // If the time shifts but the currentTime >= lastStackActiveTime, then that boundary
                 // is still valid.  Otherwise, we need to reset the lastStackactiveTime to the
@@ -353,6 +358,9 @@ public class RecentsActivity extends Activity implements ViewTreeObserver.OnPreD
         mScrimViews = new SystemBarScrimViews(this);
         getWindow().getAttributes().privateFlags |=
                 WindowManager.LayoutParams.PRIVATE_FLAG_FORCE_DECOR_VIEW_VISIBILITY;
+        if (Recents.getConfiguration().isLowRamDevice) {
+            getWindow().addFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN);
+        }
 
         mLastConfig = new Configuration(Utilities.getAppConfiguration(this));
         mFocusTimerDuration = getResources().getInteger(R.integer.recents_auto_advance_duration);
@@ -364,7 +372,7 @@ public class RecentsActivity extends Activity implements ViewTreeObserver.OnPreD
         });
 
         // Set the window background
-        getWindow().setBackgroundDrawable(mRecentsView.getBackgroundScrim());
+        mRecentsView.updateBackgroundScrim(getWindow(), isInMultiWindowMode());
 
         // Create the home intent runnable
         mHomeIntent = new Intent(Intent.ACTION_MAIN, null);
@@ -376,6 +384,7 @@ public class RecentsActivity extends Activity implements ViewTreeObserver.OnPreD
         IntentFilter filter = new IntentFilter();
         filter.addAction(Intent.ACTION_SCREEN_OFF);
         filter.addAction(Intent.ACTION_TIME_CHANGED);
+        filter.addAction(Intent.ACTION_USER_SWITCHED);
         registerReceiver(mSystemBroadcastReceiver, filter);
 
         getWindow().addPrivateFlags(LayoutParams.PRIVATE_FLAG_NO_MOVE_ANIMATION);
@@ -401,6 +410,18 @@ public class RecentsActivity extends Activity implements ViewTreeObserver.OnPreD
 
         // Notify of the next draw
         mRecentsView.getViewTreeObserver().addOnPreDrawListener(mRecentsDrawnEventListener);
+
+        // If Recents was restarted, then it should complete the enter animation with partially
+        // reset launch state with dock, app and home set to false
+        Object isRelaunching = getLastNonConfigurationInstance();
+        if (isRelaunching != null && isRelaunching instanceof Boolean && (boolean) isRelaunching) {
+            RecentsActivityLaunchState launchState = Recents.getConfiguration().getLaunchState();
+            launchState.launchedViaDockGesture = false;
+            launchState.launchedFromApp = false;
+            launchState.launchedFromHome = false;
+            onEnterAnimationComplete();
+        }
+        mRecentsStartRequested = false;
     }
 
     @Override
@@ -434,7 +455,6 @@ public class RecentsActivity extends Activity implements ViewTreeObserver.OnPreD
      * Reloads the stack views upon launching Recents.
      */
     private void reloadStackView() {
-
         // If the Recents component has preloaded a load plan, then use that to prevent
         // reconstructing the task stack
         RecentsTaskLoader loader = Recents.getTaskLoader();
@@ -511,6 +531,11 @@ public class RecentsActivity extends Activity implements ViewTreeObserver.OnPreD
     }
 
     @Override
+    public Object onRetainNonConfigurationInstance() {
+        return true;
+    }
+
+    @Override
     protected void onPause() {
         super.onPause();
 
@@ -536,6 +561,9 @@ public class RecentsActivity extends Activity implements ViewTreeObserver.OnPreD
     public void onMultiWindowModeChanged(boolean isInMultiWindowMode) {
         super.onMultiWindowModeChanged(isInMultiWindowMode);
 
+        // Set the window background
+        mRecentsView.updateBackgroundScrim(getWindow(), isInMultiWindowMode);
+
         reloadTaskStack(isInMultiWindowMode, true /* sendConfigChangedEvent */);
     }
 
@@ -549,7 +577,9 @@ public class RecentsActivity extends Activity implements ViewTreeObserver.OnPreD
         MetricsLogger.hidden(this, MetricsEvent.OVERVIEW_ACTIVITY);
         Recents.getTaskLoader().getHighResThumbnailLoader().setVisible(false);
 
-        if (!isChangingConfigurations()) {
+        // When recents starts again before onStop, do not reset launch flags so entrance animation
+        // can run
+        if (!isChangingConfigurations() && !mRecentsStartRequested) {
             // Workaround for b/22542869, if the RecentsActivity is started again, but without going
             // through SystemUI, we need to reset the config launch flags to ensure that we do not
             // wait on the system to send a signal that was never queued.
@@ -693,6 +723,10 @@ public class RecentsActivity extends Activity implements ViewTreeObserver.OnPreD
         EventBus.getDefault().send(new FocusNextTaskViewEvent(timerIndicatorDuration));
 
         MetricsLogger.action(this, MetricsEvent.ACTION_OVERVIEW_PAGE);
+    }
+
+    public final void onBusEvent(RecentsActivityStartingEvent event) {
+        mRecentsStartRequested = true;
     }
 
     public final void onBusEvent(UserInteractionEvent event) {

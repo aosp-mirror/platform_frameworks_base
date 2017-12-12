@@ -30,8 +30,6 @@ import android.util.SparseIntArray;
 
 import com.android.internal.app.IVoiceInteractor;
 
-import java.io.PrintWriter;
-import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -90,11 +88,12 @@ public abstract class ActivityManagerInternal {
             String processName, String abiOverride, int uid, Runnable crashHandler);
 
     /**
-     * Acquires a sleep token with the specified tag.
+     * Acquires a sleep token for the specified display with the specified tag.
      *
      * @param tag A string identifying the purpose of the token (eg. "Dream").
+     * @param displayId The display to apply the sleep token to.
      */
-    public abstract SleepToken acquireSleepToken(@NonNull String tag);
+    public abstract SleepToken acquireSleepToken(@NonNull String tag, int displayId);
 
     /**
      * Sleep tokens cause the activity manager to put the top activity to sleep.
@@ -263,4 +262,10 @@ public abstract class ActivityManagerInternal {
      * Clears the previously saved activity manager ANR state.
      */
     public abstract void clearSavedANRState();
+
+    /**
+     * Set focus on an activity.
+     * @param token The IApplicationToken for the activity
+     */
+    public abstract void setFocusedActivity(IBinder token);
 }

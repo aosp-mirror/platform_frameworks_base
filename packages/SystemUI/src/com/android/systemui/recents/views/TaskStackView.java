@@ -219,6 +219,7 @@ public class TaskStackView extends FrameLayout implements TaskStack.TaskStackCal
     private boolean mResetToInitialStateWhenResized;
     private int mLastWidth;
     private int mLastHeight;
+    private boolean mStackActionButtonVisible;
 
     // We keep track of the task view focused by user interaction and draw a frame around it in the
     // grid layout.
@@ -287,6 +288,7 @@ public class TaskStackView extends FrameLayout implements TaskStack.TaskStackCal
         mDividerSize = ssp.getDockedDividerSize(context);
         mDisplayOrientation = Utilities.getAppConfiguration(mContext).orientation;
         mDisplayRect = ssp.getDisplayRect();
+        mStackActionButtonVisible = false;
 
         // Create a frame to draw around the focused task view
         if (Recents.getConfiguration().isGridEnabled) {
@@ -975,6 +977,9 @@ public class TaskStackView extends FrameLayout implements TaskStack.TaskStackCal
                 mLayoutAlgorithm.clearUnfocusedTaskOverrides();
                 willScroll = mAnimationHelper.startScrollToFocusedTaskAnimation(newFocusedTask,
                         requestViewFocus);
+                if (willScroll) {
+                    sendAccessibilityEvent(AccessibilityEvent.TYPE_VIEW_SCROLLED);
+                }
             } else {
                 // Focus the task view
                 TaskView newFocusedTaskView = getChildViewForTask(newFocusedTask);
@@ -1159,7 +1164,7 @@ public class TaskStackView extends FrameLayout implements TaskStack.TaskStackCal
             Task focusedTask = getAccessibilityFocusedTask();
             info.setScrollable(true);
             int focusedTaskIndex = mStack.indexOfStackTask(focusedTask);
-            if (focusedTaskIndex > 0) {
+            if (focusedTaskIndex > 0 || !mStackActionButtonVisible) {
                 info.addAction(AccessibilityNodeInfo.ACTION_SCROLL_BACKWARD);
             }
             if (0 <= focusedTaskIndex && focusedTaskIndex < mStack.getTaskCount() - 1) {
@@ -1685,7 +1690,7 @@ public class TaskStackView extends FrameLayout implements TaskStack.TaskStackCal
         // If the doze trigger has already fired, then update the state for this task view
         if (mUIDozeTrigger.isAsleep() ||
                 Recents.getSystemServices().hasFreeformWorkspaceSupport() ||
-                useGridLayout()) {
+                useGridLayout() || Recents.getConfiguration().isLowRamDevice) {
             tv.setNoUserInteractionState();
         }
 
@@ -1764,6 +1769,16 @@ public class TaskStackView extends FrameLayout implements TaskStack.TaskStackCal
 
         // In grid layout, the stack action button always remains visible.
         if (mEnterAnimationComplete && !useGridLayout()) {
+            if (Recents.getConfiguration().isLowRamDevice) {
+                // Show stack button when user drags down to show older tasks on low ram devices
+                if (mStack.getTaskCount() > 0 && !mStackActionButtonVisible
+                        && mTouchHandler.mIsScrolling && curScroll - prevScroll < 0) {
+                    // Going up
+                    EventBus.getDefault().send(
+                            new ShowStackActionButtonEvent(true /* translate */));
+                }
+                return;
+            }
             if (prevScroll > SHOW_STACK_ACTION_BUTTON_SCROLL_THRESHOLD &&
                     curScroll <= SHOW_STACK_ACTION_BUTTON_SCROLL_THRESHOLD &&
                     mStack.getTaskCount() > 0) {
@@ -1808,6 +1823,18 @@ public class TaskStackView extends FrameLayout implements TaskStack.TaskStackCal
         if (mStack.getTaskCount() > 0) {
             Task mostRecentTask = mStack.getStackFrontMostTask(true /* includeFreefromTasks */);
             launchTask(mostRecentTask);
+        }
+    }
+
+    public final void onBusEvent(ShowStackActionButtonEvent event) {
+        if (RecentsDebugFlags.Static.EnableStackActionButton) {
+            mStackActionButtonVisible = true;
+        }
+    }
+
+    public final void onBusEvent(HideStackActionButtonEvent event) {
+        if (RecentsDebugFlags.Static.EnableStackActionButton) {
+            mStackActionButtonVisible = false;
         }
     }
 
@@ -1938,6 +1965,9 @@ public class TaskStackView extends FrameLayout implements TaskStack.TaskStackCal
         // Remove the task from the stack
         mStack.removeTask(event.task, event.animation, false /* fromDockGesture */);
         EventBus.getDefault().send(new DeleteTaskDataEvent(event.task));
+        if (mStack.getTaskCount() > 0 && Recents.getConfiguration().isLowRamDevice) {
+            EventBus.getDefault().send(new ShowStackActionButtonEvent(false /* translate */));
+        }
 
         MetricsLogger.action(getContext(), MetricsEvent.OVERVIEW_DISMISS,
                 event.task.key.getComponent().toString());
@@ -2378,6 +2408,10 @@ public class TaskStackView extends FrameLayout implements TaskStack.TaskStackCal
     }
 
     private void updateStackActionButtonVisibility() {
+        if (Recents.getConfiguration().isLowRamDevice) {
+            return;
+        }
+
         // Always show the button in grid layout.
         if (useGridLayout() ||
                 (mStackScroller.getStackScroll() < SHOW_STACK_ACTION_BUTTON_SCROLL_THRESHOLD &&

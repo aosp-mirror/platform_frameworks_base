@@ -112,14 +112,29 @@ include $(BUILD_PREBUILT)
 # Run sanity tests on fonts on checkbuild
 checkbuild: fontchain_lint
 
-FONTCHAIN_LINTER := frameworks/base/tools/fonts/fontchain_lint.py
+FONTCHAIN_LINTER := $(HOST_OUT_EXECUTABLES)/fontchain_linter
 ifeq ($(MINIMAL_FONT_FOOTPRINT),true)
 CHECK_EMOJI := false
 else
 CHECK_EMOJI := true
 endif
 
+fontchain_lint_timestamp := $(call intermediates-dir-for,PACKAGING,fontchain_lint)/stamp
+
 .PHONY: fontchain_lint
-fontchain_lint: $(FONTCHAIN_LINTER) $(TARGET_OUT)/etc/fonts.xml $(PRODUCT_OUT)/system.img
-	PYTHONPATH=$$PYTHONPATH:external/fonttools/Lib \
-	python $(FONTCHAIN_LINTER) $(TARGET_OUT) $(CHECK_EMOJI) external/unicode
+fontchain_lint: $(fontchain_lint_timestamp)
+
+fontchain_lint_deps := \
+    external/unicode/DerivedAge.txt \
+    external/unicode/emoji-data.txt \
+    external/unicode/emoji-sequences.txt \
+    external/unicode/emoji-variation-sequences.txt \
+    external/unicode/emoji-zwj-sequences.txt \
+    external/unicode/additions/emoji-data.txt \
+    external/unicode/additions/emoji-sequences.txt \
+    external/unicode/additions/emoji-zwj-sequences.txt \
+
+$(fontchain_lint_timestamp): $(FONTCHAIN_LINTER) $(TARGET_OUT)/etc/fonts.xml $(PRODUCT_OUT)/system.img $(fontchain_lint_deps)
+	@echo Running fontchain lint
+	$(FONTCHAIN_LINTER) $(TARGET_OUT) $(CHECK_EMOJI) external/unicode
+	touch $@

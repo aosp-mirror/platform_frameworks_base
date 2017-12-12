@@ -53,7 +53,7 @@ public class FullscreenUserSwitcher {
         mParent = containerStub.inflate();
         mContainer = mParent.findViewById(R.id.container);
         mUserGridView = mContainer.findViewById(R.id.user_grid);
-        mUserGridView.init(statusBar, mUserSwitcherController);
+        mUserGridView.init(statusBar, mUserSwitcherController, true /* showInitially */);
         mUserGridView.setUserSelectionListener(record -> {
             if (!record.isCurrent) {
                 toggleSwitchInProgress(true);
@@ -72,6 +72,15 @@ public class FullscreenUserSwitcher {
         mContainer.findViewById(R.id.start_driving).setOnClickListener(v -> {
             cancelTimer();
             automaticallySelectUser();
+        });
+
+        // Any interaction with the screen should cancel the timer.
+        mContainer.setOnClickListener(v -> {
+            cancelTimer();
+        });
+        mUserGridView.setOnTouchListener((v, e) -> {
+            cancelTimer();
+            return false;
         });
 
         mSwitchingUsers = mParent.findViewById(R.id.switching_users);
@@ -152,6 +161,7 @@ public class FullscreenUserSwitcher {
         if (mTimer != null) {
             mTimer.cancel();
             mTimer = null;
+            mProgressBar.setProgress(0, true /* animate */);
         }
     }
 

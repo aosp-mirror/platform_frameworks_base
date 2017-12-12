@@ -16,17 +16,6 @@
 
 package com.android.server.pm;
 
-import static com.android.internal.util.XmlUtils.readBitmapAttribute;
-import static com.android.internal.util.XmlUtils.readBooleanAttribute;
-import static com.android.internal.util.XmlUtils.readIntAttribute;
-import static com.android.internal.util.XmlUtils.readLongAttribute;
-import static com.android.internal.util.XmlUtils.readStringAttribute;
-import static com.android.internal.util.XmlUtils.readUriAttribute;
-import static com.android.internal.util.XmlUtils.writeBooleanAttribute;
-import static com.android.internal.util.XmlUtils.writeIntAttribute;
-import static com.android.internal.util.XmlUtils.writeLongAttribute;
-import static com.android.internal.util.XmlUtils.writeStringAttribute;
-import static com.android.internal.util.XmlUtils.writeUriAttribute;
 import static org.xmlpull.v1.XmlPullParser.END_DOCUMENT;
 import static org.xmlpull.v1.XmlPullParser.START_TAG;
 
@@ -54,8 +43,6 @@ import android.content.pm.PackageManager;
 import android.content.pm.ParceledListSlice;
 import android.content.pm.VersionedPackage;
 import android.graphics.Bitmap;
-import android.graphics.Bitmap.CompressFormat;
-import android.graphics.BitmapFactory;
 import android.net.Uri;
 import android.os.Binder;
 import android.os.Bundle;
@@ -84,9 +71,6 @@ import android.util.SparseBooleanArray;
 import android.util.SparseIntArray;
 import android.util.Xml;
 
-import java.io.CharArrayWriter;
-import libcore.io.IoUtils;
-
 import com.android.internal.R;
 import com.android.internal.annotations.GuardedBy;
 import com.android.internal.content.PackageHelper;
@@ -97,10 +81,13 @@ import com.android.internal.util.ImageUtils;
 import com.android.internal.util.IndentingPrintWriter;
 import com.android.server.IoThread;
 
+import libcore.io.IoUtils;
+
 import org.xmlpull.v1.XmlPullParser;
 import org.xmlpull.v1.XmlPullParserException;
 import org.xmlpull.v1.XmlSerializer;
 
+import java.io.CharArrayWriter;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
@@ -125,32 +112,6 @@ public class PackageInstallerService extends IPackageInstaller.Stub {
 
     /** XML constants used in {@link #mSessionsFile} */
     private static final String TAG_SESSIONS = "sessions";
-    private static final String TAG_SESSION = "session";
-    private static final String TAG_GRANTED_RUNTIME_PERMISSION = "granted-runtime-permission";
-    private static final String ATTR_SESSION_ID = "sessionId";
-    private static final String ATTR_USER_ID = "userId";
-    private static final String ATTR_INSTALLER_PACKAGE_NAME = "installerPackageName";
-    private static final String ATTR_INSTALLER_UID = "installerUid";
-    private static final String ATTR_CREATED_MILLIS = "createdMillis";
-    private static final String ATTR_SESSION_STAGE_DIR = "sessionStageDir";
-    private static final String ATTR_SESSION_STAGE_CID = "sessionStageCid";
-    private static final String ATTR_PREPARED = "prepared";
-    private static final String ATTR_SEALED = "sealed";
-    private static final String ATTR_MODE = "mode";
-    private static final String ATTR_INSTALL_FLAGS = "installFlags";
-    private static final String ATTR_INSTALL_LOCATION = "installLocation";
-    private static final String ATTR_SIZE_BYTES = "sizeBytes";
-    private static final String ATTR_APP_PACKAGE_NAME = "appPackageName";
-    @Deprecated
-    private static final String ATTR_APP_ICON = "appIcon";
-    private static final String ATTR_APP_LABEL = "appLabel";
-    private static final String ATTR_ORIGINATING_URI = "originatingUri";
-    private static final String ATTR_ORIGINATING_UID = "originatingUid";
-    private static final String ATTR_REFERRER_URI = "referrerUri";
-    private static final String ATTR_ABI_OVERRIDE = "abiOverride";
-    private static final String ATTR_VOLUME_UUID = "volumeUuid";
-    private static final String ATTR_NAME = "name";
-    private static final String ATTR_INSTALL_REASON = "installRason";
 
     /** Automatically destroy sessions older than this */
     private static final long MAX_AGE_MILLIS = 3 * DateUtils.DAY_IN_MILLIS;
@@ -357,8 +318,16 @@ public class PackageInstallerService extends IPackageInstaller.Stub {
             while ((type = in.next()) != END_DOCUMENT) {
                 if (type == START_TAG) {
                     final String tag = in.getName();
-                    if (TAG_SESSION.equals(tag)) {
-                        final PackageInstallerSession session = readSessionLocked(in);
+                    if (PackageInstallerSession.TAG_SESSION.equals(tag)) {
+                        final PackageInstallerSession session;
+                        try {
+                            session = PackageInstallerSession.readFromXml(in, mInternalCallback,
+                                    mContext, mPm, mInstallThread.getLooper(), mSessionsDir);
+                        } catch (Exception e) {
+                            Slog.e(TAG, "Could not read session", e);
+                            continue;
+                        }
+
                         final long age = System.currentTimeMillis() - session.createdMillis;
 
                         final boolean valid;
@@ -397,53 +366,10 @@ public class PackageInstallerService extends IPackageInstaller.Stub {
         session.dump(pw);
         mHistoricalSessions.add(writer.toString());
 
+        int installerUid = session.getInstallerUid();
         // Increment the number of sessions by this installerUid.
-        mHistoricalSessionsByInstaller.put(
-                session.installerUid,
-                mHistoricalSessionsByInstaller.get(session.installerUid) + 1);
-    }
-
-    private PackageInstallerSession readSessionLocked(XmlPullParser in) throws IOException,
-            XmlPullParserException {
-        final int sessionId = readIntAttribute(in, ATTR_SESSION_ID);
-        final int userId = readIntAttribute(in, ATTR_USER_ID);
-        final String installerPackageName = readStringAttribute(in, ATTR_INSTALLER_PACKAGE_NAME);
-        final int installerUid = readIntAttribute(in, ATTR_INSTALLER_UID, mPm.getPackageUid(
-                installerPackageName, PackageManager.MATCH_UNINSTALLED_PACKAGES, userId));
-        final long createdMillis = readLongAttribute(in, ATTR_CREATED_MILLIS);
-        final String stageDirRaw = readStringAttribute(in, ATTR_SESSION_STAGE_DIR);
-        final File stageDir = (stageDirRaw != null) ? new File(stageDirRaw) : null;
-        final String stageCid = readStringAttribute(in, ATTR_SESSION_STAGE_CID);
-        final boolean prepared = readBooleanAttribute(in, ATTR_PREPARED, true);
-        final boolean sealed = readBooleanAttribute(in, ATTR_SEALED);
-
-        final SessionParams params = new SessionParams(
-                SessionParams.MODE_INVALID);
-        params.mode = readIntAttribute(in, ATTR_MODE);
-        params.installFlags = readIntAttribute(in, ATTR_INSTALL_FLAGS);
-        params.installLocation = readIntAttribute(in, ATTR_INSTALL_LOCATION);
-        params.sizeBytes = readLongAttribute(in, ATTR_SIZE_BYTES);
-        params.appPackageName = readStringAttribute(in, ATTR_APP_PACKAGE_NAME);
-        params.appIcon = readBitmapAttribute(in, ATTR_APP_ICON);
-        params.appLabel = readStringAttribute(in, ATTR_APP_LABEL);
-        params.originatingUri = readUriAttribute(in, ATTR_ORIGINATING_URI);
-        params.originatingUid =
-                readIntAttribute(in, ATTR_ORIGINATING_UID, SessionParams.UID_UNKNOWN);
-        params.referrerUri = readUriAttribute(in, ATTR_REFERRER_URI);
-        params.abiOverride = readStringAttribute(in, ATTR_ABI_OVERRIDE);
-        params.volumeUuid = readStringAttribute(in, ATTR_VOLUME_UUID);
-        params.grantedRuntimePermissions = readGrantedRuntimePermissions(in);
-        params.installReason = readIntAttribute(in, ATTR_INSTALL_REASON);
-
-        final File appIconFile = buildAppIconFile(sessionId);
-        if (appIconFile.exists()) {
-            params.appIcon = BitmapFactory.decodeFile(appIconFile.getAbsolutePath());
-            params.appIconLastModified = appIconFile.lastModified();
-        }
-
-        return new PackageInstallerSession(mInternalCallback, mContext, mPm,
-                mInstallThread.getLooper(), sessionId, userId, installerPackageName, installerUid,
-                params, createdMillis, stageDir, stageCid, prepared, sealed);
+        mHistoricalSessionsByInstaller.put(installerUid,
+                mHistoricalSessionsByInstaller.get(installerUid) + 1);
     }
 
     private void writeSessionsLocked() {
@@ -460,7 +386,7 @@ public class PackageInstallerService extends IPackageInstaller.Stub {
             final int size = mSessions.size();
             for (int i = 0; i < size; i++) {
                 final PackageInstallerSession session = mSessions.valueAt(i);
-                writeSessionLocked(out, session);
+                session.write(out, mSessionsDir);
             }
             out.endTag(null, TAG_SESSIONS);
             out.endDocument();
@@ -471,106 +397,6 @@ public class PackageInstallerService extends IPackageInstaller.Stub {
                 mSessionsFile.failWrite(fos);
             }
         }
-    }
-
-    private void writeSessionLocked(XmlSerializer out, PackageInstallerSession session)
-            throws IOException {
-        final SessionParams params = session.params;
-
-        out.startTag(null, TAG_SESSION);
-
-        writeIntAttribute(out, ATTR_SESSION_ID, session.sessionId);
-        writeIntAttribute(out, ATTR_USER_ID, session.userId);
-        writeStringAttribute(out, ATTR_INSTALLER_PACKAGE_NAME,
-                session.installerPackageName);
-        writeIntAttribute(out, ATTR_INSTALLER_UID, session.installerUid);
-        writeLongAttribute(out, ATTR_CREATED_MILLIS, session.createdMillis);
-        if (session.stageDir != null) {
-            writeStringAttribute(out, ATTR_SESSION_STAGE_DIR,
-                    session.stageDir.getAbsolutePath());
-        }
-        if (session.stageCid != null) {
-            writeStringAttribute(out, ATTR_SESSION_STAGE_CID, session.stageCid);
-        }
-        writeBooleanAttribute(out, ATTR_PREPARED, session.isPrepared());
-        writeBooleanAttribute(out, ATTR_SEALED, session.isSealed());
-
-        writeIntAttribute(out, ATTR_MODE, params.mode);
-        writeIntAttribute(out, ATTR_INSTALL_FLAGS, params.installFlags);
-        writeIntAttribute(out, ATTR_INSTALL_LOCATION, params.installLocation);
-        writeLongAttribute(out, ATTR_SIZE_BYTES, params.sizeBytes);
-        writeStringAttribute(out, ATTR_APP_PACKAGE_NAME, params.appPackageName);
-        writeStringAttribute(out, ATTR_APP_LABEL, params.appLabel);
-        writeUriAttribute(out, ATTR_ORIGINATING_URI, params.originatingUri);
-        writeIntAttribute(out, ATTR_ORIGINATING_UID, params.originatingUid);
-        writeUriAttribute(out, ATTR_REFERRER_URI, params.referrerUri);
-        writeStringAttribute(out, ATTR_ABI_OVERRIDE, params.abiOverride);
-        writeStringAttribute(out, ATTR_VOLUME_UUID, params.volumeUuid);
-        writeIntAttribute(out, ATTR_INSTALL_REASON, params.installReason);
-
-        // Persist app icon if changed since last written
-        final File appIconFile = buildAppIconFile(session.sessionId);
-        if (params.appIcon == null && appIconFile.exists()) {
-            appIconFile.delete();
-        } else if (params.appIcon != null
-                && appIconFile.lastModified() != params.appIconLastModified) {
-            if (LOGD) Slog.w(TAG, "Writing changed icon " + appIconFile);
-            FileOutputStream os = null;
-            try {
-                os = new FileOutputStream(appIconFile);
-                params.appIcon.compress(CompressFormat.PNG, 90, os);
-            } catch (IOException e) {
-                Slog.w(TAG, "Failed to write icon " + appIconFile + ": " + e.getMessage());
-            } finally {
-                IoUtils.closeQuietly(os);
-            }
-
-            params.appIconLastModified = appIconFile.lastModified();
-        }
-
-        writeGrantedRuntimePermissions(out, params.grantedRuntimePermissions);
-
-        out.endTag(null, TAG_SESSION);
-    }
-
-    private static void writeGrantedRuntimePermissions(XmlSerializer out,
-            String[] grantedRuntimePermissions) throws IOException {
-        if (grantedRuntimePermissions != null) {
-            for (String permission : grantedRuntimePermissions) {
-                out.startTag(null, TAG_GRANTED_RUNTIME_PERMISSION);
-                writeStringAttribute(out, ATTR_NAME, permission);
-                out.endTag(null, TAG_GRANTED_RUNTIME_PERMISSION);
-            }
-        }
-    }
-
-    private static String[] readGrantedRuntimePermissions(XmlPullParser in)
-            throws IOException, XmlPullParserException {
-        List<String> permissions = null;
-
-        final int outerDepth = in.getDepth();
-        int type;
-        while ((type = in.next()) != XmlPullParser.END_DOCUMENT
-                && (type != XmlPullParser.END_TAG || in.getDepth() > outerDepth)) {
-            if (type == XmlPullParser.END_TAG || type == XmlPullParser.TEXT) {
-                continue;
-            }
-            if (TAG_GRANTED_RUNTIME_PERMISSION.equals(in.getName())) {
-                String permission = readStringAttribute(in, ATTR_NAME);
-                if (permissions == null) {
-                    permissions = new ArrayList<>();
-                }
-                permissions.add(permission);
-            }
-        }
-
-        if (permissions == null) {
-            return null;
-        }
-
-        String[] permissionsArray = new String[permissions.size()];
-        permissions.toArray(permissionsArray);
-        return permissionsArray;
     }
 
     private File buildAppIconFile(int sessionId) {
@@ -615,6 +441,10 @@ public class PackageInstallerService extends IPackageInstaller.Stub {
             params.installFlags &= ~PackageManager.INSTALL_FROM_ADB;
             params.installFlags &= ~PackageManager.INSTALL_ALL_USERS;
             params.installFlags |= PackageManager.INSTALL_REPLACE_EXISTING;
+            if ((params.installFlags & PackageManager.INSTALL_VIRTUAL_PRELOAD) != 0
+                    && !mPm.isCallerVerifier(callingUid)) {
+                params.installFlags &= ~PackageManager.INSTALL_VIRTUAL_PRELOAD;
+            }
         }
 
         // Only system components can circumvent runtime permissions when installing.
@@ -881,9 +711,11 @@ public class PackageInstallerService extends IPackageInstaller.Stub {
         synchronized (mSessions) {
             for (int i = 0; i < mSessions.size(); i++) {
                 final PackageInstallerSession session = mSessions.valueAt(i);
-                if (Objects.equals(session.installerPackageName, installerPackageName)
+
+                SessionInfo info = session.generateInfo(false);
+                if (Objects.equals(info.getInstallerPackageName(), installerPackageName)
                         && session.userId == userId) {
-                    result.add(session.generateInfo(false));
+                    result.add(info);
                 }
             }
         }
@@ -958,7 +790,7 @@ public class PackageInstallerService extends IPackageInstaller.Stub {
         final int size = sessions.size();
         for (int i = 0; i < size; i++) {
             final PackageInstallerSession session = sessions.valueAt(i);
-            if (session.installerUid == installerUid) {
+            if (session.getInstallerUid() == installerUid) {
                 count++;
             }
         }
@@ -970,7 +802,7 @@ public class PackageInstallerService extends IPackageInstaller.Stub {
         if (callingUid == Process.ROOT_UID) {
             return true;
         } else {
-            return (session != null) && (callingUid == session.installerUid);
+            return (session != null) && (callingUid == session.getInstallerUid());
         }
     }
 

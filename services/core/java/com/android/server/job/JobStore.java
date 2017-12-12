@@ -24,6 +24,7 @@ import android.content.Context;
 import android.os.Environment;
 import android.os.Handler;
 import android.os.PersistableBundle;
+import android.os.Process;
 import android.os.SystemClock;
 import android.os.UserHandle;
 import android.text.format.DateUtils;
@@ -38,6 +39,7 @@ import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.util.ArrayUtils;
 import com.android.internal.util.FastXmlSerializer;
 import com.android.server.IoThread;
+import com.android.server.job.JobSchedulerInternal.JobStorePersistStats;
 import com.android.server.job.controllers.JobStatus;
 
 import java.io.ByteArrayOutputStream;
@@ -72,9 +74,14 @@ public final class JobStore {
 
     /** Threshold to adjust how often we want to write to the db. */
     private static final int MAX_OPS_BEFORE_WRITE = 1;
+
     final Object mLock;
     final JobSet mJobSet; // per-caller-uid tracking
     final Context mContext;
+
+    // Bookkeeping around incorrect boot-time system clock
+    private final long mXmlTimestamp;
+    private boolean mRtcGood;
 
     private int mDirtyOperations;
 
@@ -83,6 +90,8 @@ public final class JobStore {
     /** Handler backed by IoThread for writing to disk. */
     private final Handler mIoHandler = IoThread.getHandler();
     private static JobStore sSingleton;
+
+    private JobStorePersistStats mPersistInfo = new JobStorePersistStats();
 
     /** Used by the {@link JobSchedulerService} to instantiate the JobStore. */
     static JobStore initAndGet(JobSchedulerService jobManagerService) {
@@ -120,7 +129,52 @@ public final class JobStore {
 
         mJobSet = new JobSet();
 
-        readJobMapFromDisk(mJobSet);
+        // If the current RTC is earlier than the timestamp on our persisted jobs file,
+        // we suspect that the RTC is uninitialized and so we cannot draw conclusions
+        // about persisted job scheduling.
+        //
+        // Note that if the persisted jobs file does not exist, we proceed with the
+        // assumption that the RTC is good.  This is less work and is safe: if the
+        // clock updates to sanity then we'll be saving the persisted jobs file in that
+        // correct state, which is normal; or we'll wind up writing the jobs file with
+        // an incorrect historical timestamp.  That's fine; at worst we'll reboot with
+        // a *correct* timestamp, see a bunch of overdue jobs, and run them; then
+        // settle into normal operation.
+        mXmlTimestamp = mJobsFile.getLastModifiedTime();
+        mRtcGood = (System.currentTimeMillis() > mXmlTimestamp);
+
+        readJobMapFromDisk(mJobSet, mRtcGood);
+    }
+
+    public boolean jobTimesInflatedValid() {
+        return mRtcGood;
+    }
+
+    public boolean clockNowValidToInflate(long now) {
+        return now >= mXmlTimestamp;
+    }
+
+    /**
+     * Find all the jobs that were affected by RTC clock uncertainty at boot time.  Returns
+     * parallel lists of the existing JobStatus objects and of new, equivalent JobStatus instances
+     * with now-corrected time bounds.
+     */
+    public void getRtcCorrectedJobsLocked(final ArrayList<JobStatus> toAdd,
+            final ArrayList<JobStatus> toRemove) {
+        final long elapsedNow = SystemClock.elapsedRealtime();
+
+        // Find the jobs that need to be fixed up, collecting them for post-iteration
+        // replacement with their new versions
+        forEachJob(job -> {
+            final Pair<Long, Long> utcTimes = job.getPersistedUtcTimes();
+            if (utcTimes != null) {
+                Pair<Long, Long> elapsedRuntimes =
+                        convertRtcBoundsToElapsed(utcTimes, elapsedNow);
+                toAdd.add(new JobStatus(job, elapsedRuntimes.first, elapsedRuntimes.second,
+                        0, job.getLastSuccessfulRunTime(), job.getLastFailedRunTime()));
+                toRemove.add(job);
+            }
+        });
     }
 
     /**
@@ -147,6 +201,10 @@ public final class JobStore {
 
     public int size() {
         return mJobSet.size();
+    }
+
+    public JobStorePersistStats getPersistStats() {
+        return mPersistInfo;
     }
 
     public int countJobsForUid(int uid) {
@@ -241,8 +299,6 @@ public final class JobStore {
     /**
      * Every time the state changes we write all the jobs in one swath, instead of trying to
      * track incremental changes.
-     * @return Whether the operation was successful. This will only fail for e.g. if the system is
-     * low on storage. If this happens, we continue as normal
      */
     private void maybeWriteStatusToDiskAsync() {
         mDirtyOperations++;
@@ -250,20 +306,21 @@ public final class JobStore {
             if (DEBUG) {
                 Slog.v(TAG, "Writing jobs to disk.");
             }
-            mIoHandler.post(new WriteJobsMapToDiskRunnable());
+            mIoHandler.removeCallbacks(mWriteRunnable);
+            mIoHandler.post(mWriteRunnable);
         }
     }
 
     @VisibleForTesting
-    public void readJobMapFromDisk(JobSet jobSet) {
-        new ReadJobMapFromDiskRunnable(jobSet).run();
+    public void readJobMapFromDisk(JobSet jobSet, boolean rtcGood) {
+        new ReadJobMapFromDiskRunnable(jobSet, rtcGood).run();
     }
 
     /**
      * Runnable that writes {@link #mJobSet} out to xml.
      * NOTE: This Runnable locks on mLock
      */
-    private final class WriteJobsMapToDiskRunnable implements Runnable {
+    private final Runnable mWriteRunnable = new Runnable() {
         @Override
         public void run() {
             final long startElapsed = SystemClock.elapsedRealtime();
@@ -280,13 +337,16 @@ public final class JobStore {
                 });
             }
             writeJobsMapImpl(storeCopy);
-            if (JobSchedulerService.DEBUG) {
+            if (DEBUG) {
                 Slog.v(TAG, "Finished writing, took " + (SystemClock.elapsedRealtime()
                         - startElapsed) + "ms");
             }
         }
 
         private void writeJobsMapImpl(List<JobStatus> jobList) {
+            int numJobs = 0;
+            int numSystemJobs = 0;
+            int numSyncJobs = 0;
             try {
                 ByteArrayOutputStream baos = new ByteArrayOutputStream();
                 XmlSerializer out = new FastXmlSerializer();
@@ -307,11 +367,19 @@ public final class JobStore {
                     writeExecutionCriteriaToXml(out, jobStatus);
                     writeBundleToXml(jobStatus.getJob().getExtras(), out);
                     out.endTag(null, "job");
+
+                    numJobs++;
+                    if (jobStatus.getUid() == Process.SYSTEM_UID) {
+                        numSystemJobs++;
+                        if (isSyncJob(jobStatus)) {
+                            numSyncJobs++;
+                        }
+                    }
                 }
                 out.endTag(null, "job-info");
                 out.endDocument();
 
-                // Write out to disk in one fell sweep.
+                // Write out to disk in one fell swoop.
                 FileOutputStream fos = mJobsFile.startWrite();
                 fos.write(baos.toByteArray());
                 mJobsFile.finishWrite(fos);
@@ -324,6 +392,10 @@ public final class JobStore {
                 if (DEBUG) {
                     Slog.d(TAG, "Error persisting bundle.", e);
                 }
+            } finally {
+                mPersistInfo.countAllJobsSaved = numJobs;
+                mPersistInfo.countSystemServerJobsSaved = numSystemJobs;
+                mPersistInfo.countSystemSyncManagerJobsSaved = numSyncJobs;
             }
         }
 
@@ -417,15 +489,27 @@ public final class JobStore {
                 out.startTag(null, XML_TAG_ONEOFF);
             }
 
+            // If we still have the persisted times, we need to record those directly because
+            // we haven't yet been able to calculate the usual elapsed-timebase bounds
+            // correctly due to wall-clock uncertainty.
+            Pair <Long, Long> utcJobTimes = jobStatus.getPersistedUtcTimes();
+            if (DEBUG && utcJobTimes != null) {
+                Slog.i(TAG, "storing original UTC timestamps for " + jobStatus);
+            }
+
+            final long nowRTC = System.currentTimeMillis();
+            final long nowElapsed = SystemClock.elapsedRealtime();
             if (jobStatus.hasDeadlineConstraint()) {
                 // Wall clock deadline.
-                final long deadlineWallclock =  System.currentTimeMillis() +
-                        (jobStatus.getLatestRunTimeElapsed() - SystemClock.elapsedRealtime());
+                final long deadlineWallclock = (utcJobTimes == null)
+                        ? nowRTC + (jobStatus.getLatestRunTimeElapsed() - nowElapsed)
+                        : utcJobTimes.second;
                 out.attribute(null, "deadline", Long.toString(deadlineWallclock));
             }
             if (jobStatus.hasTimingDelayConstraint()) {
-                final long delayWallclock = System.currentTimeMillis() +
-                        (jobStatus.getEarliestRunTime() - SystemClock.elapsedRealtime());
+                final long delayWallclock = (utcJobTimes == null)
+                        ? nowRTC + (jobStatus.getEarliestRunTime() - nowElapsed)
+                        : utcJobTimes.first;
                 out.attribute(null, "delay", Long.toString(delayWallclock));
             }
 
@@ -443,6 +527,30 @@ public final class JobStore {
                 out.endTag(null, XML_TAG_ONEOFF);
             }
         }
+    };
+
+    /**
+     * Translate the supplied RTC times to the elapsed timebase, with clamping appropriate
+     * to interpreting them as a job's delay + deadline times for alarm-setting purposes.
+     * @param rtcTimes a Pair<Long, Long> in which {@code first} is the "delay" earliest
+     *     allowable runtime for the job, and {@code second} is the "deadline" time at which
+     *     the job becomes overdue.
+     */
+    private static Pair<Long, Long> convertRtcBoundsToElapsed(Pair<Long, Long> rtcTimes,
+            long nowElapsed) {
+        final long nowWallclock = System.currentTimeMillis();
+        final long earliest = (rtcTimes.first > JobStatus.NO_EARLIEST_RUNTIME)
+                ? nowElapsed + Math.max(rtcTimes.first - nowWallclock, 0)
+                : JobStatus.NO_EARLIEST_RUNTIME;
+        final long latest = (rtcTimes.second < JobStatus.NO_LATEST_RUNTIME)
+                ? nowElapsed + Math.max(rtcTimes.second - nowWallclock, 0)
+                : JobStatus.NO_LATEST_RUNTIME;
+        return Pair.create(earliest, latest);
+    }
+
+    private static boolean isSyncJob(JobStatus status) {
+        return com.android.server.content.SyncJobService.class.getName()
+                .equals(status.getServiceComponent().getClassName());
     }
 
     /**
@@ -451,22 +559,27 @@ public final class JobStore {
      */
     private final class ReadJobMapFromDiskRunnable implements Runnable {
         private final JobSet jobSet;
+        private final boolean rtcGood;
 
         /**
          * @param jobSet Reference to the (empty) set of JobStatus objects that back the JobStore,
          *               so that after disk read we can populate it directly.
          */
-        ReadJobMapFromDiskRunnable(JobSet jobSet) {
+        ReadJobMapFromDiskRunnable(JobSet jobSet, boolean rtcIsGood) {
             this.jobSet = jobSet;
+            this.rtcGood = rtcIsGood;
         }
 
         @Override
         public void run() {
+            int numJobs = 0;
+            int numSystemJobs = 0;
+            int numSyncJobs = 0;
             try {
                 List<JobStatus> jobs;
                 FileInputStream fis = mJobsFile.openRead();
                 synchronized (mLock) {
-                    jobs = readJobMapImpl(fis);
+                    jobs = readJobMapImpl(fis, rtcGood);
                     if (jobs != null) {
                         long now = SystemClock.elapsedRealtime();
                         IActivityManager am = ActivityManager.getService();
@@ -475,26 +588,35 @@ public final class JobStore {
                             js.prepareLocked(am);
                             js.enqueueTime = now;
                             this.jobSet.add(js);
+
+                            numJobs++;
+                            if (js.getUid() == Process.SYSTEM_UID) {
+                                numSystemJobs++;
+                                if (isSyncJob(js)) {
+                                    numSyncJobs++;
+                                }
+                            }
                         }
                     }
                 }
                 fis.close();
             } catch (FileNotFoundException e) {
-                if (JobSchedulerService.DEBUG) {
+                if (DEBUG) {
                     Slog.d(TAG, "Could not find jobs file, probably there was nothing to load.");
                 }
-            } catch (XmlPullParserException e) {
-                if (JobSchedulerService.DEBUG) {
-                    Slog.d(TAG, "Error parsing xml.", e);
-                }
-            } catch (IOException e) {
-                if (JobSchedulerService.DEBUG) {
-                    Slog.d(TAG, "Error parsing xml.", e);
+            } catch (XmlPullParserException | IOException e) {
+                Slog.wtf(TAG, "Error jobstore xml.", e);
+            } finally {
+                if (mPersistInfo.countAllJobsLoaded < 0) { // Only set them once.
+                    mPersistInfo.countAllJobsLoaded = numJobs;
+                    mPersistInfo.countSystemServerJobsLoaded = numSystemJobs;
+                    mPersistInfo.countSystemSyncManagerJobsLoaded = numSyncJobs;
                 }
             }
+            Slog.i(TAG, "Read " + numJobs + " jobs");
         }
 
-        private List<JobStatus> readJobMapImpl(FileInputStream fis)
+        private List<JobStatus> readJobMapImpl(FileInputStream fis, boolean rtcIsGood)
                 throws XmlPullParserException, IOException {
             XmlPullParser parser = Xml.newPullParser();
             parser.setInput(fis, StandardCharsets.UTF_8.name());
@@ -533,7 +655,7 @@ public final class JobStore {
                         tagName = parser.getName();
                         // Start reading job.
                         if ("job".equals(tagName)) {
-                            JobStatus persistedJob = restoreJobFromXml(parser);
+                            JobStatus persistedJob = restoreJobFromXml(rtcIsGood, parser);
                             if (persistedJob != null) {
                                 if (DEBUG) {
                                     Slog.d(TAG, "Read out " + persistedJob);
@@ -556,8 +678,8 @@ public final class JobStore {
          *               will take the parser into the body of the job tag.
          * @return Newly instantiated job holding all the information we just read out of the xml tag.
          */
-        private JobStatus restoreJobFromXml(XmlPullParser parser) throws XmlPullParserException,
-                IOException {
+        private JobStatus restoreJobFromXml(boolean rtcIsGood, XmlPullParser parser)
+                throws XmlPullParserException, IOException {
             JobInfo.Builder jobBuilder;
             int uid, sourceUserId;
             long lastSuccessfulRunTime;
@@ -621,10 +743,10 @@ public final class JobStore {
                 return null;
             }
 
-            // Tuple of (earliest runtime, latest runtime) in elapsed realtime after disk load.
-            Pair<Long, Long> elapsedRuntimes;
+            // Tuple of (earliest runtime, latest runtime) in UTC.
+            final Pair<Long, Long> rtcRuntimes;
             try {
-                elapsedRuntimes = buildExecutionTimesFromXml(parser);
+                rtcRuntimes = buildRtcExecutionTimesFromXml(parser);
             } catch (NumberFormatException e) {
                 if (DEBUG) {
                     Slog.d(TAG, "Error parsing execution time parameters, skipping.");
@@ -633,6 +755,8 @@ public final class JobStore {
             }
 
             final long elapsedNow = SystemClock.elapsedRealtime();
+            Pair<Long, Long> elapsedRuntimes = convertRtcBoundsToElapsed(rtcRuntimes, elapsedNow);
+
             if (XML_TAG_PERIODIC.equals(parser.getName())) {
                 try {
                     String val = parser.getAttributeValue(null, "period");
@@ -722,7 +846,8 @@ public final class JobStore {
             JobStatus js = new JobStatus(
                     jobBuilder.build(), uid, sourcePackageName, sourceUserId, sourceTag,
                     elapsedRuntimes.first, elapsedRuntimes.second,
-                    lastSuccessfulRunTime, lastFailedRunTime);
+                    lastSuccessfulRunTime, lastFailedRunTime,
+                    (rtcIsGood) ? null : rtcRuntimes);
             return js;
         }
 
@@ -775,6 +900,32 @@ public final class JobStore {
                 int backoffPolicy = Integer.parseInt(val);  // Will throw NFE which we catch higher up.
                 jobBuilder.setBackoffCriteria(initialBackoff, backoffPolicy);
             }
+        }
+
+        /**
+         * Extract a job's earliest/latest run time data from XML.  These are returned in
+         * unadjusted UTC wall clock time, because we do not yet know whether the system
+         * clock is reliable for purposes of calculating deltas from 'now'.
+         *
+         * @param parser
+         * @return A Pair of timestamps in UTC wall-clock time.  The first is the earliest
+         *     time at which the job is to become runnable, and the second is the deadline at
+         *     which it becomes overdue to execute.
+         * @throws NumberFormatException
+         */
+        private Pair<Long, Long> buildRtcExecutionTimesFromXml(XmlPullParser parser)
+                throws NumberFormatException {
+            String val;
+            // Pull out execution time data.
+            val = parser.getAttributeValue(null, "delay");
+            final long earliestRunTimeRtc = (val != null)
+                    ? Long.parseLong(val)
+                    : JobStatus.NO_EARLIEST_RUNTIME;
+            val = parser.getAttributeValue(null, "deadline");
+            final long latestRunTimeRtc = (val != null)
+                    ? Long.parseLong(val)
+                    : JobStatus.NO_LATEST_RUNTIME;
+            return Pair.create(earliestRunTimeRtc, latestRunTimeRtc);
         }
 
         /**

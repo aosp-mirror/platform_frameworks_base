@@ -442,6 +442,10 @@ public class ExifInterface {
     private static final int RAF_INFO_SIZE = 160;
     private static final int RAF_JPEG_LENGTH_VALUE_SIZE = 4;
 
+    private static final byte[] HEIF_TYPE_FTYP = new byte[] {'f', 't', 'y', 'p'};
+    private static final byte[] HEIF_BRAND_MIF1 = new byte[] {'m', 'i', 'f', '1'};
+    private static final byte[] HEIF_BRAND_HEIC = new byte[] {'h', 'e', 'i', 'c'};
+
     // See http://fileformats.archiveteam.org/wiki/Olympus_ORF
     private static final short ORF_SIGNATURE_1 = 0x4f52;
     private static final short ORF_SIGNATURE_2 = 0x5352;
@@ -1264,6 +1268,7 @@ public class ExifInterface {
     private static final int IMAGE_TYPE_RAF = 9;
     private static final int IMAGE_TYPE_RW2 = 10;
     private static final int IMAGE_TYPE_SRW = 11;
+    private static final int IMAGE_TYPE_HEIF = 12;
 
     static {
         sFormatter = new SimpleDateFormat("yyyy:MM:dd HH:mm:ss");
@@ -1691,6 +1696,10 @@ public class ExifInterface {
                     getRafAttributes(inputStream);
                     break;
                 }
+                case IMAGE_TYPE_HEIF: {
+                    getHeifAttributes(inputStream);
+                    break;
+                }
                 case IMAGE_TYPE_ORF: {
                     getOrfAttributes(inputStream);
                     break;
@@ -2101,14 +2110,14 @@ public class ExifInterface {
     private int getMimeType(BufferedInputStream in) throws IOException {
         in.mark(SIGNATURE_CHECK_SIZE);
         byte[] signatureCheckBytes = new byte[SIGNATURE_CHECK_SIZE];
-        if (in.read(signatureCheckBytes) != SIGNATURE_CHECK_SIZE) {
-            throw new EOFException();
-        }
+        in.read(signatureCheckBytes);
         in.reset();
         if (isJpegFormat(signatureCheckBytes)) {
             return IMAGE_TYPE_JPEG;
         } else if (isRafFormat(signatureCheckBytes)) {
             return IMAGE_TYPE_RAF;
+        } else if (isHeifFormat(signatureCheckBytes)) {
+            return IMAGE_TYPE_HEIF;
         } else if (isOrfFormat(signatureCheckBytes)) {
             return IMAGE_TYPE_ORF;
         } else if (isRw2Format(signatureCheckBytes)) {
@@ -2145,6 +2154,78 @@ public class ExifInterface {
             }
         }
         return true;
+    }
+
+    private boolean isHeifFormat(byte[] signatureCheckBytes) throws IOException {
+        ByteOrderedDataInputStream signatureInputStream = null;
+        try {
+            signatureInputStream = new ByteOrderedDataInputStream(signatureCheckBytes);
+            signatureInputStream.setByteOrder(ByteOrder.BIG_ENDIAN);
+
+            long chunkSize = signatureInputStream.readInt();
+            byte[] chunkType = new byte[4];
+            signatureInputStream.read(chunkType);
+
+            if (!Arrays.equals(chunkType, HEIF_TYPE_FTYP)) {
+                return false;
+            }
+
+            long chunkDataOffset = 8;
+            if (chunkSize == 1) {
+                // This indicates that the next 8 bytes represent the chunk size,
+                // and chunk data comes after that.
+                chunkSize = signatureInputStream.readLong();
+                if (chunkSize < 16) {
+                    // The smallest valid chunk is 16 bytes long in this case.
+                    return false;
+                }
+                chunkDataOffset += 8;
+            }
+
+            // only sniff up to signatureCheckBytes.length
+            if (chunkSize > signatureCheckBytes.length) {
+                chunkSize = signatureCheckBytes.length;
+            }
+
+            long chunkDataSize = chunkSize - chunkDataOffset;
+
+            // It should at least have major brand (4-byte) and minor version (4-byte).
+            // The rest of the chunk (if any) is a list of (4-byte) compatible brands.
+            if (chunkDataSize < 8) {
+                return false;
+            }
+
+            byte[] brand = new byte[4];
+            boolean isMif1 = false;
+            boolean isHeic = false;
+            for (long i = 0; i < chunkDataSize / 4;  ++i) {
+                if (signatureInputStream.read(brand) != brand.length) {
+                    return false;
+                }
+                if (i == 1) {
+                    // Skip this index, it refers to the minorVersion, not a brand.
+                    continue;
+                }
+                if (Arrays.equals(brand, HEIF_BRAND_MIF1)) {
+                    isMif1 = true;
+                } else if (Arrays.equals(brand, HEIF_BRAND_HEIC)) {
+                    isHeic = true;
+                }
+                if (isMif1 && isHeic) {
+                    return true;
+                }
+            }
+        } catch (Exception e) {
+            if (DEBUG) {
+                Log.d(TAG, "Exception parsing HEIF file type box.", e);
+            }
+        } finally {
+            if (signatureInputStream != null) {
+                signatureInputStream.close();
+                signatureInputStream = null;
+            }
+        }
+        return false;
     }
 
     /**
@@ -2439,6 +2520,100 @@ public class ExifInterface {
         }
     }
 
+    private void getHeifAttributes(ByteOrderedDataInputStream in) throws IOException {
+        MediaMetadataRetriever retriever = new MediaMetadataRetriever();
+        try {
+            if (mSeekableFileDescriptor != null) {
+                retriever.setDataSource(mSeekableFileDescriptor);
+            } else {
+                retriever.setDataSource(new MediaDataSource() {
+                    long mPosition;
+
+                    @Override
+                    public void close() throws IOException {}
+
+                    @Override
+                    public int readAt(long position, byte[] buffer, int offset, int size)
+                            throws IOException {
+                        if (size == 0) {
+                            return 0;
+                        }
+                        if (position < 0) {
+                            return -1;
+                        }
+                        if (mPosition != position) {
+                            in.seek(position);
+                            mPosition = position;
+                        }
+
+                        int bytesRead = in.read(buffer, offset, size);
+                        if (bytesRead < 0) {
+                            mPosition = -1; // need to seek on next read
+                            return -1;
+                        }
+
+                        mPosition += bytesRead;
+                        return bytesRead;
+                    }
+
+                    @Override
+                    public long getSize() throws IOException {
+                        return -1;
+                    }
+                });
+            }
+
+            String hasVideo = retriever.extractMetadata(
+                    MediaMetadataRetriever.METADATA_KEY_HAS_VIDEO);
+
+            final String METADATA_HAS_VIDEO_VALUE_YES = "yes";
+            if (METADATA_HAS_VIDEO_VALUE_YES.equals(hasVideo)) {
+                String width = retriever.extractMetadata(
+                        MediaMetadataRetriever.METADATA_KEY_VIDEO_WIDTH);
+                String height = retriever.extractMetadata(
+                        MediaMetadataRetriever.METADATA_KEY_VIDEO_HEIGHT);
+
+                if (width != null) {
+                    mAttributes[IFD_TYPE_PRIMARY].put(TAG_IMAGE_WIDTH,
+                            ExifAttribute.createUShort(Integer.parseInt(width), mExifByteOrder));
+                }
+
+                if (height != null) {
+                    mAttributes[IFD_TYPE_PRIMARY].put(TAG_IMAGE_LENGTH,
+                            ExifAttribute.createUShort(Integer.parseInt(height), mExifByteOrder));
+                }
+
+                String rotation = retriever.extractMetadata(
+                        MediaMetadataRetriever.METADATA_KEY_VIDEO_ROTATION);
+                if (rotation != null) {
+                    int orientation = ExifInterface.ORIENTATION_NORMAL;
+
+                    // all rotation angles in CW
+                    switch (Integer.parseInt(rotation)) {
+                        case 90:
+                            orientation = ExifInterface.ORIENTATION_ROTATE_90;
+                            break;
+                        case 180:
+                            orientation = ExifInterface.ORIENTATION_ROTATE_180;
+                            break;
+                        case 270:
+                            orientation = ExifInterface.ORIENTATION_ROTATE_270;
+                            break;
+                    }
+
+                    mAttributes[IFD_TYPE_PRIMARY].put(TAG_ORIENTATION,
+                            ExifAttribute.createUShort(orientation, mExifByteOrder));
+                }
+
+                if (DEBUG) {
+                    Log.d(TAG, "Heif meta: " + width + "x" + height + ", rotation " + rotation);
+                }
+            }
+        } finally {
+            retriever.release();
+        }
+    }
+
     /**
      * ORF files contains a primary image data and a MakerNote data that contains preview/thumbnail
      * images. Both data takes the form of IFDs and can therefore be read with the
@@ -2661,9 +2836,9 @@ public class ExifInterface {
     }
 
     private void addDefaultValuesForCompatibility() {
-        // The value of DATETIME tag has the same value of DATETIME_ORIGINAL tag.
+        // If DATETIME tag has no value, then set the value to DATETIME_ORIGINAL tag's.
         String valueOfDateTimeOriginal = getAttribute(TAG_DATETIME_ORIGINAL);
-        if (valueOfDateTimeOriginal != null) {
+        if (valueOfDateTimeOriginal != null && getAttribute(TAG_DATETIME) == null) {
             mAttributes[IFD_TYPE_PRIMARY].put(TAG_DATETIME,
                     ExifAttribute.createString(valueOfDateTimeOriginal));
         }
@@ -2679,7 +2854,7 @@ public class ExifInterface {
         }
         if (getAttribute(TAG_ORIENTATION) == null) {
             mAttributes[IFD_TYPE_PRIMARY].put(TAG_ORIENTATION,
-                    ExifAttribute.createULong(0, mExifByteOrder));
+                    ExifAttribute.createUShort(0, mExifByteOrder));
         }
         if (getAttribute(TAG_LIGHT_SOURCE) == null) {
             mAttributes[IFD_TYPE_EXIF].put(TAG_LIGHT_SOURCE,

@@ -16,6 +16,9 @@
 package com.android.settingslib.wifi;
 
 import static com.google.common.truth.Truth.assertThat;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 import android.content.Context;
 
@@ -34,28 +37,63 @@ public class AccessPointPreferenceTest {
     private Context mContext = RuntimeEnvironment.application;
 
     @Test
-    public void generatePreferenceKey_shouldReturnSsidPlusSecurity() {
+    public void generatePreferenceKey_returnsSsidPlusSecurity() {
         String ssid = "ssid";
+        String bssid = "00:00:00:00:00:00";
         int security = AccessPoint.SECURITY_WEP;
         String expectedKey = ssid + ',' + security;
 
         TestAccessPointBuilder builder = new TestAccessPointBuilder(mContext);
-        builder.setSsid(ssid).setSecurity(security);
+        builder.setBssid(bssid).setSsid(ssid).setSecurity(security);
 
         assertThat(AccessPointPreference.generatePreferenceKey(builder.build()))
                 .isEqualTo(expectedKey);
     }
 
     @Test
-    public void generatePreferenceKey_shouldReturnBssidPlusSecurity() {
-        String bssid = "bssid";
+    public void generatePreferenceKey_emptySsidReturnsBssidPlusSecurity() {
+        String ssid = "";
+        String bssid = "00:00:00:00:00:00";
         int security = AccessPoint.SECURITY_WEP;
         String expectedKey = bssid + ',' + security;
 
         TestAccessPointBuilder builder = new TestAccessPointBuilder(mContext);
-        builder.setBssid(bssid).setSecurity(security);
+        builder.setBssid(bssid).setSsid(ssid).setSecurity(security);
 
         assertThat(AccessPointPreference.generatePreferenceKey(builder.build()))
                 .isEqualTo(expectedKey);
+    }
+
+    @Test
+    public void refresh_openNetwork_updateContentDescription() {
+        final String ssid = "ssid";
+        final String summary = "connected";
+        final int security = AccessPoint.SECURITY_WEP;
+        final AccessPoint ap = new TestAccessPointBuilder(mContext)
+                .setSsid(ssid)
+                .setSecurity(security)
+                .build();
+        final AccessPointPreference pref = mock(AccessPointPreference.class);
+        when(pref.getTitle()).thenReturn(ssid);
+        when(pref.getSummary()).thenReturn(summary);
+
+        assertThat(AccessPointPreference.buildContentDescription(
+                RuntimeEnvironment.application, pref, ap))
+                .isEqualTo("ssid,connected,Wifi signal full.,Secure network");
+    }
+
+    @Test
+    public void refresh_setTitle_shouldUseSsidString() {
+        final String ssid = "ssid";
+        final String summary = "connected";
+        final int security = AccessPoint.SECURITY_WEP;
+        final AccessPoint ap = new TestAccessPointBuilder(mContext)
+                .setSsid(ssid)
+                .setSecurity(security)
+                .build();
+        final AccessPointPreference preference = mock(AccessPointPreference.class);
+
+        AccessPointPreference.setTitle(preference, ap, false /* savedNetwork */);
+        verify(preference).setTitle(ssid);
     }
 }

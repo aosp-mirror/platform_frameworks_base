@@ -21,7 +21,6 @@ import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.fail;
 
-import android.net.MacAddress.MacAddressType;
 import android.support.test.filters.SmallTest;
 import android.support.test.runner.AndroidJUnit4;
 
@@ -37,11 +36,11 @@ public class MacAddressTest {
 
     static class AddrTypeTestCase {
         byte[] addr;
-        MacAddressType expected;
+        int expectedType;
 
-        static AddrTypeTestCase of(MacAddressType expected, int... addr) {
+        static AddrTypeTestCase of(int expectedType, int... addr) {
             AddrTypeTestCase t = new AddrTypeTestCase();
-            t.expected = expected;
+            t.expectedType = expectedType;
             t.addr = toByteArray(addr);
             return t;
         }
@@ -50,26 +49,58 @@ public class MacAddressTest {
     @Test
     public void testMacAddrTypes() {
         AddrTypeTestCase[] testcases = {
-            AddrTypeTestCase.of(null),
-            AddrTypeTestCase.of(null, 0),
-            AddrTypeTestCase.of(null, 1, 2, 3, 4, 5),
-            AddrTypeTestCase.of(null, 1, 2, 3, 4, 5, 6, 7),
-            AddrTypeTestCase.of(MacAddressType.UNICAST, 0xa0, 0xb0, 0xc0, 0xd0, 0xe0, 0xf0),
-            AddrTypeTestCase.of(MacAddressType.BROADCAST, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff),
-            AddrTypeTestCase.of(MacAddressType.MULTICAST, 1, 2, 3, 4, 5, 6),
-            AddrTypeTestCase.of(MacAddressType.MULTICAST, 11, 22, 33, 44, 55, 66),
-            AddrTypeTestCase.of(MacAddressType.MULTICAST, 33, 33, 0xaa, 0xbb, 0xcc, 0xdd)
+            AddrTypeTestCase.of(MacAddress.TYPE_UNKNOWN),
+            AddrTypeTestCase.of(MacAddress.TYPE_UNKNOWN, 0),
+            AddrTypeTestCase.of(MacAddress.TYPE_UNKNOWN, 1, 2, 3, 4, 5),
+            AddrTypeTestCase.of(MacAddress.TYPE_UNKNOWN, 1, 2, 3, 4, 5, 6, 7),
+            AddrTypeTestCase.of(MacAddress.TYPE_UNICAST, 0xa0, 0xb0, 0xc0, 0xd0, 0xe0, 0xf0),
+            AddrTypeTestCase.of(MacAddress.TYPE_BROADCAST, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff),
+            AddrTypeTestCase.of(MacAddress.TYPE_MULTICAST, 1, 2, 3, 4, 5, 6),
+            AddrTypeTestCase.of(MacAddress.TYPE_MULTICAST, 11, 22, 33, 44, 55, 66),
+            AddrTypeTestCase.of(MacAddress.TYPE_MULTICAST, 33, 33, 0xaa, 0xbb, 0xcc, 0xdd)
         };
 
         for (AddrTypeTestCase t : testcases) {
-            MacAddressType got = MacAddress.macAddressType(t.addr);
+            int got = MacAddress.macAddressType(t.addr);
             String msg = String.format("expected type of %s to be %s, but got %s",
-                    Arrays.toString(t.addr), t.expected, got);
-            assertEquals(msg, t.expected, got);
+                    Arrays.toString(t.addr), t.expectedType, got);
+            assertEquals(msg, t.expectedType, got);
 
-            if (got != null) {
-                assertEquals(got, new MacAddress(t.addr).addressType());
+            if (got != MacAddress.TYPE_UNKNOWN) {
+                assertEquals(got, MacAddress.fromBytes(t.addr).addressType());
             }
+        }
+    }
+
+    @Test
+    public void testToSafeString() {
+        String[][] macs = {
+            {"07:00:d3:56:8a:c4", "07:00:d3:00:00:00"},
+            {"33:33:aa:bb:cc:dd", "33:33:aa:00:00:00"},
+            {"06:00:00:00:00:00", "06:00:00:00:00:00"},
+            {"07:00:d3:56:8a:c4", "07:00:d3:00:00:00"}
+        };
+
+        for (String[] pair : macs) {
+            String mac = pair[0];
+            String expected = pair[1];
+            assertEquals(expected, MacAddress.fromString(mac).toSafeString());
+        }
+    }
+
+    @Test
+    public void testHexPaddingWhenPrinting() {
+        String[] macs = {
+            "07:00:d3:56:8a:c4",
+            "33:33:aa:bb:cc:dd",
+            "06:00:00:00:00:00",
+            "07:00:d3:56:8a:c4"
+        };
+
+        for (String mac : macs) {
+            assertEquals(mac, MacAddress.fromString(mac).toString());
+            assertEquals(mac,
+                    MacAddress.stringAddrFromByteAddr(MacAddress.byteAddrFromStringAddr(mac)));
         }
     }
 
@@ -77,14 +108,14 @@ public class MacAddressTest {
     public void testIsMulticastAddress() {
         MacAddress[] multicastAddresses = {
             MacAddress.BROADCAST_ADDRESS,
-            new MacAddress("07:00:d3:56:8a:c4"),
-            new MacAddress("33:33:aa:bb:cc:dd"),
+            MacAddress.fromString("07:00:d3:56:8a:c4"),
+            MacAddress.fromString("33:33:aa:bb:cc:dd"),
         };
         MacAddress[] unicastAddresses = {
             MacAddress.ALL_ZEROS_ADDRESS,
-            new MacAddress("00:01:44:55:66:77"),
-            new MacAddress("08:00:22:33:44:55"),
-            new MacAddress("06:00:00:00:00:00"),
+            MacAddress.fromString("00:01:44:55:66:77"),
+            MacAddress.fromString("08:00:22:33:44:55"),
+            MacAddress.fromString("06:00:00:00:00:00"),
         };
 
         for (MacAddress mac : multicastAddresses) {
@@ -100,13 +131,13 @@ public class MacAddressTest {
     @Test
     public void testIsLocallyAssignedAddress() {
         MacAddress[] localAddresses = {
-            new MacAddress("06:00:00:00:00:00"),
-            new MacAddress("07:00:d3:56:8a:c4"),
-            new MacAddress("33:33:aa:bb:cc:dd"),
+            MacAddress.fromString("06:00:00:00:00:00"),
+            MacAddress.fromString("07:00:d3:56:8a:c4"),
+            MacAddress.fromString("33:33:aa:bb:cc:dd"),
         };
         MacAddress[] universalAddresses = {
-            new MacAddress("00:01:44:55:66:77"),
-            new MacAddress("08:00:22:33:44:55"),
+            MacAddress.fromString("00:01:44:55:66:77"),
+            MacAddress.fromString("08:00:22:33:44:55"),
         };
 
         for (MacAddress mac : localAddresses) {
@@ -123,13 +154,16 @@ public class MacAddressTest {
     public void testMacAddressConversions() {
         final int iterations = 10000;
         for (int i = 0; i < iterations; i++) {
-            MacAddress mac = MacAddress.getRandomAddress();
+            MacAddress mac = MacAddress.createRandomUnicastAddress();
 
             String stringRepr = mac.toString();
             byte[] bytesRepr = mac.toByteArray();
 
-            assertEquals(mac, new MacAddress(stringRepr));
-            assertEquals(mac, new MacAddress(bytesRepr));
+            assertEquals(mac, MacAddress.fromString(stringRepr));
+            assertEquals(mac, MacAddress.fromBytes(bytesRepr));
+
+            assertEquals(mac, MacAddress.fromString(MacAddress.stringAddrFromByteAddr(bytesRepr)));
+            assertEquals(mac, MacAddress.fromBytes(MacAddress.byteAddrFromStringAddr(stringRepr)));
         }
     }
 
@@ -138,7 +172,7 @@ public class MacAddressTest {
         final int iterations = 1000;
         final String expectedAndroidOui = "da:a1:19";
         for (int i = 0; i < iterations; i++) {
-            MacAddress mac = MacAddress.getRandomAddress();
+            MacAddress mac = MacAddress.createRandomUnicastAddress();
             String stringRepr = mac.toString();
 
             assertTrue(stringRepr + " expected to be a locally assigned address",
@@ -150,13 +184,14 @@ public class MacAddressTest {
         final Random r = new Random();
         final String anotherOui = "24:5f:78";
         final String expectedLocalOui = "26:5f:78";
-        final MacAddress base = new MacAddress(anotherOui + ":0:0:0");
+        final MacAddress base = MacAddress.fromString(anotherOui + ":0:0:0");
         for (int i = 0; i < iterations; i++) {
-            MacAddress mac = MacAddress.getRandomAddress(base, r);
+            MacAddress mac = MacAddress.createRandomUnicastAddress(base, r);
             String stringRepr = mac.toString();
 
             assertTrue(stringRepr + " expected to be a locally assigned address",
                     mac.isLocallyAssigned());
+            assertEquals(MacAddress.TYPE_UNICAST, mac.addressType());
             assertTrue(stringRepr + " expected to begin with " + expectedLocalOui,
                     stringRepr.startsWith(expectedLocalOui));
         }
@@ -165,7 +200,6 @@ public class MacAddressTest {
     @Test
     public void testConstructorInputValidation() {
         String[] invalidStringAddresses = {
-            null,
             "",
             "abcd",
             "1:2:3:4:5",
@@ -175,14 +209,19 @@ public class MacAddressTest {
 
         for (String s : invalidStringAddresses) {
             try {
-                MacAddress mac = new MacAddress(s);
-                fail("new MacAddress(" + s + ") should have failed, but returned " + mac);
+                MacAddress mac = MacAddress.fromString(s);
+                fail("MacAddress.fromString(" + s + ") should have failed, but returned " + mac);
             } catch (IllegalArgumentException excepted) {
             }
         }
 
+        try {
+            MacAddress mac = MacAddress.fromString(null);
+            fail("MacAddress.fromString(null) should have failed, but returned " + mac);
+        } catch (NullPointerException excepted) {
+        }
+
         byte[][] invalidBytesAddresses = {
-            null,
             {},
             {1,2,3,4,5},
             {1,2,3,4,5,6,7},
@@ -190,11 +229,17 @@ public class MacAddressTest {
 
         for (byte[] b : invalidBytesAddresses) {
             try {
-                MacAddress mac = new MacAddress(b);
-                fail("new MacAddress(" + Arrays.toString(b)
+                MacAddress mac = MacAddress.fromBytes(b);
+                fail("MacAddress.fromBytes(" + Arrays.toString(b)
                         + ") should have failed, but returned " + mac);
             } catch (IllegalArgumentException excepted) {
             }
+        }
+
+        try {
+            MacAddress mac = MacAddress.fromBytes(null);
+            fail("MacAddress.fromBytes(null) should have failed, but returned " + mac);
+        } catch (NullPointerException excepted) {
         }
     }
 

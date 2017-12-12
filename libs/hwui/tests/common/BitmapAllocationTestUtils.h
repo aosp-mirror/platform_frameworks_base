@@ -41,7 +41,7 @@ public:
         SkBitmap skBitmap;
         SkImageInfo info = SkImageInfo::Make(width, height, colorType, kPremul_SkAlphaType);
         skBitmap.setInfo(info);
-        sk_sp<Bitmap> heapBitmap(Bitmap::allocateHeapBitmap(&skBitmap, nullptr));
+        sk_sp<Bitmap> heapBitmap(Bitmap::allocateHeapBitmap(&skBitmap));
         setup(skBitmap);
         return Bitmap::allocateHardwareBitmap(skBitmap);
     }

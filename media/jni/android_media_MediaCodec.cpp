@@ -21,6 +21,7 @@
 #include "android_media_MediaCodec.h"
 
 #include "android_media_MediaCrypto.h"
+#include "android_media_MediaDescrambler.h"
 #include "android_media_MediaMetricsJNI.h"
 #include "android_media_Utils.h"
 #include "android_runtime/AndroidRuntime.h"
@@ -29,7 +30,7 @@
 #include "jni.h"
 #include <nativehelper/JNIHelp.h>
 
-#include <android/media/IDescrambler.h>
+#include <android/hardware/cas/native/1.0/IDescrambler.h>
 
 #include <cutils/compiler.h>
 
@@ -136,7 +137,7 @@ JMediaCodec::JMediaCodec(
     mLooper->start(
             false,      // runOnCallingThread
             true,       // canCallJava
-            PRIORITY_FOREGROUND);
+            ANDROID_PRIORITY_VIDEO);
 
     if (nameIsType) {
         mCodec = MediaCodec::CreateByType(mLooper, name, encoder, &mInitStatus);
@@ -1010,8 +1011,7 @@ static void android_media_MediaCodec_native_configure(
 
     sp<IDescrambler> descrambler;
     if (descramblerBinderObj != NULL) {
-        sp<IBinder> binder = ibinderForJavaObject(env, descramblerBinderObj);
-        descrambler = interface_cast<IDescrambler>(binder);
+        descrambler = JDescrambler::GetDescrambler(env, descramblerBinderObj);
     }
 
     err = codec->configure(format, bufferProducer, crypto, descrambler, flags);
@@ -1726,7 +1726,7 @@ static void android_media_MediaCodec_setVideoScalingMode(
 
     if (mode != NATIVE_WINDOW_SCALING_MODE_SCALE_TO_WINDOW
             && mode != NATIVE_WINDOW_SCALING_MODE_SCALE_CROP) {
-        jniThrowException(env, "java/lang/InvalidArgumentException", NULL);
+        jniThrowException(env, "java/lang/IllegalArgumentException", NULL);
         return;
     }
 
@@ -1952,7 +1952,7 @@ static const JNINativeMethod gMethods[] = {
 
     { "native_configure",
       "([Ljava/lang/String;[Ljava/lang/Object;Landroid/view/Surface;"
-      "Landroid/media/MediaCrypto;Landroid/os/IBinder;I)V",
+      "Landroid/media/MediaCrypto;Landroid/os/IHwBinder;I)V",
       (void *)android_media_MediaCodec_native_configure },
 
     { "native_setSurface",

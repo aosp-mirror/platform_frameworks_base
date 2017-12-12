@@ -40,12 +40,16 @@
     <string name="connected_via_passpoint" msgid="2826205693803088747">"Anslutet via %1$s"</string>
     <string name="available_via_passpoint" msgid="1617440946846329613">"Tillgängligt via %1$s"</string>
     <string name="wifi_connected_no_internet" msgid="3149853966840874992">"Ansluten, inget internet"</string>
+    <string name="wifi_ap_unable_to_handle_new_sta" msgid="5348824313514404541">"Åtkomstpunkten har inga platser över för tillfället"</string>
+    <string name="connected_via_carrier" msgid="7583780074526041912">"Anslutet via %1$s"</string>
+    <string name="available_via_carrier" msgid="1469036129740799053">"Tillgängligt via %1$s"</string>
     <string name="speed_label_very_slow" msgid="1867055264243608530">"Mycket långsam"</string>
     <string name="speed_label_slow" msgid="813109590815810235">"Långsam"</string>
     <string name="speed_label_okay" msgid="2331665440671174858">"Okej"</string>
     <string name="speed_label_medium" msgid="3175763313268941953">"Medelsnabb"</string>
     <string name="speed_label_fast" msgid="7715732164050975057">"Snabb"</string>
     <string name="speed_label_very_fast" msgid="2265363430784523409">"Mycket snabb"</string>
+    <string name="preference_summary_default_combination" msgid="8532964268242666060">"<xliff:g id="STATE">%1$s</xliff:g>/<xliff:g id="DESCRIPTION">%2$s</xliff:g>"</string>
     <string name="bluetooth_disconnected" msgid="6557104142667339895">"Kopplas ifrån"</string>
     <string name="bluetooth_disconnecting" msgid="8913264760027764974">"Kopplar ifrån…"</string>
     <string name="bluetooth_connecting" msgid="8555009514614320497">"Ansluter…"</string>
@@ -101,6 +105,8 @@
     <string name="accessibility_wifi_two_bars" msgid="3569851234710034416">"Wi-Fi: två staplar."</string>
     <string name="accessibility_wifi_three_bars" msgid="8134185644861380311">"Wi-Fi: tre staplar."</string>
     <string name="accessibility_wifi_signal_full" msgid="7061045677694702">"Full signalstyrka för Wi-Fi."</string>
+    <string name="accessibility_wifi_security_type_none" msgid="1223747559986205423">"Öppet nätverk"</string>
+    <string name="accessibility_wifi_security_type_secured" msgid="862921720418885331">"Säkert nätverk"</string>
     <string name="process_kernel_label" msgid="3916858646836739323">"Operativsystemet Android"</string>
     <string name="data_usage_uninstalled_apps" msgid="614263770923231598">"Borttagna appar"</string>
     <string name="data_usage_uninstalled_apps_users" msgid="7986294489899813194">"Borttagna appar och användare"</string>
@@ -187,6 +193,7 @@
     <string name="wifi_allow_scan_with_traffic" msgid="3601853081178265786">"Tillåt alltid sökning efter Wi-Fi-roaming"</string>
     <string name="mobile_data_always_on" msgid="8774857027458200434">"Mobildata alltid aktiverad"</string>
     <string name="tethering_hardware_offload" msgid="7470077827090325814">"Maskinvaruacceleration för internetdelning"</string>
+    <string name="bluetooth_show_devices_without_names" msgid="4708446092962060176">"Visa namnlösa Bluetooth-enheter"</string>
     <string name="bluetooth_disable_absolute_volume" msgid="2660673801947898809">"Inaktivera Absolute volume"</string>
     <string name="bluetooth_enable_inband_ringing" msgid="3291686366721786740">"Aktivera samtal inom nätverket"</string>
     <string name="bluetooth_select_avrcp_version_string" msgid="3750059931120293633">"AVRCP-version för Bluetooth"</string>
@@ -202,6 +209,12 @@
     <string name="bluetooth_select_a2dp_codec_ldac_playback_quality" msgid="3619694372407843405">"Bluetooth-ljud via LDAC-kodek: uppspelningskvalitet"</string>
     <string name="bluetooth_select_a2dp_codec_ldac_playback_quality_dialog_title" msgid="3181967377574368400">"Välj Bluetooth-ljud via LDAC-kodek:\nuppspelningskvalitet"</string>
     <string name="bluetooth_select_a2dp_codec_streaming_label" msgid="5347862512596240506">"Streaming: <xliff:g id="STREAMING_PARAMETER">%1$s</xliff:g>"</string>
+    <string name="select_private_dns_configuration_title" msgid="3700456559305263922">"Privat DNS"</string>
+    <string name="select_private_dns_configuration_dialog_title" msgid="9221994415765826811">"Välj läget Privat DNS"</string>
+    <string name="private_dns_mode_off" msgid="8236575187318721684">"Av"</string>
+    <string name="private_dns_mode_opportunistic" msgid="7608409735589131766">"Opportunistisk"</string>
+    <string name="private_dns_mode_provider" msgid="8354935160639360804">"Värdnamn för leverantör av privat DNS"</string>
+    <string name="private_dns_mode_provider_hostname_hint" msgid="2487492386970928143">"Ange värdnamn för DNS-leverantör"</string>
     <string name="wifi_display_certification_summary" msgid="1155182309166746973">"Visa certifieringsalternativ för Wi-Fi-skärmdelning"</string>
     <string name="wifi_verbose_logging_summary" msgid="6615071616111731958">"Öka loggningsnivån för Wi-Fi, visa per SSID RSSI i Wi‑Fi Picker"</string>
     <string name="wifi_aggressive_handover_summary" msgid="7266329646559808827">"När funktionen har aktiverats kommer dataanslutningen lämnas över från Wi-Fi till mobilen på ett aggressivare sätt när Wi-Fi-signalen är svag"</string>
@@ -226,6 +239,7 @@
     <string name="dev_settings_warning_message" msgid="2298337781139097964">"Inställningarna är endast avsedda att användas för utvecklingsändamål. De kan orsaka problem med enheten eller apparna som finns installerade på den."</string>
     <string name="verify_apps_over_usb_title" msgid="4177086489869041953">"Verifiera appar via USB"</string>
     <string name="verify_apps_over_usb_summary" msgid="9164096969924529200">"Kontrollera om appar som installeras via ADB/ADT kan vara skadliga."</string>
+    <string name="bluetooth_show_devices_without_names_summary" msgid="2351196058115755520">"Bluetooth-enheter utan namn (enbart MAC-adresser) visas"</string>
     <string name="bluetooth_disable_absolute_volume_summary" msgid="6031284410786545957">"Inaktivera Bluetooth-funktionen Absolute volume om det skulle uppstå problem med volymen på fjärrenheter, t.ex. alldeles för hög volym eller brist på kontroll."</string>
     <string name="bluetooth_enable_inband_ringing_summary" msgid="2787866074741784975">"Tillåt att ringsignaler på mobilen kan spelas upp i Bluetooth-headset"</string>
     <string name="enable_terminal_title" msgid="95572094356054120">"Lokal terminal"</string>
@@ -259,7 +273,7 @@
     <string name="show_hw_screen_updates_summary" msgid="1115593565980196197">"Visningar blinkar i fönster vid GPU-ritningar"</string>
     <string name="show_hw_layers_updates" msgid="5645728765605699821">"Visa maskinvaruskiktuppd."</string>
     <string name="show_hw_layers_updates_summary" msgid="5296917233236661465">"Låt maskinvaruskikt blinka grönt vid uppdateringar"</string>
-    <string name="debug_hw_overdraw" msgid="2968692419951565417">"Felsök överskriden GPU"</string>
+    <string name="debug_hw_overdraw" msgid="2968692419951565417">"Felsök GPU-överritning"</string>
     <string name="debug_hw_renderer" msgid="7568529019431785816">"Ange GPU-renderare"</string>
     <string name="disable_overlays" msgid="2074488440505934665">"Inaktivera HW-överlagringar"</string>
     <string name="disable_overlays_summary" msgid="3578941133710758592">"Använd alltid GPU för skärmsammansättning"</string>
@@ -345,12 +359,11 @@
     <string name="power_discharging_duration_short" msgid="4192244429001842403">"<xliff:g id="LEVEL">^1</xliff:g> – <xliff:g id="TIME">^2</xliff:g> kvar"</string>
     <string name="power_charging" msgid="1779532561355864267">"<xliff:g id="LEVEL">%1$s</xliff:g> – <xliff:g id="STATE">%2$s</xliff:g>"</string>
     <string name="power_charging_duration" msgid="4676999980973411875">"<xliff:g id="LEVEL">^1</xliff:g> – <xliff:g id="TIME">^2</xliff:g> tills det är fulladdat"</string>
-    <string name="power_charging_duration_short" msgid="1098603958472207920">"<xliff:g id="LEVEL">^1</xliff:g> – <xliff:g id="TIME">^2</xliff:g>"</string>
     <string name="battery_info_status_unknown" msgid="196130600938058547">"Okänd"</string>
     <string name="battery_info_status_charging" msgid="1705179948350365604">"Laddar"</string>
     <string name="battery_info_status_charging_lower" msgid="8689770213898117994">"laddas"</string>
     <string name="battery_info_status_discharging" msgid="310932812698268588">"Laddar inte"</string>
-    <string name="battery_info_status_not_charging" msgid="2820070506621483576">"Laddar inte"</string>
+    <string name="battery_info_status_not_charging" msgid="8523453668342598579">"Inkopplad, kan inte laddas just nu"</string>
     <string name="battery_info_status_full" msgid="2824614753861462808">"Fullt"</string>
     <string name="disabled_by_admin_summary_text" msgid="6750513964908334617">"Strys av administratören"</string>
     <string name="enabled_by_admin" msgid="5302986023578399263">"Aktiverad av administratör"</string>
@@ -375,7 +388,6 @@
     <string name="screen_zoom_summary_custom" msgid="5611979864124160447">"Anpassad (<xliff:g id="DENSITYDPI">%d</xliff:g>)"</string>
     <string name="help_feedback_label" msgid="6815040660801785649">"Hjälp och feedback"</string>
     <string name="content_description_menu_button" msgid="8182594799812351266">"Meny"</string>
-    <string name="time_zone_gmt" msgid="2587097992671450782">"GMT"</string>
     <string name="retail_demo_reset_message" msgid="118771671364131297">"Ange lösenord och utför fabriksåterställning i demoläge"</string>
     <string name="retail_demo_reset_next" msgid="8356731459226304963">"Nästa"</string>
     <string name="retail_demo_reset_title" msgid="696589204029930100">"Lösenord krävs"</string>

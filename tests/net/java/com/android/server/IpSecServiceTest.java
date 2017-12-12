@@ -23,7 +23,11 @@ import static android.system.OsConstants.SOCK_DGRAM;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotEquals;
 import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
+import static org.mockito.Matchers.anyInt;
+import static org.mockito.Matchers.anyString;
+import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -46,6 +50,8 @@ import java.net.InetAddress;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.net.UnknownHostException;
+import java.util.ArrayList;
+import java.util.List;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -57,6 +63,8 @@ import org.junit.runner.RunWith;
 public class IpSecServiceTest {
 
     private static final int DROID_SPI = 0xD1201D;
+    private static final int MAX_NUM_ENCAP_SOCKETS = 100;
+    private static final int MAX_NUM_SPIS = 100;
     private static final int TEST_UDP_ENCAP_INVALID_PORT = 100;
     private static final int TEST_UDP_ENCAP_PORT_OUT_RANGE = 100000;
 
@@ -258,6 +266,117 @@ public class IpSecServiceTest {
                                 + ", Exception: "
                                 + e);
             }
+        }
+    }
+
+    /**
+     * This function checks if the number of encap UDP socket that one UID can reserve has a
+     * reasonable limit.
+     */
+    @Test
+    public void testSocketResourceTrackerLimitation() throws Exception {
+        List<IpSecUdpEncapResponse> openUdpEncapSockets = new ArrayList<IpSecUdpEncapResponse>();
+        // Reserve sockets until it fails.
+        for (int i = 0; i < MAX_NUM_ENCAP_SOCKETS; i++) {
+            IpSecUdpEncapResponse newUdpEncapSocket =
+                    mIpSecService.openUdpEncapsulationSocket(0, new Binder());
+            assertNotNull(newUdpEncapSocket);
+            if (IpSecManager.Status.OK != newUdpEncapSocket.status) {
+                break;
+            }
+            openUdpEncapSockets.add(newUdpEncapSocket);
+        }
+        // Assert that the total sockets quota has a reasonable limit.
+        assertTrue("No UDP encap socket was open", !openUdpEncapSockets.isEmpty());
+        assertTrue(
+                "Number of open UDP encap sockets is out of bound",
+                openUdpEncapSockets.size() < MAX_NUM_ENCAP_SOCKETS);
+
+        // Try to reserve one more UDP encapsulation socket, and should fail.
+        IpSecUdpEncapResponse extraUdpEncapSocket =
+                mIpSecService.openUdpEncapsulationSocket(0, new Binder());
+        assertNotNull(extraUdpEncapSocket);
+        assertEquals(IpSecManager.Status.RESOURCE_UNAVAILABLE, extraUdpEncapSocket.status);
+
+        // Close one of the open UDP encapsulation sockets.
+        mIpSecService.closeUdpEncapsulationSocket(openUdpEncapSockets.get(0).resourceId);
+        openUdpEncapSockets.get(0).fileDescriptor.close();
+        openUdpEncapSockets.remove(0);
+
+        // Try to reserve one more UDP encapsulation socket, and should be successful.
+        extraUdpEncapSocket = mIpSecService.openUdpEncapsulationSocket(0, new Binder());
+        assertNotNull(extraUdpEncapSocket);
+        assertEquals(IpSecManager.Status.OK, extraUdpEncapSocket.status);
+        openUdpEncapSockets.add(extraUdpEncapSocket);
+
+        // Close open UDP sockets.
+        for (IpSecUdpEncapResponse openSocket : openUdpEncapSockets) {
+            mIpSecService.closeUdpEncapsulationSocket(openSocket.resourceId);
+            openSocket.fileDescriptor.close();
+        }
+    }
+
+    /**
+     * This function checks if the number of SPI that one UID can reserve has a reasonable limit.
+     * This test does not test for both address families or duplicate SPIs because resource tracking
+     * code does not depend on them.
+     */
+    @Test
+    public void testSpiResourceTrackerLimitation() throws Exception {
+        List<IpSecSpiResponse> reservedSpis = new ArrayList<IpSecSpiResponse>();
+        // Return the same SPI for all SPI allocation since IpSecService only
+        // tracks the resource ID.
+        when(mMockNetd.ipSecAllocateSpi(
+                        anyInt(),
+                        eq(IpSecTransform.DIRECTION_OUT),
+                        anyString(),
+                        eq(InetAddress.getLoopbackAddress().getHostAddress()),
+                        anyInt()))
+                .thenReturn(DROID_SPI);
+        // Reserve spis until it fails.
+        for (int i = 0; i < MAX_NUM_SPIS; i++) {
+            IpSecSpiResponse newSpi =
+                    mIpSecService.reserveSecurityParameterIndex(
+                            0x1,
+                            InetAddress.getLoopbackAddress().getHostAddress(),
+                            DROID_SPI + i,
+                            new Binder());
+            assertNotNull(newSpi);
+            if (IpSecManager.Status.OK != newSpi.status) {
+                break;
+            }
+            reservedSpis.add(newSpi);
+        }
+        // Assert that the SPI quota has a reasonable limit.
+        assertTrue(reservedSpis.size() > 0 && reservedSpis.size() < MAX_NUM_SPIS);
+
+        // Try to reserve one more SPI, and should fail.
+        IpSecSpiResponse extraSpi =
+                mIpSecService.reserveSecurityParameterIndex(
+                        0x1,
+                        InetAddress.getLoopbackAddress().getHostAddress(),
+                        DROID_SPI + MAX_NUM_SPIS,
+                        new Binder());
+        assertNotNull(extraSpi);
+        assertEquals(IpSecManager.Status.RESOURCE_UNAVAILABLE, extraSpi.status);
+
+        // Release one reserved spi.
+        mIpSecService.releaseSecurityParameterIndex(reservedSpis.get(0).resourceId);
+        reservedSpis.remove(0);
+
+        // Should successfully reserve one more spi.
+        extraSpi =
+                mIpSecService.reserveSecurityParameterIndex(
+                        0x1,
+                        InetAddress.getLoopbackAddress().getHostAddress(),
+                        DROID_SPI + MAX_NUM_SPIS,
+                        new Binder());
+        assertNotNull(extraSpi);
+        assertEquals(IpSecManager.Status.OK, extraSpi.status);
+
+        // Release reserved SPIs.
+        for (IpSecSpiResponse spiResp : reservedSpis) {
+            mIpSecService.releaseSecurityParameterIndex(spiResp.resourceId);
         }
     }
 }

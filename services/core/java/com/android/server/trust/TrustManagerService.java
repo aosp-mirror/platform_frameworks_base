@@ -344,7 +344,7 @@ public class TrustManagerService extends SystemService {
                             + "of user " + userInfo.id + "can unlock user profile.");
                 }
 
-                if (!StorageManager.isUserKeyUnlocked(userInfo.id)
+                if (!mUserManager.isUserUnlockingOrUnlocked(userInfo.id)
                         && !directUnlock) {
                     if (DEBUG) Slog.d(TAG, "refreshAgentList: skipping user " + userInfo.id
                             + "'s trust agent " + name + ": FBE still locked and "

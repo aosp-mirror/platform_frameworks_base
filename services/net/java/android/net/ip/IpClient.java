@@ -815,6 +815,15 @@ public class IpClient extends StateMachine {
         pw.println(Objects.toString(provisioningConfig, "N/A"));
         pw.decreaseIndent();
 
+        final IpReachabilityMonitor iprm = mIpReachabilityMonitor;
+        if (iprm != null) {
+            pw.println();
+            pw.println(mTag + " current IpReachabilityMonitor state:");
+            pw.increaseIndent();
+            iprm.dump(pw);
+            pw.decreaseIndent();
+        }
+
         pw.println();
         pw.println(mTag + " StateMachine dump:");
         pw.increaseIndent();
@@ -1237,6 +1246,7 @@ public class IpClient extends StateMachine {
             mIpReachabilityMonitor = new IpReachabilityMonitor(
                     mContext,
                     mInterfaceName,
+                    getHandler(),
                     mLog,
                     new IpReachabilityMonitor.Callback() {
                         @Override

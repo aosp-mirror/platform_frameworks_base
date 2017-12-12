@@ -46,7 +46,6 @@ import android.util.SparseIntArray;
 import com.android.server.connectivity.metrics.nano.IpConnectivityLogClass;
 import com.android.server.connectivity.metrics.nano.IpConnectivityLogClass.IpConnectivityEvent;
 import com.android.server.connectivity.metrics.nano.IpConnectivityLogClass.IpConnectivityLog;
-import com.android.server.connectivity.metrics.nano.IpConnectivityLogClass.NetworkId;
 import com.android.server.connectivity.metrics.nano.IpConnectivityLogClass.Pair;
 import java.io.IOException;
 import java.util.ArrayList;
@@ -128,6 +127,11 @@ final public class IpConnectivityEventBuilder {
         wakeupStats.nonApplicationWakeups = in.nonApplicationWakeups;
         wakeupStats.applicationWakeups = in.applicationWakeups;
         wakeupStats.noUidWakeups = in.noUidWakeups;
+        wakeupStats.l2UnicastCount = in.l2UnicastCount;
+        wakeupStats.l2MulticastCount = in.l2MulticastCount;
+        wakeupStats.l2BroadcastCount = in.l2BroadcastCount;
+        wakeupStats.ethertypeCounts = toPairArray(in.ethertypes);
+        wakeupStats.ipNextHeaderCounts = toPairArray(in.ipNextHeaders);
         final IpConnectivityEvent out = buildEvent(0, 0, in.iface);
         out.setWakeupStats(wakeupStats);
         return out;
@@ -242,7 +246,6 @@ final public class IpConnectivityEventBuilder {
     private static void setNetworkEvent(IpConnectivityEvent out, NetworkEvent in) {
         IpConnectivityLogClass.NetworkEvent networkEvent =
                 new IpConnectivityLogClass.NetworkEvent();
-        networkEvent.networkId = netIdOf(in.netId);
         networkEvent.eventType = in.eventType;
         networkEvent.latencyMs = (int) in.durationMs;
         out.setNetworkEvent(networkEvent);
@@ -319,12 +322,6 @@ final public class IpConnectivityEventBuilder {
             pairs[i] = p;
         }
         return pairs;
-    }
-
-    private static NetworkId netIdOf(int netid) {
-        final NetworkId ni = new NetworkId();
-        ni.networkId = netid;
-        return ni;
     }
 
     private static int ipSupportOf(DefaultNetworkEvent in) {

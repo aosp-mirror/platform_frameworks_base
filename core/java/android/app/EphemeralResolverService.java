@@ -40,6 +40,7 @@ import java.util.List;
 /**
  * Base class for implementing the resolver service.
  * @hide
+ * @removed
  * @deprecated use InstantAppResolverService instead
  */
 @Deprecated

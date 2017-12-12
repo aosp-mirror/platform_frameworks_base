@@ -16,11 +16,11 @@
 
 package com.android.server.backup.fullbackup;
 
+import static com.android.server.backup.BackupPasswordManager.PBKDF_CURRENT;
 import static com.android.server.backup.RefactoredBackupManagerService.BACKUP_FILE_HEADER_MAGIC;
 import static com.android.server.backup.RefactoredBackupManagerService.BACKUP_FILE_VERSION;
 import static com.android.server.backup.RefactoredBackupManagerService.DEBUG;
 import static com.android.server.backup.RefactoredBackupManagerService.MORE_DEBUG;
-import static com.android.server.backup.RefactoredBackupManagerService.PBKDF_CURRENT;
 import static com.android.server.backup.RefactoredBackupManagerService.SHARED_BACKUP_AGENT_PACKAGE;
 import static com.android.server.backup.RefactoredBackupManagerService.TAG;
 
@@ -459,7 +459,7 @@ public class PerformAdbBackupTask extends FullBackupTask implements BackupRestor
                 }
                 mOutputFile.close();
             } catch (IOException e) {
-                /* nothing we can do about this */
+                Slog.e(TAG, "IO error closing adb backup file: " + e.getMessage());
             }
             synchronized (mLatch) {
                 mLatch.set(true);

@@ -137,4 +137,26 @@ public class BluetoothControllerImplTest extends SysuiTestCase {
         verify(callback).onBluetoothDevicesChanged();
         mainLooper.destroy();
     }
+
+    @Test
+    public void testNullAsync_DoesNotCrash() throws Exception {
+        CachedBluetoothDevice device = mock(CachedBluetoothDevice.class);
+        when(device.getMaxConnectionState()).thenReturn(BluetoothProfile.STATE_CONNECTED);
+        BluetoothController.Callback callback = mock(BluetoothController.Callback.class);
+        mBluetoothControllerImpl.addCallback(callback);
+
+        // Grab the main looper, we'll need it later.
+        TestableLooper mainLooper = new TestableLooper(Looper.getMainLooper());
+
+        try {
+            // Trigger the state getting.
+            assertEquals(BluetoothProfile.STATE_DISCONNECTED,
+                    mBluetoothControllerImpl.getMaxConnectionState(null));
+
+            mTestableLooper.processMessages(1);
+            mainLooper.processAllMessages();
+        } finally {
+            mainLooper.destroy();
+        }
+    }
 }

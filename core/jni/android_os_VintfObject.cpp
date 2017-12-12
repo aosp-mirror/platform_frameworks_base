@@ -93,20 +93,31 @@ static jobjectArray android_os_VintfObject_report(JNIEnv* env, jclass)
     return toJavaStringArray(env, cStrings);
 }
 
-static jint android_os_VintfObject_verify(JNIEnv* env, jclass, jobjectArray packageInfo) {
-    size_t count = env->GetArrayLength(packageInfo);
-    std::vector<std::string> cPackageInfo{count};
-    for (size_t i = 0; i < count; ++i) {
-        jstring element = (jstring)env->GetObjectArrayElement(packageInfo, i);
-        const char *cString = env->GetStringUTFChars(element, NULL /* isCopy */);
-        cPackageInfo[i] = cString;
-        env->ReleaseStringUTFChars(element, cString);
+static jint verify(JNIEnv* env, jobjectArray packageInfo, android::vintf::DisabledChecks checks) {
+    std::vector<std::string> cPackageInfo;
+    if (packageInfo) {
+        size_t count = env->GetArrayLength(packageInfo);
+        cPackageInfo.resize(count);
+        for (size_t i = 0; i < count; ++i) {
+            jstring element = (jstring)env->GetObjectArrayElement(packageInfo, i);
+            const char *cString = env->GetStringUTFChars(element, NULL /* isCopy */);
+            cPackageInfo[i] = cString;
+            env->ReleaseStringUTFChars(element, cString);
+        }
     }
     std::string error;
-    int32_t status = VintfObject::CheckCompatibility(cPackageInfo, &error);
+    int32_t status = VintfObject::CheckCompatibility(cPackageInfo, &error, checks);
     if (status)
         LOG(WARNING) << "VintfObject.verify() returns " << status << ": " << error;
     return status;
+}
+
+static jint android_os_VintfObject_verify(JNIEnv* env, jclass, jobjectArray packageInfo) {
+    return verify(env, packageInfo, ::android::vintf::ENABLE_ALL_CHECKS);
+}
+
+static jint android_os_VintfObject_verifyWithoutAvb(JNIEnv* env, jclass) {
+    return verify(env, nullptr, ::android::vintf::DISABLE_AVB_CHECK);
 }
 
 static jobjectArray android_os_VintfObject_getHalNamesAndVersions(JNIEnv* env, jclass) {
@@ -148,6 +159,7 @@ static jobject android_os_VintfObject_getVndkSnapshots(JNIEnv* env, jclass) {
 static const JNINativeMethod gVintfObjectMethods[] = {
     {"report", "()[Ljava/lang/String;", (void*)android_os_VintfObject_report},
     {"verify", "([Ljava/lang/String;)I", (void*)android_os_VintfObject_verify},
+    {"verifyWithoutAvb", "()I", (void*)android_os_VintfObject_verifyWithoutAvb},
     {"getHalNamesAndVersions", "()[Ljava/lang/String;", (void*)android_os_VintfObject_getHalNamesAndVersions},
     {"getSepolicyVersion", "()Ljava/lang/String;", (void*)android_os_VintfObject_getSepolicyVersion},
     {"getVndkSnapshots", "()Ljava/util/Map;", (void*)android_os_VintfObject_getVndkSnapshots},

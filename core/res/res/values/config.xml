@@ -44,7 +44,11 @@
         <item><xliff:g id="id">@string/status_bar_zen</xliff:g></item>
         <item><xliff:g id="id">@string/status_bar_mute</xliff:g></item>
         <item><xliff:g id="id">@string/status_bar_volume</xliff:g></item>
+        <item><xliff:g id="id">@string/status_bar_vpn</xliff:g></item>
+        <item><xliff:g id="id">@string/status_bar_ethernet</xliff:g></item>
         <item><xliff:g id="id">@string/status_bar_wifi</xliff:g></item>
+        <item><xliff:g id="id">@string/status_bar_mobile</xliff:g></item>
+        <item><xliff:g id="id">@string/status_bar_airplane</xliff:g></item>
         <item><xliff:g id="id">@string/status_bar_cdma_eri</xliff:g></item>
         <item><xliff:g id="id">@string/status_bar_data_connection</xliff:g></item>
         <item><xliff:g id="id">@string/status_bar_phone_evdo_signal</xliff:g></item>
@@ -81,6 +85,10 @@
     <string translatable="false" name="status_bar_alarm_clock">alarm_clock</string>
     <string translatable="false" name="status_bar_secure">secure</string>
     <string translatable="false" name="status_bar_clock">clock</string>
+    <string translatable="false" name="status_bar_mobile">mobile</string>
+    <string translatable="false" name="status_bar_vpn">vpn</string>
+    <string translatable="false" name="status_bar_ethernet">ethernet</string>
+    <string translatable="false" name="status_bar_airplane">airplane</string>
 
     <!-- Flag indicating whether the surface flinger has limited
          alpha compositing functionality in hardware.  If set, the window
@@ -146,6 +154,11 @@
          Off by default, since the framebuffer readback used to implement the
          fading edges is prohibitively expensive on most GPUs. -->
     <bool name="config_ui_enableFadingMarquee">false</bool>
+
+    <!-- Enables or disables haptic effect when the text insertion/selection handle is moved
+         manually by the user. Off by default, since the expected haptic feedback may not be
+         available on some devices. -->
+    <bool name="config_enableHapticTextHandle">false</bool>
 
     <!-- Whether dialogs should close automatically when the user touches outside
          of them.  This should not normally be modified. -->
@@ -422,24 +435,45 @@
      -->
     <integer translatable="false" name="config_wifi_wakeup_available">0</integer>
 
-    <!-- Array of ConnectivityManager.TYPE_xxxx values allowable for tethering -->
-    <!-- Common options are [1, 4] for TYPE_WIFI and TYPE_MOBILE_DUN or
-    <!== [0,1,5,7] for TYPE_MOBILE, TYPE_WIFI, TYPE_MOBILE_HIPRI and TYPE_BLUETOOTH -->
-    <!-- This list is also modified by code within the framework, including:
+    <!-- Array of ConnectivityManager.TYPE_xxxx values allowable for tethering.
+
+         Common options are [1, 4] for TYPE_WIFI and TYPE_MOBILE_DUN or
+         [1,7,0] for TYPE_WIFI, TYPE_BLUETOOTH, and TYPE_MOBILE.
+
+         This list is also modified by code within the framework, including:
 
              - TYPE_ETHERNET (9) is prepended to this list, and
-             - the output of TelephonyManager.getTetherApnRequired()
-               determines whether both TYPE_MOBILE (0) and TYPE_HIPRI (5)
-               or TYPE_MOBILE_DUN (4) are appended (if not already present).
+
+             - the return value of TelephonyManager.getTetherApnRequired()
+               determines how the array is further modified:
+
+                   * DUN_REQUIRED
+                     TYPE_MOBILE is removed (if present)
+                     TYPE_MOBILE_HIPRI is removed (if present)
+                     TYPE_MOBILE_DUN is appended (if not already present)
+
+                   * DUN_NOT_REQUIRED
+                     TYPE_MOBILE_DUN is removed (if present)
+                     TYPE_MOBILE is appended (if not already present)
+                     TYPE_MOBILE_HIPRI is appended (if not already present)
+
+                   * DUN_UNSPECIFIED
+                     if any of TYPE_MOBILE{,_DUN,_HIPRI} are present:
+                         change nothing
+                     else:
+                         TYPE_MOBILE is appended
+                         TYPE_MOBILE_HIPRI is appended
 
          For other changes applied to this list, now and in the future, see
          com.android.server.connectivity.tethering.TetheringConfiguration.
+
+         Note also: the order of this is important. The first upstream type
+         for which a satisfying network exists is used.
       -->
     <integer-array translatable="false" name="config_tether_upstream_types">
-        <item>0</item>
         <item>1</item>
-        <item>5</item>
         <item>7</item>
+        <item>0</item>
     </integer-array>
 
     <!-- If the DUN connection for this CDMA device supports more than just DUN -->
@@ -516,15 +550,18 @@
     <!-- Integer parameters of the wifi to cellular handover feature
          wifi should not stick to bad networks -->
     <integer translatable="false" name="config_wifi_framework_wifi_score_bad_rssi_threshold_5GHz">-82</integer>
+    <integer translatable="false" name="config_wifi_framework_wifi_score_entry_rssi_threshold_5GHz">-82</integer>
     <integer translatable="false" name="config_wifi_framework_wifi_score_low_rssi_threshold_5GHz">-70</integer>
     <integer translatable="false" name="config_wifi_framework_wifi_score_good_rssi_threshold_5GHz">-57</integer>
     <integer translatable="false" name="config_wifi_framework_wifi_score_bad_rssi_threshold_24GHz">-85</integer>
+    <integer translatable="false" name="config_wifi_framework_wifi_score_entry_rssi_threshold_24GHz">-85</integer>
     <integer translatable="false" name="config_wifi_framework_wifi_score_low_rssi_threshold_24GHz">-73</integer>
     <integer translatable="false" name="config_wifi_framework_wifi_score_good_rssi_threshold_24GHz">-60</integer>
     <integer translatable="false" name="config_wifi_framework_wifi_score_bad_link_speed_24">6</integer>
     <integer translatable="false" name="config_wifi_framework_wifi_score_bad_link_speed_5">12</integer>
     <integer translatable="false" name="config_wifi_framework_wifi_score_good_link_speed_24">24</integer>
     <integer translatable="false" name="config_wifi_framework_wifi_score_good_link_speed_5">36</integer>
+
     <string  translatable="false" name="config_wifi_random_mac_oui">DA-A1-19</string>
     <string  translatable="false" name="config_wifi_framework_sap_2G_channel_list">1,6,11</string>
 
@@ -611,10 +648,10 @@
     <bool name="config_automatic_brightness_available">false</bool>
 
     <!-- Fast brightness animation ramp rate in brightness units per second-->
-    <integer translatable="false" name="config_brightness_ramp_rate_fast">200</integer>
+    <integer translatable="false" name="config_brightness_ramp_rate_fast">180</integer>
 
     <!-- Slow brightness animation ramp rate in brightness units per second-->
-    <integer translatable="false" name="config_brightness_ramp_rate_slow">40</integer>
+    <integer translatable="false" name="config_brightness_ramp_rate_slow">60</integer>
 
     <!-- Don't name config resources like this.  It should look like config_annoyDianne -->
     <bool name="config_annoy_dianne">true</bool>
@@ -864,6 +901,18 @@
     <!-- Maximum color temperature, in Kelvin, supported by Night display. -->
     <integer name="config_nightDisplayColorTemperatureMax">4082</integer>
 
+    <string-array name="config_nightDisplayColorTemperatureCoefficients">
+        <!-- R a-coefficient --> <item>0.0</item>
+        <!-- R b-coefficient --> <item>0.0</item>
+        <!-- R y-intercept --> <item>1.0</item>
+        <!-- G a-coefficient --> <item>-0.00000000962353339</item>
+        <!-- G b-coefficient --> <item>0.000153045476</item>
+        <!-- G y-intercept --> <item>0.390782778</item>
+        <!-- B a-coefficient --> <item>-0.0000000189359041</item>
+        <!-- B b-coefficient --> <item>0.000302412211</item>
+        <!-- B y-intercept --> <item>-0.198650895</item>
+    </string-array>
+
     <!-- Indicate whether to allow the device to suspend when the screen is off
          due to the proximity sensor.  This resource should only be set to true
          if the sensor HAL correctly handles the proximity sensor as a wake-up source.
@@ -1077,6 +1126,11 @@
 
     <!-- Is the lock-screen disabled for new users by default -->
     <bool name="config_disableLockscreenByDefault">false</bool>
+
+    <!-- If true, enables verification of the lockscreen credential in the factory reset protection
+        flow. This should be true if gatekeeper / weaver credentials can still be checked after a
+        factory reset. -->
+    <bool name="config_enableCredentialFactoryResetProtection">true</bool>
 
     <!-- Control the behavior when the user long presses the home button.
             0 - Nothing
@@ -1314,7 +1368,7 @@
 
     <!-- The package of the time zone rules updater application. Expected to be the same
          for all Android devices that support APK-based time zone rule updates.
-         A package-targeted android.intent.action.timezone.TRIGGER_RULES_UPDATE_CHECK intent
+         A package-targeted com.android.intent.action.timezone.TRIGGER_RULES_UPDATE_CHECK intent
          will be sent to the updater app if the system server detects an update to the updater or
          data app packages.
          The package referenced here must have the android.permission.UPDATE_TIME_ZONE_RULES
@@ -1325,7 +1379,7 @@
 
     <!-- The package of the time zone rules data application. Expected to be configured
          by OEMs to reference their own priv-app APK package.
-         A package-targeted android.intent.action.timezone.TRIGGER_RULES_UPDATE_CHECK intent
+         A package-targeted com.android.intent.action.timezone.TRIGGER_RULES_UPDATE_CHECK intent
          will be sent to the updater app if the system server detects an update to the updater or
          data app packages.
          [This is only used if config_enableUpdateableTimeZoneRules and
@@ -1376,6 +1430,7 @@
     <!-- The package name of the default network recommendation app.
          A network recommendation provider must:
              * Be granted the SCORE_NETWORKS permission.
+             * Be granted the ACCESS_COARSE_LOCATION permission.
              * Include a Service for the android.net.scoring.RECOMMEND_NETWORKS action
                protected by the BIND_NETWORK_RECOMMENDATION_SERVICE permission.
 
@@ -1660,6 +1715,10 @@
          to keep the WAL file relatively small to avoid long delays.
          The size of the WAL file is also constrained by 'db_journal_size_limit'. -->
     <integer name="db_wal_autocheckpoint">100</integer>
+
+    <!-- The number of milliseconds that SQLite connection is allowed to be idle before it
+         is closed and removed from the pool -->
+    <integer name="db_default_idle_connection_timeout">30000</integer>
 
     <!-- Max space (in MB) allocated to DownloadManager to store the downloaded
          files if they are to be stored in DownloadManager's data dir,
@@ -1978,6 +2037,10 @@
     <!-- Amount of time in ms the user needs to press the relevant key to bring up the global actions dialog -->
     <integer name="config_globalActionsKeyTimeout">500</integer>
 
+    <!-- Default width of a vertical scrollbar and height of a horizontal scrollbar.
+         Takes effect only if the scrollbar drawables have no intrinsic size. -->
+    <dimen name="config_scrollbarSize">4dp</dimen>
+
     <!-- Distance that should be scrolled, per axis value, in response to a horizontal
          {@link MotionEvent#ACTION_SCROLL} event. -->
     <dimen name="config_horizontalScrollFactor">64dp</dimen>
@@ -2218,11 +2281,19 @@
     <string-array name="config_disabledUntilUsedPreinstalledCarrierApps" translatable="false" />
 
     <!-- The list of classes that should be added to the notification ranking pipline.
-     See {@link com.android.server.notification.NotificationSignalExtractor} -->
+     See {@link com.android.server.notification.NotificationSignalExtractor}
+      If you add a new extractor to this list make sure to update
+      NotificationManagerService.handleRankingSort()-->
     <string-array name="config_notificationSignalExtractors">
+        <!-- many of the following extractors depend on the notification channel, so this
+        extractor must come first -->
+        <item>com.android.server.notification.NotificationChannelExtractor</item>
+        <item>com.android.server.notification.NotificationAdjustmentExtractor</item>
+        <!-- depends on AdjustmentExtractor-->
         <item>com.android.server.notification.ValidateNotificationPeople</item>
         <item>com.android.server.notification.PriorityExtractor</item>
         <item>com.android.server.notification.ImportanceExtractor</item>
+        <!-- depends on ImportanceExtractor-->
         <item>com.android.server.notification.NotificationIntrusivenessExtractor</item>
         <item>com.android.server.notification.VisibilityExtractor</item>
         <item>com.android.server.notification.BadgeExtractor</item>
@@ -2972,9 +3043,11 @@
     <!-- Handle volume keys directly in Window Manager without passing them to the foreground app -->
     <bool name="config_handleVolumeKeysInWindowManager">false</bool>
 
-    <!-- Volume level of in-call notification tone playback,
-         relative to the overall voice call stream volume [0..100] -->
-    <integer name="config_inCallNotificationVolumeRelative">67</integer>
+    <!-- Volume level of in-call notification tone playback [0..1] -->
+    <item name="config_inCallNotificationVolume" format="float" type="dimen">.10</item>
+
+    <!-- URI for in call notification sound -->
+    <string translatable="false" name="config_inCallNotificationSound">/system/media/audio/ui/InCallNotification.ogg</string>
 
     <!-- The OEM specified sensor type for the lift trigger to launch the camera app. -->
     <integer name="config_cameraLiftTriggerSensorType">-1</integer>
@@ -3002,6 +3075,13 @@
     <!-- An array of packages that need to be treated as type service in battery settings -->
     <string-array translatable="false" name="config_batteryPackageTypeService"/>
 
+    <!-- Flag indicating whether or not to enable night mode detection. -->
+    <bool name="config_enableNightMode">false</bool>
+
+    <!-- Flag indicating that the actions buttons for a notification should be tinted with by the
+         color supplied by the Notification.Builder if present. -->
+    <bool name="config_tintNotificationActionButtons">true</bool>
+
     <!-- Show area update info settings in CellBroadcastReceiver and information in SIM status in Settings app -->
     <bool name="config_showAreaUpdateInfoSettings">false</bool>
 
@@ -3010,6 +3090,12 @@
 
     <!-- Allow SystemUI to show the shutdown dialog -->
     <bool name="config_showSysuiShutdown">true</bool>
+
+    <!-- The stable device width and height in pixels. If these aren't set to a positive number
+         then the device will use the width and height of the default display the first time it's
+         booted.  -->
+    <integer name="config_stableDeviceDisplayWidth">-1</integer>
+    <integer name="config_stableDeviceDisplayHeight">-1</integer>
 
     <!-- Decide whether to display 'No service' on status bar instead of 'Emergency calls only'
          when SIM is unready. -->

@@ -16,11 +16,16 @@
 
 package com.android.systemui.screenshot;
 
+import static com.android.systemui.screenshot.GlobalScreenshot.SHARING_INTENT;
+import static com.android.systemui.statusbar.phone.StatusBar.SYSTEM_DIALOG_REASON_SCREENSHOT;
+
 import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
 import android.animation.AnimatorSet;
 import android.animation.ValueAnimator;
 import android.animation.ValueAnimator.AnimatorUpdateListener;
+import android.app.ActivityManager;
+import android.app.ActivityOptions;
 import android.app.admin.DevicePolicyManager;
 import android.app.Notification;
 import android.app.Notification.BigPictureStyle;
@@ -46,7 +51,9 @@ import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Environment;
+import android.os.PowerManager;
 import android.os.Process;
+import android.os.RemoteException;
 import android.os.UserHandle;
 import android.provider.MediaStore;
 import android.util.DisplayMetrics;
@@ -61,6 +68,7 @@ import android.view.ViewGroup;
 import android.view.WindowManager;
 import android.view.animation.Interpolator;
 import android.widget.ImageView;
+import android.widget.Toast;
 
 import com.android.internal.messages.nano.SystemMessageProto.SystemMessage;
 import com.android.systemui.R;
@@ -275,14 +283,13 @@ class SaveImageInBackgroundTask extends AsyncTask<Void, Void, Void> {
             sharingIntent.putExtra(Intent.EXTRA_STREAM, uri);
             sharingIntent.putExtra(Intent.EXTRA_SUBJECT, subject);
 
-            // Create a share action for the notification
-            PendingIntent chooseAction = PendingIntent.getBroadcast(context, 0,
-                    new Intent(context, GlobalScreenshot.TargetChosenReceiver.class),
-                    PendingIntent.FLAG_CANCEL_CURRENT | PendingIntent.FLAG_ONE_SHOT);
-            Intent chooserIntent = Intent.createChooser(sharingIntent, null,
-                    chooseAction.getIntentSender())
-                    .addFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK | Intent.FLAG_ACTIVITY_NEW_TASK);
-            PendingIntent shareAction = PendingIntent.getActivity(context, 0, chooserIntent,
+            // Create a share action for the notification. Note, we proxy the call to ShareReceiver
+            // because RemoteViews currently forces an activity options on the PendingIntent being
+            // launched, and since we don't want to trigger the share sheet in this case, we will
+            // start the chooser activitiy directly in ShareReceiver.
+            PendingIntent shareAction = PendingIntent.getBroadcast(context, 0,
+                    new Intent(context, GlobalScreenshot.ShareReceiver.class)
+                            .putExtra(SHARING_INTENT, sharingIntent),
                     PendingIntent.FLAG_CANCEL_CURRENT);
             Notification.Action.Builder shareActionBuilder = new Notification.Action.Builder(
                     R.drawable.ic_screenshot_share,
@@ -290,7 +297,7 @@ class SaveImageInBackgroundTask extends AsyncTask<Void, Void, Void> {
             mNotificationBuilder.addAction(shareActionBuilder.build());
 
             // Create a delete action for the notification
-            PendingIntent deleteAction = PendingIntent.getBroadcast(context,  0,
+            PendingIntent deleteAction = PendingIntent.getBroadcast(context, 0,
                     new Intent(context, GlobalScreenshot.DeleteScreenshotReceiver.class)
                             .putExtra(GlobalScreenshot.SCREENSHOT_URI_ID, uri.toString()),
                     PendingIntent.FLAG_CANCEL_CURRENT | PendingIntent.FLAG_ONE_SHOT);
@@ -401,6 +408,7 @@ class DeleteImageInBackgroundTask extends AsyncTask<Uri, Void, Void> {
 
 class GlobalScreenshot {
     static final String SCREENSHOT_URI_ID = "android:screenshot_uri_id";
+    static final String SHARING_INTENT = "android:screenshot_sharing_intent";
 
     private static final int SCREENSHOT_FLASH_TO_PEAK_DURATION = 130;
     private static final int SCREENSHOT_DROP_IN_DURATION = 430;
@@ -476,7 +484,6 @@ class GlobalScreenshot {
                 ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT, 0, 0,
                 WindowManager.LayoutParams.TYPE_SCREENSHOT,
                 WindowManager.LayoutParams.FLAG_FULLSCREEN
-                    | WindowManager.LayoutParams.FLAG_HARDWARE_ACCELERATED
                     | WindowManager.LayoutParams.FLAG_LAYOUT_IN_SCREEN
                     | WindowManager.LayoutParams.FLAG_SHOW_WHEN_LOCKED,
                 PixelFormat.TRANSLUCENT);
@@ -679,6 +686,13 @@ class GlobalScreenshot {
      */
     private void startAnimation(final Runnable finisher, int w, int h, boolean statusBarVisible,
             boolean navBarVisible) {
+        // If power save is on, show a toast so there is some visual indication that a screenshot
+        // has been taken.
+        PowerManager powerManager = (PowerManager) mContext.getSystemService(Context.POWER_SERVICE);
+        if (powerManager.isPowerSaveMode()) {
+            Toast.makeText(mContext, R.string.screenshot_saved_title, Toast.LENGTH_SHORT).show();
+        }
+
         // Add the view for the animation
         mScreenshotView.setImageBitmap(mScreenBitmap);
         mScreenshotLayout.requestFocus();
@@ -886,6 +900,30 @@ class GlobalScreenshot {
                 .bigText(errorMsg)
                 .build();
         nManager.notify(SystemMessage.NOTE_GLOBAL_SCREENSHOT, n);
+    }
+
+    /**
+     * Receiver to proxy the share intent.
+     */
+    public static class ShareReceiver extends BroadcastReceiver {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            try {
+                ActivityManager.getService().closeSystemDialogs(SYSTEM_DIALOG_REASON_SCREENSHOT);
+            } catch (RemoteException e) {
+            }
+
+            Intent sharingIntent = intent.getParcelableExtra(SHARING_INTENT);
+            PendingIntent chooseAction = PendingIntent.getBroadcast(context, 0,
+                    new Intent(context, GlobalScreenshot.TargetChosenReceiver.class),
+                    PendingIntent.FLAG_CANCEL_CURRENT | PendingIntent.FLAG_ONE_SHOT);
+            Intent chooserIntent = Intent.createChooser(sharingIntent, null,
+                    chooseAction.getIntentSender())
+                    .addFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK | Intent.FLAG_ACTIVITY_NEW_TASK);
+            ActivityOptions opts = ActivityOptions.makeBasic();
+            opts.setDisallowEnterPictureInPictureWhileLaunching(true);
+            context.startActivityAsUser(chooserIntent, opts.toBundle(), UserHandle.CURRENT);
+        }
     }
 
     /**

@@ -22,6 +22,7 @@ import android.util.Log;
 public class CpuPowerCalculator extends PowerCalculator {
     private static final String TAG = "CpuPowerCalculator";
     private static final boolean DEBUG = BatteryStatsHelper.DEBUG;
+    private static final long MICROSEC_IN_HR = (long) 60 * 60 * 1000 * 1000;
     private final PowerProfile mProfile;
 
     public CpuPowerCalculator(PowerProfile profile) {
@@ -33,35 +34,24 @@ public class CpuPowerCalculator extends PowerCalculator {
                              long rawUptimeUs, int statsType) {
 
         app.cpuTimeMs = (u.getUserCpuTimeUs(statsType) + u.getSystemCpuTimeUs(statsType)) / 1000;
-
-        // Aggregate total time spent on each cluster.
-        long totalTime = 0;
         final int numClusters = mProfile.getNumCpuClusters();
-        for (int cluster = 0; cluster < numClusters; cluster++) {
-            final int speedsForCluster = mProfile.getNumSpeedStepsInCpuCluster(cluster);
-            for (int speed = 0; speed < speedsForCluster; speed++) {
-                totalTime += u.getTimeAtCpuSpeed(cluster, speed, statsType);
-            }
-        }
-        totalTime = Math.max(totalTime, 1);
 
-        double cpuPowerMaMs = 0;
+        double cpuPowerMaUs = 0;
         for (int cluster = 0; cluster < numClusters; cluster++) {
             final int speedsForCluster = mProfile.getNumSpeedStepsInCpuCluster(cluster);
             for (int speed = 0; speed < speedsForCluster; speed++) {
-                final double ratio = (double) u.getTimeAtCpuSpeed(cluster, speed, statsType) /
-                        totalTime;
-                final double cpuSpeedStepPower = ratio * app.cpuTimeMs *
+                final long timeUs = u.getTimeAtCpuSpeed(cluster, speed, statsType);
+                final double cpuSpeedStepPower = timeUs *
                         mProfile.getAveragePowerForCpu(cluster, speed);
-                if (DEBUG && ratio != 0) {
+                if (DEBUG) {
                     Log.d(TAG, "UID " + u.getUid() + ": CPU cluster #" + cluster + " step #"
-                            + speed + " ratio=" + BatteryStatsHelper.makemAh(ratio) + " power="
-                            + BatteryStatsHelper.makemAh(cpuSpeedStepPower / (60 * 60 * 1000)));
+                            + speed + " timeUs=" + timeUs + " power="
+                            + BatteryStatsHelper.makemAh(cpuSpeedStepPower / MICROSEC_IN_HR));
                 }
-                cpuPowerMaMs += cpuSpeedStepPower;
+                cpuPowerMaUs += cpuSpeedStepPower;
             }
         }
-        app.cpuPowerMah = cpuPowerMaMs / (60 * 60 * 1000);
+        app.cpuPowerMah = cpuPowerMaUs / MICROSEC_IN_HR;
 
         if (DEBUG && (app.cpuTimeMs != 0 || app.cpuPowerMah != 0)) {
             Log.d(TAG, "UID " + u.getUid() + ": CPU time=" + app.cpuTimeMs + " ms power="

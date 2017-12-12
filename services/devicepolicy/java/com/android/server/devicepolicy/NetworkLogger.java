@@ -107,7 +107,8 @@ final class NetworkLogger {
             return false;
         }
         try {
-           if (mIpConnectivityMetrics.registerNetdEventCallback(mNetdEventCallback)) {
+           if (mIpConnectivityMetrics.addNetdEventCallback(
+                    INetdEventCallback.CALLBACK_CALLER_DEVICE_POLICY, mNetdEventCallback)) {
                 mHandlerThread = new ServiceThread(TAG, Process.THREAD_PRIORITY_BACKGROUND,
                         /* allowIo */ false);
                 mHandlerThread.start();
@@ -138,7 +139,8 @@ final class NetworkLogger {
                 // logging is forcefully disabled even if unregistering fails
                 return true;
             }
-            return mIpConnectivityMetrics.unregisterNetdEventCallback();
+            return mIpConnectivityMetrics.removeNetdEventCallback(
+                    INetdEventCallback.CALLBACK_CALLER_DEVICE_POLICY);
         } catch (RemoteException re) {
             Slog.wtf(TAG, "Failed to make remote calls to unregister the callback", re);
             return true;

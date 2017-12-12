@@ -34,6 +34,7 @@ import java.util.Locale;
 /**
  * Information about an ephemeral application.
  * @hide
+ * @removed
  */
 @Deprecated
 @SystemApi

@@ -23,15 +23,16 @@ import android.os.Looper;
 import android.system.ErrnoException;
 import android.system.Os;
 import android.system.StructStat;
+import android.system.StructTimespec;
 import android.util.Log;
-
-import com.google.android.collect.Maps;
 
 import com.android.internal.annotations.GuardedBy;
 import com.android.internal.util.ExponentiallyBucketedHistogram;
 import com.android.internal.util.XmlUtils;
 
 import dalvik.system.BlockGuard;
+
+import libcore.io.IoUtils;
 
 import org.xmlpull.v1.XmlPullParserException;
 
@@ -49,8 +50,11 @@ import java.util.Map;
 import java.util.Set;
 import java.util.WeakHashMap;
 import java.util.concurrent.CountDownLatch;
-
-import libcore.io.IoUtils;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.Future;
+import java.util.concurrent.FutureTask;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
 
 final class SharedPreferencesImpl implements SharedPreferences {
     private static final String TAG = "SharedPreferencesImpl";
@@ -70,17 +74,13 @@ final class SharedPreferencesImpl implements SharedPreferences {
     private final Object mLock = new Object();
     private final Object mWritingToDiskLock = new Object();
 
-    @GuardedBy("mLock")
-    private Map<String, Object> mMap;
+    private Future<Map<String, Object>> mMap;
 
     @GuardedBy("mLock")
     private int mDiskWritesInFlight = 0;
 
     @GuardedBy("mLock")
-    private boolean mLoaded = false;
-
-    @GuardedBy("mLock")
-    private long mStatTimestamp;
+    private StructTimespec mStatTimestamp;
 
     @GuardedBy("mLock")
     private long mStatSize;
@@ -106,27 +106,18 @@ final class SharedPreferencesImpl implements SharedPreferences {
         mFile = file;
         mBackupFile = makeBackupFile(file);
         mMode = mode;
-        mLoaded = false;
         mMap = null;
         startLoadFromDisk();
     }
 
     private void startLoadFromDisk() {
-        synchronized (mLock) {
-            mLoaded = false;
-        }
-        new Thread("SharedPreferencesImpl-load") {
-            public void run() {
-                loadFromDisk();
-            }
-        }.start();
+        FutureTask<Map<String, Object>> futureTask = new FutureTask<>(() -> loadFromDisk());
+        mMap = futureTask;
+        new Thread(futureTask, "SharedPreferencesImpl-load").start();
     }
 
-    private void loadFromDisk() {
+    private Map<String, Object> loadFromDisk() {
         synchronized (mLock) {
-            if (mLoaded) {
-                return;
-            }
             if (mBackupFile.exists()) {
                 mFile.delete();
                 mBackupFile.renameTo(mFile);
@@ -138,7 +129,7 @@ final class SharedPreferencesImpl implements SharedPreferences {
             Log.w(TAG, "Attempt to read preferences file " + mFile + " without permission");
         }
 
-        Map map = null;
+        Map<String, Object> map = null;
         StructStat stat = null;
         try {
             stat = Os.stat(mFile.getPath());
@@ -147,7 +138,7 @@ final class SharedPreferencesImpl implements SharedPreferences {
                 try {
                     str = new BufferedInputStream(
                             new FileInputStream(mFile), 16*1024);
-                    map = XmlUtils.readMapXml(str);
+                    map = (Map<String, Object>) XmlUtils.readMapXml(str);
                 } catch (Exception e) {
                     Log.w(TAG, "Cannot read " + mFile.getAbsolutePath(), e);
                 } finally {
@@ -159,16 +150,14 @@ final class SharedPreferencesImpl implements SharedPreferences {
         }
 
         synchronized (mLock) {
-            mLoaded = true;
             if (map != null) {
-                mMap = map;
-                mStatTimestamp = stat.st_mtime;
+                mStatTimestamp = stat.st_mtim;
                 mStatSize = stat.st_size;
             } else {
-                mMap = new HashMap<>();
+                map = new HashMap<>();
             }
-            mLock.notifyAll();
         }
+        return map;
     }
 
     static File makeBackupFile(File prefsFile) {
@@ -209,110 +198,126 @@ final class SharedPreferencesImpl implements SharedPreferences {
         }
 
         synchronized (mLock) {
-            return mStatTimestamp != stat.st_mtime || mStatSize != stat.st_size;
+            return !stat.st_mtim.equals(mStatTimestamp) || mStatSize != stat.st_size;
         }
     }
 
+    @Override
     public void registerOnSharedPreferenceChangeListener(OnSharedPreferenceChangeListener listener) {
         synchronized(mLock) {
             mListeners.put(listener, CONTENT);
         }
     }
 
+    @Override
     public void unregisterOnSharedPreferenceChangeListener(OnSharedPreferenceChangeListener listener) {
         synchronized(mLock) {
             mListeners.remove(listener);
         }
     }
 
-    private void awaitLoadedLocked() {
-        if (!mLoaded) {
+    private @GuardedBy("mLock") Map<String, Object> getLoaded() {
+        // For backwards compatibility, we need to ignore any interrupts. b/70122540.
+        for (;;) {
+            try {
+                return mMap.get();
+            } catch (ExecutionException e) {
+                throw new IllegalStateException(e);
+            } catch (InterruptedException e) {
+                // Ignore and try again.
+            }
+        }
+    }
+    private @GuardedBy("mLock") Map<String, Object> getLoadedWithBlockGuard() {
+        if (!mMap.isDone()) {
             // Raise an explicit StrictMode onReadFromDisk for this
             // thread, since the real read will be in a different
             // thread and otherwise ignored by StrictMode.
             BlockGuard.getThreadPolicy().onReadFromDisk();
         }
-        while (!mLoaded) {
-            try {
-                mLock.wait();
-            } catch (InterruptedException unused) {
-            }
-        }
+        return getLoaded();
     }
 
+    @Override
     public Map<String, ?> getAll() {
+        Map<String, Object> map = getLoadedWithBlockGuard();
         synchronized (mLock) {
-            awaitLoadedLocked();
-            //noinspection unchecked
-            return new HashMap<String, Object>(mMap);
+            return new HashMap<String, Object>(map);
         }
     }
 
+    @Override
     @Nullable
     public String getString(String key, @Nullable String defValue) {
+        Map<String, Object> map = getLoadedWithBlockGuard();
         synchronized (mLock) {
-            awaitLoadedLocked();
-            String v = (String)mMap.get(key);
+            String v = (String) map.get(key);
             return v != null ? v : defValue;
         }
     }
 
+    @Override
     @Nullable
     public Set<String> getStringSet(String key, @Nullable Set<String> defValues) {
+        Map<String, Object> map = getLoadedWithBlockGuard();
         synchronized (mLock) {
-            awaitLoadedLocked();
-            Set<String> v = (Set<String>) mMap.get(key);
+            @SuppressWarnings("unchecked")
+            Set<String> v = (Set<String>) map.get(key);
             return v != null ? v : defValues;
         }
     }
 
+    @Override
     public int getInt(String key, int defValue) {
+        Map<String, Object> map = getLoadedWithBlockGuard();
         synchronized (mLock) {
-            awaitLoadedLocked();
-            Integer v = (Integer)mMap.get(key);
+            Integer v = (Integer) map.get(key);
             return v != null ? v : defValue;
         }
     }
+    @Override
     public long getLong(String key, long defValue) {
+        Map<String, Object> map = getLoadedWithBlockGuard();
         synchronized (mLock) {
-            awaitLoadedLocked();
-            Long v = (Long)mMap.get(key);
+            Long v = (Long) map.get(key);
             return v != null ? v : defValue;
         }
     }
+    @Override
     public float getFloat(String key, float defValue) {
+        Map<String, Object> map = getLoadedWithBlockGuard();
         synchronized (mLock) {
-            awaitLoadedLocked();
-            Float v = (Float)mMap.get(key);
+            Float v = (Float) map.get(key);
             return v != null ? v : defValue;
         }
     }
+    @Override
     public boolean getBoolean(String key, boolean defValue) {
+        Map<String, Object> map = getLoadedWithBlockGuard();
         synchronized (mLock) {
-            awaitLoadedLocked();
-            Boolean v = (Boolean)mMap.get(key);
+            Boolean v = (Boolean) map.get(key);
             return v != null ? v : defValue;
         }
     }
 
+    @Override
     public boolean contains(String key) {
+        Map<String, Object> map = getLoadedWithBlockGuard();
         synchronized (mLock) {
-            awaitLoadedLocked();
-            return mMap.containsKey(key);
+            return map.containsKey(key);
         }
     }
 
+    @Override
     public Editor edit() {
-        // TODO: remove the need to call awaitLoadedLocked() when
+        // TODO: remove the need to call getLoaded() when
         // requesting an editor.  will require some work on the
         // Editor, but then we should be able to do:
         //
         //      context.getSharedPreferences(..).edit().putString(..).apply()
         //
         // ... all without blocking.
-        synchronized (mLock) {
-            awaitLoadedLocked();
-        }
+        getLoadedWithBlockGuard();
 
         return new EditorImpl();
     }
@@ -346,71 +351,81 @@ final class SharedPreferencesImpl implements SharedPreferences {
     }
 
     public final class EditorImpl implements Editor {
-        private final Object mLock = new Object();
+        private final Object mEditorLock = new Object();
 
-        @GuardedBy("mLock")
-        private final Map<String, Object> mModified = Maps.newHashMap();
+        @GuardedBy("mEditorLock")
+        private final Map<String, Object> mModified = new HashMap<>();
 
-        @GuardedBy("mLock")
+        @GuardedBy("mEditorLock")
         private boolean mClear = false;
 
+        @Override
         public Editor putString(String key, @Nullable String value) {
-            synchronized (mLock) {
+            synchronized (mEditorLock) {
                 mModified.put(key, value);
                 return this;
             }
         }
+        @Override
         public Editor putStringSet(String key, @Nullable Set<String> values) {
-            synchronized (mLock) {
+            synchronized (mEditorLock) {
                 mModified.put(key,
                         (values == null) ? null : new HashSet<String>(values));
                 return this;
             }
         }
+        @Override
         public Editor putInt(String key, int value) {
-            synchronized (mLock) {
+            synchronized (mEditorLock) {
                 mModified.put(key, value);
                 return this;
             }
         }
+        @Override
         public Editor putLong(String key, long value) {
-            synchronized (mLock) {
+            synchronized (mEditorLock) {
                 mModified.put(key, value);
                 return this;
             }
         }
+        @Override
         public Editor putFloat(String key, float value) {
-            synchronized (mLock) {
+            synchronized (mEditorLock) {
                 mModified.put(key, value);
                 return this;
             }
         }
+        @Override
         public Editor putBoolean(String key, boolean value) {
-            synchronized (mLock) {
+            synchronized (mEditorLock) {
                 mModified.put(key, value);
                 return this;
             }
         }
 
+        @Override
         public Editor remove(String key) {
-            synchronized (mLock) {
+            synchronized (mEditorLock) {
                 mModified.put(key, this);
                 return this;
             }
         }
 
+        @Override
         public Editor clear() {
-            synchronized (mLock) {
+            synchronized (mEditorLock) {
                 mClear = true;
                 return this;
             }
         }
 
+        @Override
         public void apply() {
             final long startTime = System.currentTimeMillis();
 
             final MemoryCommitResult mcr = commitToMemory();
             final Runnable awaitCommit = new Runnable() {
+                    @Override
                     public void run() {
                         try {
                             mcr.writtenToDiskLatch.await();
@@ -428,6 +443,7 @@ final class SharedPreferencesImpl implements SharedPreferences {
             QueuedWork.addFinisher(awaitCommit);
 
             Runnable postWriteRunnable = new Runnable() {
+                    @Override
                     public void run() {
                         awaitCommit.run();
                         QueuedWork.removeFinisher(awaitCommit);
@@ -455,13 +471,43 @@ final class SharedPreferencesImpl implements SharedPreferences {
                 // a memory commit comes in when we're already
                 // writing to disk.
                 if (mDiskWritesInFlight > 0) {
-                    // We can't modify our mMap as a currently
+                    // We can't modify our map as a currently
                     // in-flight write owns it.  Clone it before
                     // modifying it.
                     // noinspection unchecked
-                    mMap = new HashMap<String, Object>(mMap);
+                    mMap = new Future<Map<String, Object>>() {
+                        private Map<String, Object> mCopiedMap =
+                                new HashMap<String, Object>(getLoaded());
+
+                        @Override
+                        public boolean cancel(boolean mayInterruptIfRunning) {
+                            return false;
+                        }
+
+                        @Override
+                        public boolean isCancelled() {
+                            return false;
+                        }
+
+                        @Override
+                        public boolean isDone() {
+                            return true;
+                        }
+
+                        @Override
+                        public Map<String, Object> get()
+                                throws InterruptedException, ExecutionException {
+                            return mCopiedMap;
+                        }
+
+                        @Override
+                        public Map<String, Object> get(long timeout, TimeUnit unit)
+                                throws InterruptedException, ExecutionException, TimeoutException {
+                            return mCopiedMap;
+                        }
+                    };
                 }
-                mapToWriteToDisk = mMap;
+                mapToWriteToDisk = getLoaded();
                 mDiskWritesInFlight++;
 
                 boolean hasListeners = mListeners.size() > 0;
@@ -470,13 +516,13 @@ final class SharedPreferencesImpl implements SharedPreferences {
                     listeners = new HashSet<OnSharedPreferenceChangeListener>(mListeners.keySet());
                 }
 
-                synchronized (mLock) {
+                synchronized (mEditorLock) {
                     boolean changesMade = false;
 
                     if (mClear) {
-                        if (!mMap.isEmpty()) {
+                        if (!mapToWriteToDisk.isEmpty()) {
                             changesMade = true;
-                            mMap.clear();
+                            mapToWriteToDisk.clear();
                         }
                         mClear = false;
                     }
@@ -488,18 +534,18 @@ final class SharedPreferencesImpl implements SharedPreferences {
                         // setting a value to "null" for a given key is specified to be
                         // equivalent to calling remove on that key.
                         if (v == this || v == null) {
-                            if (!mMap.containsKey(k)) {
+                            if (!mapToWriteToDisk.containsKey(k)) {
                                 continue;
                             }
-                            mMap.remove(k);
+                            mapToWriteToDisk.remove(k);
                         } else {
-                            if (mMap.containsKey(k)) {
-                                Object existingValue = mMap.get(k);
+                            if (mapToWriteToDisk.containsKey(k)) {
+                                Object existingValue = mapToWriteToDisk.get(k);
                                 if (existingValue != null && existingValue.equals(v)) {
                                     continue;
                                 }
                             }
-                            mMap.put(k, v);
+                            mapToWriteToDisk.put(k, v);
                         }
 
                         changesMade = true;
@@ -521,6 +567,7 @@ final class SharedPreferencesImpl implements SharedPreferences {
                     mapToWriteToDisk);
         }
 
+        @Override
         public boolean commit() {
             long startTime = 0;
 
@@ -563,11 +610,7 @@ final class SharedPreferencesImpl implements SharedPreferences {
                 }
             } else {
                 // Run this function on the main thread.
-                ActivityThread.sMainThreadHandler.post(new Runnable() {
-                        public void run() {
-                            notifyListeners(mcr);
-                        }
-                    });
+                ActivityThread.sMainThreadHandler.post(() -> notifyListeners(mcr));
             }
         }
     }
@@ -593,6 +636,7 @@ final class SharedPreferencesImpl implements SharedPreferences {
         final boolean isFromSyncCommit = (postWriteRunnable == null);
 
         final Runnable writeToDiskRunnable = new Runnable() {
+                @Override
                 public void run() {
                     synchronized (mWritingToDiskLock) {
                         writeToFile(mcr, isFromSyncCommit);
@@ -645,7 +689,7 @@ final class SharedPreferencesImpl implements SharedPreferences {
         return str;
     }
 
-    // Note: must hold mWritingToDiskLock
+    @GuardedBy("mWritingToDiskLock")
     private void writeToFile(MemoryCommitResult mcr, boolean isFromSyncCommit) {
         long startTime = 0;
         long existsTime = 0;
@@ -744,7 +788,7 @@ final class SharedPreferencesImpl implements SharedPreferences {
             try {
                 final StructStat stat = Os.stat(mFile.getPath());
                 synchronized (mLock) {
-                    mStatTimestamp = stat.st_mtime;
+                    mStatTimestamp = stat.st_mtim;
                     mStatSize = stat.st_size;
                 }
             } catch (ErrnoException e) {
@@ -778,7 +822,7 @@ final class SharedPreferencesImpl implements SharedPreferences {
             }
 
             long fsyncDuration = fsyncTime - writeTime;
-            mSyncTimes.add(Long.valueOf(fsyncDuration).intValue());
+            mSyncTimes.add((int) fsyncDuration);
             mNumSync++;
 
             if (DEBUG || mNumSync % 1024 == 0 || fsyncDuration > MAX_FSYNC_DURATION_MILLIS) {

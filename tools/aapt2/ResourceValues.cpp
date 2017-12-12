@@ -253,10 +253,9 @@ StyledString* StyledString::Clone(StringPool* new_pool) const {
 }
 
 void StyledString::Print(std::ostream* out) const {
-  *out << "(styled string) \"" << *value->str << "\"";
+  *out << "(styled string) \"" << value->value << "\"";
   for (const StringPool::Span& span : value->spans) {
-    *out << " " << *span.name << ":" << span.first_char << ","
-         << span.last_char;
+    *out << " " << *span.name << ":" << span.first_char << "," << span.last_char;
   }
 }
 
@@ -533,75 +532,119 @@ void Attribute::Print(std::ostream* out) const {
   }
 }
 
-static void BuildAttributeMismatchMessage(DiagMessage* msg,
-                                          const Attribute* attr,
-                                          const Item* value) {
-  *msg << "expected";
-  if (attr->type_mask & android::ResTable_map::TYPE_BOOLEAN) {
-    *msg << " boolean";
+static void BuildAttributeMismatchMessage(const Attribute& attr, const Item& value,
+                                          DiagMessage* out_msg) {
+  *out_msg << "expected";
+  if (attr.type_mask & android::ResTable_map::TYPE_BOOLEAN) {
+    *out_msg << " boolean";
   }
 
-  if (attr->type_mask & android::ResTable_map::TYPE_COLOR) {
-    *msg << " color";
+  if (attr.type_mask & android::ResTable_map::TYPE_COLOR) {
+    *out_msg << " color";
   }
 
-  if (attr->type_mask & android::ResTable_map::TYPE_DIMENSION) {
-    *msg << " dimension";
+  if (attr.type_mask & android::ResTable_map::TYPE_DIMENSION) {
+    *out_msg << " dimension";
   }
 
-  if (attr->type_mask & android::ResTable_map::TYPE_ENUM) {
-    *msg << " enum";
+  if (attr.type_mask & android::ResTable_map::TYPE_ENUM) {
+    *out_msg << " enum";
   }
 
-  if (attr->type_mask & android::ResTable_map::TYPE_FLAGS) {
-    *msg << " flags";
+  if (attr.type_mask & android::ResTable_map::TYPE_FLAGS) {
+    *out_msg << " flags";
   }
 
-  if (attr->type_mask & android::ResTable_map::TYPE_FLOAT) {
-    *msg << " float";
+  if (attr.type_mask & android::ResTable_map::TYPE_FLOAT) {
+    *out_msg << " float";
   }
 
-  if (attr->type_mask & android::ResTable_map::TYPE_FRACTION) {
-    *msg << " fraction";
+  if (attr.type_mask & android::ResTable_map::TYPE_FRACTION) {
+    *out_msg << " fraction";
   }
 
-  if (attr->type_mask & android::ResTable_map::TYPE_INTEGER) {
-    *msg << " integer";
+  if (attr.type_mask & android::ResTable_map::TYPE_INTEGER) {
+    *out_msg << " integer";
   }
 
-  if (attr->type_mask & android::ResTable_map::TYPE_REFERENCE) {
-    *msg << " reference";
+  if (attr.type_mask & android::ResTable_map::TYPE_REFERENCE) {
+    *out_msg << " reference";
   }
 
-  if (attr->type_mask & android::ResTable_map::TYPE_STRING) {
-    *msg << " string";
+  if (attr.type_mask & android::ResTable_map::TYPE_STRING) {
+    *out_msg << " string";
   }
 
-  *msg << " but got " << *value;
+  *out_msg << " but got " << value;
 }
 
-bool Attribute::Matches(const Item* item, DiagMessage* out_msg) const {
+bool Attribute::Matches(const Item& item, DiagMessage* out_msg) const {
+  constexpr const uint32_t TYPE_ENUM = android::ResTable_map::TYPE_ENUM;
+  constexpr const uint32_t TYPE_FLAGS = android::ResTable_map::TYPE_FLAGS;
+  constexpr const uint32_t TYPE_INTEGER = android::ResTable_map::TYPE_INTEGER;
+  constexpr const uint32_t TYPE_REFERENCE = android::ResTable_map::TYPE_REFERENCE;
+
   android::Res_value val = {};
-  item->Flatten(&val);
+  item.Flatten(&val);
+
+  const uint32_t flattened_data = util::DeviceToHost32(val.data);
 
   // Always allow references.
-  const uint32_t mask = type_mask | android::ResTable_map::TYPE_REFERENCE;
-  if (!(mask & ResourceUtils::AndroidTypeToAttributeTypeMask(val.dataType))) {
+  const uint32_t actual_type = ResourceUtils::AndroidTypeToAttributeTypeMask(val.dataType);
+
+  // Only one type must match between the actual and expected.
+  if ((actual_type & (type_mask | TYPE_REFERENCE)) == 0) {
     if (out_msg) {
-      BuildAttributeMismatchMessage(out_msg, this, item);
+      BuildAttributeMismatchMessage(*this, item, out_msg);
     }
     return false;
+  }
 
-  } else if (ResourceUtils::AndroidTypeToAttributeTypeMask(val.dataType) &
-             android::ResTable_map::TYPE_INTEGER) {
-    if (static_cast<int32_t>(util::DeviceToHost32(val.data)) < min_int) {
+  // Enums and flags are encoded as integers, so check them first before doing any range checks.
+  if ((type_mask & TYPE_ENUM) != 0 && (actual_type & TYPE_ENUM) != 0) {
+    for (const Symbol& s : symbols) {
+      if (flattened_data == s.value) {
+        return true;
+      }
+    }
+
+    // If the attribute accepts integers, we can't fail here.
+    if ((type_mask & TYPE_INTEGER) == 0) {
       if (out_msg) {
-        *out_msg << *item << " is less than minimum integer " << min_int;
+        *out_msg << item << " is not a valid enum";
       }
       return false;
-    } else if (static_cast<int32_t>(util::DeviceToHost32(val.data)) > max_int) {
+    }
+  }
+
+  if ((type_mask & TYPE_FLAGS) != 0 && (actual_type & TYPE_FLAGS) != 0) {
+    uint32_t mask = 0u;
+    for (const Symbol& s : symbols) {
+      mask |= s.value;
+    }
+
+    // Check if the flattened data is covered by the flag bit mask.
+    // If the attribute accepts integers, we can't fail here.
+    if ((mask & flattened_data) == flattened_data) {
+      return true;
+    } else if ((type_mask & TYPE_INTEGER) == 0) {
       if (out_msg) {
-        *out_msg << *item << " is greater than maximum integer " << max_int;
+        *out_msg << item << " is not a valid flag";
+      }
+      return false;
+    }
+  }
+
+  // Finally check the integer range of the value.
+  if ((type_mask & TYPE_INTEGER) != 0 && (actual_type & TYPE_INTEGER) != 0) {
+    if (static_cast<int32_t>(flattened_data) < min_int) {
+      if (out_msg) {
+        *out_msg << item << " is less than minimum integer " << min_int;
+      }
+      return false;
+    } else if (static_cast<int32_t>(flattened_data) > max_int) {
+      if (out_msg) {
+        *out_msg << item << " is greater than maximum integer " << max_int;
       }
       return false;
     }
@@ -762,13 +805,12 @@ bool Array::Equals(const Value* value) const {
     return false;
   }
 
-  if (items.size() != other->items.size()) {
+  if (elements.size() != other->elements.size()) {
     return false;
   }
 
-  return std::equal(items.begin(), items.end(), other->items.begin(),
-                    [](const std::unique_ptr<Item>& a,
-                       const std::unique_ptr<Item>& b) -> bool {
+  return std::equal(elements.begin(), elements.end(), other->elements.begin(),
+                    [](const std::unique_ptr<Item>& a, const std::unique_ptr<Item>& b) -> bool {
                       return a->Equals(b.get());
                     });
 }
@@ -777,14 +819,14 @@ Array* Array::Clone(StringPool* new_pool) const {
   Array* array = new Array();
   array->comment_ = comment_;
   array->source_ = source_;
-  for (auto& item : items) {
-    array->items.emplace_back(std::unique_ptr<Item>(item->Clone(new_pool)));
+  for (auto& item : elements) {
+    array->elements.emplace_back(std::unique_ptr<Item>(item->Clone(new_pool)));
   }
   return array;
 }
 
 void Array::Print(std::ostream* out) const {
-  *out << "(array) [" << util::Joiner(items, ", ") << "]";
+  *out << "(array) [" << util::Joiner(elements, ", ") << "]";
 }
 
 bool Plural::Equals(const Value* value) const {

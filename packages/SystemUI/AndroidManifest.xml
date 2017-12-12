@@ -108,6 +108,7 @@
     <uses-permission android:name="com.android.alarm.permission.SET_ALARM" />
 
     <!-- Keyguard -->
+    <uses-permission android:name="com.android.permission.WRITE_EMBEDDED_SUBSCRIPTIONS" />
     <uses-permission android:name="android.permission.CONTROL_KEYGUARD" />
     <uses-permission android:name="android.permission.MODIFY_PHONE_STATE" />
     <uses-permission android:name="android.permission.GET_ACCOUNTS" />
@@ -271,20 +272,8 @@
                 <category android:name="android.intent.category.DEFAULT" />
             </intent-filter>
             <meta-data android:name="com.android.settings.category"
-                    android:value="com.android.settings.category.system" />
+                    android:value="com.android.settings.category.ia.system" />
         </activity>
-
-        <activity-alias android:name=".tuner.TunerSettingLink"
-                        android:targetActivity=".tuner.TunerActivity"
-                        android:enabled="false"
-                        android:process=":tuner">
-            <intent-filter android:priority="1">
-                <action android:name="com.android.settings.action.EXTRA_SETTINGS" />
-                <category android:name="android.intent.category.DEFAULT" />
-            </intent-filter>
-            <meta-data android:name="com.android.settings.category"
-                       android:value="com.android.settings.category.ia.system" />
-        </activity-alias>
 
         <activity-alias android:name=".DemoMode"
                   android:targetActivity=".tuner.TunerActivity"
@@ -329,15 +318,20 @@
             android:exported="false">
         </activity>
 
+        <!-- Springboard for launching the share activity -->
+        <receiver android:name=".screenshot.GlobalScreenshot$ShareReceiver"
+            android:process=":screenshot"
+            android:exported="false" />
+
         <!-- Callback for dismissing screenshot notification after a share target is picked -->
         <receiver android:name=".screenshot.GlobalScreenshot$TargetChosenReceiver"
-                  android:process=":screenshot"
-                  android:exported="false" />
+            android:process=":screenshot"
+            android:exported="false" />
 
         <!-- Callback for deleting screenshot notification -->
         <receiver android:name=".screenshot.GlobalScreenshot$DeleteScreenshotReceiver"
-                  android:process=":screenshot"
-                  android:exported="false" />
+            android:process=":screenshot"
+            android:exported="false" />
 
         <!-- started from UsbDeviceSettingsManager -->
         <activity android:name=".usb.UsbConfirmActivity"
@@ -412,7 +406,8 @@
         <!-- started from PipUI -->
         <activity
             android:name=".pip.tv.PipMenuActivity"
-            android:exported="true"
+            android:permission="com.android.systemui.permission.SELF"
+            android:exported="false"
             android:theme="@style/PipTheme"
             android:launchMode="singleTop"
             android:taskAffinity=""
@@ -421,24 +416,10 @@
             android:supportsPictureInPicture="true"
             androidprv:alwaysFocusable="true"
             android:excludeFromRecents="true" />
-        <activity
-            android:name=".pip.tv.PipOverlayActivity"
-            android:exported="true"
-            android:theme="@style/PipTheme"
-            android:taskAffinity=""
-            android:configChanges="screenSize|smallestScreenSize|screenLayout|orientation|locale|layoutDirection"
-            android:resizeableActivity="true"
-            android:supportsPictureInPicture="true"
-            android:excludeFromRecents="true" />
-        <activity
-            android:name=".pip.tv.PipOnboardingActivity"
-            android:exported="true"
-            android:theme="@style/PipTheme"
-            android:launchMode="singleTop"
-            android:excludeFromRecents="true" />
 
         <activity
             android:name=".pip.phone.PipMenuActivity"
+            android:permission="com.android.systemui.permission.SELF"
             android:theme="@style/PipPhoneOverlayControlTheme"
             android:configChanges="orientation|screenSize|smallestScreenSize|screenLayout"
             android:excludeFromRecents="true"
@@ -456,7 +437,6 @@
             android:exported="true"
             android:label="@string/dessert_case"
             android:theme="@android:style/Theme.Black.NoTitleBar.Fullscreen"
-            android:hardwareAccelerated="true"
             android:launchMode="singleInstance"
             android:screenOrientation="locked"
             android:process=":sweetsweetdesserts"
@@ -472,7 +452,6 @@
                   android:exported="true"
                   android:icon="@drawable/icon"
                   android:label="@string/mland"
-                  android:hardwareAccelerated="true"
                   android:launchMode="singleInstance"
                   android:screenOrientation="locked"
                   android:process=":sweetsweetdesserts"

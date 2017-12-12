@@ -18,11 +18,12 @@ package com.android.settingslib.drawer;
 
 import static com.google.common.truth.Truth.assertThat;
 
-import static org.mockito.Matchers.any;
-import static org.mockito.Matchers.anyInt;
-import static org.mockito.Matchers.anyString;
-import static org.mockito.Matchers.argThat;
-import static org.mockito.Matchers.eq;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyInt;
+import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.ArgumentMatchers.argThat;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.ArgumentMatchers.isNull;
 import static org.mockito.Mockito.atLeastOnce;
 import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.verify;
@@ -59,7 +60,6 @@ import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.ArgumentCaptor;
-import org.mockito.ArgumentMatcher;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 import org.robolectric.RobolectricTestRunner;
@@ -100,6 +100,7 @@ public class TileUtilsTest {
         MockitoAnnotations.initMocks(this);
         when(mContext.getPackageManager()).thenReturn(mPackageManager);
         when(mPackageManager.getResourcesForApplication(anyString())).thenReturn(mResources);
+        when(mPackageManager.getResourcesForApplication((String) isNull())).thenReturn(mResources);
         when(mPackageManager.getApplicationInfo(eq("abc"), anyInt()))
                 .thenReturn(application.getApplicationInfo());
         mContentResolver = spy(application.getContentResolver());
@@ -115,7 +116,6 @@ public class TileUtilsTest {
         List<Tile> outTiles = new ArrayList<>();
         List<ResolveInfo> info = new ArrayList<>();
         info.add(newInfo(true, testCategory));
-        Map<Pair<String, String>, Tile> cache = new ArrayMap<>();
         when(mPackageManager.queryIntentActivitiesAsUser(eq(intent), anyInt(), anyInt()))
                 .thenReturn(info);
 
@@ -169,7 +169,6 @@ public class TileUtilsTest {
 
     @Test
     public void getTilesForIntent_shouldSkipFilteredApps() {
-        final String testCategory = "category1";
         Intent intent = new Intent();
         Map<Pair<String, String>, Tile> addedCache = new ArrayMap<>();
         List<Tile> outTiles = new ArrayList<>();
@@ -210,11 +209,9 @@ public class TileUtilsTest {
         userHandleList.add(UserHandle.CURRENT);
         when(mUserManager.getUserProfiles()).thenReturn(userHandleList);
 
-        when(mPackageManager.queryIntentActivitiesAsUser(argThat(new ArgumentMatcher<Intent>() {
-            public boolean matches(Object event) {
-                return testAction.equals(((Intent) event).getAction());
-            }
-        }), anyInt(), anyInt())).thenReturn(info);
+        when(mPackageManager.queryIntentActivitiesAsUser(argThat(
+                event -> testAction.equals(event.getAction())), anyInt(), anyInt()))
+                .thenReturn(info);
 
         List<DashboardCategory> categoryList = TileUtils.getCategories(
                 mContext, cache, false /* categoryDefinedInManifest */, testAction,

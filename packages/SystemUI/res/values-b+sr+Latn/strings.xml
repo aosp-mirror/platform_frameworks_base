@@ -312,6 +312,7 @@
     <string name="quick_settings_more_settings" msgid="326112621462813682">"Još podešavanja"</string>
     <string name="quick_settings_done" msgid="3402999958839153376">"Gotovo"</string>
     <string name="quick_settings_connected" msgid="1722253542984847487">"Povezan"</string>
+    <string name="quick_settings_connected_battery_level" msgid="4136051440381328892">"Povezano, nivo baterije je <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g>"</string>
     <string name="quick_settings_connecting" msgid="47623027419264404">"Povezuje se..."</string>
     <string name="quick_settings_tethering_label" msgid="7153452060448575549">"Povezivanje"</string>
     <string name="quick_settings_hotspot_label" msgid="6046917934974004879">"Hotspot"</string>
@@ -354,9 +355,10 @@
     <string name="description_target_search" msgid="3091587249776033139">"Pretraga"</string>
     <string name="description_direction_up" msgid="7169032478259485180">"Prevucite nagore za <xliff:g id="TARGET_DESCRIPTION">%s</xliff:g>."</string>
     <string name="description_direction_left" msgid="7207478719805562165">"Prevucite ulevo za <xliff:g id="TARGET_DESCRIPTION">%s</xliff:g>."</string>
-    <string name="zen_priority_introduction" msgid="3070506961866919502">"Neće vas uznemiravati zvukovi i vibracije, osim za alarme, podsetnike, događaje i pozivaoce koje izaberete."</string>
+    <string name="zen_priority_introduction" msgid="1149025108714420281">"Neće vas uznemiravati zvukovi i vibracije osim za alarme, podsetnike, događaje i pozivaoce koje navedete. I dalje ćete čuti sve što odaberete da pustite, uključujući muziku, video snimke i igre."</string>
+    <string name="zen_alarms_introduction" msgid="4934328096749380201">"Neće vas uznemiravati zvukovi i vibracije osim za alarme. I dalje ćete čuti sve što odaberete da pustite, uključujući muziku, video snimke i igre."</string>
     <string name="zen_priority_customize_button" msgid="7948043278226955063">"Prilagodi"</string>
-    <string name="zen_silence_introduction_voice" msgid="2284540992298200729">"Ovo blokira SVE zvukove i vibracije uključujući alarme, muziku, video snimke i igre. I dalje ćete moći da upućujete pozive."</string>
+    <string name="zen_silence_introduction_voice" msgid="3948778066295728085">"Ovo blokira SVE zvukove i vibracije uključujući alarme, muziku, video snimke i igre. I dalje ćete moći da upućujete pozive."</string>
     <string name="zen_silence_introduction" msgid="3137882381093271568">"Ovo blokira SVE zvukove i vibracije uključujući alarme, muziku, video snimke i igre."</string>
     <string name="keyguard_more_overflow_text" msgid="9195222469041601365">"+<xliff:g id="NUMBER_OF_NOTIFICATIONS">%d</xliff:g>"</string>
     <string name="speed_bump_explanation" msgid="1288875699658819755">"Manje hitna obaveštenja su u nastavku"</string>
@@ -476,7 +478,7 @@
     <string name="hidden_notifications_cancel" msgid="3690709735122344913">"Ne, hvala"</string>
     <string name="hidden_notifications_setup" msgid="41079514801976810">"Aktiviraj"</string>
     <string name="zen_mode_and_condition" msgid="4462471036429759903">"<xliff:g id="ZEN_MODE">%1$s</xliff:g>. <xliff:g id="EXIT_CONDITION">%2$s</xliff:g>"</string>
-    <string name="volume_zen_end_now" msgid="3179845345429841822">"Prekini odmah"</string>
+    <string name="volume_zen_end_now" msgid="6930243045593601084">"Isključi odmah"</string>
     <string name="accessibility_volume_expand" msgid="5946812790999244205">"Proširi"</string>
     <string name="accessibility_volume_collapse" msgid="3609549593031810875">"Skupi"</string>
     <string name="screen_pinning_title" msgid="3273740381976175811">"Ekran je zakačen"</string>
@@ -554,8 +556,7 @@
     <string name="notification_channel_disabled" msgid="2139193533791840539">"Više nećete dobijati ova obaveštenja"</string>
     <string name="notification_num_channels" msgid="2048144408999179471">"Kategorija obaveštenja: <xliff:g id="NUMBER">%d</xliff:g>"</string>
     <string name="notification_default_channel_desc" msgid="2506053815870808359">"Ova aplikacija nema kategorije obaveštenja"</string>
-    <!-- no translation found for notification_unblockable_desc (3561016061737896906) -->
-    <skip />
+    <string name="notification_unblockable_desc" msgid="3561016061737896906">"Obaveštenja iz ove aplikacije ne mogu da se isključe"</string>
     <plurals name="notification_num_channels_desc" formatted="false" msgid="5492793452274077663">
       <item quantity="one">1 od <xliff:g id="NUMBER_1">%d</xliff:g> kategorije obaveštenja za ovu aplikaciju</item>
       <item quantity="few">1 od <xliff:g id="NUMBER_1">%d</xliff:g> kategorije obaveštenja za ovu aplikaciju</item>
@@ -579,8 +580,16 @@
     <string name="notification_menu_snooze_description" msgid="3653669438131034525">"opcije za odlaganje obaveštenja"</string>
     <string name="snooze_undo" msgid="6074877317002985129">"OPOZOVI"</string>
     <string name="snoozed_for_time" msgid="2390718332980204462">"Odloženo je za <xliff:g id="TIME_AMOUNT">%1$s</xliff:g>"</string>
-    <!-- no translation found for snoozeHourOptions (2124335842674413030) -->
-    <!-- no translation found for snoozeMinuteOptions (4127251700591510196) -->
+    <plurals name="snoozeHourOptions" formatted="false" msgid="2124335842674413030">
+      <item quantity="one">%d sat</item>
+      <item quantity="few">%d sata</item>
+      <item quantity="other">%d sati</item>
+    </plurals>
+    <plurals name="snoozeMinuteOptions" formatted="false" msgid="4127251700591510196">
+      <item quantity="one">%d minut</item>
+      <item quantity="few">%d minuta</item>
+      <item quantity="other">%d minuta</item>
+    </plurals>
     <string name="battery_panel_title" msgid="7944156115535366613">"Potrošnja baterije"</string>
     <string name="battery_detail_charging_summary" msgid="1279095653533044008">"Ušteda baterije nije dostupna tokom punjenja"</string>
     <string name="battery_detail_switch_title" msgid="6285872470260795421">"Ušteda baterije"</string>
@@ -725,7 +734,7 @@
     <string name="pip_phone_dismiss_hint" msgid="6351678169095923899">"Prevucite nadole da biste odbili"</string>
     <string name="pip_menu_title" msgid="3328510504196964712">"Meni Slika u slici"</string>
     <string name="pip_notification_title" msgid="3204024940158161322">"<xliff:g id="NAME">%s</xliff:g> je slika u slici"</string>
-    <string name="pip_notification_message" msgid="4171698133469539591">"Ako ne želite da <xliff:g id="NAME">%s</xliff:g> koristi ovu funkciju, dodirnite da biste otvorili podešavanja i isključili je."</string>
+    <string name="pip_notification_message" msgid="5619512781514343311">"Ako ne želite da <xliff:g id="NAME">%s</xliff:g> koristi ovu funkciju, dodirnite da biste otvorili podešavanja i isključili je."</string>
     <string name="pip_play" msgid="1417176722760265888">"Pusti"</string>
     <string name="pip_pause" msgid="8881063404466476571">"Pauziraj"</string>
     <string name="pip_skip_to_next" msgid="1948440006726306284">"Pređi na sledeće"</string>

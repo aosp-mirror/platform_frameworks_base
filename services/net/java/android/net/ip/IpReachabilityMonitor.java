@@ -22,30 +22,27 @@ import android.net.LinkProperties;
 import android.net.LinkProperties.ProvisioningChange;
 import android.net.ProxyInfo;
 import android.net.RouteInfo;
+import android.net.ip.IpNeighborMonitor.NeighborEvent;
 import android.net.metrics.IpConnectivityLog;
 import android.net.metrics.IpReachabilityEvent;
-import android.net.netlink.NetlinkConstants;
-import android.net.netlink.NetlinkErrorMessage;
-import android.net.netlink.NetlinkMessage;
-import android.net.netlink.NetlinkSocket;
-import android.net.netlink.RtNetlinkNeighborMessage;
 import android.net.netlink.StructNdMsg;
-import android.net.netlink.StructNdaCacheInfo;
-import android.net.netlink.StructNlMsgHdr;
 import android.net.util.MultinetworkPolicyTracker;
 import android.net.util.SharedLog;
+import android.os.Handler;
 import android.os.PowerManager;
 import android.os.PowerManager.WakeLock;
 import android.os.SystemClock;
 import android.system.ErrnoException;
-import android.system.NetlinkSocketAddress;
 import android.system.OsConstants;
 import android.util.Log;
 
 import com.android.internal.annotations.GuardedBy;
 import com.android.internal.annotations.VisibleForTesting;
+import com.android.internal.util.DumpUtils;
+import com.android.internal.util.DumpUtils.Dump;
 
 import java.io.InterruptedIOException;
+import java.io.PrintWriter;
 import java.net.Inet6Address;
 import java.net.InetAddress;
 import java.net.InetSocketAddress;
@@ -134,6 +131,8 @@ import java.util.Set;
  *          state it may be best for the link to disconnect completely and
  *          reconnect afresh.
  *
+ * Accessing an instance of this class from multiple threads is NOT safe.
+ *
  * @hide
  */
 public class IpReachabilityMonitor {
@@ -169,64 +168,33 @@ public class IpReachabilityMonitor {
         }
     }
 
-    private final Object mLock = new Object();
     private final String mInterfaceName;
     private final int mInterfaceIndex;
+    private final IpNeighborMonitor mIpNeighborMonitor;
     private final SharedLog mLog;
     private final Callback mCallback;
     private final Dependencies mDependencies;
     private final MultinetworkPolicyTracker mMultinetworkPolicyTracker;
-    private final NetlinkSocketObserver mNetlinkSocketObserver;
-    private final Thread mObserverThread;
     private final IpConnectivityLog mMetricsLog = new IpConnectivityLog();
-    @GuardedBy("mLock")
     private LinkProperties mLinkProperties = new LinkProperties();
-    // TODO: consider a map to a private NeighborState class holding more
-    // information than a single NUD state entry.
-    @GuardedBy("mLock")
-    private Map<InetAddress, Short> mIpWatchList = new HashMap<>();
-    @GuardedBy("mLock")
-    private int mIpWatchListVersion;
-    private volatile boolean mRunning;
+    private Map<InetAddress, NeighborEvent> mNeighborWatchList = new HashMap<>();
     // Time in milliseconds of the last forced probe request.
     private volatile long mLastProbeTimeMs;
 
-    /**
-     * Make the kernel perform neighbor reachability detection (IPv4 ARP or IPv6 ND)
-     * for the given IP address on the specified interface index.
-     *
-     * @return 0 if the request was successfully passed to the kernel; otherwise return
-     *         a non-zero error code.
-     */
-    private static int probeNeighbor(int ifIndex, InetAddress ip) {
-        final String msgSnippet = "probing ip=" + ip.getHostAddress() + "%" + ifIndex;
-        if (DBG) { Log.d(TAG, msgSnippet); }
-
-        final byte[] msg = RtNetlinkNeighborMessage.newNewNeighborMessage(
-                1, ip, StructNdMsg.NUD_PROBE, ifIndex, null);
-
-        try {
-            NetlinkSocket.sendOneShotKernelMessage(OsConstants.NETLINK_ROUTE, msg);
-        } catch (ErrnoException e) {
-            Log.e(TAG, "Error " + msgSnippet + ": " + e);
-            return -e.errno;
-        }
-
-        return 0;
+    public IpReachabilityMonitor(
+            Context context, String ifName, Handler h, SharedLog log, Callback callback) {
+        this(context, ifName, h, log, callback, null);
     }
 
-    public IpReachabilityMonitor(Context context, String ifName, SharedLog log, Callback callback) {
-        this(context, ifName, log, callback, null);
-    }
-
-    public IpReachabilityMonitor(Context context, String ifName, SharedLog log, Callback callback,
+    public IpReachabilityMonitor(
+            Context context, String ifName, Handler h, SharedLog log, Callback callback,
             MultinetworkPolicyTracker tracker) {
-        this(ifName, getInterfaceIndex(ifName), log, callback, tracker,
+        this(ifName, getInterfaceIndex(ifName), h, log, callback, tracker,
                 Dependencies.makeDefault(context, ifName));
     }
 
     @VisibleForTesting
-    IpReachabilityMonitor(String ifName, int ifIndex, SharedLog log, Callback callback,
+    IpReachabilityMonitor(String ifName, int ifIndex, Handler h, SharedLog log, Callback callback,
             MultinetworkPolicyTracker tracker, Dependencies dependencies) {
         mInterfaceName = ifName;
         mLog = log.forSubComponent(TAG);
@@ -234,45 +202,54 @@ public class IpReachabilityMonitor {
         mMultinetworkPolicyTracker = tracker;
         mInterfaceIndex = ifIndex;
         mDependencies = dependencies;
-        mNetlinkSocketObserver = new NetlinkSocketObserver();
-        mObserverThread = new Thread(mNetlinkSocketObserver);
-        mObserverThread.start();
+
+        mIpNeighborMonitor = new IpNeighborMonitor(h, mLog,
+                (NeighborEvent event) -> {
+                    if (mInterfaceIndex != event.ifindex) return;
+                    if (!mNeighborWatchList.containsKey(event.ip)) return;
+
+                    final NeighborEvent prev = mNeighborWatchList.put(event.ip, event);
+
+                    // TODO: Consider what to do with other states that are not within
+                    // NeighborEvent#isValid() (i.e. NUD_NONE, NUD_INCOMPLETE).
+                    if (event.nudState == StructNdMsg.NUD_FAILED) {
+                        mLog.w("ALERT neighbor went from: " + prev + " to: " + event);
+                        handleNeighborLost(event);
+                    }
+                });
+        mIpNeighborMonitor.start();
     }
 
     public void stop() {
-        mRunning = false;
+        mIpNeighborMonitor.stop();
         clearLinkProperties();
-        mNetlinkSocketObserver.clearNetlinkSocket();
     }
 
-    // TODO: add a public dump() method that can be called during a bug report.
+    public void dump(PrintWriter pw) {
+        DumpUtils.dumpAsync(
+                mIpNeighborMonitor.getHandler(),
+                new Dump() {
+                    @Override
+                    public void dump(PrintWriter pw, String prefix) {
+                        pw.println(describeWatchList("\n"));
+                    }
+                },
+                pw, "", 1000);
+    }
 
-    private String describeWatchList() {
-        final String delimiter = ", ";
-        StringBuilder sb = new StringBuilder();
-        synchronized (mLock) {
-            sb.append("iface{" + mInterfaceName + "/" + mInterfaceIndex + "}, ");
-            sb.append("v{" + mIpWatchListVersion + "}, ");
-            sb.append("ntable=[");
-            boolean firstTime = true;
-            for (Map.Entry<InetAddress, Short> entry : mIpWatchList.entrySet()) {
-                if (firstTime) {
-                    firstTime = false;
-                } else {
-                    sb.append(delimiter);
-                }
-                sb.append(entry.getKey().getHostAddress() + "/" +
-                        StructNdMsg.stringForNudState(entry.getValue()));
-            }
-            sb.append("]");
+    private String describeWatchList() { return describeWatchList(" "); }
+
+    private String describeWatchList(String sep) {
+        final StringBuilder sb = new StringBuilder();
+        sb.append("iface{" + mInterfaceName + "/" + mInterfaceIndex + "}," + sep);
+        sb.append("ntable=[" + sep);
+        String delimiter = "";
+        for (Map.Entry<InetAddress, NeighborEvent> entry : mNeighborWatchList.entrySet()) {
+            sb.append(delimiter).append(entry.getKey().getHostAddress() + "/" + entry.getValue());
+            delimiter = "," + sep;
         }
+        sb.append("]");
         return sb.toString();
-    }
-
-    private boolean isWatching(InetAddress ip) {
-        synchronized (mLock) {
-            return mRunning && mIpWatchList.containsKey(ip);
-        }
     }
 
     private static boolean isOnLink(List<RouteInfo> routes, InetAddress ip) {
@@ -284,13 +261,6 @@ public class IpReachabilityMonitor {
         return false;
     }
 
-    private short getNeighborStateLocked(InetAddress ip) {
-        if (mIpWatchList.containsKey(ip)) {
-            return mIpWatchList.get(ip);
-        }
-        return StructNdMsg.NUD_NONE;
-    }
-
     public void updateLinkProperties(LinkProperties lp) {
         if (!mInterfaceName.equals(lp.getInterfaceName())) {
             // TODO: figure out whether / how to cope with interface changes.
@@ -299,70 +269,63 @@ public class IpReachabilityMonitor {
             return;
         }
 
-        synchronized (mLock) {
-            mLinkProperties = new LinkProperties(lp);
-            Map<InetAddress, Short> newIpWatchList = new HashMap<>();
+        mLinkProperties = new LinkProperties(lp);
+        Map<InetAddress, NeighborEvent> newNeighborWatchList = new HashMap<>();
 
-            final List<RouteInfo> routes = mLinkProperties.getRoutes();
-            for (RouteInfo route : routes) {
-                if (route.hasGateway()) {
-                    InetAddress gw = route.getGateway();
-                    if (isOnLink(routes, gw)) {
-                        newIpWatchList.put(gw, getNeighborStateLocked(gw));
-                    }
+        final List<RouteInfo> routes = mLinkProperties.getRoutes();
+        for (RouteInfo route : routes) {
+            if (route.hasGateway()) {
+                InetAddress gw = route.getGateway();
+                if (isOnLink(routes, gw)) {
+                    newNeighborWatchList.put(gw, mNeighborWatchList.getOrDefault(gw, null));
                 }
             }
-
-            for (InetAddress nameserver : lp.getDnsServers()) {
-                if (isOnLink(routes, nameserver)) {
-                    newIpWatchList.put(nameserver, getNeighborStateLocked(nameserver));
-                }
-            }
-
-            mIpWatchList = newIpWatchList;
-            mIpWatchListVersion++;
         }
+
+        for (InetAddress dns : lp.getDnsServers()) {
+            if (isOnLink(routes, dns)) {
+                newNeighborWatchList.put(dns, mNeighborWatchList.getOrDefault(dns, null));
+            }
+        }
+
+        mNeighborWatchList = newNeighborWatchList;
         if (DBG) { Log.d(TAG, "watch: " + describeWatchList()); }
     }
 
     public void clearLinkProperties() {
-        synchronized (mLock) {
-            mLinkProperties.clear();
-            mIpWatchList.clear();
-            mIpWatchListVersion++;
-        }
+        mLinkProperties.clear();
+        mNeighborWatchList.clear();
         if (DBG) { Log.d(TAG, "clear: " + describeWatchList()); }
     }
 
-    private void handleNeighborLost(String msg) {
+    private void handleNeighborLost(NeighborEvent event) {
+        final LinkProperties whatIfLp = new LinkProperties(mLinkProperties);
+
         InetAddress ip = null;
-        final ProvisioningChange delta;
-        synchronized (mLock) {
-            LinkProperties whatIfLp = new LinkProperties(mLinkProperties);
+        for (Map.Entry<InetAddress, NeighborEvent> entry : mNeighborWatchList.entrySet()) {
+            // TODO: Consider using NeighborEvent#isValid() here; it's more
+            // strict but may interact badly if other entries are somehow in
+            // NUD_INCOMPLETE (say, during network attach).
+            if (entry.getValue().nudState != StructNdMsg.NUD_FAILED) continue;
 
-            for (Map.Entry<InetAddress, Short> entry : mIpWatchList.entrySet()) {
-                if (entry.getValue() != StructNdMsg.NUD_FAILED) {
-                    continue;
-                }
-
-                ip = entry.getKey();
-                for (RouteInfo route : mLinkProperties.getRoutes()) {
-                    if (ip.equals(route.getGateway())) {
-                        whatIfLp.removeRoute(route);
-                    }
-                }
-
-                if (avoidingBadLinks() || !(ip instanceof Inet6Address)) {
-                    // We should do this unconditionally, but alas we cannot: b/31827713.
-                    whatIfLp.removeDnsServer(ip);
+            ip = entry.getKey();
+            for (RouteInfo route : mLinkProperties.getRoutes()) {
+                if (ip.equals(route.getGateway())) {
+                    whatIfLp.removeRoute(route);
                 }
             }
 
-            delta = LinkProperties.compareProvisioning(mLinkProperties, whatIfLp);
+            if (avoidingBadLinks() || !(ip instanceof Inet6Address)) {
+                // We should do this unconditionally, but alas we cannot: b/31827713.
+                whatIfLp.removeDnsServer(ip);
+            }
         }
 
+        final ProvisioningChange delta = LinkProperties.compareProvisioning(
+                mLinkProperties, whatIfLp);
+
         if (delta == ProvisioningChange.LOST_PROVISIONING) {
-            final String logMsg = "FAILURE: LOST_PROVISIONING, " + msg;
+            final String logMsg = "FAILURE: LOST_PROVISIONING, " + event;
             Log.w(TAG, logMsg);
             if (mCallback != null) {
                 // TODO: remove |ip| when the callback signature no longer has
@@ -378,12 +341,9 @@ public class IpReachabilityMonitor {
     }
 
     public void probeAll() {
-        final List<InetAddress> ipProbeList;
-        synchronized (mLock) {
-            ipProbeList = new ArrayList<>(mIpWatchList.keySet());
-        }
+        final List<InetAddress> ipProbeList = new ArrayList<>(mNeighborWatchList.keySet());
 
-        if (!ipProbeList.isEmpty() && mRunning) {
+        if (!ipProbeList.isEmpty()) {
             // Keep the CPU awake long enough to allow all ARP/ND
             // probes a reasonable chance at success. See b/23197666.
             //
@@ -394,13 +354,10 @@ public class IpReachabilityMonitor {
         }
 
         for (InetAddress target : ipProbeList) {
-            if (!mRunning) {
-                break;
-            }
-            final int returnValue = probeNeighbor(mInterfaceIndex, target);
+            final int rval = IpNeighborMonitor.startKernelNeighborProbe(mInterfaceIndex, target);
             mLog.log(String.format("put neighbor %s into NUD_PROBE state (rval=%d)",
-                     target.getHostAddress(), returnValue));
-            logEvent(IpReachabilityEvent.PROBE, returnValue);
+                     target.getHostAddress(), rval));
+            logEvent(IpReachabilityEvent.PROBE, rval);
         }
         mLastProbeTimeMs = SystemClock.elapsedRealtime();
     }
@@ -445,154 +402,5 @@ public class IpReachabilityMonitor {
         boolean isProvisioningLost = (delta == ProvisioningChange.LOST_PROVISIONING);
         int eventType = IpReachabilityEvent.nudFailureEventType(isFromProbe, isProvisioningLost);
         mMetricsLog.log(mInterfaceName, new IpReachabilityEvent(eventType));
-    }
-
-    // TODO: simplify the number of objects by making this extend Thread.
-    private final class NetlinkSocketObserver implements Runnable {
-        private NetlinkSocket mSocket;
-
-        @Override
-        public void run() {
-            if (VDBG) { Log.d(TAG, "Starting observing thread."); }
-            mRunning = true;
-
-            try {
-                setupNetlinkSocket();
-            } catch (ErrnoException | SocketException e) {
-                Log.e(TAG, "Failed to suitably initialize a netlink socket", e);
-                mRunning = false;
-            }
-
-            while (mRunning) {
-                final ByteBuffer byteBuffer;
-                try {
-                    byteBuffer = recvKernelReply();
-                } catch (ErrnoException e) {
-                    if (mRunning) { Log.w(TAG, "ErrnoException: ", e); }
-                    break;
-                }
-                final long whenMs = SystemClock.elapsedRealtime();
-                if (byteBuffer == null) {
-                    continue;
-                }
-                parseNetlinkMessageBuffer(byteBuffer, whenMs);
-            }
-
-            clearNetlinkSocket();
-
-            mRunning = false; // Not a no-op when ErrnoException happened.
-            if (VDBG) { Log.d(TAG, "Finishing observing thread."); }
-        }
-
-        private void clearNetlinkSocket() {
-            if (mSocket != null) {
-                mSocket.close();
-            }
-        }
-
-            // TODO: Refactor the main loop to recreate the socket upon recoverable errors.
-        private void setupNetlinkSocket() throws ErrnoException, SocketException {
-            clearNetlinkSocket();
-            mSocket = new NetlinkSocket(OsConstants.NETLINK_ROUTE);
-
-            final NetlinkSocketAddress listenAddr = new NetlinkSocketAddress(
-                    0, OsConstants.RTMGRP_NEIGH);
-            mSocket.bind(listenAddr);
-
-            if (VDBG) {
-                final NetlinkSocketAddress nlAddr = mSocket.getLocalAddress();
-                Log.d(TAG, "bound to sockaddr_nl{"
-                        + ((long) (nlAddr.getPortId() & 0xffffffff)) + ", "
-                        + nlAddr.getGroupsMask()
-                        + "}");
-            }
-        }
-
-        private ByteBuffer recvKernelReply() throws ErrnoException {
-            try {
-                return mSocket.recvMessage(0);
-            } catch (InterruptedIOException e) {
-                // Interruption or other error, e.g. another thread closed our file descriptor.
-            } catch (ErrnoException e) {
-                if (e.errno != OsConstants.EAGAIN) {
-                    throw e;
-                }
-            }
-            return null;
-        }
-
-        private void parseNetlinkMessageBuffer(ByteBuffer byteBuffer, long whenMs) {
-            while (byteBuffer.remaining() > 0) {
-                final int position = byteBuffer.position();
-                final NetlinkMessage nlMsg = NetlinkMessage.parse(byteBuffer);
-                if (nlMsg == null || nlMsg.getHeader() == null) {
-                    byteBuffer.position(position);
-                    Log.e(TAG, "unparsable netlink msg: " + NetlinkConstants.hexify(byteBuffer));
-                    break;
-                }
-
-                final int srcPortId = nlMsg.getHeader().nlmsg_pid;
-                if (srcPortId !=  0) {
-                    Log.e(TAG, "non-kernel source portId: " + ((long) (srcPortId & 0xffffffff)));
-                    break;
-                }
-
-                if (nlMsg instanceof NetlinkErrorMessage) {
-                    Log.e(TAG, "netlink error: " + nlMsg);
-                    continue;
-                } else if (!(nlMsg instanceof RtNetlinkNeighborMessage)) {
-                    if (DBG) {
-                        Log.d(TAG, "non-rtnetlink neighbor msg: " + nlMsg);
-                    }
-                    continue;
-                }
-
-                evaluateRtNetlinkNeighborMessage((RtNetlinkNeighborMessage) nlMsg, whenMs);
-            }
-        }
-
-        private void evaluateRtNetlinkNeighborMessage(
-                RtNetlinkNeighborMessage neighMsg, long whenMs) {
-            final StructNdMsg ndMsg = neighMsg.getNdHeader();
-            if (ndMsg == null || ndMsg.ndm_ifindex != mInterfaceIndex) {
-                return;
-            }
-
-            final InetAddress destination = neighMsg.getDestination();
-            if (!isWatching(destination)) {
-                return;
-            }
-
-            final short msgType = neighMsg.getHeader().nlmsg_type;
-            final short nudState = ndMsg.ndm_state;
-            final String eventMsg = "NeighborEvent{"
-                    + "elapsedMs=" + whenMs + ", "
-                    + destination.getHostAddress() + ", "
-                    + "[" + NetlinkConstants.hexify(neighMsg.getLinkLayerAddress()) + "], "
-                    + NetlinkConstants.stringForNlMsgType(msgType) + ", "
-                    + StructNdMsg.stringForNudState(nudState)
-                    + "}";
-
-            if (VDBG) {
-                Log.d(TAG, neighMsg.toString());
-            } else if (DBG) {
-                Log.d(TAG, eventMsg);
-            }
-
-            synchronized (mLock) {
-                if (mIpWatchList.containsKey(destination)) {
-                    final short value =
-                            (msgType == NetlinkConstants.RTM_DELNEIGH)
-                            ? StructNdMsg.NUD_NONE
-                            : nudState;
-                    mIpWatchList.put(destination, value);
-                }
-            }
-
-            if (nudState == StructNdMsg.NUD_FAILED) {
-                Log.w(TAG, "ALERT: " + eventMsg);
-                handleNeighborLost(eventMsg);
-            }
-        }
     }
 }

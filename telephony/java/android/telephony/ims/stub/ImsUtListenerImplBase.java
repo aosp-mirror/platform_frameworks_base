@@ -21,6 +21,7 @@ import android.os.RemoteException;
 
 import com.android.ims.ImsCallForwardInfo;
 import com.android.ims.ImsReasonInfo;
+import com.android.ims.ImsSsData;
 import com.android.ims.ImsSsInfo;
 import com.android.ims.internal.IImsUt;
 import com.android.ims.internal.IImsUtListener;
@@ -85,4 +86,10 @@ public class ImsUtListenerImplBase extends IImsUtListener.Stub {
     public void utConfigurationCallWaitingQueried(IImsUt ut, int id, ImsSsInfo[] cwInfo)
             throws RemoteException {
     }
+
+    /**
+     * Notifies client when Supplementary Service indication is received
+     */
+    @Override
+    public void onSupplementaryServiceIndication(ImsSsData ssData) {}
 }

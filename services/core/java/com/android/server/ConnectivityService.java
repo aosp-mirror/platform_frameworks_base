@@ -44,7 +44,6 @@ import android.content.ContentResolver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
-import android.content.pm.PackageManager;
 import android.content.res.Configuration;
 import android.database.ContentObserver;
 import android.net.ConnectivityManager;
@@ -129,7 +128,6 @@ import com.android.internal.util.IndentingPrintWriter;
 import com.android.internal.util.MessageUtils;
 import com.android.internal.util.WakeupMessage;
 import com.android.internal.util.XmlUtils;
-import com.android.server.LocalServices;
 import com.android.server.am.BatteryStatsService;
 import com.android.server.connectivity.DataConnectionStats;
 import com.android.server.connectivity.IpConnectivityMetrics;
@@ -951,7 +949,10 @@ public class ConnectivityService extends IConnectivityManager.Stub
                         getNetworkTypeName(networkType), "");
                 info.setDetailedState(NetworkInfo.DetailedState.DISCONNECTED, null, null);
                 info.setIsAvailable(true);
-                state = new NetworkState(info, new LinkProperties(), new NetworkCapabilities(),
+                final NetworkCapabilities capabilities = new NetworkCapabilities();
+                capabilities.setCapability(NetworkCapabilities.NET_CAPABILITY_NOT_ROAMING,
+                        !info.isRoaming());
+                state = new NetworkState(info, new LinkProperties(), capabilities,
                         null, null, null);
             }
             filterNetworkStateForUid(state, uid, ignoreBlocked);
@@ -1053,8 +1054,7 @@ public class ConnectivityService extends IConnectivityManager.Stub
     /**
      * Apply any relevant filters to {@link NetworkState} for the given UID. For
      * example, this may mark the network as {@link DetailedState#BLOCKED} based
-     * on {@link #isNetworkWithLinkPropertiesBlocked}, or
-     * {@link NetworkInfo#isMetered()} based on network policies.
+     * on {@link #isNetworkWithLinkPropertiesBlocked}.
      */
     private void filterNetworkStateForUid(NetworkState state, int uid, boolean ignoreBlocked) {
         if (state == null || state.networkInfo == null || state.linkProperties == null) return;
@@ -1064,15 +1064,6 @@ public class ConnectivityService extends IConnectivityManager.Stub
         }
         if (mLockdownTracker != null) {
             mLockdownTracker.augmentNetworkInfo(state.networkInfo);
-        }
-
-        // TODO: apply metered state closer to NetworkAgentInfo
-        final long token = Binder.clearCallingIdentity();
-        try {
-            state.networkInfo.setMetered(mPolicyManager.isNetworkMetered(state));
-        } catch (RemoteException e) {
-        } finally {
-            Binder.restoreCallingIdentity(token);
         }
     }
 
@@ -1343,30 +1334,24 @@ public class ConnectivityService extends IConnectivityManager.Stub
     }
 
     @Override
+    @Deprecated
     public NetworkQuotaInfo getActiveNetworkQuotaInfo() {
-        enforceAccessPermission();
-        final int uid = Binder.getCallingUid();
-        final long token = Binder.clearCallingIdentity();
-        try {
-            final NetworkState state = getUnfilteredActiveNetworkState(uid);
-            if (state.networkInfo != null) {
-                try {
-                    return mPolicyManager.getNetworkQuotaInfo(state);
-                } catch (RemoteException e) {
-                }
-            }
-            return null;
-        } finally {
-            Binder.restoreCallingIdentity(token);
-        }
+        Log.w(TAG, "Shame on UID " + Binder.getCallingUid()
+                + " for calling the hidden API getNetworkQuotaInfo(). Shame!");
+        return new NetworkQuotaInfo();
     }
 
     @Override
     public boolean isActiveNetworkMetered() {
         enforceAccessPermission();
 
-        final NetworkInfo info = getActiveNetworkInfo();
-        return (info != null) ? info.isMetered() : false;
+        final NetworkCapabilities caps = getNetworkCapabilities(getActiveNetwork());
+        if (caps != null) {
+            return !caps.hasCapability(NetworkCapabilities.NET_CAPABILITY_NOT_METERED);
+        } else {
+            // Always return the most conservative value
+            return true;
+        }
     }
 
     private INetworkManagementEventObserver mDataActivityObserver = new BaseNetworkObserver() {
@@ -2787,7 +2772,8 @@ public class ConnectivityService extends IConnectivityManager.Stub
         enforceAccessPermission();
 
         NetworkAgentInfo nai = getNetworkAgentInfoForNetwork(network);
-        if (nai != null && !nai.networkInfo.isMetered()) {
+        if (nai != null && nai.networkCapabilities
+                .hasCapability(NetworkCapabilities.NET_CAPABILITY_NOT_METERED)) {
             return ConnectivityManager.MULTIPATH_PREFERENCE_UNMETERED;
         }
 
@@ -5605,7 +5591,8 @@ public class ConnectivityService extends IConnectivityManager.Stub
     }
 
     private void logNetworkEvent(NetworkAgentInfo nai, int evtype) {
-        mMetricsLog.log(new NetworkEvent(nai.network.netId, evtype));
+        int[] transports = nai.networkCapabilities.getTransportTypes();
+        mMetricsLog.log(nai.network.netId, transports, new NetworkEvent(evtype));
     }
 
     private static boolean toBool(int encodedBoolean) {

@@ -28,6 +28,7 @@ import static com.android.server.backup.RefactoredBackupManagerService.TIMEOUT_B
 import static com.android.server.backup.internal.BackupHandler.MSG_BACKUP_OPERATION_TIMEOUT;
 import static com.android.server.backup.internal.BackupHandler.MSG_BACKUP_RESTORE_STEP;
 
+import android.annotation.Nullable;
 import android.app.ApplicationThreadConstants;
 import android.app.IBackupAgent;
 import android.app.backup.BackupDataInput;
@@ -57,6 +58,7 @@ import com.android.internal.backup.IBackupTransport;
 import com.android.server.AppWidgetBackupBridge;
 import com.android.server.EventLogTags;
 import com.android.server.backup.BackupRestoreTask;
+import com.android.server.backup.DataChangedJournal;
 import com.android.server.backup.KeyValueBackupJob;
 import com.android.server.backup.PackageManagerBackupAgent;
 import com.android.server.backup.RefactoredBackupManagerService;
@@ -114,7 +116,7 @@ public class PerformBackupTask implements BackupRestoreTask {
     ArrayList<BackupRequest> mQueue;
     ArrayList<BackupRequest> mOriginalQueue;
     File mStateDir;
-    File mJournal;
+    @Nullable DataChangedJournal mJournal;
     BackupState mCurrentState;
     List<String> mPendingFullBackups;
     IBackupObserver mObserver;
@@ -142,9 +144,9 @@ public class PerformBackupTask implements BackupRestoreTask {
 
     public PerformBackupTask(RefactoredBackupManagerService backupManagerService,
             IBackupTransport transport, String dirName,
-            ArrayList<BackupRequest> queue, File journal, IBackupObserver observer,
-            IBackupManagerMonitor monitor, List<String> pendingFullBackups,
-            boolean userInitiated, boolean nonIncremental) {
+            ArrayList<BackupRequest> queue, @Nullable DataChangedJournal journal,
+            IBackupObserver observer, IBackupManagerMonitor monitor,
+            List<String> pendingFullBackups, boolean userInitiated, boolean nonIncremental) {
         this.backupManagerService = backupManagerService;
         mTransport = transport;
         mOriginalQueue = queue;

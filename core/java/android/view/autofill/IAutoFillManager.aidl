@@ -32,6 +32,7 @@ import android.view.autofill.IAutoFillManagerClient;
 interface IAutoFillManager {
     // Returns flags: FLAG_ADD_CLIENT_ENABLED | FLAG_ADD_CLIENT_DEBUG | FLAG_ADD_CLIENT_VERBOSE
     int addClient(in IAutoFillManagerClient client, int userId);
+    void removeClient(in IAutoFillManagerClient client, int userId);
     int startSession(IBinder activityToken, in IBinder appCallback, in AutofillId autoFillId,
             in Rect bounds, in AutofillValue value, int userId, boolean hasCallback, int flags,
             String packageName);
@@ -49,4 +50,5 @@ interface IAutoFillManager {
     void disableOwnedAutofillServices(int userId);
     boolean isServiceSupported(int userId);
     boolean isServiceEnabled(int userId, String packageName);
+    void onPendingSaveUi(int operation, IBinder token);
 }

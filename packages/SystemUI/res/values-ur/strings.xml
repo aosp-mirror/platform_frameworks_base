@@ -64,7 +64,7 @@
     <string name="usb_debugging_message" msgid="2220143855912376496">"‏کمپیوٹر کے RSA کا کلیدی فنگر پرنٹ ہے:\n<xliff:g id="FINGERPRINT">%1$s</xliff:g>"</string>
     <string name="usb_debugging_always" msgid="303335496705863070">"اس کمپیوٹر سے ہمیشہ اجازت دیں"</string>
     <string name="usb_debugging_secondary_user_title" msgid="6353808721761220421">"‏USB ڈیبگ کرنے کی اجازت نہیں ہے"</string>
-    <string name="usb_debugging_secondary_user_message" msgid="8572228137833020196">"‏اس آلہ پر فی الحال سائن ان کردہ صارف USB ڈیبگ کرنا آن نہیں کر سکتا۔ اس خصوصیت کو استعمال کرنے کیلئے ایڈمن صارف پر سوئچ کریں۔"</string>
+    <string name="usb_debugging_secondary_user_message" msgid="6067122453571699801">"‏اس آلہ پر فی الحال سائن ان کردہ صارف USB ڈیبگنگ آن نہیں کر سکتا۔ اس خصوصیت کا استعمال کرنے کیلئے، ابتدائی صارف پر سوئچ کریں۔"</string>
     <string name="compat_mode_on" msgid="6623839244840638213">"پوری سکرین پر زوم کریں"</string>
     <string name="compat_mode_off" msgid="4434467572461327898">"پوری سکرین پر پھیلائیں"</string>
     <string name="screenshot_saving_ticker" msgid="7403652894056693515">"اسکرین شاٹ محفوظ ہو رہا ہے…"</string>
@@ -353,10 +353,10 @@
     <string name="description_target_search" msgid="3091587249776033139">"تلاش کریں"</string>
     <string name="description_direction_up" msgid="7169032478259485180">"<xliff:g id="TARGET_DESCRIPTION">%s</xliff:g> کیلئے اوپر سلائیڈ کریں۔"</string>
     <string name="description_direction_left" msgid="7207478719805562165">"<xliff:g id="TARGET_DESCRIPTION">%s</xliff:g> کیلئے بائیں سلائیڈ کریں۔"</string>
-    <string name="zen_priority_introduction" msgid="7577965386868311310">"الارمز، یاد دہانیوں، ایونٹس اور آپ کے متعین کردہ کالرز کے علاوہ، آپ آوازوں اور وائبریشنز سے ڈسٹرب نہیں ہوں گے۔ موسیقی، ویڈیوز اور گیمز سمیت آپ ابھی بھی ہر وہ چیز سنیں گے جسے چلانے کا آپ انتخاب کرتے ہیں۔"</string>
-    <string name="zen_alarms_introduction" msgid="7034415210361973827">"الارمز کے علاوہ، آپ آوازوں اور وائبریشنز سے ڈسٹرب نہیں ہوں گے۔ موسیقی، ویڈیوز اور گیمز سمیت آپ ہر وہ چیز سنیں گے جسے چلانے کا آپ انتخاب کرتے ہیں۔"</string>
+    <string name="zen_priority_introduction" msgid="1149025108714420281">"الارمز، یاددہانیوں، ایونٹس اور آپ کے متعین کردہ کالرز کے علاوہ، آپ آوازوں اور وائبریشنز سے ڈسٹرب نہیں ہوں گے۔ موسیقی، ویڈیوز اور گیمز سمیت آپ ابھی بھی ہر وہ چیز سنیں گے جسے چلانے کا آپ انتخاب کرتے ہیں۔"</string>
+    <string name="zen_alarms_introduction" msgid="4934328096749380201">"الارمز کے علاوہ، آپ آوازوں اور وائبریشنز سے ڈسٹرب نہیں ہوں گے۔ موسیقی، ویڈیوز اور گیمز سمیت آپ ہر وہ چیز سنیں گے جسے چلانے کا آپ انتخاب کرتے ہیں۔"</string>
     <string name="zen_priority_customize_button" msgid="7948043278226955063">"حسب ضرورت بنائیں"</string>
-    <string name="zen_silence_introduction_voice" msgid="2284540992298200729">"یہ الارمز، موسیقی، ویڈیوز اور گیمز کی آوازوں اور وائبریشنز سمیت سبھی آوازیں اور وائبریشنز مسدود کر دیتا ہے۔ آپ ابھی بھی فون کالز کر سکیں گے۔"</string>
+    <string name="zen_silence_introduction_voice" msgid="3948778066295728085">"یہ الارمز، موسیقی، ویڈیوز اور گیمز کی آوازوں اور وائبریشنز سمیت سبھی آوازیں اور وائبریشنز مسدود کر دیتا ہے۔ آپ ابھی بھی فون کالز کر سکیں گے۔"</string>
     <string name="zen_silence_introduction" msgid="3137882381093271568">"یہ الارمز، موسیقی، ویڈیوز اور گیمز کی آوازوں اور وائبریشنز سمیت سبھی آوازیں اور وائبریشنز مسدود کر دیتا ہے۔"</string>
     <string name="keyguard_more_overflow_text" msgid="9195222469041601365">"‎+<xliff:g id="NUMBER_OF_NOTIFICATIONS">%d</xliff:g>‎"</string>
     <string name="speed_bump_explanation" msgid="1288875699658819755">"کم اہم اطلاعات ذیل میں ہیں"</string>
@@ -456,7 +456,7 @@
     <string name="monitoring_description_do_learn_more" msgid="1849514470437907421">"مزید جانیں"</string>
     <string name="monitoring_description_do_body_vpn" msgid="8255218762488901796">"آپ <xliff:g id="VPN_APP">%1$s</xliff:g> سے منسلک ہیں جو ای میلز، ایپس اور ویب سائٹس سمیت آپ کے نیٹ ورک کی سرگرمی مانیٹر کر سکتی ہے۔"</string>
     <string name="monitoring_description_vpn_settings_separator" msgid="1933186756733474388">" "</string>
-    <string name="monitoring_description_vpn_settings" msgid="8869300202410505143">"‏VPN کی ترتیبات کھولیں"</string>
+    <string name="monitoring_description_vpn_settings" msgid="6434859242636063861">"‏VPN کی ترتیبات کھولیں"</string>
     <string name="monitoring_description_ca_cert_settings_separator" msgid="4987350385906393626">" "</string>
     <string name="monitoring_description_ca_cert_settings" msgid="5489969458872997092">"بھروسے مند استناد کھولیں"</string>
     <string name="monitoring_description_network_logging" msgid="7223505523384076027">"آپ کے ایڈمن نے نیٹ ورک لاگنگ آن کر دی ہے، جو آپ کے آلہ پر ٹریفک کو مانیٹر کرتی ہے۔\n\nمزید معلومات کیلئے اپنے ایڈمن سے رابطہ کریں۔"</string>
@@ -556,8 +556,8 @@
     <string name="notification_default_channel_desc" msgid="2506053815870808359">"اس ایپ میں اطلاعاتی زمرے نہیں ہیں"</string>
     <string name="notification_unblockable_desc" msgid="3561016061737896906">"اس ایپ کی اطلاعات کو آف نہیں کیا جا سکتا"</string>
     <plurals name="notification_num_channels_desc" formatted="false" msgid="5492793452274077663">
-      <item quantity="other">اس ایپ کے <xliff:g id="NUMBER_1">%d</xliff:g> اطلاعاتی زمروں میں سے 1</item>
-      <item quantity="one">اس ایپ کے <xliff:g id="NUMBER_0">%d</xliff:g> اطلاعاتی زمرے میں سے 1</item>
+      <item quantity="other">اس ایپ کے <xliff:g id="NUMBER_1">%s</xliff:g> اطلاعاتی زمروں میں سے 1</item>
+      <item quantity="one">اس ایپ کے <xliff:g id="NUMBER_0">%s</xliff:g> اطلاعاتی زمرے میں سے 1</item>
     </plurals>
     <string name="notification_channels_list_desc_2" msgid="6214732715833946441">"<xliff:g id="CHANNEL_NAME_1">%1$s</xliff:g>، <xliff:g id="CHANNEL_NAME_2">%2$s</xliff:g>"</string>
     <plurals name="notification_channels_list_desc_2_and_others" formatted="false" msgid="2747813553355336157">
@@ -585,8 +585,8 @@
       <item quantity="one">‏‎%d منٹ</item>
     </plurals>
     <string name="battery_panel_title" msgid="7944156115535366613">"بیٹری کا استعمال"</string>
-    <string name="battery_detail_charging_summary" msgid="1279095653533044008">"چارجنگ کے دوران بیٹری سیور دستیاب نہیں ہے"</string>
-    <string name="battery_detail_switch_title" msgid="6285872470260795421">"بیٹری سیور"</string>
+    <string name="battery_detail_charging_summary" msgid="4055327085770378335">"چارجنگ کے دوران بیٹری سیور دستیاب نہیں ہے"</string>
+    <string name="battery_detail_switch_title" msgid="8763441006881907058">"بیٹری سیور"</string>
     <string name="battery_detail_switch_summary" msgid="9049111149407626804">"کارکردگی اور پس منظر کا ڈیٹا کم کر دیتا ہے"</string>
     <string name="keyboard_key_button_template" msgid="6230056639734377300">"بٹن <xliff:g id="NAME">%1$s</xliff:g>"</string>
     <string name="keyboard_key_home" msgid="2243500072071305073">"Home"</string>
@@ -726,9 +726,9 @@
     <string name="pip_phone_minimize" msgid="1079119422589131792">"چھوٹی کریں"</string>
     <string name="pip_phone_close" msgid="8416647892889710330">"بند کریں"</string>
     <string name="pip_phone_dismiss_hint" msgid="6351678169095923899">"برخاست کرنے کیلئے نیچے گھسیٹیں"</string>
-    <string name="pip_menu_title" msgid="3328510504196964712">"تصویر کے مینو میں تصویر"</string>
+    <string name="pip_menu_title" msgid="4707292089961887657">"مینو"</string>
     <string name="pip_notification_title" msgid="3204024940158161322">"<xliff:g id="NAME">%s</xliff:g> تصویر میں تصویر میں ہے"</string>
-    <string name="pip_notification_message" msgid="4171698133469539591">"اگر آپ نہیں چاہتے ہیں کہ <xliff:g id="NAME">%s</xliff:g> اس خصوصیت کا استعمال کرے تو ترتیبات کھولنے کیلئے تھپتھپائیں اور اسے آف کر دیں۔"</string>
+    <string name="pip_notification_message" msgid="5619512781514343311">"اگر آپ نہیں چاہتے ہیں کہ <xliff:g id="NAME">%s</xliff:g> اس خصوصیت کا استعمال کرے تو ترتیبات کھولنے کے لیے تھپتھپا کر اسے آف کرے۔"</string>
     <string name="pip_play" msgid="1417176722760265888">"چلائیں"</string>
     <string name="pip_pause" msgid="8881063404466476571">"موقوف کریں"</string>
     <string name="pip_skip_to_next" msgid="1948440006726306284">"نظرانداز کرکے اگلے پر جائیں"</string>
@@ -754,6 +754,7 @@
     <string name="tuner_menu" msgid="191640047241552081">"مینو"</string>
     <string name="tuner_app" msgid="3507057938640108777">"<xliff:g id="APP">%1$s</xliff:g> ایپ"</string>
     <string name="notification_channel_alerts" msgid="4496839309318519037">"الرٹس"</string>
+    <string name="notification_channel_battery" msgid="5786118169182888462">"بیٹری"</string>
     <string name="notification_channel_screenshot" msgid="6314080179230000938">"اسکرین شاٹس"</string>
     <string name="notification_channel_general" msgid="4525309436693914482">"عمومی پیغامات"</string>
     <string name="notification_channel_storage" msgid="3077205683020695313">"اسٹوریج"</string>
@@ -774,4 +775,5 @@
     <string name="running_foreground_services_title" msgid="381024150898615683">"ایپس پس منظر میں چل رہی ہیں"</string>
     <string name="running_foreground_services_msg" msgid="6326247670075574355">"بیٹری اور ڈیٹا استعمال کے بارے میں تفصیلات کے لیے تھپتھپائیں"</string>
     <string name="data_usage_disable_mobile" msgid="5116269981510015864">"موبائل ڈیٹا آف کریں؟"</string>
+    <string name="touch_filtered_warning" msgid="8671693809204767551">"چونکہ ایک ایپ اجازت کی درخواست کو مبہم کر رہی ہے، لہذا ترتیبات آپ کے جواب کی توثیق نہیں کر سکتی ہیں۔"</string>
 </resources>

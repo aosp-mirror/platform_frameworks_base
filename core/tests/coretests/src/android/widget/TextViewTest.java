@@ -16,41 +16,57 @@
 
 package android.widget;
 
+import static junit.framework.Assert.assertEquals;
+import static junit.framework.Assert.assertNotNull;
+import static junit.framework.Assert.assertTrue;
+
 import android.app.Activity;
+import android.app.Instrumentation;
 import android.content.Intent;
 import android.graphics.Paint;
 import android.platform.test.annotations.Presubmit;
-import android.test.ActivityInstrumentationTestCase2;
-import android.test.suitebuilder.annotation.SmallTest;
+import android.support.test.InstrumentationRegistry;
+import android.support.test.annotation.UiThreadTest;
+import android.support.test.filters.MediumTest;
+import android.support.test.rule.ActivityTestRule;
+import android.support.test.runner.AndroidJUnit4;
 import android.text.GetChars;
 import android.text.Layout;
 import android.text.Selection;
 import android.text.Spannable;
-import android.util.Log;
 import android.view.View;
+
+import org.junit.Before;
+import org.junit.Rule;
+import org.junit.Test;
+import org.junit.runner.RunWith;
+
 import java.util.Locale;
 
 /**
  * TextViewTest tests {@link TextView}.
  */
-public class TextViewTest extends ActivityInstrumentationTestCase2<TextViewActivity> {
-    private static final String TAG = "TextViewTest";
+@RunWith(AndroidJUnit4.class)
+@MediumTest
+public class TextViewTest {
+    @Rule
+    public ActivityTestRule<TextViewActivity> mActivityRule = new ActivityTestRule<>(
+            TextViewActivity.class);
+    private Instrumentation mInstrumentation;
+    private Activity mActivity;
     private TextView mTextView;
 
-    public TextViewTest() {
-        super(TextViewActivity.class);
+    @Before
+    public void setup() {
+        mActivity = mActivityRule.getActivity();
+        mInstrumentation = InstrumentationRegistry.getInstrumentation();
     }
 
-    @SmallTest
     @Presubmit
-    public void testArray() throws Exception {
-        getActivity().runOnUiThread(new Runnable() {
-            @Override
-            public void run() {
-                mTextView = new TextView(getActivity());
-            }
-        });
-        getInstrumentation().waitForIdleSync();
+    @UiThreadTest
+    @Test
+    public void testArray() {
+        mTextView = new TextView(mActivity);
 
         char[] c = new char[] { 'H', 'e', 'l', 'l', 'o', ' ',
                                 'W', 'o', 'r', 'l', 'd', '!' };
@@ -78,15 +94,10 @@ public class TextViewTest extends ActivityInstrumentationTestCase2<TextViewActiv
         assertEquals('\0', c2[5]);
     }
 
-    @SmallTest
-    public void testProcessTextActivityResultNonEditable() {
-        getActivity().runOnUiThread(new Runnable() {
-            @Override
-            public void run() {
-                mTextView = new TextView(getActivity());
-            }
-        });
-        getInstrumentation().waitForIdleSync();
+    @Test
+    public void testProcessTextActivityResultNonEditable() throws Throwable {
+        mActivityRule.runOnUiThread(() -> mTextView = new TextView(mActivity));
+        mInstrumentation.waitForIdleSync();
         CharSequence originalText = "This is some text.";
         mTextView.setText(originalText, TextView.BufferType.SPANNABLE);
         assertEquals(originalText, mTextView.getText().toString());
@@ -94,30 +105,23 @@ public class TextViewTest extends ActivityInstrumentationTestCase2<TextViewActiv
         Selection.setSelection((Spannable) mTextView.getText(), 0, mTextView.getText().length());
 
         // We need to run this in the UI thread, as it will create a Toast.
-        getActivity().runOnUiThread(new Runnable() {
-            @Override
-            public void run() {
-                CharSequence newText = "Text is replaced.";
-                Intent data = new Intent();
-                data.putExtra(Intent.EXTRA_PROCESS_TEXT, newText);
-                mTextView.onActivityResult(TextView.PROCESS_TEXT_REQUEST_CODE, Activity.RESULT_OK, data);
-            }
+        mActivityRule.runOnUiThread(() -> {
+            CharSequence newText = "Text is replaced.";
+            Intent data = new Intent();
+            data.putExtra(Intent.EXTRA_PROCESS_TEXT, newText);
+            mTextView.onActivityResult(TextView.PROCESS_TEXT_REQUEST_CODE, Activity.RESULT_OK,
+                    data);
         });
-        getInstrumentation().waitForIdleSync();
+        mInstrumentation.waitForIdleSync();
 
         // This is a TextView, which can't be modified. Hence no change should have been made.
         assertEquals(originalText, mTextView.getText().toString());
     }
 
-    @SmallTest
-    public void testProcessTextActivityResultEditable() {
-        getActivity().runOnUiThread(new Runnable() {
-            @Override
-            public void run() {
-                mTextView = new EditText(getActivity());
-            }
-        });
-        getInstrumentation().waitForIdleSync();
+    @Test
+    public void testProcessTextActivityResultEditable() throws Throwable {
+        mActivityRule.runOnUiThread(() -> mTextView = new EditText(mActivity));
+        mInstrumentation.waitForIdleSync();
         CharSequence originalText = "This is some text.";
         mTextView.setText(originalText, TextView.BufferType.SPANNABLE);
         assertEquals(originalText, mTextView.getText().toString());
@@ -132,15 +136,10 @@ public class TextViewTest extends ActivityInstrumentationTestCase2<TextViewActiv
         assertEquals(newText, mTextView.getText().toString());
     }
 
-    @SmallTest
-    public void testProcessTextActivityResultCancel() {
-        getActivity().runOnUiThread(new Runnable() {
-            @Override
-            public void run() {
-                mTextView = new EditText(getActivity());
-            }
-        });
-        getInstrumentation().waitForIdleSync();
+    @Test
+    public void testProcessTextActivityResultCancel() throws Throwable {
+        mActivityRule.runOnUiThread(() -> mTextView = new EditText(mActivity));
+        mInstrumentation.waitForIdleSync();
         CharSequence originalText = "This is some text.";
         mTextView.setText(originalText, TextView.BufferType.SPANNABLE);
         assertEquals(originalText, mTextView.getText().toString());
@@ -156,15 +155,10 @@ public class TextViewTest extends ActivityInstrumentationTestCase2<TextViewActiv
         assertEquals(originalText, mTextView.getText().toString());
     }
 
-    @SmallTest
-    public void testProcessTextActivityNoData() {
-        getActivity().runOnUiThread(new Runnable() {
-            @Override
-            public void run() {
-                mTextView = new EditText(getActivity());
-            }
-        });
-        getInstrumentation().waitForIdleSync();
+    @Test
+    public void testProcessTextActivityNoData() throws Throwable {
+        mActivityRule.runOnUiThread(() -> mTextView = new EditText(mActivity));
+        mInstrumentation.waitForIdleSync();
         CharSequence originalText = "This is some text.";
         mTextView.setText(originalText, TextView.BufferType.SPANNABLE);
         assertEquals(originalText, mTextView.getText().toString());
@@ -176,13 +170,14 @@ public class TextViewTest extends ActivityInstrumentationTestCase2<TextViewActiv
         assertEquals(originalText, mTextView.getText().toString());
     }
 
-    @SmallTest
+    @Test
+    @UiThreadTest
     public void testHyphenationWidth() {
-        TextView textView = new TextView(getActivity());
-        textView.setHyphenationFrequency(Layout.HYPHENATION_FREQUENCY_FULL);
-        textView.setTextLocale(Locale.US);
+        mTextView = new TextView(mActivity);
+        mTextView.setHyphenationFrequency(Layout.HYPHENATION_FREQUENCY_FULL);
+        mTextView.setTextLocale(Locale.US);
 
-        Paint paint = textView.getPaint();
+        Paint paint = mTextView.getPaint();
 
         String word = "thisissuperlonglongword";
         float wordWidth = paint.measureText(word, 0, word.length());
@@ -192,17 +187,17 @@ public class TextViewTest extends ActivityInstrumentationTestCase2<TextViewActiv
             sb.append(word);
             sb.append(" ");
         }
-        textView.setText(sb.toString());
+        mTextView.setText(sb.toString());
 
         int width = (int)(wordWidth * 0.7);
         int height = 4096;  // enough for all text.
 
-        textView.measure(
+        mTextView.measure(
                 View.MeasureSpec.makeMeasureSpec(width, View.MeasureSpec.EXACTLY),
                 View.MeasureSpec.makeMeasureSpec(height, View.MeasureSpec.EXACTLY));
-        textView.layout(0, 0, width, height);
+        mTextView.layout(0, 0, width, height);
 
-        Layout layout = textView.getLayout();
+        Layout layout = mTextView.getLayout();
         assertNotNull(layout);
 
         int lineCount = layout.getLineCount();

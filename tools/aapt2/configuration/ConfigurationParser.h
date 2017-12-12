@@ -20,8 +20,9 @@
 #include <string>
 #include <unordered_map>
 #include <vector>
-#include <ConfigDescription.h>
 
+#include "ConfigDescription.h"
+#include "Diagnostics.h"
 #include "util/Maybe.h"
 
 namespace aapt {
@@ -48,6 +49,9 @@ struct Artifact {
   Maybe<std::string> device_feature_group;
   /** If present, uses the OpenGL texture group with this name. */
   Maybe<std::string> gl_texture_group;
+
+  /** Convert an artifact name template into a name string based on configuration contents. */
+  Maybe<std::string> ToArtifactName(const std::string& format, IDiagnostics* diag) const;
 };
 
 /** Enumeration of currently supported ABIs. */
@@ -61,6 +65,9 @@ enum class Abi {
   kMips64,
   kUniversal
 };
+
+/** Helper method to convert an ABI to a string representing the path within the APK. */
+const std::string& AbiToString(Abi abi);
 
 /**
  * Represents an individual locale. When a locale is included, it must be
@@ -114,11 +121,10 @@ struct GlTexture {
   }
 };
 
-/**
- * AAPT2 XML configuration binary representation.
- */
-struct Configuration {
-  std::unordered_map<std::string, Artifact> artifacts;
+/** AAPT2 XML configuration file binary representation. */
+struct PostProcessingConfiguration {
+  // TODO: Support named artifacts?
+  std::vector<Artifact> artifacts;
   Maybe<std::string> artifact_format;
 
   Group<Abi> abi_groups;
@@ -142,16 +148,14 @@ class Element;
  */
 class ConfigurationParser {
  public:
+
+  /** Returns a ConfigurationParser for the file located at the provided path. */
+  static Maybe<ConfigurationParser> ForPath(const std::string& path);
+
   /** Returns a ConfigurationParser for the configuration in the provided file contents. */
   static ConfigurationParser ForContents(const std::string& contents) {
     ConfigurationParser parser{contents};
     return parser;
-  }
-
-  /** Returns a ConfigurationParser for the file located at the provided path. */
-  static ConfigurationParser ForPath(const std::string& path) {
-    // TODO: Read XML file into memory.
-    return ForContents(path);
   }
 
   /** Sets the diagnostics context to use when parsing. */
@@ -164,7 +168,7 @@ class ConfigurationParser {
    * Parses the configuration file and returns the results. If the configuration could not be parsed
    * the result is empty and any errors will be displayed with the provided diagnostics context.
    */
-  Maybe<configuration::Configuration> Parse();
+  Maybe<configuration::PostProcessingConfiguration> Parse();
 
  protected:
   /**
@@ -183,9 +187,8 @@ class ConfigurationParser {
    * An ActionHandler for processing XML elements in the XmlActionExecutor. Returns true if the
    * element was successfully processed, otherwise returns false.
    */
-  using ActionHandler = std::function<bool(configuration::Configuration* config,
-                                           xml::Element* element,
-                                           IDiagnostics* diag)>;
+  using ActionHandler = std::function<bool(configuration::PostProcessingConfiguration* config,
+                                           xml::Element* element, IDiagnostics* diag)>;
 
   /** Handler for <artifact> tags. */
   static ActionHandler artifact_handler_;
@@ -213,4 +216,4 @@ class ConfigurationParser {
 
 }  // namespace aapt
 
-#endif //AAPT2_CONFIGURATION_H
+#endif  // AAPT2_CONFIGURATION_H

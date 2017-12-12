@@ -25,12 +25,11 @@
     <string name="keyguard_password_enter_puk_code" msgid="670683628782925409">"सिम PUK आणि नवीन पिन कोड टाइप करा"</string>
     <string name="keyguard_password_enter_puk_prompt" msgid="3747778500166059332">"सिम PUK कोड"</string>
     <string name="keyguard_password_enter_pin_prompt" msgid="8188243197504453830">"नवीन सिम पिन कोड"</string>
-    <string name="keyguard_password_entry_touch_hint" msgid="5790410752696806482"><font size="17">"संकेतशब्द टाइप करण्यासाठी स्पर्श करा"</font></string>
-    <string name="keyguard_password_enter_password_code" msgid="595980919238127672">"अनलॉक करण्यासाठी संकेतशब्द टाइप करा"</string>
+    <string name="keyguard_password_entry_touch_hint" msgid="5790410752696806482"><font size="17">"पासवर्ड टाइप करण्यासाठी स्पर्श करा"</font></string>
+    <string name="keyguard_password_enter_password_code" msgid="595980919238127672">"अनलॉक करण्यासाठी पासवर्ड टाइप करा"</string>
     <string name="keyguard_password_enter_pin_password_code" msgid="7504123374204446086">"अनलॉक करण्यासाठी पिन टाइप करा"</string>
     <string name="keyguard_password_wrong_pin_code" msgid="6535018036285012028">"चुकीचा पिन कोड."</string>
-    <!-- no translation found for keyguard_sim_error_message_short (592109500618448312) -->
-    <skip />
+    <string name="keyguard_sim_error_message_short" msgid="592109500618448312">"अवैध कार्ड."</string>
     <string name="keyguard_charged" msgid="2222329688813033109">"चार्ज झाली"</string>
     <string name="keyguard_plugged_in" msgid="89308975354638682">"चार्ज होत आहे"</string>
     <string name="keyguard_plugged_in_charging_fast" msgid="8869226755413795173">"द्रुतपणे चार्ज होत आहे"</string>
@@ -54,30 +53,30 @@
     <string name="keyguard_accessibility_next_alarm" msgid="5835196989158584991">"पुढील अलार्म <xliff:g id="ALARM">%1$s</xliff:g> साठी सेट केला"</string>
     <string name="keyboardview_keycode_delete" msgid="6883116827512721630">"हटवा"</string>
     <string name="disable_carrier_button_text" msgid="6914341927421916114">"eSIM बंद करा"</string>
-    <string name="keyboardview_keycode_enter" msgid="4505833604411016668">"प्रविष्ट करा"</string>
+    <string name="keyboardview_keycode_enter" msgid="4505833604411016668">"एंटर करा"</string>
     <string name="kg_forgot_pattern_button_text" msgid="534245177645252620">"पॅटर्न विसरलात"</string>
     <string name="kg_wrong_pattern" msgid="7620081431514773802">"चुकीचा पॅटर्न"</string>
-    <string name="kg_wrong_password" msgid="4580683060277329277">"चुकीचा संकेतशब्द"</string>
+    <string name="kg_wrong_password" msgid="4580683060277329277">"चुकीचा पासवर्ड"</string>
     <string name="kg_wrong_pin" msgid="4785660766909463466">"चुकीचा पिन"</string>
     <string name="kg_too_many_failed_attempts_countdown" msgid="527455490371878356">"<xliff:g id="NUMBER">%d</xliff:g> सेकंदांमध्ये पुन्हा प्रयत्न करा."</string>
     <string name="kg_pattern_instructions" msgid="5547646893001491340">"तुमचा पॅटर्न काढा"</string>
     <string name="kg_sim_pin_instructions" msgid="6389000973113699187">"सिम पिन एंटर करा"</string>
     <string name="kg_sim_pin_instructions_multi" msgid="1643757228644271861">"\"<xliff:g id="CARRIER">%1$s</xliff:g>\" साठी सिम पिन एंटर करा"</string>
     <string name="kg_sim_lock_instructions_esim" msgid="4957650659201013804">"मोबाइल सेवांशिवाय डिव्हाइस वापरण्यासाठी eSIM बंद करा."</string>
-    <string name="kg_pin_instructions" msgid="4069609316644030034">"पिन प्रविष्ट करा"</string>
-    <string name="kg_password_instructions" msgid="136952397352976538">"संकेतशब्द प्रविष्ट करा"</string>
-    <string name="kg_puk_enter_puk_hint" msgid="2288964170039899277">"सिम आता अक्षम केले आहे. सुरू ठेवण्यासाठी PUK कोड प्रविष्ट करा. तपशीलांसाठी वाहकाशी संपर्क साधा."</string>
-    <string name="kg_puk_enter_puk_hint_multi" msgid="1373131883510840794">"\"<xliff:g id="CARRIER">%1$s</xliff:g>\" सिम आता अक्षम केले आहे. सुरू ठेवण्यासाठी PUK कोड प्रविष्ट करा. तपशीलांसाठी वाहकाशी संपर्क साधा."</string>
-    <string name="kg_puk_enter_pin_hint" msgid="3137789674920391087">"इच्छित पिन कोड प्रविष्ट करा"</string>
+    <string name="kg_pin_instructions" msgid="4069609316644030034">"पिन एंटर करा"</string>
+    <string name="kg_password_instructions" msgid="136952397352976538">"पासवर्ड एंटर करा"</string>
+    <string name="kg_puk_enter_puk_hint" msgid="2288964170039899277">"सिम आता अक्षम केले आहे. सुरू ठेवण्यासाठी PUK कोड एंटर करा. तपशीलांसाठी वाहकाशी संपर्क साधा."</string>
+    <string name="kg_puk_enter_puk_hint_multi" msgid="1373131883510840794">"\"<xliff:g id="CARRIER">%1$s</xliff:g>\" सिम आता अक्षम केले आहे. सुरू ठेवण्यासाठी PUK कोड एंटर करा. तपशीलांसाठी वाहकाशी संपर्क साधा."</string>
+    <string name="kg_puk_enter_pin_hint" msgid="3137789674920391087">"इच्छित पिन कोड एंटर करा"</string>
     <string name="kg_enter_confirm_pin_hint" msgid="3089485999116759671">"इच्छित पिन कोड ची पुष्टी करा"</string>
     <string name="kg_sim_unlock_progress_dialog_message" msgid="4471738151810900114">"सिम कार्ड अनलॉक करत आहे…"</string>
     <string name="kg_invalid_sim_pin_hint" msgid="3057533256729513335">"4 ते 8 अंकांचा पिन टाईप करा."</string>
     <string name="kg_invalid_sim_puk_hint" msgid="6003602401368264144">"PUK कोड 8 अंकी किंवा त्यापेक्षा अधिकचा असावा."</string>
-    <string name="kg_invalid_puk" msgid="5399287873762592502">"योग्य PUK कोड पुन्हा प्रविष्ट करा. पुनःपुन्हा प्रयत्न करणे सिम कायमचे अक्षम करेल."</string>
+    <string name="kg_invalid_puk" msgid="5399287873762592502">"योग्य PUK कोड पुन्हा एंटर करा. पुनःपुन्हा प्रयत्न करणे सिम कायमचे अक्षम करेल."</string>
     <string name="kg_invalid_confirm_pin_hint" product="default" msgid="5672736555427444330">"पिन कोड जुळत नाहीत"</string>
     <string name="kg_login_too_many_attempts" msgid="6604574268387867255">"खूप जास्त पॅटर्न प्रयत्न"</string>
     <string name="kg_too_many_failed_pin_attempts_dialog_message" msgid="8637788033282252027">"आपण आपला PIN <xliff:g id="NUMBER_0">%1$d</xliff:g> वेळा चुकीच्या पद्धतीने टाइप केला आहे. \n\n<xliff:g id="NUMBER_1">%2$d</xliff:g> सेकंदांमध्ये पुन्हा प्रयत्न करा."</string>
-    <string name="kg_too_many_failed_password_attempts_dialog_message" msgid="7724148763268377734">"आपण आपला संकेतशब्द <xliff:g id="NUMBER_0">%1$d</xliff:g> वेळा चुकीच्या पद्धतीने टाइप केला आहे. \n\n<xliff:g id="NUMBER_1">%2$d</xliff:g> सेकंदांमध्ये पुन्हा प्रयत्न करा."</string>
+    <string name="kg_too_many_failed_password_attempts_dialog_message" msgid="7724148763268377734">"आपण आपला पासवर्ड <xliff:g id="NUMBER_0">%1$d</xliff:g> वेळा चुकीच्या पद्धतीने टाइप केला आहे. \n\n<xliff:g id="NUMBER_1">%2$d</xliff:g> सेकंदांमध्ये पुन्हा प्रयत्न करा."</string>
     <string name="kg_too_many_failed_pattern_attempts_dialog_message" msgid="4820967667848302092">"तुम्ही आपला अनलॉक पॅटर्न <xliff:g id="NUMBER_0">%1$d</xliff:g> वेळा अयोग्यरितीने काढला. \n\n <xliff:g id="NUMBER_1">%2$d</xliff:g> सेकंदांमध्ये पुन्हा प्रयत्न करा."</string>
     <string name="kg_failed_attempts_almost_at_wipe" product="tablet" msgid="1629351522209932316">"आपण टॅबलेट अनलॉक करण्याचा <xliff:g id="NUMBER_0">%1$d</xliff:g> वेळा चुकीच्या पद्धतीने प्रयत्न केला आहे. आणखी <xliff:g id="NUMBER_1">%2$d</xliff:g> अयशस्वी प्रयत्नांनंतर, हे टॅबलेट रीसेट केला जाईल, जे त्याचा सर्व डेटा हटवेल."</string>
     <string name="kg_failed_attempts_almost_at_wipe" product="default" msgid="3921998703529189931">"आपण फोन अनलॉक करण्याचा <xliff:g id="NUMBER_0">%1$d</xliff:g> वेळा चुकीच्या पद्धतीने प्रयत्न केला आहे. आणखी <xliff:g id="NUMBER_1">%2$d</xliff:g> अयशस्वी प्रयत्नांनंतर, हा फोन रीसेट केला जाईल, जे त्याचा सर्व डेटा हटवेल."</string>
@@ -114,10 +113,10 @@
     <string name="kg_prompt_reason_restart_password" msgid="6984641181515902406">"डिव्हाइस रीस्टार्ट झाल्यावर पासवर्ड आवश्यक आहे"</string>
     <string name="kg_prompt_reason_timeout_pattern" msgid="5304487696073914063">"अतिरिक्त सुरक्षिततेसाठी पॅटर्न आवश्‍यक आहे"</string>
     <string name="kg_prompt_reason_timeout_pin" msgid="8851462864335757813">"अतिरिक्त सुरक्षिततेसाठी पिन आवश्‍यक आहे"</string>
-    <string name="kg_prompt_reason_timeout_password" msgid="6563904839641583441">"अतिरिक्त सुरक्षिततेसाठी संकेतशब्द आवश्‍यक आहे"</string>
+    <string name="kg_prompt_reason_timeout_password" msgid="6563904839641583441">"अतिरिक्त सुरक्षिततेसाठी पासवर्ड आवश्‍यक आहे"</string>
     <string name="kg_prompt_reason_switch_profiles_pattern" msgid="3398054847288438444">"तुम्ही प्रोफाईल स्विच करता तेव्‍हा पॅटर्न आवश्‍यक आहे"</string>
     <string name="kg_prompt_reason_switch_profiles_pin" msgid="7426368139226961699">"आपण प्रोफाईल स्विच करता तेव्‍हा पिन आवश्‍यक आहे"</string>
-    <string name="kg_prompt_reason_switch_profiles_password" msgid="8383831046318421845">"आपण प्रोफाईल स्विच करता तेव्‍हा संकेतशब्द आवश्‍यक आहे"</string>
+    <string name="kg_prompt_reason_switch_profiles_password" msgid="8383831046318421845">"आपण प्रोफाईल स्विच करता तेव्‍हा पासवर्ड आवश्‍यक आहे"</string>
     <string name="kg_prompt_reason_device_admin" msgid="3452168247888906179">"प्रशासकाद्वारे लॉक केलेले डिव्हाइस"</string>
     <string name="kg_prompt_reason_user_request" msgid="8236951765212462286">"डिव्हाइस मॅन्युअली लॉक केले होते"</string>
     <plurals name="kg_prompt_reason_time_pattern" formatted="false" msgid="71299470072448533">

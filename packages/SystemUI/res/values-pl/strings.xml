@@ -66,7 +66,7 @@
     <string name="usb_debugging_message" msgid="2220143855912376496">"Odcisk cyfrowy klucza RSA komputera to:\n<xliff:g id="FINGERPRINT">%1$s</xliff:g>"</string>
     <string name="usb_debugging_always" msgid="303335496705863070">"Zawsze zezwalaj z tego komputera"</string>
     <string name="usb_debugging_secondary_user_title" msgid="6353808721761220421">"Debugowanie USB jest niedozwolone"</string>
-    <string name="usb_debugging_secondary_user_message" msgid="8572228137833020196">"Użytkownik obecnie zalogowany na tym urządzeniu nie może włączyć debugowania USB. Aby użyć tej funkcji, przełącz się na użytkownika będącego administratorem."</string>
+    <string name="usb_debugging_secondary_user_message" msgid="6067122453571699801">"Użytkownik obecnie zalogowany na tym urządzeniu nie może włączyć debugowania USB. Aby użyć tej funkcji, przełącz się na użytkownika głównego."</string>
     <string name="compat_mode_on" msgid="6623839244840638213">"Powiększ, aby wypełnić ekran"</string>
     <string name="compat_mode_off" msgid="4434467572461327898">"Rozciągnij, aby wypełnić ekran"</string>
     <string name="screenshot_saving_ticker" msgid="7403652894056693515">"Zapisywanie zrzutu ekranu..."</string>
@@ -244,7 +244,7 @@
     <string name="data_usage_disabled_dialog_4g_title" msgid="1601769736881078016">"Transmisja danych 4G została wstrzymana"</string>
     <string name="data_usage_disabled_dialog_mobile_title" msgid="6801382439018099779">"Mobilna transmisja danych jest wstrzymana"</string>
     <string name="data_usage_disabled_dialog_title" msgid="3932437232199671967">"Transmisja danych została wstrzymana"</string>
-    <string name="data_usage_disabled_dialog" msgid="4919541636934603816">"Osiągnięto ustawiony limit danych. Nie korzystasz już z komórkowej transmisji danych.\n\nJeśli włączysz ją ponownie, może zostać naliczona opłata za użycie danych."</string>
+    <string name="data_usage_disabled_dialog" msgid="4919541636934603816">"Osiągnięto ustawiony limit danych. Nie korzystasz już z mobilnej transmisji danych.\n\nJeśli włączysz ją ponownie, może zostać naliczona opłata za użycie danych."</string>
     <string name="data_usage_disabled_dialog_enable" msgid="1412395410306390593">"Wznów"</string>
     <string name="status_bar_settings_signal_meter_disconnected" msgid="1940231521274147771">"Brak internetu"</string>
     <string name="status_bar_settings_signal_meter_wifi_nossid" msgid="6557486452774597820">"Wi-Fi: połączono"</string>
@@ -357,10 +357,10 @@
     <string name="description_target_search" msgid="3091587249776033139">"Szukaj"</string>
     <string name="description_direction_up" msgid="7169032478259485180">"Przesuń w górę: <xliff:g id="TARGET_DESCRIPTION">%s</xliff:g>."</string>
     <string name="description_direction_left" msgid="7207478719805562165">"Przesuń w lewo: <xliff:g id="TARGET_DESCRIPTION">%s</xliff:g>."</string>
-    <string name="zen_priority_introduction" msgid="7577965386868311310">"Nie będą Cię niepokoić żadne dźwięki ani wibracje z wyjątkiem alarmów, przypomnień, wydarzeń i połączeń od wybranych osób. Będziesz słyszeć wszystkie odtwarzane treści, takie jak muzyka, filmy czy gry."</string>
-    <string name="zen_alarms_introduction" msgid="7034415210361973827">"Nie będą Cię niepokoić żadne dźwięki ani wibracje z wyjątkiem alarmów. Będziesz słyszeć wszystkie odtwarzane treści, takie jak muzyka, filmy czy gry."</string>
+    <string name="zen_priority_introduction" msgid="1149025108714420281">"Nie będą Cię niepokoić żadne dźwięki ani wibracje z wyjątkiem alarmów, przypomnień, wydarzeń i połączeń od wybranych osób. Będziesz słyszeć wszystkie odtwarzane treści, takie jak muzyka, filmy czy gry."</string>
+    <string name="zen_alarms_introduction" msgid="4934328096749380201">"Nie będą Cię niepokoić żadne dźwięki ani wibracje z wyjątkiem alarmów. Będziesz słyszeć wszystkie odtwarzane treści, takie jak muzyka, filmy czy gry."</string>
     <string name="zen_priority_customize_button" msgid="7948043278226955063">"Dostosuj"</string>
-    <string name="zen_silence_introduction_voice" msgid="2284540992298200729">"To zablokuje WSZYSTKIE dźwięki i wibracje, w tym alarmy, muzykę, filmy i gry. Nadal będzie można wykonywać połączenia."</string>
+    <string name="zen_silence_introduction_voice" msgid="3948778066295728085">"To zablokuje WSZYSTKIE dźwięki i wibracje, w tym alarmy, muzykę, filmy i gry. Nadal będzie można wykonywać połączenia."</string>
     <string name="zen_silence_introduction" msgid="3137882381093271568">"To zablokuje WSZYSTKIE dźwięki i wibracje – w tym alarmy, muzykę, filmy i gry."</string>
     <string name="keyguard_more_overflow_text" msgid="9195222469041601365">"+<xliff:g id="NUMBER_OF_NOTIFICATIONS">%d</xliff:g>"</string>
     <string name="speed_bump_explanation" msgid="1288875699658819755">"Poniżej widać mniej pilne powiadomienia"</string>
@@ -460,7 +460,7 @@
     <string name="monitoring_description_do_learn_more" msgid="1849514470437907421">"Więcej informacji"</string>
     <string name="monitoring_description_do_body_vpn" msgid="8255218762488901796">"Łączysz się z aplikacją <xliff:g id="VPN_APP">%1$s</xliff:g>, która może monitorować Twoją aktywność w sieci, w tym e-maile, aplikacje i strony internetowe."</string>
     <string name="monitoring_description_vpn_settings_separator" msgid="1933186756733474388">"  "</string>
-    <string name="monitoring_description_vpn_settings" msgid="8869300202410505143">"Otwórz ustawienia VPN"</string>
+    <string name="monitoring_description_vpn_settings" msgid="6434859242636063861">"Otwórz ustawienia VPN"</string>
     <string name="monitoring_description_ca_cert_settings_separator" msgid="4987350385906393626">" "</string>
     <string name="monitoring_description_ca_cert_settings" msgid="5489969458872997092">"Otwórz zaufane dane logowania"</string>
     <string name="monitoring_description_network_logging" msgid="7223505523384076027">"Administrator włączył rejestrowanie sieciowe, które pozwala monitorować ruch na Twoim urządzeniu.\n\nAby dowiedzieć się więcej, skontaktuj się z administratorem."</string>
@@ -560,10 +560,10 @@
     <string name="notification_default_channel_desc" msgid="2506053815870808359">"Ta aplikacja nie ma kategorii powiadomień"</string>
     <string name="notification_unblockable_desc" msgid="3561016061737896906">"Powiadomień z tej aplikacji nie można wyłączyć"</string>
     <plurals name="notification_num_channels_desc" formatted="false" msgid="5492793452274077663">
-      <item quantity="few">1 z <xliff:g id="NUMBER_1">%d</xliff:g> kategorii powiadomień z tej aplikacji</item>
-      <item quantity="many">1 z <xliff:g id="NUMBER_1">%d</xliff:g> kategorii powiadomień z tej aplikacji</item>
-      <item quantity="other">1 z <xliff:g id="NUMBER_1">%d</xliff:g> kategorii powiadomień z tej aplikacji</item>
-      <item quantity="one">1 z <xliff:g id="NUMBER_0">%d</xliff:g> kategorii powiadomień z tej aplikacji</item>
+      <item quantity="few">1 z <xliff:g id="NUMBER_1">%s</xliff:g> kategorii powiadomień z tej aplikacji</item>
+      <item quantity="many">1 z <xliff:g id="NUMBER_1">%s</xliff:g> kategorii powiadomień z tej aplikacji</item>
+      <item quantity="other">1 z <xliff:g id="NUMBER_1">%s</xliff:g> kategorii powiadomień z tej aplikacji</item>
+      <item quantity="one">1 z <xliff:g id="NUMBER_0">%s</xliff:g> kategorii powiadomień z tej aplikacji</item>
     </plurals>
     <string name="notification_channels_list_desc_2" msgid="6214732715833946441">"<xliff:g id="CHANNEL_NAME_1">%1$s</xliff:g>, <xliff:g id="CHANNEL_NAME_2">%2$s</xliff:g>"</string>
     <plurals name="notification_channels_list_desc_2_and_others" formatted="false" msgid="2747813553355336157">
@@ -597,8 +597,8 @@
       <item quantity="one">]%d minuta</item>
     </plurals>
     <string name="battery_panel_title" msgid="7944156115535366613">"Wykorzystanie baterii"</string>
-    <string name="battery_detail_charging_summary" msgid="1279095653533044008">"Oszczędzanie baterii nie jest dostępne podczas ładowania"</string>
-    <string name="battery_detail_switch_title" msgid="6285872470260795421">"Oszczędzanie baterii"</string>
+    <string name="battery_detail_charging_summary" msgid="4055327085770378335">"Oszczędzanie baterii nie jest dostępne podczas ładowania"</string>
+    <string name="battery_detail_switch_title" msgid="8763441006881907058">"Oszczędzanie baterii"</string>
     <string name="battery_detail_switch_summary" msgid="9049111149407626804">"Zmniejsza wydajność i ogranicza dane w tle"</string>
     <string name="keyboard_key_button_template" msgid="6230056639734377300">"Przycisk <xliff:g id="NAME">%1$s</xliff:g>"</string>
     <string name="keyboard_key_home" msgid="2243500072071305073">"Home"</string>
@@ -738,9 +738,9 @@
     <string name="pip_phone_minimize" msgid="1079119422589131792">"Minimalizuj"</string>
     <string name="pip_phone_close" msgid="8416647892889710330">"Zamknij"</string>
     <string name="pip_phone_dismiss_hint" msgid="6351678169095923899">"Przeciągnij w dół, by zamknąć"</string>
-    <string name="pip_menu_title" msgid="3328510504196964712">"Menu funkcji Obraz w obrazie"</string>
+    <string name="pip_menu_title" msgid="4707292089961887657">"Menu"</string>
     <string name="pip_notification_title" msgid="3204024940158161322">"Aplikacja <xliff:g id="NAME">%s</xliff:g> działa w trybie obraz w obrazie"</string>
-    <string name="pip_notification_message" msgid="4171698133469539591">"Jeśli nie chcesz, by aplikacja <xliff:g id="NAME">%s</xliff:g> korzystała z tej funkcji, otwórz ustawienia i ją wyłącz."</string>
+    <string name="pip_notification_message" msgid="5619512781514343311">"Jeśli nie chcesz, by aplikacja <xliff:g id="NAME">%s</xliff:g> korzystała z tej funkcji, otwórz ustawienia i ją wyłącz."</string>
     <string name="pip_play" msgid="1417176722760265888">"Odtwórz"</string>
     <string name="pip_pause" msgid="8881063404466476571">"Wstrzymaj"</string>
     <string name="pip_skip_to_next" msgid="1948440006726306284">"Dalej"</string>
@@ -766,6 +766,7 @@
     <string name="tuner_menu" msgid="191640047241552081">"Menu"</string>
     <string name="tuner_app" msgid="3507057938640108777">"Aplikacja <xliff:g id="APP">%1$s</xliff:g>"</string>
     <string name="notification_channel_alerts" msgid="4496839309318519037">"Alerty"</string>
+    <string name="notification_channel_battery" msgid="5786118169182888462">"Bateria"</string>
     <string name="notification_channel_screenshot" msgid="6314080179230000938">"Zrzuty ekranu"</string>
     <string name="notification_channel_general" msgid="4525309436693914482">"Wiadomości"</string>
     <string name="notification_channel_storage" msgid="3077205683020695313">"Pamięć wewnętrzna"</string>
@@ -786,4 +787,5 @@
     <string name="running_foreground_services_title" msgid="381024150898615683">"Aplikacje działające w tle"</string>
     <string name="running_foreground_services_msg" msgid="6326247670075574355">"Kliknij, by wyświetlić szczegóły wykorzystania baterii i użycia danych"</string>
     <string name="data_usage_disable_mobile" msgid="5116269981510015864">"Wyłączyć mobilną transmisję danych?"</string>
+    <string name="touch_filtered_warning" msgid="8671693809204767551">"Aplikacja Ustawienia nie może zweryfikować Twojej odpowiedzi, ponieważ inna aplikacja zasłania prośbę o udzielenie uprawnień."</string>
 </resources>

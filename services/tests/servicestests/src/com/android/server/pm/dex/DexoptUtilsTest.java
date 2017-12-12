@@ -60,6 +60,7 @@ public class DexoptUtilsTest {
         ApplicationInfo ai = new ApplicationInfo();
         String codeDir = "/data/app/mock.android.com";
         ai.setBaseCodePath(codeDir + "/base.dex");
+        ai.classLoaderName = baseClassLoader;
         ai.privateFlags = ai.privateFlags | ApplicationInfo.PRIVATE_FLAG_ISOLATED_SPLIT_LOADING;
         boolean[] pathsWithCode;
         if (!addSplits) {
@@ -79,17 +80,17 @@ public class DexoptUtilsTest {
                     codeDir + "/config-split-7.dex",
                     codeDir + "/feature-no-deps.dex"});
 
-            String[] splitClassLoaderNames = new String[]{
+            ai.splitClassLoaderNames = new String[]{
+                    DELEGATE_LAST_CLASS_LOADER_NAME,
+                    DELEGATE_LAST_CLASS_LOADER_NAME,
                     PATH_CLASS_LOADER_NAME,
-                    PATH_CLASS_LOADER_NAME,
-                    PATH_CLASS_LOADER_NAME,
-                    PATH_CLASS_LOADER_NAME,
+                    DEX_CLASS_LOADER_NAME,
                     PATH_CLASS_LOADER_NAME,
                     null,   // A null class loader name should default to PathClassLoader.
                     null,   // The config split gets a null class loader.
                     null};  // The feature split with no dependency and no specified class loader.
             if (addSplitDependencies) {
-                ai.splitDependencies = new SparseArray<>(splitClassLoaderNames.length + 1);
+                ai.splitDependencies = new SparseArray<>(ai.splitClassLoaderNames.length + 1);
                 ai.splitDependencies.put(0, new int[] {-1}); // base has no dependency
                 ai.splitDependencies.put(1, new int[] {2}); // split 1 depends on 2
                 ai.splitDependencies.put(2, new int[] {4}); // split 2 depends on 4
@@ -116,9 +117,9 @@ public class DexoptUtilsTest {
 
         assertEquals(9, contexts.length);
         assertEquals("PCL[a.dex:b.dex]", contexts[0]);
-        assertEquals("PCL[];PCL[base-2.dex];PCL[base-4.dex];PCL[a.dex:b.dex:base.dex]",
+        assertEquals("DLC[];DLC[base-2.dex];PCL[base-4.dex];PCL[a.dex:b.dex:base.dex]",
                 contexts[1]);
-        assertEquals("PCL[];PCL[base-4.dex];PCL[a.dex:b.dex:base.dex]", contexts[2]);
+        assertEquals("DLC[];PCL[base-4.dex];PCL[a.dex:b.dex:base.dex]", contexts[2]);
         assertEquals("PCL[];PCL[base-4.dex];PCL[a.dex:b.dex:base.dex]", contexts[3]);
         assertEquals("PCL[];PCL[a.dex:b.dex:base.dex]", contexts[4]);
         assertEquals("PCL[];PCL[a.dex:b.dex:base.dex]", contexts[5]);
@@ -184,13 +185,13 @@ public class DexoptUtilsTest {
                 data.info, null, data.pathsWithCode);
 
         assertEquals(9, contexts.length);
-        assertEquals("PCL[]", contexts[0]);
-        assertEquals("PCL[];PCL[base-2.dex];PCL[base-4.dex];PCL[base.dex]", contexts[1]);
-        assertEquals("PCL[];PCL[base-4.dex];PCL[base.dex]", contexts[2]);
-        assertEquals("PCL[];PCL[base-4.dex];PCL[base.dex]", contexts[3]);
-        assertEquals("PCL[];PCL[base.dex]", contexts[4]);
-        assertEquals("PCL[];PCL[base.dex]", contexts[5]);
-        assertEquals("PCL[];PCL[base-5.dex];PCL[base.dex]", contexts[6]);
+        assertEquals("DLC[]", contexts[0]);
+        assertEquals("DLC[];DLC[base-2.dex];PCL[base-4.dex];DLC[base.dex]", contexts[1]);
+        assertEquals("DLC[];PCL[base-4.dex];DLC[base.dex]", contexts[2]);
+        assertEquals("PCL[];PCL[base-4.dex];DLC[base.dex]", contexts[3]);
+        assertEquals("PCL[];DLC[base.dex]", contexts[4]);
+        assertEquals("PCL[];DLC[base.dex]", contexts[5]);
+        assertEquals("PCL[];PCL[base-5.dex];DLC[base.dex]", contexts[6]);
         assertEquals(null, contexts[7]);  // config split
         assertEquals("PCL[]", contexts[8]);  // feature split with no dependency
     }
@@ -205,8 +206,8 @@ public class DexoptUtilsTest {
 
         assertEquals(9, contexts.length);
         assertEquals("PCL[a.dex:b.dex]", contexts[0]);
-        assertEquals("PCL[];PCL[base-2.dex];PCL[base-4.dex];PCL[a.dex:b.dex:base.dex]", contexts[1]);
-        assertEquals("PCL[];PCL[base-4.dex];PCL[a.dex:b.dex:base.dex]", contexts[2]);
+        assertEquals("DLC[];DLC[base-2.dex];PCL[base-4.dex];PCL[a.dex:b.dex:base.dex]", contexts[1]);
+        assertEquals("DLC[];PCL[base-4.dex];PCL[a.dex:b.dex:base.dex]", contexts[2]);
         assertEquals("PCL[];PCL[base-4.dex];PCL[a.dex:b.dex:base.dex]", contexts[3]);
         assertEquals("PCL[];PCL[a.dex:b.dex:base.dex]", contexts[4]);
         assertEquals("PCL[];PCL[a.dex:b.dex:base.dex]", contexts[5]);
@@ -246,7 +247,7 @@ public class DexoptUtilsTest {
                 data.info, sharedLibrary, data.pathsWithCode);
 
         assertEquals(1, contexts.length);
-        assertEquals("PCL[a.dex:b.dex]", contexts[0]);
+        assertEquals("DLC[a.dex:b.dex]", contexts[0]);
     }
 
     @Test
@@ -267,7 +268,7 @@ public class DexoptUtilsTest {
                 data.info, null, data.pathsWithCode);
 
         assertEquals(1, contexts.length);
-        assertEquals("PCL[]", contexts[0]);
+        assertEquals("DLC[]", contexts[0]);
     }
 
     @Test
@@ -300,8 +301,8 @@ public class DexoptUtilsTest {
 
         assertEquals(9, contexts.length);
         assertEquals(null, contexts[0]);
-        assertEquals("PCL[];PCL[base-2.dex];PCL[base-4.dex];PCL[a.dex:b.dex:base.dex]", contexts[1]);
-        assertEquals("PCL[];PCL[base-4.dex];PCL[a.dex:b.dex:base.dex]", contexts[2]);
+        assertEquals("DLC[];DLC[base-2.dex];PCL[base-4.dex];PCL[a.dex:b.dex:base.dex]", contexts[1]);
+        assertEquals("DLC[];PCL[base-4.dex];PCL[a.dex:b.dex:base.dex]", contexts[2]);
         assertEquals("PCL[];PCL[base-4.dex];PCL[a.dex:b.dex:base.dex]", contexts[3]);
         assertEquals("PCL[];PCL[a.dex:b.dex:base.dex]", contexts[4]);
         assertEquals("PCL[];PCL[a.dex:b.dex:base.dex]", contexts[5]);
@@ -322,8 +323,8 @@ public class DexoptUtilsTest {
         String[] context = DexoptUtils.processContextForDexLoad(classLoaders, classPaths);
         assertNotNull(context);
         assertEquals(2, context.length);
-        assertEquals("PCL[];PCL[parent1.dex];PCL[parent2.dex:parent3.dex]", context[0]);
-        assertEquals("PCL[foo.dex];PCL[parent1.dex];PCL[parent2.dex:parent3.dex]", context[1]);
+        assertEquals("DLC[];PCL[parent1.dex];PCL[parent2.dex:parent3.dex]", context[0]);
+        assertEquals("DLC[foo.dex];PCL[parent1.dex];PCL[parent2.dex:parent3.dex]", context[1]);
     }
 
     @Test

@@ -18,6 +18,7 @@ package android.view;
 
 
 import android.annotation.StringRes;
+import android.annotation.TestApi;
 import android.graphics.Rect;
 
 /**
@@ -278,6 +279,7 @@ public abstract class ActionMode {
      * @return true if the UI used to show this action mode can take focus
      * @hide Internal use only
      */
+    @TestApi
     public boolean isUiFocusable() {
         return true;
     }

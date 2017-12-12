@@ -18,11 +18,28 @@
 
 #include <algorithm>
 
+#include "text/Unicode.h"
+#include "text/Utf8Iterator.h"
 #include "util/Util.h"
 
-using android::StringPiece;
+using ::aapt::text::Utf8Iterator;
+using ::android::StringPiece;
 
 namespace aapt {
+
+StringPiece AnnotationProcessor::ExtractFirstSentence(const StringPiece& comment) {
+  Utf8Iterator iter(comment);
+  while (iter.HasNext()) {
+    const char32_t codepoint = iter.Next();
+    if (codepoint == U'.') {
+      const size_t current_position = iter.Position();
+      if (!iter.HasNext() || text::IsWhitespace(iter.Next())) {
+        return comment.substr(0, current_position);
+      }
+    }
+  }
+  return comment;
+}
 
 void AnnotationProcessor::AppendCommentLine(std::string& comment) {
   static const std::string sDeprecated = "@deprecated";

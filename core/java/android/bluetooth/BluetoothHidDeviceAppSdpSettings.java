@@ -19,17 +19,17 @@ package android.bluetooth;
 import android.os.Parcel;
 import android.os.Parcelable;
 
+import java.util.Arrays;
+
 /**
- * Represents the Service Discovery Protocol (SDP) settings for a Bluetooth
- * HID Device application.
+ * Represents the Service Discovery Protocol (SDP) settings for a Bluetooth HID Device application.
  *
- * The BluetoothHidDevice framework adds the SDP record during app
- * registration, so that the Android device can be discovered as a Bluetooth
- * HID Device.
+ * <p>The BluetoothHidDevice framework adds the SDP record during app registration, so that the
+ * Android device can be discovered as a Bluetooth HID Device.
  *
- * {@see BluetoothHidDevice}
+ * <p>{@see BluetoothHidDevice}
  *
- * {@hide}
+ * <p>{@hide}
  */
 public final class BluetoothHidDeviceAppSdpSettings implements Parcelable {
 
@@ -39,8 +39,21 @@ public final class BluetoothHidDeviceAppSdpSettings implements Parcelable {
     public final byte subclass;
     public final byte[] descriptors;
 
-    public BluetoothHidDeviceAppSdpSettings(String name, String description, String provider,
-            byte subclass, byte[] descriptors) {
+    /**
+     * Create a BluetoothHidDeviceAppSdpSettings object for the Bluetooth SDP record.
+     *
+     * @param name Name of this Bluetooth HID device. Maximum length is 50 bytes.
+     * @param description Description for this Bluetooth HID device. Maximum length is 50 bytes.
+     * @param provider Provider of this Bluetooth HID device. Maximum length is 50 bytes.
+     * @param subclass Subclass of this Bluetooth HID device. See <a
+     *     href="www.usb.org/developers/hidpage/HID1_11.pdf">
+     *     www.usb.org/developers/hidpage/HID1_11.pdf Section 4.2</a>
+     * @param descriptors Descriptors of this Bluetooth HID device. See <a
+     *     href="www.usb.org/developers/hidpage/HID1_11.pdf">
+     *     www.usb.org/developers/hidpage/HID1_11.pdf Chapter 6</a> Maximum length is 2048 bytes.
+     */
+    public BluetoothHidDeviceAppSdpSettings(
+            String name, String description, String provider, byte subclass, byte[] descriptors) {
         this.name = name;
         this.description = description;
         this.provider = provider;
@@ -52,7 +65,11 @@ public final class BluetoothHidDeviceAppSdpSettings implements Parcelable {
     public boolean equals(Object o) {
         if (o instanceof BluetoothHidDeviceAppSdpSettings) {
             BluetoothHidDeviceAppSdpSettings sdp = (BluetoothHidDeviceAppSdpSettings) o;
-            return false;
+            return this.name.equals(sdp.name)
+                    && this.description.equals(sdp.description)
+                    && this.provider.equals(sdp.provider)
+                    && this.subclass == sdp.subclass
+                    && Arrays.equals(this.descriptors, sdp.descriptors);
         }
         return false;
     }

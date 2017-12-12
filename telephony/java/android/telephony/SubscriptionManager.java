@@ -18,25 +18,28 @@ package android.telephony;
 
 import android.annotation.NonNull;
 import android.annotation.SdkConstant;
-import android.annotation.SystemService;
+import android.annotation.SystemApi;
 import android.annotation.SdkConstant.SdkConstantType;
+import android.annotation.SystemService;
 import android.content.Context;
 import android.content.Intent;
 import android.content.res.Configuration;
 import android.content.res.Resources;
+import android.net.INetworkPolicyManager;
 import android.net.Uri;
 import android.os.Handler;
+import android.os.Looper;
 import android.os.Message;
 import android.os.RemoteException;
 import android.os.ServiceManager;
 import android.util.DisplayMetrics;
-
 import com.android.internal.telephony.IOnSubscriptionsChangedListener;
 import com.android.internal.telephony.ISub;
 import com.android.internal.telephony.ITelephonyRegistry;
 import com.android.internal.telephony.PhoneConstants;
-
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 
 /**
@@ -57,7 +60,7 @@ public class SubscriptionManager {
 
     /** Base value for Dummy SUBSCRIPTION_ID's. */
     /** FIXME: Remove DummySubId's, but for now have them map just below INVALID_SUBSCRIPTION_ID
-    /** @hide */
+     /** @hide */
     public static final int DUMMY_SUBSCRIPTION_ID_BASE = INVALID_SUBSCRIPTION_ID - 1;
 
     /** An invalid phone identifier */
@@ -366,7 +369,7 @@ public class SubscriptionManager {
      */
     @SdkConstant(SdkConstantType.BROADCAST_INTENT_ACTION)
     public static final String SUB_DEFAULT_CHANGED_ACTION =
-        "android.intent.action.SUB_DEFAULT_CHANGED";
+            "android.intent.action.SUB_DEFAULT_CHANGED";
 
     /**
      * Broadcast Action: The default subscription has changed.  This has the following
@@ -408,7 +411,15 @@ public class SubscriptionManager {
      * for #onSubscriptionsChanged to be invoked.
      */
     public static class OnSubscriptionsChangedListener {
-        private final Handler mHandler  = new Handler() {
+        private class OnSubscriptionsChangedListenerHandler extends Handler {
+            OnSubscriptionsChangedListenerHandler() {
+                super();
+            }
+
+            OnSubscriptionsChangedListenerHandler(Looper looper) {
+                super(looper);
+            }
+
             @Override
             public void handleMessage(Message msg) {
                 if (DBG) {
@@ -416,7 +427,22 @@ public class SubscriptionManager {
                 }
                 OnSubscriptionsChangedListener.this.onSubscriptionsChanged();
             }
-        };
+        }
+
+        private final Handler mHandler;
+
+        public OnSubscriptionsChangedListener() {
+            mHandler = new OnSubscriptionsChangedListenerHandler();
+        }
+
+        /**
+         * Allow a listener to be created with a custom looper
+         * @param looper the looper that the underlining handler should run on
+         * @hide
+         */
+        public OnSubscriptionsChangedListener(Looper looper) {
+            mHandler = new OnSubscriptionsChangedListenerHandler(looper);
+        }
 
         /**
          * Callback invoked when there is any change to any SubscriptionInfo. Typically
@@ -619,7 +645,7 @@ public class SubscriptionManager {
         }
 
         if (result == null) {
-            result = new ArrayList<SubscriptionInfo>();
+            result = new ArrayList<>();
         }
         return result;
     }
@@ -1448,8 +1474,8 @@ public class SubscriptionManager {
         try {
             ISub iSub = ISub.Stub.asInterface(ServiceManager.getService("isub"));
             if (iSub != null) {
-                resultValue = iSub.getSubscriptionProperty(subId, propKey, 
-                    context.getOpPackageName());
+                resultValue = iSub.getSubscriptionProperty(subId, propKey,
+                        context.getOpPackageName());
             }
         } catch (RemoteException ex) {
             // ignore it
@@ -1538,5 +1564,64 @@ public class SubscriptionManager {
         } catch (RemoteException ex) {
         }
         return false;
+    }
+
+    /**
+     * Get the description of the billing relationship plan between a carrier
+     * and a specific subscriber.
+     * <p>
+     * This method is only accessible to the following narrow set of apps:
+     * <ul>
+     * <li>The carrier app for this subscriberId, as determined by
+     * {@link TelephonyManager#hasCarrierPrivileges(int)}.
+     * <li>The carrier app explicitly delegated access through
+     * {@link CarrierConfigManager#KEY_CONFIG_PLANS_PACKAGE_OVERRIDE_STRING}.
+     * </ul>
+     *
+     * @param subId the subscriber this relationship applies to
+     * @hide
+     */
+    @SystemApi
+    public @NonNull List<SubscriptionPlan> getSubscriptionPlans(int subId) {
+        final INetworkPolicyManager npm = INetworkPolicyManager.Stub
+                .asInterface(ServiceManager.getService(Context.NETWORK_POLICY_SERVICE));
+        try {
+            SubscriptionPlan[] subscriptionPlans =
+                    npm.getSubscriptionPlans(subId, mContext.getOpPackageName());
+            return subscriptionPlans == null
+                    ? Collections.emptyList() : Arrays.asList(subscriptionPlans);
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    /**
+     * Set the description of the billing relationship plan between a carrier
+     * and a specific subscriber.
+     * <p>
+     * This method is only accessible to the following narrow set of apps:
+     * <ul>
+     * <li>The carrier app for this subscriberId, as determined by
+     * {@link TelephonyManager#hasCarrierPrivileges(int)}.
+     * <li>The carrier app explicitly delegated access through
+     * {@link CarrierConfigManager#KEY_CONFIG_PLANS_PACKAGE_OVERRIDE_STRING}.
+     * </ul>
+     *
+     * @param subId the subscriber this relationship applies to
+     * @param plans the list of plans. The first plan is always the primary and
+     *            most important plan. Any additional plans are secondary and
+     *            may not be displayed or used by decision making logic.
+     * @hide
+     */
+    @SystemApi
+    public void setSubscriptionPlans(int subId, @NonNull List<SubscriptionPlan> plans) {
+        final INetworkPolicyManager npm = INetworkPolicyManager.Stub
+                .asInterface(ServiceManager.getService(Context.NETWORK_POLICY_SERVICE));
+        try {
+            npm.setSubscriptionPlans(subId, plans.toArray(new SubscriptionPlan[plans.size()]),
+                    mContext.getOpPackageName());
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
     }
 }

@@ -37,12 +37,17 @@ public class ConfigurationControllerImpl implements ConfigurationController,
     private final Configuration mLastConfig = new Configuration();
     private int mDensity;
     private float mFontScale;
+    private boolean mInCarMode;
+    private int mUiMode;
     private LocaleList mLocaleList;
 
     public ConfigurationControllerImpl(Context context) {
         Configuration currentConfig = context.getResources().getConfiguration();
         mFontScale = currentConfig.fontScale;
         mDensity = currentConfig.densityDpi;
+        mInCarMode = (currentConfig.uiMode  & Configuration.UI_MODE_TYPE_MASK)
+                == Configuration.UI_MODE_TYPE_CAR;
+        mUiMode = currentConfig.uiMode & Configuration.UI_MODE_NIGHT_MASK;
         mLocaleList = currentConfig.getLocales();
     }
 
@@ -58,7 +63,9 @@ public class ConfigurationControllerImpl implements ConfigurationController,
         });
         final float fontScale = newConfig.fontScale;
         final int density = newConfig.densityDpi;
-        if (density != mDensity || mFontScale != fontScale) {
+        int uiMode = newConfig.uiMode & Configuration.UI_MODE_NIGHT_MASK;
+        if (density != mDensity || fontScale != mFontScale
+                || (mInCarMode && uiMode != mUiMode)) {
             listeners.forEach(l -> {
                 if (mListeners.contains(l)) {
                     l.onDensityOrFontScaleChanged();
@@ -66,6 +73,7 @@ public class ConfigurationControllerImpl implements ConfigurationController,
             });
             mDensity = density;
             mFontScale = fontScale;
+            mUiMode = uiMode;
         }
 
         final LocaleList localeList = newConfig.getLocales();

@@ -94,7 +94,7 @@ interface IWifiManager
 
     void reassociate();
 
-    WifiInfo getConnectionInfo();
+    WifiInfo getConnectionInfo(String callingPackage);
 
     boolean setWifiEnabled(String packageName, boolean enable);
 

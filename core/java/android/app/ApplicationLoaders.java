@@ -18,9 +18,8 @@ package android.app;
 
 import android.os.Build;
 import android.os.Trace;
-import android.text.TextUtils;
 import android.util.ArrayMap;
-import com.android.internal.os.PathClassLoaderFactory;
+import com.android.internal.os.ClassLoaderFactory;
 import dalvik.system.PathClassLoader;
 
 /** @hide */
@@ -31,15 +30,16 @@ public class ApplicationLoaders {
 
     ClassLoader getClassLoader(String zip, int targetSdkVersion, boolean isBundled,
                                String librarySearchPath, String libraryPermittedPath,
-                               ClassLoader parent) {
+                               ClassLoader parent, String classLoaderName) {
         // For normal usage the cache key used is the same as the zip path.
         return getClassLoader(zip, targetSdkVersion, isBundled, librarySearchPath,
-                              libraryPermittedPath, parent, zip);
+                              libraryPermittedPath, parent, zip, classLoaderName);
     }
 
     private ClassLoader getClassLoader(String zip, int targetSdkVersion, boolean isBundled,
                                        String librarySearchPath, String libraryPermittedPath,
-                                       ClassLoader parent, String cacheKey) {
+                                       ClassLoader parent, String cacheKey,
+                                       String classLoaderName) {
         /*
          * This is the parent we use if they pass "null" in.  In theory
          * this should be the "system" class loader; in practice we
@@ -66,28 +66,25 @@ public class ApplicationLoaders {
 
                 Trace.traceBegin(Trace.TRACE_TAG_ACTIVITY_MANAGER, zip);
 
-                PathClassLoader pathClassloader = PathClassLoaderFactory.createClassLoader(
-                                                      zip,
-                                                      librarySearchPath,
-                                                      libraryPermittedPath,
-                                                      parent,
-                                                      targetSdkVersion,
-                                                      isBundled);
+                ClassLoader classloader = ClassLoaderFactory.createClassLoader(
+                        zip,  librarySearchPath, libraryPermittedPath, parent,
+                        targetSdkVersion, isBundled, classLoaderName);
 
                 Trace.traceEnd(Trace.TRACE_TAG_ACTIVITY_MANAGER);
 
                 Trace.traceBegin(Trace.TRACE_TAG_ACTIVITY_MANAGER, "setupVulkanLayerPath");
-                setupVulkanLayerPath(pathClassloader, librarySearchPath);
+                setupVulkanLayerPath(classloader, librarySearchPath);
                 Trace.traceEnd(Trace.TRACE_TAG_ACTIVITY_MANAGER);
 
-                mLoaders.put(cacheKey, pathClassloader);
-                return pathClassloader;
+                mLoaders.put(cacheKey, classloader);
+                return classloader;
             }
 
             Trace.traceBegin(Trace.TRACE_TAG_ACTIVITY_MANAGER, zip);
-            PathClassLoader pathClassloader = new PathClassLoader(zip, parent);
+            ClassLoader loader = ClassLoaderFactory.createClassLoader(
+                    zip, null, parent, classLoaderName);
             Trace.traceEnd(Trace.TRACE_TAG_ACTIVITY_MANAGER);
-            return pathClassloader;
+            return loader;
         }
     }
 
@@ -105,7 +102,7 @@ public class ApplicationLoaders {
         // The cache key is passed separately to enable the stub WebView to be cached under the
         // stub's APK path, when the actual package path is the donor APK.
         return getClassLoader(packagePath, Build.VERSION.SDK_INT, false, libsPath, null, null,
-                              cacheKey);
+                              cacheKey, null /* classLoaderName */);
     }
 
     private static native void setupVulkanLayerPath(ClassLoader classLoader, String librarySearchPath);
@@ -122,7 +119,7 @@ public class ApplicationLoaders {
         baseDexClassLoader.addDexPath(dexPath);
     }
 
-    private final ArrayMap<String, ClassLoader> mLoaders = new ArrayMap<String, ClassLoader>();
+    private final ArrayMap<String, ClassLoader> mLoaders = new ArrayMap<>();
 
     private static final ApplicationLoaders gApplicationLoaders = new ApplicationLoaders();
 }

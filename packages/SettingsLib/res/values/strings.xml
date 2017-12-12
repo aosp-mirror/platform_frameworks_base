@@ -97,6 +97,14 @@
     <!-- Summary for Connected wifi network without internet -->
     <string name="wifi_connected_no_internet">Connected, no Internet</string>
 
+    <!-- Summary for networks failing to connect due to association rejection status 17, AP full -->
+    <string name="wifi_ap_unable_to_handle_new_sta">Access point temporarily full</string>
+
+    <!-- Status message of Wi-Fi when it is connected to a Carrier Network. [CHAR LIMIT=NONE] -->
+    <string name="connected_via_carrier">Connected via %1$s</string>
+    <!-- Status message of Wi-Fi when an available network is a carrier network. [CHAR LIMIT=NONE] -->
+    <string name="available_via_carrier">Available via %1$s</string>
+
     <!-- Speed label for very slow network speed -->
     <string name="speed_label_very_slow">Very Slow</string>
     <!-- Speed label for slow network speed -->
@@ -109,6 +117,9 @@
     <string name="speed_label_fast">Fast</string>
     <!-- Speed label for very fast network speed -->
     <string name="speed_label_very_fast">Very Fast</string>
+
+    <!-- Summary text separator for preferences including a short description (eg. "Fast / Connected"). -->
+    <string name="preference_summary_default_combination"><xliff:g id="state" example="ON">%1$s</xliff:g> / <xliff:g id="description" example="High accuracy mode">%2$s</xliff:g></string>
 
     <!-- Bluetooth settings.  Message when a device is disconnected -->
     <string name="bluetooth_disconnected">Disconnected</string>
@@ -236,6 +247,12 @@
     <string name="accessibility_wifi_three_bars">Wifi three bars.</string>
     <!-- Content description of the WIFI signal when it is full for accessibility (not shown on the screen). [CHAR LIMIT=NONE] -->
     <string name="accessibility_wifi_signal_full">Wifi signal full.</string>
+
+    <!-- Content description of the Wi-Fi security type. This message indicates this is an open Wi-Fi (no password needed) [CHAR LIMIT=NONE] -->
+    <string name="accessibility_wifi_security_type_none">Open network</string>
+
+    <!-- Content description of the Wi-Fi security type. This message indicates this is a secured Wi-Fi (password needed) [CHAR LIMIT=NONE] -->
+    <string name="accessibility_wifi_security_type_secured">Secure network</string>
 
     <!-- Label for kernel threads in battery usage -->
     <string name="process_kernel_label">Android OS</string>
@@ -467,6 +484,8 @@
     <string name="mobile_data_always_on">Mobile data always active</string>
     <!-- Setting Checkbox title whether to enable hardware acceleration for tethering. [CHAR LIMIT=80] -->
     <string name="tethering_hardware_offload">Tethering hardware acceleration</string>
+    <!-- Setting Checkbox title for showing Bluetooth devices without names -->
+    <string name="bluetooth_show_devices_without_names">Show Bluetooth devices without names</string>
     <!-- Setting Checkbox title for disabling Bluetooth absolute volume -->
     <string name="bluetooth_disable_absolute_volume">Disable absolute volume</string>
     <!-- Setting Checkbox title for enabling Bluetooth inband ringing -->
@@ -559,11 +578,12 @@
     <string name="verify_apps_over_usb_title">Verify apps over USB</string>
     <!-- Summary of checkbox setting to perform package verification on apps installed over USB/ADT/ADB [CHAR LIMIT=NONE] -->
     <string name="verify_apps_over_usb_summary">Check apps installed via ADB/ADT for harmful behavior.</string>
+    <!-- Summary of checkbox for showing Bluetooth devices without names -->
+    <string name="bluetooth_show_devices_without_names_summary">Bluetooth devices without names (MAC addresses only) will be displayed</string>
     <!-- Summary of checkbox for disabling Bluetooth absolute volume -->
     <string name="bluetooth_disable_absolute_volume_summary">Disables the Bluetooth absolute volume feature in case of volume issues with remote devices such as unacceptably loud volume or lack of control.</string>
     <!-- Summary of checkbox for enabling Bluetooth inband ringing -->
     <string name="bluetooth_enable_inband_ringing_summary">Allow ringtones on the phone to be played on Bluetooth headsets</string>
-
 
     <!-- Title of checkbox setting that enables the terminal app. [CHAR LIMIT=32] -->
     <string name="enable_terminal_title">Local terminal</string>
@@ -858,8 +878,6 @@
     <string name="power_charging"><xliff:g id="level">%1$s</xliff:g> - <xliff:g id="state">%2$s</xliff:g></string>
     <!-- [CHAR_LIMIT=40] Label for battery level chart when charging with duration -->
     <string name="power_charging_duration"><xliff:g id="level">^1</xliff:g> - <xliff:g id="time">^2</xliff:g> until fully charged</string>
-    <!-- [CHAR_LIMIT=40] Short label for battery level chart when charging with duration -->
-    <string name="power_charging_duration_short"><xliff:g id="level">^1</xliff:g> - <xliff:g id="time">^2</xliff:g></string>
 
     <!-- Battery Info screen. Value for a status item.  Used for diagnostic info screens, precise translation isn't needed -->
     <string name="battery_info_status_unknown">Unknown</string>
@@ -870,7 +888,7 @@
     <!-- Battery Info screen. Value for a status item.  Used for diagnostic info screens, precise translation isn't needed -->
     <string name="battery_info_status_discharging">Not charging</string>
     <!-- Battery Info screen. Value for a status item.  Used for diagnostic info screens, precise translation isn't needed -->
-    <string name="battery_info_status_not_charging">Not charging</string>
+    <string name="battery_info_status_not_charging">Plugged in, can\'t charge right now</string>
     <!-- Battery Info screen. Value for a status item.  Used for diagnostic info screens, precise translation isn't needed -->
     <string name="battery_info_status_full">Full</string>
 
@@ -945,9 +963,6 @@
 
     <!-- Content description for drawer menu button [CHAR_LIMIT=30]-->
     <string name="content_description_menu_button">Menu</string>
-
-    <!-- Label for Greenwich mean time, used in a string like GMT+05:00. [CHAR LIMIT=NONE] -->
-    <string name="time_zone_gmt">GMT</string>
 
     <!-- Label for carrier demo mode factory reset confirmation dialog. [CHAR LIMIT=NONE] -->
     <string name="retail_demo_reset_message">Enter password to perform factory reset in demo mode</string>

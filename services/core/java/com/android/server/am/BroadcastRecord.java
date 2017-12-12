@@ -248,6 +248,55 @@ final class BroadcastRecord extends Binder {
         state = IDLE;
     }
 
+    /**
+     * Copy constructor which takes a different intent.
+     * Only used by {@link #maybeStripForHistory}.
+     */
+    private BroadcastRecord(BroadcastRecord from, Intent newIntent) {
+        intent = newIntent;
+        targetComp = newIntent.getComponent();
+
+        callerApp = from.callerApp;
+        callerPackage = from.callerPackage;
+        callingPid = from.callingPid;
+        callingUid = from.callingUid;
+        callerInstantApp = from.callerInstantApp;
+        ordered = from.ordered;
+        sticky = from.sticky;
+        initialSticky = from.initialSticky;
+        userId = from.userId;
+        resolvedType = from.resolvedType;
+        requiredPermissions = from.requiredPermissions;
+        appOp = from.appOp;
+        options = from.options;
+        receivers = from.receivers;
+        delivery = from.delivery;
+        resultTo = from.resultTo;
+        enqueueClockTime = from.enqueueClockTime;
+        dispatchTime = from.dispatchTime;
+        dispatchClockTime = from.dispatchClockTime;
+        receiverTime = from.receiverTime;
+        finishTime = from.finishTime;
+        resultCode = from.resultCode;
+        resultData = from.resultData;
+        resultExtras = from.resultExtras;
+        resultAbort = from.resultAbort;
+        nextReceiver = from.nextReceiver;
+        receiver = from.receiver;
+        state = from.state;
+        anrCount = from.anrCount;
+        manifestCount = from.manifestCount;
+        manifestSkipCount = from.manifestSkipCount;
+        queue = from.queue;
+    }
+
+    public BroadcastRecord maybeStripForHistory() {
+        if (!intent.canStripForHistory()) {
+            return this;
+        }
+        return new BroadcastRecord(this, intent.maybeStripForHistory());
+    }
+
     boolean cleanupDisabledPackageReceiversLocked(
             String packageName, Set<String> filterByClasses, int userId, boolean doit) {
         if ((userId != UserHandle.USER_ALL && this.userId != userId) || receivers == null) {

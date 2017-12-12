@@ -42,7 +42,7 @@ public class OffloadHardwareInterface {
     // Change this value to control whether tether offload is enabled or
     // disabled by default in the absence of an explicit Settings value.
     // See accompanying unittest to distinguish 0 from non-0 values.
-    private static final int DEFAULT_TETHER_OFFLOAD_DISABLED = 1;
+    private static final int DEFAULT_TETHER_OFFLOAD_DISABLED = 0;
     private static final String NO_INTERFACE_NAME = "";
     private static final String NO_IPV4_ADDRESS = "";
     private static final String NO_IPV4_GATEWAY = "";

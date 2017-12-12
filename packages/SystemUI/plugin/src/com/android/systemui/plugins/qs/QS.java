@@ -31,9 +31,9 @@ import com.android.systemui.plugins.qs.QS.HeightListener;
 @DependsOn(target = HeightListener.class)
 public interface QS extends FragmentBase {
 
-    public static final String ACTION = "com.android.systemui.action.PLUGIN_QS";
+    String ACTION = "com.android.systemui.action.PLUGIN_QS";
 
-    public static final int VERSION = 6;
+    int VERSION = 6;
 
     String TAG = "QS";
 
@@ -66,8 +66,8 @@ public interface QS extends FragmentBase {
     }
 
     @ProvidesInterface(version = HeightListener.VERSION)
-    public interface HeightListener {
-        public static final int VERSION = 1;
+    interface HeightListener {
+        int VERSION = 1;
         void onQsHeightChanged();
     }
 

@@ -312,6 +312,30 @@ message WifiLog {
 
   // Counts the number of AllSingleScanLister.onResult calls with a partial (channels) scan result
   optional int32 partial_all_single_scan_listener_results = 75;
+
+  // Pno scan metrics
+  optional PnoScanMetrics pno_scan_metrics = 76;
+
+  // Histogram of "Connect to Network" notifications.
+  // The notification Action should be unset.
+  repeated ConnectToNetworkNotificationAndActionCount connect_to_network_notification_count = 77;
+
+  // Histogram of "Connect to Network" notification user actions.
+  repeated ConnectToNetworkNotificationAndActionCount connect_to_network_notification_action_count = 78;
+
+  // The number of SSIDs blacklisted from recommendation by the open network
+  // notification recommender
+  optional int32 open_network_recommender_blacklist_size = 79;
+
+  // Is the available network notification feature turned on
+  optional bool is_wifi_networks_available_notification_on = 80;
+
+  // Count of recommendation updates made by the open network notification
+  // recommender
+  optional int32 num_open_network_recommendation_updates = 81;
+
+  // Count of connection attempts that were initiated unsuccessfully
+  optional int32 num_open_network_connect_message_failed_to_send = 82;
 }
 
 // Information that gets logged for every WiFi connection.
@@ -926,4 +950,89 @@ message NumConnectableNetworksBucket {
 
   // Number of scan results with num_connectable_networks
   optional int32 count = 2 [default = 0];
+}
+
+// Pno scan metrics
+// Here "Pno Scan" refers to the session of offloaded scans, these metrics count the result of a
+// single session, and not the individual scans within that session.
+message PnoScanMetrics {
+  // Total number of attempts to offload pno scans
+  optional int32 num_pno_scan_attempts = 1;
+
+  // Total number of pno scans failed
+  optional int32 num_pno_scan_failed = 2;
+
+  // Number of pno scans started successfully over offload
+  optional int32 num_pno_scan_started_over_offload = 3;
+
+  // Number of pno scans failed over offload
+  optional int32 num_pno_scan_failed_over_offload = 4;
+
+  // Total number of pno scans that found any network
+  optional int32 num_pno_found_network_events = 5;
+}
+
+// Number of occurrences for a particular "Connect to Network" Notification or
+// notification Action.
+message ConnectToNetworkNotificationAndActionCount {
+
+  // "Connect to Network" notifications
+  enum Notification {
+
+    // Default
+    NOTIFICATION_UNKNOWN = 0;
+
+    // Initial notification with a recommended network.
+    NOTIFICATION_RECOMMEND_NETWORK = 1;
+
+    // Notification when connecting to the recommended network.
+    NOTIFICATION_CONNECTING_TO_NETWORK = 2;
+
+    // Notification when successfully connected to the network.
+    NOTIFICATION_CONNECTED_TO_NETWORK = 3;
+
+    // Notification when failed to connect to network.
+    NOTIFICATION_FAILED_TO_CONNECT = 4;
+  }
+
+  // "Connect to Network" notification actions
+  enum Action {
+
+    // Default
+    ACTION_UNKNOWN = 0;
+
+    // User dismissed the "Connect to Network" notification.
+    ACTION_USER_DISMISSED_NOTIFICATION = 1;
+
+    // User tapped action button to connect to recommended network.
+    ACTION_CONNECT_TO_NETWORK = 2;
+
+    // User tapped action button to open Wi-Fi Settings.
+    ACTION_PICK_WIFI_NETWORK = 3;
+
+    // User tapped "Failed to connect" notification to open Wi-Fi Settings.
+    ACTION_PICK_WIFI_NETWORK_AFTER_CONNECT_FAILURE = 4;
+  }
+
+  // Recommenders of the "Connect to Network" notification
+  enum Recommender {
+
+    // Default.
+    RECOMMENDER_UNKNOWN = 0;
+
+    // Open Network Available recommender.
+    RECOMMENDER_OPEN = 1;
+  }
+
+  // Notification Type.
+  optional Notification notification = 1;
+
+  // Action Type.
+  optional Action action = 2;
+
+  // Recommender Type.
+  optional Recommender recommender = 3;
+
+  // Occurrences of this action.
+  optional int32 count = 4;
 }

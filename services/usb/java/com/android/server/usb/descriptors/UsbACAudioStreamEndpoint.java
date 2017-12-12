@@ -21,7 +21,7 @@ package com.android.server.usb.descriptors;
  * see audio10.pdf section 3.7.2
  */
 public class UsbACAudioStreamEndpoint extends UsbACEndpoint {
-    private static final String TAG = "ACAudioStreamEndpoint";
+    private static final String TAG = "UsbACAudioStreamEndpoint";
 
     //TODO data fields...
     public UsbACAudioStreamEndpoint(int length, byte type, byte subclass) {

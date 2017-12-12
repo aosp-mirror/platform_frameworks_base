@@ -577,7 +577,7 @@ public class BugreportReceiverTest {
                 mUiBot.getVisibleObject(mContext.getString(R.string.bugreport_confirm_dont_repeat));
         final boolean firstTime = propertyState == null || propertyState == STATE_UNKNOWN;
         if (firstTime) {
-            if (Build.TYPE.equals("user")) {
+            if (Build.IS_USER) {
                 assertFalse("Checkbox should NOT be checked by default on user builds",
                         dontShowAgain.isChecked());
                 mUiBot.click(dontShowAgain, "dont-show-again");

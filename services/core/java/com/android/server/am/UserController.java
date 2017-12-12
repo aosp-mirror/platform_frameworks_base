@@ -671,12 +671,6 @@ final class UserController {
         }
 
         if (stopped) {
-            // Evict the user's credential encryption key
-            try {
-                getStorageManager().lockUserKey(userId);
-            } catch (RemoteException re) {
-                throw re.rethrowAsRuntimeException();
-            }
             mInjector.systemServiceManagerCleanupUser(userId);
             synchronized (mLock) {
                 mInjector.getActivityStackSupervisor().removeUserLocked(userId);
@@ -684,6 +678,12 @@ final class UserController {
             // Remove the user if it is ephemeral.
             if (getUserInfo(userId).isEphemeral()) {
                 mInjector.getUserManager().removeUser(userId);
+            }
+            // Evict the user's credential encryption key.
+            try {
+                getStorageManager().lockUserKey(userId);
+            } catch (RemoteException re) {
+                throw re.rethrowAsRuntimeException();
             }
         }
     }
@@ -1447,15 +1447,6 @@ final class UserController {
         return mStartedUserArray;
     }
 
-    boolean isUserStoppingOrShuttingDownLocked(int userId) {
-        UserState state = getStartedUserStateLocked(userId);
-        if (state == null) {
-            return false;
-        }
-        return state.state == UserState.STATE_STOPPING
-                || state.state == UserState.STATE_SHUTDOWN;
-    }
-
     boolean isUserRunningLocked(int userId, int flags) {
         UserState state = getStartedUserStateLocked(userId);
         if (state == null) {
@@ -1478,6 +1469,10 @@ final class UserController {
                 case UserState.STATE_RUNNING_UNLOCKING:
                 case UserState.STATE_RUNNING_UNLOCKED:
                     return true;
+                // In the stopping/shutdown state return unlock state of the user key
+                case UserState.STATE_STOPPING:
+                case UserState.STATE_SHUTDOWN:
+                    return StorageManager.isUserKeyUnlocked(userId);
                 default:
                     return false;
             }
@@ -1486,13 +1481,16 @@ final class UserController {
             switch (state.state) {
                 case UserState.STATE_RUNNING_UNLOCKED:
                     return true;
+                // In the stopping/shutdown state return unlock state of the user key
+                case UserState.STATE_STOPPING:
+                case UserState.STATE_SHUTDOWN:
+                    return StorageManager.isUserKeyUnlocked(userId);
                 default:
                     return false;
             }
         }
 
-        // One way or another, we're running!
-        return true;
+        return state.state != UserState.STATE_STOPPING && state.state != UserState.STATE_SHUTDOWN;
     }
 
     UserInfo getCurrentUser() {

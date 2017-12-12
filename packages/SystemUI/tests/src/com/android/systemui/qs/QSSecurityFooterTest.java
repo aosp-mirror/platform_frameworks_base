@@ -29,6 +29,7 @@ import android.provider.Settings;
 import android.support.test.runner.AndroidJUnit4;
 import android.test.suitebuilder.annotation.SmallTest;
 import android.text.SpannableStringBuilder;
+import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
@@ -393,6 +394,57 @@ public class QSSecurityFooterTest extends SysuiTestCase {
                                  R.string.monitoring_description_personal_profile_named_vpn,
                                  VPN_PACKAGE)),
                      mFooter.getVpnMessage(false, true, VPN_PACKAGE, null));
+    }
+
+    @Test
+    public void testConfigSubtitleVisibility() {
+        View view = LayoutInflater.from(mContext)
+                .inflate(R.layout.quick_settings_footer_dialog, null);
+
+        // Device Management subtitle should be shown when there is Device Management section only
+        // Other sections visibility will be set somewhere else so it will not be tested here
+        mFooter.configSubtitleVisibility(true, false, false, false, view);
+        assertEquals(View.VISIBLE,
+                view.findViewById(R.id.device_management_subtitle).getVisibility());
+
+        // If there are multiple sections, all subtitles should be shown
+        mFooter.configSubtitleVisibility(true, true, false, false, view);
+        assertEquals(View.VISIBLE,
+                view.findViewById(R.id.device_management_subtitle).getVisibility());
+        assertEquals(View.VISIBLE,
+                view.findViewById(R.id.ca_certs_subtitle).getVisibility());
+
+        // If there are multiple sections, all subtitles should be shown
+        mFooter.configSubtitleVisibility(true, true, true, true, view);
+        assertEquals(View.VISIBLE,
+                view.findViewById(R.id.device_management_subtitle).getVisibility());
+        assertEquals(View.VISIBLE,
+                view.findViewById(R.id.ca_certs_subtitle).getVisibility());
+        assertEquals(View.VISIBLE,
+                view.findViewById(R.id.network_logging_subtitle).getVisibility());
+        assertEquals(View.VISIBLE,
+                view.findViewById(R.id.vpn_subtitle).getVisibility());
+
+        // If there are multiple sections, all subtitles should be shown, event if there is no
+        // Device Management section
+        mFooter.configSubtitleVisibility(false, true, true, true, view);
+        assertEquals(View.VISIBLE,
+                view.findViewById(R.id.ca_certs_subtitle).getVisibility());
+        assertEquals(View.VISIBLE,
+                view.findViewById(R.id.network_logging_subtitle).getVisibility());
+        assertEquals(View.VISIBLE,
+                view.findViewById(R.id.vpn_subtitle).getVisibility());
+
+        // If there is only 1 section, the title should be hidden
+        mFooter.configSubtitleVisibility(false, true, false, false, view);
+        assertEquals(View.GONE,
+                view.findViewById(R.id.ca_certs_subtitle).getVisibility());
+        mFooter.configSubtitleVisibility(false, false, true, false, view);
+        assertEquals(View.GONE,
+                view.findViewById(R.id.network_logging_subtitle).getVisibility());
+        mFooter.configSubtitleVisibility(false, false, false, true, view);
+        assertEquals(View.GONE,
+                view.findViewById(R.id.vpn_subtitle).getVisibility());
     }
 
     private CharSequence addLink(CharSequence description) {

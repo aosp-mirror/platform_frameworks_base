@@ -213,53 +213,11 @@ public final class TextServicesManager {
     /**
      * @hide
      */
-    public void setCurrentSpellChecker(SpellCheckerInfo sci) {
-        try {
-            if (sci == null) {
-                throw new NullPointerException("SpellCheckerInfo is null.");
-            }
-            mService.setCurrentSpellChecker(null, sci.getId());
-        } catch (RemoteException e) {
-            throw e.rethrowFromSystemServer();
-        }
-    }
-
-    /**
-     * @hide
-     */
     public SpellCheckerSubtype getCurrentSpellCheckerSubtype(
             boolean allowImplicitlySelectedSubtype) {
         try {
             // Passing null as a locale until we support multiple enabled spell checker subtypes.
             return mService.getCurrentSpellCheckerSubtype(null, allowImplicitlySelectedSubtype);
-        } catch (RemoteException e) {
-            throw e.rethrowFromSystemServer();
-        }
-    }
-
-    /**
-     * @hide
-     */
-    public void setSpellCheckerSubtype(SpellCheckerSubtype subtype) {
-        try {
-            final int hashCode;
-            if (subtype == null) {
-                hashCode = 0;
-            } else {
-                hashCode = subtype.hashCode();
-            }
-            mService.setCurrentSpellCheckerSubtype(null, hashCode);
-        } catch (RemoteException e) {
-            throw e.rethrowFromSystemServer();
-        }
-    }
-
-    /**
-     * @hide
-     */
-    public void setSpellCheckerEnabled(boolean enabled) {
-        try {
-            mService.setSpellCheckerEnabled(enabled);
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }

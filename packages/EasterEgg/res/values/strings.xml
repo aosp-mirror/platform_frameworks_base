@@ -17,6 +17,7 @@ Copyright (C) 2016 The Android Open Source Project
 <resources xmlns:android="http://schemas.android.com/apk/res/android">
     <string name="app_name" translatable="false">Android Easter Egg</string>
     <string name="notification_name" translatable="false">Android Neko</string>
+    <string name="notification_channel_name" translatable="false">New cats</string>
     <string name="default_tile_name" translatable="false">\????</string>
     <string name="notification_title" translatable="false">A cat is here.</string>
     <string name="default_cat_name" translatable="false">Cat #%s</string>
@@ -34,7 +35,7 @@ Copyright (C) 2016 The Android Open Source Project
         <item>@drawable/food_bits</item>
         <item>@drawable/food_sysuituna</item>
         <item>@drawable/food_chicken</item>
-        <item>@drawable/food_donut</item>
+        <item>@drawable/food_cookie</item>
     </array>
     <integer-array name="food_intervals">
         <item>0</item>

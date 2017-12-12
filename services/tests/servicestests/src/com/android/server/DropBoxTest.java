@@ -18,18 +18,20 @@ package com.android.server;
 
 import android.content.ContentResolver;
 import android.content.Context;
+import android.content.ContextWrapper;
 import android.content.Intent;
 import android.os.DropBoxManager;
+import android.os.Looper;
 import android.os.Parcel;
-import android.os.Parcelable;
 import android.os.ParcelFileDescriptor;
+import android.os.Parcelable;
 import android.os.Process;
-import android.os.ServiceManager;
 import android.os.StatFs;
+import android.os.UserHandle;
 import android.provider.Settings;
 import android.test.AndroidTestCase;
 
-import com.android.server.DropBoxManagerService;
+import com.android.server.DropBoxManagerService.EntryFile;
 
 import java.io.BufferedReader;
 import java.io.File;
@@ -41,8 +43,28 @@ import java.io.InputStreamReader;
 import java.util.Random;
 import java.util.zip.GZIPOutputStream;
 
-/** Test {@link DropBoxManager} functionality. */
+/**
+ * Test {@link DropBoxManager} functionality.
+ *
+ * Run with:
+ * bit FrameworksServicesTests:com.android.server.DropBoxTest
+ */
 public class DropBoxTest extends AndroidTestCase {
+    private Context mContext;
+
+    @Override
+    protected void setUp() throws Exception {
+        super.setUp();
+
+        mContext = new ContextWrapper(super.getContext()) {
+            @Override
+            public void sendBroadcastAsUser(Intent intent,
+                    UserHandle user, String receiverPermission) {
+                // Don't actually send broadcasts.
+            }
+        };
+    }
+
     public void tearDown() throws Exception {
         ContentResolver cr = getContext().getContentResolver();
         Settings.Global.putString(cr, Settings.Global.DROPBOX_AGE_SECONDS, "");
@@ -51,9 +73,15 @@ public class DropBoxTest extends AndroidTestCase {
         Settings.Global.putString(cr, Settings.Global.DROPBOX_TAG_PREFIX + "DropBoxTest", "");
     }
 
+    @Override
+    public Context getContext() {
+        return mContext;
+    }
+
     public void testAddText() throws Exception {
         File dir = getEmptyDir("testAddText");
-        DropBoxManagerService service = new DropBoxManagerService(getContext(), dir);
+        DropBoxManagerService service = new DropBoxManagerService(getContext(), dir,
+                Looper.getMainLooper());
         DropBoxManager dropbox = new DropBoxManager(getContext(), service.getServiceStub());
 
         long before = System.currentTimeMillis();
@@ -89,15 +117,19 @@ public class DropBoxTest extends AndroidTestCase {
 
     public void testAddData() throws Exception {
         File dir = getEmptyDir("testAddData");
-        DropBoxManagerService service = new DropBoxManagerService(getContext(), dir);
+        DropBoxManagerService service = new DropBoxManagerService(getContext(), dir,
+                Looper.getMainLooper());
         DropBoxManager dropbox = new DropBoxManager(getContext(), service.getServiceStub());
 
         long before = System.currentTimeMillis();
+        Thread.sleep(1);
         dropbox.addData("DropBoxTest", "TEST".getBytes(), 0);
+        Thread.sleep(1);
         long after = System.currentTimeMillis();
 
         DropBoxManager.Entry e = dropbox.getNextEntry("DropBoxTest", before);
-        assertTrue(null == dropbox.getNextEntry("DropBoxTest", e.getTimeMillis()));
+        assertNotNull(e);
+        assertNull(dropbox.getNextEntry("DropBoxTest", e.getTimeMillis()));
 
         assertEquals("DropBoxTest", e.getTag());
         assertTrue(e.getTimeMillis() >= before);
@@ -114,10 +146,12 @@ public class DropBoxTest extends AndroidTestCase {
         File dir = getEmptyDir("testAddFile");
         long before = System.currentTimeMillis();
 
-        File f0 = new File(dir, "f0.txt");
-        File f1 = new File(dir, "f1.txt.gz");
-        File f2 = new File(dir, "f2.dat");
-        File f3 = new File(dir, "f2.dat.gz");
+        File clientDir = getEmptyDir("testAddFile_client");
+
+        File f0 = new File(clientDir, "f0.txt");
+        File f1 = new File(clientDir, "f1.txt.gz");
+        File f2 = new File(clientDir, "f2.dat");
+        File f3 = new File(clientDir, "f2.dat.gz");
 
         FileWriter w0 = new FileWriter(f0);
         GZIPOutputStream gz1 = new GZIPOutputStream(new FileOutputStream(f1));
@@ -134,7 +168,8 @@ public class DropBoxTest extends AndroidTestCase {
         os2.close();
         gz3.close();
 
-        DropBoxManagerService service = new DropBoxManagerService(getContext(), dir);
+        DropBoxManagerService service = new DropBoxManagerService(getContext(), dir,
+                Looper.getMainLooper());
         DropBoxManager dropbox = new DropBoxManager(getContext(), service.getServiceStub());
 
         dropbox.addFile("DropBoxTest", f0, DropBoxManager.IS_TEXT);
@@ -200,7 +235,8 @@ public class DropBoxTest extends AndroidTestCase {
         // Tombstone in the far future
         new FileOutputStream(new File(dir, "DropBoxTest@" + (before + 100002) + ".lost")).close();
 
-        DropBoxManagerService service = new DropBoxManagerService(getContext(), dir);
+        DropBoxManagerService service = new DropBoxManagerService(getContext(), dir,
+                Looper.getMainLooper());
         DropBoxManager dropbox = new DropBoxManager(getContext(), service.getServiceStub());
 
         // Until a write, the timestamps are taken at face value
@@ -251,7 +287,8 @@ public class DropBoxTest extends AndroidTestCase {
 
     public void testIsTagEnabled() throws Exception {
         File dir = getEmptyDir("testIsTagEnabled");
-        DropBoxManagerService service = new DropBoxManagerService(getContext(), dir);
+        DropBoxManagerService service = new DropBoxManagerService(getContext(), dir,
+                Looper.getMainLooper());
         DropBoxManager dropbox = new DropBoxManager(getContext(), service.getServiceStub());
 
         long before = System.currentTimeMillis();
@@ -284,7 +321,8 @@ public class DropBoxTest extends AndroidTestCase {
 
     public void testGetNextEntry() throws Exception {
         File dir = getEmptyDir("testGetNextEntry");
-        DropBoxManagerService service = new DropBoxManagerService(getContext(), dir);
+        DropBoxManagerService service = new DropBoxManagerService(getContext(), dir,
+                Looper.getMainLooper());
         DropBoxManager dropbox = new DropBoxManager(getContext(), service.getServiceStub());
 
         long before = System.currentTimeMillis();
@@ -346,7 +384,8 @@ public class DropBoxTest extends AndroidTestCase {
 
         final int overhead = 64;
         long before = System.currentTimeMillis();
-        DropBoxManagerService service = new DropBoxManagerService(getContext(), dir);
+        DropBoxManagerService service = new DropBoxManagerService(getContext(), dir,
+                Looper.getMainLooper());
         DropBoxManager dropbox = new DropBoxManager(getContext(), service.getServiceStub());
 
         addRandomEntry(dropbox, "DropBoxTest0", blockSize - overhead);
@@ -440,7 +479,8 @@ public class DropBoxTest extends AndroidTestCase {
 
         // Write one normal entry and another so big that it is instantly tombstoned
         long before = System.currentTimeMillis();
-        DropBoxManagerService service = new DropBoxManagerService(getContext(), dir);
+        DropBoxManagerService service = new DropBoxManagerService(getContext(), dir,
+                Looper.getMainLooper());
         DropBoxManager dropbox = new DropBoxManager(getContext(), service.getServiceStub());
 
         dropbox.addText("DropBoxTest", "TEST");
@@ -471,7 +511,8 @@ public class DropBoxTest extends AndroidTestCase {
     public void testFileCountLimits() throws Exception {
         File dir = getEmptyDir("testFileCountLimits");
 
-        DropBoxManagerService service = new DropBoxManagerService(getContext(), dir);
+        DropBoxManagerService service = new DropBoxManagerService(getContext(), dir,
+                Looper.getMainLooper());
         DropBoxManager dropbox = new DropBoxManager(getContext(), service.getServiceStub());
         dropbox.addText("DropBoxTest", "TEST0");
         dropbox.addText("DropBoxTest", "TEST1");
@@ -524,7 +565,8 @@ public class DropBoxTest extends AndroidTestCase {
 
         File dir = new File(getEmptyDir("testCreateDropBoxManagerWith"), "InvalidDirectory");
         new FileOutputStream(dir).close();  // Create an empty file
-        DropBoxManagerService service = new DropBoxManagerService(getContext(), dir);
+        DropBoxManagerService service = new DropBoxManagerService(getContext(), dir,
+                Looper.getMainLooper());
         DropBoxManager dropbox = new DropBoxManager(getContext(), service.getServiceStub());
 
         dropbox.addText("DropBoxTest", "should be ignored");
@@ -733,6 +775,223 @@ public class DropBoxTest extends AndroidTestCase {
         int after = countOpenFiles();
         assertTrue(after > 0);
         assertTrue(after < before + 20);
+    }
+
+    public void testEntryFile() throws Exception {
+        File fromDir = getEmptyDir("testEntryFile_from");
+        File toDir = getEmptyDir("testEntryFile_to");
+
+        {
+            File f = new File(fromDir, "f0.txt");
+            try (FileWriter w = new FileWriter(f)) {
+                w.write("abc");
+            }
+
+            EntryFile e = new EntryFile(f, toDir, "tag:!", 12345, DropBoxManager.IS_TEXT, 1024);
+
+            assertEquals("tag:!", e.tag);
+            assertEquals(12345, e.timestampMillis);
+            assertEquals(DropBoxManager.IS_TEXT, e.flags);
+            assertEquals(1, e.blocks);
+
+            assertFalse(f.exists()); // Because it should be renamed.
+
+            assertTrue(e.hasFile());
+            assertEquals(new File(toDir, "tag%3A!@12345.txt"), e.getFile(toDir));
+            assertTrue(e.getFile(toDir).exists());
+        }
+        // Same test with gzip.
+        {
+            File f = new File(fromDir, "f0.txt.gz"); // It's a lie; it's not actually gz.
+            try (FileWriter w = new FileWriter(f)) {
+                w.write("abc");
+            }
+
+            EntryFile e = new EntryFile(f, toDir, "tag:!", 12345,
+                    DropBoxManager.IS_TEXT | DropBoxManager.IS_GZIPPED, 1024);
+
+            assertEquals("tag:!", e.tag);
+
+            assertFalse(f.exists()); // Because it should be renamed.
+
+            assertTrue(e.hasFile());
+            assertEquals(new File(toDir, "tag%3A!@12345.txt.gz"), e.getFile(toDir));
+            assertTrue(e.getFile(toDir).exists());
+
+        }
+        // binary, gzip.
+        {
+            File f = new File(fromDir, "f0.dat.gz"); // It's a lie; it's not actually gz.
+            try (FileWriter w = new FileWriter(f)) {
+                w.write("abc");
+            }
+
+            EntryFile e = new EntryFile(f, toDir, "tag:!", 12345,
+                    DropBoxManager.IS_GZIPPED, 1024);
+
+            assertEquals("tag:!", e.tag);
+
+            assertFalse(f.exists()); // Because it should be renamed.
+
+            assertTrue(e.hasFile());
+            assertEquals(new File(toDir, "tag%3A!@12345.dat.gz"), e.getFile(toDir));
+            assertTrue(e.getFile(toDir).exists());
+
+        }
+
+        // Tombstone.
+        {
+            EntryFile e = new EntryFile(toDir, "tag:!", 12345);
+
+            assertEquals("tag:!", e.tag);
+            assertEquals(12345, e.timestampMillis);
+            assertEquals(DropBoxManager.IS_EMPTY, e.flags);
+            assertEquals(0, e.blocks);
+
+            assertTrue(e.hasFile());
+            assertEquals(new File(toDir, "tag%3A!@12345.lost"), e.getFile(toDir));
+            assertTrue(e.getFile(toDir).exists());
+        }
+
+        // From existing files.
+        {
+            File f = new File(fromDir, "tag%3A!@12345.dat");
+            f.createNewFile();
+
+            EntryFile e = new EntryFile(f, 1024);
+
+            assertEquals("tag:!", e.tag);
+            assertEquals(12345, e.timestampMillis);
+            assertEquals(0, e.flags);
+            assertEquals(0, e.blocks);
+
+            assertTrue(f.exists());
+        }
+        {
+            File f = new File(fromDir, "tag%3A!@12345.dat.gz");
+            f.createNewFile();
+
+            EntryFile e = new EntryFile(f, 1024);
+
+            assertEquals("tag:!", e.tag);
+            assertEquals(12345, e.timestampMillis);
+            assertEquals(DropBoxManager.IS_GZIPPED, e.flags);
+            assertEquals(0, e.blocks);
+
+            assertTrue(f.exists());
+        }
+        {
+            File f = new File(fromDir, "tag%3A!@12345.txt");
+            try (FileWriter w = new FileWriter(f)) {
+                w.write(new char[1024]);
+            }
+
+            EntryFile e = new EntryFile(f, 1024);
+
+            assertEquals("tag:!", e.tag);
+            assertEquals(12345, e.timestampMillis);
+            assertEquals(DropBoxManager.IS_TEXT, e.flags);
+            assertEquals(1, e.blocks);
+
+            assertTrue(f.exists());
+        }
+        {
+            File f = new File(fromDir, "tag%3A!@12345.txt.gz");
+            try (FileWriter w = new FileWriter(f)) {
+                w.write(new char[1025]);
+            }
+
+            EntryFile e = new EntryFile(f, 1024);
+
+            assertEquals("tag:!", e.tag);
+            assertEquals(12345, e.timestampMillis);
+            assertEquals(DropBoxManager.IS_TEXT | DropBoxManager.IS_GZIPPED, e.flags);
+            assertEquals(2, e.blocks);
+
+            assertTrue(f.exists());
+        }
+        {
+            File f = new File(fromDir, "tag%3A!@12345.lost");
+            f.createNewFile();
+
+            EntryFile e = new EntryFile(f, 1024);
+
+            assertEquals("tag:!", e.tag);
+            assertEquals(12345, e.timestampMillis);
+            assertEquals(DropBoxManager.IS_EMPTY, e.flags);
+            assertEquals(0, e.blocks);
+
+            assertTrue(f.exists());
+        }
+        {
+            File f = new File(fromDir, "@12345.dat"); // Empty tag -- this actually works.
+            f.createNewFile();
+
+            EntryFile e = new EntryFile(f, 1024);
+
+            assertEquals("", e.tag);
+            assertEquals(12345, e.timestampMillis);
+            assertEquals(0, e.flags);
+            assertEquals(0, e.blocks);
+
+            assertTrue(f.exists());
+        }
+        // From invalid filenames.
+        {
+            File f = new File(fromDir, "tag.dat"); // No @.
+            f.createNewFile();
+
+            EntryFile e = new EntryFile(f, 1024);
+
+            assertEquals(null, e.tag);
+            assertEquals(0, e.timestampMillis);
+            assertEquals(DropBoxManager.IS_EMPTY, e.flags);
+            assertEquals(0, e.blocks);
+
+            assertFalse(f.exists());
+        }
+        {
+            File f = new File(fromDir, "tag@.dat"); // Invalid timestamp.
+            f.createNewFile();
+
+            EntryFile e = new EntryFile(f, 1024);
+
+            assertEquals(null, e.tag);
+            assertEquals(0, e.timestampMillis);
+            assertEquals(DropBoxManager.IS_EMPTY, e.flags);
+            assertEquals(0, e.blocks);
+
+            assertFalse(f.exists());
+        }
+        {
+            File f = new File(fromDir, "tag@12345.daxt"); // Invalid extension.
+            f.createNewFile();
+
+            EntryFile e = new EntryFile(f, 1024);
+
+            assertEquals(null, e.tag);
+            assertEquals(0, e.timestampMillis);
+            assertEquals(DropBoxManager.IS_EMPTY, e.flags);
+            assertEquals(0, e.blocks);
+
+            assertFalse(f.exists());
+        }
+    }
+
+    public void testCompareEntries() {
+        File dir = getEmptyDir("testCompareEntries");
+        assertEquals(-1,
+                new EntryFile(new File(dir, "aaa@100.dat"), 1).compareTo(
+                new EntryFile(new File(dir, "bbb@200.dat"), 1)));
+        assertEquals(1,
+                new EntryFile(new File(dir, "aaa@200.dat"), 1).compareTo(
+                new EntryFile(new File(dir, "bbb@100.dat"), 1)));
+        assertEquals(-1,
+                new EntryFile(new File(dir, "aaa@100.dat"), 1).compareTo(
+                new EntryFile(new File(dir, "bbb@100.dat"), 1)));
+        assertEquals(1,
+                new EntryFile(new File(dir, "bbb@100.dat"), 1).compareTo(
+                new EntryFile(new File(dir, "aaa@100.dat"), 1)));
     }
 
     private void addRandomEntry(DropBoxManager dropbox, String tag, int size) throws Exception {

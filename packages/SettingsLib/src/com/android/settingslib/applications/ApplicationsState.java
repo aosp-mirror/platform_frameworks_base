@@ -339,26 +339,35 @@ public class ApplicationsState {
         synchronized (mEntriesMap) {
             AppEntry entry = mEntriesMap.get(userId).get(packageName);
             if (entry != null && (entry.info.flags & ApplicationInfo.FLAG_INSTALLED) != 0) {
-                mBackgroundHandler.post(() -> {
-                    try {
-                        final StorageStats stats = mStats.queryStatsForPackage(
-                                entry.info.storageUuid, packageName, UserHandle.of(userId));
-                        final PackageStats legacy = new PackageStats(packageName, userId);
-                        legacy.codeSize = stats.getCodeBytes();
-                        legacy.dataSize = stats.getDataBytes();
-                        legacy.cacheSize = stats.getCacheBytes();
-                        try {
-                            mBackgroundHandler.mStatsObserver.onGetStatsCompleted(legacy, true);
-                        } catch (RemoteException ignored) {
-                        }
-                    } catch (NameNotFoundException | IOException e) {
-                        Log.w(TAG, "Failed to query stats: " + e);
-                        try {
-                            mBackgroundHandler.mStatsObserver.onGetStatsCompleted(null, false);
-                        } catch (RemoteException ignored) {
-                        }
-                    }
-                });
+                mBackgroundHandler.post(
+                        () -> {
+                            try {
+                                final StorageStats stats =
+                                        mStats.queryStatsForPackage(
+                                                entry.info.storageUuid,
+                                                packageName,
+                                                UserHandle.of(userId));
+                                final long cacheQuota =
+                                        mStats.getCacheQuotaBytes(
+                                                entry.info.storageUuid.toString(), entry.info.uid);
+                                final PackageStats legacy = new PackageStats(packageName, userId);
+                                legacy.codeSize = stats.getCodeBytes();
+                                legacy.dataSize = stats.getDataBytes();
+                                legacy.cacheSize = Math.min(stats.getCacheBytes(), cacheQuota);
+                                try {
+                                    mBackgroundHandler.mStatsObserver.onGetStatsCompleted(
+                                            legacy, true);
+                                } catch (RemoteException ignored) {
+                                }
+                            } catch (NameNotFoundException | IOException e) {
+                                Log.w(TAG, "Failed to query stats: " + e);
+                                try {
+                                    mBackgroundHandler.mStatsObserver.onGetStatsCompleted(
+                                            null, false);
+                                } catch (RemoteException ignored) {
+                                }
+                            }
+                        });
             }
             if (DEBUG_LOCKING) Log.v(TAG, "...requestSize releasing lock");
         }
@@ -1638,6 +1647,21 @@ public class ApplicationsState {
         }
     };
 
+    public static final AppFilter FILTER_PHOTOS =
+            new AppFilter() {
+                @Override
+                public void init() {}
+
+                @Override
+                public boolean filterApp(AppEntry entry) {
+                    boolean isPhotosApp;
+                    synchronized (entry) {
+                        isPhotosApp = entry.info.category == ApplicationInfo.CATEGORY_IMAGE;
+                    }
+                    return isPhotosApp;
+                }
+            };
+
     public static final AppFilter FILTER_OTHER_APPS =
             new AppFilter() {
                 @Override
@@ -1650,7 +1674,8 @@ public class ApplicationsState {
                         isCategorized =
                                 FILTER_AUDIO.filterApp(entry)
                                         || FILTER_GAMES.filterApp(entry)
-                                        || FILTER_MOVIES.filterApp(entry);
+                                        || FILTER_MOVIES.filterApp(entry)
+                                        || FILTER_PHOTOS.filterApp(entry);
                     }
                     return !isCategorized;
                 }

@@ -19,10 +19,15 @@ package com.android.settingslib.wifi;
 import android.content.Context;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
+import android.net.wifi.ScanResult;
 import android.net.wifi.WifiConfiguration;
 import android.net.wifi.WifiInfo;
 import android.os.Bundle;
 import android.support.annotation.Keep;
+
+import com.android.settingslib.wifi.AccessPoint.Speed;
+
+import java.util.ArrayList;
 
 /**
 * Build and return a valid AccessPoint.
@@ -39,6 +44,7 @@ public class TestAccessPointBuilder {
 
     // set some sensible defaults
     private String mBssid = null;
+    private int mSpeed = Speed.NONE;
     private int mRssi = AccessPoint.UNREACHABLE_RSSI;
     private int mNetworkId = WifiConfiguration.INVALID_NETWORK_ID;
     private String ssid = "TestSsid";
@@ -48,8 +54,12 @@ public class TestAccessPointBuilder {
     private int mSecurity = AccessPoint.SECURITY_NONE;
     private WifiConfiguration mWifiConfig;
     private WifiInfo mWifiInfo;
+    private boolean mIsCarrierAp = false;
+    private String mCarrierName = null;
 
     Context mContext;
+    private ArrayList<ScanResult> mScanResultCache;
+    private ArrayList<TimestampedScoredNetwork> mScoredNetworkCache;
 
     @Keep
     public TestAccessPointBuilder(Context context) {
@@ -74,7 +84,18 @@ public class TestAccessPointBuilder {
         if (mProviderFriendlyName != null) {
             bundle.putString(AccessPoint.KEY_PROVIDER_FRIENDLY_NAME, mProviderFriendlyName);
         }
+        if (mScanResultCache != null) {
+            bundle.putParcelableArrayList(AccessPoint.KEY_SCANRESULTCACHE, mScanResultCache);
+        }
+        if (mScoredNetworkCache != null) {
+            bundle.putParcelableArrayList(AccessPoint.KEY_SCOREDNETWORKCACHE, mScoredNetworkCache);
+        }
         bundle.putInt(AccessPoint.KEY_SECURITY, mSecurity);
+        bundle.putInt(AccessPoint.KEY_SPEED, mSpeed);
+        bundle.putBoolean(AccessPoint.KEY_IS_CARRIER_AP, mIsCarrierAp);
+        if (mCarrierName != null) {
+            bundle.putString(AccessPoint.KEY_CARRIER_NAME, mCarrierName);
+        }
 
         AccessPoint ap = new AccessPoint(mContext, bundle);
         ap.setRssi(mRssi);
@@ -125,6 +146,11 @@ public class TestAccessPointBuilder {
     @Keep
     public TestAccessPointBuilder setRssi(int rssi) {
         mRssi = rssi;
+        return this;
+    }
+
+    public TestAccessPointBuilder setSpeed(int speed) {
+        mSpeed = speed;
         return this;
     }
 
@@ -200,6 +226,27 @@ public class TestAccessPointBuilder {
 
     public TestAccessPointBuilder setBssid(String bssid) {
         mBssid = bssid;
+        return this;
+    }
+
+    public TestAccessPointBuilder setScanResultCache(ArrayList<ScanResult> scanResultCache) {
+        mScanResultCache = scanResultCache;
+        return this;
+    }
+
+    public TestAccessPointBuilder setIsCarrierAp(boolean isCarrierAp) {
+        mIsCarrierAp = isCarrierAp;
+        return this;
+    }
+
+    public TestAccessPointBuilder setCarrierName(String carrierName) {
+        mCarrierName = carrierName;
+        return this;
+    }
+
+    public TestAccessPointBuilder setScoredNetworkCache(
+            ArrayList<TimestampedScoredNetwork> scoredNetworkCache) {
+        mScoredNetworkCache = scoredNetworkCache;
         return this;
     }
 }

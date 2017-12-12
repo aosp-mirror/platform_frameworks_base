@@ -42,7 +42,6 @@ import android.util.AndroidRuntimeException;
 import android.util.ArrayMap;
 import android.util.AttributeSet;
 import android.util.DebugUtils;
-import android.util.Log;
 import android.util.SparseArray;
 import android.util.SuperNotCalledException;
 import android.view.ContextMenu;
@@ -405,6 +404,11 @@ public class Fragment implements ComponentCallbacks2, OnCreateContextMenuListene
     // The cached value from onGetLayoutInflater(Bundle) that will be returned from
     // getLayoutInflater()
     LayoutInflater mLayoutInflater;
+
+    // Keep track of whether or not this Fragment has run performCreate(). Retained instance
+    // fragments can have mRetaining set to true without going through creation, so we must
+    // track it separately.
+    boolean mIsCreated;
 
     /**
      * State information that has been retrieved from a fragment instance
@@ -2483,6 +2487,7 @@ public class Fragment implements ComponentCallbacks2, OnCreateContextMenuListene
         mState = CREATED;
         mCalled = false;
         onCreate(savedInstanceState);
+        mIsCreated = true;
         if (!mCalled) {
             throw new SuperNotCalledException("Fragment " + this
                     + " did not call through to super.onCreate()");
@@ -2759,6 +2764,7 @@ public class Fragment implements ComponentCallbacks2, OnCreateContextMenuListene
         }
         mState = INITIALIZING;
         mCalled = false;
+        mIsCreated = false;
         onDestroy();
         if (!mCalled) {
             throw new SuperNotCalledException("Fragment " + this

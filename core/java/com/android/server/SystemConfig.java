@@ -141,6 +141,7 @@ public class SystemConfig {
 
 
     final ArrayMap<String, ArraySet<String>> mPrivAppPermissions = new ArrayMap<>();
+    final ArrayMap<String, ArraySet<String>> mPrivAppDenyPermissions = new ArrayMap<>();
 
     public static SystemConfig getInstance() {
         synchronized (SystemConfig.class) {
@@ -217,6 +218,10 @@ public class SystemConfig {
 
     public ArraySet<String> getPrivAppPermissions(String packageName) {
         return mPrivAppPermissions.get(packageName);
+    }
+
+    public ArraySet<String> getPrivAppDenyPermissions(String packageName) {
+        return mPrivAppDenyPermissions.get(packageName);
     }
 
     SystemConfig() {
@@ -584,6 +589,12 @@ public class SystemConfig {
             addFeature(PackageManager.FEATURE_SECURELY_REMOVES_USERS, 0);
         }
 
+        if (ActivityManager.isLowRamDeviceStatic()) {
+            addFeature(PackageManager.FEATURE_RAM_LOW, 0);
+        } else {
+            addFeature(PackageManager.FEATURE_RAM_NORMAL, 0);
+        }
+
         for (String featureName : mUnavailableFeatures) {
             removeFeature(featureName);
         }
@@ -654,6 +665,7 @@ public class SystemConfig {
         if (permissions == null) {
             permissions = new ArraySet<>();
         }
+        ArraySet<String> denyPermissions = mPrivAppDenyPermissions.get(packageName);
         int depth = parser.getDepth();
         while (XmlUtils.nextElementWithin(parser, depth)) {
             String name = parser.getName();
@@ -665,8 +677,22 @@ public class SystemConfig {
                     continue;
                 }
                 permissions.add(permName);
+            } else if ("deny-permission".equals(name)) {
+                String permName = parser.getAttributeValue(null, "name");
+                if (TextUtils.isEmpty(permName)) {
+                    Slog.w(TAG, "name is required for <deny-permission> in "
+                            + parser.getPositionDescription());
+                    continue;
+                }
+                if (denyPermissions == null) {
+                    denyPermissions = new ArraySet<>();
+                }
+                denyPermissions.add(permName);
             }
         }
         mPrivAppPermissions.put(packageName, permissions);
+        if (denyPermissions != null) {
+            mPrivAppDenyPermissions.put(packageName, denyPermissions);
+        }
     }
 }

@@ -560,15 +560,15 @@ public class NavigationBarView extends FrameLayout implements PluginListener<Nav
     public void onFinishInflate() {
         mNavigationInflaterView = (NavigationBarInflaterView) findViewById(
                 R.id.navigation_inflater);
-        updateRotatedViews();
         mNavigationInflaterView.setButtonDispatchers(mButtonDispatchers);
 
         getImeSwitchButton().setOnClickListener(mImeSwitcherClickListener);
 
         DockedStackExistsListener.register(mDockedListener);
+        updateRotatedViews();
     }
 
-    void updateRotatedViews() {
+    private void updateRotatedViews() {
         mRotatedViews[Surface.ROTATION_0] =
                 mRotatedViews[Surface.ROTATION_180] = findViewById(R.id.rot0);
         mRotatedViews[Surface.ROTATION_270] =
@@ -609,6 +609,7 @@ public class NavigationBarView extends FrameLayout implements PluginListener<Nav
         updateCurrentView();
 
         mDeadZone = (DeadZone) mCurrentView.findViewById(R.id.deadzone);
+
         ((NavigationBarFrame) getRootView()).setDeadZone(mDeadZone);
         mDeadZone.setDisplayRotation(mCurrentRotation);
 
@@ -682,8 +683,6 @@ public class NavigationBarView extends FrameLayout implements PluginListener<Nav
 
             if (isCarMode != mInCarMode) {
                 mInCarMode = isCarMode;
-                getHomeButton().setCarMode(isCarMode);
-
                 if (ALTERNATE_CAR_MODE_UI) {
                     mUseCarModeUi = isCarMode;
                     uiCarModeChanged = true;
@@ -749,6 +748,7 @@ public class NavigationBarView extends FrameLayout implements PluginListener<Nav
     @Override
     protected void onAttachedToWindow() {
         super.onAttachedToWindow();
+        reorient();
         onPluginDisconnected(null); // Create default gesture helper
         Dependency.get(PluginManager.class).addPluginListener(this,
                 NavGesture.class, false /* Only one */);

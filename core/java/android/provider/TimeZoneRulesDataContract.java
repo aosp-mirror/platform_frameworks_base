@@ -16,6 +16,7 @@
 
 package android.provider;
 
+import android.annotation.SystemApi;
 import android.net.Uri;
 
 /**
@@ -24,6 +25,7 @@ import android.net.Uri;
  *
  * @hide
  */
+@SystemApi
 public final class TimeZoneRulesDataContract {
 
     private TimeZoneRulesDataContract() {}

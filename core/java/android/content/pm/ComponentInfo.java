@@ -183,12 +183,12 @@ public class ComponentInfo extends PackageItemInfo {
     protected void dumpBack(Printer pw, String prefix) {
         dumpBack(pw, prefix, DUMP_FLAG_ALL);
     }
-    
-    void dumpBack(Printer pw, String prefix, int flags) {
-        if ((flags&DUMP_FLAG_APPLICATION) != 0) {
+
+    void dumpBack(Printer pw, String prefix, int dumpFlags) {
+        if ((dumpFlags & DUMP_FLAG_APPLICATION) != 0) {
             if (applicationInfo != null) {
                 pw.println(prefix + "ApplicationInfo:");
-                applicationInfo.dump(pw, prefix + "  ", flags);
+                applicationInfo.dump(pw, prefix + "  ", dumpFlags);
             } else {
                 pw.println(prefix + "ApplicationInfo: null");
             }

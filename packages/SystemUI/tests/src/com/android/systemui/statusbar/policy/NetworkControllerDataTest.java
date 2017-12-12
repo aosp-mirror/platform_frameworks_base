@@ -144,6 +144,23 @@ public class NetworkControllerDataTest extends NetworkControllerBaseTest {
 
     @Test
     @Ignore("Flaky")
+    public void testAlwaysShowDataRatIcon() {
+        setupDefaultSignal();
+        when(mMockTm.getDataEnabled(mSubId)).thenReturn(false);
+        updateDataConnectionState(TelephonyManager.DATA_DISCONNECTED,
+                TelephonyManager.NETWORK_TYPE_GSM);
+
+        // Switch to showing data RAT icon when data is disconnected
+        // and re-initialize the NetworkController.
+        mConfig.alwaysShowDataRatIcon = true;
+        mNetworkController.handleConfigurationChanged();
+
+        verifyDataIndicators(TelephonyIcons.ICON_G,
+                TelephonyIcons.QS_DATA_G);
+    }
+
+    @Test
+    @Ignore("Flaky")
     public void test4gDataIconConfigChange() {
         setupDefaultSignal();
         updateDataConnectionState(TelephonyManager.DATA_CONNECTED,

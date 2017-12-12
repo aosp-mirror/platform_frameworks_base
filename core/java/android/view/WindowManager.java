@@ -16,6 +16,7 @@
 
 package android.view;
 
+import android.Manifest.permission;
 import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.RequiresPermission;
@@ -955,7 +956,11 @@ public interface WindowManager extends ViewManager {
          * {@link #FLAG_DISMISS_KEYGUARD} to automatically fully dismisss
          * non-secure keyguards.  This flag only applies to the top-most
          * full-screen window.
+         * @deprecated Use {@link android.R.attr#showWhenLocked} or
+         * {@link android.app.Activity#setShowWhenLocked(boolean)} instead to prevent an
+         * unintentional double life-cycle event.
          */
+        @Deprecated
         public static final int FLAG_SHOW_WHEN_LOCKED = 0x00080000;
 
         /** Window flag: ask that the system wallpaper be shown behind
@@ -980,24 +985,32 @@ public interface WindowManager extends ViewManager {
         /** Window flag: when set as a window is being added or made
          * visible, once the window has been shown then the system will
          * poke the power manager's user activity (as if the user had woken
-         * up the device) to turn the screen on. */
+         * up the device) to turn the screen on.
+         * @deprecated Use {@link android.R.attr#turnScreenOn} or
+         * {@link android.app.Activity#setTurnScreenOn(boolean)} instead to prevent an
+         * unintentional double life-cycle event.
+         */
+        @Deprecated
         public static final int FLAG_TURN_SCREEN_ON = 0x00200000;
 
-        /** Window flag: when set the window will cause the keyguard to
-         * be dismissed, only if it is not a secure lock keyguard. Because such
-         * a keyguard is not needed for security, it will never re-appear if
-         * the user navigates to another window (in contrast to
-         * {@link #FLAG_SHOW_WHEN_LOCKED}, which will only temporarily
-         * hide both secure and non-secure keyguards but ensure they reappear
-         * when the user moves to another UI that doesn't hide them).
-         * If the keyguard is currently active and is secure (requires an
-         * unlock credential) than the user will still need to confirm it before
-         * seeing this window, unless {@link #FLAG_SHOW_WHEN_LOCKED} has
-         * also been set.
-         * @deprecated Use {@link #FLAG_SHOW_WHEN_LOCKED} or {@link KeyguardManager#dismissKeyguard}
-         * instead. Since keyguard was dismissed all the time as long as an activity with this flag
-         * on its window was focused, keyguard couldn't guard against unintentional touches on the
-         * screen, which isn't desired.
+        /**
+         * Window flag: when set the window will cause the keyguard to be
+         * dismissed, only if it is not a secure lock keyguard. Because such a
+         * keyguard is not needed for security, it will never re-appear if the
+         * user navigates to another window (in contrast to
+         * {@link #FLAG_SHOW_WHEN_LOCKED}, which will only temporarily hide both
+         * secure and non-secure keyguards but ensure they reappear when the
+         * user moves to another UI that doesn't hide them). If the keyguard is
+         * currently active and is secure (requires an unlock credential) than
+         * the user will still need to confirm it before seeing this window,
+         * unless {@link #FLAG_SHOW_WHEN_LOCKED} has also been set.
+         *
+         * @deprecated Use {@link #FLAG_SHOW_WHEN_LOCKED} or
+         *             {@link KeyguardManager#requestDismissKeyguard} instead.
+         *             Since keyguard was dismissed all the time as long as an
+         *             activity with this flag on its window was focused,
+         *             keyguard couldn't guard against unintentional touches on
+         *             the screen, which isn't desired.
          */
         @Deprecated
         public static final int FLAG_DISMISS_KEYGUARD = 0x00400000;
@@ -1394,15 +1407,14 @@ public interface WindowManager extends ViewManager {
         public static final int PRIVATE_FLAG_SUSTAINED_PERFORMANCE_MODE = 0x00040000;
 
         /**
-         * Flag to indicate that this window is used as a task snapshot window. A task snapshot
-         * window is a starting window that gets shown with a screenshot from the previous state
-         * that is active until the app has drawn its first frame.
-         *
-         * <p>If this flag is set, SystemUI flags are ignored such that the real window behind can
-         * set the SystemUI flags.
+         * Flag to indicate that any window added by an application process that is of type
+         * {@link #TYPE_TOAST} or that requires
+         * {@link android.app.AppOpsManager#OP_SYSTEM_ALERT_WINDOW} permission should be hidden when
+         * this window is visible.
          * @hide
          */
-        public static final int PRIVATE_FLAG_TASK_SNAPSHOT = 0x00080000;
+        @RequiresPermission(android.Manifest.permission.HIDE_NON_SYSTEM_OVERLAY_WINDOWS)
+        public static final int PRIVATE_FLAG_HIDE_NON_SYSTEM_OVERLAY_WINDOWS = 0x00080000;
 
         /**
          * Indicates that this window is the rounded corners overlay present on some
@@ -1411,6 +1423,15 @@ public interface WindowManager extends ViewManager {
          * @hide
          */
         public static final int PRIVATE_FLAG_IS_ROUNDED_CORNERS_OVERLAY = 0x00100000;
+
+        /**
+         * If this flag is set on the window, window manager will acquire a sleep token that puts
+         * all activities to sleep as long as this window is visible. When this flag is set, the
+         * window needs to occlude all activity windows.
+         * @hide
+         */
+        @RequiresPermission(permission.DEVICE_POWER)
+        public static final int PRIVATE_FLAG_ACQUIRES_SLEEP_TOKEN = 0x00200000;
 
         /**
          * Control flags that are private to the platform.

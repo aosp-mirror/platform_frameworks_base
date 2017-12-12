@@ -143,7 +143,7 @@ final class ProcessRecord {
     ActiveInstrumentation instr;// Set to currently active instrumentation running in process
     boolean usingWrapper;       // Set to true when process was launched with a wrapper attached
     final ArraySet<BroadcastRecord> curReceivers = new ArraySet<BroadcastRecord>();// receivers currently running in the app
-    long lastWakeTime;          // How long proc held wake lock at last check
+    long whenUnimportant;       // When (uptime) the process last became unimportant
     long lastCpuTime;           // How long proc has run CPU at last check
     long curCpuTime;            // How long proc has run CPU most recently
     long lastRequestedGc;       // When we last asked the app to do a gc
@@ -204,7 +204,7 @@ final class ProcessRecord {
     boolean whitelistManager;
 
     void dump(PrintWriter pw, String prefix) {
-        final long now = SystemClock.uptimeMillis();
+        final long nowUptime = SystemClock.uptimeMillis();
 
         pw.print(prefix); pw.print("user #"); pw.print(userId);
                 pw.print(" uid="); pw.print(info.uid);
@@ -254,11 +254,11 @@ final class ProcessRecord {
         pw.print(prefix); pw.print("pid="); pw.print(pid); pw.print(" starting=");
                 pw.println(starting);
         pw.print(prefix); pw.print("lastActivityTime=");
-                TimeUtils.formatDuration(lastActivityTime, now, pw);
+                TimeUtils.formatDuration(lastActivityTime, nowUptime, pw);
                 pw.print(" lastPssTime=");
-                TimeUtils.formatDuration(lastPssTime, now, pw);
+                TimeUtils.formatDuration(lastPssTime, nowUptime, pw);
                 pw.print(" nextPssTime=");
-                TimeUtils.formatDuration(nextPssTime, now, pw);
+                TimeUtils.formatDuration(nextPssTime, nowUptime, pw);
                 pw.println();
         pw.print(prefix); pw.print("adjSeq="); pw.print(adjSeq);
                 pw.print(" lruSeq="); pw.print(lruSeq);
@@ -294,7 +294,7 @@ final class ProcessRecord {
                 pw.print(" pssProcState="); pw.print(pssProcState);
                 pw.print(" setProcState="); pw.print(setProcState);
                 pw.print(" lastStateTime=");
-                TimeUtils.formatDuration(lastStateTime, now, pw);
+                TimeUtils.formatDuration(lastStateTime, nowUptime, pw);
                 pw.println();
         if (hasShownUi || pendingUiClean || hasAboveClient || treatLikeActivity) {
             pw.print(prefix); pw.print("hasShownUi="); pw.print(hasShownUi);
@@ -334,29 +334,26 @@ final class ProcessRecord {
         }
         if (lastProviderTime > 0) {
             pw.print(prefix); pw.print("lastProviderTime=");
-            TimeUtils.formatDuration(lastProviderTime, now, pw);
+            TimeUtils.formatDuration(lastProviderTime, nowUptime, pw);
             pw.println();
         }
         if (hasStartedServices) {
             pw.print(prefix); pw.print("hasStartedServices="); pw.println(hasStartedServices);
         }
-        if (setProcState >= ActivityManager.PROCESS_STATE_SERVICE) {
-            long wtime;
-            synchronized (mBatteryStats) {
-                wtime = mBatteryStats.getProcessWakeTime(info.uid,
-                        pid, SystemClock.elapsedRealtime());
-            }
-            pw.print(prefix); pw.print("lastWakeTime="); pw.print(lastWakeTime);
-                    pw.print(" timeUsed=");
-                    TimeUtils.formatDuration(wtime-lastWakeTime, pw); pw.println("");
+        if (setProcState > ActivityManager.PROCESS_STATE_SERVICE) {
             pw.print(prefix); pw.print("lastCpuTime="); pw.print(lastCpuTime);
-                    pw.print(" timeUsed=");
-                    TimeUtils.formatDuration(curCpuTime-lastCpuTime, pw); pw.println("");
+                    if (lastCpuTime > 0) {
+                        pw.print(" timeUsed=");
+                        TimeUtils.formatDuration(curCpuTime - lastCpuTime, pw);
+                    }
+                    pw.print(" whenUnimportant=");
+                    TimeUtils.formatDuration(whenUnimportant - nowUptime, pw);
+                    pw.println();
         }
         pw.print(prefix); pw.print("lastRequestedGc=");
-                TimeUtils.formatDuration(lastRequestedGc, now, pw);
+                TimeUtils.formatDuration(lastRequestedGc, nowUptime, pw);
                 pw.print(" lastLowMemory=");
-                TimeUtils.formatDuration(lastLowMemory, now, pw);
+                TimeUtils.formatDuration(lastLowMemory, nowUptime, pw);
                 pw.print(" reportLowMemory="); pw.println(reportLowMemory);
         if (killed || killedByAm || waitingToKill != null) {
             pw.print(prefix); pw.print("killed="); pw.print(killed);

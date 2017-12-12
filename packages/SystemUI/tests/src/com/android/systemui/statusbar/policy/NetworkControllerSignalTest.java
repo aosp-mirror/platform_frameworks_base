@@ -202,6 +202,14 @@ public class NetworkControllerSignalTest extends NetworkControllerBaseTest {
     }
 
     @Test
+    public void testRoamingNoService_DoesNotCrash() {
+        setupDefaultSignal();
+        setCdma();
+        mServiceState = null;
+        updateServiceState();
+    }
+
+    @Test
     @Ignore("Flaky")
     public void testQsSignalStrength() {
         for (int testStrength = SignalStrength.SIGNAL_STRENGTH_NONE_OR_UNKNOWN;

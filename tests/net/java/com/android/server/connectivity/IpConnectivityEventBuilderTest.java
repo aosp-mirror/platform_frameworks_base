@@ -337,7 +337,6 @@ public class IpConnectivityEventBuilderTest {
     public void testNetworkEventSerialization() {
         ConnectivityMetricsEvent ev = describeIpEvent(
                 aType(NetworkEvent.class),
-                anInt(100),
                 anInt(5),
                 aLong(20410));
 
@@ -352,9 +351,6 @@ public class IpConnectivityEventBuilderTest {
                 "  network_event <",
                 "    event_type: 5",
                 "    latency_ms: 20410",
-                "    network_id <",
-                "      network_id: 100",
-                "    >",
                 "  >",
                 ">",
                 "version: 2\n");
@@ -508,6 +504,13 @@ public class IpConnectivityEventBuilderTest {
         stats.rootWakeups = 2;
         stats.systemWakeups = 3;
         stats.noUidWakeups = 3;
+        stats.l2UnicastCount = 5;
+        stats.l2MulticastCount = 1;
+        stats.l2BroadcastCount = 2;
+        stats.ethertypes.put(0x800, 3);
+        stats.ethertypes.put(0x86dd, 3);
+        stats.ipNextHeaders.put(6, 5);
+
 
         IpConnectivityEvent got = IpConnectivityEventBuilder.toProto(stats);
         String want = String.join("\n",
@@ -521,6 +524,21 @@ public class IpConnectivityEventBuilderTest {
                 "  wakeup_stats <",
                 "    application_wakeups: 5",
                 "    duration_sec: 0",
+                "    ethertype_counts <",
+                "      key: 2048",
+                "      value: 3",
+                "    >",
+                "    ethertype_counts <",
+                "      key: 34525",
+                "      value: 3",
+                "    >",
+                "    ip_next_header_counts <",
+                "      key: 6",
+                "      value: 5",
+                "    >",
+                "    l2_broadcast_count: 2",
+                "    l2_multicast_count: 1",
+                "    l2_unicast_count: 5",
                 "    no_uid_wakeups: 3",
                 "    non_application_wakeups: 1",
                 "    root_wakeups: 2",

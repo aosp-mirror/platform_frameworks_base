@@ -679,7 +679,8 @@ final class FragmentManagerImpl extends FragmentManager implements LayoutInflate
     ArrayList<Integer> mAvailBackStackIndices;
 
     ArrayList<OnBackStackChangedListener> mBackStackChangeListeners;
-    CopyOnWriteArrayList<Pair<FragmentLifecycleCallbacks, Boolean>> mLifecycleCallbacks;
+    final CopyOnWriteArrayList<Pair<FragmentLifecycleCallbacks, Boolean>>
+            mLifecycleCallbacks = new CopyOnWriteArrayList<>();
 
     int mCurState = Fragment.INITIALIZING;
     FragmentHostCallback<?> mHost;
@@ -1231,7 +1232,7 @@ final class FragmentManagerImpl extends FragmentManager implements LayoutInflate
                         }
                         dispatchOnFragmentAttached(f, mHost.getContext(), false);
 
-                        if (!f.mRetaining) {
+                        if (!f.mIsCreated) {
                             dispatchOnFragmentPreCreated(f, f.mSavedFragmentState, false);
                             f.performCreate(f.mSavedFragmentState);
                             dispatchOnFragmentCreated(f, f.mSavedFragmentState, false);
@@ -1379,8 +1380,13 @@ final class FragmentManagerImpl extends FragmentManager implements LayoutInflate
                                     @Override
                                     public void onAnimationEnd(Animator anim) {
                                         container.endViewTransition(view);
-                                        if (fragment.getAnimatingAway() != null) {
-                                            fragment.setAnimatingAway(null);
+                                        Animator animator = f.getAnimatingAway();
+                                        f.setAnimatingAway(null);
+                                        // If the animation finished immediately, the fragment's
+                                        // view will still be there. If so, we can just pretend
+                                        // there was no animation and skip the moveToState()
+                                        if (container.indexOfChild(view) == -1
+                                                && animator != null) {
                                             moveToState(fragment, fragment.getStateAfterAnimating(),
                                                     0, 0, false);
                                         }
@@ -3100,6 +3106,9 @@ final class FragmentManagerImpl extends FragmentManager implements LayoutInflate
     }
 
     public boolean dispatchCreateOptionsMenu(Menu menu, MenuInflater inflater) {
+        if (mCurState < Fragment.CREATED) {
+            return false;
+        }
         boolean show = false;
         ArrayList<Fragment> newMenus = null;
         for (int i = 0; i < mAdded.size(); i++) {
@@ -3130,6 +3139,9 @@ final class FragmentManagerImpl extends FragmentManager implements LayoutInflate
     }
     
     public boolean dispatchPrepareOptionsMenu(Menu menu) {
+        if (mCurState < Fragment.CREATED) {
+            return false;
+        }
         boolean show = false;
         for (int i = 0; i < mAdded.size(); i++) {
             Fragment f = mAdded.get(i);
@@ -3143,6 +3155,9 @@ final class FragmentManagerImpl extends FragmentManager implements LayoutInflate
     }
     
     public boolean dispatchOptionsItemSelected(MenuItem item) {
+        if (mCurState < Fragment.CREATED) {
+            return false;
+        }
         for (int i = 0; i < mAdded.size(); i++) {
             Fragment f = mAdded.get(i);
             if (f != null) {
@@ -3155,6 +3170,9 @@ final class FragmentManagerImpl extends FragmentManager implements LayoutInflate
     }
     
     public boolean dispatchContextItemSelected(MenuItem item) {
+        if (mCurState < Fragment.CREATED) {
+            return false;
+        }
         for (int i = 0; i < mAdded.size(); i++) {
             Fragment f = mAdded.get(i);
             if (f != null) {
@@ -3167,6 +3185,9 @@ final class FragmentManagerImpl extends FragmentManager implements LayoutInflate
     }
     
     public void dispatchOptionsMenuClosed(Menu menu) {
+        if (mCurState < Fragment.CREATED) {
+            return;
+        }
         for (int i = 0; i < mAdded.size(); i++) {
             Fragment f = mAdded.get(i);
             if (f != null) {
@@ -3191,17 +3212,10 @@ final class FragmentManagerImpl extends FragmentManager implements LayoutInflate
 
     public void registerFragmentLifecycleCallbacks(FragmentLifecycleCallbacks cb,
             boolean recursive) {
-        if (mLifecycleCallbacks == null) {
-            mLifecycleCallbacks = new CopyOnWriteArrayList<>();
-        }
-        mLifecycleCallbacks.add(new Pair(cb, recursive));
+        mLifecycleCallbacks.add(new Pair<>(cb, recursive));
     }
 
     public void unregisterFragmentLifecycleCallbacks(FragmentLifecycleCallbacks cb) {
-        if (mLifecycleCallbacks == null) {
-            return;
-        }
-
         synchronized (mLifecycleCallbacks) {
             for (int i = 0, N = mLifecycleCallbacks.size(); i < N; i++) {
                 if (mLifecycleCallbacks.get(i).first == cb) {
@@ -3220,9 +3234,6 @@ final class FragmentManagerImpl extends FragmentManager implements LayoutInflate
                         .dispatchOnFragmentPreAttached(f, context, true);
             }
         }
-        if (mLifecycleCallbacks == null) {
-            return;
-        }
         for (Pair<FragmentLifecycleCallbacks, Boolean> p : mLifecycleCallbacks) {
             if (!onlyRecursive || p.second) {
                 p.first.onFragmentPreAttached(this, f, context);
@@ -3237,9 +3248,6 @@ final class FragmentManagerImpl extends FragmentManager implements LayoutInflate
                 ((FragmentManagerImpl) parentManager)
                         .dispatchOnFragmentAttached(f, context, true);
             }
-        }
-        if (mLifecycleCallbacks == null) {
-            return;
         }
         for (Pair<FragmentLifecycleCallbacks, Boolean> p : mLifecycleCallbacks) {
             if (!onlyRecursive || p.second) {
@@ -3257,9 +3265,6 @@ final class FragmentManagerImpl extends FragmentManager implements LayoutInflate
                         .dispatchOnFragmentPreCreated(f, savedInstanceState, true);
             }
         }
-        if (mLifecycleCallbacks == null) {
-            return;
-        }
         for (Pair<FragmentLifecycleCallbacks, Boolean> p : mLifecycleCallbacks) {
             if (!onlyRecursive || p.second) {
                 p.first.onFragmentPreCreated(this, f, savedInstanceState);
@@ -3274,9 +3279,6 @@ final class FragmentManagerImpl extends FragmentManager implements LayoutInflate
                 ((FragmentManagerImpl) parentManager)
                         .dispatchOnFragmentCreated(f, savedInstanceState, true);
             }
-        }
-        if (mLifecycleCallbacks == null) {
-            return;
         }
         for (Pair<FragmentLifecycleCallbacks, Boolean> p : mLifecycleCallbacks) {
             if (!onlyRecursive || p.second) {
@@ -3294,9 +3296,6 @@ final class FragmentManagerImpl extends FragmentManager implements LayoutInflate
                         .dispatchOnFragmentActivityCreated(f, savedInstanceState, true);
             }
         }
-        if (mLifecycleCallbacks == null) {
-            return;
-        }
         for (Pair<FragmentLifecycleCallbacks, Boolean> p : mLifecycleCallbacks) {
             if (!onlyRecursive || p.second) {
                 p.first.onFragmentActivityCreated(this, f, savedInstanceState);
@@ -3313,9 +3312,6 @@ final class FragmentManagerImpl extends FragmentManager implements LayoutInflate
                         .dispatchOnFragmentViewCreated(f, v, savedInstanceState, true);
             }
         }
-        if (mLifecycleCallbacks == null) {
-            return;
-        }
         for (Pair<FragmentLifecycleCallbacks, Boolean> p : mLifecycleCallbacks) {
             if (!onlyRecursive || p.second) {
                 p.first.onFragmentViewCreated(this, f, v, savedInstanceState);
@@ -3330,9 +3326,6 @@ final class FragmentManagerImpl extends FragmentManager implements LayoutInflate
                 ((FragmentManagerImpl) parentManager)
                         .dispatchOnFragmentStarted(f, true);
             }
-        }
-        if (mLifecycleCallbacks == null) {
-            return;
         }
         for (Pair<FragmentLifecycleCallbacks, Boolean> p : mLifecycleCallbacks) {
             if (!onlyRecursive || p.second) {
@@ -3349,9 +3342,6 @@ final class FragmentManagerImpl extends FragmentManager implements LayoutInflate
                         .dispatchOnFragmentResumed(f, true);
             }
         }
-        if (mLifecycleCallbacks == null) {
-            return;
-        }
         for (Pair<FragmentLifecycleCallbacks, Boolean> p : mLifecycleCallbacks) {
             if (!onlyRecursive || p.second) {
                 p.first.onFragmentResumed(this, f);
@@ -3366,9 +3356,6 @@ final class FragmentManagerImpl extends FragmentManager implements LayoutInflate
                 ((FragmentManagerImpl) parentManager)
                         .dispatchOnFragmentPaused(f, true);
             }
-        }
-        if (mLifecycleCallbacks == null) {
-            return;
         }
         for (Pair<FragmentLifecycleCallbacks, Boolean> p : mLifecycleCallbacks) {
             if (!onlyRecursive || p.second) {
@@ -3385,9 +3372,6 @@ final class FragmentManagerImpl extends FragmentManager implements LayoutInflate
                         .dispatchOnFragmentStopped(f, true);
             }
         }
-        if (mLifecycleCallbacks == null) {
-            return;
-        }
         for (Pair<FragmentLifecycleCallbacks, Boolean> p : mLifecycleCallbacks) {
             if (!onlyRecursive || p.second) {
                 p.first.onFragmentStopped(this, f);
@@ -3402,9 +3386,6 @@ final class FragmentManagerImpl extends FragmentManager implements LayoutInflate
                 ((FragmentManagerImpl) parentManager)
                         .dispatchOnFragmentSaveInstanceState(f, outState, true);
             }
-        }
-        if (mLifecycleCallbacks == null) {
-            return;
         }
         for (Pair<FragmentLifecycleCallbacks, Boolean> p : mLifecycleCallbacks) {
             if (!onlyRecursive || p.second) {
@@ -3421,9 +3402,6 @@ final class FragmentManagerImpl extends FragmentManager implements LayoutInflate
                         .dispatchOnFragmentViewDestroyed(f, true);
             }
         }
-        if (mLifecycleCallbacks == null) {
-            return;
-        }
         for (Pair<FragmentLifecycleCallbacks, Boolean> p : mLifecycleCallbacks) {
             if (!onlyRecursive || p.second) {
                 p.first.onFragmentViewDestroyed(this, f);
@@ -3439,9 +3417,6 @@ final class FragmentManagerImpl extends FragmentManager implements LayoutInflate
                         .dispatchOnFragmentDestroyed(f, true);
             }
         }
-        if (mLifecycleCallbacks == null) {
-            return;
-        }
         for (Pair<FragmentLifecycleCallbacks, Boolean> p : mLifecycleCallbacks) {
             if (!onlyRecursive || p.second) {
                 p.first.onFragmentDestroyed(this, f);
@@ -3456,9 +3431,6 @@ final class FragmentManagerImpl extends FragmentManager implements LayoutInflate
                 ((FragmentManagerImpl) parentManager)
                         .dispatchOnFragmentDetached(f, true);
             }
-        }
-        if (mLifecycleCallbacks == null) {
-            return;
         }
         for (Pair<FragmentLifecycleCallbacks, Boolean> p : mLifecycleCallbacks) {
             if (!onlyRecursive || p.second) {

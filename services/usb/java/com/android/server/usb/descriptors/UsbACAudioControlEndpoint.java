@@ -21,7 +21,7 @@ package com.android.server.usb.descriptors;
  * audio10.pdf section 4.4.2.1
  */
 public class UsbACAudioControlEndpoint extends UsbACEndpoint {
-    private static final String TAG = "ACAudioControlEndpoint";
+    private static final String TAG = "UsbACAudioControlEndpoint";
 
     private byte mAddress;  // 2:1 The address of the endpoint on the USB device.
                             // D7: Direction. 1 = IN endpoint
@@ -64,7 +64,7 @@ public class UsbACAudioControlEndpoint extends UsbACEndpoint {
 
         mAddress = stream.getByte();
         mAttribs = stream.getByte();
-        mMaxPacketSize = stream.unpackUsbWord();
+        mMaxPacketSize = stream.unpackUsbShort();
         mInterval = stream.getByte();
 
         return mLength;

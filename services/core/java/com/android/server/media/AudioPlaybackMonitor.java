@@ -100,7 +100,11 @@ class AudioPlaybackMonitor extends IPlaybackConfigDispatcher.Stub {
      * @param configs List of the current audio playback configuration
      */
     @Override
-    public void dispatchPlaybackConfigChange(List<AudioPlaybackConfiguration> configs) {
+    public void dispatchPlaybackConfigChange(List<AudioPlaybackConfiguration> configs,
+            boolean flush) {
+        if (flush) {
+            Binder.flushPendingCommands();
+        }
         final long token = Binder.clearCallingIdentity();
         try {
             List<Integer> newActiveAudioPlaybackClientUids = new ArrayList<>();

@@ -85,11 +85,6 @@ CopyResult OpenGLReadback::copyGraphicBufferInto(GraphicBuffer* graphicBuffer,
 
     uint32_t width = graphicBuffer->getWidth();
     uint32_t height = graphicBuffer->getHeight();
-    // If this is a 90 or 270 degree rotation we need to swap width/height
-    // This is a fuzzy way of checking that.
-    if (texTransform[Matrix4::kSkewX] >= 0.5f || texTransform[Matrix4::kSkewX] <= -0.5f) {
-        std::swap(width, height);
-    }
     CopyResult copyResult = copyImageInto(sourceImage, texTransform, width, height,
             srcRect, bitmap);
 
@@ -233,11 +228,12 @@ inline CopyResult copyTextureInto(Caches& caches, RenderState& renderState,
                 .build();
         Matrix4 ortho;
         ortho.loadOrtho(destWidth, destHeight);
-        renderState.render(glop, ortho);
+        renderState.render(glop, ortho, false);
 
         // TODO: We should convert to linear space when the target is RGBA16F
         glReadPixels(0, 0, bitmap->width(), bitmap->height(), format,
                 type, bitmap->getPixels());
+        bitmap->notifyPixelsChanged();
     }
 
     // Cleanup
@@ -252,6 +248,12 @@ inline CopyResult copyTextureInto(Caches& caches, RenderState& renderState,
 CopyResult OpenGLReadbackImpl::copyImageInto(EGLImageKHR eglImage,
         const Matrix4& imgTransform, int imgWidth, int imgHeight, const Rect& srcRect,
         SkBitmap* bitmap) {
+
+    // If this is a 90 or 270 degree rotation we need to swap width/height
+    // This is a fuzzy way of checking that.
+    if (imgTransform[Matrix4::kSkewX] >= 0.5f || imgTransform[Matrix4::kSkewX] <= -0.5f) {
+        std::swap(imgWidth, imgHeight);
+    }
 
     Caches& caches = Caches::getInstance();
     GLuint sourceTexId;
@@ -278,6 +280,11 @@ CopyResult OpenGLReadbackImpl::copyImageInto(EGLImageKHR eglImage,
 
 bool OpenGLReadbackImpl::copyLayerInto(renderthread::RenderThread& renderThread,
         GlLayer& layer, SkBitmap* bitmap) {
+    if (!layer.isRenderable()) {
+        // layer has never been updated by DeferredLayerUpdater, abort copy
+        return false;
+    }
+
     return CopyResult::Success == copyTextureInto(Caches::getInstance(),
             renderThread.renderState(), layer.getTexture(), layer.getTexTransform(),
             Rect(), bitmap);

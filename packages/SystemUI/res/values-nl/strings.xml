@@ -64,7 +64,7 @@
     <string name="usb_debugging_message" msgid="2220143855912376496">"De vingerafdruk voor de RSA-sleutel van de computer is:\n<xliff:g id="FINGERPRINT">%1$s</xliff:g>"</string>
     <string name="usb_debugging_always" msgid="303335496705863070">"Altijd toestaan vanaf deze computer"</string>
     <string name="usb_debugging_secondary_user_title" msgid="6353808721761220421">"USB-foutopsporing niet toegestaan"</string>
-    <string name="usb_debugging_secondary_user_message" msgid="8572228137833020196">"De gebruiker die momenteel is ingelogd op dit apparaat, kan USB-foutopsporing niet inschakelen. Als u deze functie wilt gebruiken, schakelt u naar een beheerdersgebruiker."</string>
+    <string name="usb_debugging_secondary_user_message" msgid="6067122453571699801">"De gebruiker die momenteel is ingelogd op dit apparaat, kan USB-foutopsporing niet inschakelen. Als je deze functie wilt gebruiken, schakel je naar de primaire gebruiker."</string>
     <string name="compat_mode_on" msgid="6623839244840638213">"Zoom om scherm te vullen"</string>
     <string name="compat_mode_off" msgid="4434467572461327898">"Rek uit v. schermvulling"</string>
     <string name="screenshot_saving_ticker" msgid="7403652894056693515">"Screenshot opslaan..."</string>
@@ -353,10 +353,10 @@
     <string name="description_target_search" msgid="3091587249776033139">"Zoeken"</string>
     <string name="description_direction_up" msgid="7169032478259485180">"Veeg omhoog voor <xliff:g id="TARGET_DESCRIPTION">%s</xliff:g>."</string>
     <string name="description_direction_left" msgid="7207478719805562165">"Veeg naar links voor <xliff:g id="TARGET_DESCRIPTION">%s</xliff:g>."</string>
-    <string name="zen_priority_introduction" msgid="7577965386868311310">"Je wordt niet gestoord door geluiden en trillingen, behalve bij alarmen, herinneringen, afspraken en specifieke bellers die je selecteert. Je kunt nog steeds alles horen wat je wilt afspelen, waaronder muziek, video\'s en games."</string>
-    <string name="zen_alarms_introduction" msgid="7034415210361973827">"Je wordt niet gestoord door geluiden en trillingen, behalve bij alarmen. Je kunt nog steeds alles horen wat je wilt afspelen, waaronder muziek, video\'s en games."</string>
+    <string name="zen_priority_introduction" msgid="1149025108714420281">"Je wordt niet gestoord door geluiden en trillingen, behalve bij alarmen, herinneringen, afspraken en specifieke bellers die je selecteert. Je kunt nog steeds alles horen wat je wilt afspelen, waaronder muziek, video\'s en games."</string>
+    <string name="zen_alarms_introduction" msgid="4934328096749380201">"Je wordt niet gestoord door geluiden en trillingen, behalve bij alarmen. Je kunt nog steeds alles horen wat je wilt afspelen, waaronder muziek, video\'s en games."</string>
     <string name="zen_priority_customize_button" msgid="7948043278226955063">"Aanpassen"</string>
-    <string name="zen_silence_introduction_voice" msgid="2284540992298200729">"Hiermee worden ALLE geluiden en trillingen geblokkeerd, waaronder die voor alarmen, muziek, video\'s en games. U kunt wel nog steeds bellen."</string>
+    <string name="zen_silence_introduction_voice" msgid="3948778066295728085">"Hiermee worden ALLE geluiden en trillingen geblokkeerd, waaronder die voor alarmen, muziek, video\'s en games. Je kunt wel nog steeds bellen."</string>
     <string name="zen_silence_introduction" msgid="3137882381093271568">"Hiermee worden ALLE geluiden en trillingen geblokkeerd, waaronder die voor alarmen, muziek, video\'s en games."</string>
     <string name="keyguard_more_overflow_text" msgid="9195222469041601365">"+<xliff:g id="NUMBER_OF_NOTIFICATIONS">%d</xliff:g>"</string>
     <string name="speed_bump_explanation" msgid="1288875699658819755">"Minder urgente meldingen onderaan"</string>
@@ -456,7 +456,7 @@
     <string name="monitoring_description_do_learn_more" msgid="1849514470437907421">"Meer informatie"</string>
     <string name="monitoring_description_do_body_vpn" msgid="8255218762488901796">"Je bent verbonden met <xliff:g id="VPN_APP">%1$s</xliff:g>, waarmee je netwerkactiviteit (waaronder e-mails, apps en websites) kan worden gecontroleerd."</string>
     <string name="monitoring_description_vpn_settings_separator" msgid="1933186756733474388">" "</string>
-    <string name="monitoring_description_vpn_settings" msgid="8869300202410505143">"VPN-instellingen openen"</string>
+    <string name="monitoring_description_vpn_settings" msgid="6434859242636063861">"VPN-instellingen openen"</string>
     <string name="monitoring_description_ca_cert_settings_separator" msgid="4987350385906393626">" "</string>
     <string name="monitoring_description_ca_cert_settings" msgid="5489969458872997092">"Vertrouwde gegevens openen"</string>
     <string name="monitoring_description_network_logging" msgid="7223505523384076027">"Je beheerder heeft netwerkregistratie ingeschakeld, waarmee verkeer op je apparaat wordt bijgehouden.\n\nNeem contact op met je beheerder voor meer informatie."</string>
@@ -556,8 +556,8 @@
     <string name="notification_default_channel_desc" msgid="2506053815870808359">"Deze app heeft geen meldingscategorieën"</string>
     <string name="notification_unblockable_desc" msgid="3561016061737896906">"Meldingen van deze app kunnen niet worden uitgeschakeld"</string>
     <plurals name="notification_num_channels_desc" formatted="false" msgid="5492793452274077663">
-      <item quantity="other">1 van <xliff:g id="NUMBER_1">%d</xliff:g> meldingscategorieën van deze app</item>
-      <item quantity="one">1 van <xliff:g id="NUMBER_0">%d</xliff:g> meldingscategorie van deze app</item>
+      <item quantity="other">1 van <xliff:g id="NUMBER_1">%s</xliff:g> meldingscategorieën van deze app</item>
+      <item quantity="one">1 van <xliff:g id="NUMBER_0">%s</xliff:g> meldingscategorie van deze app</item>
     </plurals>
     <string name="notification_channels_list_desc_2" msgid="6214732715833946441">"<xliff:g id="CHANNEL_NAME_1">%1$s</xliff:g>, <xliff:g id="CHANNEL_NAME_2">%2$s</xliff:g>"</string>
     <plurals name="notification_channels_list_desc_2_and_others" formatted="false" msgid="2747813553355336157">
@@ -585,8 +585,8 @@
       <item quantity="one">%d minuut</item>
     </plurals>
     <string name="battery_panel_title" msgid="7944156115535366613">"Accugebruik"</string>
-    <string name="battery_detail_charging_summary" msgid="1279095653533044008">"Batterijbesparing niet beschikbaar tijdens opladen"</string>
-    <string name="battery_detail_switch_title" msgid="6285872470260795421">"Batterijbesparing"</string>
+    <string name="battery_detail_charging_summary" msgid="4055327085770378335">"Batterijbesparing niet beschikbaar tijdens opladen"</string>
+    <string name="battery_detail_switch_title" msgid="8763441006881907058">"Batterijbesparing"</string>
     <string name="battery_detail_switch_summary" msgid="9049111149407626804">"Vermindert de prestaties en achtergrondgegevens"</string>
     <string name="keyboard_key_button_template" msgid="6230056639734377300">"Knop <xliff:g id="NAME">%1$s</xliff:g>"</string>
     <string name="keyboard_key_home" msgid="2243500072071305073">"Home"</string>
@@ -726,9 +726,9 @@
     <string name="pip_phone_minimize" msgid="1079119422589131792">"Minimaliseren"</string>
     <string name="pip_phone_close" msgid="8416647892889710330">"Sluiten"</string>
     <string name="pip_phone_dismiss_hint" msgid="6351678169095923899">"Sleep omlaag om te sluiten"</string>
-    <string name="pip_menu_title" msgid="3328510504196964712">"Scherm-in-scherm-menu"</string>
+    <string name="pip_menu_title" msgid="4707292089961887657">"Menu"</string>
     <string name="pip_notification_title" msgid="3204024940158161322">"<xliff:g id="NAME">%s</xliff:g> is in scherm-in-scherm"</string>
-    <string name="pip_notification_message" msgid="4171698133469539591">"Als je niet wilt dat <xliff:g id="NAME">%s</xliff:g> deze functie gebruikt, tik je om de instellingen te openen en schakel je de functie uit."</string>
+    <string name="pip_notification_message" msgid="5619512781514343311">"Als je niet wilt dat <xliff:g id="NAME">%s</xliff:g> deze functie gebruikt, tik je om de instellingen te openen en schakel je de functie uit."</string>
     <string name="pip_play" msgid="1417176722760265888">"Afspelen"</string>
     <string name="pip_pause" msgid="8881063404466476571">"Onderbreken"</string>
     <string name="pip_skip_to_next" msgid="1948440006726306284">"Doorgaan naar volgende"</string>
@@ -754,6 +754,7 @@
     <string name="tuner_menu" msgid="191640047241552081">"Menu"</string>
     <string name="tuner_app" msgid="3507057938640108777">"<xliff:g id="APP">%1$s</xliff:g>-app"</string>
     <string name="notification_channel_alerts" msgid="4496839309318519037">"Meldingen"</string>
+    <string name="notification_channel_battery" msgid="5786118169182888462">"Batterij"</string>
     <string name="notification_channel_screenshot" msgid="6314080179230000938">"Screenshots"</string>
     <string name="notification_channel_general" msgid="4525309436693914482">"Algemene berichten"</string>
     <string name="notification_channel_storage" msgid="3077205683020695313">"Opslag"</string>
@@ -774,4 +775,5 @@
     <string name="running_foreground_services_title" msgid="381024150898615683">"Apps uitgevoerd op achtergrond"</string>
     <string name="running_foreground_services_msg" msgid="6326247670075574355">"Tik voor batterij- en datagebruik"</string>
     <string name="data_usage_disable_mobile" msgid="5116269981510015864">"Mobiele data uitschakelen?"</string>
+    <string name="touch_filtered_warning" msgid="8671693809204767551">"Aangezien een app een toestemmingsverzoek afdekt, kan Instellingen je reactie niet verifiëren."</string>
 </resources>

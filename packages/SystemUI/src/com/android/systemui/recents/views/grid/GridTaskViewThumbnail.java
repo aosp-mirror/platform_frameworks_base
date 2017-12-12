@@ -26,8 +26,8 @@ import com.android.systemui.recents.views.TaskViewThumbnail;
 
 public class GridTaskViewThumbnail extends TaskViewThumbnail {
 
-    private Path mThumbnailOutline;
-    private Path mRestBackgroundOutline;
+    private final Path mThumbnailOutline = new Path();
+    private final Path mRestBackgroundOutline = new Path();
     // True if either this view's size or thumbnail scale has changed and mThumbnailOutline should
     // be updated.
     private boolean mUpdateThumbnailOutline = true;
@@ -77,47 +77,38 @@ public class GridTaskViewThumbnail extends TaskViewThumbnail {
             (int) (mThumbnailRect.width() * mThumbnailScale));
         final int thumbnailHeight = Math.min(viewHeight,
             (int) (mThumbnailRect.height() * mThumbnailScale));
-        // Draw the thumbnail, we only round the bottom corners:
-        //
-        // outerLeft                outerRight
-        //    <----------------------->            mRestBackgroundOutline
-        //    _________________________            (thumbnailWidth < viewWidth)
-        //    |_______________________| outerTop     A ____ B
-        //    |                       |    ↑           |  |
-        //    |                       |    |           |  |
-        //    |                       |    |           |  |
-        //    |                       |    |           |  | C
-        //    \_______________________/    ↓           |__/
-        //  mCornerRadius             outerBottom    E    D
-        //
-        //  mRestBackgroundOutline (thumbnailHeight < viewHeight)
-        //  A _________________________ B
-        //    |                       | C
-        //  F \_______________________/
-        //    E                       D
-        final int outerLeft = 0;
-        final int outerTop = 0;
-        final int outerRight = outerLeft + thumbnailWidth;
-        final int outerBottom = outerTop + thumbnailHeight;
-        mThumbnailOutline = new Path();
-        mThumbnailOutline.moveTo(outerLeft, outerTop);
-        mThumbnailOutline.lineTo(outerRight, outerTop);
-        mThumbnailOutline.lineTo(outerRight, outerBottom - mCornerRadius);
-        mThumbnailOutline.arcTo(outerRight -  2 * mCornerRadius, outerBottom - 2 * mCornerRadius,
-                outerRight, outerBottom, 0, 90, false);
-        mThumbnailOutline.lineTo(outerLeft + mCornerRadius, outerBottom);
-        mThumbnailOutline.arcTo(outerLeft, outerBottom - 2 * mCornerRadius,
-                outerLeft + 2 * mCornerRadius, outerBottom, 90, 90, false);
-        mThumbnailOutline.lineTo(outerLeft, outerTop);
-        mThumbnailOutline.close();
 
         if (mBitmapShader != null && thumbnailWidth > 0 && thumbnailHeight > 0) {
+            // Draw the thumbnail, we only round the bottom corners:
+            //
+            // outerLeft                outerRight
+            //    <----------------------->            mRestBackgroundOutline
+            //    _________________________            (thumbnailWidth < viewWidth)
+            //    |_______________________| outerTop     A ____ B
+            //    |                       |    ↑           |  |
+            //    |                       |    |           |  |
+            //    |                       |    |           |  |
+            //    |                       |    |           |  | C
+            //    \_______________________/    ↓           |__/
+            //  mCornerRadius             outerBottom    E    D
+            //
+            //  mRestBackgroundOutline (thumbnailHeight < viewHeight)
+            //  A _________________________ B
+            //    |                       | C
+            //  F \_______________________/
+            //    E                       D
+            final int outerLeft = 0;
+            final int outerTop = 0;
+            final int outerRight = outerLeft + thumbnailWidth;
+            final int outerBottom = outerTop + thumbnailHeight;
+            createThumbnailPath(outerLeft, outerTop, outerRight, outerBottom, mThumbnailOutline);
+
             if (thumbnailWidth < viewWidth) {
                 final int l = Math.max(0, outerRight - mCornerRadius);
                 final int r = outerRight;
                 final int t = outerTop;
                 final int b = outerBottom;
-                mRestBackgroundOutline = new Path();
+                mRestBackgroundOutline.reset();
                 mRestBackgroundOutline.moveTo(l, t); // A
                 mRestBackgroundOutline.lineTo(r, t); // B
                 mRestBackgroundOutline.lineTo(r, b - mCornerRadius); // C
@@ -133,7 +124,7 @@ public class GridTaskViewThumbnail extends TaskViewThumbnail {
                 final int r = outerRight;
                 final int t = Math.max(0, thumbnailHeight - mCornerRadius);
                 final int b = outerBottom;
-                mRestBackgroundOutline = new Path();
+                mRestBackgroundOutline.reset();
                 mRestBackgroundOutline.moveTo(l, t); // A
                 mRestBackgroundOutline.lineTo(r, t); // B
                 mRestBackgroundOutline.lineTo(r, b - mCornerRadius); // C
@@ -145,7 +136,24 @@ public class GridTaskViewThumbnail extends TaskViewThumbnail {
                 mRestBackgroundOutline.lineTo(l, t); // A
                 mRestBackgroundOutline.close();
             }
+        } else {
+            createThumbnailPath(0, 0, viewWidth, viewHeight, mThumbnailOutline);
         }
+    }
+
+    private void createThumbnailPath(int outerLeft, int outerTop, int outerRight, int outerBottom,
+            Path outPath) {
+        outPath.reset();
+        outPath.moveTo(outerLeft, outerTop);
+        outPath.lineTo(outerRight, outerTop);
+        outPath.lineTo(outerRight, outerBottom - mCornerRadius);
+        outPath.arcTo(outerRight -  2 * mCornerRadius, outerBottom - 2 * mCornerRadius, outerRight,
+                outerBottom, 0, 90, false);
+        outPath.lineTo(outerLeft + mCornerRadius, outerBottom);
+        outPath.arcTo(outerLeft, outerBottom - 2 * mCornerRadius, outerLeft + 2 * mCornerRadius,
+                outerBottom, 90, 90, false);
+        outPath.lineTo(outerLeft, outerTop);
+        outPath.close();
     }
 
     @Override

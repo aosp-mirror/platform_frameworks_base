@@ -30,6 +30,7 @@ import static android.content.pm.ActivityInfo.FLAG_SHOW_FOR_ALL_USERS;
 import static android.view.Display.DEFAULT_DISPLAY;
 import static android.view.Display.FLAG_CAN_SHOW_WITH_INSECURE_KEYGUARD;
 
+import static android.view.Display.INVALID_DISPLAY;
 import static com.android.server.am.ActivityManagerDebugConfig.DEBUG_ADD_REMOVE;
 import static com.android.server.am.ActivityManagerDebugConfig.DEBUG_ALL;
 import static com.android.server.am.ActivityManagerDebugConfig.DEBUG_APP;
@@ -64,6 +65,7 @@ import static com.android.server.am.ActivityManagerDebugConfig.POSTFIX_VISIBILIT
 import static com.android.server.am.ActivityManagerDebugConfig.TAG_AM;
 import static com.android.server.am.ActivityManagerDebugConfig.TAG_WITH_CLASS_NAME;
 import static com.android.server.am.ActivityRecord.APPLICATION_ACTIVITY_TYPE;
+import static com.android.server.am.ActivityStack.ActivityState.PAUSED;
 import static com.android.server.am.ActivityRecord.ASSISTANT_ACTIVITY_TYPE;
 import static com.android.server.am.ActivityRecord.HOME_ACTIVITY_TYPE;
 import static com.android.server.am.ActivityStack.ActivityState.STOPPED;
@@ -124,7 +126,6 @@ import com.android.internal.app.IVoiceInteractor;
 import com.android.internal.os.BatteryStatsImpl;
 import com.android.server.Watchdog;
 import com.android.server.am.ActivityManagerService.ItemMatcher;
-import com.android.server.am.ActivityStackSupervisor.ActivityContainer;
 import com.android.server.wm.StackWindowController;
 import com.android.server.wm.StackWindowListener;
 import com.android.server.wm.WindowManagerService;
@@ -205,7 +206,7 @@ class ActivityStack<T extends StackWindowController> extends ConfigurationContai
 
     @Override
     protected ConfigurationContainer getParent() {
-        return mActivityContainer.mActivityDisplay;
+        return getDisplay();
     }
 
     @Override
@@ -230,9 +231,6 @@ class ActivityStack<T extends StackWindowController> extends ConfigurationContai
     static final int STACK_INVISIBLE = 0;
     // Stack is considered visible
     static final int STACK_VISIBLE = 1;
-    // Stack is considered visible, but only becuase it has activity that is visible behind other
-    // activities and there is a specific combination of stacks.
-    static final int STACK_VISIBLE_ACTIVITY_BEHIND = 2;
 
     @VisibleForTesting
     /* The various modes for the method {@link #removeTask}. */
@@ -339,8 +337,8 @@ class ActivityStack<T extends StackWindowController> extends ConfigurationContai
     int mCurrentUser;
 
     final int mStackId;
-    final ActivityContainer mActivityContainer;
     /** The other stacks, in order, on the attached display. Updated at attach/detach time. */
+    // TODO: This list doesn't belong here...
     ArrayList<ActivityStack> mStacks;
     /** The attached Display's unique identifier, or -1 if detached */
     int mDisplayId;
@@ -365,8 +363,6 @@ class ActivityStack<T extends StackWindowController> extends ConfigurationContai
     static final int STOP_TIMEOUT_MSG = ActivityManagerService.FIRST_ACTIVITY_STACK_MSG + 4;
     static final int DESTROY_ACTIVITIES_MSG = ActivityManagerService.FIRST_ACTIVITY_STACK_MSG + 5;
     static final int TRANSLUCENT_TIMEOUT_MSG = ActivityManagerService.FIRST_ACTIVITY_STACK_MSG + 6;
-    static final int RELEASE_BACKGROUND_RESOURCES_TIMEOUT_MSG =
-            ActivityManagerService.FIRST_ACTIVITY_STACK_MSG + 7;
 
     private static class ScheduleDestroyArgs {
         final ProcessRecord mOwner;
@@ -440,15 +436,6 @@ class ActivityStack<T extends StackWindowController> extends ConfigurationContai
                         notifyActivityDrawnLocked(null);
                     }
                 } break;
-                case RELEASE_BACKGROUND_RESOURCES_TIMEOUT_MSG: {
-                    synchronized (mService) {
-                        final ActivityRecord r = getVisibleBehindActivity();
-                        Slog.e(TAG, "Timeout waiting for cancelVisibleBehind player=" + r);
-                        if (r != null) {
-                            mService.killAppAtUsersRequest(r.app, null);
-                        }
-                    }
-                } break;
             }
         }
     }
@@ -461,24 +448,21 @@ class ActivityStack<T extends StackWindowController> extends ConfigurationContai
         return count;
     }
 
-    ActivityStack(ActivityStackSupervisor.ActivityContainer activityContainer,
-            RecentTasks recentTasks, boolean onTop) {
-        mActivityContainer = activityContainer;
-        mStackSupervisor = activityContainer.getOuter();
-        mService = mStackSupervisor.mService;
+    ActivityStack(ActivityStackSupervisor.ActivityDisplay display, int stackId,
+            ActivityStackSupervisor supervisor, RecentTasks recentTasks, boolean onTop) {
+        mStackSupervisor = supervisor;
+        mService = supervisor.mService;
         mHandler = new ActivityStackHandler(mService.mHandler.getLooper());
         mWindowManager = mService.mWindowManager;
-        mStackId = activityContainer.mStackId;
+        mStackId = stackId;
         mCurrentUser = mService.mUserController.getCurrentUserIdLocked();
         mRecentTasks = recentTasks;
         mTaskPositioner = mStackId == FREEFORM_WORKSPACE_STACK_ID
                 ? new LaunchingTaskPositioner() : null;
-        final ActivityStackSupervisor.ActivityDisplay display = mActivityContainer.mActivityDisplay;
         mTmpRect2.setEmpty();
         mWindowContainerController = createStackWindowController(display.mDisplayId, onTop,
                 mTmpRect2);
-        activityContainer.mStack = this;
-        mStackSupervisor.mActivityContainers.put(mStackId, activityContainer);
+        mStackSupervisor.mStacks.put(mStackId, this);
         postAddToDisplay(display, mTmpRect2.isEmpty() ? null : mTmpRect2, onTop);
     }
 
@@ -535,7 +519,11 @@ class ActivityStack<T extends StackWindowController> extends ConfigurationContai
      * either destroyed completely or re-parented.
      */
     private void removeFromDisplay() {
-        mDisplayId = Display.INVALID_DISPLAY;
+        final ActivityStackSupervisor.ActivityDisplay display = getDisplay();
+        if (display != null) {
+            display.detachStack(this);
+        }
+        mDisplayId = INVALID_DISPLAY;
         mStacks = null;
         if (mTaskPositioner != null) {
             mTaskPositioner.reset();
@@ -551,14 +539,18 @@ class ActivityStack<T extends StackWindowController> extends ConfigurationContai
     /** Removes the stack completely. Also calls WindowManager to do the same on its side. */
     void remove() {
         removeFromDisplay();
-        mStackSupervisor.deleteActivityContainerRecord(mStackId);
+        mStackSupervisor.mStacks.remove(mStackId);
         mWindowContainerController.removeContainer();
         mWindowContainerController = null;
         onParentChanged();
     }
 
+    ActivityStackSupervisor.ActivityDisplay getDisplay() {
+        return mStackSupervisor.getActivityDisplay(mDisplayId);
+    }
+
     void getDisplaySize(Point out) {
-        mActivityContainer.mActivityDisplay.mDisplay.getSize(out);
+        getDisplay().mDisplay.getSize(out);
     }
 
     /**
@@ -850,8 +842,7 @@ class ActivityStack<T extends StackWindowController> extends ConfigurationContai
     }
 
     final boolean isOnHomeDisplay() {
-        return isAttached() &&
-                mActivityContainer.mActivityDisplay.mDisplayId == DEFAULT_DISPLAY;
+        return isAttached() && mDisplayId == DEFAULT_DISPLAY;
     }
 
     void moveToFront(String reason) {
@@ -963,7 +954,9 @@ class ActivityStack<T extends StackWindowController> extends ConfigurationContai
                 if (DEBUG_TASKS) Slog.d(TAG_TASKS, "Skipping " + task + ": different user");
                 continue;
             }
-            final ActivityRecord r = task.getTopActivity();
+
+            // Overlays should not be considered as the task's logical top activity.
+            final ActivityRecord r = task.getTopActivity(false /* includeOverlays */);
             if (r == null || r.finishing || r.userId != userId ||
                     r.launchMode == ActivityInfo.LAUNCH_SINGLE_INSTANCE) {
                 if (DEBUG_TASKS) Slog.d(TAG_TASKS, "Skipping " + task + ": mismatch root " + r);
@@ -1180,10 +1173,26 @@ class ActivityStack<T extends StackWindowController> extends ConfigurationContai
         }
     }
 
+    void checkReadyForSleep() {
+        if (shouldSleepActivities() && goToSleepIfPossible(false /* shuttingDown */)) {
+            mStackSupervisor.checkReadyForSleepLocked(true /* allowDelay */);
+        }
+    }
+
     /**
-     * @return true if something must be done before going to sleep.
+     * Tries to put the activities in the stack to sleep.
+     *
+     * If the stack is not in a state where its activities can be put to sleep, this function will
+     * start any necessary actions to move the stack into such a state. It is expected that this
+     * function get called again when those actions complete.
+     *
+     * @param shuttingDown true when the called because the device is shutting down.
+     * @return true if the stack finished going to sleep, false if the stack only started the
+     * process of going to sleep (checkReadyForSleep will be called when that process finishes).
      */
-    boolean checkReadyForSleepLocked() {
+    boolean goToSleepIfPossible(boolean shuttingDown) {
+        boolean shouldSleep = true;
+
         if (mResumedActivity != null) {
             // Still have something resumed; can't sleep until it is paused.
             if (DEBUG_PAUSE) Slog.v(TAG_PAUSE, "Sleep needs to pause " + mResumedActivity);
@@ -1193,32 +1202,44 @@ class ActivityStack<T extends StackWindowController> extends ConfigurationContai
             // If we are in the middle of resuming the top activity in
             // {@link #resumeTopActivityUncheckedLocked}, mResumedActivity will be set but not
             // resumed yet. We must not proceed pausing the activity here. This method will be
-            // called again if necessary as part of
+            // called again if necessary as part of {@link #checkReadyForSleep} or
             // {@link ActivityStackSupervisor#checkReadyForSleepLocked}.
             if (mStackSupervisor.inResumeTopActivity) {
                 if (DEBUG_PAUSE) Slog.v(TAG_PAUSE, "In the middle of resuming top activity "
                         + mResumedActivity);
-                return true;
+            } else {
+                startPausingLocked(false, true, null, false);
             }
-
-            startPausingLocked(false, true, null, false);
-            return true;
-        }
-        if (mPausingActivity != null) {
+            shouldSleep = false ;
+        } else if (mPausingActivity != null) {
             // Still waiting for something to pause; can't sleep yet.
             if (DEBUG_PAUSE) Slog.v(TAG_PAUSE, "Sleep still waiting to pause " + mPausingActivity);
-            return true;
+            shouldSleep = false;
         }
 
-        if (hasVisibleBehindActivity()) {
-            // Stop visible behind activity before going to sleep.
-            final ActivityRecord r = getVisibleBehindActivity();
-            mStackSupervisor.mStoppingActivities.add(r);
-            if (DEBUG_STATES) Slog.v(TAG_STATES, "Sleep still waiting to stop visible behind " + r);
-            return true;
+        if (!shuttingDown) {
+            if (containsActivityFromStack(mStackSupervisor.mStoppingActivities)) {
+                // Still need to tell some activities to stop; can't sleep yet.
+                if (DEBUG_PAUSE) Slog.v(TAG_PAUSE, "Sleep still need to stop "
+                        + mStackSupervisor.mStoppingActivities.size() + " activities");
+
+                mStackSupervisor.scheduleIdleLocked();
+                shouldSleep = false;
+            }
+
+            if (containsActivityFromStack(mStackSupervisor.mGoingToSleepActivities)) {
+                // Still need to tell some activities to sleep; can't sleep yet.
+                if (DEBUG_PAUSE) Slog.v(TAG_PAUSE, "Sleep still need to sleep "
+                        + mStackSupervisor.mGoingToSleepActivities.size() + " activities");
+                shouldSleep = false;
+            }
         }
 
-        return false;
+        if (shouldSleep) {
+            goToSleep();
+        }
+
+        return shouldSleep;
     }
 
     void goToSleep() {
@@ -1236,6 +1257,15 @@ class ActivityStack<T extends StackWindowController> extends ConfigurationContai
                 }
             }
         }
+    }
+
+    private boolean containsActivityFromStack(List<ActivityRecord> rs) {
+        for (ActivityRecord r : rs) {
+            if (r.getStack() == this) {
+                return true;
+            }
+        }
+        return false;
     }
 
     /**
@@ -1270,7 +1300,7 @@ class ActivityStack<T extends StackWindowController> extends ConfigurationContai
         if (mPausingActivity != null) {
             Slog.wtf(TAG, "Going to pause when pause is already pending for " + mPausingActivity
                     + " state=" + mPausingActivity.state);
-            if (!mService.isSleepingLocked()) {
+            if (!shouldSleepActivities()) {
                 // Avoid recursion among check for sleep and complete pause during sleeping.
                 // Because activity will be paused immediately after resume, just let pause
                 // be completed by the order of activity paused from clients.
@@ -1285,12 +1315,6 @@ class ActivityStack<T extends StackWindowController> extends ConfigurationContai
                 mStackSupervisor.resumeFocusedStackTopActivityLocked();
             }
             return false;
-        }
-
-        if (mActivityContainer.mParentActivity == null) {
-            // Top level stack, not a child. Look for child stacks.
-            mStackSupervisor.pauseChildStacks(prev, userLeaving, uiSleeping, resuming,
-                    pauseImmediately);
         }
 
         if (DEBUG_STATES) Slog.v(TAG_STATES, "Moving to PAUSING: " + prev);
@@ -1436,8 +1460,7 @@ class ActivityStack<T extends StackWindowController> extends ConfigurationContai
                     // We can't clobber it, because the stop confirmation will not be handled.
                     // We don't need to schedule another stop, we only need to let it happen.
                     prev.state = STOPPING;
-                } else if ((!prev.visible && !hasVisibleBehindActivity())
-                        || mService.isSleepingOrShuttingDownLocked()) {
+                } else if (!prev.visible || shouldSleepOrShutDownActivities()) {
                     // Clear out any deferred client hide we might currently have.
                     prev.setDeferHidingClient(false);
                     // If we were visible then resumeTopActivities will release resources before
@@ -1459,10 +1482,10 @@ class ActivityStack<T extends StackWindowController> extends ConfigurationContai
 
         if (resumeNext) {
             final ActivityStack topStack = mStackSupervisor.getFocusedStack();
-            if (!mService.isSleepingOrShuttingDownLocked()) {
+            if (!topStack.shouldSleepOrShutDownActivities()) {
                 mStackSupervisor.resumeFocusedStackTopActivityLocked(topStack, prev, null);
             } else {
-                mStackSupervisor.checkReadyForSleepLocked();
+                checkReadyForSleep();
                 ActivityRecord top = topStack.topRunningActivityLocked();
                 if (top == null || (prev != null && top != prev)) {
                     // If there are no more activities available to run, do resume anyway to start
@@ -1528,7 +1551,7 @@ class ActivityStack<T extends StackWindowController> extends ConfigurationContai
                 mStackSupervisor.scheduleIdleTimeoutLocked(r);
             }
         } else {
-            mStackSupervisor.checkReadyForSleepLocked();
+            checkReadyForSleep();
         }
     }
 
@@ -1642,8 +1665,8 @@ class ActivityStack<T extends StackWindowController> extends ConfigurationContai
     }
 
     /**
-     * Returns what the stack visibility should be: {@link #STACK_INVISIBLE}, {@link #STACK_VISIBLE}
-     * or {@link #STACK_VISIBLE_ACTIVITY_BEHIND}.
+     * Returns what the stack visibility should be: {@link #STACK_INVISIBLE} or
+     * {@link #STACK_VISIBLE}.
      *
      * @param starting The currently starting activity or null if there is none.
      */
@@ -1667,14 +1690,6 @@ class ActivityStack<T extends StackWindowController> extends ConfigurationContai
         // Check position and visibility of this stack relative to the front stack on its display.
         final ActivityStack topStack = getTopStackOnDisplay();
         final int topStackId = topStack.mStackId;
-
-        if (StackId.isBackdropToTranslucentActivity(mStackId)
-                && hasVisibleBehindActivity() && StackId.isHomeOrRecentsStack(topStackId)
-                && (topStack.topActivity() == null || !topStack.topActivity().fullscreen)) {
-            // The fullscreen or assistant stack should be visible if it has a visible behind
-            // activity behind the home or recents stack that is translucent.
-            return STACK_VISIBLE_ACTIVITY_BEHIND;
-        }
 
         if (mStackId == DOCKED_STACK_ID) {
             // If the assistant stack is focused and translucent, then the docked stack is always
@@ -1800,12 +1815,10 @@ class ActivityStack<T extends StackWindowController> extends ConfigurationContai
             boolean aboveTop = top != null;
             final int stackVisibility = shouldBeVisible(starting);
             final boolean stackInvisible = stackVisibility != STACK_VISIBLE;
-            final boolean stackVisibleBehind = stackVisibility == STACK_VISIBLE_ACTIVITY_BEHIND;
             boolean behindFullscreenActivity = stackInvisible;
             boolean resumeNextActivity = mStackSupervisor.isFocusedStack(this)
                     && (isInStackLocked(starting) == null);
             boolean behindTranslucentActivity = false;
-            final ActivityRecord visibleBehind = getVisibleBehindActivity();
             for (int taskNdx = mTaskHistory.size() - 1; taskNdx >= 0; --taskNdx) {
                 final TaskRecord task = mTaskHistory.get(taskNdx);
                 final ArrayList<ActivityRecord> activities = task.mActivities;
@@ -1830,7 +1843,6 @@ class ActivityStack<T extends StackWindowController> extends ConfigurationContai
 
                     // Check whether activity should be visible without Keyguard influence
                     final boolean visibleIgnoringKeyguard = r.shouldBeVisibleIgnoringKeyguard(
-                            behindTranslucentActivity, stackVisibleBehind, visibleBehind,
                             behindFullscreenActivity);
                     r.visibleIgnoringKeyguard = visibleIgnoringKeyguard;
 
@@ -1882,7 +1894,7 @@ class ActivityStack<T extends StackWindowController> extends ConfigurationContai
                                 + stackInvisible + " behindFullscreenActivity="
                                 + behindFullscreenActivity + " mLaunchTaskBehind="
                                 + r.mLaunchTaskBehind);
-                        makeInvisible(r, visibleBehind);
+                        makeInvisible(r);
                     }
                 }
                 if (mStackId == FREEFORM_WORKSPACE_STACK_ID) {
@@ -1969,9 +1981,10 @@ class ActivityStack<T extends StackWindowController> extends ConfigurationContai
     boolean checkKeyguardVisibility(ActivityRecord r, boolean shouldBeVisible,
             boolean isTop) {
         final boolean isInPinnedStack = r.getStack().getStackId() == PINNED_STACK_ID;
-        final boolean keyguardShowing = mStackSupervisor.mKeyguardController.isKeyguardShowing();
+        final boolean keyguardShowing = mStackSupervisor.mKeyguardController.isKeyguardShowing(
+                mDisplayId != INVALID_DISPLAY ? mDisplayId : DEFAULT_DISPLAY);
         final boolean keyguardLocked = mStackSupervisor.mKeyguardController.isKeyguardLocked();
-        final boolean showWhenLocked = r.hasShowWhenLockedWindows() && !isInPinnedStack;
+        final boolean showWhenLocked = r.canShowWhenLocked() && !isInPinnedStack;
         final boolean dismissKeyguard = r.hasDismissKeyguardWindows();
         if (shouldBeVisible) {
             if (dismissKeyguard && mTopDismissingKeyguardActivity == null) {
@@ -2009,8 +2022,7 @@ class ActivityStack<T extends StackWindowController> extends ConfigurationContai
      * {@link Display#FLAG_CAN_SHOW_WITH_INSECURE_KEYGUARD} applied.
      */
     private boolean canShowWithInsecureKeyguard() {
-        final ActivityStackSupervisor.ActivityDisplay activityDisplay
-                = mActivityContainer.mActivityDisplay;
+        final ActivityStackSupervisor.ActivityDisplay activityDisplay = getDisplay();
         if (activityDisplay == null) {
             throw new IllegalStateException("Stack is not attached to any display, stackId="
                     + mStackId);
@@ -2057,7 +2069,8 @@ class ActivityStack<T extends StackWindowController> extends ConfigurationContai
         return false;
     }
 
-    private void makeInvisible(ActivityRecord r, ActivityRecord visibleBehind) {
+    // TODO: Should probably be moved into ActivityRecord.
+    private void makeInvisible(ActivityRecord r) {
         if (!r.visible) {
             if (DEBUG_VISIBILITY) Slog.v(TAG_VISIBILITY, "Already invisible: " + r);
             return;
@@ -2067,11 +2080,16 @@ class ActivityStack<T extends StackWindowController> extends ConfigurationContai
         if (DEBUG_VISIBILITY) Slog.v(TAG_VISIBILITY, "Making invisible: " + r + " " + r.state);
         try {
             final boolean canEnterPictureInPicture = r.checkEnterPictureInPictureState(
-                    "makeInvisible", true /* noThrow */, true /* beforeStopping */);
-            // Defer telling the client it is hidden if it can enter Pip and isn't current stopped
-            // or stopping. This gives it a chance to enter Pip in onPause().
+                    "makeInvisible", true /* beforeStopping */);
+            // Defer telling the client it is hidden if it can enter Pip and isn't current paused,
+            // stopped or stopping. This gives it a chance to enter Pip in onPause().
+            // TODO: There is still a question surrounding activities in multi-window mode that want
+            // to enter Pip after they are paused, but are still visible. I they should be okay to
+            // enter Pip in those cases, but not "auto-Pip" which is what this condition covers and
+            // the current contract for "auto-Pip" is that the app should enter it before onPause
+            // returns. Just need to confirm this reasoning makes sense.
             final boolean deferHidingClient = canEnterPictureInPicture
-                    && r.state != STOPPING && r.state != STOPPED;
+                    && r.state != STOPPING && r.state != STOPPED && r.state != PAUSED;
             r.setDeferHidingClient(deferHidingClient);
             r.setVisible(false);
 
@@ -2086,21 +2104,15 @@ class ActivityStack<T extends StackWindowController> extends ConfigurationContai
 
                     // Reset the flag indicating that an app can enter picture-in-picture once the
                     // activity is hidden
-                    r.supportsPictureInPictureWhilePausing = false;
+                    r.supportsEnterPipOnTaskSwitch = false;
                     break;
 
                 case INITIALIZING:
                 case RESUMED:
                 case PAUSING:
                 case PAUSED:
-                    // This case created for transitioning activities from
-                    // translucent to opaque {@link Activity#convertToOpaque}.
-                    if (visibleBehind == r) {
-                        releaseBackgroundResources(r);
-                    } else {
-                        addToStopping(r, true /* scheduleIdle */,
-                                canEnterPictureInPicture /* idleDelayed */);
-                    }
+                    addToStopping(r, true /* scheduleIdle */,
+                            canEnterPictureInPicture /* idleDelayed */);
                     break;
 
                 default:
@@ -2157,7 +2169,6 @@ class ActivityStack<T extends StackWindowController> extends ConfigurationContai
      * occurred and the activity will be notified immediately.
      */
     void notifyActivityDrawnLocked(ActivityRecord r) {
-        mActivityContainer.setDrawn();
         if ((r == null)
                 || (mUndrawnActivitiesBelowTopTranslucent.remove(r) &&
                         mUndrawnActivitiesBelowTopTranslucent.isEmpty())) {
@@ -2245,12 +2256,18 @@ class ActivityStack<T extends StackWindowController> extends ConfigurationContai
         } finally {
             mStackSupervisor.inResumeTopActivity = false;
         }
+
         // When resuming the top activity, it may be necessary to pause the top activity (for
         // example, returning to the lock screen. We suppress the normal pause logic in
         // {@link #resumeTopActivityUncheckedLocked}, since the top activity is resumed at the end.
         // We call the {@link ActivityStackSupervisor#checkReadyForSleepLocked} again here to ensure
-        // any necessary pause logic occurs.
-        mStackSupervisor.checkReadyForSleepLocked();
+        // any necessary pause logic occurs. In the case where the Activity will be shown regardless
+        // of the lock screen, the call to {@link ActivityStackSupervisor#checkReadyForSleepLocked}
+        // is skipped.
+        final ActivityRecord next = topRunningActivityLocked(true /* focusableOnly */);
+        if (next == null || !next.canTurnScreenOn()) {
+            checkReadyForSleep();
+        }
 
         return result;
     }
@@ -2279,12 +2296,8 @@ class ActivityStack<T extends StackWindowController> extends ConfigurationContai
 
         final boolean hasRunningActivity = next != null;
 
-        final ActivityRecord parent = mActivityContainer.mParentActivity;
-        final boolean isParentNotResumed = parent != null && parent.state != ActivityState.RESUMED;
-        if (hasRunningActivity
-                && (isParentNotResumed || !mActivityContainer.isAttachedLocked())) {
-            // Do not resume this stack if its parent is not resumed.
-            // TODO: If in a loop, make sure that parent stack resumeTopActivity is called 1st.
+        // TODO: Maybe this entire condition can get removed?
+        if (hasRunningActivity && getDisplay() == null) {
             return false;
         }
 
@@ -2338,7 +2351,7 @@ class ActivityStack<T extends StackWindowController> extends ConfigurationContai
 
         // If we are sleeping, and there is no resumed activity, and the top
         // activity is paused, well that is the state we want.
-        if (mService.isSleepingOrShuttingDownLocked()
+        if (shouldSleepOrShutDownActivities()
                 && mLastPausedActivity == next
                 && mStackSupervisor.allPausedActivitiesComplete()) {
             // Make sure we have executed any pending transitions, since there
@@ -2386,7 +2399,7 @@ class ActivityStack<T extends StackWindowController> extends ConfigurationContai
             // represent the last resumed activity. However, the last focus stack does if it isn't null.
             final ActivityRecord lastResumed = lastFocusedStack.mResumedActivity;
             lastResumedCanPip = lastResumed != null && lastResumed.checkEnterPictureInPictureState(
-                    "resumeTopActivity", true /* noThrow */, userLeaving /* beforeStopping */);
+                    "resumeTopActivity", userLeaving /* beforeStopping */);
         }
         // If the flag RESUME_WHILE_PAUSING is set, then continue to schedule the previous activity
         // to be paused, while at the same time resuming the new resume activity only if the
@@ -2430,7 +2443,7 @@ class ActivityStack<T extends StackWindowController> extends ConfigurationContai
         // If the most recent activity was noHistory but was only stopped rather
         // than stopped+finished because the device went to sleep, we need to make
         // sure to finish it as we're making a new activity topmost.
-        if (mService.isSleepingLocked() && mLastNoHistoryActivity != null &&
+        if (shouldSleepActivities() && mLastNoHistoryActivity != null &&
                 !mLastNoHistoryActivity.finishing) {
             if (DEBUG_STATES) Slog.d(TAG_STATES,
                     "no-history finish of " + mLastNoHistoryActivity + " on new resume");
@@ -2550,118 +2563,139 @@ class ActivityStack<T extends StackWindowController> extends ConfigurationContai
                     || (lastStack.mLastPausedActivity != null
                     && !lastStack.mLastPausedActivity.fullscreen));
 
-            // This activity is now becoming visible.
-            if (!next.visible || next.stopped || lastActivityTranslucent) {
-                next.setVisibility(true);
-            }
-
-            // schedule launch ticks to collect information about slow apps.
-            next.startLaunchTickingLocked();
-
-            ActivityRecord lastResumedActivity =
-                    lastStack == null ? null :lastStack.mResumedActivity;
-            ActivityState lastState = next.state;
-
-            mService.updateCpuStats();
-
-            if (DEBUG_STATES) Slog.v(TAG_STATES, "Moving to RESUMED: " + next + " (in existing)");
-
-            setResumedActivityLocked(next, "resumeTopActivityInnerLocked");
-
-            mService.updateLruProcessLocked(next.app, true, null);
-            updateLRUListLocked(next);
-            mService.updateOomAdjLocked();
-
-            // Have the window manager re-evaluate the orientation of
-            // the screen based on the new activity order.
-            boolean notUpdated = true;
-            if (mStackSupervisor.isFocusedStack(this)) {
-                final Configuration config = mWindowManager.updateOrientationFromAppTokens(
-                        mStackSupervisor.getDisplayOverrideConfiguration(mDisplayId),
-                        next.mayFreezeScreenLocked(next.app) ? next.appToken : null, mDisplayId);
-                if (config != null) {
-                    next.frozenBeforeDestroy = true;
-                }
-                notUpdated = !mService.updateDisplayOverrideConfigurationLocked(config, next,
-                        false /* deferResume */, mDisplayId);
-            }
-
-            if (notUpdated) {
-                // The configuration update wasn't able to keep the existing
-                // instance of the activity, and instead started a new one.
-                // We should be all done, but let's just make sure our activity
-                // is still at the top and schedule another run if something
-                // weird happened.
-                ActivityRecord nextNext = topRunningActivityLocked();
-                if (DEBUG_SWITCH || DEBUG_STATES) Slog.i(TAG_STATES,
-                        "Activity config changed during resume: " + next
-                        + ", new next: " + nextNext);
-                if (nextNext != next) {
-                    // Do over!
-                    mStackSupervisor.scheduleResumeTopActivities();
-                }
-                if (!next.visible || next.stopped) {
+            // The contained logic must be synchronized, since we are both changing the visibility
+            // and updating the {@link Configuration}. {@link ActivityRecord#setVisibility} will
+            // ultimately cause the client code to schedule a layout. Since layouts retrieve the
+            // current {@link Configuration}, we must ensure that the below code updates it before
+            // the layout can occur.
+            synchronized(mWindowManager.getWindowManagerLock()) {
+                // This activity is now becoming visible.
+                if (!next.visible || next.stopped || lastActivityTranslucent) {
                     next.setVisibility(true);
                 }
-                next.completeResumeLocked();
-                if (DEBUG_STACK) mStackSupervisor.validateTopActivitiesLocked();
-                return true;
-            }
 
-            try {
-                // Deliver all pending results.
-                ArrayList<ResultInfo> a = next.results;
-                if (a != null) {
-                    final int N = a.size();
-                    if (!next.finishing && N > 0) {
-                        if (DEBUG_RESULTS) Slog.v(TAG_RESULTS,
-                                "Delivering results to " + next + ": " + a);
-                        next.app.thread.scheduleSendResult(next.appToken, a);
+                // schedule launch ticks to collect information about slow apps.
+                next.startLaunchTickingLocked();
+
+                ActivityRecord lastResumedActivity =
+                        lastStack == null ? null :lastStack.mResumedActivity;
+                ActivityState lastState = next.state;
+
+                mService.updateCpuStats();
+
+                if (DEBUG_STATES) Slog.v(TAG_STATES, "Moving to RESUMED: " + next
+                        + " (in existing)");
+
+                setResumedActivityLocked(next, "resumeTopActivityInnerLocked");
+
+                mService.updateLruProcessLocked(next.app, true, null);
+                updateLRUListLocked(next);
+                mService.updateOomAdjLocked();
+
+                // Have the window manager re-evaluate the orientation of
+                // the screen based on the new activity order.
+                boolean notUpdated = true;
+
+                if (mStackSupervisor.isFocusedStack(this)) {
+
+                    // We have special rotation behavior when Keyguard is locked. Make sure all
+                    // activity visibilities are set correctly as well as the transition is updated
+                    // if needed to get the correct rotation behavior.
+                    // TODO: Remove this once visibilities are set correctly immediately when
+                    // starting an activity.
+                    if (mStackSupervisor.mKeyguardController.isKeyguardLocked()) {
+                        mStackSupervisor.ensureActivitiesVisibleLocked(null /* starting */,
+                                0 /* configChanges */, false /* preserveWindows */);
                     }
+                    final Configuration config = mWindowManager.updateOrientationFromAppTokens(
+                            mStackSupervisor.getDisplayOverrideConfiguration(mDisplayId),
+                            next.mayFreezeScreenLocked(next.app) ? next.appToken : null,
+                                    mDisplayId);
+                    if (config != null) {
+                        next.frozenBeforeDestroy = true;
+                    }
+                    notUpdated = !mService.updateDisplayOverrideConfigurationLocked(config, next,
+                            false /* deferResume */, mDisplayId);
                 }
 
-                if (next.newIntents != null) {
-                    next.app.thread.scheduleNewIntent(
-                            next.newIntents, next.appToken, false /* andPause */);
+                if (notUpdated) {
+                    // The configuration update wasn't able to keep the existing
+                    // instance of the activity, and instead started a new one.
+                    // We should be all done, but let's just make sure our activity
+                    // is still at the top and schedule another run if something
+                    // weird happened.
+                    ActivityRecord nextNext = topRunningActivityLocked();
+                    if (DEBUG_SWITCH || DEBUG_STATES) Slog.i(TAG_STATES,
+                            "Activity config changed during resume: " + next
+                                    + ", new next: " + nextNext);
+                    if (nextNext != next) {
+                        // Do over!
+                        mStackSupervisor.scheduleResumeTopActivities();
+                    }
+                    if (!next.visible || next.stopped) {
+                        next.setVisibility(true);
+                    }
+                    next.completeResumeLocked();
+                    if (DEBUG_STACK) mStackSupervisor.validateTopActivitiesLocked();
+                    return true;
                 }
 
-                // Well the app will no longer be stopped.
-                // Clear app token stopped state in window manager if needed.
-                next.notifyAppResumed(next.stopped);
+                try {
+                    // Deliver all pending results.
+                    ArrayList<ResultInfo> a = next.results;
+                    if (a != null) {
+                        final int N = a.size();
+                        if (!next.finishing && N > 0) {
+                            if (DEBUG_RESULTS) Slog.v(TAG_RESULTS,
+                                    "Delivering results to " + next + ": " + a);
+                            next.app.thread.scheduleSendResult(next.appToken, a);
+                        }
+                    }
 
-                EventLog.writeEvent(EventLogTags.AM_RESUME_ACTIVITY, next.userId,
-                        System.identityHashCode(next), next.getTask().taskId,
-                        next.shortComponentName);
+                    if (next.newIntents != null) {
+                        next.app.thread.scheduleNewIntent(
+                                next.newIntents, next.appToken, false /* andPause */);
+                    }
 
-                next.sleeping = false;
-                mService.showUnsupportedZoomDialogIfNeededLocked(next);
-                mService.showAskCompatModeDialogLocked(next);
-                next.app.pendingUiClean = true;
-                next.app.forceProcessStateUpTo(mService.mTopProcessState);
-                next.clearOptionsLocked();
-                next.app.thread.scheduleResumeActivity(next.appToken, next.app.repProcState,
-                        mService.isNextTransitionForward(), resumeAnimOptions);
+                    // Well the app will no longer be stopped.
+                    // Clear app token stopped state in window manager if needed.
+                    next.notifyAppResumed(next.stopped);
 
-                if (DEBUG_STATES) Slog.d(TAG_STATES, "resumeTopActivityLocked: Resumed " + next);
-            } catch (Exception e) {
-                // Whoops, need to restart this activity!
-                if (DEBUG_STATES) Slog.v(TAG_STATES, "Resume failed; resetting state to "
-                        + lastState + ": " + next);
-                next.state = lastState;
-                if (lastStack != null) {
-                    lastStack.mResumedActivity = lastResumedActivity;
+                    EventLog.writeEvent(EventLogTags.AM_RESUME_ACTIVITY, next.userId,
+                            System.identityHashCode(next), next.getTask().taskId,
+                            next.shortComponentName);
+
+                    next.sleeping = false;
+                    mService.showUnsupportedZoomDialogIfNeededLocked(next);
+                    mService.showAskCompatModeDialogLocked(next);
+                    next.app.pendingUiClean = true;
+                    next.app.forceProcessStateUpTo(mService.mTopProcessState);
+                    next.clearOptionsLocked();
+                    next.app.thread.scheduleResumeActivity(next.appToken, next.app.repProcState,
+                            mService.isNextTransitionForward(), resumeAnimOptions);
+
+                    if (DEBUG_STATES) Slog.d(TAG_STATES, "resumeTopActivityLocked: Resumed "
+                            + next);
+                } catch (Exception e) {
+                    // Whoops, need to restart this activity!
+                    if (DEBUG_STATES) Slog.v(TAG_STATES, "Resume failed; resetting state to "
+                            + lastState + ": " + next);
+                    next.state = lastState;
+                    if (lastStack != null) {
+                        lastStack.mResumedActivity = lastResumedActivity;
+                    }
+                    Slog.i(TAG, "Restarting because process died: " + next);
+                    if (!next.hasBeenLaunched) {
+                        next.hasBeenLaunched = true;
+                    } else  if (SHOW_APP_STARTING_PREVIEW && lastStack != null &&
+                            mStackSupervisor.isFrontStackOnDisplay(lastStack)) {
+                        next.showStartingWindow(null /* prev */, false /* newTask */,
+                                false /* taskSwitch */);
+                    }
+                    mStackSupervisor.startSpecificActivityLocked(next, true, false);
+                    if (DEBUG_STACK) mStackSupervisor.validateTopActivitiesLocked();
+                    return true;
                 }
-                Slog.i(TAG, "Restarting because process died: " + next);
-                if (!next.hasBeenLaunched) {
-                    next.hasBeenLaunched = true;
-                } else  if (SHOW_APP_STARTING_PREVIEW && lastStack != null &&
-                        mStackSupervisor.isFrontStackOnDisplay(lastStack)) {
-                    next.showStartingWindow(null /* prev */, false /* newTask */,
-                            false /* taskSwitch */);
-                }
-                mStackSupervisor.startSpecificActivityLocked(next, true, false);
-                if (DEBUG_STACK) mStackSupervisor.validateTopActivitiesLocked();
-                return true;
             }
 
             // From this point on, if something goes wrong there is no way
@@ -2913,11 +2947,9 @@ class ActivityStack<T extends StackWindowController> extends ConfigurationContai
                         // supporting picture-in-picture while pausing only if the starting activity
                         // would not be considered an overlay on top of the current activity
                         // (eg. not fullscreen, or the assistant)
-                        if (focusedTopActivity != null
-                                && focusedTopActivity.getStackId() != PINNED_STACK_ID
-                                && r.getStackId() != ASSISTANT_STACK_ID
-                                && r.fullscreen) {
-                            focusedTopActivity.supportsPictureInPictureWhilePausing = true;
+                        if (canEnterPipOnTaskSwitch(focusedTopActivity,
+                                null /* toFrontTask */, r, options)) {
+                            focusedTopActivity.supportsEnterPipOnTaskSwitch = true;
                         }
                         transit = TRANSIT_TASK_OPEN;
                     }
@@ -2970,6 +3002,30 @@ class ActivityStack<T extends StackWindowController> extends ConfigurationContai
             // because there is nothing for it to animate on top of.
             ActivityOptions.abort(options);
         }
+    }
+
+    /**
+     * @return Whether the switch to another task can trigger the currently running activity to
+     * enter PiP while it is pausing (if supported). Only one of {@param toFrontTask} or
+     * {@param toFrontActivity} should be set.
+     */
+    private boolean canEnterPipOnTaskSwitch(ActivityRecord pipCandidate,
+            TaskRecord toFrontTask, ActivityRecord toFrontActivity, ActivityOptions opts) {
+        if (opts != null && opts.disallowEnterPictureInPictureWhileLaunching()) {
+            // Ensure the caller has requested not to trigger auto-enter PiP
+            return false;
+        }
+        if (pipCandidate == null || pipCandidate.getStackId() == PINNED_STACK_ID) {
+            // Ensure that we do not trigger entering PiP an activity on the pinned stack
+            return false;
+        }
+        final int targetStackId = toFrontTask != null ? toFrontTask.getStackId()
+                : toFrontActivity.getStackId();
+        if (targetStackId == ASSISTANT_STACK_ID) {
+            // Ensure the task/activity being brought forward is not the assistant
+            return false;
+        }
+        return true;
     }
 
     private boolean isTaskSwitch(ActivityRecord r,
@@ -3442,7 +3498,7 @@ class ActivityStack<T extends StackWindowController> extends ConfigurationContai
         if ((r.intent.getFlags()&Intent.FLAG_ACTIVITY_NO_HISTORY) != 0
                 || (r.info.flags&ActivityInfo.FLAG_NO_HISTORY) != 0) {
             if (!r.finishing) {
-                if (!mService.isSleepingLocked()) {
+                if (!shouldSleepActivities()) {
                     if (DEBUG_STATES) Slog.d(TAG_STATES, "no-history finish of " + r);
                     if (requestFinishActivityLocked(r.appToken, Activity.RESULT_CANCELED, null,
                             "stop-no-history", false)) {
@@ -3474,7 +3530,7 @@ class ActivityStack<T extends StackWindowController> extends ConfigurationContai
                 EventLogTags.writeAmStopActivity(
                         r.userId, System.identityHashCode(r), r.shortComponentName);
                 r.app.thread.scheduleStopActivity(r.appToken, r.visible, r.configChangeFlags);
-                if (mService.isSleepingOrShuttingDownLocked()) {
+                if (shouldSleepOrShutDownActivities()) {
                     r.setSleeping(true);
                 }
                 Message msg = mHandler.obtainMessage(STOP_TIMEOUT_MSG, r);
@@ -3861,7 +3917,7 @@ class ActivityStack<T extends StackWindowController> extends ConfigurationContai
             }
         }
         if (noActivitiesInStack) {
-            mActivityContainer.onTaskListEmptyLocked();
+            remove();
         }
     }
 
@@ -3972,7 +4028,7 @@ class ActivityStack<T extends StackWindowController> extends ConfigurationContai
                             destIntent, null /*ephemeralIntent*/, null, aInfo, null /*rInfo*/, null,
                             null, parent.appToken, null, 0, -1, parent.launchedFromUid,
                             parent.launchedFromPackage, -1, parent.launchedFromUid, 0, null,
-                            false, true, null, null, null, "navigateUpTo");
+                            false, true, null, null, "navigateUpTo");
                     foundParentInTask = res == ActivityManager.START_SUCCESS;
                 } catch (RemoteException e) {
                     foundParentInTask = false;
@@ -4043,10 +4099,6 @@ class ActivityStack<T extends StackWindowController> extends ConfigurationContai
 
         // Get rid of any pending idle timeouts.
         removeTimeoutsForActivityLocked(r);
-        if (getVisibleBehindActivity() == r) {
-            mStackSupervisor.requestVisibleBehindLocked(r, false);
-        }
-
         // Clean-up activities are no longer relaunching (e.g. app process died). Notify window
         // manager so it can update its bookkeeping.
         mWindowManager.notifyAppRelaunchesCleared(r.appToken);
@@ -4061,7 +4113,6 @@ class ActivityStack<T extends StackWindowController> extends ConfigurationContai
     }
 
     private void removeActivityFromHistoryLocked(ActivityRecord r, String reason) {
-        mStackSupervisor.removeChildActivityContainers(r);
         finishActivityResultsLocked(r, Activity.RESULT_CANCELED, null);
         r.makeFinishingLocked();
         if (DEBUG_ADD_REMOVE) Slog.i(TAG_ADD_REMOVE,
@@ -4350,56 +4401,6 @@ class ActivityStack<T extends StackWindowController> extends ConfigurationContai
         }
     }
 
-    void releaseBackgroundResources(ActivityRecord r) {
-        if (hasVisibleBehindActivity() &&
-                !mHandler.hasMessages(RELEASE_BACKGROUND_RESOURCES_TIMEOUT_MSG)) {
-            if (r == topRunningActivityLocked()
-                    && shouldBeVisible(null) == STACK_VISIBLE) {
-                // Don't release the top activity if it has requested to run behind the next
-                // activity and the stack is currently visible.
-                return;
-            }
-            if (DEBUG_STATES) Slog.d(TAG_STATES, "releaseBackgroundResources activtyDisplay=" +
-                    mActivityContainer.mActivityDisplay + " visibleBehind=" + r + " app=" + r.app +
-                    " thread=" + r.app.thread);
-            if (r != null && r.app != null && r.app.thread != null) {
-                try {
-                    r.app.thread.scheduleCancelVisibleBehind(r.appToken);
-                } catch (RemoteException e) {
-                }
-                mHandler.sendEmptyMessageDelayed(RELEASE_BACKGROUND_RESOURCES_TIMEOUT_MSG, 500);
-            } else {
-                Slog.e(TAG, "releaseBackgroundResources: activity " + r + " no longer running");
-                backgroundResourcesReleased();
-            }
-        }
-    }
-
-    final void backgroundResourcesReleased() {
-        mHandler.removeMessages(RELEASE_BACKGROUND_RESOURCES_TIMEOUT_MSG);
-        final ActivityRecord r = getVisibleBehindActivity();
-        if (r != null) {
-            mStackSupervisor.mStoppingActivities.add(r);
-            setVisibleBehindActivity(null);
-            mStackSupervisor.scheduleIdleTimeoutLocked(null);
-        }
-        mStackSupervisor.resumeFocusedStackTopActivityLocked();
-    }
-
-    boolean hasVisibleBehindActivity() {
-        return isAttached() && mActivityContainer.mActivityDisplay.hasVisibleBehindActivity();
-    }
-
-    void setVisibleBehindActivity(ActivityRecord r) {
-        if (isAttached()) {
-            mActivityContainer.mActivityDisplay.setVisibleBehindActivity(r);
-        }
-    }
-
-    ActivityRecord getVisibleBehindActivity() {
-        return isAttached() ? mActivityContainer.mActivityDisplay.mVisibleBehindActivity : null;
-    }
-
     private void removeHistoryRecordsForAppLocked(ArrayList<ActivityRecord> list,
             ProcessRecord app, String listName) {
         int i = list.size();
@@ -4602,9 +4603,9 @@ class ActivityStack<T extends StackWindowController> extends ConfigurationContai
         // If a new task is moved to the front, then mark the existing top activity as supporting
         // picture-in-picture while paused only if the task would not be considered an oerlay on top
         // of the current activity (eg. not fullscreen, or the assistant)
-        if (topActivity != null && topActivity.getStackId() != PINNED_STACK_ID
-                && tr.getStackId() != ASSISTANT_STACK_ID && tr.containsOnlyFullscreenActivities()) {
-            topActivity.supportsPictureInPictureWhilePausing = true;
+        if (canEnterPipOnTaskSwitch(topActivity, tr, null /* toFrontActivity */,
+                options)) {
+            topActivity.supportsEnterPipOnTaskSwitch = true;
         }
 
         mStackSupervisor.resumeFocusedStackTopActivityLocked();
@@ -4662,28 +4663,6 @@ class ActivityStack<T extends StackWindowController> extends ConfigurationContai
         }
 
         if (DEBUG_TRANSITION) Slog.v(TAG_TRANSITION, "Prepare to back transition: task=" + taskId);
-
-        if (mStackId == HOME_STACK_ID && topTask().isHomeTask()) {
-            // For the case where we are moving the home task back and there is an activity visible
-            // behind it on the fullscreen or assistant stack, we want to move the focus to the
-            // visible behind activity to maintain order with what the user is seeing.
-            ActivityRecord visibleBehind = null;
-            final ActivityStack fullscreenStack =
-                    mStackSupervisor.getStack(FULLSCREEN_WORKSPACE_STACK_ID);
-            final ActivityStack assistantStack =
-                    mStackSupervisor.getStack(ASSISTANT_STACK_ID);
-            if (fullscreenStack != null && fullscreenStack.hasVisibleBehindActivity()) {
-                visibleBehind = fullscreenStack.getVisibleBehindActivity();
-            } else if (assistantStack != null && assistantStack.hasVisibleBehindActivity()) {
-                visibleBehind = assistantStack.getVisibleBehindActivity();
-            }
-            if (visibleBehind != null) {
-                mStackSupervisor.moveFocusableActivityStackToFrontLocked(visibleBehind,
-                        "moveTaskToBack");
-                mStackSupervisor.resumeFocusedStackTopActivityLocked();
-                return true;
-            }
-        }
 
         boolean prevIsHome = false;
 
@@ -4748,7 +4727,7 @@ class ActivityStack<T extends StackWindowController> extends ConfigurationContai
      * focus may be on another display.
      */
     private ActivityStack getTopStackOnDisplay() {
-        final ArrayList<ActivityStack> stacks = mActivityContainer.mActivityDisplay.mStacks;
+        final ArrayList<ActivityStack> stacks = getDisplay().mStacks;
         return stacks.isEmpty() ? null : stacks.get(stacks.size() - 1);
     }
 
@@ -5225,7 +5204,7 @@ class ActivityStack<T extends StackWindowController> extends ConfigurationContai
                 mStacks.add(0, this);
             }
             if (!isHomeOrRecentsStack()) {
-                mActivityContainer.onTaskListEmptyLocked();
+                remove();
             }
         }
 
@@ -5244,8 +5223,8 @@ class ActivityStack<T extends StackWindowController> extends ConfigurationContai
                 voiceInteractor, type);
         // add the task to stack first, mTaskPositioner might need the stack association
         addTask(task, toTop, "createTaskRecord");
-        final boolean isLockscreenShown =
-                mService.mStackSupervisor.mKeyguardController.isKeyguardShowing();
+        final boolean isLockscreenShown = mService.mStackSupervisor.mKeyguardController
+                .isKeyguardShowing(mDisplayId != INVALID_DISPLAY ? mDisplayId : DEFAULT_DISPLAY);
         if (!layoutTaskInStack(task, info.windowLayout) && mBounds != null && task.isResizeable()
                 && !isLockscreenShown) {
             task.updateOverrideConfiguration(mBounds);
@@ -5396,5 +5375,14 @@ class ActivityStack<T extends StackWindowController> extends ConfigurationContai
         mWindowManager.executeAppTransition();
         mNoAnimActivities.clear();
         ActivityOptions.abort(options);
+    }
+
+    boolean shouldSleepActivities() {
+        final ActivityStackSupervisor.ActivityDisplay display = getDisplay();
+        return display != null ? display.isSleeping() : mService.isSleepingLocked();
+    }
+
+    boolean shouldSleepOrShutDownActivities() {
+        return shouldSleepActivities() || mService.isShuttingDownLocked();
     }
 }

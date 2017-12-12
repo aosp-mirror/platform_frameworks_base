@@ -179,4 +179,9 @@ public class HidlSupport {
         }
         return Objects.equals(lft.asBinder(), ((IHwInterface) rgt).asBinder());
     }
+
+    /**
+     * Return PID of process if sharable to clients.
+     */
+    public static native int getPidIfSharable();
 }

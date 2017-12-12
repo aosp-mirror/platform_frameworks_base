@@ -17,8 +17,15 @@
  */
 -->
 <resources>
+    <color name="car_qs_background_primary">#263238</color> <!-- Blue Gray 900 -->
     <color name="car_user_switcher_progress_bgcolor">#00000000</color> <!-- Transparent -->
     <color name="car_user_switcher_progress_fgcolor">#80CBC4</color> <!-- Teal 200 -->
-    <color name="car_start_driving_background">#FAFAFA</color> <!-- Grey 50 -->
-    <color name="car_start_driving_text">#212121</color> <!-- Grey 900 -->
+    <color name="car_user_switcher_no_user_image_bgcolor">@color/car_grey_50</color>
+    <color name="car_user_switcher_no_user_image_fgcolor">@color/car_grey_900</color>
+    <color name="car_start_driving_background">@color/car_grey_50</color>
+    <color name="car_start_driving_text">@color/car_grey_900</color>
+    <color name="car_qs_footer_user_name_color">@color/car_grey_50</color>
+
+    <color name="car_grey_50">#FAFAFA</color>
+    <color name="car_grey_900">#212121</color>
 </resources>

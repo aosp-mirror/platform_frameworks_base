@@ -21,24 +21,8 @@
 <resources xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
     <string name="byteShort" msgid="8340973892742019101">"B"</string>
-    <string name="kilobyteShort" msgid="7542884022844556968">"kB"</string>
-    <string name="megabyteShort" msgid="6355851576770428922">"MB"</string>
-    <string name="gigabyteShort" msgid="3259882455212193214">"GB"</string>
-    <string name="terabyteShort" msgid="231613018159186962">"TB"</string>
     <string name="petabyteShort" msgid="5637816680144990219">"PB"</string>
     <string name="fileSizeSuffix" msgid="8897567456150907538">"<xliff:g id="NUMBER">%1$s</xliff:g> <xliff:g id="UNIT">%2$s</xliff:g>"</string>
-    <string name="durationDays" msgid="6652371460511178259">"<xliff:g id="DAYS">%1$d</xliff:g> dagar"</string>
-    <string name="durationDayHours" msgid="2713107458736744435">"<xliff:g id="DAYS">%1$d</xliff:g> dag <xliff:g id="HOURS">%2$d</xliff:g> tim"</string>
-    <string name="durationDayHour" msgid="7293789639090958917">"<xliff:g id="DAYS">%1$d</xliff:g> dag <xliff:g id="HOURS">%2$d</xliff:g> tim"</string>
-    <string name="durationHours" msgid="4266858287167358988">"<xliff:g id="HOURS">%1$d</xliff:g> timmar"</string>
-    <string name="durationHourMinutes" msgid="9029176248692041549">"<xliff:g id="HOURS">%1$d</xliff:g> tim <xliff:g id="MINUTES">%2$d</xliff:g> min"</string>
-    <string name="durationHourMinute" msgid="2741677355177402539">"<xliff:g id="HOURS">%1$d</xliff:g> tim <xliff:g id="MINUTES">%2$d</xliff:g> min"</string>
-    <string name="durationMinutes" msgid="3134226679883579347">"<xliff:g id="MINUTES">%1$d</xliff:g> minuter"</string>
-    <string name="durationMinute" msgid="7155301744174623818">"<xliff:g id="MINUTES">%1$d</xliff:g> min"</string>
-    <string name="durationMinuteSeconds" msgid="1424656185379003751">"<xliff:g id="MINUTES">%1$d</xliff:g> min <xliff:g id="SECONDS">%2$d</xliff:g> sek"</string>
-    <string name="durationMinuteSecond" msgid="3989228718067466680">"<xliff:g id="MINUTES">%1$d</xliff:g> min <xliff:g id="SECONDS">%2$d</xliff:g> sek"</string>
-    <string name="durationSeconds" msgid="8050088505238241405">"<xliff:g id="SECONDS">%1$d</xliff:g> sekunder"</string>
-    <string name="durationSecond" msgid="985669622276420331">"<xliff:g id="SECONDS">%1$d</xliff:g> sekund"</string>
     <string name="untitled" msgid="4638956954852782576">"&lt;Okänd&gt;"</string>
     <string name="emptyPhoneNumber" msgid="7694063042079676517">"(Inget telefonnummer)"</string>
     <string name="unknownName" msgid="6867811765370350269">"Okänt"</string>
@@ -95,11 +79,13 @@
     <string name="RestrictedOnAllVoiceTitle" msgid="158800171499150681">"Tjänster för röst- och nödsamtal har blockerats"</string>
     <string name="RestrictedStateContent" msgid="4278821484643362350">"Detta erbjuds för tillfället inte på mobilnätverket där du befinner dig"</string>
     <string name="NetworkPreferenceSwitchTitle" msgid="4008877505368566980">"Det går inte att nå nätverket"</string>
-    <string name="NetworkPreferenceSwitchSummary" msgid="4164230263214915351">"Testa om du får bättre mottagning genom att ändra till en annan typ under System &gt; Nätverk och internet &gt; Mobila nätverk &gt; Önskad nätverkstyp."</string>
+    <string name="NetworkPreferenceSwitchSummary" msgid="1203771446683319957">"Testa om du får bättre mottagning genom att ändra till en annan typ under Inställningar &gt; Nätverk och internet &gt; Mobila nätverk &gt; Önskad nätverkstyp."</string>
+    <string name="EmergencyCallWarningTitle" msgid="4790413876281901612">"Wi-Fi-samtal är aktiverat"</string>
+    <string name="EmergencyCallWarningSummary" msgid="8973232888021643293">"Mobilnätverk krävs för att ringa nödsamtal."</string>
     <string name="notification_channel_network_alert" msgid="4427736684338074967">"Aviseringar"</string>
     <string name="notification_channel_call_forward" msgid="2419697808481833249">"Vidarekoppla samtal"</string>
     <string name="notification_channel_emergency_callback" msgid="6686166232265733921">"Läget Återuppringning vid nödsamtal"</string>
-    <string name="notification_channel_mobile_data_alert" msgid="6130875231721406231">"Aviseringar för mobildata"</string>
+    <string name="notification_channel_mobile_data_status" msgid="4575131690860945836">"Status för mobildata"</string>
     <string name="notification_channel_sms" msgid="3441746047346135073">"Sms"</string>
     <string name="notification_channel_voice_mail" msgid="3954099424160511919">"Röstmeddelanden"</string>
     <string name="notification_channel_wfc" msgid="2130802501654254801">"Wi-Fi-samtal"</string>
@@ -434,7 +420,7 @@
     <string name="permdesc_setTimeZone" product="tv" msgid="888864653946175955">"Tillåter att appen ändrar tidszonen på TV:n."</string>
     <string name="permdesc_setTimeZone" product="default" msgid="4499943488436633398">"Tillåter att appen ändrar mobilens tidszon."</string>
     <string name="permlab_getAccounts" msgid="1086795467760122114">"hitta konton på enheten"</string>
-    <string name="permdesc_getAccounts" product="tablet" msgid="2741496534769660027">"Tillåter att appen hämtar en lista över alla kända konton på surfplattan. Detta kan inkludera konton som har skapats av appar som du har installerat."</string>
+    <string name="permdesc_getAccounts" product="tablet" msgid="2741496534769660027">"Tillåter att appen laddar ned en lista över alla kända konton på surfplattan. Detta kan inkludera konton som har skapats av appar som du har installerat."</string>
     <string name="permdesc_getAccounts" product="tv" msgid="4190633395633907543">"Tillåter att appen hämtar listan med konton som TV:n kan identifiera. Den kan innehålla konton som skapats av appar som du har installerat."</string>
     <string name="permdesc_getAccounts" product="default" msgid="3448316822451807382">"Tillåter att appen hämtar en lista över alla kända konton på mobilen. Detta kan inkludera konton som har skapats av appar som du har installerat."</string>
     <string name="permlab_accessNetworkState" msgid="4951027964348974773">"visa nätverksanslutningar"</string>
@@ -455,7 +441,7 @@
     <string name="permdesc_changeWifiMulticastState" product="default" msgid="6851949706025349926">"Tillåter att appen tar emot paket som skickats med multicast-adress till alla enheter i ett Wi-Fi-nätverk och inte bara till den här mobilen. Detta drar mer batteri än när multicastläget inte används."</string>
     <string name="permlab_bluetoothAdmin" msgid="6006967373935926659">"få åtkomst till Bluetooth-inställningar"</string>
     <string name="permdesc_bluetoothAdmin" product="tablet" msgid="6921177471748882137">"Tillåter att appen konfigurerar den lokala Bluetooth-surfplattan samt upptäcker och parkopplar den med fjärranslutna enheter."</string>
-    <string name="permdesc_bluetoothAdmin" product="tv" msgid="3373125682645601429">"Tillåter att appen konfigurerar den lokala Bluetooth-TV:n och identifierar och kopplar den till fjärrenheter."</string>
+    <string name="permdesc_bluetoothAdmin" product="tv" msgid="3373125682645601429">"Tillåter att appen konfigurerar den lokala Bluetooth-TV:n och identifierar och parkopplar den till fjärrenheter."</string>
     <string name="permdesc_bluetoothAdmin" product="default" msgid="8931682159331542137">"Tillåter att appen konfigurerar den lokala Bluetooth-mobilen samt upptäcker och parkopplar den med fjärranslutna enheter."</string>
     <string name="permlab_accessWimaxState" msgid="4195907010610205703">"ansluta till och koppla från WiMAX"</string>
     <string name="permdesc_accessWimaxState" msgid="6360102877261978887">"Tillåter att appen avgör om WiMAX är aktiverat och kommer åt information om eventuella anslutna WiMAX-nätverk."</string>
@@ -463,7 +449,7 @@
     <string name="permdesc_changeWimaxState" product="tablet" msgid="3156456504084201805">"Tillåter att appen ansluter surfplattan till eller kopplar från WiMAX-nätverk."</string>
     <string name="permdesc_changeWimaxState" product="tv" msgid="6022307083934827718">"Tillåter att appen ansluter TV:n till och kopplar från TV:n från WiMAX-nätverk."</string>
     <string name="permdesc_changeWimaxState" product="default" msgid="697025043004923798">"Tillåter att appen ansluter mobilen till eller kopplar från WiMAX-nätverk."</string>
-    <string name="permlab_bluetooth" msgid="6127769336339276828">"koppla till Bluetooth-enheter"</string>
+    <string name="permlab_bluetooth" msgid="6127769336339276828">"parkoppla till Bluetooth-enheter"</string>
     <string name="permdesc_bluetooth" product="tablet" msgid="3480722181852438628">"Tillåter att appen kommer åt pekdatorns Bluetooth-konfiguration och upprättar och godkänner anslutningar till parkopplade enheter."</string>
     <string name="permdesc_bluetooth" product="tv" msgid="3974124940101104206">"Tillåter att appen visar konfigurationen av Bluetooth på TV:n och godkänner alla anslutningar till kopplade enheter."</string>
     <string name="permdesc_bluetooth" product="default" msgid="3207106324452312739">"Tillåter att appen kommer åt mobilens Bluetooth-konfiguration och upprättar och godkänner anslutningar till parkopplade enheter."</string>
@@ -1780,4 +1766,5 @@
     <string name="mmcc_imsi_unknown_in_hlr" msgid="6321202257374418726">"SIM-kort tillhandahålls inte"</string>
     <string name="mmcc_illegal_ms" msgid="2769452751852211112">"SIM-kort tillåts inte"</string>
     <string name="mmcc_illegal_me" msgid="4438696681169345015">"Mobil tillåts inte"</string>
+    <string name="popup_window_default_title" msgid="4874318849712115433">"popup-fönster"</string>
 </resources>

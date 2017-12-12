@@ -23,6 +23,7 @@ import android.annotation.SystemApi;
 import android.annotation.SystemService;
 import android.content.Context;
 import android.util.Log;
+
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 
@@ -265,7 +266,13 @@ public final class PowerManager {
      * {@link #PROXIMITY_SCREEN_OFF_WAKE_LOCK} wake lock until the proximity sensor
      * indicates that an object is not in close proximity.
      */
-    public static final int RELEASE_FLAG_WAIT_FOR_NO_PROXIMITY = 1;
+    public static final int RELEASE_FLAG_WAIT_FOR_NO_PROXIMITY = 1 << 0;
+
+    /**
+     * Flag for {@link WakeLock#release(int)} when called due to timeout.
+     * @hide
+     */
+    public static final int RELEASE_FLAG_TIMEOUT = 1 << 16;
 
     /**
      * Brightness value for fully on.
@@ -848,15 +855,13 @@ public final class PowerManager {
      * to {@link #boostScreenBrightness(long)}.
      * @return {@code True} if the screen brightness is currently boosted. {@code False} otherwise.
      *
+     * @deprecated This call is rarely used and will be phased out soon.
      * @hide
+     * @removed
      */
-    @SystemApi
+    @SystemApi @Deprecated
     public boolean isScreenBrightnessBoosted() {
-        try {
-            return mService.isScreenBrightnessBoosted();
-        } catch (RemoteException e) {
-            throw e.rethrowFromSystemServer();
-        }
+        return false;
     }
 
     /**
@@ -1216,9 +1221,11 @@ public final class PowerManager {
      * Intent that is broadcast when the state of {@link #isScreenBrightnessBoosted()} has changed.
      * This broadcast is only sent to registered receivers.
      *
+     * @deprecated This intent is rarely used and will be phased out soon.
      * @hide
+     * @removed
      **/
-    @SystemApi
+    @SystemApi @Deprecated
     public static final String ACTION_SCREEN_BRIGHTNESS_BOOST_CHANGED
             = "android.os.action.SCREEN_BRIGHTNESS_BOOST_CHANGED";
 
@@ -1243,7 +1250,8 @@ public final class PowerManager {
         private String mTag;
         private final String mPackageName;
         private final IBinder mToken;
-        private int mCount;
+        private int mInternalCount;
+        private int mExternalCount;
         private boolean mRefCounted = true;
         private boolean mHeld;
         private WorkSource mWorkSource;
@@ -1252,7 +1260,7 @@ public final class PowerManager {
 
         private final Runnable mReleaser = new Runnable() {
             public void run() {
-                release();
+                release(RELEASE_FLAG_TIMEOUT);
             }
         };
 
@@ -1329,7 +1337,9 @@ public final class PowerManager {
         }
 
         private void acquireLocked() {
-            if (!mRefCounted || mCount++ == 0) {
+            mInternalCount++;
+            mExternalCount++;
+            if (!mRefCounted || mInternalCount == 1) {
                 // Do this even if the wake lock is already thought to be held (mHeld == true)
                 // because non-reference counted wake locks are not always properly released.
                 // For example, the keyguard's wake lock might be forcibly released by the
@@ -1374,7 +1384,11 @@ public final class PowerManager {
          */
         public void release(int flags) {
             synchronized (mToken) {
-                if (!mRefCounted || --mCount == 0) {
+                mInternalCount--;
+                if ((flags & RELEASE_FLAG_TIMEOUT) == 0) {
+                    mExternalCount--;
+                }
+                if (!mRefCounted || mInternalCount == 0) {
                     mHandler.removeCallbacks(mReleaser);
                     if (mHeld) {
                         Trace.asyncTraceEnd(Trace.TRACE_TAG_POWER, mTraceName, 0);
@@ -1386,7 +1400,7 @@ public final class PowerManager {
                         mHeld = false;
                     }
                 }
-                if (mCount < 0) {
+                if (mRefCounted && mExternalCount < 0) {
                     throw new RuntimeException("WakeLock under-locked " + mTag);
                 }
             }
@@ -1470,7 +1484,7 @@ public final class PowerManager {
             synchronized (mToken) {
                 return "WakeLock{"
                     + Integer.toHexString(System.identityHashCode(this))
-                    + " held=" + mHeld + ", refCount=" + mCount + "}";
+                    + " held=" + mHeld + ", refCount=" + mInternalCount + "}";
             }
         }
 

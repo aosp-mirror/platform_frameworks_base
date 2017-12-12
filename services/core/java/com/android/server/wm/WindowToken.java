@@ -288,4 +288,12 @@ class WindowToken extends WindowContainer<WindowState> {
     String getName() {
         return toString();
     }
+
+    boolean okToDisplay() {
+        return mDisplayContent != null && mDisplayContent.okToDisplay();
+    }
+
+    boolean okToAnimate() {
+        return mDisplayContent != null && mDisplayContent.okToAnimate();
+    }
 }

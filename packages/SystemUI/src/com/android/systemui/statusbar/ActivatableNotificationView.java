@@ -214,13 +214,22 @@ public abstract class ActivatableNotificationView extends ExpandableOutlineView 
         mFakeShadow = findViewById(R.id.fake_shadow);
         mShadowHidden = mFakeShadow.getVisibility() != VISIBLE;
         mBackgroundDimmed = findViewById(R.id.backgroundDimmed);
-        mBackgroundNormal.setCustomBackground(R.drawable.notification_material_bg);
-        mBackgroundDimmed.setCustomBackground(R.drawable.notification_material_bg_dim);
         mDimmedAlpha = Color.alpha(mContext.getColor(
                 R.color.notification_material_background_dimmed_color));
+        initBackground();
         updateBackground();
         updateBackgroundTint();
         updateOutlineAlpha();
+    }
+
+    /**
+     * Sets the custom backgrounds on {@link #mBackgroundNormal} and {@link #mBackgroundDimmed}.
+     * This method can also be used to reload the backgrounds on both of those views, which can
+     * be useful in a configuration change.
+     */
+    protected void initBackground() {
+        mBackgroundNormal.setCustomBackground(R.drawable.notification_material_bg);
+        mBackgroundDimmed.setCustomBackground(R.drawable.notification_material_bg_dim);
     }
 
     private final Runnable mTapTimeoutRunnable = new Runnable() {

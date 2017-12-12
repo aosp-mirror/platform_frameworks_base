@@ -19,6 +19,10 @@ package android.net;
 /** {@hide} */
 oneway interface INetdEventCallback {
 
+    // Possible addNetdEventCallback callers.
+    const int CALLBACK_CALLER_DEVICE_POLICY = 0;
+    const int CALLBACK_CALLER_NETWORK_WATCHLIST = 1;
+
     /**
      * Reports a single DNS lookup function call.
      * This method must not block or perform long-running operations.

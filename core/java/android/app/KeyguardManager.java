@@ -174,7 +174,7 @@ public class KeyguardManager {
      */
     public Intent createConfirmFactoryResetCredentialIntent(
             CharSequence title, CharSequence description, CharSequence alternateButtonLabel) {
-        if (!LockPatternUtils.frpCredentialEnabled()) {
+        if (!LockPatternUtils.frpCredentialEnabled(mContext)) {
             Log.w(TAG, "Factory reset credentials not supported.");
             return null;
         }
@@ -298,7 +298,9 @@ public class KeyguardManager {
     }
 
     /**
-     * Callback passed to {@link KeyguardManager#dismissKeyguard} to notify caller of result.
+     * Callback passed to
+     * {@link KeyguardManager#requestDismissKeyguard(Activity, KeyguardDismissCallback)}
+     * to notify caller of result.
      */
     public static abstract class KeyguardDismissCallback {
 
@@ -461,6 +463,9 @@ public class KeyguardManager {
      * <p>
      * If the Keyguard is secure and the device is not in a trusted state, this will bring up the
      * UI so the user can enter their credentials.
+     * <p>
+     * If the value set for the {@link Activity} attr {@link android.R.attr#turnScreenOn} is true,
+     * the screen will turn on when the keyguard is dismissed.
      *
      * @param activity The activity requesting the dismissal. The activity must be either visible
      *                 by using {@link LayoutParams#FLAG_SHOW_WHEN_LOCKED} or must be in a state in

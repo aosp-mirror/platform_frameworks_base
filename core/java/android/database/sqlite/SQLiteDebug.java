@@ -16,12 +16,13 @@
 
 package android.database.sqlite;
 
-import java.util.ArrayList;
-
+import android.annotation.TestApi;
 import android.os.Build;
 import android.os.SystemProperties;
 import android.util.Log;
 import android.util.Printer;
+
+import java.util.ArrayList;
 
 /**
  * Provides debugging info about all SQLite databases running in the current process.
@@ -117,6 +118,7 @@ public final class SQLiteDebug {
     /**
      * contains statistics about a database
      */
+    @TestApi
     public static class DbStats {
         /** name of the database */
         public String dbName;
@@ -127,7 +129,8 @@ public final class SQLiteDebug {
         /** the database size */
         public long dbSize;
 
-        /** documented here http://www.sqlite.org/c3ref/c_dbstatus_lookaside_used.html */
+        /**
+         * Number of lookaside slots: http://www.sqlite.org/c3ref/c_dbstatus_lookaside_used.html */
         public int lookaside;
 
         /** statement cache stats: hits/misses/cachesize */
@@ -147,6 +150,7 @@ public final class SQLiteDebug {
      * return all pager and database stats for the current process.
      * @return {@link PagerStats}
      */
+    @TestApi
     public static PagerStats getDatabaseInfo() {
         PagerStats stats = new PagerStats();
         nativeGetPagerStats(stats);

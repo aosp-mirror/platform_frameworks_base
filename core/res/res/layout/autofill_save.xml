@@ -14,6 +14,7 @@
      limitations under the License.
 -->
 
+<!-- NOTE: outer layout is required to provide proper shadow. -->
 <LinearLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="fill_parent"
@@ -21,6 +22,7 @@
     android:orientation="vertical">
 
     <LinearLayout
+        xmlns:android="http://schemas.android.com/apk/res/android"
         android:id="@+id/autofill_save"
         android:layout_width="fill_parent"
         android:layout_height="wrap_content"
@@ -42,9 +44,16 @@
                 android:layout_height="wrap_content"
                 android:orientation="horizontal">
 
+                <ImageView
+                    android:id="@+id/autofill_save_icon"
+                    android:scaleType="fitStart"
+                    android:layout_width="24dp"
+                    android:layout_height="24dp"/>
+
                 <TextView
                     android:id="@+id/autofill_save_title"
-                    android:layout_width="0dp"
+                    android:paddingLeft="8dp"
+                    android:layout_width="fill_parent"
                     android:layout_height="wrap_content"
                     android:text="@string/autofill_save_title"
                     android:textSize="16sp"
@@ -52,26 +61,14 @@
                     android:layout_weight="1">
                 </TextView>
 
-                <ImageView
-                    android:id="@+id/autofill_save_close"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_marginLeft="16dp"
-                    android:src="@android:drawable/ic_close"
-                    android:alpha="0.54"
-                    android:background="?android:attr/selectableItemBackgroundBorderless"
-                    android:contentDescription="@android:string/close_button_text">
-                </ImageView>
-
             </LinearLayout>
 
-            <TextView
-                android:id="@+id/autofill_save_subtitle"
-                android:layout_width="fill_parent"
+            <com.android.server.autofill.ui.CustomScrollView
+                android:id="@+id/autofill_save_custom_subtitle"
+                android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="4dp"
-                android:visibility="gone">
-            </TextView>
+                android:visibility="gone"/>
 
         </LinearLayout>
 
@@ -105,7 +102,6 @@
                 android:layout_height="wrap_content"
                 style="@style/Widget.Material.Button.Colored"
                 android:text="@string/autofill_save_yes">
-                <requestFocus />
             </Button>
 
         </com.android.internal.widget.ButtonBarLayout>

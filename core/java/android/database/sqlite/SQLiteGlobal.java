@@ -16,6 +16,7 @@
 
 package android.database.sqlite;
 
+import android.annotation.TestApi;
 import android.content.res.Resources;
 import android.os.StatFs;
 import android.os.SystemProperties;
@@ -34,6 +35,7 @@ import android.os.SystemProperties;
  *
  * @hide
  */
+@TestApi
 public final class SQLiteGlobal {
     private static final String TAG = "SQLiteGlobal";
 
@@ -124,4 +126,15 @@ public final class SQLiteGlobal {
                 com.android.internal.R.integer.db_connection_pool_size));
         return Math.max(2, value);
     }
+
+    /**
+     * The default number of milliseconds that SQLite connection is allowed to be idle before it
+     * is closed and removed from the pool.
+     */
+    public static int getIdleConnectionTimeout() {
+        return SystemProperties.getInt("debug.sqlite.idle_connection_timeout",
+                Resources.getSystem().getInteger(
+                        com.android.internal.R.integer.db_default_idle_connection_timeout));
+    }
+
 }

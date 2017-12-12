@@ -28,4 +28,7 @@ interface ICarrierConfigLoader {
     void notifyConfigChangedForSubId(int subId);
 
     void updateConfigForPhoneId(int phoneId, String simState);
+
+    String getDefaultCarrierServicePackageName();
+
 }

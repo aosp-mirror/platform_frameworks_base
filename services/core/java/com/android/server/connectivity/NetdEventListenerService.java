@@ -21,6 +21,7 @@ import static android.util.TimeUtils.NANOS_PER_MS;
 import android.content.Context;
 import android.net.ConnectivityManager;
 import android.net.INetdEventCallback;
+import android.net.MacAddress;
 import android.net.Network;
 import android.net.NetworkCapabilities;
 import android.net.metrics.ConnectStats;
@@ -58,7 +59,6 @@ public class NetdEventListenerService extends INetdEventListener.Stub {
 
     private static final String TAG = NetdEventListenerService.class.getSimpleName();
     private static final boolean DBG = false;
-    private static final boolean VDBG = false;
 
     // Rate limit connect latency logging to 1 measurement per 15 seconds (5760 / day) with maximum
     // bursts of 5000 measurements.
@@ -98,19 +98,53 @@ public class NetdEventListenerService extends INetdEventListener.Stub {
     @GuardedBy("this")
     private final TokenBucket mConnectTb =
             new TokenBucket(CONNECT_LATENCY_FILL_RATE, CONNECT_LATENCY_BURST_LIMIT);
-    // Callback should only be registered/unregistered when logging is being enabled/disabled in DPM
-    // by the device owner. It's DevicePolicyManager's responsibility to ensure that.
-    @GuardedBy("this")
-    private INetdEventCallback mNetdEventCallback;
 
-    public synchronized boolean registerNetdEventCallback(INetdEventCallback callback) {
-        mNetdEventCallback = callback;
+
+    /**
+     * There are only 2 possible callbacks.
+     *
+     * mNetdEventCallbackList[CALLBACK_CALLER_DEVICE_POLICY].
+     * Callback registered/unregistered when logging is being enabled/disabled in DPM
+     * by the device owner. It's DevicePolicyManager's responsibility to ensure that.
+     *
+     * mNetdEventCallbackList[CALLBACK_CALLER_NETWORK_WATCHLIST]
+     * Callback registered/unregistered by NetworkWatchlistService.
+     */
+    @GuardedBy("this")
+    private static final int[] ALLOWED_CALLBACK_TYPES = {
+        INetdEventCallback.CALLBACK_CALLER_DEVICE_POLICY,
+        INetdEventCallback.CALLBACK_CALLER_NETWORK_WATCHLIST
+    };
+
+    @GuardedBy("this")
+    private INetdEventCallback[] mNetdEventCallbackList =
+            new INetdEventCallback[ALLOWED_CALLBACK_TYPES.length];
+
+    public synchronized boolean addNetdEventCallback(int callerType, INetdEventCallback callback) {
+        if (!isValidCallerType(callerType)) {
+            Log.e(TAG, "Invalid caller type: " + callerType);
+            return false;
+        }
+        mNetdEventCallbackList[callerType] = callback;
         return true;
     }
 
-    public synchronized boolean unregisterNetdEventCallback() {
-        mNetdEventCallback = null;
+    public synchronized boolean removeNetdEventCallback(int callerType) {
+        if (!isValidCallerType(callerType)) {
+            Log.e(TAG, "Invalid caller type: " + callerType);
+            return false;
+        }
+        mNetdEventCallbackList[callerType] = null;
         return true;
+    }
+
+    private static boolean isValidCallerType(int callerType) {
+        for (int i = 0; i < ALLOWED_CALLBACK_TYPES.length; i++) {
+            if (callerType == ALLOWED_CALLBACK_TYPES[i]) {
+                return true;
+            }
+        }
+        return false;
     }
 
     public NetdEventListenerService(Context context) {
@@ -164,13 +198,13 @@ public class NetdEventListenerService extends INetdEventListener.Stub {
     public synchronized void onDnsEvent(int netId, int eventType, int returnCode, int latencyMs,
             String hostname, String[] ipAddresses, int ipAddressesCount, int uid)
             throws RemoteException {
-        maybeVerboseLog("onDnsEvent(%d, %d, %d, %dms)", netId, eventType, returnCode, latencyMs);
-
         long timestamp = System.currentTimeMillis();
         getMetricsForNetwork(timestamp, netId).addDnsResult(eventType, returnCode, latencyMs);
 
-        if (mNetdEventCallback != null) {
-            mNetdEventCallback.onDnsEvent(hostname, ipAddresses, ipAddressesCount, timestamp, uid);
+        for (INetdEventCallback callback : mNetdEventCallbackList) {
+            if (callback != null) {
+                callback.onDnsEvent(hostname, ipAddresses, ipAddressesCount, timestamp, uid);
+            }
         }
     }
 
@@ -179,22 +213,23 @@ public class NetdEventListenerService extends INetdEventListener.Stub {
     // This method must not block or perform long-running operations.
     public synchronized void onConnectEvent(int netId, int error, int latencyMs, String ipAddr,
             int port, int uid) throws RemoteException {
-        maybeVerboseLog("onConnectEvent(%d, %d, %dms)", netId, error, latencyMs);
-
         long timestamp = System.currentTimeMillis();
         getMetricsForNetwork(timestamp, netId).addConnectResult(error, latencyMs, ipAddr);
 
-        if (mNetdEventCallback != null) {
-            mNetdEventCallback.onConnectEvent(ipAddr, port, timestamp, uid);
+        for (INetdEventCallback callback : mNetdEventCallbackList) {
+            if (callback != null) {
+                // TODO(rickywai): Remove this checking to collect ip in watchlist.
+                if (callback ==
+                        mNetdEventCallbackList[INetdEventCallback.CALLBACK_CALLER_DEVICE_POLICY]) {
+                    callback.onConnectEvent(ipAddr, port, timestamp, uid);
+                }
+            }
         }
     }
 
     @Override
-    public synchronized void onWakeupEvent(String prefix, int uid, int gid, long timestampNs) {
-        maybeVerboseLog("onWakeupEvent(%s, %d, %d, %sns)", prefix, uid, gid, timestampNs);
-
-        // TODO: add ip protocol and port
-
+    public synchronized void onWakeupEvent(String prefix, int uid, int ethertype, int ipNextHeader,
+            byte[] dstHw, String srcIp, String dstIp, int srcPort, int dstPort, long timestampNs) {
         String iface = prefix.replaceFirst(WAKEUP_EVENT_IFACE_PREFIX, "");
         final long timestampMs;
         if (timestampNs > 0) {
@@ -203,15 +238,22 @@ public class NetdEventListenerService extends INetdEventListener.Stub {
             timestampMs = System.currentTimeMillis();
         }
 
-        addWakeupEvent(iface, timestampMs, uid);
-    }
-
-    @GuardedBy("this")
-    private void addWakeupEvent(String iface, long timestampMs, int uid) {
         WakeupEvent event = new WakeupEvent();
         event.iface = iface;
         event.timestampMs = timestampMs;
         event.uid = uid;
+        event.ethertype = ethertype;
+        event.dstHwAddr = MacAddress.fromBytes(dstHw);
+        event.srcIp = srcIp;
+        event.dstIp = dstIp;
+        event.ipNextHeader = ipNextHeader;
+        event.srcPort = srcPort;
+        event.dstPort = dstPort;
+        addWakeupEvent(event);
+    }
+
+    private void addWakeupEvent(WakeupEvent event) {
+        String iface = event.iface;
         mWakeupEvents.append(event);
         WakeupStats stats = mWakeupStats.get(iface);
         if (stats == null) {
@@ -289,10 +331,6 @@ public class NetdEventListenerService extends INetdEventListener.Stub {
 
     private static void maybeLog(String s, Object... args) {
         if (DBG) Log.d(TAG, String.format(s, args));
-    }
-
-    private static void maybeVerboseLog(String s, Object... args) {
-        if (VDBG) Log.d(TAG, String.format(s, args));
     }
 
     /** Helper class for buffering summaries of NetworkMetrics at regular time intervals */

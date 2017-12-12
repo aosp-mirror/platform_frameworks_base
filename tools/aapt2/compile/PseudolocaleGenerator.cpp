@@ -120,7 +120,7 @@ std::unique_ptr<StyledString> PseudolocalizeStyledString(StyledString* string,
 
   // All Span indices are UTF-16 based, according to the resources.arsc format expected by the
   // runtime. So we will do all our processing in UTF-16, then convert back.
-  const std::u16string text16 = util::Utf8ToUtf16(*string->value->str);
+  const std::u16string text16 = util::Utf8ToUtf16(string->value->value);
 
   // Convenient wrapper around the text that allows us to work with StringPieces.
   const StringPiece16 text(text16);

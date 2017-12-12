@@ -16,11 +16,14 @@
 
 package com.android.internal.content;
 
+import static android.net.TrafficStats.MB_IN_BYTES;
+import static android.os.storage.VolumeInfo.ID_PRIVATE_INTERNAL;
+
 import android.content.Context;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageInfo;
-import android.content.pm.PackageManager;
 import android.content.pm.PackageInstaller.SessionParams;
+import android.content.pm.PackageManager;
 import android.content.pm.PackageManager.NameNotFoundException;
 import android.content.pm.PackageParser.PackageLite;
 import android.os.Environment;
@@ -39,20 +42,18 @@ import android.util.Log;
 
 import com.android.internal.annotations.VisibleForTesting;
 
+import libcore.io.IoUtils;
+
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.Collections;
 import java.util.Objects;
+import java.util.UUID;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipFile;
 import java.util.zip.ZipOutputStream;
-
-import libcore.io.IoUtils;
-
-import static android.net.TrafficStats.MB_IN_BYTES;
-import static android.os.storage.VolumeInfo.ID_PRIVATE_INTERNAL;
 
 /**
  * Constants used internally between the PackageManager
@@ -358,7 +359,7 @@ public class PackageHelper {
         public boolean fitsOnInternalStorage(Context context, SessionParams params)
                 throws IOException {
             StorageManager storage = getStorageManager(context);
-            File target = getDataDirectory();
+            final UUID target = storage.getUuidForPath(getDataDirectory());
             return (params.sizeBytes <= storage.getAllocatableBytes(target,
                     translateAllocateFlags(params.installFlags)));
         }
@@ -466,7 +467,8 @@ public class PackageHelper {
             boolean isInternalStorage = ID_PRIVATE_INTERNAL.equals(vol.id);
             if (vol.type == VolumeInfo.TYPE_PRIVATE && vol.isMountedWritable()
                     && (!isInternalStorage || allow3rdPartyOnInternal)) {
-                final long availBytes = storageManager.getAllocatableBytes(new File(vol.path),
+                final UUID target = storageManager.getUuidForPath(new File(vol.path));
+                final long availBytes = storageManager.getAllocatableBytes(target,
                         translateAllocateFlags(params.installFlags));
                 if (availBytes >= params.sizeBytes) {
                     allCandidates.add(vol.fsUuid);
@@ -523,7 +525,7 @@ public class PackageHelper {
 
     public static boolean fitsOnInternal(Context context, SessionParams params) throws IOException {
         final StorageManager storage = context.getSystemService(StorageManager.class);
-        final File target = Environment.getDataDirectory();
+        final UUID target = storage.getUuidForPath(Environment.getDataDirectory());
         return (params.sizeBytes <= storage.getAllocatableBytes(target,
                 translateAllocateFlags(params.installFlags)));
     }

@@ -30,6 +30,7 @@ class DozeHostFake implements DozeHost {
     boolean dozing;
     float doubleTapX;
     float doubleTapY;
+    float aodDimmingScrimOpacity;
 
     @Override
     public void addCallback(@NonNull Callback callback) {
@@ -113,5 +114,10 @@ class DozeHostFake implements DozeHost {
 
     @Override
     public void setDozeScreenBrightness(int value) {
+    }
+
+    @Override
+    public void setAodDimmingScrim(float scrimOpacity) {
+        aodDimmingScrimOpacity = scrimOpacity;
     }
 }

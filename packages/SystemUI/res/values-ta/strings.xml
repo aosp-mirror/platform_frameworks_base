@@ -64,7 +64,7 @@
     <string name="usb_debugging_message" msgid="2220143855912376496">"பின்வருவது கணினியின் RSA விசை கைரேகையாகும்:\n<xliff:g id="FINGERPRINT">%1$s</xliff:g>"</string>
     <string name="usb_debugging_always" msgid="303335496705863070">"இந்தக் கணினியிலிருந்து எப்போதும் அனுமதி"</string>
     <string name="usb_debugging_secondary_user_title" msgid="6353808721761220421">"USB பிழைத்திருத்தம் அனுமதிக்கப்படவில்லை"</string>
-    <string name="usb_debugging_secondary_user_message" msgid="8572228137833020196">"தற்போது இந்தச் சாதனத்தில் உள்நுழைந்துள்ள பயனரால் USB பிழைத்திருத்தத்தை இயக்க முடியாது. இந்த அம்சத்தைப் பயன்படுத்த, நிர்வாகிப் பயனருக்கு மாறவும்."</string>
+    <string name="usb_debugging_secondary_user_message" msgid="6067122453571699801">"தற்போது இந்தச் சாதனத்தில் உள்நுழைந்துள்ள பயனரால் USB பிழைத்திருத்தத்தை இயக்க முடியாது. இந்த அம்சத்தை இயக்க, முதன்மைப் பயனருக்கு மாறவும்."</string>
     <string name="compat_mode_on" msgid="6623839244840638213">"திரையை நிரப்ப அளவை மாற்று"</string>
     <string name="compat_mode_off" msgid="4434467572461327898">"திரையை நிரப்ப இழு"</string>
     <string name="screenshot_saving_ticker" msgid="7403652894056693515">"ஸ்க்ரீன் ஷாட்டைச் சேமிக்கிறது…"</string>
@@ -353,10 +353,10 @@
     <string name="description_target_search" msgid="3091587249776033139">"தேடு"</string>
     <string name="description_direction_up" msgid="7169032478259485180">"<xliff:g id="TARGET_DESCRIPTION">%s</xliff:g> க்கு மேலாக இழுக்கவும்."</string>
     <string name="description_direction_left" msgid="7207478719805562165">"<xliff:g id="TARGET_DESCRIPTION">%s</xliff:g> க்கு இடதுபக்கமாக இழுக்கவும்."</string>
-    <string name="zen_priority_introduction" msgid="7577965386868311310">"அலாரங்கள், நினைவூட்டல்கள், நிகழ்வுகள் மற்றும் குறிப்பிட்ட அழைப்பாளர்களைத் தவிர்த்து, பிற ஒலிகள் மற்றும் அதிர்வுகளின் தொந்தரவு இருக்காது. எனினும், நீங்கள் எதையேனும் (இசை, வீடியோக்கள் மற்றும் கேம்ஸ் உட்பட) ஒலிக்கும்படி தேர்ந்தெடுத்திருந்தால், அவை வழக்கம் போல் ஒலிக்கும்."</string>
-    <string name="zen_alarms_introduction" msgid="7034415210361973827">"அலாரங்களைத் தவிர்த்து, பிற ஒலிகள் மற்றும் அதிர்வுகளின் தொந்தரவு இருக்காது. எனினும், நீங்கள் எதையேனும் (இசை, வீடியோக்கள் மற்றும் கேம்ஸ் உட்பட) ஒலிக்கும்படி தேர்ந்தெடுத்திருந்தால், அவை வழக்கம் போல் ஒலிக்கும்."</string>
+    <string name="zen_priority_introduction" msgid="1149025108714420281">"அலாரங்கள், நினைவூட்டல்கள், நிகழ்வுகள் மற்றும் குறிப்பிட்ட அழைப்பாளர்களைத் தவிர்த்து, பிற ஒலிகள் மற்றும் அதிர்வுகளின் தொந்தரவு இருக்காது. எனினும், நீங்கள் எதையேனும் (இசை, வீடியோக்கள், கேம்ஸ் போன்றவை) ஒலிக்கும்படி தேர்ந்தெடுத்திருந்தால், அவை வழக்கம் போல் ஒலிக்கும்."</string>
+    <string name="zen_alarms_introduction" msgid="4934328096749380201">"அலாரங்களைத் தவிர்த்து, பிற ஒலிகள் மற்றும் அதிர்வுகளின் தொந்தரவு இருக்காது. எனினும், நீங்கள் எதையேனும் (இசை, வீடியோக்கள், கேம்ஸ் போன்றவை) ஒலிக்கும்படி தேர்ந்தெடுத்திருந்தால், அவை வழக்கம் போல் ஒலிக்கும்."</string>
     <string name="zen_priority_customize_button" msgid="7948043278226955063">"தனிப்பயனாக்கு"</string>
-    <string name="zen_silence_introduction_voice" msgid="2284540992298200729">"இது அலாரங்கள், இசை, வீடியோக்கள் மற்றும் கேம்ஸ் உட்பட எல்லா ஒலிகளையும் அதிர்வுகளையும் தடுக்கும். இருப்பினும் நீங்கள் அழைப்புகளைச் செய்யலாம்."</string>
+    <string name="zen_silence_introduction_voice" msgid="3948778066295728085">"இது அலாரங்கள், இசை, வீடியோக்கள் மற்றும் கேம்ஸ் உட்பட எல்லா ஒலிகளையும் அதிர்வுகளையும் தடுக்கும். எனினும், உங்களால் ஃபோன் அழைப்புகளைச் செய்ய முடியும்."</string>
     <string name="zen_silence_introduction" msgid="3137882381093271568">"இது அலாரங்கள், இசை, வீடியோக்கள் மற்றும் கேம்ஸ் உட்பட எல்லா ஒலிகளையும் அதிர்வுகளையும் தடுக்கும்."</string>
     <string name="keyguard_more_overflow_text" msgid="9195222469041601365">"+<xliff:g id="NUMBER_OF_NOTIFICATIONS">%d</xliff:g>"</string>
     <string name="speed_bump_explanation" msgid="1288875699658819755">"அவசர நிலைக் குறைவான அறிவிப்புகள் கீழே உள்ளன"</string>
@@ -456,7 +456,7 @@
     <string name="monitoring_description_do_learn_more" msgid="1849514470437907421">"மேலும் அறிக"</string>
     <string name="monitoring_description_do_body_vpn" msgid="8255218762488901796">"<xliff:g id="VPN_APP">%1$s</xliff:g> உடன் இணைக்கப்பட்டுள்ளீர்கள். இந்தப் பயன்பாட்டால் மின்னஞ்சல்கள், பயன்பாடுகள், இணையதளங்கள் உட்பட உங்கள் நெட்வொர்க் செயல்பாட்டைக் கண்காணிக்க முடியும்."</string>
     <string name="monitoring_description_vpn_settings_separator" msgid="1933186756733474388">" "</string>
-    <string name="monitoring_description_vpn_settings" msgid="8869300202410505143">"VPN அமைப்புகளைத் திற"</string>
+    <string name="monitoring_description_vpn_settings" msgid="6434859242636063861">"VPN அமைப்புகளைத் திற"</string>
     <string name="monitoring_description_ca_cert_settings_separator" msgid="4987350385906393626">" "</string>
     <string name="monitoring_description_ca_cert_settings" msgid="5489969458872997092">"நம்பகமான அனுமதிச் சான்றுகளைத் திற"</string>
     <string name="monitoring_description_network_logging" msgid="7223505523384076027">"உங்கள் நிர்வாகி நெட்வொர்க் பதிவெடுத்தலை இயக்கியுள்ளார், இது சாதனத்தில் ட்ராஃபிக்கைக் கண்காணிக்கும்.\n\nமேலும் தகவலுக்கு, உங்கள் நிர்வாகியைத் தொடர்புகொள்ளவும்."</string>
@@ -556,8 +556,8 @@
     <string name="notification_default_channel_desc" msgid="2506053815870808359">"இந்தப் பயன்பாட்டில் அறிவிப்பு வகைகள் இல்லை"</string>
     <string name="notification_unblockable_desc" msgid="3561016061737896906">"இந்தப் பயன்பாட்டிலிருந்து அறிவிப்புகளைப் பெறுவதை முடக்க முடியாது"</string>
     <plurals name="notification_num_channels_desc" formatted="false" msgid="5492793452274077663">
-      <item quantity="other">இந்தப் பயன்பாடு வழங்கும் <xliff:g id="NUMBER_1">%d</xliff:g> அறிவிப்பு வகைகளில் ஒரு அறிவிப்பு வகை</item>
-      <item quantity="one">இந்தப் பயன்பாடு வழங்கும் <xliff:g id="NUMBER_0">%d</xliff:g> அறிவிப்பு வகையில் ஒரு அறிவிப்பு வகை</item>
+      <item quantity="other">இந்தப் பயன்பாடு வழங்கும் <xliff:g id="NUMBER_1">%s</xliff:g> அறிவிப்பு வகைகளில் ஒரு அறிவிப்பு வகை</item>
+      <item quantity="one">இந்தப் பயன்பாடு வழங்கும் <xliff:g id="NUMBER_0">%s</xliff:g> அறிவிப்பு வகையில் ஒரு அறிவிப்பு வகை</item>
     </plurals>
     <string name="notification_channels_list_desc_2" msgid="6214732715833946441">"<xliff:g id="CHANNEL_NAME_1">%1$s</xliff:g>, <xliff:g id="CHANNEL_NAME_2">%2$s</xliff:g>"</string>
     <plurals name="notification_channels_list_desc_2_and_others" formatted="false" msgid="2747813553355336157">
@@ -585,8 +585,8 @@
       <item quantity="one">%d நிமிடம்</item>
     </plurals>
     <string name="battery_panel_title" msgid="7944156115535366613">"பேட்டரி பயன்பாடு"</string>
-    <string name="battery_detail_charging_summary" msgid="1279095653533044008">"சார்ஜ் செய்யும் போது பேட்டரி சேமிப்பானைப் பயன்படுத்த முடியாது"</string>
-    <string name="battery_detail_switch_title" msgid="6285872470260795421">"பேட்டரி சேமிப்பான்"</string>
+    <string name="battery_detail_charging_summary" msgid="4055327085770378335">"சார்ஜ் செய்யும் போது பேட்டரி சேமிப்பானைப் பயன்படுத்த முடியாது"</string>
+    <string name="battery_detail_switch_title" msgid="8763441006881907058">"பேட்டரி சேமிப்பான்"</string>
     <string name="battery_detail_switch_summary" msgid="9049111149407626804">"செயல்திறனையும் பின்புலத்தில் தரவு செயலாக்கப்படுவதையும் குறைக்கும்"</string>
     <string name="keyboard_key_button_template" msgid="6230056639734377300">"<xliff:g id="NAME">%1$s</xliff:g> பொத்தான்"</string>
     <string name="keyboard_key_home" msgid="2243500072071305073">"ஹோம்"</string>
@@ -726,9 +726,9 @@
     <string name="pip_phone_minimize" msgid="1079119422589131792">"சிறிதாக்கு"</string>
     <string name="pip_phone_close" msgid="8416647892889710330">"மூடு"</string>
     <string name="pip_phone_dismiss_hint" msgid="6351678169095923899">"நிராகரிக்க, கீழே இழுக்கவும்"</string>
-    <string name="pip_menu_title" msgid="3328510504196964712">"பிக்ச்சர்-இன்-பிக்ச்சர் மெனு"</string>
+    <string name="pip_menu_title" msgid="4707292089961887657">"மெனு"</string>
     <string name="pip_notification_title" msgid="3204024940158161322">"<xliff:g id="NAME">%s</xliff:g> தற்போது பிக்ச்சர்-இன்-பிக்ச்சரில் உள்ளது"</string>
-    <string name="pip_notification_message" msgid="4171698133469539591">"<xliff:g id="NAME">%s</xliff:g> இந்த அம்சத்தைப் பயன்படுத்த வேண்டாம் என நினைத்தால், அமைப்புகளைத் திறந்து அதை முடக்க, தட்டவும்."</string>
+    <string name="pip_notification_message" msgid="5619512781514343311">"<xliff:g id="NAME">%s</xliff:g> இந்த அம்சத்தைப் பயன்படுத்த வேண்டாம் என நினைத்தால், அமைப்புகளைத் திறந்து அதை முடக்க, தட்டவும்."</string>
     <string name="pip_play" msgid="1417176722760265888">"இயக்கு"</string>
     <string name="pip_pause" msgid="8881063404466476571">"இடைநிறுத்து"</string>
     <string name="pip_skip_to_next" msgid="1948440006726306284">"அடுத்ததற்குச் செல்"</string>
@@ -754,6 +754,7 @@
     <string name="tuner_menu" msgid="191640047241552081">"மெனு"</string>
     <string name="tuner_app" msgid="3507057938640108777">"<xliff:g id="APP">%1$s</xliff:g> பயன்பாடு"</string>
     <string name="notification_channel_alerts" msgid="4496839309318519037">"விழிப்பூட்டல்கள்"</string>
+    <string name="notification_channel_battery" msgid="5786118169182888462">"பேட்டரி"</string>
     <string name="notification_channel_screenshot" msgid="6314080179230000938">"ஸ்கிரீன் ஷாட்டுகள்"</string>
     <string name="notification_channel_general" msgid="4525309436693914482">"பொதுச் செய்திகள்"</string>
     <string name="notification_channel_storage" msgid="3077205683020695313">"சேமிப்பிடம்"</string>
@@ -774,4 +775,5 @@
     <string name="running_foreground_services_title" msgid="381024150898615683">"பின்னணியில் இயங்கும் பயன்பாடுகள்"</string>
     <string name="running_foreground_services_msg" msgid="6326247670075574355">"பேட்டரி மற்றும் தரவு உபயோக விவரங்களைக் காண, தட்டவும்"</string>
     <string name="data_usage_disable_mobile" msgid="5116269981510015864">"மொபைல் டேட்டாவை முடக்கவா?"</string>
+    <string name="touch_filtered_warning" msgid="8671693809204767551">"அனுமதிக் கோரிக்கையைப் பயன்பாடு மறைப்பதால், அமைப்புகளால் உங்கள் பதிலைச் சரிபார்க்க முடியாது."</string>
 </resources>

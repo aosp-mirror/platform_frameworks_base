@@ -321,6 +321,12 @@ public class MockPackageManager extends PackageManager {
         throw new UnsupportedOperationException();
     }
 
+    /** @hide */
+    @Override
+    public String[] getNamesForUids(int uid[]) {
+        throw new UnsupportedOperationException();
+    }
+
     /**
      * @hide - to match hiding in superclass
      */

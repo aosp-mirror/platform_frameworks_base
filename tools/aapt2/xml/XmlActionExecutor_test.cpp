@@ -18,6 +18,8 @@
 
 #include "test/Test.h"
 
+using ::testing::NotNull;
+
 namespace aapt {
 namespace xml {
 
@@ -42,12 +44,11 @@ TEST(XmlActionExecutorTest, BuildsAccessibleNestedPattern) {
       test::BuildXmlDom("<manifest><application /></manifest>");
 
   StdErrDiagnostics diag;
-  ASSERT_TRUE(
-      executor.Execute(XmlActionExecutorPolicy::kNone, &diag, doc.get()));
-  ASSERT_NE(nullptr, manifest_el);
+  ASSERT_TRUE(executor.Execute(XmlActionExecutorPolicy::kNone, &diag, doc.get()));
+  ASSERT_THAT(manifest_el, NotNull());
   EXPECT_EQ(std::string("manifest"), manifest_el->name);
 
-  ASSERT_NE(nullptr, application_el);
+  ASSERT_THAT(application_el, NotNull());
   EXPECT_EQ(std::string("application"), application_el->name);
 }
 
@@ -58,8 +59,7 @@ TEST(XmlActionExecutorTest, FailsWhenUndefinedHierarchyExists) {
   std::unique_ptr<XmlResource> doc =
       test::BuildXmlDom("<manifest><application /><activity /></manifest>");
   StdErrDiagnostics diag;
-  ASSERT_FALSE(
-      executor.Execute(XmlActionExecutorPolicy::kWhitelist, &diag, doc.get()));
+  ASSERT_FALSE(executor.Execute(XmlActionExecutorPolicy::kWhitelist, &diag, doc.get()));
 }
 
 }  // namespace xml

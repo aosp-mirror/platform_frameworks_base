@@ -38,8 +38,9 @@ import android.telephony.ServiceState;
 import android.telephony.SignalStrength;
 import android.telephony.TelephonyHistogram;
 import android.telephony.VisualVoicemailSmsFilterSettings;
-import com.android.ims.internal.IImsServiceController;
-import com.android.ims.internal.IImsServiceFeatureListener;
+import com.android.ims.internal.IImsMMTelFeature;
+import com.android.ims.internal.IImsRcsFeature;
+import com.android.ims.internal.IImsServiceFeatureCallback;
 import com.android.internal.telephony.CellNetworkScanResult;
 import com.android.internal.telephony.OperatorInfo;
 
@@ -784,12 +785,27 @@ interface ITelephony {
     int getTetherApnRequired();
 
     /**
-     *  Get ImsServiceController binder from ImsResolver that corresponds to the subId and feature
-     *  requested as well as registering the ImsServiceController for callbacks using the
-     *  IImsServiceFeatureListener interface.
+     *  Get IImsMMTelFeature binder from ImsResolver that corresponds to the subId and MMTel feature
+     *  as well as registering the MMTelFeature for callbacks using the IImsServiceFeatureCallback
+     *  interface.
      */
-    IImsServiceController getImsServiceControllerAndListen(int slotIndex, int feature,
-                IImsServiceFeatureListener callback);
+    IImsMMTelFeature getMMTelFeatureAndListen(int slotId, in IImsServiceFeatureCallback callback);
+
+    /**
+     *  Get IImsMMTelFeature binder from ImsResolver that corresponds to the subId and MMTel feature
+     *  as well as registering the MMTelFeature for callbacks using the IImsServiceFeatureCallback
+     *  interface.
+     *  Used for emergency calling only.
+     */
+    IImsMMTelFeature getEmergencyMMTelFeatureAndListen(int slotId,
+            in IImsServiceFeatureCallback callback);
+
+    /**
+     *  Get IImsRcsFeature binder from ImsResolver that corresponds to the subId and RCS feature
+     *  as well as registering the RcsFeature for callbacks using the IImsServiceFeatureCallback
+     *  interface.
+     */
+    IImsRcsFeature getRcsFeatureAndListen(int slotId, in IImsServiceFeatureCallback callback);
 
     /**
      * Set the network selection mode to automatic.

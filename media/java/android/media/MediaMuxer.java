@@ -70,7 +70,7 @@ import java.util.Map;
  <p>
   Per-frame metadata is useful in carrying extra information that correlated with video or audio to
   facilitate offline processing, e.g. gyro signals from the sensor could help video stabilization when
-  doing offline processing. Metaadata track is only supported in MP4 container. When adding a new
+  doing offline processing. Metadata track is only supported in MP4 container. When adding a new
   metadata track, track's mime format must start with prefix "application/", e.g. "applicaton/gyro".
   Metadata's format/layout will be defined by the application. Writing metadata is nearly the same as
   writing video/audio data except that the data will not be from mediacodec. Application just needs

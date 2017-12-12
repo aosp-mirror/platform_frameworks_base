@@ -26,6 +26,7 @@ import static java.lang.reflect.Modifier.isFinal;
 import static java.lang.reflect.Modifier.isPublic;
 import static java.lang.reflect.Modifier.isStatic;
 
+import android.platform.test.annotations.Presubmit;
 import android.support.test.filters.SmallTest;
 import android.support.test.runner.AndroidJUnit4;
 
@@ -37,6 +38,7 @@ import java.util.HashSet;
 import java.util.Set;
 
 /** Tests that ensure appropriate settings are backed up. */
+@Presubmit
 @RunWith(AndroidJUnit4.class)
 @SmallTest
 public class SettingsBackupTest {
@@ -97,7 +99,9 @@ public class SettingsBackupTest {
                     Settings.Global.ALARM_MANAGER_CONSTANTS,
                     Settings.Global.ALLOW_USER_SWITCHING_WHEN_SYSTEM_USER_LOCKED,
                     Settings.Global.ALWAYS_FINISH_ACTIVITIES,
+                    Settings.Global.ALWAYS_ON_DISPLAY_CONSTANTS,
                     Settings.Global.ANIMATOR_DURATION_SCALE,
+                    Settings.Global.ANOMALY_DETECTION_CONSTANTS,
                     Settings.Global.APN_DB_UPDATE_CONTENT_URL,
                     Settings.Global.APN_DB_UPDATE_METADATA_URL,
                     Settings.Global.APP_IDLE_CONSTANTS,
@@ -117,10 +121,10 @@ public class SettingsBackupTest {
                     Settings.Global.BLUETOOTH_INTEROPERABILITY_LIST,
                     Settings.Global.BLUETOOTH_MAP_CLIENT_PRIORITY_PREFIX,
                     Settings.Global.BLUETOOTH_MAP_PRIORITY_PREFIX,
-                    Settings.Global.BLUETOOTH_ON, // Candidate for backup?
                     Settings.Global.BLUETOOTH_PAN_PRIORITY_PREFIX,
                     Settings.Global.BLUETOOTH_PBAP_CLIENT_PRIORITY_PREFIX,
                     Settings.Global.BLUETOOTH_SAP_PRIORITY_PREFIX,
+                    Settings.Global.BLUETOOTH_HEARING_AID_PRIORITY_PREFIX,
                     Settings.Global.BOOT_COUNT,
                     Settings.Global.CAPTIVE_PORTAL_FALLBACK_URL,
                     Settings.Global.CAPTIVE_PORTAL_HTTPS_URL,
@@ -156,6 +160,7 @@ public class SettingsBackupTest {
                     Settings.Global.DEBUG_VIEW_ATTRIBUTES,
                     Settings.Global.DEFAULT_DNS_SERVER,
                     Settings.Global.DEFAULT_INSTALL_LOCATION,
+                    Settings.Global.DEFAULT_RESTRICT_BACKGROUND_DATA,
                     Settings.Global.DESK_DOCK_SOUND,
                     Settings.Global.DESK_UNDOCK_SOUND,
                     Settings.Global.DEVELOPMENT_ENABLE_FREEFORM_WINDOWS_SUPPORT,
@@ -166,6 +171,7 @@ public class SettingsBackupTest {
                     Settings.Global.DEVICE_IDLE_CONSTANTS,
                     Settings.Global.DEVICE_IDLE_CONSTANTS_WATCH,
                     Settings.Global.BATTERY_SAVER_CONSTANTS,
+                    Settings.Global.DEFAULT_SM_DP_PLUS,
                     Settings.Global.DEVICE_NAME,
                     Settings.Global.DEVICE_POLICY_CONSTANTS,
                     Settings.Global.DEVICE_PROVISIONED,
@@ -190,6 +196,7 @@ public class SettingsBackupTest {
                     Settings.Global.ENABLE_ACCESSIBILITY_GLOBAL_GESTURE_ENABLED,
                     Settings.Global.ENABLE_CACHE_QUOTA_CALCULATION,
                     Settings.Global.ENABLE_CELLULAR_ON_BOOT,
+                    Settings.Global.ENABLE_DELETION_HELPER_NO_THRESHOLD_TOGGLE,
                     Settings.Global.ENABLE_DISKSTATS_LOGGING,
                     Settings.Global.ENABLE_EPHEMERAL_FEATURE,
                     Settings.Global.ENHANCED_4G_MODE_ENABLED,
@@ -213,6 +220,7 @@ public class SettingsBackupTest {
                     Settings.Global.HTTP_PROXY,
                     Settings.Global.INET_CONDITION_DEBOUNCE_DOWN_DELAY,
                     Settings.Global.INET_CONDITION_DEBOUNCE_UP_DELAY,
+                    Settings.Global.INSTANT_APP_DEXOPT_ENABLED,
                     Settings.Global.INTENT_FIREWALL_UPDATE_CONTENT_URL,
                     Settings.Global.INTENT_FIREWALL_UPDATE_METADATA_URL,
                     Settings.Global.JOB_SCHEDULER_CONSTANTS,
@@ -247,6 +255,7 @@ public class SettingsBackupTest {
                     Settings.Global.NETSTATS_GLOBAL_ALERT_BYTES,
                     Settings.Global.NETSTATS_POLL_INTERVAL,
                     Settings.Global.NETSTATS_SAMPLE_ENABLED,
+                    Settings.Global.NETSTATS_AUGMENT_ENABLED,
                     Settings.Global.NETSTATS_TIME_CACHE_MAX_AGE,
                     Settings.Global.NETSTATS_UID_BUCKET_DURATION,
                     Settings.Global.NETSTATS_UID_DELETE_AGE,
@@ -269,6 +278,7 @@ public class SettingsBackupTest {
                     Settings.Global.NEW_CONTACT_AGGREGATOR,
                     Settings.Global.NITZ_UPDATE_DIFF,
                     Settings.Global.NITZ_UPDATE_SPACING,
+                    Settings.Global.NOTIFICATION_SNOOZE_OPTIONS,
                     Settings.Global.NSD_ON,
                     Settings.Global.NTP_SERVER,
                     Settings.Global.NTP_TIMEOUT,
@@ -320,7 +330,9 @@ public class SettingsBackupTest {
                     Settings.Global.SMS_SHORT_CODE_RULE,
                     Settings.Global.SMS_SHORT_CODES_UPDATE_CONTENT_URL,
                     Settings.Global.SMS_SHORT_CODES_UPDATE_METADATA_URL,
+                    Settings.Global.SPEED_LABEL_CACHE_EVICTION_AGE_MILLIS,
                     Settings.Global.STORAGE_BENCHMARK_INTERVAL,
+                    Settings.Global.STORAGE_SETTINGS_CLOBBER_THRESHOLD,
                     Settings.Global.SYNC_MAX_RETRY_DELAY_IN_SECONDS,
                     Settings.Global.SYS_FREE_STORAGE_LOG_INTERVAL,
                     Settings.Global.SYS_STORAGE_CACHE_MAX_BYTES,
@@ -331,7 +343,9 @@ public class SettingsBackupTest {
                     Settings.Global.TCP_DEFAULT_INIT_RWND,
                     Settings.Global.TETHER_DUN_APN,
                     Settings.Global.TETHER_DUN_REQUIRED,
+                    Settings.Global.TETHER_OFFLOAD_DISABLED,
                     Settings.Global.TETHER_SUPPORTED,
+                    Settings.Global.TEXT_CLASSIFIER_CONSTANTS,
                     Settings.Global.THEATER_MODE_ON,
                     Settings.Global.TRANSITION_ANIMATION_SCALE,
                     Settings.Global.TRUSTED_SOUND,
@@ -432,6 +446,7 @@ public class SettingsBackupTest {
                  Settings.Secure.DOZE_PULSE_ON_LONG_PRESS,
                  Settings.Secure.EMERGENCY_ASSISTANCE_APPLICATION,
                  Settings.Secure.ENABLED_NOTIFICATION_ASSISTANT,
+                 Settings.Secure.ENABLED_NOTIFICATION_LISTENERS,
                  Settings.Secure.ENABLED_NOTIFICATION_POLICY_ACCESS_PACKAGES,
                  Settings.Secure.ENABLED_PRINT_SERVICES,
                  Settings.Secure.IMMERSIVE_MODE_CONFIRMATIONS,
@@ -486,6 +501,7 @@ public class SettingsBackupTest {
                  Settings.Secure.TRUST_AGENTS_INITIALIZED,
                  Settings.Secure.TV_INPUT_CUSTOM_LABELS,
                  Settings.Secure.TV_INPUT_HIDDEN_INPUTS,
+                 Settings.Secure.TV_USER_SETUP_COMPLETE,
                  Settings.Secure.UI_NIGHT_MODE, // candidate?
                  Settings.Secure.UNKNOWN_SOURCES_DEFAULT_REVERSED,
                  Settings.Secure.UNSAFE_VOLUME_MUSIC_ACTIVE_MS,

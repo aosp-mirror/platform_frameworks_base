@@ -29,7 +29,9 @@ import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
+import android.os.PersistableBundle;
 import android.provider.Settings;
+import android.telephony.CarrierConfigManager;
 import android.telephony.ServiceState;
 import android.telephony.SignalStrength;
 import android.telephony.SubscriptionInfo;
@@ -58,10 +60,8 @@ import java.util.ArrayList;
 import java.util.BitSet;
 import java.util.Collections;
 import java.util.Comparator;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
-import java.util.Map;
 
 import static android.net.NetworkCapabilities.NET_CAPABILITY_VALIDATED;
 
@@ -116,7 +116,7 @@ public class NetworkControllerImpl extends BroadcastReceiver
 
     // States that don't belong to a subcontroller.
     private boolean mAirplaneMode = false;
-    private boolean mHasNoSims;
+    private boolean mHasNoSubs;
     private Locale mLocale = null;
     // This list holds our ordering.
     private List<SubscriptionInfo> mCurrentSubscriptions = new ArrayList<>();
@@ -140,6 +140,7 @@ public class NetworkControllerImpl extends BroadcastReceiver
     @VisibleForTesting
     ServiceState mLastServiceState;
     private boolean mUserSetup;
+    private boolean mSimDetected;
 
     /**
      * Construct this controller object and register for updates.
@@ -246,6 +247,7 @@ public class NetworkControllerImpl extends BroadcastReceiver
         filter.addAction(ConnectivityManager.CONNECTIVITY_ACTION);
         filter.addAction(ConnectivityManager.INET_CONDITION_ACTION);
         filter.addAction(Intent.ACTION_AIRPLANE_MODE_CHANGED);
+        filter.addAction(CarrierConfigManager.ACTION_CARRIER_CONFIG_CHANGED);
         mContext.registerReceiver(this, filter, null, mReceiverHandler);
         mListening = true;
 
@@ -363,7 +365,7 @@ public class NetworkControllerImpl extends BroadcastReceiver
         cb.setSubs(mCurrentSubscriptions);
         cb.setIsAirplaneMode(new IconState(mAirplaneMode,
                 TelephonyIcons.FLIGHT_MODE_ICON, R.string.accessibility_airplane_mode, mContext));
-        cb.setNoSims(mHasNoSims);
+        cb.setNoSims(mHasNoSubs, mSimDetected);
         mWifiSignalController.notifyListeners(cb);
         mEthernetSignalController.notifyListeners(cb);
         for (int i = 0; i < mMobileSignalControllers.size(); i++) {
@@ -434,6 +436,14 @@ public class NetworkControllerImpl extends BroadcastReceiver
                 // emergency state.
                 recalculateEmergency();
             }
+        } else if (action.equals(CarrierConfigManager.ACTION_CARRIER_CONFIG_CHANGED)) {
+            mConfig = Config.readConfig(mContext);
+            mReceiverHandler.post(new Runnable() {
+                @Override
+                public void run() {
+                    handleConfigurationChanged();
+                }
+            });
         } else {
             int subId = intent.getIntExtra(PhoneConstants.SUBSCRIPTION_KEY,
                     SubscriptionManager.INVALID_SUBSCRIPTION_ID);
@@ -498,11 +508,25 @@ public class NetworkControllerImpl extends BroadcastReceiver
 
     @VisibleForTesting
     protected void updateNoSims() {
-        boolean hasNoSims = mHasMobileDataFeature && mMobileSignalControllers.size() == 0;
-        if (hasNoSims != mHasNoSims) {
-            mHasNoSims = hasNoSims;
-            mCallbackHandler.setNoSims(mHasNoSims);
+        boolean hasNoSubs = mHasMobileDataFeature && mMobileSignalControllers.size() == 0;
+        boolean simDetected = hasAnySim();
+        if (hasNoSubs != mHasNoSubs || simDetected != mSimDetected) {
+            mHasNoSubs = hasNoSubs;
+            mSimDetected = simDetected;
+            mCallbackHandler.setNoSims(mHasNoSubs, mSimDetected);
         }
+    }
+
+    private boolean hasAnySim() {
+        int simCount = mPhone.getSimCount();
+        for (int i = 0; i < simCount; i++) {
+            int state = mPhone.getSimState(i);
+            if (state != TelephonyManager.SIM_STATE_ABSENT
+                    && state != TelephonyManager.SIM_STATE_UNKNOWN) {
+                return true;
+            }
+        }
+        return false;
     }
 
     @VisibleForTesting
@@ -631,7 +655,7 @@ public class NetworkControllerImpl extends BroadcastReceiver
     private void notifyListeners() {
         mCallbackHandler.setIsAirplaneMode(new IconState(mAirplaneMode,
                 TelephonyIcons.FLIGHT_MODE_ICON, R.string.accessibility_airplane_mode, mContext));
-        mCallbackHandler.setNoSims(mHasNoSims);
+        mCallbackHandler.setNoSims(mHasNoSubs, mSimDetected);
     }
 
     /**
@@ -822,8 +846,8 @@ public class NetworkControllerImpl extends BroadcastReceiver
             }
             String nosim = args.getString("nosim");
             if (nosim != null) {
-                mHasNoSims = nosim.equals("show");
-                mCallbackHandler.setNoSims(mHasNoSims);
+                mHasNoSubs = nosim.equals("show");
+                mCallbackHandler.setNoSims(mHasNoSubs, mSimDetected);
             }
             String mobile = args.getString("mobile");
             if (mobile != null) {
@@ -959,6 +983,7 @@ public class NetworkControllerImpl extends BroadcastReceiver
         boolean hideLtePlus = false;
         boolean hspaDataDistinguishable;
         boolean inflateSignalStrengths = false;
+        boolean alwaysShowDataRatIcon = false;
 
         static Config readConfig(Context context) {
             Config config = new Config();
@@ -972,6 +997,14 @@ public class NetworkControllerImpl extends BroadcastReceiver
                     res.getBoolean(R.bool.config_hspa_data_distinguishable);
             config.hideLtePlus = res.getBoolean(R.bool.config_hideLtePlus);
             config.inflateSignalStrengths = res.getBoolean(R.bool.config_inflateSignalStrength);
+
+            CarrierConfigManager configMgr = (CarrierConfigManager)
+                    context.getSystemService(Context.CARRIER_CONFIG_SERVICE);
+            PersistableBundle b = configMgr.getConfig();
+            if (b != null) {
+                config.alwaysShowDataRatIcon = b.getBoolean(
+                        CarrierConfigManager.KEY_ALWAYS_SHOW_DATA_RAT_ICON_BOOL);
+            }
             return config;
         }
     }

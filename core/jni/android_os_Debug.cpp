@@ -29,6 +29,7 @@
 #include <time.h>
 #include <unistd.h>
 
+#include <atomic>
 #include <iomanip>
 #include <string>
 
@@ -44,14 +45,13 @@
 #include "jni.h"
 #include <memtrack/memtrack.h>
 #include <memunreachable/memunreachable.h>
+#include "android_os_Debug.h"
 
 namespace android
 {
 
-using UniqueFile = std::unique_ptr<FILE, decltype(&fclose)>;
-
 static inline UniqueFile MakeUniqueFile(const char* path, const char* mode) {
-    return UniqueFile(fopen(path, mode), fclose);
+    return UniqueFile(fopen(path, mode), safeFclose);
 }
 
 enum {
@@ -150,6 +150,14 @@ struct stats_t {
     int swappedOut;
     int swappedOutPss;
 };
+
+enum pss_rollup_support {
+  PSS_ROLLUP_UNTRIED,
+  PSS_ROLLUP_SUPPORTED,
+  PSS_ROLLUP_UNSUPPORTED
+};
+
+static std::atomic<pss_rollup_support> g_pss_rollup_support;
 
 #define BINDER_STATS "/proc/binder/stats"
 
@@ -544,6 +552,33 @@ static void android_os_Debug_getDirtyPages(JNIEnv *env, jobject clazz, jobject o
     android_os_Debug_getDirtyPagesPid(env, clazz, getpid(), object);
 }
 
+UniqueFile OpenSmapsOrRollup(int pid)
+{
+    enum pss_rollup_support rollup_support =
+            g_pss_rollup_support.load(std::memory_order_relaxed);
+    if (rollup_support != PSS_ROLLUP_UNSUPPORTED) {
+        std::string smaps_rollup_path =
+                base::StringPrintf("/proc/%d/smaps_rollup", pid);
+        UniqueFile fp_rollup = MakeUniqueFile(smaps_rollup_path.c_str(), "re");
+        if (fp_rollup == nullptr && errno != ENOENT) {
+            return fp_rollup;  // Actual error, not just old kernel.
+        }
+        if (fp_rollup != nullptr) {
+            if (rollup_support == PSS_ROLLUP_UNTRIED) {
+                ALOGI("using rollup pss collection");
+                g_pss_rollup_support.store(PSS_ROLLUP_SUPPORTED,
+                                           std::memory_order_relaxed);
+            }
+            return fp_rollup;
+        }
+        g_pss_rollup_support.store(PSS_ROLLUP_UNSUPPORTED,
+                                   std::memory_order_relaxed);
+    }
+
+    std::string smaps_path = base::StringPrintf("/proc/%d/smaps", pid);
+    return MakeUniqueFile(smaps_path.c_str(), "re");
+}
+
 static jlong android_os_Debug_getPssPid(JNIEnv *env, jobject clazz, jint pid,
         jlongArray outUssSwapPss, jlongArray outMemtrack)
 {
@@ -559,12 +594,11 @@ static jlong android_os_Debug_getPssPid(JNIEnv *env, jobject clazz, jint pid,
     }
 
     {
-        std::string smaps_path = base::StringPrintf("/proc/%d/smaps", pid);
-        UniqueFile fp = MakeUniqueFile(smaps_path.c_str(), "re");
+        UniqueFile fp = OpenSmapsOrRollup(pid);
 
         if (fp != nullptr) {
             while (true) {
-                if (fgets(line, 1024, fp.get()) == NULL) {
+                if (fgets(line, sizeof (line), fp.get()) == NULL) {
                     break;
                 }
 
@@ -671,6 +705,8 @@ enum {
     MEMINFO_CACHED,
     MEMINFO_SHMEM,
     MEMINFO_SLAB,
+    MEMINFO_SLAB_RECLAIMABLE,
+    MEMINFO_SLAB_UNRECLAIMABLE,
     MEMINFO_SWAP_TOTAL,
     MEMINFO_SWAP_FREE,
     MEMINFO_ZRAM_TOTAL,
@@ -742,6 +778,8 @@ static void android_os_Debug_getMemInfo(JNIEnv *env, jobject clazz, jlongArray o
             "Cached:",
             "Shmem:",
             "Slab:",
+            "SReclaimable:",
+            "SUnreclaim:",
             "SwapTotal:",
             "SwapFree:",
             "ZRam:",
@@ -758,6 +796,8 @@ static void android_os_Debug_getMemInfo(JNIEnv *env, jobject clazz, jlongArray o
             7,
             6,
             5,
+            13,
+            11,
             10,
             9,
             5,
@@ -767,7 +807,7 @@ static void android_os_Debug_getMemInfo(JNIEnv *env, jobject clazz, jlongArray o
             12,
             0
     };
-    long mem[] = { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 };
+    long mem[] = { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 };
 
     char* p = buffer;
     while (*p && numFound < (sizeof(tagsLen) / sizeof(tagsLen[0]))) {
@@ -1002,21 +1042,16 @@ static void dumpNativeHeap(FILE* fp)
     fprintf(fp, "END\n");
 }
 
-/*
- * Dump the native heap, writing human-readable output to the specified
- * file descriptor.
- */
-static void android_os_Debug_dumpNativeHeap(JNIEnv* env, jobject clazz,
-    jobject fileDescriptor)
+static bool openFile(JNIEnv* env, jobject fileDescriptor, UniqueFile& fp)
 {
     if (fileDescriptor == NULL) {
         jniThrowNullPointerException(env, "fd == null");
-        return;
+        return false;
     }
     int origFd = jniGetFDFromFileDescriptor(env, fileDescriptor);
     if (origFd < 0) {
         jniThrowRuntimeException(env, "Invalid file descriptor");
-        return;
+        return false;
     }
 
     /* dup() the descriptor so we don't close the original with fclose() */
@@ -1024,20 +1059,49 @@ static void android_os_Debug_dumpNativeHeap(JNIEnv* env, jobject clazz,
     if (fd < 0) {
         ALOGW("dup(%d) failed: %s\n", origFd, strerror(errno));
         jniThrowRuntimeException(env, "dup() failed");
-        return;
+        return false;
     }
 
-    UniqueFile fp(fdopen(fd, "w"), fclose);
+    fp.reset(fdopen(fd, "w"));
     if (fp == nullptr) {
         ALOGW("fdopen(%d) failed: %s\n", fd, strerror(errno));
         close(fd);
         jniThrowRuntimeException(env, "fdopen() failed");
+        return false;
+    }
+    return true;
+}
+
+/*
+ * Dump the native heap, writing human-readable output to the specified
+ * file descriptor.
+ */
+static void android_os_Debug_dumpNativeHeap(JNIEnv* env, jobject,
+    jobject fileDescriptor)
+{
+    UniqueFile fp(nullptr, safeFclose);
+    if (!openFile(env, fileDescriptor, fp)) {
         return;
     }
 
     ALOGD("Native heap dump starting...\n");
     dumpNativeHeap(fp.get());
     ALOGD("Native heap dump complete.\n");
+}
+
+/*
+ * Dump the native malloc info, writing xml output to the specified
+ * file descriptor.
+ */
+static void android_os_Debug_dumpNativeMallocInfo(JNIEnv* env, jobject,
+    jobject fileDescriptor)
+{
+    UniqueFile fp(nullptr, safeFclose);
+    if (!openFile(env, fileDescriptor, fp)) {
+        return;
+    }
+
+    malloc_info(0, fp.get());
 }
 
 static bool dumpTraces(JNIEnv* env, jint pid, jstring fileName, jint timeoutSecs,
@@ -1100,6 +1164,8 @@ static const JNINativeMethod gMethods[] = {
             (void*) android_os_Debug_getMemInfo },
     { "dumpNativeHeap",         "(Ljava/io/FileDescriptor;)V",
             (void*) android_os_Debug_dumpNativeHeap },
+    { "dumpNativeMallocInfo",   "(Ljava/io/FileDescriptor;)V",
+            (void*) android_os_Debug_dumpNativeMallocInfo },
     { "getBinderSentTransactions", "()I",
             (void*) android_os_Debug_getBinderSentTransactions },
     { "getBinderReceivedTransactions", "()I",

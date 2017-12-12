@@ -27,6 +27,8 @@
 #include "SkiaProfileRenderer.h"
 #include "utils/TraceUtils.h"
 
+#include <GrBackendSurface.h>
+
 #include <cutils/properties.h>
 #include <strings.h>
 
@@ -69,20 +71,17 @@ bool SkiaOpenGLPipeline::draw(const Frame& frame, const SkRect& screenDirty,
     mEglManager.damageFrame(frame, dirty);
 
     // setup surface for fbo0
-    GrBackendRenderTargetDesc renderTargetDesc;
-    renderTargetDesc.fWidth = frame.width();
-    renderTargetDesc.fHeight = frame.height();
-    renderTargetDesc.fConfig = kRGBA_8888_GrPixelConfig;
-    renderTargetDesc.fOrigin = kBottomLeft_GrSurfaceOrigin;
-    renderTargetDesc.fSampleCnt = 0;
-    renderTargetDesc.fStencilBits = STENCIL_BUFFER_SIZE;
-    renderTargetDesc.fRenderTargetHandle = 0;
+    GrGLFramebufferInfo fboInfo;
+    fboInfo.fFBOID = 0;
+
+    GrBackendRenderTarget backendRT(frame.width(), frame.height(), 0, STENCIL_BUFFER_SIZE,
+            kRGBA_8888_GrPixelConfig, fboInfo);
 
     SkSurfaceProps props(0, kUnknown_SkPixelGeometry);
 
     SkASSERT(mRenderThread.getGrContext() != nullptr);
     sk_sp<SkSurface> surface(SkSurface::MakeFromBackendRenderTarget(
-            mRenderThread.getGrContext(), renderTargetDesc, &props));
+            mRenderThread.getGrContext(), backendRT, kBottomLeft_GrSurfaceOrigin, nullptr, &props));
 
     SkiaPipeline::updateLighting(lightGeometry, lightInfo);
     renderFrame(*layerUpdateQueue, dirty, renderNodes, opaque, wideColorGamut,
@@ -270,8 +269,7 @@ sk_sp<Bitmap> SkiaOpenGLPipeline::allocateHardwareBitmap(renderthread::RenderThr
     switch (info.colorType()) {
     case kRGBA_8888_SkColorType:
         isSupported = true;
-    // ARGB_4444 and Index_8 are both upconverted to RGBA_8888
-    case kIndex_8_SkColorType:
+    // ARGB_4444 is upconverted to RGBA_8888
     case kARGB_4444_SkColorType:
         pixelFormat = PIXEL_FORMAT_RGBA_8888;
         format = GL_RGBA;
@@ -305,6 +303,13 @@ sk_sp<Bitmap> SkiaOpenGLPipeline::allocateHardwareBitmap(renderthread::RenderThr
         return nullptr;
     }
 
+    auto colorSpace = info.colorSpace();
+    bool convertToSRGB = false;
+    if (colorSpace && (!colorSpace->isSRGB())) {
+        isSupported = false;
+        convertToSRGB = true;
+    }
+
     SkBitmap bitmap;
     if (isSupported) {
         bitmap = skBitmap;
@@ -312,7 +317,7 @@ sk_sp<Bitmap> SkiaOpenGLPipeline::allocateHardwareBitmap(renderthread::RenderThr
         bitmap.allocPixels(SkImageInfo::MakeN32(info.width(), info.height(), info.alphaType(),
                 nullptr));
         bitmap.eraseColor(0);
-        if (info.colorType() == kRGBA_F16_SkColorType) {
+        if (info.colorType() == kRGBA_F16_SkColorType || convertToSRGB) {
             // Drawing RGBA_F16 onto ARGB_8888 is not supported
             skBitmap.readPixels(bitmap.info().makeColorSpace(SkColorSpace::MakeSRGB()),
                     bitmap.getPixels(), bitmap.rowBytes(), 0, 0);

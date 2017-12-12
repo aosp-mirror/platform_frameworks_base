@@ -219,6 +219,10 @@ public final class JobServiceContext implements ServiceConnection {
                     isDeadlineExpired, triggeredUris, triggeredAuthorities);
             mExecutionStartTimeElapsed = SystemClock.elapsedRealtime();
 
+            // Once we'e begun executing a job, we by definition no longer care whether
+            // it was inflated from disk with not-yet-coherent delay/deadline bounds.
+            job.clearPersistedUtcTimes();
+
             mVerb = VERB_BINDING;
             scheduleOpTimeOutLocked();
             final Intent intent = new Intent().setComponent(job.getServiceComponent());
@@ -255,6 +259,13 @@ public final class JobServiceContext implements ServiceConnection {
      */
     JobStatus getRunningJobLocked() {
         return mRunningJob;
+    }
+
+    /**
+     * Used only for debugging. Will return <code>"&lt;null&gt;"</code> if there is no job running.
+     */
+    private String getRunningJobNameLocked() {
+        return mRunningJob != null ? mRunningJob.toShortString() : "<null>";
     }
 
     /** Called externally when a job that was scheduled for execution should be cancelled. */
@@ -518,7 +529,7 @@ public final class JobServiceContext implements ServiceConnection {
     /** Start the job on the service. */
     private void handleServiceBoundLocked() {
         if (DEBUG) {
-            Slog.d(TAG, "handleServiceBound for " + mRunningJob.toShortString());
+            Slog.d(TAG, "handleServiceBound for " + getRunningJobNameLocked());
         }
         if (mVerb != VERB_BINDING) {
             Slog.e(TAG, "Sending onStartJob for a job that isn't pending. "
@@ -635,36 +646,34 @@ public final class JobServiceContext implements ServiceConnection {
     private void handleOpTimeoutLocked() {
         switch (mVerb) {
             case VERB_BINDING:
-                Slog.w(TAG, "Time-out while trying to bind " + mRunningJob.toShortString() +
-                        ", dropping.");
+                Slog.w(TAG, "Time-out while trying to bind " + getRunningJobNameLocked()
+                        + ", dropping.");
                 closeAndCleanupJobLocked(false /* needsReschedule */, "timed out while binding");
                 break;
             case VERB_STARTING:
                 // Client unresponsive - wedged or failed to respond in time. We don't really
                 // know what happened so let's log it and notify the JobScheduler
                 // FINISHED/NO-RETRY.
-                Slog.w(TAG, "No response from client for onStartJob " +
-                        mRunningJob != null ? mRunningJob.toShortString() : "<null>");
+                Slog.w(TAG, "No response from client for onStartJob "
+                        + getRunningJobNameLocked());
                 closeAndCleanupJobLocked(false /* needsReschedule */, "timed out while starting");
                 break;
             case VERB_STOPPING:
                 // At least we got somewhere, so fail but ask the JobScheduler to reschedule.
-                Slog.w(TAG, "No response from client for onStopJob " +
-                        mRunningJob != null ? mRunningJob.toShortString() : "<null>");
+                Slog.w(TAG, "No response from client for onStopJob "
+                        + getRunningJobNameLocked());
                 closeAndCleanupJobLocked(true /* needsReschedule */, "timed out while stopping");
                 break;
             case VERB_EXECUTING:
                 // Not an error - client ran out of time.
                 Slog.i(TAG, "Client timed out while executing (no jobFinished received), " +
-                        "sending onStop: "  +
-                        mRunningJob != null ? mRunningJob.toShortString() : "<null>");
+                        "sending onStop: " + getRunningJobNameLocked());
                 mParams.setStopReason(JobParameters.REASON_TIMEOUT);
                 sendStopMessageLocked("timeout while executing");
                 break;
             default:
-                Slog.e(TAG, "Handling timeout for an invalid job state: " +
-                        mRunningJob != null ? mRunningJob.toShortString() : "<null>"
-                        + ", dropping.");
+                Slog.e(TAG, "Handling timeout for an invalid job state: "
+                        + getRunningJobNameLocked() + ", dropping.");
                 closeAndCleanupJobLocked(false /* needsReschedule */, "invalid timeout");
         }
     }
@@ -681,6 +690,7 @@ public final class JobServiceContext implements ServiceConnection {
             return;
         }
         try {
+            applyStoppedReasonLocked(reason);
             mVerb = VERB_STOPPING;
             scheduleOpTimeOutLocked();
             service.stopJob(mParams);
@@ -704,10 +714,10 @@ public final class JobServiceContext implements ServiceConnection {
         }
         applyStoppedReasonLocked(reason);
         completedJob = mRunningJob;
-        mJobPackageTracker.noteInactive(completedJob);
+        mJobPackageTracker.noteInactive(completedJob, mParams.getStopReason());
         try {
             mBatteryStats.noteJobFinish(mRunningJob.getBatteryName(),
-                    mRunningJob.getSourceUid());
+                    mRunningJob.getSourceUid(), mParams.getStopReason());
         } catch (RemoteException e) {
             // Whatever.
         }

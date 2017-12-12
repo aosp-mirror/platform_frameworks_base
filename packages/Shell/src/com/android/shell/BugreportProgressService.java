@@ -1060,7 +1060,6 @@ public class BugreportProgressService extends Service {
         }
         return new Notification.Builder(context, NOTIFICATION_CHANNEL_ID)
                 .addExtras(sNotificationBundle)
-                .setCategory(Notification.CATEGORY_SYSTEM)
                 .setSmallIcon(
                         isTv(context) ? R.drawable.ic_bug_report_black_24dp
                                 : com.android.internal.R.drawable.stat_sys_adb)

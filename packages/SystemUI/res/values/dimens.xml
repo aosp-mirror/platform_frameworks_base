@@ -192,6 +192,23 @@
     <!-- Height of the status bar header bar -->
     <dimen name="status_bar_header_height">124dp</dimen>
 
+    <!-- Height of the status bar header bar in the car setting. -->
+    <dimen name="car_status_bar_header_height">128dp</dimen>
+
+    <!-- The bottom padding of the status bar header. -->
+    <dimen name="status_bar_header_padding_bottom">48dp</dimen>
+
+    <!-- The height of the container that holds the system icons in the quick settings header. -->
+    <dimen name="qs_header_system_icons_area_height">40dp</dimen>
+
+    <!-- The height of the container that holds the system icons in the quick settings header in the
+         car setting. -->
+    <dimen name="car_qs_header_system_icons_area_height">54dp</dimen>
+
+    <!-- The height of the quick settings footer that holds the user switcher, settings icon,
+         etc. -->
+    <dimen name="qs_footer_height">48dp</dimen>
+
     <!-- Height of the status bar header bar when expanded -->
     <dimen name="status_bar_header_height_expanded">124dp</dimen>
 
@@ -281,6 +298,7 @@
     <dimen name="qs_detail_padding_start">16dp</dimen>
     <dimen name="qs_detail_items_padding_top">4dp</dimen>
     <dimen name="qs_detail_item_icon_size">24dp</dimen>
+    <dimen name="qs_detail_item_icon_width">32dp</dimen>
     <dimen name="qs_detail_item_icon_marginStart">0dp</dimen>
     <dimen name="qs_detail_item_icon_marginEnd">20dp</dimen>
     <dimen name="qs_footer_padding_start">16dp</dimen>
@@ -829,11 +847,15 @@
     <dimen name="edge_margin">16dp</dimen>
 
     <dimen name="rounded_corner_radius">0dp</dimen>
-    <dimen name="rounded_corner_content_padding">8dp</dimen>
+    <dimen name="rounded_corner_content_padding">0dp</dimen>
+    <dimen name="nav_content_padding">0dp</dimen>
 
     <!-- Intended corner radius when drawing the mobile signal -->
     <dimen name="stat_sys_mobile_signal_corner_radius">0.75dp</dimen>
     <!-- How far to inset the rounded edges -->
     <dimen name="stat_sys_mobile_signal_circle_inset">0.9dp</dimen>
+
+    <!-- Home button padding for sizing -->
+    <dimen name="home_padding">15dp</dimen>
 
 </resources>

@@ -19,6 +19,7 @@ package com.android.server.wm;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
@@ -31,7 +32,6 @@ import android.support.test.filters.MediumTest;
 import android.support.test.runner.AndroidJUnit4;
 import android.util.ArraySet;
 
-import com.android.internal.util.Predicate;
 import com.android.server.wm.TaskSnapshotPersister.RemoveObsoleteFilesQueueItem;
 
 import org.junit.Test;
@@ -140,6 +140,29 @@ public class TaskSnapshotPersisterLoaderTest extends TaskSnapshotPersisterTestBa
     }
 
     @Test
+    public void testLowResolutionPersistAndLoadSnapshot() {
+        TaskSnapshot a = createSnapshot(0.5f /* reducedResolution */);
+        assertTrue(a.isReducedResolution());
+        mPersister.persistSnapshot(1 , mTestUserId, a);
+        mPersister.waitForQueueEmpty();
+        final File[] files = new File[] { new File(sFilesDir.getPath() + "/snapshots/1.proto"),
+                new File(sFilesDir.getPath() + "/snapshots/1_reduced.jpg")};
+        final File[] nonExistsFiles = new File[] {
+                new File(sFilesDir.getPath() + "/snapshots/1.jpg"),
+        };
+        assertTrueForFiles(files, File::exists, " must exist");
+        assertTrueForFiles(nonExistsFiles, file -> !file.exists(), " must not exist");
+        final TaskSnapshot snapshot = mLoader.loadTask(1, mTestUserId, true /* reduced */);
+        assertNotNull(snapshot);
+        assertEquals(TEST_INSETS, snapshot.getContentInsets());
+        assertNotNull(snapshot.getSnapshot());
+        assertEquals(Configuration.ORIENTATION_PORTRAIT, snapshot.getOrientation());
+
+        final TaskSnapshot snapshotNotExist = mLoader.loadTask(1, mTestUserId, false /* reduced */);
+        assertNull(snapshotNotExist);
+    }
+
+    @Test
     public void testRemoveObsoleteFiles() {
         mPersister.persistSnapshot(1, mTestUserId, createSnapshot());
         mPersister.persistSnapshot(2, mTestUserId, createSnapshot());
@@ -175,5 +198,17 @@ public class TaskSnapshotPersisterLoaderTest extends TaskSnapshotPersisterTestBa
                 new File(sFilesDir.getPath() + "/snapshots/2.jpg"),
                 new File(sFilesDir.getPath() + "/snapshots/2_reduced.jpg")};
         assertTrueForFiles(existsFiles, File::exists, " must exist");
+    }
+
+    /**
+     * Private predicate definition.
+     *
+     * This is needed because com.android.internal.util.Predicate is deprecated
+     * and can only be used with classes fron android.test.runner. This cannot
+     * use java.util.function.Predicate because that is not present on all API
+     * versions that this test must run on.
+     */
+    private interface Predicate<T> {
+        boolean apply(T t);
     }
 }

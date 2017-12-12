@@ -108,6 +108,7 @@ import com.android.internal.util.Preconditions;
 import com.android.internal.widget.LockPatternUtils;
 import com.android.server.NativeDaemonConnector.Command;
 import com.android.server.NativeDaemonConnector.SensitiveArg;
+import com.android.server.pm.PackageManagerException;
 import com.android.server.pm.PackageManagerService;
 import com.android.server.storage.AppFuseBridge;
 
@@ -1078,7 +1079,8 @@ class StorageManagerService extends IStorageManager.Stub
                     flags |= DiskInfo.FLAG_ADOPTABLE;
                 }
                 // Adoptable storage isn't currently supported on FBE devices
-                if (StorageManager.isFileEncryptedNativeOnly()) {
+                if (StorageManager.isFileEncryptedNativeOnly()
+                        && !SystemProperties.getBoolean(StorageManager.PROP_ADOPTABLE_FBE, false)) {
                     flags &= ~DiskInfo.FLAG_ADOPTABLE;
                 }
                 mDisks.put(id, new DiskInfo(id, flags));
@@ -2045,7 +2047,8 @@ class StorageManagerService extends IStorageManager.Stub
         }
 
         if ((mask & StorageManager.DEBUG_FORCE_ADOPTABLE) != 0) {
-            if (StorageManager.isFileEncryptedNativeOnly()) {
+            if (StorageManager.isFileEncryptedNativeOnly()
+                    && !SystemProperties.getBoolean(StorageManager.PROP_ADOPTABLE_FBE, false)) {
                 throw new IllegalStateException(
                         "Adoptable storage not available on device with native FBE");
             }
@@ -2120,6 +2123,17 @@ class StorageManagerService extends IStorageManager.Stub
             }
             mMoveCallback = callback;
             mMoveTargetUuid = volumeUuid;
+
+            // We need all the users unlocked to move their primary storage
+            final List<UserInfo> users = mContext.getSystemService(UserManager.class).getUsers();
+            for (UserInfo user : users) {
+                if (StorageManager.isFileEncryptedNativeOrEmulated()
+                        && !isUserKeyUnlocked(user.id)) {
+                    Slog.w(TAG, "Failing move due to locked user " + user.id);
+                    onMoveStatusLocked(PackageManager.MOVE_FAILED_LOCKED_USER);
+                    return;
+                }
+            }
 
             // When moving to/from primary physical volume, we probably just nuked
             // the current storage location, so we have nothing to move.

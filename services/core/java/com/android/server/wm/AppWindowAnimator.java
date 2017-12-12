@@ -16,8 +16,8 @@
 
 package com.android.server.wm;
 
+import static android.view.Display.INVALID_DISPLAY;
 import static android.view.WindowManagerPolicy.FINISH_LAYOUT_REDO_ANIM;
-
 import static com.android.server.wm.AppTransition.TRANSIT_UNSET;
 import static com.android.server.wm.WindowManagerDebugConfig.DEBUG_ANIM;
 import static com.android.server.wm.WindowManagerDebugConfig.DEBUG_VISIBILITY;
@@ -148,7 +148,7 @@ public class AppWindowAnimator {
         }
         // Start out animation gone if window is gone, or visible if window is visible.
         transformation.clear();
-        transformation.setAlpha(mAppToken.hasContentToDisplay() ? 1 : 0);
+        transformation.setAlpha(mAppToken.isVisible() ? 1 : 0);
         hasTransformation = true;
         mStackClip = stackClip;
 
@@ -172,7 +172,7 @@ public class AppWindowAnimator {
         animation = sDummyAnimation;
         hasTransformation = true;
         transformation.clear();
-        transformation.setAlpha(mAppToken.hasContentToDisplay() ? 1 : 0);
+        transformation.setAlpha(mAppToken.isVisible() ? 1 : 0);
     }
 
     void setNullAnimation() {
@@ -358,7 +358,7 @@ public class AppWindowAnimator {
 
     // This must be called while inside a transaction.
     boolean stepAnimationLocked(long currentTime) {
-        if (mService.okToAnimate()) {
+        if (mAppToken.okToAnimate()) {
             // We will run animations as long as the display isn't frozen.
 
             if (animation == sDummyAnimation) {
@@ -423,8 +423,8 @@ public class AppWindowAnimator {
 
         if (DEBUG_ANIM) Slog.v(TAG, "Animation done in " + mAppToken
                 + ": reportedVisible=" + mAppToken.reportedVisible
-                + " okToDisplay=" + mService.okToDisplay()
-                + " okToAnimate=" + mService.okToAnimate()
+                + " okToDisplay=" + mAppToken.okToDisplay()
+                + " okToAnimate=" + mAppToken.okToAnimate()
                 + " startingDisplayed=" + mAppToken.startingDisplayed);
 
         transformation.clear();
@@ -450,7 +450,7 @@ public class AppWindowAnimator {
         return isAnimating;
     }
 
-    void dump(PrintWriter pw, String prefix, boolean dumpAll) {
+    void dump(PrintWriter pw, String prefix) {
         pw.print(prefix); pw.print("mAppToken="); pw.println(mAppToken);
         pw.print(prefix); pw.print("mAnimator="); pw.println(mAnimator);
         pw.print(prefix); pw.print("freezingScreen="); pw.print(freezingScreen);

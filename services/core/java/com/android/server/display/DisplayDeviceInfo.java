@@ -98,6 +98,12 @@ final class DisplayDeviceInfo {
     public static final int FLAG_CAN_SHOW_WITH_INSECURE_KEYGUARD = 1 << 9;
 
     /**
+     * Flag: This display will destroy its content on removal.
+     * @hide
+     */
+    public static final int FLAG_DESTROY_CONTENT_ON_REMOVAL = 1 << 10;
+
+    /**
      * Touch attachment: Display does not receive touch.
      */
     public static final int TOUCH_NONE = 0;

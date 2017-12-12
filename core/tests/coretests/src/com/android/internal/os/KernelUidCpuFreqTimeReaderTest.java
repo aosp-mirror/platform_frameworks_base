@@ -98,6 +98,14 @@ public class KernelUidCpuFreqTimeReaderTest {
         }
         verifyNoMoreInteractions(mCallback);
 
+        // Verify that there won't be a callback if the proc file values didn't change.
+        Mockito.reset(mCallback, mBufferedReader);
+        when(mBufferedReader.readLine())
+                .thenReturn(getFreqsLine(freqs), getUidTimesLines(uids, newTimes1));
+        mKernelUidCpuFreqTimeReader.readDelta(mBufferedReader, mCallback);
+        verify(mCallback).onCpuFreqs(freqs);
+        verifyNoMoreInteractions(mCallback);
+
         // Verify that calling with a null callback doesn't result in any crashes
         Mockito.reset(mCallback, mBufferedReader);
         final long[][] newTimes2 = new long[uids.length][freqs.length];
@@ -127,6 +135,91 @@ public class KernelUidCpuFreqTimeReaderTest {
         for (int i = 0; i < uids.length; ++i) {
             verify(mCallback).onUidCpuFreqTime(uids[i], subtract(newTimes3[i], newTimes2[i]));
         }
+        verifyNoMoreInteractions(mCallback);
+    }
+
+    @Test
+    public void testReadDelta_malformedData() throws Exception {
+        final long[] freqs = {1, 12, 123, 1234, 12345, 123456};
+        final int[] uids = {1, 22, 333, 4444, 5555};
+        final long[][] times = new long[uids.length][freqs.length];
+        for (int i = 0; i < uids.length; ++i) {
+            for (int j = 0; j < freqs.length; ++j) {
+                times[i][j] = uids[i] * freqs[j] * 10;
+            }
+        }
+        when(mBufferedReader.readLine())
+                .thenReturn(getFreqsLine(freqs), getUidTimesLines(uids, times));
+        mKernelUidCpuFreqTimeReader.readDelta(mBufferedReader, mCallback);
+        verify(mCallback).onCpuFreqs(freqs);
+        for (int i = 0; i < uids.length; ++i) {
+            verify(mCallback).onUidCpuFreqTime(uids[i], times[i]);
+        }
+        verifyNoMoreInteractions(mCallback);
+
+        // Verify that there is no callback if any value in the proc file is -ve.
+        Mockito.reset(mCallback, mBufferedReader);
+        final long[][] newTimes1 = new long[uids.length][freqs.length];
+        for (int i = 0; i < uids.length; ++i) {
+            for (int j = 0; j < freqs.length; ++j) {
+                newTimes1[i][j] = (times[i][j] + uids[i] + freqs[j]) * 10;
+            }
+        }
+        newTimes1[uids.length - 1][freqs.length - 1] *= -1;
+        when(mBufferedReader.readLine())
+                .thenReturn(getFreqsLine(freqs), getUidTimesLines(uids, newTimes1));
+        mKernelUidCpuFreqTimeReader.readDelta(mBufferedReader, mCallback);
+        verify(mCallback).onCpuFreqs(freqs);
+        for (int i = 0; i < uids.length; ++i) {
+            if (i == uids.length - 1) {
+                continue;
+            }
+            verify(mCallback).onUidCpuFreqTime(uids[i], subtract(newTimes1[i], times[i]));
+        }
+        verifyNoMoreInteractions(mCallback);
+
+        // Verify that the internal state was not modified when the proc file had -ve value.
+        Mockito.reset(mCallback, mBufferedReader);
+        for (int i = 0; i < freqs.length; ++i) {
+            newTimes1[uids.length - 1][i] = times[uids.length - 1][i];
+        }
+        when(mBufferedReader.readLine())
+                .thenReturn(getFreqsLine(freqs), getUidTimesLines(uids, newTimes1));
+        mKernelUidCpuFreqTimeReader.readDelta(mBufferedReader, mCallback);
+        verify(mCallback).onCpuFreqs(freqs);
+        verifyNoMoreInteractions(mCallback);
+
+        // Verify that there is no callback if the values in the proc file are decreased.
+        Mockito.reset(mCallback, mBufferedReader);
+        final long[][] newTimes2 = new long[uids.length][freqs.length];
+        for (int i = 0; i < uids.length; ++i) {
+            for (int j = 0; j < freqs.length; ++j) {
+                newTimes2[i][j] = (newTimes1[i][j] + uids[i] * freqs[j]) * 10;
+            }
+        }
+        newTimes2[uids.length - 1][freqs.length - 1] =
+                newTimes1[uids.length - 1][freqs.length - 1] - 222;
+        when(mBufferedReader.readLine())
+                .thenReturn(getFreqsLine(freqs), getUidTimesLines(uids, newTimes2));
+        mKernelUidCpuFreqTimeReader.readDelta(mBufferedReader, mCallback);
+        verify(mCallback).onCpuFreqs(freqs);
+        for (int i = 0; i < uids.length; ++i) {
+            if (i == uids.length - 1) {
+                continue;
+            }
+            verify(mCallback).onUidCpuFreqTime(uids[i], subtract(newTimes2[i], newTimes1[i]));
+        }
+        verifyNoMoreInteractions(mCallback);
+
+        // Verify that the internal state was not modified when the proc file had decreasing values.
+        Mockito.reset(mCallback, mBufferedReader);
+        for (int i = 0; i < freqs.length; ++i) {
+            newTimes2[uids.length - 1][i] = newTimes1[uids.length - 1][i];
+        }
+        when(mBufferedReader.readLine())
+                .thenReturn(getFreqsLine(freqs), getUidTimesLines(uids, newTimes2));
+        mKernelUidCpuFreqTimeReader.readDelta(mBufferedReader, mCallback);
+        verify(mCallback).onCpuFreqs(freqs);
         verifyNoMoreInteractions(mCallback);
     }
 

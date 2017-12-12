@@ -30,6 +30,7 @@ import android.view.Gravity;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.WindowManager;
+import android.view.WindowManager.LayoutParams;
 
 import com.android.keyguard.R;
 import com.android.systemui.Dumpable;
@@ -99,7 +100,6 @@ public class StatusBarWindowManager implements RemoteInputController.Callback, D
                         | WindowManager.LayoutParams.FLAG_DRAWS_SYSTEM_BAR_BACKGROUNDS,
                 PixelFormat.TRANSLUCENT);
         mLp.token = new Binder();
-        mLp.flags |= WindowManager.LayoutParams.FLAG_HARDWARE_ACCELERATED;
         mLp.gravity = Gravity.TOP;
         mLp.softInputMode = WindowManager.LayoutParams.SOFT_INPUT_ADJUST_RESIZE;
         mLp.setTitle("StatusBar");
@@ -231,6 +231,7 @@ public class StatusBarWindowManager implements RemoteInputController.Callback, D
         applyModalFlag(state);
         applyBrightness(state);
         applyHasTopUi(state);
+        applySleepToken(state);
         if (mLp.copyFrom(mLpChanged) != 0) {
             mWindowManager.updateViewLayout(mStatusBarView, mLp);
         }
@@ -272,6 +273,14 @@ public class StatusBarWindowManager implements RemoteInputController.Callback, D
 
     private void applyHasTopUi(State state) {
         mHasTopUiChanged = isExpanded(state);
+    }
+
+    private void applySleepToken(State state) {
+        if (state.dozing) {
+            mLpChanged.privateFlags |= LayoutParams.PRIVATE_FLAG_ACQUIRES_SLEEP_TOKEN;
+        } else {
+            mLpChanged.privateFlags &= ~LayoutParams.PRIVATE_FLAG_ACQUIRES_SLEEP_TOKEN;
+        }
     }
 
     public void setKeyguardShowing(boolean showing) {

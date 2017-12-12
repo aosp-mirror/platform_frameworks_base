@@ -67,6 +67,7 @@ import java.io.BufferedWriter;
 import java.io.File;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -318,6 +319,22 @@ import java.util.Map;
  * out.
  * </p>
  *
+ * <h3>Safe Browsing</h3>
+ *
+ * <p>
+ * If Safe Browsing is enabled, WebView will block malicious URLs and present a warning UI to the
+ * user to allow them to navigate back safely or proceed to the malicious page.
+ * </p>
+ * <p>
+ * The recommended way for apps to enable the feature is putting the following tag in the manifest:
+ * </p>
+ * <p>
+ * <pre>
+ * &lt;meta-data android:name="android.webkit.WebView.EnableSafeBrowsing"
+ *            android:value="true" /&gt;
+ * </pre>
+ * </p>
+ *
  */
 // Implementation notes.
 // The WebView is a thin API class that delegates its public API to a backend WebViewProvider
@@ -329,16 +346,6 @@ import java.util.Map;
 public class WebView extends AbsoluteLayout
         implements ViewTreeObserver.OnGlobalFocusChangeListener,
         ViewGroup.OnHierarchyChangeListener, ViewDebug.HierarchyHandler {
-
-    /**
-     * Broadcast Action: Indicates the data reduction proxy setting changed.
-     * Sent by the settings app when user changes the data reduction proxy value. This intent will
-     * always stay as a hidden API.
-     * @hide
-     */
-    @SystemApi
-    public static final String DATA_REDUCTION_PROXY_SETTING_CHANGED =
-            "android.webkit.DATA_REDUCTION_PROXY_SETTING_CHANGED";
 
     private static final String LOGTAG = "WebView";
 
@@ -1621,22 +1628,60 @@ public class WebView extends AbsoluteLayout
     }
 
     /**
-     * Starts Safe Browsing initialization. This should only be called once.
-     * @param context is the activity context the WebView will be used in.
-     * @param callback will be called with the value true if initialization is
-     * successful. The callback will be run on the UI thread.
-     * @hide
+     * Starts Safe Browsing initialization.
+     * <p>
+     * URL loads are not guaranteed to be protected by Safe Browsing until after {@code callback} is
+     * invoked with {@code true}. Safe Browsing is not fully supported on all devices. For those
+     * devices {@code callback} will receive {@code false}.
+     * <p>
+     * This does not enable the Safe Browsing feature itself, and should only be called if Safe
+     * Browsing is enabled by the manifest tag or {@link WebSettings#setSafeBrowsingEnabled}. This
+     * prepares resources used for Safe Browsing.
+     * <p>
+     * This should be called with the Application Context (and will always use the Application
+     * context to do its work regardless).
+     *
+     * @param context Application Context.
+     * @param callback will be called on the UI thread with {@code true} if initialization is
+     * successful, {@code false} otherwise.
      */
-    public static void initSafeBrowsing(Context context, ValueCallback<Boolean> callback) {
+    public static void startSafeBrowsing(Context context, ValueCallback<Boolean> callback) {
         getFactory().getStatics().initSafeBrowsing(context, callback);
     }
 
     /**
-     * Shuts down Safe Browsing. This should only be called once.
-     * @hide
+     * Sets the list of domains that are exempt from SafeBrowsing checks. The list is
+     * global for all the WebViews.
+     * <p>
+     * Each rule should take one of these:
+     * <table>
+     * <tr><th> Rule </th> <th> Example </th> <th> Matches Subdomain</th> </tr>
+     * <tr><td> HOSTNAME </td> <td> example.com </td> <td> Yes </td> </tr>
+     * <tr><td> .HOSTNAME </td> <td> .example.com </td> <td> No </td> </tr>
+     * <tr><td> IPV4_LITERAL </td> <td> 192.168.1.1 </td> <td> No </td></tr>
+     * <tr><td> IPV6_LITERAL_WITH_BRACKETS </td><td>[10:20:30:40:50:60:70:80]</td><td>No</td></tr>
+     * </table>
+     * <p>
+     * All other rules, including wildcards, are invalid.
+     *
+     * @param urls the list of URLs
+     * @param callback will be called with true if URLs are successfully added to the whitelist.
+     * It will be called with false if any URLs are malformed. The callback will be run on
+     * the UI thread
      */
-    public static void shutdownSafeBrowsing() {
-        getFactory().getStatics().shutdownSafeBrowsing();
+    public static void setSafeBrowsingWhitelist(@NonNull List<String> urls,
+            @Nullable ValueCallback<Boolean> callback) {
+        getFactory().getStatics().setSafeBrowsingWhitelist(urls, callback);
+    }
+
+    /**
+     * Returns a URL pointing to the privacy policy for Safe Browsing reporting.
+     *
+     * @return the url pointing to a privacy policy document which can be displayed to users.
+     */
+    @NonNull
+    public static Uri getSafeBrowsingPrivacyPolicyUrl() {
+        return getFactory().getStatics().getSafeBrowsingPrivacyPolicyUrl();
     }
 
     /**
@@ -1880,13 +1925,14 @@ public class WebView extends AbsoluteLayout
      * For applications targeted to API level {@link android.os.Build.VERSION_CODES#JELLY_BEAN} or below,
      * all public methods (including the inherited ones) can be accessed, see the
      * important security note below for implications.
-     * <p> Note that injected objects will not
-     * appear in JavaScript until the page is next (re)loaded. For example:
+     * <p> Note that injected objects will not appear in JavaScript until the page is next
+     * (re)loaded. JavaScript should be enabled before injecting the object. For example:
      * <pre>
      * class JsObject {
      *    {@literal @}JavascriptInterface
      *    public String toString() { return "injectedObject"; }
      * }
+     * webview.getSettings().setJavaScriptEnabled(true);
      * webView.addJavascriptInterface(new JsObject(), "injectedObject");
      * webView.loadData("<!DOCTYPE html><title></title>", "text/html", null);
      * webView.loadUrl("javascript:alert(injectedObject.toString())");</pre>
@@ -2274,7 +2320,6 @@ public class WebView extends AbsoluteLayout
 
     /**
      * Sets the {@link TextClassifier} for this WebView.
-     * @hide
      */
     public void setTextClassifier(@Nullable TextClassifier textClassifier) {
         mProvider.setTextClassifier(textClassifier);
@@ -2283,7 +2328,6 @@ public class WebView extends AbsoluteLayout
     /**
      * Returns the {@link TextClassifier} used by this WebView.
      * If no TextClassifier has been set, this WebView uses the default set by the system.
-     * @hide
      */
     @NonNull
     public TextClassifier getTextClassifier() {
@@ -2679,25 +2723,20 @@ public class WebView extends AbsoluteLayout
      *   {@code IFRAME}, in which case it would be treated the same way as multiple forms described
      *   above, except that the {@link ViewStructure#setWebDomain(String) web domain} of the
      *   {@code FORM} contains the {@code src} attribute from the {@code IFRAME} node.
-     *   <li>If the Android SDK provides a similar View, then should be set with the
-     *   fully-qualified class name of such view.
      *   <li>The W3C autofill field ({@code autocomplete} tag attribute) maps to
-     *       {@link ViewStructure#setAutofillHints(String[])}.
-     *   <li>The {@code type} attribute of {@code INPUT} tags maps to
-     *       {@link ViewStructure#setInputType(int)}.
-     *   <li>The {@code value} attribute of {@code INPUT} tags maps to
-     *       {@link ViewStructure#setText(CharSequence)}.
-     *   <li>If the view is editalbe, the {@link ViewStructure#setAutofillType(int)} and
+     *   {@link ViewStructure#setAutofillHints(String[])}.
+     *   <li>If the view is editable, the {@link ViewStructure#setAutofillType(int)} and
      *   {@link ViewStructure#setAutofillValue(AutofillValue)} must be set.
      *   <li>The {@code placeholder} attribute maps to {@link ViewStructure#setHint(CharSequence)}.
      *   <li>Other HTML attributes can be represented through
      *   {@link ViewStructure#setHtmlInfo(android.view.ViewStructure.HtmlInfo)}.
      * </ol>
      *
-     * <p>It should also call {@code structure.setDataIsSensitive(false)} for fields whose value
-     * were not dynamically changed (for example, through Javascript).
+     * <p>If the WebView implementation can determine that the value of a field was set statically
+     * (for example, not through Javascript), it should also call
+     * {@code structure.setDataIsSensitive(false)}.
      *
-     * <p>Example1: an HTML form with 2 fields for username and password.
+     * <p>For example, an HTML form with 2 fields for username and password:
      *
      * <pre class="prettyprint">
      *    &lt;input type="text" name="username" id="user" value="Type your username" autocomplete="username" placeholder="Email or username"&gt;
@@ -2710,50 +2749,26 @@ public class WebView extends AbsoluteLayout
      *     int index = structure.addChildCount(2);
      *     ViewStructure username = structure.newChild(index);
      *     username.setAutofillId(structure.getAutofillId(), 1); // id 1 - first child
-     *     username.setClassName("input");
-     *     username.setInputType("android.widget.EditText");
      *     username.setAutofillHints("username");
      *     username.setHtmlInfo(username.newHtmlInfoBuilder("input")
      *         .addAttribute("type", "text")
      *         .addAttribute("name", "username")
-     *         .addAttribute("id", "user")
      *         .build());
      *     username.setHint("Email or username");
      *     username.setAutofillType(View.AUTOFILL_TYPE_TEXT);
      *     username.setAutofillValue(AutofillValue.forText("Type your username"));
-     *     username.setText("Type your username");
-     *     // Value of the field is not sensitive because it was not dynamically changed:
+     *     // Value of the field is not sensitive because it was created statically and not changed.
      *     username.setDataIsSensitive(false);
      *
      *     ViewStructure password = structure.newChild(index + 1);
      *     username.setAutofillId(structure, 2); // id 2 - second child
-     *     password.setInputType("android.widget.EditText");
-     *     password.setInputType(InputType.TYPE_TEXT_VARIATION_PASSWORD);
      *     password.setAutofillHints("current-password");
      *     password.setHtmlInfo(password.newHtmlInfoBuilder("input")
      *         .addAttribute("type", "password")
      *         .addAttribute("name", "password")
-     *         .addAttribute("id", "pass")
      *         .build());
      *     password.setHint("Password");
      *     password.setAutofillType(View.AUTOFILL_TYPE_TEXT);
-     * </pre>
-     *
-     * <p>Example2: an IFRAME tag.
-     *
-     * <pre class="prettyprint">
-     *    &lt;iframe src="https://example.com/login"/&gt;
-     * </pre>
-     *
-     * <p>Would map to:
-     *
-     * <pre class="prettyprint">
-     *     int index = structure.addChildCount(1);
-     *     ViewStructure iframe = structure.newChildFor(index);
-     *     iframe.setAutofillId(structure.getAutofillId(), 1);
-     *     iframe.setHtmlInfo(iframe.newHtmlInfoBuilder("iframe")
-     *         .addAttribute("src", "https://example.com/login")
-     *         .build());
      * </pre>
      */
     @Override

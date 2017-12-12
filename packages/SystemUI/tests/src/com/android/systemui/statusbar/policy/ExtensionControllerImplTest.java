@@ -27,7 +27,6 @@ import android.support.test.filters.SmallTest;
 import android.testing.AndroidTestingRunner;
 import android.testing.TestableLooper;
 import android.testing.TestableLooper.RunWithLooper;
-import android.util.Log;
 
 import com.android.systemui.Dependency;
 import com.android.systemui.SysuiTestCase;
@@ -145,7 +144,6 @@ public class ExtensionControllerImplTest extends SysuiTestCase {
     @Test
     @RunWithLooper
     public void testSortOrder() {
-        Log.d("TestTest", "Config " + mContext.getResources().getConfiguration().uiMode);
         Object def = new Object();
         Object uiMode = new Object();
         Object tuner = new Object();

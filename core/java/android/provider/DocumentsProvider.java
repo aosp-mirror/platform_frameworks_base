@@ -22,6 +22,7 @@ import static android.provider.DocumentsContract.METHOD_CREATE_WEB_LINK_INTENT;
 import static android.provider.DocumentsContract.METHOD_DELETE_DOCUMENT;
 import static android.provider.DocumentsContract.METHOD_EJECT_ROOT;
 import static android.provider.DocumentsContract.METHOD_FIND_DOCUMENT_PATH;
+import static android.provider.DocumentsContract.METHOD_GET_DOCUMENT_METADATA;
 import static android.provider.DocumentsContract.METHOD_IS_CHILD_DOCUMENT;
 import static android.provider.DocumentsContract.METHOD_MOVE_DOCUMENT;
 import static android.provider.DocumentsContract.METHOD_REMOVE_DOCUMENT;
@@ -55,9 +56,7 @@ import android.graphics.Point;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.CancellationSignal;
-import android.os.OperationCanceledException;
 import android.os.ParcelFileDescriptor;
-import android.os.ParcelFileDescriptor.OnCloseListener;
 import android.os.ParcelableException;
 import android.provider.DocumentsContract.Document;
 import android.provider.DocumentsContract.Path;
@@ -627,6 +626,12 @@ public abstract class DocumentsProvider extends ContentProvider {
         throw new UnsupportedOperationException("Eject not supported");
     }
 
+    /** {@hide} */
+    public @Nullable Bundle getDocumentMetadata(String documentId, @Nullable String[] tags)
+            throws FileNotFoundException {
+        throw new UnsupportedOperationException("Metadata not supported");
+    }
+
     /**
      * Return concrete MIME type of the requested document. Must match the value
      * of {@link Document#COLUMN_MIME_TYPE} for this document. The default
@@ -1136,6 +1141,9 @@ public abstract class DocumentsProvider extends ContentProvider {
             }
 
             out.putParcelable(DocumentsContract.EXTRA_RESULT, path);
+        } else if (METHOD_GET_DOCUMENT_METADATA.equals(method)) {
+            return getDocumentMetadata(
+                    documentId, extras.getStringArray(DocumentsContract.EXTRA_METADATA_TAGS));
         } else {
             throw new UnsupportedOperationException("Method not supported " + method);
         }

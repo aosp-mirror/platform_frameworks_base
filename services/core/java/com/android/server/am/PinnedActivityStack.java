@@ -20,7 +20,6 @@ import android.app.RemoteAction;
 import android.content.res.Configuration;
 import android.graphics.Rect;
 
-import com.android.server.am.ActivityStackSupervisor.ActivityContainer;
 import com.android.server.wm.PinnedStackWindowController;
 import com.android.server.wm.PinnedStackWindowListener;
 
@@ -33,9 +32,9 @@ import java.util.List;
 class PinnedActivityStack extends ActivityStack<PinnedStackWindowController>
         implements PinnedStackWindowListener {
 
-    PinnedActivityStack(ActivityContainer activityContainer,
-            RecentTasks recentTasks, boolean onTop) {
-        super(activityContainer, recentTasks, onTop);
+    PinnedActivityStack(ActivityStackSupervisor.ActivityDisplay display, int stackId,
+            ActivityStackSupervisor supervisor, RecentTasks recentTasks, boolean onTop) {
+        super(display, stackId, supervisor, recentTasks, onTop);
     }
 
     @Override
@@ -92,15 +91,16 @@ class PinnedActivityStack extends ActivityStack<PinnedStackWindowController>
         return mWindowContainerController.deferScheduleMultiWindowModeChanged();
     }
 
-    public void updatePictureInPictureModeForPinnedStackAnimation(Rect targetStackBounds) {
+    public void updatePictureInPictureModeForPinnedStackAnimation(Rect targetStackBounds,
+            boolean forceUpdate) {
         // It is guaranteed that the activities requiring the update will be in the pinned stack at
         // this point (either reparented before the animation into PiP, or before reparenting after
         // the animation out of PiP)
         synchronized(this) {
             ArrayList<TaskRecord> tasks = getAllTasks();
             for (int i = 0; i < tasks.size(); i++ ) {
-                mStackSupervisor.scheduleUpdatePictureInPictureModeIfNeeded(tasks.get(i),
-                        targetStackBounds, true /* immediate */);
+                mStackSupervisor.updatePictureInPictureMode(tasks.get(i), targetStackBounds,
+                        forceUpdate);
             }
         }
     }

@@ -20,8 +20,8 @@ package com.android.server.usb.descriptors;
  * A class for decoding information in Terminal Descriptors.
  * see termt10.pdf
  */
-public class UsbTerminalTypes {
-    private static final String TAG = "TerminalTypes";
+public final class UsbTerminalTypes {
+    private static final String TAG = "UsbTerminalTypes";
 
     // USB
     public static final int TERMINAL_USB_STREAMING   = 0x0101;

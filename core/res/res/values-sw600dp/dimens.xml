@@ -104,9 +104,6 @@
     <dimen name="kg_runway_lights_top_margin">-10dp</dimen>
 
     <!-- Margin around the various security views -->
-    <dimen name="keyguard_security_view_margin">12dp</dimen>
-
-    <!-- Margin around the various security views -->
     <dimen name="keyguard_muliuser_selector_margin">12dp</dimen>
 
     <!-- width of ImmersiveModeConfirmation (-1 for match_parent) -->

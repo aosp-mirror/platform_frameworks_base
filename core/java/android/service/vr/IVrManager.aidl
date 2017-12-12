@@ -59,6 +59,13 @@ interface IVrManager {
     boolean getVrModeState();
 
     /**
+     * Returns the current Persistent VR mode state.
+     *
+     * @return {@code true} if Persistent VR mode is enabled.
+     */
+    boolean getPersistentVrModeEnabled();
+
+    /**
      * Sets the persistent VR mode state of a device. When a device is in persistent VR mode it will
      * remain in VR mode even if the foreground does not specify VR mode being enabled. Mainly used
      * by VR viewers to indicate that a device is placed in a VR viewer.
@@ -86,5 +93,13 @@ interface IVrManager {
      * currently, else return the display id of the virtual display
      */
     int getVr2dDisplayId();
+
+    /**
+     * Set the component name of the compositor service to bind.
+     *
+     * @param componentName flattened string representing a ComponentName of a Service in the
+     * application's compositor process to bind to, or null to clear the current binding.
+     */
+    void setAndBindCompositor(in String componentName);
 }
 

@@ -999,7 +999,10 @@ public class WifiManager {
         }
     }
 
-    /** @hide */
+    /**
+     * @hide
+     * @removed
+     */
     @SystemApi
     @RequiresPermission(android.Manifest.permission.READ_WIFI_CREDENTIAL)
     public WifiConnectionStatistics getConnectionStatistics() {
@@ -1579,6 +1582,7 @@ public class WifiManager {
      * @deprecated This API is nolonger supported.
      * Use {@link android.net.wifi.WifiScanner} API
      * @hide
+     * @removed
      */
     @Deprecated
     @SystemApi
@@ -1594,6 +1598,7 @@ public class WifiManager {
      * @deprecated This API is nolonger supported.
      * Use {@link android.net.wifi.WifiScanner} API
      * @hide
+     * @removed
      */
     @Deprecated
     @SystemApi
@@ -1608,6 +1613,7 @@ public class WifiManager {
      * @deprecated This API is nolonger supported.
      * Use {@link android.net.wifi.WifiScanner} API
      * @hide
+     * @removed
      */
     @Deprecated
     @SystemApi
@@ -1633,11 +1639,17 @@ public class WifiManager {
 
     /**
      * Return dynamic information about the current Wi-Fi connection, if any is active.
+     * <p>
+     * In the connected state, access to the SSID and BSSID requires
+     * the same permissions as {@link #getScanResults}. If such access is not allowed,
+     * {@link WifiInfo#getSSID} will return {@code "<unknown ssid>"} and
+     * {@link WifiInfo#getBSSID} will return {@code "02:00:00:00:00:00"}.
+     *
      * @return the Wi-Fi information, contained in {@link WifiInfo}.
      */
     public WifiInfo getConnectionInfo() {
         try {
-            return mService.getConnectionInfo();
+            return mService.getConnectionInfo(mContext.getOpPackageName());
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
@@ -1846,7 +1858,7 @@ public class WifiManager {
     }
 
     /**
-     * This call will be deprecated and removed in an upcoming release.  It is no longer used to
+     * This call is deprecated and removed.  It is no longer used to
      * start WiFi Tethering.  Please use {@link ConnectivityManager#startTethering(int, boolean,
      * ConnectivityManager#OnStartTetheringCallback)} if
      * the caller has proper permissions.  Callers can also use the LocalOnlyHotspot feature for a
@@ -1858,8 +1870,11 @@ public class WifiManager {
      * @return {@code false}
      *
      * @hide
+     * @deprecated This API is nolonger supported.
+     * @removed
      */
     @SystemApi
+    @Deprecated
     @RequiresPermission(android.Manifest.permission.TETHER_PRIVILEGED)
     public boolean setWifiApEnabled(WifiConfiguration wifiConfig, boolean enabled) {
         String packageName = mContext.getOpPackageName();
@@ -2336,7 +2351,7 @@ public class WifiManager {
         /** WPS start succeeded */
         public abstract void onStarted(String pin);
 
-        /** WPS operation completed succesfully */
+        /** WPS operation completed successfully */
         public abstract void onSucceeded();
 
         /**
@@ -3219,7 +3234,7 @@ public class WifiManager {
      * Normally the Wifi stack filters out packets not explicitly
      * addressed to this device.  Acquring a MulticastLock will
      * cause the stack to receive packets addressed to multicast
-     * addresses.  Processing these extra packets can cause a noticable
+     * addresses.  Processing these extra packets can cause a noticeable
      * battery drain and should be disabled when not needed.
      */
     public class MulticastLock {

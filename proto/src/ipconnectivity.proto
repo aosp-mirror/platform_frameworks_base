@@ -489,7 +489,7 @@ message NetworkStats {
 
 // Represents statistics from NFLOG wakeup events due to ingress packets.
 // Since oc-mr1.
-// Next tag: 8.
+// Next tag: 13.
 message WakeupStats {
   // The time duration in seconds covered by these stats, for deriving
   // exact wakeup rates.
@@ -517,6 +517,24 @@ message WakeupStats {
 
   // The total number of wakeup packets with no associated socket or uid.
   optional int64 no_uid_wakeups = 7;
+
+  // Counts of all different ethertype values from wakeup packets received.
+  repeated Pair ethertype_counts = 8;
+
+  // Counts of all different IP next header values from wakeup packets received.
+  repeated Pair ip_next_header_counts = 9;
+
+  // The total number of wakeup packets whose destination hardware address was
+  // a unicast address.
+  optional int64 l2_unicast_count = 10;
+
+  // The total number of wakeup packets whose destination hardware address was
+  // a multicast address.
+  optional int64 l2_multicast_count = 11;
+
+  // The total number of wakeup packets whose destination hardware address was
+  // a broadcast address.
+  optional int64 l2_broadcast_count = 12;
 }
 
 // Represents one of the IP connectivity event defined in this file.
@@ -614,6 +632,6 @@ message IpConnectivityLog {
   //  nyc-mr1: not populated, implicitly 1.
   //  nyc-mr2: 2.
   //  oc:      3.
-  //  oc-dr1:  4.
+  //  oc-dr1:  4. (sailfish, marlin, walleye, taimen)
   optional int32 version = 3;
 };

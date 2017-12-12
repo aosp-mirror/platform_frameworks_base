@@ -2,9 +2,11 @@ package android.content.pm;
 
 import android.os.Parcel;
 import android.os.Parcelable;
+
 import junit.framework.TestCase;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 public class ParceledListSliceTest extends TestCase {
@@ -91,15 +93,10 @@ public class ParceledListSliceTest extends TestCase {
         }
     }
 
-    public void testStringList() throws Exception {
-        final int objectCount = 400;
-        List<String> list = new ArrayList<String>();
-        for (long i = 0; i < objectCount; i++) {
-            list.add(Long.toString(i * (6 - i)));
-        }
-
+    private void sendParcelStringList(List<String> list) {
         StringParceledListSlice slice;
         Parcel parcel = Parcel.obtain();
+
         try {
             parcel.writeParcelable(new StringParceledListSlice(list), 0);
             parcel.setDataPosition(0);
@@ -112,6 +109,26 @@ public class ParceledListSliceTest extends TestCase {
         assertNotNull(slice.getList());
         assertEquals(list, slice.getList());
     }
+
+    public void testStringList() throws Exception {
+        final int objectCount = 400;
+        List<String> list = new ArrayList<String>();
+        for (long i = 0; i < objectCount; i++) {
+            list.add(Long.toString(i * (6 - i)));
+        }
+
+        sendParcelStringList(list);
+    }
+
+    public void testLargeStringList() throws Exception {
+        final int thresholdBytes = 256 * 1024;
+        final String value = Long.toString(Long.MAX_VALUE);
+        final int objectCount = 2 * thresholdBytes / value.length();
+        final List<String> list = Collections.nCopies(objectCount, value);
+
+        sendParcelStringList(list);
+    }
+
 
     /**
      * Test that only homogeneous elements may be unparceled.

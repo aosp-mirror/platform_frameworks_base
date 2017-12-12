@@ -29,7 +29,7 @@ import android.webkit.WebViewFactoryProvider;
 import java.io.DataOutputStream;
 import java.io.File;
 import java.io.IOException;
-import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
 
 /**
  * Startup class for the WebView zygote process.
@@ -91,13 +91,18 @@ class WebViewZygoteInit {
             try {
                 Class<WebViewFactoryProvider> providerClass =
                         WebViewFactory.getWebViewProviderClass(loader);
-                Object result = providerClass.getMethod("preloadInZygote").invoke(null);
-                preloadSucceeded = ((Boolean) result).booleanValue();
-                if (!preloadSucceeded) {
-                    Log.e(TAG, "preloadInZygote returned false");
+                Method preloadInZygote = providerClass.getMethod("preloadInZygote");
+                preloadInZygote.setAccessible(true);
+                if (preloadInZygote.getReturnType() != Boolean.TYPE) {
+                    Log.e(TAG, "Unexpected return type: preloadInZygote must return boolean");
+                } else {
+                    preloadSucceeded = (boolean) providerClass.getMethod("preloadInZygote")
+                            .invoke(null);
+                    if (!preloadSucceeded) {
+                        Log.e(TAG, "preloadInZygote returned false");
+                    }
                 }
-            } catch (ClassNotFoundException | NoSuchMethodException | SecurityException |
-                     IllegalAccessException | InvocationTargetException e) {
+            } catch (ReflectiveOperationException e) {
                 Log.e(TAG, "Exception while preloading package", e);
             }
 

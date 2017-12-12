@@ -61,6 +61,7 @@ public class AssistManager implements ConfigurationChangedReceiver {
     private AssistOrbContainer mView;
     private final DeviceProvisionedController mDeviceProvisionedController;
     protected final AssistUtils mAssistUtils;
+    private final boolean mShouldEnableOrb;
 
     private IVoiceInteractionSessionShowCallback mShowCallback =
             new IVoiceInteractionSessionShowCallback.Stub() {
@@ -96,6 +97,7 @@ public class AssistManager implements ConfigurationChangedReceiver {
                 | ActivityInfo.CONFIG_LOCALE | ActivityInfo.CONFIG_UI_MODE
                 | ActivityInfo.CONFIG_SCREEN_LAYOUT | ActivityInfo.CONFIG_ASSETS_PATHS);
         onConfigurationChanged(context.getResources().getConfiguration());
+        mShouldEnableOrb = !ActivityManager.isLowRamDeviceStatic();
     }
 
     protected void registerVoiceInteractionSessionListener() {
@@ -170,9 +172,6 @@ public class AssistManager implements ConfigurationChangedReceiver {
                         | WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE,
                 PixelFormat.TRANSLUCENT);
         lp.token = new Binder();
-        if (ActivityManager.isHighEndGfx()) {
-            lp.flags |= WindowManager.LayoutParams.FLAG_HARDWARE_ACCELERATED;
-        }
         lp.gravity = Gravity.BOTTOM | Gravity.START;
         lp.setTitle("AssistPreviewPanel");
         lp.softInputMode = WindowManager.LayoutParams.SOFT_INPUT_STATE_UNCHANGED
@@ -182,7 +181,9 @@ public class AssistManager implements ConfigurationChangedReceiver {
 
     private void showOrb(@NonNull ComponentName assistComponent, boolean isService) {
         maybeSwapSearchIcon(assistComponent, isService);
-        mView.show(true /* show */, true /* animate */);
+        if (mShouldEnableOrb) {
+            mView.show(true /* show */, true /* animate */);
+        }
     }
 
     private void startAssistInternal(Bundle args, @NonNull ComponentName assistComponent,

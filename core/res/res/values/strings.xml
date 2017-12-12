@@ -20,65 +20,13 @@
 <resources xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
     <!-- Suffix added to a number to signify size in bytes. -->
     <string name="byteShort">B</string>
-    <!-- Suffix added to a number to signify size in kilobytes (1000 bytes).
-        If you retain the Latin script for the localization, please use the lowercase
-        'k', as it signifies 1000 bytes as opposed to 1024 bytes. -->
-    <string name="kilobyteShort">kB</string>
-    <!-- Suffix added to a number to signify size in megabytes. -->
-    <string name="megabyteShort">MB</string>
-    <!-- Suffix added to a number to signify size in gigabytes. -->
-    <string name="gigabyteShort">GB</string>
-    <!-- Suffix added to a number to signify size in terabytes. -->
-    <string name="terabyteShort">TB</string>
     <!-- Suffix added to a number to signify size in petabytes. -->
     <string name="petabyteShort">PB</string>
-    <!-- Format string used to add a suffix like "kB" or "MB" to a number
-         to display a size in kilobytes, megabytes, or other size units.
-         Some languages (like French) will want to add a space between
-         the placeholders. -->
-    <string name="fileSizeSuffix"><xliff:g id="number" example="123">%1$s</xliff:g> <xliff:g id="unit" example="MB">%2$s</xliff:g></string>
-
-    <!-- [CHAR_LIMIT=10] Suffix added to signify duration in days -->
-    <string name="durationDays"><xliff:g id="days">%1$d</xliff:g> days</string>
-
-    <!-- [CHAR_LIMIT=10] Suffix added to signify duration of one day with hours -->
-    <string name="durationDayHours"><xliff:g id="days">%1$d</xliff:g> day
-            <xliff:g id="hours">%2$d</xliff:g> hrs</string>
-
-    <!-- [CHAR_LIMIT=10] Suffix added to signify duration of one day with one hours -->
-    <string name="durationDayHour"><xliff:g id="days">%1$d</xliff:g> day
-            <xliff:g id="hours">%2$d</xliff:g> hr</string>
-
-    <!-- [CHAR_LIMIT=10] Suffix added to signify duration in hours -->
-    <string name="durationHours"><xliff:g id="hours">%1$d</xliff:g> hrs</string>
-
-    <!-- [CHAR_LIMIT=10] Suffix added to signify duration of one hour with minutes -->
-    <string name="durationHourMinutes"><xliff:g id="hours">%1$d</xliff:g> hr
-            <xliff:g id="minutes">%2$d</xliff:g> mins</string>
-
-    <!-- [CHAR_LIMIT=10] Suffix added to signify duration of one hour with one minute -->
-    <string name="durationHourMinute"><xliff:g id="hours">%1$d</xliff:g> hr
-            <xliff:g id="minutes">%2$d</xliff:g> min</string>
-
-    <!-- [CHAR_LIMIT=10] Suffix added to signify duration in minutes -->
-    <string name="durationMinutes"><xliff:g id="minutes">%1$d</xliff:g> mins</string>
-
-    <!-- [CHAR_LIMIT=10] Suffix added to signify duration of one minute -->
-    <string name="durationMinute"><xliff:g id="minutes">%1$d</xliff:g> min</string>
-
-    <!-- [CHAR_LIMIT=10] Suffix added to signify duration of one minute with seconds -->
-    <string name="durationMinuteSeconds"><xliff:g id="minutes">%1$d</xliff:g> min
-            <xliff:g id="seconds">%2$d</xliff:g> secs</string>
-
-    <!-- [CHAR_LIMIT=10] Suffix added to signify duration of one minute with one second -->
-    <string name="durationMinuteSecond"><xliff:g id="minutes">%1$d</xliff:g> min
-            <xliff:g id="seconds">%2$d</xliff:g> sec</string>
-
-    <!-- [CHAR_LIMIT=10] Suffix added to signify duration in seconds -->
-    <string name="durationSeconds"><xliff:g id="seconds">%1$d</xliff:g> secs</string>
-
-    <!-- [CHAR_LIMIT=10] Suffix added to signify duration of one second -->
-    <string name="durationSecond"><xliff:g id="seconds">%1$d</xliff:g> sec</string>
+    <!-- Format string used to add a suffix like "B" or "PB" to a number
+         to display a size in bytes or petabytes.
+         Some languages may want to remove the space between the placeholders
+         or replace it with a non-breaking space. -->
+    <string name="fileSizeSuffix"><xliff:g id="number" example="123">%1$s</xliff:g> <xliff:g id="unit" example="B">%2$s</xliff:g></string>
 
     <!-- Used in Contacts for a field that has no label and in Note Pad
          for a note with no name. -->
@@ -204,7 +152,11 @@
     <!-- Displayed to tell the user that they should switch their network preference. -->
     <string name="NetworkPreferenceSwitchTitle">Can\u2019t reach network</string>
     <!-- Displayed to tell the user that they should switch their network preference. -->
-    <string name="NetworkPreferenceSwitchSummary">To improve reception, try changing the type selected at System &gt; Network &amp; Internet &gt; Mobile networks &gt; Preferred network type."</string>
+    <string name="NetworkPreferenceSwitchSummary">To improve reception, try changing the type selected at Settings &gt; Network &amp; Internet &gt; Mobile networks &gt; Preferred network type."</string>
+    <!-- Displayed to tell the user that emergency calls might not be available. -->
+    <string name="EmergencyCallWarningTitle">Wi\u2011Fi calling is active</string>
+    <!-- Displayed to tell the user that emergency calls might not be available. -->
+    <string name="EmergencyCallWarningSummary">Emergency calls require a mobile network.</string>
 
     <!-- Telephony notification channel name for a channel containing network alert notifications. -->
     <string name="notification_channel_network_alert">Alerts</string>
@@ -212,8 +164,8 @@
     <string name="notification_channel_call_forward">Call forwarding</string>
     <!-- Telephony notification channel name for a channel containing emergency callback mode notifications. -->
     <string name="notification_channel_emergency_callback">Emergency callback mode</string>
-    <!-- Telephony notification channel name for a channel containing mobile data alert notifications. -->
-    <string name="notification_channel_mobile_data_alert">Mobile data alerts</string>
+    <!-- Telephony notification channel name for a channel containing mobile data status notifications. -->
+    <string name="notification_channel_mobile_data_status">Mobile data status</string>
     <!-- Telephony notification channel name for a channel containing sms notifications. -->
     <string name="notification_channel_sms">SMS messages</string>
     <!-- Telephony notification channel name for a channel containing voice mail notifications. -->
@@ -4470,7 +4422,9 @@
     <string name="stk_cc_ussd_to_dial">USSD request is modified to DIAL request.</string>
     <string name="stk_cc_ussd_to_ss">USSD request is modified to SS request.</string>
     <string name="stk_cc_ussd_to_ussd">USSD request is modified to new USSD request.</string>
+    <string name="stk_cc_ussd_to_dial_video">USSD request is modified to Video DIAL request.</string>
     <string name="stk_cc_ss_to_dial">SS request is modified to DIAL request.</string>
+    <string name="stk_cc_ss_to_dial_video">SS request is modified to Video DIAL request.</string>
     <string name="stk_cc_ss_to_ussd">SS request is modified to USSD request.</string>
     <string name="stk_cc_ss_to_ss">SS request is modified to new SS request.</string>
 
@@ -4715,4 +4669,7 @@
     <string name="mmcc_imsi_unknown_in_hlr">SIM not provisioned</string>
     <string name="mmcc_illegal_ms">SIM not allowed</string>
     <string name="mmcc_illegal_me">Phone not allowed</string>
+
+    <!-- Popup window default title to be read by a screen reader-->
+    <string name="popup_window_default_title">Popup Window</string>
 </resources>

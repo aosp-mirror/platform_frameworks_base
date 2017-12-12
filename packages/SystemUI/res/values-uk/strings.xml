@@ -66,7 +66,7 @@
     <string name="usb_debugging_message" msgid="2220143855912376496">"Цифровий відбиток ключа RSA комп’ютера:\n<xliff:g id="FINGERPRINT">%1$s</xliff:g>"</string>
     <string name="usb_debugging_always" msgid="303335496705863070">"Завжди дозволяти з цього комп’ютера"</string>
     <string name="usb_debugging_secondary_user_title" msgid="6353808721761220421">"Ви не можете вмикати налагодження USB"</string>
-    <string name="usb_debugging_secondary_user_message" msgid="8572228137833020196">"Користувач поточного облікового запису не може вмикати налагодження USB. Щоб увімкнути цю функцію, увійдіть в обліковий запис адміністратора."</string>
+    <string name="usb_debugging_secondary_user_message" msgid="6067122453571699801">"Користувач поточного облікового запису не може вмикати налагодження USB. Щоб увімкнути цю функцію, увійдіть в обліковий запис основного користувача."</string>
     <string name="compat_mode_on" msgid="6623839244840638213">"Масштабув. на весь екран"</string>
     <string name="compat_mode_off" msgid="4434467572461327898">"Розтягнути на весь екран"</string>
     <string name="screenshot_saving_ticker" msgid="7403652894056693515">"Збереження знімка екрана..."</string>
@@ -359,10 +359,10 @@
     <string name="description_target_search" msgid="3091587249776033139">"Пошук"</string>
     <string name="description_direction_up" msgid="7169032478259485180">"Проведіть пальцем угору, щоб <xliff:g id="TARGET_DESCRIPTION">%s</xliff:g>."</string>
     <string name="description_direction_left" msgid="7207478719805562165">"Проведіть пальцем ліворуч, щоб <xliff:g id="TARGET_DESCRIPTION">%s</xliff:g>."</string>
-    <string name="zen_priority_introduction" msgid="7577965386868311310">"Ви отримуватиме звукові та вібросигнали лише для вибраних будильників, нагадувань, подій і абонентів. Однак ви чутимете все, що захочете відтворити, зокрема музику, відео й ігри."</string>
-    <string name="zen_alarms_introduction" msgid="7034415210361973827">"Ви отримуватиме звукові та вібросигнали лише для будильників. Однак ви чутимете все, що захочете відтворити, зокрема музику, відео й ігри."</string>
+    <string name="zen_priority_introduction" msgid="1149025108714420281">"Ви отримуватиме звукові та вібросигнали лише для вибраних будильників, нагадувань, подій і абонентів. Однак ви чутимете все, що захочете відтворити, зокрема музику, відео й ігри."</string>
+    <string name="zen_alarms_introduction" msgid="4934328096749380201">"Ви отримуватиме звукові та вібросигнали лише для будильників. Однак ви чутимете все, що захочете відтворити, зокрема музику, відео й ігри."</string>
     <string name="zen_priority_customize_button" msgid="7948043278226955063">"Налаштувати"</string>
-    <string name="zen_silence_introduction_voice" msgid="2284540992298200729">"Блокуватимуться ВСІ звукові та вібросигнали, зокрема будильники, музика, відео й ігри. Ви зможете телефонувати."</string>
+    <string name="zen_silence_introduction_voice" msgid="3948778066295728085">"Блокуватимуться ВСІ звукові та вібросигнали, зокрема будильники, музика, відео й ігри. Однак ви зможете телефонувати."</string>
     <string name="zen_silence_introduction" msgid="3137882381093271568">"Блокуватимуться ВСІ звукові та вібросигнали, зокрема будильники, музика, відео й ігри."</string>
     <string name="keyguard_more_overflow_text" msgid="9195222469041601365">"+<xliff:g id="NUMBER_OF_NOTIFICATIONS">%d</xliff:g>"</string>
     <string name="speed_bump_explanation" msgid="1288875699658819755">"Менше термінових сповіщень нижче"</string>
@@ -462,7 +462,7 @@
     <string name="monitoring_description_do_learn_more" msgid="1849514470437907421">"Докладніше"</string>
     <string name="monitoring_description_do_body_vpn" msgid="8255218762488901796">"Під’єднано додаток <xliff:g id="VPN_APP">%1$s</xliff:g>, який може відстежувати вашу активність у мережі, як-от доступ до електронної пошти, додатків і веб-сайтів."</string>
     <string name="monitoring_description_vpn_settings_separator" msgid="1933186756733474388">" "</string>
-    <string name="monitoring_description_vpn_settings" msgid="8869300202410505143">"Відкрити налаштування мережі VPN"</string>
+    <string name="monitoring_description_vpn_settings" msgid="6434859242636063861">"Відкрити налаштування мережі VPN"</string>
     <string name="monitoring_description_ca_cert_settings_separator" msgid="4987350385906393626">" "</string>
     <string name="monitoring_description_ca_cert_settings" msgid="5489969458872997092">"Відкрити надійні облікові дані"</string>
     <string name="monitoring_description_network_logging" msgid="7223505523384076027">"Ваш адміністратор увімкнув реєстрацію в мережі, під час якої на вашому пристрої відстежується трафік.\n\nЩоб дізнатися більше, зв’яжіться з адміністратором."</string>
@@ -562,10 +562,10 @@
     <string name="notification_default_channel_desc" msgid="2506053815870808359">"У цьому додатку немає категорій сповіщень"</string>
     <string name="notification_unblockable_desc" msgid="3561016061737896906">"Сповіщення з цього додатка не можна вимкнути"</string>
     <plurals name="notification_num_channels_desc" formatted="false" msgid="5492793452274077663">
-      <item quantity="one">1 з <xliff:g id="NUMBER_1">%d</xliff:g> категорії сповіщень із цього додатка</item>
-      <item quantity="few">1 з <xliff:g id="NUMBER_1">%d</xliff:g> категорій сповіщень із цього додатка</item>
-      <item quantity="many">1 з <xliff:g id="NUMBER_1">%d</xliff:g> категорій сповіщень із цього додатка</item>
-      <item quantity="other">1 з <xliff:g id="NUMBER_1">%d</xliff:g> категорії сповіщень із цього додатка</item>
+      <item quantity="one">1 з <xliff:g id="NUMBER_1">%s</xliff:g> категорії сповіщень із цього додатка</item>
+      <item quantity="few">1 з <xliff:g id="NUMBER_1">%s</xliff:g> категорій сповіщень із цього додатка</item>
+      <item quantity="many">1 з <xliff:g id="NUMBER_1">%s</xliff:g> категорій сповіщень із цього додатка</item>
+      <item quantity="other">1 з <xliff:g id="NUMBER_1">%s</xliff:g> категорії сповіщень із цього додатка</item>
     </plurals>
     <string name="notification_channels_list_desc_2" msgid="6214732715833946441">"<xliff:g id="CHANNEL_NAME_1">%1$s</xliff:g>, <xliff:g id="CHANNEL_NAME_2">%2$s</xliff:g>"</string>
     <plurals name="notification_channels_list_desc_2_and_others" formatted="false" msgid="2747813553355336157">
@@ -599,8 +599,8 @@
       <item quantity="other">%d хвилини</item>
     </plurals>
     <string name="battery_panel_title" msgid="7944156115535366613">"Використання заряду"</string>
-    <string name="battery_detail_charging_summary" msgid="1279095653533044008">"Режим енергозбереження не можна ввімкнути під час заряджання"</string>
-    <string name="battery_detail_switch_title" msgid="6285872470260795421">"Режим енергозбереження"</string>
+    <string name="battery_detail_charging_summary" msgid="4055327085770378335">"Режим економії заряду акумулятора не працює під час заряджання"</string>
+    <string name="battery_detail_switch_title" msgid="8763441006881907058">"Режим економії заряду акумулятора"</string>
     <string name="battery_detail_switch_summary" msgid="9049111149407626804">"Знижується продуктивність і обмежується обмін даними у фоновому режимі"</string>
     <string name="keyboard_key_button_template" msgid="6230056639734377300">"Кнопка <xliff:g id="NAME">%1$s</xliff:g>"</string>
     <string name="keyboard_key_home" msgid="2243500072071305073">"Home"</string>
@@ -740,9 +740,9 @@
     <string name="pip_phone_minimize" msgid="1079119422589131792">"Згорнути"</string>
     <string name="pip_phone_close" msgid="8416647892889710330">"Закрити"</string>
     <string name="pip_phone_dismiss_hint" msgid="6351678169095923899">"Перетягніть униз, щоб закрити"</string>
-    <string name="pip_menu_title" msgid="3328510504196964712">"Меню \"Картинка в картинці\""</string>
+    <string name="pip_menu_title" msgid="4707292089961887657">"Меню"</string>
     <string name="pip_notification_title" msgid="3204024940158161322">"У додатку <xliff:g id="NAME">%s</xliff:g> є функція \"Картинка в картинці\""</string>
-    <string name="pip_notification_message" msgid="4171698133469539591">"Щоб у додатку <xliff:g id="NAME">%s</xliff:g> не працювала ця функція, вимкніть її в налаштуваннях."</string>
+    <string name="pip_notification_message" msgid="5619512781514343311">"Щоб додаток <xliff:g id="NAME">%s</xliff:g> не використовував цю функцію, вимкніть її в налаштуваннях."</string>
     <string name="pip_play" msgid="1417176722760265888">"Відтворити"</string>
     <string name="pip_pause" msgid="8881063404466476571">"Призупинити"</string>
     <string name="pip_skip_to_next" msgid="1948440006726306284">"Перейти далі"</string>
@@ -768,6 +768,7 @@
     <string name="tuner_menu" msgid="191640047241552081">"Меню"</string>
     <string name="tuner_app" msgid="3507057938640108777">"Додаток <xliff:g id="APP">%1$s</xliff:g>"</string>
     <string name="notification_channel_alerts" msgid="4496839309318519037">"Сповіщення"</string>
+    <string name="notification_channel_battery" msgid="5786118169182888462">"Акумулятор"</string>
     <string name="notification_channel_screenshot" msgid="6314080179230000938">"Знімки екрана"</string>
     <string name="notification_channel_general" msgid="4525309436693914482">"Загальні повідомлення"</string>
     <string name="notification_channel_storage" msgid="3077205683020695313">"Пам’ять"</string>
@@ -788,4 +789,5 @@
     <string name="running_foreground_services_title" msgid="381024150898615683">"Додатки, які працюють у фоновому режимі"</string>
     <string name="running_foreground_services_msg" msgid="6326247670075574355">"Торкніться, щоб перевірити використання акумулятора й трафік"</string>
     <string name="data_usage_disable_mobile" msgid="5116269981510015864">"Вимкнути мобільний трафік?"</string>
+    <string name="touch_filtered_warning" msgid="8671693809204767551">"Не вдається підтвердити вашу відповідь у налаштуваннях, оскільки інший додаток заступає запит на дозвіл."</string>
 </resources>

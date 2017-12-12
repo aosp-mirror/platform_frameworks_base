@@ -16,11 +16,14 @@
 
 package com.android.systemui.qs.tiles;
 
+import static com.android.settingslib.graph.BluetoothDeviceLayerDrawable.createLayerDrawable;
+
 import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothDevice;
 import android.bluetooth.BluetoothProfile;
 import android.content.Context;
 import android.content.Intent;
+import android.graphics.drawable.Drawable;
 import android.provider.Settings;
 import android.service.quicksettings.Tile;
 import android.text.TextUtils;
@@ -72,7 +75,7 @@ public class BluetoothTile extends QSTileImpl<BooleanState> {
     }
 
     @Override
-    public void setListening(boolean listening) {
+    public void handleSetListening(boolean listening) {
         if (listening) {
             mController.addCallback(mCallback);
         } else {
@@ -127,6 +130,13 @@ public class BluetoothTile extends QSTileImpl<BooleanState> {
             if (connected) {
                 state.icon = ResourceIcon.get(R.drawable.ic_qs_bluetooth_connected);
                 state.label = mController.getLastDeviceName();
+                CachedBluetoothDevice lastDevice = mController.getLastDevice();
+                if (lastDevice != null) {
+                    int batteryLevel = lastDevice.getBatteryLevel();
+                    if (batteryLevel != BluetoothDevice.BATTERY_LEVEL_UNKNOWN) {
+                        state.icon = new BluetoothBatteryDrawable(batteryLevel);
+                    }
+                }
                 state.contentDescription = mContext.getString(
                         R.string.accessibility_bluetooth_name, state.label);
             } else if (state.isTransient) {
@@ -198,6 +208,22 @@ public class BluetoothTile extends QSTileImpl<BooleanState> {
     @Override
     protected DetailAdapter createDetailAdapter() {
         return new BluetoothDetailAdapter();
+    }
+
+    private class BluetoothBatteryDrawable extends Icon {
+        private int mLevel;
+
+        BluetoothBatteryDrawable(int level) {
+            mLevel = level;
+        }
+
+        @Override
+        public Drawable getDrawable(Context context) {
+            return createLayerDrawable(context,
+                    R.drawable.ic_qs_bluetooth_connected, mLevel,
+                    context.getResources().getFraction(
+                            R.fraction.bt_battery_scale_fraction, 1, 1));
+        }
     }
 
     protected class BluetoothDetailAdapter implements DetailAdapter, QSDetailItems.Callback {
@@ -278,6 +304,8 @@ public class BluetoothTile extends QSTileImpl<BooleanState> {
                         item.icon = R.drawable.ic_qs_bluetooth_connected;
                         int batteryLevel = device.getBatteryLevel();
                         if (batteryLevel != BluetoothDevice.BATTERY_LEVEL_UNKNOWN) {
+                            item.iconDrawable = createLayerDrawable(mContext, item.icon,
+                                    batteryLevel);
                             item.line2 = mContext.getString(
                                     R.string.quick_settings_connected_battery_level,
                                     Utils.formatPercentage(batteryLevel));

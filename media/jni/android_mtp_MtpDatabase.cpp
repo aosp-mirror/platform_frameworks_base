@@ -55,6 +55,7 @@ using namespace android;
 
 static jmethodID method_beginSendObject;
 static jmethodID method_endSendObject;
+static jmethodID method_doScanDirectory;
 static jmethodID method_getObjectList;
 static jmethodID method_getNumObjects;
 static jmethodID method_getSupportedPlaybackFormats;
@@ -118,6 +119,8 @@ public:
                                             MtpObjectHandle handle,
                                             MtpObjectFormat format,
                                             bool succeeded);
+
+    virtual void                    doScanDirectory(const char* path);
 
     virtual MtpObjectHandleList*    getObjectList(MtpStorageID storageID,
                                     MtpObjectFormat format,
@@ -259,6 +262,16 @@ void MyMtpDatabase::endSendObject(const char* path, MtpObjectHandle handle,
     jstring pathStr = env->NewStringUTF(path);
     env->CallVoidMethod(mDatabase, method_endSendObject, pathStr,
                         (jint)handle, (jint)format, (jboolean)succeeded);
+
+    if (pathStr)
+        env->DeleteLocalRef(pathStr);
+    checkAndClearExceptionFromCallback(env, __FUNCTION__);
+}
+
+void MyMtpDatabase::doScanDirectory(const char* path) {
+    JNIEnv* env = AndroidRuntime::getJNIEnv();
+    jstring pathStr = env->NewStringUTF(path);
+    env->CallVoidMethod(mDatabase, method_doScanDirectory, pathStr);
 
     if (pathStr)
         env->DeleteLocalRef(pathStr);
@@ -853,6 +866,7 @@ MtpResponseCode MyMtpDatabase::getObjectInfo(MtpObjectHandle handle,
     // read EXIF data for thumbnail information
     switch (info.mFormat) {
         case MTP_FORMAT_EXIF_JPEG:
+        case MTP_FORMAT_HEIF:
         case MTP_FORMAT_JFIF: {
             ExifData *exifdata = exif_data_new_from_file(path);
             if (exifdata) {
@@ -910,6 +924,7 @@ void* MyMtpDatabase::getThumbnail(MtpObjectHandle handle, size_t& outThumbSize) 
     if (getObjectFilePath(handle, path, length, format) == MTP_RESPONSE_OK) {
         switch (format) {
             case MTP_FORMAT_EXIF_JPEG:
+            case MTP_FORMAT_HEIF:
             case MTP_FORMAT_JFIF: {
                 ExifData *exifdata = exif_data_new_from_file(path);
                 if (exifdata) {
@@ -1306,6 +1321,11 @@ int register_android_mtp_MtpDatabase(JNIEnv *env)
     method_endSendObject = env->GetMethodID(clazz, "endSendObject", "(Ljava/lang/String;IIZ)V");
     if (method_endSendObject == NULL) {
         ALOGE("Can't find endSendObject");
+        return -1;
+    }
+    method_doScanDirectory = env->GetMethodID(clazz, "doScanDirectory", "(Ljava/lang/String;)V");
+    if (method_doScanDirectory == NULL) {
+        ALOGE("Can't find doScanDirectory");
         return -1;
     }
     method_getObjectList = env->GetMethodID(clazz, "getObjectList", "(III)[I");

@@ -91,7 +91,7 @@ public:
     static jobject createBitmapRegionDecoder(JNIEnv* env, SkBitmapRegionDecoder* bitmap);
 
     static android::Bitmap* mapAshmemBitmap(JNIEnv* env, SkBitmap* bitmap,
-            SkColorTable* ctable, int fd, void* addr, size_t size, bool readOnly);
+            int fd, void* addr, size_t size, bool readOnly);
 
     /**
      * Given a bitmap we natively allocate a memory block to store the contents
@@ -99,7 +99,7 @@ public:
      * SkPixelRef, which ensures that upon deletion the appropriate caches
      * are notified.
      */
-    static bool allocatePixels(JNIEnv* env, SkBitmap* bitmap, SkColorTable* ctable);
+    static bool allocatePixels(JNIEnv* env, SkBitmap* bitmap);
 
     /** Copy the colors in colors[] to the bitmap, convert to the correct
         format along the way.
@@ -127,7 +127,7 @@ public:
    HeapAllocator() { };
     ~HeapAllocator() { };
 
-    virtual bool allocPixelRef(SkBitmap* bitmap, SkColorTable* ctable) override;
+    virtual bool allocPixelRef(SkBitmap* bitmap) override;
 
     /**
      * Fetches the backing allocation object. Must be called!
@@ -176,7 +176,7 @@ public:
 
     ~RecyclingClippingPixelAllocator();
 
-    virtual bool allocPixelRef(SkBitmap* bitmap, SkColorTable* ctable) override;
+    virtual bool allocPixelRef(SkBitmap* bitmap) override;
 
     /**
      *  Must be called!
@@ -206,7 +206,7 @@ class AshmemPixelAllocator : public SkBitmap::Allocator {
 public:
     explicit AshmemPixelAllocator(JNIEnv* env);
     ~AshmemPixelAllocator() { };
-    virtual bool allocPixelRef(SkBitmap* bitmap, SkColorTable* ctable);
+    virtual bool allocPixelRef(SkBitmap* bitmap);
     android::Bitmap* getStorageObjAndReset() {
         return mStorage.release();
     };

@@ -18,7 +18,11 @@ package com.android.server;
 
 import android.app.IActivityController;
 import android.os.Binder;
+import android.os.Build;
 import android.os.RemoteException;
+import android.system.ErrnoException;
+import android.system.OsConstants;
+import android.system.StructRlimit;
 import com.android.internal.os.ZygoteConnectionConstants;
 import com.android.server.am.ActivityManagerService;
 
@@ -45,6 +49,7 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 
@@ -107,6 +112,7 @@ public class Watchdog extends Thread {
     int mPhonePid;
     IActivityController mController;
     boolean mAllowRestart = true;
+    final OpenFdMonitor mOpenFdMonitor;
 
     /**
      * Used for checking status of handle threads and scheduling monitor callbacks.
@@ -269,6 +275,8 @@ public class Watchdog extends Thread {
         // Initialize monitor for Binder threads.
         addMonitor(new BinderThreadMonitor());
 
+        mOpenFdMonitor = OpenFdMonitor.create();
+
         // See the notes on DEFAULT_TIMEOUT.
         assert DB ||
                 DEFAULT_TIMEOUT > ZygoteConnectionConstants.WRAPPED_PID_TIMEOUT_MILLIS;
@@ -358,7 +366,7 @@ public class Watchdog extends Thread {
         return checkers;
     }
 
-    private String describeCheckersLocked(ArrayList<HandlerChecker> checkers) {
+    private String describeCheckersLocked(List<HandlerChecker> checkers) {
         StringBuilder builder = new StringBuilder(128);
         for (int i=0; i<checkers.size(); i++) {
             if (builder.length() > 0) {
@@ -410,7 +418,7 @@ public class Watchdog extends Thread {
     public void run() {
         boolean waitedHalf = false;
         while (true) {
-            final ArrayList<HandlerChecker> blockedCheckers;
+            final List<HandlerChecker> blockedCheckers;
             final String subject;
             final boolean allowRestart;
             int debuggerWasConnected = 0;
@@ -447,30 +455,40 @@ public class Watchdog extends Thread {
                     timeout = CHECK_INTERVAL - (SystemClock.uptimeMillis() - start);
                 }
 
-                final int waitState = evaluateCheckerCompletionLocked();
-                if (waitState == COMPLETED) {
-                    // The monitors have returned; reset
-                    waitedHalf = false;
-                    continue;
-                } else if (waitState == WAITING) {
-                    // still waiting but within their configured intervals; back off and recheck
-                    continue;
-                } else if (waitState == WAITED_HALF) {
-                    if (!waitedHalf) {
-                        // We've waited half the deadlock-detection interval.  Pull a stack
-                        // trace and wait another half.
-                        ArrayList<Integer> pids = new ArrayList<Integer>();
-                        pids.add(Process.myPid());
-                        ActivityManagerService.dumpStackTraces(true, pids, null, null,
-                            getInterestingNativePids());
-                        waitedHalf = true;
-                    }
-                    continue;
+                boolean fdLimitTriggered = false;
+                if (mOpenFdMonitor != null) {
+                    fdLimitTriggered = mOpenFdMonitor.monitor();
                 }
 
-                // something is overdue!
-                blockedCheckers = getBlockedCheckersLocked();
-                subject = describeCheckersLocked(blockedCheckers);
+                if (!fdLimitTriggered) {
+                    final int waitState = evaluateCheckerCompletionLocked();
+                    if (waitState == COMPLETED) {
+                        // The monitors have returned; reset
+                        waitedHalf = false;
+                        continue;
+                    } else if (waitState == WAITING) {
+                        // still waiting but within their configured intervals; back off and recheck
+                        continue;
+                    } else if (waitState == WAITED_HALF) {
+                        if (!waitedHalf) {
+                            // We've waited half the deadlock-detection interval.  Pull a stack
+                            // trace and wait another half.
+                            ArrayList<Integer> pids = new ArrayList<Integer>();
+                            pids.add(Process.myPid());
+                            ActivityManagerService.dumpStackTraces(true, pids, null, null,
+                                getInterestingNativePids());
+                            waitedHalf = true;
+                        }
+                        continue;
+                    }
+
+                    // something is overdue!
+                    blockedCheckers = getBlockedCheckersLocked();
+                    subject = describeCheckersLocked(blockedCheckers);
+                } else {
+                    blockedCheckers = Collections.emptyList();
+                    subject = "Open FD high water mark reached";
+                }
                 allowRestart = mAllowRestart;
             }
 
@@ -584,4 +602,87 @@ public class Watchdog extends Thread {
     }
 
     private native void native_dumpKernelStacks(String tracesPath);
+
+    public static final class OpenFdMonitor {
+        /**
+         * Number of FDs below the soft limit that we trigger a runtime restart at. This was
+         * chosen arbitrarily, but will need to be at least 6 in order to have a sufficient number
+         * of FDs in reserve to complete a dump.
+         */
+        private static final int FD_HIGH_WATER_MARK = 12;
+
+        private final File mDumpDir;
+        private final File mFdHighWaterMark;
+
+        public static OpenFdMonitor create() {
+            // Only run the FD monitor on debuggable builds (such as userdebug and eng builds).
+            if (!Build.IS_DEBUGGABLE) {
+                return null;
+            }
+
+            // Don't run the FD monitor on builds that have a global ANR trace file. We're using
+            // the ANR trace directory as a quick hack in order to get these traces in bugreports
+            // and we wouldn't want to overwrite something important.
+            final String dumpDirStr = SystemProperties.get("dalvik.vm.stack-trace-dir", "");
+            if (dumpDirStr.isEmpty()) {
+                return null;
+            }
+
+            final StructRlimit rlimit;
+            try {
+                rlimit = android.system.Os.getrlimit(OsConstants.RLIMIT_NOFILE);
+            } catch (ErrnoException errno) {
+                Slog.w(TAG, "Error thrown from getrlimit(RLIMIT_NOFILE)", errno);
+                return null;
+            }
+
+            // The assumption we're making here is that FD numbers are allocated (more or less)
+            // sequentially, which is currently (and historically) true since open is currently
+            // specified to always return the lowest-numbered non-open file descriptor for the
+            // current process.
+            //
+            // We do this to avoid having to enumerate the contents of /proc/self/fd in order to
+            // count the number of descriptors open in the process.
+            final File fdThreshold = new File("/proc/self/fd/" + (rlimit.rlim_cur - FD_HIGH_WATER_MARK));
+            return new OpenFdMonitor(new File(dumpDirStr), fdThreshold);
+        }
+
+        OpenFdMonitor(File dumpDir, File fdThreshold) {
+            mDumpDir = dumpDir;
+            mFdHighWaterMark = fdThreshold;
+        }
+
+        private void dumpOpenDescriptors() {
+            try {
+                File dumpFile = File.createTempFile("anr_fd_", "", mDumpDir);
+                java.lang.Process proc = new ProcessBuilder()
+                    .command("/system/bin/lsof", "-p", String.valueOf(Process.myPid()))
+                    .redirectErrorStream(true)
+                    .redirectOutput(dumpFile)
+                    .start();
+
+                int returnCode = proc.waitFor();
+                if (returnCode != 0) {
+                    Slog.w(TAG, "Unable to dump open descriptors, lsof return code: "
+                        + returnCode);
+                    dumpFile.delete();
+                }
+            } catch (IOException | InterruptedException ex) {
+                Slog.w(TAG, "Unable to dump open descriptors: " + ex);
+            }
+        }
+
+        /**
+         * @return {@code true} if the high water mark was breached and a dump was written,
+         *     {@code false} otherwise.
+         */
+        public boolean monitor() {
+            if (mFdHighWaterMark.exists()) {
+                dumpOpenDescriptors();
+                return true;
+            }
+
+            return false;
+        }
+    }
 }
