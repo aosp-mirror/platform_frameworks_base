@@ -30,6 +30,7 @@ import android.content.Intent;
 import android.content.pm.ActivityInfo;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.IPackageManager;
+import android.content.pm.PackageList;
 import android.content.pm.PackageManager;
 import android.content.pm.PackageManagerInternal;
 import android.content.pm.PackageParser;
@@ -252,11 +253,11 @@ public final class DefaultPermissionGrantPolicy {
         }
     }
 
-    public void grantDefaultPermissions(Collection<PackageParser.Package> packages, int userId) {
+    public void grantDefaultPermissions(int userId) {
         if (mContext.getPackageManager().hasSystemFeature(PackageManager.FEATURE_EMBEDDED, 0)) {
-            grantAllRuntimePermissions(packages, userId);
+            grantAllRuntimePermissions(userId);
         } else {
-            grantPermissionsToSysComponentsAndPrivApps(packages, userId);
+            grantPermissionsToSysComponentsAndPrivApps(userId);
             grantDefaultSystemHandlerPermissions(userId);
             grantDefaultPermissionExceptions(userId);
         }
@@ -278,10 +279,14 @@ public final class DefaultPermissionGrantPolicy {
         }
     }
 
-    private void grantAllRuntimePermissions(
-            Collection<PackageParser.Package> packages, int userId) {
+    private void grantAllRuntimePermissions(int userId) {
         Log.i(TAG, "Granting all runtime permissions for user " + userId);
-        for (PackageParser.Package pkg : packages) {
+        final PackageList packageList = mServiceInternal.getPackageList();
+        for (String packageName : packageList.getPackageNames()) {
+            final PackageParser.Package pkg = mServiceInternal.getPackage(packageName);
+            if (pkg == null) {
+                continue;
+            }
             grantRuntimePermissionsForPackage(userId, pkg);
         }
     }
@@ -290,10 +295,14 @@ public final class DefaultPermissionGrantPolicy {
         mHandler.sendEmptyMessage(MSG_READ_DEFAULT_PERMISSION_EXCEPTIONS);
     }
 
-    private void grantPermissionsToSysComponentsAndPrivApps(
-            Collection<PackageParser.Package> packages, int userId) {
+    private void grantPermissionsToSysComponentsAndPrivApps(int userId) {
         Log.i(TAG, "Granting permissions to platform components for user " + userId);
-        for (PackageParser.Package pkg : packages) {
+        final PackageList packageList = mServiceInternal.getPackageList();
+        for (String packageName : packageList.getPackageNames()) {
+            final PackageParser.Package pkg = mServiceInternal.getPackage(packageName);
+            if (pkg == null) {
+                continue;
+            }
             if (!isSysComponentOrPersistentPlatformSignedPrivApp(pkg)
                     || !doesPackageSupportRuntimePermissions(pkg)
                     || pkg.requestedPermissions.isEmpty()) {
