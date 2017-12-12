@@ -45,11 +45,119 @@ SystemPropertiesParser::Parse(const int in, const int out) const
     string line;
     string name;  // the name of the property
     string value; // the string value of the property
-
     ProtoOutputStream proto;
-    Table table(SystemPropertiesProto::_FIELD_NAMES, SystemPropertiesProto::_FIELD_IDS, SystemPropertiesProto::_FIELD_COUNT);
-    table.addEnumNameToValue("running", SystemPropertiesProto::STATUS_RUNNING);
-    table.addEnumNameToValue("stopped", SystemPropertiesProto::STATUS_STOPPED);
+    vector<pair<string, string>> extras;
+
+    Table sysPropTable(SystemPropertiesProto::_FIELD_NAMES,
+                SystemPropertiesProto::_FIELD_IDS,
+                SystemPropertiesProto::_FIELD_COUNT);
+    Message sysProp(&sysPropTable);
+
+    Table aaudioT(SystemPropertiesProto::Aaudio::_FIELD_NAMES,
+            SystemPropertiesProto::Aaudio::_FIELD_IDS,
+            SystemPropertiesProto::Aaudio::_FIELD_COUNT);
+    Message aaudio(&aaudioT);
+    sysProp.addSubMessage(SystemPropertiesProto::AAUDIO, &aaudio);
+
+    Table cameraTable(SystemPropertiesProto::Camera::_FIELD_NAMES,
+            SystemPropertiesProto::Camera::_FIELD_IDS,
+            SystemPropertiesProto::Camera::_FIELD_COUNT);
+    Message camera(&cameraTable);
+    sysProp.addSubMessage(SystemPropertiesProto::CAMERA, &camera);
+
+    Table dalvikVmTable(SystemPropertiesProto::DalvikVm::_FIELD_NAMES,
+            SystemPropertiesProto::DalvikVm::_FIELD_IDS,
+            SystemPropertiesProto::DalvikVm::_FIELD_COUNT);
+    Message dalvikVm(&dalvikVmTable);
+    sysProp.addSubMessage(SystemPropertiesProto::DALVIK_VM, &dalvikVm);
+
+    Table initSvcTable(SystemPropertiesProto::InitSvc::_FIELD_NAMES,
+            SystemPropertiesProto::InitSvc::_FIELD_IDS,
+            SystemPropertiesProto::InitSvc::_FIELD_COUNT);
+    initSvcTable.addEnumNameToValue("running", SystemPropertiesProto::InitSvc::STATUS_RUNNING);
+    initSvcTable.addEnumNameToValue("stopped", SystemPropertiesProto::InitSvc::STATUS_STOPPED);
+    Message initSvc(&initSvcTable);
+    sysProp.addSubMessage(SystemPropertiesProto::INIT_SVC, &initSvc);
+
+    Table logTable(SystemPropertiesProto::Log::_FIELD_NAMES,
+            SystemPropertiesProto::Log::_FIELD_IDS,
+            SystemPropertiesProto::Log::_FIELD_COUNT);
+    Message logMsg(&logTable);
+    sysProp.addSubMessage(SystemPropertiesProto::LOG, &logMsg);
+
+    Table persistTable(SystemPropertiesProto::Persist::_FIELD_NAMES,
+            SystemPropertiesProto::Persist::_FIELD_IDS,
+            SystemPropertiesProto::Persist::_FIELD_COUNT);
+    Message persist(&persistTable);
+    sysProp.addSubMessage(SystemPropertiesProto::PERSIST, &persist);
+
+    Table pmDexoptTable(SystemPropertiesProto::PmDexopt::_FIELD_NAMES,
+            SystemPropertiesProto::PmDexopt::_FIELD_IDS,
+            SystemPropertiesProto::PmDexopt::_FIELD_COUNT);
+    Message pmDexopt(&pmDexoptTable);
+    sysProp.addSubMessage(SystemPropertiesProto::PM_DEXOPT, &pmDexopt);
+
+    Table roTable(SystemPropertiesProto::Ro::_FIELD_NAMES,
+            SystemPropertiesProto::Ro::_FIELD_IDS,
+            SystemPropertiesProto::Ro::_FIELD_COUNT);
+    Message ro(&roTable);
+
+    Table bootTable(SystemPropertiesProto::Ro::Boot::_FIELD_NAMES,
+            SystemPropertiesProto::Ro::Boot::_FIELD_IDS,
+            SystemPropertiesProto::Ro::Boot::_FIELD_COUNT);
+    Message boot(&bootTable);
+    ro.addSubMessage(SystemPropertiesProto::Ro::BOOT, &boot);
+
+    Table bootimageTable(SystemPropertiesProto::Ro::BootImage::_FIELD_NAMES,
+            SystemPropertiesProto::Ro::BootImage::_FIELD_IDS,
+            SystemPropertiesProto::Ro::BootImage::_FIELD_COUNT);
+    Message bootimage(&bootimageTable);
+    ro.addSubMessage(SystemPropertiesProto::Ro::BOOTIMAGE, &bootimage);
+
+    Table buildTable(SystemPropertiesProto::Ro::Build::_FIELD_NAMES,
+            SystemPropertiesProto::Ro::Build::_FIELD_IDS,
+            SystemPropertiesProto::Ro::Build::_FIELD_COUNT);
+    Message build(&buildTable);
+
+    Table versionTable(SystemPropertiesProto::Ro::Build::Version::_FIELD_NAMES,
+            SystemPropertiesProto::Ro::Build::Version::_FIELD_IDS,
+            SystemPropertiesProto::Ro::Build::Version::_FIELD_COUNT);
+    Message version(&versionTable);
+    build.addSubMessage(SystemPropertiesProto::Ro::Build::VERSION, &version);
+    ro.addSubMessage(SystemPropertiesProto::Ro::BUILD, &build);
+
+    Table configTable(SystemPropertiesProto::Ro::Config::_FIELD_NAMES,
+            SystemPropertiesProto::Ro::Config::_FIELD_IDS,
+            SystemPropertiesProto::Ro::Config::_FIELD_COUNT);
+    Message config(&configTable);
+    ro.addSubMessage(SystemPropertiesProto::Ro::CONFIG, &config);
+
+    Table hardwareTable(SystemPropertiesProto::Ro::Hardware::_FIELD_NAMES,
+                   SystemPropertiesProto::Ro::Hardware::_FIELD_IDS,
+                   SystemPropertiesProto::Ro::Hardware::_FIELD_COUNT);
+    Message hardware(&hardwareTable);
+    ro.addSubMessage(SystemPropertiesProto::Ro::HARDWARE, &hardware);
+
+    Table productTable(SystemPropertiesProto::Ro::Product::_FIELD_NAMES,
+                   SystemPropertiesProto::Ro::Product::_FIELD_IDS,
+                   SystemPropertiesProto::Ro::Product::_FIELD_COUNT);
+    Message product(&productTable);
+    ro.addSubMessage(SystemPropertiesProto::Ro::PRODUCT, &product);
+
+    sysProp.addSubMessage(SystemPropertiesProto::RO, &ro);
+
+    Table sysTable(SystemPropertiesProto::Sys::_FIELD_NAMES,
+                   SystemPropertiesProto::Sys::_FIELD_IDS,
+                   SystemPropertiesProto::Sys::_FIELD_COUNT);
+    Message sys(&sysTable);
+
+    Table usbTable(SystemPropertiesProto::Sys::Usb::_FIELD_NAMES,
+                   SystemPropertiesProto::Sys::Usb::_FIELD_IDS,
+                   SystemPropertiesProto::Sys::Usb::_FIELD_COUNT);
+    Message usb(&usbTable);
+    sys.addSubMessage(SystemPropertiesProto::Sys::USB, &usb);
+
+    sysProp.addSubMessage(SystemPropertiesProto::SYS, &sys);
 
     // parse line by line
     while (reader.readLine(&line)) {
@@ -67,12 +175,18 @@ SystemPropertiesParser::Parse(const int in, const int out) const
 
         // if the property name couldn't be found in proto definition or the value has mistype,
         // add to extra properties with its name and value
-        if (!table.insertField(&proto, convertToFieldName(name), value)) {
-            long long token = proto.start(SystemPropertiesProto::EXTRA_PROPERTIES);
-            proto.write(SystemPropertiesProto::Property::NAME, name);
-            proto.write(SystemPropertiesProto::Property::VALUE, value);
-            proto.end(token);
+        if (!sysProp.insertField(&proto, convertToFieldName(name), value)) {
+            extras.push_back(make_pair(name, value));
         }
+    }
+    // end session for the last write.
+    sysProp.endSession(&proto);
+
+    for (auto it = extras.begin(); it != extras.end(); it++) {
+        long long token = proto.start(SystemPropertiesProto::EXTRA_PROPERTIES);
+        proto.write(SystemPropertiesProto::Property::NAME, it->first);
+        proto.write(SystemPropertiesProto::Property::VALUE, it->second);
+        proto.end(token);
     }
 
     if (!reader.ok(&line)) {

@@ -45,34 +45,61 @@ public final class MediaMetadata implements Parcelable {
     /**
      * @hide
      */
-    @StringDef({METADATA_KEY_TITLE, METADATA_KEY_ARTIST, METADATA_KEY_ALBUM, METADATA_KEY_AUTHOR,
-            METADATA_KEY_WRITER, METADATA_KEY_COMPOSER, METADATA_KEY_COMPILATION,
-            METADATA_KEY_DATE, METADATA_KEY_GENRE, METADATA_KEY_ALBUM_ARTIST, METADATA_KEY_ART_URI,
-            METADATA_KEY_ALBUM_ART_URI, METADATA_KEY_DISPLAY_TITLE, METADATA_KEY_DISPLAY_SUBTITLE,
-            METADATA_KEY_DISPLAY_DESCRIPTION, METADATA_KEY_DISPLAY_ICON_URI,
-            METADATA_KEY_MEDIA_ID, METADATA_KEY_MEDIA_URI})
+    @StringDef(prefix = { "METADATA_KEY_" }, value = {
+            METADATA_KEY_TITLE,
+            METADATA_KEY_ARTIST,
+            METADATA_KEY_ALBUM,
+            METADATA_KEY_AUTHOR,
+            METADATA_KEY_WRITER,
+            METADATA_KEY_COMPOSER,
+            METADATA_KEY_COMPILATION,
+            METADATA_KEY_DATE,
+            METADATA_KEY_GENRE,
+            METADATA_KEY_ALBUM_ARTIST,
+            METADATA_KEY_ART_URI,
+            METADATA_KEY_ALBUM_ART_URI,
+            METADATA_KEY_DISPLAY_TITLE,
+            METADATA_KEY_DISPLAY_SUBTITLE,
+            METADATA_KEY_DISPLAY_DESCRIPTION,
+            METADATA_KEY_DISPLAY_ICON_URI,
+            METADATA_KEY_MEDIA_ID,
+            METADATA_KEY_MEDIA_URI,
+    })
     @Retention(RetentionPolicy.SOURCE)
     public @interface TextKey {}
 
     /**
      * @hide
      */
-    @StringDef({METADATA_KEY_DURATION, METADATA_KEY_YEAR, METADATA_KEY_TRACK_NUMBER,
-            METADATA_KEY_NUM_TRACKS, METADATA_KEY_DISC_NUMBER, METADATA_KEY_BT_FOLDER_TYPE})
+    @StringDef(prefix = { "METADATA_KEY_" }, value = {
+            METADATA_KEY_DURATION,
+            METADATA_KEY_YEAR,
+            METADATA_KEY_TRACK_NUMBER,
+            METADATA_KEY_NUM_TRACKS,
+            METADATA_KEY_DISC_NUMBER,
+            METADATA_KEY_BT_FOLDER_TYPE,
+    })
     @Retention(RetentionPolicy.SOURCE)
     public @interface LongKey {}
 
     /**
      * @hide
      */
-    @StringDef({METADATA_KEY_ART, METADATA_KEY_ALBUM_ART, METADATA_KEY_DISPLAY_ICON})
+    @StringDef(prefix = { "METADATA_KEY_" }, value = {
+            METADATA_KEY_ART,
+            METADATA_KEY_ALBUM_ART,
+            METADATA_KEY_DISPLAY_ICON,
+    })
     @Retention(RetentionPolicy.SOURCE)
     public @interface BitmapKey {}
 
     /**
      * @hide
      */
-    @StringDef({METADATA_KEY_USER_RATING, METADATA_KEY_RATING})
+    @StringDef(prefix = { "METADATA_KEY_" }, value = {
+            METADATA_KEY_USER_RATING,
+            METADATA_KEY_RATING,
+    })
     @Retention(RetentionPolicy.SOURCE)
     public @interface RatingKey {}
 

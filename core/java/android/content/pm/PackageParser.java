@@ -689,7 +689,15 @@ public class PackageParser {
         pi.requiredAccountType = p.mRequiredAccountType;
         pi.overlayTarget = p.mOverlayTarget;
         pi.overlayPriority = p.mOverlayPriority;
-        pi.isStaticOverlay = p.mIsStaticOverlay;
+
+        if (p.mIsStaticOverlay) {
+            pi.mOverlayFlags |= PackageInfo.FLAG_OVERLAY_STATIC;
+        }
+
+        if (p.mTrustedOverlay) {
+            pi.mOverlayFlags |= PackageInfo.FLAG_OVERLAY_TRUSTED;
+        }
+
         pi.compileSdkVersion = p.mCompileSdkVersion;
         pi.compileSdkVersionCodename = p.mCompileSdkVersionCodename;
         pi.firstInstallTime = firstInstallTime;
@@ -6454,6 +6462,7 @@ public class PackageParser {
             mAdoptPermissions = dest.createStringArrayList();
             mAppMetaData = dest.readBundle();
             mVersionCode = dest.readInt();
+            mVersionCodeMajor = dest.readInt();
             mVersionName = dest.readString();
             if (mVersionName != null) {
                 mVersionName = mVersionName.intern();
@@ -6600,6 +6609,7 @@ public class PackageParser {
             dest.writeStringList(mAdoptPermissions);
             dest.writeBundle(mAppMetaData);
             dest.writeInt(mVersionCode);
+            dest.writeInt(mVersionCodeMajor);
             dest.writeString(mVersionName);
             dest.writeString(mSharedUserId);
             dest.writeInt(mSharedUserLabel);

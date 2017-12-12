@@ -297,3 +297,82 @@ Table::insertField(ProtoOutputStream* proto, const std::string& name, const std:
     }
     return true;
 }
+
+// ================================================================================
+Message::Message(Table* table)
+        :mTable(table),
+         mPreviousField(""),
+         mTokens(),
+         mSubMessages()
+{
+}
+
+Message::~Message()
+{
+}
+
+void
+Message::addSubMessage(uint64_t fieldId, Message* fieldMsg)
+{
+    for (auto iter = mTable->mFields.begin(); iter != mTable->mFields.end(); iter++) {
+        if (iter->second == fieldId) {
+            mSubMessages[iter->first] = fieldMsg;
+            return;
+        }
+    }
+}
+
+bool
+Message::insertField(ProtoOutputStream* proto, const std::string& name, const std::string& value)
+{
+    // If the field name can be found, it means the name is a primitive field.
+    if (mTable->mFields.find(name) != mTable->mFields.end()) {
+        endSession(proto);
+        // The only edge case is for example ro.hardware itself is a message, so a field called "value"
+        // would be defined in proto Ro::Hardware and it must be the first field.
+        if (mSubMessages.find(name) != mSubMessages.end()) {
+            startSession(proto, name);
+            return mSubMessages[name]->insertField(proto, "value", value);
+        } else {
+            return mTable->insertField(proto, name, value);
+        }
+    }
+
+    // Try to find the message field which is the prefix of name, so the value would be inserted
+    // recursively into the submessage.
+    string mutableName = name;
+    for (auto iter = mSubMessages.begin(); iter != mSubMessages.end(); iter++) {
+        string fieldName = iter->first;
+        string prefix = fieldName + "_"; // underscore is the delimiter in the name
+        if (stripPrefix(&mutableName, prefix.c_str())) {
+            if (mPreviousField != fieldName) {
+                endSession(proto);
+                startSession(proto, fieldName);
+            }
+            return mSubMessages[fieldName]->insertField(proto, mutableName, value);
+        }
+    }
+    // Can't find the name in proto definition, handle it separately.
+    return false;
+}
+
+void
+Message::startSession(ProtoOutputStream* proto, const string& name)
+{
+    uint64_t fieldId = mTable->mFields[name];
+    long long token = proto->start(fieldId);
+    mPreviousField = name;
+    mTokens.push(token);
+}
+
+void
+Message::endSession(ProtoOutputStream* proto)
+{
+    if (mPreviousField == "") return;
+    if (mSubMessages.find(mPreviousField) != mSubMessages.end()) {
+        mSubMessages[mPreviousField]->endSession(proto);
+    }
+    proto->end(mTokens.top());
+    mTokens.pop();
+    mPreviousField = "";
+}

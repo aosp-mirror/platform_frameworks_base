@@ -735,15 +735,15 @@ public class SyncManager {
     }
 
     public void onStartUser(int userHandle) {
-        mLogger.log("onStartUser: user=", userHandle);
+        mSyncHandler.post(() -> mLogger.log("onStartUser: user=", userHandle));
     }
 
     public void onUnlockUser(int userHandle) {
-        mLogger.log("onUnlockUser: user=", userHandle);
+        mSyncHandler.post(() -> mLogger.log("onUnlockUser: user=", userHandle));
     }
 
     public void onStopUser(int userHandle) {
-        mLogger.log("onStopUser: user=", userHandle);
+        mSyncHandler.post(() -> mLogger.log("onStopUser: user=", userHandle));
     }
 
 

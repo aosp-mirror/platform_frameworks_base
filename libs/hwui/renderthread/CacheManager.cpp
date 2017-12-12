@@ -53,13 +53,13 @@ CacheManager::CacheManager(const DisplayInfo& display) : mMaxSurfaceArea(display
     }
 }
 
-void CacheManager::reset(GrContext* context) {
-    if (context != mGrContext.get()) {
+void CacheManager::reset(sk_sp<GrContext> context) {
+    if (context != mGrContext) {
         destroy();
     }
 
     if (context) {
-        mGrContext = sk_ref_sp(context);
+        mGrContext = std::move(context);
         mGrContext->getResourceCacheLimits(&mMaxResources, nullptr);
         updateContextCacheSizes();
     }

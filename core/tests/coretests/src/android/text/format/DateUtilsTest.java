@@ -21,6 +21,7 @@ import static org.junit.Assert.assertEquals;
 import android.content.res.Configuration;
 import android.content.res.Resources;
 import android.os.LocaleList;
+import android.platform.test.annotations.Presubmit;
 import android.support.test.filters.SmallTest;
 import android.support.test.runner.AndroidJUnit4;
 
@@ -35,6 +36,7 @@ import java.util.Date;
 import java.util.Locale;
 import java.util.TimeZone;
 
+@Presubmit
 @SmallTest
 @RunWith(AndroidJUnit4.class)
 public class DateUtilsTest {

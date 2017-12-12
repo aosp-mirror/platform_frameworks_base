@@ -3342,6 +3342,12 @@ public final class Telephony {
         public static final String APN = "apn";
 
         /**
+         * Prefix of Integrated Circuit Card Identifier.
+         * <P>Type: TEXT </P>
+         */
+        public static final String ICCID_PREFIX = "iccid_prefix";
+
+        /**
          * User facing carrier name.
          * <P>Type: TEXT </P>
          */

@@ -1149,8 +1149,10 @@ public final class JobStore {
         public void forEachJob(JobStatusFunctor functor) {
             for (int uidIndex = mJobs.size() - 1; uidIndex >= 0; uidIndex--) {
                 ArraySet<JobStatus> jobs = mJobs.valueAt(uidIndex);
-                for (int i = jobs.size() - 1; i >= 0; i--) {
-                    functor.process(jobs.valueAt(i));
+                if (jobs != null) {
+                    for (int i = jobs.size() - 1; i >= 0; i--) {
+                        functor.process(jobs.valueAt(i));
+                    }
                 }
             }
         }

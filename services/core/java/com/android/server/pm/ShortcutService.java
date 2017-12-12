@@ -280,6 +280,13 @@ public class ShortcutService extends IShortcutService.Stub {
     private final SparseArray<ShortcutUser> mUsers = new SparseArray<>();
 
     /**
+     * User ID -> ShortcutNonPersistentUser
+     */
+    @GuardedBy("mLock")
+    private final SparseArray<ShortcutNonPersistentUser> mShortcutNonPersistentUsers =
+            new SparseArray<>();
+
+    /**
      * Max number of dynamic + manifest shortcuts that each application can have at a time.
      */
     private int mMaxShortcuts;
@@ -330,7 +337,10 @@ public class ShortcutService extends IShortcutService.Stub {
                     | PackageManager.MATCH_DIRECT_BOOT_UNAWARE
                     | PackageManager.MATCH_UNINSTALLED_PACKAGES;
 
-    @GuardedBy("mLock")
+    /**
+     * Note we use a fine-grained lock for {@link #mUnlockedUsers} due to b/64303666.
+     */
+    @GuardedBy("mUnlockedUsers")
     final SparseBooleanArray mUnlockedUsers = new SparseBooleanArray();
 
     // Stats
@@ -600,7 +610,7 @@ public class ShortcutService extends IShortcutService.Stub {
         if (DEBUG) {
         Slog.d(TAG, "handleUnlockUser: user=" + userId);
         }
-        synchronized (mLock) {
+        synchronized (mUnlockedUsers) {
             mUnlockedUsers.put(userId, true);
         }
 
@@ -628,7 +638,9 @@ public class ShortcutService extends IShortcutService.Stub {
         synchronized (mLock) {
             unloadUserLocked(userId);
 
-            mUnlockedUsers.put(userId, false);
+            synchronized (mUnlockedUsers) {
+                mUnlockedUsers.put(userId, false);
+            }
         }
     }
 
@@ -1149,9 +1161,12 @@ public class ShortcutService extends IShortcutService.Stub {
     // Requires mLock held, but "Locked" prefix would look weired so we just say "L".
     protected boolean isUserUnlockedL(@UserIdInt int userId) {
         // First, check the local copy.
-        if (mUnlockedUsers.get(userId)) {
-            return true;
+        synchronized (mUnlockedUsers) {
+            if (mUnlockedUsers.get(userId)) {
+                return true;
+            }
         }
+        
         // If the local copy says the user is locked, check with AM for the actual state, since
         // the user might just have been unlocked.
         // Note we just don't use isUserUnlockingOrUnlocked() here, because it'll return false
@@ -1197,6 +1212,18 @@ public class ShortcutService extends IShortcutService.Stub {
             checkPackageChanges(userId);
         }
         return userPackages;
+    }
+
+    /** Return the non-persistent per-user state. */
+    @GuardedBy("mLock")
+    @NonNull
+    ShortcutNonPersistentUser getNonPersistentUserLocked(@UserIdInt int userId) {
+        ShortcutNonPersistentUser ret = mShortcutNonPersistentUsers.get(userId);
+        if (ret == null) {
+            ret = new ShortcutNonPersistentUser(this, userId);
+            mShortcutNonPersistentUsers.put(userId, ret);
+        }
+        return ret;
     }
 
     void forEachLoadedUserLocked(@NonNull Consumer<ShortcutUser> c) {
@@ -2251,7 +2278,7 @@ public class ShortcutService extends IShortcutService.Stub {
             return true;
         }
         synchronized (mLock) {
-            return getUserShortcutsLocked(userId).hasHostPackage(callingPackage);
+            return getNonPersistentUserLocked(userId).hasHostPackage(callingPackage);
         }
     }
 
@@ -2375,10 +2402,7 @@ public class ShortcutService extends IShortcutService.Stub {
     public void setShortcutHostPackage(@NonNull String type, @Nullable String packageName,
             int userId) {
         synchronized (mLock) {
-            throwIfUserLockedL(userId);
-
-            final ShortcutUser user = getUserShortcutsLocked(userId);
-            user.setShortcutHostPackage(type, packageName);
+            getNonPersistentUserLocked(userId).setShortcutHostPackage(type, packageName);
         }
     }
 
@@ -3831,6 +3855,14 @@ public class ShortcutService extends IShortcutService.Stub {
 
             for (int i = 0; i < mUsers.size(); i++) {
                 final ShortcutUser user = mUsers.valueAt(i);
+                if (filter.isUserMatch(user.getUserId())) {
+                    user.dump(pw, "  ", filter);
+                    pw.println();
+                }
+            }
+
+            for (int i = 0; i < mShortcutNonPersistentUsers.size(); i++) {
+                final ShortcutNonPersistentUser user = mShortcutNonPersistentUsers.valueAt(i);
                 if (filter.isUserMatch(user.getUserId())) {
                     user.dump(pw, "  ", filter);
                     pw.println();

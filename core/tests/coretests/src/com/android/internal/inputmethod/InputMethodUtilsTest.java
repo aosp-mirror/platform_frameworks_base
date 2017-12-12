@@ -16,6 +16,15 @@
 
 package com.android.internal.inputmethod;
 
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.in;
+import static org.hamcrest.Matchers.not;
+import static org.hamcrest.core.Is.is;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
+
 import android.content.Context;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.ResolveInfo;
@@ -24,30 +33,31 @@ import android.content.res.Configuration;
 import android.content.res.Resources;
 import android.os.LocaleList;
 import android.os.Parcel;
-import android.test.InstrumentationTestCase;
-import android.test.suitebuilder.annotation.SmallTest;
+import android.support.test.InstrumentationRegistry;
+import android.support.test.filters.SmallTest;
+import android.support.test.runner.AndroidJUnit4;
 import android.util.ArrayMap;
 import android.util.ArraySet;
 import android.view.inputmethod.InputMethodInfo;
-import android.view.inputmethod.InputMethodSubtype.InputMethodSubtypeBuilder;
 import android.view.inputmethod.InputMethodSubtype;
+import android.view.inputmethod.InputMethodSubtype.InputMethodSubtypeBuilder;
+
+import org.junit.Test;
+import org.junit.runner.RunWith;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
 import java.util.Objects;
 
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.isIn;
-import static org.hamcrest.Matchers.not;
-
-public class InputMethodUtilsTest extends InstrumentationTestCase {
+@SmallTest
+@RunWith(AndroidJUnit4.class)
+public class InputMethodUtilsTest {
     private static final boolean IS_AUX = true;
     private static final boolean IS_DEFAULT = true;
     private static final boolean IS_OVERRIDES_IMPLICITLY_ENABLED_SUBTYPE = true;
     private static final boolean IS_ASCII_CAPABLE = true;
     private static final boolean IS_ENABLED_WHEN_DEFAULT_IS_NOT_ASCII_CAPABLE = true;
-    private static final boolean IS_SYSTEM_READY = true;
     private static final Locale LOCALE_EN = new Locale("en");
     private static final Locale LOCALE_EN_US = new Locale("en", "US");
     private static final Locale LOCALE_EN_GB = new Locale("en", "GB");
@@ -77,7 +87,7 @@ public class InputMethodUtilsTest extends InstrumentationTestCase {
     private static final String EXTRA_VALUE_ENABLED_WHEN_DEFAULT_IS_NOT_ASCII_CAPABLE =
             "EnabledWhenDefaultIsNotAsciiCapable";
 
-    @SmallTest
+    @Test
     public void testVoiceImes() throws Exception {
         // locale: en_US
         assertDefaultEnabledImes(getImesWithDefaultVoiceIme(), LOCALE_EN_US,
@@ -101,7 +111,7 @@ public class InputMethodUtilsTest extends InstrumentationTestCase {
                 "DummyNonDefaultAutoVoiceIme1");
     }
 
-    @SmallTest
+    @Test
     public void testKeyboardImes() throws Exception {
         // locale: en_US
         assertDefaultEnabledImes(getSamplePreinstalledImes("en-rUS"), LOCALE_EN_US,
@@ -136,7 +146,7 @@ public class InputMethodUtilsTest extends InstrumentationTestCase {
                 "com.android.apps.inputmethod.latin", "com.android.apps.inputmethod.voice");
     }
 
-    @SmallTest
+    @Test
     public void testParcelable() throws Exception {
         final ArrayList<InputMethodInfo> originalList = getSamplePreinstalledImes("en-rUS");
         final List<InputMethodInfo> clonedList = cloneViaParcel(originalList);
@@ -153,7 +163,7 @@ public class InputMethodUtilsTest extends InstrumentationTestCase {
         }
     }
 
-    @SmallTest
+    @Test
     public void testGetImplicitlyApplicableSubtypesLocked() throws Exception {
         final InputMethodSubtype nonAutoEnUS = createDummyInputMethodSubtype("en_US",
                 SUBTYPE_MODE_KEYBOARD, !IS_AUX, !IS_OVERRIDES_IMPLICITLY_ENABLED_SUBTYPE,
@@ -434,8 +444,8 @@ public class InputMethodUtilsTest extends InstrumentationTestCase {
                     InputMethodUtils.getImplicitlyApplicableSubtypesLocked(
                             getResourcesForLocales(Locale.forLanguageTag("sr-Latn-RS")), imi);
             assertEquals(2, result.size());
-            assertThat(nonAutoSrLatn, isIn(result));
-            assertThat(nonAutoHandwritingSrLatn, isIn(result));
+            assertThat(nonAutoSrLatn, is(in(result)));
+            assertThat(nonAutoHandwritingSrLatn, is(in(result)));
         }
         {
             final ArrayList<InputMethodSubtype> subtypes = new ArrayList<>();
@@ -454,8 +464,8 @@ public class InputMethodUtilsTest extends InstrumentationTestCase {
                     InputMethodUtils.getImplicitlyApplicableSubtypesLocked(
                             getResourcesForLocales(Locale.forLanguageTag("sr-Cyrl-RS")), imi);
             assertEquals(2, result.size());
-            assertThat(nonAutoSrCyrl, isIn(result));
-            assertThat(nonAutoHandwritingSrCyrl, isIn(result));
+            assertThat(nonAutoSrCyrl, is(in(result)));
+            assertThat(nonAutoHandwritingSrCyrl, is(in(result)));
         }
 
         // Make sure that secondary locales are taken into account to find the best matching
@@ -486,12 +496,12 @@ public class InputMethodUtilsTest extends InstrumentationTestCase {
                                     Locale.forLanguageTag("en-US")),
                             imi);
             assertEquals(6, result.size());
-            assertThat(nonAutoEnGB, isIn(result));
-            assertThat(nonAutoFr, isIn(result));
-            assertThat(nonAutoSrLatn, isIn(result));
-            assertThat(nonAutoHandwritingEn, isIn(result));
-            assertThat(nonAutoHandwritingFr, isIn(result));
-            assertThat(nonAutoHandwritingSrLatn, isIn(result));
+            assertThat(nonAutoEnGB, is(in(result)));
+            assertThat(nonAutoFr, is(in(result)));
+            assertThat(nonAutoSrLatn, is(in(result)));
+            assertThat(nonAutoHandwritingEn, is(in(result)));
+            assertThat(nonAutoHandwritingFr, is(in(result)));
+            assertThat(nonAutoHandwritingSrLatn, is(in(result)));
         }
 
         // Make sure that 3-letter language code can be handled.
@@ -604,16 +614,16 @@ public class InputMethodUtilsTest extends InstrumentationTestCase {
             final ArrayList<InputMethodSubtype> result =
                     InputMethodUtils.getImplicitlyApplicableSubtypesLocked(
                             getResourcesForLocales(LOCALE_FR, LOCALE_EN_US, LOCALE_JA_JP), imi);
-            assertThat(nonAutoFrCA, isIn(result));
-            assertThat(nonAutoEnUS, isIn(result));
-            assertThat(nonAutoJa, isIn(result));
-            assertThat(nonAutoIn, not(isIn(result)));
-            assertThat(nonAutoEnabledWhenDefaultIsNotAsciiCalableSubtype, not(isIn(result)));
-            assertThat(nonAutoEnabledWhenDefaultIsNotAsciiCalableSubtype, not(isIn(result)));
+            assertThat(nonAutoFrCA, is(in(result)));
+            assertThat(nonAutoEnUS, is(in(result)));
+            assertThat(nonAutoJa, is(in(result)));
+            assertThat(nonAutoIn, not(is(in(result))));
+            assertThat(nonAutoEnabledWhenDefaultIsNotAsciiCalableSubtype, not(is(in(result))));
+            assertThat(nonAutoEnabledWhenDefaultIsNotAsciiCalableSubtype, not(is(in(result))));
         }
     }
 
-    @SmallTest
+    @Test
     public void testContainsSubtypeOf() throws Exception {
         final InputMethodSubtype nonAutoEnUS = createDummyInputMethodSubtype("en_US",
                 SUBTYPE_MODE_KEYBOARD, !IS_AUX, !IS_OVERRIDES_IMPLICITLY_ENABLED_SUBTYPE,
@@ -788,7 +798,7 @@ public class InputMethodUtilsTest extends InstrumentationTestCase {
     private Context createTargetContextWithLocales(final LocaleList locales) {
         final Configuration resourceConfiguration = new Configuration();
         resourceConfiguration.setLocales(locales);
-        return getInstrumentation()
+        return InstrumentationRegistry.getInstrumentation()
                 .getTargetContext()
                 .createConfigurationContext(resourceConfiguration);
     }
@@ -1043,7 +1053,7 @@ public class InputMethodUtilsTest extends InstrumentationTestCase {
         return preinstalledImes;
     }
 
-    @SmallTest
+    @Test
     public void testGetSuitableLocalesForSpellChecker() throws Exception {
         {
             final ArrayList<Locale> locales =
@@ -1138,7 +1148,7 @@ public class InputMethodUtilsTest extends InstrumentationTestCase {
         }
     }
 
-    @SmallTest
+    @Test
     public void testParseInputMethodsAndSubtypesString() {
         // Trivial cases.
         {
@@ -1264,7 +1274,7 @@ public class InputMethodUtilsTest extends InstrumentationTestCase {
         }
     }
 
-    @SmallTest
+    @Test
     public void testbuildInputMethodsAndSubtypesString() {
         {
             ArrayMap<String, ArraySet<String>> map = new ArrayMap<>();
@@ -1272,7 +1282,7 @@ public class InputMethodUtilsTest extends InstrumentationTestCase {
         }
         {
             ArrayMap<String, ArraySet<String>> map = new ArrayMap<>();
-            map.put("ime0", new ArraySet<String>());
+            map.put("ime0", new ArraySet<>());
             assertEquals("ime0", InputMethodUtils.buildInputMethodsAndSubtypesString(map));
         }
         {
@@ -1300,8 +1310,8 @@ public class InputMethodUtilsTest extends InstrumentationTestCase {
         }
         {
             ArrayMap<String, ArraySet<String>> map = new ArrayMap<>();
-            map.put("ime0", new ArraySet<String>());
-            map.put("ime1", new ArraySet<String>());
+            map.put("ime0", new ArraySet<>());
+            map.put("ime1", new ArraySet<>());
 
             ArraySet<String> validSequences = new ArraySet<>();
             validSequences.add("ime0:ime1");
@@ -1314,7 +1324,7 @@ public class InputMethodUtilsTest extends InstrumentationTestCase {
             ArraySet<String> subtypes1 = new ArraySet<>();
             subtypes1.add("subtype0");
             map.put("ime0", subtypes1);
-            map.put("ime1", new ArraySet<String>());
+            map.put("ime1", new ArraySet<>());
 
             ArraySet<String> validSequences = new ArraySet<>();
             validSequences.add("ime0;subtype0:ime1");
@@ -1328,7 +1338,7 @@ public class InputMethodUtilsTest extends InstrumentationTestCase {
             subtypes1.add("subtype0");
             subtypes1.add("subtype1");
             map.put("ime0", subtypes1);
-            map.put("ime1", new ArraySet<String>());
+            map.put("ime1", new ArraySet<>());
 
             ArraySet<String> validSequences = new ArraySet<>();
             validSequences.add("ime0;subtype0;subtype1:ime1");
@@ -1380,7 +1390,7 @@ public class InputMethodUtilsTest extends InstrumentationTestCase {
         }
     }
 
-    @SmallTest
+    @Test
     public void testConstructLocaleFromString() throws Exception {
         assertEquals(new Locale("en"), InputMethodUtils.constructLocaleFromString("en"));
         assertEquals(new Locale("en", "US"), InputMethodUtils.constructLocaleFromString("en_US"));

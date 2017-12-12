@@ -45,8 +45,7 @@ CopyResult SkiaOpenGLReadback::copyImageInto(EGLImageKHR eglImage, const Matrix4
     if (Properties::getRenderPipelineType() == RenderPipelineType::SkiaVulkan) {
         sk_sp<const GrGLInterface> glInterface(GrGLCreateNativeInterface());
         LOG_ALWAYS_FATAL_IF(!glInterface.get());
-        grContext.reset(GrContext::Create(GrBackend::kOpenGL_GrBackend,
-                                          (GrBackendContext)glInterface.get()));
+        grContext = GrContext::MakeGL(std::move(glInterface));
     } else {
         grContext->resetContext();
     }

@@ -1520,7 +1520,11 @@ public class RefactoredBackupManagerService implements BackupManagerServiceInter
     }
 
     // clear an application's data, blocking until the operation completes or times out
-    public void clearApplicationDataSynchronous(String packageName) {
+    // if keepSystemState is true, we intentionally do not also clear system state that
+    // would ordinarily also be cleared, because we aren't actually wiping the app back
+    // to empty; we're bringing it into the actual expected state related to the already-
+    // restored notification state etc.
+    public void clearApplicationDataSynchronous(String packageName, boolean keepSystemState) {
         // Don't wipe packages marked allowClearUserData=false
         try {
             PackageInfo info = mPackageManager.getPackageInfo(packageName, 0);
@@ -1541,7 +1545,7 @@ public class RefactoredBackupManagerService implements BackupManagerServiceInter
         synchronized (mClearDataLock) {
             mClearingData = true;
             try {
-                mActivityManager.clearApplicationUserData(packageName, observer, 0);
+                mActivityManager.clearApplicationUserData(packageName, keepSystemState, observer, 0);
             } catch (RemoteException e) {
                 // can't happen because the activity manager is in this process
             }

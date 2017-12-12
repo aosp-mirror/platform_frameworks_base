@@ -37,71 +37,71 @@ message AlarmManagerServiceProto {
   // Dump from ForceAppStandbyTracker.
   optional ForceAppStandbyTrackerProto force_app_standby_tracker = 6;
 
-  optional bool is_interactive = 8;
+  optional bool is_interactive = 7;
   // Only valid if is_interactive is false.
-  optional int64 time_since_non_interactive_ms = 9;
+  optional int64 time_since_non_interactive_ms = 8;
   // Only valid if is_interactive is false.
-  optional int64 max_wakeup_delay_ms = 10;
+  optional int64 max_wakeup_delay_ms = 9;
   // Only valid if is_interactive is false.
-  optional int64 time_since_last_dispatch_ms = 11;
+  optional int64 time_since_last_dispatch_ms = 10;
   // Only valid if is_interactive is false.
-  optional int64 time_until_next_non_wakeup_delivery_ms = 12;
+  optional int64 time_until_next_non_wakeup_delivery_ms = 11;
 
-  optional int64 time_until_next_non_wakeup_alarm_ms = 13;
-  optional int64 time_until_next_wakeup_ms = 14;
-  optional int64 time_since_last_wakeup_ms = 15;
+  optional int64 time_until_next_non_wakeup_alarm_ms = 12;
+  optional int64 time_until_next_wakeup_ms = 13;
+  optional int64 time_since_last_wakeup_ms = 14;
   // Time since the last wakeup was set.
-  optional int64 time_since_last_wakeup_set_ms = 16;
-  optional int64 time_change_event_count = 17;
+  optional int64 time_since_last_wakeup_set_ms = 15;
+  optional int64 time_change_event_count = 16;
   // The current set of user whitelisted apps for device idle mode, meaning
   // these are allowed to freely schedule alarms. These are app IDs, not UIDs.
-  repeated int32 device_idle_user_whitelist_app_ids = 18;
+  repeated int32 device_idle_user_whitelist_app_ids = 17;
 
-  repeated AlarmClockMetadataProto next_alarm_clock_metadata = 19;
+  repeated AlarmClockMetadataProto next_alarm_clock_metadata = 18;
 
-  repeated BatchProto pending_alarm_batches = 20;
+  repeated BatchProto pending_alarm_batches = 19;
 
   // List of alarms per uid deferred due to user applied background restrictions
   // on the source app.
-  repeated AlarmProto pending_user_blocked_background_alarms = 21;
+  repeated AlarmProto pending_user_blocked_background_alarms = 20;
 
   // When idling mode will end. Will be empty if the device is not currently
   // idling.
-  optional AlarmProto pending_idle_until = 22;
+  optional AlarmProto pending_idle_until = 21;
 
   // Any alarms that we don't want to run during idle mode. Will be empty if the
   // device is not currently idling.
-  repeated AlarmProto pending_while_idle_alarms = 23;
+  repeated AlarmProto pending_while_idle_alarms = 22;
 
   // This is a special alarm that will put the system into idle until it goes
   // off. The caller has given the time they want this to happen at.
-  optional AlarmProto next_wake_from_idle = 24;
+  optional AlarmProto next_wake_from_idle = 23;
 
-  repeated AlarmProto past_due_non_wakeup_alarms = 25;
+  repeated AlarmProto past_due_non_wakeup_alarms = 24;
 
   // Number of delayed alarms.
-  optional int32 delayed_alarm_count = 26;
+  optional int32 delayed_alarm_count = 25;
   // The total amount of time alarms had been delayed. Overlapping alarms are
   // only counted once (ie. If two alarms were meant to trigger at the same time
   // but were delayed by 5 seconds, the total time would be 5 seconds).
-  optional int64 total_delay_time_ms = 27;
-  optional int64 max_delay_duration_ms = 28;
-  optional int64 max_non_interactive_duration_ms = 29;
+  optional int64 total_delay_time_ms = 26;
+  optional int64 max_delay_duration_ms = 27;
+  optional int64 max_non_interactive_duration_ms = 28;
 
-  optional int32 broadcast_ref_count = 30;
+  optional int32 broadcast_ref_count = 29;
   // Canonical count of (operation.send() - onSendFinished()) and listener
   // send/complete/timeout invocations.
-  optional int32 pending_intent_send_count = 31;
-  optional int32 pending_intent_finish_count = 32;
-  optional int32 listener_send_count = 33;
-  optional int32 listener_finish_count = 34;
+  optional int32 pending_intent_send_count = 30;
+  optional int32 pending_intent_finish_count = 31;
+  optional int32 listener_send_count = 32;
+  optional int32 listener_finish_count = 33;
 
-  repeated InFlightProto outstanding_deliveries = 35;
+  repeated InFlightProto outstanding_deliveries = 34;
 
   // Minimum time between ALLOW_WHILE_IDLE alarms when system is idling. It
   // should be either CosntantsProto.allow_while_idle_short_duration_ms or
   // ConstantsProto.allow_while_idle_long_duration_ms.
-  optional int64 allow_while_idle_min_duration_ms = 36;
+  optional int64 allow_while_idle_min_duration_ms = 35;
 
   message LastAllowWhileIdleDispatch {
     optional int32 uid = 1;
@@ -110,25 +110,25 @@ message AlarmManagerServiceProto {
   }
   // For each uid, this is the last time we dispatched an "allow while idle"
   // alarm, used to determine the earliest we can dispatch the next such alarm.
-  repeated LastAllowWhileIdleDispatch last_allow_while_idle_dispatch_times = 37;
+  repeated LastAllowWhileIdleDispatch last_allow_while_idle_dispatch_times = 36;
 
-  optional com.android.internal.util.LocalLogProto recent_problems = 38;
+  optional com.android.internal.util.LocalLogProto recent_problems = 37;
 
   message TopAlarm {
     optional int32 uid = 1;
     optional string package_name = 2;
     optional FilterStatsProto filter = 3;
   }
-  repeated TopAlarm top_alarms = 39;
+  repeated TopAlarm top_alarms = 38;
 
   message AlarmStat {
     optional BroadcastStatsProto broadcast = 1;
     repeated FilterStatsProto filters = 2;
   }
-  repeated AlarmStat alarm_stats = 40;
+  repeated AlarmStat alarm_stats = 39;
 
-  repeated IdleDispatchEntryProto allow_while_idle_dispatches = 41;
-  repeated WakeupEventProto recent_wakeup_history = 42;
+  repeated IdleDispatchEntryProto allow_while_idle_dispatches = 40;
+  repeated WakeupEventProto recent_wakeup_history = 41;
 }
 
 // This is a soft wrapper for alarm clock information. It is not representative
@@ -145,8 +145,9 @@ message AlarmClockMetadataProto {
 message AlarmProto {
   optional string tag = 1;
   optional .android.app.AlarmManagerProto.AlarmType type = 2;
-  // How long until the alarm goes off, in the 'elapsed' timebase.
-  optional int64 when_elapsed_ms = 3;
+  // How long until the alarm goes off, in the 'elapsed' timebase. Can be
+  // negative if 'when' is in the past.
+  optional int64 time_until_when_elapsed_ms = 3;
   optional int64 window_length_ms = 4;
   optional int64 repeat_interval_ms = 5;
   optional int32 count = 6;

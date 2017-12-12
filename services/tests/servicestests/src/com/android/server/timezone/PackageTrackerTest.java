@@ -32,6 +32,9 @@ import android.support.test.filters.SmallTest;
 
 import java.io.PrintWriter;
 import java.io.StringWriter;
+import java.time.Clock;
+import java.time.Instant;
+import java.time.ZoneId;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
@@ -57,7 +60,7 @@ public class PackageTrackerTest {
     private ConfigHelper mMockConfigHelper;
     private PackageManagerHelper mMockPackageManagerHelper;
 
-    private FakeClockHelper mFakeClock;
+    private FakeClock mFakeClock;
     private FakeIntentHelper mFakeIntentHelper;
     private PackageStatusStorage mPackageStatusStorage;
     private PackageTracker mPackageTracker;
@@ -66,7 +69,7 @@ public class PackageTrackerTest {
     public void setUp() throws Exception {
         Context context = InstrumentationRegistry.getContext();
 
-        mFakeClock = new FakeClockHelper();
+        mFakeClock = new FakeClock();
 
         // Read-only interfaces so are easy to mock.
         mMockConfigHelper = mock(ConfigHelper.class);
@@ -1444,17 +1447,32 @@ public class PackageTrackerTest {
         }
     }
 
-    private static class FakeClockHelper implements ClockHelper {
+    private static class FakeClock extends Clock {
 
         private long currentTime = 1000;
 
         @Override
-        public long currentTimestamp() {
+        public long millis() {
             return currentTime;
         }
 
         public void incrementClock(long millis) {
             currentTime += millis;
+        }
+
+        @Override
+        public ZoneId getZone() {
+            throw new UnsupportedOperationException();
+        }
+
+        @Override
+        public Clock withZone(ZoneId zone) {
+            throw new UnsupportedOperationException();
+        }
+
+        @Override
+        public Instant instant() {
+            throw new UnsupportedOperationException();
         }
     }
 

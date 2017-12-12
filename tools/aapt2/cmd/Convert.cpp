@@ -64,36 +64,38 @@ bool ConvertApk(IAaptContext* context, unique_ptr<LoadedApk> apk, IApkSerializer
     return false;
   }
 
-  // Resource table
-  if (!serializer->SerializeTable(apk->GetResourceTable(), writer)) {
-    context->GetDiagnostics()->Error(DiagMessage(apk->GetSource())
-                                     << "failed to serialize the resource table");
-    return false;
+  if (apk->GetResourceTable() != nullptr) {
+    // Resource table
+    if (!serializer->SerializeTable(apk->GetResourceTable(), writer)) {
+      context->GetDiagnostics()->Error(DiagMessage(apk->GetSource())
+                                       << "failed to serialize the resource table");
+      return false;
+    }
+
+    // Resources
+    for (const auto& package : apk->GetResourceTable()->packages) {
+      for (const auto& type : package->types) {
+        for (const auto& entry : type->entries) {
+          for (const auto& config_value : entry->values) {
+            const FileReference* file = ValueCast<FileReference>(config_value->value.get());
+            if (file != nullptr) {
+              if (file->file == nullptr) {
+                context->GetDiagnostics()->Error(DiagMessage(apk->GetSource())
+                                                 << "no file associated with " << *file);
+                return false;
+              }
+
+              if (!serializer->SerializeFile(file, writer)) {
+                context->GetDiagnostics()->Error(DiagMessage(apk->GetSource())
+                                                 << "failed to serialize file " << *file->path);
+                return false;
+              }
+            } // file
+          } // config_value
+        } // entry
+      } // type
+    } // package
   }
-
-  // Resources
-  for (const auto& package : apk->GetResourceTable()->packages) {
-    for (const auto& type : package->types) {
-      for (const auto& entry : type->entries) {
-        for (const auto& config_value : entry->values) {
-          const FileReference* file = ValueCast<FileReference>(config_value->value.get());
-          if (file != nullptr) {
-            if (file->file == nullptr) {
-              context->GetDiagnostics()->Error(DiagMessage(apk->GetSource())
-                                               << "no file associated with " << *file);
-              return false;
-            }
-
-            if (!serializer->SerializeFile(file, writer)) {
-              context->GetDiagnostics()->Error(DiagMessage(apk->GetSource())
-                                               << "failed to serialize file " << *file->path);
-              return false;
-            }
-          } // file
-        } // config_value
-      } // entry
-    } // type
-  } // package
 
   // Other files
   std::unique_ptr<io::IFileCollectionIterator> iterator = apk->GetFileCollection()->Iterator();

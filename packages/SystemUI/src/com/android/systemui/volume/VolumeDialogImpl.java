@@ -29,11 +29,15 @@ import android.app.Dialog;
 import android.app.KeyguardManager;
 import android.content.Context;
 import android.content.DialogInterface;
+import android.content.pm.PackageManager;
 import android.content.res.ColorStateList;
 import android.content.res.Resources;
 import android.graphics.Color;
 import android.graphics.Rect;
+import android.graphics.drawable.AnimatedVectorDrawable;
 import android.graphics.drawable.ColorDrawable;
+import android.graphics.drawable.Drawable;
+import android.graphics.drawable.TransitionDrawable;
 import android.media.AudioManager;
 import android.media.AudioSystem;
 import android.os.Debug;
@@ -42,6 +46,8 @@ import android.os.Looper;
 import android.os.Message;
 import android.os.SystemClock;
 import android.provider.Settings.Global;
+import android.transition.AutoTransition;
+import android.transition.TransitionManager;
 import android.util.Log;
 import android.util.Slog;
 import android.util.SparseBooleanArray;
@@ -66,6 +72,7 @@ import android.widget.TextView;
 
 import com.android.settingslib.Utils;
 import com.android.systemui.Dependency;
+import com.android.systemui.Interpolators;
 import com.android.systemui.R;
 import com.android.systemui.plugins.VolumeDialog;
 import com.android.systemui.plugins.VolumeDialogController;
@@ -97,7 +104,7 @@ public class VolumeDialogImpl implements VolumeDialog {
     private CustomDialog mDialog;
     private ViewGroup mDialogView;
     private ViewGroup mDialogRowsView;
-    private ViewGroup mDialogContentView;
+    private ImageButton mExpandButton;
     private ImageButton mRingerIcon;
     private TextView mRingerStatus;
     private final List<VolumeRow> mRows = new ArrayList<>();
@@ -109,9 +116,10 @@ public class VolumeDialogImpl implements VolumeDialog {
     private final Accessibility mAccessibility = new Accessibility();
     private final ColorStateList mActiveSliderTint;
     private final ColorStateList mInactiveSliderTint;
-    private VolumeUiLayout mHardwareLayout;
 
     private boolean mShowing;
+    private boolean mExpanded;
+    private boolean mExpandButtonAnimationRunning;
     private boolean mShowA11yStream;
 
     private int mActiveStream;
@@ -170,57 +178,57 @@ public class VolumeDialogImpl implements VolumeDialog {
         mWindow.setWindowAnimations(com.android.internal.R.style.Animation_Toast);
 
         mDialog.setContentView(R.layout.volume_dialog);
-        mDialog.setOnShowListener(new DialogInterface.OnShowListener() {
-            @Override
-            public void onShow(DialogInterface dialog) {
-                mDialogView.setTranslationY(-mDialogView.getHeight());
-                mDialogView.setAlpha(0);
-                mDialogView.animate()
-                        .alpha(1)
-                        .translationY(0)
-                        .setDuration(300)
-                        .setInterpolator(new SystemUIInterpolators.LogDecelerateInterpolator())
-                        .withEndAction(() -> {
-                            mWindow.getDecorView().requestAccessibilityFocus();
-                        })
-                        .start();
-            }
+        mDialog.setOnShowListener(dialog -> {
+            mDialogView.setTranslationY(-mDialogView.getHeight());
+            mDialogView.setAlpha(0);
+            mDialogView.animate()
+                    .alpha(1)
+                    .translationY(0)
+                    .setDuration(300)
+                    .setInterpolator(new SystemUIInterpolators.LogDecelerateInterpolator())
+                    .withEndAction(() -> {
+                        mWindow.getDecorView().requestAccessibilityFocus();
+                    })
+                    .start();
         });
         mDialogView = mDialog.findViewById(R.id.volume_dialog);
-        mDialogView.setOnHoverListener(new View.OnHoverListener() {
-            @Override
-            public boolean onHover(View v, MotionEvent event) {
-                int action = event.getActionMasked();
-                mHovering = (action == MotionEvent.ACTION_HOVER_ENTER)
-                        || (action == MotionEvent.ACTION_HOVER_MOVE);
-                rescheduleTimeoutH();
-                return true;
-            }
+        mDialogView.setOnHoverListener((v, event) -> {
+            int action = event.getActionMasked();
+            mHovering = (action == MotionEvent.ACTION_HOVER_ENTER)
+                    || (action == MotionEvent.ACTION_HOVER_MOVE);
+            rescheduleTimeoutH();
+            return true;
         });
-        mHardwareLayout = VolumeUiLayout.get(mDialogView);
-        mHardwareLayout.setOutsideTouchListener(view -> dismiss(DISMISS_REASON_TOUCH_OUTSIDE));
+        VolumeUiLayout hardwareLayout = VolumeUiLayout.get(mDialogView);
+        hardwareLayout.setOutsideTouchListener(view -> dismiss(DISMISS_REASON_TOUCH_OUTSIDE));
 
-        mDialogContentView = mDialog.findViewById(R.id.volume_dialog_content);
-        mDialogRowsView = mDialogContentView.findViewById(R.id.volume_dialog_rows);
-        mRingerIcon = mDialogContentView.findViewById(R.id.ringer_icon);
-        mRingerStatus = mDialogContentView.findViewById(R.id.ringer_status);
+        ViewGroup dialogContentView = mDialog.findViewById(R.id.volume_dialog_content);
+        mDialogRowsView = dialogContentView.findViewById(R.id.volume_dialog_rows);
+        mRingerIcon = mDialog.findViewById(R.id.ringer_icon);
+        mRingerStatus = mDialog.findViewById(R.id.ringer_status);
+
+        mExpanded = false;
+        mExpandButton = mDialogView.findViewById(R.id.volume_expand_button);
+        mExpandButton.setOnClickListener(mClickExpand);
+        mExpandButton.setVisibility(
+                AudioSystem.isSingleVolume(mContext) ? View.GONE : View.VISIBLE);
 
         if (mRows.isEmpty()) {
             addRow(AudioManager.STREAM_MUSIC,
-                    R.drawable.ic_volume_media, R.drawable.ic_volume_media_mute, true);
+                    R.drawable.ic_volume_media, R.drawable.ic_volume_media_mute, true, true);
             if (!AudioSystem.isSingleVolume(mContext)) {
                 addRow(AudioManager.STREAM_RING,
-                        R.drawable.ic_volume_ringer, R.drawable.ic_volume_ringer_mute, false);
+                        R.drawable.ic_volume_ringer, R.drawable.ic_volume_ringer_mute, true, false);
                 addRow(AudioManager.STREAM_ALARM,
-                        R.drawable.ic_volume_alarm, R.drawable.ic_volume_alarm_mute, false);
+                        R.drawable.ic_volume_alarm, R.drawable.ic_volume_alarm_mute, true, false);
                 addRow(AudioManager.STREAM_VOICE_CALL,
-                        R.drawable.ic_volume_voice, R.drawable.ic_volume_voice, false);
+                        R.drawable.ic_volume_voice, R.drawable.ic_volume_voice, false, false);
                 addRow(AudioManager.STREAM_BLUETOOTH_SCO,
-                        R.drawable.ic_volume_bt_sco, R.drawable.ic_volume_bt_sco, false);
-                addRow(AudioManager.STREAM_SYSTEM,
-                        R.drawable.ic_volume_system, R.drawable.ic_volume_system_mute, false);
+                        R.drawable.ic_volume_bt_sco, R.drawable.ic_volume_bt_sco, false, false);
+                addRow(AudioManager.STREAM_SYSTEM, R.drawable.ic_volume_system,
+                        R.drawable.ic_volume_system_mute, false, false);
                 addRow(AudioManager.STREAM_ACCESSIBILITY, R.drawable.ic_volume_accessibility,
-                        R.drawable.ic_volume_accessibility, true);
+                        R.drawable.ic_volume_accessibility, true, false);
             }
         } else {
             addExistingRows();
@@ -249,14 +257,15 @@ public class VolumeDialogImpl implements VolumeDialog {
         mHandler.sendEmptyMessage(H.RECHECK_ALL);
     }
 
-    private void addRow(int stream, int iconRes, int iconMuteRes, boolean important) {
-        addRow(stream, iconRes, iconMuteRes, important, false);
+    private void addRow(int stream, int iconRes, int iconMuteRes, boolean important,
+            boolean defaultStream) {
+        addRow(stream, iconRes, iconMuteRes, important, defaultStream, false);
     }
 
     private void addRow(int stream, int iconRes, int iconMuteRes, boolean important,
-            boolean dynamic) {
+            boolean defaultStream, boolean dynamic) {
         VolumeRow row = new VolumeRow();
-        initRow(row, stream, iconRes, iconMuteRes, important);
+        initRow(row, stream, iconRes, iconMuteRes, important, defaultStream);
         int rowSize;
         int viewSize;
         if (mShowA11yStream && dynamic && (rowSize = mRows.size()) > 1
@@ -274,7 +283,8 @@ public class VolumeDialogImpl implements VolumeDialog {
         int N = mRows.size();
         for (int i = 0; i < N; i++) {
             final VolumeRow row = mRows.get(i);
-            initRow(row, row.stream, row.iconRes, row.iconMuteRes, row.important);
+            initRow(row, row.stream, row.iconRes, row.iconMuteRes, row.important,
+                    row.defaultStream);
             mDialogRowsView.addView(row.view);
             updateVolumeRowH(row);
         }
@@ -299,6 +309,7 @@ public class VolumeDialogImpl implements VolumeDialog {
     public void dump(PrintWriter writer) {
         writer.println(VolumeDialogImpl.class.getSimpleName() + " state:");
         writer.print("  mShowing: "); writer.println(mShowing);
+        writer.print("  mExpanded: "); writer.println(mExpanded);
         writer.print("  mActiveStream: "); writer.println(mActiveStream);
         writer.print("  mDynamic: "); writer.println(mDynamic);
         writer.print("  mAutomute: "); writer.println(mAutomute);
@@ -317,11 +328,12 @@ public class VolumeDialogImpl implements VolumeDialog {
 
     @SuppressLint("InflateParams")
     private void initRow(final VolumeRow row, final int stream, int iconRes, int iconMuteRes,
-            boolean important) {
+            boolean important, boolean defaultStream) {
         row.stream = stream;
         row.iconRes = iconRes;
         row.iconMuteRes = iconMuteRes;
         row.important = important;
+        row.defaultStream = defaultStream;
         row.view = mDialog.getLayoutInflater().inflate(R.layout.volume_dialog_row, null);
         row.view.setId(row.stream);
         row.view.setTag(row);
@@ -359,34 +371,31 @@ public class VolumeDialogImpl implements VolumeDialog {
         row.icon = row.view.findViewById(R.id.volume_row_icon);
         row.icon.setImageResource(iconRes);
         if (row.stream != AudioSystem.STREAM_ACCESSIBILITY) {
-            row.icon.setOnClickListener(new OnClickListener() {
-                @Override
-                public void onClick(View v) {
-                    Events.writeEvent(mContext, Events.EVENT_ICON_CLICK, row.stream, row.iconState);
-                    mController.setActiveStream(row.stream);
-                    if (row.stream == AudioManager.STREAM_RING) {
-                        final boolean hasVibrator = mController.hasVibrator();
-                        if (mState.ringerModeInternal == AudioManager.RINGER_MODE_NORMAL) {
-                            if (hasVibrator) {
-                                mController.setRingerMode(AudioManager.RINGER_MODE_VIBRATE, false);
-                            } else {
-                                final boolean wasZero = row.ss.level == 0;
-                                mController.setStreamVolume(stream,
-                                        wasZero ? row.lastAudibleLevel : 0);
-                            }
+            row.icon.setOnClickListener(v -> {
+                Events.writeEvent(mContext, Events.EVENT_ICON_CLICK, row.stream, row.iconState);
+                mController.setActiveStream(row.stream);
+                if (row.stream == AudioManager.STREAM_RING) {
+                    final boolean hasVibrator = mController.hasVibrator();
+                    if (mState.ringerModeInternal == AudioManager.RINGER_MODE_NORMAL) {
+                        if (hasVibrator) {
+                            mController.setRingerMode(AudioManager.RINGER_MODE_VIBRATE, false);
                         } else {
-                            mController.setRingerMode(AudioManager.RINGER_MODE_NORMAL, false);
-                            if (row.ss.level == 0) {
-                                mController.setStreamVolume(stream, 1);
-                            }
+                            final boolean wasZero = row.ss.level == 0;
+                            mController.setStreamVolume(stream,
+                                    wasZero ? row.lastAudibleLevel : 0);
                         }
                     } else {
-                        final boolean vmute = row.ss.level == row.ss.levelMin;
-                        mController.setStreamVolume(stream,
-                                vmute ? row.lastAudibleLevel : row.ss.levelMin);
+                        mController.setRingerMode(AudioManager.RINGER_MODE_NORMAL, false);
+                        if (row.ss.level == 0) {
+                            mController.setStreamVolume(stream, 1);
+                        }
                     }
-                    row.userAttempt = 0;  // reset the grace period, slider updates immediately
+                } else {
+                    final boolean vmute = row.ss.level == row.ss.levelMin;
+                    mController.setStreamVolume(stream,
+                            vmute ? row.lastAudibleLevel : row.ss.levelMin);
                 }
+                row.userAttempt = 0;  // reset the grace period, slider updates immediately
             });
         } else {
             row.icon.setImportantForAccessibility(View.IMPORTANT_FOR_ACCESSIBILITY_NO);
@@ -450,6 +459,7 @@ public class VolumeDialogImpl implements VolumeDialog {
     private int computeTimeoutH() {
         if (mAccessibility.mFeedbackEnabled) return 20000;
         if (mHovering) return 16000;
+        if (mExpanded) return 5000;
         if (mSafetyWarning != null) return 5000;
         return 3000;
     }
@@ -460,6 +470,8 @@ public class VolumeDialogImpl implements VolumeDialog {
         if (!mShowing) return;
         mDialogView.animate().cancel();
         mShowing = false;
+
+        updateExpandedH(false /* expanding */, true /* dismissing */);
 
         mDialogView.setTranslationY(0);
         mDialogView.setAlpha(1);
@@ -493,6 +505,76 @@ public class VolumeDialogImpl implements VolumeDialog {
         }
     }
 
+    private void updateExpandedH(final boolean expanded, final boolean dismissing) {
+        if (D.BUG) Log.d(TAG, "updateExpandedH " + expanded);
+
+        if (mExpanded == expanded) return;
+        mExpanded = expanded;
+        mExpandButtonAnimationRunning = isAttached();
+        updateExpandButtonH();
+        TransitionManager.endTransitions(mDialogView);
+        final VolumeRow activeRow = getActiveRow();
+        if (!dismissing) {
+            mWindow.setLayout(mWindow.getAttributes().width, ViewGroup.LayoutParams.MATCH_PARENT);
+            TransitionManager.beginDelayedTransition(mDialogView, getTransition());
+        }
+        updateRowsH(activeRow);
+        rescheduleTimeoutH();
+    }
+
+    private AutoTransition getTransition() {
+        AutoTransition transition = new AutoTransition();
+        transition.setDuration(300);
+        transition.setInterpolator(Interpolators.LINEAR_OUT_SLOW_IN);
+        return transition;
+    }
+
+    private void updateExpandButtonH() {
+        if (D.BUG) Log.d(TAG, "updateExpandButtonH");
+
+        mExpandButton.setClickable(!mExpandButtonAnimationRunning);
+        if (!(mExpandButtonAnimationRunning && isAttached())) {
+            final int res = mExpanded ? R.drawable.ic_volume_collapse_animation
+                    : R.drawable.ic_volume_expand_animation;
+            if (hasTouchFeature()) {
+                mExpandButton.setImageResource(res);
+            } else {
+                // if there is no touch feature, show the volume ringer instead
+                mExpandButton.setImageResource(R.drawable.ic_volume_ringer);
+                mExpandButton.setBackgroundResource(0);  // remove gray background emphasis
+            }
+            mExpandButton.setContentDescription(mContext.getString(mExpanded ?
+                    R.string.accessibility_volume_collapse : R.string.accessibility_volume_expand));
+        }
+        if (mExpandButtonAnimationRunning) {
+            final Drawable d = mExpandButton.getDrawable();
+            if (d instanceof AnimatedVectorDrawable) {
+                // workaround to reset drawable
+                final AnimatedVectorDrawable avd = (AnimatedVectorDrawable) d.getConstantState()
+                        .newDrawable();
+                mExpandButton.setImageDrawable(avd);
+                avd.start();
+                mHandler.postDelayed(new Runnable() {
+                    @Override
+                    public void run() {
+                        mExpandButtonAnimationRunning = false;
+                        updateExpandButtonH();
+                        rescheduleTimeoutH();
+                    }
+                }, 300);
+            }
+        }
+    }
+
+    private boolean isAttached() {
+        return mDialogView != null && mDialogView.isAttachedToWindow();
+    }
+
+    private boolean hasTouchFeature() {
+        final PackageManager pm = mContext.getPackageManager();
+        return pm.hasSystemFeature(PackageManager.FEATURE_TOUCHSCREEN);
+    }
+
     private boolean shouldBeVisibleH(VolumeRow row, VolumeRow activeRow) {
         boolean isActive = row == activeRow;
         if (row.stream == AudioSystem.STREAM_ACCESSIBILITY) {
@@ -506,7 +588,7 @@ public class VolumeDialogImpl implements VolumeDialog {
             return true;
         }
 
-        return row.important || isActive;
+        return row.defaultStream || isActive || (mExpanded && row.important);
     }
 
     private void updateRowsH(final VolumeRow activeRow) {
@@ -545,7 +627,7 @@ public class VolumeDialogImpl implements VolumeDialog {
                     break;
                 case AudioManager.RINGER_MODE_NORMAL:
                 default:
-                    boolean muted = (mAutomute && ss.level == 0) || ss.muted ? true : false;
+                    boolean muted = (mAutomute && ss.level == 0) || ss.muted;
                     if (muted) {
                         mRingerStatus.setText(R.string.volume_ringer_status_silent);
                         mRingerIcon.setImageResource(R.drawable.ic_volume_ringer_mute);
@@ -596,7 +678,7 @@ public class VolumeDialogImpl implements VolumeDialog {
             mDynamic.put(stream, true);
             if (findRow(stream) == null) {
                 addRow(stream, R.drawable.ic_volume_remote, R.drawable.ic_volume_remote_mute, true,
-                        true);
+                        false, true);
             }
         }
 
@@ -843,6 +925,16 @@ public class VolumeDialogImpl implements VolumeDialog {
         }
     }
 
+    private final OnClickListener mClickExpand = new OnClickListener() {
+        @Override
+        public void onClick(View v) {
+            mExpandButton.animate().cancel();
+            final boolean newExpand = !mExpanded;
+            Events.writeEvent(mContext, Events.EVENT_EXPAND, newExpand);
+            updateExpandedH(newExpand, false /* dismissing */);
+        }
+    };
+
     private final VolumeDialogController.Callbacks mControllerCallbackH
             = new VolumeDialogController.Callbacks() {
         @Override
@@ -898,8 +990,7 @@ public class VolumeDialogImpl implements VolumeDialog {
 
         @Override
         public void onAccessibilityModeChanged(Boolean showA11yStream) {
-            boolean show = showA11yStream == null ? false : showA11yStream;
-            mShowA11yStream = show;
+            mShowA11yStream = showA11yStream == null ? false : showA11yStream;
             VolumeRow activeRow = getActiveRow();
             if (!mShowA11yStream && AudioManager.STREAM_ACCESSIBILITY == activeRow.stream) {
                 dismissH(Events.DISMISS_STREAM_GONE);
@@ -1100,6 +1191,7 @@ public class VolumeDialogImpl implements VolumeDialog {
         private int iconRes;
         private int iconMuteRes;
         private boolean important;
+        private boolean defaultStream;
         private ColorStateList cachedSliderTint;
         private int iconState;  // from Events
         private ObjectAnimator anim;  // slider progress animation for non-touch-related updates

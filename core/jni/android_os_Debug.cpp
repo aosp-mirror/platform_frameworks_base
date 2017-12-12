@@ -747,7 +747,7 @@ static long long get_zram_mem_used()
 
 static void android_os_Debug_getMemInfo(JNIEnv *env, jobject clazz, jlongArray out)
 {
-    char buffer[1024];
+    char buffer[4096];
     size_t numFound = 0;
 
     if (out == NULL) {

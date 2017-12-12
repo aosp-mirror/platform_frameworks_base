@@ -19,6 +19,7 @@ package android.text.format;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 
+import android.platform.test.annotations.Presubmit;
 import android.support.test.filters.SmallTest;
 import android.support.test.runner.AndroidJUnit4;
 
@@ -27,6 +28,7 @@ import org.junit.runner.RunWith;
 
 import java.util.Locale;
 
+@Presubmit
 @SmallTest
 @RunWith(AndroidJUnit4.class)
 public class DateFormatTest {

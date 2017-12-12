@@ -26,6 +26,7 @@ import static org.junit.Assert.assertTrue;
 
 import android.graphics.Canvas;
 import android.graphics.Paint;
+import android.platform.test.annotations.Presubmit;
 import android.support.test.filters.SmallTest;
 import android.support.test.runner.AndroidJUnit4;
 import android.text.style.ReplacementSpan;
@@ -33,6 +34,7 @@ import android.text.style.ReplacementSpan;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
+@Presubmit
 @SmallTest
 @RunWith(AndroidJUnit4.class)
 public class DynamicLayoutTest {

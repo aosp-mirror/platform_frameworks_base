@@ -1310,6 +1310,19 @@ public class CarrierConfigManager {
      */
     public static final String KEY_ALLOW_HOLD_IN_IMS_CALL_BOOL = "allow_hold_in_ims_call";
 
+
+    /**
+     * Flag indicating whether the carrier always wants to play an "on-hold" tone when a call has
+     * been remotely held.
+     * <p>
+     * When {@code true}, if the IMS stack indicates that the call session has been held, a signal
+     * will be sent from Telephony to play an audible "on-hold" tone played to the user.
+     * When {@code false}, a hold tone will only be played if the audio session becomes inactive.
+     * @hide
+     */
+    public static final String KEY_ALWAYS_PLAY_REMOTE_HOLD_TONE_BOOL =
+            "always_play_remote_hold_tone_bool";
+
     /**
      * When true, indicates that adding a call is disabled when there is an ongoing video call
      * or when there is an ongoing call on wifi which was downgraded from video and VoWifi is
@@ -1648,6 +1661,11 @@ public class CarrierConfigManager {
             "show_ims_registration_status_bool";
 
     /**
+     * Flag indicating whether the carrier supports RTT over IMS.
+     */
+    public static final String KEY_RTT_SUPPORTED_BOOL = "rtt_supported_bool";
+
+    /**
      * The flag to disable the popup dialog which warns the user of data charges.
      * @hide
      */
@@ -1706,6 +1724,7 @@ public class CarrierConfigManager {
     static {
         sDefaults = new PersistableBundle();
         sDefaults.putBoolean(KEY_ALLOW_HOLD_IN_IMS_CALL_BOOL, true);
+        sDefaults.putBoolean(KEY_ALWAYS_PLAY_REMOTE_HOLD_TONE_BOOL, false);
         sDefaults.putBoolean(KEY_ADDITIONAL_CALL_SETTING_BOOL, true);
         sDefaults.putBoolean(KEY_ALLOW_EMERGENCY_NUMBERS_IN_CALL_LOG_BOOL, false);
         sDefaults.putBoolean(KEY_ALLOW_LOCAL_DTMF_TONES_BOOL, true);
@@ -1978,6 +1997,7 @@ public class CarrierConfigManager {
         sDefaults.putStringArray(KEY_NON_ROAMING_OPERATOR_STRING_ARRAY, null);
         sDefaults.putStringArray(KEY_ROAMING_OPERATOR_STRING_ARRAY, null);
         sDefaults.putBoolean(KEY_SHOW_IMS_REGISTRATION_STATUS_BOOL, false);
+        sDefaults.putBoolean(KEY_RTT_SUPPORTED_BOOL, false);
         sDefaults.putBoolean(KEY_DISABLE_CHARGE_INDICATION_BOOL, false);
         sDefaults.putStringArray(KEY_FEATURE_ACCESS_CODES_STRING_ARRAY, null);
         sDefaults.putBoolean(KEY_IDENTIFY_HIGH_DEFINITION_CALLS_IN_CALL_LOG_BOOL, false);

@@ -126,28 +126,9 @@ import java.util.concurrent.TimeUnit;
         return mIsComplete;
     }
 
-    /**
-     * @return the human-readable string of this transaction's type
-     */
-    private String getTransactionTypeString() {
-        switch (mTransactionType) {
-            case ContextHubTransaction.TYPE_LOAD_NANOAPP:
-                return "Load";
-            case ContextHubTransaction.TYPE_UNLOAD_NANOAPP:
-                return "Unload";
-            case ContextHubTransaction.TYPE_ENABLE_NANOAPP:
-                return "Enable";
-            case ContextHubTransaction.TYPE_DISABLE_NANOAPP:
-                return "Disable";
-            case ContextHubTransaction.TYPE_QUERY_NANOAPPS:
-                return "Query";
-            default:
-                return "Unknown";
-        }
-    }
-
     @Override
     public String toString() {
-        return getTransactionTypeString() + " transaction (ID = " + mTransactionId + ")";
+        return ContextHubTransaction.typeToString(mTransactionType, true /* upperCase */)
+                + " transaction (ID = " + mTransactionId + ")";
     }
 }

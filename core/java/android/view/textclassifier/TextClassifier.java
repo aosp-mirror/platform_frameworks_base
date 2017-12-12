@@ -48,8 +48,13 @@ public interface TextClassifier {
 
     /** @hide */
     @Retention(RetentionPolicy.SOURCE)
-    @StringDef({
-            TYPE_UNKNOWN, TYPE_OTHER, TYPE_EMAIL, TYPE_PHONE, TYPE_ADDRESS, TYPE_URL
+    @StringDef(prefix = { "TYPE_" }, value = {
+            TYPE_UNKNOWN,
+            TYPE_OTHER,
+            TYPE_EMAIL,
+            TYPE_PHONE,
+            TYPE_ADDRESS,
+            TYPE_URL,
     })
     @interface EntityType {}
 

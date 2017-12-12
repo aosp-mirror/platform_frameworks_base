@@ -977,7 +977,7 @@ public final class MediaDrm {
     public static final String PROPERTY_ALGORITHMS = "algorithms";
 
     /** @hide */
-    @StringDef({
+    @StringDef(prefix = { "PROPERTY_" }, value = {
         PROPERTY_VENDOR,
         PROPERTY_VERSION,
         PROPERTY_DESCRIPTION,
@@ -1010,7 +1010,7 @@ public final class MediaDrm {
     public static final String PROPERTY_DEVICE_UNIQUE_ID = "deviceUniqueId";
 
     /** @hide */
-    @StringDef({
+    @StringDef(prefix = { "PROPERTY_" }, value = {
         PROPERTY_DEVICE_UNIQUE_ID,
     })
     @Retention(RetentionPolicy.SOURCE)
