@@ -6361,6 +6361,21 @@ public class DevicePolicyManager {
     }
 
     /**
+     * Checks if the profile owner is running in an ephemeral user.
+     *
+     * @param admin Which {@link DeviceAdminReceiver} this request is associated with.
+     * @return whether the profile owner is running in an ephemeral user.
+     */
+    public boolean isEphemeralUser(@NonNull ComponentName admin) {
+        throwIfParentInstance("isEphemeralUser");
+        try {
+            return mService.isEphemeralUser(admin);
+        } catch (RemoteException re) {
+            throw re.rethrowFromSystemServer();
+        }
+    }
+
+    /**
      * Retrieves the application restrictions for a given target application running in the calling
      * user.
      * <p>

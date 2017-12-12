@@ -8541,6 +8541,22 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
     }
 
     @Override
+    public boolean isEphemeralUser(ComponentName who) {
+        Preconditions.checkNotNull(who, "ComponentName is null");
+        synchronized (this) {
+            getActiveAdminForCallerLocked(who, DeviceAdminInfo.USES_POLICY_PROFILE_OWNER);
+        }
+
+        final int callingUserId = mInjector.userHandleGetCallingUserId();
+        final long id = mInjector.binderClearCallingIdentity();
+        try {
+            return mInjector.getUserManager().isUserEphemeral(callingUserId);
+        } finally {
+            mInjector.binderRestoreCallingIdentity(id);
+        }
+    }
+
+    @Override
     public Bundle getApplicationRestrictions(ComponentName who, String callerPackage,
             String packageName) {
         enforceCanManageScope(who, callerPackage, DeviceAdminInfo.USES_POLICY_PROFILE_OWNER,

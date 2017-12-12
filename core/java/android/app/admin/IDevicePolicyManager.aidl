@@ -358,6 +358,7 @@ interface IDevicePolicyManager {
         IApplicationThread caller, IBinder token, in Intent service,
         IServiceConnection connection, int flags, int targetUserId);
     List<UserHandle> getBindDeviceAdminTargetUsers(in ComponentName admin);
+    boolean isEphemeralUser(in ComponentName admin);
 
     long getLastSecurityLogRetrievalTime();
     long getLastBugReportRequestTime();
