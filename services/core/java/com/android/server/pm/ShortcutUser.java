@@ -124,20 +124,6 @@ class ShortcutUser {
     /** In-memory-cached default launcher. */
     private ComponentName mCachedLauncher;
 
-    /**
-     * Keep track of additional packages that other parts of the system have said are
-     * allowed to access shortcuts.  The key is the part of the system it came from,
-     * the value is the package name that has access.  We don't persist these because
-     * at boot all relevant system services will push this data back to us they do their
-     * normal evaluation of the state of the world.
-     */
-    private final ArrayMap<String, String> mHostPackages = new ArrayMap<>();
-
-    /**
-     * Set of package name values from above.
-     */
-    private final ArraySet<String> mHostPackageSet = new ArraySet<>();
-
     private String mKnownLocales;
 
     private long mLastAppScanTime;
@@ -482,23 +468,6 @@ class ShortcutUser {
         return mCachedLauncher;
     }
 
-    public void setShortcutHostPackage(@NonNull String type, @Nullable String packageName) {
-        if (packageName != null) {
-            mHostPackages.put(type, packageName);
-        } else {
-            mHostPackages.remove(type);
-        }
-
-        mHostPackageSet.clear();
-        for (int i = 0; i < mHostPackages.size(); i++) {
-            mHostPackageSet.add(mHostPackages.valueAt(i));
-        }
-    }
-
-    public boolean hasHostPackage(@NonNull String packageName) {
-        return mHostPackageSet.contains(packageName);
-    }
-
     public void resetThrottling() {
         for (int i = mPackages.size() - 1; i >= 0; i--) {
             mPackages.valueAt(i).resetThrottling();
@@ -587,18 +556,6 @@ class ShortcutUser {
             pw.print("Last known launcher: ");
             pw.print(mLastKnownLauncher);
             pw.println();
-
-            if (mHostPackages.size() > 0) {
-                pw.print(prefix);
-                pw.println("Host packages:");
-                for (int i = 0; i < mHostPackages.size(); i++) {
-                    pw.print(prefix);
-                    pw.print("  ");
-                    pw.print(mHostPackages.keyAt(i));
-                    pw.print(": ");
-                    pw.println(mHostPackages.valueAt(i));
-                }
-            }
         }
 
         for (int i = 0; i < mLaunchers.size(); i++) {

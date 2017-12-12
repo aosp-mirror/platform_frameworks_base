@@ -280,6 +280,13 @@ public class ShortcutService extends IShortcutService.Stub {
     private final SparseArray<ShortcutUser> mUsers = new SparseArray<>();
 
     /**
+     * User ID -> ShortcutNonPersistentUser
+     */
+    @GuardedBy("mLock")
+    private final SparseArray<ShortcutNonPersistentUser> mShortcutNonPersistentUsers =
+            new SparseArray<>();
+
+    /**
      * Max number of dynamic + manifest shortcuts that each application can have at a time.
      */
     private int mMaxShortcuts;
@@ -1205,6 +1212,18 @@ public class ShortcutService extends IShortcutService.Stub {
             checkPackageChanges(userId);
         }
         return userPackages;
+    }
+
+    /** Return the non-persistent per-user state. */
+    @GuardedBy("mLock")
+    @NonNull
+    ShortcutNonPersistentUser getNonPersistentUserLocked(@UserIdInt int userId) {
+        ShortcutNonPersistentUser ret = mShortcutNonPersistentUsers.get(userId);
+        if (ret == null) {
+            ret = new ShortcutNonPersistentUser(this, userId);
+            mShortcutNonPersistentUsers.put(userId, ret);
+        }
+        return ret;
     }
 
     void forEachLoadedUserLocked(@NonNull Consumer<ShortcutUser> c) {
@@ -2259,7 +2278,7 @@ public class ShortcutService extends IShortcutService.Stub {
             return true;
         }
         synchronized (mLock) {
-            return getUserShortcutsLocked(userId).hasHostPackage(callingPackage);
+            return getNonPersistentUserLocked(userId).hasHostPackage(callingPackage);
         }
     }
 
@@ -2383,10 +2402,7 @@ public class ShortcutService extends IShortcutService.Stub {
     public void setShortcutHostPackage(@NonNull String type, @Nullable String packageName,
             int userId) {
         synchronized (mLock) {
-            throwIfUserLockedL(userId);
-
-            final ShortcutUser user = getUserShortcutsLocked(userId);
-            user.setShortcutHostPackage(type, packageName);
+            getNonPersistentUserLocked(userId).setShortcutHostPackage(type, packageName);
         }
     }
 
@@ -3839,6 +3855,14 @@ public class ShortcutService extends IShortcutService.Stub {
 
             for (int i = 0; i < mUsers.size(); i++) {
                 final ShortcutUser user = mUsers.valueAt(i);
+                if (filter.isUserMatch(user.getUserId())) {
+                    user.dump(pw, "  ", filter);
+                    pw.println();
+                }
+            }
+
+            for (int i = 0; i < mShortcutNonPersistentUsers.size(); i++) {
+                final ShortcutNonPersistentUser user = mShortcutNonPersistentUsers.valueAt(i);
                 if (filter.isUserMatch(user.getUserId())) {
                     user.dump(pw, "  ", filter);
                     pw.println();
