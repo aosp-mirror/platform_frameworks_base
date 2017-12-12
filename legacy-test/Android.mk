@@ -16,35 +16,6 @@
 
 LOCAL_PATH:= $(call my-dir)
 
-# Build the legacy-test library
-# =============================
-# This contains the junit.framework and android.test classes that were in
-# Android API level 25 excluding those from android.test.runner.
-# Also contains the com.android.internal.util.Predicate[s] classes.
-include $(CLEAR_VARS)
-
-LOCAL_SRC_FILES := $(call all-java-files-under, src)
-
-LOCAL_MODULE := legacy-test
-LOCAL_NO_STANDARD_LIBRARIES := true
-LOCAL_JAVA_LIBRARIES := core-oj core-libart framework
-
-include $(BUILD_JAVA_LIBRARY)
-
-# Build the repackaged-legacy-test library
-# ========================================
-# This contains repackaged versions of the classes from legacy-test.
-include $(CLEAR_VARS)
-
-LOCAL_SRC_FILES := $(call all-java-files-under, src)
-
-LOCAL_MODULE := repackaged-legacy-test
-LOCAL_NO_STANDARD_LIBRARIES := true
-LOCAL_JAVA_LIBRARIES := core-oj core-libart framework
-LOCAL_JARJAR_RULES := $(LOCAL_PATH)/jarjar-rules.txt
-
-include $(BUILD_STATIC_JAVA_LIBRARY)
-
 # Generate the stub source files for legacy.test.stubs
 # ====================================================
 include $(CLEAR_VARS)
@@ -133,24 +104,6 @@ update-legacy-test-api: $(LEGACY_TEST_OUTPUT_API_FILE) | $(ACP)
 	$(hide) $(ACP) $(LEGACY_TEST_OUTPUT_API_FILE) $(LEGACY_TEST_API_FILE)
 	@echo Copying removed.txt
 	$(hide) $(ACP) $(LEGACY_TEST_OUTPUT_REMOVED_API_FILE) $(LEGACY_TEST_REMOVED_API_FILE)
-
-# Build the legacy-android-test library
-# =====================================
-# This contains the android.test classes that were in Android API level 25,
-# including those from android.test.runner.
-# Also contains the com.android.internal.util.Predicate[s] classes.
-include $(CLEAR_VARS)
-
-LOCAL_SRC_FILES := \
-    $(call all-java-files-under, src/android) \
-    $(call all-java-files-under, ../test-runner/src/android) \
-    $(call all-java-files-under, ../test-mock/src/android) \
-    $(call all-java-files-under, src/com)
-LOCAL_MODULE := legacy-android-test
-LOCAL_NO_STANDARD_LIBRARIES := true
-LOCAL_JAVA_LIBRARIES := core-oj core-libart framework junit
-
-include $(BUILD_STATIC_JAVA_LIBRARY)
 
 ifeq ($(HOST_OS),linux)
 # Build the legacy-performance-test-hostdex library
