@@ -148,7 +148,7 @@ class ShortcutPackageInfo {
         if (!anyVersionOkay && (currentPackage.getLongVersionCode() < mBackupSourceVersionCode)) {
             Slog.w(TAG, String.format(
                     "Can't restore: package current version %d < backed up version %d",
-                    currentPackage.versionCode, mBackupSourceVersionCode));
+                    currentPackage.getLongVersionCode(), mBackupSourceVersionCode));
             return ShortcutInfo.DISABLED_REASON_VERSION_LOWER;
         }
         return ShortcutInfo.DISABLED_REASON_NOT_DISABLED;
