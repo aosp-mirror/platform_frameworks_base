@@ -24,6 +24,7 @@ import static org.junit.Assert.assertTrue;
 import android.graphics.Canvas;
 import android.graphics.Paint.FontMetricsInt;
 import android.os.LocaleList;
+import android.platform.test.annotations.Presubmit;
 import android.support.test.filters.SmallTest;
 import android.support.test.runner.AndroidJUnit4;
 import android.text.Layout.Alignment;
@@ -43,6 +44,7 @@ import java.util.Locale;
 /**
  * Tests StaticLayout vertical metrics behavior.
  */
+@Presubmit
 @SmallTest
 @RunWith(AndroidJUnit4.class)
 public class StaticLayoutTest {
