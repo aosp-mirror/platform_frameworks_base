@@ -704,14 +704,13 @@ class WindowStateAnimator {
             }
             tmpMatrix.postScale(mWin.mGlobalScale, mWin.mGlobalScale);
 
+            // WindowState.prepareSurfaces expands for surface insets (in order they don't get
+            // clipped by the WindowState surface), so we need to go into the other direction here.
+            tmpMatrix.postTranslate(mWin.mXOffset + mWin.mAttrs.surfaceInsets.left,
+                    mWin.mYOffset + mWin.mAttrs.surfaceInsets.top);
+
             if (appTransformation != null) {
                 tmpMatrix.postConcat(appTransformation.getMatrix());
-            }
-
-            tmpMatrix.postTranslate(mWin.mXOffset, mWin.mYOffset);
-
-            if (screenAnimation) {
-                tmpMatrix.postConcat(screenRotationAnimation.getEnterTransformation().getMatrix());
             }
 
             // "convert" it into SurfaceFlinger's format
@@ -788,7 +787,10 @@ class WindowStateAnimator {
                 TAG, "computeShownFrameLocked: " + this +
                 " not attached, mAlpha=" + mAlpha);
 
-        mWin.mShownPosition.set(mWin.mXOffset, mWin.mYOffset);
+        // WindowState.prepareSurfaces expands for surface insets (in order they don't get
+        // clipped by the WindowState surface), so we need to go into the other direction here.
+        mWin.mShownPosition.set(mWin.mXOffset + mWin.mAttrs.surfaceInsets.left,
+                mWin.mYOffset + mWin.mAttrs.surfaceInsets.top);
         mShownAlpha = mAlpha;
         mHaveMatrix = false;
         mDsDx = mWin.mGlobalScale;

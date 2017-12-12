@@ -4444,6 +4444,10 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
             left -= parent.mFrame.left;
             top -= parent.mFrame.top;
         }
+
+        // Expand for surface insets. See WindowState.expandForSurfaceInsets.
+        left -= mAttrs.surfaceInsets.left;
+        top -= mAttrs.surfaceInsets.top;
         mSurfacePosition.set(left, top);
         if (!mSurfaceAnimator.hasLeash()) {
             t.setPosition(mSurfaceControl, mSurfacePosition.x, mSurfacePosition.y);

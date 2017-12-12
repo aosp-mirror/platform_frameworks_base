@@ -381,6 +381,9 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
      */
     private final ArrayList<SurfaceControl> mPendingDestroyingSurfaces = new ArrayList<>();
 
+    /** Temporary float array to retrieve 3x3 matrix values. */
+    private final float[] mTmpFloats = new float[9];
+
     private final Consumer<WindowState> mUpdateWindowsForAnimator = w -> {
         WindowStateAnimator winAnimator = w.mWinAnimator;
         final AppWindowToken atoken = w.mAppToken;
@@ -3776,5 +3779,22 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
             mPendingDestroyingSurfaces.get(i).destroy();
         }
         mPendingDestroyingSurfaces.clear();
+    }
+
+    @Override
+    void prepareSurfaces() {
+        final ScreenRotationAnimation screenRotationAnimation =
+                mService.mAnimator.getScreenRotationAnimationLocked(mDisplayId);
+        if (screenRotationAnimation != null && screenRotationAnimation.isAnimating()) {
+            screenRotationAnimation.getEnterTransformation().getMatrix().getValues(mTmpFloats);
+            mPendingTransaction.setMatrix(mWindowingLayer,
+                    mTmpFloats[Matrix.MSCALE_X], mTmpFloats[Matrix.MSKEW_Y],
+                    mTmpFloats[Matrix.MSKEW_X], mTmpFloats[Matrix.MSCALE_Y]);
+            mPendingTransaction.setPosition(mWindowingLayer,
+                    mTmpFloats[Matrix.MTRANS_X], mTmpFloats[Matrix.MTRANS_Y]);
+            mPendingTransaction.setAlpha(mWindowingLayer,
+                    screenRotationAnimation.getEnterTransformation().getAlpha());
+        }
+        super.prepareSurfaces();
     }
 }
