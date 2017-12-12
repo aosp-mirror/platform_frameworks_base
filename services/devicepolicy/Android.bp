@@ -1,0 +1,9 @@
+java_library_static {
+    name: "services.devicepolicy",
+    srcs: ["java/**/*.java"],
+
+    libs: [
+        "conscrypt",
+        "services.core",
+    ],
+}

@@ -1,0 +1,5 @@
+java_library_static {
+    name: "services.backup",
+    srcs: ["java/**/*.java"],
+    libs: ["services.core"],
+}
