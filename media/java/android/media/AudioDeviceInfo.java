@@ -127,6 +127,14 @@ public final class AudioDeviceInfo {
     }
 
     /**
+     * @hide
+     * @return The underlying {@link AudioDevicePort} instance.
+     */
+    public AudioDevicePort getPort() {
+        return mPort;
+    }
+
+    /**
      * @return The internal device ID.
      */
     public int getId() {
