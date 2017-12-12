@@ -656,7 +656,9 @@ public class StatusBar extends SystemUI implements DemoMode,
                         + "mStatusBarKeyguardViewManager was null");
                 return;
             }
-            mStatusBarKeyguardViewManager.onKeyguardFadedAway();
+            if (mKeyguardFadingAway) {
+                mStatusBarKeyguardViewManager.onKeyguardFadedAway();
+            }
         }
 
         @Override

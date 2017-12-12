@@ -195,6 +195,10 @@ public class ScrimController implements ViewTreeObserver.OnPreDrawListener,
 
     public void transitionTo(ScrimState state, Callback callback) {
         if (state == mState) {
+            // Call the callback anyway, unless it's already enqueued
+            if (callback != null && mCallback != callback) {
+                callback.onFinished();
+            }
             return;
         } else if (DEBUG) {
             Log.d(TAG, "State changed to: " + state);
