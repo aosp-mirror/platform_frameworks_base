@@ -247,6 +247,9 @@ public class PackageParser {
     }
 
     /** @hide */
+    public static final String APK_FILE_EXTENSION = ".apk";
+
+    /** @hide */
     public static class NewPermissionInfo {
         public final String name;
         public final int sdkVersion;
@@ -621,7 +624,7 @@ public class PackageParser {
     }
 
     public static boolean isApkPath(String path) {
-        return path.endsWith(".apk");
+        return path.endsWith(APK_FILE_EXTENSION);
     }
 
     /**
