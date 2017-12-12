@@ -80,7 +80,6 @@ interface IInputMethodManager {
     boolean switchToLastInputMethod(in IBinder token);
     boolean switchToNextInputMethod(in IBinder token, boolean onlyCurrentIme);
     boolean shouldOfferSwitchingToNextInputMethod(in IBinder token);
-    boolean setInputMethodEnabled(String id, boolean enabled);
     void setAdditionalInputMethodSubtypes(String id, in InputMethodSubtype[] subtypes);
     int getInputMethodWindowVisibleHeight();
     void clearLastInputMethodWindowForTransition(in IBinder token);
