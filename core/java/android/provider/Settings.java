@@ -11145,6 +11145,19 @@ public final class Settings {
                 "notification_snooze_options";
 
         /**
+         * Configuration flags for SQLite Compatibility WAL. Encoded as a key-value list, separated
+         * by commas. E.g.: compatibility_wal_supported=true, wal_syncmode=OFF
+         *
+         * Supported keys:
+         * compatibility_wal_supported      (boolean)
+         * wal_syncmode       (String)
+         *
+         * @hide
+         */
+        public static final String SQLITE_COMPATIBILITY_WAL_FLAGS =
+                "sqlite_compatibility_wal_flags";
+
+        /**
          * Enable GNSS Raw Measurements Full Tracking?
          * 0 = no
          * 1 = yes
