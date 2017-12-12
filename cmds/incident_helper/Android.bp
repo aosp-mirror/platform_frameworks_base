@@ -38,6 +38,7 @@ cc_binary {
 
 cc_test {
     name: "incident_helper_test",
+    test_suites: ["device-tests"],
     defaults: ["incident_helper_defaults"],
     local_include_dirs: ["src/"],
 
