@@ -36,6 +36,7 @@ import android.database.sqlite.SQLiteQueryBuilder;
 import android.os.Bundle;
 import android.os.Environment;
 import android.os.Handler;
+import android.os.Looper;
 import android.os.Message;
 import android.os.Parcel;
 import android.os.RemoteCallbackList;
@@ -69,7 +70,7 @@ import java.util.TimeZone;
  *
  * @hide
  */
-public class SyncStorageEngine extends Handler {
+public class SyncStorageEngine {
 
     private static final String TAG = "SyncManager";
     private static final String TAG_FILE = "SyncManagerFile";
@@ -462,7 +463,10 @@ public class SyncStorageEngine extends Handler {
 
     private boolean mGrantSyncAdaptersAccountAccess;
 
-    private SyncStorageEngine(Context context, File dataDir) {
+    private final MyHandler mHandler;
+
+    private SyncStorageEngine(Context context, File dataDir, Looper looper) {
+        mHandler = new MyHandler(looper);
         mContext = context;
         sSyncStorageEngine = this;
 
@@ -491,15 +495,15 @@ public class SyncStorageEngine extends Handler {
     }
 
     public static SyncStorageEngine newTestInstance(Context context) {
-        return new SyncStorageEngine(context, context.getFilesDir());
+        return new SyncStorageEngine(context, context.getFilesDir(), Looper.getMainLooper());
     }
 
-    public static void init(Context context) {
+    public static void init(Context context, Looper looper) {
         if (sSyncStorageEngine != null) {
             return;
         }
         File dataDir = Environment.getDataDirectory();
-        sSyncStorageEngine = new SyncStorageEngine(context, dataDir);
+        sSyncStorageEngine = new SyncStorageEngine(context, dataDir, looper);
     }
 
     public static SyncStorageEngine getSingleton() {
@@ -527,14 +531,21 @@ public class SyncStorageEngine extends Handler {
         }
     }
 
-    @Override public void handleMessage(Message msg) {
-        if (msg.what == MSG_WRITE_STATUS) {
-            synchronized (mAuthorities) {
-                writeStatusLocked();
-            }
-        } else if (msg.what == MSG_WRITE_STATISTICS) {
-            synchronized (mAuthorities) {
-                writeStatisticsLocked();
+    private class MyHandler extends Handler {
+        public MyHandler(Looper looper) {
+            super(looper);
+        }
+
+        @Override
+        public void handleMessage(Message msg) {
+            if (msg.what == MSG_WRITE_STATUS) {
+                synchronized (mAuthorities) {
+                    writeStatusLocked();
+                }
+            } else if (msg.what == MSG_WRITE_STATISTICS) {
+                synchronized (mAuthorities) {
+                    writeStatisticsLocked();
+                }
             }
         }
     }
@@ -1202,14 +1213,14 @@ public class SyncStorageEngine extends Handler {
 
             if (writeStatusNow) {
                 writeStatusLocked();
-            } else if (!hasMessages(MSG_WRITE_STATUS)) {
-                sendMessageDelayed(obtainMessage(MSG_WRITE_STATUS),
+            } else if (!mHandler.hasMessages(MSG_WRITE_STATUS)) {
+                mHandler.sendMessageDelayed(mHandler.obtainMessage(MSG_WRITE_STATUS),
                         WRITE_STATUS_DELAY);
             }
             if (writeStatisticsNow) {
                 writeStatisticsLocked();
-            } else if (!hasMessages(MSG_WRITE_STATISTICS)) {
-                sendMessageDelayed(obtainMessage(MSG_WRITE_STATISTICS),
+            } else if (!mHandler.hasMessages(MSG_WRITE_STATISTICS)) {
+                mHandler.sendMessageDelayed(mHandler.obtainMessage(MSG_WRITE_STATISTICS),
                         WRITE_STATISTICS_DELAY);
             }
         }
@@ -2102,7 +2113,7 @@ public class SyncStorageEngine extends Handler {
 
         // The file is being written, so we don't need to have a scheduled
         // write until the next change.
-        removeMessages(MSG_WRITE_STATUS);
+        mHandler.removeMessages(MSG_WRITE_STATUS);
 
         FileOutputStream fos = null;
         try {
@@ -2210,7 +2221,7 @@ public class SyncStorageEngine extends Handler {
 
         // The file is being written, so we don't need to have a scheduled
         // write until the next change.
-        removeMessages(MSG_WRITE_STATISTICS);
+        mHandler.removeMessages(MSG_WRITE_STATISTICS);
 
         FileOutputStream fos = null;
         try {

@@ -565,7 +565,7 @@ public class SyncManager {
 
         mLogger = SyncLogger.getInstance();
 
-        SyncStorageEngine.init(context);
+        SyncStorageEngine.init(context, BackgroundThread.get().getLooper());
         mSyncStorageEngine = SyncStorageEngine.getSingleton();
         mSyncStorageEngine.setOnSyncRequestListener(new OnSyncRequestListener() {
             @Override
