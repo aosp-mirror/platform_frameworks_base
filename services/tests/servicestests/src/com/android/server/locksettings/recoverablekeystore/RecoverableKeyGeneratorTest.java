@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package android.security.recoverablekeystore;
+package com.android.server.locksettings.recoverablekeystore;
 
 import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertEquals;
@@ -53,7 +53,8 @@ public class RecoverableKeyGeneratorTest {
     private static final String TEST_ALIAS = "karlin";
     private static final String WRAPPING_KEY_ALIAS = "RecoverableKeyGeneratorTestWrappingKey";
 
-    @Mock RecoverableKeyStorage mRecoverableKeyStorage;
+    @Mock
+    RecoverableKeyStorage mRecoverableKeyStorage;
 
     @Captor ArgumentCaptor<KeyProtection> mKeyProtectionArgumentCaptor;
 
