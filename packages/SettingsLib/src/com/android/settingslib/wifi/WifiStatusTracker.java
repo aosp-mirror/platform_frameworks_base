@@ -51,10 +51,7 @@ public class WifiStatusTracker {
             connected = networkInfo != null && networkInfo.isConnected();
             // If Connected grab the signal strength and ssid.
             if (connected) {
-                // try getting it out of the intent first
-                WifiInfo info = intent.getParcelableExtra(WifiManager.EXTRA_WIFI_INFO) != null
-                        ? (WifiInfo) intent.getParcelableExtra(WifiManager.EXTRA_WIFI_INFO)
-                        : mWifiManager.getConnectionInfo();
+                WifiInfo info = mWifiManager.getConnectionInfo();
                 if (info != null) {
                     ssid = getSsid(info);
                 } else {
