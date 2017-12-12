@@ -164,7 +164,6 @@ public class KeyguardViewMediator extends SystemUI {
     private static final int NOTIFY_SCREEN_TURNED_ON = 15;
     private static final int NOTIFY_SCREEN_TURNED_OFF = 16;
     private static final int NOTIFY_STARTED_GOING_TO_SLEEP = 17;
-    private static final int SET_SWITCHING_USER = 18;
 
     /**
      * The default amount of time we stay awake (used for all key input)
@@ -1419,11 +1418,7 @@ public class KeyguardViewMediator extends SystemUI {
     }
 
     public void setSwitchingUser(boolean switching) {
-        Trace.beginSection("KeyguardViewMediator#setSwitchingUser");
-        mHandler.removeMessages(SET_SWITCHING_USER);
-        Message msg = mHandler.obtainMessage(SET_SWITCHING_USER, switching ? 1 : 0, 0);
-        mHandler.sendMessage(msg);
-        Trace.endSection();
+        KeyguardUpdateMonitor.getInstance(mContext).setSwitchingUser(switching);
     }
 
     /**
@@ -1561,11 +1556,6 @@ public class KeyguardViewMediator extends SystemUI {
                 case KEYGUARD_DONE_PENDING_TIMEOUT:
                     Trace.beginSection("KeyguardViewMediator#handleMessage KEYGUARD_DONE_PENDING_TIMEOUT");
                     Log.w(TAG, "Timeout while waiting for activity drawn!");
-                    Trace.endSection();
-                    break;
-                case SET_SWITCHING_USER:
-                    Trace.beginSection("KeyguardViewMediator#handleMessage SET_SWITCHING_USER");
-                    KeyguardUpdateMonitor.getInstance(mContext).setSwitchingUser(msg.arg1 != 0);
                     Trace.endSection();
                     break;
             }
