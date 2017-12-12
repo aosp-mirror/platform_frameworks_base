@@ -2967,7 +2967,7 @@ class AlarmManagerService extends SystemService {
 
             proto.write(AlarmProto.TAG, statsTag);
             proto.write(AlarmProto.TYPE, type);
-            proto.write(AlarmProto.WHEN_ELAPSED_MS, whenElapsed - nowElapsed);
+            proto.write(AlarmProto.TIME_UNTIL_WHEN_ELAPSED_MS, whenElapsed - nowElapsed);
             proto.write(AlarmProto.WINDOW_LENGTH_MS, windowLength);
             proto.write(AlarmProto.REPEAT_INTERVAL_MS, repeatInterval);
             proto.write(AlarmProto.COUNT, count);
