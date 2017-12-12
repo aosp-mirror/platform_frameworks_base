@@ -42,7 +42,7 @@ static_assert(sizeof(sCurrentFileVersion) == sHeaderSize, "Header size is wrong"
 constexpr int sHistogramSize = ProfileData::HistogramSize();
 
 static bool mergeProfileDataIntoProto(service::GraphicsStatsProto* proto,
-                                      const std::string& package, int versionCode,
+                                      const std::string& package, int64_t versionCode,
                                       int64_t startTime, int64_t endTime, const ProfileData* data);
 static void dumpAsTextToFd(service::GraphicsStatsProto* proto, int outFd);
 
@@ -154,7 +154,7 @@ bool GraphicsStatsService::parseFromFile(const std::string& path,
 }
 
 bool mergeProfileDataIntoProto(service::GraphicsStatsProto* proto, const std::string& package,
-                               int versionCode, int64_t startTime, int64_t endTime,
+                               int64_t versionCode, int64_t startTime, int64_t endTime,
                                const ProfileData* data) {
     if (proto->stats_start() == 0 || proto->stats_start() > startTime) {
         proto->set_stats_start(startTime);
@@ -230,7 +230,7 @@ void dumpAsTextToFd(service::GraphicsStatsProto* proto, int fd) {
         return;
     }
     dprintf(fd, "\nPackage: %s", proto->package_name().c_str());
-    dprintf(fd, "\nVersion: %d", proto->version_code());
+    dprintf(fd, "\nVersion: %lld", proto->version_code());
     dprintf(fd, "\nStats since: %lldns", proto->stats_start());
     dprintf(fd, "\nStats end: %lldns", proto->stats_end());
     auto summary = proto->summary();
@@ -254,7 +254,7 @@ void dumpAsTextToFd(service::GraphicsStatsProto* proto, int fd) {
 }
 
 void GraphicsStatsService::saveBuffer(const std::string& path, const std::string& package,
-                                      int versionCode, int64_t startTime, int64_t endTime,
+                                      int64_t versionCode, int64_t startTime, int64_t endTime,
                                       const ProfileData* data) {
     service::GraphicsStatsProto statsProto;
     if (!parseFromFile(path, &statsProto)) {
@@ -320,8 +320,8 @@ GraphicsStatsService::Dump* GraphicsStatsService::createDump(int outFd, DumpType
 }
 
 void GraphicsStatsService::addToDump(Dump* dump, const std::string& path,
-                                     const std::string& package, int versionCode, int64_t startTime,
-                                     int64_t endTime, const ProfileData* data) {
+                                     const std::string& package, int64_t versionCode,
+                                     int64_t startTime, int64_t endTime, const ProfileData* data) {
     service::GraphicsStatsProto statsProto;
     if (!path.empty() && !parseFromFile(path, &statsProto)) {
         statsProto.Clear();
