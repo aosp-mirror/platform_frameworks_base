@@ -669,7 +669,8 @@ public final class OverlayManagerService extends SystemService {
     };
 
     private boolean isOverlayPackage(@NonNull final PackageInfo pi) {
-        return pi != null && pi.overlayTarget != null;
+        return pi != null && pi.overlayTarget != null
+                && (pi.overlayFlags & PackageInfo.FLAG_OVERLAY_TRUSTED) != 0;
     }
 
     private final class OverlayChangeListener
