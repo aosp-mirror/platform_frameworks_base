@@ -24,9 +24,13 @@ import static org.mockito.Mockito.any;
 import static org.mockito.Mockito.atLeast;
 import static org.mockito.Mockito.atLeastOnce;
 import static org.mockito.Mockito.eq;
+import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
+import android.animation.AnimationHandler;
 import android.animation.AnimationHandler.AnimationFrameCallbackProvider;
+import android.animation.ValueAnimator;
 import android.graphics.Matrix;
 import android.graphics.Point;
 import android.platform.test.annotations.Presubmit;
@@ -40,6 +44,7 @@ import android.view.animation.Animation;
 import android.view.animation.TranslateAnimation;
 
 import com.android.server.wm.LocalAnimationAdapter.AnimationSpec;
+import com.android.server.wm.SurfaceAnimationRunner.AnimatorFactory;
 
 import org.junit.Before;
 import org.junit.Rule;
@@ -63,6 +68,7 @@ public class SurfaceAnimationRunnerTest extends WindowTestsBase {
 
     @Mock SurfaceControl mMockSurface;
     @Mock Transaction mMockTransaction;
+    @Mock AnimationSpec mMockAnimationSpec;
     @Rule public MockitoRule mMockitoRule = MockitoJUnit.rule();
 
     private SurfaceAnimationRunner mSurfaceAnimationRunner;
@@ -72,7 +78,7 @@ public class SurfaceAnimationRunnerTest extends WindowTestsBase {
     public void setUp() throws Exception {
         super.setUp();
         mFinishCallbackLatch = new CountDownLatch(1);
-        mSurfaceAnimationRunner = new SurfaceAnimationRunner(null /* callbackProvider */,
+        mSurfaceAnimationRunner = new SurfaceAnimationRunner(null /* callbackProvider */, null,
                 mMockTransaction);
     }
 
@@ -104,7 +110,7 @@ public class SurfaceAnimationRunnerTest extends WindowTestsBase {
 
     @Test
     public void testCancel_notStarted() throws Exception {
-        mSurfaceAnimationRunner = new SurfaceAnimationRunner(new NoOpFrameCallbackProvider(),
+        mSurfaceAnimationRunner = new SurfaceAnimationRunner(new NoOpFrameCallbackProvider(), null,
                 mMockTransaction);
         mSurfaceAnimationRunner
                 .startAnimation(createTranslateAnimation(), mMockSurface, mMockTransaction,
@@ -117,17 +123,43 @@ public class SurfaceAnimationRunnerTest extends WindowTestsBase {
 
     @Test
     public void testCancel_running() throws Exception {
-        mSurfaceAnimationRunner = new SurfaceAnimationRunner(new NoOpFrameCallbackProvider(),
+        mSurfaceAnimationRunner = new SurfaceAnimationRunner(new NoOpFrameCallbackProvider(), null,
                 mMockTransaction);
-        mSurfaceAnimationRunner
-                .startAnimation(createTranslateAnimation(), mMockSurface, mMockTransaction,
-                this::finishedCallback);
+        mSurfaceAnimationRunner.startAnimation(createTranslateAnimation(), mMockSurface,
+                mMockTransaction, this::finishedCallback);
         waitUntilNextFrame();
         assertFalse(mSurfaceAnimationRunner.mRunningAnimations.isEmpty());
         mSurfaceAnimationRunner.onAnimationCancelled(mMockSurface);
         assertTrue(mSurfaceAnimationRunner.mRunningAnimations.isEmpty());
         waitUntilHandlersIdle();
         assertFinishCallbackNotCalled();
+    }
+
+    @Test
+    public void testCancel_sneakyCancelBeforeUpdate() throws Exception {
+        mSurfaceAnimationRunner = new SurfaceAnimationRunner(null, () -> new ValueAnimator() {
+            {
+                setFloatValues(0f, 1f);
+            }
+
+            @Override
+            public void addUpdateListener(AnimatorUpdateListener listener) {
+                super.addUpdateListener(animation -> {
+                    // Sneaky test cancels animation just before applying frame to simulate
+                    // interleaving of multiple threads. Muahahaha
+                    if (animation.getCurrentPlayTime() > 0) {
+                        mSurfaceAnimationRunner.onAnimationCancelled(mMockSurface);
+                    }
+                    listener.onAnimationUpdate(animation);
+                });
+            }
+        }, mMockTransaction);
+        when(mMockAnimationSpec.getDuration()).thenReturn(200L);
+        mSurfaceAnimationRunner.startAnimation(mMockAnimationSpec, mMockSurface, mMockTransaction,
+                this::finishedCallback);
+        waitUntilNextFrame();
+        assertFalse(mSurfaceAnimationRunner.mRunningAnimations.isEmpty());
+        verify(mMockAnimationSpec, atLeastOnce()).apply(any(), any(), eq(0L));
     }
 
     private void waitUntilNextFrame() throws Exception {

@@ -43,12 +43,19 @@ class SurfaceAnimationRunner {
 
     private final Object mLock = new Object();
 
+    /**
+     * Lock for cancelling animations. Must be acquired on it's own, or after acquiring
+     * {@link #mLock}
+     */
+    private final Object mCancelLock = new Object();
+
     @VisibleForTesting
     Choreographer mChoreographer;
 
     private final Runnable mApplyTransactionRunnable = this::applyTransaction;
     private final AnimationHandler mAnimationHandler;
     private final Transaction mFrameTransaction;
+    private final AnimatorFactory mAnimatorFactory;
     private boolean mApplyScheduled;
 
     @GuardedBy("mLock")
@@ -57,15 +64,15 @@ class SurfaceAnimationRunner {
 
     @GuardedBy("mLock")
     @VisibleForTesting
-    final ArrayMap<SurfaceControl, ValueAnimator> mRunningAnimations = new ArrayMap<>();
+    final ArrayMap<SurfaceControl, RunningAnimation> mRunningAnimations = new ArrayMap<>();
 
     SurfaceAnimationRunner() {
-        this(null /* callbackProvider */, new Transaction());
+        this(null /* callbackProvider */, null /* animatorFactory */, new Transaction());
     }
 
     @VisibleForTesting
     SurfaceAnimationRunner(@Nullable AnimationFrameCallbackProvider callbackProvider,
-            Transaction frameTransaction) {
+            AnimatorFactory animatorFactory, Transaction frameTransaction) {
         SurfaceAnimationThread.getHandler().runWithScissors(() -> mChoreographer = getSfInstance(),
                 0 /* timeout */);
         mFrameTransaction = frameTransaction;
@@ -73,6 +80,9 @@ class SurfaceAnimationRunner {
         mAnimationHandler.setProvider(callbackProvider != null
                 ? callbackProvider
                 : new SfVsyncFrameCallbackProvider(mChoreographer));
+        mAnimatorFactory = animatorFactory != null
+                ? animatorFactory
+                : SfValueAnimator::new;
     }
 
     void startAnimation(AnimationSpec a, SurfaceControl animationLeash, Transaction t,
@@ -95,11 +105,14 @@ class SurfaceAnimationRunner {
                 mPendingAnimations.remove(leash);
                 return;
             }
-            final ValueAnimator anim = mRunningAnimations.get(leash);
+            final RunningAnimation anim = mRunningAnimations.get(leash);
             if (anim != null) {
                 mRunningAnimations.remove(leash);
+                synchronized (mCancelLock) {
+                    anim.mCancelled = true;
+                }
                 SurfaceAnimationThread.getHandler().post(() -> {
-                    anim.cancel();
+                    anim.mAnim.cancel();
                     applyTransaction();
                 });
             }
@@ -114,44 +127,47 @@ class SurfaceAnimationRunner {
     }
 
     private void startAnimationLocked(RunningAnimation a) {
-        final ValueAnimator result = new SfValueAnimator();
+        final ValueAnimator anim = mAnimatorFactory.makeAnimator();
 
         // Animation length is already expected to be scaled.
-        result.overrideDurationScale(1.0f);
-        result.setDuration(a.mAnimSpec.getDuration());
-        result.addUpdateListener(animation -> {
-            applyTransformation(a, mFrameTransaction, result.getCurrentPlayTime());
+        anim.overrideDurationScale(1.0f);
+        anim.setDuration(a.mAnimSpec.getDuration());
+        anim.addUpdateListener(animation -> {
+            synchronized (mCancelLock) {
+                if (!a.mCancelled) {
+                    applyTransformation(a, mFrameTransaction, anim.getCurrentPlayTime());
+                }
+            }
 
             // Transaction will be applied in the commit phase.
             scheduleApplyTransaction();
         });
-        result.addListener(new AnimatorListenerAdapter() {
-
-            private boolean mCancelled;
-
+        anim.addListener(new AnimatorListenerAdapter() {
             @Override
             public void onAnimationStart(Animator animation) {
-                mFrameTransaction.show(a.mLeash);
-            }
-
-            @Override
-            public void onAnimationCancel(Animator animation) {
-                mCancelled = true;
+                synchronized (mCancelLock) {
+                    if (!a.mCancelled) {
+                        mFrameTransaction.show(a.mLeash);
+                    }
+                }
             }
 
             @Override
             public void onAnimationEnd(Animator animation) {
                 synchronized (mLock) {
                     mRunningAnimations.remove(a.mLeash);
-                }
-                if (!mCancelled) {
-                    // Post on other thread that we can push final state without jank.
-                    AnimationThread.getHandler().post(a.mFinishCallback);
+                    synchronized (mCancelLock) {
+                        if (!a.mCancelled) {
+                            // Post on other thread that we can push final state without jank.
+                            AnimationThread.getHandler().post(a.mFinishCallback);
+                        }
+                    }
                 }
             }
         });
-        result.start();
-        mRunningAnimations.put(a.mLeash, result);
+        anim.start();
+        a.mAnim = anim;
+        mRunningAnimations.put(a.mLeash, a);
     }
 
     private void applyTransformation(RunningAnimation a, Transaction t, long currentPlayTime) {
@@ -181,12 +197,21 @@ class SurfaceAnimationRunner {
         final AnimationSpec mAnimSpec;
         final SurfaceControl mLeash;
         final Runnable mFinishCallback;
+        ValueAnimator mAnim;
+
+        @GuardedBy("mCancelLock")
+        private boolean mCancelled;
 
         RunningAnimation(AnimationSpec animSpec, SurfaceControl leash, Runnable finishCallback) {
             mAnimSpec = animSpec;
             mLeash = leash;
             mFinishCallback = finishCallback;
         }
+    }
+
+    @VisibleForTesting
+    interface AnimatorFactory {
+        ValueAnimator makeAnimator();
     }
 
     /**
