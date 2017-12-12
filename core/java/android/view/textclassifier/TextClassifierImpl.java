@@ -221,8 +221,7 @@ public final class TextClassifierImpl implements TextClassifier {
                 for (int i = 0; i < results.length; i++) {
                     entityScores.put(results[i].mCollection, results[i].mScore);
                 }
-                builder.addLink(new TextLinks.TextLink(
-                        textString, span.getStartIndex(), span.getEndIndex(), entityScores));
+                builder.addLink(span.getStartIndex(), span.getEndIndex(), entityScores);
             }
         } catch (Throwable t) {
             // Avoid throwing from this method. Log the error.

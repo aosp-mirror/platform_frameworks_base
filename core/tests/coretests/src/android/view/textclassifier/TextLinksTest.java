@@ -68,8 +68,8 @@ public class TextLinksTest {
     public void testParcel() {
         final String fullText = "this is just a test";
         final TextLinks reference = new TextLinks.Builder(fullText)
-                .addLink(new TextLinks.TextLink(fullText, 0, 4, getEntityScores(0.f, 0.f, 1.f)))
-                .addLink(new TextLinks.TextLink(fullText, 5, 12, getEntityScores(.8f, .1f, .5f)))
+                .addLink(0, 4, getEntityScores(0.f, 0.f, 1.f))
+                .addLink(5, 12, getEntityScores(.8f, .1f, .5f))
                 .build();
 
         // Parcel and unparcel.

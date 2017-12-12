@@ -19,6 +19,7 @@ package android.text.util;
 import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.annotation.UiThread;
 import android.content.Context;
 import android.telephony.PhoneNumberUtils;
 import android.telephony.TelephonyManager;
@@ -29,12 +30,16 @@ import android.text.method.LinkMovementMethod;
 import android.text.method.MovementMethod;
 import android.text.style.URLSpan;
 import android.util.Patterns;
+import android.view.textclassifier.TextClassifier;
+import android.view.textclassifier.TextLinks;
+import android.view.textclassifier.TextLinks.TextLinkSpan;
 import android.webkit.WebView;
 import android.widget.TextView;
 
 import com.android.i18n.phonenumbers.PhoneNumberMatch;
 import com.android.i18n.phonenumbers.PhoneNumberUtil;
 import com.android.i18n.phonenumbers.PhoneNumberUtil.Leniency;
+import com.android.internal.util.Preconditions;
 
 import libcore.util.EmptyArray;
 
@@ -46,6 +51,12 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.Locale;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.Executor;
+import java.util.concurrent.Future;
+import java.util.function.Consumer;
+import java.util.function.Function;
+import java.util.function.Supplier;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -477,6 +488,195 @@ public class Linkify {
         }
 
         return hasMatches;
+    }
+
+    /**
+     * Scans the text of the provided TextView and turns all occurrences of the entity types
+     * specified by {@code options} into clickable links. If links are found, this method
+     * removes any pre-existing {@link TextLinkSpan} attached to the text (to avoid
+     * problems if you call it repeatedly on the same text) and sets the movement method for the
+     * TextView to LinkMovementMethod.
+     *
+     * <p><strong>Note:</strong> This method returns immediately but generates the links with
+     * the specified classifier on a background thread. The generated links are applied on the
+     * calling thread.
+     *
+     * @param textView TextView whose text is to be marked-up with links
+     * @param options optional parameters to specify how to generate the links
+     *
+     * @return a future that may be used to interrupt or query the background task
+     */
+    @UiThread
+    public static Future<Void> addLinksAsync(
+            @NonNull TextView textView,
+            @Nullable TextLinks.Options options) {
+        return addLinksAsync(textView, options, null /* executor */, null /* callback */);
+    }
+
+    /**
+     * Scans the text of the provided TextView and turns all occurrences of the entity types
+     * specified by {@code options} into clickable links. If links are found, this method
+     * removes any pre-existing {@link TextLinkSpan} attached to the text (to avoid
+     * problems if you call it repeatedly on the same text) and sets the movement method for the
+     * TextView to LinkMovementMethod.
+     *
+     * <p><strong>Note:</strong> This method returns immediately but generates the links with
+     * the specified classifier on a background thread. The generated links are applied on the
+     * calling thread.
+     *
+     * @param textView TextView whose text is to be marked-up with links
+     * @param options optional parameters to specify how to generate the links
+     * @param executor Executor that runs the background task
+     * @param callback Callback that receives the final status of the background task execution
+     *
+     * @return a future that may be used to interrupt or query the background task
+     */
+    @UiThread
+    public static Future<Void> addLinksAsync(
+            @NonNull TextView textView,
+            @Nullable TextLinks.Options options,
+            @Nullable Executor executor,
+            @Nullable Consumer<Integer> callback) {
+        Preconditions.checkNotNull(textView);
+        final CharSequence text = textView.getText();
+        final Spannable spannable = (text instanceof Spannable)
+                ? (Spannable) text : SpannableString.valueOf(text);
+        final Runnable modifyTextView = () -> {
+            addLinkMovementMethod(textView);
+            if (spannable != text) {
+                textView.setText(spannable);
+            }
+        };
+        return addLinksAsync(spannable, textView.getTextClassifier(),
+                options, executor, callback, modifyTextView);
+    }
+
+    /**
+     * Scans the text of the provided TextView and turns all occurrences of the entity types
+     * specified by {@code options} into clickable links. If links are found, this method
+     * removes any pre-existing {@link TextLinkSpan} attached to the text to avoid
+     * problems if you call it repeatedly on the same text.
+     *
+     * <p><strong>Note:</strong> This method returns immediately but generates the links with
+     * the specified classifier on a background thread. The generated links are applied on the
+     * calling thread.
+     *
+     * <p><strong>Note:</strong> If the text is currently attached to a TextView, this method
+     * should be called on the UI thread.
+     *
+     * @param text Spannable whose text is to be marked-up with links
+     * @param classifier the TextClassifier to use to generate the links
+     * @param options optional parameters to specify how to generate the links
+     *
+     * @return a future that may be used to interrupt or query the background task
+     */
+    public static Future<Void> addLinksAsync(
+            @NonNull Spannable text,
+            @NonNull TextClassifier classifier,
+            @Nullable TextLinks.Options options) {
+        return addLinksAsync(text, classifier, options, null /* executor */, null /* callback */);
+    }
+
+    /**
+     * Scans the text of the provided TextView and turns all occurrences of the entity types
+     * specified by the link {@code mask} into clickable links. If links are found, this method
+     * removes any pre-existing {@link TextLinkSpan} attached to the text to avoid
+     * problems if you call it repeatedly on the same text.
+     *
+     * <p><strong>Note:</strong> This method returns immediately but generates the links with
+     * the specified classifier on a background thread. The generated links are applied on the
+     * calling thread.
+     *
+     * <p><strong>Note:</strong> If the text is currently attached to a TextView, this method
+     * should be called on the UI thread.
+     *
+     * @param text Spannable whose text is to be marked-up with links
+     * @param classifier the TextClassifier to use to generate the links
+     * @param mask mask to define which kinds of links will be generated
+     *
+     * @return a future that may be used to interrupt or query the background task
+     */
+    public static Future<Void> addLinksAsync(
+            @NonNull Spannable text,
+            @NonNull TextClassifier classifier,
+            @LinkifyMask int mask) {
+        return addLinksAsync(text, classifier, TextLinks.Options.fromLinkMask(mask),
+                null /* executor */, null /* callback */);
+    }
+
+    /**
+     * Scans the text of the provided TextView and turns all occurrences of the entity types
+     * specified by {@code options} into clickable links. If links are found, this method
+     * removes any pre-existing {@link TextLinkSpan} attached to the text to avoid
+     * problems if you call it repeatedly on the same text.
+     *
+     * <p><strong>Note:</strong> This method returns immediately but generates the links with
+     * the specified classifier on a background thread. The generated links are applied on the
+     * calling thread.
+     *
+     * <p><strong>Note:</strong> If the text is currently attached to a TextView, this method
+     * should be called on the UI thread.
+     *
+     * @param text Spannable whose text is to be marked-up with links
+     * @param classifier the TextClassifier to use to generate the links
+     * @param options optional parameters to specify how to generate the links
+     * @param executor Executor that runs the background task
+     * @param callback Callback that receives the final status of the background task execution
+     *
+     * @return a future that may be used to interrupt or query the background task
+     */
+    public static Future<Void> addLinksAsync(
+            @NonNull Spannable text,
+            @NonNull TextClassifier classifier,
+            @Nullable TextLinks.Options options,
+            @Nullable Executor executor,
+            @Nullable Consumer<Integer> callback) {
+        return addLinksAsync(text, classifier, options, executor, callback,
+                null /* modifyTextView */);
+    }
+
+    private static Future<Void> addLinksAsync(
+            @NonNull Spannable text,
+            @NonNull TextClassifier classifier,
+            @Nullable TextLinks.Options options,
+            @Nullable Executor executor,
+            @Nullable Consumer<Integer> callback,
+            @Nullable Runnable modifyTextView) {
+        Preconditions.checkNotNull(text);
+        Preconditions.checkNotNull(classifier);
+        final Supplier<TextLinks> supplier = () -> classifier.generateLinks(text, options);
+        final Consumer<TextLinks> consumer = links -> {
+            if (links.getLinks().isEmpty()) {
+                if (callback != null) {
+                    callback.accept(TextLinks.STATUS_NO_LINKS_FOUND);
+                }
+                return;
+            }
+
+            final TextLinkSpan[] old = text.getSpans(0, text.length(), TextLinkSpan.class);
+            for (int i = old.length - 1; i >= 0; i--) {
+                text.removeSpan(old[i]);
+            }
+
+            final Function<TextLinks.TextLink, TextLinkSpan> spanFactory = (options == null)
+                    ? null : options.getSpanFactory();
+            final @TextLinks.ApplyStrategy int applyStrategy = (options == null)
+                    ? TextLinks.APPLY_STRATEGY_IGNORE : options.getApplyStrategy();
+            final @TextLinks.Status int result =  links.apply(text, applyStrategy, spanFactory);
+            if (result == TextLinks.STATUS_LINKS_APPLIED) {
+                if (modifyTextView != null) {
+                    modifyTextView.run();
+                }
+            }
+            if (callback != null) {
+                callback.accept(result);
+            }
+        };
+        if (executor == null) {
+            return CompletableFuture.supplyAsync(supplier).thenAccept(consumer);
+        } else {
+            return CompletableFuture.supplyAsync(supplier, executor).thenAccept(consumer);
+        }
     }
 
     private static final void applyLink(String url, int start, int end, Spannable text) {
