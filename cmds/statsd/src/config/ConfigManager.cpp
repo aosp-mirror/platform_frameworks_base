@@ -29,7 +29,7 @@ namespace android {
 namespace os {
 namespace statsd {
 
-#define STATS_SERVICE_DIR "/data/system/stats-service"
+#define STATS_SERVICE_DIR "/data/misc/stats-service"
 
 using android::base::StringPrintf;
 using std::unique_ptr;

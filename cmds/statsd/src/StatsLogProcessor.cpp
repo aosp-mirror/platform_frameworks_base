@@ -58,7 +58,7 @@ const int FIELD_ID_NAME = 2;
 const int FIELD_ID_METRICS = 1;
 const int FIELD_ID_UID_MAP = 2;
 
-#define STATS_DATA_DIR "/data/system/stats-data"
+#define STATS_DATA_DIR "/data/misc/stats-data"
 
 StatsLogProcessor::StatsLogProcessor(const sp<UidMap>& uidMap,
                                      const sp<AnomalyMonitor>& anomalyMonitor,
