@@ -519,14 +519,22 @@ ConfigurationParser::ActionHandler ConfigurationParser::android_sdk_group_handle
     } else {
       AndroidSdk entry;
       for (const auto& attr : child->attributes) {
+        Maybe<int>* target = nullptr;
         if (attr.name == "minSdkVersion") {
-          entry.min_sdk_version = ResourceUtils::ParseSdkVersion(attr.value);
+          target = &entry.min_sdk_version;
         } else if (attr.name == "targetSdkVersion") {
-          entry.target_sdk_version = ResourceUtils::ParseSdkVersion(attr.value);
+          target = &entry.target_sdk_version;
         } else if (attr.name == "maxSdkVersion") {
-          entry.max_sdk_version = ResourceUtils::ParseSdkVersion(attr.value);
+          target = &entry.max_sdk_version;
         } else {
           diag->Warn(DiagMessage() << "Unknown attribute: " << attr.name << " = " << attr.value);
+          continue;
+        }
+
+        *target = ResourceUtils::ParseSdkVersion(attr.value);
+        if (!*target) {
+          diag->Error(DiagMessage() << "Invalid attribute: " << attr.name << " = " << attr.value);
+          valid = false;
         }
       }
 
