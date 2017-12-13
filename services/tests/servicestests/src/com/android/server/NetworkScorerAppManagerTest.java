@@ -52,10 +52,10 @@ import com.android.internal.R;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.mockito.ArgumentMatcher;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
-import org.mockito.compat.ArgumentMatcher;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -82,13 +82,9 @@ public class NetworkScorerAppManagerTest {
         MockitoAnnotations.initMocks(this);
         mAvailableServices = new ArrayList<>();
         when(mMockContext.getPackageManager()).thenReturn(mMockPm);
-        when(mMockPm.queryIntentServices(Mockito.argThat(new ArgumentMatcher<Intent>() {
-            @Override
-            public boolean matchesObject(Object object) {
-                Intent intent = (Intent) object;
-                return NetworkScoreManager.ACTION_RECOMMEND_NETWORKS.equals(intent.getAction());
-            }
-        }), eq(PackageManager.GET_META_DATA))).thenReturn(mAvailableServices);
+        when(mMockPm.queryIntentServices(Mockito.argThat(
+                intent -> NetworkScoreManager.ACTION_RECOMMEND_NETWORKS.equals(intent.getAction())),
+                eq(PackageManager.GET_META_DATA))).thenReturn(mAvailableServices);
         when(mMockContext.getResources()).thenReturn(mResources);
         when(mMockContext.getSystemService(Context.APP_OPS_SERVICE)).thenReturn(mAppOpsManager);
 
@@ -664,15 +660,10 @@ public class NetworkScorerAppManagerTest {
 
         final int flags = PackageManager.GET_META_DATA;
         when(mMockPm.resolveService(
-                Mockito.argThat(new ArgumentMatcher<Intent>() {
-                    @Override
-                    public boolean matchesObject(Object object) {
-                        Intent intent = (Intent) object;
-                        return NetworkScoreManager.ACTION_RECOMMEND_NETWORKS
-                                .equals(intent.getAction())
-                                && compName.getPackageName().equals(intent.getPackage());
-                    }
-                }), Mockito.eq(flags))).thenReturn(serviceInfo);
+                Mockito.argThat(intent -> NetworkScoreManager.ACTION_RECOMMEND_NETWORKS
+                        .equals(intent.getAction())
+                        && compName.getPackageName().equals(intent.getPackage())),
+                Mockito.eq(flags))).thenReturn(serviceInfo);
 
         mAvailableServices.add(serviceInfo);
     }
@@ -685,13 +676,9 @@ public class NetworkScorerAppManagerTest {
 
         final int flags = 0;
         when(mMockPm.resolveActivity(
-                Mockito.argThat(new ArgumentMatcher<Intent>() {
-                    @Override
-                    public boolean matchesObject(Object object) {
-                        Intent intent = (Intent) object;
-                        return NetworkScoreManager.ACTION_CUSTOM_ENABLE.equals(intent.getAction())
-                                && useOpenWifiComp.getPackageName().equals(intent.getPackage());
-                    }
-                }), Mockito.eq(flags))).thenReturn(resolveActivityInfo);
+                Mockito.argThat(intent ->
+                        NetworkScoreManager.ACTION_CUSTOM_ENABLE.equals(intent.getAction())
+                                && useOpenWifiComp.getPackageName().equals(intent.getPackage())),
+                Mockito.eq(flags))).thenReturn(resolveActivityInfo);
     }
 }
