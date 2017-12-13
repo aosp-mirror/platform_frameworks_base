@@ -47,6 +47,7 @@ import static android.app.admin.DevicePolicyManager.DELEGATION_PACKAGE_ACCESS;
 import static android.app.admin.DevicePolicyManager.DELEGATION_PERMISSION_GRANT;
 import static android.app.admin.DevicePolicyManager.LEAVE_ALL_SYSTEM_APPS_ENABLED;
 import static android.app.admin.DevicePolicyManager.PASSWORD_QUALITY_COMPLEX;
+import static android.app.admin.DevicePolicyManager.PASSWORD_QUALITY_UNSPECIFIED;
 import static android.app.admin.DevicePolicyManager.PROFILE_KEYGUARD_FEATURES_AFFECT_OWNER;
 import static android.app.admin.DevicePolicyManager.START_USER_IN_BACKGROUND;
 import static android.app.admin.DevicePolicyManager.WIPE_EUICC;
@@ -218,6 +219,7 @@ import java.util.Map.Entry;
 import java.util.Set;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.function.Function;
 
 /**
  * Implementation of the device policy APIs.
@@ -764,7 +766,7 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
         static final int DEF_MINIMUM_PASSWORD_NON_LETTER = 0;
         @NonNull
         PasswordMetrics minimumPasswordMetrics = new PasswordMetrics(
-                DevicePolicyManager.PASSWORD_QUALITY_UNSPECIFIED, DEF_MINIMUM_PASSWORD_LENGTH,
+                PASSWORD_QUALITY_UNSPECIFIED, DEF_MINIMUM_PASSWORD_LENGTH,
                 DEF_MINIMUM_PASSWORD_LETTERS, DEF_MINIMUM_PASSWORD_UPPER_CASE,
                 DEF_MINIMUM_PASSWORD_LOWER_CASE, DEF_MINIMUM_PASSWORD_NUMERIC,
                 DEF_MINIMUM_PASSWORD_SYMBOLS, DEF_MINIMUM_PASSWORD_NON_LETTER);
@@ -890,8 +892,7 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
             out.startTag(null, TAG_POLICIES);
             info.writePoliciesToXml(out);
             out.endTag(null, TAG_POLICIES);
-            if (minimumPasswordMetrics.quality
-                    != DevicePolicyManager.PASSWORD_QUALITY_UNSPECIFIED) {
+            if (minimumPasswordMetrics.quality != PASSWORD_QUALITY_UNSPECIFIED) {
                 out.startTag(null, TAG_PASSWORD_QUALITY);
                 out.attribute(null, ATTR_VALUE, Integer.toString(minimumPasswordMetrics.quality));
                 out.endTag(null, TAG_PASSWORD_QUALITY);
@@ -3578,11 +3579,11 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
     @Override
     public int getPasswordQuality(ComponentName who, int userHandle, boolean parent) {
         if (!mHasFeature) {
-            return DevicePolicyManager.PASSWORD_QUALITY_UNSPECIFIED;
+            return PASSWORD_QUALITY_UNSPECIFIED;
         }
         enforceFullCrossUsersPermission(userHandle);
         synchronized (this) {
-            int mode = DevicePolicyManager.PASSWORD_QUALITY_UNSPECIFIED;
+            int mode = PASSWORD_QUALITY_UNSPECIFIED;
 
             if (who != null) {
                 ActiveAdmin admin = getActiveAdminUncheckedLocked(who, userHandle, parent);
@@ -3665,30 +3666,8 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
 
     @Override
     public int getPasswordMinimumLength(ComponentName who, int userHandle, boolean parent) {
-        if (!mHasFeature) {
-            return 0;
-        }
-        enforceFullCrossUsersPermission(userHandle);
-        synchronized (this) {
-            int length = 0;
-
-            if (who != null) {
-                ActiveAdmin admin = getActiveAdminUncheckedLocked(who, userHandle, parent);
-                return admin != null ? admin.minimumPasswordMetrics.length : length;
-            }
-
-            // Return the strictest policy across all participating admins.
-            List<ActiveAdmin> admins =
-                    getActiveAdminsForLockscreenPoliciesLocked(userHandle, parent);
-            final int N = admins.size();
-            for (int i = 0; i < N; i++) {
-                ActiveAdmin admin = admins.get(i);
-                if (length < admin.minimumPasswordMetrics.length) {
-                    length = admin.minimumPasswordMetrics.length;
-                }
-            }
-            return length;
-        }
+        return getStrictestPasswordRequirement(who, userHandle, parent,
+                admin -> admin.minimumPasswordMetrics.length, PASSWORD_QUALITY_UNSPECIFIED);
     }
 
     @Override
@@ -3710,31 +3689,8 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
 
     @Override
     public int getPasswordHistoryLength(ComponentName who, int userHandle, boolean parent) {
-        if (!mHasFeature) {
-            return 0;
-        }
-        enforceFullCrossUsersPermission(userHandle);
-        synchronized (this) {
-            int length = 0;
-
-            if (who != null) {
-                ActiveAdmin admin = getActiveAdminUncheckedLocked(who, userHandle, parent);
-                return admin != null ? admin.passwordHistoryLength : length;
-            }
-
-            // Return the strictest policy across all participating admins.
-            List<ActiveAdmin> admins =
-                    getActiveAdminsForLockscreenPoliciesLocked(userHandle, parent);
-            final int N = admins.size();
-            for (int i = 0; i < N; i++) {
-                ActiveAdmin admin = admins.get(i);
-                if (length < admin.passwordHistoryLength) {
-                    length = admin.passwordHistoryLength;
-                }
-            }
-
-            return length;
-        }
+        return getStrictestPasswordRequirement(who, userHandle, parent,
+                admin -> admin.passwordHistoryLength, PASSWORD_QUALITY_UNSPECIFIED);
     }
 
     @Override
@@ -3923,30 +3879,8 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
 
     @Override
     public int getPasswordMinimumUpperCase(ComponentName who, int userHandle, boolean parent) {
-        if (!mHasFeature) {
-            return 0;
-        }
-        enforceFullCrossUsersPermission(userHandle);
-        synchronized (this) {
-            int length = 0;
-
-            if (who != null) {
-                ActiveAdmin admin = getActiveAdminUncheckedLocked(who, userHandle, parent);
-                return admin != null ? admin.minimumPasswordMetrics.upperCase : length;
-            }
-
-            // Return the strictest policy across all participating admins.
-            List<ActiveAdmin> admins =
-                    getActiveAdminsForLockscreenPoliciesLocked(userHandle, parent);
-            final int N = admins.size();
-            for (int i = 0; i < N; i++) {
-                ActiveAdmin admin = admins.get(i);
-                if (length < admin.minimumPasswordMetrics.upperCase) {
-                    length = admin.minimumPasswordMetrics.upperCase;
-                }
-            }
-            return length;
-        }
+        return getStrictestPasswordRequirement(who, userHandle, parent,
+                admin -> admin.minimumPasswordMetrics.upperCase, PASSWORD_QUALITY_COMPLEX);
     }
 
     @Override
@@ -3965,30 +3899,8 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
 
     @Override
     public int getPasswordMinimumLowerCase(ComponentName who, int userHandle, boolean parent) {
-        if (!mHasFeature) {
-            return 0;
-        }
-        enforceFullCrossUsersPermission(userHandle);
-        synchronized (this) {
-            int length = 0;
-
-            if (who != null) {
-                ActiveAdmin admin = getActiveAdminUncheckedLocked(who, userHandle, parent);
-                return admin != null ? admin.minimumPasswordMetrics.lowerCase : length;
-            }
-
-            // Return the strictest policy across all participating admins.
-            List<ActiveAdmin> admins =
-                    getActiveAdminsForLockscreenPoliciesLocked(userHandle, parent);
-            final int N = admins.size();
-            for (int i = 0; i < N; i++) {
-                ActiveAdmin admin = admins.get(i);
-                if (length < admin.minimumPasswordMetrics.lowerCase) {
-                    length = admin.minimumPasswordMetrics.lowerCase;
-                }
-            }
-            return length;
-        }
+        return getStrictestPasswordRequirement(who, userHandle, parent,
+                admin -> admin.minimumPasswordMetrics.lowerCase, PASSWORD_QUALITY_COMPLEX);
     }
 
     @Override
@@ -4010,33 +3922,8 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
 
     @Override
     public int getPasswordMinimumLetters(ComponentName who, int userHandle, boolean parent) {
-        if (!mHasFeature) {
-            return 0;
-        }
-        enforceFullCrossUsersPermission(userHandle);
-        synchronized (this) {
-            int length = 0;
-
-            if (who != null) {
-                ActiveAdmin admin = getActiveAdminUncheckedLocked(who, userHandle, parent);
-                return admin != null ? admin.minimumPasswordMetrics.letters : length;
-            }
-
-            // Return the strictest policy across all participating admins.
-            List<ActiveAdmin> admins =
-                    getActiveAdminsForLockscreenPoliciesLocked(userHandle, parent);
-            final int N = admins.size();
-            for (int i = 0; i < N; i++) {
-                ActiveAdmin admin = admins.get(i);
-                if (!isLimitPasswordAllowed(admin, PASSWORD_QUALITY_COMPLEX)) {
-                    continue;
-                }
-                if (length < admin.minimumPasswordMetrics.letters) {
-                    length = admin.minimumPasswordMetrics.letters;
-                }
-            }
-            return length;
-        }
+        return getStrictestPasswordRequirement(who, userHandle, parent,
+                admin -> admin.minimumPasswordMetrics.letters, PASSWORD_QUALITY_COMPLEX);
     }
 
     @Override
@@ -4058,34 +3945,9 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
 
     @Override
     public int getPasswordMinimumNumeric(ComponentName who, int userHandle, boolean parent) {
-        if (!mHasFeature) {
-            return 0;
-        }
-        enforceFullCrossUsersPermission(userHandle);
-        synchronized (this) {
-            int length = 0;
-
-            if (who != null) {
-                ActiveAdmin admin = getActiveAdminUncheckedLocked(who, userHandle, parent);
-                return admin != null ? admin.minimumPasswordMetrics.numeric : length;
-            }
-
-            // Return the strictest policy across all participating admins.
-            List<ActiveAdmin> admins =
-                    getActiveAdminsForLockscreenPoliciesLocked(userHandle, parent);
-            final int N = admins.size();
-            for (int i = 0; i < N; i++) {
-                ActiveAdmin admin = admins.get(i);
-                if (!isLimitPasswordAllowed(admin, PASSWORD_QUALITY_COMPLEX)) {
-                    continue;
-                }
-                if (length < admin.minimumPasswordMetrics.numeric) {
-                    length = admin.minimumPasswordMetrics.numeric;
-                }
-            }
-            return length;
-        }
-    }
+        return getStrictestPasswordRequirement(who, userHandle, parent,
+                admin -> admin.minimumPasswordMetrics.numeric, PASSWORD_QUALITY_COMPLEX);
+   }
 
     @Override
     public void setPasswordMinimumSymbols(ComponentName who, int length, boolean parent) {
@@ -4106,33 +3968,8 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
 
     @Override
     public int getPasswordMinimumSymbols(ComponentName who, int userHandle, boolean parent) {
-        if (!mHasFeature) {
-            return 0;
-        }
-        enforceFullCrossUsersPermission(userHandle);
-        synchronized (this) {
-            int length = 0;
-
-            if (who != null) {
-                ActiveAdmin admin = getActiveAdminUncheckedLocked(who, userHandle, parent);
-                return admin != null ? admin.minimumPasswordMetrics.symbols : length;
-            }
-
-            // Return the strictest policy across all participating admins.
-            List<ActiveAdmin> admins =
-                    getActiveAdminsForLockscreenPoliciesLocked(userHandle, parent);
-            final int N = admins.size();
-            for (int i = 0; i < N; i++) {
-                ActiveAdmin admin = admins.get(i);
-                if (!isLimitPasswordAllowed(admin, PASSWORD_QUALITY_COMPLEX)) {
-                    continue;
-                }
-                if (length < admin.minimumPasswordMetrics.symbols) {
-                    length = admin.minimumPasswordMetrics.symbols;
-                }
-            }
-            return length;
-        }
+        return getStrictestPasswordRequirement(who, userHandle, parent,
+                admin -> admin.minimumPasswordMetrics.symbols, PASSWORD_QUALITY_COMPLEX);
     }
 
     @Override
@@ -4154,32 +3991,40 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
 
     @Override
     public int getPasswordMinimumNonLetter(ComponentName who, int userHandle, boolean parent) {
+        return getStrictestPasswordRequirement(who, userHandle, parent,
+                admin -> admin.minimumPasswordMetrics.nonLetter, PASSWORD_QUALITY_COMPLEX);
+    }
+
+    /**
+     * Calculates strictest (maximum) value for a given password property enforced by admin[s].
+     */
+    private int getStrictestPasswordRequirement(ComponentName who, int userHandle,
+            boolean parent, Function<ActiveAdmin, Integer> getter, int minimumPasswordQuality) {
         if (!mHasFeature) {
             return 0;
         }
         enforceFullCrossUsersPermission(userHandle);
         synchronized (this) {
-            int length = 0;
-
             if (who != null) {
-                ActiveAdmin admin = getActiveAdminUncheckedLocked(who, userHandle, parent);
-                return admin != null ? admin.minimumPasswordMetrics.nonLetter : length;
+                final ActiveAdmin admin = getActiveAdminUncheckedLocked(who, userHandle, parent);
+                return admin != null ? getter.apply(admin) : 0;
             }
 
-            // Return the strictest policy across all participating admins.
-            List<ActiveAdmin> admins =
+            int maxValue = 0;
+            final List<ActiveAdmin> admins =
                     getActiveAdminsForLockscreenPoliciesLocked(userHandle, parent);
             final int N = admins.size();
             for (int i = 0; i < N; i++) {
-                ActiveAdmin admin = admins.get(i);
-                if (!isLimitPasswordAllowed(admin, PASSWORD_QUALITY_COMPLEX)) {
+                final ActiveAdmin admin = admins.get(i);
+                if (!isLimitPasswordAllowed(admin, minimumPasswordQuality)) {
                     continue;
                 }
-                if (length < admin.minimumPasswordMetrics.nonLetter) {
-                    length = admin.minimumPasswordMetrics.nonLetter;
+                final Integer adminValue = getter.apply(admin);
+                if (adminValue > maxValue) {
+                    maxValue = adminValue;
                 }
             }
-            return length;
+            return maxValue;
         }
     }
 
@@ -4219,7 +4064,7 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
     private boolean isActivePasswordSufficientForUserLocked(
             DevicePolicyData policy, int userHandle, boolean parent) {
         final int requiredPasswordQuality = getPasswordQuality(null, userHandle, parent);
-        if (requiredPasswordQuality == DevicePolicyManager.PASSWORD_QUALITY_UNSPECIFIED) {
+        if (requiredPasswordQuality == PASSWORD_QUALITY_UNSPECIFIED) {
             // A special case is when there is no required password quality, then we just return
             // true since any password would be sufficient. This is for the scenario when a work
             // profile is first created so there is no information about the current password but
@@ -4459,10 +4304,10 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
         synchronized (this) {
             quality = getPasswordQuality(null, userHandle, /* parent */ false);
             if (quality == DevicePolicyManager.PASSWORD_QUALITY_MANAGED) {
-                quality = DevicePolicyManager.PASSWORD_QUALITY_UNSPECIFIED;
+                quality = PASSWORD_QUALITY_UNSPECIFIED;
             }
             final PasswordMetrics metrics = PasswordMetrics.computeForPassword(password);
-            if (quality != DevicePolicyManager.PASSWORD_QUALITY_UNSPECIFIED) {
+            if (quality != PASSWORD_QUALITY_UNSPECIFIED) {
                 final int realQuality = metrics.quality;
                 if (realQuality < quality
                         && quality != DevicePolicyManager.PASSWORD_QUALITY_COMPLEX) {
