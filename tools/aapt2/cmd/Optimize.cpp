@@ -327,7 +327,6 @@ int Optimize(const std::vector<StringPiece>& args) {
   Maybe<std::string> config_path;
   Maybe<std::string> whitelist_path;
   Maybe<std::string> target_densities;
-  Maybe<std::string> target_abis;
   std::vector<std::string> configs;
   std::vector<std::string> split_args;
   std::unordered_set<std::string> kept_artifacts;
@@ -349,12 +348,6 @@ int Optimize(const std::vector<StringPiece>& args) {
                         "Path to the whitelist.cfg file containing whitelisted resources \n"
                         "whose names should not be altered in final resource tables.",
                         &whitelist_path)
-          .OptionalFlag(
-              "--target-abis",
-              "Comma separated list of the CPU ABIs that the APK will be optimized for.\n"
-              "All the native libraries that would be unused on devices of the given ABIs will \n"
-              "be removed from the APK.",
-              &target_abis)
           .OptionalFlagList("-c",
                             "Comma separated list of configurations to include. The default\n"
                             "is all configurations.",
