@@ -40,6 +40,7 @@ import android.view.View;
 import com.android.internal.util.Preconditions;
 import com.android.server.input.InputWindowHandle;
 import com.android.server.wm.WindowManagerInternal.IDragDropCallback;
+import java.util.concurrent.atomic.AtomicReference;
 
 /**
  * Managing drag and drop operations initiated by View#startDragAndDrop.
@@ -67,42 +68,10 @@ class DragDropController {
     private final Handler mHandler;
 
     /**
-     * Lock to preserve the order of state updates.
-     * The lock is used to process drag and drop state updates in order without having the window
-     * manager lock.
-     *
-     * Suppose DragDropController invokes a callback method A, then processes the following update
-     * A'. Same for a callback method B and the following update B'. The callback wants
-     * DragDropController to processes the updates in the order of  A' then B'.
-     *
-     * Without mWriteLock: the following race can happen.
-     *
-     * 1. Thread a calls A.
-     * 2. Thread b calls B.
-     * 3. Thread b acquires the window manager lock
-     * 4. thread b processes the update B'
-     * 5. Thread a acquires the window manager lock
-     * 6. thread a processes the update A'
-     *
-     * With mWriteLock we can ensure the order of A' and B'
-     *
-     * 1. Thread a acquire mWriteLock
-     * 2. Thread a calls A
-     * 3. Thread a acquire the window manager lock
-     * 4. Thread a processes A'
-     * 5. Thread b acquire mWriteLock
-     * 6. Thread b calls B
-     * 7. Thread b acquire the window manager lock
-     * 8. Thread b processes B'
-     *
-     * Don't acquire the lock while holding the window manager lock, otherwise it causes a deadlock.
-     */
-    private final Object mWriteLock = new Object();
-
-    /**
      * Callback which is used to sync drag state with the vendor-specific code.
      */
-    @NonNull private IDragDropCallback mCallback = new IDragDropCallback() {};
+    @NonNull private AtomicReference<IDragDropCallback> mCallback = new AtomicReference<>(
+            new IDragDropCallback() {});
 
     boolean dragDropActiveLocked() {
         return mDragState != null;
@@ -114,9 +83,7 @@ class DragDropController {
 
     void registerCallback(IDragDropCallback callback) {
         Preconditions.checkNotNull(callback);
-        synchronized (mWriteLock) {
-            mCallback = callback;
-        }
+        mCallback.set(callback);
     }
 
     DragDropController(WindowManagerService service, Looper looper) {
@@ -136,45 +103,43 @@ class DragDropController {
                     + " asbinder=" + window.asBinder());
         }
 
-        synchronized (mWriteLock) {
-            synchronized (mService.mWindowMap) {
-                if (dragDropActiveLocked()) {
-                    Slog.w(TAG_WM, "Drag already in progress");
-                    return null;
-                }
-
-                // TODO(multi-display): support other displays
-                final DisplayContent displayContent =
-                        mService.getDefaultDisplayContentLocked();
-                final Display display = displayContent.getDisplay();
-
-                final SurfaceControl surface = new SurfaceControl.Builder(session)
-                        .setName("drag surface")
-                        .setSize(width, height)
-                        .setFormat(PixelFormat.TRANSLUCENT)
-                        .build();
-                surface.setLayerStack(display.getLayerStack());
-                float alpha = 1;
-                if ((flags & View.DRAG_FLAG_OPAQUE) == 0) {
-                    alpha = DRAG_SHADOW_ALPHA_TRANSPARENT;
-                }
-                surface.setAlpha(alpha);
-
-                if (SHOW_TRANSACTIONS)
-                    Slog.i(TAG_WM, "  DRAG " + surface + ": CREATE");
-                outSurface.copyFrom(surface);
-                final IBinder winBinder = window.asBinder();
-                IBinder token = new Binder();
-                mDragState = new DragState(mService, token, surface, flags, winBinder);
-                mDragState.mPid = callerPid;
-                mDragState.mUid = callerUid;
-                mDragState.mOriginalAlpha = alpha;
-                token = mDragState.mToken = new Binder();
-
-                // 5 second timeout for this window to actually begin the drag
-                sendTimeoutMessage(MSG_DRAG_START_TIMEOUT, winBinder);
-                return token;
+        synchronized (mService.mWindowMap) {
+            if (dragDropActiveLocked()) {
+                Slog.w(TAG_WM, "Drag already in progress");
+                return null;
             }
+
+            // TODO(multi-display): support other displays
+            final DisplayContent displayContent =
+                    mService.getDefaultDisplayContentLocked();
+            final Display display = displayContent.getDisplay();
+
+            final SurfaceControl surface = new SurfaceControl.Builder(session)
+                    .setName("drag surface")
+                    .setSize(width, height)
+                    .setFormat(PixelFormat.TRANSLUCENT)
+                    .build();
+            surface.setLayerStack(display.getLayerStack());
+            float alpha = 1;
+            if ((flags & View.DRAG_FLAG_OPAQUE) == 0) {
+                alpha = DRAG_SHADOW_ALPHA_TRANSPARENT;
+            }
+            surface.setAlpha(alpha);
+
+            if (SHOW_TRANSACTIONS)
+                Slog.i(TAG_WM, "  DRAG " + surface + ": CREATE");
+            outSurface.copyFrom(surface);
+            final IBinder winBinder = window.asBinder();
+            IBinder token = new Binder();
+            mDragState = new DragState(mService, token, surface, flags, winBinder);
+            mDragState.mPid = callerPid;
+            mDragState.mUid = callerUid;
+            mDragState.mOriginalAlpha = alpha;
+            token = mDragState.mToken = new Binder();
+
+            // 5 second timeout for this window to actually begin the drag
+            sendTimeoutMessage(MSG_DRAG_START_TIMEOUT, winBinder);
+            return token;
         }
     }
 
@@ -185,84 +150,89 @@ class DragDropController {
             Slog.d(TAG_WM, "perform drag: win=" + window + " data=" + data);
         }
 
-        synchronized (mWriteLock) {
-            if (!mCallback.performDrag(window, dragToken, touchSource, touchX, touchY, thumbCenterX,
-                    thumbCenterY, data)) {
-                return false;
-            }
+        final boolean callbackResult = mCallback.get().prePerformDrag(window, dragToken,
+                touchSource, touchX, touchY, thumbCenterX, thumbCenterY, data);
+        try {
             synchronized (mService.mWindowMap) {
-                if (mDragState == null) {
-                    Slog.w(TAG_WM, "No drag prepared");
-                    throw new IllegalStateException("performDrag() without prepareDrag()");
-                }
-
-                if (dragToken != mDragState.mToken) {
-                    Slog.w(TAG_WM, "Performing mismatched drag");
-                    throw new IllegalStateException("performDrag() does not match prepareDrag()");
-                }
-
-                final WindowState callingWin = mService.windowForClientLocked(null, window, false);
-                if (callingWin == null) {
-                    Slog.w(TAG_WM, "Bad requesting window " + window);
-                    return false;  // !!! TODO: throw here?
-                }
-
-                // !!! TODO: if input is not still focused on the initiating window, fail
-                // the drag initiation (e.g. an alarm window popped up just as the application
-                // called performDrag()
-
                 mHandler.removeMessages(MSG_DRAG_START_TIMEOUT, window.asBinder());
-
-                // !!! TODO: extract the current touch (x, y) in screen coordinates.  That
-                // will let us eliminate the (touchX,touchY) parameters from the API.
-
-                // !!! FIXME: put all this heavy stuff onto the mHandler looper, as well as
-                // the actual drag event dispatch stuff in the dragstate
-
-                final DisplayContent displayContent = callingWin.getDisplayContent();
-                if (displayContent == null) {
-                    return false;
-                }
-                Display display = displayContent.getDisplay();
-                mDragState.register(display);
-                if (!mService.mInputManager.transferTouchFocus(callingWin.mInputChannel,
-                        mDragState.getInputChannel())) {
-                    Slog.e(TAG_WM, "Unable to transfer touch focus");
-                    mDragState.closeLocked();
-                    return false;
-                }
-
-                mDragState.mDisplayContent = displayContent;
-                mDragState.mData = data;
-                mDragState.broadcastDragStartedLocked(touchX, touchY);
-                mDragState.overridePointerIconLocked(touchSource);
-
-                // remember the thumb offsets for later
-                mDragState.mThumbOffsetX = thumbCenterX;
-                mDragState.mThumbOffsetY = thumbCenterY;
-
-                // Make the surface visible at the proper location
-                final SurfaceControl surfaceControl = mDragState.mSurfaceControl;
-                if (SHOW_LIGHT_TRANSACTIONS) Slog.i(TAG_WM, ">>> OPEN TRANSACTION performDrag");
-                mService.openSurfaceTransaction();
                 try {
-                    surfaceControl.setPosition(touchX - thumbCenterX,
-                            touchY - thumbCenterY);
-                    surfaceControl.setLayer(mDragState.getDragLayerLocked());
-                    surfaceControl.setLayerStack(display.getLayerStack());
-                    surfaceControl.show();
+                    if (!callbackResult) {
+                        return false;
+                    }
+
+                    Preconditions.checkState(
+                            mDragState != null, "performDrag() without prepareDrag()");
+                    Preconditions.checkState(
+                            mDragState.mToken == dragToken,
+                            "performDrag() does not match prepareDrag()");
+
+                    final WindowState callingWin = mService.windowForClientLocked(
+                            null, window, false);
+                    if (callingWin == null) {
+                        Slog.w(TAG_WM, "Bad requesting window " + window);
+                        return false;  // !!! TODO: throw here?
+                    }
+
+                    // !!! TODO: if input is not still focused on the initiating window, fail
+                    // the drag initiation (e.g. an alarm window popped up just as the application
+                    // called performDrag()
+
+                    // !!! TODO: extract the current touch (x, y) in screen coordinates.  That
+                    // will let us eliminate the (touchX,touchY) parameters from the API.
+
+                    // !!! FIXME: put all this heavy stuff onto the mHandler looper, as well as
+                    // the actual drag event dispatch stuff in the dragstate
+
+                    final DisplayContent displayContent = callingWin.getDisplayContent();
+                    if (displayContent == null) {
+                        Slog.w(TAG_WM, "display content is null");
+                        return false;
+                    }
+
+                    final Display display = displayContent.getDisplay();
+                    mDragState.register(display);
+                    if (!mService.mInputManager.transferTouchFocus(callingWin.mInputChannel,
+                            mDragState.getInputChannel())) {
+                        Slog.e(TAG_WM, "Unable to transfer touch focus");
+                        return false;
+                    }
+
+                    mDragState.mDisplayContent = displayContent;
+                    mDragState.mData = data;
+                    mDragState.broadcastDragStartedLocked(touchX, touchY);
+                    mDragState.overridePointerIconLocked(touchSource);
+                    // remember the thumb offsets for later
+                    mDragState.mThumbOffsetX = thumbCenterX;
+                    mDragState.mThumbOffsetY = thumbCenterY;
+
+                    // Make the surface visible at the proper location
+                    final SurfaceControl surfaceControl = mDragState.mSurfaceControl;
+                    if (SHOW_LIGHT_TRANSACTIONS) Slog.i(TAG_WM, ">>> OPEN TRANSACTION performDrag");
+                    mService.openSurfaceTransaction();
+                    try {
+                        surfaceControl.setPosition(touchX - thumbCenterX,
+                                touchY - thumbCenterY);
+                        surfaceControl.setLayer(mDragState.getDragLayerLocked());
+                        surfaceControl.setLayerStack(display.getLayerStack());
+                        surfaceControl.show();
+                    } finally {
+                        mService.closeSurfaceTransaction("performDrag");
+                        if (SHOW_LIGHT_TRANSACTIONS) {
+                            Slog.i(TAG_WM, "<<< CLOSE TRANSACTION performDrag");
+                        }
+                    }
+
+                    mDragState.notifyLocationLocked(touchX, touchY);
                 } finally {
-                    mService.closeSurfaceTransaction("performDrag");
-                    if (SHOW_LIGHT_TRANSACTIONS) {
-                        Slog.i(TAG_WM, "<<< CLOSE TRANSACTION performDrag");
+                    if (mDragState != null && !mDragState.isInProgress()) {
+                        mDragState.closeLocked();
                     }
                 }
-
-                mDragState.notifyLocationLocked(touchX, touchY);
             }
+            return true;    // success!
+        } finally {
+            mCallback.get().postPerformDrag();
         }
-
-        return true;    // success!
     }
 
     void reportDropResult(IWindow window, boolean consumed) {
@@ -271,8 +241,8 @@ class DragDropController {
             Slog.d(TAG_WM, "Drop result=" + consumed + " reported by " + token);
         }
 
-        synchronized (mWriteLock) {
-            mCallback.reportDropResult(window, consumed);
+        mCallback.get().preReportDropResult(window, consumed);
+        try {
             synchronized (mService.mWindowMap) {
                 if (mDragState == null) {
                     // Most likely the drop recipient ANRed and we ended the drag
@@ -297,10 +267,11 @@ class DragDropController {
                     return;  // !!! TODO: throw here?
                 }
 
-
                 mDragState.mDragResult = consumed;
                 mDragState.endDragLocked();
             }
+        } finally {
+            mCallback.get().postReportDropResult();
         }
     }
 
@@ -309,8 +280,8 @@ class DragDropController {
             Slog.d(TAG_WM, "cancelDragAndDrop");
         }
 
-        synchronized (mWriteLock) {
-            mCallback.cancelDragAndDrop(dragToken);
+        mCallback.get().preCancelDragAndDrop(dragToken);
+        try {
             synchronized (mService.mWindowMap) {
                 if (mDragState == null) {
                     Slog.w(TAG_WM, "cancelDragAndDrop() without prepareDrag()");
@@ -327,6 +298,8 @@ class DragDropController {
                 mDragState.mDragResult = false;
                 mDragState.cancelDragLocked();
             }
+        } finally {
+            mCallback.get().postCancelDragAndDrop();
         }
     }
 
@@ -338,20 +311,18 @@ class DragDropController {
      * @param newY Y coordinate value in dp in the screen coordinate
      */
     void handleMotionEvent(boolean keepHandling, float newX, float newY) {
-        synchronized (mWriteLock) {
-            synchronized (mService.mWindowMap) {
-                if (!dragDropActiveLocked()) {
-                    // The drag has ended but the clean-up message has not been processed by
-                    // window manager. Drop events that occur after this until window manager
-                    // has a chance to clean-up the input handle.
-                    return;
-                }
+        synchronized (mService.mWindowMap) {
+            if (!dragDropActiveLocked()) {
+                // The drag has ended but the clean-up message has not been processed by
+                // window manager. Drop events that occur after this until window manager
+                // has a chance to clean-up the input handle.
+                return;
+            }
 
-                if (keepHandling) {
-                    mDragState.notifyMoveLocked(newX, newY);
-                } else {
-                    mDragState.notifyDropLocked(newX, newY);
-                }
+            if (keepHandling) {
+                mDragState.notifyMoveLocked(newX, newY);
+            } else {
+                mDragState.notifyDropLocked(newX, newY);
             }
         }
     }
@@ -414,12 +385,11 @@ class DragDropController {
                     if (DEBUG_DRAG) {
                         Slog.w(TAG_WM, "Timeout starting drag by win " + win);
                     }
-                    synchronized (mWriteLock) {
-                        synchronized (mService.mWindowMap) {
-                            // !!! TODO: ANR the app that has failed to start the drag in time
-                            if (mDragState != null) {
-                                mDragState.closeLocked();
-                            }
+
+                    synchronized (mService.mWindowMap) {
+                        // !!! TODO: ANR the app that has failed to start the drag in time
+                        if (mDragState != null) {
+                            mDragState.closeLocked();
                         }
                     }
                     break;
@@ -430,13 +400,12 @@ class DragDropController {
                     if (DEBUG_DRAG) {
                         Slog.w(TAG_WM, "Timeout ending drag to win " + win);
                     }
-                    synchronized (mWriteLock) {
-                        synchronized (mService.mWindowMap) {
-                            // !!! TODO: ANR the drag-receiving app
-                            if (mDragState != null) {
-                                mDragState.mDragResult = false;
-                                mDragState.endDragLocked();
-                            }
+
+                    synchronized (mService.mWindowMap) {
+                        // !!! TODO: ANR the drag-receiving app
+                        if (mDragState != null) {
+                            mDragState.mDragResult = false;
+                            mDragState.endDragLocked();
                         }
                     }
                     break;
@@ -455,15 +424,13 @@ class DragDropController {
                 }
 
                 case MSG_ANIMATION_END: {
-                    synchronized (mWriteLock) {
-                        synchronized (mService.mWindowMap) {
-                            if (mDragState == null) {
-                                Slog.wtf(TAG_WM, "mDragState unexpectedly became null while " +
-                                        "plyaing animation");
-                                return;
-                            }
-                            mDragState.closeLocked();
+                    synchronized (mService.mWindowMap) {
+                        if (mDragState == null) {
+                            Slog.wtf(TAG_WM, "mDragState unexpectedly became null while " +
+                                    "plyaing animation");
+                            return;
                         }
+                        mDragState.closeLocked();
                     }
                     break;
                 }

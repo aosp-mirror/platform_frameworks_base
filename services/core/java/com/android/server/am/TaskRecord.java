@@ -2376,8 +2376,7 @@ class TaskRecord extends ConfigurationContainer implements TaskWindowContainerLi
                             activities.add(activity);
                         }
                     } else {
-                        Slog.e(TAG, "restoreTask: Unexpected name=" + name);
-                        XmlUtils.skipCurrentTag(in);
+                        handleUnknownTag(name, in);
                     }
                 }
             }
@@ -2440,6 +2439,12 @@ class TaskRecord extends ConfigurationContainer implements TaskWindowContainerLi
 
             if (DEBUG_RECENTS) Slog.d(TAG_RECENTS, "Restored task=" + task);
             return task;
+        }
+
+        void handleUnknownTag(String name, XmlPullParser in)
+                throws IOException, XmlPullParserException {
+            Slog.e(TAG, "restoreTask: Unexpected name=" + name);
+            XmlUtils.skipCurrentTag(in);
         }
     }
 }

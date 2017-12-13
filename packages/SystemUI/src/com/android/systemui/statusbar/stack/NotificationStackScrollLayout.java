@@ -3681,6 +3681,7 @@ public class NotificationStackScrollLayout extends ViewGroup
                 mHideSensitiveNeedsAnimation = true;
                 mNeedsAnimation =  true;
             }
+            updateContentHeight();
             requestChildrenUpdate();
         }
     }

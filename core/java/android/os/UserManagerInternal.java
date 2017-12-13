@@ -130,7 +130,8 @@ public abstract class UserManagerInternal {
      * <p>Called by the {@link com.android.server.devicepolicy.DevicePolicyManagerService} when
      * createAndManageUser is called by the device owner.
      */
-    public abstract UserInfo createUserEvenWhenDisallowed(String name, int flags);
+    public abstract UserInfo createUserEvenWhenDisallowed(String name, int flags,
+            String[] disallowedPackages);
 
     /**
      * Same as {@link UserManager#removeUser(int userHandle)}, but bypasses the check for

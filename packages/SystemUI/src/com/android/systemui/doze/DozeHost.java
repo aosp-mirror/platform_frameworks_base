@@ -38,6 +38,7 @@ public interface DozeHost {
     void extendPulse();
 
     void setAnimateWakeup(boolean animateWakeup);
+    void setAnimateScreenOff(boolean animateScreenOff);
 
     void onDoubleTap(float x, float y);
 

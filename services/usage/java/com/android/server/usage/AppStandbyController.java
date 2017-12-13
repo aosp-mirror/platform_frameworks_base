@@ -84,6 +84,7 @@ import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Map;
 
 /**
  * Manages the standby state of an app, listening to various events.
@@ -774,13 +775,23 @@ public class AppStandbyController {
             return STANDBY_BUCKET_ACTIVE;
         }
 
-        return mAppIdleHistory.getAppStandbyBucket(packageName, userId, elapsedRealtime);
+        synchronized (mAppIdleLock) {
+            return mAppIdleHistory.getAppStandbyBucket(packageName, userId, elapsedRealtime);
+        }
+    }
+
+    public Map<String, Integer> getAppStandbyBuckets(int userId, long elapsedRealtime) {
+        synchronized (mAppIdleLock) {
+            return mAppIdleHistory.getAppStandbyBuckets(userId, elapsedRealtime);
+        }
     }
 
     void setAppStandbyBucket(String packageName, int userId, @StandbyBuckets int newBucket,
             String reason, long elapsedRealtime) {
-        mAppIdleHistory.setAppStandbyBucket(packageName, userId, elapsedRealtime, newBucket,
-                reason);
+        synchronized (mAppIdleLock) {
+            mAppIdleHistory.setAppStandbyBucket(packageName, userId, elapsedRealtime, newBucket,
+                    reason);
+        }
         maybeInformListeners(packageName, userId, elapsedRealtime,
                 newBucket);
     }

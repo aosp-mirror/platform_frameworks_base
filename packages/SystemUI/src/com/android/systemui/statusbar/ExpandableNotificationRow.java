@@ -206,7 +206,7 @@ public class ExpandableNotificationRow extends ActivatableNotificationView
     private OnClickListener mExpandClickListener = new OnClickListener() {
         @Override
         public void onClick(View v) {
-            if (!mShowingPublic && (!mIsLowPriority || isExpanded())
+            if (!shouldShowPublic() && (!mIsLowPriority || isExpanded())
                     && mGroupManager.isSummaryOfGroup(mStatusBarNotification)) {
                 mGroupExpansionChanging = true;
                 final boolean wasExpanded = mGroupManager.isGroupExpanded(mStatusBarNotification);
@@ -790,7 +790,7 @@ public class ExpandableNotificationRow extends ActivatableNotificationView
      * {@link #getNotificationHeader()} in case it is a low-priority group.
      */
     public NotificationHeaderView getVisibleNotificationHeader() {
-        if (mIsSummaryWithChildren && !mShowingPublic) {
+        if (mIsSummaryWithChildren && !shouldShowPublic()) {
             return mChildrenContainer.getVisibleHeader();
         }
         return getShowingLayout().getVisibleNotificationHeader();
@@ -1512,10 +1512,10 @@ public class ExpandableNotificationRow extends ActivatableNotificationView
     }
 
     private void updateChildrenVisibility() {
-        mPrivateLayout.setVisibility(!mShowingPublic && !mIsSummaryWithChildren ? VISIBLE
+        mPrivateLayout.setVisibility(!shouldShowPublic() && !mIsSummaryWithChildren ? VISIBLE
                 : INVISIBLE);
         if (mChildrenContainer != null) {
-            mChildrenContainer.setVisibility(!mShowingPublic && mIsSummaryWithChildren ? VISIBLE
+            mChildrenContainer.setVisibility(!shouldShowPublic() && mIsSummaryWithChildren ? VISIBLE
                     : INVISIBLE);
         }
         // The limits might have changed if the view suddenly became a group or vice versa
@@ -1566,7 +1566,7 @@ public class ExpandableNotificationRow extends ActivatableNotificationView
     }
 
     public boolean isExpandable() {
-        if (mIsSummaryWithChildren && !mShowingPublic) {
+        if (mIsSummaryWithChildren && !shouldShowPublic()) {
             return !mChildrenExpanded;
         }
         return mEnableNonGroupedNotificationExpand && mExpandable;
@@ -1611,7 +1611,7 @@ public class ExpandableNotificationRow extends ActivatableNotificationView
      */
     public void setUserExpanded(boolean userExpanded, boolean allowChildExpansion) {
         mFalsingManager.setNotificationExpanded();
-        if (mIsSummaryWithChildren && !mShowingPublic && allowChildExpansion
+        if (mIsSummaryWithChildren && !shouldShowPublic() && allowChildExpansion
                 && !mChildrenContainer.showingAsLowPriority()) {
             final boolean wasExpanded = mGroupManager.isGroupExpanded(mStatusBarNotification);
             mGroupManager.setGroupExpanded(mStatusBarNotification, userExpanded);
@@ -1906,7 +1906,7 @@ public class ExpandableNotificationRow extends ActivatableNotificationView
             mPublicLayout.setVisibility(mShowingPublic ? View.VISIBLE : View.INVISIBLE);
             updateChildrenVisibility();
         } else {
-            animateShowingPublic(delay, duration);
+            animateShowingPublic(delay, duration, mShowingPublic);
         }
         NotificationContentView showingLayout = getShowingLayout();
         showingLayout.updateBackgroundColor(animated);
@@ -1916,13 +1916,13 @@ public class ExpandableNotificationRow extends ActivatableNotificationView
         mShowingPublicInitialized = true;
     }
 
-    private void animateShowingPublic(long delay, long duration) {
+    private void animateShowingPublic(long delay, long duration, boolean showingPublic) {
         View[] privateViews = mIsSummaryWithChildren
                 ? new View[] {mChildrenContainer}
                 : new View[] {mPrivateLayout};
         View[] publicViews = new View[] {mPublicLayout};
-        View[] hiddenChildren = mShowingPublic ? privateViews : publicViews;
-        View[] shownChildren = mShowingPublic ? publicViews : privateViews;
+        View[] hiddenChildren = showingPublic ? privateViews : publicViews;
+        View[] shownChildren = showingPublic ? publicViews : privateViews;
         for (final View hiddenView : hiddenChildren) {
             hiddenView.setVisibility(View.VISIBLE);
             hiddenView.animate().cancel();
@@ -1959,7 +1959,11 @@ public class ExpandableNotificationRow extends ActivatableNotificationView
      *         see {@link #isClearable()}.
      */
     public boolean canViewBeDismissed() {
-        return isClearable() && (!mShowingPublic || !mSensitiveHiddenInGeneral);
+        return isClearable() && (!shouldShowPublic() || !mSensitiveHiddenInGeneral);
+    }
+
+    private boolean shouldShowPublic() {
+        return mSensitive && mHideSensitiveForIntrinsicHeight;
     }
 
     public void makeActionsVisibile() {
@@ -2005,7 +2009,7 @@ public class ExpandableNotificationRow extends ActivatableNotificationView
 
     @Override
     public boolean isContentExpandable() {
-        if (mIsSummaryWithChildren && !mShowingPublic) {
+        if (mIsSummaryWithChildren && !shouldShowPublic()) {
             return true;
         }
         NotificationContentView showingLayout = getShowingLayout();
@@ -2014,7 +2018,7 @@ public class ExpandableNotificationRow extends ActivatableNotificationView
 
     @Override
     protected View getContentView() {
-        if (mIsSummaryWithChildren && !mShowingPublic) {
+        if (mIsSummaryWithChildren && !shouldShowPublic()) {
             return mChildrenContainer;
         }
         return getShowingLayout();
@@ -2079,7 +2083,7 @@ public class ExpandableNotificationRow extends ActivatableNotificationView
 
     @Override
     public int getMaxContentHeight() {
-        if (mIsSummaryWithChildren && !mShowingPublic) {
+        if (mIsSummaryWithChildren && !shouldShowPublic()) {
             return mChildrenContainer.getMaxContentHeight();
         }
         NotificationContentView showingLayout = getShowingLayout();
@@ -2093,7 +2097,7 @@ public class ExpandableNotificationRow extends ActivatableNotificationView
         } else if (!ignoreTemporaryStates && isHeadsUpAllowed() && mIsHeadsUp
                 && mHeadsUpManager.isTrackingHeadsUp()) {
                 return getPinnedHeadsUpHeight(false /* atLeastMinHeight */);
-        } else if (mIsSummaryWithChildren && !isGroupExpanded() && !mShowingPublic) {
+        } else if (mIsSummaryWithChildren && !isGroupExpanded() && !shouldShowPublic()) {
             return mChildrenContainer.getMinHeight();
         } else if (!ignoreTemporaryStates && isHeadsUpAllowed() && mIsHeadsUp) {
             return mHeadsUpHeight;
@@ -2104,7 +2108,7 @@ public class ExpandableNotificationRow extends ActivatableNotificationView
 
     @Override
     public int getCollapsedHeight() {
-        if (mIsSummaryWithChildren && !mShowingPublic) {
+        if (mIsSummaryWithChildren && !shouldShowPublic()) {
             return mChildrenContainer.getCollapsedHeight();
         }
         return getMinHeight();
@@ -2144,7 +2148,7 @@ public class ExpandableNotificationRow extends ActivatableNotificationView
     }
 
     public NotificationContentView getShowingLayout() {
-        return mShowingPublic ? mPublicLayout : mPrivateLayout;
+        return shouldShowPublic() ? mPublicLayout : mPrivateLayout;
     }
 
     public void setLegacy(boolean legacy) {
@@ -2250,7 +2254,7 @@ public class ExpandableNotificationRow extends ActivatableNotificationView
         if (header != null && header.isInTouchRect(x - getTranslation(), y)) {
             return true;
         }
-        if ((!mIsSummaryWithChildren || mShowingPublic)
+        if ((!mIsSummaryWithChildren || shouldShowPublic())
                 && getShowingLayout().disallowSingleClick(x, y)) {
             return true;
         }
@@ -2280,7 +2284,7 @@ public class ExpandableNotificationRow extends ActivatableNotificationView
         if (canViewBeDismissed()) {
             info.addAction(AccessibilityNodeInfo.AccessibilityAction.ACTION_DISMISS);
         }
-        boolean expandable = mShowingPublic;
+        boolean expandable = shouldShowPublic();
         boolean isExpanded = false;
         if (!expandable) {
             if (mIsSummaryWithChildren) {

@@ -30,7 +30,7 @@ namespace android {
 namespace os {
 namespace statsd {
 
-#define STATS_SERVICE_DIR "/data/system/stats-service"
+#define STATS_SERVICE_DIR "/data/misc/stats-service"
 
 // for ConfigMetricsReportList
 const int FIELD_ID_REPORTS = 2;

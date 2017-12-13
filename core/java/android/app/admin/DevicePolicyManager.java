@@ -3480,6 +3480,16 @@ public class DevicePolicyManager {
     @SdkConstant(SdkConstantType.ACTIVITY_INTENT_ACTION)
     public static final String ACTION_START_ENCRYPTION
             = "android.app.action.START_ENCRYPTION";
+
+    /**
+     * Broadcast action: notify managed provisioning that new managed user is created.
+     *
+     * @hide
+     */
+    @SdkConstant(SdkConstantType.BROADCAST_INTENT_ACTION)
+    public static final String ACTION_MANAGED_USER_CREATED =
+            "android.app.action.MANAGED_USER_CREATED";
+
     /**
      * Widgets are enabled in keyguard
      */
@@ -6205,20 +6215,25 @@ public class DevicePolicyManager {
     public static final int MAKE_USER_DEMO = 0x0004;
 
     /**
-     * Flag used by {@link #createAndManageUser} to specificy that the newly created user should be
+     * Flag used by {@link #createAndManageUser} to specify that the newly created user should be
      * started in the background as part of the user creation.
      */
-    // TODO: Investigate solutions for the case where reboot happens before setup is completed.
     public static final int START_USER_IN_BACKGROUND = 0x0008;
+
+    /**
+     * Flag used by {@link #createAndManageUser} to specify that the newly created user should skip
+     * the disabling of system apps during provisioning.
+     */
+    public static final int LEAVE_ALL_SYSTEM_APPS_ENABLED = 0x0010;
 
     /**
      * @hide
      */
     @IntDef(
             flag = true,
-            prefix = {"SKIP_", "MAKE_USER_", "START_"},
+            prefix = {"SKIP_", "MAKE_USER_", "START_", "LEAVE_"},
             value = {SKIP_SETUP_WIZARD, MAKE_USER_EPHEMERAL, MAKE_USER_DEMO,
-                    START_USER_IN_BACKGROUND}
+                    START_USER_IN_BACKGROUND, LEAVE_ALL_SYSTEM_APPS_ENABLED}
     )
     @Retention(RetentionPolicy.SOURCE)
     public @interface CreateAndManageUserFlags {}
@@ -6355,6 +6370,21 @@ public class DevicePolicyManager {
         throwIfParentInstance("getSecondaryUsers");
         try {
             return mService.getSecondaryUsers(admin);
+        } catch (RemoteException re) {
+            throw re.rethrowFromSystemServer();
+        }
+    }
+
+    /**
+     * Checks if the profile owner is running in an ephemeral user.
+     *
+     * @param admin Which {@link DeviceAdminReceiver} this request is associated with.
+     * @return whether the profile owner is running in an ephemeral user.
+     */
+    public boolean isEphemeralUser(@NonNull ComponentName admin) {
+        throwIfParentInstance("isEphemeralUser");
+        try {
+            return mService.isEphemeralUser(admin);
         } catch (RemoteException re) {
             throw re.rethrowFromSystemServer();
         }
@@ -8663,5 +8693,26 @@ public class DevicePolicyManager {
          *                  apps and protected system packages.
          */
         void onApplicationUserDataCleared(String packageName, boolean succeeded);
+    }
+
+    /**
+     * Returns set of system apps that should be removed during provisioning.
+     *
+     * @param admin Which {@link DeviceAdminReceiver} this request is associated with.
+     * @param userId ID of the user to be provisioned.
+     * @param provisioningAction action indicating type of provisioning, should be one of
+     * {@link #ACTION_PROVISION_MANAGED_DEVICE}, {@link #ACTION_PROVISION_MANAGED_PROFILE} or
+     * {@link #ACTION_PROVISION_MANAGED_USER}.
+     *
+     * @hide
+     */
+    public Set<String> getDisallowedSystemApps(ComponentName admin, int userId,
+            String provisioningAction) {
+        try {
+            return new ArraySet<>(
+                    mService.getDisallowedSystemApps(admin, userId, provisioningAction));
+        } catch (RemoteException re) {
+            throw re.rethrowFromSystemServer();
+        }
     }
 }

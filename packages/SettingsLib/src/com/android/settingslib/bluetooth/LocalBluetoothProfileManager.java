@@ -25,6 +25,7 @@ import android.bluetooth.BluetoothHidHost;
 import android.bluetooth.BluetoothMap;
 import android.bluetooth.BluetoothMapClient;
 import android.bluetooth.BluetoothPan;
+import android.bluetooth.BluetoothPbap;
 import android.bluetooth.BluetoothPbapClient;
 import android.bluetooth.BluetoothProfile;
 import android.bluetooth.BluetoothUuid;
@@ -140,9 +141,11 @@ public class LocalBluetoothProfileManager {
                     BluetoothMap.ACTION_CONNECTION_STATE_CHANGED);
         }
 
-       //Create PBAP server profile, but do not add it to list of profiles
-       // as we do not need to monitor the profile as part of profile list
+        //Create PBAP server profile
+        if(DEBUG) Log.d(TAG, "Adding local PBAP profile");
         mPbapProfile = new PbapServerProfile(context);
+        addProfile(mPbapProfile, PbapServerProfile.NAME,
+             BluetoothPbap.ACTION_CONNECTION_STATE_CHANGED);
 
         if (DEBUG) Log.d(TAG, "LocalBluetoothProfileManager construction complete");
     }
@@ -495,6 +498,13 @@ public class LocalBluetoothProfileManager {
             mMapProfile.setPreferred(device, true);
         }
 
+        if ((mPbapProfile != null) &&
+            (mPbapProfile.getConnectionStatus(device) == BluetoothProfile.STATE_CONNECTED)) {
+            profiles.add(mPbapProfile);
+            removedProfiles.remove(mPbapProfile);
+            mPbapProfile.setPreferred(device, true);
+        }
+
         if (mMapClientProfile != null) {
             profiles.add(mMapClientProfile);
             removedProfiles.remove(mMapClientProfile);
@@ -503,8 +513,6 @@ public class LocalBluetoothProfileManager {
         if (mUsePbapPce) {
             profiles.add(mPbapClientProfile);
             removedProfiles.remove(mPbapClientProfile);
-            profiles.remove(mPbapProfile);
-            removedProfiles.add(mPbapProfile);
         }
 
         if (DEBUG) {

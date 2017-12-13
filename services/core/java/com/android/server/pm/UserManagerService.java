@@ -3702,8 +3702,10 @@ public class UserManagerService extends IUserManager.Stub {
         }
 
         @Override
-        public UserInfo createUserEvenWhenDisallowed(String name, int flags) {
-            UserInfo user = createUserInternalUnchecked(name, flags, UserHandle.USER_NULL, null);
+        public UserInfo createUserEvenWhenDisallowed(String name, int flags,
+                String[] disallowedPackages) {
+            UserInfo user = createUserInternalUnchecked(name, flags, UserHandle.USER_NULL,
+                    disallowedPackages);
             // Keep this in sync with UserManager.createUser
             if (user != null && !user.isAdmin() && !user.isDemo()) {
                 setUserRestriction(UserManager.DISALLOW_SMS, true, user.id);

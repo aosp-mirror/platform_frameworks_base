@@ -463,6 +463,32 @@ public final class Slice implements Parcelable {
         }
 
         /**
+         * Add a bundle to the slice being constructed.
+         * <p>Expected to be used for support library extension, should not be used for general
+         * development
+         * @param subType Optional template-specific type information
+         * @see {@link SliceItem#getSubType()}
+         */
+        public Slice.Builder addBundle(Bundle bundle, @Nullable String subType,
+                @SliceHint String... hints) {
+            mItems.add(new SliceItem(bundle, SliceItem.FORMAT_BUNDLE, subType,
+                    hints));
+            return this;
+        }
+
+        /**
+         * Add a bundle to the slice being constructed.
+         * <p>Expected to be used for support library extension, should not be used for general
+         * development
+         * @param subType Optional template-specific type information
+         * @see {@link SliceItem#getSubType()}
+         */
+        public Slice.Builder addBundle(Bundle bundle, @Nullable String subType,
+                @SliceHint List<String> hints) {
+            return addBundle(bundle, subType, hints.toArray(new String[hints.size()]));
+        }
+
+        /**
          * Construct the slice.
          */
         public Slice build() {

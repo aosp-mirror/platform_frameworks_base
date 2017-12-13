@@ -46,7 +46,7 @@ namespace os {
 namespace statsd {
 
 constexpr const char* kPermissionDump = "android.permission.DUMP";
-#define STATS_SERVICE_DIR "/data/system/stats-service"
+#define STATS_SERVICE_DIR "/data/misc/stats-service"
 
 // ======================================================================
 /**

@@ -18,6 +18,7 @@ package com.android.systemui.statusbar;
 import android.content.Intent;
 import android.os.Handler;
 import android.service.notification.NotificationListenerService;
+import android.view.View;
 
 import java.util.Set;
 
@@ -29,7 +30,7 @@ import java.util.Set;
  * want to perform some action before doing so).
  */
 public interface NotificationPresenter extends NotificationUpdateHandler,
-        NotificationData.Environment {
+        NotificationData.Environment, NotificationRemoteInputManager.Callback {
 
     /**
      * Returns true if the presenter is not visible. For example, it may not be necessary to do
@@ -81,14 +82,6 @@ public interface NotificationPresenter extends NotificationUpdateHandler,
     void onWorkChallengeChanged();
 
     /**
-     * Notifications in this set are kept around when they were canceled in response to a remote
-     * input interaction. This allows us to show what you replied and allows you to continue typing
-     * into it.
-     */
-    // TODO: Create NotificationEntryManager and move this method to there.
-    Set<String> getKeysKeptForRemoteInput();
-
-    /**
      * Called when the current user changes.
      * @param newUserId new user id
      */
@@ -98,4 +91,20 @@ public interface NotificationPresenter extends NotificationUpdateHandler,
      * Gets the NotificationLockscreenUserManager for this Presenter.
      */
     NotificationLockscreenUserManager getNotificationLockscreenUserManager();
+
+    /**
+     * Wakes the device up if dozing.
+     *
+     * @param time the time when the request to wake up was issued
+     * @param where which view caused this wake up request
+     */
+    void wakeUpIfDozing(long time, View where);
+
+    /**
+     * True if the device currently requires a PIN, pattern, or password to unlock.
+     *
+     * @param userId user id to query about
+     * @return true iff the device is locked
+     */
+    boolean isDeviceLocked(int userId);
 }

@@ -20,6 +20,7 @@ import static android.Manifest.permission.BIND_DEVICE_ADMIN;
 import static android.Manifest.permission.MANAGE_CA_CERTIFICATES;
 import static android.app.ActivityManager.LOCK_TASK_MODE_NONE;
 import static android.app.ActivityManager.USER_OP_SUCCESS;
+import static android.app.admin.DevicePolicyManager.ACTION_PROVISION_MANAGED_USER;
 import static android.app.admin.DevicePolicyManager.CODE_ACCOUNTS_NOT_EMPTY;
 import static android.app.admin.DevicePolicyManager.CODE_ADD_MANAGED_PROFILE_DISALLOWED;
 import static android.app.admin.DevicePolicyManager.CODE_CANNOT_ADD_MANAGED_PROFILE;
@@ -44,6 +45,7 @@ import static android.app.admin.DevicePolicyManager.DELEGATION_INSTALL_EXISTING_
 import static android.app.admin.DevicePolicyManager.DELEGATION_KEEP_UNINSTALLED_PACKAGES;
 import static android.app.admin.DevicePolicyManager.DELEGATION_PACKAGE_ACCESS;
 import static android.app.admin.DevicePolicyManager.DELEGATION_PERMISSION_GRANT;
+import static android.app.admin.DevicePolicyManager.LEAVE_ALL_SYSTEM_APPS_ENABLED;
 import static android.app.admin.DevicePolicyManager.PASSWORD_QUALITY_COMPLEX;
 import static android.app.admin.DevicePolicyManager.PROFILE_KEYGUARD_FEATURES_AFFECT_OWNER;
 import static android.app.admin.DevicePolicyManager.START_USER_IN_BACKGROUND;
@@ -289,6 +291,8 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
     private static final String ATTR_APPLICATION_RESTRICTIONS_MANAGER
             = "application-restrictions-manager";
 
+    private static final String MANAGED_PROVISIONING_PKG = "com.android.managedprovisioning";
+
     // Comprehensive list of delegations.
     private static final String DELEGATIONS[] = {
         DELEGATION_CERT_INSTALL,
@@ -390,6 +394,7 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
     private final LockPatternUtils mLockPatternUtils;
     private final DevicePolicyConstants mConstants;
     private final DeviceAdminServiceController mDeviceAdminServiceController;
+    private final OverlayPackagesProvider mOverlayPackagesProvider;
 
     /**
      * Contains (package-user) pairs to remove. An entry (p, u) implies that removal of package p
@@ -1902,6 +1907,8 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
         mCertificateMonitor = new CertificateMonitor(this, mInjector, mBackgroundHandler);
 
         mDeviceAdminServiceController = new DeviceAdminServiceController(this, mConstants);
+
+        mOverlayPackagesProvider = new OverlayPackagesProvider(mContext);
 
         if (!mHasFeature) {
             // Skip the rest of the initialization
@@ -8321,6 +8328,7 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
         final boolean ephemeral = (flags & DevicePolicyManager.MAKE_USER_EPHEMERAL) != 0;
         final boolean demo = (flags & DevicePolicyManager.MAKE_USER_DEMO) != 0
                 && UserManager.isDeviceInDemoMode(mContext);
+        final boolean leaveAllSystemAppsEnabled = (flags & LEAVE_ALL_SYSTEM_APPS_ENABLED) != 0;
         // Create user.
         UserHandle user = null;
         synchronized (this) {
@@ -8335,8 +8343,14 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
                 if (demo) {
                     userInfoFlags |= UserInfo.FLAG_DEMO;
                 }
+                String[] disallowedPackages = null;
+                if (!leaveAllSystemAppsEnabled) {
+                    disallowedPackages = mOverlayPackagesProvider.getNonRequiredApps(admin,
+                            UserHandle.myUserId(), ACTION_PROVISION_MANAGED_USER).toArray(
+                            new String[0]);
+                }
                 UserInfo userInfo = mUserManagerInternal.createUserEvenWhenDisallowed(name,
-                        userInfoFlags);
+                        userInfoFlags, disallowedPackages);
                 if (userInfo != null) {
                     user = userInfo.getUserHandle();
                 }
@@ -8347,11 +8361,20 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
         if (user == null) {
             return null;
         }
+
+        final int userHandle = user.getIdentifier();
+        final Intent intent = new Intent(DevicePolicyManager.ACTION_MANAGED_USER_CREATED)
+                .putExtra(Intent.EXTRA_USER_HANDLE, userHandle)
+                .putExtra(
+                        DevicePolicyManager.EXTRA_PROVISIONING_LEAVE_ALL_SYSTEM_APPS_ENABLED,
+                        leaveAllSystemAppsEnabled)
+                .setPackage(MANAGED_PROVISIONING_PKG)
+                .addFlags(Intent.FLAG_RECEIVER_FOREGROUND);
+        mContext.sendBroadcastAsUser(intent, UserHandle.SYSTEM);
+
         final long id = mInjector.binderClearCallingIdentity();
         try {
             final String adminPkg = admin.getPackageName();
-
-            final int userHandle = user.getIdentifier();
             try {
                 // Install the profile owner if not present.
                 if (!mIPackageManager.isPackageAvailable(adminPkg, userHandle)) {
@@ -8381,7 +8404,7 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
 
             if ((flags & START_USER_IN_BACKGROUND) != 0) {
                 try {
-                    mInjector.getIActivityManager().startUserInBackground(user.getIdentifier());
+                    mInjector.getIActivityManager().startUserInBackground(userHandle);
                 } catch (RemoteException re) {
                     // Does not happen, same process
                 }
@@ -8389,7 +8412,7 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
 
             return user;
         } catch (Throwable re) {
-            mUserManager.removeUser(user.getIdentifier());
+            mUserManager.removeUser(userHandle);
             return null;
         } finally {
             mInjector.binderRestoreCallingIdentity(id);
@@ -8535,6 +8558,22 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
                 }
             }
             return userHandles;
+        } finally {
+            mInjector.binderRestoreCallingIdentity(id);
+        }
+    }
+
+    @Override
+    public boolean isEphemeralUser(ComponentName who) {
+        Preconditions.checkNotNull(who, "ComponentName is null");
+        synchronized (this) {
+            getActiveAdminForCallerLocked(who, DeviceAdminInfo.USES_POLICY_PROFILE_OWNER);
+        }
+
+        final int callingUserId = mInjector.userHandleGetCallingUserId();
+        final long id = mInjector.binderClearCallingIdentity();
+        try {
+            return mInjector.getUserManager().isUserEphemeral(callingUserId);
         } finally {
             mInjector.binderRestoreCallingIdentity(id);
         }
@@ -11647,4 +11686,11 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
         return (deviceOwner != null) && deviceOwner.isLogoutEnabled;
     }
 
+    @Override
+    public List<String> getDisallowedSystemApps(ComponentName admin, int userId,
+            String provisioningAction) throws RemoteException {
+        enforceCanManageProfileAndDeviceOwners();
+        return new ArrayList<>(
+                mOverlayPackagesProvider.getNonRequiredApps(admin, userId, provisioningAction));
+    }
 }
