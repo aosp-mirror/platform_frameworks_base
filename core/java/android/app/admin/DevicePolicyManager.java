@@ -4278,16 +4278,16 @@ public class DevicePolicyManager {
     /**
      * Called by a device owner to request a bugreport.
      * <p>
-     * If the device contains secondary users or profiles, they must be affiliated with the device
-     * owner user. Otherwise a {@link SecurityException} will be thrown. See
-     * {@link #setAffiliationIds}.
+     * If the device contains secondary users or profiles, they must be affiliated with the device.
+     * Otherwise a {@link SecurityException} will be thrown. See {@link #isAffiliatedUser}.
      *
      * @param admin Which {@link DeviceAdminReceiver} this request is associated with.
      * @return {@code true} if the bugreport collection started successfully, or {@code false} if it
      *         wasn't triggered because a previous bugreport operation is still active (either the
      *         bugreport is still running or waiting for the user to share or decline)
      * @throws SecurityException if {@code admin} is not a device owner, or there is at least one
-     *         profile or secondary user that is not affiliated with the device owner user.
+     *         profile or secondary user that is not affiliated with the device.
+     * @see #isAffiliatedUser
      */
     public boolean requestBugreport(@NonNull ComponentName admin) {
         throwIfParentInstance("requestBugreport");
@@ -6335,14 +6335,14 @@ public class DevicePolicyManager {
     }
 
     /**
-     * Called by a profile owner that is affiliated with the device owner to stop the calling user
+     * Called by a profile owner that is affiliated with the device to stop the calling user
      * and switch back to primary.
      * <p> This has no effect when called on a managed profile.
      *
      * @param admin Which {@link DeviceAdminReceiver} this request is associated with.
      * @return {@code true} if the exit was successful, {@code false} otherwise.
-     * @throws SecurityException if {@code admin} is not a profile owner affiliated with the device
-     * owner.
+     * @throws SecurityException if {@code admin} is not a profile owner affiliated with the device.
+     * @see #isAffiliatedUser
      */
     public boolean logoutUser(@NonNull ComponentName admin) {
         throwIfParentInstance("logoutUser");
@@ -6630,7 +6630,7 @@ public class DevicePolicyManager {
      * This function can be called by a device owner, profile owner or a delegate given
      * the {@link #DELEGATION_INSTALL_EXISTING_PACKAGE} scope via {@link #setDelegatedScopes}.
      * When called in a secondary user or managed profile, the user/profile must be affiliated with
-     * the device owner. See {@link #setAffiliationIds}.
+     * the device. See {@link #isAffiliatedUser}.
      *
      * @param admin Which {@link DeviceAdminReceiver} this request is associated with.
      * @param packageName The package to be installed in the calling profile.
@@ -6639,7 +6639,7 @@ public class DevicePolicyManager {
      * an affiliated user or profile.
      * @see #setKeepUninstalledPackages
      * @see #setDelegatedScopes
-     * @see #setAffiliationIds
+     * @see #isAffiliatedUser
      * @see #DELEGATION_PACKAGE_ACCESS
      */
     public boolean installExistingPackage(@NonNull ComponentName admin, String packageName) {
@@ -6726,13 +6726,14 @@ public class DevicePolicyManager {
      * package list results in locked tasks belonging to those packages to be finished.
      * <p>
      * This function can only be called by the device owner or by a profile owner of a user/profile
-     * that is affiliated with the device owner user. See {@link #setAffiliationIds}. Any packages
+     * that is affiliated with the device. See {@link #isAffiliatedUser}. Any packages
      * set via this method will be cleared if the user becomes unaffiliated.
      *
      * @param packages The list of packages allowed to enter lock task mode
      * @param admin Which {@link DeviceAdminReceiver} this request is associated with.
      * @throws SecurityException if {@code admin} is not the device owner, or the profile owner of
      * an affiliated user or profile.
+     * @see #isAffiliatedUser
      * @see Activity#startLockTask()
      * @see DeviceAdminReceiver#onLockTaskModeEntering(Context, Intent, String)
      * @see DeviceAdminReceiver#onLockTaskModeExiting(Context, Intent)
@@ -6755,6 +6756,7 @@ public class DevicePolicyManager {
      *
      * @throws SecurityException if {@code admin} is not the device owner, or the profile owner of
      * an affiliated user or profile.
+     * @see #isAffiliatedUser
      * @see #setLockTaskPackages
      */
     public @NonNull String[] getLockTaskPackages(@NonNull ComponentName admin) {
@@ -6794,7 +6796,7 @@ public class DevicePolicyManager {
      * enabled.
      * <p>
      * This function can only be called by the device owner or by a profile owner of a user/profile
-     * that is affiliated with the device owner user. See {@link #setAffiliationIds}. Any features
+     * that is affiliated with the device. See {@link #isAffiliatedUser}. Any features
      * set via this method will be cleared if the user becomes unaffiliated.
      *
      * @param admin Which {@link DeviceAdminReceiver} this request is associated with.
@@ -6808,6 +6810,7 @@ public class DevicePolicyManager {
      *              {@link #LOCK_TASK_FEATURE_KEYGUARD}
      * @throws SecurityException if {@code admin} is not the device owner, or the profile owner of
      * an affiliated user or profile.
+     * @see #isAffiliatedUser
      */
     public void setLockTaskFeatures(@NonNull ComponentName admin, @LockTaskFeature int flags) {
         throwIfParentInstance("setLockTaskFeatures");
@@ -6827,7 +6830,8 @@ public class DevicePolicyManager {
      * @return bitfield of flags. See {@link #setLockTaskFeatures(ComponentName, int)} for a list.
      * @throws SecurityException if {@code admin} is not the device owner, or the profile owner of
      * an affiliated user or profile.
-     * @see #setLockTaskFeatures(ComponentName, int)
+     * @see #isAffiliatedUser
+     * @see #setLockTaskFeatures
      */
     public @LockTaskFeature int getLockTaskFeatures(@NonNull ComponentName admin) {
         throwIfParentInstance("getLockTaskFeatures");
@@ -7825,6 +7829,7 @@ public class DevicePolicyManager {
      * @param admin Which device owner this request is associated with.
      * @param enabled whether security logging should be enabled or not.
      * @throws SecurityException if {@code admin} is not a device owner.
+     * @see #setAffiliationIds
      * @see #retrieveSecurityLogs
      */
     public void setSecurityLoggingEnabled(@NonNull ComponentName admin, boolean enabled) {
@@ -7863,14 +7868,14 @@ public class DevicePolicyManager {
      * owner has been notified via {@link DeviceAdminReceiver#onSecurityLogsAvailable}.
      *
      * <p>If there is any other user or profile on the device, it must be affiliated with the
-     * device owner. Otherwise a {@link SecurityException} will be thrown. See
-     * {@link #setAffiliationIds}
+     * device. Otherwise a {@link SecurityException} will be thrown. See {@link #isAffiliatedUser}.
      *
      * @param admin Which device owner this request is associated with.
      * @return the new batch of security logs which is a list of {@link SecurityEvent},
      * or {@code null} if rate limitation is exceeded or if logging is currently disabled.
      * @throws SecurityException if {@code admin} is not a device owner, or there is at least one
-     * profile or secondary user that is not affiliated with the device owner user.
+     * profile or secondary user that is not affiliated with the device.
+     * @see #isAffiliatedUser
      * @see DeviceAdminReceiver#onSecurityLogsAvailable
      */
     public @Nullable List<SecurityEvent> retrieveSecurityLogs(@NonNull ComponentName admin) {
@@ -7913,14 +7918,14 @@ public class DevicePolicyManager {
      * about data corruption when parsing. </strong>
      *
      * <p>If there is any other user or profile on the device, it must be affiliated with the
-     * device owner. Otherwise a {@link SecurityException} will be thrown. See
-     * {@link #setAffiliationIds}
+     * device. Otherwise a {@link SecurityException} will be thrown. See {@link #isAffiliatedUser}.
      *
      * @param admin Which device owner this request is associated with.
      * @return Device logs from before the latest reboot of the system, or {@code null} if this API
      *         is not supported on the device.
      * @throws SecurityException if {@code admin} is not a device owner, or there is at least one
-     * profile or secondary user that is not affiliated with the device owner user.
+     * profile or secondary user that is not affiliated with the device.
+     * @see #isAffiliatedUser
      * @see #retrieveSecurityLogs
      */
     public @Nullable List<SecurityEvent> retrievePreRebootSecurityLogs(
@@ -8128,6 +8133,9 @@ public class DevicePolicyManager {
      * Indicates the entity that controls the device or profile owner. Two users/profiles are
      * affiliated if the set of ids set by their device or profile owners intersect.
      *
+     * <p>A user/profile that is affiliated with the device owner user is considered to be
+     * affiliated with the device.
+     *
      * <p><strong>Note:</strong> Features that depend on user affiliation (such as security logging
      * or {@link #bindDeviceAdminServiceAsUser}) won't be available when a secondary user or profile
      * is created, until it becomes affiliated. Therefore it is recommended that the appropriate
@@ -8138,6 +8146,7 @@ public class DevicePolicyManager {
      * @param ids A set of opaque non-empty affiliation ids.
      *
      * @throws IllegalArgumentException if {@code ids} is null or contains an empty string.
+     * @see #isAffiliatedUser
      */
     public void setAffiliationIds(@NonNull ComponentName admin, @NonNull Set<String> ids) {
         throwIfParentInstance("setAffiliationIds");
@@ -8165,13 +8174,12 @@ public class DevicePolicyManager {
     }
 
     /**
-     * @hide
      * Returns whether this user/profile is affiliated with the device.
      * <p>
      * By definition, the user that the device owner runs on is always affiliated with the device.
      * Any other user/profile is considered affiliated with the device if the set specified by its
      * profile owner via {@link #setAffiliationIds} intersects with the device owner's.
-     *
+     * @see #setAffiliationIds
      */
     public boolean isAffiliatedUser() {
         throwIfParentInstance("isAffiliatedUser");
@@ -8384,6 +8392,7 @@ public class DevicePolicyManager {
      * @param admin Which {@link DeviceAdminReceiver} this request is associated with.
      * @param enabled whether network logging should be enabled or not.
      * @throws SecurityException if {@code admin} is not a device owner.
+     * @see #setAffiliationIds
      * @see #retrieveNetworkLogs
      */
     public void setNetworkLoggingEnabled(@NonNull ComponentName admin, boolean enabled) {
@@ -8439,7 +8448,8 @@ public class DevicePolicyManager {
      *        {@code null} if the batch represented by batchToken is no longer available or if
      *        logging is disabled.
      * @throws SecurityException if {@code admin} is not a device owner, or there is at least one
-     * profile or secondary user that is not affiliated with the device owner user.
+     * profile or secondary user that is not affiliated with the device.
+     * @see #setAffiliationIds
      * @see DeviceAdminReceiver#onNetworkLogsAvailable
      */
     public @Nullable List<NetworkEvent> retrieveNetworkLogs(@NonNull ComponentName admin,
