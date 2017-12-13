@@ -80,6 +80,7 @@ import android.os.DropBoxManager;
 import android.os.Environment;
 import android.os.GraphicsEnvironment;
 import android.os.Handler;
+import android.os.HandlerExecutor;
 import android.os.IBinder;
 import android.os.LocaleList;
 import android.os.Looper;
@@ -172,6 +173,7 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.Objects;
 import java.util.TimeZone;
+import java.util.concurrent.Executor;
 
 final class RemoteServiceException extends AndroidRuntimeException {
     public RemoteServiceException(String msg) {
@@ -242,6 +244,7 @@ public final class ActivityThread extends ClientTransactionHandler {
     final ApplicationThread mAppThread = new ApplicationThread();
     final Looper mLooper = Looper.myLooper();
     final H mH = new H();
+    final Executor mExecutor = new HandlerExecutor(mH);
     final ArrayMap<IBinder, ActivityClientRecord> mActivities = new ArrayMap<>();
     // List of new activities (via ActivityRecord.nextIdle) that should
     // be reported when next we idle.
@@ -1941,6 +1944,10 @@ public final class ActivityThread extends ClientTransactionHandler {
 
     public Looper getLooper() {
         return mLooper;
+    }
+
+    public Executor getExecutor() {
+        return mExecutor;
     }
 
     public Application getApplication() {
