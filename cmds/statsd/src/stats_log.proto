@@ -195,7 +195,7 @@ message StatsdStatsReport {
 
     message AlertStats {
         optional string name = 1;
-        optional int32 declared_times = 2;
+        optional int32 alerted_times = 2;
     }
 
     message ConfigStats {
