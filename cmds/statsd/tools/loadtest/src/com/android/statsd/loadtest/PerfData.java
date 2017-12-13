@@ -51,13 +51,17 @@ public class PerfData extends PerfDataRecorder {
 
     private final Set<PerfDataRecorder> mRecorders;
 
-    public PerfData(Context context, boolean placebo, int replication, long bucketMins,
-        long periodSecs,  int burst) {
+    public PerfData(LoadtestActivity loadtestActivity, boolean placebo, int replication,
+        long bucketMins, long periodSecs,  int burst) {
         super(placebo, replication, bucketMins, periodSecs, burst);
         mRecorders = new HashSet();
         mRecorders.add(new BatteryDataRecorder(placebo, replication, bucketMins, periodSecs, burst));
         mRecorders.add(new MemoryDataRecorder(placebo, replication, bucketMins, periodSecs, burst));
-        mAlarmMgr = (AlarmManager) context.getSystemService(Context.ALARM_SERVICE);
+        mRecorders.add(new StatsdStatsRecorder(loadtestActivity, placebo, replication, bucketMins,
+                periodSecs, burst));
+        mRecorders.add(new ValidationRecorder(loadtestActivity, placebo, replication, bucketMins,
+                periodSecs, burst));
+        mAlarmMgr = (AlarmManager) loadtestActivity.getSystemService(Context.ALARM_SERVICE);
     }
 
     public void onDestroy() {

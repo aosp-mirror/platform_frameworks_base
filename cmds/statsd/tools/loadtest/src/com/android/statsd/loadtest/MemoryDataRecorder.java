@@ -39,7 +39,6 @@ public class MemoryDataRecorder extends PerfDataRecorder {
 
     @Override
     public void onAlarm(Context context) {
-      Log.d(TAG, "GOT ALARM IN MEM");
         runDumpsysStats(context, DUMP_FILENAME, "meminfo");
         readDumpData(context, DUMP_FILENAME, new MemInfoParser(mStartTimeMillis), mSb);
     }

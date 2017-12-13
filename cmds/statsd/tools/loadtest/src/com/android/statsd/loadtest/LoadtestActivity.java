@@ -15,6 +15,7 @@
  */
 package com.android.statsd.loadtest;
 
+import android.annotation.Nullable;
 import android.app.Activity;
 import android.app.AlarmManager;
 import android.app.PendingIntent;
@@ -43,6 +44,10 @@ import android.widget.CheckBox;
 import android.widget.EditText;
 import android.widget.TextView;
 import android.widget.Toast;
+import com.android.os.StatsLog.ConfigMetricsReport;
+import com.android.os.StatsLog.ConfigMetricsReportList;
+import com.android.os.StatsLog.StatsdStatsReport;
+import java.util.List;
 
 /**
  * Runs a load test for statsd.
@@ -191,13 +196,6 @@ public class LoadtestActivity extends Activity {
             }
         });
 
-        findViewById(R.id.display_output).setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                fetchAndDisplayData();
-            }
-        });
-
         mAlarmMgr = (AlarmManager) getSystemService(Context.ALARM_SERVICE);
         mStatsManager = (StatsManager) getSystemService("stats");
         mPowerManager = (PowerManager) getSystemService(Context.POWER_SERVICE);
@@ -237,6 +235,48 @@ public class LoadtestActivity extends Activity {
         stopLoadtest();
         clearConfigs();
         super.onDestroy();
+    }
+
+    @Nullable
+    public StatsdStatsReport getMetadata() {
+        if (!statsdRunning()) {
+            return null;
+        }
+        if (mStatsManager != null) {
+            byte[] data = mStatsManager.getMetadata();
+            if (data != null) {
+                StatsdStatsReport report = null;
+                boolean good = false;
+                try {
+                    return StatsdStatsReport.parseFrom(data);
+                } catch (com.google.protobuf.InvalidProtocolBufferException e) {
+                    Log.d(TAG, "Bad StatsdStatsReport");
+                }
+            }
+        }
+        return null;
+    }
+
+    @Nullable
+    public List<ConfigMetricsReport> getData() {
+        if (!statsdRunning()) {
+            return null;
+        }
+        if (mStatsManager != null) {
+            byte[] data = mStatsManager.getData(ConfigFactory.CONFIG_NAME);
+            if (data != null) {
+                ConfigMetricsReportList reports = null;
+                try {
+                    reports = ConfigMetricsReportList.parseFrom(data);
+                } catch (com.google.protobuf.InvalidProtocolBufferException e) {
+                    Log.d(TAG, "Invalid data");
+                }
+                if (reports != null) {
+                    return reports.getReportsList();
+                }
+            }
+        }
+        return null;
     }
 
     private void onPerfAlarm() {
@@ -284,6 +324,9 @@ public class LoadtestActivity extends Activity {
 
         // Prepare to push a sequence of atoms to logd.
         mPusher = new SequencePusher(mBurst, mPlacebo);
+
+        // Force a data flush by requesting data.
+        getData();
 
         // Create a config and push it to statsd.
         if (!setConfig(mFactory.getConfig(mReplication, mBucketMins * 60 * 1000, mPlacebo))) {
@@ -353,42 +396,6 @@ public class LoadtestActivity extends Activity {
         mBucketText.setEnabled(!mPlacebo && !mStarted);
         mDurationText.setEnabled(!mStarted);
         mPlaceboCheckBox.setEnabled(!mStarted);
-    }
-
-    private void fetchAndDisplayData() {
-        if (!statsdRunning()) {
-            return;
-        }
-        if (mStatsManager != null) {
-            byte[] data = mStatsManager.getData(ConfigFactory.CONFIG_NAME);
-            if (data != null) {
-                displayData(data);
-            } else {
-                mReportText.setText("Failed to pull data");
-            }
-        }
-    }
-
-    private void displayData(byte[] data) {
-        com.android.os.StatsLog.ConfigMetricsReportList reports = null;
-        boolean good = false;
-        if (data != null) {
-            try {
-                reports = com.android.os.StatsLog.ConfigMetricsReportList.parseFrom(data);
-                good = true;
-            } catch (com.google.protobuf.InvalidProtocolBufferException e) {
-                // display it in the text view.
-            }
-        }
-        int size = data == null ? 0 : data.length;
-        StringBuilder sb = new StringBuilder();
-        sb.append(good ? "Proto parsing OK!" : "Proto parsing Error!");
-        sb.append(" size:").append(size).append("\n");
-
-        if (good && reports != null) {
-            DisplayProtoUtils.displayLogReport(sb, reports);
-            mReportText.setText(sb.toString());
-        }
     }
 
     private boolean statsdRunning() {
