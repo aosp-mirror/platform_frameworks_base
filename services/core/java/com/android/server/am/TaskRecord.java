@@ -623,6 +623,9 @@ class TaskRecord extends ConfigurationContainer implements TaskWindowContainerLi
         if (toStack == sourceStack) {
             return false;
         }
+        if (!canBeLaunchedOnDisplay(toStack.mDisplayId)) {
+            return false;
+        }
 
         final int toStackWindowingMode = toStack.getWindowingMode();
         final ActivityRecord topActivity = getTopActivity();

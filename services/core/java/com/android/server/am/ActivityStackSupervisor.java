@@ -2312,7 +2312,7 @@ public class ActivityStackSupervisor extends ConfigurationContainer implements D
         if (displayId == INVALID_DISPLAY) {
             displayId = candidateDisplayId;
         }
-        if (displayId != INVALID_DISPLAY) {
+        if (displayId != INVALID_DISPLAY && canLaunchOnDisplay(r, displayId)) {
             if (r != null) {
                 // TODO: This should also take in the windowing mode and activity type into account.
                 stack = (T) getValidLaunchStackOnDisplay(displayId, r);
@@ -2341,7 +2341,7 @@ public class ActivityStackSupervisor extends ConfigurationContainer implements D
         }
         if (stack != null) {
             display = stack.getDisplay();
-            if (display != null) {
+            if (display != null && canLaunchOnDisplay(r, display.mDisplayId)) {
                 final int windowingMode =
                         display.resolveWindowingMode(r, options, candidateTask, activityType);
                 if (stack.isCompatible(windowingMode, activityType)) {
@@ -2351,6 +2351,7 @@ public class ActivityStackSupervisor extends ConfigurationContainer implements D
         }
 
         if (display == null
+                || !canLaunchOnDisplay(r, display.mDisplayId)
                 // TODO: Can be removed once we figure-out how non-standard types should launch
                 // outside the default display.
                 || (activityType != ACTIVITY_TYPE_STANDARD
@@ -2359,6 +2360,14 @@ public class ActivityStackSupervisor extends ConfigurationContainer implements D
         }
 
         return display.getOrCreateStack(r, options, candidateTask, activityType, onTop);
+    }
+
+    /** @return true if activity record is null or can be launched on provided display. */
+    private boolean canLaunchOnDisplay(ActivityRecord r, int displayId) {
+        if (r == null) {
+            return true;
+        }
+        return r.canBeLaunchedOnDisplay(displayId);
     }
 
     /**
@@ -4248,22 +4257,15 @@ public class ActivityStackSupervisor extends ConfigurationContainer implements D
 
         // Handle incorrect launch/move to secondary display if needed.
         if (isSecondaryDisplayPreferred) {
-            final boolean launchOnSecondaryDisplayFailed;
             final int actualDisplayId = task.getStack().mDisplayId;
             if (!task.canBeLaunchedOnDisplay(actualDisplayId)) {
-                // The task landed on an inappropriate display somehow, move it to the default
-                // display.
-                // TODO(multi-display): Find proper stack for the task on the default display.
-                mService.setTaskWindowingMode(task.taskId,
-                        WINDOWING_MODE_FULLSCREEN_OR_SPLIT_SCREEN_SECONDARY, true /* toTop */);
-                launchOnSecondaryDisplayFailed = true;
-            } else {
-                // The task might have landed on a display different from requested.
-                launchOnSecondaryDisplayFailed = actualDisplayId == DEFAULT_DISPLAY
-                        || (preferredDisplayId != INVALID_DISPLAY
-                            && preferredDisplayId != actualDisplayId);
+                throw new IllegalStateException("Task resolved to incompatible display");
             }
-            if (launchOnSecondaryDisplayFailed) {
+            // The task might have landed on a display different from requested.
+            // TODO(multi-display): Find proper stack for the task on the default display.
+            mService.setTaskWindowingMode(task.taskId,
+                    WINDOWING_MODE_FULLSCREEN_OR_SPLIT_SCREEN_SECONDARY, true /* toTop */);
+            if (preferredDisplayId != actualDisplayId) {
                 // Display a warning toast that we tried to put a non-resizeable task on a secondary
                 // display with config different from global config.
                 mService.mTaskChangeNotificationController
