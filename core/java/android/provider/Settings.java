@@ -9563,6 +9563,31 @@ public final class Settings {
         public static final String ANOMALY_DETECTION_CONSTANTS = "anomaly_detection_constants";
 
         /**
+         * Battery tip specific settings
+         * This is encoded as a key=value list, separated by commas. Ex:
+         *
+         * "battery_tip_enabled=true,summary_enabled=true,high_usage_enabled=true,"
+         * "high_usage_app_count=3,reduced_battery_enabled=false,reduced_battery_percent=50"
+         *
+         * The following keys are supported:
+         *
+         * <pre>
+         * battery_tip_enabled              (boolean)
+         * summary_enabled                  (boolean)
+         * battery_saver_tip_enabled        (boolean)
+         * high_usage_enabled               (boolean)
+         * high_usage_app_count             (int)
+         * app_restriction_enabled          (boolean)
+         * reduced_battery_enabled          (boolean)
+         * reduced_battery_percent          (int)
+         * low_battery_enabled              (boolean)
+         * low_battery_hour                 (int)
+         * </pre>
+         * @hide
+         */
+        public static final String BATTERY_TIP_CONSTANTS = "battery_tip_constants";
+
+        /**
          * Always on display(AOD) specific settings
          * This is encoded as a key=value list, separated by commas. Ex:
          *
