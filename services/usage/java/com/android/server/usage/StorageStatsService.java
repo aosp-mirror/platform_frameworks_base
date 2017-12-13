@@ -164,6 +164,14 @@ public class StorageStatsService extends IStorageStatsManager.Stub {
     }
 
     @Override
+    public boolean isReservedSupported(String volumeUuid, String callingPackage) {
+        enforcePermission(Binder.getCallingUid(), callingPackage);
+
+        // TODO: implement as part of b/62024591
+        return false;
+    }
+
+    @Override
     public long getTotalBytes(String volumeUuid, String callingPackage) {
         // NOTE: No permissions required
 

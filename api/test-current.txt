@@ -120,6 +120,7 @@ package android.app.usage {
 
   public class StorageStatsManager {
     method public boolean isQuotaSupported(java.util.UUID);
+    method public boolean isReservedSupported(java.util.UUID);
   }
 
 }
