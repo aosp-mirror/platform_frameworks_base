@@ -2251,7 +2251,7 @@ class TaskRecord extends ConfigurationContainer implements TaskWindowContainerLi
             String callingPackage = "";
             int resizeMode = RESIZE_MODE_FORCE_RESIZEABLE;
             boolean supportsPictureInPicture = false;
-            Rect bounds = null;
+            Rect lastNonFullscreenBounds = null;
             int minWidth = INVALID_MIN_SIZE;
             int minHeight = INVALID_MIN_SIZE;
             int persistTaskVersion = 0;
@@ -2336,7 +2336,7 @@ class TaskRecord extends ConfigurationContainer implements TaskWindowContainerLi
                         supportsPictureInPicture = Boolean.parseBoolean(attrValue);
                         break;
                     case ATTR_NON_FULLSCREEN_BOUNDS:
-                        bounds = Rect.unflattenFromString(attrValue);
+                        lastNonFullscreenBounds = Rect.unflattenFromString(attrValue);
                         break;
                     case ATTR_MIN_WIDTH:
                         minWidth = Integer.parseInt(attrValue);
@@ -2431,7 +2431,8 @@ class TaskRecord extends ConfigurationContainer implements TaskWindowContainerLi
                     taskAffiliation, prevTaskId, nextTaskId, taskAffiliationColor, callingUid,
                     callingPackage, resizeMode, supportsPictureInPicture, realActivitySuspended,
                     userSetupComplete, minWidth, minHeight);
-            task.updateOverrideConfiguration(bounds);
+            task.mLastNonFullscreenBounds = lastNonFullscreenBounds;
+            task.setBounds(lastNonFullscreenBounds);
 
             for (int activityNdx = activities.size() - 1; activityNdx >=0; --activityNdx) {
                 activities.get(activityNdx).setTask(task);
