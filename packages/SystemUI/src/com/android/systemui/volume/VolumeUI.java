@@ -40,9 +40,13 @@ public class VolumeUI extends SystemUI {
 
     @Override
     public void start() {
-        mEnabled = mContext.getResources().getBoolean(R.bool.enable_volume_ui);
+        boolean enableVolumeUi = mContext.getResources().getBoolean(R.bool.enable_volume_ui);
+        boolean enableSafetyWarning =
+            mContext.getResources().getBoolean(R.bool.enable_safety_warning);
+        mEnabled = enableVolumeUi || enableSafetyWarning;
         if (!mEnabled) return;
         mVolumeComponent = new VolumeDialogComponent(this, mContext, null);
+        mVolumeComponent.setEnableDialogs(enableVolumeUi, enableSafetyWarning);
         putComponent(VolumeComponent.class, getVolumeComponent());
         setDefaultVolumeController();
     }
