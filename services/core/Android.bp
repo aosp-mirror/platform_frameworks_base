@@ -1,5 +1,5 @@
 java_library_static {
-    name: "services.core",
+    name: "services.core.unboosted",
 
     aidl: {
         include_dirs: [
@@ -45,7 +45,7 @@ java_library_static {
 
 java_genrule {
     name: "services.core.priorityboosted",
-    srcs: [":services.core"],
+    srcs: [":services.core.unboosted"],
     tools: ["lockedregioncodeinjection"],
     cmd: "$(location lockedregioncodeinjection) " +
         "  --targets \"Lcom/android/server/am/ActivityManagerService;,Lcom/android/server/wm/WindowHashMap;\" " +
@@ -54,4 +54,9 @@ java_genrule {
         "  -o $(out) " +
         "  -i $(in)",
     out: ["services.core.priorityboosted.jar"],
+}
+
+java_library {
+    name: "services.core",
+    static_libs: ["services.core.priorityboosted"],
 }
