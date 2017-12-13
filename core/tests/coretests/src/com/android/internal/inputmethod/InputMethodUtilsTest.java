@@ -16,6 +16,9 @@
 
 package com.android.internal.inputmethod;
 
+import static android.view.inputmethod.InputMethodManager.CONTROL_WINDOW_IS_TEXT_EDITOR;
+import static android.view.inputmethod.InputMethodManager.CONTROL_WINDOW_VIEW_HAS_FOCUS;
+
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.in;
 import static org.hamcrest.Matchers.not;
@@ -31,6 +34,7 @@ import android.content.pm.ResolveInfo;
 import android.content.pm.ServiceInfo;
 import android.content.res.Configuration;
 import android.content.res.Resources;
+import android.os.Build;
 import android.os.LocaleList;
 import android.os.Parcel;
 import android.support.test.InstrumentationRegistry;
@@ -1410,4 +1414,29 @@ public class InputMethodUtilsTest {
         assertEquals(new Locale("a b c"), InputMethodUtils.constructLocaleFromString("a b c"));
         assertEquals(new Locale("en-US"), InputMethodUtils.constructLocaleFromString("en-US"));
     }
+
+    @Test
+    public void testIsSoftInputModeStateVisibleAllowed() {
+        // On pre-P devices, SOFT_INPUT_STATE_VISIBLE/SOFT_INPUT_STATE_ALWAYS_VISIBLE are always
+        // allowed, regardless of the focused view state.
+        assertTrue(InputMethodUtils.isSoftInputModeStateVisibleAllowed(
+                Build.VERSION_CODES.O_MR1, 0));
+        assertTrue(InputMethodUtils.isSoftInputModeStateVisibleAllowed(
+                Build.VERSION_CODES.O_MR1, CONTROL_WINDOW_VIEW_HAS_FOCUS));
+        assertTrue(InputMethodUtils.isSoftInputModeStateVisibleAllowed(
+                Build.VERSION_CODES.O_MR1,
+                CONTROL_WINDOW_VIEW_HAS_FOCUS | CONTROL_WINDOW_IS_TEXT_EDITOR));
+
+        // On P+ devices, SOFT_INPUT_STATE_VISIBLE/SOFT_INPUT_STATE_ALWAYS_VISIBLE are allowed only
+        // when there is a focused View and its View#onCheckIsTextEditor() returns true.
+        assertFalse(InputMethodUtils.isSoftInputModeStateVisibleAllowed(
+                Build.VERSION_CODES.P, 0));
+        assertFalse(InputMethodUtils.isSoftInputModeStateVisibleAllowed(
+                Build.VERSION_CODES.P, CONTROL_WINDOW_VIEW_HAS_FOCUS));
+        assertTrue(InputMethodUtils.isSoftInputModeStateVisibleAllowed(
+                Build.VERSION_CODES.P,
+                CONTROL_WINDOW_VIEW_HAS_FOCUS | CONTROL_WINDOW_IS_TEXT_EDITOR));
+
+    }
+
 }

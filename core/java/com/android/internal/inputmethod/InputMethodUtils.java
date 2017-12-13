@@ -16,6 +16,9 @@
 
 package com.android.internal.inputmethod;
 
+import static android.view.inputmethod.InputMethodManager.CONTROL_WINDOW_IS_TEXT_EDITOR;
+import static android.view.inputmethod.InputMethodManager.CONTROL_WINDOW_VIEW_HAS_FOCUS;
+
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.UserIdInt;
@@ -26,6 +29,7 @@ import android.content.pm.ApplicationInfo;
 import android.content.pm.IPackageManager;
 import android.content.pm.PackageManager;
 import android.content.res.Resources;
+import android.os.Build;
 import android.os.LocaleList;
 import android.os.RemoteException;
 import android.provider.Settings;
@@ -33,6 +37,7 @@ import android.text.TextUtils;
 import android.text.TextUtils.SimpleStringSplitter;
 import android.util.ArrayMap;
 import android.util.ArraySet;
+import android.util.Log;
 import android.util.Pair;
 import android.util.Printer;
 import android.util.Slog;
@@ -1510,4 +1515,20 @@ public class InputMethodUtils {
         }
         return locales;
     }
+
+    public static boolean isSoftInputModeStateVisibleAllowed(
+            int targetSdkVersion, int controlFlags) {
+        if (targetSdkVersion < Build.VERSION_CODES.P) {
+            // for compatibility.
+            return true;
+        }
+        if ((controlFlags & CONTROL_WINDOW_VIEW_HAS_FOCUS) == 0) {
+            return false;
+        }
+        if ((controlFlags & CONTROL_WINDOW_IS_TEXT_EDITOR) == 0) {
+            return false;
+        }
+        return true;
+    }
+
 }

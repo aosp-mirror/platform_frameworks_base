@@ -1333,7 +1333,8 @@ public final class InputMethodManager {
                         + Integer.toHexString(controlFlags));
                 final InputBindResult res = mService.startInputOrWindowGainedFocus(
                         startInputReason, mClient, windowGainingFocus, controlFlags, softInputMode,
-                        windowFlags, tba, servedContext, missingMethodFlags);
+                        windowFlags, tba, servedContext, missingMethodFlags,
+                        view.getContext().getApplicationInfo().targetSdkVersion);
                 if (DEBUG) Log.v(TAG, "Starting input: Bind result=" + res);
                 if (res != null) {
                     if (res.id != null) {
@@ -1588,7 +1589,8 @@ public final class InputMethodManager {
                 mService.startInputOrWindowGainedFocus(
                         InputMethodClient.START_INPUT_REASON_WINDOW_FOCUS_GAIN_REPORT_ONLY, mClient,
                         rootView.getWindowToken(), controlFlags, softInputMode, windowFlags, null,
-                        null, 0 /* missingMethodFlags */);
+                        null, 0 /* missingMethodFlags */,
+                        rootView.getContext().getApplicationInfo().targetSdkVersion);
             } catch (RemoteException e) {
                 throw e.rethrowFromSystemServer();
             }
