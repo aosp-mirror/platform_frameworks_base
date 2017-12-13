@@ -57,11 +57,23 @@ import java.io.PrintWriter;
 import java.net.InetAddress;
 import java.net.InetSocketAddress;
 import java.net.UnknownHostException;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import libcore.io.IoUtils;
 
-/** @hide */
+/**
+ * A service to manage multiple clients that want to access the IpSec API. The service is
+ * responsible for maintaining a list of clients and managing the resources (and related quotas)
+ * that each of them own.
+ *
+ * <p>Synchronization in IpSecService is done on all entrypoints due to potential race conditions at
+ * the kernel/xfrm level. Further, this allows the simplifying assumption to be made that only one
+ * thread is ever running at a time.
+ *
+ * @hide
+ */
 public class IpSecService extends IIpSecService.Stub {
     private static final String TAG = "IpSecService";
     private static final boolean DBG = Log.isLoggable(TAG, Log.DEBUG);
@@ -92,15 +104,15 @@ public class IpSecService extends IIpSecService.Stub {
     private static AtomicInteger mNextResourceId = new AtomicInteger(0x00FADED0);
 
     @GuardedBy("this")
-    private final ManagedResourceArray<SpiRecord> mSpiRecords = new ManagedResourceArray<>();
+    private final KernelResourceArray<SpiRecord> mSpiRecords = new KernelResourceArray<>();
 
     @GuardedBy("this")
-    private final ManagedResourceArray<TransformRecord> mTransformRecords =
-            new ManagedResourceArray<>();
+    private final KernelResourceArray<TransformRecord> mTransformRecords =
+            new KernelResourceArray<>();
 
     @GuardedBy("this")
-    private final ManagedResourceArray<UdpSocketRecord> mUdpSocketRecords =
-            new ManagedResourceArray<>();
+    private final KernelResourceArray<UdpSocketRecord> mUdpSocketRecords =
+            new KernelResourceArray<>();
 
     interface IpSecServiceConfiguration {
         INetd getNetdInstance() throws RemoteException;
@@ -119,6 +131,173 @@ public class IpSecService extends IIpSecService.Stub {
     }
 
     private final IpSecServiceConfiguration mSrvConfig;
+
+    /**
+     * Interface for user-reference and kernel-resource cleanup.
+     *
+     * <p>This interface must be implemented for a resource to be reference counted.
+     */
+    @VisibleForTesting
+    public interface IResource {
+        /**
+         * Invalidates a IResource object, ensuring it is invalid for the purposes of allocating new
+         * objects dependent on it.
+         *
+         * <p>Implementations of this method are expected to remove references to the IResource
+         * object from the IpSecService's tracking arrays. The removal from the arrays ensures that
+         * the resource is considered invalid for user access or allocation or use in other
+         * resources.
+         *
+         * <p>References to the IResource object may be held by other RefcountedResource objects,
+         * and as such, the kernel resources and quota may not be cleaned up.
+         */
+        void invalidate() throws RemoteException;
+
+        /**
+         * Releases underlying resources and related quotas.
+         *
+         * <p>Implementations of this method are expected to remove all system resources that are
+         * tracked by the IResource object. Due to other RefcountedResource objects potentially
+         * having references to the IResource object, releaseKernelResources may not always be
+         * called from releaseIfUnreferencedRecursively().
+         */
+        void freeUnderlyingResources() throws RemoteException;
+    }
+
+    /**
+     * RefcountedResource manages references and dependencies in an exclusively acyclic graph.
+     *
+     * <p>RefcountedResource implements both explicit and implicit resource management. Creating a
+     * RefcountedResource object creates an explicit reference that must be freed by calling
+     * userRelease(). Additionally, adding this object as a child of another RefcountedResource
+     * object will add an implicit reference.
+     *
+     * <p>Resources are cleaned up when all references, both implicit and explicit, are released
+     * (ie, when userRelease() is called and when all parents have called releaseReference() on this
+     * object.)
+     */
+    @VisibleForTesting
+    public class RefcountedResource<T extends IResource> implements IBinder.DeathRecipient {
+        private final T mResource;
+        private final List<RefcountedResource> mChildren;
+        int mRefCount = 1; // starts at 1 for user's reference.
+        IBinder mBinder;
+
+        RefcountedResource(T resource, IBinder binder, RefcountedResource... children) {
+            synchronized (IpSecService.this) {
+                this.mResource = resource;
+                this.mChildren = new ArrayList<>(children.length);
+                this.mBinder = binder;
+
+                for (RefcountedResource child : children) {
+                    mChildren.add(child);
+                    child.mRefCount++;
+                }
+
+                try {
+                    mBinder.linkToDeath(this, 0);
+                } catch (RemoteException e) {
+                    binderDied();
+                }
+            }
+        }
+
+        /**
+         * If the Binder object dies, this function is called to free the system resources that are
+         * being managed by this record and to subsequently release this record for garbage
+         * collection
+         */
+        @Override
+        public void binderDied() {
+            synchronized (IpSecService.this) {
+                try {
+                    userRelease();
+                } catch (Exception e) {
+                    Log.e(TAG, "Failed to release resource: " + e);
+                }
+            }
+        }
+
+        public T getResource() {
+            return mResource;
+        }
+
+        /**
+         * Unlinks from binder and performs IpSecService resource cleanup (removes from resource
+         * arrays)
+         *
+         * <p>If this method has been previously called, the RefcountedResource's binder field will
+         * be null, and the method will return without performing the cleanup a second time.
+         *
+         * <p>Note that calling this function does not imply that kernel resources will be freed at
+         * this time, or that the related quota will be returned. Such actions will only be
+         * performed upon the reference count reaching zero.
+         */
+        @GuardedBy("IpSecService.this")
+        public void userRelease() throws RemoteException {
+            // Prevent users from putting reference counts into a bad state by calling
+            // userRelease() multiple times.
+            if (mBinder == null) {
+                return;
+            }
+
+            mBinder.unlinkToDeath(this, 0);
+            mBinder = null;
+
+            mResource.invalidate();
+
+            releaseReference();
+        }
+
+        /**
+         * Removes a reference to this resource. If the resultant reference count is zero, the
+         * underlying resources are freed, and references to all child resources are also dropped
+         * recursively (resulting in them freeing their resources and children, etcetera)
+         *
+         * <p>This method also sets the reference count to an invalid value (-1) to signify that it
+         * has been fully released. Any subsequent calls to this method will result in an
+         * IllegalStateException being thrown due to resource already having been previously
+         * released
+         */
+        @VisibleForTesting
+        @GuardedBy("IpSecService.this")
+        public void releaseReference() throws RemoteException {
+            mRefCount--;
+
+            if (mRefCount > 0) {
+                return;
+            } else if (mRefCount < 0) {
+                throw new IllegalStateException(
+                        "Invalid operation - resource has already been released.");
+            }
+
+            // Cleanup own resources
+            mResource.freeUnderlyingResources();
+
+            // Cleanup child resources as needed
+            for (RefcountedResource<? extends IResource> child : mChildren) {
+                child.releaseReference();
+            }
+
+            // Enforce that resource cleanup can only be called once
+            // By decrementing the refcount (from 0 to -1), the next call will throw an
+            // IllegalStateException - it has already been released fully.
+            mRefCount--;
+        }
+
+        @Override
+        public String toString() {
+            return new StringBuilder()
+                    .append("{mResource=")
+                    .append(mResource)
+                    .append(", mRefCount=")
+                    .append(mRefCount)
+                    .append(", mChildren=")
+                    .append(mChildren)
+                    .append("}")
+                    .toString();
+        }
+    }
 
     /* Very simple counting class that looks much like a counting semaphore */
     public static class ResourceTracker {
@@ -211,13 +390,13 @@ public class IpSecService extends IIpSecService.Stub {
     private final UserQuotaTracker mUserQuotaTracker = new UserQuotaTracker();
 
     /**
-     * The ManagedResource class provides a facility to cleanly and reliably release system
-     * resources. It relies on two things: an IBinder that allows ManagedResource to automatically
+     * The KernelResource class provides a facility to cleanly and reliably release system
+     * resources. It relies on two things: an IBinder that allows KernelResource to automatically
      * clean up in the event that the Binder dies and a user-provided resourceId that should
      * uniquely identify the managed resource. To use this class, the user should implement the
      * releaseResources() method that is responsible for releasing system resources when invoked.
      */
-    private abstract class ManagedResource implements IBinder.DeathRecipient {
+    private abstract class KernelResource implements IBinder.DeathRecipient {
         final int pid;
         final int uid;
         private IBinder mBinder;
@@ -225,7 +404,7 @@ public class IpSecService extends IIpSecService.Stub {
 
         private AtomicInteger mReferenceCount = new AtomicInteger(0);
 
-        ManagedResource(int resourceId, IBinder binder) {
+        KernelResource(int resourceId, IBinder binder) {
             super();
             if (resourceId == INVALID_RESOURCE_ID) {
                 throw new IllegalArgumentException("Resource ID must not be INVALID_RESOURCE_ID");
@@ -341,7 +520,7 @@ public class IpSecService extends IIpSecService.Stub {
     /**
      * Minimal wrapper around SparseArray that performs ownership validation on element accesses.
      */
-    private class ManagedResourceArray<T extends ManagedResource> {
+    private class KernelResourceArray<T extends KernelResource> {
         SparseArray<T> mArray = new SparseArray<>();
 
         T getAndCheckOwner(int key) {
@@ -369,7 +548,7 @@ public class IpSecService extends IIpSecService.Stub {
         }
     }
 
-    private final class TransformRecord extends ManagedResource {
+    private final class TransformRecord extends KernelResource {
         private final IpSecConfig mConfig;
         private final SpiRecord[] mSpis;
         private final UdpSocketRecord mSocket;
@@ -456,7 +635,7 @@ public class IpSecService extends IIpSecService.Stub {
         }
     }
 
-    private final class SpiRecord extends ManagedResource {
+    private final class SpiRecord extends KernelResource {
         private final int mDirection;
         private final String mLocalAddress;
         private final String mRemoteAddress;
@@ -544,7 +723,7 @@ public class IpSecService extends IIpSecService.Stub {
         }
     }
 
-    private final class UdpSocketRecord extends ManagedResource {
+    private final class UdpSocketRecord extends KernelResource {
         private FileDescriptor mSocket;
         private final int mPort;
 
@@ -718,8 +897,8 @@ public class IpSecService extends IIpSecService.Stub {
     /* This method should only be called from Binder threads. Do not call this from
      * within the system server as it will crash the system on failure.
      */
-    private synchronized <T extends ManagedResource> void releaseManagedResource(
-            ManagedResourceArray<T> resArray, int resourceId, String typeName)
+    private synchronized <T extends KernelResource> void releaseKernelResource(
+            KernelResourceArray<T> resArray, int resourceId, String typeName)
             throws RemoteException {
         // We want to non-destructively get so that we can check credentials before removing
         // this from the records.
@@ -737,7 +916,7 @@ public class IpSecService extends IIpSecService.Stub {
     /** Release a previously allocated SPI that has been registered with the system server */
     @Override
     public void releaseSecurityParameterIndex(int resourceId) throws RemoteException {
-        releaseManagedResource(mSpiRecords, resourceId, "SecurityParameterIndex");
+        releaseKernelResource(mSpiRecords, resourceId, "SecurityParameterIndex");
     }
 
     /**
@@ -827,7 +1006,7 @@ public class IpSecService extends IIpSecService.Stub {
     @Override
     public void closeUdpEncapsulationSocket(int resourceId) throws RemoteException {
 
-        releaseManagedResource(mUdpSocketRecords, resourceId, "UdpEncapsulationSocket");
+        releaseKernelResource(mUdpSocketRecords, resourceId, "UdpEncapsulationSocket");
     }
 
     /**
@@ -974,7 +1153,7 @@ public class IpSecService extends IIpSecService.Stub {
      */
     @Override
     public void deleteTransportModeTransform(int resourceId) throws RemoteException {
-        releaseManagedResource(mTransformRecords, resourceId, "IpSecTransform");
+        releaseKernelResource(mTransformRecords, resourceId, "IpSecTransform");
     }
 
     /**
@@ -984,7 +1163,7 @@ public class IpSecService extends IIpSecService.Stub {
     @Override
     public synchronized void applyTransportModeTransform(
             ParcelFileDescriptor socket, int resourceId) throws RemoteException {
-        // Synchronize liberally here because we are using ManagedResources in this block
+        // Synchronize liberally here because we are using KernelResources in this block
         TransformRecord info;
         // FIXME: this code should be factored out into a security check + getter
         info = mTransformRecords.getAndCheckOwner(resourceId);
