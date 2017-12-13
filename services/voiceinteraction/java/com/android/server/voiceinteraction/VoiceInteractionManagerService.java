@@ -75,7 +75,6 @@ import com.android.server.soundtrigger.SoundTriggerInternal;
 import java.io.FileDescriptor;
 import java.io.PrintWriter;
 import java.util.List;
-import java.util.TreeSet;
 
 /**
  * SystemService that publishes an IVoiceInteractionManagerService.
@@ -442,11 +441,11 @@ public class VoiceInteractionManagerService extends SystemService {
                         mImpl.shutdownLocked();
                     }
                     if (hasComponent) {
-                        mImpl = new VoiceInteractionManagerServiceImpl(mContext,
-                                UiThread.getHandler(), this, mCurUser, serviceComponent);
+                        setImplLocked(new VoiceInteractionManagerServiceImpl(mContext,
+                                UiThread.getHandler(), this, mCurUser, serviceComponent));
                         mImpl.startLocked();
                     } else {
-                        mImpl = null;
+                        setImplLocked(null);
                     }
                 }
             }
@@ -1177,6 +1176,12 @@ public class VoiceInteractionManagerService extends SystemService {
             }
         }
 
+        private void setImplLocked(VoiceInteractionManagerServiceImpl impl) {
+            mImpl = impl;
+            mAmInternal.notifyActiveVoiceInteractionServiceChanged(
+                    getActiveServiceComponentName());
+        }
+
         class SettingsObserver extends ContentObserver {
             SettingsObserver(Handler handler) {
                 super(handler);
@@ -1219,7 +1224,7 @@ public class VoiceInteractionManagerService extends SystemService {
                         unloadAllKeyphraseModels();
                         if (mImpl != null) {
                             mImpl.shutdownLocked();
-                            mImpl = null;
+                            setImplLocked(null);
                         }
                         setCurInteractor(null, userHandle);
                         setCurRecognizer(null, userHandle);
