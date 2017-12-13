@@ -1339,7 +1339,7 @@ package android.hardware.hdmi {
 
 package android.hardware.location {
 
-  public class ContextHubInfo {
+  public class ContextHubInfo implements android.os.Parcelable {
     ctor public ContextHubInfo();
     method public int describeContents();
     method public int getId();
