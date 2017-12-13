@@ -35,13 +35,10 @@ import java.util.OptionalInt;
 public class BroadcastRadioService extends SystemService {
     private final ServiceImpl mServiceImpl = new ServiceImpl();
 
+    private final com.android.server.broadcastradio.hal1.BroadcastRadioService mHal1 =
+            new com.android.server.broadcastradio.hal1.BroadcastRadioService();
     private final com.android.server.broadcastradio.hal2.BroadcastRadioService mHal2 =
             new com.android.server.broadcastradio.hal2.BroadcastRadioService();
-
-    /**
-     * This field is used by native code, do not access or modify.
-     */
-    private final long mNativeContext = nativeInit();
 
     private final Object mLock = new Object();
     private List<RadioManager.ModuleProperties> mModules = null;
@@ -49,18 +46,6 @@ public class BroadcastRadioService extends SystemService {
     public BroadcastRadioService(Context context) {
         super(context);
     }
-
-    @Override
-    protected void finalize() throws Throwable {
-        nativeFinalize(mNativeContext);
-        super.finalize();
-    }
-
-    private native long nativeInit();
-    private native void nativeFinalize(long nativeContext);
-    private native List<RadioManager.ModuleProperties> nativeLoadModules(long nativeContext);
-    private native Tuner nativeOpenTuner(long nativeContext, int moduleId,
-            RadioManager.BandConfig config, boolean withAudio, ITunerCallback callback);
 
     @Override
     public void onStart() {
@@ -89,12 +74,7 @@ public class BroadcastRadioService extends SystemService {
             synchronized (mLock) {
                 if (mModules != null) return mModules;
 
-                mModules = nativeLoadModules(mNativeContext);
-                if (mModules == null) {
-                    throw new ParcelableException(new NullPointerException(
-                            "couldn't load radio HAL 1.x modules"));
-                }
-
+                mModules = mHal1.loadModules();
                 mModules.addAll(mHal2.loadModules(getNextId(mModules)));
 
                 return mModules;
@@ -109,7 +89,11 @@ public class BroadcastRadioService extends SystemService {
                 throw new IllegalArgumentException("Callback must not be empty");
             }
             synchronized (mLock) {
-                return nativeOpenTuner(mNativeContext, moduleId, bandConfig, withAudio, callback);
+                if (mHal2.hasModule(moduleId)) {
+                    throw new RuntimeException("Not implemented");
+                } else {
+                    return mHal1.openTuner(moduleId, bandConfig, withAudio, callback);
+                }
             }
         }
     }

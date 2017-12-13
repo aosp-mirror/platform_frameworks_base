@@ -592,18 +592,18 @@ void register_android_server_broadcastradio_Tuner(JavaVM *vm, JNIEnv *env) {
 
     register_android_server_broadcastradio_TunerCallback(vm, env);
 
-    auto tunerClass = FindClassOrDie(env, "com/android/server/broadcastradio/Tuner");
+    auto tunerClass = FindClassOrDie(env, "com/android/server/broadcastradio/hal1/Tuner");
     gjni.Tuner.nativeContext = GetFieldIDOrDie(env, tunerClass, "mNativeContext", "J");
     gjni.Tuner.region = GetFieldIDOrDie(env, tunerClass, "mRegion", "I");
     gjni.Tuner.tunerCallback = GetFieldIDOrDie(env, tunerClass, "mTunerCallback",
-            "Lcom/android/server/broadcastradio/TunerCallback;");
+            "Lcom/android/server/broadcastradio/hal1/TunerCallback;");
 
     auto arrayListClass = FindClassOrDie(env, "java/util/ArrayList");
     gjni.ArrayList.clazz = MakeGlobalRefOrDie(env, arrayListClass);
     gjni.ArrayList.cstor = GetMethodIDOrDie(env, arrayListClass, "<init>", "()V");
     gjni.ArrayList.add = GetMethodIDOrDie(env, arrayListClass, "add", "(Ljava/lang/Object;)Z");
 
-    auto res = jniRegisterNativeMethods(env, "com/android/server/broadcastradio/Tuner",
+    auto res = jniRegisterNativeMethods(env, "com/android/server/broadcastradio/hal1/Tuner",
             gTunerMethods, NELEM(gTunerMethods));
     LOG_ALWAYS_FATAL_IF(res < 0, "Unable to register native methods.");
 }

@@ -72,4 +72,8 @@ public class BroadcastRadioService {
         return mModules.values().stream().map(module -> module.mProperties).
                 collect(Collectors.toList());
     }
+
+    public boolean hasModule(int id) {
+        return mModules.containsKey(id);
+    }
 }

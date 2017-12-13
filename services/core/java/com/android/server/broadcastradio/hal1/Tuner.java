@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.android.server.broadcastradio;
+package com.android.server.broadcastradio.hal1;
 
 import android.annotation.NonNull;
 import android.graphics.Bitmap;
