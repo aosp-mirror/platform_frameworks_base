@@ -40,8 +40,6 @@ public:
 
     virtual ~EventMetricProducer();
 
-    void finish() override;
-
     // TODO: Implement this later.
     virtual void notifyAppUpgrade(const string& apk, const int uid, const int64_t version)
             override{};
@@ -49,7 +47,7 @@ public:
     virtual void notifyAppRemoved(const string& apk, const int uid) override{};
 
 protected:
-    void startNewProtoOutputStreamLocked(long long timestamp);
+    void startNewProtoOutputStreamLocked();
 
 private:
     void onMatchedLogEventInternalLocked(
@@ -57,8 +55,8 @@ private:
             const std::map<std::string, HashableDimensionKey>& conditionKey, bool condition,
             const LogEvent& event, bool scheduledPull) override;
 
-    // TODO: Pass a timestamp as a parameter in onDumpReport.
-    std::unique_ptr<std::vector<uint8_t>> onDumpReportLocked() override;
+    void onDumpReportLocked(const uint64_t dumpTimeNs,
+                            android::util::ProtoOutputStream* protoOutput) override;
 
     // Internal interface to handle condition change.
     void onConditionChangedLocked(const bool conditionMet, const uint64_t eventTime) override;
@@ -70,6 +68,10 @@ private:
     size_t byteSizeLocked() const override;
 
     const EventMetric mMetric;
+
+    // Maps to a EventMetricDataWrapper. Storing atom events in ProtoOutputStream
+    // is more space efficient than storing LogEvent.
+    std::unique_ptr<android::util::ProtoOutputStream> mProto;
 };
 
 }  // namespace statsd

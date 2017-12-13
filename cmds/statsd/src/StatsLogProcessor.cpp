@@ -111,9 +111,7 @@ void StatsLogProcessor::OnConfigUpdated(const ConfigKey& key, const StatsdConfig
     unique_ptr<MetricsManager> newMetricsManager = std::make_unique<MetricsManager>(key, config);
 
     auto it = mMetricsManagers.find(key);
-    if (it != mMetricsManagers.end()) {
-        it->second->finish();
-    } else if (mMetricsManagers.size() > StatsdStats::kMaxConfigCount) {
+    if (it == mMetricsManagers.end() && mMetricsManagers.size() > StatsdStats::kMaxConfigCount) {
         ALOGE("Can't accept more configs!");
         return;
     }
@@ -167,11 +165,7 @@ void StatsLogProcessor::onDumpReport(const ConfigKey& key, vector<uint8_t>* outD
 
     // First, fill in ConfigMetricsReport using current data on memory, which
     // starts from filling in StatsLogReport's.
-    for (auto& m : it->second->onDumpReport()) {
-        // Add each vector of StatsLogReport into a repeated field.
-        proto.write(FIELD_TYPE_MESSAGE | FIELD_COUNT_REPEATED | FIELD_ID_METRICS,
-                    reinterpret_cast<char*>(m.get()->data()), m.get()->size());
-    }
+    it->second->onDumpReport(&proto);
 
     // Fill in UidMap.
     auto uidMap = mUidMap->getOutput(key);
@@ -205,7 +199,6 @@ void StatsLogProcessor::onDumpReport(const ConfigKey& key, vector<uint8_t>* outD
 void StatsLogProcessor::OnConfigRemoved(const ConfigKey& key) {
     auto it = mMetricsManagers.find(key);
     if (it != mMetricsManagers.end()) {
-        it->second->finish();
         mMetricsManagers.erase(it);
         mUidMap->OnConfigRemoved(key);
     }
@@ -231,8 +224,9 @@ void StatsLogProcessor::flushIfNecessary(uint64_t timestampNs, const ConfigKey& 
     mLastByteSizeTimes[key] = timestampNs;
     if (totalBytes >
         StatsdStats::kMaxMetricsBytesPerConfig) {  // Too late. We need to start clearing data.
-        // We ignore the return value so we force each metric producer to clear its contents.
-        metricsManager.onDumpReport();
+        // TODO(b/70571383): By 12/15/2017 add API to drop data directly
+        ProtoOutputStream proto;
+        metricsManager.onDumpReport(&proto);
         StatsdStats::getInstance().noteDataDropped(key);
         VLOG("StatsD had to toss out metrics for %s", key.ToString().c_str());
     } else if (totalBytes > .9 * StatsdStats::kMaxMetricsBytesPerConfig) {
