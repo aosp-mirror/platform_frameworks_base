@@ -299,6 +299,12 @@ public class RippleDrawable extends LayerDrawable {
             onHotspotBoundsChanged();
         }
 
+        final int count = mExitingRipplesCount;
+        final RippleForeground[] ripples = mExitingRipples;
+        for (int i = 0; i < count; i++) {
+            ripples[i].onBoundsChange();
+        }
+
         if (mBackground != null) {
             mBackground.onBoundsChange();
         }
@@ -560,8 +566,7 @@ public class RippleDrawable extends LayerDrawable {
                 y = mHotspotBounds.exactCenterY();
             }
 
-            final boolean isBounded = isBounded();
-            mRipple = new RippleForeground(this, mHotspotBounds, x, y, isBounded, mForceSoftware);
+            mRipple = new RippleForeground(this, mHotspotBounds, x, y, mForceSoftware);
         }
 
         mRipple.setup(mState.mMaxRadius, mDensity);
