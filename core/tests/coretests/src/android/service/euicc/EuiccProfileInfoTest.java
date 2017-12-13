@@ -30,14 +30,15 @@ import android.telephony.UiccAccessRule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
+import java.util.Arrays;
+
 @SmallTest
 @RunWith(AndroidJUnit4.class)
 public class EuiccProfileInfoTest {
     @Test
     public void testWriteToParcel() {
         EuiccProfileInfo p =
-                new EuiccProfileInfo.Builder()
-                        .setIccid("21430000000000006587")
+                new EuiccProfileInfo.Builder("21430000000000006587")
                         .setNickname("profile nickname")
                         .setServiceProviderName("service provider")
                         .setProfileName("profile name")
@@ -50,9 +51,7 @@ public class EuiccProfileInfoTest {
                                         "45"))
                         .setPolicyRules(EuiccProfileInfo.POLICY_RULE_DO_NOT_DELETE)
                         .setUiccAccessRule(
-                                new UiccAccessRule[] {
-                                        new UiccAccessRule(new byte[] {}, "package", 12345L)
-                                })
+                                Arrays.asList(new UiccAccessRule(new byte[] {}, "package", 12345L)))
                         .build();
 
         Parcel parcel = Parcel.obtain();
@@ -68,8 +67,7 @@ public class EuiccProfileInfoTest {
     @Test
     public void testWriteToParcelNullCarrierId() {
         EuiccProfileInfo p =
-                new EuiccProfileInfo.Builder()
-                        .setIccid("21430000000000006587")
+                new EuiccProfileInfo.Builder("21430000000000006587")
                         .setNickname("profile nickname")
                         .setServiceProviderName("service provider")
                         .setProfileName("profile name")
@@ -77,9 +75,8 @@ public class EuiccProfileInfoTest {
                         .setState(EuiccProfileInfo.PROFILE_STATE_ENABLED)
                         .setPolicyRules(EuiccProfileInfo.POLICY_RULE_DO_NOT_DELETE)
                         .setUiccAccessRule(
-                                new UiccAccessRule[] {
-                                        new UiccAccessRule(new byte[] {}, "package", 12345L)
-                                })
+                                Arrays.asList(new UiccAccessRule(new byte[] {}, "package", 12345L))
+                        )
                         .build();
 
         Parcel parcel = Parcel.obtain();
@@ -95,8 +92,7 @@ public class EuiccProfileInfoTest {
     @Test
     public void testBuilderAndGetters() {
         EuiccProfileInfo p =
-                new EuiccProfileInfo.Builder()
-                        .setIccid("21430000000000006587")
+                new EuiccProfileInfo.Builder("21430000000000006587")
                         .setNickname("profile nickname")
                         .setProfileName("profile name")
                         .setServiceProviderName("service provider")
@@ -108,10 +104,7 @@ public class EuiccProfileInfoTest {
                         .setState(EuiccProfileInfo.PROFILE_STATE_ENABLED)
                         .setProfileClass(EuiccProfileInfo.PROFILE_CLASS_OPERATIONAL)
                         .setPolicyRules(EuiccProfileInfo.POLICY_RULE_DO_NOT_DELETE)
-                        .setUiccAccessRule(
-                                new UiccAccessRule[] {
-                                        new UiccAccessRule(new byte[0], null, 0)
-                                })
+                        .setUiccAccessRule(Arrays.asList(new UiccAccessRule(new byte[0], null, 0)))
                         .build();
 
         assertEquals("21430000000000006587", p.getIccid());
@@ -130,14 +123,13 @@ public class EuiccProfileInfoTest {
         assertFalse(p.hasPolicyRule(EuiccProfileInfo.POLICY_RULE_DO_NOT_DISABLE));
         assertArrayEquals(
                 new UiccAccessRule[] {new UiccAccessRule(new byte[0], null, 0)},
-                p.getUiccAccessRules());
+                p.getUiccAccessRules().toArray());
     }
 
     @Test
     public void testBuilder_BasedOnAnotherProfile() {
         EuiccProfileInfo p =
-                new EuiccProfileInfo.Builder()
-                        .setIccid("21430000000000006587")
+                new EuiccProfileInfo.Builder("21430000000000006587")
                         .setNickname("profile nickname")
                         .setProfileName("profile name")
                         .setServiceProviderName("service provider")
@@ -150,9 +142,7 @@ public class EuiccProfileInfoTest {
                         .setProfileClass(EuiccProfileInfo.PROFILE_CLASS_OPERATIONAL)
                         .setPolicyRules(EuiccProfileInfo.POLICY_RULE_DO_NOT_DELETE)
                         .setUiccAccessRule(
-                                new UiccAccessRule[] {
-                                        new UiccAccessRule(new byte[0], null, 0)
-                                })
+                                Arrays.asList(new UiccAccessRule(new byte[] {}, "package", 12345L)))
                         .build();
 
         EuiccProfileInfo copied = new EuiccProfileInfo.Builder(p).build();
@@ -164,8 +154,7 @@ public class EuiccProfileInfoTest {
     @Test
     public void testEqualsHashCode() {
         EuiccProfileInfo p =
-                new EuiccProfileInfo.Builder()
-                        .setIccid("21430000000000006587")
+                new EuiccProfileInfo.Builder("21430000000000006587")
                         .setNickname("profile nickname")
                         .setProfileName("profile name")
                         .setServiceProviderName("service provider")
@@ -177,10 +166,7 @@ public class EuiccProfileInfoTest {
                         .setState(EuiccProfileInfo.PROFILE_STATE_ENABLED)
                         .setProfileClass(EuiccProfileInfo.PROFILE_STATE_ENABLED)
                         .setPolicyRules(EuiccProfileInfo.POLICY_RULE_DO_NOT_DELETE)
-                        .setUiccAccessRule(
-                                new UiccAccessRule[] {
-                                        new UiccAccessRule(new byte[0], null, 0)
-                                })
+                        .setUiccAccessRule(Arrays.asList(new UiccAccessRule(new byte[0], null, 0)))
                         .build();
 
         assertTrue(p.equals(p));
@@ -229,13 +215,13 @@ public class EuiccProfileInfoTest {
     }
 
     @Test(expected = IllegalStateException.class)
-    public void testBuilderBuild_NoIccid() {
-        new EuiccProfileInfo.Builder().build();
+    public void testBuilderBuild_IllegalIccid() {
+        new EuiccProfileInfo.Builder("abc").build();
     }
 
     @Test(expected = IllegalArgumentException.class)
     public void testBuilderSetOperatorMccMnc_Illegal() {
-        new EuiccProfileInfo.Builder()
+        new EuiccProfileInfo.Builder("21430000000000006587")
                 .setCarrierIdentifier(new CarrierIdentifier(new byte[] {1, 2, 3, 4}, null, null));
     }
 

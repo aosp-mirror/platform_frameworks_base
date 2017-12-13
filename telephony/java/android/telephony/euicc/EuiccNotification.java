@@ -17,6 +17,7 @@ package android.telephony.euicc;
 
 import android.annotation.IntDef;
 import android.annotation.Nullable;
+import android.annotation.SystemApi;
 import android.os.Parcel;
 import android.os.Parcelable;
 
@@ -31,10 +32,9 @@ import java.util.Objects;
  * disabling, or deleting).
  *
  * @hide
- *
- * TODO(b/35851809): Make this a @SystemApi.
  */
-public class EuiccNotification implements Parcelable {
+@SystemApi
+public final class EuiccNotification implements Parcelable {
     /** Event */
     @Retention(RetentionPolicy.SOURCE)
     @IntDef(flag = true, prefix = { "EVENT_" }, value = {
@@ -43,6 +43,7 @@ public class EuiccNotification implements Parcelable {
             EVENT_DISABLE,
             EVENT_DELETE
     })
+    /** @hide */
     public @interface Event {}
 
     /** A profile is downloaded and installed. */
@@ -57,7 +58,7 @@ public class EuiccNotification implements Parcelable {
     /** A profile is deleted. */
     public static final int EVENT_DELETE = 1 << 3;
 
-    /** Value of the bits of all above events */
+    /** Value of the bits of all the events including install, enable, disable and delete. */
     @Event
     public static final int ALL_EVENTS =
             EVENT_INSTALL | EVENT_ENABLE | EVENT_DISABLE | EVENT_DELETE;
