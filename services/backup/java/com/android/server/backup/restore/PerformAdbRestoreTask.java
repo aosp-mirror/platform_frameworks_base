@@ -88,7 +88,6 @@ public class PerformAdbRestoreTask implements Runnable {
     private final String mDecryptPassword;
     private final AtomicBoolean mLatchObject;
     private final PackageManagerBackupAgent mPackageManagerBackupAgent;
-    private final RestoreInstallObserver mInstallObserver = new RestoreInstallObserver();
     private final RestoreDeleteObserver mDeleteObserver = new RestoreDeleteObserver();
 
     private IFullBackupRestoreObserver mObserver;
@@ -513,13 +512,11 @@ public class PerformAdbRestoreTask implements Runnable {
                                     Slog.d(TAG, "APK file; installing");
                                 }
                                 // Try to install the app.
-                                String installerName = mPackageInstallers.get(pkg);
-                                boolean isSuccessfullyInstalled = RestoreUtils.installApk(
-                                        instream, mBackupManagerService.getPackageManager(),
-                                        mInstallObserver, mDeleteObserver, mManifestSignatures,
-                                        mPackagePolicies, info, installerName,
-                                        bytesReadListener, mBackupManagerService.getDataDir()
-                                                                                         );
+                                String installerPackageName = mPackageInstallers.get(pkg);
+                                boolean isSuccessfullyInstalled = RestoreUtils.installApk(instream,
+                                        mBackupManagerService.getContext(),
+                                        mDeleteObserver, mManifestSignatures, mPackagePolicies,
+                                        info, installerPackageName, bytesReadListener);
                                 // good to go; promote to ACCEPT
                                 mPackagePolicies.put(pkg, isSuccessfullyInstalled
                                         ? RestorePolicy.ACCEPT

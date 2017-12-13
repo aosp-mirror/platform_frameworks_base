@@ -26,7 +26,6 @@ import android.content.pm.ChangedPackages;
 import android.content.pm.InstantAppInfo;
 import android.content.pm.FeatureInfo;
 import android.content.pm.IDexModuleRegisterCallback;
-import android.content.pm.IPackageInstallObserver2;
 import android.content.pm.IPackageInstaller;
 import android.content.pm.IPackageDeleteObserver;
 import android.content.pm.IPackageDeleteObserver2;
@@ -221,13 +220,6 @@ interface IPackageManager {
 
     ParceledListSlice queryInstrumentation(
             String targetPackage, int flags);
-
-    /** @deprecated Use PackageInstaller instead */
-    void installPackageAsUser(in String originPath,
-            in IPackageInstallObserver2 observer,
-            int flags,
-            in String installerPackageName,
-            int userId);
 
     void finishPackageInstall(int token, boolean didLaunch);
 

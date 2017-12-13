@@ -47,7 +47,6 @@ import android.content.res.Resources;
 import android.content.res.XmlResourceParser;
 import android.graphics.Rect;
 import android.graphics.drawable.Drawable;
-import android.net.Uri;
 import android.net.wifi.WifiManager;
 import android.os.Build;
 import android.os.Bundle;
@@ -4716,17 +4715,6 @@ public abstract class PackageManager {
             return null;
         }
     }
-
-    /**
-     * @deprecated replaced by {@link PackageInstaller}
-     * @hide
-     */
-    @Deprecated
-    public abstract void installPackage(
-            Uri packageURI,
-            PackageInstallObserver observer,
-            @InstallFlags int flags,
-            String installerPackageName);
 
     /**
      * If there is already an application with the given package name installed
