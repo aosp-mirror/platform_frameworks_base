@@ -21,6 +21,7 @@
 #include <cutils/ashmem.h>
 #include <log/log.h>
 
+#include <errno.h>
 #include <sys/mman.h>
 
 namespace android {
