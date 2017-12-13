@@ -121,6 +121,7 @@ public final class RulesManagerService extends IRulesManager.Stub {
     }
 
     public void start() {
+        // Return value deliberately ignored: no action required on failure to start.
         mPackageTracker.start();
     }
 
