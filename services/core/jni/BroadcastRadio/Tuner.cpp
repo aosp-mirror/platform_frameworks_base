@@ -24,7 +24,7 @@
 
 #include <android/hardware/broadcastradio/1.2/IBroadcastRadioFactory.h>
 #include <binder/IPCThreadState.h>
-#include <broadcastradio-utils/Utils.h>
+#include <broadcastradio-utils-1x/Utils.h>
 #include <core_jni_helpers.h>
 #include <media/AudioSystem.h>
 #include <nativehelper/JNIHelp.h>
