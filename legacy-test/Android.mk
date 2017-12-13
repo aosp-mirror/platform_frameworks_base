@@ -144,6 +144,7 @@ include $(CLEAR_VARS)
 LOCAL_SRC_FILES := \
     $(call all-java-files-under, src/android) \
     $(call all-java-files-under, ../test-runner/src/android) \
+    $(call all-java-files-under, ../test-mock/src/android) \
     $(call all-java-files-under, src/com)
 LOCAL_MODULE := legacy-android-test
 LOCAL_NO_STANDARD_LIBRARIES := true
