@@ -492,6 +492,12 @@
     <string name="stream_bluetooth_sco" msgid="2055645746402746292">"ಬ್ಲೂಟೂತ್‌"</string>
     <string name="stream_dtmf" msgid="2447177903892477915">"ಡ್ಯುಯಲ್‌ ಬಹು ಟೋನ್ ಆವರ್ತನೆ"</string>
     <string name="stream_accessibility" msgid="301136219144385106">"ಪ್ರವೇಶಿಸುವಿಕೆ"</string>
+    <!-- no translation found for volume_ringer_status_normal (4273142424125855384) -->
+    <skip />
+    <!-- no translation found for volume_ringer_status_vibrate (1825615171021346557) -->
+    <skip />
+    <!-- no translation found for volume_ringer_status_silent (6896394161022916369) -->
+    <skip />
     <string name="volume_stream_content_description_unmute" msgid="4436631538779230857">"%1$s. ಅನ್‌ಮ್ಯೂಟ್‌ ಮಾಡುವುದಕ್ಕಾಗಿ ಟ್ಯಾಪ್ ಮಾಡಿ."</string>
     <string name="volume_stream_content_description_vibrate" msgid="1187944970457807498">"%1$s. ಕಂಪನಕ್ಕೆ ಹೊಂದಿಸಲು ಟ್ಯಾಪ್ ಮಾಡಿ. ಪ್ರವೇಶಿಸುವಿಕೆ ಸೇವೆಗಳನ್ನು ಮ್ಯೂಟ್‌ ಮಾಡಬಹುದು."</string>
     <string name="volume_stream_content_description_mute" msgid="3625049841390467354">"%1$s. ಮ್ಯೂಟ್ ಮಾಡಲು ಟ್ಯಾಪ್ ಮಾಡಿ. ಪ್ರವೇಶಿಸುವಿಕೆ ಸೇವೆಗಳನ್ನು ಮ್ಯೂಟ್‌ ಮಾಡಬಹುದು."</string>
@@ -756,7 +762,7 @@
     <string name="instant_apps" msgid="6647570248119804907">"ತತ್‌ಕ್ಷಣ ಆಪ್‌ಗಳು"</string>
     <string name="instant_apps_message" msgid="8116608994995104836">"ತತ್‌ಕ್ಷಣ ಆಪ್‌ಗಳಿಗೆ ಸ್ಥಾಪನೆಯ ಅಗತ್ಯವಿಲ್ಲ."</string>
     <string name="app_info" msgid="6856026610594615344">"ಅಪ್ಲಿಕೇಶನ್ ಮಾಹಿತಿ"</string>
-    <string name="go_to_web" msgid="1106022723459948514">"ವೆಬ್‌ಗೆ ಹೋಗಿ"</string>
+    <string name="go_to_web" msgid="2650669128861626071">"ಬ್ರೌಸರ್‌ಗೆ ಹೋಗಿ"</string>
     <string name="mobile_data" msgid="7094582042819250762">"ಮೊಬೈಲ್ ಡೇಟಾ"</string>
     <string name="wifi_is_off" msgid="1838559392210456893">"ವೈ-ಫೈ ಆಫ್ ಆಗಿದೆ"</string>
     <string name="bt_is_off" msgid="2640685272289706392">"ಬ್ಲೂಟೂತ್‌ ಆಫ್ ಆಗಿದೆ"</string>

@@ -492,6 +492,9 @@
     <string name="stream_bluetooth_sco" msgid="2055645746402746292">"บลูทูธ"</string>
     <string name="stream_dtmf" msgid="2447177903892477915">"การส่งสัญญาณเสียงแบบ 2 เสียงพร้อมกัน"</string>
     <string name="stream_accessibility" msgid="301136219144385106">"การเข้าถึง"</string>
+    <string name="volume_ringer_status_normal" msgid="4273142424125855384">"ทำให้ส่งเสียง"</string>
+    <string name="volume_ringer_status_vibrate" msgid="1825615171021346557">"สั่น"</string>
+    <string name="volume_ringer_status_silent" msgid="6896394161022916369">"ปิดเสียง"</string>
     <string name="volume_stream_content_description_unmute" msgid="4436631538779230857">"%1$s แตะเพื่อเปิดเสียง"</string>
     <string name="volume_stream_content_description_vibrate" msgid="1187944970457807498">"%1$s แตะเพื่อตั้งค่าให้สั่น อาจมีการปิดเสียงบริการการเข้าถึง"</string>
     <string name="volume_stream_content_description_mute" msgid="3625049841390467354">"%1$s แตะเพื่อปิดเสียง อาจมีการปิดเสียงบริการการเข้าถึง"</string>
@@ -756,7 +759,7 @@
     <string name="instant_apps" msgid="6647570248119804907">"Instant App"</string>
     <string name="instant_apps_message" msgid="8116608994995104836">"Instant Apps ไม่ต้องใช้การติดตั้ง"</string>
     <string name="app_info" msgid="6856026610594615344">"ข้อมูลแอป"</string>
-    <string name="go_to_web" msgid="1106022723459948514">"ไปที่เว็บ"</string>
+    <string name="go_to_web" msgid="2650669128861626071">"ไปที่เบราว์เซอร์"</string>
     <string name="mobile_data" msgid="7094582042819250762">"ข้อมูลมือถือ"</string>
     <string name="wifi_is_off" msgid="1838559392210456893">"Wi-Fi ปิดอยู่"</string>
     <string name="bt_is_off" msgid="2640685272289706392">"บลูทูธปิดอยู่"</string>

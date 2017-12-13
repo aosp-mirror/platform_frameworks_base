@@ -135,4 +135,6 @@
       <item quantity="one"><xliff:g id="NUMBER_0">%d</xliff:g> மணிநேரமாகச் சாதனம் திறக்கப்படவில்லை. கடவுச்சொல்லை உறுதிப்படுத்தவும்.</item>
     </plurals>
     <string name="fingerprint_not_recognized" msgid="348813995267914625">"அடையாளங்காண முடியவில்லை"</string>
+    <!-- no translation found for kg_password_default_pin_message (6203676909479972943) -->
+    <!-- no translation found for kg_password_default_puk_message (8744416410184198352) -->
 </resources>

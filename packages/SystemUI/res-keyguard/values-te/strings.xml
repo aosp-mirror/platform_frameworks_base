@@ -135,4 +135,6 @@
       <item quantity="one"><xliff:g id="NUMBER_0">%d</xliff:g> గంట పాటు పరికరాన్ని అన్‌లాక్ చేయలేదు. పాస్‌వర్డ్‌ని నమోదు చేయండి.</item>
     </plurals>
     <string name="fingerprint_not_recognized" msgid="348813995267914625">"గుర్తించలేదు"</string>
+    <!-- no translation found for kg_password_default_pin_message (6203676909479972943) -->
+    <!-- no translation found for kg_password_default_puk_message (8744416410184198352) -->
 </resources>

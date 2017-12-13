@@ -492,6 +492,9 @@
     <string name="stream_bluetooth_sco" msgid="2055645746402746292">"Bluetooth"</string>
     <string name="stream_dtmf" msgid="2447177903892477915">"Dual multi tone frequency"</string>
     <string name="stream_accessibility" msgid="301136219144385106">"Pagiging Naa-access"</string>
+    <string name="volume_ringer_status_normal" msgid="4273142424125855384">"Ipa-ring"</string>
+    <string name="volume_ringer_status_vibrate" msgid="1825615171021346557">"I-vibrate"</string>
+    <string name="volume_ringer_status_silent" msgid="6896394161022916369">"I-mute"</string>
     <string name="volume_stream_content_description_unmute" msgid="4436631538779230857">"%1$s. I-tap upang i-unmute."</string>
     <string name="volume_stream_content_description_vibrate" msgid="1187944970457807498">"%1$s. I-tap upang itakda na mag-vibrate. Maaaring i-mute ang mga serbisyo sa Accessibility."</string>
     <string name="volume_stream_content_description_mute" msgid="3625049841390467354">"%1$s. I-tap upang i-mute. Maaaring i-mute ang mga serbisyo sa Accessibility."</string>
@@ -756,7 +759,7 @@
     <string name="instant_apps" msgid="6647570248119804907">"Instant Apps"</string>
     <string name="instant_apps_message" msgid="8116608994995104836">"Hindi kailangang i-install ang mga instant na app."</string>
     <string name="app_info" msgid="6856026610594615344">"Impormasyon ng app"</string>
-    <string name="go_to_web" msgid="1106022723459948514">"Pumunta sa web"</string>
+    <string name="go_to_web" msgid="2650669128861626071">"Pumunta sa browser"</string>
     <string name="mobile_data" msgid="7094582042819250762">"Mobile data"</string>
     <string name="wifi_is_off" msgid="1838559392210456893">"Naka-off ang Wi-Fi"</string>
     <string name="bt_is_off" msgid="2640685272289706392">"Naka-off ang Bluetooth"</string>

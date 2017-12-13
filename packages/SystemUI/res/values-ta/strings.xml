@@ -34,17 +34,14 @@
     <string name="status_bar_latest_events_title" msgid="6594767438577593172">"அறிவிப்புகள்"</string>
     <string name="battery_low_title" msgid="6456385927409742437">"பேட்டரி குறைவு"</string>
     <string name="battery_low_percent_format" msgid="2900940511201380775">"<xliff:g id="PERCENTAGE">%s</xliff:g> உள்ளது"</string>
-    <!-- no translation found for battery_low_percent_format_saver_started (7879389868952879166) -->
-    <skip />
+    <string name="battery_low_percent_format_saver_started" msgid="7879389868952879166">"<xliff:g id="PERCENTAGE">%s</xliff:g> மீதமுள்ளது. பேட்டரி சேமிப்பான் ஆன் செய்யப்பட்டுள்ளது."</string>
     <string name="invalid_charger" msgid="4549105996740522523">"USB மூலம் சார்ஜ் செய்வது ஆதரிக்கப்படவில்லை.\nவழங்கப்பட்ட சார்ஜரை மட்டும் பயன்படுத்தவும்."</string>
     <string name="invalid_charger_title" msgid="3515740382572798460">"USB சார்ஜிங் ஆதரிக்கப்படவில்லை."</string>
     <string name="invalid_charger_text" msgid="5474997287953892710">"வழங்கப்பட்ட சார்ஜரை மட்டும் பயன்படுத்துக."</string>
     <string name="battery_low_why" msgid="4553600287639198111">"அமைப்பு"</string>
-    <!-- no translation found for battery_saver_confirmation_title (2052100465684817154) -->
-    <skip />
+    <string name="battery_saver_confirmation_title" msgid="2052100465684817154">"பேட்டரி சேமிப்பானை ஆன் செய்யவா?"</string>
     <string name="battery_saver_confirmation_ok" msgid="7507968430447930257">"இயக்கு"</string>
-    <!-- no translation found for battery_saver_start_action (8187820911065797519) -->
-    <skip />
+    <string name="battery_saver_start_action" msgid="8187820911065797519">"பேட்டரி சேமிப்பானை ஆன் செய்"</string>
     <string name="status_bar_settings_settings_button" msgid="3023889916699270224">"அமைப்பு"</string>
     <string name="status_bar_settings_wifi_button" msgid="1733928151698311923">"வைஃபை"</string>
     <string name="status_bar_settings_auto_rotation" msgid="3790482541357798421">"திரையைத் தானாகச் சுழற்று"</string>
@@ -402,11 +399,9 @@
     <string name="user_remove_user_title" msgid="4681256956076895559">"பயனரை அகற்றவா?"</string>
     <string name="user_remove_user_message" msgid="1453218013959498039">"இந்தப் பயனரின் எல்லா பயன்பாடுகளும் தரவும் நீக்கப்படும்."</string>
     <string name="user_remove_user_remove" msgid="7479275741742178297">"அகற்று"</string>
-    <!-- no translation found for battery_saver_notification_title (8614079794522291840) -->
-    <skip />
+    <string name="battery_saver_notification_title" msgid="8614079794522291840">"பேட்டரி சேமிப்பான் ஆன் செய்யப்பட்டுள்ளது"</string>
     <string name="battery_saver_notification_text" msgid="820318788126672692">"செயல்திறனையும் பின்புலத் தரவையும் குறைக்கிறது"</string>
-    <!-- no translation found for battery_saver_notification_action_text (132118784269455533) -->
-    <skip />
+    <string name="battery_saver_notification_action_text" msgid="132118784269455533">"பேட்டரி சேமிப்பானை ஆஃப் செய்"</string>
     <string name="media_projection_dialog_text" msgid="3071431025448218928">"திரையில் காட்டப்படும் அனைத்தையும் <xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g> படமெடுக்கும்."</string>
     <string name="media_projection_remember_text" msgid="3103510882172746752">"மீண்டும் காட்டாதே"</string>
     <string name="clear_all_notifications_text" msgid="814192889771462828">"எல்லாவற்றையும் அழி"</string>
@@ -497,6 +492,12 @@
     <string name="stream_bluetooth_sco" msgid="2055645746402746292">"புளூடூத்"</string>
     <string name="stream_dtmf" msgid="2447177903892477915">"டூயல் டோன் மல்டி ஃப்ரீக்வென்சி"</string>
     <string name="stream_accessibility" msgid="301136219144385106">"அணுகல்தன்மை"</string>
+    <!-- no translation found for volume_ringer_status_normal (4273142424125855384) -->
+    <skip />
+    <!-- no translation found for volume_ringer_status_vibrate (1825615171021346557) -->
+    <skip />
+    <!-- no translation found for volume_ringer_status_silent (6896394161022916369) -->
+    <skip />
     <string name="volume_stream_content_description_unmute" msgid="4436631538779230857">"%1$s. ஒலி இயக்க, தட்டவும்."</string>
     <string name="volume_stream_content_description_vibrate" msgid="1187944970457807498">"%1$s. அதிர்விற்கு அமைக்க, தட்டவும். அணுகல்தன்மை சேவைகள் ஒலியடக்கப்படக்கூடும்."</string>
     <string name="volume_stream_content_description_mute" msgid="3625049841390467354">"%1$s. ஒலியடக்க, தட்டவும். அணுகல்தன்மை சேவைகள் ஒலியடக்கப்படக்கூடும்."</string>
@@ -761,7 +762,7 @@
     <string name="instant_apps" msgid="6647570248119804907">"இன்ஸ்டண்ட் பயன்பாடுகள்"</string>
     <string name="instant_apps_message" msgid="8116608994995104836">"இன்ஸ்டண்ட் பயன்பாடுகளுக்கு நிறுவல் தேவையில்லை."</string>
     <string name="app_info" msgid="6856026610594615344">"ஆப்ஸ் தகவல்"</string>
-    <string name="go_to_web" msgid="1106022723459948514">"இணையத்திற்குச் செல்"</string>
+    <string name="go_to_web" msgid="2650669128861626071">"உலாவிக்குக்குச் செல்"</string>
     <string name="mobile_data" msgid="7094582042819250762">"மொபைல் டேட்டா"</string>
     <string name="wifi_is_off" msgid="1838559392210456893">"வைஃபை முடக்கத்தில் உள்ளது"</string>
     <string name="bt_is_off" msgid="2640685272289706392">"புளூடூத் முடக்கத்தில் உள்ளது"</string>

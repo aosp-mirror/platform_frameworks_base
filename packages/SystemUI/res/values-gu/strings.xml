@@ -34,17 +34,14 @@
     <string name="status_bar_latest_events_title" msgid="6594767438577593172">"નોટિફિકેશનો"</string>
     <string name="battery_low_title" msgid="6456385927409742437">"બૅટરી ઓછી છે"</string>
     <string name="battery_low_percent_format" msgid="2900940511201380775">"<xliff:g id="PERCENTAGE">%s</xliff:g> બાકી"</string>
-    <!-- no translation found for battery_low_percent_format_saver_started (7879389868952879166) -->
-    <skip />
+    <string name="battery_low_percent_format_saver_started" msgid="7879389868952879166">"<xliff:g id="PERCENTAGE">%s</xliff:g> બાકી. બૅટરી સેવર ચાલુ છે."</string>
     <string name="invalid_charger" msgid="4549105996740522523">"USB ચાર્જિંગ સમર્થિત નથી.\nફક્ત આપવામાં આવેલ ચાર્જરનો ઉપયોગ કરો."</string>
     <string name="invalid_charger_title" msgid="3515740382572798460">"USB ચાર્જિંગ સમર્થિત નથી."</string>
     <string name="invalid_charger_text" msgid="5474997287953892710">"ફક્ત પ્રદાન કરાયેલ ચાર્જરનો ઉપયોગ કરો."</string>
     <string name="battery_low_why" msgid="4553600287639198111">"સેટિંગ્સ"</string>
-    <!-- no translation found for battery_saver_confirmation_title (2052100465684817154) -->
-    <skip />
+    <string name="battery_saver_confirmation_title" msgid="2052100465684817154">"બૅટરી સેવર ચાલુ કરીએ?"</string>
     <string name="battery_saver_confirmation_ok" msgid="7507968430447930257">"ચાલુ કરો"</string>
-    <!-- no translation found for battery_saver_start_action (8187820911065797519) -->
-    <skip />
+    <string name="battery_saver_start_action" msgid="8187820911065797519">"બૅટરી સેવર ચાલુ કરો"</string>
     <string name="status_bar_settings_settings_button" msgid="3023889916699270224">"સેટિંગ્સ"</string>
     <string name="status_bar_settings_wifi_button" msgid="1733928151698311923">"વાઇ-ફાઇ"</string>
     <string name="status_bar_settings_auto_rotation" msgid="3790482541357798421">"સ્ક્રીનને આપમેળે ફેરવો"</string>
@@ -402,11 +399,9 @@
     <string name="user_remove_user_title" msgid="4681256956076895559">"વપરાશકર્તાને દૂર કરીએ?"</string>
     <string name="user_remove_user_message" msgid="1453218013959498039">"આ વપરાશકર્તાની તમામ ઍપ્લિકેશનો અને ડેટા કાઢી નાખવામાં આવશે."</string>
     <string name="user_remove_user_remove" msgid="7479275741742178297">"દૂર કરો"</string>
-    <!-- no translation found for battery_saver_notification_title (8614079794522291840) -->
-    <skip />
+    <string name="battery_saver_notification_title" msgid="8614079794522291840">"બૅટરી સેવર ચાલુ છે"</string>
     <string name="battery_saver_notification_text" msgid="820318788126672692">"પ્રદર્શન અને બૅકગ્રાઉન્ડ ડેટા ઘટાડે છે"</string>
-    <!-- no translation found for battery_saver_notification_action_text (132118784269455533) -->
-    <skip />
+    <string name="battery_saver_notification_action_text" msgid="132118784269455533">"બૅટરી સેવર બંધ કરો"</string>
     <string name="media_projection_dialog_text" msgid="3071431025448218928">"<xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g> તમારી સ્ક્રીન પર જે પ્રદર્શિત થાય છે તે દરેક વસ્તુને કેપ્ચર કરવાનું પ્રારંભ કરશે."</string>
     <string name="media_projection_remember_text" msgid="3103510882172746752">"ફરીથી બતાવશો નહીં"</string>
     <string name="clear_all_notifications_text" msgid="814192889771462828">"બધુ સાફ કરો"</string>
@@ -497,6 +492,12 @@
     <string name="stream_bluetooth_sco" msgid="2055645746402746292">"બ્લૂટૂથ"</string>
     <string name="stream_dtmf" msgid="2447177903892477915">"દ્વિ બહુ ટોન આવર્તન"</string>
     <string name="stream_accessibility" msgid="301136219144385106">"ઍક્સેસિબિલિટી"</string>
+    <!-- no translation found for volume_ringer_status_normal (4273142424125855384) -->
+    <skip />
+    <!-- no translation found for volume_ringer_status_vibrate (1825615171021346557) -->
+    <skip />
+    <!-- no translation found for volume_ringer_status_silent (6896394161022916369) -->
+    <skip />
     <string name="volume_stream_content_description_unmute" msgid="4436631538779230857">"%1$s. અનમ્યૂટ કરવા માટે ટૅપ કરો."</string>
     <string name="volume_stream_content_description_vibrate" msgid="1187944970457807498">"%1$s. વાઇબ્રેટ પર સેટ કરવા માટે ટૅપ કરો. ઍક્સેસિબિલિટી સેવાઓ મ્યૂટ કરવામાં આવી શકે છે."</string>
     <string name="volume_stream_content_description_mute" msgid="3625049841390467354">"%1$s. મ્યૂટ કરવા માટે ટૅપ કરો. ઍક્સેસિબિલિટી સેવાઓ મ્યૂટ કરવામાં આવી શકે છે."</string>
@@ -761,7 +762,7 @@
     <string name="instant_apps" msgid="6647570248119804907">"ઝટપટ ઍપ્લિકેશનો"</string>
     <string name="instant_apps_message" msgid="8116608994995104836">"ઝટપટ ઍપ્લિકેશનો માટે ઇન્સ્ટૉલેશનની જરૂર નથી."</string>
     <string name="app_info" msgid="6856026610594615344">"ઍપ્લિકેશન માહિતી"</string>
-    <string name="go_to_web" msgid="1106022723459948514">"વેબ પર જાઓ"</string>
+    <string name="go_to_web" msgid="2650669128861626071">"બ્રાઉઝર પર જાઓ"</string>
     <string name="mobile_data" msgid="7094582042819250762">"મોબાઇલ ડેટા"</string>
     <string name="wifi_is_off" msgid="1838559392210456893">"વાઇ-ફાઇ બંધ છે"</string>
     <string name="bt_is_off" msgid="2640685272289706392">"બ્લૂટૂથ બંધ છે"</string>

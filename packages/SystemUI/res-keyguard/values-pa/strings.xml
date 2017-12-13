@@ -135,4 +135,6 @@
       <item quantity="other">ਡੀਵਾਈਸ <xliff:g id="NUMBER_1">%d</xliff:g> ਘੰਟਿਆਂ ਤੋਂ ਅਣਲਾਕ ਨਹੀਂ ਕੀਤਾ ਗਿਆ ਹੈ। ਪਾਸਵਰਡ ਦੀ ਪੁਸ਼ਟੀ ਕਰੋ</item>
     </plurals>
     <string name="fingerprint_not_recognized" msgid="348813995267914625">"ਪਛਾਣ ਨਹੀਂ ਹੋਈ"</string>
+    <!-- no translation found for kg_password_default_pin_message (6203676909479972943) -->
+    <!-- no translation found for kg_password_default_puk_message (8744416410184198352) -->
 </resources>

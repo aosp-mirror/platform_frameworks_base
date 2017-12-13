@@ -492,6 +492,12 @@
     <string name="stream_bluetooth_sco" msgid="2055645746402746292">"ব্লুটুথ"</string>
     <string name="stream_dtmf" msgid="2447177903892477915">"ডুয়েল মাল্টি টোন ফ্রিকোয়েন্সি"</string>
     <string name="stream_accessibility" msgid="301136219144385106">"অ্যাক্সেসযোগ্যতা"</string>
+    <!-- no translation found for volume_ringer_status_normal (4273142424125855384) -->
+    <skip />
+    <!-- no translation found for volume_ringer_status_vibrate (1825615171021346557) -->
+    <skip />
+    <!-- no translation found for volume_ringer_status_silent (6896394161022916369) -->
+    <skip />
     <string name="volume_stream_content_description_unmute" msgid="4436631538779230857">"%1$s। সশব্দ করতে আলতো চাপুন।"</string>
     <string name="volume_stream_content_description_vibrate" msgid="1187944970457807498">"%1$s। কম্পন এ সেট করতে আলতো চাপুন। অ্যাক্সেসযোগ্যতার পরিষেবাগুলিকে নিঃশব্দ করা হতে পারে।"</string>
     <string name="volume_stream_content_description_mute" msgid="3625049841390467354">"%1$s। নিঃশব্দ করতে আলতো চাপুন। অ্যাক্সেসযোগ্যতার পরিষেবাগুলিকে নিঃশব্দ করা হতে পারে।"</string>
@@ -756,8 +762,7 @@
     <string name="instant_apps" msgid="6647570248119804907">"ঝটপট অ্যাপ"</string>
     <string name="instant_apps_message" msgid="8116608994995104836">"ঝটপট অ্যাপ ইনস্টল করার প্রয়োজন হয় না।"</string>
     <string name="app_info" msgid="6856026610594615344">"অ্যাপের তথ্য"</string>
-    <!-- no translation found for go_to_web (2650669128861626071) -->
-    <skip />
+    <string name="go_to_web" msgid="2650669128861626071">"ব্রাউজারে যান"</string>
     <string name="mobile_data" msgid="7094582042819250762">"মোবাইল ডেটা"</string>
     <string name="wifi_is_off" msgid="1838559392210456893">"ওয়াই ফাই বন্ধ আছে"</string>
     <string name="bt_is_off" msgid="2640685272289706392">"ব্লুটুথ বন্ধ আছে"</string>

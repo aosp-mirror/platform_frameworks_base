@@ -135,4 +135,6 @@
       <item quantity="other">ઉપકરણને <xliff:g id="NUMBER_1">%d</xliff:g> કલાક માટે અનલૉક કરવામાં આવ્યું નથી. પાસવર્ડની પુષ્ટિ કરો.</item>
     </plurals>
     <string name="fingerprint_not_recognized" msgid="348813995267914625">"ઓળખાયેલ નથી"</string>
+    <!-- no translation found for kg_password_default_pin_message (6203676909479972943) -->
+    <!-- no translation found for kg_password_default_puk_message (8744416410184198352) -->
 </resources>

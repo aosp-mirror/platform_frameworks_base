@@ -496,6 +496,9 @@
     <string name="stream_bluetooth_sco" msgid="2055645746402746292">"Bluetooth"</string>
     <string name="stream_dtmf" msgid="2447177903892477915">"Doppelton-Mehrfrequenz"</string>
     <string name="stream_accessibility" msgid="301136219144385106">"Bedienungshilfen"</string>
+    <string name="volume_ringer_status_normal" msgid="4273142424125855384">"Klingeln lassen"</string>
+    <string name="volume_ringer_status_vibrate" msgid="1825615171021346557">"Vibrieren"</string>
+    <string name="volume_ringer_status_silent" msgid="6896394161022916369">"Stummschalten"</string>
     <string name="volume_stream_content_description_unmute" msgid="4436631538779230857">"%1$s. Zum Aufheben der Stummschaltung tippen."</string>
     <string name="volume_stream_content_description_vibrate" msgid="1187944970457807498">"%1$s. Tippen, um Vibrieren festzulegen. Bedienungshilfen werden unter Umständen stummgeschaltet."</string>
     <string name="volume_stream_content_description_mute" msgid="3625049841390467354">"%1$s. Zum Stummschalten tippen. Bedienungshilfen werden unter Umständen stummgeschaltet."</string>
@@ -760,7 +763,7 @@
     <string name="instant_apps" msgid="6647570248119804907">"Instant-Apps"</string>
     <string name="instant_apps_message" msgid="8116608994995104836">"Bei Instant-Apps ist keine vorherige Installation erforderlich."</string>
     <string name="app_info" msgid="6856026610594615344">"App-Informationen"</string>
-    <string name="go_to_web" msgid="1106022723459948514">"Web aufrufen"</string>
+    <string name="go_to_web" msgid="2650669128861626071">"Browser öffnen"</string>
     <string name="mobile_data" msgid="7094582042819250762">"Mobile Daten"</string>
     <string name="wifi_is_off" msgid="1838559392210456893">"WLAN ist deaktiviert"</string>
     <string name="bt_is_off" msgid="2640685272289706392">"Bluetooth ist deaktiviert"</string>
