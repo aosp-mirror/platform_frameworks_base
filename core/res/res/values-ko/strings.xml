@@ -212,6 +212,7 @@
     <string name="global_action_power_off" msgid="4471879440839879722">"종료"</string>
     <string name="global_action_emergency" msgid="7112311161137421166">"긴급 전화"</string>
     <string name="global_action_bug_report" msgid="7934010578922304799">"버그 신고"</string>
+    <string name="global_action_logout" msgid="935179188218826050">"세션 끝내기"</string>
     <string name="bugreport_title" msgid="2667494803742548533">"버그 신고"</string>
     <string name="bugreport_message" msgid="398447048750350456">"현재 기기 상태에 대한 정보를 수집하여 이메일 메시지로 전송합니다. 버그 신고를 시작하여 전송할 준비가 되려면 약간 시간이 걸립니다."</string>
     <string name="bugreport_option_interactive_title" msgid="8635056131768862479">"대화형 보고서"</string>
@@ -867,7 +868,7 @@
       <item quantity="other">지난 <xliff:g id="COUNT_1">%d</xliff:g>일</item>
       <item quantity="one">지난 <xliff:g id="COUNT_0">%d</xliff:g>일</item>
     </plurals>
-    <string name="last_month" msgid="3959346739979055432">"지난 달"</string>
+    <string name="last_month" msgid="3959346739979055432">"지난달"</string>
     <string name="older" msgid="5211975022815554840">"이전"</string>
     <string name="preposition_for_date" msgid="9093949757757445117">"<xliff:g id="DATE">%s</xliff:g>"</string>
     <string name="preposition_for_time" msgid="5506831244263083793">"<xliff:g id="TIME">%s</xliff:g>"</string>
@@ -1498,6 +1499,8 @@
     <string name="accessibility_shortcut_toogle_warning" msgid="7256507885737444807">"단축키가 사용 설정된 경우 두 개의 볼륨 버튼을 3초간 누르면 접근성 기능이 시작됩니다.\n\n 현재 접근성 기능:\n <xliff:g id="SERVICE_NAME">%1$s</xliff:g>\n\n \'설정 &gt; 접근성\'에서 기능을 변경할 수 있습니다."</string>
     <string name="disable_accessibility_shortcut" msgid="627625354248453445">"단축키 사용 중지"</string>
     <string name="leave_accessibility_shortcut_on" msgid="7653111894438512680">"단축키 사용"</string>
+    <string name="color_inversion_feature_name" msgid="4231186527799958644">"색상 반전"</string>
+    <string name="color_correction_feature_name" msgid="6779391426096954933">"색상 보정"</string>
     <string name="accessibility_shortcut_enabling_service" msgid="7771852911861522636">"접근성 단축키로 인해 <xliff:g id="SERVICE_NAME">%1$s</xliff:g>이(가) 사용 설정되었습니다."</string>
     <string name="accessibility_shortcut_disabling_service" msgid="2747243438223109821">"접근성 단축키로 인해 <xliff:g id="SERVICE_NAME">%1$s</xliff:g>이(가) 사용 중지되었습니다."</string>
     <string name="accessibility_button_prompt_text" msgid="4234556536456854251">"접근성 버튼을 탭할 때 사용할 기능을 선택하세요."</string>
@@ -1684,13 +1687,16 @@
     <string name="zen_mode_default_weeknights_name" msgid="3081318299464998143">"평일 밤"</string>
     <string name="zen_mode_default_weekends_name" msgid="2786495801019345244">"주말"</string>
     <string name="zen_mode_default_events_name" msgid="8158334939013085363">"일정"</string>
+    <string name="zen_mode_default_every_night_name" msgid="3012363838882944175">"수면 중"</string>
     <string name="muted_by" msgid="6147073845094180001">"<xliff:g id="THIRD_PARTY">%1$s</xliff:g>에서 알림음 음소거"</string>
     <string name="system_error_wipe_data" msgid="6608165524785354962">"사용 중인 기기 내부에 문제가 발생했습니다. 초기화할 때까지 불안정할 수 있습니다."</string>
     <string name="system_error_manufacturer" msgid="8086872414744210668">"사용 중인 기기 내부에 문제가 발생했습니다. 자세한 내용은 제조업체에 문의하세요."</string>
     <string name="stk_cc_ussd_to_dial" msgid="5202342984749947872">"USSD 요청이 DIAL 요청으로 수정됩니다."</string>
     <string name="stk_cc_ussd_to_ss" msgid="2345360594181405482">"USSD 요청이 SS 요청으로 수정됩니다."</string>
     <string name="stk_cc_ussd_to_ussd" msgid="7466087659967191653">"USSD 요청이 새로운 USSD 요청으로 수정됩니다."</string>
+    <string name="stk_cc_ussd_to_dial_video" msgid="585340552561515305">"USSD 요청이 동영상 DIAL 요청으로 수정됩니다."</string>
     <string name="stk_cc_ss_to_dial" msgid="2151304435775557162">"SS 요청이 DIAL 요청으로 수정됩니다."</string>
+    <string name="stk_cc_ss_to_dial_video" msgid="4306210904450719045">"SS 요청이 동영상 DIAL 요청으로 수정됩니다."</string>
     <string name="stk_cc_ss_to_ussd" msgid="3951862188105305589">"SS 요청이 USSD 요청으로 수정됩니다."</string>
     <string name="stk_cc_ss_to_ss" msgid="5470768854991452695">"SS 요청이 새로운 SS 요청으로 수정됩니다."</string>
     <string name="notification_work_profile_content_description" msgid="4600554564103770764">"직장 프로필"</string>

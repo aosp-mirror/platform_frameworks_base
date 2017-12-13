@@ -214,6 +214,7 @@
     <string name="global_action_power_off" msgid="4471879440839879722">"Strāvas padeve ir izslēgta."</string>
     <string name="global_action_emergency" msgid="7112311161137421166">"Ārkārtas"</string>
     <string name="global_action_bug_report" msgid="7934010578922304799">"Kļūdu ziņojums"</string>
+    <string name="global_action_logout" msgid="935179188218826050">"Beigt sesiju"</string>
     <string name="bugreport_title" msgid="2667494803742548533">"Kļūdu ziņojuma sagatavošana"</string>
     <string name="bugreport_message" msgid="398447048750350456">"Veicot šo darbību, tiks apkopota informācija par jūsu ierīces pašreizējo stāvokli un nosūtīta e-pasta ziņojuma veidā. Kļūdu ziņojuma pabeigšanai un nosūtīšanai var būt nepieciešams laiks. Lūdzu, esiet pacietīgs."</string>
     <string name="bugreport_option_interactive_title" msgid="8635056131768862479">"Interaktīvs pārskats"</string>
@@ -1522,6 +1523,8 @@
     <string name="accessibility_shortcut_toogle_warning" msgid="7256507885737444807">"Ja saīsne ir iespējota, vienlaikus nospiežot abas skaļuma regulēšanas pogas un trīs sekundes turot tās, tiks palaista pieejamības funkcija.\n\n Pašreiz iestatītā pieejamības funkcija:\n <xliff:g id="SERVICE_NAME">%1$s</xliff:g>\n\n Šo funkciju var mainīt sadaļā Iestatījumi &gt; Pieejamība."</string>
     <string name="disable_accessibility_shortcut" msgid="627625354248453445">"Izslēgt saīsni"</string>
     <string name="leave_accessibility_shortcut_on" msgid="7653111894438512680">"Izmantot saīsni"</string>
+    <string name="color_inversion_feature_name" msgid="4231186527799958644">"Krāsu inversija"</string>
+    <string name="color_correction_feature_name" msgid="6779391426096954933">"Krāsu korekcija"</string>
     <string name="accessibility_shortcut_enabling_service" msgid="7771852911861522636">"Pieejamības saīsne aktivizēja lietotni <xliff:g id="SERVICE_NAME">%1$s</xliff:g>"</string>
     <string name="accessibility_shortcut_disabling_service" msgid="2747243438223109821">"Pieejamības saīsne deaktivizēja lietotni <xliff:g id="SERVICE_NAME">%1$s</xliff:g>"</string>
     <string name="accessibility_button_prompt_text" msgid="4234556536456854251">"Izvēlieties funkciju, ko izmantot, kad pieskaraties pogai Pieejamība."</string>
@@ -1717,13 +1720,16 @@
     <string name="zen_mode_default_weeknights_name" msgid="3081318299464998143">"Darbadienas vakarā"</string>
     <string name="zen_mode_default_weekends_name" msgid="2786495801019345244">"Nedēļas nogalē"</string>
     <string name="zen_mode_default_events_name" msgid="8158334939013085363">"Pasākums"</string>
+    <string name="zen_mode_default_every_night_name" msgid="3012363838882944175">"Gulēšana"</string>
     <string name="muted_by" msgid="6147073845094180001">"Skaņu izslēdza <xliff:g id="THIRD_PARTY">%1$s</xliff:g>"</string>
     <string name="system_error_wipe_data" msgid="6608165524785354962">"Jūsu ierīcē ir radusies iekšēja problēma, un ierīce var darboties nestabili. Lai to labotu, veiciet rūpnīcas datu atiestatīšanu."</string>
     <string name="system_error_manufacturer" msgid="8086872414744210668">"Jūsu ierīcē ir radusies iekšēja problēma. Lai iegūtu plašāku informāciju, lūdzu, sazinieties ar ražotāju."</string>
     <string name="stk_cc_ussd_to_dial" msgid="5202342984749947872">"USSD pieprasījums ir mainīts uz DIAL pieprasījumu."</string>
     <string name="stk_cc_ussd_to_ss" msgid="2345360594181405482">"USSD pieprasījums ir mainīts uz SS pieprasījumu."</string>
     <string name="stk_cc_ussd_to_ussd" msgid="7466087659967191653">"USSD pieprasījums ir mainīts uz jaunu USSD pieprasījumu."</string>
+    <string name="stk_cc_ussd_to_dial_video" msgid="585340552561515305">"USSD pieprasījums ir mainīts uz Video DIAL pieprasījumu."</string>
     <string name="stk_cc_ss_to_dial" msgid="2151304435775557162">"SS pieprasījums ir mainīts uz DIAL pieprasījumu."</string>
+    <string name="stk_cc_ss_to_dial_video" msgid="4306210904450719045">"SS pieprasījums ir mainīts uz Video DIAL pieprasījumu."</string>
     <string name="stk_cc_ss_to_ussd" msgid="3951862188105305589">"SS pieprasījums ir mainīts uz USSD pieprasījumu."</string>
     <string name="stk_cc_ss_to_ss" msgid="5470768854991452695">"SS pieprasījums ir mainīts uz jaunu SS pieprasījumu."</string>
     <string name="notification_work_profile_content_description" msgid="4600554564103770764">"Darba profils"</string>

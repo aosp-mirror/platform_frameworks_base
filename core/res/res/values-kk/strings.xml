@@ -212,6 +212,7 @@
     <string name="global_action_power_off" msgid="4471879440839879722">"Өшіру"</string>
     <string name="global_action_emergency" msgid="7112311161137421166">"Төтенше жағдай"</string>
     <string name="global_action_bug_report" msgid="7934010578922304799">"Вирус туралы хабарлау"</string>
+    <string name="global_action_logout" msgid="935179188218826050">"Сеансты аяқтау"</string>
     <string name="bugreport_title" msgid="2667494803742548533">"Қате туралы есеп құру"</string>
     <string name="bugreport_message" msgid="398447048750350456">"Құрылғының қазіргі күйі туралы ақпаратты жинап, электрондық хабармен жібереді. Есеп әзір болғанша біраз уақыт кетеді, шыдай тұрыңыз."</string>
     <string name="bugreport_option_interactive_title" msgid="8635056131768862479">"Интерактивті есеп"</string>
@@ -1499,6 +1500,8 @@
     <string name="accessibility_shortcut_toogle_warning" msgid="7256507885737444807">"Бұл төте жол қосулы кезде дыбыс деңгейі түймелерінің екеуін де 3 секунд бойы басқанда арнайы мүмкіндік іске қосылады.\n\n Ағымдағы арнайы мүмкіндік:\n <xliff:g id="SERVICE_NAME">%1$s</xliff:g>\n\n Бұл мүмкіндікті \"Параметрлер\" &gt; \"Арнайы мүмкіндіктер\" тармағында өзгертуге болады."</string>
     <string name="disable_accessibility_shortcut" msgid="627625354248453445">"Төте жолды өшіру"</string>
     <string name="leave_accessibility_shortcut_on" msgid="7653111894438512680">"Төте жолды пайдалану"</string>
+    <string name="color_inversion_feature_name" msgid="4231186527799958644">"Түстер инверсиясы"</string>
+    <string name="color_correction_feature_name" msgid="6779391426096954933">"Түс жөндеу"</string>
     <string name="accessibility_shortcut_enabling_service" msgid="7771852911861522636">"Арнайы мүмкіндіктер таңбашасы <xliff:g id="SERVICE_NAME">%1$s</xliff:g> қызметін қосты"</string>
     <string name="accessibility_shortcut_disabling_service" msgid="2747243438223109821">"Арнайы мүмкіндіктер таңбашасы <xliff:g id="SERVICE_NAME">%1$s</xliff:g> қызметін өшірді"</string>
     <string name="accessibility_button_prompt_text" msgid="4234556536456854251">"\"Арнайы мүмкіндіктер\" түймесін түрткенде пайдаланатын мүмкіндікті таңдаңыз:"</string>
@@ -1685,13 +1688,16 @@
     <string name="zen_mode_default_weeknights_name" msgid="3081318299464998143">"Жұмыс күндері кешке"</string>
     <string name="zen_mode_default_weekends_name" msgid="2786495801019345244">"Демалыс күндері"</string>
     <string name="zen_mode_default_events_name" msgid="8158334939013085363">"Оқиға"</string>
+    <string name="zen_mode_default_every_night_name" msgid="3012363838882944175">"Ұйқы режимі"</string>
     <string name="muted_by" msgid="6147073845094180001">"<xliff:g id="THIRD_PARTY">%1$s</xliff:g> үнін өшірген"</string>
     <string name="system_error_wipe_data" msgid="6608165524785354962">"There\'s an internal problem with your device, and it may be unstable until you factory data reset."</string>
     <string name="system_error_manufacturer" msgid="8086872414744210668">"There\'s an internal problem with your device. Contact your manufacturer for details."</string>
     <string name="stk_cc_ussd_to_dial" msgid="5202342984749947872">"USSD сұрауы DIAL сұрауына өзгертілді."</string>
     <string name="stk_cc_ussd_to_ss" msgid="2345360594181405482">"USSD сұрауы SS сұрауына өзгертілді."</string>
     <string name="stk_cc_ussd_to_ussd" msgid="7466087659967191653">"USSD сұрауы жаңа USSD сұрауына өзгертілді."</string>
+    <string name="stk_cc_ussd_to_dial_video" msgid="585340552561515305">"USSD сұрауы бейне DIAL сұрауына өзгертілді."</string>
     <string name="stk_cc_ss_to_dial" msgid="2151304435775557162">"SS сұрауы DIAL сұрауына өзгертілді."</string>
+    <string name="stk_cc_ss_to_dial_video" msgid="4306210904450719045">"SS сұрауы бейне DIAL сұрауына өзгертілді."</string>
     <string name="stk_cc_ss_to_ussd" msgid="3951862188105305589">"SS сұрауы USSD сұрауына өзгертілді."</string>
     <string name="stk_cc_ss_to_ss" msgid="5470768854991452695">"SS сұрауы жаңа SS сұрауына өзгертілді."</string>
     <string name="notification_work_profile_content_description" msgid="4600554564103770764">"Жұмыс профилі"</string>

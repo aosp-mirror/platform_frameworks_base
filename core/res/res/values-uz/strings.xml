@@ -212,6 +212,7 @@
     <string name="global_action_power_off" msgid="4471879440839879722">"O‘chirish"</string>
     <string name="global_action_emergency" msgid="7112311161137421166">"Favqulodda chaqiruv"</string>
     <string name="global_action_bug_report" msgid="7934010578922304799">"Nosozlik haqida ma’lumot berish"</string>
+    <string name="global_action_logout" msgid="935179188218826050">"Seansni yakunlash"</string>
     <string name="bugreport_title" msgid="2667494803742548533">"Xatoliklar hisoboti"</string>
     <string name="bugreport_message" msgid="398447048750350456">"Qurilmangiz holati haqidagi ma’lumotlar to‘planib, e-pochta orqali yuboriladi. Hisobotni tayyorlash biroz vaqt olishi mumkin."</string>
     <string name="bugreport_option_interactive_title" msgid="8635056131768862479">"Interaktiv hisobot"</string>
@@ -1416,7 +1417,7 @@
     <string name="fingerprints" msgid="4516019619850763049">"Barmoq izlari:"</string>
     <string name="sha256_fingerprint" msgid="4391271286477279263">"SHA-256 barmoq izi:"</string>
     <string name="sha1_fingerprint" msgid="7930330235269404581">"SHA-1 barmoq izi:"</string>
-    <string name="activity_chooser_view_see_all" msgid="4292569383976636200">"Barchasini ko‘rish"</string>
+    <string name="activity_chooser_view_see_all" msgid="4292569383976636200">"Hammasi"</string>
     <string name="activity_chooser_view_dialog_title_default" msgid="4710013864974040615">"Harakat turini tanlang"</string>
     <string name="share_action_provider_share_with" msgid="5247684435979149216">"Ulashish"</string>
     <string name="sending" msgid="3245653681008218030">"Jo‘natilmoqda…"</string>
@@ -1499,6 +1500,8 @@
     <string name="accessibility_shortcut_toogle_warning" msgid="7256507885737444807">"Maxsus imkoniyatlar funksiyasidan foydalanish uchun u yoniqligida ikkala ovoz balandligini boshqarish tugmasini 3 soniya bosib turing.\n\n Joriy maxsus imkoniyatlar funksiyasi:\n <xliff:g id="SERVICE_NAME">%1$s</xliff:g>\n\n Bu funksiyani Sozlamalar &gt; Maxsus imkoniyatlar orqali o‘zgartirish mumkin."</string>
     <string name="disable_accessibility_shortcut" msgid="627625354248453445">"Tezkor ishga tushirishni o‘chirib qo‘yish"</string>
     <string name="leave_accessibility_shortcut_on" msgid="7653111894438512680">"Tezkor ishga tushirishdan foydalanish"</string>
+    <string name="color_inversion_feature_name" msgid="4231186527799958644">"Ranglarni akslantirish"</string>
+    <string name="color_correction_feature_name" msgid="6779391426096954933">"Rangni tuzatish"</string>
     <string name="accessibility_shortcut_enabling_service" msgid="7771852911861522636">"<xliff:g id="SERVICE_NAME">%1$s</xliff:g> xizmati yoqildi"</string>
     <string name="accessibility_shortcut_disabling_service" msgid="2747243438223109821">"<xliff:g id="SERVICE_NAME">%1$s</xliff:g> xizmati o‘chirib qo‘yildi"</string>
     <string name="accessibility_button_prompt_text" msgid="4234556536456854251">"Maxsus imkoniyatlar tugmasi bosilganda ishga tushadigan funksiyani tanlang:"</string>
@@ -1685,13 +1688,16 @@
     <string name="zen_mode_default_weeknights_name" msgid="3081318299464998143">"Ish kunlari kechqurun"</string>
     <string name="zen_mode_default_weekends_name" msgid="2786495801019345244">"Dam olish kunlari"</string>
     <string name="zen_mode_default_events_name" msgid="8158334939013085363">"Tadbir"</string>
+    <string name="zen_mode_default_every_night_name" msgid="3012363838882944175">"Uyquda"</string>
     <string name="muted_by" msgid="6147073845094180001">"“<xliff:g id="THIRD_PARTY">%1$s</xliff:g>” tomonidan ovozsiz qilingan"</string>
     <string name="system_error_wipe_data" msgid="6608165524785354962">"Qurilmangiz bilan bog‘liq ichki muammo mavjud. U zavod sozlamalari tiklanmaguncha barqaror ishlamasligi mumkin."</string>
     <string name="system_error_manufacturer" msgid="8086872414744210668">"Qurilmangiz bilan bog‘liq ichki muammo mavjud. Tafsilotlar uchun qurilmangiz ishlab chiqaruvchisiga murojaat qiling."</string>
     <string name="stk_cc_ussd_to_dial" msgid="5202342984749947872">"USSD so‘rovi DIAL so‘roviga o‘zgartirildi."</string>
     <string name="stk_cc_ussd_to_ss" msgid="2345360594181405482">"USSD so‘rovi SS so‘roviga o‘zgartirildi."</string>
     <string name="stk_cc_ussd_to_ussd" msgid="7466087659967191653">"USSD so‘rovi yangi USSD so‘roviga o‘zgartirildi."</string>
+    <string name="stk_cc_ussd_to_dial_video" msgid="585340552561515305">"USSD so‘rovi Video DIAL so‘roviga o‘zgartirildi."</string>
     <string name="stk_cc_ss_to_dial" msgid="2151304435775557162">"SS so‘rovi DIAL so‘roviga o‘zgartirildi."</string>
+    <string name="stk_cc_ss_to_dial_video" msgid="4306210904450719045">"SS so‘rovi Video DIAL so‘roviga o‘zgartirildi."</string>
     <string name="stk_cc_ss_to_ussd" msgid="3951862188105305589">"SS so‘rovi USSD so‘roviga o‘zgartirildi."</string>
     <string name="stk_cc_ss_to_ss" msgid="5470768854991452695">"SS so‘rovi yangi SS so‘roviga o‘zgartirildi."</string>
     <string name="notification_work_profile_content_description" msgid="4600554564103770764">"Ishchi profil"</string>

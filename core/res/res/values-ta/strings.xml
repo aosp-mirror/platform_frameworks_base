@@ -212,6 +212,7 @@
     <string name="global_action_power_off" msgid="4471879440839879722">"முடக்கு"</string>
     <string name="global_action_emergency" msgid="7112311161137421166">"அவசர அழைப்பு"</string>
     <string name="global_action_bug_report" msgid="7934010578922304799">"பிழை அறிக்கை"</string>
+    <string name="global_action_logout" msgid="935179188218826050">"அமர்வை முடிக்கிறது"</string>
     <string name="bugreport_title" msgid="2667494803742548533">"பிழை அறிக்கையை எடு"</string>
     <string name="bugreport_message" msgid="398447048750350456">"உங்கள் நடப்புச் சாதன நிலையை மின்னஞ்சல் செய்தியாக அனுப்ப, அது குறித்த தகவலை இது சேகரிக்கும். பிழை அறிக்கையைத் தொடங்குவதில் இருந்து, அது அனுப்புவதற்குத் தயாராகும் வரை, இதற்குச் சிறிது நேரம் ஆகும்; பொறுமையாகக் காத்திருக்கவும்."</string>
     <string name="bugreport_option_interactive_title" msgid="8635056131768862479">"ஊடாடத்தக்க அறிக்கை"</string>
@@ -1051,8 +1052,7 @@
     <string name="screen_compat_mode_hint" msgid="1064524084543304459">"சிஸ்டம் அமைப்பு &gt; பயன்பாடுகள் &gt; பதிவிறக்கம் என்பதில் இதை மீண்டும் இயக்கவும்."</string>
     <string name="unsupported_display_size_message" msgid="6545327290756295232">"தற்போதைய திரை அளவு அமைப்பை <xliff:g id="APP_NAME">%1$s</xliff:g> ஆதரிக்காததால், அது வழக்கத்திற்கு மாறாகச் செயல்படக்கூடும்."</string>
     <string name="unsupported_display_size_show" msgid="7969129195360353041">"எப்போதும் காட்டு"</string>
-    <!-- no translation found for unsupported_compile_sdk_message (4253168368781441759) -->
-    <skip />
+    <string name="unsupported_compile_sdk_message" msgid="4253168368781441759">"<xliff:g id="APP_NAME">%1$s</xliff:g> பயன்பாடானது, இந்தச் சாதனத்தின் Android OSக்கு இணக்கமற்ற பதிப்பிற்காக உருவாக்கப்பட்டதால், இதில் சரியாகச் செயல்படாது. இந்தப் பயன்பாட்டின் புதுப்பிக்கப்பட்ட பதிப்பானது தற்போது கிடைக்கக்கூடும்."</string>
     <string name="unsupported_compile_sdk_show" msgid="2681877855260970231">"எப்போதும் காட்டு"</string>
     <string name="unsupported_compile_sdk_check_update" msgid="3312723623323216101">"புதுப்பிப்பு உள்ளதா எனப் பார்"</string>
     <string name="smv_application" msgid="3307209192155442829">"<xliff:g id="APPLICATION">%1$s</xliff:g> பயன்பாடு (செயல்முறை <xliff:g id="PROCESS">%2$s</xliff:g>), தனது சுய-செயலாக்க StrictMode கொள்கையை மீறியது."</string>
@@ -1500,6 +1500,8 @@
     <string name="accessibility_shortcut_toogle_warning" msgid="7256507885737444807">"குறுக்குவழி இயக்கத்தில் இருந்தால், இரண்டு ஒலியளவு பொத்தான்களையும் 3 வினாடிகள் அழுத்தி, அணுகல்தன்மை அம்சத்தை இயக்கலாம்.\n\n தற்போதைய அணுகல்தன்மை அம்சம்:\n <xliff:g id="SERVICE_NAME">%1$s</xliff:g>\n\n அமைப்புகள் &gt; அணுகல்தன்மை என்பதற்குச் சென்று, அம்சத்தை மாற்றலாம்."</string>
     <string name="disable_accessibility_shortcut" msgid="627625354248453445">"குறுக்குவழியை முடக்கு"</string>
     <string name="leave_accessibility_shortcut_on" msgid="7653111894438512680">"குறுக்குவழியைப் பயன்படுத்து"</string>
+    <string name="color_inversion_feature_name" msgid="4231186527799958644">"வண்ணத்தை நேர் எதிராக மாற்றுதல்"</string>
+    <string name="color_correction_feature_name" msgid="6779391426096954933">"வண்ணத் திருத்தம்"</string>
     <string name="accessibility_shortcut_enabling_service" msgid="7771852911861522636">"அணுகல்தன்மைக் குறுக்குவழியானது <xliff:g id="SERVICE_NAME">%1$s</xliff:g>ஐ இயக்கியது"</string>
     <string name="accessibility_shortcut_disabling_service" msgid="2747243438223109821">"அணுகல்தன்மைக் குறுக்குவழியானது <xliff:g id="SERVICE_NAME">%1$s</xliff:g>ஐ முடக்கியது"</string>
     <string name="accessibility_button_prompt_text" msgid="4234556536456854251">"அணுகல்தன்மைப் பொத்தானைத் தட்டி, பயன்படுத்துவதற்கான அம்சத்தைத் தேர்ந்தெடுக்கவும்:"</string>
@@ -1639,8 +1641,7 @@
     <string name="package_installed_device_owner" msgid="6875717669960212648">"உங்கள் நிர்வாகி நிறுவியுள்ளார்"</string>
     <string name="package_updated_device_owner" msgid="1847154566357862089">"உங்கள் நிர்வாகி புதுப்பித்துள்ளார்"</string>
     <string name="package_deleted_device_owner" msgid="2307122077550236438">"உங்கள் நிர்வாகி நீக்கியுள்ளார்"</string>
-    <!-- no translation found for battery_saver_description (5394663545060026162) -->
-    <skip />
+    <string name="battery_saver_description" msgid="5394663545060026162">"சாதனத்தின் பேட்டரி ஆயுளை அதிகரிப்பதற்காக, பேட்டரி சேமிப்பான் உங்கள் சாதனத்தின் செயல்திறனைச் சற்றே குறைத்து, அதிர்வு, இருப்பிடச் சேவைகள் மற்றும் பெரும்பாலான பின்புலத் தரவு போன்றவற்றைக் கட்டுப்படுத்துகிறது. ஒத்திசைவைச் சார்ந்திருக்கும் மின்னஞ்சல், செய்தியிடல் மற்றும் பிற ஆப்ஸ் ஆகியவற்றை நீங்கள் திறக்காதவரை, அவை ஒத்திசைக்கப்படாமல் இருக்கும்.\n\nஉங்கள் ஃபோன் சார்ஜ் செய்யப்படும்போது, பேட்டரி சேமிப்பான் தானாகவே ஆஃப் செய்யப்படும்."</string>
     <string name="data_saver_description" msgid="6015391409098303235">"டேட்டா பயன்பாட்டைக் குறைப்பதற்கு உதவ, பின்புலத்தில் டேட்டாவை அனுப்புவது அல்லது பெறுவதிலிருந்து சில பயன்பாடுகளை டேட்டா சேமிப்பான் தடுக்கும். தற்போது பயன்படுத்தும் பயன்பாடானது எப்போதாவது டேட்டாவை அணுகலாம். எடுத்துக்காட்டாக, படங்களை நீங்கள் தட்டும் வரை அவை காட்டப்படாது."</string>
     <string name="data_saver_enable_title" msgid="4674073932722787417">"டேட்டா சேமிப்பானை இயக்கவா?"</string>
     <string name="data_saver_enable_button" msgid="7147735965247211818">"இயக்கு"</string>
@@ -1687,13 +1688,18 @@
     <string name="zen_mode_default_weeknights_name" msgid="3081318299464998143">"வார இரவு"</string>
     <string name="zen_mode_default_weekends_name" msgid="2786495801019345244">"வார இறுதி"</string>
     <string name="zen_mode_default_events_name" msgid="8158334939013085363">"நிகழ்வு"</string>
+    <string name="zen_mode_default_every_night_name" msgid="3012363838882944175">"உறக்கத்தில்"</string>
     <string name="muted_by" msgid="6147073845094180001">"<xliff:g id="THIRD_PARTY">%1$s</xliff:g> ஒலியடக்கினார்"</string>
     <string name="system_error_wipe_data" msgid="6608165524785354962">"சாதனத்தில் அகச் சிக்கல் இருக்கிறது, அதனை ஆரம்பநிலைக்கு மீட்டமைக்கும் வரை நிலையற்று இயங்கலாம்."</string>
     <string name="system_error_manufacturer" msgid="8086872414744210668">"சாதனத்தில் அகச் சிக்கல் இருக்கிறது. விவரங்களுக்கு சாதன தயாரிப்பாளரைத் தொடர்புகொள்ளவும்."</string>
     <string name="stk_cc_ussd_to_dial" msgid="5202342984749947872">"USSD கோரிக்கையானது DIAL கோரிக்கைக்கு மாற்றப்பட்டது."</string>
     <string name="stk_cc_ussd_to_ss" msgid="2345360594181405482">"USSD கோரிக்கையானது SS கோரிக்கைக்கு மாற்றப்பட்டது."</string>
     <string name="stk_cc_ussd_to_ussd" msgid="7466087659967191653">"USSD கோரிக்கையானது புதிய USSD கோரிக்கைக்கு மாற்றப்பட்டது."</string>
+    <!-- no translation found for stk_cc_ussd_to_dial_video (585340552561515305) -->
+    <skip />
     <string name="stk_cc_ss_to_dial" msgid="2151304435775557162">"SS கோரிக்கையானது DIAL கோரிக்கைக்கு மாற்றப்பட்டது."</string>
+    <!-- no translation found for stk_cc_ss_to_dial_video (4306210904450719045) -->
+    <skip />
     <string name="stk_cc_ss_to_ussd" msgid="3951862188105305589">"SS கோரிக்கையானது USSD கோரிக்கைக்கு மாற்றப்பட்டது."</string>
     <string name="stk_cc_ss_to_ss" msgid="5470768854991452695">"SS கோரிக்கையானது புதிய SS கோரிக்கைக்கு மாற்றப்பட்டது."</string>
     <string name="notification_work_profile_content_description" msgid="4600554564103770764">"பணி சுயவிவரம்"</string>

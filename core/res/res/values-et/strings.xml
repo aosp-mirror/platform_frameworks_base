@@ -212,6 +212,7 @@
     <string name="global_action_power_off" msgid="4471879440839879722">"Lülita välja"</string>
     <string name="global_action_emergency" msgid="7112311161137421166">"Hädaabi"</string>
     <string name="global_action_bug_report" msgid="7934010578922304799">"Veaaruanne"</string>
+    <string name="global_action_logout" msgid="935179188218826050">"Seansi lõpp"</string>
     <string name="bugreport_title" msgid="2667494803742548533">"Veaaruande võtmine"</string>
     <string name="bugreport_message" msgid="398447048750350456">"Nii kogutakse teavet teie seadme praeguse oleku kohta, et saata see meilisõnumina. Enne kui saate veaaruande ära saata, võtab selle loomine natuke aega; varuge kannatust."</string>
     <string name="bugreport_option_interactive_title" msgid="8635056131768862479">"Interakt. aruanne"</string>
@@ -1498,6 +1499,8 @@
     <string name="accessibility_shortcut_toogle_warning" msgid="7256507885737444807">"Kui otsetee on sisse lülitatud, käivitab mõlema helitugevuse nupu kolm sekundit all hoidmine juurdepääsetavuse funktsiooni.\n\n Praegune juurdepääsetavuse funktsioon:\n <xliff:g id="SERVICE_NAME">%1$s</xliff:g>\n\n Saate seda funktsiooni muuta valikutega Seaded &gt; Juurdepääsetavus."</string>
     <string name="disable_accessibility_shortcut" msgid="627625354248453445">"Lülita otsetee välja"</string>
     <string name="leave_accessibility_shortcut_on" msgid="7653111894438512680">"Kasuta otseteed"</string>
+    <string name="color_inversion_feature_name" msgid="4231186527799958644">"Värvide ümberpööramine"</string>
+    <string name="color_correction_feature_name" msgid="6779391426096954933">"Värviparandus"</string>
     <string name="accessibility_shortcut_enabling_service" msgid="7771852911861522636">"Juurdepääsetavuse otsetee lülitas teenuse <xliff:g id="SERVICE_NAME">%1$s</xliff:g> sisse"</string>
     <string name="accessibility_shortcut_disabling_service" msgid="2747243438223109821">"Juurdepääsetavuse otsetee lülitas teenuse <xliff:g id="SERVICE_NAME">%1$s</xliff:g> välja"</string>
     <string name="accessibility_button_prompt_text" msgid="4234556536456854251">"Valige, millist funktsiooni kasutada, kui vajutate nuppu Juurdepääsetavus:"</string>
@@ -1684,13 +1687,16 @@
     <string name="zen_mode_default_weeknights_name" msgid="3081318299464998143">"Argiõhtu"</string>
     <string name="zen_mode_default_weekends_name" msgid="2786495801019345244">"Nädalavahetus"</string>
     <string name="zen_mode_default_events_name" msgid="8158334939013085363">"Sündmus"</string>
+    <string name="zen_mode_default_every_night_name" msgid="3012363838882944175">"Magamine"</string>
     <string name="muted_by" msgid="6147073845094180001">"<xliff:g id="THIRD_PARTY">%1$s</xliff:g> vaigistas"</string>
     <string name="system_error_wipe_data" msgid="6608165524785354962">"Seadmes ilmnes sisemine probleem ja seade võib olla ebastabiilne seni, kuni lähtestate seadme tehase andmetele."</string>
     <string name="system_error_manufacturer" msgid="8086872414744210668">"Seadmes ilmnes sisemine probleem. Üksikasjaliku teabe saamiseks võtke ühendust tootjaga."</string>
     <string name="stk_cc_ussd_to_dial" msgid="5202342984749947872">"USSD-päring muudeti DIAL-päringuks."</string>
     <string name="stk_cc_ussd_to_ss" msgid="2345360594181405482">"USSD-päring muudeti SS-päringuks."</string>
     <string name="stk_cc_ussd_to_ussd" msgid="7466087659967191653">"USSD-päring muudeti uueks USSD-päringuks."</string>
+    <string name="stk_cc_ussd_to_dial_video" msgid="585340552561515305">"USSD-taotlus muudeti video DIAL-taotluseks."</string>
     <string name="stk_cc_ss_to_dial" msgid="2151304435775557162">"SS-päring muudeti DIAL-päringuks."</string>
+    <string name="stk_cc_ss_to_dial_video" msgid="4306210904450719045">"SS-taotlus muudeti video DIAL-taotluseks."</string>
     <string name="stk_cc_ss_to_ussd" msgid="3951862188105305589">"SS-päring muudeti USSD-päringuks."</string>
     <string name="stk_cc_ss_to_ss" msgid="5470768854991452695">"SS-päring muudeti uueks SS-päringuks."</string>
     <string name="notification_work_profile_content_description" msgid="4600554564103770764">"Tööprofiil"</string>

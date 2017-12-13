@@ -212,6 +212,7 @@
     <string name="global_action_power_off" msgid="4471879440839879722">"Исклучи"</string>
     <string name="global_action_emergency" msgid="7112311161137421166">"Итен случај"</string>
     <string name="global_action_bug_report" msgid="7934010578922304799">"Извештај за грешка"</string>
+    <string name="global_action_logout" msgid="935179188218826050">"Завршете ја сесијата"</string>
     <string name="bugreport_title" msgid="2667494803742548533">"Земи извештај за грешки"</string>
     <string name="bugreport_message" msgid="398447048750350456">"Ова ќе собира информации за моменталната состојба на вашиот уред, за да ги испрати како порака по е-пошта. Тоа ќе одземе малку време почнувајќи од извештајот за грешки додека не се подготви за праќање; бидете трпеливи."</string>
     <string name="bugreport_option_interactive_title" msgid="8635056131768862479">"Интерактивен извештај"</string>
@@ -1501,6 +1502,8 @@
     <string name="accessibility_shortcut_toogle_warning" msgid="7256507885737444807">"Кога е вклучена кратенката, ако ги притиснете двете копчиња за јачина на звук во времетраење од 3 секунди, ќе се стартува функција на пристапност.\n\n Тековна функција на пристапност:\n <xliff:g id="SERVICE_NAME">%1$s</xliff:g>\n\n Функцијата може да ја промените во „Поставки“ &gt; „Пристапност“."</string>
     <string name="disable_accessibility_shortcut" msgid="627625354248453445">"Исклучи ја кратенката"</string>
     <string name="leave_accessibility_shortcut_on" msgid="7653111894438512680">"Користи кратенка"</string>
+    <string name="color_inversion_feature_name" msgid="4231186527799958644">"Инверзија на бои"</string>
+    <string name="color_correction_feature_name" msgid="6779391426096954933">"Корекција на бои"</string>
     <string name="accessibility_shortcut_enabling_service" msgid="7771852911861522636">"Кратенката за пристапност ја вклучи <xliff:g id="SERVICE_NAME">%1$s</xliff:g>"</string>
     <string name="accessibility_shortcut_disabling_service" msgid="2747243438223109821">"Кратенката за пристапност ја исклучи <xliff:g id="SERVICE_NAME">%1$s</xliff:g>"</string>
     <string name="accessibility_button_prompt_text" msgid="4234556536456854251">"Изберете функција за користење кога ќе го допрете копчето за „Пристапност“."</string>
@@ -1687,13 +1690,16 @@
     <string name="zen_mode_default_weeknights_name" msgid="3081318299464998143">"Вечер од седмицата"</string>
     <string name="zen_mode_default_weekends_name" msgid="2786495801019345244">"Викенд"</string>
     <string name="zen_mode_default_events_name" msgid="8158334939013085363">"Настан"</string>
+    <string name="zen_mode_default_every_night_name" msgid="3012363838882944175">"Спиење"</string>
     <string name="muted_by" msgid="6147073845094180001">"Звукот го исклучи <xliff:g id="THIRD_PARTY">%1$s</xliff:g>"</string>
     <string name="system_error_wipe_data" msgid="6608165524785354962">"Настана внатрешен проблем со уредот и може да биде нестабилен сè додека не ресетирате на фабричките податоци."</string>
     <string name="system_error_manufacturer" msgid="8086872414744210668">"Настана внатрешен проблем со уредот. Контактирајте го производителот за детали."</string>
     <string name="stk_cc_ussd_to_dial" msgid="5202342984749947872">"Барањето USSD е изменето во барање DIAL."</string>
     <string name="stk_cc_ussd_to_ss" msgid="2345360594181405482">"Барањето USSD е изменето во барање SS."</string>
     <string name="stk_cc_ussd_to_ussd" msgid="7466087659967191653">"Барањето USSD е изменето во ново барање USSD."</string>
+    <string name="stk_cc_ussd_to_dial_video" msgid="585340552561515305">"Барањето USSD е изменето во барање видео DIAL."</string>
     <string name="stk_cc_ss_to_dial" msgid="2151304435775557162">"Барањето SS е изменето во барање DIAL."</string>
+    <string name="stk_cc_ss_to_dial_video" msgid="4306210904450719045">"Барањето SS е изменето во барање видео DIAL."</string>
     <string name="stk_cc_ss_to_ussd" msgid="3951862188105305589">"Барањето SS е изменето во барање USSD."</string>
     <string name="stk_cc_ss_to_ss" msgid="5470768854991452695">"Барањето SS е изменето во ново барање SS."</string>
     <string name="notification_work_profile_content_description" msgid="4600554564103770764">"Работен профил"</string>

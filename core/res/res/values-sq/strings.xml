@@ -212,6 +212,7 @@
     <string name="global_action_power_off" msgid="4471879440839879722">"Fik"</string>
     <string name="global_action_emergency" msgid="7112311161137421166">"Urgjenca"</string>
     <string name="global_action_bug_report" msgid="7934010578922304799">"Raporti i defekteve në kod"</string>
+    <string name="global_action_logout" msgid="935179188218826050">"Jepi fund sesionit"</string>
     <string name="bugreport_title" msgid="2667494803742548533">"Merr raportin e defekteve në kod"</string>
     <string name="bugreport_message" msgid="398447048750350456">"Ky funksion mundëson mbledhjen e informacioneve mbi gjendjen aktuale të pajisjes për ta dërguar si mesazh mail-i. Do të duhet pak kohë nga nisja e raportit të defekteve në kod. Faleminderit për durimin."</string>
     <string name="bugreport_option_interactive_title" msgid="8635056131768862479">"Raport interaktiv"</string>
@@ -1499,6 +1500,8 @@
     <string name="accessibility_shortcut_toogle_warning" msgid="7256507885737444807">"Kur shkurtorja është e aktivizuar, shtypja e të dy butonave për 3 sekonda do të nisë një funksion qasshmërie.\n\n Funksioni aktual i qasshmërisë:\n <xliff:g id="SERVICE_NAME">%1$s</xliff:g>\n\n Mund ta ndryshosh funksionin te Cilësimet &gt; Qasshmëria."</string>
     <string name="disable_accessibility_shortcut" msgid="627625354248453445">"Çaktivizo shkurtoren"</string>
     <string name="leave_accessibility_shortcut_on" msgid="7653111894438512680">"Përdor shkurtoren"</string>
+    <string name="color_inversion_feature_name" msgid="4231186527799958644">"Kthimi i ngjyrës"</string>
+    <string name="color_correction_feature_name" msgid="6779391426096954933">"Korrigjimi i ngjyrës"</string>
     <string name="accessibility_shortcut_enabling_service" msgid="7771852911861522636">"Shkurtorja e qasshmërisë e aktivizoi <xliff:g id="SERVICE_NAME">%1$s</xliff:g>"</string>
     <string name="accessibility_shortcut_disabling_service" msgid="2747243438223109821">"Shkurtorja e qasshmërisë e çaktivizoi <xliff:g id="SERVICE_NAME">%1$s</xliff:g>"</string>
     <string name="accessibility_button_prompt_text" msgid="4234556536456854251">"Zgjidh një funksion për ta përdorur kur troket butonin e \"Qasshmërisë\":"</string>
@@ -1685,13 +1688,16 @@
     <string name="zen_mode_default_weeknights_name" msgid="3081318299464998143">"Netët e javës"</string>
     <string name="zen_mode_default_weekends_name" msgid="2786495801019345244">"Fundjava"</string>
     <string name="zen_mode_default_events_name" msgid="8158334939013085363">"Ngjarje"</string>
+    <string name="zen_mode_default_every_night_name" msgid="3012363838882944175">"Në gjumë"</string>
     <string name="muted_by" msgid="6147073845094180001">"Lënë në heshtje nga <xliff:g id="THIRD_PARTY">%1$s</xliff:g>"</string>
     <string name="system_error_wipe_data" msgid="6608165524785354962">"Ka një problem të brendshëm me pajisjen tënde. Ajo mund të jetë e paqëndrueshme derisa të rivendosësh të dhënat në gjendje fabrike."</string>
     <string name="system_error_manufacturer" msgid="8086872414744210668">"Ka një problem të brendshëm me pajisjen tënde. Kontakto prodhuesin tënd për detaje."</string>
     <string name="stk_cc_ussd_to_dial" msgid="5202342984749947872">"Kërkesa USSD është modifikuar në kërkesën DIAL."</string>
     <string name="stk_cc_ussd_to_ss" msgid="2345360594181405482">"Kërkesa USSD është modifikuar në kërkesën SS."</string>
     <string name="stk_cc_ussd_to_ussd" msgid="7466087659967191653">"Kërkesa USSD është modifikuar në kërkesën e re USSD."</string>
+    <string name="stk_cc_ussd_to_dial_video" msgid="585340552561515305">"Kërkesa USSD është modifikuar në kërkesën Video DIAL."</string>
     <string name="stk_cc_ss_to_dial" msgid="2151304435775557162">"Kërkesa SS është e modifikuar në kërkesën DIAL."</string>
+    <string name="stk_cc_ss_to_dial_video" msgid="4306210904450719045">"Kërkesa SS është e modifikuar në kërkesën Video DIAL."</string>
     <string name="stk_cc_ss_to_ussd" msgid="3951862188105305589">"Kërkesa SS është modifikuar në kërkesën USSD."</string>
     <string name="stk_cc_ss_to_ss" msgid="5470768854991452695">"Kërkesa SS është e modifikuar në kërkesën e re SS."</string>
     <string name="notification_work_profile_content_description" msgid="4600554564103770764">"Profili i punës"</string>
