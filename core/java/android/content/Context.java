@@ -51,6 +51,7 @@ import android.net.Uri;
 import android.os.Bundle;
 import android.os.Environment;
 import android.os.Handler;
+import android.os.HandlerExecutor;
 import android.os.IBinder;
 import android.os.Looper;
 import android.os.StatFs;
@@ -75,6 +76,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
+import java.util.concurrent.Executor;
 
 /**
  * Interface to global information about an application environment.  This is
@@ -460,6 +462,16 @@ public abstract class Context {
      * @return The main looper.
      */
     public abstract Looper getMainLooper();
+
+    /**
+     * Return an {@link Executor} that will run enqueued tasks on the main
+     * thread associated with this context. This is the thread used to dispatch
+     * calls to application components (activities, services, etc).
+     */
+    public Executor getMainExecutor() {
+        // This is pretty inefficient, which is why ContextImpl overrides it
+        return new HandlerExecutor(new Handler(getMainLooper()));
+    }
 
     /**
      * Return the context of the single, global Application object of the

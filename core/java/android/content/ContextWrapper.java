@@ -45,6 +45,7 @@ import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.concurrent.Executor;
 
 /**
  * Proxying implementation of Context that simply delegates all of its calls to
@@ -103,7 +104,12 @@ public class ContextWrapper extends Context {
     public Looper getMainLooper() {
         return mBase.getMainLooper();
     }
-    
+
+    @Override
+    public Executor getMainExecutor() {
+        return mBase.getMainExecutor();
+    }
+
     @Override
     public Context getApplicationContext() {
         return mBase.getApplicationContext();

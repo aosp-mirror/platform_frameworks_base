@@ -16,7 +16,9 @@
 
 package android.app.admin;
 
+import android.annotation.CallbackExecutor;
 import android.annotation.ColorInt;
+import android.annotation.Condemned;
 import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
@@ -49,6 +51,7 @@ import android.net.ProxyInfo;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Handler;
+import android.os.HandlerExecutor;
 import android.os.Parcelable;
 import android.os.PersistableBundle;
 import android.os.Process;
@@ -94,6 +97,7 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.Set;
+import java.util.concurrent.Executor;
 
 /**
  * Public interface for managing policies enforced on a device. Most clients of this class must be
@@ -8627,6 +8631,15 @@ public class DevicePolicyManager {
         }
     }
 
+    /** {@hide} */
+    @Condemned
+    @Deprecated
+    public boolean clearApplicationUserData(@NonNull ComponentName admin,
+            @NonNull String packageName, @NonNull OnClearApplicationUserDataListener listener,
+            @NonNull Handler handler) {
+        return clearApplicationUserData(admin, packageName, listener, new HandlerExecutor(handler));
+    }
+
     /**
      * Called by the device owner or profile owner to clear application user data of a given
      * package. The behaviour of this is equivalent to the target application calling
@@ -8638,19 +8651,20 @@ public class DevicePolicyManager {
      * @param admin Which {@link DeviceAdminReceiver} this request is associated with.
      * @param packageName The name of the package which will have its user data wiped.
      * @param listener A callback object that will inform the caller when the clearing is done.
-     * @param handler The handler indicating the thread on which the listener should be invoked.
+     * @param executor The executor through which the listener should be invoked.
      * @throws SecurityException if the caller is not the device owner/profile owner.
      * @return whether the clearing succeeded.
      */
     public boolean clearApplicationUserData(@NonNull ComponentName admin,
             @NonNull String packageName, @NonNull OnClearApplicationUserDataListener listener,
-            @NonNull Handler handler) {
+            @NonNull @CallbackExecutor Executor executor) {
         throwIfParentInstance("clearAppData");
+        Preconditions.checkNotNull(executor);
         try {
             return mService.clearApplicationUserData(admin, packageName,
                     new IPackageDataObserver.Stub() {
                         public void onRemoveCompleted(String pkg, boolean succeeded) {
-                            handler.post(() ->
+                            executor.execute(() ->
                                     listener.onApplicationUserDataCleared(pkg, succeeded));
                         }
                     });

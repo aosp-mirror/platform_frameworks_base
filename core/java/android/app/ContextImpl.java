@@ -90,6 +90,7 @@ import java.io.InputStream;
 import java.nio.ByteOrder;
 import java.util.ArrayList;
 import java.util.Objects;
+import java.util.concurrent.Executor;
 
 class ReceiverRestrictedContext extends ContextWrapper {
     ReceiverRestrictedContext(Context base) {
@@ -247,6 +248,11 @@ class ContextImpl extends Context {
     @Override
     public Looper getMainLooper() {
         return mMainThread.getLooper();
+    }
+
+    @Override
+    public Executor getMainExecutor() {
+        return mMainThread.getExecutor();
     }
 
     @Override
