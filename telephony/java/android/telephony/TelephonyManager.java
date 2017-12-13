@@ -6527,6 +6527,9 @@ public class TelephonyManager {
      * @param uri The URI for the ringtone to play when receiving a voicemail from a specific
      * PhoneAccount.
      * @see #hasCarrierPrivileges
+     *
+     * @deprecated Use {@link android.provider.Settings#ACTION_CHANNEL_NOTIFICATION_SETTINGS}
+     * instead.
      */
     public void setVoicemailRingtoneUri(PhoneAccountHandle phoneAccountHandle, Uri uri) {
         try {
@@ -6569,6 +6572,9 @@ public class TelephonyManager {
      * @param enabled Whether to enable or disable vibration for voicemail notifications from a
      * specific PhoneAccount.
      * @see #hasCarrierPrivileges
+     *
+     * @deprecated Use {@link android.provider.Settings#ACTION_CHANNEL_NOTIFICATION_SETTINGS}
+     * instead.
      */
     public void setVoicemailVibrationEnabled(PhoneAccountHandle phoneAccountHandle,
             boolean enabled) {
