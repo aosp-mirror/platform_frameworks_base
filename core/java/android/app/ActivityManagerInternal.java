@@ -261,6 +261,11 @@ public abstract class ActivityManagerInternal {
     public abstract void notifyNetworkPolicyRulesUpdated(int uid, long procStateSeq);
 
     /**
+     * Called after the voice interaction service has changed.
+     */
+    public abstract void notifyActiveVoiceInteractionServiceChanged(ComponentName component);
+
+    /**
      * Called after virtual display Id is updated by
      * {@link com.android.server.vr.Vr2dDisplay} with a specific
      * {@param vr2dDisplayId}.

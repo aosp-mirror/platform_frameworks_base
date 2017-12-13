@@ -250,7 +250,6 @@ import android.app.assist.AssistStructure;
 import android.app.backup.IBackupManager;
 import android.app.servertransaction.ConfigurationChangeItem;
 import android.app.usage.UsageEvents;
-import android.app.usage.UsageStats;
 import android.app.usage.UsageStatsManagerInternal;
 import android.appwidget.AppWidgetManager;
 import android.content.ActivityNotFoundException;
@@ -628,7 +627,13 @@ public class ActivityManagerService extends IActivityManager.Stub
 
     /** All system services */
     SystemServiceManager mSystemServiceManager;
-    AssistUtils mAssistUtils;
+
+    // Wrapper around VoiceInteractionServiceManager
+    private AssistUtils mAssistUtils;
+
+    // Keeps track of the active voice interaction service component, notified from
+    // VoiceInteractionManagerService
+    ComponentName mActiveVoiceInteractionServiceComponent;
 
     private Installer mInstaller;
 
@@ -24389,6 +24394,13 @@ public class ActivityManagerService extends IActivityManager.Stub
                     }
                     record.networkStateLock.notifyAll();
                 }
+            }
+        }
+
+        @Override
+        public void notifyActiveVoiceInteractionServiceChanged(ComponentName component) {
+            synchronized (ActivityManagerService.this) {
+                mActiveVoiceInteractionServiceComponent = component;
             }
         }
 
