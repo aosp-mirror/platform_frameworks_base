@@ -136,7 +136,7 @@ class DragDropController {
             outSurface.copyFrom(surface);
             final IBinder winBinder = window.asBinder();
             IBinder token = new Binder();
-            mDragState = new DragState(mService, token, surface, flags, winBinder);
+            mDragState = new DragState(mService, this, token, surface, flags, winBinder);
             mDragState.mPid = callerPid;
             mDragState.mUid = callerUid;
             mDragState.mOriginalAlpha = alpha;

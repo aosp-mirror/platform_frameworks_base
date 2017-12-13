@@ -118,10 +118,10 @@ class DragState {
     private final Interpolator mCubicEaseOutInterpolator = new DecelerateInterpolator(1.5f);
     private Point mDisplaySize = new Point();
 
-    DragState(WindowManagerService service, IBinder token, SurfaceControl surface,
-            int flags, IBinder localWin) {
+    DragState(WindowManagerService service, DragDropController controller, IBinder token,
+            SurfaceControl surface, int flags, IBinder localWin) {
         mService = service;
-        mDragDropController = service.mDragDropController;
+        mDragDropController = controller;
         mToken = token;
         mSurfaceControl = surface;
         mFlags = flags;
@@ -530,7 +530,8 @@ class DragState {
         final int targetUserId = UserHandle.getUserId(touchedWin.getOwningUid());
 
         final DragAndDropPermissionsHandler dragAndDropPermissions;
-        if ((mFlags & View.DRAG_FLAG_GLOBAL) != 0 && (mFlags & DRAG_FLAGS_URI_ACCESS) != 0) {
+        if ((mFlags & View.DRAG_FLAG_GLOBAL) != 0 && (mFlags & DRAG_FLAGS_URI_ACCESS) != 0
+                && mData != null) {
             dragAndDropPermissions = new DragAndDropPermissionsHandler(
                     mData,
                     mUid,
@@ -542,7 +543,9 @@ class DragState {
             dragAndDropPermissions = null;
         }
         if (mSourceUserId != targetUserId){
-            mData.fixUris(mSourceUserId);
+            if (mData != null) {
+                mData.fixUris(mSourceUserId);
+            }
         }
         final int myPid = Process.myPid();
         final IBinder token = touchedWin.mClient.asBinder();
