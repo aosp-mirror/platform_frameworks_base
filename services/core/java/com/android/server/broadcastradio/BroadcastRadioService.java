@@ -16,6 +16,7 @@
 
 package com.android.server.broadcastradio;
 
+import android.annotation.NonNull;
 import android.Manifest;
 import android.content.Context;
 import android.content.pm.PackageManager;
@@ -28,9 +29,14 @@ import android.os.ParcelableException;
 import com.android.server.SystemService;
 
 import java.util.List;
+import java.util.Objects;
+import java.util.OptionalInt;
 
 public class BroadcastRadioService extends SystemService {
     private final ServiceImpl mServiceImpl = new ServiceImpl();
+
+    private final com.android.server.broadcastradio.hal2.BroadcastRadioService mHal2 =
+            new com.android.server.broadcastradio.hal2.BroadcastRadioService();
 
     /**
      * This field is used by native code, do not access or modify.
@@ -61,6 +67,14 @@ public class BroadcastRadioService extends SystemService {
         publishBinderService(Context.RADIO_SERVICE, mServiceImpl);
     }
 
+    /**
+     * Finds next available index for newly loaded modules.
+     */
+    private static int getNextId(@NonNull List<RadioManager.ModuleProperties> modules) {
+        OptionalInt max = modules.stream().mapToInt(RadioManager.ModuleProperties::getId).max();
+        return max.isPresent() ? max.getAsInt() + 1 : 0;
+    }
+
     private class ServiceImpl extends IRadioService.Stub {
         private void enforcePolicyAccess() {
             if (PackageManager.PERMISSION_GRANTED != getContext().checkCallingPermission(
@@ -78,8 +92,10 @@ public class BroadcastRadioService extends SystemService {
                 mModules = nativeLoadModules(mNativeContext);
                 if (mModules == null) {
                     throw new ParcelableException(new NullPointerException(
-                            "couldn't load radio modules"));
+                            "couldn't load radio HAL 1.x modules"));
                 }
+
+                mModules.addAll(mHal2.loadModules(getNextId(mModules)));
 
                 return mModules;
             }
