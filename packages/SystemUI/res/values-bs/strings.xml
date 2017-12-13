@@ -494,6 +494,9 @@
     <string name="stream_bluetooth_sco" msgid="2055645746402746292">"Bluetooth"</string>
     <string name="stream_dtmf" msgid="2447177903892477915">"Dvostruka višemelodijska frekvencija"</string>
     <string name="stream_accessibility" msgid="301136219144385106">"Pristupačnost"</string>
+    <string name="volume_ringer_status_normal" msgid="4273142424125855384">"Zvono"</string>
+    <string name="volume_ringer_status_vibrate" msgid="1825615171021346557">"Vibriranje"</string>
+    <string name="volume_ringer_status_silent" msgid="6896394161022916369">"Isključi zvuk"</string>
     <!-- String.format failed for translation -->
     <!-- no translation found for volume_stream_content_description_unmute (4436631538779230857) -->
     <skip />
@@ -764,8 +767,7 @@
     <string name="instant_apps" msgid="6647570248119804907">"Instant-aplikacije"</string>
     <string name="instant_apps_message" msgid="8116608994995104836">"Za instant aplikacije nije potrebna instalacija"</string>
     <string name="app_info" msgid="6856026610594615344">"Informacije o aplikaciji"</string>
-    <!-- no translation found for go_to_web (2650669128861626071) -->
-    <skip />
+    <string name="go_to_web" msgid="2650669128861626071">"Idi na preglednik"</string>
     <string name="mobile_data" msgid="7094582042819250762">"Mobilni podaci"</string>
     <string name="wifi_is_off" msgid="1838559392210456893">"Wi-Fi veza je isključena"</string>
     <string name="bt_is_off" msgid="2640685272289706392">"Bluetooth je isključen"</string>

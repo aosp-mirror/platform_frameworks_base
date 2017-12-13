@@ -498,6 +498,9 @@
     <string name="stream_bluetooth_sco" msgid="2055645746402746292">"Bluetooth"</string>
     <string name="stream_dtmf" msgid="2447177903892477915">"Тональный набор"</string>
     <string name="stream_accessibility" msgid="301136219144385106">"Специальные возможности"</string>
+    <string name="volume_ringer_status_normal" msgid="4273142424125855384">"Со звуком"</string>
+    <string name="volume_ringer_status_vibrate" msgid="1825615171021346557">"Вибрация"</string>
+    <string name="volume_ringer_status_silent" msgid="6896394161022916369">"Без звука"</string>
     <string name="volume_stream_content_description_unmute" msgid="4436631538779230857">"%1$s. Нажмите, чтобы включить звук."</string>
     <string name="volume_stream_content_description_vibrate" msgid="1187944970457807498">"%1$s. Нажмите, чтобы включить вибрацию. Специальные возможности могут прекратить работу."</string>
     <string name="volume_stream_content_description_mute" msgid="3625049841390467354">"%1$s. Нажмите, чтобы выключить звук. Специальные возможности могут прекратить работу."</string>
@@ -770,7 +773,7 @@
     <string name="instant_apps" msgid="6647570248119804907">"Приложения с мгновенным запуском"</string>
     <string name="instant_apps_message" msgid="8116608994995104836">"Приложения с мгновенным запуском не требуется устанавливать."</string>
     <string name="app_info" msgid="6856026610594615344">"О приложении"</string>
-    <string name="go_to_web" msgid="1106022723459948514">"Перейти в браузер"</string>
+    <string name="go_to_web" msgid="2650669128861626071">"Перейти в браузер"</string>
     <string name="mobile_data" msgid="7094582042819250762">"Моб. Интернет"</string>
     <string name="wifi_is_off" msgid="1838559392210456893">"Модуль Wi-Fi отключен"</string>
     <string name="bt_is_off" msgid="2640685272289706392">"Модуль Bluetooth отключен"</string>

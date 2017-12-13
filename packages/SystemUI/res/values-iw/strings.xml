@@ -496,6 +496,9 @@
     <string name="stream_bluetooth_sco" msgid="2055645746402746292">"Bluetooth"</string>
     <string name="stream_dtmf" msgid="2447177903892477915">"‏טון זוגי מרובה תדרים (DTMF)"</string>
     <string name="stream_accessibility" msgid="301136219144385106">"נגישות"</string>
+    <string name="volume_ringer_status_normal" msgid="4273142424125855384">"צלצול"</string>
+    <string name="volume_ringer_status_vibrate" msgid="1825615171021346557">"רטט"</string>
+    <string name="volume_ringer_status_silent" msgid="6896394161022916369">"השתקה"</string>
     <string name="volume_stream_content_description_unmute" msgid="4436631538779230857">"‏%1$s. הקש כדי לבטל את ההשתקה."</string>
     <string name="volume_stream_content_description_vibrate" msgid="1187944970457807498">"‏%1$s. הקש כדי להגדיר רטט. ייתכן ששירותי הנגישות מושתקים."</string>
     <string name="volume_stream_content_description_mute" msgid="3625049841390467354">"‏%1$s. הקש כדי להשתיק. ייתכן ששירותי הנגישות מושתקים."</string>
@@ -768,7 +771,7 @@
     <string name="instant_apps" msgid="6647570248119804907">"אפליקציות אינסטנט"</string>
     <string name="instant_apps_message" msgid="8116608994995104836">"אפליקציות אינסטנט לא דורשות התקנה."</string>
     <string name="app_info" msgid="6856026610594615344">"פרטי אפליקציה"</string>
-    <string name="go_to_web" msgid="1106022723459948514">"התחבר לאינטרנט"</string>
+    <string name="go_to_web" msgid="2650669128861626071">"מעבר אל הדפדפן"</string>
     <string name="mobile_data" msgid="7094582042819250762">"נתונים סלולריים"</string>
     <string name="wifi_is_off" msgid="1838559392210456893">"‏Wi-Fi כבוי"</string>
     <string name="bt_is_off" msgid="2640685272289706392">"‏Bluetooth כבוי"</string>

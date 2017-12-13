@@ -494,6 +494,9 @@
     <string name="stream_bluetooth_sco" msgid="2055645746402746292">"藍牙"</string>
     <string name="stream_dtmf" msgid="2447177903892477915">"雙音多頻訊號"</string>
     <string name="stream_accessibility" msgid="301136219144385106">"無障礙功能"</string>
+    <string name="volume_ringer_status_normal" msgid="4273142424125855384">"鈴聲"</string>
+    <string name="volume_ringer_status_vibrate" msgid="1825615171021346557">"震動"</string>
+    <string name="volume_ringer_status_silent" msgid="6896394161022916369">"靜音"</string>
     <string name="volume_stream_content_description_unmute" msgid="4436631538779230857">"%1$s。輕按即可取消靜音。"</string>
     <string name="volume_stream_content_description_vibrate" msgid="1187944970457807498">"%1$s。輕按即可設為震動。無障礙功能服務可能已經設為靜音。"</string>
     <string name="volume_stream_content_description_mute" msgid="3625049841390467354">"%1$s。輕按即可設為靜音。無障礙功能服務可能已經設為靜音。"</string>
@@ -758,7 +761,7 @@
     <string name="instant_apps" msgid="6647570248119804907">"即時應用程式"</string>
     <string name="instant_apps_message" msgid="8116608994995104836">"即時應用程式無需安裝即可使用。"</string>
     <string name="app_info" msgid="6856026610594615344">"應用程式資料"</string>
-    <string name="go_to_web" msgid="1106022723459948514">"前往網頁版"</string>
+    <string name="go_to_web" msgid="2650669128861626071">"前往瀏覽器"</string>
     <string name="mobile_data" msgid="7094582042819250762">"流動數據"</string>
     <string name="wifi_is_off" msgid="1838559392210456893">"Wi-Fi 已關閉"</string>
     <string name="bt_is_off" msgid="2640685272289706392">"藍牙已關閉"</string>

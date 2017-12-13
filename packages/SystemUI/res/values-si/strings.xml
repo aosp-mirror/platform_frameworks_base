@@ -492,6 +492,9 @@
     <string name="stream_bluetooth_sco" msgid="2055645746402746292">"බ්ලූටූත්"</string>
     <string name="stream_dtmf" msgid="2447177903892477915">"ද්විත්ව බහු ස්වර සංඛ්‍යාතය"</string>
     <string name="stream_accessibility" msgid="301136219144385106">"ප්‍රවේශ්‍යතාව"</string>
+    <string name="volume_ringer_status_normal" msgid="4273142424125855384">"නාද කරන්න"</string>
+    <string name="volume_ringer_status_vibrate" msgid="1825615171021346557">"කම්පනය කරන්න"</string>
+    <string name="volume_ringer_status_silent" msgid="6896394161022916369">"නිහඬ කරන්න"</string>
     <string name="volume_stream_content_description_unmute" msgid="4436631538779230857">"%1$s. නිහඬ කිරීම ඉවත් කිරීමට තට්ටු කරන්න."</string>
     <string name="volume_stream_content_description_vibrate" msgid="1187944970457807498">"%1$s. කම්පනය කිරීමට තට්ටු කරන්න. ප්‍රවේශ්‍යතා සේවා නිහඬ කළ හැකිය."</string>
     <string name="volume_stream_content_description_mute" msgid="3625049841390467354">"%1$s. නිහඬ කිරීමට තට්ටු කරන්න. ප්‍රවේශ්‍යතා සේවා නිහඬ කළ හැකිය."</string>
@@ -756,7 +759,7 @@
     <string name="instant_apps" msgid="6647570248119804907">"ක්ෂණික යෙදුම්"</string>
     <string name="instant_apps_message" msgid="8116608994995104836">"ක්ෂණික යෙදුම් ස්ථාපනය කිරීම අවශ්‍ය නොවේ."</string>
     <string name="app_info" msgid="6856026610594615344">"යෙදුම් තොරතුරු"</string>
-    <string name="go_to_web" msgid="1106022723459948514">"වෙබය වෙත යන්න"</string>
+    <string name="go_to_web" msgid="2650669128861626071">"බ්‍රවුසරය වෙත යන්න"</string>
     <string name="mobile_data" msgid="7094582042819250762">"ජංගම දත්ත"</string>
     <string name="wifi_is_off" msgid="1838559392210456893">"Wi-Fi ක්‍රියා විරහිතයි"</string>
     <string name="bt_is_off" msgid="2640685272289706392">"බ්ලූටූත් ක්‍රියා විරහිතයි"</string>

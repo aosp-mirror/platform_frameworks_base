@@ -492,6 +492,9 @@
     <string name="stream_bluetooth_sco" msgid="2055645746402746292">"Bluetooth"</string>
     <string name="stream_dtmf" msgid="2447177903892477915">"Çift ton çoklu frekans"</string>
     <string name="stream_accessibility" msgid="301136219144385106">"Erişilebilirlik"</string>
+    <string name="volume_ringer_status_normal" msgid="4273142424125855384">"Zili çaldır"</string>
+    <string name="volume_ringer_status_vibrate" msgid="1825615171021346557">"Titreşim"</string>
+    <string name="volume_ringer_status_silent" msgid="6896394161022916369">"Sesi kapat"</string>
     <string name="volume_stream_content_description_unmute" msgid="4436631538779230857">"%1$s. Sesi açmak için dokunun."</string>
     <string name="volume_stream_content_description_vibrate" msgid="1187944970457807498">"%1$s. Titreşime ayarlamak için dokunun. Erişilebilirlik hizmetlerinin sesi kapatılabilir."</string>
     <string name="volume_stream_content_description_mute" msgid="3625049841390467354">"%1$s. Sesi kapatmak için dokunun. Erişilebilirlik hizmetlerinin sesi kapatılabilir."</string>
@@ -756,7 +759,7 @@
     <string name="instant_apps" msgid="6647570248119804907">"Hazır Uygulamalar"</string>
     <string name="instant_apps_message" msgid="8116608994995104836">"Hazır uygulamaların yüklenmesi gerekmez."</string>
     <string name="app_info" msgid="6856026610594615344">"Uygulama bilgileri"</string>
-    <string name="go_to_web" msgid="1106022723459948514">"Web\'e git"</string>
+    <string name="go_to_web" msgid="2650669128861626071">"Tarayıcıya git"</string>
     <string name="mobile_data" msgid="7094582042819250762">"Mobil veriler"</string>
     <string name="wifi_is_off" msgid="1838559392210456893">"Kablosuz bağlantı kapalı"</string>
     <string name="bt_is_off" msgid="2640685272289706392">"Bluetooth kapalı"</string>
