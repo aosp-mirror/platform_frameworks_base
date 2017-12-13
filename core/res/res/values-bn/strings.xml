@@ -212,8 +212,7 @@
     <string name="global_action_power_off" msgid="4471879440839879722">"পাওয়ার বন্ধ করুন"</string>
     <string name="global_action_emergency" msgid="7112311161137421166">"জরুরী"</string>
     <string name="global_action_bug_report" msgid="7934010578922304799">"ত্রুটির প্রতিবেদন"</string>
-    <!-- no translation found for global_action_logout (935179188218826050) -->
-    <skip />
+    <string name="global_action_logout" msgid="935179188218826050">"সেশন শেষ করুন"</string>
     <string name="bugreport_title" msgid="2667494803742548533">"ত্রুটির অভিযোগ করুন"</string>
     <string name="bugreport_message" msgid="398447048750350456">"এটি একটি ই-মেল মেসেজ পাঠানোর জন্য আপনার ডিভাইসের বর্তমান অবস্থা সম্পর্কে তথ্য সংগ্রহ করবে৷ ত্রুটির প্রতিবেদন শুরুর সময় থেকে এটি পাঠানোর জন্য প্রস্তুত হতে কিছুটা সময় নেবে; অনুগ্রহ করে ধৈর্য রাখুন৷"</string>
     <string name="bugreport_option_interactive_title" msgid="8635056131768862479">"ইন্টারেক্টিভ প্রতিবেদন"</string>
@@ -1501,10 +1500,8 @@
     <string name="accessibility_shortcut_toogle_warning" msgid="7256507885737444807">"শর্টকাটটি চালু থাকলে দুটি ভলিউম বোতাম একসাথে ৩ সেকেন্ড টিপে ধরে রাখলে একটি অ্যাকসেসিবিলিটি বৈশিষ্ট্য চালু হবে।\n\n বর্তমান অ্যাকসেসিবিলিটি বৈশিষ্ট্য:\n <xliff:g id="SERVICE_NAME">%1$s</xliff:g>\n\n আপনি এই বৈশিষ্ট্যটি সেটিংস &gt; অ্যাকসেসিবিলিটিতে গিয়ে পরিবর্তন করতে পারবেন।"</string>
     <string name="disable_accessibility_shortcut" msgid="627625354248453445">"শর্টকাট বন্ধ করুন"</string>
     <string name="leave_accessibility_shortcut_on" msgid="7653111894438512680">"শর্টকাট ব্যবহার করুন"</string>
-    <!-- no translation found for color_inversion_feature_name (4231186527799958644) -->
-    <skip />
-    <!-- no translation found for color_correction_feature_name (6779391426096954933) -->
-    <skip />
+    <string name="color_inversion_feature_name" msgid="4231186527799958644">"রঙ উল্টানো"</string>
+    <string name="color_correction_feature_name" msgid="6779391426096954933">"রঙ সংশোধন"</string>
     <string name="accessibility_shortcut_enabling_service" msgid="7771852911861522636">"অ্যাক্সেসযোগ্যতা শর্টকাট <xliff:g id="SERVICE_NAME">%1$s</xliff:g> কে চালু করেছে"</string>
     <string name="accessibility_shortcut_disabling_service" msgid="2747243438223109821">"অ্যাক্সেসযোগ্যতা শর্টকাট <xliff:g id="SERVICE_NAME">%1$s</xliff:g> কে বন্ধ করেছে"</string>
     <string name="accessibility_button_prompt_text" msgid="4234556536456854251">"অ্যাক্সেসযোগ্যতা বোতামের সাহায্যে যে বৈশিষ্ট্যটি নিয়ন্ত্রণ করতে চান, সেটি বেছে নিন:"</string>
@@ -1691,15 +1688,18 @@
     <string name="zen_mode_default_weeknights_name" msgid="3081318299464998143">"সপ্তাহান্তের রাত্রি"</string>
     <string name="zen_mode_default_weekends_name" msgid="2786495801019345244">"সপ্তাহান্ত"</string>
     <string name="zen_mode_default_events_name" msgid="8158334939013085363">"ইভেন্ট"</string>
-    <!-- no translation found for zen_mode_default_every_night_name (3012363838882944175) -->
-    <skip />
+    <string name="zen_mode_default_every_night_name" msgid="3012363838882944175">"ঘুমানোর সময়"</string>
     <string name="muted_by" msgid="6147073845094180001">"<xliff:g id="THIRD_PARTY">%1$s</xliff:g> দ্বারা নিঃশব্দ করা হয়েছে"</string>
     <string name="system_error_wipe_data" msgid="6608165524785354962">"আপনার ডিভাইসে একটি অভ্যন্তরীন সমস্যা হয়েছে, এবং আপনি যতক্ষণ না পর্যন্ত এটিকে ফ্যাক্টরি ডেটা রিসেট করছেন ততক্ষণ এটি ঠিকভাবে কাজ নাও করতে পারে৷"</string>
     <string name="system_error_manufacturer" msgid="8086872414744210668">"আপনার ডিভাইসে একটি অভ্যন্তরীন সমস্যা হয়েছে৷ বিস্তারিত জানার জন্য প্রস্তুতকারকের সাথে যোগাযোগ করুন৷"</string>
     <string name="stk_cc_ussd_to_dial" msgid="5202342984749947872">"USSD অনুরোধটিকে ডায়াল অনুরোধে রুপান্তরিত করা হয়েছে৷"</string>
     <string name="stk_cc_ussd_to_ss" msgid="2345360594181405482">"USSD অনুরোধটিকে SS অনুরোধে রুপান্তরিত করা হয়েছে৷"</string>
     <string name="stk_cc_ussd_to_ussd" msgid="7466087659967191653">"USSD অনুরোধটিকে নতুন USSD অনুরোধে রুপান্তরিত করা হয়েছে৷"</string>
+    <!-- no translation found for stk_cc_ussd_to_dial_video (585340552561515305) -->
+    <skip />
     <string name="stk_cc_ss_to_dial" msgid="2151304435775557162">"SS অনুরোধটিকে ডায়াল অনুরোধে রুপান্তরিত করা হয়েছে৷"</string>
+    <!-- no translation found for stk_cc_ss_to_dial_video (4306210904450719045) -->
+    <skip />
     <string name="stk_cc_ss_to_ussd" msgid="3951862188105305589">"SS অনুরোধটিকে নতুন USSD অনুরোধে রুপান্তরিত করা হয়েছে৷"</string>
     <string name="stk_cc_ss_to_ss" msgid="5470768854991452695">"SS অনুরোধটিকে নতুন SS অনুরোধে রুপান্তরিত করা হয়েছে৷"</string>
     <string name="notification_work_profile_content_description" msgid="4600554564103770764">"কর্মস্থলের প্রোফাইল"</string>

@@ -212,8 +212,7 @@
     <string name="global_action_power_off" msgid="4471879440839879722">"კვების გამორთვა"</string>
     <string name="global_action_emergency" msgid="7112311161137421166">"საგანგებო სამსახურები"</string>
     <string name="global_action_bug_report" msgid="7934010578922304799">"ხარვეზის შესახებ ანგარიში"</string>
-    <!-- no translation found for global_action_logout (935179188218826050) -->
-    <skip />
+    <string name="global_action_logout" msgid="935179188218826050">"სესიის დასრულება"</string>
     <string name="bugreport_title" msgid="2667494803742548533">"შექმენით შეცდომის ანგარიში"</string>
     <string name="bugreport_message" msgid="398447048750350456">"იგი შეაგროვებს ინფორმაციას თქვენი მოწყობილობის ამჟამინდელი მდგომარეობის შესახებ, რათა ის ელფოსტის შეტყობინების სახით გააგზავნოს. ხარვეზის ანგარიშის მომზადებასა და შეტყობინების გაგზავნას გარკვეული დრო სჭირდება. გთხოვთ, მოითმინოთ."</string>
     <string name="bugreport_option_interactive_title" msgid="8635056131768862479">"ინტერაქტიული ანგარიში"</string>
@@ -1500,10 +1499,8 @@
     <string name="accessibility_shortcut_toogle_warning" msgid="7256507885737444807">"მალსახმობის ჩართვის შემთხვევაში, ხმის ორივე ღილაკზე 3 წამის განმავლობაში დაჭერით მარტივი წვდომის ფუნქცია ჩაირთვება.\n\n მარტივი წვდომის ამჟამინდელი ფუნქციაა:\n <xliff:g id="SERVICE_NAME">%1$s</xliff:g>\n\n ამ ფუნქციის შეცვლა შეგიძლიათ აქ: პარამეტრები &gt; მარტივი წვდომა."</string>
     <string name="disable_accessibility_shortcut" msgid="627625354248453445">"მალსახმობის გამორთვა"</string>
     <string name="leave_accessibility_shortcut_on" msgid="7653111894438512680">"მალსახმობის გამოყენება"</string>
-    <!-- no translation found for color_inversion_feature_name (4231186527799958644) -->
-    <skip />
-    <!-- no translation found for color_correction_feature_name (6779391426096954933) -->
-    <skip />
+    <string name="color_inversion_feature_name" msgid="4231186527799958644">"ფერთა ინვერსია"</string>
+    <string name="color_correction_feature_name" msgid="6779391426096954933">"ფერთა კორექცია"</string>
     <string name="accessibility_shortcut_enabling_service" msgid="7771852911861522636">"მარტივი წვდომის მალსახმობმა ჩართო <xliff:g id="SERVICE_NAME">%1$s</xliff:g>"</string>
     <string name="accessibility_shortcut_disabling_service" msgid="2747243438223109821">"მარტივი წვდომის მალსახმობმა გამორთო <xliff:g id="SERVICE_NAME">%1$s</xliff:g>"</string>
     <string name="accessibility_button_prompt_text" msgid="4234556536456854251">"აირჩიეთ მარტივი წვდომის ღილაკზე შეხებისას გამოსაყენებელი ფუნქცია:"</string>
@@ -1690,15 +1687,16 @@
     <string name="zen_mode_default_weeknights_name" msgid="3081318299464998143">"სამუშაო კვირის ღამე"</string>
     <string name="zen_mode_default_weekends_name" msgid="2786495801019345244">"შაბათ-კვირა"</string>
     <string name="zen_mode_default_events_name" msgid="8158334939013085363">"მოვლენა"</string>
-    <!-- no translation found for zen_mode_default_every_night_name (3012363838882944175) -->
-    <skip />
+    <string name="zen_mode_default_every_night_name" msgid="3012363838882944175">"ძილისას"</string>
     <string name="muted_by" msgid="6147073845094180001">"დადუმებულია <xliff:g id="THIRD_PARTY">%1$s</xliff:g>-ის მიერ"</string>
     <string name="system_error_wipe_data" msgid="6608165524785354962">"ფიქსირდება თქვენი მ ოწყობილობის შიდა პრობლემა და შეიძლება არასტაბილური იყოს, სანამ ქარხნულ მონაცემების არ განაახლებთ."</string>
     <string name="system_error_manufacturer" msgid="8086872414744210668">"ფიქსირდება თქვენი მოწყობილობის შიდა პრობლემა. დეტალებისათვის, მიმართეთ თქვენს მწარმოებელს."</string>
     <string name="stk_cc_ussd_to_dial" msgid="5202342984749947872">"USSD მოთხოვნა შეიცვლალა DIAL მოთხოვნით."</string>
     <string name="stk_cc_ussd_to_ss" msgid="2345360594181405482">"USSD მოთხოვნა შეიცვალა SS მოთხოვნით."</string>
     <string name="stk_cc_ussd_to_ussd" msgid="7466087659967191653">"USSD მოთხოვნა შეიცვალა ახალი USSD მოთხოვნით."</string>
+    <string name="stk_cc_ussd_to_dial_video" msgid="585340552561515305">"USSD მოთხოვნა შეიცვალა Video DIAL მოთხოვნით."</string>
     <string name="stk_cc_ss_to_dial" msgid="2151304435775557162">"SS მოთხოვნა შეიცვალა DIAL მოთხოვნით."</string>
+    <string name="stk_cc_ss_to_dial_video" msgid="4306210904450719045">"SS მოთხოვნა შეიცვალა Video DIAL მოთხოვნით."</string>
     <string name="stk_cc_ss_to_ussd" msgid="3951862188105305589">"SS მოთხოვნა შეიცვალა USSD მოთხოვნით."</string>
     <string name="stk_cc_ss_to_ss" msgid="5470768854991452695">"SS მოთხოვნა შეიცვალა ახალი SS მოთხოვნით."</string>
     <string name="notification_work_profile_content_description" msgid="4600554564103770764">"სამსახურის პროფილი"</string>

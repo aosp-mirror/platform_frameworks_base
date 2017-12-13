@@ -212,6 +212,7 @@
     <string name="global_action_power_off" msgid="4471879440839879722">"Apagar"</string>
     <string name="global_action_emergency" msgid="7112311161137421166">"Emergencias"</string>
     <string name="global_action_bug_report" msgid="7934010578922304799">"Informe de errores"</string>
+    <string name="global_action_logout" msgid="935179188218826050">"Finalizar sesión"</string>
     <string name="bugreport_title" msgid="2667494803742548533">"Iniciar informe de errores"</string>
     <string name="bugreport_message" msgid="398447048750350456">"Se recopilará información sobre el estado actual de tu dispositivo, que se enviará por correo. Pasarán unos minutos desde que se inicie el informe de errores hasta que se envíe, por lo que te recomendamos que tengas paciencia."</string>
     <string name="bugreport_option_interactive_title" msgid="8635056131768862479">"Informe interactivo"</string>
@@ -1498,6 +1499,8 @@
     <string name="accessibility_shortcut_toogle_warning" msgid="7256507885737444807">"Cuando el acceso directo está activado, puedes presionar los botones de volumen durante 3 segundos para iniciar una función de accesibilidad.\n\n Función de accesibilidad actual:\n <xliff:g id="SERVICE_NAME">%1$s</xliff:g>\n\n Puedes cambiar la función en Configuración &gt; Accesibilidad."</string>
     <string name="disable_accessibility_shortcut" msgid="627625354248453445">"Desactivar acceso directo"</string>
     <string name="leave_accessibility_shortcut_on" msgid="7653111894438512680">"Usar acceso directo"</string>
+    <string name="color_inversion_feature_name" msgid="4231186527799958644">"Inversión de color"</string>
+    <string name="color_correction_feature_name" msgid="6779391426096954933">"Corrección de color"</string>
     <string name="accessibility_shortcut_enabling_service" msgid="7771852911861522636">"El acceso directo de accesibilidad activó <xliff:g id="SERVICE_NAME">%1$s</xliff:g>"</string>
     <string name="accessibility_shortcut_disabling_service" msgid="2747243438223109821">"El acceso directo de accesibilidad desactivó <xliff:g id="SERVICE_NAME">%1$s</xliff:g>"</string>
     <string name="accessibility_button_prompt_text" msgid="4234556536456854251">"Elige una función para usar cuando presionas el botón Accesibilidad:"</string>
@@ -1684,13 +1687,16 @@
     <string name="zen_mode_default_weeknights_name" msgid="3081318299464998143">"Noche, en la semana"</string>
     <string name="zen_mode_default_weekends_name" msgid="2786495801019345244">"Fin de semana"</string>
     <string name="zen_mode_default_events_name" msgid="8158334939013085363">"Evento"</string>
+    <string name="zen_mode_default_every_night_name" msgid="3012363838882944175">"Dormir"</string>
     <string name="muted_by" msgid="6147073845094180001">"Silenciados por <xliff:g id="THIRD_PARTY">%1$s</xliff:g>"</string>
     <string name="system_error_wipe_data" msgid="6608165524785354962">"Existe un problema interno con el dispositivo, de modo que el dispositivo puede estar inestable hasta que restablezcas la configuración de fábrica."</string>
     <string name="system_error_manufacturer" msgid="8086872414744210668">"Existe un problema interno con el dispositivo. Comunícate con el fabricante para obtener más información."</string>
     <string name="stk_cc_ussd_to_dial" msgid="5202342984749947872">"La solicitud USSD cambió por una solicitud DIAL."</string>
     <string name="stk_cc_ussd_to_ss" msgid="2345360594181405482">"La solicitud USSD cambió por una solicitud SS."</string>
     <string name="stk_cc_ussd_to_ussd" msgid="7466087659967191653">"La solicitud USSD cambió por una nueva solicitud USSD."</string>
+    <string name="stk_cc_ussd_to_dial_video" msgid="585340552561515305">"Se cambió la solicitud USSD por una solicitud DIAL de video."</string>
     <string name="stk_cc_ss_to_dial" msgid="2151304435775557162">"La solicitud SS cambió por una solicitud DIAL."</string>
+    <string name="stk_cc_ss_to_dial_video" msgid="4306210904450719045">"Se cambió la solicitud SS por una solicitud DIAL de video."</string>
     <string name="stk_cc_ss_to_ussd" msgid="3951862188105305589">"La solicitud SS cambió por una solicitud USSD."</string>
     <string name="stk_cc_ss_to_ss" msgid="5470768854991452695">"La solicitud SS cambió por una nueva solicitud SS."</string>
     <string name="notification_work_profile_content_description" msgid="4600554564103770764">"Perfil de trabajo"</string>

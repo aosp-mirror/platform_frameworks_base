@@ -212,6 +212,7 @@
     <string name="global_action_power_off" msgid="4471879440839879722">"ปิดเครื่อง"</string>
     <string name="global_action_emergency" msgid="7112311161137421166">"เหตุฉุกเฉิน"</string>
     <string name="global_action_bug_report" msgid="7934010578922304799">"รายงานข้อบกพร่อง"</string>
+    <string name="global_action_logout" msgid="935179188218826050">"จบเซสชัน"</string>
     <string name="bugreport_title" msgid="2667494803742548533">"ใช้รายงานข้อบกพร่อง"</string>
     <string name="bugreport_message" msgid="398447048750350456">"การดำเนินการนี้จะรวบรวมข้อมูลเกี่ยวกับสถานะปัจจุบันของอุปกรณ์ของคุณ โดยจะส่งไปในรูปแบบข้อความอีเมล อาจใช้เวลาสักครู่ตั้งแต่เริ่มการสร้างรายงานข้อบกพร่องจนกระทั่งเสร็จสมบูรณ์ โปรดอดทนรอ"</string>
     <string name="bugreport_option_interactive_title" msgid="8635056131768862479">"รายงานแบบอินเทอร์แอกทีฟ"</string>
@@ -1051,7 +1052,7 @@
     <string name="screen_compat_mode_hint" msgid="1064524084543304459">"เปิดใช้งานอีกครั้งในการตั้งค่าระบบ &gt; แอปพลิเคชัน &gt; ดาวน์โหลด"</string>
     <string name="unsupported_display_size_message" msgid="6545327290756295232">"<xliff:g id="APP_NAME">%1$s</xliff:g> ไม่สนับสนุนการตั้งค่าขนาดการแสดงผลปัจจุบันและอาจแสดงผลผิดปกติ"</string>
     <string name="unsupported_display_size_show" msgid="7969129195360353041">"แสดงเสมอ"</string>
-    <string name="unsupported_compile_sdk_message" msgid="4253168368781441759">"<xliff:g id="APP_NAME">%1$s</xliff:g> สร้างมาสำหรับระบบปฏิบัติการ Android เวอร์ชันที่ใช้ร่วมกันไม่ได้ และอาจแสดงผลผิดปกติ ทั้งนี้ แอปเวอร์ชันอัปเดตอาจพร้อมใช้งานแล้ว"</string>
+    <string name="unsupported_compile_sdk_message" msgid="4253168368781441759">"<xliff:g id="APP_NAME">%1$s</xliff:g> ไม่ได้สร้างมาเพื่อใช้งานกับระบบปฏิบัติการ Android เวอร์ชันนี้ จึงอาจแสดงผลผิดปกติ ทั้งนี้ แอปเวอร์ชันอัปเดตอาจพร้อมใช้งานแล้ว"</string>
     <string name="unsupported_compile_sdk_show" msgid="2681877855260970231">"แสดงเสมอ"</string>
     <string name="unsupported_compile_sdk_check_update" msgid="3312723623323216101">"ตรวจสอบอัปเดต"</string>
     <string name="smv_application" msgid="3307209192155442829">"แอปพลิเคชัน <xliff:g id="APPLICATION">%1$s</xliff:g> (กระบวนการ <xliff:g id="PROCESS">%2$s</xliff:g>) ละเมิดนโยบาย StrictMode ที่บังคับใช้ด้วยตัวเอง"</string>
@@ -1498,6 +1499,8 @@
     <string name="accessibility_shortcut_toogle_warning" msgid="7256507885737444807">"เมื่อทางลัดเปิดอยู่ การกดปุ่มปรับระดับเสียงทั้ง 2 ปุ่มเป็นเวลา 3 วินาทีจะเริ่มฟีเจอร์การเข้าถึงพิเศษ\n\n ฟีเจอร์การเข้าถึงพิเศษปัจจุบัน:\n <xliff:g id="SERVICE_NAME">%1$s</xliff:g>\n\n คุณสามารถเปลี่ยนฟีเจอร์ในการตั้งค่า &gt; การเข้าถึงพิเศษ"</string>
     <string name="disable_accessibility_shortcut" msgid="627625354248453445">"ปิดทางลัด"</string>
     <string name="leave_accessibility_shortcut_on" msgid="7653111894438512680">"ใช้ทางลัด"</string>
+    <string name="color_inversion_feature_name" msgid="4231186527799958644">"การกลับสี"</string>
+    <string name="color_correction_feature_name" msgid="6779391426096954933">"การปรับแก้สี"</string>
     <string name="accessibility_shortcut_enabling_service" msgid="7771852911861522636">"ทางลัดการเข้าถึงเปิด <xliff:g id="SERVICE_NAME">%1$s</xliff:g> แล้ว"</string>
     <string name="accessibility_shortcut_disabling_service" msgid="2747243438223109821">"ทางลัดการเข้าถึงปิด <xliff:g id="SERVICE_NAME">%1$s</xliff:g> แล้ว"</string>
     <string name="accessibility_button_prompt_text" msgid="4234556536456854251">"เลือกฟีเจอร์ที่จะใช้เมื่อคุณแตะปุ่ม \"การเข้าถึงพิเศษ\":"</string>
@@ -1684,13 +1687,16 @@
     <string name="zen_mode_default_weeknights_name" msgid="3081318299464998143">"คืนวันธรรมดา"</string>
     <string name="zen_mode_default_weekends_name" msgid="2786495801019345244">"สุดสัปดาห์"</string>
     <string name="zen_mode_default_events_name" msgid="8158334939013085363">"กิจกรรม"</string>
+    <string name="zen_mode_default_every_night_name" msgid="3012363838882944175">"นอนหลับ"</string>
     <string name="muted_by" msgid="6147073845094180001">"ปิดเสียงโดย <xliff:g id="THIRD_PARTY">%1$s</xliff:g>"</string>
     <string name="system_error_wipe_data" msgid="6608165524785354962">"อุปกรณ์ของคุณเกิดปัญหาภายในเครื่อง อุปกรณ์อาจทำงานไม่เสถียรจนกว่าคุณจะรีเซ็ตข้อมูลเป็นค่าเริ่มต้น"</string>
     <string name="system_error_manufacturer" msgid="8086872414744210668">"อุปกรณ์ของคุณเกิดปัญหาภายในเครื่อง โปรดติดต่อผู้ผลิตเพื่อขอรายละเอียดเพิ่มเติม"</string>
     <string name="stk_cc_ussd_to_dial" msgid="5202342984749947872">"คำขอ USSD ได้รับการแก้ไขให้เป็นคำขอ DIAL"</string>
     <string name="stk_cc_ussd_to_ss" msgid="2345360594181405482">"คำขอ USSD ได้รับการแก้ไขให้เป็นคำขอ SS"</string>
     <string name="stk_cc_ussd_to_ussd" msgid="7466087659967191653">"คำขอ USSD ได้รับการแก้ไขให้เป็นคำขอ USSD ใหม่"</string>
+    <string name="stk_cc_ussd_to_dial_video" msgid="585340552561515305">"คำขอ USSD ได้รับการแก้ไขให้เป็นคำขอ Video DIAL"</string>
     <string name="stk_cc_ss_to_dial" msgid="2151304435775557162">"คำขอ SS ได้รับการแก้ไขให้เป็นคำขอ DIAL"</string>
+    <string name="stk_cc_ss_to_dial_video" msgid="4306210904450719045">"คำขอ SS ได้รับการแก้ไขให้เป็นคำขอ Video DIAL"</string>
     <string name="stk_cc_ss_to_ussd" msgid="3951862188105305589">"คำขอ SS ได้รับการแก้ไขให้เป็นคำขอ USSD"</string>
     <string name="stk_cc_ss_to_ss" msgid="5470768854991452695">"คำขอ SS ได้รับการแก้ไขให้เป็นคำขอ SS ใหม่"</string>
     <string name="notification_work_profile_content_description" msgid="4600554564103770764">"โปรไฟล์งาน"</string>

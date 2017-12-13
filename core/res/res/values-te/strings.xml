@@ -212,6 +212,7 @@
     <string name="global_action_power_off" msgid="4471879440839879722">"పవర్ ఆఫ్ చేయి"</string>
     <string name="global_action_emergency" msgid="7112311161137421166">"అత్యవసరం"</string>
     <string name="global_action_bug_report" msgid="7934010578922304799">"బగ్ నివేదిక"</string>
+    <string name="global_action_logout" msgid="935179188218826050">"సెషన్‌ను ముగించు"</string>
     <string name="bugreport_title" msgid="2667494803742548533">"బగ్ నివేదికను సిద్ధం చేయి"</string>
     <string name="bugreport_message" msgid="398447048750350456">"ఇది ఇ-మెయిల్ సందేశం రూపంలో పంపడానికి మీ ప్రస్తుత పరికర స్థితి గురించి సమాచారాన్ని సేకరిస్తుంది. బగ్ నివేదికను ప్రారంభించడం మొదలుకొని పంపడానికి సిద్ధం చేసే వరకు ఇందుకు కొంత సమయం పడుతుంది; దయచేసి ఓపిక పట్టండి."</string>
     <string name="bugreport_option_interactive_title" msgid="8635056131768862479">"ప్రభావశీల నివేదిక"</string>
@@ -1051,8 +1052,7 @@
     <string name="screen_compat_mode_hint" msgid="1064524084543304459">"సిస్టమ్ సెట్టింగ్‌లు &gt; అనువర్తనాలు &gt; డౌన్‌లోడ్ చేసినవిలో దీన్ని పునఃప్రారంభించండి."</string>
     <string name="unsupported_display_size_message" msgid="6545327290756295232">"<xliff:g id="APP_NAME">%1$s</xliff:g> ప్రస్తుత ప్రదర్శన పరిమాణ సెట్టింగ్‌కు మద్దతు ఇవ్వదు, దీని వలన ఊహించని సమస్యలు తలెత్తవచ్చు."</string>
     <string name="unsupported_display_size_show" msgid="7969129195360353041">"ఎల్లప్పుడూ చూపు"</string>
-    <!-- no translation found for unsupported_compile_sdk_message (4253168368781441759) -->
-    <skip />
+    <string name="unsupported_compile_sdk_message" msgid="4253168368781441759">"Android OS యొక్క అననుకూల వెర్షన్ కోసం <xliff:g id="APP_NAME">%1$s</xliff:g> రూపొందించబడింది మరియు ఊహించని సమస్యలు తలెత్తవచ్చు. యాప్ యొక్క అప్‌డేట్ చేసిన వెర్షన్ అందుబాటులో ఉండవచ్చు."</string>
     <string name="unsupported_compile_sdk_show" msgid="2681877855260970231">"ఎల్లప్పుడూ చూపు"</string>
     <string name="unsupported_compile_sdk_check_update" msgid="3312723623323216101">"అప్‌డేట్ కోసం తనిఖీ చేయి"</string>
     <string name="smv_application" msgid="3307209192155442829">"<xliff:g id="APPLICATION">%1$s</xliff:g> యాప్ (<xliff:g id="PROCESS">%2$s</xliff:g> ప్రాసెస్) అది స్వయంగా అమలు చేసే ఖచ్చితమైన మోడ్ విధానాన్ని ఉల్లంఘించింది."</string>
@@ -1500,6 +1500,8 @@
     <string name="accessibility_shortcut_toogle_warning" msgid="7256507885737444807">"షార్ట్‌కట్ ఆన్‌లో ఉన్నప్పుడు, రెండు వాల్యూమ్ బటన్‌లను 3 సెకన్ల పాటు నొక్కితే యాక్సెస్ సామర్థ్య ఫీచర్ ప్రారంభం అవుతుంది.\n\n ప్రస్తుత యాక్సెస్ సామర్థ్య ఫీచర్:\n <xliff:g id="SERVICE_NAME">%1$s</xliff:g>\n\n సెట్టింగ్‌లు &gt; యాక్సెస్ సామర్థ్యంలో మీరు ఫీచర్‌ను మార్చవచ్చు."</string>
     <string name="disable_accessibility_shortcut" msgid="627625354248453445">"సత్వరమార్గాన్ని ఆఫ్ చేయి"</string>
     <string name="leave_accessibility_shortcut_on" msgid="7653111894438512680">"సత్వరమార్గాన్ని ఉపయోగించు"</string>
+    <string name="color_inversion_feature_name" msgid="4231186527799958644">"వర్ణ విలోమం"</string>
+    <string name="color_correction_feature_name" msgid="6779391426096954933">"రంగు సవరణ"</string>
     <string name="accessibility_shortcut_enabling_service" msgid="7771852911861522636">"యాక్సెస్ సామర్థ్య షార్ట్‌కట్ ద్వారా <xliff:g id="SERVICE_NAME">%1$s</xliff:g> ఆన్ చేయబడింది"</string>
     <string name="accessibility_shortcut_disabling_service" msgid="2747243438223109821">"యాక్సెస్ సామర్థ్య షార్ట్‌కట్ ద్వారా <xliff:g id="SERVICE_NAME">%1$s</xliff:g> ఆఫ్ చేయబడింది"</string>
     <string name="accessibility_button_prompt_text" msgid="4234556536456854251">"యాక్సెస్ సామర్థ్య బటన్‌ను మీరు నొక్కినప్పుడు ఉపయోగించాల్సిన ఒక ఫీచర్‌ను ఎంచుకోండి:"</string>
@@ -1639,8 +1641,7 @@
     <string name="package_installed_device_owner" msgid="6875717669960212648">"మీ నిర్వాహకులు ఇన్‌స్టాల్ చేసారు"</string>
     <string name="package_updated_device_owner" msgid="1847154566357862089">"మీ నిర్వాహకులు నవీకరించారు"</string>
     <string name="package_deleted_device_owner" msgid="2307122077550236438">"మీ నిర్వాహకులు తొలగించారు"</string>
-    <!-- no translation found for battery_saver_description (5394663545060026162) -->
-    <skip />
+    <string name="battery_saver_description" msgid="5394663545060026162">"బ్యాటరీ జీవితకాలాన్ని మెరుగుపరచడంలో సహాయపడటానికి, బ్యాటరీ సేవర్ మీ పరికరం పనితీరును తగ్గిస్తుంది మరియు వైబ్రేషన్‌ను, స్థాన సేవలను మరియు అత్యధిక నేపథ్య డేటాను పరిమితం చేస్తుంది. ఇమెయిల్, మెసేజింగ్ మరియు సమకాలీకరణపై ఆధారపడే ఇతర యాప్‌లు మీరు వాటిని తెరిస్తే మినహా అప్‌డేట్ చేయబడవు.\n\nమీ పరికరం ఛార్జ్ అవుతున్నప్పుడు బ్యాటరీ సేవర్ స్వయంచాలకంగా ఆఫ్ అవుతుంది."</string>
     <string name="data_saver_description" msgid="6015391409098303235">"డేటా వినియోగాన్ని తగ్గించడంలో సహాయకరంగా ఉండటానికి, డేటా సేవర్ కొన్ని యాప్‌లను నేపథ్యంలో డేటాను పంపకుండా లేదా స్వీకరించకుండా నిరోధిస్తుంది. మీరు ప్రస్తుతం ఉపయోగిస్తున్న యాప్‌ డేటాను యాక్సెస్ చేయగలదు కానీ అలా అరుదుగా చేయవచ్చు. అంటే, ఉదాహరణకు, మీరు ఆ చిత్రాలను నొక్కే వరకు అవి ప్రదర్శించబడవు."</string>
     <string name="data_saver_enable_title" msgid="4674073932722787417">"డేటా సేవర్‌ను ఆన్ చేయాలా?"</string>
     <string name="data_saver_enable_button" msgid="7147735965247211818">"ఆన్ చేయి"</string>
@@ -1687,13 +1688,18 @@
     <string name="zen_mode_default_weeknights_name" msgid="3081318299464998143">"వారపు రోజుల్లో రాత్రి"</string>
     <string name="zen_mode_default_weekends_name" msgid="2786495801019345244">"వారాంతం"</string>
     <string name="zen_mode_default_events_name" msgid="8158334939013085363">"ఈవెంట్"</string>
+    <string name="zen_mode_default_every_night_name" msgid="3012363838882944175">"నిద్రావస్థ"</string>
     <string name="muted_by" msgid="6147073845094180001">"<xliff:g id="THIRD_PARTY">%1$s</xliff:g> ద్వారా మ్యూట్ చేయబడింది"</string>
     <string name="system_error_wipe_data" msgid="6608165524785354962">"మీ పరికరంతో అంతర్గత సమస్య ఏర్పడింది మరియు మీరు ఫ్యాక్టరీ డేటా రీసెట్ చేసే వరకు అస్థిరంగా ఉంటుంది."</string>
     <string name="system_error_manufacturer" msgid="8086872414744210668">"మీ పరికరంతో అంతర్గత సమస్య ఏర్పడింది. వివరాల కోసం మీ తయారీదారుని సంప్రదించండి."</string>
     <string name="stk_cc_ussd_to_dial" msgid="5202342984749947872">"USSD అభ్యర్థన డయల్ అభ్యర్థనగా సవరించబడింది."</string>
     <string name="stk_cc_ussd_to_ss" msgid="2345360594181405482">"USSD అభ్యర్థన SS అభ్యర్థనగా సవరించబడింది."</string>
     <string name="stk_cc_ussd_to_ussd" msgid="7466087659967191653">"USSD అభ్యర్థన కొత్త USSD అభ్యర్థనగా సవరించబడింది."</string>
+    <!-- no translation found for stk_cc_ussd_to_dial_video (585340552561515305) -->
+    <skip />
     <string name="stk_cc_ss_to_dial" msgid="2151304435775557162">"SS అభ్యర్థన డయల్ అభ్యర్థనగా సవరించబడింది."</string>
+    <!-- no translation found for stk_cc_ss_to_dial_video (4306210904450719045) -->
+    <skip />
     <string name="stk_cc_ss_to_ussd" msgid="3951862188105305589">"SS అభ్యర్థన USSD అభ్యర్థనగా సవరించబడింది."</string>
     <string name="stk_cc_ss_to_ss" msgid="5470768854991452695">"SS అభ్యర్థన కొత్త SS అభ్యర్థనగా సవరించబడింది."</string>
     <string name="notification_work_profile_content_description" msgid="4600554564103770764">"కార్యాలయ ప్రొఫైల్‌"</string>

@@ -144,7 +144,7 @@
     <string name="httpErrorAuth" msgid="1435065629438044534">"प्रमाणीकृत करू शकलो नाही."</string>
     <string name="httpErrorProxyAuth" msgid="1788207010559081331">"प्रॉक्सी सर्व्हरद्वारे प्रमाणीकरण यशस्वी झाले."</string>
     <string name="httpErrorConnect" msgid="8714273236364640549">"सर्व्हरशी कनेक्ट करू शकलो नाही."</string>
-    <string name="httpErrorIO" msgid="2340558197489302188">"या सर्व्हरशी संप्रेषण करू शकलो नाही. नंतर पुन्हा प्रयत्न करा."</string>
+    <string name="httpErrorIO" msgid="2340558197489302188">"या सर्व्हरशी संवाद प्रस्थापित करू शकलो नाही. नंतर पुन्हा प्रयत्न करा."</string>
     <string name="httpErrorTimeout" msgid="4743403703762883954">"सर्व्हरवरील कनेक्शन टाइमआउट झाले."</string>
     <string name="httpErrorRedirectLoop" msgid="8679596090392779516">"पृष्ठामध्ये बरीच सर्व्हर पुनर्निर्देशने आहेत."</string>
     <string name="httpErrorUnsupportedScheme" msgid="5015730812906192208">"प्रोटोकॉल समर्थित नाही."</string>
@@ -212,6 +212,7 @@
     <string name="global_action_power_off" msgid="4471879440839879722">"बंद"</string>
     <string name="global_action_emergency" msgid="7112311161137421166">"आणीबाणी"</string>
     <string name="global_action_bug_report" msgid="7934010578922304799">"बग रीपोर्ट"</string>
+    <string name="global_action_logout" msgid="935179188218826050">"सेशन समाप्त करा"</string>
     <string name="bugreport_title" msgid="2667494803742548533">"बग रीपोर्ट घ्या"</string>
     <string name="bugreport_message" msgid="398447048750350456">"ई-मेल संदेश म्हणून पाठविण्यासाठी, हे तुमच्या सद्य डिव्हाइस स्थितीविषयी माहिती संकलित करेल. बग रीपोर्ट सुरू करण्यापासून तो पाठविण्यापर्यंत थोडा वेळ लागेल; कृपया धीर धरा."</string>
     <string name="bugreport_option_interactive_title" msgid="8635056131768862479">"परस्परसंवादी अहवाल"</string>
@@ -361,13 +362,13 @@
     <string name="permdesc_broadcastSticky" product="tv" msgid="6839285697565389467">"रोचक प्रसारणे पाठविण्यास अॅपला अनुमती देते, जे प्रसारण समाप्त झाल्यानंतर तसेच रहाते. अतिरिक्त वापर टीव्ही धीमा किंवा यासाठी बरीच मेमरी वापरली जात असल्यामुळे तो अस्थिर करू शकतो."</string>
     <string name="permdesc_broadcastSticky" product="default" msgid="2825803764232445091">"रोचक प्रसारणे पाठविण्यासाठी अॅप ला अनुमती देते, जे प्रसारण समाप्त झाल्यानंतर देखील तसेच राहते. अत्याधिक वापरामुळे बरीच मेमरी वापरली जाऊन तो फोनला धीमा किंवा अस्थिर करू शकतो."</string>
     <string name="permlab_readContacts" msgid="8348481131899886131">"आपले संपर्क वाचा"</string>
-    <string name="permdesc_readContacts" product="tablet" msgid="5294866856941149639">"आपण कॉल केलेल्या, ईमेल केलेल्या किंवा विशिष्ट लोकांशी अन्य मार्गांनी संप्रेषण केलेल्या लोकांच्या फ्रिक्वेन्सीसह, आपल्या टॅब्लेटवर संचयित केलेल्या आपल्या संपर्कांविषयीचा डेटा वाचण्यासाठी अॅप ला अनुमती देते. ही परवानगी आपला संपर्क डेटा जतन करण्याची अॅप्स ला अनुमती देते आणि दुर्भावनापूर्ण अॅप्स आपल्या माहितीशिवाय संपर्क डेटा सामायिक करू शकतात."</string>
+    <string name="permdesc_readContacts" product="tablet" msgid="5294866856941149639">"आपण कॉल केलेल्या, ईमेल केलेल्या किंवा विशिष्ट लोकांशी अन्य मार्गांनी संवाद प्रस्थापित केलेल्या लोकांच्या फ्रिक्वेन्सीसह, आपल्या टॅब्लेटवर संचयित केलेल्या आपल्या संपर्कांविषयीचा डेटा वाचण्यासाठी अॅप ला अनुमती देते. ही परवानगी आपला संपर्क डेटा जतन करण्याची अॅप्स ला अनुमती देते आणि दुर्भावनापूर्ण अॅप्स आपल्या माहितीशिवाय संपर्क डेटा सामायिक करू शकतात."</string>
     <string name="permdesc_readContacts" product="tv" msgid="1839238344654834087">"आपण विशिष्ट लोकांना इतर मार्गांनी कॉल केलेल्या, ईमेल केलेल्या किंवा संप्रेषित केलेल्या फ्रिक्वेन्सीसह, आपल्या टीव्हीवर संचयित केलेल्या आपल्या संपर्कांविषयीचा डेटा वाचण्यासाठी अॅप्सला अनुमती देतात. ही परवागनी अॅप्सला आपला संपर्क डेटा जतन करण्यासाठी अनुमती देते आणि दुर्भावनापूर्ण अॅप्स आपल्याला न कळविता संपर्क डेटा सामायिक करू शकतात."</string>
-    <string name="permdesc_readContacts" product="default" msgid="8440654152457300662">"आपण कॉल केलेल्या, ईमेल केलेल्या किंवा विशिष्ट लोकांशी अन्य मार्गांनी संप्रेषण केलेल्या लोकांच्या फ्रिक्वेन्सीसह, आपल्या फोनवर संचयित केलेल्या आपल्या संपर्कांविषयीचा डेटा वाचण्यासाठी अॅप ला अनुमती देते. ही परवानगी आपला संपर्क डेटा जतन करण्याची अॅप्स ला अनुमती देते आणि दुर्भावनापूर्ण अॅप्स आपल्या माहितीशिवाय संपर्क डेटा सामायिक करू शकतात."</string>
+    <string name="permdesc_readContacts" product="default" msgid="8440654152457300662">"आपण कॉल केलेल्या, ईमेल केलेल्या किंवा विशिष्ट लोकांशी अन्य मार्गांनी संवाद प्रस्थापित केलेल्या लोकांच्या फ्रिक्वेन्सीसह, आपल्या फोनवर संचयित केलेल्या आपल्या संपर्कांविषयीचा डेटा वाचण्यासाठी अॅप ला अनुमती देते. ही परवानगी आपला संपर्क डेटा जतन करण्याची अॅप्स ला अनुमती देते आणि दुर्भावनापूर्ण अॅप्स आपल्या माहितीशिवाय संपर्क डेटा सामायिक करू शकतात."</string>
     <string name="permlab_writeContacts" msgid="5107492086416793544">"आपले संपर्क सुधारित करा"</string>
-    <string name="permdesc_writeContacts" product="tablet" msgid="897243932521953602">"आपण विशिष्ट संपर्कांशी अन्य मार्गांनी कॉल केलेल्या, ईमेल केलेल्या किंवा संप्रेषण केलेल्या फ्रिक्वेन्सीसह, आपल्या टॅब्लेटवर संचयित केलेल्या आपल्या संपर्कांविषयीचा डेटा सुधारित करण्यासाठी अॅप ला अनुमती देते. ही परवानगी संपर्क डेटा हटविण्यासाठी अॅप ला अनुमती देते."</string>
-    <string name="permdesc_writeContacts" product="tv" msgid="5438230957000018959">"आपण विशिष्ट संपर्कांशी अन्य मार्गांनी कॉल केलेल्या, ईमेल केलेल्या किंवा संप्रेषण केलेल्या फ्रिक्वेन्सीसह, आपल्या टीव्हीवर संचयित केलेल्या आपल्या संपर्कांविषयीचा डेटा सुधारित करण्यासाठी अॅपला अनुमती देते. ही परवानगी संपर्क डेटा हटविण्यासाठी अॅपला अनुमती देते."</string>
-    <string name="permdesc_writeContacts" product="default" msgid="589869224625163558">"आपण विशिष्ट संपर्कांशी अन्य मार्गांनी कॉल केलेल्या, ईमेल केलेल्या किंवा संप्रेषण केलेल्या फ्रिक्वेन्सीसह, आपल्या फोनवर संचयित केलेल्या आपल्या संपर्कांविषयीचा डेटा सुधारित करण्यासाठी अॅप ला अनुमती देते. ही परवानगी संपर्क डेटा हटविण्यासाठी अॅप ला अनुमती देते."</string>
+    <string name="permdesc_writeContacts" product="tablet" msgid="897243932521953602">"आपण विशिष्ट संपर्कांशी अन्य मार्गांनी कॉल केलेल्या, ईमेल केलेल्या किंवा संवाद प्रस्थापित केलेल्या फ्रिक्वेन्सीसह, आपल्या टॅब्लेटवर संचयित केलेल्या आपल्या संपर्कांविषयीचा डेटा सुधारित करण्यासाठी अॅप ला अनुमती देते. ही परवानगी संपर्क डेटा हटविण्यासाठी अॅप ला अनुमती देते."</string>
+    <string name="permdesc_writeContacts" product="tv" msgid="5438230957000018959">"आपण विशिष्ट संपर्कांशी अन्य मार्गांनी कॉल केलेल्या, ईमेल केलेल्या किंवा संवाद प्रस्थापित केलेल्या फ्रिक्वेन्सीसह, आपल्या टीव्हीवर संचयित केलेल्या आपल्या संपर्कांविषयीचा डेटा सुधारित करण्यासाठी अॅपला अनुमती देते. ही परवानगी संपर्क डेटा हटविण्यासाठी अॅपला अनुमती देते."</string>
+    <string name="permdesc_writeContacts" product="default" msgid="589869224625163558">"आपण विशिष्ट संपर्कांशी अन्य मार्गांनी कॉल केलेल्या, ईमेल केलेल्या किंवा संवाद प्रस्थापित केलेल्या फ्रिक्वेन्सीसह, आपल्या फोनवर संचयित केलेल्या आपल्या संपर्कांविषयीचा डेटा सुधारित करण्यासाठी अॅप ला अनुमती देते. ही परवानगी संपर्क डेटा हटविण्यासाठी अॅप ला अनुमती देते."</string>
     <string name="permlab_readCallLog" msgid="3478133184624102739">"कॉल लॉग वाचा"</string>
     <string name="permdesc_readCallLog" msgid="3204122446463552146">"हा अॅप आपला कॉल इतिहास वाचू शकता."</string>
     <string name="permlab_writeCallLog" msgid="8552045664743499354">"कॉल लॉग लिहा"</string>
@@ -1051,8 +1052,7 @@
     <string name="screen_compat_mode_hint" msgid="1064524084543304459">"सिस्टम सेटिंग्ज &gt; Apps &gt; डाउनलोड केलेले मध्ये हे पुन्हा-सक्षम करा."</string>
     <string name="unsupported_display_size_message" msgid="6545327290756295232">"<xliff:g id="APP_NAME">%1$s</xliff:g> वर्तमान डिस्प्ले आकार सेटिंगला समर्थन देत नाही आणि अनपेक्षित वर्तन करू शकते."</string>
     <string name="unsupported_display_size_show" msgid="7969129195360353041">"नेहमी दर्शवा"</string>
-    <!-- no translation found for unsupported_compile_sdk_message (4253168368781441759) -->
-    <skip />
+    <string name="unsupported_compile_sdk_message" msgid="4253168368781441759">"<xliff:g id="APP_NAME">%1$s</xliff:g> हे Android OS च्या विसंगत आवृत्तीसाठी तयार केले होते आणि ते अनपेक्षित पद्धतीने काम करू शकते. अॅपची अपडेट केलेली आवृत्ती उपलब्ध असू शकते."</string>
     <string name="unsupported_compile_sdk_show" msgid="2681877855260970231">"नेहमी दर्शवा"</string>
     <string name="unsupported_compile_sdk_check_update" msgid="3312723623323216101">"अपडेट आहे का ते तपासा"</string>
     <string name="smv_application" msgid="3307209192155442829">"अॅप <xliff:g id="APPLICATION">%1$s</xliff:g> (प्रक्रिया <xliff:g id="PROCESS">%2$s</xliff:g>) ने तिच्या स्वयं-लागू केलेल्या StrictMode धोरणाचे उल्लंघन केले आहे."</string>
@@ -1500,6 +1500,8 @@
     <string name="accessibility_shortcut_toogle_warning" msgid="7256507885737444807">"शॉर्टकट चालू असताना, दोन्ही आवाज बटणे 3 सेकंद दाबल्याने प्रवेशयोग्यता वैशिष्ट्य सुरू होईल.\n\n वर्तमान प्रवेशयोग्यता वैशिष्ट्य:\n <xliff:g id="SERVICE_NAME">%1$s</xliff:g>\n\n आपण सेटिंग्ज &gt; प्रवेशयोग्यता मध्ये वैशिष्ट्य बदलू शकता."</string>
     <string name="disable_accessibility_shortcut" msgid="627625354248453445">"शॉर्टकट बंद करा"</string>
     <string name="leave_accessibility_shortcut_on" msgid="7653111894438512680">"शॉर्टकट वापरा"</string>
+    <string name="color_inversion_feature_name" msgid="4231186527799958644">"रंगांची उलटापालट"</string>
+    <string name="color_correction_feature_name" msgid="6779391426096954933">"रंग सुधारणा"</string>
     <string name="accessibility_shortcut_enabling_service" msgid="7771852911861522636">"प्रवेशयोग्यता शॉर्टकटने <xliff:g id="SERVICE_NAME">%1$s</xliff:g> चालू केली"</string>
     <string name="accessibility_shortcut_disabling_service" msgid="2747243438223109821">"प्रवेशयोग्यता शॉर्टकटने <xliff:g id="SERVICE_NAME">%1$s</xliff:g> बंद केली"</string>
     <string name="accessibility_button_prompt_text" msgid="4234556536456854251">"आपण प्रवेशयोग्यता बटण दाबल्यावर वापरण्यासाठी वैशिष्ट्य निवडा:"</string>
@@ -1639,8 +1641,7 @@
     <string name="package_installed_device_owner" msgid="6875717669960212648">"आपल्या प्रशासकाने इंस्टॉल केले"</string>
     <string name="package_updated_device_owner" msgid="1847154566357862089">"आपल्या प्रशासकाने अपडेट केले"</string>
     <string name="package_deleted_device_owner" msgid="2307122077550236438">"आपल्या प्रशासकाने हटवले"</string>
-    <!-- no translation found for battery_saver_description (5394663545060026162) -->
-    <skip />
+    <string name="battery_saver_description" msgid="5394663545060026162">"बॅटरी लाइफ सुधारण्‍यासाठी, बॅटरी सेव्हर तुमच्या डिव्हाइस ची कामगिरी कमी करतो आणि कंपन, स्थान सेवा आणि बराचसा पार्श्वभूमी डेटा मर्यादित करतो. सिंकवर अवलंबून असणारे ईमेल, मेसेजिंग आणि इतर अ‍ॅप्स तुम्ही उघडल्याशिवाय अपडेट होऊ शकत नाहीत.\n\nतुमचे डिव्हाइस चार्ज होत असते तेव्हा बॅटरी सेव्हर आपोआप बंद होतो."</string>
     <string name="data_saver_description" msgid="6015391409098303235">"डेटा वापर कमी करण्यात मदत करण्यासाठी, डेटा सर्व्हर काही अॅप्सना पार्श्वभूमीमध्ये डेटा पाठविण्यास किंवा प्राप्त करण्यास प्रतिबंधित करतो. आपण सध्या वापरत असलेला अॅप डेटामध्ये प्रवेश करू शकतो परंतु तसे तो खूप कमी वेळा करू शकतो. याचा अर्थ, उदाहरणार्थ, आपण इमेज टॅप करेपर्यंत त्या प्रदर्शित करणार नाहीत असा असू शकतो."</string>
     <string name="data_saver_enable_title" msgid="4674073932722787417">"डेटा बचतकर्ता चालू करायचा?"</string>
     <string name="data_saver_enable_button" msgid="7147735965247211818">"चालू करा"</string>
@@ -1687,13 +1688,16 @@
     <string name="zen_mode_default_weeknights_name" msgid="3081318299464998143">"आठवड्याची शेवटची रात्र"</string>
     <string name="zen_mode_default_weekends_name" msgid="2786495801019345244">"आठवड्याच्या शेवटी"</string>
     <string name="zen_mode_default_events_name" msgid="8158334939013085363">"इव्‍हेंट"</string>
+    <string name="zen_mode_default_every_night_name" msgid="3012363838882944175">"झोपलेले आहे"</string>
     <string name="muted_by" msgid="6147073845094180001">"<xliff:g id="THIRD_PARTY">%1$s</xliff:g> द्वारे नि:शब्द केले"</string>
     <string name="system_error_wipe_data" msgid="6608165524785354962">"आपल्‍या डिव्‍हाइसमध्‍ये अंतर्गत समस्‍या आहे आणि आपला फॅक्‍टरी डेटा रीसेट होईपर्यंत ती अस्‍थिर असू शकते."</string>
     <string name="system_error_manufacturer" msgid="8086872414744210668">"आपल्‍या डिव्‍हाइसमध्‍ये अंतर्गत समस्‍या आहे. तपशीलांसाठी आपल्‍या निर्मात्याशी संपर्क साधा."</string>
     <string name="stk_cc_ussd_to_dial" msgid="5202342984749947872">"USSD विनंती डायल विनंतीवर सुधारित केली आहे."</string>
     <string name="stk_cc_ussd_to_ss" msgid="2345360594181405482">"USSD विनंती SS विनंतीवर सुधारित केली आहे."</string>
     <string name="stk_cc_ussd_to_ussd" msgid="7466087659967191653">"USSD विनंती नवीन USSD विनंतीवर सुधारित केली आहे."</string>
+    <string name="stk_cc_ussd_to_dial_video" msgid="585340552561515305">"USSD विनंतीमध्ये बदल करून ती व्हिडिओ डायल विनंतीमध्ये बदलली आहे."</string>
     <string name="stk_cc_ss_to_dial" msgid="2151304435775557162">"SS विनंती डायल विनंतीवर सुधारित केली आहे."</string>
+    <string name="stk_cc_ss_to_dial_video" msgid="4306210904450719045">"SS विनंतीमध्ये बदल करून ती व्हिडिओ डायल विनंतीमध्ये बदलली आहे."</string>
     <string name="stk_cc_ss_to_ussd" msgid="3951862188105305589">"SS विनंती USSD विनंतीवर सुधारित केली आहे."</string>
     <string name="stk_cc_ss_to_ss" msgid="5470768854991452695">"SS विनंती नवीन SS विनंतीवर सुधारित केली आहे."</string>
     <string name="notification_work_profile_content_description" msgid="4600554564103770764">"कार्य प्रोफाईल"</string>
@@ -1749,7 +1753,7 @@
     <string name="app_category_audio" msgid="1659853108734301647">"संगीत आणि ऑडिओ"</string>
     <string name="app_category_video" msgid="2728726078629384196">"चित्रपट आणि व्हिडिओ"</string>
     <string name="app_category_image" msgid="4867854544519846048">"फोटो आणि इमेज"</string>
-    <string name="app_category_social" msgid="5842783057834965912">"सामाजिक आणि संप्रेषण"</string>
+    <string name="app_category_social" msgid="5842783057834965912">"सामाजिक आणि संवाद प्रस्थापित"</string>
     <string name="app_category_news" msgid="7496506240743986873">"बातम्‍या आणि मासिके"</string>
     <string name="app_category_maps" msgid="5878491404538024367">"नकाशे आणि नेव्हिगेशन"</string>
     <string name="app_category_productivity" msgid="3742083261781538852">"उत्पादनक्षमता"</string>
