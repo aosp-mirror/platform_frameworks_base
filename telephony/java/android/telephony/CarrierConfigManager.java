@@ -1829,6 +1829,33 @@ public class CarrierConfigManager {
     public static final String KEY_CARRIER_NETWORK_SERVICE_WWAN_PACKAGE_OVERRIDE_STRING
             = "carrier_network_service_wwan_package_override_string";
 
+    /**
+     * A list of 4 LTE RSCP thresholds above which a signal level is considered POOR,
+     * MODERATE, GOOD, or EXCELLENT, to be used in SignalStrength reporting.
+     *
+     * Note that the min and max thresholds are fixed at -120 and -24, as set in 3GPP TS 27.007
+     * section 8.69.
+     * <p>
+     * See SignalStrength#MAX_WCDMA_RSCP and SignalStrength#MIN_WDCMA_RSCP. Any signal level outside
+     * these boundaries is considered invalid.
+     * @hide
+     */
+    public static final String KEY_WCDMA_RSCP_THRESHOLDS_INT_ARRAY =
+            "wcdma_rscp_thresholds_int_array";
+
+    /**
+     * The default measurement to use for signal strength reporting. If this is not specified, the
+     * RSSI is used.
+     * <p>
+     * e.g.) To use RSCP by default, set the value to "rscp". The signal strength level will
+     * then be determined by #KEY_WCDMA_RSCP_THRESHOLDS_INT_ARRAY
+     * <p>
+     * Currently this only supports the value "rscp"
+     * @hide
+     */
+    public static final String KEY_WCDMA_DEFAULT_SIGNAL_STRENGTH_MEASUREMENT_STRING =
+            "wcdma_default_signal_strength_measurement_string";
+
     /** The default value for every variable. */
     private final static PersistableBundle sDefaults;
 
@@ -2130,6 +2157,14 @@ public class CarrierConfigManager {
                         -108, /* SIGNAL_STRENGTH_GOOD */
                         -98,  /* SIGNAL_STRENGTH_GREAT */
                 });
+        sDefaults.putIntArray(KEY_WCDMA_RSCP_THRESHOLDS_INT_ARRAY,
+                new int[] {
+                        -115,  /* SIGNAL_STRENGTH_POOR */
+                        -105, /* SIGNAL_STRENGTH_MODERATE */
+                        -95, /* SIGNAL_STRENGTH_GOOD */
+                        -85  /* SIGNAL_STRENGTH_GREAT */
+                });
+        sDefaults.putString(KEY_WCDMA_DEFAULT_SIGNAL_STRENGTH_MEASUREMENT_STRING, "");
     }
 
     /**

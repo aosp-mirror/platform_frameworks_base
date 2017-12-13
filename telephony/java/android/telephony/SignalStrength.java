@@ -25,6 +25,7 @@ import android.content.res.Resources;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Objects;
 
 /**
  * Contains phone signal strength related information.
@@ -61,6 +62,13 @@ public class SignalStrength implements Parcelable {
     private static final int MAX_LTE_RSRP = -44;
     private static final int MIN_LTE_RSRP = -140;
 
+    private static final int WCDMA_RSCP_THRESHOLDS_NUM = 4;
+    private static final int MAX_WCDMA_RSCP = -24;
+    private static final int MIN_WCDMA_RSCP = -120;
+
+    /* The type of signal measurement */
+    private static final String MEASUMENT_TYPE_RSCP = "rscp";
+
     /** Parameters reported by the Radio */
     private int mGsmSignalStrength; // Valid values are (0-31, 99) as defined in TS 27.007 8.5
     private int mGsmBitErrorRate;   // bit error rate (0-7, 99) as defined in TS 27.007 8.5
@@ -75,6 +83,9 @@ public class SignalStrength implements Parcelable {
     private int mLteRssnr;
     private int mLteCqi;
     private int mTdScdmaRscp;
+    private int mWcdmaSignalStrength;
+    private int mWcdmaRscpAsu;  // the WCDMA RSCP in ASU as reported from the HAL
+    private int mWcdmaRscp;     // the WCDMA RSCP in dBm
 
     /** Parameters from the framework */
     private int mLteRsrpBoost; // offset to be reduced from the rsrp threshold while calculating
@@ -86,6 +97,13 @@ public class SignalStrength implements Parcelable {
     // The threshold of LTE RSRP for determining the display level of LTE signal bar. Note that the
     // min and max are fixed at MIN_LTE_RSRP (-140) and MAX_LTE_RSRP (-44).
     private int mLteRsrpThresholds[] = new int[LTE_RSRP_THRESHOLDS_NUM];
+
+    // The type of default measurement for determining the display level of WCDMA signal bar.
+    private String mWcdmaDefaultSignalMeasurement;
+
+    // The threshold of WCDMA RSCP for determining the display level of WCDMA signal bar. Note that
+    // the min and max are fixed at MIN_WCDMA_RSCP (-120) and MAX_WCDMA_RSCP (-24).
+    private int mWcdmaRscpThresholds[] = new int[WCDMA_RSCP_THRESHOLDS_NUM];
 
     /**
      * Create a new SignalStrength from a intent notifier Bundle
@@ -136,10 +154,14 @@ public class SignalStrength implements Parcelable {
         mLteRssnr = INVALID;
         mLteCqi = INVALID;
         mTdScdmaRscp = INVALID;
+        mWcdmaSignalStrength = 99;
+        mWcdmaRscp = INVALID;
         mLteRsrpBoost = 0;
         mIsGsm = gsmFlag;
         mUseOnlyRsrpForLteLevel = false;
+        mWcdmaDefaultSignalMeasurement = "";
         setLteRsrpThresholds(getDefaultLteRsrpThresholds());
+        setWcdmaRscpThresholds(getDefaultWcdmaRscpThresholds());
     }
 
     /**
@@ -152,9 +174,10 @@ public class SignalStrength implements Parcelable {
             int cdmaDbm, int cdmaEcio,
             int evdoDbm, int evdoEcio, int evdoSnr,
             int lteSignalStrength, int lteRsrp, int lteRsrq, int lteRssnr, int lteCqi,
-            int tdScdmaRscp,
+            int tdScdmaRscp, int wcdmaSignalStrength, int wcdmaRscpAsu,
             // values Added by config
-            int lteRsrpBoost, boolean gsmFlag, boolean lteLevelBaseOnRsrp) {
+            int lteRsrpBoost, boolean gsmFlag, boolean lteLevelBaseOnRsrp,
+            String wcdmaDefaultMeasurement) {
         mGsmSignalStrength = gsmSignalStrength;
         mGsmBitErrorRate = gsmBitErrorRate;
         mCdmaDbm = cdmaDbm;
@@ -168,15 +191,20 @@ public class SignalStrength implements Parcelable {
         mLteRssnr = lteRssnr;
         mLteCqi = lteCqi;
         mTdScdmaRscp = INVALID;
+        mWcdmaSignalStrength = wcdmaSignalStrength;
+        mWcdmaRscpAsu = wcdmaRscpAsu;
+        mWcdmaRscp = wcdmaRscpAsu - 120;
         mLteRsrpBoost = lteRsrpBoost;
         mIsGsm = gsmFlag;
         mUseOnlyRsrpForLteLevel = lteLevelBaseOnRsrp;
+        mWcdmaDefaultSignalMeasurement = wcdmaDefaultMeasurement;
         setLteRsrpThresholds(getDefaultLteRsrpThresholds());
+        setWcdmaRscpThresholds(getDefaultWcdmaRscpThresholds());
         if (DBG) log("initialize: " + toString());
     }
 
     /**
-     * Constructor for only values provided by Radio HAL
+     * Constructor for only values provided by Radio HAL V1.0
      *
      * @hide
      */
@@ -187,7 +215,23 @@ public class SignalStrength implements Parcelable {
             int tdScdmaRscp) {
         this(gsmSignalStrength, gsmBitErrorRate, cdmaDbm, cdmaEcio,
                 evdoDbm, evdoEcio, evdoSnr, lteSignalStrength, lteRsrp,
-                lteRsrq, lteRssnr, lteCqi, tdScdmaRscp, 0, true, false);
+                lteRsrq, lteRssnr, lteCqi, tdScdmaRscp, 99, INVALID, 0, true, false, "");
+    }
+
+    /**
+     * Constructor for only values provided by Radio HAL V1.2
+     *
+     * @hide
+     */
+    public SignalStrength(int gsmSignalStrength, int gsmBitErrorRate,
+            int cdmaDbm, int cdmaEcio,
+            int evdoDbm, int evdoEcio, int evdoSnr,
+            int lteSignalStrength, int lteRsrp, int lteRsrq, int lteRssnr, int lteCqi,
+            int tdScdmaRscp, int wcdmaSignalStrength, int wcdmaRscp) {
+        this(gsmSignalStrength, gsmBitErrorRate, cdmaDbm, cdmaEcio,
+                evdoDbm, evdoEcio, evdoSnr, lteSignalStrength, lteRsrp,
+                lteRsrq, lteRssnr, lteCqi, tdScdmaRscp, wcdmaSignalStrength, wcdmaRscp, 0, true,
+                false, "");
     }
 
     /**
@@ -218,10 +262,15 @@ public class SignalStrength implements Parcelable {
         mLteRssnr = s.mLteRssnr;
         mLteCqi = s.mLteCqi;
         mTdScdmaRscp = s.mTdScdmaRscp;
+        mWcdmaSignalStrength = s.mWcdmaSignalStrength;
+        mWcdmaRscpAsu = s.mWcdmaRscpAsu;
+        mWcdmaRscp = s.mWcdmaRscp;
         mLteRsrpBoost = s.mLteRsrpBoost;
         mIsGsm = s.mIsGsm;
         mUseOnlyRsrpForLteLevel = s.mUseOnlyRsrpForLteLevel;
+        mWcdmaDefaultSignalMeasurement = s.mWcdmaDefaultSignalMeasurement;
         setLteRsrpThresholds(s.mLteRsrpThresholds);
+        setWcdmaRscpThresholds(s.mWcdmaRscpThresholds);
     }
 
     /**
@@ -245,10 +294,15 @@ public class SignalStrength implements Parcelable {
         mLteRssnr = in.readInt();
         mLteCqi = in.readInt();
         mTdScdmaRscp = in.readInt();
+        mWcdmaSignalStrength = in.readInt();
+        mWcdmaRscpAsu = in.readInt();
+        mWcdmaRscp = in.readInt();
         mLteRsrpBoost = in.readInt();
         mIsGsm = in.readBoolean();
         mUseOnlyRsrpForLteLevel = in.readBoolean();
+        mWcdmaDefaultSignalMeasurement = in.readString();
         in.readIntArray(mLteRsrpThresholds);
+        in.readIntArray(mWcdmaRscpThresholds);
     }
 
     /**
@@ -268,10 +322,15 @@ public class SignalStrength implements Parcelable {
         out.writeInt(mLteRssnr);
         out.writeInt(mLteCqi);
         out.writeInt(mTdScdmaRscp);
+        out.writeInt(mWcdmaSignalStrength);
+        out.writeInt(mWcdmaRscpAsu);
+        out.writeInt(mWcdmaRscp);
         out.writeInt(mLteRsrpBoost);
         out.writeBoolean(mIsGsm);
         out.writeBoolean(mUseOnlyRsrpForLteLevel);
+        out.writeString(mWcdmaDefaultSignalMeasurement);
         out.writeIntArray(mLteRsrpThresholds);
+        out.writeIntArray(mWcdmaRscpThresholds);
     }
 
     /**
@@ -311,7 +370,17 @@ public class SignalStrength implements Parcelable {
         if (DBG) log("Signal before validate=" + this);
         // TS 27.007 8.5
         mGsmSignalStrength = mGsmSignalStrength >= 0 ? mGsmSignalStrength : 99;
+        mWcdmaSignalStrength = (mWcdmaSignalStrength >= 0) ? mWcdmaSignalStrength : 99;
+        mLteSignalStrength = (mLteSignalStrength >= 0) ? mLteSignalStrength : 99;
         // BER no change;
+
+        // WCDMA RSCP valid values are -120 through -24 as defined in TS 27.007 8.69
+        // but are reported in ASU which is 0 through 96, so we do the conversion here
+        mWcdmaRscpAsu =
+                ((mWcdmaRscpAsu - 120 >= MIN_WCDMA_RSCP) && (mWcdmaRscpAsu - 120 <= MAX_WCDMA_RSCP))
+                ? mWcdmaRscpAsu : INVALID;
+        mWcdmaRscp = ((mWcdmaRscp >= MIN_WCDMA_RSCP) && (mWcdmaRscp <= MAX_WCDMA_RSCP))
+                ? mWcdmaRscp : INVALID;
 
         mCdmaDbm = mCdmaDbm > 0 ? -mCdmaDbm : -120;
         mCdmaEcio = (mCdmaEcio > 0) ? -mCdmaEcio : -160;
@@ -321,7 +390,6 @@ public class SignalStrength implements Parcelable {
         mEvdoSnr = ((mEvdoSnr > 0) && (mEvdoSnr <= 8)) ? mEvdoSnr : -1;
 
         // TS 36.214 Physical Layer Section 5.1.3, TS 36.331 RRC
-        mLteSignalStrength = (mLteSignalStrength >= 0) ? mLteSignalStrength : 99;
         mLteRsrp = ((-mLteRsrp >= MIN_LTE_RSRP) && (-mLteRsrp <= MAX_LTE_RSRP)) ? -mLteRsrp
                 : SignalStrength.INVALID;
         mLteRsrq = ((mLteRsrq >= 3) && (mLteRsrq <= 20)) ? -mLteRsrq : SignalStrength.INVALID;
@@ -367,6 +435,16 @@ public class SignalStrength implements Parcelable {
     }
 
     /**
+     * @param defaultMeasurement sets the type of WCDMA default signal measurement
+     *
+     * Used by phone to determine default measurement type for calculation WCDMA signal level.
+     * @hide
+     */
+    public void setWcdmaDefaultSignalMeasurement(String defaultMeasurement) {
+        mWcdmaDefaultSignalMeasurement = defaultMeasurement;
+    }
+
+    /**
      * @param lteRsrpBoost - signal strength offset
      *
      * Used by phone to set the lte signal strength offset which will be
@@ -407,6 +485,23 @@ public class SignalStrength implements Parcelable {
      */
     public int getGsmBitErrorRate() {
         return this.mGsmBitErrorRate;
+    }
+
+    /**
+     * Sets the threshold array for determining the display level of WCDMA signal bar.
+     *
+     * @param wcdmaRscpThresholds int array for determining the display level.
+     *
+     * @hide
+     */
+    public void setWcdmaRscpThresholds(int[] wcdmaRscpThresholds) {
+        if ((wcdmaRscpThresholds == null)
+                || (wcdmaRscpThresholds.length != WCDMA_RSCP_THRESHOLDS_NUM)) {
+            Log.wtf(LOG_TAG, "setWcdmaRscpThresholds - wcdmaRscpThresholds is invalid.");
+            return;
+        }
+        System.arraycopy(wcdmaRscpThresholds, 0, mWcdmaRscpThresholds, 0,
+                WCDMA_RSCP_THRESHOLDS_NUM);
     }
 
     /**
@@ -500,6 +595,8 @@ public class SignalStrength implements Parcelable {
                 asuLevel = getLteAsuLevel();
             } else if (mTdScdmaRscp != SignalStrength.INVALID) {
                 asuLevel = getTdScdmaAsuLevel();
+            } else if (mWcdmaRscp != SignalStrength.INVALID) {
+                asuLevel = getWcdmaAsuLevel();
             } else {
                 asuLevel = getGsmAsuLevel();
             }
@@ -533,7 +630,11 @@ public class SignalStrength implements Parcelable {
             dBm = getLteDbm();
             if (dBm == INVALID) {
                 if (getTdScdmaLevel() == SIGNAL_STRENGTH_NONE_OR_UNKNOWN) {
-                    dBm = getGsmDbm();
+                    if (getWcdmaDbm() == INVALID) {
+                        dBm = getGsmDbm();
+                    } else {
+                        dBm = getWcdmaDbm();
+                    }
                 } else {
                     dBm = getTdScdmaDbm();
                 }
@@ -805,17 +906,21 @@ public class SignalStrength implements Parcelable {
         if (rsrpIconLevel != -1) return rsrpIconLevel;
 
         /* Valid values are (0-63, 99) as defined in TS 36.331 */
+        // TODO the range here is probably supposed to be (0..31, 99). It's unclear if anyone relies
+        // on the current incorrect range check, so this will be fixed in a future release with more
+        // soak time
         if (mLteSignalStrength > 63) rssiIconLevel = SIGNAL_STRENGTH_NONE_OR_UNKNOWN;
         else if (mLteSignalStrength >= 12) rssiIconLevel = SIGNAL_STRENGTH_GREAT;
         else if (mLteSignalStrength >= 8) rssiIconLevel = SIGNAL_STRENGTH_GOOD;
         else if (mLteSignalStrength >= 5) rssiIconLevel = SIGNAL_STRENGTH_MODERATE;
         else if (mLteSignalStrength >= 0) rssiIconLevel = SIGNAL_STRENGTH_POOR;
 
-        if (DBG) log("getLTELevel - rssi:" + mLteSignalStrength + " rssiIconLevel:"
+        if (DBG) log("getLteLevel - rssi:" + mLteSignalStrength + " rssiIconLevel:"
                 + rssiIconLevel);
         return rssiIconLevel;
 
     }
+
     /**
      * Get the LTE signal level as an asu value between 0..97, 99 is unknown
      * Asu is calculated based on 3GPP RSRP. Refer to 3GPP 27.007 (Ver 10.3.0) Sec 8.69
@@ -908,6 +1013,105 @@ public class SignalStrength implements Parcelable {
         return tdScdmaAsuLevel;
     }
 
+    /**
+     * Gets WCDMA RSCP as a dbm value between -120 and -24, as defined in TS 27.007 8.69.
+     *
+     * @hide
+     */
+    public int getWcdmaRscp() {
+        return mWcdmaRscp;
+    }
+
+    /**
+     * Get the WCDMA signal level as an ASU value between 0-96, 255 is unknown
+     *
+     * @hide
+     */
+    public int getWcdmaAsuLevel() {
+        /*
+         * 3GPP 27.007 (Ver 10.3.0) Sec 8.69
+         * 0      -120 dBm or less
+         * 1      -119 dBm
+         * 2...95 -118... -25 dBm
+         * 96     -24 dBm or greater
+         * 255    not known or not detectable
+         */
+        final int wcdmaDbm = getWcdmaDbm();
+        int wcdmaAsuLevel = 255;
+        // validateInput will always give a valid range between -120 to -24 as per ril.h. so RSCP
+        // outside range is already set to INVALID
+        if (wcdmaDbm == SignalStrength.INVALID) wcdmaAsuLevel =  255;
+        else wcdmaAsuLevel = wcdmaDbm + 120;
+        if (DBG) log("Wcdma Asu level: " + wcdmaAsuLevel);
+        return wcdmaAsuLevel;
+    }
+
+    /**
+     * Gets WCDMA signal strength as a dbm value between -120 and -24, as defined in TS 27.007 8.69.
+     *
+     * @hide
+     */
+    public int getWcdmaDbm() {
+        return mWcdmaRscp;
+    }
+
+    /**
+     * Get WCDMA as level 0..4
+     *
+     * @hide
+     */
+    public int getWcdmaLevel() {
+        int level = SIGNAL_STRENGTH_NONE_OR_UNKNOWN;
+
+        if (mWcdmaDefaultSignalMeasurement == null) {
+            Log.wtf(LOG_TAG, "getWcdmaLevel - WCDMA default signal measurement is invalid.");
+            return level;
+        }
+
+        switch (mWcdmaDefaultSignalMeasurement) {
+            case MEASUMENT_TYPE_RSCP:
+                // RSCP valid values are (-120 through -24) as defined in TS 27.007 8.69
+                if (mWcdmaRscp < MIN_WCDMA_RSCP || mWcdmaRscp > MAX_WCDMA_RSCP) {
+                    if (mWcdmaRscp != INVALID) {
+                        Log.wtf(LOG_TAG, "getWcdmaLevel - invalid WCDMA RSCP: mWcdmaRscp="
+                                + mWcdmaRscp);
+                    }
+                } else if (mWcdmaRscp >= mWcdmaRscpThresholds[3]) {
+                    level = SIGNAL_STRENGTH_GREAT;
+                } else if (mWcdmaRscp >= mWcdmaRscpThresholds[2]) {
+                    level = SIGNAL_STRENGTH_GOOD;
+                } else if (mWcdmaRscp >= mWcdmaRscpThresholds[1]) {
+                    level = SIGNAL_STRENGTH_MODERATE;
+                } else if (mWcdmaRscp >= mWcdmaRscpThresholds[0]) {
+                    level = SIGNAL_STRENGTH_POOR;
+                }
+                if (DBG) log("getWcdmaLevel=" + level + " WcdmaRscp=" + mWcdmaRscp);
+                break;
+
+            default:
+                // RSSI valid values are (0..31) as defined in TS 27.007 8.5
+                if (mWcdmaSignalStrength < 0 || mWcdmaSignalStrength > 31) {
+                    if (mWcdmaSignalStrength != 99) {
+                        Log.wtf(LOG_TAG, "getWcdmaLevel - invalid WCDMA RSSI: mWcdmaSignalStrength="
+                                + mWcdmaSignalStrength);
+                    }
+                } else if (mWcdmaSignalStrength >= 18) {
+                    level = SIGNAL_STRENGTH_GREAT;
+                } else if (mWcdmaSignalStrength >= 13) {
+                    level = SIGNAL_STRENGTH_GOOD;
+                } else if (mWcdmaSignalStrength >= 8) {
+                    level = SIGNAL_STRENGTH_MODERATE;
+                } else if (mWcdmaSignalStrength >= 3) {
+                    level = SIGNAL_STRENGTH_POOR;
+                }
+                if (DBG) log("getWcdmaLevel=" + level + " WcdmaSignalStrength=" +
+                        mWcdmaSignalStrength);
+                break;
+
+        }
+        return level;
+    }
+
    /**
      * @return hash code
      */
@@ -920,8 +1124,11 @@ public class SignalStrength implements Parcelable {
                 + (mEvdoDbm * primeNum) + (mEvdoEcio * primeNum) + (mEvdoSnr * primeNum)
                 + (mLteSignalStrength * primeNum) + (mLteRsrp * primeNum)
                 + (mLteRsrq * primeNum) + (mLteRssnr * primeNum) + (mLteCqi * primeNum)
-                + (mLteRsrpBoost * primeNum) + (mTdScdmaRscp * primeNum) + (mIsGsm ? 1 : 0)
-                + (mUseOnlyRsrpForLteLevel ? 1 : 0) + (Arrays.hashCode(mLteRsrpThresholds)));
+                + (mLteRsrpBoost * primeNum) + (mTdScdmaRscp * primeNum)
+                + (mWcdmaSignalStrength * primeNum) + (mWcdmaRscpAsu * primeNum)
+                + (mWcdmaRscp * primeNum) + (mIsGsm ? 1 : 0) + (mUseOnlyRsrpForLteLevel ? 1 : 0)
+                + (Objects.hashCode(mWcdmaDefaultSignalMeasurement))
+                + (Arrays.hashCode(mLteRsrpThresholds)) + (Arrays.hashCode(mWcdmaRscpThresholds)));
     }
 
     /**
@@ -955,9 +1162,14 @@ public class SignalStrength implements Parcelable {
                 && mLteCqi == s.mLteCqi
                 && mLteRsrpBoost == s.mLteRsrpBoost
                 && mTdScdmaRscp == s.mTdScdmaRscp
+                && mWcdmaSignalStrength == s.mWcdmaSignalStrength
+                && mWcdmaRscpAsu == s.mWcdmaRscpAsu
+                && mWcdmaRscp == s.mWcdmaRscp
                 && mIsGsm == s.mIsGsm
                 && mUseOnlyRsrpForLteLevel == s.mUseOnlyRsrpForLteLevel
-                && Arrays.equals(mLteRsrpThresholds, s.mLteRsrpThresholds));
+                && Objects.equals(mWcdmaDefaultSignalMeasurement, s.mWcdmaDefaultSignalMeasurement)
+                && Arrays.equals(mLteRsrpThresholds, s.mLteRsrpThresholds)
+                && Arrays.equals(mWcdmaRscpThresholds, s.mWcdmaRscpThresholds));
     }
 
     /**
@@ -980,10 +1192,15 @@ public class SignalStrength implements Parcelable {
                 + " " + mLteCqi
                 + " " + mLteRsrpBoost
                 + " " + mTdScdmaRscp
+                + " " + mWcdmaSignalStrength
+                + " " + mWcdmaRscpAsu
+                + " " + mWcdmaRscp
                 + " " + (mIsGsm ? "gsm|lte" : "cdma")
                 + " " + (mUseOnlyRsrpForLteLevel ? "use_only_rsrp_for_lte_level" :
                          "use_rsrp_and_rssnr_for_lte_level")
-                + " " + (Arrays.toString(mLteRsrpThresholds)));
+                + " " + mWcdmaDefaultSignalMeasurement
+                + " " + (Arrays.toString(mLteRsrpThresholds))
+                + " " + (Arrays.toString(mWcdmaRscpThresholds)));
     }
 
     /** Returns the signal strength related to GSM. */
@@ -992,7 +1209,10 @@ public class SignalStrength implements Parcelable {
         if (level == SIGNAL_STRENGTH_NONE_OR_UNKNOWN) {
             level = getTdScdmaLevel();
             if (level == SIGNAL_STRENGTH_NONE_OR_UNKNOWN) {
-                level = getGsmLevel();
+                level = getWcdmaLevel();
+                if (level == SIGNAL_STRENGTH_NONE_OR_UNKNOWN) {
+                    level = getGsmLevel();
+                }
             }
         }
         return level;
@@ -1037,11 +1257,19 @@ public class SignalStrength implements Parcelable {
         mLteCqi = m.getInt("LteCqi");
         mLteRsrpBoost = m.getInt("LteRsrpBoost");
         mTdScdmaRscp = m.getInt("TdScdma");
+        mWcdmaSignalStrength = m.getInt("WcdmaSignalStrength");
+        mWcdmaRscpAsu = m.getInt("WcdmaRscpAsu");
+        mWcdmaRscp = m.getInt("WcdmaRscp");
         mIsGsm = m.getBoolean("IsGsm");
         mUseOnlyRsrpForLteLevel = m.getBoolean("UseOnlyRsrpForLteLevel");
+        mWcdmaDefaultSignalMeasurement = m.getString("WcdmaDefaultSignalMeasurement");
         ArrayList<Integer> lteRsrpThresholds = m.getIntegerArrayList("lteRsrpThresholds");
         for (int i = 0; i < lteRsrpThresholds.size(); i++) {
             mLteRsrpThresholds[i] = lteRsrpThresholds.get(i);
+        }
+        ArrayList<Integer> wcdmaRscpThresholds = m.getIntegerArrayList("wcdmaRscpThresholds");
+        for (int i = 0; i < wcdmaRscpThresholds.size(); i++) {
+            mWcdmaRscpThresholds[i] = wcdmaRscpThresholds.get(i);
         }
     }
 
@@ -1066,13 +1294,22 @@ public class SignalStrength implements Parcelable {
         m.putInt("LteCqi", mLteCqi);
         m.putInt("LteRsrpBoost", mLteRsrpBoost);
         m.putInt("TdScdma", mTdScdmaRscp);
+        m.putInt("WcdmaSignalStrength", mWcdmaSignalStrength);
+        m.putInt("WcdmaRscpAsu", mWcdmaRscpAsu);
+        m.putInt("WcdmaRscp", mWcdmaRscp);
         m.putBoolean("IsGsm", mIsGsm);
         m.putBoolean("UseOnlyRsrpForLteLevel", mUseOnlyRsrpForLteLevel);
+        m.putString("WcdmaDefaultSignalMeasurement", mWcdmaDefaultSignalMeasurement);
         ArrayList<Integer> lteRsrpThresholds = new ArrayList<Integer>();
         for (int value : mLteRsrpThresholds) {
             lteRsrpThresholds.add(value);
         }
         m.putIntegerArrayList("lteRsrpThresholds", lteRsrpThresholds);
+        ArrayList<Integer> wcdmaRscpThresholds = new ArrayList<Integer>();
+        for (int value : mWcdmaRscpThresholds) {
+            wcdmaRscpThresholds.add(value);
+        }
+        m.putIntegerArrayList("wcdmaRscpThresholds", wcdmaRscpThresholds);
     }
 
     /**
@@ -1083,6 +1320,16 @@ public class SignalStrength implements Parcelable {
     private int[] getDefaultLteRsrpThresholds() {
         return CarrierConfigManager.getDefaultConfig().getIntArray(
                 CarrierConfigManager.KEY_LTE_RSRP_THRESHOLDS_INT_ARRAY);
+    }
+
+    /**
+     * Gets the default threshold array for determining the display level of WCDMA signal bar.
+     *
+     * @return int array for determining the display level.
+     */
+    private int[] getDefaultWcdmaRscpThresholds() {
+        return CarrierConfigManager.getDefaultConfig().getIntArray(
+                CarrierConfigManager.KEY_WCDMA_RSCP_THRESHOLDS_INT_ARRAY);
     }
 
     /**
