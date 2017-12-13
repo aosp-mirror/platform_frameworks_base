@@ -16,42 +16,6 @@
 
 LOCAL_PATH:= $(call my-dir)
 
-# Build the android.test.runner library
-# =====================================
-include $(CLEAR_VARS)
-
-LOCAL_SRC_FILES := $(call all-java-files-under, src)
-
-LOCAL_JAVA_LIBRARIES := \
-    core-oj \
-    core-libart \
-    framework \
-    legacy-test \
-    android.test.mock \
-
-LOCAL_MODULE:= android.test.runner
-
-include $(BUILD_JAVA_LIBRARY)
-
-# Build the repackaged.android.test.runner library
-# ================================================
-include $(CLEAR_VARS)
-
-LOCAL_SRC_FILES := $(call all-java-files-under, src)
-
-LOCAL_JAVA_LIBRARIES := \
-    core-oj \
-    core-libart \
-    framework \
-    legacy-test \
-    android.test.mock \
-
-LOCAL_JARJAR_RULES := $(LOCAL_PATH)/../legacy-test/jarjar-rules.txt
-
-LOCAL_MODULE:= repackaged.android.test.runner
-
-include $(BUILD_STATIC_JAVA_LIBRARY)
-
 # Generate the stub source files for android.test.runner.stubs
 # ============================================================
 include $(CLEAR_VARS)
