@@ -26,6 +26,7 @@ import android.content.Context;
 import android.content.pm.PackageManager.NameNotFoundException;
 import android.content.res.Resources;
 import android.graphics.drawable.Drawable;
+import android.os.Build;
 import android.os.Environment;
 import android.os.Parcel;
 import android.os.Parcelable;
@@ -1580,6 +1581,11 @@ public class ApplicationInfo extends PackageItemInfo implements Parcelable {
     /** @hide */
     public boolean isVendor() {
         return (privateFlags & ApplicationInfo.PRIVATE_FLAG_VENDOR) != 0;
+    }
+
+    /** @hide */
+    public boolean isTargetingDeprecatedSdkVersion() {
+        return targetSdkVersion < Build.VERSION.MIN_SUPPORTED_TARGET_SDK_INT;
     }
 
     /**

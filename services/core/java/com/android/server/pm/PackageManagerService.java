@@ -47,6 +47,7 @@ import static android.content.pm.PackageManager.INSTALL_FAILED_INTERNAL_ERROR;
 import static android.content.pm.PackageManager.INSTALL_FAILED_INVALID_APK;
 import static android.content.pm.PackageManager.INSTALL_FAILED_INVALID_INSTALL_LOCATION;
 import static android.content.pm.PackageManager.INSTALL_FAILED_MISSING_SHARED_LIBRARY;
+import static android.content.pm.PackageManager.INSTALL_FAILED_NEWER_SDK;
 import static android.content.pm.PackageManager.INSTALL_FAILED_PACKAGE_CHANGED;
 import static android.content.pm.PackageManager.INSTALL_FAILED_REPLACE_COULDNT_DELETE;
 import static android.content.pm.PackageManager.INSTALL_FAILED_SANDBOX_VERSION_DOWNGRADE;
@@ -16281,6 +16282,16 @@ public class PackageManagerService extends IPackageManager.Stub
             return;
         } finally {
             Trace.traceEnd(TRACE_TAG_PACKAGE_MANAGER);
+        }
+
+        // App targetSdkVersion is below min supported version
+        if (!forceSdk && pkg.applicationInfo.isTargetingDeprecatedSdkVersion()) {
+            Slog.w(TAG, "App " + pkg.packageName + " targets deprecated sdk");
+
+            res.setError(INSTALL_FAILED_NEWER_SDK,
+                    "App is targeting deprecated sdk (targetSdkVersion should be at least "
+                    + Build.VERSION.MIN_SUPPORTED_TARGET_SDK_INT + ").");
+            return;
         }
 
         // Instant apps must have target SDK >= O and have targetSanboxVersion >= 2
