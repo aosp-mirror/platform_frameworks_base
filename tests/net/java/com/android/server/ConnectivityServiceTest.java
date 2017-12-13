@@ -3505,7 +3505,7 @@ public class ConnectivityServiceTest {
         mCellNetworkAgent = new MockNetworkAgent(TRANSPORT_CELLULAR);
         waitForIdle();
         verify(mNetworkManagementService, never()).setDnsConfigurationForNetwork(
-                anyInt(), any(), any());
+                anyInt(), any(), any(), any(), anyBoolean(), anyString());
 
         final LinkProperties cellLp = new LinkProperties();
         cellLp.setInterfaceName("test_rmnet_data0");
@@ -3513,7 +3513,7 @@ public class ConnectivityServiceTest {
         mCellNetworkAgent.connect(false);
         waitForIdle();
         verify(mNetworkManagementService, times(1)).setDnsConfigurationForNetwork(
-                anyInt(), mStringArrayCaptor.capture(), any());
+                anyInt(), mStringArrayCaptor.capture(), any(), any(), anyBoolean(), anyString());
         // CS tells netd about the empty DNS config for this network.
         assertEmpty(mStringArrayCaptor.getValue());
         reset(mNetworkManagementService);
@@ -3522,7 +3522,7 @@ public class ConnectivityServiceTest {
         mCellNetworkAgent.sendLinkProperties(cellLp);
         waitForIdle();
         verify(mNetworkManagementService, times(1)).setDnsConfigurationForNetwork(
-                anyInt(), mStringArrayCaptor.capture(), any());
+                anyInt(), mStringArrayCaptor.capture(), any(), any(), anyBoolean(), anyString());
         assertEquals(1, mStringArrayCaptor.getValue().length);
         assertTrue(ArrayUtils.contains(mStringArrayCaptor.getValue(), "2001:db8::1"));
         reset(mNetworkManagementService);
@@ -3531,7 +3531,7 @@ public class ConnectivityServiceTest {
         mCellNetworkAgent.sendLinkProperties(cellLp);
         waitForIdle();
         verify(mNetworkManagementService, times(1)).setDnsConfigurationForNetwork(
-                anyInt(), mStringArrayCaptor.capture(), any());
+                anyInt(), mStringArrayCaptor.capture(), any(), any(), anyBoolean(), anyString());
         assertEquals(2, mStringArrayCaptor.getValue().length);
         assertTrue(ArrayUtils.containsAll(mStringArrayCaptor.getValue(),
                 new String[]{"2001:db8::1", "192.0.2.1"}));
