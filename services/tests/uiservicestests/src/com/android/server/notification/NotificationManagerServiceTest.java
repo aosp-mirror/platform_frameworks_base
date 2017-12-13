@@ -92,7 +92,9 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.mockito.*;
+import org.mockito.ArgumentCaptor;
+import org.mockito.Mock;
+import org.mockito.MockitoAnnotations;
 import org.mockito.stubbing.Answer;
 
 import java.io.BufferedInputStream;
@@ -873,6 +875,77 @@ public class NotificationManagerServiceTest extends NotificationTestCase {
     }
 
     @Test
+    public void testCancelAllCancelNotificationsFromListener_ForegroundServiceFlag()
+            throws Exception {
+        final NotificationRecord parent = generateNotificationRecord(
+                mTestNotificationChannel, 1, "group", true);
+        final NotificationRecord child = generateNotificationRecord(
+                mTestNotificationChannel, 2, "group", false);
+        final NotificationRecord child2 = generateNotificationRecord(
+                mTestNotificationChannel, 3, "group", false);
+        child2.getNotification().flags |= Notification.FLAG_FOREGROUND_SERVICE;
+        final NotificationRecord newGroup = generateNotificationRecord(
+                mTestNotificationChannel, 4, "group2", false);
+        mService.addNotification(parent);
+        mService.addNotification(child);
+        mService.addNotification(child2);
+        mService.addNotification(newGroup);
+        mService.getBinderService().cancelNotificationsFromListener(null, null);
+        waitForIdle();
+        StatusBarNotification[] notifs =
+                mBinderService.getActiveNotifications(parent.sbn.getPackageName());
+        assertEquals(0, notifs.length);
+    }
+
+    @Test
+    public void testCancelAllCancelNotificationsFromListener_ForegroundServiceFlagWithParameter()
+            throws Exception {
+        final NotificationRecord parent = generateNotificationRecord(
+                mTestNotificationChannel, 1, "group", true);
+        final NotificationRecord child = generateNotificationRecord(
+                mTestNotificationChannel, 2, "group", false);
+        final NotificationRecord child2 = generateNotificationRecord(
+                mTestNotificationChannel, 3, "group", false);
+        child2.getNotification().flags |= Notification.FLAG_FOREGROUND_SERVICE;
+        final NotificationRecord newGroup = generateNotificationRecord(
+                mTestNotificationChannel, 4, "group2", false);
+        mService.addNotification(parent);
+        mService.addNotification(child);
+        mService.addNotification(child2);
+        mService.addNotification(newGroup);
+        String[] keys = {parent.sbn.getKey(), child.sbn.getKey(),
+                child2.sbn.getKey(), newGroup.sbn.getKey()};
+        mService.getBinderService().cancelNotificationsFromListener(null, keys);
+        waitForIdle();
+        StatusBarNotification[] notifs =
+                mBinderService.getActiveNotifications(parent.sbn.getPackageName());
+        assertEquals(1, notifs.length);
+    }
+
+    @Test
+    public void testUserInitiatedCancelAllWithGroup_ForegroundServiceFlag() throws Exception {
+        final NotificationRecord parent = generateNotificationRecord(
+                mTestNotificationChannel, 1, "group", true);
+        final NotificationRecord child = generateNotificationRecord(
+                mTestNotificationChannel, 2, "group", false);
+        final NotificationRecord child2 = generateNotificationRecord(
+                mTestNotificationChannel, 3, "group", false);
+        child2.getNotification().flags |= Notification.FLAG_FOREGROUND_SERVICE;
+        final NotificationRecord newGroup = generateNotificationRecord(
+                mTestNotificationChannel, 4, "group2", false);
+        mService.addNotification(parent);
+        mService.addNotification(child);
+        mService.addNotification(child2);
+        mService.addNotification(newGroup);
+        mService.mNotificationDelegate.onClearAll(mUid, Binder.getCallingPid(),
+                parent.getUserId());
+        waitForIdle();
+        StatusBarNotification[] notifs =
+                mBinderService.getActiveNotifications(parent.sbn.getPackageName());
+        assertEquals(0, notifs.length);
+    }
+
+    @Test
     public void testFindGroupNotificationsLocked() throws Exception {
         // make sure the same notification can be found in both lists and returned
         final NotificationRecord group1 = generateNotificationRecord(
@@ -909,6 +982,157 @@ public class NotificationManagerServiceTest extends NotificationTestCase {
             assertTrue(record.getGroupKey().equals(group1.getGroupKey()));
             assertTrue(record.sbn.getId() == 1 || record.sbn.getId() == 4);
         }
+    }
+
+    @Test
+    public void testCancelAllNotifications_CancelsNoClearFlagOnGoing() throws Exception {
+        final NotificationRecord notif = generateNotificationRecord(
+                mTestNotificationChannel, 1, "group", true);
+        notif.getNotification().flags |= Notification.FLAG_NO_CLEAR;
+        mService.addNotification(notif);
+        mService.cancelAllNotificationsInt(mUid, 0, PKG, null, 0,
+                Notification.FLAG_ONGOING_EVENT, true, notif.getUserId(), 0, null);
+        waitForIdle();
+        StatusBarNotification[] notifs =
+                mBinderService.getActiveNotifications(notif.sbn.getPackageName());
+        assertEquals(0, notifs.length);
+    }
+
+    @Test
+    public void testCancelAllCancelNotificationsFromListener_NoClearFlagWithParameter()
+            throws Exception {
+        final NotificationRecord parent = generateNotificationRecord(
+                mTestNotificationChannel, 1, "group", true);
+        final NotificationRecord child = generateNotificationRecord(
+                mTestNotificationChannel, 2, "group", false);
+        final NotificationRecord child2 = generateNotificationRecord(
+                mTestNotificationChannel, 3, "group", false);
+        child2.getNotification().flags |= Notification.FLAG_NO_CLEAR;
+        final NotificationRecord newGroup = generateNotificationRecord(
+                mTestNotificationChannel, 4, "group2", false);
+        mService.addNotification(parent);
+        mService.addNotification(child);
+        mService.addNotification(child2);
+        mService.addNotification(newGroup);
+        String[] keys = {parent.sbn.getKey(), child.sbn.getKey(),
+                child2.sbn.getKey(), newGroup.sbn.getKey()};
+        mService.getBinderService().cancelNotificationsFromListener(null, keys);
+        waitForIdle();
+        StatusBarNotification[] notifs =
+                mBinderService.getActiveNotifications(parent.sbn.getPackageName());
+        assertEquals(0, notifs.length);
+    }
+
+    @Test
+    public void testAppInitiatedCancelAllNotifications_CancelsOnGoingFlag() throws Exception {
+        final StatusBarNotification sbn = generateNotificationRecord(null).sbn;
+        sbn.getNotification().flags |= Notification.FLAG_ONGOING_EVENT;
+        mBinderService.enqueueNotificationWithTag(PKG, "opPkg", "tag",
+                sbn.getId(), sbn.getNotification(), sbn.getUserId());
+        mBinderService.cancelAllNotifications(PKG, sbn.getUserId());
+        waitForIdle();
+        StatusBarNotification[] notifs =
+                mBinderService.getActiveNotifications(sbn.getPackageName());
+        assertEquals(0, notifs.length);
+    }
+
+    @Test
+    public void testCancelAllNotifications_CancelsOnGoingFlag() throws Exception {
+        final NotificationRecord notif = generateNotificationRecord(
+                mTestNotificationChannel, 1, "group", true);
+        notif.getNotification().flags |= Notification.FLAG_ONGOING_EVENT;
+        mService.addNotification(notif);
+        mService.cancelAllNotificationsInt(mUid, 0, PKG, null, 0, 0, true,
+                notif.getUserId(), 0, null);
+        waitForIdle();
+        StatusBarNotification[] notifs =
+                mBinderService.getActiveNotifications(notif.sbn.getPackageName());
+        assertEquals(0, notifs.length);
+    }
+
+    @Test
+    public void testUserInitiatedCancelAllOnClearAll_OnGoingFlag() throws Exception {
+        final NotificationRecord notif = generateNotificationRecord(
+                mTestNotificationChannel, 1, "group", true);
+        notif.getNotification().flags |= Notification.FLAG_ONGOING_EVENT;
+        mService.addNotification(notif);
+
+        mService.mNotificationDelegate.onClearAll(mUid, Binder.getCallingPid(),
+                notif.getUserId());
+        waitForIdle();
+        StatusBarNotification[] notifs =
+                mBinderService.getActiveNotifications(notif.sbn.getPackageName());
+        assertEquals(1, notifs.length);
+    }
+
+    @Test
+    public void testCancelAllCancelNotificationsFromListener_OnGoingFlag() throws Exception {
+        final NotificationRecord parent = generateNotificationRecord(
+                mTestNotificationChannel, 1, "group", true);
+        final NotificationRecord child = generateNotificationRecord(
+                mTestNotificationChannel, 2, "group", false);
+        final NotificationRecord child2 = generateNotificationRecord(
+                mTestNotificationChannel, 3, "group", false);
+        child2.getNotification().flags |= Notification.FLAG_ONGOING_EVENT;
+        final NotificationRecord newGroup = generateNotificationRecord(
+                mTestNotificationChannel, 4, "group2", false);
+        mService.addNotification(parent);
+        mService.addNotification(child);
+        mService.addNotification(child2);
+        mService.addNotification(newGroup);
+        mService.getBinderService().cancelNotificationsFromListener(null, null);
+        waitForIdle();
+        StatusBarNotification[] notifs =
+                mBinderService.getActiveNotifications(parent.sbn.getPackageName());
+        assertEquals(1, notifs.length);
+    }
+
+    @Test
+    public void testCancelAllCancelNotificationsFromListener_OnGoingFlagWithParameter()
+            throws Exception {
+        final NotificationRecord parent = generateNotificationRecord(
+                mTestNotificationChannel, 1, "group", true);
+        final NotificationRecord child = generateNotificationRecord(
+                mTestNotificationChannel, 2, "group", false);
+        final NotificationRecord child2 = generateNotificationRecord(
+                mTestNotificationChannel, 3, "group", false);
+        child2.getNotification().flags |= Notification.FLAG_ONGOING_EVENT;
+        final NotificationRecord newGroup = generateNotificationRecord(
+                mTestNotificationChannel, 4, "group2", false);
+        mService.addNotification(parent);
+        mService.addNotification(child);
+        mService.addNotification(child2);
+        mService.addNotification(newGroup);
+        String[] keys = {parent.sbn.getKey(), child.sbn.getKey(),
+                child2.sbn.getKey(), newGroup.sbn.getKey()};
+        mService.getBinderService().cancelNotificationsFromListener(null, keys);
+        waitForIdle();
+        StatusBarNotification[] notifs =
+                mBinderService.getActiveNotifications(parent.sbn.getPackageName());
+        assertEquals(0, notifs.length);
+    }
+
+    @Test
+    public void testUserInitiatedCancelAllWithGroup_OnGoingFlag() throws Exception {
+        final NotificationRecord parent = generateNotificationRecord(
+                mTestNotificationChannel, 1, "group", true);
+        final NotificationRecord child = generateNotificationRecord(
+                mTestNotificationChannel, 2, "group", false);
+        final NotificationRecord child2 = generateNotificationRecord(
+                mTestNotificationChannel, 3, "group", false);
+        child2.getNotification().flags |= Notification.FLAG_ONGOING_EVENT;
+        final NotificationRecord newGroup = generateNotificationRecord(
+                mTestNotificationChannel, 4, "group2", false);
+        mService.addNotification(parent);
+        mService.addNotification(child);
+        mService.addNotification(child2);
+        mService.addNotification(newGroup);
+        mService.mNotificationDelegate.onClearAll(mUid, Binder.getCallingPid(),
+                parent.getUserId());
+        waitForIdle();
+        StatusBarNotification[] notifs =
+                mBinderService.getActiveNotifications(parent.sbn.getPackageName());
+        assertEquals(1, notifs.length);
     }
 
     @Test
