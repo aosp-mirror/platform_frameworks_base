@@ -16,6 +16,7 @@
 
 package com.android.systemui;
 
+import android.app.AlarmManager;
 import android.content.Context;
 import android.util.ArrayMap;
 import android.util.Log;
@@ -92,10 +93,10 @@ public class SystemUIFactory {
 
     public ScrimController createScrimController(LightBarController lightBarController,
             ScrimView scrimBehind, ScrimView scrimInFront, View headsUpScrim,
-            LockscreenWallpaper lockscreenWallpaper, Consumer<Boolean> scrimVisibleListener,
-            DozeParameters dozeParameters) {
+            LockscreenWallpaper lockscreenWallpaper, Consumer<Integer> scrimVisibleListener,
+            DozeParameters dozeParameters, AlarmManager alarmManager) {
         return new ScrimController(lightBarController, scrimBehind, scrimInFront, headsUpScrim,
-                scrimVisibleListener, dozeParameters);
+                scrimVisibleListener, dozeParameters, alarmManager);
     }
 
     public NotificationIconAreaController createNotificationIconAreaController(Context context,

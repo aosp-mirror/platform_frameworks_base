@@ -26,6 +26,7 @@ import android.util.SparseBooleanArray;
 
 import com.android.internal.hardware.AmbientDisplayConfiguration;
 import com.android.systemui.R;
+import com.android.systemui.doze.AlwaysOnDisplayPolicy;
 
 import java.io.PrintWriter;
 
@@ -37,10 +38,12 @@ public class DozeParameters {
     private final AmbientDisplayConfiguration mAmbientDisplayConfiguration;
 
     private static IntInOutMatcher sPickupSubtypePerformsProxMatcher;
+    private final AlwaysOnDisplayPolicy mAlwaysOnPolicy;
 
     public DozeParameters(Context context) {
         mContext = context;
         mAmbientDisplayConfiguration = new AmbientDisplayConfiguration(mContext);
+        mAlwaysOnPolicy = new AlwaysOnDisplayPolicy(context);
     }
 
     public void dump(PrintWriter pw) {
@@ -118,6 +121,22 @@ public class DozeParameters {
 
     public int getPickupVibrationThreshold() {
         return getInt("doze.pickup.vibration.threshold", R.integer.doze_pickup_vibration_threshold);
+    }
+
+    /**
+     * For how long a wallpaper can be visible in AoD before it fades aways.
+     * @return duration in millis.
+     */
+    public long getWallpaperAodDuration() {
+        return mAlwaysOnPolicy.wallpaperVisibilityDuration;
+    }
+
+    /**
+     * How long it takes for the wallpaper fade away (Animation duration.)
+     * @return duration in millis.
+     */
+    public long getWallpaperFadeOutDuration() {
+        return mAlwaysOnPolicy.wallpaperFadeOutDuration;
     }
 
     /**

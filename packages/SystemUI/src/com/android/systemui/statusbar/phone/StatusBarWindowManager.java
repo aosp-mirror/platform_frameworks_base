@@ -138,7 +138,8 @@ public class StatusBarWindowManager implements RemoteInputController.Callback, D
         }
 
         final boolean showWallpaperOnAod = mDozeParameters.getAlwaysOn() &&
-                state.wallpaperSupportsAmbientMode;
+                state.wallpaperSupportsAmbientMode &&
+                state.scrimsVisibility != ScrimController.VISIBILITY_FULLY_OPAQUE;
         if (state.keyguardShowing && !state.backdropShowing &&
                 (!state.dozing || showWallpaperOnAod)) {
             mLpChanged.flags |= WindowManager.LayoutParams.FLAG_SHOW_WALLPAPER;
@@ -192,7 +193,8 @@ public class StatusBarWindowManager implements RemoteInputController.Callback, D
     private boolean isExpanded(State state) {
         return !state.forceCollapsed && (state.isKeyguardShowingAndNotOccluded()
                 || state.panelVisible || state.keyguardFadingAway || state.bouncerShowing
-                || state.headsUpShowing || state.scrimsVisible);
+                || state.headsUpShowing
+                || state.scrimsVisibility != ScrimController.VISIBILITY_FULLY_TRANSPARENT);
     }
 
     private void applyFitsSystemWindows(State state) {
@@ -340,8 +342,8 @@ public class StatusBarWindowManager implements RemoteInputController.Callback, D
         apply(mCurrentState);
     }
 
-    public void setScrimsVisible(boolean scrimsVisible) {
-        mCurrentState.scrimsVisible = scrimsVisible;
+    public void setScrimsVisibility(int scrimsVisibility) {
+        mCurrentState.scrimsVisibility = scrimsVisibility;
         apply(mCurrentState);
     }
 
@@ -452,7 +454,7 @@ public class StatusBarWindowManager implements RemoteInputController.Callback, D
         boolean remoteInputActive;
         boolean forcePluginOpen;
         boolean dozing;
-        boolean scrimsVisible;
+        int scrimsVisibility;
 
         private boolean isKeyguardShowingAndNotOccluded() {
             return keyguardShowing && !keyguardOccluded;
