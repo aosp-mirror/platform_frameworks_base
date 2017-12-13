@@ -236,6 +236,7 @@ public abstract class FileSystemProvider extends DocumentsProvider {
         moveInMediaStore(visibleFileBefore, getFileForDocId(afterDocId, true));
 
         if (!TextUtils.equals(docId, afterDocId)) {
+            scanFile(after);
             return afterDocId;
         } else {
             return null;
