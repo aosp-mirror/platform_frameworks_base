@@ -24,6 +24,7 @@ import static android.app.usage.UsageStatsManager.REASON_USAGE;
 import static android.app.usage.UsageStatsManager.STANDBY_BUCKET_ACTIVE;
 import static android.app.usage.UsageStatsManager.STANDBY_BUCKET_EXEMPTED;
 import static android.app.usage.UsageStatsManager.STANDBY_BUCKET_FREQUENT;
+import static android.app.usage.UsageStatsManager.STANDBY_BUCKET_NEVER;
 import static android.app.usage.UsageStatsManager.STANDBY_BUCKET_RARE;
 import static android.app.usage.UsageStatsManager.STANDBY_BUCKET_WORKING_SET;
 
@@ -133,7 +134,7 @@ public class AppStandbyController {
     @GuardedBy("mAppIdleLock")
     private AppIdleHistory mAppIdleHistory;
 
-    @GuardedBy("mAppIdleLock")
+    @GuardedBy("mPackageAccessListeners")
     private ArrayList<AppIdleStateChangeListener>
             mPackageAccessListeners = new ArrayList<>();
 
@@ -592,7 +593,7 @@ public class AppStandbyController {
     }
 
     void addListener(AppIdleStateChangeListener listener) {
-        synchronized (mAppIdleLock) {
+        synchronized (mPackageAccessListeners) {
             if (!mPackageAccessListeners.contains(listener)) {
                 mPackageAccessListeners.add(listener);
             }
@@ -600,7 +601,7 @@ public class AppStandbyController {
     }
 
     void removeListener(AppIdleStateChangeListener listener) {
-        synchronized (mAppIdleLock) {
+        synchronized (mPackageAccessListeners) {
             mPackageAccessListeners.remove(listener);
         }
     }
@@ -789,6 +790,19 @@ public class AppStandbyController {
     void setAppStandbyBucket(String packageName, int userId, @StandbyBuckets int newBucket,
             String reason, long elapsedRealtime) {
         synchronized (mAppIdleLock) {
+            AppIdleHistory.AppUsageHistory app = mAppIdleHistory.getAppUsageHistory(packageName,
+                    userId, elapsedRealtime);
+            boolean predicted = reason != null && reason.startsWith(REASON_PREDICTED);
+            // Don't allow changing bucket if higher than ACTIVE
+            if (app.currentBucket < STANDBY_BUCKET_ACTIVE) return;
+            // Don't allow prediction to change from or to NEVER
+            if ((app.currentBucket == STANDBY_BUCKET_NEVER
+                    || newBucket == STANDBY_BUCKET_NEVER)
+                    && predicted) {
+                return;
+            }
+            // If the bucket was forced, don't allow prediction to override
+            if (app.bucketingReason.equals(REASON_FORCED) && predicted) return;
             mAppIdleHistory.setAppStandbyBucket(packageName, userId, elapsedRealtime, newBucket,
                     reason);
         }
@@ -852,15 +866,19 @@ public class AppStandbyController {
 
     void informListeners(String packageName, int userId, int bucket) {
         final boolean idle = bucket >= STANDBY_BUCKET_RARE;
-        for (AppIdleStateChangeListener listener : mPackageAccessListeners) {
-            listener.onAppIdleStateChanged(packageName, userId, idle, bucket);
+        synchronized (mPackageAccessListeners) {
+            for (AppIdleStateChangeListener listener : mPackageAccessListeners) {
+                listener.onAppIdleStateChanged(packageName, userId, idle, bucket);
+            }
         }
     }
 
     void informParoleStateChanged() {
         final boolean paroled = isParoledOrCharging();
-        for (AppIdleStateChangeListener listener : mPackageAccessListeners) {
-            listener.onParoleStateChanged(paroled);
+        synchronized (mPackageAccessListeners) {
+            for (AppIdleStateChangeListener listener : mPackageAccessListeners) {
+                listener.onParoleStateChanged(paroled);
+            }
         }
     }
 
