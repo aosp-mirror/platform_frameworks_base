@@ -568,6 +568,14 @@ class DragState {
         mToken = token;
     }
 
+    /**
+     * Returns true if it has sent DRAG_STARTED broadcast out but has not been sent DRAG_END
+     * broadcast.
+     */
+    boolean isInProgress() {
+        return mDragInProgress;
+    }
+
     private static DragEvent obtainDragEvent(WindowState win, int action,
             float x, float y, Object localState,
             ClipDescription description, ClipData data,

@@ -150,80 +150,84 @@ class DragDropController {
             Slog.d(TAG_WM, "perform drag: win=" + window + " data=" + data);
         }
 
-        if (!mCallback.get().prePerformDrag(window, dragToken, touchSource, touchX, touchY, thumbCenterX,
-                thumbCenterY, data)) {
-            return false;
-        }
+        final boolean callbackResult = mCallback.get().prePerformDrag(window, dragToken,
+                touchSource, touchX, touchY, thumbCenterX, thumbCenterY, data);
         try {
             synchronized (mService.mWindowMap) {
-                if (mDragState == null) {
-                    Slog.w(TAG_WM, "No drag prepared");
-                    throw new IllegalStateException("performDrag() without prepareDrag()");
-                }
-
-                if (dragToken != mDragState.mToken) {
-                    Slog.w(TAG_WM, "Performing mismatched drag");
-                    throw new IllegalStateException("performDrag() does not match prepareDrag()");
-                }
-
-                final WindowState callingWin = mService.windowForClientLocked(null, window, false);
-                if (callingWin == null) {
-                    Slog.w(TAG_WM, "Bad requesting window " + window);
-                    return false;  // !!! TODO: throw here?
-                }
-
-                // !!! TODO: if input is not still focused on the initiating window, fail
-                // the drag initiation (e.g. an alarm window popped up just as the application
-                // called performDrag()
-
                 mHandler.removeMessages(MSG_DRAG_START_TIMEOUT, window.asBinder());
-
-                // !!! TODO: extract the current touch (x, y) in screen coordinates.  That
-                // will let us eliminate the (touchX,touchY) parameters from the API.
-
-                // !!! FIXME: put all this heavy stuff onto the mHandler looper, as well as
-                // the actual drag event dispatch stuff in the dragstate
-
-                final DisplayContent displayContent = callingWin.getDisplayContent();
-                if (displayContent == null) {
-                    return false;
-                }
-                Display display = displayContent.getDisplay();
-                mDragState.register(display);
-                if (!mService.mInputManager.transferTouchFocus(callingWin.mInputChannel,
-                        mDragState.getInputChannel())) {
-                    Slog.e(TAG_WM, "Unable to transfer touch focus");
-                    mDragState.closeLocked();
-                    return false;
-                }
-
-                mDragState.mDisplayContent = displayContent;
-                mDragState.mData = data;
-                mDragState.broadcastDragStartedLocked(touchX, touchY);
-                mDragState.overridePointerIconLocked(touchSource);
-
-                // remember the thumb offsets for later
-                mDragState.mThumbOffsetX = thumbCenterX;
-                mDragState.mThumbOffsetY = thumbCenterY;
-
-                // Make the surface visible at the proper location
-                final SurfaceControl surfaceControl = mDragState.mSurfaceControl;
-                if (SHOW_LIGHT_TRANSACTIONS) Slog.i(TAG_WM, ">>> OPEN TRANSACTION performDrag");
-                mService.openSurfaceTransaction();
                 try {
-                    surfaceControl.setPosition(touchX - thumbCenterX,
-                            touchY - thumbCenterY);
-                    surfaceControl.setLayer(mDragState.getDragLayerLocked());
-                    surfaceControl.setLayerStack(display.getLayerStack());
-                    surfaceControl.show();
+                    if (!callbackResult) {
+                        return false;
+                    }
+
+                    Preconditions.checkState(
+                            mDragState != null, "performDrag() without prepareDrag()");
+                    Preconditions.checkState(
+                            mDragState.mToken == dragToken,
+                            "performDrag() does not match prepareDrag()");
+
+                    final WindowState callingWin = mService.windowForClientLocked(
+                            null, window, false);
+                    if (callingWin == null) {
+                        Slog.w(TAG_WM, "Bad requesting window " + window);
+                        return false;  // !!! TODO: throw here?
+                    }
+
+                    // !!! TODO: if input is not still focused on the initiating window, fail
+                    // the drag initiation (e.g. an alarm window popped up just as the application
+                    // called performDrag()
+
+                    // !!! TODO: extract the current touch (x, y) in screen coordinates.  That
+                    // will let us eliminate the (touchX,touchY) parameters from the API.
+
+                    // !!! FIXME: put all this heavy stuff onto the mHandler looper, as well as
+                    // the actual drag event dispatch stuff in the dragstate
+
+                    final DisplayContent displayContent = callingWin.getDisplayContent();
+                    if (displayContent == null) {
+                        Slog.w(TAG_WM, "display content is null");
+                        return false;
+                    }
+
+                    final Display display = displayContent.getDisplay();
+                    mDragState.register(display);
+                    if (!mService.mInputManager.transferTouchFocus(callingWin.mInputChannel,
+                            mDragState.getInputChannel())) {
+                        Slog.e(TAG_WM, "Unable to transfer touch focus");
+                        return false;
+                    }
+
+                    mDragState.mDisplayContent = displayContent;
+                    mDragState.mData = data;
+                    mDragState.broadcastDragStartedLocked(touchX, touchY);
+                    mDragState.overridePointerIconLocked(touchSource);
+                    // remember the thumb offsets for later
+                    mDragState.mThumbOffsetX = thumbCenterX;
+                    mDragState.mThumbOffsetY = thumbCenterY;
+
+                    // Make the surface visible at the proper location
+                    final SurfaceControl surfaceControl = mDragState.mSurfaceControl;
+                    if (SHOW_LIGHT_TRANSACTIONS) Slog.i(TAG_WM, ">>> OPEN TRANSACTION performDrag");
+                    mService.openSurfaceTransaction();
+                    try {
+                        surfaceControl.setPosition(touchX - thumbCenterX,
+                                touchY - thumbCenterY);
+                        surfaceControl.setLayer(mDragState.getDragLayerLocked());
+                        surfaceControl.setLayerStack(display.getLayerStack());
+                        surfaceControl.show();
+                    } finally {
+                        mService.closeSurfaceTransaction("performDrag");
+                        if (SHOW_LIGHT_TRANSACTIONS) {
+                            Slog.i(TAG_WM, "<<< CLOSE TRANSACTION performDrag");
+                        }
+                    }
+
+                    mDragState.notifyLocationLocked(touchX, touchY);
                 } finally {
-                    mService.closeSurfaceTransaction("performDrag");
-                    if (SHOW_LIGHT_TRANSACTIONS) {
-                        Slog.i(TAG_WM, "<<< CLOSE TRANSACTION performDrag");
+                    if (mDragState != null && !mDragState.isInProgress()) {
+                        mDragState.closeLocked();
                     }
                 }
-
-                mDragState.notifyLocationLocked(touchX, touchY);
             }
             return true;    // success!
         } finally {
