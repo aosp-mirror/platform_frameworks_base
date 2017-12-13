@@ -29,7 +29,8 @@ import static android.view.SurfaceControl.Transaction;
 
 import android.annotation.CallSuper;
 import android.content.res.Configuration;
-import android.graphics.PixelFormat.Opacity;
+import android.graphics.Point;
+import android.graphics.Rect;
 import android.util.Slog;
 import android.view.MagnificationSpec;
 import android.view.SurfaceControl;
@@ -93,6 +94,8 @@ class WindowContainer<E extends WindowContainer> extends ConfigurationContainer<
     protected final SurfaceAnimator mSurfaceAnimator;
     protected final WindowManagerService mService;
 
+    private final Point mTmpPos = new Point();
+
     WindowContainer(WindowManagerService service) {
         mService = service;
         mPendingTransaction = service.mTransactionFactory.make();
@@ -112,6 +115,13 @@ class WindowContainer<E extends WindowContainer> extends ConfigurationContainer<
     @Override
     protected E getChildAt(int index) {
         return mChildren.get(index);
+    }
+
+    @Override
+    public void onConfigurationChanged(Configuration newParentConfig) {
+        super.onConfigurationChanged(newParentConfig);
+        updateSurfacePosition(getPendingTransaction());
+        scheduleAnimation();
     }
 
     final protected void setParent(WindowContainer<WindowContainer> parent) {
@@ -1074,6 +1084,29 @@ class WindowContainer<E extends WindowContainer> extends ConfigurationContainer<
         if (mSurfaceAnimator.isAnimating()) {
             pw.print(prefix); pw.println("ContainerAnimator:");
             mSurfaceAnimator.dump(pw, prefix + "  ");
+        }
+    }
+
+    void updateSurfacePosition(SurfaceControl.Transaction transaction) {
+        if (mSurfaceControl == null) {
+            return;
+        }
+
+        getRelativePosition(mTmpPos);
+        transaction.setPosition(mSurfaceControl, mTmpPos.x, mTmpPos.y);
+
+        for (int i = mChildren.size() - 1; i >= 0; i--) {
+            mChildren.get(i).updateSurfacePosition(transaction);
+        }
+    }
+
+    void getRelativePosition(Point outPos) {
+        final Rect bounds = getBounds();
+        outPos.set(bounds.left, bounds.top);
+        final WindowContainer parent = getParent();
+        if (parent != null) {
+            final Rect parentBounds = parent.getBounds();
+            outPos.offset(-parentBounds.left, -parentBounds.top);
         }
     }
 }

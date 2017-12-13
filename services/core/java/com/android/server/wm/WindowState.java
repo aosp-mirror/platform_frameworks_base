@@ -4425,6 +4425,7 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
         updateSurfacePosition(t);
     }
 
+    @Override
     void updateSurfacePosition(Transaction t) {
         if (mSurfaceControl == null) {
             return;
@@ -4438,11 +4439,15 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
 
     private void transformFrameToSurfacePosition(int left, int top, Point outPoint) {
         outPoint.set(left, top);
+        final WindowContainer parentWindowContainer = getParent();
         if (isChildWindow()) {
             // TODO: This probably falls apart at some point and we should
             // actually compute relative coordinates.
             final WindowState parent = getParentWindow();
             outPoint.offset(-parent.mFrame.left, -parent.mFrame.top);
+        } else if (parentWindowContainer != null) {
+            final Rect parentBounds = parentWindowContainer.getBounds();
+            outPoint.offset(-parentBounds.left, -parentBounds.top);
         }
 
         // Expand for surface insets. See WindowState.expandForSurfaceInsets.

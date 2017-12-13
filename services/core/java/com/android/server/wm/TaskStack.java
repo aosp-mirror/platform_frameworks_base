@@ -31,9 +31,8 @@ import static android.view.WindowManager.DOCKED_INVALID;
 import static android.view.WindowManager.DOCKED_LEFT;
 import static android.view.WindowManager.DOCKED_RIGHT;
 import static android.view.WindowManager.DOCKED_TOP;
-import static com.android.server.policy.WindowManagerPolicy.FINISH_LAYOUT_REDO_WALLPAPER;
+
 import static com.android.server.wm.DragResizeMode.DRAG_RESIZE_MODE_DOCKED_DIVIDER;
-import static com.android.server.wm.WindowManagerDebugConfig.DEBUG_ANIM;
 import static com.android.server.wm.WindowManagerDebugConfig.DEBUG_TASK_MOVEMENT;
 import static com.android.server.wm.WindowManagerDebugConfig.TAG_WM;
 import static com.android.server.wm.proto.StackProto.ANIMATION_BACKGROUND_SURFACE_IS_DIMMING;
@@ -220,6 +219,8 @@ public class TaskStack extends WindowContainer<Task> implements
         }
         alignTasksToAdjustedBounds(adjusted ? mAdjustedBounds : getRawBounds(), insetBounds);
         mDisplayContent.setLayoutNeeded();
+
+        updateSurfaceBounds();
     }
 
     private void alignTasksToAdjustedBounds(Rect adjustedBounds, Rect tempInsetBounds) {
@@ -241,10 +242,11 @@ public class TaskStack extends WindowContainer<Task> implements
             return;
         }
         getRawBounds(mTmpRect);
-        // TODO: Should be in relative coordinates.
-        getPendingTransaction().setSize(mAnimationBackgroundSurface, mTmpRect.width(),
-                mTmpRect.height()).setPosition(mAnimationBackgroundSurface, mTmpRect.left,
-                mTmpRect.top);
+        final Rect stackBounds = getBounds();
+        getPendingTransaction()
+                .setSize(mAnimationBackgroundSurface, mTmpRect.width(), mTmpRect.height())
+                .setPosition(mAnimationBackgroundSurface, mTmpRect.left - stackBounds.left,
+                        mTmpRect.top - stackBounds.top);
         scheduleAnimation();
     }
 
@@ -297,6 +299,7 @@ public class TaskStack extends WindowContainer<Task> implements
 
         updateAdjustedBounds();
 
+        updateSurfaceBounds();
         return result;
     }
 
@@ -711,13 +714,36 @@ public class TaskStack extends WindowContainer<Task> implements
     @Override
     public void onConfigurationChanged(Configuration newParentConfig) {
         final int prevWindowingMode = getWindowingMode();
+        // Only need to update surface size here since the super method will handle updating
+        // surface position.
+        updateSurfaceSize(getPendingTransaction());
         super.onConfigurationChanged(newParentConfig);
         final int windowingMode = getWindowingMode();
+
         if (mDisplayContent == null || prevWindowingMode == windowingMode) {
             return;
         }
         mDisplayContent.onStackWindowingModeChanged(this);
         updateBoundsForWindowModeChange();
+    }
+
+    private void updateSurfaceBounds() {
+        updateSurfaceBounds(getPendingTransaction());
+        scheduleAnimation();
+    }
+
+    void updateSurfaceBounds(SurfaceControl.Transaction transaction) {
+        updateSurfaceSize(transaction);
+        updateSurfacePosition(transaction);
+    }
+
+    private void updateSurfaceSize(SurfaceControl.Transaction transaction) {
+        if (mSurfaceControl == null) {
+            return;
+        }
+
+        final Rect stackBounds = getBounds();
+        transaction.setSize(mSurfaceControl, stackBounds.width(), stackBounds.height());
     }
 
     @Override
@@ -1677,6 +1703,9 @@ public class TaskStack extends WindowContainer<Task> implements
         mDimmer.resetDimStates();
         super.prepareSurfaces();
         getDimBounds(mTmpDimBoundsRect);
+
+        // Bounds need to be relative, as the dim layer is a child.
+        mTmpDimBoundsRect.offsetTo(0, 0);
         if (mDimmer.updateDims(getPendingTransaction(), mTmpDimBoundsRect)) {
             scheduleAnimation();
         }

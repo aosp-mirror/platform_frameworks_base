@@ -649,6 +649,9 @@ class Task extends WindowContainer<AppWindowToken> {
         mDimmer.resetDimStates();
         super.prepareSurfaces();
         getDimBounds(mTmpDimBoundsRect);
+
+        // Bounds need to be relative, as the dim layer is a child.
+        mTmpDimBoundsRect.offsetTo(0, 0);
         if (mDimmer.updateDims(getPendingTransaction(), mTmpDimBoundsRect)) {
             scheduleAnimation();
         }

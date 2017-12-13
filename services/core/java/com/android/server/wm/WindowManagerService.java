@@ -5477,7 +5477,9 @@ public class WindowManagerService extends IWindowManager.Stub
 
     /** Note that Locked in this case is on mLayoutToAnim */
     void scheduleAnimationLocked() {
-        mAnimator.scheduleAnimation();
+        if (mAnimator != null) {
+            mAnimator.scheduleAnimation();
+        }
     }
 
     // TODO: Move to DisplayContent
