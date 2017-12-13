@@ -120,6 +120,7 @@ public class SyncJobService extends JobService {
         synchronized (jobParamsMap) {
             JobParameters params = jobParamsMap.get(jobId);
             mLogger.log("callJobFinished()",
+                    " jobid=", jobId,
                     " needsReschedule=", needsReschedule,
                     " ", mLogger.jobParametersToString(params),
                     " why=", why);
