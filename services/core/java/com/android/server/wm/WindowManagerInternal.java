@@ -151,23 +151,38 @@ public abstract class WindowManagerInternal {
      */
     public interface IDragDropCallback {
         /**
-         * Called when drag operation is started.
+         * Called when drag operation is starting.
          */
-        default boolean performDrag(IWindow window, IBinder dragToken,
+        default boolean prePerformDrag(IWindow window, IBinder dragToken,
                 int touchSource, float touchX, float touchY, float thumbCenterX, float thumbCenterY,
                 ClipData data) {
             return true;
         }
 
         /**
-         * Called when drop result is reported.
+         * Called when drag operation is started.
          */
-        default void reportDropResult(IWindow window, boolean consumed) {}
+        default void postPerformDrag() {}
 
         /**
-         * Called when drag operation is cancelled.
+         * Called when drop result is being reported.
          */
-        default void cancelDragAndDrop(IBinder dragToken) {}
+        default void preReportDropResult(IWindow window, boolean consumed) {}
+
+        /**
+         * Called when drop result was reported.
+         */
+        default void postReportDropResult() {}
+
+        /**
+         * Called when drag operation is being cancelled.
+         */
+        default void preCancelDragAndDrop(IBinder dragToken) {}
+
+        /**
+         * Called when drag operation was cancelled.
+         */
+        default void postCancelDragAndDrop() {}
     }
 
     /**
