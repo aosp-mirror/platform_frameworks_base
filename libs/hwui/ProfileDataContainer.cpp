@@ -19,6 +19,7 @@
 #include <log/log.h>
 #include <cutils/ashmem.h>
 
+#include <errno.h>
 #include <sys/mman.h>
 
 namespace android {
