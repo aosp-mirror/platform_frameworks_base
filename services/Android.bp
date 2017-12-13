@@ -14,7 +14,7 @@ java_library {
 
     // The convention is to name each service module 'services.$(module_name)'
     static_libs: [
-        "services.core.priorityboosted",
+        "services.core",
         "services.accessibility",
         "services.appwidget",
         "services.autofill",
