@@ -376,4 +376,6 @@ interface IDevicePolicyManager {
 
     void setLogoutEnabled(in ComponentName admin, boolean enabled);
     boolean isLogoutEnabled();
+
+    List<String> getDisallowedSystemApps(in ComponentName admin, int userId, String provisioningAction);
 }
