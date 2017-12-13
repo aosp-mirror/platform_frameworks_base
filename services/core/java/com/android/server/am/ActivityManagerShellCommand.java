@@ -69,7 +69,9 @@ import java.net.URISyntaxException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import static android.app.ActivityManager.RESIZE_MODE_SYSTEM;
 import static android.app.ActivityManager.RESIZE_MODE_USER;
@@ -1867,10 +1869,24 @@ final class ActivityManagerShellCommand extends ShellCommand {
         String value = getNextArgRequired();
         int bucket = bucketNameToBucketValue(value);
         if (bucket < 0) return -1;
+        boolean multiple = peekNextArg() != null;
+
 
         IUsageStatsManager usm = IUsageStatsManager.Stub.asInterface(ServiceManager.getService(
                 Context.USAGE_STATS_SERVICE));
-        usm.setAppStandbyBucket(packageName, bucketNameToBucketValue(value), userId);
+        if (!multiple) {
+            usm.setAppStandbyBucket(packageName, bucketNameToBucketValue(value), userId);
+        } else {
+            HashMap<String, Integer> buckets = new HashMap<>();
+            buckets.put(packageName, bucket);
+            while ((packageName = getNextArg()) != null) {
+                value = getNextArgRequired();
+                bucket = bucketNameToBucketValue(value);
+                if (bucket < 0) continue;
+                buckets.put(packageName, bucket);
+            }
+            usm.setAppStandbyBuckets(buckets, userId);
+        }
         return 0;
     }
 
@@ -1886,12 +1902,21 @@ final class ActivityManagerShellCommand extends ShellCommand {
                 return -1;
             }
         }
-        String packageName = getNextArgRequired();
+        String packageName = getNextArg();
 
         IUsageStatsManager usm = IUsageStatsManager.Stub.asInterface(ServiceManager.getService(
                 Context.USAGE_STATS_SERVICE));
-        int bucket = usm.getAppStandbyBucket(packageName, null, userId);
-        pw.println(bucket);
+        if (packageName != null) {
+            int bucket = usm.getAppStandbyBucket(packageName, null, userId);
+            pw.println(bucket);
+        } else {
+            Map<String, Integer> buckets = (Map<String, Integer>) usm.getAppStandbyBuckets(
+                    SHELL_PACKAGE_NAME, userId);
+            for (Map.Entry<String, Integer> entry: buckets.entrySet()) {
+                pw.print(entry.getKey()); pw.print(": ");
+                pw.println(entry.getValue());
+            }
+        }
         return 0;
     }
 
