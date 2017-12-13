@@ -21,10 +21,7 @@
     android:layout_height="wrap_content"
     android:tag="messaging"
     >
-    <include layout="@layout/notification_template_header"
-             android:layout_width="wrap_content"
-             android:layout_height="@dimen/notification_header_height"
-             android:layout_marginEnd="56dp"/>
+    <include layout="@layout/notification_template_header"/>
     <LinearLayout
             android:id="@+id/notification_action_list_margin_target"
             android:layout_width="match_parent"
@@ -39,28 +36,19 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_gravity="top"
-            android:paddingStart="@dimen/notification_content_margin_start"
-            android:paddingEnd="@dimen/notification_content_margin_end"
+            android:layout_marginStart="@dimen/notification_content_margin_start"
+            android:layout_marginEnd="@dimen/notification_content_margin_end"
             android:minHeight="@dimen/notification_min_content_height"
             android:layout_marginBottom="@dimen/notification_content_margin_bottom"
             android:orientation="vertical"
             >
-            <include layout="@layout/notification_template_part_line1"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content" />
-
             <com.android.internal.widget.MessagingLinearLayout
                 android:id="@+id/notification_messaging"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="8dp"
                 android:spacing="@dimen/notification_messaging_spacing" />
         </LinearLayout>
     </LinearLayout>
     <include layout="@layout/notification_material_action_list" />
-    <include layout="@layout/notification_template_right_icon"
-             android:layout_width="wrap_content"
-             android:layout_height="wrap_content"
-             android:layout_marginTop="18dp"
-             android:layout_gravity="top|end"/>
+    <include layout="@layout/notification_template_right_icon"/>
 </com.android.internal.widget.MessagingLayout>

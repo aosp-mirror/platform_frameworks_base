@@ -41,6 +41,24 @@
         android:singleLine="true"
         />
     <TextView
+        android:id="@+id/header_text_secondary_divider"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:textAppearance="?attr/notificationHeaderTextAppearance"
+        android:layout_marginStart="@dimen/notification_header_separating_margin"
+        android:layout_marginEnd="@dimen/notification_header_separating_margin"
+        android:text="@string/notification_header_divider_symbol"
+        android:visibility="gone"/>
+    <TextView
+        android:id="@+id/header_text_secondary"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:textAppearance="?attr/notificationHeaderTextAppearance"
+        android:layout_marginStart="@dimen/notification_header_separating_margin"
+        android:layout_marginEnd="@dimen/notification_header_separating_margin"
+        android:visibility="gone"
+        android:singleLine="true"/>
+    <TextView
         android:id="@+id/header_text_divider"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"

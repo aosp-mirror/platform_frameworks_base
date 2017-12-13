@@ -69,7 +69,6 @@ public class MessagingLayout extends FrameLayout {
     private List<MessagingMessage> mMessages = new ArrayList<>();
     private List<MessagingMessage> mHistoricMessages = new ArrayList<>();
     private MessagingLinearLayout mMessagingLinearLayout;
-    private View mContractedMessage;
     private boolean mShowHistoricMessages;
     private ArrayList<MessagingGroup> mGroups = new ArrayList<>();
     private TextView mTitleView;
@@ -81,6 +80,7 @@ public class MessagingLayout extends FrameLayout {
     private Icon mLargeIcon;
     private boolean mIsOneToOne;
     private ArrayList<MessagingGroup> mAddedGroups = new ArrayList<>();
+    private Notification.Person mUser;
 
     public MessagingLayout(@NonNull Context context) {
         super(context);
@@ -129,6 +129,7 @@ public class MessagingLayout extends FrameLayout {
         Parcelable[] histMessages = extras.getParcelableArray(Notification.EXTRA_HISTORIC_MESSAGES);
         List<Notification.MessagingStyle.Message> newHistoricMessages
                 = Notification.MessagingStyle.Message.getMessagesFromBundleArray(histMessages);
+        setUser(extras.getParcelable(Notification.EXTRA_MESSAGING_PERSON));
         mConversationTitle = null;
         TextView headerText = findViewById(R.id.header_text);
         if (headerText != null) {
@@ -152,7 +153,6 @@ public class MessagingLayout extends FrameLayout {
         mMessages = messages;
         mHistoricMessages = historicMessages;
 
-        updateContractedMessage();
         updateHistoricMessageVisibility();
         updateTitleAndNamesDisplay();
     }
@@ -163,12 +163,10 @@ public class MessagingLayout extends FrameLayout {
         for (int i = 0; i < mGroups.size(); i++) {
             MessagingGroup group = mGroups.get(i);
             CharSequence senderName = group.getSenderName();
-            if (TextUtils.isEmpty(senderName)) {
+            if (!group.needsGeneratedAvatar() || TextUtils.isEmpty(senderName)) {
                 continue;
             }
-            boolean visible = !mIsOneToOne;
-            group.setSenderVisible(visible);
-            if ((visible || mLargeIcon == null) && !uniqueNames.containsKey(senderName)) {
+            if (!uniqueNames.containsKey(senderName)) {
                 char c = senderName.charAt(0);
                 if (uniqueCharacters.containsKey(c)) {
                     // this character was already used, lets make it more unique. We first need to
@@ -192,7 +190,8 @@ public class MessagingLayout extends FrameLayout {
             // Let's now set the avatars
             MessagingGroup group = mGroups.get(i);
             CharSequence senderName = group.getSenderName();
-            if (TextUtils.isEmpty(senderName) || (mIsOneToOne && mLargeIcon != null)) {
+            if (!group.needsGeneratedAvatar() || TextUtils.isEmpty(senderName)
+                    || (mIsOneToOne && mLargeIcon != null)) {
                 continue;
             }
             String symbol = uniqueNames.get(senderName);
@@ -207,7 +206,7 @@ public class MessagingLayout extends FrameLayout {
             // Let's now set the avatars
             MessagingGroup group = mGroups.get(i);
             CharSequence senderName = group.getSenderName();
-            if (TextUtils.isEmpty(senderName)) {
+            if (!group.needsGeneratedAvatar() || TextUtils.isEmpty(senderName)) {
                 continue;
             }
             if (mIsOneToOne && mLargeIcon != null) {
@@ -234,7 +233,7 @@ public class MessagingLayout extends FrameLayout {
         canvas.drawCircle(radius, radius, radius, mPaint);
         boolean needDarkText  = ColorUtils.calculateLuminance(color) > 0.5f;
         mTextPaint.setColor(needDarkText ? Color.BLACK : Color.WHITE);
-        mTextPaint.setTextSize(symbol.length() == 1 ? mAvatarSize * 0.75f : mAvatarSize * 0.4f);
+        mTextPaint.setTextSize(symbol.length() == 1 ? mAvatarSize * 0.5f : mAvatarSize * 0.3f);
         int yPos = (int) (radius - ((mTextPaint.descent() + mTextPaint.ascent()) / 2)) ;
         canvas.drawText(symbol, radius, yPos, mTextPaint);
         return Icon.createWithBitmap(bitmap);
@@ -270,11 +269,15 @@ public class MessagingLayout extends FrameLayout {
         mIsOneToOne = oneToOne;
     }
 
+    public void setUser(Notification.Person user) {
+        mUser = user;
+    }
+
     private void addMessagesToGroups(List<MessagingMessage> historicMessages,
             List<MessagingMessage> messages) {
         // Let's first find our groups!
         List<List<MessagingMessage>> groups = new ArrayList<>();
-        List<CharSequence> senders = new ArrayList<>();
+        List<Notification.Person> senders = new ArrayList<>();
 
         // Lets first find the groups
         findGroups(historicMessages, messages, groups, senders);
@@ -283,7 +286,8 @@ public class MessagingLayout extends FrameLayout {
         createGroupViews(groups, senders);
     }
 
-    private void createGroupViews(List<List<MessagingMessage>> groups, List<CharSequence> senders) {
+    private void createGroupViews(List<List<MessagingMessage>> groups,
+            List<Notification.Person> senders) {
         mGroups.clear();
         for (int groupIndex = 0; groupIndex < groups.size(); groupIndex++) {
             List<MessagingMessage> group = groups.get(groupIndex);
@@ -314,7 +318,7 @@ public class MessagingLayout extends FrameLayout {
 
     private void findGroups(List<MessagingMessage> historicMessages,
             List<MessagingMessage> messages, List<List<MessagingMessage>> groups,
-            List<CharSequence> senders) {
+            List<Notification.Person> senders) {
         CharSequence currentSenderKey = null;
         List<MessagingMessage> currentGroup = null;
         int histSize = historicMessages.size();
@@ -327,33 +331,20 @@ public class MessagingLayout extends FrameLayout {
             }
             boolean isNewGroup = currentGroup == null;
             Notification.Person sender = message.getMessage().getSenderPerson();
-            CharSequence key = sender.getKey() == null ? sender.getName() : sender.getKey();
+            CharSequence key = sender == null ? null
+                    : sender.getKey() == null ? sender.getName() : sender.getKey();
             isNewGroup |= !TextUtils.equals(key, currentSenderKey);
             if (isNewGroup) {
                 currentGroup = new ArrayList<>();
                 groups.add(currentGroup);
-                senders.add(sender.getName());
+                if (sender == null) {
+                    sender = mUser;
+                }
+                senders.add(sender);
                 currentSenderKey = key;
             }
             currentGroup.add(message);
         }
-    }
-
-    private void updateContractedMessage() {
-        for (int i = mMessages.size() - 1; i >= 0; i--) {
-            MessagingMessage m = mMessages.get(i);
-            // Incoming messages have a non-empty sender.
-            if (!TextUtils.isEmpty(m.getMessage().getSender())) {
-                mContractedMessage = m;
-                return;
-            }
-        }
-        if (!mMessages.isEmpty()) {
-            // No incoming messages, fall back to outgoing message
-            mContractedMessage = mMessages.get(mMessages.size() - 1);
-            return;
-        }
-        mContractedMessage = null;
     }
 
     /**
@@ -429,10 +420,6 @@ public class MessagingLayout extends FrameLayout {
                 }
             });
         }
-    }
-
-    public View getContractedMessage() {
-        return mContractedMessage;
     }
 
     public MessagingLinearLayout getMessagingLinearLayout() {

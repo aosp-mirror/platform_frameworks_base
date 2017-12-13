@@ -24,7 +24,7 @@
         android:id="@+id/message_icon"
         android:layout_width="@dimen/messaging_avatar_size"
         android:layout_height="@dimen/messaging_avatar_size"
-        android:layout_marginEnd="8dp"
+        android:layout_marginEnd="12dp"
         android:scaleType="centerCrop"
         android:importantForAccessibility="no" />
     <com.android.internal.widget.RemeasuringLinearLayout
@@ -32,19 +32,16 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:orientation="vertical">
+        <com.android.internal.widget.ImageFloatingTextView
+            android:id="@+id/message_name"
+            style="@style/Widget.Material.Notification.MessagingName"
+            android:layout_width="wrap_content"
+        />
         <com.android.internal.widget.MessagingLinearLayout
             android:id="@+id/group_message_container"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:spacing="2dp"
             android:layout_weight="1"/>
-        <com.android.internal.widget.ImageFloatingTextView
-            android:id="@+id/message_name"
-            style="@style/Widget.Material.Notification.MessagingName"
-            android:layout_width="wrap_content"
-            android:paddingStart="8dp"
-            android:paddingEnd="8dp"
-            android:paddingTop="2dp"
-        />
     </com.android.internal.widget.RemeasuringLinearLayout>
 </com.android.internal.widget.MessagingGroup>

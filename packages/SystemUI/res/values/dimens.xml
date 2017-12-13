@@ -72,10 +72,10 @@
     <dimen name="status_bar_connected_device_bt_indicator_size">17dp</dimen>
 
     <!-- Height of a small notification in the status bar-->
-    <dimen name="notification_min_height">100dp</dimen>
+    <dimen name="notification_min_height">106dp</dimen>
 
     <!-- Increased height of a small notification in the status bar -->
-    <dimen name="notification_min_height_increased">140dp</dimen>
+    <dimen name="notification_min_height_increased">146dp</dimen>
 
     <!-- Height of a small notification in the status bar which was used before android N -->
     <dimen name="notification_min_height_legacy">64dp</dimen>
@@ -84,7 +84,7 @@
     <dimen name="notification_min_height_before_p">92dp</dimen>
 
     <!-- Height of a large notification in the status bar -->
-    <dimen name="notification_max_height">292dp</dimen>
+    <dimen name="notification_max_height">294dp</dimen>
 
     <!-- Height of an ambient notification on ambient display -->
     <dimen name="notification_ambient_height">400dp</dimen>
@@ -96,7 +96,7 @@
     <dimen name="notification_max_heads_up_height_before_p">148dp</dimen>
 
     <!-- Height of a heads up notification in the status bar -->
-    <dimen name="notification_max_heads_up_height">156dp</dimen>
+    <dimen name="notification_max_heads_up_height">162dp</dimen>
 
     <!-- Height of a heads up notification in the status bar -->
     <dimen name="notification_max_heads_up_height_increased">188dp</dimen>
@@ -378,9 +378,6 @@
     <!-- The height of the divider between the individual notifications in a notification
          group. -->
     <dimen name="notification_children_container_divider_height">@dimen/notification_divider_height</dimen>
-
-    <!-- The height of the header for a container containing child notifications. -->
-    <dimen name="notification_children_container_header_height">53dp</dimen>
 
     <!-- The top margin for the notification children container in its non-expanded form. -->
     <dimen name="notification_children_container_margin_top">@*android:dimen/notification_content_margin_top</dimen>
