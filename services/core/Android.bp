@@ -1,0 +1,50 @@
+java_library_static {
+    name: "services.core",
+
+    aidl: {
+        include_dirs: [
+            "frameworks/native/aidl/binder",
+            "system/netd/server/binder",
+        ],
+    },
+    srcs: [
+        "java/**/*.java",
+        ":netd_aidl",
+        ":netd_metrics_aidl",
+        ":installd_aidl",
+        "java/com/android/server/EventLogTags.logtags",
+        "java/com/android/server/am/EventLogTags.logtags",
+    ],
+
+    libs: [
+        "services.net",
+        "android.hardware.light-V2.0-java",
+        "android.hardware.power-V1.0-java",
+        "android.hardware.tv.cec-V1.0-java",
+        "android.hidl.manager-V1.0-java",
+    ],
+
+    static_libs: [
+        "time_zone_distro",
+        "time_zone_distro_installer",
+        "android.hardware.weaver-V1.0-java",
+        "android.hardware.biometrics.fingerprint-V2.1-java",
+        "android.hardware.oemlock-V1.0-java",
+        "android.hardware.tetheroffload.control-V1.0-java",
+        "android.hardware.vibrator-V1.0-java",
+        "android.hardware.configstore-V1.0-java",
+    ],
+}
+
+java_genrule {
+    name: "services.core.priorityboosted",
+    srcs: [":services.core"],
+    tools: ["lockedregioncodeinjection"],
+    cmd: "$(location lockedregioncodeinjection) " +
+        "  --targets \"Lcom/android/server/am/ActivityManagerService;,Lcom/android/server/wm/WindowHashMap;\" " +
+        "  --pre \"com/android/server/am/ActivityManagerService.boostPriorityForLockedSection,com/android/server/wm/WindowManagerService.boostPriorityForLockedSection\" " +
+        "  --post \"com/android/server/am/ActivityManagerService.resetPriorityAfterLockedSection,com/android/server/wm/WindowManagerService.resetPriorityAfterLockedSection\" " +
+        "  -o $(out) " +
+        "  -i $(in)",
+    out: ["services.core.priorityboosted.jar"],
+}
