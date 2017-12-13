@@ -363,8 +363,8 @@ bool ReferenceLinker::Consume(IAaptContext* context, ResourceTable* table) {
         NameMangler::Unmangle(&name.entry, &name.package);
 
         // Symbol state information may be lost if there is no value for the resource.
-        if (entry->symbol_status.state != SymbolState::kUndefined && entry->values.empty()) {
-          context->GetDiagnostics()->Error(DiagMessage(entry->symbol_status.source)
+        if (entry->visibility.level != Visibility::Level::kUndefined && entry->values.empty()) {
+          context->GetDiagnostics()->Error(DiagMessage(entry->visibility.source)
                                            << "no definition for declared symbol '" << name << "'");
           error = true;
         }

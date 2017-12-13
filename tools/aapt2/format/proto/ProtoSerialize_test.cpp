@@ -44,14 +44,15 @@ TEST(ProtoSerializeTest, SerializeSinglePackage) {
           .AddReference("com.app.a:layout/other", ResourceId(0x7f020001), "com.app.a:layout/main")
           .AddString("com.app.a:string/text", {}, "hi")
           .AddValue("com.app.a:id/foo", {}, util::make_unique<Id>())
-          .SetSymbolState("com.app.a:bool/foo", {}, SymbolState::kUndefined, true /*allow_new*/)
+          .SetSymbolState("com.app.a:bool/foo", {}, Visibility::Level::kUndefined,
+                          true /*allow_new*/)
           .Build();
 
-  Symbol public_symbol;
-  public_symbol.state = SymbolState::kPublic;
-  ASSERT_TRUE(table->SetSymbolState(test::ParseNameOrDie("com.app.a:layout/main"),
-                                    ResourceId(0x7f020000), public_symbol,
-                                    context->GetDiagnostics()));
+  Visibility public_symbol;
+  public_symbol.level = Visibility::Level::kPublic;
+  ASSERT_TRUE(table->SetVisibilityWithId(test::ParseNameOrDie("com.app.a:layout/main"),
+                                         public_symbol, ResourceId(0x7f020000),
+                                         context->GetDiagnostics()));
 
   Id* id = test::GetValue<Id>(table.get(), "com.app.a:id/foo");
   ASSERT_THAT(id, NotNull());
@@ -89,6 +90,10 @@ TEST(ProtoSerializeTest, SerializeSinglePackage) {
       test::ParseNameOrDie("com.app.a:layout/abc"), ConfigDescription::DefaultConfig(), {},
       util::make_unique<Reference>(expected_ref), context->GetDiagnostics()));
 
+  // Make an overlayable resource.
+  ASSERT_TRUE(table->SetOverlayable(test::ParseNameOrDie("com.app.a:integer/overlayable"),
+                                    Overlayable{}, test::GetDiagnostics()));
+
   pb::ResourceTable pb_table;
   SerializeTableToPb(*table, &pb_table);
 
@@ -110,13 +115,13 @@ TEST(ProtoSerializeTest, SerializeSinglePackage) {
       new_table.FindResource(test::ParseNameOrDie("com.app.a:layout/main"));
   ASSERT_TRUE(result);
 
-  EXPECT_THAT(result.value().type->symbol_status.state, Eq(SymbolState::kPublic));
-  EXPECT_THAT(result.value().entry->symbol_status.state, Eq(SymbolState::kPublic));
+  EXPECT_THAT(result.value().type->visibility_level, Eq(Visibility::Level::kPublic));
+  EXPECT_THAT(result.value().entry->visibility.level, Eq(Visibility::Level::kPublic));
 
   result = new_table.FindResource(test::ParseNameOrDie("com.app.a:bool/foo"));
   ASSERT_TRUE(result);
-  EXPECT_THAT(result.value().entry->symbol_status.state, Eq(SymbolState::kUndefined));
-  EXPECT_TRUE(result.value().entry->symbol_status.allow_new);
+  EXPECT_THAT(result.value().entry->visibility.level, Eq(Visibility::Level::kUndefined));
+  EXPECT_TRUE(result.value().entry->allow_new);
 
   // Find the product-dependent values
   BinaryPrimitive* prim = test::GetValueForConfigAndProduct<BinaryPrimitive>(
@@ -148,6 +153,12 @@ TEST(ProtoSerializeTest, SerializeSinglePackage) {
   EXPECT_THAT(*actual_styled_str->value->spans[0].name, Eq("b"));
   EXPECT_THAT(actual_styled_str->value->spans[0].first_char, Eq(0u));
   EXPECT_THAT(actual_styled_str->value->spans[0].last_char, Eq(4u));
+
+  Maybe<ResourceTable::SearchResult> search_result =
+      new_table.FindResource(test::ParseNameOrDie("com.app.a:integer/overlayable"));
+  ASSERT_TRUE(search_result);
+  ASSERT_THAT(search_result.value().entry, NotNull());
+  EXPECT_TRUE(search_result.value().entry->overlayable);
 }
 
 TEST(ProtoSerializeTest, SerializeAndDeserializeXml) {

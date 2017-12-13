@@ -190,7 +190,7 @@ std::unique_ptr<SymbolTable::Symbol> ResourceTableSymbolSource::FindByName(
   ResourceTable::SearchResult sr = result.value();
 
   std::unique_ptr<SymbolTable::Symbol> symbol = util::make_unique<SymbolTable::Symbol>();
-  symbol->is_public = (sr.entry->symbol_status.state == SymbolState::kPublic);
+  symbol->is_public = (sr.entry->visibility.level == Visibility::Level::kPublic);
 
   if (sr.package->id && sr.type->id && sr.entry->id) {
     symbol->id = ResourceId(sr.package->id.value(), sr.type->id.value(), sr.entry->id.value());

@@ -294,36 +294,42 @@ void Debug::PrintTable(const ResourceTable& table, const DebugPrintTableOptions&
         printer->Print("/");
         printer->Print(entry->name);
 
-        switch (entry->symbol_status.state) {
-          case SymbolState::kPublic:
+        switch (entry->visibility.level) {
+          case Visibility::Level::kPublic:
             printer->Print(" PUBLIC");
             break;
-          case SymbolState::kPrivate:
+          case Visibility::Level::kPrivate:
             printer->Print(" _PRIVATE_");
             break;
-          case SymbolState::kUndefined:
+          case Visibility::Level::kUndefined:
             // Print nothing.
             break;
         }
 
+        if (entry->overlayable) {
+          printer->Print(" OVERLAYABLE");
+        }
+
         printer->Println();
 
-        printer->Indent();
-        for (const auto& value : entry->values) {
-          printer->Print("(");
-          printer->Print(value->config.to_string());
-          printer->Print(") ");
-          value->value->Accept(&headline_printer);
-          if (options.show_sources && !value->value->GetSource().path.empty()) {
-            printer->Print(" src=");
-            printer->Print(value->value->GetSource().to_string());
-          }
-          printer->Println();
+        if (options.show_values) {
           printer->Indent();
-          value->value->Accept(&body_printer);
+          for (const auto& value : entry->values) {
+            printer->Print("(");
+            printer->Print(value->config.to_string());
+            printer->Print(") ");
+            value->value->Accept(&headline_printer);
+            if (options.show_sources && !value->value->GetSource().path.empty()) {
+              printer->Print(" src=");
+              printer->Print(value->value->GetSource().to_string());
+            }
+            printer->Println();
+            printer->Indent();
+            value->value->Accept(&body_printer);
+            printer->Undent();
+          }
           printer->Undent();
         }
-        printer->Undent();
       }
       printer->Undent();
     }

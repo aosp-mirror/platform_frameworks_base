@@ -30,7 +30,7 @@
 #include "util/Util.h"
 #include "xml/XmlPullParser.h"
 
-using android::StringPiece;
+using ::android::StringPiece;
 
 namespace aapt {
 
@@ -90,9 +90,12 @@ struct ParsedResource {
   ConfigDescription config;
   std::string product;
   Source source;
+
   ResourceId id;
-  Maybe<SymbolState> symbol_state;
+  Visibility::Level visibility_level = Visibility::Level::kUndefined;
   bool allow_new = false;
+  bool overlayable = false;
+
   std::string comment;
   std::unique_ptr<Value> value;
   std::list<ParsedResource> child_resources;
@@ -106,24 +109,41 @@ static bool AddResourcesToTable(ResourceTable* table, IDiagnostics* diag, Parsed
     res->comment = trimmed_comment.to_string();
   }
 
-  if (res->symbol_state) {
-    Symbol symbol;
-    symbol.state = res->symbol_state.value();
-    symbol.source = res->source;
-    symbol.comment = res->comment;
-    symbol.allow_new = res->allow_new;
-    if (!table->SetSymbolState(res->name, res->id, symbol, diag)) {
+  if (res->visibility_level != Visibility::Level::kUndefined) {
+    Visibility visibility;
+    visibility.level = res->visibility_level;
+    visibility.source = res->source;
+    visibility.comment = res->comment;
+    if (!table->SetVisibilityWithId(res->name, visibility, res->id, diag)) {
       return false;
     }
   }
 
-  if (res->value) {
+  if (res->allow_new) {
+    AllowNew allow_new;
+    allow_new.source = res->source;
+    allow_new.comment = res->comment;
+    if (!table->SetAllowNew(res->name, allow_new, diag)) {
+      return false;
+    }
+  }
+
+  if (res->overlayable) {
+    Overlayable overlayable;
+    overlayable.source = res->source;
+    overlayable.comment = res->comment;
+    if (!table->SetOverlayable(res->name, overlayable, diag)) {
+      return false;
+    }
+  }
+
+  if (res->value != nullptr) {
     // Attach the comment, source and config to the value.
     res->value->SetComment(std::move(res->comment));
     res->value->SetSource(std::move(res->source));
 
-    if (!table->AddResource(res->name, res->id, res->config, res->product, std::move(res->value),
-                            diag)) {
+    if (!table->AddResourceWithId(res->name, res->id, res->config, res->product,
+                                  std::move(res->value), diag)) {
       return false;
     }
   }
@@ -601,8 +621,7 @@ std::unique_ptr<Item> ResourceParser::ParseXml(xml::XmlPullParser* parser,
 
   // Process the raw value.
   std::unique_ptr<Item> processed_item =
-      ResourceUtils::TryParseItemForAttribute(raw_value, type_mask,
-                                              on_create_reference);
+      ResourceUtils::TryParseItemForAttribute(raw_value, type_mask, on_create_reference);
   if (processed_item) {
     // Fix up the reference.
     if (Reference* ref = ValueCast<Reference>(processed_item.get())) {
@@ -689,8 +708,7 @@ bool ResourceParser::ParseString(xml::XmlPullParser* parser,
   return true;
 }
 
-bool ResourceParser::ParsePublic(xml::XmlPullParser* parser,
-                                 ParsedResource* out_resource) {
+bool ResourceParser::ParsePublic(xml::XmlPullParser* parser, ParsedResource* out_resource) {
   if (out_resource->config != ConfigDescription::DefaultConfig()) {
     diag_->Warn(DiagMessage(out_resource->source)
                 << "ignoring configuration '" << out_resource->config << "' for <public> tag");
@@ -728,7 +746,7 @@ bool ResourceParser::ParsePublic(xml::XmlPullParser* parser,
     out_resource->value = util::make_unique<Id>();
   }
 
-  out_resource->symbol_state = SymbolState::kPublic;
+  out_resource->visibility_level = Visibility::Level::kPublic;
   return true;
 }
 
@@ -818,7 +836,7 @@ bool ResourceParser::ParsePublicGroup(xml::XmlPullParser* parser, ParsedResource
       child_resource.id = next_id;
       child_resource.comment = std::move(comment);
       child_resource.source = item_source;
-      child_resource.symbol_state = SymbolState::kPublic;
+      child_resource.visibility_level = Visibility::Level::kPublic;
       out_resource->child_resources.push_back(std::move(child_resource));
 
       next_id.id += 1;
@@ -864,7 +882,7 @@ bool ResourceParser::ParseSymbol(xml::XmlPullParser* parser, ParsedResource* out
     return false;
   }
 
-  out_resource->symbol_state = SymbolState::kPrivate;
+  out_resource->visibility_level = Visibility::Level::kPrivate;
   return true;
 }
 
@@ -920,8 +938,12 @@ bool ResourceParser::ParseOverlayable(xml::XmlPullParser* parser, ParsedResource
         continue;
       }
 
-      // TODO(b/64980941): Mark the symbol as overlayable and allow marking which entity can overlay
-      // the resource (system/app).
+      ParsedResource child_resource;
+      child_resource.name.type = *type;
+      child_resource.name.entry = maybe_name.value().to_string();
+      child_resource.source = item_source;
+      child_resource.overlayable = true;
+      out_resource->child_resources.push_back(std::move(child_resource));
 
       xml::XmlPullParser::SkipCurrentElement(parser);
     } else if (!ShouldIgnoreElement(element_namespace, element_name)) {
@@ -932,10 +954,9 @@ bool ResourceParser::ParseOverlayable(xml::XmlPullParser* parser, ParsedResource
   return !error;
 }
 
-bool ResourceParser::ParseAddResource(xml::XmlPullParser* parser,
-                                      ParsedResource* out_resource) {
+bool ResourceParser::ParseAddResource(xml::XmlPullParser* parser, ParsedResource* out_resource) {
   if (ParseSymbolImpl(parser, out_resource)) {
-    out_resource->symbol_state = SymbolState::kUndefined;
+    out_resource->visibility_level = Visibility::Level::kUndefined;
     out_resource->allow_new = true;
     return true;
   }
@@ -1395,9 +1416,8 @@ bool ResourceParser::ParseDeclareStyleable(xml::XmlPullParser* parser,
                                            ParsedResource* out_resource) {
   out_resource->name.type = ResourceType::kStyleable;
 
-  // Declare-styleable is kPrivate by default, because it technically only
-  // exists in R.java.
-  out_resource->symbol_state = SymbolState::kPublic;
+  // Declare-styleable is kPrivate by default, because it technically only exists in R.java.
+  out_resource->visibility_level = Visibility::Level::kPublic;
 
   // Declare-styleable only ends up in default config;
   if (out_resource->config != ConfigDescription::DefaultConfig()) {

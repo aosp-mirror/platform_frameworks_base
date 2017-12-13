@@ -82,7 +82,7 @@ class JavaClassGenerator {
   static std::string TransformToFieldName(const android::StringPiece& symbol);
 
  private:
-  bool SkipSymbol(SymbolState state);
+  bool SkipSymbol(Visibility::Level state);
   bool SkipSymbol(const Maybe<SymbolTable::Symbol>& symbol);
 
   // Returns the unmangled resource entry name if the unmangled package is the same as

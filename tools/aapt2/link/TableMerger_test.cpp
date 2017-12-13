@@ -182,14 +182,12 @@ TEST_F(TableMergerTest, OverrideSameResourceIdsWithOverlay) {
   std::unique_ptr<ResourceTable> base =
       test::ResourceTableBuilder()
           .SetPackageId("", 0x7f)
-          .SetSymbolState("bool/foo", ResourceId(0x7f, 0x01, 0x0001),
-                          SymbolState::kPublic)
+          .SetSymbolState("bool/foo", ResourceId(0x7f, 0x01, 0x0001), Visibility::Level::kPublic)
           .Build();
   std::unique_ptr<ResourceTable> overlay =
       test::ResourceTableBuilder()
           .SetPackageId("", 0x7f)
-          .SetSymbolState("bool/foo", ResourceId(0x7f, 0x01, 0x0001),
-                          SymbolState::kPublic)
+          .SetSymbolState("bool/foo", ResourceId(0x7f, 0x01, 0x0001), Visibility::Level::kPublic)
           .Build();
 
   ResourceTable final_table;
@@ -205,14 +203,12 @@ TEST_F(TableMergerTest, FailToOverrideConflictingTypeIdsWithOverlay) {
   std::unique_ptr<ResourceTable> base =
       test::ResourceTableBuilder()
           .SetPackageId("", 0x7f)
-          .SetSymbolState("bool/foo", ResourceId(0x7f, 0x01, 0x0001),
-                          SymbolState::kPublic)
+          .SetSymbolState("bool/foo", ResourceId(0x7f, 0x01, 0x0001), Visibility::Level::kPublic)
           .Build();
   std::unique_ptr<ResourceTable> overlay =
       test::ResourceTableBuilder()
           .SetPackageId("", 0x7f)
-          .SetSymbolState("bool/foo", ResourceId(0x7f, 0x02, 0x0001),
-                          SymbolState::kPublic)
+          .SetSymbolState("bool/foo", ResourceId(0x7f, 0x02, 0x0001), Visibility::Level::kPublic)
           .Build();
 
   ResourceTable final_table;
@@ -228,14 +224,12 @@ TEST_F(TableMergerTest, FailToOverrideConflictingEntryIdsWithOverlay) {
   std::unique_ptr<ResourceTable> base =
       test::ResourceTableBuilder()
           .SetPackageId("", 0x7f)
-          .SetSymbolState("bool/foo", ResourceId(0x7f, 0x01, 0x0001),
-                          SymbolState::kPublic)
+          .SetSymbolState("bool/foo", ResourceId(0x7f, 0x01, 0x0001), Visibility::Level::kPublic)
           .Build();
   std::unique_ptr<ResourceTable> overlay =
       test::ResourceTableBuilder()
           .SetPackageId("", 0x7f)
-          .SetSymbolState("bool/foo", ResourceId(0x7f, 0x01, 0x0002),
-                          SymbolState::kPublic)
+          .SetSymbolState("bool/foo", ResourceId(0x7f, 0x01, 0x0002), Visibility::Level::kPublic)
           .Build();
 
   ResourceTable final_table;
@@ -253,7 +247,7 @@ TEST_F(TableMergerTest, MergeAddResourceFromOverlay) {
   std::unique_ptr<ResourceTable> table_b =
       test::ResourceTableBuilder()
           .SetPackageId("", 0x7f)
-          .SetSymbolState("bool/foo", {}, SymbolState::kUndefined, true /*allow new overlay*/)
+          .SetSymbolState("bool/foo", {}, Visibility::Level::kUndefined, true /*allow new overlay*/)
           .AddValue("bool/foo", ResourceUtils::TryParseBool("true"))
           .Build();
 

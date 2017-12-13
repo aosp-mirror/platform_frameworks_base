@@ -50,7 +50,7 @@ class BinaryResourceParser {
 
   bool ParseTable(const android::ResChunk_header* chunk);
   bool ParsePackage(const android::ResChunk_header* chunk);
-  bool ParseTypeSpec(const android::ResChunk_header* chunk);
+  bool ParseTypeSpec(const ResourceTablePackage* package, const android::ResChunk_header* chunk);
   bool ParseType(const ResourceTablePackage* package, const android::ResChunk_header* chunk);
   bool ParseLibrary(const android::ResChunk_header* chunk);
 
@@ -105,6 +105,9 @@ class BinaryResourceParser {
   // A mapping of resource ID to resource name. When we finish parsing
   // we use this to convert all resource IDs to symbolic references.
   std::map<ResourceId, ResourceName> id_index_;
+
+  // A mapping of resource ID to type spec flags.
+  std::unordered_map<ResourceId, uint32_t> entry_type_spec_flags_;
 };
 
 }  // namespace aapt
