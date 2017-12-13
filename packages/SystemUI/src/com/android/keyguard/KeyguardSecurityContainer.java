@@ -49,6 +49,7 @@ public class KeyguardSecurityContainer extends FrameLayout implements KeyguardSe
     private boolean mIsVerifyUnlockOnly;
     private SecurityMode mCurrentSecuritySelection = SecurityMode.Invalid;
     private SecurityCallback mSecurityCallback;
+    private AlertDialog mAlertDialog;
 
     private final KeyguardUpdateMonitor mUpdateMonitor;
 
@@ -95,6 +96,10 @@ public class KeyguardSecurityContainer extends FrameLayout implements KeyguardSe
 
     @Override
     public void onPause() {
+        if (mAlertDialog != null) {
+            mAlertDialog.dismiss();
+            mAlertDialog = null;
+        }
         if (mCurrentSecuritySelection != SecurityMode.None) {
             getSecurityView(mCurrentSecuritySelection).onPause();
         }
@@ -174,16 +179,20 @@ public class KeyguardSecurityContainer extends FrameLayout implements KeyguardSe
     }
 
     private void showDialog(String title, String message) {
-        final AlertDialog dialog = new AlertDialog.Builder(mContext)
+        if (mAlertDialog != null) {
+            mAlertDialog.dismiss();
+        }
+
+        mAlertDialog = new AlertDialog.Builder(mContext)
             .setTitle(title)
             .setMessage(message)
             .setCancelable(false)
             .setNeutralButton(R.string.ok, null)
             .create();
         if (!(mContext instanceof Activity)) {
-            dialog.getWindow().setType(WindowManager.LayoutParams.TYPE_KEYGUARD_DIALOG);
+            mAlertDialog.getWindow().setType(WindowManager.LayoutParams.TYPE_KEYGUARD_DIALOG);
         }
-        dialog.show();
+        mAlertDialog.show();
     }
 
     private void showTimeoutDialog(int userId, int timeoutMs) {
