@@ -17,6 +17,7 @@
 package android.telephony;
 
 import android.annotation.Nullable;
+import android.annotation.SystemApi;
 import android.content.Context;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
@@ -34,6 +35,8 @@ import android.os.Parcelable;
 import android.util.DisplayMetrics;
 
 import java.util.Arrays;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * A Parcelable class for Subscription Information.
@@ -332,12 +335,7 @@ public class SubscriptionInfo implements Parcelable {
         return this.mCountryIso;
     }
 
-    /**
-     * @return whether the subscription is an embedded one.
-     * @hide
-     *
-     * TODO(b/35851809): Make this public.
-     */
+    /** @return whether the subscription is an embedded one. */
     public boolean isEmbedded() {
         return this.mIsEmbedded;
     }
@@ -351,9 +349,9 @@ public class SubscriptionInfo implements Parcelable {
      * @return whether the app is authorized to manage this subscription per its metadata.
      * @throws UnsupportedOperationException if this subscription is not embedded.
      * @hide
-     *
-     * TODO(b/35851809): Make this public.
+     * @deprecated - Do not use.
      */
+    @Deprecated
     public boolean canManageSubscription(Context context) {
         return canManageSubscription(context, context.getPackageName());
     }
@@ -367,7 +365,9 @@ public class SubscriptionInfo implements Parcelable {
      * @return whether the app is authorized to manage this subscription per its metadata.
      * @throws UnsupportedOperationException if this subscription is not embedded.
      * @hide
+     * @deprecated - Do not use.
      */
+    @Deprecated
     public boolean canManageSubscription(Context context, String packageName) {
         if (!isEmbedded()) {
             throw new UnsupportedOperationException("Not an embedded subscription");
@@ -395,14 +395,14 @@ public class SubscriptionInfo implements Parcelable {
      * @return the {@link UiccAccessRule}s dictating who is authorized to manage this subscription.
      * @throws UnsupportedOperationException if this subscription is not embedded.
      * @hide
-     *
-     * TODO(b/35851809): Make this a SystemApi.
      */
-    public @Nullable UiccAccessRule[] getAccessRules() {
+    @SystemApi
+    public @Nullable List<UiccAccessRule> getAccessRules() {
         if (!isEmbedded()) {
             throw new UnsupportedOperationException("Not an embedded subscription");
         }
-        return mAccessRules;
+        if (mAccessRules == null) return null;
+        return Arrays.asList(mAccessRules);
     }
 
     /**
