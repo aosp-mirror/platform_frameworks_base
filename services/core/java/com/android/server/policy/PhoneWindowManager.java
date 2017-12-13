@@ -3392,7 +3392,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
     }
 
     boolean keyguardOn() {
-        return isKeyguardShowingAndNotOccluded();
+        return isKeyguardShowingAndNotOccluded() || inKeyguardRestrictedKeyInputMode();
     }
 
     private static final int[] WINDOW_TYPES_WHERE_HOME_DOESNT_WORK = {
@@ -6932,6 +6932,13 @@ public class PhoneWindowManager implements WindowManagerPolicy {
     public boolean isKeyguardOccluded() {
         if (mKeyguardDelegate == null) return false;
         return mKeyguardOccluded;
+    }
+
+    /** {@inheritDoc} */
+    @Override
+    public boolean inKeyguardRestrictedKeyInputMode() {
+        if (mKeyguardDelegate == null) return false;
+        return mKeyguardDelegate.isInputRestricted();
     }
 
     @Override
