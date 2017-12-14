@@ -577,7 +577,13 @@ public class Notification implements Parcelable
     public int flags;
 
     /** @hide */
-    @IntDef({PRIORITY_DEFAULT,PRIORITY_LOW,PRIORITY_MIN,PRIORITY_HIGH,PRIORITY_MAX})
+    @IntDef(prefix = { "PRIORITY_" }, value = {
+            PRIORITY_DEFAULT,
+            PRIORITY_LOW,
+            PRIORITY_MIN,
+            PRIORITY_HIGH,
+            PRIORITY_MAX
+    })
     @Retention(RetentionPolicy.SOURCE)
     public @interface Priority {}
 

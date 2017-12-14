@@ -42,7 +42,15 @@ import libcore.util.NativeAllocationRegistry;
 public final class HardwareBuffer implements Parcelable, AutoCloseable {
     /** @hide */
     @Retention(RetentionPolicy.SOURCE)
-    @IntDef({RGBA_8888, RGBA_FP16, RGBA_1010102, RGBX_8888, RGB_888, RGB_565, BLOB})
+    @IntDef(prefix = { "RGB", "BLOB" }, value = {
+            RGBA_8888,
+            RGBA_FP16,
+            RGBA_1010102,
+            RGBX_8888,
+            RGB_888,
+            RGB_565,
+            BLOB
+    })
     public @interface Format {
     }
 

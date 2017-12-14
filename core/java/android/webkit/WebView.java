@@ -2249,10 +2249,10 @@ public class WebView extends AbsoluteLayout
     }
 
     /** @hide */
-    @IntDef({
-        RENDERER_PRIORITY_WAIVED,
-        RENDERER_PRIORITY_BOUND,
-        RENDERER_PRIORITY_IMPORTANT
+    @IntDef(prefix = { "RENDERER_PRIORITY_" }, value = {
+            RENDERER_PRIORITY_WAIVED,
+            RENDERER_PRIORITY_BOUND,
+            RENDERER_PRIORITY_IMPORTANT
     })
     @Retention(RetentionPolicy.SOURCE)
     public @interface RendererPriority {}

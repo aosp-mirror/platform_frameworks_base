@@ -75,9 +75,14 @@ public class GradientColor extends ComplexColor {
 
     private static final boolean DBG_GRADIENT = false;
 
-    @IntDef({TILE_MODE_CLAMP, TILE_MODE_REPEAT, TILE_MODE_MIRROR})
+    @IntDef(prefix = { "TILE_MODE_" }, value = {
+            TILE_MODE_CLAMP,
+            TILE_MODE_REPEAT,
+            TILE_MODE_MIRROR
+    })
     @Retention(RetentionPolicy.SOURCE)
     private @interface GradientTileMode {}
+
     private static final int TILE_MODE_CLAMP = 0;
     private static final int TILE_MODE_REPEAT = 1;
     private static final int TILE_MODE_MIRROR = 2;

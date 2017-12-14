@@ -27,8 +27,17 @@ import java.lang.annotation.RetentionPolicy;
  */
 public abstract class ActivityLifecycleItem extends ClientTransactionItem {
 
-    @IntDef({UNDEFINED, PRE_ON_CREATE, ON_CREATE, ON_START, ON_RESUME, ON_PAUSE, ON_STOP,
-            ON_DESTROY, ON_RESTART})
+    @IntDef(prefix = { "UNDEFINED", "PRE_", "ON_" }, value = {
+            UNDEFINED,
+            PRE_ON_CREATE,
+            ON_CREATE,
+            ON_START,
+            ON_RESUME,
+            ON_PAUSE,
+            ON_STOP,
+            ON_DESTROY,
+            ON_RESTART
+    })
     @Retention(RetentionPolicy.SOURCE)
     public @interface LifecycleState{}
     public static final int UNDEFINED = -1;

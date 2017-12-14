@@ -45,9 +45,14 @@ import java.util.Arrays;
 public final class PrintJobInfo implements Parcelable {
 
     /** @hide */
-    @IntDef({
-            STATE_CREATED, STATE_QUEUED, STATE_STARTED, STATE_BLOCKED, STATE_COMPLETED,
-            STATE_FAILED, STATE_CANCELED
+    @IntDef(prefix = { "STATE_" }, value = {
+            STATE_CREATED,
+            STATE_QUEUED,
+            STATE_STARTED,
+            STATE_BLOCKED,
+            STATE_COMPLETED,
+            STATE_FAILED,
+            STATE_CANCELED
     })
     @Retention(RetentionPolicy.SOURCE)
     public @interface State {

@@ -176,7 +176,7 @@ public class WallpaperManager {
     // flags for which kind of wallpaper to act on
 
     /** @hide */
-    @IntDef(flag = true, value = {
+    @IntDef(flag = true, prefix = { "FLAG_" }, value = {
             FLAG_SYSTEM,
             FLAG_LOCK
     })

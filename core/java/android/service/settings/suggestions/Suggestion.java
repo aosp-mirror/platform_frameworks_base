@@ -38,7 +38,7 @@ public final class Suggestion implements Parcelable {
     /**
      * @hide
      */
-    @IntDef(flag = true, value = {
+    @IntDef(flag = true, prefix = { "FLAG_" }, value = {
             FLAG_HAS_BUTTON,
     })
     @Retention(RetentionPolicy.SOURCE)

@@ -36,13 +36,11 @@ import java.util.List;
 public final class SharedLibraryInfo implements Parcelable {
 
     /** @hide */
-    @IntDef(
-        flag = true,
-        value = {
-                TYPE_BUILTIN,
-                TYPE_DYNAMIC,
-                TYPE_STATIC,
-        })
+    @IntDef(flag = true, prefix = { "TYPE_" }, value = {
+            TYPE_BUILTIN,
+            TYPE_DYNAMIC,
+            TYPE_STATIC,
+    })
     @Retention(RetentionPolicy.SOURCE)
     @interface Type{}
 

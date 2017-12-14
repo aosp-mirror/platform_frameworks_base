@@ -103,8 +103,12 @@ public class UserManager {
 
     /** @hide */
     @Retention(RetentionPolicy.SOURCE)
-    @IntDef(flag=true, value={RESTRICTION_NOT_SET, RESTRICTION_SOURCE_SYSTEM,
-            RESTRICTION_SOURCE_DEVICE_OWNER, RESTRICTION_SOURCE_PROFILE_OWNER})
+    @IntDef(flag = true, prefix = { "RESTRICTION_" }, value = {
+            RESTRICTION_NOT_SET,
+            RESTRICTION_SOURCE_SYSTEM,
+            RESTRICTION_SOURCE_DEVICE_OWNER,
+            RESTRICTION_SOURCE_PROFILE_OWNER
+    })
     @SystemApi
     public @interface UserRestrictionSource {}
 

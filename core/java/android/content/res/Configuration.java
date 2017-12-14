@@ -781,25 +781,24 @@ public final class Configuration implements Parcelable, Comparable<Configuration
     public int seq;
 
     /** @hide */
-    @IntDef(flag = true,
-            value = {
-                    NATIVE_CONFIG_MCC,
-                    NATIVE_CONFIG_MNC,
-                    NATIVE_CONFIG_LOCALE,
-                    NATIVE_CONFIG_TOUCHSCREEN,
-                    NATIVE_CONFIG_KEYBOARD,
-                    NATIVE_CONFIG_KEYBOARD_HIDDEN,
-                    NATIVE_CONFIG_NAVIGATION,
-                    NATIVE_CONFIG_ORIENTATION,
-                    NATIVE_CONFIG_DENSITY,
-                    NATIVE_CONFIG_SCREEN_SIZE,
-                    NATIVE_CONFIG_VERSION,
-                    NATIVE_CONFIG_SCREEN_LAYOUT,
-                    NATIVE_CONFIG_UI_MODE,
-                    NATIVE_CONFIG_SMALLEST_SCREEN_SIZE,
-                    NATIVE_CONFIG_LAYOUTDIR,
-                    NATIVE_CONFIG_COLOR_MODE,
-            })
+    @IntDef(flag = true, prefix = { "NATIVE_CONFIG_" }, value = {
+            NATIVE_CONFIG_MCC,
+            NATIVE_CONFIG_MNC,
+            NATIVE_CONFIG_LOCALE,
+            NATIVE_CONFIG_TOUCHSCREEN,
+            NATIVE_CONFIG_KEYBOARD,
+            NATIVE_CONFIG_KEYBOARD_HIDDEN,
+            NATIVE_CONFIG_NAVIGATION,
+            NATIVE_CONFIG_ORIENTATION,
+            NATIVE_CONFIG_DENSITY,
+            NATIVE_CONFIG_SCREEN_SIZE,
+            NATIVE_CONFIG_VERSION,
+            NATIVE_CONFIG_SCREEN_LAYOUT,
+            NATIVE_CONFIG_UI_MODE,
+            NATIVE_CONFIG_SMALLEST_SCREEN_SIZE,
+            NATIVE_CONFIG_LAYOUTDIR,
+            NATIVE_CONFIG_COLOR_MODE,
+    })
     @Retention(RetentionPolicy.SOURCE)
     public @interface NativeConfig {}
 

@@ -5690,10 +5690,13 @@ public class Intent implements Parcelable, Cloneable {
     private static final int COPY_MODE_HISTORY = 2;
 
     /** @hide */
-    @IntDef(value = {COPY_MODE_ALL, COPY_MODE_FILTER, COPY_MODE_HISTORY})
+    @IntDef(prefix = { "COPY_MODE_" }, value = {
+            COPY_MODE_ALL,
+            COPY_MODE_FILTER,
+            COPY_MODE_HISTORY
+    })
     @Retention(RetentionPolicy.SOURCE)
     public @interface CopyMode {}
-
 
     /**
      * Create an empty intent.
@@ -8966,17 +8969,16 @@ public class Intent implements Parcelable, Cloneable {
     }
 
     /** @hide */
-    @IntDef(flag = true,
-            value = {
-                    FILL_IN_ACTION,
-                    FILL_IN_DATA,
-                    FILL_IN_CATEGORIES,
-                    FILL_IN_COMPONENT,
-                    FILL_IN_PACKAGE,
-                    FILL_IN_SOURCE_BOUNDS,
-                    FILL_IN_SELECTOR,
-                    FILL_IN_CLIP_DATA
-            })
+    @IntDef(flag = true, prefix = { "FILL_IN_" }, value = {
+            FILL_IN_ACTION,
+            FILL_IN_DATA,
+            FILL_IN_CATEGORIES,
+            FILL_IN_COMPONENT,
+            FILL_IN_PACKAGE,
+            FILL_IN_SOURCE_BOUNDS,
+            FILL_IN_SELECTOR,
+            FILL_IN_CLIP_DATA
+    })
     @Retention(RetentionPolicy.SOURCE)
     public @interface FillInFlags {}
 

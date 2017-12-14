@@ -229,8 +229,11 @@ public abstract class NotificationListenerService extends Service {
 
 
     /** @hide */
-    @IntDef({NOTIFICATION_CHANNEL_OR_GROUP_ADDED, NOTIFICATION_CHANNEL_OR_GROUP_UPDATED,
-            NOTIFICATION_CHANNEL_OR_GROUP_DELETED})
+    @IntDef(prefix = { "NOTIFICATION_CHANNEL_OR_GROUP_" }, value = {
+            NOTIFICATION_CHANNEL_OR_GROUP_ADDED,
+            NOTIFICATION_CHANNEL_OR_GROUP_UPDATED,
+            NOTIFICATION_CHANNEL_OR_GROUP_DELETED
+    })
     @Retention(RetentionPolicy.SOURCE)
     public @interface ChannelOrGroupModificationTypes {}
 

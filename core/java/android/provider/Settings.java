@@ -1689,7 +1689,7 @@ public final class Settings {
 
     /** @hide */
     @Retention(RetentionPolicy.SOURCE)
-    @IntDef({
+    @IntDef(prefix = { "RESET_MODE_" }, value = {
             RESET_MODE_PACKAGE_DEFAULTS,
             RESET_MODE_UNTRUSTED_DEFAULTS,
             RESET_MODE_UNTRUSTED_CHANGES,

@@ -44,10 +44,9 @@ public abstract class AccessibilityRequestPreparer {
     public static final int REQUEST_TYPE_EXTRA_DATA = 0x00000001;
 
     /** @hide */
-    @IntDef(flag = true,
-            value = {
-                REQUEST_TYPE_EXTRA_DATA
-            })
+    @IntDef(flag = true, prefix = { "REQUEST_TYPE_" }, value = {
+            REQUEST_TYPE_EXTRA_DATA
+    })
     @Retention(RetentionPolicy.SOURCE)
     public @interface RequestTypes {}
 

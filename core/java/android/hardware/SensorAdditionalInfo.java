@@ -68,8 +68,15 @@ public class SensorAdditionalInfo {
      *
      * @hide
      */
-    @IntDef({TYPE_FRAME_BEGIN, TYPE_FRAME_END, TYPE_UNTRACKED_DELAY, TYPE_INTERNAL_TEMPERATURE,
-             TYPE_VEC3_CALIBRATION, TYPE_SENSOR_PLACEMENT, TYPE_SAMPLING})
+    @IntDef(prefix = { "TYPE_" }, value = {
+            TYPE_FRAME_BEGIN,
+            TYPE_FRAME_END,
+            TYPE_UNTRACKED_DELAY,
+            TYPE_INTERNAL_TEMPERATURE,
+            TYPE_VEC3_CALIBRATION,
+            TYPE_SENSOR_PLACEMENT,
+            TYPE_SAMPLING
+    })
     @Retention(RetentionPolicy.SOURCE)
     public @interface AdditionalInfoType {}
 

@@ -114,11 +114,10 @@ public class TrustAgentService extends Service {
 
     /** @hide */
     @Retention(RetentionPolicy.SOURCE)
-    @IntDef(flag = true,
-            value = {
-                    FLAG_GRANT_TRUST_INITIATED_BY_USER,
-                    FLAG_GRANT_TRUST_DISMISS_KEYGUARD,
-            })
+    @IntDef(flag = true, prefix = { "FLAG_GRANT_TRUST_" }, value = {
+            FLAG_GRANT_TRUST_INITIATED_BY_USER,
+            FLAG_GRANT_TRUST_DISMISS_KEYGUARD,
+    })
     public @interface GrantTrustFlags {}
 
 
@@ -138,11 +137,10 @@ public class TrustAgentService extends Service {
 
     /** @hide */
     @Retention(RetentionPolicy.SOURCE)
-    @IntDef(flag = true,
-            value = {
-                TOKEN_STATE_ACTIVE,
-                TOKEN_STATE_INACTIVE,
-            })
+    @IntDef(flag = true, prefix = { "TOKEN_STATE_" }, value = {
+            TOKEN_STATE_ACTIVE,
+            TOKEN_STATE_INACTIVE,
+    })
     public @interface TokenState {}
 
     private static final int MSG_UNLOCK_ATTEMPT = 1;

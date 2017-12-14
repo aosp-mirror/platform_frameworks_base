@@ -77,7 +77,10 @@ public class TimePicker extends FrameLayout {
     public static final int MODE_CLOCK = 2;
 
     /** @hide */
-    @IntDef({MODE_SPINNER, MODE_CLOCK})
+    @IntDef(prefix = { "MODE_" }, value = {
+            MODE_SPINNER,
+            MODE_CLOCK
+    })
     @Retention(RetentionPolicy.SOURCE)
     public @interface TimePickerMode {}
 

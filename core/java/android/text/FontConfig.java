@@ -179,7 +179,11 @@ public final class FontConfig {
 
         /** @hide */
         @Retention(SOURCE)
-        @IntDef({VARIANT_DEFAULT, VARIANT_COMPACT, VARIANT_ELEGANT})
+        @IntDef(prefix = { "VARIANT_" }, value = {
+                VARIANT_DEFAULT,
+                VARIANT_COMPACT,
+                VARIANT_ELEGANT
+        })
         public @interface Variant {}
 
         /**

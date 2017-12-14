@@ -43,10 +43,17 @@ public class SecurityLog {
 
     /** @hide */
     @Retention(RetentionPolicy.SOURCE)
-    @IntDef({TAG_ADB_SHELL_INTERACTIVE, TAG_ADB_SHELL_CMD, TAG_SYNC_RECV_FILE, TAG_SYNC_SEND_FILE,
-        TAG_APP_PROCESS_START, TAG_KEYGUARD_DISMISSED, TAG_KEYGUARD_DISMISS_AUTH_ATTEMPT,
-        TAG_KEYGUARD_SECURED})
-    public @interface SECURITY_LOG_TAG {}
+    @IntDef(prefix = { "TAG_" }, value = {
+            TAG_ADB_SHELL_INTERACTIVE,
+            TAG_ADB_SHELL_CMD,
+            TAG_SYNC_RECV_FILE,
+            TAG_SYNC_SEND_FILE,
+            TAG_APP_PROCESS_START,
+            TAG_KEYGUARD_DISMISSED,
+            TAG_KEYGUARD_DISMISS_AUTH_ATTEMPT,
+            TAG_KEYGUARD_SECURED
+    })
+    public @interface SecurityLogTag {}
 
     /**
      * Indicate that an ADB interactive shell was opened via "adb shell".
@@ -143,13 +150,8 @@ public class SecurityLog {
 
         /**
          * Returns the tag of this log entry, which specifies entry's semantics.
-         * Could be one of {@link SecurityLog#TAG_SYNC_RECV_FILE},
-         * {@link SecurityLog#TAG_SYNC_SEND_FILE}, {@link SecurityLog#TAG_ADB_SHELL_CMD},
-         * {@link SecurityLog#TAG_ADB_SHELL_INTERACTIVE}, {@link SecurityLog#TAG_APP_PROCESS_START},
-         * {@link SecurityLog#TAG_KEYGUARD_DISMISSED}, {@link SecurityLog#TAG_KEYGUARD_SECURED},
-         * {@link SecurityLog#TAG_KEYGUARD_DISMISS_AUTH_ATTEMPT}.
          */
-        public @SECURITY_LOG_TAG int getTag() {
+        public @SecurityLogTag int getTag() {
             return mEvent.getTag();
         }
 

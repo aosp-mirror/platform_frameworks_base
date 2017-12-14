@@ -1178,7 +1178,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
     private AutofillId mAutofillId;
 
     /** @hide */
-    @IntDef({
+    @IntDef(prefix = { "AUTOFILL_TYPE_" }, value = {
             AUTOFILL_TYPE_NONE,
             AUTOFILL_TYPE_TEXT,
             AUTOFILL_TYPE_TOGGLE,
@@ -1249,7 +1249,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
     public static final int AUTOFILL_TYPE_DATE = 4;
 
     /** @hide */
-    @IntDef({
+    @IntDef(prefix = { "IMPORTANT_FOR_AUTOFILL_" }, value = {
             IMPORTANT_FOR_AUTOFILL_AUTO,
             IMPORTANT_FOR_AUTOFILL_YES,
             IMPORTANT_FOR_AUTOFILL_NO,
@@ -1300,9 +1300,9 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
     public static final int IMPORTANT_FOR_AUTOFILL_NO_EXCLUDE_DESCENDANTS = 0x8;
 
     /** @hide */
-    @IntDef(
-            flag = true,
-            value = {AUTOFILL_FLAG_INCLUDE_NOT_IMPORTANT_VIEWS})
+    @IntDef(flag = true, prefix = { "AUTOFILL_FLAG_" }, value = {
+            AUTOFILL_FLAG_INCLUDE_NOT_IMPORTANT_VIEWS
+    })
     @Retention(RetentionPolicy.SOURCE)
     public @interface AutofillFlags {}
 
@@ -1452,7 +1452,11 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
 
     /** @hide */
     @Retention(RetentionPolicy.SOURCE)
-    @IntDef({DRAWING_CACHE_QUALITY_LOW, DRAWING_CACHE_QUALITY_HIGH, DRAWING_CACHE_QUALITY_AUTO})
+    @IntDef(prefix = { "DRAWING_CACHE_QUALITY_" }, value = {
+            DRAWING_CACHE_QUALITY_LOW,
+            DRAWING_CACHE_QUALITY_HIGH,
+            DRAWING_CACHE_QUALITY_AUTO
+    })
     public @interface DrawingCacheQuality {}
 
     /**
@@ -1551,13 +1555,12 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      */
     static final int CONTEXT_CLICKABLE = 0x00800000;
 
-
     /** @hide */
-    @IntDef({
-        SCROLLBARS_INSIDE_OVERLAY,
-        SCROLLBARS_INSIDE_INSET,
-        SCROLLBARS_OUTSIDE_OVERLAY,
-        SCROLLBARS_OUTSIDE_INSET
+    @IntDef(prefix = { "SCROLLBARS_" }, value = {
+            SCROLLBARS_INSIDE_OVERLAY,
+            SCROLLBARS_INSIDE_INSET,
+            SCROLLBARS_OUTSIDE_OVERLAY,
+            SCROLLBARS_OUTSIDE_INSET
     })
     @Retention(RetentionPolicy.SOURCE)
     public @interface ScrollBarStyle {}
@@ -1651,11 +1654,10 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
     static final int TOOLTIP = 0x40000000;
 
     /** @hide */
-    @IntDef(flag = true,
-            value = {
-                FOCUSABLES_ALL,
-                FOCUSABLES_TOUCH_MODE
-            })
+    @IntDef(flag = true, prefix = { "FOCUSABLES_" }, value = {
+            FOCUSABLES_ALL,
+            FOCUSABLES_TOUCH_MODE
+    })
     @Retention(RetentionPolicy.SOURCE)
     public @interface FocusableMode {}
 
@@ -1672,7 +1674,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
     public static final int FOCUSABLES_TOUCH_MODE = 0x00000001;
 
     /** @hide */
-    @IntDef({
+    @IntDef(prefix = { "FOCUS_" }, value = {
             FOCUS_BACKWARD,
             FOCUS_FORWARD,
             FOCUS_LEFT,
@@ -1684,7 +1686,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
     public @interface FocusDirection {}
 
     /** @hide */
-    @IntDef({
+    @IntDef(prefix = { "FOCUS_" }, value = {
             FOCUS_LEFT,
             FOCUS_UP,
             FOCUS_RIGHT,
@@ -2426,20 +2428,20 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
     static final int PFLAG2_DRAG_HOVERED               = 0x00000002;
 
     /** @hide */
-    @IntDef({
-        LAYOUT_DIRECTION_LTR,
-        LAYOUT_DIRECTION_RTL,
-        LAYOUT_DIRECTION_INHERIT,
-        LAYOUT_DIRECTION_LOCALE
+    @IntDef(prefix = { "LAYOUT_DIRECTION_" }, value = {
+            LAYOUT_DIRECTION_LTR,
+            LAYOUT_DIRECTION_RTL,
+            LAYOUT_DIRECTION_INHERIT,
+            LAYOUT_DIRECTION_LOCALE
     })
     @Retention(RetentionPolicy.SOURCE)
     // Not called LayoutDirection to avoid conflict with android.util.LayoutDirection
     public @interface LayoutDir {}
 
     /** @hide */
-    @IntDef({
-        LAYOUT_DIRECTION_LTR,
-        LAYOUT_DIRECTION_RTL
+    @IntDef(prefix = { "LAYOUT_DIRECTION_" }, value = {
+            LAYOUT_DIRECTION_LTR,
+            LAYOUT_DIRECTION_RTL
     })
     @Retention(RetentionPolicy.SOURCE)
     public @interface ResolvedLayoutDir {}
@@ -2645,14 +2647,14 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
             TEXT_DIRECTION_RESOLVED_DEFAULT << PFLAG2_TEXT_DIRECTION_RESOLVED_MASK_SHIFT;
 
     /** @hide */
-    @IntDef({
-        TEXT_ALIGNMENT_INHERIT,
-        TEXT_ALIGNMENT_GRAVITY,
-        TEXT_ALIGNMENT_CENTER,
-        TEXT_ALIGNMENT_TEXT_START,
-        TEXT_ALIGNMENT_TEXT_END,
-        TEXT_ALIGNMENT_VIEW_START,
-        TEXT_ALIGNMENT_VIEW_END
+    @IntDef(prefix = { "TEXT_ALIGNMENT_" }, value = {
+            TEXT_ALIGNMENT_INHERIT,
+            TEXT_ALIGNMENT_GRAVITY,
+            TEXT_ALIGNMENT_CENTER,
+            TEXT_ALIGNMENT_TEXT_START,
+            TEXT_ALIGNMENT_TEXT_END,
+            TEXT_ALIGNMENT_VIEW_START,
+            TEXT_ALIGNMENT_VIEW_END
     })
     @Retention(RetentionPolicy.SOURCE)
     public @interface TextAlignment {}
@@ -3049,15 +3051,14 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
 
     /** @hide */
     @Retention(RetentionPolicy.SOURCE)
-    @IntDef(flag = true,
-            value = {
-                    SCROLL_INDICATOR_TOP,
-                    SCROLL_INDICATOR_BOTTOM,
-                    SCROLL_INDICATOR_LEFT,
-                    SCROLL_INDICATOR_RIGHT,
-                    SCROLL_INDICATOR_START,
-                    SCROLL_INDICATOR_END,
-            })
+    @IntDef(flag = true, prefix = { "SCROLL_INDICATOR_" }, value = {
+            SCROLL_INDICATOR_TOP,
+            SCROLL_INDICATOR_BOTTOM,
+            SCROLL_INDICATOR_LEFT,
+            SCROLL_INDICATOR_RIGHT,
+            SCROLL_INDICATOR_START,
+            SCROLL_INDICATOR_END,
+    })
     public @interface ScrollIndicators {}
 
     /**
@@ -3683,8 +3684,10 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
             | SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN;
 
     /** @hide */
-    @IntDef(flag = true,
-            value = { FIND_VIEWS_WITH_TEXT, FIND_VIEWS_WITH_CONTENT_DESCRIPTION })
+    @IntDef(flag = true, prefix = { "FIND_VIEWS_" }, value = {
+            FIND_VIEWS_WITH_TEXT,
+            FIND_VIEWS_WITH_CONTENT_DESCRIPTION
+    })
     @Retention(RetentionPolicy.SOURCE)
     public @interface FindViewFlags {}
 

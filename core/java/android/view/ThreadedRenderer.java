@@ -344,8 +344,10 @@ public final class ThreadedRenderer {
     private static final int FLAG_DUMP_FRAMESTATS   = 1 << 0;
     private static final int FLAG_DUMP_RESET        = 1 << 1;
 
-    @IntDef(flag = true, value = {
-            FLAG_DUMP_FRAMESTATS, FLAG_DUMP_RESET })
+    @IntDef(flag = true, prefix = { "FLAG_DUMP_" }, value = {
+            FLAG_DUMP_FRAMESTATS,
+            FLAG_DUMP_RESET
+    })
     @Retention(RetentionPolicy.SOURCE)
     public @interface DumpFlags {}
 
