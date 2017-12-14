@@ -24,6 +24,9 @@ package android.stream_proto;
 message MessageOptions {
   // creates a mapping of field names of the message to its field ids
   optional bool enable_fields_mapping = 1;
+
+  // creates mapping between field names to its field ids and recursively for its submessages.
+  optional bool enable_fields_mapping_recursively = 2;
 }
 
 extend google.protobuf.MessageOptions {
