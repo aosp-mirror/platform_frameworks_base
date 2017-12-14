@@ -1009,7 +1009,7 @@ include $(BUILD_HOST_JAVA_LIBRARY)
 # ====  java proto device library (for test only)  ==============================
 include $(CLEAR_VARS)
 LOCAL_MODULE := platformprotosnano
-LOCAL_MODULE_TAGS := tests optional
+LOCAL_MODULE_TAGS := tests
 LOCAL_PROTOC_OPTIMIZE_TYPE := nano
 LOCAL_PROTOC_FLAGS := \
     -Iexternal/protobuf/src
@@ -1020,6 +1020,17 @@ LOCAL_SRC_FILES := \
     $(call all-proto-files-under, core/proto)
 include $(BUILD_STATIC_JAVA_LIBRARY)
 
+
+# ====  java proto device library (for test only)  ==============================
+include $(CLEAR_VARS)
+LOCAL_MODULE := platformprotoslite
+LOCAL_MODULE_TAGS := tests
+LOCAL_PROTOC_OPTIMIZE_TYPE := lite
+LOCAL_PROTOC_FLAGS := \
+    -Iexternal/protobuf/src
+LOCAL_SRC_FILES := \
+    $(call all-proto-files-under, core/proto)
+include $(BUILD_STATIC_JAVA_LIBRARY)
 
 # Include subdirectory makefiles
 # ============================================================

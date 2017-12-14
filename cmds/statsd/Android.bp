@@ -31,5 +31,11 @@ cc_library_host_shared {
         type: "full",
         export_proto_headers: true,
     },
+
+    export_shared_lib_headers: [
+        "libplatformprotos",
+    ]
+
 }
+
 

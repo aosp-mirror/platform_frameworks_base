@@ -57,7 +57,7 @@ message PowerManagerServiceDumpProto {
         optional bool is_active = 3;
         optional int32 num_wake_locks = 4;
         optional bool is_process_state_unknown = 5;
-        optional .android.app.ActivityManagerProto.ProcessState process_state = 6;
+        optional .android.app.ProcessState process_state = 6;
     }
 
     optional ConstantsProto constants = 1;
