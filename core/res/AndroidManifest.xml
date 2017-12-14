@@ -566,6 +566,7 @@
 
     <!-- Made protected in P (was introduced in JB-MR2) -->
     <protected-broadcast android:name="android.intent.action.GET_RESTRICTION_ENTRIES" />
+    <protected-broadcast android:name="android.telephony.euicc.action.OTA_STATUS_CHANGED" />
 
     <!-- ====================================================================== -->
     <!--                          RUNTIME PERMISSIONS                           -->
