@@ -23,7 +23,6 @@
 #include "config/ConfigManager.h"
 #include "guardrail/MemoryLeakTrackUtil.h"
 #include "guardrail/StatsdStats.h"
-#include "storage/DropboxReader.h"
 #include "storage/StorageManager.h"
 
 #include <android-base/file.h>
@@ -199,11 +198,6 @@ status_t StatsService::command(FILE* in, FILE* out, FILE* err, Vector<String8>& 
         // adb shell cmd stats config ...
         if (!args[0].compare(String8("config"))) {
             return cmd_config(in, out, err, args);
-        }
-
-        // adb shell cmd stats print-stats-log
-        if (!args[0].compare(String8("print-stats-log")) && args.size() > 1) {
-            return cmd_print_stats_log(out, args);
         }
 
         if (!args[0].compare(String8("print-uid-map"))) {
@@ -501,15 +495,6 @@ status_t StatsService::cmd_print_stats(FILE* out, const Vector<String8>& args) {
     vector<uint8_t> output;
     statsdStats.dumpStats(&output, reset);
     return NO_ERROR;
-}
-
-status_t StatsService::cmd_print_stats_log(FILE* out, const Vector<String8>& args) {
-    long msec = 0;
-
-    if (args.size() > 2) {
-        msec = strtol(args[2].string(), NULL, 10);
-    }
-    return DropboxReader::readStatsLogs(out, args[1].string(), msec);
 }
 
 status_t StatsService::cmd_print_uid_map(FILE* out) {

@@ -184,6 +184,10 @@ void ValueMetricProducer::onDumpReportLocked(const uint64_t dumpTimeNs,
 void ValueMetricProducer::onConditionChangedLocked(const bool condition, const uint64_t eventTime) {
     mCondition = condition;
 
+    if (eventTime < mCurrentBucketStartTimeNs) {
+        return;
+    }
+
     if (mPullTagId != -1) {
         if (mCondition == true) {
             mStatsPullerManager->RegisterReceiver(mPullTagId, this,
