@@ -51,8 +51,6 @@ statsd_common_src := \
     src/metrics/MetricsManager.cpp \
     src/metrics/metrics_manager_util.cpp \
     src/packages/UidMap.cpp \
-    src/storage/DropboxReader.cpp \
-    src/storage/DropboxWriter.cpp \
     src/storage/StorageManager.cpp \
     src/StatsLogProcessor.cpp \
     src/StatsService.cpp \
@@ -76,7 +74,6 @@ statsd_common_shared_libraries := \
     libselinux \
     libutils \
     libservices \
-    libandroidfw \
     libprotoutil \
     libstatslog \
     libhardware \
