@@ -16,6 +16,7 @@
 package com.android.server.usb.descriptors;
 
 import android.hardware.usb.UsbEndpoint;
+import android.util.Log;
 
 import com.android.server.usb.descriptors.report.ReportCanvas;
 
@@ -26,6 +27,7 @@ import com.android.server.usb.descriptors.report.ReportCanvas;
  */
 public class UsbEndpointDescriptor extends UsbDescriptor {
     private static final String TAG = "UsbEndpointDescriptor";
+    private static final boolean DEBUG = false;
 
     public static final int MASK_ENDPOINT_ADDRESS = 0b000000000001111;
     public static final int MASK_ENDPOINT_DIRECTION = (byte) 0b0000000010000000;
@@ -108,6 +110,12 @@ public class UsbEndpointDescriptor extends UsbDescriptor {
     }
 
     /* package */ UsbEndpoint toAndroid(UsbDescriptorParser parser) {
+        if (DEBUG) {
+            Log.d(TAG, "toAndroid() type:"
+                    + Integer.toHexString(mAttributes & MASK_ATTRIBS_TRANSTYPE)
+                    + " sync:" + Integer.toHexString(mAttributes & MASK_ATTRIBS_SYNCTYPE)
+                    + " usage:" + Integer.toHexString(mAttributes & MASK_ATTRIBS_USEAGE));
+        }
         return new UsbEndpoint(mEndpointAddress, mAttributes, mPacketSize, mInterval);
     }
 

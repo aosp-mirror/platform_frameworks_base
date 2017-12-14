@@ -17,6 +17,7 @@ package com.android.server.usb.descriptors;
 
 import android.hardware.usb.UsbConfiguration;
 import android.hardware.usb.UsbDevice;
+import android.util.Log;
 
 import com.android.server.usb.descriptors.report.ReportCanvas;
 import com.android.server.usb.descriptors.report.UsbStrings;
@@ -30,6 +31,7 @@ import java.util.ArrayList;
  */
 public final class UsbDeviceDescriptor extends UsbDescriptor {
     private static final String TAG = "UsbDeviceDescriptor";
+    private static final boolean DEBUG = false;
 
     public static final int USBSPEC_1_0 = 0x0100;
     public static final int USBSPEC_1_1 = 0x0110;
@@ -113,19 +115,30 @@ public final class UsbDeviceDescriptor extends UsbDescriptor {
      * @hide
      */
     public UsbDevice toAndroid(UsbDescriptorParser parser) {
+        if (DEBUG) {
+            Log.d(TAG, "toAndroid()");
+        }
+
         String mfgName = parser.getDescriptorString(mMfgIndex);
         String prodName = parser.getDescriptorString(mProductIndex);
+        if (DEBUG) {
+            Log.d(TAG, "  mfgName:" + mfgName + " prodName:" + prodName);
+        }
 
         // Create version string in "%.%" format
         String versionString =
                 Integer.toString(mDeviceRelease >> 8) + "." + (mDeviceRelease & 0xFF);
         String serialStr = parser.getDescriptorString(mSerialNum);
+        if (DEBUG) {
+            Log.d(TAG, "  versionString:" + versionString + " serialStr:" + serialStr);
+        }
 
         UsbDevice device = new UsbDevice(parser.getDeviceAddr(), mVendorID, mProductID,
                 mDevClass, mDevSubClass,
                 mProtocol, mfgName, prodName,
                 versionString, serialStr);
         UsbConfiguration[] configs = new UsbConfiguration[mConfigDescriptors.size()];
+        Log.d(TAG, "  " + configs.length + " configs");
         for (int index = 0; index < mConfigDescriptors.size(); index++) {
             configs[index] = mConfigDescriptors.get(index).toAndroid(parser);
         }

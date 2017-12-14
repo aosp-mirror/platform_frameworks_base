@@ -17,6 +17,7 @@ package com.android.server.usb.descriptors;
 
 import android.hardware.usb.UsbEndpoint;
 import android.hardware.usb.UsbInterface;
+import android.util.Log;
 
 import com.android.server.usb.descriptors.report.ReportCanvas;
 import com.android.server.usb.descriptors.report.UsbStrings;
@@ -30,6 +31,7 @@ import java.util.ArrayList;
  */
 public class UsbInterfaceDescriptor extends UsbDescriptor {
     private static final String TAG = "UsbInterfaceDescriptor";
+    private static final boolean DEBUG = false;
 
     protected int mInterfaceNumber;   // 2:1 Number of Interface
     protected byte mAlternateSetting; // 3:1 Value used to select alternative setting
@@ -93,6 +95,11 @@ public class UsbInterfaceDescriptor extends UsbDescriptor {
     }
 
     UsbInterface toAndroid(UsbDescriptorParser parser) {
+        if (DEBUG) {
+            Log.d(TAG, "toAndroid() class:" + Integer.toHexString(mUsbClass)
+                    + " subclass:" + Integer.toHexString(mUsbSubclass)
+                    + " " + mEndpointDescriptors.size() + " endpoints.");
+        }
         String name = parser.getDescriptorString(mDescrIndex);
         UsbInterface ntrface = new UsbInterface(
                 mInterfaceNumber, mAlternateSetting, name, mUsbClass, mUsbSubclass, mProtocol);
