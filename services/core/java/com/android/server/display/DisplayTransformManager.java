@@ -222,7 +222,7 @@ public class DisplayTransformManager {
         return SystemProperties.getBoolean(PERSISTENT_PROPERTY_NATIVE_MODE, false);
     }
 
-    public boolean setColorMode(int colorMode) {
+    public boolean setColorMode(int colorMode, float[] nightDisplayMatrix) {
         if (colorMode == ColorDisplayController.COLOR_MODE_NATURAL) {
             applySaturation(COLOR_SATURATION_NATURAL);
             setNativeMode(false);
@@ -233,6 +233,7 @@ public class DisplayTransformManager {
             applySaturation(COLOR_SATURATION_NATURAL);
             setNativeMode(true);
         }
+        setColorMatrix(LEVEL_COLOR_MATRIX_NIGHT_DISPLAY, nightDisplayMatrix);
 
         updateConfiguration();
 
