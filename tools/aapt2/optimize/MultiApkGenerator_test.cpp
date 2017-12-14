@@ -36,8 +36,7 @@ namespace {
 
 using ::aapt::configuration::Abi;
 using ::aapt::configuration::AndroidSdk;
-using ::aapt::configuration::Artifact;
-using ::aapt::configuration::PostProcessingConfiguration;
+using ::aapt::configuration::OutputArtifact;
 using ::aapt::test::GetValue;
 using ::aapt::test::GetValueForConfig;
 using ::aapt::test::ParseConfigOrDie;
@@ -48,7 +47,6 @@ using ::testing::NotNull;
 using ::testing::PrintToString;
 using ::testing::Return;
 using ::testing::Test;
-using ::testing::_;
 
 /**
  * Subclass the MultiApkGenerator class so that we can access the protected FilterTable method to
@@ -60,11 +58,11 @@ class MultiApkGeneratorWrapper : public MultiApkGenerator {
       : MultiApkGenerator(apk, context) {
   }
 
-  std::unique_ptr<ResourceTable> FilterTable(
-      const configuration::Artifact& artifact,
-      const configuration::PostProcessingConfiguration& config, const ResourceTable& old_table,
-      IAaptContext* context, FilterChain* filter_chain) override {
-    return MultiApkGenerator::FilterTable(artifact, config, old_table, context, filter_chain);
+  std::unique_ptr<ResourceTable> FilterTable(IAaptContext* context,
+                                             const configuration::OutputArtifact& artifact,
+                                             const ResourceTable& old_table,
+                                             FilterChain* filter_chain) override {
+    return MultiApkGenerator::FilterTable(context, artifact, old_table, filter_chain);
   }
 };
 
@@ -108,27 +106,13 @@ TEST_F(MultiApkGeneratorTest, VersionFilterNewerVersion) {
 
   LoadedApk apk = {{"test.apk"}, {}, std::move(table), {}};
   std::unique_ptr<IAaptContext> ctx = test::ContextBuilder().SetMinSdkVersion(19).Build();
-  PostProcessingConfiguration empty_config;
-  TableFlattenerOptions table_flattener_options;
   FilterChain chain;
 
-  Artifact x64 = test::ArtifactBuilder()
-                     .SetName("${basename}.${sdk}.apk")
-                     .SetDensityGroup("xhdpi")
-                     .SetAndroidSdk("v23")
-                     .Build();
-
-  auto config = test::PostProcessingConfigurationBuilder()
-                    .SetLocaleGroup("en", {"en"})
-                    .SetAbiGroup("x64", {Abi::kX86_64})
-                    .SetDensityGroup("xhdpi", {"xhdpi"})
-                    .SetAndroidSdk("v23", AndroidSdk::ForMinSdk(23))
-                    .AddArtifact(x64)
-                    .Build();
+  OutputArtifact artifact = test::ArtifactBuilder().AddDensity(xhdpi_).SetAndroidSdk(23).Build();
 
   MultiApkGeneratorWrapper generator{&apk, ctx.get()};
   std::unique_ptr<ResourceTable> split =
-      generator.FilterTable(x64, config, *apk.GetResourceTable(), ctx.get(), &chain);
+      generator.FilterTable(ctx.get(), artifact, *apk.GetResourceTable(), &chain);
 
   ResourceTable* new_table = split.get();
   EXPECT_THAT(ValueForConfig(new_table, mdpi_), IsNull());
@@ -149,27 +133,13 @@ TEST_F(MultiApkGeneratorTest, VersionFilterOlderVersion) {
 
   LoadedApk apk = {{"test.apk"}, {}, std::move(table), {}};
   std::unique_ptr<IAaptContext> ctx = test::ContextBuilder().SetMinSdkVersion(1).Build();
-  PostProcessingConfiguration empty_config;
-  TableFlattenerOptions table_flattener_options;
   FilterChain chain;
 
-  Artifact x64 = test::ArtifactBuilder()
-                     .SetName("${basename}.${sdk}.apk")
-                     .SetDensityGroup("xhdpi")
-                     .SetAndroidSdk("v4")
-                     .Build();
-
-  auto config = test::PostProcessingConfigurationBuilder()
-                    .SetLocaleGroup("en", {"en"})
-                    .SetAbiGroup("x64", {Abi::kX86_64})
-                    .SetDensityGroup("xhdpi", {"xhdpi"})
-                    .SetAndroidSdk("v4", AndroidSdk::ForMinSdk(4))
-                    .AddArtifact(x64)
-                    .Build();
+  OutputArtifact artifact = test::ArtifactBuilder().AddDensity(xhdpi_).SetAndroidSdk(4).Build();
 
   MultiApkGeneratorWrapper generator{&apk, ctx.get()};;
   std::unique_ptr<ResourceTable> split =
-      generator.FilterTable(x64, config, *apk.GetResourceTable(), ctx.get(), &chain);
+      generator.FilterTable(ctx.get(), artifact, *apk.GetResourceTable(), &chain);
 
   ResourceTable* new_table = split.get();
   EXPECT_THAT(ValueForConfig(new_table, mdpi_), IsNull());
@@ -188,23 +158,13 @@ TEST_F(MultiApkGeneratorTest, VersionFilterNoVersion) {
 
   LoadedApk apk = {{"test.apk"}, {}, std::move(table), {}};
   std::unique_ptr<IAaptContext> ctx = test::ContextBuilder().SetMinSdkVersion(1).Build();
-  PostProcessingConfiguration empty_config;
-  TableFlattenerOptions table_flattener_options;
   FilterChain chain;
 
-  Artifact x64 =
-      test::ArtifactBuilder().SetName("${basename}.${sdk}.apk").SetDensityGroup("xhdpi").Build();
-
-  auto config = test::PostProcessingConfigurationBuilder()
-                    .SetLocaleGroup("en", {"en"})
-                    .SetAbiGroup("x64", {Abi::kX86_64})
-                    .SetDensityGroup("xhdpi", {"xhdpi"})
-                    .AddArtifact(x64)
-                    .Build();
+  OutputArtifact artifact = test::ArtifactBuilder().AddDensity(xhdpi_).Build();
 
   MultiApkGeneratorWrapper generator{&apk, ctx.get()};
   std::unique_ptr<ResourceTable> split =
-      generator.FilterTable(x64, config, *apk.GetResourceTable(), ctx.get(), &chain);
+      generator.FilterTable(ctx.get(), artifact, *apk.GetResourceTable(), &chain);
 
   ResourceTable* new_table = split.get();
   EXPECT_THAT(ValueForConfig(new_table, mdpi_), IsNull());

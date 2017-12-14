@@ -25,7 +25,7 @@ namespace aapt {
 std::unique_ptr<AbiFilter> AbiFilter::FromAbiList(const std::vector<configuration::Abi>& abi_list) {
   std::unordered_set<std::string> abi_set;
   for (auto& abi : abi_list) {
-    abi_set.insert(configuration::AbiToString(abi));
+    abi_set.insert(configuration::AbiToString(abi).to_string());
   }
   // Make unique by hand as the constructor is private.
   return std::unique_ptr<AbiFilter>(new AbiFilter(abi_set));

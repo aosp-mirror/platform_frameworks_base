@@ -22,6 +22,7 @@
 #include "androidfw/ResourceTypes.h"
 
 #include "SdkConstants.h"
+#include "configuration/ConfigurationParser.internal.h"
 #include "test/Test.h"
 #include "xml/XmlDom.h"
 
@@ -33,14 +34,15 @@ void PrintTo(const AndroidSdk& sdk, std::ostream* os) {
       << ", target=" << sdk.target_sdk_version.value_or_default(-1)
       << ", max=" << sdk.max_sdk_version.value_or_default(-1);
 }
-}  // namespace configuration
+
+namespace handler {
 
 namespace {
 
 using ::aapt::configuration::Abi;
 using ::aapt::configuration::AndroidManifest;
 using ::aapt::configuration::AndroidSdk;
-using ::aapt::configuration::Artifact;
+using ::aapt::configuration::ConfiguredArtifact;
 using ::aapt::configuration::DeviceFeature;
 using ::aapt::configuration::GlTexture;
 using ::aapt::configuration::Locale;
@@ -50,6 +52,7 @@ using ::aapt::xml::NodeCast;
 using ::android::ResTable_config;
 using ::android::base::StringPrintf;
 using ::testing::ElementsAre;
+using ::testing::SizeIs;
 
 constexpr const char* kValidConfig = R"(<?xml version="1.0" encoding="utf-8" ?>
 <post-process xmlns="http://schemas.android.com/tools/aapt">
@@ -144,44 +147,47 @@ TEST_F(ConfigurationParserTest, ForPath_NoFile) {
 
 TEST_F(ConfigurationParserTest, ValidateFile) {
   auto parser = ConfigurationParser::ForContents(kValidConfig).WithDiagnostics(&diag_);
-  auto result = parser.Parse();
+  auto result = parser.Parse("test.apk");
   ASSERT_TRUE(result);
-  PostProcessingConfiguration& value = result.value();
-  EXPECT_EQ(2ul, value.artifacts.size());
-  ASSERT_TRUE(value.artifact_format);
-  EXPECT_EQ(
-      "${base}.${abi}.${screen-density}.${locale}.${sdk}.${gl}.${feature}.release",
-      value.artifact_format.value()
-  );
+  const std::vector<OutputArtifact>& value = result.value();
+  EXPECT_THAT(value, SizeIs(2ul));
 
-  EXPECT_EQ(2ul, value.abi_groups.size());
-  EXPECT_EQ(2ul, value.abi_groups["arm"].size());
-  EXPECT_EQ(2ul, value.abi_groups["other"].size());
+  const OutputArtifact& a1 = value[0];
+  EXPECT_EQ(a1.name, "art1.apk");
+  EXPECT_THAT(a1.abis, ElementsAre(Abi::kArmV7a, Abi::kArm64V8a));
+  EXPECT_THAT(a1.screen_densities,
+              ElementsAre(test::ParseConfigOrDie("xhdpi").CopyWithoutSdkVersion(),
+                          test::ParseConfigOrDie("xxhdpi").CopyWithoutSdkVersion(),
+                          test::ParseConfigOrDie("xxxhdpi").CopyWithoutSdkVersion()));
+  EXPECT_THAT(a1.locales, ElementsAre(test::ParseConfigOrDie("en"), test::ParseConfigOrDie("es"),
+                                      test::ParseConfigOrDie("fr"), test::ParseConfigOrDie("de")));
+  EXPECT_EQ(a1.android_sdk.value().min_sdk_version.value(), 19l);
+  EXPECT_THAT(a1.textures, SizeIs(1ul));
+  EXPECT_THAT(a1.features, SizeIs(1ul));
 
-  EXPECT_EQ(2ul, value.screen_density_groups.size());
-  EXPECT_EQ(3ul, value.screen_density_groups["large"].size());
-  EXPECT_EQ(6ul, value.screen_density_groups["alldpi"].size());
-
-  EXPECT_EQ(2ul, value.locale_groups.size());
-  EXPECT_EQ(4ul, value.locale_groups["europe"].size());
-  EXPECT_EQ(3ul, value.locale_groups["north-america"].size());
-
-  EXPECT_EQ(1ul, value.android_sdk_groups.size());
-  EXPECT_TRUE(value.android_sdk_groups["v19"].min_sdk_version);
-  EXPECT_EQ(19, value.android_sdk_groups["v19"].min_sdk_version.value());
-
-  EXPECT_EQ(1ul, value.gl_texture_groups.size());
-  EXPECT_EQ(1ul, value.gl_texture_groups["dxt1"].size());
-
-  EXPECT_EQ(1ul, value.device_feature_groups.size());
-  EXPECT_EQ(1ul, value.device_feature_groups["low-latency"].size());
+  const OutputArtifact& a2 = value[1];
+  EXPECT_EQ(a2.name, "art2.apk");
+  EXPECT_THAT(a2.abis, ElementsAre(Abi::kX86, Abi::kMips));
+  EXPECT_THAT(a2.screen_densities,
+              ElementsAre(test::ParseConfigOrDie("ldpi").CopyWithoutSdkVersion(),
+                          test::ParseConfigOrDie("mdpi").CopyWithoutSdkVersion(),
+                          test::ParseConfigOrDie("hdpi").CopyWithoutSdkVersion(),
+                          test::ParseConfigOrDie("xhdpi").CopyWithoutSdkVersion(),
+                          test::ParseConfigOrDie("xxhdpi").CopyWithoutSdkVersion(),
+                          test::ParseConfigOrDie("xxxhdpi").CopyWithoutSdkVersion()));
+  EXPECT_THAT(a2.locales,
+              ElementsAre(test::ParseConfigOrDie("en"), test::ParseConfigOrDie("es-rMX"),
+                          test::ParseConfigOrDie("fr-rCA")));
+  EXPECT_EQ(a2.android_sdk.value().min_sdk_version.value(), 19l);
+  EXPECT_THAT(a2.textures, SizeIs(1ul));
+  EXPECT_THAT(a2.features, SizeIs(1ul));
 }
 
 TEST_F(ConfigurationParserTest, InvalidNamespace) {
   constexpr const char* invalid_ns = R"(<?xml version="1.0" encoding="utf-8" ?>
   <post-process xmlns="http://schemas.android.com/tools/another-unknown-tool" />)";
 
-  auto result = ConfigurationParser::ForContents(invalid_ns).Parse();
+  auto result = ConfigurationParser::ForContents(invalid_ns).Parse("test.apk");
   ASSERT_FALSE(result);
 }
 
@@ -197,9 +203,9 @@ TEST_F(ConfigurationParserTest, ArtifactAction) {
           gl-texture-group="dxt1"
           device-feature-group="low-latency"/>)xml");
 
-    ASSERT_TRUE(artifact_handler_(&config, NodeCast<Element>(doc->root.get()), &diag_));
+    ASSERT_TRUE(ArtifactTagHandler(&config, NodeCast<Element>(doc->root.get()), &diag_));
 
-    EXPECT_EQ(1ul, config.artifacts.size());
+    EXPECT_THAT(config.artifacts, SizeIs(1ul));
 
     auto& artifact = config.artifacts.back();
     EXPECT_FALSE(artifact.name);  // TODO: make this fail.
@@ -223,8 +229,8 @@ TEST_F(ConfigurationParserTest, ArtifactAction) {
           gl-texture-group="dxt1"
           device-feature-group="low-latency"/>)xml");
 
-    ASSERT_TRUE(artifact_handler_(&config, NodeCast<Element>(doc.get()->root.get()), &diag_));
-    EXPECT_EQ(2ul, config.artifacts.size());
+    ASSERT_TRUE(ArtifactTagHandler(&config, NodeCast<Element>(doc.get()->root.get()), &diag_));
+    EXPECT_THAT(config.artifacts, SizeIs(2ul));
     EXPECT_EQ(2, config.artifacts.back().version);
   }
 
@@ -240,8 +246,8 @@ TEST_F(ConfigurationParserTest, ArtifactAction) {
         gl-texture-group="dxt1"
         device-feature-group="low-latency"/>)xml");
 
-    ASSERT_TRUE(artifact_handler_(&config, NodeCast<Element>(doc.get()->root.get()), &diag_));
-    EXPECT_EQ(3ul, config.artifacts.size());
+    ASSERT_TRUE(ArtifactTagHandler(&config, NodeCast<Element>(doc.get()->root.get()), &diag_));
+    EXPECT_THAT(config.artifacts, SizeIs(3ul));
     EXPECT_EQ(5, config.artifacts.back().version);
   }
 
@@ -256,8 +262,8 @@ TEST_F(ConfigurationParserTest, ArtifactAction) {
         gl-texture-group="dxt1"
         device-feature-group="low-latency"/>)xml");
 
-    ASSERT_TRUE(artifact_handler_(&config, NodeCast<Element>(doc.get()->root.get()), &diag_));
-    EXPECT_EQ(4ul, config.artifacts.size());
+    ASSERT_TRUE(ArtifactTagHandler(&config, NodeCast<Element>(doc.get()->root.get()), &diag_));
+    EXPECT_THAT(config.artifacts, SizeIs(4ul));
     EXPECT_EQ(6, config.artifacts.back().version);
   }
 }
@@ -288,7 +294,7 @@ TEST_F(ConfigurationParserTest, DuplicateArtifactVersion) {
               device-feature-group="low-latency"/>
         </artifacts>
       </post-process>)xml";
-  auto result = ConfigurationParser::ForContents(configuration).Parse();
+  auto result = ConfigurationParser::ForContents(configuration).Parse("test.apk");
   ASSERT_FALSE(result);
 }
 
@@ -299,7 +305,7 @@ TEST_F(ConfigurationParserTest, ArtifactFormatAction) {
     </artifact-format>)xml");
 
   PostProcessingConfiguration config;
-  bool ok = artifact_format_handler_(&config, NodeCast<Element>(doc.get()->root.get()), &diag_);
+  bool ok = ArtifactFormatTagHandler(&config, NodeCast<Element>(doc.get()->root.get()), &diag_);
   ASSERT_TRUE(ok);
   ASSERT_TRUE(config.artifact_format);
   EXPECT_EQ(
@@ -322,10 +328,10 @@ TEST_F(ConfigurationParserTest, AbiGroupAction) {
   auto doc = test::BuildXmlDom(xml);
 
   PostProcessingConfiguration config;
-  bool ok = abi_group_handler_(&config, NodeCast<Element>(doc.get()->root.get()), &diag_);
+  bool ok = AbiGroupTagHandler(&config, NodeCast<Element>(doc.get()->root.get()), &diag_);
   ASSERT_TRUE(ok);
 
-  EXPECT_EQ(1ul, config.abi_groups.size());
+  EXPECT_THAT(config.abi_groups, SizeIs(1ul));
   ASSERT_EQ(1u, config.abi_groups.count("arm"));
 
   auto& out = config.abi_groups["arm"];
@@ -345,11 +351,10 @@ TEST_F(ConfigurationParserTest, ScreenDensityGroupAction) {
   auto doc = test::BuildXmlDom(xml);
 
   PostProcessingConfiguration config;
-  bool ok =
-      screen_density_group_handler_(&config, NodeCast<Element>(doc.get()->root.get()), &diag_);
+  bool ok = ScreenDensityGroupTagHandler(&config, NodeCast<Element>(doc.get()->root.get()), &diag_);
   ASSERT_TRUE(ok);
 
-  EXPECT_EQ(1ul, config.screen_density_groups.size());
+  EXPECT_THAT(config.screen_density_groups, SizeIs(1ul));
   ASSERT_EQ(1u, config.screen_density_groups.count("large"));
 
   ConfigDescription xhdpi;
@@ -375,7 +380,7 @@ TEST_F(ConfigurationParserTest, LocaleGroupAction) {
   auto doc = test::BuildXmlDom(xml);
 
   PostProcessingConfiguration config;
-  bool ok = locale_group_handler_(&config, NodeCast<Element>(doc.get()->root.get()), &diag_);
+  bool ok = LocaleGroupTagHandler(&config, NodeCast<Element>(doc.get()->root.get()), &diag_);
   ASSERT_TRUE(ok);
 
   ASSERT_EQ(1ul, config.locale_groups.size());
@@ -407,7 +412,7 @@ TEST_F(ConfigurationParserTest, AndroidSdkGroupAction) {
   auto doc = test::BuildXmlDom(xml);
 
   PostProcessingConfiguration config;
-  bool ok = android_sdk_group_handler_(&config, NodeCast<Element>(doc.get()->root.get()), &diag_);
+  bool ok = AndroidSdkGroupTagHandler(&config, NodeCast<Element>(doc.get()->root.get()), &diag_);
   ASSERT_TRUE(ok);
 
   ASSERT_EQ(1ul, config.android_sdk_groups.size());
@@ -434,7 +439,7 @@ TEST_F(ConfigurationParserTest, AndroidSdkGroupAction_SingleVersion) {
     auto doc = test::BuildXmlDom(xml);
 
     PostProcessingConfiguration config;
-    bool ok = android_sdk_group_handler_(&config, NodeCast<Element>(doc.get()->root.get()), &diag_);
+    bool ok = AndroidSdkGroupTagHandler(&config, NodeCast<Element>(doc.get()->root.get()), &diag_);
     ASSERT_TRUE(ok);
 
     ASSERT_EQ(1ul, config.android_sdk_groups.size());
@@ -455,7 +460,7 @@ TEST_F(ConfigurationParserTest, AndroidSdkGroupAction_SingleVersion) {
     auto doc = test::BuildXmlDom(xml);
 
     PostProcessingConfiguration config;
-    bool ok = android_sdk_group_handler_(&config, NodeCast<Element>(doc.get()->root.get()), &diag_);
+    bool ok = AndroidSdkGroupTagHandler(&config, NodeCast<Element>(doc.get()->root.get()), &diag_);
     ASSERT_TRUE(ok);
 
     ASSERT_EQ(1ul, config.android_sdk_groups.size());
@@ -476,7 +481,7 @@ TEST_F(ConfigurationParserTest, AndroidSdkGroupAction_SingleVersion) {
     auto doc = test::BuildXmlDom(xml);
 
     PostProcessingConfiguration config;
-    bool ok = android_sdk_group_handler_(&config, NodeCast<Element>(doc.get()->root.get()), &diag_);
+    bool ok = AndroidSdkGroupTagHandler(&config, NodeCast<Element>(doc.get()->root.get()), &diag_);
     ASSERT_TRUE(ok);
 
     ASSERT_EQ(1ul, config.android_sdk_groups.size());
@@ -505,7 +510,7 @@ TEST_F(ConfigurationParserTest, AndroidSdkGroupAction_InvalidVersion) {
   auto doc = test::BuildXmlDom(xml);
 
   PostProcessingConfiguration config;
-  bool ok = android_sdk_group_handler_(&config, NodeCast<Element>(doc.get()->root.get()), &diag_);
+  bool ok = AndroidSdkGroupTagHandler(&config, NodeCast<Element>(doc.get()->root.get()), &diag_);
   ASSERT_FALSE(ok);
 }
 
@@ -526,7 +531,7 @@ TEST_F(ConfigurationParserTest, AndroidSdkGroupAction_NonNumeric) {
   auto doc = test::BuildXmlDom(StringPrintf(xml, codename, codename));
 
   PostProcessingConfiguration config;
-  bool ok = android_sdk_group_handler_(&config, NodeCast<Element>(doc.get()->root.get()), &diag_);
+  bool ok = AndroidSdkGroupTagHandler(&config, NodeCast<Element>(doc.get()->root.get()), &diag_);
   ASSERT_TRUE(ok);
 
   ASSERT_EQ(1ul, config.android_sdk_groups.size());
@@ -556,10 +561,10 @@ TEST_F(ConfigurationParserTest, GlTextureGroupAction) {
   auto doc = test::BuildXmlDom(xml);
 
   PostProcessingConfiguration config;
-  bool ok = gl_texture_group_handler_(&config, NodeCast<Element>(doc.get()->root.get()), &diag_);
+  bool ok = GlTextureGroupTagHandler(&config, NodeCast<Element>(doc.get()->root.get()), &diag_);
   ASSERT_TRUE(ok);
 
-  EXPECT_EQ(1ul, config.gl_texture_groups.size());
+  EXPECT_THAT(config.gl_texture_groups, SizeIs(1ul));
   ASSERT_EQ(1u, config.gl_texture_groups.count("dxt1"));
 
   auto& out = config.gl_texture_groups["dxt1"];
@@ -585,11 +590,10 @@ TEST_F(ConfigurationParserTest, DeviceFeatureGroupAction) {
   auto doc = test::BuildXmlDom(xml);
 
   PostProcessingConfiguration config;
-  bool ok
-      = device_feature_group_handler_(&config, NodeCast<Element>(doc.get()->root.get()), &diag_);
+  bool ok = DeviceFeatureGroupTagHandler(&config, NodeCast<Element>(doc.get()->root.get()), &diag_);
   ASSERT_TRUE(ok);
 
-  EXPECT_EQ(1ul, config.device_feature_groups.size());
+  EXPECT_THAT(config.device_feature_groups, SizeIs(1ul));
   ASSERT_EQ(1u, config.device_feature_groups.count("low-latency"));
 
   auto& out = config.device_feature_groups["low-latency"];
@@ -603,14 +607,14 @@ TEST_F(ConfigurationParserTest, DeviceFeatureGroupAction) {
 
 TEST(ArtifactTest, Simple) {
   StdErrDiagnostics diag;
-  Artifact x86;
+  ConfiguredArtifact x86;
   x86.abi_group = {"x86"};
 
   auto x86_result = x86.ToArtifactName("something.${abi}.apk", "", &diag);
   ASSERT_TRUE(x86_result);
   EXPECT_EQ(x86_result.value(), "something.x86.apk");
 
-  Artifact arm;
+  ConfiguredArtifact arm;
   arm.abi_group = {"armeabi-v7a"};
 
   {
@@ -640,7 +644,7 @@ TEST(ArtifactTest, Simple) {
 
 TEST(ArtifactTest, Complex) {
   StdErrDiagnostics diag;
-  Artifact artifact;
+  ConfiguredArtifact artifact;
   artifact.abi_group = {"mips64"};
   artifact.screen_density_group = {"ldpi"};
   artifact.device_feature_group = {"df1"};
@@ -686,7 +690,7 @@ TEST(ArtifactTest, Complex) {
 
 TEST(ArtifactTest, Missing) {
   StdErrDiagnostics diag;
-  Artifact x86;
+  ConfiguredArtifact x86;
   x86.abi_group = {"x86"};
 
   EXPECT_FALSE(x86.ToArtifactName("something.${density}.apk", "", &diag));
@@ -697,7 +701,7 @@ TEST(ArtifactTest, Missing) {
 
 TEST(ArtifactTest, Empty) {
   StdErrDiagnostics diag;
-  Artifact artifact;
+  ConfiguredArtifact artifact;
 
   EXPECT_FALSE(artifact.ToArtifactName("something.${density}.apk", "", &diag));
   EXPECT_TRUE(artifact.ToArtifactName("something.apk", "", &diag));
@@ -707,7 +711,7 @@ TEST(ArtifactTest, Empty) {
 
 TEST(ArtifactTest, Repeated) {
   StdErrDiagnostics diag;
-  Artifact artifact;
+  ConfiguredArtifact artifact;
   artifact.screen_density_group = {"mdpi"};
 
   ASSERT_TRUE(artifact.ToArtifactName("something.${density}.apk", "", &diag));
@@ -717,7 +721,7 @@ TEST(ArtifactTest, Repeated) {
 
 TEST(ArtifactTest, Nesting) {
   StdErrDiagnostics diag;
-  Artifact x86;
+  ConfiguredArtifact x86;
   x86.abi_group = {"x86"};
 
   EXPECT_FALSE(x86.ToArtifactName("something.${abi${density}}.apk", "", &diag));
@@ -729,7 +733,7 @@ TEST(ArtifactTest, Nesting) {
 
 TEST(ArtifactTest, Recursive) {
   StdErrDiagnostics diag;
-  Artifact artifact;
+  ConfiguredArtifact artifact;
   artifact.device_feature_group = {"${gl}"};
   artifact.gl_texture_group = {"glx1"};
 
@@ -755,4 +759,6 @@ TEST(ArtifactTest, Recursive) {
 }
 
 }  // namespace
+}  // namespace handler
+}  // namespace configuration
 }  // namespace aapt
