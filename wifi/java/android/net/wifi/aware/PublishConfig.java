@@ -182,7 +182,7 @@ public final class PublishConfig implements Parcelable {
      *
      * @hide
      */
-    public void assertValid(Characteristics characteristics)
+    public void assertValid(Characteristics characteristics, boolean rttSupported)
             throws IllegalArgumentException {
         WifiAwareUtils.validateServiceName(mServiceName);
 
@@ -215,6 +215,10 @@ public final class PublishConfig implements Parcelable {
                 throw new IllegalArgumentException(
                         "Match filter longer than supported by device characteristics");
             }
+        }
+
+        if (!rttSupported && mEnableRanging) {
+            throw new IllegalArgumentException("Ranging is not supported");
         }
     }
 
@@ -364,6 +368,9 @@ public final class PublishConfig implements Parcelable {
          * Optional. Disabled by default - i.e. any peer which attempts to measure distance to this
          * device will be refused. If the peer has ranging enabled (using the
          * {@link SubscribeConfig} APIs listed above, it will never discover this device.
+         * <p>
+         * The device must support Wi-Fi RTT for this feature to be used. Feature support is checked
+         * as described in {@link android.net.wifi.rtt}.
          *
          * @param enable If true, ranging is supported on request of the peer.
          *

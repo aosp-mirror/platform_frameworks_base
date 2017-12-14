@@ -224,7 +224,7 @@ public final class SubscribeConfig implements Parcelable {
      *
      * @hide
      */
-    public void assertValid(Characteristics characteristics)
+    public void assertValid(Characteristics characteristics, boolean rttSupported)
             throws IllegalArgumentException {
         WifiAwareUtils.validateServiceName(mServiceName);
 
@@ -268,6 +268,10 @@ public final class SubscribeConfig implements Parcelable {
         if (mMinDistanceMmSet && mMaxDistanceMmSet && mMaxDistanceMm <= mMinDistanceMm) {
             throw new IllegalArgumentException(
                     "Maximum distance must be greater than minimum distance");
+        }
+
+        if (!rttSupported && (mMinDistanceMmSet || mMaxDistanceMmSet)) {
+            throw new IllegalArgumentException("Ranging is not supported");
         }
     }
 
@@ -422,6 +426,9 @@ public final class SubscribeConfig implements Parcelable {
          * peer must enable ranging using
          * {@link PublishConfig.Builder#setRangingEnabled(boolean)}. Otherwise discovery will
          * never be triggered.
+         * <p>
+         * The device must support Wi-Fi RTT for this feature to be used. Feature support is checked
+         * as described in {@link android.net.wifi.rtt}.
          *
          * @param minDistanceMm Minimum distance, in mm, to the publisher above which to trigger
          *                      discovery.
@@ -450,6 +457,9 @@ public final class SubscribeConfig implements Parcelable {
          * peer must enable ranging using
          * {@link PublishConfig.Builder#setRangingEnabled(boolean)}. Otherwise discovery will
          * never be triggered.
+         * <p>
+         * The device must support Wi-Fi RTT for this feature to be used. Feature support is checked
+         * as described in {@link android.net.wifi.rtt}.
          *
          * @param maxDistanceMm Maximum distance, in mm, to the publisher below which to trigger
          *                      discovery.
