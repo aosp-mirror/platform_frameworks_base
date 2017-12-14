@@ -1114,7 +1114,10 @@ public class Instrumentation {
     public Application newApplication(ClassLoader cl, String className, Context context)
             throws InstantiationException, IllegalAccessException, 
             ClassNotFoundException {
-        return newApplication(cl.loadClass(className), context);
+        Application app = getFactory(context.getPackageName())
+                .instantiateApplication(cl, className);
+        app.attach(context);
+        return app;
     }
     
     /**
@@ -1201,7 +1204,15 @@ public class Instrumentation {
             Intent intent)
             throws InstantiationException, IllegalAccessException,
             ClassNotFoundException {
-        return (Activity)cl.loadClass(className).newInstance();
+        String pkg = intent.getComponent().getPackageName();
+        return getFactory(pkg).instantiateActivity(cl, className, intent);
+    }
+
+    private AppComponentFactory getFactory(String pkg) {
+        LoadedApk apk = mThread.peekPackageInfo(pkg, true);
+        // This is in the case of starting up "android".
+        if (apk == null) apk = mThread.getSystemContext().mPackageInfo;
+        return apk.getAppFactory();
     }
 
     private void prePerformCreate(Activity activity) {
@@ -1948,6 +1959,14 @@ public class Instrumentation {
         mComponent = component;
         mWatcher = watcher;
         mUiAutomationConnection = uiAutomationConnection;
+    }
+
+    /**
+     * Only sets the ActivityThread up, keeps everything else null because app is not being
+     * instrumented.
+     */
+    final void basicInit(ActivityThread thread) {
+        mThread = thread;
     }
 
     /** @hide */

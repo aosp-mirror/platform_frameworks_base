@@ -2859,6 +2859,7 @@
       <!-- @hide @SystemApi -->
       <public name="isVrOnly"/>
       <public name="widgetFeatures" />
+      <public name="appComponentFactory" />
     </public-group>
 
     <public-group type="style" first-id="0x010302e0">
