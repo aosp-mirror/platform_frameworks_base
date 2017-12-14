@@ -47,13 +47,15 @@ public class ContextHubTransaction<T> {
      * Constants describing the type of a transaction through the Context Hub Service.
      */
     @Retention(RetentionPolicy.SOURCE)
-    @IntDef({
+    @IntDef(prefix = { "TYPE_" }, value = {
             TYPE_LOAD_NANOAPP,
             TYPE_UNLOAD_NANOAPP,
             TYPE_ENABLE_NANOAPP,
             TYPE_DISABLE_NANOAPP,
-            TYPE_QUERY_NANOAPPS})
-    public @interface Type {}
+            TYPE_QUERY_NANOAPPS
+    })
+    public @interface Type { }
+
     public static final int TYPE_LOAD_NANOAPP = 0;
     public static final int TYPE_UNLOAD_NANOAPP = 1;
     public static final int TYPE_ENABLE_NANOAPP = 2;
@@ -64,7 +66,7 @@ public class ContextHubTransaction<T> {
      * Constants describing the result of a transaction or request through the Context Hub Service.
      */
     @Retention(RetentionPolicy.SOURCE)
-    @IntDef({
+    @IntDef(prefix = { "TRANSACTION_" }, value = {
             TRANSACTION_SUCCESS,
             TRANSACTION_FAILED_UNKNOWN,
             TRANSACTION_FAILED_BAD_PARAMS,
@@ -73,7 +75,8 @@ public class ContextHubTransaction<T> {
             TRANSACTION_FAILED_AT_HUB,
             TRANSACTION_FAILED_TIMEOUT,
             TRANSACTION_FAILED_SERVICE_INTERNAL_FAILURE,
-            TRANSACTION_FAILED_HAL_UNAVAILABLE})
+            TRANSACTION_FAILED_HAL_UNAVAILABLE
+    })
     public @interface Result {}
     public static final int TRANSACTION_SUCCESS = 0;
     /**

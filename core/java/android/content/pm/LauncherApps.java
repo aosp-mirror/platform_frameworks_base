@@ -343,14 +343,13 @@ public class LauncherApps {
         public static final int FLAG_GET_KEY_FIELDS_ONLY = 1 << 2;
 
         /** @hide */
-        @IntDef(flag = true,
-                value = {
-                        FLAG_MATCH_DYNAMIC,
-                        FLAG_MATCH_PINNED,
-                        FLAG_MATCH_MANIFEST,
-                        FLAG_GET_KEY_FIELDS_ONLY,
-                        FLAG_MATCH_MANIFEST,
-                })
+        @IntDef(flag = true, prefix = { "FLAG_" }, value = {
+                FLAG_MATCH_DYNAMIC,
+                FLAG_MATCH_PINNED,
+                FLAG_MATCH_MANIFEST,
+                FLAG_GET_KEY_FIELDS_ONLY,
+                FLAG_MATCH_MANIFEST,
+        })
         @Retention(RetentionPolicy.SOURCE)
         public @interface QueryFlags {}
 
@@ -1380,7 +1379,10 @@ public class LauncherApps {
         public static final int REQUEST_TYPE_APPWIDGET = 2;
 
         /** @hide */
-        @IntDef(value = {REQUEST_TYPE_SHORTCUT})
+        @IntDef(prefix = { "REQUEST_TYPE_" }, value = {
+                REQUEST_TYPE_SHORTCUT,
+                REQUEST_TYPE_APPWIDGET
+        })
         @Retention(RetentionPolicy.SOURCE)
         public @interface RequestType {}
 

@@ -4924,7 +4924,10 @@ public class Editor {
     }
 
     @Retention(RetentionPolicy.SOURCE)
-    @IntDef({HANDLE_TYPE_SELECTION_START, HANDLE_TYPE_SELECTION_END})
+    @IntDef(prefix = { "HANDLE_TYPE_" }, value = {
+            HANDLE_TYPE_SELECTION_START,
+            HANDLE_TYPE_SELECTION_END
+    })
     public @interface HandleType {}
     public static final int HANDLE_TYPE_SELECTION_START = 0;
     public static final int HANDLE_TYPE_SELECTION_END = 1;
@@ -6129,7 +6132,11 @@ public class Editor {
         }
 
         @Retention(RetentionPolicy.SOURCE)
-        @IntDef({MERGE_EDIT_MODE_FORCE_MERGE, MERGE_EDIT_MODE_NEVER_MERGE, MERGE_EDIT_MODE_NORMAL})
+        @IntDef(prefix = { "MERGE_EDIT_MODE_" }, value = {
+                MERGE_EDIT_MODE_FORCE_MERGE,
+                MERGE_EDIT_MODE_NEVER_MERGE,
+                MERGE_EDIT_MODE_NORMAL
+        })
         private @interface MergeMode {}
         private static final int MERGE_EDIT_MODE_FORCE_MERGE = 0;
         private static final int MERGE_EDIT_MODE_NEVER_MERGE = 1;

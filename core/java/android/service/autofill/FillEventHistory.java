@@ -226,12 +226,13 @@ public final class FillEventHistory implements Parcelable {
         public static final int TYPE_CONTEXT_COMMITTED = 4;
 
         /** @hide */
-        @IntDef(
-                value = {TYPE_DATASET_SELECTED,
-                        TYPE_DATASET_AUTHENTICATION_SELECTED,
-                        TYPE_AUTHENTICATION_SELECTED,
-                        TYPE_SAVE_SHOWN,
-                        TYPE_CONTEXT_COMMITTED})
+        @IntDef(prefix = { "TYPE_" }, value = {
+                TYPE_DATASET_SELECTED,
+                TYPE_DATASET_AUTHENTICATION_SELECTED,
+                TYPE_AUTHENTICATION_SELECTED,
+                TYPE_SAVE_SHOWN,
+                TYPE_CONTEXT_COMMITTED
+        })
         @Retention(RetentionPolicy.SOURCE)
         @interface EventIds{}
 

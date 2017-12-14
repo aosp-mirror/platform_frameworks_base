@@ -95,13 +95,12 @@ public class LinearLayout extends ViewGroup {
     public static final int VERTICAL = 1;
 
     /** @hide */
-    @IntDef(flag = true,
-            value = {
-                SHOW_DIVIDER_NONE,
-                SHOW_DIVIDER_BEGINNING,
-                SHOW_DIVIDER_MIDDLE,
-                SHOW_DIVIDER_END
-            })
+    @IntDef(flag = true, prefix = { "SHOW_DIVIDER_" }, value = {
+            SHOW_DIVIDER_NONE,
+            SHOW_DIVIDER_BEGINNING,
+            SHOW_DIVIDER_MIDDLE,
+            SHOW_DIVIDER_END
+    })
     @Retention(RetentionPolicy.SOURCE)
     public @interface DividerMode {}
 

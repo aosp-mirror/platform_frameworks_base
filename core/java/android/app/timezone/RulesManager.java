@@ -69,7 +69,11 @@ public final class RulesManager {
     private static final boolean DEBUG = false;
 
     @Retention(RetentionPolicy.SOURCE)
-    @IntDef({SUCCESS, ERROR_UNKNOWN_FAILURE, ERROR_OPERATION_IN_PROGRESS})
+    @IntDef(prefix = { "SUCCESS", "ERROR_" }, value = {
+            SUCCESS,
+            ERROR_UNKNOWN_FAILURE,
+            ERROR_OPERATION_IN_PROGRESS
+    })
     public @interface ResultCode {}
 
     /**

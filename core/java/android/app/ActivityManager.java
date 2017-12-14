@@ -175,7 +175,7 @@ public class ActivityManager {
      * @hide
      */
     @Retention(RetentionPolicy.SOURCE)
-    @IntDef({
+    @IntDef(prefix = { "BUGREPORT_OPTION_" }, value = {
             BUGREPORT_OPTION_FULL,
             BUGREPORT_OPTION_INTERACTIVE,
             BUGREPORT_OPTION_REMOTE,

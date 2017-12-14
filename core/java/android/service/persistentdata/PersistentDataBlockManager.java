@@ -65,10 +65,10 @@ public class PersistentDataBlockManager {
      */
     public static final int FLASH_LOCK_LOCKED = 1;
 
-    @IntDef({
-        FLASH_LOCK_UNKNOWN,
-        FLASH_LOCK_LOCKED,
-        FLASH_LOCK_UNLOCKED,
+    @IntDef(prefix = { "FLASH_LOCK_" }, value = {
+            FLASH_LOCK_UNKNOWN,
+            FLASH_LOCK_LOCKED,
+            FLASH_LOCK_UNLOCKED,
     })
     @Retention(RetentionPolicy.SOURCE)
     public @interface FlashLockState {}

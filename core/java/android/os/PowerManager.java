@@ -466,7 +466,7 @@ public final class PowerManager {
      * @hide
      */
     @Retention(RetentionPolicy.SOURCE)
-    @IntDef({
+    @IntDef(prefix = { "SHUTDOWN_REASON_" }, value = {
             SHUTDOWN_REASON_UNKNOWN,
             SHUTDOWN_REASON_SHUTDOWN,
             SHUTDOWN_REASON_REBOOT,

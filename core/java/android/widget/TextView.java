@@ -751,7 +751,10 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
     public static final int AUTO_SIZE_TEXT_TYPE_UNIFORM = 1;
 
     /** @hide */
-    @IntDef({AUTO_SIZE_TEXT_TYPE_NONE, AUTO_SIZE_TEXT_TYPE_UNIFORM})
+    @IntDef(prefix = { "AUTO_SIZE_TEXT_TYPE_" }, value = {
+            AUTO_SIZE_TEXT_TYPE_NONE,
+            AUTO_SIZE_TEXT_TYPE_UNIFORM
+    })
     @Retention(RetentionPolicy.SOURCE)
     public @interface AutoSizeTextType {}
     // Default minimum size for auto-sizing text in scaled pixels.

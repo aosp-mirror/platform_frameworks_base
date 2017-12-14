@@ -39,7 +39,12 @@ public final class Condition implements Parcelable {
     public static final String SCHEME = "condition";
 
     /** @hide */
-    @IntDef({STATE_FALSE, STATE_TRUE, STATE_TRUE, STATE_ERROR})
+    @IntDef(prefix = { "STATE_" }, value = {
+            STATE_FALSE,
+            STATE_TRUE,
+            STATE_UNKNOWN,
+            STATE_ERROR
+    })
     @Retention(RetentionPolicy.SOURCE)
     public @interface State {}
 

@@ -219,17 +219,16 @@ public abstract class Context {
     public static final int MODE_NO_LOCALIZED_COLLATORS = 0x0010;
 
     /** @hide */
-    @IntDef(flag = true,
-            value = {
-                BIND_AUTO_CREATE,
-                BIND_DEBUG_UNBIND,
-                BIND_NOT_FOREGROUND,
-                BIND_ABOVE_CLIENT,
-                BIND_ALLOW_OOM_MANAGEMENT,
-                BIND_WAIVE_PRIORITY,
-                BIND_IMPORTANT,
-                BIND_ADJUST_WITH_ACTIVITY
-            })
+    @IntDef(flag = true, prefix = { "BIND_" }, value = {
+            BIND_AUTO_CREATE,
+            BIND_DEBUG_UNBIND,
+            BIND_NOT_FOREGROUND,
+            BIND_ABOVE_CLIENT,
+            BIND_ALLOW_OOM_MANAGEMENT,
+            BIND_WAIVE_PRIORITY,
+            BIND_IMPORTANT,
+            BIND_ADJUST_WITH_ACTIVITY
+    })
     @Retention(RetentionPolicy.SOURCE)
     public @interface BindServiceFlags {}
 
@@ -404,10 +403,9 @@ public abstract class Context {
     public static final int BIND_EXTERNAL_SERVICE = 0x80000000;
 
     /** @hide */
-    @IntDef(flag = true,
-            value = {
-                RECEIVER_VISIBLE_TO_INSTANT_APPS
-            })
+    @IntDef(flag = true, prefix = { "RECEIVER_VISIBLE_" }, value = {
+            RECEIVER_VISIBLE_TO_INSTANT_APPS
+    })
     @Retention(RetentionPolicy.SOURCE)
     public @interface RegisterReceiverFlags {}
 

@@ -122,7 +122,13 @@ public abstract class WebSettings {
     }
 
     /** @hide */
-    @IntDef({LOAD_DEFAULT, LOAD_NORMAL, LOAD_CACHE_ELSE_NETWORK, LOAD_NO_CACHE, LOAD_CACHE_ONLY})
+    @IntDef(prefix = { "LOAD_" }, value = {
+            LOAD_DEFAULT,
+            LOAD_NORMAL,
+            LOAD_CACHE_ELSE_NETWORK,
+            LOAD_NO_CACHE,
+            LOAD_CACHE_ONLY
+    })
     @Retention(RetentionPolicy.SOURCE)
     public @interface CacheMode {}
 
@@ -1415,13 +1421,12 @@ public abstract class WebSettings {
     /**
      * @hide
      */
-    @IntDef(flag = true,
-            value = {
-                    MENU_ITEM_NONE,
-                    MENU_ITEM_SHARE,
-                    MENU_ITEM_WEB_SEARCH,
-                    MENU_ITEM_PROCESS_TEXT
-            })
+    @IntDef(flag = true, prefix = { "MENU_ITEM_" }, value = {
+            MENU_ITEM_NONE,
+            MENU_ITEM_SHARE,
+            MENU_ITEM_WEB_SEARCH,
+            MENU_ITEM_PROCESS_TEXT
+    })
     @Retention(RetentionPolicy.SOURCE)
     @Target({ElementType.PARAMETER, ElementType.METHOD})
     private @interface MenuItemFlags {}

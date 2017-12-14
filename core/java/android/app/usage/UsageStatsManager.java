@@ -151,7 +151,7 @@ public final class UsageStatsManager {
     public static final String REASON_PREDICTED = "predicted";
 
     /** @hide */
-    @IntDef(flag = false, value = {
+    @IntDef(flag = false, prefix = { "STANDBY_BUCKET_" }, value = {
             STANDBY_BUCKET_EXEMPTED,
             STANDBY_BUCKET_ACTIVE,
             STANDBY_BUCKET_WORKING_SET,

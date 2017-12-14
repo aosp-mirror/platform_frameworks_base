@@ -1372,8 +1372,13 @@ public class DevicePolicyManager {
     /**
      * @hide
      */
-    @IntDef({STATE_USER_UNMANAGED, STATE_USER_SETUP_INCOMPLETE, STATE_USER_SETUP_COMPLETE,
-            STATE_USER_SETUP_FINALIZED, STATE_USER_PROFILE_COMPLETE})
+    @IntDef(prefix = { "STATE_USER_" }, value = {
+            STATE_USER_UNMANAGED,
+            STATE_USER_SETUP_INCOMPLETE,
+            STATE_USER_SETUP_COMPLETE,
+            STATE_USER_SETUP_FINALIZED,
+            STATE_USER_PROFILE_COMPLETE
+    })
     @Retention(RetentionPolicy.SOURCE)
     public @interface UserProvisioningState {}
 
@@ -1546,11 +1551,13 @@ public class DevicePolicyManager {
      * @hide
      */
     @Retention(RetentionPolicy.SOURCE)
-    @IntDef({CODE_OK, CODE_HAS_DEVICE_OWNER, CODE_USER_HAS_PROFILE_OWNER, CODE_USER_NOT_RUNNING,
+    @IntDef(prefix = { "CODE_" }, value = {
+            CODE_OK, CODE_HAS_DEVICE_OWNER, CODE_USER_HAS_PROFILE_OWNER, CODE_USER_NOT_RUNNING,
             CODE_USER_SETUP_COMPLETED, CODE_NOT_SYSTEM_USER, CODE_HAS_PAIRED,
             CODE_MANAGED_USERS_NOT_SUPPORTED, CODE_SYSTEM_USER, CODE_CANNOT_ADD_MANAGED_PROFILE,
             CODE_NOT_SYSTEM_USER_SPLIT, CODE_DEVICE_ADMIN_NOT_SUPPORTED,
-            CODE_SPLIT_SYSTEM_USER_DEVICE_SYSTEM_USER, CODE_ADD_MANAGED_PROFILE_DISALLOWED})
+            CODE_SPLIT_SYSTEM_USER_DEVICE_SYSTEM_USER, CODE_ADD_MANAGED_PROFILE_DISALLOWED
+    })
     public @interface ProvisioningPreCondition {}
 
     /**
@@ -1632,11 +1639,15 @@ public class DevicePolicyManager {
      * @hide
      */
     @Retention(RetentionPolicy.SOURCE)
-    @IntDef(flag = true,
-            value = {LOCK_TASK_FEATURE_NONE, LOCK_TASK_FEATURE_SYSTEM_INFO,
-                    LOCK_TASK_FEATURE_NOTIFICATIONS, LOCK_TASK_FEATURE_HOME,
-                    LOCK_TASK_FEATURE_RECENTS, LOCK_TASK_FEATURE_GLOBAL_ACTIONS,
-                    LOCK_TASK_FEATURE_KEYGUARD})
+    @IntDef(flag = true, prefix = { "LOCK_TASK_FEATURE_" }, value = {
+            LOCK_TASK_FEATURE_NONE,
+            LOCK_TASK_FEATURE_SYSTEM_INFO,
+            LOCK_TASK_FEATURE_NOTIFICATIONS,
+            LOCK_TASK_FEATURE_HOME,
+            LOCK_TASK_FEATURE_RECENTS,
+            LOCK_TASK_FEATURE_GLOBAL_ACTIONS,
+            LOCK_TASK_FEATURE_KEYGUARD
+    })
     public @interface LockTaskFeature {}
 
     /**
@@ -3165,7 +3176,9 @@ public class DevicePolicyManager {
 
     /** @hide */
     @Retention(RetentionPolicy.SOURCE)
-    @IntDef(flag=true, value={FLAG_EVICT_CREDENTIAL_ENCRYPTION_KEY})
+    @IntDef(flag = true, prefix = { "FLAG_EVICT_" }, value = {
+            FLAG_EVICT_CREDENTIAL_ENCRYPTION_KEY
+    })
     public @interface LockNowFlag {}
 
     /**
@@ -6229,12 +6242,13 @@ public class DevicePolicyManager {
     /**
      * @hide
      */
-    @IntDef(
-            flag = true,
-            prefix = {"SKIP_", "MAKE_USER_", "START_", "LEAVE_"},
-            value = {SKIP_SETUP_WIZARD, MAKE_USER_EPHEMERAL, MAKE_USER_DEMO,
-                    START_USER_IN_BACKGROUND, LEAVE_ALL_SYSTEM_APPS_ENABLED}
-    )
+    @IntDef(flag = true, prefix = { "SKIP_", "MAKE_USER_", "START_", "LEAVE_" }, value = {
+            SKIP_SETUP_WIZARD,
+            MAKE_USER_EPHEMERAL,
+            MAKE_USER_DEMO,
+            START_USER_IN_BACKGROUND,
+            LEAVE_ALL_SYSTEM_APPS_ENABLED
+    })
     @Retention(RetentionPolicy.SOURCE)
     public @interface CreateAndManageUserFlags {}
 

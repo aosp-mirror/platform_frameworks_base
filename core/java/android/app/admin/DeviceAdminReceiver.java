@@ -368,9 +368,9 @@ public class DeviceAdminReceiver extends BroadcastReceiver {
      * @hide
      */
     @Retention(RetentionPolicy.SOURCE)
-    @IntDef({
-        BUGREPORT_FAILURE_FAILED_COMPLETING,
-        BUGREPORT_FAILURE_FILE_NO_LONGER_AVAILABLE
+    @IntDef(prefix = { "BUGREPORT_FAILURE_" }, value = {
+            BUGREPORT_FAILURE_FAILED_COMPLETING,
+            BUGREPORT_FAILURE_FILE_NO_LONGER_AVAILABLE
     })
     public @interface BugreportFailureCode {}
 

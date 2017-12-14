@@ -129,7 +129,11 @@ public final class NetworkStats implements AutoCloseable {
      */
     public static class Bucket {
         /** @hide */
-        @IntDef({STATE_ALL, STATE_DEFAULT, STATE_FOREGROUND})
+        @IntDef(prefix = { "STATE_" }, value = {
+                STATE_ALL,
+                STATE_DEFAULT,
+                STATE_FOREGROUND
+        })
         @Retention(RetentionPolicy.SOURCE)
         public @interface State {}
 
@@ -164,7 +168,11 @@ public final class NetworkStats implements AutoCloseable {
         public static final int UID_TETHERING = TrafficStats.UID_TETHERING;
 
         /** @hide */
-        @IntDef({METERED_ALL, METERED_NO, METERED_YES})
+        @IntDef(prefix = { "METERED_" }, value = {
+                METERED_ALL,
+                METERED_NO,
+                METERED_YES
+        })
         @Retention(RetentionPolicy.SOURCE)
         public @interface Metered {}
 
@@ -187,7 +195,11 @@ public final class NetworkStats implements AutoCloseable {
         public static final int METERED_YES = 0x2;
 
         /** @hide */
-        @IntDef({ROAMING_ALL, ROAMING_NO, ROAMING_YES})
+        @IntDef(prefix = { "ROAMING_" }, value = {
+                ROAMING_ALL,
+                ROAMING_NO,
+                ROAMING_YES
+        })
         @Retention(RetentionPolicy.SOURCE)
         public @interface Roaming {}
 

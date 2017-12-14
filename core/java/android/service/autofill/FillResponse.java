@@ -63,7 +63,7 @@ public final class FillResponse implements Parcelable {
     public static final int FLAG_DISABLE_ACTIVITY_ONLY = 0x2;
 
     /** @hide */
-    @IntDef(flag = true, value = {
+    @IntDef(flag = true, prefix = { "FLAG_" }, value = {
             FLAG_TRACK_CONTEXT_COMMITED,
             FLAG_DISABLE_ACTIVITY_ONLY
     })

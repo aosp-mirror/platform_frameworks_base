@@ -172,7 +172,10 @@ public class GridLayout extends ViewGroup {
     // Public constants
 
     /** @hide */
-    @IntDef({HORIZONTAL, VERTICAL})
+    @IntDef(prefix = { "HORIZONTAL", "VERTICAL" }, value = {
+            HORIZONTAL,
+            VERTICAL
+    })
     @Retention(RetentionPolicy.SOURCE)
     public @interface Orientation {}
 
@@ -198,7 +201,10 @@ public class GridLayout extends ViewGroup {
     public static final int UNDEFINED = Integer.MIN_VALUE;
 
     /** @hide */
-    @IntDef({ALIGN_BOUNDS, ALIGN_MARGINS})
+    @IntDef(prefix = { "ALIGN_" }, value = {
+            ALIGN_BOUNDS,
+            ALIGN_MARGINS
+    })
     @Retention(RetentionPolicy.SOURCE)
     public @interface AlignmentMode {}
 

@@ -48,7 +48,11 @@ import java.util.Arrays;
  */
 public abstract class Layout {
     /** @hide */
-    @IntDef({BREAK_STRATEGY_SIMPLE, BREAK_STRATEGY_HIGH_QUALITY, BREAK_STRATEGY_BALANCED})
+    @IntDef(prefix = { "BREAK_STRATEGY_" }, value = {
+            BREAK_STRATEGY_SIMPLE,
+            BREAK_STRATEGY_HIGH_QUALITY,
+            BREAK_STRATEGY_BALANCED
+    })
     @Retention(RetentionPolicy.SOURCE)
     public @interface BreakStrategy {}
 
@@ -73,8 +77,11 @@ public abstract class Layout {
     public static final int BREAK_STRATEGY_BALANCED = 2;
 
     /** @hide */
-    @IntDef({HYPHENATION_FREQUENCY_NORMAL, HYPHENATION_FREQUENCY_FULL,
-             HYPHENATION_FREQUENCY_NONE})
+    @IntDef(prefix = { "HYPHENATION_FREQUENCY_" }, value = {
+            HYPHENATION_FREQUENCY_NORMAL,
+            HYPHENATION_FREQUENCY_FULL,
+            HYPHENATION_FREQUENCY_NONE
+    })
     @Retention(RetentionPolicy.SOURCE)
     public @interface HyphenationFrequency {}
 
@@ -105,7 +112,10 @@ public abstract class Layout {
         ArrayUtils.emptyArray(ParagraphStyle.class);
 
     /** @hide */
-    @IntDef({JUSTIFICATION_MODE_NONE, JUSTIFICATION_MODE_INTER_WORD})
+    @IntDef(prefix = { "JUSTIFICATION_MODE_" }, value = {
+            JUSTIFICATION_MODE_NONE,
+            JUSTIFICATION_MODE_INTER_WORD
+    })
     @Retention(RetentionPolicy.SOURCE)
     public @interface JustificationMode {}
 
@@ -2267,7 +2277,10 @@ public abstract class Layout {
     private int mJustificationMode;
 
     /** @hide */
-    @IntDef({DIR_LEFT_TO_RIGHT, DIR_RIGHT_TO_LEFT})
+    @IntDef(prefix = { "DIR_" }, value = {
+            DIR_LEFT_TO_RIGHT,
+            DIR_RIGHT_TO_LEFT
+    })
     @Retention(RetentionPolicy.SOURCE)
     public @interface Direction {}
 
@@ -2308,7 +2321,10 @@ public abstract class Layout {
 
     /** @hide */
     @Retention(RetentionPolicy.SOURCE)
-    @IntDef({TEXT_SELECTION_LAYOUT_RIGHT_TO_LEFT, TEXT_SELECTION_LAYOUT_LEFT_TO_RIGHT})
+    @IntDef(prefix = { "TEXT_SELECTION_LAYOUT_" }, value = {
+            TEXT_SELECTION_LAYOUT_RIGHT_TO_LEFT,
+            TEXT_SELECTION_LAYOUT_LEFT_TO_RIGHT
+    })
     public @interface TextSelectionLayout {}
 
     /** @hide */

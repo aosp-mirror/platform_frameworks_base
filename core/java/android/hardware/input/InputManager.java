@@ -188,7 +188,11 @@ public final class InputManager {
 
     /** @hide */
     @Retention(RetentionPolicy.SOURCE)
-    @IntDef({SWITCH_STATE_UNKNOWN, SWITCH_STATE_OFF, SWITCH_STATE_ON})
+    @IntDef(prefix = { "SWITCH_STATE_" }, value = {
+            SWITCH_STATE_UNKNOWN,
+            SWITCH_STATE_OFF,
+            SWITCH_STATE_ON
+    })
     public @interface SwitchState {}
 
     /**

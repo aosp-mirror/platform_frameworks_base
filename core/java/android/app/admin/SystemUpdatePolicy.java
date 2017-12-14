@@ -36,10 +36,11 @@ import java.lang.annotation.RetentionPolicy;
 public class SystemUpdatePolicy implements Parcelable {
 
     /** @hide */
-    @IntDef({
-        TYPE_INSTALL_AUTOMATIC,
-        TYPE_INSTALL_WINDOWED,
-        TYPE_POSTPONE})
+    @IntDef(prefix = { "TYPE_" }, value = {
+            TYPE_INSTALL_AUTOMATIC,
+            TYPE_INSTALL_WINDOWED,
+            TYPE_POSTPONE
+    })
     @Retention(RetentionPolicy.SOURCE)
     @interface SystemUpdatePolicyType {}
 

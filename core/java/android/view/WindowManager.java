@@ -1738,7 +1738,7 @@ public interface WindowManager extends ViewManager {
          * @hide
          */
         @Retention(RetentionPolicy.SOURCE)
-        @IntDef(flag = true, value = {
+        @IntDef(flag = true, prefix = { "SOFT_INPUT_" }, value = {
                 SOFT_INPUT_STATE_UNSPECIFIED,
                 SOFT_INPUT_STATE_UNCHANGED,
                 SOFT_INPUT_STATE_HIDDEN,

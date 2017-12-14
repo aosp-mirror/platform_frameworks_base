@@ -290,8 +290,13 @@ public class AccountManager {
 
     /** @hide */
     @Retention(RetentionPolicy.SOURCE)
-    @IntDef({VISIBILITY_UNDEFINED, VISIBILITY_VISIBLE, VISIBILITY_USER_MANAGED_VISIBLE,
-            VISIBILITY_NOT_VISIBLE, VISIBILITY_USER_MANAGED_NOT_VISIBLE})
+    @IntDef(prefix = { "VISIBILITY_" }, value = {
+            VISIBILITY_UNDEFINED,
+            VISIBILITY_VISIBLE,
+            VISIBILITY_USER_MANAGED_VISIBLE,
+            VISIBILITY_NOT_VISIBLE,
+            VISIBILITY_USER_MANAGED_NOT_VISIBLE
+    })
     public @interface AccountVisibility {
     }
 

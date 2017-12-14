@@ -89,7 +89,7 @@ public class WindowConfiguration implements Parcelable, Comparable<WindowConfigu
     public static final int WINDOWING_MODE_FREEFORM = 5;
 
     /** @hide */
-    @IntDef({
+    @IntDef(prefix = { "WINDOWING_MODE_" }, value = {
             WINDOWING_MODE_UNDEFINED,
             WINDOWING_MODE_FULLSCREEN,
             WINDOWING_MODE_PINNED,
@@ -115,7 +115,7 @@ public class WindowConfiguration implements Parcelable, Comparable<WindowConfigu
     public static final int ACTIVITY_TYPE_ASSISTANT = 4;
 
     /** @hide */
-    @IntDef({
+    @IntDef(prefix = { "ACTIVITY_TYPE_" }, value = {
             ACTIVITY_TYPE_UNDEFINED,
             ACTIVITY_TYPE_STANDARD,
             ACTIVITY_TYPE_HOME,
@@ -138,13 +138,12 @@ public class WindowConfiguration implements Parcelable, Comparable<WindowConfigu
     public static final int WINDOW_CONFIG_ACTIVITY_TYPE = 1 << 3;
 
     /** @hide */
-    @IntDef(flag = true,
-            value = {
-                    WINDOW_CONFIG_BOUNDS,
-                    WINDOW_CONFIG_APP_BOUNDS,
-                    WINDOW_CONFIG_WINDOWING_MODE,
-                    WINDOW_CONFIG_ACTIVITY_TYPE
-            })
+    @IntDef(flag = true, prefix = { "WINDOW_CONFIG_" }, value = {
+            WINDOW_CONFIG_BOUNDS,
+            WINDOW_CONFIG_APP_BOUNDS,
+            WINDOW_CONFIG_WINDOWING_MODE,
+            WINDOW_CONFIG_ACTIVITY_TYPE
+    })
     public @interface WindowConfig {}
 
     public WindowConfiguration() {

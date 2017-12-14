@@ -49,8 +49,9 @@ import java.util.Map;
 public final class PrintAttributes implements Parcelable {
     /** @hide */
     @Retention(RetentionPolicy.SOURCE)
-    @IntDef(flag = true, value = {
-            COLOR_MODE_MONOCHROME, COLOR_MODE_COLOR
+    @IntDef(flag = true, prefix = { "COLOR_MODE_" }, value = {
+            COLOR_MODE_MONOCHROME,
+            COLOR_MODE_COLOR
     })
     @interface ColorMode {
     }
@@ -64,8 +65,10 @@ public final class PrintAttributes implements Parcelable {
 
     /** @hide */
     @Retention(RetentionPolicy.SOURCE)
-    @IntDef(flag = true, value = {
-            DUPLEX_MODE_NONE, DUPLEX_MODE_LONG_EDGE, DUPLEX_MODE_SHORT_EDGE
+    @IntDef(flag = true, prefix = { "DUPLEX_MODE_" }, value = {
+            DUPLEX_MODE_NONE,
+            DUPLEX_MODE_LONG_EDGE,
+            DUPLEX_MODE_SHORT_EDGE
     })
     @interface DuplexMode {
     }

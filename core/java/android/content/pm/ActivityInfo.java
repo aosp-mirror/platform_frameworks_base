@@ -262,10 +262,10 @@ public class ActivityInfo extends ComponentInfo implements Parcelable {
     public static final int COLOR_MODE_HDR = 2;
 
     /** @hide */
-    @IntDef({
-        COLOR_MODE_DEFAULT,
-        COLOR_MODE_WIDE_COLOR_GAMUT,
-        COLOR_MODE_HDR,
+    @IntDef(prefix = { "COLOR_MODE_" }, value = {
+            COLOR_MODE_DEFAULT,
+            COLOR_MODE_WIDE_COLOR_GAMUT,
+            COLOR_MODE_HDR,
     })
     @Retention(RetentionPolicy.SOURCE)
     public @interface ColorMode {}
@@ -492,7 +492,7 @@ public class ActivityInfo extends ComponentInfo implements Parcelable {
     public int flags;
 
     /** @hide */
-    @IntDef({
+    @IntDef(prefix = { "SCREEN_ORIENTATION_" }, value = {
             SCREEN_ORIENTATION_UNSET,
             SCREEN_ORIENTATION_UNSPECIFIED,
             SCREEN_ORIENTATION_LANDSCAPE,
@@ -638,25 +638,24 @@ public class ActivityInfo extends ComponentInfo implements Parcelable {
     public int screenOrientation = SCREEN_ORIENTATION_UNSPECIFIED;
 
     /** @hide */
-    @IntDef(flag = true,
-            value = {
-                    CONFIG_MCC,
-                    CONFIG_MNC,
-                    CONFIG_LOCALE,
-                    CONFIG_TOUCHSCREEN,
-                    CONFIG_KEYBOARD,
-                    CONFIG_KEYBOARD_HIDDEN,
-                    CONFIG_NAVIGATION,
-                    CONFIG_ORIENTATION,
-                    CONFIG_SCREEN_LAYOUT,
-                    CONFIG_UI_MODE,
-                    CONFIG_SCREEN_SIZE,
-                    CONFIG_SMALLEST_SCREEN_SIZE,
-                    CONFIG_DENSITY,
-                    CONFIG_LAYOUT_DIRECTION,
-                    CONFIG_COLOR_MODE,
-                    CONFIG_FONT_SCALE,
-            })
+    @IntDef(flag = true, prefix = { "CONFIG_" }, value = {
+            CONFIG_MCC,
+            CONFIG_MNC,
+            CONFIG_LOCALE,
+            CONFIG_TOUCHSCREEN,
+            CONFIG_KEYBOARD,
+            CONFIG_KEYBOARD_HIDDEN,
+            CONFIG_NAVIGATION,
+            CONFIG_ORIENTATION,
+            CONFIG_SCREEN_LAYOUT,
+            CONFIG_UI_MODE,
+            CONFIG_SCREEN_SIZE,
+            CONFIG_SMALLEST_SCREEN_SIZE,
+            CONFIG_DENSITY,
+            CONFIG_LAYOUT_DIRECTION,
+            CONFIG_COLOR_MODE,
+            CONFIG_FONT_SCALE,
+    })
     @Retention(RetentionPolicy.SOURCE)
     public @interface Config {}
 

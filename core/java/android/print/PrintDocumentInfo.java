@@ -83,11 +83,14 @@ public final class PrintDocumentInfo implements Parcelable {
 
     /** @hide */
     @Retention(RetentionPolicy.SOURCE)
-    @IntDef({
-            CONTENT_TYPE_UNKNOWN, CONTENT_TYPE_DOCUMENT, CONTENT_TYPE_PHOTO
+    @IntDef(prefix = { "CONTENT_TYPE_" }, value = {
+            CONTENT_TYPE_UNKNOWN,
+            CONTENT_TYPE_DOCUMENT,
+            CONTENT_TYPE_PHOTO
     })
     public @interface ContentType {
     }
+
     /**
      * Content type: unknown.
      */

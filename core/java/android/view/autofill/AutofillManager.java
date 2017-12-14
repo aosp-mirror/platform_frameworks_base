@@ -1987,7 +1987,11 @@ public final class AutofillManager {
     public abstract static class AutofillCallback {
 
         /** @hide */
-        @IntDef({EVENT_INPUT_SHOWN, EVENT_INPUT_HIDDEN, EVENT_INPUT_UNAVAILABLE})
+        @IntDef(prefix = { "EVENT_INPUT_" }, value = {
+                EVENT_INPUT_SHOWN,
+                EVENT_INPUT_HIDDEN,
+                EVENT_INPUT_UNAVAILABLE
+        })
         @Retention(RetentionPolicy.SOURCE)
         public @interface AutofillEventType {}
 

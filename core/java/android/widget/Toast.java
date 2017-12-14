@@ -71,7 +71,10 @@ public class Toast {
     static final boolean localLOGV = false;
 
     /** @hide */
-    @IntDef({LENGTH_SHORT, LENGTH_LONG})
+    @IntDef(prefix = { "LENGTH_" }, value = {
+            LENGTH_SHORT,
+            LENGTH_LONG
+    })
     @Retention(RetentionPolicy.SOURCE)
     public @interface Duration {}
 
