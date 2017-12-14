@@ -16,14 +16,21 @@
 
 package com.android.server.locksettings.recoverablekeystore;
 
+import android.util.Log;
+
+import java.security.InvalidAlgorithmParameterException;
 import java.security.InvalidKeyException;
 import java.security.KeyStoreException;
 import java.security.NoSuchAlgorithmException;
+import java.util.HashMap;
+import java.util.Locale;
+import java.util.Map;
 
 import javax.crypto.Cipher;
 import javax.crypto.IllegalBlockSizeException;
 import javax.crypto.NoSuchPaddingException;
 import javax.crypto.SecretKey;
+import javax.crypto.spec.GCMParameterSpec;
 
 /**
  * A {@link javax.crypto.SecretKey} wrapped with AES/GCM/NoPadding.
@@ -31,7 +38,11 @@ import javax.crypto.SecretKey;
  * @hide
  */
 public class WrappedKey {
+    private static final String TAG = "WrappedKey";
+
     private static final String KEY_WRAP_CIPHER_ALGORITHM = "AES/GCM/NoPadding";
+    private static final String APPLICATION_KEY_ALGORITHM = "AES";
+    private static final int GCM_TAG_LENGTH_BITS = 128;
 
     private final byte[] mNonce;
     private final byte[] mKeyMaterial;
@@ -111,5 +122,55 @@ public class WrappedKey {
      */
     public byte[] getKeyMaterial() {
         return mKeyMaterial;
+    }
+
+    /**
+     * Unwraps the {@code wrappedKeys} with the {@code platformKey}.
+     *
+     * @return The unwrapped keys, indexed by alias.
+     * @throws NoSuchAlgorithmException if AES/GCM/NoPadding Cipher or AES key type is unavailable.
+     *
+     * @hide
+     */
+    public static Map<String, SecretKey> unwrapKeys(
+            SecretKey platformKey,
+            Map<String, WrappedKey> wrappedKeys)
+            throws NoSuchAlgorithmException, NoSuchPaddingException {
+        HashMap<String, SecretKey> unwrappedKeys = new HashMap<>();
+        Cipher cipher = Cipher.getInstance(KEY_WRAP_CIPHER_ALGORITHM);
+
+        for (String alias : wrappedKeys.keySet()) {
+            WrappedKey wrappedKey = wrappedKeys.get(alias);
+            try {
+                cipher.init(
+                        Cipher.UNWRAP_MODE,
+                        platformKey,
+                        new GCMParameterSpec(GCM_TAG_LENGTH_BITS, wrappedKey.getNonce()));
+            } catch (InvalidKeyException | InvalidAlgorithmParameterException e) {
+                Log.e(TAG,
+                        String.format(
+                                Locale.US,
+                                "Could not init Cipher to unwrap recoverable key with alias '%s'",
+                                alias),
+                        e);
+                continue;
+            }
+            SecretKey key;
+            try {
+                key = (SecretKey) cipher.unwrap(
+                        wrappedKey.getKeyMaterial(), APPLICATION_KEY_ALGORITHM, Cipher.SECRET_KEY);
+            } catch (InvalidKeyException | NoSuchAlgorithmException e) {
+                Log.e(TAG,
+                        String.format(
+                                Locale.US,
+                                "Error unwrapping recoverable key with alias '%s'",
+                                alias),
+                        e);
+                continue;
+            }
+            unwrappedKeys.put(alias, key);
+        }
+
+        return unwrappedKeys;
     }
 }

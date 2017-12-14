@@ -16,7 +16,9 @@
 
 package com.android.server.locksettings.recoverablekeystore;
 
+import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 
 import android.security.keystore.AndroidKeyStoreSecretKey;
 import android.security.keystore.KeyGenParameterSpec;
@@ -29,6 +31,8 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 
 import java.security.KeyStore;
+import java.util.HashMap;
+import java.util.Map;
 
 import javax.crypto.Cipher;
 import javax.crypto.KeyGenerator;
@@ -70,6 +74,36 @@ public class WrappedKeyTest {
         assertEquals(rawKey, unwrappedKey);
     }
 
+    @Test
+    public void decryptWrappedKeys_decryptsWrappedKeys() throws Exception {
+        String alias = "karlin";
+        SecretKey platformKey = generateAndroidKeyStoreKey();
+        SecretKey appKey = generateKey();
+        WrappedKey wrappedKey = WrappedKey.fromSecretKey(platformKey, appKey);
+        HashMap<String, WrappedKey> keysByAlias = new HashMap<>();
+        keysByAlias.put(alias, wrappedKey);
+
+        Map<String, SecretKey> unwrappedKeys = WrappedKey.unwrapKeys(platformKey, keysByAlias);
+
+        assertEquals(1, unwrappedKeys.size());
+        assertTrue(unwrappedKeys.containsKey(alias));
+        assertArrayEquals(appKey.getEncoded(), unwrappedKeys.get(alias).getEncoded());
+    }
+
+    @Test
+    public void decryptWrappedKeys_doesNotDieIfSomeKeysAreUnwrappable() throws Exception {
+        String alias = "karlin";
+        SecretKey appKey = generateKey();
+        WrappedKey wrappedKey = WrappedKey.fromSecretKey(generateKey(), appKey);
+        HashMap<String, WrappedKey> keysByAlias = new HashMap<>();
+        keysByAlias.put(alias, wrappedKey);
+
+        Map<String, SecretKey> unwrappedKeys = WrappedKey.unwrapKeys(
+                generateAndroidKeyStoreKey(), keysByAlias);
+
+        assertEquals(0, unwrappedKeys.size());
+    }
+
     private SecretKey generateKey() throws Exception {
         KeyGenerator keyGenerator = KeyGenerator.getInstance(KEY_ALGORITHM);
         keyGenerator.init(/*keySize=*/ 256);
@@ -81,7 +115,8 @@ public class WrappedKeyTest {
                 KEY_ALGORITHM,
                 ANDROID_KEY_STORE_PROVIDER);
         keyGenerator.init(new KeyGenParameterSpec.Builder(
-                WRAPPING_KEY_ALIAS, KeyProperties.PURPOSE_ENCRYPT | KeyProperties.PURPOSE_DECRYPT)
+                WRAPPING_KEY_ALIAS,
+                KeyProperties.PURPOSE_ENCRYPT | KeyProperties.PURPOSE_DECRYPT)
                 .setBlockModes(KeyProperties.BLOCK_MODE_GCM)
                 .setEncryptionPaddings(KeyProperties.ENCRYPTION_PADDING_NONE)
                 .build());
