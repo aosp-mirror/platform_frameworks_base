@@ -22,7 +22,6 @@ import static org.mockito.Matchers.anyInt;
 import static org.mockito.Matchers.anyLong;
 import static org.mockito.Matchers.anyString;
 import static org.mockito.Matchers.eq;
-import static org.mockito.Matchers.isNull;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -39,6 +38,7 @@ import android.net.NetworkUtils;
 import android.os.Binder;
 import android.os.ParcelFileDescriptor;
 import android.support.test.filters.SmallTest;
+import android.system.Os;
 
 import java.net.Socket;
 import java.util.Arrays;
@@ -154,6 +154,56 @@ public class IpSecServiceParameterizedTest {
                         anyString(),
                         anyString(),
                         eq(TEST_SPI_OUT));
+
+        // Verify quota and RefcountedResource objects cleaned up
+        IpSecService.UserRecord userRecord =
+                mIpSecService.mUserResourceTracker.getUserRecord(Os.getuid());
+        assertEquals(0, userRecord.mSpiQuotaTracker.mCurrent);
+        try {
+            userRecord.mSpiRecords.getRefcountedResourceOrThrow(spiResp.resourceId);
+            fail("Expected IllegalArgumentException on attempt to access deleted resource");
+        } catch (IllegalArgumentException expected) {
+
+        }
+    }
+
+    @Test
+    public void testSecurityParameterIndexBinderDeath() throws Exception {
+        when(mMockNetd.ipSecAllocateSpi(
+                        anyInt(),
+                        eq(IpSecTransform.DIRECTION_OUT),
+                        anyString(),
+                        eq(mRemoteAddr),
+                        eq(TEST_SPI_OUT)))
+                .thenReturn(TEST_SPI_OUT);
+
+        IpSecSpiResponse spiResp =
+                mIpSecService.reserveSecurityParameterIndex(
+                        IpSecTransform.DIRECTION_OUT, mRemoteAddr, TEST_SPI_OUT, new Binder());
+
+        IpSecService.UserRecord userRecord =
+                mIpSecService.mUserResourceTracker.getUserRecord(Os.getuid());
+        IpSecService.RefcountedResource refcountedRecord =
+                userRecord.mSpiRecords.getRefcountedResourceOrThrow(spiResp.resourceId);
+
+        refcountedRecord.binderDied();
+
+        verify(mMockNetd)
+                .ipSecDeleteSecurityAssociation(
+                        eq(spiResp.resourceId),
+                        anyInt(),
+                        anyString(),
+                        anyString(),
+                        eq(TEST_SPI_OUT));
+
+        // Verify quota and RefcountedResource objects cleaned up
+        assertEquals(0, userRecord.mSpiQuotaTracker.mCurrent);
+        try {
+            userRecord.mSpiRecords.getRefcountedResourceOrThrow(spiResp.resourceId);
+            fail("Expected IllegalArgumentException on attempt to access deleted resource");
+        } catch (IllegalArgumentException expected) {
+
+        }
     }
 
     private int getNewSpiResourceId(int direction, String remoteAddress, int returnSpi)
@@ -379,6 +429,61 @@ public class IpSecServiceParameterizedTest {
                         anyString(),
                         anyString(),
                         eq(TEST_SPI_IN));
+
+        // Verify quota and RefcountedResource objects cleaned up
+        IpSecService.UserRecord userRecord =
+                mIpSecService.mUserResourceTracker.getUserRecord(Os.getuid());
+        assertEquals(0, userRecord.mTransformQuotaTracker.mCurrent);
+        try {
+            userRecord.mTransformRecords.getRefcountedResourceOrThrow(
+                    createTransformResp.resourceId);
+            fail("Expected IllegalArgumentException on attempt to access deleted resource");
+        } catch (IllegalArgumentException expected) {
+
+        }
+    }
+
+    @Test
+    public void testTransportModeTransformBinderDeath() throws Exception {
+        IpSecConfig ipSecConfig = new IpSecConfig();
+        addDefaultSpisAndRemoteAddrToIpSecConfig(ipSecConfig);
+        addAuthAndCryptToIpSecConfig(ipSecConfig);
+
+        IpSecTransformResponse createTransformResp =
+                mIpSecService.createTransportModeTransform(ipSecConfig, new Binder());
+
+        IpSecService.UserRecord userRecord =
+                mIpSecService.mUserResourceTracker.getUserRecord(Os.getuid());
+        IpSecService.RefcountedResource refcountedRecord =
+                userRecord.mTransformRecords.getRefcountedResourceOrThrow(
+                        createTransformResp.resourceId);
+
+        refcountedRecord.binderDied();
+
+        verify(mMockNetd)
+                .ipSecDeleteSecurityAssociation(
+                        eq(createTransformResp.resourceId),
+                        eq(IpSecTransform.DIRECTION_OUT),
+                        anyString(),
+                        anyString(),
+                        eq(TEST_SPI_OUT));
+        verify(mMockNetd)
+                .ipSecDeleteSecurityAssociation(
+                        eq(createTransformResp.resourceId),
+                        eq(IpSecTransform.DIRECTION_IN),
+                        anyString(),
+                        anyString(),
+                        eq(TEST_SPI_IN));
+
+        // Verify quota and RefcountedResource objects cleaned up
+        assertEquals(0, userRecord.mTransformQuotaTracker.mCurrent);
+        try {
+            userRecord.mTransformRecords.getRefcountedResourceOrThrow(
+                    createTransformResp.resourceId);
+            fail("Expected IllegalArgumentException on attempt to access deleted resource");
+        } catch (IllegalArgumentException expected) {
+
+        }
     }
 
     @Test
