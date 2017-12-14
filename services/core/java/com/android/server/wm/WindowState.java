@@ -4295,8 +4295,12 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
 
     private void startMoveAnimation(Transaction t, int left, int top) {
         if (DEBUG_ANIM) Slog.v(TAG, "Setting move animation on " + this);
+        final Point oldPosition = new Point();
+        final Point newPosition = new Point();
+        transformFrameToSurfacePosition(mLastFrame.left, mLastFrame.top, oldPosition);
+        transformFrameToSurfacePosition(left, top, newPosition);
         final AnimationAdapter adapter = new LocalAnimationAdapter(
-                new MoveAnimationSpec(mLastFrame.left, mLastFrame.top, left, top),
+                new MoveAnimationSpec(oldPosition.x, oldPosition.y, newPosition.x, newPosition.y),
                 mService.mSurfaceAnimationRunner);
         startAnimation(t, adapter);
     }
@@ -4435,23 +4439,23 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
             return;
         }
 
-        int left = mFrame.left;
-        int top = mFrame.top;
+        transformFrameToSurfacePosition(mFrame.left, mFrame.top, mSurfacePosition);
+        if (!mSurfaceAnimator.hasLeash()) {
+            t.setPosition(mSurfaceControl, mSurfacePosition.x, mSurfacePosition.y);
+        }
+    }
+
+    private void transformFrameToSurfacePosition(int left, int top, Point outPoint) {
+        outPoint.set(left, top);
         if (isChildWindow()) {
             // TODO: This probably falls apart at some point and we should
             // actually compute relative coordinates.
             final WindowState parent = getParentWindow();
-            left -= parent.mFrame.left;
-            top -= parent.mFrame.top;
+            outPoint.offset(-parent.mFrame.left, -parent.mFrame.top);
         }
 
         // Expand for surface insets. See WindowState.expandForSurfaceInsets.
-        left -= mAttrs.surfaceInsets.left;
-        top -= mAttrs.surfaceInsets.top;
-        mSurfacePosition.set(left, top);
-        if (!mSurfaceAnimator.hasLeash()) {
-            t.setPosition(mSurfaceControl, mSurfacePosition.x, mSurfacePosition.y);
-        }
+        outPoint.offset(-mAttrs.surfaceInsets.left, -mAttrs.surfaceInsets.top);
     }
 
     @Override
