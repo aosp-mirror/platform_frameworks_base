@@ -4637,6 +4637,7 @@ package android.webkit {
     method public abstract android.webkit.ServiceWorkerController getServiceWorkerController();
     method public abstract android.webkit.WebViewFactoryProvider.Statics getStatics();
     method public abstract android.webkit.TokenBindingService getTokenBindingService();
+    method public abstract android.webkit.TracingController getTracingController();
     method public abstract android.webkit.WebIconDatabase getWebIconDatabase();
     method public abstract android.webkit.WebStorage getWebStorage();
     method public abstract android.webkit.WebViewDatabase getWebViewDatabase(android.content.Context);
