@@ -308,6 +308,12 @@ public class TransportManager {
         }
     }
 
+    public boolean isTransportRegistered(String transportName) {
+        synchronized (mTransportLock) {
+            return getRegisteredTransportEntryLocked(transportName) != null;
+        }
+    }
+
     /**
      * Returns a {@link TransportClient} for the current transport or null if not found.
      *

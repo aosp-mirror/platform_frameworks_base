@@ -3242,10 +3242,10 @@ public class RefactoredBackupManagerService implements BackupManagerServiceInter
             skip = true;
         }
 
-        // Do we have a transport to fetch data for us?
-        IBackupTransport transport = mTransportManager.getCurrentTransportBinder();
-        if (transport == null) {
-            if (DEBUG) Slog.w(TAG, "No transport");
+        TransportClient transportClient =
+                mTransportManager.getCurrentTransportClient("BMS.restoreAtInstall()");
+        if (transportClient == null) {
+            if (DEBUG) Slog.w(TAG, "No transport client");
             skip = true;
         }
 
@@ -3262,16 +3262,26 @@ public class RefactoredBackupManagerService implements BackupManagerServiceInter
                 // The eventual message back into the Package Manager to run the post-install
                 // steps for 'token' will be issued from the restore handling code.
 
-                // This can throw and so *must* happen before the wakelock is acquired
-                String dirName = transport.transportDirName();
-
                 mWakelock.acquire();
+
+                OnTaskFinishedListener listener = caller -> {
+                        mTransportManager.disposeOfTransportClient(transportClient, caller);
+                        mWakelock.release();
+                };
+
                 if (MORE_DEBUG) {
                     Slog.d(TAG, "Restore at install of " + packageName);
                 }
                 Message msg = mBackupHandler.obtainMessage(MSG_RUN_RESTORE);
-                msg.obj = new RestoreParams(transport, dirName, null, null,
-                        restoreSet, packageName, token);
+                msg.obj =
+                        RestoreParams.createForRestoreAtInstall(
+                                transportClient,
+                                /* observer */ null,
+                                /* monitor */ null,
+                                restoreSet,
+                                packageName,
+                                token,
+                                listener);
                 mBackupHandler.sendMessage(msg);
             } catch (Exception e) {
                 // Calling into the transport broke; back off and proceed with the installation.
@@ -3281,8 +3291,14 @@ public class RefactoredBackupManagerService implements BackupManagerServiceInter
         }
 
         if (skip) {
-            // Auto-restore disabled or no way to attempt a restore; just tell the Package
-            // Manager to proceed with the post-install handling for this package.
+            // Auto-restore disabled or no way to attempt a restore
+
+            if (transportClient != null) {
+                mTransportManager.disposeOfTransportClient(
+                        transportClient, "BMS.restoreAtInstall()");
+            }
+
+            // Tell the PackageManager to proceed with the post-install handling for this package.
             if (DEBUG) Slog.v(TAG, "Finishing install immediately");
             try {
                 mPackageManagerBinder.finishPackageInstall(token, false);

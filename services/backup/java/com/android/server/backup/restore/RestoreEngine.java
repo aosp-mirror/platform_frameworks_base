@@ -30,8 +30,8 @@ public abstract class RestoreEngine {
     public static final int TARGET_FAILURE = -2;
     public static final int TRANSPORT_FAILURE = -3;
 
-    private AtomicBoolean mRunning = new AtomicBoolean(false);
-    private AtomicInteger mResult = new AtomicInteger(SUCCESS);
+    private final AtomicBoolean mRunning = new AtomicBoolean(false);
+    private final AtomicInteger mResult = new AtomicInteger(SUCCESS);
 
     public boolean isRunning() {
         return mRunning.get();
