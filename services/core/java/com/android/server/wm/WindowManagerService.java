@@ -4561,6 +4561,7 @@ public class WindowManagerService extends IWindowManager.Stub
             if (displayContent != null) {
                 mAnimator.addDisplayLocked(displayId);
                 displayContent.initializeDisplayBaseInfo();
+                reconfigureDisplayLocked(displayContent);
             }
         }
     }
@@ -6700,7 +6701,6 @@ public class WindowManagerService extends IWindowManager.Stub
         synchronized (mWindowMap) {
             final Display display = mDisplayManager.getDisplay(displayId);
             if (display != null) {
-                createDisplayContentLocked(display);
                 displayReady(displayId);
             }
             mWindowPlacerLocked.requestTraversal();
