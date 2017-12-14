@@ -997,6 +997,10 @@ public class WebView extends AbsoluteLayout
      * hex encoding of URLs for octets outside that range. For example, '#',
      * '%', '\', '?' should be replaced by %23, %25, %27, %3f respectively.
      * <p>
+     * The {@code mimeType} parameter specifies the format of the data.
+     * If WebView can't handle the specified MIME type, it will download the data.
+     * If {@code null}, defaults to 'text/html'.
+     * <p>
      * The 'data' scheme URL formed by this method uses the default US-ASCII
      * charset. If you need need to set a different charset, you should form a
      * 'data' scheme URL which explicitly specifies a charset parameter in the
@@ -1005,8 +1009,7 @@ public class WebView extends AbsoluteLayout
      * always overrides that specified in the HTML or XML document itself.
      *
      * @param data a String of data in the given encoding
-     * @param mimeType the MIMEType of the data, e.g. 'text/html'. If {@code null},
-     *                 defaults to 'text/html'.
+     * @param mimeType the MIME type of the data, e.g. 'text/html'.
      * @param encoding the encoding of the data
      */
     public void loadData(String data, @Nullable String mimeType, @Nullable String encoding) {
@@ -1019,6 +1022,10 @@ public class WebView extends AbsoluteLayout
      * the content. The base URL is used both to resolve relative URLs and when
      * applying JavaScript's same origin policy. The historyUrl is used for the
      * history entry.
+     * <p>
+     * The {@code mimeType} parameter specifies the format of the data.
+     * If WebView can't handle the specified MIME type, it will download the data.
+     * If {@code null}, defaults to 'text/html'.
      * <p>
      * Note that content specified in this way can access local device files
      * (via 'file' scheme URLs) only if baseUrl specifies a scheme other than
@@ -1037,8 +1044,7 @@ public class WebView extends AbsoluteLayout
      * @param baseUrl the URL to use as the page's base URL. If {@code null} defaults to
      *                'about:blank'.
      * @param data a String of data in the given encoding
-     * @param mimeType the MIMEType of the data, e.g. 'text/html'. If {@code null},
-     *                 defaults to 'text/html'.
+     * @param mimeType the MIME type of the data, e.g. 'text/html'.
      * @param encoding the encoding of the data
      * @param historyUrl the URL to use as the history entry. If {@code null} defaults
      *                   to 'about:blank'. If non-null, this must be a valid URL.
