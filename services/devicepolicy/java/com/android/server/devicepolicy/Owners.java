@@ -277,6 +277,17 @@ class Owners {
         }
     }
 
+    void transferProfileOwner(ComponentName target, int userId) {
+        synchronized (mLock) {
+            final OwnerInfo ownerInfo = mProfileOwners.get(userId);
+            final OwnerInfo newOwnerInfo = new OwnerInfo(target.getPackageName(), target,
+                    ownerInfo.userRestrictionsMigrated, ownerInfo.remoteBugreportUri,
+                    ownerInfo.remoteBugreportHash);
+            mProfileOwners.put(userId, newOwnerInfo);
+            pushToPackageManagerLocked();
+        }
+    }
+
     ComponentName getProfileOwnerComponent(int userId) {
         synchronized (mLock) {
             OwnerInfo profileOwner = mProfileOwners.get(userId);
