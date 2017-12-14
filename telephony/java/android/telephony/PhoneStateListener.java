@@ -408,7 +408,7 @@ public class PhoneStateListener {
     /**
      * Callback invoked when device call state changes.
      * @param state call state
-     * @param incomingNumber incoming call phone number. If application does not have
+     * @param phoneNumber call phone number. If application does not have
      * {@link android.Manifest.permission#READ_PHONE_STATE READ_PHONE_STATE} permission, an empty
      * string will be passed as an argument.
      *
@@ -416,7 +416,7 @@ public class PhoneStateListener {
      * @see TelephonyManager#CALL_STATE_RINGING
      * @see TelephonyManager#CALL_STATE_OFFHOOK
      */
-    public void onCallStateChanged(int state, String incomingNumber) {
+    public void onCallStateChanged(int state, String phoneNumber) {
         // default implementation empty
     }
 
