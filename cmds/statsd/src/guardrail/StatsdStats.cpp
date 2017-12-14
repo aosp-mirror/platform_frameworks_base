@@ -310,7 +310,7 @@ void StatsdStats::addSubStatsToConfigLocked(const ConfigKey& key,
         for (const auto& stats : alertStats) {
             auto output = configStats.add_alert_stats();
             output->set_name(stats.first);
-            output->set_declared_times(stats.second);
+            output->set_alerted_times(stats.second);
             VLOG("alert %s declared %d times", stats.first.c_str(), stats.second);
         }
     }

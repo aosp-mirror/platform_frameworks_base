@@ -163,9 +163,9 @@ TEST(StatsdStatsTest, TestSubStats) {
     EXPECT_EQ(2, configReport.alert_stats_size());
     bool alert1first = !configReport.alert_stats(0).name().compare("alert1");
     EXPECT_EQ("alert1", configReport.alert_stats(alert1first ? 0 : 1).name());
-    EXPECT_EQ(2, configReport.alert_stats(alert1first ? 0 : 1).declared_times());
+    EXPECT_EQ(2, configReport.alert_stats(alert1first ? 0 : 1).alerted_times());
     EXPECT_EQ("alert2", configReport.alert_stats(alert1first ? 1 : 0).name());
-    EXPECT_EQ(1, configReport.alert_stats(alert1first ? 1 : 0).declared_times());
+    EXPECT_EQ(1, configReport.alert_stats(alert1first ? 1 : 0).alerted_times());
 
     EXPECT_EQ(1, configReport.condition_stats_size());
     EXPECT_EQ("condition1", configReport.condition_stats(0).name());
@@ -201,7 +201,7 @@ TEST(StatsdStatsTest, TestSubStats) {
 
     EXPECT_EQ(1, configReport2.alert_stats_size());
     EXPECT_EQ("alert99", configReport2.alert_stats(0).name());
-    EXPECT_EQ(1, configReport2.alert_stats(0).declared_times());
+    EXPECT_EQ(1, configReport2.alert_stats(0).alerted_times());
 }
 
 TEST(StatsdStatsTest, TestAtomLog) {
