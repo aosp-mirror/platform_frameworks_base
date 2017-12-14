@@ -551,18 +551,20 @@ bool PointerController::doFadingAnimationLocked(nsecs_t timestamp) {
     }
 
     // Animate spots that are fading out and being removed.
-    for (size_t i = 0; i < mLocked.spots.size(); i++) {
+    for (size_t i = 0; i < mLocked.spots.size();) {
         Spot* spot = mLocked.spots.itemAt(i);
         if (spot->id == Spot::INVALID_ID) {
             spot->alpha -= float(frameDelay) / SPOT_FADE_DURATION;
             if (spot->alpha <= 0) {
-                mLocked.spots.removeAt(i--);
+                mLocked.spots.removeAt(i);
                 releaseSpotLocked(spot);
+                continue;
             } else {
                 spot->sprite->setAlpha(spot->alpha);
                 keepAnimating = true;
             }
         }
+        ++i;
     }
     return keepAnimating;
 }
