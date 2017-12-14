@@ -19,6 +19,7 @@ package com.android.server.backup;
 import static com.google.common.truth.Truth.assertThat;
 
 import static org.mockito.Mockito.mock;
+import static org.robolectric.shadow.api.Shadow.extract;
 
 import android.app.backup.BackupManager;
 import android.content.ComponentName;
@@ -31,24 +32,25 @@ import android.os.IBinder;
 import android.platform.test.annotations.Presubmit;
 
 import com.android.server.backup.testing.BackupTransportStub;
-import com.android.server.backup.testing.DefaultPackageManagerWithQueryIntentServicesAsUser;
 import com.android.server.backup.testing.ShadowBackupTransportStub;
 import com.android.server.backup.testing.ShadowContextImplForBackup;
+import com.android.server.backup.testing.ShadowPackageManagerForBackup;
 import com.android.server.backup.testing.TransportBoundListenerStub;
 import com.android.server.backup.testing.TransportReadyCallbackStub;
 import com.android.server.backup.transport.TransportClient;
+import com.android.server.testing.FrameworkRobolectricTestRunner;
+import com.android.server.testing.SystemLoaderClasses;
 
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.MockitoAnnotations;
-import org.robolectric.RobolectricTestRunner;
 import org.robolectric.RuntimeEnvironment;
 import org.robolectric.annotation.Config;
-import org.robolectric.res.builder.RobolectricPackageManager;
 import org.robolectric.shadows.ShadowLog;
 import org.robolectric.shadows.ShadowLooper;
+import org.robolectric.shadows.ShadowPackageManager;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -56,15 +58,17 @@ import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 
-@RunWith(RobolectricTestRunner.class)
+@RunWith(FrameworkRobolectricTestRunner.class)
 @Config(
         manifest = Config.NONE,
-        sdk = 23,
+        sdk = 26,
         shadows = {
                 ShadowContextImplForBackup.class,
-                ShadowBackupTransportStub.class
+                ShadowBackupTransportStub.class,
+                ShadowPackageManagerForBackup.class
         }
 )
+@SystemLoaderClasses({TransportManager.class})
 @Presubmit
 public class TransportManagerTest {
     private static final String PACKAGE_NAME = "some.package.name";
@@ -73,7 +77,7 @@ public class TransportManagerTest {
     private TransportInfo mTransport1;
     private TransportInfo mTransport2;
 
-    private RobolectricPackageManager mPackageManager;
+    private ShadowPackageManager mPackageManagerShadow;
 
     private final TransportBoundListenerStub mTransportBoundListenerStub =
             new TransportBoundListenerStub(true);
@@ -86,9 +90,10 @@ public class TransportManagerTest {
         MockitoAnnotations.initMocks(this);
 
         ShadowLog.stream = System.out;
-        mPackageManager = new DefaultPackageManagerWithQueryIntentServicesAsUser(
-                RuntimeEnvironment.getAppResourceLoader());
-        RuntimeEnvironment.setRobolectricPackageManager(mPackageManager);
+
+        mPackageManagerShadow =
+                (ShadowPackageManagerForBackup)
+                        extract(RuntimeEnvironment.application.getPackageManager());
 
         mTransport1 = new TransportInfo(PACKAGE_NAME, "transport1.name");
         mTransport2 = new TransportInfo(PACKAGE_NAME, "transport2.name");
@@ -539,7 +544,7 @@ public class TransportManagerTest {
         packageInfo.applicationInfo = new ApplicationInfo();
         packageInfo.applicationInfo.privateFlags = flags;
 
-        mPackageManager.addPackage(packageInfo);
+        mPackageManagerShadow.addPackage(packageInfo);
 
         List<ResolveInfo> transportsInfo = new ArrayList<>();
         for (TransportInfo transport : transports) {
@@ -553,7 +558,7 @@ public class TransportManagerTest {
         Intent intent = new Intent(TransportManager.SERVICE_ACTION_TRANSPORT_HOST);
         intent.setPackage(packageName);
 
-        mPackageManager.addResolveInfoForIntent(intent, transportsInfo);
+        mPackageManagerShadow.addResolveInfoForIntent(intent, transportsInfo);
     }
 
     private TransportManager createTransportManagerAndSetUpTransports(

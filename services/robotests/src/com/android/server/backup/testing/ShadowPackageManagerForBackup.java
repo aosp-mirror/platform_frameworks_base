@@ -16,28 +16,22 @@
 
 package com.android.server.backup.testing;
 
+import android.app.ApplicationPackageManager;
 import android.content.Intent;
 import android.content.pm.ResolveInfo;
 
-import org.robolectric.res.ResourceLoader;
-import org.robolectric.res.builder.DefaultPackageManager;
+import org.robolectric.annotation.Implements;
+import org.robolectric.shadows.ShadowApplicationPackageManager;
 
 import java.util.List;
 
 /**
  * Implementation of PackageManager for Robolectric which handles queryIntentServicesAsUser().
  */
-public class DefaultPackageManagerWithQueryIntentServicesAsUser extends
-        DefaultPackageManager {
-
-    /* package */
-    public DefaultPackageManagerWithQueryIntentServicesAsUser(
-            ResourceLoader appResourceLoader) {
-        super(appResourceLoader);
-    }
-
+@Implements(value = ApplicationPackageManager.class, inheritImplementationMethods = true)
+public class ShadowPackageManagerForBackup extends ShadowApplicationPackageManager {
     @Override
     public List<ResolveInfo> queryIntentServicesAsUser(Intent intent, int flags, int userId) {
-        return super.queryIntentServices(intent, flags);
+        return queryIntentServices(intent, flags);
     }
 }
