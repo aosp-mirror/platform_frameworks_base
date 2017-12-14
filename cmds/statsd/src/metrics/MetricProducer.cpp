@@ -21,8 +21,7 @@ namespace statsd {
 
 using std::map;
 
-void MetricProducer::onMatchedLogEventLocked(const size_t matcherIndex, const LogEvent& event,
-                                             bool scheduledPull) {
+void MetricProducer::onMatchedLogEventLocked(const size_t matcherIndex, const LogEvent& event) {
     uint64_t eventTimeNs = event.GetTimestampNs();
     // this is old event, maybe statsd restarted?
     if (eventTimeNs < mStartTimeNs) {
@@ -60,8 +59,7 @@ void MetricProducer::onMatchedLogEventLocked(const size_t matcherIndex, const Lo
         condition = mCondition;
     }
 
-    onMatchedLogEventInternalLocked(matcherIndex, eventKey, conditionKeys, condition, event,
-                                    scheduledPull);
+    onMatchedLogEventInternalLocked(matcherIndex, eventKey, conditionKeys, condition, event);
 }
 
 }  // namespace statsd

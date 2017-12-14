@@ -56,7 +56,7 @@ protected:
     void onMatchedLogEventInternalLocked(
             const size_t matcherIndex, const HashableDimensionKey& eventKey,
             const std::map<std::string, HashableDimensionKey>& conditionKey, bool condition,
-            const LogEvent& event, bool scheduledPull) override;
+            const LogEvent& event) override;
 
 private:
     void onDumpReportLocked(const uint64_t dumpTimeNs,
@@ -89,14 +89,19 @@ private:
 
     // internal state of a bucket.
     typedef struct {
-        std::vector<std::pair<long, long>> raw;
-        bool tainted;
+        // Pulled data always come in pair of <start, end>. This holds the value
+        // for start. The diff (end - start) is added to sum.
+        long start;
+        // Whether the start data point is updated
+        bool startUpdated;
+        // If end data point comes before the start, record this pair as tainted
+        // and the value is not added to the running sum.
+        int tainted;
+        // Running sum of known pairs in this bucket
+        long sum;
     } Interval;
 
     std::unordered_map<HashableDimensionKey, Interval> mCurrentSlicedBucket;
-    // If condition is true and pulling on schedule, the previous bucket value needs to be carried
-    // over to the next bucket.
-    std::unordered_map<HashableDimensionKey, Interval> mNextSlicedBucket;
 
     // Save the past buckets and we can clear when the StatsLogReport is dumped.
     // TODO: Add a lock to mPastBuckets.

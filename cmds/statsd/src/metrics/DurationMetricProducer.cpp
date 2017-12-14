@@ -251,7 +251,7 @@ bool DurationMetricProducer::hitGuardRailLocked(const HashableDimensionKey& newK
 void DurationMetricProducer::onMatchedLogEventInternalLocked(
         const size_t matcherIndex, const HashableDimensionKey& eventKey,
         const map<string, HashableDimensionKey>& conditionKeys, bool condition,
-        const LogEvent& event, bool scheduledPull) {
+        const LogEvent& event) {
     flushIfNeededLocked(event.GetTimestampNs());
 
     if (matcherIndex == mStopAllIndex) {

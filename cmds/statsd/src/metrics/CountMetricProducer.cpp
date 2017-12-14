@@ -188,7 +188,7 @@ bool CountMetricProducer::hitGuardRailLocked(const HashableDimensionKey& newKey)
 void CountMetricProducer::onMatchedLogEventInternalLocked(
         const size_t matcherIndex, const HashableDimensionKey& eventKey,
         const map<string, HashableDimensionKey>& conditionKey, bool condition,
-        const LogEvent& event, bool scheduledPull) {
+        const LogEvent& event) {
     uint64_t eventTimeNs = event.GetTimestampNs();
 
     flushIfNeededLocked(eventTimeNs);
