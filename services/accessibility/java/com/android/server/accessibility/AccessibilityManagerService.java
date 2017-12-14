@@ -3863,11 +3863,14 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub {
         }
 
         private boolean isValidPackageForUid(String packageName, int uid) {
+            final long token = Binder.clearCallingIdentity();
             try {
                 return uid == mPackageManager.getPackageUid(
                         packageName, UserHandle.getUserId(uid));
             } catch (PackageManager.NameNotFoundException e) {
                 return false;
+            } finally {
+                Binder.restoreCallingIdentity(token);
             }
         }
 
