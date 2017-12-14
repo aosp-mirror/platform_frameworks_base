@@ -22,6 +22,7 @@ import static android.app.WindowConfiguration.ACTIVITY_TYPE_UNDEFINED;
 import static android.app.WindowConfiguration.WINDOWING_MODE_FULLSCREEN;
 import static android.app.WindowConfiguration.WINDOWING_MODE_UNDEFINED;
 import static android.content.Intent.FLAG_ACTIVITY_EXCLUDE_FROM_RECENTS;
+import static android.content.Intent.FLAG_ACTIVITY_MULTIPLE_TASK;
 import static android.content.Intent.FLAG_ACTIVITY_NEW_DOCUMENT;
 import static android.view.Display.DEFAULT_DISPLAY;
 
@@ -36,6 +37,7 @@ import static org.mockito.Mockito.spy;
 
 import static java.lang.Integer.MAX_VALUE;
 
+import android.app.ActivityManager;
 import android.app.ActivityManager.RecentTaskInfo;
 import android.app.ActivityManager.RunningTaskInfo;
 import android.content.ComponentName;
@@ -181,23 +183,70 @@ public class RecentTasksTest extends ActivityTestsBase {
         assertTrue(mCallbacksRecorder.removed.contains(mTasks.get(1)));
         mCallbacksRecorder.clear();
 
-        // Add a task which will trigger the trimming of another
-        TaskRecord documentTask1 = createDocumentTask(".DocumentTask1");
-        documentTask1.maxRecents = 1;
-        TaskRecord documentTask2 = createDocumentTask(".DocumentTask1");
-        mRecentTasks.add(documentTask1);
-        mRecentTasks.add(documentTask2);
-        assertTrue(mCallbacksRecorder.added.contains(documentTask1));
-        assertTrue(mCallbacksRecorder.added.contains(documentTask2));
-        assertTrue(mCallbacksRecorder.trimmed.contains(documentTask1));
-        assertTrue(mCallbacksRecorder.removed.contains(documentTask1));
-        mCallbacksRecorder.clear();
-
         // Remove the callback, ensure we don't get any calls
         mRecentTasks.unregisterCallback(mCallbacksRecorder);
         mRecentTasks.add(mTasks.get(0));
         mRecentTasks.remove(mTasks.get(0));
         assertTrue(mCallbacksRecorder.added.isEmpty());
+        assertTrue(mCallbacksRecorder.trimmed.isEmpty());
+        assertTrue(mCallbacksRecorder.removed.isEmpty());
+    }
+
+    @Test
+    public void testAddTasksNoMultiple_expectNoTrim() throws Exception {
+        // Add same non-multiple-task document tasks will remove the task (to re-add it) but not
+        // trim it
+        TaskRecord documentTask1 = createDocumentTask(".DocumentTask1");
+        TaskRecord documentTask2 = createDocumentTask(".DocumentTask1");
+        mRecentTasks.add(documentTask1);
+        mRecentTasks.add(documentTask2);
+        assertTrue(mCallbacksRecorder.added.contains(documentTask1));
+        assertTrue(mCallbacksRecorder.added.contains(documentTask2));
+        assertTrue(mCallbacksRecorder.trimmed.isEmpty());
+        assertTrue(mCallbacksRecorder.removed.contains(documentTask1));
+    }
+
+    @Test
+    public void testAddTasksMaxTaskRecents_expectNoTrim() throws Exception {
+        // Add a task hitting max-recents for that app will remove the task (to add the next one)
+        // but not trim it
+        TaskRecord documentTask1 = createDocumentTask(".DocumentTask1");
+        TaskRecord documentTask2 = createDocumentTask(".DocumentTask1");
+        documentTask1.maxRecents = 1;
+        documentTask2.maxRecents = 1;
+        mRecentTasks.add(documentTask1);
+        mRecentTasks.add(documentTask2);
+        assertTrue(mCallbacksRecorder.added.contains(documentTask1));
+        assertTrue(mCallbacksRecorder.added.contains(documentTask2));
+        assertTrue(mCallbacksRecorder.trimmed.isEmpty());
+        assertTrue(mCallbacksRecorder.removed.contains(documentTask1));
+    }
+
+    @Test
+    public void testAddTasksSameTask_expectNoTrim() throws Exception {
+        // Add a task that is already in the task list does not trigger any callbacks, it just
+        // moves in the list
+        TaskRecord documentTask1 = createDocumentTask(".DocumentTask1");
+        mRecentTasks.add(documentTask1);
+        mRecentTasks.add(documentTask1);
+        assertTrue(mCallbacksRecorder.added.size() == 1);
+        assertTrue(mCallbacksRecorder.added.contains(documentTask1));
+        assertTrue(mCallbacksRecorder.trimmed.isEmpty());
+        assertTrue(mCallbacksRecorder.removed.isEmpty());
+    }
+
+    @Test
+    public void testAddTasksMultipleTasks_expectNoTrim() throws Exception {
+        // Add same multiple-task document tasks does not trim the first tasks
+        TaskRecord documentTask1 = createDocumentTask(".DocumentTask1",
+                FLAG_ACTIVITY_MULTIPLE_TASK);
+        TaskRecord documentTask2 = createDocumentTask(".DocumentTask1",
+                FLAG_ACTIVITY_MULTIPLE_TASK);
+        mRecentTasks.add(documentTask1);
+        mRecentTasks.add(documentTask2);
+        assertTrue(mCallbacksRecorder.added.size() == 2);
+        assertTrue(mCallbacksRecorder.added.contains(documentTask1));
+        assertTrue(mCallbacksRecorder.added.contains(documentTask2));
         assertTrue(mCallbacksRecorder.trimmed.isEmpty());
         assertTrue(mCallbacksRecorder.removed.isEmpty());
     }
@@ -549,10 +598,15 @@ public class RecentTasksTest extends ActivityTestsBase {
     }
 
     private TaskRecord createDocumentTask(String className) {
+        return createDocumentTask(className, 0);
+    }
+
+    private TaskRecord createDocumentTask(String className, int flags) {
         TaskRecord task = createTaskBuilder(className)
-                .setFlags(FLAG_ACTIVITY_NEW_DOCUMENT)
+                .setFlags(FLAG_ACTIVITY_NEW_DOCUMENT | flags)
                 .build();
         task.affinity = null;
+        task.maxRecents = ActivityManager.getMaxAppRecentsLimitStatic();
         return task;
     }
 
