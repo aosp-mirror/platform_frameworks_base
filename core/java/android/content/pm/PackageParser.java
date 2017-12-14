@@ -1559,7 +1559,7 @@ public class PackageParser {
             throws PackageParserException {
         final String apkPath = apkFile.getAbsolutePath();
 
-        boolean untrusted = (parseFlags & PARSE_IS_SYSTEM_DIR) == 0;
+        boolean systemDir = (parseFlags & PARSE_IS_SYSTEM_DIR) != 0;
         int minSignatureScheme = ApkSignatureVerifier.VERSION_JAR_SIGNATURE_SCHEME;
         if ((parseFlags & PARSE_IS_EPHEMERAL) != 0 || pkg.applicationInfo.isStaticSharedLibrary()) {
             // must use v2 signing scheme
@@ -1567,7 +1567,7 @@ public class PackageParser {
         }
         try {
             ApkSignatureVerifier.Result verified =
-                    ApkSignatureVerifier.verify(apkPath, minSignatureScheme, untrusted);
+                    ApkSignatureVerifier.verify(apkPath, minSignatureScheme, systemDir);
             if (pkg.mCertificates == null) {
                 pkg.mCertificates = verified.certs;
                 pkg.mSignatures = verified.sigs;
