@@ -16,13 +16,13 @@
 
 package android.location;
 
-import com.android.internal.util.Preconditions;
-
 import android.annotation.NonNull;
 import android.content.Context;
 import android.os.Handler;
 import android.os.RemoteException;
 import android.util.Log;
+
+import com.android.internal.util.Preconditions;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -46,6 +46,11 @@ abstract class LocalListenerHelper<TListener> {
         mTag = name;
     }
 
+    /**
+     * Adds a {@param listener} to the list of listeners on which callbacks will be executed. The
+     * execution will happen on the {@param handler} thread or alternatively in the callback thread
+     * if a  {@code null} handler value is passed.
+     */
     public boolean add(@NonNull TListener listener, Handler handler) {
         Preconditions.checkNotNull(listener);
         synchronized (mListeners) {

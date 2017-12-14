@@ -33,6 +33,12 @@ public final class ProviderRequest implements Parcelable {
     public long interval = Long.MAX_VALUE;
 
     /**
+     * Whether provider shall make stronger than normal tradeoffs to substantially restrict power
+     * use.
+     */
+    public boolean lowPowerMode = false;
+
+    /**
      * A more detailed set of requests.
      * <p>Location Providers can optionally use this to
      * fine tune location updates, for example when there
@@ -41,26 +47,29 @@ public final class ProviderRequest implements Parcelable {
      */
     public List<LocationRequest> locationRequests = new ArrayList<LocationRequest>();
 
-    public ProviderRequest() { }
+    public ProviderRequest() {
+    }
 
     public static final Parcelable.Creator<ProviderRequest> CREATOR =
             new Parcelable.Creator<ProviderRequest>() {
-        @Override
-        public ProviderRequest createFromParcel(Parcel in) {
-            ProviderRequest request = new ProviderRequest();
-            request.reportLocation = in.readInt() == 1;
-            request.interval = in.readLong();
-            int count = in.readInt();
-            for (int i = 0; i < count; i++) {
-                request.locationRequests.add(LocationRequest.CREATOR.createFromParcel(in));
-            }
-            return request;
-        }
-        @Override
-        public ProviderRequest[] newArray(int size) {
-            return new ProviderRequest[size];
-        }
-    };
+                @Override
+                public ProviderRequest createFromParcel(Parcel in) {
+                    ProviderRequest request = new ProviderRequest();
+                    request.reportLocation = in.readInt() == 1;
+                    request.interval = in.readLong();
+                    request.lowPowerMode = in.readBoolean();
+                    int count = in.readInt();
+                    for (int i = 0; i < count; i++) {
+                        request.locationRequests.add(LocationRequest.CREATOR.createFromParcel(in));
+                    }
+                    return request;
+                }
+
+                @Override
+                public ProviderRequest[] newArray(int size) {
+                    return new ProviderRequest[size];
+                }
+            };
 
     @Override
     public int describeContents() {
@@ -71,6 +80,7 @@ public final class ProviderRequest implements Parcelable {
     public void writeToParcel(Parcel parcel, int flags) {
         parcel.writeInt(reportLocation ? 1 : 0);
         parcel.writeLong(interval);
+        parcel.writeBoolean(lowPowerMode);
         parcel.writeInt(locationRequests.size());
         for (LocationRequest request : locationRequests) {
             request.writeToParcel(parcel, flags);
@@ -85,6 +95,7 @@ public final class ProviderRequest implements Parcelable {
             s.append("ON");
             s.append(" interval=");
             TimeUtils.formatDuration(interval, s);
+            s.append(" lowPowerMode=" + lowPowerMode);
         } else {
             s.append("OFF");
         }

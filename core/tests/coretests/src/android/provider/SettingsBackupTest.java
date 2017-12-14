@@ -367,6 +367,7 @@ public class SettingsBackupTest {
                     Settings.Global.ENABLE_GPU_DEBUG_LAYERS,
                     Settings.Global.GPU_DEBUG_APP,
                     Settings.Global.GPU_DEBUG_LAYERS,
+                    Settings.Global.ENABLE_GNSS_RAW_MEAS_FULL_TRACKING,
                     Settings.Global.NETWORK_ACCESS_TIMEOUT_MS,
                     Settings.Global.WARNING_TEMPERATURE,
                     Settings.Global.WEBVIEW_DATA_REDUCTION_PROXY_KEY,
