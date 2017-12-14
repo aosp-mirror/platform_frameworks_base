@@ -30,7 +30,7 @@ import android.os.ParcelFileDescriptor;
  */
 interface IIpSecService
 {
-    IpSecSpiResponse reserveSecurityParameterIndex(
+    IpSecSpiResponse allocateSecurityParameterIndex(
             int direction, in String remoteAddress, int requestedSpi, in IBinder binder);
 
     void releaseSecurityParameterIndex(int resourceId);

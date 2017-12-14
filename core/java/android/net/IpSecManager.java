@@ -46,7 +46,7 @@ import java.net.Socket;
  * to create a VPN should use {@link VpnService}.
  *
  * @see <a href="https://tools.ietf.org/html/rfc4301">RFC 4301, Security Architecture for the
- * Internet Protocol</a>
+ *     Internet Protocol</a>
  */
 @SystemService(Context.IPSEC_SERVICE)
 public final class IpSecManager {
@@ -59,8 +59,7 @@ public final class IpSecManager {
      *
      * @hide
      */
-    @TestApi
-    public static final int INVALID_SECURITY_PARAMETER_INDEX = 0;
+    @TestApi public static final int INVALID_SECURITY_PARAMETER_INDEX = 0;
 
     /** @hide */
     public interface Status {
@@ -78,7 +77,7 @@ public final class IpSecManager {
      * <p>The combination of remote {@code InetAddress} and SPI must be unique across all apps on
      * one device. If this error is encountered, a new SPI is required before a transform may be
      * created. This error can be avoided by calling {@link
-     * IpSecManager#reserveSecurityParameterIndex}.
+     * IpSecManager#allocateSecurityParameterIndex}.
      */
     public static final class SpiUnavailableException extends AndroidException {
         private final int mSpi;
@@ -121,7 +120,7 @@ public final class IpSecManager {
      * This class represents a reserved SPI.
      *
      * <p>Objects of this type are used to track reserved security parameter indices. They can be
-     * obtained by calling {@link IpSecManager#reserveSecurityParameterIndex} and must be released
+     * obtained by calling {@link IpSecManager#allocateSecurityParameterIndex} and must be released
      * by calling {@link #close()} when they are no longer needed.
      */
     public static final class SecurityParameterIndex implements AutoCloseable {
@@ -170,7 +169,7 @@ public final class IpSecManager {
             mRemoteAddress = remoteAddress;
             try {
                 IpSecSpiResponse result =
-                        mService.reserveSecurityParameterIndex(
+                        mService.allocateSecurityParameterIndex(
                                 direction, remoteAddress.getHostAddress(), spi, new Binder());
 
                 if (result == null) {
@@ -228,7 +227,7 @@ public final class IpSecManager {
      *     for this user
      * @throws SpiUnavailableException indicating that a particular SPI cannot be reserved
      */
-    public SecurityParameterIndex reserveSecurityParameterIndex(
+    public SecurityParameterIndex allocateSecurityParameterIndex(
             int direction, InetAddress remoteAddress) throws ResourceUnavailableException {
         try {
             return new SecurityParameterIndex(
@@ -255,7 +254,7 @@ public final class IpSecManager {
      *     for this user
      * @throws SpiUnavailableException indicating that the requested SPI could not be reserved
      */
-    public SecurityParameterIndex reserveSecurityParameterIndex(
+    public SecurityParameterIndex allocateSecurityParameterIndex(
             int direction, InetAddress remoteAddress, int requestedSpi)
             throws SpiUnavailableException, ResourceUnavailableException {
         if (requestedSpi == IpSecManager.INVALID_SECURITY_PARAMETER_INDEX) {
@@ -273,16 +272,18 @@ public final class IpSecManager {
      * unprotected traffic can resume on that socket.
      *
      * <p>For security reasons, the destination address of any traffic on the socket must match the
-     * remote {@code  InetAddress} of the {@code IpSecTransform}. Attempts to send traffic to any
+     * remote {@code InetAddress} of the {@code IpSecTransform}. Attempts to send traffic to any
      * other IP address will result in an IOException. In addition, reads and writes on the socket
      * will throw IOException if the user deactivates the transform (by calling {@link
      * IpSecTransform#close()}) without calling {@link #removeTransportModeTransform}.
      *
-     * <h4>Rekey Procedure</h4> <p>When applying a new tranform to a socket, the previous transform
-     * will be removed. However, inbound traffic on the old transform will continue to be decrypted
-     * until that transform is deallocated by calling {@link IpSecTransform#close()}. This overlap
-     * allows rekey procedures where both transforms are valid until both endpoints are using the
-     * new transform and all in-flight packets have been received.
+     * <h4>Rekey Procedure</h4>
+     *
+     * <p>When applying a new tranform to a socket, the previous transform will be removed. However,
+     * inbound traffic on the old transform will continue to be decrypted until that transform is
+     * deallocated by calling {@link IpSecTransform#close()}. This overlap allows rekey procedures
+     * where both transforms are valid until both endpoints are using the new transform and all
+     * in-flight packets have been received.
      *
      * @param socket a stream socket
      * @param transform a transport mode {@code IpSecTransform}
@@ -310,11 +311,13 @@ public final class IpSecManager {
      * will throw IOException if the user deactivates the transform (by calling {@link
      * IpSecTransform#close()}) without calling {@link #removeTransportModeTransform}.
      *
-     * <h4>Rekey Procedure</h4> <p>When applying a new tranform to a socket, the previous transform
-     * will be removed. However, inbound traffic on the old transform will continue to be decrypted
-     * until that transform is deallocated by calling {@link IpSecTransform#close()}. This overlap
-     * allows rekey procedures where both transforms are valid until both endpoints are using the
-     * new transform and all in-flight packets have been received.
+     * <h4>Rekey Procedure</h4>
+     *
+     * <p>When applying a new tranform to a socket, the previous transform will be removed. However,
+     * inbound traffic on the old transform will continue to be decrypted until that transform is
+     * deallocated by calling {@link IpSecTransform#close()}. This overlap allows rekey procedures
+     * where both transforms are valid until both endpoints are using the new transform and all
+     * in-flight packets have been received.
      *
      * @param socket a datagram socket
      * @param transform a transport mode {@code IpSecTransform}
@@ -342,11 +345,13 @@ public final class IpSecManager {
      * will throw IOException if the user deactivates the transform (by calling {@link
      * IpSecTransform#close()}) without calling {@link #removeTransportModeTransform}.
      *
-     * <h4>Rekey Procedure</h4> <p>When applying a new tranform to a socket, the previous transform
-     * will be removed. However, inbound traffic on the old transform will continue to be decrypted
-     * until that transform is deallocated by calling {@link IpSecTransform#close()}. This overlap
-     * allows rekey procedures where both transforms are valid until both endpoints are using the
-     * new transform and all in-flight packets have been received.
+     * <h4>Rekey Procedure</h4>
+     *
+     * <p>When applying a new tranform to a socket, the previous transform will be removed. However,
+     * inbound traffic on the old transform will continue to be decrypted until that transform is
+     * deallocated by calling {@link IpSecTransform#close()}. This overlap allows rekey procedures
+     * where both transforms are valid until both endpoints are using the new transform and all
+     * in-flight packets have been received.
      *
      * @param socket a socket file descriptor
      * @param transform a transport mode {@code IpSecTransform}
@@ -379,7 +384,8 @@ public final class IpSecManager {
      * Applications should probably not use this API directly. Instead, they should use {@link
      * VpnService} to provide VPN capability in a more generic fashion.
      *
-     * TODO: Update javadoc for tunnel mode APIs at the same time the APIs are re-worked.
+     * <p>TODO: Update javadoc for tunnel mode APIs at the same time the APIs are re-worked.
+     *
      * @param net a {@link Network} that will be tunneled via IP Sec.
      * @param transform an {@link IpSecTransform}, which must be an active Tunnel Mode transform.
      * @hide
@@ -469,7 +475,8 @@ public final class IpSecManager {
      * all traffic that cannot be routed to the Tunnel's outbound interface. If that interface is
      * lost, all traffic will drop.
      *
-     * TODO: Update javadoc for tunnel mode APIs at the same time the APIs are re-worked.
+     * <p>TODO: Update javadoc for tunnel mode APIs at the same time the APIs are re-worked.
+     *
      * @param net a network that currently has transform applied to it.
      * @param transform a Tunnel Mode IPsec Transform that has been previously applied to the given
      *     network
