@@ -161,7 +161,8 @@ public class RadioManager {
         private final Set<Integer> mSupportedIdentifierTypes;
         @NonNull private final Map<String, String> mVendorInfo;
 
-        ModuleProperties(int id, String serviceName, int classId, String implementor,
+        /** @hide */
+        public ModuleProperties(int id, String serviceName, int classId, String implementor,
                 String product, String version, String serial, int numTuners, int numAudioSources,
                 boolean isCaptureSupported, BandDescriptor[] bands, boolean isBgScanSupported,
                 @ProgramSelector.ProgramType int[] supportedProgramTypes,
