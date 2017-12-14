@@ -22,6 +22,7 @@ import android.app.ActivityManager;
 import android.content.ContentResolver;
 import android.content.Context;
 import android.database.ContentObserver;
+import android.metrics.LogMaker;
 import android.net.Uri;
 import android.os.Handler;
 import android.os.Looper;
@@ -31,6 +32,8 @@ import android.provider.Settings.System;
 import android.util.Slog;
 
 import com.android.internal.R;
+import com.android.internal.logging.MetricsLogger;
+import com.android.internal.logging.nano.MetricsProto.MetricsEvent;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
@@ -109,10 +112,10 @@ public final class ColorDisplayController {
 
     private final Context mContext;
     private final int mUserId;
-
     private final ContentObserver mContentObserver;
 
     private Callback mCallback;
+    private MetricsLogger mMetricsLogger;
 
     public ColorDisplayController(@NonNull Context context) {
         this(context, ActivityManager.getCurrentUser());
@@ -209,6 +212,15 @@ public final class ColorDisplayController {
     }
 
     /**
+     * Returns the current auto mode value, without validation, or {@code 1} if the auto mode has
+     * never been set.
+     */
+    public int getAutoModeRaw() {
+        return Secure.getIntForUser(mContext.getContentResolver(), Secure.NIGHT_DISPLAY_AUTO_MODE,
+                -1, mUserId);
+    }
+
+    /**
      * Sets the current auto mode value controlling when Night display will be automatically
      * activated. One of {@link #AUTO_MODE_DISABLED}, {@link #AUTO_MODE_CUSTOM}, or
      * {@link #AUTO_MODE_TWILIGHT}.
@@ -228,7 +240,12 @@ public final class ColorDisplayController {
                     Secure.NIGHT_DISPLAY_LAST_ACTIVATED_TIME,
                     null,
                     mUserId);
+            getMetricsLogger().write(new LogMaker(
+                    MetricsEvent.ACTION_NIGHT_DISPLAY_AUTO_MODE_CHANGED)
+                    .setType(MetricsEvent.TYPE_ACTION)
+                    .setSubtype(autoMode));
         }
+
         return Secure.putIntForUser(mContext.getContentResolver(),
                 Secure.NIGHT_DISPLAY_AUTO_MODE, autoMode, mUserId);
     }
@@ -263,6 +280,10 @@ public final class ColorDisplayController {
         if (startTime == null) {
             throw new IllegalArgumentException("startTime cannot be null");
         }
+        getMetricsLogger().write(new LogMaker(
+                MetricsEvent.ACTION_NIGHT_DISPLAY_AUTO_MODE_CUSTOM_TIME_CHANGED)
+                .setType(MetricsEvent.TYPE_ACTION)
+                .setSubtype(0));
         return Secure.putIntForUser(mContext.getContentResolver(),
                 Secure.NIGHT_DISPLAY_CUSTOM_START_TIME, startTime.toSecondOfDay() * 1000, mUserId);
     }
@@ -297,6 +318,10 @@ public final class ColorDisplayController {
         if (endTime == null) {
             throw new IllegalArgumentException("endTime cannot be null");
         }
+        getMetricsLogger().write(new LogMaker(
+                MetricsEvent.ACTION_NIGHT_DISPLAY_AUTO_MODE_CUSTOM_TIME_CHANGED)
+                .setType(MetricsEvent.TYPE_ACTION)
+                .setSubtype(1));
         return Secure.putIntForUser(mContext.getContentResolver(),
                 Secure.NIGHT_DISPLAY_CUSTOM_END_TIME, endTime.toSecondOfDay() * 1000, mUserId);
     }
@@ -448,6 +473,13 @@ public final class ColorDisplayController {
                         false /* notifyForDecendants */, mContentObserver, mUserId);
             }
         }
+    }
+
+    private MetricsLogger getMetricsLogger() {
+        if (mMetricsLogger == null) {
+            mMetricsLogger = new MetricsLogger();
+        }
+        return mMetricsLogger;
     }
 
     /**

@@ -305,6 +305,7 @@ public class SettingsBackupTest {
                     Settings.Global.NETWORK_SWITCH_NOTIFICATION_RATE_LIMIT_MILLIS,
                     Settings.Global.NETWORK_WATCHLIST_ENABLED,
                     Settings.Global.NEW_CONTACT_AGGREGATOR,
+                    Settings.Global.NIGHT_DISPLAY_FORCED_AUTO_MODE_AVAILABLE,
                     Settings.Global.NITZ_UPDATE_DIFF,
                     Settings.Global.NITZ_UPDATE_SPACING,
                     Settings.Global.NOTIFICATION_SNOOZE_OPTIONS,
