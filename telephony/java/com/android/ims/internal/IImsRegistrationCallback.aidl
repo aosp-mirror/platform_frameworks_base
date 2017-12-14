@@ -15,18 +15,22 @@
  */
 
 
-package android.telephony.ims.internal.aidl;
+package com.android.ims.internal;
 
-import android.telephony.ims.internal.aidl.IImsRegistrationCallback;
+import android.net.Uri;
 import android.telephony.ims.internal.stub.ImsFeatureConfiguration;
 
+import com.android.ims.ImsReasonInfo;
+
 /**
- * See ImsRegistration for more information.
+ * See ImsRegistrationImplBase.Callback for more information.
  *
  * {@hide}
  */
-interface IImsRegistration {
-   int getRegistrationTechnology();
-   oneway void addRegistrationCallback(IImsRegistrationCallback c);
-   oneway void removeRegistrationCallback(IImsRegistrationCallback c);
+oneway interface IImsRegistrationCallback {
+   void onRegistered(int imsRadioTech);
+   void onRegistering(int imsRadioTech);
+   void onDeregistered(in ImsReasonInfo info);
+   void onTechnologyChangeFailed(int imsRadioTech, in ImsReasonInfo info);
+   void onSubscriberAssociatedUriChanged(in Uri[] uris);
 }

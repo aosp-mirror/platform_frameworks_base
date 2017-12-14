@@ -28,8 +28,8 @@ import android.telephony.ims.internal.aidl.IImsCallSessionListener;
 import android.telephony.ims.internal.aidl.IImsCapabilityCallback;
 import android.telephony.ims.internal.aidl.IImsMmTelFeature;
 import android.telephony.ims.internal.aidl.IImsMmTelListener;
-import android.telephony.ims.internal.stub.ImsRegistrationImplBase;
 import android.telephony.ims.internal.aidl.IImsSmsListener;
+import android.telephony.ims.stub.ImsRegistrationImplBase;
 import android.telephony.ims.stub.ImsEcbmImplBase;
 import android.telephony.ims.stub.ImsMultiEndpointImplBase;
 import android.telephony.ims.stub.ImsUtImplBase;
@@ -258,6 +258,15 @@ public class MmTelFeature extends ImsFeature {
         @Override
         public final void onIncomingCall(IImsCallSession c) {
             onIncomingCall(new ImsCallSession(c));
+        }
+
+        /**
+         * Updates the Listener when the voice message count for IMS has changed.
+         * @param count an integer representing the new message count.
+         */
+        @Override
+        public void onVoiceMessageCountUpdate(int count) {
+
         }
 
         /**
