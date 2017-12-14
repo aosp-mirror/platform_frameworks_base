@@ -24,7 +24,6 @@ import android.telephony.CarrierConfigManager;
 import android.telephony.ims.internal.aidl.IImsConfig;
 import android.telephony.ims.internal.aidl.IImsMmTelFeature;
 import android.telephony.ims.internal.aidl.IImsRcsFeature;
-import android.telephony.ims.internal.aidl.IImsRegistration;
 import android.telephony.ims.internal.aidl.IImsServiceController;
 import android.telephony.ims.internal.aidl.IImsServiceControllerListener;
 import android.telephony.ims.internal.feature.ImsFeature;
@@ -32,11 +31,12 @@ import android.telephony.ims.internal.feature.MmTelFeature;
 import android.telephony.ims.internal.feature.RcsFeature;
 import android.telephony.ims.internal.stub.ImsConfigImplBase;
 import android.telephony.ims.internal.stub.ImsFeatureConfiguration;
-import android.telephony.ims.internal.stub.ImsRegistrationImplBase;
+import android.telephony.ims.stub.ImsRegistrationImplBase;
 import android.util.Log;
 import android.util.SparseArray;
 
 import com.android.ims.internal.IImsFeatureStatusCallback;
+import com.android.ims.internal.IImsRegistration;
 import com.android.internal.annotations.VisibleForTesting;
 
 /**
