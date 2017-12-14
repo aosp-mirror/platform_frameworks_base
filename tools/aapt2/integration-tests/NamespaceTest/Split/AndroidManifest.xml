@@ -14,16 +14,18 @@
      limitations under the License.
 -->
 
-<resources>
-    <string name="app_name">Namespace App</string>
-    <bool name="always_true">true</bool>
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    package="com.android.aapt.namespace.split"
+    featureSplit="split">
 
-    <style name="AppTheme" parent="com.android.aapt.namespace.libone:style/Theme">
-        <item name="android:colorPrimary">#3F51B5</item>
-        <item name="android:colorPrimaryDark">#303F9F</item>
-        <item name="android:colorAccent">#FF4081</item>
-        <item name="com.android.aapt.namespace.libone:theme_attr">
-            @com.android.aapt.namespace.libtwo:string/public_string
-        </item>
-    </style>
-</resources>
+    <uses-sdk android:minSdkVersion="21" android:targetSdkVersion="26"/>
+
+    <application>
+        <activity android:name=".SplitActivity" android:theme="@style/ActivityTheme">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+        </activity>
+    </application>
+</manifest>
