@@ -105,6 +105,13 @@ public abstract class EuiccService extends Service {
     public static final String EXTRA_RESOLUTION_CALLING_PACKAGE =
             "android.service.euicc.extra.RESOLUTION_CALLING_PACKAGE";
 
+    /**
+     * Intent extra set for resolution requests containing a boolean indicating whether to ask the
+     * user to retry another confirmation code.
+     */
+    public static final String EXTRA_RESOLUTION_CONFIRMATION_CODE_RETRIED =
+            "android.service.euicc.extra.RESOLUTION_CONFIRMATION_CODE_RETRIED";
+
     /** Result code for a successful operation. */
     public static final int RESULT_OK = 0;
     /** Result code indicating that an active SIM must be deactivated to perform the operation. */
