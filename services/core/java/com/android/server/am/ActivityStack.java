@@ -1683,7 +1683,7 @@ class ActivityStack<T extends StackWindowController> extends ConfigurationContai
                     continue;
                 }
 
-                if (!r.visible && r != starting) {
+                if (!r.visibleIgnoringKeyguard && r != starting) {
                     // Also ignore invisible activities that are not the currently starting
                     // activity (about to be visible).
                     continue;
@@ -1811,6 +1811,7 @@ class ActivityStack<T extends StackWindowController> extends ConfigurationContai
             boolean behindFullscreenActivity = !stackShouldBeVisible;
             boolean resumeNextActivity = mStackSupervisor.isFocusedStack(this)
                     && (isInStackLocked(starting) == null);
+            final boolean isTopFullscreenStack = getDisplay().isTopFullscreenStack(this);
             for (int taskNdx = mTaskHistory.size() - 1; taskNdx >= 0; --taskNdx) {
                 final TaskRecord task = mTaskHistory.get(taskNdx);
                 final ArrayList<ActivityRecord> activities = task.mActivities;
@@ -1832,7 +1833,7 @@ class ActivityStack<T extends StackWindowController> extends ConfigurationContai
 
                     // Now check whether it's really visible depending on Keyguard state.
                     final boolean reallyVisible = checkKeyguardVisibility(r,
-                            visibleIgnoringKeyguard, isTop);
+                            visibleIgnoringKeyguard, isTop && isTopFullscreenStack);
                     if (visibleIgnoringKeyguard) {
                         behindFullscreenActivity = updateBehindFullscreen(!stackShouldBeVisible,
                                 behindFullscreenActivity, r);
@@ -1958,13 +1959,11 @@ class ActivityStack<T extends StackWindowController> extends ConfigurationContai
      *
      * @return true if {@param r} is visible taken Keyguard state into account, false otherwise
      */
-    boolean checkKeyguardVisibility(ActivityRecord r, boolean shouldBeVisible,
-            boolean isTop) {
-        final boolean isInPinnedStack = r.inPinnedWindowingMode();
+    boolean checkKeyguardVisibility(ActivityRecord r, boolean shouldBeVisible, boolean isTop) {
         final boolean keyguardShowing = mStackSupervisor.getKeyguardController().isKeyguardShowing(
                 mDisplayId != INVALID_DISPLAY ? mDisplayId : DEFAULT_DISPLAY);
         final boolean keyguardLocked = mStackSupervisor.getKeyguardController().isKeyguardLocked();
-        final boolean showWhenLocked = r.canShowWhenLocked() && !isInPinnedStack;
+        final boolean showWhenLocked = r.canShowWhenLocked();
         final boolean dismissKeyguard = r.hasDismissKeyguardWindows();
         if (shouldBeVisible) {
             if (dismissKeyguard && mTopDismissingKeyguardActivity == null) {
