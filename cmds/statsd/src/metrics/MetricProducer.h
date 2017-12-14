@@ -38,9 +38,10 @@ namespace statsd {
 // be a no-op.
 class MetricProducer : public virtual PackageInfoListener {
 public:
-    MetricProducer(const ConfigKey& key, const int64_t startTimeNs, const int conditionIndex,
-                   const sp<ConditionWizard>& wizard)
-        : mConfigKey(key),
+    MetricProducer(const std::string& name, const ConfigKey& key, const int64_t startTimeNs,
+                   const int conditionIndex, const sp<ConditionWizard>& wizard)
+        : mName(name),
+          mConfigKey(key),
           mStartTimeNs(startTimeNs),
           mCurrentBucketStartTimeNs(startTimeNs),
           mCurrentBucketNum(0),
@@ -107,6 +108,8 @@ protected:
     virtual void onDumpReportLocked(const uint64_t dumpTimeNs,
                                     android::util::ProtoOutputStream* protoOutput) = 0;
     virtual size_t byteSizeLocked() const = 0;
+
+    const std::string mName;
 
     const ConfigKey mConfigKey;
 
