@@ -150,8 +150,7 @@ public class StatusBarTest extends SysuiTestCase {
 
         mMetricsLogger = new FakeMetricsLogger();
         mDependency.injectTestDependency(MetricsLogger.class, mMetricsLogger);
-        mNotificationLogger = new NotificationLogger(mNotificationListener,
-                mDependency.get(UiOffloadThread.class));
+        mNotificationLogger = new NotificationLogger();
         mDependency.injectTestDependency(NotificationLogger.class, mNotificationLogger);
 
         IPowerManager powerManagerService = mock(IPowerManager.class);
@@ -183,8 +182,8 @@ public class StatusBarTest extends SysuiTestCase {
             return null;
         }).when(mStatusBarKeyguardViewManager).addAfterKeyguardGoneRunnable(any());
 
-        mEntryManager = new TestableNotificationEntryManager(mMetricsLogger,
-                mSystemServicesProxy, mPowerManager, mContext);
+        mEntryManager = new TestableNotificationEntryManager(mSystemServicesProxy, mPowerManager,
+                mContext);
         mStatusBar = new TestableStatusBar(mStatusBarKeyguardViewManager, mUnlockMethodCache,
                 mKeyguardIndicationController, mStackScroller, mHeadsUpManager,
                 mPowerManager, mNotificationPanelView, mBarService, mNotificationListener,
@@ -637,21 +636,9 @@ public class StatusBarTest extends SysuiTestCase {
 
     private class TestableNotificationEntryManager extends NotificationEntryManager {
 
-        public TestableNotificationEntryManager(MetricsLogger metricsLogger,
-                SystemServicesProxy systemServicesProxy, PowerManager powerManager,
-                Context context) {
-            super(mDependency.get(NotificationLockscreenUserManager.class),
-                    mDependency.get(NotificationGroupManager.class),
-                    mDependency.get(NotificationGutsManager.class),
-                    mDependency.get(NotificationRemoteInputManager.class),
-                    mDependency.get(NotificationMediaManager.class),
-                    mDependency.get(ForegroundServiceController.class),
-                    mDependency.get(NotificationListener.class),
-                    metricsLogger,
-                    mDependency.get(DeviceProvisionedController.class),
-                    mDependency.get(VisualStabilityManager.class),
-                    mDependency.get(UiOffloadThread.class),
-                    context);
+        public TestableNotificationEntryManager(SystemServicesProxy systemServicesProxy,
+                PowerManager powerManager, Context context) {
+            super(context);
             mSystemServicesProxy = systemServicesProxy;
             mPowerManager = powerManager;
         }

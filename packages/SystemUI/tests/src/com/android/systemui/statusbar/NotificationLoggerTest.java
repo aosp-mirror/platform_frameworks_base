@@ -80,8 +80,7 @@ public class NotificationLoggerTest extends SysuiTestCase {
         mEntry = new NotificationData.Entry(mSbn);
         mEntry.row = mRow;
 
-        mLogger = new TestableNotificationLogger(mListener, mDependency.get(UiOffloadThread.class),
-                mBarService);
+        mLogger = new TestableNotificationLogger(mBarService);
         mLogger.setUpWithEntryManager(mEntryManager, mListContainer);
     }
 
@@ -127,11 +126,7 @@ public class NotificationLoggerTest extends SysuiTestCase {
 
     private class TestableNotificationLogger extends NotificationLogger {
 
-        public TestableNotificationLogger(
-                NotificationListenerService notificationListener,
-                UiOffloadThread uiOffloadThread,
-                IStatusBarService barService) {
-            super(notificationListener, uiOffloadThread);
+        public TestableNotificationLogger(IStatusBarService barService) {
             mBarService = barService;
             // Make this on the main thread so we can wait for it during tests.
             mHandler = new Handler(Looper.getMainLooper());

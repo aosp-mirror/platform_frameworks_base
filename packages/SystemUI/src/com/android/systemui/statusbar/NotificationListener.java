@@ -27,6 +27,7 @@ import android.os.UserHandle;
 import android.service.notification.StatusBarNotification;
 import android.util.Log;
 
+import com.android.systemui.Dependency;
 import com.android.systemui.statusbar.phone.NotificationListenerWithPlugins;
 
 /**
@@ -36,15 +37,16 @@ import com.android.systemui.statusbar.phone.NotificationListenerWithPlugins;
 public class NotificationListener extends NotificationListenerWithPlugins {
     private static final String TAG = "NotificationListener";
 
-    private final NotificationRemoteInputManager mRemoteInputManager;
+    // Dependencies:
+    private final NotificationRemoteInputManager mRemoteInputManager =
+            Dependency.get(NotificationRemoteInputManager.class);
+
     private final Context mContext;
 
     protected NotificationPresenter mPresenter;
     protected NotificationEntryManager mEntryManager;
 
-    public NotificationListener(NotificationRemoteInputManager remoteInputManager,
-            Context context) {
-        mRemoteInputManager = remoteInputManager;
+    public NotificationListener(Context context) {
         mContext = context;
     }
 

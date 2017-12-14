@@ -66,7 +66,10 @@ public class NotificationGutsManager implements Dumpable {
     private final Set<String> mNonBlockablePkgs;
     private final Context mContext;
     private final AccessibilityManager mAccessibilityManager;
-    private final NotificationLockscreenUserManager mLockscreenUserManager;
+
+    // Dependencies:
+    private final NotificationLockscreenUserManager mLockscreenUserManager =
+            Dependency.get(NotificationLockscreenUserManager.class);
 
     // which notification is currently being longpress-examined by the user
     private NotificationGuts mNotificationGutsExposed;
@@ -78,10 +81,7 @@ public class NotificationGutsManager implements Dumpable {
     private OnSettingsClickListener mOnSettingsClickListener;
     private String mKeyToRemoveOnGutsClosed;
 
-    public NotificationGutsManager(
-            NotificationLockscreenUserManager lockscreenUserManager,
-            Context context) {
-        mLockscreenUserManager = lockscreenUserManager;
+    public NotificationGutsManager(Context context) {
         mContext = context;
         Resources res = context.getResources();
 

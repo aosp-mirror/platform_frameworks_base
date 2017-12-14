@@ -61,8 +61,7 @@ public class NotificationRemoteInputManagerTest extends SysuiTestCase {
         when(mPresenter.getHandler()).thenReturn(mHandler);
         when(mEntryManager.getLatestRankingMap()).thenReturn(mRanking);
 
-        mRemoteInputManager = new TestableNotificationRemoteInputManager(mLockscreenUserManager,
-                mContext);
+        mRemoteInputManager = new TestableNotificationRemoteInputManager(mContext);
         mSbn = new StatusBarNotification(TEST_PACKAGE_NAME, TEST_PACKAGE_NAME, 0, null, TEST_UID,
                 0, new Notification(), UserHandle.CURRENT, null, 0);
         mEntry = new NotificationData.Entry(mSbn);
@@ -108,9 +107,8 @@ public class NotificationRemoteInputManagerTest extends SysuiTestCase {
 
     private class TestableNotificationRemoteInputManager extends NotificationRemoteInputManager {
 
-        public TestableNotificationRemoteInputManager(
-                NotificationLockscreenUserManager lockscreenUserManager, Context context) {
-            super(lockscreenUserManager, context);
+        public TestableNotificationRemoteInputManager(Context context) {
+            super(context);
         }
 
         public void setUpWithPresenterForTest(NotificationPresenter presenter,

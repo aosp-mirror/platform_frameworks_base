@@ -39,6 +39,7 @@ import android.widget.TextView;
 
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.statusbar.IStatusBarService;
+import com.android.systemui.Dependency;
 import com.android.systemui.Dumpable;
 import com.android.systemui.statusbar.policy.RemoteInputView;
 
@@ -70,7 +71,10 @@ public class NotificationRemoteInputManager implements Dumpable {
 
     protected final ArraySet<NotificationData.Entry> mRemoteInputEntriesToRemoveOnCollapse =
             new ArraySet<>();
-    protected final NotificationLockscreenUserManager mLockscreenUserManager;
+
+    // Dependencies:
+    protected final NotificationLockscreenUserManager mLockscreenUserManager =
+            Dependency.get(NotificationLockscreenUserManager.class);
 
     /**
      * Notifications with keys in this set are not actually around anymore. We kept them around
@@ -264,9 +268,7 @@ public class NotificationRemoteInputManager implements Dumpable {
         }
     };
 
-    public NotificationRemoteInputManager(NotificationLockscreenUserManager lockscreenUserManager,
-            Context context) {
-        mLockscreenUserManager = lockscreenUserManager;
+    public NotificationRemoteInputManager(Context context) {
         mContext = context;
         mBarService = IStatusBarService.Stub.asInterface(
                 ServiceManager.getService(Context.STATUS_BAR_SERVICE));

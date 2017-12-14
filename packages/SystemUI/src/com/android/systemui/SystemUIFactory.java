@@ -127,35 +127,13 @@ public class SystemUIFactory {
         providers.put(VisualStabilityManager.class, VisualStabilityManager::new);
         providers.put(NotificationGroupManager.class, NotificationGroupManager::new);
         providers.put(NotificationMediaManager.class, () -> new NotificationMediaManager(context));
-        providers.put(NotificationGutsManager.class, () -> new NotificationGutsManager(
-                Dependency.get(NotificationLockscreenUserManager.class), context));
+        providers.put(NotificationGutsManager.class, () -> new NotificationGutsManager(context));
         providers.put(NotificationRemoteInputManager.class,
-                () -> new NotificationRemoteInputManager(
-                        Dependency.get(NotificationLockscreenUserManager.class), context));
-        providers.put(NotificationListener.class, () -> new NotificationListener(
-                Dependency.get(NotificationRemoteInputManager.class), context));
-        providers.put(NotificationLogger.class, () -> new NotificationLogger(
-                Dependency.get(NotificationListener.class),
-                Dependency.get(UiOffloadThread.class)));
-        providers.put(NotificationViewHierarchyManager.class, () ->
-                new NotificationViewHierarchyManager(
-                        Dependency.get(NotificationLockscreenUserManager.class),
-                        Dependency.get(NotificationGroupManager.class),
-                        Dependency.get(VisualStabilityManager.class),
-                        context));
-        providers.put(NotificationEntryManager.class, () ->
-                new NotificationEntryManager(
-                        Dependency.get(NotificationLockscreenUserManager.class),
-                        Dependency.get(NotificationGroupManager.class),
-                        Dependency.get(NotificationGutsManager.class),
-                        Dependency.get(NotificationRemoteInputManager.class),
-                        Dependency.get(NotificationMediaManager.class),
-                        Dependency.get(ForegroundServiceController.class),
-                        Dependency.get(NotificationListener.class),
-                        Dependency.get(MetricsLogger.class),
-                        Dependency.get(DeviceProvisionedController.class),
-                        Dependency.get(VisualStabilityManager.class),
-                        Dependency.get(UiOffloadThread.class),
-                        context));
+                () -> new NotificationRemoteInputManager(context));
+        providers.put(NotificationListener.class, () -> new NotificationListener(context));
+        providers.put(NotificationLogger.class, NotificationLogger::new);
+        providers.put(NotificationViewHierarchyManager.class,
+                () -> new NotificationViewHierarchyManager(context));
+        providers.put(NotificationEntryManager.class, () -> new NotificationEntryManager(context));
     }
 }

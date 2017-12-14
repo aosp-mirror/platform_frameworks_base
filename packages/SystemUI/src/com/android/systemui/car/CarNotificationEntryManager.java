@@ -18,37 +18,13 @@ package com.android.systemui.car;
 import android.content.Context;
 import android.service.notification.StatusBarNotification;
 
-import com.android.internal.logging.MetricsLogger;
-import com.android.systemui.ForegroundServiceController;
-import com.android.systemui.UiOffloadThread;
 import com.android.systemui.statusbar.ExpandableNotificationRow;
 import com.android.systemui.statusbar.NotificationData;
 import com.android.systemui.statusbar.NotificationEntryManager;
-import com.android.systemui.statusbar.NotificationGutsManager;
-import com.android.systemui.statusbar.NotificationListener;
-import com.android.systemui.statusbar.NotificationLockscreenUserManager;
-import com.android.systemui.statusbar.NotificationMediaManager;
-import com.android.systemui.statusbar.NotificationRemoteInputManager;
-import com.android.systemui.statusbar.notification.VisualStabilityManager;
-import com.android.systemui.statusbar.phone.NotificationGroupManager;
-import com.android.systemui.statusbar.policy.DeviceProvisionedController;
 
 public class CarNotificationEntryManager extends NotificationEntryManager {
-    public CarNotificationEntryManager(
-            NotificationLockscreenUserManager lockscreenUserManager,
-            NotificationGroupManager groupManager,
-            NotificationGutsManager gutsManager,
-            NotificationRemoteInputManager remoteInputManager,
-            NotificationMediaManager mediaManager,
-            ForegroundServiceController foregroundServiceController,
-            NotificationListener notificationListener,
-            MetricsLogger metricsLogger,
-            DeviceProvisionedController deviceProvisionedController,
-            VisualStabilityManager visualStabilityManager,
-            UiOffloadThread uiOffloadThread, Context context) {
-        super(lockscreenUserManager, groupManager, gutsManager, remoteInputManager, mediaManager,
-                foregroundServiceController, notificationListener, metricsLogger,
-                deviceProvisionedController, visualStabilityManager, uiOffloadThread, context);
+    public CarNotificationEntryManager(Context context) {
+        super(context);
     }
 
     /**

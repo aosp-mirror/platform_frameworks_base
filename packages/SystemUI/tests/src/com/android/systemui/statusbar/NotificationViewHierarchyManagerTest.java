@@ -73,8 +73,7 @@ public class NotificationViewHierarchyManagerTest extends SysuiTestCase {
 
         when(mEntryManager.getNotificationData()).thenReturn(mNotificationData);
 
-        mViewHierarchyManager = new NotificationViewHierarchyManager(mLockscreenUserManager,
-                mGroupManager, mVisualStabilityManager, mContext);
+        mViewHierarchyManager = new NotificationViewHierarchyManager(mContext);
         mViewHierarchyManager.setUpWithPresenter(mPresenter, mEntryManager, mListContainer);
     }
 

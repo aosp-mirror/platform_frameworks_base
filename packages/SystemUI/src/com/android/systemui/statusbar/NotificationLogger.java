@@ -27,6 +27,7 @@ import android.util.Log;
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.statusbar.IStatusBarService;
 import com.android.internal.statusbar.NotificationVisibility;
+import com.android.systemui.Dependency;
 import com.android.systemui.UiOffloadThread;
 
 import java.util.ArrayList;
@@ -46,8 +47,11 @@ public class NotificationLogger {
     /** Keys of notifications currently visible to the user. */
     private final ArraySet<NotificationVisibility> mCurrentlyVisibleNotifications =
             new ArraySet<>();
-    private final NotificationListenerService mNotificationListener;
-    private final UiOffloadThread mUiOffloadThread;
+
+    // Dependencies:
+    private final NotificationListenerService mNotificationListener =
+            Dependency.get(NotificationListener.class);
+    private final UiOffloadThread mUiOffloadThread = Dependency.get(UiOffloadThread.class);
 
     protected NotificationEntryManager mEntryManager;
     protected Handler mHandler = new Handler();
@@ -132,10 +136,7 @@ public class NotificationLogger {
         }
     };
 
-    public NotificationLogger(NotificationListenerService notificationListener,
-            UiOffloadThread uiOffloadThread) {
-        mNotificationListener = notificationListener;
-        mUiOffloadThread = uiOffloadThread;
+    public NotificationLogger() {
         mBarService = IStatusBarService.Stub.asInterface(
                 ServiceManager.getService(Context.STATUS_BAR_SERVICE));
     }

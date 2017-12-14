@@ -22,6 +22,7 @@ import android.util.Log;
 import android.view.View;
 import android.view.ViewGroup;
 
+import com.android.systemui.Dependency;
 import com.android.systemui.R;
 import com.android.systemui.statusbar.notification.VisualStabilityManager;
 import com.android.systemui.statusbar.phone.NotificationGroupManager;
@@ -43,9 +44,14 @@ public class NotificationViewHierarchyManager {
 
     private final HashMap<ExpandableNotificationRow, List<ExpandableNotificationRow>>
             mTmpChildOrderMap = new HashMap<>();
-    protected final NotificationLockscreenUserManager mLockscreenUserManager;
-    protected final NotificationGroupManager mGroupManager;
-    protected final VisualStabilityManager mVisualStabilityManager;
+
+    // Dependencies:
+    protected final NotificationLockscreenUserManager mLockscreenUserManager =
+            Dependency.get(NotificationLockscreenUserManager.class);
+    protected final NotificationGroupManager mGroupManager =
+            Dependency.get(NotificationGroupManager.class);
+    protected final VisualStabilityManager mVisualStabilityManager =
+            Dependency.get(VisualStabilityManager.class);
 
     /**
      * {@code true} if notifications not part of a group should by default be rendered in their
@@ -58,15 +64,7 @@ public class NotificationViewHierarchyManager {
     private NotificationEntryManager mEntryManager;
     private NotificationListContainer mListContainer;
 
-    public NotificationViewHierarchyManager(
-            NotificationLockscreenUserManager lockscreenUserManager,
-            NotificationGroupManager groupManager,
-            VisualStabilityManager visualStabilityManager,
-            Context context) {
-        mLockscreenUserManager = lockscreenUserManager;
-        mGroupManager = groupManager;
-        mVisualStabilityManager = visualStabilityManager;
-
+    public NotificationViewHierarchyManager(Context context) {
         Resources res = context.getResources();
         mAlwaysExpandNonGroupedNotification =
                 res.getBoolean(R.bool.config_alwaysExpandNonGroupedNotifications);

@@ -101,22 +101,8 @@ public class NotificationEntryManagerTest extends SysuiTestCase {
     private class TestableNotificationEntryManager extends NotificationEntryManager {
         private final CountDownLatch mCountDownLatch;
 
-        public TestableNotificationEntryManager(
-                NotificationLockscreenUserManager lockscreenUserManager,
-                NotificationGroupManager groupManager,
-                NotificationGutsManager gutsManager,
-                NotificationRemoteInputManager remoteInputManager,
-                NotificationMediaManager mediaManager,
-                ForegroundServiceController foregroundServiceController,
-                NotificationListener notificationListener,
-                MetricsLogger metricsLogger,
-                DeviceProvisionedController deviceProvisionedController,
-                VisualStabilityManager visualStabilityManager,
-                UiOffloadThread uiOffloadThread, Context context,
-                IStatusBarService barService) {
-            super(lockscreenUserManager, groupManager, gutsManager, remoteInputManager,
-                    mediaManager, foregroundServiceController, notificationListener, metricsLogger,
-                    deviceProvisionedController, visualStabilityManager, uiOffloadThread, context);
+        public TestableNotificationEntryManager(Context context, IStatusBarService barService) {
+            super(context);
             mBarService = barService;
             mCountDownLatch = new CountDownLatch(1);
             mUseHeadsUp = true;
@@ -170,12 +156,7 @@ public class NotificationEntryManagerTest extends SysuiTestCase {
         mEntry = new NotificationData.Entry(mSbn);
         mEntry.expandedIcon = mock(StatusBarIconView.class);
 
-        mEntryManager = new TestableNotificationEntryManager(mLockscreenUserManager,
-                mGroupManager, mGutsManager, mRemoteInputManager, mMediaManager,
-                mForegroundServiceController, mNotificationListener, mMetricsLogger,
-                mDeviceProvisionedController, mVisualStabilityManager,
-                mDependency.get(UiOffloadThread.class), mContext,
-                mBarService);
+        mEntryManager = new TestableNotificationEntryManager(mContext, mBarService);
         mEntryManager.setUpWithPresenter(mPresenter, mListContainer, mCallback, mHeadsUpManager);
     }
 

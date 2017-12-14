@@ -45,18 +45,7 @@ public class CarSystemUIFactory extends SystemUIFactory {
             Context context) {
         super.injectDependencies(providers, context);
         providers.put(VolumeDialogController.class, () -> new CarVolumeDialogController(context));
-        providers.put(NotificationEntryManager.class, () -> new CarNotificationEntryManager(
-                Dependency.get(NotificationLockscreenUserManager.class),
-                Dependency.get(NotificationGroupManager.class),
-                Dependency.get(NotificationGutsManager.class),
-                Dependency.get(NotificationRemoteInputManager.class),
-                Dependency.get(NotificationMediaManager.class),
-                Dependency.get(ForegroundServiceController.class),
-                Dependency.get(NotificationListener.class),
-                Dependency.get(MetricsLogger.class),
-                Dependency.get(DeviceProvisionedController.class),
-                Dependency.get(VisualStabilityManager.class),
-                Dependency.get(UiOffloadThread.class),
-                context));
+        providers.put(NotificationEntryManager.class,
+                () -> new CarNotificationEntryManager(context));
     }
 }

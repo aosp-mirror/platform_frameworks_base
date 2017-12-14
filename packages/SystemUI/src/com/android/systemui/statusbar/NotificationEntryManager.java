@@ -80,23 +80,35 @@ public class NotificationEntryManager implements Dumpable, NotificationInflater.
     protected static final boolean DEBUG = false;
     protected static final boolean ENABLE_HEADS_UP = true;
     protected static final String SETTING_HEADS_UP_TICKER = "ticker_gets_heads_up";
+
     protected final NotificationMessagingUtil mMessagingUtil;
     protected final Context mContext;
-    protected final NotificationLockscreenUserManager mLockscreenUserManager;
-    protected final NotificationGroupManager mGroupManager;
-    protected final NotificationGutsManager mGutsManager;
-    protected final NotificationRemoteInputManager mRemoteInputManager;
     protected final HashMap<String, NotificationData.Entry> mPendingNotifications = new HashMap<>();
-    protected final NotificationMediaManager mMediaManager;
-    protected final MetricsLogger mMetricsLogger;
-    protected final DeviceProvisionedController mDeviceProvisionedController;
-    protected final VisualStabilityManager mVisualStabilityManager;
-    protected final UiOffloadThread mUiOffloadThread;
-    protected final ForegroundServiceController mForegroundServiceController;
-    protected final NotificationListener mNotificationListener;
     protected final NotificationClicker mNotificationClicker = new NotificationClicker();
     protected final ArraySet<NotificationData.Entry> mHeadsUpEntriesToRemoveOnSwitch =
             new ArraySet<>();
+
+    // Dependencies:
+    protected final NotificationLockscreenUserManager mLockscreenUserManager =
+            Dependency.get(NotificationLockscreenUserManager.class);
+    protected final NotificationGroupManager mGroupManager =
+            Dependency.get(NotificationGroupManager.class);
+    protected final NotificationGutsManager mGutsManager =
+            Dependency.get(NotificationGutsManager.class);
+    protected final NotificationRemoteInputManager mRemoteInputManager =
+            Dependency.get(NotificationRemoteInputManager.class);
+    protected final NotificationMediaManager mMediaManager =
+            Dependency.get(NotificationMediaManager.class);
+    protected final MetricsLogger mMetricsLogger = Dependency.get(MetricsLogger.class);
+    protected final DeviceProvisionedController mDeviceProvisionedController =
+            Dependency.get(DeviceProvisionedController.class);
+    protected final VisualStabilityManager mVisualStabilityManager =
+            Dependency.get(VisualStabilityManager.class);
+    protected final UiOffloadThread mUiOffloadThread = Dependency.get(UiOffloadThread.class);
+    protected final ForegroundServiceController mForegroundServiceController =
+            Dependency.get(ForegroundServiceController.class);
+    protected final NotificationListener mNotificationListener =
+            Dependency.get(NotificationListener.class);
 
     protected IStatusBarService mBarService;
     protected NotificationPresenter mPresenter;
@@ -205,28 +217,7 @@ public class NotificationEntryManager implements Dumpable, NotificationInflater.
         pw.println(mUseHeadsUp);
     }
 
-    public NotificationEntryManager(NotificationLockscreenUserManager lockscreenUserManager,
-            NotificationGroupManager groupManager,
-            NotificationGutsManager gutsManager,
-            NotificationRemoteInputManager remoteInputManager,
-            NotificationMediaManager mediaManager,
-            ForegroundServiceController foregroundServiceController,
-            NotificationListener notificationListener,
-            MetricsLogger metricsLogger,
-            DeviceProvisionedController deviceProvisionedController,
-            VisualStabilityManager visualStabilityManager,
-            UiOffloadThread uiOffloadThread, Context context) {
-        mLockscreenUserManager = lockscreenUserManager;
-        mGroupManager = groupManager;
-        mGutsManager = gutsManager;
-        mRemoteInputManager = remoteInputManager;
-        mMediaManager = mediaManager;
-        mForegroundServiceController = foregroundServiceController;
-        mNotificationListener = notificationListener;
-        mMetricsLogger = metricsLogger;
-        mDeviceProvisionedController = deviceProvisionedController;
-        mVisualStabilityManager = visualStabilityManager;
-        mUiOffloadThread = uiOffloadThread;
+    public NotificationEntryManager(Context context) {
         mContext = context;
         mPowerManager = (PowerManager) mContext.getSystemService(Context.POWER_SERVICE);
         mBarService = IStatusBarService.Stub.asInterface(
