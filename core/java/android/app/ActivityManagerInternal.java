@@ -263,4 +263,9 @@ public abstract class ActivityManagerInternal {
      * Clears the previously saved activity manager ANR state.
      */
     public abstract void clearSavedANRState();
+
+    /**
+     * Returns {@code true} if {@code uid} is running an activity from {@code packageName}.
+     */
+    public abstract boolean hasRunningActivity(int uid, @Nullable String packageName);
 }
