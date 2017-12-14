@@ -43,7 +43,8 @@ class ClientLifecycleManager {
      */
     void scheduleTransaction(ClientTransaction transaction) throws RemoteException {
         transaction.schedule();
-        transaction.recycle();
+        // TODO: b/70616950
+        //transaction.recycle();
     }
 
     /**
