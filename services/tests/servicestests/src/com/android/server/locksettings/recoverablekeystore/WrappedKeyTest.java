@@ -61,7 +61,8 @@ public class WrappedKeyTest {
 
     @Test
     public void fromSecretKey_createsWrappedKeyThatCanBeUnwrapped() throws Exception {
-        SecretKey wrappingKey = generateAndroidKeyStoreKey();
+        PlatformEncryptionKey wrappingKey = new PlatformEncryptionKey(
+                GENERATION_ID, generateAndroidKeyStoreKey());
         SecretKey rawKey = generateKey();
 
         WrappedKey wrappedKey = WrappedKey.fromSecretKey(wrappingKey, rawKey);
@@ -69,7 +70,7 @@ public class WrappedKeyTest {
         Cipher cipher = Cipher.getInstance(CIPHER_ALGORITHM);
         cipher.init(
                 Cipher.UNWRAP_MODE,
-                wrappingKey,
+                wrappingKey.getKey(),
                 new GCMParameterSpec(GCM_TAG_LENGTH_BITS, wrappedKey.getNonce()));
         SecretKey unwrappedKey = (SecretKey) cipher.unwrap(
                 wrappedKey.getKeyMaterial(), KEY_ALGORITHM, Cipher.SECRET_KEY);
@@ -77,15 +78,28 @@ public class WrappedKeyTest {
     }
 
     @Test
+    public void fromSecretKey_returnsAKeyWithTheGenerationIdOfTheWrappingKey() throws Exception {
+        PlatformEncryptionKey wrappingKey = new PlatformEncryptionKey(
+                GENERATION_ID, generateAndroidKeyStoreKey());
+        SecretKey rawKey = generateKey();
+
+        WrappedKey wrappedKey = WrappedKey.fromSecretKey(wrappingKey, rawKey);
+
+        assertEquals(GENERATION_ID, wrappedKey.getPlatformKeyGenerationId());
+    }
+
+    @Test
     public void decryptWrappedKeys_decryptsWrappedKeys() throws Exception {
         String alias = "karlin";
-        PlatformDecryptionKey platformKey = generatePlatformDecryptionKey();
+        AndroidKeyStoreSecretKey platformKey = generateAndroidKeyStoreKey();
         SecretKey appKey = generateKey();
-        WrappedKey wrappedKey = WrappedKey.fromSecretKey(platformKey.getKey(), appKey);
+        WrappedKey wrappedKey = WrappedKey.fromSecretKey(
+                new PlatformEncryptionKey(GENERATION_ID, platformKey), appKey);
         HashMap<String, WrappedKey> keysByAlias = new HashMap<>();
         keysByAlias.put(alias, wrappedKey);
 
-        Map<String, SecretKey> unwrappedKeys = WrappedKey.unwrapKeys(platformKey, keysByAlias);
+        Map<String, SecretKey> unwrappedKeys = WrappedKey.unwrapKeys(
+                new PlatformDecryptionKey(GENERATION_ID, platformKey), keysByAlias);
 
         assertEquals(1, unwrappedKeys.size());
         assertTrue(unwrappedKeys.containsKey(alias));
@@ -95,26 +109,31 @@ public class WrappedKeyTest {
     @Test
     public void decryptWrappedKeys_doesNotDieIfSomeKeysAreUnwrappable() throws Exception {
         String alias = "karlin";
+        AndroidKeyStoreSecretKey platformKey = generateAndroidKeyStoreKey();
         SecretKey appKey = generateKey();
-        WrappedKey wrappedKey = WrappedKey.fromSecretKey(generateKey(), appKey);
+        WrappedKey wrappedKey = WrappedKey.fromSecretKey(
+                new PlatformEncryptionKey(GENERATION_ID, platformKey), appKey);
         HashMap<String, WrappedKey> keysByAlias = new HashMap<>();
         keysByAlias.put(alias, wrappedKey);
 
         Map<String, SecretKey> unwrappedKeys = WrappedKey.unwrapKeys(
-                generatePlatformDecryptionKey(), keysByAlias);
+                new PlatformDecryptionKey(GENERATION_ID, platformKey), keysByAlias);
 
         assertEquals(0, unwrappedKeys.size());
     }
 
     @Test
     public void decryptWrappedKeys_throwsIfPlatformKeyGenerationIdDoesNotMatch() throws Exception {
-        WrappedKey wrappedKey = WrappedKey.fromSecretKey(generateKey(), generateKey());
+        AndroidKeyStoreSecretKey platformKey = generateAndroidKeyStoreKey();
+        WrappedKey wrappedKey = WrappedKey.fromSecretKey(
+                new PlatformEncryptionKey(GENERATION_ID, platformKey), generateKey());
         HashMap<String, WrappedKey> keysByAlias = new HashMap<>();
         keysByAlias.put("benji", wrappedKey);
 
         try {
             WrappedKey.unwrapKeys(
-                    generatePlatformDecryptionKey(/*generationId=*/ 2), keysByAlias);
+                    new PlatformDecryptionKey(/*generationId=*/ 2, platformKey),
+                    keysByAlias);
             fail("Should have thrown.");
         } catch (BadPlatformKeyException e) {
             assertEquals(
@@ -141,13 +160,5 @@ public class WrappedKeyTest {
                 .setEncryptionPaddings(KeyProperties.ENCRYPTION_PADDING_NONE)
                 .build());
         return (AndroidKeyStoreSecretKey) keyGenerator.generateKey();
-    }
-
-    private PlatformDecryptionKey generatePlatformDecryptionKey() throws Exception {
-        return generatePlatformDecryptionKey(GENERATION_ID);
-    }
-
-    private PlatformDecryptionKey generatePlatformDecryptionKey(int generationId) throws Exception {
-        return new PlatformDecryptionKey(generationId, generateAndroidKeyStoreKey());
     }
 }

@@ -16,7 +16,6 @@
 
 package com.android.server.locksettings.recoverablekeystore;
 
-import android.security.keystore.AndroidKeyStoreSecretKey;
 import android.security.keystore.KeyProperties;
 import android.security.keystore.KeyProtection;
 import android.util.Log;
@@ -56,7 +55,7 @@ public class RecoverableKeyGenerator {
      * @hide
      */
     public static RecoverableKeyGenerator newInstance(
-            AndroidKeyStoreSecretKey platformKey, RecoverableKeyStorage recoverableKeyStorage)
+            PlatformEncryptionKey platformKey, RecoverableKeyStorage recoverableKeyStorage)
             throws NoSuchAlgorithmException {
         // NB: This cannot use AndroidKeyStore as the provider, as we need access to the raw key
         // material, so that it can be synced to disk in encrypted form.
@@ -66,11 +65,11 @@ public class RecoverableKeyGenerator {
 
     private final KeyGenerator mKeyGenerator;
     private final RecoverableKeyStorage mRecoverableKeyStorage;
-    private final AndroidKeyStoreSecretKey mPlatformKey;
+    private final PlatformEncryptionKey mPlatformKey;
 
     private RecoverableKeyGenerator(
             KeyGenerator keyGenerator,
-            AndroidKeyStoreSecretKey platformKey,
+            PlatformEncryptionKey platformKey,
             RecoverableKeyStorage recoverableKeyStorage) {
         mKeyGenerator = keyGenerator;
         mRecoverableKeyStorage = recoverableKeyStorage;
