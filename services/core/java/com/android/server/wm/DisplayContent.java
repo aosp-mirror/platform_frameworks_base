@@ -146,6 +146,7 @@ import android.view.InputDevice;
 import android.view.MagnificationSpec;
 import android.view.Surface;
 import android.view.SurfaceControl;
+import android.view.SurfaceControl.Transaction;
 import android.view.SurfaceSession;
 
 import com.android.internal.annotations.VisibleForTesting;
@@ -339,6 +340,7 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
             new ApplySurfaceChangesTransactionState();
     private final ScreenshotApplicationState mScreenshotApplicationState =
             new ScreenshotApplicationState();
+    private final Transaction mTmpTransaction = new Transaction();
 
     // True if this display is in the process of being removed. Used to determine if the removal of
     // the display's direct children should be allowed.
@@ -379,29 +381,11 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
      */
     private final ArrayList<SurfaceControl> mPendingDestroyingSurfaces = new ArrayList<>();
 
+    /** Temporary float array to retrieve 3x3 matrix values. */
+    private final float[] mTmpFloats = new float[9];
+
     private final Consumer<WindowState> mUpdateWindowsForAnimator = w -> {
         WindowStateAnimator winAnimator = w.mWinAnimator;
-        if (winAnimator.hasSurface()) {
-            final boolean wasAnimating = winAnimator.mWasAnimating;
-            final boolean nowAnimating = winAnimator.stepAnimationLocked(
-                    mTmpWindowAnimator.mCurrentTime);
-            winAnimator.mWasAnimating = nowAnimating;
-            mTmpWindowAnimator.orAnimating(nowAnimating);
-
-            if (DEBUG_WALLPAPER) Slog.v(TAG,
-                    w + ": wasAnimating=" + wasAnimating + ", nowAnimating=" + nowAnimating);
-
-            if (wasAnimating && !winAnimator.mAnimating
-                    && mWallpaperController.isWallpaperTarget(w)) {
-                mTmpWindowAnimator.mBulkUpdateParams |= SET_WALLPAPER_MAY_CHANGE;
-                pendingLayoutChanges |= FINISH_LAYOUT_REDO_WALLPAPER;
-                if (DEBUG_LAYOUT_REPEATS) {
-                    mService.mWindowPlacerLocked.debugLayoutRepeats(
-                            "updateWindowsAndWallpaperLocked 2", pendingLayoutChanges);
-                }
-            }
-        }
-
         final AppWindowToken atoken = w.mAppToken;
         if (winAnimator.mDrawState == READY_TO_SHOW) {
             if (atoken == null || atoken.allDrawn) {
@@ -434,13 +418,13 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
 
         // If this window is animating, make a note that we have an animating window and take
         // care of a request to run a detached wallpaper animation.
-        if (winAnimator.mAnimating) {
-            if (winAnimator.mAnimation != null) {
-                if ((flags & FLAG_SHOW_WALLPAPER) != 0
-                        && winAnimator.mAnimation.getDetachWallpaper()) {
+        if (winAnimator.isAnimationSet()) {
+            final AnimationAdapter anim = w.getAnimation();
+            if (anim != null) {
+                if ((flags & FLAG_SHOW_WALLPAPER) != 0 && anim.getDetachWallpaper()) {
                     mTmpWindow = w;
                 }
-                final int color = winAnimator.mAnimation.getBackgroundColor();
+                final int color = anim.getBackgroundColor();
                 if (color != 0) {
                     final TaskStack stack = w.getStack();
                     if (stack != null) {
@@ -448,7 +432,6 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
                     }
                 }
             }
-            mTmpWindowAnimator.setAnimating(true);
         }
 
         // If this window's app token is running a detached wallpaper animation, make a note so
@@ -684,7 +667,10 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
             mWallpaperController.updateWallpaperVisibility();
         }
 
-        w.handleWindowMovedIfNeeded();
+        // Use mTmpTransaction instead of mPendingTransaction because we don't want to commit
+        // other changes in mPendingTransaction at this point.
+        w.handleWindowMovedIfNeeded(mTmpTransaction);
+        SurfaceControl.mergeToGlobalTransaction(mTmpTransaction);
 
         final WindowStateAnimator winAnimator = w.mWinAnimator;
 
@@ -720,7 +706,7 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
                 }
             }
             final TaskStack stack = w.getStack();
-            if ((!winAnimator.isAnimationStarting() && !winAnimator.isWaitingForOpening())
+            if ((!winAnimator.isWaitingForOpening())
                     || (stack != null && stack.isAnimatingBounds())) {
                 // Updates the shown frame before we set up the surface. This is needed
                 // because the resizing could change the top-left position (in addition to
@@ -736,6 +722,12 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
                 winAnimator.computeShownFrameLocked();
             }
             winAnimator.setSurfaceBoundariesLocked(mTmpRecoveringMemory /* recoveringMemory */);
+
+            // Since setSurfaceBoundariesLocked applies the clipping, we need to apply the position
+            // to the surface of the window container as well. Use mTmpTransaction instead of
+            // mPendingTransaction to avoid committing any existing changes in there.
+            w.updateSurfacePosition(mTmpTransaction);
+            SurfaceControl.mergeToGlobalTransaction(mTmpTransaction);
         }
 
         final AppWindowToken atoken = w.mAppToken;
@@ -2617,8 +2609,7 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
         forAllWindows(w -> {
             if (w.mAppToken == null && policy.canBeHiddenByKeyguardLw(w)
                     && w.wouldBeVisibleIfPolicyIgnored() && !w.isVisible()) {
-                w.mWinAnimator.setAnimation(
-                        policy.createHiddenByKeyguardExit(onWallpaper, goingToShade));
+                w.startAnimation(policy.createHiddenByKeyguardExit(onWallpaper, goingToShade));
             }
         }, true /* traverseTopToBottom */);
     }
@@ -3775,18 +3766,35 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
     }
 
     @Override
-    void destroyAfterPendingTransaction(SurfaceControl surface) {
+    public void destroyAfterPendingTransaction(SurfaceControl surface) {
         mPendingDestroyingSurfaces.add(surface);
     }
 
     /**
      * Destroys any surfaces that have been put into the pending list with
-     * {@link #destroyAfterTransaction}.
+     * {@link #destroyAfterPendingTransaction}.
      */
     void onPendingTransactionApplied() {
         for (int i = mPendingDestroyingSurfaces.size() - 1; i >= 0; i--) {
             mPendingDestroyingSurfaces.get(i).destroy();
         }
         mPendingDestroyingSurfaces.clear();
+    }
+
+    @Override
+    void prepareSurfaces() {
+        final ScreenRotationAnimation screenRotationAnimation =
+                mService.mAnimator.getScreenRotationAnimationLocked(mDisplayId);
+        if (screenRotationAnimation != null && screenRotationAnimation.isAnimating()) {
+            screenRotationAnimation.getEnterTransformation().getMatrix().getValues(mTmpFloats);
+            mPendingTransaction.setMatrix(mWindowingLayer,
+                    mTmpFloats[Matrix.MSCALE_X], mTmpFloats[Matrix.MSKEW_Y],
+                    mTmpFloats[Matrix.MSKEW_X], mTmpFloats[Matrix.MSCALE_Y]);
+            mPendingTransaction.setPosition(mWindowingLayer,
+                    mTmpFloats[Matrix.MTRANS_X], mTmpFloats[Matrix.MTRANS_Y]);
+            mPendingTransaction.setAlpha(mWindowingLayer,
+                    screenRotationAnimation.getEnterTransformation().getAlpha());
+        }
+        super.prepareSurfaces();
     }
 }

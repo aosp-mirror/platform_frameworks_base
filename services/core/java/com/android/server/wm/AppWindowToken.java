@@ -66,6 +66,7 @@ import android.view.IApplicationToken;
 import android.view.SurfaceControl;
 import android.view.WindowManager;
 import android.view.WindowManager.LayoutParams;
+import android.view.animation.Transformation;
 
 import com.android.internal.util.ToBooleanFunction;
 import com.android.server.input.InputApplicationHandle;
@@ -75,6 +76,7 @@ import com.android.server.wm.WindowManagerService.H;
 import java.io.PrintWriter;
 import java.util.ArrayDeque;
 import java.util.ArrayList;
+import java.util.LinkedList;
 
 class AppTokenList extends ArrayList<AppWindowToken> {
 }
@@ -231,7 +233,7 @@ class AppWindowToken extends WindowToken implements WindowManagerService.AppFree
             // If this initial window is animating, stop it -- we will do an animation to reveal
             // it from behind the starting window, so there is no need for it to also be doing its
             // own stuff.
-            winAnimator.clearAnimation();
+            win.cancelAnimation();
             if (getController() != null) {
                 getController().removeStartingWindow();
             }
@@ -389,7 +391,7 @@ class AppWindowToken extends WindowToken implements WindowManagerService.AppFree
         }
 
         for (int i = mChildren.size() - 1; i >= 0 && !delayed; i--) {
-            if ((mChildren.get(i)).isWindowAnimationSet()) {
+            if ((mChildren.get(i)).isSelfOrChildAnimating()) {
                 delayed = true;
             }
         }
@@ -610,8 +612,12 @@ class AppWindowToken extends WindowToken implements WindowManagerService.AppFree
      */
     private void destroySurfaces(boolean cleanupOnResume) {
         boolean destroyedSomething = false;
-        for (int i = mChildren.size() - 1; i >= 0; i--) {
-            final WindowState win = mChildren.get(i);
+
+        // Copying to a different list as multiple children can be removed.
+        // TODO: Not sure why this is needed.
+        final LinkedList<WindowState> children = new LinkedList<>(mChildren);
+        for (int i = children.size() - 1; i >= 0; i--) {
+            final WindowState win = children.get(i);
             destroyedSomething |= win.destroySurface(cleanupOnResume, mAppStopped);
         }
         if (destroyedSomething) {
@@ -1320,7 +1326,7 @@ class AppWindowToken extends WindowToken implements WindowManagerService.AppFree
                             + " pv=" + w.mPolicyVisibility
                             + " mDrawState=" + winAnimator.drawStateToString()
                             + " ph=" + w.isParentWindowHidden() + " th=" + hiddenRequested
-                            + " a=" + winAnimator.mAnimating);
+                            + " a=" + winAnimator.isAnimationSet());
                 }
             }
 
@@ -1517,6 +1523,11 @@ class AppWindowToken extends WindowToken implements WindowManagerService.AppFree
     @Override
     int getAnimLayerAdjustment() {
         return mAppAnimator.animLayerAdjustment;
+    }
+
+    @Override
+    boolean isSelfAnimating() {
+        return mAppAnimator.isAnimating();
     }
 
     @Override

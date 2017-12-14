@@ -935,7 +935,7 @@ public class TaskStack extends WindowContainer<Task> implements
 
     @Override
     void removeIfPossible() {
-        if (isAnimating()) {
+        if (isSelfOrChildAnimating()) {
             mDeferRemoval = true;
             return;
         }
@@ -1643,7 +1643,7 @@ public class TaskStack extends WindowContainer<Task> implements
 
     /** Returns true if a removal action is still being deferred. */
     boolean checkCompleteDeferredRemoval() {
-        if (isAnimating()) {
+        if (isSelfOrChildAnimating()) {
             return true;
         }
         if (mDeferRemoval) {
