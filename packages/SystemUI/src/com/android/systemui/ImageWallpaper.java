@@ -494,7 +494,8 @@ public class ImageWallpaper extends WallpaperService {
                     }
                     if (mBackground != null) {
                         RectF dest = new RectF(left, top, right, bottom);
-                        // add a filter bitmap?
+                        Log.i(TAG, "Redrawing in rect: " + dest + " with surface size: "
+                                + mLastRequestedWidth + "x" + mLastRequestedHeight);
                         c.drawBitmap(mBackground, null, dest, null);
                     }
                 } finally {
