@@ -4299,6 +4299,38 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
          */
         Runnable mShowTooltipRunnable;
         Runnable mHideTooltipRunnable;
+
+        /**
+         * Hover move is ignored if it is within this distance in pixels from the previous one.
+         */
+        int mHoverSlop;
+
+        /**
+         * Update the anchor position if it significantly (that is by at least mHoverSlop)
+         * different from the previously stored position. Ignoring insignificant changes
+         * filters out the jitter which is typical for such input sources as stylus.
+         *
+         * @return True if the position has been updated.
+         */
+        private boolean updateAnchorPos(MotionEvent event) {
+            final int newAnchorX = (int) event.getX();
+            final int newAnchorY = (int) event.getY();
+            if (Math.abs(newAnchorX - mAnchorX) <= mHoverSlop
+                    && Math.abs(newAnchorY - mAnchorY) <= mHoverSlop) {
+                return false;
+            }
+            mAnchorX = newAnchorX;
+            mAnchorY = newAnchorY;
+            return true;
+        }
+
+        /**
+         *  Clear the anchor position to ensure that the next change is considered significant.
+         */
+        private void clearAnchorPos() {
+            mAnchorX = Integer.MAX_VALUE;
+            mAnchorY = Integer.MAX_VALUE;
+        }
     }
 
     TooltipInfo mTooltipInfo;
@@ -26816,6 +26848,8 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
                 mTooltipInfo = new TooltipInfo();
                 mTooltipInfo.mShowTooltipRunnable = this::showHoverTooltip;
                 mTooltipInfo.mHideTooltipRunnable = this::hideTooltip;
+                mTooltipInfo.mHoverSlop = ViewConfiguration.get(mContext).getScaledHoverSlop();
+                mTooltipInfo.clearAnchorPos();
             }
             mTooltipInfo.mTooltipText = tooltipText;
         }
@@ -26882,6 +26916,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
         mTooltipInfo.mTooltipPopup.hide();
         mTooltipInfo.mTooltipPopup = null;
         mTooltipInfo.mTooltipFromLongClick = false;
+        mTooltipInfo.clearAnchorPos();
         if (mAttachInfo != null) {
             mAttachInfo.mTooltipHost = null;
         }
@@ -26906,11 +26941,9 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
                 if ((mViewFlags & TOOLTIP) != TOOLTIP || (mViewFlags & ENABLED_MASK) != ENABLED) {
                     break;
                 }
-                if (!mTooltipInfo.mTooltipFromLongClick) {
+                if (!mTooltipInfo.mTooltipFromLongClick && mTooltipInfo.updateAnchorPos(event)) {
                     if (mTooltipInfo.mTooltipPopup == null) {
                         // Schedule showing the tooltip after a timeout.
-                        mTooltipInfo.mAnchorX = (int) event.getX();
-                        mTooltipInfo.mAnchorY = (int) event.getY();
                         removeCallbacks(mTooltipInfo.mShowTooltipRunnable);
                         postDelayed(mTooltipInfo.mShowTooltipRunnable,
                                 ViewConfiguration.getHoverTooltipShowTimeout());
@@ -26932,6 +26965,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
                 return true;
 
             case MotionEvent.ACTION_HOVER_EXIT:
+                mTooltipInfo.clearAnchorPos();
                 if (!mTooltipInfo.mTooltipFromLongClick) {
                     hideTooltip();
                 }
