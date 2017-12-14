@@ -18,6 +18,8 @@ package com.android.server.devicepolicy;
 import android.app.admin.IDevicePolicyManager;
 import android.content.ComponentName;
 import android.os.PersistableBundle;
+import android.security.keymaster.KeymasterCertificateChain;
+import android.security.keystore.ParcelableKeyGenParameterSpec;
 
 import com.android.internal.R;
 import com.android.server.SystemService;
@@ -56,8 +58,12 @@ abstract class BaseIDevicePolicyManager extends IDevicePolicyManager.Stub {
      * @see {@link SystemService#onStopUser}
      */
     abstract void handleStopUser(int userId);
-    
+
     public void setSystemSetting(ComponentName who, String setting, String value){}
 
     public void transferOwner(ComponentName admin, ComponentName target, PersistableBundle bundle) {}
+    public boolean generateKeyPair(ComponentName who, String callerPackage, String algorithm,
+            ParcelableKeyGenParameterSpec keySpec, KeymasterCertificateChain attestationChain) {
+        return false;
+    }
 }

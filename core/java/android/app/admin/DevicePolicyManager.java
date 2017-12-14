@@ -64,6 +64,9 @@ import android.security.AttestedKeyPair;
 import android.security.Credentials;
 import android.security.KeyChain;
 import android.security.KeyChainException;
+import android.security.keymaster.KeymasterCertificateChain;
+import android.security.keystore.AttestationUtils;
+import android.security.keystore.KeyAttestationException;
 import android.security.keystore.KeyGenParameterSpec;
 import android.security.keystore.ParcelableKeyGenParameterSpec;
 import android.service.restrictions.RestrictionsReceiver;
@@ -4005,15 +4008,27 @@ public class DevicePolicyManager {
         try {
             final ParcelableKeyGenParameterSpec parcelableSpec =
                     new ParcelableKeyGenParameterSpec(keySpec);
+            KeymasterCertificateChain attestationChain = new KeymasterCertificateChain();
             final boolean success = mService.generateKeyPair(
-                    admin, mContext.getPackageName(), algorithm, parcelableSpec);
+                    admin, mContext.getPackageName(), algorithm, parcelableSpec, attestationChain);
             if (!success) {
                 Log.e(TAG, "Error generating key via DevicePolicyManagerService.");
                 return null;
             }
 
-            final KeyPair keyPair = KeyChain.getKeyPair(mContext, keySpec.getKeystoreAlias());
-            return new AttestedKeyPair(keyPair, null);
+            final String alias = keySpec.getKeystoreAlias();
+            final KeyPair keyPair = KeyChain.getKeyPair(mContext, alias);
+            Certificate[] outputChain = null;
+            try {
+                if (AttestationUtils.isChainValid(attestationChain)) {
+                    outputChain = AttestationUtils.parseCertificateChain(attestationChain);
+                }
+            } catch (KeyAttestationException e) {
+                Log.e(TAG, "Error parsing attestation chain for alias " + alias, e);
+                mService.removeKeyPair(admin, mContext.getPackageName(), alias);
+                return null;
+            }
+            return new AttestedKeyPair(keyPair, outputChain);
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         } catch (KeyChainException e) {
