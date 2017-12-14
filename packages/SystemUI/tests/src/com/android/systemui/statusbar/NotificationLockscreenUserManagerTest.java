@@ -22,7 +22,6 @@ import static android.content.Intent.ACTION_USER_SWITCHED;
 import static junit.framework.Assert.assertFalse;
 import static junit.framework.Assert.assertTrue;
 
-import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -49,26 +48,30 @@ import com.google.android.collect.Lists;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.mockito.Mock;
+import org.mockito.MockitoAnnotations;
 
 @SmallTest
 @RunWith(AndroidTestingRunner.class)
 @TestableLooper.RunWithLooper
 public class NotificationLockscreenUserManagerTest extends SysuiTestCase {
-    private NotificationPresenter mPresenter;
-    private NotificationEntryManager mEntryManager;
-    private TestNotificationLockscreenUserManager mLockscreenUserManager;
-    private DeviceProvisionedController mDeviceProvisionedController;
+    @Mock private NotificationPresenter mPresenter;
+    @Mock private UserManager mUserManager;
+
+    // Dependency mocks:
+    @Mock private NotificationEntryManager mEntryManager;
+    @Mock private DeviceProvisionedController mDeviceProvisionedController;
+
     private int mCurrentUserId;
     private Handler mHandler;
-    private UserManager mUserManager;
+    private TestNotificationLockscreenUserManager mLockscreenUserManager;
 
     @Before
     public void setUp() {
-        mUserManager = mock(UserManager.class);
-        mPresenter = mock(NotificationPresenter.class);
-        mEntryManager = mock(NotificationEntryManager.class);
-        mDependency.injectMockDependency(DeviceProvisionedController.class);
-        mDeviceProvisionedController = mDependency.get(DeviceProvisionedController.class);
+        MockitoAnnotations.initMocks(this);
+        mDependency.injectTestDependency(NotificationEntryManager.class, mEntryManager);
+        mDependency.injectTestDependency(DeviceProvisionedController.class,
+                mDeviceProvisionedController);
 
         mHandler = new Handler(Looper.getMainLooper());
         mContext.addMockSystemService(UserManager.class, mUserManager);
@@ -80,8 +83,6 @@ public class NotificationLockscreenUserManagerTest extends SysuiTestCase {
         when(mPresenter.getEntryManager()).thenReturn(mEntryManager);
 
         mLockscreenUserManager = new TestNotificationLockscreenUserManager(mContext);
-        mDependency.injectTestDependency(NotificationLockscreenUserManager.class,
-                mLockscreenUserManager);
         mLockscreenUserManager.setUpWithPresenter(mPresenter);
     }
 

@@ -54,12 +54,14 @@ public class NotificationLoggerTest extends SysuiTestCase {
     private static final int TEST_UID = 0;
 
     @Mock private NotificationPresenter mPresenter;
-    @Mock private NotificationEntryManager mEntryManager;
-    @Mock private NotificationListener mListener;
     @Mock private NotificationListContainer mListContainer;
     @Mock private IStatusBarService mBarService;
     @Mock private NotificationData mNotificationData;
     @Mock private ExpandableNotificationRow mRow;
+
+    // Dependency mocks:
+    @Mock private NotificationEntryManager mEntryManager;
+    @Mock private NotificationListener mListener;
 
     private NotificationData.Entry mEntry;
     private StatusBarNotification mSbn;
@@ -68,6 +70,8 @@ public class NotificationLoggerTest extends SysuiTestCase {
     @Before
     public void setUp() {
         MockitoAnnotations.initMocks(this);
+        mDependency.injectTestDependency(NotificationEntryManager.class, mEntryManager);
+        mDependency.injectTestDependency(NotificationListener.class, mListener);
 
         when(mPresenter.getEntryManager()).thenReturn(mEntryManager);
         when(mEntryManager.getNotificationData()).thenReturn(mNotificationData);

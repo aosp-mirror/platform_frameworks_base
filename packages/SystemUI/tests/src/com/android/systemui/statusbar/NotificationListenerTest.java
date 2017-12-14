@@ -19,7 +19,6 @@ package com.android.systemui.statusbar;
 import static junit.framework.Assert.assertTrue;
 
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -38,6 +37,8 @@ import com.android.systemui.SysuiTestCase;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.mockito.Mock;
+import org.mockito.MockitoAnnotations;
 
 import java.util.HashSet;
 import java.util.Set;
@@ -49,24 +50,27 @@ public class NotificationListenerTest extends SysuiTestCase {
     private static final String TEST_PACKAGE_NAME = "test";
     private static final int TEST_UID = 0;
 
-    private NotificationPresenter mPresenter;
-    private Handler mHandler;
+    @Mock private NotificationPresenter mPresenter;
+    @Mock private NotificationListenerService.RankingMap mRanking;
+    @Mock private NotificationData mNotificationData;
+
+    // Dependency mocks:
+    @Mock private NotificationEntryManager mEntryManager;
+    @Mock private NotificationRemoteInputManager mRemoteInputManager;
+
     private NotificationListener mListener;
+    private Handler mHandler;
     private StatusBarNotification mSbn;
-    private NotificationListenerService.RankingMap mRanking;
     private Set<String> mKeysKeptForRemoteInput;
-    private NotificationData mNotificationData;
-    private NotificationRemoteInputManager mRemoteInputManager;
-    private NotificationEntryManager mEntryManager;
 
     @Before
     public void setUp() {
+        MockitoAnnotations.initMocks(this);
+        mDependency.injectTestDependency(NotificationEntryManager.class, mEntryManager);
+        mDependency.injectTestDependency(NotificationRemoteInputManager.class,
+                mRemoteInputManager);
+
         mHandler = new Handler(Looper.getMainLooper());
-        mPresenter = mock(NotificationPresenter.class);
-        mNotificationData = mock(NotificationData.class);
-        mRanking = mock(NotificationListenerService.RankingMap.class);
-        mRemoteInputManager = mock(NotificationRemoteInputManager.class);
-        mEntryManager = mock(NotificationEntryManager.class);
         mKeysKeptForRemoteInput = new HashSet<>();
 
         when(mPresenter.getHandler()).thenReturn(mHandler);

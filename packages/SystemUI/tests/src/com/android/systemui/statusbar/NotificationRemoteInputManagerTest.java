@@ -34,23 +34,28 @@ public class NotificationRemoteInputManagerTest extends SysuiTestCase {
     private static final String TEST_PACKAGE_NAME = "test";
     private static final int TEST_UID = 0;
 
-    private Handler mHandler;
-    private TestableNotificationRemoteInputManager mRemoteInputManager;
-    private StatusBarNotification mSbn;
-    private NotificationData.Entry mEntry;
-
     @Mock private NotificationPresenter mPresenter;
-    @Mock private NotificationEntryManager mEntryManager;
     @Mock private RemoteInputController.Delegate mDelegate;
-    @Mock private NotificationLockscreenUserManager mLockscreenUserManager;
     @Mock private NotificationRemoteInputManager.Callback mCallback;
     @Mock private RemoteInputController mController;
     @Mock private NotificationListenerService.RankingMap mRanking;
     @Mock private ExpandableNotificationRow mRow;
 
+    // Dependency mocks:
+    @Mock private NotificationEntryManager mEntryManager;
+    @Mock private NotificationLockscreenUserManager mLockscreenUserManager;
+
+    private Handler mHandler;
+    private TestableNotificationRemoteInputManager mRemoteInputManager;
+    private StatusBarNotification mSbn;
+    private NotificationData.Entry mEntry;
+
     @Before
     public void setUp() {
         MockitoAnnotations.initMocks(this);
+        mDependency.injectTestDependency(NotificationEntryManager.class, mEntryManager);
+        mDependency.injectTestDependency(NotificationLockscreenUserManager.class,
+                mLockscreenUserManager);
         mHandler = new Handler(Looper.getMainLooper());
 
         when(mPresenter.getHandler()).thenReturn(mHandler);

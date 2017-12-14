@@ -50,20 +50,26 @@ import java.util.List;
 @TestableLooper.RunWithLooper
 public class NotificationViewHierarchyManagerTest extends SysuiTestCase {
     @Mock private NotificationPresenter mPresenter;
+    @Mock private NotificationData mNotificationData;
+    @Spy private FakeListContainer mListContainer = new FakeListContainer();
+
+    // Dependency mocks:
     @Mock private NotificationEntryManager mEntryManager;
     @Mock private NotificationLockscreenUserManager mLockscreenUserManager;
     @Mock private NotificationGroupManager mGroupManager;
     @Mock private VisualStabilityManager mVisualStabilityManager;
-    @Mock private NotificationData mNotificationData;
-    @Spy private FakeListContainer mListContainer = new FakeListContainer();
 
     private NotificationViewHierarchyManager mViewHierarchyManager;
-    private NotificationTestHelper mHelper;
+    private NotificationTestHelper mHelper = new NotificationTestHelper(mContext);;
 
     @Before
     public void setUp() {
         MockitoAnnotations.initMocks(this);
-        mHelper = new NotificationTestHelper(mContext);
+        mDependency.injectTestDependency(NotificationEntryManager.class, mEntryManager);
+        mDependency.injectTestDependency(NotificationLockscreenUserManager.class,
+                mLockscreenUserManager);
+        mDependency.injectTestDependency(NotificationGroupManager.class, mGroupManager);
+        mDependency.injectTestDependency(VisualStabilityManager.class, mVisualStabilityManager);
 
         when(mPresenter.getEntryManager()).thenReturn(mEntryManager);
         when(mEntryManager.getNotificationData()).thenReturn(mNotificationData);

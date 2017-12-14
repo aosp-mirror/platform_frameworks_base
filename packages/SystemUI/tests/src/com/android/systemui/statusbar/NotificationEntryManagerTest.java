@@ -73,22 +73,24 @@ public class NotificationEntryManagerTest extends SysuiTestCase {
 
     @Mock private NotificationPresenter mPresenter;
     @Mock private ExpandableNotificationRow mRow;
-    @Mock private NotificationLockscreenUserManager mLockscreenUserManager;
-    @Mock private NotificationGroupManager mGroupManager;
-    @Mock private NotificationGutsManager mGutsManager;
-    @Mock private NotificationRemoteInputManager mRemoteInputManager;
-    @Mock private NotificationMediaManager mMediaManager;
-    @Mock private ForegroundServiceController mForegroundServiceController;
-    @Mock private NotificationListener mNotificationListener;
-    @Mock private MetricsLogger mMetricsLogger;
-    @Mock private DeviceProvisionedController mDeviceProvisionedController;
-    @Mock private VisualStabilityManager mVisualStabilityManager;
     @Mock private NotificationListContainer mListContainer;
     @Mock private NotificationEntryManager.Callback mCallback;
     @Mock private HeadsUpManager mHeadsUpManager;
     @Mock private NotificationListenerService.RankingMap mRankingMap;
     @Mock private RemoteInputController mRemoteInputController;
     @Mock private IStatusBarService mBarService;
+
+    // Dependency mocks:
+    @Mock private ForegroundServiceController mForegroundServiceController;
+    @Mock private NotificationLockscreenUserManager mLockscreenUserManager;
+    @Mock private NotificationGroupManager mGroupManager;
+    @Mock private NotificationGutsManager mGutsManager;
+    @Mock private NotificationRemoteInputManager mRemoteInputManager;
+    @Mock private NotificationMediaManager mMediaManager;
+    @Mock private NotificationListener mNotificationListener;
+    @Mock private DeviceProvisionedController mDeviceProvisionedController;
+    @Mock private VisualStabilityManager mVisualStabilityManager;
+    @Mock private MetricsLogger mMetricsLogger;
 
     private NotificationData.Entry mEntry;
     private StatusBarNotification mSbn;
@@ -135,6 +137,20 @@ public class NotificationEntryManagerTest extends SysuiTestCase {
     @Before
     public void setUp() {
         MockitoAnnotations.initMocks(this);
+        mDependency.injectTestDependency(ForegroundServiceController.class,
+                mForegroundServiceController);
+        mDependency.injectTestDependency(NotificationLockscreenUserManager.class,
+                mLockscreenUserManager);
+        mDependency.injectTestDependency(NotificationGroupManager.class, mGroupManager);
+        mDependency.injectTestDependency(NotificationGutsManager.class, mGutsManager);
+        mDependency.injectTestDependency(NotificationRemoteInputManager.class, mRemoteInputManager);
+        mDependency.injectTestDependency(NotificationMediaManager.class, mMediaManager);
+        mDependency.injectTestDependency(NotificationListener.class, mNotificationListener);
+        mDependency.injectTestDependency(DeviceProvisionedController.class,
+                mDeviceProvisionedController);
+        mDependency.injectTestDependency(VisualStabilityManager.class, mVisualStabilityManager);
+        mDependency.injectTestDependency(MetricsLogger.class, mMetricsLogger);
+
         mHandler = new Handler(Looper.getMainLooper());
         mCountDownLatch = new CountDownLatch(1);
 
