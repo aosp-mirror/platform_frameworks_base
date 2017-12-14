@@ -1248,6 +1248,7 @@
     <string name="stream_tts" translatable="false">Transmitted Through Speaker</string> <!-- STREAM_TTS -->
     <string name="stream_accessibility">Accessibility</string> <!-- STREAM_ACCESSIBILITY -->
 
+    <string name="ring_toggle_title">Calls</string>
     <string name="volume_ringer_status_normal">Ring</string>
     <string name="volume_ringer_status_vibrate">Vibrate</string>
     <string name="volume_ringer_status_silent">Mute</string>

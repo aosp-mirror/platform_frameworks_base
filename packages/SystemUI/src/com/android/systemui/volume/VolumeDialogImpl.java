@@ -19,6 +19,7 @@ package com.android.systemui.volume;
 import static android.accessibilityservice.AccessibilityServiceInfo.FEEDBACK_ALL_MASK;
 import static android.accessibilityservice.AccessibilityServiceInfo.FEEDBACK_GENERIC;
 
+import static com.android.systemui.volume.Events.DISMISS_REASON_OUTPUT_CHOOSER;
 import static com.android.systemui.volume.Events.DISMISS_REASON_TOUCH_OUTSIDE;
 
 import android.accessibilityservice.AccessibilityServiceInfo;
@@ -37,7 +38,6 @@ import android.graphics.Rect;
 import android.graphics.drawable.AnimatedVectorDrawable;
 import android.graphics.drawable.ColorDrawable;
 import android.graphics.drawable.Drawable;
-import android.graphics.drawable.TransitionDrawable;
 import android.media.AudioManager;
 import android.media.AudioSystem;
 import android.os.Debug;
@@ -106,6 +106,7 @@ public class VolumeDialogImpl implements VolumeDialog {
     private ViewGroup mDialogRowsView;
     private ImageButton mExpandButton;
     private ImageButton mRingerIcon;
+    private ImageButton mOutputChooser;
     private TextView mRingerStatus;
     private final List<VolumeRow> mRows = new ArrayList<>();
     private ConfigurableTexts mConfigurableTexts;
@@ -113,6 +114,7 @@ public class VolumeDialogImpl implements VolumeDialog {
     private final KeyguardManager mKeyguard;
     private final AccessibilityManager mAccessibilityMgr;
     private final Object mSafetyWarningLock = new Object();
+    private final Object mOutputChooserLock = new Object();
     private final Accessibility mAccessibility = new Accessibility();
     private final ColorStateList mActiveSliderTint;
     private final ColorStateList mInactiveSliderTint;
@@ -128,6 +130,7 @@ public class VolumeDialogImpl implements VolumeDialog {
     private boolean mSilentMode = VolumePrefs.DEFAULT_ENABLE_SILENT_MODE;
     private State mState;
     private SafetyWarningDialog mSafetyWarning;
+    private OutputChooserDialog mOutputChooserDialog;
     private boolean mHovering = false;
 
     public VolumeDialogImpl(Context context) {
@@ -212,6 +215,9 @@ public class VolumeDialogImpl implements VolumeDialog {
         mExpandButton.setOnClickListener(mClickExpand);
         mExpandButton.setVisibility(
                 AudioSystem.isSingleVolume(mContext) ? View.GONE : View.VISIBLE);
+
+        mOutputChooser = mDialogView.findViewById(R.id.output_chooser);
+        mOutputChooser.setOnClickListener(mClickOutputChooser);
 
         if (mRows.isEmpty()) {
             addRow(AudioManager.STREAM_MUSIC,
@@ -913,6 +919,23 @@ public class VolumeDialogImpl implements VolumeDialog {
         rescheduleTimeoutH();
     }
 
+    private void showOutputChooserH() {
+        synchronized (mOutputChooserLock) {
+            if (mOutputChooserDialog != null) {
+                return;
+            }
+            mOutputChooserDialog = new OutputChooserDialog(mContext) {
+                @Override
+                protected void cleanUp() {
+                    synchronized (mOutputChooserLock) {
+                        mOutputChooserDialog = null;
+                    }
+                }
+            };
+            mOutputChooserDialog.show();
+        }
+    }
+
     private String getStreamLabelH(StreamState ss) {
         if (ss.remoteLabel != null) {
             return ss.remoteLabel;
@@ -932,6 +955,15 @@ public class VolumeDialogImpl implements VolumeDialog {
             final boolean newExpand = !mExpanded;
             Events.writeEvent(mContext, Events.EVENT_EXPAND, newExpand);
             updateExpandedH(newExpand, false /* dismissing */);
+        }
+    };
+
+    private final OnClickListener mClickOutputChooser = new OnClickListener() {
+        @Override
+        public void onClick(View v) {
+            // TODO: log
+            dismissH(DISMISS_REASON_OUTPUT_CHOOSER);
+            showOutputChooserH();
         }
     };
 
