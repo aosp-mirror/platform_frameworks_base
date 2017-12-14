@@ -12,6 +12,8 @@ import android.service.notification.ScheduleCalendar;
 import android.service.notification.ZenModeConfig;
 import android.support.test.filters.SmallTest;
 import android.support.test.runner.AndroidJUnit4;
+import android.testing.AndroidTestingRunner;
+import android.testing.TestableLooper.RunWithLooper;
 
 import com.android.server.UiServiceTestCase;
 
@@ -23,8 +25,9 @@ import org.mockito.MockitoAnnotations;
 import java.util.Calendar;
 import java.util.GregorianCalendar;
 
-@RunWith(AndroidJUnit4.class)
+@RunWith(AndroidTestingRunner.class)
 @SmallTest
+@RunWithLooper
 public class ScheduleConditionProviderTest extends UiServiceTestCase {
 
     ScheduleConditionProvider mService;

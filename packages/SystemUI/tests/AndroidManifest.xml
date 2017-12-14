@@ -48,8 +48,9 @@
     <uses-permission android:name="android.permission.REAL_GET_TASKS" />
     <uses-permission android:name="android.permission.INTERNAL_SYSTEM_WINDOW" />
     <uses-permission android:name="android.permission.NETWORK_SETTINGS" />
+    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
 
-    <application>
+    <application android:debuggable="true">
         <uses-library android:name="android.test.runner" />
         <activity android:name="com.android.systemui.screenshot.ScreenshotStubActivity" />
 
