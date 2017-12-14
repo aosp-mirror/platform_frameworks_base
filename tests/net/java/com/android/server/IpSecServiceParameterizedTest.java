@@ -178,7 +178,7 @@ public class IpSecServiceParameterizedTest {
                 .thenReturn(TEST_SPI_OUT);
 
         IpSecSpiResponse spiResp =
-                mIpSecService.reserveSecurityParameterIndex(
+                mIpSecService.allocateSecurityParameterIndex(
                         IpSecTransform.DIRECTION_OUT, mRemoteAddr, TEST_SPI_OUT, new Binder());
 
         IpSecService.UserRecord userRecord =
