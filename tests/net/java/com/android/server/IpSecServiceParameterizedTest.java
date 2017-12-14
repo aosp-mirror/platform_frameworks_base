@@ -125,7 +125,7 @@ public class IpSecServiceParameterizedTest {
                 .thenReturn(TEST_SPI_OUT);
 
         IpSecSpiResponse spiResp =
-                mIpSecService.reserveSecurityParameterIndex(
+                mIpSecService.allocateSecurityParameterIndex(
                         IpSecTransform.DIRECTION_OUT, mRemoteAddr, TEST_SPI_OUT, new Binder());
         assertEquals(IpSecManager.Status.OK, spiResp.status);
         assertEquals(TEST_SPI_OUT, spiResp.spi);
@@ -142,7 +142,7 @@ public class IpSecServiceParameterizedTest {
                 .thenReturn(TEST_SPI_OUT);
 
         IpSecSpiResponse spiResp =
-                mIpSecService.reserveSecurityParameterIndex(
+                mIpSecService.allocateSecurityParameterIndex(
                         IpSecTransform.DIRECTION_OUT, mRemoteAddr, TEST_SPI_OUT, new Binder());
 
         mIpSecService.releaseSecurityParameterIndex(spiResp.resourceId);
@@ -212,7 +212,7 @@ public class IpSecServiceParameterizedTest {
                 .thenReturn(returnSpi);
 
         IpSecSpiResponse spi =
-                mIpSecService.reserveSecurityParameterIndex(
+                mIpSecService.allocateSecurityParameterIndex(
                         direction,
                         NetworkUtils.numericToInetAddress(remoteAddress).getHostAddress(),
                         IpSecManager.INVALID_SECURITY_PARAMETER_INDEX,
