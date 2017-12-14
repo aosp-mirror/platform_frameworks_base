@@ -48,6 +48,7 @@ import android.os.ParcelFileDescriptor;
 import android.os.RemoteException;
 import android.os.ServiceManager;
 import android.os.ShellCommand;
+import android.os.StrictMode;
 import android.os.SystemClock;
 import android.os.SystemProperties;
 import android.os.UserHandle;
@@ -126,7 +127,7 @@ final class ActivityManagerShellCommand extends ShellCommand {
         if (cmd == null) {
             return handleDefaultCommands(cmd);
         }
-        PrintWriter pw = getOutPrintWriter();
+        final PrintWriter pw = getOutPrintWriter();
         try {
             switch (cmd) {
                 case "start":
@@ -1326,65 +1327,95 @@ final class ActivityManagerShellCommand extends ShellCommand {
         @Override
         public void onUidStateChanged(int uid, int procState, long procStateSeq) throws RemoteException {
             synchronized (this) {
-                mPw.print(uid);
-                mPw.print(" procstate ");
-                mPw.print(ProcessList.makeProcStateString(procState));
-                mPw.print(" seq ");
-                mPw.println(procStateSeq);
-                mPw.flush();
+                final StrictMode.ThreadPolicy oldPolicy = StrictMode.allowThreadDiskWrites();
+                try {
+                    mPw.print(uid);
+                    mPw.print(" procstate ");
+                    mPw.print(ProcessList.makeProcStateString(procState));
+                    mPw.print(" seq ");
+                    mPw.println(procStateSeq);
+                    mPw.flush();
+                } finally {
+                    StrictMode.setThreadPolicy(oldPolicy);
+                }
             }
         }
 
         @Override
         public void onUidGone(int uid, boolean disabled) throws RemoteException {
             synchronized (this) {
-                mPw.print(uid);
-                mPw.print(" gone");
-                if (disabled) {
-                    mPw.print(" disabled");
+                final StrictMode.ThreadPolicy oldPolicy = StrictMode.allowThreadDiskWrites();
+                try {
+                    mPw.print(uid);
+                    mPw.print(" gone");
+                    if (disabled) {
+                        mPw.print(" disabled");
+                    }
+                    mPw.println();
+                    mPw.flush();
+                } finally {
+                    StrictMode.setThreadPolicy(oldPolicy);
                 }
-                mPw.println();
-                mPw.flush();
             }
         }
 
         @Override
         public void onUidActive(int uid) throws RemoteException {
             synchronized (this) {
-                mPw.print(uid);
-                mPw.println(" active");
-                mPw.flush();
+                final StrictMode.ThreadPolicy oldPolicy = StrictMode.allowThreadDiskWrites();
+                try {
+                    mPw.print(uid);
+                    mPw.println(" active");
+                    mPw.flush();
+                } finally {
+                    StrictMode.setThreadPolicy(oldPolicy);
+                }
             }
         }
 
         @Override
         public void onUidIdle(int uid, boolean disabled) throws RemoteException {
             synchronized (this) {
-                mPw.print(uid);
-                mPw.print(" idle");
-                if (disabled) {
-                    mPw.print(" disabled");
+                final StrictMode.ThreadPolicy oldPolicy = StrictMode.allowThreadDiskWrites();
+                try {
+                    mPw.print(uid);
+                    mPw.print(" idle");
+                    if (disabled) {
+                        mPw.print(" disabled");
+                    }
+                    mPw.println();
+                    mPw.flush();
+                } finally {
+                    StrictMode.setThreadPolicy(oldPolicy);
                 }
-                mPw.println();
-                mPw.flush();
             }
         }
 
         @Override
         public void onUidCachedChanged(int uid, boolean cached) throws RemoteException {
             synchronized (this) {
-                mPw.print(uid);
-                mPw.println(cached ? " cached" : " uncached");
-                mPw.flush();
+                final StrictMode.ThreadPolicy oldPolicy = StrictMode.allowThreadDiskWrites();
+                try {
+                    mPw.print(uid);
+                    mPw.println(cached ? " cached" : " uncached");
+                    mPw.flush();
+                } finally {
+                    StrictMode.setThreadPolicy(oldPolicy);
+                }
             }
         }
 
         @Override
         public void onOomAdjMessage(String msg) {
             synchronized (this) {
-                mPw.print("# ");
-                mPw.println(msg);
-                mPw.flush();
+                final StrictMode.ThreadPolicy oldPolicy = StrictMode.allowThreadDiskWrites();
+                try {
+                    mPw.print("# ");
+                    mPw.println(msg);
+                    mPw.flush();
+                } finally {
+                    StrictMode.setThreadPolicy(oldPolicy);
+                }
             }
         }
 
