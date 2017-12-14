@@ -50,11 +50,6 @@ MetricsManager::MetricsManager(const ConfigKey& key, const StatsdConfig& config)
                              mAllMetricProducers, mAllAnomalyTrackers, mConditionToMetricMap,
                              mTrackerToMetricMap, mTrackerToConditionMap);
 
-    // TODO: add alert size.
-    // no matter whether this config is valid, log it in the stats.
-    StatsdStats::getInstance().noteConfigReceived(key, mAllMetricProducers.size(),
-                                                  mAllConditionTrackers.size(),
-                                                  mAllAtomMatchers.size(), 0, mConfigValid);
     // Guardrail. Reject the config if it's too big.
     if (mAllMetricProducers.size() > StatsdStats::kMaxMetricCountPerConfig ||
         mAllConditionTrackers.size() > StatsdStats::kMaxConditionCountPerConfig ||
@@ -62,6 +57,12 @@ MetricsManager::MetricsManager(const ConfigKey& key, const StatsdConfig& config)
         ALOGE("This config is too big! Reject!");
         mConfigValid = false;
     }
+
+    // TODO: add alert size.
+    // no matter whether this config is valid, log it in the stats.
+    StatsdStats::getInstance().noteConfigReceived(key, mAllMetricProducers.size(),
+                                                  mAllConditionTrackers.size(),
+                                                  mAllAtomMatchers.size(), 0, mConfigValid);
 }
 
 MetricsManager::~MetricsManager() {

@@ -74,7 +74,7 @@ private:
     // Util function to flush the old packet.
     void flushIfNeededLocked(const uint64_t& eventTime);
 
-    const ValueMetric mMetric;
+    const int32_t mValueField;
 
     std::shared_ptr<StatsPullerManager> mStatsPullerManager;
 

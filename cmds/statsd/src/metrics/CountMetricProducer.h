@@ -76,8 +76,6 @@ private:
     // Util function to flush the old packet.
     void flushIfNeededLocked(const uint64_t& newEventTime);
 
-    const CountMetric mMetric;
-
     // TODO: Add a lock to mPastBuckets.
     std::unordered_map<HashableDimensionKey, std::vector<CountBucket>> mPastBuckets;
 

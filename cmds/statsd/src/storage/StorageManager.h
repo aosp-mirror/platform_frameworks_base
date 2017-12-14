@@ -66,7 +66,7 @@ public:
     /**
      * Call to load the saved configs from disk.
      */
-    static void readConfigFromDisk(unordered_map<ConfigKey, StatsdConfig>& configsMap);
+    static void readConfigFromDisk(std::map<ConfigKey, StatsdConfig>& configsMap);
 };
 
 }  // namespace statsd

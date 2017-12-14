@@ -75,7 +75,7 @@ private:
     // Util function to flush the old packet.
     void flushIfNeededLocked(const uint64_t& eventTime);
 
-    const DurationMetric mMetric;
+    const DurationMetric_AggregationType mAggregationType;
 
     // Index of the SimpleAtomMatcher which defines the start.
     const size_t mStartIndex;

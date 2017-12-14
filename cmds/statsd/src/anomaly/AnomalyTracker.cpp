@@ -317,7 +317,7 @@ void AnomalyTracker::informAlarmsFired(const uint64_t& timestampNs,
     for (const auto& kv : matchedAlarms) {
         declareAnomaly(timestampNs /* TODO: , kv.first */);
         mAlarms.erase(kv.first);
-        firedAlarms.erase(kv.second); // No one else can also own it, so we're done with it.
+        firedAlarms.erase(kv.second);  // No one else can also own it, so we're done with it.
     }
 }
 

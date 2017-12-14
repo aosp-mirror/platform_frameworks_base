@@ -87,7 +87,7 @@ private:
     // The default bucket size for gauge metric is 1 second.
     static const uint64_t kDefaultGaugemBucketSizeNs = 1000 * 1000 * 1000;
 
-    const GaugeMetric mMetric;
+    const int32_t mGaugeField;
 
     StatsPullerManager mStatsPullerManager;
     // tagId for pulled data. -1 if this is not pulled
