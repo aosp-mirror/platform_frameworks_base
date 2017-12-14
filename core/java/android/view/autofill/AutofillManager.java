@@ -1009,6 +1009,21 @@ public final class AutofillManager {
     }
 
     /**
+     * Returns the component name of the {@link AutofillService} that is enabled for the current
+     * user.
+     */
+    @Nullable
+    public ComponentName getAutofillServiceComponentName() {
+        if (mService == null) return null;
+
+        try {
+            return mService.getAutofillServiceComponentName();
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    /**
      * Gets the user data used for
      * <a href="AutofillService.html#FieldClassification">field classification</a>.
      *
