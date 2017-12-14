@@ -73,7 +73,6 @@ public class NotificationLoggerTest extends SysuiTestCase {
         mDependency.injectTestDependency(NotificationEntryManager.class, mEntryManager);
         mDependency.injectTestDependency(NotificationListener.class, mListener);
 
-        when(mPresenter.getEntryManager()).thenReturn(mEntryManager);
         when(mEntryManager.getNotificationData()).thenReturn(mNotificationData);
 
         mSbn = new StatusBarNotification(TEST_PACKAGE_NAME, TEST_PACKAGE_NAME, 0, null, TEST_UID,
@@ -83,7 +82,7 @@ public class NotificationLoggerTest extends SysuiTestCase {
 
         mLogger = new TestableNotificationLogger(mListener, mDependency.get(UiOffloadThread.class),
                 mBarService);
-        mLogger.setUpWithPresenter(mPresenter, mListContainer);
+        mLogger.setUpWithEntryManager(mEntryManager, mListContainer);
     }
 
     @Test

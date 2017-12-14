@@ -71,7 +71,6 @@ public class NotificationViewHierarchyManagerTest extends SysuiTestCase {
         mDependency.injectTestDependency(NotificationGroupManager.class, mGroupManager);
         mDependency.injectTestDependency(VisualStabilityManager.class, mVisualStabilityManager);
 
-        when(mPresenter.getEntryManager()).thenReturn(mEntryManager);
         when(mEntryManager.getNotificationData()).thenReturn(mNotificationData);
 
         mViewHierarchyManager = new NotificationViewHierarchyManager(mLockscreenUserManager,

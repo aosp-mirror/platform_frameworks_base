@@ -74,7 +74,6 @@ public class NotificationListenerTest extends SysuiTestCase {
         mKeysKeptForRemoteInput = new HashSet<>();
 
         when(mPresenter.getHandler()).thenReturn(mHandler);
-        when(mPresenter.getEntryManager()).thenReturn(mEntryManager);
         when(mEntryManager.getNotificationData()).thenReturn(mNotificationData);
         when(mRemoteInputManager.getKeysKeptForRemoteInput()).thenReturn(mKeysKeptForRemoteInput);
 
@@ -82,7 +81,7 @@ public class NotificationListenerTest extends SysuiTestCase {
         mSbn = new StatusBarNotification(TEST_PACKAGE_NAME, TEST_PACKAGE_NAME, 0, null, TEST_UID, 0,
                 new Notification(), UserHandle.CURRENT, null, 0);
 
-        mListener.setUpWithPresenter(mPresenter);
+        mListener.setUpWithPresenter(mPresenter, mEntryManager);
     }
 
     @Test

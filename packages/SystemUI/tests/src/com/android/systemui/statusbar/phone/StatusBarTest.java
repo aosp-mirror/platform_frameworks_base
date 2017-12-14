@@ -53,7 +53,6 @@ import android.support.test.metricshelper.MetricsAsserts;
 import android.testing.AndroidTestingRunner;
 import android.testing.TestableLooper;
 import android.testing.TestableLooper.RunWithLooper;
-import android.util.DisplayMetrics;
 import android.util.SparseArray;
 import android.view.ViewGroup.LayoutParams;
 
@@ -195,7 +194,7 @@ public class StatusBarTest extends SysuiTestCase {
         mStatusBar.mComponents = mContext.getComponents();
         mEntryManager.setUpForTest(mStatusBar, mStackScroller, mStatusBar, mHeadsUpManager,
                 mNotificationData);
-        mNotificationLogger.setUpWithPresenter(mStatusBar, mStackScroller);
+        mNotificationLogger.setUpWithEntryManager(mEntryManager, mStackScroller);
 
         TestableLooper.get(this).setMessageHandler(m -> {
             if (m.getCallback() == mStatusBar.mNotificationLogger.getVisibilityReporter()) {

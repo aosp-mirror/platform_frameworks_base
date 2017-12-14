@@ -98,13 +98,6 @@ public interface NotificationPresenter extends NotificationData.Environment,
     boolean isDeviceInVrMode();
 
     /**
-     * Returns the NotificationEntryManager for this presenter.
-     *
-     * @return NotificationEntryManager
-     */
-    NotificationEntryManager getEntryManager();
-
-    /**
      * Updates the visual representation of the notifications.
      */
     void updateNotificationViews();

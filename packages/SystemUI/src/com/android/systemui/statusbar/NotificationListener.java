@@ -39,7 +39,8 @@ public class NotificationListener extends NotificationListenerWithPlugins {
     private final NotificationRemoteInputManager mRemoteInputManager;
     private final Context mContext;
 
-    private NotificationPresenter mPresenter;
+    protected NotificationPresenter mPresenter;
+    protected NotificationEntryManager mEntryManager;
 
     public NotificationListener(NotificationRemoteInputManager remoteInputManager,
             Context context) {
@@ -59,7 +60,7 @@ public class NotificationListener extends NotificationListenerWithPlugins {
         final RankingMap currentRanking = getCurrentRanking();
         mPresenter.getHandler().post(() -> {
             for (StatusBarNotification sbn : notifications) {
-                mPresenter.getEntryManager().addNotification(sbn, currentRanking);
+                mEntryManager.addNotification(sbn, currentRanking);
             }
         });
     }
@@ -74,7 +75,7 @@ public class NotificationListener extends NotificationListenerWithPlugins {
                 String key = sbn.getKey();
                 mRemoteInputManager.getKeysKeptForRemoteInput().remove(key);
                 boolean isUpdate =
-                        mPresenter.getEntryManager().getNotificationData().get(key) != null;
+                        mEntryManager.getNotificationData().get(key) != null;
                 // In case we don't allow child notifications, we ignore children of
                 // notifications that have a summary, since` we're not going to show them
                 // anyway. This is true also when the summary is canceled,
@@ -87,17 +88,17 @@ public class NotificationListener extends NotificationListenerWithPlugins {
 
                     // Remove existing notification to avoid stale data.
                     if (isUpdate) {
-                        mPresenter.getEntryManager().removeNotification(key, rankingMap);
+                        mEntryManager.removeNotification(key, rankingMap);
                     } else {
-                        mPresenter.getEntryManager().getNotificationData()
+                        mEntryManager.getNotificationData()
                                 .updateRanking(rankingMap);
                     }
                     return;
                 }
                 if (isUpdate) {
-                    mPresenter.getEntryManager().updateNotification(sbn, rankingMap);
+                    mEntryManager.updateNotification(sbn, rankingMap);
                 } else {
-                    mPresenter.getEntryManager().addNotification(sbn, rankingMap);
+                    mEntryManager.addNotification(sbn, rankingMap);
                 }
             });
         }
@@ -110,7 +111,7 @@ public class NotificationListener extends NotificationListenerWithPlugins {
         if (sbn != null && !onPluginNotificationRemoved(sbn, rankingMap)) {
             final String key = sbn.getKey();
             mPresenter.getHandler().post(() -> {
-                mPresenter.getEntryManager().removeNotification(key, rankingMap);
+                mEntryManager.removeNotification(key, rankingMap);
             });
         }
     }
@@ -121,13 +122,15 @@ public class NotificationListener extends NotificationListenerWithPlugins {
         if (rankingMap != null) {
             RankingMap r = onPluginRankingUpdate(rankingMap);
             mPresenter.getHandler().post(() -> {
-                mPresenter.getEntryManager().updateNotificationRanking(r);
+                mEntryManager.updateNotificationRanking(r);
             });
         }
     }
 
-    public void setUpWithPresenter(NotificationPresenter presenter) {
+    public void setUpWithPresenter(NotificationPresenter presenter,
+            NotificationEntryManager entryManager) {
         mPresenter = presenter;
+        mEntryManager = entryManager;
 
         try {
             registerAsSystemService(mContext,

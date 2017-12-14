@@ -71,10 +71,8 @@ public class NotificationGutsManager implements Dumpable {
     // which notification is currently being longpress-examined by the user
     private NotificationGuts mNotificationGutsExposed;
     private NotificationMenuRowPlugin.MenuItem mGutsMenuItem;
-    private NotificationPresenter mPresenter;
-
-    // TODO: Create NotificationListContainer interface and use it instead of
-    // NotificationStackScrollLayout here
+    protected NotificationPresenter mPresenter;
+    protected NotificationEntryManager mEntryManager;
     private NotificationListContainer mListContainer;
     private NotificationInfo.CheckSaveListener mCheckSaveListener;
     private OnSettingsClickListener mOnSettingsClickListener;
@@ -95,10 +93,12 @@ public class NotificationGutsManager implements Dumpable {
                 mContext.getSystemService(Context.ACCESSIBILITY_SERVICE);
     }
 
-    public void setUp(NotificationPresenter presenter, NotificationListContainer listContainer,
+    public void setUpWithPresenter(NotificationPresenter presenter,
+            NotificationEntryManager entryManager, NotificationListContainer listContainer,
             NotificationInfo.CheckSaveListener checkSaveListener,
             OnSettingsClickListener onSettingsClickListener) {
         mPresenter = presenter;
+        mEntryManager = entryManager;
         mListContainer = listContainer;
         mCheckSaveListener = checkSaveListener;
         mOnSettingsClickListener = onSettingsClickListener;
@@ -166,8 +166,7 @@ public class NotificationGutsManager implements Dumpable {
             String key = sbn.getKey();
             if (key.equals(mKeyToRemoveOnGutsClosed)) {
                 mKeyToRemoveOnGutsClosed = null;
-                mPresenter.getEntryManager().removeNotification(key,
-                        mPresenter.getEntryManager().getLatestRankingMap());
+                mEntryManager.removeNotification(key, mEntryManager.getLatestRankingMap());
             }
         });
 

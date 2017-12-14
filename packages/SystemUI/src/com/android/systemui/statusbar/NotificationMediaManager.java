@@ -43,7 +43,8 @@ public class NotificationMediaManager implements Dumpable {
     private final Context mContext;
     private final MediaSessionManager mMediaSessionManager;
 
-    private NotificationPresenter mPresenter;
+    protected NotificationPresenter mPresenter;
+    protected NotificationEntryManager mEntryManager;
     private MediaController mMediaController;
     private String mMediaNotificationKey;
     private MediaMetadata mMediaMetadata;
@@ -82,8 +83,10 @@ public class NotificationMediaManager implements Dumpable {
         // in session state
     }
 
-    public void setUpWithPresenter(NotificationPresenter presenter) {
+    public void setUpWithPresenter(NotificationPresenter presenter,
+            NotificationEntryManager entryManager) {
         mPresenter = presenter;
+        mEntryManager = entryManager;
     }
 
     public void onNotificationRemoved(String key) {
@@ -104,8 +107,8 @@ public class NotificationMediaManager implements Dumpable {
     public void findAndUpdateMediaNotifications() {
         boolean metaDataChanged = false;
 
-        synchronized (mPresenter.getEntryManager().getNotificationData()) {
-            ArrayList<NotificationData.Entry> activeNotifications = mPresenter.getEntryManager()
+        synchronized (mEntryManager.getNotificationData()) {
+            ArrayList<NotificationData.Entry> activeNotifications = mEntryManager
                     .getNotificationData().getActiveNotifications();
             final int N = activeNotifications.size();
 
@@ -192,7 +195,7 @@ public class NotificationMediaManager implements Dumpable {
         }
 
         if (metaDataChanged) {
-            mPresenter.getEntryManager().updateNotifications();
+            mEntryManager.updateNotifications();
         }
         mPresenter.updateMediaMetaData(metaDataChanged, true);
     }

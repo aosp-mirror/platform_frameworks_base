@@ -644,7 +644,7 @@ public class StatusBar extends SystemUI implements DemoMode,
         mKeyguardManager = (KeyguardManager) mContext.getSystemService(Context.KEYGUARD_SERVICE);
         mLockPatternUtils = new LockPatternUtils(mContext);
 
-        mMediaManager.setUpWithPresenter(this);
+        mMediaManager.setUpWithPresenter(this, mEntryManager);
 
         // Connect in to the status bar manager service
         mCommandQueue = getComponent(CommandQueue.class);
@@ -670,7 +670,7 @@ public class StatusBar extends SystemUI implements DemoMode,
         mContext.registerReceiver(mWallpaperChangedReceiver, wallpaperChangedFilter);
         mWallpaperChangedReceiver.onReceive(mContext, null);
 
-        mLockscreenUserManager.setUpWithPresenter(this);
+        mLockscreenUserManager.setUpWithPresenter(this, mEntryManager);
         mCommandQueue.disable(switches[0], switches[6], false /* animate */);
         setSystemUiVisibility(switches[1], switches[7], switches[8], 0xffffffff,
                 fullscreenStackBounds, dockedStackBounds);
@@ -685,7 +685,7 @@ public class StatusBar extends SystemUI implements DemoMode,
         }
 
         // Set up the initial notification state.
-        mNotificationListener.setUpWithPresenter(this);
+        mNotificationListener.setUpWithPresenter(this, mEntryManager);
 
         if (DEBUG) {
             Log.d(TAG, String.format(
@@ -753,7 +753,7 @@ public class StatusBar extends SystemUI implements DemoMode,
         // into fragments, but the rest here, it leaves some awkward lifecycle and whatnot.
         mNotificationPanel = mStatusBarWindow.findViewById(R.id.notification_panel);
         mStackScroller = mStatusBarWindow.findViewById(R.id.notification_stack_scroller);
-        mGutsManager.setUp(this, mStackScroller, mCheckSaveListener,
+        mGutsManager.setUpWithPresenter(this, mEntryManager, mStackScroller, mCheckSaveListener,
                 key -> {
                     try {
                         mBarService.onNotificationSettingsViewed(key);
@@ -761,7 +761,7 @@ public class StatusBar extends SystemUI implements DemoMode,
                         // if we're here we're dead
                     }
                 });
-        mNotificationLogger.setUpWithPresenter(this, mStackScroller);
+        mNotificationLogger.setUpWithEntryManager(mEntryManager, mStackScroller);
         mNotificationPanel.setStatusBar(this);
         mNotificationPanel.setGroupManager(mGroupManager);
         mAboveShelfObserver = new AboveShelfObserver(mStackScroller);
@@ -2728,19 +2728,20 @@ public class StatusBar extends SystemUI implements DemoMode,
     private void addStatusBarWindow() {
         makeStatusBarView();
         mStatusBarWindowManager = Dependency.get(StatusBarWindowManager.class);
-        mRemoteInputManager.setUpWithPresenter(this, this, new RemoteInputController.Delegate() {
-            public void setRemoteInputActive(NotificationData.Entry entry,
-                    boolean remoteInputActive) {
-                mHeadsUpManager.setRemoteInputActive(entry, remoteInputActive);
-            }
-            public void lockScrollTo(NotificationData.Entry entry) {
-                mStackScroller.lockScrollTo(entry.row);
-            }
-            public void requestDisallowLongPressAndDismiss() {
-                mStackScroller.requestDisallowLongPress();
-                mStackScroller.requestDisallowDismiss();
-            }
-        });
+        mRemoteInputManager.setUpWithPresenter(this, mEntryManager, this,
+                new RemoteInputController.Delegate() {
+                    public void setRemoteInputActive(NotificationData.Entry entry,
+                            boolean remoteInputActive) {
+                        mHeadsUpManager.setRemoteInputActive(entry, remoteInputActive);
+                    }
+                    public void lockScrollTo(NotificationData.Entry entry) {
+                        mStackScroller.lockScrollTo(entry.row);
+                    }
+                    public void requestDisallowLongPressAndDismiss() {
+                        mStackScroller.requestDisallowLongPress();
+                        mStackScroller.requestDisallowDismiss();
+                    }
+                });
         mStatusBarWindowManager.add(mStatusBarWindow, getStatusBarHeight());
     }
 
@@ -4823,11 +4824,6 @@ public class StatusBar extends SystemUI implements DemoMode,
 
     public boolean isDeviceInVrMode() {
         return mVrMode;
-    }
-
-    @Override
-    public NotificationEntryManager getEntryManager() {
-        return mEntryManager;
     }
 
     private final BroadcastReceiver mBannerActionBroadcastReceiver = new BroadcastReceiver() {

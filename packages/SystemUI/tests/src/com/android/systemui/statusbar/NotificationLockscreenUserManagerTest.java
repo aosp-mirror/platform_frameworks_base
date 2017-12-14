@@ -80,10 +80,9 @@ public class NotificationLockscreenUserManagerTest extends SysuiTestCase {
         when(mUserManager.getProfiles(mCurrentUserId)).thenReturn(Lists.newArrayList(
                 new UserInfo(mCurrentUserId, "", 0), new UserInfo(mCurrentUserId + 1, "", 0)));
         when(mPresenter.getHandler()).thenReturn(mHandler);
-        when(mPresenter.getEntryManager()).thenReturn(mEntryManager);
 
         mLockscreenUserManager = new TestNotificationLockscreenUserManager(mContext);
-        mLockscreenUserManager.setUpWithPresenter(mPresenter);
+        mLockscreenUserManager.setUpWithPresenter(mPresenter, mEntryManager);
     }
 
     @Test

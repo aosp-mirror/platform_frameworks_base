@@ -59,7 +59,6 @@ public class NotificationRemoteInputManagerTest extends SysuiTestCase {
         mHandler = new Handler(Looper.getMainLooper());
 
         when(mPresenter.getHandler()).thenReturn(mHandler);
-        when(mPresenter.getEntryManager()).thenReturn(mEntryManager);
         when(mEntryManager.getLatestRankingMap()).thenReturn(mRanking);
 
         mRemoteInputManager = new TestableNotificationRemoteInputManager(mLockscreenUserManager,
@@ -69,8 +68,8 @@ public class NotificationRemoteInputManagerTest extends SysuiTestCase {
         mEntry = new NotificationData.Entry(mSbn);
         mEntry.row = mRow;
 
-        mRemoteInputManager.setUpWithPresenterForTest(mPresenter, mCallback, mDelegate,
-                mController);
+        mRemoteInputManager.setUpWithPresenterForTest(mPresenter, mEntryManager, mCallback,
+                mDelegate, mController);
     }
 
     @Test
@@ -115,10 +114,11 @@ public class NotificationRemoteInputManagerTest extends SysuiTestCase {
         }
 
         public void setUpWithPresenterForTest(NotificationPresenter presenter,
+                NotificationEntryManager entryManager,
                 Callback callback,
                 RemoteInputController.Delegate delegate,
                 RemoteInputController controller) {
-            super.setUpWithPresenter(presenter, callback, delegate);
+            super.setUpWithPresenter(presenter, entryManager, callback, delegate);
             mRemoteInputController = controller;
         }
     }

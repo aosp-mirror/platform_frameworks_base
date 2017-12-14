@@ -49,7 +49,7 @@ public class NotificationLogger {
     private final NotificationListenerService mNotificationListener;
     private final UiOffloadThread mUiOffloadThread;
 
-    protected NotificationPresenter mPresenter;
+    protected NotificationEntryManager mEntryManager;
     protected Handler mHandler = new Handler();
     protected IStatusBarService mBarService;
     private long mLastVisibilityReportUptimeMs;
@@ -96,8 +96,8 @@ public class NotificationLogger {
             //    notifications.
             // 3. Report newly visible and no-longer visible notifications.
             // 4. Keep currently visible notifications for next report.
-            ArrayList<NotificationData.Entry> activeNotifications = mPresenter.getEntryManager().
-                    getNotificationData().getActiveNotifications();
+            ArrayList<NotificationData.Entry> activeNotifications = mEntryManager
+                    .getNotificationData().getActiveNotifications();
             int N = activeNotifications.size();
             for (int i = 0; i < N; i++) {
                 NotificationData.Entry entry = activeNotifications.get(i);
@@ -140,9 +140,9 @@ public class NotificationLogger {
                 ServiceManager.getService(Context.STATUS_BAR_SERVICE));
     }
 
-    public void setUpWithPresenter(NotificationPresenter presenter,
+    public void setUpWithEntryManager(NotificationEntryManager entryManager,
             NotificationListContainer listContainer) {
-        mPresenter = presenter;
+        mEntryManager = entryManager;
         mListContainer = listContainer;
     }
 

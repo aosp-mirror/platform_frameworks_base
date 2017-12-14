@@ -155,7 +155,6 @@ public class NotificationEntryManagerTest extends SysuiTestCase {
         mCountDownLatch = new CountDownLatch(1);
 
         when(mPresenter.getHandler()).thenReturn(mHandler);
-        when(mPresenter.getEntryManager()).thenReturn(mEntryManager);
         when(mPresenter.getNotificationLockscreenUserManager()).thenReturn(mLockscreenUserManager);
         when(mPresenter.getGroupManager()).thenReturn(mGroupManager);
         when(mRemoteInputManager.getController()).thenReturn(mRemoteInputController);
