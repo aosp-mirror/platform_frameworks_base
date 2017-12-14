@@ -48,8 +48,8 @@ private:
     struct SavedBootParameters {
         int brightness;
         int volume;
-        ScopedVector<std::string> param_names;
-        ScopedVector<std::string> param_values;
+        std::vector<std::unique_ptr<std::string>> param_names;
+        std::vector<std::unique_ptr<std::string>> param_values;
 
         SavedBootParameters();
         static void RegisterJSONConverter(
