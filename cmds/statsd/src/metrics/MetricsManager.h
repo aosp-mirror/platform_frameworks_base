@@ -43,16 +43,13 @@ public:
 
     void onLogEvent(const LogEvent& event);
 
-    // Called when everything should wrap up. We are about to finish (e.g., new config comes).
-    void finish();
-
     void onAnomalyAlarmFired(const uint64_t timestampNs,
                          unordered_set<sp<const AnomalyAlarm>, SpHash<AnomalyAlarm>>& anomalySet);
 
     void setAnomalyMonitor(const sp<AnomalyMonitor>& anomalyMonitor);
 
     // Config source owner can call onDumpReport() to get all the metrics collected.
-    virtual std::vector<std::unique_ptr<std::vector<uint8_t>>> onDumpReport();
+    virtual void onDumpReport(android::util::ProtoOutputStream* protoOutput);
 
     // Computes the total byte size of all metrics managed by a single config source.
     // Does not change the state.

@@ -21,7 +21,7 @@
 #include <android-base/file.h>
 #include <android-base/test_utils.h>
 #include <gmock/gmock.h>
-#include <google/protobuf/message.h>
+#include <google/protobuf/message_lite.h>
 #include <gtest/gtest.h>
 #include <string.h>
 #include <fcntl.h>
@@ -40,13 +40,6 @@ class CpuInfoParserTest : public Test {
 public:
     virtual void SetUp() override {
         ASSERT_TRUE(tf.fd != -1);
-    }
-
-    string getSerializedString(::google::protobuf::Message& message) {
-        string expectedStr;
-        message.SerializeToFileDescriptor(tf.fd);
-        ReadFileToString(tf.path, &expectedStr);
-        return expectedStr;
     }
 
 protected:
@@ -153,6 +146,6 @@ TEST_F(CpuInfoParserTest, Success) {
 
     CaptureStdout();
     ASSERT_EQ(NO_ERROR, parser.Parse(fd, STDOUT_FILENO));
-    EXPECT_EQ(GetCapturedStdout(), getSerializedString(expected));
+    EXPECT_EQ(GetCapturedStdout(), expected.SerializeAsString());
     close(fd);
 }

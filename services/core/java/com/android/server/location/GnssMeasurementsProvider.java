@@ -40,11 +40,11 @@ public abstract class GnssMeasurementsProvider
     public void onMeasurementsAvailable(final GnssMeasurementsEvent event) {
         ListenerOperation<IGnssMeasurementsListener> operation =
                 new ListenerOperation<IGnssMeasurementsListener>() {
-            @Override
-            public void execute(IGnssMeasurementsListener listener) throws RemoteException {
-                listener.onGnssMeasurementsReceived(event);
-            }
-        };
+                    @Override
+                    public void execute(IGnssMeasurementsListener listener) throws RemoteException {
+                        listener.onGnssMeasurementsReceived(event);
+                    }
+                };
         foreach(operation);
     }
 
@@ -69,6 +69,9 @@ public abstract class GnssMeasurementsProvider
             case RESULT_NOT_SUPPORTED:
             case RESULT_INTERNAL_ERROR:
                 status = GnssMeasurementsEvent.Callback.STATUS_NOT_SUPPORTED;
+                break;
+            case RESULT_NOT_ALLOWED:
+                status = GnssMeasurementsEvent.Callback.STATUS_NOT_ALLOWED;
                 break;
             case RESULT_GPS_LOCATION_DISABLED:
                 status = GnssMeasurementsEvent.Callback.STATUS_LOCATION_DISABLED;

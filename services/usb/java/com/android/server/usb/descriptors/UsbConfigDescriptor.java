@@ -17,6 +17,7 @@ package com.android.server.usb.descriptors;
 
 import android.hardware.usb.UsbConfiguration;
 import android.hardware.usb.UsbInterface;
+import android.util.Log;
 
 import com.android.server.usb.descriptors.report.ReportCanvas;
 
@@ -29,6 +30,7 @@ import java.util.ArrayList;
  */
 public final class UsbConfigDescriptor extends UsbDescriptor {
     private static final String TAG = "UsbConfigDescriptor";
+    private static final boolean DEBUG = false;
 
     private int mTotalLength;    // 2:2 Total length in bytes of data returned
     private byte mNumInterfaces; // 4:1 Number of Interfaces
@@ -77,10 +79,16 @@ public final class UsbConfigDescriptor extends UsbDescriptor {
     }
 
     UsbConfiguration toAndroid(UsbDescriptorParser parser) {
+        if (DEBUG) {
+            Log.d(TAG, "  toAndroid()");
+        }
         String name = parser.getDescriptorString(mConfigIndex);
         UsbConfiguration config = new
                 UsbConfiguration(mConfigValue, name, mAttribs, mMaxPower);
         UsbInterface[] interfaces = new UsbInterface[mInterfaceDescriptors.size()];
+        if (DEBUG) {
+            Log.d(TAG, "    " + mInterfaceDescriptors.size() + " interfaces.");
+        }
         for (int index = 0; index < mInterfaceDescriptors.size(); index++) {
             interfaces[index] = mInterfaceDescriptors.get(index).toAndroid(parser);
         }

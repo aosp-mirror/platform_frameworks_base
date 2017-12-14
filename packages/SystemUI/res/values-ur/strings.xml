@@ -34,17 +34,14 @@
     <string name="status_bar_latest_events_title" msgid="6594767438577593172">"اطلاعات"</string>
     <string name="battery_low_title" msgid="6456385927409742437">"بیٹری کم ہے"</string>
     <string name="battery_low_percent_format" msgid="2900940511201380775">"<xliff:g id="PERCENTAGE">%s</xliff:g> باقی ہے"</string>
-    <!-- no translation found for battery_low_percent_format_saver_started (7879389868952879166) -->
-    <skip />
+    <string name="battery_low_percent_format_saver_started" msgid="7879389868952879166">"<xliff:g id="PERCENTAGE">%s</xliff:g> باقی ہے۔ بیٹری سیور آن ہے۔"</string>
     <string name="invalid_charger" msgid="4549105996740522523">"‏USB چارجنگ تعاون یافتہ نہیں ہے.\nصرف فراہم کردہ چارجر کا ہی استعمال کریں۔"</string>
     <string name="invalid_charger_title" msgid="3515740382572798460">"‏USB چارجنگ تعاون یافتہ نہیں ہے۔"</string>
     <string name="invalid_charger_text" msgid="5474997287953892710">"صرف فراہم کردہ چارجر استعمال کریں۔"</string>
     <string name="battery_low_why" msgid="4553600287639198111">"ترتیبات"</string>
-    <!-- no translation found for battery_saver_confirmation_title (2052100465684817154) -->
-    <skip />
+    <string name="battery_saver_confirmation_title" msgid="2052100465684817154">"بیٹری سیور آن کریں؟"</string>
     <string name="battery_saver_confirmation_ok" msgid="7507968430447930257">"آن کریں"</string>
-    <!-- no translation found for battery_saver_start_action (8187820911065797519) -->
-    <skip />
+    <string name="battery_saver_start_action" msgid="8187820911065797519">"بیٹری سیور آن کریں"</string>
     <string name="status_bar_settings_settings_button" msgid="3023889916699270224">"ترتیبات"</string>
     <string name="status_bar_settings_wifi_button" msgid="1733928151698311923">"Wi-Fi"</string>
     <string name="status_bar_settings_auto_rotation" msgid="3790482541357798421">"سکرین کو خودکار طور پر گھمائیں"</string>
@@ -402,11 +399,9 @@
     <string name="user_remove_user_title" msgid="4681256956076895559">"صارف کو ہٹائیں؟"</string>
     <string name="user_remove_user_message" msgid="1453218013959498039">"اس صارف کی سبھی ایپس اور ڈیٹا حذف کر دیا جائے گا۔"</string>
     <string name="user_remove_user_remove" msgid="7479275741742178297">"ہٹائیں"</string>
-    <!-- no translation found for battery_saver_notification_title (8614079794522291840) -->
-    <skip />
+    <string name="battery_saver_notification_title" msgid="8614079794522291840">"بیٹری سیور آن ہے"</string>
     <string name="battery_saver_notification_text" msgid="820318788126672692">"کارکردگی اور پس منظر کا ڈیٹا کم کر دیتا ہے"</string>
-    <!-- no translation found for battery_saver_notification_action_text (132118784269455533) -->
-    <skip />
+    <string name="battery_saver_notification_action_text" msgid="132118784269455533">"بیٹری سیور آف کریں"</string>
     <string name="media_projection_dialog_text" msgid="3071431025448218928">"<xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g> آپ کی اسکرین پر ڈسپلے ہونے والی ہر چیز کو کیپچر کرنا شروع کر دیگی۔"</string>
     <string name="media_projection_remember_text" msgid="3103510882172746752">"دوبارہ نہ دکھائیں"</string>
     <string name="clear_all_notifications_text" msgid="814192889771462828">"سبھی کو صاف کریں"</string>
@@ -497,6 +492,12 @@
     <string name="stream_bluetooth_sco" msgid="2055645746402746292">"بلوٹوتھ"</string>
     <string name="stream_dtmf" msgid="2447177903892477915">"دوہری ملٹی ٹون فریکوئنسی"</string>
     <string name="stream_accessibility" msgid="301136219144385106">"ایکسیسبیلٹی"</string>
+    <!-- no translation found for volume_ringer_status_normal (4273142424125855384) -->
+    <skip />
+    <!-- no translation found for volume_ringer_status_vibrate (1825615171021346557) -->
+    <skip />
+    <!-- no translation found for volume_ringer_status_silent (6896394161022916369) -->
+    <skip />
     <string name="volume_stream_content_description_unmute" msgid="4436631538779230857">"‏‎%1$s۔ آواز چالو کرنے کیلئے تھپتھپائیں۔"</string>
     <string name="volume_stream_content_description_vibrate" msgid="1187944970457807498">"‏‎%1$s۔ ارتعاش پر سیٹ کرنے کیلئے تھپتھپائیں۔ ایکسیسبیلٹی سروسز شاید خاموش ہوں۔"</string>
     <string name="volume_stream_content_description_mute" msgid="3625049841390467354">"‏‎%1$s۔ خاموش کرنے کیلئے تھپتھپائیں۔ ایکسیسبیلٹی سروسز شاید خاموش ہوں۔"</string>
@@ -761,7 +762,7 @@
     <string name="instant_apps" msgid="6647570248119804907">"فوری ایپس"</string>
     <string name="instant_apps_message" msgid="8116608994995104836">"فوری ایپس کو انسٹالیشن کی ضرورت نہیں ہے۔"</string>
     <string name="app_info" msgid="6856026610594615344">"ایپ کی معلومات"</string>
-    <string name="go_to_web" msgid="1106022723459948514">"ویب پر جائیں"</string>
+    <string name="go_to_web" msgid="2650669128861626071">"براؤزر پر جائیں"</string>
     <string name="mobile_data" msgid="7094582042819250762">"موبائل ڈیٹا"</string>
     <string name="wifi_is_off" msgid="1838559392210456893">"‏Wi-Fi آف ہے"</string>
     <string name="bt_is_off" msgid="2640685272289706392">"بلوٹوتھ آف ہے"</string>

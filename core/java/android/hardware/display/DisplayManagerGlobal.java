@@ -487,6 +487,19 @@ public final class DisplayManagerGlobal {
         }
     }
 
+    /**
+     * Sets the global brightness configuration for a given user.
+     *
+     * @hide
+     */
+    public void setBrightnessConfigurationForUser(BrightnessConfiguration c, int userId) {
+        try {
+            mDm.setBrightnessConfigurationForUser(c, userId);
+        } catch (RemoteException ex) {
+            throw ex.rethrowFromSystemServer();
+        }
+    }
+
     private final class DisplayManagerCallback extends IDisplayManagerCallback.Stub {
         @Override
         public void onDisplayEvent(int displayId, int event) {

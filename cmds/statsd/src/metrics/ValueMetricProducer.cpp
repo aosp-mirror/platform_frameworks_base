@@ -97,9 +97,6 @@ ValueMetricProducer::ValueMetricProducer(const ConfigKey& key, const ValueMetric
         mStatsPullerManager->RegisterReceiver(mPullTagId, this,
                                               metric.bucket().bucket_size_millis());
     }
-
-    startNewProtoOutputStreamLocked(mStartTimeNs);
-
     VLOG("value metric %s created. bucket size %lld start_time: %lld", metric.name().c_str(),
          (long long)mBucketSizeNs, (long long)mStartTimeNs);
 }
@@ -120,24 +117,17 @@ ValueMetricProducer::~ValueMetricProducer() {
     }
 }
 
-void ValueMetricProducer::startNewProtoOutputStreamLocked(long long startTime) {
-    mProto = std::make_unique<ProtoOutputStream>();
-    mProto->write(FIELD_TYPE_STRING | FIELD_ID_NAME, mMetric.name());
-    mProto->write(FIELD_TYPE_INT64 | FIELD_ID_START_REPORT_NANOS, startTime);
-    mProtoToken = mProto->start(FIELD_TYPE_MESSAGE | FIELD_ID_VALUE_METRICS);
-}
-
-void ValueMetricProducer::finish() {
-    // TODO: write the StatsLogReport to dropbox using
-    // DropboxWriter.
-}
-
 void ValueMetricProducer::onSlicedConditionMayChangeLocked(const uint64_t eventTime) {
     VLOG("Metric %s onSlicedConditionMayChange", mMetric.name().c_str());
 }
 
-std::unique_ptr<std::vector<uint8_t>> ValueMetricProducer::onDumpReportLocked() {
+void ValueMetricProducer::onDumpReportLocked(const uint64_t dumpTimeNs,
+                                             ProtoOutputStream* protoOutput) {
     VLOG("metric %s dump report now...", mMetric.name().c_str());
+    flushIfNeededLocked(dumpTimeNs);
+    protoOutput->write(FIELD_TYPE_STRING | FIELD_ID_NAME, mMetric.name());
+    protoOutput->write(FIELD_TYPE_INT64 | FIELD_ID_START_REPORT_NANOS, (long long)mStartTimeNs);
+    long long protoToken = protoOutput->start(FIELD_TYPE_MESSAGE | FIELD_ID_VALUE_METRICS);
 
     for (const auto& pair : mPastBuckets) {
         const HashableDimensionKey& hashableKey = pair.first;
@@ -148,57 +138,55 @@ std::unique_ptr<std::vector<uint8_t>> ValueMetricProducer::onDumpReportLocked() 
             continue;
         }
         long long wrapperToken =
-                mProto->start(FIELD_TYPE_MESSAGE | FIELD_COUNT_REPEATED | FIELD_ID_DATA);
+                protoOutput->start(FIELD_TYPE_MESSAGE | FIELD_COUNT_REPEATED | FIELD_ID_DATA);
 
         // First fill dimension (KeyValuePairs).
         for (const auto& kv : it->second) {
-            long long dimensionToken =
-                    mProto->start(FIELD_TYPE_MESSAGE | FIELD_COUNT_REPEATED | FIELD_ID_DIMENSION);
-            mProto->write(FIELD_TYPE_INT32 | FIELD_ID_KEY, kv.key());
+            long long dimensionToken = protoOutput->start(
+                    FIELD_TYPE_MESSAGE | FIELD_COUNT_REPEATED | FIELD_ID_DIMENSION);
+            protoOutput->write(FIELD_TYPE_INT32 | FIELD_ID_KEY, kv.key());
             if (kv.has_value_str()) {
-                mProto->write(FIELD_TYPE_STRING | FIELD_ID_VALUE_STR, kv.value_str());
+                protoOutput->write(FIELD_TYPE_STRING | FIELD_ID_VALUE_STR, kv.value_str());
             } else if (kv.has_value_int()) {
-                mProto->write(FIELD_TYPE_INT64 | FIELD_ID_VALUE_INT, kv.value_int());
+                protoOutput->write(FIELD_TYPE_INT64 | FIELD_ID_VALUE_INT, kv.value_int());
             } else if (kv.has_value_bool()) {
-                mProto->write(FIELD_TYPE_BOOL | FIELD_ID_VALUE_BOOL, kv.value_bool());
+                protoOutput->write(FIELD_TYPE_BOOL | FIELD_ID_VALUE_BOOL, kv.value_bool());
             } else if (kv.has_value_float()) {
-                mProto->write(FIELD_TYPE_FLOAT | FIELD_ID_VALUE_FLOAT, kv.value_float());
+                protoOutput->write(FIELD_TYPE_FLOAT | FIELD_ID_VALUE_FLOAT, kv.value_float());
             }
-            mProto->end(dimensionToken);
+            protoOutput->end(dimensionToken);
         }
 
         // Then fill bucket_info (ValueBucketInfo).
         for (const auto& bucket : pair.second) {
-            long long bucketInfoToken =
-                    mProto->start(FIELD_TYPE_MESSAGE | FIELD_COUNT_REPEATED | FIELD_ID_BUCKET_INFO);
-            mProto->write(FIELD_TYPE_INT64 | FIELD_ID_START_BUCKET_NANOS,
-                          (long long)bucket.mBucketStartNs);
-            mProto->write(FIELD_TYPE_INT64 | FIELD_ID_END_BUCKET_NANOS,
-                          (long long)bucket.mBucketEndNs);
-            mProto->write(FIELD_TYPE_INT64 | FIELD_ID_VALUE, (long long)bucket.mValue);
-            mProto->end(bucketInfoToken);
+            long long bucketInfoToken = protoOutput->start(
+                    FIELD_TYPE_MESSAGE | FIELD_COUNT_REPEATED | FIELD_ID_BUCKET_INFO);
+            protoOutput->write(FIELD_TYPE_INT64 | FIELD_ID_START_BUCKET_NANOS,
+                               (long long)bucket.mBucketStartNs);
+            protoOutput->write(FIELD_TYPE_INT64 | FIELD_ID_END_BUCKET_NANOS,
+                               (long long)bucket.mBucketEndNs);
+            protoOutput->write(FIELD_TYPE_INT64 | FIELD_ID_VALUE, (long long)bucket.mValue);
+            protoOutput->end(bucketInfoToken);
             VLOG("\t bucket [%lld - %lld] count: %lld", (long long)bucket.mBucketStartNs,
                  (long long)bucket.mBucketEndNs, (long long)bucket.mValue);
         }
-        mProto->end(wrapperToken);
+        protoOutput->end(wrapperToken);
     }
-    mProto->end(mProtoToken);
-    mProto->write(FIELD_TYPE_INT64 | FIELD_ID_END_REPORT_NANOS,
-                  (long long)mCurrentBucketStartTimeNs);
+    protoOutput->end(protoToken);
+    protoOutput->write(FIELD_TYPE_INT64 | FIELD_ID_END_REPORT_NANOS, (long long)dumpTimeNs);
 
     VLOG("metric %s dump report now...", mMetric.name().c_str());
-    std::unique_ptr<std::vector<uint8_t>> buffer = serializeProtoLocked();
-
-    startNewProtoOutputStreamLocked(time(nullptr) * NS_PER_SEC);
     mPastBuckets.clear();
-
-    return buffer;
-
+    mStartTimeNs = mCurrentBucketStartTimeNs;
     // TODO: Clear mDimensionKeyMap once the report is dumped.
 }
 
 void ValueMetricProducer::onConditionChangedLocked(const bool condition, const uint64_t eventTime) {
     mCondition = condition;
+
+    if (eventTime < mCurrentBucketStartTimeNs) {
+        return;
+    }
 
     if (mPullTagId != -1) {
         if (mCondition == true) {

@@ -26,6 +26,7 @@ import android.support.test.runner.AndroidJUnit4;
 import android.test.suitebuilder.annotation.SmallTest;
 
 import com.android.internal.util.FastXmlSerializer;
+import com.android.server.UiServiceTestCase;
 
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -36,7 +37,7 @@ import java.io.ByteArrayOutputStream;
 
 @SmallTest
 @RunWith(AndroidJUnit4.class)
-public class NotificationChannelTest extends NotificationTestCase {
+public class NotificationChannelTest extends UiServiceTestCase {
 
     @Test
     public void testWriteToParcel() {

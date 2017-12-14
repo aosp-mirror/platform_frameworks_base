@@ -78,6 +78,16 @@ public class StorageStatsManager {
         return isQuotaSupported(convert(uuid));
     }
 
+    /** {@hide} */
+    @TestApi
+    public boolean isReservedSupported(@NonNull UUID storageUuid) {
+        try {
+            return mService.isReservedSupported(convert(storageUuid), mContext.getOpPackageName());
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
     /**
      * Return the total size of the underlying physical media that is hosting
      * this storage volume.

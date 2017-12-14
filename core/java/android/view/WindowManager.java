@@ -1672,12 +1672,20 @@ public interface WindowManager extends ViewManager {
          * Visibility state for {@link #softInputMode}: please show the soft
          * input area when normally appropriate (when the user is navigating
          * forward to your window).
+         *
+         * <p>Applications that target {@link android.os.Build.VERSION_CODES#P} and later, this flag
+         * is ignored unless there is a focused view that returns {@code true} from
+         * {@link View#isInEditMode()} when the window is focused.</p>
          */
         public static final int SOFT_INPUT_STATE_VISIBLE = 4;
 
         /**
          * Visibility state for {@link #softInputMode}: please always make the
          * soft input area visible when this window receives input focus.
+         *
+         * <p>Applications that target {@link android.os.Build.VERSION_CODES#P} and later, this flag
+         * is ignored unless there is a focused view that returns {@code true} from
+         * {@link View#isInEditMode()} when the window is focused.</p>
          */
         public static final int SOFT_INPUT_STATE_ALWAYS_VISIBLE = 5;
 

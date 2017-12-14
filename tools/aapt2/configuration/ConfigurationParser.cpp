@@ -28,6 +28,7 @@
 #include "ConfigDescription.h"
 #include "Diagnostics.h"
 #include "ResourceUtils.h"
+#include "configuration/ConfigurationParser.internal.h"
 #include "io/File.h"
 #include "io/FileSystem.h"
 #include "io/StringStream.h"
@@ -45,11 +46,22 @@ namespace {
 using ::aapt::configuration::Abi;
 using ::aapt::configuration::AndroidManifest;
 using ::aapt::configuration::AndroidSdk;
-using ::aapt::configuration::Artifact;
-using ::aapt::configuration::PostProcessingConfiguration;
+using ::aapt::configuration::ConfiguredArtifact;
+using ::aapt::configuration::DeviceFeature;
+using ::aapt::configuration::Entry;
 using ::aapt::configuration::GlTexture;
 using ::aapt::configuration::Group;
 using ::aapt::configuration::Locale;
+using ::aapt::configuration::OutputArtifact;
+using ::aapt::configuration::PostProcessingConfiguration;
+using ::aapt::configuration::handler::AbiGroupTagHandler;
+using ::aapt::configuration::handler::AndroidSdkGroupTagHandler;
+using ::aapt::configuration::handler::ArtifactFormatTagHandler;
+using ::aapt::configuration::handler::ArtifactTagHandler;
+using ::aapt::configuration::handler::DeviceFeatureGroupTagHandler;
+using ::aapt::configuration::handler::GlTextureGroupTagHandler;
+using ::aapt::configuration::handler::LocaleGroupTagHandler;
+using ::aapt::configuration::handler::ScreenDensityGroupTagHandler;
 using ::aapt::io::IFile;
 using ::aapt::io::RegularFile;
 using ::aapt::io::StringInputStream;
@@ -59,19 +71,16 @@ using ::aapt::xml::NodeCast;
 using ::aapt::xml::XmlActionExecutor;
 using ::aapt::xml::XmlActionExecutorPolicy;
 using ::aapt::xml::XmlNodeAction;
-using ::android::base::ReadFileToString;
 using ::android::StringPiece;
+using ::android::base::ReadFileToString;
 
-const std::unordered_map<std::string, Abi> kStringToAbiMap = {
+const std::unordered_map<StringPiece, Abi> kStringToAbiMap = {
     {"armeabi", Abi::kArmeV6}, {"armeabi-v7a", Abi::kArmV7a},  {"arm64-v8a", Abi::kArm64V8a},
     {"x86", Abi::kX86},        {"x86_64", Abi::kX86_64},       {"mips", Abi::kMips},
     {"mips64", Abi::kMips64},  {"universal", Abi::kUniversal},
 };
-const std::map<Abi, std::string> kAbiToStringMap = {
-    {Abi::kArmeV6, "armeabi"}, {Abi::kArmV7a, "armeabi-v7a"},  {Abi::kArm64V8a, "arm64-v8a"},
-    {Abi::kX86, "x86"},        {Abi::kX86_64, "x86_64"},       {Abi::kMips, "mips"},
-    {Abi::kMips64, "mips64"},  {Abi::kUniversal, "universal"},
-};
+const std::array<StringPiece, 8> kAbiToStringMap = {
+    {"armeabi", "armeabi-v7a", "arm64-v8a", "x86", "x86_64", "mips", "mips64", "universal"}};
 
 constexpr const char* kAaptXmlNs = "http://schemas.android.com/tools/aapt";
 
@@ -106,12 +115,25 @@ class NamespaceVisitor : public xml::Visitor {
   }
 };
 
-}  // namespace
+/** Copies the values referenced in a configuration group to the target list. */
+template <typename T>
+bool CopyXmlReferences(const Maybe<std::string>& name, const Group<T>& groups,
+                       std::vector<T>* target) {
+  // If there was no item configured, there is nothing to do and no error.
+  if (!name) {
+    return true;
+  }
 
-namespace configuration {
+  // If the group could not be found, then something is wrong.
+  auto group = groups.find(name.value());
+  if (group == groups.end()) {
+    return false;
+  }
 
-const std::string& AbiToString(Abi abi) {
-  return kAbiToStringMap.find(abi)->second;
+  for (const T& item : group->second) {
+    target->push_back(item);
+  }
+  return true;
 }
 
 /**
@@ -119,8 +141,8 @@ const std::string& AbiToString(Abi abi) {
  * success, or false if the either the placeholder is not found in the name, or the value is not
  * present and the placeholder was.
  */
-static bool ReplacePlaceholder(const StringPiece& placeholder, const Maybe<StringPiece>& value,
-                               std::string* name, IDiagnostics* diag) {
+bool ReplacePlaceholder(const StringPiece& placeholder, const Maybe<StringPiece>& value,
+                        std::string* name, IDiagnostics* diag) {
   size_t offset = name->find(placeholder.data());
   bool found = (offset != std::string::npos);
 
@@ -149,6 +171,160 @@ static bool ReplacePlaceholder(const StringPiece& placeholder, const Maybe<Strin
     return false;
   }
   return true;
+}
+
+/**
+ * An ActionHandler for processing XML elements in the XmlActionExecutor. Returns true if the
+ * element was successfully processed, otherwise returns false.
+ */
+using ActionHandler = std::function<bool(configuration::PostProcessingConfiguration* config,
+                                         xml::Element* element, IDiagnostics* diag)>;
+
+/** Binds an ActionHandler to the current configuration being populated. */
+xml::XmlNodeAction::ActionFuncWithDiag Bind(configuration::PostProcessingConfiguration* config,
+                                            const ActionHandler& handler) {
+  return [config, handler](xml::Element* root_element, SourcePathDiagnostics* diag) {
+    return handler(config, root_element, diag);
+  };
+}
+
+/** Returns the binary reprasentation of the XML configuration. */
+Maybe<PostProcessingConfiguration> ExtractConfiguration(const std::string& contents,
+                                                        IDiagnostics* diag) {
+  StringInputStream in(contents);
+  std::unique_ptr<xml::XmlResource> doc = xml::Inflate(&in, diag, Source("config.xml"));
+  if (!doc) {
+    return {};
+  }
+
+  // Strip any namespaces from the XML as the XmlActionExecutor ignores anything with a namespace.
+  Element* root = doc->root.get();
+  if (root == nullptr) {
+    diag->Error(DiagMessage() << "Could not find the root element in the XML document");
+    return {};
+  }
+
+  std::string& xml_ns = root->namespace_uri;
+  if (!xml_ns.empty()) {
+    if (xml_ns != kAaptXmlNs) {
+      diag->Error(DiagMessage() << "Unknown namespace found on root element: " << xml_ns);
+      return {};
+    }
+
+    xml_ns.clear();
+    NamespaceVisitor visitor;
+    root->Accept(&visitor);
+  }
+
+  XmlActionExecutor executor;
+  XmlNodeAction& root_action = executor["post-process"];
+  XmlNodeAction& artifacts_action = root_action["artifacts"];
+  XmlNodeAction& groups_action = root_action["groups"];
+
+  PostProcessingConfiguration config;
+
+  // Parse the artifact elements.
+  artifacts_action["artifact"].Action(Bind(&config, ArtifactTagHandler));
+  artifacts_action["artifact-format"].Action(Bind(&config, ArtifactFormatTagHandler));
+
+  // Parse the different configuration groups.
+  groups_action["abi-group"].Action(Bind(&config, AbiGroupTagHandler));
+  groups_action["screen-density-group"].Action(Bind(&config, ScreenDensityGroupTagHandler));
+  groups_action["locale-group"].Action(Bind(&config, LocaleGroupTagHandler));
+  groups_action["android-sdk-group"].Action(Bind(&config, AndroidSdkGroupTagHandler));
+  groups_action["gl-texture-group"].Action(Bind(&config, GlTextureGroupTagHandler));
+  groups_action["device-feature-group"].Action(Bind(&config, DeviceFeatureGroupTagHandler));
+
+  if (!executor.Execute(XmlActionExecutorPolicy::kNone, diag, doc.get())) {
+    diag->Error(DiagMessage() << "Could not process XML document");
+    return {};
+  }
+
+  return {config};
+}
+
+/** Converts a ConfiguredArtifact into an OutputArtifact. */
+Maybe<OutputArtifact> ToOutputArtifact(const ConfiguredArtifact& artifact,
+                                       const std::string& apk_name,
+                                       const PostProcessingConfiguration& config,
+                                       IDiagnostics* diag) {
+  if (!artifact.name && !config.artifact_format) {
+    diag->Error(
+        DiagMessage() << "Artifact does not have a name and no global name template defined");
+    return {};
+  }
+
+  Maybe<std::string> artifact_name =
+      (artifact.name) ? artifact.Name(apk_name, diag)
+                      : artifact.ToArtifactName(config.artifact_format.value(), apk_name, diag);
+
+  if (!artifact_name) {
+    diag->Error(DiagMessage() << "Could not determine split APK artifact name");
+    return {};
+  }
+
+  OutputArtifact output_artifact;
+  output_artifact.name = artifact_name.value();
+
+  SourcePathDiagnostics src_diag{{output_artifact.name}, diag};
+  bool has_errors = false;
+
+  if (!CopyXmlReferences(artifact.abi_group, config.abi_groups, &output_artifact.abis)) {
+    src_diag.Error(DiagMessage() << "Could not lookup required ABIs: "
+                                 << artifact.abi_group.value());
+    has_errors = true;
+  }
+
+  if (!CopyXmlReferences(artifact.locale_group, config.locale_groups, &output_artifact.locales)) {
+    src_diag.Error(DiagMessage() << "Could not lookup required locales: "
+                                 << artifact.locale_group.value());
+    has_errors = true;
+  }
+
+  if (!CopyXmlReferences(artifact.screen_density_group, config.screen_density_groups,
+                         &output_artifact.screen_densities)) {
+    src_diag.Error(DiagMessage() << "Could not lookup required screen densities: "
+                                 << artifact.screen_density_group.value());
+    has_errors = true;
+  }
+
+  if (!CopyXmlReferences(artifact.device_feature_group, config.device_feature_groups,
+                         &output_artifact.features)) {
+    src_diag.Error(DiagMessage() << "Could not lookup required device features: "
+                                 << artifact.device_feature_group.value());
+    has_errors = true;
+  }
+
+  if (!CopyXmlReferences(artifact.gl_texture_group, config.gl_texture_groups,
+                         &output_artifact.textures)) {
+    src_diag.Error(DiagMessage() << "Could not lookup required OpenGL texture formats: "
+                                 << artifact.gl_texture_group.value());
+    has_errors = true;
+  }
+
+  if (artifact.android_sdk_group) {
+    auto entry = config.android_sdk_groups.find(artifact.android_sdk_group.value());
+    if (entry == config.android_sdk_groups.end()) {
+      src_diag.Error(DiagMessage() << "Could not lookup required Android SDK version: "
+                                   << artifact.android_sdk_group.value());
+      has_errors = true;
+    } else {
+      output_artifact.android_sdk = {entry->second};
+    }
+  }
+
+  if (has_errors) {
+    return {};
+  }
+  return {output_artifact};
+}
+
+}  // namespace
+
+namespace configuration {
+
+const StringPiece& AbiToString(Abi abi) {
+  return kAbiToStringMap.at(static_cast<size_t>(abi));
 }
 
 /**
@@ -186,8 +362,9 @@ Maybe<std::string> ToBaseName(std::string result, const StringPiece& apk_name, I
   return result;
 }
 
-Maybe<std::string> Artifact::ToArtifactName(const StringPiece& format, const StringPiece& apk_name,
-                                            IDiagnostics* diag) const {
+Maybe<std::string> ConfiguredArtifact::ToArtifactName(const StringPiece& format,
+                                                      const StringPiece& apk_name,
+                                                      IDiagnostics* diag) const {
   Maybe<std::string> base = ToBaseName(format.to_string(), apk_name, diag);
   if (!base) {
     return {};
@@ -221,37 +398,12 @@ Maybe<std::string> Artifact::ToArtifactName(const StringPiece& format, const Str
   return result;
 }
 
-Maybe<std::string> Artifact::Name(const StringPiece& apk_name, IDiagnostics* diag) const {
+Maybe<std::string> ConfiguredArtifact::Name(const StringPiece& apk_name, IDiagnostics* diag) const {
   if (!name) {
     return {};
   }
 
   return ToBaseName(name.value(), apk_name, diag);
-}
-
-bool PostProcessingConfiguration::AllArtifactNames(const StringPiece& apk_name,
-                                                   std::vector<std::string>* artifact_names,
-                                                   IDiagnostics* diag) const {
-  for (const auto& artifact : artifacts) {
-    Maybe<std::string> name;
-    if (artifact.name) {
-      name = artifact.Name(apk_name, diag);
-    } else {
-      if (!artifact_format) {
-        diag->Error(DiagMessage() << "No global artifact template and an artifact name is missing");
-        return false;
-      }
-      name = artifact.ToArtifactName(artifact_format.value(), apk_name, diag);
-    }
-
-    if (!name) {
-      return false;
-    }
-
-    artifact_names->push_back(std::move(name.value()));
-  }
-
-  return true;
 }
 
 }  // namespace configuration
@@ -270,86 +422,58 @@ ConfigurationParser::ConfigurationParser(std::string contents)
       diag_(&noop_) {
 }
 
-Maybe<PostProcessingConfiguration> ConfigurationParser::Parse() {
-  StringInputStream in(contents_);
-  std::unique_ptr<xml::XmlResource> doc = xml::Inflate(&in, diag_, Source("config.xml"));
-  if (!doc) {
+Maybe<std::vector<OutputArtifact>> ConfigurationParser::Parse(
+    const android::StringPiece& apk_path) {
+  Maybe<PostProcessingConfiguration> maybe_config = ExtractConfiguration(contents_, diag_);
+  if (!maybe_config) {
     return {};
   }
-
-  // Strip any namespaces from the XML as the XmlActionExecutor ignores anything with a namespace.
-  Element* root = doc->root.get();
-  if (root == nullptr) {
-    diag_->Error(DiagMessage() << "Could not find the root element in the XML document");
-    return {};
-  }
-
-  std::string& xml_ns = root->namespace_uri;
-  if (!xml_ns.empty()) {
-    if (xml_ns != kAaptXmlNs) {
-      diag_->Error(DiagMessage() << "Unknown namespace found on root element: " << xml_ns);
-      return {};
-    }
-
-    xml_ns.clear();
-    NamespaceVisitor visitor;
-    root->Accept(&visitor);
-  }
-
-  XmlActionExecutor executor;
-  XmlNodeAction& root_action = executor["post-process"];
-  XmlNodeAction& artifacts_action = root_action["artifacts"];
-  XmlNodeAction& groups_action = root_action["groups"];
-
-  PostProcessingConfiguration config;
-
-  // Helper to bind a static method to an action handler in the DOM executor.
-  auto bind_handler =
-      [&config](std::function<bool(PostProcessingConfiguration*, Element*, IDiagnostics*)> h)
-      -> XmlNodeAction::ActionFuncWithDiag {
-    return std::bind(h, &config, std::placeholders::_1, std::placeholders::_2);
-  };
-
-  // Parse the artifact elements.
-  artifacts_action["artifact"].Action(bind_handler(artifact_handler_));
-  artifacts_action["artifact-format"].Action(bind_handler(artifact_format_handler_));
-
-  // Parse the different configuration groups.
-  groups_action["abi-group"].Action(bind_handler(abi_group_handler_));
-  groups_action["screen-density-group"].Action(bind_handler(screen_density_group_handler_));
-  groups_action["locale-group"].Action(bind_handler(locale_group_handler_));
-  groups_action["android-sdk-group"].Action(bind_handler(android_sdk_group_handler_));
-  groups_action["gl-texture-group"].Action(bind_handler(gl_texture_group_handler_));
-  groups_action["device-feature-group"].Action(bind_handler(device_feature_group_handler_));
-
-  if (!executor.Execute(XmlActionExecutorPolicy::kNone, diag_, doc.get())) {
-    diag_->Error(DiagMessage() << "Could not process XML document");
-    return {};
-  }
-
-  // TODO: Validate all references in the configuration are valid. It should be safe to assume from
-  // this point on that any references from one section to another will be present.
+  const PostProcessingConfiguration& config = maybe_config.value();
 
   // TODO: Automatically arrange artifacts so that they match Play Store multi-APK requirements.
   // see: https://developer.android.com/google/play/publishing/multiple-apks.html
   //
   // For now, make sure the version codes are unique.
-  std::vector<Artifact>& artifacts = config.artifacts;
+  std::vector<ConfiguredArtifact> artifacts = config.artifacts;
   std::sort(artifacts.begin(), artifacts.end());
   if (std::adjacent_find(artifacts.begin(), artifacts.end()) != artifacts.end()) {
     diag_->Error(DiagMessage() << "Configuration has duplicate versions");
     return {};
   }
 
-  return {config};
+  const std::string& apk_name = file::GetFilename(apk_path).to_string();
+  const StringPiece ext = file::GetExtension(apk_name);
+  const std::string base_name = apk_name.substr(0, apk_name.size() - ext.size());
+
+  // Convert from a parsed configuration to a list of artifacts for processing.
+  std::vector<OutputArtifact> output_artifacts;
+  bool has_errors = false;
+
+  for (const ConfiguredArtifact& artifact : artifacts) {
+    Maybe<OutputArtifact> output_artifact = ToOutputArtifact(artifact, apk_name, config, diag_);
+    if (!output_artifact) {
+      // Defer return an error condition so that all errors are reported.
+      has_errors = true;
+    } else {
+      output_artifacts.push_back(std::move(output_artifact.value()));
+    }
+  }
+
+  if (has_errors) {
+    return {};
+  }
+  return {output_artifacts};
 }
 
-ConfigurationParser::ActionHandler ConfigurationParser::artifact_handler_ =
-    [](PostProcessingConfiguration* config, Element* root_element, IDiagnostics* diag) -> bool {
+namespace configuration {
+namespace handler {
+
+bool ArtifactTagHandler(PostProcessingConfiguration* config, Element* root_element,
+                        IDiagnostics* diag) {
   // This will be incremented later so the first version will always be different to the base APK.
   int current_version = (config->artifacts.empty()) ? 0 : config->artifacts.back().version;
 
-  Artifact artifact{};
+  ConfiguredArtifact artifact{};
   Maybe<int> version;
   for (const auto& attr : root_element->attributes) {
     if (attr.name == "name") {
@@ -380,8 +504,8 @@ ConfigurationParser::ActionHandler ConfigurationParser::artifact_handler_ =
   return true;
 };
 
-ConfigurationParser::ActionHandler ConfigurationParser::artifact_format_handler_ =
-    [](PostProcessingConfiguration* config, Element* root_element, IDiagnostics* diag) -> bool {
+bool ArtifactFormatTagHandler(PostProcessingConfiguration* config, Element* root_element,
+                              IDiagnostics* /* diag */) {
   for (auto& node : root_element->children) {
     xml::Text* t;
     if ((t = NodeCast<xml::Text>(node.get())) != nullptr) {
@@ -392,8 +516,8 @@ ConfigurationParser::ActionHandler ConfigurationParser::artifact_format_handler_
   return true;
 };
 
-ConfigurationParser::ActionHandler ConfigurationParser::abi_group_handler_ =
-    [](PostProcessingConfiguration* config, Element* root_element, IDiagnostics* diag) -> bool {
+bool AbiGroupTagHandler(PostProcessingConfiguration* config, Element* root_element,
+                        IDiagnostics* diag) {
   std::string label = GetLabel(root_element, diag);
   if (label.empty()) {
     return false;
@@ -420,8 +544,8 @@ ConfigurationParser::ActionHandler ConfigurationParser::abi_group_handler_ =
   return valid;
 };
 
-ConfigurationParser::ActionHandler ConfigurationParser::screen_density_group_handler_ =
-    [](PostProcessingConfiguration* config, Element* root_element, IDiagnostics* diag) -> bool {
+bool ScreenDensityGroupTagHandler(PostProcessingConfiguration* config, Element* root_element,
+                                  IDiagnostics* diag) {
   std::string label = GetLabel(root_element, diag);
   if (label.empty()) {
     return false;
@@ -461,8 +585,8 @@ ConfigurationParser::ActionHandler ConfigurationParser::screen_density_group_han
   return valid;
 };
 
-ConfigurationParser::ActionHandler ConfigurationParser::locale_group_handler_ =
-    [](PostProcessingConfiguration* config, Element* root_element, IDiagnostics* diag) -> bool {
+bool LocaleGroupTagHandler(PostProcessingConfiguration* config, Element* root_element,
+                           IDiagnostics* diag) {
   std::string label = GetLabel(root_element, diag);
   if (label.empty()) {
     return false;
@@ -502,8 +626,8 @@ ConfigurationParser::ActionHandler ConfigurationParser::locale_group_handler_ =
   return valid;
 };
 
-ConfigurationParser::ActionHandler ConfigurationParser::android_sdk_group_handler_ =
-    [](PostProcessingConfiguration* config, Element* root_element, IDiagnostics* diag) -> bool {
+bool AndroidSdkGroupTagHandler(PostProcessingConfiguration* config, Element* root_element,
+                               IDiagnostics* diag) {
   std::string label = GetLabel(root_element, diag);
   if (label.empty()) {
     return false;
@@ -560,8 +684,8 @@ ConfigurationParser::ActionHandler ConfigurationParser::android_sdk_group_handle
   return valid;
 };
 
-ConfigurationParser::ActionHandler ConfigurationParser::gl_texture_group_handler_ =
-    [](PostProcessingConfiguration* config, Element* root_element, IDiagnostics* diag) -> bool {
+bool GlTextureGroupTagHandler(PostProcessingConfiguration* config, Element* root_element,
+                              IDiagnostics* diag) {
   std::string label = GetLabel(root_element, diag);
   if (label.empty()) {
     return false;
@@ -603,8 +727,8 @@ ConfigurationParser::ActionHandler ConfigurationParser::gl_texture_group_handler
   return valid;
 };
 
-ConfigurationParser::ActionHandler ConfigurationParser::device_feature_group_handler_ =
-    [](PostProcessingConfiguration* config, Element* root_element, IDiagnostics* diag) -> bool {
+bool DeviceFeatureGroupTagHandler(PostProcessingConfiguration* config, Element* root_element,
+                                  IDiagnostics* diag) {
   std::string label = GetLabel(root_element, diag);
   if (label.empty()) {
     return false;
@@ -631,5 +755,8 @@ ConfigurationParser::ActionHandler ConfigurationParser::device_feature_group_han
 
   return valid;
 };
+
+}  // namespace handler
+}  // namespace configuration
 
 }  // namespace aapt

@@ -1050,11 +1050,7 @@ final class ActivityRecord extends ConfigurationContainer implements AppWindowCo
      * @return whether the given package name can launch an assist activity.
      */
     private boolean canLaunchAssistActivity(String packageName) {
-        if (service.mAssistUtils == null) {
-            return false;
-        }
-
-        final ComponentName assistComponent = service.mAssistUtils.getActiveServiceComponentName();
+        final ComponentName assistComponent = service.mActiveVoiceInteractionServiceComponent;
         if (assistComponent != null) {
             return assistComponent.getPackageName().equals(packageName);
         }

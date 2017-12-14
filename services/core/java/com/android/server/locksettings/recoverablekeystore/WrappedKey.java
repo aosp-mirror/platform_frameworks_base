@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package android.security.recoverablekeystore;
+package com.android.server.locksettings.recoverablekeystore;
 
 import java.security.InvalidKeyException;
 import java.security.KeyStoreException;

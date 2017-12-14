@@ -134,6 +134,10 @@ public class VolumeDialogComponent implements VolumeComponent, TunerService.Tuna
         mController.setVolumePolicy(mVolumePolicy);
     }
 
+    void setEnableDialogs(boolean volumeUi, boolean safetyWarning) {
+        mController.setEnableDialogs(volumeUi, safetyWarning);
+    }
+
     @Override
     public void onUserActivity() {
         final KeyguardViewMediator kvm = mSysui.getComponent(KeyguardViewMediator.class);

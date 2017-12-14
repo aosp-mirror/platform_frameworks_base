@@ -16,11 +16,7 @@
 
 #pragma once
 
-#include "logd/LogReader.h"
-#include "storage/DropboxWriter.h"
-
-#include <log/logprint.h>
-#include "frameworks/base/cmds/statsd/src/statsd_config.pb.h"
+#include "frameworks/base/cmds/statsd/src/stats_log.pb.h"
 
 #include <unordered_map>
 
@@ -29,17 +25,12 @@ namespace os {
 namespace statsd {
 
 #define DEFAULT_DIMENSION_KEY ""
-#define MATCHER_NOT_FOUND -2
 
 typedef std::string HashableDimensionKey;
 
 typedef std::map<std::string, HashableDimensionKey> ConditionKey;
 
 typedef std::unordered_map<HashableDimensionKey, int64_t> DimToValMap;
-
-EventMetricData parse(log_msg msg);
-
-int getTagId(log_msg msg);
 
 std::string getHashableKey(std::vector<KeyValuePair> key);
 

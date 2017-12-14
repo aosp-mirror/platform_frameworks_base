@@ -212,6 +212,7 @@
     <string name="global_action_power_off" msgid="4471879440839879722">"Éteindre"</string>
     <string name="global_action_emergency" msgid="7112311161137421166">"Urgence"</string>
     <string name="global_action_bug_report" msgid="7934010578922304799">"Rapport de bogue"</string>
+    <string name="global_action_logout" msgid="935179188218826050">"Fermer la session"</string>
     <string name="bugreport_title" msgid="2667494803742548533">"Créer un rapport de bogue"</string>
     <string name="bugreport_message" msgid="398447048750350456">"Cela permet de recueillir des informations concernant l\'état actuel de votre appareil. Ces informations sont ensuite envoyées sous forme de courriel. Merci de patienter pendant la préparation du rapport de bogue. Cette opération peut prendre quelques instants."</string>
     <string name="bugreport_option_interactive_title" msgid="8635056131768862479">"Rapport interactif"</string>
@@ -1498,6 +1499,8 @@
     <string name="accessibility_shortcut_toogle_warning" msgid="7256507885737444807">"Quand le raccourci est activé, appuyez sur les deux boutons de volume pendant trois secondes pour lancer une fonctionnalité d\'accessibilité.\n\n Fonctionnalité d\'accessibilité utilisée actuellement :\n <xliff:g id="SERVICE_NAME">%1$s</xliff:g>\n\n Vous pouvez changer de fonctionnalité sous Paramètres &gt; Accessibilité."</string>
     <string name="disable_accessibility_shortcut" msgid="627625354248453445">"Désactiver le raccourci"</string>
     <string name="leave_accessibility_shortcut_on" msgid="7653111894438512680">"Utiliser le raccourci"</string>
+    <string name="color_inversion_feature_name" msgid="4231186527799958644">"Inversion des couleurs"</string>
+    <string name="color_correction_feature_name" msgid="6779391426096954933">"Correction des couleurs"</string>
     <string name="accessibility_shortcut_enabling_service" msgid="7771852911861522636">"Le raccourci d\'accessibilité a activé la fonction <xliff:g id="SERVICE_NAME">%1$s</xliff:g>"</string>
     <string name="accessibility_shortcut_disabling_service" msgid="2747243438223109821">"Le raccourci d\'accessibilité a désactivé la fonction <xliff:g id="SERVICE_NAME">%1$s</xliff:g>"</string>
     <string name="accessibility_button_prompt_text" msgid="4234556536456854251">"Choisissez une fonctionnalité à utiliser lorsque vous touchez le bouton d\'accessibilité :"</string>
@@ -1684,13 +1687,16 @@
     <string name="zen_mode_default_weeknights_name" msgid="3081318299464998143">"Soirs de semaine"</string>
     <string name="zen_mode_default_weekends_name" msgid="2786495801019345244">"Fin de semaine"</string>
     <string name="zen_mode_default_events_name" msgid="8158334939013085363">"Événement"</string>
+    <string name="zen_mode_default_every_night_name" msgid="3012363838882944175">"Dormir"</string>
     <string name="muted_by" msgid="6147073845094180001">"Mis en sourdine par <xliff:g id="THIRD_PARTY">%1$s</xliff:g>"</string>
     <string name="system_error_wipe_data" msgid="6608165524785354962">"Un problème interne est survenu avec votre appareil. Il se peut qu\'il soit instable jusqu\'à ce que vous le réinitialisiez à sa configuration d\'usine."</string>
     <string name="system_error_manufacturer" msgid="8086872414744210668">"Un problème interne est survenu avec votre appareil. Communiquez avec le fabricant pour obtenir plus de détails."</string>
     <string name="stk_cc_ussd_to_dial" msgid="5202342984749947872">"La demande USSD a été modifiée et est maintenant une demande DIAL."</string>
     <string name="stk_cc_ussd_to_ss" msgid="2345360594181405482">"La demande USSD a été modifiée et est maintenant une demande SS."</string>
     <string name="stk_cc_ussd_to_ussd" msgid="7466087659967191653">"La demande USSD a été modifiée et est maintenant une nouvelle demande USSD."</string>
+    <string name="stk_cc_ussd_to_dial_video" msgid="585340552561515305">"La demande USSD a été modifiée et est maintenant une demande Video DIAL."</string>
     <string name="stk_cc_ss_to_dial" msgid="2151304435775557162">"La demande SS a été modifiée et est maintenant une demande DIAL."</string>
+    <string name="stk_cc_ss_to_dial_video" msgid="4306210904450719045">"La demande SS a été modifiée et est maintenant une demande Video DIAL."</string>
     <string name="stk_cc_ss_to_ussd" msgid="3951862188105305589">"La demande SS a été modifiée et est maintenant une demande USSD."</string>
     <string name="stk_cc_ss_to_ss" msgid="5470768854991452695">"La demande SS a été modifiée et est maintenant une nouvelle demande SS."</string>
     <string name="notification_work_profile_content_description" msgid="4600554564103770764">"Profil professionnel"</string>

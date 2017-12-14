@@ -492,6 +492,9 @@
     <string name="stream_bluetooth_sco" msgid="2055645746402746292">"Bluetooth"</string>
     <string name="stream_dtmf" msgid="2447177903892477915">"Frekuensi multinada ganda"</string>
     <string name="stream_accessibility" msgid="301136219144385106">"Aksesibilitas"</string>
+    <string name="volume_ringer_status_normal" msgid="4273142424125855384">"Dering"</string>
+    <string name="volume_ringer_status_vibrate" msgid="1825615171021346557">"Getar"</string>
+    <string name="volume_ringer_status_silent" msgid="6896394161022916369">"Nonaktifkan"</string>
     <string name="volume_stream_content_description_unmute" msgid="4436631538779230857">"%1$s. Ketuk untuk menyuarakan."</string>
     <string name="volume_stream_content_description_vibrate" msgid="1187944970457807498">"%1$s. Ketuk untuk menyetel agar bergetar. Layanan aksesibilitas mungkin dibisukan."</string>
     <string name="volume_stream_content_description_mute" msgid="3625049841390467354">"%1$s. Ketuk untuk membisukan. Layanan aksesibilitas mungkin dibisukan."</string>
@@ -756,8 +759,7 @@
     <string name="instant_apps" msgid="6647570248119804907">"Aplikasi Instan"</string>
     <string name="instant_apps_message" msgid="8116608994995104836">"Aplikasi instan tidak perlu diinstal."</string>
     <string name="app_info" msgid="6856026610594615344">"Info aplikasi"</string>
-    <!-- no translation found for go_to_web (2650669128861626071) -->
-    <skip />
+    <string name="go_to_web" msgid="2650669128861626071">"Buka browser"</string>
     <string name="mobile_data" msgid="7094582042819250762">"Data seluler"</string>
     <string name="wifi_is_off" msgid="1838559392210456893">"Wi-Fi nonaktif"</string>
     <string name="bt_is_off" msgid="2640685272289706392">"Bluetooth nonaktif"</string>

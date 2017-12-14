@@ -49,7 +49,7 @@ public final class GnssMeasurementsEvent implements Parcelable {
          * @hide
          */
         @Retention(RetentionPolicy.SOURCE)
-        @IntDef({STATUS_NOT_SUPPORTED, STATUS_READY, STATUS_LOCATION_DISABLED})
+        @IntDef({STATUS_NOT_SUPPORTED, STATUS_READY, STATUS_LOCATION_DISABLED, STATUS_NOT_ALLOWED})
         public @interface GnssMeasurementsStatus {}
 
         /**
@@ -70,6 +70,12 @@ public final class GnssMeasurementsEvent implements Parcelable {
          * enabled.
          */
         public static final int STATUS_LOCATION_DISABLED = 2;
+
+        /**
+         * The client is not allowed to register for GNSS Measurements in general or in the
+         * requested mode.
+         */
+        public static final int STATUS_NOT_ALLOWED = 3;
 
         /**
          * Reports the latest collected GNSS Measurements.

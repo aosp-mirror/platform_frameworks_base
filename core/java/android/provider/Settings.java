@@ -11143,6 +11143,15 @@ public final class Settings {
          */
         public static final String NOTIFICATION_SNOOZE_OPTIONS =
                 "notification_snooze_options";
+
+        /**
+         * Enable GNSS Raw Measurements Full Tracking?
+         * 0 = no
+         * 1 = yes
+         * @hide
+         */
+        public static final String ENABLE_GNSS_RAW_MEAS_FULL_TRACKING =
+                "enable_gnss_raw_meas_full_tracking";
     }
 
     /**

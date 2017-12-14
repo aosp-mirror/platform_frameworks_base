@@ -24,6 +24,7 @@ import android.hardware.Sensor;
 import android.hardware.SensorEvent;
 import android.hardware.SensorEventListener;
 import android.hardware.SensorManager;
+import android.hardware.display.BrightnessConfiguration;
 import android.os.Handler;
 import android.os.Looper;
 import android.os.Message;
@@ -34,7 +35,6 @@ import android.text.format.DateUtils;
 import android.util.EventLog;
 import android.util.MathUtils;
 import android.util.Slog;
-import android.util.Spline;
 import android.util.TimeUtils;
 
 import java.io.PrintWriter;
@@ -76,9 +76,8 @@ class AutomaticBrightnessController {
     // The light sensor, or null if not available or needed.
     private final Sensor mLightSensor;
 
-    // The auto-brightness spline adjustment.
-    // The brightness values have been scaled to a range of 0..1.
-    private final Spline mScreenAutoBrightnessSpline;
+    // The mapper to translate ambient lux to screen brightness in the range [0, 1.0].
+    private final BrightnessMappingStrategy mBrightnessMapper;
 
     // The minimum and maximum screen brightnesses.
     private final int mScreenBrightnessRangeMinimum;
@@ -186,7 +185,7 @@ class AutomaticBrightnessController {
     private float mBrightnessAdjustmentSampleOldGamma;
 
     public AutomaticBrightnessController(Callbacks callbacks, Looper looper,
-            SensorManager sensorManager, Spline autoBrightnessSpline, int lightSensorWarmUpTime,
+            SensorManager sensorManager, BrightnessMappingStrategy mapper, int lightSensorWarmUpTime,
             int brightnessMin, int brightnessMax, float dozeScaleFactor,
             int lightSensorRate, int initialLightSensorRate, long brighteningLightDebounceConfig,
             long darkeningLightDebounceConfig, boolean resetAmbientLuxAfterWarmUpConfig,
@@ -194,7 +193,7 @@ class AutomaticBrightnessController {
             HysteresisLevels dynamicHysteresis) {
         mCallbacks = callbacks;
         mSensorManager = sensorManager;
-        mScreenAutoBrightnessSpline = autoBrightnessSpline;
+        mBrightnessMapper = mapper;
         mScreenBrightnessRangeMinimum = brightnessMin;
         mScreenBrightnessRangeMaximum = brightnessMax;
         mLightSensorWarmUpTimeConfig = lightSensorWarmUpTime;
@@ -228,15 +227,16 @@ class AutomaticBrightnessController {
         return mScreenAutoBrightness;
     }
 
-    public void configure(boolean enable, float adjustment, boolean dozing,
-            boolean userInitiatedChange) {
+    public void configure(boolean enable, @Nullable BrightnessConfiguration configuration,
+            float adjustment, boolean dozing, boolean userInitiatedChange) {
         // While dozing, the application processor may be suspended which will prevent us from
         // receiving new information from the light sensor. On some devices, we may be able to
         // switch to a wake-up light sensor instead but for now we will simply disable the sensor
         // and hold onto the last computed screen auto brightness.  We save the dozing flag for
         // debugging purposes.
         mDozing = dozing;
-        boolean changed = setLightSensorEnabled(enable && !dozing);
+        boolean changed = setBrightnessConfiguration(configuration);
+        changed |= setLightSensorEnabled(enable && !dozing);
         if (enable && !dozing && userInitiatedChange) {
             prepareBrightnessAdjustmentSample();
         }
@@ -246,10 +246,13 @@ class AutomaticBrightnessController {
         }
     }
 
+    public boolean setBrightnessConfiguration(BrightnessConfiguration configuration) {
+        return mBrightnessMapper.setBrightnessConfiguration(configuration);
+    }
+
     public void dump(PrintWriter pw) {
         pw.println();
         pw.println("Automatic Brightness Controller Configuration:");
-        pw.println("  mScreenAutoBrightnessSpline=" + mScreenAutoBrightnessSpline);
         pw.println("  mScreenBrightnessRangeMinimum=" + mScreenBrightnessRangeMinimum);
         pw.println("  mScreenBrightnessRangeMaximum=" + mScreenBrightnessRangeMaximum);
         pw.println("  mLightSensorWarmUpTimeConfig=" + mLightSensorWarmUpTimeConfig);
@@ -274,9 +277,13 @@ class AutomaticBrightnessController {
                 mInitialHorizonAmbientLightRingBuffer);
         pw.println("  mScreenAutoBrightness=" + mScreenAutoBrightness);
         pw.println("  mScreenAutoBrightnessAdjustment=" + mScreenAutoBrightnessAdjustment);
-        pw.println("  mScreenAutoBrightnessAdjustmentMaxGamma=" + mScreenAutoBrightnessAdjustmentMaxGamma);
+        pw.println("  mScreenAutoBrightnessAdjustmentMaxGamma="
+                + mScreenAutoBrightnessAdjustmentMaxGamma);
         pw.println("  mLastScreenAutoBrightnessGamma=" + mLastScreenAutoBrightnessGamma);
         pw.println("  mDozing=" + mDozing);
+
+        pw.println();
+        mBrightnessMapper.dump(pw);
     }
 
     private boolean setLightSensorEnabled(boolean enable) {
@@ -533,7 +540,7 @@ class AutomaticBrightnessController {
             return;
         }
 
-        float value = mScreenAutoBrightnessSpline.interpolate(mAmbientLux);
+        float value = mBrightnessMapper.getBrightness(mAmbientLux);
         float gamma = 1.0f;
 
         if (USE_SCREEN_AUTO_BRIGHTNESS_ADJUSTMENT

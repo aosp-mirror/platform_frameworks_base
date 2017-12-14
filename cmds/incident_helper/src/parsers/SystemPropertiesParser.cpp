@@ -53,10 +53,16 @@ SystemPropertiesParser::Parse(const int in, const int out) const
                 SystemPropertiesProto::_FIELD_COUNT);
     Message sysProp(&sysPropTable);
 
-    Table aaudioT(SystemPropertiesProto::Aaudio::_FIELD_NAMES,
+    Table aacDrcTable(SystemPropertiesProto::AacDrc::_FIELD_NAMES,
+            SystemPropertiesProto::AacDrc::_FIELD_IDS,
+            SystemPropertiesProto::AacDrc::_FIELD_COUNT);
+    Message aacDrc(&aacDrcTable);
+    sysProp.addSubMessage(SystemPropertiesProto::AAC_DRC, &aacDrc);
+
+    Table aaudioTable(SystemPropertiesProto::Aaudio::_FIELD_NAMES,
             SystemPropertiesProto::Aaudio::_FIELD_IDS,
             SystemPropertiesProto::Aaudio::_FIELD_COUNT);
-    Message aaudio(&aaudioT);
+    Message aaudio(&aaudioTable);
     sysProp.addSubMessage(SystemPropertiesProto::AAUDIO, &aaudio);
 
     Table cameraTable(SystemPropertiesProto::Camera::_FIELD_NAMES,
@@ -142,8 +148,13 @@ SystemPropertiesParser::Parse(const int in, const int out) const
                    SystemPropertiesProto::Ro::Product::_FIELD_IDS,
                    SystemPropertiesProto::Ro::Product::_FIELD_COUNT);
     Message product(&productTable);
-    ro.addSubMessage(SystemPropertiesProto::Ro::PRODUCT, &product);
 
+    Table vendorTable(SystemPropertiesProto::Ro::Product::Vendor::_FIELD_NAMES,
+            SystemPropertiesProto::Ro::Product::Vendor::_FIELD_IDS,
+            SystemPropertiesProto::Ro::Product::Vendor::_FIELD_COUNT);
+    Message vendor(&vendorTable);
+    product.addSubMessage(SystemPropertiesProto::Ro::Product::VENDOR, &vendor);
+    ro.addSubMessage(SystemPropertiesProto::Ro::PRODUCT, &product);
     sysProp.addSubMessage(SystemPropertiesProto::RO, &ro);
 
     Table sysTable(SystemPropertiesProto::Sys::_FIELD_NAMES,

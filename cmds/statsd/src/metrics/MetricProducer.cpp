@@ -64,23 +64,6 @@ void MetricProducer::onMatchedLogEventLocked(const size_t matcherIndex, const Lo
                                     scheduledPull);
 }
 
-std::unique_ptr<std::vector<uint8_t>> MetricProducer::serializeProtoLocked() {
-    size_t bufferSize = mProto->size();
-
-    std::unique_ptr<std::vector<uint8_t>> buffer(new std::vector<uint8_t>(bufferSize));
-
-    size_t pos = 0;
-    auto it = mProto->data();
-    while (it.readBuffer() != NULL) {
-        size_t toRead = it.currentToRead();
-        std::memcpy(&((*buffer)[pos]), it.readBuffer(), toRead);
-        pos += toRead;
-        it.rp()->move(toRead);
-    }
-
-    return buffer;
-}
-
 }  // namespace statsd
 }  // namespace os
 }  // namespace android

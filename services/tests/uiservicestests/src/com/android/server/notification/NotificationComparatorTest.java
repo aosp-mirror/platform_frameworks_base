@@ -38,6 +38,8 @@ import android.telecom.TelecomManager;
 import android.support.test.runner.AndroidJUnit4;
 import android.test.suitebuilder.annotation.SmallTest;
 
+import com.android.server.UiServiceTestCase;
+
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -50,7 +52,7 @@ import java.util.List;
 
 @SmallTest
 @RunWith(AndroidJUnit4.class)
-public class NotificationComparatorTest extends NotificationTestCase {
+public class NotificationComparatorTest extends UiServiceTestCase {
     @Mock Context mContext;
     @Mock TelecomManager mTm;
     @Mock RankingHandler handler;

@@ -214,8 +214,7 @@
     <string name="global_action_power_off" msgid="4471879440839879722">"Isključi telefon"</string>
     <string name="global_action_emergency" msgid="7112311161137421166">"Hitno"</string>
     <string name="global_action_bug_report" msgid="7934010578922304799">"Izvještaj o greškama"</string>
-    <!-- no translation found for global_action_logout (935179188218826050) -->
-    <skip />
+    <string name="global_action_logout" msgid="935179188218826050">"Završi sesiju"</string>
     <string name="bugreport_title" msgid="2667494803742548533">"Kreirajte izvještaj o greškama"</string>
     <string name="bugreport_message" msgid="398447048750350456">"Ovim će se prikupljati informacije o trenutnom stanju uređaja, koji će biti poslani kao e-poruka. Može malo potrajati dok se izvještaj o greškama ne kreira i bude spreman za slanje. Budite strpljivi."</string>
     <string name="bugreport_option_interactive_title" msgid="8635056131768862479">"Interaktivni izvještaj"</string>
@@ -1526,10 +1525,8 @@
     <string name="accessibility_shortcut_toogle_warning" msgid="7256507885737444807">"Kada je prečica uključena, pritiskom na oba dugmeta za podešavanje jačine zvuka u trajanju od 3 sekunde pokrenut će se funkcija za pristupačnost.\n\n Trenutna funkcija za pristupačnost je:\n <xliff:g id="SERVICE_NAME">%1$s</xliff:g>\n\n Funkciju možete promijeniti ako odete u Postavke &gt; Pristupačnost."</string>
     <string name="disable_accessibility_shortcut" msgid="627625354248453445">"Isključi prečicu"</string>
     <string name="leave_accessibility_shortcut_on" msgid="7653111894438512680">"Koristi prečicu"</string>
-    <!-- no translation found for color_inversion_feature_name (4231186527799958644) -->
-    <skip />
-    <!-- no translation found for color_correction_feature_name (6779391426096954933) -->
-    <skip />
+    <string name="color_inversion_feature_name" msgid="4231186527799958644">"Inverzija boja"</string>
+    <string name="color_correction_feature_name" msgid="6779391426096954933">"Ispravka boja"</string>
     <string name="accessibility_shortcut_enabling_service" msgid="7771852911861522636">"Prečica za pristupačnost je uključila uslugu <xliff:g id="SERVICE_NAME">%1$s</xliff:g>"</string>
     <string name="accessibility_shortcut_disabling_service" msgid="2747243438223109821">"Prečica za pristupačnost je isključila uslugu <xliff:g id="SERVICE_NAME">%1$s</xliff:g>"</string>
     <string name="accessibility_button_prompt_text" msgid="4234556536456854251">"Odaberite funkciju koja će se koristiti kada dodirnete dugme Pristupačnost:"</string>
@@ -1725,15 +1722,16 @@
     <string name="zen_mode_default_weeknights_name" msgid="3081318299464998143">"Radni dan uvečer"</string>
     <string name="zen_mode_default_weekends_name" msgid="2786495801019345244">"Vikend"</string>
     <string name="zen_mode_default_events_name" msgid="8158334939013085363">"Događaj"</string>
-    <!-- no translation found for zen_mode_default_every_night_name (3012363838882944175) -->
-    <skip />
+    <string name="zen_mode_default_every_night_name" msgid="3012363838882944175">"Spavanje"</string>
     <string name="muted_by" msgid="6147073845094180001">"Ton isključila aplikacija <xliff:g id="THIRD_PARTY">%1$s</xliff:g>"</string>
     <string name="system_error_wipe_data" msgid="6608165524785354962">"Postoji problem u vašem uređaju i može biti nestabilan dok ga ne vratite na fabričke postavke."</string>
     <string name="system_error_manufacturer" msgid="8086872414744210668">"Postoji problem u vašem uređaju. Za više informacija obratite se proizvođaču."</string>
     <string name="stk_cc_ussd_to_dial" msgid="5202342984749947872">"USSD zahtjev je izmijenjen u DIAL zahtjev."</string>
     <string name="stk_cc_ussd_to_ss" msgid="2345360594181405482">"USSD zahtjev je izmijenjen u SS zahtjev."</string>
     <string name="stk_cc_ussd_to_ussd" msgid="7466087659967191653">"USSD zahtjev je izmijenjen u novi USSD zahtjev."</string>
+    <string name="stk_cc_ussd_to_dial_video" msgid="585340552561515305">"USSD zahtjev je izmijenjen u Video DIAL zahtjev."</string>
     <string name="stk_cc_ss_to_dial" msgid="2151304435775557162">"SS zahtjev je izmijenjen u DIAL zahtjev."</string>
+    <string name="stk_cc_ss_to_dial_video" msgid="4306210904450719045">"SS zahtjev je izmijenjen u Video DIAL zahtjev."</string>
     <string name="stk_cc_ss_to_ussd" msgid="3951862188105305589">"SS zahtjev je izmijenjen u USSD zahtjev."</string>
     <string name="stk_cc_ss_to_ss" msgid="5470768854991452695">"SS zahtjev je izmijenjen u novi SS zahtjev."</string>
     <string name="notification_work_profile_content_description" msgid="4600554564103770764">"Profil za posao"</string>

@@ -22,7 +22,7 @@ package android.os.statsd;
 option java_package = "com.android.os";
 option java_outer_classname = "StatsLog";
 
-import "frameworks/base/cmds/statsd/src/atoms_copy.proto";
+import "frameworks/base/cmds/statsd/src/atoms.proto";
 
 message KeyValuePair {
   optional int32 key = 1;
@@ -195,7 +195,7 @@ message StatsdStatsReport {
 
     message AlertStats {
         optional string name = 1;
-        optional int32 declared_times = 2;
+        optional int32 alerted_times = 2;
     }
 
     message ConfigStats {

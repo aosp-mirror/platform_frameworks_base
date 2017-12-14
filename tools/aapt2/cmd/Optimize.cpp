@@ -44,8 +44,7 @@
 #include "util/Util.h"
 
 using ::aapt::configuration::Abi;
-using ::aapt::configuration::Artifact;
-using ::aapt::configuration::PostProcessingConfiguration;
+using ::aapt::configuration::OutputArtifact;
 using ::android::ResTable_config;
 using ::android::StringPiece;
 using ::android::base::ReadFileToString;
@@ -74,7 +73,7 @@ struct OptimizeOptions {
 
   TableFlattenerOptions table_flattener_options;
 
-  Maybe<PostProcessingConfiguration> configuration;
+  Maybe<std::vector<OutputArtifact>> apk_artifacts;
 
   // Set of artifacts to keep when generating multi-APK splits. If the list is empty, all artifacts
   // are kept and will be written as output.
@@ -199,14 +198,11 @@ class OptimizeCommand {
       ++split_constraints_iter;
     }
 
-    if (options_.configuration && options_.output_dir) {
+    if (options_.apk_artifacts && options_.output_dir) {
       MultiApkGenerator generator{apk.get(), context_};
       MultiApkGeneratorOptions generator_options = {
-          options_.output_dir.value(),
-          options_.configuration.value(),
-          options_.table_flattener_options,
-          options_.kept_artifacts,
-      };
+          options_.output_dir.value(), options_.apk_artifacts.value(),
+          options_.table_flattener_options, options_.kept_artifacts};
       if (!generator.FromBaseApk(generator_options)) {
         return 1;
       }
@@ -423,29 +419,27 @@ int Optimize(const std::vector<StringPiece>& args) {
     std::string& path = config_path.value();
     Maybe<ConfigurationParser> for_path = ConfigurationParser::ForPath(path);
     if (for_path) {
-      options.configuration = for_path.value().WithDiagnostics(diag).Parse();
+      options.apk_artifacts = for_path.value().WithDiagnostics(diag).Parse(apk_path);
+      if (!options.apk_artifacts) {
+        diag->Error(DiagMessage() << "Failed to parse the output artifact list");
+        return 1;
+      }
+
     } else {
       diag->Error(DiagMessage() << "Could not parse config file " << path);
       return 1;
     }
 
     if (print_only) {
-      std::vector<std::string> names;
-      const PostProcessingConfiguration& config = options.configuration.value();
-      if (!config.AllArtifactNames(file::GetFilename(apk_path), &names, diag)) {
-        diag->Error(DiagMessage() << "Failed to generate output artifact list");
-        return 1;
-      }
-
-      for (const auto& name : names) {
-        std::cout << name << std::endl;
+      for (const OutputArtifact& artifact : options.apk_artifacts.value()) {
+        std::cout << artifact.name << std::endl;
       }
       return 0;
     }
 
     if (!kept_artifacts.empty()) {
-      for (const auto& artifact_str : kept_artifacts) {
-        for (const auto& artifact : util::Tokenize(artifact_str, ',')) {
+      for (const std::string& artifact_str : kept_artifacts) {
+        for (const StringPiece& artifact : util::Tokenize(artifact_str, ',')) {
           options.kept_artifacts.insert(artifact.to_string());
         }
       }

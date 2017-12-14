@@ -212,6 +212,7 @@
     <string name="global_action_power_off" msgid="4471879440839879722">"ਪਾਵਰ ਬੰਦ"</string>
     <string name="global_action_emergency" msgid="7112311161137421166">"ਸੰਕਟਕਾਲ"</string>
     <string name="global_action_bug_report" msgid="7934010578922304799">"ਬਗ ਰਿਪੋਰਟ"</string>
+    <string name="global_action_logout" msgid="935179188218826050">"ਸੈਸ਼ਨ ਸਮਾਪਤ ਕਰੋ"</string>
     <string name="bugreport_title" msgid="2667494803742548533">"ਬਗ ਰਿਪੋਰਟ ਲਓ"</string>
     <string name="bugreport_message" msgid="398447048750350456">"ਇਹ ਇੱਕ ਈਮੇਲ ਸੁਨੇਹਾ ਭੇਜਣ ਲਈ, ਤੁਹਾਡੇ ਵਰਤਮਾਨ ਡੀਵਾਈਸ ਬਾਰੇ ਜਾਣਕਾਰੀ ਇਕੱਠੀ ਕਰੇਗਾ। ਬੱਗ ਰਿਪੋਰਟ ਸ਼ੁਰੂ ਕਰਨ ਵਿੱਚ ਥੋੜ੍ਹਾ ਸਮਾਂ ਲੱਗੇਗਾ ਜਦੋਂ ਤੱਕ ਇਹ ਭੇਜੇ ਜਾਣ ਲਈ ਤਿਆਰ ਨਾ ਹੋਵੇ, ਕਿਰਪਾ ਕਰਕੇ ਧੀਰਜ ਰੱਖੋ।"</string>
     <string name="bugreport_option_interactive_title" msgid="8635056131768862479">"ਅੰਤਰਕਿਰਿਆਤਮਕ ਰਿਪੋਰਟ"</string>
@@ -1051,8 +1052,7 @@
     <string name="screen_compat_mode_hint" msgid="1064524084543304459">"ਸਿਸਟਮ ਸੈਟਿੰਗਾਂ &gt; ਐਪਾਂ &gt; ਡਾਊਨਲੋਡ ਕੀਤਿਆਂ ਵਿੱਚ ਇਸਨੂੰ ਮੁੜ-ਸਮਰੱਥ ਬਣਾਓ।"</string>
     <string name="unsupported_display_size_message" msgid="6545327290756295232">"<xliff:g id="APP_NAME">%1$s</xliff:g> ਵਰਤਮਾਨ ਡਿਸਪਲੇ ਆਕਾਰ ਸੈਟਿੰਗ ਦਾ ਸਮਰਥਨ ਨਹੀਂ ਕਰਦੀ ਹੈ ਅਤੇ ਅਣਕਿਆਸੇ ਤੌਰ \'ਤੇ ਵਿਹਾਰ ਕਰ ਸਕਦੀ ਹੈ।"</string>
     <string name="unsupported_display_size_show" msgid="7969129195360353041">"ਹਮੇਸ਼ਾ  ਦਿਖਾਓ"</string>
-    <!-- no translation found for unsupported_compile_sdk_message (4253168368781441759) -->
-    <skip />
+    <string name="unsupported_compile_sdk_message" msgid="4253168368781441759">"<xliff:g id="APP_NAME">%1$s</xliff:g> ਨੂੰ Android OS ਦਾ ਇੱਕ ਗੈਰ-ਅਨੁਕੂਲ ਵਰਜਨ ਬਣਾਇਆ ਗਿਆ ਸੀ ਅਤੇ ਅਣਕਿਆਸੇ ਤੌਰ \'ਤੇ ਵਿਹਾਰ ਕਰ ਸਕਦੀ ਹੈ। ਐਪ ਦਾ ਇੱਕ ਅੱਪਡੇਟ ਕੀਤਾ ਹੋਇਆ ਵਰਜਨ ਉਪਲਬਧ ਹੋ ਸਕਦਾ ਹੈ।"</string>
     <string name="unsupported_compile_sdk_show" msgid="2681877855260970231">"ਹਮੇਸਾਂ ਦਿਖਾਓ"</string>
     <string name="unsupported_compile_sdk_check_update" msgid="3312723623323216101">"ਅੱਪਡੇਟ ਦੀ ਜਾਂਚ ਕਰੋ"</string>
     <string name="smv_application" msgid="3307209192155442829">"ਐਪ <xliff:g id="APPLICATION">%1$s</xliff:g> (ਪ੍ਰਕਿਰਿਆ <xliff:g id="PROCESS">%2$s</xliff:g>) ਨੇ ਆਪਣੀ ਖੁਦ-ਲਾਗੂ ਕੀਤੀ ਸਟ੍ਰਿਕਟਮੋਡ ਨੀਤੀ ਦੀ ਉਲੰਘਣਾ ਕੀਤੀ ਹੈ।"</string>
@@ -1500,6 +1500,8 @@
     <string name="accessibility_shortcut_toogle_warning" msgid="7256507885737444807">"ਸ਼ਾਰਟਕੱਟ ਚਾਲੂ ਹੋਣ \'ਤੇ, ਕਿਸੇ ਪਹੁੰਚਯੋਗਤਾ ਵਿਸ਼ੇਸ਼ਤਾ ਨੂੰ ਸ਼ੁਰੂ ਕਰਨ ਲਈ ਅਵਾਜ਼ ਬਟਨਾਂ ਨੂੰ 3 ਸਕਿੰਟ ਲਈ ਦਬਾ ਕੇ ਰੱਖੋ।\n\n ਵਰਤਮਾਨ ਪਹੁੰਚਯੋਗਤਾ ਵਿਸ਼ੇਸ਼ਤਾ:\n <xliff:g id="SERVICE_NAME">%1$s</xliff:g>\n\n ਤੁਸੀਂ ਸੈਟਿੰਗਾਂ &gt; ਪਹੁੰਚਯੋਗਤਾ ਵਿੱਚ ਵਿਸ਼ੇਸ਼ਤਾ ਨੂੰ ਬਦਲ ਸਕਦੇ ਹੋ।"</string>
     <string name="disable_accessibility_shortcut" msgid="627625354248453445">"ਸ਼ਾਰਟਕੱਟ ਬੰਦ ਕਰੋ"</string>
     <string name="leave_accessibility_shortcut_on" msgid="7653111894438512680">"ਸ਼ਾਰਟਕੱਟ ਦੀ ਵਰਤੋਂ ਕਰੋ"</string>
+    <string name="color_inversion_feature_name" msgid="4231186527799958644">"ਰੰਗ ਦੀ ਉਲਟੀ ਤਰਤੀਬ"</string>
+    <string name="color_correction_feature_name" msgid="6779391426096954933">"ਰੰਗ ਸੁਧਾਈ"</string>
     <string name="accessibility_shortcut_enabling_service" msgid="7771852911861522636">"ਪਹੁੰਚਯੋਗਤਾ ਸ਼ਾਰਟਕੱਟ ਨੇ <xliff:g id="SERVICE_NAME">%1$s</xliff:g> ਨੂੰ ਚਾਲੂ ਕੀਤਾ"</string>
     <string name="accessibility_shortcut_disabling_service" msgid="2747243438223109821">"ਪਹੁੰਚਯੋਗਤਾ ਸ਼ਾਰਟਕੱਟ ਨੇ <xliff:g id="SERVICE_NAME">%1$s</xliff:g> ਨੂੰ ਬੰਦ ਕੀਤਾ"</string>
     <string name="accessibility_button_prompt_text" msgid="4234556536456854251">"ਤੁਹਾਡੇ ਵੱਲੋਂ ਪਹੁੰਚਯੋਗਤਾ ਬਟਨ ਨੂੰ ਟੈਪ ਕੀਤੇ ਜਾਣ \'ਤੇ ਵਰਤਣ ਲਈ ਕੋਈ ਵਿਸ਼ੇਸ਼ਤਾ ਚੁਣੋ:"</string>
@@ -1639,8 +1641,7 @@
     <string name="package_installed_device_owner" msgid="6875717669960212648">"ਤੁਹਾਡੇ ਪ੍ਰਸ਼ਾਸਕ ਵੱਲੋਂ ਸਥਾਪਤ ਕੀਤਾ ਗਿਆ"</string>
     <string name="package_updated_device_owner" msgid="1847154566357862089">"ਤੁਹਾਡੇ ਪ੍ਰਸ਼ਾਸਕ ਵੱਲੋਂ ਅੱਪਡੇਟ ਕੀਤਾ ਗਿਆ"</string>
     <string name="package_deleted_device_owner" msgid="2307122077550236438">"ਤੁਹਾਡੇ ਪ੍ਰਸ਼ਾਸਕ ਵੱਲੋਂ ਮਿਟਾਇਆ ਗਿਆ"</string>
-    <!-- no translation found for battery_saver_description (5394663545060026162) -->
-    <skip />
+    <string name="battery_saver_description" msgid="5394663545060026162">"ਬੈਟਰੀ ਲਾਈਫ਼ ਨੂੰ ਬਿਹਤਰ ਬਣਾਉਣ ਵਿੱਚ ਸਹਾਇਤਾ ਕਰਨ ਲਈ, ਬੈਟਰੀ ਸੇਵਰ ਤੁਹਾਡੇ ਡੀਵਾਈਸ ਦਾ ਪ੍ਰਦਰਸ਼ਨ ਘਟਾਉਂਦਾ ਹੈ ਅਤੇ ਥਰਥਰਾਹਟ, ਟਿਕਾਣਾ ਸੇਵਾਵਾਂ ਅਤੇ ਜ਼ਿਆਦਾਤਰ ਬੈਕਗ੍ਰਾਊਂਡ ਡਾਟੇ ਨੂੰ ਸੀਮਤ ਕਰਦਾ ਹੈ। ਈਮੇਲ, ਸੁਨੇਹਾ ਭੇਜਣ ਅਤੇ ਹੋਰ ਐਪਾਂ, ਜੋ ਸਮਕਾਲੀਕਰਨ \'ਤੇ ਨਿਰਭਰ ਹਨ, ਉਹ ਉਦੋਂ ਤੱਕ ਅੱਪਡੇਟ ਨਹੀਂ ਕੀਤੇ ਜਾ ਸਕਦੇ ਜਦੋਂ ਤੱਕ ਤੁਸੀਂ ਉਹਨਾਂ ਨੂੰ ਖੋਲ੍ਹਦੇ ਨਹੀਂ।\n\nਬੈਟਰੀ ਸੇਵਰ ਸਵੈਚਲਿਤ ਤੌਰ \'ਤੇ ਬੰਦ ਹੁੰਦਾ ਹੈ ਜਦੋਂ ਤੁਹਾਡਾ ਡੀਵਾਈਸ ਚਾਰਜ ਹੋ ਰਿਹਾ ਹੁੰਦਾ ਹੈ।"</string>
     <string name="data_saver_description" msgid="6015391409098303235">"ਡਾਟਾ ਵਰਤੋਂ ਘਟਾਉਣ ਵਿੱਚ ਮਦਦ ਲਈ, ਡਾਟਾ ਸੇਵਰ ਕੁਝ ਐਪਾਂ ਨੂੰ ਬੈਕਗ੍ਰਾਊਂਡ ਵਿੱਚ ਡਾਟਾ ਭੇਜਣ ਜਾਂ ਪ੍ਰਾਪਤ ਕਰਨ ਤੋਂ ਰੋਕਦਾ ਹੈ। ਤੁਹਾਡੇ ਵੱਲੋਂ ਵਰਤਮਾਨ ਤੌਰ \'ਤੇ ਵਰਤੀ ਜਾ ਰਹੀ ਐਪ ਡਾਟਾ \'ਤੇ ਪਹੁੰਚ ਕਰ ਸਕਦੀ ਹੈ, ਪਰ ਉਹ ਇੰਝ ਕਦੇ-ਕਦਾਈਂ ਕਰ ਸਕਦੀ ਹੈ। ਉਦਾਹਰਨ ਲਈ, ਇਸ ਦਾ ਮਤਲਬ ਇਹ ਹੋ ਸਕਦਾ ਹੈ ਕਿ ਚਿੱਤਰ ਤਦ ਤੱਕ ਨਹੀਂ ਪ੍ਰਦਰਸ਼ਿਤ ਕੀਤੇ ਜਾਂਦੇ, ਜਦੋਂ ਤੱਕ ਤੁਸੀਂ ਉਹਨਾਂ \'ਤੇ ਟੈਪ ਨਹੀਂ ਕਰਦੇ।"</string>
     <string name="data_saver_enable_title" msgid="4674073932722787417">"ਕੀ ਡਾਟਾ ਸੇਵਰ ਚਾਲੂ ਕਰਨਾ ਹੈ?"</string>
     <string name="data_saver_enable_button" msgid="7147735965247211818">"ਚਾਲੂ ਕਰੋ"</string>
@@ -1687,13 +1688,18 @@
     <string name="zen_mode_default_weeknights_name" msgid="3081318299464998143">"ਵੀਕਨਾਈਟ"</string>
     <string name="zen_mode_default_weekends_name" msgid="2786495801019345244">"ਹਫ਼ਤੇ ਦਾ ਅੰਤਲਾ ਦਿਨ"</string>
     <string name="zen_mode_default_events_name" msgid="8158334939013085363">"ਇਵੈਂਟ"</string>
+    <string name="zen_mode_default_every_night_name" msgid="3012363838882944175">"ਸੌਣ ਵੇਲੇ"</string>
     <string name="muted_by" msgid="6147073845094180001">"<xliff:g id="THIRD_PARTY">%1$s</xliff:g> ਵੱਲੋਂ ਮਿਊਟ ਕੀਤਾ ਗਿਆ"</string>
     <string name="system_error_wipe_data" msgid="6608165524785354962">"ਤੁਹਾਡੇ ਡੀਵਾਈਸ ਨਾਲ ਇੱਕ ਅੰਦਰੂਨੀ ਸਮੱਸਿਆ ਹੈ ਅਤੇ ਇਹ ਅਸਥਿਰ ਹੋ ਸਕਦੀ ਹੈ ਜਦੋਂ ਤੱਕ ਤੁਸੀਂ ਫੈਕਟਰੀ ਡਾਟਾ ਰੀਸੈੱਟ ਨਹੀਂ ਕਰਦੇ।"</string>
     <string name="system_error_manufacturer" msgid="8086872414744210668">"ਤੁਹਾਡੇ ਡੀਵਾਈਸ ਨਾਲ ਇੱਕ ਅੰਦਰੂਨੀ ਸਮੱਸਿਆ ਸੀ। ਵੇਰਵਿਆਂ ਲਈ ਆਪਣੇ ਨਿਰਮਾਤਾ ਨੂੰ ਸੰਪਰਕ ਕਰੋ।"</string>
     <string name="stk_cc_ussd_to_dial" msgid="5202342984749947872">"USSD ਬੇਨਤੀ DIAL ਬੇਨਤੀ ਵਿੱਚ ਸੰਸ਼ੋਧਿਤ ਕੀਤੀ ਗਈ ਹੈ।"</string>
     <string name="stk_cc_ussd_to_ss" msgid="2345360594181405482">"USSD ਬੇਨਤੀ SS ਬੇਨਤੀ ਵਿੱਚ ਸੰਸ਼ੋਧਿਤ ਕੀਤੀ ਗਈ ਹੈ।"</string>
     <string name="stk_cc_ussd_to_ussd" msgid="7466087659967191653">"USSD ਬੇਨਤੀ ਨਵੀਂ USSD ਬੇਨਤੀ ਵਿੱਚ ਸੰਸ਼ੋਧਿਤ ਕੀਤੀ ਗਈ ਹੈ।"</string>
+    <!-- no translation found for stk_cc_ussd_to_dial_video (585340552561515305) -->
+    <skip />
     <string name="stk_cc_ss_to_dial" msgid="2151304435775557162">"SS ਬੇਨਤੀ DIAL ਬੇਨਤੀ ਵਿੱਚ ਸੰਸ਼ੋਧਿਤ ਕੀਤੀ ਗਈ ਹੈ।"</string>
+    <!-- no translation found for stk_cc_ss_to_dial_video (4306210904450719045) -->
+    <skip />
     <string name="stk_cc_ss_to_ussd" msgid="3951862188105305589">"SS ਬੇਨਤੀ USSD ਬੇਨਤੀ ਵਿੱਚ ਸੰਸ਼ੋਧਿਤ ਕੀਤੀ ਗਈ ਹੈ।"</string>
     <string name="stk_cc_ss_to_ss" msgid="5470768854991452695">"SS ਬੇਨਤੀ ਨਵੀਂ SS ਵਿੱਚ ਸੰਸ਼ੋਧਿਤ ਕੀਤੀ ਗਈ ਹੈ।"</string>
     <string name="notification_work_profile_content_description" msgid="4600554564103770764">"ਕਾਰਜ ਪ੍ਰੋਫਾਈਲ"</string>

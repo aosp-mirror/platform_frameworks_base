@@ -103,6 +103,8 @@ public class VolumeDialogControllerImpl implements VolumeDialogController, Dumpa
     private final Vibrator mVibrator;
     private final boolean mHasVibrator;
     private boolean mShowA11yStream;
+    private boolean mShowVolumeDialog;
+    private boolean mShowSafetyWarning;
 
     private boolean mDestroyed;
     private VolumePolicy mVolumePolicy;
@@ -282,6 +284,11 @@ public class VolumeDialogControllerImpl implements VolumeDialogController, Dumpa
         mWorker.obtainMessage(W.SET_ACTIVE_STREAM, stream, 0).sendToTarget();
     }
 
+    public void setEnableDialogs(boolean volumeUi, boolean safetyWarning) {
+      mShowVolumeDialog = volumeUi;
+      mShowSafetyWarning = safetyWarning;
+    }
+
     public void vibrate() {
         if (mHasVibrator) {
             mVibrator.vibrate(VIBRATE_HINT_DURATION);
@@ -311,7 +318,9 @@ public class VolumeDialogControllerImpl implements VolumeDialogController, Dumpa
     }
 
     private void onShowSafetyWarningW(int flags) {
-        mCallbacks.onShowSafetyWarning(flags);
+        if (mShowSafetyWarning) {
+            mCallbacks.onShowSafetyWarning(flags);
+        }
     }
 
     private void onAccessibilityModeChanged(Boolean showA11yStream) {
@@ -343,7 +352,8 @@ public class VolumeDialogControllerImpl implements VolumeDialogController, Dumpa
                 && mStatusBar.getWakefulnessState() != WakefulnessLifecycle.WAKEFULNESS_ASLEEP
                 && mStatusBar.getWakefulnessState() != WakefulnessLifecycle.WAKEFULNESS_GOING_TO_SLEEP
                 && mStatusBar.isDeviceInteractive()
-                && (flags & AudioManager.FLAG_SHOW_UI) != 0;
+                && (flags & AudioManager.FLAG_SHOW_UI) != 0
+                && mShowVolumeDialog;
     }
 
     boolean onVolumeChangedW(int stream, int flags) {

@@ -32,7 +32,6 @@ import static android.content.pm.ApplicationInfo.PRIVATE_FLAG_ACTIVITIES_RESIZE_
 import static android.content.pm.ApplicationInfo.PRIVATE_FLAG_ACTIVITIES_RESIZE_MODE_UNRESIZEABLE;
 import static android.content.pm.PackageManager.INSTALL_PARSE_FAILED_BAD_MANIFEST;
 import static android.content.pm.PackageManager.INSTALL_PARSE_FAILED_BAD_PACKAGE_NAME;
-import static android.content.pm.PackageManager.INSTALL_PARSE_FAILED_CERTIFICATE_ENCODING;
 import static android.content.pm.PackageManager.INSTALL_PARSE_FAILED_INCONSISTENT_CERTIFICATES;
 import static android.content.pm.PackageManager.INSTALL_PARSE_FAILED_MANIFEST_MALFORMED;
 import static android.content.pm.PackageManager.INSTALL_PARSE_FAILED_NOT_APK;
@@ -87,7 +86,8 @@ import android.util.Slog;
 import android.util.SparseArray;
 import android.util.TypedValue;
 import android.util.apk.ApkSignatureSchemeV2Verifier;
-import android.util.jar.StrictJarFile;
+import android.util.apk.ApkSignatureVerifier;
+import android.util.apk.SignatureNotFoundException;
 import android.view.Gravity;
 
 import com.android.internal.R;
@@ -106,12 +106,10 @@ import java.io.File;
 import java.io.FileDescriptor;
 import java.io.FileOutputStream;
 import java.io.IOException;
-import java.io.InputStream;
 import java.io.PrintWriter;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.reflect.Constructor;
-import java.security.GeneralSecurityException;
 import java.security.KeyFactory;
 import java.security.NoSuchAlgorithmException;
 import java.security.PublicKey;
@@ -129,8 +127,6 @@ import java.util.List;
 import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.atomic.AtomicInteger;
-import java.util.concurrent.atomic.AtomicReference;
-import java.util.zip.ZipEntry;
 
 /**
  * Parser for package files (APKs) on disk. This supports apps packaged either
@@ -173,7 +169,7 @@ public class PackageParser {
     // TODO: refactor "codePath" to "apkPath"
 
     /** File name in an APK for the Android manifest. */
-    private static final String ANDROID_MANIFEST_FILENAME = "AndroidManifest.xml";
+    public static final String ANDROID_MANIFEST_FILENAME = "AndroidManifest.xml";
 
     /** Path prefix for apps on expanded storage */
     private static final String MNT_EXPAND = "/mnt/expand/";
@@ -819,23 +815,6 @@ public class PackageParser {
             }
         }
         return pi;
-    }
-
-    private static Certificate[][] loadCertificates(StrictJarFile jarFile, ZipEntry entry)
-            throws PackageParserException {
-        InputStream is = null;
-        try {
-            // We must read the stream for the JarEntry to retrieve
-            // its certificates.
-            is = jarFile.getInputStream(entry);
-            readFullyIgnoringContents(is);
-            return jarFile.getCertificateChains(entry);
-        } catch (IOException | RuntimeException e) {
-            throw new PackageParserException(INSTALL_PARSE_FAILED_UNEXPECTED_EXCEPTION,
-                    "Failed reading " + entry.getName() + " in " + jarFile, e);
-        } finally {
-            IoUtils.closeQuietly(is);
-        }
     }
 
     public static final int PARSE_MUST_BE_APK = 1 << 0;
@@ -1517,7 +1496,7 @@ public class PackageParser {
 
         pkg.mCertificates = certificates;
         try {
-            pkg.mSignatures = convertToSignatures(certificates);
+            pkg.mSignatures = ApkSignatureVerifier.convertToSignatures(certificates);
         } catch (CertificateEncodingException e) {
             // certificates weren't encoded properly; something went wrong
             throw new PackageParserException(INSTALL_PARSE_FAILED_NO_CERTIFICATES,
@@ -1580,155 +1559,44 @@ public class PackageParser {
             throws PackageParserException {
         final String apkPath = apkFile.getAbsolutePath();
 
-        // Try to verify the APK using APK Signature Scheme v2.
-        boolean verified = false;
-        {
-            Certificate[][] allSignersCerts = null;
-            Signature[] signatures = null;
-            try {
-                Trace.traceBegin(TRACE_TAG_PACKAGE_MANAGER, "verifyV2");
-                allSignersCerts = ApkSignatureSchemeV2Verifier.verify(apkPath);
-                signatures = convertToSignatures(allSignersCerts);
-                // APK verified using APK Signature Scheme v2.
-                verified = true;
-            } catch (ApkSignatureSchemeV2Verifier.SignatureNotFoundException e) {
-                // No APK Signature Scheme v2 signature found
-                if ((parseFlags & PARSE_IS_EPHEMERAL) != 0) {
-                    throw new PackageParserException(INSTALL_PARSE_FAILED_NO_CERTIFICATES,
+        boolean untrusted = (parseFlags & PARSE_IS_SYSTEM_DIR) == 0;
+        int minSignatureScheme = ApkSignatureVerifier.VERSION_JAR_SIGNATURE_SCHEME;
+        if ((parseFlags & PARSE_IS_EPHEMERAL) != 0 || pkg.applicationInfo.isStaticSharedLibrary()) {
+            // must use v2 signing scheme
+            minSignatureScheme = ApkSignatureVerifier.VERSION_APK_SIGNATURE_SCHEME_V2;
+        }
+        try {
+            ApkSignatureVerifier.Result verified =
+                    ApkSignatureVerifier.verify(apkPath, minSignatureScheme, untrusted);
+            if (pkg.mCertificates == null) {
+                pkg.mCertificates = verified.certs;
+                pkg.mSignatures = verified.sigs;
+                pkg.mSigningKeys = new ArraySet<>(verified.certs.length);
+                for (int i = 0; i < verified.certs.length; i++) {
+                    Certificate[] signerCerts = verified.certs[i];
+                    Certificate signerCert = signerCerts[0];
+                    pkg.mSigningKeys.add(signerCert.getPublicKey());
+                }
+            } else {
+                if (!Signature.areExactMatch(pkg.mSignatures, verified.sigs)) {
+                    throw new PackageParserException(
+                            INSTALL_PARSE_FAILED_INCONSISTENT_CERTIFICATES,
+                            apkPath + " has mismatched certificates");
+                }
+            }
+        } catch (SignatureNotFoundException e) {
+            if ((parseFlags & PARSE_IS_EPHEMERAL) != 0) {
+                throw new PackageParserException(INSTALL_PARSE_FAILED_NO_CERTIFICATES,
                         "No APK Signature Scheme v2 signature in ephemeral package " + apkPath,
                         e);
-                }
-                // Static shared libraries must use only the V2 signing scheme
-                if (pkg.applicationInfo.isStaticSharedLibrary()) {
-                    throw new PackageParserException(INSTALL_PARSE_FAILED_NO_CERTIFICATES,
-                            "Static shared libs must use v2 signature scheme " + apkPath);
-                }
-            } catch (Exception e) {
-                // APK Signature Scheme v2 signature was found but did not verify
+            }
+            if (pkg.applicationInfo.isStaticSharedLibrary()) {
                 throw new PackageParserException(INSTALL_PARSE_FAILED_NO_CERTIFICATES,
-                        "Failed to collect certificates from " + apkPath
-                                + " using APK Signature Scheme v2",
-                        e);
-            } finally {
-                Trace.traceEnd(TRACE_TAG_PACKAGE_MANAGER);
+                        "Static shared libs must use v2 signature scheme " + apkPath);
             }
-
-            if (verified) {
-                if (pkg.mCertificates == null) {
-                    pkg.mCertificates = allSignersCerts;
-                    pkg.mSignatures = signatures;
-                    pkg.mSigningKeys = new ArraySet<>(allSignersCerts.length);
-                    for (int i = 0; i < allSignersCerts.length; i++) {
-                        Certificate[] signerCerts = allSignersCerts[i];
-                        Certificate signerCert = signerCerts[0];
-                        pkg.mSigningKeys.add(signerCert.getPublicKey());
-                    }
-                } else {
-                    if (!Signature.areExactMatch(pkg.mSignatures, signatures)) {
-                        throw new PackageParserException(
-                                INSTALL_PARSE_FAILED_INCONSISTENT_CERTIFICATES,
-                                apkPath + " has mismatched certificates");
-                    }
-                }
-                // Not yet done, because we need to confirm that AndroidManifest.xml exists and,
-                // if requested, that classes.dex exists.
-            }
-        }
-
-        StrictJarFile jarFile = null;
-        try {
-            Trace.traceBegin(TRACE_TAG_PACKAGE_MANAGER, "strictJarFileCtor");
-            // Ignore signature stripping protections when verifying APKs from system partition.
-            // For those APKs we only care about extracting signer certificates, and don't care
-            // about verifying integrity.
-            boolean signatureSchemeRollbackProtectionsEnforced =
-                    (parseFlags & PARSE_IS_SYSTEM_DIR) == 0;
-            jarFile = new StrictJarFile(
-                    apkPath,
-                    !verified, // whether to verify JAR signature
-                    signatureSchemeRollbackProtectionsEnforced);
-            Trace.traceEnd(TRACE_TAG_PACKAGE_MANAGER);
-
-            // Always verify manifest, regardless of source
-            final ZipEntry manifestEntry = jarFile.findEntry(ANDROID_MANIFEST_FILENAME);
-            if (manifestEntry == null) {
-                throw new PackageParserException(INSTALL_PARSE_FAILED_BAD_MANIFEST,
-                        "Package " + apkPath + " has no manifest");
-            }
-
-            // Optimization: early termination when APK already verified
-            if (verified) {
-                return;
-            }
-
-            // APK's integrity needs to be verified using JAR signature scheme.
-            Trace.traceBegin(TRACE_TAG_PACKAGE_MANAGER, "verifyV1");
-            final List<ZipEntry> toVerify = new ArrayList<>();
-            toVerify.add(manifestEntry);
-
-            // If we're parsing an untrusted package, verify all contents
-            if ((parseFlags & PARSE_IS_SYSTEM_DIR) == 0) {
-                final Iterator<ZipEntry> i = jarFile.iterator();
-                while (i.hasNext()) {
-                    final ZipEntry entry = i.next();
-
-                    if (entry.isDirectory()) continue;
-
-                    final String entryName = entry.getName();
-                    if (entryName.startsWith("META-INF/")) continue;
-                    if (entryName.equals(ANDROID_MANIFEST_FILENAME)) continue;
-
-                    toVerify.add(entry);
-                }
-            }
-
-            // Verify that entries are signed consistently with the first entry
-            // we encountered. Note that for splits, certificates may have
-            // already been populated during an earlier parse of a base APK.
-            for (ZipEntry entry : toVerify) {
-                final Certificate[][] entryCerts = loadCertificates(jarFile, entry);
-                if (ArrayUtils.isEmpty(entryCerts)) {
-                    throw new PackageParserException(INSTALL_PARSE_FAILED_NO_CERTIFICATES,
-                            "Package " + apkPath + " has no certificates at entry "
-                            + entry.getName());
-                }
-                final Signature[] entrySignatures = convertToSignatures(entryCerts);
-
-                if (pkg.mCertificates == null) {
-                    pkg.mCertificates = entryCerts;
-                    pkg.mSignatures = entrySignatures;
-                    pkg.mSigningKeys = new ArraySet<PublicKey>();
-                    for (int i=0; i < entryCerts.length; i++) {
-                        pkg.mSigningKeys.add(entryCerts[i][0].getPublicKey());
-                    }
-                } else {
-                    if (!Signature.areExactMatch(pkg.mSignatures, entrySignatures)) {
-                        throw new PackageParserException(
-                                INSTALL_PARSE_FAILED_INCONSISTENT_CERTIFICATES, "Package " + apkPath
-                                        + " has mismatched certificates at entry "
-                                        + entry.getName());
-                    }
-                }
-            }
-            Trace.traceEnd(TRACE_TAG_PACKAGE_MANAGER);
-        } catch (GeneralSecurityException e) {
-            throw new PackageParserException(INSTALL_PARSE_FAILED_CERTIFICATE_ENCODING,
-                    "Failed to collect certificates from " + apkPath, e);
-        } catch (IOException | RuntimeException e) {
             throw new PackageParserException(INSTALL_PARSE_FAILED_NO_CERTIFICATES,
-                    "Failed to collect certificates from " + apkPath, e);
-        } finally {
-            closeQuietly(jarFile);
+                    "No APK Signature Scheme v2 signature in package " + apkPath, e);
         }
-    }
-
-    private static Signature[] convertToSignatures(Certificate[][] certs)
-            throws CertificateEncodingException {
-        final Signature[] res = new Signature[certs.length];
-        for (int i = 0; i < certs.length; i++) {
-            res[i] = new Signature(certs[i]);
-        }
-        return res;
     }
 
     private static AssetManager newConfiguredAssetManager() {
@@ -3756,6 +3624,11 @@ public class PackageParser {
         }
         ai.taskAffinity = buildTaskAffinityName(ai.packageName, ai.packageName,
                 str, outError);
+        String factory = sa.getNonResourceString(
+                com.android.internal.R.styleable.AndroidManifestApplication_appComponentFactory);
+        if (factory != null) {
+            ai.appComponentFactory = buildClassName(ai.packageName, factory, outError);
+        }
 
         if (outError[0] == null) {
             CharSequence pname;
@@ -7645,33 +7518,6 @@ public class PackageParser {
      */
     public static void setCompatibilityModeEnabled(boolean compatibilityModeEnabled) {
         sCompatibilityModeEnabled = compatibilityModeEnabled;
-    }
-
-    private static AtomicReference<byte[]> sBuffer = new AtomicReference<byte[]>();
-
-    public static long readFullyIgnoringContents(InputStream in) throws IOException {
-        byte[] buffer = sBuffer.getAndSet(null);
-        if (buffer == null) {
-            buffer = new byte[4096];
-        }
-
-        int n = 0;
-        int count = 0;
-        while ((n = in.read(buffer, 0, buffer.length)) != -1) {
-            count += n;
-        }
-
-        sBuffer.set(buffer);
-        return count;
-    }
-
-    public static void closeQuietly(StrictJarFile jarFile) {
-        if (jarFile != null) {
-            try {
-                jarFile.close();
-            } catch (Exception ignored) {
-            }
-        }
     }
 
     public static class PackageParserException extends Exception {

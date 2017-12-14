@@ -36,6 +36,7 @@ LOCAL_SRC_FILES := \
         src/IncidentReportArgs.cpp
 
 LOCAL_EXPORT_C_INCLUDE_DIRS := $(LOCAL_PATH)/include
+LOCAL_PROTO_OPTIMIZE_TYPE := lite
 
 include $(BUILD_SHARED_LIBRARY)
 

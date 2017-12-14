@@ -103,6 +103,11 @@ class DragDropController {
                     + " asbinder=" + window.asBinder());
         }
 
+        if (width <= 0 || height <= 0) {
+            Slog.w(TAG_WM, "width and height of drag shadow must be positive");
+            return null;
+        }
+
         synchronized (mService.mWindowMap) {
             if (dragDropActiveLocked()) {
                 Slog.w(TAG_WM, "Drag already in progress");

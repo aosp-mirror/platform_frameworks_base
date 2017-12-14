@@ -11,12 +11,14 @@ import android.service.notification.NotificationStats;
 import android.support.test.runner.AndroidJUnit4;
 import android.test.suitebuilder.annotation.SmallTest;
 
+import com.android.server.UiServiceTestCase;
+
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
 @SmallTest
 @RunWith(AndroidJUnit4.class)
-public class NotificationStatsTest extends NotificationTestCase {
+public class NotificationStatsTest extends UiServiceTestCase {
 
     @Test
     public void testConstructor() {

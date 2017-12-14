@@ -926,10 +926,9 @@ class UserController implements Handler.Callback {
                 final Integer userIdInt = userId;
                 mUserLru.remove(userIdInt);
                 mUserLru.add(userIdInt);
-
-                if (unlockListener != null) {
-                    uss.mUnlockProgress.addListener(unlockListener);
-                }
+            }
+            if (unlockListener != null) {
+                uss.mUnlockProgress.addListener(unlockListener);
             }
             if (updateUmState) {
                 mInjector.getUserManagerInternal().setUserState(userId, uss.state);

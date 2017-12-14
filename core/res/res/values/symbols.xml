@@ -287,6 +287,7 @@
   <java-symbol type="bool" name="split_action_bar_is_narrow" />
   <java-symbol type="bool" name="config_useVolumeKeySounds" />
   <java-symbol type="bool" name="config_enableWallpaperService" />
+  <java-symbol type="string" name="config_wallpaperManagerServiceName" />
   <java-symbol type="bool" name="config_enableUpdateableTimeZoneRules" />
   <java-symbol type="bool" name="config_timeZoneRulesUpdateTrackingEnabled" />
   <java-symbol type="string" name="config_timeZoneRulesUpdaterPackage" />
@@ -3184,4 +3185,8 @@
 
   <java-symbol type="string" name="global_action_logout" />
   <java-symbol type="drawable" name="ic_logout" />
+
+  <java-symbol type="dimen" name="config_screenBrightnessMinimumNits" />
+  <java-symbol type="dimen" name="config_screenBrightnessMaximumNits" />
+  <java-symbol type="array" name="config_autoBrightnessDisplayValuesNits" />
 </resources>

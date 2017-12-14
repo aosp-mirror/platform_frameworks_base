@@ -61,7 +61,7 @@ import java.util.concurrent.TimeUnit;
      *
      * @param result the result of the transaction
      */
-    /* package */ void onTransactionComplete(int result) {
+    /* package */ void onTransactionComplete(@ContextHubTransaction.Result int result) {
     }
 
     /**
@@ -72,7 +72,8 @@ import java.util.concurrent.TimeUnit;
      * @param result           the result of the query
      * @param nanoAppStateList the list of nanoapps given by the query response
      */
-    /* package */ void onQueryResponse(int result, List<NanoAppState> nanoAppStateList) {
+    /* package */ void onQueryResponse(
+            @ContextHubTransaction.Result int result, List<NanoAppState> nanoAppStateList) {
     }
 
     /**

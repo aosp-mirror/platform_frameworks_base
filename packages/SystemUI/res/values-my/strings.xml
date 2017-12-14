@@ -492,6 +492,9 @@
     <string name="stream_bluetooth_sco" msgid="2055645746402746292">"ဘလူးတုသ်"</string>
     <string name="stream_dtmf" msgid="2447177903892477915">"နှစ်လိုင်းပေါင်း အသံပေါင်းစုံ ကြိမ်နှုန်း"</string>
     <string name="stream_accessibility" msgid="301136219144385106">"အများသုံးစွဲနိုင်မှု"</string>
+    <string name="volume_ringer_status_normal" msgid="4273142424125855384">"အသံမြည်သည်"</string>
+    <string name="volume_ringer_status_vibrate" msgid="1825615171021346557">"တုန်ခါသည်"</string>
+    <string name="volume_ringer_status_silent" msgid="6896394161022916369">"အသံတိတ်သည်"</string>
     <string name="volume_stream_content_description_unmute" msgid="4436631538779230857">"%1$s။ အသံပြန်ဖွင့်ရန် တို့ပါ။"</string>
     <string name="volume_stream_content_description_vibrate" msgid="1187944970457807498">"%1$s။ တုန်ခါမှုကို သတ်မှတ်ရန် တို့ပါ။ အများသုံးစွဲနိုင်မှု ဝန်ဆောင်မှုများကို အသံပိတ်ထားနိုင်ပါသည်။"</string>
     <string name="volume_stream_content_description_mute" msgid="3625049841390467354">"%1$s။ အသံပိတ်ရန် တို့ပါ။ အများသုံးစွဲနိုင်မှု ဝန်ဆောင်မှုများကို အသံပိတ်ထားနိုင်ပါသည်။"</string>
@@ -756,7 +759,7 @@
     <string name="instant_apps" msgid="6647570248119804907">"Instant Apps"</string>
     <string name="instant_apps_message" msgid="8116608994995104836">"ချက်ခြင်းသုံးအက်ပ်များကို ထည့်သွင်းစရာမလိုပါ။"</string>
     <string name="app_info" msgid="6856026610594615344">"အက်ပ်အချက်အလက်"</string>
-    <string name="go_to_web" msgid="1106022723459948514">"ဝဘ်သို့ သွားရန်"</string>
+    <string name="go_to_web" msgid="2650669128861626071">"ဘရောင်ဇာသို့ သွားပါ"</string>
     <string name="mobile_data" msgid="7094582042819250762">"မိုဘိုင်းဒေတာ"</string>
     <string name="wifi_is_off" msgid="1838559392210456893">"Wi-Fi ကို ပိတ်ထားသည်"</string>
     <string name="bt_is_off" msgid="2640685272289706392">"ဘလူးတုသ်ကို ပိတ်ထားသည်"</string>

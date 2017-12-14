@@ -80,6 +80,7 @@ import android.os.DropBoxManager;
 import android.os.Environment;
 import android.os.GraphicsEnvironment;
 import android.os.Handler;
+import android.os.HandlerExecutor;
 import android.os.IBinder;
 import android.os.LocaleList;
 import android.os.Looper;
@@ -172,6 +173,7 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.Objects;
 import java.util.TimeZone;
+import java.util.concurrent.Executor;
 
 final class RemoteServiceException extends AndroidRuntimeException {
     public RemoteServiceException(String msg) {
@@ -242,6 +244,7 @@ public final class ActivityThread extends ClientTransactionHandler {
     final ApplicationThread mAppThread = new ApplicationThread();
     final Looper mLooper = Looper.myLooper();
     final H mH = new H();
+    final Executor mExecutor = new HandlerExecutor(mH);
     final ArrayMap<IBinder, ActivityClientRecord> mActivities = new ArrayMap<>();
     // List of new activities (via ActivityRecord.nextIdle) that should
     // be reported when next we idle.
@@ -1943,6 +1946,10 @@ public final class ActivityThread extends ClientTransactionHandler {
         return mLooper;
     }
 
+    public Executor getExecutor() {
+        return mExecutor;
+    }
+
     public Application getApplication() {
         return mInitialApplication;
     }
@@ -3152,7 +3159,8 @@ public final class ActivityThread extends ClientTransactionHandler {
             data.intent.setExtrasClassLoader(cl);
             data.intent.prepareToEnterProcess();
             data.setExtrasClassLoader(cl);
-            receiver = (BroadcastReceiver)cl.loadClass(component).newInstance();
+            receiver = packageInfo.getAppFactory()
+                    .instantiateReceiver(cl, data.info.name, data.intent);
         } catch (Exception e) {
             if (DEBUG_BROADCAST) Slog.i(TAG,
                     "Finishing failed broadcast to " + data.intent.getComponent());
@@ -3307,7 +3315,8 @@ public final class ActivityThread extends ClientTransactionHandler {
         Service service = null;
         try {
             java.lang.ClassLoader cl = packageInfo.getClassLoader();
-            service = (Service) cl.loadClass(data.info.name).newInstance();
+            service = packageInfo.getAppFactory()
+                    .instantiateService(cl, data.info.name, data.intent);
         } catch (Exception e) {
             if (!mInstrumentation.onException(service, e)) {
                 throw new RuntimeException(
@@ -5644,6 +5653,7 @@ public final class ActivityThread extends ClientTransactionHandler {
             }
         } else {
             mInstrumentation = new Instrumentation();
+            mInstrumentation.basicInit(this);
         }
 
         if ((data.appInfo.flags&ApplicationInfo.FLAG_LARGE_HEAP) != 0) {
@@ -6175,8 +6185,13 @@ public final class ActivityThread extends ClientTransactionHandler {
 
             try {
                 final java.lang.ClassLoader cl = c.getClassLoader();
-                localProvider = (ContentProvider)cl.
-                    loadClass(info.name).newInstance();
+                LoadedApk packageInfo = peekPackageInfo(ai.packageName, true);
+                if (packageInfo == null) {
+                    // System startup case.
+                    packageInfo = getSystemContext().mPackageInfo;
+                }
+                localProvider = packageInfo.getAppFactory()
+                        .instantiateProvider(cl, info.name);
                 provider = localProvider.getIContentProvider();
                 if (provider == null) {
                     Slog.e(TAG, "Failed to instantiate class " +
@@ -6322,6 +6337,7 @@ public final class ActivityThread extends ClientTransactionHandler {
                     UserHandle.myUserId());
             try {
                 mInstrumentation = new Instrumentation();
+                mInstrumentation.basicInit(this);
                 ContextImpl context = ContextImpl.createAppContext(
                         this, getSystemContext().mPackageInfo);
                 mInitialApplication = context.mPackageInfo.makeApplication(true, null);

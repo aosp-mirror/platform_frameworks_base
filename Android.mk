@@ -97,6 +97,7 @@ aidl_files := \
 	frameworks/base/core/java/android/app/admin/SystemUpdatePolicy.aidl \
 	frameworks/base/core/java/android/app/admin/PasswordMetrics.aidl \
 	frameworks/base/core/java/android/app/slice/ISliceManager.aidl \
+	frameworks/base/core/java/android/app/slice/ISliceListener.aidl \
 	frameworks/base/core/java/android/print/PrintDocumentInfo.aidl \
 	frameworks/base/core/java/android/print/PageRange.aidl \
 	frameworks/base/core/java/android/print/PrintAttributes.aidl \
@@ -276,8 +277,8 @@ non_base_dirs := \
 framework_base_android_test_mock_src_files := \
   $(call all-java-files-under, test-mock/src/android/test/mock)
 
-framework_base_android_test_runner_excluding_mock_src_files := \
-  $(filter-out $(framework_base_android_test_mock_src_files), $(call all-java-files-under, test-runner/src))
+framework_base_android_test_runner_src_files := \
+  $(call all-java-files-under, test-runner/src)
 
 # Find all files in specific directories (relative to frameworks/base)
 # to document and check apis
@@ -327,7 +328,7 @@ framework_docs_LOCAL_SRC_FILES := \
 # These are relative to frameworks/base
 framework_docs_LOCAL_API_CHECK_SRC_FILES := \
   $(framework_base_android_test_mock_src_files) \
-  $(framework_base_android_test_runner_excluding_mock_src_files) \
+  $(framework_base_android_test_runner_src_files) \
   $(files_to_check_apis) \
   $(common_src_files) \
 
@@ -1008,7 +1009,7 @@ include $(BUILD_HOST_JAVA_LIBRARY)
 # ====  java proto device library (for test only)  ==============================
 include $(CLEAR_VARS)
 LOCAL_MODULE := platformprotosnano
-LOCAL_MODULE_TAGS := tests optional
+LOCAL_MODULE_TAGS := tests
 LOCAL_PROTOC_OPTIMIZE_TYPE := nano
 LOCAL_PROTOC_FLAGS := \
     -Iexternal/protobuf/src
@@ -1019,6 +1020,17 @@ LOCAL_SRC_FILES := \
     $(call all-proto-files-under, core/proto)
 include $(BUILD_STATIC_JAVA_LIBRARY)
 
+
+# ====  java proto device library (for test only)  ==============================
+include $(CLEAR_VARS)
+LOCAL_MODULE := platformprotoslite
+LOCAL_MODULE_TAGS := tests
+LOCAL_PROTOC_OPTIMIZE_TYPE := lite
+LOCAL_PROTOC_FLAGS := \
+    -Iexternal/protobuf/src
+LOCAL_SRC_FILES := \
+    $(call all-proto-files-under, core/proto)
+include $(BUILD_STATIC_JAVA_LIBRARY)
 
 # Include subdirectory makefiles
 # ============================================================

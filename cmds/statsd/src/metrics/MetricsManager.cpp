@@ -27,6 +27,11 @@
 #include "stats_util.h"
 
 #include <log/logprint.h>
+
+using android::util::FIELD_COUNT_REPEATED;
+using android::util::FIELD_TYPE_MESSAGE;
+using android::util::ProtoOutputStream;
+
 using std::make_unique;
 using std::set;
 using std::string;
@@ -36,6 +41,8 @@ using std::vector;
 namespace android {
 namespace os {
 namespace statsd {
+
+const int FIELD_ID_METRICS = 1;
 
 MetricsManager::MetricsManager(const ConfigKey& key, const StatsdConfig& config) : mConfigKey(key) {
     mConfigValid =
@@ -65,21 +72,17 @@ bool MetricsManager::isConfigValid() const {
     return mConfigValid;
 }
 
-void MetricsManager::finish() {
-    for (auto& metricProducer : mAllMetricProducers) {
-        metricProducer->finish();
-    }
-}
-
-vector<std::unique_ptr<vector<uint8_t>>> MetricsManager::onDumpReport() {
+void MetricsManager::onDumpReport(ProtoOutputStream* protoOutput) {
     VLOG("=========================Metric Reports Start==========================");
+    uint64_t dumpTimeStampNs = time(nullptr) * NS_PER_SEC;
     // one StatsLogReport per MetricProduer
-    vector<std::unique_ptr<vector<uint8_t>>> reportList;
     for (auto& metric : mAllMetricProducers) {
-        reportList.push_back(metric->onDumpReport());
+        long long token =
+                protoOutput->start(FIELD_TYPE_MESSAGE | FIELD_COUNT_REPEATED | FIELD_ID_METRICS);
+        metric->onDumpReport(dumpTimeStampNs, protoOutput);
+        protoOutput->end(token);
     }
     VLOG("=========================Metric Reports End==========================");
-    return reportList;
 }
 
 // Consume the stats log if it's interesting to this metric.

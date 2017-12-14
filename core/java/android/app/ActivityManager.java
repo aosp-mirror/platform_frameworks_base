@@ -533,10 +533,10 @@ public class ActivityManager {
     // to frameworks/base/core/proto/android/app/activitymanager.proto and the following method must
     // be updated to correctly map between them.
     /**
-     * Maps ActivityManager.PROCESS_STATE_ values to ActivityManagerProto.ProcessState enum.
+     * Maps ActivityManager.PROCESS_STATE_ values to ProcessState enum.
      *
      * @param amInt a process state of the form ActivityManager.PROCESS_STATE_
-     * @return the value of the corresponding android.app.ActivityManagerProto's ProcessState enum.
+     * @return the value of the corresponding ActivityManager's ProcessState enum.
      * @hide
      */
     public static final int processStateAmToProto(int amInt) {

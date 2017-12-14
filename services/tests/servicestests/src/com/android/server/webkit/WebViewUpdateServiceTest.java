@@ -39,9 +39,9 @@ import android.webkit.WebViewProviderResponse;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
+import org.mockito.ArgumentMatcher;
 import org.mockito.Mockito;
 import org.mockito.Matchers;
-import org.mockito.compat.ArgumentMatcher;
 
 import java.lang.Integer;
 import java.util.concurrent.CountDownLatch;
@@ -141,7 +141,7 @@ public class WebViewUpdateServiceTest {
     }
 
     // For matching the package name of a PackageInfo
-    private class IsPackageInfoWithName extends ArgumentMatcher<PackageInfo> {
+    private class IsPackageInfoWithName implements ArgumentMatcher<PackageInfo> {
         private final String mPackageName;
 
         IsPackageInfoWithName(String name) {
@@ -149,8 +149,8 @@ public class WebViewUpdateServiceTest {
         }
 
         @Override
-        public boolean matchesObject(Object p) {
-            return ((PackageInfo) p).packageName.equals(mPackageName);
+        public boolean matches(PackageInfo p) {
+            return p.packageName.equals(mPackageName);
         }
 
         @Override

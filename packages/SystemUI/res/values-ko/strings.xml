@@ -494,6 +494,9 @@
     <string name="stream_bluetooth_sco" msgid="2055645746402746292">"블루투스"</string>
     <string name="stream_dtmf" msgid="2447177903892477915">"듀얼 멀티 톤 주파수"</string>
     <string name="stream_accessibility" msgid="301136219144385106">"접근성"</string>
+    <string name="volume_ringer_status_normal" msgid="4273142424125855384">"벨소리"</string>
+    <string name="volume_ringer_status_vibrate" msgid="1825615171021346557">"진동"</string>
+    <string name="volume_ringer_status_silent" msgid="6896394161022916369">"음소거"</string>
     <string name="volume_stream_content_description_unmute" msgid="4436631538779230857">"%1$s. 탭하여 음소거를 해제하세요."</string>
     <string name="volume_stream_content_description_vibrate" msgid="1187944970457807498">"%1$s. 탭하여 진동으로 설정하세요. 접근성 서비스가 음소거될 수 있습니다."</string>
     <string name="volume_stream_content_description_mute" msgid="3625049841390467354">"%1$s. 탭하여 음소거로 설정하세요. 접근성 서비스가 음소거될 수 있습니다."</string>
@@ -758,7 +761,7 @@
     <string name="instant_apps" msgid="6647570248119804907">"인스턴트 앱"</string>
     <string name="instant_apps_message" msgid="8116608994995104836">"인스턴트 앱은 설치가 필요하지 않습니다."</string>
     <string name="app_info" msgid="6856026610594615344">"앱 정보"</string>
-    <string name="go_to_web" msgid="1106022723459948514">"웹으로 이동"</string>
+    <string name="go_to_web" msgid="2650669128861626071">"브라우저로 이동"</string>
     <string name="mobile_data" msgid="7094582042819250762">"모바일 데이터"</string>
     <string name="wifi_is_off" msgid="1838559392210456893">"Wi-Fi가 사용 중지됨"</string>
     <string name="bt_is_off" msgid="2640685272289706392">"블루투스가 사용 중지됨"</string>

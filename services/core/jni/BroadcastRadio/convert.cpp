@@ -21,7 +21,7 @@
 
 #include "regions.h"
 
-#include <broadcastradio-utils/Utils.h>
+#include <broadcastradio-utils-1x/Utils.h>
 #include <core_jni_helpers.h>
 #include <nativehelper/JNIHelp.h>
 #include <utils/Log.h>

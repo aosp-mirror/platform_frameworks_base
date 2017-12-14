@@ -45,6 +45,7 @@ public class VolumeDialogControllerImplTest extends SysuiTestCase {
         mCallback = mock(VolumeDialogControllerImpl.C.class);
         mStatusBar = mock(StatusBar.class);
         mVolumeController = new TestableVolumeDialogControllerImpl(mContext, mCallback, mStatusBar);
+        mVolumeController.setEnableDialogs(true, true);
     }
 
     @Test

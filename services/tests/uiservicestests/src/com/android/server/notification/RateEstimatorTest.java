@@ -24,9 +24,11 @@ import org.junit.runner.RunWith;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.assertFalse;
 
+import com.android.server.UiServiceTestCase;
+
 @SmallTest
 @RunWith(AndroidJUnit4.class)
-public class RateEstimatorTest extends NotificationTestCase {
+public class RateEstimatorTest extends UiServiceTestCase {
     private long mTestStartTime;
     private RateEstimator mEstimator;
 

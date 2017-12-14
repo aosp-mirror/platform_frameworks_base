@@ -20,7 +20,6 @@
     <string name="app_name">Statsd Loadtest</string>
     <string name="bucket_label">bucket size (mins):&#160;</string>
     <string name="burst_label">burst:&#160;</string>
-    <string name="display_output">Show metrics data</string>
     <string name="placebo">placebo</string>
     <string name="period_label">logging period (secs):&#160;</string>
     <string name="replication_label">metric replication:&#160;</string>

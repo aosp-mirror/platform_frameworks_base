@@ -22,7 +22,7 @@ import android.widget.TextView;
 
 public abstract class NumericalWatcher implements TextWatcher {
 
-  private static final String TAG = "loadtest.NumericalWatcher";
+    private static final String TAG = "loadtest.NumericalWatcher";
 
     private final TextView mTextView;
     private final int mMin;
@@ -45,9 +45,6 @@ public abstract class NumericalWatcher implements TextWatcher {
         }
         int unsanitized = Integer.parseInt(s);
         int newValue = sanitize(unsanitized);
-
-        Log.d(TAG, "YOYO " + currentValue + " " + newValue + " " + unsanitized);
-
         if (currentValue != newValue || unsanitized != newValue) {
             currentValue = newValue;
             editable.clear();

@@ -30,54 +30,6 @@ namespace aapt {
 
 namespace configuration {
 
-/** A mapping of group labels to group of configuration items. */
-template<class T>
-using Group = std::unordered_map<std::string, std::vector<T>>;
-
-/** A mapping of group label to a single configuration item. */
-template <class T>
-using Entry = std::unordered_map<std::string, T>;
-
-/** Output artifact configuration options. */
-struct Artifact {
-  /** Name to use for output of processing foo.apk -> foo.<name>.apk. */
-  Maybe<std::string> name;
-  /**
-   * Value to add to the base Android manifest versionCode. If it is not present in the
-   * configuration file, it is set to the previous artifact + 1. If the first artifact does not have
-   * a value, artifacts are a 1 based index.
-   */
-  int version;
-  /** If present, uses the ABI group with this name. */
-  Maybe<std::string> abi_group;
-  /** If present, uses the screen density group with this name. */
-  Maybe<std::string> screen_density_group;
-  /** If present, uses the locale group with this name. */
-  Maybe<std::string> locale_group;
-  /** If present, uses the Android SDK group with this name. */
-  Maybe<std::string> android_sdk_group;
-  /** If present, uses the device feature group with this name. */
-  Maybe<std::string> device_feature_group;
-  /** If present, uses the OpenGL texture group with this name. */
-  Maybe<std::string> gl_texture_group;
-
-  /** Convert an artifact name template into a name string based on configuration contents. */
-  Maybe<std::string> ToArtifactName(const android::StringPiece& format,
-                                    const android::StringPiece& apk_name, IDiagnostics* diag) const;
-
-  /** Convert an artifact name template into a name string based on configuration contents. */
-  Maybe<std::string> Name(const android::StringPiece& apk_name, IDiagnostics* diag) const;
-
-  bool operator<(const Artifact& rhs) const {
-    // TODO(safarmer): Order by play store multi-APK requirements.
-    return version < rhs.version;
-  }
-
-  bool operator==(const Artifact& rhs) const  {
-    return version == rhs.version;
-  }
-};
-
 /** Enumeration of currently supported ABIs. */
 enum class Abi {
   kArmeV6,
@@ -91,7 +43,7 @@ enum class Abi {
 };
 
 /** Helper method to convert an ABI to a string representing the path within the APK. */
-const std::string& AbiToString(Abi abi);
+const android::StringPiece& AbiToString(Abi abi);
 
 /**
  * Represents an individual locale. When a locale is included, it must be
@@ -151,22 +103,16 @@ struct GlTexture {
   }
 };
 
-/** AAPT2 XML configuration file binary representation. */
-struct PostProcessingConfiguration {
-  // TODO: Support named artifacts?
-  std::vector<Artifact> artifacts;
-  Maybe<std::string> artifact_format;
-
-  Group<Abi> abi_groups;
-  Group<ConfigDescription> screen_density_groups;
-  Group<ConfigDescription> locale_groups;
-  Entry<AndroidSdk> android_sdk_groups;
-  Group<DeviceFeature> device_feature_groups;
-  Group<GlTexture> gl_texture_groups;
-
-  /** Helper method that generates a list of artifact names and returns true on success. */
-  bool AllArtifactNames(const android::StringPiece& apk_name,
-                        std::vector<std::string>* artifact_names, IDiagnostics* diag) const;
+/** An artifact with all the details pulled from the PostProcessingConfiguration. */
+struct OutputArtifact {
+  std::string name;
+  int version;
+  std::vector<Abi> abis;
+  std::vector<ConfigDescription> screen_densities;
+  std::vector<ConfigDescription> locales;
+  Maybe<AndroidSdk> android_sdk;
+  std::vector<DeviceFeature> features;
+  std::vector<GlTexture> textures;
 };
 
 }  // namespace configuration
@@ -202,7 +148,7 @@ class ConfigurationParser {
    * Parses the configuration file and returns the results. If the configuration could not be parsed
    * the result is empty and any errors will be displayed with the provided diagnostics context.
    */
-  Maybe<configuration::PostProcessingConfiguration> Parse();
+  Maybe<std::vector<configuration::OutputArtifact>> Parse(const android::StringPiece& apk_path);
 
  protected:
   /**
@@ -216,30 +162,6 @@ class ConfigurationParser {
   IDiagnostics* diagnostics() {
     return diag_;
   }
-
-  /**
-   * An ActionHandler for processing XML elements in the XmlActionExecutor. Returns true if the
-   * element was successfully processed, otherwise returns false.
-   */
-  using ActionHandler = std::function<bool(configuration::PostProcessingConfiguration* config,
-                                           xml::Element* element, IDiagnostics* diag)>;
-
-  /** Handler for <artifact> tags. */
-  static ActionHandler artifact_handler_;
-  /** Handler for <artifact-format> tags. */
-  static ActionHandler artifact_format_handler_;
-  /** Handler for <abi-group> tags. */
-  static ActionHandler abi_group_handler_;
-  /** Handler for <screen-density-group> tags. */
-  static ActionHandler screen_density_group_handler_;
-  /** Handler for <locale-group> tags. */
-  static ActionHandler locale_group_handler_;
-  /** Handler for <android-sdk-group> tags. */
-  static ActionHandler android_sdk_group_handler_;
-  /** Handler for <gl-texture-group> tags. */
-  static ActionHandler gl_texture_group_handler_;
-  /** Handler for <device-feature-group> tags. */
-  static ActionHandler device_feature_group_handler_;
 
  private:
   /** The contents of the configuration file to parse. */

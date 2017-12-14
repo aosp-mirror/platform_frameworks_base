@@ -49,6 +49,7 @@ import android.util.ArrayMap;
 import android.util.Xml;
 
 import com.android.internal.util.FastXmlSerializer;
+import com.android.server.UiServiceTestCase;
 
 import com.google.android.collect.Lists;
 
@@ -68,7 +69,7 @@ import java.io.ByteArrayOutputStream;
 import java.util.ArrayList;
 import java.util.List;
 
-public class ManagedServicesTest extends NotificationTestCase {
+public class ManagedServicesTest extends UiServiceTestCase {
 
     @Mock
     private IPackageManager mIpm;

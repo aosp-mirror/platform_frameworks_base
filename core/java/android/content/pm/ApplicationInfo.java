@@ -26,6 +26,7 @@ import android.content.Context;
 import android.content.pm.PackageManager.NameNotFoundException;
 import android.content.res.Resources;
 import android.graphics.drawable.Drawable;
+import android.os.Build;
 import android.os.Environment;
 import android.os.Parcel;
 import android.os.Parcelable;
@@ -952,6 +953,13 @@ public class ApplicationInfo extends PackageItemInfo implements Parcelable {
     public int targetSandboxVersion;
 
     /**
+     * The factory of this package, as specified by the &lt;manifest&gt;
+     * tag's {@link android.R.styleable#AndroidManifestApplication_appComponentFactory}
+     * attribute.
+     */
+    public String appComponentFactory;
+
+    /**
      * The category of this app. Categories are used to cluster multiple apps
      * together into meaningful groups, such as when summarizing battery,
      * network, or disk usage. Apps should only define this value when they fit
@@ -1267,6 +1275,7 @@ public class ApplicationInfo extends PackageItemInfo implements Parcelable {
         targetSandboxVersion = orig.targetSandboxVersion;
         classLoaderName = orig.classLoaderName;
         splitClassLoaderNames = orig.splitClassLoaderNames;
+        appComponentFactory = orig.appComponentFactory;
     }
 
     public String toString() {
@@ -1339,6 +1348,7 @@ public class ApplicationInfo extends PackageItemInfo implements Parcelable {
         dest.writeStringArray(splitClassLoaderNames);
         dest.writeInt(compileSdkVersion);
         dest.writeString(compileSdkVersionCodename);
+        dest.writeString(appComponentFactory);
     }
 
     public static final Parcelable.Creator<ApplicationInfo> CREATOR
@@ -1408,6 +1418,7 @@ public class ApplicationInfo extends PackageItemInfo implements Parcelable {
         splitClassLoaderNames = source.readStringArray();
         compileSdkVersion = source.readInt();
         compileSdkVersionCodename = source.readString();
+        appComponentFactory = source.readString();
     }
 
     /**
@@ -1580,6 +1591,11 @@ public class ApplicationInfo extends PackageItemInfo implements Parcelable {
     /** @hide */
     public boolean isVendor() {
         return (privateFlags & ApplicationInfo.PRIVATE_FLAG_VENDOR) != 0;
+    }
+
+    /** @hide */
+    public boolean isTargetingDeprecatedSdkVersion() {
+        return targetSdkVersion < Build.VERSION.MIN_SUPPORTED_TARGET_SDK_INT;
     }
 
     /**

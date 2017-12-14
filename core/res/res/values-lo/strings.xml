@@ -212,6 +212,7 @@
     <string name="global_action_power_off" msgid="4471879440839879722">"ປິດ"</string>
     <string name="global_action_emergency" msgid="7112311161137421166">"ສຸກເສີນ"</string>
     <string name="global_action_bug_report" msgid="7934010578922304799">"ລາຍງານຂໍ້ຜິດພາດ"</string>
+    <string name="global_action_logout" msgid="935179188218826050">"ສິ້ນສຸດເຊດຊັນ"</string>
     <string name="bugreport_title" msgid="2667494803742548533">"ໃຊ້ລາຍງານຂໍ້ບົກພ່ອງ"</string>
     <string name="bugreport_message" msgid="398447048750350456">"ນີ້ຈະເປັນການເກັບກຳຂໍ້ມູນກ່ຽວກັບ ສະຖານະປັດຈຸບັນຂອງອຸປະກອນທ່ານ ເພື່ອສົ່ງເປັນຂໍ້ຄວາມທາງອີເມວ. ມັນຈະໃຊ້ເວລາໜ້ອຍນຶ່ງ ໃນການເລີ່ມຕົ້ນການລາຍງານຂໍ້ຜິດພາດ ຈົນກວ່າຈະພ້ອມທີ່ຈະສົ່ງໄດ້, ກະລຸນາລໍຖ້າ."</string>
     <string name="bugreport_option_interactive_title" msgid="8635056131768862479">"ລາຍງານແບບໂຕ້ຕອບ"</string>
@@ -1498,6 +1499,8 @@
     <string name="accessibility_shortcut_toogle_warning" msgid="7256507885737444807">"ເມື່ອເປີດໃຊ້ປຸ່ມລັດແລ້ວ, ໃຫ້ກົດປຸ່ມສຽງທັງສອງຄ້າງໄວ້ 3 ວິນາທີເພື່ອເລີ່ມຄຸນສົມບັດການຊ່ວຍເຂົ້າເຖິງ.\n\n ຄຸນສົມບັດການຊ່ວຍເຂົ້າເຖິງປັດຈຸບັນ:\n <xliff:g id="SERVICE_NAME">%1$s</xliff:g>\n\n ທ່ານສາມາດປ່ຽນຄຸນສົມບັດໄດ້ໃນການຕັ້ງຄ່າ &gt; ການຊ່ວຍເຂົ້າເຖິງ."</string>
     <string name="disable_accessibility_shortcut" msgid="627625354248453445">"ປິດປຸ່ມລັດ"</string>
     <string name="leave_accessibility_shortcut_on" msgid="7653111894438512680">"ໃຊ້ປຸ່ມລັດ"</string>
+    <string name="color_inversion_feature_name" msgid="4231186527799958644">"ການປີ້ນສີ"</string>
+    <string name="color_correction_feature_name" msgid="6779391426096954933">"ການແກ້ໄຂຄ່າສີ"</string>
     <string name="accessibility_shortcut_enabling_service" msgid="7771852911861522636">"Accessibility Shortcut turned <xliff:g id="SERVICE_NAME">%1$s</xliff:g> on"</string>
     <string name="accessibility_shortcut_disabling_service" msgid="2747243438223109821">"Accessibility Shortcut turned <xliff:g id="SERVICE_NAME">%1$s</xliff:g> off"</string>
     <string name="accessibility_button_prompt_text" msgid="4234556536456854251">"ເລືອກຄຸນສົມບັດທີ່ຈະໃຊ້ເມື່ອທ່ານແຕະປຸ່ມການຊ່ວຍເຂົ້າເຖິງ:"</string>
@@ -1684,13 +1687,16 @@
     <string name="zen_mode_default_weeknights_name" msgid="3081318299464998143">"ຄ່ຳ​ຄືນ​ໃນ​ອາ​ທິດ"</string>
     <string name="zen_mode_default_weekends_name" msgid="2786495801019345244">"ທ້າຍອາທິດ"</string>
     <string name="zen_mode_default_events_name" msgid="8158334939013085363">"ການນັດໝາຍ"</string>
+    <string name="zen_mode_default_every_night_name" msgid="3012363838882944175">"ການນອນ"</string>
     <string name="muted_by" msgid="6147073845094180001">"ຖືກ​ປິດ​ສຽງ​ໂດຍ <xliff:g id="THIRD_PARTY">%1$s</xliff:g>"</string>
     <string name="system_error_wipe_data" msgid="6608165524785354962">"ມີ​ບັນ​ຫາ​ພາຍ​ໃນ​ກັບ​ອຸ​ປະ​ກອນ​ຂອງ​ທ່ານ, ແລະ​ມັນ​ອາດ​ຈະ​ບໍ່​ສະ​ຖຽນ​ຈົນ​ກວ່າ​ທ່ານ​ຕັ້ງ​ເປັນ​ຂໍ້​ມູນ​ໂຮງ​ງານ​ຄືນ​ແລ້ວ."</string>
     <string name="system_error_manufacturer" msgid="8086872414744210668">"ມີ​ບັນ​ຫາ​ພາຍ​ໃນ​ກັບ​ອຸ​ປະ​ກອນ​ຂອງ​ທ່ານ. ຕິດ​ຕໍ່ຜູ້​ຜະ​ລິດ​ຂອງ​ທ່ານ​ສຳ​ລັບ​ລາຍ​ລະ​ອຽດ​ຕ່າງໆ."</string>
     <string name="stk_cc_ussd_to_dial" msgid="5202342984749947872">"ການ​ຂໍ USSD ຖືກ​ດັດ​ແປງ​ເປັນ​ການ​ຂໍ DIAL ແລ້ວ."</string>
     <string name="stk_cc_ussd_to_ss" msgid="2345360594181405482">"ການ​ຂໍ USSD ຖືກ​ດັດ​ແປງ​ເປັນ​ການ​ຂໍ SS ແລ້ວ."</string>
     <string name="stk_cc_ussd_to_ussd" msgid="7466087659967191653">"ການ​ຂໍ USSD ຖືກ​ດັດ​ແປງ​ເປັນ​ການ​ຂໍ USSD ໃໝ່​ແລ້ວ."</string>
+    <string name="stk_cc_ussd_to_dial_video" msgid="585340552561515305">"ການ​ຂໍ USSD ຖືກ​ດັດ​ແປງ​ເປັນ​ການ​ຂໍ DIAL ວິດີໂອແລ້ວ."</string>
     <string name="stk_cc_ss_to_dial" msgid="2151304435775557162">"ການ​ຂໍ SS ຖືກ​ດັດ​ແປງ​ເປັນ​ການ​ຂໍ DIAL ແລ້ວ."</string>
+    <string name="stk_cc_ss_to_dial_video" msgid="4306210904450719045">"ການ​ຂໍ SS ຖືກ​ດັດ​ແປງ​ເປັນ​ການ​ຂໍ DIAL ວິດີໂອແລ້ວ."</string>
     <string name="stk_cc_ss_to_ussd" msgid="3951862188105305589">"ການ​ຂໍ SS ຖືກ​ດັດ​ແປງ​ເປັນ​ການ​ຂໍ USSD ແລ້ວ."</string>
     <string name="stk_cc_ss_to_ss" msgid="5470768854991452695">"ການ​ຂໍ SS ຖືກ​ດັດ​ແປງ​ເປັນ​ການ​ຂໍ SS ໃໝ່​ແລ້ວ."</string>
     <string name="notification_work_profile_content_description" msgid="4600554564103770764">"​ໂປຣ​ໄຟລ໌​ບ່ອນ​ເຮັດ​ວຽກ"</string>

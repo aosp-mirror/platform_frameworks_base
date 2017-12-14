@@ -27,12 +27,12 @@ import android.app.ActivityManager;
 import android.app.Notification;
 import android.app.Notification.Builder;
 import android.app.NotificationChannel;
-import android.app.NotificationManager;
 import android.os.UserHandle;
-import android.provider.Settings.Secure;
 import android.service.notification.StatusBarNotification;
 import android.support.test.runner.AndroidJUnit4;
 import android.test.suitebuilder.annotation.SmallTest;
+
+import com.android.server.UiServiceTestCase;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -42,7 +42,7 @@ import org.mockito.MockitoAnnotations;
 
 @SmallTest
 @RunWith(AndroidJUnit4.class)
-public class BadgeExtractorTest extends NotificationTestCase {
+public class BadgeExtractorTest extends UiServiceTestCase {
 
     @Mock RankingConfig mConfig;
 

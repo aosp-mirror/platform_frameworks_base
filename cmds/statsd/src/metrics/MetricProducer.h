@@ -74,16 +74,10 @@ public:
         return mConditionSliced;
     };
 
-    // This is called when the metric collecting is done, e.g., when there is a new configuration
-    // coming. MetricProducer should do the clean up, and dump existing data to dropbox.
-    virtual void finish() = 0;
-
-    // TODO: Pass a timestamp as a parameter in onDumpReport and update all its
-    // implementations.
-    // onDumpReport returns the proto-serialized output and clears the previously stored contents.
-    std::unique_ptr<std::vector<uint8_t>> onDumpReport() {
+    // Output the metrics data to [protoOutput]. All metrics reports end with the same timestamp.
+    void onDumpReport(const uint64_t dumpTimeNs, android::util::ProtoOutputStream* protoOutput) {
         std::lock_guard<std::mutex> lock(mMutex);
-        return onDumpReportLocked();
+        return onDumpReportLocked(dumpTimeNs, protoOutput);
     }
 
     // Returns the memory in bytes currently used to store this metric's data. Does not change
@@ -110,12 +104,14 @@ public:
 protected:
     virtual void onConditionChangedLocked(const bool condition, const uint64_t eventTime) = 0;
     virtual void onSlicedConditionMayChangeLocked(const uint64_t eventTime) = 0;
-    virtual std::unique_ptr<std::vector<uint8_t>> onDumpReportLocked() = 0;
+    virtual void onDumpReportLocked(const uint64_t dumpTimeNs,
+                                    android::util::ProtoOutputStream* protoOutput) = 0;
     virtual size_t byteSizeLocked() const = 0;
 
     const ConfigKey mConfigKey;
 
-    const uint64_t mStartTimeNs;
+    // The start time for the current in memory metrics data.
+    uint64_t mStartTimeNs;
 
     uint64_t mCurrentBucketStartTimeNs;
 
@@ -165,15 +161,7 @@ protected:
     void onMatchedLogEventLocked(const size_t matcherIndex, const LogEvent& event,
                                  bool scheduledPull);
 
-    std::unique_ptr<android::util::ProtoOutputStream> mProto;
-
-    long long mProtoToken;
-
-    // Read/Write mutex to make the producer thread-safe.
-    // TODO(yanglu): replace with std::shared_mutex when available in libc++.
     mutable std::mutex mMutex;
-
-    std::unique_ptr<std::vector<uint8_t>> serializeProtoLocked();
 };
 
 }  // namespace statsd

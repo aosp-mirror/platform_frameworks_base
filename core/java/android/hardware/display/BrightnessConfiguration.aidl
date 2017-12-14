@@ -13,21 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.android.server.notification;
 
-import android.content.Context;
-import android.support.test.InstrumentationRegistry;
-import android.testing.TestableContext;
+package android.hardware.display;
 
-import org.junit.Rule;
-
-
-public class NotificationTestCase {
-    @Rule
-    public final TestableContext mContext =
-            new TestableContext(InstrumentationRegistry.getContext(), null);
-
-    protected TestableContext getContext() {
-        return mContext;
-    }
-}
+parcelable BrightnessConfiguration;

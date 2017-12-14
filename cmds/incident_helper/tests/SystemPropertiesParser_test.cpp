@@ -21,7 +21,7 @@
 #include <android-base/file.h>
 #include <android-base/test_utils.h>
 #include <gmock/gmock.h>
-#include <google/protobuf/message.h>
+#include <google/protobuf/message_lite.h>
 #include <gtest/gtest.h>
 #include <string.h>
 #include <fcntl.h>
@@ -42,13 +42,6 @@ public:
         ASSERT_TRUE(tf.fd != -1);
     }
 
-    string getSerializedString(::google::protobuf::Message& message) {
-        string expectedStr;
-        message.SerializeToFileDescriptor(tf.fd);
-        ReadFileToString(tf.path, &expectedStr);
-        return expectedStr;
-    }
-
 protected:
     TemporaryFile tf;
 
@@ -61,44 +54,39 @@ TEST_F(SystemPropertiesParserTest, HasSwapInfo) {
     SystemPropertiesParser parser;
     SystemPropertiesProto expected;
 
-    SystemPropertiesProto::Aaudio* aaudio = expected.mutable_aaudio();
-    aaudio->set_hw_burst_min_usec(2000);
-    aaudio->set_mmap_exclusive_policy(2);
-
-    SystemPropertiesProto::DalvikVm* dalvikVm = expected.mutable_dalvik_vm();
-    dalvikVm->set_appimageformat("lz4");
-
+    expected.mutable_aac_drc()->set_cut(123);
+    expected.mutable_aaudio()->set_hw_burst_min_usec(2000);
+    expected.mutable_aaudio()->set_mmap_exclusive_policy(2);
+    expected.mutable_dalvik_vm()->set_appimageformat("lz4");
     expected.set_drm_64bit_enabled(false);
-
-    SystemPropertiesProto::InitSvc* initSvc = expected.mutable_init_svc();
-    initSvc->set_adbd(SystemPropertiesProto_InitSvc_Status_STATUS_RUNNING);
-    initSvc->set_lmkd(SystemPropertiesProto_InitSvc_Status_STATUS_STOPPED);
-
+    expected.mutable_init_svc()->set_adbd(
+        SystemPropertiesProto_InitSvc_Status_STATUS_RUNNING);
+    expected.mutable_init_svc()->set_lmkd(
+        SystemPropertiesProto_InitSvc_Status_STATUS_STOPPED);
     expected.set_media_mediadrmservice_enable(true);
 
     SystemPropertiesProto::Ro* ro = expected.mutable_ro();
-
-    SystemPropertiesProto::Ro::Boot* boot = ro->mutable_boot();
-    boot->add_boottime("1BLL:85");
-    boot->add_boottime("1BLE:898");
-    boot->add_boottime("2BLL:0");
-    boot->add_boottime("2BLE:862");
-    boot->add_boottime("SW:6739");
-    boot->add_boottime("KL:340");
-
-    SystemPropertiesProto::Ro::BootImage* bootimage = ro->mutable_bootimage();
-    bootimage->set_build_date_utc(1509394807LL);
-    bootimage->set_build_fingerprint("google/marlin/marlin:P/MASTER/jinyithu10301320:eng/dev-keys");
-
-    SystemPropertiesProto::Ro::Hardware* hardware = ro->mutable_hardware();
-    hardware->set_value("marlin");
-    hardware->set_power("marlin-profile");
+    ro->mutable_boot()->add_boottime("1BLL:85");
+    ro->mutable_boot()->add_boottime("1BLE:898");
+    ro->mutable_boot()->add_boottime("2BLL:0");
+    ro->mutable_boot()->add_boottime("2BLE:862");
+    ro->mutable_boot()->add_boottime("SW:6739");
+    ro->mutable_boot()->add_boottime("KL:340");
+    ro->mutable_bootimage()->set_build_date_utc(1509394807LL);
+    ro->mutable_bootimage()->set_build_fingerprint(
+        "google/marlin/marlin:P/MASTER/jinyithu10301320:eng/dev-keys");
+    ro->mutable_hardware()->set_value("marlin");
+    ro->mutable_hardware()->set_power("marlin-profile");
+    ro->mutable_product()->add_cpu_abilist("arm64-v8a");
+    ro->mutable_product()->add_cpu_abilist("armeabi-v7a");
+    ro->mutable_product()->add_cpu_abilist("armeabi");
+    ro->mutable_product()->mutable_vendor()->set_brand("google");
 
     int fd = open(testFile.c_str(), O_RDONLY);
     ASSERT_TRUE(fd != -1);
 
     CaptureStdout();
     ASSERT_EQ(NO_ERROR, parser.Parse(fd, STDOUT_FILENO));
-    EXPECT_EQ(GetCapturedStdout(), getSerializedString(expected));
+    EXPECT_EQ(GetCapturedStdout(), expected.SerializeAsString());
     close(fd);
 }

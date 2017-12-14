@@ -26,7 +26,7 @@ package android.os;
 // Android Platform Exported System Properties
 // TODO: This is not the completed list, new properties need to be whitelisted.
 message SystemPropertiesProto {
-    option (stream_proto.stream_msg).enable_fields_mapping = true;
+    option (stream_proto.stream_msg).enable_fields_mapping_recursively = true;
 
     // Properties that are not specified below would be appended here.
     // These values stay on device only.
@@ -38,15 +38,16 @@ message SystemPropertiesProto {
     }
     repeated Property extra_properties = 1;
 
-    optional int32  aac_drc_boost = 2;
-    optional int32  aac_drc_cut = 3;
-    optional int32  aac_drc_enc_target_level = 4;
-    optional int32  aac_drc_heavy = 5;
-    optional int32  aac_drc_reference_level = 6;
+    message AacDrc {
+        optional int32  boost = 1;
+        optional int32  cut = 2;
+        optional int32  enc_target_level = 3;
+        optional int32  heavy = 4;
+        optional int32  reference_level = 5;
+    }
+    optional AacDrc aac_drc = 2;
 
     message Aaudio {
-        option (stream_proto.stream_msg).enable_fields_mapping = true;
-
         optional int32  hw_burst_min_usec = 1;
         optional int32  minimum_sleep_usec = 2;
         optional int32  mixer_bursts = 3;
@@ -56,23 +57,19 @@ message SystemPropertiesProto {
 
         // Next Tag: 7
     }
-    optional Aaudio aaudio = 7;
+    optional Aaudio aaudio = 3;
 
-    optional int32  af_fast_track_multiplier = 8;
+    optional int32  af_fast_track_multiplier = 4;
 
     message Camera {
-        option (stream_proto.stream_msg).enable_fields_mapping = true;
-
         optional bool   disable_zsl_mode = 1;
         optional int32  fifo_disable = 2;
 
         // Next Tag: 3
     }
-    optional Camera camera = 9;
+    optional Camera camera = 5;
 
     message DalvikVm {
-        option (stream_proto.stream_msg).enable_fields_mapping = true;
-
         optional string appimageformat = 1;
         optional string backgroundgctype = 2;
         optional bool   checkjni = 3;
@@ -130,17 +127,15 @@ message SystemPropertiesProto {
 
         // Next Tag: 55
     }
-    optional DalvikVm dalvik_vm = 10;
+    optional DalvikVm dalvik_vm = 6;
 
-    optional bool   drm_64bit_enabled = 11;
-    optional bool   drm_service_enabled = 12;
-    optional bool   dumpstate_dry_run = 13;
-    optional string gsm_sim_operator_numeric = 14;
-    optional bool   hal_instrumentation_enable = 15;
+    optional bool   drm_64bit_enabled = 7;
+    optional bool   drm_service_enabled = 8;
+    optional bool   dumpstate_dry_run = 9;
+    optional string gsm_sim_operator_numeric = 10;
+    optional bool   hal_instrumentation_enable = 11;
 
     message InitSvc {
-        option (stream_proto.stream_msg).enable_fields_mapping = true;
-
         enum Status {
             STATUS_UNKNOWN = 0;
             STATUS_RUNNING = 1;
@@ -190,28 +185,24 @@ message SystemPropertiesProto {
 
         // Next Tag: 42
     }
-    optional InitSvc init_svc = 16;
+    optional InitSvc init_svc = 12;
 
-    optional bool   keyguard_no_require_sim = 17;
-    optional string libc_debug_malloc_options = 18;
-    optional string libc_debug_malloc_program = 19;
+    optional bool   keyguard_no_require_sim = 13;
+    optional string libc_debug_malloc_options = 14;
+    optional string libc_debug_malloc_program = 15;
 
     message Log {
-        option (stream_proto.stream_msg).enable_fields_mapping = true;
-
         optional string tag_WifiHAL = 1;
         optional string tag_stats_log = 2;
 
         // Next Tag: 3
     }
-    optional Log log = 20;
+    optional Log log = 16;
 
-    optional bool   media_mediadrmservice_enable = 21;
-    optional bool   media_recorder_show_manufacturer_and_model = 22;
+    optional bool   media_mediadrmservice_enable = 17;
+    optional bool   media_recorder_show_manufacturer_and_model = 18;
 
     message Persist {
-        option (stream_proto.stream_msg).enable_fields_mapping = true;
-
         optional string config_calibration_fac = 1;
         optional int32  dbg_volte_avail_ovr = 2;
         optional int32  dbg_vt_avail_ovr = 3;
@@ -226,11 +217,9 @@ message SystemPropertiesProto {
 
         // Next Tag: 12
     }
-    optional Persist persist = 23;
+    optional Persist persist = 19;
 
     message PmDexopt {
-        option (stream_proto.stream_msg).enable_fields_mapping = true;
-
         optional string ab_ota = 1;
         optional string bg_dexopt = 2;
         optional string boot = 3;
@@ -239,11 +228,9 @@ message SystemPropertiesProto {
 
         // Next Tag: 6
     }
-    optional PmDexopt pm_dexopt = 24;
+    optional PmDexopt pm_dexopt = 20;
 
     message Ro {
-        option (stream_proto.stream_msg).enable_fields_mapping = true;
-
         optional int32  adb_secure = 1;
         optional string arch = 2;
         optional bool   audio_ignore_effects = 3;
@@ -252,8 +239,6 @@ message SystemPropertiesProto {
         optional string board_platform = 6;
 
         message Boot {
-            option (stream_proto.stream_msg).enable_fields_mapping = true;
-
             optional string avb_version = 1;
             optional string baseband = 2;
             optional string bootdevice = 3;
@@ -280,8 +265,6 @@ message SystemPropertiesProto {
         optional Boot boot = 7;
 
         message BootImage {
-            option (stream_proto.stream_msg).enable_fields_mapping = true;
-
             optional string build_date = 1;
             optional int32  build_date_utc = 2;
             optional string build_fingerprint = 3;
@@ -294,8 +277,6 @@ message SystemPropertiesProto {
         optional string bootmode = 10;
 
         message Build {
-            option (stream_proto.stream_msg).enable_fields_mapping = true;
-
             optional string date = 1;
             optional int32  date_utc = 2;
             optional string description = 3;
@@ -309,15 +290,13 @@ message SystemPropertiesProto {
             optional string user = 11;
 
             message Version {
-                option (stream_proto.stream_msg).enable_fields_mapping = true;
-
-                optional string version_base_os = 1;
-                optional string version_codename = 2;
-                optional string version_incremental = 3;
-                optional int32  version_preview_sdk = 4;
-                optional string version_release = 5;
-                optional int32  version_sdk = 6;
-                optional string version_security_patch = 7;
+                optional string base_os = 1;
+                optional string codename = 2;
+                optional string incremental = 3;
+                optional int32  preview_sdk = 4;
+                optional string release = 5;
+                optional int32  sdk = 6;
+                optional string security_patch = 7;
 
                 // Next Tag: 8
             }
@@ -334,8 +313,6 @@ message SystemPropertiesProto {
         optional string com_google_clientidbase = 16;
 
         message Config {
-            option (stream_proto.stream_msg).enable_fields_mapping = true;
-
             optional string alarm_alert = 1;
             optional int32  media_vol_steps = 2;
             optional string notification_sound = 3;
@@ -357,8 +334,6 @@ message SystemPropertiesProto {
         optional string gfx_driver_0 = 26;
 
         message Hardware {
-            option (stream_proto.stream_msg).enable_fields_mapping = true;
-
             optional string value = 1; // value of ro.hardware itself
 
             optional string activity_recognition = 2;
@@ -410,26 +385,28 @@ message SystemPropertiesProto {
         optional int32  opengles_version = 31;
 
         message Product {
-            option (stream_proto.stream_msg).enable_fields_mapping = true;
-
             optional string board = 1;
             optional string brand = 2;
             optional string cpu_abi = 3;
-            optional string cpu_abilist = 4;
-            optional string cpu_abilist32 = 5;
-            optional string cpu_abilist64 = 6;
+            repeated string cpu_abilist = 4;
+            repeated string cpu_abilist32 = 5;
+            repeated string cpu_abilist64 = 6;
             optional string device = 7;
             optional int32  first_api_level = 8;
             optional string manufacturer = 9;
             optional string model = 10;
             optional string name = 11;
-            optional string vendor_brand = 12;
-            optional string vendor_device = 13;
-            optional string vendor_manufacturer = 14;
-            optional string vendor_model = 15;
-            optional string vendor_name = 16;
 
-            // Next Tag: 17
+            message Vendor {
+                optional string brand = 1;
+                optional string device = 2;
+                optional string manufacturer = 3;
+                optional string model = 4;
+                optional string name = 5;
+            }
+            optional Vendor vendor = 12;
+
+            // Next Tag: 13
         }
         optional Product product = 32;
 
@@ -452,22 +429,18 @@ message SystemPropertiesProto {
 
         // Next Tag: 49
     }
-    optional Ro ro = 25;
+    optional Ro ro = 21;
 
-    optional string sendbug_preferred_domain = 26;
-    optional int32  service_bootanim_exit = 27;
+    optional string sendbug_preferred_domain = 22;
+    optional int32  service_bootanim_exit = 23;
 
     message Sys {
-        option (stream_proto.stream_msg).enable_fields_mapping = true;
-
         optional int32  boot_completed = 1;
         optional int32  boot_from_charger_mode = 2;
         optional int32  retaildemo_enabled = 3;
         optional string shutdown_requested = 4;
 
         message Usb {
-            option (stream_proto.stream_msg).enable_fields_mapping = true;
-
             optional string config = 1;
             optional int32  configfs = 2;
             optional string controller = 3;
@@ -484,16 +457,16 @@ message SystemPropertiesProto {
 
         // Next Tag: 6
     }
-    optional Sys sys = 28;
+    optional Sys sys = 24;
 
-    optional int32  telephony_lteOnCdmaDevice = 29;
-    optional int32  tombstoned_max_tombstone_count = 30;
-    optional string vold_decrypt = 31;
-    optional int32  vold_post_fs_data_done = 32;
-    optional int32  vts_native_server_on = 33;
-    optional string wifi_direct_interface = 34;
-    optional string wifi_interface = 35;
+    optional int32  telephony_lteOnCdmaDevice = 25;
+    optional int32  tombstoned_max_tombstone_count = 26;
+    optional string vold_decrypt = 27;
+    optional int32  vold_post_fs_data_done = 28;
+    optional int32  vts_native_server_on = 29;
+    optional string wifi_direct_interface = 30;
+    optional string wifi_interface = 31;
 
-    // Next Tag: 36
+    // Next Tag: 32
 }
 

@@ -2106,11 +2106,13 @@ package android.location {
     method public int getQuality();
     method public float getSmallestDisplacement();
     method public android.os.WorkSource getWorkSource();
+    method public boolean isLowPowerMode();
     method public android.location.LocationRequest setExpireAt(long);
     method public android.location.LocationRequest setExpireIn(long);
     method public android.location.LocationRequest setFastestInterval(long);
     method public void setHideFromAppOps(boolean);
     method public android.location.LocationRequest setInterval(long);
+    method public android.location.LocationRequest setLowPowerMode(boolean);
     method public android.location.LocationRequest setNumUpdates(int);
     method public android.location.LocationRequest setProvider(java.lang.String);
     method public android.location.LocationRequest setQuality(int);

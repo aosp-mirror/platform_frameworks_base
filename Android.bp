@@ -99,6 +99,7 @@ java_library {
         "core/java/android/app/backup/IRestoreSession.aidl",
         "core/java/android/app/backup/ISelectBackupTransportCallback.aidl",
         "core/java/android/app/slice/ISliceManager.aidl",
+        "core/java/android/app/slice/ISliceListener.aidl",
         "core/java/android/app/timezone/ICallback.aidl",
         "core/java/android/app/timezone/IRulesManager.aidl",
         "core/java/android/app/usage/ICacheQuotaService.aidl",
@@ -677,35 +678,23 @@ cc_library {
         "-Werror",
         "-Wno-unused-parameter",
     ],
+
+    srcs: [
+        "core/proto/**/*.proto",
+        "libs/incident/**/*.proto",
+        "tools/streaming_proto/stream.proto",
+    ],
+
     target: {
         host: {
             proto: {
                 type: "full",
             },
-            srcs: [
-                "core/proto/**/*.proto",
-                "libs/incident/**/*.proto",
-                "tools/streaming_proto/stream.proto",
-            ],
         },
         android: {
             proto: {
                 type: "lite",
             },
-            // We only build the protos that are optimized for the lite
-            // runtime, as well as the only protos that are actually
-            // needed by the device.
-            srcs: [
-                "core/proto/android/os/cpufreq.proto",
-                "core/proto/android/os/cpuinfo.proto",
-                "core/proto/android/os/kernelwake.proto",
-                "core/proto/android/os/pagetypeinfo.proto",
-                "core/proto/android/os/procrank.proto",
-                "core/proto/android/os/system_properties.proto",
-                "core/proto/android/service/graphicsstats.proto",
-                "libs/incident/proto/android/privacy.proto",
-                "tools/streaming_proto/stream.proto",
-            ],
             shared: {
                 enabled: false,
             },
