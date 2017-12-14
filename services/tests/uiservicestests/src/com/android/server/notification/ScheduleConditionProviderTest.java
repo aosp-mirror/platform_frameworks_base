@@ -13,6 +13,8 @@ import android.service.notification.ZenModeConfig;
 import android.support.test.filters.SmallTest;
 import android.support.test.runner.AndroidJUnit4;
 
+import com.android.server.UiServiceTestCase;
+
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -23,7 +25,7 @@ import java.util.GregorianCalendar;
 
 @RunWith(AndroidJUnit4.class)
 @SmallTest
-public class ScheduleConditionProviderTest extends NotificationTestCase {
+public class ScheduleConditionProviderTest extends UiServiceTestCase {
 
     ScheduleConditionProvider mService;
 

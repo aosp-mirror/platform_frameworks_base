@@ -53,6 +53,7 @@ import android.test.suitebuilder.annotation.SmallTest;
 
 
 import com.android.internal.logging.nano.MetricsProto.MetricsEvent;
+import com.android.server.UiServiceTestCase;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -65,7 +66,7 @@ import java.util.Objects;
 
 @SmallTest
 @RunWith(AndroidJUnit4.class)
-public class NotificationRecordTest extends NotificationTestCase {
+public class NotificationRecordTest extends UiServiceTestCase {
 
     private final Context mMockContext = Mockito.mock(Context.class);
     @Mock PackageManager mPm;

@@ -105,6 +105,14 @@ public abstract class SliceProvider extends ContentProvider {
     /**
      * @hide
      */
+    public static final String METHOD_PIN = "pin";
+    /**
+     * @hide
+     */
+    public static final String METHOD_UNPIN = "unpin";
+    /**
+     * @hide
+     */
     public static final String EXTRA_INTENT = "slice_intent";
     /**
      * @hide
@@ -140,6 +148,18 @@ public abstract class SliceProvider extends ContentProvider {
     @Deprecated
     public Slice onBindSlice(Uri sliceUri) {
         return null;
+    }
+
+    /**
+     * @hide
+     */
+    public void onSlicePinned(Uri sliceUri) {
+    }
+
+    /**
+     * @hide
+     */
+    public void onSliceUnpinned(Uri sliceUri) {
     }
 
     /**
@@ -221,6 +241,7 @@ public abstract class SliceProvider extends ContentProvider {
             getContext().enforceCallingPermission(permission.BIND_SLICE,
                     "Slice binding requires the permission BIND_SLICE");
             Intent intent = extras.getParcelable(EXTRA_INTENT);
+            if (intent == null) return null;
             Uri uri = onMapIntentToUri(intent);
             List<SliceSpec> supportedSpecs = extras.getParcelableArrayList(EXTRA_SUPPORTED_SPECS);
             Bundle b = new Bundle();
@@ -231,8 +252,60 @@ public abstract class SliceProvider extends ContentProvider {
                 b.putParcelable(EXTRA_SLICE, null);
             }
             return b;
+        } else if (method.equals(METHOD_PIN)) {
+            Uri uri = extras.getParcelable(EXTRA_BIND_URI);
+            if (!UserHandle.isSameApp(Binder.getCallingUid(), Process.myUid())) {
+                getContext().enforceUriPermission(uri, permission.BIND_SLICE,
+                        permission.BIND_SLICE, Binder.getCallingPid(), Binder.getCallingUid(),
+                        Intent.FLAG_GRANT_WRITE_URI_PERMISSION,
+                        "Slice binding requires the permission BIND_SLICE");
+            }
+            handlePinSlice(uri);
+        } else if (method.equals(METHOD_UNPIN)) {
+            Uri uri = extras.getParcelable(EXTRA_BIND_URI);
+            if (!UserHandle.isSameApp(Binder.getCallingUid(), Process.myUid())) {
+                getContext().enforceUriPermission(uri, permission.BIND_SLICE,
+                        permission.BIND_SLICE, Binder.getCallingPid(), Binder.getCallingUid(),
+                        Intent.FLAG_GRANT_WRITE_URI_PERMISSION,
+                        "Slice binding requires the permission BIND_SLICE");
+            }
+            handleUnpinSlice(uri);
         }
         return super.call(method, arg, extras);
+    }
+
+    private void handlePinSlice(Uri sliceUri) {
+        if (Looper.myLooper() == Looper.getMainLooper()) {
+            onSlicePinned(sliceUri);
+        } else {
+            CountDownLatch latch = new CountDownLatch(1);
+            Handler.getMain().post(() -> {
+                onSlicePinned(sliceUri);
+                latch.countDown();
+            });
+            try {
+                latch.await();
+            } catch (InterruptedException e) {
+                throw new RuntimeException(e);
+            }
+        }
+    }
+
+    private void handleUnpinSlice(Uri sliceUri) {
+        if (Looper.myLooper() == Looper.getMainLooper()) {
+            onSliceUnpinned(sliceUri);
+        } else {
+            CountDownLatch latch = new CountDownLatch(1);
+            Handler.getMain().post(() -> {
+                onSliceUnpinned(sliceUri);
+                latch.countDown();
+            });
+            try {
+                latch.await();
+            } catch (InterruptedException e) {
+                throw new RuntimeException(e);
+            }
+        }
     }
 
     private Slice handleBindSlice(Uri sliceUri, List<SliceSpec> supportedSpecs) {

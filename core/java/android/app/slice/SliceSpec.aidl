@@ -16,17 +16,4 @@
 
 package android.app.slice;
 
-import android.app.slice.ISliceListener;
-import android.app.slice.SliceSpec;
-import android.net.Uri;
-
-/** @hide */
-interface ISliceManager {
-    void addSliceListener(in Uri uri, String pkg, in ISliceListener listener,
-            in SliceSpec[] specs);
-    void removeSliceListener(in Uri uri, String pkg, in ISliceListener listener);
-    void pinSlice(String pkg, in Uri uri, in SliceSpec[] specs);
-    void unpinSlice(String pkg, in Uri uri);
-    boolean hasSliceAccess(String pkg);
-    SliceSpec[] getPinnedSpecs(in Uri uri, String pkg);
-}
+parcelable SliceSpec;

@@ -10,7 +10,8 @@ LOCAL_MODULE_TAGS := tests
 
 # Include test java files and source from notifications package.
 LOCAL_SRC_FILES := $(call all-java-files-under, src) \
-	$(call all-java-files-under, ../../core/java/com/android/server/notification)
+	$(call all-java-files-under, ../../core/java/com/android/server/notification) \
+	$(call all-java-files-under, ../../core/java/com/android/server/slice) \
 
 LOCAL_STATIC_JAVA_LIBRARIES := \
     frameworks-base-testutils \

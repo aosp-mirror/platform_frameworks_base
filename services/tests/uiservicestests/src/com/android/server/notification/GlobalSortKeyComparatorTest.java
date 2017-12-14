@@ -28,6 +28,8 @@ import android.service.notification.StatusBarNotification;
 import android.support.test.runner.AndroidJUnit4;
 import android.test.suitebuilder.annotation.SmallTest;
 
+import com.android.server.UiServiceTestCase;
+
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
@@ -37,7 +39,7 @@ import java.util.List;
 
 @SmallTest
 @RunWith(AndroidJUnit4.class)
-public class GlobalSortKeyComparatorTest extends NotificationTestCase {
+public class GlobalSortKeyComparatorTest extends UiServiceTestCase {
 
     private final String PKG = "PKG";
     private final int UID = 1111111;

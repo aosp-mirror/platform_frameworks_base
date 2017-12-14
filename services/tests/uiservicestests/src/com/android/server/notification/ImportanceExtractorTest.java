@@ -30,7 +30,6 @@ import android.support.test.runner.AndroidJUnit4;
 import android.test.suitebuilder.annotation.SmallTest;
 
 import org.mockito.Mock;
-import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
 
 import static org.mockito.Matchers.anyInt;
@@ -39,9 +38,11 @@ import static org.mockito.Mockito.when;
 
 import static org.junit.Assert.assertEquals;
 
+import com.android.server.UiServiceTestCase;
+
 @SmallTest
 @RunWith(AndroidJUnit4.class)
-public class ImportanceExtractorTest extends NotificationTestCase {
+public class ImportanceExtractorTest extends UiServiceTestCase {
 
     @Mock RankingConfig mConfig;
 

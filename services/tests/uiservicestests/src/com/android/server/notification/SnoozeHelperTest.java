@@ -32,7 +32,6 @@ import android.os.UserHandle;
 import android.service.notification.StatusBarNotification;
 import android.support.test.runner.AndroidJUnit4;
 import android.test.suitebuilder.annotation.SmallTest;
-import android.util.Slog;
 
 import static junit.framework.Assert.assertEquals;
 import static junit.framework.Assert.assertFalse;
@@ -46,10 +45,12 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import com.android.server.UiServiceTestCase;
+
 
 @SmallTest
 @RunWith(AndroidJUnit4.class)
-public class SnoozeHelperTest extends NotificationTestCase {
+public class SnoozeHelperTest extends UiServiceTestCase {
     private static final String TEST_CHANNEL_ID = "test_channel_id";
 
     @Mock SnoozeHelper.Callback mCallback;

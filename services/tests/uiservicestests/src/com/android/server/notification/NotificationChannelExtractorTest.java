@@ -16,7 +16,6 @@
 
 package com.android.server.notification;
 
-import static android.app.NotificationManager.IMPORTANCE_DEFAULT;
 import static android.app.NotificationManager.IMPORTANCE_HIGH;
 import static android.app.NotificationManager.IMPORTANCE_LOW;
 
@@ -31,17 +30,17 @@ import static org.mockito.Mockito.when;
 
 import android.app.Notification;
 import android.app.NotificationChannel;
-import android.app.PendingIntent;
-import android.content.Intent;
 import android.os.UserHandle;
 import android.service.notification.StatusBarNotification;
+
+import com.android.server.UiServiceTestCase;
 
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
-public class NotificationChannelExtractorTest extends NotificationTestCase {
+public class NotificationChannelExtractorTest extends UiServiceTestCase {
 
     @Mock RankingConfig mConfig;
 

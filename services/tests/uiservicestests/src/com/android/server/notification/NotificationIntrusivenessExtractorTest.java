@@ -32,9 +32,11 @@ import android.content.Intent;
 import android.os.UserHandle;
 import android.service.notification.StatusBarNotification;
 
+import com.android.server.UiServiceTestCase;
+
 import org.junit.Test;
 
-public class NotificationIntrusivenessExtractorTest extends NotificationTestCase {
+public class NotificationIntrusivenessExtractorTest extends UiServiceTestCase {
 
     @Test
     public void testNonIntrusive() {
