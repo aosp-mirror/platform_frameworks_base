@@ -59,6 +59,21 @@ import java.util.function.Supplier;
  * You can fill the 'missing argument' spot with {@link #__()}
  * (which is the factory function for {@link ArgumentPlaceholder})
  *
+ * NOTE: It is highly recommended to <b>only</b> use {@code ClassName::methodName}
+ * (aka unbounded method references) as the 1st argument for any of the
+ * factories ({@code obtain*(...)}) to avoid unwanted allocations.
+ * This means <b>not</b> using:
+ * <ul>
+ *     <li>{@code someVar::methodName} or {@code this::methodName} as it captures the reference
+ *     on the left of {@code ::}, resulting in an allocation on each evaluation of such
+ *     bounded method references</li>
+ *
+ *     <li>A lambda expression, e.g. {@code () -> toString()} due to how easy it is to accidentally
+ *     capture state from outside. In the above lambda expression for example, no variable from
+ *     outer scope is explicitly mentioned, yet one is still captured due to {@code toString()}
+ *     being an equivalent of {@code this.toString()}</li>
+ * </ul>
+ *
  * @hide
  */
 @SuppressWarnings({"unchecked", "unused", "WeakerAccess"})
