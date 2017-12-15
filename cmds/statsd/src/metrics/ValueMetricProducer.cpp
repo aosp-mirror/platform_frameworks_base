@@ -294,6 +294,10 @@ void ValueMetricProducer::onMatchedLogEventInternalLocked(
     } else {    // for pushed events
         interval.sum += value;
     }
+
+    for (auto& tracker : mAnomalyTrackers) {
+        tracker->detectAndDeclareAnomaly(eventTimeNs, mCurrentBucketNum, eventKey, interval.sum);
+    }
 }
 
 long ValueMetricProducer::get_value(const LogEvent& event) {
@@ -327,6 +331,12 @@ void ValueMetricProducer::flushIfNeededLocked(const uint64_t& eventTimeNs) {
         // it will auto create new vector of ValuebucketInfo if the key is not found.
         auto& bucketList = mPastBuckets[slice.first];
         bucketList.push_back(info);
+
+        for (auto& tracker : mAnomalyTrackers) {
+            if (tracker != nullptr) {
+                tracker->addPastBucket(slice.first, info.mValue, info.mBucketNum);
+            }
+        }
     }
     VLOG("%d tainted pairs in the bucket", tainted);
 
