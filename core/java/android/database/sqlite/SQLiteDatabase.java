@@ -289,6 +289,10 @@ public final class SQLiteDatabase extends SQLiteClosable {
         mConfigurationLocked.journalMode = journalMode;
         mConfigurationLocked.syncMode = syncMode;
         mConfigurationLocked.useCompatibilityWal = SQLiteGlobal.isCompatibilityWalSupported();
+        if (!mConfigurationLocked.isInMemoryDb() && SQLiteCompatibilityWalFlags.areFlagsSet()) {
+            mConfigurationLocked.useCompatibilityWal = SQLiteCompatibilityWalFlags
+                    .isCompatibilityWalSupported();
+        }
     }
 
     @Override
