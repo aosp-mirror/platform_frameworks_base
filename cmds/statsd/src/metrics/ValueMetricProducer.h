@@ -19,6 +19,7 @@
 #include <gtest/gtest_prod.h>
 #include <utils/threads.h>
 #include <list>
+#include "../anomaly/AnomalyTracker.h"
 #include "../condition/ConditionTracker.h"
 #include "../external/PullDataReceiver.h"
 #include "../external/StatsPullerManager.h"
@@ -117,6 +118,7 @@ private:
     FRIEND_TEST(ValueMetricProducerTest, TestNonDimensionalEvents);
     FRIEND_TEST(ValueMetricProducerTest, TestEventsWithNonSlicedCondition);
     FRIEND_TEST(ValueMetricProducerTest, TestPushedEventsWithoutCondition);
+    FRIEND_TEST(ValueMetricProducerTest, TestAnomalyDetection);
 };
 
 }  // namespace statsd
