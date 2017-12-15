@@ -143,7 +143,7 @@ import java.util.concurrent.atomic.AtomicInteger;
     /**
      * Creates a transaction for unloading a nanoapp.
      *
-     * @param contextHubId       the ID of the hub to load the nanoapp to
+     * @param contextHubId       the ID of the hub to unload the nanoapp from
      * @param nanoAppId          the ID of the nanoapp to unload
      * @param onCompleteCallback the client on complete callback
      * @return the generated transaction
@@ -174,6 +174,76 @@ import java.util.concurrent.atomic.AtomicInteger;
                     if (result == ContextHubTransaction.TRANSACTION_SUCCESS) {
                         mClientManager.onNanoAppUnloaded(contextHubId, nanoAppId);
                     }
+                } catch (RemoteException e) {
+                    Log.e(TAG, "RemoteException while calling client onTransactionComplete", e);
+                }
+            }
+        };
+    }
+
+    /**
+     * Creates a transaction for enabling a nanoapp.
+     *
+     * @param contextHubId       the ID of the hub to enable the nanoapp on
+     * @param nanoAppId          the ID of the nanoapp to enable
+     * @param onCompleteCallback the client on complete callback
+     * @return the generated transaction
+     */
+    /* package */ ContextHubServiceTransaction createEnableTransaction(
+            int contextHubId, long nanoAppId, IContextHubTransactionCallback onCompleteCallback) {
+        return new ContextHubServiceTransaction(
+                mNextAvailableId.getAndIncrement(), ContextHubTransaction.TYPE_ENABLE_NANOAPP) {
+            @Override
+            /* package */ int onTransact() {
+                try {
+                    return mContextHubProxy.enableNanoApp(
+                            contextHubId, nanoAppId, this.getTransactionId());
+                } catch (RemoteException e) {
+                    Log.e(TAG, "RemoteException while trying to enable nanoapp with ID 0x" +
+                            Long.toHexString(nanoAppId), e);
+                    return Result.UNKNOWN_FAILURE;
+                }
+            }
+
+            @Override
+            /* package */ void onTransactionComplete(@ContextHubTransaction.Result int result) {
+                try {
+                    onCompleteCallback.onTransactionComplete(result);
+                } catch (RemoteException e) {
+                    Log.e(TAG, "RemoteException while calling client onTransactionComplete", e);
+                }
+            }
+        };
+    }
+
+    /**
+     * Creates a transaction for disabling a nanoapp.
+     *
+     * @param contextHubId       the ID of the hub to disable the nanoapp on
+     * @param nanoAppId          the ID of the nanoapp to disable
+     * @param onCompleteCallback the client on complete callback
+     * @return the generated transaction
+     */
+    /* package */ ContextHubServiceTransaction createDisableTransaction(
+            int contextHubId, long nanoAppId, IContextHubTransactionCallback onCompleteCallback) {
+        return new ContextHubServiceTransaction(
+                mNextAvailableId.getAndIncrement(), ContextHubTransaction.TYPE_DISABLE_NANOAPP) {
+            @Override
+            /* package */ int onTransact() {
+                try {
+                    return mContextHubProxy.disableNanoApp(
+                            contextHubId, nanoAppId, this.getTransactionId());
+                } catch (RemoteException e) {
+                    Log.e(TAG, "RemoteException while trying to disable nanoapp with ID 0x" +
+                            Long.toHexString(nanoAppId), e);
+                    return Result.UNKNOWN_FAILURE;
+                }
+            }
+
+            @Override
+            /* package */ void onTransactionComplete(@ContextHubTransaction.Result int result) {
+                try {
+                    onCompleteCallback.onTransactionComplete(result);
                 } catch (RemoteException e) {
                     Log.e(TAG, "RemoteException while calling client onTransactionComplete", e);
                 }
