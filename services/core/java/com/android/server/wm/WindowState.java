@@ -118,7 +118,9 @@ import static com.android.server.wm.proto.WindowStateProto.GIVEN_CONTENT_INSETS;
 import static com.android.server.wm.proto.WindowStateProto.IDENTIFIER;
 import static com.android.server.wm.proto.WindowStateProto.PARENT_FRAME;
 import static com.android.server.wm.proto.WindowStateProto.STACK_ID;
+import static com.android.server.wm.proto.WindowStateProto.SHOWN_POSITION;
 import static com.android.server.wm.proto.WindowStateProto.SURFACE_INSETS;
+import static com.android.server.wm.proto.WindowStateProto.SURFACE_POSITION;
 import static com.android.server.wm.proto.WindowStateProto.WINDOW_CONTAINER;
 
 import android.annotation.CallSuper;
@@ -3112,6 +3114,8 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
         mContentFrame.writeToProto(proto, CONTENT_FRAME);
         mContentInsets.writeToProto(proto, CONTENT_INSETS);
         mAttrs.surfaceInsets.writeToProto(proto, SURFACE_INSETS);
+        mSurfacePosition.writeToProto(proto, SURFACE_POSITION);
+        mShownPosition.writeToProto(proto, SHOWN_POSITION);
         mWinAnimator.writeToProto(proto, ANIMATOR);
         proto.write(ANIMATING_EXIT, mAnimatingExit);
         for (int i = 0; i < mChildren.size(); i++) {
