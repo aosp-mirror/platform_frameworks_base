@@ -18,9 +18,13 @@ package com.android.server.backup;
 
 import static com.google.common.truth.Truth.assertThat;
 
+import static junit.framework.Assert.fail;
+
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 import static org.robolectric.shadow.api.Shadow.extract;
 
+import android.annotation.Nullable;
 import android.app.backup.BackupManager;
 import android.content.ComponentName;
 import android.content.Intent;
@@ -29,15 +33,18 @@ import android.content.pm.PackageInfo;
 import android.content.pm.ResolveInfo;
 import android.content.pm.ServiceInfo;
 import android.os.IBinder;
+import android.os.RemoteException;
 import android.platform.test.annotations.Presubmit;
 
-import com.android.server.backup.testing.BackupTransportStub;
+import com.android.internal.backup.IBackupTransport;
+import com.android.internal.util.FunctionalUtils.ThrowingRunnable;
 import com.android.server.backup.testing.ShadowBackupTransportStub;
 import com.android.server.backup.testing.ShadowContextImplForBackup;
 import com.android.server.backup.testing.ShadowPackageManagerForBackup;
 import com.android.server.backup.testing.TransportBoundListenerStub;
 import com.android.server.backup.testing.TransportReadyCallbackStub;
 import com.android.server.backup.transport.TransportClient;
+import com.android.server.backup.transport.TransportNotRegisteredException;
 import com.android.server.testing.FrameworkRobolectricTestRunner;
 import com.android.server.testing.SystemLoaderClasses;
 
@@ -95,15 +102,29 @@ public class TransportManagerTest {
                 (ShadowPackageManagerForBackup)
                         extract(RuntimeEnvironment.application.getPackageManager());
 
-        mTransport1 = new TransportInfo(PACKAGE_NAME, "transport1.name");
-        mTransport2 = new TransportInfo(PACKAGE_NAME, "transport2.name");
+        mTransport1 = new TransportInfo(
+                PACKAGE_NAME,
+                "transport1.name",
+                new Intent(),
+                "currentDestinationString",
+                new Intent(),
+                "dataManagementLabel");
+        mTransport2 = new TransportInfo(
+                PACKAGE_NAME,
+                "transport2.name",
+                new Intent(),
+                "currentDestinationString",
+                new Intent(),
+                "dataManagementLabel");
 
         ShadowContextImplForBackup.sComponentBinderMap.put(mTransport1.componentName,
                 mTransport1.binder);
         ShadowContextImplForBackup.sComponentBinderMap.put(mTransport2.componentName,
                 mTransport2.binder);
-        ShadowBackupTransportStub.sBinderTransportMap.put(mTransport1.binder, mTransport1.stub);
-        ShadowBackupTransportStub.sBinderTransportMap.put(mTransport2.binder, mTransport2.stub);
+        ShadowBackupTransportStub.sBinderTransportMap.put(
+                mTransport1.binder, mTransport1.binderInterface);
+        ShadowBackupTransportStub.sBinderTransportMap.put(
+                mTransport2.binder, mTransport2.binderInterface);
     }
 
     @After
@@ -129,8 +150,10 @@ public class TransportManagerTest {
                 Arrays.asList(mTransport1.componentName, mTransport2.componentName));
         assertThat(transportManager.getBoundTransportNames()).asList().containsExactlyElementsIn(
                 Arrays.asList(mTransport1.name, mTransport2.name));
-        assertThat(mTransportBoundListenerStub.isCalledForTransport(mTransport1.stub)).isTrue();
-        assertThat(mTransportBoundListenerStub.isCalledForTransport(mTransport2.stub)).isTrue();
+        assertThat(mTransportBoundListenerStub.isCalledForTransport(mTransport1.binderInterface))
+                .isTrue();
+        assertThat(mTransportBoundListenerStub.isCalledForTransport(mTransport2.binderInterface))
+                .isTrue();
     }
 
     @Test
@@ -153,8 +176,10 @@ public class TransportManagerTest {
                 Collections.singleton(mTransport2.componentName));
         assertThat(transportManager.getBoundTransportNames()).asList().containsExactlyElementsIn(
                 Collections.singleton(mTransport2.name));
-        assertThat(mTransportBoundListenerStub.isCalledForTransport(mTransport1.stub)).isFalse();
-        assertThat(mTransportBoundListenerStub.isCalledForTransport(mTransport2.stub)).isTrue();
+        assertThat(mTransportBoundListenerStub.isCalledForTransport(mTransport1.binderInterface))
+                .isFalse();
+        assertThat(mTransportBoundListenerStub.isCalledForTransport(mTransport2.binderInterface))
+                .isTrue();
     }
 
     @Test
@@ -193,8 +218,10 @@ public class TransportManagerTest {
                 Collections.singleton(mTransport2.componentName));
         assertThat(transportManager.getBoundTransportNames()).asList().containsExactlyElementsIn(
                 Collections.singleton(mTransport2.name));
-        assertThat(mTransportBoundListenerStub.isCalledForTransport(mTransport1.stub)).isFalse();
-        assertThat(mTransportBoundListenerStub.isCalledForTransport(mTransport2.stub)).isTrue();
+        assertThat(mTransportBoundListenerStub.isCalledForTransport(mTransport1.binderInterface))
+                .isFalse();
+        assertThat(mTransportBoundListenerStub.isCalledForTransport(mTransport2.binderInterface))
+                .isTrue();
     }
 
     @Test
@@ -250,8 +277,10 @@ public class TransportManagerTest {
                 Arrays.asList(mTransport1.componentName, mTransport2.componentName));
         assertThat(transportManager.getBoundTransportNames()).asList().containsExactlyElementsIn(
                 Arrays.asList(mTransport1.name, mTransport2.name));
-        assertThat(mTransportBoundListenerStub.isCalledForTransport(mTransport1.stub)).isFalse();
-        assertThat(mTransportBoundListenerStub.isCalledForTransport(mTransport2.stub)).isTrue();
+        assertThat(mTransportBoundListenerStub.isCalledForTransport(mTransport1.binderInterface))
+                .isFalse();
+        assertThat(mTransportBoundListenerStub.isCalledForTransport(mTransport2.binderInterface))
+                .isTrue();
     }
 
     @Test
@@ -265,8 +294,10 @@ public class TransportManagerTest {
                 Arrays.asList(mTransport1.componentName, mTransport2.componentName));
         assertThat(transportManager.getBoundTransportNames()).asList().containsExactlyElementsIn(
                 Arrays.asList(mTransport1.name, mTransport2.name));
-        assertThat(mTransportBoundListenerStub.isCalledForTransport(mTransport1.stub)).isFalse();
-        assertThat(mTransportBoundListenerStub.isCalledForTransport(mTransport2.stub)).isFalse();
+        assertThat(mTransportBoundListenerStub.isCalledForTransport(mTransport1.binderInterface))
+                .isFalse();
+        assertThat(mTransportBoundListenerStub.isCalledForTransport(mTransport2.binderInterface))
+                .isFalse();
     }
 
     @Test
@@ -280,8 +311,10 @@ public class TransportManagerTest {
                 Arrays.asList(mTransport1.componentName, mTransport2.componentName));
         assertThat(transportManager.getBoundTransportNames()).asList().containsExactlyElementsIn(
                 Arrays.asList(mTransport1.name, mTransport2.name));
-        assertThat(mTransportBoundListenerStub.isCalledForTransport(mTransport1.stub)).isFalse();
-        assertThat(mTransportBoundListenerStub.isCalledForTransport(mTransport2.stub)).isFalse();
+        assertThat(mTransportBoundListenerStub.isCalledForTransport(mTransport1.binderInterface))
+                .isFalse();
+        assertThat(mTransportBoundListenerStub.isCalledForTransport(mTransport2.binderInterface))
+                .isFalse();
     }
 
     @Test
@@ -295,8 +328,10 @@ public class TransportManagerTest {
                 Arrays.asList(mTransport1.componentName, mTransport2.componentName));
         assertThat(transportManager.getBoundTransportNames()).asList().containsExactlyElementsIn(
                 Arrays.asList(mTransport1.name, mTransport2.name));
-        assertThat(mTransportBoundListenerStub.isCalledForTransport(mTransport1.stub)).isFalse();
-        assertThat(mTransportBoundListenerStub.isCalledForTransport(mTransport2.stub)).isTrue();
+        assertThat(mTransportBoundListenerStub.isCalledForTransport(mTransport1.binderInterface))
+                .isFalse();
+        assertThat(mTransportBoundListenerStub.isCalledForTransport(mTransport2.binderInterface))
+                .isTrue();
     }
 
     @Test
@@ -305,9 +340,9 @@ public class TransportManagerTest {
                 Arrays.asList(mTransport1, mTransport2), mTransport1.name);
 
         assertThat(transportManager.getTransportBinder(mTransport1.name)).isEqualTo(
-                mTransport1.stub);
+                mTransport1.binderInterface);
         assertThat(transportManager.getTransportBinder(mTransport2.name)).isEqualTo(
-                mTransport2.stub);
+                mTransport2.binderInterface);
     }
 
     @Test
@@ -326,7 +361,7 @@ public class TransportManagerTest {
 
         assertThat(transportManager.getTransportBinder(mTransport1.name)).isNull();
         assertThat(transportManager.getTransportBinder(mTransport2.name)).isEqualTo(
-                mTransport2.stub);
+                mTransport2.binderInterface);
     }
 
     @Test
@@ -356,7 +391,8 @@ public class TransportManagerTest {
         TransportManager transportManager = createTransportManagerAndSetUpTransports(
                 Arrays.asList(mTransport1, mTransport2), mTransport1.name);
 
-        assertThat(transportManager.getCurrentTransportBinder()).isEqualTo(mTransport1.stub);
+        assertThat(transportManager.getCurrentTransportBinder())
+                .isEqualTo(mTransport1.binderInterface);
     }
 
     @Test
@@ -375,8 +411,10 @@ public class TransportManagerTest {
         TransportManager transportManager = createTransportManagerAndSetUpTransports(
                 Arrays.asList(mTransport1, mTransport2), mTransport1.name);
 
-        assertThat(transportManager.getTransportName(mTransport1.stub)).isEqualTo(mTransport1.name);
-        assertThat(transportManager.getTransportName(mTransport2.stub)).isEqualTo(mTransport2.name);
+        assertThat(transportManager.getTransportName(mTransport1.binderInterface))
+                .isEqualTo(mTransport1.name);
+        assertThat(transportManager.getTransportName(mTransport2.binderInterface))
+                .isEqualTo(mTransport2.name);
     }
 
     @Test
@@ -385,8 +423,9 @@ public class TransportManagerTest {
                 createTransportManagerAndSetUpTransports(Collections.singletonList(mTransport2),
                         Collections.singletonList(mTransport1), mTransport1.name);
 
-        assertThat(transportManager.getTransportName(mTransport1.stub)).isNull();
-        assertThat(transportManager.getTransportName(mTransport2.stub)).isEqualTo(mTransport2.name);
+        assertThat(transportManager.getTransportName(mTransport1.binderInterface)).isNull();
+        assertThat(transportManager.getTransportName(mTransport2.binderInterface))
+                .isEqualTo(mTransport2.name);
     }
 
     @Test
@@ -499,7 +538,7 @@ public class TransportManagerTest {
         TransportManager transportManager =
                 createTransportManagerAndSetUpTransports(
                         Arrays.asList(mTransport1, mTransport2), mTransport1.name);
-        transportManager.describeTransport(
+        transportManager.updateTransportAttributes(
                 mTransport1.componentName, "newName", null, "destinationString", null, null);
 
         TransportClient transportClient =
@@ -514,7 +553,7 @@ public class TransportManagerTest {
         TransportManager transportManager =
                 createTransportManagerAndSetUpTransports(
                         Arrays.asList(mTransport1, mTransport2), mTransport1.name);
-        transportManager.describeTransport(
+        transportManager.updateTransportAttributes(
                 mTransport1.componentName, "newName", null, "destinationString", null, null);
 
         TransportClient transportClient =
@@ -529,7 +568,7 @@ public class TransportManagerTest {
         TransportManager transportManager =
                 createTransportManagerAndSetUpTransports(
                         Arrays.asList(mTransport1, mTransport2), mTransport1.name);
-        transportManager.describeTransport(
+        transportManager.updateTransportAttributes(
                 mTransport1.componentName, "newName", null, "destinationString", null, null);
 
         String transportName = transportManager.getTransportName(mTransport1.componentName);
@@ -547,6 +586,48 @@ public class TransportManagerTest {
 
         assertThat(transportManager.isTransportRegistered(mTransport1.name)).isTrue();
         assertThat(transportManager.isTransportRegistered(mTransport2.name)).isFalse();
+    }
+
+    @Test
+    public void getTransportAttributes_forRegisteredTransport_returnsCorrectValues()
+            throws Exception {
+        TransportManager transportManager =
+                createTransportManagerAndSetUpTransports(
+                        Collections.singletonList(mTransport1),
+                        mTransport1.name);
+
+        assertThat(transportManager.getTransportConfigurationIntent(mTransport1.name))
+                .isEqualTo(mTransport1.binderInterface.configurationIntent());
+        assertThat(transportManager.getTransportDataManagementIntent(mTransport1.name))
+                .isEqualTo(mTransport1.binderInterface.dataManagementIntent());
+        assertThat(transportManager.getTransportDataManagementLabel(mTransport1.name))
+                .isEqualTo(mTransport1.binderInterface.dataManagementLabel());
+        assertThat(transportManager.getTransportDirName(mTransport1.name))
+                .isEqualTo(mTransport1.binderInterface.transportDirName());
+    }
+
+    @Test
+    public void getTransportAttributes_forUnregisteredTransport_throws()
+            throws Exception {
+        TransportManager transportManager =
+                createTransportManagerAndSetUpTransports(
+                        Collections.singletonList(mTransport1),
+                        Collections.singletonList(mTransport2),
+                        mTransport1.name);
+
+        expectThrows(
+                TransportNotRegisteredException.class,
+                () -> transportManager.getTransportConfigurationIntent(mTransport2.name));
+        expectThrows(
+                TransportNotRegisteredException.class,
+                () -> transportManager.getTransportDataManagementIntent(
+                        mTransport2.name));
+        expectThrows(
+                TransportNotRegisteredException.class,
+                () -> transportManager.getTransportDataManagementLabel(mTransport2.name));
+        expectThrows(
+                TransportNotRegisteredException.class,
+                () -> transportManager.getTransportDirName(mTransport2.name));
     }
 
     private void setUpPackageWithTransports(String packageName, List<TransportInfo> transports,
@@ -616,10 +697,12 @@ public class TransportManagerTest {
         assertThat(transportManager.getBoundTransportNames()).asList().containsExactlyElementsIn(
                 availableTransportsNames);
         for (TransportInfo transport : availableTransports) {
-            assertThat(mTransportBoundListenerStub.isCalledForTransport(transport.stub)).isTrue();
+            assertThat(mTransportBoundListenerStub.isCalledForTransport(transport.binderInterface))
+                    .isTrue();
         }
         for (TransportInfo transport : unavailableTransports) {
-            assertThat(mTransportBoundListenerStub.isCalledForTransport(transport.stub)).isFalse();
+            assertThat(mTransportBoundListenerStub.isCalledForTransport(transport.binderInterface))
+                    .isFalse();
         }
 
         mTransportBoundListenerStub.resetState();
@@ -627,19 +710,46 @@ public class TransportManagerTest {
         return transportManager;
     }
 
+    private static <T extends Throwable> void expectThrows(
+            Class<T> throwableClass, ThrowingRunnable runnable) {
+        try {
+            runnable.runOrThrow();
+            fail("Expected to throw " + throwableClass.getSimpleName());
+        } catch (Throwable t) {
+            assertThat(t).isInstanceOf(throwableClass);
+        }
+    }
+
     private static class TransportInfo {
         public final String packageName;
         public final String name;
         public final ComponentName componentName;
-        public final BackupTransportStub stub;
+        public final IBackupTransport binderInterface;
         public final IBinder binder;
 
-        TransportInfo(String packageName, String name) {
+        TransportInfo(
+                String packageName,
+                String name,
+                @Nullable Intent configurationIntent,
+                String currentDestinationString,
+                @Nullable Intent dataManagementIntent,
+                String dataManagementLabel) {
             this.packageName = packageName;
             this.name = name;
             this.componentName = new ComponentName(packageName, name);
-            this.stub = new BackupTransportStub(name);
             this.binder = mock(IBinder.class);
+            IBackupTransport transport = mock(IBackupTransport.class);
+            try {
+                when(transport.name()).thenReturn(name);
+                when(transport.configurationIntent()).thenReturn(configurationIntent);
+                when(transport.currentDestinationString()).thenReturn(currentDestinationString);
+                when(transport.dataManagementIntent()).thenReturn(dataManagementIntent);
+                when(transport.dataManagementLabel()).thenReturn(dataManagementLabel);
+            } catch (RemoteException e) {
+                // Only here to mock methods that throw RemoteException
+            }
+            this.binderInterface = transport;
         }
     }
+
 }

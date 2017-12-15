@@ -293,16 +293,6 @@ public class BackupHandler extends Handler {
                 break;
             }
 
-            case MSG_RETRY_INIT: {
-                synchronized (backupManagerService.getQueueLock()) {
-                    backupManagerService.recordInitPendingLocked(msg.arg1 != 0, (String) msg.obj);
-                    backupManagerService.getAlarmManager().set(AlarmManager.RTC_WAKEUP,
-                            System.currentTimeMillis(),
-                            backupManagerService.getRunInitIntent());
-                }
-                break;
-            }
-
             case MSG_RUN_GET_RESTORE_SETS: {
                 // Like other async operations, this is entered with the wakelock held
                 RestoreSet[] sets = null;
