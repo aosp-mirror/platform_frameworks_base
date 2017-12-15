@@ -113,7 +113,8 @@ public class UserRestrictionsUtils {
             UserManager.DISALLOW_OEM_UNLOCK,
             UserManager.DISALLOW_UNMUTE_DEVICE,
             UserManager.DISALLOW_AUTOFILL,
-            UserManager.DISALLOW_USER_SWITCH
+            UserManager.DISALLOW_USER_SWITCH,
+            UserManager.DISALLOW_UNIFIED_PASSWORD,
     });
 
     /**
@@ -192,7 +193,7 @@ public class UserRestrictionsUtils {
             UserManager.DISALLOW_BLUETOOTH_SHARING
     );
 
-    /*
+    /**
      * Special user restrictions that are always applied to all users no matter who sets them.
      */
     private static final Set<String> PROFILE_GLOBAL_RESTRICTIONS = Sets.newArraySet(

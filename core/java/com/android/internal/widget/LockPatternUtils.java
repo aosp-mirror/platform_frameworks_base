@@ -27,7 +27,6 @@ import android.content.ContentResolver;
 import android.content.Context;
 import android.content.pm.UserInfo;
 import android.os.AsyncTask;
-import android.os.Build;
 import android.os.Handler;
 import android.os.IBinder;
 import android.os.Looper;
@@ -35,7 +34,6 @@ import android.os.Message;
 import android.os.RemoteException;
 import android.os.ServiceManager;
 import android.os.SystemClock;
-import android.os.SystemProperties;
 import android.os.UserHandle;
 import android.os.UserManager;
 import android.os.storage.IStorageManager;
@@ -964,9 +962,12 @@ public class LockPatternUtils {
 
     /**
      * Retrieves whether the current profile and device locks can be unified.
+     * @param userHandle profile user handle.
      */
     public boolean isSeparateProfileChallengeAllowedToUnify(int userHandle) {
-        return getDevicePolicyManager().isProfileActivePasswordSufficientForParent(userHandle);
+        return getDevicePolicyManager().isProfileActivePasswordSufficientForParent(userHandle)
+                && !getUserManager().hasUserRestriction(
+                        UserManager.DISALLOW_UNIFIED_PASSWORD, UserHandle.of(userHandle));
     }
 
     private boolean hasSeparateChallenge(int userHandle) {

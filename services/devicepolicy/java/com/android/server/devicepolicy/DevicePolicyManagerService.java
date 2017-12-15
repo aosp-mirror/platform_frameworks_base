@@ -4082,6 +4082,17 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
     }
 
     @Override
+    public boolean isUsingUnifiedPassword(ComponentName admin) {
+        if (!mHasFeature) {
+            return true;
+        }
+        final int userId = mInjector.userHandleGetCallingUserId();
+        enforceProfileOrDeviceOwner(admin);
+        enforceManagedProfile(userId, "query unified challenge status");
+        return !isSeparateProfileChallengeEnabled(userId);
+    }
+
+    @Override
     public boolean isProfileActivePasswordSufficientForParent(int userHandle) {
         if (!mHasFeature) {
             return true;
