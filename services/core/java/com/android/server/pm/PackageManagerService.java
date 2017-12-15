@@ -173,6 +173,7 @@ import android.content.pm.PackageParser.Package;
 import android.content.pm.PackageParser.PackageLite;
 import android.content.pm.PackageParser.PackageParserException;
 import android.content.pm.PackageParser.ParseFlags;
+import android.content.pm.PackageParser.ServiceIntentInfo;
 import android.content.pm.PackageStats;
 import android.content.pm.PackageUserState;
 import android.content.pm.ParceledListSlice;
@@ -12558,7 +12559,12 @@ public class PackageManagerService extends IPackageManager.Stub
                     out.print(' ');
                     filter.service.printComponentShortName(out);
                     out.print(" filter ");
-                    out.println(Integer.toHexString(System.identityHashCode(filter)));
+                    out.print(Integer.toHexString(System.identityHashCode(filter)));
+                    if (filter.service.info.permission != null) {
+                        out.print(" permission "); out.println(filter.service.info.permission);
+                    } else {
+                        out.println();
+                    }
         }
 
         @Override
@@ -20551,6 +20557,7 @@ Slog.v(TAG, ":: stepped forward, applying functor at tag " + parser.getName());
                 pw.println("    dexopt: dump dexopt state");
                 pw.println("    compiler-stats: dump compiler statistics");
                 pw.println("    enabled-overlays: dump list of enabled overlay packages");
+                pw.println("    service-permissions: dump permissions required by services");
                 pw.println("    <package.name>: info about given package");
                 return;
             } else if ("--checkin".equals(opt)) {
@@ -20686,6 +20693,8 @@ Slog.v(TAG, ":: stepped forward, applying functor at tag " + parser.getName());
                 dumpState.setDump(DumpState.DUMP_COMPILER_STATS);
             } else if ("changes".equals(cmd)) {
                 dumpState.setDump(DumpState.DUMP_CHANGES);
+            } else if ("service-permissions".equals(cmd)) {
+                dumpState.setDump(DumpState.DUMP_SERVICE_PERMISSIONS);
             } else if ("write".equals(cmd)) {
                 synchronized (mPackages) {
                     mSettings.writeLPr();
@@ -21064,6 +21073,25 @@ Slog.v(TAG, ":: stepped forward, applying functor at tag " + parser.getName());
                     }
                 }
                 ipw.decreaseIndent();
+            }
+
+            if (!checkin && dumpState.isDumping(DumpState.DUMP_SERVICE_PERMISSIONS)
+                    && packageName == null) {
+                if (dumpState.onTitlePrinted()) pw.println();
+                pw.println("Service permissions:");
+
+                final Iterator<ServiceIntentInfo> filterIterator = mServices.filterIterator();
+                while (filterIterator.hasNext()) {
+                    final ServiceIntentInfo info = filterIterator.next();
+                    final ServiceInfo serviceInfo = info.service.info;
+                    final String permission = serviceInfo.permission;
+                    if (permission != null) {
+                        pw.print("    ");
+                        pw.print(serviceInfo.getComponentName().flattenToShortString());
+                        pw.print(": ");
+                        pw.println(permission);
+                    }
+                }
             }
 
             if (!checkin && dumpState.isDumping(DumpState.DUMP_DEXOPT)) {
