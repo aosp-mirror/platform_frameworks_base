@@ -21,5 +21,6 @@
     android:textAppearance="?attr/textAppearanceListItemSmall"
     android:gravity="center_vertical"
     android:drawablePadding="14dip"
+    android:textAlignment="viewStart"
     android:paddingStart="?attr/listPreferredItemPaddingStart"
     android:paddingEnd="?attr/listPreferredItemPaddingEnd" />
