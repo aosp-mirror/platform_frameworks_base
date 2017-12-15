@@ -16,6 +16,8 @@
 
 package com.android.server.locksettings.recoverablekeystore;
 
+import com.android.internal.annotations.VisibleForTesting;
+
 import java.nio.charset.StandardCharsets;
 import java.security.InvalidKeyException;
 import java.security.MessageDigest;
@@ -25,6 +27,7 @@ import java.security.SecureRandom;
 import java.util.HashMap;
 import java.util.Map;
 
+import javax.crypto.AEADBadTagException;
 import javax.crypto.KeyGenerator;
 import javax.crypto.SecretKey;
 
@@ -45,8 +48,12 @@ public class KeySyncUtils {
             "V1 locally_encrypted_recovery_key".getBytes(StandardCharsets.UTF_8);
     private static final byte[] ENCRYPTED_APPLICATION_KEY_HEADER =
             "V1 encrypted_application_key".getBytes(StandardCharsets.UTF_8);
+    private static final byte[] RECOVERY_CLAIM_HEADER =
+            "V1 KF_claim".getBytes(StandardCharsets.UTF_8);
 
     private static final byte[] THM_KF_HASH_PREFIX = "THM_KF_hash".getBytes(StandardCharsets.UTF_8);
+
+    private static final int KEY_CLAIMANT_LENGTH_BYTES = 16;
 
     /**
      * Encrypts the recovery key using both the lock screen hash and the remote storage's public
@@ -121,7 +128,7 @@ public class KeySyncUtils {
      */
     public static SecretKey generateRecoveryKey() throws NoSuchAlgorithmException {
         KeyGenerator keyGenerator = KeyGenerator.getInstance(RECOVERY_KEY_ALGORITHM);
-        keyGenerator.init(RECOVERY_KEY_SIZE_BITS, SecureRandom.getInstanceStrong());
+        keyGenerator.init(RECOVERY_KEY_SIZE_BITS, new SecureRandom());
         return keyGenerator.generateKey();
     }
 
@@ -153,13 +160,100 @@ public class KeySyncUtils {
     }
 
     /**
-     * Returns a new array, the contents of which are the concatenation of {@code a} and {@code b}.
+     * Returns a random 16-byte key claimant.
+     *
+     * @hide
      */
-    private static byte[] concat(byte[] a, byte[] b) {
-        byte[] result = new byte[a.length + b.length];
-        System.arraycopy(a, 0, result, 0, a.length);
-        System.arraycopy(b, 0, result, a.length, b.length);
-        return result;
+    public static byte[] generateKeyClaimant() {
+        SecureRandom secureRandom = new SecureRandom();
+        byte[] key = new byte[KEY_CLAIMANT_LENGTH_BYTES];
+        secureRandom.nextBytes(key);
+        return key;
+    }
+
+    /**
+     * Encrypts a claim to recover a remote recovery key.
+     *
+     * @param publicKey The public key of the remote server.
+     * @param vaultParams Associated vault parameters.
+     * @param challenge The challenge issued by the server.
+     * @param thmKfHash The THM hash of the lock screen.
+     * @param keyClaimant The random key claimant.
+     * @return The encrypted recovery claim, to be sent to the remote server.
+     * @throws NoSuchAlgorithmException if any SecureBox algorithm is not present.
+     * @throws InvalidKeyException if the {@code publicKey} could not be used to encrypt.
+     *
+     * @hide
+     */
+    public static byte[] encryptRecoveryClaim(
+            PublicKey publicKey,
+            byte[] vaultParams,
+            byte[] challenge,
+            byte[] thmKfHash,
+            byte[] keyClaimant) throws NoSuchAlgorithmException, InvalidKeyException {
+        return SecureBox.encrypt(
+                publicKey,
+                /*sharedSecret=*/ null,
+                /*header=*/ concat(RECOVERY_CLAIM_HEADER, vaultParams, challenge),
+                /*payload=*/ concat(thmKfHash, keyClaimant));
+    }
+
+    /**
+     * Decrypts a recovery key, after having retrieved it from a remote server.
+     *
+     * @param lskfHash The lock screen hash associated with the key.
+     * @param encryptedRecoveryKey The encrypted key.
+     * @return The raw key material.
+     * @throws NoSuchAlgorithmException if any SecureBox algorithm is unavailable.
+     * @throws AEADBadTagException if the message has been tampered with or was encrypted with a
+     *     different key.
+     */
+    public static byte[] decryptRecoveryKey(byte[] lskfHash, byte[] encryptedRecoveryKey)
+            throws NoSuchAlgorithmException, InvalidKeyException, AEADBadTagException {
+        return SecureBox.decrypt(
+                /*ourPrivateKey=*/ null,
+                /*sharedSecret=*/ lskfHash,
+                /*header=*/ LOCALLY_ENCRYPTED_RECOVERY_KEY_HEADER,
+                /*encryptedPayload=*/ encryptedRecoveryKey);
+    }
+
+    /**
+     * Decrypts an application key, using the recovery key.
+     *
+     * @param recoveryKey The recovery key - used to wrap all application keys.
+     * @param encryptedApplicationKey The application key to unwrap.
+     * @return The raw key material of the application key.
+     * @throws NoSuchAlgorithmException if any SecureBox algorithm is unavailable.
+     * @throws AEADBadTagException if the message has been tampered with or was encrypted with a
+     *     different key.
+     */
+    public static byte[] decryptApplicationKey(byte[] recoveryKey, byte[] encryptedApplicationKey)
+            throws NoSuchAlgorithmException, InvalidKeyException, AEADBadTagException {
+        return SecureBox.decrypt(
+                /*ourPrivateKey=*/ null,
+                /*sharedSecret=*/ recoveryKey,
+                /*header=*/ ENCRYPTED_APPLICATION_KEY_HEADER,
+                /*encryptedPayload=*/ encryptedApplicationKey);
+    }
+
+    /**
+     * Returns the concatenation of all the given {@code arrays}.
+     */
+    @VisibleForTesting
+    static byte[] concat(byte[]... arrays) {
+        int length = 0;
+        for (byte[] array : arrays) {
+            length += array.length;
+        }
+
+        byte[] concatenated = new byte[length];
+        int pos = 0;
+        for (byte[] array : arrays) {
+            System.arraycopy(array, /*srcPos=*/ 0, concatenated, pos, array.length);
+            pos += array.length;
+        }
+
+        return concatenated;
     }
 
     // Statics only
