@@ -124,27 +124,51 @@ public class WrappedKey {
         return mKeyMaterial;
     }
 
+
+    /**
+     * Returns the generation ID of the platform key, with which this key was wrapped.
+     *
+     * @hide
+     */
+    public int getPlatformKeyGenerationId() {
+        // TODO(robertberry) Implement. See ag/3362855.
+        return 1;
+    }
+
     /**
      * Unwraps the {@code wrappedKeys} with the {@code platformKey}.
      *
      * @return The unwrapped keys, indexed by alias.
      * @throws NoSuchAlgorithmException if AES/GCM/NoPadding Cipher or AES key type is unavailable.
+     * @throws BadPlatformKeyException if the {@code platformKey} has a different generation ID to
+     *     any of the {@code wrappedKeys}.
      *
      * @hide
      */
     public static Map<String, SecretKey> unwrapKeys(
-            SecretKey platformKey,
+            PlatformDecryptionKey platformKey,
             Map<String, WrappedKey> wrappedKeys)
-            throws NoSuchAlgorithmException, NoSuchPaddingException {
+            throws NoSuchAlgorithmException, NoSuchPaddingException, BadPlatformKeyException {
         HashMap<String, SecretKey> unwrappedKeys = new HashMap<>();
         Cipher cipher = Cipher.getInstance(KEY_WRAP_CIPHER_ALGORITHM);
+        int platformKeyGenerationId = platformKey.getGenerationId();
 
         for (String alias : wrappedKeys.keySet()) {
             WrappedKey wrappedKey = wrappedKeys.get(alias);
+            if (wrappedKey.getPlatformKeyGenerationId() != platformKeyGenerationId) {
+                throw new BadPlatformKeyException(String.format(
+                        Locale.US,
+                        "WrappedKey with alias '%s' was wrapped with platform key %d, not "
+                                + "platform key %d",
+                        alias,
+                        wrappedKey.getPlatformKeyGenerationId(),
+                        platformKey.getGenerationId()));
+            }
+
             try {
                 cipher.init(
                         Cipher.UNWRAP_MODE,
-                        platformKey,
+                        platformKey.getKey(),
                         new GCMParameterSpec(GCM_TAG_LENGTH_BITS, wrappedKey.getNonce()));
             } catch (InvalidKeyException | InvalidAlgorithmParameterException e) {
                 Log.e(TAG,
