@@ -1022,8 +1022,16 @@ public class Notification implements Parcelable
     /**
      * {@link #extras} key: A String array containing the people that this notification relates to,
      * each of which was supplied to {@link Builder#addPerson(String)}.
+     *
+     * @deprecated the actual objects are now in {@link #EXTRA_PEOPLE_LIST}
      */
     public static final String EXTRA_PEOPLE = "android.people";
+
+    /**
+     * {@link #extras} key: An arrayList of {@link Person} objects containing the people that
+     * this notification relates to.
+     */
+    public static final String EXTRA_PEOPLE_LIST = "android.people.list";
 
     /**
      * Allow certain system-generated notifications to appear before the device is provisioned.
@@ -2819,7 +2827,7 @@ public class Notification implements Parcelable
         private Bundle mUserExtras = new Bundle();
         private Style mStyle;
         private ArrayList<Action> mActions = new ArrayList<Action>(MAX_ACTION_BUTTONS);
-        private ArrayList<String> mPersonList = new ArrayList<String>();
+        private ArrayList<Person> mPersonList = new ArrayList<>();
         private NotificationColorUtil mColorUtil;
         private boolean mIsLegacy;
         private boolean mIsLegacyInitialized;
@@ -2910,8 +2918,9 @@ public class Notification implements Parcelable
                     Collections.addAll(mActions, mN.actions);
                 }
 
-                if (mN.extras.containsKey(EXTRA_PEOPLE)) {
-                    Collections.addAll(mPersonList, mN.extras.getStringArray(EXTRA_PEOPLE));
+                if (mN.extras.containsKey(EXTRA_PEOPLE_LIST)) {
+                    ArrayList<Person> people = mN.extras.getParcelableArrayList(EXTRA_PEOPLE_LIST);
+                    mPersonList.addAll(people);
                 }
 
                 if (mN.getSmallIcon() == null && mN.icon != 0) {
@@ -3621,13 +3630,41 @@ public class Notification implements Parcelable
          * URIs.  The path part of these URIs must exist in the contacts database, in the
          * appropriate column, or the reference will be discarded as invalid. Telephone schema
          * URIs will be resolved by {@link android.provider.ContactsContract.PhoneLookup}.
+         * It is also possible to provide a URI with the schema {@code name:} in order to uniquely
+         * identify a person without an entry in the contacts database.
          * </P>
          *
          * @param uri A URI for the person.
          * @see Notification#EXTRA_PEOPLE
+         * @deprecated use {@link #addPerson(Person)}
          */
         public Builder addPerson(String uri) {
-            mPersonList.add(uri);
+            addPerson(new Person().setUri(uri));
+            return this;
+        }
+
+        /**
+         * Add a person that is relevant to this notification.
+         *
+         * <P>
+         * Depending on user preferences, this annotation may allow the notification to pass
+         * through interruption filters, if this notification is of category {@link #CATEGORY_CALL}
+         * or {@link #CATEGORY_MESSAGE}. The addition of people may also cause this notification to
+         * appear more prominently in the user interface.
+         * </P>
+         *
+         * <P>
+         * A person should usually contain a uri in order to benefit from the ranking boost.
+         * However, even if no uri is provided, it's beneficial to provide other people in the
+         * notification, such that listeners and voice only devices can announce and handle them
+         * properly.
+         * </P>
+         *
+         * @param person the person to add.
+         * @see Notification#EXTRA_PEOPLE_LIST
+         */
+        public Builder addPerson(Person person) {
+            mPersonList.add(person);
             return this;
         }
 
@@ -4968,8 +5005,7 @@ public class Notification implements Parcelable
                 mActions.toArray(mN.actions);
             }
             if (!mPersonList.isEmpty()) {
-                mN.extras.putStringArray(EXTRA_PEOPLE,
-                        mPersonList.toArray(new String[mPersonList.size()]));
+                mN.extras.putParcelableArrayList(EXTRA_PEOPLE_LIST, mPersonList);
             }
             if (mN.bigContentView != null || mN.contentView != null
                     || mN.headsUpContentView != null) {
@@ -7100,6 +7136,176 @@ public class Notification implements Parcelable
             }
             return remoteViews;
         }
+    }
+
+    /**
+     * A Person associated with this Notification.
+     */
+    public static final class Person implements Parcelable {
+        @Nullable private CharSequence mName;
+        @Nullable private Icon mIcon;
+        @Nullable private String mUri;
+        @Nullable private String mKey;
+
+        protected Person(Parcel in) {
+            mName = in.readCharSequence();
+            if (in.readInt() != 0) {
+                mIcon = Icon.CREATOR.createFromParcel(in);
+            }
+            mUri = in.readString();
+            mKey = in.readString();
+        }
+
+        /**
+         * Create a new person.
+         */
+        public Person() {
+        }
+
+        /**
+         * Give this person a name.
+         *
+         * @param name the name of this person
+         */
+        public Person setName(@Nullable CharSequence name) {
+            this.mName = name;
+            return this;
+        }
+
+        /**
+         * Add an icon for this person.
+         * <br />
+         * This is currently only used for {@link MessagingStyle} notifications and should not be
+         * provided otherwise, in order to save memory. The system will prefer this icon over any
+         * images that are resolved from the URI.
+         *
+         * @param icon the icon of the person
+         */
+        public Person setIcon(@Nullable Icon icon) {
+            this.mIcon = icon;
+            return this;
+        }
+
+        /**
+         * Set a URI associated with this person.
+         *
+         * <P>
+         * Depending on user preferences, adding a URI to a Person may allow the notification to
+         * pass through interruption filters, if this notification is of
+         * category {@link #CATEGORY_CALL} or {@link #CATEGORY_MESSAGE}.
+         * The addition of people may also cause this notification to appear more prominently in
+         * the user interface.
+         * </P>
+         *
+         * <P>
+         * The person should be specified by the {@code String} representation of a
+         * {@link android.provider.ContactsContract.Contacts#CONTENT_LOOKUP_URI}.
+         * </P>
+         *
+         * <P>The system will also attempt to resolve {@code mailto:} and {@code tel:} schema
+         * URIs.  The path part of these URIs must exist in the contacts database, in the
+         * appropriate column, or the reference will be discarded as invalid. Telephone schema
+         * URIs will be resolved by {@link android.provider.ContactsContract.PhoneLookup}.
+         * </P>
+         *
+         * @param uri a URI for the person
+         */
+        public Person setUri(@Nullable String uri) {
+            mUri = uri;
+            return this;
+        }
+
+        /**
+         * Add a key to this person in order to uniquely identify it.
+         * This is especially useful if the name doesn't uniquely identify this person or if the
+         * display name is a short handle of the actual name.
+         *
+         * <P>If no key is provided, the name serves as as the key for the purpose of
+         * identification.</P>
+         *
+         * @param key the key that uniquely identifies this person
+         */
+        public Person setKey(@Nullable String key) {
+            mKey = key;
+            return this;
+        }
+
+
+        /**
+         * @return the uri provided for this person or {@code null} if no Uri was provided
+         */
+        @Nullable
+        public String getUri() {
+            return mUri;
+        }
+
+        /**
+         * @return the name provided for this person or {@code null} if no name was provided
+         */
+        @Nullable
+        public CharSequence getName() {
+            return mName;
+        }
+
+        /**
+         * @return the icon provided for this person or {@code null} if no icon was provided
+         */
+        @Nullable
+        public Icon getIcon() {
+            return mIcon;
+        }
+
+        /**
+         * @return the key provided for this person or {@code null} if no key was provided
+         */
+        @Nullable
+        public String getKey() {
+            return mKey;
+        }
+
+        /**
+         * @return the URI associated with this person, or "name:mName" otherwise
+         *  @hide
+         */
+        public String resolveToLegacyUri() {
+            if (mUri != null) {
+                return mUri;
+            }
+            if (mName != null) {
+                return "name:" + mName;
+            }
+            return "";
+        }
+
+        @Override
+        public int describeContents() {
+            return 0;
+        }
+
+        @Override
+        public void writeToParcel(Parcel dest, @WriteFlags int flags) {
+            dest.writeCharSequence(mName);
+            if (mIcon != null) {
+                dest.writeInt(1);
+                mIcon.writeToParcel(dest, 0);
+            } else {
+                dest.writeInt(0);
+            }
+            dest.writeString(mUri);
+            dest.writeString(mKey);
+        }
+
+        public static final Creator<Person> CREATOR = new Creator<Person>() {
+            @Override
+            public Person createFromParcel(Parcel in) {
+                return new Person(in);
+            }
+
+            @Override
+            public Person[] newArray(int size) {
+                return new Person[size];
+            }
+        };
     }
 
     // When adding a new Style subclass here, don't forget to update
