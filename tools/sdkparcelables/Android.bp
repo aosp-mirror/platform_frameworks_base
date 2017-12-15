@@ -1,0 +1,22 @@
+java_binary_host {
+    name: "sdkparcelables",
+    manifest: "manifest.txt",
+    srcs: [
+        "src/**/*.kt",
+    ],
+    static_libs: [
+        "asm-6.0",
+    ],
+}
+
+java_library_host {
+    name: "sdkparcelables_test",
+    manifest: "manifest.txt",
+    srcs: [
+        "tests/**/*.kt",
+    ],
+    static_libs: [
+        "sdkparcelables",
+        "junit",
+    ],
+}
