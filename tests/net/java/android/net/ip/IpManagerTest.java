@@ -69,6 +69,8 @@ import java.util.Set;
 
 /**
  * Tests for IpManager.
+ *
+ * TODO: Rename to IpClientTest.
  */
 @RunWith(AndroidJUnit4.class)
 @SmallTest
@@ -111,7 +113,16 @@ public class IpManagerTest {
         verify(mNMService, times(1)).registerObserver(arg.capture());
         mObserver = arg.getValue();
         reset(mNMService);
+        // Verify IpClient doesn't call onLinkPropertiesChange() when it starts.
+        verify(mCb, never()).onLinkPropertiesChange(any());
+        reset(mCb);
         return ipm;
+    }
+
+    private static LinkProperties makeEmptyLinkProperties(String iface) {
+        final LinkProperties empty = new LinkProperties();
+        empty.setInterfaceName(iface);
+        return empty;
     }
 
     @Test
@@ -144,6 +155,8 @@ public class IpManagerTest {
         ipm.stop();
         verify(mNMService, timeout(100).times(1)).disableIpv6(iface);
         verify(mNMService, timeout(100).times(1)).clearInterfaceAddresses(iface);
+        verify(mCb, timeout(100).times(1))
+                .onLinkPropertiesChange(eq(makeEmptyLinkProperties(iface)));
     }
 
     @Test
@@ -193,6 +206,8 @@ public class IpManagerTest {
         ipm.stop();
         verify(mNMService, timeout(100).times(1)).disableIpv6(iface);
         verify(mNMService, timeout(100).times(1)).clearInterfaceAddresses(iface);
+        verify(mCb, timeout(100).times(1))
+                .onLinkPropertiesChange(eq(makeEmptyLinkProperties(iface)));
     }
 
     @Test
