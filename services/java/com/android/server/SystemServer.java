@@ -26,6 +26,7 @@ import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.content.res.Configuration;
 import android.content.res.Resources.Theme;
+import android.database.sqlite.SQLiteCompatibilityWalFlags;
 import android.os.BaseBundle;
 import android.os.Binder;
 import android.os.Build;
@@ -327,6 +328,8 @@ public final class SystemServer {
 
             // The system server should never make non-oneway calls
             Binder.setWarnOnBlocking(true);
+            // Deactivate SQLiteCompatibilityWalFlags until settings provider is initialized
+            SQLiteCompatibilityWalFlags.init(null);
 
             // Here we go!
             Slog.i(TAG, "Entered the Android system server!");
@@ -803,6 +806,8 @@ public final class SystemServer {
 
             traceBeginAndSlog("InstallSystemProviders");
             mActivityManagerService.installSystemProviders();
+            // Now that SettingsProvider is ready, reactivate SQLiteCompatibilityWalFlags
+            SQLiteCompatibilityWalFlags.reset();
             traceEnd();
 
             traceBeginAndSlog("StartVibratorService");

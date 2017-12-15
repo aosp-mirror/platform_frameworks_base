@@ -37,7 +37,7 @@ public class SQLiteCompatibilityWalFlags {
 
     private static final String TAG = "SQLiteCompatibilityWalFlags";
 
-    private static volatile boolean sInitialized = true; // Temporarily disable flags
+    private static volatile boolean sInitialized;
     private static volatile boolean sFlagsSet;
     private static volatile boolean sCompatibilityWalSupported;
     private static volatile String sWALSyncMode;
