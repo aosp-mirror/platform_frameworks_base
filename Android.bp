@@ -534,7 +534,7 @@ java_library {
     ],
 
     aidl: {
-        local_include_dirs: [
+        export_include_dirs: [
             // From build/make/core/pathmap.mk FRAMEWORK_BASE_SUBDIRS
             "core/java",
             "graphics/java",
