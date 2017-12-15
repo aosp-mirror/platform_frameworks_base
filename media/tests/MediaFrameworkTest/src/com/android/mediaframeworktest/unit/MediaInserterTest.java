@@ -16,13 +16,13 @@
 
 package com.android.mediaframeworktest.unit;
 
+import static org.mockito.Matchers.any;
+import static org.mockito.Matchers.argThat;
+import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
-import static org.mockito.Matchers.argThat;
-import static org.mockito.Matchers.any;
-import static org.mockito.Matchers.eq;
 
 import android.content.ContentProviderClient;
 import android.content.ContentValues;
@@ -36,10 +36,9 @@ import android.provider.MediaStore.Video;
 import android.test.InstrumentationTestCase;
 import android.test.suitebuilder.annotation.SmallTest;
 
-import org.hamcrest.Description;
+import org.mockito.ArgumentMatcher;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
-import org.mockito.compat.ArgumentMatcher;
 
 public class MediaInserterTest extends InstrumentationTestCase {
 
@@ -59,7 +58,7 @@ public class MediaInserterTest extends InstrumentationTestCase {
     private static final Uri sImagesUri = Images.Media.getContentUri(sVolumeName);
     private static final Uri sFilesUri = Files.getContentUri(sVolumeName);
 
-    private static class MediaUriMatcher extends ArgumentMatcher<Uri> {
+    private static class MediaUriMatcher implements ArgumentMatcher<Uri> {
         private final Uri mUri;
 
         private MediaUriMatcher(Uri uri) {
@@ -67,15 +66,8 @@ public class MediaInserterTest extends InstrumentationTestCase {
         }
 
         @Override
-        public boolean matchesObject(Object argument) {
-            if (!(argument instanceof Uri)) {
-                return false;
-            }
-
-            Uri actualUri = (Uri) argument;
-            if (actualUri == mUri)
-                return true;
-            return false;
+        public boolean matches(Uri actualUri) {
+            return actualUri == mUri;
         }
 
         @Override
