@@ -151,13 +151,33 @@ public abstract class SliceProvider extends ContentProvider {
     }
 
     /**
-     * @hide
+     * Called to inform an app that a slice has been pinned.
+     * <p>
+     * Pinning is a way that slice hosts use to notify apps of which slices
+     * they care about updates for. When a slice is pinned the content is
+     * expected to be relatively fresh and kept up to date.
+     * <p>
+     * Being pinned does not provide any escalated privileges for the slice
+     * provider. So apps should do things such as turn on syncing or schedule
+     * a job in response to a onSlicePinned.
+     * <p>
+     * Pinned state is not persisted through a reboot, and apps can expect a
+     * new call to onSlicePinned for any slices that should remain pinned
+     * after a reboot occurs.
+     *
+     * @param sliceUri The uri of the slice being unpinned.
+     * @see #onSliceUnpinned(Uri)
      */
     public void onSlicePinned(Uri sliceUri) {
     }
 
     /**
-     * @hide
+     * Called to inform an app that a slices is no longer pinned.
+     * <p>
+     * This means that no other apps on the device care about updates to this
+     * slice anymore and therefore it is not important to be updated. Any syncs
+     * or jobs related to this slice should be cancelled.
+     * @see #onSlicePinned(Uri)
      */
     public void onSliceUnpinned(Uri sliceUri) {
     }
