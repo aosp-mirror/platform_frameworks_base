@@ -59,26 +59,12 @@ public abstract class VrManagerInternal {
             int userId, int processId, @NonNull ComponentName calling);
 
     /**
-     * Set whether the system has acquired a sleep token.
-     *
-     * @param isAsleep is {@code true} if the device is asleep, or {@code false} otherwise.
-     */
-    public abstract void onSleepStateChanged(boolean isAsleep);
-
-    /**
      * Set whether the display used for VR output is on.
      *
      * @param isScreenOn is {@code true} if the display is on and can receive commands,
      *      or {@code false} otherwise.
      */
     public abstract void onScreenStateChanged(boolean isScreenOn);
-
-    /**
-     * Set whether the keyguard is currently active/showing.
-     *
-     * @param isShowing is {@code true} if the keyguard is active/showing.
-     */
-    public abstract void onKeyguardStateChanged(boolean isShowing);
 
     /**
      * Return NO_ERROR if the given package is installed on the device and enabled as a

@@ -31,8 +31,11 @@ import static org.xmlpull.v1.XmlPullParser.START_TAG;
 import android.Manifest;
 import android.annotation.Nullable;
 import android.app.ActivityManager;
+import android.app.ActivityManagerInternal;
+import android.app.ActivityManagerInternal.ScreenObserver;
 import android.app.AppOpsManager;
 import android.app.IActivityManager;
+import android.app.KeyguardManager;
 import android.app.usage.StorageStatsManager;
 import android.content.BroadcastReceiver;
 import android.content.ComponentName;
@@ -160,7 +163,8 @@ import javax.crypto.spec.PBEKeySpec;
  * watch for and manage dynamically added storage, such as SD cards and USB mass
  * storage. Also decides how storage should be presented to users on the device.
  */
-class StorageManagerService extends IStorageManager.Stub implements Watchdog.Monitor {
+class StorageManagerService extends IStorageManager.Stub
+        implements Watchdog.Monitor, ScreenObserver {
 
     // Static direct instance pointer for the tightly-coupled idle service to use
     static StorageManagerService sSelf = null;
@@ -402,6 +406,7 @@ class StorageManagerService extends IStorageManager.Stub implements Watchdog.Mon
     private volatile boolean mSystemReady = false;
     private volatile boolean mBootCompleted = false;
     private volatile boolean mDaemonConnected = false;
+    private volatile boolean mSecureKeyguardShowing = true;
 
     private PackageManagerService mPms;
 
@@ -827,6 +832,7 @@ class StorageManagerService extends IStorageManager.Stub implements Watchdog.Mon
                     mVold.onUserStarted(userId);
                     mStoraged.onUserStarted(userId);
                 }
+                mVold.onSecureKeyguardStateChanged(mSecureKeyguardShowing);
             } catch (Exception e) {
                 Slog.wtf(TAG, e);
             }
@@ -875,6 +881,24 @@ class StorageManagerService extends IStorageManager.Stub implements Watchdog.Mon
 
         synchronized (mLock) {
             mSystemUnlockedUsers = ArrayUtils.removeInt(mSystemUnlockedUsers, userId);
+        }
+    }
+
+    @Override
+    public void onAwakeStateChanged(boolean isAwake) {
+        // Ignored
+    }
+
+    @Override
+    public void onKeyguardStateChanged(boolean isShowing) {
+        // Push down current secure keyguard status so that we ignore malicious
+        // USB devices while locked.
+        mSecureKeyguardShowing = isShowing
+                && mContext.getSystemService(KeyguardManager.class).isDeviceSecure();
+        try {
+            mVold.onSecureKeyguardStateChanged(mSecureKeyguardShowing);
+        } catch (Exception e) {
+            Slog.wtf(TAG, e);
         }
     }
 
@@ -1414,6 +1438,9 @@ class StorageManagerService extends IStorageManager.Stub implements Watchdog.Mon
     }
 
     private void systemReady() {
+        LocalServices.getService(ActivityManagerInternal.class)
+                .registerScreenObserver(this);
+
         mSystemReady = true;
         mHandler.obtainMessage(H_SYSTEM_READY).sendToTarget();
     }
