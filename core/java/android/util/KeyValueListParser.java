@@ -17,6 +17,9 @@ package android.util;
 
 import android.text.TextUtils;
 
+import java.time.Duration;
+import java.time.format.DateTimeParseException;
+
 /**
  * Parses a list of key=value pairs, separated by some delimiter, and puts the results in
  * an internal Map. Values can be then queried by key, or if not found, a default value
@@ -188,5 +191,25 @@ public class KeyValueListParser {
      */
     public String keyAt(int index) {
         return mValues.keyAt(index);
+    }
+
+    /**
+     * {@hide}
+     * Parse a duration in millis based on java.time.Duration or just a number (millis)
+     */
+    public long getDurationMillis(String key, long def) {
+        String value = mValues.get(key);
+        if (value != null) {
+            try {
+                if (value.startsWith("P") || value.startsWith("p")) {
+                    return Duration.parse(value).toMillis();
+                } else {
+                    return Long.parseLong(value);
+                }
+            } catch (NumberFormatException | DateTimeParseException e) {
+                // fallthrough
+            }
+        }
+        return def;
     }
 }
