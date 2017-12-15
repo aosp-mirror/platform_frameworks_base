@@ -34,7 +34,7 @@ namespace statsd {
 // A MetricsManager is responsible for managing metrics from one single config source.
 class MetricsManager {
 public:
-    MetricsManager(const ConfigKey& configKey, const StatsdConfig& config);
+    MetricsManager(const ConfigKey& configKey, const StatsdConfig& config, const long timeBaseSec);
 
     virtual ~MetricsManager();
 

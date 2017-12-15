@@ -22,33 +22,41 @@ namespace android {
 namespace os {
 namespace statsd {
 
-class StatsPullerManager{
+class StatsPullerManager {
  public:
-  virtual ~StatsPullerManager() {}
+    virtual ~StatsPullerManager() {}
 
-  virtual void RegisterReceiver(int tagId, wp<PullDataReceiver> receiver, long intervalMs) {
-    mPullerManager.RegisterReceiver(tagId, receiver, intervalMs);
-  };
+    virtual void RegisterReceiver(int tagId,
+                                  wp <PullDataReceiver> receiver,
+                                  long intervalMs) {
+        mPullerManager.RegisterReceiver(tagId, receiver, intervalMs);
+    };
 
-  virtual void UnRegisterReceiver(int tagId, wp<PullDataReceiver> receiver) {
-    mPullerManager.UnRegisterReceiver(tagId, receiver);
-  };
+    virtual void UnRegisterReceiver(int tagId, wp <PullDataReceiver> receiver) {
+        mPullerManager.UnRegisterReceiver(tagId, receiver);
+    };
 
-  // Verify if we know how to pull for this matcher
-  bool PullerForMatcherExists(int tagId) {
-    return mPullerManager.PullerForMatcherExists(tagId);
-  }
+    // Verify if we know how to pull for this matcher
+    bool PullerForMatcherExists(int tagId) {
+        return mPullerManager.PullerForMatcherExists(tagId);
+    }
 
-  void OnAlarmFired() {
-    mPullerManager.OnAlarmFired();
-  }
+    void OnAlarmFired() {
+        mPullerManager.OnAlarmFired();
+    }
 
-  virtual bool Pull(const int tagId, vector<std::shared_ptr<LogEvent>>* data) {
-    return mPullerManager.Pull(tagId, data);
-  }
+    virtual bool
+    Pull(const int tagId, vector<std::shared_ptr<LogEvent>>* data) {
+        return mPullerManager.Pull(tagId, data);
+    }
+
+    virtual void SetTimeBaseSec(const long timeBaseSec) {
+        mPullerManager.SetTimeBaseSec(timeBaseSec);
+    }
 
  private:
-  StatsPullerManagerImpl& mPullerManager = StatsPullerManagerImpl::GetInstance();
+    StatsPullerManagerImpl
+        & mPullerManager = StatsPullerManagerImpl::GetInstance();
 };
 
 }  // namespace statsd

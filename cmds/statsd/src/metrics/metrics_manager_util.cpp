@@ -188,7 +188,7 @@ bool initConditions(const ConfigKey& key, const StatsdConfig& config,
     return true;
 }
 
-bool initMetrics(const ConfigKey& key, const StatsdConfig& config,
+bool initMetrics(const ConfigKey& key, const StatsdConfig& config, const long timeBaseSec,
                  const unordered_map<string, int>& logTrackerMap,
                  const unordered_map<string, int>& conditionTrackerMap,
                  const vector<sp<LogMatchingTracker>>& allAtomMatchers,
@@ -202,7 +202,13 @@ bool initMetrics(const ConfigKey& key, const StatsdConfig& config,
                                 config.event_metric_size() + config.value_metric_size();
     allMetricProducers.reserve(allMetricsCount);
     StatsPullerManager statsPullerManager;
-    uint64_t startTimeNs = time(nullptr) * NS_PER_SEC;
+    // Align all buckets to same instant in MIN_BUCKET_SIZE_SEC, so that avoid alarm
+    // clock will not grow very aggressive. New metrics will be delayed up to
+    // MIN_BUCKET_SIZE_SEC before starting.
+    long currentTimeSec = time(nullptr);
+    uint64_t startTimeNs = (currentTimeSec + kMinBucketSizeSec -
+                            (currentTimeSec - timeBaseSec) % kMinBucketSizeSec) *
+                           NS_PER_SEC;
 
     // Build MetricProducers for each metric defined in config.
     // build CountMetricProducer
@@ -478,7 +484,7 @@ bool initAlerts(const StatsdConfig& config, const unordered_map<string, int>& me
     return true;
 }
 
-bool initStatsdConfig(const ConfigKey& key, const StatsdConfig& config, set<int>& allTagIds,
+bool initStatsdConfig(const ConfigKey& key, const StatsdConfig& config, const long timeBaseSec, set<int>& allTagIds,
                       vector<sp<LogMatchingTracker>>& allAtomMatchers,
                       vector<sp<ConditionTracker>>& allConditionTrackers,
                       vector<sp<MetricProducer>>& allMetricProducers,
@@ -502,7 +508,7 @@ bool initStatsdConfig(const ConfigKey& key, const StatsdConfig& config, set<int>
         return false;
     }
 
-    if (!initMetrics(key, config, logTrackerMap, conditionTrackerMap, allAtomMatchers,
+    if (!initMetrics(key, config, timeBaseSec, logTrackerMap, conditionTrackerMap, allAtomMatchers,
                      allConditionTrackers, allMetricProducers, conditionToMetricMap,
                      trackerToMetricMap, metricProducerMap)) {
         ALOGE("initMetricProducers failed");
