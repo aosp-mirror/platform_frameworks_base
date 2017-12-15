@@ -4314,6 +4314,25 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
         mWinAnimator.onAnimationFinished();
     }
 
+    /**
+     * Retrieves the current transformation matrix of the window, relative to the display.
+     *
+     * @param float9 A temporary array of 9 floats.
+     * @param outMatrix Matrix to fill in the transformation.
+     */
+    void getTransformationMatrix(float[] float9, Matrix outMatrix) {
+        float9[Matrix.MSCALE_X] = mWinAnimator.mDsDx;
+        float9[Matrix.MSKEW_Y] = mWinAnimator.mDtDx;
+        float9[Matrix.MSKEW_X] = mWinAnimator.mDtDy;
+        float9[Matrix.MSCALE_Y] = mWinAnimator.mDsDy;
+        float9[Matrix.MTRANS_X] = mSurfacePosition.x + mShownPosition.x;
+        float9[Matrix.MTRANS_Y] = mSurfacePosition.y + mShownPosition.y;
+        float9[Matrix.MPERSP_0] = 0;
+        float9[Matrix.MPERSP_1] = 0;
+        float9[Matrix.MPERSP_2] = 1;
+        outMatrix.setValues(float9);
+    }
+
     // TODO: Hack to work around the number of states AppWindowToken needs to access without having
     // access to its windows children. Need to investigate re-writing
     // {@link AppWindowToken#updateReportedVisibilityLocked} so this can be removed.
