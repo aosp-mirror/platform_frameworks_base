@@ -297,7 +297,7 @@ public class VoicemailContract {
          * {@link ContentResolver#applyBatch}), and if the {@link ContentValues} doesn't contain
          * this column, the voicemail provider implicitly sets it to 0 if the calling package is
          * the {@link #SOURCE_PACKAGE} or to 1 otherwise. To prevent this behavior, explicitly set
-         * {@link #DIRTY_RETAIN} to this column in the {@link ContentValues}.
+         * {@link #DIRTY_RETAIN} to DIRTY in the {@link ContentValues}.
          *
          * <P>Type: INTEGER (boolean)</P>
          *
