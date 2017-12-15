@@ -279,8 +279,8 @@ public final class JobSchedulerService extends com.android.server.SystemService
         private static final long DEFAULT_MIN_LINEAR_BACKOFF_TIME = JobInfo.MIN_BACKOFF_MILLIS;
         private static final long DEFAULT_MIN_EXP_BACKOFF_TIME = JobInfo.MIN_BACKOFF_MILLIS;
         private static final long DEFAULT_STANDBY_HEARTBEAT_TIME = 11 * 60 * 1000L;
-        private static final int DEFAULT_STANDBY_WORKING_BEATS = 5;  // ~ 1 hour, with 11-min beats
-        private static final int DEFAULT_STANDBY_FREQUENT_BEATS = 31; // ~ 6 hours
+        private static final int DEFAULT_STANDBY_WORKING_BEATS = 11;  // ~ 2 hours, with 11min beats
+        private static final int DEFAULT_STANDBY_FREQUENT_BEATS = 43; // ~ 8 hours
         private static final int DEFAULT_STANDBY_RARE_BEATS = 130; // ~ 24 hours
 
         /**
