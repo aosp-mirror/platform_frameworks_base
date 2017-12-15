@@ -324,6 +324,13 @@ public final class ViewRootImpl implements ViewParent,
     final Rect mTempRect; // used in the transaction to not thrash the heap.
     final Rect mVisRect; // used to retrieve visible rect of focused view.
 
+    // This is used to reduce the race between window focus changes being dispatched from
+    // the window manager and input events coming through the input system.
+    @GuardedBy("this")
+    boolean mUpcomingWindowFocus;
+    @GuardedBy("this")
+    boolean mUpcomingInTouchMode;
+
     public boolean mTraversalScheduled;
     int mTraversalBarrier;
     boolean mWillDrawSoon;
@@ -2461,6 +2468,93 @@ public final class ViewRootImpl implements ViewParent,
         }
     }
 
+    private void handleWindowFocusChanged() {
+        final boolean hasWindowFocus;
+        final boolean inTouchMode;
+        synchronized (this) {
+            hasWindowFocus = mUpcomingWindowFocus;
+            inTouchMode = mUpcomingInTouchMode;
+        }
+
+        if (mAttachInfo.mHasWindowFocus == hasWindowFocus) {
+            return;
+        }
+
+        if (mAdded) {
+            profileRendering(hasWindowFocus);
+
+            if (hasWindowFocus) {
+                ensureTouchModeLocally(inTouchMode);
+                if (mAttachInfo.mThreadedRenderer != null && mSurface.isValid()) {
+                    mFullRedrawNeeded = true;
+                    try {
+                        final WindowManager.LayoutParams lp = mWindowAttributes;
+                        final Rect surfaceInsets = lp != null ? lp.surfaceInsets : null;
+                        mAttachInfo.mThreadedRenderer.initializeIfNeeded(
+                                mWidth, mHeight, mAttachInfo, mSurface, surfaceInsets);
+                    } catch (OutOfResourcesException e) {
+                        Log.e(mTag, "OutOfResourcesException locking surface", e);
+                        try {
+                            if (!mWindowSession.outOfMemory(mWindow)) {
+                                Slog.w(mTag, "No processes killed for memory;"
+                                        + " killing self");
+                                Process.killProcess(Process.myPid());
+                            }
+                        } catch (RemoteException ex) {
+                        }
+                        // Retry in a bit.
+                        mHandler.sendMessageDelayed(mHandler.obtainMessage(
+                                MSG_WINDOW_FOCUS_CHANGED), 500);
+                        return;
+                    }
+                }
+            }
+
+            mAttachInfo.mHasWindowFocus = hasWindowFocus;
+
+            mLastWasImTarget = WindowManager.LayoutParams
+                    .mayUseInputMethod(mWindowAttributes.flags);
+
+            InputMethodManager imm = InputMethodManager.peekInstance();
+            if (imm != null && mLastWasImTarget && !isInLocalFocusMode()) {
+                imm.onPreWindowFocus(mView, hasWindowFocus);
+            }
+            if (mView != null) {
+                mAttachInfo.mKeyDispatchState.reset();
+                mView.dispatchWindowFocusChanged(hasWindowFocus);
+                mAttachInfo.mTreeObserver.dispatchOnWindowFocusChange(hasWindowFocus);
+
+                if (mAttachInfo.mTooltipHost != null) {
+                    mAttachInfo.mTooltipHost.hideTooltip();
+                }
+            }
+
+            // Note: must be done after the focus change callbacks,
+            // so all of the view state is set up correctly.
+            if (hasWindowFocus) {
+                if (imm != null && mLastWasImTarget && !isInLocalFocusMode()) {
+                    imm.onPostWindowFocus(mView, mView.findFocus(),
+                            mWindowAttributes.softInputMode,
+                            !mHasHadWindowFocus, mWindowAttributes.flags);
+                }
+                // Clear the forward bit.  We can just do this directly, since
+                // the window manager doesn't care about it.
+                mWindowAttributes.softInputMode &=
+                        ~WindowManager.LayoutParams.SOFT_INPUT_IS_FORWARD_NAVIGATION;
+                ((WindowManager.LayoutParams) mView.getLayoutParams())
+                        .softInputMode &=
+                        ~WindowManager.LayoutParams
+                                .SOFT_INPUT_IS_FORWARD_NAVIGATION;
+                mHasHadWindowFocus = true;
+            } else {
+                if (mPointerCapture) {
+                    handlePointerCaptureChanged(false);
+                }
+            }
+        }
+        mFirstInputStage.onWindowFocusChanged(hasWindowFocus);
+    }
+
     private void handleOutOfResourcesException(Surface.OutOfResourcesException e) {
         Log.e(mTag, "OutOfResourcesException initializing HW surface", e);
         try {
@@ -3909,81 +4003,7 @@ public final class ViewRootImpl implements ViewParent,
                     }
                     break;
                 case MSG_WINDOW_FOCUS_CHANGED: {
-                    final boolean hasWindowFocus = msg.arg1 != 0;
-                    if (mAdded) {
-                        mAttachInfo.mHasWindowFocus = hasWindowFocus;
-
-                        profileRendering(hasWindowFocus);
-
-                        if (hasWindowFocus) {
-                            boolean inTouchMode = msg.arg2 != 0;
-                            ensureTouchModeLocally(inTouchMode);
-                            if (mAttachInfo.mThreadedRenderer != null && mSurface.isValid()) {
-                                mFullRedrawNeeded = true;
-                                try {
-                                    final WindowManager.LayoutParams lp = mWindowAttributes;
-                                    final Rect surfaceInsets = lp != null ? lp.surfaceInsets : null;
-                                    mAttachInfo.mThreadedRenderer.initializeIfNeeded(
-                                            mWidth, mHeight, mAttachInfo, mSurface, surfaceInsets);
-                                } catch (OutOfResourcesException e) {
-                                    Log.e(mTag, "OutOfResourcesException locking surface", e);
-                                    try {
-                                        if (!mWindowSession.outOfMemory(mWindow)) {
-                                            Slog.w(mTag, "No processes killed for memory;"
-                                                    + " killing self");
-                                            Process.killProcess(Process.myPid());
-                                        }
-                                    } catch (RemoteException ex) {
-                                    }
-                                    // Retry in a bit.
-                                    sendMessageDelayed(obtainMessage(msg.what, msg.arg1, msg.arg2),
-                                            500);
-                                    return;
-                                }
-                            }
-                        }
-
-                        mLastWasImTarget = WindowManager.LayoutParams
-                                .mayUseInputMethod(mWindowAttributes.flags);
-
-                        InputMethodManager imm = InputMethodManager.peekInstance();
-                        if (imm != null && mLastWasImTarget && !isInLocalFocusMode()) {
-                            imm.onPreWindowFocus(mView, hasWindowFocus);
-                        }
-                        if (mView != null) {
-                            mAttachInfo.mKeyDispatchState.reset();
-                            mView.dispatchWindowFocusChanged(hasWindowFocus);
-                            mAttachInfo.mTreeObserver.dispatchOnWindowFocusChange(hasWindowFocus);
-
-                            if (mAttachInfo.mTooltipHost != null) {
-                                mAttachInfo.mTooltipHost.hideTooltip();
-                            }
-                        }
-
-                        // Note: must be done after the focus change callbacks,
-                        // so all of the view state is set up correctly.
-                        if (hasWindowFocus) {
-                            if (imm != null && mLastWasImTarget && !isInLocalFocusMode()) {
-                                imm.onPostWindowFocus(mView, mView.findFocus(),
-                                        mWindowAttributes.softInputMode,
-                                        !mHasHadWindowFocus, mWindowAttributes.flags);
-                            }
-                            // Clear the forward bit.  We can just do this directly, since
-                            // the window manager doesn't care about it.
-                            mWindowAttributes.softInputMode &=
-                                    ~WindowManager.LayoutParams.SOFT_INPUT_IS_FORWARD_NAVIGATION;
-                            ((WindowManager.LayoutParams) mView.getLayoutParams())
-                                    .softInputMode &=
-                                        ~WindowManager.LayoutParams
-                                                .SOFT_INPUT_IS_FORWARD_NAVIGATION;
-                            mHasHadWindowFocus = true;
-                        } else {
-                            if (mPointerCapture) {
-                                handlePointerCaptureChanged(false);
-                            }
-                        }
-                    }
-                    mFirstInputStage.onWindowFocusChanged(hasWindowFocus);
+                    handleWindowFocusChanged();
                 } break;
                 case MSG_DIE:
                     doDie();
@@ -6854,6 +6874,7 @@ public final class ViewRootImpl implements ViewParent,
         }
 
         if (stage != null) {
+            handleWindowFocusChanged();
             stage.deliver(q);
         } else {
             finishInputEvent(q);
@@ -7159,10 +7180,12 @@ public final class ViewRootImpl implements ViewParent,
     }
 
     public void windowFocusChanged(boolean hasFocus, boolean inTouchMode) {
+        synchronized (this) {
+            mUpcomingWindowFocus = hasFocus;
+            mUpcomingInTouchMode = inTouchMode;
+        }
         Message msg = Message.obtain();
         msg.what = MSG_WINDOW_FOCUS_CHANGED;
-        msg.arg1 = hasFocus ? 1 : 0;
-        msg.arg2 = inTouchMode ? 1 : 0;
         mHandler.sendMessage(msg);
     }
 
