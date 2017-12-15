@@ -278,7 +278,7 @@ framework_base_android_test_mock_src_files := \
   $(call all-java-files-under, test-mock/src/android/test/mock)
 
 framework_base_android_test_runner_src_files := \
-  $(call all-java-files-under, test-runner/src)
+  $(call all-java-files-under, test-runner/src/junit)
 
 # Find all files in specific directories (relative to frameworks/base)
 # to document and check apis
