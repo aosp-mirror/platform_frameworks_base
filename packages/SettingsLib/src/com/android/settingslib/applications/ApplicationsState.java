@@ -21,6 +21,9 @@ import android.app.AppGlobals;
 import android.app.Application;
 import android.app.usage.StorageStats;
 import android.app.usage.StorageStatsManager;
+import android.arch.lifecycle.Lifecycle;
+import android.arch.lifecycle.LifecycleObserver;
+import android.arch.lifecycle.OnLifecycleEvent;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
@@ -52,11 +55,6 @@ import android.util.SparseArray;
 
 import com.android.internal.R;
 import com.android.internal.util.ArrayUtils;
-import com.android.settingslib.core.lifecycle.Lifecycle;
-import com.android.settingslib.core.lifecycle.LifecycleObserver;
-import com.android.settingslib.core.lifecycle.events.OnDestroy;
-import com.android.settingslib.core.lifecycle.events.OnPause;
-import com.android.settingslib.core.lifecycle.events.OnResume;
 
 import java.io.File;
 import java.io.IOException;
@@ -595,7 +593,7 @@ public class ApplicationsState {
                 .replaceAll("").toLowerCase();
     }
 
-    public class Session implements LifecycleObserver, OnPause, OnResume, OnDestroy {
+    public class Session implements LifecycleObserver {
         final Callbacks mCallbacks;
         boolean mResumed;
 
@@ -621,6 +619,7 @@ public class ApplicationsState {
             }
         }
 
+        @OnLifecycleEvent(Lifecycle.Event.ON_RESUME)
         public void onResume() {
             if (DEBUG_LOCKING) Log.v(TAG, "resume about to acquire lock...");
             synchronized (mEntriesMap) {
@@ -633,6 +632,7 @@ public class ApplicationsState {
             if (DEBUG_LOCKING) Log.v(TAG, "...resume releasing lock");
         }
 
+        @OnLifecycleEvent(Lifecycle.Event.ON_PAUSE)
         public void onPause() {
             if (DEBUG_LOCKING) Log.v(TAG, "pause about to acquire lock...");
             synchronized (mEntriesMap) {
@@ -752,6 +752,7 @@ public class ApplicationsState {
             Process.setThreadPriority(Process.THREAD_PRIORITY_BACKGROUND);
         }
 
+        @OnLifecycleEvent(Lifecycle.Event.ON_DESTROY)
         public void onDestroy() {
             if (!mHasLifecycle) {
                 // TODO: Legacy, remove this later once all usages are switched to Lifecycle
