@@ -98,7 +98,7 @@ public class NotificationShelf extends ActivatableNotificationView implements
         setClipToActualHeight(false);
         setClipChildren(false);
         setClipToPadding(false);
-        mShelfIcons.setShowAllIcons(false);
+        mShelfIcons.setIsStaticLayout(false);
         mViewInvertHelper = new ViewInvertHelper(mShelfIcons,
                 NotificationPanelView.DOZE_ANIMATION_DURATION);
         mShelfState = new ShelfState();
@@ -681,7 +681,8 @@ public class NotificationShelf extends ActivatableNotificationView implements
         if (isLayoutRtl()) {
             start = getWidth() - start - mCollapsedIcons.getWidth();
         }
-        int width = (int) NotificationUtils.interpolate(start + mCollapsedIcons.getWidth(),
+        int width = (int) NotificationUtils.interpolate(
+                start + mCollapsedIcons.getFinalTranslationX(),
                 mShelfIcons.getWidth(),
                 openedAmount);
         mShelfIcons.setActualLayoutWidth(width);
@@ -691,6 +692,9 @@ public class NotificationShelf extends ActivatableNotificationView implements
             // we have to ensure that adding the low priority notification won't lead to an
             // overflow
             collapsedPadding -= (1.0f + OVERFLOW_EARLY_AMOUNT) * mCollapsedIcons.getIconSize();
+        } else {
+            // Partial overflow padding will fill enough space to add extra dots
+            collapsedPadding -= mCollapsedIcons.getPartialOverflowExtraPadding();
         }
         float padding = NotificationUtils.interpolate(collapsedPadding,
                 mShelfIcons.getPaddingEnd(),
@@ -700,7 +704,6 @@ public class NotificationShelf extends ActivatableNotificationView implements
                 mShelfIcons.getPaddingStart(), openedAmount);
         mShelfIcons.setActualPaddingStart(paddingStart);
         mShelfIcons.setOpenedAmount(openedAmount);
-        mShelfIcons.setVisualOverflowAdaption(mCollapsedIcons.getVisualOverflowAdaption());
     }
 
     public void setMaxLayoutHeight(int maxLayoutHeight) {
