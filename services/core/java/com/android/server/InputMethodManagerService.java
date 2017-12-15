@@ -93,7 +93,6 @@ import android.hardware.input.InputManagerInternal;
 import android.inputmethodservice.InputMethodService;
 import android.net.Uri;
 import android.os.Binder;
-import android.os.Build;
 import android.os.Bundle;
 import android.os.Debug;
 import android.os.Environment;
@@ -269,8 +268,6 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
     private final HardKeyboardListener mHardKeyboardListener;
     private final AppOpsManager mAppOpsManager;
     private final UserManager mUserManager;
-
-    final InputBindResult mNoBinding = new InputBindResult(null, null, null, -1, -1);
 
     // All known input methods.  mMethodMap also serves as the global
     // lock for this class.
@@ -1778,6 +1775,7 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
         return flags;
     }
 
+    @NonNull
     InputBindResult attachNewInputLocked(
             /* @InputMethodClient.StartInputReason */ final int startInputReason, boolean initial) {
         if (!mBoundToMethod) {
@@ -1801,11 +1799,12 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
             if (DEBUG) Slog.v(TAG, "Attach new input asks to show input");
             showCurrentInputLocked(getAppShowFlags(), null);
         }
-        return new InputBindResult(session.session,
-                (session.channel != null ? session.channel.dup() : null),
+        return new InputBindResult(InputBindResult.ResultCode.SUCCESS_WITH_IME_SESSION,
+                session.session, (session.channel != null ? session.channel.dup() : null),
                 mCurId, mCurSeq, mCurUserActionNotificationSequenceNumber);
     }
 
+    @NonNull
     InputBindResult startInputLocked(
             /* @InputMethodClient.StartInputReason */ final int startInputReason,
             IInputMethodClient client, IInputContext inputContext,
@@ -1813,7 +1812,7 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
             @Nullable EditorInfo attribute, int controlFlags) {
         // If no method is currently selected, do nothing.
         if (mCurMethodId == null) {
-            return mNoBinding;
+            return InputBindResult.NO_IME;
         }
 
         ClientState cs = mClients.get(client.asBinder());
@@ -1825,7 +1824,7 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
         if (attribute == null) {
             Slog.w(TAG, "Ignoring startInput with null EditorInfo."
                     + " uid=" + cs.uid + " pid=" + cs.pid);
-            return null;
+            return InputBindResult.NULL_EDITOR_INFO;
         }
 
         try {
@@ -1839,7 +1838,7 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
                     Slog.w(TAG, "Starting input on non-focused client " + cs.client
                             + " (uid=" + cs.uid + " pid=" + cs.pid + ")");
                 }
-                return null;
+                return InputBindResult.NOT_IME_TARGET_WINDOW;
             }
         } catch (RemoteException e) {
         }
@@ -1848,20 +1847,21 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
                 controlFlags, startInputReason);
     }
 
+    @NonNull
     InputBindResult startInputUncheckedLocked(@NonNull ClientState cs, IInputContext inputContext,
             /* @InputConnectionInspector.missingMethods */ final int missingMethods,
             @NonNull EditorInfo attribute, int controlFlags,
             /* @InputMethodClient.StartInputReason */ final int startInputReason) {
         // If no method is currently selected, do nothing.
         if (mCurMethodId == null) {
-            return mNoBinding;
+            return InputBindResult.NO_IME;
         }
 
         if (!InputMethodUtils.checkIfPackageBelongsToUid(mAppOpsManager, cs.uid,
                 attribute.packageName)) {
             Slog.e(TAG, "Rejecting this client as it reported an invalid package name."
                     + " uid=" + cs.uid + " package=" + attribute.packageName);
-            return mNoBinding;
+            return InputBindResult.INVALID_PACKAGE_NAME;
         }
 
         if (mCurClient != cs) {
@@ -1901,7 +1901,9 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
                     // Return to client, and we will get back with it when
                     // we have had a session made for it.
                     requestClientSessionLocked(cs);
-                    return new InputBindResult(null, null, mCurId, mCurSeq,
+                    return new InputBindResult(
+                            InputBindResult.ResultCode.SUCCESS_WAITING_IME_SESSION,
+                            null, null, mCurId, mCurSeq,
                             mCurUserActionNotificationSequenceNumber);
                 } else if (SystemClock.uptimeMillis()
                         < (mLastBindTime+TIME_TO_RECONNECT)) {
@@ -1912,7 +1914,9 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
                     // we can report back.  If it has been too long, we want
                     // to fall through so we can try a disconnect/reconnect
                     // to see if we can get back in touch with the service.
-                    return new InputBindResult(null, null, mCurId, mCurSeq,
+                    return new InputBindResult(
+                            InputBindResult.ResultCode.SUCCESS_WAITING_IME_BINDING,
+                            null, null, mCurId, mCurSeq,
                             mCurUserActionNotificationSequenceNumber);
                 } else {
                     EventLog.writeEvent(EventLogTags.IMF_FORCE_RECONNECT_IME,
@@ -1926,13 +1930,15 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
 
     InputBindResult startInputInnerLocked() {
         if (mCurMethodId == null) {
-            return mNoBinding;
+            return InputBindResult.NO_IME;
         }
 
         if (!mSystemReady) {
             // If the system is not yet ready, we shouldn't be running third
             // party code.
-            return new InputBindResult(null, null, mCurMethodId, mCurSeq,
+            return new InputBindResult(
+                    InputBindResult.ResultCode.ERROR_SYSTEM_NOT_READY,
+                    null, null, mCurMethodId, mCurSeq,
                     mCurUserActionNotificationSequenceNumber);
         }
 
@@ -1959,23 +1965,24 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
                 mIWindowManager.addWindowToken(mCurToken, TYPE_INPUT_METHOD, DEFAULT_DISPLAY);
             } catch (RemoteException e) {
             }
-            return new InputBindResult(null, null, mCurId, mCurSeq,
+            return new InputBindResult(
+                    InputBindResult.ResultCode.SUCCESS_WAITING_IME_BINDING,
+                    null, null, mCurId, mCurSeq,
                     mCurUserActionNotificationSequenceNumber);
-        } else {
-            mCurIntent = null;
-            Slog.w(TAG, "Failure connecting to input method service: "
-                    + mCurIntent);
         }
-        return null;
+        mCurIntent = null;
+        Slog.w(TAG, "Failure connecting to input method service: " + mCurIntent);
+        return InputBindResult.IME_NOT_CONNECTED;
     }
 
+    @NonNull
     private InputBindResult startInput(
             /* @InputMethodClient.StartInputReason */ final int startInputReason,
             IInputMethodClient client, IInputContext inputContext,
             /* @InputConnectionInspector.missingMethods */ final int missingMethods,
             @Nullable EditorInfo attribute, int controlFlags) {
         if (!calledFromValidUser()) {
-            return null;
+            return InputBindResult.INVALID_USER;
         }
         synchronized (mMethodMap) {
             if (DEBUG) {
@@ -2719,6 +2726,7 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
         return res;
     }
 
+    @NonNull
     @Override
     public InputBindResult startInputOrWindowGainedFocus(
             /* @InputMethodClient.StartInputReason */ final int startInputReason,
@@ -2726,16 +2734,27 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
             int windowFlags, @Nullable EditorInfo attribute, IInputContext inputContext,
             /* @InputConnectionInspector.missingMethods */ final int missingMethods,
             int unverifiedTargetSdkVersion) {
+        final InputBindResult result;
         if (windowToken != null) {
-            return windowGainedFocus(startInputReason, client, windowToken, controlFlags,
+            result = windowGainedFocus(startInputReason, client, windowToken, controlFlags,
                     softInputMode, windowFlags, attribute, inputContext, missingMethods,
                     unverifiedTargetSdkVersion);
         } else {
-            return startInput(startInputReason, client, inputContext, missingMethods, attribute,
+            result = startInput(startInputReason, client, inputContext, missingMethods, attribute,
                     controlFlags);
         }
+        if (result == null) {
+            // This must never happen, but just in case.
+            Slog.wtf(TAG, "InputBindResult is @NonNull. startInputReason="
+                    + InputMethodClient.getStartInputReason(startInputReason)
+                    + " windowFlags=#" + Integer.toHexString(windowFlags)
+                    + " editorInfo=" + attribute);
+            return InputBindResult.NULL;
+        }
+        return result;
     }
 
+    @NonNull
     private InputBindResult windowGainedFocus(
             /* @InputMethodClient.StartInputReason */ final int startInputReason,
             IInputMethodClient client, IBinder windowToken, int controlFlags,
@@ -2778,7 +2797,7 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
                             Slog.w(TAG, "Focus gain on non-focused client " + cs.client
                                     + " (uid=" + cs.uid + " pid=" + cs.pid + ")");
                         }
-                        return null;
+                        return InputBindResult.NOT_IME_TARGET_WINDOW;
                     }
                 } catch (RemoteException e) {
                 }
@@ -2788,7 +2807,7 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
                     Slog.w(TAG, "If you want to interect with IME, you need "
                             + "android.permission.INTERACT_ACROSS_USERS_FULL");
                     hideCurrentInputLocked(0, null);
-                    return null;
+                    return InputBindResult.INVALID_USER;
                 }
 
                 if (mCurFocusedWindow == windowToken) {
@@ -2800,7 +2819,9 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
                         return startInputUncheckedLocked(cs, inputContext, missingMethods,
                                 attribute, controlFlags, startInputReason);
                     }
-                    return null;
+                    return new InputBindResult(
+                            InputBindResult.ResultCode.SUCCESS_REPORT_WINDOW_FOCUS_ONLY,
+                            null, null, null, -1, -1);
                 }
                 mCurFocusedWindow = windowToken;
                 mCurFocusedWindowSoftInputMode = softInputMode;
