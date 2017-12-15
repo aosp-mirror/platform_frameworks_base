@@ -33,6 +33,7 @@ import android.view.InputChannel;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+
 /**
  * Tests for the {@link TaskPositioningController} class.
  *
@@ -78,9 +79,9 @@ public class TaskPositioningControllerTests extends WindowTestsBase {
             assertNotNull(mTarget.getDragWindowHandleLocked());
         }
 
-        assertTrue(sWm.mH.runWithScissors(() -> {
-            mTarget.finishPositioning();
-        }, TIMEOUT_MS));
+        mTarget.finishTaskPositioning();
+        // Wait until the looper processes finishTaskPositioning.
+        assertTrue(sWm.mH.runWithScissors(() -> {}, TIMEOUT_MS));
 
         assertFalse(mTarget.isPositioningLocked());
         assertNull(mTarget.getDragWindowHandleLocked());
@@ -99,15 +100,17 @@ public class TaskPositioningControllerTests extends WindowTestsBase {
         assertNotNull(mWindow.getTask().getTopVisibleAppMainWindow());
 
         mTarget.handleTapOutsideTask(content, 0, 0);
+        // Wait until the looper processes finishTaskPositioning.
+        assertTrue(sWm.mH.runWithScissors(() -> {}, TIMEOUT_MS));
 
         synchronized (sWm.mWindowMap) {
             assertTrue(mTarget.isPositioningLocked());
             assertNotNull(mTarget.getDragWindowHandleLocked());
         }
 
-        assertTrue(sWm.mH.runWithScissors(() -> {
-            mTarget.finishPositioning();
-        }, TIMEOUT_MS));
+        mTarget.finishTaskPositioning();
+        // Wait until the looper processes finishTaskPositioning.
+        assertTrue(sWm.mH.runWithScissors(() -> {}, TIMEOUT_MS));
 
         assertFalse(mTarget.isPositioningLocked());
         assertNull(mTarget.getDragWindowHandleLocked());

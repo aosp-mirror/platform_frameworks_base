@@ -62,8 +62,8 @@ public class TaskTapPointerEventListener implements PointerEventListener {
 
                 synchronized (this) {
                     if (!mTouchExcludeRegion.contains(x, y)) {
-                        mService.mH.obtainMessage(H.TAP_OUTSIDE_TASK,
-                                x, y, mDisplayContent).sendToTarget();
+                        mService.mTaskPositioningController.handleTapOutsideTask(
+                                mDisplayContent, x, y);
                     }
                 }
             }
