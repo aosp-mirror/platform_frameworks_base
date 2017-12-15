@@ -68,4 +68,13 @@ public interface RecoverableKeyStorage {
     SecretKey loadFromAndroidKeyStore(String alias) throws KeyStoreException,
             NoSuchAlgorithmException,
             UnrecoverableEntryException;
+
+    /**
+     * Removes the entry with the given {@code alias} from AndroidKeyStore.
+     *
+     * @throws KeyStoreException if an error occurred deleting the key from AndroidKeyStore.
+     *
+     * @hide
+     */
+    void removeFromAndroidKeyStore(String alias) throws KeyStoreException;
 }
