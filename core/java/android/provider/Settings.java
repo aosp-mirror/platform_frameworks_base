@@ -9584,9 +9584,10 @@ public final class Settings {
         /**
          * App standby (app idle) specific settings.
          * This is encoded as a key=value list, separated by commas. Ex:
-         *
+         * <p>
          * "idle_duration=5000,parole_interval=4500"
-         *
+         * <p>
+         * All durations are in millis.
          * The following keys are supported:
          *
          * <pre>
@@ -9734,6 +9735,15 @@ public final class Settings {
          * see also android.view.textclassifier.TextClassifierConstants
          */
         public static final String TEXT_CLASSIFIER_CONSTANTS = "text_classifier_constants";
+
+        /**
+         * Whether or not App Standby feature is enabled. This controls throttling of apps
+         * based on usage patterns and predictions.
+         * Type: int (0 for false, 1 for true)
+         * Default: 1
+         * @hide
+         */
+        public static final java.lang.String APP_STANDBY_ENABLED = "app_standby_enabled";
 
         /**
          * Get the key that retrieves a bluetooth headset's priority.
