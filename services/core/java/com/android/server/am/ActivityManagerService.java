@@ -2947,9 +2947,11 @@ public class ActivityManagerService extends IActivityManager.Stub
         try {
             return super.onTransact(code, data, reply, flags);
         } catch (RuntimeException e) {
-            // The activity manager only throws security exceptions, so let's
+            // The activity manager only throws certain exceptions intentionally, so let's
             // log all others.
-            if (!(e instanceof SecurityException)) {
+            if (!(e instanceof SecurityException
+                    || e instanceof IllegalArgumentException
+                    || e instanceof IllegalStateException)) {
                 Slog.wtf(TAG, "Activity Manager Crash."
                         + " UID:" + Binder.getCallingUid()
                         + " PID:" + Binder.getCallingPid()
