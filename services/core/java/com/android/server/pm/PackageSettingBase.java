@@ -131,7 +131,6 @@ public abstract class PackageSettingBase extends SettingBase {
      * using the full set of code paths when the package's process is started.
      */
     Set<String> oldCodePaths;
-    PackageSettingBase origPackage;
 
     /** Package name of the app that installed this package */
     String installerPackageName;
@@ -263,7 +262,6 @@ public abstract class PackageSettingBase extends SettingBase {
         lastUpdateTime = orig.lastUpdateTime;
         legacyNativeLibraryPathString = orig.legacyNativeLibraryPathString;
         // Intentionally skip oldCodePaths; it's not relevant for copies
-        origPackage = orig.origPackage;
         parentPackageName = orig.parentPackageName;
         primaryCpuAbiString = orig.primaryCpuAbiString;
         resourcePath = orig.resourcePath;

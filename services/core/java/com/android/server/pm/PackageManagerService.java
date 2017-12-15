@@ -650,18 +650,15 @@ public class PackageManagerService extends IPackageManager.Stub
     @GuardedBy("mInstallLock")
     final Installer mInstaller;
 
-    /** Directory where installed third-party apps stored */
-    final File mAppInstallDir;
-
-    /**
-     * Directory to which applications installed internally have their
-     * 32 bit native libraries copied.
-     */
-    private File mAppLib32InstallDir;
-
-    // Directory containing the private parts (e.g. code and non-resource assets) of forward-locked
-    // apps.
-    final File mDrmAppPrivateInstallDir;
+    /** Directory where installed applications are stored */
+    private static final File sAppInstallDir =
+            new File(Environment.getDataDirectory(), "app");
+    /** Directory where installed application's 32-bit native libraries are copied. */
+    private static final File sAppLib32InstallDir =
+            new File(Environment.getDataDirectory(), "app-lib");
+    /** Directory where code and non-resource assets of forward-locked applications are stored */
+    private static final File sDrmAppPrivateInstallDir =
+            new File(Environment.getDataDirectory(), "app-private");
 
     // ----------------------------------------------------------------
 
@@ -741,9 +738,6 @@ public class PackageManagerService extends IPackageManager.Stub
 
     @GuardedBy("mAvailableFeatures")
     final ArrayMap<String, FeatureInfo> mAvailableFeatures;
-
-    // If mac_permissions.xml was found for seinfo labeling.
-    boolean mFoundPolicyFile;
 
     private final InstantAppRegistry mInstantAppRegistry;
 
@@ -2445,11 +2439,6 @@ public class PackageManagerService extends IPackageManager.Stub
             Watchdog.getInstance().addThread(mHandler, WATCHDOG_TIMEOUT);
             mInstantAppRegistry = new InstantAppRegistry(this);
 
-            File dataDir = Environment.getDataDirectory();
-            mAppInstallDir = new File(dataDir, "app");
-            mAppLib32InstallDir = new File(dataDir, "app-lib");
-            mDrmAppPrivateInstallDir = new File(dataDir, "app-private");
-
             ArrayMap<String, String> libConfig = systemConfig.getSharedLibraries();
             final int builtInLibCount = libConfig.size();
             for (int i = 0; i < builtInLibCount; i++) {
@@ -2459,7 +2448,7 @@ public class PackageManagerService extends IPackageManager.Stub
                         SharedLibraryInfo.TYPE_BUILTIN, PLATFORM_PACKAGE_NAME, 0);
             }
 
-            mFoundPolicyFile = SELinuxMMAC.readInstallPolicy();
+            SELinuxMMAC.readInstallPolicy();
 
             Trace.traceBegin(TRACE_TAG_PACKAGE_MANAGER, "read user settings");
             mFirstBoot = !mSettings.readLPw(sUserManager.getUsers(false));
@@ -2737,9 +2726,9 @@ public class PackageManagerService extends IPackageManager.Stub
             if (!mOnlyCore) {
                 EventLog.writeEvent(EventLogTags.BOOT_PROGRESS_PMS_DATA_SCAN_START,
                         SystemClock.uptimeMillis());
-                scanDirTracedLI(mAppInstallDir, 0, scanFlags | SCAN_REQUIRE_KNOWN, 0);
+                scanDirTracedLI(sAppInstallDir, 0, scanFlags | SCAN_REQUIRE_KNOWN, 0);
 
-                scanDirTracedLI(mDrmAppPrivateInstallDir, mDefParseFlags
+                scanDirTracedLI(sDrmAppPrivateInstallDir, mDefParseFlags
                         | PackageParser.PARSE_FORWARD_LOCK,
                         scanFlags | SCAN_REQUIRE_KNOWN, 0);
 
@@ -2908,7 +2897,18 @@ public class PackageManagerService extends IPackageManager.Stub
                 // NOTE: We ignore potential failures here during a system scan (like
                 // the rest of the commands above) because there's precious little we
                 // can do about it. A settings error is reported, though.
-                adjustCpuAbisForSharedUserLPw(setting.packages, null /*scannedPackage*/);
+                final List<String> changedAbiCodePath =
+                        adjustCpuAbisForSharedUserLPw(setting.packages, null /*scannedPackage*/);
+                if (changedAbiCodePath != null && changedAbiCodePath.size() > 0) {
+                    for (int i = changedAbiCodePath.size() - 1; i <= 0; --i) {
+                        final String codePathString = changedAbiCodePath.get(i);
+                        try {
+                            mInstaller.rmdex(codePathString,
+                                    getDexCodeInstructionSet(getPreferredInstructionSet()));
+                        } catch (InstallerException ignored) {
+                        }
+                    }
+                }
             }
 
             // Now that we know all the packages we are keeping,
@@ -8134,6 +8134,7 @@ public class PackageManagerService extends IPackageManager.Stub
                 int errorCode = PackageManager.INSTALL_SUCCEEDED;
 
                 if (throwable == null) {
+                    // TODO(toddke): move lower in the scan chain
                     // Static shared libraries have synthetic package names
                     if (parseResult.pkg.applicationInfo.isStaticSharedLibrary()) {
                         renameStaticSharedLibraryPackage(parseResult.pkg);
@@ -8486,7 +8487,7 @@ public class PackageManagerService extends IPackageManager.Stub
             // Set CPU Abis to application info.
             if ((scanFlags & SCAN_FIRST_BOOT_OR_UPGRADE) != 0) {
                 final String cpuAbiOverride = deriveAbiOverride(pkg.cpuAbiOverride, updatedPs);
-                derivePackageAbi(pkg, cpuAbiOverride, false, mAppLib32InstallDir);
+                derivePackageAbi(pkg, cpuAbiOverride, false);
             } else {
                 pkg.applicationInfo.primaryCpuAbi = updatedPs.primaryCpuAbiString;
                 pkg.applicationInfo.secondaryCpuAbi = updatedPs.secondaryCpuAbiString;
@@ -8594,7 +8595,7 @@ public class PackageManagerService extends IPackageManager.Stub
         }
 
         // Note that we invoke the following method only if we are about to unpack an application
-        PackageParser.Package scannedPkg = scanPackageLI(pkg, parseFlags, scanFlags
+        PackageParser.Package scannedPkg = scanPackageNewLI(pkg, parseFlags, scanFlags
                 | SCAN_UPDATE_SIGNATURE, currentTime, user);
 
         /*
@@ -9615,12 +9616,12 @@ public class PackageManagerService extends IPackageManager.Stub
         final PackageParser.Package scannedPkg;
         try {
             // Scan the parent
-            scannedPkg = scanPackageLI(pkg, parseFlags, scanFlags, currentTime, user);
+            scannedPkg = scanPackageNewLI(pkg, parseFlags, scanFlags, currentTime, user);
             // Scan the children
             final int childCount = (pkg.childPackages != null) ? pkg.childPackages.size() : 0;
             for (int i = 0; i < childCount; i++) {
                 PackageParser.Package childPkg = pkg.childPackages.get(i);
-                scanPackageLI(childPkg, parseFlags,
+                scanPackageNewLI(childPkg, parseFlags,
                         scanFlags, currentTime, user);
             }
         } finally {
@@ -9634,23 +9635,655 @@ public class PackageManagerService extends IPackageManager.Stub
         return scannedPkg;
     }
 
-    private PackageParser.Package scanPackageLI(PackageParser.Package pkg,
+    /** The result of a package scan. */
+    private static class ScanResult {
+        /** Whether or not the package scan was successful */
+        public final boolean success;
+        /**
+         * The final package settings. This may be the same object passed in
+         * the {@link ScanRequest}, but, with modified values.
+         */
+        @Nullable public final PackageSetting pkgSetting;
+        /** ABI code paths that have changed in the package scan */
+        @Nullable public final List<String> changedAbiCodePath;
+        public ScanResult(
+                boolean success,
+                @Nullable PackageSetting pkgSetting,
+                @Nullable List<String> changedAbiCodePath) {
+            this.success = success;
+            this.pkgSetting = pkgSetting;
+            this.changedAbiCodePath = changedAbiCodePath;
+        }
+    }
+
+    /** A package to be scanned */
+    private static class ScanRequest {
+        /** The parsed package */
+        @NonNull public final PackageParser.Package pkg;
+        /** Shared user settings, if the package has a shared user */
+        @Nullable public final SharedUserSetting sharedUserSetting;
+        /**
+         * Package settings of the currently installed version.
+         * <p><em>IMPORTANT:</em> The contents of this object may be modified
+         * during scan.
+         */
+        @Nullable public final PackageSetting pkgSetting;
+        /** A copy of the settings for the currently installed version */
+        @Nullable public final PackageSetting oldPkgSetting;
+        /** Package settings for the disabled version on the /system partition */
+        @Nullable public final PackageSetting disabledPkgSetting;
+        /** Package settings for the installed version under its original package name */
+        @Nullable public final PackageSetting originalPkgSetting;
+        /** The real package name of a renamed application */
+        @Nullable public final String realPkgName;
+        public final @ParseFlags int parseFlags;
+        public final @ScanFlags int scanFlags;
+        /** The user for which the package is being scanned */
+        @Nullable public final UserHandle user;
+        /** Whether or not the platform package is being scanned */
+        public final boolean isPlatformPackage;
+        public ScanRequest(
+                @NonNull PackageParser.Package pkg,
+                @Nullable SharedUserSetting sharedUserSetting,
+                @Nullable PackageSetting pkgSetting,
+                @Nullable PackageSetting disabledPkgSetting,
+                @Nullable PackageSetting originalPkgSetting,
+                @Nullable String realPkgName,
+                @ParseFlags int parseFlags,
+                @ScanFlags int scanFlags,
+                boolean isPlatformPackage,
+                @Nullable UserHandle user) {
+            this.pkg = pkg;
+            this.pkgSetting = pkgSetting;
+            this.sharedUserSetting = sharedUserSetting;
+            this.oldPkgSetting = pkgSetting == null ? null : new PackageSetting(pkgSetting);
+            this.disabledPkgSetting = disabledPkgSetting;
+            this.originalPkgSetting = originalPkgSetting;
+            this.realPkgName = realPkgName;
+            this.parseFlags = parseFlags;
+            this.scanFlags = scanFlags;
+            this.isPlatformPackage = isPlatformPackage;
+            this.user = user;
+        }
+    }
+
+    @GuardedBy("mInstallLock")
+    private PackageParser.Package scanPackageNewLI(@NonNull PackageParser.Package pkg,
             final @ParseFlags int parseFlags, final @ScanFlags int scanFlags, long currentTime,
             @Nullable UserHandle user) throws PackageManagerException {
-        boolean success = false;
-        try {
-            final PackageParser.Package res = scanPackageDirtyLI(pkg, parseFlags, scanFlags,
-                    currentTime, user);
-            success = true;
-            return res;
-        } finally {
-            if (!success && (scanFlags & SCAN_DELETE_DATA_ON_FAILURES) != 0) {
-                // DELETE_DATA_ON_FAILURES is only used by frozen paths
-                destroyAppDataLIF(pkg, UserHandle.USER_ALL,
-                        StorageManager.FLAG_STORAGE_DE | StorageManager.FLAG_STORAGE_CE);
-                destroyAppProfilesLIF(pkg, UserHandle.USER_ALL);
+
+        final String renamedPkgName = mSettings.getRenamedPackageLPr(pkg.mRealPackage);
+        final String realPkgName = getRealPackageName(pkg, renamedPkgName);
+        if (realPkgName != null) {
+            ensurePackageRenamed(pkg, renamedPkgName);
+        }
+        final PackageSetting originalPkgSetting = getOriginalPackageLocked(pkg, renamedPkgName);
+        final PackageSetting pkgSetting = mSettings.getPackageLPr(pkg.packageName);
+        final PackageSetting disabledPkgSetting =
+                mSettings.getDisabledSystemPkgLPr(pkg.packageName);
+
+        if (mTransferedPackages.contains(pkg.packageName)) {
+            Slog.w(TAG, "Package " + pkg.packageName
+                    + " was transferred to another, but its .apk remains");
+        }
+
+        synchronized (mPackages) {
+            applyPolicy(pkg, parseFlags, scanFlags);
+            assertPackageIsValid(pkg, parseFlags, scanFlags);
+
+            SharedUserSetting sharedUserSetting = null;
+            if (pkg.mSharedUserId != null) {
+                // SIDE EFFECTS; may potentially allocate a new shared user
+                sharedUserSetting = mSettings.getSharedUserLPw(
+                        pkg.mSharedUserId, 0 /*pkgFlags*/, 0 /*pkgPrivateFlags*/, true /*create*/);
+                if (DEBUG_PACKAGE_SCANNING) {
+                    if ((parseFlags & PackageParser.PARSE_CHATTY) != 0)
+                        Log.d(TAG, "Shared UserID " + pkg.mSharedUserId
+                                + " (uid=" + sharedUserSetting.userId + "):"
+                                + " packages=" + sharedUserSetting.packages);
+                }
+            }
+
+            boolean scanSucceeded = false;
+            try {
+                final ScanRequest request = new ScanRequest(pkg, sharedUserSetting, pkgSetting,
+                        disabledPkgSetting, originalPkgSetting, realPkgName, parseFlags, scanFlags,
+                        (pkg == mPlatformPackage), user);
+                final ScanResult result = scanPackageOnlyLI(request, mFactoryTest, currentTime);
+                if (result.success) {
+                    commitScanResultsLocked(request, result);
+                }
+                scanSucceeded = true;
+            } finally {
+                  if (!scanSucceeded && (scanFlags & SCAN_DELETE_DATA_ON_FAILURES) != 0) {
+                      // DELETE_DATA_ON_FAILURES is only used by frozen paths
+                      destroyAppDataLIF(pkg, UserHandle.USER_ALL,
+                              StorageManager.FLAG_STORAGE_DE | StorageManager.FLAG_STORAGE_CE);
+                      destroyAppProfilesLIF(pkg, UserHandle.USER_ALL);
+                  }
             }
         }
+        return pkg;
+    }
+
+    /**
+     * Commits the package scan and modifies system state.
+     * <p><em>WARNING:</em> The method may throw an excpetion in the middle
+     * of committing the package, leaving the system in an inconsistent state.
+     * This needs to be fixed so, once we get to this point, no errors are
+     * possible and the system is not left in an inconsistent state.
+     */
+    @GuardedBy("mPackages")
+    private void commitScanResultsLocked(@NonNull ScanRequest request, @NonNull ScanResult result)
+            throws PackageManagerException {
+        final PackageParser.Package pkg = request.pkg;
+        final @ParseFlags int parseFlags = request.parseFlags;
+        final @ScanFlags int scanFlags = request.scanFlags;
+        final PackageSetting oldPkgSetting = request.oldPkgSetting;
+        final PackageSetting originalPkgSetting = request.originalPkgSetting;
+        final UserHandle user = request.user;
+        final String realPkgName = request.realPkgName;
+        final PackageSetting pkgSetting = result.pkgSetting;
+        final List<String> changedAbiCodePath = result.changedAbiCodePath;
+        final boolean newPkgSettingCreated = (result.pkgSetting != request.pkgSetting);
+
+        if (newPkgSettingCreated) {
+            if (originalPkgSetting != null) {
+                mSettings.addRenamedPackageLPw(pkg.packageName, originalPkgSetting.name);
+            }
+            // THROWS: when we can't allocate a user id. add call to check if there's
+            // enough space to ensure we won't throw; otherwise, don't modify state
+            mSettings.addUserToSettingLPw(pkgSetting);
+
+            if (originalPkgSetting != null && (scanFlags & SCAN_CHECK_ONLY) == 0) {
+                mTransferedPackages.add(originalPkgSetting.name);
+            }
+        }
+        // TODO(toddke): Consider a method specifically for modifying the Package object
+        // post scan; or, moving this stuff out of the Package object since it has nothing
+        // to do with the package on disk.
+        // We need to have this here because addUserToSettingLPw() is sometimes responsible
+        // for creating the application ID. If we did this earlier, we would be saving the
+        // correct ID.
+        pkg.applicationInfo.uid = pkgSetting.appId;
+
+        mSettings.writeUserRestrictionsLPw(pkgSetting, oldPkgSetting);
+
+        if ((scanFlags & SCAN_CHECK_ONLY) == 0 && realPkgName != null) {
+            mTransferedPackages.add(pkg.packageName);
+        }
+
+        // THROWS: when requested libraries that can't be found. it only changes
+        // the state of the passed in pkg object, so, move to the top of the method
+        // and allow it to abort
+        if ((scanFlags & SCAN_BOOTING) == 0
+                && (parseFlags & PackageParser.PARSE_IS_SYSTEM_DIR) == 0) {
+            // Check all shared libraries and map to their actual file path.
+            // We only do this here for apps not on a system dir, because those
+            // are the only ones that can fail an install due to this.  We
+            // will take care of the system apps by updating all of their
+            // library paths after the scan is done. Also during the initial
+            // scan don't update any libs as we do this wholesale after all
+            // apps are scanned to avoid dependency based scanning.
+            updateSharedLibrariesLPr(pkg, null);
+        }
+
+        // All versions of a static shared library are referenced with the same
+        // package name. Internally, we use a synthetic package name to allow
+        // multiple versions of the same shared library to be installed. So,
+        // we need to generate the synthetic package name of the latest shared
+        // library in order to compare signatures.
+        PackageSetting signatureCheckPs = pkgSetting;
+        if (pkg.applicationInfo.isStaticSharedLibrary()) {
+            SharedLibraryEntry libraryEntry = getLatestSharedLibraVersionLPr(pkg);
+            if (libraryEntry != null) {
+                signatureCheckPs = mSettings.getPackageLPr(libraryEntry.apk);
+            }
+        }
+
+        final KeySetManagerService ksms = mSettings.mKeySetManagerService;
+        if (ksms.shouldCheckUpgradeKeySetLocked(signatureCheckPs, scanFlags)) {
+            if (ksms.checkUpgradeKeySetLocked(signatureCheckPs, pkg)) {
+                // We just determined the app is signed correctly, so bring
+                // over the latest parsed certs.
+                pkgSetting.signatures.mSignatures = pkg.mSignatures;
+            } else {
+                if ((parseFlags & PackageParser.PARSE_IS_SYSTEM_DIR) == 0) {
+                    throw new PackageManagerException(INSTALL_FAILED_UPDATE_INCOMPATIBLE,
+                            "Package " + pkg.packageName + " upgrade keys do not match the "
+                                    + "previously installed version");
+                } else {
+                    pkgSetting.signatures.mSignatures = pkg.mSignatures;
+                    String msg = "System package " + pkg.packageName
+                            + " signature changed; retaining data.";
+                    reportSettingsProblem(Log.WARN, msg);
+                }
+            }
+        } else {
+            try {
+                final boolean compareCompat = isCompatSignatureUpdateNeeded(pkg);
+                final boolean compareRecover = isRecoverSignatureUpdateNeeded(pkg);
+                final boolean compatMatch = verifySignatures(signatureCheckPs, pkg.mSignatures,
+                        compareCompat, compareRecover);
+                // The new KeySets will be re-added later in the scanning process.
+                if (compatMatch) {
+                    synchronized (mPackages) {
+                        ksms.removeAppKeySetDataLPw(pkg.packageName);
+                    }
+                }
+                // We just determined the app is signed correctly, so bring
+                // over the latest parsed certs.
+                pkgSetting.signatures.mSignatures = pkg.mSignatures;
+            } catch (PackageManagerException e) {
+                if ((parseFlags & PackageParser.PARSE_IS_SYSTEM_DIR) == 0) {
+                    throw e;
+                }
+                // The signature has changed, but this package is in the system
+                // image...  let's recover!
+                pkgSetting.signatures.mSignatures = pkg.mSignatures;
+                // However...  if this package is part of a shared user, but it
+                // doesn't match the signature of the shared user, let's fail.
+                // What this means is that you can't change the signatures
+                // associated with an overall shared user, which doesn't seem all
+                // that unreasonable.
+                if (signatureCheckPs.sharedUser != null) {
+                    if (compareSignatures(signatureCheckPs.sharedUser.signatures.mSignatures,
+                            pkg.mSignatures) != PackageManager.SIGNATURE_MATCH) {
+                        throw new PackageManagerException(
+                                INSTALL_PARSE_FAILED_INCONSISTENT_CERTIFICATES,
+                                "Signature mismatch for shared user: "
+                                        + pkgSetting.sharedUser);
+                    }
+                }
+                // File a report about this.
+                String msg = "System package " + pkg.packageName
+                        + " signature changed; retaining data.";
+                reportSettingsProblem(Log.WARN, msg);
+            }
+        }
+
+        if ((scanFlags & SCAN_CHECK_ONLY) == 0 && pkg.mAdoptPermissions != null) {
+            // This package wants to adopt ownership of permissions from
+            // another package.
+            for (int i = pkg.mAdoptPermissions.size() - 1; i >= 0; i--) {
+                final String origName = pkg.mAdoptPermissions.get(i);
+                final PackageSetting orig = mSettings.getPackageLPr(origName);
+                if (orig != null) {
+                    if (verifyPackageUpdateLPr(orig, pkg)) {
+                        Slog.i(TAG, "Adopting permissions from " + origName + " to "
+                                + pkg.packageName);
+                        mSettings.mPermissions.transferPermissions(origName, pkg.packageName);
+                    }
+                }
+            }
+        }
+
+        if (changedAbiCodePath != null && changedAbiCodePath.size() > 0) {
+            for (int i = changedAbiCodePath.size() - 1; i <= 0; --i) {
+                final String codePathString = changedAbiCodePath.get(i);
+                try {
+                    mInstaller.rmdex(codePathString,
+                            getDexCodeInstructionSet(getPreferredInstructionSet()));
+                } catch (InstallerException ignored) {
+                }
+            }
+        }
+
+        if ((scanFlags & SCAN_CHECK_ONLY) != 0) {
+            if (oldPkgSetting != null) {
+                synchronized (mPackages) {
+                    mSettings.mPackages.put(oldPkgSetting.name, oldPkgSetting);
+                }
+            }
+        } else {
+            final int userId = user == null ? 0 : user.getIdentifier();
+            // Modify state for the given package setting
+            commitPackageSettings(pkg, pkgSetting, user, scanFlags,
+                    (parseFlags & PackageParser.PARSE_CHATTY) != 0 /*chatty*/);
+            if (pkgSetting.getInstantApp(userId)) {
+                mInstantAppRegistry.addInstantAppLPw(userId, pkgSetting.appId);
+            }
+        }
+    }
+
+    /**
+     * Returns the "real" name of the package.
+     * <p>This may differ from the package's actual name if the application has already
+     * been installed under one of this package's original names.
+     */
+    private static @Nullable String getRealPackageName(@NonNull PackageParser.Package pkg,
+            @Nullable String renamedPkgName) {
+        if (pkg.mOriginalPackages == null || !pkg.mOriginalPackages.contains(renamedPkgName)) {
+            return null;
+        }
+        return pkg.mRealPackage;
+    }
+
+    /**
+     * Returns the original package setting.
+     * <p>A package can migrate its name during an update. In this scenario, a package
+     * designates a set of names that it considers as one of its original names.
+     * <p>An original package must be signed identically and it must have the same
+     * shared user [if any].
+     */
+    @GuardedBy("mPackages")
+    private @Nullable PackageSetting getOriginalPackageLocked(@NonNull PackageParser.Package pkg,
+            @Nullable String renamedPkgName) {
+        if (pkg.mOriginalPackages == null || pkg.mOriginalPackages.contains(renamedPkgName)) {
+            return null;
+        }
+        for (int i = pkg.mOriginalPackages.size() - 1; i >= 0; --i) {
+            final PackageSetting originalPs =
+                    mSettings.getPackageLPr(pkg.mOriginalPackages.get(i));
+            if (originalPs != null) {
+                // the package is already installed under its original name...
+                // but, should we use it?
+                if (!verifyPackageUpdateLPr(originalPs, pkg)) {
+                    // the new package is incompatible with the original
+                    continue;
+                } else if (originalPs.sharedUser != null) {
+                    if (!originalPs.sharedUser.name.equals(pkg.mSharedUserId)) {
+                        // the shared user id is incompatible with the original
+                        Slog.w(TAG, "Unable to migrate data from " + originalPs.name
+                                + " to " + pkg.packageName + ": old uid "
+                                + originalPs.sharedUser.name
+                                + " differs from " + pkg.mSharedUserId);
+                        continue;
+                    }
+                    // TODO: Add case when shared user id is added [b/28144775]
+                } else {
+                    if (DEBUG_UPGRADE) Log.v(TAG, "Renaming new package "
+                            + pkg.packageName + " to old name " + originalPs.name);
+                }
+                return originalPs;
+            }
+        }
+        return null;
+    }
+
+    /**
+     * Renames the package if it was installed under a different name.
+     * <p>When we've already installed the package under an original name, update
+     * the new package so we can continue to have the old name.
+     */
+    private static void ensurePackageRenamed(@NonNull PackageParser.Package pkg,
+            @NonNull String renamedPackageName) {
+        if (pkg.mOriginalPackages == null
+                || !pkg.mOriginalPackages.contains(renamedPackageName)
+                || pkg.packageName.equals(renamedPackageName)) {
+            return;
+        }
+        pkg.setPackageName(renamedPackageName);
+    }
+
+    /**
+     * Just scans the package without any side effects.
+     * <p>Not entirely true at the moment. There is still one side effect -- this
+     * method potentially modifies a live {@link PackageSetting} object representing
+     * the package being scanned. This will be resolved in the future.
+     *
+     * @param request Information about the package to be scanned
+     * @param isUnderFactoryTest Whether or not the device is under factory test
+     * @param currentTime The current time, in millis
+     * @return The results of the scan
+     */
+    @GuardedBy("mInstallLock")
+    private static @NonNull ScanResult scanPackageOnlyLI(@NonNull ScanRequest request,
+            boolean isUnderFactoryTest, long currentTime)
+                    throws PackageManagerException {
+        final PackageParser.Package pkg = request.pkg;
+        PackageSetting pkgSetting = request.pkgSetting;
+        final PackageSetting disabledPkgSetting = request.disabledPkgSetting;
+        final PackageSetting originalPkgSetting = request.originalPkgSetting;
+        final @ParseFlags int parseFlags = request.parseFlags;
+        final @ScanFlags int scanFlags = request.scanFlags;
+        final String realPkgName = request.realPkgName;
+        final SharedUserSetting sharedUserSetting = request.sharedUserSetting;
+        final UserHandle user = request.user;
+        final boolean isPlatformPackage = request.isPlatformPackage;
+
+        List<String> changedAbiCodePath = null;
+
+        if (DEBUG_PACKAGE_SCANNING) {
+            if ((parseFlags & PackageParser.PARSE_CHATTY) != 0)
+                Log.d(TAG, "Scanning package " + pkg.packageName);
+        }
+
+        if (Build.IS_DEBUGGABLE &&
+                pkg.isPrivileged() &&
+                !SystemProperties.getBoolean("pm.dexopt.priv-apps", true)) {
+            PackageManagerServiceUtils.logPackageHasUncompressedCode(pkg);
+        }
+
+        // Initialize package source and resource directories
+        final File scanFile = new File(pkg.codePath);
+        final File destCodeFile = new File(pkg.applicationInfo.getCodePath());
+        final File destResourceFile = new File(pkg.applicationInfo.getResourcePath());
+
+        // We keep references to the derived CPU Abis from settings in oder to reuse
+        // them in the case where we're not upgrading or booting for the first time.
+        String primaryCpuAbiFromSettings = null;
+        String secondaryCpuAbiFromSettings = null;
+        boolean needToDeriveAbi = (scanFlags & SCAN_FIRST_BOOT_OR_UPGRADE) != 0;
+
+        if (!needToDeriveAbi) {
+            if (pkgSetting != null) {
+                primaryCpuAbiFromSettings = pkgSetting.primaryCpuAbiString;
+                secondaryCpuAbiFromSettings = pkgSetting.secondaryCpuAbiString;
+            } else {
+                // Re-scanning a system package after uninstalling updates; need to derive ABI
+                needToDeriveAbi = true;
+            }
+        }
+
+        if (pkgSetting != null && pkgSetting.sharedUser != sharedUserSetting) {
+            PackageManagerService.reportSettingsProblem(Log.WARN,
+                    "Package " + pkg.packageName + " shared user changed from "
+                            + (pkgSetting.sharedUser != null
+                            ? pkgSetting.sharedUser.name : "<nothing>")
+                            + " to "
+                            + (sharedUserSetting != null ? sharedUserSetting.name : "<nothing>")
+                            + "; replacing with new");
+            pkgSetting = null;
+        }
+
+        String[] usesStaticLibraries = null;
+        if (pkg.usesStaticLibraries != null) {
+            usesStaticLibraries = new String[pkg.usesStaticLibraries.size()];
+            pkg.usesStaticLibraries.toArray(usesStaticLibraries);
+        }
+
+        final boolean createNewPackage = (pkgSetting == null);
+        if (createNewPackage) {
+            final String parentPackageName = (pkg.parentPackage != null)
+                    ? pkg.parentPackage.packageName : null;
+            final boolean instantApp = (scanFlags & SCAN_AS_INSTANT_APP) != 0;
+            final boolean virtualPreload = (scanFlags & SCAN_AS_VIRTUAL_PRELOAD) != 0;
+            // REMOVE SharedUserSetting from method; update in a separate call
+            pkgSetting = Settings.createNewSetting(pkg.packageName, originalPkgSetting,
+                    disabledPkgSetting, realPkgName, sharedUserSetting, destCodeFile,
+                    destResourceFile, pkg.applicationInfo.nativeLibraryRootDir,
+                    pkg.applicationInfo.primaryCpuAbi, pkg.applicationInfo.secondaryCpuAbi,
+                    pkg.mVersionCode, pkg.applicationInfo.flags, pkg.applicationInfo.privateFlags,
+                    user, true /*allowInstall*/, instantApp, virtualPreload,
+                    parentPackageName, pkg.getChildPackageNames(),
+                    UserManagerService.getInstance(), usesStaticLibraries,
+                    pkg.usesStaticLibrariesVersions);
+        } else {
+            // REMOVE SharedUserSetting from method; update in a separate call.
+            //
+            // TODO(narayan): This update is bogus. nativeLibraryDir & primaryCpuAbi,
+            // secondaryCpuAbi are not known at this point so we always update them
+            // to null here, only to reset them at a later point.
+            Settings.updatePackageSetting(pkgSetting, disabledPkgSetting, sharedUserSetting,
+                    destCodeFile, pkg.applicationInfo.nativeLibraryDir,
+                    pkg.applicationInfo.primaryCpuAbi, pkg.applicationInfo.secondaryCpuAbi,
+                    pkg.applicationInfo.flags, pkg.applicationInfo.privateFlags,
+                    pkg.getChildPackageNames(), UserManagerService.getInstance(),
+                    usesStaticLibraries, pkg.usesStaticLibrariesVersions);
+        }
+        if (createNewPackage && originalPkgSetting != null) {
+            // If we are first transitioning from an original package,
+            // fix up the new package's name now.  We need to do this after
+            // looking up the package under its new name, so getPackageLP
+            // can take care of fiddling things correctly.
+            pkg.setPackageName(originalPkgSetting.name);
+
+            // File a report about this.
+            String msg = "New package " + pkgSetting.realName
+                    + " renamed to replace old package " + pkgSetting.name;
+            reportSettingsProblem(Log.WARN, msg);
+        }
+
+        if (disabledPkgSetting != null) {
+            pkg.applicationInfo.flags |= ApplicationInfo.FLAG_UPDATED_SYSTEM_APP;
+        }
+
+        SELinuxMMAC.assignSeInfoValue(pkg);
+
+        pkg.mExtras = pkgSetting;
+        pkg.applicationInfo.processName = fixProcessName(
+                pkg.applicationInfo.packageName,
+                pkg.applicationInfo.processName);
+
+        if (!isPlatformPackage) {
+            // Get all of our default paths setup
+            pkg.applicationInfo.initForUser(UserHandle.USER_SYSTEM);
+        }
+
+        final String cpuAbiOverride = deriveAbiOverride(pkg.cpuAbiOverride, pkgSetting);
+
+        if ((scanFlags & SCAN_NEW_INSTALL) == 0) {
+            if (needToDeriveAbi) {
+                Trace.traceBegin(TRACE_TAG_PACKAGE_MANAGER, "derivePackageAbi");
+                final boolean extractNativeLibs = !pkg.isLibrary();
+                derivePackageAbi(pkg, cpuAbiOverride, extractNativeLibs);
+                Trace.traceEnd(TRACE_TAG_PACKAGE_MANAGER);
+
+                // Some system apps still use directory structure for native libraries
+                // in which case we might end up not detecting abi solely based on apk
+                // structure. Try to detect abi based on directory structure.
+                if (isSystemApp(pkg) && !pkg.isUpdatedSystemApp() &&
+                        pkg.applicationInfo.primaryCpuAbi == null) {
+                    setBundledAppAbisAndRoots(pkg, pkgSetting);
+                    setNativeLibraryPaths(pkg, sAppLib32InstallDir);
+                }
+            } else {
+                // This is not a first boot or an upgrade, don't bother deriving the
+                // ABI during the scan. Instead, trust the value that was stored in the
+                // package setting.
+                pkg.applicationInfo.primaryCpuAbi = primaryCpuAbiFromSettings;
+                pkg.applicationInfo.secondaryCpuAbi = secondaryCpuAbiFromSettings;
+
+                setNativeLibraryPaths(pkg, sAppLib32InstallDir);
+
+                if (DEBUG_ABI_SELECTION) {
+                    Slog.i(TAG, "Using ABIS and native lib paths from settings : " +
+                            pkg.packageName + " " + pkg.applicationInfo.primaryCpuAbi + ", " +
+                            pkg.applicationInfo.secondaryCpuAbi);
+                }
+            }
+        } else {
+            if ((scanFlags & SCAN_MOVE) != 0) {
+                // We haven't run dex-opt for this move (since we've moved the compiled output too)
+                // but we already have this packages package info in the PackageSetting. We just
+                // use that and derive the native library path based on the new codepath.
+                pkg.applicationInfo.primaryCpuAbi = pkgSetting.primaryCpuAbiString;
+                pkg.applicationInfo.secondaryCpuAbi = pkgSetting.secondaryCpuAbiString;
+            }
+
+            // Set native library paths again. For moves, the path will be updated based on the
+            // ABIs we've determined above. For non-moves, the path will be updated based on the
+            // ABIs we determined during compilation, but the path will depend on the final
+            // package path (after the rename away from the stage path).
+            setNativeLibraryPaths(pkg, sAppLib32InstallDir);
+        }
+
+        // This is a special case for the "system" package, where the ABI is
+        // dictated by the zygote configuration (and init.rc). We should keep track
+        // of this ABI so that we can deal with "normal" applications that run under
+        // the same UID correctly.
+        if (isPlatformPackage) {
+            pkg.applicationInfo.primaryCpuAbi = VMRuntime.getRuntime().is64Bit() ?
+                    Build.SUPPORTED_64_BIT_ABIS[0] : Build.SUPPORTED_32_BIT_ABIS[0];
+        }
+
+        // If there's a mismatch between the abi-override in the package setting
+        // and the abiOverride specified for the install. Warn about this because we
+        // would've already compiled the app without taking the package setting into
+        // account.
+        if ((scanFlags & SCAN_NO_DEX) == 0 && (scanFlags & SCAN_NEW_INSTALL) != 0) {
+            if (cpuAbiOverride == null && pkgSetting.cpuAbiOverrideString != null) {
+                Slog.w(TAG, "Ignoring persisted ABI override " + cpuAbiOverride +
+                        " for package " + pkg.packageName);
+            }
+        }
+
+        pkgSetting.primaryCpuAbiString = pkg.applicationInfo.primaryCpuAbi;
+        pkgSetting.secondaryCpuAbiString = pkg.applicationInfo.secondaryCpuAbi;
+        pkgSetting.cpuAbiOverrideString = cpuAbiOverride;
+
+        // Copy the derived override back to the parsed package, so that we can
+        // update the package settings accordingly.
+        pkg.cpuAbiOverride = cpuAbiOverride;
+
+        if (DEBUG_ABI_SELECTION) {
+            Slog.d(TAG, "Resolved nativeLibraryRoot for " + pkg.applicationInfo.packageName
+                    + " to root=" + pkg.applicationInfo.nativeLibraryRootDir + ", isa="
+                    + pkg.applicationInfo.nativeLibraryRootRequiresIsa);
+        }
+
+        // Push the derived path down into PackageSettings so we know what to
+        // clean up at uninstall time.
+        pkgSetting.legacyNativeLibraryPathString = pkg.applicationInfo.nativeLibraryRootDir;
+
+        if (DEBUG_ABI_SELECTION) {
+            Log.d(TAG, "Abis for package[" + pkg.packageName + "] are" +
+                    " primary=" + pkg.applicationInfo.primaryCpuAbi +
+                    " secondary=" + pkg.applicationInfo.secondaryCpuAbi);
+        }
+
+        if ((scanFlags & SCAN_BOOTING) == 0 && pkgSetting.sharedUser != null) {
+            // We don't do this here during boot because we can do it all
+            // at once after scanning all existing packages.
+            //
+            // We also do this *before* we perform dexopt on this package, so that
+            // we can avoid redundant dexopts, and also to make sure we've got the
+            // code and package path correct.
+            changedAbiCodePath =
+                    adjustCpuAbisForSharedUserLPw(pkgSetting.sharedUser.packages, pkg);
+        }
+
+        if (isUnderFactoryTest && pkg.requestedPermissions.contains(
+                android.Manifest.permission.FACTORY_TEST)) {
+            pkg.applicationInfo.flags |= ApplicationInfo.FLAG_FACTORY_TEST;
+        }
+
+        if (isSystemApp(pkg)) {
+            pkgSetting.isOrphaned = true;
+        }
+
+        // Take care of first install / last update times.
+        final long scanFileTime = getLastModifiedTime(pkg);
+        if (currentTime != 0) {
+            if (pkgSetting.firstInstallTime == 0) {
+                pkgSetting.firstInstallTime = pkgSetting.lastUpdateTime = currentTime;
+            } else if ((scanFlags & SCAN_UPDATE_TIME) != 0) {
+                pkgSetting.lastUpdateTime = currentTime;
+            }
+        } else if (pkgSetting.firstInstallTime == 0) {
+            // We need *something*.  Take time time stamp of the file.
+            pkgSetting.firstInstallTime = pkgSetting.lastUpdateTime = scanFileTime;
+        } else if ((parseFlags & PackageParser.PARSE_IS_SYSTEM_DIR) != 0) {
+            if (scanFileTime != pkgSetting.timeStamp) {
+                // A package on the system image has changed; consider this
+                // to be an update.
+                pkgSetting.lastUpdateTime = scanFileTime;
+            }
+        }
+        pkgSetting.setTimeStamp(scanFileTime);
+
+        return new ScanResult(true, pkgSetting, changedAbiCodePath);
     }
 
     /**
@@ -9701,490 +10334,6 @@ public class PackageManagerService extends IPackageManager.Stub
         }
     }
 
-    private PackageParser.Package scanPackageDirtyLI(PackageParser.Package pkg,
-            final @ParseFlags int parseFlags, final @ScanFlags int scanFlags, long currentTime,
-            @Nullable UserHandle user)
-                    throws PackageManagerException {
-        if (DEBUG_PACKAGE_SCANNING) {
-            if ((parseFlags & PackageParser.PARSE_CHATTY) != 0)
-                Log.d(TAG, "Scanning package " + pkg.packageName);
-        }
-
-        applyPolicy(pkg, parseFlags, scanFlags);
-
-        assertPackageIsValid(pkg, parseFlags, scanFlags);
-
-        if (Build.IS_DEBUGGABLE &&
-                pkg.isPrivileged() &&
-                SystemProperties.getBoolean(PROPERTY_NAME_PM_DEXOPT_PRIV_APPS_OOB, false)) {
-            PackageManagerServiceUtils.logPackageHasUncompressedCode(pkg);
-        }
-
-        // Initialize package source and resource directories
-        final File scanFile = new File(pkg.codePath);
-        final File destCodeFile = new File(pkg.applicationInfo.getCodePath());
-        final File destResourceFile = new File(pkg.applicationInfo.getResourcePath());
-
-        SharedUserSetting suid = null;
-        PackageSetting pkgSetting = null;
-
-        // Getting the package setting may have a side-effect, so if we
-        // are only checking if scan would succeed, stash a copy of the
-        // old setting to restore at the end.
-        PackageSetting nonMutatedPs = null;
-
-        // We keep references to the derived CPU Abis from settings in oder to reuse
-        // them in the case where we're not upgrading or booting for the first time.
-        String primaryCpuAbiFromSettings = null;
-        String secondaryCpuAbiFromSettings = null;
-        boolean needToDeriveAbi = (scanFlags & SCAN_FIRST_BOOT_OR_UPGRADE) != 0;
-
-        // writer
-        synchronized (mPackages) {
-            if (pkg.mSharedUserId != null) {
-                // SIDE EFFECTS; may potentially allocate a new shared user
-                suid = mSettings.getSharedUserLPw(
-                        pkg.mSharedUserId, 0 /*pkgFlags*/, 0 /*pkgPrivateFlags*/, true /*create*/);
-                if (DEBUG_PACKAGE_SCANNING) {
-                    if ((parseFlags & PackageParser.PARSE_CHATTY) != 0)
-                        Log.d(TAG, "Shared UserID " + pkg.mSharedUserId + " (uid=" + suid.userId
-                                + "): packages=" + suid.packages);
-                }
-            }
-
-            // Check if we are renaming from an original package name.
-            PackageSetting origPackage = null;
-            String realName = null;
-            if (pkg.mOriginalPackages != null) {
-                // This package may need to be renamed to a previously
-                // installed name.  Let's check on that...
-                final String renamed = mSettings.getRenamedPackageLPr(pkg.mRealPackage);
-                if (pkg.mOriginalPackages.contains(renamed)) {
-                    // This package had originally been installed as the
-                    // original name, and we have already taken care of
-                    // transitioning to the new one.  Just update the new
-                    // one to continue using the old name.
-                    realName = pkg.mRealPackage;
-                    if (!pkg.packageName.equals(renamed)) {
-                        // Callers into this function may have already taken
-                        // care of renaming the package; only do it here if
-                        // it is not already done.
-                        pkg.setPackageName(renamed);
-                    }
-                } else {
-                    for (int i=pkg.mOriginalPackages.size()-1; i>=0; i--) {
-                        if ((origPackage = mSettings.getPackageLPr(
-                                pkg.mOriginalPackages.get(i))) != null) {
-                            // We do have the package already installed under its
-                            // original name...  should we use it?
-                            if (!verifyPackageUpdateLPr(origPackage, pkg)) {
-                                // New package is not compatible with original.
-                                origPackage = null;
-                                continue;
-                            } else if (origPackage.sharedUser != null) {
-                                // Make sure uid is compatible between packages.
-                                if (!origPackage.sharedUser.name.equals(pkg.mSharedUserId)) {
-                                    Slog.w(TAG, "Unable to migrate data from " + origPackage.name
-                                            + " to " + pkg.packageName + ": old uid "
-                                            + origPackage.sharedUser.name
-                                            + " differs from " + pkg.mSharedUserId);
-                                    origPackage = null;
-                                    continue;
-                                }
-                                // TODO: Add case when shared user id is added [b/28144775]
-                            } else {
-                                if (DEBUG_UPGRADE) Log.v(TAG, "Renaming new package "
-                                        + pkg.packageName + " to old name " + origPackage.name);
-                            }
-                            break;
-                        }
-                    }
-                }
-            }
-
-            if (mTransferedPackages.contains(pkg.packageName)) {
-                Slog.w(TAG, "Package " + pkg.packageName
-                        + " was transferred to another, but its .apk remains");
-            }
-
-            // See comments in nonMutatedPs declaration
-            if ((scanFlags & SCAN_CHECK_ONLY) != 0) {
-                PackageSetting foundPs = mSettings.getPackageLPr(pkg.packageName);
-                if (foundPs != null) {
-                    nonMutatedPs = new PackageSetting(foundPs);
-                }
-            }
-
-            if (!needToDeriveAbi) {
-                PackageSetting foundPs = mSettings.getPackageLPr(pkg.packageName);
-                if (foundPs != null) {
-                    primaryCpuAbiFromSettings = foundPs.primaryCpuAbiString;
-                    secondaryCpuAbiFromSettings = foundPs.secondaryCpuAbiString;
-                } else {
-                    // when re-adding a system package failed after uninstalling updates.
-                    needToDeriveAbi = true;
-                }
-            }
-
-            pkgSetting = mSettings.getPackageLPr(pkg.packageName);
-            if (pkgSetting != null && pkgSetting.sharedUser != suid) {
-                PackageManagerService.reportSettingsProblem(Log.WARN,
-                        "Package " + pkg.packageName + " shared user changed from "
-                                + (pkgSetting.sharedUser != null
-                                        ? pkgSetting.sharedUser.name : "<nothing>")
-                                + " to "
-                                + (suid != null ? suid.name : "<nothing>")
-                                + "; replacing with new");
-                pkgSetting = null;
-            }
-            final PackageSetting oldPkgSetting =
-                    pkgSetting == null ? null : new PackageSetting(pkgSetting);
-            final PackageSetting disabledPkgSetting =
-                    mSettings.getDisabledSystemPkgLPr(pkg.packageName);
-
-            String[] usesStaticLibraries = null;
-            if (pkg.usesStaticLibraries != null) {
-                usesStaticLibraries = new String[pkg.usesStaticLibraries.size()];
-                pkg.usesStaticLibraries.toArray(usesStaticLibraries);
-            }
-
-            if (pkgSetting == null) {
-                final String parentPackageName = (pkg.parentPackage != null)
-                        ? pkg.parentPackage.packageName : null;
-                final boolean instantApp = (scanFlags & SCAN_AS_INSTANT_APP) != 0;
-                final boolean virtualPreload = (scanFlags & SCAN_AS_VIRTUAL_PRELOAD) != 0;
-                // REMOVE SharedUserSetting from method; update in a separate call
-                pkgSetting = Settings.createNewSetting(pkg.packageName, origPackage,
-                        disabledPkgSetting, realName, suid, destCodeFile, destResourceFile,
-                        pkg.applicationInfo.nativeLibraryRootDir, pkg.applicationInfo.primaryCpuAbi,
-                        pkg.applicationInfo.secondaryCpuAbi, pkg.getLongVersionCode(),
-                        pkg.applicationInfo.flags, pkg.applicationInfo.privateFlags, user,
-                        true /*allowInstall*/, instantApp, virtualPreload,
-                        parentPackageName, pkg.getChildPackageNames(),
-                        UserManagerService.getInstance(), usesStaticLibraries,
-                        pkg.usesStaticLibrariesVersions);
-                // SIDE EFFECTS; updates system state; move elsewhere
-                if (origPackage != null) {
-                    mSettings.addRenamedPackageLPw(pkg.packageName, origPackage.name);
-                }
-                mSettings.addUserToSettingLPw(pkgSetting);
-            } else {
-                // REMOVE SharedUserSetting from method; update in a separate call.
-                //
-                // TODO(narayan): This update is bogus. nativeLibraryDir & primaryCpuAbi,
-                // secondaryCpuAbi are not known at this point so we always update them
-                // to null here, only to reset them at a later point.
-                Settings.updatePackageSetting(pkgSetting, disabledPkgSetting, suid, destCodeFile,
-                        pkg.applicationInfo.nativeLibraryDir, pkg.applicationInfo.primaryCpuAbi,
-                        pkg.applicationInfo.secondaryCpuAbi, pkg.applicationInfo.flags,
-                        pkg.applicationInfo.privateFlags, pkg.getChildPackageNames(),
-                        UserManagerService.getInstance(), usesStaticLibraries,
-                        pkg.usesStaticLibrariesVersions);
-            }
-            // SIDE EFFECTS; persists system state to files on disk; move elsewhere
-            mSettings.writeUserRestrictionsLPw(pkgSetting, oldPkgSetting);
-
-            // SIDE EFFECTS; modifies system state; move elsewhere
-            if (pkgSetting.origPackage != null) {
-                // If we are first transitioning from an original package,
-                // fix up the new package's name now.  We need to do this after
-                // looking up the package under its new name, so getPackageLP
-                // can take care of fiddling things correctly.
-                pkg.setPackageName(origPackage.name);
-
-                // File a report about this.
-                String msg = "New package " + pkgSetting.realName
-                        + " renamed to replace old package " + pkgSetting.name;
-                reportSettingsProblem(Log.WARN, msg);
-
-                // Make a note of it.
-                if ((scanFlags & SCAN_CHECK_ONLY) == 0) {
-                    mTransferedPackages.add(origPackage.name);
-                }
-
-                // No longer need to retain this.
-                pkgSetting.origPackage = null;
-            }
-
-            // SIDE EFFECTS; modifies system state; move elsewhere
-            if ((scanFlags & SCAN_CHECK_ONLY) == 0 && realName != null) {
-                // Make a note of it.
-                mTransferedPackages.add(pkg.packageName);
-            }
-
-            if (mSettings.isDisabledSystemPackageLPr(pkg.packageName)) {
-                pkg.applicationInfo.flags |= ApplicationInfo.FLAG_UPDATED_SYSTEM_APP;
-            }
-
-            if ((scanFlags & SCAN_BOOTING) == 0
-                    && (parseFlags & PackageParser.PARSE_IS_SYSTEM_DIR) == 0) {
-                // Check all shared libraries and map to their actual file path.
-                // We only do this here for apps not on a system dir, because those
-                // are the only ones that can fail an install due to this.  We
-                // will take care of the system apps by updating all of their
-                // library paths after the scan is done. Also during the initial
-                // scan don't update any libs as we do this wholesale after all
-                // apps are scanned to avoid dependency based scanning.
-                updateSharedLibrariesLPr(pkg, null);
-            }
-
-            if (mFoundPolicyFile) {
-                SELinuxMMAC.assignSeInfoValue(pkg);
-            }
-            pkg.applicationInfo.uid = pkgSetting.appId;
-            pkg.mExtras = pkgSetting;
-
-
-            // Static shared libs have same package with different versions where
-            // we internally use a synthetic package name to allow multiple versions
-            // of the same package, therefore we need to compare signatures against
-            // the package setting for the latest library version.
-            PackageSetting signatureCheckPs = pkgSetting;
-            if (pkg.applicationInfo.isStaticSharedLibrary()) {
-                SharedLibraryEntry libraryEntry = getLatestSharedLibraVersionLPr(pkg);
-                if (libraryEntry != null) {
-                    signatureCheckPs = mSettings.getPackageLPr(libraryEntry.apk);
-                }
-            }
-
-            final KeySetManagerService ksms = mSettings.mKeySetManagerService;
-            if (ksms.shouldCheckUpgradeKeySetLocked(signatureCheckPs, scanFlags)) {
-                if (ksms.checkUpgradeKeySetLocked(signatureCheckPs, pkg)) {
-                    // We just determined the app is signed correctly, so bring
-                    // over the latest parsed certs.
-                    pkgSetting.signatures.mSignatures = pkg.mSignatures;
-                } else {
-                    if ((parseFlags & PackageParser.PARSE_IS_SYSTEM_DIR) == 0) {
-                        throw new PackageManagerException(INSTALL_FAILED_UPDATE_INCOMPATIBLE,
-                                "Package " + pkg.packageName + " upgrade keys do not match the "
-                                + "previously installed version");
-                    } else {
-                        pkgSetting.signatures.mSignatures = pkg.mSignatures;
-                        String msg = "System package " + pkg.packageName
-                                + " signature changed; retaining data.";
-                        reportSettingsProblem(Log.WARN, msg);
-                    }
-                }
-            } else {
-                try {
-                    final boolean compareCompat = isCompatSignatureUpdateNeeded(pkg);
-                    final boolean compareRecover = isRecoverSignatureUpdateNeeded(pkg);
-                    final boolean compatMatch = verifySignatures(signatureCheckPs, pkg.mSignatures,
-                            compareCompat, compareRecover);
-                    // The new KeySets will be re-added later in the scanning process.
-                    if (compatMatch) {
-                        synchronized (mPackages) {
-                            ksms.removeAppKeySetDataLPw(pkg.packageName);
-                        }
-                    }
-                    // We just determined the app is signed correctly, so bring
-                    // over the latest parsed certs.
-                    pkgSetting.signatures.mSignatures = pkg.mSignatures;
-                } catch (PackageManagerException e) {
-                    if ((parseFlags & PackageParser.PARSE_IS_SYSTEM_DIR) == 0) {
-                        throw e;
-                    }
-                    // The signature has changed, but this package is in the system
-                    // image...  let's recover!
-                    pkgSetting.signatures.mSignatures = pkg.mSignatures;
-                    // However...  if this package is part of a shared user, but it
-                    // doesn't match the signature of the shared user, let's fail.
-                    // What this means is that you can't change the signatures
-                    // associated with an overall shared user, which doesn't seem all
-                    // that unreasonable.
-                    if (signatureCheckPs.sharedUser != null) {
-                        if (compareSignatures(signatureCheckPs.sharedUser.signatures.mSignatures,
-                                pkg.mSignatures) != PackageManager.SIGNATURE_MATCH) {
-                            throw new PackageManagerException(
-                                    INSTALL_PARSE_FAILED_INCONSISTENT_CERTIFICATES,
-                                    "Signature mismatch for shared user: "
-                                            + pkgSetting.sharedUser);
-                        }
-                    }
-                    // File a report about this.
-                    String msg = "System package " + pkg.packageName
-                            + " signature changed; retaining data.";
-                    reportSettingsProblem(Log.WARN, msg);
-                }
-            }
-
-            if ((scanFlags & SCAN_CHECK_ONLY) == 0 && pkg.mAdoptPermissions != null) {
-                // This package wants to adopt ownership of permissions from
-                // another package.
-                for (int i = pkg.mAdoptPermissions.size() - 1; i >= 0; i--) {
-                    final String origName = pkg.mAdoptPermissions.get(i);
-                    final PackageSetting orig = mSettings.getPackageLPr(origName);
-                    if (orig != null) {
-                        if (verifyPackageUpdateLPr(orig, pkg)) {
-                            Slog.i(TAG, "Adopting permissions from " + origName + " to "
-                                    + pkg.packageName);
-                            // SIDE EFFECTS; updates permissions system state; move elsewhere
-                            mSettings.mPermissions.transferPermissions(origName, pkg.packageName);
-                        }
-                    }
-                }
-            }
-        }
-
-        pkg.applicationInfo.processName = fixProcessName(
-                pkg.applicationInfo.packageName,
-                pkg.applicationInfo.processName);
-
-        if (pkg != mPlatformPackage) {
-            // Get all of our default paths setup
-            pkg.applicationInfo.initForUser(UserHandle.USER_SYSTEM);
-        }
-
-        final String cpuAbiOverride = deriveAbiOverride(pkg.cpuAbiOverride, pkgSetting);
-
-        if ((scanFlags & SCAN_NEW_INSTALL) == 0) {
-            if (needToDeriveAbi) {
-                Trace.traceBegin(TRACE_TAG_PACKAGE_MANAGER, "derivePackageAbi");
-                final boolean extractNativeLibs = !pkg.isLibrary();
-                derivePackageAbi(pkg, cpuAbiOverride, extractNativeLibs, mAppLib32InstallDir);
-                Trace.traceEnd(TRACE_TAG_PACKAGE_MANAGER);
-
-                // Some system apps still use directory structure for native libraries
-                // in which case we might end up not detecting abi solely based on apk
-                // structure. Try to detect abi based on directory structure.
-                if (isSystemApp(pkg) && !pkg.isUpdatedSystemApp() &&
-                        pkg.applicationInfo.primaryCpuAbi == null) {
-                    setBundledAppAbisAndRoots(pkg, pkgSetting);
-                    setNativeLibraryPaths(pkg, mAppLib32InstallDir);
-                }
-            } else {
-                // This is not a first boot or an upgrade, don't bother deriving the
-                // ABI during the scan. Instead, trust the value that was stored in the
-                // package setting.
-                pkg.applicationInfo.primaryCpuAbi = primaryCpuAbiFromSettings;
-                pkg.applicationInfo.secondaryCpuAbi = secondaryCpuAbiFromSettings;
-
-                setNativeLibraryPaths(pkg, mAppLib32InstallDir);
-
-                if (DEBUG_ABI_SELECTION) {
-                    Slog.i(TAG, "Using ABIS and native lib paths from settings : " +
-                        pkg.packageName + " " + pkg.applicationInfo.primaryCpuAbi + ", " +
-                        pkg.applicationInfo.secondaryCpuAbi);
-                }
-            }
-        } else {
-            if ((scanFlags & SCAN_MOVE) != 0) {
-                // We haven't run dex-opt for this move (since we've moved the compiled output too)
-                // but we already have this packages package info in the PackageSetting. We just
-                // use that and derive the native library path based on the new codepath.
-                pkg.applicationInfo.primaryCpuAbi = pkgSetting.primaryCpuAbiString;
-                pkg.applicationInfo.secondaryCpuAbi = pkgSetting.secondaryCpuAbiString;
-            }
-
-            // Set native library paths again. For moves, the path will be updated based on the
-            // ABIs we've determined above. For non-moves, the path will be updated based on the
-            // ABIs we determined during compilation, but the path will depend on the final
-            // package path (after the rename away from the stage path).
-            setNativeLibraryPaths(pkg, mAppLib32InstallDir);
-        }
-
-        // This is a special case for the "system" package, where the ABI is
-        // dictated by the zygote configuration (and init.rc). We should keep track
-        // of this ABI so that we can deal with "normal" applications that run under
-        // the same UID correctly.
-        if (mPlatformPackage == pkg) {
-            pkg.applicationInfo.primaryCpuAbi = VMRuntime.getRuntime().is64Bit() ?
-                    Build.SUPPORTED_64_BIT_ABIS[0] : Build.SUPPORTED_32_BIT_ABIS[0];
-        }
-
-        // If there's a mismatch between the abi-override in the package setting
-        // and the abiOverride specified for the install. Warn about this because we
-        // would've already compiled the app without taking the package setting into
-        // account.
-        if ((scanFlags & SCAN_NO_DEX) == 0 && (scanFlags & SCAN_NEW_INSTALL) != 0) {
-            if (cpuAbiOverride == null && pkgSetting.cpuAbiOverrideString != null) {
-                Slog.w(TAG, "Ignoring persisted ABI override " + cpuAbiOverride +
-                        " for package " + pkg.packageName);
-            }
-        }
-
-        pkgSetting.primaryCpuAbiString = pkg.applicationInfo.primaryCpuAbi;
-        pkgSetting.secondaryCpuAbiString = pkg.applicationInfo.secondaryCpuAbi;
-        pkgSetting.cpuAbiOverrideString = cpuAbiOverride;
-
-        // Copy the derived override back to the parsed package, so that we can
-        // update the package settings accordingly.
-        pkg.cpuAbiOverride = cpuAbiOverride;
-
-        if (DEBUG_ABI_SELECTION) {
-            Slog.d(TAG, "Resolved nativeLibraryRoot for " + pkg.applicationInfo.packageName
-                    + " to root=" + pkg.applicationInfo.nativeLibraryRootDir + ", isa="
-                    + pkg.applicationInfo.nativeLibraryRootRequiresIsa);
-        }
-
-        // Push the derived path down into PackageSettings so we know what to
-        // clean up at uninstall time.
-        pkgSetting.legacyNativeLibraryPathString = pkg.applicationInfo.nativeLibraryRootDir;
-
-        if (DEBUG_ABI_SELECTION) {
-            Log.d(TAG, "Abis for package[" + pkg.packageName + "] are" +
-                    " primary=" + pkg.applicationInfo.primaryCpuAbi +
-                    " secondary=" + pkg.applicationInfo.secondaryCpuAbi);
-        }
-
-        // SIDE EFFECTS; removes DEX files from disk; move elsewhere
-        if ((scanFlags & SCAN_BOOTING) == 0 && pkgSetting.sharedUser != null) {
-            // We don't do this here during boot because we can do it all
-            // at once after scanning all existing packages.
-            //
-            // We also do this *before* we perform dexopt on this package, so that
-            // we can avoid redundant dexopts, and also to make sure we've got the
-            // code and package path correct.
-            adjustCpuAbisForSharedUserLPw(pkgSetting.sharedUser.packages, pkg);
-        }
-
-        if (mFactoryTest && pkg.requestedPermissions.contains(
-                android.Manifest.permission.FACTORY_TEST)) {
-            pkg.applicationInfo.flags |= ApplicationInfo.FLAG_FACTORY_TEST;
-        }
-
-        if (isSystemApp(pkg)) {
-            pkgSetting.isOrphaned = true;
-        }
-
-        // Take care of first install / last update times.
-        final long scanFileTime = getLastModifiedTime(pkg);
-        if (currentTime != 0) {
-            if (pkgSetting.firstInstallTime == 0) {
-                pkgSetting.firstInstallTime = pkgSetting.lastUpdateTime = currentTime;
-            } else if ((scanFlags & SCAN_UPDATE_TIME) != 0) {
-                pkgSetting.lastUpdateTime = currentTime;
-            }
-        } else if (pkgSetting.firstInstallTime == 0) {
-            // We need *something*.  Take time time stamp of the file.
-            pkgSetting.firstInstallTime = pkgSetting.lastUpdateTime = scanFileTime;
-        } else if ((parseFlags & PackageParser.PARSE_IS_SYSTEM_DIR) != 0) {
-            if (scanFileTime != pkgSetting.timeStamp) {
-                // A package on the system image has changed; consider this
-                // to be an update.
-                pkgSetting.lastUpdateTime = scanFileTime;
-            }
-        }
-        pkgSetting.setTimeStamp(scanFileTime);
-
-        if ((scanFlags & SCAN_CHECK_ONLY) != 0) {
-            if (nonMutatedPs != null) {
-                synchronized (mPackages) {
-                    mSettings.mPackages.put(nonMutatedPs.name, nonMutatedPs);
-                }
-            }
-        } else {
-            final int userId = user == null ? 0 : user.getIdentifier();
-            // Modify state for the given package setting
-            commitPackageSettings(pkg, pkgSetting, user, scanFlags,
-                    (parseFlags & PackageParser.PARSE_CHATTY) != 0 /*chatty*/);
-            if (pkgSetting.getInstantApp(userId)) {
-                mInstantAppRegistry.addInstantAppLPw(userId, pkgSetting.appId);
-            }
-        }
-        return pkg;
-    }
-
     /**
      * Applies policy to the parsed package based upon the given policy flags.
      * Ensures the package is in a good state.
@@ -10192,7 +10341,7 @@ public class PackageManagerService extends IPackageManager.Stub
      * Implementation detail: This method must NOT have any side effect. It would
      * ideally be static, but, it requires locks to read system state.
      */
-    private void applyPolicy(PackageParser.Package pkg, final @ParseFlags int parseFlags,
+    private static void applyPolicy(PackageParser.Package pkg, final @ParseFlags int parseFlags,
             final @ScanFlags int scanFlags) {
         if ((scanFlags & SCAN_AS_SYSTEM) != 0) {
             pkg.applicationInfo.flags |= ApplicationInfo.FLAG_SYSTEM;
@@ -10581,8 +10730,7 @@ public class PackageManagerService extends IPackageManager.Stub
      * be available for query, resolution, etc...
      */
     private void commitPackageSettings(PackageParser.Package pkg, PackageSetting pkgSetting,
-            UserHandle user, final @ScanFlags int scanFlags, boolean chatty)
-                    throws PackageManagerException {
+            UserHandle user, final @ScanFlags int scanFlags, boolean chatty) {
         final String pkgName = pkg.packageName;
         if (mCustomResolverComponentName != null &&
                 mCustomResolverComponentName.getPackageName().equals(pkg.packageName)) {
@@ -10935,11 +11083,11 @@ public class PackageManagerService extends IPackageManager.Stub
      * If {@code extractLibs} is true, native libraries are extracted from the app if required.
      */
     private static void derivePackageAbi(PackageParser.Package pkg, String cpuAbiOverride,
-            boolean extractLibs, File appLib32InstallDir)
+            boolean extractLibs)
                     throws PackageManagerException {
         // Give ourselves some initial paths; we'll come back for another
         // pass once we've determined ABI below.
-        setNativeLibraryPaths(pkg, appLib32InstallDir);
+        setNativeLibraryPaths(pkg, sAppLib32InstallDir);
 
         // We would never need to extract libs for forward-locked and external packages,
         // since the container service will do it for us. We shouldn't attempt to
@@ -11089,7 +11237,7 @@ public class PackageManagerService extends IPackageManager.Stub
 
         // Now that we've calculated the ABIs and determined if it's an internal app,
         // we will go ahead and populate the nativeLibraryPath.
-        setNativeLibraryPaths(pkg, appLib32InstallDir);
+        setNativeLibraryPaths(pkg, sAppLib32InstallDir);
     }
 
     /**
@@ -11105,8 +11253,9 @@ public class PackageManagerService extends IPackageManager.Stub
      * NOTE: We currently only match for the primary CPU abi string. Matching the secondary
      * adds unnecessary complexity.
      */
-    private void adjustCpuAbisForSharedUserLPw(Set<PackageSetting> packagesForUser,
-            PackageParser.Package scannedPackage) {
+    private static @Nullable List<String> adjustCpuAbisForSharedUserLPw(
+            Set<PackageSetting> packagesForUser, PackageParser.Package scannedPackage) {
+        List<String> changedAbiCodePath = null;
         String requiredInstructionSet = null;
         if (scannedPackage != null && scannedPackage.applicationInfo.primaryCpuAbi != null) {
             requiredInstructionSet = VMRuntime.getInstructionSet(
@@ -11176,15 +11325,15 @@ public class PackageManagerService extends IPackageManager.Stub
                                     + (scannedPackage != null ? scannedPackage : "null")
                                     + ")");
                         }
-                        try {
-                            mInstaller.rmdex(ps.codePathString,
-                                    getDexCodeInstructionSet(getPreferredInstructionSet()));
-                        } catch (InstallerException ignored) {
+                        if (changedAbiCodePath == null) {
+                            changedAbiCodePath = new ArrayList<>();
                         }
+                        changedAbiCodePath.add(ps.codePathString);
                     }
                 }
             }
         }
+        return changedAbiCodePath;
     }
 
     private void setUpCustomResolverActivity(PackageParser.Package pkg) {
@@ -16621,7 +16770,7 @@ public class PackageManagerService extends IPackageManager.Stub
                 String abiOverride = (TextUtils.isEmpty(pkg.cpuAbiOverride) ?
                     args.abiOverride : pkg.cpuAbiOverride);
                 final boolean extractNativeLibs = !pkg.isLibrary();
-                derivePackageAbi(pkg, abiOverride, extractNativeLibs, mAppLib32InstallDir);
+                derivePackageAbi(pkg, abiOverride, extractNativeLibs);
             } catch (PackageManagerException pme) {
                 Slog.e(TAG, "Error deriving application ABI", pme);
                 res.setError(INSTALL_FAILED_INTERNAL_ERROR, "Error deriving application ABI");
@@ -16947,7 +17096,7 @@ public class PackageManagerService extends IPackageManager.Stub
                 return name.startsWith("vmdl") && name.endsWith(".tmp");
             }
         };
-        for (File file : mDrmAppPrivateInstallDir.listFiles(filter)) {
+        for (File file : sDrmAppPrivateInstallDir.listFiles(filter)) {
             file.delete();
         }
     }

@@ -687,7 +687,6 @@ public final class Settings {
                     (childPkgNames != null) ? new ArrayList<>(childPkgNames) : null;
             pkgSetting.codePath = codePath;
             pkgSetting.legacyNativeLibraryPathString = legacyNativeLibraryPath;
-            pkgSetting.origPackage = originalPkg;
             pkgSetting.parentPackageName = parentPkgName;
             pkgSetting.pkgFlags = pkgFlags;
             pkgSetting.pkgPrivateFlags = pkgPrivateFlags;
