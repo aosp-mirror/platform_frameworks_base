@@ -52,7 +52,7 @@ public final class StatsLogEventWrapper implements Parcelable {
         // pushed ones to be consistent.
         write4Bytes(STATS_BUFFER_TAG_ID);
         mStorage.write(EVENT_TYPE_LIST); // This is required to start the log entry.
-        mStorage.write(fields); // Indicate number of elements in this list.
+        mStorage.write(fields + 1); // Indicate number of elements in this list. +1 for the tag
         mStorage.write(EVENT_TYPE_INT);
         // The first element is the real atom tag number
         write4Bytes(tag);
