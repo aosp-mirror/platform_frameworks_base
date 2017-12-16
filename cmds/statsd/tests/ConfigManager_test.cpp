@@ -88,12 +88,6 @@ TEST(ConfigManagerTest, TestAddUpdateRemove) {
     {
         InSequence s;
 
-        // The built-in fake one.
-        // TODO: Remove this when we get rid of the fake one, and make this
-        // test loading one from disk somewhere.
-        EXPECT_CALL(*(listener.get()),
-                    OnConfigUpdated(ConfigKeyEq(1000, "fake"), StatsdConfigEq("CONFIG_12345")))
-                .RetiresOnSaturation();
         manager->Startup();
 
         // Add another one
@@ -147,7 +141,7 @@ TEST(ConfigManagerTest, TestRemoveUid) {
 
     StatsdConfig config;
 
-    EXPECT_CALL(*(listener.get()), OnConfigUpdated(_, _)).Times(6);
+    EXPECT_CALL(*(listener.get()), OnConfigUpdated(_, _)).Times(5);
     EXPECT_CALL(*(listener.get()), OnConfigRemoved(ConfigKeyEq(2, "xxx")));
     EXPECT_CALL(*(listener.get()), OnConfigRemoved(ConfigKeyEq(2, "yyy")));
     EXPECT_CALL(*(listener.get()), OnConfigRemoved(ConfigKeyEq(2, "zzz")));

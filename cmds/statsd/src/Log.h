@@ -26,5 +26,8 @@
 
 #include <log/log.h>
 
+// Use the local value to turn on/off debug logs instead of using log.tag. properties.
+// The advantage is that in production compiler can remove the logging code if the local
+// DEBUG/VERBOSE is false.
 #define VLOG(...) \
     if (DEBUG) ALOGD(__VA_ARGS__);
