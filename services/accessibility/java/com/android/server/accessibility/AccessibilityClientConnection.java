@@ -25,7 +25,6 @@ import android.accessibilityservice.IAccessibilityServiceClient;
 import android.accessibilityservice.IAccessibilityServiceConnection;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
-import android.app.AppOpsManager;
 import android.app.PendingIntent;
 import android.content.ComponentName;
 import android.content.Context;
@@ -40,9 +39,7 @@ import android.os.Handler;
 import android.os.IBinder;
 import android.os.Looper;
 import android.os.Message;
-import android.os.Process;
 import android.os.RemoteException;
-import android.os.UserHandle;
 import android.util.Slog;
 import android.util.SparseArray;
 import android.view.KeyEvent;
@@ -96,7 +93,6 @@ abstract class AccessibilityClientConnection extends IAccessibilityServiceConnec
     protected final Object mLock;
 
     protected final SecurityPolicy mSecurityPolicy;
-    private final AppOpsManager mAppOpsManager;
 
     // The service that's bound to this instance. Whenever this value is non-null, this
     // object is registered as a death recipient
@@ -254,7 +250,6 @@ abstract class AccessibilityClientConnection extends IAccessibilityServiceConnec
         mAccessibilityServiceInfo = accessibilityServiceInfo;
         mLock = lock;
         mSecurityPolicy = securityPolicy;
-        mAppOpsManager = (AppOpsManager) context.getSystemService(Context.APP_OPS_SERVICE);
         mGlobalActionPerformer = globalActionPerfomer;
         mSystemSupport = systemSupport;
         mInvocationHandler = new InvocationHandler(mainHandler.getLooper());
@@ -711,16 +706,6 @@ abstract class AccessibilityClientConnection extends IAccessibilityServiceConnec
             long accessibilityNodeId, int action, Bundle arguments, int interactionId,
             IAccessibilityInteractionConnectionCallback callback, long interrogatingTid)
             throws RemoteException {
-
-        // Skip this if the caller is the Accessibility InteractionBridge.
-        if (UserHandle.getAppId(Binder.getCallingUid()) != Process.SYSTEM_UID) {
-            if (mAppOpsManager.noteOp(AppOpsManager.OP_PERFORM_ACCESSIBILITY_ACTION,
-                    Binder.getCallingUid(), mComponentName.getPackageName())
-                    != AppOpsManager.MODE_ALLOWED) {
-                return false;
-            }
-        }
-
         final int resolvedWindowId;
         IAccessibilityInteractionConnection connection = null;
         synchronized (mLock) {
@@ -740,15 +725,6 @@ abstract class AccessibilityClientConnection extends IAccessibilityServiceConnec
 
     @Override
     public boolean performGlobalAction(int action) {
-        // Skip this if the caller is the Accessibility InteractionBridge.
-        if (UserHandle.getAppId(Binder.getCallingUid()) != Process.SYSTEM_UID) {
-            if (mAppOpsManager.noteOp(AppOpsManager.OP_PERFORM_ACCESSIBILITY_ACTION,
-                    Binder.getCallingUid(), mComponentName.getPackageName())
-                    != AppOpsManager.MODE_ALLOWED) {
-                return false;
-            }
-        }
-
         synchronized (mLock) {
             if (!isCalledForCurrentUserLocked()) {
                 return false;
