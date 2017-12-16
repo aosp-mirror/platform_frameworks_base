@@ -686,30 +686,42 @@ public class MbmsDownloadSession implements AutoCloseable {
     }
 
     /**
-     * Gets information about the status of a file pending download.
+     * Requests information about the state of a file pending download.
      *
-     * If there was a problem communicating with the middleware or if it has no records of the
+     * The state will be delivered as a callback via
+     * {@link DownloadStateCallback#onStateUpdated(DownloadRequest, FileInfo, int)}. If no such
+     * callback has been registered via
+     * {@link #registerStateCallback(DownloadRequest, DownloadStateCallback, Handler)}, this
+     * method will be a no-op.
+     *
+     * If the middleware has no record of the
      * file indicated by {@code fileInfo} being associated with {@code downloadRequest},
-     * {@link #STATUS_UNKNOWN} will be returned.
+     * an {@link IllegalArgumentException} will be thrown.
      *
      * @param downloadRequest The download request to query.
      * @param fileInfo The particular file within the request to get information on.
-     * @return The status of the download.
      */
-    @DownloadStatus
-    public int getDownloadStatus(DownloadRequest downloadRequest, FileInfo fileInfo) {
+    public void requestDownloadState(DownloadRequest downloadRequest, FileInfo fileInfo) {
         IMbmsDownloadService downloadService = mService.get();
         if (downloadService == null) {
             throw new IllegalStateException("Middleware not yet bound");
         }
 
         try {
-            return downloadService.getDownloadStatus(downloadRequest, fileInfo);
+            int result = downloadService.requestDownloadState(downloadRequest, fileInfo);
+            if (result != MbmsErrors.SUCCESS) {
+                if (result == MbmsErrors.DownloadErrors.ERROR_UNKNOWN_DOWNLOAD_REQUEST) {
+                    throw new IllegalArgumentException("Unknown download request.");
+                }
+                if (result == MbmsErrors.DownloadErrors.ERROR_UNKNOWN_FILE_INFO) {
+                    throw new IllegalArgumentException("Unknown file.");
+                }
+                sendErrorToApp(result, null);
+            }
         } catch (RemoteException e) {
             mService.set(null);
             sIsInitialized.set(false);
             sendErrorToApp(MbmsErrors.ERROR_MIDDLEWARE_LOST, null);
-            return STATUS_UNKNOWN;
         }
     }
 
