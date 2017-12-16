@@ -772,7 +772,6 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
     public void unregisterUiTestAutomationService(IAccessibilityServiceClient serviceClient) {
         synchronized (mLock) {
             mUiAutomationManager.unregisterUiTestAutomationServiceLocked(serviceClient);
-            onUserStateChangedLocked(getCurrentUserStateLocked());
         }
     }
 

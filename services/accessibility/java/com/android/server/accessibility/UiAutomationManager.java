@@ -28,6 +28,7 @@ import android.os.RemoteException;
 import android.util.Slog;
 import android.view.accessibility.AccessibilityEvent;
 
+import com.android.internal.util.DumpUtils;
 import com.android.server.wm.WindowManagerInternal;
 
 import java.io.FileDescriptor;
@@ -44,6 +45,8 @@ class UiAutomationManager {
     private UiAutomationService mUiAutomationService;
 
     private AccessibilityServiceInfo mUiAutomationServiceInfo;
+
+    private AccessibilityClientConnection.SystemSupport mSystemSupport;
 
     private int mUiAutomationFlags;
 
@@ -92,6 +95,7 @@ class UiAutomationManager {
             return;
         }
 
+        mSystemSupport = systemSupport;
         mUiAutomationService = new UiAutomationService(context, accessibilityServiceInfo, id,
                 mainHandler, lock, securityPolicy, systemSupport, windowManagerInternal,
                 globalActionPerfomer);
@@ -169,6 +173,7 @@ class UiAutomationManager {
             mUiAutomationServiceOwner.unlinkToDeath(mUiAutomationServiceOwnerDeathRecipient, 0);
             mUiAutomationServiceOwner = null;
         }
+        mSystemSupport.onClientChange(false);
     }
 
     private class UiAutomationService extends AccessibilityClientConnection {
@@ -222,6 +227,17 @@ class UiAutomationManager {
         @Override
         protected boolean supportsFlagForNotImportantViews(AccessibilityServiceInfo info) {
             return true;
+        }
+
+        @Override
+        public void dump(FileDescriptor fd, final PrintWriter pw, String[] args) {
+            if (!DumpUtils.checkDumpPermission(mContext, LOG_TAG, pw)) return;
+            synchronized (mLock) {
+                pw.append("Ui Automation[eventTypes="
+                        + AccessibilityEvent.eventTypeToString(mEventTypes));
+                pw.append(", notificationTimeout=" + mNotificationTimeout);
+                pw.append("]");
+            }
         }
 
         // Since this isn't really an accessibility service, several methods are just stubbed here.
