@@ -260,10 +260,8 @@ public class AppOpsManager {
     public static final int OP_REQUEST_DELETE_PACKAGES = 72;
     /** @hide Bind an accessibility service. */
     public static final int OP_BIND_ACCESSIBILITY_SERVICE = 73;
-    /** @hide Interact with the system UI via an Accessibility Service */
-    public static final int OP_PERFORM_ACCESSIBILITY_ACTION = 74;
     /** @hide */
-    public static final int _NUM_OP = 75;
+    public static final int _NUM_OP = 74;
 
     /** Access to coarse location information. */
     public static final String OPSTR_COARSE_LOCATION = "android:coarse_location";
@@ -508,7 +506,6 @@ public class AppOpsManager {
             OP_CHANGE_WIFI_STATE,
             OP_REQUEST_DELETE_PACKAGES,
             OP_BIND_ACCESSIBILITY_SERVICE,
-            OP_PERFORM_ACCESSIBILITY_ACTION,
     };
 
     /**
@@ -590,7 +587,6 @@ public class AppOpsManager {
             null, // OP_CHANGE_WIFI_STATE
             null, // OP_REQUEST_DELETE_PACKAGES
             null, // OP_BIND_ACCESSIBILITY_SERVICE
-            null, // OP_PERFORM_ACCESSIBILITY_ACTION
     };
 
     /**
@@ -672,7 +668,6 @@ public class AppOpsManager {
             "CHANGE_WIFI_STATE",
             "REQUEST_DELETE_PACKAGES",
             "BIND_ACCESSIBILITY_SERVICE",
-            "OP_PERFORM_ACCESSIBILITY_ACTION",
     };
 
     /**
@@ -754,7 +749,6 @@ public class AppOpsManager {
             Manifest.permission.CHANGE_WIFI_STATE,
             Manifest.permission.REQUEST_DELETE_PACKAGES,
             Manifest.permission.BIND_ACCESSIBILITY_SERVICE,
-            null, // no permission for OP_PERFORM_ACCESSIBILITY_ACTION
     };
 
     /**
@@ -837,7 +831,6 @@ public class AppOpsManager {
             null, // OP_CHANGE_WIFI_STATE
             null, // REQUEST_DELETE_PACKAGES
             null, // OP_BIND_ACCESSIBILITY_SERVICE
-            null, // OP_PERFORM_ACCESSIBILITY_ACTION
     };
 
     /**
@@ -919,7 +912,6 @@ public class AppOpsManager {
             false, // OP_CHANGE_WIFI_STATE
             false, // OP_REQUEST_DELETE_PACKAGES
             false, // OP_BIND_ACCESSIBILITY_SERVICE
-            false, // OP_PERFORM_ACCESSIBILITY_ACTION
     };
 
     /**
@@ -1000,7 +992,6 @@ public class AppOpsManager {
             AppOpsManager.MODE_ALLOWED,  // OP_CHANGE_WIFI_STATE
             AppOpsManager.MODE_ALLOWED,  // REQUEST_DELETE_PACKAGES
             AppOpsManager.MODE_ALLOWED,  // OP_BIND_ACCESSIBILITY_SERVICE
-            AppOpsManager.MODE_ALLOWED,  // OP_PERFORM_ACCESSIBILITY_ACTION
     };
 
     /**
@@ -1085,7 +1076,6 @@ public class AppOpsManager {
             false, // OP_CHANGE_WIFI_STATE
             false, // OP_REQUEST_DELETE_PACKAGES
             false, // OP_BIND_ACCESSIBILITY_SERVICE
-            false, // OP_PERFORM_ACCESSIBILITY_ACTION
     };
 
     /**
