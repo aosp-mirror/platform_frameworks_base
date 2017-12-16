@@ -236,17 +236,15 @@ copyFileIfChanged(JNIEnv *env, void* arg, ZipFileRO* zipFile, ZipEntryRO zipEntr
         return INSTALL_SUCCEEDED;
     }
 
-    char localTmpFileName[nativeLibPath.size() + TMP_FILE_PATTERN_LEN + 2];
+    char localTmpFileName[nativeLibPath.size() + TMP_FILE_PATTERN_LEN + 1];
     if (strlcpy(localTmpFileName, nativeLibPath.c_str(), sizeof(localTmpFileName))
             != nativeLibPath.size()) {
         ALOGD("Couldn't allocate local file name for library");
         return INSTALL_FAILED_INTERNAL_ERROR;
     }
 
-    *(localTmpFileName + nativeLibPath.size()) = '/';
-
     if (strlcpy(localTmpFileName + nativeLibPath.size(), TMP_FILE_PATTERN,
-                    TMP_FILE_PATTERN_LEN - nativeLibPath.size()) != TMP_FILE_PATTERN_LEN) {
+                    TMP_FILE_PATTERN_LEN + 1) != TMP_FILE_PATTERN_LEN) {
         ALOGI("Couldn't allocate temporary file name for library");
         return INSTALL_FAILED_INTERNAL_ERROR;
     }
