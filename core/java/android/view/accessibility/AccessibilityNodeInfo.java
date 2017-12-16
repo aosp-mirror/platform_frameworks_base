@@ -2325,7 +2325,7 @@ public class AccessibilityNodeInfo implements Parcelable {
     /**
      * Returns whether the node is explicitly marked as a focusable unit by a screen reader. Note
      * that {@code false} indicates that it is not explicitly marked, not that the node is not
-     * a focusable unit. Screen readers should generally used other signals, such as
+     * a focusable unit. Screen readers should generally use other signals, such as
      * {@link #isFocusable()}, or the presence of text in a node, to determine what should receive
      * focus.
      *
