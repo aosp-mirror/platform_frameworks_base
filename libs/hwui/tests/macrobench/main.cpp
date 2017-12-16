@@ -17,24 +17,24 @@
 #include "tests/common/LeakChecker.h"
 #include "tests/common/TestScene.h"
 
+#include "Properties.h"
 #include "hwui/Typeface.h"
 #include "protos/hwui.pb.h"
-#include "Properties.h"
 
-#include <benchmark/benchmark.h>
 #include <../src/sysinfo.h>
+#include <benchmark/benchmark.h>
 #include <getopt.h>
+#include <pthread.h>
 #include <stdio.h>
-#include <string>
 #include <unistd.h>
+#include <string>
 #include <unordered_map>
 #include <vector>
-#include <pthread.h>
 
-#include <sys/types.h>
-#include <sys/stat.h>
-#include <fcntl.h>
 #include <errno.h>
+#include <fcntl.h>
+#include <sys/stat.h>
+#include <sys/types.h>
 
 using namespace android;
 using namespace android::uirenderer;
