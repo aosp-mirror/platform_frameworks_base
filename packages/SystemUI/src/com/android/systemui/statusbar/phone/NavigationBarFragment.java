@@ -69,6 +69,7 @@ import com.android.internal.logging.MetricsLogger;
 import com.android.internal.logging.nano.MetricsProto.MetricsEvent;
 import com.android.internal.util.LatencyTracker;
 import com.android.systemui.Dependency;
+import com.android.systemui.OverviewProxyService;
 import com.android.systemui.R;
 import com.android.systemui.SysUiServiceProvider;
 import com.android.systemui.assist.AssistManager;
@@ -125,6 +126,8 @@ public class NavigationBarFragment extends Fragment implements Callbacks {
     private int mSystemUiVisibility;
     private LightBarController mLightBarController;
 
+    private OverviewProxyService mOverviewProxyService;
+
     public boolean mHomeBlockedThisTouch;
 
     // ----- Fragment Lifecycle Callbacks -----
@@ -152,6 +155,7 @@ public class NavigationBarFragment extends Fragment implements Callbacks {
             mDisabledFlags1 = savedInstanceState.getInt(EXTRA_DISABLE_STATE, 0);
         }
         mAssistManager = Dependency.get(AssistManager.class);
+        mOverviewProxyService = Dependency.get(OverviewProxyService.class);
 
         try {
             WindowManagerGlobal.getWindowManagerService()
@@ -364,7 +368,8 @@ public class NavigationBarFragment extends Fragment implements Callbacks {
 
     private boolean shouldDisableNavbarGestures() {
         return !mStatusBar.isDeviceProvisioned()
-                || (mDisabledFlags1 & StatusBarManager.DISABLE_SEARCH) != 0;
+                || (mDisabledFlags1 & StatusBarManager.DISABLE_SEARCH) != 0
+                || mOverviewProxyService.getProxy() != null;
     }
 
     private void repositionNavigationBar() {
@@ -449,6 +454,7 @@ public class NavigationBarFragment extends Fragment implements Callbacks {
         MetricsLogger.action(getContext(), MetricsEvent.ACTION_ASSIST_LONG_PRESS);
         mAssistManager.startAssist(new Bundle() /* args */);
         mStatusBar.awakenDreams();
+
         if (mNavigationBarView != null) {
             mNavigationBarView.abortCurrentGesture();
         }

@@ -98,6 +98,7 @@ public class NavigationBarView extends FrameLayout implements PluginListener<Nav
     private GestureHelper mGestureHelper;
     private DeadZone mDeadZone;
     private final NavigationBarTransitions mBarTransitions;
+    private final OverviewProxyService mOverviewProxyService;
 
     // workaround for LayoutTransitions leaving the nav buttons in a weird state (bug 5549288)
     final static boolean WORKAROUND_INVALID_LAYOUT = true;
@@ -226,6 +227,7 @@ public class NavigationBarView extends FrameLayout implements PluginListener<Nav
         mButtonDispatchers.put(R.id.ime_switcher, new ButtonDispatcher(R.id.ime_switcher));
         mButtonDispatchers.put(R.id.accessibility_button,
                 new ButtonDispatcher(R.id.accessibility_button));
+        mOverviewProxyService = Dependency.get(OverviewProxyService.class);
     }
 
     public BarTransitions getBarTransitions() {
@@ -463,6 +465,10 @@ public class NavigationBarView extends FrameLayout implements PluginListener<Nav
             // exiting.
             disableBack = false;
             disableRecent = false;
+        }
+        if (mOverviewProxyService.getProxy() != null) {
+            // When overview is connected to the launcher service, disable the recents button
+            disableRecent = true;
         }
 
         ViewGroup navButtons = (ViewGroup) getCurrentView().findViewById(R.id.nav_buttons);
@@ -779,7 +785,7 @@ public class NavigationBarView extends FrameLayout implements PluginListener<Nav
         onPluginDisconnected(null); // Create default gesture helper
         Dependency.get(PluginManager.class).addPluginListener(this,
                 NavGesture.class, false /* Only one */);
-        Dependency.get(OverviewProxyService.class).addCallback(mOverviewProxyListener);
+        mOverviewProxyService.addCallback(mOverviewProxyListener);
     }
 
     @Override
@@ -789,7 +795,7 @@ public class NavigationBarView extends FrameLayout implements PluginListener<Nav
         if (mGestureHelper != null) {
             mGestureHelper.destroy();
         }
-        Dependency.get(OverviewProxyService.class).removeCallback(mOverviewProxyListener);
+        mOverviewProxyService.removeCallback(mOverviewProxyListener);
     }
 
     @Override
