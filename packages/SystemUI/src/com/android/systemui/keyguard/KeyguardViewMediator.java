@@ -613,6 +613,13 @@ public class KeyguardViewMediator extends SystemUI {
         }
 
         @Override
+        public void onBouncerVisiblityChanged(boolean shown) {
+            synchronized (KeyguardViewMediator.this) {
+                adjustStatusBarLocked(shown);
+            }
+        }
+
+        @Override
         public void playTrustedSound() {
             KeyguardViewMediator.this.playTrustedSound();
         }
@@ -1862,6 +1869,10 @@ public class KeyguardViewMediator extends SystemUI {
     }
 
     private void adjustStatusBarLocked() {
+        adjustStatusBarLocked(false /* forceHideHomeRecentsButtons */);
+    }
+
+    private void adjustStatusBarLocked(boolean forceHideHomeRecentsButtons) {
         if (mStatusBarManager == null) {
             mStatusBarManager = (StatusBarManager)
                     mContext.getSystemService(Context.STATUS_BAR_SERVICE);
@@ -1872,19 +1883,14 @@ public class KeyguardViewMediator extends SystemUI {
             // Disable aspects of the system/status/navigation bars that must not be re-enabled by
             // windows that appear on top, ever
             int flags = StatusBarManager.DISABLE_NONE;
-            if (mShowing) {
-                // Permanently disable components not available when keyguard is enabled
-                // (like recents). Temporary enable/disable (e.g. the "back" button) are
-                // done in KeyguardHostView.
-                flags |= StatusBarManager.DISABLE_RECENT;
-            }
-            if (isShowingAndNotOccluded()) {
-                flags |= StatusBarManager.DISABLE_HOME;
+            if (forceHideHomeRecentsButtons || isShowingAndNotOccluded()) {
+                flags |= StatusBarManager.DISABLE_HOME | StatusBarManager.DISABLE_RECENT;
             }
 
             if (DEBUG) {
                 Log.d(TAG, "adjustStatusBarLocked: mShowing=" + mShowing + " mOccluded=" + mOccluded
-                        + " isSecure=" + isSecure() + " --> flags=0x" + Integer.toHexString(flags));
+                        + " isSecure=" + isSecure() + " force=" + forceHideHomeRecentsButtons
+                        +  " --> flags=0x" + Integer.toHexString(flags));
             }
 
             mStatusBarManager.disable(flags);
