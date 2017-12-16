@@ -247,7 +247,7 @@ write_stats_log_java(FILE* out, const Atoms& atoms)
     fprintf(out, " * API For logging statistics events.\n");
     fprintf(out, " * @hide\n");
     fprintf(out, " */\n");
-    fprintf(out, "public final class StatsLog {\n");
+    fprintf(out, "public class StatsLogInternal {\n");
     fprintf(out, "    // Constants for atom codes.\n");
 
     // Print constants for the atom codes.

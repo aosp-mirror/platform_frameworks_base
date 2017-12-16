@@ -79,6 +79,7 @@ message Atom {
         IsolatedUidChanged isolated_uid_changed = 43;
         PacketWakeupOccurred packet_wakeup_occurred = 44;
         DropboxErrorChanged dropbox_error_changed = 45;
+        AppHook app_hook = 46;
         // TODO: Reorder the numbering so that the most frequent occur events occur in the first 15.
     }
 
@@ -799,6 +800,29 @@ message DropboxErrorChanged {
 
     // 1 indicates in foreground. -1 indicates not available.
     optional int32 is_foreground = 7;
+}
+
+/*
+ * Allows other apps to push events into statsd.
+ * Logged from:
+ *      frameworks/base/core/java/android/util/StatsLog.java
+ */
+message AppHook {
+    // The uid of the application that sent this custom atom.
+    optional int32 uid = 1;
+
+    // An arbitrary label chosen by the developer. For Android P, the label should be in [0, 16).
+    optional int32 label = 2;
+
+    // Allows applications to easily use a custom event as start/stop boundaries (ie, define custom
+    // predicates for the metrics).
+    enum State {
+        UNKNOWN = 0;
+        UNSPECIFIED = 1;  // For events that are known to not represent START/STOP.
+        STOP = 2;
+        START = 3;
+    }
+    optional State state = 3;
 }
 
 /**
