@@ -97,6 +97,7 @@ cc_library_shared {
     cflags: [
         "-Wall",
         "-Werror",
+        "-fexceptions",
     ],
     export_generated_headers: ["statslog.h"],
     shared_libs: [
