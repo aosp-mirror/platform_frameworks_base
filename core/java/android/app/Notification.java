@@ -1071,8 +1071,18 @@ public class Notification implements Parcelable
      * direct replies
      * {@link android.app.Notification.MessagingStyle} notification. This extra is a
      * {@link CharSequence}
+     *
+     * @deprecated use {@link #EXTRA_MESSAGING_PERSON}
      */
     public static final String EXTRA_SELF_DISPLAY_NAME = "android.selfDisplayName";
+
+    /**
+     * {@link #extras} key: the person to be displayed for all messages sent by the user including
+     * direct replies
+     * {@link android.app.Notification.MessagingStyle} notification. This extra is a
+     * {@link Person}
+     */
+    public static final String EXTRA_MESSAGING_PERSON = "android.messagingUser";
 
     /**
      * {@link #extras} key: a {@link CharSequence} to be displayed as the title to a conversation
@@ -6001,7 +6011,7 @@ public class Notification implements Parcelable
          */
         public static final int MAXIMUM_RETAINED_MESSAGES = 25;
 
-        CharSequence mUserDisplayName;
+        @NonNull Person mUser;
         @Nullable CharSequence mConversationTitle;
         List<Message> mMessages = new ArrayList<>();
         List<Message> mHistoricMessages = new ArrayList<>();
@@ -6015,16 +6025,40 @@ public class Notification implements Parcelable
          * user before the posting app reposts the notification with those messages after they've
          * been actually sent and in previous messages sent by the user added in
          * {@link #addMessage(Notification.MessagingStyle.Message)}
+         *
+         * @deprecated use {@code MessagingStyle(Person)}
          */
         public MessagingStyle(@NonNull CharSequence userDisplayName) {
-            mUserDisplayName = userDisplayName;
+            this(new Person().setName(userDisplayName));
+        }
+
+        /**
+         * @param user Required - The person displayed for any messages that are sent by the
+         * user. Any messages added with {@link #addMessage(Notification.MessagingStyle.Message)}
+         * who don't have a Person associated with it will be displayed as if they were sent
+         * by this user. The user also needs to have a valid name associated with it.
+         */
+        public MessagingStyle(@NonNull Person user) {
+            mUser = user;
+            if (user == null || user.getName() == null) {
+                throw new RuntimeException("user must be valid and have a name");
+            }
+        }
+
+        /**
+         * @return the user to be displayed for any replies sent by the user
+         */
+        public Person getUser() {
+            return mUser;
         }
 
         /**
          * Returns the name to be displayed for any replies sent by the user
+         *
+         * @deprecated use {@link #getUser()} instead
          */
         public CharSequence getUserDisplayName() {
-            return mUserDisplayName;
+            return mUser.getName();
         }
 
         /**
@@ -6060,8 +6094,28 @@ public class Notification implements Parcelable
          * @see Message#Message(CharSequence, long, CharSequence)
          *
          * @return this object for method chaining
+         *
+         * @deprecated use {@link #addMessage(CharSequence, long, Person)}
          */
         public MessagingStyle addMessage(CharSequence text, long timestamp, CharSequence sender) {
+            return addMessage(text, timestamp,
+                    sender == null ? null : new Person().setName(sender));
+        }
+
+        /**
+         * Adds a message for display by this notification. Convenience call for a simple
+         * {@link Message} in {@link #addMessage(Notification.MessagingStyle.Message)}.
+         * @param text A {@link CharSequence} to be displayed as the message content
+         * @param timestamp Time at which the message arrived
+         * @param sender The {@link Person} who sent the message.
+         * Should be <code>null</code> for messages by the current user, in which case
+         * the platform will insert the user set in {@code MessagingStyle(Person)}.
+         *
+         * @see Message#Message(CharSequence, long, CharSequence)
+         *
+         * @return this object for method chaining
+         */
+        public MessagingStyle addMessage(CharSequence text, long timestamp, Person sender) {
             return addMessage(new Message(text, timestamp, sender));
         }
 
@@ -6141,8 +6195,10 @@ public class Notification implements Parcelable
         @Override
         public void addExtras(Bundle extras) {
             super.addExtras(extras);
-            if (mUserDisplayName != null) {
-                extras.putCharSequence(EXTRA_SELF_DISPLAY_NAME, mUserDisplayName);
+            if (mUser != null) {
+                // For legacy usages
+                extras.putCharSequence(EXTRA_SELF_DISPLAY_NAME, mUser.getName());
+                extras.putParcelable(EXTRA_MESSAGING_PERSON, mUser);
             }
             if (mConversationTitle != null) {
                 extras.putCharSequence(EXTRA_CONVERSATION_TITLE, mConversationTitle);
@@ -6162,14 +6218,15 @@ public class Notification implements Parcelable
             Message m = findLatestIncomingMessage();
             CharSequence text = (m == null) ? null : m.mText;
             CharSequence sender = m == null ? null
-                    : TextUtils.isEmpty(m.mSender) ? mUserDisplayName : m.mSender;
+                    : m.mSender == null || TextUtils.isEmpty(m.mSender.getName())
+                            ? mUser.getName() : m.mSender.getName();
             CharSequence title;
             if (!TextUtils.isEmpty(mConversationTitle)) {
                 if (!TextUtils.isEmpty(sender)) {
                     BidiFormatter bidi = BidiFormatter.getInstance();
                     title = mBuilder.mContext.getString(
                             com.android.internal.R.string.notification_messaging_title_template,
-                            bidi.unicodeWrap(mConversationTitle), bidi.unicodeWrap(m.mSender));
+                            bidi.unicodeWrap(mConversationTitle), bidi.unicodeWrap(sender));
                 } else {
                     title = mConversationTitle;
                 }
@@ -6192,7 +6249,11 @@ public class Notification implements Parcelable
         protected void restoreFromExtras(Bundle extras) {
             super.restoreFromExtras(extras);
 
-            mUserDisplayName = extras.getCharSequence(EXTRA_SELF_DISPLAY_NAME);
+            mUser = extras.getParcelable(EXTRA_MESSAGING_PERSON);
+            if (mUser == null) {
+                CharSequence displayName = extras.getCharSequence(EXTRA_SELF_DISPLAY_NAME);
+                mUser = new Person().setName(displayName);
+            }
             mConversationTitle = extras.getCharSequence(EXTRA_CONVERSATION_TITLE);
             Parcelable[] messages = extras.getParcelableArray(EXTRA_MESSAGES);
             mMessages = Message.getMessagesFromBundleArray(messages);
@@ -6227,7 +6288,7 @@ public class Notification implements Parcelable
             for (int i = messages.size() - 1; i >= 0; i--) {
                 Message m = messages.get(i);
                 // Incoming messages have a non-empty sender.
-                if (!TextUtils.isEmpty(m.mSender)) {
+                if (m.mSender != null && !TextUtils.isEmpty(m.mSender.getName())) {
                     return m;
                 }
             }
@@ -6274,8 +6335,8 @@ public class Notification implements Parcelable
         private boolean hasOnlyWhiteSpaceSenders() {
             for (int i = 0; i < mMessages.size(); i++) {
                 Message m = mMessages.get(i);
-                CharSequence sender = m.getSender();
-                if (!isWhiteSpace(sender)) {
+                Person sender = m.getSenderPerson();
+                if (sender != null && !isWhiteSpace(sender.getName())) {
                     return false;
                 }
             }
@@ -6304,9 +6365,9 @@ public class Notification implements Parcelable
             ArraySet<CharSequence> names = new ArraySet<>();
             for (int i = 0; i < mMessages.size(); i++) {
                 Message m = mMessages.get(i);
-                CharSequence sender = m.getSender();
+                Person sender = m.getSenderPerson();
                 if (sender != null) {
-                    names.add(sender);
+                    names.add(sender.getName());
                 }
             }
             SpannableStringBuilder title = new SpannableStringBuilder();
@@ -6341,13 +6402,15 @@ public class Notification implements Parcelable
             static final String KEY_TEXT = "text";
             static final String KEY_TIMESTAMP = "time";
             static final String KEY_SENDER = "sender";
+            static final String KEY_SENDER_PERSON = "sender_person";
             static final String KEY_DATA_MIME_TYPE = "type";
             static final String KEY_DATA_URI= "uri";
             static final String KEY_EXTRAS_BUNDLE = "extras";
 
             private final CharSequence mText;
             private final long mTimestamp;
-            private final CharSequence mSender;
+            @Nullable
+            private final Person mSender;
 
             private Bundle mExtras = new Bundle();
             private String mDataMimeType;
@@ -6362,8 +6425,28 @@ public class Notification implements Parcelable
              * the platform will insert {@link MessagingStyle#getUserDisplayName()}.
              * Should be unique amongst all individuals in the conversation, and should be
              * consistent during re-posts of the notification.
+             *
+             *  @deprecated use {@code Message(CharSequence, long, Person)}
              */
             public Message(CharSequence text, long timestamp, CharSequence sender){
+                this(text, timestamp, sender == null ? null : new Person().setName(sender));
+            }
+
+            /**
+             * Constructor
+             * @param text A {@link CharSequence} to be displayed as the message content
+             * @param timestamp Time at which the message arrived
+             * @param sender The {@link Person} who sent the message.
+             * Should be <code>null</code> for messages by the current user, in which case
+             * the platform will insert the user set in {@code MessagingStyle(Person)}.
+             * <p>
+             * The person provided should contain an Icon, set with {@link Person#setIcon(Icon)}
+             * and also have a name provided with {@link Person#setName(CharSequence)}. If multiple
+             * users have the same name, consider providing a key with {@link Person#setKey(String)}
+             * in order to differentiate between the different users.
+             * </p>
+             */
+            public Message(CharSequence text, long timestamp, @Nullable Person sender){
                 mText = text;
                 mTimestamp = timestamp;
                 mSender = sender;
@@ -6426,8 +6509,18 @@ public class Notification implements Parcelable
 
             /**
              * Get the text used to display the contact's name in the messaging experience
+             *
+             * @deprecated use {@link #getSenderPerson()}
              */
             public CharSequence getSender() {
+                return mSender == null ? null : mSender.getName();
+            }
+
+            /**
+             * Get the sender associated with this message.
+             */
+            @Nullable
+            public Person getSenderPerson() {
                 return mSender;
             }
 
@@ -6453,7 +6546,9 @@ public class Notification implements Parcelable
                 }
                 bundle.putLong(KEY_TIMESTAMP, mTimestamp);
                 if (mSender != null) {
-                    bundle.putCharSequence(KEY_SENDER, mSender);
+                    // Legacy listeners need this
+                    bundle.putCharSequence(KEY_SENDER, mSender.getName());
+                    bundle.putParcelable(KEY_SENDER_PERSON, mSender);
                 }
                 if (mDataMimeType != null) {
                     bundle.putString(KEY_DATA_MIME_TYPE, mDataMimeType);
@@ -6502,8 +6597,20 @@ public class Notification implements Parcelable
                     if (!bundle.containsKey(KEY_TEXT) || !bundle.containsKey(KEY_TIMESTAMP)) {
                         return null;
                     } else {
+
+                        Person senderPerson = bundle.getParcelable(KEY_SENDER_PERSON);
+                        if (senderPerson == null) {
+                            // Legacy apps that use compat don't actually provide the sender objects
+                            // We need to fix the compat version to provide people / use
+                            // the native api instead
+                            CharSequence senderName = bundle.getCharSequence(KEY_SENDER);
+                            if (senderName != null) {
+                                senderPerson = new Person().setName(senderName);
+                            }
+                        }
                         Message message = new Message(bundle.getCharSequence(KEY_TEXT),
-                                bundle.getLong(KEY_TIMESTAMP), bundle.getCharSequence(KEY_SENDER));
+                                bundle.getLong(KEY_TIMESTAMP),
+                                senderPerson);
                         if (bundle.containsKey(KEY_DATA_MIME_TYPE) &&
                                 bundle.containsKey(KEY_DATA_URI)) {
                             message.setData(bundle.getString(KEY_DATA_MIME_TYPE),

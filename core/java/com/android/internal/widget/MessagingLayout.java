@@ -315,7 +315,7 @@ public class MessagingLayout extends FrameLayout {
     private void findGroups(List<MessagingMessage> historicMessages,
             List<MessagingMessage> messages, List<List<MessagingMessage>> groups,
             List<CharSequence> senders) {
-        CharSequence currentSender = null;
+        CharSequence currentSenderKey = null;
         List<MessagingMessage> currentGroup = null;
         int histSize = historicMessages.size();
         for (int i = 0; i < histSize + messages.size(); i++) {
@@ -326,13 +326,14 @@ public class MessagingLayout extends FrameLayout {
                 message = messages.get(i - histSize);
             }
             boolean isNewGroup = currentGroup == null;
-            CharSequence sender = message.getMessage().getSender();
-            isNewGroup |= !TextUtils.equals(sender, currentSender);
+            Notification.Person sender = message.getMessage().getSenderPerson();
+            CharSequence key = sender.getKey() == null ? sender.getName() : sender.getKey();
+            isNewGroup |= !TextUtils.equals(key, currentSenderKey);
             if (isNewGroup) {
                 currentGroup = new ArrayList<>();
                 groups.add(currentGroup);
-                senders.add(sender);
-                currentSender = sender;
+                senders.add(sender.getName());
+                currentSenderKey = key;
             }
             currentGroup.add(message);
         }
