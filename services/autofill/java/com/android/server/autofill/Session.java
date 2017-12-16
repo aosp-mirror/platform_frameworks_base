@@ -512,7 +512,6 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
         }
 
         final AutofillId[] fieldClassificationIds = response.getFieldClassificationIds();
-        // TODO(b/67867469): remove once feature is finished (or use method from AFM to check)
         if (fieldClassificationIds != null && !mService.isFieldClassificationEnabled()) {
             Slog.w(TAG, "Ignoring " + response + " because field detection is disabled");
             processNullResponseLocked(requestFlags);
@@ -1662,7 +1661,7 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
                         isIgnored ? ViewState.STATE_IGNORED : ViewState.STATE_INITIAL);
                 mViewStates.put(id, viewState);
 
-                // TODO(b/67867469): for optimization purposes, should also ignore if change is
+                // TODO(b/70407264): for optimization purposes, should also ignore if change is
                 // detectable, and batch-send them when the session is finished (but that will
                 // require tracking detectable fields on AutofillManager)
                 if (isIgnored) {

@@ -3531,6 +3531,11 @@ package android.provider {
   public static final class Settings.Secure extends android.provider.Settings.NameValueTable {
     method public static boolean putString(android.content.ContentResolver, java.lang.String, java.lang.String, java.lang.String, boolean);
     method public static void resetToDefaults(android.content.ContentResolver, java.lang.String);
+    field public static final java.lang.String AUTOFILL_FEATURE_FIELD_CLASSIFICATION = "autofill_field_classification";
+    field public static final java.lang.String AUTOFILL_USER_DATA_MAX_FIELD_CLASSIFICATION_IDS_SIZE = "autofill_user_data_max_field_classification_size";
+    field public static final java.lang.String AUTOFILL_USER_DATA_MAX_USER_DATA_SIZE = "autofill_user_data_max_user_data_size";
+    field public static final java.lang.String AUTOFILL_USER_DATA_MAX_VALUE_LENGTH = "autofill_user_data_max_value_length";
+    field public static final java.lang.String AUTOFILL_USER_DATA_MIN_VALUE_LENGTH = "autofill_user_data_min_value_length";
     field public static final java.lang.String INSTANT_APPS_ENABLED = "instant_apps_enabled";
   }
 

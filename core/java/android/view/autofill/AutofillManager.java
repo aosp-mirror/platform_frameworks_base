@@ -24,7 +24,6 @@ import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.SystemService;
-import android.annotation.TestApi;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
@@ -1010,20 +1009,14 @@ public final class AutofillManager {
     }
 
     /**
-     * Gets the user data used for <a href="#FieldsClassification">fields classification</a>.
+     * Gets the user data used for
+     * <a href="AutofillService.html#FieldClassification">field classification</a>.
      *
      * <p><b>Note:</b> This method should only be called by an app providing an autofill service.
      *
-     * TODO(b/67867469):
-     *  - proper javadoc
-     *  - unhide / remove testApi
-     *
      * @return value previously set by {@link #setUserData(UserData)} or {@code null} if it was
      * reset or if the caller currently does not have an enabled autofill service for the user.
-     *
-     * @hide
      */
-    @TestApi
     @Nullable public UserData getUserData() {
         try {
             return mService.getUserData();
@@ -1034,21 +1027,13 @@ public final class AutofillManager {
     }
 
     /**
-     * Sets the user data used for <a href="#FieldsClassification">fields classification</a>.
+     * Sets the user data used for
+     * <a href="AutofillService.html#FieldClassification">field classification</a>
      *
      * <p><b>Note:</b> This method should only be called by an app providing an autofill service,
      * and it's ignored if the caller currently doesn't have an enabled autofill service for
      * the user.
-     *
-     * TODO(b/67867469):
-     *  - proper javadoc
-     *  - unhide / remove testApi
-     *  - add unit tests:
-     *    - call set / get / verify
-     *
-     * @hide
      */
-    @TestApi
     public void setUserData(@Nullable UserData userData) {
         try {
             mService.setUserData(userData);
@@ -1058,13 +1043,17 @@ public final class AutofillManager {
     }
 
     /**
-     * TODO(b/67867469):
-     * - proper javadoc
-     * - mention this method in other places
-     * - unhide / remove testApi
-     * @hide
+     * Checks if <a href="AutofillService.html#FieldClassification">field classification</a> is
+     * enabled.
+     *
+     * <p>As field classification is an expensive operation, it could be disabled, either
+     * temporarily (for example, because the service exceeded a rate-limit threshold) or
+     * permanently (for example, because the device is a low-level device).
+     *
+     * <p><b>Note:</b> This method should only be called by an app providing an autofill service,
+     * and it's ignored if the caller currently doesn't have an enabled autofill service for
+     * the user.
      */
-    @TestApi
     public boolean isFieldClassificationEnabled() {
         try {
             return mService.isFieldClassificationEnabled();

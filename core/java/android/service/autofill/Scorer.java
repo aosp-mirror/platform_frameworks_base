@@ -15,21 +15,14 @@
  */
 package android.service.autofill;
 
-import android.annotation.TestApi;
-
 /**
  * Helper class used to calculate a score.
  *
- * <p>Typically used to calculate the field classification score between an actual
- * {@link android.view.autofill.AutofillValue}  filled by the user and the expected value predicted
- * by an autofill service.
- *
- * TODO(b/67867469):
- * - improve javadoc
- * - unhide / remove testApi
- * @hide
+ * <p>Typically used to calculate the
+ * <a href="AutofillService.html#FieldClassification">field classification</a> score between an
+ * actual {@link android.view.autofill.AutofillValue} filled by the user and the expected value
+ * predicted by an autofill service.
  */
-@TestApi
 public interface Scorer {
 
 }

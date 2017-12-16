@@ -5328,48 +5328,51 @@ public final class Settings {
         public static final String AUTOFILL_SERVICE = "autofill_service";
 
         /**
-         * Experimental autofill feature.
+         * Boolean indicating if Autofill supports field classification.
          *
-         * <p>TODO(b/67867469): document (or remove) once feature is finished
+         * @see android.service.autofill.AutofillService
+         *
          * @hide
          */
+        @SystemApi
         @TestApi
         public static final String AUTOFILL_FEATURE_FIELD_CLASSIFICATION =
                 "autofill_field_classification";
 
         /**
-         * Experimental autofill feature.
+         * Defines value returned by {@link android.service.autofill.UserData#getMaxUserDataSize()}.
          *
-         * <p>TODO(b/67867469): document (or remove) once feature is finished
          * @hide
          */
+        @SystemApi
         public static final String AUTOFILL_USER_DATA_MAX_USER_DATA_SIZE =
                 "autofill_user_data_max_user_data_size";
 
         /**
-         * Experimental autofill feature.
+         * Defines value returned by
+         * {@link android.service.autofill.UserData#getMaxFieldClassificationIdsSize()}.
          *
-         * <p>TODO(b/67867469): document (or remove) once feature is finished
          * @hide
          */
+        @SystemApi
         public static final String AUTOFILL_USER_DATA_MAX_FIELD_CLASSIFICATION_IDS_SIZE =
                 "autofill_user_data_max_field_classification_size";
 
         /**
-         * Experimental autofill feature.
+         * Defines value returned by {@link android.service.autofill.UserData#getMaxValueLength()}.
          *
-         * <p>TODO(b/67867469): document (or remove) once feature is finished
          * @hide
          */
+        @SystemApi
         public static final String AUTOFILL_USER_DATA_MAX_VALUE_LENGTH =
                 "autofill_user_data_max_value_length";
 
         /**
-         * Experimental autofill feature.
+         * Defines value returned by {@link android.service.autofill.UserData#getMinValueLength()}.
          *
-         * <p>TODO(b/67867469): document (or remove) once feature is finished
          * @hide
          */
+        @SystemApi
         public static final String AUTOFILL_USER_DATA_MIN_VALUE_LENGTH =
                 "autofill_user_data_min_value_length";
 

@@ -41,7 +41,7 @@ import java.util.Arrays;
 import java.util.List;
 
 /**
- * Response for a {@link
+ * Response for an {@link
  * AutofillService#onFillRequest(FillRequest, android.os.CancellationSignal, FillCallback)}.
  *
  * <p>See the main {@link AutofillService} documentation for more details and examples.
@@ -156,6 +156,7 @@ public final class FillResponse implements Parcelable {
     }
 
     /** @hide */
+    @TestApi
     public int getFlags() {
         return mFlags;
     }
@@ -352,22 +353,18 @@ public final class FillResponse implements Parcelable {
         }
 
         /**
-         * Sets which fields are used for <a href="#FieldsClassification">fields classification</a>
+         * Sets which fields are used for
+         * <a href="AutofillService.html#FieldClassification">field classification</a>
          *
+         * <p><b>Note:</b> This method automatically adds the
+         * {@link FillResponse#FLAG_TRACK_CONTEXT_COMMITED} to the {@link #setFlags(int) flags}.
+
          * @throws IllegalArgumentException is length of {@code ids} args is more than
          * {@link UserData#getMaxFieldClassificationIdsSize()}.
          * @throws IllegalStateException if {@link #build()} or {@link #disableAutofill(long)} was
          * already called.
          * @throws NullPointerException if {@code ids} or any element on it is {@code null}.
-         *
-         * TODO(b/67867469):
-         *  - improve javadoc: explain relationship with UserData and how to check results
-         *  - unhide / remove testApi
-         *  - implement multiple ids
-         *
-         * @hide
          */
-        @TestApi
         public Builder setFieldClassificationIds(@NonNull AutofillId... ids) {
             throwIfDestroyed();
             throwIfDisableAutofillCalled();
@@ -375,6 +372,7 @@ public final class FillResponse implements Parcelable {
             Preconditions.checkArgumentInRange(ids.length, 1,
                     UserData.getMaxFieldClassificationIdsSize(), "ids length");
             mFieldClassificationIds = ids;
+            mFlags |= FLAG_TRACK_CONTEXT_COMMITED;
             return this;
         }
 
@@ -423,9 +421,8 @@ public final class FillResponse implements Parcelable {
          * @throws IllegalStateException if either {@link #addDataset(Dataset)},
          *       {@link #setAuthentication(AutofillId[], IntentSender, RemoteViews)},
          *       {@link #setSaveInfo(SaveInfo)}, {@link #setClientState(Bundle)}, or
-         *       {link #setFieldClassificationIds(AutofillId...)} was already called.
+         *       {@link #setFieldClassificationIds(AutofillId...)} was already called.
          */
-        // TODO(b/67867469): add @ to {link setFieldClassificationIds} once it's public
         public Builder disableAutofill(long duration) {
             throwIfDestroyed();
             if (duration <= 0) {
@@ -506,14 +503,13 @@ public final class FillResponse implements Parcelable {
          *       {@link #setAuthentication(AutofillId[], IntentSender, RemoteViews)},
          *       {@link #setSaveInfo(SaveInfo)}, {@link #disableAutofill(long)},
          *       {@link #setClientState(Bundle)},
-         *       or {link #setFieldClassificationIds(AutofillId...)}.
+         *       or {@link #setFieldClassificationIds(AutofillId...)}.
          *   <li>{@link #setHeader(RemoteViews)} or {@link #setFooter(RemoteViews)} is called
          *       without any previous calls to {@link #addDataset(Dataset)}.
          * </ol>
          *
          * @return A built response.
          */
-        // TODO(b/67867469): add @ to {link setFieldClassificationIds} once it's public
         public FillResponse build() {
             throwIfDestroyed();
             if (mAuthentication == null && mDatasets == null && mSaveInfo == null
