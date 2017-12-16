@@ -225,6 +225,12 @@ public final class ActivityThread extends ClientTransactionHandler {
      */
     public static final long INVALID_PROC_STATE_SEQ = -1;
 
+    /**
+     * Identifier for the sequence no. associated with this process start. It will be provided
+     * as one of the arguments when the process starts.
+     */
+    public static final String PROC_START_SEQ_IDENT = "seq=";
+
     private final Object mNetworkPolicyLock = new Object();
 
     /**
@@ -6289,7 +6295,7 @@ public final class ActivityThread extends ClientTransactionHandler {
         System.exit(0);
     }
 
-    private void attach(boolean system) {
+    private void attach(boolean system, long startSeq) {
         sCurrentActivityThread = this;
         mSystemThread = system;
         if (!system) {
@@ -6304,7 +6310,7 @@ public final class ActivityThread extends ClientTransactionHandler {
             RuntimeInit.setApplicationObject(mAppThread.asBinder());
             final IActivityManager mgr = ActivityManager.getService();
             try {
-                mgr.attachApplication(mAppThread);
+                mgr.attachApplication(mAppThread, startSeq);
             } catch (RemoteException ex) {
                 throw ex.rethrowFromSystemServer();
             }
@@ -6383,7 +6389,7 @@ public final class ActivityThread extends ClientTransactionHandler {
             ThreadedRenderer.enableForegroundTrimming();
         }
         ActivityThread thread = new ActivityThread();
-        thread.attach(true);
+        thread.attach(true, 0);
         return thread;
     }
 
@@ -6455,8 +6461,19 @@ public final class ActivityThread extends ClientTransactionHandler {
 
         Looper.prepareMainLooper();
 
+        // Find the value for {@link #PROC_START_SEQ_IDENT} if provided on the command line.
+        // It will be in the format "seq=114"
+        long startSeq = 0;
+        if (args != null) {
+            for (int i = args.length - 1; i >= 0; --i) {
+                if (args[i] != null && args[i].startsWith(PROC_START_SEQ_IDENT)) {
+                    startSeq = Long.parseLong(
+                            args[i].substring(PROC_START_SEQ_IDENT.length()));
+                }
+            }
+        }
         ActivityThread thread = new ActivityThread();
-        thread.attach(false);
+        thread.attach(false, startSeq);
 
         if (sMainThreadHandler == null) {
             sMainThreadHandler = thread.getHandler();
