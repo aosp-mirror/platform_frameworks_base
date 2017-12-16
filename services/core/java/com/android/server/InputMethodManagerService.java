@@ -35,6 +35,7 @@ import com.android.internal.os.SomeArgs;
 import com.android.internal.os.TransferPipe;
 import com.android.internal.util.DumpUtils;
 import com.android.internal.util.FastXmlSerializer;
+import com.android.internal.util.IndentingPrintWriter;
 import com.android.internal.view.IInputContext;
 import com.android.internal.view.IInputMethod;
 import com.android.internal.view.IInputMethodClient;
@@ -4663,23 +4664,31 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
         @ShellCommandResult
         @Override
         public int onCommand(@Nullable String cmd) {
-            if (cmd == null) {
-                return handleDefaultCommands(cmd);
+            // For existing "adb shell ime <command>".
+            if ("ime".equals(cmd)) {
+                final String imeCommand = getNextArg();
+                if (imeCommand == null || "help".equals(imeCommand) || "-h".equals(imeCommand)) {
+                    onImeCommandHelp();
+                    return ShellCommandResult.SUCCESS;
+                }
+                switch (imeCommand) {
+                    case "list":
+                        return mService.handleShellCommandListInputMethods(this);
+                    case "enable":
+                        return mService.handleShellCommandEnableDisableInputMethod(this, true);
+                    case "disable":
+                        return mService.handleShellCommandEnableDisableInputMethod(this, false);
+                    case "set":
+                        return mService.handleShellCommandSetInputMethod(this);
+                    case "reset":
+                        return mService.handleShellCommandResetInputMethod(this);
+                    default:
+                        getOutPrintWriter().println("Unknown command: " + imeCommand);
+                        return ShellCommandResult.FAILURE;
+                }
             }
-            switch (cmd) {
-                case "list":
-                    return mService.handleShellCommandListInputMethods(this);
-                case "enable":
-                    return mService.handleShellCommandEnableDisableInputMethod(this, true);
-                case "disable":
-                    return mService.handleShellCommandEnableDisableInputMethod(this, false);
-                case "set":
-                    return mService.handleShellCommandSetInputMethod(this);
-                case "reset-ime":
-                    return mService.handleShellCommandResetInputMethod(this);
-                default:
-                    return handleDefaultCommands(cmd);
-            }
+
+            return handleDefaultCommands(cmd);
         }
 
         @BinderThread
@@ -4691,19 +4700,48 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
                 pw.println("    Prints this help text.");
                 pw.println("  dump [options]");
                 pw.println("    Synonym of dumpsys.");
-                pw.println("  list [-a] [-s]");
-                pw.println("    prints all enabled input methods.");
-                pw.println("     -a: see all input methods");
-                pw.println("     -s: only a single summary line of each");
-                pw.println("  enable <ID>");
-                pw.println("    allows the given input method ID to be used.");
-                pw.println("  disable <ID>");
-                pw.println("    disallows the given input method ID to be used.");
-                pw.println("  set <ID>");
-                pw.println("    switches to the given input method ID.");
-                pw.println("  reset-ime");
-                pw.println("    reset currently selected/enabled IMEs to the default ones as if");
-                pw.println("    the device is initially booted with the current locale.");
+                pw.println("  ime <command> [options]");
+                pw.println("    Manipulate IMEs.  Run \"ime help\" for details.");
+            }
+        }
+
+        private void onImeCommandHelp() {
+            try (IndentingPrintWriter pw =
+                         new IndentingPrintWriter(getOutPrintWriter(), "  ", 100)) {
+                pw.println("ime <command>:");
+                pw.increaseIndent();
+
+                pw.println("list [-a] [-s]");
+                pw.increaseIndent();
+                pw.println("prints all enabled input methods.");
+                pw.increaseIndent();
+                pw.println("-a: see all input methods");
+                pw.println("-s: only a single summary line of each");
+                pw.decreaseIndent();
+                pw.decreaseIndent();
+
+                pw.println("enable <ID>");
+                pw.increaseIndent();
+                pw.println("allows the given input method ID to be used.");
+                pw.decreaseIndent();
+
+                pw.println("disable <ID>");
+                pw.increaseIndent();
+                pw.println("disallows the given input method ID to be used.");
+                pw.decreaseIndent();
+
+                pw.println("set <ID>");
+                pw.increaseIndent();
+                pw.println("switches to the given input method ID.");
+                pw.decreaseIndent();
+
+                pw.println("reset");
+                pw.increaseIndent();
+                pw.println("reset currently selected/enabled IMEs to the default ones as if "
+                        + "the device is initially booted with the current locale.");
+                pw.decreaseIndent();
+
+                pw.decreaseIndent();
             }
         }
     }
