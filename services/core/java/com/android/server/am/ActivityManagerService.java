@@ -23254,7 +23254,8 @@ public class ActivityManagerService extends IActivityManager.Stub
                                 break;
                         }
                     }
-                } else if (app.curProcState == ActivityManager.PROCESS_STATE_HEAVY_WEIGHT) {
+                } else if (app.curProcState == ActivityManager.PROCESS_STATE_HEAVY_WEIGHT
+                        && !app.killedByAm) {
                     if (app.trimMemoryLevel < ComponentCallbacks2.TRIM_MEMORY_BACKGROUND
                             && app.thread != null) {
                         try {
