@@ -58,7 +58,7 @@ protected:
     void onMatchedLogEventInternalLocked(
             const size_t matcherIndex, const HashableDimensionKey& eventKey,
             const std::map<std::string, HashableDimensionKey>& conditionKey, bool condition,
-            const LogEvent& event, bool scheduledPull) override;
+            const LogEvent& event) override;
 
 private:
     void onDumpReportLocked(const uint64_t dumpTimeNs,
@@ -75,8 +75,6 @@ private:
 
     // Util function to flush the old packet.
     void flushIfNeededLocked(const uint64_t& newEventTime);
-
-    const CountMetric mMetric;
 
     // TODO: Add a lock to mPastBuckets.
     std::unordered_map<HashableDimensionKey, std::vector<CountBucket>> mPastBuckets;

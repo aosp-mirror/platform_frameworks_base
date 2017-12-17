@@ -189,7 +189,7 @@ public class BackupHandler extends Handler {
                     }
                     task.execute();
                 } catch (ClassCastException e) {
-                    Slog.e(TAG, "Invalid backup task in flight, obj=" + msg.obj);
+                    Slog.e(TAG, "Invalid backup/restore task in flight, obj=" + msg.obj);
                 }
                 break;
             }
@@ -229,10 +229,18 @@ public class BackupHandler extends Handler {
                 RestoreParams params = (RestoreParams) msg.obj;
                 Slog.d(TAG, "MSG_RUN_RESTORE observer=" + params.observer);
 
-                PerformUnifiedRestoreTask task = new PerformUnifiedRestoreTask(backupManagerService,
-                        params.transport,
-                        params.observer, params.monitor, params.token, params.pkgInfo,
-                        params.pmToken, params.isSystemRestore, params.filterSet);
+                PerformUnifiedRestoreTask task =
+                        new PerformUnifiedRestoreTask(
+                                backupManagerService,
+                                params.transportClient,
+                                params.observer,
+                                params.monitor,
+                                params.token,
+                                params.packageInfo,
+                                params.pmToken,
+                                params.isSystemRestore,
+                                params.filterSet,
+                                params.listener);
 
                 synchronized (backupManagerService.getPendingRestores()) {
                     if (backupManagerService.isRestoreInProgress()) {
@@ -285,22 +293,15 @@ public class BackupHandler extends Handler {
                 break;
             }
 
-            case MSG_RETRY_INIT: {
-                synchronized (backupManagerService.getQueueLock()) {
-                    backupManagerService.recordInitPendingLocked(msg.arg1 != 0, (String) msg.obj);
-                    backupManagerService.getAlarmManager().set(AlarmManager.RTC_WAKEUP,
-                            System.currentTimeMillis(),
-                            backupManagerService.getRunInitIntent());
-                }
-                break;
-            }
-
             case MSG_RUN_GET_RESTORE_SETS: {
                 // Like other async operations, this is entered with the wakelock held
                 RestoreSet[] sets = null;
                 RestoreGetSetsParams params = (RestoreGetSetsParams) msg.obj;
+                String callerLogString = "BH/MSG_RUN_GET_RESTORE_SETS";
                 try {
-                    sets = params.transport.getAvailableRestoreSets();
+                    IBackupTransport transport =
+                            params.transportClient.connectOrThrow(callerLogString);
+                    sets = transport.getAvailableRestoreSets();
                     // cache the result in the active session
                     synchronized (params.session) {
                         params.session.mRestoreSets = sets;
@@ -325,7 +326,7 @@ public class BackupHandler extends Handler {
                     removeMessages(MSG_RESTORE_SESSION_TIMEOUT);
                     sendEmptyMessageDelayed(MSG_RESTORE_SESSION_TIMEOUT, TIMEOUT_RESTORE_INTERVAL);
 
-                    backupManagerService.getWakelock().release();
+                    params.listener.onFinished(callerLogString);
                 }
                 break;
             }

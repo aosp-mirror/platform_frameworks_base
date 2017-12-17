@@ -223,7 +223,12 @@ public class PasswordMetrics implements Parcelable {
     }
 
     @Retention(RetentionPolicy.SOURCE)
-    @IntDef({CHAR_UPPER_CASE, CHAR_LOWER_CASE, CHAR_DIGIT, CHAR_SYMBOL})
+    @IntDef(prefix = { "CHAR_" }, value = {
+            CHAR_UPPER_CASE,
+            CHAR_LOWER_CASE,
+            CHAR_DIGIT,
+            CHAR_SYMBOL
+    })
     private @interface CharacterCatagory {}
     private static final int CHAR_LOWER_CASE = 0;
     private static final int CHAR_UPPER_CASE = 1;

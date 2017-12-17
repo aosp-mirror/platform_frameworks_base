@@ -16,7 +16,6 @@
 package android.service.autofill;
 
 import android.annotation.NonNull;
-import android.annotation.TestApi;
 import android.os.Parcel;
 import android.os.Parcelable;
 import android.view.autofill.AutofillValue;
@@ -24,14 +23,8 @@ import android.view.autofill.AutofillValue;
 /**
  * Helper used to calculate the classification score between an actual {@link AutofillValue} filled
  * by the user and the expected value predicted by an autofill service.
- *
- * TODO(b/67867469):
- * - improve javadoc
- * - document algorithm / copy from InternalScorer
- * - unhide / remove testApi
- * @hide
  */
-@TestApi
+// TODO(b/70291841): explain algorithm once it's fully implemented
 public final class EditDistanceScorer extends InternalScorer implements Scorer, Parcelable {
 
     private static final EditDistanceScorer sInstance = new EditDistanceScorer();
@@ -46,10 +39,11 @@ public final class EditDistanceScorer extends InternalScorer implements Scorer, 
     private EditDistanceScorer() {
     }
 
+    /** @hide */
     @Override
     public float getScore(@NonNull AutofillValue actualValue, @NonNull String userData) {
         if (actualValue == null || !actualValue.isText() || userData == null) return 0;
-        // TODO(b/67867469): implement edit distance - currently it's returning either 0, 100%, or
+        // TODO(b/70291841): implement edit distance - currently it's returning either 0, 100%, or
         // partial match when number of chars match
         final String textValue = actualValue.getTextValue().toString();
         final int total = textValue.length();

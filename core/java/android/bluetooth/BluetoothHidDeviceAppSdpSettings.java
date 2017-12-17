@@ -28,8 +28,6 @@ import java.util.Arrays;
  * Android device can be discovered as a Bluetooth HID Device.
  *
  * <p>{@see BluetoothHidDevice}
- *
- * <p>{@hide}
  */
 public final class BluetoothHidDeviceAppSdpSettings implements Parcelable {
 

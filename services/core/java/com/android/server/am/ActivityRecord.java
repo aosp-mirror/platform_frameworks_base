@@ -2731,7 +2731,8 @@ final class ActivityRecord extends ConfigurationContainer implements AppWindowCo
      *         {@link #mShowWhenLocked}.
      */
     boolean canShowWhenLocked() {
-        return mShowWhenLocked || service.mWindowManager.containsShowWhenLockedWindow(appToken);
+        return !inMultiWindowMode() && (mShowWhenLocked
+                || service.mWindowManager.containsShowWhenLockedWindow(appToken));
     }
 
     void setTurnScreenOn(boolean turnScreenOn) {

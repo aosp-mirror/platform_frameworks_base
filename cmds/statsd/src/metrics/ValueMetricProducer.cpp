@@ -73,13 +73,13 @@ ValueMetricProducer::ValueMetricProducer(const ConfigKey& key, const ValueMetric
                                          const sp<ConditionWizard>& wizard, const int pullTagId,
                                          const uint64_t startTimeNs,
                                          shared_ptr<StatsPullerManager> statsPullerManager)
-    : MetricProducer(key, startTimeNs, conditionIndex, wizard),
-      mMetric(metric),
+    : MetricProducer(metric.name(), key, startTimeNs, conditionIndex, wizard),
+      mValueField(metric.value_field()),
       mStatsPullerManager(statsPullerManager),
       mPullTagId(pullTagId) {
     // TODO: valuemetric for pushed events may need unlimited bucket length
     if (metric.has_bucket() && metric.bucket().has_bucket_size_millis()) {
-        mBucketSizeNs = mMetric.bucket().bucket_size_millis() * 1000 * 1000;
+        mBucketSizeNs = metric.bucket().bucket_size_millis() * 1000 * 1000;
     } else {
         mBucketSizeNs = kDefaultBucketSizeMillis * 1000 * 1000;
     }
@@ -118,14 +118,14 @@ ValueMetricProducer::~ValueMetricProducer() {
 }
 
 void ValueMetricProducer::onSlicedConditionMayChangeLocked(const uint64_t eventTime) {
-    VLOG("Metric %s onSlicedConditionMayChange", mMetric.name().c_str());
+    VLOG("Metric %s onSlicedConditionMayChange", mName.c_str());
 }
 
 void ValueMetricProducer::onDumpReportLocked(const uint64_t dumpTimeNs,
                                              ProtoOutputStream* protoOutput) {
-    VLOG("metric %s dump report now...", mMetric.name().c_str());
+    VLOG("metric %s dump report now...", mName.c_str());
     flushIfNeededLocked(dumpTimeNs);
-    protoOutput->write(FIELD_TYPE_STRING | FIELD_ID_NAME, mMetric.name());
+    protoOutput->write(FIELD_TYPE_STRING | FIELD_ID_NAME, mName);
     protoOutput->write(FIELD_TYPE_INT64 | FIELD_ID_START_REPORT_NANOS, (long long)mStartTimeNs);
     long long protoToken = protoOutput->start(FIELD_TYPE_MESSAGE | FIELD_ID_VALUE_METRICS);
 
@@ -175,7 +175,7 @@ void ValueMetricProducer::onDumpReportLocked(const uint64_t dumpTimeNs,
     protoOutput->end(protoToken);
     protoOutput->write(FIELD_TYPE_INT64 | FIELD_ID_END_REPORT_NANOS, (long long)dumpTimeNs);
 
-    VLOG("metric %s dump report now...", mMetric.name().c_str());
+    VLOG("metric %s dump report now...", mName.c_str());
     mPastBuckets.clear();
     mStartTimeNs = mCurrentBucketStartTimeNs;
     // TODO: Clear mDimensionKeyMap once the report is dumped.
@@ -185,13 +185,16 @@ void ValueMetricProducer::onConditionChangedLocked(const bool condition, const u
     mCondition = condition;
 
     if (eventTime < mCurrentBucketStartTimeNs) {
+        VLOG("Skip event due to late arrival: %lld vs %lld", (long long)eventTime,
+             (long long)mCurrentBucketStartTimeNs);
         return;
     }
 
+    flushIfNeededLocked(eventTime);
+
     if (mPullTagId != -1) {
         if (mCondition == true) {
-            mStatsPullerManager->RegisterReceiver(mPullTagId, this,
-                                                  mMetric.bucket().bucket_size_millis());
+            mStatsPullerManager->RegisterReceiver(mPullTagId, this, mBucketSizeNs / 1000 / 1000);
         } else if (mCondition == false) {
             mStatsPullerManager->UnRegisterReceiver(mPullTagId, this);
         }
@@ -202,9 +205,8 @@ void ValueMetricProducer::onConditionChangedLocked(const bool condition, const u
                 return;
             }
             for (const auto& data : allData) {
-                onMatchedLogEventLocked(0, *data, false);
+                onMatchedLogEventLocked(0, *data);
             }
-            flushIfNeededLocked(eventTime);
         }
         return;
     }
@@ -213,19 +215,26 @@ void ValueMetricProducer::onConditionChangedLocked(const bool condition, const u
 void ValueMetricProducer::onDataPulled(const std::vector<std::shared_ptr<LogEvent>>& allData) {
     std::lock_guard<std::mutex> lock(mMutex);
 
-    if (mCondition == true || !mMetric.has_condition()) {
+    if (mCondition == true || mConditionTrackerIndex < 0) {
         if (allData.size() == 0) {
             return;
         }
-        uint64_t eventTime = allData.at(0)->GetTimestampNs();
-        // alarm is not accurate and might drift.
-        if (eventTime > mCurrentBucketStartTimeNs + mBucketSizeNs * 3 / 2) {
-            flushIfNeededLocked(eventTime);
-        }
+        // For scheduled pulled data, the effective event time is snap to the nearest
+        // bucket boundary to make bucket finalize.
+        uint64_t realEventTime = allData.at(0)->GetTimestampNs();
+        uint64_t eventTime = mStartTimeNs + ((realEventTime - mStartTimeNs)/mBucketSizeNs) * mBucketSizeNs;
+
+        mCondition = false;
         for (const auto& data : allData) {
-            onMatchedLogEventLocked(0, *data, true);
+            data->setTimestampNs(eventTime-1);
+            onMatchedLogEventLocked(0, *data);
         }
-        flushIfNeededLocked(eventTime);
+
+        mCondition = true;
+        for (const auto& data : allData) {
+            data->setTimestampNs(eventTime);
+            onMatchedLogEventLocked(0, *data);
+        }
     }
 }
 
@@ -237,11 +246,10 @@ bool ValueMetricProducer::hitGuardRailLocked(const HashableDimensionKey& newKey)
     }
     if (mCurrentSlicedBucket.size() > StatsdStats::kDimensionKeySizeSoftLimit - 1) {
         size_t newTupleCount = mCurrentSlicedBucket.size() + 1;
-        StatsdStats::getInstance().noteMetricDimensionSize(mConfigKey, mMetric.name(),
-                                                           newTupleCount);
+        StatsdStats::getInstance().noteMetricDimensionSize(mConfigKey, mName, newTupleCount);
         // 2. Don't add more tuples, we are above the allowed threshold. Drop the data.
         if (newTupleCount > StatsdStats::kDimensionKeySizeHardLimit) {
-            ALOGE("ValueMetric %s dropping data for dimension key %s", mMetric.name().c_str(),
+            ALOGE("ValueMetric %s dropping data for dimension key %s", mName.c_str(),
                   newKey.c_str());
             return true;
         }
@@ -253,13 +261,15 @@ bool ValueMetricProducer::hitGuardRailLocked(const HashableDimensionKey& newKey)
 void ValueMetricProducer::onMatchedLogEventInternalLocked(
         const size_t matcherIndex, const HashableDimensionKey& eventKey,
         const map<string, HashableDimensionKey>& conditionKey, bool condition,
-        const LogEvent& event, bool scheduledPull) {
+        const LogEvent& event) {
     uint64_t eventTimeNs = event.GetTimestampNs();
     if (eventTimeNs < mCurrentBucketStartTimeNs) {
         VLOG("Skip event due to late arrival: %lld vs %lld", (long long)eventTimeNs,
              (long long)mCurrentBucketStartTimeNs);
         return;
     }
+
+    flushIfNeededLocked(eventTimeNs);
 
     if (hitGuardRailLocked(eventKey)) {
         return;
@@ -268,42 +278,31 @@ void ValueMetricProducer::onMatchedLogEventInternalLocked(
 
     long value = get_value(event);
 
-    if (mPullTagId != -1) {
-        if (scheduledPull) {
-            // scheduled pull always sets beginning of current bucket and end
-            // of next bucket
-            if (interval.raw.size() > 0) {
-                interval.raw.back().second = value;
-            } else {
-                interval.raw.push_back(make_pair(value, value));
-            }
-            Interval& nextInterval = mNextSlicedBucket[eventKey];
-            if (nextInterval.raw.size() == 0) {
-                nextInterval.raw.push_back(make_pair(value, 0));
-            } else {
-                nextInterval.raw.front().first = value;
-            }
+    if (mPullTagId != -1) { // for pulled events
+        if (mCondition == true) {
+            interval.start = value;
+            interval.startUpdated = true;
         } else {
-            if (mCondition == true) {
-                interval.raw.push_back(make_pair(value, 0));
+            if (interval.startUpdated) {
+                interval.sum += (value - interval.start);
+                interval.startUpdated = false;
             } else {
-                if (interval.raw.size() != 0) {
-                    interval.raw.back().second = value;
-                } else {
-                    interval.tainted = true;
-                    VLOG("Data on condition true missing!");
-                }
+                VLOG("No start for matching end %ld", value);
+                interval.tainted += 1;
             }
         }
-    } else {
-        flushIfNeededLocked(eventTimeNs);
-        interval.raw.push_back(make_pair(value, 0));
+    } else {    // for pushed events
+        interval.sum += value;
+    }
+
+    for (auto& tracker : mAnomalyTrackers) {
+        tracker->detectAndDeclareAnomaly(eventTimeNs, mCurrentBucketNum, eventKey, interval.sum);
     }
 }
 
 long ValueMetricProducer::get_value(const LogEvent& event) {
     status_t err = NO_ERROR;
-    long val = event.GetLong(mMetric.value_field(), &err);
+    long val = event.GetLong(mValueField, &err);
     if (err == NO_ERROR) {
         return val;
     } else {
@@ -327,27 +326,22 @@ void ValueMetricProducer::flushIfNeededLocked(const uint64_t& eventTimeNs) {
 
     int tainted = 0;
     for (const auto& slice : mCurrentSlicedBucket) {
-        long value = 0;
-        if (mPullTagId != -1) {
-            for (const auto& pair : slice.second.raw) {
-                value += (pair.second - pair.first);
-            }
-        } else {
-            for (const auto& pair : slice.second.raw) {
-                value += pair.first;
-            }
-        }
         tainted += slice.second.tainted;
-        info.mValue = value;
-        VLOG(" %s, %ld, %d", slice.first.c_str(), value, tainted);
+        info.mValue = slice.second.sum;
         // it will auto create new vector of ValuebucketInfo if the key is not found.
         auto& bucketList = mPastBuckets[slice.first];
         bucketList.push_back(info);
+
+        for (auto& tracker : mAnomalyTrackers) {
+            if (tracker != nullptr) {
+                tracker->addPastBucket(slice.first, info.mValue, info.mBucketNum);
+            }
+        }
     }
+    VLOG("%d tainted pairs in the bucket", tainted);
 
     // Reset counters
-    mCurrentSlicedBucket.swap(mNextSlicedBucket);
-    mNextSlicedBucket.clear();
+    mCurrentSlicedBucket.clear();
 
     int64_t numBucketsForward = (eventTimeNs - mCurrentBucketStartTimeNs) / mBucketSizeNs;
     mCurrentBucketStartTimeNs = mCurrentBucketStartTimeNs + numBucketsForward * mBucketSizeNs;
@@ -356,7 +350,7 @@ void ValueMetricProducer::flushIfNeededLocked(const uint64_t& eventTimeNs) {
     if (numBucketsForward > 1) {
         VLOG("Skipping forward %lld buckets", (long long)numBucketsForward);
     }
-    VLOG("metric %s: new bucket start time: %lld", mMetric.name().c_str(),
+    VLOG("metric %s: new bucket start time: %lld", mName.c_str(),
          (long long)mCurrentBucketStartTimeNs);
 }
 

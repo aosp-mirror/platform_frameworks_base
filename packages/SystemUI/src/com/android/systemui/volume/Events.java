@@ -80,6 +80,7 @@ public class Events {
     public static final int DISMISS_REASON_SETTINGS_CLICKED = 5;
     public static final int DISMISS_REASON_DONE_CLICKED = 6;
     public static final int DISMISS_STREAM_GONE = 7;
+    public static final int DISMISS_REASON_OUTPUT_CHOOSER = 8;
     public static final String[] DISMISS_REASONS = {
             "unknown",
             "touch_outside",
@@ -88,7 +89,8 @@ public class Events {
             "screen_off",
             "settings_clicked",
             "done_clicked",
-            "a11y_stream_changed"
+            "a11y_stream_changed",
+            "output_chooser"
     };
 
     public static final int SHOW_REASON_UNKNOWN = 0;

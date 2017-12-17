@@ -61,6 +61,8 @@ import com.android.server.backup.BackupUtils;
 import com.android.server.backup.PackageManagerBackupAgent;
 import com.android.server.backup.PackageManagerBackupAgent.Metadata;
 import com.android.server.backup.RefactoredBackupManagerService;
+import com.android.server.backup.internal.OnTaskFinishedListener;
+import com.android.server.backup.transport.TransportClient;
 import com.android.server.backup.utils.AppBackupUtils;
 import com.android.server.backup.utils.BackupManagerMonitorUtils;
 
@@ -76,8 +78,8 @@ import java.util.List;
 public class PerformUnifiedRestoreTask implements BackupRestoreTask {
 
     private RefactoredBackupManagerService backupManagerService;
-    // Transport we're working with to do the restore
-    private IBackupTransport mTransport;
+    // Transport client we're working with to do the restore
+    private final TransportClient mTransportClient;
 
     // Where per-transport saved state goes
     File mStateDir;
@@ -141,6 +143,9 @@ public class PerformUnifiedRestoreTask implements BackupRestoreTask {
     // Done?
     private boolean mFinished;
 
+    // When finished call listener
+    private final OnTaskFinishedListener mListener;
+
     // Key/value: bookkeeping about staged data and files for agent access
     private File mBackupDataName;
     private File mStageName;
@@ -154,15 +159,16 @@ public class PerformUnifiedRestoreTask implements BackupRestoreTask {
     // Invariant: mWakelock is already held, and this task is responsible for
     // releasing it at the end of the restore operation.
     public PerformUnifiedRestoreTask(RefactoredBackupManagerService backupManagerService,
-            IBackupTransport transport, IRestoreObserver observer,
+            TransportClient transportClient, IRestoreObserver observer,
             IBackupManagerMonitor monitor, long restoreSetToken, PackageInfo targetPackage,
-            int pmToken, boolean isFullSystemRestore, String[] filterSet) {
+            int pmToken, boolean isFullSystemRestore, String[] filterSet,
+            OnTaskFinishedListener listener) {
         this.backupManagerService = backupManagerService;
         mEphemeralOpToken = backupManagerService.generateRandomIntegerToken();
         mState = UnifiedRestoreState.INITIAL;
         mStartRealtime = SystemClock.elapsedRealtime();
 
-        mTransport = transport;
+        mTransportClient = transportClient;
         mObserver = observer;
         mMonitor = monitor;
         mToken = restoreSetToken;
@@ -171,6 +177,7 @@ public class PerformUnifiedRestoreTask implements BackupRestoreTask {
         mIsSystemRestore = isFullSystemRestore;
         mFinished = false;
         mDidLaunch = false;
+        mListener = listener;
 
         if (targetPackage != null) {
             // Single package restore
@@ -342,7 +349,7 @@ public class PerformUnifiedRestoreTask implements BackupRestoreTask {
         }
 
         try {
-            String transportDir = mTransport.transportDirName();
+            String transportDir = mTransportClient.getTransportDirName();
             mStateDir = new File(backupManagerService.getBaseStateDir(), transportDir);
 
             // Fetch the current metadata from the dataset first
@@ -351,7 +358,11 @@ public class PerformUnifiedRestoreTask implements BackupRestoreTask {
             mAcceptSet.add(0, pmPackage);
 
             PackageInfo[] packages = mAcceptSet.toArray(new PackageInfo[0]);
-            mStatus = mTransport.startRestore(mToken, packages);
+
+            IBackupTransport transport =
+                    mTransportClient.connectOrThrow("PerformUnifiedRestoreTask.startRestore()");
+
+            mStatus = transport.startRestore(mToken, packages);
             if (mStatus != BackupTransport.TRANSPORT_OK) {
                 Slog.e(TAG, "Transport error " + mStatus + "; no restore possible");
                 mStatus = BackupTransport.TRANSPORT_ERROR;
@@ -359,7 +370,7 @@ public class PerformUnifiedRestoreTask implements BackupRestoreTask {
                 return;
             }
 
-            RestoreDescription desc = mTransport.nextRestorePackage();
+            RestoreDescription desc = transport.nextRestorePackage();
             if (desc == null) {
                 Slog.e(TAG, "No restore metadata available; halting");
                 mMonitor = BackupManagerMonitorUtils.monitorEvent(mMonitor,
@@ -444,7 +455,10 @@ public class PerformUnifiedRestoreTask implements BackupRestoreTask {
     private void dispatchNextRestore() {
         UnifiedRestoreState nextState = UnifiedRestoreState.FINAL;
         try {
-            mRestoreDescription = mTransport.nextRestorePackage();
+            IBackupTransport transport =
+                    mTransportClient.connectOrThrow(
+                            "PerformUnifiedRestoreTask.dispatchNextRestore()");
+            mRestoreDescription = transport.nextRestorePackage();
             final String pkgName = (mRestoreDescription != null)
                     ? mRestoreDescription.getPackageName() : null;
             if (pkgName == null) {
@@ -657,13 +671,17 @@ public class PerformUnifiedRestoreTask implements BackupRestoreTask {
         File downloadFile = (staging) ? mStageName : mBackupDataName;
 
         try {
+            IBackupTransport transport =
+                    mTransportClient.connectOrThrow(
+                            "PerformUnifiedRestoreTask.initiateOneRestore()");
+
             // Run the transport's restore pass
             stage = ParcelFileDescriptor.open(downloadFile,
                     ParcelFileDescriptor.MODE_READ_WRITE |
                             ParcelFileDescriptor.MODE_CREATE |
                             ParcelFileDescriptor.MODE_TRUNCATE);
 
-            if (mTransport.getRestoreData(stage) != BackupTransport.TRANSPORT_OK) {
+            if (transport.getRestoreData(stage) != BackupTransport.TRANSPORT_OK) {
                 // Transport-level failure, so we wind everything up and
                 // terminate the restore operation.
                 Slog.e(TAG, "Error getting restore data for " + packageName);
@@ -750,7 +768,7 @@ public class PerformUnifiedRestoreTask implements BackupRestoreTask {
         // None of this can run on the work looper here, so we spin asynchronous
         // work like this:
         //
-        //   StreamFeederThread: read data from mTransport.getNextFullRestoreDataChunk()
+        //   StreamFeederThread: read data from transport.getNextFullRestoreDataChunk()
         //                       write it into the pipe to the engine
         //   EngineThread: FullRestoreEngine thread communicating with the target app
         //
@@ -844,10 +862,12 @@ public class PerformUnifiedRestoreTask implements BackupRestoreTask {
             // spin up the engine and start moving data to it
             new Thread(mEngineThread, "unified-restore-engine").start();
 
+            String callerLogString = "PerformUnifiedRestoreTask$StreamFeederThread.run()";
             try {
+                IBackupTransport transport = mTransportClient.connectOrThrow(callerLogString);
                 while (status == BackupTransport.TRANSPORT_OK) {
                     // have the transport write some of the restoring data to us
-                    int result = mTransport.getNextFullRestoreDataChunk(tWriteEnd);
+                    int result = transport.getNextFullRestoreDataChunk(tWriteEnd);
                     if (result > 0) {
                         // The transport wrote this many bytes of restore data to the
                         // pipe, so pass it along to the engine.
@@ -936,7 +956,9 @@ public class PerformUnifiedRestoreTask implements BackupRestoreTask {
                     // Something went wrong somewhere.  Whether it was at the transport
                     // level is immaterial; we need to tell the transport to bail
                     try {
-                        mTransport.abortFullRestore();
+                        IBackupTransport transport =
+                                mTransportClient.connectOrThrow(callerLogString);
+                        transport.abortFullRestore();
                     } catch (Exception e) {
                         // transport itself is dead; make sure we handle this as a
                         // fatal error
@@ -1039,8 +1061,11 @@ public class PerformUnifiedRestoreTask implements BackupRestoreTask {
             Slog.d(TAG, "finishing restore mObserver=" + mObserver);
         }
 
+        String callerLogString = "PerformUnifiedRestoreTask.finalizeRestore()";
         try {
-            mTransport.finishRestore();
+            IBackupTransport transport =
+                    mTransportClient.connectOrThrow(callerLogString);
+            transport.finishRestore();
         } catch (Exception e) {
             Slog.e(TAG, "Error finishing restore", e);
         }
@@ -1087,9 +1112,6 @@ public class PerformUnifiedRestoreTask implements BackupRestoreTask {
             backupManagerService.writeRestoreTokens();
         }
 
-        // done; we can finally release the wakelock and be legitimately done.
-        Slog.i(TAG, "Restore complete.");
-
         synchronized (backupManagerService.getPendingRestores()) {
             if (backupManagerService.getPendingRestores().size() > 0) {
                 if (DEBUG) {
@@ -1108,7 +1130,8 @@ public class PerformUnifiedRestoreTask implements BackupRestoreTask {
             }
         }
 
-        backupManagerService.getWakelock().release();
+        Slog.i(TAG, "Restore complete.");
+        mListener.onFinished(callerLogString);
     }
 
     void keyValueAgentErrorCleanup() {
@@ -1301,13 +1324,11 @@ public class PerformUnifiedRestoreTask implements BackupRestoreTask {
 
     void sendOnRestorePackage(String name) {
         if (mObserver != null) {
-            if (mObserver != null) {
-                try {
-                    mObserver.onUpdate(mCount, name);
-                } catch (RemoteException e) {
-                    Slog.d(TAG, "Restore observer died in onUpdate");
-                    mObserver = null;
-                }
+            try {
+                mObserver.onUpdate(mCount, name);
+            } catch (RemoteException e) {
+                Slog.d(TAG, "Restore observer died in onUpdate");
+                mObserver = null;
             }
         }
     }

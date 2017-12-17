@@ -225,6 +225,12 @@ public final class ActivityThread extends ClientTransactionHandler {
      */
     public static final long INVALID_PROC_STATE_SEQ = -1;
 
+    /**
+     * Identifier for the sequence no. associated with this process start. It will be provided
+     * as one of the arguments when the process starts.
+     */
+    public static final String PROC_START_SEQ_IDENT = "seq=";
+
     private final Object mNetworkPolicyLock = new Object();
 
     /**
@@ -377,7 +383,7 @@ public final class ActivityThread extends ClientTransactionHandler {
 
         ActivityInfo activityInfo;
         CompatibilityInfo compatInfo;
-        public LoadedApk packageInfo;
+        public LoadedApk loadedApk;
 
         List<ResultInfo> pendingResults;
         List<ReferrerIntent> pendingIntents;
@@ -420,7 +426,7 @@ public final class ActivityThread extends ClientTransactionHandler {
             this.isForward = isForward;
             this.profilerInfo = profilerInfo;
             this.overrideConfig = overrideConfig;
-            this.packageInfo = client.getPackageInfoNoCheck(activityInfo.applicationInfo,
+            this.loadedApk = client.getLoadedApkNoCheck(activityInfo.applicationInfo,
                     compatInfo);
             init();
         }
@@ -602,7 +608,7 @@ public final class ActivityThread extends ClientTransactionHandler {
     }
 
     static final class AppBindData {
-        LoadedApk info;
+        LoadedApk loadedApk;
         String processName;
         ApplicationInfo appInfo;
         List<ProviderInfo> providers;
@@ -1774,13 +1780,13 @@ public final class ActivityThread extends ClientTransactionHandler {
         return mH;
     }
 
-    public final LoadedApk getPackageInfo(String packageName, CompatibilityInfo compatInfo,
-            int flags) {
-        return getPackageInfo(packageName, compatInfo, flags, UserHandle.myUserId());
+    public final LoadedApk getLoadedApkForPackageName(String packageName,
+            CompatibilityInfo compatInfo, int flags) {
+        return getLoadedApkForPackageName(packageName, compatInfo, flags, UserHandle.myUserId());
     }
 
-    public final LoadedApk getPackageInfo(String packageName, CompatibilityInfo compatInfo,
-            int flags, int userId) {
+    public final LoadedApk getLoadedApkForPackageName(String packageName,
+            CompatibilityInfo compatInfo, int flags, int userId) {
         final boolean differentUser = (UserHandle.myUserId() != userId);
         synchronized (mResourcesManager) {
             WeakReference<LoadedApk> ref;
@@ -1793,13 +1799,13 @@ public final class ActivityThread extends ClientTransactionHandler {
                 ref = mResourcePackages.get(packageName);
             }
 
-            LoadedApk packageInfo = ref != null ? ref.get() : null;
-            //Slog.i(TAG, "getPackageInfo " + packageName + ": " + packageInfo);
-            //if (packageInfo != null) Slog.i(TAG, "isUptoDate " + packageInfo.mResDir
-            //        + ": " + packageInfo.mResources.getAssets().isUpToDate());
-            if (packageInfo != null && (packageInfo.mResources == null
-                    || packageInfo.mResources.getAssets().isUpToDate())) {
-                if (packageInfo.isSecurityViolation()
+            LoadedApk loadedApk = ref != null ? ref.get() : null;
+            //Slog.i(TAG, "getLoadedApkForPackageName " + packageName + ": " + loadedApk);
+            //if (loadedApk != null) Slog.i(TAG, "isUptoDate " + loadedApk.mResDir
+            //        + ": " + loadedApk.mResources.getAssets().isUpToDate());
+            if (loadedApk != null && (loadedApk.mResources == null
+                    || loadedApk.mResources.getAssets().isUpToDate())) {
+                if (loadedApk.isSecurityViolation()
                         && (flags&Context.CONTEXT_IGNORE_SECURITY) == 0) {
                     throw new SecurityException(
                             "Requesting code from " + packageName
@@ -1807,7 +1813,7 @@ public final class ActivityThread extends ClientTransactionHandler {
                             + mBoundApplication.processName
                             + "/" + mBoundApplication.appInfo.uid);
                 }
-                return packageInfo;
+                return loadedApk;
             }
         }
 
@@ -1822,13 +1828,13 @@ public final class ActivityThread extends ClientTransactionHandler {
         }
 
         if (ai != null) {
-            return getPackageInfo(ai, compatInfo, flags);
+            return getLoadedApk(ai, compatInfo, flags);
         }
 
         return null;
     }
 
-    public final LoadedApk getPackageInfo(ApplicationInfo ai, CompatibilityInfo compatInfo,
+    public final LoadedApk getLoadedApk(ApplicationInfo ai, CompatibilityInfo compatInfo,
             int flags) {
         boolean includeCode = (flags&Context.CONTEXT_INCLUDE_CODE) != 0;
         boolean securityViolation = includeCode && ai.uid != 0
@@ -1850,17 +1856,17 @@ public final class ActivityThread extends ClientTransactionHandler {
                 throw new SecurityException(msg);
             }
         }
-        return getPackageInfo(ai, compatInfo, null, securityViolation, includeCode,
+        return getLoadedApk(ai, compatInfo, null, securityViolation, includeCode,
                 registerPackage);
     }
 
     @Override
-    public final LoadedApk getPackageInfoNoCheck(ApplicationInfo ai,
+    public final LoadedApk getLoadedApkNoCheck(ApplicationInfo ai,
             CompatibilityInfo compatInfo) {
-        return getPackageInfo(ai, compatInfo, null, false, true, false);
+        return getLoadedApk(ai, compatInfo, null, false, true, false);
     }
 
-    public final LoadedApk peekPackageInfo(String packageName, boolean includeCode) {
+    public final LoadedApk peekLoadedApk(String packageName, boolean includeCode) {
         synchronized (mResourcesManager) {
             WeakReference<LoadedApk> ref;
             if (includeCode) {
@@ -1872,7 +1878,7 @@ public final class ActivityThread extends ClientTransactionHandler {
         }
     }
 
-    private LoadedApk getPackageInfo(ApplicationInfo aInfo, CompatibilityInfo compatInfo,
+    private LoadedApk getLoadedApk(ApplicationInfo aInfo, CompatibilityInfo compatInfo,
             ClassLoader baseLoader, boolean securityViolation, boolean includeCode,
             boolean registerPackage) {
         final boolean differentUser = (UserHandle.myUserId() != UserHandle.getUserId(aInfo.uid));
@@ -1887,35 +1893,35 @@ public final class ActivityThread extends ClientTransactionHandler {
                 ref = mResourcePackages.get(aInfo.packageName);
             }
 
-            LoadedApk packageInfo = ref != null ? ref.get() : null;
-            if (packageInfo == null || (packageInfo.mResources != null
-                    && !packageInfo.mResources.getAssets().isUpToDate())) {
+            LoadedApk loadedApk = ref != null ? ref.get() : null;
+            if (loadedApk == null || (loadedApk.mResources != null
+                    && !loadedApk.mResources.getAssets().isUpToDate())) {
                 if (localLOGV) Slog.v(TAG, (includeCode ? "Loading code package "
                         : "Loading resource-only package ") + aInfo.packageName
                         + " (in " + (mBoundApplication != null
                                 ? mBoundApplication.processName : null)
                         + ")");
-                packageInfo =
+                loadedApk =
                     new LoadedApk(this, aInfo, compatInfo, baseLoader,
                             securityViolation, includeCode &&
                             (aInfo.flags&ApplicationInfo.FLAG_HAS_CODE) != 0, registerPackage);
 
                 if (mSystemThread && "android".equals(aInfo.packageName)) {
-                    packageInfo.installSystemApplicationInfo(aInfo,
-                            getSystemContext().mPackageInfo.getClassLoader());
+                    loadedApk.installSystemApplicationInfo(aInfo,
+                            getSystemContext().mLoadedApk.getClassLoader());
                 }
 
                 if (differentUser) {
                     // Caching not supported across users
                 } else if (includeCode) {
                     mPackages.put(aInfo.packageName,
-                            new WeakReference<LoadedApk>(packageInfo));
+                            new WeakReference<LoadedApk>(loadedApk));
                 } else {
                     mResourcePackages.put(aInfo.packageName,
-                            new WeakReference<LoadedApk>(packageInfo));
+                            new WeakReference<LoadedApk>(loadedApk));
                 }
             }
-            return packageInfo;
+            return loadedApk;
         }
     }
 
@@ -2627,8 +2633,8 @@ public final class ActivityThread extends ClientTransactionHandler {
     /**  Core implementation of activity launch. */
     private Activity performLaunchActivity(ActivityClientRecord r) {
         ActivityInfo aInfo = r.activityInfo;
-        if (r.packageInfo == null) {
-            r.packageInfo = getPackageInfo(aInfo.applicationInfo, r.compatInfo,
+        if (r.loadedApk == null) {
+            r.loadedApk = getLoadedApk(aInfo.applicationInfo, r.compatInfo,
                     Context.CONTEXT_INCLUDE_CODE);
         }
 
@@ -2665,15 +2671,15 @@ public final class ActivityThread extends ClientTransactionHandler {
         }
 
         try {
-            Application app = r.packageInfo.makeApplication(false, mInstrumentation);
+            Application app = r.loadedApk.makeApplication(false, mInstrumentation);
 
             if (localLOGV) Slog.v(TAG, "Performing launch of " + r);
             if (localLOGV) Slog.v(
                     TAG, r + ": app=" + app
                     + ", appName=" + app.getPackageName()
-                    + ", pkg=" + r.packageInfo.getPackageName()
+                    + ", pkg=" + r.loadedApk.getPackageName()
                     + ", comp=" + r.intent.getComponent().toShortString()
-                    + ", dir=" + r.packageInfo.getAppDir());
+                    + ", dir=" + r.loadedApk.getAppDir());
 
             if (activity != null) {
                 CharSequence title = r.activityInfo.loadLabel(appContext.getPackageManager());
@@ -2813,7 +2819,7 @@ public final class ActivityThread extends ClientTransactionHandler {
         }
 
         ContextImpl appContext = ContextImpl.createActivityContext(
-                this, r.packageInfo, r.activityInfo, r.token, displayId, r.overrideConfig);
+                this, r.loadedApk, r.activityInfo, r.token, displayId, r.overrideConfig);
 
         final DisplayManagerGlobal dm = DisplayManagerGlobal.getInstance();
         // For debugging purposes, if the activity's package name contains the value of
@@ -2821,7 +2827,7 @@ public final class ActivityThread extends ClientTransactionHandler {
         // its content on a secondary display if there is one.
         String pkgName = SystemProperties.get("debug.second-display.pkg");
         if (pkgName != null && !pkgName.isEmpty()
-                && r.packageInfo.mPackageName.contains(pkgName)) {
+                && r.loadedApk.mPackageName.contains(pkgName)) {
             for (int id : dm.getDisplayIds()) {
                 if (id != Display.DEFAULT_DISPLAY) {
                     Display display =
@@ -3141,7 +3147,7 @@ public final class ActivityThread extends ClientTransactionHandler {
 
         String component = data.intent.getComponent().getClassName();
 
-        LoadedApk packageInfo = getPackageInfoNoCheck(
+        LoadedApk loadedApk = getLoadedApkNoCheck(
                 data.info.applicationInfo, data.compatInfo);
 
         IActivityManager mgr = ActivityManager.getService();
@@ -3150,7 +3156,7 @@ public final class ActivityThread extends ClientTransactionHandler {
         BroadcastReceiver receiver;
         ContextImpl context;
         try {
-            app = packageInfo.makeApplication(false, mInstrumentation);
+            app = loadedApk.makeApplication(false, mInstrumentation);
             context = (ContextImpl) app.getBaseContext();
             if (data.info.splitName != null) {
                 context = (ContextImpl) context.createContextForSplit(data.info.splitName);
@@ -3159,7 +3165,7 @@ public final class ActivityThread extends ClientTransactionHandler {
             data.intent.setExtrasClassLoader(cl);
             data.intent.prepareToEnterProcess();
             data.setExtrasClassLoader(cl);
-            receiver = packageInfo.getAppFactory()
+            receiver = loadedApk.getAppFactory()
                     .instantiateReceiver(cl, data.info.name, data.intent);
         } catch (Exception e) {
             if (DEBUG_BROADCAST) Slog.i(TAG,
@@ -3175,9 +3181,9 @@ public final class ActivityThread extends ClientTransactionHandler {
                 TAG, "Performing receive of " + data.intent
                 + ": app=" + app
                 + ", appName=" + app.getPackageName()
-                + ", pkg=" + packageInfo.getPackageName()
+                + ", pkg=" + loadedApk.getPackageName()
                 + ", comp=" + data.intent.getComponent().toShortString()
-                + ", dir=" + packageInfo.getAppDir());
+                + ", dir=" + loadedApk.getAppDir());
 
             sCurrentBroadcastIntent.set(data.intent);
             receiver.setPendingResult(data);
@@ -3222,8 +3228,8 @@ public final class ActivityThread extends ClientTransactionHandler {
         unscheduleGcIdler();
 
         // instantiate the BackupAgent class named in the manifest
-        LoadedApk packageInfo = getPackageInfoNoCheck(data.appInfo, data.compatInfo);
-        String packageName = packageInfo.mPackageName;
+        LoadedApk loadedApk = getLoadedApkNoCheck(data.appInfo, data.compatInfo);
+        String packageName = loadedApk.mPackageName;
         if (packageName == null) {
             Slog.d(TAG, "Asked to create backup agent for nonexistent package");
             return;
@@ -3249,11 +3255,11 @@ public final class ActivityThread extends ClientTransactionHandler {
                 try {
                     if (DEBUG_BACKUP) Slog.v(TAG, "Initializing agent class " + classname);
 
-                    java.lang.ClassLoader cl = packageInfo.getClassLoader();
+                    java.lang.ClassLoader cl = loadedApk.getClassLoader();
                     agent = (BackupAgent) cl.loadClass(classname).newInstance();
 
                     // set up the agent's context
-                    ContextImpl context = ContextImpl.createAppContext(this, packageInfo);
+                    ContextImpl context = ContextImpl.createAppContext(this, loadedApk);
                     context.setOuterContext(agent);
                     agent.attach(context);
 
@@ -3289,8 +3295,8 @@ public final class ActivityThread extends ClientTransactionHandler {
     private void handleDestroyBackupAgent(CreateBackupAgentData data) {
         if (DEBUG_BACKUP) Slog.v(TAG, "handleDestroyBackupAgent: " + data);
 
-        LoadedApk packageInfo = getPackageInfoNoCheck(data.appInfo, data.compatInfo);
-        String packageName = packageInfo.mPackageName;
+        LoadedApk loadedApk = getLoadedApkNoCheck(data.appInfo, data.compatInfo);
+        String packageName = loadedApk.mPackageName;
         BackupAgent agent = mBackupAgents.get(packageName);
         if (agent != null) {
             try {
@@ -3310,12 +3316,12 @@ public final class ActivityThread extends ClientTransactionHandler {
         // we are back active so skip it.
         unscheduleGcIdler();
 
-        LoadedApk packageInfo = getPackageInfoNoCheck(
+        LoadedApk loadedApk = getLoadedApkNoCheck(
                 data.info.applicationInfo, data.compatInfo);
         Service service = null;
         try {
-            java.lang.ClassLoader cl = packageInfo.getClassLoader();
-            service = packageInfo.getAppFactory()
+            java.lang.ClassLoader cl = loadedApk.getClassLoader();
+            service = loadedApk.getAppFactory()
                     .instantiateService(cl, data.info.name, data.intent);
         } catch (Exception e) {
             if (!mInstrumentation.onException(service, e)) {
@@ -3328,10 +3334,10 @@ public final class ActivityThread extends ClientTransactionHandler {
         try {
             if (localLOGV) Slog.v(TAG, "Creating service " + data.info.name);
 
-            ContextImpl context = ContextImpl.createAppContext(this, packageInfo);
+            ContextImpl context = ContextImpl.createAppContext(this, loadedApk);
             context.setOuterContext(service);
 
-            Application app = packageInfo.makeApplication(false, mInstrumentation);
+            Application app = loadedApk.makeApplication(false, mInstrumentation);
             service.attach(context, this, data.info.name, data.token, app,
                     ActivityManager.getService());
             service.onCreate();
@@ -4195,11 +4201,11 @@ public final class ActivityThread extends ClientTransactionHandler {
     }
 
     private void handleUpdatePackageCompatibilityInfo(UpdateCompatibilityData data) {
-        LoadedApk apk = peekPackageInfo(data.pkg, false);
+        LoadedApk apk = peekLoadedApk(data.pkg, false);
         if (apk != null) {
             apk.setCompatibilityInfo(data.info);
         }
-        apk = peekPackageInfo(data.pkg, true);
+        apk = peekLoadedApk(data.pkg, true);
         if (apk != null) {
             apk.setCompatibilityInfo(data.info);
         }
@@ -4693,7 +4699,7 @@ public final class ActivityThread extends ClientTransactionHandler {
                 if (a != null) {
                     Configuration thisConfig = applyConfigCompatMainThread(
                             mCurDefaultDisplayDpi, newConfig,
-                            ar.packageInfo.getCompatibilityInfo());
+                            ar.loadedApk.getCompatibilityInfo());
                     if (!ar.activity.mFinished && (allActivities || !ar.paused)) {
                         // If the activity is currently resumed, its configuration
                         // needs to change right now.
@@ -5179,7 +5185,7 @@ public final class ActivityThread extends ClientTransactionHandler {
     }
 
     final void handleDispatchPackageBroadcast(int cmd, String[] packages) {
-        boolean hasPkgInfo = false;
+        boolean hasLoadedApk = false;
         switch (cmd) {
             case ApplicationThreadConstants.PACKAGE_REMOVED:
             case ApplicationThreadConstants.PACKAGE_REMOVED_DONT_KILL:
@@ -5190,14 +5196,14 @@ public final class ActivityThread extends ClientTransactionHandler {
                 }
                 synchronized (mResourcesManager) {
                     for (int i = packages.length - 1; i >= 0; i--) {
-                        if (!hasPkgInfo) {
+                        if (!hasLoadedApk) {
                             WeakReference<LoadedApk> ref = mPackages.get(packages[i]);
                             if (ref != null && ref.get() != null) {
-                                hasPkgInfo = true;
+                                hasLoadedApk = true;
                             } else {
                                 ref = mResourcePackages.get(packages[i]);
                                 if (ref != null && ref.get() != null) {
-                                    hasPkgInfo = true;
+                                    hasLoadedApk = true;
                                 }
                             }
                         }
@@ -5217,21 +5223,21 @@ public final class ActivityThread extends ClientTransactionHandler {
                 synchronized (mResourcesManager) {
                     for (int i = packages.length - 1; i >= 0; i--) {
                         WeakReference<LoadedApk> ref = mPackages.get(packages[i]);
-                        LoadedApk pkgInfo = ref != null ? ref.get() : null;
-                        if (pkgInfo != null) {
-                            hasPkgInfo = true;
+                        LoadedApk loadedApk = ref != null ? ref.get() : null;
+                        if (loadedApk != null) {
+                            hasLoadedApk = true;
                         } else {
                             ref = mResourcePackages.get(packages[i]);
-                            pkgInfo = ref != null ? ref.get() : null;
-                            if (pkgInfo != null) {
-                                hasPkgInfo = true;
+                            loadedApk = ref != null ? ref.get() : null;
+                            if (loadedApk != null) {
+                                hasLoadedApk = true;
                             }
                         }
                         // If the package is being replaced, yet it still has a valid
                         // LoadedApk object, the package was updated with _DONT_KILL.
                         // Adjust it's internal references to the application info and
                         // resources.
-                        if (pkgInfo != null) {
+                        if (loadedApk != null) {
                             try {
                                 final String packageName = packages[i];
                                 final ApplicationInfo aInfo =
@@ -5245,13 +5251,13 @@ public final class ActivityThread extends ClientTransactionHandler {
                                         if (ar.activityInfo.applicationInfo.packageName
                                                 .equals(packageName)) {
                                             ar.activityInfo.applicationInfo = aInfo;
-                                            ar.packageInfo = pkgInfo;
+                                            ar.loadedApk = loadedApk;
                                         }
                                     }
                                 }
                                 final List<String> oldPaths =
                                         sPackageManager.getPreviousCodePaths(packageName);
-                                pkgInfo.updateApplicationInfo(aInfo, oldPaths);
+                                loadedApk.updateApplicationInfo(aInfo, oldPaths);
                             } catch (RemoteException e) {
                             }
                         }
@@ -5260,7 +5266,7 @@ public final class ActivityThread extends ClientTransactionHandler {
                 break;
             }
         }
-        ApplicationPackageManager.handlePackageBroadcast(cmd, packages, hasPkgInfo);
+        ApplicationPackageManager.handlePackageBroadcast(cmd, packages, hasLoadedApk);
     }
 
     final void handleLowMemory() {
@@ -5464,7 +5470,7 @@ public final class ActivityThread extends ClientTransactionHandler {
             applyCompatConfiguration(mCurDefaultDisplayDpi);
         }
 
-        data.info = getPackageInfoNoCheck(data.appInfo, data.compatInfo);
+        data.loadedApk = getLoadedApkNoCheck(data.appInfo, data.compatInfo);
 
         /**
          * Switch this process to density compatibility mode if needed.
@@ -5508,7 +5514,7 @@ public final class ActivityThread extends ClientTransactionHandler {
             // XXX should have option to change the port.
             Debug.changeDebugPort(8100);
             if (data.debugMode == ApplicationThreadConstants.DEBUG_WAIT) {
-                Slog.w(TAG, "Application " + data.info.getPackageName()
+                Slog.w(TAG, "Application " + data.loadedApk.getPackageName()
                       + " is waiting for the debugger on port 8100...");
 
                 IActivityManager mgr = ActivityManager.getService();
@@ -5527,7 +5533,7 @@ public final class ActivityThread extends ClientTransactionHandler {
                 }
 
             } else {
-                Slog.w(TAG, "Application " + data.info.getPackageName()
+                Slog.w(TAG, "Application " + data.loadedApk.getPackageName()
                       + " can be debugged on port 8100...");
             }
         }
@@ -5575,14 +5581,14 @@ public final class ActivityThread extends ClientTransactionHandler {
             mInstrumentationAppDir = ii.sourceDir;
             mInstrumentationSplitAppDirs = ii.splitSourceDirs;
             mInstrumentationLibDir = getInstrumentationLibrary(data.appInfo, ii);
-            mInstrumentedAppDir = data.info.getAppDir();
-            mInstrumentedSplitAppDirs = data.info.getSplitAppDirs();
-            mInstrumentedLibDir = data.info.getLibDir();
+            mInstrumentedAppDir = data.loadedApk.getAppDir();
+            mInstrumentedSplitAppDirs = data.loadedApk.getSplitAppDirs();
+            mInstrumentedLibDir = data.loadedApk.getLibDir();
         } else {
             ii = null;
         }
 
-        final ContextImpl appContext = ContextImpl.createAppContext(this, data.info);
+        final ContextImpl appContext = ContextImpl.createAppContext(this, data.loadedApk);
         updateLocaleListFromAppContext(appContext,
                 mResourcesManager.getConfiguration().getLocales());
 
@@ -5626,9 +5632,9 @@ public final class ActivityThread extends ClientTransactionHandler {
             }
             ii.copyTo(instrApp);
             instrApp.initForUser(UserHandle.myUserId());
-            final LoadedApk pi = getPackageInfo(instrApp, data.compatInfo,
+            final LoadedApk loadedApk = getLoadedApk(instrApp, data.compatInfo,
                     appContext.getClassLoader(), false, true, false);
-            final ContextImpl instrContext = ContextImpl.createAppContext(this, pi);
+            final ContextImpl instrContext = ContextImpl.createAppContext(this, loadedApk);
 
             try {
                 final ClassLoader cl = instrContext.getClassLoader();
@@ -5673,7 +5679,7 @@ public final class ActivityThread extends ClientTransactionHandler {
         try {
             // If the app is being launched for full backup or restore, bring it up in
             // a restricted environment with the base application class.
-            app = data.info.makeApplication(data.restrictedBackupMode, null);
+            app = data.loadedApk.makeApplication(data.restrictedBackupMode, null);
             mInitialApplication = app;
 
             // don't bring up providers in restricted mode; they may depend on the
@@ -5727,7 +5733,7 @@ public final class ActivityThread extends ClientTransactionHandler {
                 final int preloadedFontsResource = info.metaData.getInt(
                         ApplicationInfo.METADATA_PRELOADED_FONTS, 0);
                 if (preloadedFontsResource != 0) {
-                    data.info.getResources().preloadFonts(preloadedFontsResource);
+                    data.loadedApk.getResources().preloadFonts(preloadedFontsResource);
                 }
             }
         } catch (RemoteException e) {
@@ -6185,12 +6191,12 @@ public final class ActivityThread extends ClientTransactionHandler {
 
             try {
                 final java.lang.ClassLoader cl = c.getClassLoader();
-                LoadedApk packageInfo = peekPackageInfo(ai.packageName, true);
-                if (packageInfo == null) {
+                LoadedApk loadedApk = peekLoadedApk(ai.packageName, true);
+                if (loadedApk == null) {
                     // System startup case.
-                    packageInfo = getSystemContext().mPackageInfo;
+                    loadedApk = getSystemContext().mLoadedApk;
                 }
-                localProvider = packageInfo.getAppFactory()
+                localProvider = loadedApk.getAppFactory()
                         .instantiateProvider(cl, info.name);
                 provider = localProvider.getIContentProvider();
                 if (provider == null) {
@@ -6289,7 +6295,7 @@ public final class ActivityThread extends ClientTransactionHandler {
         System.exit(0);
     }
 
-    private void attach(boolean system) {
+    private void attach(boolean system, long startSeq) {
         sCurrentActivityThread = this;
         mSystemThread = system;
         if (!system) {
@@ -6304,7 +6310,7 @@ public final class ActivityThread extends ClientTransactionHandler {
             RuntimeInit.setApplicationObject(mAppThread.asBinder());
             final IActivityManager mgr = ActivityManager.getService();
             try {
-                mgr.attachApplication(mAppThread);
+                mgr.attachApplication(mAppThread, startSeq);
             } catch (RemoteException ex) {
                 throw ex.rethrowFromSystemServer();
             }
@@ -6339,8 +6345,8 @@ public final class ActivityThread extends ClientTransactionHandler {
                 mInstrumentation = new Instrumentation();
                 mInstrumentation.basicInit(this);
                 ContextImpl context = ContextImpl.createAppContext(
-                        this, getSystemContext().mPackageInfo);
-                mInitialApplication = context.mPackageInfo.makeApplication(true, null);
+                        this, getSystemContext().mLoadedApk);
+                mInitialApplication = context.mLoadedApk.makeApplication(true, null);
                 mInitialApplication.onCreate();
             } catch (Exception e) {
                 throw new RuntimeException(
@@ -6383,7 +6389,7 @@ public final class ActivityThread extends ClientTransactionHandler {
             ThreadedRenderer.enableForegroundTrimming();
         }
         ActivityThread thread = new ActivityThread();
-        thread.attach(true);
+        thread.attach(true, 0);
         return thread;
     }
 
@@ -6455,8 +6461,19 @@ public final class ActivityThread extends ClientTransactionHandler {
 
         Looper.prepareMainLooper();
 
+        // Find the value for {@link #PROC_START_SEQ_IDENT} if provided on the command line.
+        // It will be in the format "seq=114"
+        long startSeq = 0;
+        if (args != null) {
+            for (int i = args.length - 1; i >= 0; --i) {
+                if (args[i] != null && args[i].startsWith(PROC_START_SEQ_IDENT)) {
+                    startSeq = Long.parseLong(
+                            args[i].substring(PROC_START_SEQ_IDENT.length()));
+                }
+            }
+        }
         ActivityThread thread = new ActivityThread();
-        thread.attach(false);
+        thread.attach(false, startSeq);
 
         if (sMainThreadHandler == null) {
             sMainThreadHandler = thread.getHandler();

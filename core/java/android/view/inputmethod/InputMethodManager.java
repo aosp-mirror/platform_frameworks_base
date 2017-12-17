@@ -281,10 +281,10 @@ public final class InputMethodManager {
     boolean mActive = false;
 
     /**
-     * Set whenever this client becomes inactive, to know we need to reset
-     * state with the IME the next time we receive focus.
+     * {@code true} if next {@link #onPostWindowFocus(View, View, int, boolean, int)} needs to
+     * restart input.
      */
-    boolean mHasBeenInactive = true;
+    boolean mRestartOnNextWindowFocus = true;
 
     /**
      * As reported by IME through InputConnection.
@@ -489,7 +489,7 @@ public final class InputMethodManager {
                             // Some other client has starting using the IME, so note
                             // that this happened and make sure our own editor's
                             // state is reset.
-                            mHasBeenInactive = true;
+                            mRestartOnNextWindowFocus = true;
                             try {
                                 // Note that finishComposingText() is allowed to run
                                 // even when we are not active.
@@ -500,7 +500,7 @@ public final class InputMethodManager {
                         // Check focus again in case that "onWindowFocus" is called before
                         // handling this message.
                         if (mServedView != null && mServedView.hasWindowFocus()) {
-                            if (checkFocusNoStartInput(mHasBeenInactive)) {
+                            if (checkFocusNoStartInput(mRestartOnNextWindowFocus)) {
                                 final int reason = active ?
                                         InputMethodClient.START_INPUT_REASON_ACTIVATED_BY_IMMS :
                                         InputMethodClient.START_INPUT_REASON_DEACTIVATED_BY_IMMS;
@@ -1336,46 +1336,28 @@ public final class InputMethodManager {
                         windowFlags, tba, servedContext, missingMethodFlags,
                         view.getContext().getApplicationInfo().targetSdkVersion);
                 if (DEBUG) Log.v(TAG, "Starting input: Bind result=" + res);
-                if (res != null) {
-                    if (res.id != null) {
-                        setInputChannelLocked(res.channel);
-                        mBindSequence = res.sequence;
-                        mCurMethod = res.method;
-                        mCurId = res.id;
-                        mNextUserActionNotificationSequenceNumber =
-                                res.userActionNotificationSequenceNumber;
-                    } else {
-                        if (res.channel != null && res.channel != mCurChannel) {
-                            res.channel.dispose();
-                        }
-                        if (mCurMethod == null) {
-                            // This means there is no input method available.
-                            if (DEBUG) Log.v(TAG, "ABORT input: no input method!");
-                            return true;
-                        }
-                    }
-                } else {
-                    if (startInputReason
-                            == InputMethodClient.START_INPUT_REASON_WINDOW_FOCUS_GAIN) {
-                        // We are here probably because of an obsolete window-focus-in message sent
-                        // to windowGainingFocus.  Since IMMS determines whether a Window can have
-                        // IME focus or not by using the latest window focus state maintained in the
-                        // WMS, this kind of race condition cannot be avoided.  One obvious example
-                        // would be that we have already received a window-focus-out message but the
-                        // UI thread is still handling previous window-focus-in message here.
-                        // TODO: InputBindResult should have the error code.
-                        if (DEBUG) Log.w(TAG, "startInputOrWindowGainedFocus failed. "
-                                + "Window focus may have already been lost. "
-                                + "win=" + windowGainingFocus + " view=" + dumpViewInfo(view));
-                        if (!mActive) {
-                            // mHasBeenInactive is a latch switch to forcefully refresh IME focus
-                            // state when an inactive (mActive == false) client is gaining window
-                            // focus. In case we have unnecessary disable the latch due to this
-                            // spurious wakeup, we re-enable the latch here.
-                            // TODO: Come up with more robust solution.
-                            mHasBeenInactive = true;
-                        }
-                    }
+                if (res == null) {
+                    Log.wtf(TAG, "startInputOrWindowGainedFocus must not return"
+                            + " null. startInputReason="
+                            + InputMethodClient.getStartInputReason(startInputReason)
+                            + " editorInfo=" + tba
+                            + " controlFlags=#" + Integer.toHexString(controlFlags));
+                    return false;
+                }
+                if (res.id != null) {
+                    setInputChannelLocked(res.channel);
+                    mBindSequence = res.sequence;
+                    mCurMethod = res.method;
+                    mCurId = res.id;
+                    mNextUserActionNotificationSequenceNumber =
+                            res.userActionNotificationSequenceNumber;
+                } else if (res.channel != null && res.channel != mCurChannel) {
+                    res.channel.dispose();
+                }
+                switch (res.result) {
+                    case InputBindResult.ResultCode.ERROR_NOT_IME_TARGET_WINDOW:
+                        mRestartOnNextWindowFocus = true;
+                        break;
                 }
                 if (mCurMethod != null && mCompletions != null) {
                     try {
@@ -1551,9 +1533,9 @@ public final class InputMethodManager {
                     + " softInputMode=" + InputMethodClient.softInputModeToString(softInputMode)
                     + " first=" + first + " flags=#"
                     + Integer.toHexString(windowFlags));
-            if (mHasBeenInactive) {
-                if (DEBUG) Log.v(TAG, "Has been inactive!  Starting fresh");
-                mHasBeenInactive = false;
+            if (mRestartOnNextWindowFocus) {
+                if (DEBUG) Log.v(TAG, "Restarting due to mRestartOnNextWindowFocus");
+                mRestartOnNextWindowFocus = false;
                 forceNewFocus = true;
             }
             focusInLocked(focusedView != null ? focusedView : rootView);
@@ -2485,7 +2467,7 @@ public final class InputMethodManager {
         p.println("  mMainLooper=" + mMainLooper);
         p.println("  mIInputContext=" + mIInputContext);
         p.println("  mActive=" + mActive
-                + " mHasBeenInactive=" + mHasBeenInactive
+                + " mRestartOnNextWindowFocus=" + mRestartOnNextWindowFocus
                 + " mBindSequence=" + mBindSequence
                 + " mCurId=" + mCurId);
         p.println("  mFullscreenMode=" + mFullscreenMode);

@@ -28,6 +28,7 @@ import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.app.ActivityManagerInternal;
 import android.app.AlertDialog;
+import android.app.AppOpsManager;
 import android.app.PendingIntent;
 import android.appwidget.AppWidgetManagerInternal;
 import android.content.BroadcastReceiver;
@@ -193,6 +194,8 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
 
     private final SecurityPolicy mSecurityPolicy;
 
+    private final AppOpsManager mAppOpsManager;
+
     private final MainHandler mMainHandler;
 
     private final GlobalActionPerformer mGlobalActionPerformer;
@@ -261,6 +264,7 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
         mWindowManagerService = LocalServices.getService(WindowManagerInternal.class);
         mUserManager = (UserManager) context.getSystemService(Context.USER_SERVICE);
         mSecurityPolicy = new SecurityPolicy();
+        mAppOpsManager = (AppOpsManager) context.getSystemService(Context.APP_OPS_SERVICE);
         mMainHandler = new MainHandler(mContext.getMainLooper());
         mGlobalActionPerformer = new GlobalActionPerformer(mContext, mWindowManagerService);
 
@@ -768,7 +772,6 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
     public void unregisterUiTestAutomationService(IAccessibilityServiceClient serviceClient) {
         synchronized (mLock) {
             mUiAutomationManager.unregisterUiTestAutomationServiceLocked(serviceClient);
-            onUserStateChangedLocked(getCurrentUserStateLocked());
         }
     }
 
@@ -1223,14 +1226,11 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
         for (int i = 0, count = installedServices.size(); i < count; i++) {
             ResolveInfo resolveInfo = installedServices.get(i);
             ServiceInfo serviceInfo = resolveInfo.serviceInfo;
-            if (!android.Manifest.permission.BIND_ACCESSIBILITY_SERVICE.equals(
-                    serviceInfo.permission)) {
-                Slog.w(LOG_TAG, "Skipping accessibilty service " + new ComponentName(
-                        serviceInfo.packageName, serviceInfo.name).flattenToShortString()
-                        + ": it does not require the permission "
-                        + android.Manifest.permission.BIND_ACCESSIBILITY_SERVICE);
+
+            if (!canRegisterService(serviceInfo)) {
                 continue;
             }
+
             AccessibilityServiceInfo accessibilityServiceInfo;
             try {
                 accessibilityServiceInfo = new AccessibilityServiceInfo(resolveInfo, mContext);
@@ -1249,6 +1249,28 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
 
         mTempAccessibilityServiceInfoList.clear();
         return false;
+    }
+
+    private boolean canRegisterService(ServiceInfo serviceInfo) {
+        if (!android.Manifest.permission.BIND_ACCESSIBILITY_SERVICE.equals(
+                serviceInfo.permission)) {
+            Slog.w(LOG_TAG, "Skipping accessibility service " + new ComponentName(
+                    serviceInfo.packageName, serviceInfo.name).flattenToShortString()
+                    + ": it does not require the permission "
+                    + android.Manifest.permission.BIND_ACCESSIBILITY_SERVICE);
+            return false;
+        }
+
+        int servicePackageUid = serviceInfo.applicationInfo.uid;
+        if (mAppOpsManager.noteOpNoThrow(AppOpsManager.OP_BIND_ACCESSIBILITY_SERVICE,
+                servicePackageUid, serviceInfo.packageName) != AppOpsManager.MODE_ALLOWED) {
+            Slog.w(LOG_TAG, "Skipping accessibility service " + new ComponentName(
+                    serviceInfo.packageName, serviceInfo.name).flattenToShortString()
+                    + ": disallowed by AppOps");
+            return false;
+        }
+
+        return true;
     }
 
     private boolean readEnabledAccessibilityServicesLocked(UserState userState) {

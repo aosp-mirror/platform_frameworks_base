@@ -98,7 +98,8 @@ public class PerformInitializeTask implements Runnable {
                                     transportDirName));
                     EventLog.writeEvent(EventLogTags.BACKUP_SUCCESS, 0, millis);
                     synchronized (backupManagerService.getQueueLock()) {
-                        backupManagerService.recordInitPendingLocked(false, transportName);
+                        backupManagerService.recordInitPendingLocked(
+                                false, transportName, transportDirName);
                     }
                     notifyResult(transportName, BackupTransport.TRANSPORT_OK);
                 } else {
@@ -107,7 +108,8 @@ public class PerformInitializeTask implements Runnable {
                     Slog.e(TAG, "Transport error in initializeDevice()");
                     EventLog.writeEvent(EventLogTags.BACKUP_TRANSPORT_FAILURE, "(initialize)");
                     synchronized (backupManagerService.getQueueLock()) {
-                        backupManagerService.recordInitPendingLocked(true, transportName);
+                        backupManagerService.recordInitPendingLocked(
+                                true, transportName, transportDirName);
                     }
                     notifyResult(transportName, status);
                     result = status;

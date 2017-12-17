@@ -1689,7 +1689,7 @@ public final class Settings {
 
     /** @hide */
     @Retention(RetentionPolicy.SOURCE)
-    @IntDef({
+    @IntDef(prefix = { "RESET_MODE_" }, value = {
             RESET_MODE_PACKAGE_DEFAULTS,
             RESET_MODE_UNTRUSTED_DEFAULTS,
             RESET_MODE_UNTRUSTED_CHANGES,
@@ -5328,48 +5328,51 @@ public final class Settings {
         public static final String AUTOFILL_SERVICE = "autofill_service";
 
         /**
-         * Experimental autofill feature.
+         * Boolean indicating if Autofill supports field classification.
          *
-         * <p>TODO(b/67867469): document (or remove) once feature is finished
+         * @see android.service.autofill.AutofillService
+         *
          * @hide
          */
+        @SystemApi
         @TestApi
         public static final String AUTOFILL_FEATURE_FIELD_CLASSIFICATION =
                 "autofill_field_classification";
 
         /**
-         * Experimental autofill feature.
+         * Defines value returned by {@link android.service.autofill.UserData#getMaxUserDataSize()}.
          *
-         * <p>TODO(b/67867469): document (or remove) once feature is finished
          * @hide
          */
+        @SystemApi
         public static final String AUTOFILL_USER_DATA_MAX_USER_DATA_SIZE =
                 "autofill_user_data_max_user_data_size";
 
         /**
-         * Experimental autofill feature.
+         * Defines value returned by
+         * {@link android.service.autofill.UserData#getMaxFieldClassificationIdsSize()}.
          *
-         * <p>TODO(b/67867469): document (or remove) once feature is finished
          * @hide
          */
+        @SystemApi
         public static final String AUTOFILL_USER_DATA_MAX_FIELD_CLASSIFICATION_IDS_SIZE =
                 "autofill_user_data_max_field_classification_size";
 
         /**
-         * Experimental autofill feature.
+         * Defines value returned by {@link android.service.autofill.UserData#getMaxValueLength()}.
          *
-         * <p>TODO(b/67867469): document (or remove) once feature is finished
          * @hide
          */
+        @SystemApi
         public static final String AUTOFILL_USER_DATA_MAX_VALUE_LENGTH =
                 "autofill_user_data_max_value_length";
 
         /**
-         * Experimental autofill feature.
+         * Defines value returned by {@link android.service.autofill.UserData#getMinValueLength()}.
          *
-         * <p>TODO(b/67867469): document (or remove) once feature is finished
          * @hide
          */
+        @SystemApi
         public static final String AUTOFILL_USER_DATA_MIN_VALUE_LENGTH =
                 "autofill_user_data_min_value_length";
 
@@ -9463,6 +9466,7 @@ public final class Settings {
          * service_min_restart_time_between     (long)
          * service_max_inactivity               (long)
          * service_bg_start_timeout             (long)
+         * process_start_async                  (boolean)
          * </pre>
          *
          * <p>
@@ -9584,9 +9588,10 @@ public final class Settings {
         /**
          * App standby (app idle) specific settings.
          * This is encoded as a key=value list, separated by commas. Ex:
-         *
+         * <p>
          * "idle_duration=5000,parole_interval=4500"
-         *
+         * <p>
+         * All durations are in millis.
          * The following keys are supported:
          *
          * <pre>
@@ -9734,6 +9739,15 @@ public final class Settings {
          * see also android.view.textclassifier.TextClassifierConstants
          */
         public static final String TEXT_CLASSIFIER_CONSTANTS = "text_classifier_constants";
+
+        /**
+         * Whether or not App Standby feature is enabled. This controls throttling of apps
+         * based on usage patterns and predictions.
+         * Type: int (0 for false, 1 for true)
+         * Default: 1
+         * @hide
+         */
+        public static final java.lang.String APP_STANDBY_ENABLED = "app_standby_enabled";
 
         /**
          * Get the key that retrieves a bluetooth headset's priority.
@@ -11143,6 +11157,19 @@ public final class Settings {
          */
         public static final String NOTIFICATION_SNOOZE_OPTIONS =
                 "notification_snooze_options";
+
+        /**
+         * Configuration flags for SQLite Compatibility WAL. Encoded as a key-value list, separated
+         * by commas. E.g.: compatibility_wal_supported=true, wal_syncmode=OFF
+         *
+         * Supported keys:
+         * compatibility_wal_supported      (boolean)
+         * wal_syncmode       (String)
+         *
+         * @hide
+         */
+        public static final String SQLITE_COMPATIBILITY_WAL_FLAGS =
+                "sqlite_compatibility_wal_flags";
 
         /**
          * Enable GNSS Raw Measurements Full Tracking?

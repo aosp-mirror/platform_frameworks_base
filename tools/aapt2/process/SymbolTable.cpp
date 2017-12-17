@@ -30,7 +30,8 @@
 #include "ValueVisitor.h"
 #include "util/Util.h"
 
-using android::StringPiece;
+using ::android::StringPiece;
+using ::android::StringPiece16;
 
 namespace aapt {
 
@@ -291,11 +292,34 @@ std::unique_ptr<SymbolTable::Symbol> AssetManagerSymbolSource::FindByName(
   const std::u16string package16 = util::Utf8ToUtf16(name.package);
   const std::u16string type16 = util::Utf8ToUtf16(to_string(name.type));
   const std::u16string entry16 = util::Utf8ToUtf16(name.entry);
+  const std::u16string mangled_entry16 =
+      util::Utf8ToUtf16(NameMangler::MangleEntry(name.package, name.entry));
 
-  uint32_t type_spec_flags = 0;
-  ResourceId res_id = table.identifierForName(
-      entry16.data(), entry16.size(), type16.data(), type16.size(),
-      package16.data(), package16.size(), &type_spec_flags);
+  uint32_t type_spec_flags;
+  ResourceId res_id;
+
+  // There can be mangled resources embedded within other packages. Here we will
+  // look into each package and look-up the mangled name until we find the resource.
+  const size_t count = table.getBasePackageCount();
+  for (size_t i = 0; i < count; i++) {
+    const android::String16 package_name = table.getBasePackageName(i);
+    StringPiece16 real_package16 = package16;
+    StringPiece16 real_entry16 = entry16;
+    std::u16string scratch_entry16;
+    if (StringPiece16(package_name) != package16) {
+      real_entry16 = mangled_entry16;
+      real_package16 = package_name.string();
+    }
+
+    type_spec_flags = 0;
+    res_id = table.identifierForName(real_entry16.data(), real_entry16.size(), type16.data(),
+                                     type16.size(), real_package16.data(), real_package16.size(),
+                                     &type_spec_flags);
+    if (res_id.is_valid()) {
+      break;
+    }
+  }
+
   if (!res_id.is_valid()) {
     return {};
   }

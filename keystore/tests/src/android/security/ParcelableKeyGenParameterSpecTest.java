@@ -55,7 +55,7 @@ public final class ParcelableKeyGenParameterSpecTest {
     static final int USER_AUTHENTICATION_DURATION = 300;
     static final byte[] ATTESTATION_CHALLENGE = new byte[] {'c', 'h'};
 
-    KeyGenParameterSpec configureDefaultSpec() {
+    public static KeyGenParameterSpec configureDefaultSpec() {
         return new KeyGenParameterSpec.Builder(ALIAS, KEY_PURPOSES)
                 .setUid(UID)
                 .setKeySize(KEYSIZE)
@@ -80,7 +80,7 @@ public final class ParcelableKeyGenParameterSpecTest {
                 .build();
     }
 
-    void validateSpecValues(KeyGenParameterSpec spec, int uid, String alias) {
+    public static void validateSpecValues(KeyGenParameterSpec spec, int uid, String alias) {
         assertThat(spec.getKeystoreAlias(), is(alias));
         assertThat(spec.getPurposes(), is(KEY_PURPOSES));
         assertThat(spec.getUid(), is(uid));

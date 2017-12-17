@@ -79,6 +79,7 @@ message Atom {
         IsolatedUidChanged isolated_uid_changed = 43;
         PacketWakeupOccurred packet_wakeup_occurred = 44;
         DropboxErrorChanged dropbox_error_changed = 45;
+        AppHook app_hook = 46;
         // TODO: Reorder the numbering so that the most frequent occur events occur in the first 15.
     }
 
@@ -97,19 +98,29 @@ message Atom {
         CpuTimePerUidFreqPulled cpu_time_per_uid_freq_pulled = 1010;
         WifiActivityEnergyInfoPulled wifi_activity_energy_info_pulled = 1011;
         ModemActivityInfoPulled modem_activity_info_pulled = 1012;
+        AttributionChainDummyAtom attribution_chain_dummy_atom = 10000;
     }
 }
 
 /**
- * A WorkSource represents the chained attribution of applications that
- * resulted in a particular bit of work being done.
+ * An attribution represents an application or module that is part of process where a particular bit
+ * of work is done.
  */
-message WorkSource {
-    // The uid for a given element in the attribution chain.
-    repeated int32 uid = 1;
-    // The (optional) string tag for an element in the attribution chain. If the
-    // element has no tag, it is encoded as an empty string.
-    repeated string tag = 2;
+message Attribution {
+    // The uid for an application or module.
+    optional int32 uid = 1;
+    // The string tag for the attribution node.
+    optional string tag = 2;
+}
+
+/**
+ * An attribution chain represents the chained attributions of applications or modules that
+ * resulted in a particular bit of work being done.
+ * The ordering of the attributions is that of calls, that is uid = [A, B, C] if A calls B that
+ * calls C.
+ */
+message AttributionChain {
+    repeated Attribution attribution = 1;
 }
 
 /*
@@ -127,7 +138,7 @@ message WorkSource {
  *   - The CamelCase name of the message type should match the
  *     underscore_separated name as defined in Atom.
  *   - If an atom represents work that can be attributed to an app, there can
- *     be exactly one WorkSource field. It must be field number 1.
+ *     be exactly one AttributionChain field. It must be field number 1.
  *   - A field that is a uid should be a string field, tagged with the [xxx]
  *     annotation. The generated code on android will be represented by UIDs,
  *     and those UIDs will be translated in xxx to those strings.
@@ -137,6 +148,11 @@ message WorkSource {
  *   - If there is a UID, it goes first. Think in an object-oriented fashion.
  * *****************************************************************************
  */
+
+message AttributionChainDummyAtom {
+    optional AttributionChain attribution_chain = 1;
+    optional int32 value = 2;
+}
 
 /**
  * Logs when the screen state changes.
@@ -799,6 +815,29 @@ message DropboxErrorChanged {
 
     // 1 indicates in foreground. -1 indicates not available.
     optional int32 is_foreground = 7;
+}
+
+/*
+ * Allows other apps to push events into statsd.
+ * Logged from:
+ *      frameworks/base/core/java/android/util/StatsLog.java
+ */
+message AppHook {
+    // The uid of the application that sent this custom atom.
+    optional int32 uid = 1;
+
+    // An arbitrary label chosen by the developer. For Android P, the label should be in [0, 16).
+    optional int32 label = 2;
+
+    // Allows applications to easily use a custom event as start/stop boundaries (ie, define custom
+    // predicates for the metrics).
+    enum State {
+        UNKNOWN = 0;
+        UNSPECIFIED = 1;  // For events that are known to not represent START/STOP.
+        STOP = 2;
+        START = 3;
+    }
+    optional State state = 3;
 }
 
 /**

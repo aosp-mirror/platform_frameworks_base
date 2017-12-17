@@ -99,7 +99,10 @@ public abstract class ActivityManagerInternal {
     // Called by the power manager.
     public abstract void onWakefulnessChanged(int wakefulness);
 
-    public abstract int startIsolatedProcess(String entryPoint, String[] mainArgs,
+    /**
+     * @return {@code true} if process start is successful, {@code false} otherwise.
+     */
+    public abstract boolean startIsolatedProcess(String entryPoint, String[] mainArgs,
             String processName, String abiOverride, int uid, Runnable crashHandler);
 
     /**
@@ -309,4 +312,11 @@ public abstract class ActivityManagerInternal {
      * Returns {@code true} if {@code uid} is running an activity from {@code packageName}.
      */
     public abstract boolean hasRunningActivity(int uid, @Nullable String packageName);
+
+    public interface ScreenObserver {
+        public void onAwakeStateChanged(boolean isAwake);
+        public void onKeyguardStateChanged(boolean isShowing);
+    }
+
+    public abstract void registerScreenObserver(ScreenObserver observer);
 }

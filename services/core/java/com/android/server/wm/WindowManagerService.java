@@ -725,8 +725,6 @@ public class WindowManagerService extends IWindowManager.Stub
         }
     }
 
-    boolean mAnimateWallpaperWithTarget;
-
     // TODO: Move to RootWindowContainer
     AppWindowToken mFocusedApp = null;
 
@@ -1088,8 +1086,8 @@ public class WindowManagerService extends IWindowManager.Stub
         mAllowTheaterModeWakeFromLayout = context.getResources().getBoolean(
                 com.android.internal.R.bool.config_allowTheaterModeWakeFromWindowLayout);
 
-        mTaskPositioningController =
-                new TaskPositioningController(this, mInputManager, mInputMonitor, mActivityManager);
+        mTaskPositioningController = new TaskPositioningController(
+                this, mInputManager, mInputMonitor, mActivityManager, mH.getLooper());
         mDragDropController = new DragDropController(this, mH.getLooper());
 
         LocalServices.addService(WindowManagerInternal.class, new LocalService());
@@ -2182,18 +2180,15 @@ public class WindowManagerService extends IWindowManager.Stub
         if (win.isWinVisibleLw() && winAnimator.applyAnimationLocked(transit, false)) {
             focusMayChange = isDefaultDisplay;
             win.mAnimatingExit = true;
-            win.mWinAnimator.mAnimating = true;
         } else if (win.mWinAnimator.isAnimationSet()) {
             // Currently in a hide animation... turn this into
             // an exit.
             win.mAnimatingExit = true;
-            win.mWinAnimator.mAnimating = true;
         } else if (win.getDisplayContent().mWallpaperController.isWallpaperTarget(win)) {
             // If the wallpaper is currently behind this
             // window, we need to change both of them inside
             // of a transaction to avoid artifacts.
             win.mAnimatingExit = true;
-            win.mWinAnimator.mAnimating = true;
         } else {
             if (mInputMethodWindow == win) {
                 setInputMethodWindowLocked(null);
@@ -4566,6 +4561,7 @@ public class WindowManagerService extends IWindowManager.Stub
             if (displayContent != null) {
                 mAnimator.addDisplayLocked(displayId);
                 displayContent.initializeDisplayBaseInfo();
+                reconfigureDisplayLocked(displayContent);
             }
         }
     }
@@ -4613,7 +4609,6 @@ public class WindowManagerService extends IWindowManager.Stub
         public static final int DO_ANIMATION_CALLBACK = 26;
 
         public static final int CLIENT_FREEZE_TIMEOUT = 30;
-        public static final int TAP_OUTSIDE_TASK = 31;
         public static final int NOTIFY_ACTIVITY_DRAWN = 32;
 
         public static final int ALL_WINDOWS_DRAWN = 33;
@@ -4626,8 +4621,6 @@ public class WindowManagerService extends IWindowManager.Stub
         public static final int CHECK_IF_BOOT_ANIMATION_FINISHED = 37;
         public static final int RESET_ANR_MESSAGE = 38;
         public static final int WALLPAPER_DRAW_PENDING_TIMEOUT = 39;
-
-        public static final int FINISH_TASK_POSITIONING = 40;
 
         public static final int UPDATE_DOCKED_STACK_DIVIDER = 41;
 
@@ -4904,17 +4897,6 @@ public class WindowManagerService extends IWindowManager.Stub
                     }
                     break;
                 }
-
-                case TAP_OUTSIDE_TASK: {
-                    mTaskPositioningController.handleTapOutsideTask(
-                            (DisplayContent)msg.obj, msg.arg1, msg.arg2);
-                }
-                break;
-
-                case FINISH_TASK_POSITIONING: {
-                    mTaskPositioningController.finishPositioning();
-                }
-                break;
 
                 case NOTIFY_ACTIVITY_DRAWN:
                     try {
@@ -6705,7 +6687,6 @@ public class WindowManagerService extends IWindowManager.Stub
         synchronized (mWindowMap) {
             final Display display = mDisplayManager.getDisplay(displayId);
             if (display != null) {
-                createDisplayContentLocked(display);
                 displayReady(displayId);
             }
             mWindowPlacerLocked.requestTraversal();

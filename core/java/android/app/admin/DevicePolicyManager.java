@@ -64,6 +64,9 @@ import android.security.AttestedKeyPair;
 import android.security.Credentials;
 import android.security.KeyChain;
 import android.security.KeyChainException;
+import android.security.keymaster.KeymasterCertificateChain;
+import android.security.keystore.AttestationUtils;
+import android.security.keystore.KeyAttestationException;
 import android.security.keystore.KeyGenParameterSpec;
 import android.security.keystore.ParcelableKeyGenParameterSpec;
 import android.service.restrictions.RestrictionsReceiver;
@@ -1376,8 +1379,13 @@ public class DevicePolicyManager {
     /**
      * @hide
      */
-    @IntDef({STATE_USER_UNMANAGED, STATE_USER_SETUP_INCOMPLETE, STATE_USER_SETUP_COMPLETE,
-            STATE_USER_SETUP_FINALIZED, STATE_USER_PROFILE_COMPLETE})
+    @IntDef(prefix = { "STATE_USER_" }, value = {
+            STATE_USER_UNMANAGED,
+            STATE_USER_SETUP_INCOMPLETE,
+            STATE_USER_SETUP_COMPLETE,
+            STATE_USER_SETUP_FINALIZED,
+            STATE_USER_PROFILE_COMPLETE
+    })
     @Retention(RetentionPolicy.SOURCE)
     public @interface UserProvisioningState {}
 
@@ -1550,11 +1558,13 @@ public class DevicePolicyManager {
      * @hide
      */
     @Retention(RetentionPolicy.SOURCE)
-    @IntDef({CODE_OK, CODE_HAS_DEVICE_OWNER, CODE_USER_HAS_PROFILE_OWNER, CODE_USER_NOT_RUNNING,
+    @IntDef(prefix = { "CODE_" }, value = {
+            CODE_OK, CODE_HAS_DEVICE_OWNER, CODE_USER_HAS_PROFILE_OWNER, CODE_USER_NOT_RUNNING,
             CODE_USER_SETUP_COMPLETED, CODE_NOT_SYSTEM_USER, CODE_HAS_PAIRED,
             CODE_MANAGED_USERS_NOT_SUPPORTED, CODE_SYSTEM_USER, CODE_CANNOT_ADD_MANAGED_PROFILE,
             CODE_NOT_SYSTEM_USER_SPLIT, CODE_DEVICE_ADMIN_NOT_SUPPORTED,
-            CODE_SPLIT_SYSTEM_USER_DEVICE_SYSTEM_USER, CODE_ADD_MANAGED_PROFILE_DISALLOWED})
+            CODE_SPLIT_SYSTEM_USER_DEVICE_SYSTEM_USER, CODE_ADD_MANAGED_PROFILE_DISALLOWED
+    })
     public @interface ProvisioningPreCondition {}
 
     /**
@@ -1636,11 +1646,15 @@ public class DevicePolicyManager {
      * @hide
      */
     @Retention(RetentionPolicy.SOURCE)
-    @IntDef(flag = true,
-            value = {LOCK_TASK_FEATURE_NONE, LOCK_TASK_FEATURE_SYSTEM_INFO,
-                    LOCK_TASK_FEATURE_NOTIFICATIONS, LOCK_TASK_FEATURE_HOME,
-                    LOCK_TASK_FEATURE_RECENTS, LOCK_TASK_FEATURE_GLOBAL_ACTIONS,
-                    LOCK_TASK_FEATURE_KEYGUARD})
+    @IntDef(flag = true, prefix = { "LOCK_TASK_FEATURE_" }, value = {
+            LOCK_TASK_FEATURE_NONE,
+            LOCK_TASK_FEATURE_SYSTEM_INFO,
+            LOCK_TASK_FEATURE_NOTIFICATIONS,
+            LOCK_TASK_FEATURE_HOME,
+            LOCK_TASK_FEATURE_RECENTS,
+            LOCK_TASK_FEATURE_GLOBAL_ACTIONS,
+            LOCK_TASK_FEATURE_KEYGUARD
+    })
     public @interface LockTaskFeature {}
 
     /**
@@ -2651,6 +2665,28 @@ public class DevicePolicyManager {
     }
 
     /**
+     * When called by a profile owner of a managed profile returns true if the profile uses unified
+     * challenge with its parent user.
+     *
+     * <strong>Note: This method is not concerned with password quality and will return false if
+     * the profile has empty password as a separate challenge.
+     *
+     * @param admin Which {@link DeviceAdminReceiver} this request is associated with.
+     * @throws SecurityException if {@code admin} is not a profile owner of a managed profile.
+     * @see UserManager#DISALLOW_UNIFIED_PASSWORD
+     */
+    public boolean isUsingUnifiedPassword(@NonNull ComponentName admin) {
+        if (mService != null) {
+            try {
+                return mService.isUsingUnifiedPassword(admin);
+            } catch (RemoteException e) {
+                throw e.rethrowFromSystemServer();
+            }
+        }
+        return true;
+    }
+
+    /**
      * Determine whether the current profile password the user has set is sufficient
      * to meet the policy requirements (e.g. quality, minimum length) that have been
      * requested by the admins of the parent user and its profiles.
@@ -3169,7 +3205,9 @@ public class DevicePolicyManager {
 
     /** @hide */
     @Retention(RetentionPolicy.SOURCE)
-    @IntDef(flag=true, value={FLAG_EVICT_CREDENTIAL_ENCRYPTION_KEY})
+    @IntDef(flag = true, prefix = { "FLAG_EVICT_" }, value = {
+            FLAG_EVICT_CREDENTIAL_ENCRYPTION_KEY
+    })
     public @interface LockNowFlag {}
 
     /**
@@ -3992,15 +4030,27 @@ public class DevicePolicyManager {
         try {
             final ParcelableKeyGenParameterSpec parcelableSpec =
                     new ParcelableKeyGenParameterSpec(keySpec);
+            KeymasterCertificateChain attestationChain = new KeymasterCertificateChain();
             final boolean success = mService.generateKeyPair(
-                    admin, mContext.getPackageName(), algorithm, parcelableSpec);
+                    admin, mContext.getPackageName(), algorithm, parcelableSpec, attestationChain);
             if (!success) {
                 Log.e(TAG, "Error generating key via DevicePolicyManagerService.");
                 return null;
             }
 
-            final KeyPair keyPair = KeyChain.getKeyPair(mContext, keySpec.getKeystoreAlias());
-            return new AttestedKeyPair(keyPair, null);
+            final String alias = keySpec.getKeystoreAlias();
+            final KeyPair keyPair = KeyChain.getKeyPair(mContext, alias);
+            Certificate[] outputChain = null;
+            try {
+                if (AttestationUtils.isChainValid(attestationChain)) {
+                    outputChain = AttestationUtils.parseCertificateChain(attestationChain);
+                }
+            } catch (KeyAttestationException e) {
+                Log.e(TAG, "Error parsing attestation chain for alias " + alias, e);
+                mService.removeKeyPair(admin, mContext.getPackageName(), alias);
+                return null;
+            }
+            return new AttestedKeyPair(keyPair, outputChain);
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         } catch (KeyChainException e) {
@@ -6233,12 +6283,13 @@ public class DevicePolicyManager {
     /**
      * @hide
      */
-    @IntDef(
-            flag = true,
-            prefix = {"SKIP_", "MAKE_USER_", "START_", "LEAVE_"},
-            value = {SKIP_SETUP_WIZARD, MAKE_USER_EPHEMERAL, MAKE_USER_DEMO,
-                    START_USER_IN_BACKGROUND, LEAVE_ALL_SYSTEM_APPS_ENABLED}
-    )
+    @IntDef(flag = true, prefix = { "SKIP_", "MAKE_USER_", "START_", "LEAVE_" }, value = {
+            SKIP_SETUP_WIZARD,
+            MAKE_USER_EPHEMERAL,
+            MAKE_USER_DEMO,
+            START_USER_IN_BACKGROUND,
+            LEAVE_ALL_SYSTEM_APPS_ENABLED
+    })
     @Retention(RetentionPolicy.SOURCE)
     public @interface CreateAndManageUserFlags {}
 
@@ -8735,6 +8786,46 @@ public class DevicePolicyManager {
         try {
             return new ArraySet<>(
                     mService.getDisallowedSystemApps(admin, userId, provisioningAction));
+        } catch (RemoteException re) {
+            throw re.rethrowFromSystemServer();
+        }
+    }
+
+    //TODO STOPSHIP Add link to onTransferComplete callback when implemented.
+    /**
+     * Transfers the current administrator. All policies from the current administrator are
+     * migrated to the new administrator. The whole operation is atomic - the transfer is either
+     * complete or not done at all.
+     *
+     * Depending on the current administrator (device owner, profile owner, corporate owned
+     * profile owner), you have the following expected behaviour:
+     * <ul>
+     *     <li>A device owner can only be transferred to a new device owner</li>
+     *     <li>A profile owner can only be transferred to a new profile owner</li>
+     *     <li>A corporate owned managed profile can have two cases:
+     *          <ul>
+     *              <li>If the device owner and profile owner are the same package,
+     *              both will be transferred.</li>
+     *              <li>If the device owner and profile owner are different packages,
+     *              and if this method is called from the profile owner, only the profile owner
+     *              is transferred. Similarly, if it is called from the device owner, only
+     *              the device owner is transferred.</li>
+     *          </ul>
+     *     </li>
+     * </ul>
+     *
+     * @param admin Which {@link DeviceAdminReceiver} this request is associated with.
+     * @param target Which {@link DeviceAdminReceiver} we want the new administrator to be.
+     * @param bundle Parameters - This bundle allows the current administrator to pass data to the
+     *               new administrator. The parameters will be received in the
+     *               onTransferComplete callback.
+     * @hide
+     */
+    public void transferOwner(@NonNull ComponentName admin, @NonNull ComponentName target,
+            PersistableBundle bundle) {
+        throwIfParentInstance("transferOwner");
+        try {
+            mService.transferOwner(admin, target, bundle);
         } catch (RemoteException re) {
             throw re.rethrowFromSystemServer();
         }

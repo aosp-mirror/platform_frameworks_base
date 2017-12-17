@@ -189,7 +189,6 @@ public class WindowTestUtils {
     public static class TestTask extends Task {
         boolean mShouldDeferRemoval = false;
         boolean mOnDisplayChangedCalled = false;
-        private boolean mUseLocalIsAnimating = false;
         private boolean mIsAnimating = false;
 
         TestTask(int taskId, TaskStack stack, int userId, WindowManagerService service,
@@ -214,12 +213,11 @@ public class WindowTestUtils {
         }
 
         @Override
-        boolean isAnimating() {
-            return mUseLocalIsAnimating ? mIsAnimating : super.isAnimating();
+        boolean isSelfAnimating() {
+            return mIsAnimating;
         }
 
         void setLocalIsAnimating(boolean isAnimating) {
-            mUseLocalIsAnimating = true;
             mIsAnimating = isAnimating;
         }
     }

@@ -57,7 +57,7 @@ protected:
     void onMatchedLogEventInternalLocked(
             const size_t matcherIndex, const HashableDimensionKey& eventKey,
             const std::map<std::string, HashableDimensionKey>& conditionKeys, bool condition,
-            const LogEvent& event, bool scheduledPull) override;
+            const LogEvent& event) override;
 
 private:
     void onDumpReportLocked(const uint64_t dumpTimeNs,
@@ -75,7 +75,7 @@ private:
     // Util function to flush the old packet.
     void flushIfNeededLocked(const uint64_t& eventTime);
 
-    const DurationMetric mMetric;
+    const DurationMetric_AggregationType mAggregationType;
 
     // Index of the SimpleAtomMatcher which defines the start.
     const size_t mStartIndex;

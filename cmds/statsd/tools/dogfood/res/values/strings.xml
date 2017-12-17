@@ -47,6 +47,9 @@
     <string name="screen_on">Screen On</string>
     <string name="screen_off">Screen Off</string>
 
+    <string name="custom_start">App hook start</string>
+    <string name="custom_stop">App hook stop</string>
+
     <string name="dump">DumpReport</string>
     <string name="report_header">Report details</string>
 </resources>

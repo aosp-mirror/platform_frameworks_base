@@ -1323,10 +1323,10 @@ public final class Display {
         public static final int HDR_TYPE_HLG = 3;
 
         /** @hide */
-        @IntDef({
-            HDR_TYPE_DOLBY_VISION,
-            HDR_TYPE_HDR10,
-            HDR_TYPE_HLG,
+        @IntDef(prefix = { "HDR_TYPE_" }, value = {
+                HDR_TYPE_DOLBY_VISION,
+                HDR_TYPE_HDR10,
+                HDR_TYPE_HLG,
         })
         @Retention(RetentionPolicy.SOURCE)
         public @interface HdrType {}

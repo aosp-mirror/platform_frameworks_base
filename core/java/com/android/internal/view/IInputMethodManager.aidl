@@ -56,6 +56,7 @@ interface IInputMethodManager {
             in ResultReceiver resultReceiver);
     // If windowToken is null, this just does startInput().  Otherwise this reports that a window
     // has gained focus, and if 'attribute' is non-null then also does startInput.
+    // @NonNull
     InputBindResult startInputOrWindowGainedFocus(
             /* @InputMethodClient.StartInputReason */ int startInputReason,
             in IInputMethodClient client, in IBinder windowToken, int controlFlags,

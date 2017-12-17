@@ -121,8 +121,12 @@ public class Surface implements Parcelable {
 
     /** @hide */
     @Retention(RetentionPolicy.SOURCE)
-    @IntDef({SCALING_MODE_FREEZE, SCALING_MODE_SCALE_TO_WINDOW,
-                    SCALING_MODE_SCALE_CROP, SCALING_MODE_NO_SCALE_CROP})
+    @IntDef(prefix = { "SCALING_MODE_" }, value = {
+            SCALING_MODE_FREEZE,
+            SCALING_MODE_SCALE_TO_WINDOW,
+            SCALING_MODE_SCALE_CROP,
+            SCALING_MODE_NO_SCALE_CROP
+    })
     public @interface ScalingMode {}
     // From system/window.h
     /** @hide */
@@ -135,7 +139,12 @@ public class Surface implements Parcelable {
     public static final int SCALING_MODE_NO_SCALE_CROP = 3;
 
     /** @hide */
-    @IntDef({ROTATION_0, ROTATION_90, ROTATION_180, ROTATION_270})
+    @IntDef(prefix = { "ROTATION_" }, value = {
+            ROTATION_0,
+            ROTATION_90,
+            ROTATION_180,
+            ROTATION_270
+    })
     @Retention(RetentionPolicy.SOURCE)
     public @interface Rotation {}
 

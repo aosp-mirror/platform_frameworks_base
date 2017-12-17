@@ -182,7 +182,12 @@ public abstract class FragmentTransaction {
     public static final int TRANSIT_FRAGMENT_FADE = 3 | TRANSIT_ENTER_MASK;
 
     /** @hide */
-    @IntDef({TRANSIT_NONE, TRANSIT_FRAGMENT_OPEN, TRANSIT_FRAGMENT_CLOSE, TRANSIT_FRAGMENT_FADE})
+    @IntDef(prefix = { "TRANSIT_" }, value = {
+            TRANSIT_NONE,
+            TRANSIT_FRAGMENT_OPEN,
+            TRANSIT_FRAGMENT_CLOSE,
+            TRANSIT_FRAGMENT_FADE
+    })
     @Retention(RetentionPolicy.SOURCE)
     public @interface Transit {}
 

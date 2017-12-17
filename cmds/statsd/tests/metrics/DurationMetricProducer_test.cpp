@@ -56,8 +56,8 @@ TEST(DurationMetricTrackerTest, TestNoCondition) {
             kConfigKey, metric, -1 /*no condition*/, 1 /* start index */, 2 /* stop index */,
             3 /* stop_all index */, false /*nesting*/, wizard, {}, bucketStartTimeNs);
 
-    durationProducer.onMatchedLogEvent(1 /* start index*/, event1, false /* scheduledPull */);
-    durationProducer.onMatchedLogEvent(2 /* stop index*/, event2, false /* scheduledPull */);
+    durationProducer.onMatchedLogEvent(1 /* start index*/, event1);
+    durationProducer.onMatchedLogEvent(2 /* stop index*/, event2);
     durationProducer.flushIfNeededLocked(bucketStartTimeNs + 2 * bucketSizeNs + 1);
     EXPECT_EQ(1UL, durationProducer.mPastBuckets.size());
     EXPECT_TRUE(durationProducer.mPastBuckets.find(DEFAULT_DIMENSION_KEY) !=
@@ -94,14 +94,14 @@ TEST(DurationMetricTrackerTest, TestNonSlicedCondition) {
     EXPECT_FALSE(durationProducer.mCondition);
     EXPECT_FALSE(durationProducer.isConditionSliced());
 
-    durationProducer.onMatchedLogEvent(1 /* start index*/, event1, false /* scheduledPull */);
-    durationProducer.onMatchedLogEvent(2 /* stop index*/, event2, false /* scheduledPull */);
+    durationProducer.onMatchedLogEvent(1 /* start index*/, event1);
+    durationProducer.onMatchedLogEvent(2 /* stop index*/, event2);
     durationProducer.flushIfNeededLocked(bucketStartTimeNs + bucketSizeNs + 1);
     EXPECT_EQ(0UL, durationProducer.mPastBuckets.size());
 
-    durationProducer.onMatchedLogEvent(1 /* start index*/, event3, false /* scheduledPull */);
+    durationProducer.onMatchedLogEvent(1 /* start index*/, event3);
     durationProducer.onConditionChanged(true /* condition */, bucketStartTimeNs + bucketSizeNs + 2);
-    durationProducer.onMatchedLogEvent(2 /* stop index*/, event4, false /* scheduledPull */);
+    durationProducer.onMatchedLogEvent(2 /* stop index*/, event4);
     durationProducer.flushIfNeededLocked(bucketStartTimeNs + 2 * bucketSizeNs + 1);
     EXPECT_EQ(1UL, durationProducer.mPastBuckets.size());
     EXPECT_TRUE(durationProducer.mPastBuckets.find(DEFAULT_DIMENSION_KEY) !=

@@ -54,8 +54,8 @@ TEST(CountMetricProducerTest, TestNonDimensionalEvents) {
                                       bucketStartTimeNs);
 
     // 2 events in bucket 1.
-    countProducer.onMatchedLogEvent(1 /*log matcher index*/, event1, false);
-    countProducer.onMatchedLogEvent(1 /*log matcher index*/, event2, false);
+    countProducer.onMatchedLogEvent(1 /*log matcher index*/, event1);
+    countProducer.onMatchedLogEvent(1 /*log matcher index*/, event2);
 
     // Flushes at event #2.
     countProducer.flushIfNeededLocked(bucketStartTimeNs + 2);
@@ -74,7 +74,7 @@ TEST(CountMetricProducerTest, TestNonDimensionalEvents) {
 
     // 1 matched event happens in bucket 2.
     LogEvent event3(tagId, bucketStartTimeNs + bucketSizeNs + 2);
-    countProducer.onMatchedLogEvent(1 /*log matcher index*/, event3, false);
+    countProducer.onMatchedLogEvent(1 /*log matcher index*/, event3);
     countProducer.flushIfNeededLocked(bucketStartTimeNs + 2 * bucketSizeNs + 1);
     EXPECT_EQ(1UL, countProducer.mPastBuckets.size());
     EXPECT_TRUE(countProducer.mPastBuckets.find(DEFAULT_DIMENSION_KEY) !=
@@ -111,12 +111,12 @@ TEST(CountMetricProducerTest, TestEventsWithNonSlicedCondition) {
     CountMetricProducer countProducer(kConfigKey, metric, 1, wizard, bucketStartTimeNs);
 
     countProducer.onConditionChanged(true, bucketStartTimeNs);
-    countProducer.onMatchedLogEvent(1 /*matcher index*/, event1, false /*pulled*/);
+    countProducer.onMatchedLogEvent(1 /*matcher index*/, event1);
     EXPECT_EQ(0UL, countProducer.mPastBuckets.size());
 
     countProducer.onConditionChanged(false /*new condition*/, bucketStartTimeNs + 2);
     // Upon this match event, the matched event1 is flushed.
-    countProducer.onMatchedLogEvent(1 /*matcher index*/, event2, false /*pulled*/);
+    countProducer.onMatchedLogEvent(1 /*matcher index*/, event2);
     EXPECT_EQ(0UL, countProducer.mPastBuckets.size());
 
     countProducer.flushIfNeededLocked(bucketStartTimeNs + bucketSizeNs + 1);
@@ -166,11 +166,11 @@ TEST(CountMetricProducerTest, TestEventsWithSlicedCondition) {
     CountMetricProducer countProducer(kConfigKey, metric, 1 /*condition tracker index*/, wizard,
                                       bucketStartTimeNs);
 
-    countProducer.onMatchedLogEvent(1 /*log matcher index*/, event1, false);
+    countProducer.onMatchedLogEvent(1 /*log matcher index*/, event1);
     countProducer.flushIfNeededLocked(bucketStartTimeNs + 1);
     EXPECT_EQ(0UL, countProducer.mPastBuckets.size());
 
-    countProducer.onMatchedLogEvent(1 /*log matcher index*/, event2, false);
+    countProducer.onMatchedLogEvent(1 /*log matcher index*/, event2);
     countProducer.flushIfNeededLocked(bucketStartTimeNs + bucketSizeNs + 1);
     EXPECT_EQ(1UL, countProducer.mPastBuckets.size());
     EXPECT_TRUE(countProducer.mPastBuckets.find(DEFAULT_DIMENSION_KEY) !=
@@ -217,29 +217,29 @@ TEST(CountMetricProducerTest, TestAnomalyDetection) {
     LogEvent event7(tagId, bucketStartTimeNs + 3 * bucketSizeNs + 3 + NS_PER_SEC);
 
     // Two events in bucket #0.
-    countProducer.onMatchedLogEvent(1 /*log matcher index*/, event1, false);
-    countProducer.onMatchedLogEvent(1 /*log matcher index*/, event2, false);
+    countProducer.onMatchedLogEvent(1 /*log matcher index*/, event1);
+    countProducer.onMatchedLogEvent(1 /*log matcher index*/, event2);
 
     EXPECT_EQ(1UL, countProducer.mCurrentSlicedCounter->size());
     EXPECT_EQ(2L, countProducer.mCurrentSlicedCounter->begin()->second);
     EXPECT_EQ(anomalyTracker->getLastAlarmTimestampNs(), -1LL);
 
     // One event in bucket #2. No alarm as bucket #0 is trashed out.
-    countProducer.onMatchedLogEvent(1 /*log matcher index*/, event3, false);
+    countProducer.onMatchedLogEvent(1 /*log matcher index*/, event3);
     EXPECT_EQ(1UL, countProducer.mCurrentSlicedCounter->size());
     EXPECT_EQ(1L, countProducer.mCurrentSlicedCounter->begin()->second);
     EXPECT_EQ(anomalyTracker->getLastAlarmTimestampNs(), -1LL);
 
     // Two events in bucket #3.
-    countProducer.onMatchedLogEvent(1 /*log matcher index*/, event4, false);
-    countProducer.onMatchedLogEvent(1 /*log matcher index*/, event5, false);
-    countProducer.onMatchedLogEvent(1 /*log matcher index*/, event6, false);
+    countProducer.onMatchedLogEvent(1 /*log matcher index*/, event4);
+    countProducer.onMatchedLogEvent(1 /*log matcher index*/, event5);
+    countProducer.onMatchedLogEvent(1 /*log matcher index*/, event6);
     EXPECT_EQ(1UL, countProducer.mCurrentSlicedCounter->size());
     EXPECT_EQ(3L, countProducer.mCurrentSlicedCounter->begin()->second);
     // Anomaly at event 6 is within refractory period. The alarm is at event 5 timestamp not event 6
     EXPECT_EQ(anomalyTracker->getLastAlarmTimestampNs(), (long long)event5.GetTimestampNs());
 
-    countProducer.onMatchedLogEvent(1 /*log matcher index*/, event7, false);
+    countProducer.onMatchedLogEvent(1 /*log matcher index*/, event7);
     EXPECT_EQ(1UL, countProducer.mCurrentSlicedCounter->size());
     EXPECT_EQ(4L, countProducer.mCurrentSlicedCounter->begin()->second);
     EXPECT_EQ(anomalyTracker->getLastAlarmTimestampNs(), (long long)event7.GetTimestampNs());

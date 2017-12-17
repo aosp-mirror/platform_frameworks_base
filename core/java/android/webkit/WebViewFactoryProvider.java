@@ -134,6 +134,14 @@ public interface WebViewFactoryProvider {
     TokenBindingService getTokenBindingService();
 
     /**
+     * Gets the TracingController instance for this WebView implementation. The
+     * implementation must return the same instance on subsequent calls.
+     *
+     * @return the TracingController instance
+     */
+    TracingController getTracingController();
+
+    /**
      * Gets the ServiceWorkerController instance for this WebView implementation. The
      * implementation must return the same instance on subsequent calls.
      *

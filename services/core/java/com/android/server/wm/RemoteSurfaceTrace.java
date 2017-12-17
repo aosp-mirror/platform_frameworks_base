@@ -20,6 +20,7 @@ import android.graphics.Rect;
 import android.graphics.Region;
 import android.os.IBinder;
 import android.os.Parcel;
+import android.os.StrictMode;
 import android.util.Slog;
 import android.view.SurfaceControl;
 
@@ -54,67 +55,122 @@ class RemoteSurfaceTrace extends SurfaceControlWithBackground {
 
     @Override
     public void setAlpha(float alpha) {
-        writeFloatEvent("Alpha", alpha);
+        final StrictMode.ThreadPolicy oldPolicy = StrictMode.allowThreadDiskWrites();
+        try {
+            writeFloatEvent("Alpha", alpha);
+        } finally {
+            StrictMode.setThreadPolicy(oldPolicy);
+        }
         super.setAlpha(alpha);
     }
 
     @Override
     public void setLayer(int zorder) {
-        writeIntEvent("Layer", zorder);
+        final StrictMode.ThreadPolicy oldPolicy = StrictMode.allowThreadDiskWrites();
+        try {
+            writeIntEvent("Layer", zorder);
+        } finally {
+            StrictMode.setThreadPolicy(oldPolicy);
+        }
         super.setLayer(zorder);
     }
 
     @Override
     public void setPosition(float x, float y) {
-        writeFloatEvent("Position", x, y);
+        final StrictMode.ThreadPolicy oldPolicy = StrictMode.allowThreadDiskWrites();
+        try {
+            writeFloatEvent("Position", x, y);
+        } finally {
+            StrictMode.setThreadPolicy(oldPolicy);
+        }
         super.setPosition(x, y);
     }
 
     @Override
     public void setGeometryAppliesWithResize() {
-        writeEvent("GeometryAppliesWithResize");
+        final StrictMode.ThreadPolicy oldPolicy = StrictMode.allowThreadDiskWrites();
+        try {
+            writeEvent("GeometryAppliesWithResize");
+        } finally {
+            StrictMode.setThreadPolicy(oldPolicy);
+        }
         super.setGeometryAppliesWithResize();
     }
 
     @Override
     public void setSize(int w, int h) {
-        writeIntEvent("Size", w, h);
+        final StrictMode.ThreadPolicy oldPolicy = StrictMode.allowThreadDiskWrites();
+        try {
+            writeIntEvent("Size", w, h);
+        } finally {
+            StrictMode.setThreadPolicy(oldPolicy);
+        }
         super.setSize(w, h);
     }
 
     @Override
     public void setWindowCrop(Rect crop) {
-        writeRectEvent("Crop", crop);
+        final StrictMode.ThreadPolicy oldPolicy = StrictMode.allowThreadDiskWrites();
+        try {
+            writeRectEvent("Crop", crop);
+        } finally {
+            StrictMode.setThreadPolicy(oldPolicy);
+        }
         super.setWindowCrop(crop);
     }
 
     @Override
     public void setFinalCrop(Rect crop) {
-        writeRectEvent("FinalCrop", crop);
+        final StrictMode.ThreadPolicy oldPolicy = StrictMode.allowThreadDiskWrites();
+        try {
+            writeRectEvent("FinalCrop", crop);
+        } finally {
+            StrictMode.setThreadPolicy(oldPolicy);
+        }
         super.setFinalCrop(crop);
     }
 
     @Override
     public void setLayerStack(int layerStack) {
-        writeIntEvent("LayerStack", layerStack);
+        final StrictMode.ThreadPolicy oldPolicy = StrictMode.allowThreadDiskWrites();
+        try {
+            writeIntEvent("LayerStack", layerStack);
+        } finally {
+            StrictMode.setThreadPolicy(oldPolicy);
+        }
         super.setLayerStack(layerStack);
     }
 
     @Override
     public void setMatrix(float dsdx, float dtdx, float dsdy, float dtdy) {
-        writeFloatEvent("Matrix", dsdx, dtdx, dsdy, dtdy);
+        final StrictMode.ThreadPolicy oldPolicy = StrictMode.allowThreadDiskWrites();
+        try {
+            writeFloatEvent("Matrix", dsdx, dtdx, dsdy, dtdy);
+        } finally {
+            StrictMode.setThreadPolicy(oldPolicy);
+        }
         super.setMatrix(dsdx, dtdx, dsdy, dtdy);
     }
 
     @Override
     public void hide() {
-        writeEvent("Hide");
+        final StrictMode.ThreadPolicy oldPolicy = StrictMode.allowThreadDiskWrites();
+        try {
+            writeEvent("Hide");
+        } finally {
+            StrictMode.setThreadPolicy(oldPolicy);
+        }
         super.hide();
     }
 
     @Override
     public void show() {
-        writeEvent("Show");
+        final StrictMode.ThreadPolicy oldPolicy = StrictMode.allowThreadDiskWrites();
+        try {
+            writeEvent("Show");
+        } finally {
+            StrictMode.setThreadPolicy(oldPolicy);
+        }
         super.show();
     }
 

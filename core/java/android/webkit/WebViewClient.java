@@ -256,11 +256,11 @@ public class WebViewClient {
     public static final int ERROR_UNSAFE_RESOURCE = -16;
 
     /** @hide */
-    @IntDef({
-        SAFE_BROWSING_THREAT_UNKNOWN,
-        SAFE_BROWSING_THREAT_MALWARE,
-        SAFE_BROWSING_THREAT_PHISHING,
-        SAFE_BROWSING_THREAT_UNWANTED_SOFTWARE
+    @IntDef(prefix = { "SAFE_BROWSING_THREAT_" }, value = {
+            SAFE_BROWSING_THREAT_UNKNOWN,
+            SAFE_BROWSING_THREAT_MALWARE,
+            SAFE_BROWSING_THREAT_PHISHING,
+            SAFE_BROWSING_THREAT_UNWANTED_SOFTWARE
     })
     @Retention(RetentionPolicy.SOURCE)
     public @interface SafeBrowsingThreat {}

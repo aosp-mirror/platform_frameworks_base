@@ -29,6 +29,12 @@ namespace android {
 namespace os {
 namespace statsd {
 
+using std::map;
+using std::pair;
+using std::set;
+using std::string;
+using std::vector;
+
 #define STATS_SERVICE_DIR "/data/misc/stats-service"
 
 using android::base::StringPrintf;
@@ -41,8 +47,14 @@ ConfigManager::~ConfigManager() {
 }
 
 void ConfigManager::Startup() {
-    StorageManager::readConfigFromDisk(mConfigs);
-
+    map<ConfigKey, StatsdConfig> configsFromDisk;
+    StorageManager::readConfigFromDisk(configsFromDisk);
+    // TODO(b/70667694): Make the configs from disk be used. And remove the fake config,
+    // and tests shouldn't call this Startup(), maybe call StartupForTest() so we don't read
+    // configs from disk for tests.
+    // for (const auto& pair : configsFromDisk) {
+    //    UpdateConfig(pair.first, pair.second);
+    //}
     // this should be called from StatsService when it receives a statsd_config
     UpdateConfig(ConfigKey(1000, "fake"), build_fake_config());
 }
@@ -52,9 +64,8 @@ void ConfigManager::AddListener(const sp<ConfigListener>& listener) {
 }
 
 void ConfigManager::UpdateConfig(const ConfigKey& key, const StatsdConfig& config) {
-    // Add to map
-    mConfigs[key] = config;
-    // Why doesn't this work? mConfigs.insert({key, config});
+    // Add to set
+    mConfigs.insert(key);
 
     // Save to disk
     update_saved_configs(key, config);
@@ -74,7 +85,7 @@ void ConfigManager::RemoveConfigReceiver(const ConfigKey& key) {
 }
 
 void ConfigManager::RemoveConfig(const ConfigKey& key) {
-    unordered_map<ConfigKey, StatsdConfig>::iterator it = mConfigs.find(key);
+    auto it = mConfigs.find(key);
     if (it != mConfigs.end()) {
         // Remove from map
         mConfigs.erase(it);
@@ -100,9 +111,9 @@ void ConfigManager::RemoveConfigs(int uid) {
 
     for (auto it = mConfigs.begin(); it != mConfigs.end();) {
         // Remove from map
-        if (it->first.GetUid() == uid) {
-            removed.push_back(it->first);
-            mConfigReceivers.erase(it->first);
+        if (it->GetUid() == uid) {
+            removed.push_back(*it);
+            mConfigReceivers.erase(*it);
             it = mConfigs.erase(it);
         } else {
             it++;
@@ -123,10 +134,10 @@ void ConfigManager::RemoveAllConfigs() {
 
     for (auto it = mConfigs.begin(); it != mConfigs.end();) {
         // Remove from map
-        removed.push_back(it->first);
-        auto receiverIt = mConfigReceivers.find(it->first);
+        removed.push_back(*it);
+        auto receiverIt = mConfigReceivers.find(*it);
         if (receiverIt != mConfigReceivers.end()) {
-            mConfigReceivers.erase(it->first);
+            mConfigReceivers.erase(*it);
         }
         it = mConfigs.erase(it);
     }
@@ -143,7 +154,7 @@ void ConfigManager::RemoveAllConfigs() {
 vector<ConfigKey> ConfigManager::GetAllConfigKeys() const {
     vector<ConfigKey> ret;
     for (auto it = mConfigs.cbegin(); it != mConfigs.cend(); ++it) {
-        ret.push_back(it->first);
+        ret.push_back(*it);
     }
     return ret;
 }
@@ -160,15 +171,13 @@ const pair<string, string> ConfigManager::GetConfigReceiver(const ConfigKey& key
 void ConfigManager::Dump(FILE* out) {
     fprintf(out, "CONFIGURATIONS (%d)\n", (int)mConfigs.size());
     fprintf(out, "     uid name\n");
-    for (unordered_map<ConfigKey, StatsdConfig>::const_iterator it = mConfigs.begin();
-         it != mConfigs.end(); it++) {
-        fprintf(out, "  %6d %s\n", it->first.GetUid(), it->first.GetName().c_str());
-        auto receiverIt = mConfigReceivers.find(it->first);
+    for (const auto& key : mConfigs) {
+        fprintf(out, "  %6d %s\n", key.GetUid(), key.GetName().c_str());
+        auto receiverIt = mConfigReceivers.find(key);
         if (receiverIt != mConfigReceivers.end()) {
             fprintf(out, "    -> received by %s, %s\n", receiverIt->second.first.c_str(),
                     receiverIt->second.second.c_str());
         }
-        // TODO: Print the contents of the config too.
     }
 }
 
@@ -227,7 +236,8 @@ StatsdConfig build_fake_config() {
     metric->mutable_bucket()->set_bucket_size_millis(30 * 1000L);
 
     // Anomaly threshold for screen-on count.
-    Alert* alert = config.add_alert();
+    // TODO(b/70627390): Uncomment once the bug is fixed.
+    /*Alert* alert = config.add_alert();
     alert->set_name("ALERT_1");
     alert->set_metric_name("METRIC_1");
     alert->set_number_of_buckets(6);
@@ -235,7 +245,7 @@ StatsdConfig build_fake_config() {
     alert->set_refractory_period_secs(30);
     Alert::IncidentdDetails* details = alert->mutable_incidentd_details();
     details->add_section(12);
-    details->add_section(13);
+    details->add_section(13);*/
 
     // Count process state changes, slice by uid.
     metric = config.add_count_metric();
@@ -246,6 +256,8 @@ StatsdConfig build_fake_config() {
     keyMatcher->set_key(UID_PROCESS_STATE_UID_KEY);
 
     // Anomaly threshold for background count.
+    // TODO(b/70627390): Uncomment once the bug is fixed.
+    /*
     alert = config.add_alert();
     alert->set_name("ALERT_2");
     alert->set_metric_name("METRIC_2");
@@ -254,7 +266,7 @@ StatsdConfig build_fake_config() {
     alert->set_refractory_period_secs(20);
     details = alert->mutable_incidentd_details();
     details->add_section(14);
-    details->add_section(15);
+    details->add_section(15);*/
 
     // Count process state changes, slice by uid, while SCREEN_IS_OFF
     metric = config.add_count_metric();
@@ -326,6 +338,8 @@ StatsdConfig build_fake_config() {
     durationMetric->set_what("SCREEN_IS_ON");
 
     // Anomaly threshold for background count.
+    // TODO(b/70627390): Uncomment once the bug is fixed.
+    /*
     alert = config.add_alert();
     alert->set_name("ALERT_8");
     alert->set_metric_name("METRIC_8");
@@ -333,7 +347,7 @@ StatsdConfig build_fake_config() {
     alert->set_trigger_if_sum_gt(2000000000); // 2 seconds
     alert->set_refractory_period_secs(120);
     details = alert->mutable_incidentd_details();
-    details->add_section(-1);
+    details->add_section(-1);*/
 
     // Value metric to count KERNEL_WAKELOCK when screen turned on
     ValueMetric* valueMetric = config.add_value_metric();

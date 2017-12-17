@@ -55,7 +55,7 @@ EventMetricProducer::EventMetricProducer(const ConfigKey& key, const EventMetric
                                          const int conditionIndex,
                                          const sp<ConditionWizard>& wizard,
                                          const uint64_t startTimeNs)
-    : MetricProducer(key, startTimeNs, conditionIndex, wizard), mMetric(metric) {
+    : MetricProducer(metric.name(), key, startTimeNs, conditionIndex, wizard) {
     if (metric.links().size() > 0) {
         mConditionLinks.insert(mConditionLinks.begin(), metric.links().begin(),
                                metric.links().end());
@@ -98,12 +98,12 @@ std::unique_ptr<std::vector<uint8_t>> serializeProtoLocked(ProtoOutputStream& pr
 
 void EventMetricProducer::onDumpReportLocked(const uint64_t dumpTimeNs,
                                              ProtoOutputStream* protoOutput) {
-    protoOutput->write(FIELD_TYPE_STRING | FIELD_ID_NAME, mMetric.name());
+    protoOutput->write(FIELD_TYPE_STRING | FIELD_ID_NAME, mName);
     protoOutput->write(FIELD_TYPE_INT64 | FIELD_ID_START_REPORT_NANOS, (long long)mStartTimeNs);
     protoOutput->write(FIELD_TYPE_INT64 | FIELD_ID_END_REPORT_NANOS, (long long)dumpTimeNs);
 
     size_t bufferSize = mProto->size();
-    VLOG("metric %s dump report now... proto size: %zu ", mMetric.name().c_str(), bufferSize);
+    VLOG("metric %s dump report now... proto size: %zu ", mName.c_str(), bufferSize);
     std::unique_ptr<std::vector<uint8_t>> buffer = serializeProtoLocked(*mProto);
 
     protoOutput->write(FIELD_TYPE_MESSAGE | FIELD_ID_EVENT_METRICS,
@@ -115,14 +115,14 @@ void EventMetricProducer::onDumpReportLocked(const uint64_t dumpTimeNs,
 
 void EventMetricProducer::onConditionChangedLocked(const bool conditionMet,
                                                    const uint64_t eventTime) {
-    VLOG("Metric %s onConditionChanged", mMetric.name().c_str());
+    VLOG("Metric %s onConditionChanged", mName.c_str());
     mCondition = conditionMet;
 }
 
 void EventMetricProducer::onMatchedLogEventInternalLocked(
         const size_t matcherIndex, const HashableDimensionKey& eventKey,
         const std::map<std::string, HashableDimensionKey>& conditionKey, bool condition,
-        const LogEvent& event, bool scheduledPull) {
+        const LogEvent& event) {
     if (!condition) {
         return;
     }

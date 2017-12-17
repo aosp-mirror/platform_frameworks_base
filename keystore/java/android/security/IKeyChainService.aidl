@@ -16,6 +16,7 @@
 package android.security;
 
 import android.content.pm.StringParceledListSlice;
+import android.security.keymaster.KeymasterCertificateChain;
 import android.security.keystore.ParcelableKeyGenParameterSpec;
 
 /**
@@ -33,6 +34,7 @@ interface IKeyChainService {
     void setUserSelectable(String alias, boolean isUserSelectable);
 
     boolean generateKeyPair(in String algorithm, in ParcelableKeyGenParameterSpec spec);
+    boolean attestKey(in String alias, in byte[] challenge, out KeymasterCertificateChain chain);
 
     // APIs used by CertInstaller and DevicePolicyManager
     String installCaCertificate(in byte[] caCertificate);

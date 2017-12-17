@@ -680,6 +680,40 @@ public final class KeyGenParameterSpec implements AlgorithmParameterSpec {
         }
 
         /**
+         * A Builder constructor taking in an already-built KeyGenParameterSpec, useful for
+         * changing values of the KeyGenParameterSpec quickly.
+         * @hide Should be used internally only.
+         */
+        public Builder(@NonNull KeyGenParameterSpec sourceSpec) {
+            this(sourceSpec.getKeystoreAlias(), sourceSpec.getPurposes());
+            mUid = sourceSpec.getUid();
+            mKeySize = sourceSpec.getKeySize();
+            mSpec = sourceSpec.getAlgorithmParameterSpec();
+            mCertificateSubject = sourceSpec.getCertificateSubject();
+            mCertificateSerialNumber = sourceSpec.getCertificateSerialNumber();
+            mCertificateNotBefore = sourceSpec.getCertificateNotBefore();
+            mCertificateNotAfter = sourceSpec.getCertificateNotAfter();
+            mKeyValidityStart = sourceSpec.getKeyValidityStart();
+            mKeyValidityForOriginationEnd = sourceSpec.getKeyValidityForOriginationEnd();
+            mKeyValidityForConsumptionEnd = sourceSpec.getKeyValidityForConsumptionEnd();
+            mPurposes = sourceSpec.getPurposes();
+            if (sourceSpec.isDigestsSpecified()) {
+                mDigests = sourceSpec.getDigests();
+            }
+            mEncryptionPaddings = sourceSpec.getEncryptionPaddings();
+            mSignaturePaddings = sourceSpec.getSignaturePaddings();
+            mBlockModes = sourceSpec.getBlockModes();
+            mRandomizedEncryptionRequired = sourceSpec.isRandomizedEncryptionRequired();
+            mUserAuthenticationRequired = sourceSpec.isUserAuthenticationRequired();
+            mUserAuthenticationValidityDurationSeconds =
+                sourceSpec.getUserAuthenticationValidityDurationSeconds();
+            mAttestationChallenge = sourceSpec.getAttestationChallenge();
+            mUniqueIdIncluded = sourceSpec.isUniqueIdIncluded();
+            mUserAuthenticationValidWhileOnBody = sourceSpec.isUserAuthenticationValidWhileOnBody();
+            mInvalidatedByBiometricEnrollment = sourceSpec.isInvalidatedByBiometricEnrollment();
+        }
+
+        /**
          * Sets the UID which will own the key.
          *
          * @param uid UID or {@code -1} for the UID of the current process.

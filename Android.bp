@@ -463,6 +463,17 @@ java_library {
         "telecomm/java/com/android/internal/telecom/IInCallService.aidl",
         "telecomm/java/com/android/internal/telecom/ITelecomService.aidl",
         "telecomm/java/com/android/internal/telecom/RemoteServiceCallback.aidl",
+        "telephony/java/android/telephony/ims/internal/aidl/IImsCallSessionListener.aidl",
+        "telephony/java/android/telephony/ims/internal/aidl/IImsCapabilityCallback.aidl",
+        "telephony/java/android/telephony/ims/internal/aidl/IImsConfig.aidl",
+        "telephony/java/android/telephony/ims/internal/aidl/IImsConfigCallback.aidl",
+        "telephony/java/android/telephony/ims/internal/aidl/IImsMmTelFeature.aidl",
+        "telephony/java/android/telephony/ims/internal/aidl/IImsMmTelListener.aidl",
+        "telephony/java/android/telephony/ims/internal/aidl/IImsRcsFeature.aidl",
+        "telephony/java/android/telephony/ims/internal/aidl/IImsRegistration.aidl",
+        "telephony/java/android/telephony/ims/internal/aidl/IImsRegistrationCallback.aidl",
+        "telephony/java/android/telephony/ims/internal/aidl/IImsServiceController.aidl",
+        "telephony/java/android/telephony/ims/internal/aidl/IImsServiceControllerListener.aidl",
         "telephony/java/android/telephony/mbms/IMbmsDownloadSessionCallback.aidl",
         "telephony/java/android/telephony/mbms/IMbmsStreamingSessionCallback.aidl",
         "telephony/java/android/telephony/mbms/IDownloadStateCallback.aidl",
@@ -553,7 +564,7 @@ java_library {
     ],
 
     aidl: {
-        local_include_dirs: [
+        export_include_dirs: [
             // From build/make/core/pathmap.mk FRAMEWORK_BASE_SUBDIRS
             "core/java",
             "graphics/java",
@@ -624,7 +635,7 @@ genrule {
     name: "framework-statslog-gen",
     tools: ["stats-log-api-gen"],
     cmd: "$(location stats-log-api-gen) --java $(out)",
-    out: ["android/util/StatsLog.java"],
+    out: ["android/util/StatsLogInternal.java"],
 }
 
 gensrcs {

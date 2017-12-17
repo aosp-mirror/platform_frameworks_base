@@ -22,7 +22,6 @@ import static android.content.pm.ActivityInfo.RESIZE_MODE_FORCE_RESIZABLE_PORTRA
 import static android.content.pm.ActivityInfo.RESIZE_MODE_FORCE_RESIZABLE_PRESERVE_ORIENTATION;
 import static android.content.pm.ActivityInfo.SCREEN_ORIENTATION_UNSET;
 import static android.content.res.Configuration.EMPTY;
-import static android.view.WindowManager.LayoutParams.TYPE_APPLICATION_STARTING;
 
 import static com.android.server.EventLogTags.WM_TASK_REMOVED;
 import static com.android.server.wm.WindowManagerDebugConfig.DEBUG_STACK;
@@ -43,7 +42,6 @@ import android.graphics.Rect;
 import android.util.EventLog;
 import android.util.Slog;
 import android.util.proto.ProtoOutputStream;
-import android.view.DisplayInfo;
 import android.view.Surface;
 
 import com.android.internal.annotations.VisibleForTesting;
@@ -162,7 +160,7 @@ class Task extends WindowContainer<AppWindowToken> {
     boolean shouldDeferRemoval() {
         // TODO: This should probably return false if mChildren.isEmpty() regardless if the stack
         // is animating...
-        return hasWindowsAlive() && mStack.isAnimating();
+        return hasWindowsAlive() && mStack.isSelfOrChildAnimating();
     }
 
     @Override

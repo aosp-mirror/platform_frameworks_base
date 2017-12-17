@@ -409,15 +409,16 @@ class ActivityDisplay extends ConfigurationContainer<ActivityStack> {
                 otherStack.setWindowingMode(WINDOWING_MODE_FULLSCREEN);
             }
         } finally {
-            if (mHomeStack != null && !isTopStack(mHomeStack)) {
+            final ActivityStack topFullscreenStack =
+                    getStack(WINDOWING_MODE_FULLSCREEN, ACTIVITY_TYPE_STANDARD);
+            if (topFullscreenStack != null && mHomeStack != null && !isTopStack(mHomeStack)) {
                 // Whenever split-screen is dismissed we want the home stack directly behind the
-                // currently top stack so it shows up when the top stack is finished.
-                final ActivityStack topStack = getTopStack();
+                // current top fullscreen stack so it shows up when the top stack is finished.
                 // TODO: Would be better to use ActivityDisplay.positionChildAt() for this, however
                 // ActivityDisplay doesn't have a direct controller to WM side yet. We can switch
                 // once we have that.
                 mHomeStack.moveToFront("onSplitScreenModeDismissed");
-                topStack.moveToFront("onSplitScreenModeDismissed");
+                topFullscreenStack.moveToFront("onSplitScreenModeDismissed");
             }
             mSupervisor.mWindowManager.continueSurfaceLayout();
         }
@@ -435,7 +436,7 @@ class ActivityDisplay extends ConfigurationContainer<ActivityStack> {
                 }
                 otherStack.setWindowingMode(WINDOWING_MODE_SPLIT_SCREEN_SECONDARY,
                         false /* animate */, false /* showRecents */,
-                        false /* sendNonResizeableNotification */);
+                        true /* enteringSplitScreenMode */);
             }
         } finally {
             mSupervisor.mWindowManager.continueSurfaceLayout();
@@ -553,6 +554,16 @@ class ActivityDisplay extends ConfigurationContainer<ActivityStack> {
 
     boolean isTopStack(ActivityStack stack) {
         return stack == getTopStack();
+    }
+
+    boolean isTopFullscreenStack(ActivityStack stack) {
+        for (int i = mStacks.size() - 1; i >= 0; --i) {
+            final ActivityStack current = mStacks.get(i);
+            if (current.getWindowingMode() == WINDOWING_MODE_FULLSCREEN) {
+                return current == stack;
+            }
+        }
+        return false;
     }
 
     int getIndexOf(ActivityStack stack) {

@@ -25,7 +25,6 @@ import static com.android.server.backup.internal.BackupHandler.MSG_REQUEST_BACKU
 import static com.android.server.backup.internal.BackupHandler.MSG_RESTORE_OPERATION_TIMEOUT;
 import static com.android.server.backup.internal.BackupHandler.MSG_RESTORE_SESSION_TIMEOUT;
 import static com.android.server.backup.internal.BackupHandler.MSG_RETRY_CLEAR;
-import static com.android.server.backup.internal.BackupHandler.MSG_RETRY_INIT;
 import static com.android.server.backup.internal.BackupHandler.MSG_RUN_ADB_BACKUP;
 import static com.android.server.backup.internal.BackupHandler.MSG_RUN_ADB_RESTORE;
 import static com.android.server.backup.internal.BackupHandler.MSG_RUN_CLEAR;
@@ -120,6 +119,7 @@ import com.android.server.backup.params.RestoreParams;
 import com.android.server.backup.restore.ActiveRestoreSession;
 import com.android.server.backup.restore.PerformUnifiedRestoreTask;
 import com.android.server.backup.transport.TransportClient;
+import com.android.server.backup.transport.TransportNotRegisteredException;
 import com.android.server.backup.utils.AppBackupUtils;
 import com.android.server.backup.utils.BackupManagerMonitorUtils;
 import com.android.server.backup.utils.BackupObserverUtils;
@@ -1083,56 +1083,35 @@ public class RefactoredBackupManagerService implements BackupManagerServiceInter
         return mBackupPasswordManager.backupPasswordMatches(currentPw);
     }
 
-    // Maintain persistent state around whether need to do an initialize operation.
-    // Must be called with the queue lock held.
-    public void recordInitPendingLocked(boolean isPending, String transportName) {
+    /**
+     * Maintain persistent state around whether need to do an initialize operation.
+     * Must be called with the queue lock held.
+     */
+    @GuardedBy("mQueueLock")
+    public void recordInitPendingLocked(
+            boolean isPending, String transportName, String transportDirName) {
         if (MORE_DEBUG) {
             Slog.i(TAG, "recordInitPendingLocked: " + isPending
                     + " on transport " + transportName);
         }
-        mBackupHandler.removeMessages(MSG_RETRY_INIT);
 
-        try {
-            IBackupTransport transport = mTransportManager.getTransportBinder(transportName);
-            if (transport != null) {
-                String transportDirName = transport.transportDirName();
-                File stateDir = new File(mBaseStateDir, transportDirName);
-                File initPendingFile = new File(stateDir, INIT_SENTINEL_FILE_NAME);
+        File stateDir = new File(mBaseStateDir, transportDirName);
+        File initPendingFile = new File(stateDir, INIT_SENTINEL_FILE_NAME);
 
-                if (isPending) {
-                    // We need an init before we can proceed with sending backup data.
-                    // Record that with an entry in our set of pending inits, as well as
-                    // journaling it via creation of a sentinel file.
-                    mPendingInits.add(transportName);
-                    try {
-                        (new FileOutputStream(initPendingFile)).close();
-                    } catch (IOException ioe) {
-                        // Something is badly wrong with our permissions; just try to move on
-                    }
-                } else {
-                    // No more initialization needed; wipe the journal and reset our state.
-                    initPendingFile.delete();
-                    mPendingInits.remove(transportName);
-                }
-                return; // done; don't fall through to the error case
-            }
-        } catch (Exception e) {
-            // transport threw when asked its name; fall through to the lookup-failed case
-            Slog.e(TAG, "Transport " + transportName + " failed to report name: "
-                    + e.getMessage());
-        }
-
-        // The named transport doesn't exist or threw.  This operation is
-        // important, so we record the need for a an init and post a message
-        // to retry the init later.
         if (isPending) {
+            // We need an init before we can proceed with sending backup data.
+            // Record that with an entry in our set of pending inits, as well as
+            // journaling it via creation of a sentinel file.
             mPendingInits.add(transportName);
-            mBackupHandler.sendMessageDelayed(
-                    mBackupHandler.obtainMessage(MSG_RETRY_INIT,
-                            (isPending ? 1 : 0),
-                            0,
-                            transportName),
-                    TRANSPORT_RETRY_INTERVAL);
+            try {
+                (new FileOutputStream(initPendingFile)).close();
+            } catch (IOException ioe) {
+                // Something is badly wrong with our permissions; just try to move on
+            }
+        } else {
+            // No more initialization needed; wipe the journal and reset our state.
+            initPendingFile.delete();
+            mPendingInits.remove(transportName);
         }
     }
 
@@ -1614,27 +1593,9 @@ public class RefactoredBackupManagerService implements BackupManagerServiceInter
             return BackupManager.ERROR_BACKUP_NOT_ALLOWED;
         }
 
-        // We're using pieces of the new binding on-demand infra-structure and the old always-bound
-        // infra-structure below this comment. The TransportManager.getCurrentTransportClient() line
-        // is using the new one and TransportManager.getCurrentTransportBinder() is using the old.
-        // This is weird but there is a reason.
-        // This is the natural place to put TransportManager.getCurrentTransportClient() because of
-        // the null handling below that should be the same for TransportClient.
-        // TransportClient.connect() would return a IBackupTransport for us (instead of using the
-        // old infra), but it may block and we don't want this in this thread.
-        // The only usage of transport in this method is for transport.transportDirName(). When the
-        // push-from-transport part of binding on-demand is in place we will replace the calls for
-        // IBackupTransport.transportDirName() with calls for
-        // TransportManager.transportDirName(transportName) or similar. So we'll leave the old piece
-        // here until we implement that.
-        // TODO(brufino): Remove always-bound code mTransportManager.getCurrentTransportBinder()
         TransportClient transportClient =
                 mTransportManager.getCurrentTransportClient("BMS.requestBackup()");
-        IBackupTransport transport = mTransportManager.getCurrentTransportBinder();
-        if (transportClient == null || transport == null) {
-            if (transportClient != null) {
-                mTransportManager.disposeOfTransportClient(transportClient, "BMS.requestBackup()");
-            }
+        if (transportClient == null) {
             BackupObserverUtils.sendBackupFinished(observer, BackupManager.ERROR_TRANSPORT_ABORTED);
             monitor = BackupManagerMonitorUtils.monitorEvent(monitor,
                     BackupManagerMonitor.LOG_EVENT_ID_TRANSPORT_IS_NULL,
@@ -1679,15 +1640,7 @@ public class RefactoredBackupManagerService implements BackupManagerServiceInter
                     + " k/v backups");
         }
 
-        String dirName;
-        try {
-            dirName = transport.transportDirName();
-        } catch (Exception e) {
-            Slog.e(TAG, "Transport unavailable while attempting backup: " + e.getMessage());
-            BackupObserverUtils.sendBackupFinished(observer, BackupManager.ERROR_TRANSPORT_ABORTED);
-            return BackupManager.ERROR_TRANSPORT_ABORTED;
-        }
-
+        String dirName = transportClient.getTransportDirName();
         boolean nonIncrementalBackup = (flags & BackupManager.FLAG_NON_INCREMENTAL_BACKUP) != 0;
 
         Message msg = mBackupHandler.obtainMessage(MSG_REQUEST_BACKUP);
@@ -1998,16 +1951,17 @@ public class RefactoredBackupManagerService implements BackupManagerServiceInter
         writeFullBackupScheduleAsync();
     }
 
-    private boolean fullBackupAllowable(IBackupTransport transport) {
-        if (transport == null) {
-            Slog.w(TAG, "Transport not present; full data backup not performed");
+    private boolean fullBackupAllowable(String transportName) {
+        if (!mTransportManager.isTransportRegistered(transportName)) {
+            Slog.w(TAG, "Transport not registered; full data backup not performed");
             return false;
         }
 
         // Don't proceed unless we have already established package metadata
         // for the current dataset via a key/value backup pass.
         try {
-            File stateDir = new File(mBaseStateDir, transport.transportDirName());
+            String transportDirName = mTransportManager.getTransportDirName(transportName);
+            File stateDir = new File(mBaseStateDir, transportDirName);
             File pmState = new File(stateDir, PACKAGE_MANAGER_SENTINEL);
             if (pmState.length() <= 0) {
                 if (DEBUG) {
@@ -2097,7 +2051,8 @@ public class RefactoredBackupManagerService implements BackupManagerServiceInter
 
                 headBusy = false;
 
-                if (!fullBackupAllowable(mTransportManager.getCurrentTransportBinder())) {
+                String transportName = mTransportManager.getCurrentTransportName();
+                if (!fullBackupAllowable(transportName)) {
                     if (MORE_DEBUG) {
                         Slog.i(TAG, "Preconditions not met; not running full backup");
                     }
@@ -2545,7 +2500,8 @@ public class RefactoredBackupManagerService implements BackupManagerServiceInter
             throw new IllegalStateException("Restore supported only for the device owner");
         }
 
-        if (!fullBackupAllowable(mTransportManager.getCurrentTransportBinder())) {
+        String transportName = mTransportManager.getCurrentTransportName();
+        if (!fullBackupAllowable(transportName)) {
             Slog.i(TAG, "Full backup not currently possible -- key/value backup not yet run?");
         } else {
             if (DEBUG) {
@@ -2826,10 +2782,30 @@ public class RefactoredBackupManagerService implements BackupManagerServiceInter
                     if (wasEnabled && mProvisioned) {
                         // NOTE: we currently flush every registered transport, not just
                         // the currently-active one.
-                        String[] allTransports = mTransportManager.getBoundTransportNames();
+                        List<String> transportNames = new ArrayList<>();
+                        List<String> transportDirNames = new ArrayList<>();
+                        mTransportManager.forEachRegisteredTransport(
+                                name -> {
+                                    final String dirName;
+                                    try {
+                                        dirName =
+                                                mTransportManager
+                                                        .getTransportDirName(name);
+                                    } catch (TransportNotRegisteredException e) {
+                                        // Should never happen
+                                        Slog.e(TAG, "Unexpected unregistered transport", e);
+                                        return;
+                                    }
+                                    transportNames.add(name);
+                                    transportDirNames.add(dirName);
+                                });
+
                         // build the set of transports for which we are posting an init
-                        for (String transport : allTransports) {
-                            recordInitPendingLocked(true, transport);
+                        for (int i = 0; i < transportNames.size(); i++) {
+                            recordInitPendingLocked(
+                                    true,
+                                    transportNames.get(i),
+                                    transportDirNames.get(i));
                         }
                         mAlarmManager.set(AlarmManager.RTC_WAKEUP, System.currentTimeMillis(),
                                 mRunInitIntent);
@@ -2993,7 +2969,7 @@ public class RefactoredBackupManagerService implements BackupManagerServiceInter
 
         final long oldId = Binder.clearCallingIdentity();
         try {
-            mTransportManager.describeTransport(
+            mTransportManager.updateTransportAttributes(
                     transportComponent,
                     name,
                     configurationIntent,
@@ -3093,23 +3069,16 @@ public class RefactoredBackupManagerService implements BackupManagerServiceInter
     public Intent getConfigurationIntent(String transportName) {
         mContext.enforceCallingOrSelfPermission(android.Manifest.permission.BACKUP,
                 "getConfigurationIntent");
-
-        final IBackupTransport transport = mTransportManager.getTransportBinder(transportName);
-        if (transport != null) {
-            try {
-                final Intent intent = transport.configurationIntent();
-                if (MORE_DEBUG) {
-                    Slog.d(TAG, "getConfigurationIntent() returning config intent "
-                            + intent);
-                }
-                return intent;
-            } catch (Exception e) {
-                /* fall through to return null */
-                Slog.e(TAG, "Unable to get configuration intent from transport: " + e.getMessage());
+        try {
+            Intent intent = mTransportManager.getTransportConfigurationIntent(transportName);
+            if (MORE_DEBUG) {
+                Slog.d(TAG, "getConfigurationIntent() returning intent " + intent);
             }
+            return intent;
+        } catch (TransportNotRegisteredException e) {
+            Slog.e(TAG, "Unable to get configuration intent from transport: " + e.getMessage());
+            return null;
         }
-
-        return null;
     }
 
     // Supply the configuration summary string for the given transport.  If the name is
@@ -3143,22 +3112,16 @@ public class RefactoredBackupManagerService implements BackupManagerServiceInter
         mContext.enforceCallingOrSelfPermission(android.Manifest.permission.BACKUP,
                 "getDataManagementIntent");
 
-        final IBackupTransport transport = mTransportManager.getTransportBinder(transportName);
-        if (transport != null) {
-            try {
-                final Intent intent = transport.dataManagementIntent();
-                if (MORE_DEBUG) {
-                    Slog.d(TAG, "getDataManagementIntent() returning intent "
-                            + intent);
-                }
-                return intent;
-            } catch (Exception e) {
-                /* fall through to return null */
-                Slog.e(TAG, "Unable to get management intent from transport: " + e.getMessage());
+        try {
+            Intent intent = mTransportManager.getTransportDataManagementIntent(transportName);
+            if (MORE_DEBUG) {
+                Slog.d(TAG, "getDataManagementIntent() returning intent " + intent);
             }
+            return intent;
+        } catch (TransportNotRegisteredException e) {
+            Slog.e(TAG, "Unable to get management intent from transport: " + e.getMessage());
+            return null;
         }
-
-        return null;
     }
 
     // Supply the menu label for affordances that fire the manage-data intent
@@ -3168,19 +3131,16 @@ public class RefactoredBackupManagerService implements BackupManagerServiceInter
         mContext.enforceCallingOrSelfPermission(android.Manifest.permission.BACKUP,
                 "getDataManagementLabel");
 
-        final IBackupTransport transport = mTransportManager.getTransportBinder(transportName);
-        if (transport != null) {
-            try {
-                final String text = transport.dataManagementLabel();
-                if (MORE_DEBUG) Slog.d(TAG, "getDataManagementLabel() returning " + text);
-                return text;
-            } catch (Exception e) {
-                /* fall through to return null */
-                Slog.e(TAG, "Unable to get management label from transport: " + e.getMessage());
+        try {
+            String label = mTransportManager.getTransportDataManagementLabel(transportName);
+            if (MORE_DEBUG) {
+                Slog.d(TAG, "getDataManagementLabel() returning " + label);
             }
+            return label;
+        } catch (TransportNotRegisteredException e) {
+            Slog.e(TAG, "Unable to get management label from transport: " + e.getMessage());
+            return null;
         }
-
-        return null;
     }
 
     // Callback: a requested backup agent has been instantiated.  This should only
@@ -3242,10 +3202,10 @@ public class RefactoredBackupManagerService implements BackupManagerServiceInter
             skip = true;
         }
 
-        // Do we have a transport to fetch data for us?
-        IBackupTransport transport = mTransportManager.getCurrentTransportBinder();
-        if (transport == null) {
-            if (DEBUG) Slog.w(TAG, "No transport");
+        TransportClient transportClient =
+                mTransportManager.getCurrentTransportClient("BMS.restoreAtInstall()");
+        if (transportClient == null) {
+            if (DEBUG) Slog.w(TAG, "No transport client");
             skip = true;
         }
 
@@ -3262,16 +3222,26 @@ public class RefactoredBackupManagerService implements BackupManagerServiceInter
                 // The eventual message back into the Package Manager to run the post-install
                 // steps for 'token' will be issued from the restore handling code.
 
-                // This can throw and so *must* happen before the wakelock is acquired
-                String dirName = transport.transportDirName();
-
                 mWakelock.acquire();
+
+                OnTaskFinishedListener listener = caller -> {
+                        mTransportManager.disposeOfTransportClient(transportClient, caller);
+                        mWakelock.release();
+                };
+
                 if (MORE_DEBUG) {
                     Slog.d(TAG, "Restore at install of " + packageName);
                 }
                 Message msg = mBackupHandler.obtainMessage(MSG_RUN_RESTORE);
-                msg.obj = new RestoreParams(transport, dirName, null, null,
-                        restoreSet, packageName, token);
+                msg.obj =
+                        RestoreParams.createForRestoreAtInstall(
+                                transportClient,
+                                /* observer */ null,
+                                /* monitor */ null,
+                                restoreSet,
+                                packageName,
+                                token,
+                                listener);
                 mBackupHandler.sendMessage(msg);
             } catch (Exception e) {
                 // Calling into the transport broke; back off and proceed with the installation.
@@ -3281,8 +3251,14 @@ public class RefactoredBackupManagerService implements BackupManagerServiceInter
         }
 
         if (skip) {
-            // Auto-restore disabled or no way to attempt a restore; just tell the Package
-            // Manager to proceed with the post-install handling for this package.
+            // Auto-restore disabled or no way to attempt a restore
+
+            if (transportClient != null) {
+                mTransportManager.disposeOfTransportClient(
+                        transportClient, "BMS.restoreAtInstall()");
+            }
+
+            // Tell the PackageManager to proceed with the post-install handling for this package.
             if (DEBUG) Slog.v(TAG, "Finishing install immediately");
             try {
                 mPackageManagerBinder.finishPackageInstall(token, false);
@@ -3481,14 +3457,16 @@ public class RefactoredBackupManagerService implements BackupManagerServiceInter
             pw.println("Available transports:");
             final String[] transports = listAllTransports();
             if (transports != null) {
-                for (String t : listAllTransports()) {
+                for (String t : transports) {
                     pw.println((t.equals(mTransportManager.getCurrentTransportName()) ? "  * "
                             : "    ") + t);
                     try {
                         IBackupTransport transport = mTransportManager.getTransportBinder(t);
-                        File dir = new File(mBaseStateDir, transport.transportDirName());
+                        File dir = new File(mBaseStateDir,
+                                mTransportManager.getTransportDirName(t));
                         pw.println("       destination: " + transport.currentDestinationString());
-                        pw.println("       intent: " + transport.configurationIntent());
+                        pw.println("       intent: "
+                                + mTransportManager.getTransportConfigurationIntent(t));
                         for (File f : dir.listFiles()) {
                             pw.println(
                                     "       " + f.getName() + " - " + f.length() + " state bytes");

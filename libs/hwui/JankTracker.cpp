@@ -27,9 +27,11 @@
 
 #include <cutils/ashmem.h>
 #include <log/log.h>
+#include <sstream>
 
 #include "Properties.h"
 #include "utils/TimeUtils.h"
+#include "utils/Trace.h"
 
 namespace android {
 namespace uirenderer {
@@ -149,6 +151,19 @@ void JankTracker::finishFrame(const FrameInfo& frame) {
             mData->reportJankType((JankType)i);
             (*mGlobalData)->reportJankType((JankType)i);
         }
+    }
+
+    // Log daveys since they are weird and we don't know what they are (b/70339576)
+    if (totalDuration >= 700_ms) {
+        static int sDaveyCount = 0;
+        std::stringstream ss;
+        ss << "Davey! duration=" << ns2ms(totalDuration) << "ms; ";
+        for (size_t i = 0; i < static_cast<size_t>(FrameInfoIndex::NumIndexes); i++) {
+            ss << FrameInfoNames[i] << "=" << frame[i] << ", ";
+        }
+        ALOGI("%s", ss.str().c_str());
+        // Just so we have something that counts up, the value is largely irrelevant
+        ATRACE_INT(ss.str().c_str(), ++sDaveyCount);
     }
 }
 

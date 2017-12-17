@@ -97,7 +97,7 @@ class SurfaceAnimator {
     void startAnimation(Transaction t, AnimationAdapter anim, boolean hidden) {
         cancelAnimation(t, true /* restarting */);
         mAnimation = anim;
-        final SurfaceControl surface = mAnimatable.getSurface();
+        final SurfaceControl surface = mAnimatable.getSurfaceControl();
         if (surface == null) {
             Slog.w(TAG, "Unable to start animation, surface is null or no children.");
             cancelAnimation();
@@ -105,7 +105,7 @@ class SurfaceAnimator {
         }
         mLeash = createAnimationLeash(surface, t,
                 mAnimatable.getSurfaceWidth(), mAnimatable.getSurfaceHeight(), hidden);
-        mAnimatable.onLeashCreated(t, mLeash);
+        mAnimatable.onAnimationLeashCreated(t, mLeash);
         if (mAnimationStartDelayed) {
             if (DEBUG_ANIM) Slog.i(TAG, "Animation start delayed");
             return;
@@ -169,7 +169,16 @@ class SurfaceAnimator {
      * surface is reparented to the leash. This method takes care of that.
      */
     void setLayer(Transaction t, int layer) {
-        t.setLayer(mLeash != null ? mLeash : mAnimatable.getSurface(), layer);
+        t.setLayer(mLeash != null ? mLeash : mAnimatable.getSurfaceControl(), layer);
+    }
+
+    /**
+     * Sets the surface to be relatively layered.
+     *
+     * @see #setLayer
+     */
+    void setRelativeLayer(Transaction t, SurfaceControl relativeTo, int layer) {
+        t.setRelativeLayer(mLeash != null ? mLeash : mAnimatable.getSurfaceControl(), relativeTo, layer);
     }
 
     /**
@@ -178,7 +187,7 @@ class SurfaceAnimator {
      * @see #setLayer
      */
     void reparent(Transaction t, SurfaceControl newParent) {
-        t.reparent(mLeash != null ? mLeash : mAnimatable.getSurface(), newParent.getHandle());
+        t.reparent(mLeash != null ? mLeash : mAnimatable.getSurfaceControl(), newParent.getHandle());
     }
 
     /**
@@ -207,8 +216,8 @@ class SurfaceAnimator {
     }
 
     private void reset(Transaction t) {
-        final SurfaceControl surface = mAnimatable.getSurface();
-        final SurfaceControl parent = mAnimatable.getParentSurface();
+        final SurfaceControl surface = mAnimatable.getSurfaceControl();
+        final SurfaceControl parent = mAnimatable.getParentSurfaceControl();
 
         // If the surface was destroyed, we don't care to reparent it back.
         final boolean destroy = mLeash != null && surface != null && parent != null;
@@ -216,19 +225,22 @@ class SurfaceAnimator {
             if (DEBUG_ANIM) Slog.i(TAG, "Reparenting to original parent");
             t.reparent(surface, parent.getHandle());
         }
+        if (mLeash != null) {
+            mAnimatable.destroyAfterPendingTransaction(mLeash);
+        }
         mLeash = null;
         mAnimation = null;
 
         // Make sure to inform the animatable after the leash was destroyed.
         if (destroy) {
-            mAnimatable.onLeashDestroyed(t);
+            mAnimatable.onAnimationLeashDestroyed(t);
         }
     }
 
     private SurfaceControl createAnimationLeash(SurfaceControl surface, Transaction t, int width,
             int height, boolean hidden) {
         if (DEBUG_ANIM) Slog.i(TAG, "Reparenting to leash");
-        final SurfaceControl.Builder builder = mAnimatable.makeLeash()
+        final SurfaceControl.Builder builder = mAnimatable.makeAnimationLeash()
                 .setName(surface + " - animation-leash")
                 .setSize(width, height);
         final SurfaceControl leash = builder.build();
@@ -273,7 +285,7 @@ class SurfaceAnimator {
          * @param t The transaction to use to apply any necessary changes.
          * @param leash The leash that was created.
          */
-        void onLeashCreated(Transaction t, SurfaceControl leash);
+        void onAnimationLeashCreated(Transaction t, SurfaceControl leash);
 
         /**
          * Called when the leash is being destroyed, and the surface was reparented back to the
@@ -281,22 +293,30 @@ class SurfaceAnimator {
          *
          * @param t The transaction to use to apply any necessary changes.
          */
-        void onLeashDestroyed(Transaction t);
+        void onAnimationLeashDestroyed(Transaction t);
 
         /**
-         * @return A new child surface.
+         * Destroy a given surface after executing {@link #getPendingTransaction}.
+         *
+         * @see WindowContainer#destroyAfterPendingTransaction
          */
-        SurfaceControl.Builder makeLeash();
+        void destroyAfterPendingTransaction(SurfaceControl surface);
+
+        /**
+         * @return A new surface to be used for the animation leash, inserted at the correct
+         *         position in the hierarchy.
+         */
+        SurfaceControl.Builder makeAnimationLeash();
 
         /**
          * @return The surface of the object to be animated.
          */
-        @Nullable SurfaceControl getSurface();
+        @Nullable SurfaceControl getSurfaceControl();
 
         /**
          * @return The parent of the surface object to be animated.
          */
-        @Nullable SurfaceControl getParentSurface();
+        @Nullable SurfaceControl getParentSurfaceControl();
 
         /**
          * @return The width of the surface to be animated.

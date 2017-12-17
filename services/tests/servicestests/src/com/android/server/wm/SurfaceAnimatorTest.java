@@ -33,8 +33,6 @@ import android.view.SurfaceControl.Builder;
 import android.view.SurfaceControl.Transaction;
 import android.view.SurfaceSession;
 
-import com.google.android.collect.Lists;
-
 import com.android.server.wm.SurfaceAnimator.Animatable;
 import com.android.server.wm.SurfaceAnimator.OnAnimationFinishedCallback;
 
@@ -50,27 +48,127 @@ import java.util.ArrayList;
 /**
  * Test class for {@link SurfaceAnimatorTest}.
  *
- * runtest frameworks-services -c com.android.server.wm.SurfaceAnimatorTest
+ * atest FrameworksServicesTests:com.android.server.wm.SurfaceAnimatorTest
  */
 @SmallTest
 @Presubmit
 @RunWith(AndroidJUnit4.class)
 public class SurfaceAnimatorTest extends WindowTestsBase {
 
-    @Mock
-    AnimationAdapter mSpec;
-    @Mock
-    AnimationAdapter mSpec2;
+    @Mock AnimationAdapter mSpec;
+    @Mock AnimationAdapter mSpec2;
     @Mock Transaction mTransaction;
 
-    private SurfaceAnimator mSurfaceAnimator;
-    private SurfaceControl mParent;
-    private SurfaceControl mSurface;
-    private boolean mFinishedCallbackCalled;
-    private SurfaceControl mLeash;
     private SurfaceSession mSession = new SurfaceSession();
+    private MyAnimatable mAnimatable;
 
-    private final Animatable mAnimatable = new Animatable() {
+    @Before
+    public void setUp() throws Exception {
+        super.setUp();
+        MockitoAnnotations.initMocks(this);
+        mAnimatable = new MyAnimatable();
+    }
+
+    @Test
+    public void testRunAnimation() throws Exception {
+        mAnimatable.mSurfaceAnimator.startAnimation(mTransaction, mSpec, true /* hidden */);
+        final ArgumentCaptor<OnAnimationFinishedCallback> callbackCaptor = ArgumentCaptor.forClass(
+                OnAnimationFinishedCallback.class);
+
+        assertTrue(mAnimatable.mSurfaceAnimator.isAnimating());
+        assertNotNull(mAnimatable.mSurfaceAnimator.getAnimation());
+        verify(mTransaction).reparent(eq(mAnimatable.mSurface), eq(mAnimatable.mLeash.getHandle()));
+        verify(mSpec).startAnimation(any(), any(), callbackCaptor.capture());
+
+        callbackCaptor.getValue().onAnimationFinished(mSpec);
+        assertFalse(mAnimatable.mSurfaceAnimator.isAnimating());
+        assertNull(mAnimatable.mSurfaceAnimator.getAnimation());
+        assertTrue(mAnimatable.mFinishedCallbackCalled);
+        assertTrue(mAnimatable.mPendingDestroySurfaces.contains(mAnimatable.mLeash));
+        // TODO: Verify reparenting once we use mPendingTransaction to reparent it back
+    }
+
+    @Test
+    public void testOverrideAnimation() throws Exception {
+        mAnimatable.mSurfaceAnimator.startAnimation(mTransaction, mSpec, true /* hidden */);
+        final SurfaceControl firstLeash = mAnimatable.mLeash;
+        mAnimatable.mSurfaceAnimator.startAnimation(mTransaction, mSpec2, true /* hidden */);
+
+        assertTrue(mAnimatable.mPendingDestroySurfaces.contains(firstLeash));
+        assertFalse(mAnimatable.mFinishedCallbackCalled);
+
+        final ArgumentCaptor<OnAnimationFinishedCallback> callbackCaptor = ArgumentCaptor.forClass(
+                OnAnimationFinishedCallback.class);
+        assertTrue(mAnimatable.mSurfaceAnimator.isAnimating());
+        assertNotNull(mAnimatable.mSurfaceAnimator.getAnimation());
+        verify(mSpec).startAnimation(any(), any(), callbackCaptor.capture());
+
+        // First animation was finished, but this shouldn't cancel the second animation
+        callbackCaptor.getValue().onAnimationFinished(mSpec);
+        assertTrue(mAnimatable.mSurfaceAnimator.isAnimating());
+
+        // Second animation was finished
+        verify(mSpec2).startAnimation(any(), any(), callbackCaptor.capture());
+        callbackCaptor.getValue().onAnimationFinished(mSpec2);
+        assertFalse(mAnimatable.mSurfaceAnimator.isAnimating());
+        assertTrue(mAnimatable.mFinishedCallbackCalled);
+    }
+
+    @Test
+    public void testCancelAnimation() throws Exception {
+        mAnimatable.mSurfaceAnimator.startAnimation(mTransaction, mSpec, true /* hidden */);
+        assertTrue(mAnimatable.mSurfaceAnimator.isAnimating());
+        mAnimatable.mSurfaceAnimator.cancelAnimation();
+        assertFalse(mAnimatable.mSurfaceAnimator.isAnimating());
+        verify(mSpec).onAnimationCancelled(any());
+        assertTrue(mAnimatable.mFinishedCallbackCalled);
+        assertTrue(mAnimatable.mPendingDestroySurfaces.contains(mAnimatable.mLeash));
+    }
+
+    @Test
+    public void testDelayingAnimationStart() throws Exception {
+        mAnimatable.mSurfaceAnimator.startDelayingAnimationStart();
+        mAnimatable.mSurfaceAnimator.startAnimation(mTransaction, mSpec, true /* hidden */);
+        verifyZeroInteractions(mSpec);
+        assertTrue(mAnimatable.mSurfaceAnimator.isAnimating());
+        mAnimatable.mSurfaceAnimator.endDelayingAnimationStart();
+        verify(mSpec).startAnimation(any(), any(), any());
+    }
+
+    @Test
+    public void testDelayingAnimationStartAndCancelled() throws Exception {
+        mAnimatable.mSurfaceAnimator.startDelayingAnimationStart();
+        mAnimatable.mSurfaceAnimator.startAnimation(mTransaction, mSpec, true /* hidden */);
+        mAnimatable.mSurfaceAnimator.cancelAnimation();
+        verifyZeroInteractions(mSpec);
+        assertFalse(mAnimatable.mSurfaceAnimator.isAnimating());
+        assertTrue(mAnimatable.mFinishedCallbackCalled);
+        assertTrue(mAnimatable.mPendingDestroySurfaces.contains(mAnimatable.mLeash));
+    }
+
+    private class MyAnimatable implements Animatable {
+
+        final SurfaceControl mParent;
+        final SurfaceControl mSurface;
+        final ArrayList<SurfaceControl> mPendingDestroySurfaces = new ArrayList<>();
+        final SurfaceAnimator mSurfaceAnimator;
+        SurfaceControl mLeash;
+        boolean mFinishedCallbackCalled;
+
+        MyAnimatable() {
+            mParent = sWm.makeSurfaceBuilder(mSession)
+                    .setName("test surface parent")
+                    .setSize(3000, 3000)
+                    .build();
+            mSurface = sWm.makeSurfaceBuilder(mSession)
+                    .setName("test surface")
+                    .setSize(1, 1)
+                    .build();
+            mFinishedCallbackCalled = false;
+            mLeash = null;
+            mSurfaceAnimator = new SurfaceAnimator(this, mFinishedCallback, sWm);
+        }
+
         @Override
         public Transaction getPendingTransaction() {
             return mTransaction;
@@ -81,15 +179,20 @@ public class SurfaceAnimatorTest extends WindowTestsBase {
         }
 
         @Override
-        public void onLeashCreated(Transaction t, SurfaceControl leash) {
+        public void onAnimationLeashCreated(Transaction t, SurfaceControl leash) {
         }
 
         @Override
-        public void onLeashDestroyed(Transaction t) {
+        public void onAnimationLeashDestroyed(Transaction t) {
         }
 
         @Override
-        public Builder makeLeash() {
+        public void destroyAfterPendingTransaction(SurfaceControl surface) {
+            mPendingDestroySurfaces.add(surface);
+        }
+
+        @Override
+        public Builder makeAnimationLeash() {
             return new SurfaceControl.Builder(mSession) {
 
                 @Override
@@ -101,12 +204,12 @@ public class SurfaceAnimatorTest extends WindowTestsBase {
         }
 
         @Override
-        public SurfaceControl getSurface() {
+        public SurfaceControl getSurfaceControl() {
             return mSurface;
         }
 
         @Override
-        public SurfaceControl getParentSurface() {
+        public SurfaceControl getParentSurfaceControl() {
             return mParent;
         }
 
@@ -119,99 +222,9 @@ public class SurfaceAnimatorTest extends WindowTestsBase {
         public int getSurfaceHeight() {
             return 1;
         }
-    };
 
-    private final Runnable mFinishedCallback = () -> {
-        mFinishedCallbackCalled = true;
-    };
-
-    @Before
-    public void setUp() throws Exception {
-        super.setUp();
-        MockitoAnnotations.initMocks(this);
-        mParent = sWm.makeSurfaceBuilder(mSession)
-                .setName("test surface parent")
-                .setSize(3000, 3000)
-                .build();
-        mSurface = sWm.makeSurfaceBuilder(mSession)
-                .setName("test surface")
-                .setSize(1, 1)
-                .build();
-        mFinishedCallbackCalled = false;
-        mLeash = null;
-        mSurfaceAnimator = new SurfaceAnimator(mAnimatable, mFinishedCallback, sWm);
-    }
-
-    @Test
-    public void testRunAnimation() throws Exception {
-        mSurfaceAnimator.startAnimation(mTransaction, mSpec, true /* hidden */);
-        final ArgumentCaptor<OnAnimationFinishedCallback> callbackCaptor = ArgumentCaptor.forClass(
-                OnAnimationFinishedCallback.class);
-
-        assertTrue(mSurfaceAnimator.isAnimating());
-        assertNotNull(mSurfaceAnimator.getAnimation());
-        verify(mTransaction).reparent(eq(mSurface), eq(mLeash.getHandle()));
-        verify(mSpec).startAnimation(any(), any(), callbackCaptor.capture());
-
-        callbackCaptor.getValue().onAnimationFinished(mSpec);
-        assertFalse(mSurfaceAnimator.isAnimating());
-        assertNull(mSurfaceAnimator.getAnimation());
-        assertTrue(mFinishedCallbackCalled);
-
-        // TODO: Verify reparenting once we use mPendingTransaction to reparent it back
-    }
-
-    @Test
-    public void testOverrideAnimation() throws Exception {
-        mSurfaceAnimator.startAnimation(mTransaction, mSpec, true /* hidden */);
-        mSurfaceAnimator.startAnimation(mTransaction, mSpec2, true /* hidden */);
-
-        assertFalse(mFinishedCallbackCalled);
-
-        final ArgumentCaptor<OnAnimationFinishedCallback> callbackCaptor = ArgumentCaptor.forClass(
-                OnAnimationFinishedCallback.class);
-        assertTrue(mSurfaceAnimator.isAnimating());
-        assertNotNull(mSurfaceAnimator.getAnimation());
-        verify(mSpec).startAnimation(any(), any(), callbackCaptor.capture());
-
-        // First animation was finished, but this shouldn't cancel the second animation
-        callbackCaptor.getValue().onAnimationFinished(mSpec);
-        assertTrue(mSurfaceAnimator.isAnimating());
-
-        // Second animation was finished
-        verify(mSpec2).startAnimation(any(), any(), callbackCaptor.capture());
-        callbackCaptor.getValue().onAnimationFinished(mSpec2);
-        assertFalse(mSurfaceAnimator.isAnimating());
-        assertTrue(mFinishedCallbackCalled);
-    }
-
-    @Test
-    public void testCancelAnimation() throws Exception {
-        mSurfaceAnimator.startAnimation(mTransaction, mSpec, true /* hidden */);
-        assertTrue(mSurfaceAnimator.isAnimating());
-        mSurfaceAnimator.cancelAnimation();
-        assertFalse(mSurfaceAnimator.isAnimating());
-        verify(mSpec).onAnimationCancelled(any());
-        assertTrue(mFinishedCallbackCalled);
-    }
-
-    @Test
-    public void testDelayingAnimationStart() throws Exception {
-        mSurfaceAnimator.startDelayingAnimationStart();
-        mSurfaceAnimator.startAnimation(mTransaction, mSpec, true /* hidden */);
-        verifyZeroInteractions(mSpec);
-        assertTrue(mSurfaceAnimator.isAnimating());
-        mSurfaceAnimator.endDelayingAnimationStart();
-        verify(mSpec).startAnimation(any(), any(), any());
-    }
-
-    @Test
-    public void testDelayingAnimationStartAndCancelled() throws Exception {
-        mSurfaceAnimator.startDelayingAnimationStart();
-        mSurfaceAnimator.startAnimation(mTransaction, mSpec, true /* hidden */);
-        mSurfaceAnimator.cancelAnimation();
-        verifyZeroInteractions(mSpec);
-        assertFalse(mSurfaceAnimator.isAnimating());
-        assertTrue(mFinishedCallbackCalled);
+        private final Runnable mFinishedCallback = () -> {
+            mFinishedCallbackCalled = true;
+        };
     }
 }

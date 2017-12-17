@@ -140,6 +140,20 @@ public class MainActivity extends Activity {
             }
         });
 
+        findViewById(R.id.custom_start).setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                StatsLog.logStart(8);
+            }
+        });
+
+        findViewById(R.id.custom_stop).setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                StatsLog.logStop(8);
+            }
+        });
+
         mReportText = (TextView) findViewById(R.id.report_text);
 
         findViewById(R.id.dump).setOnClickListener(new View.OnClickListener() {

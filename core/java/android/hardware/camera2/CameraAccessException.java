@@ -16,7 +16,6 @@
 
 package android.hardware.camera2;
 
-import android.annotation.NonNull;
 import android.annotation.IntDef;
 import android.util.AndroidException;
 
@@ -81,15 +80,16 @@ public class CameraAccessException extends AndroidException {
      */
     public static final int CAMERA_DEPRECATED_HAL = 1000;
 
-     /** @hide */
-     @Retention(RetentionPolicy.SOURCE)
-     @IntDef(
-         {CAMERA_IN_USE,
-          MAX_CAMERAS_IN_USE,
-          CAMERA_DISABLED,
-          CAMERA_DISCONNECTED,
-          CAMERA_ERROR})
-     public @interface AccessError {};
+    /** @hide */
+    @Retention(RetentionPolicy.SOURCE)
+    @IntDef(prefix = { "CAMERA_", "MAX_CAMERAS_IN_USE" }, value = {
+            CAMERA_IN_USE,
+            MAX_CAMERAS_IN_USE,
+            CAMERA_DISABLED,
+            CAMERA_DISCONNECTED,
+            CAMERA_ERROR
+    })
+    public @interface AccessError {}
 
     // Make the eclipse warning about serializable exceptions go away
     private static final long serialVersionUID = 5630338637471475675L; // randomly generated

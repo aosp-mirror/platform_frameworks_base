@@ -38,9 +38,10 @@ namespace statsd {
 // be a no-op.
 class MetricProducer : public virtual PackageInfoListener {
 public:
-    MetricProducer(const ConfigKey& key, const int64_t startTimeNs, const int conditionIndex,
-                   const sp<ConditionWizard>& wizard)
-        : mConfigKey(key),
+    MetricProducer(const std::string& name, const ConfigKey& key, const int64_t startTimeNs,
+                   const int conditionIndex, const sp<ConditionWizard>& wizard)
+        : mName(name),
+          mConfigKey(key),
           mStartTimeNs(startTimeNs),
           mCurrentBucketStartTimeNs(startTimeNs),
           mCurrentBucketNum(0),
@@ -54,9 +55,9 @@ public:
     virtual ~MetricProducer(){};
 
     // Consume the parsed stats log entry that already matched the "what" of the metric.
-    void onMatchedLogEvent(const size_t matcherIndex, const LogEvent& event, bool scheduledPull) {
+    void onMatchedLogEvent(const size_t matcherIndex, const LogEvent& event) {
         std::lock_guard<std::mutex> lock(mMutex);
-        onMatchedLogEventLocked(matcherIndex, event, scheduledPull);
+        onMatchedLogEventLocked(matcherIndex, event);
     }
 
     void onConditionChanged(const bool condition, const uint64_t eventTime) {
@@ -108,6 +109,8 @@ protected:
                                     android::util::ProtoOutputStream* protoOutput) = 0;
     virtual size_t byteSizeLocked() const = 0;
 
+    const std::string mName;
+
     const ConfigKey mConfigKey;
 
     // The start time for the current in memory metrics data.
@@ -155,11 +158,10 @@ protected:
     virtual void onMatchedLogEventInternalLocked(
             const size_t matcherIndex, const HashableDimensionKey& eventKey,
             const std::map<std::string, HashableDimensionKey>& conditionKey, bool condition,
-            const LogEvent& event, bool scheduledPull) = 0;
+            const LogEvent& event) = 0;
 
     // Consume the parsed stats log entry that already matched the "what" of the metric.
-    void onMatchedLogEventLocked(const size_t matcherIndex, const LogEvent& event,
-                                 bool scheduledPull);
+    void onMatchedLogEventLocked(const size_t matcherIndex, const LogEvent& event);
 
     mutable std::mutex mMutex;
 };

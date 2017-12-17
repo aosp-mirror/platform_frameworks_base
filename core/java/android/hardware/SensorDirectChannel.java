@@ -40,8 +40,12 @@ public final class SensorDirectChannel implements Channel {
 
     /** @hide */
     @Retention(RetentionPolicy.SOURCE)
-    @IntDef(flag = true, value = {TYPE_MEMORY_FILE, TYPE_HARDWARE_BUFFER})
-    public @interface MemoryType {};
+    @IntDef(flag = true, prefix = { "TYPE_" }, value = {
+            TYPE_MEMORY_FILE,
+            TYPE_HARDWARE_BUFFER
+    })
+    public @interface MemoryType {}
+
     /**
      * Shared memory type ashmem, wrapped in MemoryFile object.
      *
@@ -60,8 +64,13 @@ public final class SensorDirectChannel implements Channel {
 
     /** @hide */
     @Retention(RetentionPolicy.SOURCE)
-    @IntDef(flag = true, value = {RATE_STOP, RATE_NORMAL, RATE_FAST, RATE_VERY_FAST})
-    public @interface RateLevel {};
+    @IntDef(flag = true, prefix = { "RATE_" }, value = {
+            RATE_STOP,
+            RATE_NORMAL,
+            RATE_FAST,
+            RATE_VERY_FAST
+    })
+    public @interface RateLevel {}
 
     /**
      * Sensor stopped (no event output).

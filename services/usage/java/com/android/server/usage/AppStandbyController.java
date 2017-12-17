@@ -24,6 +24,7 @@ import static android.app.usage.UsageStatsManager.REASON_USAGE;
 import static android.app.usage.UsageStatsManager.STANDBY_BUCKET_ACTIVE;
 import static android.app.usage.UsageStatsManager.STANDBY_BUCKET_EXEMPTED;
 import static android.app.usage.UsageStatsManager.STANDBY_BUCKET_FREQUENT;
+import static android.app.usage.UsageStatsManager.STANDBY_BUCKET_NEVER;
 import static android.app.usage.UsageStatsManager.STANDBY_BUCKET_RARE;
 import static android.app.usage.UsageStatsManager.STANDBY_BUCKET_WORKING_SET;
 
@@ -133,7 +134,7 @@ public class AppStandbyController {
     @GuardedBy("mAppIdleLock")
     private AppIdleHistory mAppIdleHistory;
 
-    @GuardedBy("mAppIdleLock")
+    @GuardedBy("mPackageAccessListeners")
     private ArrayList<AppIdleStateChangeListener>
             mPackageAccessListeners = new ArrayList<>();
 
@@ -161,11 +162,13 @@ public class AppStandbyController {
     long[] mAppStandbyScreenThresholds = SCREEN_TIME_THRESHOLDS;
     long[] mAppStandbyElapsedThresholds = ELAPSED_TIME_THRESHOLDS;
 
-    boolean mAppIdleEnabled;
+    volatile boolean mAppIdleEnabled;
     boolean mAppIdleTempParoled;
     boolean mCharging;
     private long mLastAppIdleParoledTime;
     private boolean mSystemServicesReady = false;
+
+    private final DeviceStateReceiver mDeviceStateReceiver;
 
     private volatile boolean mPendingOneTimeCheckIdleStates;
 
@@ -177,7 +180,7 @@ public class AppStandbyController {
     private AppWidgetManager mAppWidgetManager;
     private PowerManager mPowerManager;
     private PackageManager mPackageManager;
-    private Injector mInjector;
+    Injector mInjector;
 
 
     AppStandbyController(Context context, Looper looper) {
@@ -189,14 +192,13 @@ public class AppStandbyController {
         mContext = mInjector.getContext();
         mHandler = new AppStandbyHandler(mInjector.getLooper());
         mPackageManager = mContext.getPackageManager();
-        mAppIdleEnabled = mInjector.isAppIdleEnabled();
+        mDeviceStateReceiver = new DeviceStateReceiver();
 
-        if (mAppIdleEnabled) {
-            IntentFilter deviceStates = new IntentFilter(Intent.ACTION_BATTERY_CHANGED);
-            deviceStates.addAction(BatteryManager.ACTION_DISCHARGING);
-            deviceStates.addAction(PowerManager.ACTION_DEVICE_IDLE_MODE_CHANGED);
-            mContext.registerReceiver(new DeviceStateReceiver(), deviceStates);
-        }
+        IntentFilter deviceStates = new IntentFilter(Intent.ACTION_BATTERY_CHANGED);
+        deviceStates.addAction(BatteryManager.ACTION_DISCHARGING);
+        deviceStates.addAction(PowerManager.ACTION_DEVICE_IDLE_MODE_CHANGED);
+        mContext.registerReceiver(mDeviceStateReceiver, deviceStates);
+
         synchronized (mAppIdleLock) {
             mAppIdleHistory = new AppIdleHistory(mInjector.getDataSystemDirectory(),
                     mInjector.elapsedRealtime());
@@ -212,9 +214,14 @@ public class AppStandbyController {
                 null, mHandler);
     }
 
+    void setAppIdleEnabled(boolean enabled) {
+        mAppIdleEnabled = enabled;
+    }
+
     public void onBootPhase(int phase) {
         mInjector.onBootPhase(phase);
         if (phase == PHASE_SYSTEM_SERVICES_READY) {
+            setAppIdleEnabled(mInjector.isAppIdleEnabled());
             // Observe changes to the threshold
             SettingsObserver settingsObserver = new SettingsObserver(mHandler);
             settingsObserver.registerObserver();
@@ -239,6 +246,8 @@ public class AppStandbyController {
     }
 
     void reportContentProviderUsage(String authority, String providerPkgName, int userId) {
+        if (!mAppIdleEnabled) return;
+
         // Get sync adapters for the authority
         String[] packages = ContentResolver.getSyncAdapterPackagesForAuthorityAsUser(
                 authority, userId);
@@ -294,6 +303,7 @@ public class AppStandbyController {
     }
 
     boolean isParoledOrCharging() {
+        if (!mAppIdleEnabled) return true;
         synchronized (mAppIdleLock) {
             return mAppIdleTempParoled || mCharging;
         }
@@ -519,6 +529,7 @@ public class AppStandbyController {
     }
 
     void reportEvent(UsageEvents.Event event, long elapsedRealtime, int userId) {
+        if (!mAppIdleEnabled) return;
         synchronized (mAppIdleLock) {
             // TODO: Ideally this should call isAppIdleFiltered() to avoid calling back
             // about apps that are on some kind of whitelist anyway.
@@ -558,6 +569,8 @@ public class AppStandbyController {
      * required.
      */
     void forceIdleState(String packageName, int userId, boolean idle) {
+        if (!mAppIdleEnabled) return;
+
         final int appId = getAppId(packageName);
         if (appId < 0) return;
         final long elapsedRealtime = mInjector.elapsedRealtime();
@@ -592,7 +605,7 @@ public class AppStandbyController {
     }
 
     void addListener(AppIdleStateChangeListener listener) {
-        synchronized (mAppIdleLock) {
+        synchronized (mPackageAccessListeners) {
             if (!mPackageAccessListeners.contains(listener)) {
                 mPackageAccessListeners.add(listener);
             }
@@ -600,7 +613,7 @@ public class AppStandbyController {
     }
 
     void removeListener(AppIdleStateChangeListener listener) {
-        synchronized (mAppIdleLock) {
+        synchronized (mPackageAccessListeners) {
             mPackageAccessListeners.remove(listener);
         }
     }
@@ -762,7 +775,7 @@ public class AppStandbyController {
     }
 
     void setAppIdleAsync(String packageName, boolean idle, int userId) {
-        if (packageName == null) return;
+        if (packageName == null || !mAppIdleEnabled) return;
 
         mHandler.obtainMessage(MSG_FORCE_IDLE_STATE, userId, idle ? 1 : 0, packageName)
                 .sendToTarget();
@@ -770,8 +783,8 @@ public class AppStandbyController {
 
     @StandbyBuckets public int getAppStandbyBucket(String packageName, int userId,
             long elapsedRealtime, boolean shouldObfuscateInstantApps) {
-        if (shouldObfuscateInstantApps &&
-                mInjector.isPackageEphemeral(userId, packageName)) {
+        if (!mAppIdleEnabled || (shouldObfuscateInstantApps
+                && mInjector.isPackageEphemeral(userId, packageName))) {
             return STANDBY_BUCKET_ACTIVE;
         }
 
@@ -782,13 +795,26 @@ public class AppStandbyController {
 
     public Map<String, Integer> getAppStandbyBuckets(int userId, long elapsedRealtime) {
         synchronized (mAppIdleLock) {
-            return mAppIdleHistory.getAppStandbyBuckets(userId, elapsedRealtime);
+            return mAppIdleHistory.getAppStandbyBuckets(userId, elapsedRealtime, mAppIdleEnabled);
         }
     }
 
     void setAppStandbyBucket(String packageName, int userId, @StandbyBuckets int newBucket,
             String reason, long elapsedRealtime) {
         synchronized (mAppIdleLock) {
+            AppIdleHistory.AppUsageHistory app = mAppIdleHistory.getAppUsageHistory(packageName,
+                    userId, elapsedRealtime);
+            boolean predicted = reason != null && reason.startsWith(REASON_PREDICTED);
+            // Don't allow changing bucket if higher than ACTIVE
+            if (app.currentBucket < STANDBY_BUCKET_ACTIVE) return;
+            // Don't allow prediction to change from or to NEVER
+            if ((app.currentBucket == STANDBY_BUCKET_NEVER
+                    || newBucket == STANDBY_BUCKET_NEVER)
+                    && predicted) {
+                return;
+            }
+            // If the bucket was forced, don't allow prediction to override
+            if (app.bucketingReason.equals(REASON_FORCED) && predicted) return;
             mAppIdleHistory.setAppStandbyBucket(packageName, userId, elapsedRealtime, newBucket,
                     reason);
         }
@@ -852,15 +878,19 @@ public class AppStandbyController {
 
     void informListeners(String packageName, int userId, int bucket) {
         final boolean idle = bucket >= STANDBY_BUCKET_RARE;
-        for (AppIdleStateChangeListener listener : mPackageAccessListeners) {
-            listener.onAppIdleStateChanged(packageName, userId, idle, bucket);
+        synchronized (mPackageAccessListeners) {
+            for (AppIdleStateChangeListener listener : mPackageAccessListeners) {
+                listener.onAppIdleStateChanged(packageName, userId, idle, bucket);
+            }
         }
     }
 
     void informParoleStateChanged() {
         final boolean paroled = isParoledOrCharging();
-        for (AppIdleStateChangeListener listener : mPackageAccessListeners) {
-            listener.onParoleStateChanged(paroled);
+        synchronized (mPackageAccessListeners) {
+            for (AppIdleStateChangeListener listener : mPackageAccessListeners) {
+                listener.onParoleStateChanged(paroled);
+            }
         }
     }
 
@@ -1040,8 +1070,11 @@ public class AppStandbyController {
         }
 
         boolean isAppIdleEnabled() {
-            return mContext.getResources().getBoolean(
+            final boolean buildFlag = mContext.getResources().getBoolean(
                     com.android.internal.R.bool.config_enableAutoPowerModes);
+            final boolean runtimeFlag = Settings.Global.getInt(mContext.getContentResolver(),
+                    Settings.Global.APP_STANDBY_ENABLED, 1) == 1;
+            return buildFlag && runtimeFlag;
         }
 
         boolean isCharging() {
@@ -1112,7 +1145,7 @@ public class AppStandbyController {
                     break;
 
                 case MSG_CHECK_IDLE_STATES:
-                    if (checkIdleStates(msg.arg1)) {
+                    if (checkIdleStates(msg.arg1) && mAppIdleEnabled) {
                         mHandler.sendMessageDelayed(mHandler.obtainMessage(
                                 MSG_CHECK_IDLE_STATES, msg.arg1, 0),
                                 mCheckIdleIntervalMillis);
@@ -1211,6 +1244,8 @@ public class AppStandbyController {
         void registerObserver() {
             mContext.getContentResolver().registerContentObserver(Settings.Global.getUriFor(
                     Settings.Global.APP_IDLE_CONSTANTS), false, this);
+            mContext.getContentResolver().registerContentObserver(Settings.Global.getUriFor(
+                    Settings.Global.APP_STANDBY_ENABLED), false, this);
         }
 
         @Override
@@ -1220,15 +1255,27 @@ public class AppStandbyController {
         }
 
         void updateSettings() {
+            if (DEBUG) {
+                Slog.d(TAG,
+                        "appidle=" + Settings.Global.getString(mContext.getContentResolver(),
+                                Settings.Global.APP_STANDBY_ENABLED));
+                Slog.d(TAG, "appidleconstants=" + Settings.Global.getString(
+                        mContext.getContentResolver(),
+                        Settings.Global.APP_IDLE_CONSTANTS));
+            }
+            // Check if app_idle_enabled has changed
+            setAppIdleEnabled(mInjector.isAppIdleEnabled());
+
+            // Look at global settings for this.
+            // TODO: Maybe apply different thresholds for different users.
+            try {
+                mParser.setString(mInjector.getAppIdleSettings());
+            } catch (IllegalArgumentException e) {
+                Slog.e(TAG, "Bad value for app idle settings: " + e.getMessage());
+                // fallthrough, mParser is empty and all defaults will be returned.
+            }
+
             synchronized (mAppIdleLock) {
-                // Look at global settings for this.
-                // TODO: Maybe apply different thresholds for different users.
-                try {
-                    mParser.setString(mInjector.getAppIdleSettings());
-                } catch (IllegalArgumentException e) {
-                    Slog.e(TAG, "Bad value for app idle settings: " + e.getMessage());
-                    // fallthrough, mParser is empty and all defaults will be returned.
-                }
 
                 // Default: 24 hours between paroles
                 mAppIdleParoleIntervalMillis = mParser.getLong(KEY_PAROLE_INTERVAL,

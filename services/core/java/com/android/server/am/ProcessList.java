@@ -628,6 +628,7 @@ public final class ProcessList {
 
     /**
      * Set the out-of-memory badness adjustment for a process.
+     * If {@code pid <= 0}, this method will be a no-op.
      *
      * @param pid The process identifier to set.
      * @param uid The uid of the app
@@ -636,6 +637,10 @@ public final class ProcessList {
      * {@hide}
      */
     public static final void setOomAdj(int pid, int uid, int amt) {
+        // This indicates that the process is not started yet and so no need to proceed further.
+        if (pid <= 0) {
+            return;
+        }
         if (amt == UNKNOWN_ADJ)
             return;
 
@@ -657,6 +662,10 @@ public final class ProcessList {
      * {@hide}
      */
     public static final void remove(int pid) {
+        // This indicates that the process is not started yet and so no need to proceed further.
+        if (pid <= 0) {
+            return;
+        }
         ByteBuffer buf = ByteBuffer.allocate(4 * 2);
         buf.putInt(LMK_PROCREMOVE);
         buf.putInt(pid);

@@ -125,6 +125,11 @@ public final class Slice implements Parcelable {
      */
     public static final String HINT_HIDDEN = "hidden";
     /**
+     * Hint indicating this content should be shown instead of the normal content when the slice
+     * is in small format.
+     */
+    public static final String HINT_SUMMARY = "summary";
+    /**
      * Hint to indicate that this content has a toggle action associated with it. To indicate that
      * the toggle is on, use {@link #HINT_SELECTED}. When the toggle state changes, the intent
      * associated with it will be sent along with an extra {@link #EXTRA_TOGGLE_STATE} which can be
@@ -151,7 +156,6 @@ public final class Slice implements Parcelable {
 
     /**
      * Key to retrieve an extra added to an intent when a control is changed.
-     * @hide
      */
     public static final String EXTRA_TOGGLE_STATE = "android.app.slice.extra.TOGGLE_STATE";
     /**
@@ -171,6 +175,13 @@ public final class Slice implements Parcelable {
      * Subtype to tag an item represents a slider.
      */
     public static final String SUBTYPE_SLIDER = "slider";
+    /**
+     * Subtype to indicate that this content has a toggle action associated with it. To indicate
+     * that the toggle is on, use {@link #HINT_SELECTED}. When the toggle state changes, the
+     * intent associated with it will be sent along with an extra {@link #EXTRA_TOGGLE_STATE}
+     * which can be retrieved to see the new state of the toggle.
+     */
+    public static final String SUBTYPE_TOGGLE = "toggle";
 
     private final SliceItem[] mItems;
     private final @SliceHint String[] mHints;

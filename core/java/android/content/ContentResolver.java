@@ -335,7 +335,7 @@ public abstract class ContentResolver {
     public static final String EXTRA_HONORED_ARGS = "android.content.extra.HONORED_ARGS";
 
     /** @hide */
-    @IntDef(flag = false, value = {
+    @IntDef(flag = false, prefix = { "QUERY_SORT_DIRECTION_" }, value = {
             QUERY_SORT_DIRECTION_ASCENDING,
             QUERY_SORT_DIRECTION_DESCENDING
     })
@@ -482,11 +482,10 @@ public abstract class ContentResolver {
     public static final int SYNC_OBSERVER_TYPE_ALL = 0x7fffffff;
 
     /** @hide */
-    @IntDef(flag = true,
-            value = {
-                NOTIFY_SYNC_TO_NETWORK,
-                NOTIFY_SKIP_NOTIFY_FOR_DESCENDANTS
-            })
+    @IntDef(flag = true, prefix = { "NOTIFY_" }, value = {
+            NOTIFY_SYNC_TO_NETWORK,
+            NOTIFY_SKIP_NOTIFY_FOR_DESCENDANTS
+    })
     @Retention(RetentionPolicy.SOURCE)
     public @interface NotifyFlags {}
 

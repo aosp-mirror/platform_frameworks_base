@@ -1094,6 +1094,12 @@ public final class SQLiteConnectionPool implements Closeable {
             printer.println("  Open: " + mIsOpen);
             printer.println("  Max connections: " + mMaxConnectionPoolSize);
             printer.println("  Total execution time: " + mTotalExecutionTimeCounter);
+            if (SQLiteCompatibilityWalFlags.areFlagsSet()) {
+                printer.println("  Compatibility WAL settings: compatibility_wal_supported="
+                        + SQLiteCompatibilityWalFlags
+                        .isCompatibilityWalSupported() + ", wal_syncmode="
+                        + SQLiteCompatibilityWalFlags.getWALSyncMode());
+            }
             if (mConfiguration.isLookasideConfigSet()) {
                 printer.println("  Lookaside config: sz=" + mConfiguration.lookasideSlotSize
                         + " cnt=" + mConfiguration.lookasideSlotCount);

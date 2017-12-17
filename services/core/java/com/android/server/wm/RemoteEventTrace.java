@@ -20,6 +20,7 @@ import java.io.FileDescriptor;
 import java.io.FileOutputStream;
 import java.io.DataOutputStream;
 
+import android.os.StrictMode;
 import android.util.Slog;
 import android.os.Debug;
 
@@ -40,22 +41,28 @@ class RemoteEventTrace {
     }
 
     void openSurfaceTransaction() {
+        final StrictMode.ThreadPolicy oldPolicy = StrictMode.allowThreadDiskWrites();
         try {
             mOut.writeUTF("OpenTransaction");
             writeSigil();
         } catch (Exception e) {
             logException(e);
             mService.disableSurfaceTrace();
+        } finally {
+            StrictMode.setThreadPolicy(oldPolicy);
         }
     }
 
     void closeSurfaceTransaction() {
+        final StrictMode.ThreadPolicy oldPolicy = StrictMode.allowThreadDiskWrites();
         try {
             mOut.writeUTF("CloseTransaction");
             writeSigil();
         } catch (Exception e) {
             logException(e);
             mService.disableSurfaceTrace();
+        } finally {
+            StrictMode.setThreadPolicy(oldPolicy);
         }
     }
 

@@ -68,6 +68,7 @@ bool initConditions(const ConfigKey& key, const StatsdConfig& config,
 // input:
 // [key]: the config key that this config belongs to
 // [config]: the input config
+// [timeBaseSec]: start time base for all metrics
 // [logTrackerMap]: LogMatchingTracker name to index mapping from previous step.
 // [conditionTrackerMap]: condition name to index mapping
 // output:
@@ -76,7 +77,7 @@ bool initConditions(const ConfigKey& key, const StatsdConfig& config,
 //                          the list of MetricProducer index
 // [trackerToMetricMap]: contains the mapping from log tracker to MetricProducer index.
 bool initMetrics(
-        const ConfigKey& key, const StatsdConfig& config,
+        const ConfigKey& key, const StatsdConfig& config, const long timeBaseSec,
         const std::unordered_map<std::string, int>& logTrackerMap,
         const std::unordered_map<std::string, int>& conditionTrackerMap,
         const std::unordered_map<int, std::vector<MetricConditionLink>>& eventConditionLinks,
@@ -88,7 +89,7 @@ bool initMetrics(
 
 // Initialize MetricsManager from StatsdConfig.
 // Parameters are the members of MetricsManager. See MetricsManager for declaration.
-bool initStatsdConfig(const ConfigKey& key, const StatsdConfig& config, std::set<int>& allTagIds,
+bool initStatsdConfig(const ConfigKey& key, const StatsdConfig& config, const long timeBaseSec, std::set<int>& allTagIds,
                       std::vector<sp<LogMatchingTracker>>& allAtomMatchers,
                       std::vector<sp<ConditionTracker>>& allConditionTrackers,
                       std::vector<sp<MetricProducer>>& allMetricProducers,

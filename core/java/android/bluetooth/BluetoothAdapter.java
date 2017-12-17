@@ -156,7 +156,7 @@ public final class BluetoothAdapter {
             "android.bluetooth.adapter.extra.PREVIOUS_STATE";
 
     /** @hide */
-    @IntDef({
+    @IntDef(prefix = { "STATE_" }, value = {
             STATE_OFF,
             STATE_TURNING_ON,
             STATE_ON,
@@ -357,7 +357,11 @@ public final class BluetoothAdapter {
             "android.bluetooth.adapter.extra.PREVIOUS_SCAN_MODE";
 
     /** @hide */
-    @IntDef({SCAN_MODE_NONE, SCAN_MODE_CONNECTABLE, SCAN_MODE_CONNECTABLE_DISCOVERABLE})
+    @IntDef(prefix = { "SCAN_" }, value = {
+            SCAN_MODE_NONE,
+            SCAN_MODE_CONNECTABLE,
+            SCAN_MODE_CONNECTABLE_DISCOVERABLE
+    })
     @Retention(RetentionPolicy.SOURCE)
     public @interface ScanMode {}
 

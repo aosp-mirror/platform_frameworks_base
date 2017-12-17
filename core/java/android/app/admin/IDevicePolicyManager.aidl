@@ -36,6 +36,7 @@ import android.os.Bundle;
 import android.os.PersistableBundle;
 import android.os.RemoteCallback;
 import android.os.UserHandle;
+import android.security.keymaster.KeymasterCertificateChain;
 import android.security.keystore.ParcelableKeyGenParameterSpec;
 
 import java.util.List;
@@ -79,6 +80,7 @@ interface IDevicePolicyManager {
 
     boolean isActivePasswordSufficient(int userHandle, boolean parent);
     boolean isProfileActivePasswordSufficientForParent(int userHandle);
+    boolean isUsingUnifiedPassword(in ComponentName admin);
     int getCurrentFailedPasswordAttempts(int userHandle, boolean parent);
     int getProfileWithMinimumFailedPasswordsForWipe(int userHandle, boolean parent);
 
@@ -166,7 +168,9 @@ interface IDevicePolicyManager {
             in byte[] certBuffer, in byte[] certChainBuffer, String alias, boolean requestAccess,
             boolean isUserSelectable);
     boolean removeKeyPair(in ComponentName who, in String callerPackage, String alias);
-    boolean generateKeyPair(in ComponentName who, in String callerPackage, in String algorithm, in ParcelableKeyGenParameterSpec keySpec);
+    boolean generateKeyPair(in ComponentName who, in String callerPackage, in String algorithm,
+            in ParcelableKeyGenParameterSpec keySpec,
+            out KeymasterCertificateChain attestationChain);
     void choosePrivateKeyAlias(int uid, in Uri uri, in String alias, IBinder aliasCallback);
 
     void setDelegatedScopes(in ComponentName who, in String delegatePackage, in List<String> scopes);
@@ -378,4 +382,5 @@ interface IDevicePolicyManager {
     boolean isLogoutEnabled();
 
     List<String> getDisallowedSystemApps(in ComponentName admin, int userId, String provisioningAction);
+    void transferOwner(in ComponentName admin, in ComponentName target, in PersistableBundle bundle);
 }

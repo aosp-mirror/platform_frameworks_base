@@ -39,22 +39,22 @@ enum AnEnum {
 }
 
 message AllTypesAtom {
-    optional android.os.statsd.WorkSource attribution = 1;
-    optional double double_field = 2;
-    optional float float_field = 3;
-    optional int64 int64_field = 4;
-    optional uint64 uint64_field = 5;
-    optional int32 int32_field = 6;
-    optional fixed64 fixed64_field = 7;
-    optional fixed32 fixed32_field = 8;
-    optional bool bool_field = 9;
-    optional string string_field = 10;
-    optional uint32 uint32_field = 11;
-    optional AnEnum enum_field = 12;
-    optional sfixed32 sfixed32_field = 13;
-    optional sfixed64 sfixed64_field = 14;
-    optional sint32 sint32_field = 15;
-    optional sint64 sint64_field = 16;
+  optional android.os.statsd.AttributionChain attribution_chain = 1;
+  optional double double_field = 2;
+  optional float float_field = 3;
+  optional int64 int64_field = 4;
+  optional uint64 uint64_field = 5;
+  optional int32 int32_field = 6;
+  optional fixed64 fixed64_field = 7;
+  optional fixed32 fixed32_field = 8;
+  optional bool bool_field = 9;
+  optional string string_field = 10;
+  optional uint32 uint32_field = 11;
+  optional AnEnum enum_field = 12;
+  optional sfixed32 sfixed32_field = 13;
+  optional sfixed64 sfixed64_field = 14;
+  optional sint32 sint32_field = 15;
+  optional sint64 sint64_field = 16;
 }
 
 message Event {
@@ -99,14 +99,12 @@ message BadSkippedFieldMultiple {
     }
 }
 
-message BadWorkSourcePositionAtom {
-    optional int32 field1 = 1;
-    optional android.os.statsd.WorkSource attribution = 2;
+message BadAttributionChainPositionAtom {
+  optional int32 field1 = 1;
+  optional android.os.statsd.AttributionChain attribution = 2;
 }
 
-message BadWorkSourcePosition {
-    oneof event {
-        BadWorkSourcePositionAtom bad = 1;
-    }
+message BadAttributionChainPosition {
+  oneof event { BadAttributionChainPositionAtom bad = 1; }
 }
 

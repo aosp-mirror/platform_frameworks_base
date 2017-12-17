@@ -662,7 +662,7 @@ class RecentTasks {
      * task to be trimmed as a result of that add.
      */
     private boolean canAddTaskWithoutTrim(TaskRecord task) {
-        return findTrimIndexForAddTask(task) == -1;
+        return findRemoveIndexForAddTask(task) == -1;
     }
 
     /**
@@ -896,7 +896,7 @@ class RecentTasks {
         }
 
         if (DEBUG_RECENTS) Slog.d(TAG_RECENTS, "addRecent: trimming tasks for " + task);
-        trimForAddTask(task);
+        removeForAddTask(task);
 
         task.inRecents = true;
         if (!isAffiliated || needAffiliationFix) {
@@ -1175,8 +1175,8 @@ class RecentTasks {
      * If needed, remove oldest existing entries in recents that are for the same kind
      * of task as the given one.
      */
-    private void trimForAddTask(TaskRecord task) {
-        final int removeIndex = findTrimIndexForAddTask(task);
+    private void removeForAddTask(TaskRecord task) {
+        final int removeIndex = findRemoveIndexForAddTask(task);
         if (removeIndex == -1) {
             // Nothing to trim
             return;
@@ -1187,7 +1187,7 @@ class RecentTasks {
         // callbacks here.
         final TaskRecord removedTask = mTasks.remove(removeIndex);
         if (removedTask != task) {
-            notifyTaskRemoved(removedTask, TRIMMED);
+            notifyTaskRemoved(removedTask, !TRIMMED);
             if (DEBUG_RECENTS_TRIM_TASKS) Slog.d(TAG, "Trimming task=" + removedTask
                     + " for addition of task=" + task);
         }
@@ -1198,7 +1198,7 @@ class RecentTasks {
      * Find the task that would be removed if the given {@param task} is added to the recent tasks
      * list (if any).
      */
-    private int findTrimIndexForAddTask(TaskRecord task) {
+    private int findRemoveIndexForAddTask(TaskRecord task) {
         int recentsCount = mTasks.size();
         final Intent intent = task.intent;
         final boolean document = intent != null && intent.isDocument();
@@ -1241,7 +1241,6 @@ class RecentTasks {
                         // don't need to trim it.
                         continue;
                     } else if (maxRecents > 0) {
-                        // Otherwise only trim if we are over our max recents for this task
                         --maxRecents;
                         if (!sameIntent || multiTasksAllowed) {
                             // We don't want to trim if we are not over the max allowed entries and

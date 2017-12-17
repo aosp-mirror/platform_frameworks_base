@@ -76,6 +76,12 @@ public interface ViewMediatorCallback {
     void playTrustedSound();
 
     /**
+     * When the bouncer is shown or hides
+     * @param shown
+     */
+    void onBouncerVisiblityChanged(boolean shown);
+
+    /**
      * @return true if the screen is on
      */
     boolean isScreenOn();

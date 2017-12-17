@@ -73,6 +73,33 @@ public abstract class AttestationUtils {
     public static final int ID_TYPE_MEID = 3;
 
     /**
+     * Creates an array of X509Certificates from the provided KeymasterCertificateChain.
+     *
+     * @hide Only called by the DevicePolicyManager.
+     */
+    @NonNull public static X509Certificate[] parseCertificateChain(
+            final KeymasterCertificateChain kmChain) throws
+            KeyAttestationException {
+        // Extract certificate chain.
+        final Collection<byte[]> rawChain = kmChain.getCertificates();
+        if (rawChain.size() < 2) {
+            throw new KeyAttestationException("Attestation certificate chain contained "
+                    + rawChain.size() + " entries. At least two are required.");
+        }
+        final ByteArrayOutputStream concatenatedRawChain = new ByteArrayOutputStream();
+        try {
+            for (final byte[] cert : rawChain) {
+                concatenatedRawChain.write(cert);
+            }
+            return CertificateFactory.getInstance("X.509").generateCertificates(
+                    new ByteArrayInputStream(concatenatedRawChain.toByteArray()))
+                            .toArray(new X509Certificate[0]);
+        } catch (Exception e) {
+            throw new KeyAttestationException("Unable to construct certificate chain", e);
+        }
+    }
+
+    /**
      * Performs attestation of the device's identifiers. This method returns a certificate chain
      * whose first element contains the requested device identifiers in an extension. The device's
      * manufacturer, model, brand, device and product are always also included in the attestation.
@@ -173,22 +200,18 @@ public abstract class AttestationUtils {
                     KeyStore.getKeyStoreException(errorCode));
         }
 
-        // Extract certificate chain.
-        final Collection<byte[]> rawChain = outChain.getCertificates();
-        if (rawChain.size() < 2) {
-            throw new DeviceIdAttestationException("Attestation certificate chain contained "
-                    + rawChain.size() + " entries. At least two are required.");
-        }
-        final ByteArrayOutputStream concatenatedRawChain = new ByteArrayOutputStream();
         try {
-            for (final byte[] cert : rawChain) {
-                concatenatedRawChain.write(cert);
-            }
-            return CertificateFactory.getInstance("X.509").generateCertificates(
-                    new ByteArrayInputStream(concatenatedRawChain.toByteArray()))
-                            .toArray(new X509Certificate[0]);
-        } catch (Exception e) {
-            throw new DeviceIdAttestationException("Unable to construct certificate chain", e);
+            return parseCertificateChain(outChain);
+        } catch (KeyAttestationException e) {
+            throw new DeviceIdAttestationException(e.getMessage(), e);
         }
+    }
+
+    /**
+     * Returns true if the attestation chain provided is a valid key attestation chain.
+     * @hide
+     */
+    public static boolean isChainValid(KeymasterCertificateChain chain) {
+        return chain != null && chain.getCertificates().size() >= 2;
     }
 }

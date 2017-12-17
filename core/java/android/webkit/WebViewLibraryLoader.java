@@ -123,10 +123,11 @@ public class WebViewLibraryLoader {
                 throw new IllegalArgumentException(
                         "Native library paths to the WebView RelRo process must not be null!");
             }
-            int pid = LocalServices.getService(ActivityManagerInternal.class).startIsolatedProcess(
-                    RelroFileCreator.class.getName(), new String[] { nativeLib.path },
-                    "WebViewLoader-" + abi, abi, Process.SHARED_RELRO_UID, crashHandler);
-            if (pid <= 0) throw new Exception("Failed to start the relro file creator process");
+            boolean success = LocalServices.getService(ActivityManagerInternal.class)
+                    .startIsolatedProcess(
+                            RelroFileCreator.class.getName(), new String[] { nativeLib.path },
+                            "WebViewLoader-" + abi, abi, Process.SHARED_RELRO_UID, crashHandler);
+            if (!success) throw new Exception("Failed to start the relro file creator process");
         } catch (Throwable t) {
             // Log and discard errors as we must not crash the system server.
             Log.e(LOGTAG, "error starting relro file creator for abi " + abi, t);

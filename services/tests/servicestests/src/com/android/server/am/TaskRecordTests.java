@@ -17,33 +17,46 @@
 
 package com.android.server.am;
 
+import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.verify;
 
 import android.app.ActivityManager;
 import android.content.ComponentName;
 import android.content.Intent;
 import android.content.pm.ActivityInfo;
+import android.content.res.XmlResourceParser;
+import android.graphics.Rect;
 import android.platform.test.annotations.Presubmit;
 import android.service.voice.IVoiceInteractionSession;
+import android.support.test.InstrumentationRegistry;
 import android.support.test.filters.MediumTest;
 import android.support.test.runner.AndroidJUnit4;
+import android.util.Xml;
 
+import com.android.frameworks.servicestests.R;
 import com.android.internal.app.IVoiceInteractor;
 import com.android.server.am.TaskRecord.TaskRecordFactory;
 
+import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.xmlpull.v1.XmlPullParser;
 import org.xmlpull.v1.XmlPullParserException;
+import org.xmlpull.v1.XmlSerializer;
 
+import java.io.BufferedReader;
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.FileReader;
 import java.io.IOException;
+import java.io.OutputStream;
+import java.io.Reader;
+import java.nio.file.Files;
 import java.util.ArrayList;
+import java.util.Comparator;
 
 /**
  * Tests for exercising {@link TaskRecord}.
@@ -54,11 +67,33 @@ import java.util.ArrayList;
 @MediumTest
 @Presubmit
 @RunWith(AndroidJUnit4.class)
-public class TaskRecordTests {
+public class TaskRecordTests extends ActivityTestsBase {
+
+    private static final String TASK_TAG = "task";
+
+    private ActivityManagerService mService;
 
     @Before
     public void setUp() throws Exception {
+        super.setUp();
         TaskRecord.setTaskRecordFactory(null);
+        mService = createActivityManagerService();
+    }
+
+    @Test
+    public void testRestoreWindowedTask() throws Exception {
+        final TaskRecord expected = createTaskRecord(64);
+        expected.mLastNonFullscreenBounds = new Rect(50, 50, 100, 100);
+
+        final File serializedFile = serializeToFile(expected);
+
+        try {
+            final TaskRecord actual = restoreFromFile(serializedFile);
+            assertEquals(expected.taskId, actual.taskId);
+            assertEquals(expected.mLastNonFullscreenBounds, actual.mLastNonFullscreenBounds);
+        } finally {
+            serializedFile.delete();
+        }
     }
 
     @Test
@@ -76,6 +111,38 @@ public class TaskRecordTests {
         TaskRecord.create(null, 0, null, null, null, null);
 
         assertTrue(factory.mCreated);
+    }
+
+    private File serializeToFile(TaskRecord r) throws IOException, XmlPullParserException {
+        final File tmpFile = File.createTempFile(r.taskId + "_task_", "xml");
+
+        try (final OutputStream os = new FileOutputStream(tmpFile)) {
+            final XmlSerializer serializer = Xml.newSerializer();
+            serializer.setOutput(os, "UTF-8");
+            serializer.startDocument(null, true);
+            serializer.startTag(null, TASK_TAG);
+            r.saveToXml(serializer);
+            serializer.endTag(null, TASK_TAG);
+            serializer.endDocument();
+        }
+
+        return tmpFile;
+    }
+
+    private TaskRecord restoreFromFile(File file) throws IOException, XmlPullParserException {
+        try (final Reader reader = new BufferedReader(new FileReader(file))) {
+            final XmlPullParser parser = Xml.newPullParser();
+            parser.setInput(reader);
+            assertEquals(XmlPullParser.START_TAG, parser.next());
+            assertEquals(TASK_TAG, parser.getName());
+            return TaskRecord.restoreFromXml(parser, mService.mStackSupervisor);
+        }
+    }
+
+    private TaskRecord createTaskRecord(int taskId) {
+        return new TaskRecord(mService, taskId, new Intent(), null, null, null, null, null, false,
+                false, false, 0, 10050, null, new ArrayList<>(), 0, false, null, 0, 0, 0, 0, 0,
+                null, 0, false, false, false, 0, 0);
     }
 
     private static class TestTaskRecordFactory extends TaskRecordFactory {

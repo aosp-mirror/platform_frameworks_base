@@ -53,12 +53,15 @@ import java.lang.annotation.RetentionPolicy;
 public final class PrinterInfo implements Parcelable {
 
     /** @hide */
-    @IntDef({
-            STATUS_IDLE, STATUS_BUSY, STATUS_UNAVAILABLE
+    @IntDef(prefix = { "STATUS_" }, value = {
+            STATUS_IDLE,
+            STATUS_BUSY,
+            STATUS_UNAVAILABLE
     })
     @Retention(RetentionPolicy.SOURCE)
     public @interface Status {
     }
+
     /** Printer status: the printer is idle and ready to print. */
     public static final int STATUS_IDLE = PrinterInfoProto.STATUS_IDLE;
 

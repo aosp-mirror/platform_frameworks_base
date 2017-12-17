@@ -80,8 +80,15 @@ public class TextToSpeech {
     public static final int STOPPED = -2;
 
     /** @hide */
-    @IntDef({ERROR_SYNTHESIS, ERROR_SERVICE, ERROR_OUTPUT, ERROR_NETWORK, ERROR_NETWORK_TIMEOUT,
-             ERROR_INVALID_REQUEST, ERROR_NOT_INSTALLED_YET})
+    @IntDef(prefix = { "ERROR_" }, value = {
+            ERROR_SYNTHESIS,
+            ERROR_SERVICE,
+            ERROR_OUTPUT,
+            ERROR_NETWORK,
+            ERROR_NETWORK_TIMEOUT,
+            ERROR_INVALID_REQUEST,
+            ERROR_NOT_INSTALLED_YET
+    })
     @Retention(RetentionPolicy.SOURCE)
     public @interface Error {}
 

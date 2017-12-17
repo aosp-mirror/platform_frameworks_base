@@ -24,6 +24,7 @@ import android.util.Log;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.List;
 
 /**
@@ -153,11 +154,12 @@ import java.util.List;
             nanoAppIdSet.add(appInfo.appId);
         }
 
-        for (int nanoAppHandle : mNanoAppHash.keySet()) {
-            NanoAppInstanceInfo info = mNanoAppHash.get(nanoAppHandle);
+        Iterator<NanoAppInstanceInfo> iterator = mNanoAppHash.values().iterator();
+        while (iterator.hasNext()) {
+            NanoAppInstanceInfo info = iterator.next();
             if (info.getContexthubId() == contextHubId &&
                     !nanoAppIdSet.contains(info.getAppId())) {
-                mNanoAppHash.remove(nanoAppHandle);
+                iterator.remove();
             }
         }
     }

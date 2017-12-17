@@ -19,8 +19,9 @@
 #include "config/ConfigKey.h"
 #include "config/ConfigListener.h"
 
+#include <map>
+#include <set>
 #include <string>
-#include <unordered_map>
 
 #include <stdio.h>
 
@@ -28,13 +29,7 @@ namespace android {
 namespace os {
 namespace statsd {
 
-using android::RefBase;
-using std::string;
-using std::unordered_map;
-using std::vector;
-using std::pair;
-
-// Util function to Hard code a test metric for counting screen on events.
+// Util function to build a hard coded config with test metrics.
 StatsdConfig build_fake_config();
 
 /**
@@ -43,7 +38,7 @@ StatsdConfig build_fake_config();
  * TODO: Store the configs persistently too.
  * TODO: Dump method for debugging.
  */
-class ConfigManager : public virtual RefBase {
+class ConfigManager : public virtual android::RefBase {
 public:
     ConfigManager();
     virtual ~ConfigManager();
@@ -68,17 +63,17 @@ public:
     /**
      * Sets the broadcast receiver for a configuration key.
      */
-    void SetConfigReceiver(const ConfigKey& key, const string& pkg, const string& cls);
+    void SetConfigReceiver(const ConfigKey& key, const std::string& pkg, const std::string& cls);
 
     /**
      * Returns the package name and class name representing the broadcast receiver for this config.
      */
-    const pair<string, string> GetConfigReceiver(const ConfigKey& key) const;
+    const std::pair<std::string, std::string> GetConfigReceiver(const ConfigKey& key) const;
 
     /**
      * Returns all config keys registered.
      */
-    vector<ConfigKey> GetAllConfigKeys() const;
+    std::vector<ConfigKey> GetAllConfigKeys() const;
 
     /**
      * Erase any broadcast receiver associated with this config key.
@@ -121,18 +116,18 @@ private:
     /**
      * The Configs that have been set. Each config should
      */
-    unordered_map<ConfigKey, StatsdConfig> mConfigs;
+    std::set<ConfigKey> mConfigs;
 
     /**
      * Each config key can be subscribed by up to one receiver, specified as the package name and
      * class name.
      */
-    unordered_map<ConfigKey, pair<string, string>> mConfigReceivers;
+    std::map<ConfigKey, std::pair<std::string, std::string>> mConfigReceivers;
 
     /**
      * The ConfigListeners that will be told about changes.
      */
-    vector<sp<ConfigListener>> mListeners;
+    std::vector<sp<ConfigListener>> mListeners;
 };
 
 }  // namespace statsd

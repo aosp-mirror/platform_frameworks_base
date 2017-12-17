@@ -153,13 +153,14 @@ public class UiAutomationManagerTest {
     }
 
     @Test
-    public void uiAutomationBinderDiesBeforeConnecting_shouldNotCrash() throws Exception {
+    public void uiAutomationBinderDiesBeforeConnecting_notifiesSystem() throws Exception {
         register(0);
         ArgumentCaptor<IBinder.DeathRecipient> captor = ArgumentCaptor.forClass(
                 IBinder.DeathRecipient.class);
         verify(mMockOwner).linkToDeath(captor.capture(), anyInt());
         captor.getValue().binderDied();
         mMessageCapturingHandler.sendAllMessages();
+        verify(mMockSystemSupport).onClientChange(false);
     }
 
     private void register(int flags) {

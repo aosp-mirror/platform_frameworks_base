@@ -1328,6 +1328,14 @@ public class GnssLocationProvider implements LocationProviderInterface {
             } else if (!mStarted) {
                 // start GPS
                 startNavigating(singleShot);
+            } else {
+                // GNSS Engine is already ON, but no GPS_CAPABILITY_SCHEDULING
+                mAlarmManager.cancel(mTimeoutIntent);
+                if (mFixInterval >= NO_FIX_TIMEOUT) {
+                    // set timer to give up if we do not receive a fix within NO_FIX_TIMEOUT
+                    // and our fix interval is not short
+                    mAlarmManager.set(AlarmManager.ELAPSED_REALTIME_WAKEUP,
+                            SystemClock.elapsedRealtime() + NO_FIX_TIMEOUT, mTimeoutIntent);                }
             }
         } else {
             updateClientUids(new WorkSource());

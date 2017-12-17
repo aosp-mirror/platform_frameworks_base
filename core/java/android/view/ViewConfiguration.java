@@ -290,6 +290,7 @@ public class ViewConfiguration {
     private final int mMaximumFlingVelocity;
     private final int mScrollbarSize;
     private final int mTouchSlop;
+    private final int mHoverSlop;
     private final int mMinScrollbarTouchTarget;
     private final int mDoubleTapTouchSlop;
     private final int mPagingTouchSlop;
@@ -320,6 +321,7 @@ public class ViewConfiguration {
         mMaximumFlingVelocity = MAXIMUM_FLING_VELOCITY;
         mScrollbarSize = SCROLL_BAR_SIZE;
         mTouchSlop = TOUCH_SLOP;
+        mHoverSlop = TOUCH_SLOP / 2;
         mMinScrollbarTouchTarget = MIN_SCROLLBAR_TOUCH_TARGET;
         mDoubleTapTouchSlop = DOUBLE_TAP_TOUCH_SLOP;
         mPagingTouchSlop = PAGING_TOUCH_SLOP;
@@ -407,6 +409,8 @@ public class ViewConfiguration {
                 com.android.internal.R.bool.config_ui_enableFadingMarquee);
         mTouchSlop = res.getDimensionPixelSize(
                 com.android.internal.R.dimen.config_viewConfigurationTouchSlop);
+        mHoverSlop = res.getDimensionPixelSize(
+                com.android.internal.R.dimen.config_viewConfigurationHoverSlop);
         mMinScrollbarTouchTarget = res.getDimensionPixelSize(
                 com.android.internal.R.dimen.config_minScrollbarTouchTarget);
         mPagingTouchSlop = mTouchSlop * 2;
@@ -637,6 +641,14 @@ public class ViewConfiguration {
      */
     public int getScaledTouchSlop() {
         return mTouchSlop;
+    }
+
+    /**
+     * @return Distance in pixels a hover can wander while it is still considered "stationary".
+     *
+     */
+    public int getScaledHoverSlop() {
+        return mHoverSlop;
     }
 
     /**

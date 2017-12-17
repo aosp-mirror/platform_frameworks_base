@@ -103,8 +103,12 @@ public class UserManager {
 
     /** @hide */
     @Retention(RetentionPolicy.SOURCE)
-    @IntDef(flag=true, value={RESTRICTION_NOT_SET, RESTRICTION_SOURCE_SYSTEM,
-            RESTRICTION_SOURCE_DEVICE_OWNER, RESTRICTION_SOURCE_PROFILE_OWNER})
+    @IntDef(flag = true, prefix = { "RESTRICTION_" }, value = {
+            RESTRICTION_NOT_SET,
+            RESTRICTION_SOURCE_SYSTEM,
+            RESTRICTION_SOURCE_DEVICE_OWNER,
+            RESTRICTION_SOURCE_PROFILE_OWNER
+    })
     @SystemApi
     public @interface UserRestrictionSource {}
 
@@ -768,6 +772,25 @@ public class UserManager {
     @Deprecated
     @SystemApi
     public static final String DISALLOW_OEM_UNLOCK = "no_oem_unlock";
+
+    /**
+     * Specifies that the managed profile is not allowed to have unified lock screen challenge with
+     * the primary user.
+     *
+     * <p><strong>Note:</strong> Setting this restriction alone doesn't automatically set a
+     * separate challenge. Profile owner can ask the user to set a new password using
+     * {@link DevicePolicyManager#ACTION_SET_NEW_PASSWORD} and verify it using
+     * {@link DevicePolicyManager#isUsingUnifiedPassword(ComponentName)}.
+     *
+     * <p>Can be set by profile owners. It only has effect on managed profiles when set by managed
+     * profile owner. Has no effect on non-managed profiles or users.
+     * <p>Key for user restrictions.
+     * <p>Type: Boolean
+     * @see DevicePolicyManager#addUserRestriction(ComponentName, String)
+     * @see DevicePolicyManager#clearUserRestriction(ComponentName, String)
+     * @see #getUserRestrictions()
+     */
+    public static final String DISALLOW_UNIFIED_PASSWORD = "no_unified_password";
 
     /**
      * Allows apps in the parent profile to handle web links from the managed profile.

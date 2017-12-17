@@ -678,7 +678,7 @@ void register_android_server_broadcastradio_convert(JNIEnv *env) {
     gjni.AmBandDescriptor.cstor = GetMethodIDOrDie(env, amBandDescriptorClass,
             "<init>", "(IIIIIZ)V");
 
-    auto convertClass = FindClassOrDie(env, "com/android/server/broadcastradio/Convert");
+    auto convertClass = FindClassOrDie(env, "com/android/server/broadcastradio/hal1/Convert");
     gjni.Convert.clazz = MakeGlobalRefOrDie(env, convertClass);
     gjni.Convert.stringMapToNative = GetStaticMethodIDOrDie(env, convertClass, "stringMapToNative",
             "(Ljava/util/Map;)[[Ljava/lang/String;");

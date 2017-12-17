@@ -44,17 +44,12 @@ namespace statsd {
 
 const int FIELD_ID_METRICS = 1;
 
-MetricsManager::MetricsManager(const ConfigKey& key, const StatsdConfig& config) : mConfigKey(key) {
+MetricsManager::MetricsManager(const ConfigKey& key, const StatsdConfig& config, const long timeBaseSec) : mConfigKey(key) {
     mConfigValid =
-            initStatsdConfig(key, config, mTagIds, mAllAtomMatchers, mAllConditionTrackers,
+            initStatsdConfig(key, config, timeBaseSec, mTagIds, mAllAtomMatchers, mAllConditionTrackers,
                              mAllMetricProducers, mAllAnomalyTrackers, mConditionToMetricMap,
                              mTrackerToMetricMap, mTrackerToConditionMap);
 
-    // TODO: add alert size.
-    // no matter whether this config is valid, log it in the stats.
-    StatsdStats::getInstance().noteConfigReceived(key, mAllMetricProducers.size(),
-                                                  mAllConditionTrackers.size(),
-                                                  mAllAtomMatchers.size(), 0, mConfigValid);
     // Guardrail. Reject the config if it's too big.
     if (mAllMetricProducers.size() > StatsdStats::kMaxMetricCountPerConfig ||
         mAllConditionTrackers.size() > StatsdStats::kMaxConditionCountPerConfig ||
@@ -62,6 +57,12 @@ MetricsManager::MetricsManager(const ConfigKey& key, const StatsdConfig& config)
         ALOGE("This config is too big! Reject!");
         mConfigValid = false;
     }
+
+    // TODO: add alert size.
+    // no matter whether this config is valid, log it in the stats.
+    StatsdStats::getInstance().noteConfigReceived(key, mAllMetricProducers.size(),
+                                                  mAllConditionTrackers.size(),
+                                                  mAllAtomMatchers.size(), 0, mConfigValid);
 }
 
 MetricsManager::~MetricsManager() {
@@ -162,8 +163,7 @@ void MetricsManager::onLogEvent(const LogEvent& event) {
                 auto& metricList = pair->second;
                 for (const int metricIndex : metricList) {
                     // pushed metrics are never scheduled pulls
-                    mAllMetricProducers[metricIndex]->onMatchedLogEvent(i, event,
-                                                                        false /* schedulePull */);
+                    mAllMetricProducers[metricIndex]->onMatchedLogEvent(i, event);
                 }
             }
         }

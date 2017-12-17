@@ -170,6 +170,8 @@ message WindowStateProto {
   optional WindowStateAnimatorProto animator = 13;
   optional bool animating_exit = 14;
   repeated WindowStateProto child_windows = 15;
+  optional .android.graphics.RectProto surface_position = 16;
+  optional .android.graphics.RectProto shown_position = 17;
 }
 
 message IdentifierProto {

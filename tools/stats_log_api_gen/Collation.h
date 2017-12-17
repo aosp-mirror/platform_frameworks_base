@@ -37,21 +37,20 @@ using google::protobuf::Descriptor;
  * The types for atom parameters.
  */
 typedef enum {
-    JAVA_TYPE_UNKNOWN = 0,
+  JAVA_TYPE_UNKNOWN = 0,
 
-    JAVA_TYPE_WORK_SOURCE = 1,
-    JAVA_TYPE_BOOLEAN = 2,
-    JAVA_TYPE_INT = 3,
-    JAVA_TYPE_LONG = 4,
-    JAVA_TYPE_FLOAT = 5,
-    JAVA_TYPE_DOUBLE = 6,
-    JAVA_TYPE_STRING = 7,
-    JAVA_TYPE_ENUM = 8,
+  JAVA_TYPE_ATTRIBUTION_CHAIN = 1,
+  JAVA_TYPE_BOOLEAN = 2,
+  JAVA_TYPE_INT = 3,
+  JAVA_TYPE_LONG = 4,
+  JAVA_TYPE_FLOAT = 5,
+  JAVA_TYPE_DOUBLE = 6,
+  JAVA_TYPE_STRING = 7,
+  JAVA_TYPE_ENUM = 8,
 
-    JAVA_TYPE_OBJECT = -1,
-    JAVA_TYPE_BYTE_ARRAY = -2,
+  JAVA_TYPE_OBJECT = -1,
+  JAVA_TYPE_BYTE_ARRAY = -2,
 } java_type_t;
-
 
 /**
  * The name and type for an atom field.
@@ -100,6 +99,8 @@ struct Atoms {
  * Gather the information about the atoms.  Returns the number of errors.
  */
 int collate_atoms(const Descriptor* descriptor, Atoms* atoms);
+int collate_atom(const Descriptor *atom, AtomDecl *atomDecl,
+                 vector<java_type_t> *signature);
 
 }  // namespace stats_log_api_gen
 }  // namespace android

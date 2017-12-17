@@ -25,6 +25,7 @@ java_library {
     srcs: ["src/**/*.java"],
 
     no_framework_libs: true,
+    hostdex: true,
     libs: [
         "framework",
     ],

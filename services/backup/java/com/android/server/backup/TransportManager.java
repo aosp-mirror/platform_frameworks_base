@@ -49,12 +49,14 @@ import com.android.server.EventLogTags;
 import com.android.server.backup.transport.TransportClient;
 import com.android.server.backup.transport.TransportClientManager;
 import com.android.server.backup.transport.TransportConnectionListener;
+import com.android.server.backup.transport.TransportNotRegisteredException;
 
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.function.Consumer;
 import java.util.function.Predicate;
 
 /**
@@ -236,6 +238,72 @@ public class TransportManager {
         return getTransportBinder(mCurrentTransportName);
     }
 
+    /**
+     * Retrieve the configuration intent of {@code transportName}.
+     * @throws TransportNotRegisteredException if the transport is not registered.
+     */
+    @Nullable
+    public Intent getTransportConfigurationIntent(String transportName)
+            throws TransportNotRegisteredException {
+        synchronized (mTransportLock) {
+            return getRegisteredTransportDescriptionOrThrowLocked(transportName)
+                    .configurationIntent;
+        }
+    }
+
+    /**
+     * Retrieve the data management intent of {@code transportName}.
+     * @throws TransportNotRegisteredException if the transport is not registered.
+     */
+    @Nullable
+    public Intent getTransportDataManagementIntent(String transportName)
+            throws TransportNotRegisteredException {
+        synchronized (mTransportLock) {
+            return getRegisteredTransportDescriptionOrThrowLocked(transportName)
+                    .dataManagementIntent;
+        }
+    }
+
+    /**
+     * Retrieve the data management label of {@code transportName}.
+     * @throws TransportNotRegisteredException if the transport is not registered.
+     */
+    @Nullable
+    public String getTransportDataManagementLabel(String transportName)
+            throws TransportNotRegisteredException {
+        synchronized (mTransportLock) {
+            return getRegisteredTransportDescriptionOrThrowLocked(transportName)
+                    .dataManagementLabel;
+        }
+    }
+
+    /**
+     * Retrieve the transport dir name of {@code transportName}.
+     * @throws TransportNotRegisteredException if the transport is not registered.
+     */
+    public String getTransportDirName(String transportName)
+            throws TransportNotRegisteredException {
+        synchronized (mTransportLock) {
+            return getRegisteredTransportDescriptionOrThrowLocked(transportName)
+                    .transportDirName;
+        }
+    }
+
+    /**
+     * Execute {@code transportConsumer} for each registered transport passing the transport name.
+     * This is called with an internal lock held, ensuring that the transport will remain registered
+     * while {@code transportConsumer} is being executed. Don't do heavy operations in
+     * {@code transportConsumer}.
+     */
+    public void forEachRegisteredTransport(Consumer<String> transportConsumer) {
+        synchronized (mTransportLock) {
+            for (TransportDescription transportDescription
+                    : mRegisteredTransportsDescriptionMap.values()) {
+                transportConsumer.accept(transportDescription.name);
+            }
+        }
+    }
+
     public String getTransportName(IBackupTransport binder) {
         synchronized (mTransportLock) {
             for (TransportConnection conn : mValidTransports.values()) {
@@ -281,6 +349,17 @@ public class TransportManager {
     }
 
     @GuardedBy("mTransportLock")
+    private TransportDescription getRegisteredTransportDescriptionOrThrowLocked(
+            String transportName) throws TransportNotRegisteredException {
+        TransportDescription description = getRegisteredTransportDescriptionLocked(transportName);
+        if (description == null) {
+            throw new TransportNotRegisteredException(transportName);
+        }
+        return description;
+    }
+
+
+    @GuardedBy("mTransportLock")
     @Nullable
     private Map.Entry<ComponentName, TransportDescription> getRegisteredTransportEntryLocked(
             String transportName) {
@@ -305,6 +384,12 @@ public class TransportManager {
             TransportDescription description = mRegisteredTransportsDescriptionMap.get(component);
             return mTransportClientManager.getTransportClient(
                     component, description.transportDirName, caller);
+        }
+    }
+
+    public boolean isTransportRegistered(String transportName) {
+        synchronized (mTransportLock) {
+            return getRegisteredTransportEntryLocked(transportName) != null;
         }
     }
 
@@ -379,13 +464,13 @@ public class TransportManager {
      * Updates given values for the transport already registered and identified with
      * {@param transportComponent}. If the transport is not registered it will log and return.
      */
-    public void describeTransport(
+    public void updateTransportAttributes(
             ComponentName transportComponent,
             String name,
             @Nullable Intent configurationIntent,
             String currentDestinationString,
             @Nullable Intent dataManagementIntent,
-            String dataManagementLabel) {
+            @Nullable String dataManagementLabel) {
         synchronized (mTransportLock) {
             TransportDescription description =
                     mRegisteredTransportsDescriptionMap.get(transportComponent);
@@ -760,7 +845,7 @@ public class TransportManager {
         @Nullable private Intent configurationIntent;
         private String currentDestinationString;
         @Nullable private Intent dataManagementIntent;
-        private String dataManagementLabel;
+        @Nullable private String dataManagementLabel;
 
         private TransportDescription(
                 String name,
@@ -768,7 +853,7 @@ public class TransportManager {
                 @Nullable Intent configurationIntent,
                 String currentDestinationString,
                 @Nullable Intent dataManagementIntent,
-                String dataManagementLabel) {
+                @Nullable String dataManagementLabel) {
             this.name = name;
             this.transportDirName = transportDirName;
             this.configurationIntent = configurationIntent;

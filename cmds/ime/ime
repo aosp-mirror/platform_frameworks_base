@@ -1,2 +1,2 @@
 #!/system/bin/sh
-exec cmd input_method "$@"
+exec cmd input_method ime "$@"

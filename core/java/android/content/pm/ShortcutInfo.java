@@ -109,8 +109,7 @@ public final class ShortcutInfo implements Parcelable {
     public static final int FLAG_SHADOW = 1 << 12;
 
     /** @hide */
-    @IntDef(flag = true,
-            value = {
+    @IntDef(flag = true, prefix = { "FLAG_" }, value = {
             FLAG_DYNAMIC,
             FLAG_PINNED,
             FLAG_HAS_ICON_RES,
@@ -153,15 +152,14 @@ public final class ShortcutInfo implements Parcelable {
             | CLONE_REMOVE_RES_NAMES;
 
     /** @hide */
-    @IntDef(flag = true,
-            value = {
-                    CLONE_REMOVE_ICON,
-                    CLONE_REMOVE_INTENT,
-                    CLONE_REMOVE_NON_KEY_INFO,
-                    CLONE_REMOVE_RES_NAMES,
-                    CLONE_REMOVE_FOR_CREATOR,
-                    CLONE_REMOVE_FOR_LAUNCHER
-            })
+    @IntDef(flag = true, prefix = { "CLONE_" }, value = {
+            CLONE_REMOVE_ICON,
+            CLONE_REMOVE_INTENT,
+            CLONE_REMOVE_NON_KEY_INFO,
+            CLONE_REMOVE_RES_NAMES,
+            CLONE_REMOVE_FOR_CREATOR,
+            CLONE_REMOVE_FOR_LAUNCHER
+    })
     @Retention(RetentionPolicy.SOURCE)
     public @interface CloneFlags {}
 
@@ -212,7 +210,7 @@ public final class ShortcutInfo implements Parcelable {
     public static final int DISABLED_REASON_OTHER_RESTORE_ISSUE = 103;
 
     /** @hide */
-    @IntDef(value = {
+    @IntDef(prefix = { "DISABLED_REASON_" }, value = {
             DISABLED_REASON_NOT_DISABLED,
             DISABLED_REASON_BY_APP,
             DISABLED_REASON_APP_CHANGED,
@@ -220,7 +218,7 @@ public final class ShortcutInfo implements Parcelable {
             DISABLED_REASON_BACKUP_NOT_SUPPORTED,
             DISABLED_REASON_SIGNATURE_MISMATCH,
             DISABLED_REASON_OTHER_RESTORE_ISSUE,
-            })
+    })
     @Retention(RetentionPolicy.SOURCE)
     public @interface DisabledReason{}
 

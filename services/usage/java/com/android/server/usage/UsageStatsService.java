@@ -728,6 +728,10 @@ public class UsageStatsService extends SystemService implements
             } catch (RemoteException re) {
                 throw re.rethrowFromSystemServer();
             }
+            final boolean shellCaller = callingUid == 0 || callingUid == Process.SHELL_UID;
+            final String reason = shellCaller
+                    ? UsageStatsManager.REASON_FORCED
+                    : UsageStatsManager.REASON_PREDICTED + ":" + callingUid;
             final long token = Binder.clearCallingIdentity();
             try {
                 // Caller cannot set their own standby state
@@ -735,8 +739,7 @@ public class UsageStatsService extends SystemService implements
                         PackageManager.MATCH_ANY_USER, userId) == callingUid) {
                     throw new IllegalArgumentException("Cannot set your own standby bucket");
                 }
-                mAppStandby.setAppStandbyBucket(packageName, userId, bucket,
-                        UsageStatsManager.REASON_PREDICTED + ":" + callingUid,
+                mAppStandby.setAppStandbyBucket(packageName, userId, bucket, reason,
                         SystemClock.elapsedRealtime());
             } finally {
                 Binder.restoreCallingIdentity(token);
@@ -779,6 +782,10 @@ public class UsageStatsService extends SystemService implements
             } catch (RemoteException re) {
                 throw re.rethrowFromSystemServer();
             }
+            final boolean shellCaller = callingUid == 0 || callingUid == Process.SHELL_UID;
+            final String reason = shellCaller
+                    ? UsageStatsManager.REASON_FORCED
+                    : UsageStatsManager.REASON_PREDICTED + ":" + callingUid;
             final long token = Binder.clearCallingIdentity();
             try {
                 final long elapsedRealtime = SystemClock.elapsedRealtime();
@@ -796,8 +803,7 @@ public class UsageStatsService extends SystemService implements
                             PackageManager.MATCH_ANY_USER, userId) == callingUid) {
                         throw new IllegalArgumentException("Cannot set your own standby bucket");
                     }
-                    mAppStandby.setAppStandbyBucket(packageName, userId, bucket,
-                            UsageStatsManager.REASON_PREDICTED + ":" + callingUid,
+                    mAppStandby.setAppStandbyBucket(packageName, userId, bucket, reason,
                             elapsedRealtime);
                 }
             } finally {

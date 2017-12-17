@@ -23,12 +23,13 @@
 #include <android-base/file.h>
 #include <dirent.h>
 
-using android::util::FIELD_COUNT_REPEATED;
-using android::util::FIELD_TYPE_MESSAGE;
-
 namespace android {
 namespace os {
 namespace statsd {
+
+using android::util::FIELD_COUNT_REPEATED;
+using android::util::FIELD_TYPE_MESSAGE;
+using std::map;
 
 #define STATS_SERVICE_DIR "/data/misc/stats-service"
 
@@ -170,7 +171,7 @@ void StorageManager::appendConfigMetricsReport(const char* path, ProtoOutputStre
     }
 }
 
-void StorageManager::readConfigFromDisk(unordered_map<ConfigKey, StatsdConfig>& configsMap) {
+void StorageManager::readConfigFromDisk(map<ConfigKey, StatsdConfig>& configsMap) {
     unique_ptr<DIR, decltype(&closedir)> dir(opendir(STATS_SERVICE_DIR), closedir);
     if (dir == NULL) {
         VLOG("no default config on disk");
