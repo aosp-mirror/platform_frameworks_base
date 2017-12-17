@@ -26,6 +26,9 @@ namespace statsd {
 
 #define DEFAULT_DIMENSION_KEY ""
 
+// Minimum bucket size in seconds
+const long kMinBucketSizeSec = 5 * 60;
+
 typedef std::string HashableDimensionKey;
 
 typedef std::map<std::string, HashableDimensionKey> ConditionKey;

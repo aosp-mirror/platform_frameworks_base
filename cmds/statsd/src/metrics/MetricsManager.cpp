@@ -44,9 +44,9 @@ namespace statsd {
 
 const int FIELD_ID_METRICS = 1;
 
-MetricsManager::MetricsManager(const ConfigKey& key, const StatsdConfig& config) : mConfigKey(key) {
+MetricsManager::MetricsManager(const ConfigKey& key, const StatsdConfig& config, const long timeBaseSec) : mConfigKey(key) {
     mConfigValid =
-            initStatsdConfig(key, config, mTagIds, mAllAtomMatchers, mAllConditionTrackers,
+            initStatsdConfig(key, config, timeBaseSec, mTagIds, mAllAtomMatchers, mAllConditionTrackers,
                              mAllMetricProducers, mAllAnomalyTrackers, mConditionToMetricMap,
                              mTrackerToMetricMap, mTrackerToConditionMap);
 

@@ -76,6 +76,8 @@ private:
     // to retrieve the stored data.
     std::function<void(const ConfigKey& key)> mSendBroadcast;
 
+    const long mTimeBaseSec;
+
     FRIEND_TEST(StatsLogProcessorTest, TestRateLimitByteSize);
     FRIEND_TEST(StatsLogProcessorTest, TestRateLimitBroadcast);
     FRIEND_TEST(StatsLogProcessorTest, TestDropWhenByteSizeTooLarge);

@@ -24,6 +24,7 @@
 #include "android-base/stringprintf.h"
 #include "guardrail/StatsdStats.h"
 #include "metrics/CountMetricProducer.h"
+#include "external/StatsPullerManager.h"
 #include "stats_util.h"
 #include "storage/StorageManager.h"
 
@@ -63,10 +64,15 @@ const int FIELD_ID_UID_MAP = 2;
 StatsLogProcessor::StatsLogProcessor(const sp<UidMap>& uidMap,
                                      const sp<AnomalyMonitor>& anomalyMonitor,
                                      const std::function<void(const ConfigKey&)>& sendBroadcast)
-    : mUidMap(uidMap), mAnomalyMonitor(anomalyMonitor), mSendBroadcast(sendBroadcast) {
+    : mUidMap(uidMap),
+      mAnomalyMonitor(anomalyMonitor),
+      mSendBroadcast(sendBroadcast),
+      mTimeBaseSec(time(nullptr)) {
     // On each initialization of StatsLogProcessor, check stats-data directory to see if there is
     // any left over data to be read.
     StorageManager::sendBroadcast(STATS_DATA_DIR, mSendBroadcast);
+    StatsPullerManager statsPullerManager;
+    statsPullerManager.SetTimeBaseSec(mTimeBaseSec);
 }
 
 StatsLogProcessor::~StatsLogProcessor() {
@@ -108,7 +114,7 @@ void StatsLogProcessor::OnLogEvent(const LogEvent& msg) {
 
 void StatsLogProcessor::OnConfigUpdated(const ConfigKey& key, const StatsdConfig& config) {
     ALOGD("Updated configuration for key %s", key.ToString().c_str());
-    unique_ptr<MetricsManager> newMetricsManager = std::make_unique<MetricsManager>(key, config);
+    unique_ptr<MetricsManager> newMetricsManager = std::make_unique<MetricsManager>(key, config, mTimeBaseSec);
 
     auto it = mMetricsManagers.find(key);
     if (it == mMetricsManagers.end() && mMetricsManagers.size() > StatsdStats::kMaxConfigCount) {

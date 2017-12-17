@@ -44,7 +44,7 @@ namespace os {
 namespace statsd {
 
 StatsPullerManagerImpl::StatsPullerManagerImpl()
-    : mCurrentPullingInterval(LONG_MAX), mPullStartTimeMs(get_pull_start_time_ms()) {
+    : mCurrentPullingInterval(LONG_MAX) {
     shared_ptr<StatsPuller> statsCompanionServicePuller = make_shared<StatsCompanionServicePuller>();
     shared_ptr<StatsPuller> resourcePowerManagerPuller = make_shared<ResourcePowerManagerPuller>();
     shared_ptr<StatsPuller> cpuTimePerUidPuller = make_shared<CpuTimePerUidPuller>();
@@ -94,11 +94,6 @@ bool StatsPullerManagerImpl::PullerForMatcherExists(int tagId) const {
     return mPullers.find(tagId) != mPullers.end();
 }
 
-long StatsPullerManagerImpl::get_pull_start_time_ms() const {
-    // TODO: limit and align pull intervals to 10min boundaries if this turns out to be a problem
-    return time(nullptr) * 1000;
-}
-
 void StatsPullerManagerImpl::RegisterReceiver(int tagId, wp<PullDataReceiver> receiver,
                                               long intervalMs) {
     AutoMutex _l(mReceiversLock);
@@ -114,12 +109,17 @@ void StatsPullerManagerImpl::RegisterReceiver(int tagId, wp<PullDataReceiver> re
     receiverInfo.timeInfo.first = intervalMs;
     receivers.push_back(receiverInfo);
 
+    // Round it to the nearest minutes. This is the limit of alarm manager.
+    // In practice, we should limit it higher.
+    long roundedIntervalMs = intervalMs/1000/60 * 1000 * 60;
     // There is only one alarm for all pulled events. So only set it to the smallest denom.
-    if (intervalMs < mCurrentPullingInterval) {
+    if (roundedIntervalMs < mCurrentPullingInterval) {
         VLOG("Updating pulling interval %ld", intervalMs);
-        mCurrentPullingInterval = intervalMs;
+        mCurrentPullingInterval = roundedIntervalMs;
+        long currentTimeMs = time(nullptr) * 1000;
+        long nextAlarmTimeMs = currentTimeMs + mCurrentPullingInterval - (currentTimeMs - mTimeBaseSec * 1000) % mCurrentPullingInterval;
         if (mStatsCompanionService != nullptr) {
-            mStatsCompanionService->setPullingAlarms(mPullStartTimeMs, mCurrentPullingInterval);
+            mStatsCompanionService->setPullingAlarms(nextAlarmTimeMs, mCurrentPullingInterval);
         } else {
             VLOG("Failed to update pulling interval");
         }
@@ -146,7 +146,7 @@ void StatsPullerManagerImpl::UnRegisterReceiver(int tagId, wp<PullDataReceiver> 
 void StatsPullerManagerImpl::OnAlarmFired() {
     AutoMutex _l(mReceiversLock);
 
-    uint64_t currentTimeMs = time(nullptr) * 1000;
+    uint64_t currentTimeMs = time(nullptr) /60 * 60 * 1000;
 
     vector<pair<int, vector<ReceiverInfo*>>> needToPull =
             vector<pair<int, vector<ReceiverInfo*>>>();

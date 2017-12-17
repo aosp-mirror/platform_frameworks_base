@@ -41,7 +41,7 @@ using android::util::ProtoOutputStream;
  */
 class MockMetricsManager : public MetricsManager {
 public:
-    MockMetricsManager() : MetricsManager(ConfigKey(1, "key"), StatsdConfig()) {
+    MockMetricsManager() : MetricsManager(ConfigKey(1, "key"), StatsdConfig(), 1000) {
     }
 
     MOCK_METHOD0(byteSize, size_t());

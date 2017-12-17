@@ -47,6 +47,8 @@ public:
 
     bool Pull(const int tagId, vector<std::shared_ptr<LogEvent>>* data);
 
+    void SetTimeBaseSec(long timeBaseSec) {mTimeBaseSec = timeBaseSec;};
+
 private:
     StatsPullerManagerImpl();
 
@@ -73,11 +75,8 @@ private:
 
     // for pulled metrics, it is important for the buckets to be aligned to multiple of smallest
     // bucket size. All pulled metrics start pulling based on this time, so that they can be
-    // correctly attributed to the correct buckets. Pulled data attach a timestamp which is the
-    // request time.
-    const long mPullStartTimeMs;
-
-    long get_pull_start_time_ms() const;
+    // correctly attributed to the correct buckets.
+    long mTimeBaseSec;
 
     LogEvent parse_pulled_data(String16 data);
 };

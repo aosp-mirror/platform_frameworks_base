@@ -63,7 +63,7 @@ MATCHER_P(StatsdConfigEq, name, "") {
 
 TEST(ConfigManagerTest, TestFakeConfig) {
     auto metricsManager =
-            std::make_unique<MetricsManager>(ConfigKey(0, "test"), build_fake_config());
+            std::make_unique<MetricsManager>(ConfigKey(0, "test"), build_fake_config(), 1000);
     EXPECT_TRUE(metricsManager->isConfigValid());
 }
 
