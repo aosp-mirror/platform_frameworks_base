@@ -55,8 +55,9 @@ void ConfigManager::Startup() {
     // for (const auto& pair : configsFromDisk) {
     //    UpdateConfig(pair.first, pair.second);
     //}
-    // this should be called from StatsService when it receives a statsd_config
-    UpdateConfig(ConfigKey(1000, "fake"), build_fake_config());
+
+    // Uncomment the following line and use the hard coded config for development.
+    // UpdateConfig(ConfigKey(1000, "fake"), build_fake_config());
 }
 
 void ConfigManager::AddListener(const sp<ConfigListener>& listener) {
