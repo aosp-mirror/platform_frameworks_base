@@ -36,13 +36,13 @@ import com.android.systemui.statusbar.phone.NotificationListenerWithPlugins;
 public class NotificationListener extends NotificationListenerWithPlugins {
     private static final String TAG = "NotificationListener";
 
-    private final NotificationPresenter mPresenter;
     private final NotificationRemoteInputManager mRemoteInputManager;
     private final Context mContext;
 
-    public NotificationListener(NotificationPresenter presenter,
-            NotificationRemoteInputManager remoteInputManager, Context context) {
-        mPresenter = presenter;
+    private NotificationPresenter mPresenter;
+
+    public NotificationListener(NotificationRemoteInputManager remoteInputManager,
+            Context context) {
         mRemoteInputManager = remoteInputManager;
         mContext = context;
     }
@@ -120,7 +120,9 @@ public class NotificationListener extends NotificationListenerWithPlugins {
         }
     }
 
-    public void register() {
+    public void setUpWithPresenter(NotificationPresenter presenter) {
+        mPresenter = presenter;
+
         try {
             registerAsSystemService(mContext,
                     new ComponentName(mContext.getPackageName(), getClass().getCanonicalName()),

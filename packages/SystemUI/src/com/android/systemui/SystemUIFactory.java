@@ -30,6 +30,8 @@ import com.android.systemui.qs.QSTileHost;
 import com.android.systemui.statusbar.KeyguardIndicationController;
 import com.android.systemui.statusbar.NotificationGutsManager;
 import com.android.systemui.statusbar.NotificationLockscreenUserManager;
+import com.android.systemui.statusbar.NotificationListener;
+import com.android.systemui.statusbar.NotificationLogger;
 import com.android.systemui.statusbar.NotificationRemoteInputManager;
 import com.android.systemui.statusbar.ScrimView;
 import com.android.systemui.statusbar.phone.DozeParameters;
@@ -37,6 +39,7 @@ import com.android.systemui.statusbar.phone.KeyguardBouncer;
 import com.android.systemui.statusbar.phone.LightBarController;
 import com.android.systemui.statusbar.phone.LockIcon;
 import com.android.systemui.statusbar.phone.LockscreenWallpaper;
+import com.android.systemui.statusbar.phone.NotificationGroupManager;
 import com.android.systemui.statusbar.phone.NotificationIconAreaController;
 import com.android.systemui.statusbar.phone.ScrimController;
 import com.android.systemui.statusbar.phone.StatusBar;
@@ -114,10 +117,16 @@ public class SystemUIFactory {
             Context context) {
         providers.put(NotificationLockscreenUserManager.class,
                 () -> new NotificationLockscreenUserManager(context));
+        providers.put(NotificationGroupManager.class, NotificationGroupManager::new);
         providers.put(NotificationGutsManager.class, () -> new NotificationGutsManager(
                 Dependency.get(NotificationLockscreenUserManager.class), context));
         providers.put(NotificationRemoteInputManager.class,
                 () -> new NotificationRemoteInputManager(
                         Dependency.get(NotificationLockscreenUserManager.class), context));
+        providers.put(NotificationListener.class, () -> new NotificationListener(
+                Dependency.get(NotificationRemoteInputManager.class), context));
+        providers.put(NotificationLogger.class, () -> new NotificationLogger(
+                Dependency.get(NotificationListener.class),
+                Dependency.get(UiOffloadThread.class)));
     }
 }
