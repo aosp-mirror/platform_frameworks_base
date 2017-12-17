@@ -110,6 +110,10 @@ public:
      */
     void setTimestampNs(uint64_t timestampNs) {mTimestampNs = timestampNs;}
 
+    int size() const {
+        return mElements.size();
+    }
+
 private:
     /**
      * Don't copy, it's slower. If we really need this we can add it but let's try to

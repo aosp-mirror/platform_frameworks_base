@@ -120,6 +120,11 @@ message MetricConditionLink {
     repeated KeyMatcher key_in_condition = 3;
 }
 
+message FieldFilter {
+    optional bool include_all = 1;
+    repeated int32 field_num = 2;
+}
+
 message EventMetric {
     optional string name = 1;
 
@@ -170,7 +175,7 @@ message GaugeMetric {
 
     optional string what = 2;
 
-    optional int32 gauge_field = 3;
+    optional FieldFilter gauge_fields = 3;
 
     optional string condition = 4;
 

@@ -173,6 +173,7 @@ LOCAL_SRC_FILES := \
     tests/metrics/DurationMetricProducer_test.cpp \
     tests/metrics/EventMetricProducer_test.cpp \
     tests/metrics/ValueMetricProducer_test.cpp \
+    tests/metrics/GaugeMetricProducer_test.cpp \
     tests/guardrail/StatsdStats_test.cpp
 
 LOCAL_STATIC_LIBRARIES := \
