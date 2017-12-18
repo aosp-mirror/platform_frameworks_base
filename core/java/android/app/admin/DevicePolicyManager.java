@@ -2676,6 +2676,7 @@ public class DevicePolicyManager {
      * @see UserManager#DISALLOW_UNIFIED_PASSWORD
      */
     public boolean isUsingUnifiedPassword(@NonNull ComponentName admin) {
+        throwIfParentInstance("isUsingUnifiedPassword");
         if (mService != null) {
             try {
                 return mService.isUsingUnifiedPassword(admin);
