@@ -39,9 +39,9 @@ import java.util.List;
  * The ShortcutManager performs operations on an app's set of <em>shortcuts</em>. The
  * {@link ShortcutInfo} class contains information about each of the shortcuts themselves.
  *
- * <p>An app's shortcuts represent specific tasks and actions that users can take within your app.
- * When a user selects a shortcut in the currently-active launcher, your app opens an activity other
- * than the app's starting activity, provided that the currently-active launcher supports app
+ * <p>An app's shortcuts represent specific tasks and actions that users can perform within your
+ * app. When a user selects a shortcut in the currently-active launcher, your app opens an activity
+ * other than the app's starting activity, provided that the currently-active launcher supports app
  * shortcuts.</p>
  *
  * <p>The types of shortcuts that you create for your app depend on the app's key use cases. For
@@ -94,13 +94,15 @@ import java.util.List;
  *
  * <p>When the launcher displays an app's shortcuts, they should appear in the following order:
  *
- * <ul>
- *   <li>Static shortcuts&mdash;shortcuts whose {@link ShortcutInfo#isDeclaredInManifest()} method
- *   returns {@code true}&mdash;followed by dynamic shortcuts&mdash;shortcuts whose
- *   {@link ShortcutInfo#isDynamic()} method returns {@code true}.
- *   <li>Within each shortcut type (static and dynamic), shortcuts are sorted in order of increasing
- *   rank according to {@link ShortcutInfo#getRank()}.
- * </ul>
+ * <ol>
+ *   <li><b>Static shortcuts:</b> Shortcuts whose {@link ShortcutInfo#isDeclaredInManifest()} method
+ *   returns {@code true}.</li>
+ *   <li><b>Dynamic shortcuts:</b> Shortcuts whose {@link ShortcutInfo#isDynamic()} method returns
+ *   {@code true}.</li>
+ * </ol>
+ *
+ * <p>Within each shortcut type (static and dynamic), shortcuts are sorted in order of increasing
+ * rank according to {@link ShortcutInfo#getRank()}.</p>
  *
  * <h4>Shortcut ranks</h4>
  *
@@ -118,8 +120,8 @@ import java.util.List;
  * <h3>Options for static shortcuts</h3>
  *
  * The following list includes descriptions for the different attributes within a static shortcut.
- * You must provide a value for {@code android:shortcutId}, {@code android:shortcutShortLabel}; all
- * other values are optional.
+ * You must provide a value for {@code android:shortcutId} and {@code android:shortcutShortLabel};
+ * all other values are optional.
  *
  * <dl>
  *   <dt>{@code android:shortcutId}</dt>
@@ -134,7 +136,7 @@ import java.util.List;
  *   <p>The default value is {@code true}. If you set it to {@code false}, you should also set
  *   {@code android:shortcutDisabledMessage} to a message that explains why you've disabled the
  *   shortcut. If you don't think you need to provide such a message, it's easiest to just remove
- *   the shortcut from the XML file entirely, rather than changing the values of its
+ *   the shortcut from the XML file entirely, rather than changing the values of the shortcut's
  *   {@code android:enabled} and {@code android:shortcutDisabledMessage} attributes.
  *   </dd>
  *
@@ -152,7 +154,7 @@ import java.util.List;
  *   <dd><p>A concise phrase that describes the shortcut's purpose. For more information, see
  *   {@link ShortcutInfo.Builder#setShortLabel(CharSequence)}.</p>
  *   <p class="note"><b>Note: </b>This attribute's value must be a resource string, such as
- *   <code>@string/shortcut_label</code>.</p>
+ *   <code>@string/shortcut_short_label</code>.</p>
  *   </dd>
  *
  *   <dt>{@code android:shortcutLongLabel}</dt>
@@ -165,8 +167,8 @@ import java.util.List;
  *
  *   <dt>{@code android:shortcutDisabledMessage}</dt>
  *   <dd><p>The message that appears in a supported launcher when the user attempts to launch a
- *   disabled shortcut. This attribute's value has no effect if {@code android:enabled} is
- *   {@code true}. The message should explain to the user why the shortcut is now disabled.</p>
+ *   disabled shortcut. The message should explain to the user why the shortcut is now disabled.
+ *   This attribute's value has no effect if {@code android:enabled} is {@code true}.</p>
  *   <p class="note"><b>Note: </b>This attribute's value must be a resource string, such as
  *   <code>@string/shortcut_disabled_message</code>.</p>
  *   </dd>
@@ -175,20 +177,20 @@ import java.util.List;
  * <h3>Inner elements that define static shortcuts</h3>
  *
  * <p>The XML file that lists an app's static shortcuts supports the following elements inside each
- * {@code &lt;shortcut&gt;} element. You must include an {@code intent} inner element for each
+ * {@code <shortcut>} element. You must include an {@code intent} inner element for each
  * static shortcut that you define.</p>
  *
  * <dl>
  *   <dt>{@code intent}</dt>
  *   <dd><p>The action that the system launches when the user selects the shortcut. This intent must
  *   provide a value for the {@code android:action} attribute.</p>
- *   <p>You can provide multiple intents for a single shortcut so that the last defined activity is
- *   launched with the other activities in the
+ *   <p>You can provide multiple intents for a single shortcut. If you do so, the last defined
+ *   activity is launched, and the other activities are placed in the
  *   <a href="/guide/components/tasks-and-back-stack.html">back stack</a>. See
  *   <a href="/guide/topics/ui/shortcuts.html#static">Using Static Shortcuts</a> and the
  *   {@link android.app.TaskStackBuilder} class reference for details.</p>
  *   <p class="note"><b>Note:</b> This {@code intent} element cannot include string resources.</p>
- *   <p>For more information, see
+ *   <p>To learn more about how to configure intents, see
  *   <a href="{@docRoot}guide/topics/ui/settings.html#Intents">Using intents</a>.</p>
  *   </dd>
  *
