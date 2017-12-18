@@ -156,4 +156,6 @@
 
     <color name="zen_introduction">#ffffffff</color>
 
+    <color name="smart_reply_button_text">#ff4285f4</color><!-- blue 500 -->
+    <color name="smart_reply_button_background">#fff7f7f7</color>
 </resources>
