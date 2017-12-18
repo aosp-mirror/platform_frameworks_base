@@ -26,6 +26,7 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.ServiceConnection;
 import android.content.pm.PackageManager;
+import android.content.pm.PackageManagerInternal;
 import android.database.ContentObserver;
 import android.location.LocationManager;
 import android.net.INetworkRecommendationProvider;
@@ -50,14 +51,17 @@ import android.os.RemoteCallbackList;
 import android.os.RemoteException;
 import android.os.UserHandle;
 import android.provider.Settings.Global;
+import android.text.TextUtils;
 import android.util.ArrayMap;
 import android.util.ArraySet;
+import android.util.IntArray;
 import android.util.Log;
 
 import com.android.internal.annotations.GuardedBy;
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.content.PackageMonitor;
 import com.android.internal.os.TransferPipe;
+import com.android.internal.telephony.SmsApplication;
 import com.android.internal.util.DumpUtils;
 
 import java.io.FileDescriptor;
@@ -91,7 +95,8 @@ public class NetworkScoreService extends INetworkScoreService.Stub {
     private final Object mPackageMonitorLock = new Object();
     private final Object mServiceConnectionLock = new Object();
     private final Handler mHandler;
-    private final DispatchingContentObserver mContentObserver;
+    private final DispatchingContentObserver mRecommendationSettingsObserver;
+    private final ContentObserver mUseOpenWifiPackageObserver;
     private final Function<NetworkScorerAppData, ScoringServiceConnection> mServiceConnProducer;
 
     @GuardedBy("mPackageMonitorLock")
@@ -255,8 +260,40 @@ public class NetworkScoreService extends INetworkScoreService.Stub {
         mContext.registerReceiverAsUser(
                 mLocationModeReceiver, UserHandle.SYSTEM, locationModeFilter,
                 null /* broadcastPermission*/, mHandler);
-        mContentObserver = new DispatchingContentObserver(context, mHandler);
+        mRecommendationSettingsObserver = new DispatchingContentObserver(context, mHandler);
         mServiceConnProducer = serviceConnProducer;
+        mUseOpenWifiPackageObserver = new ContentObserver(mHandler) {
+            @Override
+            public void onChange(boolean selfChange, Uri uri, int userId) {
+                Uri useOpenWifiPkgUri = Global.getUriFor(Global.USE_OPEN_WIFI_PACKAGE);
+                if (useOpenWifiPkgUri.equals(uri)) {
+                    String useOpenWifiPackage = Global.getString(mContext.getContentResolver(),
+                            Global.USE_OPEN_WIFI_PACKAGE);
+                    if (!TextUtils.isEmpty(useOpenWifiPackage)) {
+                        LocalServices.getService(PackageManagerInternal.class)
+                                .grantDefaultPermissionsToDefaultUseOpenWifiApp(useOpenWifiPackage,
+                                        userId);
+                    }
+                }
+            }
+        };
+        mContext.getContentResolver().registerContentObserver(
+                Global.getUriFor(Global.USE_OPEN_WIFI_PACKAGE),
+                false /*notifyForDescendants*/,
+                mUseOpenWifiPackageObserver);
+        // Set a callback for the package manager to query the use open wifi app.
+        LocalServices.getService(PackageManagerInternal.class).setUseOpenWifiAppPackagesProvider(
+                new PackageManagerInternal.PackagesProvider() {
+                    @Override
+                    public String[] getPackages(int userId) {
+                        String useOpenWifiPackage = Global.getString(mContext.getContentResolver(),
+                                Global.USE_OPEN_WIFI_PACKAGE);
+                        if (!TextUtils.isEmpty(useOpenWifiPackage)) {
+                            return new String[]{useOpenWifiPackage};
+                        }
+                        return null;
+                    }
+                });
     }
 
     /** Called when the system is ready to run third-party code but before it actually does so. */
@@ -287,11 +324,11 @@ public class NetworkScoreService extends INetworkScoreService.Stub {
 
     private void registerRecommendationSettingsObserver() {
         final Uri packageNameUri = Global.getUriFor(Global.NETWORK_RECOMMENDATIONS_PACKAGE);
-        mContentObserver.observe(packageNameUri,
+        mRecommendationSettingsObserver.observe(packageNameUri,
                 ServiceHandler.MSG_RECOMMENDATIONS_PACKAGE_CHANGED);
 
         final Uri settingUri = Global.getUriFor(Global.NETWORK_RECOMMENDATIONS_ENABLED);
-        mContentObserver.observe(settingUri,
+        mRecommendationSettingsObserver.observe(settingUri,
                 ServiceHandler.MSG_RECOMMENDATION_ENABLED_SETTING_CHANGED);
     }
 

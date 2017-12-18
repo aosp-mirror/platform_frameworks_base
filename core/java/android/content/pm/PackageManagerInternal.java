@@ -119,6 +119,12 @@ public abstract class PackageManagerInternal {
     public abstract void setSimCallManagerPackagesProvider(PackagesProvider provider);
 
     /**
+     * Sets the Use Open Wifi packages provider.
+     * @param provider The packages provider.
+     */
+    public abstract void setUseOpenWifiAppPackagesProvider(PackagesProvider provider);
+
+    /**
      * Sets the sync adapter packages provider.
      * @param provider The provider.
      */
@@ -144,6 +150,14 @@ public abstract class PackageManagerInternal {
      * @param userId The user for which to grant the permissions.
      */
     public abstract void grantDefaultPermissionsToDefaultSimCallManager(String packageName,
+            int userId);
+
+    /**
+     * Requests granting of the default permissions to the current default Use Open Wifi app.
+     * @param packageName The default use open wifi package name.
+     * @param userId The user for which to grant the permissions.
+     */
+    public abstract void grantDefaultPermissionsToDefaultUseOpenWifiApp(String packageName,
             int userId);
 
     /**
