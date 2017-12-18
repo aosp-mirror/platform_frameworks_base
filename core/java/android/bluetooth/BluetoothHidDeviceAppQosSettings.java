@@ -26,8 +26,6 @@ import android.os.Parcelable;
  * registration.
  *
  * <p>{@see BluetoothHidDevice}
- *
- * <p>{@hide}
  */
 public final class BluetoothHidDeviceAppQosSettings implements Parcelable {
 
@@ -46,10 +44,8 @@ public final class BluetoothHidDeviceAppQosSettings implements Parcelable {
 
     /**
      * Create a BluetoothHidDeviceAppQosSettings object for the Bluetooth L2CAP channel. The QoS
-     * Settings is optional. Recommended to use BluetoothHidDeviceAppQosSettings.Builder. {@see <a
-     * href="https://www.bluetooth.com/specifications/profiles-overview">
-     * https://www.bluetooth.com/specifications/profiles-overview </a> Bluetooth HID Specfication
-     * v1.1.1 Section 5.2 and Appendix D }
+     * Settings is optional. Recommended to use BluetoothHidDeviceAppQosSettings.Builder.
+     * Please refer to Bluetooth HID Specfication v1.1.1 Section 5.2 and Appendix D for parameters.
      *
      * @param serviceType L2CAP service type
      * @param tokenRate L2CAP token rate
