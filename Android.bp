@@ -693,7 +693,6 @@ cc_library {
     srcs: [
         "core/proto/**/*.proto",
         "libs/incident/**/*.proto",
-        "tools/streaming_proto/stream.proto",
     ],
 
     target: {

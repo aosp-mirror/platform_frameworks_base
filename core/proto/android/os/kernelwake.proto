@@ -18,8 +18,6 @@ syntax = "proto2";
 option java_multiple_files = true;
 option java_outer_classname = "WakeupSourcesProto";
 
-import "frameworks/base/tools/streaming_proto/stream.proto";
-
 package android.os;
 
 message KernelWakeSources {
@@ -29,8 +27,6 @@ message KernelWakeSources {
 
 // Next Tag: 11
 message WakeupSourceProto {
-    option (stream_proto.stream_msg).enable_fields_mapping = true;
-
     // Name of the event which triggers application processor
     optional string name = 1;
 
