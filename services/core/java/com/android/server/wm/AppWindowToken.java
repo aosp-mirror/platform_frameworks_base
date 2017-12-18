@@ -52,7 +52,6 @@ import static com.android.server.wm.proto.AppWindowTokenProto.NAME;
 import static com.android.server.wm.proto.AppWindowTokenProto.WINDOW_TOKEN;
 
 import android.annotation.CallSuper;
-import android.annotation.NonNull;
 import android.app.Activity;
 import android.content.res.Configuration;
 import android.graphics.GraphicBuffer;
@@ -215,6 +214,8 @@ class AppWindowToken extends WindowToken implements WindowManagerService.AppFree
 
     /** Whether this token should be boosted at the top of all app window tokens. */
     private boolean mNeedsZBoost;
+
+    private final Point mTmpPoint = new Point();
 
     AppWindowToken(WindowManagerService service, IApplicationToken token, boolean voiceInteraction,
             DisplayContent dc, long inputDispatchingTimeoutNanos, boolean fullscreen,
@@ -1503,6 +1504,12 @@ class AppWindowToken extends WindowToken implements WindowManagerService.AppFree
                 true /* topToBottom */);
     }
 
+    @Override
+    public SurfaceControl.Builder makeAnimationLeash() {
+        return super.makeAnimationLeash()
+                .setParent(getAppAnimationLayer());
+    }
+
     boolean applyAnimationLocked(WindowManager.LayoutParams lp, int transit, boolean enter,
             boolean isVoiceInteraction) {
 
@@ -1521,8 +1528,13 @@ class AppWindowToken extends WindowToken implements WindowManagerService.AppFree
         if (okToAnimate()) {
             final Animation a = loadAnimation(lp, transit, enter, isVoiceInteraction);
             if (a != null) {
+                final TaskStack stack = getStack();
+                mTmpPoint.set(0, 0);
+                if (stack != null) {
+                    stack.getRelativePosition(mTmpPoint);
+                }
                 final AnimationAdapter adapter = new LocalAnimationAdapter(
-                        new WindowAnimationSpec(a, new Point(),
+                        new WindowAnimationSpec(a, mTmpPoint,
                                 mService.mAppTransition.canSkipFirstFrame()),
                         mService.mSurfaceAnimationRunner);
                 startAnimation(getPendingTransaction(), adapter, !isVisible());

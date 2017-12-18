@@ -1020,6 +1020,17 @@ class WindowContainer<E extends WindowContainer> extends ConfigurationContainer<
         return makeSurface();
     }
 
+    /**
+     * @return The layer on which all app animations are happening.
+     */
+    SurfaceControl getAppAnimationLayer() {
+        final WindowContainer parent = getParent();
+        if (parent != null) {
+            return parent.getAppAnimationLayer();
+        }
+        return null;
+    }
+
     @Override
     public void commitPendingTransaction() {
         scheduleAnimation();

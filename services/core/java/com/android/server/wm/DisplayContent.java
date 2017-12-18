@@ -136,7 +136,6 @@ import android.util.DisplayMetrics;
 import android.util.MutableBoolean;
 import android.util.Slog;
 import android.util.proto.ProtoOutputStream;
-import android.view.animation.Transformation;
 import android.view.Display;
 import android.view.DisplayInfo;
 import android.view.InputDevice;
@@ -3176,7 +3175,7 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
         /**
          * A control placed at the appropriate level for transitions to occur.
          */
-        SurfaceControl mAnimationLayer = null;
+        SurfaceControl mAppAnimationLayer = null;
 
         // Cached reference to some special stacks we tend to get a lot so we don't need to loop
         // through the list to find them.
@@ -3522,19 +3521,28 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
             // The appropriate place for App-Transitions to occur is right
             // above all other animations but still below things in the Picture-and-Picture
             // windowing mode.
-            if (mAnimationLayer != null) {
-                t.setLayer(mAnimationLayer, layer++);
+            if (mAppAnimationLayer != null) {
+                t.setLayer(mAppAnimationLayer, layer++);
             }
+        }
+
+        @Override
+        SurfaceControl getAppAnimationLayer() {
+            return mAppAnimationLayer;
         }
 
         @Override
         void onParentSet() {
             super.onParentSet();
             if (getParent() != null) {
-                mAnimationLayer = makeSurface().build();
+                mAppAnimationLayer = makeChildSurface(null)
+                        .setName("animationLayer")
+                        .build();
+                getPendingTransaction().show(mAppAnimationLayer);
+                scheduleAnimation();
             } else {
-                mAnimationLayer.destroy();
-                mAnimationLayer = null;
+                mAppAnimationLayer.destroy();
+                mAppAnimationLayer = null;
             }
         }
     }
