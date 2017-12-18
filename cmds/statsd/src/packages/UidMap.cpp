@@ -31,10 +31,9 @@ namespace android {
 namespace os {
 namespace statsd {
 
-UidMap::UidMap() : mBytesUsed(0) {
-}
-UidMap::~UidMap() {
-}
+UidMap::UidMap() : mBytesUsed(0) {}
+
+UidMap::~UidMap() {}
 
 bool UidMap::hasApp(int uid, const string& packageName) const {
     lock_guard<mutex> lock(mMutex);
@@ -46,6 +45,27 @@ bool UidMap::hasApp(int uid, const string& packageName) const {
         }
     }
     return false;
+}
+
+string UidMap::normalizeAppName(const string& appName) const {
+    string normalizedName = appName;
+    std::transform(normalizedName.begin(), normalizedName.end(), normalizedName.begin(), ::tolower);
+    return normalizedName;
+}
+
+std::set<string> UidMap::getAppNamesFromUid(const int32_t& uid, bool returnNormalized) const {
+    lock_guard<mutex> lock(mMutex);
+    return getAppNamesFromUidLocked(uid,returnNormalized);
+}
+
+std::set<string> UidMap::getAppNamesFromUidLocked(const int32_t& uid, bool returnNormalized) const {
+    std::set<string> names;
+    auto range = mMap.equal_range(uid);
+    for (auto it = range.first; it != range.second; ++it) {
+        names.insert(returnNormalized ?
+            normalizeAppName(it->second.packageName) : it->second.packageName);
+    }
+    return names;
 }
 
 int64_t UidMap::getAppVersion(int uid, const string& packageName) const {
@@ -97,17 +117,17 @@ void UidMap::updateApp(const int64_t& timestamp, const String16& app_16, const i
                        const int64_t& versionCode) {
     lock_guard<mutex> lock(mMutex);
 
-    string app = string(String8(app_16).string());
+    string appName = string(String8(app_16).string());
 
     // Notify any interested producers that this app has updated
     for (auto it : mSubscribers) {
-        it->notifyAppUpgrade(app, uid, versionCode);
+        it->notifyAppUpgrade(appName, uid, versionCode);
     }
 
     auto log = mOutput.add_changes();
     log->set_deletion(false);
     log->set_timestamp_nanos(timestamp);
-    log->set_app(app);
+    log->set_app(appName);
     log->set_uid(uid);
     log->set_version(versionCode);
     mBytesUsed += log->ByteSize();
@@ -117,16 +137,15 @@ void UidMap::updateApp(const int64_t& timestamp, const String16& app_16, const i
 
     auto range = mMap.equal_range(int(uid));
     for (auto it = range.first; it != range.second; ++it) {
-        if (it->second.packageName == app) {
+        // If we find the exact same app name and uid, update the app version directly.
+        if (it->second.packageName == appName) {
             it->second.versionCode = versionCode;
             return;
         }
-        VLOG("updateApp failed to find the app %s with uid %i to update", app.c_str(), uid);
-        return;
     }
 
     // Otherwise, we need to add an app at this uid.
-    mMap.insert(make_pair(uid, AppData(app, versionCode)));
+    mMap.insert(make_pair(uid, AppData(appName, versionCode)));
 }
 
 void UidMap::ensureBytesUsedBelowLimit() {
@@ -154,6 +173,7 @@ void UidMap::ensureBytesUsedBelowLimit() {
 void UidMap::removeApp(const String16& app_16, const int32_t& uid) {
     removeApp(time(nullptr) * NS_PER_SEC, app_16, uid);
 }
+
 void UidMap::removeApp(const int64_t& timestamp, const String16& app_16, const int32_t& uid) {
     lock_guard<mutex> lock(mMutex);
 
