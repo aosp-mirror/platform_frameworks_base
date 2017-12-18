@@ -16,9 +16,14 @@
 
 package com.android.server.locksettings.recoverablekeystore;
 
+import android.annotation.Nullable;
+
 import java.security.InvalidKeyException;
 import java.security.NoSuchAlgorithmException;
+import java.security.PrivateKey;
 import java.security.PublicKey;
+
+import javax.crypto.AEADBadTagException;
 
 /**
  * TODO(b/69056040) Add implementation of SecureBox. This is a placeholder so KeySyncUtils compiles.
@@ -32,8 +37,25 @@ public class SecureBox {
      * @hide
      */
     public static byte[] encrypt(
-            PublicKey theirPublicKey, byte[] sharedSecret, byte[] header, byte[] payload)
+            @Nullable PublicKey theirPublicKey,
+            @Nullable byte[] sharedSecret,
+            @Nullable byte[] header,
+            @Nullable byte[] payload)
             throws NoSuchAlgorithmException, InvalidKeyException {
+        throw new UnsupportedOperationException("Needs to be implemented.");
+    }
+
+    /**
+     * TODO(b/69056040) Add implementation of decrypt.
+     *
+     * @hide
+     */
+    public static byte[] decrypt(
+            @Nullable PrivateKey ourPrivateKey,
+            @Nullable byte[] sharedSecret,
+            @Nullable byte[] header,
+            byte[] encryptedPayload)
+            throws NoSuchAlgorithmException, InvalidKeyException, AEADBadTagException {
         throw new UnsupportedOperationException("Needs to be implemented.");
     }
 }
