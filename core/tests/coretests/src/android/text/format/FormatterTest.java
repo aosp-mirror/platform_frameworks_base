@@ -23,6 +23,7 @@ import android.content.Context;
 import android.content.res.Configuration;
 import android.content.res.Resources;
 import android.icu.util.MeasureUnit;
+import android.platform.test.annotations.Presubmit;
 import android.support.test.InstrumentationRegistry;
 import android.support.test.filters.SmallTest;
 import android.support.test.runner.AndroidJUnit4;
@@ -36,7 +37,7 @@ import org.junit.runner.RunWith;
 import java.util.Locale;
 import java.util.Set;
 
-
+@Presubmit
 @SmallTest
 @RunWith(AndroidJUnit4.class)
 public class FormatterTest {
