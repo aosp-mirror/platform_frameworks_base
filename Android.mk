@@ -72,12 +72,6 @@ non_base_dirs := \
   ../opt/net/voip/src/java/android/net/rtp \
   ../opt/net/voip/src/java/android/net/sip \
 
-framework_base_android_test_base_src_files := \
-  $(call all-java-files-under, test-base/src/junit)
-
-framework_base_android_test_runner_src_files := \
-  $(call all-java-files-under, test-runner/src/junit)
-
 # Find all files in specific directories (relative to frameworks/base)
 # to document and check apis
 files_to_check_apis := \
@@ -126,8 +120,6 @@ framework_docs_LOCAL_SRC_FILES := \
 
 # These are relative to frameworks/base
 framework_docs_LOCAL_API_CHECK_SRC_FILES := \
-  $(framework_base_android_test_base_src_files) \
-  $(framework_base_android_test_runner_src_files) \
   $(files_to_check_apis) \
   $(common_src_files) \
 
