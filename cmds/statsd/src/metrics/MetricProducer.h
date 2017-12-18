@@ -27,6 +27,7 @@
 
 #include <log/logprint.h>
 #include <utils/RefBase.h>
+#include <unordered_map>
 
 namespace android {
 namespace os {
@@ -53,6 +54,18 @@ public:
         mDimensionKeyMap[DEFAULT_DIMENSION_KEY] = std::vector<KeyValuePair>();
     };
     virtual ~MetricProducer(){};
+
+    void notifyAppUpgrade(const string& apk, const int uid, const int64_t version) override{
+            // TODO: Implement me.
+    };
+
+    void notifyAppRemoved(const string& apk, const int uid) override{
+            // TODO: Implement me.
+    };
+
+    void onUidMapReceived() override{
+            // TODO: Implement me.
+    };
 
     // Consume the parsed stats log entry that already matched the "what" of the metric.
     void onMatchedLogEvent(const size_t matcherIndex, const LogEvent& event) {

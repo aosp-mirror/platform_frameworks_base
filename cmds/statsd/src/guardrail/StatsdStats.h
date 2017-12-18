@@ -46,6 +46,8 @@ public:
 
     const static int kMaxTimestampCount = 20;
 
+    const static int kMaxLogSourceCount = 50;
+
     // Max memory allowed for storing metrics per configuration. When this limit is approached,
     // statsd will send a broadcast so that the client can fetch the data and clear this memory.
     static const size_t kMaxMetricsBytesPerConfig = 128 * 1024;

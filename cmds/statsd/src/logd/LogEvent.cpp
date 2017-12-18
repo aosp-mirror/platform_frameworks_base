@@ -33,6 +33,7 @@ LogEvent::LogEvent(log_msg& msg) {
     mContext =
             create_android_log_parser(msg.msg() + sizeof(uint32_t), msg.len() - sizeof(uint32_t));
     mTimestampNs = msg.entry_v1.sec * NS_PER_SEC + msg.entry_v1.nsec;
+    mLogUid = msg.entry_v4.uid;
     init(mContext);
 }
 

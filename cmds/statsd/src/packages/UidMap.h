@@ -72,14 +72,14 @@ public:
 
     // Helper for debugging contents of this uid map. Can be triggered with:
     // adb shell cmd stats print-uid-map
-    void printUidMap(FILE* out);
+    void printUidMap(FILE* out) const;
 
     // Commands for indicating to the map that a producer should be notified if an app is updated.
     // This allows the metric producer to distinguish when the same uid or app represents a
     // different version of an app.
-    void addListener(sp<PackageInfoListener> producer);
+    void addListener(wp<PackageInfoListener> producer);
     // Remove the listener from the set of metric producers that subscribe to updates.
-    void removeListener(sp<PackageInfoListener> producer);
+    void removeListener(wp<PackageInfoListener> producer);
 
     // Informs uid map that a config is added/updated. Used for keeping mConfigKeys up to date.
     void OnConfigUpdated(const ConfigKey& key);
@@ -102,7 +102,9 @@ public:
     void clearOutput();
 
     // Get currently cached value of memory used by UID map.
-    size_t getBytesUsed();
+    size_t getBytesUsed() const;
+
+    std::set<int32_t> getAppUid(const string& package) const;
 
 private:
     std::set<string> getAppNamesFromUidLocked(const int32_t& uid, bool returnNormalized) const;
@@ -116,6 +118,8 @@ private:
     void removeApp(const int64_t& timestamp, const String16& packageName, const int32_t& uid);
 
     UidMapping getOutput(const int64_t& timestamp, const ConfigKey& key);
+
+    void getListenerListCopyLocked(std::vector<wp<PackageInfoListener>>* output);
 
     // TODO: Use shared_mutex for improved read-locking if a library can be found in Android.
     mutable mutex mMutex;
@@ -133,7 +137,7 @@ private:
     UidMapping mOutput;
 
     // Metric producers that should be notified if there's an upgrade in any app.
-    set<sp<PackageInfoListener>> mSubscribers;
+    set<wp<PackageInfoListener>> mSubscribers;
 
     // Mapping of config keys we're aware of to the epoch time they last received an update. This
     // lets us know it's safe to delete events older than the oldest update. The value is nanosec.
