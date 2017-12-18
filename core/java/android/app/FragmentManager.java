@@ -75,7 +75,9 @@ import java.util.concurrent.CopyOnWriteArrayList;
  * <a href="http://android-developers.blogspot.com/2011/03/fragments-for-all.html">
  * Fragments For All</a> for more details.
  *
- * @deprecated Use {@link android.support.v4.app.FragmentManager}
+ * @deprecated Use the <a href="{@docRoot}tools/extras/support-library.html">Support Library</a>
+ *      {@link android.support.v4.app.FragmentManager} for consistent behavior across all devices
+ *      and access to <a href="{@docRoot}topic/libraries/architecture/lifecycle.html">Lifecycle</a>.
  */
 @Deprecated
 public abstract class FragmentManager {
@@ -90,7 +92,8 @@ public abstract class FragmentManager {
      * the identifier as returned by {@link #getId} is the only thing that
      * will be persisted across activity instances.
      *
-     * @deprecated Use {@link android.support.v4.app.FragmentManager.BackStackEntry}
+     * @deprecated Use the <a href="{@docRoot}tools/extras/support-library.html">
+     *      Support Library</a> {@link android.support.v4.app.FragmentManager.BackStackEntry}
      */
     @Deprecated
     public interface BackStackEntry {
@@ -136,7 +139,9 @@ public abstract class FragmentManager {
     /**
      * Interface to watch for changes to the back stack.
      *
-     * @deprecated Use {@link android.support.v4.app.FragmentManager.OnBackStackChangedListener}
+     * @deprecated Use the <a href="{@docRoot}tools/extras/support-library.html">
+     *      Support Library</a>
+     *      {@link android.support.v4.app.FragmentManager.OnBackStackChangedListener}
      */
     @Deprecated
     public interface OnBackStackChangedListener {
@@ -438,7 +443,9 @@ public abstract class FragmentManager {
      * Callback interface for listening to fragment state changes that happen
      * within a given FragmentManager.
      *
-     * @deprecated Use {@link android.support.v4.app.FragmentManager.FragmentLifecycleCallbacks}
+     * @deprecated Use the <a href="{@docRoot}tools/extras/support-library.html">
+     *      Support Library</a>
+     *      {@link android.support.v4.app.FragmentManager.FragmentLifecycleCallbacks}
      */
     @Deprecated
     public abstract static class FragmentLifecycleCallbacks {

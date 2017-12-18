@@ -38,7 +38,8 @@ import java.io.PrintWriter;
  * host fragments, implement {@link FragmentHostCallback}, overriding the methods
  * applicable to the host.
  *
- * @deprecated Use {@link android.support.v4.app.FragmentHostCallback}
+ * @deprecated Use the <a href="{@docRoot}tools/extras/support-library.html">Support Library</a>
+ *      {@link android.support.v4.app.FragmentHostCallback}
  */
 @Deprecated
 public abstract class FragmentHostCallback<E> extends FragmentContainer {
