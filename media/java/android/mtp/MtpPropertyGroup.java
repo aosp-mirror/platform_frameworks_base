@@ -23,22 +23,21 @@ import android.os.RemoteException;
 import android.provider.MediaStore.Audio;
 import android.provider.MediaStore.Files;
 import android.provider.MediaStore.Images;
-import android.provider.MediaStore.MediaColumns;
 import android.util.Log;
 
 import java.util.ArrayList;
 
+/**
+ * MtpPropertyGroup represents a list of MTP properties.
+ * {@hide}
+ */
 class MtpPropertyGroup {
-
-    private static final String TAG = "MtpPropertyGroup";
+    private static final String TAG = MtpPropertyGroup.class.getSimpleName();
 
     private class Property {
-        // MTP property code
-        int     code;
-        // MTP data type
-        int     type;
-        // column index for our query
-        int     column;
+        int code;
+        int type;
+        int column;
 
         Property(int code, int type, int column) {
             this.code = code;
@@ -47,32 +46,26 @@ class MtpPropertyGroup {
         }
     }
 
-    private final MtpDatabase mDatabase;
     private final ContentProviderClient mProvider;
     private final String mVolumeName;
     private final Uri mUri;
 
     // list of all properties in this group
-    private final Property[]    mProperties;
+    private final Property[] mProperties;
 
     // list of columns for database query
-    private String[]             mColumns;
+    private String[] mColumns;
 
-    private static final String ID_WHERE = Files.FileColumns._ID + "=?";
-    private static final String FORMAT_WHERE = Files.FileColumns.FORMAT + "=?";
-    private static final String ID_FORMAT_WHERE = ID_WHERE + " AND " + FORMAT_WHERE;
-    private static final String PARENT_WHERE = Files.FileColumns.PARENT + "=?";
-    private static final String PARENT_FORMAT_WHERE = PARENT_WHERE + " AND " + FORMAT_WHERE;
+    private static final String PATH_WHERE = Files.FileColumns.DATA + "=?";
+
     // constructs a property group for a list of properties
-    public MtpPropertyGroup(MtpDatabase database, ContentProviderClient provider, String volumeName,
-            int[] properties) {
-        mDatabase = database;
+    public MtpPropertyGroup(ContentProviderClient provider, String volumeName, int[] properties) {
         mProvider = provider;
         mVolumeName = volumeName;
         mUri = Files.getMtpObjectsUri(volumeName);
 
         int count = properties.length;
-        ArrayList<String> columns = new ArrayList<String>(count);
+        ArrayList<String> columns = new ArrayList<>(count);
         columns.add(Files.FileColumns._ID);
 
         mProperties = new Property[count];
@@ -90,37 +83,29 @@ class MtpPropertyGroup {
         String column = null;
         int type;
 
-         switch (code) {
+        switch (code) {
             case MtpConstants.PROPERTY_STORAGE_ID:
-                column = Files.FileColumns.STORAGE_ID;
                 type = MtpConstants.TYPE_UINT32;
                 break;
-             case MtpConstants.PROPERTY_OBJECT_FORMAT:
-                column = Files.FileColumns.FORMAT;
+            case MtpConstants.PROPERTY_OBJECT_FORMAT:
                 type = MtpConstants.TYPE_UINT16;
                 break;
             case MtpConstants.PROPERTY_PROTECTION_STATUS:
-                // protection status is always 0
                 type = MtpConstants.TYPE_UINT16;
                 break;
             case MtpConstants.PROPERTY_OBJECT_SIZE:
-                column = Files.FileColumns.SIZE;
                 type = MtpConstants.TYPE_UINT64;
                 break;
             case MtpConstants.PROPERTY_OBJECT_FILE_NAME:
-                column = Files.FileColumns.DATA;
                 type = MtpConstants.TYPE_STR;
                 break;
             case MtpConstants.PROPERTY_NAME:
-                column = MediaColumns.TITLE;
                 type = MtpConstants.TYPE_STR;
                 break;
             case MtpConstants.PROPERTY_DATE_MODIFIED:
-                column = Files.FileColumns.DATE_MODIFIED;
                 type = MtpConstants.TYPE_STR;
                 break;
             case MtpConstants.PROPERTY_DATE_ADDED:
-                column = Files.FileColumns.DATE_ADDED;
                 type = MtpConstants.TYPE_STR;
                 break;
             case MtpConstants.PROPERTY_ORIGINAL_RELEASE_DATE:
@@ -128,12 +113,9 @@ class MtpPropertyGroup {
                 type = MtpConstants.TYPE_STR;
                 break;
             case MtpConstants.PROPERTY_PARENT_OBJECT:
-                column = Files.FileColumns.PARENT;
                 type = MtpConstants.TYPE_UINT32;
                 break;
             case MtpConstants.PROPERTY_PERSISTENT_UID:
-                // PUID is concatenation of storageID and object handle
-                column = Files.FileColumns.STORAGE_ID;
                 type = MtpConstants.TYPE_UINT128;
                 break;
             case MtpConstants.PROPERTY_DURATION:
@@ -145,7 +127,6 @@ class MtpPropertyGroup {
                 type = MtpConstants.TYPE_UINT16;
                 break;
             case MtpConstants.PROPERTY_DISPLAY_NAME:
-                column = MediaColumns.DISPLAY_NAME;
                 type = MtpConstants.TYPE_STR;
                 break;
             case MtpConstants.PROPERTY_ARTIST:
@@ -195,40 +176,19 @@ class MtpPropertyGroup {
         }
     }
 
-   private String queryString(int id, String column) {
-        Cursor c = null;
-        try {
-            // for now we are only reading properties from the "objects" table
-            c = mProvider.query(mUri,
-                            new String [] { Files.FileColumns._ID, column },
-                            ID_WHERE, new String[] { Integer.toString(id) }, null, null);
-            if (c != null && c.moveToNext()) {
-                return c.getString(1);
-            } else {
-                return "";
-            }
-        } catch (Exception e) {
-            return null;
-        } finally {
-            if (c != null) {
-                c.close();
-            }
-        }
-    }
-
-    private String queryAudio(int id, String column) {
+    private String queryAudio(String path, String column) {
         Cursor c = null;
         try {
             c = mProvider.query(Audio.Media.getContentUri(mVolumeName),
-                            new String [] { Files.FileColumns._ID, column },
-                            ID_WHERE, new String[] { Integer.toString(id) }, null, null);
+                            new String [] { column },
+                            PATH_WHERE, new String[] {path}, null, null);
             if (c != null && c.moveToNext()) {
-                return c.getString(1);
+                return c.getString(0);
             } else {
                 return "";
             }
         } catch (Exception e) {
-            return null;
+            return "";
         } finally {
             if (c != null) {
                 c.close();
@@ -236,21 +196,19 @@ class MtpPropertyGroup {
         }
     }
 
-    private String queryGenre(int id) {
+    private String queryGenre(String path) {
         Cursor c = null;
         try {
-            Uri uri = Audio.Genres.getContentUriForAudioId(mVolumeName, id);
-            c = mProvider.query(uri,
-                            new String [] { Files.FileColumns._ID, Audio.GenresColumns.NAME },
-                            null, null, null, null);
+            c = mProvider.query(Audio.Genres.getContentUri(mVolumeName),
+                            new String [] { Audio.GenresColumns.NAME },
+                            PATH_WHERE, new String[] {path}, null, null);
             if (c != null && c.moveToNext()) {
-                return c.getString(1);
+                return c.getString(0);
             } else {
                 return "";
             }
         } catch (Exception e) {
-            Log.e(TAG, "queryGenre exception", e);
-            return null;
+            return "";
         } finally {
             if (c != null) {
                 c.close();
@@ -258,211 +216,127 @@ class MtpPropertyGroup {
         }
     }
 
-    private Long queryLong(int id, String column) {
+    /**
+     * Gets the values of the properties represented by this property group for the given
+     * object and adds them to the given property list.
+     * @return Response_OK if the operation succeeded.
+     */
+    public int getPropertyList(MtpStorageManager.MtpObject object, MtpPropertyList list) {
         Cursor c = null;
-        try {
-            // for now we are only reading properties from the "objects" table
-            c = mProvider.query(mUri,
-                            new String [] { Files.FileColumns._ID, column },
-                            ID_WHERE, new String[] { Integer.toString(id) }, null, null);
-            if (c != null && c.moveToNext()) {
-                return new Long(c.getLong(1));
-            }
-        } catch (Exception e) {
-        } finally {
-            if (c != null) {
-                c.close();
-            }
-        }
-        return null;
-    }
-
-    private static String nameFromPath(String path) {
-        // extract name from full path
-        int start = 0;
-        int lastSlash = path.lastIndexOf('/');
-        if (lastSlash >= 0) {
-            start = lastSlash + 1;
-        }
-        int end = path.length();
-        if (end - start > 255) {
-            end = start + 255;
-        }
-        return path.substring(start, end);
-    }
-
-    MtpPropertyList getPropertyList(int handle, int format, int depth) {
-        //Log.d(TAG, "getPropertyList handle: " + handle + " format: " + format + " depth: " + depth);
-        if (depth > 1) {
-            // we only support depth 0 and 1
-            // depth 0: single object, depth 1: immediate children
-            return new MtpPropertyList(0, MtpConstants.RESPONSE_SPECIFICATION_BY_DEPTH_UNSUPPORTED);
-        }
-
-        String where;
-        String[] whereArgs;
-        if (format == 0) {
-            if (handle == 0xFFFFFFFF) {
-                // select all objects
-                where = null;
-                whereArgs = null;
-            } else {
-                whereArgs = new String[] { Integer.toString(handle) };
-                if (depth == 1) {
-                    where = PARENT_WHERE;
-                } else {
-                    where = ID_WHERE;
+        int id = object.getId();
+        String path = object.getPath().toString();
+        for (Property property : mProperties) {
+            if (property.column != -1 && c == null) {
+                try {
+                    // Look up the entry in MediaProvider only if one of those properties is needed.
+                    c = mProvider.query(mUri, mColumns,
+                            PATH_WHERE, new String[] {path}, null, null);
+                    if (c != null && !c.moveToNext()) {
+                        c.close();
+                        c = null;
+                    }
+                } catch (RemoteException e) {
+                    Log.e(TAG, "Mediaprovider lookup failed");
                 }
             }
-        } else {
-            if (handle == 0xFFFFFFFF) {
-                // select all objects with given format
-                where = FORMAT_WHERE;
-                whereArgs = new String[] { Integer.toString(format) };
-            } else {
-                whereArgs = new String[] { Integer.toString(handle), Integer.toString(format) };
-                if (depth == 1) {
-                    where = PARENT_FORMAT_WHERE;
-                } else {
-                    where = ID_FORMAT_WHERE;
-                }
-            }
-        }
-
-        Cursor c = null;
-        try {
-            // don't query if not necessary
-            if (depth > 0 || handle == 0xFFFFFFFF || mColumns.length > 1) {
-                c = mProvider.query(mUri, mColumns, where, whereArgs, null, null);
-                if (c == null) {
-                    return new MtpPropertyList(0, MtpConstants.RESPONSE_INVALID_OBJECT_HANDLE);
-                }
-            }
-
-            int count = (c == null ? 1 : c.getCount());
-            MtpPropertyList result = new MtpPropertyList(count * mProperties.length,
-                    MtpConstants.RESPONSE_OK);
-
-            // iterate over all objects in the query
-            for (int objectIndex = 0; objectIndex < count; objectIndex++) {
-                if (c != null) {
-                    c.moveToNext();
-                    handle = (int)c.getLong(0);
-                }
-
-                // iterate over all properties in the query for the given object
-                for (int propertyIndex = 0; propertyIndex < mProperties.length; propertyIndex++) {
-                    Property property = mProperties[propertyIndex];
-                    int propertyCode = property.code;
-                    int column = property.column;
-
-                    // handle some special cases
-                    switch (propertyCode) {
-                        case MtpConstants.PROPERTY_PROTECTION_STATUS:
-                            // protection status is always 0
-                            result.append(handle, propertyCode, MtpConstants.TYPE_UINT16, 0);
+            switch (property.code) {
+                case MtpConstants.PROPERTY_PROTECTION_STATUS:
+                    // protection status is always 0
+                    list.append(id, property.code, property.type, 0);
+                    break;
+                case MtpConstants.PROPERTY_NAME:
+                case MtpConstants.PROPERTY_OBJECT_FILE_NAME:
+                case MtpConstants.PROPERTY_DISPLAY_NAME:
+                    list.append(id, property.code, object.getName());
+                    break;
+                case MtpConstants.PROPERTY_DATE_MODIFIED:
+                case MtpConstants.PROPERTY_DATE_ADDED:
+                    // convert from seconds to DateTime
+                    list.append(id, property.code,
+                            format_date_time(object.getModifiedTime()));
+                    break;
+                case MtpConstants.PROPERTY_STORAGE_ID:
+                    list.append(id, property.code, property.type, object.getStorageId());
+                    break;
+                case MtpConstants.PROPERTY_OBJECT_FORMAT:
+                    list.append(id, property.code, property.type, object.getFormat());
+                    break;
+                case MtpConstants.PROPERTY_OBJECT_SIZE:
+                    list.append(id, property.code, property.type, object.getSize());
+                    break;
+                case MtpConstants.PROPERTY_PARENT_OBJECT:
+                    list.append(id, property.code, property.type,
+                            object.getParent().isRoot() ? 0 : object.getParent().getId());
+                    break;
+                case MtpConstants.PROPERTY_PERSISTENT_UID:
+                    // The persistent uid must be unique and never reused among all objects,
+                    // and remain the same between sessions.
+                    long puid = (object.getPath().toString().hashCode() << 32)
+                            + object.getModifiedTime();
+                    list.append(id, property.code, property.type, puid);
+                    break;
+                case MtpConstants.PROPERTY_ORIGINAL_RELEASE_DATE:
+                    // release date is stored internally as just the year
+                    int year = 0;
+                    if (c != null)
+                        year = c.getInt(property.column);
+                    String dateTime = Integer.toString(year) + "0101T000000";
+                    list.append(id, property.code, dateTime);
+                    break;
+                case MtpConstants.PROPERTY_TRACK:
+                    int track = 0;
+                    if (c != null)
+                        track = c.getInt(property.column);
+                    list.append(id, property.code, MtpConstants.TYPE_UINT16,
+                            track % 1000);
+                    break;
+                case MtpConstants.PROPERTY_ARTIST:
+                    list.append(id, property.code,
+                            queryAudio(path, Audio.AudioColumns.ARTIST));
+                    break;
+                case MtpConstants.PROPERTY_ALBUM_NAME:
+                    list.append(id, property.code,
+                            queryAudio(path, Audio.AudioColumns.ALBUM));
+                    break;
+                case MtpConstants.PROPERTY_GENRE:
+                    String genre = queryGenre(path);
+                    if (genre != null) {
+                        list.append(id, property.code, genre);
+                    }
+                    break;
+                case MtpConstants.PROPERTY_AUDIO_WAVE_CODEC:
+                case MtpConstants.PROPERTY_AUDIO_BITRATE:
+                case MtpConstants.PROPERTY_SAMPLE_RATE:
+                    // we don't have these in our database, so return 0
+                    list.append(id, property.code, MtpConstants.TYPE_UINT32, 0);
+                    break;
+                case MtpConstants.PROPERTY_BITRATE_TYPE:
+                case MtpConstants.PROPERTY_NUMBER_OF_CHANNELS:
+                    // we don't have these in our database, so return 0
+                    list.append(id, property.code, MtpConstants.TYPE_UINT16, 0);
+                    break;
+                default:
+                    switch(property.type) {
+                        case MtpConstants.TYPE_UNDEFINED:
+                            list.append(id, property.code, property.type, 0);
                             break;
-                        case MtpConstants.PROPERTY_OBJECT_FILE_NAME:
-                            // special case - need to extract file name from full path
-                            String value = c.getString(column);
-                            if (value != null) {
-                                result.append(handle, propertyCode, nameFromPath(value));
-                            } else {
-                                result.setResult(MtpConstants.RESPONSE_INVALID_OBJECT_HANDLE);
-                            }
-                            break;
-                        case MtpConstants.PROPERTY_NAME:
-                            // first try title
-                            String name = c.getString(column);
-                            // then try name
-                            if (name == null) {
-                                name = queryString(handle, Audio.PlaylistsColumns.NAME);
-                            }
-                            // if title and name fail, extract name from full path
-                            if (name == null) {
-                                name = queryString(handle, Files.FileColumns.DATA);
-                                if (name != null) {
-                                    name = nameFromPath(name);
-                                }
-                            }
-                            if (name != null) {
-                                result.append(handle, propertyCode, name);
-                            } else {
-                                result.setResult(MtpConstants.RESPONSE_INVALID_OBJECT_HANDLE);
-                            }
-                            break;
-                        case MtpConstants.PROPERTY_DATE_MODIFIED:
-                        case MtpConstants.PROPERTY_DATE_ADDED:
-                            // convert from seconds to DateTime
-                            result.append(handle, propertyCode, format_date_time(c.getInt(column)));
-                            break;
-                        case MtpConstants.PROPERTY_ORIGINAL_RELEASE_DATE:
-                            // release date is stored internally as just the year
-                            int year = c.getInt(column);
-                            String dateTime = Integer.toString(year) + "0101T000000";
-                            result.append(handle, propertyCode, dateTime);
-                            break;
-                        case MtpConstants.PROPERTY_PERSISTENT_UID:
-                            // PUID is concatenation of storageID and object handle
-                            long puid = c.getLong(column);
-                            puid <<= 32;
-                            puid += handle;
-                            result.append(handle, propertyCode, MtpConstants.TYPE_UINT128, puid);
-                            break;
-                        case MtpConstants.PROPERTY_TRACK:
-                            result.append(handle, propertyCode, MtpConstants.TYPE_UINT16,
-                                        c.getInt(column) % 1000);
-                            break;
-                        case MtpConstants.PROPERTY_ARTIST:
-                            result.append(handle, propertyCode,
-                                    queryAudio(handle, Audio.AudioColumns.ARTIST));
-                            break;
-                        case MtpConstants.PROPERTY_ALBUM_NAME:
-                            result.append(handle, propertyCode,
-                                    queryAudio(handle, Audio.AudioColumns.ALBUM));
-                            break;
-                        case MtpConstants.PROPERTY_GENRE:
-                            String genre = queryGenre(handle);
-                            if (genre != null) {
-                                result.append(handle, propertyCode, genre);
-                            } else {
-                                result.setResult(MtpConstants.RESPONSE_INVALID_OBJECT_HANDLE);
-                            }
-                            break;
-                        case MtpConstants.PROPERTY_AUDIO_WAVE_CODEC:
-                        case MtpConstants.PROPERTY_AUDIO_BITRATE:
-                        case MtpConstants.PROPERTY_SAMPLE_RATE:
-                            // we don't have these in our database, so return 0
-                            result.append(handle, propertyCode, MtpConstants.TYPE_UINT32, 0);
-                            break;
-                        case MtpConstants.PROPERTY_BITRATE_TYPE:
-                        case MtpConstants.PROPERTY_NUMBER_OF_CHANNELS:
-                            // we don't have these in our database, so return 0
-                            result.append(handle, propertyCode, MtpConstants.TYPE_UINT16, 0);
+                        case MtpConstants.TYPE_STR:
+                            String value = "";
+                            if (c != null)
+                                value = c.getString(property.column);
+                            list.append(id, property.code, value);
                             break;
                         default:
-                            if (property.type == MtpConstants.TYPE_STR) {
-                                result.append(handle, propertyCode, c.getString(column));
-                            } else if (property.type == MtpConstants.TYPE_UNDEFINED) {
-                                result.append(handle, propertyCode, property.type, 0);
-                            } else {
-                                result.append(handle, propertyCode, property.type,
-                                        c.getLong(column));
-                            }
-                            break;
+                            long longValue = 0L;
+                            if (c != null)
+                                longValue = c.getLong(property.column);
+                            list.append(id, property.code, property.type, longValue);
                     }
-                }
-            }
-
-            return result;
-        } catch (RemoteException e) {
-            return new MtpPropertyList(0, MtpConstants.RESPONSE_GENERAL_ERROR);
-        } finally {
-            if (c != null) {
-                c.close();
             }
         }
-        // impossible to get here, so no return statement
+        if (c != null)
+            c.close();
+        return MtpConstants.RESPONSE_OK;
     }
 
     private native String format_date_time(long seconds);
