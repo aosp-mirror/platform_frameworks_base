@@ -45,29 +45,29 @@ namespace statsd {
 
 StatsPullerManagerImpl::StatsPullerManagerImpl()
     : mCurrentPullingInterval(LONG_MAX) {
-    shared_ptr<StatsPuller> statsCompanionServicePuller = make_shared<StatsCompanionServicePuller>();
-    shared_ptr<StatsPuller> resourcePowerManagerPuller = make_shared<ResourcePowerManagerPuller>();
-    shared_ptr<StatsPuller> cpuTimePerUidPuller = make_shared<CpuTimePerUidPuller>();
-    shared_ptr<StatsPuller> cpuTimePerUidFreqPuller = make_shared<CpuTimePerUidFreqPuller>();
-
     mPullers.insert({android::util::KERNEL_WAKELOCK,
-                     statsCompanionServicePuller});
+                     make_shared<StatsCompanionServicePuller>(android::util::KERNEL_WAKELOCK)});
     mPullers.insert({android::util::WIFI_BYTES_TRANSFER,
-                     statsCompanionServicePuller});
-    mPullers.insert({android::util::MOBILE_BYTES_TRANSFER,
-                     statsCompanionServicePuller});
+                     make_shared<StatsCompanionServicePuller>(android::util::WIFI_BYTES_TRANSFER)});
+    mPullers.insert(
+            {android::util::MOBILE_BYTES_TRANSFER,
+             make_shared<StatsCompanionServicePuller>(android::util::MOBILE_BYTES_TRANSFER)});
     mPullers.insert({android::util::WIFI_BYTES_TRANSFER_BY_FG_BG,
-                     statsCompanionServicePuller});
+                     make_shared<StatsCompanionServicePuller>(
+                             android::util::WIFI_BYTES_TRANSFER_BY_FG_BG)});
     mPullers.insert({android::util::MOBILE_BYTES_TRANSFER_BY_FG_BG,
-                     statsCompanionServicePuller});
+                     make_shared<StatsCompanionServicePuller>(
+                             android::util::MOBILE_BYTES_TRANSFER_BY_FG_BG)});
     mPullers.insert({android::util::PLATFORM_SLEEP_STATE,
-                     resourcePowerManagerPuller});
+                     make_shared<ResourcePowerManagerPuller>(android::util::PLATFORM_SLEEP_STATE)});
     mPullers.insert({android::util::SLEEP_STATE_VOTER,
-                     resourcePowerManagerPuller});
-    mPullers.insert({android::util::SUBSYSTEM_SLEEP_STATE,
-                     resourcePowerManagerPuller});
-    mPullers.insert({android::util::CPU_TIME_PER_UID, cpuTimePerUidPuller});
-    mPullers.insert({android::util::CPU_TIME_PER_UID_FREQ, cpuTimePerUidFreqPuller});
+                     make_shared<ResourcePowerManagerPuller>(android::util::SLEEP_STATE_VOTER)});
+    mPullers.insert(
+            {android::util::SUBSYSTEM_SLEEP_STATE,
+             make_shared<ResourcePowerManagerPuller>(android::util::SUBSYSTEM_SLEEP_STATE)});
+    mPullers.insert({android::util::CPU_TIME_PER_FREQ, make_shared<StatsCompanionServicePuller>(android::util::CPU_TIME_PER_FREQ)});
+    mPullers.insert({android::util::CPU_TIME_PER_UID, make_shared<CpuTimePerUidPuller>()});
+    mPullers.insert({android::util::CPU_TIME_PER_UID_FREQ, make_shared<CpuTimePerUidFreqPuller>()});
 
     mStatsCompanionService = StatsService::getStatsCompanionService();
 }
@@ -76,7 +76,7 @@ bool StatsPullerManagerImpl::Pull(int tagId, vector<shared_ptr<LogEvent>>* data)
     if (DEBUG) ALOGD("Initiating pulling %d", tagId);
 
     if (mPullers.find(tagId) != mPullers.end()) {
-        bool ret = mPullers.find(tagId)->second->Pull(tagId, data);
+        bool ret = mPullers.find(tagId)->second->Pull(data);
         ALOGD("pulled %d items", (int)data->size());
         return ret;
     } else {

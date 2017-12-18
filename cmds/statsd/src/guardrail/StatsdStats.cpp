@@ -19,6 +19,7 @@
 #include "StatsdStats.h"
 
 #include <android/util/ProtoOutputStream.h>
+#include "../stats_log_util.h"
 #include "statslog.h"
 
 namespace android {
@@ -58,6 +59,20 @@ const int FIELD_ID_ATOM_STATS_TAG = 1;
 const int FIELD_ID_ATOM_STATS_COUNT = 2;
 
 const int FIELD_ID_ANOMALY_ALARMS_REGISTERED = 1;
+
+std::map<int, long> StatsdStats::kPullerCooldownMap = {
+        {android::util::KERNEL_WAKELOCK, 1},
+        {android::util::WIFI_BYTES_TRANSFER, 1},
+        {android::util::MOBILE_BYTES_TRANSFER, 1},
+        {android::util::WIFI_BYTES_TRANSFER_BY_FG_BG, 1},
+        {android::util::MOBILE_BYTES_TRANSFER_BY_FG_BG, 1},
+        {android::util::PLATFORM_SLEEP_STATE, 1},
+        {android::util::SLEEP_STATE_VOTER, 1},
+        {android::util::SUBSYSTEM_SLEEP_STATE, 1},
+        {android::util::CPU_TIME_PER_FREQ, 1},
+        {android::util::CPU_TIME_PER_UID, 1},
+        {android::util::CPU_TIME_PER_UID_FREQ, 1},
+};
 
 // TODO: add stats for pulled atoms.
 StatsdStats::StatsdStats() {
@@ -231,6 +246,21 @@ void StatsdStats::noteRegisteredAnomalyAlarmChanged() {
     mAnomalyAlarmRegisteredStats++;
 }
 
+void StatsdStats::updateMinPullIntervalSec(int pullAtomId, long intervalSec) {
+    lock_guard<std::mutex> lock(mLock);
+    mPulledAtomStats[pullAtomId].minPullIntervalSec = intervalSec;
+}
+
+void StatsdStats::notePull(int pullAtomId) {
+    lock_guard<std::mutex> lock(mLock);
+    mPulledAtomStats[pullAtomId].totalPull++;
+}
+
+void StatsdStats::notePullFromCache(int pullAtomId) {
+    lock_guard<std::mutex> lock(mLock);
+    mPulledAtomStats[pullAtomId].totalPullFromCache++;
+}
+
 void StatsdStats::noteAtomLogged(int atomId, int32_t timeSec) {
     lock_guard<std::mutex> lock(mLock);
 
@@ -401,7 +431,7 @@ void StatsdStats::dumpStats(std::vector<uint8_t>* output, bool reset) {
         configStats.clear_alert_stats();
     }
 
-    VLOG("********Atom stats***********");
+    VLOG("********Pushed Atom stats***********");
     const size_t atomCounts = mPushedAtomStats.size();
     for (size_t i = 2; i < atomCounts; i++) {
         if (mPushedAtomStats[i] > 0) {
@@ -413,6 +443,12 @@ void StatsdStats::dumpStats(std::vector<uint8_t>* output, bool reset) {
 
             VLOG("Atom %lu->%d\n", (unsigned long)i, mPushedAtomStats[i]);
         }
+    }
+
+    VLOG("********Pulled Atom stats***********");
+    for (const auto& pair : mPulledAtomStats) {
+        android::os::statsd::writePullerStatsToStream(pair, &proto);
+        VLOG("Atom %d->%ld, %ld, %ld\n", (int) pair.first, (long) pair.second.totalPull, (long) pair.second.totalPullFromCache, (long) pair.second.minPullIntervalSec);
     }
 
     if (mAnomalyAlarmRegisteredStats > 0) {

@@ -17,6 +17,7 @@
 
 #include "config/ConfigKey.h"
 #include "frameworks/base/cmds/statsd/src/stats_log.pb.h"
+#include "statslog.h"
 
 #include <gtest/gtest_prod.h>
 #include <log/log_time.h>
@@ -61,6 +62,13 @@ public:
 
     /* Min period between two checks of byte size per config key in nanoseconds. */
     static const unsigned long long kMinByteSizeCheckPeriodNs = 10 * NS_PER_SEC;
+
+    // Default minimum interval between pulls for an atom. Pullers can return cached values if
+    // another pull request happens within this interval.
+    static std::map<int, long> kPullerCooldownMap;
+
+    // Default cooldown time for a puller
+    static const long kDefaultPullerCooldown = 1;
 
     /**
      * Report a new config has been received and report the static stats about the config.
@@ -154,6 +162,15 @@ public:
     void setUidMapChanges(int changes);
     void setCurrentUidMapMemory(int bytes);
 
+    // Update minimum interval between pulls for an pulled atom
+    void updateMinPullIntervalSec(int pullAtomId, long intervalSec);
+
+    // Notify pull request for an atom
+    void notePull(int pullAtomId);
+
+    // Notify pull request for an atom served from cached data
+    void notePullFromCache(int pullAtomId);
+
     /**
      * Reset the historical stats. Including all stats in icebox, and the tracked stats about
      * metrics, matchers, and atoms. The active configs will be kept and StatsdStats will continue
@@ -167,6 +184,12 @@ public:
      * [reset]: whether to clear the historical stats after the call.
      */
     void dumpStats(std::vector<uint8_t>* buffer, bool reset);
+
+    typedef struct {
+        long totalPull;
+        long totalPullFromCache;
+        long minPullIntervalSec;
+    } PulledAtomStats;
 
 private:
     StatsdStats();
@@ -199,6 +222,8 @@ private:
     // out of that range will be dropped (it's either pulled atoms or test atoms).
     // This is a vector, not a map because it will be accessed A LOT -- for each stats log.
     std::vector<int> mPushedAtomStats;
+
+    std::map<int, PulledAtomStats> mPulledAtomStats;
 
     // Stores the number of times statsd modified the anomaly alarm registered with
     // StatsCompanionService.

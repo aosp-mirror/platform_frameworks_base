@@ -326,6 +326,7 @@ void GaugeMetricProducer::flushIfNeededLocked(const uint64_t& eventTimeNs) {
         }
     }
 
+    mCurrentSlicedBucketForAnomaly = std::make_shared<DimToValMap>();
     mCurrentSlicedBucket = std::make_shared<DimToGaugeFieldsMap>();
 
     // Adjusts the bucket start time
