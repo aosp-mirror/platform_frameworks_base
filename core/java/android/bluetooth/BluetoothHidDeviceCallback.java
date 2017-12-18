@@ -106,8 +106,8 @@ public abstract class BluetoothHidDeviceCallback {
      * @param reportId Report Id.
      * @param data Report data.
      */
-    public void onIntrData(BluetoothDevice device, byte reportId, byte[] data) {
-        Log.d(TAG, "onIntrData: device=" + device + " reportId=" + reportId);
+    public void onInterruptData(BluetoothDevice device, byte reportId, byte[] data) {
+        Log.d(TAG, "onInterruptData: device=" + device + " reportId=" + reportId);
     }
 
     /**

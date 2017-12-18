@@ -85,7 +85,7 @@ public final class BluetoothHidDevice implements BluetoothProfile {
      *
      * @see BluetoothHidDeviceCallback#onGetReport(BluetoothDevice, byte, byte, int)
      * @see BluetoothHidDeviceCallback#onSetReport(BluetoothDevice, byte, byte, byte[])
-     * @see BluetoothHidDeviceCallback#onIntrData(BluetoothDevice, byte, byte[])
+     * @see BluetoothHidDeviceCallback#onInterruptData(BluetoothDevice, byte, byte[])
      */
     public static final byte REPORT_TYPE_INPUT = (byte) 1;
     public static final byte REPORT_TYPE_OUTPUT = (byte) 2;
@@ -155,8 +155,8 @@ public final class BluetoothHidDevice implements BluetoothProfile {
         }
 
         @Override
-        public void onIntrData(BluetoothDevice device, byte reportId, byte[] data) {
-            mCallback.onIntrData(device, reportId, data);
+        public void onInterruptData(BluetoothDevice device, byte reportId, byte[] data) {
+            mCallback.onInterruptData(device, reportId, data);
         }
 
         @Override
