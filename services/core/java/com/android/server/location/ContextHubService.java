@@ -583,7 +583,7 @@ public class ContextHubService extends IContextHubService.Stub {
      * @param abortCode    the nanoapp-specific abort code
      */
     private void handleAppAbortCallback(int contextHubId, long nanoAppId, int abortCode) {
-        // TODO(b/31049861): Implement this
+        mClientManager.onNanoAppAborted(contextHubId, nanoAppId, abortCode);
     }
 
     /**

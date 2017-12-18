@@ -179,7 +179,7 @@ public class ContextHubClientBroker extends IContextHubClient.Stub
     }
 
     /**
-     * Handles a nanoapp load event.
+     * Notifies the client of a nanoapp load event if the connection is open.
      *
      * @param nanoAppId the ID of the nanoapp that was loaded.
      */
@@ -195,7 +195,7 @@ public class ContextHubClientBroker extends IContextHubClient.Stub
     }
 
     /**
-     * Handles a nanoapp unload event.
+     * Notifies the client of a nanoapp unload event if the connection is open.
      *
      * @param nanoAppId the ID of the nanoapp that was unloaded.
      */
@@ -211,7 +211,7 @@ public class ContextHubClientBroker extends IContextHubClient.Stub
     }
 
     /**
-     * Handles a hub reset for this client.
+     * Notifies the client of a hub reset event if the connection is open.
      */
     /* package */ void onHubReset() {
         if (mConnectionOpen.get()) {
@@ -220,6 +220,23 @@ public class ContextHubClientBroker extends IContextHubClient.Stub
             } catch (RemoteException e) {
                 Log.e(TAG, "RemoteException while calling onHubReset on client" +
                         " (host endpoint ID = " + mHostEndPointId + ")", e);
+            }
+        }
+    }
+
+    /**
+     * Notifies the client of a nanoapp abort event if the connection is open.
+     *
+     * @param nanoAppId the ID of the nanoapp that aborted
+     * @param abortCode the nanoapp specific abort code
+     */
+    /* package */ void onNanoAppAborted(long nanoAppId, int abortCode) {
+        if (mConnectionOpen.get()) {
+            try {
+                mCallbackInterface.onNanoAppAborted(nanoAppId, abortCode);
+            } catch (RemoteException e) {
+                Log.e(TAG, "RemoteException while calling onNanoAppAborted on client"
+                        + " (host endpoint ID = " + mHostEndPointId + ")", e);
             }
         }
     }

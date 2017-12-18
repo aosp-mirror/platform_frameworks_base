@@ -149,32 +149,35 @@ import java.util.function.Consumer;
     }
 
     /**
-     * Handles a nanoapp load event.
-     *
-     * @param contextHubId the ID of the hub where the nanoapp was loaded.
-     * @param nanoAppId    the ID of the nanoapp that was loaded.
+     * @param contextHubId the ID of the hub where the nanoapp was loaded
+     * @param nanoAppId    the ID of the nanoapp that was loaded
      */
     /* package */ void onNanoAppLoaded(int contextHubId, long nanoAppId) {
         forEachClientOfHub(contextHubId, client -> client.onNanoAppLoaded(nanoAppId));
     }
 
     /**
-     * Handles a nanoapp unload event.
-     *
-     * @param contextHubId the ID of the hub where the nanoapp was unloaded.
-     * @param nanoAppId    the ID of the nanoapp that was unloaded.
+     * @param contextHubId the ID of the hub where the nanoapp was unloaded
+     * @param nanoAppId    the ID of the nanoapp that was unloaded
      */
     /* package */ void onNanoAppUnloaded(int contextHubId, long nanoAppId) {
         forEachClientOfHub(contextHubId, client -> client.onNanoAppUnloaded(nanoAppId));
     }
 
     /**
-     * Handles a hub reset.
-     *
-     * @param contextHubId the ID of the hub that has reset.
+     * @param contextHubId the ID of the hub that has reset
      */
     /* package */ void onHubReset(int contextHubId) {
         forEachClientOfHub(contextHubId, client -> client.onHubReset());
+    }
+
+    /**
+     * @param contextHubId the ID of the hub that contained the nanoapp that aborted
+     * @param nanoAppId the ID of the nanoapp that aborted
+     * @param abortCode the nanoapp specific abort code
+     */
+    /* package */ void onNanoAppAborted(int contextHubId, long nanoAppId, int abortCode) {
+        forEachClientOfHub(contextHubId, client -> client.onNanoAppAborted(nanoAppId, abortCode));
     }
 
     /**
