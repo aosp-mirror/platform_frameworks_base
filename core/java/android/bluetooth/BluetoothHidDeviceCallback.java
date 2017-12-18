@@ -24,8 +24,6 @@ import android.util.Log;
  * registration.
  *
  * <p>{@see BluetoothHidDevice}
- *
- * <p>{@hide}
  */
 public abstract class BluetoothHidDeviceCallback {
 
