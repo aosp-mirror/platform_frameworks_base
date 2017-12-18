@@ -52,6 +52,7 @@ import android.os.UserManager;
 import android.provider.Settings;
 import android.service.autofill.AutofillService;
 import android.service.autofill.AutofillServiceInfo;
+import android.service.autofill.FieldClassification;
 import android.service.autofill.FieldClassification.Match;
 import android.service.autofill.FillEventHistory;
 import android.service.autofill.FillEventHistory.Event;
@@ -81,6 +82,7 @@ import com.android.server.autofill.ui.AutoFillUI;
 
 import java.io.PrintWriter;
 import java.util.ArrayList;
+import java.util.List;
 import java.util.Random;
 
 /**
@@ -720,37 +722,45 @@ final class AutofillManagerServiceImpl {
             @Nullable ArrayList<AutofillId> manuallyFilledFieldIds,
             @Nullable ArrayList<ArrayList<String>> manuallyFilledDatasetIds,
             @Nullable ArrayList<AutofillId> detectedFieldIdsList,
-            @Nullable ArrayList<Match> detectedMatchesList,
+            @Nullable ArrayList<FieldClassification> detectedFieldClassificationsList,
             @NonNull String appPackageName) {
-
         synchronized (mLock) {
             if (isValidEventLocked("logDatasetNotSelected()", sessionId)) {
                 AutofillId[] detectedFieldsIds = null;
-                Match[] detectedMatches = null;
+                FieldClassification[] detectedFieldClassifications = null;
                 if (detectedFieldIdsList != null) {
                     detectedFieldsIds = new AutofillId[detectedFieldIdsList.size()];
                     detectedFieldIdsList.toArray(detectedFieldsIds);
-                    detectedMatches = new Match[detectedMatchesList.size()];
-                    detectedMatchesList.toArray(detectedMatches);
+                    detectedFieldClassifications =
+                            new FieldClassification[detectedFieldClassificationsList.size()];
+                    detectedFieldClassificationsList.toArray(detectedFieldClassifications);
 
-                    final int size = detectedMatchesList.size();
+                    final int numberFields = detectedFieldsIds.length;
+                    int totalSize = 0;
                     float totalScore = 0;
-                    for (int i = 0; i < size; i++) {
-                        totalScore += detectedMatches[i].getScore();
+                    for (int i = 0; i < numberFields; i++) {
+                        final FieldClassification fc = detectedFieldClassifications[i];
+                        final List<Match> matches = fc.getMatches();
+                        final int size = matches.size();
+                        totalSize += size;
+                        for (int j = 0; j < size; j++) {
+                            totalScore += matches.get(j).getScore();
+                        }
                     }
-                    final int averageScore = (int) ((totalScore * 100) / size);
-                    mMetricsLogger.write(
-                            Helper.newLogMaker(MetricsEvent.AUTOFILL_FIELD_CLASSIFICATION_MATCHES,
-                                    appPackageName, getServicePackageName())
-                            .setCounterValue(size)
-                            .addTaggedData(MetricsEvent.FIELD_AUTOFILL_MATCH_SCORE, averageScore));
 
+                    final int averageScore = (int) ((totalScore * 100) / totalSize);
+                    mMetricsLogger.write(Helper
+                            .newLogMaker(MetricsEvent.AUTOFILL_FIELD_CLASSIFICATION_MATCHES,
+                                    appPackageName, getServicePackageName())
+                            .setCounterValue(numberFields)
+                            .addTaggedData(MetricsEvent.FIELD_AUTOFILL_MATCH_SCORE,
+                                    averageScore));
                 }
                 mEventHistory.addEvent(new Event(Event.TYPE_CONTEXT_COMMITTED, null,
                         clientState, selectedDatasets, ignoredDatasets,
                         changedFieldIds, changedDatasetIds,
                         manuallyFilledFieldIds, manuallyFilledDatasetIds,
-                        detectedFieldsIds, detectedMatches));
+                        detectedFieldsIds, detectedFieldClassifications));
             }
         }
     }

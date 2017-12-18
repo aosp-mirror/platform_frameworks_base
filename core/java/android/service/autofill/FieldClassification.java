@@ -25,8 +25,9 @@ import android.view.autofill.Helper;
 
 import com.android.internal.util.Preconditions;
 
-import com.google.android.collect.Lists;
-
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.List;
 
 /**
@@ -36,15 +37,24 @@ import java.util.List;
 // TODO(b/70291841): let caller handle Parcelable...
 public final class FieldClassification implements Parcelable {
 
-    private final Match mMatch;
+    private final ArrayList<Match> mMatches;
 
     /** @hide */
-    public FieldClassification(@NonNull Match match) {
-        mMatch = Preconditions.checkNotNull(match);
+    public FieldClassification(@NonNull ArrayList<Match> matches) {
+        mMatches = Preconditions.checkNotNull(matches);
+        Collections.sort(mMatches, new Comparator<Match>() {
+            @Override
+            public int compare(Match o1, Match o2) {
+                if (o1.mScore > o2.mScore) return -1;
+                if (o1.mScore < o2.mScore) return 1;
+                return 0;
+            }}
+        );
     }
 
     /**
-     * Gets the {@link Match matches} with the highest {@link Match#getScore() scores}.
+     * Gets the {@link Match matches} with the highest {@link Match#getScore() scores} (sorted in
+     * descending order).
      *
      * <p><b>Note:</b> There's no guarantee of how many matches will be returned. In fact,
      * the Android System might return just the top match to minimize the impact of field
@@ -52,14 +62,14 @@ public final class FieldClassification implements Parcelable {
      */
     @NonNull
     public List<Match> getMatches() {
-        return Lists.newArrayList(mMatch);
+        return mMatches;
     }
 
     @Override
     public String toString() {
         if (!sDebug) return super.toString();
 
-        return "FieldClassification: " + mMatch;
+        return "FieldClassification: " + mMatches;
     }
 
     /////////////////////////////////////
@@ -73,7 +83,10 @@ public final class FieldClassification implements Parcelable {
 
     @Override
     public void writeToParcel(Parcel parcel, int flags) {
-        mMatch.writeToParcel(parcel);
+        parcel.writeInt(mMatches.size());
+        for (int i = 0; i < mMatches.size(); i++) {
+            mMatches.get(i).writeToParcel(parcel);
+        }
     }
 
     public static final Parcelable.Creator<FieldClassification> CREATOR =
@@ -81,7 +94,13 @@ public final class FieldClassification implements Parcelable {
 
         @Override
         public FieldClassification createFromParcel(Parcel parcel) {
-            return new FieldClassification(Match.readFromParcel(parcel));
+            final int size = parcel.readInt();
+            final ArrayList<Match> matches = new ArrayList<>();
+            for (int i = 0; i < size; i++) {
+                matches.add(i, Match.readFromParcel(parcel));
+            }
+
+            return new FieldClassification(matches);
         }
 
         @Override
