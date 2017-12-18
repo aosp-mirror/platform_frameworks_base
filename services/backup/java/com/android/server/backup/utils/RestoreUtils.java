@@ -102,7 +102,9 @@ public class RestoreUtils {
                         }
                     }
 
-                    session.commit(receiver.getIntentSender());
+                    // Installation is current disabled
+                    session.abandon();
+                    // session.commit(receiver.getIntentSender());
                 }
             } catch (Exception t) {
                 installer.abandonSession(sessionId);
@@ -110,9 +112,14 @@ public class RestoreUtils {
                 throw t;
             }
 
-            Intent result = receiver.getResult();
-            int status = result.getIntExtra(PackageInstaller.EXTRA_STATUS,
-                    PackageInstaller.STATUS_FAILURE);
+            // Installation is current disabled
+            Intent result = null;
+            // Intent result = receiver.getResult();
+
+            // Installation is current disabled
+            int status = PackageInstaller.STATUS_FAILURE;
+            // int status = result.getIntExtra(PackageInstaller.EXTRA_STATUS,
+            //        PackageInstaller.STATUS_FAILURE);
 
             if (status != PackageInstaller.STATUS_SUCCESS) {
                 // The only time we continue to accept install of data even if the
