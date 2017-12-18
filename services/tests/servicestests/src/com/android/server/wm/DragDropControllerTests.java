@@ -28,6 +28,7 @@ import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.when;
 
 import android.content.ClipData;
+import android.graphics.PixelFormat;
 import android.os.IBinder;
 import android.os.Looper;
 import android.os.UserHandle;
@@ -37,6 +38,7 @@ import android.support.test.filters.SmallTest;
 import android.support.test.runner.AndroidJUnit4;
 import android.view.InputChannel;
 import android.view.Surface;
+import android.view.SurfaceControl;
 import android.view.SurfaceSession;
 import android.view.View;
 import com.android.internal.annotations.GuardedBy;
@@ -147,9 +149,7 @@ public class DragDropControllerTests extends WindowTestsBase {
 
     @Test
     public void testPrepareDrag_ZeroSizeSurface() throws Exception {
-        final Surface surface = new Surface();
-        mToken = mTarget.prepareDrag(
-                new SurfaceSession(), 0, 0, mWindow.mClient, 0, 0, 0, surface);
+        mToken = mTarget.prepareDrag(new SurfaceSession(), 0, 0, mWindow.mClient, 0, 0, 0);
         assertNull(mToken);
     }
 
@@ -169,16 +169,24 @@ public class DragDropControllerTests extends WindowTestsBase {
     }
 
     private void dragFlow(int flag, ClipData data, float dropX, float dropY) {
-        final Surface surface = new Surface();
-        mToken = mTarget.prepareDrag(
-                new SurfaceSession(), 0, 0, mWindow.mClient, flag, 100, 100, surface);
+        mToken = mTarget.prepareDrag(new SurfaceSession(), 0, 0, mWindow.mClient, flag, 100, 100);
         assertNotNull(mToken);
+        final SurfaceSession appSession = new SurfaceSession();
+        try {
+            final SurfaceControl surface = new SurfaceControl.Builder(appSession)
+                    .setName("drag surface")
+                    .setSize(100, 100)
+                    .setFormat(PixelFormat.TRANSLUCENT)
+                    .build();
 
-        assertTrue(sWm.mInputManager.transferTouchFocus(null, null));
-        assertTrue(mTarget.performDrag(
-                mWindow.mClient, mToken, 0, 0, 0, 0, 0, data));
+            assertTrue(sWm.mInputManager.transferTouchFocus(null, null));
+            assertNotNull(mTarget.performDrag(
+                    new SurfaceSession(), mWindow.mClient, mToken, surface, 0, 0, 0, 0, 0, data));
 
-        mTarget.handleMotionEvent(false, dropX, dropY);
-        mToken = mWindow.mClient.asBinder();
+            mTarget.handleMotionEvent(false, dropX, dropY);
+            mToken = mWindow.mClient.asBinder();
+        } finally {
+            appSession.kill();
+        }
     }
 }

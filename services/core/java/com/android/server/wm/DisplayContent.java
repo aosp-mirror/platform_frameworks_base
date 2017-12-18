@@ -3690,6 +3690,13 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
             .setParent(mOverlayLayer);
     }
 
+    /**
+     * Reparents the given surface to mOverlayLayer.
+     */
+    void reparentToOverlay(Transaction transaction, SurfaceControl surface) {
+        transaction.reparent(surface, mOverlayLayer.getHandle());
+    }
+
     void applyMagnificationSpec(MagnificationSpec spec) {
         applyMagnificationSpec(getPendingTransaction(), spec);
         getPendingTransaction().apply();

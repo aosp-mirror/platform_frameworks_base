@@ -51,6 +51,7 @@ import android.view.IWindowSession;
 import android.view.IWindowSessionCallback;
 import android.view.InputChannel;
 import android.view.Surface;
+import android.view.SurfaceControl;
 import android.view.SurfaceSession;
 import android.view.WindowManager;
 
@@ -309,26 +310,24 @@ class Session extends IWindowSession.Stub implements IBinder.DeathRecipient {
 
     /* Drag/drop */
     @Override
-    public IBinder prepareDrag(IWindow window, int flags, int width, int height,
-            Surface outSurface) {
+    public IBinder prepareDrag(IWindow window, int flags, int width, int height) {
         final int callerPid = Binder.getCallingPid();
         final int callerUid = Binder.getCallingUid();
         final long ident = Binder.clearCallingIdentity();
         try {
-            return mDragDropController.prepareDrag(
-                    mSurfaceSession, callerPid, callerUid, window, flags, width, height,
-                    outSurface);
+            return mDragDropController.prepareDrag(mSurfaceSession, callerPid, callerUid, window,
+                    flags, width, height);
         } finally {
             Binder.restoreCallingIdentity(ident);
         }
     }
 
     @Override
-    public boolean performDrag(IWindow window, IBinder dragToken,
+    public boolean performDrag(IWindow window, IBinder dragToken, SurfaceControl surface,
             int touchSource, float touchX, float touchY, float thumbCenterX, float thumbCenterY,
             ClipData data) {
-        return mDragDropController.performDrag(window, dragToken, touchSource,
-                touchX, touchY, thumbCenterX, thumbCenterY, data);
+        return mDragDropController.performDrag(mSurfaceSession, window, dragToken, surface,
+                touchSource, touchX, touchY, thumbCenterX, thumbCenterY, data);
     }
 
     @Override

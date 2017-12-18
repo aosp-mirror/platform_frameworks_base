@@ -18,12 +18,10 @@ package com.android.server.wm;
 
 import static com.android.server.wm.WindowManagerDebugConfig.DEBUG_DRAG;
 import static com.android.server.wm.WindowManagerDebugConfig.SHOW_LIGHT_TRANSACTIONS;
-import static com.android.server.wm.WindowManagerDebugConfig.SHOW_TRANSACTIONS;
 import static com.android.server.wm.WindowManagerDebugConfig.TAG_WM;
 
 import android.annotation.NonNull;
 import android.content.ClipData;
-import android.graphics.PixelFormat;
 import android.os.Binder;
 import android.os.Handler;
 import android.os.IBinder;
@@ -32,8 +30,8 @@ import android.os.Message;
 import android.util.Slog;
 import android.view.Display;
 import android.view.IWindow;
-import android.view.Surface;
 import android.view.SurfaceControl;
+import android.view.SurfaceControl.Transaction;
 import android.view.SurfaceSession;
 import android.view.View;
 
@@ -96,7 +94,7 @@ class DragDropController {
     }
 
     IBinder prepareDrag(SurfaceSession session, int callerPid,
-            int callerUid, IWindow window, int flags, int width, int height, Surface outSurface) {
+            int callerUid, IWindow window, int flags, int width, int height) {
         if (DEBUG_DRAG) {
             Slog.d(TAG_WM, "prepare drag surface: w=" + width + " h=" + height
                     + " flags=" + Integer.toHexString(flags) + " win=" + window
@@ -115,28 +113,13 @@ class DragDropController {
             }
 
             // TODO(multi-display): support other displays
-            final DisplayContent displayContent =
-                    mService.getDefaultDisplayContentLocked();
-            final Display display = displayContent.getDisplay();
-
-            final SurfaceControl surface = new SurfaceControl.Builder(session)
-                    .setName("drag surface")
-                    .setSize(width, height)
-                    .setFormat(PixelFormat.TRANSLUCENT)
-                    .build();
-            surface.setLayerStack(display.getLayerStack());
             float alpha = 1;
             if ((flags & View.DRAG_FLAG_OPAQUE) == 0) {
                 alpha = DRAG_SHADOW_ALPHA_TRANSPARENT;
             }
-            surface.setAlpha(alpha);
-
-            if (SHOW_TRANSACTIONS)
-                Slog.i(TAG_WM, "  DRAG " + surface + ": CREATE");
-            outSurface.copyFrom(surface);
             final IBinder winBinder = window.asBinder();
             IBinder token = new Binder();
-            mDragState = new DragState(mService, this, token, surface, flags, winBinder);
+            mDragState = new DragState(mService, this, token, /* surface */ null, flags, winBinder);
             mDragState.mPid = callerPid;
             mDragState.mUid = callerUid;
             mDragState.mOriginalAlpha = alpha;
@@ -148,9 +131,9 @@ class DragDropController {
         }
     }
 
-    boolean performDrag(IWindow window, IBinder dragToken,
-            int touchSource, float touchX, float touchY, float thumbCenterX, float thumbCenterY,
-            ClipData data) {
+    boolean performDrag(SurfaceSession session, IWindow window, IBinder dragToken,
+            SurfaceControl surface, int touchSource, float touchX, float touchY, float thumbCenterX,
+            float thumbCenterY, ClipData data) {
         if (DEBUG_DRAG) {
             Slog.d(TAG_WM, "perform drag: win=" + window + " data=" + data);
         }
@@ -202,6 +185,8 @@ class DragDropController {
                         return false;
                     }
 
+                    mDragState.mSurfaceControl = surface;
+                    surface = null;
                     mDragState.mDisplayContent = displayContent;
                     mDragState.mData = data;
                     mDragState.broadcastDragStartedLocked(touchX, touchY);
@@ -213,22 +198,25 @@ class DragDropController {
                     // Make the surface visible at the proper location
                     final SurfaceControl surfaceControl = mDragState.mSurfaceControl;
                     if (SHOW_LIGHT_TRANSACTIONS) Slog.i(TAG_WM, ">>> OPEN TRANSACTION performDrag");
-                    mService.openSurfaceTransaction();
-                    try {
-                        surfaceControl.setPosition(touchX - thumbCenterX,
-                                touchY - thumbCenterY);
-                        surfaceControl.setLayer(mDragState.getDragLayerLocked());
-                        surfaceControl.setLayerStack(display.getLayerStack());
-                        surfaceControl.show();
-                    } finally {
-                        mService.closeSurfaceTransaction("performDrag");
-                        if (SHOW_LIGHT_TRANSACTIONS) {
-                            Slog.i(TAG_WM, "<<< CLOSE TRANSACTION performDrag");
-                        }
+
+                    final SurfaceControl.Transaction transaction =
+                            callingWin.getPendingTransaction();
+                    transaction.setAlpha(surfaceControl, mDragState.mOriginalAlpha);
+                    transaction.setPosition(
+                            surfaceControl, touchX - thumbCenterX, touchY - thumbCenterY);
+                    transaction.show(surfaceControl);
+                    displayContent.reparentToOverlay(transaction, surfaceControl);
+                    callingWin.scheduleAnimation();
+
+                    if (SHOW_LIGHT_TRANSACTIONS) {
+                        Slog.i(TAG_WM, "<<< CLOSE TRANSACTION performDrag");
                     }
 
                     mDragState.notifyLocationLocked(touchX, touchY);
                 } finally {
+                    if (surface != null) {
+                        surface.release();
+                    }
                     if (mDragState != null && !mDragState.isInProgress()) {
                         mDragState.closeLocked();
                     }

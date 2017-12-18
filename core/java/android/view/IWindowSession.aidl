@@ -29,6 +29,7 @@ import android.view.IWindowId;
 import android.view.MotionEvent;
 import android.view.WindowManager;
 import android.view.Surface;
+import android.view.SurfaceControl;
 
 /**
  * System private per-application interface to the window manager.
@@ -154,21 +155,21 @@ interface IWindowSession {
      * the drag to the OS and passes that as the return value.  A return value of
      * null indicates failure.
      */
-    IBinder prepareDrag(IWindow window, int flags,
-            int thumbnailWidth, int thumbnailHeight, out Surface outSurface);
+    IBinder prepareDrag(IWindow window, int flags, int thumbnailWidth, int thumbnailHeight);
 
     /**
      * Initiate the drag operation itself
      */
-    boolean performDrag(IWindow window, IBinder dragToken, int touchSource,
-            float touchX, float touchY, float thumbCenterX, float thumbCenterY, in ClipData data);
+    boolean performDrag(IWindow window, IBinder dragToken, in SurfaceControl surface,
+            int touchSource, float touchX, float touchY, float thumbCenterX, float thumbCenterY,
+            in ClipData data);
 
-   /**
+    /**
      * Report the result of a drop action targeted to the given window.
      * consumed is 'true' when the drop was accepted by a valid recipient,
      * 'false' otherwise.
      */
-	void reportDropResult(IWindow window, boolean consumed);
+    void reportDropResult(IWindow window, boolean consumed);
 
     /**
      * Cancel the current drag operation.
