@@ -26,6 +26,7 @@ import android.os.UserHandle;
  * @hide
  */
 interface ICrossProfileApps {
-    void startActivityAsUser(in String callingPackage, in ComponentName component, in Rect sourceBounds, in Bundle startActivityOptions, in UserHandle user);
+    void startActivityAsUser(in String callingPackage, in ComponentName component,
+        in UserHandle user);
     List<UserHandle> getTargetUserProfiles(in String callingPackage);
 }

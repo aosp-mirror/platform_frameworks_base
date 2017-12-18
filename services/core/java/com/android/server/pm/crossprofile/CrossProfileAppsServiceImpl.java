@@ -19,6 +19,7 @@ import static android.content.pm.PackageManager.MATCH_DIRECT_BOOT_AWARE;
 import static android.content.pm.PackageManager.MATCH_DIRECT_BOOT_UNAWARE;
 
 import android.annotation.UserIdInt;
+import android.app.ActivityOptions;
 import android.app.AppOpsManager;
 import android.content.ComponentName;
 import android.content.Context;
@@ -74,8 +75,6 @@ public class CrossProfileAppsServiceImpl extends ICrossProfileApps.Stub {
     public void startActivityAsUser(
             String callingPackage,
             ComponentName component,
-            Rect sourceBounds,
-            Bundle startActivityOptions,
             UserHandle user) throws RemoteException {
         Preconditions.checkNotNull(callingPackage);
         Preconditions.checkNotNull(component);
@@ -103,7 +102,6 @@ public class CrossProfileAppsServiceImpl extends ICrossProfileApps.Stub {
         // CATEGORY_LAUNCHER as calling startActivityAsUser ignore them if component is present.
         final Intent launchIntent = new Intent(Intent.ACTION_MAIN);
         launchIntent.addCategory(Intent.CATEGORY_LAUNCHER);
-        launchIntent.setSourceBounds(sourceBounds);
         launchIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK
                 | Intent.FLAG_ACTIVITY_RESET_TASK_IF_NEEDED);
         // Only package name is set here, as opposed to component name, because intent action and
@@ -114,7 +112,8 @@ public class CrossProfileAppsServiceImpl extends ICrossProfileApps.Stub {
         final long ident = mInjector.clearCallingIdentity();
         try {
             launchIntent.setComponent(component);
-            mContext.startActivityAsUser(launchIntent, startActivityOptions, user);
+            mContext.startActivityAsUser(launchIntent,
+                    ActivityOptions.makeOpenCrossProfileAppsAnimation().toBundle(), user);
         } finally {
             mInjector.restoreCallingIdentity(ident);
         }

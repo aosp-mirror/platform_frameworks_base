@@ -205,8 +205,6 @@ public class CrossProfileAppsServiceImplTest {
                         mCrossProfileAppsServiceImpl.startActivityAsUser(
                                 PACKAGE_ONE,
                                 ACTIVITY_COMPONENT,
-                                null,
-                                null,
                                 UserHandle.of(PRIMARY_USER)));
 
         verify(mContext, never())
@@ -214,33 +212,6 @@ public class CrossProfileAppsServiceImplTest {
                         any(Intent.class),
                         nullable(Bundle.class),
                         any(UserHandle.class));
-    }
-
-    @Test
-    public void startActivityAsUser_profile_successWithOption() throws Exception {
-        Bundle options = Bundle.forPair("test_key", "test_value");
-
-        mCrossProfileAppsServiceImpl.startActivityAsUser(
-                PACKAGE_ONE,
-                ACTIVITY_COMPONENT,
-                null,
-                options,
-                UserHandle.of(PROFILE_OF_PRIMARY_USER));
-
-        ArgumentCaptor<Intent> intentCaptor = ArgumentCaptor.forClass(Intent.class);
-        ArgumentCaptor<Bundle> bundleCaptor = ArgumentCaptor.forClass(Bundle.class);
-
-        verify(mContext)
-                .startActivityAsUser(
-                        intentCaptor.capture(),
-                        bundleCaptor.capture(),
-                        eq(UserHandle.of(PROFILE_OF_PRIMARY_USER)));
-
-        Intent intent = intentCaptor.getValue();
-        assertEquals(ACTIVITY_COMPONENT, intent.getComponent());
-
-        Bundle bundle = bundleCaptor.getValue();
-        assertEquals("test_value", bundle.getString("test_key"));
     }
 
     @Test
@@ -253,8 +224,6 @@ public class CrossProfileAppsServiceImplTest {
                         mCrossProfileAppsServiceImpl.startActivityAsUser(
                                 PACKAGE_ONE,
                                 ACTIVITY_COMPONENT,
-                                null,
-                                null,
                                 UserHandle.of(PROFILE_OF_PRIMARY_USER)));
 
         verify(mContext, never())
@@ -272,8 +241,6 @@ public class CrossProfileAppsServiceImplTest {
                         mCrossProfileAppsServiceImpl.startActivityAsUser(
                                 PACKAGE_TWO,
                                 ACTIVITY_COMPONENT,
-                                null,
-                                null,
                                 UserHandle.of(PROFILE_OF_PRIMARY_USER)));
 
         verify(mContext, never())
@@ -293,8 +260,6 @@ public class CrossProfileAppsServiceImplTest {
                         mCrossProfileAppsServiceImpl.startActivityAsUser(
                                 PACKAGE_ONE,
                                 ACTIVITY_COMPONENT,
-                                null,
-                                null,
                                 UserHandle.of(PROFILE_OF_PRIMARY_USER)));
 
         verify(mContext, never())
@@ -312,8 +277,6 @@ public class CrossProfileAppsServiceImplTest {
                         mCrossProfileAppsServiceImpl.startActivityAsUser(
                                 PACKAGE_ONE,
                                 new ComponentName(PACKAGE_TWO, "test"),
-                                null,
-                                null,
                                 UserHandle.of(PROFILE_OF_PRIMARY_USER)));
 
         verify(mContext, never())
@@ -331,8 +294,6 @@ public class CrossProfileAppsServiceImplTest {
                         mCrossProfileAppsServiceImpl.startActivityAsUser(
                                 PACKAGE_ONE,
                                 ACTIVITY_COMPONENT,
-                                null,
-                                null,
                                 UserHandle.of(SECONDARY_USER)));
 
         verify(mContext, never())
@@ -349,8 +310,6 @@ public class CrossProfileAppsServiceImplTest {
         mCrossProfileAppsServiceImpl.startActivityAsUser(
                 PACKAGE_ONE,
                 ACTIVITY_COMPONENT,
-                null,
-                null,
                 UserHandle.of(PRIMARY_USER));
 
         verify(mContext)

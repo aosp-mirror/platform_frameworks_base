@@ -36,6 +36,7 @@ import android.os.IRemoteCallback;
 import android.os.Parcelable;
 import android.os.RemoteException;
 import android.os.ResultReceiver;
+import android.os.UserHandle;
 import android.transition.Transition;
 import android.transition.TransitionListenerAdapter;
 import android.transition.TransitionManager;
@@ -265,6 +266,8 @@ public class ActivityOptions {
     public static final int ANIM_CUSTOM_IN_PLACE = 10;
     /** @hide */
     public static final int ANIM_CLIP_REVEAL = 11;
+    /** @hide */
+    public static final int ANIM_OPEN_CROSS_PROFILE_APPS = 12;
 
     private String mPackageName;
     private Rect mLaunchBounds;
@@ -483,6 +486,19 @@ public class ActivityOptions {
         opts.mWidth = width;
         opts.mHeight = height;
         return opts;
+    }
+
+    /**
+     * Creates an {@link ActivityOptions} object specifying an animation where the new activity
+     * is started in another user profile by calling {@link
+     * android.content.pm.crossprofile.CrossProfileApps#startMainActivity(ComponentName, UserHandle)
+     * }.
+     * @hide
+     */
+    public static ActivityOptions makeOpenCrossProfileAppsAnimation() {
+        ActivityOptions options = new ActivityOptions();
+        options.mAnimationType = ANIM_OPEN_CROSS_PROFILE_APPS;
+        return options;
     }
 
     /**

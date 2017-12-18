@@ -2706,6 +2706,12 @@ public class WindowManagerService extends IWindowManager.Stub
         }
     }
 
+    public void overridePendingAppTransitionStartCrossProfileApps() {
+        synchronized (mWindowMap) {
+            mAppTransition.overridePendingAppTransitionStartCrossProfileApps();
+        }
+    }
+
     void prolongAnimationsFromSpecs(@NonNull AppTransitionAnimationSpec[] specs, boolean scaleUp) {
         // This is used by freeform <-> recents windows transition. We need to synchronize
         // the animation with the appearance of the content of recents, so we will make

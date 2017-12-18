@@ -44,17 +44,17 @@ import static com.android.server.wm.WindowManagerDebugConfig.DEBUG_APP_TRANSITIO
 import static com.android.server.wm.WindowManagerDebugConfig.TAG_WITH_CLASS_NAME;
 import static com.android.server.wm.WindowManagerDebugConfig.TAG_WM;
 import static com.android.server.wm.WindowManagerInternal.AppTransitionListener;
+import static com.android.server.wm.WindowStateAnimator.STACK_CLIP_AFTER_ANIM;
 import static com.android.server.wm.WindowStateAnimator.STACK_CLIP_BEFORE_ANIM;
 import static com.android.server.wm.WindowStateAnimator.STACK_CLIP_NONE;
-import static com.android.server.wm.WindowStateAnimator.STACK_CLIP_AFTER_ANIM;
 import static com.android.server.wm.proto.AppTransitionProto.APP_TRANSITION_STATE;
 import static com.android.server.wm.proto.AppTransitionProto.LAST_USED_APP_TRANSITION;
 
 import android.annotation.Nullable;
 import android.app.ActivityManager;
+import android.content.ComponentName;
 import android.content.Context;
 import android.content.res.Configuration;
-import android.graphics.Bitmap;
 import android.graphics.GraphicBuffer;
 import android.graphics.Path;
 import android.graphics.Rect;
@@ -64,6 +64,7 @@ import android.os.IBinder;
 import android.os.IRemoteCallback;
 import android.os.RemoteException;
 import android.os.SystemProperties;
+import android.os.UserHandle;
 import android.util.ArraySet;
 import android.util.Slog;
 import android.util.SparseArray;
@@ -199,6 +200,13 @@ public class AppTransition implements Dump {
     private static final int NEXT_TRANSIT_TYPE_THUMBNAIL_ASPECT_SCALE_DOWN = 6;
     private static final int NEXT_TRANSIT_TYPE_CUSTOM_IN_PLACE = 7;
     private static final int NEXT_TRANSIT_TYPE_CLIP_REVEAL = 8;
+
+    /**
+     * Refers to the transition to activity started by using {@link
+     * android.content.pm.crossprofile.CrossProfileApps#startMainActivity(ComponentName, UserHandle)
+     * }.
+     */
+    private static final int NEXT_TRANSIT_TYPE_OPEN_CROSS_PROFILE_APPS = 9;
     private int mNextAppTransitionType = NEXT_TRANSIT_TYPE_NONE;
 
     // These are the possible states for the enter/exit activities during a thumbnail transition
@@ -1605,6 +1613,17 @@ public class AppTransition implements Dump {
                         + " transit=" + appTransitionToString(transit) + " isEntrance=" + enter
                         + " Callers=" + Debug.getCallers(3));
             }
+        } else if (mNextAppTransitionType == NEXT_TRANSIT_TYPE_OPEN_CROSS_PROFILE_APPS
+                && (transit == TRANSIT_ACTIVITY_OPEN
+                        || transit == TRANSIT_TASK_OPEN
+                        || transit == TRANSIT_TASK_TO_FRONT)) {
+            a = loadAnimationRes("android", enter
+                    ? com.android.internal.R.anim.activity_open_enter
+                    : com.android.internal.R.anim.activity_open_exit);
+            Slog.v(TAG,
+                    "applyAnimation NEXT_TRANSIT_TYPE_OPEN_CROSS_PROFILE_APPS:"
+                            + " anim=" + a + " transit=" + appTransitionToString(transit)
+                            + " isEntrance=" + enter + " Callers=" + Debug.getCallers(3));
         } else {
             int animAttr = 0;
             switch (transit) {
@@ -1828,6 +1847,17 @@ public class AppTransition implements Dump {
             mNextAppTransitionPackage = packageName;
             mNextAppTransitionInPlace = anim;
         } else {
+            postAnimationCallback();
+        }
+    }
+
+    /**
+     * @see {@link #NEXT_TRANSIT_TYPE_OPEN_CROSS_PROFILE_APPS}
+     */
+    void overridePendingAppTransitionStartCrossProfileApps() {
+        if (isTransitionSet()) {
+            clear();
+            mNextAppTransitionType = NEXT_TRANSIT_TYPE_OPEN_CROSS_PROFILE_APPS;
             postAnimationCallback();
         }
     }
