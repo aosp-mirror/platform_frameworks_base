@@ -25,6 +25,7 @@ import android.util.Log;
 
 import com.android.server.locksettings.recoverablekeystore.WrappedKey;
 import com.android.server.locksettings.recoverablekeystore.storage.RecoverableKeyStoreDbContract.KeysEntry;
+import com.android.server.locksettings.recoverablekeystore.storage.RecoverableKeyStoreDbContract.UserMetadataEntry;
 
 import java.util.HashMap;
 import java.util.Locale;
@@ -172,6 +173,52 @@ public class RecoverableKeyStoreDb {
                 keys.put(alias, new WrappedKey(nonce, keyMaterial, platformKeyGenerationId));
             }
             return keys;
+        }
+    }
+
+    /**
+     * Sets the {@code generationId} of the platform key for the account owned by {@code userId}.
+     *
+     * @return The primary key ID of the relation.
+     */
+    public long setPlatformKeyGenerationId(int userId, int generationId) {
+        SQLiteDatabase db = mKeyStoreDbHelper.getWritableDatabase();
+        ContentValues values = new ContentValues();
+        values.put(UserMetadataEntry.COLUMN_NAME_USER_ID, userId);
+        values.put(UserMetadataEntry.COLUMN_NAME_PLATFORM_KEY_GENERATION_ID, generationId);
+        return db.replace(
+                UserMetadataEntry.TABLE_NAME, /*nullColumnHack=*/ null, values);
+    }
+
+    /**
+     * Returns the generation ID associated with the platform key of the user with {@code userId}.
+     */
+    public int getPlatformKeyGenerationId(int userId) {
+        SQLiteDatabase db = mKeyStoreDbHelper.getReadableDatabase();
+        String[] projection = {
+                UserMetadataEntry.COLUMN_NAME_PLATFORM_KEY_GENERATION_ID};
+        String selection =
+                UserMetadataEntry.COLUMN_NAME_USER_ID + " = ?";
+        String[] selectionArguments = {
+                Integer.toString(userId)};
+
+        try (
+            Cursor cursor = db.query(
+                UserMetadataEntry.TABLE_NAME,
+                projection,
+                selection,
+                selectionArguments,
+                /*groupBy=*/ null,
+                /*having=*/ null,
+                /*orderBy=*/ null)
+        ) {
+            if (cursor.getCount() == 0) {
+                return -1;
+            }
+            cursor.moveToFirst();
+            return cursor.getInt(
+                    cursor.getColumnIndexOrThrow(
+                            UserMetadataEntry.COLUMN_NAME_PLATFORM_KEY_GENERATION_ID));
         }
     }
 
