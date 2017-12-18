@@ -62,13 +62,12 @@ public class RecoverableKeyStoreDb {
      *
      * @param uid Uid of the application to whom the key belongs.
      * @param alias The alias of the key in the AndroidKeyStore.
-     * @param wrappedKey The wrapped bytes of the key.
-     * @param generationId The generation ID of the platform key that wrapped the key.
+     * @param wrappedKey The wrapped key.
      * @return The primary key of the inserted row, or -1 if failed.
      *
      * @hide
      */
-    public long insertKey(int uid, String alias, WrappedKey wrappedKey, int generationId) {
+    public long insertKey(int uid, String alias, WrappedKey wrappedKey) {
         SQLiteDatabase db = mKeyStoreDbHelper.getWritableDatabase();
         ContentValues values = new ContentValues();
         values.put(KeysEntry.COLUMN_NAME_UID, uid);
@@ -76,7 +75,7 @@ public class RecoverableKeyStoreDb {
         values.put(KeysEntry.COLUMN_NAME_NONCE, wrappedKey.getNonce());
         values.put(KeysEntry.COLUMN_NAME_WRAPPED_KEY, wrappedKey.getKeyMaterial());
         values.put(KeysEntry.COLUMN_NAME_LAST_SYNCED_AT, -1);
-        values.put(KeysEntry.COLUMN_NAME_GENERATION_ID, generationId);
+        values.put(KeysEntry.COLUMN_NAME_GENERATION_ID, wrappedKey.getPlatformKeyGenerationId());
         return db.replace(KeysEntry.TABLE_NAME, /*nullColumnHack=*/ null, values);
     }
 
@@ -123,7 +122,9 @@ public class RecoverableKeyStoreDb {
                     cursor.getColumnIndexOrThrow(KeysEntry.COLUMN_NAME_NONCE));
             byte[] keyMaterial = cursor.getBlob(
                     cursor.getColumnIndexOrThrow(KeysEntry.COLUMN_NAME_WRAPPED_KEY));
-            return new WrappedKey(nonce, keyMaterial);
+            int generationId = cursor.getInt(
+                    cursor.getColumnIndexOrThrow(KeysEntry.COLUMN_NAME_GENERATION_ID));
+            return new WrappedKey(nonce, keyMaterial, generationId);
         }
     }
 
@@ -168,7 +169,7 @@ public class RecoverableKeyStoreDb {
                         cursor.getColumnIndexOrThrow(KeysEntry.COLUMN_NAME_WRAPPED_KEY));
                 String alias = cursor.getString(
                         cursor.getColumnIndexOrThrow(KeysEntry.COLUMN_NAME_ALIAS));
-                keys.put(alias, new WrappedKey(nonce, keyMaterial));
+                keys.put(alias, new WrappedKey(nonce, keyMaterial, platformKeyGenerationId));
             }
             return keys;
         }

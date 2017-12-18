@@ -48,6 +48,7 @@ import javax.crypto.SecretKey;
 @SmallTest
 @RunWith(AndroidJUnit4.class)
 public class RecoverableKeyGeneratorTest {
+    private static final int TEST_GENERATION_ID = 3;
     private static final String ANDROID_KEY_STORE_PROVIDER = "AndroidKeyStore";
     private static final String KEY_ALGORITHM = "AES";
     private static final String TEST_ALIAS = "karlin";
@@ -58,14 +59,14 @@ public class RecoverableKeyGeneratorTest {
 
     @Captor ArgumentCaptor<KeyProtection> mKeyProtectionArgumentCaptor;
 
-    private AndroidKeyStoreSecretKey mPlatformKey;
+    private PlatformEncryptionKey mPlatformKey;
     private SecretKey mKeyHandle;
     private RecoverableKeyGenerator mRecoverableKeyGenerator;
 
     @Before
     public void setUp() throws Exception {
         MockitoAnnotations.initMocks(this);
-        mPlatformKey = generateAndroidKeyStoreKey();
+        mPlatformKey = new PlatformEncryptionKey(TEST_GENERATION_ID, generateAndroidKeyStoreKey());
         mKeyHandle = generateKey();
         mRecoverableKeyGenerator = RecoverableKeyGenerator.newInstance(
                 mPlatformKey, mRecoverableKeyStorage);
