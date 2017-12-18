@@ -16,6 +16,7 @@
 
 package com.android.server.wm;
 
+import static android.util.TimeUtils.NANOS_PER_MS;
 import static android.view.Choreographer.CALLBACK_TRAVERSAL;
 import static android.view.Choreographer.getSfInstance;
 
@@ -25,7 +26,6 @@ import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
 import android.animation.ValueAnimator;
 import android.annotation.Nullable;
-import android.os.SystemClock;
 import android.util.ArrayMap;
 import android.view.Choreographer;
 import android.view.SurfaceControl;
@@ -144,10 +144,6 @@ class SurfaceAnimationRunner {
             scheduleApplyTransaction();
         });
 
-        if (a.mAnimSpec.canSkipFirstFrame()) {
-            anim.setCurrentPlayTime(Choreographer.getFrameDelay());
-        }
-
         anim.addListener(new AnimatorListenerAdapter() {
             @Override
             public void onAnimationStart(Animator animation) {
@@ -173,6 +169,14 @@ class SurfaceAnimationRunner {
             }
         });
         anim.start();
+        if (a.mAnimSpec.canSkipFirstFrame()) {
+            // If we can skip the first frame, we start one frame later.
+            anim.setCurrentPlayTime(mChoreographer.getFrameIntervalNanos() / NANOS_PER_MS);
+        }
+
+        // Immediately start the animation by manually applying an animation frame. Otherwise, the
+        // start time would only be set in the next frame, leading to a delay.
+        anim.doAnimationFrame(mChoreographer.getFrameTime());
         a.mAnim = anim;
         mRunningAnimations.put(a.mLeash, a);
     }
