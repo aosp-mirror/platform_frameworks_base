@@ -44,7 +44,6 @@ public class WrappedKey {
     private static final String APPLICATION_KEY_ALGORITHM = "AES";
     private static final int GCM_TAG_LENGTH_BITS = 128;
 
-    private final int mPlatformKeyGenerationId;
     private final byte[] mNonce;
     private final byte[] mKeyMaterial;
 
@@ -56,8 +55,8 @@ public class WrappedKey {
      *     {@link android.security.keystore.AndroidKeyStoreKey} for an example of a key that does
      *     not expose its key material.
      */
-    public static WrappedKey fromSecretKey(PlatformEncryptionKey wrappingKey, SecretKey key)
-            throws InvalidKeyException, KeyStoreException {
+    public static WrappedKey fromSecretKey(
+            SecretKey wrappingKey, SecretKey key) throws InvalidKeyException, KeyStoreException {
         if (key.getEncoded() == null) {
             throw new InvalidKeyException(
                     "key does not expose encoded material. It cannot be wrapped.");
@@ -71,7 +70,7 @@ public class WrappedKey {
                     "Android does not support AES/GCM/NoPadding. This should never happen.");
         }
 
-        cipher.init(Cipher.WRAP_MODE, wrappingKey.getKey());
+        cipher.init(Cipher.WRAP_MODE, wrappingKey);
         byte[] encryptedKeyMaterial;
         try {
             encryptedKeyMaterial = cipher.wrap(key);
@@ -91,10 +90,7 @@ public class WrappedKey {
             }
         }
 
-        return new WrappedKey(
-                /*nonce=*/ cipher.getIV(),
-                /*keyMaterial=*/ encryptedKeyMaterial,
-                /*platformKeyGenerationId=*/ wrappingKey.getGenerationId());
+        return new WrappedKey(/*mNonce=*/ cipher.getIV(), /*mKeyMaterial=*/ encryptedKeyMaterial);
     }
 
     /**
@@ -102,14 +98,12 @@ public class WrappedKey {
      *
      * @param nonce The nonce with which the key material was encrypted.
      * @param keyMaterial The encrypted bytes of the key material.
-     * @param platformKeyGenerationId The generation ID of the key used to wrap this key.
      *
      * @hide
      */
-    public WrappedKey(byte[] nonce, byte[] keyMaterial, int platformKeyGenerationId) {
+    public WrappedKey(byte[] nonce, byte[] keyMaterial) {
         mNonce = nonce;
         mKeyMaterial = keyMaterial;
-        mPlatformKeyGenerationId = platformKeyGenerationId;
     }
 
     /**
@@ -130,13 +124,15 @@ public class WrappedKey {
         return mKeyMaterial;
     }
 
+
     /**
      * Returns the generation ID of the platform key, with which this key was wrapped.
      *
      * @hide
      */
     public int getPlatformKeyGenerationId() {
-        return mPlatformKeyGenerationId;
+        // TODO(robertberry) Implement. See ag/3362855.
+        return 1;
     }
 
     /**
