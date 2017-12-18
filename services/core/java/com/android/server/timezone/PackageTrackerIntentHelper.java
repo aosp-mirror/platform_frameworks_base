@@ -21,7 +21,7 @@ package com.android.server.timezone;
  * it is not possible to test various cases with the real one because of the need to simulate
  * receiving and broadcasting intents.
  */
-interface IntentHelper {
+interface PackageTrackerIntentHelper {
 
     void initialize(String updateAppPackageName, String dataAppPackageName,
             PackageTracker packageTracker);

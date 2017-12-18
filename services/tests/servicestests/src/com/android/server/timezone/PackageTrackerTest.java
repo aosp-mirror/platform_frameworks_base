@@ -31,7 +31,6 @@ import android.support.test.InstrumentationRegistry;
 import android.support.test.filters.SmallTest;
 
 import java.io.File;
-import java.io.IOException;
 import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.time.Clock;
@@ -1400,7 +1399,7 @@ public class PackageTrackerTest {
     /**
      * A fake IntentHelper implementation for use in tests.
      */
-    private static class FakeIntentHelper implements IntentHelper {
+    private static class FakeIntentHelper implements PackageTrackerIntentHelper {
 
         private PackageTracker mPackageTracker;
         private String mUpdateAppPackageName;
