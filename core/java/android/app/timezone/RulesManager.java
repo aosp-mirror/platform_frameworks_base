@@ -36,7 +36,7 @@ import java.util.Arrays;
  * <p>This interface is intended for use with the default APK-based time zone rules update
  * application but it can also be used by OEMs if that mechanism is turned off using configuration.
  * All callers must possess the {@link android.Manifest.permission#UPDATE_TIME_ZONE_RULES} system
- * permission.
+ * permission unless otherwise stated.
  *
  * <p>When using the default mechanism, when properly configured the Android system will send a
  * {@link RulesUpdaterContract#ACTION_TRIGGER_RULES_UPDATE_CHECK} intent with a
@@ -120,9 +120,12 @@ public final class RulesManager {
 
     /**
      * Returns information about the current time zone rules state such as the IANA version of
-     * the system and any currently installed distro. This method is intended to allow clients to
-     * determine if the current state can be improved; for example by passing the information to a
-     * server that may provide a new distro for download.
+     * the system and any currently installed distro. This method allows clients to determine the
+     * current device state, perhaps to see if it can be improved; for example by passing the
+     * information to a server that may provide a new distro for download.
+     *
+     * <p>Callers must possess the {@link android.Manifest.permission#QUERY_TIME_ZONE_RULES} system
+     * permission.
      */
     public RulesState getRulesState() {
         try {

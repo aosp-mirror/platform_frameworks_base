@@ -2397,6 +2397,12 @@
     <permission android:name="android.permission.UPDATE_CONFIG"
         android:protectionLevel="signature|privileged" />
 
+    <!-- Allows an application to query the current time zone rules state
+         on device.
+         @SystemApi @hide -->
+    <permission android:name="android.permission.QUERY_TIME_ZONE_RULES"
+                android:protectionLevel="signature|privileged" />
+
     <!-- Allows a time zone rule updater application to request
          the system installs / uninstalls timezone rules.
          <p>An application requesting this permission is responsible for
