@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-#define DEBUG true
+#define DEBUG false
 
 #include "Log.h"
 #include "DurationMetricProducer.h"

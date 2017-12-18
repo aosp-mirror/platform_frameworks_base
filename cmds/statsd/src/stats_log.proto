@@ -29,9 +29,10 @@ message KeyValuePair {
 
   oneof value {
     string value_str = 2;
-    int64 value_int = 3;
-    bool value_bool = 4;
-    float value_float = 5;
+    int32 value_int = 3;
+    int64 value_long = 4;
+    bool value_bool = 5;
+    float value_float = 6;
   }
 }
 
@@ -88,7 +89,7 @@ message GaugeBucketInfo {
 
   optional int64 end_bucket_nanos = 2;
 
-  optional int64 gauge = 3;
+  optional Atom atom = 3;
 }
 
 message GaugeMetricData {

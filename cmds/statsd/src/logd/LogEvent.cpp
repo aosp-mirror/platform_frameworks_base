@@ -69,6 +69,13 @@ bool LogEvent::write(uint32_t value) {
     return false;
 }
 
+bool LogEvent::write(int64_t value) {
+    if (mContext) {
+        return android_log_write_int64(mContext, value) >= 0;
+    }
+    return false;
+}
+
 bool LogEvent::write(uint64_t value) {
     if (mContext) {
         return android_log_write_int64(mContext, value) >= 0;
@@ -224,7 +231,7 @@ KeyValuePair LogEvent::GetKeyValueProto(size_t key) const {
     if (elem.type == EVENT_TYPE_INT) {
         pair.set_value_int(elem.data.int32);
     } else if (elem.type == EVENT_TYPE_LONG) {
-        pair.set_value_int(elem.data.int64);
+        pair.set_value_long(elem.data.int64);
     } else if (elem.type == EVENT_TYPE_STRING) {
         pair.set_value_str(elem.data.string);
     } else if (elem.type == EVENT_TYPE_FLOAT) {

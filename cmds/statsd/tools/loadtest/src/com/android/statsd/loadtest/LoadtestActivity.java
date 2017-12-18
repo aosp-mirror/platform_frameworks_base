@@ -419,11 +419,6 @@ public class LoadtestActivity extends Activity {
     private void clearConfigs() {
         // TODO: Clear all configs instead of specific ones.
         if (mStatsManager != null) {
-            if (!mStatsManager.removeConfiguration("fake")) {
-                Log.d(TAG, "Removed \"fake\" statsd configs.");
-            } else {
-                Log.d(TAG, "Failed to remove \"fake\" config. Loadtest results cannot be trusted.");
-            }
             if (mStarted) {
                 if (!mStatsManager.removeConfiguration(ConfigFactory.CONFIG_NAME)) {
                     Log.d(TAG, "Removed loadtest statsd configs.");

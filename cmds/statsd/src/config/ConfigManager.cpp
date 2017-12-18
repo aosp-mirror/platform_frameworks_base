@@ -55,8 +55,9 @@ void ConfigManager::Startup() {
     // for (const auto& pair : configsFromDisk) {
     //    UpdateConfig(pair.first, pair.second);
     //}
-    // this should be called from StatsService when it receives a statsd_config
-    UpdateConfig(ConfigKey(1000, "fake"), build_fake_config());
+
+    // Uncomment the following line and use the hard coded config for development.
+    // UpdateConfig(ConfigKey(1000, "fake"), build_fake_config());
 }
 
 void ConfigManager::AddListener(const sp<ConfigListener>& listener) {
@@ -369,7 +370,7 @@ StatsdConfig build_fake_config() {
     GaugeMetric* gaugeMetric = config.add_gauge_metric();
     gaugeMetric->set_name("METRIC_10");
     gaugeMetric->set_what("DEVICE_TEMPERATURE");
-    gaugeMetric->set_gauge_field(DEVICE_TEMPERATURE_KEY);
+    gaugeMetric->mutable_gauge_fields()->add_field_num(DEVICE_TEMPERATURE_KEY);
     gaugeMetric->mutable_bucket()->set_bucket_size_millis(60 * 1000L);
 
     // Event matchers............

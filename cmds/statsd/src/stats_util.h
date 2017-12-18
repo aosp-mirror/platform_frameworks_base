@@ -17,6 +17,8 @@
 #pragma once
 
 #include "frameworks/base/cmds/statsd/src/stats_log.pb.h"
+#include <sstream>
+#include "logd/LogReader.h"
 
 #include <unordered_map>
 
@@ -34,6 +36,41 @@ typedef std::string HashableDimensionKey;
 typedef std::map<std::string, HashableDimensionKey> ConditionKey;
 
 typedef std::unordered_map<HashableDimensionKey, int64_t> DimToValMap;
+
+/*
+ * In memory rep for LogEvent. Uses much less memory than LogEvent
+ */
+typedef struct EventKV {
+    std::vector<KeyValuePair> kv;
+    string ToString() const {
+        std::ostringstream result;
+        result << "{ ";
+        const size_t N = kv.size();
+        for (size_t i = 0; i < N; i++) {
+            result << " ";
+            result << (i + 1);
+            result << "->";
+            const auto& pair = kv[i];
+            if (pair.has_value_int()) {
+                result << pair.value_int();
+            } else if (pair.has_value_long()) {
+                result << pair.value_long();
+            } else if (pair.has_value_float()) {
+                result << pair.value_float();
+            } else if (pair.has_value_str()) {
+                result << pair.value_str().c_str();
+            }
+        }
+        result << " }";
+        return result.str();
+    }
+} EventKV;
+
+typedef std::unordered_map<HashableDimensionKey, std::shared_ptr<EventKV>> DimToEventKVMap;
+
+EventMetricData parse(log_msg msg);
+
+int getTagId(log_msg msg);
 
 std::string getHashableKey(std::vector<KeyValuePair> key);
 
