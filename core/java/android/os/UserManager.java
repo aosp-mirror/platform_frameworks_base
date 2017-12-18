@@ -748,6 +748,7 @@ public class UserManager {
      * @see #getUserRestrictions()
      * @hide
      */
+    @SystemApi
     public static final String DISALLOW_RUN_IN_BACKGROUND = "no_run_in_background";
 
     /**
