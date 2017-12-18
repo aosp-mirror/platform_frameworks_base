@@ -327,6 +327,8 @@ public final class ViewRootImpl implements ViewParent,
     // This is used to reduce the race between window focus changes being dispatched from
     // the window manager and input events coming through the input system.
     @GuardedBy("this")
+    boolean mWindowFocusChanged;
+    @GuardedBy("this")
     boolean mUpcomingWindowFocus;
     @GuardedBy("this")
     boolean mUpcomingInTouchMode;
@@ -2472,12 +2474,12 @@ public final class ViewRootImpl implements ViewParent,
         final boolean hasWindowFocus;
         final boolean inTouchMode;
         synchronized (this) {
+            if (!mWindowFocusChanged) {
+                return;
+            }
+            mWindowFocusChanged = false;
             hasWindowFocus = mUpcomingWindowFocus;
             inTouchMode = mUpcomingInTouchMode;
-        }
-
-        if (mAttachInfo.mHasWindowFocus == hasWindowFocus) {
-            return;
         }
 
         if (mAdded) {
@@ -7181,6 +7183,7 @@ public final class ViewRootImpl implements ViewParent,
 
     public void windowFocusChanged(boolean hasFocus, boolean inTouchMode) {
         synchronized (this) {
+            mWindowFocusChanged = true;
             mUpcomingWindowFocus = hasFocus;
             mUpcomingInTouchMode = inTouchMode;
         }
