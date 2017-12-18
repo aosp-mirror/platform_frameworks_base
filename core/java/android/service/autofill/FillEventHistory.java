@@ -156,7 +156,8 @@ public final class FillEventHistory implements Parcelable {
                 final AutofillId[] detectedFields = event.mDetectedFieldIds;
                 parcel.writeParcelableArray(detectedFields, flags);
                 if (detectedFields != null) {
-                    parcel.writeParcelableArray(event.mDetectedFieldClassifications, flags);
+                    FieldClassification.writeArrayToParcel(parcel,
+                            event.mDetectedFieldClassifications);
                 }
             }
         }
@@ -551,7 +552,7 @@ public final class FillEventHistory implements Parcelable {
                                 AutofillId.class);
                         final FieldClassification[] detectedFieldClassifications =
                                 (detectedFieldIds != null)
-                                ? parcel.readParcelableArray(null, FieldClassification.class)
+                                ? FieldClassification.readArrayFromParcel(parcel)
                                 : null;
 
                         selection.addEvent(new Event(eventType, datasetId, clientState,
