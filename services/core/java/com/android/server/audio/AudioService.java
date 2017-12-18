@@ -3884,7 +3884,8 @@ public class AudioService extends IAudioService.Stub
         IsInCall = telecomManager.isInCall();
         Binder.restoreCallingIdentity(ident);
 
-        return (IsInCall || getMode() == AudioManager.MODE_IN_COMMUNICATION);
+        return (IsInCall || getMode() == AudioManager.MODE_IN_COMMUNICATION ||
+                getMode() == AudioManager.MODE_IN_CALL);
     }
 
     /**
