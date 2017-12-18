@@ -97,11 +97,29 @@ public class ApkSignatureSchemeV2Verifier {
      */
     public static X509Certificate[][] verify(String apkFile)
             throws SignatureNotFoundException, SecurityException, IOException {
-        try (RandomAccessFile apk = new RandomAccessFile(apkFile, "r")) {
-            return verify(apk);
-        }
+        return verify(apkFile, true);
     }
 
+    /**
+     * Returns the certificates associated with each signer for the given APK without verification.
+     * This method is dangerous and should not be used, unless the caller is absolutely certain the
+     * APK is trusted.  Specifically, verification is only done for the APK Signature Scheme V2
+     * Block while gathering signer information.  The APK contents are not verified.
+     *
+     * @throws SignatureNotFoundException if the APK is not signed using APK Signature Scheme v2.
+     * @throws IOException if an I/O error occurs while reading the APK file.
+     */
+    public static X509Certificate[][] plsCertsNoVerifyOnlyCerts(String apkFile)
+            throws SignatureNotFoundException, SecurityException, IOException {
+        return verify(apkFile, false);
+    }
+
+    private static X509Certificate[][] verify(String apkFile, boolean verifyIntegrity)
+            throws SignatureNotFoundException, SecurityException, IOException {
+        try (RandomAccessFile apk = new RandomAccessFile(apkFile, "r")) {
+            return verify(apk, verifyIntegrity);
+        }
+    }
     /**
      * Verifies APK Signature Scheme v2 signatures of the provided APK and returns the certificates
      * associated with each signer.
@@ -111,10 +129,10 @@ public class ApkSignatureSchemeV2Verifier {
      *         verify.
      * @throws IOException if an I/O error occurs while reading the APK file.
      */
-    private static X509Certificate[][] verify(RandomAccessFile apk)
+    private static X509Certificate[][] verify(RandomAccessFile apk, boolean verifyIntegrity)
             throws SignatureNotFoundException, SecurityException, IOException {
         SignatureInfo signatureInfo = findSignature(apk);
-        return verify(apk.getFD(), signatureInfo);
+        return verify(apk.getFD(), signatureInfo, verifyIntegrity);
     }
 
     /**
@@ -161,7 +179,8 @@ public class ApkSignatureSchemeV2Verifier {
      */
     private static X509Certificate[][] verify(
             FileDescriptor apkFileDescriptor,
-            SignatureInfo signatureInfo) throws SecurityException {
+            SignatureInfo signatureInfo,
+            boolean doVerifyIntegrity) throws SecurityException {
         int signerCount = 0;
         Map<Integer, byte[]> contentDigests = new ArrayMap<>();
         List<X509Certificate[]> signerCerts = new ArrayList<>();
@@ -198,13 +217,15 @@ public class ApkSignatureSchemeV2Verifier {
             throw new SecurityException("No content digests found");
         }
 
-        verifyIntegrity(
-                contentDigests,
-                apkFileDescriptor,
-                signatureInfo.apkSigningBlockOffset,
-                signatureInfo.centralDirOffset,
-                signatureInfo.eocdOffset,
-                signatureInfo.eocd);
+        if (doVerifyIntegrity) {
+            verifyIntegrity(
+                    contentDigests,
+                    apkFileDescriptor,
+                    signatureInfo.apkSigningBlockOffset,
+                    signatureInfo.centralDirOffset,
+                    signatureInfo.eocdOffset,
+                    signatureInfo.eocd);
+        }
 
         return signerCerts.toArray(new X509Certificate[signerCerts.size()][]);
     }

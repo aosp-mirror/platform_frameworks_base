@@ -58,37 +58,19 @@ public class ApkSignatureVerifier {
     private static final AtomicReference<byte[]> sBuffer = new AtomicReference<>();
 
     /**
-     * Verifies the provided APK and returns the certificates associated with each signer.  Also
-     * ensures that the provided APK contains an AndroidManifest.xml file.
-     *
-     * @param systemDir systemDir apk contents are already trusted, so we don't need to enforce
-     *                  v2 stripping rollback protection, or verify integrity of the APK.
+     * Verifies the provided APK and returns the certificates associated with each signer.
      *
      * @throws PackageParserException if the APK's signature failed to verify.
      */
-    public static Result verify(String apkPath, int minSignatureSchemeVersion, boolean systemDir)
+    public static Result verify(String apkPath, int minSignatureSchemeVersion)
             throws PackageParserException {
 
         // first try v2
         Trace.traceBegin(TRACE_TAG_PACKAGE_MANAGER, "verifyV2");
         try {
-            Certificate[][] signerCerts;
-            signerCerts = ApkSignatureSchemeV2Verifier.verify(apkPath);
+            Certificate[][] signerCerts = ApkSignatureSchemeV2Verifier.verify(apkPath);
             Signature[] signerSigs = convertToSignatures(signerCerts);
 
-            // sanity check - must have an AndroidManifest file
-            StrictJarFile jarFile = null;
-            try {
-                jarFile = new StrictJarFile(apkPath, false, false);
-                final ZipEntry manifestEntry =
-                        jarFile.findEntry(PackageParser.ANDROID_MANIFEST_FILENAME);
-                if (manifestEntry == null) {
-                    throw new PackageParserException(INSTALL_PARSE_FAILED_BAD_MANIFEST,
-                            "Package " + apkPath + " has no manifest");
-                }
-            } finally {
-                closeQuietly(jarFile);
-            }
             return new Result(signerCerts, signerSigs, VERSION_APK_SIGNATURE_SCHEME_V2);
         } catch (SignatureNotFoundException e) {
             // not signed with v2, try older if allowed
@@ -96,9 +78,6 @@ public class ApkSignatureVerifier {
                 throw new PackageParserException(INSTALL_PARSE_FAILED_NO_CERTIFICATES,
                         "No APK Signature Scheme v2 signature in package " + apkPath, e);
             }
-        } catch (PackageParserException e) {
-            // preserve any new exceptions explicitly thrown here
-            throw e;
         } catch (Exception e) {
             // APK Signature Scheme v2 signature found but did not verify
             throw new  PackageParserException(INSTALL_PARSE_FAILED_NO_CERTIFICATES,
@@ -109,10 +88,17 @@ public class ApkSignatureVerifier {
         }
 
         // v2 didn't work, try jarsigner
-        return verifyV1Signature(apkPath, systemDir);
+        return verifyV1Signature(apkPath, true);
     }
 
-    private static Result verifyV1Signature(String apkPath, boolean systemDir)
+    /**
+     * Verifies the provided APK and returns the certificates associated with each signer.
+     *
+     * @param verifyFull whether to verify all contents of this APK or just collect certificates.
+     *
+     * @throws PackageParserException if there was a problem collecting certificates
+     */
+    private static Result verifyV1Signature(String apkPath, boolean verifyFull)
             throws PackageParserException {
         StrictJarFile jarFile = null;
 
@@ -121,10 +107,17 @@ public class ApkSignatureVerifier {
             final Signature[] lastSigs;
 
             Trace.traceBegin(TRACE_TAG_PACKAGE_MANAGER, "strictJarFileCtor");
-            jarFile = new StrictJarFile(apkPath, true, !systemDir);
+
+            // we still pass verify = true to ctor to collect certs, even though we're not checking
+            // the whole jar.
+            jarFile = new StrictJarFile(
+                    apkPath,
+                    true, // collect certs
+                    verifyFull); // whether to reject APK with stripped v2 signatures (b/27887819)
             final List<ZipEntry> toVerify = new ArrayList<>();
 
-            // Always verify manifest, regardless of source
+            // Gather certs from AndroidManifest.xml, which every APK must have, as an optimization
+            // to not need to verify the whole APK when verifyFUll == false.
             final ZipEntry manifestEntry = jarFile.findEntry(
                     PackageParser.ANDROID_MANIFEST_FILENAME);
             if (manifestEntry == null) {
@@ -139,8 +132,8 @@ public class ApkSignatureVerifier {
             }
             lastSigs = convertToSignatures(lastCerts);
 
-            // don't waste time on already-trusted packages
-            if (!systemDir) {
+            // fully verify all contents, except for AndroidManifest.xml  and the META-INF/ files.
+            if (verifyFull) {
                 final Iterator<ZipEntry> i = jarFile.iterator();
                 while (i.hasNext()) {
                     final ZipEntry entry = i.next();
@@ -153,9 +146,6 @@ public class ApkSignatureVerifier {
                     toVerify.add(entry);
                 }
 
-                // Verify that entries are signed consistently with the first entry
-                // we encountered. Note that for splits, certificates may have
-                // already been populated during an earlier parse of a base APK.;
                 for (ZipEntry entry : toVerify) {
                     final Certificate[][] entryCerts = loadCertificates(jarFile, entry);
                     if (ArrayUtils.isEmpty(entryCerts)) {
@@ -242,6 +232,43 @@ public class ApkSignatureVerifier {
             } catch (Exception ignored) {
             }
         }
+    }
+
+    /**
+     * Returns the certificates associated with each signer for the given APK without verification.
+     * This method is dangerous and should not be used, unless the caller is absolutely certain the
+     * APK is trusted.
+     *
+     * @throws PackageParserException if the APK's signature failed to verify.
+     * or greater is not found, except in the case of no JAR signature.
+     */
+    public static Result plsCertsNoVerifyOnlyCerts(String apkPath, int minSignatureSchemeVersion)
+            throws PackageParserException {
+
+        // first try v2
+        Trace.traceBegin(TRACE_TAG_PACKAGE_MANAGER, "certsOnlyV2");
+        try {
+            Certificate[][] signerCerts =
+                    ApkSignatureSchemeV2Verifier.plsCertsNoVerifyOnlyCerts(apkPath);
+            Signature[] signerSigs = convertToSignatures(signerCerts);
+            return new Result(signerCerts, signerSigs, VERSION_APK_SIGNATURE_SCHEME_V2);
+        } catch (SignatureNotFoundException e) {
+            // not signed with v2, try older if allowed
+            if (minSignatureSchemeVersion >= VERSION_APK_SIGNATURE_SCHEME_V2) {
+                throw new PackageParserException(INSTALL_PARSE_FAILED_NO_CERTIFICATES,
+                        "No APK Signature Scheme v2 signature in package " + apkPath, e);
+            }
+        } catch (Exception e) {
+            // APK Signature Scheme v2 signature found but did not verify
+            throw new  PackageParserException(INSTALL_PARSE_FAILED_NO_CERTIFICATES,
+                    "Failed to collect certificates from " + apkPath
+                            + " using APK Signature Scheme v2", e);
+        } finally {
+            Trace.traceEnd(TRACE_TAG_PACKAGE_MANAGER);
+        }
+
+        // v2 didn't work, try jarsigner
+        return verifyV1Signature(apkPath, false);
     }
 
     /**
