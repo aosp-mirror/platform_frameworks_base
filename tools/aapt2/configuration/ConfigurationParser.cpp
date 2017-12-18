@@ -526,6 +526,16 @@ bool AbiGroupTagHandler(PostProcessingConfiguration* config, Element* root_eleme
   auto& group = config->abi_groups[label];
   bool valid = true;
 
+  // Special case for empty abi-group tag. Label will be used as the ABI.
+  if (root_element->GetChildElements().empty()) {
+    auto abi = kStringToAbiMap.find(label);
+    if (abi == kStringToAbiMap.end()) {
+      return false;
+    }
+    group.push_back(abi->second);
+    return true;
+  }
+
   for (auto* child : root_element->GetChildElements()) {
     if (child->name != "abi") {
       diag->Error(DiagMessage() << "Unexpected element in ABI group: " << child->name);
@@ -534,7 +544,13 @@ bool AbiGroupTagHandler(PostProcessingConfiguration* config, Element* root_eleme
       for (auto& node : child->children) {
         xml::Text* t;
         if ((t = NodeCast<xml::Text>(node.get())) != nullptr) {
-          group.push_back(kStringToAbiMap.at(TrimWhitespace(t->text).to_string()));
+          auto abi = kStringToAbiMap.find(TrimWhitespace(t->text).to_string());
+          if (abi != kStringToAbiMap.end()) {
+            group.push_back(abi->second);
+          } else {
+            diag->Error(DiagMessage() << "Could not parse ABI value: " << t->text);
+            valid = false;
+          }
           break;
         }
       }
@@ -553,6 +569,25 @@ bool ScreenDensityGroupTagHandler(PostProcessingConfiguration* config, Element* 
 
   auto& group = config->screen_density_groups[label];
   bool valid = true;
+
+  // Special case for empty screen-density-group tag. Label will be used as the screen density.
+  if (root_element->GetChildElements().empty()) {
+    ConfigDescription config_descriptor;
+    bool parsed = ConfigDescription::Parse(label, &config_descriptor);
+    if (parsed &&
+        (config_descriptor.CopyWithoutSdkVersion().diff(ConfigDescription::DefaultConfig()) ==
+            android::ResTable_config::CONFIG_DENSITY)) {
+      // Copy the density with the minimum SDK version stripped out.
+      group.push_back(config_descriptor.CopyWithoutSdkVersion());
+    } else {
+      diag->Error(DiagMessage()
+                      << "Could not parse config descriptor for empty screen-density-group: "
+                      << label);
+      valid = false;
+    }
+
+    return valid;
+  }
 
   for (auto* child : root_element->GetChildElements()) {
     if (child->name != "screen-density") {
@@ -594,6 +629,25 @@ bool LocaleGroupTagHandler(PostProcessingConfiguration* config, Element* root_el
 
   auto& group = config->locale_groups[label];
   bool valid = true;
+
+  // Special case to auto insert a locale for an empty group. Label will be used for locale.
+  if (root_element->GetChildElements().empty()) {
+    ConfigDescription config_descriptor;
+    bool parsed = ConfigDescription::Parse(label, &config_descriptor);
+    if (parsed &&
+        (config_descriptor.CopyWithoutSdkVersion().diff(ConfigDescription::DefaultConfig()) ==
+            android::ResTable_config::CONFIG_LOCALE)) {
+      // Copy the locale with the minimum SDK version stripped out.
+      group.push_back(config_descriptor.CopyWithoutSdkVersion());
+    } else {
+      diag->Error(DiagMessage()
+                      << "Could not parse config descriptor for empty screen-density-group: "
+                      << label);
+      valid = false;
+    }
+
+    return valid;
+  }
 
   for (auto* child : root_element->GetChildElements()) {
     if (child->name != "locale") {

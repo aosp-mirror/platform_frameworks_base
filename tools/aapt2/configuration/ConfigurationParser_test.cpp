@@ -338,6 +338,32 @@ TEST_F(ConfigurationParserTest, AbiGroupAction) {
   ASSERT_THAT(out, ElementsAre(Abi::kArmV7a, Abi::kArm64V8a));
 }
 
+TEST_F(ConfigurationParserTest, AbiGroupAction_EmptyGroup) {
+  static constexpr const char* xml = R"xml(<abi-group label="arm64-v8a"/>)xml";
+
+  auto doc = test::BuildXmlDom(xml);
+
+  PostProcessingConfiguration config;
+  bool ok = AbiGroupTagHandler(&config, NodeCast<Element>(doc.get()->root.get()), &diag_);
+  ASSERT_TRUE(ok);
+
+  EXPECT_THAT(config.abi_groups, SizeIs(1ul));
+  ASSERT_EQ(1u, config.abi_groups.count("arm64-v8a"));
+
+  auto& out = config.abi_groups["arm64-v8a"];
+  ASSERT_THAT(out, ElementsAre(Abi::kArm64V8a));
+}
+
+TEST_F(ConfigurationParserTest, AbiGroupAction_InvalidEmptyGroup) {
+  static constexpr const char* xml = R"xml(<abi-group label="arm"/>)xml";
+
+  auto doc = test::BuildXmlDom(xml);
+
+  PostProcessingConfiguration config;
+  bool ok = AbiGroupTagHandler(&config, NodeCast<Element>(doc.get()->root.get()), &diag_);
+  ASSERT_FALSE(ok);
+}
+
 TEST_F(ConfigurationParserTest, ScreenDensityGroupAction) {
   static constexpr const char* xml = R"xml(
     <screen-density-group label="large">
@@ -368,6 +394,35 @@ TEST_F(ConfigurationParserTest, ScreenDensityGroupAction) {
   ASSERT_THAT(out, ElementsAre(xhdpi, xxhdpi, xxxhdpi));
 }
 
+TEST_F(ConfigurationParserTest, ScreenDensityGroupAction_EmtpyGroup) {
+  static constexpr const char* xml = R"xml(<screen-density-group label="xhdpi"/>)xml";
+
+  auto doc = test::BuildXmlDom(xml);
+
+  PostProcessingConfiguration config;
+  bool ok = ScreenDensityGroupTagHandler(&config, NodeCast<Element>(doc.get()->root.get()), &diag_);
+  ASSERT_TRUE(ok);
+
+  EXPECT_THAT(config.screen_density_groups, SizeIs(1ul));
+  ASSERT_EQ(1u, config.screen_density_groups.count("xhdpi"));
+
+  ConfigDescription xhdpi;
+  xhdpi.density = ResTable_config::DENSITY_XHIGH;
+
+  auto& out = config.screen_density_groups["xhdpi"];
+  ASSERT_THAT(out, ElementsAre(xhdpi));
+}
+
+TEST_F(ConfigurationParserTest, ScreenDensityGroupAction_InvalidEmtpyGroup) {
+  static constexpr const char* xml = R"xml(<screen-density-group label="really-big-screen"/>)xml";
+
+  auto doc = test::BuildXmlDom(xml);
+
+  PostProcessingConfiguration config;
+  bool ok = ScreenDensityGroupTagHandler(&config, NodeCast<Element>(doc.get()->root.get()), &diag_);
+  ASSERT_FALSE(ok);
+}
+
 TEST_F(ConfigurationParserTest, LocaleGroupAction) {
   static constexpr const char* xml = R"xml(
     <locale-group label="europe">
@@ -394,6 +449,35 @@ TEST_F(ConfigurationParserTest, LocaleGroupAction) {
   ConfigDescription de = test::ParseConfigOrDie("de");
 
   ASSERT_THAT(out, ElementsAre(en, es, fr, de));
+}
+
+TEST_F(ConfigurationParserTest, LocaleGroupAction_EmtpyGroup) {
+  static constexpr const char* xml = R"xml(<locale-group label="en"/>)xml";
+
+  auto doc = test::BuildXmlDom(xml);
+
+  PostProcessingConfiguration config;
+  bool ok = LocaleGroupTagHandler(&config, NodeCast<Element>(doc.get()->root.get()), &diag_);
+  ASSERT_TRUE(ok);
+
+  ASSERT_EQ(1ul, config.locale_groups.size());
+  ASSERT_EQ(1u, config.locale_groups.count("en"));
+
+  const auto& out = config.locale_groups["en"];
+
+  ConfigDescription en = test::ParseConfigOrDie("en");
+
+  ASSERT_THAT(out, ElementsAre(en));
+}
+
+TEST_F(ConfigurationParserTest, LocaleGroupAction_InvalidEmtpyGroup) {
+  static constexpr const char* xml = R"xml(<locale-group label="arm64"/>)xml";
+
+  auto doc = test::BuildXmlDom(xml);
+
+  PostProcessingConfiguration config;
+  bool ok = LocaleGroupTagHandler(&config, NodeCast<Element>(doc.get()->root.get()), &diag_);
+  ASSERT_FALSE(ok);
 }
 
 TEST_F(ConfigurationParserTest, AndroidSdkGroupAction) {
