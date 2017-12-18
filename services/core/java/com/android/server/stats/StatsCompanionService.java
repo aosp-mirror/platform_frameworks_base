@@ -455,7 +455,7 @@ public class StatsCompanionService extends IStatsCompanionService.Stub {
             Slog.d(TAG, "Pulling " + tagId);
 
         switch (tagId) {
-            case StatsLog.WIFI_BYTES_TRANSFERRED: {
+            case StatsLog.WIFI_BYTES_TRANSFER: {
                 long token = Binder.clearCallingIdentity();
                 try {
                     // TODO: Consider caching the following call to get BatteryStatsInternal.
@@ -476,7 +476,7 @@ public class StatsCompanionService extends IStatsCompanionService.Stub {
                 }
                 break;
             }
-            case StatsLog.MOBILE_BYTES_TRANSFERRED: {
+            case StatsLog.MOBILE_BYTES_TRANSFER: {
                 long token = Binder.clearCallingIdentity();
                 try {
                     BatteryStatsInternal bs = LocalServices.getService(BatteryStatsInternal.class);
@@ -496,7 +496,7 @@ public class StatsCompanionService extends IStatsCompanionService.Stub {
                 }
                 break;
             }
-            case StatsLog.WIFI_BYTES_TRANSFERRED_BY_FG_BG: {
+            case StatsLog.WIFI_BYTES_TRANSFER_BY_FG_BG: {
                 long token = Binder.clearCallingIdentity();
                 try {
                     BatteryStatsInternal bs = LocalServices.getService(BatteryStatsInternal.class);
@@ -516,7 +516,7 @@ public class StatsCompanionService extends IStatsCompanionService.Stub {
                 }
                 break;
             }
-            case StatsLog.MOBILE_BYTES_TRANSFERRED_BY_FG_BG: {
+            case StatsLog.MOBILE_BYTES_TRANSFER_BY_FG_BG: {
                 long token = Binder.clearCallingIdentity();
                 try {
                     BatteryStatsInternal bs = LocalServices.getService(BatteryStatsInternal.class);
@@ -536,7 +536,7 @@ public class StatsCompanionService extends IStatsCompanionService.Stub {
                 }
                 break;
             }
-            case StatsLog.KERNEL_WAKELOCK_PULLED: {
+            case StatsLog.KERNEL_WAKELOCK: {
                 final KernelWakelockStats wakelockStats =
                         mKernelWakelockReader.readKernelWakelockStats(mTmpWakelockStats);
                 List<StatsLogEventWrapper> ret = new ArrayList();
@@ -552,7 +552,7 @@ public class StatsCompanionService extends IStatsCompanionService.Stub {
                 }
                 return ret.toArray(new StatsLogEventWrapper[ret.size()]);
             }
-            case StatsLog.CPU_TIME_PER_FREQ_PULLED: {
+            case StatsLog.CPU_TIME_PER_FREQ: {
                 List<StatsLogEventWrapper> ret = new ArrayList();
                 for (int cluster = 0; cluster < mKernelCpuSpeedReaders.length; cluster++) {
                     long[] clusterTimeMs = mKernelCpuSpeedReaders[cluster].readDelta();
@@ -568,7 +568,7 @@ public class StatsCompanionService extends IStatsCompanionService.Stub {
                 }
                 return ret.toArray(new StatsLogEventWrapper[ret.size()]);
             }
-            case StatsLog.WIFI_ACTIVITY_ENERGY_INFO_PULLED: {
+            case StatsLog.WIFI_ACTIVITY_ENERGY_INFO: {
                 List<StatsLogEventWrapper> ret = new ArrayList();
                 long token = Binder.clearCallingIdentity();
                 if (mWifiManager == null) {
@@ -596,7 +596,7 @@ public class StatsCompanionService extends IStatsCompanionService.Stub {
                 }
                 break;
             }
-            case StatsLog.MODEM_ACTIVITY_INFO_PULLED: {
+            case StatsLog.MODEM_ACTIVITY_INFO: {
                 List<StatsLogEventWrapper> ret = new ArrayList();
                 long token = Binder.clearCallingIdentity();
                 if (mTelephony == null) {
