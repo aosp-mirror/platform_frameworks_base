@@ -19,6 +19,7 @@ package android.telephony;
 import static android.telephony.TelephonyManager.PHONE_TYPE_CDMA;
 
 import android.annotation.StringDef;
+import android.app.PendingIntent;
 import android.content.res.Resources;
 import android.os.Binder;
 import android.text.TextUtils;
@@ -92,11 +93,13 @@ public class SmsMessage {
 
     /**
      * Indicates a 3GPP format SMS message.
+     * @see SmsManager#injectSmsPdu(byte[], String, PendingIntent)
      */
     public static final String FORMAT_3GPP = "3gpp";
 
     /**
      * Indicates a 3GPP2 format SMS message.
+     * @see SmsManager#injectSmsPdu(byte[], String, PendingIntent)
      */
     public static final String FORMAT_3GPP2 = "3gpp2";
 
