@@ -21,6 +21,7 @@ import android.os.Parcelable;
 import android.system.ErrnoException;
 import android.system.Os;
 import android.system.OsConstants;
+import android.util.proto.ProtoOutputStream;
 
 import com.android.okhttp.internalandroidapi.Dns;
 import com.android.okhttp.internalandroidapi.HttpURLConnectionFactory;
@@ -401,5 +402,12 @@ public class Network implements Parcelable {
     @Override
     public String toString() {
         return Integer.toString(netId);
+    }
+
+    /** @hide */
+    public void writeToProto(ProtoOutputStream proto, long fieldId) {
+        final long token = proto.start(fieldId);
+        proto.write(NetworkProto.NET_ID, netId);
+        proto.end(token);
     }
 }

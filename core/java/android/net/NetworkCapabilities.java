@@ -20,6 +20,7 @@ import android.annotation.IntDef;
 import android.net.ConnectivityManager.NetworkCallback;
 import android.os.Parcel;
 import android.os.Parcelable;
+import android.util.proto.ProtoOutputStream;
 
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.util.BitUtils;
@@ -1014,6 +1015,31 @@ public final class NetworkCapabilities implements Parcelable {
         String signalStrength = (hasSignalStrength() ? " SignalStrength: " + mSignalStrength : "");
 
         return "[" + transports + capabilities + upBand + dnBand + specifier + signalStrength + "]";
+    }
+
+    /** @hide */
+    public void writeToProto(ProtoOutputStream proto, long fieldId) {
+        final long token = proto.start(fieldId);
+
+        for (int transport : getTransportTypes()) {
+            proto.write(NetworkCapabilitiesProto.TRANSPORTS, transport);
+        }
+
+        for (int capability : getCapabilities()) {
+            proto.write(NetworkCapabilitiesProto.CAPABILITIES, capability);
+        }
+
+        proto.write(NetworkCapabilitiesProto.LINK_UP_BANDWIDTH_KBPS, mLinkUpBandwidthKbps);
+        proto.write(NetworkCapabilitiesProto.LINK_DOWN_BANDWIDTH_KBPS, mLinkDownBandwidthKbps);
+
+        if (mNetworkSpecifier != null) {
+            proto.write(NetworkCapabilitiesProto.NETWORK_SPECIFIER, mNetworkSpecifier.toString());
+        }
+
+        proto.write(NetworkCapabilitiesProto.CAN_REPORT_SIGNAL_STRENGTH, hasSignalStrength());
+        proto.write(NetworkCapabilitiesProto.SIGNAL_STRENGTH, mSignalStrength);
+
+        proto.end(token);
     }
 
     /**

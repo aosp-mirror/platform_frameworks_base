@@ -25,17 +25,20 @@ import android.net.Network;
 import android.net.NetworkCapabilities;
 import android.net.NetworkInfo;
 import android.net.NetworkPolicyManager;
+import android.net.NetworkRequest;
 import android.net.TrafficStats;
 import android.os.Process;
 import android.os.UserHandle;
 import android.text.format.DateUtils;
 import android.util.ArraySet;
 import android.util.Slog;
+import android.util.proto.ProtoOutputStream;
 
 import com.android.internal.annotations.GuardedBy;
 import com.android.server.job.JobSchedulerService;
 import com.android.server.job.JobServiceContext;
 import com.android.server.job.StateChangedListener;
+import com.android.server.job.StateControllerProto;
 
 import java.io.PrintWriter;
 
@@ -289,5 +292,33 @@ public final class ConnectivityController extends StateController implements
                 pw.print(": "); pw.print(js.getJob().getRequiredNetwork());
             }
         }
+    }
+
+    @Override
+    public void dumpControllerStateLocked(ProtoOutputStream proto, long fieldId, int filterUid) {
+        final long token = proto.start(fieldId);
+        final long mToken = proto.start(StateControllerProto.CONNECTIVITY);
+
+        proto.write(StateControllerProto.ConnectivityController.IS_CONNECTED, mConnected);
+
+        for (int i = 0; i < mTrackedJobs.size(); i++) {
+            final JobStatus js = mTrackedJobs.valueAt(i);
+            if (!js.shouldDump(filterUid)) {
+                continue;
+            }
+            final long jsToken = proto.start(StateControllerProto.ConnectivityController.TRACKED_JOBS);
+            js.writeToShortProto(proto, StateControllerProto.ConnectivityController.TrackedJob.INFO);
+            proto.write(StateControllerProto.ConnectivityController.TrackedJob.SOURCE_UID,
+                    js.getSourceUid());
+            NetworkRequest rn = js.getJob().getRequiredNetwork();
+            if (rn != null) {
+                rn.writeToProto(proto,
+                        StateControllerProto.ConnectivityController.TrackedJob.REQUIRED_NETWORK);
+            }
+            proto.end(jsToken);
+        }
+
+        proto.end(mToken);
+        proto.end(token);
     }
 }

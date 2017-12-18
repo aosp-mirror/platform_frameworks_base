@@ -9410,6 +9410,12 @@ public class Intent implements Parcelable, Cloneable {
     }
 
     /** @hide */
+    public void writeToProto(ProtoOutputStream proto, long fieldId) {
+        // Same input parameters that toString() gives to toShortString().
+        writeToProto(proto, fieldId, true, true, true, false);
+    }
+
+    /** @hide */
     public void writeToProto(ProtoOutputStream proto, long fieldId, boolean secure, boolean comp,
             boolean extras, boolean clip) {
         long token = proto.start(fieldId);

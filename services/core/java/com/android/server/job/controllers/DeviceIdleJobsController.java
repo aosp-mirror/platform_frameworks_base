@@ -29,12 +29,15 @@ import android.os.UserHandle;
 import android.util.ArraySet;
 import android.util.Slog;
 import android.util.SparseBooleanArray;
+import android.util.proto.ProtoOutputStream;
 
 import com.android.internal.util.ArrayUtils;
 import com.android.server.DeviceIdleController;
 import com.android.server.LocalServices;
 import com.android.server.job.JobSchedulerService;
 import com.android.server.job.JobStore;
+import com.android.server.job.StateControllerProto;
+import com.android.server.job.StateControllerProto.DeviceIdleJobsController.TrackedJob;
 
 import java.io.PrintWriter;
 import java.util.Arrays;
@@ -268,6 +271,38 @@ public final class DeviceIdleJobsController extends StateController {
                 pw.println();
             }
         });
+    }
+
+    @Override
+    public void dumpControllerStateLocked(ProtoOutputStream proto, long fieldId, int filterUid) {
+        final long token = proto.start(fieldId);
+        final long mToken = proto.start(StateControllerProto.DEVICE_IDLE);
+
+        proto.write(StateControllerProto.DeviceIdleJobsController.IS_DEVICE_IDLE_MODE,
+                mDeviceIdleMode);
+        mJobSchedulerService.getJobStore().forEachJob(new JobStore.JobStatusFunctor() {
+            @Override public void process(JobStatus jobStatus) {
+                if (!jobStatus.shouldDump(filterUid)) {
+                    return;
+                }
+                final long jsToken =
+                        proto.start(StateControllerProto.DeviceIdleJobsController.TRACKED_JOBS);
+
+                jobStatus.writeToShortProto(proto, TrackedJob.INFO);
+                proto.write(TrackedJob.SOURCE_UID, jobStatus.getSourceUid());
+                proto.write(TrackedJob.SOURCE_PACKAGE_NAME, jobStatus.getSourcePackageName());
+                proto.write(TrackedJob.ARE_CONSTRAINTS_SATISFIED,
+                        (jobStatus.satisfiedConstraints &
+                            JobStatus.CONSTRAINT_DEVICE_NOT_DOZING) != 0);
+                proto.write(TrackedJob.IS_DOZE_WHITELISTED, jobStatus.dozeWhitelisted);
+                proto.write(TrackedJob.IS_ALLOWED_IN_DOZE, mAllowInIdleJobs.contains(jobStatus));
+
+                proto.end(jsToken);
+            }
+        });
+
+        proto.end(mToken);
+        proto.end(token);
     }
 
     final class DeviceIdleUpdateFunctor implements JobStore.JobStatusFunctor {

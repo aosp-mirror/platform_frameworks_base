@@ -20,10 +20,12 @@ import android.app.usage.UsageStatsManagerInternal;
 import android.content.Context;
 import android.os.UserHandle;
 import android.util.Slog;
+import android.util.proto.ProtoOutputStream;
 
 import com.android.server.LocalServices;
 import com.android.server.job.JobSchedulerService;
 import com.android.server.job.JobStore;
+import com.android.server.job.StateControllerProto;
 
 import java.io.PrintWriter;
 
@@ -150,6 +152,38 @@ public final class AppIdleController extends StateController {
                 }
             }
         });
+    }
+
+    @Override
+    public void dumpControllerStateLocked(ProtoOutputStream proto, long fieldId, int filterUid) {
+        final long token = proto.start(fieldId);
+        final long mToken = proto.start(StateControllerProto.APP_IDLE);
+
+        proto.write(StateControllerProto.AppIdleController.IS_PAROLE_ON, mAppIdleParoleOn);
+
+        mJobSchedulerService.getJobStore().forEachJob(new JobStore.JobStatusFunctor() {
+            @Override public void process(JobStatus js) {
+                // Skip printing details if the caller requested a filter
+                if (!js.shouldDump(filterUid)) {
+                    return;
+                }
+
+                final long jsToken =
+                        proto.start(StateControllerProto.AppIdleController.TRACKED_JOBS);
+                js.writeToShortProto(proto, StateControllerProto.AppIdleController.TrackedJob.INFO);
+                proto.write(StateControllerProto.AppIdleController.TrackedJob.SOURCE_UID,
+                        js.getSourceUid());
+                proto.write(StateControllerProto.AppIdleController.TrackedJob.SOURCE_PACKAGE_NAME,
+                        js.getSourcePackageName());
+                proto.write(
+                        StateControllerProto.AppIdleController.TrackedJob.ARE_CONSTRAINTS_SATISFIED,
+                        (js.satisfiedConstraints & JobStatus.CONSTRAINT_APP_NOT_IDLE) != 0);
+                proto.end(jsToken);
+            }
+        });
+
+        proto.end(mToken);
+        proto.end(token);
     }
 
     void setAppIdleParoleOn(boolean isAppIdleParoleOn) {
