@@ -255,8 +255,13 @@ public class ScrimController implements ViewTreeObserver.OnPreDrawListener,
             mKeyguardFadeoutAnimation.cancel();
         }
 
-        // Do not let the device sleep until we're done with all animations
-        holdWakeLock();
+        // The device might sleep if it's entering AOD, we need to make sure that
+        // the animation plays properly until the last frame.
+        // It's important to avoid holding the wakelock unless necessary because
+        // WakeLock#aqcuire will trigger an IPC and will cause jank.
+        if (mState == ScrimState.AOD) {
+            holdWakeLock();
+        }
 
         // AOD wallpapers should fade away after a while
         if (mWallpaperSupportsAmbientMode && mDozeParameters.getAlwaysOn()
