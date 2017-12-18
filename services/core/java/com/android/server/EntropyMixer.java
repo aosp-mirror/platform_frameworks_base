@@ -196,11 +196,14 @@ public class EntropyMixer extends Binder {
      * Mixes in the output from HW RNG (if present) into the Linux RNG.
      */
     private void addHwRandomEntropy() {
+        if (!new File(hwRandomDevice).exists()) {
+            // HW RNG not present/exposed -- ignore
+            return;
+        }
+
         try {
             RandomBlock.fromFile(hwRandomDevice).toFile(randomDevice, false);
             Slog.i(TAG, "Added HW RNG output to entropy pool");
-        } catch (FileNotFoundException ignored) {
-            // HW RNG not present/exposed -- ignore
         } catch (IOException e) {
             Slog.w(TAG, "Failed to add HW RNG output to entropy pool", e);
         }
