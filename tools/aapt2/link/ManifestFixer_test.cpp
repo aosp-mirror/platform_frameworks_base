@@ -19,6 +19,7 @@
 #include "test/Test.h"
 
 using ::android::StringPiece;
+using ::testing::IsNull;
 using ::testing::NotNull;
 
 namespace aapt {
@@ -109,7 +110,9 @@ TEST_F(ManifestFixerTest, AllowMetaData) {
 }
 
 TEST_F(ManifestFixerTest, UseDefaultSdkVersionsIfNonePresent) {
-  ManifestFixerOptions options = {std::string("8"), std::string("22")};
+  ManifestFixerOptions options;
+  options.min_sdk_version_default = std::string("8");
+  options.target_sdk_version_default = std::string("22");
 
   std::unique_ptr<xml::XmlResource> doc = VerifyWithOptions(R"EOF(
       <manifest xmlns:android="http://schemas.android.com/apk/res/android"
@@ -190,7 +193,9 @@ TEST_F(ManifestFixerTest, UseDefaultSdkVersionsIfNonePresent) {
 }
 
 TEST_F(ManifestFixerTest, UsesSdkMustComeBeforeApplication) {
-  ManifestFixerOptions options = {std::string("8"), std::string("22")};
+  ManifestFixerOptions options;
+  options.min_sdk_version_default = std::string("8");
+  options.target_sdk_version_default = std::string("22");
   std::unique_ptr<xml::XmlResource> doc = VerifyWithOptions(R"EOF(
           <manifest xmlns:android="http://schemas.android.com/apk/res/android"
                     package="android">
@@ -437,6 +442,29 @@ TEST_F(ManifestFixerTest, SupportKeySets) {
         </key-sets>
       </manifest>)";
   EXPECT_THAT(Verify(input), NotNull());
+}
+
+TEST_F(ManifestFixerTest, UnexpectedElementsInManifest) {
+  std::string input = R"(
+      <manifest xmlns:android="http://schemas.android.com/apk/res/android"
+          package="android">
+        <beep/>
+      </manifest>)";
+  ManifestFixerOptions options;
+  options.warn_validation = true;
+
+  // Unexpected element should result in a warning if the flag is set to 'true'.
+  std::unique_ptr<xml::XmlResource> manifest = VerifyWithOptions(input, options);
+  ASSERT_THAT(manifest, NotNull());
+
+  // Unexpected element should result in an error if the flag is set to 'false'.
+  options.warn_validation = false;
+  manifest = VerifyWithOptions(input, options);
+  ASSERT_THAT(manifest, IsNull());
+
+  // By default the flag should be set to 'false'.
+  manifest = Verify(input);
+  ASSERT_THAT(manifest, IsNull());
 }
 
 }  // namespace aapt

@@ -35,6 +35,11 @@ struct ManifestFixerOptions {
   Maybe<std::string> rename_instrumentation_target_package;
   Maybe<std::string> version_name_default;
   Maybe<std::string> version_code_default;
+
+  // Wether validation errors should be treated only as warnings. If this is 'true', then an
+  // incorrect node will not result in an error, but only as a warning, and the parsing will
+  // continue.
+  bool warn_validation = false;
 };
 
 /**
