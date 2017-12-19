@@ -96,6 +96,9 @@ class WindowContainer<E extends WindowContainer> extends ConfigurationContainer<
 
     private final Point mTmpPos = new Point();
 
+    /** Total number of elements in this subtree, including our own hierarchy element. */
+    private int mTreeWeight = 1;
+
     WindowContainer(WindowManagerService service) {
         mService = service;
         mPendingTransaction = service.mTransactionFactory.make();
@@ -157,7 +160,7 @@ class WindowContainer<E extends WindowContainer> extends ConfigurationContainer<
             // surface animator such that hierarchy is preserved when animating, i.e.
             // mSurfaceControl stays attached to the leash and we just reparent the leash to the
             // new parent.
-            mSurfaceAnimator.reparent(getPendingTransaction(), mParent.mSurfaceControl);
+            reparentSurfaceControl(getPendingTransaction(), mParent.mSurfaceControl);
         }
 
         // Either way we need to ask the parent to assign us a Z-order.
@@ -200,6 +203,8 @@ class WindowContainer<E extends WindowContainer> extends ConfigurationContainer<
         } else {
             mChildren.add(positionToAdd, child);
         }
+        onChildAdded(child);
+
         // Set the parent after we've actually added a child in case a subclass depends on this.
         child.setParent(this);
     }
@@ -213,8 +218,19 @@ class WindowContainer<E extends WindowContainer> extends ConfigurationContainer<
                     + " can't add to container=" + getName());
         }
         mChildren.add(index, child);
+        onChildAdded(child);
+
         // Set the parent after we've actually added a child in case a subclass depends on this.
         child.setParent(this);
+    }
+
+    private void onChildAdded(WindowContainer child) {
+        mTreeWeight += child.mTreeWeight;
+        WindowContainer parent = getParent();
+        while (parent != null) {
+            parent.mTreeWeight += child.mTreeWeight;
+            parent = parent.getParent();
+        }
     }
 
     /**
@@ -225,10 +241,20 @@ class WindowContainer<E extends WindowContainer> extends ConfigurationContainer<
     @CallSuper
     void removeChild(E child) {
         if (mChildren.remove(child)) {
+            onChildRemoved(child);
             child.setParent(null);
         } else {
             throw new IllegalArgumentException("removeChild: container=" + child.getName()
                     + " is not a child of container=" + getName());
+        }
+    }
+
+    private void onChildRemoved(WindowContainer child) {
+        mTreeWeight -= child.mTreeWeight;
+        WindowContainer parent = getParent();
+        while (parent != null) {
+            parent.mTreeWeight -= child.mTreeWeight;
+            parent = parent.getParent();
         }
     }
 
@@ -246,7 +272,9 @@ class WindowContainer<E extends WindowContainer> extends ConfigurationContainer<
             // Need to do this after calling remove on the child because the child might try to
             // remove/detach itself from its parent which will cause an exception if we remove
             // it before calling remove on the child.
-            mChildren.remove(child);
+            if (mChildren.remove(child)) {
+                onChildRemoved(child);
+            }
         }
 
         if (mSurfaceControl != null) {
@@ -262,6 +290,34 @@ class WindowContainer<E extends WindowContainer> extends ConfigurationContainer<
             setController(null);
         }
 
+    }
+
+    /**
+     * @return The index of this element in the hierarchy tree in prefix order.
+     */
+    int getPrefixOrderIndex() {
+        if (mParent == null) {
+            return 0;
+        }
+        return mParent.getPrefixOrderIndex(this);
+    }
+
+    private int getPrefixOrderIndex(WindowContainer child) {
+        int order = 0;
+        for (int i = 0; i < mChildren.size(); i++) {
+            final WindowContainer childI = mChildren.get(i);
+            if (child == childI) {
+                break;
+            }
+            order += childI.mTreeWeight;
+        }
+        if (mParent != null) {
+            order += mParent.getPrefixOrderIndex(this);
+        }
+
+        // We also need to count ourselves.
+        order++;
+        return order;
     }
 
     /**
@@ -831,10 +887,7 @@ class WindowContainer<E extends WindowContainer> extends ConfigurationContainer<
     void assignLayer(Transaction t, int layer) {
         final boolean changed = layer != mLastLayer || mLastRelativeToLayer != null;
         if (mSurfaceControl != null && changed) {
-
-            // Route through surface animator to accommodate that our surface control might be
-            // attached to the leash, and leash is attached to parent container.
-            mSurfaceAnimator.setLayer(t, layer);
+            setLayer(t, layer);
             mLastLayer = layer;
             mLastRelativeToLayer = null;
         }
@@ -843,13 +896,28 @@ class WindowContainer<E extends WindowContainer> extends ConfigurationContainer<
     void assignRelativeLayer(Transaction t, SurfaceControl relativeTo, int layer) {
         final boolean changed = layer != mLastLayer || mLastRelativeToLayer != relativeTo;
         if (mSurfaceControl != null && changed) {
-
-            // Route through surface animator to accommodate that our surface control might be
-            // attached to the leash, and leash is attached to parent container.
-            mSurfaceAnimator.setRelativeLayer(t, relativeTo, layer);
+            setRelativeLayer(t, relativeTo, layer);
             mLastLayer = layer;
             mLastRelativeToLayer = relativeTo;
         }
+    }
+
+    protected void setLayer(Transaction t, int layer) {
+
+        // Route through surface animator to accommodate that our surface control might be
+        // attached to the leash, and leash is attached to parent container.
+        mSurfaceAnimator.setLayer(t, layer);
+    }
+
+    protected void setRelativeLayer(Transaction t, SurfaceControl relativeTo, int layer) {
+
+        // Route through surface animator to accommodate that our surface control might be
+        // attached to the leash, and leash is attached to parent container.
+        mSurfaceAnimator.setRelativeLayer(t, relativeTo, layer);
+    }
+
+    protected void reparentSurfaceControl(Transaction t, SurfaceControl newParent) {
+        mSurfaceAnimator.reparent(t, newParent);
     }
 
     void assignChildLayers(Transaction t) {

@@ -141,7 +141,7 @@ class AppWindowThumbnail implements Animatable {
 
     @Override
     public Builder makeAnimationLeash() {
-        return mAppToken.makeSurface();
+        return mAppToken.makeSurface().setParent(mAppToken.getAppAnimationLayer());
     }
 
     @Override

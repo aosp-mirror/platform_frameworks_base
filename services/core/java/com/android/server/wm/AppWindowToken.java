@@ -65,6 +65,7 @@ import android.os.Trace;
 import android.util.Slog;
 import android.util.proto.ProtoOutputStream;
 import android.view.DisplayInfo;
+import android.view.SurfaceControl.Transaction;
 import android.view.animation.Animation;
 import android.view.IApplicationToken;
 import android.view.SurfaceControl;
@@ -90,6 +91,11 @@ class AppTokenList extends ArrayList<AppWindowToken> {
  */
 class AppWindowToken extends WindowToken implements WindowManagerService.AppFreezeListener {
     private static final String TAG = TAG_WITH_CLASS_NAME ? "AppWindowToken" : TAG_WM;
+
+    /**
+     * Value to increment the z-layer when boosting a layer during animations. BOOST in l33tsp34k.
+     */
+    private static final int Z_BOOST_BASE = 800570000;
 
     // Non-null only for application tokens.
     final IApplicationToken appToken;
@@ -1537,11 +1543,10 @@ class AppWindowToken extends WindowToken implements WindowManagerService.AppFree
                         new WindowAnimationSpec(a, mTmpPoint,
                                 mService.mAppTransition.canSkipFirstFrame()),
                         mService.mSurfaceAnimationRunner);
-                startAnimation(getPendingTransaction(), adapter, !isVisible());
                 if (a.getZAdjustment() == Animation.ZORDER_TOP) {
                     mNeedsZBoost = true;
-                    getDisplayContent().assignWindowLayers(false /* setLayoutNeeded */);
                 }
+                startAnimation(getPendingTransaction(), adapter, !isVisible());
                 mTransit = transit;
                 mTransitFlags = mService.mAppTransition.getTransitFlags();
                 // TODO: Skip first frame and app stack clip mode.
@@ -1608,6 +1613,39 @@ class AppWindowToken extends WindowToken implements WindowManagerService.AppFree
             a.scaleCurrentDuration(mService.getTransitionAnimationScaleLocked());
         }
         return a;
+    }
+
+    @Override
+    protected void setLayer(Transaction t, int layer) {
+        if (!mSurfaceAnimator.hasLeash()) {
+            t.setLayer(mSurfaceControl, layer);
+        }
+    }
+
+    @Override
+    protected void setRelativeLayer(Transaction t, SurfaceControl relativeTo, int layer) {
+        if (!mSurfaceAnimator.hasLeash()) {
+            t.setRelativeLayer(mSurfaceControl, relativeTo, layer);
+        }
+    }
+
+    @Override
+    protected void reparentSurfaceControl(Transaction t, SurfaceControl newParent) {
+        if (!mSurfaceAnimator.hasLeash()) {
+            t.reparent(mSurfaceControl, newParent.getHandle());
+        }
+    }
+
+    @Override
+    public void onAnimationLeashCreated(Transaction t, SurfaceControl leash) {
+
+        // The leash is parented to the animation layer. We need to preserve the z-order by using
+        // the prefix order index, but we boost if necessary.
+        int layer = getPrefixOrderIndex();
+        if (mNeedsZBoost) {
+            layer += Z_BOOST_BASE;
+        }
+        leash.setLayer(layer);
     }
 
     /**
