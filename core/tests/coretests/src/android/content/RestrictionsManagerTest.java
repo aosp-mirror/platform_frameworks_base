@@ -17,6 +17,7 @@ package android.content;
 
 import android.os.Bundle;
 import android.os.Parcelable;
+import android.support.test.filters.LargeTest;
 import android.test.AndroidTestCase;
 
 import java.util.Arrays;
@@ -24,6 +25,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
+@LargeTest
 public class RestrictionsManagerTest extends AndroidTestCase {
     private RestrictionsManager mRm;
 

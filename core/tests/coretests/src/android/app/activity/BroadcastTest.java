@@ -27,12 +27,13 @@ import android.os.Bundle;
 import android.os.IBinder;
 import android.os.Parcel;
 import android.os.UserHandle;
+import android.support.test.filters.LargeTest;
 import android.test.FlakyTest;
-import android.test.suitebuilder.annotation.Suppress;
 import android.util.Log;
 
 import java.util.Arrays;
 
+@LargeTest
 public class BroadcastTest extends ActivityTestsBase {
     public static final int BROADCAST_TIMEOUT = 5 * 1000;
 

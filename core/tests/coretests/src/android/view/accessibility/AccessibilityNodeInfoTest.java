@@ -18,6 +18,7 @@ package android.view.accessibility;
 
 import static org.junit.Assert.fail;
 
+import android.support.test.filters.LargeTest;
 import android.support.test.runner.AndroidJUnit4;
 import android.util.ArraySet;
 import android.view.accessibility.AccessibilityNodeInfo.AccessibilityAction;
@@ -29,6 +30,7 @@ import org.junit.runner.RunWith;
 
 import java.util.ArrayList;
 
+@LargeTest
 @RunWith(AndroidJUnit4.class)
 public class AccessibilityNodeInfoTest {
 

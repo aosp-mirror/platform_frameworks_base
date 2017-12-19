@@ -17,6 +17,7 @@
 
 package android.animation;
 
+import android.support.test.filters.LargeTest;
 import android.test.ActivityInstrumentationTestCase2;
 import android.test.UiThreadTest;
 import android.util.StateSet;
@@ -27,7 +28,7 @@ import com.android.frameworks.coretests.R;
 
 import java.util.concurrent.atomic.AtomicInteger;
 
-
+@LargeTest
 public class StateListAnimatorTest extends ActivityInstrumentationTestCase2<BasicAnimatorActivity> {
 
     public StateListAnimatorTest() {

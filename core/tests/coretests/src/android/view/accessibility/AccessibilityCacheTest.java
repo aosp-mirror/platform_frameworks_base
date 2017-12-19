@@ -28,6 +28,7 @@ import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import android.support.test.filters.LargeTest;
 import android.support.test.runner.AndroidJUnit4;
 import android.view.View;
 
@@ -42,7 +43,7 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
 
-
+@LargeTest
 @RunWith(AndroidJUnit4.class)
 public class AccessibilityCacheTest {
     private static final int WINDOW_ID_1 = 0xBEEF;
