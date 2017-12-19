@@ -294,6 +294,11 @@ interface IWindowManager
     boolean hasNavigationBar();
 
     /**
+    * Get the position of the nav bar
+    */
+    int getNavBarPosition();
+
+    /**
      * Lock the device immediately with the specified options (can be null).
      */
     void lockNow(in Bundle options);

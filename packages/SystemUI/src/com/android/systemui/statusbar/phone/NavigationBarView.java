@@ -26,6 +26,7 @@ import android.app.ActivityManager;
 import android.app.StatusBarManager;
 import android.content.Context;
 import android.content.res.Configuration;
+import android.graphics.Canvas;
 import android.graphics.Point;
 import android.graphics.Rect;
 import android.os.Handler;
@@ -601,6 +602,24 @@ public class NavigationBarView extends FrameLayout implements PluginListener<Nav
 
         DockedStackExistsListener.register(mDockedListener);
         updateRotatedViews();
+    }
+
+    public void onDarkIntensityChange(float intensity) {
+        if (mGestureHelper != null) {
+            mGestureHelper.onDarkIntensityChange(intensity);
+        }
+    }
+
+    @Override
+    protected void onDraw(Canvas canvas) {
+        mGestureHelper.onDraw(canvas);
+        super.onDraw(canvas);
+    }
+
+    @Override
+    protected void onLayout(boolean changed, int left, int top, int right, int bottom) {
+        super.onLayout(changed, left, top, right, bottom);
+        mGestureHelper.onLayout(changed, left, top, right, bottom);
     }
 
     private void updateRotatedViews() {
