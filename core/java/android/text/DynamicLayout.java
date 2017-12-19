@@ -492,7 +492,9 @@ public class DynamicLayout extends Layout
         }
     }
 
-    private void reflow(CharSequence s, int where, int before, int after) {
+    /** @hide */
+    @VisibleForTesting(visibility = VisibleForTesting.Visibility.PACKAGE)
+    public void reflow(CharSequence s, int where, int before, int after) {
         if (s != mBase)
             return;
 
@@ -805,8 +807,8 @@ public class DynamicLayout extends Layout
             return;
         }
 
-        int firstBlock = -1;
-        int lastBlock = -1;
+        /*final*/ int firstBlock = -1;
+        /*final*/ int lastBlock = -1;
         for (int i = 0; i < mNumberOfBlocks; i++) {
             if (mBlockEndLines[i] >= startLine) {
                 firstBlock = i;
@@ -821,10 +823,10 @@ public class DynamicLayout extends Layout
         }
         final int lastBlockEndLine = mBlockEndLines[lastBlock];
 
-        boolean createBlockBefore = startLine > (firstBlock == 0 ? 0 :
+        final boolean createBlockBefore = startLine > (firstBlock == 0 ? 0 :
                 mBlockEndLines[firstBlock - 1] + 1);
-        boolean createBlock = newLineCount > 0;
-        boolean createBlockAfter = endLine < mBlockEndLines[lastBlock];
+        final boolean createBlock = newLineCount > 0;
+        final boolean createBlockAfter = endLine < mBlockEndLines[lastBlock];
 
         int numAddedBlocks = 0;
         if (createBlockBefore) numAddedBlocks++;
@@ -863,12 +865,18 @@ public class DynamicLayout extends Layout
 
         if (numAddedBlocks + numRemovedBlocks != 0 && mBlocksAlwaysNeedToBeRedrawn != null) {
             final ArraySet<Integer> set = new ArraySet<>();
+            final int changedBlockCount = numAddedBlocks - numRemovedBlocks;
             for (int i = 0; i < mBlocksAlwaysNeedToBeRedrawn.size(); i++) {
                 Integer block = mBlocksAlwaysNeedToBeRedrawn.valueAt(i);
-                if (block > firstBlock) {
-                    block += numAddedBlocks - numRemovedBlocks;
+                if (block < firstBlock) {
+                    // block index is before firstBlock add it since it did not change
+                    set.add(block);
                 }
-                set.add(block);
+                if (block > lastBlock) {
+                    // block index is after lastBlock, the index reduced to += changedBlockCount
+                    block += changedBlockCount;
+                    set.add(block);
+                }
             }
             mBlocksAlwaysNeedToBeRedrawn = set;
         }
