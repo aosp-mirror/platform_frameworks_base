@@ -18,6 +18,7 @@ package android.security.recoverablekeystore;
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.app.PendingIntent;
 import android.content.pm.PackageManager.NameNotFoundException;
 import android.os.RemoteException;
 import android.os.ServiceManager;
@@ -29,6 +30,7 @@ import android.util.AndroidException;
 import com.android.internal.widget.ILockSettings;
 
 import java.util.List;
+import java.util.Map;
 
 /**
  * A wrapper around KeyStore which lets key be exported to trusted hardware on server side and
@@ -43,8 +45,22 @@ public class RecoverableKeyStoreLoader {
     public static final int NO_ERROR = KeyStore.NO_ERROR;
     public static final int SYSTEM_ERROR = KeyStore.SYSTEM_ERROR;
     public static final int UNINITIALIZED_RECOVERY_PUBLIC_KEY = 20;
-    // Too many updates to recovery public key or server parameters.
+    /**
+     * Rate limit is enforced to prevent using too many trusted remote devices, since each device
+     * can have its own number of user secret guesses allowed.
+     *
+     * @hide
+     */
     public static final int RATE_LIMIT_EXCEEDED = 21;
+
+    /** Key has been successfully synced. */
+    public static final int RECOVERY_STATUS_SYNCED = 0;
+    /** Waiting for recovery agent to sync the key. */
+    public static final int RECOVERY_STATUS_SYNC_IN_PROGRESS = 1;
+    /** Recovery account is not available. */
+    public static final int RECOVERY_STATUS_MISSING_ACCOUNT = 2;
+    /** Key cannot be synced. */
+    public static final int RECOVERY_STATUS_PERMANENT_FAILURE = 3;
 
     private final ILockSettings mBinder;
 
@@ -155,12 +171,56 @@ public class RecoverableKeyStoreLoader {
      * @return Data necessary to recover keystore.
      * @hide
      */
-    public KeyStoreRecoveryData getRecoveryData(@NonNull byte[] account)
+    public @NonNull KeyStoreRecoveryData getRecoveryData(@NonNull byte[] account)
             throws RecoverableKeyStoreLoaderException {
         try {
             KeyStoreRecoveryData recoveryData =
                     mBinder.getRecoveryData(account, UserHandle.getCallingUserId());
             return recoveryData;
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        } catch (ServiceSpecificException e) {
+            throw RecoverableKeyStoreLoaderException.fromServiceSpecificException(e);
+        }
+    }
+
+    /**
+     * Sets a listener which notifies recovery agent that new recovery snapshot is available. {@link
+     * #getRecoveryData} can be used to get the snapshot. Note that every recovery agent can have at
+     * most one registered listener at any time.
+     *
+     * @param intent triggered when new snapshot is available. Unregisters listener if the value is
+     *     {@code null}.
+     * @hide
+     */
+    public void setSnapshotCreatedPendingIntent(@Nullable PendingIntent intent)
+            throws RecoverableKeyStoreLoaderException {
+        try {
+            mBinder.setSnapshotCreatedPendingIntent(intent, UserHandle.getCallingUserId());
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        } catch (ServiceSpecificException e) {
+            throw RecoverableKeyStoreLoaderException.fromServiceSpecificException(e);
+        }
+    }
+
+    /**
+     * Returns a map from recovery agent accounts to corresponding KeyStore recovery snapshot
+     * version. Version zero is used, if no snapshots were created for the account.
+     *
+     * @return Map from recovery agent accounts to snapshot versions.
+     * @see KeyStoreRecoveryData.getSnapshotVersion
+     * @hide
+     */
+    public @NonNull Map<byte[], Integer> getRecoverySnapshotVersions()
+            throws RecoverableKeyStoreLoaderException {
+        try {
+            // IPC doesn't support generic Maps.
+            @SuppressWarnings("unchecked")
+            Map<byte[], Integer> result =
+                    (Map<byte[], Integer>)
+                            mBinder.getRecoverySnapshotVersions(UserHandle.getCallingUserId());
+            return result;
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         } catch (ServiceSpecificException e) {
@@ -191,8 +251,8 @@ public class RecoverableKeyStoreLoader {
 
     /**
      * Updates recovery status for given keys. It is used to notify keystore that key was
-     * successfully stored on the server or there were an error. Returned as a part of KeyInfo data
-     * structure.
+     * successfully stored on the server or there were an error. Application can check this value
+     * using {@code getRecoveyStatus}.
      *
      * @param packageName Application whose recoverable keys' statuses are to be updated.
      * @param aliases List of application-specific key aliases. If the array is empty, updates the
@@ -204,6 +264,39 @@ public class RecoverableKeyStoreLoader {
             throws NameNotFoundException, RecoverableKeyStoreLoaderException {
         try {
             mBinder.setRecoveryStatus(packageName, aliases, status, UserHandle.getCallingUserId());
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        } catch (ServiceSpecificException e) {
+            throw RecoverableKeyStoreLoaderException.fromServiceSpecificException(e);
+        }
+    }
+
+    /**
+     * Returns a {@code Map} from Application's KeyStore key aliases to their recovery status.
+     * Negative status values are reserved for recovery agent specific codes. List of common codes:
+     *
+     * <ul>
+     *   <li>{@link #RECOVERY_STATUS_SYNCED}
+     *   <li>{@link #RECOVERY_STATUS_SYNC_IN_PROGRESS}
+     *   <li>{@link #RECOVERY_STATUS_MISSING_ACCOUNT}
+     *   <li>{@link #RECOVERY_STATUS_PERMANENT_FAILURE}
+     * </ul>
+     *
+     * @param packageName Application whose recoverable keys' statuses are to be retrieved. if
+     *     {@code null} caller's package will be used.
+     * @return {@code Map} from KeyStore alias to recovery status.
+     * @see #setRecoveryStatus
+     * @hide
+     */
+    public Map<String, Integer> getRecoveryStatus(@Nullable String packageName)
+            throws RecoverableKeyStoreLoaderException {
+        try {
+            // IPC doesn't support generic Maps.
+            @SuppressWarnings("unchecked")
+            Map<String, Integer> result =
+                    (Map<String, Integer>)
+                            mBinder.getRecoveryStatus(packageName, UserHandle.getCallingUserId());
+            return result;
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         } catch (ServiceSpecificException e) {

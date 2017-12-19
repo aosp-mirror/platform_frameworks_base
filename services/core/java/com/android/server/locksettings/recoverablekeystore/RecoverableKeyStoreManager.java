@@ -18,6 +18,7 @@ package com.android.server.locksettings.recoverablekeystore;
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.app.PendingIntent;
 import android.content.Context;
 import android.os.Binder;
 import android.os.RemoteException;
@@ -33,6 +34,7 @@ import com.android.internal.annotations.VisibleForTesting;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 /**
  * Class with {@link RecoverableKeyStoreLoader} API implementation and internal methods to interact
@@ -77,7 +79,7 @@ public class RecoverableKeyStoreManager {
      * @return recovery data
      * @hide
      */
-    public KeyStoreRecoveryData getRecoveryData(@NonNull byte[] account, int userId)
+    public @NonNull KeyStoreRecoveryData getRecoveryData(@NonNull byte[] account, int userId)
             throws RemoteException {
         checkRecoverKeyStorePermission();
         final int callingUid = Binder.getCallingUid(); // Recovery agent uid.
@@ -100,6 +102,24 @@ public class RecoverableKeyStoreManager {
                 RecoverableKeyStoreLoader.UNINITIALIZED_RECOVERY_PUBLIC_KEY);
     }
 
+    public void setSnapshotCreatedPendingIntent(@Nullable PendingIntent intent, int userId)
+            throws RemoteException {
+        checkRecoverKeyStorePermission();
+        throw new UnsupportedOperationException();
+    }
+
+    /**
+     * Gets recovery snapshot versions for all accounts. Note that snapshot may have 0 application
+     * keys, but it still needs to be synced, if previous versions were not empty.
+     *
+     * @return Map from Recovery agent account to snapshot version.
+     */
+    public @NonNull Map<byte[], Integer> getRecoverySnapshotVersions(int userId)
+            throws RemoteException {
+        checkRecoverKeyStorePermission();
+        throw new UnsupportedOperationException();
+    }
+
     public void setServerParameters(long serverParameters, int userId) throws RemoteException {
         checkRecoverKeyStorePermission();
         throw new UnsupportedOperationException();
@@ -108,6 +128,21 @@ public class RecoverableKeyStoreManager {
     public void setRecoveryStatus(
             @NonNull String packageName, @Nullable String[] aliases, int status, int userId)
             throws RemoteException {
+        checkRecoverKeyStorePermission();
+        throw new UnsupportedOperationException();
+    }
+
+    /**
+     * Gets recovery status for keys {@code packageName}.
+     *
+     * @param packageName which recoverable keys statuses will be returned
+     * @return Map from KeyStore alias to recovery status
+     */
+    public @NonNull Map<String, Integer> getRecoveryStatus(@Nullable String packageName, int userId)
+            throws RemoteException {
+        // Any application should be able to check status for its own keys.
+        // If caller is a recovery agent it can check statuses for other packages, but
+        // only for recoverable keys it manages.
         checkRecoverKeyStorePermission();
         throw new UnsupportedOperationException();
     }
@@ -130,7 +165,7 @@ public class RecoverableKeyStoreManager {
      * @return secret types
      * @hide
      */
-    public int[] getRecoverySecretTypes(int userId) throws RemoteException {
+    public @NonNull int[] getRecoverySecretTypes(int userId) throws RemoteException {
         checkRecoverKeyStorePermission();
         throw new UnsupportedOperationException();
     }
@@ -141,7 +176,7 @@ public class RecoverableKeyStoreManager {
      * @return secret types
      * @hide
      */
-    public int[] getPendingRecoverySecretTypes(int userId) throws RemoteException {
+    public @NonNull int[] getPendingRecoverySecretTypes(int userId) throws RemoteException {
         checkRecoverKeyStorePermission();
         throw new UnsupportedOperationException();
     }
@@ -164,7 +199,7 @@ public class RecoverableKeyStoreManager {
      * @return recovery claim
      * @hide
      */
-    public byte[] startRecoverySession(
+    public @NonNull byte[] startRecoverySession(
             @NonNull String sessionId,
             @NonNull byte[] verifierPublicKey,
             @NonNull byte[] vaultParams,

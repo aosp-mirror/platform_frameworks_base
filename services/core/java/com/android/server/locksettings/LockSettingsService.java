@@ -1943,6 +1943,15 @@ public class LockSettingsService extends ILockSettings.Stub {
         return mRecoverableKeyStoreManager.getRecoveryData(account, userId);
     }
 
+    public void setSnapshotCreatedPendingIntent(@Nullable PendingIntent intent, int userId)
+            throws RemoteException {
+        mRecoverableKeyStoreManager.setSnapshotCreatedPendingIntent(intent, userId);
+    }
+
+    public Map getRecoverySnapshotVersions(int userId) throws RemoteException {
+        return mRecoverableKeyStoreManager.getRecoverySnapshotVersions(userId);
+    }
+
     @Override
     public void setServerParameters(long serverParameters, int userId) throws RemoteException {
         mRecoverableKeyStoreManager.setServerParameters(serverParameters, userId);
@@ -1952,6 +1961,10 @@ public class LockSettingsService extends ILockSettings.Stub {
     public void setRecoveryStatus(@NonNull String packageName, @Nullable String[] aliases,
             int status, int userId) throws RemoteException {
         mRecoverableKeyStoreManager.setRecoveryStatus(packageName, aliases, status, userId);
+    }
+
+    public Map getRecoveryStatus(@Nullable String packageName, int userId) throws RemoteException {
+        return mRecoverableKeyStoreManager.getRecoveryStatus(packageName, userId);
     }
 
     @Override
