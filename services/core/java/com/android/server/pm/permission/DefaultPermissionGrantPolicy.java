@@ -27,7 +27,6 @@ import android.app.admin.DevicePolicyManager;
 import android.companion.CompanionDeviceManager;
 import android.content.Context;
 import android.content.Intent;
-import android.content.pm.ActivityInfo;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.IPackageManager;
 import android.content.pm.PackageList;
@@ -62,8 +61,6 @@ import android.util.Slog;
 import android.util.Xml;
 import com.android.internal.util.XmlUtils;
 import com.android.server.LocalServices;
-import com.android.server.pm.PackageManagerService;
-import com.android.server.pm.PackageSetting;
 
 import org.xmlpull.v1.XmlPullParser;
 import org.xmlpull.v1.XmlPullParserException;
@@ -1169,7 +1166,8 @@ public final class DefaultPermissionGrantPolicy {
         final String systemPackageName = mServiceInternal.getKnownPackageName(
                 PackageManagerInternal.PACKAGE_SYSTEM, UserHandle.USER_SYSTEM);
         final PackageParser.Package systemPackage = getPackage(systemPackageName);
-        return compareSignatures(systemPackage.mSignatures, pkg.mSignatures)
+        return compareSignatures(systemPackage.mSigningDetails.signatures,
+                pkg.mSigningDetails.signatures)
                 == PackageManager.SIGNATURE_MATCH;
     }
 
