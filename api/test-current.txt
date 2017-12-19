@@ -253,6 +253,13 @@ package android.net {
     field public static final int INVALID_SECURITY_PARAMETER_INDEX = 0; // 0x0
   }
 
+  public class TrafficStats {
+    method public static long getLoopbackRxBytes();
+    method public static long getLoopbackRxPackets();
+    method public static long getLoopbackTxBytes();
+    method public static long getLoopbackTxPackets();
+  }
+
 }
 
 package android.os {
