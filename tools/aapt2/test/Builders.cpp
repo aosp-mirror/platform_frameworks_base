@@ -116,19 +116,20 @@ ResourceTableBuilder& ResourceTableBuilder::AddValue(const StringPiece& name,
                                                      const ResourceId& id,
                                                      std::unique_ptr<Value> value) {
   ResourceName res_name = ParseNameOrDie(name);
-  CHECK(table_->AddResourceAllowMangled(res_name, id, config, {}, std::move(value),
-                                        GetDiagnostics()));
+  CHECK(table_->AddResourceWithIdMangled(res_name, id, config, {}, std::move(value),
+                                         GetDiagnostics()));
   return *this;
 }
 
 ResourceTableBuilder& ResourceTableBuilder::SetSymbolState(const StringPiece& name,
-                                                           const ResourceId& id, SymbolState state,
+                                                           const ResourceId& id,
+                                                           Visibility::Level level,
                                                            bool allow_new) {
   ResourceName res_name = ParseNameOrDie(name);
-  Symbol symbol;
-  symbol.state = state;
-  symbol.allow_new = allow_new;
-  CHECK(table_->SetSymbolStateAllowMangled(res_name, id, symbol, GetDiagnostics()));
+  Visibility visibility;
+  visibility.level = level;
+  CHECK(table_->SetVisibilityWithIdMangled(res_name, visibility, id, GetDiagnostics()));
+  CHECK(table_->SetAllowNewMangled(res_name, AllowNew{}, GetDiagnostics()));
   return *this;
 }
 

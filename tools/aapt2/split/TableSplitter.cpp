@@ -233,13 +233,13 @@ void TableSplitter::SplitTable(ResourceTable* original_table) {
             ResourceTableType* split_type = split_pkg->FindOrCreateType(type->type);
             if (!split_type->id) {
               split_type->id = type->id;
-              split_type->symbol_status = type->symbol_status;
+              split_type->visibility_level = type->visibility_level;
             }
 
             ResourceEntry* split_entry = split_type->FindOrCreateEntry(entry->name);
             if (!split_entry->id) {
               split_entry->id = entry->id;
-              split_entry->symbol_status = entry->symbol_status;
+              split_entry->visibility = entry->visibility;
             }
 
             // Copy the selected values into the new Split Entry.

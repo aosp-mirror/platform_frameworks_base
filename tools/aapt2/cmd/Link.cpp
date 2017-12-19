@@ -631,9 +631,9 @@ bool ResourceFileFlattener::Flatten(ResourceTable* table, IArchiveWriter* archiv
 
               dst_path =
                   ResourceUtils::BuildResourceFileName(doc->file, context_->GetNameMangler());
-              bool result = table->AddFileReferenceAllowMangled(doc->file.name, doc->file.config,
-                                                                doc->file.source, dst_path, nullptr,
-                                                                context_->GetDiagnostics());
+              bool result =
+                  table->AddFileReferenceMangled(doc->file.name, doc->file.config, doc->file.source,
+                                                 dst_path, nullptr, context_->GetDiagnostics());
               if (!result) {
                 return false;
               }
@@ -1343,9 +1343,9 @@ class LinkCommand {
 
       std::unique_ptr<Id> id = util::make_unique<Id>();
       id->SetSource(source.WithLine(exported_symbol.line));
-      bool result = final_table_.AddResourceAllowMangled(
-          res_name, ConfigDescription::DefaultConfig(), std::string(), std::move(id),
-          context_->GetDiagnostics());
+      bool result =
+          final_table_.AddResourceMangled(res_name, ConfigDescription::DefaultConfig(),
+                                          std::string(), std::move(id), context_->GetDiagnostics());
       if (!result) {
         return false;
       }

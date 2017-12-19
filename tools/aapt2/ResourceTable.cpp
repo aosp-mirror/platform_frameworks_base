@@ -22,6 +22,7 @@
 #include <tuple>
 
 #include "android-base/logging.h"
+#include "android-base/stringprintf.h"
 #include "androidfw/ResourceTypes.h"
 
 #include "ConfigDescription.h"
@@ -33,6 +34,7 @@
 
 using ::aapt::text::IsValidResourceEntryName;
 using ::android::StringPiece;
+using ::android::base::StringPrintf;
 
 namespace aapt {
 
@@ -45,7 +47,7 @@ static bool less_than_struct_with_name(const std::unique_ptr<T>& lhs, const Stri
   return lhs->name.compare(0, lhs->name.size(), rhs.data(), rhs.size()) < 0;
 }
 
-ResourceTablePackage* ResourceTable::FindPackage(const StringPiece& name) {
+ResourceTablePackage* ResourceTable::FindPackage(const StringPiece& name) const {
   const auto last = packages.end();
   auto iter = std::lower_bound(packages.begin(), last, name,
                                less_than_struct_with_name<ResourceTablePackage>);
@@ -55,7 +57,7 @@ ResourceTablePackage* ResourceTable::FindPackage(const StringPiece& name) {
   return nullptr;
 }
 
-ResourceTablePackage* ResourceTable::FindPackageById(uint8_t id) {
+ResourceTablePackage* ResourceTable::FindPackageById(uint8_t id) const {
   for (auto& package : packages) {
     if (package->id && package->id.value() == id) {
       return package.get();
@@ -206,30 +208,23 @@ std::vector<ResourceConfigValue*> ResourceEntry::FindValuesIf(
   return results;
 }
 
-/**
- * The default handler for collisions.
- *
- * Typically, a weak value will be overridden by a strong value. An existing
- * weak
- * value will not be overridden by an incoming weak value.
- *
- * There are some exceptions:
- *
- * Attributes: There are two types of Attribute values: USE and DECL.
- *
- * USE is anywhere an Attribute is declared without a format, and in a place
- * that would
- * be legal to declare if the Attribute already existed. This is typically in a
- * <declare-styleable> tag. Attributes defined in a <declare-styleable> are also
- * weak.
- *
- * DECL is an absolute declaration of an Attribute and specifies an explicit
- * format.
- *
- * A DECL will override a USE without error. Two DECLs must match in their
- * format for there to be
- * no error.
- */
+// The default handler for collisions.
+//
+// Typically, a weak value will be overridden by a strong value. An existing weak
+// value will not be overridden by an incoming weak value.
+//
+// There are some exceptions:
+//
+// Attributes: There are two types of Attribute values: USE and DECL.
+//
+// USE is anywhere an Attribute is declared without a format, and in a place that would
+// be legal to declare if the Attribute already existed. This is typically in a
+// <declare-styleable> tag. Attributes defined in a <declare-styleable> are also weak.
+//
+// DECL is an absolute declaration of an Attribute and specifies an explicit format.
+//
+// A DECL will override a USE without error. Two DECLs must match in their format for there to be
+// no error.
 ResourceTable::CollisionResult ResourceTable::ResolveValueCollision(Value* existing,
                                                                     Value* incoming) {
   Attribute* existing_attr = ValueCast<Attribute>(existing);
@@ -287,14 +282,14 @@ ResourceTable::CollisionResult ResourceTable::ResolveValueCollision(Value* exist
   return CollisionResult::kConflict;
 }
 
-static StringPiece ValidateName(const StringPiece& name) {
+static StringPiece ResourceNameValidator(const StringPiece& name) {
   if (!IsValidResourceEntryName(name)) {
     return name;
   }
   return {};
 }
 
-static StringPiece SkipValidateName(const StringPiece& /*name*/) {
+static StringPiece SkipNameValidator(const StringPiece& /*name*/) {
   return {};
 }
 
@@ -303,17 +298,14 @@ bool ResourceTable::AddResource(const ResourceNameRef& name,
                                 const StringPiece& product,
                                 std::unique_ptr<Value> value,
                                 IDiagnostics* diag) {
-  return AddResourceImpl(name, {}, config, product, std::move(value), ValidateName,
+  return AddResourceImpl(name, {}, config, product, std::move(value), ResourceNameValidator,
                          ResolveValueCollision, diag);
 }
 
-bool ResourceTable::AddResource(const ResourceNameRef& name,
-                                const ResourceId& res_id,
-                                const ConfigDescription& config,
-                                const StringPiece& product,
-                                std::unique_ptr<Value> value,
-                                IDiagnostics* diag) {
-  return AddResourceImpl(name, res_id, config, product, std::move(value), ValidateName,
+bool ResourceTable::AddResourceWithId(const ResourceNameRef& name, const ResourceId& res_id,
+                                      const ConfigDescription& config, const StringPiece& product,
+                                      std::unique_ptr<Value> value, IDiagnostics* diag) {
+  return AddResourceImpl(name, res_id, config, product, std::move(value), ResourceNameValidator,
                          ResolveValueCollision, diag);
 }
 
@@ -322,14 +314,14 @@ bool ResourceTable::AddFileReference(const ResourceNameRef& name,
                                      const Source& source,
                                      const StringPiece& path,
                                      IDiagnostics* diag) {
-  return AddFileReferenceImpl(name, config, source, path, nullptr, ValidateName, diag);
+  return AddFileReferenceImpl(name, config, source, path, nullptr, ResourceNameValidator, diag);
 }
 
-bool ResourceTable::AddFileReferenceAllowMangled(
-    const ResourceNameRef& name, const ConfigDescription& config,
-    const Source& source, const StringPiece& path, io::IFile* file,
-    IDiagnostics* diag) {
-  return AddFileReferenceImpl(name, config, source, path, file, SkipValidateName, diag);
+bool ResourceTable::AddFileReferenceMangled(const ResourceNameRef& name,
+                                            const ConfigDescription& config, const Source& source,
+                                            const StringPiece& path, io::IFile* file,
+                                            IDiagnostics* diag) {
+  return AddFileReferenceImpl(name, config, source, path, file, SkipNameValidator, diag);
 }
 
 bool ResourceTable::AddFileReferenceImpl(const ResourceNameRef& name,
@@ -344,88 +336,85 @@ bool ResourceTable::AddFileReferenceImpl(const ResourceNameRef& name,
                          name_validator, ResolveValueCollision, diag);
 }
 
-bool ResourceTable::AddResourceAllowMangled(const ResourceNameRef& name,
-                                            const ConfigDescription& config,
-                                            const StringPiece& product,
-                                            std::unique_ptr<Value> value,
-                                            IDiagnostics* diag) {
-  return AddResourceImpl(name, ResourceId{}, config, product, std::move(value), SkipValidateName,
+bool ResourceTable::AddResourceMangled(const ResourceNameRef& name, const ConfigDescription& config,
+                                       const StringPiece& product, std::unique_ptr<Value> value,
+                                       IDiagnostics* diag) {
+  return AddResourceImpl(name, ResourceId{}, config, product, std::move(value), SkipNameValidator,
                          ResolveValueCollision, diag);
 }
 
-bool ResourceTable::AddResourceAllowMangled(const ResourceNameRef& name,
-                                            const ResourceId& id,
-                                            const ConfigDescription& config,
-                                            const StringPiece& product,
-                                            std::unique_ptr<Value> value,
-                                            IDiagnostics* diag) {
-  return AddResourceImpl(name, id, config, product, std::move(value), SkipValidateName,
+bool ResourceTable::AddResourceWithIdMangled(const ResourceNameRef& name, const ResourceId& id,
+                                             const ConfigDescription& config,
+                                             const StringPiece& product,
+                                             std::unique_ptr<Value> value, IDiagnostics* diag) {
+  return AddResourceImpl(name, id, config, product, std::move(value), SkipNameValidator,
                          ResolveValueCollision, diag);
+}
+
+bool ResourceTable::ValidateName(NameValidator name_validator, const ResourceNameRef& name,
+                                 const Source& source, IDiagnostics* diag) {
+  const StringPiece bad_char = name_validator(name.entry);
+  if (!bad_char.empty()) {
+    diag->Error(DiagMessage(source) << "resource '" << name << "' has invalid entry name '"
+                                    << name.entry << "'. Invalid character '" << bad_char << "'");
+    return false;
+  }
+  return true;
 }
 
 bool ResourceTable::AddResourceImpl(const ResourceNameRef& name, const ResourceId& res_id,
                                     const ConfigDescription& config, const StringPiece& product,
                                     std::unique_ptr<Value> value, NameValidator name_validator,
-                                    const CollisionResolverFunc& conflictResolver,
+                                    const CollisionResolverFunc& conflict_resolver,
                                     IDiagnostics* diag) {
   CHECK(value != nullptr);
   CHECK(diag != nullptr);
 
-  const StringPiece bad_char = name_validator(name.entry);
-  if (!bad_char.empty()) {
-    diag->Error(DiagMessage(value->GetSource()) << "resource '" << name
-                                                << "' has invalid entry name '" << name.entry
-                                                << "'. Invalid character '" << bad_char << "'");
-
+  const Source& source = value->GetSource();
+  if (!ValidateName(name_validator, name, source, diag)) {
     return false;
   }
 
   ResourceTablePackage* package = FindOrCreatePackage(name.package);
   if (res_id.is_valid_dynamic() && package->id && package->id.value() != res_id.package_id()) {
-    diag->Error(DiagMessage(value->GetSource())
-                << "trying to add resource '" << name << "' with ID " << res_id
-                << " but package '" << package->name << "' already has ID "
-                << std::hex << (int)package->id.value() << std::dec);
+    diag->Error(DiagMessage(source) << "trying to add resource '" << name << "' with ID " << res_id
+                                    << " but package '" << package->name << "' already has ID "
+                                    << StringPrintf("%02x", package->id.value()));
     return false;
   }
 
   ResourceTableType* type = package->FindOrCreateType(name.type);
   if (res_id.is_valid_dynamic() && type->id && type->id.value() != res_id.type_id()) {
-    diag->Error(DiagMessage(value->GetSource())
-                << "trying to add resource '" << name << "' with ID " << res_id
-                << " but type '" << type->type << "' already has ID "
-                << std::hex << (int)type->id.value() << std::dec);
+    diag->Error(DiagMessage(source)
+                << "trying to add resource '" << name << "' with ID " << res_id << " but type '"
+                << type->type << "' already has ID " << StringPrintf("%02x", type->id.value()));
     return false;
   }
 
   ResourceEntry* entry = type->FindOrCreateEntry(name.entry);
   if (res_id.is_valid_dynamic() && entry->id && entry->id.value() != res_id.entry_id()) {
-    diag->Error(DiagMessage(value->GetSource())
+    diag->Error(DiagMessage(source)
                 << "trying to add resource '" << name << "' with ID " << res_id
                 << " but resource already has ID "
-                << ResourceId(package->id.value(), type->id.value(),
-                              entry->id.value()));
+                << ResourceId(package->id.value(), type->id.value(), entry->id.value()));
     return false;
   }
 
   ResourceConfigValue* config_value = entry->FindOrCreateValue(config, product);
-  if (!config_value->value) {
+  if (config_value->value == nullptr) {
     // Resource does not exist, add it now.
     config_value->value = std::move(value);
-
   } else {
-    switch (conflictResolver(config_value->value.get(), value.get())) {
+    switch (conflict_resolver(config_value->value.get(), value.get())) {
       case CollisionResult::kTakeNew:
         // Take the incoming value.
         config_value->value = std::move(value);
         break;
 
       case CollisionResult::kConflict:
-        diag->Error(DiagMessage(value->GetSource())
-                    << "duplicate value for resource '" << name << "' "
-                    << "with config '" << config << "'");
-        diag->Error(DiagMessage(config_value->value->GetSource())
-                    << "resource previously defined here");
+        diag->Error(DiagMessage(source) << "duplicate value for resource '" << name << "' "
+                                        << "with config '" << config << "'");
+        diag->Error(DiagMessage(source) << "resource previously defined here");
         return false;
 
       case CollisionResult::kKeepOriginal:
@@ -441,52 +430,56 @@ bool ResourceTable::AddResourceImpl(const ResourceNameRef& name, const ResourceI
   return true;
 }
 
-bool ResourceTable::SetSymbolState(const ResourceNameRef& name, const ResourceId& res_id,
-                                   const Symbol& symbol, IDiagnostics* diag) {
-  return SetSymbolStateImpl(name, res_id, symbol, ValidateName, diag);
+bool ResourceTable::SetVisibility(const ResourceNameRef& name, const Visibility& visibility,
+                                  IDiagnostics* diag) {
+  return SetVisibilityImpl(name, visibility, ResourceId{}, ResourceNameValidator, diag);
 }
 
-bool ResourceTable::SetSymbolStateAllowMangled(const ResourceNameRef& name,
-                                               const ResourceId& res_id,
-                                               const Symbol& symbol,
-                                               IDiagnostics* diag) {
-  return SetSymbolStateImpl(name, res_id, symbol, SkipValidateName, diag);
+bool ResourceTable::SetVisibilityMangled(const ResourceNameRef& name, const Visibility& visibility,
+                                         IDiagnostics* diag) {
+  return SetVisibilityImpl(name, visibility, ResourceId{}, SkipNameValidator, diag);
 }
 
-bool ResourceTable::SetSymbolStateImpl(const ResourceNameRef& name, const ResourceId& res_id,
-                                       const Symbol& symbol, NameValidator name_validator,
-                                       IDiagnostics* diag) {
+bool ResourceTable::SetVisibilityWithId(const ResourceNameRef& name, const Visibility& visibility,
+                                        const ResourceId& res_id, IDiagnostics* diag) {
+  return SetVisibilityImpl(name, visibility, res_id, ResourceNameValidator, diag);
+}
+
+bool ResourceTable::SetVisibilityWithIdMangled(const ResourceNameRef& name,
+                                               const Visibility& visibility,
+                                               const ResourceId& res_id, IDiagnostics* diag) {
+  return SetVisibilityImpl(name, visibility, res_id, SkipNameValidator, diag);
+}
+
+bool ResourceTable::SetVisibilityImpl(const ResourceNameRef& name, const Visibility& visibility,
+                                      const ResourceId& res_id, NameValidator name_validator,
+                                      IDiagnostics* diag) {
   CHECK(diag != nullptr);
 
-  const StringPiece bad_char = name_validator(name.entry);
-  if (!bad_char.empty()) {
-    diag->Error(DiagMessage(symbol.source) << "resource '" << name << "' has invalid entry name '"
-                                           << name.entry << "'. Invalid character '" << bad_char
-                                           << "'");
+  const Source& source = visibility.source;
+  if (!ValidateName(name_validator, name, source, diag)) {
     return false;
   }
 
   ResourceTablePackage* package = FindOrCreatePackage(name.package);
   if (res_id.is_valid_dynamic() && package->id && package->id.value() != res_id.package_id()) {
-    diag->Error(DiagMessage(symbol.source)
-                << "trying to add resource '" << name << "' with ID " << res_id
-                << " but package '" << package->name << "' already has ID "
-                << std::hex << (int)package->id.value() << std::dec);
+    diag->Error(DiagMessage(source) << "trying to add resource '" << name << "' with ID " << res_id
+                                    << " but package '" << package->name << "' already has ID "
+                                    << StringPrintf("%02x", package->id.value()));
     return false;
   }
 
   ResourceTableType* type = package->FindOrCreateType(name.type);
   if (res_id.is_valid_dynamic() && type->id && type->id.value() != res_id.type_id()) {
-    diag->Error(DiagMessage(symbol.source)
-                << "trying to add resource '" << name << "' with ID " << res_id
-                << " but type '" << type->type << "' already has ID "
-                << std::hex << (int)type->id.value() << std::dec);
+    diag->Error(DiagMessage(source)
+                << "trying to add resource '" << name << "' with ID " << res_id << " but type '"
+                << type->type << "' already has ID " << StringPrintf("%02x", type->id.value()));
     return false;
   }
 
   ResourceEntry* entry = type->FindOrCreateEntry(name.entry);
   if (res_id.is_valid_dynamic() && entry->id && entry->id.value() != res_id.entry_id()) {
-    diag->Error(DiagMessage(symbol.source)
+    diag->Error(DiagMessage(source)
                 << "trying to add resource '" << name << "' with ID " << res_id
                 << " but resource already has ID "
                 << ResourceId(package->id.value(), type->id.value(), entry->id.value()));
@@ -499,48 +492,96 @@ bool ResourceTable::SetSymbolStateImpl(const ResourceNameRef& name, const Resour
     entry->id = res_id.entry_id();
   }
 
-  // Only mark the type state as public, it doesn't care about being private.
-  if (symbol.state == SymbolState::kPublic) {
-    type->symbol_status.state = SymbolState::kPublic;
+  // Only mark the type visibility level as public, it doesn't care about being private.
+  if (visibility.level == Visibility::Level::kPublic) {
+    type->visibility_level = Visibility::Level::kPublic;
   }
 
-  if (symbol.allow_new) {
-    // This symbol can be added as a new resource when merging (if it belongs to an overlay).
-    entry->symbol_status.allow_new = true;
-  }
-
-  if (symbol.state == SymbolState::kUndefined &&
-      entry->symbol_status.state != SymbolState::kUndefined) {
+  if (visibility.level == Visibility::Level::kUndefined &&
+      entry->visibility.level != Visibility::Level::kUndefined) {
     // We can't undefine a symbol (remove its visibility). Ignore.
     return true;
   }
 
-  if (symbol.state == SymbolState::kPrivate &&
-      entry->symbol_status.state == SymbolState::kPublic) {
+  if (visibility.level < entry->visibility.level) {
     // We can't downgrade public to private. Ignore.
     return true;
   }
 
   // This symbol definition takes precedence, replace.
-  entry->symbol_status.state = symbol.state;
-  entry->symbol_status.source = symbol.source;
-  entry->symbol_status.comment = symbol.comment;
+  entry->visibility = visibility;
   return true;
 }
 
-Maybe<ResourceTable::SearchResult> ResourceTable::FindResource(const ResourceNameRef& name) {
+bool ResourceTable::SetAllowNew(const ResourceNameRef& name, const AllowNew& allow_new,
+                                IDiagnostics* diag) {
+  return SetAllowNewImpl(name, allow_new, ResourceNameValidator, diag);
+}
+
+bool ResourceTable::SetAllowNewMangled(const ResourceNameRef& name, const AllowNew& allow_new,
+                                       IDiagnostics* diag) {
+  return SetAllowNewImpl(name, allow_new, SkipNameValidator, diag);
+}
+
+bool ResourceTable::SetAllowNewImpl(const ResourceNameRef& name, const AllowNew& allow_new,
+                                    NameValidator name_validator, IDiagnostics* diag) {
+  CHECK(diag != nullptr);
+
+  if (!ValidateName(name_validator, name, allow_new.source, diag)) {
+    return false;
+  }
+
+  ResourceTablePackage* package = FindOrCreatePackage(name.package);
+  ResourceTableType* type = package->FindOrCreateType(name.type);
+  ResourceEntry* entry = type->FindOrCreateEntry(name.entry);
+  entry->allow_new = allow_new;
+  return true;
+}
+
+bool ResourceTable::SetOverlayable(const ResourceNameRef& name, const Overlayable& overlayable,
+                                   IDiagnostics* diag) {
+  return SetOverlayableImpl(name, overlayable, ResourceNameValidator, diag);
+}
+
+bool ResourceTable::SetOverlayableMangled(const ResourceNameRef& name,
+                                          const Overlayable& overlayable, IDiagnostics* diag) {
+  return SetOverlayableImpl(name, overlayable, SkipNameValidator, diag);
+}
+
+bool ResourceTable::SetOverlayableImpl(const ResourceNameRef& name, const Overlayable& overlayable,
+                                       NameValidator name_validator, IDiagnostics* diag) {
+  CHECK(diag != nullptr);
+
+  if (!ValidateName(name_validator, name, overlayable.source, diag)) {
+    return false;
+  }
+
+  ResourceTablePackage* package = FindOrCreatePackage(name.package);
+  ResourceTableType* type = package->FindOrCreateType(name.type);
+  ResourceEntry* entry = type->FindOrCreateEntry(name.entry);
+  if (entry->overlayable) {
+    diag->Error(DiagMessage(overlayable.source)
+                << "duplicate overlayable declaration for resource '" << name << "'");
+    diag->Error(DiagMessage(entry->overlayable.value().source) << "previous declaration here");
+    return false;
+  }
+  entry->overlayable = overlayable;
+  return true;
+}
+
+Maybe<ResourceTable::SearchResult> ResourceTable::FindResource(const ResourceNameRef& name) const {
   ResourceTablePackage* package = FindPackage(name.package);
-  if (!package) {
+  if (package == nullptr) {
     return {};
   }
 
   ResourceTableType* type = package->FindType(name.type);
-  if (!type) {
+  if (type == nullptr) {
     return {};
   }
 
   ResourceEntry* entry = type->FindEntry(name.entry);
-  if (!entry) {
+  if (entry == nullptr) {
     return {};
   }
   return SearchResult{package, type, entry};
@@ -552,23 +593,20 @@ std::unique_ptr<ResourceTable> ResourceTable::Clone() const {
     ResourceTablePackage* new_pkg = new_table->CreatePackage(pkg->name, pkg->id);
     for (const auto& type : pkg->types) {
       ResourceTableType* new_type = new_pkg->FindOrCreateType(type->type);
-      if (!new_type->id) {
-        new_type->id = type->id;
-        new_type->symbol_status = type->symbol_status;
-      }
+      new_type->id = type->id;
+      new_type->visibility_level = type->visibility_level;
 
       for (const auto& entry : type->entries) {
         ResourceEntry* new_entry = new_type->FindOrCreateEntry(entry->name);
-        if (!new_entry->id) {
-          new_entry->id = entry->id;
-          new_entry->symbol_status = entry->symbol_status;
-        }
+        new_entry->id = entry->id;
+        new_entry->visibility = entry->visibility;
+        new_entry->allow_new = entry->allow_new;
+        new_entry->overlayable = entry->overlayable;
 
         for (const auto& config_value : entry->values) {
           ResourceConfigValue* new_value =
               new_entry->FindOrCreateValue(config_value->config, config_value->product);
-          Value* value = config_value->value->Clone(&new_table->string_pool);
-          new_value->value = std::unique_ptr<Value>(value);
+          new_value->value.reset(config_value->value->Clone(&new_table->string_pool));
         }
       }
     }

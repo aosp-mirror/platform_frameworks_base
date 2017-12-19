@@ -43,16 +43,16 @@ void SerializeSourceToPb(const Source& source, StringPool* src_pool, pb::Source*
   }
 }
 
-static pb::SymbolStatus_Visibility SerializeVisibilityToPb(SymbolState state) {
+static pb::Visibility::Level SerializeVisibilityToPb(Visibility::Level state) {
   switch (state) {
-    case SymbolState::kPrivate:
-      return pb::SymbolStatus_Visibility_PRIVATE;
-    case SymbolState::kPublic:
-      return pb::SymbolStatus_Visibility_PUBLIC;
+    case Visibility::Level::kPrivate:
+      return pb::Visibility::PRIVATE;
+    case Visibility::Level::kPublic:
+      return pb::Visibility::PUBLIC;
     default:
       break;
   }
-  return pb::SymbolStatus_Visibility_UNKNOWN;
+  return pb::Visibility::UNKNOWN;
 }
 
 void SerializeConfig(const ConfigDescription& config, pb::Configuration* out_pb_config) {
@@ -293,12 +293,26 @@ void SerializeTableToPb(const ResourceTable& table, pb::ResourceTable* out_table
         }
         pb_entry->set_name(entry->name);
 
-        // Write the SymbolStatus struct.
-        pb::SymbolStatus* pb_status = pb_entry->mutable_symbol_status();
-        pb_status->set_visibility(SerializeVisibilityToPb(entry->symbol_status.state));
-        SerializeSourceToPb(entry->symbol_status.source, &source_pool, pb_status->mutable_source());
-        pb_status->set_comment(entry->symbol_status.comment);
-        pb_status->set_allow_new(entry->symbol_status.allow_new);
+        // Write the Visibility struct.
+        pb::Visibility* pb_visibility = pb_entry->mutable_visibility();
+        pb_visibility->set_level(SerializeVisibilityToPb(entry->visibility.level));
+        SerializeSourceToPb(entry->visibility.source, &source_pool,
+                            pb_visibility->mutable_source());
+        pb_visibility->set_comment(entry->visibility.comment);
+
+        if (entry->allow_new) {
+          pb::AllowNew* pb_allow_new = pb_entry->mutable_allow_new();
+          SerializeSourceToPb(entry->allow_new.value().source, &source_pool,
+                              pb_allow_new->mutable_source());
+          pb_allow_new->set_comment(entry->allow_new.value().comment);
+        }
+
+        if (entry->overlayable) {
+          pb::Overlayable* pb_overlayable = pb_entry->mutable_overlayable();
+          SerializeSourceToPb(entry->overlayable.value().source, &source_pool,
+                              pb_overlayable->mutable_source());
+          pb_overlayable->set_comment(entry->overlayable.value().comment);
+        }
 
         for (const std::unique_ptr<ResourceConfigValue>& config_value : entry->values) {
           pb::ConfigValue* pb_config_value = pb_entry->add_config_value();

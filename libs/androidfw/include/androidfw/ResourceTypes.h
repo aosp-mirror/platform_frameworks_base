@@ -1339,9 +1339,13 @@ struct ResTable_typeSpec
     // Number of uint32_t entry configuration masks that follow.
     uint32_t entryCount;
 
-    enum {
+    enum : uint32_t {
         // Additional flag indicating an entry is public.
-        SPEC_PUBLIC = 0x40000000
+        SPEC_PUBLIC = 0x40000000u,
+
+        // Additional flag indicating an entry is overlayable at runtime.
+        // Added in Android-P.
+        SPEC_OVERLAYABLE = 0x80000000u,
     };
 };
 

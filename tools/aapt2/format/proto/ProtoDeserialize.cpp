@@ -358,16 +358,16 @@ static void DeserializeSourceFromPb(const pb::Source& pb_source, const ResString
   out_source->line = static_cast<size_t>(pb_source.position().line_number());
 }
 
-static SymbolState DeserializeVisibilityFromPb(const pb::SymbolStatus_Visibility& pb_visibility) {
-  switch (pb_visibility) {
-    case pb::SymbolStatus_Visibility_PRIVATE:
-      return SymbolState::kPrivate;
-    case pb::SymbolStatus_Visibility_PUBLIC:
-      return SymbolState::kPublic;
+static Visibility::Level DeserializeVisibilityFromPb(const pb::Visibility::Level& pb_level) {
+  switch (pb_level) {
+    case pb::Visibility::PRIVATE:
+      return Visibility::Level::kPrivate;
+    case pb::Visibility::PUBLIC:
+      return Visibility::Level::kPublic;
     default:
       break;
   }
-  return SymbolState::kUndefined;
+  return Visibility::Level::kUndefined;
 }
 
 static bool DeserializePackageFromPb(const pb::Package& pb_package, const ResStringPool& src_pool,
@@ -402,26 +402,46 @@ static bool DeserializePackageFromPb(const pb::Package& pb_package, const ResStr
       }
 
       // Deserialize the symbol status (public/private with source and comments).
-      if (pb_entry.has_symbol_status()) {
-        const pb::SymbolStatus& pb_status = pb_entry.symbol_status();
-        if (pb_status.has_source()) {
-          DeserializeSourceFromPb(pb_status.source(), src_pool, &entry->symbol_status.source);
+      if (pb_entry.has_visibility()) {
+        const pb::Visibility& pb_visibility = pb_entry.visibility();
+        if (pb_visibility.has_source()) {
+          DeserializeSourceFromPb(pb_visibility.source(), src_pool, &entry->visibility.source);
         }
+        entry->visibility.comment = pb_visibility.comment();
 
-        entry->symbol_status.comment = pb_status.comment();
-        entry->symbol_status.allow_new = pb_status.allow_new();
-
-        const SymbolState visibility = DeserializeVisibilityFromPb(pb_status.visibility());
-        entry->symbol_status.state = visibility;
-        if (visibility == SymbolState::kPublic) {
+        const Visibility::Level level = DeserializeVisibilityFromPb(pb_visibility.level());
+        entry->visibility.level = level;
+        if (level == Visibility::Level::kPublic) {
           // Propagate the public visibility up to the Type.
-          type->symbol_status.state = SymbolState::kPublic;
-        } else if (visibility == SymbolState::kPrivate) {
+          type->visibility_level = Visibility::Level::kPublic;
+        } else if (level == Visibility::Level::kPrivate) {
           // Only propagate if no previous state was assigned.
-          if (type->symbol_status.state == SymbolState::kUndefined) {
-            type->symbol_status.state = SymbolState::kPrivate;
+          if (type->visibility_level == Visibility::Level::kUndefined) {
+            type->visibility_level = Visibility::Level::kPrivate;
           }
         }
+      }
+
+      if (pb_entry.has_allow_new()) {
+        const pb::AllowNew& pb_allow_new = pb_entry.allow_new();
+
+        AllowNew allow_new;
+        if (pb_allow_new.has_source()) {
+          DeserializeSourceFromPb(pb_allow_new.source(), src_pool, &allow_new.source);
+        }
+        allow_new.comment = pb_allow_new.comment();
+        entry->allow_new = std::move(allow_new);
+      }
+
+      if (pb_entry.has_overlayable()) {
+        const pb::Overlayable& pb_overlayable = pb_entry.overlayable();
+
+        Overlayable overlayable;
+        if (pb_overlayable.has_source()) {
+          DeserializeSourceFromPb(pb_overlayable.source(), src_pool, &overlayable.source);
+        }
+        overlayable.comment = pb_overlayable.comment();
+        entry->overlayable = std::move(overlayable);
       }
 
       ResourceId resid(pb_package.package_id().id(), pb_type.type_id().id(),

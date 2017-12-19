@@ -223,7 +223,7 @@ bool BinaryResourceParser::ParsePackage(const ResChunk_header* chunk) {
         break;
 
       case android::RES_TABLE_TYPE_SPEC_TYPE:
-        if (!ParseTypeSpec(parser.chunk())) {
+        if (!ParseTypeSpec(package, parser.chunk())) {
           return false;
         }
         break;
@@ -260,7 +260,8 @@ bool BinaryResourceParser::ParsePackage(const ResChunk_header* chunk) {
   return true;
 }
 
-bool BinaryResourceParser::ParseTypeSpec(const ResChunk_header* chunk) {
+bool BinaryResourceParser::ParseTypeSpec(const ResourceTablePackage* package,
+                                         const ResChunk_header* chunk) {
   if (type_pool_.getError() != NO_ERROR) {
     diag_->Error(DiagMessage(source_) << "missing type string pool");
     return false;
@@ -275,6 +276,34 @@ bool BinaryResourceParser::ParseTypeSpec(const ResChunk_header* chunk) {
   if (type_spec->id == 0) {
     diag_->Error(DiagMessage(source_) << "ResTable_typeSpec has invalid id: " << type_spec->id);
     return false;
+  }
+
+  // The data portion of this chunk contains entry_count 32bit entries,
+  // each one representing a set of flags.
+  const size_t entry_count = dtohl(type_spec->entryCount);
+
+  // There can only be 2^16 entries in a type, because that is the ID
+  // space for entries (EEEE) in the resource ID 0xPPTTEEEE.
+  if (entry_count > std::numeric_limits<uint16_t>::max()) {
+    diag_->Error(DiagMessage(source_)
+                 << "ResTable_typeSpec has too many entries (" << entry_count << ")");
+    return false;
+  }
+
+  const size_t data_size = util::DeviceToHost32(type_spec->header.size) -
+                           util::DeviceToHost16(type_spec->header.headerSize);
+  if (entry_count * sizeof(uint32_t) > data_size) {
+    diag_->Error(DiagMessage(source_) << "ResTable_typeSpec too small to hold entries.");
+    return false;
+  }
+
+  // Record the type_spec_flags for later. We don't know resource names yet, and we need those
+  // to mark resources as overlayable.
+  const uint32_t* type_spec_flags = reinterpret_cast<const uint32_t*>(
+      reinterpret_cast<uintptr_t>(type_spec) + util::DeviceToHost16(type_spec->header.headerSize));
+  for (size_t i = 0; i < entry_count; i++) {
+    ResourceId id(package->id.value_or_default(0x0), type_spec->id, static_cast<size_t>(i));
+    entry_type_spec_flags_[id] = util::DeviceToHost32(type_spec_flags[i]);
   }
   return true;
 }
@@ -346,18 +375,34 @@ bool BinaryResourceParser::ParseType(const ResourceTablePackage* package,
       return false;
     }
 
-    if (!table_->AddResourceAllowMangled(name, res_id, config, {}, std::move(resource_value),
-                                         diag_)) {
+    if (!table_->AddResourceWithIdMangled(name, res_id, config, {}, std::move(resource_value),
+                                          diag_)) {
       return false;
     }
 
-    if ((entry->flags & ResTable_entry::FLAG_PUBLIC) != 0) {
-      Symbol symbol;
-      symbol.state = SymbolState::kPublic;
-      symbol.source = source_.WithLine(0);
-      if (!table_->SetSymbolStateAllowMangled(name, res_id, symbol, diag_)) {
-        return false;
+    const uint32_t type_spec_flags = entry_type_spec_flags_[res_id];
+    if ((entry->flags & ResTable_entry::FLAG_PUBLIC) != 0 ||
+        (type_spec_flags & ResTable_typeSpec::SPEC_OVERLAYABLE) != 0) {
+      if (entry->flags & ResTable_entry::FLAG_PUBLIC) {
+        Visibility visibility;
+        visibility.level = Visibility::Level::kPublic;
+        visibility.source = source_.WithLine(0);
+        if (!table_->SetVisibilityWithIdMangled(name, visibility, res_id, diag_)) {
+          return false;
+        }
       }
+
+      if (type_spec_flags & ResTable_typeSpec::SPEC_OVERLAYABLE) {
+        Overlayable overlayable;
+        overlayable.source = source_.WithLine(0);
+        if (!table_->SetOverlayableMangled(name, overlayable, diag_)) {
+          return false;
+        }
+      }
+
+      // Erase the ID from the map once processed, so that we don't mark the same symbol more than
+      // once.
+      entry_type_spec_flags_.erase(res_id);
     }
 
     // Add this resource name->id mapping to the index so
