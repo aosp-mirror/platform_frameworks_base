@@ -956,7 +956,7 @@ public class WallpaperManagerService extends IWallpaperManager.Stub
                 }
                 if (mInfo != null && mInfo.getSupportsAmbientMode()) {
                     try {
-                        mEngine.setInAmbientMode(mInAmbientMode);
+                        mEngine.setInAmbientMode(mInAmbientMode, false /* animated */);
                     } catch (RemoteException e) {
                         Slog.w(TAG, "Failed to set ambient mode state", e);
                     }
@@ -1751,7 +1751,7 @@ public class WallpaperManagerService extends IWallpaperManager.Stub
         }
     }
 
-    public void setInAmbientMode(boolean inAmbienMode) {
+    public void setInAmbientMode(boolean inAmbienMode, boolean animated) {
         final IWallpaperEngine engine;
         synchronized (mLock) {
             mInAmbientMode = inAmbienMode;
@@ -1766,7 +1766,7 @@ public class WallpaperManagerService extends IWallpaperManager.Stub
 
         if (engine != null) {
             try {
-                engine.setInAmbientMode(inAmbienMode);
+                engine.setInAmbientMode(inAmbienMode, animated);
             } catch (RemoteException e) {
                 // Cannot talk to wallpaper engine.
             }

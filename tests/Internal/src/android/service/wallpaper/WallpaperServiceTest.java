@@ -38,7 +38,7 @@ public class WallpaperServiceTest {
             public Engine onCreateEngine() {
                 return new Engine() {
                     @Override
-                    public void onAmbientModeChanged(boolean inAmbientMode) {
+                    public void onAmbientModeChanged(boolean inAmbientMode, boolean animated) {
                         ambientModeChangedCount[0]++;
                     }
                 };
@@ -47,12 +47,12 @@ public class WallpaperServiceTest {
         WallpaperService.Engine engine = service.onCreateEngine();
         engine.setCreated(true);
 
-        engine.doAmbientModeChanged(false);
+        engine.doAmbientModeChanged(false, false);
         assertFalse("ambient mode should be false", engine.isInAmbientMode());
         assertEquals("onAmbientModeChanged should have been called",
                 ambientModeChangedCount[0], 1);
 
-        engine.doAmbientModeChanged(true);
+        engine.doAmbientModeChanged(true, false);
         assertTrue("ambient mode should be false", engine.isInAmbientMode());
         assertEquals("onAmbientModeChanged should have been called",
                 ambientModeChangedCount[0], 2);
