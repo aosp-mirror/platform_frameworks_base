@@ -3014,6 +3014,13 @@
     <!-- Notification action name for opening the wifi picker, showing the user all the nearby networks. -->
     <string name="wifi_available_action_all_networks">All Networks</string>
 
+    <!--Notification title for Wi-Fi Wake onboarding. This is displayed the first time a user disables Wi-Fi with the feature enabled. -->
+    <string name="wifi_wakeup_onboarding_title">Wi\u2011Fi will turn on automatically</string>
+    <!--Notification subtext for Wi-Fi Wake onboarding.-->
+    <string name="wifi_wakeup_onboarding_subtext">When you\'re near a high quality saved network</string>
+    <!--Notification action to disable Wi-Fi Wake during onboarding.-->
+    <string name="wifi_wakeup_onboarding_action_disable">Don\'t turn back on</string>
+
     <!-- A notification is shown when a wifi captive portal network is detected.  This is the notification's title. -->
     <string name="wifi_available_sign_in">Sign in to Wi-Fi network</string>
 
