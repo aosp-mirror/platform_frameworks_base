@@ -658,32 +658,40 @@ public abstract class BatteryStats implements Parcelable {
          */
         public static final int PROCESS_STATE_FOREGROUND_SERVICE = 1;
         /**
-         * Time this uid has any process that is top while the device is sleeping, but none
-         * in the "foreground service" or better state.
-         */
-        public static final int PROCESS_STATE_TOP_SLEEPING = 2;
-        /**
          * Time this uid has any process in an active foreground state, but none in the
          * "top sleeping" or better state.
          */
-        public static final int PROCESS_STATE_FOREGROUND = 3;
+        public static final int PROCESS_STATE_FOREGROUND = 2;
         /**
          * Time this uid has any process in an active background state, but none in the
          * "foreground" or better state.
          */
-        public static final int PROCESS_STATE_BACKGROUND = 4;
+        public static final int PROCESS_STATE_BACKGROUND = 3;
+        /**
+         * Time this uid has any process that is top while the device is sleeping, but not
+         * active for any other reason.  We kind-of consider it a kind of cached process
+         * for execution restrictions.
+         */
+        public static final int PROCESS_STATE_TOP_SLEEPING = 4;
+        /**
+         * Time this uid has any process that is in the background but it has an activity
+         * marked as "can't save state".  This is essentially a cached process, though the
+         * system will try much harder than normal to avoid killing it.
+         */
+        public static final int PROCESS_STATE_HEAVY_WEIGHT = 5;
         /**
          * Time this uid has any processes that are sitting around cached, not in one of the
          * other active states.
          */
-        public static final int PROCESS_STATE_CACHED = 5;
+        public static final int PROCESS_STATE_CACHED = 6;
         /**
          * Total number of process states we track.
          */
-        public static final int NUM_PROCESS_STATE = 6;
+        public static final int NUM_PROCESS_STATE = 7;
 
         static final String[] PROCESS_STATE_NAMES = {
-            "Top", "Fg Service", "Top Sleeping", "Foreground", "Background", "Cached"
+                "Top", "Fg Service", "Foreground", "Background", "Top Sleeping", "Heavy Weight",
+                "Cached"
         };
 
         public abstract long getProcessStateTime(int state, long elapsedRealtimeUs, int which);
