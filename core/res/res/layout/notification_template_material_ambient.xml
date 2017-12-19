@@ -72,7 +72,7 @@
                 android:textColor="#eeffffff"
                 android:layout_marginTop="4dp"
                 android:ellipsize="end"
-                android:maxLines="7"
+                android:maxLines="3"
             />
         </LinearLayout>
     </LinearLayout>
