@@ -28,6 +28,8 @@ import static com.android.internal.widget.LockPatternUtils.USER_FRP;
 import static com.android.internal.widget.LockPatternUtils.frpCredentialEnabled;
 import static com.android.internal.widget.LockPatternUtils.userOwnsFrpCredential;
 
+import android.annotation.NonNull;
+import android.annotation.Nullable;
 import android.annotation.UserIdInt;
 import android.app.ActivityManager;
 import android.app.IActivityManager;
@@ -60,6 +62,7 @@ import android.os.Process;
 import android.os.RemoteException;
 import android.os.ResultReceiver;
 import android.os.ServiceManager;
+import android.os.ServiceSpecificException;
 import android.os.ShellCallback;
 import android.os.StrictMode;
 import android.os.SystemProperties;
@@ -75,6 +78,10 @@ import android.security.keystore.AndroidKeyStoreProvider;
 import android.security.keystore.KeyProperties;
 import android.security.keystore.KeyProtection;
 import android.security.keystore.UserNotAuthenticatedException;
+import android.security.recoverablekeystore.KeyEntryRecoveryData;
+import android.security.recoverablekeystore.KeyStoreRecoveryData;
+import android.security.recoverablekeystore.KeyStoreRecoveryMetadata;
+import android.security.recoverablekeystore.RecoverableKeyStoreLoader.RecoverableKeyStoreLoaderException;
 import android.service.gatekeeper.GateKeeperResponse;
 import android.service.gatekeeper.IGateKeeperService;
 import android.text.TextUtils;
@@ -95,9 +102,10 @@ import com.android.internal.widget.LockPatternUtils;
 import com.android.internal.widget.VerifyCredentialResponse;
 import com.android.server.SystemService;
 import com.android.server.locksettings.LockSettingsStorage.CredentialHash;
+import com.android.server.locksettings.LockSettingsStorage.PersistentData;
+import com.android.server.locksettings.recoverablekeystore.RecoverableKeyStoreManager;
 import com.android.server.locksettings.SyntheticPasswordManager.AuthenticationResult;
 import com.android.server.locksettings.SyntheticPasswordManager.AuthenticationToken;
-import com.android.server.locksettings.LockSettingsStorage.PersistentData;
 
 import libcore.util.HexEncoding;
 
@@ -168,6 +176,8 @@ public class LockSettingsService extends ILockSettings.Stub {
     private final SyntheticPasswordManager mSpManager;
 
     private final KeyStore mKeyStore;
+
+    private final RecoverableKeyStoreManager mRecoverableKeyStoreManager;
 
     private boolean mFirstCallToVold;
     protected IGateKeeperService mGateKeeperService;
@@ -367,6 +377,10 @@ public class LockSettingsService extends ILockSettings.Stub {
             return KeyStore.getInstance();
         }
 
+        public RecoverableKeyStoreManager getRecoverableKeyStoreManager() {
+            return RecoverableKeyStoreManager.getInstance(mContext);
+        }
+
         public IStorageManager getStorageManager() {
             final IBinder service = ServiceManager.getService("mount");
             if (service != null) {
@@ -393,6 +407,7 @@ public class LockSettingsService extends ILockSettings.Stub {
         mInjector = injector;
         mContext = injector.getContext();
         mKeyStore = injector.getKeyStore();
+        mRecoverableKeyStoreManager = injector.getRecoverableKeyStoreManager();
         mHandler = injector.getHandler();
         mStrongAuth = injector.getStrongAuth();
         mActivityManager = injector.getActivityManager();
@@ -1912,6 +1927,72 @@ public class LockSettingsService extends ILockSettings.Stub {
         } finally {
             Binder.restoreCallingIdentity(origId);
         }
+    }
+
+    @Override
+    public void initRecoveryService(@NonNull String rootCertificateAlias,
+            @NonNull byte[] signedPublicKeyList, int userId)
+            throws RemoteException {
+        mRecoverableKeyStoreManager.initRecoveryService(rootCertificateAlias,
+                signedPublicKeyList, userId);
+    }
+
+    @Override
+    public KeyStoreRecoveryData getRecoveryData(@NonNull byte[] account, int userId)
+            throws RemoteException {
+        return mRecoverableKeyStoreManager.getRecoveryData(account, userId);
+    }
+
+    @Override
+    public void setServerParameters(long serverParameters, int userId) throws RemoteException {
+        mRecoverableKeyStoreManager.setServerParameters(serverParameters, userId);
+    }
+
+    @Override
+    public void setRecoveryStatus(@NonNull String packageName, @Nullable String[] aliases,
+            int status, int userId) throws RemoteException {
+        mRecoverableKeyStoreManager.setRecoveryStatus(packageName, aliases, status, userId);
+    }
+
+    @Override
+    public void setRecoverySecretTypes(@NonNull @KeyStoreRecoveryMetadata.UserSecretType
+            int[] secretTypes, int userId) throws RemoteException {
+        mRecoverableKeyStoreManager.setRecoverySecretTypes(secretTypes, userId);
+    }
+
+    @Override
+    public int[] getRecoverySecretTypes(int userId) throws RemoteException {
+        return mRecoverableKeyStoreManager.getRecoverySecretTypes(userId);
+
+    }
+
+    @Override
+    public int[] getPendingRecoverySecretTypes(int userId) throws RemoteException {
+        throw new SecurityException("Not implemented");
+    }
+
+    @Override
+    public void recoverySecretAvailable(@NonNull KeyStoreRecoveryMetadata recoverySecret,
+            int userId)
+            throws RemoteException {
+        mRecoverableKeyStoreManager.recoverySecretAvailable(recoverySecret, userId);
+    }
+
+    @Override
+    public byte[] startRecoverySession(@NonNull String sessionId,
+            @NonNull byte[] verifierPublicKey, @NonNull byte[] vaultParams,
+            @NonNull byte[] vaultChallenge, @NonNull List<KeyStoreRecoveryMetadata> secrets,
+            int userId) throws RemoteException {
+        return mRecoverableKeyStoreManager.startRecoverySession(sessionId, verifierPublicKey,
+                vaultParams, vaultChallenge, secrets, userId);
+    }
+
+    @Override
+    public void recoverKeys(@NonNull String sessionId, @NonNull byte[] recoveryKeyBlob,
+            @NonNull List<KeyEntryRecoveryData> applicationKeys, int userId)
+            throws RemoteException {
+        mRecoverableKeyStoreManager.recoverKeys(sessionId, recoveryKeyBlob, applicationKeys,
+                userId);
     }
 
     private static final String[] VALID_SETTINGS = new String[] {
