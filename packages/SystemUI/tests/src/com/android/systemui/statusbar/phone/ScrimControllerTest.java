@@ -16,13 +16,21 @@
 
 package com.android.systemui.statusbar.phone;
 
+import static com.android.systemui.statusbar.phone.ScrimController.VISIBILITY_FULLY_OPAQUE;
+import static com.android.systemui.statusbar.phone.ScrimController.VISIBILITY_FULLY_TRANSPARENT;
+import static com.android.systemui.statusbar.phone.ScrimController.VISIBILITY_SEMI_TRANSPARENT;
+
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyInt;
+import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
-import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.reset;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import android.animation.Animator;
+import android.app.AlarmManager;
 import android.graphics.Color;
 import android.os.Handler;
 import android.os.Looper;
@@ -31,6 +39,7 @@ import android.testing.AndroidTestingRunner;
 import android.testing.TestableLooper;
 import android.view.View;
 
+import com.android.keyguard.KeyguardUpdateMonitor;
 import com.android.systemui.SysuiTestCase;
 import com.android.systemui.statusbar.ScrimView;
 import com.android.systemui.util.wakelock.WakeLock;
@@ -52,12 +61,13 @@ public class ScrimControllerTest extends SysuiTestCase {
     private ScrimView mScrimBehind;
     private ScrimView mScrimInFront;
     private View mHeadsUpScrim;
-    private Consumer<Boolean> mScrimVisibilityCallback;
-    private Boolean mScrimVisibile;
+    private Consumer<Integer> mScrimVisibilityCallback;
+    private int mScrimVisibility;
     private LightBarController mLightBarController;
     private DozeParameters mDozeParamenters;
     private WakeLock mWakeLock;
     private boolean mAlwaysOnEnabled;
+    private AlarmManager mAlarmManager;
 
     @Before
     public void setup() {
@@ -66,13 +76,15 @@ public class ScrimControllerTest extends SysuiTestCase {
         mScrimInFront = new ScrimView(getContext());
         mHeadsUpScrim = mock(View.class);
         mWakeLock = mock(WakeLock.class);
+        mAlarmManager = mock(AlarmManager.class);
         mAlwaysOnEnabled = true;
-        mScrimVisibilityCallback = (Boolean visible) -> mScrimVisibile = visible;
+        mScrimVisibilityCallback = (Integer visible) -> mScrimVisibility = visible;
         mDozeParamenters = mock(DozeParameters.class);
         when(mDozeParamenters.getAlwaysOn()).thenAnswer(invocation -> mAlwaysOnEnabled);
         when(mDozeParamenters.getDisplayNeedsBlanking()).thenReturn(true);
         mScrimController = new SynchronousScrimController(mLightBarController, mScrimBehind,
-                mScrimInFront, mHeadsUpScrim, mScrimVisibilityCallback, mDozeParamenters);
+                mScrimInFront, mHeadsUpScrim, mScrimVisibilityCallback, mDozeParamenters,
+                mAlarmManager);
     }
 
     @Test
@@ -87,29 +99,70 @@ public class ScrimControllerTest extends SysuiTestCase {
         mScrimController.finishAnimationsImmediately();
         // Front scrim should be transparent
         // Back scrim should be visible without tint
-        assertScrimVisibility(false /* front */, true /* behind */);
+        assertScrimVisibility(VISIBILITY_FULLY_TRANSPARENT, VISIBILITY_SEMI_TRANSPARENT);
         assertScrimTint(mScrimBehind, false /* tinted */);
     }
 
     @Test
-    public void transitionToAod() {
+    public void transitionToAod_withRegularWallpaper() {
         mScrimController.transitionTo(ScrimState.AOD);
         mScrimController.finishAnimationsImmediately();
         // Front scrim should be transparent
         // Back scrim should be visible with tint
-        assertScrimVisibility(false /* front */, true /* behind */);
+        assertScrimVisibility(VISIBILITY_FULLY_TRANSPARENT, VISIBILITY_FULLY_OPAQUE);
+        assertScrimTint(mScrimBehind, true /* tinted */);
+        assertScrimTint(mScrimInFront, true /* tinted */);
+    }
+
+    @Test
+    public void transitionToAod_withAodWallpaper() {
+        mScrimController.setWallpaperSupportsAmbientMode(true);
+        mScrimController.transitionTo(ScrimState.AOD);
+        mScrimController.finishAnimationsImmediately();
+        // Front scrim should be transparent
+        // Back scrim should be transparent
+        assertScrimVisibility(VISIBILITY_FULLY_TRANSPARENT, VISIBILITY_FULLY_TRANSPARENT);
+
+        // Move on to PULSING and check if the back scrim is still transparent
+        mScrimController.transitionTo(ScrimState.PULSING);
+        mScrimController.finishAnimationsImmediately();
+        assertScrimVisibility(VISIBILITY_FULLY_TRANSPARENT, VISIBILITY_FULLY_TRANSPARENT);
+    }
+
+    @Test
+    public void transitionToAod_withAodWallpaperAndLockScreenWallpaper() {
+        ScrimState.AOD.mKeyguardUpdateMonitor = new KeyguardUpdateMonitor(getContext()) {
+            @Override
+            public boolean hasLockscreenWallpaper() {
+                return true;
+            }
+        };
+        mScrimController.setWallpaperSupportsAmbientMode(true);
+        mScrimController.transitionTo(ScrimState.AOD);
+        mScrimController.finishAnimationsImmediately();
+        // Front scrim should be transparent
+        // Back scrim should be visible with tint
+        assertScrimVisibility(VISIBILITY_FULLY_TRANSPARENT, VISIBILITY_FULLY_OPAQUE);
         assertScrimTint(mScrimBehind, true /* tinted */);
         assertScrimTint(mScrimInFront, true /* tinted */);
     }
 
     @Test
     public void transitionToPulsing() {
+        // Pre-condition
+        // Need to go to AoD first because PULSING doesn't change
+        // the back scrim opacity - otherwise it would hide AoD wallpapers.
+        mScrimController.setWallpaperSupportsAmbientMode(false);
+        mScrimController.transitionTo(ScrimState.AOD);
+        mScrimController.finishAnimationsImmediately();
+        assertScrimVisibility(VISIBILITY_FULLY_TRANSPARENT, VISIBILITY_FULLY_OPAQUE);
+
         mScrimController.transitionTo(ScrimState.PULSING);
         mScrimController.finishAnimationsImmediately();
         // Front scrim should be transparent
         // Back scrim should be visible with tint
         // Pulse callback should have been invoked
-        assertScrimVisibility(false /* front */, true /* behind */);
+        assertScrimVisibility(VISIBILITY_FULLY_TRANSPARENT, VISIBILITY_FULLY_OPAQUE);
         assertScrimTint(mScrimBehind, true /* tinted */);
     }
 
@@ -119,7 +172,7 @@ public class ScrimControllerTest extends SysuiTestCase {
         mScrimController.finishAnimationsImmediately();
         // Front scrim should be transparent
         // Back scrim should be visible without tint
-        assertScrimVisibility(true /* front */, true /* behind */);
+        assertScrimVisibility(VISIBILITY_SEMI_TRANSPARENT, VISIBILITY_SEMI_TRANSPARENT);
         assertScrimTint(mScrimBehind, false /* tinted */);
     }
 
@@ -129,13 +182,13 @@ public class ScrimControllerTest extends SysuiTestCase {
         mScrimController.finishAnimationsImmediately();
         // Front scrim should be transparent
         // Back scrim should be transparent
-        assertScrimVisibility(false /* front */, false /* behind */);
+        assertScrimVisibility(VISIBILITY_FULLY_TRANSPARENT, VISIBILITY_FULLY_TRANSPARENT);
         assertScrimTint(mScrimBehind, false /* tinted */);
         assertScrimTint(mScrimInFront, false /* tinted */);
 
         // Back scrim should be visible after start dragging
         mScrimController.setPanelExpansion(0.5f);
-        assertScrimVisibility(false /* front */, true /* behind */);
+        assertScrimVisibility(VISIBILITY_FULLY_TRANSPARENT, VISIBILITY_SEMI_TRANSPARENT);
     }
 
     @Test
@@ -151,7 +204,7 @@ public class ScrimControllerTest extends SysuiTestCase {
         // Front scrim should be transparent
         // Back scrim should be transparent
         // Neither scrims should be tinted anymore after the animation.
-        assertScrimVisibility(false /* front */, false /* behind */);
+        assertScrimVisibility(VISIBILITY_FULLY_TRANSPARENT, VISIBILITY_FULLY_TRANSPARENT);
         assertScrimTint(mScrimInFront, false /* tinted */);
         assertScrimTint(mScrimBehind, false /* tinted */);
     }
@@ -169,8 +222,8 @@ public class ScrimControllerTest extends SysuiTestCase {
                         Assert.assertTrue("Scrim should be visible during transition. Alpha: "
                                 + mScrimInFront.getViewAlpha(), mScrimInFront.getViewAlpha() > 0);
                         assertScrimTint(mScrimInFront, true /* tinted */);
-                        Assert.assertTrue("Scrim should be visible during transition.",
-                                mScrimVisibile);
+                        Assert.assertSame("Scrim should be visible during transition.",
+                                mScrimVisibility, VISIBILITY_FULLY_OPAQUE);
                     }
                 });
         mScrimController.finishAnimationsImmediately();
@@ -224,10 +277,10 @@ public class ScrimControllerTest extends SysuiTestCase {
     @Test
     public void testHoldsWakeLock() {
         mScrimController.transitionTo(ScrimState.AOD);
-        verify(mWakeLock, times(1)).acquire();
+        verify(mWakeLock).acquire();
         verify(mWakeLock, never()).release();
         mScrimController.finishAnimationsImmediately();
-        verify(mWakeLock, times(1)).release();
+        verify(mWakeLock).release();
     }
 
     @Test
@@ -236,7 +289,30 @@ public class ScrimControllerTest extends SysuiTestCase {
         mScrimController.finishAnimationsImmediately();
         ScrimController.Callback callback = mock(ScrimController.Callback.class);
         mScrimController.transitionTo(ScrimState.UNLOCKED, callback);
-        verify(callback, times(1)).onFinished();
+        verify(callback).onFinished();
+    }
+
+    @Test
+    public void testHoldsAodWallpaperAnimationLock() {
+        // Pre-conditions
+        mScrimController.transitionTo(ScrimState.AOD);
+        mScrimController.finishAnimationsImmediately();
+        reset(mWakeLock);
+
+        mScrimController.onHideWallpaperTimeout();
+        verify(mWakeLock).acquire();
+        verify(mWakeLock, never()).release();
+        mScrimController.finishAnimationsImmediately();
+        verify(mWakeLock).release();
+    }
+
+    @Test
+    public void testWillHideAoDWallpaper() {
+        mScrimController.setWallpaperSupportsAmbientMode(true);
+        mScrimController.transitionTo(ScrimState.AOD);
+        verify(mAlarmManager).setExact(anyInt(), anyLong(), any(), any(), any());
+        mScrimController.transitionTo(ScrimState.KEYGUARD);
+        verify(mAlarmManager).cancel(any(AlarmManager.OnAlarmListener.class));
     }
 
     private void assertScrimTint(ScrimView scrimView, boolean tinted) {
@@ -247,12 +323,23 @@ public class ScrimControllerTest extends SysuiTestCase {
                 tinted, viewIsTinted);
     }
 
-    private void assertScrimVisibility(boolean inFront, boolean behind) {
+    private void assertScrimVisibility(int inFront, int behind) {
+        boolean inFrontVisible = inFront != ScrimController.VISIBILITY_FULLY_TRANSPARENT;
+        boolean behindVisible = behind != ScrimController.VISIBILITY_FULLY_TRANSPARENT;
         Assert.assertEquals("Unexpected front scrim visibility. Alpha is "
-                + mScrimInFront.getViewAlpha(), inFront, mScrimInFront.getViewAlpha() > 0);
+                + mScrimInFront.getViewAlpha(), inFrontVisible, mScrimInFront.getViewAlpha() > 0);
         Assert.assertEquals("Unexpected back scrim visibility. Alpha is "
-                + mScrimBehind.getViewAlpha(), behind, mScrimBehind.getViewAlpha() > 0);
-        Assert.assertEquals("Invalid visibility.", inFront || behind, mScrimVisibile);
+                + mScrimBehind.getViewAlpha(), behindVisible, mScrimBehind.getViewAlpha() > 0);
+
+        final int visibility;
+        if (inFront == VISIBILITY_FULLY_OPAQUE || behind == VISIBILITY_FULLY_OPAQUE) {
+            visibility = VISIBILITY_FULLY_OPAQUE;
+        } else if (inFront > VISIBILITY_FULLY_TRANSPARENT || behind > VISIBILITY_FULLY_TRANSPARENT) {
+            visibility = VISIBILITY_SEMI_TRANSPARENT;
+        } else {
+            visibility = VISIBILITY_FULLY_TRANSPARENT;
+        }
+        Assert.assertEquals("Invalid visibility.", visibility, mScrimVisibility);
     }
 
     /**
@@ -264,9 +351,10 @@ public class ScrimControllerTest extends SysuiTestCase {
 
         public SynchronousScrimController(LightBarController lightBarController,
                 ScrimView scrimBehind, ScrimView scrimInFront, View headsUpScrim,
-                Consumer<Boolean> scrimVisibleListener, DozeParameters dozeParameters) {
+                Consumer<Integer> scrimVisibleListener, DozeParameters dozeParameters,
+                AlarmManager alarmManager) {
             super(lightBarController, scrimBehind, scrimInFront, headsUpScrim,
-                    scrimVisibleListener, dozeParameters);
+                    scrimVisibleListener, dozeParameters, alarmManager);
             mHandler = new FakeHandler(Looper.myLooper());
         }
 

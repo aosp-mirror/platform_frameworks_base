@@ -19,6 +19,7 @@ package com.android.systemui.statusbar.phone;
 import android.graphics.Color;
 import android.os.Trace;
 
+import com.android.keyguard.KeyguardUpdateMonitor;
 import com.android.systemui.statusbar.ScrimView;
 import com.android.systemui.statusbar.stack.StackStateAnimator;
 
@@ -89,8 +90,10 @@ public enum ScrimState {
                 updateScrimColor(mScrimInFront, 1, Color.BLACK);
             }
             final boolean alwaysOnEnabled = mDozeParameters.getAlwaysOn();
-            mBlankScreen = previousState == ScrimState.PULSING;
-            mCurrentBehindAlpha = 1;
+            final boolean wasPulsing = previousState == ScrimState.PULSING;
+            mBlankScreen = wasPulsing && !mCanControlScreenOff;
+            mCurrentBehindAlpha = mWallpaperSupportsAmbientMode
+                    && !mKeyguardUpdateMonitor.hasLockscreenWallpaper() ? 0f : 1f;
             mCurrentInFrontAlpha = alwaysOnEnabled ? mAodFrontScrimAlpha : 1f;
             mCurrentInFrontTint = Color.BLACK;
             mCurrentBehindTint = Color.BLACK;
@@ -106,9 +109,10 @@ public enum ScrimState {
     PULSING {
         @Override
         public void prepare(ScrimState previousState) {
-            mCurrentBehindAlpha = 1;
             mCurrentInFrontAlpha = 0;
             mCurrentInFrontTint = Color.BLACK;
+            mCurrentBehindAlpha = mWallpaperSupportsAmbientMode
+                    && !mKeyguardUpdateMonitor.hasLockscreenWallpaper() ? 0f : 1f;
             mCurrentBehindTint = Color.BLACK;
             mBlankScreen = mDisplayRequiresBlanking;
             if (mDisplayRequiresBlanking) {
@@ -158,6 +162,8 @@ public enum ScrimState {
     DozeParameters mDozeParameters;
     boolean mDisplayRequiresBlanking;
     boolean mCanControlScreenOff;
+    boolean mWallpaperSupportsAmbientMode;
+    KeyguardUpdateMonitor mKeyguardUpdateMonitor;
 
     public void init(ScrimView scrimInFront, ScrimView scrimBehind, DozeParameters dozeParameters) {
         mScrimInFront = scrimInFront;
@@ -165,6 +171,7 @@ public enum ScrimState {
         mDozeParameters = dozeParameters;
         mDisplayRequiresBlanking = dozeParameters.getDisplayNeedsBlanking();
         mCanControlScreenOff = dozeParameters.getCanControlScreenOffAnimation();
+        mKeyguardUpdateMonitor = KeyguardUpdateMonitor.getInstance(scrimInFront.getContext());
     }
 
     public void prepare(ScrimState previousState) {
@@ -217,5 +224,9 @@ public enum ScrimState {
 
     public void setScrimBehindAlphaKeyguard(float scrimBehindAlphaKeyguard) {
         mScrimBehindAlphaKeyguard = scrimBehindAlphaKeyguard;
+    }
+
+    public void setWallpaperSupportsAmbientMode(boolean wallpaperSupportsAmbientMode) {
+        mWallpaperSupportsAmbientMode = wallpaperSupportsAmbientMode;
     }
 }

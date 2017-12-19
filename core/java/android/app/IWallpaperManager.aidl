@@ -155,4 +155,9 @@ interface IWallpaperManager {
      * Unregister a callback that was receiving color updates
      */
     void unregisterWallpaperColorsCallback(IWallpaperManagerCallback cb, int userId);
+
+    /**
+     * Called from SystemUI when it shows the AoD UI.
+     */
+    void setInAmbientMode(boolean inAmbienMode);
 }

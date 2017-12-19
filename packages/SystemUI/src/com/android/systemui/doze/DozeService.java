@@ -24,9 +24,10 @@ import android.util.Log;
 
 import com.android.systemui.Dependency;
 import com.android.systemui.plugins.DozeServicePlugin;
-import com.android.systemui.plugins.PluginManager;
 import com.android.systemui.plugins.DozeServicePlugin.RequestDoze;
 import com.android.systemui.plugins.PluginListener;
+import com.android.systemui.plugins.PluginManager;
+
 import java.io.FileDescriptor;
 import java.io.PrintWriter;
 

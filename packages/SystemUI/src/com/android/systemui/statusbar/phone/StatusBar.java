@@ -46,6 +46,7 @@ import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.app.ActivityManager;
 import android.app.ActivityOptions;
+import android.app.AlarmManager;
 import android.app.KeyguardManager;
 import android.app.Notification;
 import android.app.NotificationManager;
@@ -53,6 +54,7 @@ import android.app.PendingIntent;
 import android.app.StatusBarManager;
 import android.app.TaskStackBuilder;
 import android.app.WallpaperColors;
+import android.app.WallpaperInfo;
 import android.app.WallpaperManager;
 import android.app.admin.DevicePolicyManager;
 import android.content.BroadcastReceiver;
@@ -249,7 +251,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Stack;
-import java.util.function.Function;
 
 public class StatusBar extends SystemUI implements DemoMode,
         DragDownHelper.DragDownCallback, ActivityStarter, OnUnlockMethodChangedListener,
@@ -526,7 +527,22 @@ public class StatusBar extends SystemUI implements DemoMode,
     protected NotificationLockscreenUserManager mLockscreenUserManager;
     protected NotificationRemoteInputManager mRemoteInputManager;
 
+    private BroadcastReceiver mWallpaperChangedReceiver = new BroadcastReceiver() {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            WallpaperManager wallpaperManager = context.getSystemService(WallpaperManager.class);
+            if (wallpaperManager == null) {
+                Log.w(TAG, "WallpaperManager not available");
+                return;
+            }
+            WallpaperInfo info = wallpaperManager.getWallpaperInfo();
+            final boolean supportsAmbientMode = info != null &&
+                    info.getSupportsAmbientMode();
 
+            mStatusBarWindowManager.setWallpaperSupportsAmbientMode(supportsAmbientMode);
+            mScrimController.setWallpaperSupportsAmbientMode(supportsAmbientMode);
+        }
+    };
 
     private Runnable mLaunchTransitionEndRunnable;
     protected boolean mLaunchTransitionFadingAway;
@@ -703,6 +719,11 @@ public class StatusBar extends SystemUI implements DemoMode,
         }
 
         createAndAddWindows();
+
+        // Make sure we always have the most current wallpaper info.
+        IntentFilter wallpaperChangedFilter = new IntentFilter(Intent.ACTION_WALLPAPER_CHANGED);
+        mContext.registerReceiver(mWallpaperChangedReceiver, wallpaperChangedFilter);
+        mWallpaperChangedReceiver.onReceive(mContext, null);
 
         mCommandQueue.disable(switches[0], switches[6], false /* animate */);
         setSystemUiVisibility(switches[1], switches[7], switches[8], 0xffffffff,
@@ -922,9 +943,9 @@ public class StatusBar extends SystemUI implements DemoMode,
                 scrimBehind, scrimInFront, headsUpScrim, mLockscreenWallpaper,
                 scrimsVisible -> {
                     if (mStatusBarWindowManager != null) {
-                        mStatusBarWindowManager.setScrimsVisible(scrimsVisible);
+                        mStatusBarWindowManager.setScrimsVisibility(scrimsVisible);
                     }
-                }, new DozeParameters(mContext));
+                }, new DozeParameters(mContext), mContext.getSystemService(AlarmManager.class));
         if (mScrimSrcModeEnabled) {
             Runnable runnable = () -> {
                 boolean asSrc = mBackdrop.getVisibility() != View.VISIBLE;
