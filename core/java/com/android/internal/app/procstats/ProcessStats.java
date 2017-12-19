@@ -81,10 +81,10 @@ public final class ProcessStats implements Parcelable {
     public static final int STATE_IMPORTANT_FOREGROUND = 2;
     public static final int STATE_IMPORTANT_BACKGROUND = 3;
     public static final int STATE_BACKUP = 4;
-    public static final int STATE_HEAVY_WEIGHT = 5;
-    public static final int STATE_SERVICE = 6;
-    public static final int STATE_SERVICE_RESTARTING = 7;
-    public static final int STATE_RECEIVER = 8;
+    public static final int STATE_SERVICE = 5;
+    public static final int STATE_SERVICE_RESTARTING = 6;
+    public static final int STATE_RECEIVER = 7;
+    public static final int STATE_HEAVY_WEIGHT = 8;
     public static final int STATE_HOME = 9;
     public static final int STATE_LAST_ACTIVITY = 10;
     public static final int STATE_CACHED_ACTIVITY = 11;
@@ -141,8 +141,8 @@ public final class ProcessStats implements Parcelable {
 
     public static final int[] NON_CACHED_PROC_STATES = new int[] {
             STATE_PERSISTENT, STATE_TOP, STATE_IMPORTANT_FOREGROUND,
-            STATE_IMPORTANT_BACKGROUND, STATE_BACKUP, STATE_HEAVY_WEIGHT,
-            STATE_SERVICE, STATE_SERVICE_RESTARTING, STATE_RECEIVER
+            STATE_IMPORTANT_BACKGROUND, STATE_BACKUP,
+            STATE_SERVICE, STATE_SERVICE_RESTARTING, STATE_RECEIVER, STATE_HEAVY_WEIGHT
     };
 
     public static final int[] BACKGROUND_PROC_STATES = new int[] {
@@ -152,13 +152,13 @@ public final class ProcessStats implements Parcelable {
 
     public static final int[] ALL_PROC_STATES = new int[] { STATE_PERSISTENT,
             STATE_TOP, STATE_IMPORTANT_FOREGROUND, STATE_IMPORTANT_BACKGROUND, STATE_BACKUP,
-            STATE_HEAVY_WEIGHT, STATE_SERVICE, STATE_SERVICE_RESTARTING, STATE_RECEIVER,
-            STATE_HOME, STATE_LAST_ACTIVITY, STATE_CACHED_ACTIVITY,
+            STATE_SERVICE, STATE_SERVICE_RESTARTING, STATE_RECEIVER,
+            STATE_HEAVY_WEIGHT, STATE_HOME, STATE_LAST_ACTIVITY, STATE_CACHED_ACTIVITY,
             STATE_CACHED_ACTIVITY_CLIENT, STATE_CACHED_EMPTY
     };
 
     // Current version of the parcel format.
-    private static final int PARCEL_VERSION = 22;
+    private static final int PARCEL_VERSION = 23;
     // In-memory Parcel magic number, used to detect attempts to unmarshall bad data
     private static final int MAGIC = 0x50535454;
 

@@ -457,6 +457,19 @@ public class ActivityManager {
     /** @hide User operation call: one of related users cannot be stopped. */
     public static final int USER_OP_ERROR_RELATED_USERS_CANNOT_STOP = -4;
 
+    /**
+     * Process states, describing the kind of state a particular process is in.
+     * When updating these, make sure to also check all related references to the
+     * constant in code, and update these arrays:
+     *
+     * com.android.internal.app.procstats.ProcessState#PROCESS_STATE_TO_STATE
+     * com.android.server.am.ProcessList#sProcStateToProcMem
+     * com.android.server.am.ProcessList#sFirstAwakePssTimes
+     * com.android.server.am.ProcessList#sSameAwakePssTimes
+     * com.android.server.am.ProcessList#sTestFirstPssTimes
+     * com.android.server.am.ProcessList#sTestSamePssTimes
+     */
+
     /** @hide Not a real process state. */
     public static final int PROCESS_STATE_UNKNOWN = -1;
 
@@ -491,20 +504,20 @@ public class ActivityManager {
     /** @hide Process is in the background running a backup/restore operation. */
     public static final int PROCESS_STATE_BACKUP = 9;
 
-    /** @hide Process is in the background, but it can't restore its state so we want
-     * to try to avoid killing it. */
-    public static final int PROCESS_STATE_HEAVY_WEIGHT = 10;
-
     /** @hide Process is in the background running a service.  Unlike oom_adj, this level
      * is used for both the normal running in background state and the executing
      * operations state. */
-    public static final int PROCESS_STATE_SERVICE = 11;
+    public static final int PROCESS_STATE_SERVICE = 10;
 
     /** @hide Process is in the background running a receiver.   Note that from the
      * perspective of oom_adj, receivers run at a higher foreground level, but for our
      * prioritization here that is not necessary and putting them below services means
      * many fewer changes in some process states as they receive broadcasts. */
-    public static final int PROCESS_STATE_RECEIVER = 12;
+    public static final int PROCESS_STATE_RECEIVER = 11;
+
+    /** @hide Process is in the background, but it can't restore its state so we want
+     * to try to avoid killing it. */
+    public static final int PROCESS_STATE_HEAVY_WEIGHT = 12;
 
     /** @hide Process is in the background but hosts the home activity. */
     public static final int PROCESS_STATE_HOME = 13;
@@ -2942,14 +2955,6 @@ public class ActivityManager {
         public static final int IMPORTANCE_CANT_SAVE_STATE_PRE_26 = 170;
 
         /**
-         * Constant for {@link #importance}: This process is running an
-         * application that can not save its state, and thus can't be killed
-         * while in the background.  This will be used with apps that have
-         * {@link android.R.attr#cantSaveState} set on their application tag.
-         */
-        public static final int IMPORTANCE_CANT_SAVE_STATE = 270;
-
-        /**
          * Constant for {@link #importance}: This process is contains services
          * that should remain running.  These are background services apps have
          * started, not something the user is aware of, so they may be killed by
@@ -2957,6 +2962,14 @@ public class ActivityManager {
          * stay running as long as they want to).
          */
         public static final int IMPORTANCE_SERVICE = 300;
+
+        /**
+         * Constant for {@link #importance}: This process is running an
+         * application that can not save its state, and thus can't be killed
+         * while in the background.  This will be used with apps that have
+         * {@link android.R.attr#cantSaveState} set on their application tag.
+         */
+        public static final int IMPORTANCE_CANT_SAVE_STATE = 350;
 
         /**
          * Constant for {@link #importance}: This process process contains
@@ -2993,10 +3006,10 @@ public class ActivityManager {
                 return IMPORTANCE_GONE;
             } else if (procState >= PROCESS_STATE_HOME) {
                 return IMPORTANCE_CACHED;
-            } else if (procState >= PROCESS_STATE_SERVICE) {
-                return IMPORTANCE_SERVICE;
             } else if (procState == PROCESS_STATE_HEAVY_WEIGHT) {
                 return IMPORTANCE_CANT_SAVE_STATE;
+            } else if (procState >= PROCESS_STATE_SERVICE) {
+                return IMPORTANCE_SERVICE;
             } else if (procState >= PROCESS_STATE_TRANSIENT_BACKGROUND) {
                 return IMPORTANCE_PERCEPTIBLE;
             } else if (procState >= PROCESS_STATE_IMPORTANT_FOREGROUND) {
@@ -3049,10 +3062,10 @@ public class ActivityManager {
                 return PROCESS_STATE_NONEXISTENT;
             } else if (importance >= IMPORTANCE_CACHED) {
                 return PROCESS_STATE_HOME;
-            } else if (importance >= IMPORTANCE_SERVICE) {
-                return PROCESS_STATE_SERVICE;
             } else if (importance == IMPORTANCE_CANT_SAVE_STATE) {
                 return PROCESS_STATE_HEAVY_WEIGHT;
+            } else if (importance >= IMPORTANCE_SERVICE) {
+                return PROCESS_STATE_SERVICE;
             } else if (importance >= IMPORTANCE_PERCEPTIBLE) {
                 return PROCESS_STATE_TRANSIENT_BACKGROUND;
             } else if (importance >= IMPORTANCE_VISIBLE) {
