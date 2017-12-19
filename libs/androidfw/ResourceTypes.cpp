@@ -6880,6 +6880,9 @@ status_t ResTable::createIdmap(const ResTable& overlay,
         return UNKNOWN_ERROR;
     }
 
+    // The number of resources overlaid that were not explicitly marked overlayable.
+    size_t forcedOverlayCount = 0u;
+
     KeyedVector<uint8_t, IdmapTypeMap> map;
 
     // overlaid packages are assumed to contain only one package group
@@ -6919,6 +6922,7 @@ status_t ResTable::createIdmap(const ResTable& overlay,
                 continue;
             }
 
+            uint32_t typeSpecFlags = 0u;
             const String16 overlayType(resName.type, resName.typeLen);
             const String16 overlayName(resName.name, resName.nameLen);
             uint32_t overlayResID = overlay.identifierForName(overlayName.string(),
@@ -6926,12 +6930,21 @@ status_t ResTable::createIdmap(const ResTable& overlay,
                                                               overlayType.string(),
                                                               overlayType.size(),
                                                               overlayPackage.string(),
-                                                              overlayPackage.size());
+                                                              overlayPackage.size(),
+                                                              &typeSpecFlags);
             if (overlayResID == 0) {
+                // No such target resource was found.
                 if (typeMap.entryMap.isEmpty()) {
                     typeMap.entryOffset++;
                 }
                 continue;
+            }
+
+            // Now that we know this is being overlaid, check if it can be, and emit a warning if
+            // it can't.
+            if ((dtohl(typeConfigs->typeSpecFlags[entryIndex]) &
+                    ResTable_typeSpec::SPEC_OVERLAYABLE) == 0) {
+                forcedOverlayCount++;
             }
 
             if (typeMap.overlayTypeId == -1) {
@@ -7010,6 +7023,10 @@ status_t ResTable::createIdmap(const ResTable& overlay,
             entries[j] = htodl(typeMap.entryMap[j]);
         }
         typeData += entryCount * 2;
+    }
+
+    if (forcedOverlayCount > 0) {
+        ALOGW("idmap: overlaid %zu resources not marked overlayable", forcedOverlayCount);
     }
 
     return NO_ERROR;
