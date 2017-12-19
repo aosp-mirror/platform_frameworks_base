@@ -40,4 +40,7 @@ public interface KeyStoreProxy {
     /** @see KeyStore#setEntry(String, KeyStore.Entry, KeyStore.ProtectionParameter) */
     void setEntry(String alias, KeyStore.Entry entry, KeyStore.ProtectionParameter protParam)
             throws KeyStoreException;
+
+    /** @see KeyStore#deleteEntry(String) */
+    void deleteEntry(String alias) throws KeyStoreException;
 }

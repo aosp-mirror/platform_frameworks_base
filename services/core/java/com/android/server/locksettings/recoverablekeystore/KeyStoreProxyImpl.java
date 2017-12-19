@@ -52,4 +52,9 @@ public class KeyStoreProxyImpl implements KeyStoreProxy {
             throws KeyStoreException {
         mKeyStore.setEntry(alias, entry, protParam);
     }
+
+    @Override
+    public void deleteEntry(String alias) throws KeyStoreException {
+        mKeyStore.deleteEntry(alias);
+    }
 }
