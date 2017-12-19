@@ -309,25 +309,19 @@ class Session extends IWindowSession.Stub implements IBinder.DeathRecipient {
     }
 
     /* Drag/drop */
+
     @Override
-    public IBinder prepareDrag(IWindow window, int flags, int width, int height) {
+    public IBinder performDrag(IWindow window, int flags, SurfaceControl surface, int touchSource,
+            float touchX, float touchY, float thumbCenterX, float thumbCenterY, ClipData data) {
         final int callerPid = Binder.getCallingPid();
         final int callerUid = Binder.getCallingUid();
         final long ident = Binder.clearCallingIdentity();
         try {
-            return mDragDropController.prepareDrag(mSurfaceSession, callerPid, callerUid, window,
-                    flags, width, height);
+            return mDragDropController.performDrag(mSurfaceSession, callerPid, callerUid, window,
+                    flags, surface, touchSource, touchX, touchY, thumbCenterX, thumbCenterY, data);
         } finally {
             Binder.restoreCallingIdentity(ident);
         }
-    }
-
-    @Override
-    public boolean performDrag(IWindow window, IBinder dragToken, SurfaceControl surface,
-            int touchSource, float touchX, float touchY, float thumbCenterX, float thumbCenterY,
-            ClipData data) {
-        return mDragDropController.performDrag(mSurfaceSession, window, dragToken, surface,
-                touchSource, touchX, touchY, thumbCenterX, thumbCenterY, data);
     }
 
     @Override
