@@ -70,7 +70,7 @@ bool CpuTimePerUidFreqPuller::Pull(const int tagId, vector<shared_ptr<LogEvent>>
     int idx = 0;
     do {
       timeMs = std::stoull(pch);
-      auto ptr = make_shared<LogEvent>(android::util::CPU_TIME_PER_UID_FREQ_PULLED, timestamp);
+      auto ptr = make_shared<LogEvent>(android::util::CPU_TIME_PER_UID_FREQ, timestamp);
       ptr->write(uid);
       ptr->write(idx);
       ptr->write(timeMs);

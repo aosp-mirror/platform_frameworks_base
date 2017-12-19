@@ -269,13 +269,9 @@ public class ContextHubService extends IContextHubService.Stub {
         checkPermissions();
         int[] returnArray = new int[mContextHubInfo.length];
 
-        Log.d(TAG, "System supports " + returnArray.length + " hubs");
         for (int i = 0; i < returnArray.length; ++i) {
             returnArray[i] = i;
-            Log.d(TAG, String.format("Hub %s is mapped to %d",
-                    mContextHubInfo[i].getName(), returnArray[i]));
         }
-
         return returnArray;
     }
 
@@ -425,12 +421,6 @@ public class ContextHubService extends IContextHubService.Stub {
         for (int i = 0; i < foundInstances.size(); i++) {
             retArray[i] = foundInstances.get(i).intValue();
         }
-
-        if (retArray.length == 0) {
-            Log.d(TAG, "No nanoapps found on hub ID " + hubHandle + " using NanoAppFilter: "
-                    + filter);
-        }
-
         return retArray;
     }
 
@@ -583,7 +573,7 @@ public class ContextHubService extends IContextHubService.Stub {
      * @param abortCode    the nanoapp-specific abort code
      */
     private void handleAppAbortCallback(int contextHubId, long nanoAppId, int abortCode) {
-        // TODO(b/31049861): Implement this
+        mClientManager.onNanoAppAborted(contextHubId, nanoAppId, abortCode);
     }
 
     /**

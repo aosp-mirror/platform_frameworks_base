@@ -1,11 +1,11 @@
-/**
- * Copyright (c) 2016, The Android Open Source Project
+/*
+ * Copyright (C) 2017 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *     http://www.apache.org/licenses/LICENSE-2.0
+ *      http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -14,19 +14,15 @@
  * limitations under the License.
  */
 
-package android.os;
+syntax = "proto2";
 
-/**
-  * Listener for incident report status
-  *
-  * {@hide}
-  */
-oneway interface IIncidentReportCompletedListener {
-    /**
-     * Called when there has been an incident report.
-     *
-     * The system service implementing this method should delete or move the file
-     * after it is finished with it.
-     */
-    void onIncidentReport(String filename);
+package com.android.internal.app.procstats;
+
+message ProcessStatsProto {
+  enum MemoryFactor {
+    MEM_FACTOR_NORMAL = 0;
+    MEM_FACTOR_MODERATE = 1;
+    MEM_FACTOR_LOW = 2;
+    MEM_FACTOR_CRITICAL = 3;
+  }
 }

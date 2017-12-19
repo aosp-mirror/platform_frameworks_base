@@ -870,14 +870,33 @@ interface ITelephony {
      *
      * @param enable true to turn on, else false
      */
-    void setDataEnabled(int subId, boolean enable);
+    void setUserDataEnabled(int subId, boolean enable);
+
+    /**
+     * Get the user enabled state of Mobile Data.
+     *
+     * TODO: remove and use isUserDataEnabled.
+     * This can't be removed now because some vendor codes
+     * calls through ITelephony directly while they should
+     * use TelephonyManager.
+     *
+     * @return true on enabled
+     */
+    boolean getDataEnabled(int subId);
 
     /**
      * Get the user enabled state of Mobile Data.
      *
      * @return true on enabled
      */
-    boolean getDataEnabled(int subId);
+    boolean isUserDataEnabled(int subId);
+
+    /**
+     * Get the overall enabled state of Mobile Data.
+     *
+     * @return true on enabled
+     */
+    boolean isDataEnabled(int subId);
 
     /**
      * Get P-CSCF address from PCO after data connection is established or modified.

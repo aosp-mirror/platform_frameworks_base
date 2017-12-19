@@ -54,6 +54,7 @@ public class StatusBarWindowManager implements RemoteInputController.Callback, D
     private final Context mContext;
     private final WindowManager mWindowManager;
     private final IActivityManager mActivityManager;
+    private final DozeParameters mDozeParameters;
     private View mStatusBarView;
     private WindowManager.LayoutParams mLp;
     private WindowManager.LayoutParams mLpChanged;
@@ -70,8 +71,8 @@ public class StatusBarWindowManager implements RemoteInputController.Callback, D
         mWindowManager = (WindowManager) context.getSystemService(Context.WINDOW_SERVICE);
         mActivityManager = ActivityManager.getService();
         mKeyguardScreenRotation = shouldEnableKeyguardScreenRotation();
-        mScreenBrightnessDoze = mContext.getResources().getInteger(
-                com.android.internal.R.integer.config_screenBrightnessDoze) / 255f;
+        mDozeParameters = new DozeParameters(mContext);
+        mScreenBrightnessDoze = mDozeParameters.getScreenBrightnessDoze();
     }
 
     private boolean shouldEnableKeyguardScreenRotation() {
@@ -136,7 +137,11 @@ public class StatusBarWindowManager implements RemoteInputController.Callback, D
             mLpChanged.privateFlags &= ~WindowManager.LayoutParams.PRIVATE_FLAG_KEYGUARD;
         }
 
-        if (state.keyguardShowing && !state.backdropShowing && !state.dozing) {
+        final boolean showWallpaperOnAod = mDozeParameters.getAlwaysOn() &&
+                state.wallpaperSupportsAmbientMode &&
+                state.scrimsVisibility != ScrimController.VISIBILITY_FULLY_OPAQUE;
+        if (state.keyguardShowing && !state.backdropShowing &&
+                (!state.dozing || showWallpaperOnAod)) {
             mLpChanged.flags |= WindowManager.LayoutParams.FLAG_SHOW_WALLPAPER;
         } else {
             mLpChanged.flags &= ~WindowManager.LayoutParams.FLAG_SHOW_WALLPAPER;
@@ -188,7 +193,8 @@ public class StatusBarWindowManager implements RemoteInputController.Callback, D
     private boolean isExpanded(State state) {
         return !state.forceCollapsed && (state.isKeyguardShowingAndNotOccluded()
                 || state.panelVisible || state.keyguardFadingAway || state.bouncerShowing
-                || state.headsUpShowing || state.scrimsVisible);
+                || state.headsUpShowing
+                || state.scrimsVisibility != ScrimController.VISIBILITY_FULLY_TRANSPARENT);
     }
 
     private void applyFitsSystemWindows(State state) {
@@ -336,13 +342,18 @@ public class StatusBarWindowManager implements RemoteInputController.Callback, D
         apply(mCurrentState);
     }
 
-    public void setScrimsVisible(boolean scrimsVisible) {
-        mCurrentState.scrimsVisible = scrimsVisible;
+    public void setScrimsVisibility(int scrimsVisibility) {
+        mCurrentState.scrimsVisibility = scrimsVisibility;
         apply(mCurrentState);
     }
 
     public void setHeadsUpShowing(boolean showing) {
         mCurrentState.headsUpShowing = showing;
+        apply(mCurrentState);
+    }
+
+    public void setWallpaperSupportsAmbientMode(boolean supportsAmbientMode) {
+        mCurrentState.wallpaperSupportsAmbientMode = supportsAmbientMode;
         apply(mCurrentState);
     }
 
@@ -433,6 +444,7 @@ public class StatusBarWindowManager implements RemoteInputController.Callback, D
         boolean forceDozeBrightness;
         boolean forceUserActivity;
         boolean backdropShowing;
+        boolean wallpaperSupportsAmbientMode;
 
         /**
          * The {@link StatusBar} state from the status bar.
@@ -442,7 +454,7 @@ public class StatusBarWindowManager implements RemoteInputController.Callback, D
         boolean remoteInputActive;
         boolean forcePluginOpen;
         boolean dozing;
-        boolean scrimsVisible;
+        int scrimsVisibility;
 
         private boolean isKeyguardShowingAndNotOccluded() {
             return keyguardShowing && !keyguardOccluded;

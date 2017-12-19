@@ -50,24 +50,24 @@ StatsPullerManagerImpl::StatsPullerManagerImpl()
     shared_ptr<StatsPuller> cpuTimePerUidPuller = make_shared<CpuTimePerUidPuller>();
     shared_ptr<StatsPuller> cpuTimePerUidFreqPuller = make_shared<CpuTimePerUidFreqPuller>();
 
-    mPullers.insert({android::util::KERNEL_WAKELOCK_PULLED,
+    mPullers.insert({android::util::KERNEL_WAKELOCK,
                      statsCompanionServicePuller});
-    mPullers.insert({android::util::WIFI_BYTES_TRANSFERRED,
+    mPullers.insert({android::util::WIFI_BYTES_TRANSFER,
                      statsCompanionServicePuller});
-    mPullers.insert({android::util::MOBILE_BYTES_TRANSFERRED,
+    mPullers.insert({android::util::MOBILE_BYTES_TRANSFER,
                      statsCompanionServicePuller});
-    mPullers.insert({android::util::WIFI_BYTES_TRANSFERRED_BY_FG_BG,
+    mPullers.insert({android::util::WIFI_BYTES_TRANSFER_BY_FG_BG,
                      statsCompanionServicePuller});
-    mPullers.insert({android::util::MOBILE_BYTES_TRANSFERRED_BY_FG_BG,
+    mPullers.insert({android::util::MOBILE_BYTES_TRANSFER_BY_FG_BG,
                      statsCompanionServicePuller});
-    mPullers.insert({android::util::POWER_STATE_PLATFORM_SLEEP_STATE_PULLED,
+    mPullers.insert({android::util::PLATFORM_SLEEP_STATE,
                      resourcePowerManagerPuller});
-    mPullers.insert({android::util::POWER_STATE_VOTER_PULLED,
+    mPullers.insert({android::util::SLEEP_STATE_VOTER,
                      resourcePowerManagerPuller});
-    mPullers.insert({android::util::POWER_STATE_SUBSYSTEM_SLEEP_STATE_PULLED,
+    mPullers.insert({android::util::SUBSYSTEM_SLEEP_STATE,
                      resourcePowerManagerPuller});
-    mPullers.insert({android::util::CPU_TIME_PER_UID_PULLED, cpuTimePerUidPuller});
-    mPullers.insert({android::util::CPU_TIME_PER_UID_FREQ_PULLED, cpuTimePerUidFreqPuller});
+    mPullers.insert({android::util::CPU_TIME_PER_UID, cpuTimePerUidPuller});
+    mPullers.insert({android::util::CPU_TIME_PER_UID_FREQ, cpuTimePerUidFreqPuller});
 
     mStatsCompanionService = StatsService::getStatsCompanionService();
 }

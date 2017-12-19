@@ -160,6 +160,7 @@ import android.view.inputmethod.InputConnection;
 import android.view.inputmethod.InputMethodManager;
 import android.view.textclassifier.TextClassificationManager;
 import android.view.textclassifier.TextClassifier;
+import android.view.textclassifier.TextLinks;
 import android.view.textservice.SpellCheckerSubtype;
 import android.view.textservice.TextServicesManager;
 import android.widget.RemoteViews.RemoteView;
@@ -168,6 +169,7 @@ import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.logging.MetricsLogger;
 import com.android.internal.logging.nano.MetricsProto.MetricsEvent;
 import com.android.internal.util.FastMath;
+import com.android.internal.util.Preconditions;
 import com.android.internal.widget.EditableInputConnection;
 
 import libcore.util.EmptyArray;
@@ -11150,6 +11152,20 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
         return mTextClassifier;
     }
 
+    /**
+     * Starts an ActionMode for the specified TextLink.
+     *
+     * @return Whether or not we're attempting to start the action mode.
+     * @hide
+     */
+    public boolean requestActionMode(@NonNull TextLinks.TextLink link) {
+        Preconditions.checkNotNull(link);
+        if (mEditor != null) {
+            mEditor.startLinkActionModeAsync(link);
+            return true;
+        }
+        return false;
+    }
     /**
      * @hide
      */

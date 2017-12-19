@@ -214,7 +214,7 @@ TEST(StatsdStatsTest, TestAtomLog) {
     stats.noteAtomLogged(android::util::SENSOR_STATE_CHANGED, now + 2);
     stats.noteAtomLogged(android::util::DROPBOX_ERROR_CHANGED, now + 3);
     // pulled event, should ignore
-    stats.noteAtomLogged(android::util::WIFI_BYTES_TRANSFERRED, now + 4);
+    stats.noteAtomLogged(android::util::WIFI_BYTES_TRANSFER, now + 4);
 
     vector<uint8_t> output;
     stats.dumpStats(&output, false);

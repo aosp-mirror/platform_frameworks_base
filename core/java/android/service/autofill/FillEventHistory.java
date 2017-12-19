@@ -25,7 +25,6 @@ import android.content.IntentSender;
 import android.os.Bundle;
 import android.os.Parcel;
 import android.os.Parcelable;
-import android.service.autofill.FieldClassification.Match;
 import android.util.ArrayMap;
 import android.util.ArraySet;
 import android.util.Log;
@@ -157,7 +156,8 @@ public final class FillEventHistory implements Parcelable {
                 final AutofillId[] detectedFields = event.mDetectedFieldIds;
                 parcel.writeParcelableArray(detectedFields, flags);
                 if (detectedFields != null) {
-                    Match.writeArrayToParcel(parcel, event.mDetectedMatches);
+                    FieldClassification.writeArrayToParcel(parcel,
+                            event.mDetectedFieldClassifications);
                 }
             }
         }
@@ -251,7 +251,7 @@ public final class FillEventHistory implements Parcelable {
         @Nullable private final ArrayList<ArrayList<String>> mManuallyFilledDatasetIds;
 
         @Nullable private final AutofillId[] mDetectedFieldIds;
-        @Nullable private final Match[] mDetectedMatches;
+        @Nullable private final FieldClassification[] mDetectedFieldClassifications;
 
         /**
          * Returns the type of the event.
@@ -370,11 +370,11 @@ public final class FillEventHistory implements Parcelable {
             final ArrayMap<AutofillId, FieldClassification> map = new ArrayMap<>(size);
             for (int i = 0; i < size; i++) {
                 final AutofillId id = mDetectedFieldIds[i];
-                final Match match = mDetectedMatches[i];
+                final FieldClassification fc = mDetectedFieldClassifications[i];
                 if (sVerbose) {
-                    Log.v(TAG, "getFieldsClassification[" + i + "]: id=" + id + ", match=" + match);
+                    Log.v(TAG, "getFieldsClassification[" + i + "]: id=" + id + ", fc=" + fc);
                 }
-                map.put(id, new FieldClassification(match));
+                map.put(id, fc);
             }
             return map;
         }
@@ -455,7 +455,7 @@ public final class FillEventHistory implements Parcelable {
          * and belonged to datasets.
          * @param manuallyFilledDatasetIds The ids of datasets that had values matching the
          * respective entry on {@code manuallyFilledFieldIds}.
-         * @param detectedMatches the field classification matches.
+         * @param detectedFieldClassifications the field classification matches.
          *
          * @throws IllegalArgumentException If the length of {@code changedFieldIds} and
          * {@code changedDatasetIds} doesn't match.
@@ -471,7 +471,8 @@ public final class FillEventHistory implements Parcelable {
                 @Nullable ArrayList<String> changedDatasetIds,
                 @Nullable ArrayList<AutofillId> manuallyFilledFieldIds,
                 @Nullable ArrayList<ArrayList<String>> manuallyFilledDatasetIds,
-                @Nullable AutofillId[] detectedFieldIds, @Nullable Match[] detectedMatches) {
+                @Nullable AutofillId[] detectedFieldIds,
+                @Nullable FieldClassification[] detectedFieldClassifications) {
             mEventType = Preconditions.checkArgumentInRange(eventType, 0, TYPE_CONTEXT_COMMITTED,
                     "eventType");
             mDatasetId = datasetId;
@@ -496,7 +497,7 @@ public final class FillEventHistory implements Parcelable {
             mManuallyFilledDatasetIds = manuallyFilledDatasetIds;
 
             mDetectedFieldIds = detectedFieldIds;
-            mDetectedMatches = detectedMatches;
+            mDetectedFieldClassifications = detectedFieldClassifications;
         }
 
         @Override
@@ -510,7 +511,8 @@ public final class FillEventHistory implements Parcelable {
                     + ", manuallyFilledFieldIds=" + mManuallyFilledFieldIds
                     + ", manuallyFilledDatasetIds=" + mManuallyFilledDatasetIds
                     + ", detectedFieldIds=" + Arrays.toString(mDetectedFieldIds)
-                    + ", detectedMaches =" + Arrays.toString(mDetectedMatches)
+                    + ", detectedFieldClassifications ="
+                        + Arrays.toString(mDetectedFieldClassifications)
                     + "]";
         }
     }
@@ -548,15 +550,16 @@ public final class FillEventHistory implements Parcelable {
                         }
                         final AutofillId[] detectedFieldIds = parcel.readParcelableArray(null,
                                 AutofillId.class);
-                        final Match[] detectedMatches = (detectedFieldIds != null)
-                                ? Match.readArrayFromParcel(parcel)
+                        final FieldClassification[] detectedFieldClassifications =
+                                (detectedFieldIds != null)
+                                ? FieldClassification.readArrayFromParcel(parcel)
                                 : null;
 
                         selection.addEvent(new Event(eventType, datasetId, clientState,
                                 selectedDatasetIds, ignoredDatasets,
                                 changedFieldIds, changedDatasetIds,
                                 manuallyFilledFieldIds, manuallyFilledDatasetIds,
-                                detectedFieldIds, detectedMatches));
+                                detectedFieldIds, detectedFieldClassifications));
                     }
                     return selection;
                 }

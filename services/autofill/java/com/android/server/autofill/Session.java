@@ -66,6 +66,7 @@ import android.service.autofill.SaveRequest;
 import android.service.autofill.UserData;
 import android.service.autofill.ValueFinder;
 import android.service.autofill.EditDistanceScorer;
+import android.service.autofill.FieldClassification;
 import android.util.ArrayMap;
 import android.util.ArraySet;
 import android.util.LocalLog;
@@ -961,15 +962,15 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
         final UserData userData = mService.getUserData();
 
         final ArrayList<AutofillId> detectedFieldIds;
-        final ArrayList<Match> detectedMatches;
+        final ArrayList<FieldClassification> detectedFieldClassifications;
 
         if (userData != null) {
             final int maxFieldsSize = UserData.getMaxFieldClassificationIdsSize();
             detectedFieldIds = new ArrayList<>(maxFieldsSize);
-            detectedMatches = new ArrayList<>(maxFieldsSize);
+            detectedFieldClassifications = new ArrayList<>(maxFieldsSize);
         } else {
             detectedFieldIds = null;
-            detectedMatches = null;
+            detectedFieldClassifications = null;
         }
 
         for (int i = 0; i < mViewStates.size(); i++) {
@@ -1078,8 +1079,8 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
 
                     // Sets field classification score for field
                     if (userData!= null) {
-                        setScore(detectedFieldIds, detectedMatches, userData, viewState.id,
-                                currentValue);
+                        setScore(detectedFieldIds, detectedFieldClassifications, userData,
+                                viewState.id, currentValue);
                     }
                 } // else
             } // else
@@ -1093,7 +1094,7 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
                     + ", changedDatasetIds=" + changedDatasetIds
                     + ", manuallyFilledIds=" + manuallyFilledIds
                     + ", detectedFieldIds=" + detectedFieldIds
-                    + ", detectedMatches=" + detectedMatches
+                    + ", detectedFieldClassifications=" + detectedFieldClassifications
                     );
         }
 
@@ -1116,16 +1117,17 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
         mService.logContextCommitted(id, mClientState, mSelectedDatasetIds, ignoredDatasets,
                 changedFieldIds, changedDatasetIds,
                 manuallyFilledFieldIds, manuallyFilledDatasetIds,
-                detectedFieldIds, detectedMatches, mComponentName.getPackageName());
+                detectedFieldIds, detectedFieldClassifications, mComponentName.getPackageName());
     }
 
     /**
-     * Adds the top score match to {@code detectedFieldsIds} and {@code detectedMatches} for
+     * Adds the matches to {@code detectedFieldsIds} and {@code detectedFieldClassifications} for
      * {@code fieldId} based on its {@code currentValue} and {@code userData}.
      */
     private static void setScore(@NonNull ArrayList<AutofillId> detectedFieldIds,
-            @NonNull ArrayList<Match> detectedMatches, @NonNull UserData userData,
-            @NonNull AutofillId fieldId, @NonNull AutofillValue currentValue) {
+            @NonNull ArrayList<FieldClassification> detectedFieldClassifications,
+            @NonNull UserData userData, @NonNull AutofillId fieldId,
+            @NonNull AutofillValue currentValue) {
 
         final String[] userValues = userData.getValues();
         final String[] remoteIds = userData.getRemoteIds();
@@ -1138,23 +1140,26 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
                     + valuesLength + ", ids.length = " + idsLength);
             return;
         }
-        String remoteId = null;
-        float topScore = 0;
+
+        ArrayList<Match> matches = null;
         for (int i = 0; i < userValues.length; i++) {
+            String remoteId = remoteIds[i];
             final String value = userValues[i];
             final float score = userData.getScorer().getScore(currentValue, value);
-            if (score > topScore) {
-                topScore = score;
-                remoteId = remoteIds[i];
+            if (score > 0) {
+                if (sVerbose) {
+                    Slog.v(TAG, "adding score " + score + " at index " + i + " and id " + fieldId);
+                }
+                if (matches == null) {
+                    matches = new ArrayList<>(userValues.length);
+                }
+                matches.add(new Match(remoteId, score));
             }
+            else if (sVerbose) Slog.v(TAG, "skipping score 0 at index " + i + " and id " + fieldId);
         }
-
-        if (remoteId != null && topScore > 0) {
-            if (sVerbose) Slog.v(TAG, "setScores(): top score for #" + fieldId + " is " + topScore);
+        if (matches != null) {
             detectedFieldIds.add(fieldId);
-            detectedMatches.add(new Match(remoteId, topScore));
-        } else if (sVerbose) {
-            Slog.v(TAG, "setScores(): no top score for #" + fieldId + ": " + topScore);
+            detectedFieldClassifications.add(new FieldClassification(matches));
         }
     }
 

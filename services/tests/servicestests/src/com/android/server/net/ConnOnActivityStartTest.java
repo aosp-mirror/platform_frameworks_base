@@ -19,7 +19,6 @@ package com.android.server.net;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
 
 import com.android.frameworks.servicestests.R;
 import com.android.servicestests.aidl.ICmdReceiverService;
@@ -42,6 +41,7 @@ import android.support.test.uiautomator.UiDevice;
 import android.util.Log;
 
 import org.junit.AfterClass;
+import org.junit.Assert;
 import org.junit.BeforeClass;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -81,7 +81,7 @@ public class ConnOnActivityStartTest {
 
     private static final long NETWORK_CHECK_TIMEOUT_MS = 4000; // 4 sec
 
-    private static final long SCREEN_ON_DELAY_MS = 500; // 0.5 sec
+    private static final long SCREEN_ON_DELAY_MS = 1000; // 1 sec
 
     private static final long BIND_SERVICE_TIMEOUT_SEC = 4;
 
@@ -348,13 +348,17 @@ public class ConnOnActivityStartTest {
     }
 
     private String executeCommand(String cmd) throws IOException {
-        final String result = mUiDevice.executeShellCommand(cmd).trim();
+        final String result = executeSilentCommand(cmd);
         Log.d(TAG, String.format("Result for '%s': %s", cmd, result));
         return result;
     }
 
+    private static String executeSilentCommand(String cmd) throws IOException {
+        return mUiDevice.executeShellCommand(cmd).trim();
+    }
+
     private void assertDelayedCommandResult(String cmd, String expectedResult,
-            int maxTries, int napTimeMs) throws IOException {
+            int maxTries, int napTimeMs) throws Exception {
         String result = "";
         for (int i = 1; i <= maxTries; ++i) {
             result = executeCommand(cmd);
@@ -392,6 +396,23 @@ public class ConnOnActivityStartTest {
         } else {
             fail("Timed out waiting for network availability status from test app " + mTestPkgUid);
         }
+    }
+
+    private static void fail(String msg) throws Exception {
+        dumpOnFailure();
+        Assert.fail(msg);
+    }
+
+    private static void dumpOnFailure() throws Exception {
+        Log.d(TAG, ">>> Begin network_management dump");
+        Log.printlns(Log.LOG_ID_MAIN, Log.DEBUG,
+                TAG, executeSilentCommand("dumpsys network_management"), null);
+        Log.d(TAG, "<<< End network_management dump");
+
+        Log.d(TAG, ">>> Begin netpolicy dump");
+        Log.printlns(Log.LOG_ID_MAIN, Log.DEBUG,
+                TAG, executeSilentCommand("dumpsys netpolicy"), null);
+        Log.d(TAG, "<<< End netpolicy dump");
     }
 
     private void finishActivity() throws Exception {

@@ -87,7 +87,6 @@ import android.util.SparseArray;
 import android.util.TypedValue;
 import android.util.apk.ApkSignatureSchemeV2Verifier;
 import android.util.apk.ApkSignatureVerifier;
-import android.util.apk.SignatureNotFoundException;
 import android.view.Gravity;
 
 import com.android.internal.R;
@@ -1561,41 +1560,35 @@ public class PackageParser {
 
         boolean systemDir = (parseFlags & PARSE_IS_SYSTEM_DIR) != 0;
         int minSignatureScheme = ApkSignatureVerifier.VERSION_JAR_SIGNATURE_SCHEME;
-        if ((parseFlags & PARSE_IS_EPHEMERAL) != 0 || pkg.applicationInfo.isStaticSharedLibrary()) {
+        if (pkg.applicationInfo.isStaticSharedLibrary()) {
             // must use v2 signing scheme
             minSignatureScheme = ApkSignatureVerifier.VERSION_APK_SIGNATURE_SCHEME_V2;
         }
-        try {
-            ApkSignatureVerifier.Result verified =
-                    ApkSignatureVerifier.verify(apkPath, minSignatureScheme, systemDir);
-            if (pkg.mCertificates == null) {
-                pkg.mCertificates = verified.certs;
-                pkg.mSignatures = verified.sigs;
-                pkg.mSigningKeys = new ArraySet<>(verified.certs.length);
-                for (int i = 0; i < verified.certs.length; i++) {
-                    Certificate[] signerCerts = verified.certs[i];
-                    Certificate signerCert = signerCerts[0];
-                    pkg.mSigningKeys.add(signerCert.getPublicKey());
-                }
-            } else {
-                if (!Signature.areExactMatch(pkg.mSignatures, verified.sigs)) {
-                    throw new PackageParserException(
-                            INSTALL_PARSE_FAILED_INCONSISTENT_CERTIFICATES,
-                            apkPath + " has mismatched certificates");
-                }
-            }
-        } catch (SignatureNotFoundException e) {
+        ApkSignatureVerifier.Result verified =
+                ApkSignatureVerifier.verify(apkPath, minSignatureScheme, systemDir);
+        if (verified.signatureSchemeVersion
+                < ApkSignatureVerifier.VERSION_APK_SIGNATURE_SCHEME_V2) {
+            // TODO (b/68860689): move this logic to packagemanagerserivce
             if ((parseFlags & PARSE_IS_EPHEMERAL) != 0) {
                 throw new PackageParserException(INSTALL_PARSE_FAILED_NO_CERTIFICATES,
-                        "No APK Signature Scheme v2 signature in ephemeral package " + apkPath,
-                        e);
+                        "No APK Signature Scheme v2 signature in ephemeral package " + apkPath);
             }
-            if (pkg.applicationInfo.isStaticSharedLibrary()) {
-                throw new PackageParserException(INSTALL_PARSE_FAILED_NO_CERTIFICATES,
-                        "Static shared libs must use v2 signature scheme " + apkPath);
+        }
+        if (pkg.mCertificates == null) {
+            pkg.mCertificates = verified.certs;
+            pkg.mSignatures = verified.sigs;
+            pkg.mSigningKeys = new ArraySet<>(verified.certs.length);
+            for (int i = 0; i < verified.certs.length; i++) {
+                Certificate[] signerCerts = verified.certs[i];
+                Certificate signerCert = signerCerts[0];
+                pkg.mSigningKeys.add(signerCert.getPublicKey());
             }
-            throw new PackageParserException(INSTALL_PARSE_FAILED_NO_CERTIFICATES,
-                    "No APK Signature Scheme v2 signature in package " + apkPath, e);
+        } else {
+            if (!Signature.areExactMatch(pkg.mSignatures, verified.sigs)) {
+                throw new PackageParserException(
+                        INSTALL_PARSE_FAILED_INCONSISTENT_CERTIFICATES,
+                        apkPath + " has mismatched certificates");
+            }
         }
     }
 

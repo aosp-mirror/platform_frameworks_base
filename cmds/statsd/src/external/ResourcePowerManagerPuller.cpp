@@ -92,7 +92,7 @@ bool ResourcePowerManagerPuller::Pull(const int tagId, vector<shared_ptr<LogEven
                     const PowerStatePlatformSleepState& state = states[i];
 
                     auto statePtr = make_shared<LogEvent>(
-                            android::util::POWER_STATE_PLATFORM_SLEEP_STATE_PULLED, timestamp);
+                            android::util::PLATFORM_SLEEP_STATE, timestamp);
                     statePtr->write(state.name);
                     statePtr->write(state.residencyInMsecSinceBoot);
                     statePtr->write(state.totalTransitions);
@@ -104,7 +104,7 @@ bool ResourcePowerManagerPuller::Pull(const int tagId, vector<shared_ptr<LogEven
                          (long long)state.totalTransitions, state.supportedOnlyInSuspend ? 1 : 0);
                     for (auto voter : state.voters) {
                         auto voterPtr =
-                                make_shared<LogEvent>(android::util::POWER_STATE_VOTER_PULLED, timestamp);
+                                make_shared<LogEvent>(android::util::SLEEP_STATE_VOTER, timestamp);
                         voterPtr->write(state.name);
                         voterPtr->write(voter.name);
                         voterPtr->write(voter.totalTimeInMsecVotedForSinceBoot);
@@ -138,7 +138,7 @@ bool ResourcePowerManagerPuller::Pull(const int tagId, vector<shared_ptr<LogEven
                             for (size_t j = 0; j < subsystem.states.size(); j++) {
                                 const PowerStateSubsystemSleepState& state = subsystem.states[j];
                                 auto subsystemStatePtr = make_shared<LogEvent>(
-                                        android::util::POWER_STATE_SUBSYSTEM_SLEEP_STATE_PULLED, timestamp);
+                                        android::util::SUBSYSTEM_SLEEP_STATE, timestamp);
                                 subsystemStatePtr->write(subsystem.name);
                                 subsystemStatePtr->write(state.name);
                                 subsystemStatePtr->write(state.residencyInMsecSinceBoot);

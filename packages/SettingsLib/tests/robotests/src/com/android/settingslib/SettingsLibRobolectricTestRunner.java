@@ -38,32 +38,25 @@ public class SettingsLibRobolectricTestRunner extends RobolectricTestRunner {
         final String resDir = appRoot + "/tests/robotests/res";
         final String assetsDir = appRoot + config.assetDir();
 
-        final AndroidManifest manifest = new AndroidManifest(Fs.fileFromPath(manifestPath),
-                Fs.fileFromPath(resDir), Fs.fileFromPath(assetsDir)) {
+        return new AndroidManifest(Fs.fileFromPath(manifestPath), Fs.fileFromPath(resDir),
+            Fs.fileFromPath(assetsDir), "com.android.settingslib") {
             @Override
             public List<ResourcePath> getIncludedResourcePaths() {
                 List<ResourcePath> paths = super.getIncludedResourcePaths();
-                SettingsLibRobolectricTestRunner.getIncludedResourcePaths(getPackageName(), paths);
+                paths.add(new ResourcePath(
+                    null,
+                    Fs.fileFromPath("./frameworks/base/packages/SettingsLib/res"),
+                    null));
+                paths.add(new ResourcePath(
+                    null,
+                    Fs.fileFromPath("./frameworks/base/core/res/res"),
+                    null));
+                paths.add(new ResourcePath(
+                    null,
+                    Fs.fileFromPath("./frameworks/support/v7/appcompat/res"),
+                    null));
                 return paths;
             }
         };
-        manifest.setPackageName("com.android.settingslib");
-        return manifest;
     }
-
-    static void getIncludedResourcePaths(String packageName, List<ResourcePath> paths) {
-        paths.add(new ResourcePath(
-                null,
-                Fs.fileFromPath("./frameworks/base/packages/SettingsLib/res"),
-                null));
-        paths.add(new ResourcePath(
-                null,
-                Fs.fileFromPath("./frameworks/base/core/res/res"),
-                null));
-        paths.add(new ResourcePath(
-                null,
-                Fs.fileFromPath("./frameworks/support/v7/appcompat/res"),
-                null));
-    }
-
 }

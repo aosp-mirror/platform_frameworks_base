@@ -20,31 +20,39 @@ import static android.view.autofill.Helper.sDebug;
 
 import android.annotation.NonNull;
 import android.os.Parcel;
-import android.os.Parcelable;
 import android.view.autofill.Helper;
 
 import com.android.internal.util.Preconditions;
 
-import com.google.android.collect.Lists;
-
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.List;
 
 /**
  * Represents the <a href="AutofillService.html#FieldClassification">field classification</a>
  * results for a given field.
  */
-// TODO(b/70291841): let caller handle Parcelable...
-public final class FieldClassification implements Parcelable {
+public final class FieldClassification {
 
-    private final Match mMatch;
+    private final ArrayList<Match> mMatches;
 
     /** @hide */
-    public FieldClassification(@NonNull Match match) {
-        mMatch = Preconditions.checkNotNull(match);
+    public FieldClassification(@NonNull ArrayList<Match> matches) {
+        mMatches = Preconditions.checkNotNull(matches);
+        Collections.sort(mMatches, new Comparator<Match>() {
+            @Override
+            public int compare(Match o1, Match o2) {
+                if (o1.mScore > o2.mScore) return -1;
+                if (o1.mScore < o2.mScore) return 1;
+                return 0;
+            }}
+        );
     }
 
     /**
-     * Gets the {@link Match matches} with the highest {@link Match#getScore() scores}.
+     * Gets the {@link Match matches} with the highest {@link Match#getScore() scores} (sorted in
+     * descending order).
      *
      * <p><b>Note:</b> There's no guarantee of how many matches will be returned. In fact,
      * the Android System might return just the top match to minimize the impact of field
@@ -52,43 +60,48 @@ public final class FieldClassification implements Parcelable {
      */
     @NonNull
     public List<Match> getMatches() {
-        return Lists.newArrayList(mMatch);
+        return mMatches;
     }
 
     @Override
     public String toString() {
         if (!sDebug) return super.toString();
 
-        return "FieldClassification: " + mMatch;
+        return "FieldClassification: " + mMatches;
     }
 
-    /////////////////////////////////////
-    // Parcelable "contract" methods. //
-    /////////////////////////////////////
-
-    @Override
-    public int describeContents() {
-        return 0;
+    private void writeToParcel(Parcel parcel) {
+        parcel.writeInt(mMatches.size());
+        for (int i = 0; i < mMatches.size(); i++) {
+            mMatches.get(i).writeToParcel(parcel);
+        }
     }
 
-    @Override
-    public void writeToParcel(Parcel parcel, int flags) {
-        mMatch.writeToParcel(parcel);
-    }
-
-    public static final Parcelable.Creator<FieldClassification> CREATOR =
-            new Parcelable.Creator<FieldClassification>() {
-
-        @Override
-        public FieldClassification createFromParcel(Parcel parcel) {
-            return new FieldClassification(Match.readFromParcel(parcel));
+    private static FieldClassification readFromParcel(Parcel parcel) {
+        final int size = parcel.readInt();
+        final ArrayList<Match> matches = new ArrayList<>();
+        for (int i = 0; i < size; i++) {
+            matches.add(i, Match.readFromParcel(parcel));
         }
 
-        @Override
-        public FieldClassification[] newArray(int size) {
-            return new FieldClassification[size];
+        return new FieldClassification(matches);
+    }
+
+    static FieldClassification[] readArrayFromParcel(Parcel parcel) {
+        final int length = parcel.readInt();
+        final FieldClassification[] fcs = new FieldClassification[length];
+        for (int i = 0; i < length; i++) {
+            fcs[i] = readFromParcel(parcel);
         }
-    };
+        return fcs;
+    }
+
+    static void writeArrayToParcel(@NonNull Parcel parcel, @NonNull FieldClassification[] fcs) {
+        parcel.writeInt(fcs.length);
+        for (int i = 0; i < fcs.length; i++) {
+            fcs[i].writeToParcel(parcel);
+        }
+    }
 
     /**
      * Represents the score of a {@link UserData} entry for the field.
@@ -150,24 +163,6 @@ public final class FieldClassification implements Parcelable {
 
         private static Match readFromParcel(@NonNull Parcel parcel) {
             return new Match(parcel.readString(), parcel.readFloat());
-        }
-
-        /** @hide */
-        public static Match[] readArrayFromParcel(@NonNull Parcel parcel) {
-            final int length = parcel.readInt();
-            final Match[] matches = new Match[length];
-            for (int i = 0; i < length; i++) {
-                matches[i] = readFromParcel(parcel);
-            }
-            return matches;
-        }
-
-        /** @hide */
-        public static void writeArrayToParcel(@NonNull Parcel parcel, @NonNull Match[] matches) {
-            parcel.writeInt(matches.length);
-            for (int i = 0; i < matches.length; i++) {
-                matches[i].writeToParcel(parcel);
-            }
         }
     }
 }

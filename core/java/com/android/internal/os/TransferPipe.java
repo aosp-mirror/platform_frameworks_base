@@ -34,11 +34,12 @@ import java.io.FileDescriptor;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.OutputStream;
 
 /**
  * Helper for transferring data through a pipe from a client app.
  */
-public final class TransferPipe implements Runnable, Closeable {
+public class TransferPipe implements Runnable, Closeable {
     static final String TAG = "TransferPipe";
     static final boolean DEBUG = false;
 
@@ -64,7 +65,11 @@ public final class TransferPipe implements Runnable, Closeable {
     }
 
     public TransferPipe(String bufferPrefix) throws IOException {
-        mThread = new Thread(this, "TransferPipe");
+        this(bufferPrefix, "TransferPipe");
+    }
+
+    protected TransferPipe(String bufferPrefix, String threadName) throws IOException {
+        mThread = new Thread(this, threadName);
         mFds = ParcelFileDescriptor.createPipe();
         mBufferPrefix = bufferPrefix;
     }
@@ -234,11 +239,15 @@ public final class TransferPipe implements Runnable, Closeable {
         }
     }
 
+    protected OutputStream getNewOutputStream() {
+          return new FileOutputStream(mOutFd);
+    }
+
     @Override
     public void run() {
         final byte[] buffer = new byte[1024];
         final FileInputStream fis;
-        final FileOutputStream fos;
+        final OutputStream fos;
 
         synchronized (this) {
             ParcelFileDescriptor readFd = getReadFd();
@@ -247,7 +256,7 @@ public final class TransferPipe implements Runnable, Closeable {
                 return;
             }
             fis = new FileInputStream(readFd.getFileDescriptor());
-            fos = new FileOutputStream(mOutFd);
+            fos = getNewOutputStream();
         }
 
         if (DEBUG) Slog.i(TAG, "Ready to read pipe...");

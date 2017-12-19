@@ -101,7 +101,7 @@ static jint nativeWaitWakeup(JNIEnv *env, jobject clazz, jobject outBuf)
             return -1;
         }
         ALOGV("Registering callback...");
-        set_wakeup_callback(&wakeup_callback);
+        autosuspend_set_wakeup_callback(&wakeup_callback);
     }
 
     // Wait for wakeup.

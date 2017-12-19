@@ -27,8 +27,10 @@ import static android.support.test.espresso.matcher.ViewMatchers.withId;
 import static android.support.test.espresso.matcher.ViewMatchers.withText;
 import static android.widget.espresso.CustomViewActions.longPressAtRelativeCoordinates;
 import static android.widget.espresso.DragHandleUtils.onHandleView;
-import static android.widget.espresso.FloatingToolbarEspressoUtils.assertFloatingToolbarContainsItem;
-import static android.widget.espresso.FloatingToolbarEspressoUtils.assertFloatingToolbarDoesNotContainItem;
+import static android.widget.espresso.FloatingToolbarEspressoUtils
+        .assertFloatingToolbarContainsItem;
+import static android.widget.espresso.FloatingToolbarEspressoUtils
+        .assertFloatingToolbarDoesNotContainItem;
 import static android.widget.espresso.FloatingToolbarEspressoUtils.assertFloatingToolbarIsDisplayed;
 import static android.widget.espresso.FloatingToolbarEspressoUtils.assertFloatingToolbarItemIndex;
 import static android.widget.espresso.FloatingToolbarEspressoUtils.clickFloatingToolbarItem;
@@ -68,12 +70,15 @@ import android.test.suitebuilder.annotation.Suppress;
 import android.text.InputType;
 import android.text.Selection;
 import android.text.Spannable;
+import android.text.SpannableString;
+import android.text.method.LinkMovementMethod;
 import android.view.ActionMode;
 import android.view.KeyEvent;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.textclassifier.TextClassificationManager;
 import android.view.textclassifier.TextClassifier;
+import android.view.textclassifier.TextLinks;
 import android.widget.espresso.CustomViewActions.RelativeCoordinatesProvider;
 
 import com.android.frameworks.coretests.R;
@@ -301,6 +306,33 @@ public class TextViewActivityTest {
         onView(withId(R.id.textview)).perform(longClick());
         sleepForFloatingToolbarPopup();
 
+        assertFloatingToolbarIsDisplayed();
+    }
+
+    @Test
+    public void testToolbarAppearsAfterLinkClicked() throws Throwable {
+        useSystemDefaultTextClassifier();
+        TextClassificationManager textClassificationManager =
+                mActivity.getSystemService(TextClassificationManager.class);
+        TextClassifier textClassifier = textClassificationManager.getTextClassifier();
+        final TextView textView = mActivity.findViewById(R.id.textview);
+        SpannableString content = new SpannableString("Call me at +19148277737");
+        TextLinks links = textClassifier.generateLinks(content);
+        links.apply(content, null);
+
+        mActivityRule.runOnUiThread(() -> {
+            textView.setText(content);
+            textView.setMovementMethod(LinkMovementMethod.getInstance());
+        });
+        mInstrumentation.waitForIdleSync();
+
+        // Wait for the UI thread to refresh
+        Thread.sleep(1000);
+
+        TextLinks.TextLink textLink = links.getLinks().iterator().next();
+        int position = (textLink.getStart() + textLink.getEnd()) / 2;
+        onView(withId(R.id.textview)).perform(clickOnTextAtIndex(position));
+        sleepForFloatingToolbarPopup();
         assertFloatingToolbarIsDisplayed();
     }
 

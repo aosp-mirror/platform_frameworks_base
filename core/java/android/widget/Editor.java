@@ -107,6 +107,7 @@ import android.view.inputmethod.ExtractedTextRequest;
 import android.view.inputmethod.InputConnection;
 import android.view.inputmethod.InputMethodManager;
 import android.view.textclassifier.TextClassification;
+import android.view.textclassifier.TextLinks;
 import android.widget.AdapterView.OnItemClickListener;
 import android.widget.TextView.Drawables;
 import android.widget.TextView.OnEditorActionListener;
@@ -172,6 +173,13 @@ public class Editor {
         int INSERTION = 0;
         int SELECTION_START = 1;
         int SELECTION_END = 2;
+    }
+
+    @IntDef({TextActionMode.SELECTION, TextActionMode.INSERTION, TextActionMode.TEXT_LINK})
+    @interface TextActionMode {
+        int SELECTION = 0;
+        int INSERTION = 1;
+        int TEXT_LINK = 2;
     }
 
     // Each Editor manages its own undo stack.
@@ -2053,7 +2061,7 @@ public class Editor {
         stopTextActionMode();
 
         ActionMode.Callback actionModeCallback =
-                new TextActionModeCallback(false /* hasSelection */);
+                new TextActionModeCallback(TextActionMode.INSERTION);
         mTextActionMode = mTextView.startActionMode(
                 actionModeCallback, ActionMode.TYPE_FLOATING);
         if (mTextActionMode != null && getInsertionController() != null) {
@@ -2079,7 +2087,23 @@ public class Editor {
      * Asynchronously starts a selection action mode using the TextClassifier.
      */
     void startSelectionActionModeAsync(boolean adjustSelection) {
-        getSelectionActionModeHelper().startActionModeAsync(adjustSelection);
+        getSelectionActionModeHelper().startSelectionActionModeAsync(adjustSelection);
+    }
+
+    void startLinkActionModeAsync(TextLinks.TextLink link) {
+        Preconditions.checkNotNull(link);
+        if (!(mTextView.getText() instanceof Spannable)) {
+            return;
+        }
+        Spannable text = (Spannable) mTextView.getText();
+        stopTextActionMode();
+        if (mTextView.isTextSelectable()) {
+            Selection.setSelection((Spannable) text, link.getStart(), link.getEnd());
+        } else {
+            //TODO: Nonselectable text
+        }
+
+        getSelectionActionModeHelper().startLinkActionModeAsync(link);
     }
 
     /**
@@ -2145,7 +2169,7 @@ public class Editor {
         return true;
     }
 
-    boolean startSelectionActionModeInternal() {
+    boolean startActionModeInternal(@TextActionMode int actionMode) {
         if (extractedTextModeWillBeStarted()) {
             return false;
         }
@@ -2159,8 +2183,7 @@ public class Editor {
             return false;
         }
 
-        ActionMode.Callback actionModeCallback =
-                new TextActionModeCallback(true /* hasSelection */);
+        ActionMode.Callback actionModeCallback = new TextActionModeCallback(actionMode);
         mTextActionMode = mTextView.startActionMode(actionModeCallback, ActionMode.TYPE_FLOATING);
 
         final boolean selectionStarted = mTextActionMode != null;
@@ -3828,8 +3851,9 @@ public class Editor {
         private final int mHandleHeight;
         private final Map<MenuItem, OnClickListener> mAssistClickHandlers = new HashMap<>();
 
-        public TextActionModeCallback(boolean hasSelection) {
-            mHasSelection = hasSelection;
+        TextActionModeCallback(@TextActionMode int mode) {
+            mHasSelection = mode == TextActionMode.SELECTION
+                    || (mTextIsSelectable && mode == TextActionMode.TEXT_LINK);
             if (mHasSelection) {
                 SelectionModifierCursorController selectionController = getSelectionController();
                 if (selectionController.mStartHandle == null) {

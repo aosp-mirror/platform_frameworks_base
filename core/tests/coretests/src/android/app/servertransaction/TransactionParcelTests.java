@@ -513,6 +513,12 @@ public class TransactionParcelTests {
         }
 
         @Override
+        public void dumpMemInfoProto(ParcelFileDescriptor parcelFileDescriptor,
+                Debug.MemoryInfo memoryInfo, boolean b, boolean b1, boolean b2,
+                boolean b3, String[] strings) throws RemoteException {
+        }
+
+        @Override
         public void dumpGfxInfo(ParcelFileDescriptor parcelFileDescriptor, String[] strings)
                 throws RemoteException {
         }

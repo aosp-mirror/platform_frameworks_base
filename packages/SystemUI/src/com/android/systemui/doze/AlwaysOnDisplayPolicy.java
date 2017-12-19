@@ -40,12 +40,16 @@ public class AlwaysOnDisplayPolicy {
     private static final long DEFAULT_PROX_SCREEN_OFF_DELAY_MS = 10 * DateUtils.SECOND_IN_MILLIS;
     private static final long DEFAULT_PROX_COOLDOWN_TRIGGER_MS = 2 * DateUtils.SECOND_IN_MILLIS;
     private static final long DEFAULT_PROX_COOLDOWN_PERIOD_MS = 5 * DateUtils.SECOND_IN_MILLIS;
+    private static final long DEFAULT_WALLPAPER_VISIBILITY_MS = 60 * DateUtils.SECOND_IN_MILLIS;
+    private static final long DEFAULT_WALLPAPER_FADE_OUT_MS = 400;
 
     static final String KEY_SCREEN_BRIGHTNESS_ARRAY = "screen_brightness_array";
     static final String KEY_DIMMING_SCRIM_ARRAY = "dimming_scrim_array";
     static final String KEY_PROX_SCREEN_OFF_DELAY_MS = "prox_screen_off_delay";
     static final String KEY_PROX_COOLDOWN_TRIGGER_MS = "prox_cooldown_trigger";
     static final String KEY_PROX_COOLDOWN_PERIOD_MS = "prox_cooldown_period";
+    static final String KEY_WALLPAPER_VISIBILITY_MS = "wallpaper_visibility_timeout";
+    static final String KEY_WALLPAPER_FADE_OUT_MS = "wallpaper_fade_out_duration";
 
     /**
      * Integer array to map ambient brightness type to real screen brightness.
@@ -88,6 +92,24 @@ public class AlwaysOnDisplayPolicy {
      * @see #KEY_PROX_COOLDOWN_PERIOD_MS
      */
     public long proxCooldownPeriodMs;
+
+    /**
+     * For how long(ms) the wallpaper should still be visible
+     * after entering AoD.
+     *
+     * @see Settings.Global#ALWAYS_ON_DISPLAY_CONSTANTS
+     * @see #KEY_WALLPAPER_VISIBILITY_MS
+     */
+    public long wallpaperVisibilityDuration;
+
+    /**
+     * Duration(ms) of the fade out animation after
+     * {@link #KEY_WALLPAPER_VISIBILITY_MS} elapses.
+     *
+     * @see Settings.Global#ALWAYS_ON_DISPLAY_CONSTANTS
+     * @see #KEY_WALLPAPER_FADE_OUT_MS
+     */
+    public long wallpaperFadeOutDuration;
 
     private final KeyValueListParser mParser;
     private final Context mContext;
@@ -138,6 +160,10 @@ public class AlwaysOnDisplayPolicy {
                         DEFAULT_PROX_COOLDOWN_TRIGGER_MS);
                 proxCooldownPeriodMs = mParser.getLong(KEY_PROX_COOLDOWN_PERIOD_MS,
                         DEFAULT_PROX_COOLDOWN_PERIOD_MS);
+                wallpaperFadeOutDuration = mParser.getLong(KEY_WALLPAPER_FADE_OUT_MS,
+                        DEFAULT_WALLPAPER_FADE_OUT_MS);
+                wallpaperVisibilityDuration = mParser.getLong(KEY_WALLPAPER_VISIBILITY_MS,
+                        DEFAULT_WALLPAPER_VISIBILITY_MS);
                 screenBrightnessArray = mParser.getIntArray(KEY_SCREEN_BRIGHTNESS_ARRAY,
                         resources.getIntArray(
                                 R.array.config_doze_brightness_sensor_to_brightness));

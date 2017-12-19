@@ -16,7 +16,6 @@
 
 package android.os;
 
-import android.os.IIncidentReportCompletedListener;
 import android.os.IIncidentReportStatusListener;
 import android.os.IncidentReportArgs;
 

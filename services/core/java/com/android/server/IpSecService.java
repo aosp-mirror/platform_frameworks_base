@@ -34,6 +34,7 @@ import android.net.IpSecTransform;
 import android.net.IpSecTransformResponse;
 import android.net.IpSecUdpEncapResponse;
 import android.net.NetworkUtils;
+import android.net.TrafficStats;
 import android.net.util.NetdService;
 import android.os.Binder;
 import android.os.IBinder;
@@ -120,6 +121,7 @@ public class IpSecService extends IIpSecService.Stub {
     }
 
     private final IpSecServiceConfiguration mSrvConfig;
+    final UidFdTagger mUidFdTagger;
 
     /**
      * Interface for user-reference and kernel-resource cleanup.
@@ -762,8 +764,23 @@ public class IpSecService extends IIpSecService.Stub {
     /** @hide */
     @VisibleForTesting
     public IpSecService(Context context, IpSecServiceConfiguration config) {
+        this(context, config, (fd, uid) ->  {
+            try{
+                TrafficStats.setThreadStatsUid(uid);
+                TrafficStats.tagFileDescriptor(fd);
+            } finally {
+                TrafficStats.clearThreadStatsUid();
+            }
+        });
+    }
+
+    /** @hide */
+    @VisibleForTesting
+    public IpSecService(
+            Context context, IpSecServiceConfiguration config, UidFdTagger uidFdTagger) {
         mContext = context;
         mSrvConfig = config;
+        mUidFdTagger = uidFdTagger;
     }
 
     public void systemReady() {
@@ -925,6 +942,26 @@ public class IpSecService extends IIpSecService.Stub {
     }
 
     /**
+     * Functional interface to do traffic tagging of given sockets to UIDs.
+     *
+     * <p>Specifically used by openUdpEncapsulationSocket to ensure data usage on the UDP encap
+     * sockets are billed to the UID that the UDP encap socket was created on behalf of.
+     *
+     * <p>Separate class so that the socket tagging logic can be mocked; TrafficStats uses static
+     * methods that cannot be easily mocked/tested.
+     */
+    @VisibleForTesting
+    public interface UidFdTagger {
+        /**
+         * Sets socket tag to assign all traffic to the provided UID.
+         *
+         * <p>Since the socket is created on behalf of an unprivileged application, all traffic
+         * should be accounted to the UID of the unprivileged application.
+         */
+        public void tag(FileDescriptor fd, int uid) throws IOException;
+    }
+
+    /**
      * Open a socket via the system server and bind it to the specified port (random if port=0).
      * This will return a PFD to the user that represent a bound UDP socket. The system server will
      * cache the socket and a record of its owner so that it can and must be freed when no longer
@@ -939,7 +976,8 @@ public class IpSecService extends IIpSecService.Stub {
         }
         checkNotNull(binder, "Null Binder passed to openUdpEncapsulationSocket");
 
-        UserRecord userRecord = mUserResourceTracker.getUserRecord(Binder.getCallingUid());
+        int callingUid = Binder.getCallingUid();
+        UserRecord userRecord = mUserResourceTracker.getUserRecord(callingUid);
         int resourceId = mNextResourceId.getAndIncrement();
         FileDescriptor sockFd = null;
         try {
@@ -948,6 +986,7 @@ public class IpSecService extends IIpSecService.Stub {
             }
 
             sockFd = Os.socket(AF_INET, SOCK_DGRAM, IPPROTO_UDP);
+            mUidFdTagger.tag(sockFd, callingUid);
 
             if (port != 0) {
                 Log.v(TAG, "Binding to port " + port);

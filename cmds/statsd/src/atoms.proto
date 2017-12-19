@@ -85,19 +85,19 @@ message Atom {
 
     // Pulled events will start at field 1000.
     oneof pulled {
-        WifiBytesTransferred wifi_bytes_transferred = 1000;
-        WifiBytesTransferredByFgBg wifi_bytes_transferred_by_fg_bg = 1001;
-        MobileBytesTransferred mobile_bytes_transferred = 1002;
-        MobileBytesTransferredByFgBg mobile_bytes_transferred_by_fg_bg = 1003;
-        KernelWakelockPulled kernel_wakelock_pulled = 1004;
-        PowerStatePlatformSleepStatePulled power_state_platform_sleep_state_pulled = 1005;
-        PowerStateVoterPulled power_state_voter_pulled = 1006;
-        PowerStateSubsystemSleepStatePulled power_state_subsystem_sleep_state_pulled = 1007;
-        CpuTimePerFreqPulled cpu_time_per_freq_pulled = 1008;
-        CpuTimePerUidPulled cpu_time_per_uid_pulled = 1009;
-        CpuTimePerUidFreqPulled cpu_time_per_uid_freq_pulled = 1010;
-        WifiActivityEnergyInfoPulled wifi_activity_energy_info_pulled = 1011;
-        ModemActivityInfoPulled modem_activity_info_pulled = 1012;
+        WifiBytesTransfer wifi_bytes_transfer = 1000;
+        WifiBytesTransferByFgBg wifi_bytes_transfer_by_fg_bg = 1001;
+        MobileBytesTransfer mobile_bytes_transfer = 1002;
+        MobileBytesTransferByFgBg mobile_bytes_transfer_by_fg_bg = 1003;
+        KernelWakelock kernel_wakelock = 1004;
+        PlatformSleepState platform_sleep_state = 1005;
+        SleepStateVoter sleep_state_voter = 1006;
+        SubsystemSleepState subsystem_sleep_state = 1007;
+        CpuTimePerFreq cpu_time_per_freq = 1008;
+        CpuTimePerUid cpu_time_per_uid = 1009;
+        CpuTimePerUidFreq cpu_time_per_uid_freq = 1010;
+        WifiActivityEnergyInfo wifi_activity_energy_info = 1011;
+        ModemActivityInfo modem_activity_info = 1012;
         AttributionChainDummyAtom attribution_chain_dummy_atom = 10000;
     }
 }
@@ -846,7 +846,7 @@ message AppHook {
  * Pulled from:
  *   StatsCompanionService (using BatteryStats to get which interfaces are wifi)
  */
-message WifiBytesTransferred {
+message WifiBytesTransfer {
     optional int32 uid = 1;
 
     optional int64 rx_bytes = 2;
@@ -864,7 +864,7 @@ message WifiBytesTransferred {
  * Pulled from:
  *   StatsCompanionService (using BatteryStats to get which interfaces are wifi)
  */
-message WifiBytesTransferredByFgBg {
+message WifiBytesTransferByFgBg {
     optional int32 uid = 1;
 
     // 1 denotes foreground and 0 denotes background. This is called Set in NetworkStats.
@@ -885,7 +885,7 @@ message WifiBytesTransferredByFgBg {
  * Pulled from:
  *   StatsCompanionService (using BatteryStats to get which interfaces are mobile data)
  */
-message MobileBytesTransferred {
+message MobileBytesTransfer {
     optional int32 uid = 1;
 
     optional int64 rx_bytes = 2;
@@ -903,7 +903,7 @@ message MobileBytesTransferred {
  * Pulled from:
  *   StatsCompanionService (using BatteryStats to get which interfaces are mobile data)
  */
-message MobileBytesTransferredByFgBg {
+message MobileBytesTransferByFgBg {
     optional int32 uid = 1;
 
     // 1 denotes foreground and 0 denotes background. This is called Set in NetworkStats.
@@ -925,7 +925,7 @@ message MobileBytesTransferredByFgBg {
  * Pulled from:
  *   StatsCompanionService using KernelWakelockReader.
  */
-message KernelWakelockPulled {
+message KernelWakelock {
     optional string name = 1;
 
     optional int32 count = 2;
@@ -941,7 +941,7 @@ message KernelWakelockPulled {
  * Definition here:
  *   hardware/interfaces/power/1.0/types.hal
  */
-message PowerStatePlatformSleepStatePulled {
+message PlatformSleepState {
     optional string name = 1;
     optional uint64 residency_in_msec_since_boot = 2;
     optional uint64 total_transitions = 3;
@@ -954,9 +954,9 @@ message PowerStatePlatformSleepStatePulled {
  * Definition here:
  *   hardware/interfaces/power/1.0/types.hal
  */
-message PowerStateVoterPulled {
-    optional string power_state_platform_sleep_state_name = 1;
-    optional string power_state_voter_name = 2;
+message SleepStateVoter {
+    optional string platform_sleep_state_name = 1;
+    optional string voter_name = 2;
     optional uint64 total_time_in_msec_voted_for_since_boot = 3;
     optional uint64 total_number_of_times_voted_since_boot = 4;
 }
@@ -967,9 +967,9 @@ message PowerStateVoterPulled {
  * Definition here:
  *   hardware/interfaces/power/1.1/types.hal
  */
-message PowerStateSubsystemSleepStatePulled {
-    optional string power_state_subsystem_name = 1;
-    optional string power_state_subsystem_sleep_state_name = 2;
+message SubsystemSleepState {
+    optional string subsystem_name = 1;
+    optional string subsystem_sleep_state_name = 2;
     optional uint64 residency_in_msec_since_boot = 3;
     optional uint64 total_transitions = 4;
     optional uint64 last_entry_timestamp_ms = 5;
@@ -1006,17 +1006,17 @@ message IsolatedUidChanged {
  * if current time is smaller than last value, there must be a cpu
  * hotplug event, and the current time is taken as delta.
  */
-message CpuTimePerFreqPulled {
+message CpuTimePerFreq {
     optional uint32 cluster = 1;
     optional uint32 freq_index = 2;
-    optional uint64 time = 3;
+    optional uint64 time_ms = 3;
 }
 
 /**
  * Pulls Cpu Time Per Uid.
  * Note that isolated process uid time should be attributed to host uids.
  */
-message CpuTimePerUidPulled {
+message CpuTimePerUid {
     optional uint64 uid = 1;
     optional uint64 user_time_ms = 2;
     optional uint64 sys_time_ms = 3;
@@ -1027,7 +1027,7 @@ message CpuTimePerUidPulled {
  * Note that isolated process uid time should be attributed to host uids.
  * For each uid, we order the time by descending frequencies.
  */
-message CpuTimePerUidFreqPulled {
+message CpuTimePerUidFreq {
     optional uint64 uid = 1;
     optional uint64 freq_idx = 2;
     optional uint64 time_ms = 3;
@@ -1065,7 +1065,7 @@ message PacketWakeupOccurred {
 /**
  * Pulls Wifi Controller Activity Energy Info
  */
-message WifiActivityEnergyInfoPulled {
+message WifiActivityEnergyInfo {
     // timestamp(wall clock) of record creation
     optional uint64 timestamp_ms = 1;
     // stack reported state
@@ -1084,7 +1084,7 @@ message WifiActivityEnergyInfoPulled {
 /**
  * Pulls Modem Activity Energy Info
  */
-message ModemActivityInfoPulled {
+message ModemActivityInfo {
     // timestamp(wall clock) of record creation
     optional uint64 timestamp_ms = 1;
     // sleep time in ms.

@@ -65,18 +65,14 @@ public class ApkSignatureVerifier {
      *                  v2 stripping rollback protection, or verify integrity of the APK.
      *
      * @throws PackageParserException if the APK's signature failed to verify.
-     * @throws SignatureNotFoundException if a signature corresponding to minLevel or greater
-     * is not found, except in the case of no JAR signature.
      */
     public static Result verify(String apkPath, int minSignatureSchemeVersion, boolean systemDir)
-            throws PackageParserException, SignatureNotFoundException {
-        boolean verified = false;
-        Certificate[][] signerCerts;
-        int level = VERSION_APK_SIGNATURE_SCHEME_V2;
+            throws PackageParserException {
 
         // first try v2
         Trace.traceBegin(TRACE_TAG_PACKAGE_MANAGER, "verifyV2");
         try {
+            Certificate[][] signerCerts;
             signerCerts = ApkSignatureSchemeV2Verifier.verify(apkPath);
             Signature[] signerSigs = convertToSignatures(signerCerts);
 
@@ -93,12 +89,12 @@ public class ApkSignatureVerifier {
             } finally {
                 closeQuietly(jarFile);
             }
-            return new Result(signerCerts, signerSigs);
+            return new Result(signerCerts, signerSigs, VERSION_APK_SIGNATURE_SCHEME_V2);
         } catch (SignatureNotFoundException e) {
             // not signed with v2, try older if allowed
             if (minSignatureSchemeVersion >= VERSION_APK_SIGNATURE_SCHEME_V2) {
-                throw new SignatureNotFoundException(
-                        "No APK Signature Scheme v2 signature found for " + apkPath, e);
+                throw new PackageParserException(INSTALL_PARSE_FAILED_NO_CERTIFICATES,
+                        "No APK Signature Scheme v2 signature in package " + apkPath, e);
             }
         } catch (PackageParserException e) {
             // preserve any new exceptions explicitly thrown here
@@ -178,7 +174,7 @@ public class ApkSignatureVerifier {
                     }
                 }
             }
-            return new Result(lastCerts, lastSigs);
+            return new Result(lastCerts, lastSigs, VERSION_JAR_SIGNATURE_SCHEME);
         } catch (GeneralSecurityException e) {
             throw new PackageParserException(INSTALL_PARSE_FAILED_CERTIFICATE_ENCODING,
                     "Failed to collect certificates from " + apkPath, e);
@@ -254,10 +250,12 @@ public class ApkSignatureVerifier {
     public static class Result {
         public final Certificate[][] certs;
         public final Signature[] sigs;
+        public final int signatureSchemeVersion;
 
-        public Result(Certificate[][] certs, Signature[] sigs) {
+        public Result(Certificate[][] certs, Signature[] sigs, int signingVersion) {
             this.certs = certs;
             this.sigs = sigs;
+            this.signatureSchemeVersion = signingVersion;
         }
     }
 }

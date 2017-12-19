@@ -35,6 +35,7 @@ import android.util.Log;
 import android.view.ActionMode;
 import android.view.textclassifier.TextClassification;
 import android.view.textclassifier.TextClassifier;
+import android.view.textclassifier.TextLinks;
 import android.view.textclassifier.TextSelection;
 import android.view.textclassifier.logging.SmartSelectionEventTracker;
 import android.view.textclassifier.logging.SmartSelectionEventTracker.SelectionEvent;
@@ -97,7 +98,10 @@ public final class SelectionActionModeHelper {
         }
     }
 
-    public void startActionModeAsync(boolean adjustSelection) {
+    /**
+     * Starts Selection ActionMode.
+     */
+    public void startSelectionActionModeAsync(boolean adjustSelection) {
         // Check if the smart selection should run for editable text.
         adjustSelection &= !mTextView.isTextEditable()
                 || mTextView.getTextClassifier().getSettings()
@@ -109,7 +113,7 @@ public final class SelectionActionModeHelper {
                 mTextView.getSelectionEnd());
         cancelAsyncTask();
         if (skipTextClassification()) {
-            startActionMode(null);
+            startSelectionActionMode(null);
         } else {
             resetTextClassificationHelper();
             mTextClassificationAsyncTask = new TextClassificationAsyncTask(
@@ -119,8 +123,27 @@ public final class SelectionActionModeHelper {
                             ? mTextClassificationHelper::suggestSelection
                             : mTextClassificationHelper::classifyText,
                     mSmartSelectSprite != null
-                            ? this::startActionModeWithSmartSelectAnimation
-                            : this::startActionMode)
+                            ? this::startSelectionActionModeWithSmartSelectAnimation
+                            : this::startSelectionActionMode)
+                    .execute();
+        }
+    }
+
+    /**
+     * Starts Link ActionMode.
+     */
+    public void startLinkActionModeAsync(TextLinks.TextLink textLink) {
+        //TODO: tracking/logging
+        cancelAsyncTask();
+        if (skipTextClassification()) {
+            startLinkActionMode(null);
+        } else {
+            resetTextClassificationHelper(textLink.getStart(), textLink.getEnd());
+            mTextClassificationAsyncTask = new TextClassificationAsyncTask(
+                    mTextView,
+                    mTextClassificationHelper.getTimeoutDuration(),
+                    mTextClassificationHelper::classifyText,
+                    this::startLinkActionMode)
                     .execute();
         }
     }
@@ -200,9 +223,19 @@ public final class SelectionActionModeHelper {
         return noOpTextClassifier || noSelection || password;
     }
 
-    private void startActionMode(@Nullable SelectionResult result) {
+    private void startLinkActionMode(@Nullable SelectionResult result) {
+        startActionMode(Editor.TextActionMode.TEXT_LINK, result);
+    }
+
+    private void startSelectionActionMode(@Nullable SelectionResult result) {
+        startActionMode(Editor.TextActionMode.SELECTION, result);
+    }
+
+    private void startActionMode(
+            @Editor.TextActionMode int actionMode, @Nullable SelectionResult result) {
         final CharSequence text = getText(mTextView);
-        if (result != null && text instanceof Spannable) {
+        if (result != null && text instanceof Spannable
+                && (mTextView.isTextSelectable() || mTextView.isTextEditable())) {
             // Do not change the selection if TextClassifier should be dark launched.
             if (!mTextView.getTextClassifier().getSettings().isDarkLaunch()) {
                 Selection.setSelection((Spannable) text, result.mStart, result.mEnd);
@@ -211,12 +244,13 @@ public final class SelectionActionModeHelper {
         } else {
             mTextClassification = null;
         }
-        if (mEditor.startSelectionActionModeInternal()) {
+        if (mEditor.startActionModeInternal(actionMode)) {
             final SelectionModifierCursorController controller = mEditor.getSelectionController();
-            if (controller != null) {
+            if (controller != null
+                    && (mTextView.isTextSelectable() || mTextView.isTextEditable())) {
                 controller.show();
             }
-            if (result != null) {
+            if (result != null && actionMode == Editor.TextActionMode.SELECTION) {
                 mSelectionTracker.onSmartSelection(result);
             }
         }
@@ -224,10 +258,11 @@ public final class SelectionActionModeHelper {
         mTextClassificationAsyncTask = null;
     }
 
-    private void startActionModeWithSmartSelectAnimation(@Nullable SelectionResult result) {
+    private void startSelectionActionModeWithSmartSelectAnimation(
+            @Nullable SelectionResult result) {
         final Layout layout = mTextView.getLayout();
 
-        final Runnable onAnimationEndCallback = () -> startActionMode(result);
+        final Runnable onAnimationEndCallback = () -> startSelectionActionMode(result);
         // TODO do not trigger the animation if the change included only non-printable characters
         final boolean didSelectionChange =
                 result != null && (mTextView.getSelectionStart() != result.mStart
@@ -386,13 +421,22 @@ public final class SelectionActionModeHelper {
         mTextClassificationAsyncTask = null;
     }
 
-    private void resetTextClassificationHelper() {
+    private void resetTextClassificationHelper(int selectionStart, int selectionEnd) {
+        if (selectionStart < 0 || selectionEnd < 0) {
+            // Use selection indices
+            selectionStart = mTextView.getSelectionStart();
+            selectionEnd = mTextView.getSelectionEnd();
+        }
         mTextClassificationHelper.init(
                 mTextView.getContext(),
                 mTextView.getTextClassifier(),
                 getText(mTextView),
-                mTextView.getSelectionStart(), mTextView.getSelectionEnd(),
+                selectionStart, selectionEnd,
                 mTextView.getTextLocales());
+    }
+
+    private void resetTextClassificationHelper() {
+        resetTextClassificationHelper(-1, -1);
     }
 
     private void cancelSmartSelectAnimation() {

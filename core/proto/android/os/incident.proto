@@ -28,13 +28,14 @@ import "frameworks/base/core/proto/android/os/system_properties.proto";
 import "frameworks/base/core/proto/android/providers/settings.proto";
 import "frameworks/base/core/proto/android/server/activitymanagerservice.proto";
 import "frameworks/base/core/proto/android/server/alarmmanagerservice.proto";
-import "frameworks/base/core/proto/android/server/windowmanagerservice.proto";
 import "frameworks/base/core/proto/android/server/fingerprint.proto";
 import "frameworks/base/core/proto/android/server/powermanagerservice.proto";
+import "frameworks/base/core/proto/android/server/windowmanagerservice.proto";
 import "frameworks/base/core/proto/android/service/appwidget.proto";
 import "frameworks/base/core/proto/android/service/battery.proto";
 import "frameworks/base/core/proto/android/service/batterystats.proto";
 import "frameworks/base/core/proto/android/service/diskstats.proto";
+import "frameworks/base/core/proto/android/service/graphicsstats.proto";
 import "frameworks/base/core/proto/android/service/netstats.proto";
 import "frameworks/base/core/proto/android/service/notification.proto";
 import "frameworks/base/core/proto/android/service/package.proto";
@@ -176,6 +177,11 @@ message IncidentProto {
 
     optional com.android.server.am.proto.MemInfoProto meminfo = 3018 [
         (section).type = SECTION_DUMPSYS,
-        (section).args = "meminfo --proto"
+        (section).args = "meminfo -a --proto"
+    ];
+
+    optional android.service.GraphicsStatsServiceDumpProto graphicsstats = 3019 [
+        (section).type = SECTION_DUMPSYS,
+        (section).args = "graphicsstats --proto"
     ];
 }

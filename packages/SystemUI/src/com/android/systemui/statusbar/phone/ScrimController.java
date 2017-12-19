@@ -20,6 +20,7 @@ import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
 import android.animation.PropertyValuesHolder;
 import android.animation.ValueAnimator;
+import android.app.AlarmManager;
 import android.app.WallpaperManager;
 import android.content.Context;
 import android.graphics.Color;
@@ -51,6 +52,7 @@ import com.android.systemui.statusbar.NotificationData;
 import com.android.systemui.statusbar.ScrimView;
 import com.android.systemui.statusbar.policy.OnHeadsUpChangedListener;
 import com.android.systemui.statusbar.stack.ViewState;
+import com.android.systemui.util.AlarmTimeout;
 import com.android.systemui.util.wakelock.DelayedWakeLock;
 import com.android.systemui.util.wakelock.WakeLock;
 
@@ -73,6 +75,19 @@ public class ScrimController implements ViewTreeObserver.OnPreDrawListener,
             = new PathInterpolator(0f, 0, 0.7f, 1f);
     public static final Interpolator KEYGUARD_FADE_OUT_INTERPOLATOR_LOCKED
             = new PathInterpolator(0.3f, 0f, 0.8f, 1f);
+
+    /**
+     * When both scrims have 0 alpha.
+     */
+    public static final int VISIBILITY_FULLY_TRANSPARENT = 0;
+    /**
+     * When scrims aren't transparent (alpha 0) but also not opaque (alpha 1.)
+     */
+    public static final int VISIBILITY_SEMI_TRANSPARENT = 1;
+    /**
+     * When at least 1 scrim is fully opaque (alpha set to 1.)
+     */
+    public static final int VISIBILITY_FULLY_OPAQUE = 2;
     /**
      * Default alpha value for most scrims.
      */
@@ -111,6 +126,7 @@ public class ScrimController implements ViewTreeObserver.OnPreDrawListener,
     private final UnlockMethodCache mUnlockMethodCache;
     private final KeyguardUpdateMonitor mKeyguardUpdateMonitor;
     private final DozeParameters mDozeParameters;
+    private final AlarmTimeout mTimeTicker;
 
     private final SysuiColorExtractor mColorExtractor;
     private GradientColors mLockColors;
@@ -138,23 +154,25 @@ public class ScrimController implements ViewTreeObserver.OnPreDrawListener,
     private float mCurrentBehindAlpha = NOT_INITIALIZED;
     private int mCurrentInFrontTint;
     private int mCurrentBehindTint;
+    private boolean mWallpaperVisibilityTimedOut;
     private int mPinnedHeadsUpCount;
     private float mTopHeadsUpDragAmount;
     private View mDraggedHeadsUpView;
     private boolean mKeyguardFadingOutInProgress;
     private ValueAnimator mKeyguardFadeoutAnimation;
-    private boolean mScrimsVisible;
-    private final Consumer<Boolean> mScrimVisibleListener;
+    private int mScrimsVisibility;
+    private final Consumer<Integer> mScrimVisibleListener;
     private boolean mBlankScreen;
     private boolean mScreenBlankingCallbackCalled;
     private Callback mCallback;
+    private boolean mWallpaperSupportsAmbientMode;
 
     private final WakeLock mWakeLock;
     private boolean mWakeLockHeld;
 
     public ScrimController(LightBarController lightBarController, ScrimView scrimBehind,
-            ScrimView scrimInFront, View headsUpScrim, Consumer<Boolean> scrimVisibleListener,
-            DozeParameters dozeParameters) {
+            ScrimView scrimInFront, View headsUpScrim, Consumer<Integer> scrimVisibleListener,
+            DozeParameters dozeParameters, AlarmManager alarmManager) {
         mScrimBehind = scrimBehind;
         mScrimInFront = scrimInFront;
         mHeadsUpScrim = headsUpScrim;
@@ -164,6 +182,8 @@ public class ScrimController implements ViewTreeObserver.OnPreDrawListener,
         mKeyguardUpdateMonitor = KeyguardUpdateMonitor.getInstance(mContext);
         mLightBarController = lightBarController;
         mScrimBehindAlphaResValue = mContext.getResources().getFloat(R.dimen.scrim_behind_alpha);
+        mTimeTicker = new AlarmTimeout(alarmManager, this::onHideWallpaperTimeout,
+                "hide_aod_wallpaper", new Handler());
         mWakeLock = createWakeLock();
         // Scrim alpha is initially set to the value on the resource but might be changed
         // to make sure that text on top of it is legible.
@@ -236,13 +256,18 @@ public class ScrimController implements ViewTreeObserver.OnPreDrawListener,
         }
 
         // Do not let the device sleep until we're done with all animations
-        if (!mWakeLockHeld) {
-            if (mWakeLock != null) {
-                mWakeLockHeld = true;
-                mWakeLock.acquire();
-            } else {
-                Log.w(TAG, "Cannot hold wake lock, it has not been set yet");
+        holdWakeLock();
+
+        // AOD wallpapers should fade away after a while
+        if (mWallpaperSupportsAmbientMode && mDozeParameters.getAlwaysOn()
+                && (mState == ScrimState.AOD || mState == ScrimState.PULSING)) {
+            if (!mWallpaperVisibilityTimedOut) {
+                mTimeTicker.schedule(mDozeParameters.getWallpaperAodDuration(),
+                        AlarmTimeout.MODE_IGNORE_IF_SCHEDULED);
             }
+        } else {
+            mTimeTicker.cancel();
+            mWallpaperVisibilityTimedOut = false;
         }
 
         if (!mKeyguardUpdateMonitor.needsSlowUnlockTransition()) {
@@ -277,6 +302,30 @@ public class ScrimController implements ViewTreeObserver.OnPreDrawListener,
 
     public void onExpandingFinished() {
         mTracking = false;
+    }
+
+    @VisibleForTesting
+    protected void onHideWallpaperTimeout() {
+        if (mState != ScrimState.AOD && mState != ScrimState.PULSING) {
+            return;
+        }
+
+        holdWakeLock();
+        mWallpaperVisibilityTimedOut = true;
+        mAnimateChange = true;
+        mAnimationDuration = mDozeParameters.getWallpaperFadeOutDuration();
+        scheduleUpdate();
+    }
+
+    private void holdWakeLock() {
+        if (!mWakeLockHeld) {
+            if (mWakeLock != null) {
+                mWakeLockHeld = true;
+                mWakeLock.acquire();
+            } else {
+                Log.w(TAG, "Cannot hold wake lock, it has not been set yet");
+            }
+        }
     }
 
     /**
@@ -391,6 +440,14 @@ public class ScrimController implements ViewTreeObserver.OnPreDrawListener,
             mLightBarController.setScrimColor(mScrimInFront.getColors());
         }
 
+        // We want to override the back scrim opacity for AOD and PULSING
+        // when it's time to fade the wallpaper away.
+        boolean overrideBackScrimAlpha = (mState == ScrimState.PULSING || mState == ScrimState.AOD)
+                && mWallpaperVisibilityTimedOut;
+        if (overrideBackScrimAlpha) {
+            mCurrentBehindAlpha = 1;
+        }
+
         setScrimInFrontAlpha(mCurrentInFrontAlpha);
         setScrimBehindAlpha(mCurrentBehindAlpha);
 
@@ -398,12 +455,18 @@ public class ScrimController implements ViewTreeObserver.OnPreDrawListener,
     }
 
     private void dispatchScrimsVisible() {
-        boolean scrimsVisible = mScrimBehind.getViewAlpha() > 0 || mScrimInFront.getViewAlpha() > 0;
+        final int currentScrimVisibility;
+        if (mScrimInFront.getViewAlpha() == 1 || mScrimBehind.getViewAlpha() == 1) {
+            currentScrimVisibility = VISIBILITY_FULLY_OPAQUE;
+        } else if (mScrimInFront.getViewAlpha() == 0 && mScrimBehind.getViewAlpha() == 0) {
+            currentScrimVisibility = VISIBILITY_FULLY_TRANSPARENT;
+        } else {
+            currentScrimVisibility = VISIBILITY_SEMI_TRANSPARENT;
+        }
 
-        if (mScrimsVisible != scrimsVisible) {
-            mScrimsVisible = scrimsVisible;
-
-            mScrimVisibleListener.accept(scrimsVisible);
+        if (mScrimsVisibility != currentScrimVisibility) {
+            mScrimsVisibility = currentScrimVisibility;
+            mScrimVisibleListener.accept(currentScrimVisibility);
         }
     }
 
@@ -809,6 +872,14 @@ public class ScrimController implements ViewTreeObserver.OnPreDrawListener,
         pw.print(" tint=0x"); pw.println(Integer.toHexString(mScrimBehind.getTint()));
 
         pw.print("   mTracking="); pw.println(mTracking);
+    }
+
+    public void setWallpaperSupportsAmbientMode(boolean wallpaperSupportsAmbientMode) {
+        mWallpaperSupportsAmbientMode = wallpaperSupportsAmbientMode;
+        ScrimState[] states = ScrimState.values();
+        for (int i = 0; i < states.length; i++) {
+            states[i].setWallpaperSupportsAmbientMode(wallpaperSupportsAmbientMode);
+        }
     }
 
     public interface Callback {

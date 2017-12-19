@@ -1717,6 +1717,13 @@ public class CarrierConfigManager {
     public static final String KEY_SPN_DISPLAY_RULE_USE_ROAMING_FROM_SERVICE_STATE_BOOL =
             "spn_display_rule_use_roaming_from_service_state_bool";
 
+    /**
+     * Determines whether any carrier has been identified and its specific config has been applied,
+     * default to false.
+     * @hide
+     */
+    public static final String KEY_CARRIER_CONFIG_APPLIED_BOOL = "carrier_config_applied_bool";
+
     /** The default value for every variable. */
     private final static PersistableBundle sDefaults;
 
@@ -2002,6 +2009,7 @@ public class CarrierConfigManager {
         sDefaults.putBoolean(KEY_IDENTIFY_HIGH_DEFINITION_CALLS_IN_CALL_LOG_BOOL, false);
         sDefaults.putBoolean(KEY_SPN_DISPLAY_RULE_USE_ROAMING_FROM_SERVICE_STATE_BOOL, false);
         sDefaults.putBoolean(KEY_ALWAYS_SHOW_DATA_RAT_ICON_BOOL, false);
+        sDefaults.putBoolean(KEY_CARRIER_CONFIG_APPLIED_BOOL, false);
     }
 
     /**
@@ -2044,6 +2052,33 @@ public class CarrierConfigManager {
     @Nullable
     public PersistableBundle getConfig() {
         return getConfigForSubId(SubscriptionManager.getDefaultSubscriptionId());
+    }
+
+    /**
+     * Determines whether a configuration {@link PersistableBundle} obtained from
+     * {@link #getConfig()} or {@link #getConfigForSubId(int)} corresponds to an identified carrier.
+     * <p>
+     * When an app receives the {@link CarrierConfigManager#ACTION_CARRIER_CONFIG_CHANGED}
+     * broadcast which informs it that the carrier configuration has changed, it is possible
+     * that another reload of the carrier configuration has begun since the intent was sent.
+     * In this case, the carrier configuration the app fetches (e.g. via {@link #getConfig()})
+     * may not represent the configuration for the current carrier. It should be noted that it
+     * does not necessarily mean the configuration belongs to current carrier when this function
+     * return true because it may belong to another previous identified carrier. Users should
+     * always call {@link #getConfig()} or {@link #getConfigForSubId(int)} after receiving the
+     * broadcast {@link #ACTION_CARRIER_CONFIG_CHANGED}.
+     * </p>
+     * <p>
+     * After using {@link #getConfig()} or {@link #getConfigForSubId(int)} an app should always
+     * use this method to confirm whether any carrier specific configuration has been applied.
+     * </p>
+     *
+     * @param bundle the configuration bundle to be checked.
+     * @return boolean true if any carrier specific configuration bundle has been applied, false
+     * otherwise or the bundle is null.
+     */
+    public static boolean isConfigForIdentifiedCarrier(PersistableBundle bundle) {
+        return bundle != null && bundle.getBoolean(KEY_CARRIER_CONFIG_APPLIED_BOOL);
     }
 
     /**

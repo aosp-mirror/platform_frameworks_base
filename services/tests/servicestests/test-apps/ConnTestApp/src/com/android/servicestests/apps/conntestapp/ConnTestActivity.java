@@ -77,6 +77,7 @@ public class ConnTestActivity extends Activity {
         Log.i(TAG, "onStop called");
         if (finishCommandReceiver != null) {
             unregisterReceiver(finishCommandReceiver);
+            finishCommandReceiver = null;
         }
         super.onStop();
     }

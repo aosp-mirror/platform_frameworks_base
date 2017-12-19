@@ -37,6 +37,7 @@ import javax.crypto.SecretKey;
 public class KeySyncUtilsTest {
     private static final int RECOVERY_KEY_LENGTH_BITS = 256;
     private static final int THM_KF_HASH_SIZE = 256;
+    private static final int KEY_CLAIMANT_LENGTH_BYTES = 16;
     private static final String SHA_256_ALGORITHM = "SHA-256";
 
     @Test
@@ -68,6 +69,32 @@ public class KeySyncUtilsTest {
         SecretKey b = KeySyncUtils.generateRecoveryKey();
 
         assertFalse(Arrays.equals(a.getEncoded(), b.getEncoded()));
+    }
+
+    @Test
+    public void generateKeyClaimant_returns16Bytes() throws Exception {
+        byte[] keyClaimant = KeySyncUtils.generateKeyClaimant();
+
+        assertEquals(KEY_CLAIMANT_LENGTH_BYTES, keyClaimant.length);
+    }
+
+    @Test
+    public void generateKeyClaimant_generatesANewClaimantEachTime() {
+        byte[] a = KeySyncUtils.generateKeyClaimant();
+        byte[] b = KeySyncUtils.generateKeyClaimant();
+
+        assertFalse(Arrays.equals(a, b));
+    }
+
+    @Test
+    public void concat_concatenatesArrays() {
+        assertArrayEquals(
+                utf8Bytes("hello, world!"),
+                KeySyncUtils.concat(
+                        utf8Bytes("hello"),
+                        utf8Bytes(", "),
+                        utf8Bytes("world"),
+                        utf8Bytes("!")));
     }
 
     private static byte[] utf8Bytes(String s) {

@@ -675,6 +675,7 @@ public class WallpaperManagerService extends IWallpaperManager.Stub
 
     final SparseArray<Boolean> mUserRestorecon = new SparseArray<Boolean>();
     int mCurrentUserId;
+    boolean mInAmbientMode;
 
     static class WallpaperData {
 
@@ -952,6 +953,13 @@ public class WallpaperManagerService extends IWallpaperManager.Stub
                         Slog.w(TAG, "Failed to set wallpaper padding", e);
                     }
                     mPaddingChanged = false;
+                }
+                if (mInfo != null && mInfo.getSupportsAmbientMode()) {
+                    try {
+                        mEngine.setInAmbientMode(mInAmbientMode);
+                    } catch (RemoteException e) {
+                        Slog.w(TAG, "Failed to set ambient mode state", e);
+                    }
                 }
                 try {
                     // This will trigger onComputeColors in the wallpaper engine.
@@ -1739,6 +1747,28 @@ public class WallpaperManagerService extends IWallpaperManager.Stub
                     mColorsChangedListeners.get(userId);
             if (userColorsChangedListeners != null) {
                 userColorsChangedListeners.unregister(cb);
+            }
+        }
+    }
+
+    public void setInAmbientMode(boolean inAmbienMode) {
+        final IWallpaperEngine engine;
+        synchronized (mLock) {
+            mInAmbientMode = inAmbienMode;
+            final WallpaperData data = mWallpaperMap.get(mCurrentUserId);
+            if (data != null && data.connection != null && data.connection.mInfo != null
+                    && data.connection.mInfo.getSupportsAmbientMode()) {
+                engine = data.connection.mEngine;
+            } else {
+                engine = null;
+            }
+        }
+
+        if (engine != null) {
+            try {
+                engine.setInAmbientMode(inAmbienMode);
+            } catch (RemoteException e) {
+                // Cannot talk to wallpaper engine.
             }
         }
     }

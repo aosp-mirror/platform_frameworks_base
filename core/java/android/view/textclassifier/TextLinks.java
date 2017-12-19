@@ -22,6 +22,8 @@ import android.annotation.Nullable;
 import android.os.LocaleList;
 import android.text.SpannableString;
 import android.text.style.ClickableSpan;
+import android.view.View;
+import android.widget.TextView;
 
 import com.android.internal.util.Preconditions;
 
@@ -189,9 +191,14 @@ public final class TextLinks {
      * @hide
      */
     public static final Function<TextLink, ClickableSpan> DEFAULT_SPAN_FACTORY =
-            textLink -> {
-                // TODO: Implement.
-                throw new UnsupportedOperationException("Not yet implemented");
+            textLink -> new ClickableSpan() {
+                @Override
+                public void onClick(View widget) {
+                    if (widget instanceof TextView) {
+                        final TextView textView = (TextView) widget;
+                        textView.requestActionMode(textLink);
+                    }
+                }
             };
 
     /**
