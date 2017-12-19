@@ -53,7 +53,7 @@ class WindowSurfaceController {
 
     final WindowStateAnimator mAnimator;
 
-    SurfaceControlWithBackground mSurfaceControl;
+    SurfaceControl mSurfaceControl;
 
     // Should only be set from within setShown().
     private boolean mSurfaceShown = false;
@@ -108,13 +108,11 @@ class WindowSurfaceController {
                 .setFormat(format)
                 .setFlags(flags)
                 .setMetadata(windowType, ownerUid);
-        mSurfaceControl = new SurfaceControlWithBackground(
-                name, b, windowType, w, h, this);
+        mSurfaceControl = b.build();
         Trace.traceEnd(TRACE_TAG_WINDOW_MANAGER);
 
         if (mService.mRoot.mSurfaceTraceEnabled) {
-            mSurfaceControl = new RemoteSurfaceTrace(
-                    mService.mRoot.mSurfaceTraceFd.getFileDescriptor(), mSurfaceControl, win);
+            installRemoteTrace(mService.mRoot.mSurfaceTraceFd.getFileDescriptor());
         }
     }
 
@@ -123,7 +121,7 @@ class WindowSurfaceController {
     }
 
     void removeRemoteTrace() {
-        mSurfaceControl = new SurfaceControlWithBackground(mSurfaceControl);
+        mSurfaceControl = new SurfaceControl(mSurfaceControl);
     }
 
 

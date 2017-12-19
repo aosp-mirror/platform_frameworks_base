@@ -697,6 +697,7 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
 
         final AppWindowToken atoken = w.mAppToken;
         if (atoken != null) {
+            atoken.updateLetterbox(w);
             final boolean updateAllDrawn = atoken.updateDrawnWindowStates(w);
             if (updateAllDrawn && !mTmpUpdateAllDrawn.contains(atoken)) {
                 mTmpUpdateAllDrawn.add(atoken);
