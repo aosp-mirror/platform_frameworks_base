@@ -955,7 +955,7 @@ public final class Settings {
         }
         // Update signatures if needed.
         if (p.signatures.mSignatures == null) {
-            p.signatures.assignSignatures(pkg.mSignatures);
+            p.signatures.assignSignatures(pkg.mSigningDetails);
         }
         // Update flags if needed.
         if (pkg.applicationInfo.flags != p.pkgFlags) {
@@ -964,7 +964,7 @@ public final class Settings {
         // If this app defines a shared user id initialize
         // the shared user signatures as well.
         if (p.sharedUser != null && p.sharedUser.signatures.mSignatures == null) {
-            p.sharedUser.signatures.assignSignatures(pkg.mSignatures);
+            p.sharedUser.signatures.assignSignatures(pkg.mSigningDetails);
         }
         // Update static shared library dependencies if needed
         if (pkg.usesStaticLibraries != null && pkg.usesStaticLibrariesVersions != null
@@ -4565,10 +4565,8 @@ public final class Settings {
             }
             pw.print(prefix); pw.print("  versionName="); pw.println(ps.pkg.mVersionName);
             pw.print(prefix); pw.print("  splits="); dumpSplitNames(pw, ps.pkg); pw.println();
-            final int apkSigningVersion = PackageParser.getApkSigningVersion(ps.pkg);
-            if (apkSigningVersion != PackageParser.APK_SIGNING_UNKNOWN) {
-                pw.print(prefix); pw.print("  apkSigningVersion="); pw.println(apkSigningVersion);
-            }
+            final int apkSigningVersion = ps.pkg.mSigningDetails.signatureSchemeVersion;
+            pw.print(prefix); pw.print("  apkSigningVersion="); pw.println(apkSigningVersion);
             pw.print(prefix); pw.print("  applicationInfo=");
                 pw.println(ps.pkg.applicationInfo.toString());
             pw.print(prefix); pw.print("  flags="); printFlags(pw, ps.pkg.applicationInfo.flags,
