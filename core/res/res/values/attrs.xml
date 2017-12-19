@@ -4442,7 +4442,7 @@
         <attr name="textColor" />
         <!-- Size of the text. Recommended dimension type for text is "sp" for scaled-pixels (example: 15sp). -->
         <attr name="textSize" />
-        <!-- Style (bold, italic, bolditalic) for the text. -->
+        <!-- Style (normal, bold, italic, bold|italic) for the text. -->
         <attr name="textStyle" />
         <!-- Typeface (normal, sans, serif, monospace) for the text. -->
         <attr name="typeface" />
@@ -4527,7 +4527,7 @@
         <attr name="textScaleX" format="float" />
         <!-- Typeface (normal, sans, serif, monospace) for the text. -->
         <attr name="typeface" />
-        <!-- Style (bold, italic, bolditalic) for the text. -->
+        <!-- Style (normal, bold, italic, bold|italic) for the text. -->
         <attr name="textStyle" />
         <!-- Font family (named by string or as a font resource reference) for the text. -->
         <attr name="fontFamily" />
