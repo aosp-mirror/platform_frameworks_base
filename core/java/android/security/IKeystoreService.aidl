@@ -56,7 +56,7 @@ interface IKeystoreService {
     int clear_uid(long uid);
 
     // Keymaster 0.4 methods
-    int addRngEntropy(in byte[] data);
+    int addRngEntropy(in byte[] data, int flags);
     int generateKey(String alias, in KeymasterArguments arguments, in byte[] entropy, int uid,
         int flags, out KeyCharacteristics characteristics);
     int getKeyCharacteristics(String alias, in KeymasterBlob clientId, in KeymasterBlob appId,
