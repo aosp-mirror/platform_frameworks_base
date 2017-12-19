@@ -301,7 +301,7 @@ public class WifiAwareManager {
         if (VDBG) Log.v(TAG, "publish(): clientId=" + clientId + ", config=" + publishConfig);
 
         try {
-            mService.publish(clientId, publishConfig,
+            mService.publish(mContext.getOpPackageName(), clientId, publishConfig,
                     new WifiAwareDiscoverySessionCallbackProxy(this, looper, true, callback,
                             clientId));
         } catch (RemoteException e) {
@@ -334,7 +334,7 @@ public class WifiAwareManager {
         }
 
         try {
-            mService.subscribe(clientId, subscribeConfig,
+            mService.subscribe(mContext.getOpPackageName(), clientId, subscribeConfig,
                     new WifiAwareDiscoverySessionCallbackProxy(this, looper, false, callback,
                             clientId));
         } catch (RemoteException e) {

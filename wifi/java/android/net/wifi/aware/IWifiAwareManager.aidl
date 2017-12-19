@@ -42,9 +42,9 @@ interface IWifiAwareManager
             in ConfigRequest configRequest, boolean notifyOnIdentityChanged);
     void disconnect(int clientId, in IBinder binder);
 
-    void publish(int clientId, in PublishConfig publishConfig,
+    void publish(in String callingPackage, int clientId, in PublishConfig publishConfig,
             in IWifiAwareDiscoverySessionCallback callback);
-    void subscribe(int clientId, in SubscribeConfig subscribeConfig,
+    void subscribe(in String callingPackage, int clientId, in SubscribeConfig subscribeConfig,
             in IWifiAwareDiscoverySessionCallback callback);
 
     // session API
