@@ -42,6 +42,9 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
@@ -66,6 +69,18 @@ final class TextClassifierImpl implements TextClassifier {
     private static final String MODEL_FILE_REGEX = "textclassifier\\.smartselection\\.(.*)\\.model";
     private static final String UPDATED_MODEL_FILE_PATH =
             "/data/misc/textclassifier/textclassifier.smartselection.model";
+    private static final List<String> ENTITY_TYPES_ALL =
+            Collections.unmodifiableList(Arrays.asList(
+                    TextClassifier.TYPE_ADDRESS,
+                    TextClassifier.TYPE_EMAIL,
+                    TextClassifier.TYPE_PHONE,
+                    TextClassifier.TYPE_URL));
+    private static final List<String> ENTITY_TYPES_BASE =
+            Collections.unmodifiableList(Arrays.asList(
+                    TextClassifier.TYPE_ADDRESS,
+                    TextClassifier.TYPE_EMAIL,
+                    TextClassifier.TYPE_PHONE,
+                    TextClassifier.TYPE_URL));
 
     private final Context mContext;
 
@@ -168,17 +183,23 @@ final class TextClassifierImpl implements TextClassifier {
 
     @Override
     public TextLinks generateLinks(
-            @NonNull CharSequence text, @NonNull TextLinks.Options options) {
+            @NonNull CharSequence text, @Nullable TextLinks.Options options) {
         Utils.validateInput(text);
         final String textString = text.toString();
         final TextLinks.Builder builder = new TextLinks.Builder(textString);
         try {
-            LocaleList defaultLocales = options != null ? options.getDefaultLocales() : null;
+            final LocaleList defaultLocales = options != null ? options.getDefaultLocales() : null;
+            final Collection<String> entitiesToIdentify =
+                    options != null && options.getEntityConfig() != null
+                            ? options.getEntityConfig().getEntities(this) : ENTITY_TYPES_ALL;
             final SmartSelection smartSelection = getSmartSelection(defaultLocales);
             final SmartSelection.AnnotatedSpan[] annotations = smartSelection.annotate(textString);
             for (SmartSelection.AnnotatedSpan span : annotations) {
-                final Map<String, Float> entityScores = new HashMap<>();
                 final SmartSelection.ClassificationResult[] results = span.getClassification();
+                if (results.length == 0 || !entitiesToIdentify.contains(results[0].mCollection)) {
+                    continue;
+                }
+                final Map<String, Float> entityScores = new HashMap<>();
                 for (int i = 0; i < results.length; i++) {
                     entityScores.put(results[i].mCollection, results[i].mScore);
                 }
@@ -190,6 +211,20 @@ final class TextClassifierImpl implements TextClassifier {
             Log.e(LOG_TAG, "Error getting links info.", t);
         }
         return builder.build();
+    }
+
+    @Override
+    public Collection<String> getEntitiesForPreset(@TextClassifier.EntityPreset int entityPreset) {
+        switch (entityPreset) {
+            case TextClassifier.ENTITY_PRESET_NONE:
+                return Collections.emptyList();
+            case TextClassifier.ENTITY_PRESET_BASE:
+                return ENTITY_TYPES_BASE;
+            case TextClassifier.ENTITY_PRESET_ALL:
+                // fall through
+            default:
+                return ENTITY_TYPES_ALL;
+        }
     }
 
     @Override
