@@ -1695,11 +1695,9 @@
     <string name="stk_cc_ussd_to_dial" msgid="5202342984749947872">"USSD கோரிக்கையானது DIAL கோரிக்கைக்கு மாற்றப்பட்டது."</string>
     <string name="stk_cc_ussd_to_ss" msgid="2345360594181405482">"USSD கோரிக்கையானது SS கோரிக்கைக்கு மாற்றப்பட்டது."</string>
     <string name="stk_cc_ussd_to_ussd" msgid="7466087659967191653">"USSD கோரிக்கையானது புதிய USSD கோரிக்கைக்கு மாற்றப்பட்டது."</string>
-    <!-- no translation found for stk_cc_ussd_to_dial_video (585340552561515305) -->
-    <skip />
+    <string name="stk_cc_ussd_to_dial_video" msgid="585340552561515305">"USSD கோரிக்கையானது வீடியோ DIAL கோரிக்கைக்கு மாற்றப்பட்டது."</string>
     <string name="stk_cc_ss_to_dial" msgid="2151304435775557162">"SS கோரிக்கையானது DIAL கோரிக்கைக்கு மாற்றப்பட்டது."</string>
-    <!-- no translation found for stk_cc_ss_to_dial_video (4306210904450719045) -->
-    <skip />
+    <string name="stk_cc_ss_to_dial_video" msgid="4306210904450719045">"SS கோரிக்கையானது வீடியோ DIAL கோரிக்கைக்கு மாற்றப்பட்டது."</string>
     <string name="stk_cc_ss_to_ussd" msgid="3951862188105305589">"SS கோரிக்கையானது USSD கோரிக்கைக்கு மாற்றப்பட்டது."</string>
     <string name="stk_cc_ss_to_ss" msgid="5470768854991452695">"SS கோரிக்கையானது புதிய SS கோரிக்கைக்கு மாற்றப்பட்டது."</string>
     <string name="notification_work_profile_content_description" msgid="4600554564103770764">"பணி சுயவிவரம்"</string>

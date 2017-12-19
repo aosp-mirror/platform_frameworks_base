@@ -1696,9 +1696,9 @@
     <string name="stk_cc_ussd_to_dial" msgid="5202342984749947872">"សំណើរ USSD ត្រូវបានកែសម្រួលទៅតាមសំណើរការហៅទូរស័ព្ទ។"</string>
     <string name="stk_cc_ussd_to_ss" msgid="2345360594181405482">"សំណើរ USSD ត្រូវបានកែសម្រួលទៅតាមសំណើរ SS។"</string>
     <string name="stk_cc_ussd_to_ussd" msgid="7466087659967191653">"សំណើរ USSD ត្រូវបានកែសម្រួលទៅតាមសំណើរ USSD ថ្មី។្"</string>
-    <string name="stk_cc_ussd_to_dial_video" msgid="585340552561515305">"សំណើ USSD ត្រូវបានកែសម្រួលទៅជាសំណើ Video DIAL ។"</string>
+    <string name="stk_cc_ussd_to_dial_video" msgid="585340552561515305">"សំណើ USSD ត្រូវបានកែប្រែទៅជាសំណើ DIAL ជាវីដេអូ។"</string>
     <string name="stk_cc_ss_to_dial" msgid="2151304435775557162">"សំណើរ SS ត្រូវបានកែសម្រួលទៅតាមសំណើរការហៅទូរស័ព្ទ។"</string>
-    <string name="stk_cc_ss_to_dial_video" msgid="4306210904450719045">"សំណើ SS ត្រូវបានកែសម្រួលទៅជាសំណើ Video DIAL ។"</string>
+    <string name="stk_cc_ss_to_dial_video" msgid="4306210904450719045">"សំណើ SS ត្រូវបានកែប្រែទៅជាសំណើ DIAL ជាវីដេអូ។"</string>
     <string name="stk_cc_ss_to_ussd" msgid="3951862188105305589">"សំណើរ SS ត្រូវបានកែសម្រួលទៅតាមសំណើរ USSD។"</string>
     <string name="stk_cc_ss_to_ss" msgid="5470768854991452695">"សំណើរ SS ត្រូវបានកែសម្រួលទៅតាមសំណើរ SS ថ្មី។"</string>
     <string name="notification_work_profile_content_description" msgid="4600554564103770764">"ប្រវត្តិរូបការងារ"</string>
