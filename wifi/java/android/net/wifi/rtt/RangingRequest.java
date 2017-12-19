@@ -17,6 +17,7 @@
 package android.net.wifi.rtt;
 
 import android.annotation.NonNull;
+import android.annotation.SystemApi;
 import android.net.MacAddress;
 import android.net.wifi.ScanResult;
 import android.net.wifi.aware.AttachCallback;
@@ -206,6 +207,7 @@ public final class RangingRequest implements Parcelable {
          *
          * @hide
          */
+        @SystemApi
         public Builder addResponder(@NonNull ResponderConfig responder) {
             if (responder == null) {
                 throw new IllegalArgumentException("Null Responder!");
