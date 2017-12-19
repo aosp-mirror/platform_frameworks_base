@@ -206,7 +206,7 @@ bool initMetrics(const ConfigKey& key, const StatsdConfig& config, const long ti
     // clock will not grow very aggressive. New metrics will be delayed up to
     // MIN_BUCKET_SIZE_SEC before starting.
     long currentTimeSec = time(nullptr);
-    uint64_t startTimeNs = (currentTimeSec + kMinBucketSizeSec -
+    uint64_t startTimeNs = (currentTimeSec - kMinBucketSizeSec -
                             (currentTimeSec - timeBaseSec) % kMinBucketSizeSec) *
                            NS_PER_SEC;
 
@@ -410,12 +410,15 @@ bool initMetrics(const ConfigKey& key, const StatsdConfig& config, const long ti
             return false;
         }
 
-        if (((!metric.gauge_fields().has_include_all() ||
-              (metric.gauge_fields().has_include_all() &&
-               metric.gauge_fields().include_all() == false)) &&
-             metric.gauge_fields().field_num_size() == 0) ||
-            (metric.gauge_fields().has_include_all() && metric.gauge_fields().include_all() == true &&
-             metric.gauge_fields().field_num_size() > 0)) {
+        if ((!metric.gauge_fields().has_include_all() ||
+             (metric.gauge_fields().include_all() == false)) &&
+            metric.gauge_fields().field_num_size() == 0) {
+            ALOGW("Incorrect field filter setting in GaugeMetric %s", metric.name().c_str());
+            return false;
+        }
+        if ((metric.gauge_fields().has_include_all() &&
+             metric.gauge_fields().include_all() == true) &&
+            metric.gauge_fields().field_num_size() > 0) {
             ALOGW("Incorrect field filter setting in GaugeMetric %s", metric.name().c_str());
             return false;
         }
