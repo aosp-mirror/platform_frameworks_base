@@ -3835,7 +3835,7 @@ public class ActivityManager {
         pw.println();
         dumpService(pw, fd, ProcessStats.SERVICE_NAME, new String[] { packageName });
         pw.println();
-        dumpService(pw, fd, "usagestats", new String[] { "--packages", packageName });
+        dumpService(pw, fd, "usagestats", new String[] { packageName });
         pw.println();
         dumpService(pw, fd, BatteryStats.SERVICE_NAME, new String[] { packageName });
         pw.flush();
