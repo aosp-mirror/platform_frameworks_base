@@ -27,6 +27,7 @@ import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 import static org.mockito.Matchers.anyInt;
 import static org.mockito.Matchers.anyString;
+import static org.mockito.Matchers.argThat;
 import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
@@ -40,10 +41,14 @@ import android.net.IpSecTransform;
 import android.net.IpSecUdpEncapResponse;
 import android.os.Binder;
 import android.os.ParcelFileDescriptor;
+import android.os.Process;
 import android.support.test.filters.SmallTest;
 import android.support.test.runner.AndroidJUnit4;
 import android.system.ErrnoException;
 import android.system.Os;
+import android.system.StructStat;
+
+import dalvik.system.SocketTagger;
 
 import java.io.FileDescriptor;
 import java.net.InetAddress;
@@ -56,6 +61,7 @@ import java.util.List;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.mockito.ArgumentMatcher;
 
 /** Unit tests for {@link IpSecService}. */
 @SmallTest
@@ -410,5 +416,63 @@ public class IpSecServiceTest {
         for (IpSecSpiResponse spiResp : reservedSpis) {
             mIpSecService.releaseSecurityParameterIndex(spiResp.resourceId);
         }
+    }
+
+    @Test
+    public void testUidFdtagger() throws Exception {
+        SocketTagger actualSocketTagger = SocketTagger.get();
+
+        try {
+            FileDescriptor sockFd = Os.socket(AF_INET, SOCK_DGRAM, IPPROTO_UDP);
+
+            // Has to be done after socket creation because BlockGuardOS calls tag on new sockets
+            SocketTagger mockSocketTagger = mock(SocketTagger.class);
+            SocketTagger.set(mockSocketTagger);
+
+            mIpSecService.mUidFdTagger.tag(sockFd, Process.LAST_APPLICATION_UID);
+            verify(mockSocketTagger).tag(eq(sockFd));
+        } finally {
+            SocketTagger.set(actualSocketTagger);
+        }
+    }
+
+    /**
+     * Checks if two file descriptors point to the same file.
+     *
+     * <p>According to stat.h documentation, the correct way to check for equivalent or duplicated
+     * file descriptors is to check their inode and device. These two entries uniquely identify any
+     * file.
+     */
+    private boolean fileDescriptorsEqual(FileDescriptor fd1, FileDescriptor fd2) {
+        try {
+            StructStat fd1Stat = Os.fstat(fd1);
+            StructStat fd2Stat = Os.fstat(fd2);
+
+            return fd1Stat.st_ino == fd2Stat.st_ino && fd1Stat.st_dev == fd2Stat.st_dev;
+        } catch (ErrnoException e) {
+            return false;
+        }
+    }
+
+    @Test
+    public void testOpenUdpEncapSocketTagsSocket() throws Exception {
+        IpSecService.UidFdTagger mockTagger = mock(IpSecService.UidFdTagger.class);
+        IpSecService testIpSecService =
+                new IpSecService(mMockContext, mMockIpSecSrvConfig, mockTagger);
+
+        IpSecUdpEncapResponse udpEncapResp =
+                testIpSecService.openUdpEncapsulationSocket(0, new Binder());
+        assertNotNull(udpEncapResp);
+        assertEquals(IpSecManager.Status.OK, udpEncapResp.status);
+
+        FileDescriptor sockFd = udpEncapResp.fileDescriptor.getFileDescriptor();
+        ArgumentMatcher<FileDescriptor> fdMatcher =
+                (argFd) -> {
+                    return fileDescriptorsEqual(sockFd, argFd);
+                };
+        verify(mockTagger).tag(argThat(fdMatcher), eq(Os.getuid()));
+
+        testIpSecService.closeUdpEncapsulationSocket(udpEncapResp.resourceId);
+        udpEncapResp.fileDescriptor.close();
     }
 }
