@@ -26,6 +26,7 @@ import android.os.Handler;
 import android.os.Looper;
 import android.os.Message;
 import android.os.Parcel;
+import android.os.PersistableBundle;
 import android.util.Log;
 import dalvik.system.CloseGuard;
 import java.lang.annotation.Retention;
@@ -1201,7 +1202,6 @@ public final class MediaDrm implements AutoCloseable {
     public native void setPropertyByteArray(@NonNull @ArrayProperty
             String propertyName, @NonNull byte[] value);
 
-
     private static final native void setCipherAlgorithmNative(
             @NonNull MediaDrm drm, @NonNull byte[] sessionId, @NonNull String algorithm);
 
@@ -1226,6 +1226,25 @@ public final class MediaDrm implements AutoCloseable {
     private static final native boolean verifyNative(
             @NonNull MediaDrm drm, @NonNull byte[] sessionId,
             @NonNull byte[] keyId, @NonNull byte[] message, @NonNull byte[] signature);
+
+    /**
+     * Return Metrics data about the current MediaDrm instance.
+     *
+     * @return a {@link PersistableBundle} containing the set of attributes and values
+     * available for this instance of MediaDrm.
+     * The attributes are described in {@link MetricsConstants}.
+     *
+     * Additional vendor-specific fields may also be present in
+     * the return value.
+     *
+     * @hide - not part of the public API at this time
+     */
+    public PersistableBundle getMetrics() {
+        PersistableBundle bundle = getMetricsNative();
+        return bundle;
+    }
+
+    private native PersistableBundle getMetricsNative();
 
     /**
      * In addition to supporting decryption of DASH Common Encrypted Media, the
@@ -1530,5 +1549,23 @@ public final class MediaDrm implements AutoCloseable {
     static {
         System.loadLibrary("media_jni");
         native_init();
+    }
+
+    /**
+     * Definitions for the metrics that are reported via the
+     * {@link #getMetrics} call.
+     *
+     * @hide - not part of the public API at this time
+     */
+    public final static class MetricsConstants
+    {
+        private MetricsConstants() {}
+
+        /**
+         * This is a placeholder metric. More metrics will be added.
+         * <P>
+         * TODO: Add the full set of metrics constants.
+         */
+        public static final String TEMPORARY = "/drm/mediadrm/dummymetric";
     }
 }
