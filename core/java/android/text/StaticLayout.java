@@ -454,6 +454,10 @@ public class StaticLayout extends Layout {
         private static final SynchronizedPool<Builder> sPool = new SynchronizedPool<>(3);
     }
 
+    /**
+     * @deprecated Use {@link Builder} instead.
+     */
+    @Deprecated
     public StaticLayout(CharSequence source, TextPaint paint,
                         int width,
                         Alignment align, float spacingmult, float spacingadd,
@@ -463,16 +467,9 @@ public class StaticLayout extends Layout {
     }
 
     /**
-     * @hide
+     * @deprecated Use {@link Builder} instead.
      */
-    public StaticLayout(CharSequence source, TextPaint paint,
-            int width, Alignment align, TextDirectionHeuristic textDir,
-            float spacingmult, float spacingadd,
-            boolean includepad) {
-        this(source, 0, source.length(), paint, width, align, textDir,
-                spacingmult, spacingadd, includepad);
-    }
-
+    @Deprecated
     public StaticLayout(CharSequence source, int bufstart, int bufend,
                         TextPaint paint, int outerwidth,
                         Alignment align,
@@ -483,17 +480,9 @@ public class StaticLayout extends Layout {
     }
 
     /**
-     * @hide
+     * @deprecated Use {@link Builder} instead.
      */
-    public StaticLayout(CharSequence source, int bufstart, int bufend,
-            TextPaint paint, int outerwidth,
-            Alignment align, TextDirectionHeuristic textDir,
-            float spacingmult, float spacingadd,
-            boolean includepad) {
-        this(source, bufstart, bufend, paint, outerwidth, align, textDir,
-                spacingmult, spacingadd, includepad, null, 0, Integer.MAX_VALUE);
-}
-
+    @Deprecated
     public StaticLayout(CharSequence source, int bufstart, int bufend,
             TextPaint paint, int outerwidth,
             Alignment align,
@@ -507,7 +496,9 @@ public class StaticLayout extends Layout {
 
     /**
      * @hide
+     * @deprecated Use {@link Builder} instead.
      */
+    @Deprecated
     public StaticLayout(CharSequence source, int bufstart, int bufend,
                         TextPaint paint, int outerwidth,
                         Alignment align, TextDirectionHeuristic textDir,
@@ -565,6 +556,9 @@ public class StaticLayout extends Layout {
         Builder.recycle(b);
     }
 
+    /**
+     * Used by DynamicLayout.
+     */
     /* package */ StaticLayout(@Nullable CharSequence text) {
         super(text, null, 0, null, 0, 0);
 
