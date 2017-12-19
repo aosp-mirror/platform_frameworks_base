@@ -218,4 +218,11 @@ public final class WebViewDelegate {
             throw e.rethrowFromSystemServer();
         }
     }
+
+    /**
+     * Returns the data directory suffix to use, or null for none.
+     */
+    public String getDataDirectorySuffix() {
+        return WebViewFactory.getDataDirectorySuffix();
+    }
 }
