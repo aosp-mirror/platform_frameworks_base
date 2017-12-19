@@ -1376,8 +1376,9 @@ public abstract class ConnectionService extends Service {
                 : onCreateOutgoingConnection(callManagerAccount, request);
         Log.d(this, "createConnection, connection: %s", connection);
         if (connection == null) {
+            Log.i(this, "createConnection, implementation returned null connection.");
             connection = Connection.createFailedConnection(
-                    new DisconnectCause(DisconnectCause.ERROR));
+                    new DisconnectCause(DisconnectCause.ERROR, "IMPL_RETURNED_NULL_CONNECTION"));
         }
 
         connection.setTelecomCallId(callId);
