@@ -2,8 +2,6 @@
 #include "stream_proto_utils.h"
 #include "string_utils.h"
 
-#include <frameworks/base/tools/streaming_proto/stream.pb.h>
-
 #include <iomanip>
 #include <iostream>
 #include <sstream>
@@ -12,16 +10,12 @@ using namespace android::stream_proto;
 using namespace google::protobuf::io;
 using namespace std;
 
+const bool GENERATE_MAPPING = true;
+
 static string
 make_filename(const FileDescriptorProto& file_descriptor)
 {
     return file_descriptor.name() + ".h";
-}
-
-static inline bool
-should_generate_enums_mapping(const EnumDescriptorProto& enu)
-{
-    return enu.options().GetExtension(stream_enum).enable_enums_mapping();
 }
 
 static void
@@ -36,7 +30,7 @@ write_enum(stringstream& text, const EnumDescriptorProto& enu, const string& ind
                 << " = " << value.number() << ";" << endl;
     }
 
-    if (should_generate_enums_mapping(enu)) {
+    if (GENERATE_MAPPING) {
         string name = make_constant_name(enu.name());
         string prefix = name + "_";
         text << indent << "const int _ENUM_" << name << "_COUNT = " << N << ";" << endl;
@@ -79,23 +73,11 @@ write_field(stringstream& text, const FieldDescriptorProto& field, const string&
     text << endl;
 }
 
-static inline bool
-should_generate_fields_mapping(const DescriptorProto& message)
-{
-    return message.options().GetExtension(stream_msg).enable_fields_mapping();
-}
-
-static inline bool
-should_generate_fields_mapping_recursively(const DescriptorProto& message) {
-    return message.options().GetExtension(stream_msg).enable_fields_mapping_recursively();
-}
-
 static void
-write_message(stringstream& text, const DescriptorProto& message, const string& indent, bool genMapping)
+write_message(stringstream& text, const DescriptorProto& message, const string& indent)
 {
     int N;
     const string indented = indent + INDENT;
-    genMapping |= should_generate_fields_mapping_recursively(message);
 
     text << indent << "// message " << message.name() << endl;
     text << indent << "namespace " << message.name() << " {" << endl;
@@ -109,7 +91,7 @@ write_message(stringstream& text, const DescriptorProto& message, const string& 
     // Nested classes
     N = message.nested_type_size();
     for (int i=0; i<N; i++) {
-        write_message(text, message.nested_type(i), indented, genMapping);
+        write_message(text, message.nested_type(i), indented);
     }
 
     // Fields
@@ -118,7 +100,7 @@ write_message(stringstream& text, const DescriptorProto& message, const string& 
         write_field(text, message.field(i), indented);
     }
 
-    if (genMapping | should_generate_fields_mapping(message)) {
+    if (GENERATE_MAPPING) {
         N = message.field_size();
         text << indented << "const int _FIELD_COUNT = " << N << ";" << endl;
         text << indented << "const char* _FIELD_NAMES[" << N << "] = {" << endl;
@@ -167,7 +149,7 @@ write_header_file(CodeGeneratorResponse* response, const FileDescriptorProto& fi
 
     N = file_descriptor.message_type_size();
     for (size_t i=0; i<N; i++) {
-        write_message(text, file_descriptor.message_type(i), "", false);
+        write_message(text, file_descriptor.message_type(i), "");
     }
 
     for (vector<string>::iterator it = namespaces.begin(); it != namespaces.end(); it++) {

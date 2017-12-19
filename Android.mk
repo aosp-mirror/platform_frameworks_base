@@ -1003,7 +1003,6 @@ LOCAL_PROTOC_FLAGS := \
     -Iexternal/protobuf/src
 LOCAL_SOURCE_FILES_ALL_GENERATED := true
 LOCAL_SRC_FILES := \
-    tools/streaming_proto/stream.proto \
     cmds/am/proto/instrumentation_data.proto \
     $(call all-proto-files-under, core/proto) \
     $(call all-proto-files-under, libs/incident/proto) \

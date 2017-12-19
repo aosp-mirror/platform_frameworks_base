@@ -18,8 +18,6 @@ syntax = "proto2";
 option java_multiple_files = true;
 option java_outer_classname = "CpuInfoProto";
 
-import "frameworks/base/tools/streaming_proto/stream.proto";
-
 package android.os;
 
 /**
@@ -31,8 +29,6 @@ package android.os;
 message CpuInfo {
 
     message TaskStats {
-        option (stream_proto.stream_msg).enable_fields_mapping = true;
-
         optional int32 total = 1;    // total number of cpu tasks
         optional int32 running = 2;  // number of running tasks
         optional int32 sleeping = 3; // number of sleeping tasks
@@ -42,8 +38,6 @@ message CpuInfo {
     optional TaskStats task_stats = 1;
 
     message MemStats { // unit in kB
-        option (stream_proto.stream_msg).enable_fields_mapping = true;
-
         optional int32 total = 1;
         optional int32 used = 2;
         optional int32 free = 3;
@@ -54,8 +48,6 @@ message CpuInfo {
     optional MemStats swap = 3;
 
     message CpuUsage { // unit is percentage %
-        option (stream_proto.stream_msg).enable_fields_mapping = true;
-
         optional int32 cpu = 1;   // 400% cpu indicates 4 cores
         optional int32 user = 2;
         optional int32 nice = 3;
@@ -70,8 +62,6 @@ message CpuInfo {
 
     // Next Tag: 13
     message Task {
-        option (stream_proto.stream_msg).enable_fields_mapping = true;
-
         optional int32 pid = 1;
         optional int32 tid = 2;
         optional string user = 3;
@@ -80,8 +70,6 @@ message CpuInfo {
         optional float cpu = 6;     // precentage of cpu usage of the task
 
         enum Status {
-            option (stream_proto.stream_enum).enable_enums_mapping = true;
-
             STATUS_UNKNOWN = 0;
             STATUS_D = 1;  // uninterruptible sleep
             STATUS_R = 2;  // running
@@ -95,8 +83,6 @@ message CpuInfo {
 
         // How Android memory manager will treat the task
         enum Policy {
-            option (stream_proto.stream_enum).enable_enums_mapping = true;
-
             POLICY_UNKNOWN = 0;
             POLICY_fg = 1;  // foreground, the name is lower case for parsing the value
             POLICY_bg = 2;  // background, the name is lower case for parsing the value

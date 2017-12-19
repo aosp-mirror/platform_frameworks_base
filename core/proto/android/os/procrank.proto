@@ -19,7 +19,6 @@ option java_multiple_files = true;
 option java_outer_classname = "ProcrankProto";
 
 import "frameworks/base/libs/incident/proto/android/privacy.proto";
-import "frameworks/base/tools/streaming_proto/stream.proto";
 
 package android.os;
 
@@ -36,7 +35,6 @@ message Procrank {
 
 // Next Tag: 11
 message ProcessProto {
-    option (stream_proto.stream_msg).enable_fields_mapping = true;
     option (android.msg_privacy).dest = DEST_AUTOMATIC;
 
     // ID of the process
