@@ -21,6 +21,7 @@ package com.android.server.am.proto;
 import "frameworks/base/core/proto/android/app/notification.proto";
 import "frameworks/base/core/proto/android/content/intent.proto";
 import "frameworks/base/core/proto/android/graphics/rect.proto";
+import "frameworks/base/core/proto/android/internal/processstats.proto";
 import "frameworks/base/core/proto/android/os/looper.proto";
 import "frameworks/base/core/proto/android/server/intentresolver.proto";
 import "frameworks/base/core/proto/android/server/windowmanagerservice.proto";
@@ -163,7 +164,7 @@ message MemInfoProto {
   optional int64 uptime_duration_ms = 1;
   optional int64 elapsed_realtime_ms = 2;
 
-  message NativeProcess {
+  message ProcessMemory {
     optional int32 pid = 1;
     optional string process_name = 2;
 
@@ -197,7 +198,7 @@ message MemInfoProto {
     optional HeapInfo native_heap = 3;
     optional HeapInfo dalvik_heap = 4;
     repeated MemoryInfo other_heaps = 5;
-    optional HeapInfo unknown_heap = 6;
+    optional MemoryInfo unknown_heap = 6;
     // Summation of native_heap, dalvik_heap, and other_heaps.
     optional HeapInfo total_heap = 7;
 
@@ -219,7 +220,113 @@ message MemInfoProto {
     }
     optional AppSummary app_summary = 9;
   }
-  repeated NativeProcess native_processes = 3;
+  repeated ProcessMemory native_processes = 3;
+
+  message AppData {
+    optional ProcessMemory process_memory = 1;
+
+    message ObjectStats {
+      optional int32 view_instance_count = 1;
+      optional int32 view_root_instance_count = 2;
+      optional int32 app_context_instance_count = 3;
+      optional int32 activity_instance_count = 4;
+      optional int32 global_asset_count = 5;
+      optional int32 global_asset_manager_count = 6;
+      optional int32 local_binder_object_count = 7;
+      optional int32 proxy_binder_object_count = 8;
+      optional int64 parcel_memory_kb = 9;
+      optional int32 parcel_count = 10;
+      optional int32 binder_object_death_count = 11;
+      optional int32 open_ssl_socket_count = 12;
+      optional int32 webview_instance_count = 13;
+    }
+    optional ObjectStats objects = 2;
+
+    message SqlStats {
+      optional int32 memory_used_kb = 1;
+      optional int32 pagecache_overflow_kb = 2;
+      optional int32 malloc_size_kb = 3;
+
+      message Database {
+        optional string name = 1;
+        optional int32 page_size = 2;
+        optional int32 db_size = 3;
+        // Number of lookaside slots:
+        // http://www.sqlite.org/c3ref/c_dbstatus_lookaside_used.html
+        optional int32 lookaside_b = 4;
+        // Statement cache stats: hits/misses/cachesize
+        optional string cache = 5;
+      }
+      repeated Database databases = 4;
+    }
+    optional SqlStats sql = 3;
+
+    optional string asset_allocations = 4;
+    optional string unreachable_memory = 5;
+  }
+  repeated AppData app_processes = 4;
+
+  message MemItem {
+    optional string tag = 1;
+    optional string label = 2;
+    optional int32 id = 3;
+    optional bool is_proc = 4;
+    optional bool has_activities = 5;
+    optional int64 pss_kb = 6;
+    optional int64 swap_pss_kb = 7;
+    repeated MemItem sub_items = 8;
+  }
+  repeated MemItem total_pss_by_process = 5;
+  repeated MemItem total_pss_by_oom_adjustment = 6;
+  repeated MemItem total_pss_by_category = 7;
+
+  optional int64 total_ram_kb = 8;
+  optional .com.android.internal.app.procstats.ProcessStatsProto.MemoryFactor status = 9;
+  // Total free RAM = cached_pss_kb + cached_kernel_kb + free_kb.
+  optional int64 cached_pss_kb = 10;
+  optional int64 cached_kernel_kb = 11;
+  optional int64 free_kb = 12;
+  // Total used RAM = used_pss_kb + used_kernel_kb.
+  optional int64 used_pss_kb = 13;
+  optional int64 used_kernel_kb = 14;
+
+  optional int64 lost_ram_kb = 15;
+
+  optional int64 total_zram_kb = 16;
+  optional int64 zram_physical_used_in_swap_kb = 17;
+  optional int64 total_zram_swap_kb = 18;
+
+  optional int64 ksm_sharing_kb = 19;
+  optional int64 ksm_shared_kb = 20;
+  optional int64 ksm_unshared_kb = 21;
+  optional int64 ksm_volatile_kb = 22;
+
+  // The approximate per-application memory class of the current device. This
+  // gives developers an idea of how hard a memory limit you should impose on
+  // their application to let the overall system work best. The value is in
+  // megabytes; the baseline Android memory class is 16 (which happens to be the
+  // Java heap limit of those devices); some devices with more memory may have
+  // 24 or even higher numbers.
+  optional int32 tuning_mb = 23;
+  // The approximate per-application memory class of the current device when an
+  // application is running with a large heap. This is the space available for
+  // memory-intensive applications; most applications should not need this
+  // amount of memory, and should instead stay with the tuning_mb limit. The
+  // value is in megabytes. This may be the same size as tuning_mb on memory
+  // constrained devices, or it may be significantly larger on devices with a
+  // large amount of available RAM.
+  // This is the size of the application's Dalvik heap if it has specified
+  // 'android:largeHeap="true"' in its manifest.
+  optional int32 tuning_large_mb = 24;
+
+  optional int64 oom_kb = 25;
+
+  // The maximum pss size in kb that we consider a process acceptable to restore
+  // from its cached state for running in the background when RAM is low.
+  optional int64 restore_limit_kb = 26;
+
+  optional bool is_low_ram_device = 27;
+  optional bool is_high_end_gfx = 28;
 }
 
 message StickyBroadcastProto {

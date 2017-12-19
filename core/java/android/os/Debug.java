@@ -1136,7 +1136,7 @@ public final class Debug
             int intervalUs) {
         VMDebug.startMethodTracing(fixTracePath(tracePath), bufferSize, 0, true, intervalUs);
     }
-    
+
     /**
      * Formats name of trace log file for method tracing.
      */
@@ -1706,11 +1706,11 @@ public final class Debug
      * Retrieves information about this processes memory usages. This information is broken down by
      * how much is in use by dalvik, the native heap, and everything else.
      *
-     * <p><b>Note:</b> this method directly retrieves memory information for the give process
+     * <p><b>Note:</b> this method directly retrieves memory information for the given process
      * from low-level data available to it.  It may not be able to retrieve information about
      * some protected allocations, such as graphics.  If you want to be sure you can see
-     * all information about allocations by the process, use instead
-     * {@link android.app.ActivityManager#getProcessMemoryInfo(int[])}.</p>
+     * all information about allocations by the process, use
+     * {@link android.app.ActivityManager#getProcessMemoryInfo(int[])} instead.</p>
      */
     public static native void getMemoryInfo(MemoryInfo memoryInfo);
 
