@@ -23,6 +23,7 @@
 #include <android/os/IIncidentManager.h>
 #include <android/os/IncidentReportArgs.h>
 #include <binder/IServiceManager.h>
+#include <statslog.h>
 #include <time.h>
 
 namespace android {
@@ -224,6 +225,9 @@ void AnomalyTracker::declareAnomaly(const uint64_t& timestampNs) {
     }
 
     StatsdStats::getInstance().noteAnomalyDeclared(mConfigKey, mAlert.name());
+
+    android::util::stats_write(android::util::ANOMALY_DETECTED, mConfigKey.GetUid(),
+                               mConfigKey.GetName().c_str(), mAlert.name().c_str());
 }
 
 void AnomalyTracker::declareAnomalyIfAlarmExpired(const HashableDimensionKey& dimensionKey,
