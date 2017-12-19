@@ -14146,8 +14146,7 @@ public class ActivityManagerService extends IActivityManager.Stub
             for (int i = mLruProcesses.size() - 1 ; i >= 0 ; i--) {
                 ProcessRecord proc = mLruProcesses.get(i);
                 if (proc.notCachedSinceIdle) {
-                    if (proc.setProcState != ActivityManager.PROCESS_STATE_TOP_SLEEPING
-                            && proc.setProcState >= ActivityManager.PROCESS_STATE_FOREGROUND_SERVICE
+                    if (proc.setProcState >= ActivityManager.PROCESS_STATE_FOREGROUND_SERVICE
                             && proc.setProcState <= ActivityManager.PROCESS_STATE_SERVICE) {
                         if (doKilling && proc.initialIdlePss != 0
                                 && proc.lastPss > ((proc.initialIdlePss*3)/2)) {
@@ -21692,7 +21691,7 @@ public class ActivityManagerService extends IActivityManager.Stub
         int procState;
         boolean foregroundActivities = false;
         mTmpBroadcastQueue.clear();
-        if (app == TOP_APP) {
+        if (PROCESS_STATE_CUR_TOP == ActivityManager.PROCESS_STATE_TOP && app == TOP_APP) {
             // The last app on the list is the foreground app.
             adj = ProcessList.FOREGROUND_APP_ADJ;
             schedGroup = ProcessList.SCHED_GROUP_TOP_APP;
@@ -21728,6 +21727,13 @@ public class ActivityManagerService extends IActivityManager.Stub
             procState = ActivityManager.PROCESS_STATE_SERVICE;
             if (DEBUG_OOM_ADJ_REASON) Slog.d(TAG, "Making exec-service: " + app);
             //Slog.i(TAG, "EXEC " + (app.execServicesFg ? "FG" : "BG") + ": " + app);
+        } else if (app == TOP_APP) {
+            adj = ProcessList.FOREGROUND_APP_ADJ;
+            schedGroup = ProcessList.SCHED_GROUP_BACKGROUND;
+            app.adjType = "top-sleeping";
+            foregroundActivities = true;
+            procState = PROCESS_STATE_CUR_TOP;
+            if (DEBUG_OOM_ADJ_REASON) Slog.d(TAG, "Making top: " + app);
         } else {
             // As far as we know the process is empty.  We may change our mind later.
             schedGroup = ProcessList.SCHED_GROUP_BACKGROUND;
@@ -23176,7 +23182,7 @@ public class ActivityManagerService extends IActivityManager.Stub
         if (app.curProcState <= ActivityManager.PROCESS_STATE_BOUND_FOREGROUND_SERVICE) {
             isInteraction = true;
             app.fgInteractionTime = 0;
-        } else if (app.curProcState <= ActivityManager.PROCESS_STATE_TOP_SLEEPING) {
+        } else if (app.curProcState <= ActivityManager.PROCESS_STATE_FOREGROUND_SERVICE) {
             if (app.fgInteractionTime == 0) {
                 app.fgInteractionTime = nowElapsed;
                 isInteraction = false;

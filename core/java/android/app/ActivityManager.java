@@ -458,16 +458,17 @@ public class ActivityManager {
     public static final int USER_OP_ERROR_RELATED_USERS_CANNOT_STOP = -4;
 
     /**
+     * @hide
      * Process states, describing the kind of state a particular process is in.
      * When updating these, make sure to also check all related references to the
      * constant in code, and update these arrays:
      *
-     * com.android.internal.app.procstats.ProcessState#PROCESS_STATE_TO_STATE
-     * com.android.server.am.ProcessList#sProcStateToProcMem
-     * com.android.server.am.ProcessList#sFirstAwakePssTimes
-     * com.android.server.am.ProcessList#sSameAwakePssTimes
-     * com.android.server.am.ProcessList#sTestFirstPssTimes
-     * com.android.server.am.ProcessList#sTestSamePssTimes
+     * @see com.android.internal.app.procstats.ProcessState#PROCESS_STATE_TO_STATE
+     * @see com.android.server.am.ProcessList#sProcStateToProcMem
+     * @see com.android.server.am.ProcessList#sFirstAwakePssTimes
+     * @see com.android.server.am.ProcessList#sSameAwakePssTimes
+     * @see com.android.server.am.ProcessList#sTestFirstPssTimes
+     * @see com.android.server.am.ProcessList#sTestSamePssTimes
      */
 
     /** @hide Not a real process state. */
@@ -489,31 +490,31 @@ public class ActivityManager {
     /** @hide Process is hosting a foreground service. */
     public static final int PROCESS_STATE_FOREGROUND_SERVICE = 4;
 
-    /** @hide Same as {@link #PROCESS_STATE_TOP} but while device is sleeping. */
-    public static final int PROCESS_STATE_TOP_SLEEPING = 5;
-
     /** @hide Process is important to the user, and something they are aware of. */
-    public static final int PROCESS_STATE_IMPORTANT_FOREGROUND = 6;
+    public static final int PROCESS_STATE_IMPORTANT_FOREGROUND = 5;
 
     /** @hide Process is important to the user, but not something they are aware of. */
-    public static final int PROCESS_STATE_IMPORTANT_BACKGROUND = 7;
+    public static final int PROCESS_STATE_IMPORTANT_BACKGROUND = 6;
 
     /** @hide Process is in the background transient so we will try to keep running. */
-    public static final int PROCESS_STATE_TRANSIENT_BACKGROUND = 8;
+    public static final int PROCESS_STATE_TRANSIENT_BACKGROUND = 7;
 
     /** @hide Process is in the background running a backup/restore operation. */
-    public static final int PROCESS_STATE_BACKUP = 9;
+    public static final int PROCESS_STATE_BACKUP = 8;
 
     /** @hide Process is in the background running a service.  Unlike oom_adj, this level
      * is used for both the normal running in background state and the executing
      * operations state. */
-    public static final int PROCESS_STATE_SERVICE = 10;
+    public static final int PROCESS_STATE_SERVICE = 9;
 
     /** @hide Process is in the background running a receiver.   Note that from the
      * perspective of oom_adj, receivers run at a higher foreground level, but for our
      * prioritization here that is not necessary and putting them below services means
      * many fewer changes in some process states as they receive broadcasts. */
-    public static final int PROCESS_STATE_RECEIVER = 11;
+    public static final int PROCESS_STATE_RECEIVER = 10;
+
+    /** @hide Same as {@link #PROCESS_STATE_TOP} but while device is sleeping. */
+    public static final int PROCESS_STATE_TOP_SLEEPING = 11;
 
     /** @hide Process is in the background, but it can't restore its state so we want
      * to try to avoid killing it. */
@@ -2897,13 +2898,13 @@ public class ActivityManager {
         public static final int IMPORTANCE_FOREGROUND_SERVICE = 125;
 
         /**
-         * Constant for {@link #importance}: This process is running the foreground
-         * UI, but the device is asleep so it is not visible to the user.  This means
-         * the user is not really aware of the process, because they can not see or
-         * interact with it, but it is quite important because it what they expect to
-         * return to once unlocking the device.
+         * @deprecated Pre-{@link android.os.Build.VERSION_CODES#P} version of
+         * {@link #IMPORTANCE_TOP_SLEEPING}.  As of Android
+         * {@link android.os.Build.VERSION_CODES#P}, this is considered much less
+         * important since we want to reduce what apps can do when the screen is off.
          */
-        public static final int IMPORTANCE_TOP_SLEEPING = 150;
+        @Deprecated
+        public static final int IMPORTANCE_TOP_SLEEPING_PRE_28 = 150;
 
         /**
          * Constant for {@link #importance}: This process is running something
@@ -2964,6 +2965,15 @@ public class ActivityManager {
         public static final int IMPORTANCE_SERVICE = 300;
 
         /**
+         * Constant for {@link #importance}: This process is running the foreground
+         * UI, but the device is asleep so it is not visible to the user.  Though the
+         * system will try hard to keep its process from being killed, in all other
+         * ways we consider it a kind of cached process, with the limitations that go
+         * along with that state: network access, running background services, etc.
+         */
+        public static final int IMPORTANCE_TOP_SLEEPING = 325;
+
+        /**
          * Constant for {@link #importance}: This process is running an
          * application that can not save its state, and thus can't be killed
          * while in the background.  This will be used with apps that have
@@ -3008,14 +3018,14 @@ public class ActivityManager {
                 return IMPORTANCE_CACHED;
             } else if (procState == PROCESS_STATE_HEAVY_WEIGHT) {
                 return IMPORTANCE_CANT_SAVE_STATE;
+            } else if (procState >= PROCESS_STATE_TOP_SLEEPING) {
+                return IMPORTANCE_TOP_SLEEPING;
             } else if (procState >= PROCESS_STATE_SERVICE) {
                 return IMPORTANCE_SERVICE;
             } else if (procState >= PROCESS_STATE_TRANSIENT_BACKGROUND) {
                 return IMPORTANCE_PERCEPTIBLE;
             } else if (procState >= PROCESS_STATE_IMPORTANT_FOREGROUND) {
                 return IMPORTANCE_VISIBLE;
-            } else if (procState >= PROCESS_STATE_TOP_SLEEPING) {
-                return IMPORTANCE_TOP_SLEEPING;
             } else if (procState >= PROCESS_STATE_FOREGROUND_SERVICE) {
                 return IMPORTANCE_FOREGROUND_SERVICE;
             } else {
@@ -3049,6 +3059,8 @@ public class ActivityManager {
                 switch (importance) {
                     case IMPORTANCE_PERCEPTIBLE:
                         return IMPORTANCE_PERCEPTIBLE_PRE_26;
+                    case IMPORTANCE_TOP_SLEEPING:
+                        return IMPORTANCE_TOP_SLEEPING_PRE_28;
                     case IMPORTANCE_CANT_SAVE_STATE:
                         return IMPORTANCE_CANT_SAVE_STATE_PRE_26;
                 }
@@ -3062,16 +3074,18 @@ public class ActivityManager {
                 return PROCESS_STATE_NONEXISTENT;
             } else if (importance >= IMPORTANCE_CACHED) {
                 return PROCESS_STATE_HOME;
-            } else if (importance == IMPORTANCE_CANT_SAVE_STATE) {
+            } else if (importance >= IMPORTANCE_CANT_SAVE_STATE) {
                 return PROCESS_STATE_HEAVY_WEIGHT;
+            } else if (importance >= IMPORTANCE_TOP_SLEEPING) {
+                return PROCESS_STATE_TOP_SLEEPING;
             } else if (importance >= IMPORTANCE_SERVICE) {
                 return PROCESS_STATE_SERVICE;
             } else if (importance >= IMPORTANCE_PERCEPTIBLE) {
                 return PROCESS_STATE_TRANSIENT_BACKGROUND;
             } else if (importance >= IMPORTANCE_VISIBLE) {
                 return PROCESS_STATE_IMPORTANT_FOREGROUND;
-            } else if (importance >= IMPORTANCE_TOP_SLEEPING) {
-                return PROCESS_STATE_TOP_SLEEPING;
+            } else if (importance >= IMPORTANCE_TOP_SLEEPING_PRE_28) {
+                return PROCESS_STATE_FOREGROUND_SERVICE;
             } else if (importance >= IMPORTANCE_FOREGROUND_SERVICE) {
                 return PROCESS_STATE_FOREGROUND_SERVICE;
             } else {
