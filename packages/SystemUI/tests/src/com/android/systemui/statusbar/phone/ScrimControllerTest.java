@@ -27,6 +27,7 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.reset;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyZeroInteractions;
 import static org.mockito.Mockito.when;
 
 import android.animation.Animator;
@@ -275,12 +276,19 @@ public class ScrimControllerTest extends SysuiTestCase {
     }
 
     @Test
-    public void testHoldsWakeLock() {
+    public void testHoldsWakeLock_whenAOD() {
         mScrimController.transitionTo(ScrimState.AOD);
         verify(mWakeLock).acquire();
         verify(mWakeLock, never()).release();
         mScrimController.finishAnimationsImmediately();
         verify(mWakeLock).release();
+    }
+
+    @Test
+    public void testDoesNotHoldWakeLock_whenUnlocking() {
+        mScrimController.transitionTo(ScrimState.UNLOCKED);
+        mScrimController.finishAnimationsImmediately();
+        verifyZeroInteractions(mWakeLock);
     }
 
     @Test
