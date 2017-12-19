@@ -22,6 +22,7 @@ statsd_common_src := \
     src/atoms.proto \
     src/anomaly/AnomalyMonitor.cpp \
     src/anomaly/AnomalyTracker.cpp \
+    src/anomaly/DurationAnomalyTracker.cpp \
     src/condition/CombinationConditionTracker.cpp \
     src/condition/condition_util.cpp \
     src/condition/SimpleConditionTracker.cpp \

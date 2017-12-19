@@ -24,12 +24,11 @@ namespace statsd {
 
 using std::pair;
 
-OringDurationTracker::OringDurationTracker(const ConfigKey& key, const string& name,
-                                           const HashableDimensionKey& eventKey,
-                                           sp<ConditionWizard> wizard, int conditionIndex,
-                                           bool nesting, uint64_t currentBucketStartNs,
-                                           uint64_t bucketSizeNs,
-                                           const std::vector<sp<AnomalyTracker>>& anomalyTrackers)
+OringDurationTracker::OringDurationTracker(
+        const ConfigKey& key, const string& name, const HashableDimensionKey& eventKey,
+        sp<ConditionWizard> wizard, int conditionIndex, bool nesting, uint64_t currentBucketStartNs,
+        uint64_t bucketSizeNs, const vector<sp<DurationAnomalyTracker>>& anomalyTrackers)
+
     : DurationTracker(key, name, eventKey, wizard, conditionIndex, nesting, currentBucketStartNs,
                       bucketSizeNs, anomalyTrackers),
       mStarted(),
@@ -264,8 +263,8 @@ void OringDurationTracker::onConditionChanged(bool condition, const uint64_t tim
     }
 }
 
-int64_t OringDurationTracker::predictAnomalyTimestampNs(const AnomalyTracker& anomalyTracker,
-                                                        const uint64_t eventTimestampNs) const {
+int64_t OringDurationTracker::predictAnomalyTimestampNs(
+        const DurationAnomalyTracker& anomalyTracker, const uint64_t eventTimestampNs) const {
     // TODO: Unit-test this and see if it can be done more efficiently (e.g. use int32).
     // All variables below represent durations (not timestamps).
 

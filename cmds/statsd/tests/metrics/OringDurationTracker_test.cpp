@@ -273,7 +273,7 @@ TEST(OringDurationTrackerTest, TestPredictAnomalyTimestamp) {
     uint64_t eventStartTimeNs = bucketStartTimeNs + NS_PER_SEC + 1;
     uint64_t bucketSizeNs = 30 * NS_PER_SEC;
 
-    sp<AnomalyTracker> anomalyTracker = new AnomalyTracker(alert, kConfigKey);
+    sp<DurationAnomalyTracker> anomalyTracker = new DurationAnomalyTracker(alert, kConfigKey);
     OringDurationTracker tracker(kConfigKey, "metric", eventKey, wizard, 1, true, bucketStartTimeNs,
                                  bucketSizeNs, {anomalyTracker});
 
@@ -335,13 +335,13 @@ TEST(OringDurationTrackerTest, TestAnomalyDetection) {
     uint64_t eventStartTimeNs = bucketStartTimeNs + NS_PER_SEC + 1;
     uint64_t bucketSizeNs = 30 * NS_PER_SEC;
 
-    sp<AnomalyTracker> anomalyTracker = new AnomalyTracker(alert, kConfigKey);
+    sp<DurationAnomalyTracker> anomalyTracker = new DurationAnomalyTracker(alert, kConfigKey);
     OringDurationTracker tracker(kConfigKey, "metric", eventKey, wizard, 1, true /*nesting*/,
                                  bucketStartTimeNs, bucketSizeNs, {anomalyTracker});
 
     tracker.noteStart(DEFAULT_DIMENSION_KEY, true, eventStartTimeNs, key1);
     tracker.noteStop(DEFAULT_DIMENSION_KEY, eventStartTimeNs + 10, false);
-    EXPECT_EQ(anomalyTracker->mLastAlarmTimestampNs, -1);
+    EXPECT_EQ(anomalyTracker->mLastAnomalyTimestampNs, -1);
     EXPECT_TRUE(tracker.mStarted.empty());
     EXPECT_EQ(10LL, tracker.mDuration);
 
@@ -355,7 +355,7 @@ TEST(OringDurationTrackerTest, TestAnomalyDetection) {
     tracker.noteStop(DEFAULT_DIMENSION_KEY, eventStartTimeNs + 2 * bucketSizeNs + 25, false);
     EXPECT_EQ(anomalyTracker->getSumOverPastBuckets(eventKey), (long long)(bucketSizeNs));
     EXPECT_EQ((long long)(eventStartTimeNs + 2 * bucketSizeNs + 25),
-              anomalyTracker->mLastAlarmTimestampNs);
+              anomalyTracker->mLastAnomalyTimestampNs);
 }
 
 }  // namespace statsd

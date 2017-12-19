@@ -20,6 +20,7 @@
 #include <unordered_map>
 
 #include <android/util/ProtoOutputStream.h>
+#include "../anomaly/DurationAnomalyTracker.h"
 #include "../condition/ConditionTracker.h"
 #include "../matchers/matcher_util.h"
 #include "MetricProducer.h"
@@ -45,7 +46,7 @@ public:
 
     virtual ~DurationMetricProducer();
 
-    virtual sp<AnomalyTracker> createAnomalyTracker(const Alert &alert) override;
+    sp<AnomalyTracker> addAnomalyTracker(const Alert &alert) override;
 
 protected:
     void onMatchedLogEventInternalLocked(
@@ -97,6 +98,9 @@ private:
     // Helper function to create a duration tracker given the metric aggregation type.
     std::unique_ptr<DurationTracker> createDurationTracker(
             const HashableDimensionKey& eventKey) const;
+
+    // This hides the base class's std::vector<sp<AnomalyTracker>> mAnomalyTrackers
+    std::vector<sp<DurationAnomalyTracker>> mAnomalyTrackers;
 
     // Util function to check whether the specified dimension hits the guardrail.
     bool hitGuardRailLocked(const HashableDimensionKey& newKey);
