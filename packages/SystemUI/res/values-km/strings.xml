@@ -492,9 +492,10 @@
     <string name="stream_bluetooth_sco" msgid="2055645746402746292">"ប៊្លូធូស"</string>
     <string name="stream_dtmf" msgid="2447177903892477915">"ហ្វ្រេកង់ពហុសំឡេងទ្វេ"</string>
     <string name="stream_accessibility" msgid="301136219144385106">"ភាព​ងាយស្រួល"</string>
+    <string name="ring_toggle_title" msgid="3281244519428819576">"ហៅទូរសព្ទ"</string>
     <string name="volume_ringer_status_normal" msgid="4273142424125855384">"រោទ៍"</string>
     <string name="volume_ringer_status_vibrate" msgid="1825615171021346557">"ញ័រ"</string>
-    <string name="volume_ringer_status_silent" msgid="6896394161022916369">"បិទ"</string>
+    <string name="volume_ringer_status_silent" msgid="6896394161022916369">"បិទសំឡេង"</string>
     <string name="volume_stream_content_description_unmute" msgid="4436631538779230857">"%1$s។ ប៉ះដើម្បីបើកសំឡេង។"</string>
     <string name="volume_stream_content_description_vibrate" msgid="1187944970457807498">"%1$s។ ប៉ះដើម្បីកំណត់ឲ្យញ័រ។ សេវាកម្មលទ្ធភាពប្រើប្រាស់អាចនឹងត្រូវបានបិទសំឡេង។"</string>
     <string name="volume_stream_content_description_mute" msgid="3625049841390467354">"%1$s។ ប៉ះដើម្បីបិទសំឡេង។ សេវាកម្មលទ្ធភាពប្រើប្រាស់អាចនឹងត្រូវបានបិទសំឡេង។"</string>

@@ -492,12 +492,11 @@
     <string name="stream_bluetooth_sco" msgid="2055645746402746292">"બ્લૂટૂથ"</string>
     <string name="stream_dtmf" msgid="2447177903892477915">"દ્વિ બહુ ટોન આવર્તન"</string>
     <string name="stream_accessibility" msgid="301136219144385106">"ઍક્સેસિબિલિટી"</string>
-    <!-- no translation found for volume_ringer_status_normal (4273142424125855384) -->
+    <!-- no translation found for ring_toggle_title (3281244519428819576) -->
     <skip />
-    <!-- no translation found for volume_ringer_status_vibrate (1825615171021346557) -->
-    <skip />
-    <!-- no translation found for volume_ringer_status_silent (6896394161022916369) -->
-    <skip />
+    <string name="volume_ringer_status_normal" msgid="4273142424125855384">"રિંગ કરો"</string>
+    <string name="volume_ringer_status_vibrate" msgid="1825615171021346557">"વાઇબ્રેટ"</string>
+    <string name="volume_ringer_status_silent" msgid="6896394161022916369">"મ્યૂટ કરો"</string>
     <string name="volume_stream_content_description_unmute" msgid="4436631538779230857">"%1$s. અનમ્યૂટ કરવા માટે ટૅપ કરો."</string>
     <string name="volume_stream_content_description_vibrate" msgid="1187944970457807498">"%1$s. વાઇબ્રેટ પર સેટ કરવા માટે ટૅપ કરો. ઍક્સેસિબિલિટી સેવાઓ મ્યૂટ કરવામાં આવી શકે છે."</string>
     <string name="volume_stream_content_description_mute" msgid="3625049841390467354">"%1$s. મ્યૂટ કરવા માટે ટૅપ કરો. ઍક્સેસિબિલિટી સેવાઓ મ્યૂટ કરવામાં આવી શકે છે."</string>
