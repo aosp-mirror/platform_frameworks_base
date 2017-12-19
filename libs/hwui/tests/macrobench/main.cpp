@@ -21,7 +21,6 @@
 #include "hwui/Typeface.h"
 #include "protos/hwui.pb.h"
 
-#include <../src/sysinfo.h>
 #include <benchmark/benchmark.h>
 #include <getopt.h>
 #include <pthread.h>
@@ -320,9 +319,6 @@ int main(int argc, char* argv[]) {
         name_field_width += 5;
 
         benchmark::BenchmarkReporter::Context context;
-        context.num_cpus = benchmark::NumCPUs();
-        context.mhz_per_cpu = benchmark::CyclesPerSecond() / 1000000.0f;
-        context.cpu_scaling_enabled = benchmark::CpuScalingEnabled();
         context.name_field_width = name_field_width;
         gBenchmarkReporter->ReportContext(context);
     }
