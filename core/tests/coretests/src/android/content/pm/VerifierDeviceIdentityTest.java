@@ -17,9 +17,11 @@
 package android.content.pm;
 
 import android.os.Parcel;
+import android.support.test.filters.LargeTest;
 
 import java.util.Random;
 
+@LargeTest
 public class VerifierDeviceIdentityTest extends android.test.AndroidTestCase {
     private static final long TEST_1 = 0x7A5F00FF5A55AAA5L;
 

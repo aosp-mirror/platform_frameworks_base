@@ -16,8 +16,11 @@
 
 package android.content.pm;
 
+import android.support.test.filters.LargeTest;
+
 import junit.framework.TestCase;
 
+@LargeTest
 public class SignatureTest extends TestCase {
 
     /** Cert A with valid syntax */

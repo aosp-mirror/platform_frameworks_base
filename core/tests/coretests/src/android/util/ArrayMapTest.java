@@ -14,6 +14,7 @@
 
 package android.util;
 
+import android.support.test.filters.LargeTest;
 import android.util.ArrayMap;
 
 import junit.framework.TestCase;
@@ -24,6 +25,7 @@ import java.util.ConcurrentModificationException;
 /**
  * Unit tests for ArrayMap that don't belong in CTS.
  */
+@LargeTest
 public class ArrayMapTest extends TestCase {
     private static final String TAG = "ArrayMapTest";
     ArrayMap<String, String> map = new ArrayMap<>();

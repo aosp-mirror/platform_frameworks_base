@@ -30,6 +30,7 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
 import android.os.SystemClock;
+import android.support.test.filters.LargeTest;
 import android.test.AndroidTestCase;
 import android.util.DisplayMetrics;
 import android.util.Log;
@@ -49,6 +50,7 @@ import java.util.concurrent.locks.ReentrantLock;
  * Contains additional tests that cannot be included in CTS because they require
  * system permissions.  See also the CTS version of VirtualDisplayTest.
  */
+@LargeTest
 public class VirtualDisplayTest extends AndroidTestCase {
     private static final String TAG = "VirtualDisplayTest";
 

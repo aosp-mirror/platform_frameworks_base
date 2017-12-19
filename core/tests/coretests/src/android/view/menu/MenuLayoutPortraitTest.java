@@ -16,13 +16,12 @@
 
 package android.view.menu;
 
-import android.util.KeyUtils;
-import com.android.internal.view.menu.IconMenuView;
-import com.android.internal.view.menu.MenuBuilder;
-
 import android.content.pm.ActivityInfo;
+import android.support.test.filters.LargeTest;
 import android.test.ActivityInstrumentationTestCase;
+import android.util.KeyUtils;
 
+@LargeTest
 public class MenuLayoutPortraitTest extends ActivityInstrumentationTestCase<MenuLayoutPortrait> {
     private static final String LONG_TITLE = "Really really really really really really really really really really long title";
     private static final String SHORT_TITLE = "Item";

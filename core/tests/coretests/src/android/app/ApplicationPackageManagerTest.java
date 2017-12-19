@@ -22,6 +22,7 @@ import android.content.pm.IPackageManager;
 import android.content.pm.PackageInfo;
 import android.os.storage.StorageManager;
 import android.os.storage.VolumeInfo;
+import android.support.test.filters.LargeTest;
 
 import junit.framework.TestCase;
 
@@ -34,6 +35,7 @@ import java.util.List;
 import static android.os.storage.VolumeInfo.STATE_MOUNTED;
 import static android.os.storage.VolumeInfo.STATE_UNMOUNTED;
 
+@LargeTest
 public class ApplicationPackageManagerTest extends TestCase {
     private static final String sInternalVolPath = "/data";
     private static final String sAdoptedVolPath = "/mnt/expand/123";
