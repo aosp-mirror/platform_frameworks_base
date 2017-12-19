@@ -16,7 +16,12 @@
 
 LOCAL_PATH:= $(call my-dir)
 
-android_test_mock_source_files := $(call all-java-files-under, src/android/test/mock)
+# Includes the main framework source to ensure that doclava has access to the
+# visibility information for the base classes of the mock classes. Without it
+# otherwise hidden methods could be visible.
+android_test_mock_source_files := \
+    $(call all-java-files-under, src/android/test/mock) \
+    $(call all-java-files-under, ../core/java) \
 
 # Generate the stub source files for android.test.mock.stubs
 # ==========================================================
@@ -62,6 +67,8 @@ LOCAL_SOURCE_FILES_ALL_GENERATED := true
 
 # Make sure to run droiddoc first to generate the stub source files.
 LOCAL_ADDITIONAL_DEPENDENCIES := $(android_test_mock_gen_stamp)
+
+LOCAL_SDK_VERSION := current
 
 include $(BUILD_STATIC_JAVA_LIBRARY)
 
