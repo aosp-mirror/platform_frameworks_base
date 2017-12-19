@@ -140,7 +140,7 @@
       <item quantity="one">SIM PIN kodini kiriting, qurilmani qulfdan chiqarish uchun sizda <xliff:g id="NUMBER_0">%d</xliff:g> ta urinish bor.</item>
     </plurals>
     <plurals name="kg_password_default_puk_message" formatted="false" msgid="8744416410184198352">
-      <item quantity="other">SIM karta faolsizlantirildi. Davom etish uchun PUK kodni kiriting. Yana <xliff:g id="_NUMBER_1">%d</xliff:g> marta urinib ko‘rganingizdan keyin SIM kartadan umuman foydalanib bo‘lmaydi. Batafsil axborot olish uchun tarmoq operatoriga murojaat qiling.</item>
-      <item quantity="one">SIM karta faolsizlantirildi. Davom etish uchun PUK kodni kiriting. Yana <xliff:g id="_NUMBER_0">%d</xliff:g> marta urinib ko‘rganingizdan keyin SIM kartadan umuman foydalanib bo‘lmaydi. Batafsil axborot olish uchun tarmoq operatoriga murojaat qiling.</item>
+      <item quantity="other">SIM karta faolsizlantirildi. Davom etish uchun PUK kodni kiriting. Yana <xliff:g id="_NUMBER_1">%d</xliff:g> marta xato qilsangiz, SIM kartangiz butunlay qulflanadi. Batafsil axborot olish uchun tarmoq operatoriga murojaat qiling.</item>
+      <item quantity="one">SIM karta faolsizlantirildi. Davom etish uchun PUK kodni kiriting. Yana <xliff:g id="_NUMBER_0">%d</xliff:g> marta xato qilsangiz, SIM kartangiz butunlay qulflanadi. Batafsil axborot olish uchun tarmoq operatoriga murojaat qiling.</item>
     </plurals>
 </resources>

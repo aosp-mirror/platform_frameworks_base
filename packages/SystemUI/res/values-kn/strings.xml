@@ -492,12 +492,11 @@
     <string name="stream_bluetooth_sco" msgid="2055645746402746292">"ಬ್ಲೂಟೂತ್‌"</string>
     <string name="stream_dtmf" msgid="2447177903892477915">"ಡ್ಯುಯಲ್‌ ಬಹು ಟೋನ್ ಆವರ್ತನೆ"</string>
     <string name="stream_accessibility" msgid="301136219144385106">"ಪ್ರವೇಶಿಸುವಿಕೆ"</string>
-    <!-- no translation found for volume_ringer_status_normal (4273142424125855384) -->
+    <!-- no translation found for ring_toggle_title (3281244519428819576) -->
     <skip />
-    <!-- no translation found for volume_ringer_status_vibrate (1825615171021346557) -->
-    <skip />
-    <!-- no translation found for volume_ringer_status_silent (6896394161022916369) -->
-    <skip />
+    <string name="volume_ringer_status_normal" msgid="4273142424125855384">"ರಿಂಗ್"</string>
+    <string name="volume_ringer_status_vibrate" msgid="1825615171021346557">"ವೈಬ್ರೇಟ್‌"</string>
+    <string name="volume_ringer_status_silent" msgid="6896394161022916369">"ಮ್ಯೂಟ್"</string>
     <string name="volume_stream_content_description_unmute" msgid="4436631538779230857">"%1$s. ಅನ್‌ಮ್ಯೂಟ್‌ ಮಾಡುವುದಕ್ಕಾಗಿ ಟ್ಯಾಪ್ ಮಾಡಿ."</string>
     <string name="volume_stream_content_description_vibrate" msgid="1187944970457807498">"%1$s. ಕಂಪನಕ್ಕೆ ಹೊಂದಿಸಲು ಟ್ಯಾಪ್ ಮಾಡಿ. ಪ್ರವೇಶಿಸುವಿಕೆ ಸೇವೆಗಳನ್ನು ಮ್ಯೂಟ್‌ ಮಾಡಬಹುದು."</string>
     <string name="volume_stream_content_description_mute" msgid="3625049841390467354">"%1$s. ಮ್ಯೂಟ್ ಮಾಡಲು ಟ್ಯಾಪ್ ಮಾಡಿ. ಪ್ರವೇಶಿಸುವಿಕೆ ಸೇವೆಗಳನ್ನು ಮ್ಯೂಟ್‌ ಮಾಡಬಹುದು."</string>

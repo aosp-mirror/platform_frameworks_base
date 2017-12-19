@@ -492,12 +492,11 @@
     <string name="stream_bluetooth_sco" msgid="2055645746402746292">"ബ്ലൂടൂത്ത്"</string>
     <string name="stream_dtmf" msgid="2447177903892477915">"ഡ്യുവൽ മൾട്ടി റ്റോൺ ഫ്രീക്വൻസി"</string>
     <string name="stream_accessibility" msgid="301136219144385106">"ഉപയോഗസഹായി"</string>
-    <!-- no translation found for volume_ringer_status_normal (4273142424125855384) -->
+    <!-- no translation found for ring_toggle_title (3281244519428819576) -->
     <skip />
-    <!-- no translation found for volume_ringer_status_vibrate (1825615171021346557) -->
-    <skip />
-    <!-- no translation found for volume_ringer_status_silent (6896394161022916369) -->
-    <skip />
+    <string name="volume_ringer_status_normal" msgid="4273142424125855384">"റിംഗ് ചെയ്യുക"</string>
+    <string name="volume_ringer_status_vibrate" msgid="1825615171021346557">"വൈബ്രേറ്റ് ചെയ്യുക"</string>
+    <string name="volume_ringer_status_silent" msgid="6896394161022916369">"മ്യൂട്ട് ചെയ്യുക"</string>
     <string name="volume_stream_content_description_unmute" msgid="4436631538779230857">"%1$s. അൺമ്യൂട്ടുചെയ്യുന്നതിന് ടാപ്പുചെയ്യുക."</string>
     <string name="volume_stream_content_description_vibrate" msgid="1187944970457807498">"%1$s. വൈബ്രേറ്റിലേക്ക് സജ്ജമാക്കുന്നതിന് ടാപ്പുചെയ്യുക. ഉപയോഗസഹായി സേവനങ്ങൾ മ്യൂട്ടുചെയ്യപ്പെട്ടേക്കാം."</string>
     <string name="volume_stream_content_description_mute" msgid="3625049841390467354">"%1$s. മ്യൂട്ടുചെയ്യുന്നതിന് ടാപ്പുചെയ്യുക. ഉപയോഗസഹായി സേവനങ്ങൾ മ്യൂട്ടുചെയ്യപ്പെട്ടേക്കാം."</string>

@@ -492,6 +492,8 @@
     <string name="stream_bluetooth_sco" msgid="2055645746402746292">"ब्लुटुथ"</string>
     <string name="stream_dtmf" msgid="2447177903892477915">"दोहोरो बहु टोनको फ्रिक्वेन्सी"</string>
     <string name="stream_accessibility" msgid="301136219144385106">"पहुँच"</string>
+    <!-- no translation found for ring_toggle_title (3281244519428819576) -->
+    <skip />
     <string name="volume_ringer_status_normal" msgid="4273142424125855384">"घन्टी"</string>
     <string name="volume_ringer_status_vibrate" msgid="1825615171021346557">"कम्पन"</string>
     <string name="volume_ringer_status_silent" msgid="6896394161022916369">"म्युट गर्नुहोस्"</string>
