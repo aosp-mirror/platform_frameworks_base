@@ -214,6 +214,20 @@ public class NotificationTest {
         assertTrue(n.allPendingIntents.contains(intent));
     }
 
+    @Test
+    public void testMessagingStyle_isGroupConversation() {
+        Notification.MessagingStyle messagingStyle = new Notification.MessagingStyle("self name")
+                .setGroupConversation(true);
+        Notification notification = new Notification.Builder(mContext, "test id")
+                .setSmallIcon(1)
+                .setContentTitle("test title")
+                .setStyle(messagingStyle)
+                .build();
+
+        assertTrue(messagingStyle.isGroupConversation());
+        assertTrue(notification.extras.getBoolean(Notification.EXTRA_IS_GROUP_CONVERSATION));
+    }
+
     private Notification.Builder getMediaNotification() {
         MediaSession session = new MediaSession(mContext, "test");
         return new Notification.Builder(mContext, "color")
