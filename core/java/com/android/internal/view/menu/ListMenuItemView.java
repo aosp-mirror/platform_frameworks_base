@@ -50,6 +50,7 @@ public class ListMenuItemView extends LinearLayout
     private TextView mShortcutView;
     private ImageView mSubMenuArrowView;
     private ImageView mGroupDivider;
+    private LinearLayout mContent;
 
     private Drawable mBackground;
     private int mTextAppearance;
@@ -114,6 +115,8 @@ public class ListMenuItemView extends LinearLayout
             mSubMenuArrowView.setImageDrawable(mSubMenuArrow);
         }
         mGroupDivider = findViewById(com.android.internal.R.id.group_divider);
+
+        mContent = findViewById(com.android.internal.R.id.content);
     }
 
     public void initialize(MenuItemImpl itemData, int menuType) {
@@ -129,6 +132,18 @@ public class ListMenuItemView extends LinearLayout
         setEnabled(itemData.isEnabled());
         setSubMenuArrowVisible(itemData.hasSubMenu());
         setContentDescription(itemData.getContentDescription());
+    }
+
+    private void addContentView(View v) {
+        addContentView(v, -1);
+    }
+
+    private void addContentView(View v, int index) {
+        if (mContent != null) {
+            mContent.addView(v, index);
+        } else {
+            addView(v, index);
+        }
     }
 
     public void setForceShowIcon(boolean forceShow) {
@@ -270,7 +285,7 @@ public class ListMenuItemView extends LinearLayout
         LayoutInflater inflater = getInflater();
         mIconView = (ImageView) inflater.inflate(com.android.internal.R.layout.list_menu_item_icon,
                 this, false);
-        addView(mIconView, 0);
+        addContentView(mIconView, 0);
     }
 
     private void insertRadioButton() {
@@ -278,7 +293,7 @@ public class ListMenuItemView extends LinearLayout
         mRadioButton =
                 (RadioButton) inflater.inflate(com.android.internal.R.layout.list_menu_item_radio,
                 this, false);
-        addView(mRadioButton);
+        addContentView(mRadioButton);
     }
 
     private void insertCheckBox() {
@@ -286,7 +301,7 @@ public class ListMenuItemView extends LinearLayout
         mCheckBox =
                 (CheckBox) inflater.inflate(com.android.internal.R.layout.list_menu_item_checkbox,
                 this, false);
-        addView(mCheckBox);
+        addContentView(mCheckBox);
     }
 
     public boolean prefersCondensedTitle() {
