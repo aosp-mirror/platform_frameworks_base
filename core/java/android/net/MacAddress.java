@@ -33,8 +33,6 @@ import java.util.Random;
  *
  * This class only supports 48 bits long addresses and does not support 64 bits long addresses.
  * Instances of this class are immutable.
- *
- * @hide
  */
 public final class MacAddress implements Parcelable {
 
@@ -132,11 +130,12 @@ public final class MacAddress implements Parcelable {
     }
 
     /**
-     * @return a String representation of the OUI part of this MacAddres,
-     * with the lower 3 bytes constituting the NIC part replaced with 0.
+     * @return a String representation of the OUI part of this MacAddress made of 3 hexadecimal
+     * numbers in [0,ff] joined by ':' characters.
      */
-    public String toSafeString() {
-        return stringAddrFromLongAddr(mAddr & OUI_MASK);
+    public String toOuiString() {
+        return String.format(
+                "%02x:%02x:%02x", (mAddr >> 40) & 0xff, (mAddr >> 32) & 0xff, (mAddr >> 24) & 0xff);
     }
 
     @Override
