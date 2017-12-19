@@ -31,6 +31,7 @@ import android.security.recoverablekeystore.KeyStoreRecoveryMetadata;
 import android.security.recoverablekeystore.RecoverableKeyStoreLoader;
 
 import com.android.internal.annotations.VisibleForTesting;
+import com.android.internal.widget.LockPatternUtils;
 import com.android.server.locksettings.recoverablekeystore.storage.RecoverableKeyStoreDb;
 import com.android.server.locksettings.recoverablekeystore.storage.RecoverySessionStorage;
 
@@ -50,7 +51,6 @@ import java.util.Map;
  */
 public class RecoverableKeyStoreManager {
     private static final String TAG = "RecoverableKeyStoreManager";
-
     private static RecoverableKeyStoreManager mInstance;
 
     private final Context mContext;
@@ -278,21 +278,47 @@ public class RecoverableKeyStoreManager {
         throw new UnsupportedOperationException();
     }
 
-    /** This function can only be used inside LockSettingsService. */
+    /**
+     * This function can only be used inside LockSettingsService.
+     *
+     * @param storedHashType from {@Code CredentialHash}
+     * @param credential - unencrypted String. Password length should be at most 16 symbols {@code
+     *     mPasswordMaxLength}
+     * @param userId for user who just unlocked the device.
+     * @hide
+     */
     public void lockScreenSecretAvailable(
-            @KeyStoreRecoveryMetadata.LockScreenUiFormat int type,
-            String unencryptedPassword,
-            int userId) {
+            int storedHashType, @NonNull String credential, int userId) {
+        // Notify RecoverableKeystoreLoader about unlock
+        @KeyStoreRecoveryMetadata.LockScreenUiFormat int uiFormat;
+        if (storedHashType == LockPatternUtils.CREDENTIAL_TYPE_PATTERN) {
+            uiFormat = KeyStoreRecoveryMetadata.TYPE_PATTERN;
+        } else if (isPin(credential)) {
+            uiFormat = KeyStoreRecoveryMetadata.TYPE_PIN;
+        } else {
+            uiFormat = KeyStoreRecoveryMetadata.TYPE_PASSWORD;
+        }
+        // TODO: check getPendingRecoverySecretTypes.
         // TODO: compute SHA256 or Argon2id depending on secret type.
-        throw new UnsupportedOperationException();
     }
 
     /** This function can only be used inside LockSettingsService. */
     public void lockScreenSecretChanged(
             @KeyStoreRecoveryMetadata.LockScreenUiFormat int type,
-            @Nullable String unencryptedPassword,
+            @Nullable String credential,
             int userId) {
         throw new UnsupportedOperationException();
+    }
+
+    @VisibleForTesting
+    boolean isPin(@NonNull String credential) {
+        for (int i = 0; i < credential.length(); i++) {
+            char c = credential.charAt(i);
+            if (c < '0' || c > '9') {
+                return false;
+            }
+        }
+        return true;
     }
 
     private void checkRecoverKeyStorePermission() {
