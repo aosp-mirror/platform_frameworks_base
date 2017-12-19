@@ -381,7 +381,7 @@
     <string name="permdesc_readCalendar" product="tablet" msgid="4993979255403945892">"Esta aplicação pode ler todos os eventos do calendário armazenados no seu tablet e partilhar ou guardar os dados do calendário."</string>
     <string name="permdesc_readCalendar" product="tv" msgid="8837931557573064315">"Esta aplicação pode ler todos os eventos do calendário armazenados na sua TV e partilhar ou guardar os dados do calendário."</string>
     <string name="permdesc_readCalendar" product="default" msgid="4373978642145196715">"Esta aplicação pode ler todos os eventos do calendário armazenados no seu telemóvel e partilhar ou guardar os dados do calendário."</string>
-    <string name="permlab_writeCalendar" msgid="8438874755193825647">"adicionar ou modificar eventos do calendário e enviar e-mail a convidados sem o conhecimento dos proprietários"</string>
+    <string name="permlab_writeCalendar" msgid="8438874755193825647">"adicionar ou modificar eventos do calendário e enviar email a convidados sem o conhecimento dos proprietários"</string>
     <string name="permdesc_writeCalendar" product="tablet" msgid="1675270619903625982">"Esta aplicação pode adicionar, remover ou alterar eventos do calendário no seu tablet. Esta aplicação pode enviar mensagens que parecem vir de proprietários do calendário ou alterar eventos sem notificar os respetivos proprietários."</string>
     <string name="permdesc_writeCalendar" product="tv" msgid="9017809326268135866">"Esta aplicação pode adicionar, remover ou alterar eventos do calendário na sua TV. Esta aplicação pode enviar mensagens que parecem vir de proprietários do calendário ou alterar eventos sem notificar os respetivos proprietários."</string>
     <string name="permdesc_writeCalendar" product="default" msgid="7592791790516943173">"Esta aplicação pode adicionar, remover ou alterar eventos do calendário no seu telemóvel. Esta aplicação pode enviar mensagens que parecem vir de proprietários do calendário ou alterar eventos sem notificar os respetivos proprietários."</string>
@@ -756,7 +756,7 @@
     <string name="lockscreen_glogin_forgot_pattern" msgid="2588521501166032747">"Desbloqueio da conta"</string>
     <string name="lockscreen_glogin_too_many_attempts" msgid="2751368605287288808">"Demasiadas tentativas para desenhar sequência"</string>
     <string name="lockscreen_glogin_instructions" msgid="3931816256100707784">"Para desbloquear, inicie sessão com a Conta Google."</string>
-    <string name="lockscreen_glogin_username_hint" msgid="8846881424106484447">"Nome de utilizador (e-mail)"</string>
+    <string name="lockscreen_glogin_username_hint" msgid="8846881424106484447">"Nome de utilizador (email)"</string>
     <string name="lockscreen_glogin_password_hint" msgid="5958028383954738528">"Palavra-passe"</string>
     <string name="lockscreen_glogin_submit_button" msgid="7130893694795786300">"Iniciar sessão"</string>
     <string name="lockscreen_glogin_invalid_input" msgid="1364051473347485908">"Nome de utilizador ou palavra-passe inválidos."</string>

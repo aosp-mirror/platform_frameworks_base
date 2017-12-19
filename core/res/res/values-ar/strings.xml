@@ -66,15 +66,15 @@
     <string name="PwdMmi" msgid="7043715687905254199">"تغيير كلمة المرور"</string>
     <string name="PinMmi" msgid="3113117780361190304">"‏تغيير رمز PIN"</string>
     <string name="CnipMmi" msgid="3110534680557857162">"رقم الاتصال موجود"</string>
-    <string name="CnirMmi" msgid="3062102121430548731">"رقم الاتصال مقيّد"</string>
+    <string name="CnirMmi" msgid="3062102121430548731">"رقم الاتصال محظور"</string>
     <string name="ThreeWCMmi" msgid="9051047170321190368">"اتصال ثلاثي"</string>
     <string name="RuacMmi" msgid="7827887459138308886">"رفض المكالمات المزعجة غير المرغوب فيها"</string>
     <string name="CndMmi" msgid="3116446237081575808">"تسليم رقم الاتصال"</string>
     <string name="DndMmi" msgid="1265478932418334331">"عدم الإزعاج"</string>
-    <string name="CLIRDefaultOnNextCallOn" msgid="429415409145781923">"الإعداد الافتراضي لمعرف المتصل هو مقيّد. الاتصال التالي: مقيّد"</string>
-    <string name="CLIRDefaultOnNextCallOff" msgid="3092918006077864624">"الإعداد الافتراضي لمعرف المتصل هو مقيّد. الاتصال التالي: غير مقيّد"</string>
-    <string name="CLIRDefaultOffNextCallOn" msgid="6179425182856418465">"الإعداد الافتراضي لمعرف المتصل هو غير مقيّد. الاتصال التالي: مقيّد"</string>
-    <string name="CLIRDefaultOffNextCallOff" msgid="2567998633124408552">"الإعداد الافتراضي لمعرف المتصل هو غير مقيّد. الاتصال التالي: غير مقيّد"</string>
+    <string name="CLIRDefaultOnNextCallOn" msgid="429415409145781923">"الإعداد الافتراضي لمعرف المتصل هو محظور  . الاتصال التالي: محظور"</string>
+    <string name="CLIRDefaultOnNextCallOff" msgid="3092918006077864624">"الإعداد الافتراضي لمعرف المتصل هو محظور  . الاتصال التالي: غير محظور"</string>
+    <string name="CLIRDefaultOffNextCallOn" msgid="6179425182856418465">"الإعداد الافتراضي لمعرف المتصل هو غير محظور  . الاتصال التالي: محظور"</string>
+    <string name="CLIRDefaultOffNextCallOff" msgid="2567998633124408552">"الإعداد الافتراضي لمعرف المتصل هو غير محظور  . الاتصال التالي: غير محظور"</string>
     <string name="serviceNotProvisioned" msgid="8614830180508686666">"الخدمة غير متوفرة."</string>
     <string name="CLIRPermanent" msgid="3377371145926835671">"لا يمكنك تغيير إعداد معرّف المتصل."</string>
     <string name="RestrictedOnDataTitle" msgid="1322504692764166532">"ليست هناك خدمة بيانات"</string>
