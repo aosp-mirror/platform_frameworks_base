@@ -28,7 +28,8 @@ import java.util.List;
  * {@link FragmentController#retainNonConfig()} and
  * {@link FragmentController#restoreAllState(Parcelable, FragmentManagerNonConfig)}.</p>
  *
- * @deprecated Use {@link android.support.v4.app.FragmentManagerNonConfig}
+ * @deprecated Use the <a href="{@docRoot}tools/extras/support-library.html">Support Library</a>
+ *      {@link android.support.v4.app.FragmentManagerNonConfig}
  */
 @Deprecated
 public class FragmentManagerNonConfig {

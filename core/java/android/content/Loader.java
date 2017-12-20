@@ -49,7 +49,8 @@ import java.io.PrintWriter;
  *
  * @param <D> The result returned when the load is complete
  *
- * @deprecated Use {@link android.support.v4.content.Loader}
+ * @deprecated Use the <a href="{@docRoot}tools/extras/support-library.html">Support Library</a>
+ *      {@link android.support.v4.content.Loader}
  */
 @Deprecated
 public class Loader<D> {

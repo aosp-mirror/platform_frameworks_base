@@ -39,7 +39,8 @@ import java.util.Arrays;
  * {@link #setSelectionArgs(String[])}, {@link #setSortOrder(String)},
  * and {@link #setProjection(String[])}.
  *
- * @deprecated Use {@link android.support.v4.content.CursorLoader}
+ * @deprecated Use the <a href="{@docRoot}tools/extras/support-library.html">Support Library</a>
+ *      {@link android.support.v4.content.CursorLoader}
  */
 @Deprecated
 public class CursorLoader extends AsyncTaskLoader<Cursor> {
