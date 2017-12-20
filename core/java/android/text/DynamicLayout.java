@@ -42,8 +42,7 @@ import java.lang.ref.WeakReference;
  * {@link android.graphics.Canvas#drawText(java.lang.CharSequence, int, int, float, float, android.graphics.Paint)
  *  Canvas.drawText()} directly.</p>
  */
-public class DynamicLayout extends Layout
-{
+public class DynamicLayout extends Layout {
     private static final int PRIORITY = 128;
     private static final int BLOCK_MINIMUM_CHARACTER_LENGTH = 400;
 
@@ -303,8 +302,9 @@ public class DynamicLayout extends Layout
     }
 
     /**
-     * Make a layout for the specified text that will be updated as the text is changed.
+     * @deprecated Use {@link Builder} instead.
      */
+    @Deprecated
     public DynamicLayout(@NonNull CharSequence base,
                          @NonNull TextPaint paint,
                          @IntRange(from = 0) int width, @NonNull Alignment align,
@@ -315,9 +315,9 @@ public class DynamicLayout extends Layout
     }
 
     /**
-     * Make a layout for the transformed text (password transformation being the primary example of
-     * a transformation) that will be updated as the base text is changed.
+     * @deprecated Use {@link Builder} instead.
      */
+    @Deprecated
     public DynamicLayout(@NonNull CharSequence base, @NonNull CharSequence display,
                          @NonNull TextPaint paint,
                          @IntRange(from = 0) int width, @NonNull Alignment align,
@@ -328,10 +328,9 @@ public class DynamicLayout extends Layout
     }
 
     /**
-     * Make a layout for the transformed text (password transformation being the primary example of
-     * a transformation) that will be updated as the base text is changed. If ellipsize is non-null,
-     * the Layout will ellipsize the text down to ellipsizedWidth.
+     * @deprecated Use {@link Builder} instead.
      */
+    @Deprecated
     public DynamicLayout(@NonNull CharSequence base, @NonNull CharSequence display,
                          @NonNull TextPaint paint,
                          @IntRange(from = 0) int width, @NonNull Alignment align,
@@ -351,7 +350,9 @@ public class DynamicLayout extends Layout
      * the Layout will ellipsize the text down to ellipsizedWidth.
      *
      * @hide
+     * @deprecated Use {@link Builder} instead.
      */
+    @Deprecated
     public DynamicLayout(@NonNull CharSequence base, @NonNull CharSequence display,
                          @NonNull TextPaint paint,
                          @IntRange(from = 0) int width,
