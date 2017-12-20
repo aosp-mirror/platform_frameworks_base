@@ -486,6 +486,7 @@ public final class OutputConfiguration implements Parcelable {
         this.mConfiguredSize = other.mConfiguredSize;
         this.mConfiguredGenerationId = other.mConfiguredGenerationId;
         this.mIsDeferredConfig = other.mIsDeferredConfig;
+        this.mIsShared = other.mIsShared;
     }
 
     /**
@@ -498,6 +499,7 @@ public final class OutputConfiguration implements Parcelable {
         int width = source.readInt();
         int height = source.readInt();
         boolean isDeferred = source.readInt() == 1;
+        boolean isShared = source.readInt() == 1;
         ArrayList<Surface> surfaces = new ArrayList<Surface>();
         source.readTypedList(surfaces, Surface.CREATOR);
 
@@ -508,6 +510,7 @@ public final class OutputConfiguration implements Parcelable {
         mSurfaces = surfaces;
         mConfiguredSize = new Size(width, height);
         mIsDeferredConfig = isDeferred;
+        mIsShared = isShared;
         mSurfaces = surfaces;
         if (mSurfaces.size() > 0) {
             mSurfaceType = SURFACE_TYPE_UNKNOWN;
