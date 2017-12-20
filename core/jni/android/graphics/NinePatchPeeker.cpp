@@ -76,13 +76,18 @@ void NinePatchPeeker::scale(float scaleX, float scaleY, int scaledWidth, int sca
     if (!mPatch) {
         return;
     }
-    mPatch->paddingLeft   = int(mPatch->paddingLeft   * scaleX + 0.5f);
-    mPatch->paddingTop    = int(mPatch->paddingTop    * scaleY + 0.5f);
-    mPatch->paddingRight  = int(mPatch->paddingRight  * scaleX + 0.5f);
-    mPatch->paddingBottom = int(mPatch->paddingBottom * scaleY + 0.5f);
 
     // The max value for the divRange is one pixel less than the actual max to ensure that the size
     // of the last div is not zero. A div of size 0 is considered invalid input and will not render.
-    scaleDivRange(mPatch->getXDivs(), mPatch->numXDivs, scaleX, scaledWidth - 1);
-    scaleDivRange(mPatch->getYDivs(), mPatch->numYDivs, scaleY, scaledHeight - 1);
+    if (!SkScalarNearlyEqual(scaleX, 1.0f)) {
+        mPatch->paddingLeft   = int(mPatch->paddingLeft   * scaleX + 0.5f);
+        mPatch->paddingRight  = int(mPatch->paddingRight  * scaleX + 0.5f);
+        scaleDivRange(mPatch->getXDivs(), mPatch->numXDivs, scaleX, scaledWidth - 1);
+    }
+
+    if (!SkScalarNearlyEqual(scaleY, 1.0f)) {
+        mPatch->paddingTop    = int(mPatch->paddingTop    * scaleY + 0.5f);
+        mPatch->paddingBottom = int(mPatch->paddingBottom * scaleY + 0.5f);
+        scaleDivRange(mPatch->getYDivs(), mPatch->numYDivs, scaleY, scaledHeight - 1);
+    }
 }
