@@ -5345,6 +5345,7 @@ public final class Settings {
          * @hide
          */
         @SystemApi
+        @TestApi
         public static final String AUTOFILL_USER_DATA_MAX_USER_DATA_SIZE =
                 "autofill_user_data_max_user_data_size";
 
@@ -5355,6 +5356,7 @@ public final class Settings {
          * @hide
          */
         @SystemApi
+        @TestApi
         public static final String AUTOFILL_USER_DATA_MAX_FIELD_CLASSIFICATION_IDS_SIZE =
                 "autofill_user_data_max_field_classification_size";
 
@@ -5364,6 +5366,7 @@ public final class Settings {
          * @hide
          */
         @SystemApi
+        @TestApi
         public static final String AUTOFILL_USER_DATA_MAX_VALUE_LENGTH =
                 "autofill_user_data_max_value_length";
 
@@ -5373,6 +5376,7 @@ public final class Settings {
          * @hide
          */
         @SystemApi
+        @TestApi
         public static final String AUTOFILL_USER_DATA_MIN_VALUE_LENGTH =
                 "autofill_user_data_min_value_length";
 
