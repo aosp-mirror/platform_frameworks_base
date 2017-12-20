@@ -25,7 +25,8 @@
 #include <assert.h>
 #include <dlfcn.h>
 
-#include <GLES/gl.h>
+#include <GLES2/gl2.h>
+#include <GLES2/gl2ext.h>
 #include <ETC1/etc1.h>
 
 #include <SkBitmap.h>
@@ -639,6 +640,10 @@ static int checkFormat(SkColorType colorType, int format, int type)
                         return 0;
             }
             break;
+        case kRGBA_F16_SkColorType:
+            if (type == GL_HALF_FLOAT_OES && format == PIXEL_FORMAT_RGBA_FP16)
+                return 0;
+            break;
         default:
             break;
     }
@@ -656,6 +661,8 @@ static int getInternalFormat(SkColorType colorType)
             return GL_RGBA;
         case kRGB_565_SkColorType:
             return GL_RGB;
+        case kRGBA_F16_SkColorType:
+            return PIXEL_FORMAT_RGBA_FP16;
         default:
             return -1;
     }
@@ -672,6 +679,8 @@ static int getType(SkColorType colorType)
             return GL_UNSIGNED_BYTE;
         case kRGB_565_SkColorType:
             return GL_UNSIGNED_SHORT_5_6_5;
+        case kRGBA_F16_SkColorType:
+            return GL_HALF_FLOAT_OES;
         default:
             return -1;
     }
