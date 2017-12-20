@@ -168,12 +168,10 @@ public class EuiccManager {
     public static final String META_DATA_CARRIER_ICON = "android.telephony.euicc.carriericon";
 
     private final Context mContext;
-    private final IEuiccController mController;
 
     /** @hide */
     public EuiccManager(Context context) {
         mContext = context;
-        mController = IEuiccController.Stub.asInterface(ServiceManager.getService("econtroller"));
     }
 
     /**
@@ -189,7 +187,7 @@ public class EuiccManager {
     public boolean isEnabled() {
         // In the future, this may reach out to IEuiccController (if non-null) to check any dynamic
         // restrictions.
-        return mController != null;
+        return getIEuiccController() != null;
     }
 
     /**
@@ -206,7 +204,7 @@ public class EuiccManager {
             return null;
         }
         try {
-            return mController.getEid();
+            return getIEuiccController().getEid();
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
@@ -232,7 +230,7 @@ public class EuiccManager {
             return;
         }
         try {
-            mController.downloadSubscription(subscription, switchAfterDownload,
+            getIEuiccController().downloadSubscription(subscription, switchAfterDownload,
                     mContext.getOpPackageName(), callbackIntent);
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
@@ -296,7 +294,7 @@ public class EuiccManager {
             return;
         }
         try {
-            mController.continueOperation(resolutionIntent, resolutionExtras);
+            getIEuiccController().continueOperation(resolutionIntent, resolutionExtras);
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
@@ -328,7 +326,7 @@ public class EuiccManager {
             return;
         }
         try {
-            mController.getDownloadableSubscriptionMetadata(
+            getIEuiccController().getDownloadableSubscriptionMetadata(
                     subscription, mContext.getOpPackageName(), callbackIntent);
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
@@ -358,7 +356,7 @@ public class EuiccManager {
             return;
         }
         try {
-            mController.getDefaultDownloadableSubscriptionList(
+            getIEuiccController().getDefaultDownloadableSubscriptionList(
                     mContext.getOpPackageName(), callbackIntent);
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
@@ -377,7 +375,7 @@ public class EuiccManager {
             return null;
         }
         try {
-            return mController.getEuiccInfo();
+            return getIEuiccController().getEuiccInfo();
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
@@ -402,7 +400,7 @@ public class EuiccManager {
             return;
         }
         try {
-            mController.deleteSubscription(
+            getIEuiccController().deleteSubscription(
                     subscriptionId, mContext.getOpPackageName(), callbackIntent);
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
@@ -429,7 +427,7 @@ public class EuiccManager {
             return;
         }
         try {
-            mController.switchToSubscription(
+            getIEuiccController().switchToSubscription(
                     subscriptionId, mContext.getOpPackageName(), callbackIntent);
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
@@ -455,7 +453,8 @@ public class EuiccManager {
             return;
         }
         try {
-            mController.updateSubscriptionNickname(subscriptionId, nickname, callbackIntent);
+            getIEuiccController().updateSubscriptionNickname(
+                    subscriptionId, nickname, callbackIntent);
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
@@ -477,7 +476,7 @@ public class EuiccManager {
             return;
         }
         try {
-            mController.eraseSubscriptions(callbackIntent);
+            getIEuiccController().eraseSubscriptions(callbackIntent);
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
@@ -507,7 +506,7 @@ public class EuiccManager {
             return;
         }
         try {
-            mController.retainSubscriptionsForFactoryReset(callbackIntent);
+            getIEuiccController().retainSubscriptionsForFactoryReset(callbackIntent);
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
@@ -519,5 +518,9 @@ public class EuiccManager {
         } catch (PendingIntent.CanceledException e) {
             // Caller canceled the callback; do nothing.
         }
+    }
+
+    private static IEuiccController getIEuiccController() {
+        return IEuiccController.Stub.asInterface(ServiceManager.getService("econtroller"));
     }
 }
