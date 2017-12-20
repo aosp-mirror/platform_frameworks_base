@@ -180,6 +180,10 @@ public final class Slice implements Parcelable {
      * which can be retrieved to see the new state of the toggle.
      */
     public static final String SUBTYPE_TOGGLE = "toggle";
+    /**
+     * Subtype to tag an item representing priority.
+     */
+    public static final String SUBTYPE_PRIORITY = "priority";
 
     private final SliceItem[] mItems;
     private final @SliceHint String[] mHints;
