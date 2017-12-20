@@ -461,8 +461,10 @@ public final class PointerIcon implements Parcelable {
                     + "refer to a bitmap drawable.");
         }
 
+        final Bitmap bitmap = ((BitmapDrawable) drawable).getBitmap();
+        validateHotSpot(bitmap, hotSpotX, hotSpotY);
         // Set the properties now that we have successfully loaded the icon.
-        mBitmap = ((BitmapDrawable)drawable).getBitmap();
+        mBitmap = bitmap;
         mHotSpotX = hotSpotX;
         mHotSpotY = hotSpotY;
     }
