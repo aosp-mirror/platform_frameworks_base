@@ -952,7 +952,7 @@
     <string name="deleteText" msgid="6979668428458199034">"Избриши"</string>
     <string name="inputMethod" msgid="1653630062304567879">"Метод на внес"</string>
     <string name="editTextMenuTitle" msgid="4909135564941815494">"Дејства со текст"</string>
-    <string name="low_internal_storage_view_title" msgid="5576272496365684834">"Меморијата е речиси полна"</string>
+    <string name="low_internal_storage_view_title" msgid="5576272496365684834">"Капацитетот е речиси полн"</string>
     <string name="low_internal_storage_view_text" msgid="6640505817617414371">"Некои системски функции може да не работат"</string>
     <string name="low_internal_storage_view_text_no_boot" msgid="6935190099204693424">"Нема доволно меморија во системот. Проверете дали има слободен простор од 250 МБ и рестартирајте."</string>
     <string name="app_running_notification_title" msgid="8718335121060787914">"<xliff:g id="APP_NAME">%1$s</xliff:g> работи"</string>

@@ -1357,7 +1357,7 @@
     <string name="fingerprints" msgid="4516019619850763049">"Barmoq izlari:"</string>
     <string name="sha256_fingerprint" msgid="4391271286477279263">"SHA-256 barmoq izi:"</string>
     <string name="sha1_fingerprint" msgid="7930330235269404581">"SHA-1 barmoq izi:"</string>
-    <string name="activity_chooser_view_see_all" msgid="4292569383976636200">"Barchasini ko‘rish"</string>
+    <string name="activity_chooser_view_see_all" msgid="4292569383976636200">"Hammasi"</string>
     <string name="activity_chooser_view_dialog_title_default" msgid="4710013864974040615">"Harakat turini tanlang"</string>
     <string name="share_action_provider_share_with" msgid="5247684435979149216">"Ulashish"</string>
     <string name="sending" msgid="3245653681008218030">"Jo‘natilmoqda…"</string>
