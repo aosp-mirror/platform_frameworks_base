@@ -26,6 +26,7 @@
 using ::aapt::configuration::Abi;
 using ::aapt::configuration::AndroidSdk;
 using ::aapt::configuration::ConfiguredArtifact;
+using ::aapt::configuration::GetOrCreateGroup;
 using ::aapt::io::StringInputStream;
 using ::android::StringPiece;
 
@@ -227,6 +228,11 @@ ArtifactBuilder& ArtifactBuilder::SetName(const std::string& name) {
   return *this;
 }
 
+ArtifactBuilder& ArtifactBuilder::SetVersion(int version) {
+  artifact_.version = version;
+  return *this;
+}
+
 ArtifactBuilder& ArtifactBuilder::AddAbi(configuration::Abi abi) {
   artifact_.abis.push_back(abi);
   return *this;
@@ -249,6 +255,55 @@ ArtifactBuilder& ArtifactBuilder::SetAndroidSdk(int min_sdk) {
 
 configuration::OutputArtifact ArtifactBuilder::Build() {
   return artifact_;
+}
+
+PostProcessingConfigurationBuilder& PostProcessingConfigurationBuilder::AddAbiGroup(
+    const std::string& label, std::vector<configuration::Abi> abis) {
+  return AddGroup(label, &config_.abi_groups, std::move(abis));
+}
+
+PostProcessingConfigurationBuilder& PostProcessingConfigurationBuilder::AddDensityGroup(
+    const std::string& label, std::vector<std::string> densities) {
+  std::vector<ConfigDescription> configs;
+  for (const auto& density : densities) {
+    configs.push_back(test::ParseConfigOrDie(density));
+  }
+  return AddGroup(label, &config_.screen_density_groups, configs);
+}
+
+PostProcessingConfigurationBuilder& PostProcessingConfigurationBuilder::AddLocaleGroup(
+    const std::string& label, std::vector<std::string> locales) {
+  std::vector<ConfigDescription> configs;
+  for (const auto& locale : locales) {
+    configs.push_back(test::ParseConfigOrDie(locale));
+  }
+  return AddGroup(label, &config_.locale_groups, configs);
+}
+
+PostProcessingConfigurationBuilder& PostProcessingConfigurationBuilder::AddDeviceFeatureGroup(
+    const std::string& label) {
+  return AddGroup(label, &config_.device_feature_groups);
+}
+
+PostProcessingConfigurationBuilder& PostProcessingConfigurationBuilder::AddGlTextureGroup(
+    const std::string& label) {
+  return AddGroup(label, &config_.gl_texture_groups);
+}
+
+PostProcessingConfigurationBuilder& PostProcessingConfigurationBuilder::AddAndroidSdk(
+    std::string label, int min_sdk) {
+  config_.android_sdks[label] = AndroidSdk::ForMinSdk(min_sdk);
+  return *this;
+}
+
+PostProcessingConfigurationBuilder& PostProcessingConfigurationBuilder::AddArtifact(
+    configuration::ConfiguredArtifact artifact) {
+  config_.artifacts.push_back(std::move(artifact));
+  return *this;
+}
+
+configuration::PostProcessingConfiguration PostProcessingConfigurationBuilder::Build() {
+  return config_;
 }
 
 }  // namespace test

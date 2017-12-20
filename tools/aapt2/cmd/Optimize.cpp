@@ -377,43 +377,9 @@ int Optimize(const std::vector<StringPiece>& args) {
   }
 
   const std::string& apk_path = flags.GetArgs()[0];
-  std::unique_ptr<LoadedApk> apk = LoadedApk::LoadApkFromPath(apk_path, context.GetDiagnostics());
-  if (!apk) {
-    return 1;
-  }
 
   context.SetVerbose(verbose);
   IDiagnostics* diag = context.GetDiagnostics();
-
-  if (target_densities) {
-    // Parse the target screen densities.
-    for (const StringPiece& config_str : util::Tokenize(target_densities.value(), ',')) {
-      Maybe<uint16_t> target_density = ParseTargetDensityParameter(config_str, diag);
-      if (!target_density) {
-        return 1;
-      }
-      options.table_splitter_options.preferred_densities.push_back(target_density.value());
-    }
-  }
-
-  std::unique_ptr<IConfigFilter> filter;
-  if (!configs.empty()) {
-    filter = ParseConfigFilterParameters(configs, diag);
-    if (filter == nullptr) {
-      return 1;
-    }
-    options.table_splitter_options.config_filter = filter.get();
-  }
-
-  // Parse the split parameters.
-  for (const std::string& split_arg : split_args) {
-    options.split_paths.emplace_back();
-    options.split_constraints.emplace_back();
-    if (!ParseSplitParameter(split_arg, diag, &options.split_paths.back(),
-                             &options.split_constraints.back())) {
-      return 1;
-    }
-  }
 
   if (config_path) {
     std::string& path = config_path.value();
@@ -454,6 +420,41 @@ int Optimize(const std::vector<StringPiece>& args) {
   } else if (print_only) {
     diag->Error(DiagMessage() << "Asked to print artifacts without providing a configurations");
     return 1;
+  }
+
+  std::unique_ptr<LoadedApk> apk = LoadedApk::LoadApkFromPath(apk_path, context.GetDiagnostics());
+  if (!apk) {
+    return 1;
+  }
+
+  if (target_densities) {
+    // Parse the target screen densities.
+    for (const StringPiece& config_str : util::Tokenize(target_densities.value(), ',')) {
+      Maybe<uint16_t> target_density = ParseTargetDensityParameter(config_str, diag);
+      if (!target_density) {
+        return 1;
+      }
+      options.table_splitter_options.preferred_densities.push_back(target_density.value());
+    }
+  }
+
+  std::unique_ptr<IConfigFilter> filter;
+  if (!configs.empty()) {
+    filter = ParseConfigFilterParameters(configs, diag);
+    if (filter == nullptr) {
+      return 1;
+    }
+    options.table_splitter_options.config_filter = filter.get();
+  }
+
+  // Parse the split parameters.
+  for (const std::string& split_arg : split_args) {
+    options.split_paths.emplace_back();
+    options.split_constraints.emplace_back();
+    if (!ParseSplitParameter(split_arg, diag, &options.split_paths.back(),
+                             &options.split_constraints.back())) {
+      return 1;
+    }
   }
 
   if (options.table_flattener_options.collapse_key_stringpool) {
