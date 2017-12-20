@@ -63,6 +63,7 @@ import android.os.SELinux;
 import android.os.ServiceManager;
 import android.os.ShellCallback;
 import android.os.ShellCommand;
+import android.os.SystemClock;
 import android.os.SystemProperties;
 import android.os.UserHandle;
 import android.os.UserManager;
@@ -79,6 +80,7 @@ import android.util.Slog;
 import android.util.SparseArray;
 import android.util.SparseBooleanArray;
 import android.util.SparseIntArray;
+import android.util.SparseLongArray;
 import android.util.TimeUtils;
 import android.util.Xml;
 
@@ -241,8 +243,7 @@ public class UserManagerService extends IUserManager.Stub {
     private static final IBinder mUserRestriconToken = new Binder();
 
     /**
-     * User-related information that is used for persisting to flash. Only UserInfo is
-     * directly exposed to other system apps.
+     * Internal non-parcelable wrapper for UserInfo that is not exposed to other system apps.
      */
     @VisibleForTesting
     static class UserData {
@@ -259,6 +260,12 @@ public class UserManagerService extends IUserManager.Stub {
         PersistableBundle seedAccountOptions;
         // Whether to perist the seed account information to be available after a boot
         boolean persistSeedData;
+
+        /** Elapsed realtime since boot when the user started. */
+        long startRealtime;
+
+        /** Elapsed realtime since boot when the user was unlocked. */
+        long unlockRealtime;
 
         void clearSeedAccountData() {
             seedAccountName = null;
@@ -451,6 +458,37 @@ public class UserManagerService extends IUserManager.Stub {
         public void onBootPhase(int phase) {
             if (phase == SystemService.PHASE_ACTIVITY_MANAGER_READY) {
                 mUms.cleanupPartialUsers();
+            }
+        }
+
+        @Override
+        public void onStartUser(int userHandle) {
+            synchronized (mUms.mUsersLock) {
+                final UserData user = mUms.getUserDataLU(userHandle);
+                if (user != null) {
+                    user.startRealtime = SystemClock.elapsedRealtime();
+                }
+            }
+        }
+
+        @Override
+        public void onUnlockUser(int userHandle) {
+            synchronized (mUms.mUsersLock) {
+                final UserData user = mUms.getUserDataLU(userHandle);
+                if (user != null) {
+                    user.unlockRealtime = SystemClock.elapsedRealtime();
+                }
+            }
+        }
+
+        @Override
+        public void onStopUser(int userHandle) {
+            synchronized (mUms.mUsersLock) {
+                final UserData user = mUms.getUserDataLU(userHandle);
+                if (user != null) {
+                    user.startRealtime = 0;
+                    user.unlockRealtime = 0;
+                }
             }
         }
     }
@@ -1055,6 +1093,29 @@ public class UserManagerService extends IUserManager.Stub {
     public boolean isUserRunning(int userId) {
         checkManageOrInteractPermIfCallerInOtherProfileGroup(userId, "isUserRunning");
         return mLocalService.isUserRunning(userId);
+    }
+
+    @Override
+    public long getUserStartRealtime() {
+        final int userId = UserHandle.getUserId(Binder.getCallingUid());
+        synchronized (mUsersLock) {
+            final UserData user = getUserDataLU(userId);
+            if (user != null) {
+                return user.startRealtime;
+            }
+            return 0;
+        }
+    }
+
+    @Override
+    public long getUserUnlockRealtime() {
+        synchronized (mUsersLock) {
+            final UserData user = getUserDataLU(UserHandle.getUserId(Binder.getCallingUid()));
+            if (user != null) {
+                return user.unlockRealtime;
+            }
+            return 0;
+        }
     }
 
     private void checkManageOrInteractPermIfCallerInOtherProfileGroup(int userId, String name) {
@@ -3484,6 +3545,7 @@ public class UserManagerService extends IUserManager.Stub {
         if (!DumpUtils.checkDumpPermission(mContext, LOG_TAG, pw)) return;
 
         long now = System.currentTimeMillis();
+        final long nowRealtime = SystemClock.elapsedRealtime();
         StringBuilder sb = new StringBuilder();
         synchronized (mPackagesLock) {
             synchronized (mUsersLock) {
@@ -3511,25 +3573,20 @@ public class UserManagerService extends IUserManager.Stub {
                     }
                     pw.println(UserState.stateToString(state));
                     pw.print("    Created: ");
-                    if (userInfo.creationTime == 0) {
-                        pw.println("<unknown>");
-                    } else {
-                        sb.setLength(0);
-                        TimeUtils.formatDuration(now - userInfo.creationTime, sb);
-                        sb.append(" ago");
-                        pw.println(sb);
-                    }
+                    dumpTimeAgo(pw, sb, now, userInfo.creationTime);
+
                     pw.print("    Last logged in: ");
-                    if (userInfo.lastLoggedInTime == 0) {
-                        pw.println("<unknown>");
-                    } else {
-                        sb.setLength(0);
-                        TimeUtils.formatDuration(now - userInfo.lastLoggedInTime, sb);
-                        sb.append(" ago");
-                        pw.println(sb);
-                    }
+                    dumpTimeAgo(pw, sb, now, userInfo.lastLoggedInTime);
+
                     pw.print("    Last logged in fingerprint: ");
                     pw.println(userInfo.lastLoggedInFingerprint);
+
+                    pw.print("    Start time: ");
+                    dumpTimeAgo(pw, sb, nowRealtime, userData.startRealtime);
+
+                    pw.print("    Unlock time: ");
+                    dumpTimeAgo(pw, sb, nowRealtime, userData.unlockRealtime);
+
                     pw.print("    Has profile owner: ");
                     pw.println(mIsUserManaged.get(userId));
                     pw.println("    Restrictions:");
@@ -3590,6 +3647,17 @@ public class UserManagerService extends IUserManager.Stub {
             pw.println("  Supports switchable users: " + UserManager.supportsMultipleUsers());
             pw.println("  All guests ephemeral: " + Resources.getSystem().getBoolean(
                     com.android.internal.R.bool.config_guestUserEphemeral));
+        }
+    }
+
+    private static void dumpTimeAgo(PrintWriter pw, StringBuilder sb, long nowTime, long time) {
+        if (time == 0) {
+            pw.println("<unknown>");
+        } else {
+            sb.setLength(0);
+            TimeUtils.formatDuration(nowTime - time, sb);
+            sb.append(" ago");
+            pw.println(sb);
         }
     }
 
