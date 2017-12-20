@@ -25,6 +25,9 @@ import android.os.RemoteException;
 import android.util.Log;
 import android.util.Slog;
 import android.util.SparseArray;
+import android.util.SparseBooleanArray;
+
+import com.android.internal.annotations.GuardedBy;
 
 public class SyncJobService extends JobService {
     private static final String TAG = "SyncManager";
@@ -32,7 +35,14 @@ public class SyncJobService extends JobService {
     public static final String EXTRA_MESSENGER = "messenger";
 
     private Messenger mMessenger;
-    private SparseArray<JobParameters> jobParamsMap = new SparseArray<JobParameters>();
+
+    private final Object mLock = new Object();
+
+    @GuardedBy("mLock")
+    private final SparseArray<JobParameters> mJobParamsMap = new SparseArray<>();
+
+    @GuardedBy("mLock")
+    private final SparseBooleanArray mStartedSyncs = new SparseBooleanArray();
 
     private final SyncLogger mLogger = SyncLogger.getInstance();
 
@@ -69,8 +79,10 @@ public class SyncJobService extends JobService {
         mLogger.purgeOldLogs();
 
         boolean isLoggable = Log.isLoggable(TAG, Log.VERBOSE);
-        synchronized (jobParamsMap) {
-            jobParamsMap.put(params.getJobId(), params);
+        synchronized (mLock) {
+            final int jobId = params.getJobId();
+            mJobParamsMap.put(jobId, params);
+            mStartedSyncs.delete(jobId);
         }
         Message m = Message.obtain();
         m.what = SyncManager.SyncHandler.MESSAGE_START_SYNC;
@@ -97,8 +109,18 @@ public class SyncJobService extends JobService {
                     + params.getStopReason());
         }
         mLogger.log("onStopJob() ", mLogger.jobParametersToString(params));
-        synchronized (jobParamsMap) {
-            jobParamsMap.remove(params.getJobId());
+        synchronized (mLock) {
+            final int jobId = params.getJobId();
+            mJobParamsMap.remove(jobId);
+
+            if (!mStartedSyncs.get(jobId)) {
+                final String message = "Job " + jobId + " didn't start: params=" +
+                        jobParametersToString(params);
+                mLogger.log(message);
+                Slog.wtf(TAG, message);
+            }
+
+            mStartedSyncs.delete(jobId);
         }
         Message m = Message.obtain();
         m.what = SyncManager.SyncHandler.MESSAGE_STOP_SYNC;
@@ -117,8 +139,8 @@ public class SyncJobService extends JobService {
     }
 
     public void callJobFinished(int jobId, boolean needsReschedule, String why) {
-        synchronized (jobParamsMap) {
-            JobParameters params = jobParamsMap.get(jobId);
+        synchronized (mLock) {
+            JobParameters params = mJobParamsMap.get(jobId);
             mLogger.log("callJobFinished()",
                     " jobid=", jobId,
                     " needsReschedule=", needsReschedule,
@@ -126,10 +148,25 @@ public class SyncJobService extends JobService {
                     " why=", why);
             if (params != null) {
                 jobFinished(params, needsReschedule);
-                jobParamsMap.remove(jobId);
+                mJobParamsMap.remove(jobId);
             } else {
                 Slog.e(TAG, "Job params not found for " + String.valueOf(jobId));
             }
+        }
+    }
+
+    public void markSyncStarted(int jobId) {
+        synchronized (mLock) {
+            mStartedSyncs.put(jobId, true);
+        }
+    }
+
+    public static String jobParametersToString(JobParameters params) {
+        if (params == null) {
+            return "job:null";
+        } else {
+            return "job:#" + params.getJobId() + ":"
+                    + SyncOperation.maybeCreateFromJobExtras(params.getExtras());
         }
     }
 }

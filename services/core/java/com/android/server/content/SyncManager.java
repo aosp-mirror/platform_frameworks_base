@@ -2898,6 +2898,8 @@ public class SyncManager {
             final boolean isLoggable = Log.isLoggable(TAG, Log.VERBOSE);
             if (isLoggable) Slog.v(TAG, op.toString());
 
+            mSyncJobService.markSyncStarted(op.jobId);
+
             if (mStorageIsLow) {
                 deferSyncH(op, SYNC_DELAY_ON_LOW_STORAGE, "storage low");
                 return;
