@@ -3445,7 +3445,7 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
                 final int windowCount = mWindows.size();
                 for (int i = 0; i < windowCount; i++) {
                     AccessibilityWindowInfo window = mWindows.get(i);
-                    if (window.inPictureInPicture()) {
+                    if (window.isInPictureInPictureMode()) {
                         return window;
                     }
                 }
