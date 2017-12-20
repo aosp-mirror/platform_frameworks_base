@@ -643,6 +643,7 @@ int AndroidRuntime::startVm(JavaVM** pJavaVM, JNIEnv** pEnv, bool zygote)
     char methodTraceFileBuf[sizeof("-Xmethod-trace-file:") + PROPERTY_VALUE_MAX];
     char methodTraceFileSizeBuf[sizeof("-Xmethod-trace-file-size:") + PROPERTY_VALUE_MAX];
     std::string fingerprintBuf;
+    char jdwpProviderBuf[sizeof("-XjdwpProvider:") - 1 + PROPERTY_VALUE_MAX];
 
     bool checkJni = false;
     property_get("dalvik.vm.checkjni", propBuf, "");
@@ -765,8 +766,14 @@ int AndroidRuntime::startVm(JavaVM** pJavaVM, JNIEnv** pEnv, bool zygote)
      * Set suspend=y to pause during VM init and use android ADB transport.
      */
     if (zygote) {
-      addOption("-agentlib:jdwp=transport=dt_android_adb,suspend=n,server=y");
+      addOption("-XjdwpOptions:suspend=n,server=y");
     }
+
+    // Set the JDWP provider. By default let the runtime choose.
+    parseRuntimeOption("dalvik.vm.jdwp-provider",
+                       jdwpProviderBuf,
+                       "-XjdwpProvider:",
+                       "default");
 
     parseRuntimeOption("dalvik.vm.lockprof.threshold",
                        lockProfThresholdBuf,
