@@ -69,7 +69,7 @@
     <string name="compat_mode_off" msgid="4434467572461327898">"स्क्रिन भर्न तन्काउनुहोस्"</string>
     <string name="screenshot_saving_ticker" msgid="7403652894056693515">"स्क्रिनसट बचत गर्दै…"</string>
     <string name="screenshot_saving_title" msgid="8242282144535555697">"स्क्रिनसट बचत गर्दै…"</string>
-    <string name="screenshot_saving_text" msgid="2419718443411738818">"स्क्रिनसट बचत हुँदै छ।"</string>
+    <string name="screenshot_saving_text" msgid="2419718443411738818">"स्क्रिनसट बचत हुँदैछ।"</string>
     <string name="screenshot_saved_title" msgid="6461865960961414961">"स्क्रिनसट क्याप्चर गरियो।"</string>
     <string name="screenshot_saved_text" msgid="2685605830386712477">"आफ्नो स्क्रिनसट हेर्न ट्याप गर्नुहोस्।"</string>
     <string name="screenshot_failed_title" msgid="705781116746922771">"स्क्रिनसट क्याप्चर गर्न सकिएन।"</string>

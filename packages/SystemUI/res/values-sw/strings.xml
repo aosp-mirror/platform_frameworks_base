@@ -71,7 +71,7 @@
     <string name="screenshot_saving_title" msgid="8242282144535555697">"Inahifadhi picha ya skrini..."</string>
     <string name="screenshot_saving_text" msgid="2419718443411738818">"Picha ya skrini inahifadhiwa"</string>
     <string name="screenshot_saved_title" msgid="6461865960961414961">"Picha ya skrini imenaswa."</string>
-    <string name="screenshot_saved_text" msgid="2685605830386712477">"Gonga ili utazame picha ya skrini uliyohifadhi."</string>
+    <string name="screenshot_saved_text" msgid="2685605830386712477">"Gusa ili utazame picha ya skrini uliyohifadhi."</string>
     <string name="screenshot_failed_title" msgid="705781116746922771">"Haikuweza kunasa picha ya skrini"</string>
     <string name="screenshot_failed_to_save_unknown_text" msgid="7887826345701753830">"Hitilafu imetokea wakati wa kuhifadhi picha ya skrini."</string>
     <string name="screenshot_failed_to_save_text" msgid="2592658083866306296">"Haina nafasi ya kutosha kuhifadhi picha ya skrini."</string>
@@ -320,8 +320,8 @@
     <string name="quick_settings_cellular_detail_data_warning" msgid="2440098045692399009">"Onyo <xliff:g id="DATA_LIMIT">%s</xliff:g>"</string>
     <string name="quick_settings_work_mode_label" msgid="6244915274350490429">"Hali ya kazi"</string>
     <string name="quick_settings_night_display_label" msgid="3577098011487644395">"Mwanga wa Usiku"</string>
-    <string name="quick_settings_night_display_summary_on" msgid="1814901757887526769">"Umewasha hali ya Mwanga wa Usiku, gonga ili uizime"</string>
-    <string name="quick_settings_night_display_summary_off" msgid="7892102914128777905">"Umezima hali ya Mwanga wa Usiku, gonga ili uiwashe"</string>
+    <string name="quick_settings_night_display_summary_on" msgid="1814901757887526769">"Umewasha hali ya Mwanga wa Usiku, gusa ili uizime"</string>
+    <string name="quick_settings_night_display_summary_off" msgid="7892102914128777905">"Umezima hali ya Mwanga wa Usiku, gusa ili uiwashe"</string>
     <string name="recents_empty_message" msgid="808480104164008572">"Hakuna vipengee vya hivi karibuni"</string>
     <string name="recents_empty_message_dismissed_all" msgid="2791312568666558651">"Umeondoa vipengee vyote"</string>
     <string name="recents_app_info_button_label" msgid="2890317189376000030">"Maelezo ya Programu"</string>
@@ -351,7 +351,7 @@
     <string name="zen_silence_introduction" msgid="3137882381093271568">"Hatua hii huzuia sauti na mitetemo YOTE, ikiwa ni pamoja na ile inayotokana na kengele, muziki, video na michezo."</string>
     <string name="keyguard_more_overflow_text" msgid="9195222469041601365">"<xliff:g id="NUMBER_OF_NOTIFICATIONS">%d</xliff:g>+"</string>
     <string name="speed_bump_explanation" msgid="1288875699658819755">"Arifa zisizo za dharura sana ziko hapo chini"</string>
-    <string name="notification_tap_again" msgid="7590196980943943842">"Gonga tena ili ufungue"</string>
+    <string name="notification_tap_again" msgid="7590196980943943842">"Gusa tena ili ufungue"</string>
     <string name="keyguard_unlock" msgid="8043466894212841998">"Telezesha kidole ili ufungue"</string>
     <string name="phone_hint" msgid="4872890986869209950">"Telezesha kidole kutoka kwa aikoni ili ufikie simu"</string>
     <string name="voice_hint" msgid="8939888732119726665">"Telezesha kidole kutoka aikoni ili upate mapendekezo ya sauti"</string>
@@ -441,7 +441,7 @@
     <string name="volumeui_prompt_allow" msgid="7954396902482228786">"Ruhusu"</string>
     <string name="volumeui_prompt_deny" msgid="5720663643411696731">"Kataa"</string>
     <string name="volumeui_notification_title" msgid="4906770126345910955">"<xliff:g id="APP_NAME">%1$s</xliff:g> ni mazungumzo ya sauti"</string>
-    <string name="volumeui_notification_text" msgid="8819536904234337445">"Gonga ili urejeshe picha ya asili."</string>
+    <string name="volumeui_notification_text" msgid="8819536904234337445">"Gusa ili urejeshe picha ya asili."</string>
     <string name="managed_profile_foreground_toast" msgid="5421487114739245972">"Unatumia wasifu wako wa kazini"</string>
   <string-array name="volume_stream_titles">
     <item msgid="5841843895402729630">"Piga simu"</item>
@@ -455,9 +455,9 @@
     <item msgid="150349973435223405"></item>
     <item msgid="6761963760295549099"></item>
   </string-array>
-    <string name="volume_stream_content_description_unmute" msgid="4436631538779230857">"%1$s. Gonga ili urejeshe."</string>
-    <string name="volume_stream_content_description_vibrate" msgid="1187944970457807498">"%1$s. Gonga ili uweke mtetemo. Huenda ikakomesha huduma za zana za walio na matatizo ya kuona au kusikia."</string>
-    <string name="volume_stream_content_description_mute" msgid="3625049841390467354">"%1$s. Gonga ili ukomeshe. Huenda ikakomesha huduma za zana za walio na matatizo ya kuona au kusikia."</string>
+    <string name="volume_stream_content_description_unmute" msgid="4436631538779230857">"%1$s. Gusa ili urejeshe."</string>
+    <string name="volume_stream_content_description_vibrate" msgid="1187944970457807498">"%1$s. Gusa ili uweke mtetemo. Huenda ikakomesha huduma za zana za walio na matatizo ya kuona au kusikia."</string>
+    <string name="volume_stream_content_description_mute" msgid="3625049841390467354">"%1$s. Gusa ili ukomeshe. Huenda ikakomesha huduma za zana za walio na matatizo ya kuona au kusikia."</string>
     <string name="volume_dialog_accessibility_shown_message" msgid="1834631467074259998">"Inaonyesha %s ya vidhibiti vya sauti. Telezesha kidole juu ili uondoe."</string>
     <string name="volume_dialog_accessibility_dismissed_message" msgid="51543526013711399">"Imeficha vidhibiti vya sauti"</string>
     <string name="system_ui_tuner" msgid="708224127392452018">"Kirekebishi cha kiolesura cha mfumo"</string>
@@ -629,9 +629,9 @@
     <string name="accessibility_action_divider_top_50" msgid="6385859741925078668">"Juu 50%"</string>
     <string name="accessibility_action_divider_top_30" msgid="6201455163864841205">"Juu 30%"</string>
     <string name="accessibility_action_divider_bottom_full" msgid="301433196679548001">"Skrini nzima ya chini"</string>
-    <string name="accessibility_qs_edit_tile_label" msgid="8374924053307764245">"Nafasi ya <xliff:g id="POSITION">%1$d</xliff:g>, <xliff:g id="TILE_NAME">%2$s</xliff:g>. Gonga mara mbili ili ubadilishe."</string>
-    <string name="accessibility_qs_edit_add_tile_label" msgid="8133209638023882667">"<xliff:g id="TILE_NAME">%1$s</xliff:g>. Gonga mara mbili ili uongeze."</string>
-    <string name="accessibility_qs_edit_position_label" msgid="5055306305919289819">"Nafasi ya <xliff:g id="POSITION">%1$d</xliff:g>. Gonga mara mbili ili uchague."</string>
+    <string name="accessibility_qs_edit_tile_label" msgid="8374924053307764245">"Nafasi ya <xliff:g id="POSITION">%1$d</xliff:g>, <xliff:g id="TILE_NAME">%2$s</xliff:g>. Gusa mara mbili ili ubadilishe."</string>
+    <string name="accessibility_qs_edit_add_tile_label" msgid="8133209638023882667">"<xliff:g id="TILE_NAME">%1$s</xliff:g>. Gusa mara mbili ili uongeze."</string>
+    <string name="accessibility_qs_edit_position_label" msgid="5055306305919289819">"Nafasi ya <xliff:g id="POSITION">%1$d</xliff:g>. Gusa mara mbili ili uchague."</string>
     <string name="accessibility_qs_edit_move_tile" msgid="2461819993780159542">"Hamisha <xliff:g id="TILE_NAME">%1$s</xliff:g>"</string>
     <string name="accessibility_qs_edit_remove_tile" msgid="7484493384665907197">"Ondoa <xliff:g id="TILE_NAME">%1$s</xliff:g>"</string>
     <string name="accessibility_qs_edit_tile_added" msgid="8050200862063548309">"<xliff:g id="TILE_NAME">%1$s</xliff:g> imeongezwa kwenye nafasi ya <xliff:g id="POSITION">%2$d</xliff:g>"</string>

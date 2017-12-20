@@ -396,7 +396,7 @@
     <string name="battery_saver_notification_title" msgid="237918726750955859">"Estalvi de bateria activat"</string>
     <string name="battery_saver_notification_text" msgid="820318788126672692">"Redueix el rendiment i l\'ús de les dades en segon pla."</string>
     <string name="battery_saver_notification_action_text" msgid="109158658238110382">"Desactiva l\'estalvi de bateria"</string>
-    <string name="media_projection_dialog_text" msgid="3071431025448218928">"<xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g> començarà a enregistrar tot el que es mostri a la pantalla."</string>
+    <string name="media_projection_dialog_text" msgid="3071431025448218928">"<xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g> començarà a gravar tot el que es mostri a la pantalla."</string>
     <string name="media_projection_remember_text" msgid="3103510882172746752">"No ho tornis a mostrar"</string>
     <string name="clear_all_notifications_text" msgid="814192889771462828">"Esborra-ho tot"</string>
     <string name="media_projection_action_text" msgid="8470872969457985954">"Comença ara"</string>
@@ -523,7 +523,7 @@
     <string name="notification_more_settings" msgid="816306283396553571">"Més opcions"</string>
     <string name="notification_done" msgid="5279426047273930175">"Fet"</string>
     <string name="notification_gear_accessibility" msgid="94429150213089611">"Controls de notificació de l\'aplicació <xliff:g id="APP_NAME">%1$s</xliff:g>"</string>
-    <string name="battery_panel_title" msgid="7944156115535366613">"Ús de la bateria"</string>
+    <string name="battery_panel_title" msgid="7944156115535366613">"Consum de la bateria"</string>
     <string name="battery_detail_charging_summary" msgid="1279095653533044008">"La funció Estalvi de bateria no està disponible durant la càrrega"</string>
     <string name="battery_detail_switch_title" msgid="6285872470260795421">"Estalvi de bateria"</string>
     <string name="battery_detail_switch_summary" msgid="9049111149407626804">"Redueix el rendiment i les dades en segon pla"</string>

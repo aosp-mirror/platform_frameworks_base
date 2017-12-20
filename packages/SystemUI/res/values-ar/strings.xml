@@ -431,7 +431,7 @@
     <string name="monitoring_description_vpn_app_device_owned" msgid="4970443827043261703">"تتم إدارة جهازك عن طريق <xliff:g id="ORGANIZATION">%1$s</xliff:g>.\n\nيمكن للمشرف مراقبة وإدارة كل من الإعدادات والوصول إلى الشركة والتطبيقات والبيانات المرتبطة بجهازك ومعلومات الموقع لجهازك.\n\nأنت متصل بـ <xliff:g id="APPLICATION">%2$s</xliff:g>، الذي يمكنه مراقبة أنشطتك على الشبكة، بما في ذلك الرسائل الإلكترونية والتطبيقات ومواقع الويب.\n\nللمزيد من المعلومات، اتصل بالمشرف."</string>
     <string name="keyguard_indication_trust_disabled" msgid="7412534203633528135">"سيظل الجهاز مقفلاً إلى أن يتم إلغاء قفله يدويًا"</string>
     <string name="hidden_notifications_title" msgid="7139628534207443290">"الحصول على الإشعارات بشكل أسرع"</string>
-    <string name="hidden_notifications_text" msgid="2326409389088668981">"الاطلاع عليها قبل إلغاء القفل"</string>
+    <string name="hidden_notifications_text" msgid="2326409389088668981">"الاطّلاع عليها قبل إلغاء القفل"</string>
     <string name="hidden_notifications_cancel" msgid="3690709735122344913">"لا، شكرًا"</string>
     <string name="hidden_notifications_setup" msgid="41079514801976810">"إعداد"</string>
     <string name="zen_mode_and_condition" msgid="4462471036429759903">"<xliff:g id="ZEN_MODE">%1$s</xliff:g>. <xliff:g id="EXIT_CONDITION">%2$s</xliff:g>"</string>
