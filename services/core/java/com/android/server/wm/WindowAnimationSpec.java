@@ -17,8 +17,11 @@
 package com.android.server.wm;
 
 import static com.android.server.wm.AnimationAdapter.STATUS_BAR_TRANSITION_DURATION;
+import static com.android.server.wm.WindowStateAnimator.STACK_CLIP_AFTER_ANIM;
+import static com.android.server.wm.WindowStateAnimator.STACK_CLIP_NONE;
 
 import android.graphics.Point;
+import android.graphics.Rect;
 import android.os.SystemClock;
 import android.view.SurfaceControl;
 import android.view.SurfaceControl.Transaction;
@@ -39,11 +42,25 @@ public class WindowAnimationSpec implements AnimationSpec {
     private final Point mPosition = new Point();
     private final ThreadLocal<TmpValues> mThreadLocalTmps = ThreadLocal.withInitial(TmpValues::new);
     private final boolean mCanSkipFirstFrame;
+    private final Rect mStackBounds = new Rect();
+    private int mStackClipMode;
+    private final Rect mTmpRect = new Rect();
 
     public WindowAnimationSpec(Animation animation, Point position, boolean canSkipFirstFrame)  {
+        this(animation, position, null /* stackBounds */, canSkipFirstFrame, STACK_CLIP_NONE);
+    }
+
+    public WindowAnimationSpec(Animation animation, Point position, Rect stackBounds,
+            boolean canSkipFirstFrame, int stackClipMode) {
         mAnimation = animation;
-        mPosition.set(position.x, position.y);
+        if (position != null) {
+            mPosition.set(position.x, position.y);
+        }
         mCanSkipFirstFrame = canSkipFirstFrame;
+        mStackClipMode = stackClipMode;
+        if (stackBounds != null) {
+            mStackBounds.set(stackBounds);
+        }
     }
 
     @Override
@@ -69,7 +86,16 @@ public class WindowAnimationSpec implements AnimationSpec {
         tmp.transformation.getMatrix().postTranslate(mPosition.x, mPosition.y);
         t.setMatrix(leash, tmp.transformation.getMatrix(), tmp.floats);
         t.setAlpha(leash, tmp.transformation.getAlpha());
-        t.setWindowCrop(leash, tmp.transformation.getClipRect());
+        if (mStackClipMode == STACK_CLIP_NONE) {
+            t.setWindowCrop(leash, tmp.transformation.getClipRect());
+        } else if (mStackClipMode == STACK_CLIP_AFTER_ANIM) {
+            t.setFinalCrop(leash, mStackBounds);
+            t.setWindowCrop(leash, tmp.transformation.getClipRect());
+        } else {
+            mTmpRect.set(tmp.transformation.getClipRect());
+            mTmpRect.intersect(mStackBounds);
+            t.setWindowCrop(leash, mTmpRect);
+        }
     }
 
     @Override

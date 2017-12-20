@@ -222,6 +222,7 @@ class AppWindowToken extends WindowToken implements WindowManagerService.AppFree
     private boolean mNeedsZBoost;
 
     private final Point mTmpPoint = new Point();
+    private final Rect mTmpRect = new Rect();
 
     AppWindowToken(WindowManagerService service, IApplicationToken token, boolean voiceInteraction,
             DisplayContent dc, long inputDispatchingTimeoutNanos, boolean fullscreen,
@@ -1536,12 +1537,15 @@ class AppWindowToken extends WindowToken implements WindowManagerService.AppFree
             if (a != null) {
                 final TaskStack stack = getStack();
                 mTmpPoint.set(0, 0);
+                mTmpRect.setEmpty();
                 if (stack != null) {
                     stack.getRelativePosition(mTmpPoint);
+                    stack.getBounds(mTmpRect);
                 }
                 final AnimationAdapter adapter = new LocalAnimationAdapter(
-                        new WindowAnimationSpec(a, mTmpPoint,
-                                mService.mAppTransition.canSkipFirstFrame()),
+                        new WindowAnimationSpec(a, mTmpPoint, mTmpRect,
+                                mService.mAppTransition.canSkipFirstFrame(),
+                                mService.mAppTransition.getAppStackClipMode()),
                         mService.mSurfaceAnimationRunner);
                 if (a.getZAdjustment() == Animation.ZORDER_TOP) {
                     mNeedsZBoost = true;
@@ -1549,7 +1553,6 @@ class AppWindowToken extends WindowToken implements WindowManagerService.AppFree
                 startAnimation(getPendingTransaction(), adapter, !isVisible());
                 mTransit = transit;
                 mTransitFlags = mService.mAppTransition.getTransitFlags();
-                // TODO: Skip first frame and app stack clip mode.
             }
         } else {
             cancelAnimation();

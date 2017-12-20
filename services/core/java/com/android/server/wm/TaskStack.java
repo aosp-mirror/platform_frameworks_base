@@ -320,7 +320,7 @@ public class TaskStack extends WindowContainer<Task> implements
         if (matchParentBounds()
                 || !inSplitScreenSecondaryWindowingMode()
                 || mDisplayContent == null
-                || mDisplayContent.getSplitScreenPrimaryStack() != null) {
+                || mDisplayContent.getSplitScreenPrimaryStackIgnoringVisibility() != null) {
             return true;
         }
         return false;
