@@ -34,7 +34,7 @@ import java.util.concurrent.TimeoutException;
  * through the ContextHubManager APIs. The caller can either retrieve the result
  * synchronously through a blocking call ({@link #waitForResponse(long, TimeUnit)}) or
  * asynchronously through a user-defined callback
- * ({@link #setCallbackOnComplete(ContextHubTransaction.Callback, Handler)}).
+ * ({@link #setOnCompleteCallback(ContextHubTransaction.Callback, Handler)}).
  *
  * @param <T> the type of the contents in the transaction response
  *
@@ -271,7 +271,7 @@ public class ContextHubTransaction<T> {
      * A transaction can be invalidated if the process owning the transaction is no longer active
      * and the reference to this object is lost.
      *
-     * This method or {@link #setCallbackOnComplete(ContextHubTransaction.Callback)} can only be
+     * This method or {@link #setOnCompleteCallback(ContextHubTransaction.Callback)} can only be
      * invoked once, or an IllegalStateException will be thrown.
      *
      * @param callback the callback to be invoked upon completion
@@ -280,7 +280,7 @@ public class ContextHubTransaction<T> {
      * @throws IllegalStateException if this method is called multiple times
      * @throws NullPointerException if the callback or handler is null
      */
-    public void setCallbackOnComplete(
+    public void setOnCompleteCallback(
             @NonNull ContextHubTransaction.Callback<T> callback, @NonNull Handler handler) {
         synchronized (this) {
             if (callback == null) {
@@ -312,10 +312,10 @@ public class ContextHubTransaction<T> {
     /**
      * Sets a callback to be invoked when the transaction completes.
      *
-     * Equivalent to {@link #setCallbackOnComplete(ContextHubTransaction.Callback, Handler)}
+     * Equivalent to {@link #setOnCompleteCallback(ContextHubTransaction.Callback, Handler)}
      * with the handler being that of the main thread's Looper.
      *
-     * This method or {@link #setCallbackOnComplete(ContextHubTransaction.Callback, Handler)}
+     * This method or {@link #setOnCompleteCallback(ContextHubTransaction.Callback, Handler)}
      * can only be invoked once, or an IllegalStateException will be thrown.
      *
      * @param callback the callback to be invoked upon completion
@@ -323,8 +323,8 @@ public class ContextHubTransaction<T> {
      * @throws IllegalStateException if this method is called multiple times
      * @throws NullPointerException if the callback is null
      */
-    public void setCallbackOnComplete(@NonNull ContextHubTransaction.Callback<T> callback) {
-        setCallbackOnComplete(callback, new Handler(Looper.getMainLooper()));
+    public void setOnCompleteCallback(@NonNull ContextHubTransaction.Callback<T> callback) {
+        setOnCompleteCallback(callback, new Handler(Looper.getMainLooper()));
     }
 
     /**
