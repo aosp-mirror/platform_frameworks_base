@@ -60,4 +60,9 @@
         <item>2</item>
         <item>3</item>
     </integer-array>
+
+    <overlayable>
+        <item type="string" name="test2" />
+        <item type="array" name="integerArray1" />
+    </overlayable>
 </resources>
