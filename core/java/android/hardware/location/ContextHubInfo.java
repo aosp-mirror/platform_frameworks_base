@@ -275,8 +275,6 @@ public class ContextHubInfo implements Parcelable {
         retVal += ", StoppedPowerDraw : " + mStoppedPowerDrawMw + " mW";
         retVal += ", PeakPowerDraw : " + mPeakPowerDrawMw + " mW";
         retVal += ", MaxPacketLength : " + mMaxPacketLengthBytes + " Bytes";
-        retVal += "\n\tSupported sensors : " + Arrays.toString(mSupportedSensors);
-        retVal += "\n\tMemory Regions : " + Arrays.toString(mMemoryRegions);
 
         return retVal;
     }

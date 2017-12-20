@@ -27,15 +27,13 @@ import libcore.util.EmptyArray;
  * Describes an instance of a nanoapp, used by the internal state manged by ContextHubService.
  *
  * TODO(b/69270990) Remove this class once the old API is deprecated.
- * TODO(b/70624255) Clean up toString() by removing unnecessary fields
  *
  * @hide
  */
 @SystemApi
 public class NanoAppInstanceInfo {
-    private static final String PRE_LOADED_GENERIC_UNKNOWN = "Preloaded app, unknown";
-    private String mPublisher = PRE_LOADED_GENERIC_UNKNOWN;
-    private String mName = PRE_LOADED_GENERIC_UNKNOWN;
+    private String mPublisher = "Unknown";
+    private String mName = "Unknown";
 
     private int mHandle;
     private long mAppId;
@@ -227,9 +225,7 @@ public class NanoAppInstanceInfo {
     public String toString() {
         String retVal = "handle : " + mHandle;
         retVal += ", Id : 0x" + Long.toHexString(mAppId);
-        retVal += ", Version : " + mAppVersion;
-        retVal += ", Name : " + mName;
-        retVal += ", Publisher : " + mPublisher;
+        retVal += ", Version : 0x" + Integer.toHexString(mAppVersion);
 
         return retVal;
     }
