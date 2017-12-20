@@ -78,4 +78,8 @@ interface IKeystoreService {
     int attestKey(String alias, in KeymasterArguments params, out KeymasterCertificateChain chain);
     int attestDeviceIds(in KeymasterArguments params, out KeymasterCertificateChain chain);
     int onDeviceOffBody();
+    int importWrappedKey(in String wrappedKeyAlias, in byte[] wrappedKey,
+        in String wrappingKeyAlias, in byte[] maskingKey, in KeymasterArguments arguments,
+        in long rootSid, in long fingerprintSid,
+        out KeyCharacteristics characteristics);
 }
