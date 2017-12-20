@@ -66,51 +66,51 @@ public class ContextHubTransaction<T> {
      * Constants describing the result of a transaction or request through the Context Hub Service.
      */
     @Retention(RetentionPolicy.SOURCE)
-    @IntDef(prefix = { "TRANSACTION_" }, value = {
-            TRANSACTION_SUCCESS,
-            TRANSACTION_FAILED_UNKNOWN,
-            TRANSACTION_FAILED_BAD_PARAMS,
-            TRANSACTION_FAILED_UNINITIALIZED,
-            TRANSACTION_FAILED_PENDING,
-            TRANSACTION_FAILED_AT_HUB,
-            TRANSACTION_FAILED_TIMEOUT,
-            TRANSACTION_FAILED_SERVICE_INTERNAL_FAILURE,
-            TRANSACTION_FAILED_HAL_UNAVAILABLE
+    @IntDef(prefix = { "RESULT_" }, value = {
+            RESULT_SUCCESS,
+            RESULT_FAILED_UNKNOWN,
+            RESULT_FAILED_BAD_PARAMS,
+            RESULT_FAILED_UNINITIALIZED,
+            RESULT_FAILED_PENDING,
+            RESULT_FAILED_AT_HUB,
+            RESULT_FAILED_TIMEOUT,
+            RESULT_FAILED_SERVICE_INTERNAL_FAILURE,
+            RESULT_FAILED_HAL_UNAVAILABLE
     })
     public @interface Result {}
-    public static final int TRANSACTION_SUCCESS = 0;
+    public static final int RESULT_SUCCESS = 0;
     /**
      * Generic failure mode.
      */
-    public static final int TRANSACTION_FAILED_UNKNOWN = 1;
+    public static final int RESULT_FAILED_UNKNOWN = 1;
     /**
      * Failure mode when the request parameters were not valid.
      */
-    public static final int TRANSACTION_FAILED_BAD_PARAMS = 2;
+    public static final int RESULT_FAILED_BAD_PARAMS = 2;
     /**
      * Failure mode when the Context Hub is not initialized.
      */
-    public static final int TRANSACTION_FAILED_UNINITIALIZED = 3;
+    public static final int RESULT_FAILED_UNINITIALIZED = 3;
     /**
      * Failure mode when there are too many transactions pending.
      */
-    public static final int TRANSACTION_FAILED_PENDING = 4;
+    public static final int RESULT_FAILED_PENDING = 4;
     /**
      * Failure mode when the request went through, but failed asynchronously at the hub.
      */
-    public static final int TRANSACTION_FAILED_AT_HUB = 5;
+    public static final int RESULT_FAILED_AT_HUB = 5;
     /**
      * Failure mode when the transaction has timed out.
      */
-    public static final int TRANSACTION_FAILED_TIMEOUT = 6;
+    public static final int RESULT_FAILED_TIMEOUT = 6;
     /**
      * Failure mode when the transaction has failed internally at the service.
      */
-    public static final int TRANSACTION_FAILED_SERVICE_INTERNAL_FAILURE = 7;
+    public static final int RESULT_FAILED_SERVICE_INTERNAL_FAILURE = 7;
     /**
      * Failure mode when the Context Hub HAL was not available.
      */
-    public static final int TRANSACTION_FAILED_HAL_UNAVAILABLE = 8;
+    public static final int RESULT_FAILED_HAL_UNAVAILABLE = 8;
 
     /**
      * A class describing the response for a ContextHubTransaction.
