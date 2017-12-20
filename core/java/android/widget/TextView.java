@@ -4867,6 +4867,10 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
      * Sets line spacing for this TextView.  Each line other than the last line will have its height
      * multiplied by {@code mult} and have {@code add} added to it.
      *
+     * @param add The value in pixels that should be added to each line other than the last line.
+     *            This will be applied after the multiplier
+     * @param mult The value by which each line height other than the last line will be multiplied
+     *             by
      *
      * @attr ref android.R.styleable#TextView_lineSpacingExtra
      * @attr ref android.R.styleable#TextView_lineSpacingMultiplier
