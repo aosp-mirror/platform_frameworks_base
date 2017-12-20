@@ -16,10 +16,9 @@
 
 package android.view.textclassifier;
 
+import static org.hamcrest.CoreMatchers.not;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertThat;
-import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
 import static org.mockito.Mockito.mock;
 
 import android.os.LocaleList;
@@ -33,8 +32,6 @@ import org.hamcrest.Matcher;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-
-import java.util.Collection;
 
 @SmallTest
 @RunWith(AndroidJUnit4.class)
@@ -166,20 +163,50 @@ public class TextClassificationManagerTest {
     }
 
     @Test
-    public void testGenerateLinks() {
+    public void testGenerateLinks_phone() {
         if (isTextClassifierDisabled()) return;
+        String text = "The number is +12122537077. See you tonight!";
+        assertThat(mClassifier.generateLinks(text, null),
+                isTextLinksContaining(text, "+12122537077", TextClassifier.TYPE_PHONE));
+    }
 
-        checkGenerateLinksFindsLink(
-                "The number is +12122537077. See you tonight!",
-                "+12122537077",
-                TextClassifier.TYPE_PHONE);
+    @Test
+    public void testGenerateLinks_exclude() {
+        if (isTextClassifierDisabled()) return;
+        String text = "The number is +12122537077. See you tonight!";
+        assertThat(mClassifier.generateLinks(text, mLinksOptions.setEntityConfig(
+                new TextClassifier.EntityConfig(TextClassifier.ENTITY_PRESET_ALL)
+                        .excludeEntities(TextClassifier.TYPE_PHONE))),
+                not(isTextLinksContaining(text, "+12122537077", TextClassifier.TYPE_PHONE)));
+    }
 
-        checkGenerateLinksFindsLink(
-                "The address is 1600 Amphitheater Parkway, Mountain View, CA. See you tonight!",
-                "1600 Amphitheater Parkway, Mountain View, CA",
-                TextClassifier.TYPE_ADDRESS);
+    @Test
+    public void testGenerateLinks_none_config() {
+        if (isTextClassifierDisabled()) return;
+        String text = "The number is +12122537077. See you tonight!";
+        assertThat(mClassifier.generateLinks(text, mLinksOptions.setEntityConfig(
+                new TextClassifier.EntityConfig(TextClassifier.ENTITY_PRESET_NONE))),
+                not(isTextLinksContaining(text, "+12122537077", TextClassifier.TYPE_PHONE)));
+    }
 
-        // TODO: Add more entity types when the model supports them.
+    @Test
+    public void testGenerateLinks_address() {
+        if (isTextClassifierDisabled()) return;
+        String text = "The address is 1600 Amphitheater Parkway, Mountain View, CA. See you!";
+        assertThat(mClassifier.generateLinks(text, null),
+                isTextLinksContaining(text, "1600 Amphitheater Parkway, Mountain View, CA",
+                        TextClassifier.TYPE_ADDRESS));
+    }
+
+    @Test
+    public void testGenerateLinks_include() {
+        if (isTextClassifierDisabled()) return;
+        String text = "The address is 1600 Amphitheater Parkway, Mountain View, CA. See you!";
+        assertThat(mClassifier.generateLinks(text, mLinksOptions.setEntityConfig(
+                new TextClassifier.EntityConfig(TextClassifier.ENTITY_PRESET_NONE)
+                        .includeEntities(TextClassifier.TYPE_ADDRESS))),
+                isTextLinksContaining(text, "1600 Amphitheater Parkway, Mountain View, CA",
+                        TextClassifier.TYPE_ADDRESS));
     }
 
     @Test
@@ -191,25 +218,6 @@ public class TextClassificationManagerTest {
 
     private boolean isTextClassifierDisabled() {
         return mClassifier == TextClassifier.NO_OP;
-    }
-
-    private void checkGenerateLinksFindsLink(String text, String classifiedText, String type) {
-        assertTrue(text.contains(classifiedText));
-        int startIndex = text.indexOf(classifiedText);
-        int endIndex = startIndex + classifiedText.length();
-
-        Collection<TextLinks.TextLink> links = mClassifier.generateLinks(text, mLinksOptions)
-                .getLinks();
-        for (TextLinks.TextLink link : links) {
-            if (text.subSequence(link.getStart(), link.getEnd()).equals(classifiedText)) {
-                assertEquals(type, link.getEntity(0));
-                assertEquals(startIndex, link.getStart());
-                assertEquals(endIndex, link.getEnd());
-                assertTrue(link.getConfidenceScore(type) > 0);
-                return;
-            }
-        }
-        fail(); // Subsequence was not identified.
     }
 
     private static Matcher<TextSelection> isTextSelection(
@@ -236,6 +244,31 @@ public class TextClassificationManagerTest {
             public void describeTo(Description description) {
                 description.appendValue(
                         String.format("%d, %d, %s", startIndex, endIndex, type));
+            }
+        };
+    }
+
+    private static Matcher<TextLinks> isTextLinksContaining(
+            final String text, final String substring, final String type) {
+        return new BaseMatcher<TextLinks>() {
+
+            @Override
+            public void describeTo(Description description) {
+                description.appendText("text=").appendValue(text)
+                        .appendText(", substring=").appendValue(substring)
+                        .appendText(", type=").appendValue(type);
+            }
+
+            @Override
+            public boolean matches(Object o) {
+                if (o instanceof TextLinks) {
+                    for (TextLinks.TextLink link : ((TextLinks) o).getLinks()) {
+                        if (text.subSequence(link.getStart(), link.getEnd()).equals(substring)) {
+                            return type.equals(link.getEntity(0));
+                        }
+                    }
+                }
+                return false;
             }
         };
     }

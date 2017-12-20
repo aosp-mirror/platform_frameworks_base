@@ -19,14 +19,12 @@ syntax = "proto2";
 option java_multiple_files = true;
 
 import "frameworks/base/libs/incident/proto/android/privacy.proto";
-import "frameworks/base/tools/streaming_proto/stream.proto";
 
 package android.os;
 
 // Android Platform Exported System Properties
 // TODO: This is not the completed list, new properties need to be whitelisted.
 message SystemPropertiesProto {
-    option (stream_proto.stream_msg).enable_fields_mapping_recursively = true;
 
     // Properties that are not specified below would be appended here.
     // These values stay on device only.

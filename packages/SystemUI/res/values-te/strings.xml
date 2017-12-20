@@ -492,12 +492,11 @@
     <string name="stream_bluetooth_sco" msgid="2055645746402746292">"బ్లూటూత్"</string>
     <string name="stream_dtmf" msgid="2447177903892477915">"డ్యూయల్ మల్టీ టోన్ ఫ్రీక్వెన్సీ"</string>
     <string name="stream_accessibility" msgid="301136219144385106">"యాక్సెస్ సామర్థ్యం"</string>
-    <!-- no translation found for volume_ringer_status_normal (4273142424125855384) -->
+    <!-- no translation found for ring_toggle_title (3281244519428819576) -->
     <skip />
-    <!-- no translation found for volume_ringer_status_vibrate (1825615171021346557) -->
-    <skip />
-    <!-- no translation found for volume_ringer_status_silent (6896394161022916369) -->
-    <skip />
+    <string name="volume_ringer_status_normal" msgid="4273142424125855384">"రింగ్"</string>
+    <string name="volume_ringer_status_vibrate" msgid="1825615171021346557">"వైబ్రేట్"</string>
+    <string name="volume_ringer_status_silent" msgid="6896394161022916369">"మ్యూట్"</string>
     <string name="volume_stream_content_description_unmute" msgid="4436631538779230857">"%1$s. అన్‌మ్యూట్ చేయడానికి నొక్కండి."</string>
     <string name="volume_stream_content_description_vibrate" msgid="1187944970457807498">"%1$s. వైబ్రేషన్‌కు సెట్ చేయడానికి నొక్కండి. యాక్సెస్ సామర్థ్య సేవలు మ్యూట్ చేయబడవచ్చు."</string>
     <string name="volume_stream_content_description_mute" msgid="3625049841390467354">"%1$s. మ్యూట్ చేయడానికి నొక్కండి. యాక్సెస్ సామర్థ్య సేవలు మ్యూట్ చేయబడవచ్చు."</string>

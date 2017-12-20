@@ -15,6 +15,7 @@
  */
 package com.android.server.devicepolicy;
 
+import android.annotation.UserIdInt;
 import android.app.admin.IDevicePolicyManager;
 import android.content.ComponentName;
 import android.os.PersistableBundle;
@@ -23,6 +24,8 @@ import android.security.keystore.ParcelableKeyGenParameterSpec;
 
 import com.android.internal.R;
 import com.android.server.SystemService;
+
+import java.util.List;
 
 /**
  * Defines the required interface for IDevicePolicyManager implemenation.
@@ -65,6 +68,23 @@ abstract class BaseIDevicePolicyManager extends IDevicePolicyManager.Stub {
 
     public boolean generateKeyPair(ComponentName who, String callerPackage, String algorithm,
             ParcelableKeyGenParameterSpec keySpec, KeymasterCertificateChain attestationChain) {
+        return false;
+    }
+
+    @Override
+    public boolean setPasswordBlacklist(ComponentName who, String name, List<String> blacklist,
+            boolean parent) {
+        return false;
+    }
+
+    @Override
+    public String getPasswordBlacklistName(ComponentName who, @UserIdInt int userId,
+            boolean parent) {
+        return null;
+    }
+
+    @Override
+    public boolean isPasswordBlacklisted(@UserIdInt int userId, String password) {
         return false;
     }
 

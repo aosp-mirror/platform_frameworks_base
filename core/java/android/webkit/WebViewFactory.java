@@ -33,6 +33,7 @@ import android.util.AndroidRuntimeException;
 import android.util.ArraySet;
 import android.util.Log;
 
+import java.io.File;
 import java.lang.reflect.Method;
 
 /**
@@ -63,6 +64,8 @@ public final class WebViewFactory {
     private static final Object sProviderLock = new Object();
     private static PackageInfo sPackageInfo;
     private static Boolean sWebViewSupported;
+    private static boolean sWebViewDisabled;
+    private static String sDataDirectorySuffix; // stored here so it can be set without loading WV
 
     // Error codes for loadWebViewNativeLibraryFromPackage
     public static final int LIBLOAD_SUCCESS = 0;
@@ -110,6 +113,45 @@ public final class WebViewFactory {
                     .hasSystemFeature(PackageManager.FEATURE_WEBVIEW);
         }
         return sWebViewSupported;
+    }
+
+    /**
+     * @hide
+     */
+    static void disableWebView() {
+        synchronized (sProviderLock) {
+            if (sProviderInstance != null) {
+                throw new IllegalStateException(
+                        "Can't disable WebView: WebView already initialized");
+            }
+            sWebViewDisabled = true;
+        }
+    }
+
+    /**
+     * @hide
+     */
+    static void setDataDirectorySuffix(String suffix) {
+        synchronized (sProviderLock) {
+            if (sProviderInstance != null) {
+                throw new IllegalStateException(
+                        "Can't set data directory suffix: WebView already initialized");
+            }
+            if (suffix.indexOf(File.separatorChar) >= 0) {
+                throw new IllegalArgumentException("Suffix " + suffix
+                                                   + " contains a path separator");
+            }
+            sDataDirectorySuffix = suffix;
+        }
+    }
+
+    /**
+     * @hide
+     */
+    static String getDataDirectorySuffix() {
+        synchronized (sProviderLock) {
+            return sDataDirectorySuffix;
+        }
     }
 
     /**
@@ -202,6 +244,11 @@ public final class WebViewFactory {
             if (!isWebViewSupported()) {
                 // Device doesn't support WebView; don't try to load it, just throw.
                 throw new UnsupportedOperationException();
+            }
+
+            if (sWebViewDisabled) {
+                throw new IllegalStateException(
+                        "WebView.disableWebView() was called: WebView is disabled");
             }
 
             StrictMode.ThreadPolicy oldPolicy = StrictMode.allowThreadDiskReads();

@@ -26,7 +26,7 @@ import java.util.Arrays;
  * @hide
  */
 @SystemApi
-public class ContextHubInfo {
+public class ContextHubInfo implements Parcelable {
     private int mId;
     private String mName;
     private String mVendor;

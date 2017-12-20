@@ -16,17 +16,23 @@
 
 package android.view.textclassifier;
 
+import android.annotation.IntDef;
 import android.annotation.IntRange;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.StringDef;
 import android.annotation.WorkerThread;
 import android.os.LocaleList;
+import android.util.ArraySet;
 
 import com.android.internal.util.Preconditions;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.List;
 
 /**
  * Interface for providing text classification related features.
@@ -57,6 +63,20 @@ public interface TextClassifier {
             TYPE_URL,
     })
     @interface EntityType {}
+
+    /** Designates that the TextClassifier should identify all entity types it can. **/
+    int ENTITY_PRESET_ALL = 0;
+    /** Designates that the TextClassifier should identify no entities. **/
+    int ENTITY_PRESET_NONE = 1;
+    /** Designates that the TextClassifier should identify a base set of entities determined by the
+     * TextClassifier. **/
+    int ENTITY_PRESET_BASE = 2;
+
+    /** @hide */
+    @Retention(RetentionPolicy.SOURCE)
+    @IntDef(prefix = { "ENTITY_CONFIG_" },
+            value = {ENTITY_PRESET_ALL, ENTITY_PRESET_NONE, ENTITY_PRESET_BASE})
+    @interface EntityPreset {}
 
     /**
      * No-op TextClassifier.
@@ -217,6 +237,8 @@ public interface TextClassifier {
      * Returns a {@link TextLinks} that may be applied to the text to annotate it with links
      * information.
      *
+     * If no options are supplied, default values will be used, determined by the TextClassifier.
+     *
      * @param text the text to generate annotations for
      * @param options configuration for link generation
      *
@@ -251,6 +273,16 @@ public interface TextClassifier {
     }
 
     /**
+     * Returns a {@link Collection} of the entity types in the specified preset.
+     *
+     * @see #ENTITIES_ALL
+     * @see #ENTITIES_NONE
+     */
+    default Collection<String> getEntitiesForPreset(@EntityPreset int entityPreset) {
+        return Collections.EMPTY_LIST;
+    }
+
+    /**
      * Logs a TextClassifier event.
      *
      * @param source the text classifier used to generate this event
@@ -268,6 +300,62 @@ public interface TextClassifier {
         return TextClassifierConstants.DEFAULT;
     }
 
+    /**
+     * Configuration object for specifying what entities to identify.
+     *
+     * Configs are initially based on a predefined preset, and can be modified from there.
+     */
+    final class EntityConfig {
+        private final @TextClassifier.EntityPreset int mEntityPreset;
+        private final Collection<String> mExcludedEntityTypes;
+        private final Collection<String> mIncludedEntityTypes;
+
+        public EntityConfig(@TextClassifier.EntityPreset int mEntityPreset) {
+            this.mEntityPreset = mEntityPreset;
+            mExcludedEntityTypes = new ArraySet<>();
+            mIncludedEntityTypes = new ArraySet<>();
+        }
+
+        /**
+         * Specifies an entity to include in addition to any specified by the enity preset.
+         *
+         * Note that if an entity has been excluded, the exclusion will take precedence.
+         */
+        public EntityConfig includeEntities(String... entities) {
+            for (String entity : entities) {
+                mIncludedEntityTypes.add(entity);
+            }
+            return this;
+        }
+
+        /**
+         * Specifies an entity to be excluded.
+         */
+        public EntityConfig excludeEntities(String... entities) {
+            for (String entity : entities) {
+                mExcludedEntityTypes.add(entity);
+            }
+            return this;
+        }
+
+        /**
+         * Returns an unmodifiable list of the final set of entities to find.
+         */
+        public List<String> getEntities(TextClassifier textClassifier) {
+            ArrayList<String> entities = new ArrayList<>();
+            for (String entity : textClassifier.getEntitiesForPreset(mEntityPreset)) {
+                if (!mExcludedEntityTypes.contains(entity)) {
+                    entities.add(entity);
+                }
+            }
+            for (String entity : mIncludedEntityTypes) {
+                if (!mExcludedEntityTypes.contains(entity) && !entities.contains(entity)) {
+                    entities.add(entity);
+                }
+            }
+            return Collections.unmodifiableList(entities);
+        }
+    }
 
     /**
      * Utility functions for TextClassifier methods.

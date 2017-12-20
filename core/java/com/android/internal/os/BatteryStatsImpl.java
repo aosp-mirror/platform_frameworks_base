@@ -120,7 +120,7 @@ public class BatteryStatsImpl extends BatteryStats {
     private static final int MAGIC = 0xBA757475; // 'BATSTATS'
 
     // Current on-disk Parcel version
-    private static final int VERSION = 170 + (USE_OLD_HISTORY ? 1000 : 0);
+    private static final int VERSION = 171 + (USE_OLD_HISTORY ? 1000 : 0);
 
     // Maximum number of items we will record in the history.
     private static final int MAX_HISTORY_ITEMS;
@@ -8678,13 +8678,15 @@ public class BatteryStatsImpl extends BatteryStats {
             } else if (procState <= ActivityManager.PROCESS_STATE_FOREGROUND_SERVICE) {
                 // Persistent and other foreground states go here.
                 uidRunningState = PROCESS_STATE_FOREGROUND_SERVICE;
-            } else if (procState <= ActivityManager.PROCESS_STATE_TOP_SLEEPING) {
-                uidRunningState = PROCESS_STATE_TOP_SLEEPING;
             } else if (procState <= ActivityManager.PROCESS_STATE_IMPORTANT_FOREGROUND) {
                 // Persistent and other foreground states go here.
                 uidRunningState = PROCESS_STATE_FOREGROUND;
             } else if (procState <= ActivityManager.PROCESS_STATE_RECEIVER) {
                 uidRunningState = PROCESS_STATE_BACKGROUND;
+            } else if (procState <= ActivityManager.PROCESS_STATE_TOP_SLEEPING) {
+                uidRunningState = PROCESS_STATE_TOP_SLEEPING;
+            } else if (procState <= ActivityManager.PROCESS_STATE_HEAVY_WEIGHT) {
+                uidRunningState = PROCESS_STATE_HEAVY_WEIGHT;
             } else {
                 uidRunningState = PROCESS_STATE_CACHED;
             }

@@ -79,7 +79,8 @@ message Atom {
         IsolatedUidChanged isolated_uid_changed = 43;
         PacketWakeupOccurred packet_wakeup_occurred = 44;
         DropboxErrorChanged dropbox_error_changed = 45;
-        AppHook app_hook = 46;
+        AnomalyDetected anomaly_detected = 46;
+        AppHook app_hook = 47;
         // TODO: Reorder the numbering so that the most frequent occur events occur in the first 15.
     }
 
@@ -838,6 +839,23 @@ message AppHook {
         START = 3;
     }
     optional State state = 3;
+}
+
+/**
+ * Logs when statsd detects an anomaly.
+ *
+ * Logged from:
+ *   frameworks/base/cmds/statsd/src/anomaly/AnomalyTracker.cpp
+ */
+message AnomalyDetected {
+    // Uid that owns the config whose anomaly detection alert fired.
+    optional int32 config_uid = 1;
+
+    // Name of the config whose anomaly detection alert fired.
+    optional string config_name = 2;
+
+    // Name of the alert (i.e. name of the anomaly that was detected).
+    optional string alert_name = 3;
 }
 
 /**

@@ -102,6 +102,11 @@ public class DevicePolicyManagerServiceTestable extends DevicePolicyManagerServi
         this.context = injector.context;
     }
 
+    @Override
+    public boolean isPasswordBlacklisted(int userId, String password) {
+        return false;
+    }
+
 
     public void notifyChangeToContentObserver(Uri uri, int userHandle) {
         ContentObserver co = mMockInjector.mContentObservers.get(new Pair<>(uri, userHandle));
@@ -202,6 +207,11 @@ public class DevicePolicyManagerServiceTestable extends DevicePolicyManagerServi
         @Override
         LockPatternUtils newLockPatternUtils() {
             return services.lockPatternUtils;
+        }
+
+        @Override
+        PasswordBlacklist newPasswordBlacklist(File file) {
+            return services.passwordBlacklist;
         }
 
         @Override

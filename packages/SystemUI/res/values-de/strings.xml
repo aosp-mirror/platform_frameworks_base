@@ -496,6 +496,7 @@
     <string name="stream_bluetooth_sco" msgid="2055645746402746292">"Bluetooth"</string>
     <string name="stream_dtmf" msgid="2447177903892477915">"Doppelton-Mehrfrequenz"</string>
     <string name="stream_accessibility" msgid="301136219144385106">"Bedienungshilfen"</string>
+    <string name="ring_toggle_title" msgid="3281244519428819576">"Anrufe"</string>
     <string name="volume_ringer_status_normal" msgid="4273142424125855384">"Klingeln lassen"</string>
     <string name="volume_ringer_status_vibrate" msgid="1825615171021346557">"Vibrieren"</string>
     <string name="volume_ringer_status_silent" msgid="6896394161022916369">"Stummschalten"</string>
