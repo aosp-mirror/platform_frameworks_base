@@ -14175,7 +14175,7 @@ public class ActivityManagerService extends IActivityManager.Stub
             for (int i = mLruProcesses.size() - 1 ; i >= 0 ; i--) {
                 ProcessRecord proc = mLruProcesses.get(i);
                 if (proc.notCachedSinceIdle) {
-                    if (proc.setProcState >= ActivityManager.PROCESS_STATE_FOREGROUND_SERVICE
+                    if (proc.setProcState >= ActivityManager.PROCESS_STATE_BOUND_FOREGROUND_SERVICE
                             && proc.setProcState <= ActivityManager.PROCESS_STATE_SERVICE) {
                         if (doKilling && proc.initialIdlePss != 0
                                 && proc.lastPss > ((proc.initialIdlePss*3)/2)) {
@@ -21420,7 +21420,7 @@ public class ActivityManagerService extends IActivityManager.Stub
                 mAppWarnings.onDensityChanged();
 
                 killAllBackgroundProcessesExcept(N,
-                        ActivityManager.PROCESS_STATE_FOREGROUND_SERVICE);
+                        ActivityManager.PROCESS_STATE_BOUND_FOREGROUND_SERVICE);
             }
         }
 
@@ -22394,6 +22394,7 @@ public class ActivityManagerService extends IActivityManager.Stub
             // to the top state.
             switch (procState) {
                 case ActivityManager.PROCESS_STATE_BOUND_FOREGROUND_SERVICE:
+                case ActivityManager.PROCESS_STATE_FOREGROUND_SERVICE:
                     // Something else is keeping it at this level, just leave it.
                     break;
                 case ActivityManager.PROCESS_STATE_IMPORTANT_FOREGROUND:
@@ -23231,7 +23232,7 @@ public class ActivityManagerService extends IActivityManager.Stub
         // To avoid some abuse patterns, we are going to be careful about what we consider
         // to be an app interaction.  Being the top activity doesn't count while the display
         // is sleeping, nor do short foreground services.
-        if (app.curProcState <= ActivityManager.PROCESS_STATE_BOUND_FOREGROUND_SERVICE) {
+        if (app.curProcState <= ActivityManager.PROCESS_STATE_TOP) {
             isInteraction = true;
             app.fgInteractionTime = 0;
         } else if (app.curProcState <= ActivityManager.PROCESS_STATE_FOREGROUND_SERVICE) {

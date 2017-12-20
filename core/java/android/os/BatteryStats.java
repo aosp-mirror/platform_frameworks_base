@@ -525,8 +525,8 @@ public abstract class BatteryStats implements Parcelable {
             return ActivityManager.PROCESS_STATE_NONEXISTENT;
         } else if (procState == ActivityManager.PROCESS_STATE_TOP) {
             return Uid.PROCESS_STATE_TOP;
-        } else if (procState <= ActivityManager.PROCESS_STATE_FOREGROUND_SERVICE) {
-            // Persistent and other foreground states go here.
+        } else if (procState == ActivityManager.PROCESS_STATE_FOREGROUND_SERVICE) {
+            // State when app has put itself in the foreground.
             return Uid.PROCESS_STATE_FOREGROUND_SERVICE;
         } else if (procState <= ActivityManager.PROCESS_STATE_IMPORTANT_FOREGROUND) {
             // Persistent and other foreground states go here.

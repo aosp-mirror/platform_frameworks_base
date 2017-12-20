@@ -485,11 +485,11 @@ public class ActivityManager {
      * all activities that are visible to the user. */
     public static final int PROCESS_STATE_TOP = 2;
 
-    /** @hide Process is hosting a foreground service due to a system binding. */
-    public static final int PROCESS_STATE_BOUND_FOREGROUND_SERVICE = 3;
-
     /** @hide Process is hosting a foreground service. */
-    public static final int PROCESS_STATE_FOREGROUND_SERVICE = 4;
+    public static final int PROCESS_STATE_FOREGROUND_SERVICE = 3;
+
+    /** @hide Process is hosting a foreground service due to a system binding. */
+    public static final int PROCESS_STATE_BOUND_FOREGROUND_SERVICE = 4;
 
     /** @hide Process is important to the user, and something they are aware of. */
     public static final int PROCESS_STATE_IMPORTANT_FOREGROUND = 5;
@@ -3086,11 +3086,11 @@ public class ActivityManager {
             } else if (importance >= IMPORTANCE_VISIBLE) {
                 return PROCESS_STATE_IMPORTANT_FOREGROUND;
             } else if (importance >= IMPORTANCE_TOP_SLEEPING_PRE_28) {
-                return PROCESS_STATE_FOREGROUND_SERVICE;
+                return PROCESS_STATE_IMPORTANT_FOREGROUND;
             } else if (importance >= IMPORTANCE_FOREGROUND_SERVICE) {
                 return PROCESS_STATE_FOREGROUND_SERVICE;
             } else {
-                return PROCESS_STATE_BOUND_FOREGROUND_SERVICE;
+                return PROCESS_STATE_TOP;
             }
         }
 

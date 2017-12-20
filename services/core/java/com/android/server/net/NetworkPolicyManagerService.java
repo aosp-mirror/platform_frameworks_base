@@ -2949,7 +2949,7 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
                     if (state <= ActivityManager.PROCESS_STATE_TOP) {
                         fout.print(" (fg)");
                     } else {
-                        fout.print(state <= ActivityManager.PROCESS_STATE_FOREGROUND_SERVICE
+                        fout.print(state <= ActivityManager.PROCESS_STATE_BOUND_FOREGROUND_SERVICE
                                 ? " (fg svc)" : " (bg)");
                     }
 
