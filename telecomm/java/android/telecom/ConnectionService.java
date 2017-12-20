@@ -1371,9 +1371,19 @@ public abstract class ConnectionService extends Service {
                 isIncoming,
                 isUnknown);
 
-        Connection connection = isUnknown ? onCreateUnknownConnection(callManagerAccount, request)
-                : isIncoming ? onCreateIncomingConnection(callManagerAccount, request)
-                : onCreateOutgoingConnection(callManagerAccount, request);
+        Connection connection = null;
+        if (request.getExtras() != null && request.getExtras().getBoolean(
+                TelecomManager.EXTRA_IS_HANDOVER,false)) {
+            if (!isIncoming) {
+                connection = onCreateOutgoingHandoverConnection(callManagerAccount, request);
+            } else {
+                // Todo: Call onCreateIncommingHandoverConnection()
+            }
+        } else {
+            connection = isUnknown ? onCreateUnknownConnection(callManagerAccount, request)
+                    : isIncoming ? onCreateIncomingConnection(callManagerAccount, request)
+                    : onCreateOutgoingConnection(callManagerAccount, request);
+        }
         Log.d(this, "createConnection, connection: %s", connection);
         if (connection == null) {
             connection = Connection.createFailedConnection(
