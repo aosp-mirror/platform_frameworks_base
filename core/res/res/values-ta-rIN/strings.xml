@@ -294,7 +294,7 @@
     <string name="permlab_subscribedFeedsRead" msgid="4756609637053353318">"குழுசேர்ந்த ஊட்டங்களைப் படித்தல்"</string>
     <string name="permdesc_subscribedFeedsRead" msgid="5557058907906144505">"தற்போது ஒத்திசைந்த ஊட்டங்களைப் பற்றிய விவரங்களைப் பெற பயன்பாட்டை அனுமதிக்கிறது."</string>
     <string name="permlab_sendSms" msgid="7544599214260982981">"SMS செய்திகளை அனுப்புதல் மற்றும் பார்த்தல்"</string>
-    <string name="permdesc_sendSms" msgid="7094729298204937667">"SMS செய்திகளை அனுப்ப பயன்பாட்டை அனுமதிக்கிறது. இதற்கு எதிர்பாராத கட்டணங்கள் விதிக்கப்படலாம். தீங்கு விளைவிக்கும் பயன்பாடுகள் உங்களின் உறுதிப்படுத்தல் எதுவுமின்றி செய்திகளை அனுப்பி உங்களுக்குக் கட்டணம் விதிக்கலாம்."</string>
+    <string name="permdesc_sendSms" msgid="7094729298204937667">"SMS செய்திகளை அனுப்ப பயன்பாட்டை அனுமதிக்கிறது. இதற்கு எதிர்பாராத பேமெண்ட்கள் விதிக்கப்படலாம். தீங்கு விளைவிக்கும் பயன்பாடுகள் உங்களின் உறுதிப்படுத்தல் எதுவுமின்றி செய்திகளை அனுப்பி உங்களுக்குக் கட்டணம் விதிக்கலாம்."</string>
     <string name="permlab_readSms" msgid="8745086572213270480">"உங்கள் உரைச் செய்திகளை (SMS அல்லது MMS) படித்தல்"</string>
     <string name="permdesc_readSms" product="tablet" msgid="2467981548684735522">"உங்கள் டேப்லெட் அல்லது சிம் கார்டில் சேமிக்கப்பட்ட SMS குறுஞ்செய்திகளைப் படிக்க பயன்பாட்டை அனுமதிக்கிறது. SMS குறுஞ்செய்திகளின் உள்ளடக்கம் அல்லது ரகசியத்தன்மை ஆகியவற்றைப் பொருட்படுத்தாமல் அச்செய்திகளைப் படிக்க பயன்பாட்டை இது அனுமதிக்கிறது."</string>
     <string name="permdesc_readSms" product="tv" msgid="5102425513647038535">"டிவி அல்லது சிம் கார்டில் சேமிக்கப்பட்ட SMS செய்திகளைப் படிக்க, பயன்பாட்டை அனுமதிக்கிறது. உள்ளடக்கம் அல்லது ரகசியத்தன்மையைப் பொருட்படுத்தாமல் எல்லா SMS செய்திகளையும் பார்க்க, இது பயன்பாட்டை அனுமதிக்கிறது."</string>
@@ -1078,7 +1078,7 @@
     <string name="wifi_no_internet" msgid="8451173622563841546">"வைஃபை இணைய அணுகல் கொண்டிருக்கவில்லை"</string>
     <string name="wifi_no_internet_detailed" msgid="8083079241212301741">"விருப்பங்களுக்கு, தட்டவும்"</string>
     <string name="network_switch_metered" msgid="4671730921726992671">"<xliff:g id="NETWORK_TYPE">%1$s</xliff:g>க்கு மாற்றப்பட்டது"</string>
-    <string name="network_switch_metered_detail" msgid="5325661434777870353">"<xliff:g id="PREVIOUS_NETWORK">%2$s</xliff:g> இல் இணைய அணுகல் இல்லாததால், சாதனமானது <xliff:g id="NEW_NETWORK">%1$s</xliff:g>ஐப் பயன்படுத்துகிறது. கட்டணங்கள் விதிக்கப்படலாம்."</string>
+    <string name="network_switch_metered_detail" msgid="5325661434777870353">"<xliff:g id="PREVIOUS_NETWORK">%2$s</xliff:g> இல் இணைய அணுகல் இல்லாததால், சாதனமானது <xliff:g id="NEW_NETWORK">%1$s</xliff:g>ஐப் பயன்படுத்துகிறது. பேமெண்ட்கள் விதிக்கப்படலாம்."</string>
     <string name="network_switch_metered_toast" msgid="5779283181685974304">"<xliff:g id="PREVIOUS_NETWORK">%1$s</xliff:g> இலிருந்து <xliff:g id="NEW_NETWORK">%2$s</xliff:g>க்கு மாற்றப்பட்டது"</string>
   <string-array name="network_switch_type_name">
     <item msgid="2952042958050315394">"மொபைல் டேட்டா"</item>
@@ -1143,7 +1143,7 @@
     <string name="no_permissions" msgid="7283357728219338112">"அனுமதிகள் தேவையில்லை"</string>
     <string name="perm_costs_money" msgid="4902470324142151116">"இதனால் நீங்கள் கட்டணம் செலுத்த வேண்டியிருக்கலாம்"</string>
     <string name="dlg_ok" msgid="7376953167039865701">"சரி"</string>
-    <string name="usb_charging_notification_title" msgid="6895185153353640787">"இந்தச் சாதனத்தை USB சார்ஜ் செய்கிறது"</string>
+    <string name="usb_charging_notification_title" msgid="6895185153353640787">"சாதனம் USB சார்ஜிங் செய்யப்படுகிறது"</string>
     <string name="usb_supplying_notification_title" msgid="5310642257296510271">"இணைத்துள்ள சாதனத்திற்கு USB சக்தி அளிக்கிறது"</string>
     <string name="usb_mtp_notification_title" msgid="8396264943589760855">"USB, கோப்புப் பரிமாற்றத்துக்கு மட்டும்"</string>
     <string name="usb_ptp_notification_title" msgid="1347328437083192112">"USB, படப் பரிமாற்றத்துக்கு மட்டும்"</string>

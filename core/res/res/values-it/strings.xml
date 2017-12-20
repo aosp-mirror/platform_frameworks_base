@@ -1558,10 +1558,10 @@
     <string name="select_year" msgid="7952052866994196170">"Seleziona anno"</string>
     <string name="deleted_key" msgid="7659477886625566590">"<xliff:g id="KEY">%1$s</xliff:g> eliminato"</string>
     <string name="managed_profile_label_badge" msgid="2355652472854327647">"<xliff:g id="LABEL">%1$s</xliff:g> lavoro"</string>
-    <string name="lock_to_app_toast" msgid="1420543809500606964">"Per sbloccare questa schermata tieni premuta l\'opzione Indietro."</string>
-    <string name="lock_to_app_toast_locked" msgid="9125176335701699164">"L\'app è bloccata. Su questo dispositivo non è consentito lo sblocco."</string>
-    <string name="lock_to_app_start" msgid="6643342070839862795">"Schermata bloccata"</string>
-    <string name="lock_to_app_exit" msgid="8598219838213787430">"Schermata sbloccata"</string>
+    <string name="lock_to_app_toast" msgid="1420543809500606964">"Per sganciare questa schermata tieni premuta l\'opzione Indietro."</string>
+    <string name="lock_to_app_toast_locked" msgid="9125176335701699164">"L\'app è fissata. Non è possibile sganciarla su questo dispositivo."</string>
+    <string name="lock_to_app_start" msgid="6643342070839862795">"Schermata fissata"</string>
+    <string name="lock_to_app_exit" msgid="8598219838213787430">"Schermata sganciata"</string>
     <string name="lock_to_app_unlock_pin" msgid="2552556656504331634">"Richiedi il PIN per lo sblocco"</string>
     <string name="lock_to_app_unlock_pattern" msgid="4182192144797225137">"Richiedi sequenza di sblocco prima di sbloccare"</string>
     <string name="lock_to_app_unlock_password" msgid="6380979775916974414">"Richiedi password prima di sbloccare"</string>
@@ -1663,7 +1663,7 @@
     <string name="usb_mtp_launch_notification_title" msgid="8359219638312208932">"Connesso a <xliff:g id="PRODUCT_NAME">%1$s</xliff:g>"</string>
     <string name="usb_mtp_launch_notification_description" msgid="8541876176425411358">"Tocca per visualizzare i file"</string>
     <string name="pin_target" msgid="3052256031352291362">"Blocca"</string>
-    <string name="unpin_target" msgid="3556545602439143442">"Sblocca"</string>
+    <string name="unpin_target" msgid="3556545602439143442">"Sgancia"</string>
     <string name="app_info" msgid="6856026610594615344">"Informazioni app"</string>
     <string name="negative_duration" msgid="5688706061127375131">"−<xliff:g id="TIME">%1$s</xliff:g>"</string>
     <string name="reset_retail_demo_mode_title" msgid="2370249087943803584">"Ripristinare il dispositivo?"</string>

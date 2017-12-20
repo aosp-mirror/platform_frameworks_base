@@ -246,7 +246,7 @@
     <string name="permgrouplab_contacts" msgid="3657758145679177612">"ລາຍຊື່"</string>
     <string name="permgroupdesc_contacts" msgid="6951499528303668046">"ເຂົ້າ​ຫາ​ລາຍ​ຊື່​ຂອງ​ທ່ານ"</string>
     <string name="permgrouplab_location" msgid="7275582855722310164">"ສະ​ຖານ​ທີ່"</string>
-    <string name="permgroupdesc_location" msgid="1346617465127855033">"ເຂົ້າເຖິງທີ່ຕັ້ງອຸປະກອນນີ້"</string>
+    <string name="permgroupdesc_location" msgid="1346617465127855033">"ເຂົ້າເຖິງຂໍ້ມູນສະຖານທີ່ຂອງອຸປະກອນນີ້"</string>
     <string name="permgrouplab_calendar" msgid="5863508437783683902">"ປະຕິທິນ"</string>
     <string name="permgroupdesc_calendar" msgid="3889615280211184106">"ເຂົ້າ​ຫາ​ປະ​ຕິ​ທິນ​ຂອງ​ທ່ານ"</string>
     <string name="permgrouplab_sms" msgid="228308803364967808">"SMS"</string>

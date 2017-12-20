@@ -62,8 +62,8 @@
     <string name="needPuk2" msgid="4526033371987193070">"Introduza o PUK2 para desbloquear o cartão SIM."</string>
     <string name="enablePin" msgid="209412020907207950">"Ação sem êxito. Ative o bloqueio do SIM/RUIM."</string>
     <plurals name="pinpuk_attempts" formatted="false" msgid="1251012001539225582">
-      <item quantity="one">Tem mais <xliff:g id="NUMBER_0">%d</xliff:g> tentativa antes de o cartão SIM ficar bloqueado.</item>
       <item quantity="other">Tem mais <xliff:g id="NUMBER_1">%d</xliff:g> tentativas antes de o cartão SIM ficar bloqueado.</item>
+      <item quantity="one">Tem mais <xliff:g id="NUMBER_0">%d</xliff:g> tentativa antes de o cartão SIM ficar bloqueado.</item>
     </plurals>
     <string name="imei" msgid="2625429890869005782">"IMEI"</string>
     <string name="meid" msgid="4841221237681254195">"MEID"</string>
@@ -169,18 +169,18 @@
     <string name="low_memory" product="tv" msgid="516619861191025923">"O armazenamento da TV está cheio. Elimine alguns ficheiros para libertar espaço."</string>
     <string name="low_memory" product="default" msgid="3475999286680000541">"O armazenamento do telemóvel está cheio. Elimine alguns ficheiros para libertar espaço."</string>
     <plurals name="ssl_ca_cert_warning" formatted="false" msgid="5106721205300213569">
-      <item quantity="one">Autoridade de certificação instalada</item>
       <item quantity="other">Autoridades de certificação instaladas</item>
+      <item quantity="one">Autoridade de certificação instalada</item>
     </plurals>
     <string name="ssl_ca_cert_noti_by_unknown" msgid="4475437862189850602">"Por um terceiro desconhecido"</string>
-    <string name="ssl_ca_cert_noti_by_administrator" msgid="550758088185764312">"Do administrador do seu perfil de trabalho"</string>
+    <string name="ssl_ca_cert_noti_by_administrator" msgid="550758088185764312">"Do gestor do seu perfil de trabalho"</string>
     <string name="ssl_ca_cert_noti_managed" msgid="4030263497686867141">"Por <xliff:g id="MANAGING_DOMAIN">%s</xliff:g>"</string>
     <string name="work_profile_deleted" msgid="5005572078641980632">"Perfil de trabalho eliminado"</string>
     <string name="work_profile_deleted_description" msgid="6305147513054341102">"Perfil de trabalho eliminado devido a aplicação de administração em falta."</string>
-    <string name="work_profile_deleted_details" msgid="226615743462361248">"A aplicação de administração do perfil de trabalho está em falta ou corrompida. Consequentemente, o seu perfil de trabalho e os dados relacionados foram eliminados. Contacte o seu administrador para obter assistência."</string>
+    <string name="work_profile_deleted_details" msgid="226615743462361248">"A aplicação de administração do perfil de trabalho está em falta ou corrompida. Consequentemente, o seu perfil de trabalho e os dados relacionados foram eliminados. Contacte o seu gestor para obter assistência."</string>
     <string name="work_profile_deleted_description_dpm_wipe" msgid="6019770344820507579">"O seu perfil de trabalho já não está disponível neste dispositivo."</string>
     <string name="factory_reset_warning" msgid="5423253125642394387">"O seu dispositivo será apagado"</string>
-    <string name="factory_reset_message" msgid="4905025204141900666">"A aplicação de administração tem componentes em falta ou corrompidos e não podem ser utilizados. O seu dispositivo será agora apagado. Contacte o seu administrador para obter assistência."</string>
+    <string name="factory_reset_message" msgid="4905025204141900666">"A aplicação de administração tem componentes em falta ou corrompidos e não podem ser utilizados. O seu dispositivo será agora apagado. Contacte o seu gestor para obter assistência."</string>
     <string name="me" msgid="6545696007631404292">"Eu"</string>
     <string name="power_dialog" product="tablet" msgid="8545351420865202853">"Opções do tablet"</string>
     <string name="power_dialog" product="tv" msgid="6153888706430556356">"Opções de TV"</string>
@@ -223,8 +223,8 @@
     <string name="bugreport_option_full_title" msgid="6354382025840076439">"Relatório completo"</string>
     <string name="bugreport_option_full_summary" msgid="7210859858969115745">"Utilize esta opção para uma interferência mínima do sistema quando o dispositivo não responder ou estiver demasiado lento, ou quando precisar de todas as secções de relatório. Não permite introduzir mais detalhes ou tirar capturas de ecrã adicionais."</string>
     <plurals name="bugreport_countdown" formatted="false" msgid="6878900193900090368">
-      <item quantity="one">A tirar uma captura de ecrã do relatório de erro dentro de <xliff:g id="NUMBER_0">%d</xliff:g> segundo…</item>
       <item quantity="other">A tirar uma captura de ecrã do relatório de erro dentro de <xliff:g id="NUMBER_1">%d</xliff:g> segundos.</item>
+      <item quantity="one">A tirar uma captura de ecrã do relatório de erro dentro de <xliff:g id="NUMBER_0">%d</xliff:g> segundo…</item>
     </plurals>
     <string name="global_action_toggle_silent_mode" msgid="8219525344246810925">"Modo silencioso"</string>
     <string name="global_action_silent_mode_on_status" msgid="3289841937003758806">"Som desativado"</string>
@@ -351,7 +351,7 @@
     <string name="permdesc_readCalendar" product="tablet" msgid="4216462049057658723">"Permite que a aplicação leia todos os eventos do calendário guardados no tablet, incluindo os de amigos ou colegas de trabalho. Pode permitir que a aplicação partilhe ou guarde dados do calendário, independentemente da confidencialidade ou sensibilidade."</string>
     <string name="permdesc_readCalendar" product="tv" msgid="3191352452242394196">"Permite à aplicação ler todos os eventos de calendário armazenados na sua TV, incluindo os de amigos e de colegas de trabalho. Isto pode permitir à aplicação partilhar ou guardar os seus dados de calendário, independentemente da confidencialidade ou sensibilidade."</string>
     <string name="permdesc_readCalendar" product="default" msgid="7434548682470851583">"Permite que a aplicação leia todos os eventos do calendário guardados no telemóvel, incluindo os de amigos ou colegas de trabalho. Pode permitir que a aplicação partilhe ou guarde dados do calendário, independentemente da confidencialidade ou da sensibilidade."</string>
-    <string name="permlab_writeCalendar" msgid="8438874755193825647">"adicionar ou modificar eventos do calendário e enviar e-mail a convidados sem o conhecimento dos proprietários"</string>
+    <string name="permlab_writeCalendar" msgid="8438874755193825647">"adicionar ou modificar eventos do calendário e enviar email a convidados sem o conhecimento dos proprietários"</string>
     <string name="permdesc_writeCalendar" product="tablet" msgid="6679035520113668528">"Permite que a aplicação adicione, remova e altere eventos que pode modificar no tablet, incluindo eventos relacionados com amigos ou colegas de trabalho. Pode permitir que a aplicação envie mensagens que parecem ser enviadas pelos proprietários dos calendários ou modifique eventos sem o conhecimento do proprietário."</string>
     <string name="permdesc_writeCalendar" product="tv" msgid="1273290605500902507">"Permite à aplicação adicionar, remover ou alterar eventos que pode modificar na TV, incluindo os que pertencem a amigos ou a colegas de trabalho. Isto pode permitir à aplicação enviar mensagens que parecem vir de proprietários do calendário ou modificar eventos sem o conhecimento do proprietário."</string>
     <string name="permdesc_writeCalendar" product="default" msgid="2324469496327249376">"Permite que a aplicação adicione, remova e altere eventos que pode modificar no telemóvel, incluindo eventos relacionados com amigos ou colegas de trabalho. Pode permitir que a aplicação envie mensagens que parecem ser enviadas pelos proprietários dos calendários ou modifique eventos sem o conhecimento do proprietário."</string>
@@ -574,7 +574,7 @@
     <item msgid="3145118944639869809">"Personalizado"</item>
   </string-array>
   <string-array name="organizationTypes">
-    <item msgid="7546335612189115615">"Emprego"</item>
+    <item msgid="7546335612189115615">"Trabalho"</item>
     <item msgid="4378074129049520373">"Outro"</item>
     <item msgid="3455047468583965104">"Personalizado"</item>
   </string-array>
@@ -719,7 +719,7 @@
     <string name="lockscreen_glogin_forgot_pattern" msgid="2588521501166032747">"Desbloqueio da conta"</string>
     <string name="lockscreen_glogin_too_many_attempts" msgid="2751368605287288808">"Demasiadas tentativas para desenhar sequência"</string>
     <string name="lockscreen_glogin_instructions" msgid="3931816256100707784">"Para desbloquear, inicie sessão com a Conta Google."</string>
-    <string name="lockscreen_glogin_username_hint" msgid="8846881424106484447">"Nome de utilizador (e-mail)"</string>
+    <string name="lockscreen_glogin_username_hint" msgid="8846881424106484447">"Nome de utilizador (email)"</string>
     <string name="lockscreen_glogin_password_hint" msgid="5958028383954738528">"Palavra-passe"</string>
     <string name="lockscreen_glogin_submit_button" msgid="7130893694795786300">"Iniciar sessão"</string>
     <string name="lockscreen_glogin_invalid_input" msgid="1364051473347485908">"Nome de utilizador ou palavra-passe inválidos."</string>
@@ -828,8 +828,8 @@
     <string name="oneMonthDurationPast" msgid="7396384508953779925">"Há 1 mês"</string>
     <string name="beforeOneMonthDurationPast" msgid="909134546836499826">"Há mais de 1 mês"</string>
     <plurals name="last_num_days" formatted="false" msgid="5104533550723932025">
-      <item quantity="one">Último <xliff:g id="COUNT_0">%d</xliff:g> dia</item>
       <item quantity="other">Últimos <xliff:g id="COUNT_1">%d</xliff:g> dias</item>
+      <item quantity="one">Último <xliff:g id="COUNT_0">%d</xliff:g> dia</item>
     </plurals>
     <string name="last_month" msgid="3959346739979055432">"Último mês"</string>
     <string name="older" msgid="5211975022815554840">"Mais antiga"</string>
@@ -849,81 +849,81 @@
     <string name="year" msgid="4001118221013892076">"ano"</string>
     <string name="years" msgid="6881577717993213522">"anos"</string>
     <plurals name="duration_seconds" formatted="false" msgid="4527986939729687805">
-      <item quantity="one">1 segundo</item>
       <item quantity="other"><xliff:g id="COUNT">%d</xliff:g> segundos</item>
+      <item quantity="one">1 segundo</item>
     </plurals>
     <plurals name="duration_minutes" formatted="false" msgid="643786953939956125">
-      <item quantity="one">1 minuto</item>
       <item quantity="other"><xliff:g id="COUNT">%d</xliff:g> minutos</item>
+      <item quantity="one">1 minuto</item>
     </plurals>
     <plurals name="duration_hours" formatted="false" msgid="6826233369186668274">
-      <item quantity="one">1 hora</item>
       <item quantity="other"><xliff:g id="COUNT">%d</xliff:g> horas</item>
+      <item quantity="one">1 hora</item>
     </plurals>
     <string name="now_string_shortest" msgid="8912796667087856402">"agora"</string>
     <plurals name="duration_minutes_shortest" formatted="false" msgid="3957499975064245495">
-      <item quantity="one"><xliff:g id="COUNT_0">%d</xliff:g> m</item>
       <item quantity="other"><xliff:g id="COUNT_1">%d</xliff:g> m</item>
+      <item quantity="one"><xliff:g id="COUNT_0">%d</xliff:g> m</item>
     </plurals>
     <plurals name="duration_hours_shortest" formatted="false" msgid="3552182110578602356">
-      <item quantity="one"><xliff:g id="COUNT_0">%d</xliff:g> h</item>
       <item quantity="other"><xliff:g id="COUNT_1">%d</xliff:g> h</item>
+      <item quantity="one"><xliff:g id="COUNT_0">%d</xliff:g> h</item>
     </plurals>
     <plurals name="duration_days_shortest" formatted="false" msgid="5213655532597081640">
-      <item quantity="one"><xliff:g id="COUNT_0">%d</xliff:g> d</item>
       <item quantity="other"><xliff:g id="COUNT_1">%d</xliff:g> d</item>
+      <item quantity="one"><xliff:g id="COUNT_0">%d</xliff:g> d</item>
     </plurals>
     <plurals name="duration_years_shortest" formatted="false" msgid="7848711145196397042">
-      <item quantity="one"><xliff:g id="COUNT_0">%d</xliff:g> a</item>
       <item quantity="other"><xliff:g id="COUNT_1">%d</xliff:g> a</item>
+      <item quantity="one"><xliff:g id="COUNT_0">%d</xliff:g> a</item>
     </plurals>
     <plurals name="duration_minutes_shortest_future" formatted="false" msgid="3277614521231489951">
-      <item quantity="one">dentro de <xliff:g id="COUNT_0">%d</xliff:g> min</item>
       <item quantity="other">dentro de <xliff:g id="COUNT_1">%d</xliff:g> min</item>
+      <item quantity="one">dentro de <xliff:g id="COUNT_0">%d</xliff:g> min</item>
     </plurals>
     <plurals name="duration_hours_shortest_future" formatted="false" msgid="2152452368397489370">
-      <item quantity="one">dentro de <xliff:g id="COUNT_0">%d</xliff:g> h</item>
       <item quantity="other">dentro de <xliff:g id="COUNT_1">%d</xliff:g> h</item>
+      <item quantity="one">dentro de <xliff:g id="COUNT_0">%d</xliff:g> h</item>
     </plurals>
     <plurals name="duration_days_shortest_future" formatted="false" msgid="8088331502820295701">
-      <item quantity="one">dentro de <xliff:g id="COUNT_0">%d</xliff:g> d</item>
       <item quantity="other">dentro de <xliff:g id="COUNT_1">%d</xliff:g> d</item>
+      <item quantity="one">dentro de <xliff:g id="COUNT_0">%d</xliff:g> d</item>
     </plurals>
     <plurals name="duration_years_shortest_future" formatted="false" msgid="2317006667145250301">
-      <item quantity="one">dentro de <xliff:g id="COUNT_0">%d</xliff:g> a</item>
       <item quantity="other">dentro de <xliff:g id="COUNT_1">%d</xliff:g> a</item>
+      <item quantity="one">dentro de <xliff:g id="COUNT_0">%d</xliff:g> a</item>
     </plurals>
     <plurals name="duration_minutes_relative" formatted="false" msgid="3178131706192980192">
-      <item quantity="one">há <xliff:g id="COUNT_0">%d</xliff:g> minuto</item>
       <item quantity="other">há <xliff:g id="COUNT_1">%d</xliff:g> minutos</item>
+      <item quantity="one">há <xliff:g id="COUNT_0">%d</xliff:g> minuto</item>
     </plurals>
     <plurals name="duration_hours_relative" formatted="false" msgid="676894109982008411">
-      <item quantity="one">há <xliff:g id="COUNT_0">%d</xliff:g> hora</item>
       <item quantity="other">há <xliff:g id="COUNT_1">%d</xliff:g> horas</item>
+      <item quantity="one">há <xliff:g id="COUNT_0">%d</xliff:g> hora</item>
     </plurals>
     <plurals name="duration_days_relative" formatted="false" msgid="2203515825765397130">
-      <item quantity="one">há <xliff:g id="COUNT_0">%d</xliff:g> dia</item>
       <item quantity="other">há <xliff:g id="COUNT_1">%d</xliff:g> dias</item>
+      <item quantity="one">há <xliff:g id="COUNT_0">%d</xliff:g> dia</item>
     </plurals>
     <plurals name="duration_years_relative" formatted="false" msgid="4820062134188885734">
-      <item quantity="one">há <xliff:g id="COUNT_0">%d</xliff:g> ano</item>
       <item quantity="other">há <xliff:g id="COUNT_1">%d</xliff:g> anos</item>
+      <item quantity="one">há <xliff:g id="COUNT_0">%d</xliff:g> ano</item>
     </plurals>
     <plurals name="duration_minutes_relative_future" formatted="false" msgid="4655043589817680966">
-      <item quantity="one">dentro de <xliff:g id="COUNT_0">%d</xliff:g> minuto</item>
       <item quantity="other">dentro de <xliff:g id="COUNT_1">%d</xliff:g> minutos</item>
+      <item quantity="one">dentro de <xliff:g id="COUNT_0">%d</xliff:g> minuto</item>
     </plurals>
     <plurals name="duration_hours_relative_future" formatted="false" msgid="8084579714205223891">
-      <item quantity="one">dentro de <xliff:g id="COUNT_0">%d</xliff:g> hora</item>
       <item quantity="other">dentro de <xliff:g id="COUNT_1">%d</xliff:g> horas</item>
+      <item quantity="one">dentro de <xliff:g id="COUNT_0">%d</xliff:g> hora</item>
     </plurals>
     <plurals name="duration_days_relative_future" formatted="false" msgid="333215369363433992">
-      <item quantity="one">dentro de <xliff:g id="COUNT_0">%d</xliff:g> dia</item>
       <item quantity="other">dentro de <xliff:g id="COUNT_1">%d</xliff:g> dias</item>
+      <item quantity="one">dentro de <xliff:g id="COUNT_0">%d</xliff:g> dia</item>
     </plurals>
     <plurals name="duration_years_relative_future" formatted="false" msgid="8644862986413104011">
-      <item quantity="one">dentro de <xliff:g id="COUNT_0">%d</xliff:g> ano</item>
       <item quantity="other">dentro de <xliff:g id="COUNT_1">%d</xliff:g> anos</item>
+      <item quantity="one">dentro de <xliff:g id="COUNT_0">%d</xliff:g> ano</item>
     </plurals>
     <string name="VideoView_error_title" msgid="3534509135438353077">"Problema com o vídeo"</string>
     <string name="VideoView_error_text_invalid_progressive_playback" msgid="3186670335938670444">"Este vídeo não é válido para transmissão em fluxo contínuo neste aparelho."</string>
@@ -1064,12 +1064,12 @@
     <string name="ringtone_picker_title" msgid="3515143939175119094">"Toques"</string>
     <string name="ringtone_unknown" msgid="5477919988701784788">"Toque desconhecido"</string>
     <plurals name="wifi_available" formatted="false" msgid="7900333017752027322">
-      <item quantity="one">Rede Wi-Fi disponível</item>
       <item quantity="other">Redes Wi-Fi disponíveis</item>
+      <item quantity="one">Rede Wi-Fi disponível</item>
     </plurals>
     <plurals name="wifi_available_detailed" formatted="false" msgid="1140699367193975606">
-      <item quantity="one">Rede Wi-Fi aberta disponível</item>
       <item quantity="other">Redes Wi-Fi abertas disponíveis</item>
+      <item quantity="one">Rede Wi-Fi aberta disponível</item>
     </plurals>
     <string name="wifi_available_sign_in" msgid="9157196203958866662">"Iniciar sessão na rede Wi-Fi"</string>
     <string name="network_available_sign_in" msgid="1848877297365446605">"Início de sessão na rede"</string>
@@ -1155,7 +1155,7 @@
     <string name="taking_remote_bugreport_notification_title" msgid="6742483073875060934">"A criar relatório de erro…"</string>
     <string name="share_remote_bugreport_notification_title" msgid="4987095013583691873">"Pretende partilhar o relatório de erro?"</string>
     <string name="sharing_remote_bugreport_notification_title" msgid="7572089031496651372">"A partilhar relatório de erro…"</string>
-    <string name="share_remote_bugreport_notification_message_finished" msgid="8610614010660772643">"O seu administrador de TI solicitou um relatório de erro para ajudar na resolução de problemas deste dispositivo. As aplicações e os dados podem ser partilhados."</string>
+    <string name="share_remote_bugreport_notification_message_finished" msgid="8610614010660772643">"O seu gestor de TI solicitou um relatório de erro para ajudar na resolução de problemas deste dispositivo. As aplicações e os dados podem ser partilhados."</string>
     <string name="share_remote_bugreport_action" msgid="6249476773913384948">"PARTILHAR"</string>
     <string name="decline_remote_bugreport_action" msgid="6230987241608770062">"RECUSAR"</string>
     <string name="select_input_method" msgid="8547250819326693584">"Alterar teclado"</string>
@@ -1260,8 +1260,8 @@
     <string name="no_matches" msgid="8129421908915840737">"Sem correspondências"</string>
     <string name="find_on_page" msgid="1946799233822820384">"Localizar na página"</string>
     <plurals name="matches_found" formatted="false" msgid="1210884353962081884">
-      <item quantity="one">1 correspondência</item>
       <item quantity="other"><xliff:g id="INDEX">%d</xliff:g> de <xliff:g id="TOTAL">%d</xliff:g></item>
+      <item quantity="one">1 correspondência</item>
     </plurals>
     <string name="action_mode_done" msgid="7217581640461922289">"Concluído"</string>
     <string name="progress_erasing" product="nosdcard" msgid="4521573321524340058">"A apagar memória de armazenamento USB..."</string>
@@ -1440,7 +1440,7 @@
     <string name="user_logging_out_message" msgid="8939524935808875155">"A terminar a sessão de <xliff:g id="NAME">%1$s</xliff:g>…"</string>
     <string name="owner_name" msgid="2716755460376028154">"Proprietário"</string>
     <string name="error_message_title" msgid="4510373083082500195">"Erro"</string>
-    <string name="error_message_change_not_allowed" msgid="1347282344200417578">"O administrador não permite esta alteração"</string>
+    <string name="error_message_change_not_allowed" msgid="1347282344200417578">"O gestor não permite esta alteração"</string>
     <string name="app_not_found" msgid="3429141853498927379">"Não foram encontradas aplicações para executar esta ação"</string>
     <string name="revoke" msgid="5404479185228271586">"Revogar"</string>
     <string name="mediasize_iso_a0" msgid="1994474252931294172">"ISO A0"</string>
@@ -1532,7 +1532,7 @@
     <string name="reason_service_unavailable" msgid="7824008732243903268">"Serviço de impressão não ativado"</string>
     <string name="print_service_installed_title" msgid="2246317169444081628">"Serviço <xliff:g id="NAME">%s</xliff:g> instalado"</string>
     <string name="print_service_installed_message" msgid="5897362931070459152">"Toque para ativar"</string>
-    <string name="restr_pin_enter_admin_pin" msgid="783643731895143970">"Introduza o PIN de administrador"</string>
+    <string name="restr_pin_enter_admin_pin" msgid="783643731895143970">"Introduza o PIN de gestor"</string>
     <string name="restr_pin_enter_pin" msgid="3395953421368476103">"Introduzir PIN"</string>
     <string name="restr_pin_incorrect" msgid="8571512003955077924">"Incorreto"</string>
     <string name="restr_pin_enter_old_pin" msgid="1462206225512910757">"PIN Atual"</string>
@@ -1542,8 +1542,8 @@
     <string name="restr_pin_error_doesnt_match" msgid="2224214190906994548">"Os PINs não correspondem. Tente novamente."</string>
     <string name="restr_pin_error_too_short" msgid="8173982756265777792">"O PIN é demasiado pequeno. Deve ter, no mínimo, 4 dígitos."</string>
     <plurals name="restr_pin_countdown" formatted="false" msgid="9061246974881224688">
-      <item quantity="one">Tente novamente dentro de 1 segundo</item>
       <item quantity="other">Tente novamente dentro de <xliff:g id="COUNT">%d</xliff:g> segundos</item>
+      <item quantity="one">Tente novamente dentro de 1 segundo</item>
     </plurals>
     <string name="restr_pin_try_later" msgid="973144472490532377">"Tente novamente mais tarde"</string>
     <string name="immersive_cling_title" msgid="8394201622932303336">"Visualização de ecrã inteiro"</string>
@@ -1565,44 +1565,44 @@
     <string name="lock_to_app_unlock_pin" msgid="2552556656504331634">"Pedir PIN antes de soltar"</string>
     <string name="lock_to_app_unlock_pattern" msgid="4182192144797225137">"Pedir sequência de desbloqueio antes de soltar"</string>
     <string name="lock_to_app_unlock_password" msgid="6380979775916974414">"Pedir palavra-passe antes de soltar"</string>
-    <string name="package_installed_device_owner" msgid="8420696545959087545">"Instalado pelo administrador"</string>
-    <string name="package_updated_device_owner" msgid="8856631322440187071">"Atualizado pelo administrador"</string>
-    <string name="package_deleted_device_owner" msgid="7650577387493101353">"Eliminado pelo administrador"</string>
+    <string name="package_installed_device_owner" msgid="8420696545959087545">"Instalado pelo gestor"</string>
+    <string name="package_updated_device_owner" msgid="8856631322440187071">"Atualizado pelo gestor"</string>
+    <string name="package_deleted_device_owner" msgid="7650577387493101353">"Eliminado pelo gestor"</string>
     <string name="battery_saver_description" msgid="1960431123816253034">"Para ajudar a melhorar a autonomia da bateria, a poupança de bateria reduz o desempenho do seu dispositivo e limita a vibração, os serviços de localização e a maioria dos dados em segundo plano. O email, as mensagens e outras aplicações que dependem da sincronização não podem ser atualizados exceto se os abrir.\n\nA poupança de bateria desliga-se automaticamente quando o dispositivo está a carregar."</string>
     <string name="data_saver_description" msgid="6015391409098303235">"Para ajudar a reduzir a utilização de dados, a Poupança de dados impede que algumas aplicações enviem ou recebam dados em segundo plano. Uma determinada aplicação que esteja a utilizar atualmente pode aceder aos dados, mas é possível que o faça com menos frequência. Isto pode significar, por exemplo, que as imagens não são apresentadas até que toque nas mesmas."</string>
     <string name="data_saver_enable_title" msgid="4674073932722787417">"Ativar a Poupança de dados?"</string>
     <string name="data_saver_enable_button" msgid="7147735965247211818">"Ativar"</string>
     <plurals name="zen_mode_duration_minutes_summary" formatted="false" msgid="4367877408072000848">
-      <item quantity="one">Durante um minuto (até à(s) <xliff:g id="FORMATTEDTIME_0">%2$s</xliff:g>)</item>
       <item quantity="other">Durante %1$d minutos (até à(s) <xliff:g id="FORMATTEDTIME_1">%2$s</xliff:g>)</item>
+      <item quantity="one">Durante um minuto (até à(s) <xliff:g id="FORMATTEDTIME_0">%2$s</xliff:g>)</item>
     </plurals>
     <plurals name="zen_mode_duration_minutes_summary_short" formatted="false" msgid="6830154222366042597">
-      <item quantity="one">Durante 1 min (até à(s) <xliff:g id="FORMATTEDTIME_0">%2$s</xliff:g>)</item>
       <item quantity="other">Durante %1$d min (até à(s) <xliff:g id="FORMATTEDTIME_1">%2$s</xliff:g>)</item>
+      <item quantity="one">Durante 1 min (até à(s) <xliff:g id="FORMATTEDTIME_0">%2$s</xliff:g>)</item>
     </plurals>
     <plurals name="zen_mode_duration_hours_summary" formatted="false" msgid="8152974162096743862">
-      <item quantity="one">Durante uma hora (até à(s) <xliff:g id="FORMATTEDTIME_0">%2$s</xliff:g>)</item>
       <item quantity="other">Durante %1$d horas (até à(s) <xliff:g id="FORMATTEDTIME_1">%2$s</xliff:g>)</item>
+      <item quantity="one">Durante uma hora (até à(s) <xliff:g id="FORMATTEDTIME_0">%2$s</xliff:g>)</item>
     </plurals>
     <plurals name="zen_mode_duration_hours_summary_short" formatted="false" msgid="4787552595253082371">
-      <item quantity="one">Durante 1 h (até à(s) <xliff:g id="FORMATTEDTIME_0">%2$s</xliff:g>)</item>
       <item quantity="other">Durante %1$d h (até à(s) <xliff:g id="FORMATTEDTIME_1">%2$s</xliff:g>)</item>
+      <item quantity="one">Durante 1 h (até à(s) <xliff:g id="FORMATTEDTIME_0">%2$s</xliff:g>)</item>
     </plurals>
     <plurals name="zen_mode_duration_minutes" formatted="false" msgid="5127407202506485571">
-      <item quantity="one">Durante um minuto</item>
       <item quantity="other">Durante %d minutos</item>
+      <item quantity="one">Durante um minuto</item>
     </plurals>
     <plurals name="zen_mode_duration_minutes_short" formatted="false" msgid="2199350154433426128">
-      <item quantity="one">Durante 1 min</item>
       <item quantity="other">Durante %d min</item>
+      <item quantity="one">Durante 1 min</item>
     </plurals>
     <plurals name="zen_mode_duration_hours" formatted="false" msgid="3938821308277433854">
-      <item quantity="one">Durante uma hora</item>
       <item quantity="other">Durante %d horas</item>
+      <item quantity="one">Durante uma hora</item>
     </plurals>
     <plurals name="zen_mode_duration_hours_short" formatted="false" msgid="6748277774662434217">
-      <item quantity="one">Durante 1 h</item>
       <item quantity="other">Durante %d h</item>
+      <item quantity="one">Durante 1 h</item>
     </plurals>
     <string name="zen_mode_until" msgid="7336308492289875088">"Até às <xliff:g id="FORMATTEDTIME">%1$s</xliff:g>"</string>
     <string name="zen_mode_alarm" msgid="9128205721301330797">"Até <xliff:g id="FORMATTEDTIME">%1$s</xliff:g> (próximo alarme)"</string>
@@ -1636,8 +1636,8 @@
     <string name="close_button_text" msgid="3937902162644062866">"Fechar"</string>
     <string name="notification_messaging_title_template" msgid="3452480118762691020">"<xliff:g id="CONVERSATION_TITLE">%1$s</xliff:g>: <xliff:g id="SENDER_NAME">%2$s</xliff:g>"</string>
     <plurals name="selected_count" formatted="false" msgid="7187339492915744615">
-      <item quantity="one"><xliff:g id="COUNT_0">%1$d</xliff:g> selecionado</item>
       <item quantity="other"><xliff:g id="COUNT_1">%1$d</xliff:g> selecionados</item>
+      <item quantity="one"><xliff:g id="COUNT_0">%1$d</xliff:g> selecionado</item>
     </plurals>
     <string name="importance_from_user" msgid="7318955817386549931">"Definiu a importância destas notificações."</string>
     <string name="importance_from_person" msgid="9160133597262938296">"É importante devido às pessoas envolvidas."</string>

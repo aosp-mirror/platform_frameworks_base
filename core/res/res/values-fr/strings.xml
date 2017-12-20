@@ -245,7 +245,7 @@
     <string name="managed_profile_label" msgid="5289992269827577857">"Passer au profil professionnel"</string>
     <string name="permgrouplab_contacts" msgid="3657758145679177612">"Contacts"</string>
     <string name="permgroupdesc_contacts" msgid="6951499528303668046">"accéder à vos contacts"</string>
-    <string name="permgrouplab_location" msgid="7275582855722310164">"Position"</string>
+    <string name="permgrouplab_location" msgid="7275582855722310164">"Localisation"</string>
     <string name="permgroupdesc_location" msgid="1346617465127855033">"accéder à la position de l\'appareil"</string>
     <string name="permgrouplab_calendar" msgid="5863508437783683902">"Agenda"</string>
     <string name="permgroupdesc_calendar" msgid="3889615280211184106">"accéder à votre agenda"</string>
