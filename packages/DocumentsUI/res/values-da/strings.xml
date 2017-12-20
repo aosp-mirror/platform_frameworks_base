@@ -117,8 +117,8 @@
     <string name="allow" msgid="7225948811296386551">"Tillad"</string>
     <string name="deny" msgid="2081879885755434506">"Afvis"</string>
     <plurals name="elements_selected" formatted="false" msgid="1376955402452875047">
-      <item quantity="one">Der er valgt <xliff:g id="COUNT_1">%1$d</xliff:g></item>
-      <item quantity="other">Der er valgt <xliff:g id="COUNT_1">%1$d</xliff:g></item>
+      <item quantity="one"><xliff:g id="COUNT_1">%1$d</xliff:g> er markeret</item>
+      <item quantity="other"><xliff:g id="COUNT_1">%1$d</xliff:g> er markeret</item>
     </plurals>
     <plurals name="elements_dragged" formatted="false" msgid="3727204615215602228">
       <item quantity="one"><xliff:g id="COUNT_1">%1$d</xliff:g> element</item>

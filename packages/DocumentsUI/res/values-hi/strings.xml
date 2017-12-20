@@ -28,7 +28,7 @@
     <string name="menu_settings" msgid="8239065133341597825">"मेमोरी सेटिंग"</string>
     <string name="menu_open" msgid="432922957274920903">"खोलें"</string>
     <string name="menu_save" msgid="2394743337684426338">"जोड़ें"</string>
-    <string name="menu_share" msgid="3075149983979628146">"साझा करें"</string>
+    <string name="menu_share" msgid="3075149983979628146">"शेयर करें"</string>
     <string name="menu_delete" msgid="8138799623850614177">"मिटाएं"</string>
     <string name="menu_select_all" msgid="8323579667348729928">"सभी चुनें"</string>
     <string name="menu_copy" msgid="3612326052677229148">"इनकी कॉपी बनाएं..."</string>
@@ -63,7 +63,7 @@
     <string name="no_results" msgid="6622510343880730446">"%1$s में कोई मिलान नहीं मिला"</string>
     <string name="toast_no_application" msgid="4632640357724698144">"फ़ाइल नहीं खोली जा सकती"</string>
     <string name="toast_failed_delete" msgid="2180678019407244069">"कुछ दस्तावेज़ों को हटाने में अक्षम"</string>
-    <string name="share_via" msgid="8966594246261344259">"इसके द्वारा साझा करें"</string>
+    <string name="share_via" msgid="8966594246261344259">"इसके ज़रिए शेयर करें"</string>
     <string name="copy_notification_title" msgid="6374299806748219777">"फ़ाइलें कॉपी हो रही हैं"</string>
     <string name="move_notification_title" msgid="6193835179777284805">"फाइलें ले जाई जा रही हैं"</string>
     <string name="delete_notification_title" msgid="3329403967712437496">"फ़ाइलें हटाई जा रही हैं"</string>

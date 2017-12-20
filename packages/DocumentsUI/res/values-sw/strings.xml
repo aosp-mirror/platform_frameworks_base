@@ -96,7 +96,7 @@
       <item quantity="other">Haikuweza kufuta faili <xliff:g id="COUNT_1">%1$d</xliff:g></item>
       <item quantity="one">Haikuweza kufuta faili <xliff:g id="COUNT_0">%1$d</xliff:g></item>
     </plurals>
-    <string name="notification_touch_for_details" msgid="6268189413228855582">"Gonga ili uangalie maelezo"</string>
+    <string name="notification_touch_for_details" msgid="6268189413228855582">"Gusa ili uangalie maelezo"</string>
     <string name="close" msgid="3043722427445528732">"Funga"</string>
     <string name="copy_failure_alert_content" msgid="4563147454522476183">"Haikunakili faili zifuatazo: <xliff:g id="LIST">%1$s</xliff:g>"</string>
     <string name="move_failure_alert_content" msgid="2635075788682922861">"Haikuhamisha faili zifuatazo: <xliff:g id="LIST">%1$s</xliff:g>"</string>
