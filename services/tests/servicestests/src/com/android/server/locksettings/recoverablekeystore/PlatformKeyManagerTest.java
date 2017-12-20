@@ -36,6 +36,8 @@ import android.support.test.InstrumentationRegistry;
 import android.support.test.filters.SmallTest;
 import android.support.test.runner.AndroidJUnit4;
 
+import com.android.server.locksettings.recoverablekeystore.storage.RecoverableKeyStoreDb;
+
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -45,6 +47,7 @@ import org.mockito.Captor;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
+import java.io.File;
 import java.security.KeyStore;
 import java.util.List;
 
@@ -52,9 +55,9 @@ import java.util.List;
 @RunWith(AndroidJUnit4.class)
 public class PlatformKeyManagerTest {
 
+    private static final String DATABASE_FILE_NAME = "recoverablekeystore.db";
     private static final int USER_AUTHENTICATION_VALIDITY_DURATION_SECONDS = 15;
     private static final int USER_ID_FIXTURE = 42;
-    private static final String TEST_SHARED_PREFS_NAME = "PlatformKeyManagerTestPrefs";
 
     @Mock private Context mContext;
     @Mock private KeyStoreProxy mKeyStoreProxy;
@@ -63,18 +66,20 @@ public class PlatformKeyManagerTest {
     @Captor private ArgumentCaptor<KeyStore.ProtectionParameter> mProtectionParameterCaptor;
     @Captor private ArgumentCaptor<KeyStore.Entry> mEntryArgumentCaptor;
 
-    private SharedPreferences mSharedPreferences;
+    private RecoverableKeyStoreDb mRecoverableKeyStoreDb;
+    private File mDatabaseFile;
+
     private PlatformKeyManager mPlatformKeyManager;
 
     @Before
     public void setUp() {
         MockitoAnnotations.initMocks(this);
 
-        Context testContext = InstrumentationRegistry.getTargetContext();
-        mSharedPreferences = testContext.getSharedPreferences(
-                TEST_SHARED_PREFS_NAME, Context.MODE_PRIVATE);
+        Context context = InstrumentationRegistry.getTargetContext();
+        mDatabaseFile = context.getDatabasePath(DATABASE_FILE_NAME);
+        mRecoverableKeyStoreDb = RecoverableKeyStoreDb.newInstance(context);
         mPlatformKeyManager = new PlatformKeyManager(
-                USER_ID_FIXTURE, mContext, mKeyStoreProxy, mSharedPreferences);
+                USER_ID_FIXTURE, mContext, mKeyStoreProxy, mRecoverableKeyStoreDb);
 
         when(mContext.getSystemService(anyString())).thenReturn(mKeyguardManager);
         when(mContext.getSystemServiceName(any())).thenReturn("test");
@@ -83,7 +88,8 @@ public class PlatformKeyManagerTest {
 
     @After
     public void tearDown() {
-        mSharedPreferences.edit().clear().commit();
+        mRecoverableKeyStoreDb.close();
+        mDatabaseFile.delete();
     }
 
     @Test

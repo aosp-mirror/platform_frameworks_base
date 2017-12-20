@@ -18,16 +18,14 @@ package com.android.server.locksettings.recoverablekeystore;
 
 import android.app.KeyguardManager;
 import android.content.Context;
-import android.content.SharedPreferences;
-import android.os.Environment;
 import android.security.keystore.AndroidKeyStoreSecretKey;
 import android.security.keystore.KeyProperties;
 import android.security.keystore.KeyProtection;
 import android.util.Log;
 
 import com.android.internal.annotations.VisibleForTesting;
+import com.android.server.locksettings.recoverablekeystore.storage.RecoverableKeyStoreDb;
 
-import java.io.File;
 import java.io.IOException;
 import java.security.KeyStore;
 import java.security.KeyStoreException;
@@ -64,8 +62,6 @@ public class PlatformKeyManager {
 
     private static final String KEY_ALGORITHM = "AES";
     private static final int KEY_SIZE_BITS = 256;
-    private static final String SHARED_PREFS_KEY_GENERATION_ID = "generationId";
-    private static final String SHARED_PREFS_PATH = "/system/recoverablekeystore/platform_keys.xml";
     private static final String KEY_ALIAS_PREFIX =
             "com.android.server.locksettings.recoverablekeystore/platform/";
     private static final String ENCRYPT_KEY_ALIAS_SUFFIX = "encrypt";
@@ -74,7 +70,7 @@ public class PlatformKeyManager {
 
     private final Context mContext;
     private final KeyStoreProxy mKeyStore;
-    private final SharedPreferences mSharedPreferences;
+    private final RecoverableKeyStoreDb mDatabase;
     private final int mUserId;
 
     private static final String ANDROID_KEY_STORE_PROVIDER = "AndroidKeyStore";
@@ -92,17 +88,14 @@ public class PlatformKeyManager {
      *
      * @hide
      */
-    public static PlatformKeyManager getInstance(Context context, int userId)
+    public static PlatformKeyManager getInstance(Context context, RecoverableKeyStoreDb database, int userId)
             throws KeyStoreException, NoSuchAlgorithmException, InsecureUserException {
         context = context.getApplicationContext();
-        File sharedPreferencesFile = new File(
-                Environment.getDataDirectory().getAbsoluteFile(), SHARED_PREFS_PATH);
-        sharedPreferencesFile.mkdirs();
         PlatformKeyManager keyManager = new PlatformKeyManager(
                 userId,
                 context,
                 new KeyStoreProxyImpl(getAndLoadAndroidKeyStore()),
-                context.getSharedPreferences(sharedPreferencesFile, Context.MODE_PRIVATE));
+                database);
         keyManager.init();
         return keyManager;
     }
@@ -112,11 +105,11 @@ public class PlatformKeyManager {
             int userId,
             Context context,
             KeyStoreProxy keyStore,
-            SharedPreferences sharedPreferences) {
+            RecoverableKeyStoreDb database) {
         mUserId = userId;
         mKeyStore = keyStore;
         mContext = context;
-        mSharedPreferences = sharedPreferences;
+        mDatabase = database;
     }
 
     /**
@@ -127,7 +120,11 @@ public class PlatformKeyManager {
      * @hide
      */
     public int getGenerationId() {
-        return mSharedPreferences.getInt(getGenerationIdKey(), 1);
+        int generationId = mDatabase.getPlatformKeyGenerationId(mUserId);
+        if (generationId == -1) {
+            return 1;
+        }
+        return generationId;
     }
 
     /**
@@ -150,9 +147,9 @@ public class PlatformKeyManager {
      * @hide
      */
     public void regenerate() throws NoSuchAlgorithmException, KeyStoreException {
-        int generationId = getGenerationId();
-        generateAndLoadKey(generationId + 1);
-        setGenerationId(generationId + 1);
+        int nextId = getGenerationId() + 1;
+        generateAndLoadKey(nextId);
+        setGenerationId(nextId);
     }
 
     /**
@@ -252,14 +249,7 @@ public class PlatformKeyManager {
      * Sets the current generation ID to {@code generationId}.
      */
     private void setGenerationId(int generationId) {
-        mSharedPreferences.edit().putInt(getGenerationIdKey(), generationId).commit();
-    }
-
-    /**
-     * Returns the current user's generation ID key in the shared preferences.
-     */
-    private String getGenerationIdKey() {
-        return SHARED_PREFS_KEY_GENERATION_ID + "/" + mUserId;
+        mDatabase.setPlatformKeyGenerationId(mUserId, generationId);
     }
 
     /**
