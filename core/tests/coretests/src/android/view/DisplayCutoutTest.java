@@ -25,6 +25,7 @@ import static org.junit.Assert.assertTrue;
 
 import android.graphics.Point;
 import android.graphics.Rect;
+import android.graphics.Region;
 import android.os.Parcel;
 import android.platform.test.annotations.Presubmit;
 import android.support.test.filters.SmallTest;
@@ -34,7 +35,6 @@ import android.view.DisplayCutout.ParcelableWrapper;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
-import java.util.ArrayList;
 import java.util.Arrays;
 
 @RunWith(AndroidJUnit4.class)
@@ -45,19 +45,14 @@ public class DisplayCutoutTest {
     /** This is not a consistent cutout. Useful for verifying insets in one go though. */
     final DisplayCutout mCutoutNumbers = new DisplayCutout(
             new Rect(1, 2, 3, 4),
-            new Rect(5, 6, 7, 8),
-            Arrays.asList(
-                    new Point(9, 10),
-                    new Point(11, 12),
-                    new Point(13, 14),
-                    new Point(15, 16)));
+            new Region(5, 6, 7, 8));
 
     final DisplayCutout mCutoutTop = createCutoutTop();
 
     @Test
     public void hasCutout() throws Exception {
-        assertFalse(NO_CUTOUT.hasCutout());
-        assertTrue(mCutoutTop.hasCutout());
+        assertTrue(NO_CUTOUT.isEmpty());
+        assertFalse(mCutoutTop.isEmpty());
     }
 
     @Test
@@ -67,30 +62,12 @@ public class DisplayCutoutTest {
         assertEquals(3, mCutoutNumbers.getSafeInsetRight());
         assertEquals(4, mCutoutNumbers.getSafeInsetBottom());
 
-        Rect safeInsets = new Rect();
-        mCutoutNumbers.getSafeInsets(safeInsets);
-
-        assertEquals(new Rect(1, 2, 3, 4), safeInsets);
+        assertEquals(new Rect(1, 2, 3, 4), mCutoutNumbers.getSafeInsets());
     }
 
     @Test
     public void getBoundingRect() throws Exception {
-        Rect boundingRect = new Rect();
-        mCutoutTop.getBoundingRect(boundingRect);
-
-        assertEquals(new Rect(50, 0, 75, 100), boundingRect);
-    }
-
-    @Test
-    public void getBoundingPolygon() throws Exception {
-        ArrayList<Point> boundingPolygon = new ArrayList<>();
-        mCutoutTop.getBoundingPolygon(boundingPolygon);
-
-        assertEquals(Arrays.asList(
-                new Point(75, 0),
-                new Point(50, 0),
-                new Point(75, 100),
-                new Point(50, 100)), boundingPolygon);
+        assertEquals(new Rect(50, 0, 75, 100), mCutoutTop.getBoundingRect());
     }
 
     @Test
@@ -167,104 +144,61 @@ public class DisplayCutoutTest {
         assertEquals(cutout.getSafeInsetRight(), 0);
         assertEquals(cutout.getSafeInsetBottom(), 0);
 
-        assertFalse(cutout.hasCutout());
+        assertTrue(cutout.isEmpty());
     }
 
     @Test
     public void inset_bounds() throws Exception {
         DisplayCutout cutout = mCutoutTop.inset(1, 2, 3, 4);
 
-        Rect boundingRect = new Rect();
-        cutout.getBoundingRect(boundingRect);
-
-        assertEquals(new Rect(49, -2, 74, 98), boundingRect);
-
-        ArrayList<Point> boundingPolygon = new ArrayList<>();
-        cutout.getBoundingPolygon(boundingPolygon);
-
-        assertEquals(Arrays.asList(
-                new Point(74, -2),
-                new Point(49, -2),
-                new Point(74, 98),
-                new Point(49, 98)), boundingPolygon);
+        assertEquals(new Rect(49, -2, 74, 98), cutout.getBoundingRect());
     }
 
     @Test
     public void calculateRelativeTo_top() throws Exception {
         DisplayCutout cutout = mCutoutTop.calculateRelativeTo(new Rect(0, 0, 200, 400));
 
-        Rect insets = new Rect();
-        cutout.getSafeInsets(insets);
-
-        assertEquals(new Rect(0, 100, 0, 0), insets);
+        assertEquals(new Rect(0, 100, 0, 0), cutout.getSafeInsets());
     }
 
     @Test
     public void calculateRelativeTo_left() throws Exception {
         DisplayCutout cutout = mCutoutTop.calculateRelativeTo(new Rect(0, 0, 400, 200));
 
-        Rect insets = new Rect();
-        cutout.getSafeInsets(insets);
-
-        assertEquals(new Rect(75, 0, 0, 0), insets);
+        assertEquals(new Rect(75, 0, 0, 0), cutout.getSafeInsets());
     }
 
     @Test
     public void calculateRelativeTo_bottom() throws Exception {
         DisplayCutout cutout = mCutoutTop.calculateRelativeTo(new Rect(0, -300, 200, 100));
 
-        Rect insets = new Rect();
-        cutout.getSafeInsets(insets);
-
-        assertEquals(new Rect(0, 0, 0, 100), insets);
+        assertEquals(new Rect(0, 0, 0, 100), cutout.getSafeInsets());
     }
 
     @Test
     public void calculateRelativeTo_right() throws Exception {
         DisplayCutout cutout = mCutoutTop.calculateRelativeTo(new Rect(-400, -200, 100, 100));
 
-        Rect insets = new Rect();
-        cutout.getSafeInsets(insets);
-
-        assertEquals(new Rect(0, 0, 50, 0), insets);
+        assertEquals(new Rect(0, 0, 50, 0), cutout.getSafeInsets());
     }
 
     @Test
     public void calculateRelativeTo_bounds() throws Exception {
         DisplayCutout cutout = mCutoutTop.calculateRelativeTo(new Rect(-1000, -2000, 100, 200));
 
-
-        Rect boundingRect = new Rect();
-        cutout.getBoundingRect(boundingRect);
-        assertEquals(new Rect(1050, 2000, 1075, 2100), boundingRect);
-
-        ArrayList<Point> boundingPolygon = new ArrayList<>();
-        cutout.getBoundingPolygon(boundingPolygon);
-
-        assertEquals(Arrays.asList(
-                new Point(1075, 2000),
-                new Point(1050, 2000),
-                new Point(1075, 2100),
-                new Point(1050, 2100)), boundingPolygon);
+        assertEquals(new Rect(1050, 2000, 1075, 2100), cutout.getBoundingRect());
     }
 
     @Test
     public void fromBoundingPolygon() throws Exception {
         assertEquals(
-                new DisplayCutout(
-                        new Rect(0, 0, 0, 0), // fromBoundingPolygon won't calculate safe insets.
-                        new Rect(50, 0, 75, 100),
-                        Arrays.asList(
-                                new Point(75, 0),
-                                new Point(50, 0),
-                                new Point(75, 100),
-                                new Point(50, 100))),
+                new Rect(50, 0, 75, 100),
                 DisplayCutout.fromBoundingPolygon(
                         Arrays.asList(
                                 new Point(75, 0),
                                 new Point(50, 0),
                                 new Point(75, 100),
-                                new Point(50, 100))));
+                                new Point(50, 100))).getBounds().getBounds());
     }
 
     @Test
@@ -324,24 +258,12 @@ public class DisplayCutoutTest {
     }
 
     private static DisplayCutout createCutoutTop() {
-        return new DisplayCutout(
-                new Rect(0, 100, 0, 0),
-                new Rect(50, 0, 75, 100),
-                Arrays.asList(
-                        new Point(75, 0),
-                        new Point(50, 0),
-                        new Point(75, 100),
-                        new Point(50, 100)));
+        return createCutoutWithInsets(0, 100, 0, 0);
     }
 
     private static DisplayCutout createCutoutWithInsets(int left, int top, int right, int bottom) {
         return new DisplayCutout(
                 new Rect(left, top, right, bottom),
-                new Rect(50, 0, 75, 100),
-                Arrays.asList(
-                        new Point(75, 0),
-                        new Point(50, 0),
-                        new Point(75, 100),
-                        new Point(50, 100)));
+                new Region(50, 0, 75, 100));
     }
 }

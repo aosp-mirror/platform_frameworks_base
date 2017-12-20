@@ -451,9 +451,9 @@ public class WindowFrameTests extends WindowTestsBase {
     private DisplayCutout createDisplayCutoutFromRect(int left, int top, int right, int bottom) {
         return DisplayCutout.fromBoundingPolygon(Arrays.asList(
                 new Point(left, top),
-                new Point (left, bottom),
-                new Point (right, bottom),
-                new Point (left, bottom)
+                new Point(left, bottom),
+                new Point(right, bottom),
+                new Point(right, top)
         ));
     }
 }

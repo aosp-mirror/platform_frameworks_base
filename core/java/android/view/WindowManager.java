@@ -1286,7 +1286,6 @@ public interface WindowManager extends ViewManager {
          * The window must correctly position its contents to take the display cutout into account.
          *
          * @see DisplayCutout
-         * @hide for now
          */
         public static final long FLAG2_LAYOUT_IN_DISPLAY_CUTOUT_AREA = 0x00000001;
 
@@ -1294,7 +1293,6 @@ public interface WindowManager extends ViewManager {
          * Various behavioral options/flags.  Default is none.
          *
          * @see #FLAG2_LAYOUT_IN_DISPLAY_CUTOUT_AREA
-         * @hide for now
          */
         @Flags2 public long flags2;
 
@@ -2249,6 +2247,7 @@ public interface WindowManager extends ViewManager {
             out.writeInt(y);
             out.writeInt(type);
             out.writeInt(flags);
+            out.writeLong(flags2);
             out.writeInt(privateFlags);
             out.writeInt(softInputMode);
             out.writeInt(gravity);
@@ -2304,6 +2303,7 @@ public interface WindowManager extends ViewManager {
             y = in.readInt();
             type = in.readInt();
             flags = in.readInt();
+            flags2 = in.readLong();
             privateFlags = in.readInt();
             softInputMode = in.readInt();
             gravity = in.readInt();
@@ -2434,6 +2434,10 @@ public interface WindowManager extends ViewManager {
                     changes |= TRANSLUCENT_FLAGS_CHANGED;
                 }
                 flags = o.flags;
+                changes |= FLAGS_CHANGED;
+            }
+            if (flags2 != o.flags2) {
+                flags2 = o.flags2;
                 changes |= FLAGS_CHANGED;
             }
             if (privateFlags != o.privateFlags) {
@@ -2689,6 +2693,11 @@ public interface WindowManager extends ViewManager {
             sb.append(System.lineSeparator());
             sb.append(prefix).append("  fl=").append(
                     ViewDebug.flagsToString(LayoutParams.class, "flags", flags));
+            if (flags2 != 0) {
+                sb.append(System.lineSeparator());
+                // TODO(roosa): add a long overload for ViewDebug.flagsToString.
+                sb.append(prefix).append("  fl2=0x").append(Long.toHexString(flags2));
+            }
             if (privateFlags != 0) {
                 sb.append(System.lineSeparator());
                 sb.append(prefix).append("  pfl=").append(ViewDebug.flagsToString(
