@@ -22,9 +22,9 @@
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
     <string name="app_name" msgid="719438068451601849">"Čuvar tastature"</string>
     <string name="keyguard_password_enter_pin_code" msgid="3037685796058495017">"Unesite PIN"</string>
-    <string name="keyguard_password_enter_puk_code" msgid="3035856550289724338">"Unesite SIM PUK i novi PIN kôd"</string>
+    <string name="keyguard_password_enter_puk_code" msgid="3035856550289724338">"Unesite SIM PUK i novi PIN"</string>
     <string name="keyguard_password_enter_puk_prompt" msgid="1801941051094974609">"SIM PUK kôd"</string>
-    <string name="keyguard_password_enter_pin_prompt" msgid="3201151840570492538">"Novi SIM PIN kôd"</string>
+    <string name="keyguard_password_enter_pin_prompt" msgid="3201151840570492538">"Novi SIM PIN"</string>
     <string name="keyguard_password_entry_touch_hint" msgid="7858547464982981384"><font size="17">"Dodirnite za unos lozinke"</font></string>
     <string name="keyguard_password_enter_password_code" msgid="1054721668279049780">"Unesite lozinku za otključavanje tipkovnice"</string>
     <string name="keyguard_password_enter_pin_password_code" msgid="6391755146112503443">"Unesite PIN za otključavanje tipkovnice"</string>
@@ -64,13 +64,13 @@
     <string name="kg_password_instructions" msgid="5753646556186936819">"Unesite lozinku"</string>
     <string name="kg_puk_enter_puk_hint" msgid="453227143861735537">"SIM je sada onemogućen. Unesite PUK kôd da nastavite. Za više informacija obratite se operateru."</string>
     <string name="kg_puk_enter_puk_hint_multi" msgid="363822494559783025">"SIM operator \"<xliff:g id="CARRIER">%1$s</xliff:g>\" je sada isključen. Unesite PUK kôd da nastavite. Za više informacija obratite se operateru."</string>
-    <string name="kg_puk_enter_pin_hint" msgid="7871604527429602024">"Unesite željeni PIN kôd"</string>
-    <string name="kg_enter_confirm_pin_hint" msgid="325676184762529976">"Potvrdi željeni PIN kôd"</string>
+    <string name="kg_puk_enter_pin_hint" msgid="7871604527429602024">"Unesite željeni PIN"</string>
+    <string name="kg_enter_confirm_pin_hint" msgid="325676184762529976">"Potvrdi željeni PIN"</string>
     <string name="kg_sim_unlock_progress_dialog_message" msgid="8950398016976865762">"Otključavanje SIM kartice…"</string>
     <string name="kg_invalid_sim_pin_hint" msgid="8795159358110620001">"Unesite PIN koji sadrži od 4 do 8 brojeva."</string>
     <string name="kg_invalid_sim_puk_hint" msgid="7553388325654369575">"PUK kôd treba da sadrži 8 brojeva ili više."</string>
     <string name="kg_invalid_puk" msgid="3638289409676051243">"Ponovo unesite ispravan PUK kôd. Ponovljeni pokušaji će trajno onemogućiti SIM."</string>
-    <string name="kg_invalid_confirm_pin_hint" product="default" msgid="7003469261464593516">"PIN kodovi se ne poklapaju"</string>
+    <string name="kg_invalid_confirm_pin_hint" product="default" msgid="7003469261464593516">"PIN-ovi se ne poklapaju"</string>
     <string name="kg_login_too_many_attempts" msgid="6486842094005698475">"Previše pokušaja otključavanja pomoću uzorka"</string>
     <string name="kg_too_many_failed_pin_attempts_dialog_message" msgid="8276745642049502550">"Pogrešno ste unijeli PIN <xliff:g id="NUMBER_0">%1$d</xliff:g> puta. \n\nBroj sekundi do sljedećeg pokušaja: <xliff:g id="NUMBER_1">%2$d</xliff:g>."</string>
     <string name="kg_too_many_failed_password_attempts_dialog_message" msgid="7813713389422226531">"Pogrešno ste unijeli lozinku <xliff:g id="NUMBER_0">%1$d</xliff:g> puta. \n\nBroj sekundi do sljedećeg pokušaja: <xliff:g id="NUMBER_1">%2$d</xliff:g>."</string>
@@ -89,11 +89,11 @@
     <string name="kg_failed_attempts_now_erasing_profile" product="default" msgid="4951507352869831265">"Pokušali ste <xliff:g id="NUMBER">%d</xliff:g> puta neispravno otključati telefon. Poslovni profil će biti uklonjen a svi podaci s profila bit će izbrisani."</string>
     <string name="kg_failed_attempts_almost_at_login" product="tablet" msgid="3253575572118914370">"Pogrešno ste nacrtali uzorak za otključavanje <xliff:g id="NUMBER_0">%1$d</xliff:g> puta. Ako napravite još <xliff:g id="NUMBER_1">%2$d</xliff:g> pokušaja bez uspjeha, od vas će se tražiti da otključate tablet pomoću e-pošte. \n\n Pokušajte ponovo za <xliff:g id="NUMBER_2">%3$d</xliff:g> sek."</string>
     <string name="kg_failed_attempts_almost_at_login" product="default" msgid="1437638152015574839">"Pogrešno ste nacrtali uzorak za otključavanje <xliff:g id="NUMBER_0">%1$d</xliff:g> puta. Ako napravite još <xliff:g id="NUMBER_1">%2$d</xliff:g> pokušaja bez uspjeha, od vas će se tražiti da otključate telefon pomoću e-pošte. \n\n Pokušajte ponovo za <xliff:g id="NUMBER_2">%3$d</xliff:g> sek."</string>
-    <string name="kg_password_wrong_pin_code_pukked" msgid="30531039455764924">"Pogrešan PIN kôd za SIM. Morate obratiti svom operateru za otključavanje uređaja."</string>
+    <string name="kg_password_wrong_pin_code_pukked" msgid="30531039455764924">"Pogrešan PIN za SIM. Morate obratiti svom operateru za otključavanje uređaja."</string>
     <plurals name="kg_password_wrong_pin_code" formatted="false" msgid="6721575017538162249">
-      <item quantity="one">PIN kôd za SIM karticu je netačan. Imate još <xliff:g id="NUMBER_1">%d</xliff:g> pokušaj.</item>
-      <item quantity="few">PIN kôd za SIM karticu je netačan. Imate još <xliff:g id="NUMBER_1">%d</xliff:g> pokušaja.</item>
-      <item quantity="other">PIN kôd za SIM karticu je netačan. Imate još <xliff:g id="NUMBER_1">%d</xliff:g> pokušaja.</item>
+      <item quantity="one">PIN za SIM karticu je netačan. Imate još <xliff:g id="NUMBER_1">%d</xliff:g> pokušaj.</item>
+      <item quantity="few">PIN za SIM karticu je netačan. Imate još <xliff:g id="NUMBER_1">%d</xliff:g> pokušaja.</item>
+      <item quantity="other">PIN za SIM karticu je netačan. Imate još <xliff:g id="NUMBER_1">%d</xliff:g> pokušaja.</item>
     </plurals>
     <string name="kg_password_wrong_puk_code_dead" msgid="7077536808291316208">"SIM je neupotrebljiv. Obratite se svom operateru."</string>
     <plurals name="kg_password_wrong_puk_code" formatted="false" msgid="7576227366999858780">
