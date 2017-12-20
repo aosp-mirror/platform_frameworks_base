@@ -16,17 +16,23 @@
 
 package com.android.systemui.keyguard;
 
+import android.app.ActivityManager;
+import android.app.AlarmManager;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.graphics.drawable.Icon;
 import android.icu.text.DateFormat;
 import android.icu.text.DisplayContext;
 import android.net.Uri;
 import android.os.Handler;
+import android.text.TextUtils;
 
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.systemui.R;
+import com.android.systemui.statusbar.policy.NextAlarmController;
+import com.android.systemui.statusbar.policy.NextAlarmControllerImpl;
 
 import java.util.Date;
 import java.util.Locale;
@@ -39,20 +45,26 @@ import androidx.app.slice.builders.ListBuilder.RowBuilder;
 /**
  * Simple Slice provider that shows the current date.
  */
-public class KeyguardSliceProvider extends SliceProvider {
+public class KeyguardSliceProvider extends SliceProvider implements
+        NextAlarmController.NextAlarmChangeCallback {
 
     public static final String KEYGUARD_SLICE_URI = "content://com.android.systemui.keyguard/main";
     public static final String KEYGUARD_DATE_URI = "content://com.android.systemui.keyguard/date";
+    public static final String KEYGUARD_NEXT_ALARM_URI =
+            "content://com.android.systemui.keyguard/alarm";
 
     private final Date mCurrentTime = new Date();
     protected final Uri mSliceUri;
     protected final Uri mDateUri;
+    protected final Uri mAlarmUri;
     private final Handler mHandler;
     private String mDatePattern;
     private DateFormat mDateFormat;
     private String mLastText;
     private boolean mRegistered;
     private boolean mRegisteredEveryMinute;
+    private String mNextAlarm;
+    private NextAlarmController mNextAlarmController;
 
     /**
      * Receiver responsible for time ticking and updating the date format.
@@ -86,22 +98,40 @@ public class KeyguardSliceProvider extends SliceProvider {
         mHandler = handler;
         mSliceUri = Uri.parse(KEYGUARD_SLICE_URI);
         mDateUri = Uri.parse(KEYGUARD_DATE_URI);
+        mAlarmUri = Uri.parse(KEYGUARD_NEXT_ALARM_URI);
     }
-
-
 
     @Override
     public Slice onBindSlice(Uri sliceUri) {
-        return new ListBuilder(mSliceUri)
-                .addRow(new RowBuilder(mDateUri).setTitle(mLastText)).build();
+        ListBuilder builder = new ListBuilder(mSliceUri)
+                .addRow(new RowBuilder(mDateUri).setTitle(mLastText));
+        if (!TextUtils.isEmpty(mNextAlarm)) {
+            Icon icon = Icon.createWithResource(getContext(), R.drawable.ic_access_alarms_big);
+            builder.addRow(new RowBuilder(mAlarmUri).setTitle(mNextAlarm).addEndItem(icon));
+        }
+
+        return builder.build();
     }
 
     @Override
     public boolean onCreateSliceProvider() {
+        mNextAlarmController = new NextAlarmControllerImpl(getContext());
+        mNextAlarmController.addCallback(this);
         mDatePattern = getContext().getString(R.string.system_ui_date_pattern);
         registerClockUpdate(false /* everyMinute */);
         updateClock();
         return true;
+    }
+
+    public static String formatNextAlarm(Context context, AlarmManager.AlarmClockInfo info) {
+        if (info == null) {
+            return "";
+        }
+        String skeleton = android.text.format.DateFormat
+                .is24HourFormat(context, ActivityManager.getCurrentUser()) ? "EHm" : "Ehma";
+        String pattern = android.text.format.DateFormat
+                .getBestDateTimePattern(Locale.getDefault(), skeleton);
+        return android.text.format.DateFormat.format(pattern, info.getTriggerTime()).toString();
     }
 
     /**
@@ -168,5 +198,11 @@ public class KeyguardSliceProvider extends SliceProvider {
     @VisibleForTesting
     void cleanDateFormat() {
         mDateFormat = null;
+    }
+
+    @Override
+    public void onNextAlarmChanged(AlarmManager.AlarmClockInfo nextAlarm) {
+        mNextAlarm = formatNextAlarm(getContext(), nextAlarm);
+        getContext().getContentResolver().notifyChange(mSliceUri, null /* observer */);
     }
 }
