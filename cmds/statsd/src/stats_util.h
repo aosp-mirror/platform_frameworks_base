@@ -16,8 +16,9 @@
 
 #pragma once
 
-#include "frameworks/base/cmds/statsd/src/stats_log.pb.h"
 #include <sstream>
+#include "HashableDimensionKey.h"
+#include "frameworks/base/cmds/statsd/src/stats_log.pb.h"
 #include "logd/LogReader.h"
 
 #include <unordered_map>
@@ -26,12 +27,10 @@ namespace android {
 namespace os {
 namespace statsd {
 
-#define DEFAULT_DIMENSION_KEY ""
+const HashableDimensionKey DEFAULT_DIMENSION_KEY = HashableDimensionKey(vector<KeyValuePair>());
 
 // Minimum bucket size in seconds
 const long kMinBucketSizeSec = 5 * 60;
-
-typedef std::string HashableDimensionKey;
 
 typedef std::map<std::string, HashableDimensionKey> ConditionKey;
 
@@ -67,13 +66,6 @@ typedef struct EventKV {
 } EventKV;
 
 typedef std::unordered_map<HashableDimensionKey, std::shared_ptr<EventKV>> DimToEventKVMap;
-
-EventMetricData parse(log_msg msg);
-
-int getTagId(log_msg msg);
-
-std::string getHashableKey(std::vector<KeyValuePair> key);
-
 }  // namespace statsd
 }  // namespace os
 }  // namespace android

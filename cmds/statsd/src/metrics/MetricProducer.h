@@ -49,10 +49,7 @@ public:
           mCondition(conditionIndex >= 0 ? false : true),
           mConditionSliced(false),
           mWizard(wizard),
-          mConditionTrackerIndex(conditionIndex) {
-        // reuse the same map for non-sliced metrics too. this way, we avoid too many if-else.
-        mDimensionKeyMap[DEFAULT_DIMENSION_KEY] = std::vector<KeyValuePair>();
-    };
+          mConditionTrackerIndex(conditionIndex){};
     virtual ~MetricProducer(){};
 
     void notifyAppUpgrade(const string& apk, const int uid, const int64_t version) override{
@@ -144,10 +141,6 @@ protected:
     int mConditionTrackerIndex;
 
     std::vector<KeyMatcher> mDimension;  // The dimension defined in statsd_config
-
-    // Keep the map from the internal HashableDimensionKey to std::vector<KeyValuePair>
-    // that StatsLogReport wants.
-    std::unordered_map<HashableDimensionKey, std::vector<KeyValuePair>> mDimensionKeyMap;
 
     std::vector<MetricConditionLink> mConditionLinks;
 

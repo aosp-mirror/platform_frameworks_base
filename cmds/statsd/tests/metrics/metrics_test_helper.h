@@ -38,6 +38,8 @@ public:
     MOCK_METHOD2(Pull, bool(const int pullCode, vector<std::shared_ptr<LogEvent>>* data));
 };
 
+HashableDimensionKey getMockedDimensionKey(int key, std::string value);
+
 }  // namespace statsd
 }  // namespace os
 }  // namespace android

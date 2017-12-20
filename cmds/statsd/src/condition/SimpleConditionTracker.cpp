@@ -279,7 +279,7 @@ void SimpleConditionTracker::evaluateCondition(const LogEvent& event,
     }
 
     // outputKey is the output key values. e.g, uid:1234
-    const HashableDimensionKey outputKey = getHashableKey(getDimensionKey(event, mOutputDimension));
+    const HashableDimensionKey outputKey(getDimensionKey(event, mOutputDimension));
     handleConditionEvent(outputKey, matchedState == 1, conditionCache, conditionChangedCache);
 }
 

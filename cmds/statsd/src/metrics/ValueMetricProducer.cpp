@@ -132,16 +132,12 @@ void ValueMetricProducer::onDumpReportLocked(const uint64_t dumpTimeNs,
     for (const auto& pair : mPastBuckets) {
         const HashableDimensionKey& hashableKey = pair.first;
         VLOG("  dimension key %s", hashableKey.c_str());
-        auto it = mDimensionKeyMap.find(hashableKey);
-        if (it == mDimensionKeyMap.end()) {
-            ALOGE("Dimension key %s not found?!?! skip...", hashableKey.c_str());
-            continue;
-        }
+        const vector<KeyValuePair>& kvs = hashableKey.getKeyValuePairs();
         long long wrapperToken =
                 protoOutput->start(FIELD_TYPE_MESSAGE | FIELD_COUNT_REPEATED | FIELD_ID_DATA);
 
         // First fill dimension (KeyValuePairs).
-        for (const auto& kv : it->second) {
+        for (const auto& kv : kvs) {
             long long dimensionToken = protoOutput->start(
                     FIELD_TYPE_MESSAGE | FIELD_COUNT_REPEATED | FIELD_ID_DIMENSION);
             protoOutput->write(FIELD_TYPE_INT32 | FIELD_ID_KEY, kv.key());

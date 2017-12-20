@@ -12,9 +12,9 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+#include "src/metrics/GaugeMetricProducer.h"
 #include "logd/LogEvent.h"
 #include "metrics_test_helper.h"
-#include "src/metrics/GaugeMetricProducer.h"
 
 #include <gmock/gmock.h>
 #include <gtest/gtest.h>
