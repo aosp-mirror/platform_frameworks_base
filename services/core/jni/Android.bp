@@ -33,6 +33,7 @@ cc_library_static {
         "com_android_server_location_ContextHubService.cpp",
         "com_android_server_location_GnssLocationProvider.cpp",
         "com_android_server_locksettings_SyntheticPasswordManager.cpp",
+        "com_android_server_net_NetworkStatsService.cpp",
         "com_android_server_power_PowerManagerService.cpp",
         "com_android_server_SerialService.cpp",
         "com_android_server_storage_AppFuseBridge.cpp",

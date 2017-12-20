@@ -67,4 +67,13 @@ interface INetworkStatsService {
     /** Unregisters a callback on data usage. */
     void unregisterUsageRequest(in DataUsageRequest request);
 
+    /** Get the uid stats information since boot */
+    long getUidStats(int uid, int type);
+
+    /** Get the iface stats information since boot */
+    long getIfaceStats(String iface, int type);
+
+    /** Get the total network stats information since boot */
+    long getTotalStats(int type);
+
 }
