@@ -328,7 +328,7 @@
     <string name="recents_empty_message_dismissed_all" msgid="2791312568666558651">"Sve ste obrisali"</string>
     <string name="recents_app_info_button_label" msgid="2890317189376000030">"Informacije o aplikaciji"</string>
     <string name="recents_lock_to_app_button_label" msgid="6942899049072506044">"kačenje ekrana"</string>
-    <string name="recents_search_bar_label" msgid="8074997400187836677">"pretraga"</string>
+    <string name="recents_search_bar_label" msgid="8074997400187836677">"pretraživanje"</string>
     <string name="recents_launch_error_message" msgid="2969287838120550506">"Aplikacija <xliff:g id="APP">%s</xliff:g> nije pokrenuta."</string>
     <string name="recents_launch_disabled_message" msgid="1624523193008871793">"<xliff:g id="APP">%s</xliff:g> je onemogućena u sigurnom načinu rada."</string>
     <string name="recents_stack_action_button_label" msgid="6593727103310426253">"Obriši sve"</string>
@@ -464,7 +464,7 @@
     <string name="volume_stream_content_description_mute" msgid="3625049841390467354">"%1$s. Dodirnite da isključite zvuk. Zvukovi usluga pristupačnosti mogu biti isključeni."</string>
     <string name="volume_dialog_accessibility_shown_message" msgid="1834631467074259998">"Prikazane kontrole jačine zvuka za: %s. Prevucite prema gore za odbacivanje."</string>
     <string name="volume_dialog_accessibility_dismissed_message" msgid="51543526013711399">"Kontrole jačine zvuka sakrivene"</string>
-    <string name="system_ui_tuner" msgid="708224127392452018">"Podešavač za korisničko sučelje sistema"</string>
+    <string name="system_ui_tuner" msgid="708224127392452018">"Podešavač za korisnički interfejs sistema"</string>
     <string name="show_battery_percentage" msgid="5444136600512968798">"Prikaži ugrađeni postotak baterije"</string>
     <string name="show_battery_percentage_summary" msgid="3215025775576786037">"Prikazuje postotak nivoa baterije unutar ikone na statusnoj traci kada se baterija ne puni"</string>
     <string name="quick_settings" msgid="10042998191725428">"Brze postavke"</string>
@@ -487,12 +487,12 @@
     <string name="accessibility_status_bar_hotspot" msgid="4099381329956402865">"Pristupna tačka"</string>
     <string name="accessibility_managed_profile" msgid="6613641363112584120">"Profil za posao"</string>
     <string name="tuner_warning_title" msgid="7094689930793031682">"Zabava za neke, ali ne za sve"</string>
-    <string name="tuner_warning" msgid="8730648121973575701">"Podešavač za korisničko sučelje sistema vam omogućava dodatne načine da podesite i prilagodite Androidovo sučelje. Ove eksperimentalne funkcije se u budućim verzijama mogu mijenjati, kvariti ili nestati. Budite oprezni."</string>
+    <string name="tuner_warning" msgid="8730648121973575701">"Podešavač za korisnički interfejs sistema vam omogućava dodatne načine da podesite i prilagodite Androidov interfejs. Ove eksperimentalne funkcije se u budućim verzijama mogu mijenjati, kvariti ili nestati. Budite oprezni."</string>
     <string name="tuner_persistent_warning" msgid="8597333795565621795">"Ove eksperimentalne funkcije se u budućim verzijama mogu mijenjati, kvariti ili nestati. Budite oprezni."</string>
     <string name="got_it" msgid="2239653834387972602">"Razumijem"</string>
-    <string name="tuner_toast" msgid="603429811084428439">"Čestitamo! Podešavač za korisničko sučelje sistema je dodan u Postavke"</string>
+    <string name="tuner_toast" msgid="603429811084428439">"Čestitamo! Podešavač za korisnički interfejs sistema je dodan u Postavke"</string>
     <string name="remove_from_settings" msgid="8389591916603406378">"Ukloni iz Postavki"</string>
-    <string name="remove_from_settings_prompt" msgid="6069085993355887748">"Želite li ukloniti Podešavač za korisničko sučelje sistema iz Postavki i prestati koristiti sve njegove funkcije?"</string>
+    <string name="remove_from_settings_prompt" msgid="6069085993355887748">"Želite li ukloniti Podešavač za korisnički interfejs sistema iz Postavki i prestati koristiti sve njegove funkcije?"</string>
     <string name="activity_not_found" msgid="348423244327799974">"Aplikacija nije instalirana na uređaju"</string>
     <string name="clock_seconds" msgid="7689554147579179507">"Prikaži sekunde"</string>
     <string name="clock_seconds_desc" msgid="6282693067130470675">"Prikaži sekunde na statusnoj traci. Može skratiti trajanje baterije."</string>
@@ -632,7 +632,7 @@
     <string name="accessibility_action_divider_top_70" msgid="5090779195650364522">"Gore 70%"</string>
     <string name="accessibility_action_divider_top_50" msgid="6385859741925078668">"Gore 50%"</string>
     <string name="accessibility_action_divider_top_30" msgid="6201455163864841205">"Gore 30%"</string>
-    <string name="accessibility_action_divider_bottom_full" msgid="301433196679548001">"Dole cijeli ekran"</string>
+    <string name="accessibility_action_divider_bottom_full" msgid="301433196679548001">"Donji ekran kao cijeli ekran"</string>
     <string name="accessibility_qs_edit_tile_label" msgid="8374924053307764245">"Pozicija <xliff:g id="POSITION">%1$d</xliff:g>, <xliff:g id="TILE_NAME">%2$s</xliff:g>. Dvaput dodirnite za uređivanje."</string>
     <string name="accessibility_qs_edit_add_tile_label" msgid="8133209638023882667">"<xliff:g id="TILE_NAME">%1$s</xliff:g> Dvaput dodirnite za dodavanje."</string>
     <string name="accessibility_qs_edit_position_label" msgid="5055306305919289819">"Pozicija <xliff:g id="POSITION">%1$d</xliff:g>. Dvaput dodirnite za odabir."</string>

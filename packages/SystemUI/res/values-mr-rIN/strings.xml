@@ -89,7 +89,7 @@
     <string name="accessibility_phone_button" msgid="6738112589538563574">"फोन"</string>
     <string name="accessibility_voice_assist_button" msgid="487611083884852965">"व्हॉइस सहाय्य"</string>
     <string name="accessibility_unlock_button" msgid="128158454631118828">"अनलॉक करा"</string>
-    <string name="accessibility_unlock_button_fingerprint" msgid="8214125623493923751">"अनलॉक बटण, फिंगरप्रिंटची प्रतीक्षा करीत आहे"</string>
+    <string name="accessibility_unlock_button_fingerprint" msgid="8214125623493923751">"अनलॉक बटण, फिंगरप्रिंटची प्रतीक्षा करत आहे"</string>
     <string name="accessibility_unlock_without_fingerprint" msgid="7541705575183694446">"आपले फिंगरप्रिंट न वापरता अनलॉक करा"</string>
     <string name="unlock_label" msgid="8779712358041029439">"अनलॉक करा"</string>
     <string name="phone_label" msgid="2320074140205331708">"फोन उघडा"</string>
@@ -136,7 +136,7 @@
     <string name="accessibility_desc_on" msgid="2385254693624345265">"चालू."</string>
     <string name="accessibility_desc_off" msgid="6475508157786853157">"बंद."</string>
     <string name="accessibility_desc_connected" msgid="8366256693719499665">"कनेक्‍ट केले."</string>
-    <string name="accessibility_desc_connecting" msgid="3812924520316280149">"कनेक्ट करीत आहे."</string>
+    <string name="accessibility_desc_connecting" msgid="3812924520316280149">"कनेक्ट करत आहे."</string>
     <string name="accessibility_data_connection_gprs" msgid="1606477224486747751">"GPRS"</string>
     <string name="accessibility_data_connection_1x" msgid="994133468120244018">"1 X"</string>
     <string name="accessibility_data_connection_hspa" msgid="2032328855462645198">"HSPA"</string>
@@ -165,7 +165,7 @@
     <string name="accessibility_notifications_button" msgid="4498000369779421892">"सूचना."</string>
     <string name="accessibility_remove_notification" msgid="3603099514902182350">"सूचना साफ करा."</string>
     <string name="accessibility_gps_enabled" msgid="3511469499240123019">"GPS सक्षम केले."</string>
-    <string name="accessibility_gps_acquiring" msgid="8959333351058967158">"GPS प्राप्त करीत आहे."</string>
+    <string name="accessibility_gps_acquiring" msgid="8959333351058967158">"GPS प्राप्त करत आहे."</string>
     <string name="accessibility_tty_enabled" msgid="4613200365379426561">"TeleTypewriter सक्षम केले."</string>
     <string name="accessibility_ringer_vibrate" msgid="666585363364155055">"रिंगर कंपन."</string>
     <string name="accessibility_ringer_silent" msgid="9061243307939135383">"रिंगर मूक."</string>
@@ -176,7 +176,7 @@
     <string name="accessibility_recents_item_dismissed" msgid="6803574935084867070">"<xliff:g id="APP">%s</xliff:g> डिसमिस केला."</string>
     <string name="accessibility_recents_all_items_dismissed" msgid="4464697366179168836">"अलीकडील सर्व अॅप्लिकेशन डिसमिस झाले."</string>
     <string name="accessibility_recents_item_open_app_info" msgid="5107479759905883540">"<xliff:g id="APP">%s</xliff:g> अॅप्लिकेशन माहिती उघडा."</string>
-    <string name="accessibility_recents_item_launched" msgid="7616039892382525203">"<xliff:g id="APP">%s</xliff:g> प्रारंभ करीत आहे."</string>
+    <string name="accessibility_recents_item_launched" msgid="7616039892382525203">"<xliff:g id="APP">%s</xliff:g> प्रारंभ करत आहे."</string>
     <string name="accessibility_recents_task_header" msgid="1437183540924535457">"<xliff:g id="APP">%1$s</xliff:g> <xliff:g id="ACTIVITY_LABEL">%2$s</xliff:g>"</string>
     <string name="accessibility_notification_dismissed" msgid="854211387186306927">"सूचना डिसमिस केल्या."</string>
     <string name="accessibility_desc_notification_shade" msgid="4690274844447504208">"सूचना शेड."</string>
@@ -238,7 +238,7 @@
     <string name="data_usage_disabled_dialog_4g_title" msgid="1601769736881078016">"4G डेटास विराम दिला आहे"</string>
     <string name="data_usage_disabled_dialog_mobile_title" msgid="4651001290947318931">"सेल्युलर डेटास विराम दिला आहे"</string>
     <string name="data_usage_disabled_dialog_title" msgid="3932437232199671967">"डेटास विराम दिला आहे"</string>
-    <string name="data_usage_disabled_dialog" msgid="1841738975235283398">"आपण सेट केलेली डेटा मर्यादा गाठली आहे. आपण यापुढे मोबाइल डेटा वापरणार नाही.\n\nआपण पुन: सुरु केल्यास, डेटा वापरासाठी शुल्क आकारले जाऊ शकतात."</string>
+    <string name="data_usage_disabled_dialog" msgid="1841738975235283398">"आपण सेट केलेली डेटा मर्यादा गाठली आहे. आपण यापुढे मोबाइल डेटा वापरणार नाही.\n\nआपण पुन: सुरु केल्यास, डेटा वापरासाठी शुल्क आकारले जाऊ शकते."</string>
     <string name="data_usage_disabled_dialog_enable" msgid="1412395410306390593">"पुन्हा सुरु करा"</string>
     <string name="status_bar_settings_signal_meter_disconnected" msgid="1940231521274147771">"इंटरनेट कनेक्शन नाही"</string>
     <string name="status_bar_settings_signal_meter_wifi_nossid" msgid="6557486452774597820">"वाय-फाय कनेक्ट केले"</string>
@@ -306,7 +306,7 @@
     <string name="quick_settings_more_settings" msgid="326112621462813682">"अधिक सेटिंग्ज"</string>
     <string name="quick_settings_done" msgid="3402999958839153376">"पूर्ण झाले"</string>
     <string name="quick_settings_connected" msgid="1722253542984847487">"कनेक्ट केलेले"</string>
-    <string name="quick_settings_connecting" msgid="47623027419264404">"कनेक्ट करीत आहे..."</string>
+    <string name="quick_settings_connecting" msgid="47623027419264404">"कनेक्ट करत आहे..."</string>
     <string name="quick_settings_tethering_label" msgid="7153452060448575549">"टेदरिंग"</string>
     <string name="quick_settings_hotspot_label" msgid="6046917934974004879">"हॉटस्पॉट"</string>
     <string name="quick_settings_notifications_label" msgid="4818156442169154523">"सूचना"</string>

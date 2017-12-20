@@ -24,7 +24,7 @@
     <string name="status_bar_recent_remove_item_title" msgid="6026395868129852968">"Fjern fra listen"</string>
     <string name="status_bar_recent_inspect_item_title" msgid="7793624864528818569">"Info om appen"</string>
     <string name="status_bar_no_recent_apps" msgid="7374907845131203189">"De sist brukte skjermene dine vises her"</string>
-    <string name="status_bar_accessibility_dismiss_recents" msgid="4576076075226540105">"Avvis nylige apper"</string>
+    <string name="status_bar_accessibility_dismiss_recents" msgid="4576076075226540105">"Avvis nylig brukte apper"</string>
     <plurals name="status_bar_accessibility_recent_apps" formatted="false" msgid="9138535907802238759">
       <item quantity="other">%d skjermer i oversikten</item>
       <item quantity="one">1 skjerm i oversikten</item>
