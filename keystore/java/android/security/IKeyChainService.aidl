@@ -35,6 +35,7 @@ interface IKeyChainService {
 
     boolean generateKeyPair(in String algorithm, in ParcelableKeyGenParameterSpec spec);
     boolean attestKey(in String alias, in byte[] challenge, out KeymasterCertificateChain chain);
+    boolean setKeyPairCertificate(String alias, in byte[] userCert, in byte[] certChain);
 
     // APIs used by CertInstaller and DevicePolicyManager
     String installCaCertificate(in byte[] caCertificate);
