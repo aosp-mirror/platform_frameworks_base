@@ -67,6 +67,7 @@ import com.android.internal.content.PackageMonitor;
 import com.android.internal.os.BackgroundThread;
 import com.android.internal.util.DumpUtils;
 import com.android.internal.util.Preconditions;
+import com.android.server.FgThread;
 import com.android.server.LocalServices;
 import com.android.server.SystemService;
 import com.android.server.UiThread;
@@ -389,11 +390,13 @@ public class VoiceInteractionManagerService extends SystemService {
         }
 
         public void switchUser(int userHandle) {
-            synchronized (this) {
-                mCurUser = userHandle;
-                mCurUserUnlocked = false;
-                switchImplementationIfNeededLocked(false);
-            }
+            FgThread.getHandler().post(() -> {
+                synchronized (this) {
+                    mCurUser = userHandle;
+                    mCurUserUnlocked = false;
+                    switchImplementationIfNeededLocked(false);
+                }
+            });
         }
 
         void switchImplementationIfNeeded(boolean force) {

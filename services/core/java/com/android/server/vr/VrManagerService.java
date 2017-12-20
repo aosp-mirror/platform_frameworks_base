@@ -59,6 +59,8 @@ import android.util.ArrayMap;
 import android.util.ArraySet;
 import android.util.Slog;
 import android.util.SparseArray;
+
+import com.android.server.FgThread;
 import com.android.server.wm.WindowManagerInternal;
 import android.view.inputmethod.InputMethodManagerInternal;
 
@@ -825,9 +827,11 @@ public class VrManagerService extends SystemService
 
     @Override
     public void onSwitchUser(int userHandle) {
-        synchronized (mLock) {
-            mComponentObserver.onUsersChanged();
-        }
+        FgThread.getHandler().post(() -> {
+            synchronized (mLock) {
+                mComponentObserver.onUsersChanged();
+            }
+        });
 
     }
 
