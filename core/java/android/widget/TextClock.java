@@ -20,6 +20,7 @@ import static android.view.ViewDebug.ExportedProperty;
 import static android.widget.RemoteViews.RemoteView;
 
 import android.annotation.NonNull;
+import android.annotation.TestApi;
 import android.app.ActivityManager;
 import android.content.BroadcastReceiver;
 import android.content.ContentResolver;
@@ -141,6 +142,9 @@ public class TextClock extends TextView {
     private boolean mShowCurrentUserTime;
 
     private ContentObserver mFormatChangeObserver;
+    // Used by tests to stop time change events from triggering the text update
+    private boolean mStopTicking;
+
     private class FormatChangeObserver extends ContentObserver {
 
         public FormatChangeObserver(Handler handler) {
@@ -163,6 +167,9 @@ public class TextClock extends TextView {
     private final BroadcastReceiver mIntentReceiver = new BroadcastReceiver() {
         @Override
         public void onReceive(Context context, Intent intent) {
+            if (mStopTicking) {
+                return; // Test disabled the clock ticks
+            }
             if (mTimeZone == null && Intent.ACTION_TIMEZONE_CHANGED.equals(intent.getAction())) {
                 final String timeZone = intent.getStringExtra("time-zone");
                 createTime(timeZone);
@@ -173,6 +180,9 @@ public class TextClock extends TextView {
 
     private final Runnable mTicker = new Runnable() {
         public void run() {
+            if (mStopTicking) {
+                return; // Test disabled the clock ticks
+            }
             onTimeChanged();
 
             long now = SystemClock.uptimeMillis();
@@ -544,6 +554,15 @@ public class TextClock extends TextView {
 
             mRegistered = false;
         }
+    }
+
+    /**
+     * Used by tests to stop the clock tick from updating the text.
+     * @hide
+     */
+    @TestApi
+    public void disableClockTick() {
+        mStopTicking = true;
     }
 
     private void registerReceiver() {
