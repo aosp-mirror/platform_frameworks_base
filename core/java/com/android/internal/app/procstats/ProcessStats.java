@@ -134,6 +134,10 @@ public final class ProcessStats implements Parcelable {
     public static final int FLAG_SHUTDOWN = 1<<1;
     public static final int FLAG_SYSPROPS = 1<<2;
 
+    public static final int ADD_PSS_INTERNAL = 0;
+    public static final int ADD_PSS_EXTERNAL = 1;
+    public static final int ADD_PSS_EXTERNAL_SLOW = 2;
+
     public static final int[] ALL_MEM_ADJ = new int[] { ADJ_MEM_FACTOR_NORMAL,
             ADJ_MEM_FACTOR_MODERATE, ADJ_MEM_FACTOR_LOW, ADJ_MEM_FACTOR_CRITICAL };
 
@@ -158,7 +162,7 @@ public final class ProcessStats implements Parcelable {
     };
 
     // Current version of the parcel format.
-    private static final int PARCEL_VERSION = 23;
+    private static final int PARCEL_VERSION = 24;
     // In-memory Parcel magic number, used to detect attempts to unmarshall bad data
     private static final int MAGIC = 0x50535454;
 
@@ -182,6 +186,18 @@ public final class ProcessStats implements Parcelable {
     boolean mRunning;
 
     boolean mHasSwappedOutPss;
+
+    // Count and total time expended doing "quick" pss computations for internal use.
+    public long mInternalPssCount;
+    public long mInternalPssTime;
+
+    // Count and total time expended doing "quick" pss computations due to external requests.
+    public long mExternalPssCount;
+    public long mExternalPssTime;
+
+    // Count and total time expended doing full/slow pss computations due to external requests.
+    public long mExternalSlowPssCount;
+    public long mExternalSlowPssTime;
 
     public final SparseMappingTable mTableData = new SparseMappingTable();
 
@@ -301,6 +317,13 @@ public final class ProcessStats implements Parcelable {
         }
         mTimePeriodEndRealtime += other.mTimePeriodEndRealtime - other.mTimePeriodStartRealtime;
         mTimePeriodEndUptime += other.mTimePeriodEndUptime - other.mTimePeriodStartUptime;
+
+        mInternalPssCount += other.mInternalPssCount;
+        mInternalPssTime += other.mInternalPssTime;
+        mExternalPssCount += other.mExternalPssCount;
+        mExternalPssTime += other.mExternalPssTime;
+        mExternalSlowPssCount += other.mExternalSlowPssCount;
+        mExternalSlowPssTime += other.mExternalSlowPssTime;
 
         mHasSwappedOutPss |= other.mHasSwappedOutPss;
     }
@@ -500,6 +523,12 @@ public final class ProcessStats implements Parcelable {
         buildTimePeriodStartClockStr();
         mTimePeriodStartRealtime = mTimePeriodEndRealtime = SystemClock.elapsedRealtime();
         mTimePeriodStartUptime = mTimePeriodEndUptime = SystemClock.uptimeMillis();
+        mInternalPssCount = 0;
+        mInternalPssTime = 0;
+        mExternalPssCount = 0;
+        mExternalPssTime = 0;
+        mExternalSlowPssCount = 0;
+        mExternalSlowPssTime = 0;
         mTableData.reset();
         Arrays.fill(mMemFactorDurations, 0);
         mSysMemUsage.resetTable();
@@ -760,6 +789,12 @@ public final class ProcessStats implements Parcelable {
         out.writeLong(mTimePeriodEndRealtime);
         out.writeLong(mTimePeriodStartUptime);
         out.writeLong(mTimePeriodEndUptime);
+        out.writeLong(mInternalPssCount);
+        out.writeLong(mInternalPssTime);
+        out.writeLong(mExternalPssCount);
+        out.writeLong(mExternalPssTime);
+        out.writeLong(mExternalSlowPssCount);
+        out.writeLong(mExternalSlowPssTime);
         out.writeString(mRuntime);
         out.writeInt(mHasSwappedOutPss ? 1 : 0);
         out.writeInt(mFlags);
@@ -928,6 +963,12 @@ public final class ProcessStats implements Parcelable {
         mTimePeriodEndRealtime = in.readLong();
         mTimePeriodStartUptime = in.readLong();
         mTimePeriodEndUptime = in.readLong();
+        mInternalPssCount = in.readLong();
+        mInternalPssTime = in.readLong();
+        mExternalPssCount = in.readLong();
+        mExternalPssTime = in.readLong();
+        mExternalSlowPssCount = in.readLong();
+        mExternalSlowPssTime = in.readLong();
         mRuntime = in.readString();
         mHasSwappedOutPss = in.readInt() != 0;
         mFlags = in.readInt();
@@ -1484,8 +1525,30 @@ public final class ProcessStats implements Parcelable {
                 totalMem.processStateWeight[STATE_SERVICE_RESTARTING], totalMem.totalTime, totalPss,
                 totalMem.processStateSamples[STATE_SERVICE_RESTARTING]);
         pw.println();
+        pw.println("PSS collection stats:");
+        pw.print("  Internal: ");
+        pw.print(mInternalPssCount);
+        pw.print("x over ");
+        TimeUtils.formatDuration(mInternalPssTime, pw);
+        pw.println();
+        pw.print("  External: ");
+        pw.print(mExternalPssCount);
+        pw.print("x over ");
+        TimeUtils.formatDuration(mExternalPssTime, pw);
+        pw.println();
+        pw.print("  External Slow: ");
+        pw.print(mExternalSlowPssCount);
+        pw.print("x over ");
+        TimeUtils.formatDuration(mExternalSlowPssTime, pw);
+        pw.println();
+        pw.println();
         pw.print("          Start time: ");
         pw.print(DateFormat.format("yyyy-MM-dd HH:mm:ss", mTimePeriodStartClock));
+        pw.println();
+        pw.print("        Total uptime: ");
+        TimeUtils.formatDuration(
+                (mRunning ? SystemClock.uptimeMillis() : mTimePeriodEndUptime)
+                        - mTimePeriodStartUptime, pw);
         pw.println();
         pw.print("  Total elapsed time: ");
         TimeUtils.formatDuration(

@@ -153,7 +153,6 @@ public final class ProcessState {
     private int mNumActiveServices;
     private int mNumStartedServices;
 
-    private int mNumExcessiveWake;
     private int mNumExcessiveCpu;
 
     private int mNumCachedKill;
@@ -470,9 +469,23 @@ public final class ProcessState {
         }
     }
 
-    public void addPss(long pss, long uss, boolean always,
+    public void addPss(long pss, long uss, boolean always, int type, long duration,
             ArrayMap<String, ProcessStateHolder> pkgList) {
         ensureNotDead();
+        switch (type) {
+            case ProcessStats.ADD_PSS_INTERNAL:
+                mStats.mInternalPssCount++;
+                mStats.mInternalPssTime += duration;
+                break;
+            case ProcessStats.ADD_PSS_EXTERNAL:
+                mStats.mExternalPssCount++;
+                mStats.mExternalPssTime += duration;
+                break;
+            case ProcessStats.ADD_PSS_EXTERNAL_SLOW:
+                mStats.mExternalSlowPssCount++;
+                mStats.mExternalSlowPssTime += duration;
+                break;
+        }
         if (!always) {
             if (mLastPssState == mCurState && SystemClock.uptimeMillis()
                     < (mLastPssTime+(30*1000))) {

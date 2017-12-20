@@ -432,13 +432,13 @@ public final class ProcessList {
     public static final int PSS_MIN_TIME_FROM_STATE_CHANGE = 15*1000;
 
     // The maximum amount of time we want to go between PSS collections.
-    public static final int PSS_MAX_INTERVAL = 30*60*1000;
+    public static final int PSS_MAX_INTERVAL = 40*60*1000;
 
     // The minimum amount of time between successive PSS requests for *all* processes.
-    public static final int PSS_ALL_INTERVAL = 10*60*1000;
+    public static final int PSS_ALL_INTERVAL = 20*60*1000;
 
-    // The minimum amount of time between successive PSS requests for a process.
-    private static final int PSS_SHORT_INTERVAL = 2*60*1000;
+    // The amount of time until PSS when a persistent process first appears.
+    private static final int PSS_FIRST_PERSISTENT_INTERVAL = 30*1000;
 
     // The amount of time until PSS when a process first becomes top.
     private static final int PSS_FIRST_TOP_INTERVAL = 10*1000;
@@ -449,6 +449,9 @@ public final class ProcessList {
     // The amount of time until PSS when a process first becomes cached.
     private static final int PSS_FIRST_CACHED_INTERVAL = 30*1000;
 
+    // The amount of time until PSS when the top process stays in the same state.
+    private static final int PSS_SAME_TOP_INTERVAL = 5*60*1000;
+
     // The amount of time until PSS when an important process stays in the same state.
     private static final int PSS_SAME_IMPORTANT_INTERVAL = 15*60*1000;
 
@@ -457,6 +460,18 @@ public final class ProcessList {
 
     // The amount of time until PSS when a cached process stays in the same state.
     private static final int PSS_SAME_CACHED_INTERVAL = 30*60*1000;
+
+    // The amount of time until PSS when a persistent process first appears.
+    private static final int PSS_FIRST_ASLEEP_PERSISTENT_INTERVAL = 1*60*1000;
+
+    // The amount of time until PSS when a process first becomes top.
+    private static final int PSS_FIRST_ASLEEP_TOP_INTERVAL = 20*1000;
+
+    // The amount of time until PSS when a process first goes into the background.
+    private static final int PSS_FIRST_ASLEEP_BACKGROUND_INTERVAL = 30*1000;
+
+    // The amount of time until PSS when a process first becomes cached.
+    private static final int PSS_FIRST_ASLEEP_CACHED_INTERVAL = 1*60*1000;
 
     // The minimum time interval after a state change it is safe to collect PSS.
     public static final int PSS_TEST_MIN_TIME_FROM_STATE_CHANGE = 10*1000;
@@ -502,8 +517,8 @@ public final class ProcessList {
     };
 
     private static final long[] sFirstAwakePssTimes = new long[] {
-        PSS_SHORT_INTERVAL,             // ActivityManager.PROCESS_STATE_PERSISTENT
-        PSS_SHORT_INTERVAL,             // ActivityManager.PROCESS_STATE_PERSISTENT_UI
+        PSS_FIRST_PERSISTENT_INTERVAL,  // ActivityManager.PROCESS_STATE_PERSISTENT
+        PSS_FIRST_PERSISTENT_INTERVAL,  // ActivityManager.PROCESS_STATE_PERSISTENT_UI
         PSS_FIRST_TOP_INTERVAL,         // ActivityManager.PROCESS_STATE_TOP
         PSS_FIRST_BACKGROUND_INTERVAL,  // ActivityManager.PROCESS_STATE_BOUND_FOREGROUND_SERVICE
         PSS_FIRST_BACKGROUND_INTERVAL,  // ActivityManager.PROCESS_STATE_FOREGROUND_SERVICE
@@ -526,7 +541,51 @@ public final class ProcessList {
     private static final long[] sSameAwakePssTimes = new long[] {
         PSS_SAME_IMPORTANT_INTERVAL,    // ActivityManager.PROCESS_STATE_PERSISTENT
         PSS_SAME_IMPORTANT_INTERVAL,    // ActivityManager.PROCESS_STATE_PERSISTENT_UI
-        PSS_SHORT_INTERVAL,             // ActivityManager.PROCESS_STATE_TOP
+        PSS_SAME_TOP_INTERVAL,          // ActivityManager.PROCESS_STATE_TOP
+        PSS_SAME_IMPORTANT_INTERVAL,    // ActivityManager.PROCESS_STATE_BOUND_FOREGROUND_SERVICE
+        PSS_SAME_IMPORTANT_INTERVAL,    // ActivityManager.PROCESS_STATE_FOREGROUND_SERVICE
+        PSS_SAME_IMPORTANT_INTERVAL,    // ActivityManager.PROCESS_STATE_IMPORTANT_FOREGROUND
+        PSS_SAME_IMPORTANT_INTERVAL,    // ActivityManager.PROCESS_STATE_IMPORTANT_BACKGROUND
+        PSS_SAME_IMPORTANT_INTERVAL,    // ActivityManager.PROCESS_STATE_TRANSIENT_BACKGROUND
+        PSS_SAME_IMPORTANT_INTERVAL,    // ActivityManager.PROCESS_STATE_BACKUP
+        PSS_SAME_SERVICE_INTERVAL,      // ActivityManager.PROCESS_STATE_SERVICE
+        PSS_SAME_SERVICE_INTERVAL,      // ActivityManager.PROCESS_STATE_RECEIVER
+        PSS_SAME_CACHED_INTERVAL,       // ActivityManager.PROCESS_STATE_TOP_SLEEPING
+        PSS_SAME_CACHED_INTERVAL,       // ActivityManager.PROCESS_STATE_HEAVY_WEIGHT
+        PSS_SAME_CACHED_INTERVAL,       // ActivityManager.PROCESS_STATE_HOME
+        PSS_SAME_CACHED_INTERVAL,       // ActivityManager.PROCESS_STATE_LAST_ACTIVITY
+        PSS_SAME_CACHED_INTERVAL,       // ActivityManager.PROCESS_STATE_CACHED_ACTIVITY
+        PSS_SAME_CACHED_INTERVAL,       // ActivityManager.PROCESS_STATE_CACHED_ACTIVITY_CLIENT
+        PSS_SAME_CACHED_INTERVAL,       // ActivityManager.PROCESS_STATE_CACHED_RECENT
+        PSS_SAME_CACHED_INTERVAL,       // ActivityManager.PROCESS_STATE_CACHED_EMPTY
+    };
+
+    private static final long[] sFirstAsleepPssTimes = new long[] {
+        PSS_FIRST_ASLEEP_PERSISTENT_INTERVAL,   // ActivityManager.PROCESS_STATE_PERSISTENT
+        PSS_FIRST_ASLEEP_PERSISTENT_INTERVAL,   // ActivityManager.PROCESS_STATE_PERSISTENT_UI
+        PSS_FIRST_ASLEEP_TOP_INTERVAL,          // ActivityManager.PROCESS_STATE_TOP
+        PSS_FIRST_ASLEEP_BACKGROUND_INTERVAL,   // ActivityManager.PROCESS_STATE_BOUND_FOREGROUND_SERVICE
+        PSS_FIRST_ASLEEP_BACKGROUND_INTERVAL,   // ActivityManager.PROCESS_STATE_FOREGROUND_SERVICE
+        PSS_FIRST_ASLEEP_BACKGROUND_INTERVAL,   // ActivityManager.PROCESS_STATE_IMPORTANT_FOREGROUND
+        PSS_FIRST_ASLEEP_BACKGROUND_INTERVAL,   // ActivityManager.PROCESS_STATE_IMPORTANT_BACKGROUND
+        PSS_FIRST_ASLEEP_BACKGROUND_INTERVAL,   // ActivityManager.PROCESS_STATE_TRANSIENT_BACKGROUND
+        PSS_FIRST_ASLEEP_BACKGROUND_INTERVAL,   // ActivityManager.PROCESS_STATE_BACKUP
+        PSS_FIRST_ASLEEP_BACKGROUND_INTERVAL,   // ActivityManager.PROCESS_STATE_SERVICE
+        PSS_FIRST_ASLEEP_CACHED_INTERVAL,       // ActivityManager.PROCESS_STATE_RECEIVER
+        PSS_FIRST_ASLEEP_CACHED_INTERVAL,       // ActivityManager.PROCESS_STATE_TOP_SLEEPING
+        PSS_FIRST_ASLEEP_CACHED_INTERVAL,       // ActivityManager.PROCESS_STATE_HEAVY_WEIGHT
+        PSS_FIRST_ASLEEP_CACHED_INTERVAL,       // ActivityManager.PROCESS_STATE_HOME
+        PSS_FIRST_ASLEEP_CACHED_INTERVAL,       // ActivityManager.PROCESS_STATE_LAST_ACTIVITY
+        PSS_FIRST_ASLEEP_CACHED_INTERVAL,       // ActivityManager.PROCESS_STATE_CACHED_ACTIVITY
+        PSS_FIRST_ASLEEP_CACHED_INTERVAL,       // ActivityManager.PROCESS_STATE_CACHED_ACTIVITY_CLIENT
+        PSS_FIRST_ASLEEP_CACHED_INTERVAL,       // ActivityManager.PROCESS_STATE_CACHED_RECENT
+        PSS_FIRST_ASLEEP_CACHED_INTERVAL,       // ActivityManager.PROCESS_STATE_CACHED_EMPTY
+    };
+
+    private static final long[] sSameAsleepPssTimes = new long[] {
+        PSS_SAME_IMPORTANT_INTERVAL,    // ActivityManager.PROCESS_STATE_PERSISTENT
+        PSS_SAME_IMPORTANT_INTERVAL,    // ActivityManager.PROCESS_STATE_PERSISTENT_UI
+        PSS_SAME_TOP_INTERVAL,          // ActivityManager.PROCESS_STATE_TOP
         PSS_SAME_IMPORTANT_INTERVAL,    // ActivityManager.PROCESS_STATE_BOUND_FOREGROUND_SERVICE
         PSS_SAME_IMPORTANT_INTERVAL,    // ActivityManager.PROCESS_STATE_FOREGROUND_SERVICE
         PSS_SAME_IMPORTANT_INTERVAL,    // ActivityManager.PROCESS_STATE_IMPORTANT_FOREGROUND
@@ -604,8 +663,8 @@ public final class ProcessList {
                         ? sTestFirstPssTimes
                         : sTestSamePssTimes)
                 : (first
-                        ? sFirstAwakePssTimes
-                        : sSameAwakePssTimes);
+                        ? (sleeping ? sFirstAsleepPssTimes : sFirstAwakePssTimes)
+                        : (sleeping ? sSameAsleepPssTimes : sSameAwakePssTimes));
         return now + table[procState];
     }
 
