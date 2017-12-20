@@ -50,7 +50,7 @@
     <string name="sort_size" msgid="3350681319735474741">"ਆਕਾਰ ਮੁਤਾਬਕ"</string>
     <string name="drawer_open" msgid="4545466532430226949">"ਰੂਟਸ ਦਿਖਾਓ"</string>
     <string name="drawer_close" msgid="7602734368552123318">"ਰੂਟਸ ਲੁਕਾਓ"</string>
-    <string name="save_error" msgid="6167009778003223664">"ਦਸਾਤਵੇਜ਼ ਸੁਰੱਖਿਅਤ ਕਰਨ ਵਿੱਚ ਅਸਫਲ"</string>
+    <string name="save_error" msgid="6167009778003223664">"ਦਸਾਤਵੇਜ਼ ਰੱਖਿਅਤ ਕਰਨ ਵਿੱਚ ਅਸਫਲ"</string>
     <string name="create_error" msgid="3735649141335444215">"ਫੋਲਡਰ ਬਣਾਉਣ ਲਈ ਅਸਫਲ"</string>
     <string name="query_error" msgid="5999895349602476581">"ਇਸ ਵੇਲੇ ਸਮੱਗਰੀ ਨੂੰ ਲੋਡ ਨਹੀਂ ਕੀਤਾ ਜਾ ਸਕਦਾ"</string>
     <string name="root_recent" msgid="4470053704320518133">"ਹਾਲੀਆ"</string>
@@ -62,7 +62,7 @@
     <string name="empty" msgid="7858882803708117596">"ਕੋਈ ਆਈਟਮਾਂ ਨਹੀਂ"</string>
     <string name="no_results" msgid="6622510343880730446">"%1$s ਵਿੱਚ ਕੋਈ ਮੇਲ ਨਹੀਂ"</string>
     <string name="toast_no_application" msgid="4632640357724698144">"ਫ਼ਾਈਲ ਨੂੰ ਖੋਲ੍ਹਿਆ ਨਹੀਂ ਜਾ ਸਕਦਾ"</string>
-    <string name="toast_failed_delete" msgid="2180678019407244069">"ਕੁਝ ਦਸਤਾਵੇਜ਼ ਮਿਟਾਉਣ ਵਿੱਚ ਅਸਮਰੱਥ"</string>
+    <string name="toast_failed_delete" msgid="2180678019407244069">"ਕੁਝ ਦਸਤਾਵੇਜ਼ਾਂ ਨੂੰ ਮਿਟਾਉਣ ਦੇ ਅਯੋਗ"</string>
     <string name="share_via" msgid="8966594246261344259">"ਇਸ ਰਾਹੀਂ ਸਾਂਝਾ ਕਰੋ"</string>
     <string name="copy_notification_title" msgid="6374299806748219777">"ਫਾਈਲਾਂ ਕਾਪੀ ਕਰ ਰਿਹਾ ਹੈ"</string>
     <string name="move_notification_title" msgid="6193835179777284805">"ਫ਼ਾਈਲਾਂ ਨੂੰ ਮੂਵ ਕਰ ਰਿਹਾ ਹੈ"</string>
@@ -83,7 +83,7 @@
     <string name="undo" msgid="7905788502491742328">"ਅਣਕੀਤਾ ਕਰੋ"</string>
     <string name="copy_preparing" msgid="3896202461003039386">"ਕਾਪੀ ਕਰਨ ਦੀ ਤਿਆਰੀ ਹੋ ਰਹੀ ਹੈ…"</string>
     <string name="move_preparing" msgid="2772219441375531410">"ਮੂਵ ਲਈ ਤਿਆਰ ਕਰ ਰਿਹਾ ਹੈ..."</string>
-    <string name="delete_preparing" msgid="5655813182533491992">"ਮਿਟਾਉਣ ਦੀ ਤਿਆਰੀ ਹੋ ਰਹੀ ਹੈ…"</string>
+    <string name="delete_preparing" msgid="5655813182533491992">"ਮਿਟਾਉਣ ਦੀ ਤਿਆਰੀ ਕੀਤੀ ਜਾ ਰਹੀ ਹੈ…"</string>
     <plurals name="copy_error_notification_title" formatted="false" msgid="7160447124922897689">
       <item quantity="one"><xliff:g id="COUNT_1">%1$d</xliff:g> ਫ਼ਾਈਲਾਂ ਨੂੰ ਕਾਪੀ ਨਹੀਂ ਕੀਤਾ ਜਾ ਸਕਿਆ</item>
       <item quantity="other"><xliff:g id="COUNT_1">%1$d</xliff:g> ਫ਼ਾਈਲਾਂ ਨੂੰ ਕਾਪੀ ਨਹੀਂ ਕੀਤਾ ਜਾ ਸਕਿਆ</item>
@@ -125,7 +125,7 @@
       <item quantity="other"><xliff:g id="COUNT_1">%1$d</xliff:g> ਆਈਟਮਾਂ</item>
     </plurals>
     <string name="delete_filename_confirmation_message" msgid="5312817725577537488">"ਕੀ \"<xliff:g id="NAME">%1$s</xliff:g>\" ਨੂੰ ਮਿਟਾਉਣਾ ਹੈ?"</string>
-    <string name="delete_foldername_confirmation_message" msgid="5885501832257285329">"ਫੋਲਡਰ \"<xliff:g id="NAME">%1$s</xliff:g>\" ਅਤੇ ਉਸ ਦੀਆਂ ਸਮੱਗਰੀਆਂ ਨੂੰ ਮਿਟਾਉਣਾ ਹੈ?"</string>
+    <string name="delete_foldername_confirmation_message" msgid="5885501832257285329">"ਕੀ ਫੋਲਡਰ \"<xliff:g id="NAME">%1$s</xliff:g>\" ਅਤੇ ਉਸ ਦੀਆਂ ਸਮੱਗਰੀਆਂ ਨੂੰ ਮਿਟਾਉਣਾ ਹੈ?"</string>
     <plurals name="delete_files_confirmation_message" formatted="false" msgid="8417505791395471802">
       <item quantity="one">ਕੀ <xliff:g id="COUNT_1">%1$d</xliff:g> ਫ਼ਾਈਲਾਂ ਨੂੰ ਮਿਟਾਉਣਾ ਹੈ?</item>
       <item quantity="other">ਕੀ <xliff:g id="COUNT_1">%1$d</xliff:g> ਫ਼ਾਈਲਾਂ ਨੂੰ ਮਿਟਾਉਣਾ ਹੈ?</item>

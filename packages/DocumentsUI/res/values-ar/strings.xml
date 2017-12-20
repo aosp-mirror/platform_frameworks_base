@@ -136,7 +136,7 @@
     </plurals>
     <string name="clipboard_files_cannot_paste" msgid="2878324825602325706">"يتعذر لصق الملفات المحددة في هذا الموقع."</string>
     <string name="menu_rename" msgid="7678802479104285353">"إعادة تسمية"</string>
-    <string name="rename_error" msgid="4203041674883412606">"أخفقت إعادة تسمية المستند."</string>
+    <string name="rename_error" msgid="4203041674883412606">"تعذّرت إعادة تسمية المستند."</string>
     <string name="notification_copy_files_converted_title" msgid="3153573223054275181">"تم تحويل بعض الملفات"</string>
     <string name="open_external_dialog_request" msgid="5789329484285817629">"هل تريد منح التطبيق <xliff:g id="APPNAME"><b>^1</b></xliff:g> حق الوصول إلى الدليل <xliff:g id="DIRECTORY"><i>^2</i></xliff:g> على <xliff:g id="STORAGE"><i>^3</i></xliff:g>؟"</string>
     <string name="open_external_dialog_request_primary_volume" msgid="6635562535713428688">"هل تريد تمكين <xliff:g id="APPNAME"><b>^1</b></xliff:g> من الدخول إلى دليل <xliff:g id="DIRECTORY"><i>^2</i></xliff:g>؟"</string>

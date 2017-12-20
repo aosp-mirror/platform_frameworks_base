@@ -28,10 +28,10 @@
     <string name="menu_settings" msgid="8239065133341597825">"Postavke pohrane"</string>
     <string name="menu_open" msgid="432922957274920903">"Otvori"</string>
     <string name="menu_save" msgid="2394743337684426338">"Sačuvaj"</string>
-    <string name="menu_share" msgid="3075149983979628146">"Podijeli"</string>
+    <string name="menu_share" msgid="3075149983979628146">"Dijeli"</string>
     <string name="menu_delete" msgid="8138799623850614177">"Izbriši"</string>
     <string name="menu_select_all" msgid="8323579667348729928">"Odaberi sve"</string>
-    <string name="menu_copy" msgid="3612326052677229148">"Kopiraj na..."</string>
+    <string name="menu_copy" msgid="3612326052677229148">"Kopiraj u..."</string>
     <string name="menu_move" msgid="1828090633118079817">"Premjesti u..."</string>
     <string name="menu_new_window" msgid="1226032889278727538">"Novi prozor"</string>
     <string name="menu_copy_to_clipboard" msgid="489311381979634291">"Kopiraj"</string>
@@ -63,7 +63,7 @@
     <string name="no_results" msgid="6622510343880730446">"Nema rezultata u %1$s"</string>
     <string name="toast_no_application" msgid="4632640357724698144">"Nije moguće otvoriti fajl"</string>
     <string name="toast_failed_delete" msgid="2180678019407244069">"Nije moguće obrisati neke dokumente"</string>
-    <string name="share_via" msgid="8966594246261344259">"Podijeli preko"</string>
+    <string name="share_via" msgid="8966594246261344259">"Dijeli preko"</string>
     <string name="copy_notification_title" msgid="6374299806748219777">"Kopiraju se fajlovi"</string>
     <string name="move_notification_title" msgid="6193835179777284805">"Premještanje fajlova"</string>
     <string name="delete_notification_title" msgid="3329403967712437496">"Brisanje fajlova"</string>
@@ -84,9 +84,9 @@
       <item quantity="other">Briše se <xliff:g id="COUNT_1">%1$d</xliff:g> fajlova.</item>
     </plurals>
     <string name="undo" msgid="7905788502491742328">"Vrati"</string>
-    <string name="copy_preparing" msgid="3896202461003039386">"Priprema se kopiranje..."</string>
+    <string name="copy_preparing" msgid="3896202461003039386">"Priprema za kopiranje..."</string>
     <string name="move_preparing" msgid="2772219441375531410">"Priprema za premještanje..."</string>
-    <string name="delete_preparing" msgid="5655813182533491992">"Pripremanje za brisanje…"</string>
+    <string name="delete_preparing" msgid="5655813182533491992">"Priprema za brisanje…"</string>
     <plurals name="copy_error_notification_title" formatted="false" msgid="7160447124922897689">
       <item quantity="one">Nije moguće kopirati <xliff:g id="COUNT_1">%1$d</xliff:g> fajl</item>
       <item quantity="few">Nije moguće kopirati <xliff:g id="COUNT_1">%1$d</xliff:g> fajla</item>

@@ -22,13 +22,13 @@
     <string name="title_save" msgid="2433679664882857999">"Saqlash"</string>
     <string name="menu_create_dir" msgid="2547620241173881754">"Yangi jild"</string>
     <string name="menu_grid" msgid="6878021334497835259">"To‘r ko‘rinishida"</string>
-    <string name="menu_list" msgid="7279285939892417279">"Ro‘yxat ko‘rinishida"</string>
+    <string name="menu_list" msgid="7279285939892417279">"Qator"</string>
     <string name="menu_sort" msgid="7677740407158414452">"Saralash"</string>
     <string name="menu_search" msgid="3816712084502856974">"Qidirish"</string>
     <string name="menu_settings" msgid="8239065133341597825">"Xotira sozlamalari"</string>
     <string name="menu_open" msgid="432922957274920903">"Ochish"</string>
     <string name="menu_save" msgid="2394743337684426338">"Saqlash"</string>
-    <string name="menu_share" msgid="3075149983979628146">"Baham ko‘rish"</string>
+    <string name="menu_share" msgid="3075149983979628146">"Ulashish"</string>
     <string name="menu_delete" msgid="8138799623850614177">"O‘chirish"</string>
     <string name="menu_select_all" msgid="8323579667348729928">"Hammasini belgilash"</string>
     <string name="menu_copy" msgid="3612326052677229148">"Nusxalash…"</string>
@@ -63,7 +63,7 @@
     <string name="no_results" msgid="6622510343880730446">"%1$s jildidan topilmadi"</string>
     <string name="toast_no_application" msgid="4632640357724698144">"Fayl ochilmadi"</string>
     <string name="toast_failed_delete" msgid="2180678019407244069">"Ba’zi hujjatlar o‘chirilmadi"</string>
-    <string name="share_via" msgid="8966594246261344259">"Baham ko‘rish"</string>
+    <string name="share_via" msgid="8966594246261344259">"Ulashish"</string>
     <string name="copy_notification_title" msgid="6374299806748219777">"Fayllar nusxalanmoqda"</string>
     <string name="move_notification_title" msgid="6193835179777284805">"Ko‘chirib o‘tkazilmoqda"</string>
     <string name="delete_notification_title" msgid="3329403967712437496">"Fayllar o‘chirilmoqda"</string>
