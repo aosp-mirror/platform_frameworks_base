@@ -58,4 +58,22 @@ class RecoverableKeyStoreDbContract {
          */
         static final String COLUMN_NAME_LAST_SYNCED_AT = "last_synced_at";
     }
+
+    /**
+     * Recoverable KeyStore metadata for a specific user profile.
+     */
+    static class UserMetadataEntry implements BaseColumns {
+        static final String TABLE_NAME = "user_metadata";
+
+        /**
+         * User ID of the profile.
+         */
+        static final String COLUMN_NAME_USER_ID = "user_id";
+
+        /**
+         * Every time a new platform key is generated for a user, this increments. The platform key
+         * is used to wrap recoverable keys on disk.
+         */
+        static final String COLUMN_NAME_PLATFORM_KEY_GENERATION_ID = "platform_key_generation_id";
+    }
 }
