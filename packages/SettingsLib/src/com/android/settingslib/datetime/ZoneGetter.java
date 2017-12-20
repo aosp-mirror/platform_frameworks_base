@@ -271,7 +271,7 @@ public class ZoneGetter {
      * @param now The current time, used to tell whether daylight savings is active.
      * @return A CharSequence suitable for display as the offset label of {@code tz}.
      */
-    private static CharSequence getGmtOffsetText(TimeZoneFormat tzFormatter, Locale locale,
+    public static CharSequence getGmtOffsetText(TimeZoneFormat tzFormatter, Locale locale,
             TimeZone tz, Date now) {
         final SpannableStringBuilder builder = new SpannableStringBuilder();
 
