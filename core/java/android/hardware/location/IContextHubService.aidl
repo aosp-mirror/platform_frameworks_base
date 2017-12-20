@@ -43,22 +43,25 @@ interface IContextHubService {
     ContextHubInfo getContextHubInfo(int contextHubHandle);
 
     // Loads a nanoapp at the specified hub (old API)
-    int loadNanoApp(int hubHandle, in NanoApp app);
+    int loadNanoApp(int contextHubHandle, in NanoApp nanoApp);
 
     // Unloads a nanoapp given its instance ID (old API)
-    int unloadNanoApp(int nanoAppInstanceHandle);
+    int unloadNanoApp(int nanoAppHandle);
 
     // Gets the NanoAppInstanceInfo of a nanoapp give its instance ID
-    NanoAppInstanceInfo getNanoAppInstanceInfo(int nanoAppInstanceHandle);
+    NanoAppInstanceInfo getNanoAppInstanceInfo(int nanoAppHandle);
 
     // Finds all nanoApp instances matching some filter
-    int[] findNanoAppOnHub(int hubHandle, in NanoAppFilter filter);
+    int[] findNanoAppOnHub(int contextHubHandle, in NanoAppFilter filter);
 
     // Sends a message to a nanoApp
-    int sendMessage(int hubHandle, int nanoAppHandle, in ContextHubMessage msg);
+    int sendMessage(int contextHubHandle, int nanoAppHandle, in ContextHubMessage msg);
 
     // Creates a client to send and receive messages
     IContextHubClient createClient(in IContextHubClientCallback client, int contextHubId);
+
+    // Returns a list of ContextHub objects of available hubs
+    List<ContextHubInfo> getContextHubs();
 
     // Loads a nanoapp at the specified hub (new API)
     void loadNanoAppOnHub(

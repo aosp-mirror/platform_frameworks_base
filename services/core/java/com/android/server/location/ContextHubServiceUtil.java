@@ -30,6 +30,9 @@ import android.hardware.location.NanoAppMessage;
 import android.hardware.location.NanoAppState;
 import android.util.Log;
 
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
 import java.util.ArrayList;
 
@@ -43,19 +46,20 @@ import java.util.ArrayList;
             + HARDWARE_PERMISSION + "' not granted to access ContextHub Hardware";
 
     /**
-     * Creates a ContextHubInfo array from an ArrayList of HIDL ContextHub objects.
+     * Creates a ConcurrentHashMap of the Context Hub ID to the ContextHubInfo object given an
+     * ArrayList of HIDL ContextHub objects.
      *
      * @param hubList the ContextHub ArrayList
-     * @return the ContextHubInfo array
+     * @return the HashMap object
      */
     /* package */
-    static ContextHubInfo[] createContextHubInfoArray(List<ContextHub> hubList) {
-        ContextHubInfo[] contextHubInfoList = new ContextHubInfo[hubList.size()];
-        for (int i = 0; i < hubList.size(); i++) {
-            contextHubInfoList[i] = new ContextHubInfo(hubList.get(i));
+    static HashMap<Integer, ContextHubInfo> createContextHubInfoMap(List<ContextHub> hubList) {
+        HashMap<Integer, ContextHubInfo> contextHubIdToInfoMap = new HashMap<>();
+        for (ContextHub contextHub : hubList) {
+            contextHubIdToInfoMap.put(contextHub.hubId, new ContextHubInfo(contextHub));
         }
 
-        return contextHubInfoList;
+        return contextHubIdToInfoMap;
     }
 
     /**
@@ -84,6 +88,22 @@ import java.util.ArrayList;
         byte[] primitiveArray = new byte[array.size()];
         for (int i = 0; i < array.size(); i++) {
             primitiveArray[i] = array.get(i);
+        }
+
+        return primitiveArray;
+    }
+
+    /**
+     * Creates a primitive integer array given a Collection<Integer>.
+     * @param collection the collection to iterate
+     * @return the primitive integer array
+     */
+    static int[] createPrimitiveIntArray(Collection<Integer> collection) {
+        int[] primitiveArray = new int[collection.size()];
+
+        int i = 0;
+        for (int contextHubId : collection) {
+            primitiveArray[i++] = contextHubId;
         }
 
         return primitiveArray;

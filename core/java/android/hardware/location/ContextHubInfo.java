@@ -262,7 +262,7 @@ public class ContextHubInfo implements Parcelable {
     @Override
     public String toString() {
         String retVal = "";
-        retVal += "Id : " + mId;
+        retVal += "ID/handle : " + mId;
         retVal += ", Name : " + mName;
         retVal += "\n\tVendor : " + mVendor;
         retVal += ", Toolchain : " + mToolchain;
