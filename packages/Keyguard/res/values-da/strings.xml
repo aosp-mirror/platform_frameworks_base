@@ -117,15 +117,15 @@
     <string name="kg_prompt_reason_device_admin" msgid="5838877342219587193">"Enhedsadministratoren har låst enheden"</string>
     <string name="kg_prompt_reason_user_request" msgid="500999297306031595">"Enheden blev låst manuelt"</string>
     <plurals name="kg_prompt_reason_time_pattern" formatted="false" msgid="2697444392228541853">
-      <item quantity="one">Enheden blev sidst låst op for <xliff:g id="NUMBER_1">%d</xliff:g> timer siden. Bekræft mønsteret.</item>
+      <item quantity="one">Enheden blev sidst låst op for <xliff:g id="NUMBER_1">%d</xliff:g> time siden. Bekræft mønsteret.</item>
       <item quantity="other">Enheden blev sidst låst op for <xliff:g id="NUMBER_1">%d</xliff:g> timer siden. Bekræft mønsteret.</item>
     </plurals>
     <plurals name="kg_prompt_reason_time_pin" formatted="false" msgid="2118758475374354849">
-      <item quantity="one">Enheden blev sidst låst op for <xliff:g id="NUMBER_1">%d</xliff:g> timer siden. Bekræft pinkoden.</item>
+      <item quantity="one">Enheden blev sidst låst op for <xliff:g id="NUMBER_1">%d</xliff:g> time siden. Bekræft pinkoden.</item>
       <item quantity="other">Enheden blev sidst låst op for <xliff:g id="NUMBER_1">%d</xliff:g> timer siden. Bekræft pinkoden.</item>
     </plurals>
     <plurals name="kg_prompt_reason_time_password" formatted="false" msgid="5132693663364913675">
-      <item quantity="one">Enheden blev sidst låst op for <xliff:g id="NUMBER_1">%d</xliff:g> timer siden. Bekræft adgangskoden.</item>
+      <item quantity="one">Enheden blev sidst låst op for <xliff:g id="NUMBER_1">%d</xliff:g> time siden. Bekræft adgangskoden.</item>
       <item quantity="other">Enheden blev sidst låst op for <xliff:g id="NUMBER_1">%d</xliff:g> timer siden. Bekræft adgangskoden.</item>
     </plurals>
     <string name="fingerprint_not_recognized" msgid="2690661881608146617">"Ikke genkendt"</string>
