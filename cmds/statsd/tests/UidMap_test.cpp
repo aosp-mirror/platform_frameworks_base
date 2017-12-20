@@ -74,6 +74,14 @@ TEST(UidMapTest, TestMatching) {
     EXPECT_TRUE(m.hasApp(1000, kApp1));
     EXPECT_TRUE(m.hasApp(1000, kApp2));
     EXPECT_FALSE(m.hasApp(1000, "not.app"));
+
+    std::set<string> name_set = m.getAppNamesFromUid(1000u, true /* returnNormalized */);
+    EXPECT_EQ(name_set.size(), 2u);
+    EXPECT_TRUE(name_set.find(kApp1) != name_set.end());
+    EXPECT_TRUE(name_set.find(kApp2) != name_set.end());
+
+    name_set = m.getAppNamesFromUid(12345, true /* returnNormalized */);
+    EXPECT_TRUE(name_set.empty());
 }
 
 TEST(UidMapTest, TestAddAndRemove) {
@@ -90,12 +98,59 @@ TEST(UidMapTest, TestAddAndRemove) {
     versions.push_back(5);
     m.updateMap(uids, versions, apps);
 
+    std::set<string> name_set = m.getAppNamesFromUid(1000, true /* returnNormalized */);
+    EXPECT_EQ(name_set.size(), 2u);
+    EXPECT_TRUE(name_set.find(kApp1) != name_set.end());
+    EXPECT_TRUE(name_set.find(kApp2) != name_set.end());
+
+    // Update the app1 version.
     m.updateApp(String16(kApp1.c_str()), 1000, 40);
     EXPECT_EQ(40, m.getAppVersion(1000, kApp1));
+
+    name_set = m.getAppNamesFromUid(1000, true /* returnNormalized */);
+    EXPECT_EQ(name_set.size(), 2u);
+    EXPECT_TRUE(name_set.find(kApp1) != name_set.end());
+    EXPECT_TRUE(name_set.find(kApp2) != name_set.end());
 
     m.removeApp(String16(kApp1.c_str()), 1000);
     EXPECT_FALSE(m.hasApp(1000, kApp1));
     EXPECT_TRUE(m.hasApp(1000, kApp2));
+    name_set = m.getAppNamesFromUid(1000, true /* returnNormalized */);
+    EXPECT_EQ(name_set.size(), 1u);
+    EXPECT_TRUE(name_set.find(kApp1) == name_set.end());
+    EXPECT_TRUE(name_set.find(kApp2) != name_set.end());
+
+    // Remove app2.
+    m.removeApp(String16(kApp2.c_str()), 1000);
+    EXPECT_FALSE(m.hasApp(1000, kApp1));
+    EXPECT_FALSE(m.hasApp(1000, kApp2));
+    name_set = m.getAppNamesFromUid(1000, true /* returnNormalized */);
+    EXPECT_TRUE(name_set.empty());
+}
+
+TEST(UidMapTest, TestUpdateApp) {
+    UidMap m;
+    m.updateMap({1000, 1000}, {4, 5}, {String16(kApp1.c_str()), String16(kApp2.c_str())});
+    std::set<string> name_set = m.getAppNamesFromUid(1000, true /* returnNormalized */);
+    EXPECT_EQ(name_set.size(), 2u);
+    EXPECT_TRUE(name_set.find(kApp1) != name_set.end());
+    EXPECT_TRUE(name_set.find(kApp2) != name_set.end());
+
+    // Adds a new name for uid 1000.
+    m.updateApp(String16("NeW_aPP1_NAmE"), 1000, 40);
+    name_set = m.getAppNamesFromUid(1000, true /* returnNormalized */);
+    EXPECT_EQ(name_set.size(), 3u);
+    EXPECT_TRUE(name_set.find(kApp1) != name_set.end());
+    EXPECT_TRUE(name_set.find(kApp2) != name_set.end());
+    EXPECT_TRUE(name_set.find("NeW_aPP1_NAmE") == name_set.end());
+    EXPECT_TRUE(name_set.find("new_app1_name") != name_set.end());
+
+    // This name is also reused by another uid 2000.
+    m.updateApp(String16("NeW_aPP1_NAmE"), 2000, 1);
+    name_set = m.getAppNamesFromUid(2000, true /* returnNormalized */);
+    EXPECT_EQ(name_set.size(), 1u);
+    EXPECT_TRUE(name_set.find("NeW_aPP1_NAmE") == name_set.end());
+    EXPECT_TRUE(name_set.find("new_app1_name") != name_set.end());
 }
 
 TEST(UidMapTest, TestClearingOutput) {

@@ -14,8 +14,7 @@
  * limitations under the License.
  */
 
-#ifndef STATSD_UIDMAP_H
-#define STATSD_UIDMAP_H
+#pragma once
 
 #include "config/ConfigKey.h"
 #include "config/ConfigListener.h"
@@ -66,6 +65,9 @@ public:
     // Returns true if the given uid contains the specified app (eg. com.google.android.gms).
     bool hasApp(int uid, const string& packageName) const;
 
+    // Returns the app names from uid.
+    std::set<string> getAppNamesFromUid(const int32_t& uid, bool returnNormalized) const;
+
     int64_t getAppVersion(int uid, const string& packageName) const;
 
     // Helper for debugging contents of this uid map. Can be triggered with:
@@ -103,6 +105,9 @@ public:
     size_t getBytesUsed();
 
 private:
+    std::set<string> getAppNamesFromUidLocked(const int32_t& uid, bool returnNormalized) const;
+    string normalizeAppName(const string& appName) const;
+
     void updateMap(const int64_t& timestamp, const vector<int32_t>& uid,
                    const vector<int64_t>& versionCode, const vector<String16>& packageName);
 
@@ -160,4 +165,3 @@ private:
 }  // namespace os
 }  // namespace android
 
-#endif  // STATSD_UIDMAP_H
