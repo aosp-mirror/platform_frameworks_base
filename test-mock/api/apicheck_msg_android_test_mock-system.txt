@@ -1,0 +1,17 @@
+
+******************************
+You have tried to change the API from what has been previously approved.
+
+To make these errors go away, you have two choices:
+   1) You can add "@hide" javadoc comments to the methods, etc. listed in the
+      errors above.
+
+   2) You can update android-test-mock-current.txt by executing the following command:
+         make update-android-test-mock-system-api
+
+      To submit the revised android-test-mock-system-current.txt to the main Android repository,
+      you will need approval.
+******************************
+
+
+

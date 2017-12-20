@@ -68,7 +68,7 @@ class ResourceTableBuilder {
   ResourceTableBuilder& AddValue(const android::StringPiece& name, const ConfigDescription& config,
                                  const ResourceId& id, std::unique_ptr<Value> value);
   ResourceTableBuilder& SetSymbolState(const android::StringPiece& name, const ResourceId& id,
-                                       SymbolState state, bool allow_new = false);
+                                       Visibility::Level level, bool allow_new = false);
 
   StringPool* string_pool();
   std::unique_ptr<ResourceTable> Build();

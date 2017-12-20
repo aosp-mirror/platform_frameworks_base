@@ -16,6 +16,8 @@
 
 package android.util;
 
+import android.support.test.filters.LargeTest;
+
 import junit.framework.TestCase;
 
 import java.io.PrintWriter;
@@ -24,7 +26,7 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 
-
+@LargeTest
 public class LocalLogTest extends TestCase {
 
     public void testA() {

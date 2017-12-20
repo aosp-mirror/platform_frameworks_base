@@ -340,22 +340,6 @@ public class WorkSource implements Parcelable {
         }
     }
 
-    /** @hide */
-    public WorkSource stripNames() {
-        if (mNum <= 0) {
-            return new WorkSource();
-        }
-        WorkSource result = new WorkSource();
-        int lastUid = -1;
-        for (int i=0; i<mNum; i++) {
-            int uid = mUids[i];
-            if (i == 0 || lastUid != uid) {
-                result.add(uid);
-            }
-        }
-        return result;
-    }
-
     private boolean removeUids(WorkSource other) {
         int N1 = mNum;
         final int[] uids1 = mUids;

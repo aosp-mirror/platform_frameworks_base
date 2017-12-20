@@ -17,4 +17,6 @@
 
 set -e
 
-aapt package -M AndroidManifest.xml -S res -F overlay.apk -f
+aapt2 compile --dir res -o compiled.flata
+aapt2 link --manifest AndroidManifest.xml -o overlay.apk compiled.flata
+rm compiled.flata

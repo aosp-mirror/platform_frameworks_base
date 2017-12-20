@@ -191,14 +191,14 @@ JavaClassGenerator::JavaClassGenerator(IAaptContext* context,
                                        const JavaClassGeneratorOptions& options)
     : context_(context), table_(table), options_(options) {}
 
-bool JavaClassGenerator::SkipSymbol(SymbolState state) {
+bool JavaClassGenerator::SkipSymbol(Visibility::Level level) {
   switch (options_.types) {
     case JavaClassGeneratorOptions::SymbolTypes::kAll:
       return false;
     case JavaClassGeneratorOptions::SymbolTypes::kPublicPrivate:
-      return state == SymbolState::kUndefined;
+      return level == Visibility::Level::kUndefined;
     case JavaClassGeneratorOptions::SymbolTypes::kPublic:
-      return state != SymbolState::kPublic;
+      return level != Visibility::Level::kPublic;
   }
   return true;
 }
@@ -444,8 +444,8 @@ void JavaClassGenerator::ProcessResource(const ResourceNameRef& name, const Reso
     AnnotationProcessor* processor = resource_member->GetCommentBuilder();
 
     // Add the comments from any <public> tags.
-    if (entry.symbol_status.state != SymbolState::kUndefined) {
-      processor->AppendComment(entry.symbol_status.comment);
+    if (entry.visibility.level != Visibility::Level::kUndefined) {
+      processor->AppendComment(entry.visibility.comment);
     }
 
     // Add the comments from all configurations of this entry.
@@ -484,7 +484,7 @@ void JavaClassGenerator::ProcessResource(const ResourceNameRef& name, const Reso
 Maybe<std::string> JavaClassGenerator::UnmangleResource(const StringPiece& package_name,
                                                         const StringPiece& package_name_to_generate,
                                                         const ResourceEntry& entry) {
-  if (SkipSymbol(entry.symbol_status.state)) {
+  if (SkipSymbol(entry.visibility.level)) {
     return {};
   }
 

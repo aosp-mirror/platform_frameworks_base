@@ -26,6 +26,7 @@
 
 using namespace android;
 
+using ::testing::Gt;
 using ::testing::IsNull;
 using ::testing::NotNull;
 
@@ -250,15 +251,15 @@ static std::unique_ptr<ResourceTable> BuildTableWithSparseEntries(
     const ResourceId resid(context->GetPackageId(), 0x02, static_cast<uint16_t>(i));
     const auto value =
         util::make_unique<BinaryPrimitive>(Res_value::TYPE_INT_DEC, static_cast<uint32_t>(i));
-    CHECK(table->AddResource(name, resid, ConfigDescription::DefaultConfig(), "",
-                             std::unique_ptr<Value>(value->Clone(nullptr)),
-                             context->GetDiagnostics()));
+    CHECK(table->AddResourceWithId(name, resid, ConfigDescription::DefaultConfig(), "",
+                                   std::unique_ptr<Value>(value->Clone(nullptr)),
+                                   context->GetDiagnostics()));
 
     // Every few entries, write out a sparse_config value. This will give us the desired load.
     if (i % stride == 0) {
-      CHECK(table->AddResource(name, resid, sparse_config, "",
-                               std::unique_ptr<Value>(value->Clone(nullptr)),
-                               context->GetDiagnostics()));
+      CHECK(table->AddResourceWithId(name, resid, sparse_config, "",
+                                     std::unique_ptr<Value>(value->Clone(nullptr)),
+                                     context->GetDiagnostics()));
     }
   }
   return table;
@@ -566,6 +567,27 @@ TEST_F(TableFlattenerTest, ObfuscatingResourceNamesWithWhitelistSucceeds) {
   ASSERT_GE(idx, 0);
   EXPECT_TRUE(Exists(&res_table, "com.app.test:layout/0_resource_name_obfuscated",
                      ResourceId(0x7f050000), {}, Res_value::TYPE_STRING, (uint32_t)idx, 0u));
+}
+
+TEST_F(TableFlattenerTest, FlattenOverlayable) {
+  std::unique_ptr<ResourceTable> table =
+      test::ResourceTableBuilder()
+          .SetPackageId("com.app.test", 0x7f)
+          .AddSimple("com.app.test:integer/overlayable", ResourceId(0x7f020000))
+          .Build();
+
+  ASSERT_TRUE(table->SetOverlayable(test::ParseNameOrDie("com.app.test:integer/overlayable"),
+                                    Overlayable{}, test::GetDiagnostics()));
+
+  ResTable res_table;
+  ASSERT_TRUE(Flatten(context_.get(), {}, table.get(), &res_table));
+
+  const StringPiece16 overlayable_name(u"com.app.test:integer/overlayable");
+  uint32_t spec_flags = 0u;
+  ASSERT_THAT(res_table.identifierForName(overlayable_name.data(), overlayable_name.size(), nullptr,
+                                          0u, nullptr, 0u, &spec_flags),
+              Gt(0u));
+  EXPECT_TRUE(spec_flags & android::ResTable_typeSpec::SPEC_OVERLAYABLE);
 }
 
 }  // namespace aapt

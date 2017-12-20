@@ -24,6 +24,7 @@ import static org.mockito.hamcrest.MockitoHamcrest.argThat;
 
 import android.content.Context;
 import android.content.Intent;
+import android.support.test.filters.LargeTest;
 
 import org.hamcrest.BaseMatcher;
 import org.hamcrest.Description;
@@ -33,6 +34,7 @@ import org.junit.Test;
 /**
  * Tests for {@link RulesUpdaterContract}.
  */
+@LargeTest
 public class RulesUpdaterContractTest {
 
     @Test

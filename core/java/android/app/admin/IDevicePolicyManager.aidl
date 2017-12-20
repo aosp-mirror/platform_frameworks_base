@@ -175,6 +175,8 @@ interface IDevicePolicyManager {
     boolean generateKeyPair(in ComponentName who, in String callerPackage, in String algorithm,
             in ParcelableKeyGenParameterSpec keySpec,
             out KeymasterCertificateChain attestationChain);
+    boolean setKeyPairCertificate(in ComponentName who, in String callerPackage, in String alias,
+            in byte[] certBuffer, in byte[] certChainBuffer, boolean isUserSelectable);
     void choosePrivateKeyAlias(int uid, in Uri uri, in String alias, IBinder aliasCallback);
 
     void setDelegatedScopes(in ComponentName who, in String delegatePackage, in List<String> scopes);

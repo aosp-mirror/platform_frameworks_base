@@ -47,9 +47,6 @@ jfieldID gOptions_bitmapFieldID;
 
 jfieldID gBitmap_ninePatchInsetsFieldID;
 
-jclass gInsetStruct_class;
-jmethodID gInsetStruct_constructorMethodID;
-
 jclass gBitmapConfig_class;
 jmethodID gBitmapConfig_nativeToConfigMethodID;
 
@@ -97,43 +94,6 @@ jstring encodedFormatToString(JNIEnv* env, SkEncodedImageFormat format) {
         jstr = env->NewStringUTF(mimeType);
     }
     return jstr;
-}
-
-static void scaleDivRange(int32_t* divs, int count, float scale, int maxValue) {
-    for (int i = 0; i < count; i++) {
-        divs[i] = int32_t(divs[i] * scale + 0.5f);
-        if (i > 0 && divs[i] == divs[i - 1]) {
-            divs[i]++; // avoid collisions
-        }
-    }
-
-    if (CC_UNLIKELY(divs[count - 1] > maxValue)) {
-        // if the collision avoidance above put some divs outside the bounds of the bitmap,
-        // slide outer stretchable divs inward to stay within bounds
-        int highestAvailable = maxValue;
-        for (int i = count - 1; i >= 0; i--) {
-            divs[i] = highestAvailable;
-            if (i > 0 && divs[i] <= divs[i-1]){
-                // keep shifting
-                highestAvailable = divs[i] - 1;
-            } else {
-                break;
-            }
-        }
-    }
-}
-
-static void scaleNinePatchChunk(android::Res_png_9patch* chunk, float scale,
-        int scaledWidth, int scaledHeight) {
-    chunk->paddingLeft = int(chunk->paddingLeft * scale + 0.5f);
-    chunk->paddingTop = int(chunk->paddingTop * scale + 0.5f);
-    chunk->paddingRight = int(chunk->paddingRight * scale + 0.5f);
-    chunk->paddingBottom = int(chunk->paddingBottom * scale + 0.5f);
-
-    // The max value for the divRange is one pixel less than the actual max to ensure that the size
-    // of the last div is not zero. A div of size 0 is considered invalid input and will not render.
-    scaleDivRange(chunk->getXDivs(), chunk->numXDivs, scale, scaledWidth - 1);
-    scaleDivRange(chunk->getYDivs(), chunk->numYDivs, scale, scaledHeight - 1);
 }
 
 class ScaleCheckingAllocator : public SkBitmap::HeapAllocator {
@@ -428,7 +388,7 @@ static jobject doDecode(JNIEnv* env, std::unique_ptr<SkStreamRewindable> stream,
     jbyteArray ninePatchChunk = NULL;
     if (peeker.mPatch != NULL) {
         if (willScale) {
-            scaleNinePatchChunk(peeker.mPatch, scale, scaledWidth, scaledHeight);
+            peeker.scale(scale, scale, scaledWidth, scaledHeight);
         }
 
         size_t ninePatchArraySize = peeker.mPatch->serializedSize();
@@ -448,12 +408,7 @@ static jobject doDecode(JNIEnv* env, std::unique_ptr<SkStreamRewindable> stream,
 
     jobject ninePatchInsets = NULL;
     if (peeker.mHasInsets) {
-        ninePatchInsets = env->NewObject(gInsetStruct_class, gInsetStruct_constructorMethodID,
-                peeker.mOpticalInsets[0], peeker.mOpticalInsets[1],
-                peeker.mOpticalInsets[2], peeker.mOpticalInsets[3],
-                peeker.mOutlineInsets[0], peeker.mOutlineInsets[1],
-                peeker.mOutlineInsets[2], peeker.mOutlineInsets[3],
-                peeker.mOutlineRadius, peeker.mOutlineAlpha, scale);
+        ninePatchInsets = peeker.createNinePatchInsets(env, scale);
         if (ninePatchInsets == NULL) {
             return nullObjectReturn("nine patch insets == null");
         }
@@ -508,13 +463,7 @@ static jobject doDecode(JNIEnv* env, std::unique_ptr<SkStreamRewindable> stream,
     }
 
     if (padding) {
-        if (peeker.mPatch != NULL) {
-            GraphicsJNI::set_jrect(env, padding,
-                    peeker.mPatch->paddingLeft, peeker.mPatch->paddingTop,
-                    peeker.mPatch->paddingRight, peeker.mPatch->paddingBottom);
-        } else {
-            GraphicsJNI::set_jrect(env, padding, -1, -1, -1, -1);
-        }
+        peeker.getPadding(env, padding);
     }
 
     // If we get here, the outputBitmap should have an installed pixelref.
@@ -704,11 +653,6 @@ int register_android_graphics_BitmapFactory(JNIEnv* env) {
     jclass bitmap_class = FindClassOrDie(env, "android/graphics/Bitmap");
     gBitmap_ninePatchInsetsFieldID = GetFieldIDOrDie(env, bitmap_class, "mNinePatchInsets",
             "Landroid/graphics/NinePatch$InsetStruct;");
-
-    gInsetStruct_class = MakeGlobalRefOrDie(env, FindClassOrDie(env,
-        "android/graphics/NinePatch$InsetStruct"));
-    gInsetStruct_constructorMethodID = GetMethodIDOrDie(env, gInsetStruct_class, "<init>",
-                                                        "(IIIIIIIIFIF)V");
 
     gBitmapConfig_class = MakeGlobalRefOrDie(env, FindClassOrDie(env,
             "android/graphics/Bitmap$Config"));

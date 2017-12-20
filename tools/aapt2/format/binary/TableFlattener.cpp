@@ -283,7 +283,7 @@ class PackageFlattener {
 
     T* result = buffer->NextBlock<T>();
     ResTable_entry* out_entry = (ResTable_entry*)result;
-    if (entry->entry->symbol_status.state == SymbolState::kPublic) {
+    if (entry->entry->visibility.level == Visibility::Level::kPublic) {
       out_entry->flags |= ResTable_entry::FLAG_PUBLIC;
     }
 
@@ -443,8 +443,13 @@ class PackageFlattener {
 
       // Populate the config masks for this entry.
 
-      if (entry->symbol_status.state == SymbolState::kPublic) {
+      if (entry->visibility.level == Visibility::Level::kPublic) {
         config_masks[entry->id.value()] |= util::HostToDevice32(ResTable_typeSpec::SPEC_PUBLIC);
+      }
+
+      if (entry->overlayable) {
+        config_masks[entry->id.value()] |=
+            util::HostToDevice32(ResTable_typeSpec::SPEC_OVERLAYABLE);
       }
 
       const size_t config_count = entry->values.size();

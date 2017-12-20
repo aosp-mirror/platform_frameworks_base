@@ -29,6 +29,7 @@ namespace aapt {
 
 struct DebugPrintTableOptions {
   bool show_sources = false;
+  bool show_values = true;
 };
 
 struct Debug {

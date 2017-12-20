@@ -139,8 +139,8 @@ TEST(JavaClassGeneratorTest, OnlyWritePublicResources) {
           .AddSimple("android:id/one", ResourceId(0x01020000))
           .AddSimple("android:id/two", ResourceId(0x01020001))
           .AddSimple("android:id/three", ResourceId(0x01020002))
-          .SetSymbolState("android:id/one", ResourceId(0x01020000), SymbolState::kPublic)
-          .SetSymbolState("android:id/two", ResourceId(0x01020001), SymbolState::kPrivate)
+          .SetSymbolState("android:id/one", ResourceId(0x01020000), Visibility::Level::kPublic)
+          .SetSymbolState("android:id/two", ResourceId(0x01020001), Visibility::Level::kPrivate)
           .Build();
 
   std::unique_ptr<IAaptContext> context =

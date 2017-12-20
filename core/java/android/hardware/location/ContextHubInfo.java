@@ -262,7 +262,7 @@ public class ContextHubInfo implements Parcelable {
     @Override
     public String toString() {
         String retVal = "";
-        retVal += "Id : " + mId;
+        retVal += "ID/handle : " + mId;
         retVal += ", Name : " + mName;
         retVal += "\n\tVendor : " + mVendor;
         retVal += ", Toolchain : " + mToolchain;
@@ -275,8 +275,6 @@ public class ContextHubInfo implements Parcelable {
         retVal += ", StoppedPowerDraw : " + mStoppedPowerDrawMw + " mW";
         retVal += ", PeakPowerDraw : " + mPeakPowerDrawMw + " mW";
         retVal += ", MaxPacketLength : " + mMaxPacketLengthBytes + " Bytes";
-        retVal += "\n\tSupported sensors : " + Arrays.toString(mSupportedSensors);
-        retVal += "\n\tMemory Regions : " + Arrays.toString(mMemoryRegions);
 
         return retVal;
     }

@@ -22,6 +22,7 @@ import static org.mockito.MockitoAnnotations.initMocks;
 
 import android.os.Bundle;
 import android.os.RemoteException;
+import android.support.test.filters.LargeTest;
 import android.support.test.runner.AndroidJUnit4;
 
 import libcore.util.EmptyArray;
@@ -36,6 +37,7 @@ import java.util.List;
 /**
  * Tests for AccessibilityInteractionClient
  */
+@LargeTest
 @RunWith(AndroidJUnit4.class)
 public class AccessibilityInteractionClientTest {
     private static final int MOCK_CONNECTION_ID = 0xabcd;

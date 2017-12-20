@@ -20,6 +20,7 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 import android.content.Context;
+import android.support.test.filters.LargeTest;
 import android.test.AndroidTestCase;
 import android.util.ArrayMap;
 import android.util.ArraySet;
@@ -36,6 +37,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+@LargeTest
 public class FullBackupTest extends AndroidTestCase {
     private XmlPullParserFactory mFactory;
     private XmlPullParser mXpp;

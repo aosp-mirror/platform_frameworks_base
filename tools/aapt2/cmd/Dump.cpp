@@ -69,14 +69,12 @@ static void DumpCompiledFile(const ResourceFile& file, const Source& source, off
   printer->Println(StringPrintf("Data:     offset=%" PRIi64 " length=%zd", offset, len));
 }
 
-static bool TryDumpFile(IAaptContext* context, const std::string& file_path) {
+static bool TryDumpFile(IAaptContext* context, const std::string& file_path,
+                        const DebugPrintTableOptions& print_options) {
   // Use a smaller buffer so that there is less latency for dumping to stdout.
   constexpr size_t kStdOutBufferSize = 1024u;
   io::FileOutputStream fout(STDOUT_FILENO, kStdOutBufferSize);
   Printer printer(&fout);
-
-  DebugPrintTableOptions print_options;
-  print_options.show_sources = true;
 
   std::string err;
   std::unique_ptr<io::ZipFileCollection> zip = io::ZipFileCollection::Create(file_path, &err);
@@ -244,7 +242,12 @@ class DumpContext : public IAaptContext {
 // Entry point for dump command.
 int Dump(const std::vector<StringPiece>& args) {
   bool verbose = false;
-  Flags flags = Flags().OptionalSwitch("-v", "increase verbosity of output", &verbose);
+  bool no_values = false;
+  Flags flags = Flags()
+                    .OptionalSwitch("--no-values",
+                                    "Suppresses output of values when displaying resource tables.",
+                                    &no_values)
+                    .OptionalSwitch("-v", "increase verbosity of output", &verbose);
   if (!flags.Parse("aapt2 dump", args, &std::cerr)) {
     return 1;
   }
@@ -252,8 +255,11 @@ int Dump(const std::vector<StringPiece>& args) {
   DumpContext context;
   context.SetVerbose(verbose);
 
+  DebugPrintTableOptions dump_table_options;
+  dump_table_options.show_sources = true;
+  dump_table_options.show_values = !no_values;
   for (const std::string& arg : flags.GetArgs()) {
-    if (!TryDumpFile(&context, arg)) {
+    if (!TryDumpFile(&context, arg, dump_table_options)) {
       return 1;
     }
   }

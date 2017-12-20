@@ -29,8 +29,8 @@
 using ::aapt::io::StringInputStream;
 using ::aapt::test::StrValueEq;
 using ::aapt::test::ValueEq;
-using ::android::ResTable_map;
 using ::android::Res_value;
+using ::android::ResTable_map;
 using ::android::StringPiece;
 using ::testing::Eq;
 using ::testing::IsEmpty;
@@ -38,6 +38,7 @@ using ::testing::IsNull;
 using ::testing::NotNull;
 using ::testing::Pointee;
 using ::testing::SizeIs;
+using ::testing::StrEq;
 
 namespace aapt {
 
@@ -482,7 +483,7 @@ TEST_F(ResourceParserTest, ParseAttributesDeclareStyleable) {
   Maybe<ResourceTable::SearchResult> result =
       table_.FindResource(test::ParseNameOrDie("styleable/foo"));
   ASSERT_TRUE(result);
-  EXPECT_THAT(result.value().entry->symbol_status.state, Eq(SymbolState::kPublic));
+  EXPECT_THAT(result.value().entry->visibility.level, Eq(Visibility::Level::kPublic));
 
   Attribute* attr = test::GetValue<Attribute>(&table_, "attr/bar");
   ASSERT_THAT(attr, NotNull());
@@ -718,6 +719,26 @@ TEST_F(ResourceParserTest, AutoIncrementIdsInPublicGroup) {
   EXPECT_THAT(actual_id, Eq(ResourceId(0x01010041)));
 }
 
+TEST_F(ResourceParserTest, StrongestSymbolVisibilityWins) {
+  std::string input = R"(
+      <!-- private -->
+      <java-symbol type="string" name="foo" />
+      <!-- public -->
+      <public type="string" name="foo" id="0x01020000" />
+      <!-- private2 -->
+      <java-symbol type="string" name="foo" />)";
+  ASSERT_TRUE(TestParse(input));
+
+  Maybe<ResourceTable::SearchResult> result =
+      table_.FindResource(test::ParseNameOrDie("string/foo"));
+  ASSERT_TRUE(result);
+
+  ResourceEntry* entry = result.value().entry;
+  ASSERT_THAT(entry, NotNull());
+  EXPECT_THAT(entry->visibility.level, Eq(Visibility::Level::kPublic));
+  EXPECT_THAT(entry->visibility.comment, StrEq("public"));
+}
+
 TEST_F(ResourceParserTest, ExternalTypesShouldOnlyBeReferences) {
   ASSERT_TRUE(TestParse(R"(<item type="layout" name="foo">@layout/bar</item>)"));
   ASSERT_FALSE(TestParse(R"(<item type="layout" name="bar">"this is a string"</item>)"));
@@ -731,8 +752,8 @@ TEST_F(ResourceParserTest, AddResourcesElementShouldAddEntryWithUndefinedSymbol)
   ASSERT_TRUE(result);
   const ResourceEntry* entry = result.value().entry;
   ASSERT_THAT(entry, NotNull());
-  EXPECT_THAT(entry->symbol_status.state, Eq(SymbolState::kUndefined));
-  EXPECT_TRUE(entry->symbol_status.allow_new);
+  EXPECT_THAT(entry->visibility.level, Eq(Visibility::Level::kUndefined));
+  EXPECT_TRUE(entry->allow_new);
 }
 
 TEST_F(ResourceParserTest, ParseItemElementWithFormat) {
@@ -833,6 +854,22 @@ TEST_F(ResourceParserTest, ParseOverlayableTagWithSystemPolicy) {
         <item type="string" name="bar" />
       </overlayable>)";
   ASSERT_TRUE(TestParse(input));
+
+  Maybe<ResourceTable::SearchResult> search_result =
+      table_.FindResource(test::ParseNameOrDie("string/bar"));
+  ASSERT_TRUE(search_result);
+  ASSERT_THAT(search_result.value().entry, NotNull());
+  EXPECT_THAT(search_result.value().entry->visibility.level, Eq(Visibility::Level::kUndefined));
+  EXPECT_TRUE(search_result.value().entry->overlayable);
+}
+
+TEST_F(ResourceParserTest, DuplicateOverlayableIsError) {
+  std::string input = R"(
+      <overlayable>
+        <item type="string" name="foo" />
+        <item type="string" name="foo" />
+      </overlayable>)";
+  EXPECT_FALSE(TestParse(input));
 }
 
 }  // namespace aapt

@@ -30,7 +30,6 @@ import android.content.Context;
 import android.support.test.InstrumentationRegistry;
 import android.support.test.filters.SmallTest;
 import android.support.test.runner.AndroidJUnit4;
-
 import com.android.server.locksettings.recoverablekeystore.WrappedKey;
 
 import java.io.File;
@@ -65,7 +64,7 @@ public class RecoverableKeyStoreDbTest {
         WrappedKey oldWrappedKey = new WrappedKey(
                 getUtf8Bytes("nonce1"),
                 getUtf8Bytes("keymaterial1"),
-                /*platformKeyGenerationId=*/1);
+                /*platformKeyGenerationId=*/ 1);
         mRecoverableKeyStoreDb.insertKey(
                 userId, alias, oldWrappedKey);
         byte[] nonce = getUtf8Bytes("nonce2");
@@ -80,6 +79,29 @@ public class RecoverableKeyStoreDbTest {
         assertArrayEquals(nonce, retrievedKey.getNonce());
         assertArrayEquals(keyMaterial, retrievedKey.getKeyMaterial());
         assertEquals(2, retrievedKey.getPlatformKeyGenerationId());
+    }
+
+    @Test
+    public void insertKey_allowsTwoUidsToHaveSameAlias() {
+        String alias = "pcoulton";
+        WrappedKey key1 = new WrappedKey(
+                getUtf8Bytes("nonce1"),
+                getUtf8Bytes("key1"),
+                /*platformKeyGenerationId=*/ 1);
+        WrappedKey key2 = new WrappedKey(
+                getUtf8Bytes("nonce2"),
+                getUtf8Bytes("key2"),
+                /*platformKeyGenerationId=*/ 1);
+
+        mRecoverableKeyStoreDb.insertKey(/*uid=*/ 1, alias, key1);
+        mRecoverableKeyStoreDb.insertKey(/*uid=*/ 2, alias, key2);
+
+        assertArrayEquals(
+                getUtf8Bytes("nonce1"),
+                mRecoverableKeyStoreDb.getKey(1, alias).getNonce());
+        assertArrayEquals(
+                getUtf8Bytes("nonce2"),
+                mRecoverableKeyStoreDb.getKey(2, alias).getNonce());
     }
 
     @Test
@@ -155,6 +177,29 @@ public class RecoverableKeyStoreDbTest {
                 /*userId=*/ 2, generationId);
 
         assertTrue(keys.isEmpty());
+    }
+
+    @Test
+    public void getPlatformKeyGenerationId_returnsGenerationId() {
+        int userId = 42;
+        int generationId = 24;
+        mRecoverableKeyStoreDb.setPlatformKeyGenerationId(userId, generationId);
+
+        assertEquals(generationId, mRecoverableKeyStoreDb.getPlatformKeyGenerationId(userId));
+    }
+
+    @Test
+    public void getPlatformKeyGenerationId_returnsMinusOneIfNoEntry() {
+        assertEquals(-1, mRecoverableKeyStoreDb.getPlatformKeyGenerationId(42));
+    }
+
+    @Test
+    public void setPlatformKeyGenerationId_replacesOldEntry() {
+        int userId = 42;
+        mRecoverableKeyStoreDb.setPlatformKeyGenerationId(userId, 1);
+        mRecoverableKeyStoreDb.setPlatformKeyGenerationId(userId, 2);
+
+        assertEquals(2, mRecoverableKeyStoreDb.getPlatformKeyGenerationId(userId));
     }
 
     private static byte[] getUtf8Bytes(String s) {

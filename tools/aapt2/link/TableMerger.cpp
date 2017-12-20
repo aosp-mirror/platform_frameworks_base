@@ -83,43 +83,57 @@ bool TableMerger::MergeAndMangle(const Source& src, const StringPiece& package_n
 
 static bool MergeType(IAaptContext* context, const Source& src, ResourceTableType* dst_type,
                       ResourceTableType* src_type) {
-  if (dst_type->symbol_status.state < src_type->symbol_status.state) {
+  if (src_type->visibility_level > dst_type->visibility_level) {
     // The incoming type's visibility is stronger, so we should override the visibility.
-    if (src_type->symbol_status.state == SymbolState::kPublic) {
+    if (src_type->visibility_level == Visibility::Level::kPublic) {
       // Only copy the ID if the source is public, or else the ID is meaningless.
       dst_type->id = src_type->id;
     }
-    dst_type->symbol_status = std::move(src_type->symbol_status);
-  } else if (dst_type->symbol_status.state == SymbolState::kPublic &&
-             src_type->symbol_status.state == SymbolState::kPublic &&
-             dst_type->id && src_type->id &&
-             dst_type->id.value() != src_type->id.value()) {
+    dst_type->visibility_level = src_type->visibility_level;
+  } else if (dst_type->visibility_level == Visibility::Level::kPublic &&
+             src_type->visibility_level == Visibility::Level::kPublic && dst_type->id &&
+             src_type->id && dst_type->id.value() != src_type->id.value()) {
     // Both types are public and have different IDs.
-    context->GetDiagnostics()->Error(DiagMessage(src)
-                                     << "cannot merge type '" << src_type->type
-                                     << "': conflicting public IDs");
+    context->GetDiagnostics()->Error(DiagMessage(src) << "cannot merge type '" << src_type->type
+                                                      << "': conflicting public IDs");
     return false;
   }
   return true;
 }
 
-static bool MergeEntry(IAaptContext* context, const Source& src, ResourceEntry* dst_entry,
-                       ResourceEntry* src_entry) {
-  if (dst_entry->symbol_status.state < src_entry->symbol_status.state) {
-    // The incoming type's visibility is stronger, so we should override the visibility.
-    if (src_entry->symbol_status.state == SymbolState::kPublic) {
-      // Only copy the ID if the source is public, or else the ID is meaningless.
+static bool MergeEntry(IAaptContext* context, const Source& src, bool overlay,
+                       ResourceEntry* dst_entry, ResourceEntry* src_entry) {
+  // Copy over the strongest visibility.
+  if (src_entry->visibility.level > dst_entry->visibility.level) {
+    // Only copy the ID if the source is public, or else the ID is meaningless.
+    if (src_entry->visibility.level == Visibility::Level::kPublic) {
       dst_entry->id = src_entry->id;
     }
-    dst_entry->symbol_status = std::move(src_entry->symbol_status);
-  } else if (src_entry->symbol_status.state == SymbolState::kPublic &&
-             dst_entry->symbol_status.state == SymbolState::kPublic &&
-             dst_entry->id && src_entry->id &&
-             dst_entry->id.value() != src_entry->id.value()) {
+    dst_entry->visibility = std::move(src_entry->visibility);
+  } else if (src_entry->visibility.level == Visibility::Level::kPublic &&
+             dst_entry->visibility.level == Visibility::Level::kPublic && dst_entry->id &&
+             src_entry->id && src_entry->id != dst_entry->id) {
     // Both entries are public and have different IDs.
     context->GetDiagnostics()->Error(DiagMessage(src) << "cannot merge entry '" << src_entry->name
                                                       << "': conflicting public IDs");
     return false;
+  }
+
+  // Copy over the rest of the properties, if needed.
+  if (src_entry->allow_new) {
+    dst_entry->allow_new = std::move(src_entry->allow_new);
+  }
+
+  if (src_entry->overlayable) {
+    if (dst_entry->overlayable && !overlay) {
+      context->GetDiagnostics()->Error(DiagMessage(src_entry->overlayable.value().source)
+                                       << "duplicate overlayable declaration for resource '"
+                                       << src_entry->name << "'");
+      context->GetDiagnostics()->Error(DiagMessage(dst_entry->overlayable.value().source)
+                                       << "previous declaration here");
+      return false;
+    }
+    dst_entry->overlayable = std::move(src_entry->overlayable);
   }
   return true;
 }
@@ -202,7 +216,7 @@ bool TableMerger::DoMerge(const Source& src, ResourceTable* src_table,
       }
 
       ResourceEntry* dst_entry;
-      if (allow_new_resources || src_entry->symbol_status.allow_new) {
+      if (allow_new_resources || src_entry->allow_new) {
         dst_entry = dst_type->FindOrCreateEntry(entry_name);
       } else {
         dst_entry = dst_type->FindEntry(entry_name);
@@ -220,7 +234,7 @@ bool TableMerger::DoMerge(const Source& src, ResourceTable* src_table,
         continue;
       }
 
-      if (!MergeEntry(context_, src, dst_entry, src_entry.get())) {
+      if (!MergeEntry(context_, src, overlay, dst_entry, src_entry.get())) {
         error = true;
         continue;
       }
