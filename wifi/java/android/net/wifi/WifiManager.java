@@ -1615,53 +1615,6 @@ public class WifiManager {
     }
 
     /**
-     * startLocationRestrictedScan()
-     * Trigger a scan which will not make use of DFS channels and is thus not suitable for
-     * establishing wifi connection.
-     * @deprecated This API is nolonger supported.
-     * Use {@link android.net.wifi.WifiScanner} API
-     * @hide
-     * @removed
-     */
-    @Deprecated
-    @SystemApi
-    @SuppressLint("Doclava125")
-    public boolean startLocationRestrictedScan(WorkSource workSource) {
-        return false;
-    }
-
-    /**
-     * Check if the Batched Scan feature is supported.
-     *
-     * @return false if not supported.
-     * @deprecated This API is nolonger supported.
-     * Use {@link android.net.wifi.WifiScanner} API
-     * @hide
-     * @removed
-     */
-    @Deprecated
-    @SystemApi
-    @SuppressLint("Doclava125")
-    public boolean isBatchedScanSupported() {
-        return false;
-    }
-
-    /**
-     * Retrieve the latest batched scan result.  This should be called immediately after
-     * {@link BATCHED_SCAN_RESULTS_AVAILABLE_ACTION} is received.
-     * @deprecated This API is nolonger supported.
-     * Use {@link android.net.wifi.WifiScanner} API
-     * @hide
-     * @removed
-     */
-    @Deprecated
-    @SystemApi
-    @SuppressLint("Doclava125")
-    public List<BatchedScanResult> getBatchedScanResults() {
-        return null;
-    }
-
-    /**
      * Creates a configuration token describing the current network of MIME type
      * application/vnd.wfa.wsc. Can be used to configure WiFi networks via NFC.
      *
