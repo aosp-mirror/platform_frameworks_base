@@ -184,6 +184,10 @@ public final class Slice implements Parcelable {
      * Subtype to tag an item representing priority.
      */
     public static final String SUBTYPE_PRIORITY = "priority";
+    /**
+     * Subtype to tag an item to use as a content description.
+     */
+    public static final String SUBTYPE_CONTENT_DESCRIPTION = "content_description";
 
     private final SliceItem[] mItems;
     private final @SliceHint String[] mHints;
