@@ -1269,6 +1269,14 @@
     <string name="volume_dialog_accessibility_shown_message">%s volume controls shown. Swipe up to dismiss.</string>
     <string name="volume_dialog_accessibility_dismissed_message">Volume controls hidden</string>
 
+    <string name="output_title">Media output</string>
+    <string name="output_calls_title">Phone call output</string>
+    <string name="output_none_found">No devices found</string>
+    <string name="output_none_found_service_off">No devices found. Try turning on <xliff:g id="service" example="Bluetooth">%1$s</xliff:g></string>
+    <string name="output_service_bt">Bluetooth</string>
+    <string name="output_service_wifi">Wi-Fi</string>
+    <string name="output_service_bt_wifi">Bluetooth and Wi-Fi</string>
+
     <!-- Name of special SystemUI debug settings -->
     <string name="system_ui_tuner">System UI Tuner</string>
 

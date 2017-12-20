@@ -55,7 +55,6 @@ public class OutputChooserLayout extends FrameLayout {
     private AutoSizingList mItemList;
     private View mEmpty;
     private TextView mEmptyText;
-    private ImageView mEmptyIcon;
 
     private Item[] mItems;
 
@@ -76,7 +75,6 @@ public class OutputChooserLayout extends FrameLayout {
         mEmpty = findViewById(android.R.id.empty);
         mEmpty.setVisibility(GONE);
         mEmptyText = mEmpty.findViewById(android.R.id.title);
-        mEmptyIcon = mEmpty.findViewById(android.R.id.icon);
     }
 
     @Override
@@ -93,9 +91,8 @@ public class OutputChooserLayout extends FrameLayout {
         }
     }
 
-    public void setEmptyState(int icon, int text) {
+    public void setEmptyState(String text) {
         mEmpty.post(() -> {
-            mEmptyIcon.setImageResource(icon);
             mEmptyText.setText(text);
         });
     }
@@ -241,6 +238,8 @@ public class OutputChooserLayout extends FrameLayout {
     }
 
     public static class Item {
+        public static int DEVICE_TYPE_BT = 1;
+        public static int DEVICE_TYPE_MEDIA_ROUTER = 2;
         public int iconResId;
         public Drawable icon;
         public Drawable overlay;
@@ -249,6 +248,7 @@ public class OutputChooserLayout extends FrameLayout {
         public Object tag;
         public boolean canDisconnect;
         public int icon2 = -1;
+        public int deviceType = 0;
     }
 
     public interface Callback {
