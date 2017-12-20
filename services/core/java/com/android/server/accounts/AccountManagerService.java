@@ -1406,7 +1406,7 @@ public class AccountManagerService
             mLocalUnlockedUsers.put(userId, true);
         }
         if (userId < 1) return;
-        syncSharedAccounts(userId);
+        mHandler.post(() -> syncSharedAccounts(userId));
     }
 
     private void syncSharedAccounts(int userId) {
