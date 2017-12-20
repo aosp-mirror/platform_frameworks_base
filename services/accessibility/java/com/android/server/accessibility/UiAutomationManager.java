@@ -18,6 +18,7 @@ package com.android.server.accessibility;
 
 import android.accessibilityservice.AccessibilityServiceInfo;
 import android.accessibilityservice.IAccessibilityServiceClient;
+import android.annotation.Nullable;
 import android.app.UiAutomation;
 import android.content.ComponentName;
 import android.content.Context;
@@ -46,7 +47,7 @@ class UiAutomationManager {
 
     private AccessibilityServiceInfo mUiAutomationServiceInfo;
 
-    private AccessibilityClientConnection.SystemSupport mSystemSupport;
+    private AbstractAccessibilityServiceConnection.SystemSupport mSystemSupport;
 
     private int mUiAutomationFlags;
 
@@ -78,7 +79,7 @@ class UiAutomationManager {
             Context context, AccessibilityServiceInfo accessibilityServiceInfo,
             int id, Handler mainHandler, Object lock,
             AccessibilityManagerService.SecurityPolicy securityPolicy,
-            AccessibilityClientConnection.SystemSupport systemSupport,
+            AbstractAccessibilityServiceConnection.SystemSupport systemSupport,
             WindowManagerInternal windowManagerInternal,
             GlobalActionPerformer globalActionPerfomer, int flags) {
         accessibilityServiceInfo.setComponentName(COMPONENT_NAME);
@@ -157,6 +158,17 @@ class UiAutomationManager {
         return mUiAutomationService.mEventTypes;
     }
 
+    int getRelevantEventTypes() {
+        if (mUiAutomationService == null) return 0;
+        return mUiAutomationService.getRelevantEventTypes();
+    }
+
+    @Nullable
+    AccessibilityServiceInfo getServiceInfo() {
+        if (mUiAutomationService == null) return null;
+        return mUiAutomationService.getServiceInfo();
+    }
+
     void dumpUiAutomationService(FileDescriptor fd, final PrintWriter pw, String[] args) {
         if (mUiAutomationService != null) {
             mUiAutomationService.dump(fd, pw, args);
@@ -176,7 +188,7 @@ class UiAutomationManager {
         mSystemSupport.onClientChange(false);
     }
 
-    private class UiAutomationService extends AccessibilityClientConnection {
+    private class UiAutomationService extends AbstractAccessibilityServiceConnection {
         private final Handler mMainHandler;
 
         UiAutomationService(Context context, AccessibilityServiceInfo accessibilityServiceInfo,

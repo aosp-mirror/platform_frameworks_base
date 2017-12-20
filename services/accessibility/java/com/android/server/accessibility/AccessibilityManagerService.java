@@ -20,6 +20,8 @@ import static android.view.WindowManager.LayoutParams.TYPE_ACCESSIBILITY_OVERLAY
 import static android.view.accessibility.AccessibilityNodeInfo.ACTION_ACCESSIBILITY_FOCUS;
 import static android.view.accessibility.AccessibilityNodeInfo.ACTION_CLEAR_ACCESSIBILITY_FOCUS;
 
+import static com.android.internal.util.FunctionalUtils.ignoreRemoteException;
+
 import android.Manifest;
 import android.accessibilityservice.AccessibilityService;
 import android.accessibilityservice.AccessibilityServiceInfo;
@@ -84,7 +86,6 @@ import android.view.MagnificationSpec;
 import android.view.View;
 import android.view.WindowInfo;
 import android.view.WindowManager;
-import android.view.accessibility.AccessibilityCache;
 import android.view.accessibility.AccessibilityEvent;
 import android.view.accessibility.AccessibilityInteractionClient;
 import android.view.accessibility.AccessibilityManager;
@@ -114,6 +115,7 @@ import java.io.FileDescriptor;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -131,7 +133,7 @@ import java.util.function.Consumer;
  * on the device. Events are dispatched to {@link AccessibilityService}s.
  */
 public class AccessibilityManagerService extends IAccessibilityManager.Stub
-        implements AccessibilityClientConnection.SystemSupport {
+        implements AbstractAccessibilityServiceConnection.SystemSupport {
 
     private static final boolean DEBUG = false;
 
@@ -455,7 +457,7 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
     }
 
     @Override
-    public long addClient(IAccessibilityManagerClient client, int userId) {
+    public long addClient(IAccessibilityManagerClient callback, int userId) {
         synchronized (mLock) {
             // We treat calls from a profile as if made by its parent as profiles
             // share the accessibility state of the parent. The call below
@@ -467,15 +469,17 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
             // the system UI or the system we add it to the global state that
             // is shared across users.
             UserState userState = getUserStateLocked(resolvedUserId);
+            Client client = new Client(callback, Binder.getCallingUid(), userState);
             if (mSecurityPolicy.isCallerInteractingAcrossUsers(userId)) {
-                mGlobalClients.register(client);
+                mGlobalClients.register(callback, client);
                 if (DEBUG) {
                     Slog.i(LOG_TAG, "Added global client for pid:" + Binder.getCallingPid());
                 }
                 return IntPair.of(
-                        userState.getClientState(), userState.mLastSentRelevantEventTypes);
+                        userState.getClientState(),
+                        client.mLastSentRelevantEventTypes);
             } else {
-                userState.mUserClients.register(client);
+                userState.mUserClients.register(callback, client);
                 // If this client is not for the current user we do not
                 // return a state since it is not for the foreground user.
                 // We will send the state to the client on a user switch.
@@ -485,7 +489,7 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
                 }
                 return IntPair.of(
                         (resolvedUserId == mCurrentUserId) ? userState.getClientState() : 0,
-                        userState.mLastSentRelevantEventTypes);
+                        client.mLastSentRelevantEventTypes);
             }
         }
     }
@@ -951,7 +955,7 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
      * Has no effect if no item has accessibility focus, if the item with accessibility
      * focus does not expose the specified action, or if the action fails.
      *
-     * @param actionId The id of the action to perform.
+     * @param action The action to perform.
      *
      * @return {@code true} if the action was performed. {@code false} if it was not.
      */
@@ -1329,33 +1333,67 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
     }
 
     private void updateRelevantEventsLocked(UserState userState) {
-        int relevantEventTypes = AccessibilityCache.CACHE_CRITICAL_EVENTS_MASK;
-        for (AccessibilityServiceConnection service : userState.mBoundServices) {
-            relevantEventTypes |= service.mEventTypes;
-        }
-        relevantEventTypes |= mUiAutomationManager.getRequestedEventMaskLocked();
-        int finalRelevantEventTypes = relevantEventTypes;
+        mMainHandler.post(() -> {
+            broadcastToClients(userState, ignoreRemoteException(client -> {
+                int relevantEventTypes = computeRelevantEventTypes(userState, client);
 
-        if (userState.mLastSentRelevantEventTypes != finalRelevantEventTypes) {
-            userState.mLastSentRelevantEventTypes = finalRelevantEventTypes;
-            mMainHandler.obtainMessage(MainHandler.MSG_SEND_RELEVANT_EVENTS_CHANGED_TO_CLIENTS,
-                    userState.mUserId, finalRelevantEventTypes);
-            mMainHandler.post(() -> {
-                broadcastToClients(userState, (client) -> {
-                    try {
-                        client.setRelevantEventTypes(finalRelevantEventTypes);
-                    } catch (RemoteException re) {
-                        /* ignore */
-                    }
-                });
-            });
+                if (client.mLastSentRelevantEventTypes != relevantEventTypes) {
+                    client.mLastSentRelevantEventTypes = relevantEventTypes;
+                    client.mCallback.setRelevantEventTypes(relevantEventTypes);
+                }
+            }));
+        });
+    }
+
+    private int computeRelevantEventTypes(UserState userState, Client client) {
+        int relevantEventTypes = 0;
+
+        int numBoundServices = userState.mBoundServices.size();
+        for (int i = 0; i < numBoundServices; i++) {
+            AccessibilityServiceConnection service =
+                    userState.mBoundServices.get(i);
+            relevantEventTypes |= isClientInPackageWhitelist(service.getServiceInfo(), client)
+                    ? service.getRelevantEventTypes()
+                    : 0;
         }
+        relevantEventTypes |= isClientInPackageWhitelist(
+                mUiAutomationManager.getServiceInfo(), client)
+                ? mUiAutomationManager.getRelevantEventTypes()
+                : 0;
+        return relevantEventTypes;
+    }
+
+    private static boolean isClientInPackageWhitelist(
+            @Nullable AccessibilityServiceInfo serviceInfo, Client client) {
+        if (serviceInfo == null) return false;
+
+        String[] clientPackages = client.mPackageNames;
+        boolean result = ArrayUtils.isEmpty(serviceInfo.packageNames);
+        if (!result && clientPackages != null) {
+            for (String packageName : clientPackages) {
+                if (ArrayUtils.contains(serviceInfo.packageNames, packageName)) {
+                    result = true;
+                    break;
+                }
+            }
+        }
+        if (!result) {
+            if (DEBUG) {
+                Slog.d(LOG_TAG, "Dropping events: "
+                        + Arrays.toString(clientPackages) + " -> "
+                        + serviceInfo.getComponentName().flattenToShortString()
+                        + " due to not being in package whitelist "
+                        + Arrays.toString(serviceInfo.packageNames));
+            }
+        }
+
+        return result;
     }
 
     private void broadcastToClients(
-            UserState userState, Consumer<IAccessibilityManagerClient> clientAction) {
-        mGlobalClients.broadcast(clientAction);
-        userState.mUserClients.broadcast(clientAction);
+            UserState userState, Consumer<Client> clientAction) {
+        mGlobalClients.broadcastForEachCookie(clientAction);
+        userState.mUserClients.broadcastForEachCookie(clientAction);
     }
 
     private void unbindAllServicesLocked(UserState userState) {
@@ -2156,6 +2194,7 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
      * permission to write secure settings, since someone with that permission can enable
      * accessibility services themselves.
      */
+    @Override
     public void performAccessibilityShortcut() {
         if ((UserHandle.getAppId(Binder.getCallingUid()) != Process.SYSTEM_UID)
                 && (mContext.checkCallingPermission(Manifest.permission.WRITE_SECURE_SETTINGS)
@@ -2445,13 +2484,8 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
                     synchronized (mLock) {
                         userState = getUserStateLocked(userId);
                     }
-                    broadcastToClients(userState, (client) -> {
-                        try {
-                            client.setRelevantEventTypes(relevantEventTypes);
-                        } catch (RemoteException re) {
-                            /* ignore */
-                        }
-                    });
+                    broadcastToClients(userState, ignoreRemoteException(
+                            client -> client.mCallback.setRelevantEventTypes(relevantEventTypes)));
                 } break;
 
                case MSG_SEND_ACCESSIBILITY_BUTTON_TO_INPUT_FILTER: {
@@ -2500,30 +2534,14 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
 
         private void sendStateToClients(int clientState,
                 RemoteCallbackList<IAccessibilityManagerClient> clients) {
-            clients.broadcast((client) -> {
-                try {
-                    client.setState(clientState);
-                } catch (RemoteException re) {
-                    /* ignore */
-                }
-            });
+            clients.broadcast(ignoreRemoteException(
+                    client -> client.setState(clientState)));
         }
 
         private void notifyClientsOfServicesStateChange(
                 RemoteCallbackList<IAccessibilityManagerClient> clients) {
-            try {
-                final int userClientCount = clients.beginBroadcast();
-                for (int i = 0; i < userClientCount; i++) {
-                    IAccessibilityManagerClient client = clients.getBroadcastItem(i);
-                    try {
-                        client.notifyServicesStateChanged();
-                    } catch (RemoteException re) {
-                        /* ignore */
-                    }
-                }
-            } finally {
-                clients.finishBroadcast();
-            }
+            clients.broadcast(ignoreRemoteException(
+                    client -> client.notifyServicesStateChanged()));
         }
     }
 
@@ -3335,20 +3353,20 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
         }
 
         public boolean canGetAccessibilityNodeInfoLocked(
-                AccessibilityClientConnection service, int windowId) {
+                AbstractAccessibilityServiceConnection service, int windowId) {
             return canRetrieveWindowContentLocked(service) && isRetrievalAllowingWindow(windowId);
         }
 
-        public boolean canRetrieveWindowsLocked(AccessibilityClientConnection service) {
+        public boolean canRetrieveWindowsLocked(AbstractAccessibilityServiceConnection service) {
             return canRetrieveWindowContentLocked(service) && service.mRetrieveInteractiveWindows;
         }
 
-        public boolean canRetrieveWindowContentLocked(AccessibilityClientConnection service) {
+        public boolean canRetrieveWindowContentLocked(AbstractAccessibilityServiceConnection service) {
             return (service.mAccessibilityServiceInfo.getCapabilities()
                     & AccessibilityServiceInfo.CAPABILITY_CAN_RETRIEVE_WINDOW_CONTENT) != 0;
         }
 
-        public boolean canControlMagnification(AccessibilityClientConnection service) {
+        public boolean canControlMagnification(AbstractAccessibilityServiceConnection service) {
             return (service.mAccessibilityServiceInfo.getCapabilities()
                     & AccessibilityServiceInfo.CAPABILITY_CAN_CONTROL_MAGNIFICATION) != 0;
         }
@@ -3476,13 +3494,26 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
         }
     }
 
+    /** Represents an {@link AccessibilityManager} */
+    class Client {
+        final IAccessibilityManagerClient mCallback;
+        final String[] mPackageNames;
+        int mLastSentRelevantEventTypes;
+
+        private Client(IAccessibilityManagerClient callback, int clientUid, UserState userState) {
+            mCallback = callback;
+            mPackageNames = mPackageManager.getPackagesForUid(clientUid);
+            mLastSentRelevantEventTypes = computeRelevantEventTypes(userState, this);
+        }
+    }
+
     public class UserState {
         public final int mUserId;
 
         // Non-transient state.
 
         public final RemoteCallbackList<IAccessibilityManagerClient> mUserClients =
-            new RemoteCallbackList<>();
+                new RemoteCallbackList<>();
 
         public final SparseArray<RemoteAccessibilityConnection> mInteractionConnections =
                 new SparseArray<>();
@@ -3493,8 +3524,6 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
 
         public final CopyOnWriteArrayList<AccessibilityServiceConnection> mBoundServices =
                 new CopyOnWriteArrayList<>();
-
-        public int mLastSentRelevantEventTypes = AccessibilityEvent.TYPES_ALL_MASK;
 
         public final Map<ComponentName, AccessibilityServiceConnection> mComponentNameToServiceMap =
                 new HashMap<>();
