@@ -988,18 +988,20 @@ public class IpSecService extends IIpSecService.Stub {
             sockFd = Os.socket(AF_INET, SOCK_DGRAM, IPPROTO_UDP);
             mUidFdTagger.tag(sockFd, callingUid);
 
-            if (port != 0) {
-                Log.v(TAG, "Binding to port " + port);
-                Os.bind(sockFd, INADDR_ANY, port);
-            } else {
-                port = bindToRandomPort(sockFd);
-            }
             // This code is common to both the unspecified and specified port cases
             Os.setsockoptInt(
                     sockFd,
                     OsConstants.IPPROTO_UDP,
                     OsConstants.UDP_ENCAP,
                     OsConstants.UDP_ENCAP_ESPINUDP);
+
+            mSrvConfig.getNetdInstance().ipSecSetEncapSocketOwner(sockFd, callingUid);
+            if (port != 0) {
+                Log.v(TAG, "Binding to port " + port);
+                Os.bind(sockFd, INADDR_ANY, port);
+            } else {
+                port = bindToRandomPort(sockFd);
+            }
 
             userRecord.mEncapSocketRecords.put(
                     resourceId,
