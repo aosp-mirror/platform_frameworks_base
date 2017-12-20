@@ -567,6 +567,10 @@
     <!-- Made protected in P (was introduced in JB-MR2) -->
     <protected-broadcast android:name="android.intent.action.GET_RESTRICTION_ENTRIES" />
 
+    <!-- Added in P -->
+    <protected-broadcast android:name="android.app.action.PROFILE_OWNER_CHANGED" />
+    <protected-broadcast android:name="android.app.action.TRANSFER_OWNER_COMPLETE" />
+
     <!-- ====================================================================== -->
     <!--                          RUNTIME PERMISSIONS                           -->
     <!-- ====================================================================== -->

@@ -20,6 +20,7 @@ import static android.Manifest.permission.BIND_DEVICE_ADMIN;
 import static android.Manifest.permission.MANAGE_CA_CERTIFICATES;
 import static android.app.ActivityManager.LOCK_TASK_MODE_NONE;
 import static android.app.ActivityManager.USER_OP_SUCCESS;
+import static android.app.admin.DeviceAdminReceiver.EXTRA_TRANSFER_OWNER_ADMIN_EXTRAS_BUNDLE;
 import static android.app.admin.DevicePolicyManager.ACTION_PROVISION_MANAGED_USER;
 import static android.app.admin.DevicePolicyManager.CODE_ACCOUNTS_NOT_EMPTY;
 import static android.app.admin.DevicePolicyManager.CODE_ADD_MANAGED_PROFILE_DISALLOWED;
@@ -154,7 +155,6 @@ import android.provider.ContactsContract.QuickContact;
 import android.provider.ContactsInternal;
 import android.provider.Settings;
 import android.provider.Settings.Global;
-import android.security.Credentials;
 import android.security.IKeyChainAliasCallback;
 import android.security.IKeyChainService;
 import android.security.KeyChain;
@@ -6506,13 +6506,36 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
         }
     }
 
-    synchronized void sendDeviceOwnerCommand(String action, Bundle extras) {
-        Intent intent = new Intent(action);
-        intent.setComponent(mOwners.getDeviceOwnerComponent());
+    void sendDeviceOwnerCommand(String action, Bundle extras) {
+        int deviceOwnerUserId;
+        ComponentName deviceOwnerComponent;
+        synchronized (this) {
+            deviceOwnerUserId = mOwners.getDeviceOwnerUserId();
+            deviceOwnerComponent = mOwners.getDeviceOwnerComponent();
+        }
+        sendActiveAdminCommand(action, extras, deviceOwnerUserId,
+                deviceOwnerComponent);
+    }
+
+    private void sendProfileOwnerCommand(String action, Bundle extras, int userHandle) {
+        sendActiveAdminCommand(action, extras, userHandle,
+                mOwners.getProfileOwnerComponent(userHandle));
+    }
+
+    private void sendActiveAdminCommand(String action, Bundle extras,
+            int userHandle, ComponentName receiverComponent) {
+        final Intent intent = new Intent(action);
+        intent.setComponent(receiverComponent);
         if (extras != null) {
             intent.putExtras(extras);
         }
-        mContext.sendBroadcastAsUser(intent, UserHandle.of(mOwners.getDeviceOwnerUserId()));
+        mContext.sendBroadcastAsUser(intent, UserHandle.of(userHandle));
+    }
+
+    private void sendOwnerChangedBroadcast(String broadcast, int userId) {
+        final Intent intent = new Intent(broadcast)
+                .addFlags(Intent.FLAG_RECEIVER_INCLUDE_BACKGROUND);
+        mContext.sendBroadcastAsUser(intent, UserHandle.of(userId));
     }
 
     private synchronized String getDeviceOwnerRemoteBugreportUri() {
@@ -6890,10 +6913,7 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
             ident = mInjector.binderClearCallingIdentity();
             try {
                 // TODO Send to system too?
-                mContext.sendBroadcastAsUser(
-                        new Intent(DevicePolicyManager.ACTION_DEVICE_OWNER_CHANGED)
-                                .addFlags(Intent.FLAG_RECEIVER_INCLUDE_BACKGROUND),
-                        UserHandle.of(userId));
+                sendOwnerChangedBroadcast(DevicePolicyManager.ACTION_DEVICE_OWNER_CHANGED, userId);
             } finally {
                 mInjector.binderRestoreCallingIdentity(ident);
             }
@@ -7044,9 +7064,8 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
             try {
                 clearDeviceOwnerLocked(admin, deviceOwnerUserId);
                 removeActiveAdminLocked(deviceOwnerComponent, deviceOwnerUserId);
-                Intent intent = new Intent(DevicePolicyManager.ACTION_DEVICE_OWNER_CHANGED);
-                intent.addFlags(Intent.FLAG_RECEIVER_INCLUDE_BACKGROUND);
-                mContext.sendBroadcastAsUser(intent, UserHandle.of(deviceOwnerUserId));
+                sendOwnerChangedBroadcast(DevicePolicyManager.ACTION_DEVICE_OWNER_CHANGED,
+                        deviceOwnerUserId);
             } finally {
                 mInjector.binderRestoreCallingIdentity(ident);
             }
@@ -7131,6 +7150,8 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
                     ensureUnknownSourcesRestrictionForProfileOwnerLocked(userHandle, admin,
                             true /* newOwner */);
                 }
+                sendOwnerChangedBroadcast(DevicePolicyManager.ACTION_PROFILE_OWNER_CHANGED,
+                        userHandle);
             } finally {
                 mInjector.binderRestoreCallingIdentity(id);
             }
@@ -7159,6 +7180,8 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
             try {
                 clearProfileOwnerLocked(admin, userId);
                 removeActiveAdminLocked(who, userId);
+                sendOwnerChangedBroadcast(DevicePolicyManager.ACTION_PROFILE_OWNER_CHANGED,
+                        userId);
             } finally {
                 mInjector.binderRestoreCallingIdentity(ident);
             }
@@ -11846,9 +11869,9 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
     }
 
     //TODO: Add callback information to the javadoc once it is completed.
-    //TODO: Make transferOwner atomic.
+    //TODO: Make transferOwnership atomic.
     @Override
-    public void transferOwner(ComponentName admin, ComponentName target, PersistableBundle bundle) {
+    public void transferOwnership(ComponentName admin, ComponentName target, PersistableBundle bundle) {
         if (!mHasFeature) {
             return;
         }
@@ -11876,13 +11899,12 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
 
         final long id = mInjector.binderClearCallingIdentity();
         try {
-            //STOPSHIP add support for COMP, edge cases when device is rebooted/work mode off,
-            //transfer callbacks and broadcast
+            //STOPSHIP add support for COMP, edge cases when device is rebooted/work mode off
             synchronized (this) {
                 if (isProfileOwner(admin, callingUserId)) {
-                    transferProfileOwnerLocked(admin, target, callingUserId);
+                    transferProfileOwnerLocked(admin, target, callingUserId, bundle);
                 } else if (isDeviceOwner(admin, callingUserId)) {
-                    transferDeviceOwnerLocked(admin, target, callingUserId);
+                    transferDeviceOwnerLocked(admin, target, callingUserId, bundle);
                 }
             }
         } finally {
@@ -11894,24 +11916,40 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
      * Transfers the profile owner for user with id profileOwnerUserId from admin to target.
      */
     private void transferProfileOwnerLocked(ComponentName admin, ComponentName target,
-            int profileOwnerUserId) {
+            int profileOwnerUserId, PersistableBundle bundle) {
         transferActiveAdminUncheckedLocked(target, admin, profileOwnerUserId);
         mOwners.transferProfileOwner(target, profileOwnerUserId);
         Slog.i(LOG_TAG, "Profile owner set: " + target + " on user " + profileOwnerUserId);
         mOwners.writeProfileOwner(profileOwnerUserId);
         mDeviceAdminServiceController.startServiceForOwner(
                 target.getPackageName(), profileOwnerUserId, "transfer-profile-owner");
+        sendProfileOwnerCommand(DeviceAdminReceiver.ACTION_TRANSFER_OWNERSHIP_COMPLETE,
+                getTransferOwnerAdminExtras(bundle), profileOwnerUserId);
+        sendOwnerChangedBroadcast(DevicePolicyManager.ACTION_PROFILE_OWNER_CHANGED,
+                profileOwnerUserId);
     }
 
     /**
      * Transfers the device owner for user with id userId from admin to target.
      */
-    private void transferDeviceOwnerLocked(ComponentName admin, ComponentName target, int userId) {
+    private void transferDeviceOwnerLocked(ComponentName admin, ComponentName target, int userId,
+            PersistableBundle bundle) {
         transferActiveAdminUncheckedLocked(target, admin, userId);
         mOwners.transferDeviceOwner(target);
         Slog.i(LOG_TAG, "Device owner set: " + target + " on user " + userId);
         mOwners.writeDeviceOwner();
         mDeviceAdminServiceController.startServiceForOwner(
                 target.getPackageName(), userId, "transfer-device-owner");
+        sendDeviceOwnerCommand(DeviceAdminReceiver.ACTION_TRANSFER_OWNERSHIP_COMPLETE,
+                getTransferOwnerAdminExtras(bundle));
+        sendOwnerChangedBroadcast(DevicePolicyManager.ACTION_DEVICE_OWNER_CHANGED, userId);
+    }
+
+    private Bundle getTransferOwnerAdminExtras(PersistableBundle bundle) {
+        Bundle extras = new Bundle();
+        if (bundle != null) {
+            extras.putParcelable(EXTRA_TRANSFER_OWNER_ADMIN_EXTRAS_BUNDLE, bundle);
+        }
+        return extras;
     }
 }

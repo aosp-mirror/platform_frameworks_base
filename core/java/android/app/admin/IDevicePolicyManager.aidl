@@ -387,5 +387,5 @@ interface IDevicePolicyManager {
     boolean isLogoutEnabled();
 
     List<String> getDisallowedSystemApps(in ComponentName admin, int userId, String provisioningAction);
-    void transferOwner(in ComponentName admin, in ComponentName target, in PersistableBundle bundle);
+    void transferOwnership(in ComponentName admin, in ComponentName target, in PersistableBundle bundle);
 }
