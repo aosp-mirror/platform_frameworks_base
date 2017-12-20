@@ -385,10 +385,18 @@ static jobject doDecode(JNIEnv* env, std::unique_ptr<SkStreamRewindable> stream,
             return nullObjectReturn("codec->getAndroidPixels() failed.");
     }
 
+    // This is weird so let me explain: we could use the scale parameter
+    // directly, but for historical reasons this is how the corresponding
+    // Dalvik code has always behaved. We simply recreate the behavior here.
+    // The result is slightly different from simply using scale because of
+    // the 0.5f rounding bias applied when computing the target image size
+    const float scaleX = scaledWidth / float(decodingBitmap.width());
+    const float scaleY = scaledHeight / float(decodingBitmap.height());
+
     jbyteArray ninePatchChunk = NULL;
     if (peeker.mPatch != NULL) {
         if (willScale) {
-            peeker.scale(scale, scale, scaledWidth, scaledHeight);
+            peeker.scale(scaleX, scaleY, scaledWidth, scaledHeight);
         }
 
         size_t ninePatchArraySize = peeker.mPatch->serializedSize();
@@ -419,14 +427,6 @@ static jobject doDecode(JNIEnv* env, std::unique_ptr<SkStreamRewindable> stream,
 
     SkBitmap outputBitmap;
     if (willScale) {
-        // This is weird so let me explain: we could use the scale parameter
-        // directly, but for historical reasons this is how the corresponding
-        // Dalvik code has always behaved. We simply recreate the behavior here.
-        // The result is slightly different from simply using scale because of
-        // the 0.5f rounding bias applied when computing the target image size
-        const float sx = scaledWidth / float(decodingBitmap.width());
-        const float sy = scaledHeight / float(decodingBitmap.height());
-
         // Set the allocator for the outputBitmap.
         SkBitmap::Allocator* outputAllocator;
         if (javaBitmap != nullptr) {
@@ -456,7 +456,7 @@ static jobject doDecode(JNIEnv* env, std::unique_ptr<SkStreamRewindable> stream,
         paint.setFilterQuality(kLow_SkFilterQuality); // bilinear filtering
 
         SkCanvas canvas(outputBitmap, SkCanvas::ColorBehavior::kLegacy);
-        canvas.scale(sx, sy);
+        canvas.scale(scaleX, scaleY);
         canvas.drawBitmap(decodingBitmap, 0.0f, 0.0f, &paint);
     } else {
         outputBitmap.swap(decodingBitmap);
