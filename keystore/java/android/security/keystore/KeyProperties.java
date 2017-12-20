@@ -44,6 +44,7 @@ public abstract class KeyProperties {
             PURPOSE_DECRYPT,
             PURPOSE_SIGN,
             PURPOSE_VERIFY,
+            PURPOSE_WRAP_KEY,
     })
     public @interface PurposeEnum {}
 
@@ -68,6 +69,11 @@ public abstract class KeyProperties {
     public static final int PURPOSE_VERIFY = 1 << 3;
 
     /**
+     * Purpose of key: wrapping and unwrapping wrapped keys for secure import.
+     */
+    public static final int PURPOSE_WRAP_KEY = 1 << 5;
+
+    /**
      * @hide
      */
     public static abstract class Purpose {
@@ -83,6 +89,8 @@ public abstract class KeyProperties {
                     return KeymasterDefs.KM_PURPOSE_SIGN;
                 case PURPOSE_VERIFY:
                     return KeymasterDefs.KM_PURPOSE_VERIFY;
+                case PURPOSE_WRAP_KEY:
+                    return KeymasterDefs.KM_PURPOSE_WRAP;
                 default:
                     throw new IllegalArgumentException("Unknown purpose: " + purpose);
             }
@@ -98,6 +106,8 @@ public abstract class KeyProperties {
                     return PURPOSE_SIGN;
                 case KeymasterDefs.KM_PURPOSE_VERIFY:
                     return PURPOSE_VERIFY;
+                case KeymasterDefs.KM_PURPOSE_WRAP:
+                    return PURPOSE_WRAP_KEY;
                 default:
                     throw new IllegalArgumentException("Unknown purpose: " + purpose);
             }
@@ -145,6 +155,15 @@ public abstract class KeyProperties {
 
     /** Advanced Encryption Standard (AES) key. */
     public static final String KEY_ALGORITHM_AES = "AES";
+
+    /**
+     * Triple Data Encryption Algorithm (3DES) key.
+     *
+     * @deprecated Included for interoperability with legacy systems. Prefer {@link
+     * KeyProperties#KEY_ALGORITHM_AES} for new development.
+     */
+    @Deprecated
+    public static final String KEY_ALGORITHM_3DES = "DESede";
 
     /** Keyed-Hash Message Authentication Code (HMAC) key using SHA-1 as the hash. */
     public static final String KEY_ALGORITHM_HMAC_SHA1 = "HmacSHA1";
@@ -196,6 +215,8 @@ public abstract class KeyProperties {
                 @NonNull @KeyAlgorithmEnum String algorithm) {
             if (KEY_ALGORITHM_AES.equalsIgnoreCase(algorithm)) {
                 return KeymasterDefs.KM_ALGORITHM_AES;
+            } else if (KEY_ALGORITHM_3DES.equalsIgnoreCase(algorithm)) {
+                return KeymasterDefs.KM_ALGORITHM_3DES;
             } else if (algorithm.toUpperCase(Locale.US).startsWith("HMAC")) {
                 return KeymasterDefs.KM_ALGORITHM_HMAC;
             } else {
@@ -210,6 +231,8 @@ public abstract class KeyProperties {
             switch (keymasterAlgorithm) {
                 case KeymasterDefs.KM_ALGORITHM_AES:
                     return KEY_ALGORITHM_AES;
+                case KeymasterDefs.KM_ALGORITHM_3DES:
+                    return KEY_ALGORITHM_3DES;
                 case KeymasterDefs.KM_ALGORITHM_HMAC:
                     switch (keymasterDigest) {
                         case KeymasterDefs.KM_DIGEST_SHA1:
@@ -666,6 +689,10 @@ public abstract class KeyProperties {
      */
     public static final int ORIGIN_UNKNOWN = 1 << 2;
 
+    /** Key was imported into the AndroidKeyStore in an encrypted wrapper */
+    public static final int ORIGIN_SECURELY_IMPORTED = 1 << 3;
+
+
     /**
      * @hide
      */
@@ -680,6 +707,8 @@ public abstract class KeyProperties {
                     return ORIGIN_IMPORTED;
                 case KeymasterDefs.KM_ORIGIN_UNKNOWN:
                     return ORIGIN_UNKNOWN;
+                case KeymasterDefs.KM_ORIGIN_SECURELY_IMPORTED:
+                    return ORIGIN_SECURELY_IMPORTED;
                 default:
                     throw new IllegalArgumentException("Unknown origin: " + origin);
             }

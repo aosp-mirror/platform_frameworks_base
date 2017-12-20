@@ -262,6 +262,7 @@ public final class KeyGenParameterSpec implements AlgorithmParameterSpec {
     private final boolean mUniqueIdIncluded;
     private final boolean mUserAuthenticationValidWhileOnBody;
     private final boolean mInvalidatedByBiometricEnrollment;
+    private final boolean mIsStrongBoxBacked;
 
     /**
      * @hide should be built with Builder
@@ -289,7 +290,8 @@ public final class KeyGenParameterSpec implements AlgorithmParameterSpec {
             byte[] attestationChallenge,
             boolean uniqueIdIncluded,
             boolean userAuthenticationValidWhileOnBody,
-            boolean invalidatedByBiometricEnrollment) {
+            boolean invalidatedByBiometricEnrollment,
+            boolean isStrongBoxBacked) {
         if (TextUtils.isEmpty(keyStoreAlias)) {
             throw new IllegalArgumentException("keyStoreAlias must not be empty");
         }
@@ -335,6 +337,7 @@ public final class KeyGenParameterSpec implements AlgorithmParameterSpec {
         mUniqueIdIncluded = uniqueIdIncluded;
         mUserAuthenticationValidWhileOnBody = userAuthenticationValidWhileOnBody;
         mInvalidatedByBiometricEnrollment = invalidatedByBiometricEnrollment;
+        mIsStrongBoxBacked = isStrongBoxBacked;
     }
 
     /**
@@ -625,6 +628,13 @@ public final class KeyGenParameterSpec implements AlgorithmParameterSpec {
     }
 
     /**
+     * Returns {@code true} if the key is protected by a Strongbox security chip.
+     */
+    public boolean isStrongBoxBacked() {
+        return mIsStrongBoxBacked;
+    }
+
+    /**
      * Builder of {@link KeyGenParameterSpec} instances.
      */
     public final static class Builder {
@@ -652,6 +662,7 @@ public final class KeyGenParameterSpec implements AlgorithmParameterSpec {
         private boolean mUniqueIdIncluded = false;
         private boolean mUserAuthenticationValidWhileOnBody;
         private boolean mInvalidatedByBiometricEnrollment = true;
+        private boolean mIsStrongBoxBacked = false;
 
         /**
          * Creates a new instance of the {@code Builder}.
@@ -1177,6 +1188,15 @@ public final class KeyGenParameterSpec implements AlgorithmParameterSpec {
         }
 
         /**
+         * Sets whether this key should be protected by a StrongBox security chip.
+         */
+        @NonNull
+        public Builder setIsStrongBoxBacked(boolean isStrongBoxBacked) {
+            mIsStrongBoxBacked = isStrongBoxBacked;
+            return this;
+        }
+
+        /**
          * Builds an instance of {@code KeyGenParameterSpec}.
          */
         @NonNull
@@ -1204,7 +1224,8 @@ public final class KeyGenParameterSpec implements AlgorithmParameterSpec {
                     mAttestationChallenge,
                     mUniqueIdIncluded,
                     mUserAuthenticationValidWhileOnBody,
-                    mInvalidatedByBiometricEnrollment);
+                    mInvalidatedByBiometricEnrollment,
+                    mIsStrongBoxBacked);
         }
     }
 }

@@ -488,9 +488,9 @@ public final class KeyProtection implements ProtectionParameter {
         private int mUserAuthenticationValidityDurationSeconds = -1;
         private boolean mUserAuthenticationValidWhileOnBody;
         private boolean mInvalidatedByBiometricEnrollment = true;
-
         private long mBoundToSecureUserId = GateKeeper.INVALID_SECURE_USER_ID;
         private boolean mCriticalToDeviceEncryption = false;
+
         /**
          * Creates a new instance of the {@code Builder}.
          *

@@ -101,6 +101,7 @@ public final class KeymasterDefs {
     public static final int KM_ALGORITHM_RSA = 1;
     public static final int KM_ALGORITHM_EC = 3;
     public static final int KM_ALGORITHM_AES = 32;
+    public static final int KM_ALGORITHM_3DES = 33;
     public static final int KM_ALGORITHM_HMAC = 128;
 
     // Block modes.
@@ -130,6 +131,7 @@ public final class KeymasterDefs {
     public static final int KM_ORIGIN_GENERATED = 0;
     public static final int KM_ORIGIN_IMPORTED = 2;
     public static final int KM_ORIGIN_UNKNOWN = 3;
+    public static final int KM_ORIGIN_SECURELY_IMPORTED = 4;
 
     // Key usability requirements.
     public static final int KM_BLOB_STANDALONE = 0;
@@ -140,6 +142,7 @@ public final class KeymasterDefs {
     public static final int KM_PURPOSE_DECRYPT = 1;
     public static final int KM_PURPOSE_SIGN = 2;
     public static final int KM_PURPOSE_VERIFY = 3;
+    public static final int KM_PURPOSE_WRAP = 5;
 
     // Key formats.
     public static final int KM_KEY_FORMAT_X509 = 0;

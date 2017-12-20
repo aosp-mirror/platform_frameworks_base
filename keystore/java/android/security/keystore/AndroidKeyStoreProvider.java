@@ -80,6 +80,7 @@ public class AndroidKeyStoreProvider extends Provider {
 
         // javax.crypto.KeyGenerator
         put("KeyGenerator.AES", PACKAGE_NAME + ".AndroidKeyStoreKeyGeneratorSpi$AES");
+        put("KeyGenerator.DESede", PACKAGE_NAME + ".AndroidKeyStoreKeyGeneratorSpi$DESede");
         put("KeyGenerator.HmacSHA1", PACKAGE_NAME + ".AndroidKeyStoreKeyGeneratorSpi$HmacSHA1");
         put("KeyGenerator.HmacSHA224", PACKAGE_NAME + ".AndroidKeyStoreKeyGeneratorSpi$HmacSHA224");
         put("KeyGenerator.HmacSHA256", PACKAGE_NAME + ".AndroidKeyStoreKeyGeneratorSpi$HmacSHA256");
@@ -88,6 +89,7 @@ public class AndroidKeyStoreProvider extends Provider {
 
         // java.security.SecretKeyFactory
         putSecretKeyFactoryImpl("AES");
+        putSecretKeyFactoryImpl("DESede");
         putSecretKeyFactoryImpl("HmacSHA1");
         putSecretKeyFactoryImpl("HmacSHA224");
         putSecretKeyFactoryImpl("HmacSHA256");
@@ -348,7 +350,8 @@ public class AndroidKeyStoreProvider extends Provider {
         }
 
         if (keymasterAlgorithm == KeymasterDefs.KM_ALGORITHM_HMAC ||
-                keymasterAlgorithm == KeymasterDefs.KM_ALGORITHM_AES) {
+                keymasterAlgorithm == KeymasterDefs.KM_ALGORITHM_AES ||
+                keymasterAlgorithm == KeymasterDefs.KM_ALGORITHM_3DES) {
             return loadAndroidKeyStoreSecretKeyFromKeystore(userKeyAlias, uid,
                     keyCharacteristics);
         } else if (keymasterAlgorithm == KeymasterDefs.KM_ALGORITHM_RSA ||
