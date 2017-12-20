@@ -6562,6 +6562,14 @@ public final class Settings {
         public static final String ANR_SHOW_BACKGROUND = "anr_show_background";
 
         /**
+         * If nonzero, crashes in foreground processes will bring up a dialog.
+         * Otherwise, the process will be silently killed.
+         * @hide
+         */
+        public static final String SHOW_FIRST_CRASH_DIALOG_DEV_OPTION =
+                "show_first_crash_dialog_dev_option";
+
+        /**
          * The {@link ComponentName} string of the service to be used as the voice recognition
          * service.
          *
@@ -7398,6 +7406,7 @@ public final class Settings {
             SCREENSAVER_ACTIVATE_ON_DOCK,
             SCREENSAVER_ACTIVATE_ON_SLEEP,
             LOCKDOWN_IN_POWER_MENU,
+            SHOW_FIRST_CRASH_DIALOG_DEV_OPTION,
         };
 
         /** @hide */
@@ -11316,6 +11325,13 @@ public final class Settings {
          */
         public static final String ENABLE_SMART_REPLIES_IN_NOTIFICATIONS =
                 "enable_smart_replies_in_notifications";
+
+        /**
+         * If nonzero, crashes in foreground processes will bring up a dialog.
+         * Otherwise, the process will be silently killed.
+         * @hide
+         */
+        public static final String SHOW_FIRST_CRASH_DIALOG = "show_first_crash_dialog";
     }
 
     /**

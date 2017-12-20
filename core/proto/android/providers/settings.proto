@@ -390,8 +390,9 @@ message GlobalSettingsProto {
     optional SettingProto enable_gnss_raw_meas_full_tracking = 346;
     optional SettingProto zram_enabled = 347;
     optional SettingProto enable_smart_replies_in_notifications = 348;
+    optional SettingProto show_first_crash_dialog = 349;
 
-    // Next tag = 349;
+    // Next tag = 350;
 }
 
 message SecureSettingsProto {
@@ -593,8 +594,9 @@ message SecureSettingsProto {
     optional SettingProto qs_auto_added_tiles = 193;
     optional SettingProto lockdown_in_power_menu = 194;
     optional SettingProto backup_manager_constants = 169;
+    optional SettingProto show_first_crash_dialog_dev_option = 195;
 
-    // Next tag = 195
+    // Next tag = 196
 }
 
 message SystemSettingsProto {

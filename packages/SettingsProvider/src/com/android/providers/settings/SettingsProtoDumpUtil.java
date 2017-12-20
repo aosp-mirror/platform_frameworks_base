@@ -1125,6 +1125,9 @@ class SettingsProtoDumpUtil {
         dumpSetting(s, p,
                 Settings.Global.ENABLE_SMART_REPLIES_IN_NOTIFICATIONS,
                 GlobalSettingsProto.ENABLE_SMART_REPLIES_IN_NOTIFICATIONS);
+        dumpSetting(s, p,
+                Settings.Global.SHOW_FIRST_CRASH_DIALOG,
+                GlobalSettingsProto.SHOW_FIRST_CRASH_DIALOG);
     }
 
     /** Dump a single {@link SettingsState.Setting} to a proto buf */
@@ -1515,6 +1518,9 @@ class SettingsProtoDumpUtil {
         dumpSetting(s, p,
                 Settings.Secure.ANR_SHOW_BACKGROUND,
                 SecureSettingsProto.ANR_SHOW_BACKGROUND);
+        dumpSetting(s, p,
+                Settings.Secure.SHOW_FIRST_CRASH_DIALOG_DEV_OPTION,
+                SecureSettingsProto.SHOW_FIRST_CRASH_DIALOG_DEV_OPTION);
         dumpSetting(s, p,
                 Settings.Secure.VOICE_RECOGNITION_SERVICE,
                 SecureSettingsProto.VOICE_RECOGNITION_SERVICE);
