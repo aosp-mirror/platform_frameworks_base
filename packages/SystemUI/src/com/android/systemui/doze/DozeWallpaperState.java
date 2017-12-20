@@ -53,6 +53,8 @@ public class DozeWallpaperState implements DozeMachine.Part {
         final boolean isAmbientMode;
         switch (newState) {
             case DOZE_AOD:
+            case DOZE_AOD_PAUSING:
+            case DOZE_AOD_PAUSED:
             case DOZE_REQUEST_PULSE:
             case DOZE_PULSING:
             case DOZE_PULSE_DONE:
