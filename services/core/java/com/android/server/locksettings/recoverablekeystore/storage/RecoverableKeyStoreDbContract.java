@@ -62,6 +62,11 @@ class RecoverableKeyStoreDbContract {
          * Timestamp of when this key was last synced with remote storage, or -1 if never synced.
          */
         static final String COLUMN_NAME_LAST_SYNCED_AT = "last_synced_at";
+
+        /**
+         * Status of the key sync {@code RecoverableKeyStoreLoader#setRecoveryStatus}
+         */
+        static final String COLUMN_NAME_RECOVERY_STATUS = "recovery_status";
     }
 
     /**

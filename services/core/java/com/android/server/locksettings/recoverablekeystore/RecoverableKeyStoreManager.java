@@ -159,18 +159,37 @@ public class RecoverableKeyStoreManager {
         throw new UnsupportedOperationException();
     }
 
+    /**
+     * Updates recovery status for the application given its {@code packageName}.
+     *
+     * @param packageName which recoverable key statuses will be returned
+     * @param aliases - KeyStore aliases or {@code null} for all aliases of the app
+     * @param status - new status
+     */
     public void setRecoveryStatus(
             @NonNull String packageName, @Nullable String[] aliases, int status, int userId)
             throws RemoteException {
         checkRecoverKeyStorePermission();
-        throw new UnsupportedOperationException();
+        int uid = Binder.getCallingUid();
+        if (packageName != null) {
+            // TODO: get uid for package name, when many apps are supported.
+        }
+        if (aliases == null) {
+            // Get all keys for the app.
+            Map<String, Integer> allKeys = mDatabase.getStatusForAllKeys(uid);
+            aliases = new String[allKeys.size()];
+            allKeys.keySet().toArray(aliases);
+        }
+        for (String alias: aliases) {
+            mDatabase.setRecoveryStatus(uid, alias, status);
+        }
     }
 
     /**
-     * Gets recovery status for keys {@code packageName}.
+     * Gets recovery status for caller or other application {@code packageName}.
+     * @param packageName which recoverable keys statuses will be returned.
      *
-     * @param packageName which recoverable keys statuses will be returned
-     * @return Map from KeyStore alias to recovery status
+     * @return {@code Map} from KeyStore alias to recovery status.
      */
     public @NonNull Map<String, Integer> getRecoveryStatus(@Nullable String packageName, int userId)
             throws RemoteException {
@@ -178,7 +197,7 @@ public class RecoverableKeyStoreManager {
         // If caller is a recovery agent it can check statuses for other packages, but
         // only for recoverable keys it manages.
         checkRecoverKeyStorePermission();
-        throw new UnsupportedOperationException();
+        return mDatabase.getStatusForAllKeys(Binder.getCallingUid());
     }
 
     /**

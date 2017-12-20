@@ -16,6 +16,7 @@
 
 package com.android.server.locksettings.recoverablekeystore.storage;
 
+import static com.google.common.truth.Truth.assertThat;
 import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNull;
@@ -27,6 +28,7 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 
 import android.content.Context;
+import android.security.recoverablekeystore.RecoverableKeyStoreLoader;
 import android.support.test.InstrumentationRegistry;
 import android.support.test.filters.SmallTest;
 import android.support.test.runner.AndroidJUnit4;
@@ -119,10 +121,11 @@ public class RecoverableKeyStoreDbTest {
         int userId = 12;
         int uid = 1009;
         int generationId = 6;
+        int status = 120;
         String alias = "test";
         byte[] nonce = getUtf8Bytes("nonce");
         byte[] keyMaterial = getUtf8Bytes("keymaterial");
-        WrappedKey wrappedKey = new WrappedKey(nonce, keyMaterial, generationId);
+        WrappedKey wrappedKey = new WrappedKey(nonce, keyMaterial, generationId, 120);
         mRecoverableKeyStoreDb.insertKey(userId, uid, alias, wrappedKey);
 
         WrappedKey retrievedKey = mRecoverableKeyStoreDb.getKey(uid, alias);
@@ -130,6 +133,7 @@ public class RecoverableKeyStoreDbTest {
         assertArrayEquals(nonce, retrievedKey.getNonce());
         assertArrayEquals(keyMaterial, retrievedKey.getKeyMaterial());
         assertEquals(generationId, retrievedKey.getPlatformKeyGenerationId());
+        assertEquals(status,retrievedKey.getRecoveryStatus());
     }
 
     @Test
@@ -206,6 +210,84 @@ public class RecoverableKeyStoreDbTest {
         mRecoverableKeyStoreDb.setPlatformKeyGenerationId(userId, 2);
 
         assertEquals(2, mRecoverableKeyStoreDb.getPlatformKeyGenerationId(userId));
+    }
+
+    @Test
+    public void setRecoveryStatus_withSingleKey() {
+        int userId = 12;
+        int uid = 1009;
+        int generationId = 6;
+        int status = 120;
+        int status2 = 121;
+        String alias = "test";
+        byte[] nonce = getUtf8Bytes("nonce");
+        byte[] keyMaterial = getUtf8Bytes("keymaterial");
+        WrappedKey wrappedKey = new WrappedKey(nonce, keyMaterial, generationId, status);
+        mRecoverableKeyStoreDb.insertKey(userId, uid, alias, wrappedKey);
+
+        WrappedKey retrievedKey = mRecoverableKeyStoreDb.getKey(uid, alias);
+        assertThat(retrievedKey.getRecoveryStatus()).isEqualTo(status);
+
+        mRecoverableKeyStoreDb.setRecoveryStatus(uid, alias, status2);
+
+        retrievedKey = mRecoverableKeyStoreDb.getKey(uid, alias);
+        assertThat(retrievedKey.getRecoveryStatus()).isEqualTo(status2);
+    }
+
+    @Test
+    public void getStatusForAllKeys_with3Keys() {
+        int userId = 12;
+        int uid = 1009;
+        int generationId = 6;
+        int status = 120;
+        int status2 = 121;
+        String alias = "test";
+        String alias2 = "test2";
+        String alias3 = "test3";
+        byte[] nonce = getUtf8Bytes("nonce");
+        byte[] keyMaterial = getUtf8Bytes("keymaterial");
+
+        WrappedKey wrappedKey = new WrappedKey(nonce, keyMaterial, generationId, status);
+        mRecoverableKeyStoreDb.insertKey(userId, uid, alias2, wrappedKey);
+        WrappedKey wrappedKey2 = new WrappedKey(nonce, keyMaterial, generationId, status);
+        mRecoverableKeyStoreDb.insertKey(userId, uid, alias3, wrappedKey);
+        WrappedKey wrappedKeyWithDefaultStatus = new WrappedKey(nonce, keyMaterial, generationId);
+        mRecoverableKeyStoreDb.insertKey(userId, uid, alias, wrappedKeyWithDefaultStatus);
+
+        Map<String, Integer> statuses = mRecoverableKeyStoreDb.getStatusForAllKeys(uid);
+        assertThat(statuses).hasSize(3);
+        assertThat(statuses).containsEntry(alias,
+                RecoverableKeyStoreLoader.RECOVERY_STATUS_SYNC_IN_PROGRESS);
+        assertThat(statuses).containsEntry(alias2, status);
+        assertThat(statuses).containsEntry(alias3, status);
+
+        int updates = mRecoverableKeyStoreDb.setRecoveryStatus(uid, alias, status2);
+        assertThat(updates).isEqualTo(1);
+        updates = mRecoverableKeyStoreDb.setRecoveryStatus(uid, alias3, status2);
+        assertThat(updates).isEqualTo(1);
+        statuses = mRecoverableKeyStoreDb.getStatusForAllKeys(uid);
+
+        assertThat(statuses).hasSize(3);
+        assertThat(statuses).containsEntry(alias, status2); // updated from default
+        assertThat(statuses).containsEntry(alias2, status);
+        assertThat(statuses).containsEntry(alias3, status2); // updated
+    }
+
+    @Test
+    public void setRecoveryStatus_withEmptyDatabase() throws Exception{
+        int uid = 1009;
+        String alias = "test";
+        int status = 120;
+        int updates = mRecoverableKeyStoreDb.setRecoveryStatus(uid, alias, status);
+        assertThat(updates).isEqualTo(0); // database was empty
+    }
+
+
+    @Test
+    public void getStatusForAllKeys_withEmptyDatabase() {
+        int uid = 1009;
+        Map<String, Integer> statuses = mRecoverableKeyStoreDb.getStatusForAllKeys(uid);
+        assertThat(statuses).hasSize(0);
     }
 
     private static byte[] getUtf8Bytes(String s) {

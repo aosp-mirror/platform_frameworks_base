@@ -16,11 +16,13 @@
 
 package com.android.server.locksettings.recoverablekeystore.storage;
 
+import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.content.ContentValues;
 import android.content.Context;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
+import android.security.recoverablekeystore.RecoverableKeyStoreLoader;
 import android.util.Log;
 
 import com.android.server.locksettings.recoverablekeystore.WrappedKey;
@@ -80,6 +82,7 @@ public class RecoverableKeyStoreDb {
         values.put(KeysEntry.COLUMN_NAME_WRAPPED_KEY, wrappedKey.getKeyMaterial());
         values.put(KeysEntry.COLUMN_NAME_LAST_SYNCED_AT, LAST_SYNCED_AT_UNSYNCED);
         values.put(KeysEntry.COLUMN_NAME_GENERATION_ID, wrappedKey.getPlatformKeyGenerationId());
+        values.put(KeysEntry.COLUMN_NAME_RECOVERY_STATUS, wrappedKey.getRecoveryStatus());
         return db.replace(KeysEntry.TABLE_NAME, /*nullColumnHack=*/ null, values);
     }
 
@@ -94,7 +97,8 @@ public class RecoverableKeyStoreDb {
                 KeysEntry._ID,
                 KeysEntry.COLUMN_NAME_NONCE,
                 KeysEntry.COLUMN_NAME_WRAPPED_KEY,
-                KeysEntry.COLUMN_NAME_GENERATION_ID};
+                KeysEntry.COLUMN_NAME_GENERATION_ID,
+                KeysEntry.COLUMN_NAME_RECOVERY_STATUS};
         String selection =
                 KeysEntry.COLUMN_NAME_UID + " = ? AND "
                 + KeysEntry.COLUMN_NAME_ALIAS + " = ?";
@@ -128,8 +132,70 @@ public class RecoverableKeyStoreDb {
                     cursor.getColumnIndexOrThrow(KeysEntry.COLUMN_NAME_WRAPPED_KEY));
             int generationId = cursor.getInt(
                     cursor.getColumnIndexOrThrow(KeysEntry.COLUMN_NAME_GENERATION_ID));
-            return new WrappedKey(nonce, keyMaterial, generationId);
+            int recoveryStatus = cursor.getInt(
+                    cursor.getColumnIndexOrThrow(KeysEntry.COLUMN_NAME_RECOVERY_STATUS));
+            return new WrappedKey(nonce, keyMaterial, generationId, recoveryStatus);
         }
+    }
+
+    /**
+     * Returns all statuses for keys {@code uid} and {@code platformKeyGenerationId}.
+     *
+     * @param uid of the application
+     *
+     * @return Map from Aliases to status.
+     *
+     * @hide
+     */
+    public @NonNull Map<String, Integer> getStatusForAllKeys(int uid) {
+        SQLiteDatabase db = mKeyStoreDbHelper.getReadableDatabase();
+        String[] projection = {
+                KeysEntry._ID,
+                KeysEntry.COLUMN_NAME_ALIAS,
+                KeysEntry.COLUMN_NAME_RECOVERY_STATUS};
+        String selection =
+                KeysEntry.COLUMN_NAME_UID + " = ?";
+        String[] selectionArguments = {Integer.toString(uid)};
+
+        try (
+            Cursor cursor = db.query(
+                KeysEntry.TABLE_NAME,
+                projection,
+                selection,
+                selectionArguments,
+                /*groupBy=*/ null,
+                /*having=*/ null,
+                /*orderBy=*/ null)
+        ) {
+            HashMap<String, Integer> statuses = new HashMap<>();
+            while (cursor.moveToNext()) {
+                String alias = cursor.getString(
+                        cursor.getColumnIndexOrThrow(KeysEntry.COLUMN_NAME_ALIAS));
+                int recoveryStatus = cursor.getInt(
+                        cursor.getColumnIndexOrThrow(KeysEntry.COLUMN_NAME_RECOVERY_STATUS));
+                statuses.put(alias, recoveryStatus);
+            }
+            return statuses;
+        }
+    }
+
+    /**
+     * Updates status for given key.
+     * @param uid of the application
+     * @param alias of the key
+     * @param status - new status
+     * @return number of updated entries.
+     * @hide
+     **/
+    public int setRecoveryStatus(int uid, String alias, int status) {
+        SQLiteDatabase db = mKeyStoreDbHelper.getWritableDatabase();
+        ContentValues values = new ContentValues();
+        values.put(KeysEntry.COLUMN_NAME_RECOVERY_STATUS, status);
+        String selection =
+                KeysEntry.COLUMN_NAME_UID + " = ? AND "
+                + KeysEntry.COLUMN_NAME_ALIAS + " = ?";
+        return db.update(KeysEntry.TABLE_NAME, values, selection,
+            new String[] {String.valueOf(uid), alias});
     }
 
     /**
@@ -148,7 +214,8 @@ public class RecoverableKeyStoreDb {
                 KeysEntry._ID,
                 KeysEntry.COLUMN_NAME_NONCE,
                 KeysEntry.COLUMN_NAME_WRAPPED_KEY,
-                KeysEntry.COLUMN_NAME_ALIAS};
+                KeysEntry.COLUMN_NAME_ALIAS,
+                KeysEntry.COLUMN_NAME_RECOVERY_STATUS};
         String selection =
                 KeysEntry.COLUMN_NAME_USER_ID + " = ? AND "
                 + KeysEntry.COLUMN_NAME_GENERATION_ID + " = ?";
@@ -173,7 +240,10 @@ public class RecoverableKeyStoreDb {
                         cursor.getColumnIndexOrThrow(KeysEntry.COLUMN_NAME_WRAPPED_KEY));
                 String alias = cursor.getString(
                         cursor.getColumnIndexOrThrow(KeysEntry.COLUMN_NAME_ALIAS));
-                keys.put(alias, new WrappedKey(nonce, keyMaterial, platformKeyGenerationId));
+                int recoveryStatus = cursor.getInt(
+                        cursor.getColumnIndexOrThrow(KeysEntry.COLUMN_NAME_RECOVERY_STATUS));
+                keys.put(alias, new WrappedKey(nonce, keyMaterial, platformKeyGenerationId,
+                        recoveryStatus));
             }
             return keys;
         }

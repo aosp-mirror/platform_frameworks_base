@@ -24,6 +24,7 @@ class RecoverableKeyStoreDbHelper extends SQLiteOpenHelper {
                     + KeysEntry.COLUMN_NAME_WRAPPED_KEY + " BLOB,"
                     + KeysEntry.COLUMN_NAME_GENERATION_ID + " INTEGER,"
                     + KeysEntry.COLUMN_NAME_LAST_SYNCED_AT + " INTEGER,"
+                    + KeysEntry.COLUMN_NAME_RECOVERY_STATUS + " INTEGER,"
                     + "UNIQUE(" + KeysEntry.COLUMN_NAME_UID + ","
                     + KeysEntry.COLUMN_NAME_ALIAS + "))";
 
