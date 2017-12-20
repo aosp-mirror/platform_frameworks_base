@@ -42,8 +42,7 @@ import org.junit.runner.RunWith;
 
 @RunWith(AndroidJUnit4.class)
 @SmallTest
-// TODO: b/70616950
-//@Presubmit
+@Presubmit
 public class ObjectPoolTests {
 
     // 1. Check if two obtained objects from pool are not the same.
