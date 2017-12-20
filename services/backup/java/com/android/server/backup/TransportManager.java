@@ -483,6 +483,7 @@ public class TransportManager {
             description.currentDestinationString = currentDestinationString;
             description.dataManagementIntent = dataManagementIntent;
             description.dataManagementLabel = dataManagementLabel;
+            Slog.d(TAG, "Transport " + name + " updated its attributes");
         }
     }
 
