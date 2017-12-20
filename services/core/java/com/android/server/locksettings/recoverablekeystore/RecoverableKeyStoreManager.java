@@ -30,7 +30,13 @@ import android.security.recoverablekeystore.KeyStoreRecoveryMetadata;
 import android.security.recoverablekeystore.RecoverableKeyStoreLoader;
 
 import com.android.internal.annotations.VisibleForTesting;
+import com.android.server.locksettings.recoverablekeystore.storage.RecoverableKeyStoreDb;
+import com.android.server.locksettings.recoverablekeystore.storage.RecoverySessionStorage;
 
+import java.security.InvalidKeyException;
+import java.security.NoSuchAlgorithmException;
+import java.security.PublicKey;
+import java.security.spec.InvalidKeySpecException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -44,7 +50,10 @@ public class RecoverableKeyStoreManager {
     private static final String TAG = "RecoverableKeyStoreManager";
 
     private static RecoverableKeyStoreManager mInstance;
-    private Context mContext;
+
+    private final Context mContext;
+    private final RecoverableKeyStoreDb mDatabase;
+    private final RecoverySessionStorage mRecoverySessionStorage;
 
     /**
      * Returns a new or existing instance.
@@ -53,14 +62,23 @@ public class RecoverableKeyStoreManager {
      */
     public static synchronized RecoverableKeyStoreManager getInstance(Context mContext) {
         if (mInstance == null) {
-            mInstance = new RecoverableKeyStoreManager(mContext);
+            RecoverableKeyStoreDb db = RecoverableKeyStoreDb.newInstance(mContext);
+            mInstance = new RecoverableKeyStoreManager(
+                    mContext.getApplicationContext(),
+                    db,
+                    new RecoverySessionStorage());
         }
         return mInstance;
     }
 
     @VisibleForTesting
-    RecoverableKeyStoreManager(Context context) {
+    RecoverableKeyStoreManager(
+            Context context,
+            RecoverableKeyStoreDb recoverableKeyStoreDb,
+            RecoverySessionStorage recoverySessionStorage) {
         mContext = context;
+        mDatabase = recoverableKeyStoreDb;
+        mRecoverySessionStorage = recoverySessionStorage;
     }
 
     public int initRecoveryService(
@@ -161,7 +179,13 @@ public class RecoverableKeyStoreManager {
     /**
      * Initializes recovery session.
      *
-     * @return recovery claim
+     * @param sessionId A unique ID to identify the recovery session.
+     * @param verifierPublicKey X509-encoded public key.
+     * @param vaultParams Additional params associated with vault.
+     * @param vaultChallenge Challenge issued by vault service.
+     * @param secrets Lock-screen hashes. Should have a single element. TODO: why is this a list?
+     * @return Encrypted bytes of recovery claim. This can then be issued to the vault service.
+     *
      * @hide
      */
     public byte[] startRecoverySession(
@@ -173,7 +197,40 @@ public class RecoverableKeyStoreManager {
             int userId)
             throws RemoteException {
         checkRecoverKeyStorePermission();
-        throw new UnsupportedOperationException();
+
+        if (secrets.size() != 1) {
+            // TODO: support multiple secrets
+            throw new RemoteException("Only a single KeyStoreRecoveryMetadata is supported");
+        }
+
+        byte[] keyClaimant = KeySyncUtils.generateKeyClaimant();
+        byte[] kfHash = secrets.get(0).getSecret();
+        mRecoverySessionStorage.add(
+                userId, new RecoverySessionStorage.Entry(sessionId, kfHash, keyClaimant));
+
+        try {
+            byte[] thmKfHash = KeySyncUtils.calculateThmKfHash(kfHash);
+            PublicKey publicKey = KeySyncUtils.deserializePublicKey(verifierPublicKey);
+            return KeySyncUtils.encryptRecoveryClaim(
+                    publicKey,
+                    vaultParams,
+                    vaultChallenge,
+                    thmKfHash,
+                    keyClaimant);
+        } catch (NoSuchAlgorithmException e) {
+            // Should never happen: all the algorithms used are required by AOSP implementations.
+            throw new RemoteException(
+                    "Missing required algorithm",
+                    e,
+                    /*enableSuppression=*/ true,
+                    /*writeableStackTrace=*/ true);
+        } catch (InvalidKeySpecException | InvalidKeyException e) {
+            throw new RemoteException(
+                    "Not a valid X509 key",
+                    e,
+                    /*enableSuppression=*/ true,
+                    /*writeableStackTrace=*/ true);
+        }
     }
 
     public void recoverKeys(
