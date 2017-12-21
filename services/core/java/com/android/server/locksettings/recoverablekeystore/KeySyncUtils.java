@@ -116,7 +116,8 @@ public class KeySyncUtils {
      * @throws NoSuchAlgorithmException if any SecureBox algorithm is unavailable.
      * @throws InvalidKeyException if the hash cannot be used to encrypt for some reason.
      */
-    private static byte[] locallyEncryptRecoveryKey(byte[] lockScreenHash, SecretKey recoveryKey)
+    @VisibleForTesting
+    static byte[] locallyEncryptRecoveryKey(byte[] lockScreenHash, SecretKey recoveryKey)
             throws NoSuchAlgorithmException, InvalidKeyException {
         return SecureBox.encrypt(
                 /*theirPublicKey=*/ null,
