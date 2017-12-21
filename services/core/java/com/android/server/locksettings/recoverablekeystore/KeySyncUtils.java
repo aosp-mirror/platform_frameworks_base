@@ -20,10 +20,13 @@ import com.android.internal.annotations.VisibleForTesting;
 
 import java.nio.charset.StandardCharsets;
 import java.security.InvalidKeyException;
+import java.security.KeyFactory;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.security.PublicKey;
 import java.security.SecureRandom;
+import java.security.spec.InvalidKeySpecException;
+import java.security.spec.X509EncodedKeySpec;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -39,6 +42,7 @@ import javax.crypto.SecretKey;
  */
 public class KeySyncUtils {
 
+    private static final String PUBLIC_KEY_FACTORY_ALGORITHM = "EC";
     private static final String RECOVERY_KEY_ALGORITHM = "AES";
     private static final int RECOVERY_KEY_SIZE_BITS = 256;
 
@@ -234,6 +238,21 @@ public class KeySyncUtils {
                 /*sharedSecret=*/ recoveryKey,
                 /*header=*/ ENCRYPTED_APPLICATION_KEY_HEADER,
                 /*encryptedPayload=*/ encryptedApplicationKey);
+    }
+
+    /**
+     * Deserializes a X509 public key.
+     *
+     * @param key The bytes of the key.
+     * @return The key.
+     * @throws NoSuchAlgorithmException if the public key algorithm is unavailable.
+     * @throws InvalidKeySpecException if the bytes of the key are not a valid key.
+     */
+    public static PublicKey deserializePublicKey(byte[] key)
+            throws NoSuchAlgorithmException, InvalidKeySpecException {
+        KeyFactory keyFactory = KeyFactory.getInstance(PUBLIC_KEY_FACTORY_ALGORITHM);
+        X509EncodedKeySpec publicKeySpec = new X509EncodedKeySpec(key);
+        return keyFactory.generatePublic(publicKeySpec);
     }
 
     /**
