@@ -5,6 +5,7 @@ import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
 
 import com.android.server.locksettings.recoverablekeystore.storage.RecoverableKeyStoreDbContract.KeysEntry;
+import com.android.server.locksettings.recoverablekeystore.storage.RecoverableKeyStoreDbContract.RecoveryServicePublicKeyEntry;
 import com.android.server.locksettings.recoverablekeystore.storage.RecoverableKeyStoreDbContract.UserMetadataEntry;
 
 /**
@@ -34,11 +35,24 @@ class RecoverableKeyStoreDbHelper extends SQLiteOpenHelper {
                     + UserMetadataEntry.COLUMN_NAME_USER_ID + " INTEGER UNIQUE,"
                     + UserMetadataEntry.COLUMN_NAME_PLATFORM_KEY_GENERATION_ID + " INTEGER)";
 
+    private static final String SQL_CREATE_RECOVERY_SERVICE_PUBLIC_KEY_ENTRY =
+            "CREATE TABLE " + RecoveryServicePublicKeyEntry.TABLE_NAME + " ("
+                    + RecoveryServicePublicKeyEntry._ID + " INTEGER PRIMARY KEY,"
+                    + RecoveryServicePublicKeyEntry.COLUMN_NAME_USER_ID + " INTEGER,"
+                    + RecoveryServicePublicKeyEntry.COLUMN_NAME_UID + " INTEGER,"
+                    + RecoveryServicePublicKeyEntry.COLUMN_NAME_PUBLIC_KEY + " BLOB,"
+                    + "UNIQUE("
+                    + RecoveryServicePublicKeyEntry.COLUMN_NAME_USER_ID  + ","
+                    + RecoveryServicePublicKeyEntry.COLUMN_NAME_UID + "))";
+
     private static final String SQL_DELETE_KEYS_ENTRY =
             "DROP TABLE IF EXISTS " + KeysEntry.TABLE_NAME;
 
     private static final String SQL_DELETE_USER_METADATA_ENTRY =
             "DROP TABLE IF EXISTS " + UserMetadataEntry.TABLE_NAME;
+
+    private static final String SQL_DELETE_RECOVERY_SERVICE_PUBLIC_KEY_ENTRY =
+            "DROP TABLE IF EXISTS " + RecoveryServicePublicKeyEntry.TABLE_NAME;
 
     RecoverableKeyStoreDbHelper(Context context) {
         super(context, DATABASE_NAME, null, DATABASE_VERSION);
@@ -48,12 +62,14 @@ class RecoverableKeyStoreDbHelper extends SQLiteOpenHelper {
     public void onCreate(SQLiteDatabase db) {
         db.execSQL(SQL_CREATE_KEYS_ENTRY);
         db.execSQL(SQL_CREATE_USER_METADATA_ENTRY);
+        db.execSQL(SQL_CREATE_RECOVERY_SERVICE_PUBLIC_KEY_ENTRY);
     }
 
     @Override
     public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion) {
         db.execSQL(SQL_DELETE_KEYS_ENTRY);
         db.execSQL(SQL_DELETE_USER_METADATA_ENTRY);
+        db.execSQL(SQL_DELETE_RECOVERY_SERVICE_PUBLIC_KEY_ENTRY);
         onCreate(db);
     }
 }

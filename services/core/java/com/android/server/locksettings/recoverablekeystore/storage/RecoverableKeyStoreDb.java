@@ -27,9 +27,19 @@ import android.util.Log;
 
 import com.android.server.locksettings.recoverablekeystore.WrappedKey;
 import com.android.server.locksettings.recoverablekeystore.storage.RecoverableKeyStoreDbContract.KeysEntry;
+import com.android.server.locksettings.recoverablekeystore.storage.RecoverableKeyStoreDbContract.RecoveryServicePublicKeyEntry;
 import com.android.server.locksettings.recoverablekeystore.storage.RecoverableKeyStoreDbContract.UserMetadataEntry;
 
+
+
+import java.security.KeyFactory;
+import java.security.NoSuchAlgorithmException;
+import java.security.PublicKey;
+import java.security.spec.InvalidKeySpecException;
+import java.security.spec.X509EncodedKeySpec;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 
@@ -292,6 +302,88 @@ public class RecoverableKeyStoreDb {
             return cursor.getInt(
                     cursor.getColumnIndexOrThrow(
                             UserMetadataEntry.COLUMN_NAME_PLATFORM_KEY_GENERATION_ID));
+        }
+    }
+
+    /**
+     * Inserts or updates the public key of the recovery service into the database.
+     *
+     * @param userId The uid of the profile the application is running under.
+     * @param uid The uid of the application to whom the key belongs.
+     * @param publicKey The public key of the recovery service.
+     * @return The primary key of the inserted row, or -1 if failed.
+     *
+     * @hide
+     */
+    public long setRecoveryServicePublicKey(int userId, int uid, PublicKey publicKey) {
+        SQLiteDatabase db = mKeyStoreDbHelper.getWritableDatabase();
+        ContentValues values = new ContentValues();
+        values.put(RecoveryServicePublicKeyEntry.COLUMN_NAME_USER_ID, userId);
+        values.put(RecoveryServicePublicKeyEntry.COLUMN_NAME_UID, uid);
+        values.put(RecoveryServicePublicKeyEntry.COLUMN_NAME_PUBLIC_KEY, publicKey.getEncoded());
+        return db.replace(RecoveryServicePublicKeyEntry.TABLE_NAME, /*nullColumnHack=*/ null,
+                values);
+    }
+
+    /**
+     * Returns the public key of the recovery service.
+     *
+     * @param userId The uid of the profile the application is running under.
+     * @param uid The uid of the application who initializes the local recovery components.
+     *
+     * @hide
+     */
+    public PublicKey getRecoveryServicePublicKey(int userId, int uid) {
+        SQLiteDatabase db = mKeyStoreDbHelper.getReadableDatabase();
+
+        String[] projection = {
+                RecoveryServicePublicKeyEntry._ID,
+                RecoveryServicePublicKeyEntry.COLUMN_NAME_USER_ID,
+                RecoveryServicePublicKeyEntry.COLUMN_NAME_UID,
+                RecoveryServicePublicKeyEntry.COLUMN_NAME_PUBLIC_KEY};
+        String selection =
+                RecoveryServicePublicKeyEntry.COLUMN_NAME_USER_ID + " = ? AND "
+                        + RecoveryServicePublicKeyEntry.COLUMN_NAME_UID + " = ?";
+        String[] selectionArguments = { Integer.toString(userId), Integer.toString(uid)};
+
+        try (
+                Cursor cursor = db.query(
+                        RecoveryServicePublicKeyEntry.TABLE_NAME,
+                        projection,
+                        selection,
+                        selectionArguments,
+                        /*groupBy=*/ null,
+                        /*having=*/ null,
+                        /*orderBy=*/ null)
+        ) {
+            int count = cursor.getCount();
+            if (count == 0) {
+                return null;
+            }
+            if (count > 1) {
+                Log.wtf(TAG,
+                        String.format(Locale.US,
+                                "%d PublicKey entries found for userId=%d uid=%d. "
+                                        + "Should only ever be 0 or 1.", count, userId, uid));
+                return null;
+            }
+            cursor.moveToFirst();
+            byte[] keyBytes = cursor.getBlob(cursor.getColumnIndexOrThrow(
+                    RecoveryServicePublicKeyEntry.COLUMN_NAME_PUBLIC_KEY));
+            X509EncodedKeySpec pkSpec = new X509EncodedKeySpec(keyBytes);
+            try {
+                return KeyFactory.getInstance("EC").generatePublic(pkSpec);
+            } catch (NoSuchAlgorithmException e) {
+                // Should never happen
+                throw new RuntimeException(e);
+            } catch (InvalidKeySpecException e) {
+                Log.wtf(TAG,
+                        String.format(Locale.US,
+                                "Recovery service public key entry cannot be decoded for "
+                                        + "userId=%d uid=%d.",
+                                userId, uid));
+                return null;
+            }
         }
     }
 

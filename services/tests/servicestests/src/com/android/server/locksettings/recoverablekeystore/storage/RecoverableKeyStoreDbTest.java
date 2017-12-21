@@ -36,6 +36,9 @@ import com.android.server.locksettings.recoverablekeystore.WrappedKey;
 
 import java.io.File;
 import java.nio.charset.StandardCharsets;
+import java.security.KeyPairGenerator;
+import java.security.PublicKey;
+import java.security.spec.ECGenParameterSpec;
 import java.util.Map;
 
 @SmallTest
@@ -290,7 +293,71 @@ public class RecoverableKeyStoreDbTest {
         assertThat(statuses).hasSize(0);
     }
 
+    @Test
+    public void setRecoveryServicePublicKey_replaceOldKey() throws Exception {
+        int userId = 12;
+        int uid = 10009;
+        PublicKey pubkey1 = genRandomPublicKey();
+        PublicKey pubkey2 = genRandomPublicKey();
+        mRecoverableKeyStoreDb.setRecoveryServicePublicKey(userId, uid, pubkey1);
+        mRecoverableKeyStoreDb.setRecoveryServicePublicKey(userId, uid, pubkey2);
+        assertThat(mRecoverableKeyStoreDb.getRecoveryServicePublicKey(userId, uid)).isEqualTo(
+                pubkey2);
+    }
+
+    @Test
+    public void setRecoveryServicePublicKey_allowsTwoUsersToHaveTheSameUidAndKey()
+            throws Exception {
+        int userId1 = 12;
+        int userId2 = 23;
+        int uid = 10009;
+        PublicKey pubkey = genRandomPublicKey();
+        mRecoverableKeyStoreDb.setRecoveryServicePublicKey(userId1, uid, pubkey);
+        mRecoverableKeyStoreDb.setRecoveryServicePublicKey(userId2, uid, pubkey);
+        assertThat(mRecoverableKeyStoreDb.getRecoveryServicePublicKey(userId1, uid)).isEqualTo(
+                pubkey);
+        assertThat(mRecoverableKeyStoreDb.getRecoveryServicePublicKey(userId2, uid)).isEqualTo(
+                pubkey);
+    }
+
+    @Test
+    public void setRecoveryServicePublicKey_allowsAUserToHaveTwoUids() throws Exception {
+        int userId = 12;
+        int uid1 = 10009;
+        int uid2 = 20009;
+        PublicKey pubkey = genRandomPublicKey();
+        mRecoverableKeyStoreDb.setRecoveryServicePublicKey(userId, uid1, pubkey);
+        mRecoverableKeyStoreDb.setRecoveryServicePublicKey(userId, uid2, pubkey);
+        assertThat(mRecoverableKeyStoreDb.getRecoveryServicePublicKey(userId, uid1)).isEqualTo(
+                pubkey);
+        assertThat(mRecoverableKeyStoreDb.getRecoveryServicePublicKey(userId, uid2)).isEqualTo(
+                pubkey);
+    }
+
+    @Test
+    public void getRecoveryServicePublicKey_returnsNullIfNoKey() throws Exception {
+        int userId = 12;
+        int uid = 10009;
+        assertNull(mRecoverableKeyStoreDb.getRecoveryServicePublicKey(userId, uid));
+    }
+
+    @Test
+    public void getRecoveryServicePublicKey_returnsInsertedKey() throws Exception {
+        int userId = 12;
+        int uid = 10009;
+        PublicKey pubkey = genRandomPublicKey();
+        mRecoverableKeyStoreDb.setRecoveryServicePublicKey(userId, uid, pubkey);
+        assertThat(mRecoverableKeyStoreDb.getRecoveryServicePublicKey(userId, uid)).isEqualTo(
+                pubkey);
+    }
+
     private static byte[] getUtf8Bytes(String s) {
         return s.getBytes(StandardCharsets.UTF_8);
+    }
+
+    private static PublicKey genRandomPublicKey() throws Exception {
+        KeyPairGenerator keyPairGenerator = KeyPairGenerator.getInstance("EC");
+        keyPairGenerator.initialize(new ECGenParameterSpec("secp256r1"));
+        return keyPairGenerator.generateKeyPair().getPublic();
     }
 }
