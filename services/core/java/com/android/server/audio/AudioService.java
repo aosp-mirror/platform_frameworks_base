@@ -2203,7 +2203,7 @@ public class AudioService extends IAudioService.Stub
         return (mStreamStates[streamType].getMaxIndex() + 5) / 10;
     }
 
-    /** @see AudioManager#getStreamMinVolume(int) */
+    /** @see AudioManager#getStreamMinVolumeInt(int) */
     public int getStreamMinVolume(int streamType) {
         ensureValidStreamType(streamType);
         return (mStreamStates[streamType].getMinIndex() + 5) / 10;
