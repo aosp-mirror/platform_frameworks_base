@@ -1601,6 +1601,7 @@ public class AppOpsManager {
     }
 
     /** @hide */
+    @TestApi
     public void setMode(int code, int uid, String packageName, int mode) {
         try {
             mService.setMode(code, uid, packageName, mode);
