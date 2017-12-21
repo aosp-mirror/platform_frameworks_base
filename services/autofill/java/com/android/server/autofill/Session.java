@@ -65,7 +65,6 @@ import android.service.autofill.SaveInfo;
 import android.service.autofill.SaveRequest;
 import android.service.autofill.UserData;
 import android.service.autofill.ValueFinder;
-import android.service.autofill.EditDistanceScorer;
 import android.service.autofill.FieldClassification;
 import android.util.ArrayMap;
 import android.util.ArraySet;
@@ -1558,7 +1557,7 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
      *
      * <p>A new request will be started in 2 scenarios:
      * <ol>
-     *   <li>If the user manually requested autofill after the view was already filled.
+     *   <li>If the user manually requested autofill.
      *   <li>If the view is part of a new partition.
      * </ol>
      *
@@ -1566,14 +1565,10 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
      * @param viewState The view that is entered.
      * @param flags The flag that was passed by the AutofillManager.
      */
-    private void requestNewFillResponseIfNecessaryLocked(@NonNull AutofillId id,
+    private void requestNewFillResponseOnViewEnteredIfNecessaryLocked(@NonNull AutofillId id,
             @NonNull ViewState viewState, int flags) {
-        // First check if this is a manual request after view was autofilled.
-        final int state = viewState.getState();
-        final boolean restart = (state & STATE_AUTOFILLED) != 0
-                && (flags & FLAG_MANUAL_REQUEST) != 0;
-        if (restart) {
-            if (sDebug) Slog.d(TAG, "Re-starting session on view  " + id);
+        if ((flags & FLAG_MANUAL_REQUEST) != 0) {
+            if (sDebug) Slog.d(TAG, "Re-starting session on view " + id + " and flags " + flags);
             viewState.setState(STATE_RESTARTED_SESSION);
             requestNewFillResponseLocked(flags);
             return;
@@ -1728,7 +1723,7 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
                 if (sVerbose && virtualBounds != null) {
                     Slog.v(TAG, "entered on virtual child " + id + ": " + virtualBounds);
                 }
-                requestNewFillResponseIfNecessaryLocked(id, viewState, flags);
+                requestNewFillResponseOnViewEnteredIfNecessaryLocked(id, viewState, flags);
 
                 // Remove the UI if the ViewState has changed.
                 if (mCurrentViewId != viewState.id) {
