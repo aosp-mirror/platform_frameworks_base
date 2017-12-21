@@ -205,4 +205,17 @@ public class WorkSourceTest extends TestCase {
         ws.add(ws2);
         assertEquals(2, workChains.size());
     }
+
+    public void testSet_noWorkChains() {
+        WorkSource ws = new WorkSource();
+        ws.set(10);
+        assertEquals(1, ws.size());
+        assertEquals(10, ws.get(0));
+
+        WorkSource ws2 = new WorkSource();
+        ws2.set(20, "foo");
+        assertEquals(1, ws2.size());
+        assertEquals(20, ws2.get(0));
+        assertEquals("foo", ws2.getName(0));
+    }
 }

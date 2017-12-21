@@ -266,7 +266,9 @@ public class WorkSource implements Parcelable {
         if (mUids == null) mUids = new int[2];
         mUids[0] = uid;
         mNames = null;
-        mChains.clear();
+        if (mChains != null) {
+            mChains.clear();
+        }
     }
 
     /** @hide */
@@ -281,7 +283,9 @@ public class WorkSource implements Parcelable {
         }
         mUids[0] = uid;
         mNames[0] = name;
-        mChains.clear();
+        if (mChains != null) {
+            mChains.clear();
+        }
     }
 
     /**
