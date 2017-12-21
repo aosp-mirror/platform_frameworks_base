@@ -32,12 +32,7 @@ void MetricProducer::onMatchedLogEventLocked(const size_t matcherIndex, const Lo
 
     if (mDimension.size() > 0) {
         vector<KeyValuePair> key = getDimensionKey(event, mDimension);
-        eventKey = getHashableKey(key);
-        // Add the HashableDimensionKey->vector<KeyValuePair> to the map, because StatsLogReport
-        // expects vector<KeyValuePair>.
-        if (mDimensionKeyMap.find(eventKey) == mDimensionKeyMap.end()) {
-            mDimensionKeyMap[eventKey] = key;
-        }
+        eventKey = HashableDimensionKey(key);
     } else {
         eventKey = DEFAULT_DIMENSION_KEY;
     }
@@ -58,7 +53,6 @@ void MetricProducer::onMatchedLogEventLocked(const size_t matcherIndex, const Lo
     } else {
         condition = mCondition;
     }
-
     onMatchedLogEventInternalLocked(matcherIndex, eventKey, conditionKeys, condition, event);
 }
 
