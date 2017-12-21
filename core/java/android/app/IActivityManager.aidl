@@ -63,6 +63,7 @@ import android.os.IProgressListener;
 import android.os.ParcelFileDescriptor;
 import android.os.PersistableBundle;
 import android.os.StrictMode;
+import android.os.WorkSource;
 import android.service.voice.IVoiceInteractionSession;
 import com.android.internal.app.IVoiceInteractor;
 import com.android.internal.os.IResultReceiver;
@@ -198,7 +199,7 @@ interface IActivityManager {
     void enterSafeMode();
     boolean startNextMatchingActivity(in IBinder callingActivity,
             in Intent intent, in Bundle options);
-    void noteWakeupAlarm(in IIntentSender sender, int sourceUid,
+    void noteWakeupAlarm(in IIntentSender sender, in WorkSource workSource, int sourceUid,
             in String sourcePkg, in String tag);
     void removeContentProvider(in IBinder connection, boolean stable);
     void setRequestedOrientation(in IBinder token, int requestedOrientation);
@@ -468,8 +469,8 @@ interface IActivityManager {
     void dumpHeapFinished(in String path);
     void setVoiceKeepAwake(in IVoiceInteractionSession session, boolean keepAwake);
     void updateLockTaskPackages(int userId, in String[] packages);
-    void noteAlarmStart(in IIntentSender sender, int sourceUid, in String tag);
-    void noteAlarmFinish(in IIntentSender sender, int sourceUid, in String tag);
+    void noteAlarmStart(in IIntentSender sender, in WorkSource workSource, int sourceUid, in String tag);
+    void noteAlarmFinish(in IIntentSender sender, in WorkSource workSource, int sourceUid, in String tag);
     int getPackageProcessState(in String packageName, in String callingPackage);
     oneway void showLockTaskEscapeMessage(in IBinder token);
     void updateDeviceOwner(in String packageName);

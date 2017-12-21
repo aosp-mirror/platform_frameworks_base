@@ -13858,68 +13858,100 @@ public class ActivityManagerService extends IActivityManager.Stub
                 Context.WINDOW_SERVICE)).addView(v, lp);
     }
 
-    public void noteWakeupAlarm(IIntentSender sender, int sourceUid, String sourcePkg, String tag) {
-        if (sender != null && !(sender instanceof PendingIntentRecord)) {
-            return;
+    @Override
+    public void noteWakeupAlarm(IIntentSender sender, WorkSource workSource, int sourceUid,
+            String sourcePkg, String tag) {
+        if (workSource != null && workSource.isEmpty()) {
+            workSource = null;
         }
-        final PendingIntentRecord rec = (PendingIntentRecord)sender;
-        final BatteryStatsImpl stats = mBatteryStatsService.getActiveStatistics();
-        synchronized (stats) {
-            if (mBatteryStatsService.isOnBattery()) {
-                mBatteryStatsService.enforceCallingPermission();
-                int MY_UID = Binder.getCallingUid();
-                final int uid;
-                if (sender == null) {
-                    uid = sourceUid;
-                } else {
-                    uid = rec.uid == MY_UID ? SYSTEM_UID : rec.uid;
+
+        if (sourceUid <= 0 && workSource == null) {
+            // Try and derive a UID to attribute things to based on the caller.
+            if (sender != null) {
+                if (!(sender instanceof PendingIntentRecord)) {
+                    return;
                 }
-                BatteryStatsImpl.Uid.Pkg pkg =
-                    stats.getPackageStatsLocked(sourceUid >= 0 ? sourceUid : uid,
-                            sourcePkg != null ? sourcePkg : rec.key.packageName);
-                pkg.noteWakeupAlarmLocked(tag);
-                StatsLog.write(StatsLog.WAKEUP_ALARM_OCCURRED, sourceUid >= 0 ? sourceUid : uid,
-                        tag);
+
+                final PendingIntentRecord rec = (PendingIntentRecord) sender;
+                final int callerUid = Binder.getCallingUid();
+                sourceUid = rec.uid == callerUid ? SYSTEM_UID : rec.uid;
+            } else {
+                // TODO(narayan): Should we throw an exception in this case ? It means that we
+                // haven't been able to derive a UID to attribute things to.
+                return;
             }
         }
+
+        if (DEBUG_POWER) {
+            Slog.w(TAG, "noteWakupAlarm[ sourcePkg=" + sourcePkg + ", sourceUid=" + sourceUid
+                    + ", workSource=" + workSource + ", tag=" + tag + "]");
+        }
+
+        mBatteryStatsService.noteWakupAlarm(sourcePkg, sourceUid, workSource, tag);
     }
 
-    public void noteAlarmStart(IIntentSender sender, int sourceUid, String tag) {
-        if (sender != null && !(sender instanceof PendingIntentRecord)) {
-            return;
+    @Override
+    public void noteAlarmStart(IIntentSender sender, WorkSource workSource, int sourceUid,
+            String tag) {
+        if (workSource != null && workSource.isEmpty()) {
+            workSource = null;
         }
-        final PendingIntentRecord rec = (PendingIntentRecord)sender;
-        final BatteryStatsImpl stats = mBatteryStatsService.getActiveStatistics();
-        synchronized (stats) {
-            mBatteryStatsService.enforceCallingPermission();
-            int MY_UID = Binder.getCallingUid();
-            final int uid;
-            if (sender == null) {
-                uid = sourceUid;
+
+        if (sourceUid <= 0 && workSource == null) {
+            // Try and derive a UID to attribute things to based on the caller.
+            if (sender != null) {
+                if (!(sender instanceof PendingIntentRecord)) {
+                    return;
+                }
+
+                final PendingIntentRecord rec = (PendingIntentRecord) sender;
+                final int callerUid = Binder.getCallingUid();
+                sourceUid = rec.uid == callerUid ? SYSTEM_UID : rec.uid;
             } else {
-                uid = rec.uid == MY_UID ? SYSTEM_UID : rec.uid;
+                // TODO(narayan): Should we throw an exception in this case ? It means that we
+                // haven't been able to derive a UID to attribute things to.
+                return;
             }
-            mBatteryStatsService.noteAlarmStart(tag, sourceUid >= 0 ? sourceUid : uid);
         }
+
+        if (DEBUG_POWER) {
+            Slog.w(TAG, "noteAlarmStart[sourceUid=" + sourceUid + ", workSource=" + workSource +
+                    ", tag=" + tag + "]");
+        }
+
+        mBatteryStatsService.noteAlarmStart(tag, workSource, sourceUid);
     }
 
-    public void noteAlarmFinish(IIntentSender sender, int sourceUid, String tag) {
-        if (sender != null && !(sender instanceof PendingIntentRecord)) {
-            return;
+    @Override
+    public void noteAlarmFinish(IIntentSender sender, WorkSource workSource, int sourceUid,
+            String tag) {
+        if (workSource != null && workSource.isEmpty()) {
+            workSource = null;
         }
-        final PendingIntentRecord rec = (PendingIntentRecord)sender;
-        final BatteryStatsImpl stats = mBatteryStatsService.getActiveStatistics();
-        synchronized (stats) {
-            mBatteryStatsService.enforceCallingPermission();
-            int MY_UID = Binder.getCallingUid();
-            final int uid;
-            if (sender == null) {
-                uid = sourceUid;
+
+        if (sourceUid <= 0 && workSource == null) {
+            // Try and derive a UID to attribute things to based on the caller.
+            if (sender != null) {
+                if (!(sender instanceof PendingIntentRecord)) {
+                    return;
+                }
+
+                final PendingIntentRecord rec = (PendingIntentRecord) sender;
+                final int callerUid = Binder.getCallingUid();
+                sourceUid = rec.uid == callerUid ? SYSTEM_UID : rec.uid;
             } else {
-                uid = rec.uid == MY_UID ? SYSTEM_UID : rec.uid;
+                // TODO(narayan): Should we throw an exception in this case ? It means that we
+                // haven't been able to derive a UID to attribute things to.
+                return;
             }
-            mBatteryStatsService.noteAlarmFinish(tag, sourceUid >= 0 ? sourceUid : uid);
         }
+
+        if (DEBUG_POWER) {
+            Slog.w(TAG, "noteAlarmFinish[sourceUid=" + sourceUid + ", workSource=" + workSource +
+                    ", tag=" + tag + "]");
+        }
+
+        mBatteryStatsService.noteAlarmFinish(tag, workSource, sourceUid);
     }
 
     public boolean killPids(int[] pids, String pReason, boolean secure) {

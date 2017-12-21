@@ -38,6 +38,7 @@ import android.os.SystemClock;
 import android.os.UserHandle;
 import android.os.UserManagerInternal;
 import android.os.WorkSource;
+import android.os.WorkSource.WorkChain;
 import android.os.connectivity.CellularBatteryStats;
 import android.os.health.HealthStatsParceler;
 import android.os.health.HealthStatsWriter;
@@ -66,6 +67,7 @@ import java.nio.CharBuffer;
 import java.nio.charset.CharsetDecoder;
 import java.nio.charset.CodingErrorAction;
 import java.nio.charset.StandardCharsets;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.concurrent.ExecutionException;
@@ -446,17 +448,24 @@ public final class BatteryStatsService extends IBatteryStats.Stub
         }
     }
 
-    public void noteAlarmStart(String name, int uid) {
+    public void noteWakupAlarm(String name, int uid, WorkSource workSource, String tag) {
         enforceCallingPermission();
         synchronized (mStats) {
-            mStats.noteAlarmStartLocked(name, uid);
+            mStats.noteWakupAlarmLocked(name, uid, workSource, tag);
         }
     }
 
-    public void noteAlarmFinish(String name, int uid) {
+    public void noteAlarmStart(String name, WorkSource workSource, int uid) {
         enforceCallingPermission();
         synchronized (mStats) {
-            mStats.noteAlarmFinishLocked(name, uid);
+            mStats.noteAlarmStartLocked(name, workSource, uid);
+        }
+    }
+
+    public void noteAlarmFinish(String name, WorkSource workSource, int uid) {
+        enforceCallingPermission();
+        synchronized (mStats) {
+            mStats.noteAlarmFinishLocked(name, workSource, uid);
         }
     }
 
