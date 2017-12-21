@@ -277,9 +277,6 @@ non_base_dirs := \
 framework_base_android_test_base_src_files := \
   $(call all-java-files-under, test-base/src/junit)
 
-framework_base_android_test_mock_src_files := \
-  $(call all-java-files-under, test-mock/src/android/test/mock)
-
 framework_base_android_test_runner_src_files := \
   $(call all-java-files-under, test-runner/src/junit)
 
@@ -311,6 +308,7 @@ files_to_document := \
   $(files_to_check_apis) \
   $(call find-other-java-files,\
     test-base/src \
+    test-mock/src \
     test-runner/src)
 
 # These are relative to frameworks/base
@@ -331,7 +329,6 @@ framework_docs_LOCAL_SRC_FILES := \
 # These are relative to frameworks/base
 framework_docs_LOCAL_API_CHECK_SRC_FILES := \
   $(framework_base_android_test_base_src_files) \
-  $(framework_base_android_test_mock_src_files) \
   $(framework_base_android_test_runner_src_files) \
   $(files_to_check_apis) \
   $(common_src_files) \
@@ -359,7 +356,6 @@ framework_docs_LOCAL_API_CHECK_JAVA_LIBRARIES := \
 	icu4j \
 	framework \
 	voip-common \
-	android.test.mock \
 
 # Platform docs can refer to Support Library APIs, but we don't actually build
 # them as part of the docs target, so we need to include them on the classpath.

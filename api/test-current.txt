@@ -685,21 +685,6 @@ package android.telephony.mbms.vendor {
 
 }
 
-package android.test.mock {
-
-  public class MockContext extends android.content.Context {
-    method public int getUserId();
-  }
-
-  public deprecated class MockPackageManager extends android.content.pm.PackageManager {
-    method public java.lang.String getDefaultBrowserPackageNameAsUser(int);
-    method public int getInstallReason(java.lang.String, android.os.UserHandle);
-    method public java.lang.String getPermissionControllerPackageName();
-    method public boolean isPermissionReviewModeEnabled();
-  }
-
-}
-
 package android.text {
 
   public static final class Selection.MemoryTextWatcher implements android.text.TextWatcher {
