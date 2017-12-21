@@ -17,6 +17,7 @@ class RecoverableKeyStoreDbHelper extends SQLiteOpenHelper {
     private static final String SQL_CREATE_KEYS_ENTRY =
             "CREATE TABLE " + KeysEntry.TABLE_NAME + "( "
                     + KeysEntry._ID + " INTEGER PRIMARY KEY,"
+                    + KeysEntry.COLUMN_NAME_USER_ID + " INTEGER,"
                     + KeysEntry.COLUMN_NAME_UID + " INTEGER,"
                     + KeysEntry.COLUMN_NAME_ALIAS + " TEXT,"
                     + KeysEntry.COLUMN_NAME_NONCE + " BLOB,"

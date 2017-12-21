@@ -29,6 +29,11 @@ class RecoverableKeyStoreDbContract {
         static final String TABLE_NAME = "keys";
 
         /**
+         * The user id of the profile the application is running under.
+         */
+        static final String COLUMN_NAME_USER_ID = "user_id";
+
+        /**
          * The uid of the application that generated the key.
          */
         static final String COLUMN_NAME_UID = "uid";

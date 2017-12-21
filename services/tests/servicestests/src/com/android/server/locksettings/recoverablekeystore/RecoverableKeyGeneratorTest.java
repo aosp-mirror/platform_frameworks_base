@@ -61,6 +61,7 @@ public class RecoverableKeyGeneratorTest {
     private static final String UNSUPPORTED_CIPHER_ALGORITHM = "AES/CTR/NoPadding";
     private static final String TEST_ALIAS = "karlin";
     private static final String WRAPPING_KEY_ALIAS = "RecoverableKeyGeneratorTestWrappingKey";
+    private static final int TEST_USER_ID = 1000;
     private static final int KEYSTORE_UID_SELF = -1;
     private static final int GCM_TAG_LENGTH_BITS = 128;
     private static final int GCM_NONCE_LENGTH_BYTES = 12;
@@ -95,7 +96,8 @@ public class RecoverableKeyGeneratorTest {
 
     @Test
     public void generateAndStoreKey_setsKeyInKeyStore() throws Exception {
-        mRecoverableKeyGenerator.generateAndStoreKey(mPlatformKey, KEYSTORE_UID_SELF, TEST_ALIAS);
+        mRecoverableKeyGenerator.generateAndStoreKey(
+                mPlatformKey, TEST_USER_ID, KEYSTORE_UID_SELF, TEST_ALIAS);
 
         KeyStore keyStore = AndroidKeyStoreProvider.getKeyStoreForUid(KEYSTORE_UID_SELF);
         assertTrue(keyStore.containsAlias(TEST_ALIAS));
@@ -104,7 +106,8 @@ public class RecoverableKeyGeneratorTest {
     @Test
     public void generateAndStoreKey_storesKeyEnabledForAesGcmNoPaddingEncryptDecrypt()
             throws Exception {
-        mRecoverableKeyGenerator.generateAndStoreKey(mPlatformKey, KEYSTORE_UID_SELF, TEST_ALIAS);
+        mRecoverableKeyGenerator.generateAndStoreKey(
+                mPlatformKey, TEST_USER_ID, KEYSTORE_UID_SELF, TEST_ALIAS);
 
         KeyStore keyStore = AndroidKeyStoreProvider.getKeyStoreForUid(KEYSTORE_UID_SELF);
         SecretKey key = (SecretKey) keyStore.getKey(TEST_ALIAS, /*password=*/ null);
@@ -117,7 +120,8 @@ public class RecoverableKeyGeneratorTest {
 
     @Test
     public void generateAndStoreKey_storesKeyDisabledForOtherModes() throws Exception {
-        mRecoverableKeyGenerator.generateAndStoreKey(mPlatformKey, KEYSTORE_UID_SELF, TEST_ALIAS);
+        mRecoverableKeyGenerator.generateAndStoreKey(
+                mPlatformKey, TEST_USER_ID, KEYSTORE_UID_SELF, TEST_ALIAS);
 
         KeyStore keyStore = AndroidKeyStoreProvider.getKeyStoreForUid(KEYSTORE_UID_SELF);
         SecretKey key = (SecretKey) keyStore.getKey(TEST_ALIAS, /*password=*/ null);
@@ -133,7 +137,8 @@ public class RecoverableKeyGeneratorTest {
 
     @Test
     public void generateAndStoreKey_storesWrappedKey() throws Exception {
-        mRecoverableKeyGenerator.generateAndStoreKey(mPlatformKey, KEYSTORE_UID_SELF, TEST_ALIAS);
+        mRecoverableKeyGenerator.generateAndStoreKey(
+                mPlatformKey, TEST_USER_ID, KEYSTORE_UID_SELF, TEST_ALIAS);
 
         KeyStore keyStore = AndroidKeyStoreProvider.getKeyStoreForUid(KEYSTORE_UID_SELF);
         SecretKey key = (SecretKey) keyStore.getKey(TEST_ALIAS, /*password=*/ null);
