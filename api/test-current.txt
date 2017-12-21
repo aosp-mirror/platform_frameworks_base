@@ -114,6 +114,10 @@ package android.app.admin {
     field public static final java.lang.String EXTRA_RESTRICTION = "android.app.extra.RESTRICTION";
   }
 
+  public static final class SecurityLog.SecurityEvent implements android.os.Parcelable {
+    ctor public SecurityLog.SecurityEvent(long, byte[]);
+  }
+
 }
 
 package android.app.usage {
