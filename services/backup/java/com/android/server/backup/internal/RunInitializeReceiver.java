@@ -23,37 +23,41 @@ import static com.android.server.backup.RefactoredBackupManagerService.TAG;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
+import android.os.PowerManager;
 import android.util.ArraySet;
 import android.util.Slog;
 
 import com.android.server.backup.RefactoredBackupManagerService;
 
 public class RunInitializeReceiver extends BroadcastReceiver {
-
-    private RefactoredBackupManagerService backupManagerService;
+    private final RefactoredBackupManagerService mBackupManagerService;
 
     public RunInitializeReceiver(RefactoredBackupManagerService backupManagerService) {
-        this.backupManagerService = backupManagerService;
+        mBackupManagerService = backupManagerService;
     }
 
     public void onReceive(Context context, Intent intent) {
         if (RUN_INITIALIZE_ACTION.equals(intent.getAction())) {
-            synchronized (backupManagerService.getQueueLock()) {
-                final ArraySet<String> pendingInits = backupManagerService.getPendingInits();
+            synchronized (mBackupManagerService.getQueueLock()) {
+                final ArraySet<String> pendingInits = mBackupManagerService.getPendingInits();
                 if (DEBUG) {
                     Slog.v(TAG, "Running a device init; " + pendingInits.size() + " pending");
                 }
 
                 if (pendingInits.size() > 0) {
-                    final String[] transports = pendingInits.toArray(new String[pendingInits.size()]);
-                    PerformInitializeTask initTask = new PerformInitializeTask(backupManagerService,
-                            transports, null);
+                    final String[] transports =
+                            pendingInits.toArray(new String[pendingInits.size()]);
 
-                    // Acquire the wakelock and pass it to the init thread.  it will
-                    // be released once init concludes.
-                    backupManagerService.clearPendingInits();
-                    backupManagerService.getWakelock().acquire();
-                    backupManagerService.getBackupHandler().post(initTask);
+                    mBackupManagerService.clearPendingInits();
+
+                    PowerManager.WakeLock wakelock = mBackupManagerService.getWakelock();
+                    wakelock.acquire();
+                    OnTaskFinishedListener listener = caller -> wakelock.release();
+
+                    Runnable task =
+                            new PerformInitializeTask(
+                                    mBackupManagerService, transports, null, listener);
+                    mBackupManagerService.getBackupHandler().post(task);
                 }
             }
         }

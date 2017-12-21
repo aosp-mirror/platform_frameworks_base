@@ -18,8 +18,6 @@ package com.android.server.backup;
 
 import static com.google.common.truth.Truth.assertThat;
 
-import static junit.framework.Assert.fail;
-
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 import static org.robolectric.shadow.api.Shadow.extract;
@@ -58,7 +56,6 @@ import org.robolectric.annotation.Config;
 import org.robolectric.shadows.ShadowLog;
 import org.robolectric.shadows.ShadowLooper;
 import org.robolectric.shadows.ShadowPackageManager;
-import org.testng.Assert.ThrowingRunnable;
 
 import java.util.ArrayList;
 import java.util.Arrays;
