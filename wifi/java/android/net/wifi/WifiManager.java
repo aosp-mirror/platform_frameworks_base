@@ -2846,8 +2846,7 @@ public class WifiManager {
      * gets added to the list of configured networks for the foreground user.
      *
      * For a new network, this function is used instead of a
-     * sequence of addNetwork(), enableNetwork(), saveConfiguration() and
-     * reconnect()
+     * sequence of addNetwork(), enableNetwork(), and reconnect()
      *
      * @param config the set of variables that describe the configuration,
      *            contained in a {@link WifiConfiguration} object.
@@ -2869,8 +2868,7 @@ public class WifiManager {
     /**
      * Connect to a network with the given networkId.
      *
-     * This function is used instead of a enableNetwork(), saveConfiguration() and
-     * reconnect()
+     * This function is used instead of a enableNetwork() and reconnect()
      *
      * @param networkId the ID of the network as returned by {@link #addNetwork} or {@link
      *        getConfiguredNetworks}.
@@ -2890,10 +2888,12 @@ public class WifiManager {
      * is updated. Any new network is enabled by default.
      *
      * For a new network, this function is used instead of a
-     * sequence of addNetwork(), enableNetwork() and saveConfiguration().
+     * sequence of addNetwork() and enableNetwork().
      *
      * For an existing network, it accomplishes the task of updateNetwork()
-     * and saveConfiguration()
+     *
+     * This API will cause reconnect if the crecdentials of the current active
+     * connection has been changed.
      *
      * @param config the set of variables that describe the configuration,
      *            contained in a {@link WifiConfiguration} object.
@@ -2912,7 +2912,6 @@ public class WifiManager {
      * foreground user.
      *
      * This function is used instead of a sequence of removeNetwork()
-     * and saveConfiguration().
      *
      * @param config the set of variables that describe the configuration,
      *            contained in a {@link WifiConfiguration} object.
