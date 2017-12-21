@@ -23,6 +23,7 @@ import android.annotation.SystemApi;
 import android.annotation.SystemService;
 import android.content.Context;
 import android.os.Handler;
+import android.os.HandlerExecutor;
 import android.os.Looper;
 import android.os.RemoteException;
 import android.os.ServiceManager;
@@ -598,6 +599,25 @@ public final class ContextHubManager {
         }
 
         return new ContextHubClient(client, clientInterface, hubInfo);
+    }
+
+    /**
+     * Equivalent to {@link #createClient(ContextHubInfo, ContextHubClientCallback, Executor)}
+     * with the executor using the main thread's Looper.
+     *
+     * @param hubInfo  the hub to attach this client to
+     * @param callback the notification callback to register
+     * @return the registered client object
+     *
+     * @throws IllegalArgumentException if hubInfo does not represent a valid hub
+     * @throws IllegalStateException    if there were too many registered clients at the service
+     * @throws NullPointerException     if callback or hubInfo is null
+     * @hide
+     * @see ContextHubClientCallback
+     */
+    @NonNull public ContextHubClient createClient(
+            @NonNull ContextHubInfo hubInfo, @NonNull ContextHubClientCallback callback) {
+        return createClient(hubInfo, callback, new HandlerExecutor(Handler.getMain()));
     }
 
     /**
