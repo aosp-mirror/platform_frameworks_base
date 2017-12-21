@@ -3505,6 +3505,7 @@
         @hide -->
     <permission android:name="android.permission.LOCAL_MAC_ADDRESS"
                 android:protectionLevel="signature|privileged" />
+    <uses-permission android:name="android.permission.LOCAL_MAC_ADDRESS"/>
 
     <!-- @SystemApi Allows access to MAC addresses of WiFi and Bluetooth peer devices.
         @hide -->
