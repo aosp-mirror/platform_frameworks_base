@@ -54,6 +54,17 @@
             android:layout_height="match_parent"
             android:layout="@layout/operator_name" />
 
+        <com.android.systemui.statusbar.policy.Clock
+            android:id="@+id/clock"
+            android:textAppearance="@style/TextAppearance.StatusBar.Clock"
+            android:layout_width="wrap_content"
+            android:layout_height="match_parent"
+            android:singleLine="true"
+            android:paddingStart="@dimen/status_bar_left_clock_starting_padding"
+            android:paddingEnd="@dimen/status_bar_left_clock_end_padding"
+            android:gravity="center_vertical|start"
+        />
+
         <!-- The alpha of this area is controlled from both PhoneStatusBarTransitions and
              PhoneStatusBar (DISABLE_NOTIFICATION_ICONS). -->
         <com.android.systemui.statusbar.AlphaOptimizedFrameLayout
@@ -70,17 +81,6 @@
             >
 
             <include layout="@layout/system_icons" />
-
-            <com.android.systemui.statusbar.policy.Clock
-                android:id="@+id/clock"
-                android:textAppearance="@style/TextAppearance.StatusBar.Clock"
-                android:layout_width="wrap_content"
-                android:layout_height="match_parent"
-                android:singleLine="true"
-                android:paddingStart="@dimen/status_bar_clock_starting_padding"
-                android:paddingEnd="@dimen/status_bar_clock_end_padding"
-                android:gravity="center_vertical|start"
-                />
         </com.android.keyguard.AlphaOptimizedLinearLayout>
     </LinearLayout>
 

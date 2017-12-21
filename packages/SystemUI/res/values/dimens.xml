@@ -48,6 +48,12 @@
     <!-- The end padding for the clock in the status bar. -->
     <dimen name="status_bar_clock_end_padding">0dp</dimen>
 
+    <!-- Starting padding for a left-aligned status bar clock -->
+    <dimen name="status_bar_left_clock_starting_padding">0dp</dimen>
+
+    <!-- End padding for left-aligned status bar clock -->
+    <dimen name="status_bar_left_clock_end_padding">7dp</dimen>
+
     <!-- Spacing after the wifi signals that is present if there are any icons following it. -->
     <dimen name="status_bar_wifi_signal_spacer_width">4dp</dimen>
 
