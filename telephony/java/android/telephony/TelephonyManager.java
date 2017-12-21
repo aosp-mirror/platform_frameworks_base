@@ -4563,7 +4563,7 @@ public class TelephonyManager {
     }
 
     /**
-     * Sets the telephony property with the value specified.
+     * Sets a per-phone telephony property with the value specified.
      *
      * @hide
      */
@@ -4610,6 +4610,20 @@ public class TelephonyManager {
         Rlog.d(TAG, "setTelephonyProperty: success phoneId=" + phoneId +
                 " property=" + property + " value: " + value + " propVal=" + propVal);
         SystemProperties.set(property, propVal);
+    }
+
+    /**
+     * Sets a global telephony property with the value specified.
+     *
+     * @hide
+     */
+    public static void setTelephonyProperty(String property, String value) {
+        if (value == null) {
+            value = "";
+        }
+        Rlog.d(TAG, "setTelephonyProperty: success" + " property=" +
+                property + " value: " + value);
+        SystemProperties.set(property, value);
     }
 
     /**
@@ -4701,7 +4715,7 @@ public class TelephonyManager {
     }
 
     /**
-     * Gets the telephony property.
+     * Gets a per-phone telephony property.
      *
      * @hide
      */
@@ -4714,6 +4728,19 @@ public class TelephonyManager {
                 propVal = values[phoneId];
             }
         }
+        return propVal == null ? defaultVal : propVal;
+    }
+
+    /**
+     * Gets a global telephony property.
+     *
+     * See also getTelephonyProperty(phoneId, property, defaultVal). Most telephony properties are
+     * per-phone.
+     *
+     * @hide
+     */
+    public static String getTelephonyProperty(String property, String defaultVal) {
+        String propVal = SystemProperties.get(property);
         return propVal == null ? defaultVal : propVal;
     }
 
