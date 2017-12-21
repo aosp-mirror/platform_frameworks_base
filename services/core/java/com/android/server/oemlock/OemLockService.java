@@ -178,14 +178,21 @@ public class OemLockService extends SystemService {
             }
         }
 
+        /** Currently MasterClearConfirm will call isOemUnlockAllowed()
+         * to sync PersistentDataBlockOemUnlockAllowedBit which
+         * is needed before factory reset
+         * TODO: Figure out better place to run sync e.g. adding new API
+         */
         @Override
         public boolean isOemUnlockAllowed() {
             enforceOemUnlockReadPermission();
 
             final long token = Binder.clearCallingIdentity();
             try {
-                return mOemLock.isOemUnlockAllowedByCarrier() &&
-                        mOemLock.isOemUnlockAllowedByDevice();
+                boolean allowed = mOemLock.isOemUnlockAllowedByCarrier()
+                        && mOemLock.isOemUnlockAllowedByDevice();
+                setPersistentDataBlockOemUnlockAllowedBit(allowed);
+                return allowed;
             } finally {
                 Binder.restoreCallingIdentity(token);
             }
@@ -213,7 +220,8 @@ public class OemLockService extends SystemService {
         final PersistentDataBlockManager pdbm = (PersistentDataBlockManager)
                 mContext.getSystemService(Context.PERSISTENT_DATA_BLOCK_SERVICE);
         // if mOemLock is PersistentDataBlockLock, then the bit should have already been set
-        if (pdbm != null && !(mOemLock instanceof PersistentDataBlockLock)) {
+        if (pdbm != null && !(mOemLock instanceof PersistentDataBlockLock)
+                && pdbm.getOemUnlockEnabled() != allowed) {
             Slog.i(TAG, "Update OEM Unlock bit in pst partition to " + allowed);
             pdbm.setOemUnlockEnabled(allowed);
         }
