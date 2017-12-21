@@ -38,6 +38,7 @@ import android.app.Notification;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
 import android.app.admin.DevicePolicyManager;
+import android.app.admin.DevicePolicyManagerInternal;
 import android.app.admin.PasswordMetrics;
 import android.app.backup.BackupManager;
 import android.app.trust.IStrongAuthTracker;
@@ -90,6 +91,7 @@ import android.util.EventLog;
 import android.util.Log;
 import android.util.Slog;
 
+import com.android.internal.annotations.GuardedBy;
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.messages.nano.SystemMessageProto.SystemMessage;
 import com.android.internal.notification.SystemNotificationChannels;
@@ -100,6 +102,7 @@ import com.android.internal.widget.ICheckCredentialProgressCallback;
 import com.android.internal.widget.ILockSettings;
 import com.android.internal.widget.LockPatternUtils;
 import com.android.internal.widget.VerifyCredentialResponse;
+import com.android.server.LocalServices;
 import com.android.server.SystemService;
 import com.android.server.locksettings.LockSettingsStorage.CredentialHash;
 import com.android.server.locksettings.LockSettingsStorage.PersistentData;
@@ -891,14 +894,26 @@ public class LockSettingsService extends ILockSettings.Stub {
             String managedUserPassword) {
         checkWritePermission(userId);
         synchronized (mSeparateChallengeLock) {
-            setBoolean(SEPARATE_PROFILE_CHALLENGE_KEY, enabled, userId);
-            if (enabled) {
-                mStorage.removeChildProfileLock(userId);
-                removeKeystoreProfileKey(userId);
-            } else {
-                tieManagedProfileLockIfNecessary(userId, managedUserPassword);
-            }
+            setSeparateProfileChallengeEnabledLocked(userId, enabled, managedUserPassword);
         }
+        notifySeparateProfileChallengeChanged(userId);
+    }
+
+    @GuardedBy("mSeparateChallengeLock")
+    private void setSeparateProfileChallengeEnabledLocked(@UserIdInt int userId, boolean enabled,
+            String managedUserPassword) {
+        setBoolean(SEPARATE_PROFILE_CHALLENGE_KEY, enabled, userId);
+        if (enabled) {
+            mStorage.removeChildProfileLock(userId);
+            removeKeystoreProfileKey(userId);
+        } else {
+            tieManagedProfileLockIfNecessary(userId, managedUserPassword);
+        }
+    }
+
+    private void notifySeparateProfileChallengeChanged(int userId) {
+        LocalServices.getService(DevicePolicyManagerInternal.class)
+                .reportSeparateProfileChallengeChanged(userId);
     }
 
     @Override
@@ -1234,9 +1249,10 @@ public class LockSettingsService extends ILockSettings.Stub {
         checkWritePermission(userId);
         synchronized (mSeparateChallengeLock) {
             setLockCredentialInternal(credential, type, savedCredential, requestedQuality, userId);
-            setSeparateProfileChallengeEnabled(userId, true, null);
+            setSeparateProfileChallengeEnabledLocked(userId, true, null);
             notifyPasswordChanged(userId);
         }
+        notifySeparateProfileChallengeChanged(userId);
     }
 
     private void setLockCredentialInternal(String credential, int credentialType,
@@ -2442,9 +2458,10 @@ public class LockSettingsService extends ILockSettings.Stub {
         }
         if (result) {
             synchronized (mSeparateChallengeLock) {
-                setSeparateProfileChallengeEnabled(userId, true, null);
+                setSeparateProfileChallengeEnabledLocked(userId, true, null);
             }
             notifyPasswordChanged(userId);
+            notifySeparateProfileChallengeChanged(userId);
         }
         return result;
     }

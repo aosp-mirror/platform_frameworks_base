@@ -16,6 +16,7 @@
 
 package com.android.server.power;
 
+import android.annotation.UserIdInt;
 import android.app.ActivityManagerInternal;
 import android.app.AppOpsManager;
 
@@ -27,6 +28,7 @@ import com.android.server.EventLogTags;
 import com.android.server.LocalServices;
 import com.android.server.policy.WindowManagerPolicy;
 
+import android.app.trust.TrustManager;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
@@ -82,6 +84,7 @@ final class Notifier {
     private static final int MSG_BROADCAST = 2;
     private static final int MSG_WIRELESS_CHARGING_STARTED = 3;
     private static final int MSG_SCREEN_BRIGHTNESS_BOOST_CHANGED = 4;
+    private static final int MSG_PROFILE_TIMED_OUT = 5;
 
     private final Object mLock = new Object();
 
@@ -93,6 +96,7 @@ final class Notifier {
     private final ActivityManagerInternal mActivityManagerInternal;
     private final InputManagerInternal mInputManagerInternal;
     private final InputMethodManagerInternal mInputMethodManagerInternal;
+    private final TrustManager mTrustManager;
 
     private final NotifierHandler mHandler;
     private final Intent mScreenOnIntent;
@@ -138,6 +142,7 @@ final class Notifier {
         mActivityManagerInternal = LocalServices.getService(ActivityManagerInternal.class);
         mInputManagerInternal = LocalServices.getService(InputManagerInternal.class);
         mInputMethodManagerInternal = LocalServices.getService(InputMethodManagerInternal.class);
+        mTrustManager = mContext.getSystemService(TrustManager.class);
 
         mHandler = new NotifierHandler(looper);
         mScreenOnIntent = new Intent(Intent.ACTION_SCREEN_ON);
@@ -559,6 +564,16 @@ final class Notifier {
         mHandler.sendMessage(msg);
     }
 
+    /**
+     * Called when profile screen lock timeout has expired.
+     */
+    public void onProfileTimeout(@UserIdInt int userId) {
+        final Message msg = mHandler.obtainMessage(MSG_PROFILE_TIMED_OUT);
+        msg.setAsynchronous(true);
+        msg.arg1 = userId;
+        mHandler.sendMessage(msg);
+    }
+
     private void updatePendingBroadcastLocked() {
         if (!mBroadcastInProgress
                 && mPendingInteractiveState != INTERACTIVE_STATE_UNKNOWN
@@ -710,27 +725,32 @@ final class Notifier {
         mSuspendBlocker.release();
     }
 
+    private void lockProfile(@UserIdInt int userId) {
+        mTrustManager.setDeviceLockedForUser(userId, true /*locked*/);
+    }
+
     private final class NotifierHandler extends Handler {
+
         public NotifierHandler(Looper looper) {
             super(looper, null, true /*async*/);
         }
-
         @Override
         public void handleMessage(Message msg) {
             switch (msg.what) {
                 case MSG_USER_ACTIVITY:
                     sendUserActivity();
                     break;
-
                 case MSG_BROADCAST:
                     sendNextBroadcast();
                     break;
-
                 case MSG_WIRELESS_CHARGING_STARTED:
                     playWirelessChargingStartedSound();
                     break;
                 case MSG_SCREEN_BRIGHTNESS_BOOST_CHANGED:
                     sendBrightnessBoostChangedBroadcast();
+                    break;
+                case MSG_PROFILE_TIMED_OUT:
+                    lockProfile(msg.arg1);
                     break;
             }
         }

@@ -16,9 +16,10 @@
 
 package com.android.server.power;
 
-import android.Manifest;
 import android.annotation.IntDef;
+import android.annotation.UserIdInt;
 import android.app.ActivityManager;
+import android.app.SynchronousUserSwitchObserver;
 import android.content.BroadcastReceiver;
 import android.content.ContentResolver;
 import android.content.Context;
@@ -410,12 +411,12 @@ public final class PowerManagerService extends SystemService
     private boolean mDozeAfterScreenOffConfig;
 
     // The minimum screen off timeout, in milliseconds.
-    private int mMinimumScreenOffTimeoutConfig;
+    private long mMinimumScreenOffTimeoutConfig;
 
     // The screen dim duration, in milliseconds.
     // This is subtracted from the end of the screen off timeout so the
     // minimum screen off timeout should be longer than this.
-    private int mMaximumScreenDimDurationConfig;
+    private long mMaximumScreenDimDurationConfig;
 
     // The maximum screen dim time expressed as a ratio relative to the screen
     // off timeout.  If the screen off timeout is very short then we want the
@@ -427,14 +428,14 @@ public final class PowerManagerService extends SystemService
     private boolean mSupportsDoubleTapWakeConfig;
 
     // The screen off timeout setting value in milliseconds.
-    private int mScreenOffTimeoutSetting;
+    private long mScreenOffTimeoutSetting;
 
     // The sleep timeout setting value in milliseconds.
-    private int mSleepTimeoutSetting;
+    private long mSleepTimeoutSetting;
 
     // The maximum allowable screen off timeout according to the device
     // administration policy.  Overrides other settings.
-    private int mMaximumScreenOffTimeoutFromDeviceAdmin = Integer.MAX_VALUE;
+    private long mMaximumScreenOffTimeoutFromDeviceAdmin = Long.MAX_VALUE;
 
     // The stay on while plugged in setting.
     // A bitfield of battery conditions under which to make the screen stay on.
@@ -554,6 +555,46 @@ public final class PowerManagerService extends SystemService
 
     // True if we are currently in VR Mode.
     private boolean mIsVrModeEnabled;
+
+    private final class ForegroundProfileObserver extends SynchronousUserSwitchObserver {
+        @Override
+        public void onUserSwitching(int newUserId) throws RemoteException {}
+
+        @Override
+        public void onForegroundProfileSwitch(@UserIdInt int newProfileId) throws RemoteException {
+            final long now = SystemClock.uptimeMillis();
+            synchronized(mLock) {
+                mForegroundProfile = newProfileId;
+                maybeUpdateForegroundProfileLastActivityLocked(now);
+            }
+        }
+    }
+
+    // User id corresponding to activity the user is currently interacting with.
+    private @UserIdInt int mForegroundProfile;
+
+    // Per-profile state to track when a profile should be locked.
+    private final SparseArray<ProfilePowerState> mProfilePowerState = new SparseArray<>();
+
+    private static final class ProfilePowerState {
+        // Profile user id.
+        final @UserIdInt int mUserId;
+        // Maximum time to lock set by admin.
+        long mScreenOffTimeout;
+        // Like top-level mWakeLockSummary, but only for wake locks that affect current profile.
+        int mWakeLockSummary;
+        // Last user activity that happened in an app running in the profile.
+        long mLastUserActivityTime;
+        // Whether profile has been locked last time it timed out.
+        boolean mLockingNotified;
+
+        public ProfilePowerState(@UserIdInt int userId, long screenOffTimeout) {
+            mUserId = userId;
+            mScreenOffTimeout = screenOffTimeout;
+            // Not accurate but at least won't cause immediate locking of the profile.
+            mLastUserActivityTime = SystemClock.uptimeMillis();
+        }
+    }
 
     /**
      * All times are in milliseconds. These constants are kept synchronized with the system
@@ -752,6 +793,12 @@ public final class PowerManagerService extends SystemService
             mDisplayManagerInternal.initPowerManagement(
                     mDisplayPowerCallbacks, mHandler, sensorManager);
 
+            try {
+                final ForegroundProfileObserver observer = new ForegroundProfileObserver();
+                ActivityManager.getService().registerUserSwitchObserver(observer, TAG);
+            } catch (RemoteException e) {
+                // Shouldn't happen since in-process.
+            }
 
             // Go.
             readConfigurationLocked();
@@ -1333,6 +1380,8 @@ public final class PowerManagerService extends SystemService
                 return false;
             }
 
+            maybeUpdateForegroundProfileLastActivityLocked(eventTime);
+
             if ((flags & PowerManager.USER_ACTIVITY_FLAG_NO_CHANGE_LIGHTS) != 0) {
                 if (eventTime > mLastUserActivityTimeNoChangeLights
                         && eventTime > mLastUserActivityTime) {
@@ -1358,6 +1407,13 @@ public final class PowerManagerService extends SystemService
             Trace.traceEnd(Trace.TRACE_TAG_POWER);
         }
         return false;
+    }
+
+    private void maybeUpdateForegroundProfileLastActivityLocked(long eventTime) {
+        final ProfilePowerState profile = mProfilePowerState.get(mForegroundProfile);
+        if (profile != null && eventTime > profile.mLastUserActivityTime) {
+            profile.mLastUserActivityTime = eventTime;
+        }
     }
 
     private void wakeUpInternal(long eventTime, String reason, int uid, String opPackageName,
@@ -1648,22 +1704,48 @@ public final class PowerManagerService extends SystemService
                 }
             }
 
-            // Phase 2: Update display power state.
-            boolean displayBecameReady = updateDisplayPowerStateLocked(dirtyPhase2);
+            // Phase 2: Lock profiles that became inactive/not kept awake.
+            updateProfilesLocked(now);
 
-            // Phase 3: Update dream state (depends on display ready signal).
+            // Phase 3: Update display power state.
+            final boolean displayBecameReady = updateDisplayPowerStateLocked(dirtyPhase2);
+
+            // Phase 4: Update dream state (depends on display ready signal).
             updateDreamLocked(dirtyPhase2, displayBecameReady);
 
-            // Phase 4: Send notifications, if needed.
+            // Phase 5: Send notifications, if needed.
             finishWakefulnessChangeIfNeededLocked();
 
-            // Phase 5: Update suspend blocker.
+            // Phase 6: Update suspend blocker.
             // Because we might release the last suspend blocker here, we need to make sure
             // we finished everything else first!
             updateSuspendBlockerLocked();
         } finally {
             Trace.traceEnd(Trace.TRACE_TAG_POWER);
         }
+    }
+
+    /**
+     * Check profile timeouts and notify profiles that should be locked.
+     */
+    private void updateProfilesLocked(long now) {
+        final int numProfiles = mProfilePowerState.size();
+        for (int i = 0; i < numProfiles; i++) {
+            final ProfilePowerState profile = mProfilePowerState.valueAt(i);
+            if (isProfileBeingKeptAwakeLocked(profile, now)) {
+                profile.mLockingNotified = false;
+            } else if (!profile.mLockingNotified) {
+                profile.mLockingNotified = true;
+                mNotifier.onProfileTimeout(profile.mUserId);
+            }
+        }
+    }
+
+    private boolean isProfileBeingKeptAwakeLocked(ProfilePowerState profile, long now) {
+        return (profile.mLastUserActivityTime + profile.mScreenOffTimeout > now)
+                || (profile.mWakeLockSummary & WAKE_LOCK_STAY_AWAKE) != 0
+                || (mProximityPositive &&
+                    (profile.mWakeLockSummary & WAKE_LOCK_PROXIMITY_SCREEN_OFF) != 0);
     }
 
     /**
@@ -1800,60 +1882,28 @@ public final class PowerManagerService extends SystemService
         if ((dirty & (DIRTY_WAKE_LOCKS | DIRTY_WAKEFULNESS)) != 0) {
             mWakeLockSummary = 0;
 
+            final int numProfiles = mProfilePowerState.size();
+            for (int i = 0; i < numProfiles; i++) {
+                mProfilePowerState.valueAt(i).mWakeLockSummary = 0;
+            }
+
             final int numWakeLocks = mWakeLocks.size();
             for (int i = 0; i < numWakeLocks; i++) {
                 final WakeLock wakeLock = mWakeLocks.get(i);
-                switch (wakeLock.mFlags & PowerManager.WAKE_LOCK_LEVEL_MASK) {
-                    case PowerManager.PARTIAL_WAKE_LOCK:
-                        if (!wakeLock.mDisabled) {
-                            // We only respect this if the wake lock is not disabled.
-                            mWakeLockSummary |= WAKE_LOCK_CPU;
-                        }
-                        break;
-                    case PowerManager.FULL_WAKE_LOCK:
-                        mWakeLockSummary |= WAKE_LOCK_SCREEN_BRIGHT | WAKE_LOCK_BUTTON_BRIGHT;
-                        break;
-                    case PowerManager.SCREEN_BRIGHT_WAKE_LOCK:
-                        mWakeLockSummary |= WAKE_LOCK_SCREEN_BRIGHT;
-                        break;
-                    case PowerManager.SCREEN_DIM_WAKE_LOCK:
-                        mWakeLockSummary |= WAKE_LOCK_SCREEN_DIM;
-                        break;
-                    case PowerManager.PROXIMITY_SCREEN_OFF_WAKE_LOCK:
-                        mWakeLockSummary |= WAKE_LOCK_PROXIMITY_SCREEN_OFF;
-                        break;
-                    case PowerManager.DOZE_WAKE_LOCK:
-                        mWakeLockSummary |= WAKE_LOCK_DOZE;
-                        break;
-                    case PowerManager.DRAW_WAKE_LOCK:
-                        mWakeLockSummary |= WAKE_LOCK_DRAW;
-                        break;
+                final int wakeLockFlags = getWakeLockSummaryFlags(wakeLock);
+                mWakeLockSummary |= wakeLockFlags;
+                for (int j = 0; j < numProfiles; j++) {
+                    final ProfilePowerState profile = mProfilePowerState.valueAt(j);
+                    if (wakeLockAffectsUser(wakeLock, profile.mUserId)) {
+                        profile.mWakeLockSummary |= wakeLockFlags;
+                    }
                 }
             }
 
-            // Cancel wake locks that make no sense based on the current state.
-            if (mWakefulness != WAKEFULNESS_DOZING) {
-                mWakeLockSummary &= ~(WAKE_LOCK_DOZE | WAKE_LOCK_DRAW);
-            }
-            if (mWakefulness == WAKEFULNESS_ASLEEP
-                    || (mWakeLockSummary & WAKE_LOCK_DOZE) != 0) {
-                mWakeLockSummary &= ~(WAKE_LOCK_SCREEN_BRIGHT | WAKE_LOCK_SCREEN_DIM
-                        | WAKE_LOCK_BUTTON_BRIGHT);
-                if (mWakefulness == WAKEFULNESS_ASLEEP) {
-                    mWakeLockSummary &= ~WAKE_LOCK_PROXIMITY_SCREEN_OFF;
-                }
-            }
-
-            // Infer implied wake locks where necessary based on the current state.
-            if ((mWakeLockSummary & (WAKE_LOCK_SCREEN_BRIGHT | WAKE_LOCK_SCREEN_DIM)) != 0) {
-                if (mWakefulness == WAKEFULNESS_AWAKE) {
-                    mWakeLockSummary |= WAKE_LOCK_CPU | WAKE_LOCK_STAY_AWAKE;
-                } else if (mWakefulness == WAKEFULNESS_DREAMING) {
-                    mWakeLockSummary |= WAKE_LOCK_CPU;
-                }
-            }
-            if ((mWakeLockSummary & WAKE_LOCK_DRAW) != 0) {
-                mWakeLockSummary |= WAKE_LOCK_CPU;
+            mWakeLockSummary = adjustWakeLockSummaryLocked(mWakeLockSummary);
+            for (int i = 0; i < numProfiles; i++) {
+                final ProfilePowerState profile = mProfilePowerState.valueAt(i);
+                profile.mWakeLockSummary = adjustWakeLockSummaryLocked(profile.mWakeLockSummary);
             }
 
             if (DEBUG_SPEW) {
@@ -1862,6 +1912,72 @@ public final class PowerManagerService extends SystemService
                         + ", mWakeLockSummary=0x" + Integer.toHexString(mWakeLockSummary));
             }
         }
+    }
+
+    private int adjustWakeLockSummaryLocked(int wakeLockSummary) {
+        // Cancel wake locks that make no sense based on the current state.
+        if (mWakefulness != WAKEFULNESS_DOZING) {
+            wakeLockSummary &= ~(WAKE_LOCK_DOZE | WAKE_LOCK_DRAW);
+        }
+        if (mWakefulness == WAKEFULNESS_ASLEEP
+                || (wakeLockSummary & WAKE_LOCK_DOZE) != 0) {
+            wakeLockSummary &= ~(WAKE_LOCK_SCREEN_BRIGHT | WAKE_LOCK_SCREEN_DIM
+                    | WAKE_LOCK_BUTTON_BRIGHT);
+            if (mWakefulness == WAKEFULNESS_ASLEEP) {
+                wakeLockSummary &= ~WAKE_LOCK_PROXIMITY_SCREEN_OFF;
+            }
+        }
+
+        // Infer implied wake locks where necessary based on the current state.
+        if ((wakeLockSummary & (WAKE_LOCK_SCREEN_BRIGHT | WAKE_LOCK_SCREEN_DIM)) != 0) {
+            if (mWakefulness == WAKEFULNESS_AWAKE) {
+                wakeLockSummary |= WAKE_LOCK_CPU | WAKE_LOCK_STAY_AWAKE;
+            } else if (mWakefulness == WAKEFULNESS_DREAMING) {
+                wakeLockSummary |= WAKE_LOCK_CPU;
+            }
+        }
+        if ((wakeLockSummary & WAKE_LOCK_DRAW) != 0) {
+            wakeLockSummary |= WAKE_LOCK_CPU;
+        }
+
+        return wakeLockSummary;
+    }
+
+    /** Get wake lock summary flags that correspond to the given wake lock. */
+    private int getWakeLockSummaryFlags(WakeLock wakeLock) {
+        switch (wakeLock.mFlags & PowerManager.WAKE_LOCK_LEVEL_MASK) {
+            case PowerManager.PARTIAL_WAKE_LOCK:
+                if (!wakeLock.mDisabled) {
+                    // We only respect this if the wake lock is not disabled.
+                    return WAKE_LOCK_CPU;
+                }
+                break;
+            case PowerManager.FULL_WAKE_LOCK:
+                return WAKE_LOCK_SCREEN_BRIGHT | WAKE_LOCK_BUTTON_BRIGHT;
+            case PowerManager.SCREEN_BRIGHT_WAKE_LOCK:
+                return WAKE_LOCK_SCREEN_BRIGHT;
+            case PowerManager.SCREEN_DIM_WAKE_LOCK:
+                return WAKE_LOCK_SCREEN_DIM;
+            case PowerManager.PROXIMITY_SCREEN_OFF_WAKE_LOCK:
+                return WAKE_LOCK_PROXIMITY_SCREEN_OFF;
+            case PowerManager.DOZE_WAKE_LOCK:
+                return WAKE_LOCK_DOZE;
+            case PowerManager.DRAW_WAKE_LOCK:
+                return WAKE_LOCK_DRAW;
+        }
+        return 0;
+    }
+
+    private boolean wakeLockAffectsUser(WakeLock wakeLock, @UserIdInt int userId) {
+        if (wakeLock.mWorkSource != null) {
+            for (int k = 0; k < wakeLock.mWorkSource.size(); k++) {
+                final int uid = wakeLock.mWorkSource.get(k);
+                if (userId == UserHandle.getUserId(uid)) {
+                    return true;
+                }
+            }
+        }
+        return userId == UserHandle.getUserId(wakeLock.mOwnerUid);
     }
 
     void checkForLongWakeLocks() {
@@ -1917,10 +2033,11 @@ public final class PowerManagerService extends SystemService
             if (mWakefulness == WAKEFULNESS_AWAKE
                     || mWakefulness == WAKEFULNESS_DREAMING
                     || mWakefulness == WAKEFULNESS_DOZING) {
-                final int sleepTimeout = getSleepTimeoutLocked();
-                final int screenOffTimeout = getScreenOffTimeoutLocked(sleepTimeout);
-                final int screenDimDuration = getScreenDimDurationLocked(screenOffTimeout);
+                final long sleepTimeout = getSleepTimeoutLocked();
+                final long screenOffTimeout = getScreenOffTimeoutLocked(sleepTimeout);
+                final long screenDimDuration = getScreenDimDurationLocked(screenOffTimeout);
                 final boolean userInactiveOverride = mUserInactiveOverrideFromWindowManager;
+                final long nextProfileTimeout = getNextProfileTimeoutLocked(now);
 
                 mUserActivitySummary = 0;
                 if (mLastUserActivityTime >= mLastWakeTime) {
@@ -1977,10 +2094,12 @@ public final class PowerManagerService extends SystemService
                     nextTimeout = -1;
                 }
 
+                if (nextProfileTimeout > 0) {
+                    nextTimeout = Math.min(nextTimeout, nextProfileTimeout);
+                }
+
                 if (mUserActivitySummary != 0 && nextTimeout >= 0) {
-                    Message msg = mHandler.obtainMessage(MSG_USER_ACTIVITY_TIMEOUT);
-                    msg.setAsynchronous(true);
-                    mHandler.sendMessageAtTime(msg, nextTimeout);
+                    scheduleUserInactivityTimeout(nextTimeout);
                 }
             } else {
                 mUserActivitySummary = 0;
@@ -1993,6 +2112,28 @@ public final class PowerManagerService extends SystemService
                         + ", nextTimeout=" + TimeUtils.formatUptime(nextTimeout));
             }
         }
+    }
+
+    private void scheduleUserInactivityTimeout(long timeMs) {
+        final Message msg = mHandler.obtainMessage(MSG_USER_ACTIVITY_TIMEOUT);
+        msg.setAsynchronous(true);
+        mHandler.sendMessageAtTime(msg, timeMs);
+    }
+
+    /**
+     * Finds the next profile timeout time or returns -1 if there are no profiles to be locked.
+     */
+    private long getNextProfileTimeoutLocked(long now) {
+        long nextTimeout = -1;
+        final int numProfiles = mProfilePowerState.size();
+        for (int i = 0; i < numProfiles; i++) {
+            final ProfilePowerState profile = mProfilePowerState.valueAt(i);
+            final long timeout = profile.mLastUserActivityTime + profile.mScreenOffTimeout;
+            if (timeout > now && (nextTimeout == -1 || timeout < nextTimeout)) {
+                nextTimeout = timeout;
+            }
+        }
+        return nextTimeout;
     }
 
     /**
@@ -2014,21 +2155,21 @@ public final class PowerManagerService extends SystemService
         }
     }
 
-    private int getSleepTimeoutLocked() {
-        int timeout = mSleepTimeoutSetting;
+    private long getSleepTimeoutLocked() {
+        final long timeout = mSleepTimeoutSetting;
         if (timeout <= 0) {
             return -1;
         }
         return Math.max(timeout, mMinimumScreenOffTimeoutConfig);
     }
 
-    private int getScreenOffTimeoutLocked(int sleepTimeout) {
-        int timeout = mScreenOffTimeoutSetting;
+    private long getScreenOffTimeoutLocked(long sleepTimeout) {
+        long timeout = mScreenOffTimeoutSetting;
         if (isMaximumScreenOffTimeoutFromDeviceAdminEnforcedLocked()) {
             timeout = Math.min(timeout, mMaximumScreenOffTimeoutFromDeviceAdmin);
         }
         if (mUserActivityTimeoutOverrideFromWindowManager >= 0) {
-            timeout = (int)Math.min(timeout, mUserActivityTimeoutOverrideFromWindowManager);
+            timeout = Math.min(timeout, mUserActivityTimeoutOverrideFromWindowManager);
         }
         if (sleepTimeout >= 0) {
             timeout = Math.min(timeout, sleepTimeout);
@@ -2036,9 +2177,9 @@ public final class PowerManagerService extends SystemService
         return Math.max(timeout, mMinimumScreenOffTimeoutConfig);
     }
 
-    private int getScreenDimDurationLocked(int screenOffTimeout) {
+    private long getScreenDimDurationLocked(long screenOffTimeout) {
         return Math.min(mMaximumScreenDimDurationConfig,
-                (int)(screenOffTimeout * mMaximumScreenDimRatioConfig));
+                (long)(screenOffTimeout * mMaximumScreenDimRatioConfig));
     }
 
     /**
@@ -2781,9 +2922,27 @@ public final class PowerManagerService extends SystemService
                 Settings.Global.STAY_ON_WHILE_PLUGGED_IN, val);
     }
 
-    void setMaximumScreenOffTimeoutFromDeviceAdminInternal(int timeMs) {
+    void setMaximumScreenOffTimeoutFromDeviceAdminInternal(@UserIdInt int userId, long timeMs) {
+        if (userId < 0) {
+            Slog.wtf(TAG, "Attempt to set screen off timeout for invalid user: " + userId);
+            return;
+        }
         synchronized (mLock) {
-            mMaximumScreenOffTimeoutFromDeviceAdmin = timeMs;
+            // System-wide timeout
+            if (userId == UserHandle.USER_SYSTEM) {
+                mMaximumScreenOffTimeoutFromDeviceAdmin = timeMs;
+            } else if (timeMs == Long.MAX_VALUE || timeMs == 0) {
+                mProfilePowerState.delete(userId);
+            } else {
+                final ProfilePowerState profile = mProfilePowerState.get(userId);
+                if (profile != null) {
+                    profile.mScreenOffTimeout = timeMs;
+                } else {
+                    mProfilePowerState.put(userId, new ProfilePowerState(userId, timeMs));
+                    // We need to recalculate wake locks for the new profile state.
+                    mDirty |= DIRTY_WAKE_LOCKS;
+                }
+            }
             mDirty |= DIRTY_SETTINGS;
             updatePowerStateLocked();
         }
@@ -2981,7 +3140,7 @@ public final class PowerManagerService extends SystemService
 
     private boolean isMaximumScreenOffTimeoutFromDeviceAdminEnforcedLocked() {
         return mMaximumScreenOffTimeoutFromDeviceAdmin >= 0
-                && mMaximumScreenOffTimeoutFromDeviceAdmin < Integer.MAX_VALUE;
+                && mMaximumScreenOffTimeoutFromDeviceAdmin < Long.MAX_VALUE;
     }
 
     private void setAttentionLightInternal(boolean on, int color) {
@@ -3325,10 +3484,11 @@ public final class PowerManagerService extends SystemService
             pw.println("  mScreenBrightnessForVrSetting=" + mScreenBrightnessForVrSetting);
             pw.println("  mDoubleTapWakeEnabled=" + mDoubleTapWakeEnabled);
             pw.println("  mIsVrModeEnabled=" + mIsVrModeEnabled);
+            pw.println("  mForegroundProfile=" + mForegroundProfile);
 
-            final int sleepTimeout = getSleepTimeoutLocked();
-            final int screenOffTimeout = getScreenOffTimeoutLocked(sleepTimeout);
-            final int screenDimDuration = getScreenDimDurationLocked(screenOffTimeout);
+            final long sleepTimeout = getSleepTimeoutLocked();
+            final long screenOffTimeout = getScreenOffTimeoutLocked(sleepTimeout);
+            final long screenDimDuration = getScreenDimDurationLocked(screenOffTimeout);
             pw.println();
             pw.println("Sleep timeout: " + sleepTimeout + " ms");
             pw.println("Screen off timeout: " + screenOffTimeout + " ms");
@@ -3372,6 +3532,23 @@ public final class PowerManagerService extends SystemService
             pw.println("Display Power: " + mDisplayPowerCallbacks);
 
             mBatterySaverPolicy.dump(pw);
+
+            pw.println();
+            final int numProfiles = mProfilePowerState.size();
+            pw.println("Profile power states: size=" + numProfiles);
+            for (int i = 0; i < numProfiles; i++) {
+                final ProfilePowerState profile = mProfilePowerState.valueAt(i);
+                pw.print("  mUserId=");
+                pw.print(profile.mUserId);
+                pw.print(" mScreenOffTimeout=");
+                pw.print(profile.mScreenOffTimeout);
+                pw.print(" mWakeLockSummary=");
+                pw.print(profile.mWakeLockSummary);
+                pw.print(" mLastUserActivityTime=");
+                pw.print(profile.mLastUserActivityTime);
+                pw.print(" mLockingNotified=");
+                pw.println(profile.mLockingNotified);
+            }
 
             wcd = mWirelessChargerDetector;
         }
@@ -3590,7 +3767,8 @@ public final class PowerManagerService extends SystemService
             proto.write(
                     PowerServiceSettingsAndConfigurationDumpProto
                             .MAXIMUM_SCREEN_OFF_TIMEOUT_FROM_DEVICE_ADMIN_MS,
-                    mMaximumScreenOffTimeoutFromDeviceAdmin);
+                    // Clamp to int32
+                    Math.min(mMaximumScreenOffTimeoutFromDeviceAdmin, Integer.MAX_VALUE));
             proto.write(
                     PowerServiceSettingsAndConfigurationDumpProto
                             .IS_MAXIMUM_SCREEN_OFF_TIMEOUT_FROM_DEVICE_ADMIN_ENFORCED_LOCKED,
@@ -3686,9 +3864,9 @@ public final class PowerManagerService extends SystemService
                     mIsVrModeEnabled);
             proto.end(settingsAndConfigurationToken);
 
-            final int sleepTimeout = getSleepTimeoutLocked();
-            final int screenOffTimeout = getScreenOffTimeoutLocked(sleepTimeout);
-            final int screenDimDuration = getScreenDimDurationLocked(screenOffTimeout);
+            final long sleepTimeout = getSleepTimeoutLocked();
+            final long screenOffTimeout = getScreenOffTimeoutLocked(sleepTimeout);
+            final long screenDimDuration = getScreenDimDurationLocked(screenOffTimeout);
             proto.write(PowerManagerServiceDumpProto.SLEEP_TIMEOUT_MS, sleepTimeout);
             proto.write(PowerManagerServiceDumpProto.SCREEN_OFF_TIMEOUT_MS, screenOffTimeout);
             proto.write(PowerManagerServiceDumpProto.SCREEN_DIM_DURATION_MS, screenDimDuration);
@@ -4697,8 +4875,8 @@ public final class PowerManagerService extends SystemService
         }
 
         @Override
-        public void setMaximumScreenOffTimeoutFromDeviceAdmin(int timeMs) {
-            setMaximumScreenOffTimeoutFromDeviceAdminInternal(timeMs);
+        public void setMaximumScreenOffTimeoutFromDeviceAdmin(@UserIdInt int userId, long timeMs) {
+            setMaximumScreenOffTimeoutFromDeviceAdminInternal(userId, timeMs);
         }
 
         @Override
