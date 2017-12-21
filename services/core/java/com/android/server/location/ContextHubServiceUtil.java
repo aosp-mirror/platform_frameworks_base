@@ -215,17 +215,17 @@ import java.util.ArrayList;
     static int toTransactionResult(int halResult) {
         switch (halResult) {
             case Result.OK:
-                return ContextHubTransaction.TRANSACTION_SUCCESS;
+                return ContextHubTransaction.RESULT_SUCCESS;
             case Result.BAD_PARAMS:
-                return ContextHubTransaction.TRANSACTION_FAILED_BAD_PARAMS;
+                return ContextHubTransaction.RESULT_FAILED_BAD_PARAMS;
             case Result.NOT_INIT:
-                return ContextHubTransaction.TRANSACTION_FAILED_UNINITIALIZED;
+                return ContextHubTransaction.RESULT_FAILED_UNINITIALIZED;
             case Result.TRANSACTION_PENDING:
-                return ContextHubTransaction.TRANSACTION_FAILED_PENDING;
+                return ContextHubTransaction.RESULT_FAILED_PENDING;
             case Result.TRANSACTION_FAILED:
             case Result.UNKNOWN_FAILURE:
             default: /* fall through */
-                return ContextHubTransaction.TRANSACTION_FAILED_UNKNOWN;
+                return ContextHubTransaction.RESULT_FAILED_UNKNOWN;
         }
     }
 }

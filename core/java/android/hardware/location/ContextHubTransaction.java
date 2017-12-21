@@ -34,7 +34,7 @@ import java.util.concurrent.TimeoutException;
  * through the ContextHubManager APIs. The caller can either retrieve the result
  * synchronously through a blocking call ({@link #waitForResponse(long, TimeUnit)}) or
  * asynchronously through a user-defined callback
- * ({@link #setCallbackOnComplete(ContextHubTransaction.Callback, Handler)}).
+ * ({@link #setOnCompleteCallback(ContextHubTransaction.Callback, Handler)}).
  *
  * @param <T> the type of the contents in the transaction response
  *
@@ -66,51 +66,51 @@ public class ContextHubTransaction<T> {
      * Constants describing the result of a transaction or request through the Context Hub Service.
      */
     @Retention(RetentionPolicy.SOURCE)
-    @IntDef(prefix = { "TRANSACTION_" }, value = {
-            TRANSACTION_SUCCESS,
-            TRANSACTION_FAILED_UNKNOWN,
-            TRANSACTION_FAILED_BAD_PARAMS,
-            TRANSACTION_FAILED_UNINITIALIZED,
-            TRANSACTION_FAILED_PENDING,
-            TRANSACTION_FAILED_AT_HUB,
-            TRANSACTION_FAILED_TIMEOUT,
-            TRANSACTION_FAILED_SERVICE_INTERNAL_FAILURE,
-            TRANSACTION_FAILED_HAL_UNAVAILABLE
+    @IntDef(prefix = { "RESULT_" }, value = {
+            RESULT_SUCCESS,
+            RESULT_FAILED_UNKNOWN,
+            RESULT_FAILED_BAD_PARAMS,
+            RESULT_FAILED_UNINITIALIZED,
+            RESULT_FAILED_PENDING,
+            RESULT_FAILED_AT_HUB,
+            RESULT_FAILED_TIMEOUT,
+            RESULT_FAILED_SERVICE_INTERNAL_FAILURE,
+            RESULT_FAILED_HAL_UNAVAILABLE
     })
     public @interface Result {}
-    public static final int TRANSACTION_SUCCESS = 0;
+    public static final int RESULT_SUCCESS = 0;
     /**
      * Generic failure mode.
      */
-    public static final int TRANSACTION_FAILED_UNKNOWN = 1;
+    public static final int RESULT_FAILED_UNKNOWN = 1;
     /**
      * Failure mode when the request parameters were not valid.
      */
-    public static final int TRANSACTION_FAILED_BAD_PARAMS = 2;
+    public static final int RESULT_FAILED_BAD_PARAMS = 2;
     /**
      * Failure mode when the Context Hub is not initialized.
      */
-    public static final int TRANSACTION_FAILED_UNINITIALIZED = 3;
+    public static final int RESULT_FAILED_UNINITIALIZED = 3;
     /**
      * Failure mode when there are too many transactions pending.
      */
-    public static final int TRANSACTION_FAILED_PENDING = 4;
+    public static final int RESULT_FAILED_PENDING = 4;
     /**
      * Failure mode when the request went through, but failed asynchronously at the hub.
      */
-    public static final int TRANSACTION_FAILED_AT_HUB = 5;
+    public static final int RESULT_FAILED_AT_HUB = 5;
     /**
      * Failure mode when the transaction has timed out.
      */
-    public static final int TRANSACTION_FAILED_TIMEOUT = 6;
+    public static final int RESULT_FAILED_TIMEOUT = 6;
     /**
      * Failure mode when the transaction has failed internally at the service.
      */
-    public static final int TRANSACTION_FAILED_SERVICE_INTERNAL_FAILURE = 7;
+    public static final int RESULT_FAILED_SERVICE_INTERNAL_FAILURE = 7;
     /**
      * Failure mode when the Context Hub HAL was not available.
      */
-    public static final int TRANSACTION_FAILED_HAL_UNAVAILABLE = 8;
+    public static final int RESULT_FAILED_HAL_UNAVAILABLE = 8;
 
     /**
      * A class describing the response for a ContextHubTransaction.
@@ -271,7 +271,7 @@ public class ContextHubTransaction<T> {
      * A transaction can be invalidated if the process owning the transaction is no longer active
      * and the reference to this object is lost.
      *
-     * This method or {@link #setCallbackOnComplete(ContextHubTransaction.Callback)} can only be
+     * This method or {@link #setOnCompleteCallback(ContextHubTransaction.Callback)} can only be
      * invoked once, or an IllegalStateException will be thrown.
      *
      * @param callback the callback to be invoked upon completion
@@ -280,7 +280,7 @@ public class ContextHubTransaction<T> {
      * @throws IllegalStateException if this method is called multiple times
      * @throws NullPointerException if the callback or handler is null
      */
-    public void setCallbackOnComplete(
+    public void setOnCompleteCallback(
             @NonNull ContextHubTransaction.Callback<T> callback, @NonNull Handler handler) {
         synchronized (this) {
             if (callback == null) {
@@ -312,10 +312,10 @@ public class ContextHubTransaction<T> {
     /**
      * Sets a callback to be invoked when the transaction completes.
      *
-     * Equivalent to {@link #setCallbackOnComplete(ContextHubTransaction.Callback, Handler)}
+     * Equivalent to {@link #setOnCompleteCallback(ContextHubTransaction.Callback, Handler)}
      * with the handler being that of the main thread's Looper.
      *
-     * This method or {@link #setCallbackOnComplete(ContextHubTransaction.Callback, Handler)}
+     * This method or {@link #setOnCompleteCallback(ContextHubTransaction.Callback, Handler)}
      * can only be invoked once, or an IllegalStateException will be thrown.
      *
      * @param callback the callback to be invoked upon completion
@@ -323,8 +323,8 @@ public class ContextHubTransaction<T> {
      * @throws IllegalStateException if this method is called multiple times
      * @throws NullPointerException if the callback is null
      */
-    public void setCallbackOnComplete(@NonNull ContextHubTransaction.Callback<T> callback) {
-        setCallbackOnComplete(callback, new Handler(Looper.getMainLooper()));
+    public void setOnCompleteCallback(@NonNull ContextHubTransaction.Callback<T> callback) {
+        setOnCompleteCallback(callback, new Handler(Looper.getMainLooper()));
     }
 
     /**

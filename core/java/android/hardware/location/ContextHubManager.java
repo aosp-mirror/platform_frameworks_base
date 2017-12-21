@@ -291,7 +291,7 @@ public final class ContextHubManager {
             public void onQueryResponse(int result, List<NanoAppState> nanoappList) {
                 Log.e(TAG, "Received a query callback on a non-query request");
                 transaction.setResponse(new ContextHubTransaction.Response<Void>(
-                        ContextHubTransaction.TRANSACTION_FAILED_SERVICE_INTERNAL_FAILURE, null));
+                        ContextHubTransaction.RESULT_FAILED_SERVICE_INTERNAL_FAILURE, null));
             }
 
             @Override
@@ -323,7 +323,7 @@ public final class ContextHubManager {
             public void onTransactionComplete(int result) {
                 Log.e(TAG, "Received a non-query callback on a query request");
                 transaction.setResponse(new ContextHubTransaction.Response<List<NanoAppState>>(
-                        ContextHubTransaction.TRANSACTION_FAILED_SERVICE_INTERNAL_FAILURE, null));
+                        ContextHubTransaction.RESULT_FAILED_SERVICE_INTERNAL_FAILURE, null));
             }
         };
     }
