@@ -728,6 +728,7 @@ gensrcs {
         "core/proto/android/os/kernelwake.proto",
         "core/proto/android/os/pagetypeinfo.proto",
         "core/proto/android/os/procrank.proto",
+        "core/proto/android/os/ps.proto",
         "core/proto/android/os/system_properties.proto",
     ],
 

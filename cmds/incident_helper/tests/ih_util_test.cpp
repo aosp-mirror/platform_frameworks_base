@@ -71,11 +71,29 @@ TEST(IhUtilTest, ParseRecordByColumns) {
     EXPECT_EQ(expected, result);
 
     result = parseRecordByColumns("abc \t2345  6789 ", indices);
-    expected = { "abc", "2345", "6789" };
+    expected = { "abc", "2345  6789" };
     EXPECT_EQ(expected, result);
 
-    result = parseRecordByColumns("abc \t23456789 bob", indices);
-    expected = { "abc", "23456789", "bob" };
+    std::string extraColumn1 = "abc \t23456789 bob";
+    std::string emptyMidColm = "abc \t         bob";
+    std::string longFirstClm = "abcdefgt\t6789 bob";
+    std::string lngFrstEmpty = "abcdefgt\t     bob";
+
+    result = parseRecordByColumns(extraColumn1, indices);
+    expected = { "abc", "23456789 bob" };
+    EXPECT_EQ(expected, result);
+
+    // 2nd column should be treated as an empty entry.
+    result = parseRecordByColumns(emptyMidColm, indices);
+    expected = { "abc", "bob" };
+    EXPECT_EQ(expected, result);
+
+    result = parseRecordByColumns(longFirstClm, indices);
+    expected = { "abcdefgt", "6789 bob" };
+    EXPECT_EQ(expected, result);
+
+    result = parseRecordByColumns(lngFrstEmpty, indices);
+    expected = { "abcdefgt", "bob" };
     EXPECT_EQ(expected, result);
 }
 

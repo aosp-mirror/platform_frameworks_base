@@ -17,47 +17,61 @@
 
 #include <android/util/ProtoOutputStream.h>
 
-#include "frameworks/base/core/proto/android/os/kernelwake.proto.h"
+#include "frameworks/base/core/proto/android/os/ps.proto.h"
 #include "ih_util.h"
-#include "KernelWakesParser.h"
+#include "PsParser.h"
 
 using namespace android::os;
 
-status_t
-KernelWakesParser::Parse(const int in, const int out) const
-{
+status_t PsParser::Parse(const int in, const int out) const {
     Reader reader(in);
     string line;
     header_t header;  // the header of /d/wakeup_sources
+    vector<int> columnIndices; // task table can't be split by purely delimiter, needs column positions.
     record_t record;  // retain each record
     int nline = 0;
+    int diff = 0;
 
     ProtoOutputStream proto;
-    Table table(WakeupSourceProto::_FIELD_NAMES, WakeupSourceProto::_FIELD_IDS, WakeupSourceProto::_FIELD_COUNT);
+    Table table(PsDumpProto::Process::_FIELD_NAMES, PsDumpProto::Process::_FIELD_IDS, PsDumpProto::Process::_FIELD_COUNT);
+    const char* pcyNames[] = { "fg", "bg", "ta" };
+    const int pcyValues[] = {PsDumpProto::Process::POLICY_FG, PsDumpProto::Process::POLICY_BG, PsDumpProto::Process::POLICY_TA};
+    table.addEnumTypeMap("pcy", pcyNames, pcyValues, 3);
+    const char* sNames[] = { "D", "R", "S", "T", "t", "X", "Z" };
+    const int sValues[] = {PsDumpProto::Process::STATE_D, PsDumpProto::Process::STATE_R, PsDumpProto::Process::STATE_S, PsDumpProto::Process::STATE_T, PsDumpProto::Process::STATE_TRACING, PsDumpProto::Process::STATE_X, PsDumpProto::Process::STATE_Z};
+    table.addEnumTypeMap("s", sNames, sValues, 7);
 
-    // parse line by line
+    // Parse line by line
     while (reader.readLine(&line)) {
         if (line.empty()) continue;
-        // parse head line
+
         if (nline++ == 0) {
-            header = parseHeader(line, TAB_DELIMITER);
+            header = parseHeader(line, DEFAULT_WHITESPACE);
+
+            const char* headerNames[] = { "LABEL", "USER", "PID", "TID", "PPID", "VSZ", "RSS", "WCHAN", "ADDR", "S", "PRI", "NI", "RTPRIO", "SCH", "PCY", "TIME", "CMD", NULL };
+            if (!getColumnIndices(columnIndices, headerNames, line)) {
+                return -1;
+            }
+
             continue;
         }
 
-        // parse for each record, the line delimiter is \t only!
-        record = parseRecord(line, TAB_DELIMITER);
+        record = parseRecordByColumns(line, columnIndices);
 
-        if (record.size() < header.size()) {
+        diff = record.size() - header.size();
+        if (diff < 0) {
             // TODO: log this to incident report!
-            fprintf(stderr, "[%s]Line %d has missing fields\n%s\n", this->name.string(), nline, line.c_str());
+            fprintf(stderr, "[%s]Line %d has %d missing fields\n%s\n", this->name.string(), nline, -diff, line.c_str());
+            printRecord(record);
             continue;
-        } else if (record.size() > header.size()) {
+        } else if (diff > 0) {
             // TODO: log this to incident report!
-            fprintf(stderr, "[%s]Line %d has extra fields\n%s\n", this->name.string(), nline, line.c_str());
+            fprintf(stderr, "[%s]Line %d has %d extra fields\n%s\n", this->name.string(), nline, diff, line.c_str());
+            printRecord(record);
             continue;
         }
 
-        long long token = proto.start(KernelWakeSources::WAKEUP_SOURCES);
+        long long token = proto.start(PsDumpProto::PROCESSES);
         for (int i=0; i<(int)record.size(); i++) {
             if (!table.insertField(&proto, header[i], record[i])) {
                 fprintf(stderr, "[%s]Line %d has bad value %s of %s\n",

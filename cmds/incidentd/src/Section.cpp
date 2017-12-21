@@ -521,7 +521,7 @@ CommandSection::Execute(ReportRequestSet* requests) const
             ALOGW("CommandSection '%s' failed to set up stdout: %s", this->name.string(), strerror(errno));
             _exit(EXIT_FAILURE);
         }
-        execv(this->mCommand[0], (char *const *) this->mCommand);
+        execvp(this->mCommand[0], (char *const *) this->mCommand);
         int err = errno; // record command error code
         ALOGW("CommandSection '%s' failed in executing command: %s", this->name.string(), strerror(errno));
         _exit(err); // exit with command error code

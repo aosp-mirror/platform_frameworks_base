@@ -49,6 +49,7 @@ CpuInfoParser::Parse(const int in, const int out) const
     vector<int> columnIndices; // task table can't be split by purely delimiter, needs column positions.
     record_t record;
     int nline = 0;
+    int diff = 0;
     bool nextToSwap = false;
     bool nextToUsage = false;
 
@@ -107,18 +108,10 @@ CpuInfoParser::Parse(const int in, const int out) const
             header = parseHeader(line, "[ %]");
             nextToUsage = false;
 
-            // NAME is not in the list since the last split index is default to the end of line.
-            const char* headerNames[11] = { "PID", "TID", "USER", "PR", "NI", "CPU", "S", "VIRT", "RES", "PCY", "CMD" };
-            size_t lastIndex = 0;
-            for (int i = 0; i < 11; i++) {
-                string s = headerNames[i];
-                lastIndex = line.find(s, lastIndex);
-                if (lastIndex == string::npos) {
-                    fprintf(stderr, "Bad Task Header: %s\n", line.c_str());
-                    return -1;
-                }
-                lastIndex += s.length();
-                columnIndices.push_back(lastIndex);
+            // NAME is not in the list since we need to modify the end of the CMD index.
+            const char* headerNames[] = { "PID", "TID", "USER", "PR", "NI", "CPU", "S", "VIRT", "RES", "PCY", "CMD", NULL };
+            if (!getColumnIndices(columnIndices, headerNames, line)) {
+                return -1;
             }
             // Need to remove the end index of CMD and use the start index of NAME because CMD values contain spaces.
             // for example: ... CMD             NAME
@@ -128,12 +121,20 @@ CpuInfoParser::Parse(const int in, const int out) const
             int endCMD = columnIndices.back();
             columnIndices.pop_back();
             columnIndices.push_back(line.find("NAME", endCMD) - 1);
+            // Add NAME index to complete the column list.
+            columnIndices.push_back(columnIndices.back() + 4);
             continue;
         }
 
         record = parseRecordByColumns(line, columnIndices);
-        if (record.size() != header.size()) {
-            fprintf(stderr, "[%s]Line %d has missing fields:\n%s\n", this->name.string(), nline, line.c_str());
+        diff = record.size() - header.size();
+        if (diff < 0) {
+            fprintf(stderr, "[%s]Line %d has %d missing fields\n%s\n", this->name.string(), nline, -diff, line.c_str());
+            printRecord(record);
+            continue;
+        } else if (diff > 0) {
+            fprintf(stderr, "[%s]Line %d has %d extra fields\n%s\n", this->name.string(), nline, diff, line.c_str());
+            printRecord(record);
             continue;
         }
 

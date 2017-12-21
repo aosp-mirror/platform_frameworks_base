@@ -56,11 +56,22 @@ header_t parseHeader(const std::string& line, const std::string& delimiters = DE
 record_t parseRecord(const std::string& line, const std::string& delimiters = DEFAULT_WHITESPACE);
 
 /**
+ * Gets the list of end indices of each word in the line and places it in the given vector,
+ * clearing out the vector beforehand. These indices can be used with parseRecordByColumns.
+ * Will return false if there was a problem getting the indices. headerNames
+ * must be NULL terminated.
+ */
+bool getColumnIndices(std::vector<int>& indices, const char* headerNames[], const std::string& line);
+
+/**
  * When a text-format table aligns by its vertical position, it is not possible to split them by purely delimiters.
  * This function allows to parse record by its header's column position' indices, must in ascending order.
  * At the same time, it still looks at the char at index, if it doesn't belong to delimiters, moves forward to find the delimiters.
  */
 record_t parseRecordByColumns(const std::string& line, const std::vector<int>& indices, const std::string& delimiters = DEFAULT_WHITESPACE);
+
+/** Prints record_t to stderr */
+void printRecord(const record_t& record);
 
 /**
  * When the line starts/ends with the given key, the function returns true
