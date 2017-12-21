@@ -453,7 +453,6 @@ import com.android.internal.os.SomeArgs;
  * email address), the service should only use it locally (i.e., in the app's process) for
  * heuristics purposes, but it should not be sent to external servers.
  *
- * </pre>
  */
 public abstract class AutofillService extends Service {
     private static final String TAG = "AutofillService";
