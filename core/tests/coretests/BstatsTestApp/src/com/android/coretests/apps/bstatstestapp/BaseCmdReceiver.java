@@ -13,9 +13,17 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+package com.android.coretests.apps.bstatstestapp;
 
-package com.android.frameworks.coretests.aidl;
+import android.os.RemoteException;
 
-interface ICmdCallback {
-    void onLaunched(IBinder receiver);
+import com.android.frameworks.coretests.aidl.ICmdReceiver;
+
+public class BaseCmdReceiver extends ICmdReceiver.Stub {
+    @Override
+    public void doSomeWork(int durationMs) {}
+    @Override
+    public void showApplicationOverlay() throws RemoteException {}
+    @Override
+    public void finishHost() {}
 }

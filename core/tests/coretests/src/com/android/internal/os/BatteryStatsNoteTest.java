@@ -170,7 +170,6 @@ public class BatteryStatsNoteTest extends TestCase{
                 elapsedTimeUs, STATS_SINCE_CHARGED);
         expectedRunTimeMs = stateRuntimeMap.get(ActivityManager.PROCESS_STATE_TRANSIENT_BACKGROUND)
                 + stateRuntimeMap.get(ActivityManager.PROCESS_STATE_BACKUP)
-                + stateRuntimeMap.get(ActivityManager.PROCESS_STATE_HEAVY_WEIGHT)
                 + stateRuntimeMap.get(ActivityManager.PROCESS_STATE_SERVICE)
                 + stateRuntimeMap.get(ActivityManager.PROCESS_STATE_RECEIVER);
         assertEquals(expectedRunTimeMs * 1000, actualRunTimeUs);

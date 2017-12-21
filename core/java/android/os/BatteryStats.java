@@ -16,6 +16,7 @@
 
 package android.os;
 
+import android.app.ActivityManager;
 import android.app.job.JobParameters;
 import android.content.Context;
 import android.content.pm.ApplicationInfo;
@@ -33,6 +34,7 @@ import android.util.TimeUtils;
 import android.util.proto.ProtoOutputStream;
 import android.view.Display;
 
+import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.os.BatterySipper;
 import com.android.internal.os.BatteryStatsHelper;
 
@@ -327,7 +329,8 @@ public abstract class BatteryStats implements Parcelable {
      *
      * Other types might include times spent in foreground, background etc.
      */
-    private final String UID_TIMES_TYPE_ALL = "A";
+    @VisibleForTesting
+    public static final String UID_TIMES_TYPE_ALL = "A";
 
     /**
      * State for keeping track of counting information.
@@ -507,6 +510,31 @@ public abstract class BatteryStats implements Parcelable {
     }
 
     /**
+     * Maps the ActivityManager procstate into corresponding BatteryStats procstate.
+     */
+    public static int mapToInternalProcessState(int procState) {
+        if (procState == ActivityManager.PROCESS_STATE_NONEXISTENT) {
+            return ActivityManager.PROCESS_STATE_NONEXISTENT;
+        } else if (procState == ActivityManager.PROCESS_STATE_TOP) {
+            return Uid.PROCESS_STATE_TOP;
+        } else if (procState <= ActivityManager.PROCESS_STATE_FOREGROUND_SERVICE) {
+            // Persistent and other foreground states go here.
+            return Uid.PROCESS_STATE_FOREGROUND_SERVICE;
+        } else if (procState <= ActivityManager.PROCESS_STATE_IMPORTANT_FOREGROUND) {
+            // Persistent and other foreground states go here.
+            return Uid.PROCESS_STATE_FOREGROUND;
+        } else if (procState <= ActivityManager.PROCESS_STATE_RECEIVER) {
+            return Uid.PROCESS_STATE_BACKGROUND;
+        } else if (procState <= ActivityManager.PROCESS_STATE_TOP_SLEEPING) {
+            return Uid.PROCESS_STATE_TOP_SLEEPING;
+        } else if (procState <= ActivityManager.PROCESS_STATE_HEAVY_WEIGHT) {
+            return Uid.PROCESS_STATE_HEAVY_WEIGHT;
+        } else {
+            return Uid.PROCESS_STATE_CACHED;
+        }
+    }
+
+    /**
      * The statistics associated with a particular uid.
      */
     public static abstract class Uid {
@@ -645,6 +673,15 @@ public abstract class BatteryStats implements Parcelable {
         public abstract long[] getCpuFreqTimes(int which);
         public abstract long[] getScreenOffCpuFreqTimes(int which);
 
+        /**
+         * Returns cpu times of an uid at a particular process state.
+         */
+        public abstract long[] getCpuFreqTimes(int which, int procState);
+        /**
+         * Returns cpu times of an uid while the screen if off at a particular process state.
+         */
+        public abstract long[] getScreenOffCpuFreqTimes(int which, int procState);
+
         // Note: the following times are disjoint.  They can be added together to find the
         // total time a uid has had any processes running at all.
 
@@ -689,9 +726,30 @@ public abstract class BatteryStats implements Parcelable {
          */
         public static final int NUM_PROCESS_STATE = 7;
 
+        // Used in dump
         static final String[] PROCESS_STATE_NAMES = {
                 "Top", "Fg Service", "Foreground", "Background", "Top Sleeping", "Heavy Weight",
                 "Cached"
+        };
+
+        // Used in checkin dump
+        @VisibleForTesting
+        public static final String[] UID_PROCESS_TYPES = {
+                "T",  // TOP
+                "FS", // FOREGROUND_SERVICE
+                "F",  // FOREGROUND
+                "B",  // BACKGROUND
+                "TS", // TOP_SLEEPING
+                "HW",  // HEAVY_WEIGHT
+                "C"   // CACHED
+        };
+
+        /**
+         * When the process exits one of these states, we need to make sure cpu time in this state
+         * is not attributed to any non-critical process states.
+         */
+        public static final int[] CRITICAL_PROC_STATES = {
+            PROCESS_STATE_TOP, PROCESS_STATE_FOREGROUND_SERVICE, PROCESS_STATE_FOREGROUND
         };
 
         public abstract long getProcessStateTime(int state, long elapsedRealtimeUs, int which);
@@ -4002,6 +4060,29 @@ public abstract class BatteryStats implements Parcelable {
                     dumpLine(pw, uid, category, CPU_TIMES_AT_FREQ_DATA, UID_TIMES_TYPE_ALL,
                             cpuFreqTimeMs.length, sb.toString());
                 }
+
+                for (int procState = 0; procState < Uid.NUM_PROCESS_STATE; ++procState) {
+                    final long[] timesMs = u.getCpuFreqTimes(which, procState);
+                    if (timesMs != null && timesMs.length == cpuFreqs.length) {
+                        sb.setLength(0);
+                        for (int i = 0; i < timesMs.length; ++i) {
+                            sb.append((i == 0 ? "" : ",") + timesMs[i]);
+                        }
+                        final long[] screenOffTimesMs = u.getScreenOffCpuFreqTimes(
+                                which, procState);
+                        if (screenOffTimesMs != null) {
+                            for (int i = 0; i < screenOffTimesMs.length; ++i) {
+                                sb.append("," + screenOffTimesMs[i]);
+                            }
+                        } else {
+                            for (int i = 0; i < timesMs.length; ++i) {
+                                sb.append(",0");
+                            }
+                        }
+                        dumpLine(pw, uid, category, CPU_TIMES_AT_FREQ_DATA,
+                                Uid.UID_PROCESS_TYPES[procState], timesMs.length, sb.toString());
+                    }
+                }
             }
 
             final ArrayMap<String, ? extends BatteryStats.Uid.Proc> processStats
@@ -5610,6 +5691,30 @@ public abstract class BatteryStats implements Parcelable {
                     sb.append(" " + screenOffCpuFreqTimes[i]);
                 }
                 pw.println(sb.toString());
+            }
+
+            for (int procState = 0; procState < Uid.NUM_PROCESS_STATE; ++procState) {
+                final long[] cpuTimes = u.getCpuFreqTimes(which, procState);
+                if (cpuTimes != null) {
+                    sb.setLength(0);
+                    sb.append("    Cpu times per freq at state "
+                            + Uid.PROCESS_STATE_NAMES[procState] + ":");
+                    for (int i = 0; i < cpuTimes.length; ++i) {
+                        sb.append(" " + cpuTimes[i]);
+                    }
+                    pw.println(sb.toString());
+                }
+
+                final long[] screenOffCpuTimes = u.getScreenOffCpuFreqTimes(which, procState);
+                if (screenOffCpuTimes != null) {
+                    sb.setLength(0);
+                    sb.append("   Screen-off cpu times per freq at state "
+                            + Uid.PROCESS_STATE_NAMES[procState] + ":");
+                    for (int i = 0; i < screenOffCpuTimes.length; ++i) {
+                        sb.append(" " + screenOffCpuTimes[i]);
+                    }
+                    pw.println(sb.toString());
+                }
             }
 
             final ArrayMap<String, ? extends BatteryStats.Uid.Proc> processStats

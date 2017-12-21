@@ -960,7 +960,7 @@ public class BatteryStatsCpuTimesTest {
     }
 
     @Test
-    public void testReadKernelUiidCpuFreqTimesLocked_invalidUid() {
+    public void testReadKernelUidCpuFreqTimesLocked_invalidUid() {
         // PRECONDITIONS
         updateTimeBasesLocked(true, Display.STATE_ON, 0, 0);
 
