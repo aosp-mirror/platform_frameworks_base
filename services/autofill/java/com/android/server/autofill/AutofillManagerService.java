@@ -568,13 +568,12 @@ public final class AutofillManagerService extends SystemService {
 
         @Override
         public FillEventHistory getFillEventHistory() throws RemoteException {
-            UserHandle user = getCallingUserHandle();
-            int uid = getCallingUid();
+            final int userId = UserHandle.getCallingUserId();
 
             synchronized (mLock) {
-                AutofillManagerServiceImpl service = peekServiceForUserLocked(user.getIdentifier());
+                final AutofillManagerServiceImpl service = peekServiceForUserLocked(userId);
                 if (service != null) {
-                    return service.getFillEventHistory(uid);
+                    return service.getFillEventHistory(getCallingUid());
                 }
             }
 
@@ -583,13 +582,12 @@ public final class AutofillManagerService extends SystemService {
 
         @Override
         public UserData getUserData() throws RemoteException {
-            UserHandle user = getCallingUserHandle();
-            int uid = getCallingUid();
+            final int userId = UserHandle.getCallingUserId();
 
             synchronized (mLock) {
-                AutofillManagerServiceImpl service = peekServiceForUserLocked(user.getIdentifier());
+                final AutofillManagerServiceImpl service = peekServiceForUserLocked(userId);
                 if (service != null) {
-                    return service.getUserData(uid);
+                    return service.getUserData(getCallingUid());
                 }
             }
 
@@ -598,30 +596,42 @@ public final class AutofillManagerService extends SystemService {
 
         @Override
         public void setUserData(UserData userData) throws RemoteException {
-            UserHandle user = getCallingUserHandle();
-            int uid = getCallingUid();
+            final int userId = UserHandle.getCallingUserId();
 
             synchronized (mLock) {
-                AutofillManagerServiceImpl service = peekServiceForUserLocked(user.getIdentifier());
+                final AutofillManagerServiceImpl service = peekServiceForUserLocked(userId);
                 if (service != null) {
-                    service.setUserData(uid, userData);
+                    service.setUserData(getCallingUid(), userData);
                 }
             }
         }
 
         @Override
         public boolean isFieldClassificationEnabled() throws RemoteException {
-            UserHandle user = getCallingUserHandle();
-            int uid = getCallingUid();
+            final int userId = UserHandle.getCallingUserId();
 
             synchronized (mLock) {
-                AutofillManagerServiceImpl service = peekServiceForUserLocked(user.getIdentifier());
+                final AutofillManagerServiceImpl service = peekServiceForUserLocked(userId);
                 if (service != null) {
-                    return service.isFieldClassificationEnabled();
+                    return service.isFieldClassificationEnabled(getCallingUid());
                 }
             }
 
             return false;
+        }
+
+        @Override
+        public ComponentName getAutofillServiceComponentName() throws RemoteException {
+            final int userId = UserHandle.getCallingUserId();
+
+            synchronized (mLock) {
+                final AutofillManagerServiceImpl service = peekServiceForUserLocked(userId);
+                if (service != null) {
+                    return service.getServiceComponentName();
+                }
+            }
+
+            return null;
         }
 
         @Override

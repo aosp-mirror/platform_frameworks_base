@@ -500,6 +500,8 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
     @Override
     public void onFillRequestSuccess(int requestFlags, @Nullable FillResponse response,
             @NonNull String servicePackageName) {
+        final AutofillId[] fieldClassificationIds;
+
         synchronized (mLock) {
             if (mDestroyed) {
                 Slog.w(TAG, "Call to Session#onFillRequestSuccess() rejected - session: "
@@ -510,13 +512,13 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
                 processNullResponseLocked(requestFlags);
                 return;
             }
-        }
 
-        final AutofillId[] fieldClassificationIds = response.getFieldClassificationIds();
-        if (fieldClassificationIds != null && !mService.isFieldClassificationEnabled()) {
-            Slog.w(TAG, "Ignoring " + response + " because field detection is disabled");
-            processNullResponseLocked(requestFlags);
-            return;
+            fieldClassificationIds = response.getFieldClassificationIds();
+            if (fieldClassificationIds != null && !mService.isFieldClassificationEnabledLocked()) {
+                Slog.w(TAG, "Ignoring " + response + " because field detection is disabled");
+                processNullResponseLocked(requestFlags);
+                return;
+            }
         }
 
         mService.setLastResponse(id, response);

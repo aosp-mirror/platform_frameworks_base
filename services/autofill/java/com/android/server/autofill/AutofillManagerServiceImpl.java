@@ -835,7 +835,7 @@ final class AutofillManagerServiceImpl {
             pw.println(mContext.getString(R.string.config_defaultAutofillService));
         pw.print(prefix); pw.print("Disabled: "); pw.println(mDisabled);
         pw.print(prefix); pw.print("Field classification enabled: ");
-            pw.println(isFieldClassificationEnabled());
+            pw.println(isFieldClassificationEnabledLocked());
         pw.print(prefix); pw.print("Setup complete: "); pw.println(mSetupComplete);
         pw.print(prefix); pw.print("Last prune: "); pw.println(mLastPrune);
 
@@ -1095,7 +1095,18 @@ final class AutofillManagerServiceImpl {
         return false;
     }
 
-    boolean isFieldClassificationEnabled() {
+    // Called by AutofillManager, checks UID.
+    boolean isFieldClassificationEnabled(int uid) {
+        synchronized (mLock) {
+            if (!isCalledByServiceLocked("isFieldClassificationEnabled", uid)) {
+                return false;
+            }
+            return isFieldClassificationEnabledLocked();
+        }
+    }
+
+    // Called by internally, no need to check UID.
+    boolean isFieldClassificationEnabledLocked() {
         return Settings.Secure.getIntForUser(
                 mContext.getContentResolver(),
                 Settings.Secure.AUTOFILL_FEATURE_FIELD_CLASSIFICATION, 0,
