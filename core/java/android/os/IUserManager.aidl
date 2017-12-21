@@ -79,9 +79,7 @@ interface IUserManager {
     void setDefaultGuestRestrictions(in Bundle restrictions);
     Bundle getDefaultGuestRestrictions();
     boolean markGuestForDeletion(int userHandle);
-    void setQuietModeEnabled(int userHandle, boolean enableQuietMode, in IntentSender target);
     boolean isQuietModeEnabled(int userHandle);
-    boolean trySetQuietModeDisabled(int userHandle, in IntentSender target);
     void setSeedAccountData(int userHandle, in String accountName,
             in String accountType, in PersistableBundle accountOptions, boolean persist);
     String getSeedAccountName();
@@ -99,4 +97,5 @@ interface IUserManager {
     boolean isUserRunning(int userId);
     boolean isUserNameSet(int userHandle);
     boolean hasRestrictedProfiles();
+    boolean trySetQuietModeEnabled(String callingPackage, boolean enableQuietMode, int userHandle, in IntentSender target);
 }
