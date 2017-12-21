@@ -3967,6 +3967,63 @@ package android.telephony {
     field public static final java.lang.String MBMS_STREAMING_SERVICE_ACTION = "android.telephony.action.EmbmsStreaming";
   }
 
+  public class NetworkRegistrationState implements android.os.Parcelable {
+    ctor public NetworkRegistrationState(int, int, int, int, int, boolean, int[], android.telephony.CellIdentity);
+    ctor protected NetworkRegistrationState(android.os.Parcel);
+    method public int describeContents();
+    method public int getAccessNetworkTechnology();
+    method public int[] getAvailableServices();
+    method public int getDomain();
+    method public int getRegState();
+    method public int getTransportType();
+    method public boolean isEmergencyEnabled();
+    method public void writeToParcel(android.os.Parcel, int);
+    field public static final android.os.Parcelable.Creator<android.telephony.NetworkRegistrationState> CREATOR;
+    field public static final int DOMAIN_CS = 1; // 0x1
+    field public static final int DOMAIN_PS = 2; // 0x2
+    field public static final int REG_STATE_DENIED = 3; // 0x3
+    field public static final int REG_STATE_HOME = 1; // 0x1
+    field public static final int REG_STATE_NOT_REG_NOT_SEARCHING = 0; // 0x0
+    field public static final int REG_STATE_NOT_REG_SEARCHING = 2; // 0x2
+    field public static final int REG_STATE_ROAMING = 5; // 0x5
+    field public static final int REG_STATE_UNKNOWN = 4; // 0x4
+    field public static final int SERVICE_TYPE_DATA = 2; // 0x2
+    field public static final int SERVICE_TYPE_EMERGENCY = 5; // 0x5
+    field public static final int SERVICE_TYPE_SMS = 3; // 0x3
+    field public static final int SERVICE_TYPE_VIDEO = 4; // 0x4
+    field public static final int SERVICE_TYPE_VOICE = 1; // 0x1
+  }
+
+  public abstract class NetworkService extends android.app.Service {
+    method protected abstract android.telephony.NetworkService.NetworkServiceProvider createNetworkServiceProvider(int);
+    field public static final java.lang.String NETWORK_SERVICE_EXTRA_SLOT_ID = "android.telephony.extra.SLOT_ID";
+    field public static final java.lang.String NETWORK_SERVICE_INTERFACE = "android.telephony.NetworkService";
+  }
+
+  public class NetworkService.NetworkServiceProvider {
+    ctor public NetworkService.NetworkServiceProvider(int);
+    method public void getNetworkRegistrationState(int, android.telephony.NetworkServiceCallback);
+    method public final int getSlotId();
+    method public final void notifyNetworkRegistrationStateChanged();
+    method protected void onDestroy();
+  }
+
+  public class NetworkServiceCallback {
+    method public void onGetNetworkRegistrationStateComplete(int, android.telephony.NetworkRegistrationState);
+    field public static final int RESULT_ERROR_BUSY = 3; // 0x3
+    field public static final int RESULT_ERROR_FAILED = 5; // 0x5
+    field public static final int RESULT_ERROR_ILLEGAL_STATE = 4; // 0x4
+    field public static final int RESULT_ERROR_INVALID_ARG = 2; // 0x2
+    field public static final int RESULT_ERROR_UNSUPPORTED = 1; // 0x1
+    field public static final int RESULT_SUCCESS = 0; // 0x0
+  }
+
+  public class ServiceState implements android.os.Parcelable {
+    method public java.util.List<android.telephony.NetworkRegistrationState> getNetworkRegistrationStates();
+    method public java.util.List<android.telephony.NetworkRegistrationState> getNetworkRegistrationStates(int);
+    method public android.telephony.NetworkRegistrationState getNetworkRegistrationStates(int, int);
+  }
+
   public final class SmsManager {
     method public void sendMultipartTextMessageWithoutPersisting(java.lang.String, java.lang.String, java.util.List<java.lang.String>, java.util.List<android.app.PendingIntent>, java.util.List<android.app.PendingIntent>);
     method public void sendTextMessageWithoutPersisting(java.lang.String, java.lang.String, java.lang.String, android.app.PendingIntent, android.app.PendingIntent);
