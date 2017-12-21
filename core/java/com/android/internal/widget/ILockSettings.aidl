@@ -16,6 +16,7 @@
 
 package com.android.internal.widget;
 
+import android.app.PendingIntent;
 import android.app.trust.IStrongAuthTracker;
 import android.os.Bundle;
 import android.security.recoverablekeystore.KeyEntryRecoveryData;
@@ -23,6 +24,8 @@ import android.security.recoverablekeystore.KeyStoreRecoveryData;
 import android.security.recoverablekeystore.KeyStoreRecoveryMetadata;
 import com.android.internal.widget.ICheckCredentialProgressCallback;
 import com.android.internal.widget.VerifyCredentialResponse;
+
+import java.util.Map;
 
 /** {@hide} */
 interface ILockSettings {
@@ -63,8 +66,11 @@ interface ILockSettings {
     void initRecoveryService(in String rootCertificateAlias, in byte[] signedPublicKeyList,
             int userId);
     KeyStoreRecoveryData getRecoveryData(in byte[] account, int userId);
+    void setSnapshotCreatedPendingIntent(in PendingIntent intent, int userId);
+    Map getRecoverySnapshotVersions(int userId);
     void setServerParameters(long serverParameters, int userId);
     void setRecoveryStatus(in String packageName, in String[] aliases, int status, int userId);
+    Map getRecoveryStatus(in String packageName, int userId);
     void setRecoverySecretTypes(in int[] secretTypes, int userId);
     int[] getRecoverySecretTypes(int userId);
     int[] getPendingRecoverySecretTypes(int userId);
