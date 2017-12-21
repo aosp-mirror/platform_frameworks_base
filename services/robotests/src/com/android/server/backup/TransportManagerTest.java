@@ -23,6 +23,7 @@ import static junit.framework.Assert.fail;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 import static org.robolectric.shadow.api.Shadow.extract;
+import static org.testng.Assert.expectThrows;
 
 import android.annotation.Nullable;
 import android.app.backup.BackupManager;
@@ -37,7 +38,6 @@ import android.os.RemoteException;
 import android.platform.test.annotations.Presubmit;
 
 import com.android.internal.backup.IBackupTransport;
-import com.android.internal.util.FunctionalUtils.ThrowingRunnable;
 import com.android.server.backup.testing.ShadowBackupTransportStub;
 import com.android.server.backup.testing.ShadowContextImplForBackup;
 import com.android.server.backup.testing.ShadowPackageManagerForBackup;
@@ -58,6 +58,7 @@ import org.robolectric.annotation.Config;
 import org.robolectric.shadows.ShadowLog;
 import org.robolectric.shadows.ShadowLooper;
 import org.robolectric.shadows.ShadowPackageManager;
+import org.testng.Assert.ThrowingRunnable;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -708,16 +709,6 @@ public class TransportManagerTest {
         mTransportBoundListenerStub.resetState();
 
         return transportManager;
-    }
-
-    private static <T extends Throwable> void expectThrows(
-            Class<T> throwableClass, ThrowingRunnable runnable) {
-        try {
-            runnable.runOrThrow();
-            fail("Expected to throw " + throwableClass.getSimpleName());
-        } catch (Throwable t) {
-            assertThat(t).isInstanceOf(throwableClass);
-        }
     }
 
     private static class TransportInfo {
