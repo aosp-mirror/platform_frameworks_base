@@ -1123,6 +1123,8 @@ public final class SmsManager {
 
     // SMS send failure result codes
 
+    /** No error. {@hide}*/
+    static public final int RESULT_ERROR_NONE    = 0;
     /** Generic failure cause */
     static public final int RESULT_ERROR_GENERIC_FAILURE    = 1;
     /** Failed because radio was explicitly turned off */
