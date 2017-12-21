@@ -1741,6 +1741,10 @@ public class LockSettingsService extends ILockSettings.Stub {
                     }
                 }
             }
+            // Use credentials to create recoverable keystore snapshot.
+            mRecoverableKeyStoreManager.lockScreenSecretAvailable(storedHash.type, credential,
+                userId);
+
         } else if (response.getResponseCode() == VerifyCredentialResponse.RESPONSE_RETRY) {
             if (response.getTimeout() > 0) {
                 requireStrongAuth(STRONG_AUTH_REQUIRED_AFTER_LOCKOUT, userId);
@@ -1931,14 +1935,14 @@ public class LockSettingsService extends ILockSettings.Stub {
 
     @Override
     public void initRecoveryService(@NonNull String rootCertificateAlias,
-            @NonNull byte[] signedPublicKeyList, int userId)
+            @NonNull byte[] signedPublicKeyList, @UserIdInt int userId)
             throws RemoteException {
         mRecoverableKeyStoreManager.initRecoveryService(rootCertificateAlias,
                 signedPublicKeyList, userId);
     }
 
     @Override
-    public KeyStoreRecoveryData getRecoveryData(@NonNull byte[] account, int userId)
+    public KeyStoreRecoveryData getRecoveryData(@NonNull byte[] account, @UserIdInt int userId)
             throws RemoteException {
         return mRecoverableKeyStoreManager.getRecoveryData(account, userId);
     }
@@ -1953,13 +1957,14 @@ public class LockSettingsService extends ILockSettings.Stub {
     }
 
     @Override
-    public void setServerParameters(long serverParameters, int userId) throws RemoteException {
+    public void setServerParameters(long serverParameters, @UserIdInt int userId)
+            throws RemoteException {
         mRecoverableKeyStoreManager.setServerParameters(serverParameters, userId);
     }
 
     @Override
     public void setRecoveryStatus(@NonNull String packageName, @Nullable String[] aliases,
-            int status, int userId) throws RemoteException {
+            int status, @UserIdInt int userId) throws RemoteException {
         mRecoverableKeyStoreManager.setRecoveryStatus(packageName, aliases, status, userId);
     }
 
@@ -1969,25 +1974,24 @@ public class LockSettingsService extends ILockSettings.Stub {
 
     @Override
     public void setRecoverySecretTypes(@NonNull @KeyStoreRecoveryMetadata.UserSecretType
-            int[] secretTypes, int userId) throws RemoteException {
+            int[] secretTypes, @UserIdInt int userId) throws RemoteException {
         mRecoverableKeyStoreManager.setRecoverySecretTypes(secretTypes, userId);
     }
 
     @Override
-    public int[] getRecoverySecretTypes(int userId) throws RemoteException {
+    public int[] getRecoverySecretTypes(@UserIdInt int userId) throws RemoteException {
         return mRecoverableKeyStoreManager.getRecoverySecretTypes(userId);
 
     }
 
     @Override
-    public int[] getPendingRecoverySecretTypes(int userId) throws RemoteException {
+    public int[] getPendingRecoverySecretTypes(@UserIdInt int userId) throws RemoteException {
         throw new SecurityException("Not implemented");
     }
 
     @Override
     public void recoverySecretAvailable(@NonNull KeyStoreRecoveryMetadata recoverySecret,
-            int userId)
-            throws RemoteException {
+            @UserIdInt int userId) throws RemoteException {
         mRecoverableKeyStoreManager.recoverySecretAvailable(recoverySecret, userId);
     }
 
@@ -1995,14 +1999,14 @@ public class LockSettingsService extends ILockSettings.Stub {
     public byte[] startRecoverySession(@NonNull String sessionId,
             @NonNull byte[] verifierPublicKey, @NonNull byte[] vaultParams,
             @NonNull byte[] vaultChallenge, @NonNull List<KeyStoreRecoveryMetadata> secrets,
-            int userId) throws RemoteException {
+            @UserIdInt int userId) throws RemoteException {
         return mRecoverableKeyStoreManager.startRecoverySession(sessionId, verifierPublicKey,
                 vaultParams, vaultChallenge, secrets, userId);
     }
 
     @Override
     public void recoverKeys(@NonNull String sessionId, @NonNull byte[] recoveryKeyBlob,
-            @NonNull List<KeyEntryRecoveryData> applicationKeys, int userId)
+            @NonNull List<KeyEntryRecoveryData> applicationKeys, @UserIdInt int userId)
             throws RemoteException {
         mRecoverableKeyStoreManager.recoverKeys(sessionId, recoveryKeyBlob, applicationKeys,
                 userId);
