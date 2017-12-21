@@ -39,6 +39,7 @@ import java.util.Map;
 public class RecoverableKeyStoreDb {
     private static final String TAG = "RecoverableKeyStoreDb";
     private static final int IDLE_TIMEOUT_SECONDS = 30;
+    private static final int LAST_SYNCED_AT_UNSYNCED = -1;
 
     private final RecoverableKeyStoreDbHelper mKeyStoreDbHelper;
 
@@ -61,6 +62,7 @@ public class RecoverableKeyStoreDb {
     /**
      * Inserts a key into the database.
      *
+     * @param userId The uid of the profile the application is running under.
      * @param uid Uid of the application to whom the key belongs.
      * @param alias The alias of the key in the AndroidKeyStore.
      * @param wrappedKey The wrapped key.
@@ -68,14 +70,15 @@ public class RecoverableKeyStoreDb {
      *
      * @hide
      */
-    public long insertKey(int uid, String alias, WrappedKey wrappedKey) {
+    public long insertKey(int userId, int uid, String alias, WrappedKey wrappedKey) {
         SQLiteDatabase db = mKeyStoreDbHelper.getWritableDatabase();
         ContentValues values = new ContentValues();
+        values.put(KeysEntry.COLUMN_NAME_USER_ID, userId);
         values.put(KeysEntry.COLUMN_NAME_UID, uid);
         values.put(KeysEntry.COLUMN_NAME_ALIAS, alias);
         values.put(KeysEntry.COLUMN_NAME_NONCE, wrappedKey.getNonce());
         values.put(KeysEntry.COLUMN_NAME_WRAPPED_KEY, wrappedKey.getKeyMaterial());
-        values.put(KeysEntry.COLUMN_NAME_LAST_SYNCED_AT, -1);
+        values.put(KeysEntry.COLUMN_NAME_LAST_SYNCED_AT, LAST_SYNCED_AT_UNSYNCED);
         values.put(KeysEntry.COLUMN_NAME_GENERATION_ID, wrappedKey.getPlatformKeyGenerationId());
         return db.replace(KeysEntry.TABLE_NAME, /*nullColumnHack=*/ null, values);
     }
@@ -130,16 +133,16 @@ public class RecoverableKeyStoreDb {
     }
 
     /**
-     * Returns all keys for the given {@code uid} and {@code platformKeyGenerationId}.
+     * Returns all keys for the given {@code userId} and {@code platformKeyGenerationId}.
      *
-     * @param uid User id of the profile to which all the keys are associated.
+     * @param userId User id of the profile to which all the keys are associated.
      * @param platformKeyGenerationId The generation ID of the platform key that wrapped these keys.
      *     (i.e., this should be the most recent generation ID, as older platform keys are not
      *     usable.)
      *
      * @hide
      */
-    public Map<String, WrappedKey> getAllKeys(int uid, int platformKeyGenerationId) {
+    public Map<String, WrappedKey> getAllKeys(int userId, int platformKeyGenerationId) {
         SQLiteDatabase db = mKeyStoreDbHelper.getReadableDatabase();
         String[] projection = {
                 KeysEntry._ID,
@@ -147,10 +150,10 @@ public class RecoverableKeyStoreDb {
                 KeysEntry.COLUMN_NAME_WRAPPED_KEY,
                 KeysEntry.COLUMN_NAME_ALIAS};
         String selection =
-                KeysEntry.COLUMN_NAME_UID + " = ? AND "
+                KeysEntry.COLUMN_NAME_USER_ID + " = ? AND "
                 + KeysEntry.COLUMN_NAME_GENERATION_ID + " = ?";
         String[] selectionArguments = {
-                Integer.toString(uid), Integer.toString(platformKeyGenerationId) };
+                Integer.toString(userId), Integer.toString(platformKeyGenerationId) };
 
         try (
             Cursor cursor = db.query(

@@ -60,22 +60,23 @@ public class RecoverableKeyStoreDbTest {
     @Test
     public void insertKey_replacesOldKey() {
         int userId = 12;
+        int uid = 10009;
         String alias = "test";
         WrappedKey oldWrappedKey = new WrappedKey(
                 getUtf8Bytes("nonce1"),
                 getUtf8Bytes("keymaterial1"),
                 /*platformKeyGenerationId=*/ 1);
         mRecoverableKeyStoreDb.insertKey(
-                userId, alias, oldWrappedKey);
+                userId, uid, alias, oldWrappedKey);
         byte[] nonce = getUtf8Bytes("nonce2");
         byte[] keyMaterial = getUtf8Bytes("keymaterial2");
         WrappedKey newWrappedKey = new WrappedKey(
                 nonce, keyMaterial, /*platformKeyGenerationId=*/2);
 
         mRecoverableKeyStoreDb.insertKey(
-                userId, alias, newWrappedKey);
+                userId, uid, alias, newWrappedKey);
 
-        WrappedKey retrievedKey = mRecoverableKeyStoreDb.getKey(userId, alias);
+        WrappedKey retrievedKey = mRecoverableKeyStoreDb.getKey(uid, alias);
         assertArrayEquals(nonce, retrievedKey.getNonce());
         assertArrayEquals(keyMaterial, retrievedKey.getKeyMaterial());
         assertEquals(2, retrievedKey.getPlatformKeyGenerationId());
@@ -83,6 +84,7 @@ public class RecoverableKeyStoreDbTest {
 
     @Test
     public void insertKey_allowsTwoUidsToHaveSameAlias() {
+        int userId = 6;
         String alias = "pcoulton";
         WrappedKey key1 = new WrappedKey(
                 getUtf8Bytes("nonce1"),
@@ -93,8 +95,8 @@ public class RecoverableKeyStoreDbTest {
                 getUtf8Bytes("key2"),
                 /*platformKeyGenerationId=*/ 1);
 
-        mRecoverableKeyStoreDb.insertKey(/*uid=*/ 1, alias, key1);
-        mRecoverableKeyStoreDb.insertKey(/*uid=*/ 2, alias, key2);
+        mRecoverableKeyStoreDb.insertKey(userId, /*uid=*/ 1, alias, key1);
+        mRecoverableKeyStoreDb.insertKey(userId, /*uid=*/ 2, alias, key2);
 
         assertArrayEquals(
                 getUtf8Bytes("nonce1"),
@@ -115,14 +117,15 @@ public class RecoverableKeyStoreDbTest {
     @Test
     public void getKey_returnsInsertedKey() {
         int userId = 12;
+        int uid = 1009;
         int generationId = 6;
         String alias = "test";
         byte[] nonce = getUtf8Bytes("nonce");
         byte[] keyMaterial = getUtf8Bytes("keymaterial");
         WrappedKey wrappedKey = new WrappedKey(nonce, keyMaterial, generationId);
-        mRecoverableKeyStoreDb.insertKey(userId, alias, wrappedKey);
+        mRecoverableKeyStoreDb.insertKey(userId, uid, alias, wrappedKey);
 
-        WrappedKey retrievedKey = mRecoverableKeyStoreDb.getKey(userId, alias);
+        WrappedKey retrievedKey = mRecoverableKeyStoreDb.getKey(uid, alias);
 
         assertArrayEquals(nonce, retrievedKey.getNonce());
         assertArrayEquals(keyMaterial, retrievedKey.getKeyMaterial());
@@ -132,12 +135,13 @@ public class RecoverableKeyStoreDbTest {
     @Test
     public void getAllKeys_getsKeysWithUserIdAndGenerationId() {
         int userId = 12;
+        int uid = 1009;
         int generationId = 6;
         String alias = "test";
         byte[] nonce = getUtf8Bytes("nonce");
         byte[] keyMaterial = getUtf8Bytes("keymaterial");
         WrappedKey wrappedKey = new WrappedKey(nonce, keyMaterial, generationId);
-        mRecoverableKeyStoreDb.insertKey(userId, alias, wrappedKey);
+        mRecoverableKeyStoreDb.insertKey(userId, uid, alias, wrappedKey);
 
         Map<String, WrappedKey> keys = mRecoverableKeyStoreDb.getAllKeys(userId, generationId);
 
@@ -152,12 +156,13 @@ public class RecoverableKeyStoreDbTest {
     @Test
     public void getAllKeys_doesNotReturnKeysWithBadGenerationId() {
         int userId = 12;
+        int uid = 6000;
         WrappedKey wrappedKey = new WrappedKey(
                 getUtf8Bytes("nonce"),
                 getUtf8Bytes("keymaterial"),
                 /*platformKeyGenerationId=*/ 5);
         mRecoverableKeyStoreDb.insertKey(
-                userId, /*alias=*/ "test", wrappedKey);
+                userId, uid, /*alias=*/ "test", wrappedKey);
 
         Map<String, WrappedKey> keys = mRecoverableKeyStoreDb.getAllKeys(
                 userId, /*generationId=*/ 7);
@@ -168,10 +173,11 @@ public class RecoverableKeyStoreDbTest {
     @Test
     public void getAllKeys_doesNotReturnKeysWithBadUserId() {
         int generationId = 12;
+        int uid = 10009;
         WrappedKey wrappedKey = new WrappedKey(
                 getUtf8Bytes("nonce"), getUtf8Bytes("keymaterial"), generationId);
         mRecoverableKeyStoreDb.insertKey(
-                /*userId=*/ 1, /*alias=*/ "test", wrappedKey);
+                /*userId=*/ 1, uid, /*alias=*/ "test", wrappedKey);
 
         Map<String, WrappedKey> keys = mRecoverableKeyStoreDb.getAllKeys(
                 /*userId=*/ 2, generationId);

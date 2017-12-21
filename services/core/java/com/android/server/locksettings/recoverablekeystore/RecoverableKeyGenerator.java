@@ -87,6 +87,7 @@ public class RecoverableKeyGenerator {
      * The generated key allows encrypt/decrypt only using AES/GCM/NoPadding.
      *
      * @param platformKey The user's platform key, with which to wrap the generated key.
+     * @param userId The user ID of the profile to which the calling app belongs.
      * @param uid The uid of the application that will own the key.
      * @param alias The alias by which the key will be known in AndroidKeyStore.
      * @throws RecoverableKeyStorageException if there is some error persisting the key either to
@@ -96,7 +97,8 @@ public class RecoverableKeyGenerator {
      *
      * @hide
      */
-    public void generateAndStoreKey(PlatformEncryptionKey platformKey, int uid, String alias)
+    public void generateAndStoreKey(
+            PlatformEncryptionKey platformKey, int userId, int uid, String alias)
             throws RecoverableKeyStorageException, KeyStoreException, InvalidKeyException {
         mKeyGenerator.init(KEY_SIZE_BITS);
         SecretKey key = mKeyGenerator.generateKey();
@@ -134,7 +136,7 @@ public class RecoverableKeyGenerator {
         } catch (DestroyFailedException e) {
             Log.w(TAG, "Could not destroy SecretKey.");
         }
-        long result = mDatabase.insertKey(uid, alias, wrappedKey);
+        long result = mDatabase.insertKey(userId, uid, alias, wrappedKey);
 
         if (result == RESULT_CANNOT_INSERT_ROW) {
             // Attempt to clean up
