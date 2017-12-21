@@ -24,7 +24,6 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.pm.ParceledListSlice;
-import android.database.ContentObserver;
 import android.hardware.Sensor;
 import android.hardware.SensorEvent;
 import android.hardware.SensorEventListener;
@@ -34,6 +33,8 @@ import android.net.Uri;
 import android.os.BatteryManager;
 import android.os.Environment;
 import android.os.Handler;
+import android.os.Looper;
+import android.os.Message;
 import android.os.PowerManager;
 import android.os.RemoteException;
 import android.os.SystemClock;
@@ -88,7 +89,7 @@ public class BrightnessTracker {
 
     private static final String TAG_EVENTS = "events";
     private static final String TAG_EVENT = "event";
-    private static final String ATTR_BRIGHTNESS = "brightness";
+    private static final String ATTR_NITS = "nits";
     private static final String ATTR_TIMESTAMP = "timestamp";
     private static final String ATTR_PACKAGE_NAME = "packageName";
     private static final String ATTR_USER = "user";
@@ -97,7 +98,10 @@ public class BrightnessTracker {
     private static final String ATTR_BATTERY_LEVEL = "batteryLevel";
     private static final String ATTR_NIGHT_MODE = "nightMode";
     private static final String ATTR_COLOR_TEMPERATURE = "colorTemperature";
-    private static final String ATTR_LAST_BRIGHTNESS = "lastBrightness";
+    private static final String ATTR_LAST_NITS = "lastNits";
+
+    private static final int MSG_BACKGROUND_START = 0;
+    private static final int MSG_BRIGHTNESS_CHANGED = 1;
 
     // Lock held while accessing mEvents, is held while writing events to flash.
     private final Object mEventsLock = new Object();
@@ -113,9 +117,7 @@ public class BrightnessTracker {
     private final Context mContext;
     private final ContentResolver mContentResolver;
     private Handler mBgHandler;
-    // mSettingsObserver, mBroadcastReceiver and mSensorListener should only be used on
-    // the mBgHandler thread.
-    private SettingsObserver mSettingsObserver;
+    // mBroadcastReceiver and mSensorListener should only be used on the mBgHandler thread.
     private BroadcastReceiver mBroadcastReceiver;
     private SensorListener mSensorListener;
 
@@ -126,9 +128,9 @@ public class BrightnessTracker {
     @GuardedBy("mDataCollectionLock")
     private float mLastBatteryLevel = Float.NaN;
     @GuardedBy("mDataCollectionLock")
-    private int mIgnoreBrightness = -1;
+    private float mLastBrightness = -1;
     @GuardedBy("mDataCollectionLock")
-    private int mLastBrightness = -1;
+    private boolean mStarted;
 
     private final Injector mInjector;
 
@@ -144,32 +146,30 @@ public class BrightnessTracker {
         }
     }
 
-    /** Start listening for brightness slider events */
-    public void start() {
+    /**
+     * Start listening for brightness slider events
+     *
+     * @param brightness the initial screen brightness
+     */
+    public void start(float initialBrightness) {
         if (DEBUG) {
             Slog.d(TAG, "Start");
         }
-        mBgHandler = mInjector.getBackgroundHandler();
+        mBgHandler = new TrackerHandler(mInjector.getBackgroundHandler().getLooper());
         mUserManager = mContext.getSystemService(UserManager.class);
 
-        mBgHandler.post(() -> backgroundStart());
+        mBgHandler.obtainMessage(MSG_BACKGROUND_START, (Float) initialBrightness).sendToTarget();
     }
 
-    private void backgroundStart() {
+    private void backgroundStart(float initialBrightness) {
         readEvents();
 
-        mLastBrightness = mInjector.getSystemIntForUser(mContentResolver,
-                Settings.System.SCREEN_BRIGHTNESS, -1,
-                UserHandle.USER_CURRENT);
-
         mSensorListener = new SensorListener();
+
 
         if (mInjector.isInteractive(mContext)) {
             mInjector.registerSensorListener(mContext, mSensorListener, mBgHandler);
         }
-
-        mSettingsObserver = new SettingsObserver(mBgHandler);
-        mInjector.registerBrightnessObserver(mContentResolver, mSettingsObserver);
 
         final IntentFilter intentFilter = new IntentFilter();
         intentFilter.addAction(Intent.ACTION_SHUTDOWN);
@@ -180,6 +180,10 @@ public class BrightnessTracker {
         mInjector.registerReceiver(mContext, mBroadcastReceiver, intentFilter);
 
         mInjector.scheduleIdleJob(mContext);
+        synchronized (mDataCollectionLock) {
+            mLastBrightness = initialBrightness;
+            mStarted = true;
+        }
     }
 
     /** Stop listening for events */
@@ -188,10 +192,14 @@ public class BrightnessTracker {
         if (DEBUG) {
             Slog.d(TAG, "Stop");
         }
+        mBgHandler.removeMessages(MSG_BACKGROUND_START);
         mInjector.unregisterSensorListener(mContext, mSensorListener);
         mInjector.unregisterReceiver(mContext, mBroadcastReceiver);
-        mInjector.unregisterBrightnessObserver(mContext, mSettingsObserver);
         mInjector.cancelIdleJob(mContext);
+
+        synchronized (mDataCollectionLock) {
+            mStarted = false;
+        }
     }
 
     /**
@@ -220,39 +228,44 @@ public class BrightnessTracker {
         return new ParceledListSlice<>(out);
     }
 
-    /** Sets brightness without logging the brightness change event */
-    public void setBrightness(int brightness, int userId) {
-        synchronized (mDataCollectionLock) {
-            mIgnoreBrightness = brightness;
-        }
-        mInjector.putSystemIntForUser(mContentResolver, Settings.System.SCREEN_BRIGHTNESS,
-                brightness, userId);
-    }
-
     public void persistEvents() {
         scheduleWriteEvents();
     }
 
-    private void handleBrightnessChanged() {
+    /**
+     * Notify the BrightnessTracker that the user has changed the brightness of the display.
+     */
+    public void notifyBrightnessChanged(float brightness, boolean userInitiated) {
         if (DEBUG) {
-            Slog.d(TAG, "Brightness change");
+            Slog.d(TAG, String.format("notifyBrightnessChanged(brightness=%f, userInitiated=%b)",
+                        brightness, userInitiated));
         }
-        final BrightnessChangeEvent event = new BrightnessChangeEvent();
-        event.timeStamp = mInjector.currentTimeMillis();
+        Message m = mBgHandler.obtainMessage(MSG_BRIGHTNESS_CHANGED,
+                userInitiated ? 1 : 0, 0 /*unused*/, (Float) brightness);
+        m.sendToTarget();
+    }
 
-        int brightness = mInjector.getSystemIntForUser(mContentResolver,
-                Settings.System.SCREEN_BRIGHTNESS, -1,
-                UserHandle.USER_CURRENT);
-
+    private void handleBrightnessChanged(float brightness, boolean userInitiated) {
+        final BrightnessChangeEvent event;
         synchronized (mDataCollectionLock) {
-            int previousBrightness = mLastBrightness;
-            mLastBrightness = brightness;
-
-            if (brightness == -1 || brightness == mIgnoreBrightness) {
-                // Notified of brightness change but no setting or self change so ignore.
-                mIgnoreBrightness = -1;
+            if (!mStarted) {
+                // Not currently gathering brightness change information
                 return;
             }
+
+            float previousBrightness = mLastBrightness;
+            mLastBrightness = brightness;
+
+            if (!userInitiated) {
+                // We want to record what current brightness is so that we know what the user
+                // changed it from, but if it wasn't user initiated then we don't want to record it
+                // as a BrightnessChangeEvent.
+                return;
+            }
+
+
+            event = new BrightnessChangeEvent();
+            event.timeStamp = mInjector.currentTimeMillis();
 
             final int readingCount = mLastSensorReadings.size();
             if (readingCount == 0) {
@@ -386,7 +399,7 @@ public class BrightnessTracker {
             if (userSerialNo != -1 && toWrite[i].timeStamp > timeCutOff) {
                 mEvents.append(toWrite[i]);
                 out.startTag(null, TAG_EVENT);
-                out.attribute(null, ATTR_BRIGHTNESS, Integer.toString(toWrite[i].brightness));
+                out.attribute(null, ATTR_NITS, Float.toString(toWrite[i].brightness));
                 out.attribute(null, ATTR_TIMESTAMP, Long.toString(toWrite[i].timeStamp));
                 out.attribute(null, ATTR_PACKAGE_NAME, toWrite[i].packageName);
                 out.attribute(null, ATTR_USER, Integer.toString(userSerialNo));
@@ -394,8 +407,8 @@ public class BrightnessTracker {
                 out.attribute(null, ATTR_NIGHT_MODE, Boolean.toString(toWrite[i].nightMode));
                 out.attribute(null, ATTR_COLOR_TEMPERATURE, Integer.toString(
                         toWrite[i].colorTemperature));
-                out.attribute(null, ATTR_LAST_BRIGHTNESS,
-                        Integer.toString(toWrite[i].lastBrightness));
+                out.attribute(null, ATTR_LAST_NITS,
+                        Float.toString(toWrite[i].lastBrightness));
                 StringBuilder luxValues = new StringBuilder();
                 StringBuilder luxTimestamps = new StringBuilder();
                 for (int j = 0; j < toWrite[i].luxValues.length; ++j) {
@@ -446,8 +459,8 @@ public class BrightnessTracker {
                 if (TAG_EVENT.equals(tag)) {
                     BrightnessChangeEvent event = new BrightnessChangeEvent();
 
-                    String brightness = parser.getAttributeValue(null, ATTR_BRIGHTNESS);
-                    event.brightness = Integer.parseInt(brightness);
+                    String brightness = parser.getAttributeValue(null, ATTR_NITS);
+                    event.brightness = Float.parseFloat(brightness);
                     String timestamp = parser.getAttributeValue(null, ATTR_TIMESTAMP);
                     event.timeStamp = Long.parseLong(timestamp);
                     event.packageName = parser.getAttributeValue(null, ATTR_PACKAGE_NAME);
@@ -460,8 +473,8 @@ public class BrightnessTracker {
                     String colorTemperature =
                             parser.getAttributeValue(null, ATTR_COLOR_TEMPERATURE);
                     event.colorTemperature = Integer.parseInt(colorTemperature);
-                    String lastBrightness = parser.getAttributeValue(null, ATTR_LAST_BRIGHTNESS);
-                    event.lastBrightness = Integer.parseInt(lastBrightness);
+                    String lastBrightness = parser.getAttributeValue(null, ATTR_LAST_NITS);
+                    event.lastBrightness = Float.parseFloat(lastBrightness);
 
                     String luxValue = parser.getAttributeValue(null, ATTR_LUX);
                     String luxTimestamp = parser.getAttributeValue(null, ATTR_LUX_TIMESTAMPS);
@@ -582,22 +595,6 @@ public class BrightnessTracker {
         }
     }
 
-    private final class SettingsObserver extends ContentObserver {
-        public SettingsObserver(Handler handler) {
-            super(handler);
-        }
-
-        @Override
-        public void onChange(boolean selfChange, Uri uri) {
-            if (DEBUG) {
-                Slog.v(TAG, "settings change " + uri);
-            }
-            // Self change is based on observer passed to notifyObserver, SettingsProvider
-            // passes null so no changes are self changes.
-            handleBrightnessChanged();
-        }
-    }
-
     private final class Receiver extends BroadcastReceiver {
         @Override
         public void onReceive(Context context, Intent intent) {
@@ -623,6 +620,24 @@ public class BrightnessTracker {
         }
     }
 
+    private final class TrackerHandler extends Handler {
+        public TrackerHandler(Looper looper) {
+            super(looper, null, true /*async*/);
+        }
+        public void handleMessage(Message msg) {
+            switch (msg.what) {
+                case MSG_BACKGROUND_START:
+                    backgroundStart((float)msg.obj /*initial brightness*/);
+                    break;
+                case MSG_BRIGHTNESS_CHANGED:
+                    float newBrightness = (float) msg.obj;
+                    boolean userInitiatedChange = (msg.arg1 == 1);
+                    handleBrightnessChanged(newBrightness, userInitiatedChange);
+                    break;
+            }
+        }
+    }
+
     @VisibleForTesting
     static class Injector {
         public void registerSensorListener(Context context,
@@ -638,18 +653,6 @@ public class BrightnessTracker {
             sensorManager.unregisterListener(sensorListener);
         }
 
-        public void registerBrightnessObserver(ContentResolver resolver,
-                ContentObserver settingsObserver) {
-            resolver.registerContentObserver(Settings.System.getUriFor(
-                    Settings.System.SCREEN_BRIGHTNESS),
-                    false, settingsObserver, UserHandle.USER_ALL);
-        }
-
-        public void unregisterBrightnessObserver(Context context,
-                ContentObserver settingsObserver) {
-            context.getContentResolver().unregisterContentObserver(settingsObserver);
-        }
-
         public void registerReceiver(Context context,
                 BroadcastReceiver receiver, IntentFilter filter) {
             context.registerReceiver(receiver, filter);
@@ -662,16 +665,6 @@ public class BrightnessTracker {
 
         public Handler getBackgroundHandler() {
             return BackgroundThread.getHandler();
-        }
-
-        public int getSystemIntForUser(ContentResolver resolver, String setting, int defaultValue,
-                int userId) {
-            return Settings.System.getIntForUser(resolver, setting, defaultValue, userId);
-        }
-
-        public void putSystemIntForUser(ContentResolver resolver, String setting, int value,
-                int userId) {
-            Settings.System.putIntForUser(resolver, setting, value, userId);
         }
 
         public int getSecureIntForUser(ContentResolver resolver, String setting, int defaultValue,

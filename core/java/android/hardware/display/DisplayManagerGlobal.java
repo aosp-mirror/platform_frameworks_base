@@ -476,18 +476,6 @@ public final class DisplayManagerGlobal {
     }
 
     /**
-     * Set brightness but don't add a BrightnessChangeEvent
-     * STOPSHIP remove when adaptive brightness accepts curves.
-     */
-    public void setBrightness(int brightness) {
-        try {
-            mDm.setBrightness(brightness);
-        } catch (RemoteException ex) {
-            throw ex.rethrowFromSystemServer();
-        }
-    }
-
-    /**
      * Sets the global brightness configuration for a given user.
      *
      * @hide

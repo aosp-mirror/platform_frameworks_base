@@ -2441,6 +2441,7 @@ public final class PowerManagerService extends SystemService
             float screenAutoBrightnessAdjustment = 0.0f;
             boolean autoBrightness = (mScreenBrightnessModeSetting ==
                     Settings.System.SCREEN_BRIGHTNESS_MODE_AUTOMATIC);
+            boolean brightnessIsTemporary = false;
             if (!mBootCompleted) {
                 // Keep the brightness steady during boot. This requires the
                 // bootloader brightness and the default brightness to be identical.
@@ -2455,6 +2456,7 @@ public final class PowerManagerService extends SystemService
                 brightnessSetByUser = false;
             } else if (isValidBrightness(mTemporaryScreenBrightnessSettingOverride)) {
                 screenBrightness = mTemporaryScreenBrightnessSettingOverride;
+                brightnessIsTemporary = true;
             } else if (isValidBrightness(mScreenBrightnessSetting)) {
                 screenBrightness = mScreenBrightnessSetting;
             }
@@ -2464,6 +2466,7 @@ public final class PowerManagerService extends SystemService
                         mTemporaryScreenAutoBrightnessAdjustmentSettingOverride)) {
                     screenAutoBrightnessAdjustment =
                             mTemporaryScreenAutoBrightnessAdjustmentSettingOverride;
+                    brightnessIsTemporary = true;
                 } else if (isValidAutoBrightnessAdjustment(
                         mScreenAutoBrightnessAdjustmentSetting)) {
                     screenAutoBrightnessAdjustment = mScreenAutoBrightnessAdjustmentSetting;
@@ -2479,6 +2482,7 @@ public final class PowerManagerService extends SystemService
             mDisplayPowerRequest.screenAutoBrightnessAdjustment =
                     screenAutoBrightnessAdjustment;
             mDisplayPowerRequest.brightnessSetByUser = brightnessSetByUser;
+            mDisplayPowerRequest.brightnessIsTemporary = brightnessIsTemporary;
             mDisplayPowerRequest.useAutoBrightness = autoBrightness;
             mDisplayPowerRequest.useProximitySensor = shouldUseProximitySensorLocked();
             mDisplayPowerRequest.boostScreenBrightness = shouldBoostScreenBrightness();
