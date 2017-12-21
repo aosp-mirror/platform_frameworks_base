@@ -235,10 +235,13 @@ public final class SelectionActionModeHelper {
             @Editor.TextActionMode int actionMode, @Nullable SelectionResult result) {
         final CharSequence text = getText(mTextView);
         if (result != null && text instanceof Spannable
-                && (mTextView.isTextSelectable() || mTextView.isTextEditable())) {
+                && (mTextView.isTextSelectable()
+                    || mTextView.isTextEditable()
+                    || actionMode == Editor.TextActionMode.TEXT_LINK)) {
             // Do not change the selection if TextClassifier should be dark launched.
             if (!mTextView.getTextClassifier().getSettings().isDarkLaunch()) {
                 Selection.setSelection((Spannable) text, result.mStart, result.mEnd);
+                mTextView.invalidate();
             }
             mTextClassification = result.mClassification;
         } else {
@@ -250,8 +253,17 @@ public final class SelectionActionModeHelper {
                     && (mTextView.isTextSelectable() || mTextView.isTextEditable())) {
                 controller.show();
             }
-            if (result != null && actionMode == Editor.TextActionMode.SELECTION) {
-                mSelectionTracker.onSmartSelection(result);
+            if (result != null) {
+                switch (actionMode) {
+                    case Editor.TextActionMode.SELECTION:
+                        mSelectionTracker.onSmartSelection(result);
+                        break;
+                    case Editor.TextActionMode.TEXT_LINK:
+                        mSelectionTracker.onLinkSelected(result);
+                        break;
+                    default:
+                        break;
+                }
             }
         }
         mEditor.setRestartActionModeOnNextRefresh(false);
@@ -486,12 +498,24 @@ public final class SelectionActionModeHelper {
          * Called when selection action mode is started and the results come from a classifier.
          */
         public void onSmartSelection(SelectionResult result) {
+            onClassifiedSelection(result);
+            mLogger.logSelectionModified(
+                    result.mStart, result.mEnd, result.mClassification, result.mSelection);
+        }
+
+        /**
+         * Called when link action mode is started and the classification comes from a classifier.
+         */
+        public void onLinkSelected(SelectionResult result) {
+            onClassifiedSelection(result);
+            // TODO: log (b/70246800)
+        }
+
+        private void onClassifiedSelection(SelectionResult result) {
             if (isSelectionStarted()) {
                 mSelectionStart = result.mStart;
                 mSelectionEnd = result.mEnd;
                 mAllowReset = mSelectionStart != mOriginalStart || mSelectionEnd != mOriginalEnd;
-                mLogger.logSelectionModified(
-                        result.mStart, result.mEnd, result.mClassification, result.mSelection);
             }
         }
 
