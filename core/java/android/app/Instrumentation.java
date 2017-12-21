@@ -1209,6 +1209,11 @@ public class Instrumentation {
     }
 
     private AppComponentFactory getFactory(String pkg) {
+        if (mThread == null) {
+            Log.e(TAG, "Uninitialized ActivityThread, likely app-created Instrumentation,"
+                    + " disabling AppComponentFactory", new Throwable());
+            return AppComponentFactory.DEFAULT;
+        }
         LoadedApk loadedApk = mThread.peekLoadedApk(pkg, true);
         // This is in the case of starting up "android".
         if (loadedApk == null) loadedApk = mThread.getSystemContext().mLoadedApk;
