@@ -105,7 +105,7 @@ int main(int /*argc*/, char** /*argv*/) {
 
     // Set up the binder
     sp<ProcessState> ps(ProcessState::self());
-    ps->setThreadPoolMaxThreadCount(1);  // everything is oneway, let it queue and save ram
+    ps->setThreadPoolMaxThreadCount(9);
     ps->startThreadPool();
     ps->giveThreadPoolName();
     IPCThreadState::self()->disableBackgroundScheduling(true);

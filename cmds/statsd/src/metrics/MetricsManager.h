@@ -24,6 +24,7 @@
 #include "logd/LogEvent.h"
 #include "matchers/LogMatchingTracker.h"
 #include "metrics/MetricProducer.h"
+#include "packages/UidMap.h"
 
 #include <unordered_map>
 
@@ -32,9 +33,10 @@ namespace os {
 namespace statsd {
 
 // A MetricsManager is responsible for managing metrics from one single config source.
-class MetricsManager {
+class MetricsManager : public PackageInfoListener {
 public:
-    MetricsManager(const ConfigKey& configKey, const StatsdConfig& config, const long timeBaseSec);
+    MetricsManager(const ConfigKey& configKey, const StatsdConfig& config, const long timeBaseSec,
+                   sp<UidMap> uidMap);
 
     virtual ~MetricsManager();
 
@@ -48,6 +50,12 @@ public:
 
     void setAnomalyMonitor(const sp<AnomalyMonitor>& anomalyMonitor);
 
+    void notifyAppUpgrade(const string& apk, const int uid, const int64_t version) override;
+
+    void notifyAppRemoved(const string& apk, const int uid) override;
+
+    void onUidMapReceived() override;
+
     // Config source owner can call onDumpReport() to get all the metrics collected.
     virtual void onDumpReport(android::util::ProtoOutputStream* protoOutput);
 
@@ -57,6 +65,23 @@ public:
 
 private:
     const ConfigKey mConfigKey;
+
+    sp<UidMap> mUidMap;
+
+    bool mConfigValid = false;
+
+    // The uid log sources from StatsdConfig.
+    std::vector<int32_t> mAllowedUid;
+
+    // The pkg log sources from StatsdConfig.
+    std::vector<std::string> mAllowedPkg;
+
+    // The combined uid sources (after translating pkg name to uid).
+    // Logs from uids that are not in the list will be ignored to avoid spamming.
+    std::set<int32_t> mAllowedLogSources;
+
+    // To guard access to mAllowedLogSources
+    mutable std::mutex mAllowedLogSourcesMutex;
 
     // All event tags that are interesting to my metrics.
     std::set<int> mTagIds;
@@ -102,7 +127,7 @@ private:
     // maps from ConditionTracker to MetricProducer
     std::unordered_map<int, std::vector<int>> mConditionToMetricMap;
 
-    bool mConfigValid = false;
+    void initLogSourceWhiteList();
 };
 
 }  // namespace statsd

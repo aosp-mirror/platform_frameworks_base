@@ -62,6 +62,10 @@ public:
      */
     int GetTagId() const { return mTagId; }
 
+    uint32_t GetUid() const {
+        return mLogUid;
+    }
+
     /**
      * Get the nth value, starting at 1.
      *
@@ -133,6 +137,8 @@ private:
     uint64_t mTimestampNs;
 
     int mTagId;
+
+    uint32_t mLogUid;
 };
 
 }  // namespace statsd

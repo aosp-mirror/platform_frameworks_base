@@ -222,6 +222,11 @@ message Alert {
     optional int64 trigger_if_sum_gt = 6;
 }
 
+message AllowedLogSource {
+    repeated int32 uid = 1;
+    repeated string package = 2;
+}
+
 message StatsdConfig {
     optional string name = 1;
 
@@ -240,4 +245,6 @@ message StatsdConfig {
     repeated Predicate predicate = 8;
 
     repeated Alert alert = 9;
+
+    optional AllowedLogSource log_source = 10;
 }

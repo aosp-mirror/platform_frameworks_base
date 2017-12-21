@@ -87,26 +87,41 @@ void UidMap::updateMap(const vector<int32_t>& uid, const vector<int64_t>& versio
 
 void UidMap::updateMap(const int64_t& timestamp, const vector<int32_t>& uid,
                        const vector<int64_t>& versionCode, const vector<String16>& packageName) {
-    lock_guard<mutex> lock(mMutex);  // Exclusively lock for updates.
+    vector<wp<PackageInfoListener>> broadcastList;
+    {
+        lock_guard<mutex> lock(mMutex);  // Exclusively lock for updates.
 
-    mMap.clear();
-    for (size_t j = 0; j < uid.size(); j++) {
-        mMap.insert(make_pair(uid[j],
-                              AppData(string(String8(packageName[j]).string()), versionCode[j])));
-    }
+        mMap.clear();
+        for (size_t j = 0; j < uid.size(); j++) {
+            mMap.insert(make_pair(
+                    uid[j], AppData(string(String8(packageName[j]).string()), versionCode[j])));
+        }
 
-    auto snapshot = mOutput.add_snapshots();
-    snapshot->set_timestamp_nanos(timestamp);
-    for (size_t j = 0; j < uid.size(); j++) {
-        auto t = snapshot->add_package_info();
-        t->set_name(string(String8(packageName[j]).string()));
-        t->set_version(int(versionCode[j]));
-        t->set_uid(uid[j]);
+        auto snapshot = mOutput.add_snapshots();
+        snapshot->set_timestamp_nanos(timestamp);
+        for (size_t j = 0; j < uid.size(); j++) {
+            auto t = snapshot->add_package_info();
+            t->set_name(string(String8(packageName[j]).string()));
+            t->set_version(int(versionCode[j]));
+            t->set_uid(uid[j]);
+        }
+        mBytesUsed += snapshot->ByteSize();
+        StatsdStats::getInstance().setCurrentUidMapMemory(mBytesUsed);
+        StatsdStats::getInstance().setUidMapSnapshots(mOutput.snapshots_size());
+        ensureBytesUsedBelowLimit();
+        getListenerListCopyLocked(&broadcastList);
     }
-    mBytesUsed += snapshot->ByteSize();
-    StatsdStats::getInstance().setCurrentUidMapMemory(mBytesUsed);
-    StatsdStats::getInstance().setUidMapSnapshots(mOutput.snapshots_size());
-    ensureBytesUsedBelowLimit();
+    // To avoid invoking callback while holding the internal lock. we get a copy of the listener
+    // list and invoke the callback. It's still possible that after we copy the list, a
+    // listener removes itself before we call it. It's then the listener's job to handle it (expect
+    // the callback to be called after listener is removed, and the listener should properly
+    // ignore it).
+    for (auto weakPtr : broadcastList) {
+        auto strongPtr = weakPtr.promote();
+        if (strongPtr != NULL) {
+            strongPtr->onUidMapReceived();
+        }
+    }
 }
 
 void UidMap::updateApp(const String16& app_16, const int32_t& uid, const int64_t& versionCode) {
@@ -115,37 +130,45 @@ void UidMap::updateApp(const String16& app_16, const int32_t& uid, const int64_t
 
 void UidMap::updateApp(const int64_t& timestamp, const String16& app_16, const int32_t& uid,
                        const int64_t& versionCode) {
-    lock_guard<mutex> lock(mMutex);
-
+    vector<wp<PackageInfoListener>> broadcastList;
     string appName = string(String8(app_16).string());
+    {
+        lock_guard<mutex> lock(mMutex);
 
-    // Notify any interested producers that this app has updated
-    for (auto it : mSubscribers) {
-        it->notifyAppUpgrade(appName, uid, versionCode);
+        auto log = mOutput.add_changes();
+        log->set_deletion(false);
+        log->set_timestamp_nanos(timestamp);
+        log->set_app(appName);
+        log->set_uid(uid);
+        log->set_version(versionCode);
+        mBytesUsed += log->ByteSize();
+        StatsdStats::getInstance().setCurrentUidMapMemory(mBytesUsed);
+        StatsdStats::getInstance().setUidMapChanges(mOutput.changes_size());
+        ensureBytesUsedBelowLimit();
+
+        auto range = mMap.equal_range(int(uid));
+        bool found = false;
+        for (auto it = range.first; it != range.second; ++it) {
+            // If we find the exact same app name and uid, update the app version directly.
+            if (it->second.packageName == appName) {
+                it->second.versionCode = versionCode;
+                found = true;
+                break;
+            }
+        }
+        if (!found) {
+            // Otherwise, we need to add an app at this uid.
+            mMap.insert(make_pair(uid, AppData(appName, versionCode)));
+        }
+        getListenerListCopyLocked(&broadcastList);
     }
 
-    auto log = mOutput.add_changes();
-    log->set_deletion(false);
-    log->set_timestamp_nanos(timestamp);
-    log->set_app(appName);
-    log->set_uid(uid);
-    log->set_version(versionCode);
-    mBytesUsed += log->ByteSize();
-    StatsdStats::getInstance().setCurrentUidMapMemory(mBytesUsed);
-    StatsdStats::getInstance().setUidMapChanges(mOutput.changes_size());
-    ensureBytesUsedBelowLimit();
-
-    auto range = mMap.equal_range(int(uid));
-    for (auto it = range.first; it != range.second; ++it) {
-        // If we find the exact same app name and uid, update the app version directly.
-        if (it->second.packageName == appName) {
-            it->second.versionCode = versionCode;
-            return;
+    for (auto weakPtr : broadcastList) {
+        auto strongPtr = weakPtr.promote();
+        if (strongPtr != NULL) {
+            strongPtr->notifyAppUpgrade(appName, uid, versionCode);
         }
     }
-
-    // Otherwise, we need to add an app at this uid.
-    mMap.insert(make_pair(uid, AppData(appName, versionCode)));
 }
 
 void UidMap::ensureBytesUsedBelowLimit() {
@@ -174,42 +197,59 @@ void UidMap::removeApp(const String16& app_16, const int32_t& uid) {
     removeApp(time(nullptr) * NS_PER_SEC, app_16, uid);
 }
 
-void UidMap::removeApp(const int64_t& timestamp, const String16& app_16, const int32_t& uid) {
-    lock_guard<mutex> lock(mMutex);
-
-    string app = string(String8(app_16).string());
-
-    for (auto it : mSubscribers) {
-        it->notifyAppRemoved(app, uid);
-    }
-
-    auto log = mOutput.add_changes();
-    log->set_deletion(true);
-    log->set_timestamp_nanos(timestamp);
-    log->set_app(app);
-    log->set_uid(uid);
-    mBytesUsed += log->ByteSize();
-    StatsdStats::getInstance().setCurrentUidMapMemory(mBytesUsed);
-    StatsdStats::getInstance().setUidMapChanges(mOutput.changes_size());
-    ensureBytesUsedBelowLimit();
-
-    auto range = mMap.equal_range(int(uid));
-    for (auto it = range.first; it != range.second; ++it) {
-        if (it->second.packageName == app) {
-            mMap.erase(it);
-            return;
+void UidMap::getListenerListCopyLocked(vector<wp<PackageInfoListener>>* output) {
+    for (auto weakIt = mSubscribers.begin(); weakIt != mSubscribers.end();) {
+        auto strongPtr = weakIt->promote();
+        if (strongPtr != NULL) {
+            output->push_back(*weakIt);
+            weakIt++;
+        } else {
+            weakIt = mSubscribers.erase(weakIt);
+            VLOG("The UidMap listener is gone, remove it now");
         }
     }
-    VLOG("removeApp failed to find the app %s with uid %i to remove", app.c_str(), uid);
-    return;
 }
 
-void UidMap::addListener(sp<PackageInfoListener> producer) {
+void UidMap::removeApp(const int64_t& timestamp, const String16& app_16, const int32_t& uid) {
+    vector<wp<PackageInfoListener>> broadcastList;
+    string app = string(String8(app_16).string());
+    {
+        lock_guard<mutex> lock(mMutex);
+
+        auto log = mOutput.add_changes();
+        log->set_deletion(true);
+        log->set_timestamp_nanos(timestamp);
+        log->set_app(app);
+        log->set_uid(uid);
+        mBytesUsed += log->ByteSize();
+        StatsdStats::getInstance().setCurrentUidMapMemory(mBytesUsed);
+        StatsdStats::getInstance().setUidMapChanges(mOutput.changes_size());
+        ensureBytesUsedBelowLimit();
+
+        auto range = mMap.equal_range(int(uid));
+        for (auto it = range.first; it != range.second; ++it) {
+            if (it->second.packageName == app) {
+                mMap.erase(it);
+                break;
+            }
+        }
+        getListenerListCopyLocked(&broadcastList);
+    }
+
+    for (auto weakPtr : broadcastList) {
+        auto strongPtr = weakPtr.promote();
+        if (strongPtr != NULL) {
+            strongPtr->notifyAppRemoved(app, uid);
+        }
+    }
+}
+
+void UidMap::addListener(wp<PackageInfoListener> producer) {
     lock_guard<mutex> lock(mMutex);  // Lock for updates
     mSubscribers.insert(producer);
 }
 
-void UidMap::removeListener(sp<PackageInfoListener> producer) {
+void UidMap::removeListener(wp<PackageInfoListener> producer) {
     lock_guard<mutex> lock(mMutex);  // Lock for updates
     mSubscribers.erase(producer);
 }
@@ -270,7 +310,7 @@ int64_t UidMap::getMinimumTimestampNs() {
     return m;
 }
 
-size_t UidMap::getBytesUsed() {
+size_t UidMap::getBytesUsed() const {
     return mBytesUsed;
 }
 
@@ -316,7 +356,7 @@ UidMapping UidMap::getOutput(const int64_t& timestamp, const ConfigKey& key) {
     return ret;
 }
 
-void UidMap::printUidMap(FILE* out) {
+void UidMap::printUidMap(FILE* out) const {
     lock_guard<mutex> lock(mMutex);
 
     for (auto it : mMap) {
@@ -348,6 +388,18 @@ void UidMap::OnConfigUpdated(const ConfigKey& key) {
 
 void UidMap::OnConfigRemoved(const ConfigKey& key) {
     mLastUpdatePerConfigKey.erase(key);
+}
+
+set<int32_t> UidMap::getAppUid(const string& package) const {
+    lock_guard<mutex> lock(mMutex);
+
+    set<int32_t> results;
+    for (const auto& pair : mMap) {
+        if (pair.second.packageName == package) {
+            results.insert(pair.first);
+        }
+    }
+    return results;
 }
 
 }  // namespace statsd
