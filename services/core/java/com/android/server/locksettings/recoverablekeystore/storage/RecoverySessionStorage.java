@@ -129,15 +129,17 @@ public class RecoverySessionStorage implements Destroyable {
     public static class Entry implements Destroyable {
         private final byte[] mLskfHash;
         private final byte[] mKeyClaimant;
+        private final byte[] mVaultParams;
         private final String mSessionId;
 
         /**
          * @hide
          */
-        public Entry(String sessionId, byte[] lskfHash, byte[] keyClaimant) {
-            this.mLskfHash = lskfHash;
-            this.mSessionId = sessionId;
-            this.mKeyClaimant = keyClaimant;
+        public Entry(String sessionId, byte[] lskfHash, byte[] keyClaimant, byte[] vaultParams) {
+            mLskfHash = lskfHash;
+            mSessionId = sessionId;
+            mKeyClaimant = keyClaimant;
+            mVaultParams = vaultParams;
         }
 
         /**
@@ -157,6 +159,15 @@ public class RecoverySessionStorage implements Destroyable {
          */
         public byte[] getKeyClaimant() {
             return mKeyClaimant;
+        }
+
+        /**
+         * Returns the vault params associated with the session.
+         *
+         * @hide
+         */
+        public byte[] getVaultParams() {
+            return mVaultParams;
         }
 
         /**

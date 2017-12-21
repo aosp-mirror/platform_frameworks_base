@@ -54,6 +54,8 @@ public class KeySyncUtils {
             "V1 encrypted_application_key".getBytes(StandardCharsets.UTF_8);
     private static final byte[] RECOVERY_CLAIM_HEADER =
             "V1 KF_claim".getBytes(StandardCharsets.UTF_8);
+    private static final byte[] RECOVERY_RESPONSE_HEADER =
+            "V1 reencrypted_recovery_key".getBytes(StandardCharsets.UTF_8);
 
     private static final byte[] THM_KF_HASH_PREFIX = "THM_KF_hash".getBytes(StandardCharsets.UTF_8);
 
@@ -201,6 +203,28 @@ public class KeySyncUtils {
                 /*sharedSecret=*/ null,
                 /*header=*/ concat(RECOVERY_CLAIM_HEADER, vaultParams, challenge),
                 /*payload=*/ concat(thmKfHash, keyClaimant));
+    }
+
+    /**
+     * Decrypts response from recovery claim, returning the locally encrypted key.
+     *
+     * @param keyClaimant The key claimant, used by the remote service to encrypt the response.
+     * @param vaultParams Vault params associated with the claim.
+     * @param encryptedResponse The encrypted response.
+     * @return The locally encrypted recovery key.
+     * @throws NoSuchAlgorithmException if any SecureBox algorithm is not present.
+     * @throws InvalidKeyException if the {@code keyClaimant} could not be used to decrypt.
+     * @throws AEADBadTagException if the message has been tampered with or was encrypted with a
+     *     different key.
+     */
+    public static byte[] decryptRecoveryClaimResponse(
+            byte[] keyClaimant, byte[] vaultParams, byte[] encryptedResponse)
+            throws NoSuchAlgorithmException, InvalidKeyException, AEADBadTagException {
+        return SecureBox.decrypt(
+                /*ourPrivateKey=*/ null,
+                /*sharedSecret=*/ keyClaimant,
+                /*header=*/ concat(RECOVERY_RESPONSE_HEADER, vaultParams),
+                /*encryptedPayload=*/ encryptedResponse);
     }
 
     /**

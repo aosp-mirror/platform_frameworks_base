@@ -35,6 +35,7 @@ import com.android.internal.annotations.VisibleForTesting;
 import com.android.server.locksettings.recoverablekeystore.storage.RecoverableKeyStoreDb;
 import com.android.server.locksettings.recoverablekeystore.storage.RecoverySessionStorage;
 
+import java.nio.charset.StandardCharsets;
 import java.security.InvalidKeyException;
 import java.security.KeyStoreException;
 import java.security.NoSuchAlgorithmException;
@@ -42,9 +43,12 @@ import java.security.PublicKey;
 import java.security.spec.InvalidKeySpecException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+
+import javax.crypto.AEADBadTagException;
 
 /**
  * Class with {@link RecoverableKeyStoreLoader} API implementation and internal methods to interact
@@ -225,7 +229,7 @@ public class RecoverableKeyStoreManager {
      * @param verifierPublicKey X509-encoded public key.
      * @param vaultParams Additional params associated with vault.
      * @param vaultChallenge Challenge issued by vault service.
-     * @param secrets Lock-screen hashes. Should have a single element. TODO: why is this a list?
+     * @param secrets Lock-screen hashes. For now only a single secret is supported.
      * @return Encrypted bytes of recovery claim. This can then be issued to the vault service.
      *
      * @hide
@@ -248,7 +252,8 @@ public class RecoverableKeyStoreManager {
         byte[] keyClaimant = KeySyncUtils.generateKeyClaimant();
         byte[] kfHash = secrets.get(0).getSecret();
         mRecoverySessionStorage.add(
-                userId, new RecoverySessionStorage.Entry(sessionId, kfHash, keyClaimant));
+                userId,
+                new RecoverySessionStorage.Entry(sessionId, kfHash, keyClaimant, vaultParams));
 
         try {
             byte[] thmKfHash = KeySyncUtils.calculateThmKfHash(kfHash);
@@ -275,14 +280,101 @@ public class RecoverableKeyStoreManager {
         }
     }
 
+    /**
+     * Invoked by a recovery agent after a successful recovery claim is sent to the remote vault
+     * service.
+     *
+     * <p>TODO: should also load into AndroidKeyStore.
+     *
+     * @param sessionId The session ID used to generate the claim. See
+     *     {@link #startRecoverySession(String, byte[], byte[], byte[], List, int)}.
+     * @param encryptedRecoveryKey The encrypted recovery key blob returned by the remote vault
+     *     service.
+     * @param applicationKeys The encrypted key blobs returned by the remote vault service. These
+     *     were wrapped with the recovery key.
+     * @param uid The uid of the recovery agent.
+     * @throws RemoteException if an error occurred recovering the keys.
+     */
     public void recoverKeys(
             @NonNull String sessionId,
-            @NonNull byte[] recoveryKeyBlob,
+            @NonNull byte[] encryptedRecoveryKey,
             @NonNull List<KeyEntryRecoveryData> applicationKeys,
-            int userId)
+            int uid)
             throws RemoteException {
         checkRecoverKeyStorePermission();
-        throw new UnsupportedOperationException();
+
+        RecoverySessionStorage.Entry sessionEntry = mRecoverySessionStorage.get(uid, sessionId);
+        if (sessionEntry == null) {
+            throw new RemoteException(String.format(Locale.US,
+                    "User %d does not have pending session '%s'", uid, sessionId));
+        }
+
+        try {
+            byte[] recoveryKey = decryptRecoveryKey(sessionEntry, encryptedRecoveryKey);
+            recoverApplicationKeys(recoveryKey, applicationKeys);
+        } finally {
+            sessionEntry.destroy();
+            mRecoverySessionStorage.remove(uid);
+        }
+    }
+
+    private byte[] decryptRecoveryKey(
+            RecoverySessionStorage.Entry sessionEntry, byte[] encryptedClaimResponse)
+            throws RemoteException {
+        try {
+            byte[] locallyEncryptedKey = KeySyncUtils.decryptRecoveryClaimResponse(
+                    sessionEntry.getKeyClaimant(),
+                    sessionEntry.getVaultParams(),
+                    encryptedClaimResponse);
+            return KeySyncUtils.decryptRecoveryKey(sessionEntry.getLskfHash(), locallyEncryptedKey);
+        } catch (InvalidKeyException | AEADBadTagException e) {
+            throw new RemoteException(
+                    "Failed to decrypt recovery key",
+                    e,
+                    /*enableSuppression=*/ true,
+                    /*writeableStackTrace=*/ true);
+        } catch (NoSuchAlgorithmException e) {
+            // Should never happen: all the algorithms used are required by AOSP implementations
+            throw new RemoteException(
+                    "Missing required algorithm",
+                    e,
+                    /*enableSuppression=*/ true,
+                    /*writeableStackTrace=*/ true);
+        }
+    }
+
+    /**
+     * Uses {@code recoveryKey} to decrypt {@code applicationKeys}.
+     *
+     * <p>TODO: and load them into store?
+     *
+     * @throws RemoteException if an error occurred decrypting the keys.
+     */
+    private void recoverApplicationKeys(
+            @NonNull byte[] recoveryKey,
+            @NonNull List<KeyEntryRecoveryData> applicationKeys) throws RemoteException {
+        for (KeyEntryRecoveryData applicationKey : applicationKeys) {
+            String alias = new String(applicationKey.getAlias(), StandardCharsets.UTF_8);
+            byte[] encryptedKeyMaterial = applicationKey.getEncryptedKeyMaterial();
+
+            try {
+                // TODO: put decrypted key material in appropriate AndroidKeyStore
+                KeySyncUtils.decryptApplicationKey(recoveryKey, encryptedKeyMaterial);
+            } catch (NoSuchAlgorithmException e) {
+                // Should never happen: all the algorithms used are required by AOSP implementations
+                throw new RemoteException(
+                        "Missing required algorithm",
+                        e,
+                    /*enableSuppression=*/ true,
+                    /*writeableStackTrace=*/ true);
+            } catch (InvalidKeyException | AEADBadTagException e) {
+                throw new RemoteException(
+                        "Failed to recover key with alias '" + alias + "'",
+                        e,
+                    /*enableSuppression=*/ true,
+                    /*writeableStackTrace=*/ true);
+            }
+        }
     }
 
     /**

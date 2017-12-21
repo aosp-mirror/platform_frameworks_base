@@ -55,6 +55,8 @@ public class KeySyncUtilsTest {
             utf8Bytes("snQzsbvclkSsG6PwasAp1oFLzbq3KtFe");
     private static final byte[] RECOVERY_CLAIM_HEADER =
             "V1 KF_claim".getBytes(StandardCharsets.UTF_8);
+    private static final byte[] RECOVERY_RESPONSE_HEADER =
+            "V1 reencrypted_recovery_key".getBytes(StandardCharsets.UTF_8);
 
     @Test
     public void calculateThmKfHash_isShaOfLockScreenHashWithPrefix() throws Exception {
@@ -167,6 +169,42 @@ public class KeySyncUtilsTest {
         try {
             KeySyncUtils.decryptRecoveryKey(LOCK_SCREEN_HASH_2, encrypted);
             fail("Did not throw decrypting with bad key.");
+        } catch (AEADBadTagException error) {
+            // expected
+        }
+    }
+
+    @Test
+    public void decryptRecoveryClaimResponse_decryptsAValidResponse() throws Exception {
+        byte[] keyClaimant = KeySyncUtils.generateKeyClaimant();
+        byte[] vaultParams = randomBytes(100);
+        byte[] recoveryKey = randomBytes(32);
+        byte[] encryptedPayload = SecureBox.encrypt(
+                /*theirPublicKey=*/ null,
+                /*sharedSecret=*/ keyClaimant,
+                /*header=*/ KeySyncUtils.concat(RECOVERY_RESPONSE_HEADER, vaultParams),
+                /*payload=*/ recoveryKey);
+
+        byte[] decrypted = KeySyncUtils.decryptRecoveryClaimResponse(
+                keyClaimant, vaultParams, encryptedPayload);
+
+        assertArrayEquals(recoveryKey, decrypted);
+    }
+
+    @Test
+    public void decryptRecoveryClaimResponse_throwsIfCannotDecrypt() throws Exception {
+        byte[] vaultParams = randomBytes(100);
+        byte[] recoveryKey = randomBytes(32);
+        byte[] encryptedPayload = SecureBox.encrypt(
+                /*theirPublicKey=*/ null,
+                /*sharedSecret=*/ KeySyncUtils.generateKeyClaimant(),
+                /*header=*/ KeySyncUtils.concat(RECOVERY_RESPONSE_HEADER, vaultParams),
+                /*payload=*/ recoveryKey);
+
+        try {
+            KeySyncUtils.decryptRecoveryClaimResponse(
+                    KeySyncUtils.generateKeyClaimant(), vaultParams, encryptedPayload);
+            fail("Did not throw decrypting with bad keyClaimant");
         } catch (AEADBadTagException error) {
             // expected
         }

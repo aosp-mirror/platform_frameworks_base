@@ -37,6 +37,7 @@ public class RecoverySessionStorageTest {
     private static final int TEST_USER_ID = 696;
     private static final byte[] TEST_LSKF_HASH = getUtf8Bytes("lskf");
     private static final byte[] TEST_KEY_CLAIMANT = getUtf8Bytes("0000111122223333");
+    private static final byte[] TEST_VAULT_PARAMS = getUtf8Bytes("vault params vault params");
 
     @Test
     public void size_isZeroForEmpty() {
@@ -47,7 +48,7 @@ public class RecoverySessionStorageTest {
     public void size_incrementsAfterAdd() {
         RecoverySessionStorage storage = new RecoverySessionStorage();
         storage.add(TEST_USER_ID, new RecoverySessionStorage.Entry(
-                TEST_SESSION_ID, lskfHashFixture(), keyClaimantFixture()));
+                TEST_SESSION_ID, lskfHashFixture(), keyClaimantFixture(), vaultParamsFixture()));
 
         assertEquals(1, storage.size());
     }
@@ -56,7 +57,7 @@ public class RecoverySessionStorageTest {
     public void size_decrementsAfterRemove() {
         RecoverySessionStorage storage = new RecoverySessionStorage();
         storage.add(TEST_USER_ID, new RecoverySessionStorage.Entry(
-                TEST_SESSION_ID, lskfHashFixture(), keyClaimantFixture()));
+                TEST_SESSION_ID, lskfHashFixture(), keyClaimantFixture(), vaultParamsFixture()));
         storage.remove(TEST_USER_ID);
 
         assertEquals(0, storage.size());
@@ -66,7 +67,7 @@ public class RecoverySessionStorageTest {
     public void remove_overwritesLskfHashMemory() {
         RecoverySessionStorage storage = new RecoverySessionStorage();
         RecoverySessionStorage.Entry entry = new RecoverySessionStorage.Entry(
-                TEST_SESSION_ID, lskfHashFixture(), keyClaimantFixture());
+                TEST_SESSION_ID, lskfHashFixture(), keyClaimantFixture(), vaultParamsFixture());
         storage.add(TEST_USER_ID, entry);
 
         storage.remove(TEST_USER_ID);
@@ -78,7 +79,7 @@ public class RecoverySessionStorageTest {
     public void remove_overwritesKeyClaimantMemory() {
         RecoverySessionStorage storage = new RecoverySessionStorage();
         RecoverySessionStorage.Entry entry = new RecoverySessionStorage.Entry(
-                TEST_SESSION_ID, lskfHashFixture(), keyClaimantFixture());
+                TEST_SESSION_ID, lskfHashFixture(), keyClaimantFixture(), vaultParamsFixture());
         storage.add(TEST_USER_ID, entry);
 
         storage.remove(TEST_USER_ID);
@@ -90,7 +91,7 @@ public class RecoverySessionStorageTest {
     public void destroy_overwritesLskfHashMemory() {
         RecoverySessionStorage storage = new RecoverySessionStorage();
         RecoverySessionStorage.Entry entry = new RecoverySessionStorage.Entry(
-                TEST_SESSION_ID, lskfHashFixture(), keyClaimantFixture());
+                TEST_SESSION_ID, lskfHashFixture(), keyClaimantFixture(), vaultParamsFixture());
         storage.add(TEST_USER_ID, entry);
 
         storage.destroy();
@@ -102,7 +103,7 @@ public class RecoverySessionStorageTest {
     public void destroy_overwritesKeyClaimantMemory() {
         RecoverySessionStorage storage = new RecoverySessionStorage();
         RecoverySessionStorage.Entry entry = new RecoverySessionStorage.Entry(
-                TEST_SESSION_ID, lskfHashFixture(), keyClaimantFixture());
+                TEST_SESSION_ID, lskfHashFixture(), keyClaimantFixture(), vaultParamsFixture());
         storage.add(TEST_USER_ID, entry);
 
         storage.destroy();
@@ -124,6 +125,10 @@ public class RecoverySessionStorageTest {
 
     private static byte[] keyClaimantFixture() {
         return Arrays.copyOf(TEST_KEY_CLAIMANT, TEST_KEY_CLAIMANT.length);
+    }
+
+    private static byte[] vaultParamsFixture() {
+        return Arrays.copyOf(TEST_VAULT_PARAMS, TEST_VAULT_PARAMS.length);
     }
 
     private static byte[] getUtf8Bytes(String s) {

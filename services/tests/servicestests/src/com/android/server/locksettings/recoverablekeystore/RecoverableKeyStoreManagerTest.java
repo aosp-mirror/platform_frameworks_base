@@ -21,6 +21,7 @@ import static android.security.recoverablekeystore.KeyStoreRecoveryMetadata.TYPE
 
 import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.fail;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.times;
@@ -29,6 +30,7 @@ import static org.mockito.Mockito.verify;
 import android.content.Context;
 import android.os.RemoteException;
 import android.security.recoverablekeystore.KeyDerivationParameters;
+import android.security.recoverablekeystore.KeyEntryRecoveryData;
 import android.security.recoverablekeystore.KeyStoreRecoveryMetadata;
 import android.security.recoverablekeystore.RecoverableKeyStoreLoader;
 import android.support.test.InstrumentationRegistry;
@@ -39,6 +41,7 @@ import com.android.server.locksettings.recoverablekeystore.storage.RecoverableKe
 import com.android.server.locksettings.recoverablekeystore.storage.RecoverySessionStorage;
 
 import com.google.common.collect.ImmutableList;
+import com.google.common.collect.ImmutableMap;
 
 import org.junit.After;
 import org.junit.Before;
@@ -50,6 +53,10 @@ import org.mockito.MockitoAnnotations;
 import java.io.File;
 import java.nio.charset.StandardCharsets;
 import java.util.concurrent.Executors;
+import java.util.Random;
+
+import javax.crypto.SecretKey;
+import javax.crypto.spec.SecretKeySpec;
 
 @SmallTest
 @RunWith(AndroidJUnit4.class)
@@ -77,6 +84,9 @@ public class RecoverableKeyStoreManagerTest {
     private static final byte[] TEST_VAULT_PARAMS = getUtf8Bytes("vault_params");
     private static final int TEST_USER_ID = 10009;
     private static final int KEY_CLAIMANT_LENGTH_BYTES = 16;
+    private static final byte[] RECOVERY_RESPONSE_HEADER =
+            "V1 reencrypted_recovery_key".getBytes(StandardCharsets.UTF_8);
+    private static final String TEST_ALIAS = "nick";
 
     @Mock private Context mMockContext;
 
@@ -156,6 +166,7 @@ public class RecoverableKeyStoreManagerTest {
                     TEST_VAULT_CHALLENGE,
                     ImmutableList.of(),
                     TEST_USER_ID);
+            fail("should have thrown");
         } catch (RemoteException e) {
             assertEquals("Only a single KeyStoreRecoveryMetadata is supported",
                     e.getMessage());
@@ -176,13 +187,151 @@ public class RecoverableKeyStoreManagerTest {
                             KeyDerivationParameters.createSHA256Parameters(TEST_SALT),
                             TEST_SECRET)),
                     TEST_USER_ID);
+            fail("should have thrown");
         } catch (RemoteException e) {
             assertEquals("Not a valid X509 key",
                     e.getMessage());
         }
     }
 
+    @Test
+    public void recoverKeys_throwsIfNoSessionIsPresent() throws Exception {
+        try {
+            mRecoverableKeyStoreManager.recoverKeys(
+                    TEST_SESSION_ID,
+                    /*recoveryKeyBlob=*/ randomBytes(32),
+                    /*applicationKeys=*/ ImmutableList.of(
+                            new KeyEntryRecoveryData(getUtf8Bytes("alias"), randomBytes(32))
+                    ),
+                    TEST_USER_ID);
+            fail("should have thrown");
+        } catch (RemoteException e) {
+            assertEquals("User 10009 does not have pending session 'karlin'",
+                    e.getMessage());
+        }
+    }
+
+    @Test
+    public void recoverKeys_throwsIfRecoveryClaimCannotBeDecrypted() throws Exception {
+        mRecoverableKeyStoreManager.startRecoverySession(
+                TEST_SESSION_ID,
+                TEST_PUBLIC_KEY,
+                TEST_VAULT_PARAMS,
+                TEST_VAULT_CHALLENGE,
+                ImmutableList.of(new KeyStoreRecoveryMetadata(
+                        TYPE_LOCKSCREEN,
+                        TYPE_PASSWORD,
+                        KeyDerivationParameters.createSHA256Parameters(TEST_SALT),
+                        TEST_SECRET)),
+                TEST_USER_ID);
+
+        try {
+            mRecoverableKeyStoreManager.recoverKeys(
+                    TEST_SESSION_ID,
+                    /*encryptedRecoveryKey=*/ randomBytes(60),
+                    /*applicationKeys=*/ ImmutableList.of(),
+                    /*uid=*/ TEST_USER_ID);
+            fail("should have thrown");
+        } catch (RemoteException e) {
+            assertEquals("Failed to decrypt recovery key", e.getMessage());
+        }
+    }
+
+    @Test
+    public void recoverKeys_throwsIfFailedToDecryptAnApplicationKey() throws Exception {
+        mRecoverableKeyStoreManager.startRecoverySession(
+                TEST_SESSION_ID,
+                TEST_PUBLIC_KEY,
+                TEST_VAULT_PARAMS,
+                TEST_VAULT_CHALLENGE,
+                ImmutableList.of(new KeyStoreRecoveryMetadata(
+                        TYPE_LOCKSCREEN,
+                        TYPE_PASSWORD,
+                        KeyDerivationParameters.createSHA256Parameters(TEST_SALT),
+                        TEST_SECRET)),
+                TEST_USER_ID);
+        byte[] keyClaimant = mRecoverySessionStorage.get(TEST_USER_ID, TEST_SESSION_ID)
+                .getKeyClaimant();
+        SecretKey recoveryKey = randomRecoveryKey();
+        byte[] encryptedClaimResponse = encryptClaimResponse(
+                keyClaimant, TEST_SECRET, TEST_VAULT_PARAMS, recoveryKey);
+        KeyEntryRecoveryData badApplicationKey = new KeyEntryRecoveryData(
+                TEST_ALIAS.getBytes(StandardCharsets.UTF_8),
+                randomBytes(32));
+
+        try {
+            mRecoverableKeyStoreManager.recoverKeys(
+                    TEST_SESSION_ID,
+                    /*encryptedRecoveryKey=*/ encryptedClaimResponse,
+                    /*applicationKeys=*/ ImmutableList.of(badApplicationKey),
+                    /*uid=*/ TEST_USER_ID);
+            fail("should have thrown");
+        } catch (RemoteException e) {
+            assertEquals("Failed to recover key with alias 'nick'", e.getMessage());
+        }
+    }
+
+    @Test
+    public void recoverKeys_doesNotThrowIfAllIsOk() throws Exception {
+        mRecoverableKeyStoreManager.startRecoverySession(
+                TEST_SESSION_ID,
+                TEST_PUBLIC_KEY,
+                TEST_VAULT_PARAMS,
+                TEST_VAULT_CHALLENGE,
+                ImmutableList.of(new KeyStoreRecoveryMetadata(
+                        TYPE_LOCKSCREEN,
+                        TYPE_PASSWORD,
+                        KeyDerivationParameters.createSHA256Parameters(TEST_SALT),
+                        TEST_SECRET)),
+                TEST_USER_ID);
+        byte[] keyClaimant = mRecoverySessionStorage.get(TEST_USER_ID, TEST_SESSION_ID)
+                .getKeyClaimant();
+        SecretKey recoveryKey = randomRecoveryKey();
+        byte[] encryptedClaimResponse = encryptClaimResponse(
+                keyClaimant, TEST_SECRET, TEST_VAULT_PARAMS, recoveryKey);
+        KeyEntryRecoveryData applicationKey = new KeyEntryRecoveryData(
+                TEST_ALIAS.getBytes(StandardCharsets.UTF_8),
+                randomEncryptedApplicationKey(recoveryKey)
+        );
+
+        mRecoverableKeyStoreManager.recoverKeys(
+                TEST_SESSION_ID,
+                encryptedClaimResponse,
+                ImmutableList.of(applicationKey),
+                TEST_USER_ID);
+    }
+
+    private static byte[] randomEncryptedApplicationKey(SecretKey recoveryKey) throws Exception {
+        return KeySyncUtils.encryptKeysWithRecoveryKey(recoveryKey, ImmutableMap.of(
+                "alias", new SecretKeySpec(randomBytes(32), "AES")
+        )).get("alias");
+    }
+
+    private static byte[] encryptClaimResponse(
+            byte[] keyClaimant,
+            byte[] lskfHash,
+            byte[] vaultParams,
+            SecretKey recoveryKey) throws Exception {
+        byte[] locallyEncryptedRecoveryKey = KeySyncUtils.locallyEncryptRecoveryKey(
+                lskfHash, recoveryKey);
+        return SecureBox.encrypt(
+                /*theirPublicKey=*/ null,
+                /*sharedSecret=*/ keyClaimant,
+                /*header=*/ KeySyncUtils.concat(RECOVERY_RESPONSE_HEADER, vaultParams),
+                /*payload=*/ locallyEncryptedRecoveryKey);
+    }
+
+    private static SecretKey randomRecoveryKey() {
+        return new SecretKeySpec(randomBytes(32), "AES");
+    }
+
     private static byte[] getUtf8Bytes(String s) {
         return s.getBytes(StandardCharsets.UTF_8);
+    }
+
+    private static byte[] randomBytes(int n) {
+        byte[] bytes = new byte[n];
+        new Random().nextBytes(bytes);
+        return bytes;
     }
 }
