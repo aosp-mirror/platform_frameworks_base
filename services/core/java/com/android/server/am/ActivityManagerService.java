@@ -19900,16 +19900,14 @@ public class ActivityManagerService extends IActivityManager.Stub
         userId = mUserController.handleIncomingUser(callingPid, callingUid, userId, true,
                 ALLOW_NON_FULL, "broadcast", callerPackage);
 
-        // Make sure that the user who is receiving this broadcast is running.
-        // If not, we will just skip it. Make an exception for shutdown broadcasts
-        // and upgrade steps.
-
-        if (userId != UserHandle.USER_ALL && !mUserController.isUserRunning(userId, 0)) {
+        // Make sure that the user who is receiving this broadcast or its parent is running.
+        // If not, we will just skip it. Make an exception for shutdown broadcasts, upgrade steps.
+        if (userId != UserHandle.USER_ALL && !mUserController.isUserOrItsParentRunning(userId)) {
             if ((callingUid != SYSTEM_UID
                     || (intent.getFlags() & Intent.FLAG_RECEIVER_BOOT_UPGRADE) == 0)
                     && !Intent.ACTION_SHUTDOWN.equals(intent.getAction())) {
                 Slog.w(TAG, "Skipping broadcast of " + intent
-                        + ": user " + userId + " is stopped");
+                        + ": user " + userId + " and its parent (if any) are stopped");
                 return ActivityManager.BROADCAST_FAILED_USER_STOPPED;
             }
         }
