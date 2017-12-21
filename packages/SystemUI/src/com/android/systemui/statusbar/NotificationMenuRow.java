@@ -176,8 +176,6 @@ public class NotificationMenuRow implements NotificationMenuRowPlugin, View.OnCl
         final Resources res = mContext.getResources();
         mHorizSpaceForIcon = res.getDimensionPixelSize(R.dimen.notification_menu_icon_size);
         mVertSpaceForIcons = res.getDimensionPixelSize(R.dimen.notification_min_height);
-        mSidePadding = res.getDimensionPixelSize(R.dimen.notification_lockscreen_side_paddings);
-        mIconPadding = res.getDimensionPixelSize(R.dimen.notification_menu_icon_padding);
         mMenuItems.clear();
         // Construct the menu items based on the notification
         if (mParent != null && mParent.getStatusBarNotification() != null) {
@@ -498,8 +496,8 @@ public class NotificationMenuRow implements NotificationMenuRowPlugin, View.OnCl
         final int count = mMenuContainer.getChildCount();
         for (int i = 0; i < count; i++) {
             final View v = mMenuContainer.getChildAt(i);
-            final float left = mSidePadding + i * mHorizSpaceForIcon;
-            final float right = mParent.getWidth() - (mHorizSpaceForIcon * (i + 1)) - mSidePadding;
+            final float left = i * mHorizSpaceForIcon;
+            final float right = mParent.getWidth() - (mHorizSpaceForIcon * (i + 1));
             v.setX(showOnLeft ? left : right);
         }
         mOnLeft = showOnLeft;

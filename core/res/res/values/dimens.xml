@@ -152,11 +152,11 @@
     <dimen name="dialog_padding">16dp</dimen>
 
     <!-- The margin on the start of the content view -->
-    <dimen name="notification_content_margin_start">24dp</dimen>
+    <dimen name="notification_content_margin_start">16dp</dimen>
 
     <!-- The margin on the end of the content view
         Keep in sync with notification_content_plus_picture_margin! -->
-    <dimen name="notification_content_margin_end">24dp</dimen>
+    <dimen name="notification_content_margin_end">16dp</dimen>
 
     <!-- The margin on the end of the content view with a picture.
         Keep in sync with notification_content_plus_picture_margin! -->
@@ -166,7 +166,7 @@
         content end margin.
         Keep equal to (notification_content_picture_margin + notification_content_margin_end)!
     -->
-    <dimen name="notification_content_plus_picture_margin_end">80dp</dimen>
+    <dimen name="notification_content_plus_picture_margin_end">72dp</dimen>
 
     <!-- The additional margin on the sides of the ambient view. -->
     <dimen name="notification_extra_margin_ambient">16dp</dimen>

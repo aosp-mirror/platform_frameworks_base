@@ -102,10 +102,7 @@
     <dimen name="notification_max_heads_up_height_increased">188dp</dimen>
 
     <!-- Side padding on the lockscreen on the side of notifications -->
-    <dimen name="notification_lockscreen_side_paddings">8dp</dimen>
-
-    <!-- Additional side padding for custom content if the app doesn't target P yet -->
-    <dimen name="notification_content_custom_view_side_padding">@dimen/notification_lockscreen_side_paddings</dimen>
+    <dimen name="notification_side_paddings">4dp</dimen>
 
     <!-- Height of a messaging notifications with actions at least. Not that this is an upper bound
          and the notification won't use this much, but is measured with wrap_content -->
@@ -121,7 +118,7 @@
     <dimen name="notification_min_interaction_height">40dp</dimen>
 
     <!-- the padding of the shelf icon container -->
-    <dimen name="shelf_icon_container_padding">21dp</dimen>
+    <dimen name="shelf_icon_container_padding">13dp</dimen>
 
     <!-- The padding of a notification icon on top to the start of the notification. Used for custom
          views where the distance can't be measured -->
@@ -226,7 +223,7 @@
     <dimen name="qs_footer_height">48dp</dimen>
 
     <!-- The padding between the notifications and the quick settings container -->
-    <dimen name="qs_notification_keyguard_padding">8dp</dimen>
+    <dimen name="qs_notification_padding">@dimen/notification_side_paddings</dimen>
 
     <!-- Height of the status bar header bar when expanded -->
     <dimen name="status_bar_header_height_expanded">124dp</dimen>

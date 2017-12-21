@@ -69,7 +69,6 @@ public abstract class ExpandableOutlineView extends ExpandableView {
     private float mBottomRoundness;
     private float mTopRoundness;
     private int mBackgroundTop;
-    protected int mCurrentSidePaddings;
 
     /**
      * {@code true} if the children views of the {@link ExpandableOutlineView} are translated when
@@ -83,9 +82,9 @@ public abstract class ExpandableOutlineView extends ExpandableView {
             if (!mCustomOutline && mCurrentTopRoundness == 0.0f
                     && mCurrentBottomRoundness == 0.0f && !mAlwaysRoundBothCorners) {
                 int translation = mShouldTranslateContents ? (int) getTranslation() : 0;
-                int left = Math.max(translation + mCurrentSidePaddings, mCurrentSidePaddings);
+                int left = Math.max(translation, 0);
                 int top = mClipTopAmount + mBackgroundTop;
-                int right = getWidth() - mCurrentSidePaddings + Math.min(translation, 0);
+                int right = getWidth() + Math.min(translation, 0);
                 int bottom = Math.max(getActualHeight() - mClipBottomAmount, top);
                 outline.setRect(left, top, right, bottom);
             } else {
@@ -115,9 +114,9 @@ public abstract class ExpandableOutlineView extends ExpandableView {
         if (!mCustomOutline) {
             int translation = mShouldTranslateContents && !ignoreTranslation
                     ? (int) getTranslation() : 0;
-            left = Math.max(translation + mCurrentSidePaddings, mCurrentSidePaddings);
+            left = Math.max(translation, 0);
             top = mClipTopAmount + mBackgroundTop;
-            right = getWidth() - mCurrentSidePaddings + Math.min(translation, 0);
+            right = getWidth() + Math.min(translation, 0);
             bottom = Math.max(getActualHeight(), top);
             int intersectBottom = Math.max(getActualHeight() - mClipBottomAmount, top);
             if (bottom != intersectBottom) {
@@ -135,8 +134,6 @@ public abstract class ExpandableOutlineView extends ExpandableView {
             top = mOutlineRect.top;
             right = mOutlineRect.right;
             bottom = mOutlineRect.bottom;
-            left = Math.max(mCurrentSidePaddings, left);
-            right = Math.min(getWidth() - mCurrentSidePaddings, right);
         }
         height = bottom - top;
         if (height == 0) {
@@ -160,13 +157,6 @@ public abstract class ExpandableOutlineView extends ExpandableView {
             roundedRectPath.op(intersectPath, Path.Op.INTERSECT);
         }
         return roundedRectPath;
-    }
-
-    protected Path getRoundedRectPath(int left, int top, int right, int bottom, float topRoundness,
-            float bottomRoundness) {
-        getRoundedRectPath(left, top, right, bottom, topRoundness, bottomRoundness,
-                mTmpPath);
-        return mTmpPath;
     }
 
     private void getRoundedRectPath(int left, int top, int right, int bottom, float topRoundness,
@@ -394,11 +384,5 @@ public abstract class ExpandableOutlineView extends ExpandableView {
 
     public Path getCustomClipPath(View child) {
         return null;
-    }
-
-    public void setCurrentSidePaddings(float currentSidePaddings) {
-        mCurrentSidePaddings = (int) currentSidePaddings;
-        invalidateOutline();
-        invalidate();
     }
 }

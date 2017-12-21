@@ -62,7 +62,7 @@ public class NotificationMediaTemplateViewWrapper extends NotificationTemplateVi
     }
 
     @Override
-    public boolean shouldClipToSidePaddings() {
+    public boolean shouldClipToRounding() {
         return true;
     }
 }
