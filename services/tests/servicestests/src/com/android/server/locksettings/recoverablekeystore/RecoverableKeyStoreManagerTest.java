@@ -49,6 +49,7 @@ import org.mockito.MockitoAnnotations;
 
 import java.io.File;
 import java.nio.charset.StandardCharsets;
+import java.util.concurrent.Executors;
 
 @SmallTest
 @RunWith(AndroidJUnit4.class)
@@ -95,7 +96,8 @@ public class RecoverableKeyStoreManagerTest {
         mRecoverableKeyStoreManager = new RecoverableKeyStoreManager(
                 mMockContext,
                 mRecoverableKeyStoreDb,
-                mRecoverySessionStorage);
+                mRecoverySessionStorage,
+                Executors.newSingleThreadExecutor());
     }
 
     @After
