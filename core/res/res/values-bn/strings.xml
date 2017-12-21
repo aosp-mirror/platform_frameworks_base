@@ -406,7 +406,7 @@
     <string name="permlab_vibrate" msgid="7696427026057705834">"ভাইব্রেশন নিয়ন্ত্রণ করুন"</string>
     <string name="permdesc_vibrate" msgid="6284989245902300945">"অ্যাপ্লিকেশানকে কম্পক নিয়ন্ত্রণ করতে দেয়৷"</string>
     <string name="permlab_callPhone" msgid="3925836347681847954">"সরাসরি ফোন নম্বরগুলিতে কল করে"</string>
-    <string name="permdesc_callPhone" msgid="3740797576113760827">"অ্যাপ্লিকেশানটিকে আপনার হস্তক্ষেপ ছাড়াই ফোন নম্বরগুলিতে কল করতে মঞ্জুর করে৷ এটি অপ্রত্যাশিত পরিমাণ খরচা বা কলের কারণ হতে পারে৷ মনে রাখবেন, এটি অ্যাপ্লিকেশানটির দ্বারা জরুরি নম্বরগুলিতে কল করাকে অনুমতি দেয় না৷ ক্ষতিকারক অ্যাপ্লিকেশানগুলি আপনার সম্মতি ছাড়াই কল করার ফলে আপনাকে অহেতুক অর্থ প্রদান করতে হতে পারে৷"</string>
+    <string name="permdesc_callPhone" msgid="3740797576113760827">"অ্যাপ্লিকেশানটিকে আপনার হস্তক্ষেপ ছাড়াই ফোন নম্বরগুলিতে কল করতে মঞ্জুর করে৷ এটি অপ্রত্যাশিত পরিমাণ খরচা বা কলের কারণ হতে পারে৷ মনে রাখবেন, এটি অ্যাপ্লিকেশানটির দ্বারা জরুরি নম্বরগুলিতে কল করাকে অনুমতি দেয় না৷ ক্ষতিকারক অ্যাপ্লিকেশানগুলি আপনার সম্মতি ছাড়াই কল করার ফলে আপনাকে অহেতুক পেমেন্ট করতে হতে পারে৷"</string>
     <string name="permlab_accessImsCallService" msgid="3574943847181793918">"IMS পরিষেবাতে অ্যাক্সেস"</string>
     <string name="permdesc_accessImsCallService" msgid="8992884015198298775">"আপনার হস্তক্ষেপ ছাড়াই কল করতে অ্যাপ্লিকেশানটিকে IMS পরিষেবা ব্যবহারের অনুমতি দিন৷"</string>
     <string name="permlab_readPhoneState" msgid="9178228524507610486">"ফোনের স্থিতি এবং পরিচয় পড়ুন"</string>
@@ -982,7 +982,7 @@
     <string name="editTextMenuTitle" msgid="4909135564941815494">"পাঠ্য ক্রিয়াগুলি"</string>
     <string name="email" msgid="4560673117055050403">"ইমেল"</string>
     <string name="dial" msgid="4204975095406423102">"ফোন করুন"</string>
-    <string name="map" msgid="6068210738233985748">"মানচিত্র"</string>
+    <string name="map" msgid="6068210738233985748">"ম্যাপ"</string>
     <string name="browse" msgid="6993590095938149861">"ব্রাউজার"</string>
     <string name="low_internal_storage_view_title" msgid="5576272496365684834">"স্টোরেজ পূর্ণ হতে চলেছে"</string>
     <string name="low_internal_storage_view_text" msgid="6640505817617414371">"কিছু কিছু সিস্টেম ক্রিয়াকলাপ কাজ নাও করতে পারে"</string>
@@ -1074,7 +1074,7 @@
     <string name="dump_heap_notification" msgid="2618183274836056542">"<xliff:g id="PROC">%1$s</xliff:g> মেমরি সীমা অতিক্রম করেছে"</string>
     <string name="dump_heap_notification_detail" msgid="6901391084243999274">"অনেক ডেটা সংগ্রহ করা হয়েছে; শেয়ার করার জন্য ট্যাপ করুন"</string>
     <string name="dump_heap_title" msgid="5864292264307651673">"হিপ ডাম্প শেয়ার করবেন?"</string>
-    <string name="dump_heap_text" msgid="4809417337240334941">"<xliff:g id="PROC">%1$s</xliff:g> প্রক্রিয়াটি তার <xliff:g id="SIZE">%2$s</xliff:g> এর মেমরি সীমা অতিক্রম করেছে৷ তার বিকাশকারীর সাথে শেয়ার করার জন্য একটি হিপ ডাম্প উপলব্ধ৷ সতর্কতা অবলম্বন করুন: এই হিপ ডাম্পে অ্যাপ্লিকেশানটির অ্যাক্সেস আছে এমন আপনার যেকোন ব্যক্তিগত তথ্য থাকতে পারে৷"</string>
+    <string name="dump_heap_text" msgid="4809417337240334941">"<xliff:g id="PROC">%1$s</xliff:g> প্রক্রিয়াটি তার <xliff:g id="SIZE">%2$s</xliff:g> এর মেমরি সীমা অতিক্রম করেছে৷ তার ডেভেলপারের সাথে শেয়ার করার জন্য একটি হিপ ডাম্প উপলব্ধ৷ সতর্কতা অবলম্বন করুন: এই হিপ ডাম্পে অ্যাপ্লিকেশানটির অ্যাক্সেস আছে এমন আপনার যেকোন ব্যক্তিগত তথ্য থাকতে পারে৷"</string>
     <string name="sendText" msgid="5209874571959469142">"পাঠ্যের জন্য একটি কাজ বেছে নিন"</string>
     <string name="volume_ringtone" msgid="6885421406845734650">"রিং ভলিউম"</string>
     <string name="volume_music" msgid="5421651157138628171">"মিডিয়ার ভলিউম"</string>
@@ -1740,7 +1740,7 @@
     <string name="app_category_image" msgid="4867854544519846048">"ফটো ও ছবিগুলি"</string>
     <string name="app_category_social" msgid="5842783057834965912">"সামাজিক ও যোগাযোগ"</string>
     <string name="app_category_news" msgid="7496506240743986873">"খবর ও পত্রিকাগুলি"</string>
-    <string name="app_category_maps" msgid="5878491404538024367">"মানচিত্র ও নেভিগেশান"</string>
+    <string name="app_category_maps" msgid="5878491404538024367">"ম্যাপ ও নেভিগেশান"</string>
     <string name="app_category_productivity" msgid="3742083261781538852">"উৎপাদনশীলতা"</string>
     <string name="device_storage_monitor_notification_channel" msgid="3295871267414816228">"ডিভাইসের স্টোরেজ"</string>
     <string name="adb_debugging_notification_channel_tv" msgid="5537766997350092316">"USB ডিবাগিং"</string>
