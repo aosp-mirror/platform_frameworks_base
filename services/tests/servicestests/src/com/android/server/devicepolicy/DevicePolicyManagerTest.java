@@ -17,6 +17,10 @@ package com.android.server.devicepolicy;
 
 import static android.app.admin.DevicePolicyManager.DELEGATION_APP_RESTRICTIONS;
 import static android.app.admin.DevicePolicyManager.DELEGATION_CERT_INSTALL;
+import static android.app.admin.DevicePolicyManager.ID_TYPE_BASE_INFO;
+import static android.app.admin.DevicePolicyManager.ID_TYPE_IMEI;
+import static android.app.admin.DevicePolicyManager.ID_TYPE_MEID;
+import static android.app.admin.DevicePolicyManager.ID_TYPE_SERIAL;
 import static android.app.admin.DevicePolicyManager.WIPE_EUICC;
 import static android.os.UserManagerInternal.CAMERA_DISABLED_GLOBALLY;
 import static android.os.UserManagerInternal.CAMERA_DISABLED_LOCALLY;
@@ -71,6 +75,7 @@ import android.os.UserManager;
 import android.platform.test.annotations.Presubmit;
 import android.provider.Settings;
 import android.security.KeyChain;
+import android.security.keystore.AttestationUtils;
 import android.telephony.TelephonyManager;
 import android.test.MoreAsserts;
 import android.test.suitebuilder.annotation.SmallTest;
@@ -4457,6 +4462,47 @@ public class DevicePolicyManagerTest extends DpmTestBase {
             assertNotNull(ownerInstalledCaCerts);
             assertTrue(ownerInstalledCaCerts.isEmpty());
         });
+    }
+
+    private void assertAttestationFlags(int attestationFlags, int[] expectedFlags) {
+        int[] gotFlags = DevicePolicyManagerService.translateIdAttestationFlags(attestationFlags);
+        Arrays.sort(gotFlags);
+        Arrays.sort(expectedFlags);
+        assertTrue(Arrays.equals(expectedFlags, gotFlags));
+    }
+
+    public void testTranslationOfIdAttestationFlag() {
+        int[] allIdTypes = new int[]{ID_TYPE_SERIAL, ID_TYPE_IMEI, ID_TYPE_MEID};
+        int[] correspondingAttUtilsTypes = new int[]{
+            AttestationUtils.ID_TYPE_SERIAL, AttestationUtils.ID_TYPE_IMEI,
+            AttestationUtils.ID_TYPE_MEID};
+
+        // Test translation of zero flags
+        assertNull(DevicePolicyManagerService.translateIdAttestationFlags(0));
+
+        // Test translation of the ID_TYPE_BASE_INFO flag, which should yield an empty, but
+        // non-null array
+        assertAttestationFlags(ID_TYPE_BASE_INFO, new int[] {});
+
+        // Test translation of a single flag
+        assertAttestationFlags(ID_TYPE_BASE_INFO | ID_TYPE_SERIAL,
+                new int[] {AttestationUtils.ID_TYPE_SERIAL});
+        assertAttestationFlags(ID_TYPE_SERIAL, new int[] {AttestationUtils.ID_TYPE_SERIAL});
+
+        // Test translation of two flags
+        assertAttestationFlags(ID_TYPE_SERIAL | ID_TYPE_IMEI,
+                new int[] {AttestationUtils.ID_TYPE_IMEI, AttestationUtils.ID_TYPE_SERIAL});
+        assertAttestationFlags(ID_TYPE_BASE_INFO | ID_TYPE_MEID | ID_TYPE_SERIAL,
+                new int[] {AttestationUtils.ID_TYPE_MEID, AttestationUtils.ID_TYPE_SERIAL});
+
+        // Test translation of all three flags
+        assertAttestationFlags(ID_TYPE_SERIAL | ID_TYPE_IMEI | ID_TYPE_MEID,
+                new int[] {AttestationUtils.ID_TYPE_IMEI, AttestationUtils.ID_TYPE_SERIAL,
+                    AttestationUtils.ID_TYPE_MEID});
+        // Test translation of all three flags
+        assertAttestationFlags(ID_TYPE_SERIAL | ID_TYPE_IMEI | ID_TYPE_MEID | ID_TYPE_BASE_INFO,
+                new int[] {AttestationUtils.ID_TYPE_IMEI, AttestationUtils.ID_TYPE_SERIAL,
+                    AttestationUtils.ID_TYPE_MEID});
     }
 
     private void setUserSetupCompleteForUser(boolean isUserSetupComplete, int userhandle) {
