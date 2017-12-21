@@ -38,6 +38,7 @@ import android.os.SystemClock;
 import android.os.UserHandle;
 import android.os.UserManagerInternal;
 import android.os.WorkSource;
+import android.os.connectivity.CellularBatteryStats;
 import android.os.health.HealthStatsParceler;
 import android.os.health.HealthStatsWriter;
 import android.os.health.UidHealthStats;
@@ -1404,6 +1405,16 @@ public final class BatteryStatsService extends IBatteryStats.Stub
                 }
             }
             if (DBG) Slog.d(TAG, "end dumpLocked");
+        }
+    }
+
+    /**
+     * Gets a snapshot of cellular stats
+     * @hide
+     */
+    public CellularBatteryStats getCellularBatteryStats() {
+        synchronized (mStats) {
+            return mStats.getCellularBatteryStats();
         }
     }
 
