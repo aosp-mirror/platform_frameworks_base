@@ -129,7 +129,7 @@ public final class FillRequest implements Parcelable {
     /**
      * Gets the extra client state returned from the last {@link
      * AutofillService#onFillRequest(FillRequest, CancellationSignal, FillCallback)}
-     * fill request}.
+     * fill request.
      *
      * @return The client state.
      */
