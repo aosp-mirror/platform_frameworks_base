@@ -137,12 +137,53 @@
                 android:text="@integer/duration_default"
                 android:textSize="30dp"/>
         </LinearLayout>
-	<CheckBox
+        <CheckBox
             android:id="@+id/placebo"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="@string/placebo"
             android:checked="false" />
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal">
+            <CheckBox
+                android:id="@+id/include_count"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/count"
+                android:checked="true"/>
+            <CheckBox
+                android:id="@+id/include_duration"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/duration"
+                android:checked="true"/>
+            <CheckBox
+                android:id="@+id/include_event"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/event"
+                android:checked="true"/>
+        </LinearLayout>
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal">
+            <CheckBox
+                android:id="@+id/include_value"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/value"
+                android:checked="true"/>
+            <CheckBox
+                android:id="@+id/include_gauge"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/gauge"
+                android:checked="true"/>
+        </LinearLayout>
 
         <Space
             android:layout_width="1dp"
