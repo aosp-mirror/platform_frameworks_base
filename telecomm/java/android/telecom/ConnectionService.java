@@ -21,6 +21,7 @@ import android.app.Service;
 import android.content.ComponentName;
 import android.content.Intent;
 import android.net.Uri;
+import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.IBinder;
@@ -143,6 +144,7 @@ public abstract class ConnectionService extends Service {
     private static final String SESSION_START_RTT = "CS.+RTT";
     private static final String SESSION_STOP_RTT = "CS.-RTT";
     private static final String SESSION_RTT_UPGRADE_RESPONSE = "CS.rTRUR";
+    private static final String SESSION_HANDOVER_FAILED = "CS.haF";
 
     private static final int MSG_ADD_CONNECTION_SERVICE_ADAPTER = 1;
     private static final int MSG_CREATE_CONNECTION = 2;
@@ -172,6 +174,7 @@ public abstract class ConnectionService extends Service {
     private static final int MSG_ON_STOP_RTT = 27;
     private static final int MSG_RTT_UPGRADE_RESPONSE = 28;
     private static final int MSG_CREATE_CONNECTION_COMPLETE = 29;
+    private static final int MSG_HANDOVER_FAILED = 32;
 
     private static Connection sNullConnection;
 
@@ -269,6 +272,22 @@ public abstract class ConnectionService extends Service {
                 args.arg4 = connectionManagerPhoneAccount;
                 args.argi1 = isIncoming ? 1 : 0;
                 mHandler.obtainMessage(MSG_CREATE_CONNECTION_FAILED, args).sendToTarget();
+            } finally {
+                Log.endSession();
+            }
+        }
+
+        @Override
+        public void handoverFailed(String callId, ConnectionRequest request, int reason,
+                                   Session.Info sessionInfo) {
+            Log.startSession(sessionInfo, SESSION_HANDOVER_FAILED);
+            try {
+                SomeArgs args = SomeArgs.obtain();
+                args.arg1 = callId;
+                args.arg2 = request;
+                args.arg3 = Log.createSubsession();
+                args.arg4 = reason;
+                mHandler.obtainMessage(MSG_HANDOVER_FAILED, args).sendToTarget();
             } finally {
                 Log.endSession();
             }
@@ -716,6 +735,36 @@ public abstract class ConnectionService extends Service {
                             Log.i(this, "createConnectionFailed %s", id);
                             createConnectionFailed(connectionMgrPhoneAccount, id, request,
                                     isIncoming);
+                        }
+                    } finally {
+                        args.recycle();
+                        Log.endSession();
+                    }
+                    break;
+                }
+                case MSG_HANDOVER_FAILED: {
+                    SomeArgs args = (SomeArgs) msg.obj;
+                    Log.continueSession((Session) args.arg3, SESSION_HANDLER +
+                            SESSION_HANDOVER_FAILED);
+                    try {
+                        final String id = (String) args.arg1;
+                        final ConnectionRequest request = (ConnectionRequest) args.arg2;
+                        final int reason = (int) args.arg4;
+                        if (!mAreAccountsInitialized) {
+                            Log.d(this, "Enqueueing pre-init request %s", id);
+                            mPreInitializationConnectionRequests.add(
+                                    new android.telecom.Logging.Runnable(
+                                            SESSION_HANDLER
+                                                    + SESSION_HANDOVER_FAILED + ".pICR",
+                                            null /*lock*/) {
+                                        @Override
+                                        public void loggedRun() {
+                                            handoverFailed(id, request, reason);
+                                        }
+                                    }.prepare());
+                        } else {
+                            Log.i(this, "createConnectionFailed %s", id);
+                            handoverFailed(id, request, reason);
                         }
                     } finally {
                         args.recycle();
@@ -1372,12 +1421,13 @@ public abstract class ConnectionService extends Service {
                 isUnknown);
 
         Connection connection = null;
-        if (request.getExtras() != null && request.getExtras().getBoolean(
-                TelecomManager.EXTRA_IS_HANDOVER,false)) {
+        if (getApplicationContext().getApplicationInfo().targetSdkVersion >
+                Build.VERSION_CODES.O_MR1 && request.getExtras() != null &&
+                request.getExtras().getBoolean(TelecomManager.EXTRA_IS_HANDOVER,false)) {
             if (!isIncoming) {
                 connection = onCreateOutgoingHandoverConnection(callManagerAccount, request);
             } else {
-                // Todo: Call onCreateIncommingHandoverConnection()
+                connection = onCreateIncomingHandoverConnection(callManagerAccount, request);
             }
         } else {
             connection = isUnknown ? onCreateUnknownConnection(callManagerAccount, request)
@@ -1450,6 +1500,13 @@ public abstract class ConnectionService extends Service {
         } else {
             onCreateOutgoingConnectionFailed(callManagerAccount, request);
         }
+    }
+
+    private void handoverFailed(final String callId, final ConnectionRequest request,
+                                        int reason) {
+
+        Log.i(this, "handoverFailed %s", callId);
+        onHandoverFailed(request, reason);
     }
 
     /**
