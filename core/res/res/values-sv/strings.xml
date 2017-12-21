@@ -420,7 +420,7 @@
     <string name="permdesc_setTimeZone" product="tv" msgid="888864653946175955">"Tillåter att appen ändrar tidszonen på TV:n."</string>
     <string name="permdesc_setTimeZone" product="default" msgid="4499943488436633398">"Tillåter att appen ändrar mobilens tidszon."</string>
     <string name="permlab_getAccounts" msgid="1086795467760122114">"hitta konton på enheten"</string>
-    <string name="permdesc_getAccounts" product="tablet" msgid="2741496534769660027">"Tillåter att appen hämtar en lista över alla kända konton på surfplattan. Detta kan inkludera konton som har skapats av appar som du har installerat."</string>
+    <string name="permdesc_getAccounts" product="tablet" msgid="2741496534769660027">"Tillåter att appen laddar ned en lista över alla kända konton på surfplattan. Detta kan inkludera konton som har skapats av appar som du har installerat."</string>
     <string name="permdesc_getAccounts" product="tv" msgid="4190633395633907543">"Tillåter att appen hämtar listan med konton som TV:n kan identifiera. Den kan innehålla konton som skapats av appar som du har installerat."</string>
     <string name="permdesc_getAccounts" product="default" msgid="3448316822451807382">"Tillåter att appen hämtar en lista över alla kända konton på mobilen. Detta kan inkludera konton som har skapats av appar som du har installerat."</string>
     <string name="permlab_accessNetworkState" msgid="4951027964348974773">"visa nätverksanslutningar"</string>

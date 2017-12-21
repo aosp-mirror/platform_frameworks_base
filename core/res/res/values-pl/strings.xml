@@ -270,7 +270,7 @@
     <string name="permgrouplab_calendar" msgid="5863508437783683902">"Kalendarz"</string>
     <string name="permgroupdesc_calendar" msgid="3889615280211184106">"dostęp do kalendarza"</string>
     <string name="permgrouplab_sms" msgid="228308803364967808">"SMS"</string>
-    <string name="permgroupdesc_sms" msgid="4656988620100940350">"wysyłanie i wyświetlanie SMS-ów"</string>
+    <string name="permgroupdesc_sms" msgid="4656988620100940350">"wysyłanie i wyświetlanie SMS‑ów"</string>
     <string name="permgrouplab_storage" msgid="1971118770546336966">"Pamięć wewnętrzna"</string>
     <string name="permgroupdesc_storage" msgid="637758554581589203">"dostęp do zdjęć, multimediów i plików na Twoim urządzeniu"</string>
     <string name="permgrouplab_microphone" msgid="171539900250043464">"Mikrofon"</string>

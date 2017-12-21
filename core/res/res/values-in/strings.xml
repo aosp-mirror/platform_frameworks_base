@@ -484,7 +484,7 @@
     <string name="permlab_writeSyncSettings" msgid="5408694875793945314">"nyalakan dan matikan sinkronisasi"</string>
     <string name="permdesc_writeSyncSettings" msgid="8956262591306369868">"Memungkinkan aplikasi mengubah setelan sinkronisasi untuk sebuah akun. Misalnya, izin ini dapat digunakan untuk mengaktifkan sinkronisasi dari aplikasi Orang dengan sebuah akun."</string>
     <string name="permlab_readSyncStats" msgid="7396577451360202448">"statistika baca sinkron"</string>
-    <string name="permdesc_readSyncStats" msgid="1510143761757606156">"Memungkinkan aplikasi membaca statistik sinkronisasi untuk sebuah akun, termasuk riwayat kejadian sinkronisasi dan berapa banyak data yang disinkronkan."</string>
+    <string name="permdesc_readSyncStats" msgid="1510143761757606156">"Memungkinkan aplikasi membaca statistik sinkronisasi untuk sebuah akun, termasuk histori kejadian sinkronisasi dan berapa banyak data yang disinkronkan."</string>
     <string name="permlab_sdcardRead" product="nosdcard" msgid="367275095159405468">"baca konten simpanan USB Anda"</string>
     <string name="permlab_sdcardRead" product="default" msgid="2188156462934977940">"baca konten kartu SD Anda"</string>
     <string name="permdesc_sdcardRead" product="nosdcard" msgid="3446988712598386079">"Mengizinkan aplikasi membaca konten penyimpanan USB Anda."</string>
@@ -507,7 +507,7 @@
     <string name="permdesc_bind_connection_service" msgid="4008754499822478114">"Memungkinkan aplikasi berinteraksi dengan layanan telepon untuk melakukan/menerima panggilan."</string>
     <string name="permlab_control_incall_experience" msgid="9061024437607777619">"memberikan pengalaman pengguna dalam panggilan"</string>
     <string name="permdesc_control_incall_experience" msgid="915159066039828124">"Memungkinkan aplikasi memberikan pengalaman pengguna dalam panggilan."</string>
-    <string name="permlab_readNetworkUsageHistory" msgid="7862593283611493232">"baca riwayat penggunaan jaringan"</string>
+    <string name="permlab_readNetworkUsageHistory" msgid="7862593283611493232">"baca histori penggunaan jaringan"</string>
     <string name="permdesc_readNetworkUsageHistory" msgid="7689060749819126472">"Mengizinkan apl membaca penggunaan jaringan historis untuk apl dan jaringan tertentu."</string>
     <string name="permlab_manageNetworkPolicy" msgid="2562053592339859990">"kelola kebijakan jaringan"</string>
     <string name="permdesc_manageNetworkPolicy" msgid="7537586771559370668">"Mengizinkan apl mengelola kebijakan jaringan dan menentukan peraturan khusus apl."</string>
@@ -785,7 +785,7 @@
     <string name="password_keyboard_label_alt_key" msgid="1284820942620288678">"ALT"</string>
     <string name="granularity_label_character" msgid="7336470535385009523">"karakter"</string>
     <string name="granularity_label_word" msgid="7075570328374918660">"kata"</string>
-    <string name="granularity_label_link" msgid="5815508880782488267">"tautan"</string>
+    <string name="granularity_label_link" msgid="5815508880782488267">"link"</string>
     <string name="granularity_label_line" msgid="5764267235026120888">"baris"</string>
     <string name="factorytest_failed" msgid="5410270329114212041">"Uji pabrik gagal"</string>
     <string name="factorytest_not_system" msgid="4435201656767276723">"Tindakan FACTORY_TEST hanya didukung untuk paket yang terpasang pada /system/app."</string>
@@ -817,12 +817,12 @@
     <string name="autofill_parish" msgid="8202206105468820057">"Kampung"</string>
     <string name="autofill_area" msgid="3547409050889952423">"Area"</string>
     <string name="autofill_emirate" msgid="2893880978835698818">"Emirat"</string>
-    <string name="permlab_readHistoryBookmarks" msgid="3775265775405106983">"baca riwayat dan bookmark web Anda"</string>
-    <string name="permdesc_readHistoryBookmarks" msgid="8462378226600439658">"Memungkinkan aplikasi membaca riwayat semua URL yang telah dikunjungi Browser, dan semua bookmark Browser. Catatan: izin ini tidak dapat diberlakukan oleh browser pihak ketiga atau aplikasi lain dengan kemampuan menjelajahi web."</string>
-    <string name="permlab_writeHistoryBookmarks" msgid="3714785165273314490">"tulis riwayat dan bookmark web"</string>
-    <string name="permdesc_writeHistoryBookmarks" product="tablet" msgid="6825527469145760922">"Memungkinkan aplikasi mengubah riwayat atau bookmark Browser yang tersimpan dalam tablet Anda. Izin ini memungkinkan aplikasi menghapus atau mengubah data Browser. Catatan: izin ini tidak dapat diberlakukan oleh browser pihak ketiga atau aplikasi lain dengan kemampuan menjelajahi web."</string>
-    <string name="permdesc_writeHistoryBookmarks" product="tv" msgid="7007393823197766548">"Mengizinkan aplikasi untuk memodifikasi riwayat atau bookmark Browser yang disimpan di TV. Izin ini memungkinkan aplikasi untuk menghapus atau memodifikasi data Browser. Catatan: izin ini mungkin diterapkan oleh browser pihak ketiga atau aplikasi lain yang memiliki kemampuan menjelajah web."</string>
-    <string name="permdesc_writeHistoryBookmarks" product="default" msgid="8497389531014185509">"Memungkinkan aplikasi mengubah riwayat atau bookmark Browser yang tersimpan dalam ponsel Anda. Izin ini memungkinkan aplikasi menghapus atau mengubah data Browser. Catatan: izin ini tidak dapat diberlakukan oleh browser pihak ketiga atau aplikasi lain dengan kemampuan menjelajahi web."</string>
+    <string name="permlab_readHistoryBookmarks" msgid="3775265775405106983">"baca histori dan bookmark web Anda"</string>
+    <string name="permdesc_readHistoryBookmarks" msgid="8462378226600439658">"Memungkinkan aplikasi membaca histori semua URL yang telah dikunjungi Browser, dan semua bookmark Browser. Catatan: izin ini tidak dapat diberlakukan oleh browser pihak ketiga atau aplikasi lain dengan kemampuan menjelajahi web."</string>
+    <string name="permlab_writeHistoryBookmarks" msgid="3714785165273314490">"tulis histori dan bookmark web"</string>
+    <string name="permdesc_writeHistoryBookmarks" product="tablet" msgid="6825527469145760922">"Memungkinkan aplikasi mengubah histori atau bookmark Browser yang tersimpan dalam tablet Anda. Izin ini memungkinkan aplikasi menghapus atau mengubah data Browser. Catatan: izin ini tidak dapat diberlakukan oleh browser pihak ketiga atau aplikasi lain dengan kemampuan menjelajahi web."</string>
+    <string name="permdesc_writeHistoryBookmarks" product="tv" msgid="7007393823197766548">"Mengizinkan aplikasi untuk memodifikasi histori atau bookmark Browser yang disimpan di TV. Izin ini memungkinkan aplikasi untuk menghapus atau memodifikasi data Browser. Catatan: izin ini mungkin diterapkan oleh browser pihak ketiga atau aplikasi lain yang memiliki kemampuan menjelajah web."</string>
+    <string name="permdesc_writeHistoryBookmarks" product="default" msgid="8497389531014185509">"Memungkinkan aplikasi mengubah histori atau bookmark Browser yang tersimpan dalam ponsel Anda. Izin ini memungkinkan aplikasi menghapus atau mengubah data Browser. Catatan: izin ini tidak dapat diberlakukan oleh browser pihak ketiga atau aplikasi lain dengan kemampuan menjelajahi web."</string>
     <string name="permlab_setAlarm" msgid="1379294556362091814">"setel alarm"</string>
     <string name="permdesc_setAlarm" msgid="316392039157473848">"Mengizinkan apl menyetel alarm di apl jam alarm yang terpasang. Beberapa apl jam alarm mungkin tidak menerapkan fitur ini."</string>
     <string name="permlab_addVoicemail" msgid="5525660026090959044">"tambahkan kotak pesan"</string>
