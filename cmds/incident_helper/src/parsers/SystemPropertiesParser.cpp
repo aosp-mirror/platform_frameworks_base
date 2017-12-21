@@ -149,12 +149,25 @@ SystemPropertiesParser::Parse(const int in, const int out) const
                    SystemPropertiesProto::Ro::Product::_FIELD_COUNT);
     Message product(&productTable);
 
-    Table vendorTable(SystemPropertiesProto::Ro::Product::Vendor::_FIELD_NAMES,
+    Table pVendorTable(SystemPropertiesProto::Ro::Product::Vendor::_FIELD_NAMES,
             SystemPropertiesProto::Ro::Product::Vendor::_FIELD_IDS,
             SystemPropertiesProto::Ro::Product::Vendor::_FIELD_COUNT);
-    Message vendor(&vendorTable);
-    product.addSubMessage(SystemPropertiesProto::Ro::Product::VENDOR, &vendor);
+    Message pVendor(&pVendorTable);
+    product.addSubMessage(SystemPropertiesProto::Ro::Product::VENDOR, &pVendor);
     ro.addSubMessage(SystemPropertiesProto::Ro::PRODUCT, &product);
+
+    Table telephonyTable(SystemPropertiesProto::Ro::Telephony::_FIELD_NAMES,
+                   SystemPropertiesProto::Ro::Telephony::_FIELD_IDS,
+                   SystemPropertiesProto::Ro::Telephony::_FIELD_COUNT);
+    Message telephony(&telephonyTable);
+    ro.addSubMessage(SystemPropertiesProto::Ro::TELEPHONY, &telephony);
+
+    Table vendorTable(SystemPropertiesProto::Ro::Vendor::_FIELD_NAMES,
+                   SystemPropertiesProto::Ro::Vendor::_FIELD_IDS,
+                   SystemPropertiesProto::Ro::Vendor::_FIELD_COUNT);
+    Message vendor(&vendorTable);
+    ro.addSubMessage(SystemPropertiesProto::Ro::VENDOR, &vendor);
+
     sysProp.addSubMessage(SystemPropertiesProto::RO, &ro);
 
     Table sysTable(SystemPropertiesProto::Sys::_FIELD_NAMES,
