@@ -81,16 +81,20 @@ jstring JNICALL Java_com_android_server_usb_descriptors_UsbDescriptorParser_getD
         return NULL;
     }
 
-    char* c_str = usb_device_get_string(device, stringId, 0 /*timeout*/);
+    // Get Raw UCS2 Bytes
+    jbyte* byteBuffer = NULL;
+    size_t numUSC2Bytes = 0;
+    int retVal =
+            usb_device_get_string_ucs2(device, stringId, 0 /*timeout*/,
+                                     (void**)&byteBuffer, &numUSC2Bytes);
 
-    jstring j_str = env->NewStringUTF(c_str);
+    jstring j_str = NULL;
 
-    free(c_str);
-    usb_device_close(device);
-
+    if (retVal == 0) {
+        j_str = env->NewString((jchar*)byteBuffer, numUSC2Bytes/2);
+        free(byteBuffer);
+    }
     return j_str;
 }
 
 } // extern "C"
-
-
