@@ -1558,22 +1558,31 @@ public class PackageParser {
             throws PackageParserException {
         final String apkPath = apkFile.getAbsolutePath();
 
-        boolean systemDir = (parseFlags & PARSE_IS_SYSTEM_DIR) != 0;
         int minSignatureScheme = ApkSignatureVerifier.VERSION_JAR_SIGNATURE_SCHEME;
         if (pkg.applicationInfo.isStaticSharedLibrary()) {
             // must use v2 signing scheme
             minSignatureScheme = ApkSignatureVerifier.VERSION_APK_SIGNATURE_SCHEME_V2;
         }
-        ApkSignatureVerifier.Result verified =
-                ApkSignatureVerifier.verify(apkPath, minSignatureScheme, systemDir);
+        ApkSignatureVerifier.Result verified;
+        if ((parseFlags & PARSE_IS_SYSTEM_DIR) != 0) {
+            // systemDir APKs are already trusted, save time by not verifying
+            verified = ApkSignatureVerifier.plsCertsNoVerifyOnlyCerts(
+                        apkPath, minSignatureScheme);
+        } else {
+            verified = ApkSignatureVerifier.verify(apkPath, minSignatureScheme);
+        }
         if (verified.signatureSchemeVersion
                 < ApkSignatureVerifier.VERSION_APK_SIGNATURE_SCHEME_V2) {
             // TODO (b/68860689): move this logic to packagemanagerserivce
             if ((parseFlags & PARSE_IS_EPHEMERAL) != 0) {
                 throw new PackageParserException(INSTALL_PARSE_FAILED_NO_CERTIFICATES,
-                        "No APK Signature Scheme v2 signature in ephemeral package " + apkPath);
+                    "No APK Signature Scheme v2 signature in ephemeral package " + apkPath);
             }
         }
+
+        // Verify that entries are signed consistently with the first pkg
+        // we encountered. Note that for splits, certificates may have
+        // already been populated during an earlier parse of a base APK.
         if (pkg.mCertificates == null) {
             pkg.mCertificates = verified.certs;
             pkg.mSignatures = verified.sigs;
