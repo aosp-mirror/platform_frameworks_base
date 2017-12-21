@@ -28,7 +28,6 @@ import android.net.wifi.WifiInfo;
 import android.net.wifi.ScanSettings;
 import android.net.wifi.ScanResult;
 import android.net.wifi.PasspointManagementObjectDefinition;
-import android.net.wifi.WifiConnectionStatistics;
 import android.net.wifi.WifiActivityEnergyInfo;
 import android.net.Network;
 
@@ -165,8 +164,6 @@ interface IWifiManager
     int getAggressiveHandover();
 
     void enableWifiConnectivityManager(boolean enabled);
-
-    WifiConnectionStatistics getConnectionStatistics();
 
     void disableEphemeralNetwork(String SSID);
 

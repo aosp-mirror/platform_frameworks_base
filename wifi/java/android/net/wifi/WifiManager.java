@@ -999,20 +999,6 @@ public class WifiManager {
     }
 
     /**
-     * @hide
-     * @removed
-     */
-    @SystemApi
-    @RequiresPermission(android.Manifest.permission.READ_WIFI_CREDENTIAL)
-    public WifiConnectionStatistics getConnectionStatistics() {
-        try {
-            return mService.getConnectionStatistics();
-        } catch (RemoteException e) {
-            throw e.rethrowFromSystemServer();
-        }
-    }
-
-    /**
      * Returns a WifiConfiguration matching this ScanResult
      *
      * @param scanResult scanResult that represents the BSSID
