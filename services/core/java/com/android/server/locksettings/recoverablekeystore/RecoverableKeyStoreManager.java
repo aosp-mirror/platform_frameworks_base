@@ -29,19 +29,22 @@ import android.security.recoverablekeystore.KeyEntryRecoveryData;
 import android.security.recoverablekeystore.KeyStoreRecoveryData;
 import android.security.recoverablekeystore.KeyStoreRecoveryMetadata;
 import android.security.recoverablekeystore.RecoverableKeyStoreLoader;
+import android.util.Log;
 
 import com.android.internal.annotations.VisibleForTesting;
-import com.android.internal.widget.LockPatternUtils;
 import com.android.server.locksettings.recoverablekeystore.storage.RecoverableKeyStoreDb;
 import com.android.server.locksettings.recoverablekeystore.storage.RecoverySessionStorage;
 
 import java.security.InvalidKeyException;
+import java.security.KeyStoreException;
 import java.security.NoSuchAlgorithmException;
 import java.security.PublicKey;
 import java.security.spec.InvalidKeySpecException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
 /**
  * Class with {@link RecoverableKeyStoreLoader} API implementation and internal methods to interact
@@ -50,12 +53,13 @@ import java.util.Map;
  * @hide
  */
 public class RecoverableKeyStoreManager {
-    private static final String TAG = "RecoverableKeyStoreManager";
+    private static final String TAG = "RecoverableKeyStoreMgr";
     private static RecoverableKeyStoreManager mInstance;
 
     private final Context mContext;
     private final RecoverableKeyStoreDb mDatabase;
     private final RecoverySessionStorage mRecoverySessionStorage;
+    private final ExecutorService mExecutorService;
 
     /**
      * Returns a new or existing instance.
@@ -68,7 +72,8 @@ public class RecoverableKeyStoreManager {
             mInstance = new RecoverableKeyStoreManager(
                     mContext.getApplicationContext(),
                     db,
-                    new RecoverySessionStorage());
+                    new RecoverySessionStorage(),
+                    Executors.newSingleThreadExecutor());
         }
         return mInstance;
     }
@@ -77,10 +82,12 @@ public class RecoverableKeyStoreManager {
     RecoverableKeyStoreManager(
             Context context,
             RecoverableKeyStoreDb recoverableKeyStoreDb,
-            RecoverySessionStorage recoverySessionStorage) {
+            RecoverySessionStorage recoverySessionStorage,
+            ExecutorService executorService) {
         mContext = context;
         mDatabase = recoverableKeyStoreDb;
         mRecoverySessionStorage = recoverySessionStorage;
+        mExecutorService = executorService;
     }
 
     public int initRecoveryService(
@@ -289,17 +296,17 @@ public class RecoverableKeyStoreManager {
      */
     public void lockScreenSecretAvailable(
             int storedHashType, @NonNull String credential, int userId) {
-        // Notify RecoverableKeystoreLoader about unlock
-        @KeyStoreRecoveryMetadata.LockScreenUiFormat int uiFormat;
-        if (storedHashType == LockPatternUtils.CREDENTIAL_TYPE_PATTERN) {
-            uiFormat = KeyStoreRecoveryMetadata.TYPE_PATTERN;
-        } else if (isPin(credential)) {
-            uiFormat = KeyStoreRecoveryMetadata.TYPE_PIN;
-        } else {
-            uiFormat = KeyStoreRecoveryMetadata.TYPE_PASSWORD;
+        // So as not to block the critical path unlocking the phone, defer to another thread.
+        try {
+            mExecutorService.execute(KeySyncTask.newInstance(
+                    mContext, mDatabase, userId, storedHashType, credential));
+        } catch (NoSuchAlgorithmException e) {
+            Log.wtf(TAG, "Should never happen - algorithm unavailable for KeySync", e);
+        } catch (KeyStoreException e) {
+            Log.e(TAG, "Key store error encountered during recoverable key sync", e);
+        } catch (InsecureUserException e) {
+            Log.wtf(TAG, "Impossible - insecure user, but user just entered lock screen", e);
         }
-        // TODO: check getPendingRecoverySecretTypes.
-        // TODO: compute SHA256 or Argon2id depending on secret type.
     }
 
     /** This function can only be used inside LockSettingsService. */
@@ -308,17 +315,6 @@ public class RecoverableKeyStoreManager {
             @Nullable String credential,
             int userId) {
         throw new UnsupportedOperationException();
-    }
-
-    @VisibleForTesting
-    boolean isPin(@NonNull String credential) {
-        for (int i = 0; i < credential.length(); i++) {
-            char c = credential.charAt(i);
-            if (c < '0' || c > '9') {
-                return false;
-            }
-        }
-        return true;
     }
 
     private void checkRecoverKeyStorePermission() {

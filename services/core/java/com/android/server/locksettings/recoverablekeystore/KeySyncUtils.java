@@ -74,7 +74,7 @@ public class KeySyncUtils {
      *
      * @hide
      */
-    public byte[] thmEncryptRecoveryKey(
+    public static byte[] thmEncryptRecoveryKey(
             PublicKey publicKey,
             byte[] lockScreenHash,
             byte[] vaultParams,
