@@ -259,7 +259,7 @@
     <string name="foreground_service_apps_in_background" msgid="7175032677643332242">"Додатків, що використовують заряд акумулятора: <xliff:g id="NUMBER">%1$d</xliff:g>"</string>
     <string name="foreground_service_tap_for_details" msgid="372046743534354644">"Торкніться, щоб перевірити використання акумулятора й трафік"</string>
     <string name="foreground_service_multiple_separator" msgid="4021901567939866542">"<xliff:g id="LEFT_SIDE">%1$s</xliff:g>, <xliff:g id="RIGHT_SIDE">%2$s</xliff:g>"</string>
-    <string name="safeMode" msgid="2788228061547930246">"Безп. режим"</string>
+    <string name="safeMode" msgid="2788228061547930246">"Безпечний режим"</string>
     <string name="android_system_label" msgid="6577375335728551336">"Система Android"</string>
     <string name="user_owner_label" msgid="1119010402169916617">"Перейти в особистий профіль"</string>
     <string name="managed_profile_label" msgid="5289992269827577857">"Перейти в робочий профіль"</string>
