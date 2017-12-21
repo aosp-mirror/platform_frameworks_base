@@ -977,6 +977,10 @@ package android.widget {
     method public boolean isPopupShowing();
   }
 
+  public class TextClock extends android.widget.TextView {
+    method public void disableClockTick();
+  }
+
   public class TimePicker extends android.widget.FrameLayout {
     method public android.view.View getAmView();
     method public android.view.View getHourView();
