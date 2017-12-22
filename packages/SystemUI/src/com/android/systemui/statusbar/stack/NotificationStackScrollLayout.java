@@ -657,8 +657,29 @@ public class NotificationStackScrollLayout extends ViewGroup
 
     private void onPreDrawDuringAnimation() {
         mShelf.updateAppearance();
+        updateClippingToTopRoundedCorner();
         if (!mNeedsAnimation && !mChildrenUpdateRequested) {
             updateBackground();
+        }
+    }
+
+    private void updateClippingToTopRoundedCorner() {
+        Float clipStart = (float) mTopPadding;
+        Float clipEnd = clipStart + mCornerRadius;
+        boolean first = true;
+        for (int i = 0; i < getChildCount(); i++) {
+            ExpandableView child = (ExpandableView) getChildAt(i);
+            if (child.getVisibility() == GONE) {
+                continue;
+            }
+            float start = child.getTranslationY();
+            float end = start + Math.max(child.getActualHeight() - child.getClipBottomAmount(),
+                    0);
+            boolean clip = clipStart > start && clipStart < end
+                    || clipEnd >= start && clipEnd <= end;
+            clip &= !(first && mOwnScrollY == 0);
+            child.setDistanceToTopRoundness(clip ? Math.max(start - clipStart, 0) : -1);
+            first = false;
         }
     }
 
@@ -2981,6 +3002,7 @@ public class NotificationStackScrollLayout extends ViewGroup
             mAnimationEvents.clear();
             updateBackground();
             updateViewShadows();
+            updateClippingToTopRoundedCorner();
         } else {
             applyCurrentState();
         }
@@ -3674,6 +3696,7 @@ public class NotificationStackScrollLayout extends ViewGroup
         setAnimationRunning(false);
         updateBackground();
         updateViewShadows();
+        updateClippingToTopRoundedCorner();
     }
 
     private void updateViewShadows() {
