@@ -25,10 +25,13 @@ import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.app.ActivityThread;
 import android.content.ContentResolver;
+import android.os.Bundle;
 import android.os.Parcel;
 import android.os.Parcelable;
 import android.provider.Settings;
+import android.service.autofill.FieldClassification.Match;
 import android.util.Log;
+import android.view.autofill.AutofillManager;
 import android.view.autofill.Helper;
 
 import com.android.internal.util.Preconditions;
@@ -49,21 +52,32 @@ public final class UserData implements Parcelable {
     private static final int DEFAULT_MIN_VALUE_LENGTH = 5;
     private static final int DEFAULT_MAX_VALUE_LENGTH = 100;
 
-    private final InternalScorer mScorer;
+    private final String mAlgorithm;
+    private final Bundle mAlgorithmArgs;
     private final String[] mRemoteIds;
     private final String[] mValues;
 
     private UserData(Builder builder) {
-        mScorer = builder.mScorer;
+        mAlgorithm = builder.mAlgorithm;
+        mAlgorithmArgs = builder.mAlgorithmArgs;
         mRemoteIds = new String[builder.mRemoteIds.size()];
         builder.mRemoteIds.toArray(mRemoteIds);
         mValues = new String[builder.mValues.size()];
         builder.mValues.toArray(mValues);
     }
 
+    /**
+     * Gets the name of the algorithm that is used to calculate
+     * {@link Match#getScore() match scores}.
+     */
+    @Nullable
+    public String getFieldClassificationAlgorithm() {
+        return mAlgorithm;
+    }
+
     /** @hide */
-    public InternalScorer getScorer() {
-        return mScorer;
+    public Bundle getAlgorithmArgs() {
+        return mAlgorithmArgs;
     }
 
     /** @hide */
@@ -78,7 +92,9 @@ public final class UserData implements Parcelable {
 
     /** @hide */
     public void dump(String prefix, PrintWriter pw) {
-        pw.print(prefix); pw.print("Scorer: "); pw.println(mScorer);
+        pw.print(prefix); pw.print("Algorithm: "); pw.print(mAlgorithm);
+        pw.print(" Args: "); pw.println(mAlgorithmArgs);
+
         // Cannot disclose remote ids or values because they could contain PII
         pw.print(prefix); pw.print("Remote ids size: "); pw.println(mRemoteIds.length);
         for (int i = 0; i < mRemoteIds.length; i++) {
@@ -105,9 +121,10 @@ public final class UserData implements Parcelable {
      * A builder for {@link UserData} objects.
      */
     public static final class Builder {
-        private final InternalScorer mScorer;
         private final ArrayList<String> mRemoteIds;
         private final ArrayList<String> mValues;
+        private String mAlgorithm;
+        private Bundle mAlgorithmArgs;
         private boolean mDestroyed;
 
         /**
@@ -120,13 +137,9 @@ public final class UserData implements Parcelable {
          *   <li>{@code value} is empty
          *   <li>the length of {@code value} is lower than {@link UserData#getMinValueLength()}
          *   <li>the length of {@code value} is higher than {@link UserData#getMaxValueLength()}
-         *   <li>{@code scorer} is not instance of a class provided by the Android System.
          * </ol>
          */
-        public Builder(@NonNull Scorer scorer, @NonNull String remoteId, @NonNull String value) {
-            Preconditions.checkArgument((scorer instanceof InternalScorer),
-                    "not provided by Android System: " + scorer);
-            mScorer = (InternalScorer) scorer;
+        public Builder(@NonNull String remoteId, @NonNull String value) {
             checkValidRemoteId(remoteId);
             checkValidValue(value);
             final int capacity = getMaxUserDataSize();
@@ -134,6 +147,31 @@ public final class UserData implements Parcelable {
             mValues = new ArrayList<>(capacity);
             mRemoteIds.add(remoteId);
             mValues.add(value);
+        }
+
+        /**
+         * Sets the algorithm used for <a href="#FieldClassification">field classification</a>.
+         *
+         * <p>The currently available algorithms can be retrieve through
+         * {@link AutofillManager#getAvailableFieldClassificationAlgorithms()}.
+         *
+         * <p><b>Note: </b>The available algorithms in the Android System can change dinamically,
+         * so it's not guaranteed that the algorithm set here is the one that will be effectually
+         * used. If the algorithm set here is not available at runtime, the
+         * {@link AutofillManager#getDefaultFieldClassificationAlgorithm()} is used instead.
+         * You can verify which algorithm was used by calling
+         * {@link FieldClassification.Match#getAlgorithm()}.
+         *
+         * @param name name of the algorithm or {@code null} to used default.
+         * @param args optional arguments to the algorithm.
+         *
+         * @return this builder
+         */
+        public Builder setFieldClassificationAlgorithm(@Nullable String name,
+                @Nullable Bundle args) {
+            mAlgorithm = name;
+            mAlgorithmArgs = args;
+            return this;
         }
 
         /**
@@ -211,7 +249,7 @@ public final class UserData implements Parcelable {
     public String toString() {
         if (!sDebug) return super.toString();
 
-        final StringBuilder builder = new StringBuilder("UserData: [scorer=").append(mScorer);
+        final StringBuilder builder = new StringBuilder("UserData: [algorithm=").append(mAlgorithm);
         // Cannot disclose remote ids or values because they could contain PII
         builder.append(", remoteIds=");
         Helper.appendRedacted(builder, mRemoteIds);
@@ -231,9 +269,10 @@ public final class UserData implements Parcelable {
 
     @Override
     public void writeToParcel(Parcel parcel, int flags) {
-        parcel.writeParcelable(mScorer, flags);
         parcel.writeStringArray(mRemoteIds);
         parcel.writeStringArray(mValues);
+        parcel.writeString(mAlgorithm);
+        parcel.writeBundle(mAlgorithmArgs);
     }
 
     public static final Parcelable.Creator<UserData> CREATOR =
@@ -243,10 +282,10 @@ public final class UserData implements Parcelable {
             // Always go through the builder to ensure the data ingested by
             // the system obeys the contract of the builder to avoid attacks
             // using specially crafted parcels.
-            final InternalScorer scorer = parcel.readParcelable(null);
             final String[] remoteIds = parcel.readStringArray();
             final String[] values = parcel.readStringArray();
-            final Builder builder = new Builder(scorer, remoteIds[0], values[0]);
+            final Builder builder = new Builder(remoteIds[0], values[0])
+                    .setFieldClassificationAlgorithm(parcel.readString(), parcel.readBundle());
             for (int i = 1; i < remoteIds.length; i++) {
                 builder.add(remoteIds[i], values[i]);
             }

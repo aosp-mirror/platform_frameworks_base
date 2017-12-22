@@ -58,4 +58,6 @@ interface IAutoFillManager {
     void setUserData(in UserData userData);
     boolean isFieldClassificationEnabled();
     ComponentName getAutofillServiceComponentName();
+    List<String> getAvailableFieldClassificationAlgorithms();
+    String getDefaultFieldClassificationAlgorithm();
 }

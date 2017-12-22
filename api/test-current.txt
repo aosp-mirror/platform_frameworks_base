@@ -477,7 +477,8 @@ package android.service.autofill {
     method public void apply(android.service.autofill.ValueFinder, android.widget.RemoteViews, int) throws java.lang.Exception;
   }
 
-  public final class EditDistanceScorer extends android.service.autofill.InternalScorer implements android.os.Parcelable android.service.autofill.Scorer {
+  public final class EditDistanceScorer {
+    method public static android.service.autofill.EditDistanceScorer getInstance();
     method public float getScore(android.view.autofill.AutofillValue, java.lang.String);
   }
 
@@ -491,11 +492,6 @@ package android.service.autofill {
 
   public abstract class InternalSanitizer implements android.os.Parcelable android.service.autofill.Sanitizer {
     ctor public InternalSanitizer();
-  }
-
-  public abstract class InternalScorer implements android.os.Parcelable android.service.autofill.Scorer {
-    ctor public InternalScorer();
-    method public abstract float getScore(android.view.autofill.AutofillValue, java.lang.String);
   }
 
   public abstract class InternalTransformation implements android.os.Parcelable android.service.autofill.Transformation {

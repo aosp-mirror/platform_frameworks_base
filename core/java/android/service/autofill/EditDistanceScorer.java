@@ -16,8 +16,7 @@
 package android.service.autofill;
 
 import android.annotation.NonNull;
-import android.os.Parcel;
-import android.os.Parcelable;
+import android.annotation.TestApi;
 import android.view.autofill.AutofillValue;
 
 /**
@@ -25,13 +24,20 @@ import android.view.autofill.AutofillValue;
  * by the user and the expected value predicted by an autofill service.
  */
 // TODO(b/70291841): explain algorithm once it's fully implemented
-public final class EditDistanceScorer extends InternalScorer implements Scorer, Parcelable {
+/** @hide */
+@TestApi
+public final class EditDistanceScorer {
 
     private static final EditDistanceScorer sInstance = new EditDistanceScorer();
+
+    /** @hide */
+    public static final String NAME = "EDIT_DISTANCE";
 
     /**
      * Gets the singleton instance.
      */
+    @TestApi
+    /** @hide */
     public static EditDistanceScorer getInstance() {
         return sInstance;
     }
@@ -39,59 +45,32 @@ public final class EditDistanceScorer extends InternalScorer implements Scorer, 
     private EditDistanceScorer() {
     }
 
-    /** @hide */
-    @Override
-    public float getScore(@NonNull AutofillValue actualValue, @NonNull String userData) {
-        if (actualValue == null || !actualValue.isText() || userData == null) return 0;
+    /**
+     * Returns the classification score between an actual {@link AutofillValue} filled
+     * by the user and the expected value predicted by an autofill service.
+     *
+     * <p>A full-match is {@code 1.0} (representing 100%), a full mismatch is {@code 0.0} and
+     * partial mathces are something in between, typically using edit-distance algorithms.
+     *
+     * @hide
+     */
+    @TestApi
+    public float getScore(@NonNull AutofillValue actualValue, @NonNull String userDataValue) {
+        if (actualValue == null || !actualValue.isText() || userDataValue == null) return 0;
         // TODO(b/70291841): implement edit distance - currently it's returning either 0, 100%, or
         // partial match when number of chars match
         final String textValue = actualValue.getTextValue().toString();
         final int total = textValue.length();
-        if (total != userData.length()) return 0F;
+        if (total != userDataValue.length()) return 0F;
 
         int matches = 0;
         for (int i = 0; i < total; i++) {
             if (Character.toLowerCase(textValue.charAt(i)) == Character
-                    .toLowerCase(userData.charAt(i))) {
+                    .toLowerCase(userDataValue.charAt(i))) {
                 matches++;
             }
         }
 
         return ((float) matches) / total;
     }
-
-    /////////////////////////////////////
-    // Object "contract" methods. //
-    /////////////////////////////////////
-    @Override
-    public String toString() {
-        return "EditDistanceScorer";
-    }
-
-    /////////////////////////////////////
-    // Parcelable "contract" methods. //
-    /////////////////////////////////////
-
-    @Override
-    public int describeContents() {
-        return 0;
-    }
-
-    @Override
-    public void writeToParcel(Parcel parcel, int flags) {
-        // Do nothing
-    }
-
-    public static final Parcelable.Creator<EditDistanceScorer> CREATOR =
-            new Parcelable.Creator<EditDistanceScorer>() {
-        @Override
-        public EditDistanceScorer createFromParcel(Parcel parcel) {
-            return EditDistanceScorer.getInstance();
-        }
-
-        @Override
-        public EditDistanceScorer[] newArray(int size) {
-            return new EditDistanceScorer[size];
-        }
-    };
 }

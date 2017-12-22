@@ -17,4 +17,3 @@
 package android.service.autofill;
 
 parcelable UserData;
-parcelable UserData.Constraints;

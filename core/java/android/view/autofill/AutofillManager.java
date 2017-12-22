@@ -53,6 +53,7 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.ref.WeakReference;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
 
@@ -1027,7 +1028,9 @@ public final class AutofillManager {
      * Gets the user data used for
      * <a href="AutofillService.html#FieldClassification">field classification</a>.
      *
-     * <p><b>Note:</b> This method should only be called by an app providing an autofill service.
+     * <p><b>Note:</b> This method should only be called by an app providing an autofill service,
+     * and it's ignored if the caller currently doesn't have an enabled autofill service for
+     * the user.
      *
      * @return value previously set by {@link #setUserData(UserData)} or {@code null} if it was
      * reset or if the caller currently does not have an enabled autofill service for the user.
@@ -1075,6 +1078,49 @@ public final class AutofillManager {
         } catch (RemoteException e) {
             e.rethrowFromSystemServer();
             return false;
+        }
+    }
+
+    /**
+     * Gets the name of the default algorithm used for
+     * <a href="AutofillService.html#FieldClassification">field classification</a>.
+     *
+     * <p>The default algorithm is used when the algorithm on {@link UserData} is invalid or not
+     * set.
+     *
+     * <p><b>Note:</b> This method should only be called by an app providing an autofill service,
+     * and it's ignored if the caller currently doesn't have an enabled autofill service for
+     * the user.
+     */
+    @Nullable
+    public String getDefaultFieldClassificationAlgorithm() {
+        try {
+            return mService.getDefaultFieldClassificationAlgorithm();
+        } catch (RemoteException e) {
+            e.rethrowFromSystemServer();
+            return null;
+        }
+    }
+
+    /**
+     * Gets the name of all algorithms currently available for
+     * <a href="AutofillService.html#FieldClassification">field classification</a>.
+     *
+     * <p><b>Note:</b> This method should only be called by an app providing an autofill service,
+     * and it's ignored if the caller currently doesn't have an enabled autofill service for
+     * the user.
+     *
+     * @return list of all algorithms currently available, or an empty list if the caller currently
+     * does not have an enabled autofill service for the user.
+     */
+    @NonNull
+    public List<String> getAvailableFieldClassificationAlgorithms() {
+        try {
+            final List<String> names = mService.getAvailableFieldClassificationAlgorithms();
+            return names != null ? names : Collections.emptyList();
+        } catch (RemoteException e) {
+            e.rethrowFromSystemServer();
+            return null;
         }
     }
 

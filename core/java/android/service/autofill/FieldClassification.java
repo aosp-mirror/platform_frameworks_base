@@ -106,18 +106,20 @@ public final class FieldClassification {
     /**
      * Represents the score of a {@link UserData} entry for the field.
      *
-     * <p>The score is defined by {@link #getScore()} and the entry is identified by
-     * {@link #getRemoteId()}.
+     * <p>The score is calculated by the given {@link #getAlgorithm() algorithm} and
+     * the entry is identified by {@link #getRemoteId()}.
      */
     public static final class Match {
 
         private final String mRemoteId;
         private final float mScore;
+        private final String mAlgorithm;
 
         /** @hide */
-        public Match(String remoteId, float score) {
+        public Match(String remoteId, float score, String algorithm) {
             mRemoteId = Preconditions.checkNotNull(remoteId);
             mScore = score;
+            mAlgorithm = algorithm;
         }
 
         /**
@@ -140,11 +142,25 @@ public final class FieldClassification {
          *   <li>Any other value is a partial match.
          * </ul>
          *
-         * <p>How the score is calculated depends on the algorithm used by the {@link Scorer}
-         * implementation.
+         * <p>How the score is calculated depends on the
+         * {@link UserData.Builder#setFieldClassificationAlgorithm(String, android.os.Bundle)
+         * algorithm} used.
          */
         public float getScore() {
             return mScore;
+        }
+
+        /**
+         * Gets the algorithm used to calculate this score.
+         *
+         * <p>Typically, this is either the algorithm set by
+         * {@link UserData.Builder#setFieldClassificationAlgorithm(String, android.os.Bundle)},
+         * or the
+         * {@link android.view.autofill.AutofillManager#getDefaultFieldClassificationAlgorithm()}.
+         */
+        @NonNull
+        public String getAlgorithm() {
+            return mAlgorithm;
         }
 
         @Override
@@ -153,16 +169,19 @@ public final class FieldClassification {
 
             final StringBuilder string = new StringBuilder("Match: remoteId=");
             Helper.appendRedacted(string, mRemoteId);
-            return string.append(", score=").append(mScore).toString();
+            return string.append(", score=").append(mScore)
+                    .append(", algorithm=").append(mAlgorithm)
+                    .toString();
         }
 
         private void writeToParcel(@NonNull Parcel parcel) {
             parcel.writeString(mRemoteId);
             parcel.writeFloat(mScore);
+            parcel.writeString(mAlgorithm);
         }
 
         private static Match readFromParcel(@NonNull Parcel parcel) {
-            return new Match(parcel.readString(), parcel.readFloat());
+            return new Match(parcel.readString(), parcel.readFloat(), parcel.readString());
         }
     }
 }
