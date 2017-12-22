@@ -210,13 +210,31 @@ public final class ImageDecoder implements AutoCloseable {
      *  Contains information about the encoded image.
      */
     public static class ImageInfo {
+        /**
+         * Width of the image, without scaling or cropping.
+         */
         public final int width;
-        public final int height;
-        // TODO?: Add more info? mimetype, ninepatch etc?
 
-        ImageInfo(int width, int height) {
-            this.width = width;
-            this.height = height;
+        /**
+         * Height of the image, without scaling or cropping.
+         */
+        public final int height;
+
+        /* @hide */
+        ImageDecoder decoder;
+
+        /* @hide */
+        ImageInfo(ImageDecoder decoder) {
+            this.width   = decoder.mWidth;
+            this.height  = decoder.mHeight;
+            this.decoder = decoder;
+        }
+
+        /**
+         * The mimeType of the image, if known.
+         */
+        public String getMimeType() {
+            return decoder.getMimeType();
         }
     };
 
@@ -671,8 +689,12 @@ public final class ImageDecoder implements AutoCloseable {
             @Nullable OnHeaderDecodedListener listener) throws IOException {
         try (ImageDecoder decoder = src.createImageDecoder()) {
             if (listener != null) {
-                ImageInfo info = new ImageInfo(decoder.mWidth, decoder.mHeight);
-                listener.onHeaderDecoded(info, decoder);
+                ImageInfo info = new ImageInfo(decoder);
+                try {
+                    listener.onHeaderDecoded(info, decoder);
+                } finally {
+                    info.decoder = null;
+                }
             }
 
             decoder.checkState();
@@ -753,8 +775,12 @@ public final class ImageDecoder implements AutoCloseable {
             @Nullable OnHeaderDecodedListener listener) throws IOException {
         try (ImageDecoder decoder = src.createImageDecoder()) {
             if (listener != null) {
-                ImageInfo info = new ImageInfo(decoder.mWidth, decoder.mHeight);
-                listener.onHeaderDecoded(info, decoder);
+                ImageInfo info = new ImageInfo(decoder);
+                try {
+                    listener.onHeaderDecoded(info, decoder);
+                } finally {
+                    info.decoder = null;
+                }
             }
 
             decoder.checkState();
@@ -771,6 +797,10 @@ public final class ImageDecoder implements AutoCloseable {
                                  decoder.mPreferRamOverQuality,
                                  decoder.mAsAlphaMask);
         }
+    }
+
+    private String getMimeType() {
+        return nGetMimeType(mNativePtr);
     }
 
     /**
@@ -802,4 +832,5 @@ public final class ImageDecoder implements AutoCloseable {
                                                 int sampleSize);
     private static native void nGetPadding(long nativePtr, Rect outRect);
     private static native void nClose(long nativePtr);
+    private static native String nGetMimeType(long nativePtr);
 }
