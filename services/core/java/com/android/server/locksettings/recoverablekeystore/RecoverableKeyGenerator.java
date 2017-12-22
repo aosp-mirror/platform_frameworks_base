@@ -16,22 +16,15 @@
 
 package com.android.server.locksettings.recoverablekeystore;
 
-import android.security.keystore.KeyProperties;
-import android.security.keystore.KeyProtection;
-import android.util.Log;
-
 import com.android.server.locksettings.recoverablekeystore.storage.RecoverableKeyStoreDb;
 
 import java.security.InvalidKeyException;
-import java.security.KeyStore;
 import java.security.KeyStoreException;
 import java.security.NoSuchAlgorithmException;
-import java.security.NoSuchProviderException;
 import java.util.Locale;
 
 import javax.crypto.KeyGenerator;
 import javax.crypto.SecretKey;
-import javax.security.auth.DestroyFailedException;
 
 /**
  * Generates keys and stores them both in AndroidKeyStore and on disk, in wrapped form.
@@ -43,8 +36,6 @@ import javax.security.auth.DestroyFailedException;
  * @hide
  */
 public class RecoverableKeyGenerator {
-    private static final String TAG = "RecoverableKeyGenerator";
-
     private static final int RESULT_CANNOT_INSERT_ROW = -1;
     private static final String KEY_GENERATOR_ALGORITHM = "AES";
     private static final int KEY_SIZE_BITS = 256;
@@ -62,20 +53,16 @@ public class RecoverableKeyGenerator {
         // NB: This cannot use AndroidKeyStore as the provider, as we need access to the raw key
         // material, so that it can be synced to disk in encrypted form.
         KeyGenerator keyGenerator = KeyGenerator.getInstance(KEY_GENERATOR_ALGORITHM);
-        return new RecoverableKeyGenerator(
-                keyGenerator, database, new AndroidKeyStoreFactory.Impl());
+        return new RecoverableKeyGenerator(keyGenerator, database);
     }
 
     private final KeyGenerator mKeyGenerator;
     private final RecoverableKeyStoreDb mDatabase;
-    private final AndroidKeyStoreFactory mAndroidKeyStoreFactory;
 
     private RecoverableKeyGenerator(
             KeyGenerator keyGenerator,
-            RecoverableKeyStoreDb recoverableKeyStoreDb,
-            AndroidKeyStoreFactory androidKeyStoreFactory) {
+            RecoverableKeyStoreDb recoverableKeyStoreDb) {
         mKeyGenerator = keyGenerator;
-        mAndroidKeyStoreFactory = androidKeyStoreFactory;
         mDatabase = recoverableKeyStoreDb;
     }
 
@@ -89,69 +76,29 @@ public class RecoverableKeyGenerator {
      * @param platformKey The user's platform key, with which to wrap the generated key.
      * @param userId The user ID of the profile to which the calling app belongs.
      * @param uid The uid of the application that will own the key.
-     * @param alias The alias by which the key will be known in AndroidKeyStore.
+     * @param alias The alias by which the key will be known in the recoverable key store.
      * @throws RecoverableKeyStorageException if there is some error persisting the key either to
-     *     the AndroidKeyStore or the database.
+     *     the database.
      * @throws KeyStoreException if there is a KeyStore error wrapping the generated key.
      * @throws InvalidKeyException if the platform key cannot be used to wrap keys.
      *
      * @hide
      */
-    public void generateAndStoreKey(
+    public byte[] generateAndStoreKey(
             PlatformEncryptionKey platformKey, int userId, int uid, String alias)
             throws RecoverableKeyStorageException, KeyStoreException, InvalidKeyException {
         mKeyGenerator.init(KEY_SIZE_BITS);
         SecretKey key = mKeyGenerator.generateKey();
 
-        KeyStoreProxy keyStore;
-
-        try {
-            keyStore = mAndroidKeyStoreFactory.getKeyStoreForUid(uid);
-        } catch (NoSuchProviderException e) {
-            throw new RecoverableKeyStorageException(
-                    "Impossible: AndroidKeyStore provider did not exist", e);
-        } catch (KeyStoreException e) {
-            throw new RecoverableKeyStorageException(
-                    "Could not load AndroidKeyStore for " + uid, e);
-        }
-
-        try {
-            keyStore.setEntry(
-                    alias,
-                    new KeyStore.SecretKeyEntry(key),
-                    new KeyProtection.Builder(
-                            KeyProperties.PURPOSE_ENCRYPT | KeyProperties.PURPOSE_DECRYPT)
-                            .setBlockModes(KeyProperties.BLOCK_MODE_GCM)
-                            .setEncryptionPaddings(KeyProperties.ENCRYPTION_PADDING_NONE)
-                            .build());
-        } catch (KeyStoreException e) {
-            throw new RecoverableKeyStorageException(
-                    "Failed to load (%d, %s) into AndroidKeyStore", e);
-        }
-
         WrappedKey wrappedKey = WrappedKey.fromSecretKey(platformKey, key);
-        try {
-            // Keep raw key material in memory for minimum possible time.
-            key.destroy();
-        } catch (DestroyFailedException e) {
-            Log.w(TAG, "Could not destroy SecretKey.");
-        }
         long result = mDatabase.insertKey(userId, uid, alias, wrappedKey);
 
         if (result == RESULT_CANNOT_INSERT_ROW) {
-            // Attempt to clean up
-            try {
-                keyStore.deleteEntry(alias);
-            } catch (KeyStoreException e) {
-                Log.e(TAG, String.format(Locale.US,
-                        "Could not delete recoverable key (%d, %s) from "
-                                + "AndroidKeyStore after error writing to database.", uid, alias),
-                        e);
-            }
-
             throw new RecoverableKeyStorageException(
                     String.format(
                             Locale.US, "Failed writing (%d, %s) to database.", uid, alias));
         }
+
+        return key.getEncoded();
     }
 }

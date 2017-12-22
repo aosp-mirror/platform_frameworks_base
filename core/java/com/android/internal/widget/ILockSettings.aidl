@@ -66,6 +66,7 @@ interface ILockSettings {
     void initRecoveryService(in String rootCertificateAlias, in byte[] signedPublicKeyList,
             int userId);
     KeyStoreRecoveryData getRecoveryData(in byte[] account, int userId);
+    byte[] generateAndStoreKey(String alias);
     void setSnapshotCreatedPendingIntent(in PendingIntent intent, int userId);
     Map getRecoverySnapshotVersions(int userId);
     void setServerParameters(long serverParameters, int userId);

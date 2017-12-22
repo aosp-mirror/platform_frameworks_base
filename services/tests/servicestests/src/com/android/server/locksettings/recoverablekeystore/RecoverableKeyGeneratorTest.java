@@ -16,13 +16,12 @@
 
 package com.android.server.locksettings.recoverablekeystore;
 
-import static junit.framework.Assert.fail;
+import static junit.framework.Assert.assertNotNull;
 
 import static org.junit.Assert.assertArrayEquals;
-import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.assertEquals;
 
 import android.content.Context;
-import android.security.keystore.AndroidKeyStoreProvider;
 import android.security.keystore.AndroidKeyStoreSecretKey;
 import android.security.keystore.KeyGenParameterSpec;
 import android.security.keystore.KeyProperties;
@@ -32,8 +31,6 @@ import android.support.test.runner.AndroidJUnit4;
 
 import com.android.server.locksettings.recoverablekeystore.storage.RecoverableKeyStoreDb;
 
-import com.google.common.collect.ImmutableMap;
-
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -41,13 +38,10 @@ import org.junit.runner.RunWith;
 
 import java.io.File;
 import java.nio.charset.StandardCharsets;
-import java.security.InvalidKeyException;
 import java.security.KeyStore;
-import java.util.Arrays;
 
 import javax.crypto.Cipher;
 import javax.crypto.KeyGenerator;
-import javax.crypto.SecretKey;
 import javax.crypto.spec.GCMParameterSpec;
 
 @SmallTest
@@ -57,14 +51,13 @@ public class RecoverableKeyGeneratorTest {
     private static final int TEST_GENERATION_ID = 3;
     private static final String ANDROID_KEY_STORE_PROVIDER = "AndroidKeyStore";
     private static final String KEY_ALGORITHM = "AES";
-    private static final String SUPPORTED_CIPHER_ALGORITHM = "AES/GCM/NoPadding";
-    private static final String UNSUPPORTED_CIPHER_ALGORITHM = "AES/CTR/NoPadding";
+    private static final int KEY_SIZE_BYTES = 32;
+    private static final String KEY_WRAP_ALGORITHM = "AES/GCM/NoPadding";
     private static final String TEST_ALIAS = "karlin";
     private static final String WRAPPING_KEY_ALIAS = "RecoverableKeyGeneratorTestWrappingKey";
     private static final int TEST_USER_ID = 1000;
     private static final int KEYSTORE_UID_SELF = -1;
     private static final int GCM_TAG_LENGTH_BITS = 128;
-    private static final int GCM_NONCE_LENGTH_BYTES = 12;
 
     private PlatformEncryptionKey mPlatformKey;
     private PlatformDecryptionKey mDecryptKey;
@@ -95,67 +88,33 @@ public class RecoverableKeyGeneratorTest {
     }
 
     @Test
-    public void generateAndStoreKey_setsKeyInKeyStore() throws Exception {
-        mRecoverableKeyGenerator.generateAndStoreKey(
-                mPlatformKey, TEST_USER_ID, KEYSTORE_UID_SELF, TEST_ALIAS);
-
-        KeyStore keyStore = AndroidKeyStoreProvider.getKeyStoreForUid(KEYSTORE_UID_SELF);
-        assertTrue(keyStore.containsAlias(TEST_ALIAS));
-    }
-
-    @Test
-    public void generateAndStoreKey_storesKeyEnabledForAesGcmNoPaddingEncryptDecrypt()
-            throws Exception {
-        mRecoverableKeyGenerator.generateAndStoreKey(
-                mPlatformKey, TEST_USER_ID, KEYSTORE_UID_SELF, TEST_ALIAS);
-
-        KeyStore keyStore = AndroidKeyStoreProvider.getKeyStoreForUid(KEYSTORE_UID_SELF);
-        SecretKey key = (SecretKey) keyStore.getKey(TEST_ALIAS, /*password=*/ null);
-        Cipher cipher = Cipher.getInstance(SUPPORTED_CIPHER_ALGORITHM);
-        cipher.init(Cipher.ENCRYPT_MODE, key);
-        byte[] nonce = new byte[GCM_NONCE_LENGTH_BYTES];
-        Arrays.fill(nonce, (byte) 0);
-        cipher.init(Cipher.DECRYPT_MODE, key, new GCMParameterSpec(GCM_TAG_LENGTH_BITS, nonce));
-    }
-
-    @Test
-    public void generateAndStoreKey_storesKeyDisabledForOtherModes() throws Exception {
-        mRecoverableKeyGenerator.generateAndStoreKey(
-                mPlatformKey, TEST_USER_ID, KEYSTORE_UID_SELF, TEST_ALIAS);
-
-        KeyStore keyStore = AndroidKeyStoreProvider.getKeyStoreForUid(KEYSTORE_UID_SELF);
-        SecretKey key = (SecretKey) keyStore.getKey(TEST_ALIAS, /*password=*/ null);
-        Cipher cipher = Cipher.getInstance(UNSUPPORTED_CIPHER_ALGORITHM);
-
-        try {
-            cipher.init(Cipher.ENCRYPT_MODE, key);
-            fail("Should not be able to use key for " + UNSUPPORTED_CIPHER_ALGORITHM);
-        } catch (InvalidKeyException e) {
-            // expected
-        }
-    }
-
-    @Test
     public void generateAndStoreKey_storesWrappedKey() throws Exception {
         mRecoverableKeyGenerator.generateAndStoreKey(
                 mPlatformKey, TEST_USER_ID, KEYSTORE_UID_SELF, TEST_ALIAS);
 
-        KeyStore keyStore = AndroidKeyStoreProvider.getKeyStoreForUid(KEYSTORE_UID_SELF);
-        SecretKey key = (SecretKey) keyStore.getKey(TEST_ALIAS, /*password=*/ null);
         WrappedKey wrappedKey = mRecoverableKeyStoreDb.getKey(KEYSTORE_UID_SELF, TEST_ALIAS);
-        SecretKey unwrappedKey = WrappedKey
-                .unwrapKeys(mDecryptKey, ImmutableMap.of(TEST_ALIAS, wrappedKey))
-                .get(TEST_ALIAS);
+        assertNotNull(wrappedKey);
+    }
 
-        // key and unwrappedKey should be equivalent. let's check!
-        byte[] plaintext = getUtf8Bytes("dtianpos");
-        Cipher cipher = Cipher.getInstance(SUPPORTED_CIPHER_ALGORITHM);
-        cipher.init(Cipher.ENCRYPT_MODE, key);
-        byte[] encrypted = cipher.doFinal(plaintext);
-        byte[] iv = cipher.getIV();
-        cipher.init(Cipher.DECRYPT_MODE, unwrappedKey, new GCMParameterSpec(128, iv));
-        byte[] decrypted = cipher.doFinal(encrypted);
-        assertArrayEquals(decrypted, plaintext);
+    @Test
+    public void generateAndStoreKey_returnsRawMaterialOfCorrectLength() throws Exception {
+        byte[] rawKey = mRecoverableKeyGenerator.generateAndStoreKey(
+                mPlatformKey, TEST_USER_ID, KEYSTORE_UID_SELF, TEST_ALIAS);
+
+        assertEquals(KEY_SIZE_BYTES, rawKey.length);
+    }
+
+    @Test
+    public void generateAndStoreKey_storesTheWrappedVersionOfTheRawMaterial() throws Exception {
+        byte[] rawMaterial = mRecoverableKeyGenerator.generateAndStoreKey(
+                mPlatformKey, TEST_USER_ID, KEYSTORE_UID_SELF, TEST_ALIAS);
+
+        WrappedKey wrappedKey = mRecoverableKeyStoreDb.getKey(KEYSTORE_UID_SELF, TEST_ALIAS);
+        Cipher cipher = Cipher.getInstance(KEY_WRAP_ALGORITHM);
+        cipher.init(Cipher.DECRYPT_MODE, mDecryptKey.getKey(),
+                new GCMParameterSpec(GCM_TAG_LENGTH_BITS, wrappedKey.getNonce()));
+        byte[] unwrappedMaterial = cipher.doFinal(wrappedKey.getKeyMaterial());
+        assertArrayEquals(rawMaterial, unwrappedMaterial);
     }
 
     private AndroidKeyStoreSecretKey generateAndroidKeyStoreKey() throws Exception {

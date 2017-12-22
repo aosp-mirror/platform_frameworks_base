@@ -24,10 +24,14 @@ import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.fail;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyInt;
+import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
+import android.app.KeyguardManager;
 import android.app.PendingIntent;
 import android.content.Context;
 import android.content.Intent;
@@ -61,7 +65,9 @@ import java.util.concurrent.Executors;
 import java.util.Map;
 import java.util.Random;
 
+import javax.crypto.Cipher;
 import javax.crypto.SecretKey;
+import javax.crypto.spec.GCMParameterSpec;
 import javax.crypto.spec.SecretKeySpec;
 
 @SmallTest
@@ -69,6 +75,7 @@ import javax.crypto.spec.SecretKeySpec;
 public class RecoverableKeyStoreManagerTest {
     private static final String DATABASE_FILE_NAME = "recoverablekeystore.db";
 
+    private static final String KEY_WRAP_CIPHER_ALGORITHM = "AES/GCM/NoPadding";
     private static final String TEST_SESSION_ID = "karlin";
     private static final byte[] TEST_PUBLIC_KEY = new byte[] {
         (byte) 0x30, (byte) 0x59, (byte) 0x30, (byte) 0x13, (byte) 0x06, (byte) 0x07, (byte) 0x2a,
@@ -93,13 +100,15 @@ public class RecoverableKeyStoreManagerTest {
     private static final byte[] RECOVERY_RESPONSE_HEADER =
             "V1 reencrypted_recovery_key".getBytes(StandardCharsets.UTF_8);
     private static final String TEST_ALIAS = "nick";
-
+    private static final int RECOVERABLE_KEY_SIZE_BYTES = 32;
     private static final int GENERATION_ID = 1;
     private static final byte[] NONCE = getUtf8Bytes("nonce");
     private static final byte[] KEY_MATERIAL = getUtf8Bytes("keymaterial");
+    private static final int GCM_TAG_SIZE_BITS = 128;
 
     @Mock private Context mMockContext;
     @Mock private ListenersStorage mMockListenersStorage;
+    @Mock private KeyguardManager mKeyguardManager;
 
     private RecoverableKeyStoreDb mRecoverableKeyStoreDb;
     private File mDatabaseFile;
@@ -113,7 +122,13 @@ public class RecoverableKeyStoreManagerTest {
         Context context = InstrumentationRegistry.getTargetContext();
         mDatabaseFile = context.getDatabasePath(DATABASE_FILE_NAME);
         mRecoverableKeyStoreDb = RecoverableKeyStoreDb.newInstance(context);
+
         mRecoverySessionStorage = new RecoverySessionStorage();
+
+        when(mMockContext.getSystemService(anyString())).thenReturn(mKeyguardManager);
+        when(mMockContext.getSystemServiceName(any())).thenReturn("test");
+        when(mKeyguardManager.isDeviceSecure(anyInt())).thenReturn(true);
+
         mRecoverableKeyStoreManager = new RecoverableKeyStoreManager(
                 mMockContext,
                 mRecoverableKeyStoreDb,
@@ -126,6 +141,42 @@ public class RecoverableKeyStoreManagerTest {
     public void tearDown() {
         mRecoverableKeyStoreDb.close();
         mDatabaseFile.delete();
+    }
+
+    @Test
+    public void generateAndStoreKey_storesTheKey() throws Exception {
+        int uid = Binder.getCallingUid();
+
+        mRecoverableKeyStoreManager.generateAndStoreKey(TEST_ALIAS);
+
+        assertThat(mRecoverableKeyStoreDb.getKey(uid, TEST_ALIAS)).isNotNull();
+    }
+
+    @Test
+    public void generateAndStoreKey_returnsAKeyOfAppropriateSize() throws Exception {
+        assertThat(mRecoverableKeyStoreManager.generateAndStoreKey(TEST_ALIAS))
+                .hasLength(RECOVERABLE_KEY_SIZE_BYTES);
+    }
+
+    @Test
+    public void generateAndStoreKey_storesTheWrappedFormOfTheReturnedBytes() throws Exception {
+        int uid = Binder.getCallingUid();
+
+        byte[] rawKey = mRecoverableKeyStoreManager.generateAndStoreKey(TEST_ALIAS);
+
+        WrappedKey wrappedKey = mRecoverableKeyStoreDb.getKey(uid, TEST_ALIAS);
+        PlatformEncryptionKey encryptionKey = PlatformKeyManager.getInstance(
+                mMockContext,
+                mRecoverableKeyStoreDb,
+                Binder.getCallingUserHandle().getIdentifier())
+                .getEncryptKey();
+        Cipher cipher = Cipher.getInstance(KEY_WRAP_CIPHER_ALGORITHM);
+        cipher.init(
+                Cipher.ENCRYPT_MODE,
+                encryptionKey.getKey(),
+                new GCMParameterSpec(GCM_TAG_SIZE_BITS, wrappedKey.getNonce()));
+        byte[] encryptedBytes = cipher.update(rawKey);
+        assertArrayEquals(encryptedBytes, wrappedKey.getKeyMaterial());
     }
 
     @Test
