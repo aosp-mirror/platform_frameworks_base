@@ -3534,11 +3534,19 @@
     @hide -->
     <permission android:name="android.permission.ACCESS_INSTANT_APPS"
             android:protectionLevel="signature|installer|verifier" />
+    <uses-permission android:name="android.permission.ACCESS_INSTANT_APPS"/>
 
     <!-- Allows the holder to view the instant applications on the device.
     @hide -->
     <permission android:name="android.permission.VIEW_INSTANT_APPS"
-            android:protectionLevel="signature|preinstalled" />
+                android:protectionLevel="signature|preinstalled" />
+
+    <!-- Allows the holder to manage whether the system can bind to services
+         provided by instant apps. This permission is intended to protect
+         test/development fucntionality and should be used only in such cases.
+    @hide -->
+    <permission android:name="android.permission.MANAGE_BIND_INSTANT_SERVICE"
+                android:protectionLevel="signature" />
 
     <!-- Allows receiving the usage of media resource e.g. video/audio codec and
          graphic memory.

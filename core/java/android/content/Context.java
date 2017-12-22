@@ -324,6 +324,15 @@ public abstract class Context {
     public static final int BIND_ADJUST_WITH_ACTIVITY = 0x0080;
 
     /**
+     * @hide Flag for {@link #bindService}: allows binding to a service provided
+     * by an instant app. Note that the caller may not have access to the instant
+     * app providing the service which is a violation of the instant app sandbox.
+     * This flag is intended ONLY for development/testing and should be used with
+     * great care. Only the system is allowed to use this flag.
+     */
+    public static final int BIND_ALLOW_INSTANT = 0x00400000;
+
+    /**
      * @hide Flag for {@link #bindService}: like {@link #BIND_NOT_FOREGROUND}, but puts it
      * up in to the important background state (instead of transient).
      */

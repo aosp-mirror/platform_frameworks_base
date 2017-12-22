@@ -64,7 +64,9 @@ import android.os.PowerManager;
 import android.os.Process;
 import android.os.RemoteCallbackList;
 import android.os.RemoteException;
+import android.os.ResultReceiver;
 import android.os.ServiceManager;
+import android.os.ShellCallback;
 import android.os.SystemClock;
 import android.os.UserHandle;
 import android.os.UserManager;
@@ -297,6 +299,14 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
             mUserStates.put(userId, state);
         }
         return state;
+    }
+
+    boolean getBindInstantServiceAllowed(int userId) {
+        return  mSecurityPolicy.getBindInstantServiceAllowed(userId);
+    }
+
+    void setBindInstantServiceAllowed(int userId, boolean allowed) {
+        mSecurityPolicy.setBindInstantServiceAllowed(userId, allowed);
     }
 
     private void registerBroadcastReceivers() {
@@ -1218,14 +1228,18 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
     private boolean readInstalledAccessibilityServiceLocked(UserState userState) {
         mTempAccessibilityServiceInfoList.clear();
 
+        int flags = PackageManager.GET_SERVICES
+                | PackageManager.GET_META_DATA
+                | PackageManager.MATCH_DISABLED_UNTIL_USED_COMPONENTS
+                | PackageManager.MATCH_DIRECT_BOOT_AWARE
+                | PackageManager.MATCH_DIRECT_BOOT_UNAWARE;
+
+        if (userState.mBindInstantServiceAllowed) {
+            flags |= PackageManager.MATCH_INSTANT;
+        }
+
         List<ResolveInfo> installedServices = mPackageManager.queryIntentServicesAsUser(
-                new Intent(AccessibilityService.SERVICE_INTERFACE),
-                PackageManager.GET_SERVICES
-                        | PackageManager.GET_META_DATA
-                        | PackageManager.MATCH_DISABLED_UNTIL_USED_COMPONENTS
-                        | PackageManager.MATCH_DIRECT_BOOT_AWARE
-                        | PackageManager.MATCH_DIRECT_BOOT_UNAWARE,
-                mCurrentUserId);
+                new Intent(AccessibilityService.SERVICE_INTERFACE), flags, mCurrentUserId);
 
         for (int i = 0, count = installedServices.size(); i < count; i++) {
             ResolveInfo resolveInfo = installedServices.get(i);
@@ -2709,6 +2723,14 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
         }
     }
 
+    @Override
+    public void onShellCommand(FileDescriptor in, FileDescriptor out,
+            FileDescriptor err, String[] args, ShellCallback callback,
+            ResultReceiver resultReceiver) {
+        new AccessibilityShellCommand(this).exec(this, in, out, err, args,
+                callback, resultReceiver);
+    }
+
     final class WindowsForAccessibilityCallback implements
             WindowManagerInternal.WindowsForAccessibilityCallback {
 
@@ -3074,6 +3096,32 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
                 }
             }
             return uidPackages;
+        }
+
+        private boolean getBindInstantServiceAllowed(int userId) {
+            mContext.enforceCallingOrSelfPermission(
+                    Manifest.permission.MANAGE_BIND_INSTANT_SERVICE,
+                    "getBindInstantServiceAllowed");
+            UserState state = mUserStates.get(userId);
+            return (state != null) && state.mBindInstantServiceAllowed;
+        }
+
+        private void setBindInstantServiceAllowed(int userId, boolean allowed) {
+            mContext.enforceCallingOrSelfPermission(
+                    Manifest.permission.MANAGE_BIND_INSTANT_SERVICE,
+                    "setBindInstantServiceAllowed");
+            UserState state = mUserStates.get(userId);
+            if (state == null) {
+                if (!allowed) {
+                    return;
+                }
+                state = new UserState(userId);
+                mUserStates.put(userId, state);
+            }
+            if (state.mBindInstantServiceAllowed != allowed) {
+                state.mBindInstantServiceAllowed = allowed;
+                onUserStateChangedLocked(state);
+            }
         }
 
         public void clearWindowsLocked() {
@@ -3557,6 +3605,8 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
         public boolean mIsPerformGesturesEnabled;
         public boolean mIsFilterKeyEventsEnabled;
         public boolean mAccessibilityFocusOnlyInActiveWindow;
+
+        public boolean mBindInstantServiceAllowed;
 
         public UserState(int userId) {
             mUserId = userId;

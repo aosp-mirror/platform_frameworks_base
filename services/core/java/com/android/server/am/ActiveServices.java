@@ -348,7 +348,7 @@ public final class ActiveServices {
 
         ServiceLookupResult res =
             retrieveServiceLocked(service, resolvedType, callingPackage,
-                    callingPid, callingUid, userId, true, callerFg, false);
+                    callingPid, callingUid, userId, true, callerFg, false, false);
         if (res == null) {
             return null;
         }
@@ -597,7 +597,7 @@ public final class ActiveServices {
 
         // If this service is active, make sure it is stopped.
         ServiceLookupResult r = retrieveServiceLocked(service, resolvedType, null,
-                Binder.getCallingPid(), Binder.getCallingUid(), userId, false, false, false);
+                Binder.getCallingPid(), Binder.getCallingUid(), userId, false, false, false, false);
         if (r != null) {
             if (r.record != null) {
                 final long origId = Binder.clearCallingIdentity();
@@ -658,7 +658,7 @@ public final class ActiveServices {
     IBinder peekServiceLocked(Intent service, String resolvedType, String callingPackage) {
         ServiceLookupResult r = retrieveServiceLocked(service, resolvedType, callingPackage,
                 Binder.getCallingPid(), Binder.getCallingUid(),
-                UserHandle.getCallingUserId(), false, false, false);
+                UserHandle.getCallingUserId(), false, false, false, false);
 
         IBinder ret = null;
         if (r != null) {
@@ -1282,12 +1282,19 @@ public final class ActiveServices {
                     + ") set BIND_ALLOW_WHITELIST_MANAGEMENT when binding service " + service);
         }
 
+        if ((flags & Context.BIND_ALLOW_INSTANT) != 0 && !isCallerSystem) {
+            throw new SecurityException(
+                    "Non-system caller " + caller + " (pid=" + Binder.getCallingPid()
+                            + ") set BIND_ALLOW_INSTANT when binding service " + service);
+        }
+
         final boolean callerFg = callerApp.setSchedGroup != ProcessList.SCHED_GROUP_BACKGROUND;
         final boolean isBindExternal = (flags & Context.BIND_EXTERNAL_SERVICE) != 0;
+        final boolean allowInstant = (flags & Context.BIND_ALLOW_INSTANT) != 0;
 
         ServiceLookupResult res =
             retrieveServiceLocked(service, resolvedType, callingPackage, Binder.getCallingPid(),
-                    Binder.getCallingUid(), userId, true, callerFg, isBindExternal);
+                    Binder.getCallingUid(), userId, true, callerFg, isBindExternal, allowInstant);
         if (res == null) {
             return 0;
         }
@@ -1657,7 +1664,8 @@ public final class ActiveServices {
 
     private ServiceLookupResult retrieveServiceLocked(Intent service,
             String resolvedType, String callingPackage, int callingPid, int callingUid, int userId,
-            boolean createIfNeeded, boolean callingFromFg, boolean isBindExternal) {
+            boolean createIfNeeded, boolean callingFromFg, boolean isBindExternal,
+            boolean allowInstant) {
         ServiceRecord r = null;
         if (DEBUG_SERVICE) Slog.v(TAG_SERVICE, "retrieveServiceLocked: " + service
                 + " type=" + resolvedType + " callingUid=" + callingUid);
@@ -1685,11 +1693,14 @@ public final class ActiveServices {
         }
         if (r == null) {
             try {
+                int flags = ActivityManagerService.STOCK_PM_FLAGS
+                        | PackageManager.MATCH_DEBUG_TRIAGED_MISSING;
+                if (allowInstant) {
+                    flags |= PackageManager.MATCH_INSTANT;
+                }
                 // TODO: come back and remove this assumption to triage all services
                 ResolveInfo rInfo = mAm.getPackageManagerInternalLocked().resolveService(service,
-                        resolvedType, ActivityManagerService.STOCK_PM_FLAGS
-                                | PackageManager.MATCH_DEBUG_TRIAGED_MISSING,
-                        userId, callingUid);
+                        resolvedType, flags, userId, callingUid);
                 ServiceInfo sInfo =
                     rInfo != null ? rInfo.serviceInfo : null;
                 if (sInfo == null) {

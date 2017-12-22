@@ -91,10 +91,12 @@ class AccessibilityServiceConnection extends AbstractAccessibilityServiceConnect
         if (userState == null) return;
         final long identity = Binder.clearCallingIdentity();
         try {
+            int flags = Context.BIND_AUTO_CREATE | Context.BIND_FOREGROUND_SERVICE_WHILE_AWAKE;
+            if (userState.mBindInstantServiceAllowed) {
+                flags |= Context.BIND_ALLOW_INSTANT;
+            }
             if (mService == null && mContext.bindServiceAsUser(
-                    mIntent, this,
-                    Context.BIND_AUTO_CREATE | Context.BIND_FOREGROUND_SERVICE_WHILE_AWAKE,
-                    new UserHandle(userState.mUserId))) {
+                    mIntent, this, flags, new UserHandle(userState.mUserId))) {
                 userState.getBindingServicesLocked().add(mComponentName);
             }
         } finally {

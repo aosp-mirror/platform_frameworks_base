@@ -30,6 +30,7 @@ import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.content.ServiceConnection;
+import android.content.pm.PackageManager;
 import android.content.pm.ParceledListSlice;
 import android.graphics.Region;
 import android.os.Binder;
@@ -740,6 +741,9 @@ abstract class AbstractAccessibilityServiceConnection extends IAccessibilityServ
 
     @Override
     public boolean isFingerprintGestureDetectionAvailable() {
+        if (!mContext.getPackageManager().hasSystemFeature(PackageManager.FEATURE_FINGERPRINT)) {
+            return false;
+        }
         if (isCapturingFingerprintGestures()) {
             FingerprintGestureDispatcher dispatcher =
                     mSystemSupport.getFingerprintGestureDispatcher();
