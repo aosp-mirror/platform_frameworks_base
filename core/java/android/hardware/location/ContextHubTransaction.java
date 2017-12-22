@@ -15,15 +15,16 @@
  */
 package android.hardware.location;
 
+import android.annotation.CallbackExecutor;
 import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.os.Handler;
-import android.os.Looper;
-import android.util.Log;
+import android.os.HandlerExecutor;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.Executor;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 
@@ -33,8 +34,8 @@ import java.util.concurrent.TimeoutException;
  * This object is generated as a result of an asynchronous request sent to the Context Hub
  * through the ContextHubManager APIs. The caller can either retrieve the result
  * synchronously through a blocking call ({@link #waitForResponse(long, TimeUnit)}) or
- * asynchronously through a user-defined callback
- * ({@link #setOnCompleteCallback(ContextHubTransaction.Callback, Handler)}).
+ * asynchronously through a user-defined listener
+ * ({@link #setOnCompleteListener(Listener, Executor)} )}).
  *
  * @param <T> the type of the contents in the transaction response
  *
@@ -145,20 +146,20 @@ public class ContextHubTransaction<T> {
     }
 
     /**
-     * An interface describing the callback to be invoked when a transaction completes.
+     * An interface describing the listener for a transaction completion.
      *
-     * @param <C> the type of the contents in the transaction response
+     * @param <L> the type of the contents in the transaction response
      */
     @FunctionalInterface
-    public interface Callback<C> {
+    public interface Listener<L> {
         /**
-         * The callback to invoke when the transaction completes.
+         * The listener function to invoke when the transaction completes.
          *
          * @param transaction the transaction that this callback was attached to.
          * @param response the response of the transaction.
          */
         void onComplete(
-                ContextHubTransaction<C> transaction, ContextHubTransaction.Response<C> response);
+                ContextHubTransaction<L> transaction, ContextHubTransaction.Response<L> response);
     }
 
     /*
@@ -173,14 +174,14 @@ public class ContextHubTransaction<T> {
     private ContextHubTransaction.Response<T> mResponse;
 
     /*
-     * The handler to invoke the aynsc response supplied by onComplete.
+     * The executor to invoke the onComplete async callback.
      */
-    private Handler mHandler = null;
+    private Executor mExecutor = null;
 
     /*
-     * The callback to invoke when the transaction completes.
+     * The listener to be invoked when the transaction completes.
      */
-    private ContextHubTransaction.Callback<T> mCallback = null;
+    private ContextHubTransaction.Listener<T> mListener = null;
 
     /*
      * Synchronization latch used to block on response.
@@ -258,73 +259,68 @@ public class ContextHubTransaction<T> {
     }
 
     /**
-     * Sets a callback to be invoked when the transaction completes.
+     * Sets the listener to be invoked invoked when the transaction completes.
      *
      * This function provides an asynchronous approach to retrieve the result of the
      * transaction. When the transaction response has been provided by the Context Hub,
-     * the given callback will be posted by the provided handler.
+     * the given listener will be invoked.
      *
-     * If the transaction has already completed at the time of invocation, the callback
-     * will be immediately posted by the handler. If the transaction has been invalidated,
-     * the callback will never be invoked.
+     * If the transaction has already completed at the time of invocation, the listener
+     * will be immediately invoked. If the transaction has been invalidated,
+     * the listener will never be invoked.
      *
      * A transaction can be invalidated if the process owning the transaction is no longer active
      * and the reference to this object is lost.
      *
-     * This method or {@link #setOnCompleteCallback(ContextHubTransaction.Callback)} can only be
+     * This method or {@link #setOnCompleteListener(ContextHubTransaction.Listener)} can only be
      * invoked once, or an IllegalStateException will be thrown.
      *
-     * @param callback the callback to be invoked upon completion
-     * @param handler the handler to post the callback
+     * @param listener the listener to be invoked upon completion
+     * @param executor the executor to invoke the callback
      *
      * @throws IllegalStateException if this method is called multiple times
      * @throws NullPointerException if the callback or handler is null
      */
-    public void setOnCompleteCallback(
-            @NonNull ContextHubTransaction.Callback<T> callback, @NonNull Handler handler) {
+    public void setOnCompleteListener(
+            @NonNull ContextHubTransaction.Listener<T> listener,
+            @NonNull @CallbackExecutor Executor executor) {
         synchronized (this) {
-            if (callback == null) {
-                throw new NullPointerException("Callback cannot be null");
+            if (listener == null) {
+                throw new NullPointerException("Listener cannot be null");
             }
-            if (handler == null) {
-                throw new NullPointerException("Handler cannot be null");
+            if (executor == null) {
+                throw new NullPointerException("Executor cannot be null");
             }
-            if (mCallback != null) {
+            if (mListener != null) {
                 throw new IllegalStateException(
-                        "Cannot set ContextHubTransaction callback multiple times");
+                        "Cannot set ContextHubTransaction listener multiple times");
             }
 
-            mCallback = callback;
-            mHandler = handler;
+            mListener = listener;
+            mExecutor = executor;
 
             if (mDoneSignal.getCount() == 0) {
-                boolean callbackPosted = mHandler.post(() -> {
-                    mCallback.onComplete(this, mResponse);
-                });
-
-                if (!callbackPosted) {
-                    Log.e(TAG, "Failed to post callback to Handler");
-                }
+                mExecutor.execute(() -> mListener.onComplete(this, mResponse));
             }
         }
     }
 
     /**
-     * Sets a callback to be invoked when the transaction completes.
+     * Sets the listener to be invoked invoked when the transaction completes.
      *
-     * Equivalent to {@link #setOnCompleteCallback(ContextHubTransaction.Callback, Handler)}
-     * with the handler being that of the main thread's Looper.
+     * Equivalent to {@link #setOnCompleteListener(ContextHubTransaction.Listener, Executor)}
+     * with the executor using the main thread's Looper.
      *
-     * This method or {@link #setOnCompleteCallback(ContextHubTransaction.Callback, Handler)}
+     * This method or {@link #setOnCompleteListener(ContextHubTransaction.Listener, Executor)}
      * can only be invoked once, or an IllegalStateException will be thrown.
      *
-     * @param callback the callback to be invoked upon completion
+     * @param listener the listener to be invoked upon completion
      *
      * @throws IllegalStateException if this method is called multiple times
      * @throws NullPointerException if the callback is null
      */
-    public void setOnCompleteCallback(@NonNull ContextHubTransaction.Callback<T> callback) {
-        setOnCompleteCallback(callback, new Handler(Looper.getMainLooper()));
+    public void setOnCompleteListener(@NonNull ContextHubTransaction.Listener<T> listener) {
+        setOnCompleteListener(listener, new HandlerExecutor(Handler.getMain()));
     }
 
     /**
@@ -339,7 +335,7 @@ public class ContextHubTransaction<T> {
      * @throws IllegalStateException if this method is invoked multiple times
      * @throws NullPointerException if the response is null
      */
-    void setResponse(ContextHubTransaction.Response<T> response) {
+    /* package */ void setResponse(ContextHubTransaction.Response<T> response) {
         synchronized (this) {
             if (response == null) {
                 throw new NullPointerException("Response cannot be null");
@@ -353,14 +349,8 @@ public class ContextHubTransaction<T> {
             mIsResponseSet = true;
 
             mDoneSignal.countDown();
-            if (mCallback != null) {
-                boolean callbackPosted = mHandler.post(() -> {
-                    mCallback.onComplete(this, mResponse);
-                });
-
-                if (!callbackPosted) {
-                    Log.e(TAG, "Failed to post callback to Handler");
-                }
+            if (mListener != null) {
+                mExecutor.execute(() -> mListener.onComplete(this, mResponse));
             }
         }
     }
