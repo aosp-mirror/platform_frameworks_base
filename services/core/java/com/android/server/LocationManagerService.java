@@ -1144,7 +1144,7 @@ public class LocationManagerService extends ILocationManager.Stub {
     }
 
     /**
-     * Returns the system information of the GNSS hardware.
+     * Returns the year of the GNSS hardware.
      */
     @Override
     public int getGnssYearOfHardware() {
@@ -1152,6 +1152,19 @@ public class LocationManagerService extends ILocationManager.Stub {
             return mGnssSystemInfoProvider.getGnssYearOfHardware();
         } else {
             return 0;
+        }
+    }
+
+
+    /**
+     * Returns the model name of the GNSS hardware.
+     */
+    @Override
+    public String getGnssHardwareModelName() {
+        if (mGnssSystemInfoProvider != null) {
+            return mGnssSystemInfoProvider.getGnssHardwareModelName();
+        } else {
+            return LocationManager.GNSS_HARDWARE_MODEL_NAME_UNKNOWN;
         }
     }
 

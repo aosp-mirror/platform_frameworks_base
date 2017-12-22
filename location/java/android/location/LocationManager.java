@@ -19,6 +19,7 @@ package android.location;
 import com.android.internal.location.ProviderProperties;
 
 import android.Manifest;
+import android.annotation.NonNull;
 import android.annotation.RequiresPermission;
 import android.annotation.SuppressLint;
 import android.annotation.SystemApi;
@@ -224,6 +225,12 @@ public class LocationManager {
      */
     public static final String HIGH_POWER_REQUEST_CHANGE_ACTION =
         "android.location.HIGH_POWER_REQUEST_CHANGE";
+
+    /**
+     * The value returned by {@link LocationManager#getGnssHardwareModelName()} when the hardware
+     * does not support providing the actual value.
+     */
+    public static final String GNSS_HARDWARE_MODEL_NAME_UNKNOWN = "Model Name Unknown";
 
     // Map from LocationListeners to their associated ListenerTransport objects
     private HashMap<LocationListener,ListenerTransport> mListeners =
@@ -1969,14 +1976,29 @@ public class LocationManager {
     }
 
     /**
-     * Returns the system information of the GPS hardware.
-     * May return 0 if GPS hardware is earlier than 2016.
-     * @hide
+     * Returns the model year of the GNSS hardware and software build.
+     *
+     * May return 0 if the model year is less than 2016.
      */
-    @TestApi
     public int getGnssYearOfHardware() {
         try {
             return mService.getGnssYearOfHardware();
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    /**
+     * Returns the Model Name (including Vendor and Hardware/Software Version) of the GNSS hardware
+     * driver.
+     *
+     * Will return {@link LocationManager#GNSS_HARDWARE_MODEL_NAME_UNKNOWN} when the GNSS hardware
+     * abstraction layer does not support providing this value.
+     */
+    @NonNull
+    public String getGnssHardwareModelName() {
+        try {
+            return mService.getGnssHardwareModelName();
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }

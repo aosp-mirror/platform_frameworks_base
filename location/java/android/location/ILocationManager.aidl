@@ -71,6 +71,7 @@ interface ILocationManager
     void removeGnssNavigationMessageListener(in IGnssNavigationMessageListener listener);
 
     int getGnssYearOfHardware();
+    String getGnssHardwareModelName();
 
     int getGnssBatchSize(String packageName);
     boolean addGnssBatchingCallback(in IBatchedLocationCallback callback, String packageName);
