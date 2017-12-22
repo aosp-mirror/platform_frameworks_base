@@ -16,7 +16,6 @@
 package android.content.pm.crossprofile;
 
 import android.annotation.NonNull;
-import android.annotation.Nullable;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.res.Resources;
@@ -61,15 +60,10 @@ public class CrossProfileApps {
      * @param user The UserHandle of the profile, must be one of the users returned by
      *        {@link #getTargetUserProfiles()}, otherwise a {@link SecurityException} will
      *        be thrown.
-     * @param sourceBounds The Rect containing the source bounds of the clicked icon, see
-     *                     {@link android.content.Intent#setSourceBounds(Rect)}.
-     * @param startActivityOptions Options to pass to startActivity
      */
-    public void startMainActivity(@NonNull ComponentName component, @NonNull UserHandle user,
-            @Nullable Rect sourceBounds, @Nullable Bundle startActivityOptions) {
+    public void startMainActivity(@NonNull ComponentName component, @NonNull UserHandle user) {
         try {
-            mService.startActivityAsUser(mContext.getPackageName(),
-                    component, sourceBounds, startActivityOptions, user);
+            mService.startActivityAsUser(mContext.getPackageName(), component, user);
         } catch (RemoteException ex) {
             throw ex.rethrowFromSystemServer();
         }
