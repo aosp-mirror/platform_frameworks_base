@@ -350,21 +350,22 @@ import java.util.List;
  * view.</br>
  * </p>
  * <p>
- * <b>Windows changed</b> - represents the event of changes in the windows shown on
+ * <b>Windows changed</b> - represents a change in the windows shown on
  * the screen such as a window appeared, a window disappeared, a window size changed,
- * a window layer changed, etc.</br>
+ * a window layer changed, etc. These events should only come from the system, which is responsible
+ * for managing windows. For regions of the user interface that are presented as windows but are
+ * controlled by an app's process, use {@link #TYPE_WINDOW_STATE_CHANGED}.</br>
  * <em>Type:</em> {@link #TYPE_WINDOWS_CHANGED}</br>
  * <em>Properties:</em></br>
  * <ul>
  *   <li>{@link #getEventType()} - The type of the event.</li>
  *   <li>{@link #getEventTime()} - The event time.</li>
+ *   <li>{@link #getWindowChanges()}</li> - The specific change to the source window
  * </ul>
  * <em>Note:</em> You can retrieve the {@link AccessibilityWindowInfo} for the window
- * source of the event via {@link AccessibilityEvent#getSource()} to get the source
- * node on which then call {@link AccessibilityNodeInfo#getWindow()
- * AccessibilityNodeInfo.getWindow()} to get the window. Also all windows on the screen can
- * be retrieved by a call to {@link android.accessibilityservice.AccessibilityService#getWindows()
- * android.accessibilityservice.AccessibilityService.getWindows()}.
+ * source of the event by looking through the list returned by
+ * {@link android.accessibilityservice.AccessibilityService#getWindows()} for the window whose ID
+ * matches {@link #getWindowId()}.
  * </p>
  * <p>
  * <b>NOTIFICATION TYPES</b></br>
@@ -712,6 +713,88 @@ public final class AccessibilityEvent extends AccessibilityRecord implements Par
      */
     public static final int CONTENT_CHANGE_TYPE_CONTENT_DESCRIPTION = 0x00000004;
 
+    /**
+     * Change type for {@link #TYPE_WINDOWS_CHANGED} event:
+     * The window was added.
+     */
+    public static final int WINDOWS_CHANGE_ADDED = 0x00000001;
+
+    /**
+     * Change type for {@link #TYPE_WINDOWS_CHANGED} event:
+     * A window was removed.
+     */
+    public static final int WINDOWS_CHANGE_REMOVED = 0x00000002;
+
+    /**
+     * Change type for {@link #TYPE_WINDOWS_CHANGED} event:
+     * The window's title changed.
+     */
+    public static final int WINDOWS_CHANGE_TITLE = 0x00000004;
+
+    /**
+     * Change type for {@link #TYPE_WINDOWS_CHANGED} event:
+     * The window's bounds changed.
+     */
+    public static final int WINDOWS_CHANGE_BOUNDS = 0x00000008;
+
+    /**
+     * Change type for {@link #TYPE_WINDOWS_CHANGED} event:
+     * The window's layer changed.
+     */
+    public static final int WINDOWS_CHANGE_LAYER = 0x00000010;
+
+    /**
+     * Change type for {@link #TYPE_WINDOWS_CHANGED} event:
+     * The window's {@link AccessibilityWindowInfo#isActive()} changed.
+     */
+    public static final int WINDOWS_CHANGE_ACTIVE = 0x00000020;
+
+    /**
+     * Change type for {@link #TYPE_WINDOWS_CHANGED} event:
+     * The window's {@link AccessibilityWindowInfo#isFocused()} changed.
+     */
+    public static final int WINDOWS_CHANGE_FOCUSED = 0x00000040;
+
+    /**
+     * Change type for {@link #TYPE_WINDOWS_CHANGED} event:
+     * The window's {@link AccessibilityWindowInfo#isAccessibilityFocused()} changed.
+     */
+    public static final int WINDOWS_CHANGE_ACCESSIBILITY_FOCUSED = 0x00000080;
+
+    /**
+     * Change type for {@link #TYPE_WINDOWS_CHANGED} event:
+     * The window's parent changed.
+     */
+    public static final int WINDOWS_CHANGE_PARENT = 0x00000100;
+
+    /**
+     * Change type for {@link #TYPE_WINDOWS_CHANGED} event:
+     * The window's children changed.
+     */
+    public static final int WINDOWS_CHANGE_CHILDREN = 0x00000200;
+
+    /**
+     * Change type for {@link #TYPE_WINDOWS_CHANGED} event:
+     * The window either entered or exited picture-in-picture mode.
+     */
+    public static final int WINDOWS_CHANGE_PIP = 0x00000400;
+
+    /** @hide */
+    @Retention(RetentionPolicy.SOURCE)
+    @IntDef(flag = true, prefix = { "WINDOWS_CHANGE_" }, value = {
+            WINDOWS_CHANGE_ADDED,
+            WINDOWS_CHANGE_REMOVED,
+            WINDOWS_CHANGE_TITLE,
+            WINDOWS_CHANGE_BOUNDS,
+            WINDOWS_CHANGE_LAYER,
+            WINDOWS_CHANGE_ACTIVE,
+            WINDOWS_CHANGE_FOCUSED,
+            WINDOWS_CHANGE_ACCESSIBILITY_FOCUSED,
+            WINDOWS_CHANGE_PARENT,
+            WINDOWS_CHANGE_CHILDREN,
+            WINDOWS_CHANGE_PIP
+    })
+    public @interface WindowsChangeTypes {}
 
     /** @hide */
     @IntDef(flag = true, prefix = { "TYPE_" }, value = {
@@ -782,6 +865,7 @@ public final class AccessibilityEvent extends AccessibilityRecord implements Par
     int mMovementGranularity;
     int mAction;
     int mContentChangeTypes;
+    int mWindowChangeTypes;
 
     private ArrayList<AccessibilityRecord> mRecords;
 
@@ -802,6 +886,7 @@ public final class AccessibilityEvent extends AccessibilityRecord implements Par
         mMovementGranularity = event.mMovementGranularity;
         mAction = event.mAction;
         mContentChangeTypes = event.mContentChangeTypes;
+        mWindowChangeTypes = event.mWindowChangeTypes;
         mEventTime = event.mEventTime;
         mPackageName = event.mPackageName;
     }
@@ -919,6 +1004,43 @@ public final class AccessibilityEvent extends AccessibilityRecord implements Par
     }
 
     /**
+     * Get the bit mask of change types signaled by a {@link #TYPE_WINDOWS_CHANGED} event. A
+     * single event may represent multiple change types.
+     *
+     * @return The bit mask of change types.
+     */
+    @WindowsChangeTypes
+    public int getWindowChanges() {
+        return mWindowChangeTypes;
+    }
+
+    /** @hide  */
+    public void setWindowChanges(@WindowsChangeTypes int changes) {
+        mWindowChangeTypes = changes;
+    }
+
+    private static String windowChangeTypesToString(@WindowsChangeTypes int types) {
+        return BitUtils.flagsToString(types, AccessibilityEvent::singleWindowChangeTypeToString);
+    }
+
+    private static String singleWindowChangeTypeToString(int type) {
+        switch (type) {
+            case WINDOWS_CHANGE_ADDED: return "WINDOWS_CHANGE_ADDED";
+            case WINDOWS_CHANGE_REMOVED: return "WINDOWS_CHANGE_REMOVED";
+            case WINDOWS_CHANGE_TITLE: return "WINDOWS_CHANGE_TITLE";
+            case WINDOWS_CHANGE_BOUNDS: return "WINDOWS_CHANGE_BOUNDS";
+            case WINDOWS_CHANGE_LAYER: return "WINDOWS_CHANGE_LAYER";
+            case WINDOWS_CHANGE_ACTIVE: return "WINDOWS_CHANGE_ACTIVE";
+            case WINDOWS_CHANGE_FOCUSED: return "WINDOWS_CHANGE_FOCUSED";
+            case WINDOWS_CHANGE_ACCESSIBILITY_FOCUSED:
+                return "WINDOWS_CHANGE_ACCESSIBILITY_FOCUSED";
+            case WINDOWS_CHANGE_PARENT: return "WINDOWS_CHANGE_PARENT";
+            case WINDOWS_CHANGE_CHILDREN: return "WINDOWS_CHANGE_CHILDREN";
+            default: return Integer.toHexString(type);
+        }
+    }
+
+    /**
      * Sets the event type.
      *
      * @param eventType The event type.
@@ -1025,6 +1147,26 @@ public final class AccessibilityEvent extends AccessibilityRecord implements Par
     }
 
     /**
+     * Convenience method to obtain a {@link #TYPE_WINDOWS_CHANGED} event for a specific window and
+     * change set.
+     *
+     * @param windowId The ID of the window that changed
+     * @param windowChangeTypes The changes to populate
+     * @return An instance of a TYPE_WINDOWS_CHANGED, populated with the requested fields and with
+     *         importantForAccessibility set to {@code true}.
+     *
+     * @hide
+     */
+    public static AccessibilityEvent obtainWindowsChangedEvent(
+            int windowId, int windowChangeTypes) {
+        final AccessibilityEvent event = AccessibilityEvent.obtain(TYPE_WINDOWS_CHANGED);
+        event.setWindowId(windowId);
+        event.setWindowChanges(windowChangeTypes);
+        event.setImportantForAccessibility(true);
+        return event;
+    }
+
+    /**
      * Returns a cached instance if such is available or a new one is
      * instantiated with its type property set.
      *
@@ -1099,6 +1241,7 @@ public final class AccessibilityEvent extends AccessibilityRecord implements Par
         mMovementGranularity = 0;
         mAction = 0;
         mContentChangeTypes = 0;
+        mWindowChangeTypes = 0;
         mPackageName = null;
         mEventTime = 0;
         if (mRecords != null) {
@@ -1120,6 +1263,7 @@ public final class AccessibilityEvent extends AccessibilityRecord implements Par
         mMovementGranularity = parcel.readInt();
         mAction = parcel.readInt();
         mContentChangeTypes = parcel.readInt();
+        mWindowChangeTypes = parcel.readInt();
         mPackageName = TextUtils.CHAR_SEQUENCE_CREATOR.createFromParcel(parcel);
         mEventTime = parcel.readLong();
         mConnectionId = parcel.readInt();
@@ -1178,6 +1322,7 @@ public final class AccessibilityEvent extends AccessibilityRecord implements Par
         parcel.writeInt(mMovementGranularity);
         parcel.writeInt(mAction);
         parcel.writeInt(mContentChangeTypes);
+        parcel.writeInt(mWindowChangeTypes);
         TextUtils.writeToParcel(mPackageName, parcel, 0);
         parcel.writeLong(mEventTime);
         parcel.writeInt(mConnectionId);
@@ -1238,11 +1383,13 @@ public final class AccessibilityEvent extends AccessibilityRecord implements Par
         builder.append("; PackageName: ").append(mPackageName);
         builder.append("; MovementGranularity: ").append(mMovementGranularity);
         builder.append("; Action: ").append(mAction);
+        builder.append("; ContentChangeTypes: ").append(
+                contentChangeTypesToString(mContentChangeTypes));
+        builder.append("; WindowChangeTypes: ").append(
+                windowChangeTypesToString(mWindowChangeTypes));
         builder.append(super.toString());
         if (DEBUG) {
             builder.append("\n");
-            builder.append("; ContentChangeTypes: ").append(
-                    contentChangeTypesToString(mContentChangeTypes));
             builder.append("; sourceWindowId: ").append(mSourceWindowId);
             builder.append("; mSourceNodeId: ").append(mSourceNodeId);
             for (int i = 0; i < getRecordCount(); i++) {
