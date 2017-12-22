@@ -27,7 +27,10 @@ import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 
+import android.app.PendingIntent;
 import android.content.Context;
+import android.content.Intent;
+import android.os.Binder;
 import android.os.RemoteException;
 import android.security.recoverablekeystore.KeyDerivationParameters;
 import android.security.recoverablekeystore.KeyEntryRecoveryData;
@@ -89,6 +92,7 @@ public class RecoverableKeyStoreManagerTest {
     private static final String TEST_ALIAS = "nick";
 
     @Mock private Context mMockContext;
+    @Mock private ListenersStorage mMockListenersStorage;
 
     private RecoverableKeyStoreDb mRecoverableKeyStoreDb;
     private File mDatabaseFile;
@@ -107,7 +111,8 @@ public class RecoverableKeyStoreManagerTest {
                 mMockContext,
                 mRecoverableKeyStoreDb,
                 mRecoverySessionStorage,
-                Executors.newSingleThreadExecutor());
+                Executors.newSingleThreadExecutor(),
+                mMockListenersStorage);
     }
 
     @After
@@ -299,6 +304,16 @@ public class RecoverableKeyStoreManagerTest {
                 encryptedClaimResponse,
                 ImmutableList.of(applicationKey),
                 TEST_USER_ID);
+    }
+
+    @Test
+    public void setSnapshotCreatedPendingIntent() throws Exception {
+        int uid = Binder.getCallingUid();
+        PendingIntent intent = PendingIntent.getBroadcast(
+                InstrumentationRegistry.getTargetContext(), /*requestCode=*/1,
+                new Intent(), /*flags=*/ 0);
+        mRecoverableKeyStoreManager.setSnapshotCreatedPendingIntent(intent, /*userId=*/ 0);
+        verify(mMockListenersStorage).setSnapshotListener(eq(uid), any(PendingIntent.class));
     }
 
     private static byte[] randomEncryptedApplicationKey(SecretKey recoveryKey) throws Exception {

@@ -64,6 +64,7 @@ public class RecoverableKeyStoreManager {
     private final RecoverableKeyStoreDb mDatabase;
     private final RecoverySessionStorage mRecoverySessionStorage;
     private final ExecutorService mExecutorService;
+    private final ListenersStorage mListenersStorage;
 
     /**
      * Returns a new or existing instance.
@@ -77,7 +78,8 @@ public class RecoverableKeyStoreManager {
                     mContext.getApplicationContext(),
                     db,
                     new RecoverySessionStorage(),
-                    Executors.newSingleThreadExecutor());
+                    Executors.newSingleThreadExecutor(),
+                    ListenersStorage.getInstance());
         }
         return mInstance;
     }
@@ -87,11 +89,13 @@ public class RecoverableKeyStoreManager {
             Context context,
             RecoverableKeyStoreDb recoverableKeyStoreDb,
             RecoverySessionStorage recoverySessionStorage,
-            ExecutorService executorService) {
+            ExecutorService executorService,
+            ListenersStorage listenersStorage) {
         mContext = context;
         mDatabase = recoverableKeyStoreDb;
         mRecoverySessionStorage = recoverySessionStorage;
         mExecutorService = executorService;
+        mListenersStorage = listenersStorage;
     }
 
     public int initRecoveryService(
@@ -134,7 +138,8 @@ public class RecoverableKeyStoreManager {
     public void setSnapshotCreatedPendingIntent(@Nullable PendingIntent intent, int userId)
             throws RemoteException {
         checkRecoverKeyStorePermission();
-        throw new UnsupportedOperationException();
+        final int recoveryAgentUid = Binder.getCallingUid();
+        mListenersStorage.setSnapshotListener(recoveryAgentUid, intent);
     }
 
     /**
