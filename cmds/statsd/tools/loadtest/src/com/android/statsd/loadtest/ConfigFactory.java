@@ -83,7 +83,9 @@ public class ConfigFactory {
      * @param placebo If true, only return an empty config
      * @return The serialized config
      */
-  public byte[] getConfig(int replication, long bucketMillis, boolean placebo) {
+  public byte[] getConfig(int replication, long bucketMillis, boolean placebo, boolean includeCount,
+                          boolean includeDuration, boolean includeEvent, boolean includeValue,
+                          boolean includeGauge) {
         StatsdConfig.Builder config = StatsdConfig.newBuilder()
             .setName(CONFIG_NAME);
         if (placebo) {
@@ -92,25 +94,35 @@ public class ConfigFactory {
         int numMetrics = 0;
         for (int i = 0; i < replication; i++) {
             // metrics
-            for (EventMetric metric : mTemplate.getEventMetricList()) {
-                addEventMetric(metric, i, config);
-                numMetrics++;
+            if (includeEvent) {
+                for (EventMetric metric : mTemplate.getEventMetricList()) {
+                    addEventMetric(metric, i, config);
+                    numMetrics++;
+                }
             }
-            for (CountMetric metric : mTemplate.getCountMetricList()) {
-                addCountMetric(metric, i, bucketMillis, config);
-                numMetrics++;
+            if (includeCount) {
+                for (CountMetric metric : mTemplate.getCountMetricList()) {
+                    addCountMetric(metric, i, bucketMillis, config);
+                    numMetrics++;
+                }
             }
-            for (DurationMetric metric : mTemplate.getDurationMetricList()) {
-                addDurationMetric(metric, i, bucketMillis, config);
-                numMetrics++;
+            if (includeDuration) {
+                for (DurationMetric metric : mTemplate.getDurationMetricList()) {
+                    addDurationMetric(metric, i, bucketMillis, config);
+                    numMetrics++;
+                }
             }
-            for (GaugeMetric metric : mTemplate.getGaugeMetricList()) {
-                addGaugeMetric(metric, i, bucketMillis, config);
-                numMetrics++;
+            if (includeGauge) {
+                for (GaugeMetric metric : mTemplate.getGaugeMetricList()) {
+                    addGaugeMetric(metric, i, bucketMillis, config);
+                    numMetrics++;
+                }
             }
-            for (ValueMetric metric : mTemplate.getValueMetricList()) {
-                addValueMetric(metric, i, bucketMillis, config);
-                numMetrics++;
+            if (includeValue) {
+                for (ValueMetric metric : mTemplate.getValueMetricList()) {
+                    addValueMetric(metric, i, bucketMillis, config);
+                    numMetrics++;
+                }
             }
             // predicates
             for (Predicate predicate : mTemplate.getPredicateList()) {

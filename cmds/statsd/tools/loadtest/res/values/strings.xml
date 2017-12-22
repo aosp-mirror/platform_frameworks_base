@@ -26,5 +26,10 @@
     <string name="duration_label">test duration (mins):&#160;</string>
     <string name="start"> &#160;Start&#160; </string>
     <string name="stop"> &#160;Stop&#160; </string>
+    <string name="count"> count </string>
+    <string name="duration"> duration </string>
+    <string name="event"> event </string>
+    <string name="value"> value </string>
+    <string name="gauge"> gauge </string>
 
 </resources>

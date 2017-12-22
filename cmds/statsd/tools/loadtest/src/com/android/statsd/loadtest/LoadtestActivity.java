@@ -110,6 +110,11 @@ public class LoadtestActivity extends Activity {
     private EditText mDurationText;
     private TextView mReportText;
     private CheckBox mPlaceboCheckBox;
+    private CheckBox mCountMetricCheckBox;
+    private CheckBox mDurationMetricCheckBox;
+    private CheckBox mEventMetricCheckBox;
+    private CheckBox mValueMetricCheckBox;
+    private CheckBox mGaugeMetricCheckBox;
 
     /** When the load test started. */
     private long mStartedTimeMillis;
@@ -128,6 +133,31 @@ public class LoadtestActivity extends Activity {
      * the configuration is empty.
      */
     private boolean mPlacebo;
+
+    /**
+     * Whether to include CountMetric in the config.
+     */
+    private boolean mIncludeCountMetric;
+
+    /**
+     * Whether to include DurationMetric in the config.
+     */
+    private boolean mIncludeDurationMetric;
+
+    /**
+     * Whether to include EventMetric in the config.
+     */
+    private boolean mIncludeEventMetric;
+
+    /**
+     * Whether to include ValueMetric in the config.
+     */
+    private boolean mIncludeValueMetric;
+
+    /**
+     * Whether to include GaugeMetric in the config.
+     */
+    private boolean mIncludeGaugeMetric;
 
     /** The burst size. */
     private int mBurst;
@@ -170,6 +200,7 @@ public class LoadtestActivity extends Activity {
         initPeriod();
         initDuration();
         initPlacebo();
+        initMetricWhitelist();
 
         // Hide the keyboard outside edit texts.
         findViewById(R.id.outside).setOnTouchListener(new View.OnTouchListener() {
@@ -329,7 +360,9 @@ public class LoadtestActivity extends Activity {
         getData();
 
         // Create a config and push it to statsd.
-        if (!setConfig(mFactory.getConfig(mReplication, mBucketMins * 60 * 1000, mPlacebo))) {
+        if (!setConfig(mFactory.getConfig(mReplication, mBucketMins * 60 * 1000, mPlacebo,
+                mIncludeCountMetric, mIncludeDurationMetric, mIncludeEventMetric,
+                mIncludeValueMetric, mIncludeGaugeMetric))) {
             return;
         }
 
@@ -547,5 +580,49 @@ public class LoadtestActivity extends Activity {
                 setPlacebo(((CheckBox) view).isChecked());
             }
         });
+    }
+
+    private void initMetricWhitelist() {
+        mCountMetricCheckBox = findViewById(R.id.include_count);
+        mCountMetricCheckBox.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                mIncludeCountMetric = mCountMetricCheckBox.isChecked();
+            }
+        });
+        mDurationMetricCheckBox = findViewById(R.id.include_duration);
+        mDurationMetricCheckBox.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                mIncludeDurationMetric = mDurationMetricCheckBox.isChecked();
+            }
+        });
+        mEventMetricCheckBox = findViewById(R.id.include_event);
+        mEventMetricCheckBox.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                mIncludeEventMetric = mEventMetricCheckBox.isChecked();
+            }
+        });
+        mValueMetricCheckBox = findViewById(R.id.include_value);
+        mValueMetricCheckBox.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                mIncludeValueMetric = mValueMetricCheckBox.isChecked();
+            }
+        });
+        mGaugeMetricCheckBox = findViewById(R.id.include_gauge);
+        mGaugeMetricCheckBox.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                mIncludeGaugeMetric = mGaugeMetricCheckBox.isChecked();
+            }
+        });
+
+        mIncludeCountMetric = mCountMetricCheckBox.isChecked();
+        mIncludeDurationMetric = mDurationMetricCheckBox.isChecked();
+        mIncludeEventMetric = mEventMetricCheckBox.isChecked();
+        mIncludeValueMetric = mValueMetricCheckBox.isChecked();
+        mIncludeGaugeMetric = mGaugeMetricCheckBox.isChecked();
     }
 }
