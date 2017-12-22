@@ -423,19 +423,21 @@ public class RecoverableKeyStoreLoader {
     /**
      * Imports keys.
      *
-     * @param sessionId Id for recovery session, same as in = {@link startRecoverySession}.
+     * @param sessionId Id for recovery session, same as in
+     *     {@link #startRecoverySession(String, byte[], byte[], byte[], List)} on}.
      * @param recoveryKeyBlob Recovery blob encrypted by symmetric key generated for this session.
      * @param applicationKeys Application keys. Key material can be decrypted using recoveryKeyBlob
      *     and session. KeyStore only uses package names from the application info in {@link
      *     KeyEntryRecoveryData}. Caller is responsibility to perform certificates check.
+     * @return Map from alias to raw key material.
      */
-    public void recoverKeys(
+    public Map<String, byte[]> recoverKeys(
             @NonNull String sessionId,
             @NonNull byte[] recoveryKeyBlob,
             @NonNull List<KeyEntryRecoveryData> applicationKeys)
             throws RecoverableKeyStoreLoaderException {
         try {
-            mBinder.recoverKeys(
+            return (Map<String, byte[]>) mBinder.recoverKeys(
                     sessionId, recoveryKeyBlob, applicationKeys, UserHandle.getCallingUserId());
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();

@@ -78,6 +78,6 @@ interface ILockSettings {
     byte[] startRecoverySession(in String sessionId,
             in byte[] verifierPublicKey, in byte[] vaultParams, in byte[] vaultChallenge,
             in List<KeyStoreRecoveryMetadata> secrets, int userId);
-    void recoverKeys(in String sessionId, in byte[] recoveryKeyBlob,
+    Map/*<String, byte[]>*/ recoverKeys(in String sessionId, in byte[] recoveryKeyBlob,
             in List<KeyEntryRecoveryData> applicationKeys, int userId);
 }

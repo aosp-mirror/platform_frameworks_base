@@ -285,7 +285,7 @@ public class RecoverableKeyStoreManagerTest {
     }
 
     @Test
-    public void recoverKeys_doesNotThrowIfAllIsOk() throws Exception {
+    public void recoverKeys_returnsDecryptedKeys() throws Exception {
         mRecoverableKeyStoreManager.startRecoverySession(
                 TEST_SESSION_ID,
                 TEST_PUBLIC_KEY,
@@ -302,16 +302,19 @@ public class RecoverableKeyStoreManagerTest {
         SecretKey recoveryKey = randomRecoveryKey();
         byte[] encryptedClaimResponse = encryptClaimResponse(
                 keyClaimant, TEST_SECRET, TEST_VAULT_PARAMS, recoveryKey);
+        byte[] applicationKeyBytes = randomBytes(32);
         KeyEntryRecoveryData applicationKey = new KeyEntryRecoveryData(
                 TEST_ALIAS.getBytes(StandardCharsets.UTF_8),
-                randomEncryptedApplicationKey(recoveryKey)
-        );
+                encryptedApplicationKey(recoveryKey, applicationKeyBytes));
 
-        mRecoverableKeyStoreManager.recoverKeys(
+        Map<String, byte[]> recoveredKeys = mRecoverableKeyStoreManager.recoverKeys(
                 TEST_SESSION_ID,
                 encryptedClaimResponse,
                 ImmutableList.of(applicationKey),
                 TEST_USER_ID);
+
+        assertThat(recoveredKeys).hasSize(1);
+        assertThat(recoveredKeys.get(TEST_ALIAS)).isEqualTo(applicationKeyBytes);
     }
 
     @Test
@@ -387,9 +390,10 @@ public class RecoverableKeyStoreManagerTest {
         assertThat(statuses).containsEntry(alias2, status); // updated
     }
 
-    private static byte[] randomEncryptedApplicationKey(SecretKey recoveryKey) throws Exception {
+    private static byte[] encryptedApplicationKey(
+            SecretKey recoveryKey, byte[] applicationKey) throws Exception {
         return KeySyncUtils.encryptKeysWithRecoveryKey(recoveryKey, ImmutableMap.of(
-                "alias", new SecretKeySpec(randomBytes(32), "AES")
+                "alias", new SecretKeySpec(applicationKey, "AES")
         )).get("alias");
     }
 

@@ -2021,11 +2021,11 @@ public class LockSettingsService extends ILockSettings.Stub {
     }
 
     @Override
-    public void recoverKeys(@NonNull String sessionId, @NonNull byte[] recoveryKeyBlob,
+    public Map<String, byte[]> recoverKeys(@NonNull String sessionId, @NonNull byte[] recoveryKeyBlob,
             @NonNull List<KeyEntryRecoveryData> applicationKeys, @UserIdInt int userId)
             throws RemoteException {
-        mRecoverableKeyStoreManager.recoverKeys(sessionId, recoveryKeyBlob, applicationKeys,
-                userId);
+        return mRecoverableKeyStoreManager.recoverKeys(
+                sessionId, recoveryKeyBlob, applicationKeys, userId);
     }
 
     private static final String[] VALID_SETTINGS = new String[] {
