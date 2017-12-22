@@ -1,5 +1,9 @@
 package android.test.mock {
 
+  public deprecated class MockAccountManager {
+    method public static android.accounts.AccountManager newMockAccountManager(android.content.Context);
+  }
+
   public deprecated class MockApplication extends android.app.Application {
     ctor public MockApplication();
   }
@@ -9,6 +13,7 @@ package android.test.mock {
     ctor public MockContentProvider(android.content.Context);
     ctor public MockContentProvider(android.content.Context, java.lang.String, java.lang.String, android.content.pm.PathPermission[]);
     method public android.content.ContentProviderResult[] applyBatch(java.util.ArrayList<android.content.ContentProviderOperation>);
+    method public static deprecated void attachInfoForTesting(android.content.ContentProvider, android.content.Context, android.content.pm.ProviderInfo);
     method public int delete(android.net.Uri, java.lang.String, java.lang.String[]);
     method public final android.content.IContentProvider getIContentProvider();
     method public java.lang.String getType(android.net.Uri);
@@ -409,6 +414,10 @@ package android.test.mock {
     method public android.content.res.ColorStateList getColorStateList(int) throws android.content.res.Resources.NotFoundException;
     method public android.graphics.drawable.Drawable getDrawable(int) throws android.content.res.Resources.NotFoundException;
     method public void updateConfiguration(android.content.res.Configuration, android.util.DisplayMetrics);
+  }
+
+  public deprecated class MockService {
+    method public static <T extends android.app.Service> void attachForTesting(android.app.Service, android.content.Context, java.lang.String, android.app.Application);
   }
 
 }
