@@ -1737,6 +1737,19 @@ class UserController implements Handler.Callback {
         }
     }
 
+    boolean isUserOrItsParentRunning(int userId) {
+        synchronized (mLock) {
+            if (isUserRunning(userId, 0)) {
+                return true;
+            }
+            final int parentUserId = mUserProfileGroupIds.get(userId, UserInfo.NO_PROFILE_GROUP_ID);
+            if (parentUserId == UserInfo.NO_PROFILE_GROUP_ID) {
+                return false;
+            }
+            return isUserRunning(parentUserId, 0);
+        }
+    }
+
     boolean isCurrentProfile(int userId) {
         synchronized (mLock) {
             return ArrayUtils.contains(mCurrentProfileIds, userId);
