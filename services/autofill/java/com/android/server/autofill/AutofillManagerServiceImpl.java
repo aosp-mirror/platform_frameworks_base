@@ -400,7 +400,7 @@ final class AutofillManagerServiceImpl {
             return;
         }
 
-        session.logContextCommittedLocked();
+        session.logContextCommitted();
 
         final boolean finished = session.showSaveLocked();
         if (sVerbose) Slog.v(TAG, "finishSessionLocked(): session finished on save? " + finished);
@@ -713,7 +713,7 @@ final class AutofillManagerServiceImpl {
     /**
      * Updates the last fill response when an autofill context is committed.
      */
-    void logContextCommitted(int sessionId, @Nullable Bundle clientState,
+    void logContextCommittedLocked(int sessionId, @Nullable Bundle clientState,
             @Nullable ArrayList<String> selectedDatasets,
             @Nullable ArraySet<String> ignoredDatasets,
             @Nullable ArrayList<AutofillId> changedFieldIds,
@@ -723,44 +723,42 @@ final class AutofillManagerServiceImpl {
             @Nullable ArrayList<AutofillId> detectedFieldIdsList,
             @Nullable ArrayList<FieldClassification> detectedFieldClassificationsList,
             @NonNull String appPackageName) {
-        synchronized (mLock) {
-            if (isValidEventLocked("logDatasetNotSelected()", sessionId)) {
-                AutofillId[] detectedFieldsIds = null;
-                FieldClassification[] detectedFieldClassifications = null;
-                if (detectedFieldIdsList != null) {
-                    detectedFieldsIds = new AutofillId[detectedFieldIdsList.size()];
-                    detectedFieldIdsList.toArray(detectedFieldsIds);
-                    detectedFieldClassifications =
-                            new FieldClassification[detectedFieldClassificationsList.size()];
-                    detectedFieldClassificationsList.toArray(detectedFieldClassifications);
+        if (isValidEventLocked("logDatasetNotSelected()", sessionId)) {
+            AutofillId[] detectedFieldsIds = null;
+            FieldClassification[] detectedFieldClassifications = null;
+            if (detectedFieldIdsList != null) {
+                detectedFieldsIds = new AutofillId[detectedFieldIdsList.size()];
+                detectedFieldIdsList.toArray(detectedFieldsIds);
+                detectedFieldClassifications =
+                        new FieldClassification[detectedFieldClassificationsList.size()];
+                detectedFieldClassificationsList.toArray(detectedFieldClassifications);
 
-                    final int numberFields = detectedFieldsIds.length;
-                    int totalSize = 0;
-                    float totalScore = 0;
-                    for (int i = 0; i < numberFields; i++) {
-                        final FieldClassification fc = detectedFieldClassifications[i];
-                        final List<Match> matches = fc.getMatches();
-                        final int size = matches.size();
-                        totalSize += size;
-                        for (int j = 0; j < size; j++) {
-                            totalScore += matches.get(j).getScore();
-                        }
+                final int numberFields = detectedFieldsIds.length;
+                int totalSize = 0;
+                float totalScore = 0;
+                for (int i = 0; i < numberFields; i++) {
+                    final FieldClassification fc = detectedFieldClassifications[i];
+                    final List<Match> matches = fc.getMatches();
+                    final int size = matches.size();
+                    totalSize += size;
+                    for (int j = 0; j < size; j++) {
+                        totalScore += matches.get(j).getScore();
                     }
-
-                    final int averageScore = (int) ((totalScore * 100) / totalSize);
-                    mMetricsLogger.write(Helper
-                            .newLogMaker(MetricsEvent.AUTOFILL_FIELD_CLASSIFICATION_MATCHES,
-                                    appPackageName, getServicePackageName())
-                            .setCounterValue(numberFields)
-                            .addTaggedData(MetricsEvent.FIELD_AUTOFILL_MATCH_SCORE,
-                                    averageScore));
                 }
-                mEventHistory.addEvent(new Event(Event.TYPE_CONTEXT_COMMITTED, null,
-                        clientState, selectedDatasets, ignoredDatasets,
-                        changedFieldIds, changedDatasetIds,
-                        manuallyFilledFieldIds, manuallyFilledDatasetIds,
-                        detectedFieldsIds, detectedFieldClassifications));
+
+                final int averageScore = (int) ((totalScore * 100) / totalSize);
+                mMetricsLogger.write(Helper
+                        .newLogMaker(MetricsEvent.AUTOFILL_FIELD_CLASSIFICATION_MATCHES,
+                                appPackageName, getServicePackageName())
+                        .setCounterValue(numberFields)
+                        .addTaggedData(MetricsEvent.FIELD_AUTOFILL_MATCH_SCORE,
+                                averageScore));
             }
+            mEventHistory.addEvent(new Event(Event.TYPE_CONTEXT_COMMITTED, null,
+                    clientState, selectedDatasets, ignoredDatasets,
+                    changedFieldIds, changedDatasetIds,
+                    manuallyFilledFieldIds, manuallyFilledDatasetIds,
+                    detectedFieldsIds, detectedFieldClassifications));
         }
     }
 
