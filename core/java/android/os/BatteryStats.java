@@ -227,8 +227,11 @@ public abstract class BatteryStats implements Parcelable {
      * New in version 28:
      *   - Light/Deep Doze power
      *   - WiFi Multicast Wakelock statistics (count & duration)
+     * New in version 29:
+     *   - Process states re-ordered. TOP_SLEEPING now below BACKGROUND. HEAVY_WEIGHT introduced.
+     *   - CPU times per UID process state
      */
-    static final int CHECKIN_VERSION = 28;
+    static final int CHECKIN_VERSION = 29;
 
     /**
      * Old version, we hit 9 and ran out of room, need to remove.
