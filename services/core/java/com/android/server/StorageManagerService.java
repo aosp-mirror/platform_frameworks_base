@@ -2201,7 +2201,7 @@ class StorageManagerService extends IStorageManager.Stub
         }
 
         try {
-            mVold.fdeEnable(type, password, IVold.ENCRYPTION_FLAG_IN_PLACE);
+            mVold.fdeEnable(type, password, 0);
         } catch (Exception e) {
             Slog.wtf(TAG, e);
             return -1;
