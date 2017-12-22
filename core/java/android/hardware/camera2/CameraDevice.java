@@ -26,6 +26,7 @@ import static android.hardware.camera2.ICameraDeviceUser.CONSTRAINED_HIGH_SPEED_
 import android.hardware.camera2.params.InputConfiguration;
 import android.hardware.camera2.params.StreamConfigurationMap;
 import android.hardware.camera2.params.OutputConfiguration;
+import android.hardware.camera2.params.SessionConfiguration;
 import android.os.Handler;
 import android.view.Surface;
 
@@ -809,6 +810,26 @@ public abstract class CameraDevice implements AutoCloseable {
             @NonNull CameraCaptureSession.StateCallback callback,
             @Nullable Handler handler)
             throws CameraAccessException;
+
+    /**
+     * <p>Create a new {@link CameraCaptureSession} using a {@link SessionConfiguration} helper
+     * object that aggregates all supported parameters.</p>
+     *
+     * @param config A session configuration (see {@link SessionConfiguration}).
+     *
+     * @throws IllegalArgumentException In case the session configuration is invalid; or the output
+     *                                  configurations are empty.
+     * @throws CameraAccessException In case the camera device is no longer connected or has
+     *                               encountered a fatal error.
+     * @see #createCaptureSession(List, CameraCaptureSession.StateCallback, Handler)
+     * @see #createCaptureSessionByOutputConfigurations
+     * @see #createReprocessableCaptureSession
+     * @see #createConstrainedHighSpeedCaptureSession
+     */
+    public void createCaptureSession(
+            SessionConfiguration config) throws CameraAccessException {
+        throw new UnsupportedOperationException("No default implementation");
+    }
 
     /**
      * <p>Create a {@link CaptureRequest.Builder} for new capture requests,
