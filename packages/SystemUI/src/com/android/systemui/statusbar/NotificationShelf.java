@@ -25,6 +25,7 @@ import android.content.res.Resources;
 import android.graphics.Rect;
 import android.os.SystemProperties;
 import android.util.AttributeSet;
+import android.util.Log;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.ViewTreeObserver;
@@ -56,6 +57,7 @@ public class NotificationShelf extends ActivatableNotificationView implements
     private static final boolean ICON_ANMATIONS_WHILE_SCROLLING
             = SystemProperties.getBoolean("debug.icon_scroll_animations", true);
     private static final int TAG_CONTINUOUS_CLIPPING = R.id.continuous_clipping_tag;
+    private static final String TAG = "NotificationShelf";
     private ViewInvertHelper mViewInvertHelper;
     private boolean mDark;
     private NotificationIconContainer mShelfIcons;
@@ -294,10 +296,15 @@ public class NotificationShelf extends ActivatableNotificationView implements
             if (notGoneIndex == 0) {
                 StatusBarIconView icon = row.getEntry().expandedIcon;
                 NotificationIconContainer.IconState iconState = getIconState(icon);
-                if (iconState.clampedAppearAmount == 1.0f) {
+                if (iconState != null && iconState.clampedAppearAmount == 1.0f) {
                     // only if the first icon is fully in the shelf we want to clip to it!
                     backgroundTop = (int) (row.getTranslationY() - getTranslationY());
                     firstElementRoundness = row.getCurrentTopRoundness();
+                } else if (iconState == null) {
+                    Log.wtf(TAG, "iconState is null. ExpandedIcon: " + row.getEntry().expandedIcon
+                            + (row.getEntry().expandedIcon != null
+                            ? "\n icon parent: " + row.getEntry().expandedIcon.getParent() : "")
+                            + " \n number of notifications: " + mHostLayout.getChildCount() );
                 }
             }
             notGoneIndex++;
