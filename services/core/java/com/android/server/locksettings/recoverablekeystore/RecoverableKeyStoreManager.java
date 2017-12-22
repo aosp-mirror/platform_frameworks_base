@@ -42,6 +42,7 @@ import java.security.NoSuchAlgorithmException;
 import java.security.PublicKey;
 import java.security.spec.InvalidKeySpecException;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
@@ -308,8 +309,6 @@ public class RecoverableKeyStoreManager {
      * Invoked by a recovery agent after a successful recovery claim is sent to the remote vault
      * service.
      *
-     * <p>TODO: should also load into AndroidKeyStore.
-     *
      * @param sessionId The session ID used to generate the claim. See
      *     {@link #startRecoverySession(String, byte[], byte[], byte[], List, int)}.
      * @param encryptedRecoveryKey The encrypted recovery key blob returned by the remote vault
@@ -317,9 +316,10 @@ public class RecoverableKeyStoreManager {
      * @param applicationKeys The encrypted key blobs returned by the remote vault service. These
      *     were wrapped with the recovery key.
      * @param uid The uid of the recovery agent.
+     * @return Map from alias to raw key material.
      * @throws RemoteException if an error occurred recovering the keys.
      */
-    public void recoverKeys(
+    public Map<String, byte[]> recoverKeys(
             @NonNull String sessionId,
             @NonNull byte[] encryptedRecoveryKey,
             @NonNull List<KeyEntryRecoveryData> applicationKeys,
@@ -335,7 +335,7 @@ public class RecoverableKeyStoreManager {
 
         try {
             byte[] recoveryKey = decryptRecoveryKey(sessionEntry, encryptedRecoveryKey);
-            recoverApplicationKeys(recoveryKey, applicationKeys);
+            return recoverApplicationKeys(recoveryKey, applicationKeys);
         } finally {
             sessionEntry.destroy();
             mRecoverySessionStorage.remove(uid);
@@ -370,20 +370,21 @@ public class RecoverableKeyStoreManager {
     /**
      * Uses {@code recoveryKey} to decrypt {@code applicationKeys}.
      *
-     * <p>TODO: and load them into store?
-     *
+     * @return Map from alias to raw key material.
      * @throws RemoteException if an error occurred decrypting the keys.
      */
-    private void recoverApplicationKeys(
+    private Map<String, byte[]> recoverApplicationKeys(
             @NonNull byte[] recoveryKey,
             @NonNull List<KeyEntryRecoveryData> applicationKeys) throws RemoteException {
+        HashMap<String, byte[]> keyMaterialByAlias = new HashMap<>();
         for (KeyEntryRecoveryData applicationKey : applicationKeys) {
             String alias = new String(applicationKey.getAlias(), StandardCharsets.UTF_8);
             byte[] encryptedKeyMaterial = applicationKey.getEncryptedKeyMaterial();
 
             try {
-                // TODO: put decrypted key material in appropriate AndroidKeyStore
-                KeySyncUtils.decryptApplicationKey(recoveryKey, encryptedKeyMaterial);
+                byte[] keyMaterial =
+                        KeySyncUtils.decryptApplicationKey(recoveryKey, encryptedKeyMaterial);
+                keyMaterialByAlias.put(alias, keyMaterial);
             } catch (NoSuchAlgorithmException e) {
                 // Should never happen: all the algorithms used are required by AOSP implementations
                 throw new RemoteException(
@@ -399,6 +400,7 @@ public class RecoverableKeyStoreManager {
                     /*writeableStackTrace=*/ true);
             }
         }
+        return keyMaterialByAlias;
     }
 
     /**
