@@ -978,7 +978,7 @@
     <string name="textSelectionCABTitle" msgid="5236850394370820357">"Selección de texto"</string>
     <string name="addToDictionary" msgid="4352161534510057874">"Engadir ao dicionario"</string>
     <string name="deleteText" msgid="6979668428458199034">"Eliminar"</string>
-    <string name="inputMethod" msgid="1653630062304567879">"Método de entrada"</string>
+    <string name="inputMethod" msgid="1653630062304567879">"Método de introdución de texto"</string>
     <string name="editTextMenuTitle" msgid="4909135564941815494">"Accións de texto"</string>
     <string name="email" msgid="4560673117055050403">"Correo electrónico"</string>
     <string name="dial" msgid="4204975095406423102">"Teléfono"</string>
@@ -1283,7 +1283,7 @@
     <string name="permission_request_notification_with_subtitle" msgid="8530393139639560189">"Permiso solicitado\npara a conta <xliff:g id="ACCOUNT">%s</xliff:g>."</string>
     <string name="forward_intent_to_owner" msgid="1207197447013960896">"Estás usando esta aplicación fóra do teu perfil de traballo"</string>
     <string name="forward_intent_to_work" msgid="621480743856004612">"Estás usando esta aplicación no teu perfil de traballo"</string>
-    <string name="input_method_binding_label" msgid="1283557179944992649">"Método de entrada"</string>
+    <string name="input_method_binding_label" msgid="1283557179944992649">"Método de introdución de texto"</string>
     <string name="sync_binding_label" msgid="3687969138375092423">"Sincronizar"</string>
     <string name="accessibility_binding_label" msgid="4148120742096474641">"Accesibilidade"</string>
     <string name="wallpaper_binding_label" msgid="1240087844304687662">"Fondo de pantalla"</string>

@@ -217,7 +217,7 @@
     <string name="reboot_safemode_title" msgid="7054509914500140361">"Start på nytt i sikker modus"</string>
     <string name="reboot_safemode_confirm" msgid="55293944502784668">"Ønsker du å starte på nytt i sikker modus? Dette deaktiverer alle tredjepartsprogrammene du har installert. De gjenopprettes når du starter på nytt."</string>
     <string name="recent_tasks_title" msgid="3691764623638127888">"Nylig"</string>
-    <string name="no_recent_tasks" msgid="8794906658732193473">"Ingen nylige apper."</string>
+    <string name="no_recent_tasks" msgid="8794906658732193473">"Ingen nylig brukte apper."</string>
     <string name="global_actions" product="tablet" msgid="408477140088053665">"Innstillinger for nettbrett"</string>
     <string name="global_actions" product="tv" msgid="7240386462508182976">"Alternativer for TV"</string>
     <string name="global_actions" product="default" msgid="2406416831541615258">"Telefoninnstillinger"</string>
