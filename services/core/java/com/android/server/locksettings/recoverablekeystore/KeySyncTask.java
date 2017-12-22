@@ -28,20 +28,24 @@ import com.android.server.locksettings.recoverablekeystore.storage.RecoverableKe
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.nio.charset.StandardCharsets;
+import java.security.GeneralSecurityException;
 import java.security.InvalidKeyException;
 import java.security.KeyStoreException;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.security.PublicKey;
 import java.security.SecureRandom;
+import java.security.UnrecoverableKeyException;
+import java.util.Map;
 
 import javax.crypto.KeyGenerator;
+import javax.crypto.NoSuchPaddingException;
 import javax.crypto.SecretKey;
 
 /**
  * Task to sync application keys to a remote vault service.
  *
- * TODO: implement fully
+ * @hide
  */
 public class KeySyncTask implements Runnable {
     private static final String TAG = "KeySyncTask";
@@ -52,11 +56,13 @@ public class KeySyncTask implements Runnable {
     private static final int LENGTH_PREFIX_BYTES = Integer.BYTES;
     private static final String LOCK_SCREEN_HASH_ALGORITHM = "SHA-256";
 
-    private final Context mContext;
     private final RecoverableKeyStoreDb mRecoverableKeyStoreDb;
     private final int mUserId;
+    private final RecoverableSnapshotConsumer mSnapshotConsumer;
     private final int mCredentialType;
     private final String mCredential;
+    private final PlatformKeyManager.Factory mPlatformKeyManagerFactory;
+    private final VaultKeySupplier mVaultKeySupplier;
 
     public static KeySyncTask newInstance(
             Context context,
@@ -66,11 +72,17 @@ public class KeySyncTask implements Runnable {
             String credential
     ) throws NoSuchAlgorithmException, KeyStoreException, InsecureUserException {
         return new KeySyncTask(
-                context.getApplicationContext(),
                 recoverableKeyStoreDb,
                 userId,
                 credentialType,
-                credential);
+                credential,
+                () -> PlatformKeyManager.getInstance(context, recoverableKeyStoreDb, userId),
+                (salt, recoveryKey, applicationKeys) -> {
+                    // TODO: implement sending intent
+                },
+                () -> {
+                    throw new UnsupportedOperationException("Not implemented vault key.");
+                });
     }
 
     /**
@@ -80,19 +92,26 @@ public class KeySyncTask implements Runnable {
      * @param userId The uid of the user whose profile has been unlocked.
      * @param credentialType The type of credential - i.e., pattern or password.
      * @param credential The credential, encoded as a {@link String}.
+     * @param platformKeyManagerFactory Instantiates a {@link PlatformKeyManager} for the user.
+     *     This is a factory to enable unit testing, as otherwise it would be impossible to test
+     *     without a screen unlock occurring!
      */
     @VisibleForTesting
     KeySyncTask(
-            Context context,
             RecoverableKeyStoreDb recoverableKeyStoreDb,
             int userId,
             int credentialType,
-            String credential) {
-        mContext = context;
+            String credential,
+            PlatformKeyManager.Factory platformKeyManagerFactory,
+            RecoverableSnapshotConsumer snapshotConsumer,
+            VaultKeySupplier vaultKeySupplier) {
         mRecoverableKeyStoreDb = recoverableKeyStoreDb;
         mUserId = userId;
         mCredentialType = credentialType;
         mCredential = credential;
+        mPlatformKeyManagerFactory = platformKeyManagerFactory;
+        mSnapshotConsumer = snapshotConsumer;
+        mVaultKeySupplier = vaultKeySupplier;
     }
 
     @Override
@@ -105,10 +124,29 @@ public class KeySyncTask implements Runnable {
     }
 
     private void syncKeys() {
+        if (!isSyncPending()) {
+            Log.d(TAG, "Key sync not needed.");
+            return;
+        }
+
         byte[] salt = generateSalt();
         byte[] localLskfHash = hashCredentials(salt, mCredential);
 
-        // TODO: decrypt local wrapped application keys, ready for sync
+        Map<String, SecretKey> rawKeys;
+        try {
+            rawKeys = getKeysToSync();
+        } catch (GeneralSecurityException e) {
+            Log.e(TAG, "Failed to load recoverable keys for sync", e);
+            return;
+        } catch (InsecureUserException e) {
+            Log.wtf(TAG, "A screen unlock triggered the key sync flow, so user must have "
+                    + "lock screen. This should be impossible.", e);
+            return;
+        } catch (BadPlatformKeyException e) {
+            Log.wtf(TAG, "Loaded keys for same generation ID as platform key, so "
+                    + "BadPlatformKeyException should be impossible.", e);
+            return;
+        }
 
         SecretKey recoveryKey;
         try {
@@ -118,17 +156,24 @@ public class KeySyncTask implements Runnable {
             return;
         }
 
-        // TODO: encrypt each application key with recovery key
-
-        PublicKey vaultKey = getVaultPublicKey();
+        Map<String, byte[]> encryptedApplicationKeys;
+        try {
+            encryptedApplicationKeys = KeySyncUtils.encryptKeysWithRecoveryKey(
+                    recoveryKey, rawKeys);
+        } catch (InvalidKeyException | NoSuchAlgorithmException e) {
+            Log.wtf(TAG,
+                    "Should be impossible: could not encrypt application keys with random key",
+                    e);
+            return;
+        }
 
         // TODO: construct vault params and vault metadata
         byte[] vaultParams = {};
 
-        byte[] locallyEncryptedRecoveryKey;
+        byte[] encryptedRecoveryKey;
         try {
-            locallyEncryptedRecoveryKey = KeySyncUtils.thmEncryptRecoveryKey(
-                    vaultKey,
+            encryptedRecoveryKey = KeySyncUtils.thmEncryptRecoveryKey(
+                    mVaultKeySupplier.get(),
                     localLskfHash,
                     vaultParams,
                     recoveryKey);
@@ -140,12 +185,35 @@ public class KeySyncTask implements Runnable {
             return;
         }
 
-        // TODO: send RECOVERABLE_KEYSTORE_SNAPSHOT intent
+        mSnapshotConsumer.accept(salt, encryptedRecoveryKey, encryptedApplicationKeys);
     }
 
     private PublicKey getVaultPublicKey() {
         // TODO: fill this in
         throw new UnsupportedOperationException("TODO: get vault public key.");
+    }
+
+    /**
+     * Returns all of the recoverable keys for the user.
+     */
+    private Map<String, SecretKey> getKeysToSync()
+            throws InsecureUserException, KeyStoreException, UnrecoverableKeyException,
+            NoSuchAlgorithmException, NoSuchPaddingException, BadPlatformKeyException {
+        PlatformKeyManager platformKeyManager = mPlatformKeyManagerFactory.newInstance();
+        PlatformDecryptionKey decryptKey = platformKeyManager.getDecryptKey();
+        Map<String, WrappedKey> wrappedKeys = mRecoverableKeyStoreDb.getAllKeys(
+                mUserId, decryptKey.getGenerationId());
+        return WrappedKey.unwrapKeys(decryptKey, wrappedKeys);
+    }
+
+    /**
+     * Returns {@code true} if a sync is pending.
+     */
+    private boolean isSyncPending() {
+        // TODO: implement properly. For now just always syncing if the user has any recoverable
+        // keys. We need to keep track of when the store's state actually changes.
+        return !mRecoverableKeyStoreDb.getAllKeys(
+                mUserId, mRecoverableKeyStoreDb.getPlatformKeyGenerationId(mUserId)).isEmpty();
     }
 
     /**
@@ -220,5 +288,23 @@ public class KeySyncTask implements Runnable {
         KeyGenerator keyGenerator = KeyGenerator.getInstance(RECOVERY_KEY_ALGORITHM);
         keyGenerator.init(RECOVERY_KEY_SIZE_BITS);
         return keyGenerator.generateKey();
+    }
+
+    /**
+     * TODO: just replace with the Intent call. I'm not sure exactly what this looks like, hence
+     * this interface, so I can test in the meantime.
+     */
+    public interface RecoverableSnapshotConsumer {
+        void accept(
+                byte[] salt,
+                byte[] encryptedRecoveryKey,
+                Map<String, byte[]> encryptedApplicationKeys);
+    }
+
+    /**
+     * TODO: until this is in the database, so we can test.
+     */
+    public interface VaultKeySupplier {
+        PublicKey get();
     }
 }
