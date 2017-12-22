@@ -35,7 +35,7 @@ import java.util.Arrays;
  *
  * TODO(b/35851809): Make this a @SystemApi.
  */
-public final class EuiccRat implements Parcelable {
+public final class EuiccRulesAuthTable implements Parcelable {
     /** Profile policy rule flags */
     @Retention(RetentionPolicy.SOURCE)
     @IntDef(flag = true, prefix = { "POLICY_RULE_FLAG_" }, value = {
@@ -50,7 +50,7 @@ public final class EuiccRat implements Parcelable {
     private final CarrierIdentifier[][] mCarrierIds;
     private final int[] mPolicyRuleFlags;
 
-    /** This is used to build new {@link EuiccRat} instance. */
+    /** This is used to build new {@link EuiccRulesAuthTable} instance. */
     public static final class Builder {
         private int[] mPolicyRules;
         private CarrierIdentifier[][] mCarrierIds;
@@ -72,7 +72,7 @@ public final class EuiccRat implements Parcelable {
          * Builds the RAT instance. This builder should not be used anymore after this method is
          * called, otherwise {@link NullPointerException} will be thrown.
          */
-        public EuiccRat build() {
+        public EuiccRulesAuthTable build() {
             if (mPosition != mPolicyRules.length) {
                 throw new IllegalStateException(
                         "Not enough rules are added, expected: "
@@ -80,7 +80,7 @@ public final class EuiccRat implements Parcelable {
                                 + ", added: "
                                 + mPosition);
             }
-            return new EuiccRat(mPolicyRules, mCarrierIds, mPolicyRuleFlags);
+            return new EuiccRulesAuthTable(mPolicyRules, mCarrierIds, mPolicyRuleFlags);
         }
 
         /**
@@ -125,7 +125,8 @@ public final class EuiccRat implements Parcelable {
         return true;
     }
 
-    private EuiccRat(int[] policyRules, CarrierIdentifier[][] carrierIds, int[] policyRuleFlags) {
+    private EuiccRulesAuthTable(int[] policyRules, CarrierIdentifier[][] carrierIds,
+            int[] policyRuleFlags) {
         mPolicyRules = policyRules;
         mCarrierIds = carrierIds;
         mPolicyRuleFlags = policyRuleFlags;
@@ -207,7 +208,7 @@ public final class EuiccRat implements Parcelable {
             return false;
         }
 
-        EuiccRat that = (EuiccRat) obj;
+        EuiccRulesAuthTable that = (EuiccRulesAuthTable) obj;
         if (mCarrierIds.length != that.mCarrierIds.length) {
             return false;
         }
@@ -234,7 +235,7 @@ public final class EuiccRat implements Parcelable {
                 && Arrays.equals(mPolicyRuleFlags, that.mPolicyRuleFlags);
     }
 
-    private EuiccRat(Parcel source) {
+    private EuiccRulesAuthTable(Parcel source) {
         mPolicyRules = source.createIntArray();
         int len = mPolicyRules.length;
         mCarrierIds = new CarrierIdentifier[len][];
@@ -244,16 +245,16 @@ public final class EuiccRat implements Parcelable {
         mPolicyRuleFlags = source.createIntArray();
     }
 
-    public static final Creator<EuiccRat> CREATOR =
-            new Creator<EuiccRat>() {
+    public static final Creator<EuiccRulesAuthTable> CREATOR =
+            new Creator<EuiccRulesAuthTable>() {
                 @Override
-                public EuiccRat createFromParcel(Parcel source) {
-                    return new EuiccRat(source);
+                public EuiccRulesAuthTable createFromParcel(Parcel source) {
+                    return new EuiccRulesAuthTable(source);
                 }
 
                 @Override
-                public EuiccRat[] newArray(int size) {
-                    return new EuiccRat[size];
+                public EuiccRulesAuthTable[] newArray(int size) {
+                    return new EuiccRulesAuthTable[size];
                 }
             };
 }
