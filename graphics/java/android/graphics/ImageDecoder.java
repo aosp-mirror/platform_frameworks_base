@@ -20,6 +20,7 @@ import static android.system.OsConstants.SEEK_SET;
 
 import android.annotation.IntDef;
 import android.annotation.NonNull;
+import android.annotation.Nullable;
 import android.annotation.RawRes;
 import android.content.ContentResolver;
 import android.content.res.AssetFileDescriptor;
@@ -359,7 +360,6 @@ public final class ImageDecoder implements AutoCloseable {
      * @throws ArrayIndexOutOfBoundsException if offset and length are
      *      not within data.
      */
-    // TODO: Overloads that don't use offset, length
     public static Source createSource(@NonNull byte[] data, int offset,
             int length) throws ArrayIndexOutOfBoundsException {
         if (data == null) {
@@ -371,6 +371,13 @@ public final class ImageDecoder implements AutoCloseable {
                     "invalid offset/length!");
         }
         return new ByteArraySource(data, offset, length);
+    }
+
+    /**
+     * See {@link #createSource(byte[], int, int).
+     */
+    public static Source createSource(@NonNull byte[] data) {
+        return createSource(data, 0, data.length);
     }
 
     /**
@@ -648,13 +655,20 @@ public final class ImageDecoder implements AutoCloseable {
     }
 
     /**
-     *  Create a {@link Drawable}.
+     *  Create a {@link Drawable} from a {@code Source}.
+     *
+     *  @param src representing the encoded image.
+     *  @param listener for learning the {@link ImageInfo} and changing any
+     *      default settings on the {@code ImageDecoder}. If not {@code null},
+     *      this will be called on the same thread as {@code decodeDrawable}
+     *      before that method returns.
+     *  @return Drawable for displaying the image.
      *  @throws IOException if {@code src} is not found, is an unsupported
      *      format, or cannot be decoded for any reason.
      */
     @NonNull
-    public static Drawable decodeDrawable(Source src, OnHeaderDecodedListener listener)
-            throws IOException {
+    public static Drawable decodeDrawable(@NonNull Source src,
+            @Nullable OnHeaderDecodedListener listener) throws IOException {
         try (ImageDecoder decoder = src.createImageDecoder()) {
             if (listener != null) {
                 ImageInfo info = new ImageInfo(decoder.mWidth, decoder.mHeight);
@@ -714,13 +728,29 @@ public final class ImageDecoder implements AutoCloseable {
     }
 
     /**
-     *  Create a {@link Bitmap}.
+     * See {@link #decodeDrawable(Source, OnHeaderDecodedListener)}.
+     */
+    @NonNull
+    public static Drawable decodeDrawable(@NonNull Source src)
+            throws IOException {
+        return decodeDrawable(src, null);
+    }
+
+    /**
+     *  Create a {@link Bitmap} from a {@code Source}.
+     *
+     *  @param src representing the encoded image.
+     *  @param listener for learning the {@link ImageInfo} and changing any
+     *      default settings on the {@code ImageDecoder}. If not {@code null},
+     *      this will be called on the same thread as {@code decodeBitmap}
+     *      before that method returns.
+     *  @return Bitmap containing the image.
      *  @throws IOException if {@code src} is not found, is an unsupported
      *      format, or cannot be decoded for any reason.
      */
     @NonNull
-    public static Bitmap decodeBitmap(Source src, OnHeaderDecodedListener listener)
-            throws IOException {
+    public static Bitmap decodeBitmap(@NonNull Source src,
+            @Nullable OnHeaderDecodedListener listener) throws IOException {
         try (ImageDecoder decoder = src.createImageDecoder()) {
             if (listener != null) {
                 ImageInfo info = new ImageInfo(decoder.mWidth, decoder.mHeight);
@@ -741,6 +771,14 @@ public final class ImageDecoder implements AutoCloseable {
                                  decoder.mPreferRamOverQuality,
                                  decoder.mAsAlphaMask);
         }
+    }
+
+    /**
+     *  See {@link #decodeBitmap(Source, OnHeaderDecodedListener)}.
+     */
+    @NonNull
+    public static Bitmap decodeBitmap(@NonNull Source src) throws IOException {
+        return decodeBitmap(src, null);
     }
 
     private static native ImageDecoder nCreate(long asset) throws IOException;
