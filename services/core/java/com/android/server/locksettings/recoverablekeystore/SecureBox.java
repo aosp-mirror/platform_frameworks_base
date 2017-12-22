@@ -230,7 +230,7 @@ public class SecureBox {
      * @throws NoSuchAlgorithmException if any underlying crypto algorithm is not supported
      * @throws InvalidKeyException if the provided key is invalid for underlying crypto algorithms
      * @throws AEADBadTagException if the authentication tag contained in {@code encryptedPayload}
-     *     cannot be validated
+     *     cannot be validated, or if the payload is not a valid SecureBox V2 payload.
      * @hide
      */
     public static byte[] decrypt(
@@ -244,12 +244,14 @@ public class SecureBox {
             throw new IllegalArgumentException("Both the private key and shared secret are empty");
         }
         header = emptyByteArrayIfNull(header);
-        encryptedPayload = emptyByteArrayIfNull(encryptedPayload);
+        if (encryptedPayload == null) {
+            throw new NullPointerException("Encrypted payload must not be null.");
+        }
 
         ByteBuffer ciphertextBuffer = ByteBuffer.wrap(encryptedPayload);
         byte[] version = readEncryptedPayload(ciphertextBuffer, VERSION.length);
         if (!Arrays.equals(version, VERSION)) {
-            throw new IllegalArgumentException("The payload was not encrypted by SecureBox v2");
+            throw new AEADBadTagException("The payload was not encrypted by SecureBox v2");
         }
 
         byte[] senderPublicKeyBytes;
@@ -271,12 +273,13 @@ public class SecureBox {
         return aesGcmDecrypt(decryptionKey, randNonce, ciphertext, header);
     }
 
-    private static byte[] readEncryptedPayload(ByteBuffer buffer, int length) {
+    private static byte[] readEncryptedPayload(ByteBuffer buffer, int length)
+            throws AEADBadTagException {
         byte[] output = new byte[length];
         try {
             buffer.get(output);
         } catch (BufferUnderflowException ex) {
-            throw new IllegalArgumentException("The encrypted payload is too short");
+            throw new AEADBadTagException("The encrypted payload is too short");
         }
         return output;
     }
