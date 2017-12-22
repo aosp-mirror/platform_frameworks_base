@@ -38,10 +38,12 @@ import com.android.server.locksettings.recoverablekeystore.storage.RecoverySessi
 import java.nio.charset.StandardCharsets;
 import java.security.InvalidKeyException;
 import java.security.KeyStoreException;
+import java.security.KeyFactory;
 import java.security.NoSuchAlgorithmException;
 import java.security.PublicKey;
 import java.security.UnrecoverableKeyException;
 import java.security.spec.InvalidKeySpecException;
+import java.security.spec.X509EncodedKeySpec;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -112,12 +114,24 @@ public class RecoverableKeyStoreManager {
         }
     }
 
-    public int initRecoveryService(
+    public void initRecoveryService(
             @NonNull String rootCertificateAlias, @NonNull byte[] signedPublicKeyList, int userId)
             throws RemoteException {
         checkRecoverKeyStorePermission();
-        // TODO open /system/etc/security/... cert file
-        throw new UnsupportedOperationException();
+        // TODO: open /system/etc/security/... cert file, and check the signature on the public keys
+        PublicKey publicKey;
+        try {
+            KeyFactory kf = KeyFactory.getInstance("EC");
+            // TODO: Randomly choose a key from the list -- right now we just use the whole input
+            X509EncodedKeySpec pkSpec = new X509EncodedKeySpec(signedPublicKeyList);
+            publicKey = kf.generatePublic(pkSpec);
+        } catch (NoSuchAlgorithmException e) {
+            // Should never happen
+            throw new RuntimeException(e);
+        } catch (InvalidKeySpecException e) {
+            throw new RemoteException("Invalid public key for the recovery service");
+        }
+        mDatabase.setRecoveryServicePublicKey(userId, Binder.getCallingUid(), publicKey);
     }
 
     /**

@@ -86,4 +86,26 @@ class RecoverableKeyStoreDbContract {
          */
         static final String COLUMN_NAME_PLATFORM_KEY_GENERATION_ID = "platform_key_generation_id";
     }
+
+    /**
+     * Table holding public keys of the recovery service.
+     */
+    static class RecoveryServicePublicKeyEntry implements BaseColumns {
+        static final String TABLE_NAME = "recovery_service_public_keys";
+
+        /**
+         * The user id of the profile the application is running under.
+         */
+        static final String COLUMN_NAME_USER_ID = "user_id";
+
+        /**
+         * The uid of the application that initializes the local recovery components.
+         */
+        static final String COLUMN_NAME_UID = "uid";
+
+        /**
+         * The public key of the recovery service.
+         */
+        static final String COLUMN_NAME_PUBLIC_KEY = "public_key";
+    }
 }
