@@ -51,7 +51,7 @@ class UidMap : public virtual android::RefBase {
 public:
     UidMap();
     ~UidMap();
-
+    static const std::map<std::string, uint32_t> sAidToUidMapping;
     /*
      * All three inputs must be the same size, and the jth element in each array refers to the same
      * tuple, ie. uid[j] corresponds to packageName[j] with versionCode[j].

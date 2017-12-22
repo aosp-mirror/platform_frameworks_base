@@ -127,7 +127,7 @@ void StatsLogProcessor::OnConfigUpdated(const ConfigKey& key, const StatsdConfig
     if (newMetricsManager->isConfigValid()) {
         mUidMap->OnConfigUpdated(key);
         newMetricsManager->setAnomalyMonitor(mAnomalyMonitor);
-        if (config.log_source().package().size() > 0) {
+        if (newMetricsManager->shouldAddUidMapListener()) {
             // We have to add listener after the MetricsManager is constructed because it's
             // not safe to create wp or sp from this pointer inside its constructor.
             mUidMap->addListener(newMetricsManager.get());
@@ -150,7 +150,8 @@ size_t StatsLogProcessor::GetMetricsSize(const ConfigKey& key) const {
     return it->second->byteSize();
 }
 
-void StatsLogProcessor::onDumpReport(const ConfigKey& key, const uint64_t& dumpTimeStampNs, ConfigMetricsReportList* report) {
+void StatsLogProcessor::onDumpReport(const ConfigKey& key, const uint64_t& dumpTimeStampNs,
+                                     ConfigMetricsReportList* report) {
     auto it = mMetricsManagers.find(key);
     if (it == mMetricsManagers.end()) {
         ALOGW("Config source %s does not exist", key.ToString().c_str());
