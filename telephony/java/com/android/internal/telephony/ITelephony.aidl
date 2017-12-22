@@ -846,13 +846,13 @@ interface ITelephony {
      * Ask the radio to connect to the input network and change selection mode to manual.
      *
      * @param subId the id of the subscription.
-     * @param operatorInfo the operator to attach to.
-     * @param persistSelection should the selection persist till reboot or its
-     *        turned off? Will also result in notification being not shown to
-     *        the user if the signal is lost.
+     * @param operatorNumeric the PLMN of the operator to attach to.
+     * @param persistSelection Whether the selection will persist until reboot. If true, only allows
+     * attaching to the selected PLMN until reboot; otherwise, attach to the chosen PLMN and resume
+     * normal network selection next time.
      * @return true if the request suceeded.
      */
-    boolean setNetworkSelectionModeManual(int subId, in OperatorInfo operator,
+    boolean setNetworkSelectionModeManual(int subId, in String operatorNumeric,
             boolean persistSelection);
 
     /**

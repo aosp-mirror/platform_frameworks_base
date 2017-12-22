@@ -18,7 +18,6 @@ package android.telephony;
 
 /**
  * Contains radio access network related constants.
- * @hide
  */
 public final class RadioNetworkConstants {
 
