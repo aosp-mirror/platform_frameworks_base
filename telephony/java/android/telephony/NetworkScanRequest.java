@@ -16,11 +16,14 @@
 
 package android.telephony;
 
+import android.annotation.IntDef;
 import android.os.Parcel;
 import android.os.Parcelable;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
 
 /**
  * Defines a request to peform a network scan.
@@ -28,7 +31,6 @@ import java.util.Arrays;
  * This class defines whether the network scan will be performed only once or periodically until
  * cancelled, when the scan is performed periodically, the time interval is not controlled by the
  * user but defined by the modem vendor.
- * @hide
  */
 public final class NetworkScanRequest implements Parcelable {
 
@@ -54,6 +56,14 @@ public final class NetworkScanRequest implements Parcelable {
     /** @hide */
     public static final int MAX_INCREMENTAL_PERIODICITY_SEC = 10;
 
+    /** @hide */
+    @Retention(RetentionPolicy.SOURCE)
+    @IntDef({
+        SCAN_TYPE_ONE_SHOT,
+        SCAN_TYPE_PERIODIC,
+    })
+    public @interface ScanType {}
+
     /** Performs the scan only once */
     public static final int SCAN_TYPE_ONE_SHOT = 0;
     /**
@@ -65,21 +75,21 @@ public final class NetworkScanRequest implements Parcelable {
     public static final int SCAN_TYPE_PERIODIC = 1;
 
     /** Defines the type of the scan. */
-    public int scanType;
+    private int mScanType;
 
     /**
      * Search periodicity (in seconds).
      * Expected range for the input is [5s - 300s]
-     * This value must be less than or equal to maxSearchTime
+     * This value must be less than or equal to mMaxSearchTime
      */
-    public int searchPeriodicity;
+    private int mSearchPeriodicity;
 
     /**
      * Maximum duration of the periodic search (in seconds).
      * Expected range for the input is [60s - 3600s]
      * If the search lasts this long, it will be terminated.
      */
-    public int maxSearchTime;
+    private int mMaxSearchTime;
 
     /**
      * Indicates whether the modem should report incremental
@@ -87,18 +97,18 @@ public final class NetworkScanRequest implements Parcelable {
      * FALSE – Incremental results are not reported.
      * TRUE (default) – Incremental results are reported
      */
-    public boolean incrementalResults;
+    private boolean mIncrementalResults;
 
     /**
      * Indicates the periodicity with which the modem should
      * report incremental results to the client (in seconds).
      * Expected range for the input is [1s - 10s]
-     * This value must be less than or equal to maxSearchTime
+     * This value must be less than or equal to mMaxSearchTime
      */
-    public int incrementalResultsPeriodicity;
+    private int mIncrementalResultsPeriodicity;
 
     /** Describes the radio access technologies with bands or channels that need to be scanned. */
-    public RadioAccessSpecifier[] specifiers;
+    private RadioAccessSpecifier[] mSpecifiers;
 
     /**
      * Describes the List of PLMN ids (MCC-MNC)
@@ -107,20 +117,24 @@ public final class NetworkScanRequest implements Parcelable {
      * If list not sent, search to be completed till end and all PLMNs found to be reported.
      * Max size of array is MAX_MCC_MNC_LIST_SIZE
      */
-    public ArrayList<String> mccMncs;
+    private ArrayList<String> mMccMncs;
 
     /**
-     * Creates a new NetworkScanRequest with scanType and network specifiers
+     * Creates a new NetworkScanRequest with mScanType and network mSpecifiers
      *
-     * @param scanType The type of the scan
+     * @param scanType The type of the scan, can be either one shot or periodic
      * @param specifiers the radio network with bands / channels to be scanned
-     * @param searchPeriodicity Search periodicity (in seconds)
-     * @param maxSearchTime Maximum duration of the periodic search (in seconds)
+     * @param searchPeriodicity The modem will restart the scan every searchPeriodicity seconds if
+     *                          no network has been found, until it reaches the maxSearchTime. Only
+     *                          valid when scan type is periodic scan.
+     * @param maxSearchTime Maximum duration of the search (in seconds)
      * @param incrementalResults Indicates whether the modem should report incremental
      *                           results of the network scan to the client
      * @param incrementalResultsPeriodicity Indicates the periodicity with which the modem should
-     *                                      report incremental results to the client (in seconds)
-     * @param mccMncs Describes the List of PLMN ids (MCC-MNC)
+     *                                      report incremental results to the client (in seconds),
+     *                                      only valid when incrementalResults is true
+     * @param mccMncs Describes the list of PLMN ids (MCC-MNC), once any network in the list has
+     *                been found, the scan will be terminated by the modem.
      */
     public NetworkScanRequest(int scanType, RadioAccessSpecifier[] specifiers,
                     int searchPeriodicity,
@@ -128,17 +142,61 @@ public final class NetworkScanRequest implements Parcelable {
                     boolean incrementalResults,
                     int incrementalResultsPeriodicity,
                     ArrayList<String> mccMncs) {
-        this.scanType = scanType;
-        this.specifiers = specifiers;
-        this.searchPeriodicity = searchPeriodicity;
-        this.maxSearchTime = maxSearchTime;
-        this.incrementalResults = incrementalResults;
-        this.incrementalResultsPeriodicity = incrementalResultsPeriodicity;
-        if (mccMncs != null) {
-            this.mccMncs = mccMncs;
+        this.mScanType = scanType;
+        this.mSpecifiers = specifiers.clone();
+        this.mSearchPeriodicity = searchPeriodicity;
+        this.mMaxSearchTime = maxSearchTime;
+        this.mIncrementalResults = incrementalResults;
+        this.mIncrementalResultsPeriodicity = incrementalResultsPeriodicity;
+        if (mMccMncs != null) {
+            this.mMccMncs = (ArrayList<String>) mccMncs.clone();
         } else {
-            this.mccMncs = new ArrayList<>();
+            this.mMccMncs = new ArrayList<>();
         }
+    }
+
+    /** Returns the type of the scan. */
+    @ScanType
+    public int getScanType() {
+        return mScanType;
+    }
+
+    /** Returns the search periodicity in seconds. */
+    public int getSearchPeriodicity() {
+        return mSearchPeriodicity;
+    }
+
+    /** Returns maximum duration of the periodic search in seconds. */
+    public int getMaxSearchTime() {
+        return mMaxSearchTime;
+    }
+
+    /**
+     * Returns whether incremental result is enabled.
+     * FALSE – Incremental results is not enabled.
+     * TRUE – Incremental results is reported.
+     */
+    public boolean getIncrementalResults() {
+        return mIncrementalResults;
+    }
+
+    /** Returns the periodicity in seconds of incremental results. */
+    public int getIncrementalResultsPeriodicity() {
+        return mIncrementalResultsPeriodicity;
+    }
+
+    /** Returns the radio access technologies with bands or channels that need to be scanned. */
+    public RadioAccessSpecifier[] getSpecifiers() {
+        return mSpecifiers.clone();
+    }
+
+    /**
+     * Returns the List of PLMN ids (MCC-MNC) for early termination of scan.
+     * If any PLMN of this list is found, search should end at that point and
+     * results with all PLMN found till that point should be sent as response.
+     */
+    public ArrayList<String> getPlmns() {
+        return (ArrayList<String>) mMccMncs.clone();
     }
 
     @Override
@@ -148,26 +206,26 @@ public final class NetworkScanRequest implements Parcelable {
 
     @Override
     public void writeToParcel(Parcel dest, int flags) {
-        dest.writeInt(scanType);
-        dest.writeParcelableArray(specifiers, flags);
-        dest.writeInt(searchPeriodicity);
-        dest.writeInt(maxSearchTime);
-        dest.writeBoolean(incrementalResults);
-        dest.writeInt(incrementalResultsPeriodicity);
-        dest.writeStringList(mccMncs);
+        dest.writeInt(mScanType);
+        dest.writeParcelableArray(mSpecifiers, flags);
+        dest.writeInt(mSearchPeriodicity);
+        dest.writeInt(mMaxSearchTime);
+        dest.writeBoolean(mIncrementalResults);
+        dest.writeInt(mIncrementalResultsPeriodicity);
+        dest.writeStringList(mMccMncs);
     }
 
     private NetworkScanRequest(Parcel in) {
-        scanType = in.readInt();
-        specifiers = (RadioAccessSpecifier[]) in.readParcelableArray(
+        mScanType = in.readInt();
+        mSpecifiers = (RadioAccessSpecifier[]) in.readParcelableArray(
                 Object.class.getClassLoader(),
                 RadioAccessSpecifier.class);
-        searchPeriodicity = in.readInt();
-        maxSearchTime = in.readInt();
-        incrementalResults = in.readBoolean();
-        incrementalResultsPeriodicity = in.readInt();
-        mccMncs = new ArrayList<>();
-        in.readStringList(mccMncs);
+        mSearchPeriodicity = in.readInt();
+        mMaxSearchTime = in.readInt();
+        mIncrementalResults = in.readBoolean();
+        mIncrementalResultsPeriodicity = in.readInt();
+        mMccMncs = new ArrayList<>();
+        in.readStringList(mMccMncs);
     }
 
     @Override
@@ -184,25 +242,25 @@ public final class NetworkScanRequest implements Parcelable {
             return false;
         }
 
-        return (scanType == nsr.scanType
-                && Arrays.equals(specifiers, nsr.specifiers)
-                && searchPeriodicity == nsr.searchPeriodicity
-                && maxSearchTime == nsr.maxSearchTime
-                && incrementalResults == nsr.incrementalResults
-                && incrementalResultsPeriodicity == nsr.incrementalResultsPeriodicity
-                && (((mccMncs != null)
-                && mccMncs.equals(nsr.mccMncs))));
+        return (mScanType == nsr.mScanType
+                && Arrays.equals(mSpecifiers, nsr.mSpecifiers)
+                && mSearchPeriodicity == nsr.mSearchPeriodicity
+                && mMaxSearchTime == nsr.mMaxSearchTime
+                && mIncrementalResults == nsr.mIncrementalResults
+                && mIncrementalResultsPeriodicity == nsr.mIncrementalResultsPeriodicity
+                && (((mMccMncs != null)
+                && mMccMncs.equals(nsr.mMccMncs))));
     }
 
     @Override
     public int hashCode () {
-        return ((scanType * 31)
-                + (Arrays.hashCode(specifiers)) * 37
-                + (searchPeriodicity * 41)
-                + (maxSearchTime * 43)
-                + ((incrementalResults == true? 1 : 0) * 47)
-                + (incrementalResultsPeriodicity * 53)
-                + (mccMncs.hashCode() * 59));
+        return ((mScanType * 31)
+                + (Arrays.hashCode(mSpecifiers)) * 37
+                + (mSearchPeriodicity * 41)
+                + (mMaxSearchTime * 43)
+                + ((mIncrementalResults == true? 1 : 0) * 47)
+                + (mIncrementalResultsPeriodicity * 53)
+                + (mMccMncs.hashCode() * 59));
     }
 
     public static final Creator<NetworkScanRequest> CREATOR =
