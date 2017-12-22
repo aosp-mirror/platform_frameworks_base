@@ -1,0 +1,51 @@
+<!--
+  ~ Copyright (C) 2015 The Android Open Source Project
+  ~
+  ~ Licensed under the Apache License, Version 2.0 (the "License");
+  ~ you may not use this file except in compliance with the License.
+  ~ You may obtain a copy of the License at
+  ~
+  ~        http://www.apache.org/licenses/LICENSE-2.0
+  ~ Unless required by applicable law or agreed to in writing, software
+  ~ distributed under the License is distributed on an "AS IS" BASIS,
+  ~ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  ~ See the License for the specific language governing permissions and limitations under the
+  ~ License.
+  ~
+  -->
+
+<resources>
+    <string name="app_name">Benchmark</string>
+
+    <string name="action_export">Export to CSV</string>
+
+    <string name="list_view_scroll_name">List View Fling</string>
+    <string name="list_view_scroll_description">Tests list view fling performance</string>
+    <string name="image_list_view_scroll_name">Image List View Fling</string>
+    <string name="image_list_view_scroll_description">Tests list view fling performance with images</string>
+    <string name="shadow_grid_name">Shadow Grid Fling</string>
+    <string name="shadow_grid_description">Tests shadow grid fling performance with images</string>
+    <string name="text_high_hitrate_name">High-hitrate text render</string>
+    <string name="text_high_hitrate_description">Tests high hitrate text rendering</string>
+    <string name="text_low_hitrate_name">Low-hitrate text render</string>
+    <string name="text_low_hitrate_description">Tests low-hitrate text rendering</string>
+    <string name="edit_text_input_name">Edit Text Input</string>
+    <string name="edit_text_input_description">Tests edit text input</string>
+    <string name="overdraw_name">Overdraw Test</string>
+    <string name="overdraw_description">Tests how the device handles overdraw</string>
+    <string name="memory_bandwidth_name">Memory Bandwidth</string>
+    <string name="memory_bandwidth_description">Test device\'s memory bandwidth</string>
+    <string name="memory_latency_name">Memory Latency</string>
+    <string name="memory_latency_description">Test device\'s memory latency</string>
+    <string name="power_management_name">Power Management</string>
+    <string name="power_management_description">Test device\'s power management</string>
+    <string name="cpu_heat_soak_name">CPU Heat Soak</string>
+    <string name="cpu_heat_soak_description">How hot can we make it?</string>
+    <string name="cpu_gflops_name">CPU GFlops</string>
+    <string name="cpu_gflops_description">How many gigaflops can the device attain?</string>
+
+    <string name="benchmark_category_ui">UI</string>
+    <string name="benchmark_category_compute">Compute</string>
+    <string name="benchmark_category_generic">Generic</string>
+    <string name="title_activity_image_list_view_scroll">ImageListViewScroll</string>
+</resources>

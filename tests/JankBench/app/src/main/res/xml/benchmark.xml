@@ -1,0 +1,97 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  ~ Copyright (C) 2015 The Android Open Source Project
+  ~
+  ~ Licensed under the Apache License, Version 2.0 (the "License");
+  ~ you may not use this file except in compliance with the License.
+  ~ You may obtain a copy of the License at
+  ~
+  ~        http://www.apache.org/licenses/LICENSE-2.0
+  ~ Unless required by applicable law or agreed to in writing, software
+  ~ distributed under the License is distributed on an "AS IS" BASIS,
+  ~ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  ~ See the License for the specific language governing permissions and limitations under the
+  ~ License.
+  ~
+  -->
+
+<com.android.benchmark.BenchmarkGroup
+    xmlns:benchmark="http://schemas.android.com/apk/res-auto"
+    benchmark:description="Benchmarks of the Android system"
+    benchmark:name="Android Benchmarks">
+
+    <com.android.benchmark.Benchmark
+        benchmark:name="@string/list_view_scroll_name"
+        benchmark:id="@id/benchmark_list_view_scroll"
+        benchmark:category="ui"
+        benchmark:description="@string/list_view_scroll_description" />
+
+    <com.android.benchmark.Benchmark
+        benchmark:name="@string/image_list_view_scroll_name"
+        benchmark:id="@id/benchmark_image_list_view_scroll"
+        benchmark:category="ui"
+        benchmark:description="@string/image_list_view_scroll_description" />
+
+    <com.android.benchmark.Benchmark
+        benchmark:name="@string/shadow_grid_name"
+        benchmark:id="@id/benchmark_shadow_grid"
+        benchmark:category="ui"
+        benchmark:description="@string/shadow_grid_description" />
+
+    <com.android.benchmark.Benchmark
+        benchmark:name="@string/text_low_hitrate_name"
+        benchmark:id="@id/benchmark_text_low_hitrate"
+        benchmark:category="ui"
+        benchmark:description="@string/text_low_hitrate_description" />
+
+    <com.android.benchmark.Benchmark
+        benchmark:name="@string/text_high_hitrate_name"
+        benchmark:id="@id/benchmark_text_high_hitrate"
+        benchmark:category="ui"
+        benchmark:description="@string/text_high_hitrate_description" />
+
+    <com.android.benchmark.Benchmark
+        benchmark:name="@string/edit_text_input_name"
+        benchmark:id="@id/benchmark_edit_text_input"
+        benchmark:category="ui"
+        benchmark:description="@string/edit_text_input_description" />
+
+    <com.android.benchmark.Benchmark
+        benchmark:name="@string/overdraw_name"
+        benchmark:id="@id/benchmark_overdraw"
+        benchmark:category="ui"
+        benchmark:description="@string/overdraw_description" />
+
+    <!--
+    <com.android.benchmark.Benchmark
+        benchmark:name="@string/memory_bandwidth_name"
+        benchmark:id="@id/benchmark_memory_bandwidth"
+        benchmark:category="compute"
+        benchmark:description="@string/memory_bandwidth_description" />
+
+    <com.android.benchmark.Benchmark
+        benchmark:name="@string/memory_latency_name"
+        benchmark:id="@id/benchmark_memory_latency"
+        benchmark:category="compute"
+        benchmark:description="@string/memory_latency_description" />
+
+    <com.android.benchmark.Benchmark
+        benchmark:name="@string/power_management_name"
+        benchmark:id="@id/benchmark_power_management"
+        benchmark:category="compute"
+        benchmark:description="@string/power_management_description" />
+
+    <com.android.benchmark.Benchmark
+        benchmark:name="@string/cpu_heat_soak_name"
+        benchmark:id="@id/benchmark_cpu_heat_soak"
+        benchmark:category="compute"
+        benchmark:description="@string/cpu_heat_soak_description" />
+
+    <com.android.benchmark.Benchmark
+        benchmark:name="@string/cpu_gflops_name"
+        benchmark:id="@id/benchmark_cpu_gflops"
+        benchmark:category="compute"
+        benchmark:description="@string/cpu_gflops_description" />
+        -->
+
+</com.android.benchmark.BenchmarkGroup>
