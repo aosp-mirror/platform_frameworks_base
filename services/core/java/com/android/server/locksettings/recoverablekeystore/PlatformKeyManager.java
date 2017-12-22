@@ -332,4 +332,17 @@ public class PlatformKeyManager {
         }
         return keyStore;
     }
+
+    /**
+     * @hide
+     */
+    public interface Factory {
+        /**
+         * New PlatformKeyManager instance.
+         *
+         * @hide
+         */
+        PlatformKeyManager newInstance()
+                throws NoSuchAlgorithmException, InsecureUserException, KeyStoreException;
+    }
 }

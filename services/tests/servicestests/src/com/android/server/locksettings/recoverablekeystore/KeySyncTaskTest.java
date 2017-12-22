@@ -27,20 +27,99 @@ import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyZeroInteractions;
+import static org.mockito.Mockito.when;
 
+import android.content.Context;
+import android.security.keystore.AndroidKeyStoreSecretKey;
+import android.security.keystore.KeyGenParameterSpec;
+import android.security.keystore.KeyProperties;
+import android.support.test.InstrumentationRegistry;
 import android.support.test.filters.SmallTest;
 import android.support.test.runner.AndroidJUnit4;
 
+import com.android.server.locksettings.recoverablekeystore.storage.RecoverableKeyStoreDb;
+
+import org.junit.After;
+import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.mockito.ArgumentCaptor;
+import org.mockito.Captor;
+import org.mockito.Mock;
+import org.mockito.MockitoAnnotations;
 
+import java.io.File;
 import java.nio.charset.StandardCharsets;
+import java.security.KeyPair;
 import java.util.Arrays;
+import java.util.Map;
 import java.util.Random;
+
+import javax.crypto.KeyGenerator;
+import javax.crypto.SecretKey;
 
 @SmallTest
 @RunWith(AndroidJUnit4.class)
 public class KeySyncTaskTest {
+    private static final String KEY_ALGORITHM = "AES";
+    private static final String ANDROID_KEY_STORE_PROVIDER = "AndroidKeyStore";
+    private static final String WRAPPING_KEY_ALIAS = "KeySyncTaskTest/WrappingKey";
+    private static final String DATABASE_FILE_NAME = "recoverablekeystore.db";
+    private static final int TEST_USER_ID = 1000;
+    private static final int TEST_APP_UID = 10009;
+    private static final String TEST_APP_KEY_ALIAS = "rcleaver";
+    private static final int TEST_GENERATION_ID = 2;
+    private static final int TEST_CREDENTIAL_TYPE = CREDENTIAL_TYPE_PASSWORD;
+    private static final String TEST_CREDENTIAL = "password1234";
+    private static final byte[] THM_ENCRYPTED_RECOVERY_KEY_HEADER =
+            "V1 THM_encrypted_recovery_key".getBytes(StandardCharsets.UTF_8);
+
+    @Mock private KeySyncTask.RecoverableSnapshotConsumer mRecoverableSnapshotConsumer;
+    @Mock private PlatformKeyManager mPlatformKeyManager;
+
+    @Captor private ArgumentCaptor<byte[]> mSaltCaptor;
+    @Captor private ArgumentCaptor<byte[]> mEncryptedRecoveryKeyCaptor;
+    @Captor private ArgumentCaptor<Map<String, byte[]>> mEncryptedApplicationKeysCaptor;
+
+    private RecoverableKeyStoreDb mRecoverableKeyStoreDb;
+    private File mDatabaseFile;
+    private KeyPair mKeyPair;
+    private AndroidKeyStoreSecretKey mWrappingKey;
+    private PlatformEncryptionKey mEncryptKey;
+
+    private KeySyncTask mKeySyncTask;
+
+    @Before
+    public void setUp() throws Exception {
+        MockitoAnnotations.initMocks(this);
+
+        Context context = InstrumentationRegistry.getTargetContext();
+        mDatabaseFile = context.getDatabasePath(DATABASE_FILE_NAME);
+        mRecoverableKeyStoreDb = RecoverableKeyStoreDb.newInstance(context);
+        mKeyPair = SecureBox.genKeyPair();
+
+        mKeySyncTask = new KeySyncTask(
+                mRecoverableKeyStoreDb,
+                TEST_USER_ID,
+                TEST_CREDENTIAL_TYPE,
+                TEST_CREDENTIAL,
+                () -> mPlatformKeyManager,
+                mRecoverableSnapshotConsumer,
+                () -> mKeyPair.getPublic());
+
+        mWrappingKey = generateAndroidKeyStoreKey();
+        mEncryptKey = new PlatformEncryptionKey(TEST_GENERATION_ID, mWrappingKey);
+        when(mPlatformKeyManager.getDecryptKey()).thenReturn(
+                new PlatformDecryptionKey(TEST_GENERATION_ID, mWrappingKey));
+    }
+
+    @After
+    public void tearDown() {
+        mRecoverableKeyStoreDb.close();
+        mDatabaseFile.delete();
+    }
 
     @Test
     public void isPin_isTrueForNumericString() {
@@ -112,6 +191,74 @@ public class KeySyncTaskTest {
         assertEquals(TYPE_PATTERN,
                 KeySyncTask.getUiFormat(CREDENTIAL_TYPE_PATTERN, "1234"));
 
+    }
+
+    @Test
+    public void run_doesNotSendAnythingIfNoKeysToSync() throws Exception {
+        // TODO: proper test here, once we have proper implementation for checking that keys need
+        // to be synced.
+        mKeySyncTask.run();
+
+        verifyZeroInteractions(mRecoverableSnapshotConsumer);
+    }
+
+    @Test
+    public void run_sendsEncryptedKeysIfAvailableToSync() throws Exception {
+        SecretKey applicationKey = generateKey();
+        mRecoverableKeyStoreDb.setPlatformKeyGenerationId(TEST_USER_ID, TEST_GENERATION_ID);
+        mRecoverableKeyStoreDb.insertKey(
+                TEST_USER_ID,
+                TEST_APP_UID,
+                TEST_APP_KEY_ALIAS,
+                WrappedKey.fromSecretKey(mEncryptKey, applicationKey));
+
+        mKeySyncTask.run();
+
+        verify(mRecoverableSnapshotConsumer).accept(
+                mSaltCaptor.capture(),
+                mEncryptedRecoveryKeyCaptor.capture(),
+                mEncryptedApplicationKeysCaptor.capture());
+        byte[] lockScreenHash = KeySyncTask.hashCredentials(
+                mSaltCaptor.getValue(), TEST_CREDENTIAL);
+        // TODO: what should vault params be here?
+        byte[] recoveryKey = decryptThmEncryptedKey(
+                lockScreenHash,
+                mEncryptedRecoveryKeyCaptor.getValue(),
+                /*vaultParams=*/ new byte[0]);
+        Map<String, byte[]> applicationKeys = mEncryptedApplicationKeysCaptor.getValue();
+        assertEquals(1, applicationKeys.size());
+        byte[] appKey = KeySyncUtils.decryptApplicationKey(
+                recoveryKey, applicationKeys.get(TEST_APP_KEY_ALIAS));
+        assertArrayEquals(applicationKey.getEncoded(), appKey);
+    }
+
+    private byte[] decryptThmEncryptedKey(
+            byte[] lockScreenHash, byte[] encryptedKey, byte[] vaultParams) throws Exception {
+        byte[] locallyEncryptedKey = SecureBox.decrypt(
+                mKeyPair.getPrivate(),
+                /*sharedSecret=*/ KeySyncUtils.calculateThmKfHash(lockScreenHash),
+                /*header=*/ KeySyncUtils.concat(THM_ENCRYPTED_RECOVERY_KEY_HEADER, vaultParams),
+                encryptedKey
+        );
+        return KeySyncUtils.decryptRecoveryKey(lockScreenHash, locallyEncryptedKey);
+    }
+
+    private SecretKey generateKey() throws Exception {
+        KeyGenerator keyGenerator = KeyGenerator.getInstance(KEY_ALGORITHM);
+        keyGenerator.init(/*keySize=*/ 256);
+        return keyGenerator.generateKey();
+    }
+
+    private AndroidKeyStoreSecretKey generateAndroidKeyStoreKey() throws Exception {
+        KeyGenerator keyGenerator = KeyGenerator.getInstance(
+                KEY_ALGORITHM,
+                ANDROID_KEY_STORE_PROVIDER);
+        keyGenerator.init(new KeyGenParameterSpec.Builder(
+                WRAPPING_KEY_ALIAS, KeyProperties.PURPOSE_ENCRYPT | KeyProperties.PURPOSE_DECRYPT)
+                .setBlockModes(KeyProperties.BLOCK_MODE_GCM)
+                .setEncryptionPaddings(KeyProperties.ENCRYPTION_PADDING_NONE)
+                .build());
+        return (AndroidKeyStoreSecretKey) keyGenerator.generateKey();
     }
 
     private static byte[] utf8Bytes(String s) {
