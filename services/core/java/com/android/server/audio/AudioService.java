@@ -2240,12 +2240,15 @@ public class AudioService extends IAudioService.Stub
         if (DEBUG_VOL) {
             Log.d(TAG, String.format("Mic mute %s, user=%d", on, userId));
         }
-        // If mute is for current user actually mute, else just persist the setting
-        // which will be loaded on user switch.
+        // only mute for the current user
         if (getCurrentUserId() == userId) {
+            final boolean currentMute = AudioSystem.isMicrophoneMuted();
             AudioSystem.muteMicrophone(on);
+            if (on != currentMute) {
+                mContext.sendBroadcast(new Intent(AudioManager.ACTION_MICROPHONE_MUTE_CHANGED)
+                        .setFlags(Intent.FLAG_RECEIVER_REGISTERED_ONLY));
+            }
         }
-        // Post a persist microphone msg.
     }
 
     @Override
