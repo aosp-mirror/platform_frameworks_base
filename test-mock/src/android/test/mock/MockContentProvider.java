@@ -277,4 +277,21 @@ public class MockContentProvider extends ContentProvider {
     public final IContentProvider getIContentProvider() {
         return mIContentProvider;
     }
+
+    /**
+     * Like {@link #attachInfo(Context, android.content.pm.ProviderInfo)}, but for use
+     * when directly instantiating the provider for testing.
+     *
+     * <p>Provided for use by {@code android.test.ProviderTestCase2} and
+     * {@code android.test.RenamingDelegatingContext}.
+     *
+     * @deprecated Use a mocking framework like <a href="https://github.com/mockito/mockito">Mockito</a>.
+     * New tests should be written using the
+     * <a href="{@docRoot}tools/testing-support-library/index.html">Android Testing Support Library</a>.
+     */
+    @Deprecated
+    public static void attachInfoForTesting(
+            ContentProvider provider, Context context, ProviderInfo providerInfo) {
+        provider.attachInfoForTesting(context, providerInfo);
+    }
 }
