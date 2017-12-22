@@ -2690,9 +2690,6 @@ public class DevicePolicyManager {
      * @see #getPasswordBlacklistName
      * @see #isActivePasswordSufficient
      * @see #resetPasswordWithToken
-     *
-     * TODO(63578054): unhide for P
-     * @hide
      */
     public boolean setPasswordBlacklist(@NonNull ComponentName admin, @Nullable String name,
             @Nullable List<String> blacklist) {
@@ -2712,9 +2709,6 @@ public class DevicePolicyManager {
      * @return the name of the blacklist or {@code null} if no blacklist is set
      *
      * @see #setPasswordBlacklist
-     *
-     * TODO(63578054): unhide for P
-     * @hide
      */
     public @Nullable String getPasswordBlacklistName(@NonNull ComponentName admin) {
         try {
