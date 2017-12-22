@@ -40,6 +40,7 @@ import java.security.InvalidKeyException;
 import java.security.KeyStoreException;
 import java.security.NoSuchAlgorithmException;
 import java.security.PublicKey;
+import java.security.UnrecoverableKeyException;
 import java.security.spec.InvalidKeySpecException;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -59,6 +60,11 @@ import javax.crypto.AEADBadTagException;
  */
 public class RecoverableKeyStoreManager {
     private static final String TAG = "RecoverableKeyStoreMgr";
+
+    private static final int ERROR_INSECURE_USER = 1;
+    private static final int ERROR_KEYSTORE_INTERNAL_ERROR = 2;
+    private static final int ERROR_DATABASE_ERROR = 3;
+
     private static RecoverableKeyStoreManager mInstance;
 
     private final Context mContext;
@@ -66,6 +72,7 @@ public class RecoverableKeyStoreManager {
     private final RecoverySessionStorage mRecoverySessionStorage;
     private final ExecutorService mExecutorService;
     private final ListenersStorage mListenersStorage;
+    private final RecoverableKeyGenerator mRecoverableKeyGenerator;
 
     /**
      * Returns a new or existing instance.
@@ -97,6 +104,12 @@ public class RecoverableKeyStoreManager {
         mRecoverySessionStorage = recoverySessionStorage;
         mExecutorService = executorService;
         mListenersStorage = listenersStorage;
+        try {
+            mRecoverableKeyGenerator = RecoverableKeyGenerator.newInstance(mDatabase);
+        } catch (NoSuchAlgorithmException e) {
+            // Impossible: all AOSP implementations must support AES.
+            throw new RuntimeException(e);
+        }
     }
 
     public int initRecoveryService(
@@ -339,6 +352,42 @@ public class RecoverableKeyStoreManager {
         } finally {
             sessionEntry.destroy();
             mRecoverySessionStorage.remove(uid);
+        }
+    }
+
+    /**
+     * Generates a key named {@code alias} in the recoverable store for the calling uid. Then
+     * returns the raw key material.
+     *
+     * <p>TODO: Once AndroidKeyStore has added move api, do not return raw bytes.
+     *
+     * @hide
+     */
+    public byte[] generateAndStoreKey(@NonNull String alias) throws RemoteException {
+        int uid = Binder.getCallingUid();
+        int userId = Binder.getCallingUserHandle().getIdentifier();
+
+        PlatformEncryptionKey encryptionKey;
+
+        try {
+            PlatformKeyManager platformKeyManager = PlatformKeyManager.getInstance(
+                    mContext, mDatabase, userId);
+            encryptionKey = platformKeyManager.getEncryptKey();
+        } catch (NoSuchAlgorithmException e) {
+            // Impossible: all algorithms must be supported by AOSP
+            throw new RuntimeException(e);
+        } catch (KeyStoreException | UnrecoverableKeyException e) {
+            throw new ServiceSpecificException(ERROR_KEYSTORE_INTERNAL_ERROR, e.getMessage());
+        } catch (InsecureUserException e) {
+            throw new ServiceSpecificException(ERROR_INSECURE_USER, e.getMessage());
+        }
+
+        try {
+            return mRecoverableKeyGenerator.generateAndStoreKey(encryptionKey, userId, uid, alias);
+        } catch (KeyStoreException | InvalidKeyException e) {
+            throw new ServiceSpecificException(ERROR_KEYSTORE_INTERNAL_ERROR, e.getMessage());
+        } catch (RecoverableKeyStorageException e) {
+            throw new ServiceSpecificException(ERROR_DATABASE_ERROR, e.getMessage());
         }
     }
 

@@ -2028,6 +2028,11 @@ public class LockSettingsService extends ILockSettings.Stub {
                 sessionId, recoveryKeyBlob, applicationKeys, userId);
     }
 
+    @Override
+    public byte[] generateAndStoreKey(@NonNull String alias) throws RemoteException {
+        return mRecoverableKeyStoreManager.generateAndStoreKey(alias);
+    }
+
     private static final String[] VALID_SETTINGS = new String[] {
             LockPatternUtils.LOCKOUT_PERMANENT_KEY,
             LockPatternUtils.LOCKOUT_ATTEMPT_DEADLINE,
