@@ -5,7 +5,7 @@ import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
 
 import com.android.server.locksettings.recoverablekeystore.storage.RecoverableKeyStoreDbContract.KeysEntry;
-import com.android.server.locksettings.recoverablekeystore.storage.RecoverableKeyStoreDbContract.RecoveryServicePublicKeyEntry;
+import com.android.server.locksettings.recoverablekeystore.storage.RecoverableKeyStoreDbContract.RecoveryServiceMetadataEntry;
 import com.android.server.locksettings.recoverablekeystore.storage.RecoverableKeyStoreDbContract.UserMetadataEntry;
 
 /**
@@ -36,14 +36,15 @@ class RecoverableKeyStoreDbHelper extends SQLiteOpenHelper {
                     + UserMetadataEntry.COLUMN_NAME_PLATFORM_KEY_GENERATION_ID + " INTEGER)";
 
     private static final String SQL_CREATE_RECOVERY_SERVICE_PUBLIC_KEY_ENTRY =
-            "CREATE TABLE " + RecoveryServicePublicKeyEntry.TABLE_NAME + " ("
-                    + RecoveryServicePublicKeyEntry._ID + " INTEGER PRIMARY KEY,"
-                    + RecoveryServicePublicKeyEntry.COLUMN_NAME_USER_ID + " INTEGER,"
-                    + RecoveryServicePublicKeyEntry.COLUMN_NAME_UID + " INTEGER,"
-                    + RecoveryServicePublicKeyEntry.COLUMN_NAME_PUBLIC_KEY + " BLOB,"
+            "CREATE TABLE " + RecoveryServiceMetadataEntry.TABLE_NAME + " ("
+                    + RecoveryServiceMetadataEntry._ID + " INTEGER PRIMARY KEY,"
+                    + RecoveryServiceMetadataEntry.COLUMN_NAME_USER_ID + " INTEGER,"
+                    + RecoveryServiceMetadataEntry.COLUMN_NAME_UID + " INTEGER,"
+                    + RecoveryServiceMetadataEntry.COLUMN_NAME_PUBLIC_KEY + " BLOB,"
+                    + RecoveryServiceMetadataEntry.COLUMN_NAME_SERVER_PARAMETERS + " INTEGER,"
                     + "UNIQUE("
-                    + RecoveryServicePublicKeyEntry.COLUMN_NAME_USER_ID  + ","
-                    + RecoveryServicePublicKeyEntry.COLUMN_NAME_UID + "))";
+                    + RecoveryServiceMetadataEntry.COLUMN_NAME_USER_ID  + ","
+                    + RecoveryServiceMetadataEntry.COLUMN_NAME_UID + "))";
 
     private static final String SQL_DELETE_KEYS_ENTRY =
             "DROP TABLE IF EXISTS " + KeysEntry.TABLE_NAME;
@@ -52,7 +53,7 @@ class RecoverableKeyStoreDbHelper extends SQLiteOpenHelper {
             "DROP TABLE IF EXISTS " + UserMetadataEntry.TABLE_NAME;
 
     private static final String SQL_DELETE_RECOVERY_SERVICE_PUBLIC_KEY_ENTRY =
-            "DROP TABLE IF EXISTS " + RecoveryServicePublicKeyEntry.TABLE_NAME;
+            "DROP TABLE IF EXISTS " + RecoveryServiceMetadataEntry.TABLE_NAME;
 
     RecoverableKeyStoreDbHelper(Context context) {
         super(context, DATABASE_NAME, null, DATABASE_VERSION);

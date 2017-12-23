@@ -209,7 +209,7 @@ public class RecoverableKeyStoreLoader {
      * version. Version zero is used, if no snapshots were created for the account.
      *
      * @return Map from recovery agent accounts to snapshot versions.
-     * @see KeyStoreRecoveryData.getSnapshotVersion
+     * @see KeyStoreRecoveryData#getSnapshotVersion
      * @hide
      */
     public @NonNull Map<byte[], Integer> getRecoverySnapshotVersions()
@@ -231,7 +231,7 @@ public class RecoverableKeyStoreLoader {
     /**
      * Server parameters used to generate new recovery key blobs. This value will be included in
      * {@code KeyStoreRecoveryData.getEncryptedRecoveryKeyBlob()}. The same value must be included
-     * in vaultParams {@link startRecoverySession}
+     * in vaultParams {@link #startRecoverySession}
      *
      * @param serverParameters included in recovery key blob.
      * @see #getRecoveryData

@@ -29,7 +29,6 @@ import static org.mockito.Mockito.when;
 
 import android.app.KeyguardManager;
 import android.content.Context;
-import android.content.SharedPreferences;
 import android.security.keystore.KeyProperties;
 import android.security.keystore.KeyProtection;
 import android.support.test.InstrumentationRegistry;

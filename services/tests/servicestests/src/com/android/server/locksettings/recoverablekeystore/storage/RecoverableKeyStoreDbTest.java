@@ -28,6 +28,7 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 
 import android.content.Context;
+import android.content.SharedPreferences;
 import android.security.recoverablekeystore.RecoverableKeyStoreLoader;
 import android.support.test.InstrumentationRegistry;
 import android.support.test.filters.SmallTest;
@@ -306,22 +307,60 @@ public class RecoverableKeyStoreDbTest {
     }
 
     @Test
-    public void setRecoveryServicePublicKey_allowsTwoUsersToHaveTheSameUidAndKey()
-            throws Exception {
-        int userId1 = 12;
-        int userId2 = 23;
+    public void getRecoveryServicePublicKey_returnsNullIfNoKey() throws Exception {
+        int userId = 12;
+        int uid = 10009;
+        assertThat(mRecoverableKeyStoreDb.getRecoveryServicePublicKey(userId, uid)).isNull();
+
+        long serverParams = 123456L;
+        mRecoverableKeyStoreDb.setServerParameters(userId, uid, serverParams);
+        assertThat(mRecoverableKeyStoreDb.getRecoveryServicePublicKey(userId, uid)).isNull();
+    }
+
+    @Test
+    public void getRecoveryServicePublicKey_returnsInsertedKey() throws Exception {
+        int userId = 12;
         int uid = 10009;
         PublicKey pubkey = genRandomPublicKey();
-        mRecoverableKeyStoreDb.setRecoveryServicePublicKey(userId1, uid, pubkey);
-        mRecoverableKeyStoreDb.setRecoveryServicePublicKey(userId2, uid, pubkey);
-        assertThat(mRecoverableKeyStoreDb.getRecoveryServicePublicKey(userId1, uid)).isEqualTo(
-                pubkey);
-        assertThat(mRecoverableKeyStoreDb.getRecoveryServicePublicKey(userId2, uid)).isEqualTo(
+        mRecoverableKeyStoreDb.setRecoveryServicePublicKey(userId, uid, pubkey);
+        assertThat(mRecoverableKeyStoreDb.getRecoveryServicePublicKey(userId, uid)).isEqualTo(
                 pubkey);
     }
 
     @Test
-    public void setRecoveryServicePublicKey_allowsAUserToHaveTwoUids() throws Exception {
+    public void setServerParameters_replaceOldValue() throws Exception {
+        int userId = 12;
+        int uid = 10009;
+        long serverParams1 = 111L;
+        long serverParams2 = 222L;
+        mRecoverableKeyStoreDb.setServerParameters(userId, uid, serverParams1);
+        mRecoverableKeyStoreDb.setServerParameters(userId, uid, serverParams2);
+        assertThat(mRecoverableKeyStoreDb.getServerParameters(userId, uid)).isEqualTo(
+                serverParams2);
+    }
+
+    @Test
+    public void getServerParameters_returnsNullIfNoValue() throws Exception {
+        int userId = 12;
+        int uid = 10009;
+        assertThat(mRecoverableKeyStoreDb.getServerParameters(userId, uid)).isNull();
+
+        PublicKey pubkey = genRandomPublicKey();
+        mRecoverableKeyStoreDb.setRecoveryServicePublicKey(userId, uid, pubkey);
+        assertThat(mRecoverableKeyStoreDb.getServerParameters(userId, uid)).isNull();
+    }
+
+    @Test
+    public void getServerParameters_returnsInsertedValue() throws Exception {
+        int userId = 12;
+        int uid = 10009;
+        long serverParams = 123456L;
+        mRecoverableKeyStoreDb.setServerParameters(userId, uid, serverParams);
+        assertThat(mRecoverableKeyStoreDb.getServerParameters(userId, uid)).isEqualTo(serverParams);
+    }
+
+    @Test
+    public void setRecoveryServiceMetadataEntry_allowsAUserToHaveTwoUids() throws Exception {
         int userId = 12;
         int uid1 = 10009;
         int uid2 = 20009;
@@ -335,20 +374,41 @@ public class RecoverableKeyStoreDbTest {
     }
 
     @Test
-    public void getRecoveryServicePublicKey_returnsNullIfNoKey() throws Exception {
-        int userId = 12;
+    public void setRecoveryServiceMetadataEntry_allowsTwoUsersToHaveTheSameUid() throws Exception {
+        int userId1 = 12;
+        int userId2 = 23;
         int uid = 10009;
-        assertNull(mRecoverableKeyStoreDb.getRecoveryServicePublicKey(userId, uid));
+        PublicKey pubkey = genRandomPublicKey();
+        mRecoverableKeyStoreDb.setRecoveryServicePublicKey(userId1, uid, pubkey);
+        mRecoverableKeyStoreDb.setRecoveryServicePublicKey(userId2, uid, pubkey);
+        assertThat(mRecoverableKeyStoreDb.getRecoveryServicePublicKey(userId1, uid)).isEqualTo(
+                pubkey);
+        assertThat(mRecoverableKeyStoreDb.getRecoveryServicePublicKey(userId2, uid)).isEqualTo(
+                pubkey);
     }
 
     @Test
-    public void getRecoveryServicePublicKey_returnsInsertedKey() throws Exception {
+    public void setRecoveryServiceMetadataEntry_updatesColumnsSeparately() throws Exception {
         int userId = 12;
         int uid = 10009;
-        PublicKey pubkey = genRandomPublicKey();
-        mRecoverableKeyStoreDb.setRecoveryServicePublicKey(userId, uid, pubkey);
+        PublicKey pubkey1 = genRandomPublicKey();
+        PublicKey pubkey2 = genRandomPublicKey();
+        long serverParams = 123456L;
+
+        mRecoverableKeyStoreDb.setRecoveryServicePublicKey(userId, uid, pubkey1);
         assertThat(mRecoverableKeyStoreDb.getRecoveryServicePublicKey(userId, uid)).isEqualTo(
-                pubkey);
+                pubkey1);
+        assertThat(mRecoverableKeyStoreDb.getServerParameters(userId, uid)).isNull();
+
+        mRecoverableKeyStoreDb.setServerParameters(userId, uid, serverParams);
+        assertThat(mRecoverableKeyStoreDb.getRecoveryServicePublicKey(userId, uid)).isEqualTo(
+                pubkey1);
+        assertThat(mRecoverableKeyStoreDb.getServerParameters(userId, uid)).isEqualTo(serverParams);
+
+        mRecoverableKeyStoreDb.setRecoveryServicePublicKey(userId, uid, pubkey2);
+        assertThat(mRecoverableKeyStoreDb.getRecoveryServicePublicKey(userId, uid)).isEqualTo(
+                pubkey2);
+        assertThat(mRecoverableKeyStoreDb.getServerParameters(userId, uid)).isEqualTo(serverParams);
     }
 
     private static byte[] getUtf8Bytes(String s) {

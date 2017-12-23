@@ -88,10 +88,10 @@ class RecoverableKeyStoreDbContract {
     }
 
     /**
-     * Table holding public keys of the recovery service.
+     * Table holding metadata of the recovery service.
      */
-    static class RecoveryServicePublicKeyEntry implements BaseColumns {
-        static final String TABLE_NAME = "recovery_service_public_keys";
+    static class RecoveryServiceMetadataEntry implements BaseColumns {
+        static final String TABLE_NAME = "recovery_service_metadata";
 
         /**
          * The user id of the profile the application is running under.
@@ -107,5 +107,10 @@ class RecoverableKeyStoreDbContract {
          * The public key of the recovery service.
          */
         static final String COLUMN_NAME_PUBLIC_KEY = "public_key";
+
+        /**
+         * The server parameters of the recovery service.
+         */
+        static final String COLUMN_NAME_SERVER_PARAMETERS = "server_parameters";
     }
 }

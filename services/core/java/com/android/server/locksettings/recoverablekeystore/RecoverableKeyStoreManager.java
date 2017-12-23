@@ -184,7 +184,7 @@ public class RecoverableKeyStoreManager {
 
     public void setServerParameters(long serverParameters, int userId) throws RemoteException {
         checkRecoverKeyStorePermission();
-        throw new UnsupportedOperationException();
+        mDatabase.setServerParameters(userId, Binder.getCallingUid(), serverParameters);
     }
 
     /**

@@ -27,7 +27,7 @@ import android.util.Log;
 
 import com.android.server.locksettings.recoverablekeystore.WrappedKey;
 import com.android.server.locksettings.recoverablekeystore.storage.RecoverableKeyStoreDbContract.KeysEntry;
-import com.android.server.locksettings.recoverablekeystore.storage.RecoverableKeyStoreDbContract.RecoveryServicePublicKeyEntry;
+import com.android.server.locksettings.recoverablekeystore.storage.RecoverableKeyStoreDbContract.RecoveryServiceMetadataEntry;
 import com.android.server.locksettings.recoverablekeystore.storage.RecoverableKeyStoreDbContract.UserMetadataEntry;
 
 
@@ -306,7 +306,7 @@ public class RecoverableKeyStoreDb {
     }
 
     /**
-     * Inserts or updates the public key of the recovery service into the database.
+     * Updates the public key of the recovery service into the database.
      *
      * @param userId The uid of the profile the application is running under.
      * @param uid The uid of the application to whom the key belongs.
@@ -318,11 +318,15 @@ public class RecoverableKeyStoreDb {
     public long setRecoveryServicePublicKey(int userId, int uid, PublicKey publicKey) {
         SQLiteDatabase db = mKeyStoreDbHelper.getWritableDatabase();
         ContentValues values = new ContentValues();
-        values.put(RecoveryServicePublicKeyEntry.COLUMN_NAME_USER_ID, userId);
-        values.put(RecoveryServicePublicKeyEntry.COLUMN_NAME_UID, uid);
-        values.put(RecoveryServicePublicKeyEntry.COLUMN_NAME_PUBLIC_KEY, publicKey.getEncoded());
-        return db.replace(RecoveryServicePublicKeyEntry.TABLE_NAME, /*nullColumnHack=*/ null,
-                values);
+        values.put(RecoveryServiceMetadataEntry.COLUMN_NAME_PUBLIC_KEY, publicKey.getEncoded());
+        String selection =
+                RecoveryServiceMetadataEntry.COLUMN_NAME_USER_ID + " = ? AND "
+                        + RecoveryServiceMetadataEntry.COLUMN_NAME_UID + " = ?";
+        String[] selectionArguments = {Integer.toString(userId), Integer.toString(uid)};
+
+        ensureRecoveryServiceMetadataEntryExists(userId, uid);
+        return db.update(
+                RecoveryServiceMetadataEntry.TABLE_NAME, values, selection, selectionArguments);
     }
 
     /**
@@ -337,18 +341,18 @@ public class RecoverableKeyStoreDb {
         SQLiteDatabase db = mKeyStoreDbHelper.getReadableDatabase();
 
         String[] projection = {
-                RecoveryServicePublicKeyEntry._ID,
-                RecoveryServicePublicKeyEntry.COLUMN_NAME_USER_ID,
-                RecoveryServicePublicKeyEntry.COLUMN_NAME_UID,
-                RecoveryServicePublicKeyEntry.COLUMN_NAME_PUBLIC_KEY};
+                RecoveryServiceMetadataEntry._ID,
+                RecoveryServiceMetadataEntry.COLUMN_NAME_USER_ID,
+                RecoveryServiceMetadataEntry.COLUMN_NAME_UID,
+                RecoveryServiceMetadataEntry.COLUMN_NAME_PUBLIC_KEY};
         String selection =
-                RecoveryServicePublicKeyEntry.COLUMN_NAME_USER_ID + " = ? AND "
-                        + RecoveryServicePublicKeyEntry.COLUMN_NAME_UID + " = ?";
-        String[] selectionArguments = { Integer.toString(userId), Integer.toString(uid)};
+                RecoveryServiceMetadataEntry.COLUMN_NAME_USER_ID + " = ? AND "
+                        + RecoveryServiceMetadataEntry.COLUMN_NAME_UID + " = ?";
+        String[] selectionArguments = {Integer.toString(userId), Integer.toString(uid)};
 
         try (
                 Cursor cursor = db.query(
-                        RecoveryServicePublicKeyEntry.TABLE_NAME,
+                        RecoveryServiceMetadataEntry.TABLE_NAME,
                         projection,
                         selection,
                         selectionArguments,
@@ -368,8 +372,12 @@ public class RecoverableKeyStoreDb {
                 return null;
             }
             cursor.moveToFirst();
-            byte[] keyBytes = cursor.getBlob(cursor.getColumnIndexOrThrow(
-                    RecoveryServicePublicKeyEntry.COLUMN_NAME_PUBLIC_KEY));
+            int idx = cursor.getColumnIndexOrThrow(
+                    RecoveryServiceMetadataEntry.COLUMN_NAME_PUBLIC_KEY);
+            if (cursor.isNull(idx)) {
+                return null;
+            }
+            byte[] keyBytes = cursor.getBlob(idx);
             X509EncodedKeySpec pkSpec = new X509EncodedKeySpec(keyBytes);
             try {
                 return KeyFactory.getInstance("EC").generatePublic(pkSpec);
@@ -385,6 +393,99 @@ public class RecoverableKeyStoreDb {
                 return null;
             }
         }
+    }
+
+    /**
+     * Updates the server parameters given by the application initializing the local recovery
+     * components.
+     *
+     * @param userId The uid of the profile the application is running under.
+     * @param uid The uid of the application.
+     * @param serverParameters The server parameters.
+     * @return The primary key of the inserted row, or -1 if failed.
+     *
+     * @hide
+     */
+    public long setServerParameters(int userId, int uid, long serverParameters) {
+        SQLiteDatabase db = mKeyStoreDbHelper.getWritableDatabase();
+        ContentValues values = new ContentValues();
+        values.put(RecoveryServiceMetadataEntry.COLUMN_NAME_SERVER_PARAMETERS, serverParameters);
+        String selection =
+                RecoveryServiceMetadataEntry.COLUMN_NAME_USER_ID + " = ? AND "
+                        + RecoveryServiceMetadataEntry.COLUMN_NAME_UID + " = ?";
+        String[] selectionArguments = {Integer.toString(userId), Integer.toString(uid)};
+
+        ensureRecoveryServiceMetadataEntryExists(userId, uid);
+        return db.update(
+                RecoveryServiceMetadataEntry.TABLE_NAME, values, selection, selectionArguments);
+    }
+
+    /**
+     * Returns the server paramters that was previously set by the application who initialized the
+     * local recovery service components.
+     *
+     * @param userId The uid of the profile the application is running under.
+     * @param uid The uid of the application who initialized the local recovery components.
+     * @return The server parameters that were previously set, or null if there's none.
+     *
+     * @hide
+     */
+    public Long getServerParameters(int userId, int uid) {
+        SQLiteDatabase db = mKeyStoreDbHelper.getReadableDatabase();
+
+        String[] projection = {
+                RecoveryServiceMetadataEntry._ID,
+                RecoveryServiceMetadataEntry.COLUMN_NAME_USER_ID,
+                RecoveryServiceMetadataEntry.COLUMN_NAME_UID,
+                RecoveryServiceMetadataEntry.COLUMN_NAME_SERVER_PARAMETERS};
+        String selection =
+                RecoveryServiceMetadataEntry.COLUMN_NAME_USER_ID + " = ? AND "
+                        + RecoveryServiceMetadataEntry.COLUMN_NAME_UID + " = ?";
+        String[] selectionArguments = {Integer.toString(userId), Integer.toString(uid)};
+
+        try (
+                Cursor cursor = db.query(
+                        RecoveryServiceMetadataEntry.TABLE_NAME,
+                        projection,
+                        selection,
+                        selectionArguments,
+                        /*groupBy=*/ null,
+                        /*having=*/ null,
+                        /*orderBy=*/ null)
+        ) {
+            int count = cursor.getCount();
+            if (count == 0) {
+                return null;
+            }
+            if (count > 1) {
+                Log.wtf(TAG,
+                        String.format(Locale.US,
+                                "%d deviceId entries found for userId=%d uid=%d. "
+                                        + "Should only ever be 0 or 1.", count, userId, uid));
+                return null;
+            }
+            cursor.moveToFirst();
+            int idx = cursor.getColumnIndexOrThrow(
+                    RecoveryServiceMetadataEntry.COLUMN_NAME_SERVER_PARAMETERS);
+            if (cursor.isNull(idx)) {
+                return null;
+            } else {
+                return cursor.getLong(idx);
+            }
+        }
+    }
+
+    /**
+     * Creates an empty row in the recovery service metadata table if such a row doesn't exist for
+     * the given userId and uid, so db.update will succeed.
+     */
+    private void ensureRecoveryServiceMetadataEntryExists(int userId, int uid) {
+        SQLiteDatabase db = mKeyStoreDbHelper.getWritableDatabase();
+        ContentValues values = new ContentValues();
+        values.put(RecoveryServiceMetadataEntry.COLUMN_NAME_USER_ID, userId);
+        values.put(RecoveryServiceMetadataEntry.COLUMN_NAME_UID, uid);
+        db.insertWithOnConflict(RecoveryServiceMetadataEntry.TABLE_NAME, /*nullColumnHack=*/ null,
+                values, SQLiteDatabase.CONFLICT_IGNORE);
     }
 
     /**
