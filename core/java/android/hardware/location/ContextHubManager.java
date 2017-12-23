@@ -744,8 +744,6 @@ public final class ContextHubManager {
                 synchronized (this) {
                     mLocalCallback.onMessageReceipt(hubId, nanoAppId, message);
                 }
-            } else {
-                Log.d(TAG, "Context hub manager client callback is NULL");
             }
         }
     };
