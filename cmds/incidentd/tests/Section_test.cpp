@@ -155,7 +155,7 @@ TEST(SectionTest, CommandSectionIncidentHelperTimeout) {
 }
 
 TEST(SectionTest, CommandSectionBadCommand) {
-    CommandSection cs(NOOP_PARSER, "echo", "about", NULL);
+    CommandSection cs(NOOP_PARSER, "echoo", "about", NULL);
     ReportRequestSet requests;
     ASSERT_EQ(NAME_NOT_FOUND, cs.Execute(&requests));
 }
@@ -165,6 +165,26 @@ TEST(SectionTest, CommandSectionBadCommandAndTimeout) {
     ReportRequestSet requests;
     // timeout will return first
     ASSERT_EQ(NO_ERROR, cs.Execute(&requests));
+}
+
+TEST(SectionTest, LogSectionBinary) {
+    LogSection ls(1, LOG_ID_EVENTS);
+    ReportRequestSet requests;
+    requests.setMainFd(STDOUT_FILENO);
+    CaptureStdout();
+    ASSERT_EQ(NO_ERROR, ls.Execute(&requests));
+    string results = GetCapturedStdout();
+    EXPECT_FALSE(results.empty());
+}
+
+TEST(SectionTest, LogSectionSystem) {
+    LogSection ls(1, LOG_ID_SYSTEM);
+    ReportRequestSet requests;
+    requests.setMainFd(STDOUT_FILENO);
+    CaptureStdout();
+    ASSERT_EQ(NO_ERROR, ls.Execute(&requests));
+    string results = GetCapturedStdout();
+    EXPECT_FALSE(results.empty());
 }
 
 TEST(SectionTest, TestFilterPiiTaggedFields) {
