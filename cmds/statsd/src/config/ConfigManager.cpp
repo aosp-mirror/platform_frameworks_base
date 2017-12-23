@@ -209,7 +209,7 @@ StatsdConfig build_fake_config() {
     int WAKE_LOCK_ACQUIRE_VALUE = 1;
     int WAKE_LOCK_RELEASE_VALUE = 0;
 
-    int APP_USAGE_ID = 12345;
+    int APP_USAGE_TAG_ID = 12345;
     int APP_USAGE_UID_KEY_ID = 1;
     int APP_USAGE_STATE_KEY = 2;
     int APP_USAGE_FOREGROUND = 1;
@@ -259,8 +259,9 @@ StatsdConfig build_fake_config() {
     metric->set_name("METRIC_2");
     metric->set_what("PROCESS_STATE_CHANGE");
     metric->mutable_bucket()->set_bucket_size_millis(30 * 1000L);
-    KeyMatcher* keyMatcher = metric->add_dimension();
-    keyMatcher->set_key(UID_PROCESS_STATE_UID_KEY);
+    FieldMatcher* dimensions = metric->mutable_dimensions();
+    dimensions->set_field(UID_PROCESS_STATE_TAG_ID);
+    dimensions->add_child()->set_field(UID_PROCESS_STATE_UID_KEY);
 
     // Anomaly threshold for background count.
     // TODO(b/70627390): Uncomment once the bug is fixed.
@@ -280,8 +281,10 @@ StatsdConfig build_fake_config() {
     metric->set_name("METRIC_3");
     metric->set_what("PROCESS_STATE_CHANGE");
     metric->mutable_bucket()->set_bucket_size_millis(30 * 1000L);
-    keyMatcher = metric->add_dimension();
-    keyMatcher->set_key(UID_PROCESS_STATE_UID_KEY);
+
+    dimensions = metric->mutable_dimensions();
+    dimensions->set_field(UID_PROCESS_STATE_TAG_ID);
+    dimensions->add_child()->set_field(UID_PROCESS_STATE_UID_KEY);
     metric->set_condition("SCREEN_IS_OFF");
 
     // Count wake lock, slice by uid, while SCREEN_IS_ON and app in background
@@ -289,41 +292,52 @@ StatsdConfig build_fake_config() {
     metric->set_name("METRIC_4");
     metric->set_what("APP_GET_WL");
     metric->mutable_bucket()->set_bucket_size_millis(30 * 1000L);
-    keyMatcher = metric->add_dimension();
-    keyMatcher->set_key(WAKE_LOCK_UID_KEY_ID);
+    dimensions = metric->mutable_dimensions();
+    dimensions->set_field(WAKE_LOCK_TAG_ID);
+    dimensions->add_child()->set_field(WAKE_LOCK_UID_KEY_ID);
+
+
     metric->set_condition("APP_IS_BACKGROUND_AND_SCREEN_ON");
     MetricConditionLink* link = metric->add_links();
     link->set_condition("APP_IS_BACKGROUND");
-    link->add_key_in_what()->set_key(WAKE_LOCK_UID_KEY_ID);
-    link->add_key_in_condition()->set_key(APP_USAGE_UID_KEY_ID);
+    link->mutable_dimensions_in_what()->set_field(WAKE_LOCK_TAG_ID);
+    link->mutable_dimensions_in_what()->add_child()->set_field(WAKE_LOCK_UID_KEY_ID);
+    link->mutable_dimensions_in_condition()->set_field(APP_USAGE_TAG_ID);
+    link->mutable_dimensions_in_condition()->add_child()->set_field(APP_USAGE_UID_KEY_ID);
 
     // Duration of an app holding any wl, while screen on and app in background, slice by uid
     DurationMetric* durationMetric = config.add_duration_metric();
     durationMetric->set_name("METRIC_5");
     durationMetric->mutable_bucket()->set_bucket_size_millis(30 * 1000L);
     durationMetric->set_aggregation_type(DurationMetric_AggregationType_SUM);
-    keyMatcher = durationMetric->add_dimension();
-    keyMatcher->set_key(WAKE_LOCK_UID_KEY_ID);
+    dimensions = durationMetric->mutable_dimensions();
+    dimensions->set_field(WAKE_LOCK_TAG_ID);
+    dimensions->add_child()->set_field(WAKE_LOCK_UID_KEY_ID);
     durationMetric->set_what("WL_HELD_PER_APP_PER_NAME");
     durationMetric->set_condition("APP_IS_BACKGROUND_AND_SCREEN_ON");
     link = durationMetric->add_links();
     link->set_condition("APP_IS_BACKGROUND");
-    link->add_key_in_what()->set_key(WAKE_LOCK_UID_KEY_ID);
-    link->add_key_in_condition()->set_key(APP_USAGE_UID_KEY_ID);
+    link->mutable_dimensions_in_what()->set_field(WAKE_LOCK_TAG_ID);
+    link->mutable_dimensions_in_what()->add_child()->set_field(WAKE_LOCK_UID_KEY_ID);
+    link->mutable_dimensions_in_condition()->set_field(APP_USAGE_TAG_ID);
+    link->mutable_dimensions_in_condition()->add_child()->set_field(APP_USAGE_UID_KEY_ID);
 
     // max Duration of an app holding any wl, while screen on and app in background, slice by uid
     durationMetric = config.add_duration_metric();
     durationMetric->set_name("METRIC_6");
     durationMetric->mutable_bucket()->set_bucket_size_millis(30 * 1000L);
     durationMetric->set_aggregation_type(DurationMetric_AggregationType_MAX_SPARSE);
-    keyMatcher = durationMetric->add_dimension();
-    keyMatcher->set_key(WAKE_LOCK_UID_KEY_ID);
+    dimensions = durationMetric->mutable_dimensions();
+    dimensions->set_field(WAKE_LOCK_TAG_ID);
+    dimensions->add_child()->set_field(WAKE_LOCK_UID_KEY_ID);
     durationMetric->set_what("WL_HELD_PER_APP_PER_NAME");
     durationMetric->set_condition("APP_IS_BACKGROUND_AND_SCREEN_ON");
     link = durationMetric->add_links();
     link->set_condition("APP_IS_BACKGROUND");
-    link->add_key_in_what()->set_key(WAKE_LOCK_UID_KEY_ID);
-    link->add_key_in_condition()->set_key(APP_USAGE_UID_KEY_ID);
+    link->mutable_dimensions_in_what()->set_field(WAKE_LOCK_TAG_ID);
+    link->mutable_dimensions_in_what()->add_child()->set_field(WAKE_LOCK_UID_KEY_ID);
+    link->mutable_dimensions_in_condition()->set_field(APP_USAGE_TAG_ID);
+    link->mutable_dimensions_in_condition()->add_child()->set_field(APP_USAGE_UID_KEY_ID);
 
     // Duration of an app holding any wl, while screen on and app in background
     durationMetric = config.add_duration_metric();
@@ -334,8 +348,11 @@ StatsdConfig build_fake_config() {
     durationMetric->set_condition("APP_IS_BACKGROUND_AND_SCREEN_ON");
     link = durationMetric->add_links();
     link->set_condition("APP_IS_BACKGROUND");
-    link->add_key_in_what()->set_key(WAKE_LOCK_UID_KEY_ID);
-    link->add_key_in_condition()->set_key(APP_USAGE_UID_KEY_ID);
+    link->mutable_dimensions_in_what()->set_field(WAKE_LOCK_TAG_ID);
+    link->mutable_dimensions_in_what()->add_child()->set_field(WAKE_LOCK_UID_KEY_ID);
+    link->mutable_dimensions_in_condition()->set_field(APP_USAGE_TAG_ID);
+    link->mutable_dimensions_in_condition()->add_child()->set_field(APP_USAGE_UID_KEY_ID);
+
 
     // Duration of screen on time.
     durationMetric = config.add_duration_metric();
@@ -362,8 +379,9 @@ StatsdConfig build_fake_config() {
     valueMetric->set_what("KERNEL_WAKELOCK");
     valueMetric->set_value_field(KERNEL_WAKELOCK_COUNT_KEY);
     valueMetric->set_condition("SCREEN_IS_ON");
-    keyMatcher = valueMetric->add_dimension();
-    keyMatcher->set_key(KERNEL_WAKELOCK_NAME_KEY);
+    dimensions = valueMetric->mutable_dimensions();
+    dimensions->set_field(KERNEL_WAKELOCK_TAG_ID);
+    dimensions->add_child()->set_field(KERNEL_WAKELOCK_NAME_KEY);
     // This is for testing easier. We should never set bucket size this small.
     valueMetric->mutable_bucket()->set_bucket_size_millis(60 * 1000L);
 
@@ -376,73 +394,75 @@ StatsdConfig build_fake_config() {
     GaugeMetric* gaugeMetric = config.add_gauge_metric();
     gaugeMetric->set_name("METRIC_10");
     gaugeMetric->set_what("DEVICE_TEMPERATURE");
-    gaugeMetric->mutable_gauge_fields()->add_field_num(DEVICE_TEMPERATURE_KEY);
+    auto gaugeFieldMatcher = gaugeMetric->mutable_gauge_fields_filter()->mutable_fields();
+    gaugeFieldMatcher->set_field(DEVICE_TEMPERATURE_TAG_ID);
+    gaugeFieldMatcher->add_child()->set_field(DEVICE_TEMPERATURE_KEY);
     gaugeMetric->mutable_bucket()->set_bucket_size_millis(60 * 1000L);
 
-    // Event matchers............
+    // Event matchers.
     AtomMatcher* temperatureAtomMatcher = config.add_atom_matcher();
     temperatureAtomMatcher->set_name("DEVICE_TEMPERATURE");
-    temperatureAtomMatcher->mutable_simple_atom_matcher()->set_tag(
+    temperatureAtomMatcher->mutable_simple_atom_matcher()->set_atom_id(
         DEVICE_TEMPERATURE_TAG_ID);
 
     AtomMatcher* eventMatcher = config.add_atom_matcher();
     eventMatcher->set_name("SCREEN_TURNED_ON");
     SimpleAtomMatcher* simpleAtomMatcher = eventMatcher->mutable_simple_atom_matcher();
-    simpleAtomMatcher->set_tag(SCREEN_EVENT_TAG_ID);
-    KeyValueMatcher* keyValueMatcher = simpleAtomMatcher->add_key_value_matcher();
-    keyValueMatcher->mutable_key_matcher()->set_key(SCREEN_EVENT_STATE_KEY);
-    keyValueMatcher->set_eq_int(SCREEN_EVENT_ON_VALUE);
+    simpleAtomMatcher->set_atom_id(SCREEN_EVENT_TAG_ID);
+    FieldValueMatcher* fieldValueMatcher = simpleAtomMatcher->add_field_value_matcher();
+    fieldValueMatcher->set_field(SCREEN_EVENT_STATE_KEY);
+    fieldValueMatcher->set_eq_int(SCREEN_EVENT_ON_VALUE);
 
     eventMatcher = config.add_atom_matcher();
     eventMatcher->set_name("SCREEN_TURNED_OFF");
     simpleAtomMatcher = eventMatcher->mutable_simple_atom_matcher();
-    simpleAtomMatcher->set_tag(SCREEN_EVENT_TAG_ID);
-    keyValueMatcher = simpleAtomMatcher->add_key_value_matcher();
-    keyValueMatcher->mutable_key_matcher()->set_key(SCREEN_EVENT_STATE_KEY);
-    keyValueMatcher->set_eq_int(SCREEN_EVENT_OFF_VALUE);
+    simpleAtomMatcher->set_atom_id(SCREEN_EVENT_TAG_ID);
+    fieldValueMatcher = simpleAtomMatcher->add_field_value_matcher();
+    fieldValueMatcher->set_field(SCREEN_EVENT_STATE_KEY);
+    fieldValueMatcher->set_eq_int(SCREEN_EVENT_OFF_VALUE);
 
     eventMatcher = config.add_atom_matcher();
     eventMatcher->set_name("PROCESS_STATE_CHANGE");
     simpleAtomMatcher = eventMatcher->mutable_simple_atom_matcher();
-    simpleAtomMatcher->set_tag(UID_PROCESS_STATE_TAG_ID);
+    simpleAtomMatcher->set_atom_id(UID_PROCESS_STATE_TAG_ID);
 
     eventMatcher = config.add_atom_matcher();
     eventMatcher->set_name("APP_GOES_BACKGROUND");
     simpleAtomMatcher = eventMatcher->mutable_simple_atom_matcher();
-    simpleAtomMatcher->set_tag(APP_USAGE_ID);
-    keyValueMatcher = simpleAtomMatcher->add_key_value_matcher();
-    keyValueMatcher->mutable_key_matcher()->set_key(APP_USAGE_STATE_KEY);
-    keyValueMatcher->set_eq_int(APP_USAGE_BACKGROUND);
+    simpleAtomMatcher->set_atom_id(APP_USAGE_TAG_ID);
+    fieldValueMatcher = simpleAtomMatcher->add_field_value_matcher();
+    fieldValueMatcher->set_field(APP_USAGE_STATE_KEY);
+    fieldValueMatcher->set_eq_int(APP_USAGE_BACKGROUND);
 
     eventMatcher = config.add_atom_matcher();
     eventMatcher->set_name("APP_GOES_FOREGROUND");
     simpleAtomMatcher = eventMatcher->mutable_simple_atom_matcher();
-    simpleAtomMatcher->set_tag(APP_USAGE_ID);
-    keyValueMatcher = simpleAtomMatcher->add_key_value_matcher();
-    keyValueMatcher->mutable_key_matcher()->set_key(APP_USAGE_STATE_KEY);
-    keyValueMatcher->set_eq_int(APP_USAGE_FOREGROUND);
+    simpleAtomMatcher->set_atom_id(APP_USAGE_TAG_ID);
+    fieldValueMatcher = simpleAtomMatcher->add_field_value_matcher();
+    fieldValueMatcher->set_field(APP_USAGE_STATE_KEY);
+    fieldValueMatcher->set_eq_int(APP_USAGE_FOREGROUND);
 
     eventMatcher = config.add_atom_matcher();
     eventMatcher->set_name("APP_GET_WL");
     simpleAtomMatcher = eventMatcher->mutable_simple_atom_matcher();
-    simpleAtomMatcher->set_tag(WAKE_LOCK_TAG_ID);
-    keyValueMatcher = simpleAtomMatcher->add_key_value_matcher();
-    keyValueMatcher->mutable_key_matcher()->set_key(WAKE_LOCK_STATE_KEY);
-    keyValueMatcher->set_eq_int(WAKE_LOCK_ACQUIRE_VALUE);
+    simpleAtomMatcher->set_atom_id(WAKE_LOCK_TAG_ID);
+    fieldValueMatcher = simpleAtomMatcher->add_field_value_matcher();
+    fieldValueMatcher->set_field(WAKE_LOCK_STATE_KEY);
+    fieldValueMatcher->set_eq_int(WAKE_LOCK_ACQUIRE_VALUE);
 
     eventMatcher = config.add_atom_matcher();
     eventMatcher->set_name("APP_RELEASE_WL");
     simpleAtomMatcher = eventMatcher->mutable_simple_atom_matcher();
-    simpleAtomMatcher->set_tag(WAKE_LOCK_TAG_ID);
-    keyValueMatcher = simpleAtomMatcher->add_key_value_matcher();
-    keyValueMatcher->mutable_key_matcher()->set_key(WAKE_LOCK_STATE_KEY);
-    keyValueMatcher->set_eq_int(WAKE_LOCK_RELEASE_VALUE);
+    simpleAtomMatcher->set_atom_id(WAKE_LOCK_TAG_ID);
+    fieldValueMatcher = simpleAtomMatcher->add_field_value_matcher();
+    fieldValueMatcher->set_field(WAKE_LOCK_STATE_KEY);
+    fieldValueMatcher->set_eq_int(WAKE_LOCK_RELEASE_VALUE);
 
     // pulled events
     eventMatcher = config.add_atom_matcher();
     eventMatcher->set_name("KERNEL_WAKELOCK");
     simpleAtomMatcher = eventMatcher->mutable_simple_atom_matcher();
-    simpleAtomMatcher->set_tag(KERNEL_WAKELOCK_TAG_ID);
+    simpleAtomMatcher->set_atom_id(KERNEL_WAKELOCK_TAG_ID);
 
     // Predicates.............
     Predicate* predicate = config.add_predicate();
@@ -464,8 +484,9 @@ StatsdConfig build_fake_config() {
     simplePredicate = predicate->mutable_simple_predicate();
     simplePredicate->set_start("APP_GOES_BACKGROUND");
     simplePredicate->set_stop("APP_GOES_FOREGROUND");
-    KeyMatcher* predicate_dimension1 = simplePredicate->add_dimension();
-    predicate_dimension1->set_key(APP_USAGE_UID_KEY_ID);
+    FieldMatcher* predicate_dimension1 = simplePredicate->mutable_dimensions();
+    predicate_dimension1->set_field(APP_USAGE_TAG_ID);
+    predicate_dimension1->add_child()->set_field(APP_USAGE_UID_KEY_ID);
     simplePredicate->set_count_nesting(false);
 
     predicate = config.add_predicate();
@@ -480,10 +501,10 @@ StatsdConfig build_fake_config() {
     simplePredicate = predicate->mutable_simple_predicate();
     simplePredicate->set_start("APP_GET_WL");
     simplePredicate->set_stop("APP_RELEASE_WL");
-    KeyMatcher* predicate_dimension = simplePredicate->add_dimension();
-    predicate_dimension->set_key(WAKE_LOCK_UID_KEY_ID);
-    predicate_dimension = simplePredicate->add_dimension();
-    predicate_dimension->set_key(WAKE_LOCK_NAME_KEY);
+    FieldMatcher* predicate_dimension = simplePredicate->mutable_dimensions();
+    predicate_dimension1->set_field(WAKE_LOCK_TAG_ID);
+    predicate_dimension->add_child()->set_field(WAKE_LOCK_UID_KEY_ID);
+    predicate_dimension->add_child()->set_field(WAKE_LOCK_NAME_KEY);
     simplePredicate->set_count_nesting(true);
 
     predicate = config.add_predicate();
@@ -492,8 +513,9 @@ StatsdConfig build_fake_config() {
     simplePredicate->set_start("APP_GET_WL");
     simplePredicate->set_stop("APP_RELEASE_WL");
     simplePredicate->set_initial_value(SimplePredicate_InitialValue_FALSE);
-    predicate_dimension = simplePredicate->add_dimension();
-    predicate_dimension->set_key(WAKE_LOCK_UID_KEY_ID);
+    predicate_dimension = simplePredicate->mutable_dimensions();
+    predicate_dimension->set_field(WAKE_LOCK_TAG_ID);
+    predicate_dimension->add_child()->set_field(WAKE_LOCK_UID_KEY_ID);
     simplePredicate->set_count_nesting(true);
 
     return config;

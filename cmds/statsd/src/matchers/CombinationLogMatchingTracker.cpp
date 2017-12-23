@@ -82,8 +82,8 @@ bool CombinationLogMatchingTracker::init(const vector<AtomMatcher>& allLogMatche
 
         mChildren.push_back(childIndex);
 
-        const set<int>& childTagIds = allTrackers[childIndex]->getTagIds();
-        mTagIds.insert(childTagIds.begin(), childTagIds.end());
+        const set<int>& childTagIds = allTrackers[childIndex]->getAtomIds();
+        mAtomIds.insert(childTagIds.begin(), childTagIds.end());
     }
 
     mInitialized = true;
@@ -100,7 +100,7 @@ void CombinationLogMatchingTracker::onLogEvent(const LogEvent& event,
         return;
     }
 
-    if (mTagIds.find(event.GetTagId()) == mTagIds.end()) {
+    if (mAtomIds.find(event.GetTagId()) == mAtomIds.end()) {
         matcherResults[mIndex] = MatchingState::kNotMatched;
         return;
     }

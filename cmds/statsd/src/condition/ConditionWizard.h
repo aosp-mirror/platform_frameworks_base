@@ -19,6 +19,7 @@
 
 #include "ConditionTracker.h"
 #include "condition_util.h"
+#include "stats_util.h"
 
 namespace android {
 namespace os {
@@ -40,7 +41,7 @@ public:
     // the conditionParameters contains the parameters for it's children SimpleConditionTrackers.
     virtual ConditionState query(
             const int conditionIndex,
-            const std::map<std::string, HashableDimensionKey>& conditionParameters);
+            const ConditionKey& conditionParameters);
 
 private:
     std::vector<sp<ConditionTracker>> mAllConditions;

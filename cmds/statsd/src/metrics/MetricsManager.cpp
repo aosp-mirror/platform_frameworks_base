@@ -49,7 +49,7 @@ MetricsManager::MetricsManager(const ConfigKey& key, const StatsdConfig& config,
                                const long timeBaseSec, sp<UidMap> uidMap)
     : mConfigKey(key), mUidMap(uidMap) {
     mConfigValid =
-            initStatsdConfig(key, config, timeBaseSec, mTagIds, mAllAtomMatchers, mAllConditionTrackers,
+            initStatsdConfig(key, config, *uidMap, timeBaseSec, mTagIds, mAllAtomMatchers, mAllConditionTrackers,
                              mAllMetricProducers, mAllAnomalyTrackers, mConditionToMetricMap,
                              mTrackerToMetricMap, mTrackerToConditionMap);
 
@@ -140,6 +140,12 @@ void MetricsManager::onUidMapReceived() {
         return;
     }
     initLogSourceWhiteList();
+}
+
+void MetricsManager::onDumpReport(const uint64_t& dumpTimeStampNs, ConfigMetricsReport* report) {
+    for (auto& producer : mAllMetricProducers) {
+        producer->onDumpReport(dumpTimeStampNs, report->add_metrics());
+    }
 }
 
 void MetricsManager::onDumpReport(ProtoOutputStream* protoOutput) {

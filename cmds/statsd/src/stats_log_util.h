@@ -13,23 +13,28 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-#include "ConditionWizard.h"
+
+#pragma once
+
+#include <android/util/ProtoOutputStream.h>
+#include "frameworks/base/cmds/statsd/src/stats_log.pb.h"
+#include "field_util.h"
 
 namespace android {
 namespace os {
 namespace statsd {
 
-using std::map;
-using std::string;
-using std::vector;
+// Helper function to write DimensionsValue proto to ProtoOutputStream.
+void writeDimensionsValueProtoToStream(
+    const DimensionsValue& fieldValue, util::ProtoOutputStream* protoOutput);
 
-ConditionState ConditionWizard::query(const int index,
-                                      const ConditionKey& parameters) {
-    vector<ConditionState> cache(mAllConditions.size(), ConditionState::kNotEvaluated);
+// Helper function to write Field proto to ProtoOutputStream.
+void writeFieldProtoToStream(
+    const Field& field, util::ProtoOutputStream* protoOutput);
 
-    mAllConditions[index]->isConditionMet(parameters, mAllConditions, cache);
-    return cache[index];
-}
+// Helper function to construct the field value tree and write to ProtoOutputStream
+void writeFieldValueTreeToStream(const FieldValueMap &fieldValueMap,
+    util::ProtoOutputStream* protoOutput);
 
 }  // namespace statsd
 }  // namespace os

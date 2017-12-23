@@ -20,6 +20,9 @@ statsd_common_src := \
     src/stats_log.proto \
     src/statsd_config.proto \
     src/atoms.proto \
+    src/field_util.cpp \
+    src/stats_log_util.cpp \
+    src/dimension.cpp \
     src/anomaly/AnomalyMonitor.cpp \
     src/anomaly/AnomalyTracker.cpp \
     src/anomaly/DurationAnomalyTracker.cpp \
@@ -163,6 +166,7 @@ LOCAL_SRC_FILES := \
     tests/indexed_priority_queue_test.cpp \
     tests/LogEntryMatcher_test.cpp \
     tests/LogReader_test.cpp \
+    tests/LogEvent_test.cpp \
     tests/MetricsManager_test.cpp \
     tests/StatsLogProcessor_test.cpp \
     tests/UidMap_test.cpp \
@@ -176,7 +180,10 @@ LOCAL_SRC_FILES := \
     tests/metrics/ValueMetricProducer_test.cpp \
     tests/metrics/GaugeMetricProducer_test.cpp \
     tests/guardrail/StatsdStats_test.cpp \
-    tests/metrics/metrics_test_helper.cpp
+    tests/metrics/metrics_test_helper.cpp \
+    tests/statsd_test_util.cpp \
+    tests/e2e/WakelockDuration_e2e_test.cpp \
+    tests/e2e/MetricConditionLink_e2e_test.cpp
 
 LOCAL_STATIC_LIBRARIES := \
     $(statsd_common_static_libraries) \

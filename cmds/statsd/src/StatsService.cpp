@@ -75,7 +75,7 @@ StatsService::StatsService(const sp<Looper>& handlerLooper)
 {
     mUidMap = new UidMap();
     mConfigManager = new ConfigManager();
-    mProcessor = new StatsLogProcessor(mUidMap, mAnomalyMonitor, [this](const ConfigKey& key) {
+    mProcessor = new StatsLogProcessor(mUidMap, mAnomalyMonitor, time(nullptr), [this](const ConfigKey& key) {
         sp<IStatsCompanionService> sc = getStatsCompanionService();
         auto receiver = mConfigManager->GetConfigReceiver(key);
         if (sc == nullptr) {

@@ -22,28 +22,50 @@ package android.os.statsd;
 option java_package = "com.android.internal.os";
 option java_outer_classname = "StatsdConfigProto";
 
-message KeyMatcher {
-    optional int32 key = 1;
-
-    optional bool as_package_name = 2 [default = false];
+enum Position {
+    POSITION_UNKNOWN = 0;
+    FIRST = 1;
+    LAST = 2;
+    ANY = 3;
 }
 
-message KeyValueMatcher {
-    optional KeyMatcher key_matcher = 1;
+message FieldMatcher {
+    optional int32 field = 1;
+
+    optional Position position = 2;
+
+    repeated FieldMatcher child = 3;
+}
+
+message FieldValueMatcher {
+    // Field id, as specified in the atom proto message.
+    optional int32 field = 1;
+
+    // For repeated fields, specifies the position in the array.
+    // FIRST and LAST mean that if the values are found at the first
+    // or last position, it's a match. ANY means that if the values are found
+    // anywhere in the array, then it's a match.
+    optional Position position = 2;
 
     oneof value_matcher {
-        bool eq_bool = 2;
-        string eq_string = 3;
-        int32 eq_int = 4;
+        bool eq_bool = 3;
+        string eq_string = 4;
+        int32 eq_int = 5;
 
-        int64 lt_int = 5;
-        int64 gt_int = 6;
-        float lt_float = 7;
-        float gt_float = 8;
+        int64 lt_int = 6;
+        int64 gt_int = 7;
+        float lt_float = 8;
+        float gt_float = 9;
 
-        int64 lte_int = 9;
-        int64 gte_int = 10;
+        int64 lte_int = 10;
+        int64 gte_int = 11;
+
+        MessageMatcher matches_tuple = 12;
     }
+}
+
+message MessageMatcher {
+    repeated FieldValueMatcher field_value_matcher = 1;
 }
 
 enum LogicalOperation {
@@ -56,9 +78,9 @@ enum LogicalOperation {
 }
 
 message SimpleAtomMatcher {
-    optional int32 tag = 1;
+    optional int32 atom_id = 1;
 
-    repeated KeyValueMatcher key_value_matcher = 2;
+    repeated FieldValueMatcher field_value_matcher = 2;
 }
 
 message AtomMatcher {
@@ -90,7 +112,7 @@ message SimplePredicate {
     }
     optional InitialValue initial_value = 5 [default = FALSE];
 
-    repeated KeyMatcher dimension = 6;
+    optional FieldMatcher dimensions = 6;
 }
 
 message Predicate {
@@ -115,14 +137,14 @@ message Bucket {
 message MetricConditionLink {
     optional string condition = 1;
 
-    repeated KeyMatcher key_in_what = 2;
+    optional FieldMatcher dimensions_in_what = 2;
 
-    repeated KeyMatcher key_in_condition = 3;
+    optional FieldMatcher dimensions_in_condition = 3;
 }
 
 message FieldFilter {
-    optional bool include_all = 1;
-    repeated int32 field_num = 2;
+    optional bool include_all = 1 [default = false];
+    optional FieldMatcher fields = 2;
 }
 
 message EventMetric {
@@ -142,7 +164,7 @@ message CountMetric {
 
     optional string condition = 3;
 
-    repeated KeyMatcher dimension = 4;
+    optional FieldMatcher dimensions = 4;
 
     optional Bucket bucket = 5;
 
@@ -165,7 +187,7 @@ message DurationMetric {
     }
     optional AggregationType aggregation_type = 5 [default = SUM];
 
-    repeated KeyMatcher dimension = 6;
+    optional FieldMatcher dimensions = 6;
 
     optional Bucket bucket = 7;
 }
@@ -175,11 +197,11 @@ message GaugeMetric {
 
     optional string what = 2;
 
-    optional FieldFilter gauge_fields = 3;
+    optional FieldFilter gauge_fields_filter = 3;
 
     optional string condition = 4;
 
-    repeated KeyMatcher dimension = 5;
+    optional FieldMatcher dimensions = 5;
 
     optional Bucket bucket = 6;
 
@@ -195,7 +217,7 @@ message ValueMetric {
 
     optional string condition = 4;
 
-    repeated KeyMatcher dimension = 5;
+    optional FieldMatcher dimensions = 5;
 
     optional Bucket bucket = 6;
 

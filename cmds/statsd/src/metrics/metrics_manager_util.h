@@ -43,6 +43,7 @@ namespace statsd {
 // [allAtomMatchers]: should store the sp to all the LogMatchingTracker
 // [allTagIds]: contains the set of all interesting tag ids to this config.
 bool initLogTrackers(const StatsdConfig& config,
+                const UidMap& uidMap,
                      std::unordered_map<std::string, int>& logTrackerMap,
                      std::vector<sp<LogMatchingTracker>>& allAtomMatchers,
                      std::set<int>& allTagIds);
@@ -89,7 +90,10 @@ bool initMetrics(
 
 // Initialize MetricsManager from StatsdConfig.
 // Parameters are the members of MetricsManager. See MetricsManager for declaration.
-bool initStatsdConfig(const ConfigKey& key, const StatsdConfig& config, const long timeBaseSec, std::set<int>& allTagIds,
+bool initStatsdConfig(const ConfigKey& key, const StatsdConfig& config,
+
+                const UidMap& uidMap,
+                const long timeBaseSec, std::set<int>& allTagIds,
                       std::vector<sp<LogMatchingTracker>>& allAtomMatchers,
                       std::vector<sp<ConditionTracker>>& allConditionTrackers,
                       std::vector<sp<MetricProducer>>& allMetricProducers,

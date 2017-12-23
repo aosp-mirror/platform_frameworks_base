@@ -16,6 +16,7 @@
 
 #pragma once
 
+#include "field_util.h"
 #include "frameworks/base/cmds/statsd/src/stats_log.pb.h"
 
 #include <android/util/ProtoOutputStream.h>
@@ -23,9 +24,11 @@
 #include <log/log_read.h>
 #include <private/android_logger.h>
 #include <utils/Errors.h>
+#include <utils/JenkinsHash.h>
 
 #include <memory>
 #include <string>
+#include <map>
 #include <vector>
 
 namespace android {
@@ -77,6 +80,20 @@ public:
     bool GetBool(size_t key, status_t* err) const;
     float GetFloat(size_t key, status_t* err) const;
 
+    /*
+     * Get DimensionsValue proto objects from FieldMatcher.
+     */
+    void GetAtomDimensionsValueProtos(
+        const FieldMatcher& matcher, std::vector<DimensionsValue> *dimensionsValues) const;
+    bool GetAtomDimensionsValueProto(
+        const FieldMatcher& matcher, DimensionsValue* dimensionsValue) const;
+
+    /*
+     * Get a DimensionsValue proto objects from Field.
+     */
+    bool GetSimpleAtomDimensionsValueProto(size_t field, DimensionsValue* dimensionsValue) const;
+    DimensionsValue  GetSimpleAtomDimensionsValueProto(size_t atomField)  const;
+
     /**
      * Write test data to the LogEvent. This can only be used when the LogEvent is constructed
      * using LogEvent(tagId, timestampNs). You need to call init() before you can read from it.
@@ -87,6 +104,8 @@ public:
     bool write(int64_t value);
     bool write(const string& value);
     bool write(float value);
+    bool write(const std::vector<AttributionNode>& nodes);
+    bool write(const AttributionNode& node);
 
     /**
      * Return a string representation of this event.
@@ -97,11 +116,6 @@ public:
      * Write this object to a ProtoOutputStream.
      */
     void ToProto(android::util::ProtoOutputStream& out) const;
-
-    /*
-     * Get a KeyValuePair proto object.
-     */
-    KeyValuePair GetKeyValueProto(size_t key) const;
 
     /**
      * Used with the constructor where tag is passed in. Converts the log_event_list to read mode
@@ -114,9 +128,11 @@ public:
      */
     void setTimestampNs(uint64_t timestampNs) {mTimestampNs = timestampNs;}
 
-    int size() const {
-        return mElements.size();
+    inline int size() const {
+        return mFieldValueMap.size();
     }
+
+    inline const FieldValueMap& getFieldValueMap() const { return mFieldValueMap; }
 
 private:
     /**
@@ -130,8 +146,11 @@ private:
      */
     void init(android_log_context context);
 
-    vector<android_log_list_element> mElements;
+    FieldValueMap mFieldValueMap;
 
+    // This field is used when statsD wants to create log event object and write fields to it. After
+    // calling init() function, this object would be destroyed to save memory usage.
+    // When the log event is created from log msg, this field is never initiated.
     android_log_context mContext;
 
     uint64_t mTimestampNs;

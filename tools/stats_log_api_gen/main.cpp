@@ -769,7 +769,7 @@ run(int argc, char const*const* argv)
 
     AtomDecl attributionDecl;
     vector<java_type_t> attributionSignature;
-    collate_atom(android::os::statsd::Attribution::descriptor(),
+    collate_atom(android::os::statsd::AttributionNode::descriptor(),
                  &attributionDecl, &attributionSignature);
 
     // Write the .cpp file

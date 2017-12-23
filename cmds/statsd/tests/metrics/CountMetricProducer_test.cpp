@@ -13,6 +13,7 @@
 // limitations under the License.
 
 #include "src/metrics/CountMetricProducer.h"
+#include "src/dimension.h"
 #include "metrics_test_helper.h"
 
 #include <gmock/gmock.h>
@@ -137,26 +138,29 @@ TEST(CountMetricProducerTest, TestEventsWithSlicedCondition) {
     int64_t bucketStartTimeNs = 10000000000;
     int64_t bucketSizeNs = 30 * 1000 * 1000 * 1000LL;
 
+    int tagId = 1;
+    int conditionTagId = 2;
+
     CountMetric metric;
     metric.set_name("1");
     metric.mutable_bucket()->set_bucket_size_millis(bucketSizeNs / 1000000);
     metric.set_condition("APP_IN_BACKGROUND_PER_UID_AND_SCREEN_ON");
     MetricConditionLink* link = metric.add_links();
     link->set_condition("APP_IN_BACKGROUND_PER_UID");
-    link->add_key_in_what()->set_key(1);
-    link->add_key_in_condition()->set_key(2);
+    *link->mutable_dimensions_in_what() = buildSimpleAtomFieldMatcher(tagId, 1);
+    *link->mutable_dimensions_in_condition() = buildSimpleAtomFieldMatcher(conditionTagId, 2);
 
-    LogEvent event1(1, bucketStartTimeNs + 1);
+    LogEvent event1(tagId, bucketStartTimeNs + 1);
     event1.write("111");  // uid
     event1.init();
     ConditionKey key1;
-    key1["APP_IN_BACKGROUND_PER_UID"] = getMockedDimensionKey(2, "111");
+    key1["APP_IN_BACKGROUND_PER_UID"] = {getMockedDimensionKey(conditionTagId, 2, "111")};
 
-    LogEvent event2(1, bucketStartTimeNs + 10);
+    LogEvent event2(tagId, bucketStartTimeNs + 10);
     event2.write("222");  // uid
     event2.init();
     ConditionKey key2;
-    key2["APP_IN_BACKGROUND_PER_UID"] = getMockedDimensionKey(2, "222");
+    key2["APP_IN_BACKGROUND_PER_UID"] = {getMockedDimensionKey(conditionTagId, 2, "222")};
 
     sp<MockConditionWizard> wizard = new NaggyMock<MockConditionWizard>();
     EXPECT_CALL(*wizard, query(_, key1)).WillOnce(Return(ConditionState::kFalse));

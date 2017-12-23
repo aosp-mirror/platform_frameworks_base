@@ -24,6 +24,7 @@
 #include <vector>
 #include "LogMatchingTracker.h"
 #include "frameworks/base/cmds/statsd/src/statsd_config.pb.h"
+#include "packages/UidMap.h"
 
 namespace android {
 namespace os {
@@ -32,7 +33,8 @@ namespace statsd {
 class SimpleLogMatchingTracker : public virtual LogMatchingTracker {
 public:
     SimpleLogMatchingTracker(const std::string& name, const int index,
-                             const SimpleAtomMatcher& matcher);
+                             const SimpleAtomMatcher& matcher,
+                             const UidMap& uidMap);
 
     ~SimpleLogMatchingTracker();
 
@@ -47,6 +49,7 @@ public:
 
 private:
     const SimpleAtomMatcher mMatcher;
+    const UidMap& mUidMap;
 };
 
 }  // namespace statsd

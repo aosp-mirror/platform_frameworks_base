@@ -28,7 +28,7 @@ public:
     MOCK_METHOD2(
             query,
             ConditionState(const int conditionIndex,
-                           const std::map<std::string, HashableDimensionKey>& conditionParameters));
+                           const ConditionKey& conditionParameters));
 };
 
 class MockStatsPullerManager : public StatsPullerManager {
@@ -38,7 +38,7 @@ public:
     MOCK_METHOD2(Pull, bool(const int pullCode, vector<std::shared_ptr<LogEvent>>* data));
 };
 
-HashableDimensionKey getMockedDimensionKey(int key, std::string value);
+HashableDimensionKey getMockedDimensionKey(int tagId, int key, std::string value);
 
 }  // namespace statsd
 }  // namespace os

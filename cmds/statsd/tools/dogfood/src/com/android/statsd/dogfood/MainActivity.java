@@ -252,7 +252,9 @@ public class MainActivity extends Activity {
             Log.d(TAG, "invalid pkg id");
             return;
         }
-        StatsLog.write(StatsLog.WAKELOCK_STATE_CHANGED, mUids[id], 0, name, 1);
+        int[] uids = new int[] {mUids[id]};
+        String[] tags  = new String[] {"acquire"};
+        StatsLog.write(StatsLog.WAKELOCK_STATE_CHANGED, uids, tags, 0, name, 1);
         StringBuilder sb = new StringBuilder();
         sb.append("StagsLog.write(10, ").append(mUids[id]).append(", ").append(0)
                 .append(", ").append(name).append(", 1);");
@@ -264,7 +266,9 @@ public class MainActivity extends Activity {
             Log.d(TAG, "invalid pkg id");
             return;
         }
-        StatsLog.write(10, mUids[id], 0, name, 0);
+        int[] uids = new int[] {mUids[id]};
+        String[] tags  = new String[] {"release"};
+        StatsLog.write(10, uids, tags, 0, name, 0);
         StringBuilder sb = new StringBuilder();
         sb.append("StagsLog.write(10, ").append(mUids[id]).append(", ").append(0)
                 .append(", ").append(name).append(", 0);");

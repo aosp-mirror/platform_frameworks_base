@@ -112,7 +112,7 @@ java_type(const FieldDescriptor* field)
         case FieldDescriptor::TYPE_MESSAGE:
             // TODO: not the final package name
             if (field->message_type()->full_name() ==
-                "android.os.statsd.AttributionChain") {
+                "android.os.statsd.AttributionNode") {
               return JAVA_TYPE_ATTRIBUTION_CHAIN;
             } else {
                 return JAVA_TYPE_OBJECT;

@@ -52,20 +52,20 @@ StatsdConfig buildGoodConfig() {
     eventMatcher->set_name("SCREEN_IS_ON");
 
     SimpleAtomMatcher* simpleAtomMatcher = eventMatcher->mutable_simple_atom_matcher();
-    simpleAtomMatcher->set_tag(2 /*SCREEN_STATE_CHANGE*/);
-    simpleAtomMatcher->add_key_value_matcher()->mutable_key_matcher()->set_key(
+    simpleAtomMatcher->set_atom_id(2 /*SCREEN_STATE_CHANGE*/);
+    simpleAtomMatcher->add_field_value_matcher()->set_field(
             1 /*SCREEN_STATE_CHANGE__DISPLAY_STATE*/);
-    simpleAtomMatcher->mutable_key_value_matcher(0)->set_eq_int(
+    simpleAtomMatcher->mutable_field_value_matcher(0)->set_eq_int(
             2 /*SCREEN_STATE_CHANGE__DISPLAY_STATE__STATE_ON*/);
 
     eventMatcher = config.add_atom_matcher();
     eventMatcher->set_name("SCREEN_IS_OFF");
 
     simpleAtomMatcher = eventMatcher->mutable_simple_atom_matcher();
-    simpleAtomMatcher->set_tag(2 /*SCREEN_STATE_CHANGE*/);
-    simpleAtomMatcher->add_key_value_matcher()->mutable_key_matcher()->set_key(
+    simpleAtomMatcher->set_atom_id(2 /*SCREEN_STATE_CHANGE*/);
+    simpleAtomMatcher->add_field_value_matcher()->set_field(
             1 /*SCREEN_STATE_CHANGE__DISPLAY_STATE*/);
-    simpleAtomMatcher->mutable_key_value_matcher(0)->set_eq_int(
+    simpleAtomMatcher->mutable_field_value_matcher(0)->set_eq_int(
             1 /*SCREEN_STATE_CHANGE__DISPLAY_STATE__STATE_OFF*/);
 
     eventMatcher = config.add_atom_matcher();
@@ -80,8 +80,8 @@ StatsdConfig buildGoodConfig() {
     metric->set_name("3");
     metric->set_what("SCREEN_IS_ON");
     metric->mutable_bucket()->set_bucket_size_millis(30 * 1000L);
-    KeyMatcher* keyMatcher = metric->add_dimension();
-    keyMatcher->set_key(1);
+    metric->mutable_dimensions()->set_field(2 /*SCREEN_STATE_CHANGE*/);
+    metric->mutable_dimensions()->add_child()->set_field(1);
 
     auto alert = config.add_alert();
     alert->set_name("3");
@@ -100,10 +100,10 @@ StatsdConfig buildCircleMatchers() {
     eventMatcher->set_name("SCREEN_IS_ON");
 
     SimpleAtomMatcher* simpleAtomMatcher = eventMatcher->mutable_simple_atom_matcher();
-    simpleAtomMatcher->set_tag(2 /*SCREEN_STATE_CHANGE*/);
-    simpleAtomMatcher->add_key_value_matcher()->mutable_key_matcher()->set_key(
+    simpleAtomMatcher->set_atom_id(2 /*SCREEN_STATE_CHANGE*/);
+    simpleAtomMatcher->add_field_value_matcher()->set_field(
             1 /*SCREEN_STATE_CHANGE__DISPLAY_STATE*/);
-    simpleAtomMatcher->mutable_key_value_matcher(0)->set_eq_int(
+    simpleAtomMatcher->mutable_field_value_matcher(0)->set_eq_int(
             2 /*SCREEN_STATE_CHANGE__DISPLAY_STATE__STATE_ON*/);
 
     eventMatcher = config.add_atom_matcher();
@@ -129,8 +129,8 @@ StatsdConfig buildAlertWithUnknownMetric() {
     metric->set_name("3");
     metric->set_what("SCREEN_IS_ON");
     metric->mutable_bucket()->set_bucket_size_millis(30 * 1000L);
-    KeyMatcher* keyMatcher = metric->add_dimension();
-    keyMatcher->set_key(1);
+    metric->mutable_dimensions()->set_field(2 /*SCREEN_STATE_CHANGE*/);
+    metric->mutable_dimensions()->add_child()->set_field(1);
 
     auto alert = config.add_alert();
     alert->set_name("3");
@@ -149,10 +149,10 @@ StatsdConfig buildMissingMatchers() {
     eventMatcher->set_name("SCREEN_IS_ON");
 
     SimpleAtomMatcher* simpleAtomMatcher = eventMatcher->mutable_simple_atom_matcher();
-    simpleAtomMatcher->set_tag(2 /*SCREEN_STATE_CHANGE*/);
-    simpleAtomMatcher->add_key_value_matcher()->mutable_key_matcher()->set_key(
+    simpleAtomMatcher->set_atom_id(2 /*SCREEN_STATE_CHANGE*/);
+    simpleAtomMatcher->add_field_value_matcher()->set_field(
             1 /*SCREEN_STATE_CHANGE__DISPLAY_STATE*/);
-    simpleAtomMatcher->mutable_key_value_matcher(0)->set_eq_int(
+    simpleAtomMatcher->mutable_field_value_matcher(0)->set_eq_int(
             2 /*SCREEN_STATE_CHANGE__DISPLAY_STATE__STATE_ON*/);
 
     eventMatcher = config.add_atom_matcher();
@@ -181,7 +181,7 @@ StatsdConfig buildMissingPredicate() {
     eventMatcher->set_name("SCREEN_EVENT");
 
     SimpleAtomMatcher* simpleAtomMatcher = eventMatcher->mutable_simple_atom_matcher();
-    simpleAtomMatcher->set_tag(2);
+    simpleAtomMatcher->set_atom_id(2);
 
     return config;
 }
@@ -193,12 +193,12 @@ StatsdConfig buildDimensionMetricsWithMultiTags() {
     AtomMatcher* eventMatcher = config.add_atom_matcher();
     eventMatcher->set_name("BATTERY_VERY_LOW");
     SimpleAtomMatcher* simpleAtomMatcher = eventMatcher->mutable_simple_atom_matcher();
-    simpleAtomMatcher->set_tag(2);
+    simpleAtomMatcher->set_atom_id(2);
 
     eventMatcher = config.add_atom_matcher();
     eventMatcher->set_name("BATTERY_VERY_VERY_LOW");
     simpleAtomMatcher = eventMatcher->mutable_simple_atom_matcher();
-    simpleAtomMatcher->set_tag(3);
+    simpleAtomMatcher->set_atom_id(3);
 
     eventMatcher = config.add_atom_matcher();
     eventMatcher->set_name("BATTERY_LOW");
@@ -213,8 +213,8 @@ StatsdConfig buildDimensionMetricsWithMultiTags() {
     metric->set_name("3");
     metric->set_what("BATTERY_LOW");
     metric->mutable_bucket()->set_bucket_size_millis(30 * 1000L);
-    KeyMatcher* keyMatcher = metric->add_dimension();
-    keyMatcher->set_key(1);
+    // This case is interesting. We want to dimension across two atoms.
+    metric->mutable_dimensions()->add_child()->set_field(1);
 
     auto alert = config.add_alert();
     alert->set_name("3");
@@ -233,20 +233,20 @@ StatsdConfig buildCirclePredicates() {
     eventMatcher->set_name("SCREEN_IS_ON");
 
     SimpleAtomMatcher* simpleAtomMatcher = eventMatcher->mutable_simple_atom_matcher();
-    simpleAtomMatcher->set_tag(2 /*SCREEN_STATE_CHANGE*/);
-    simpleAtomMatcher->add_key_value_matcher()->mutable_key_matcher()->set_key(
+    simpleAtomMatcher->set_atom_id(2 /*SCREEN_STATE_CHANGE*/);
+    simpleAtomMatcher->add_field_value_matcher()->set_field(
             1 /*SCREEN_STATE_CHANGE__DISPLAY_STATE*/);
-    simpleAtomMatcher->mutable_key_value_matcher(0)->set_eq_int(
+    simpleAtomMatcher->mutable_field_value_matcher(0)->set_eq_int(
             2 /*SCREEN_STATE_CHANGE__DISPLAY_STATE__STATE_ON*/);
 
     eventMatcher = config.add_atom_matcher();
     eventMatcher->set_name("SCREEN_IS_OFF");
 
     simpleAtomMatcher = eventMatcher->mutable_simple_atom_matcher();
-    simpleAtomMatcher->set_tag(2 /*SCREEN_STATE_CHANGE*/);
-    simpleAtomMatcher->add_key_value_matcher()->mutable_key_matcher()->set_key(
+    simpleAtomMatcher->set_atom_id(2 /*SCREEN_STATE_CHANGE*/);
+    simpleAtomMatcher->add_field_value_matcher()->set_field(
             1 /*SCREEN_STATE_CHANGE__DISPLAY_STATE*/);
-    simpleAtomMatcher->mutable_key_value_matcher(0)->set_eq_int(
+    simpleAtomMatcher->mutable_field_value_matcher(0)->set_eq_int(
             1 /*SCREEN_STATE_CHANGE__DISPLAY_STATE__STATE_OFF*/);
 
     auto condition = config.add_predicate();
@@ -267,6 +267,7 @@ StatsdConfig buildCirclePredicates() {
 }
 
 TEST(MetricsManagerTest, TestGoodConfig) {
+    UidMap uidMap;
     StatsdConfig config = buildGoodConfig();
     set<int> allTagIds;
     vector<sp<LogMatchingTracker>> allAtomMatchers;
@@ -277,7 +278,7 @@ TEST(MetricsManagerTest, TestGoodConfig) {
     unordered_map<int, std::vector<int>> trackerToMetricMap;
     unordered_map<int, std::vector<int>> trackerToConditionMap;
 
-    EXPECT_TRUE(initStatsdConfig(kConfigKey, config, timeBaseSec,  allTagIds, allAtomMatchers,
+    EXPECT_TRUE(initStatsdConfig(kConfigKey, config, uidMap, timeBaseSec, allTagIds, allAtomMatchers,
                                  allConditionTrackers, allMetricProducers, allAnomalyTrackers,
                                  conditionToMetricMap, trackerToMetricMap, trackerToConditionMap));
     EXPECT_EQ(1u, allMetricProducers.size());
@@ -285,6 +286,7 @@ TEST(MetricsManagerTest, TestGoodConfig) {
 }
 
 TEST(MetricsManagerTest, TestDimensionMetricsWithMultiTags) {
+    UidMap uidMap;
     StatsdConfig config = buildDimensionMetricsWithMultiTags();
     set<int> allTagIds;
     vector<sp<LogMatchingTracker>> allAtomMatchers;
@@ -295,12 +297,13 @@ TEST(MetricsManagerTest, TestDimensionMetricsWithMultiTags) {
     unordered_map<int, std::vector<int>> trackerToMetricMap;
     unordered_map<int, std::vector<int>> trackerToConditionMap;
 
-    EXPECT_FALSE(initStatsdConfig(kConfigKey, config, timeBaseSec, allTagIds, allAtomMatchers,
+    EXPECT_FALSE(initStatsdConfig(kConfigKey, config, uidMap, timeBaseSec, allTagIds, allAtomMatchers,
                                   allConditionTrackers, allMetricProducers, allAnomalyTrackers,
                                   conditionToMetricMap, trackerToMetricMap, trackerToConditionMap));
 }
 
 TEST(MetricsManagerTest, TestCircleLogMatcherDependency) {
+    UidMap uidMap;
     StatsdConfig config = buildCircleMatchers();
     set<int> allTagIds;
     vector<sp<LogMatchingTracker>> allAtomMatchers;
@@ -311,12 +314,13 @@ TEST(MetricsManagerTest, TestCircleLogMatcherDependency) {
     unordered_map<int, std::vector<int>> trackerToMetricMap;
     unordered_map<int, std::vector<int>> trackerToConditionMap;
 
-    EXPECT_FALSE(initStatsdConfig(kConfigKey, config, timeBaseSec, allTagIds, allAtomMatchers,
+    EXPECT_FALSE(initStatsdConfig(kConfigKey, config, uidMap, timeBaseSec, allTagIds, allAtomMatchers,
                                   allConditionTrackers, allMetricProducers, allAnomalyTrackers,
                                   conditionToMetricMap, trackerToMetricMap, trackerToConditionMap));
 }
 
 TEST(MetricsManagerTest, TestMissingMatchers) {
+    UidMap uidMap;
     StatsdConfig config = buildMissingMatchers();
     set<int> allTagIds;
     vector<sp<LogMatchingTracker>> allAtomMatchers;
@@ -326,12 +330,13 @@ TEST(MetricsManagerTest, TestMissingMatchers) {
     unordered_map<int, std::vector<int>> conditionToMetricMap;
     unordered_map<int, std::vector<int>> trackerToMetricMap;
     unordered_map<int, std::vector<int>> trackerToConditionMap;
-    EXPECT_FALSE(initStatsdConfig(kConfigKey, config, timeBaseSec, allTagIds, allAtomMatchers,
+    EXPECT_FALSE(initStatsdConfig(kConfigKey, config, uidMap, timeBaseSec, allTagIds, allAtomMatchers,
                                   allConditionTrackers, allMetricProducers, allAnomalyTrackers,
                                   conditionToMetricMap, trackerToMetricMap, trackerToConditionMap));
 }
 
 TEST(MetricsManagerTest, TestMissingPredicate) {
+    UidMap uidMap;
     StatsdConfig config = buildMissingPredicate();
     set<int> allTagIds;
     vector<sp<LogMatchingTracker>> allAtomMatchers;
@@ -341,12 +346,13 @@ TEST(MetricsManagerTest, TestMissingPredicate) {
     unordered_map<int, std::vector<int>> conditionToMetricMap;
     unordered_map<int, std::vector<int>> trackerToMetricMap;
     unordered_map<int, std::vector<int>> trackerToConditionMap;
-    EXPECT_FALSE(initStatsdConfig(kConfigKey, config, timeBaseSec, allTagIds, allAtomMatchers,
+    EXPECT_FALSE(initStatsdConfig(kConfigKey, config, uidMap, timeBaseSec, allTagIds, allAtomMatchers,
                                   allConditionTrackers, allMetricProducers, allAnomalyTrackers,
                                   conditionToMetricMap, trackerToMetricMap, trackerToConditionMap));
 }
 
 TEST(MetricsManagerTest, TestCirclePredicateDependency) {
+    UidMap uidMap;
     StatsdConfig config = buildCirclePredicates();
     set<int> allTagIds;
     vector<sp<LogMatchingTracker>> allAtomMatchers;
@@ -357,12 +363,13 @@ TEST(MetricsManagerTest, TestCirclePredicateDependency) {
     unordered_map<int, std::vector<int>> trackerToMetricMap;
     unordered_map<int, std::vector<int>> trackerToConditionMap;
 
-    EXPECT_FALSE(initStatsdConfig(kConfigKey, config, timeBaseSec, allTagIds, allAtomMatchers,
+    EXPECT_FALSE(initStatsdConfig(kConfigKey, config, uidMap, timeBaseSec, allTagIds, allAtomMatchers,
                                   allConditionTrackers, allMetricProducers, allAnomalyTrackers,
                                   conditionToMetricMap, trackerToMetricMap, trackerToConditionMap));
 }
 
 TEST(MetricsManagerTest, testAlertWithUnknownMetric) {
+    UidMap uidMap;
     StatsdConfig config = buildAlertWithUnknownMetric();
     set<int> allTagIds;
     vector<sp<LogMatchingTracker>> allAtomMatchers;
@@ -373,7 +380,7 @@ TEST(MetricsManagerTest, testAlertWithUnknownMetric) {
     unordered_map<int, std::vector<int>> trackerToMetricMap;
     unordered_map<int, std::vector<int>> trackerToConditionMap;
 
-    EXPECT_FALSE(initStatsdConfig(kConfigKey, config, timeBaseSec, allTagIds, allAtomMatchers,
+    EXPECT_FALSE(initStatsdConfig(kConfigKey, config, uidMap, timeBaseSec, allTagIds, allAtomMatchers,
                                   allConditionTrackers, allMetricProducers, allAnomalyTrackers,
                                   conditionToMetricMap, trackerToMetricMap, trackerToConditionMap));
 }

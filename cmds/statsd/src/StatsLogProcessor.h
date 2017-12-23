@@ -13,9 +13,10 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-#ifndef STATS_LOG_PROCESSOR_H
-#define STATS_LOG_PROCESSOR_H
 
+#pragma once
+
+#include <gtest/gtest_prod.h>
 #include "config/ConfigListener.h"
 #include "logd/LogReader.h"
 #include "metrics/MetricsManager.h"
@@ -33,6 +34,7 @@ namespace statsd {
 class StatsLogProcessor : public ConfigListener {
 public:
     StatsLogProcessor(const sp<UidMap>& uidMap, const sp<AnomalyMonitor>& anomalyMonitor,
+                      const long timeBaseSec,
                       const std::function<void(const ConfigKey&)>& sendBroadcast);
     virtual ~StatsLogProcessor();
 
@@ -44,6 +46,7 @@ public:
     size_t GetMetricsSize(const ConfigKey& key) const;
 
     void onDumpReport(const ConfigKey& key, vector<uint8_t>* outData);
+    void onDumpReport(const ConfigKey& key, const uint64_t& dumpTimeStampNs, ConfigMetricsReportList* report);
 
     /* Tells MetricsManager that the alarms in anomalySet have fired. Modifies anomalySet. */
     void onAnomalyAlarmFired(
@@ -81,10 +84,12 @@ private:
     FRIEND_TEST(StatsLogProcessorTest, TestRateLimitByteSize);
     FRIEND_TEST(StatsLogProcessorTest, TestRateLimitBroadcast);
     FRIEND_TEST(StatsLogProcessorTest, TestDropWhenByteSizeTooLarge);
+    FRIEND_TEST(StatsLogProcessorTest, TestDropWhenByteSizeTooLarge);
+    FRIEND_TEST(WakelockDurationE2eTest, TestAggregatedPredicateDimensions);
+    FRIEND_TEST(MetricConditionLinkE2eTest, TestMultiplePredicatesAndLinks);
+
 };
 
 }  // namespace statsd
 }  // namespace os
 }  // namespace android
-
-#endif  // STATS_LOG_PROCESSOR_H

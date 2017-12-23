@@ -50,12 +50,13 @@ public:
 protected:
     void onMatchedLogEventInternalLocked(
             const size_t matcherIndex, const HashableDimensionKey& eventKey,
-            const std::map<std::string, HashableDimensionKey>& conditionKey, bool condition,
+            const ConditionKey& conditionKey, bool condition,
             const LogEvent& event) override;
 
 private:
     void onDumpReportLocked(const uint64_t dumpTimeNs,
                             android::util::ProtoOutputStream* protoOutput) override;
+    void onDumpReportLocked(const uint64_t dumpTimeNs, StatsLogReport* report) override;
 
     // Internal interface to handle condition change.
     void onConditionChangedLocked(const bool conditionMet, const uint64_t eventTime) override;

@@ -30,12 +30,13 @@ using std::vector;
 
 
 SimpleLogMatchingTracker::SimpleLogMatchingTracker(const string& name, const int index,
-                                                   const SimpleAtomMatcher& matcher)
-    : LogMatchingTracker(name, index), mMatcher(matcher) {
-    if (!matcher.has_tag()) {
+                                                   const SimpleAtomMatcher& matcher,
+                                                   const UidMap& uidMap)
+    : LogMatchingTracker(name, index), mMatcher(matcher), mUidMap(uidMap) {
+    if (!matcher.has_atom_id()) {
         mInitialized = false;
     } else {
-        mTagIds.insert(matcher.tag());
+        mAtomIds.insert(matcher.atom_id());
         mInitialized = true;
     }
 }
@@ -59,12 +60,12 @@ void SimpleLogMatchingTracker::onLogEvent(const LogEvent& event,
         return;
     }
 
-    if (mTagIds.find(event.GetTagId()) == mTagIds.end()) {
+    if (mAtomIds.find(event.GetTagId()) == mAtomIds.end()) {
         matcherResults[mIndex] = MatchingState::kNotMatched;
         return;
     }
 
-    bool matched = matchesSimple(mMatcher, event);
+    bool matched = matchesSimple(mUidMap, mMatcher, event);
     matcherResults[mIndex] = matched ? MatchingState::kMatched : MatchingState::kNotMatched;
     VLOG("Stats SimpleLogMatcher %s matched? %d", mName.c_str(), matched);
 }

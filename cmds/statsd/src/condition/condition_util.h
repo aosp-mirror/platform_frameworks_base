@@ -32,12 +32,16 @@ enum ConditionState {
     kTrue = 1,
 };
 
+ConditionState operator|(ConditionState l, ConditionState r);
+void OrConditionState(const std::vector<ConditionState>& ref, vector<ConditionState> * ored);
+void OrBooleanVector(const std::vector<bool>& ref, vector<bool> * ored);
+
 ConditionState evaluateCombinationCondition(const std::vector<int>& children,
                                             const LogicalOperation& operation,
                                             const std::vector<ConditionState>& conditionCache);
 
-HashableDimensionKey getDimensionKeyForCondition(const LogEvent& event,
-                                                 const MetricConditionLink& link);
+std::vector<HashableDimensionKey> getDimensionKeysForCondition(
+        const LogEvent& event, const MetricConditionLink& link);
 }  // namespace statsd
 }  // namespace os
 }  // namespace android

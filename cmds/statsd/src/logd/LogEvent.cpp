@@ -17,8 +17,14 @@
 #define DEBUG true  // STOPSHIP if true
 #include "logd/LogEvent.h"
 
+#include "frameworks/base/cmds/statsd/src/statsd_config.pb.h"
+
+#include <set>
 #include <sstream>
-#include "stats_util.h"
+
+#include "field_util.h"
+#include "dimension.h"
+#include "stats_log_util.h"
 
 namespace android {
 namespace os {
@@ -30,16 +36,20 @@ using std::string;
 using android::util::ProtoOutputStream;
 
 LogEvent::LogEvent(log_msg& msg) {
-    mContext =
+    android_log_context context =
             create_android_log_parser(msg.msg() + sizeof(uint32_t), msg.len() - sizeof(uint32_t));
     mTimestampNs = msg.entry_v1.sec * NS_PER_SEC + msg.entry_v1.nsec;
     mLogUid = msg.entry_v4.uid;
-    init(mContext);
+    init(context);
+    if (context) {
+        android_log_destroy(&context);
+    }
 }
 
 LogEvent::LogEvent(int32_t tagId, uint64_t timestampNs) {
     mTimestampNs = timestampNs;
     mTagId = tagId;
+    mLogUid = 0;
     mContext = create_android_logger(1937006964); // the event tag shared by all stats logs
     if (mContext) {
         android_log_write_int32(mContext, tagId);
@@ -53,6 +63,14 @@ void LogEvent::init() {
         // turns to reader mode
         mContext = create_android_log_parser(buffer, len);
         init(mContext);
+        // destroy the context to save memory.
+        android_log_destroy(&mContext);
+    }
+}
+
+LogEvent::~LogEvent() {
+    if (mContext) {
+        android_log_destroy(&mContext);
     }
 }
 
@@ -98,11 +116,65 @@ bool LogEvent::write(float value) {
     return false;
 }
 
-LogEvent::~LogEvent() {
+bool LogEvent::write(const std::vector<AttributionNode>& nodes) {
     if (mContext) {
-        android_log_destroy(&mContext);
+         if (android_log_write_list_begin(mContext) < 0) {
+            return false;
+         }
+         for (size_t i = 0; i < nodes.size(); ++i) {
+             if (!write(nodes[i])) {
+                return false;
+             }
+         }
+         if (android_log_write_list_end(mContext) < 0) {
+            return false;
+         }
+         return true;
+    }
+    return false;
+}
+
+bool LogEvent::write(const AttributionNode& node) {
+    if (mContext) {
+         if (android_log_write_list_begin(mContext) < 0) {
+            return false;
+         }
+         if (android_log_write_int32(mContext, node.uid()) < 0) {
+            return false;
+         }
+         if (android_log_write_string8(mContext, node.tag().c_str()) < 0) {
+            return false;
+         }
+         if (android_log_write_int32(mContext, node.uid()) < 0) {
+            return false;
+         }
+         if (android_log_write_list_end(mContext) < 0) {
+            return false;
+         }
+         return true;
+    }
+    return false;
+}
+
+namespace {
+
+void increaseField(Field *field, bool is_child) {
+    if (is_child) {
+        if (field->child_size() <= 0) {
+            field->add_child();
+        }
+    } else {
+        field->clear_child();
+    }
+    Field* curr = is_child ? field->mutable_child(0) : field;
+    if (!curr->has_field()) {
+        curr->set_field(1);
+    } else {
+        curr->set_field(curr->field() + 1);
     }
 }
+
+}  // namespace
 
 /**
  * The elements of each log event are stored as a vector of android_log_list_elements.
@@ -110,7 +182,6 @@ LogEvent::~LogEvent() {
  * of the elements that are written to the log.
  */
 void LogEvent::init(android_log_context context) {
-    mElements.clear();
     android_log_list_element elem;
     // TODO: The log is actually structured inside one list.  This is convenient
     // because we'll be able to use it to put the attribution (WorkSource) block first
@@ -118,24 +189,79 @@ void LogEvent::init(android_log_context context) {
     // list-related log elements and the order we get there is our index-keyed data
     // structure.
     int i = 0;
+
+    int seenListStart = 0;
+
+    Field field;
     do {
         elem = android_log_read_next(context);
         switch ((int)elem.type) {
             case EVENT_TYPE_INT:
-                // elem at [0] is EVENT_TYPE_LIST, [1] is the tag id. If we add WorkSource, it would
-                // be the list starting at [2].
+                // elem at [0] is EVENT_TYPE_LIST, [1] is the tag id.
                 if (i == 1) {
                     mTagId = elem.data.int32;
-                    break;
+                } else {
+                    increaseField(&field, seenListStart > 0/* is_child */);
+                    DimensionsValue dimensionsValue;
+                    dimensionsValue.set_value_int(elem.data.int32);
+                    setFieldInLeafValueProto(field, &dimensionsValue);
+                    mFieldValueMap.insert(
+                        std::make_pair(buildAtomField(mTagId, field), dimensionsValue));
                 }
+                break;
             case EVENT_TYPE_FLOAT:
+                {
+                    increaseField(&field, seenListStart > 0/* is_child */);
+                    DimensionsValue dimensionsValue;
+                    dimensionsValue.set_value_float(elem.data.float32);
+                    setFieldInLeafValueProto(field, &dimensionsValue);
+                    mFieldValueMap.insert(
+                        std::make_pair(buildAtomField(mTagId, field), dimensionsValue));
+                }
+                break;
             case EVENT_TYPE_STRING:
+                {
+                    increaseField(&field, seenListStart > 0/* is_child */);
+                    DimensionsValue dimensionsValue;
+                    dimensionsValue.set_value_str(string(elem.data.string, elem.len).c_str());
+                    setFieldInLeafValueProto(field, &dimensionsValue);
+                    mFieldValueMap.insert(
+                        std::make_pair(buildAtomField(mTagId, field), dimensionsValue));
+                }
+                break;
             case EVENT_TYPE_LONG:
-                mElements.push_back(elem);
+                {
+                    increaseField(&field, seenListStart > 0 /* is_child */);
+                    DimensionsValue dimensionsValue;
+                    dimensionsValue.set_value_long(elem.data.int64);
+                    setFieldInLeafValueProto(field, &dimensionsValue);
+                    mFieldValueMap.insert(
+                        std::make_pair(buildAtomField(mTagId, field), dimensionsValue));
+                }
                 break;
             case EVENT_TYPE_LIST:
+                if (i >= 1) {
+                    if (seenListStart > 0) {
+                       increasePosition(&field);
+                    } else {
+                        increaseField(&field, false /* is_child */);
+                    }
+                    seenListStart++;
+                    if (seenListStart >= 3) {
+                        ALOGE("Depth > 2. Not supported!");
+                        return;
+                    }
+                }
                 break;
             case EVENT_TYPE_LIST_STOP:
+                seenListStart--;
+                if (seenListStart == 0) {
+                    field.clear_position_index();
+                } else {
+                    if (field.child_size() > 0) {
+                       field.mutable_child(0)->clear_field();
+                    }
+                }
                 break;
             case EVENT_TYPE_UNKNOWN:
                 break;
@@ -147,142 +273,145 @@ void LogEvent::init(android_log_context context) {
 }
 
 int64_t LogEvent::GetLong(size_t key, status_t* err) const {
-    if (key < 1 || (key - 1)  >= mElements.size()) {
+    DimensionsValue value;
+    if (!GetSimpleAtomDimensionsValueProto(key, &value)) {
         *err = BAD_INDEX;
         return 0;
     }
-    key--;
-    const android_log_list_element& elem = mElements[key];
-    if (elem.type == EVENT_TYPE_INT) {
-        return elem.data.int32;
-    } else if (elem.type == EVENT_TYPE_LONG) {
-        return elem.data.int64;
-    } else if (elem.type == EVENT_TYPE_FLOAT) {
-        return (int64_t)elem.data.float32;
-    } else {
-        *err = BAD_TYPE;
-        return 0;
+    const DimensionsValue* leafValue = getSingleLeafValue(&value);
+    switch (leafValue->value_case()) {
+        case DimensionsValue::ValueCase::kValueInt:
+            return (int64_t)leafValue->value_int();
+        case DimensionsValue::ValueCase::kValueLong:
+            return leafValue->value_long();
+        case DimensionsValue::ValueCase::kValueBool:
+            return leafValue->value_bool() ? 1 : 0;
+        case DimensionsValue::ValueCase::kValueFloat:
+            return (int64_t)leafValue->value_float();
+        case DimensionsValue::ValueCase::kValueTuple:
+        case DimensionsValue::ValueCase::kValueStr:
+        case DimensionsValue::ValueCase::VALUE_NOT_SET: {
+            *err = BAD_TYPE;
+            return 0;
+        }
     }
 }
 
 const char* LogEvent::GetString(size_t key, status_t* err) const {
-    if (key < 1 || (key - 1)  >= mElements.size()) {
+    DimensionsValue value;
+    if (!GetSimpleAtomDimensionsValueProto(key, &value)) {
         *err = BAD_INDEX;
-        return NULL;
+        return 0;
     }
-    key--;
-    const android_log_list_element& elem = mElements[key];
-    if (elem.type != EVENT_TYPE_STRING) {
-        *err = BAD_TYPE;
-        return NULL;
+    const DimensionsValue* leafValue = getSingleLeafValue(&value);
+    switch (leafValue->value_case()) {
+        case DimensionsValue::ValueCase::kValueStr:
+            return leafValue->value_str().c_str();
+        case DimensionsValue::ValueCase::kValueInt:
+        case DimensionsValue::ValueCase::kValueLong:
+        case DimensionsValue::ValueCase::kValueBool:
+        case DimensionsValue::ValueCase::kValueFloat:
+        case DimensionsValue::ValueCase::kValueTuple:
+        case DimensionsValue::ValueCase::VALUE_NOT_SET: {
+            *err = BAD_TYPE;
+            return 0;
+        }
     }
-    // Need to add the '/0' at the end by specifying the length of the string.
-    return string(elem.data.string, elem.len).c_str();
 }
 
 bool LogEvent::GetBool(size_t key, status_t* err) const {
-    if (key < 1 || (key - 1)  >= mElements.size()) {
+    DimensionsValue value;
+    if (!GetSimpleAtomDimensionsValueProto(key, &value)) {
         *err = BAD_INDEX;
         return 0;
     }
-    key--;
-    const android_log_list_element& elem = mElements[key];
-    if (elem.type == EVENT_TYPE_INT) {
-        return elem.data.int32 != 0;
-    } else if (elem.type == EVENT_TYPE_LONG) {
-        return elem.data.int64 != 0;
-    } else if (elem.type == EVENT_TYPE_FLOAT) {
-        return elem.data.float32 != 0;
-    } else {
-        *err = BAD_TYPE;
-        return 0;
+    const DimensionsValue* leafValue = getSingleLeafValue(&value);
+    switch (leafValue->value_case()) {
+        case DimensionsValue::ValueCase::kValueInt:
+            return leafValue->value_int() != 0;
+        case DimensionsValue::ValueCase::kValueLong:
+            return leafValue->value_long() != 0;
+        case DimensionsValue::ValueCase::kValueBool:
+            return leafValue->value_bool();
+        case DimensionsValue::ValueCase::kValueFloat:
+            return leafValue->value_float() != 0;
+        case DimensionsValue::ValueCase::kValueTuple:
+        case DimensionsValue::ValueCase::kValueStr:
+        case DimensionsValue::ValueCase::VALUE_NOT_SET: {
+            *err = BAD_TYPE;
+            return 0;
+        }
     }
 }
 
 float LogEvent::GetFloat(size_t key, status_t* err) const {
-    if (key < 1 || (key - 1)  >= mElements.size()) {
+    DimensionsValue value;
+    if (!GetSimpleAtomDimensionsValueProto(key, &value)) {
         *err = BAD_INDEX;
         return 0;
     }
-    key--;
-    const android_log_list_element& elem = mElements[key];
-    if (elem.type == EVENT_TYPE_INT) {
-        return (float)elem.data.int32;
-    } else if (elem.type == EVENT_TYPE_LONG) {
-        return (float)elem.data.int64;
-    } else if (elem.type == EVENT_TYPE_FLOAT) {
-        return elem.data.float32;
-    } else {
-        *err = BAD_TYPE;
-        return 0;
+    const DimensionsValue* leafValue = getSingleLeafValue(&value);
+    switch (leafValue->value_case()) {
+        case DimensionsValue::ValueCase::kValueInt:
+            return (float)leafValue->value_int();
+        case DimensionsValue::ValueCase::kValueLong:
+            return (float)leafValue->value_long();
+        case DimensionsValue::ValueCase::kValueBool:
+            return leafValue->value_bool() ? 1.0f : 0.0f;
+        case DimensionsValue::ValueCase::kValueFloat:
+            return leafValue->value_float();
+        case DimensionsValue::ValueCase::kValueTuple:
+        case DimensionsValue::ValueCase::kValueStr:
+        case DimensionsValue::ValueCase::VALUE_NOT_SET: {
+            *err = BAD_TYPE;
+            return 0;
+        }
     }
 }
 
-KeyValuePair LogEvent::GetKeyValueProto(size_t key) const {
-    KeyValuePair pair;
-    pair.set_key(key);
-    // If the value is not valid, return the KeyValuePair without assigning the value.
-    // Caller can detect the error by checking the enum for "one of" proto type.
-    if (key < 1 || (key - 1) >= mElements.size()) {
-        return pair;
-    }
-    key--;
+void LogEvent::GetAtomDimensionsValueProtos(const FieldMatcher& matcher,
+                                            std::vector<DimensionsValue> *dimensionsValues) const {
+    findDimensionsValues(mFieldValueMap, matcher, dimensionsValues);
+}
 
-    const android_log_list_element& elem = mElements[key];
-    if (elem.type == EVENT_TYPE_INT) {
-        pair.set_value_int(elem.data.int32);
-    } else if (elem.type == EVENT_TYPE_LONG) {
-        pair.set_value_long(elem.data.int64);
-    } else if (elem.type == EVENT_TYPE_STRING) {
-        pair.set_value_str(elem.data.string);
-    } else if (elem.type == EVENT_TYPE_FLOAT) {
-        pair.set_value_float(elem.data.float32);
+bool LogEvent::GetAtomDimensionsValueProto(const FieldMatcher& matcher,
+                                           DimensionsValue* dimensionsValue) const {
+    std::vector<DimensionsValue> rootDimensionsValues;
+    findDimensionsValues(mFieldValueMap, matcher, &rootDimensionsValues);
+    if (rootDimensionsValues.size() != 1) {
+        return false;
     }
-    return pair;
+    *dimensionsValue = rootDimensionsValues.front();
+    return true;
+}
+
+bool LogEvent::GetSimpleAtomDimensionsValueProto(size_t atomField,
+                                                 DimensionsValue* dimensionsValue) const {
+    return GetAtomDimensionsValueProto(
+        buildSimpleAtomFieldMatcher(mTagId, atomField), dimensionsValue);
+}
+
+DimensionsValue LogEvent::GetSimpleAtomDimensionsValueProto(size_t atomField)  const {
+    DimensionsValue dimensionsValue;
+    GetSimpleAtomDimensionsValueProto(atomField, &dimensionsValue);
+    return dimensionsValue;
 }
 
 string LogEvent::ToString() const {
     ostringstream result;
     result << "{ " << mTimestampNs << " (" << mTagId << ")";
-    const size_t N = mElements.size();
-    for (size_t i=0; i<N; i++) {
-        result << " ";
-        result << (i + 1);
+    for (const auto& itr : mFieldValueMap) {
+        result << FieldToString(itr.first);
         result << "->";
-        const android_log_list_element& elem = mElements[i];
-        if (elem.type == EVENT_TYPE_INT) {
-            result << elem.data.int32;
-        } else if (elem.type == EVENT_TYPE_LONG) {
-            result << elem.data.int64;
-        } else if (elem.type == EVENT_TYPE_FLOAT) {
-            result << elem.data.float32;
-        } else if (elem.type == EVENT_TYPE_STRING) {
-            // Need to add the '/0' at the end by specifying the length of the string.
-            result << string(elem.data.string, elem.len).c_str();
-        }
+        result << DimensionsValueToString(itr.second);
+        result << " ";
     }
     result << " }";
     return result.str();
 }
 
-void LogEvent::ToProto(ProtoOutputStream& proto) const {
-    long long atomToken = proto.start(FIELD_TYPE_MESSAGE | mTagId);
-    const size_t N = mElements.size();
-    for (size_t i=0; i<N; i++) {
-        const int key = i + 1;
-
-        const android_log_list_element& elem = mElements[i];
-        if (elem.type == EVENT_TYPE_INT) {
-            proto.write(FIELD_TYPE_INT32 | key, elem.data.int32);
-        } else if (elem.type == EVENT_TYPE_LONG) {
-            proto.write(FIELD_TYPE_INT64 | key, (long long)elem.data.int64);
-        } else if (elem.type == EVENT_TYPE_FLOAT) {
-            proto.write(FIELD_TYPE_FLOAT | key, elem.data.float32);
-        } else if (elem.type == EVENT_TYPE_STRING) {
-            proto.write(FIELD_TYPE_STRING | key, elem.data.string);
-        }
-    }
-    proto.end(atomToken);
+void LogEvent::ToProto(ProtoOutputStream& protoOutput) const {
+    writeFieldValueTreeToStream(getFieldValueMap(), &protoOutput);
 }
 
 }  // namespace statsd
