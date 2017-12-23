@@ -81,7 +81,7 @@ public class ConnOnActivityStartTest {
 
     private static final long NETWORK_CHECK_TIMEOUT_MS = 4000; // 4 sec
 
-    private static final long SCREEN_ON_DELAY_MS = 1000; // 1 sec
+    private static final long SCREEN_ON_DELAY_MS = 2000; // 2 sec
 
     private static final long BIND_SERVICE_TIMEOUT_SEC = 4;
 
@@ -239,7 +239,6 @@ public class ConnOnActivityStartTest {
             try {
                 Log.d(TAG, testName + " Start #" + i);
                 turnScreenOn();
-                SystemClock.sleep(SCREEN_ON_DELAY_MS);
                 startActivityAndCheckNetworkAccess();
             } finally {
                 finishActivity();
@@ -345,6 +344,8 @@ public class ConnOnActivityStartTest {
     private void turnScreenOn() throws Exception {
         executeCommand("input keyevent KEYCODE_WAKEUP");
         executeCommand("wm dismiss-keyguard");
+        // Wait for screen-on state to propagate through the system.
+        SystemClock.sleep(SCREEN_ON_DELAY_MS);
     }
 
     private String executeCommand(String cmd) throws IOException {
@@ -404,15 +405,16 @@ public class ConnOnActivityStartTest {
     }
 
     private static void dumpOnFailure() throws Exception {
-        Log.d(TAG, ">>> Begin network_management dump");
-        Log.printlns(Log.LOG_ID_MAIN, Log.DEBUG,
-                TAG, executeSilentCommand("dumpsys network_management"), null);
-        Log.d(TAG, "<<< End network_management dump");
+        dump("network_management");
+        dump("netpolicy");
+        dump("usagestats");
+    }
 
-        Log.d(TAG, ">>> Begin netpolicy dump");
+    private static void dump(String service) throws Exception {
+        Log.d(TAG, ">>> Begin dump " + service);
         Log.printlns(Log.LOG_ID_MAIN, Log.DEBUG,
-                TAG, executeSilentCommand("dumpsys netpolicy"), null);
-        Log.d(TAG, "<<< End netpolicy dump");
+                TAG, executeSilentCommand("dumpsys " + service), null);
+        Log.d(TAG, "<<< End dump " + service);
     }
 
     private void finishActivity() throws Exception {
