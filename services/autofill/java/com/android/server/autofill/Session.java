@@ -906,7 +906,15 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
      * Generates a {@link android.service.autofill.FillEventHistory.Event#TYPE_CONTEXT_COMMITTED}
      * when necessary.
      */
-    public void logContextCommittedLocked() {
+    public void logContextCommitted() {
+        mHandlerCaller.getHandler().post(() -> {
+            synchronized (mLock) {
+                logContextCommittedLocked();
+            }
+        });
+    }
+
+    private void logContextCommittedLocked() {
         final FillResponse lastResponse = getLastResponseLocked("logContextCommited()");
         if (lastResponse == null) return;
 
@@ -1115,7 +1123,7 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
             }
         }
 
-        mService.logContextCommitted(id, mClientState, mSelectedDatasetIds, ignoredDatasets,
+        mService.logContextCommittedLocked(id, mClientState, mSelectedDatasetIds, ignoredDatasets,
                 changedFieldIds, changedDatasetIds,
                 manuallyFilledFieldIds, manuallyFilledDatasetIds,
                 detectedFieldIds, detectedFieldClassifications, mComponentName.getPackageName());
@@ -1359,7 +1367,10 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
                 }
 
                 if (sDebug) Slog.d(TAG, "Good news, everyone! All checks passed, show save UI!");
-                mService.logSaveShown(id, mClientState);
+
+                // Use handler so logContextCommitted() is logged first
+                mHandlerCaller.getHandler().post(() -> mService.logSaveShown(id, mClientState));
+
                 final IAutoFillManagerClient client = getClient();
                 mPendingSaveUi = new PendingUi(mActivityToken, id, client);
                 getUiForShowing().showSaveUi(mService.getServiceLabel(), mService.getServiceIcon(),
