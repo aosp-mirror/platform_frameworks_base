@@ -757,7 +757,7 @@ public final class ContextHubManager {
         try {
             mService.registerCallback(mClientCallback);
         } catch (RemoteException e) {
-            Log.w(TAG, "Could not register callback:" + e);
+            throw e.rethrowFromSystemServer();
         }
     }
 }
