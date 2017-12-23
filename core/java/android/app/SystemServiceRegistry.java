@@ -552,8 +552,16 @@ final class SystemServiceRegistry {
         registerService(Context.WALLPAPER_SERVICE, WallpaperManager.class,
                 new CachedServiceFetcher<WallpaperManager>() {
             @Override
-            public WallpaperManager createService(ContextImpl ctx) {
-                return new WallpaperManager(ctx.getOuterContext(),
+            public WallpaperManager createService(ContextImpl ctx)
+                    throws ServiceNotFoundException {
+                final IBinder b;
+                if (ctx.getApplicationInfo().targetSdkVersion >= Build.VERSION_CODES.P) {
+                    b = ServiceManager.getServiceOrThrow(Context.WALLPAPER_SERVICE);
+                } else {
+                    b = ServiceManager.getService(Context.WALLPAPER_SERVICE);
+                }
+                IWallpaperManager service = IWallpaperManager.Stub.asInterface(b);
+                return new WallpaperManager(service, ctx.getOuterContext(),
                         ctx.mMainThread.getHandler());
             }});
 
