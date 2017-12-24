@@ -71,7 +71,8 @@ struct AndroidManifest {
 };
 
 struct AndroidSdk {
-  Maybe<int> min_sdk_version;
+  std::string label;
+  int min_sdk_version;  // min_sdk_version is mandatory if splitting by SDK.
   Maybe<int> target_sdk_version;
   Maybe<int> max_sdk_version;
   Maybe<AndroidManifest> manifest;
@@ -113,15 +114,19 @@ struct OutputArtifact {
   Maybe<AndroidSdk> android_sdk;
   std::vector<DeviceFeature> features;
   std::vector<GlTexture> textures;
+
+  inline int GetMinSdk(int default_value = -1) const {
+    if (!android_sdk) {
+      return default_value;
+    }
+    return android_sdk.value().min_sdk_version;
+  }
 };
 
 }  // namespace configuration
 
 // Forward declaration of classes used in the API.
 struct IDiagnostics;
-namespace xml {
-class Element;
-}
 
 /**
  * XML configuration file parser for the split and optimize commands.
@@ -133,8 +138,8 @@ class ConfigurationParser {
   static Maybe<ConfigurationParser> ForPath(const std::string& path);
 
   /** Returns a ConfigurationParser for the configuration in the provided file contents. */
-  static ConfigurationParser ForContents(const std::string& contents) {
-    ConfigurationParser parser{contents};
+  static ConfigurationParser ForContents(const std::string& contents, const std::string& path) {
+    ConfigurationParser parser{contents, path};
     return parser;
   }
 
@@ -156,7 +161,7 @@ class ConfigurationParser {
    * diagnostics context. The default diagnostics context can be overridden with a call to
    * WithDiagnostics(IDiagnostics *).
    */
-  explicit ConfigurationParser(std::string contents);
+  ConfigurationParser(std::string contents, const std::string& config_path);
 
   /** Returns the current diagnostics context to any subclasses. */
   IDiagnostics* diagnostics() {
@@ -166,6 +171,8 @@ class ConfigurationParser {
  private:
   /** The contents of the configuration file to parse. */
   const std::string contents_;
+  /** Path to the input configuration. */
+  const std::string config_path_;
   /** The diagnostics context to send messages to. */
   IDiagnostics* diag_;
 };

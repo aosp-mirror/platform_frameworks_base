@@ -16,7 +16,10 @@
 
 package com.android.internal.os;
 
+import android.util.SparseIntArray;
+
 import java.util.ArrayList;
+import java.util.concurrent.Future;
 
 /**
  * Mocks a BatteryStatsImpl object.
@@ -33,6 +36,7 @@ public class MockBatteryStatsImpl extends BatteryStatsImpl {
         mScreenDozeTimer = new BatteryStatsImpl.StopwatchTimer(clocks, null, -1, null,
                 mOnBatteryTimeBase);
         mBluetoothScanTimer = new StopwatchTimer(mClocks, null, -14, null, mOnBatteryTimeBase);
+        setExternalStatsSyncLocked(new DummyExternalStatsSync());
     }
 
     MockBatteryStatsImpl() {
@@ -78,6 +82,11 @@ public class MockBatteryStatsImpl extends BatteryStatsImpl {
         return this;
     }
 
+    public MockBatteryStatsImpl setKernelSingleUidTimeReader(KernelSingleUidTimeReader reader) {
+        mKernelSingleUidTimeReader = reader;
+        return this;
+    }
+
     public MockBatteryStatsImpl setKernelCpuSpeedReaders(KernelCpuSpeedReader[] readers) {
         mKernelCpuSpeedReaders = readers;
         return this;
@@ -101,6 +110,33 @@ public class MockBatteryStatsImpl extends BatteryStatsImpl {
     public MockBatteryStatsImpl setOnBatteryInternal(boolean onBatteryInternal) {
         mOnBatteryInternal = onBatteryInternal;
         return this;
+    }
+
+    public SparseIntArray getPendingUids() {
+        return mPendingUids;
+    }
+
+    private class DummyExternalStatsSync implements ExternalStatsSync {
+        @Override
+        public Future<?> scheduleSync(String reason, int flags) {
+            return null;
+        }
+
+        @Override
+        public Future<?> scheduleCpuSyncDueToRemovedUid(int uid) {
+            return null;
+        }
+
+        @Override
+        public Future<?> scheduleReadProcStateCpuTimes() {
+            return null;
+        }
+
+        @Override
+        public Future<?> scheduleCopyFromAllUidsCpuTimes() {
+            return null;
+        }
+
     }
 }
 

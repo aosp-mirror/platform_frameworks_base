@@ -16,6 +16,8 @@
 
 package com.android.server.locksettings.recoverablekeystore;
 
+import static junit.framework.Assert.fail;
+
 import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
@@ -23,13 +25,20 @@ import static org.junit.Assert.assertFalse;
 import android.support.test.filters.SmallTest;
 import android.support.test.runner.AndroidJUnit4;
 
+import com.google.common.collect.ImmutableMap;
+
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
 import java.nio.charset.StandardCharsets;
+import java.security.KeyPair;
 import java.security.MessageDigest;
 import java.util.Arrays;
+import java.util.Map;
+import java.util.Random;
 
+import javax.crypto.AEADBadTagException;
+import javax.crypto.KeyGenerator;
 import javax.crypto.SecretKey;
 
 @SmallTest
@@ -39,6 +48,15 @@ public class KeySyncUtilsTest {
     private static final int THM_KF_HASH_SIZE = 256;
     private static final int KEY_CLAIMANT_LENGTH_BYTES = 16;
     private static final String SHA_256_ALGORITHM = "SHA-256";
+    private static final String APPLICATION_KEY_ALGORITHM = "AES";
+    private static final byte[] LOCK_SCREEN_HASH_1 =
+            utf8Bytes("g09TEvo6XqVdNaYdRggzn5w2C5rCeE1F");
+    private static final byte[] LOCK_SCREEN_HASH_2 =
+            utf8Bytes("snQzsbvclkSsG6PwasAp1oFLzbq3KtFe");
+    private static final byte[] RECOVERY_CLAIM_HEADER =
+            "V1 KF_claim".getBytes(StandardCharsets.UTF_8);
+    private static final byte[] RECOVERY_RESPONSE_HEADER =
+            "V1 reencrypted_recovery_key".getBytes(StandardCharsets.UTF_8);
 
     @Test
     public void calculateThmKfHash_isShaOfLockScreenHashWithPrefix() throws Exception {
@@ -97,6 +115,233 @@ public class KeySyncUtilsTest {
                         utf8Bytes("!")));
     }
 
+    @Test
+    public void decryptApplicationKey_decryptsAnApplicationKeyEncryptedWithSecureBox()
+            throws Exception {
+        String alias = "phoebe";
+        SecretKey recoveryKey = KeySyncUtils.generateRecoveryKey();
+        SecretKey applicationKey = generateApplicationKey();
+        Map<String, byte[]> encryptedKeys =
+                KeySyncUtils.encryptKeysWithRecoveryKey(
+                        recoveryKey, ImmutableMap.of(alias, applicationKey));
+        byte[] encryptedKey = encryptedKeys.get(alias);
+
+        byte[] keyMaterial =
+                KeySyncUtils.decryptApplicationKey(recoveryKey.getEncoded(), encryptedKey);
+
+        assertArrayEquals(applicationKey.getEncoded(), keyMaterial);
+    }
+
+    @Test
+    public void decryptApplicationKey_throwsIfUnableToDecrypt() throws Exception {
+        String alias = "casper";
+        Map<String, byte[]> encryptedKeys =
+                KeySyncUtils.encryptKeysWithRecoveryKey(
+                        KeySyncUtils.generateRecoveryKey(),
+                        ImmutableMap.of("casper", generateApplicationKey()));
+        byte[] encryptedKey = encryptedKeys.get(alias);
+
+        try {
+            KeySyncUtils.decryptApplicationKey(
+                    KeySyncUtils.generateRecoveryKey().getEncoded(), encryptedKey);
+            fail("Did not throw decrypting with bad key.");
+        } catch (AEADBadTagException error) {
+            // expected
+        }
+    }
+
+    @Test
+    public void decryptRecoveryKey_decryptsALocallyEncryptedKey() throws Exception {
+        SecretKey recoveryKey = KeySyncUtils.generateRecoveryKey();
+        byte[] encrypted = KeySyncUtils.locallyEncryptRecoveryKey(
+                LOCK_SCREEN_HASH_1, recoveryKey);
+
+        byte[] keyMaterial = KeySyncUtils.decryptRecoveryKey(LOCK_SCREEN_HASH_1, encrypted);
+
+        assertArrayEquals(recoveryKey.getEncoded(), keyMaterial);
+    }
+
+    @Test
+    public void decryptRecoveryKey_throwsIfCannotDecrypt() throws Exception {
+        SecretKey recoveryKey = KeySyncUtils.generateRecoveryKey();
+        byte[] encrypted = KeySyncUtils.locallyEncryptRecoveryKey(LOCK_SCREEN_HASH_1, recoveryKey);
+
+        try {
+            KeySyncUtils.decryptRecoveryKey(LOCK_SCREEN_HASH_2, encrypted);
+            fail("Did not throw decrypting with bad key.");
+        } catch (AEADBadTagException error) {
+            // expected
+        }
+    }
+
+    @Test
+    public void decryptRecoveryClaimResponse_decryptsAValidResponse() throws Exception {
+        byte[] keyClaimant = KeySyncUtils.generateKeyClaimant();
+        byte[] vaultParams = randomBytes(100);
+        byte[] recoveryKey = randomBytes(32);
+        byte[] encryptedPayload = SecureBox.encrypt(
+                /*theirPublicKey=*/ null,
+                /*sharedSecret=*/ keyClaimant,
+                /*header=*/ KeySyncUtils.concat(RECOVERY_RESPONSE_HEADER, vaultParams),
+                /*payload=*/ recoveryKey);
+
+        byte[] decrypted = KeySyncUtils.decryptRecoveryClaimResponse(
+                keyClaimant, vaultParams, encryptedPayload);
+
+        assertArrayEquals(recoveryKey, decrypted);
+    }
+
+    @Test
+    public void decryptRecoveryClaimResponse_throwsIfCannotDecrypt() throws Exception {
+        byte[] vaultParams = randomBytes(100);
+        byte[] recoveryKey = randomBytes(32);
+        byte[] encryptedPayload = SecureBox.encrypt(
+                /*theirPublicKey=*/ null,
+                /*sharedSecret=*/ KeySyncUtils.generateKeyClaimant(),
+                /*header=*/ KeySyncUtils.concat(RECOVERY_RESPONSE_HEADER, vaultParams),
+                /*payload=*/ recoveryKey);
+
+        try {
+            KeySyncUtils.decryptRecoveryClaimResponse(
+                    KeySyncUtils.generateKeyClaimant(), vaultParams, encryptedPayload);
+            fail("Did not throw decrypting with bad keyClaimant");
+        } catch (AEADBadTagException error) {
+            // expected
+        }
+    }
+
+    @Test
+    public void encryptRecoveryClaim_encryptsLockScreenAndKeyClaimant() throws Exception {
+        KeyPair keyPair = SecureBox.genKeyPair();
+        byte[] keyClaimant = KeySyncUtils.generateKeyClaimant();
+        byte[] challenge = randomBytes(32);
+        byte[] vaultParams = randomBytes(100);
+
+        byte[] encryptedRecoveryClaim = KeySyncUtils.encryptRecoveryClaim(
+                keyPair.getPublic(),
+                vaultParams,
+                challenge,
+                LOCK_SCREEN_HASH_1,
+                keyClaimant);
+
+        byte[] decrypted = SecureBox.decrypt(
+                keyPair.getPrivate(),
+                /*sharedSecret=*/ null,
+                /*header=*/ KeySyncUtils.concat(RECOVERY_CLAIM_HEADER, vaultParams, challenge),
+                encryptedRecoveryClaim);
+        assertArrayEquals(KeySyncUtils.concat(LOCK_SCREEN_HASH_1, keyClaimant), decrypted);
+    }
+
+    @Test
+    public void encryptRecoveryClaim_cannotBeDecryptedWithoutChallenge() throws Exception {
+        KeyPair keyPair = SecureBox.genKeyPair();
+        byte[] keyClaimant = KeySyncUtils.generateKeyClaimant();
+        byte[] vaultParams = randomBytes(100);
+
+        byte[] encryptedRecoveryClaim = KeySyncUtils.encryptRecoveryClaim(
+                keyPair.getPublic(),
+                vaultParams,
+                /*challenge=*/ randomBytes(32),
+                LOCK_SCREEN_HASH_1,
+                keyClaimant);
+
+        try {
+            SecureBox.decrypt(
+                    keyPair.getPrivate(),
+                    /*sharedSecret=*/ null,
+                    /*header=*/ KeySyncUtils.concat(
+                            RECOVERY_CLAIM_HEADER, vaultParams, randomBytes(32)),
+                    encryptedRecoveryClaim);
+            fail("Should throw if challenge is incorrect.");
+        } catch (AEADBadTagException e) {
+            // expected
+        }
+    }
+
+    @Test
+    public void encryptRecoveryClaim_cannotBeDecryptedWithoutCorrectSecretKey() throws Exception {
+        byte[] keyClaimant = KeySyncUtils.generateKeyClaimant();
+        byte[] challenge = randomBytes(32);
+        byte[] vaultParams = randomBytes(100);
+
+        byte[] encryptedRecoveryClaim = KeySyncUtils.encryptRecoveryClaim(
+                SecureBox.genKeyPair().getPublic(),
+                vaultParams,
+                challenge,
+                LOCK_SCREEN_HASH_1,
+                keyClaimant);
+
+        try {
+            SecureBox.decrypt(
+                    SecureBox.genKeyPair().getPrivate(),
+                    /*sharedSecret=*/ null,
+                    /*header=*/ KeySyncUtils.concat(
+                            RECOVERY_CLAIM_HEADER, vaultParams, challenge),
+                    encryptedRecoveryClaim);
+            fail("Should throw if secret key is incorrect.");
+        } catch (AEADBadTagException e) {
+            // expected
+        }
+    }
+
+    @Test
+    public void encryptRecoveryClaim_cannotBeDecryptedWithoutCorrectVaultParams() throws Exception {
+        KeyPair keyPair = SecureBox.genKeyPair();
+        byte[] keyClaimant = KeySyncUtils.generateKeyClaimant();
+        byte[] challenge = randomBytes(32);
+
+        byte[] encryptedRecoveryClaim = KeySyncUtils.encryptRecoveryClaim(
+                keyPair.getPublic(),
+                /*vaultParams=*/ randomBytes(100),
+                challenge,
+                LOCK_SCREEN_HASH_1,
+                keyClaimant);
+
+        try {
+            SecureBox.decrypt(
+                    keyPair.getPrivate(),
+                    /*sharedSecret=*/ null,
+                    /*header=*/ KeySyncUtils.concat(
+                            RECOVERY_CLAIM_HEADER, randomBytes(100), challenge),
+                    encryptedRecoveryClaim);
+            fail("Should throw if vault params is incorrect.");
+        } catch (AEADBadTagException e) {
+            // expected
+        }
+    }
+
+    @Test
+    public void encryptRecoveryClaim_cannotBeDecryptedWithoutCorrectHeader() throws Exception {
+        KeyPair keyPair = SecureBox.genKeyPair();
+        byte[] keyClaimant = KeySyncUtils.generateKeyClaimant();
+        byte[] challenge = randomBytes(32);
+        byte[] vaultParams = randomBytes(100);
+
+        byte[] encryptedRecoveryClaim = KeySyncUtils.encryptRecoveryClaim(
+                keyPair.getPublic(),
+                vaultParams,
+                challenge,
+                LOCK_SCREEN_HASH_1,
+                keyClaimant);
+
+        try {
+            SecureBox.decrypt(
+                    keyPair.getPrivate(),
+                    /*sharedSecret=*/ null,
+                    /*header=*/ KeySyncUtils.concat(randomBytes(10), vaultParams, challenge),
+                    encryptedRecoveryClaim);
+            fail("Should throw if header is incorrect.");
+        } catch (AEADBadTagException e) {
+            // expected
+        }
+    }
+
+    private static byte[] randomBytes(int n) {
+        byte[] bytes = new byte[n];
+        new Random().nextBytes(bytes);
+        return bytes;
+    }
+
     private static byte[] utf8Bytes(String s) {
         return s.getBytes(StandardCharsets.UTF_8);
     }
@@ -105,5 +350,11 @@ public class KeySyncUtilsTest {
         MessageDigest messageDigest = MessageDigest.getInstance(SHA_256_ALGORITHM);
         messageDigest.update(bytes);
         return messageDigest.digest();
+    }
+
+    private static SecretKey generateApplicationKey() throws Exception {
+        KeyGenerator keyGenerator = KeyGenerator.getInstance(APPLICATION_KEY_ALGORITHM);
+        keyGenerator.init(/*keySize=*/ 256);
+        return keyGenerator.generateKey();
     }
 }

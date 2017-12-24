@@ -38,7 +38,8 @@ import java.util.List;
  * It is the responsibility of the host to take care of the Fragment's lifecycle.
  * The methods provided by {@link FragmentController} are for that purpose.
  *
- * @deprecated Use {@link android.support.v4.app.FragmentController}
+ * @deprecated Use the <a href="{@docRoot}tools/extras/support-library.html">Support Library</a>
+ *      {@link android.support.v4.app.FragmentController}
  */
 @Deprecated
 public class FragmentController {

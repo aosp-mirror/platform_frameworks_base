@@ -66,11 +66,19 @@ public class KernelUidCpuFreqTimeReader {
     // start reading) and if it is not available, we simply ignore further read requests.
     private static final int TOTAL_READ_ERROR_COUNT = 5;
     private int mReadErrorCounter;
-    private boolean mProcFileAvailable;
     private boolean mPerClusterTimesAvailable;
+    private boolean mAllUidTimesAvailable = true;
 
     public boolean perClusterTimesAvailable() {
         return mPerClusterTimesAvailable;
+    }
+
+    public boolean allUidTimesAvailable() {
+        return mAllUidTimesAvailable;
+    }
+
+    public SparseArray<long[]> getAllUidCpuFreqTimeMs() {
+        return mLastUidCpuFreqTimeMs;
     }
 
     public long[] readFreqs(@NonNull PowerProfile powerProfile) {
@@ -80,15 +88,16 @@ public class KernelUidCpuFreqTimeReader {
             // No need to read cpu freqs more than once.
             return mCpuFreqs;
         }
-        if (!mProcFileAvailable && mReadErrorCounter >= TOTAL_READ_ERROR_COUNT) {
+        if (!mAllUidTimesAvailable) {
             return null;
         }
         final int oldMask = StrictMode.allowThreadDiskReadsMask();
         try (BufferedReader reader = new BufferedReader(new FileReader(UID_TIMES_PROC_FILE))) {
-            mProcFileAvailable = true;
             return readFreqs(reader, powerProfile);
         } catch (IOException e) {
-            mReadErrorCounter++;
+            if (++mReadErrorCounter >= TOTAL_READ_ERROR_COUNT) {
+                mAllUidTimesAvailable = false;
+            }
             Slog.e(TAG, "Failed to read " + UID_TIMES_PROC_FILE + ": " + e);
             return null;
         } finally {
@@ -107,7 +116,7 @@ public class KernelUidCpuFreqTimeReader {
     }
 
     public void readDelta(@Nullable Callback callback) {
-        if (!mProcFileAvailable) {
+        if (mCpuFreqs == null) {
             return;
         }
         final int oldMask = StrictMode.allowThreadDiskReadsMask();

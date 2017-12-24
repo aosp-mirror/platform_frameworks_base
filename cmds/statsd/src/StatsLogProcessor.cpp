@@ -114,7 +114,8 @@ void StatsLogProcessor::OnLogEvent(const LogEvent& msg) {
 
 void StatsLogProcessor::OnConfigUpdated(const ConfigKey& key, const StatsdConfig& config) {
     ALOGD("Updated configuration for key %s", key.ToString().c_str());
-    unique_ptr<MetricsManager> newMetricsManager = std::make_unique<MetricsManager>(key, config, mTimeBaseSec);
+
+    sp<MetricsManager> newMetricsManager = new MetricsManager(key, config, mTimeBaseSec, mUidMap);
 
     auto it = mMetricsManagers.find(key);
     if (it == mMetricsManagers.end() && mMetricsManagers.size() > StatsdStats::kMaxConfigCount) {
@@ -125,7 +126,12 @@ void StatsLogProcessor::OnConfigUpdated(const ConfigKey& key, const StatsdConfig
     if (newMetricsManager->isConfigValid()) {
         mUidMap->OnConfigUpdated(key);
         newMetricsManager->setAnomalyMonitor(mAnomalyMonitor);
-        mMetricsManagers[key] = std::move(newMetricsManager);
+        if (config.log_source().package().size() > 0) {
+            // We have to add listener after the MetricsManager is constructed because it's
+            // not safe to create wp or sp from this pointer inside its constructor.
+            mUidMap->addListener(newMetricsManager.get());
+        }
+        mMetricsManagers[key] = newMetricsManager;
         // Why doesn't this work? mMetricsManagers.insert({key, std::move(newMetricsManager)});
         VLOG("StatsdConfig valid");
     } else {

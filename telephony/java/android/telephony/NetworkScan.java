@@ -19,50 +19,92 @@ package android.telephony;
 import android.content.Context;
 import android.os.RemoteException;
 import android.os.ServiceManager;
+import android.annotation.IntDef;
 import android.util.Log;
 
 import com.android.internal.telephony.ITelephony;
 
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
+
 /**
- * Allows applications to request the system to perform a network scan.
- *
- * The caller of {@link #requestNetworkScan(NetworkScanRequest, NetworkScanCallback)} will
- * receive a NetworkScan which contains the callback method to stop the scan requested.
- * @hide
+ * The caller of
+ * {@link TelephonyManager#requestNetworkScan(NetworkScanRequest, NetworkScanCallback)}
+ * will receive an instance of {@link NetworkScan}, which contains a callback method
+ * {@link #stop()} for stopping the in-progress scan.
  */
 public class NetworkScan {
 
-    public static final String TAG = "NetworkScan";
+    private static final String TAG = "NetworkScan";
 
     // Below errors are mapped from RadioError which is returned from RIL. We will consolidate
     // RadioErrors during the mapping if those RadioErrors mean no difference to the users.
+
+    /**
+     * Defines acceptable values of scan error code.
+     * @hide
+     */
+    @Retention(RetentionPolicy.SOURCE)
+    @IntDef({ERROR_MODEM_ERROR, ERROR_INVALID_SCAN, ERROR_MODEM_UNAVAILABLE, ERROR_UNSUPPORTED,
+            ERROR_RADIO_INTERFACE_ERROR, ERROR_INVALID_SCANID, ERROR_INTERRUPTED})
+    public @interface ScanErrorCode {}
+
+    /**
+     * The RIL has successfully performed the network scan.
+     */
     public static final int SUCCESS = 0;                    // RadioError:NONE
+
+    /**
+     * The scan has failed due to some modem errors.
+     */
     public static final int ERROR_MODEM_ERROR = 1;          // RadioError:RADIO_NOT_AVAILABLE
                                                             // RadioError:NO_MEMORY
                                                             // RadioError:INTERNAL_ERR
                                                             // RadioError:MODEM_ERR
                                                             // RadioError:OPERATION_NOT_ALLOWED
+
+    /**
+     * The parameters of the scan is invalid.
+     */
     public static final int ERROR_INVALID_SCAN = 2;         // RadioError:INVALID_ARGUMENTS
-    public static final int ERROR_MODEM_BUSY = 3;           // RadioError:DEVICE_IN_USE
+
+    /**
+     * The modem can not perform the scan because it is doing something else.
+     */
+    public static final int ERROR_MODEM_UNAVAILABLE = 3;    // RadioError:DEVICE_IN_USE
+
+    /**
+     * The modem does not support the request scan.
+     */
     public static final int ERROR_UNSUPPORTED = 4;          // RadioError:REQUEST_NOT_SUPPORTED
 
+
     // Below errors are generated at the Telephony.
-    public static final int ERROR_RIL_ERROR = 10000;        // Nothing or only exception is
-                                                            // returned from RIL.
-    public static final int ERROR_INVALID_SCANID = 10001;   // The scanId is invalid. The user is
-                                                            // either trying to stop a scan which
-                                                            // does not exist or started by others.
-    public static final int ERROR_INTERRUPTED = 10002;      // Scan was interrupted by another scan
-                                                            // with higher priority.
+
+    /**
+     * The RIL returns nothing or exceptions.
+     */
+    public static final int ERROR_RADIO_INTERFACE_ERROR = 10000;
+
+    /**
+     * The scan ID is invalid. The user is either trying to stop a scan which does not exist
+     * or started by others.
+     */
+    public static final int ERROR_INVALID_SCANID = 10001;
+
+    /**
+     * The scan has been interrupted by another scan with higher priority.
+     */
+    public static final int ERROR_INTERRUPTED = 10002;
+
     private final int mScanId;
     private final int mSubId;
 
     /**
      * Stops the network scan
      *
-     * This is the callback method to stop an ongoing scan. When user requests a new scan,
-     * a NetworkScan object will be returned, and the user can stop the scan by calling this
-     * method.
+     * Use this method to stop an ongoing scan. When user requests a new scan, a {@link NetworkScan}
+     * object will be returned, and the user can stop the scan by calling this method.
      */
     public void stop() throws RemoteException {
         try {

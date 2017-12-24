@@ -530,10 +530,13 @@ public final class AutofillManager {
      * @return whether autofill is enabled for the current user.
      */
     public boolean isEnabled() {
-        if (!hasAutofillFeature() || isDisabledByService()) {
+        if (!hasAutofillFeature()) {
             return false;
         }
         synchronized (mLock) {
+            if (isDisabledByServiceLocked()) {
+                return false;
+            }
             ensureServiceClientAddedIfNeededLocked();
             return mEnabled;
         }
@@ -605,19 +608,16 @@ public final class AutofillManager {
     }
 
     private boolean shouldIgnoreViewEnteredLocked(@NonNull View view, int flags) {
-        if (isDisabledByService()) {
+        if (isDisabledByServiceLocked()) {
             if (sVerbose) {
                 Log.v(TAG, "ignoring notifyViewEntered(flags=" + flags + ", view=" + view
                         + ") on state " + getStateAsStringLocked());
             }
             return true;
         }
-        if (mState == STATE_FINISHED && (flags & FLAG_MANUAL_REQUEST) == 0) {
-            if (sVerbose) {
-                Log.v(TAG, "ignoring notifyViewEntered(flags=" + flags + ", view=" + view
-                        + ") on state " + getStateAsStringLocked());
-            }
-            return true;
+        if (sVerbose && isFinishedLocked()) {
+            Log.v(TAG, "not ignoring notifyViewEntered(flags=" + flags + ", view=" + view
+                    + ") on state " + getStateAsStringLocked());
         }
         return false;
     }
@@ -1009,6 +1009,21 @@ public final class AutofillManager {
     }
 
     /**
+     * Returns the component name of the {@link AutofillService} that is enabled for the current
+     * user.
+     */
+    @Nullable
+    public ComponentName getAutofillServiceComponentName() {
+        if (mService == null) return null;
+
+        try {
+            return mService.getAutofillServiceComponentName();
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    /**
      * Gets the user data used for
      * <a href="AutofillService.html#FieldClassification">field classification</a>.
      *
@@ -1139,10 +1154,10 @@ public final class AutofillManager {
             Log.v(TAG, "startSessionLocked(): id=" + id + ", bounds=" + bounds + ", value=" + value
                     + ", flags=" + flags + ", state=" + getStateAsStringLocked());
         }
-        if (mState != STATE_UNKNOWN && (flags & FLAG_MANUAL_REQUEST) == 0) {
+        if (mState != STATE_UNKNOWN && !isFinishedLocked() && (flags & FLAG_MANUAL_REQUEST) == 0) {
             if (sVerbose) {
                 Log.v(TAG, "not automatically starting session for " + id
-                        + " on state " + getStateAsStringLocked());
+                        + " on state " + getStateAsStringLocked() + " and flags " + flags);
             }
             return;
         }
@@ -1744,8 +1759,12 @@ public final class AutofillManager {
         return mState == STATE_ACTIVE;
     }
 
-    private boolean isDisabledByService() {
+    private boolean isDisabledByServiceLocked() {
         return mState == STATE_DISABLED_BY_SERVICE;
+    }
+
+    private boolean isFinishedLocked() {
+        return mState == STATE_FINISHED;
     }
 
     private void post(Runnable runnable) {

@@ -16,6 +16,7 @@
 #define DEBUG true  // STOPSHIP if true
 #include "Log.h"
 #include "MetricsManager.h"
+#include "statslog.h"
 
 #include "CountMetricProducer.h"
 #include "condition/CombinationConditionTracker.h"
@@ -44,11 +45,36 @@ namespace statsd {
 
 const int FIELD_ID_METRICS = 1;
 
-MetricsManager::MetricsManager(const ConfigKey& key, const StatsdConfig& config, const long timeBaseSec) : mConfigKey(key) {
+MetricsManager::MetricsManager(const ConfigKey& key, const StatsdConfig& config,
+                               const long timeBaseSec, sp<UidMap> uidMap)
+    : mConfigKey(key), mUidMap(uidMap) {
     mConfigValid =
             initStatsdConfig(key, config, timeBaseSec, mTagIds, mAllAtomMatchers, mAllConditionTrackers,
                              mAllMetricProducers, mAllAnomalyTrackers, mConditionToMetricMap,
                              mTrackerToMetricMap, mTrackerToConditionMap);
+
+    if (!config.has_log_source()) {
+        // TODO(b/70794411): uncomment the following line and remove the hard coded log source
+        // after all configs have the log source added.
+        // mConfigValid = false;
+        // ALOGE("Log source white list is empty! This config won't get any data.");
+
+        mAllowedUid.push_back(1000);
+        mAllowedUid.push_back(0);
+        mAllowedLogSources.insert(mAllowedUid.begin(), mAllowedUid.end());
+    } else {
+        mAllowedUid.insert(mAllowedUid.begin(), config.log_source().uid().begin(),
+                           config.log_source().uid().end());
+        mAllowedPkg.insert(mAllowedPkg.begin(), config.log_source().package().begin(),
+                           config.log_source().package().end());
+
+        if (mAllowedUid.size() + mAllowedPkg.size() > StatsdStats::kMaxLogSourceCount) {
+            ALOGE("Too many log sources. This is likely to be an error in the config.");
+            mConfigValid = false;
+        } else {
+            initLogSourceWhiteList();
+        }
+    }
 
     // Guardrail. Reject the config if it's too big.
     if (mAllMetricProducers.size() > StatsdStats::kMaxMetricCountPerConfig ||
@@ -69,8 +95,51 @@ MetricsManager::~MetricsManager() {
     VLOG("~MetricsManager()");
 }
 
+void MetricsManager::initLogSourceWhiteList() {
+    std::lock_guard<std::mutex> lock(mAllowedLogSourcesMutex);
+    mAllowedLogSources.clear();
+    mAllowedLogSources.insert(mAllowedUid.begin(), mAllowedUid.end());
+
+    for (const auto& pkg : mAllowedPkg) {
+        auto uids = mUidMap->getAppUid(pkg);
+        mAllowedLogSources.insert(uids.begin(), uids.end());
+    }
+    if (DEBUG) {
+        for (const auto& uid : mAllowedLogSources) {
+            VLOG("Allowed uid %d", uid);
+        }
+    }
+}
+
 bool MetricsManager::isConfigValid() const {
     return mConfigValid;
+}
+
+void MetricsManager::notifyAppUpgrade(const string& apk, const int uid, const int64_t version) {
+    // check if we care this package
+    if (std::find(mAllowedPkg.begin(), mAllowedPkg.end(), apk) == mAllowedPkg.end()) {
+        return;
+    }
+    // We will re-initialize the whole list because we don't want to keep the multi mapping of
+    // UID<->pkg inside MetricsManager to reduce the memory usage.
+    initLogSourceWhiteList();
+}
+
+void MetricsManager::notifyAppRemoved(const string& apk, const int uid) {
+    // check if we care this package
+    if (std::find(mAllowedPkg.begin(), mAllowedPkg.end(), apk) == mAllowedPkg.end()) {
+        return;
+    }
+    // We will re-initialize the whole list because we don't want to keep the multi mapping of
+    // UID<->pkg inside MetricsManager to reduce the memory usage.
+    initLogSourceWhiteList();
+}
+
+void MetricsManager::onUidMapReceived() {
+    if (mAllowedPkg.size() == 0) {
+        return;
+    }
+    initLogSourceWhiteList();
 }
 
 void MetricsManager::onDumpReport(ProtoOutputStream* protoOutput) {
@@ -90,6 +159,14 @@ void MetricsManager::onDumpReport(ProtoOutputStream* protoOutput) {
 void MetricsManager::onLogEvent(const LogEvent& event) {
     if (!mConfigValid) {
         return;
+    }
+
+    if (event.GetTagId() != android::util::APP_HOOK) {
+        std::lock_guard<std::mutex> lock(mAllowedLogSourcesMutex);
+        if (mAllowedLogSources.find(event.GetUid()) == mAllowedLogSources.end()) {
+            VLOG("log source %d not on the whitelist", event.GetUid());
+            return;
+        }
     }
 
     int tagId = event.GetTagId();

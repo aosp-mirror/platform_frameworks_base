@@ -65,7 +65,6 @@ import android.service.autofill.SaveInfo;
 import android.service.autofill.SaveRequest;
 import android.service.autofill.UserData;
 import android.service.autofill.ValueFinder;
-import android.service.autofill.EditDistanceScorer;
 import android.service.autofill.FieldClassification;
 import android.util.ArrayMap;
 import android.util.ArraySet;
@@ -500,6 +499,8 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
     @Override
     public void onFillRequestSuccess(int requestFlags, @Nullable FillResponse response,
             @NonNull String servicePackageName) {
+        final AutofillId[] fieldClassificationIds;
+
         synchronized (mLock) {
             if (mDestroyed) {
                 Slog.w(TAG, "Call to Session#onFillRequestSuccess() rejected - session: "
@@ -510,13 +511,13 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
                 processNullResponseLocked(requestFlags);
                 return;
             }
-        }
 
-        final AutofillId[] fieldClassificationIds = response.getFieldClassificationIds();
-        if (fieldClassificationIds != null && !mService.isFieldClassificationEnabled()) {
-            Slog.w(TAG, "Ignoring " + response + " because field detection is disabled");
-            processNullResponseLocked(requestFlags);
-            return;
+            fieldClassificationIds = response.getFieldClassificationIds();
+            if (fieldClassificationIds != null && !mService.isFieldClassificationEnabledLocked()) {
+                Slog.w(TAG, "Ignoring " + response + " because field detection is disabled");
+                processNullResponseLocked(requestFlags);
+                return;
+            }
         }
 
         mService.setLastResponse(id, response);
@@ -905,7 +906,15 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
      * Generates a {@link android.service.autofill.FillEventHistory.Event#TYPE_CONTEXT_COMMITTED}
      * when necessary.
      */
-    public void logContextCommittedLocked() {
+    public void logContextCommitted() {
+        mHandlerCaller.getHandler().post(() -> {
+            synchronized (mLock) {
+                logContextCommittedLocked();
+            }
+        });
+    }
+
+    private void logContextCommittedLocked() {
         final FillResponse lastResponse = getLastResponseLocked("logContextCommited()");
         if (lastResponse == null) return;
 
@@ -1114,7 +1123,7 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
             }
         }
 
-        mService.logContextCommitted(id, mClientState, mSelectedDatasetIds, ignoredDatasets,
+        mService.logContextCommittedLocked(id, mClientState, mSelectedDatasetIds, ignoredDatasets,
                 changedFieldIds, changedDatasetIds,
                 manuallyFilledFieldIds, manuallyFilledDatasetIds,
                 detectedFieldIds, detectedFieldClassifications, mComponentName.getPackageName());
@@ -1358,7 +1367,10 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
                 }
 
                 if (sDebug) Slog.d(TAG, "Good news, everyone! All checks passed, show save UI!");
-                mService.logSaveShown(id, mClientState);
+
+                // Use handler so logContextCommitted() is logged first
+                mHandlerCaller.getHandler().post(() -> mService.logSaveShown(id, mClientState));
+
                 final IAutoFillManagerClient client = getClient();
                 mPendingSaveUi = new PendingUi(mActivityToken, id, client);
                 getUiForShowing().showSaveUi(mService.getServiceLabel(), mService.getServiceIcon(),
@@ -1558,7 +1570,7 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
      *
      * <p>A new request will be started in 2 scenarios:
      * <ol>
-     *   <li>If the user manually requested autofill after the view was already filled.
+     *   <li>If the user manually requested autofill.
      *   <li>If the view is part of a new partition.
      * </ol>
      *
@@ -1566,14 +1578,10 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
      * @param viewState The view that is entered.
      * @param flags The flag that was passed by the AutofillManager.
      */
-    private void requestNewFillResponseIfNecessaryLocked(@NonNull AutofillId id,
+    private void requestNewFillResponseOnViewEnteredIfNecessaryLocked(@NonNull AutofillId id,
             @NonNull ViewState viewState, int flags) {
-        // First check if this is a manual request after view was autofilled.
-        final int state = viewState.getState();
-        final boolean restart = (state & STATE_AUTOFILLED) != 0
-                && (flags & FLAG_MANUAL_REQUEST) != 0;
-        if (restart) {
-            if (sDebug) Slog.d(TAG, "Re-starting session on view  " + id);
+        if ((flags & FLAG_MANUAL_REQUEST) != 0) {
+            if (sDebug) Slog.d(TAG, "Re-starting session on view " + id + " and flags " + flags);
             viewState.setState(STATE_RESTARTED_SESSION);
             requestNewFillResponseLocked(flags);
             return;
@@ -1728,7 +1736,7 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
                 if (sVerbose && virtualBounds != null) {
                     Slog.v(TAG, "entered on virtual child " + id + ": " + virtualBounds);
                 }
-                requestNewFillResponseIfNecessaryLocked(id, viewState, flags);
+                requestNewFillResponseOnViewEnteredIfNecessaryLocked(id, viewState, flags);
 
                 // Remove the UI if the ViewState has changed.
                 if (mCurrentViewId != viewState.id) {

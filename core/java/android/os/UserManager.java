@@ -194,6 +194,21 @@ public class UserManager {
     public static final String DISALLOW_SHARE_LOCATION = "no_share_location";
 
     /**
+     * Specifies if airplane mode is disallowed on the device.
+     *
+     * <p> This restriction can only be set by the device owner and the profile owner on the
+     * primary user and it applies globally - i.e. it disables airplane mode on the entire device.
+     * <p>The default value is <code>false</code>.
+     *
+     * <p>Key for user restrictions.
+     * <p>Type: Boolean
+     * @see DevicePolicyManager#addUserRestriction(ComponentName, String)
+     * @see DevicePolicyManager#clearUserRestriction(ComponentName, String)
+     * @see #getUserRestrictions()
+     */
+    public static final String DISALLOW_AIRPLANE_MODE = "no_airplane_mode";
+
+    /**
      * Specifies if a user is disallowed from enabling the
      * "Unknown Sources" setting, that allows installation of apps from unknown sources.
      * The default value is <code>false</code>.
@@ -333,6 +348,28 @@ public class UserManager {
      * @see #getUserRestrictions()
      */
     public static final String DISALLOW_CONFIG_VPN = "no_config_vpn";
+
+    /**
+     * Specifies if a user is disallowed from configuring location mode. Device owner and profile
+     * owners can set this restriction and it only applies on the managed user.
+     *
+     * <p>In a managed profile, location sharing is forced off when it's off on primary user, so
+     * user can still turn off location sharing on managed profile when the restriction is set by
+     * profile owner on managed profile.
+     *
+     * <p>This user restriction is different from {@link #DISALLOW_SHARE_LOCATION},
+     * as the device owner or profile owner can still enable or disable location mode via
+     * {@link DevicePolicyManager#setSecureSetting} when this restriction is on.
+     *
+     * <p>The default value is <code>false</code>.
+     *
+     * <p>Key for user restrictions.
+     * <p>Type: Boolean
+     * @see DevicePolicyManager#addUserRestriction(ComponentName, String)
+     * @see DevicePolicyManager#clearUserRestriction(ComponentName, String)
+     * @see #getUserRestrictions()
+     */
+    public static final String DISALLOW_CONFIG_LOCATION_MODE = "no_config_location_mode";
 
     /**
      * Specifies if date, time and timezone configuring is disallowed.
@@ -2130,15 +2167,46 @@ public class UserManager {
     }
 
     /**
-     * Set quiet mode of a managed profile.
+     * Enables or disables quiet mode for a managed profile. If quiet mode is enabled, apps in a
+     * managed profile don't run, generate notifications, or consume data or battery.
+     * <p>
+     * If a user's credential is needed to turn off quiet mode, a confirm credential screen will be
+     * shown to the user.
+     * <p>
+     * The change may not happen instantly, however apps can listen for
+     * {@link Intent#ACTION_MANAGED_PROFILE_AVAILABLE} and
+     * {@link Intent#ACTION_MANAGED_PROFILE_UNAVAILABLE} broadcasts in order to be notified of
+     * the change of the quiet mode. Apps can also check the current state of quiet mode by
+     * calling {@link #isQuietModeEnabled(UserHandle)}.
+     * <p>
+     * The caller must either be the foreground default launcher or have one of these permissions:
+     * {@code MANAGE_USERS} or {@code MODIFY_QUIET_MODE}.
      *
-     * @param userHandle The user handle of the profile.
-     * @param enableQuietMode Whether quiet mode should be enabled or disabled.
+     * @param enableQuietMode whether quiet mode should be enabled or disabled
+     * @param userHandle user handle of the profile
+     * @return {@code false} if user's credential is needed in order to turn off quiet mode,
+     *         {@code true} otherwise
+     * @throws SecurityException if the caller is invalid
+     * @throws IllegalArgumentException if {@code userHandle} is not a managed profile
+     *
+     * @see #isQuietModeEnabled(UserHandle)
+     */
+    public boolean trySetQuietModeEnabled(boolean enableQuietMode, @NonNull UserHandle userHandle) {
+        return trySetQuietModeEnabled(enableQuietMode, userHandle, null);
+    }
+
+    /**
+     * Similar to {@link #trySetQuietModeEnabled(boolean, UserHandle)}, except you can specify
+     * a target to start when user is unlocked.
+     *
+     * @see {@link #trySetQuietModeEnabled(boolean, UserHandle)}
      * @hide
      */
-    public void setQuietModeEnabled(@UserIdInt int userHandle, boolean enableQuietMode) {
+    public boolean trySetQuietModeEnabled(
+            boolean enableQuietMode, @NonNull UserHandle userHandle, IntentSender target) {
         try {
-            mService.setQuietModeEnabled(userHandle, enableQuietMode, null);
+            return mService.trySetQuietModeEnabled(
+                    mContext.getPackageName(), enableQuietMode, userHandle.getIdentifier(), target);
         } catch (RemoteException re) {
             throw re.rethrowFromSystemServer();
         }
@@ -2154,27 +2222,6 @@ public class UserManager {
     public boolean isQuietModeEnabled(UserHandle userHandle) {
         try {
             return mService.isQuietModeEnabled(userHandle.getIdentifier());
-        } catch (RemoteException re) {
-            throw re.rethrowFromSystemServer();
-        }
-    }
-
-    /**
-     * Tries disabling quiet mode for a given user. If the user is still locked, we unlock the user
-     * first by showing the confirm credentials screen and disable quiet mode upon successful
-     * unlocking. If the user is already unlocked, we call through to {@link #setQuietModeEnabled}
-     * directly.
-     *
-     * @param userHandle The user that is going to disable quiet mode.
-     * @param target The target to launch when the user is unlocked.
-     * @return {@code true} if quiet mode is disabled without showing confirm credentials screen,
-     *         {@code false} otherwise.
-     * @hide
-     */
-    public boolean trySetQuietModeDisabled(
-            @UserIdInt int userHandle, @Nullable IntentSender target) {
-        try {
-            return mService.trySetQuietModeDisabled(userHandle, target);
         } catch (RemoteException re) {
             throw re.rethrowFromSystemServer();
         }

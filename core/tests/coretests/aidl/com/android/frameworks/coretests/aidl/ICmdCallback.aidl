@@ -17,5 +17,5 @@
 package com.android.frameworks.coretests.aidl;
 
 interface ICmdCallback {
-    void onActivityLaunched(IBinder receiver);
+    void onLaunched(IBinder receiver);
 }

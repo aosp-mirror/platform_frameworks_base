@@ -16,20 +16,15 @@
 
 package com.android.server.locksettings.recoverablekeystore;
 
-import android.security.keystore.AndroidKeyStoreSecretKey;
-import android.security.keystore.KeyProperties;
-import android.security.keystore.KeyProtection;
-import android.util.Log;
+import com.android.server.locksettings.recoverablekeystore.storage.RecoverableKeyStoreDb;
 
-import java.io.IOException;
 import java.security.InvalidKeyException;
 import java.security.KeyStoreException;
 import java.security.NoSuchAlgorithmException;
-import java.security.UnrecoverableEntryException;
+import java.util.Locale;
 
 import javax.crypto.KeyGenerator;
 import javax.crypto.SecretKey;
-import javax.security.auth.DestroyFailedException;
 
 /**
  * Generates keys and stores them both in AndroidKeyStore and on disk, in wrapped form.
@@ -41,40 +36,34 @@ import javax.security.auth.DestroyFailedException;
  * @hide
  */
 public class RecoverableKeyGenerator {
-    private static final String TAG = "RecoverableKeyGenerator";
+    private static final int RESULT_CANNOT_INSERT_ROW = -1;
     private static final String KEY_GENERATOR_ALGORITHM = "AES";
     private static final int KEY_SIZE_BITS = 256;
 
     /**
      * A new {@link RecoverableKeyGenerator} instance.
      *
-     * @param platformKey Secret key used to wrap generated keys before persisting to disk.
-     * @param recoverableKeyStorage Class that manages persisting wrapped keys to disk.
      * @throws NoSuchAlgorithmException if "AES" key generation or "AES/GCM/NoPadding" cipher is
      *     unavailable. Should never happen.
      *
      * @hide
      */
-    public static RecoverableKeyGenerator newInstance(
-            PlatformEncryptionKey platformKey, RecoverableKeyStorage recoverableKeyStorage)
+    public static RecoverableKeyGenerator newInstance(RecoverableKeyStoreDb database)
             throws NoSuchAlgorithmException {
         // NB: This cannot use AndroidKeyStore as the provider, as we need access to the raw key
         // material, so that it can be synced to disk in encrypted form.
         KeyGenerator keyGenerator = KeyGenerator.getInstance(KEY_GENERATOR_ALGORITHM);
-        return new RecoverableKeyGenerator(keyGenerator, platformKey, recoverableKeyStorage);
+        return new RecoverableKeyGenerator(keyGenerator, database);
     }
 
     private final KeyGenerator mKeyGenerator;
-    private final RecoverableKeyStorage mRecoverableKeyStorage;
-    private final PlatformEncryptionKey mPlatformKey;
+    private final RecoverableKeyStoreDb mDatabase;
 
     private RecoverableKeyGenerator(
             KeyGenerator keyGenerator,
-            PlatformEncryptionKey platformKey,
-            RecoverableKeyStorage recoverableKeyStorage) {
+            RecoverableKeyStoreDb recoverableKeyStoreDb) {
         mKeyGenerator = keyGenerator;
-        mRecoverableKeyStorage = recoverableKeyStorage;
-        mPlatformKey = platformKey;
+        mDatabase = recoverableKeyStoreDb;
     }
 
     /**
@@ -84,50 +73,32 @@ public class RecoverableKeyGenerator {
      * persisted to disk so that it can be synced remotely, and then recovered on another device.
      * The generated key allows encrypt/decrypt only using AES/GCM/NoPadding.
      *
-     * <p>The key handle returned to the caller is a reference to the AndroidKeyStore key,
-     * meaning that the caller is never able to access the raw, unencrypted key.
-     *
-     * @param alias The alias by which the key will be known in AndroidKeyStore.
+     * @param platformKey The user's platform key, with which to wrap the generated key.
+     * @param userId The user ID of the profile to which the calling app belongs.
+     * @param uid The uid of the application that will own the key.
+     * @param alias The alias by which the key will be known in the recoverable key store.
+     * @throws RecoverableKeyStorageException if there is some error persisting the key either to
+     *     the database.
+     * @throws KeyStoreException if there is a KeyStore error wrapping the generated key.
      * @throws InvalidKeyException if the platform key cannot be used to wrap keys.
-     * @throws IOException if there was an issue writing the wrapped key to the wrapped key store.
-     * @throws UnrecoverableEntryException if could not retrieve key after putting it in
-     *     AndroidKeyStore. This should not happen.
-     * @return A handle to the AndroidKeyStore key.
      *
      * @hide
      */
-    public SecretKey generateAndStoreKey(String alias) throws KeyStoreException,
-            InvalidKeyException, IOException, UnrecoverableEntryException {
+    public byte[] generateAndStoreKey(
+            PlatformEncryptionKey platformKey, int userId, int uid, String alias)
+            throws RecoverableKeyStorageException, KeyStoreException, InvalidKeyException {
         mKeyGenerator.init(KEY_SIZE_BITS);
         SecretKey key = mKeyGenerator.generateKey();
 
-        mRecoverableKeyStorage.importIntoAndroidKeyStore(
-                alias,
-                key,
-                new KeyProtection.Builder(
-                        KeyProperties.PURPOSE_ENCRYPT | KeyProperties.PURPOSE_DECRYPT)
-                        .setBlockModes(KeyProperties.BLOCK_MODE_GCM)
-                        .setEncryptionPaddings(KeyProperties.ENCRYPTION_PADDING_NONE)
-                        .build());
-        WrappedKey wrappedKey = WrappedKey.fromSecretKey(mPlatformKey, key);
+        WrappedKey wrappedKey = WrappedKey.fromSecretKey(platformKey, key);
+        long result = mDatabase.insertKey(userId, uid, alias, wrappedKey);
 
-        try {
-            // Keep raw key material in memory for minimum possible time.
-            key.destroy();
-        } catch (DestroyFailedException e) {
-            Log.w(TAG, "Could not destroy SecretKey.");
+        if (result == RESULT_CANNOT_INSERT_ROW) {
+            throw new RecoverableKeyStorageException(
+                    String.format(
+                            Locale.US, "Failed writing (%d, %s) to database.", uid, alias));
         }
 
-        mRecoverableKeyStorage.persistToDisk(alias, wrappedKey);
-
-        try {
-            // Reload from the keystore, so that the caller is only provided with the handle of the
-            // key, not the raw key material.
-            return mRecoverableKeyStorage.loadFromAndroidKeyStore(alias);
-        } catch (NoSuchAlgorithmException e) {
-            throw new RuntimeException(
-                    "Impossible: NoSuchAlgorithmException when attempting to retrieve a key "
-                            + "that has only just been stored in AndroidKeyStore.", e);
-        }
+        return key.getEncoded();
     }
 }

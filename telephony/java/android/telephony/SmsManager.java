@@ -344,6 +344,7 @@ public final class SmsManager {
      * </p>
      *
      * <p>Requires Permission:
+     * {@link android.Manifest.permission#SEND_SMS} and
      * {@link android.Manifest.permission#MODIFY_PHONE_STATE} or the calling app has carrier
      * privileges.
      * </p>
@@ -351,6 +352,10 @@ public final class SmsManager {
      * @see #sendTextMessage(String, String, String, PendingIntent, PendingIntent)
      */
     @SystemApi
+    @RequiresPermission(allOf = {
+            android.Manifest.permission.MODIFY_PHONE_STATE,
+            android.Manifest.permission.SEND_SMS
+    })
     public void sendTextMessageWithoutPersisting(
             String destinationAddress, String scAddress, String text,
             PendingIntent sentIntent, PendingIntent deliveryIntent) {
@@ -1129,6 +1134,8 @@ public final class SmsManager {
 
     // SMS send failure result codes
 
+    /** No error. {@hide}*/
+    static public final int RESULT_ERROR_NONE    = 0;
     /** Generic failure cause */
     static public final int RESULT_ERROR_GENERIC_FAILURE    = 1;
     /** Failed because radio was explicitly turned off */

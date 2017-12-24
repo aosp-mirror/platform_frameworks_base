@@ -290,11 +290,11 @@ public class CollectionUtils {
             if (cur instanceof ArraySet) {
                 ArraySet<T> arraySet = (ArraySet<T>) cur;
                 for (int i = 0; i < size; i++) {
-                    action.accept(arraySet.valueAt(i));
+                    action.acceptOrThrow(arraySet.valueAt(i));
                 }
             } else {
                 for (T t : cur) {
-                    action.accept(t);
+                    action.acceptOrThrow(t);
                 }
             }
         } catch (Exception e) {

@@ -57,6 +57,11 @@ struct ManifestFixerOptions {
   // The version codename of the framework being compiled against to set for
   // 'android:compileSdkVersionCodename' in the <manifest> tag.
   Maybe<std::string> compile_sdk_version_codename;
+
+  // Wether validation errors should be treated only as warnings. If this is 'true', then an
+  // incorrect node will not result in an error, but only as a warning, and the parsing will
+  // continue.
+  bool warn_validation = false;
 };
 
 // Verifies that the manifest is correctly formed and inserts defaults where specified with

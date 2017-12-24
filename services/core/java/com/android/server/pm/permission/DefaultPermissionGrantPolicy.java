@@ -640,9 +640,9 @@ public final class DefaultPermissionGrantPolicy {
             if (globalSearchPickerPackage != null
                     && doesPackageSupportRuntimePermissions(globalSearchPickerPackage)) {
                 grantRuntimePermissions(globalSearchPickerPackage,
-                    MICROPHONE_PERMISSIONS, true, userId);
+                    MICROPHONE_PERMISSIONS, false, userId);
                 grantRuntimePermissions(globalSearchPickerPackage,
-                    LOCATION_PERMISSIONS, true, userId);
+                    LOCATION_PERMISSIONS, false, userId);
             }
         }
 

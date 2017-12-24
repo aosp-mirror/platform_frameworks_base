@@ -32,6 +32,7 @@ import android.hardware.camera2.TotalCaptureResult;
 import android.hardware.camera2.params.InputConfiguration;
 import android.hardware.camera2.params.OutputConfiguration;
 import android.hardware.camera2.params.ReprocessFormatsMap;
+import android.hardware.camera2.params.SessionConfiguration;
 import android.hardware.camera2.params.StreamConfigurationMap;
 import android.hardware.camera2.utils.SubmitInfo;
 import android.hardware.camera2.utils.SurfaceUtils;
@@ -362,7 +363,7 @@ public class CameraDeviceImpl extends CameraDevice
             outputConfigs.add(new OutputConfiguration(s));
         }
         configureStreamsChecked(/*inputConfig*/null, outputConfigs,
-                /*operatingMode*/ICameraDeviceUser.NORMAL_MODE);
+                /*operatingMode*/ICameraDeviceUser.NORMAL_MODE, /*sessionParams*/ null);
 
     }
 
@@ -382,12 +383,13 @@ public class CameraDeviceImpl extends CameraDevice
      * @param outputs a list of one or more surfaces, or {@code null} to unconfigure
      * @param operatingMode If the stream configuration is for a normal session,
      *     a constrained high speed session, or something else.
+     * @param sessionParams Session parameters.
      * @return whether or not the configuration was successful
      *
      * @throws CameraAccessException if there were any unexpected problems during configuration
      */
     public boolean configureStreamsChecked(InputConfiguration inputConfig,
-            List<OutputConfiguration> outputs, int operatingMode)
+            List<OutputConfiguration> outputs, int operatingMode, CaptureRequest sessionParams)
                     throws CameraAccessException {
         // Treat a null input the same an empty list
         if (outputs == null) {
@@ -463,7 +465,11 @@ public class CameraDeviceImpl extends CameraDevice
                     }
                 }
 
-                mRemoteDevice.endConfigure(operatingMode);
+                if (sessionParams != null) {
+                    mRemoteDevice.endConfigure(operatingMode, sessionParams.getNativeCopy());
+                } else {
+                    mRemoteDevice.endConfigure(operatingMode, null);
+                }
 
                 success = true;
             } catch (IllegalArgumentException e) {
@@ -499,7 +505,7 @@ public class CameraDeviceImpl extends CameraDevice
             outConfigurations.add(new OutputConfiguration(surface));
         }
         createCaptureSessionInternal(null, outConfigurations, callback, handler,
-                /*operatingMode*/ICameraDeviceUser.NORMAL_MODE);
+                /*operatingMode*/ICameraDeviceUser.NORMAL_MODE, /*sessionParams*/ null);
     }
 
     @Override
@@ -515,7 +521,7 @@ public class CameraDeviceImpl extends CameraDevice
         List<OutputConfiguration> currentOutputs = new ArrayList<>(outputConfigurations);
 
         createCaptureSessionInternal(null, currentOutputs, callback, handler,
-                /*operatingMode*/ICameraDeviceUser.NORMAL_MODE);
+                /*operatingMode*/ICameraDeviceUser.NORMAL_MODE, /*sessionParams*/null);
     }
 
     @Override
@@ -535,7 +541,7 @@ public class CameraDeviceImpl extends CameraDevice
             outConfigurations.add(new OutputConfiguration(surface));
         }
         createCaptureSessionInternal(inputConfig, outConfigurations, callback, handler,
-                /*operatingMode*/ICameraDeviceUser.NORMAL_MODE);
+                /*operatingMode*/ICameraDeviceUser.NORMAL_MODE, /*sessionParams*/ null);
     }
 
     @Override
@@ -563,7 +569,8 @@ public class CameraDeviceImpl extends CameraDevice
             currentOutputs.add(new OutputConfiguration(output));
         }
         createCaptureSessionInternal(inputConfig, currentOutputs,
-                callback, handler, /*operatingMode*/ICameraDeviceUser.NORMAL_MODE);
+                callback, handler, /*operatingMode*/ICameraDeviceUser.NORMAL_MODE,
+                /*sessionParams*/ null);
     }
 
     @Override
@@ -574,16 +581,13 @@ public class CameraDeviceImpl extends CameraDevice
             throw new IllegalArgumentException(
                     "Output surface list must not be null and the size must be no more than 2");
         }
-        StreamConfigurationMap config =
-                getCharacteristics().get(CameraCharacteristics.SCALER_STREAM_CONFIGURATION_MAP);
-        SurfaceUtils.checkConstrainedHighSpeedSurfaces(outputs, /*fpsRange*/null, config);
-
         List<OutputConfiguration> outConfigurations = new ArrayList<>(outputs.size());
         for (Surface surface : outputs) {
             outConfigurations.add(new OutputConfiguration(surface));
         }
         createCaptureSessionInternal(null, outConfigurations, callback, handler,
-                /*operatingMode*/ICameraDeviceUser.CONSTRAINED_HIGH_SPEED_MODE);
+                /*operatingMode*/ICameraDeviceUser.CONSTRAINED_HIGH_SPEED_MODE,
+                /*sessionParams*/ null);
     }
 
     @Override
@@ -596,13 +600,30 @@ public class CameraDeviceImpl extends CameraDevice
         for (OutputConfiguration output : outputs) {
             currentOutputs.add(new OutputConfiguration(output));
         }
-        createCaptureSessionInternal(inputConfig, currentOutputs, callback, handler, operatingMode);
+        createCaptureSessionInternal(inputConfig, currentOutputs, callback, handler, operatingMode,
+                /*sessionParams*/ null);
+    }
+
+    @Override
+    public void createCaptureSession(SessionConfiguration config)
+            throws CameraAccessException {
+        if (config == null) {
+            throw new IllegalArgumentException("Invalid session configuration");
+        }
+
+        List<OutputConfiguration> outputConfigs = config.getOutputConfigurations();
+        if (outputConfigs == null) {
+            throw new IllegalArgumentException("Invalid output configurations");
+        }
+        createCaptureSessionInternal(config.getInputConfiguration(), outputConfigs,
+                config.getStateCallback(), config.getHandler(), config.getSessionType(),
+                config.getSessionParameters());
     }
 
     private void createCaptureSessionInternal(InputConfiguration inputConfig,
             List<OutputConfiguration> outputConfigurations,
             CameraCaptureSession.StateCallback callback, Handler handler,
-            int operatingMode) throws CameraAccessException {
+            int operatingMode, CaptureRequest sessionParams) throws CameraAccessException {
         synchronized(mInterfaceLock) {
             if (DEBUG) {
                 Log.d(TAG, "createCaptureSessionInternal");
@@ -630,7 +651,7 @@ public class CameraDeviceImpl extends CameraDevice
             try {
                 // configure streams and then block until IDLE
                 configureSuccess = configureStreamsChecked(inputConfig, outputConfigurations,
-                        operatingMode);
+                        operatingMode, sessionParams);
                 if (configureSuccess == true && inputConfig != null) {
                     input = mRemoteDevice.getInputSurface();
                 }
@@ -646,6 +667,14 @@ public class CameraDeviceImpl extends CameraDevice
             // Fire onConfigured if configureOutputs succeeded, fire onConfigureFailed otherwise.
             CameraCaptureSessionCore newSession = null;
             if (isConstrainedHighSpeed) {
+                ArrayList<Surface> surfaces = new ArrayList<>(outputConfigurations.size());
+                for (OutputConfiguration outConfig : outputConfigurations) {
+                    surfaces.add(outConfig.getSurface());
+                }
+                StreamConfigurationMap config =
+                    getCharacteristics().get(CameraCharacteristics.SCALER_STREAM_CONFIGURATION_MAP);
+                SurfaceUtils.checkConstrainedHighSpeedSurfaces(surfaces, /*fpsRange*/null, config);
+
                 newSession = new CameraConstrainedHighSpeedCaptureSessionImpl(mNextSessionId++,
                         callback, handler, this, mDeviceHandler, configureSuccess,
                         mCharacteristics);
@@ -779,6 +808,7 @@ public class CameraDeviceImpl extends CameraDevice
             }
 
             mRemoteDevice.updateOutputConfiguration(streamId, config);
+            mConfiguredOutputs.put(streamId, config);
         }
     }
 
@@ -828,6 +858,7 @@ public class CameraDeviceImpl extends CameraDevice
                             + " must have at least 1 surface");
                 }
                 mRemoteDevice.finalizeOutputConfigurations(streamId, config);
+                mConfiguredOutputs.put(streamId, config);
             }
         }
     }
@@ -950,9 +981,18 @@ public class CameraDeviceImpl extends CameraDevice
             SubmitInfo requestInfo;
 
             CaptureRequest[] requestArray = requestList.toArray(new CaptureRequest[requestList.size()]);
+            // Convert Surface to streamIdx and surfaceIdx
+            for (CaptureRequest request : requestArray) {
+                request.convertSurfaceToStreamId(mConfiguredOutputs);
+            }
+
             requestInfo = mRemoteDevice.submitRequestList(requestArray, repeating);
             if (DEBUG) {
                 Log.v(TAG, "last frame number " + requestInfo.getLastFrameNumber());
+            }
+
+            for (CaptureRequest request : requestArray) {
+                request.recoverStreamIdToSurface();
             }
 
             if (callback != null) {

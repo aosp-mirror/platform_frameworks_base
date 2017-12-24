@@ -2690,9 +2690,6 @@ public class DevicePolicyManager {
      * @see #getPasswordBlacklistName
      * @see #isActivePasswordSufficient
      * @see #resetPasswordWithToken
-     *
-     * TODO(63578054): unhide for P
-     * @hide
      */
     public boolean setPasswordBlacklist(@NonNull ComponentName admin, @Nullable String name,
             @Nullable List<String> blacklist) {
@@ -2712,9 +2709,6 @@ public class DevicePolicyManager {
      * @return the name of the blacklist or {@code null} if no blacklist is set
      *
      * @see #setPasswordBlacklist
-     *
-     * TODO(63578054): unhide for P
-     * @hide
      */
     public @Nullable String getPasswordBlacklistName(@NonNull ComponentName admin) {
         try {
@@ -3205,23 +3199,6 @@ public class DevicePolicyManager {
         if (mService != null) {
             try {
                 return mService.getMaximumTimeToLock(admin, userHandle, mParentInstance);
-            } catch (RemoteException e) {
-                throw e.rethrowFromSystemServer();
-            }
-        }
-        return 0;
-    }
-
-    /**
-     * Returns maximum time to lock that applied by all profiles in this user. We do this because we
-     * do not have a separate timeout to lock for work challenge only.
-     *
-     * @hide
-     */
-    public long getMaximumTimeToLockForUserAndProfiles(int userHandle) {
-        if (mService != null) {
-            try {
-                return mService.getMaximumTimeToLockForUserAndProfiles(userHandle);
             } catch (RemoteException e) {
                 throw e.rethrowFromSystemServer();
             }

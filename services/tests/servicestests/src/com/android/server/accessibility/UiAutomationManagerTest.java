@@ -59,7 +59,7 @@ public class UiAutomationManagerTest {
     @Mock AccessibilityServiceInfo mMockServiceInfo;
     @Mock ResolveInfo mMockResolveInfo;
     @Mock AccessibilityManagerService.SecurityPolicy mMockSecurityPolicy;
-    @Mock AccessibilityClientConnection.SystemSupport mMockSystemSupport;
+    @Mock AbstractAccessibilityServiceConnection.SystemSupport mMockSystemSupport;
     @Mock WindowManagerInternal mMockWindowManagerInternal;
     @Mock GlobalActionPerformer mMockGlobalActionPerformer;
     @Mock IBinder mMockOwner;

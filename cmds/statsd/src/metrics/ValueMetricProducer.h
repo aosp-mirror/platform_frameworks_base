@@ -47,12 +47,6 @@ public:
 
     void onDataPulled(const std::vector<std::shared_ptr<LogEvent>>& data) override;
 
-    // TODO: Implement this later.
-    virtual void notifyAppUpgrade(const string& apk, const int uid, const int64_t version)
-            override{};
-    // TODO: Implement this later.
-    virtual void notifyAppRemoved(const string& apk, const int uid) override{};
-
 protected:
     void onMatchedLogEventInternalLocked(
             const size_t matcherIndex, const HashableDimensionKey& eventKey,

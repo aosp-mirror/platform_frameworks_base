@@ -16,6 +16,7 @@
 
 package android.app.admin;
 
+import android.annotation.UserIdInt;
 import android.content.Intent;
 
 import java.util.List;
@@ -115,4 +116,11 @@ public abstract class DevicePolicyManagerInternal {
      * device owner to be affiliated with.
      */
     public abstract boolean isUserAffiliatedWithDevice(int userId);
+
+    /**
+     * Reports that a profile has changed to use a unified or separate credential.
+     *
+     * @param userId User ID of the profile.
+     */
+    public abstract void reportSeparateProfileChallengeChanged(@UserIdInt int userId);
 }

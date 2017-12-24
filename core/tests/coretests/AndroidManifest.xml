@@ -1051,7 +1051,7 @@
             </intent-filter>
         </activity>
 
-        <activity android:name=".menus.MenuLayoutPortrait" android:label="MenuLayoutPortrait"
+        <activity android:name="android.view.menu.MenuLayoutPortrait" android:label="MenuLayoutPortrait"
                 android:screenOrientation="portrait">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />

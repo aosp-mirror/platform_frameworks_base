@@ -63,7 +63,7 @@ public final class Slice implements Parcelable {
             HINT_ACTIONS,
             HINT_SELECTED,
             HINT_NO_TINT,
-            HINT_HIDDEN,
+            HINT_SHORTCUT,
             HINT_TOGGLE,
             HINT_HORIZONTAL,
             HINT_PARTIAL,
@@ -118,12 +118,10 @@ public final class Slice implements Parcelable {
      */
     public static final String HINT_NO_TINT     = "no_tint";
     /**
-     * Hint to indicate that this content should not be shown in larger renderings
-     * of Slices. This content may be used to populate the shortcut/icon
-     * format of the slice.
-     * @hide
+     * Hint to indicate that this content should only be displayed if the slice is presented
+     * as a shortcut.
      */
-    public static final String HINT_HIDDEN = "hidden";
+    public static final String HINT_SHORTCUT = "shortcut";
     /**
      * Hint indicating this content should be shown instead of the normal content when the slice
      * is in small format.
@@ -182,6 +180,10 @@ public final class Slice implements Parcelable {
      * which can be retrieved to see the new state of the toggle.
      */
     public static final String SUBTYPE_TOGGLE = "toggle";
+    /**
+     * Subtype to tag an item representing priority.
+     */
+    public static final String SUBTYPE_PRIORITY = "priority";
 
     private final SliceItem[] mItems;
     private final @SliceHint String[] mHints;

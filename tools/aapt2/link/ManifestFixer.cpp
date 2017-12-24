@@ -430,7 +430,10 @@ bool ManifestFixer::Consume(IAaptContext* context, xml::XmlResource* doc) {
     return false;
   }
 
-  if (!executor.Execute(xml::XmlActionExecutorPolicy::kWhitelist, context->GetDiagnostics(), doc)) {
+  xml::XmlActionExecutorPolicy policy = options_.warn_validation
+                                            ? xml::XmlActionExecutorPolicy::kWhitelistWarning
+                                            : xml::XmlActionExecutorPolicy::kWhitelist;
+  if (!executor.Execute(policy, context->GetDiagnostics(), doc)) {
     return false;
   }
 

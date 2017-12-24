@@ -158,7 +158,7 @@ private:
     /**
      * Print the mapping of uids to package names.
      */
-    status_t cmd_print_uid_map(FILE* out);
+    status_t cmd_print_uid_map(FILE* out, const Vector<String8>& args);
 
     /**
      * Flush the data to disk.

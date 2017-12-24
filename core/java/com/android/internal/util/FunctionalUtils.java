@@ -16,6 +16,9 @@
 
 package com.android.internal.util;
 
+import android.os.RemoteException;
+
+import java.util.function.Consumer;
 import java.util.function.Supplier;
 
 /**
@@ -23,6 +26,21 @@ import java.util.function.Supplier;
  */
 public class FunctionalUtils {
     private FunctionalUtils() {}
+
+    /**
+     * Converts a lambda expression that throws a checked exception(s) into a regular
+     * {@link Consumer} by propagating any checked exceptions as {@link RuntimeException}
+     */
+    public static <T> Consumer<T> uncheckExceptions(ThrowingConsumer<T> action) {
+        return action;
+    }
+
+    /**
+     *
+     */
+    public static <T> Consumer<T> ignoreRemoteException(RemoteExceptionIgnoringConsumer<T> action) {
+        return action;
+    }
 
     /**
      * An equivalent of {@link Runnable} that allows throwing checked exceptions
@@ -47,13 +65,43 @@ public class FunctionalUtils {
     }
 
     /**
-     * An equivalent of {@link java.util.function.Consumer} that allows throwing checked exceptions
+     * A {@link Consumer} that allows throwing checked exceptions from its single abstract method.
      *
-     * This can be used to specify a lambda argument without forcing all the checked exceptions
-     * to be handled within it
+     * Can be used together with {@link #uncheckExceptions} to effectively turn a lambda expression
+     * that throws a checked exception into a regular {@link Consumer}
      */
     @FunctionalInterface
-    public interface ThrowingConsumer<T> {
-        void accept(T t) throws Exception;
+    @SuppressWarnings("FunctionalInterfaceMethodChanged")
+    public interface ThrowingConsumer<T> extends Consumer<T> {
+        void acceptOrThrow(T t) throws Exception;
+
+        @Override
+        default void accept(T t) {
+            try {
+                acceptOrThrow(t);
+            } catch (Exception ex) {
+                throw new RuntimeException(ex);
+            }
+        }
+    }
+
+    /**
+     * A {@link Consumer} that automatically ignores any {@link RemoteException}s.
+     *
+     * Used by {@link #ignoreRemoteException}
+     */
+    @FunctionalInterface
+    @SuppressWarnings("FunctionalInterfaceMethodChanged")
+    public interface RemoteExceptionIgnoringConsumer<T> extends Consumer<T> {
+        void acceptOrThrow(T t) throws RemoteException;
+
+        @Override
+        default void accept(T t) {
+            try {
+                acceptOrThrow(t);
+            } catch (RemoteException ex) {
+                // ignore
+            }
+        }
     }
 }

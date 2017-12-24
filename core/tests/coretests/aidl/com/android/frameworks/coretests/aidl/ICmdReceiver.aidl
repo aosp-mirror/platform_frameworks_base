@@ -18,5 +18,6 @@ package com.android.frameworks.coretests.aidl;
 
 interface ICmdReceiver {
     void doSomeWork(int durationMs);
+    void showApplicationOverlay();
     void finishHost();
 }

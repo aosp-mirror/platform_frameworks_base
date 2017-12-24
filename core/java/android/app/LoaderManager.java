@@ -55,14 +55,16 @@ import java.lang.reflect.Modifier;
  * <a href="{@docRoot}guide/topics/fundamentals/loaders.html">Loaders</a> developer guide.</p>
  * </div>
  *
- * @deprecated Use {@link android.support.v4.app.LoaderManager}
+ * @deprecated Use the <a href="{@docRoot}tools/extras/support-library.html">Support Library</a>
+ *      {@link android.support.v4.app.LoaderManager}
  */
 @Deprecated
 public abstract class LoaderManager {
     /**
      * Callback interface for a client to interact with the manager.
      *
-     * @deprecated Use {@link android.support.v4.app.LoaderManager.LoaderCallbacks}
+     * @deprecated Use the <a href="{@docRoot}tools/extras/support-library.html">
+     *      Support Library</a> {@link android.support.v4.app.LoaderManager.LoaderCallbacks}
      */
     @Deprecated
     public interface LoaderCallbacks<D> {

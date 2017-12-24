@@ -32,6 +32,9 @@ public:
 
     // Notify interested listeners that the given apk and uid combination no longer exits.
     virtual void notifyAppRemoved(const std::string& apk, const int uid) = 0;
+
+    // Notify the listener that the UidMap snapshot is available.
+    virtual void onUidMapReceived() = 0;
 };
 
 }  // namespace statsd

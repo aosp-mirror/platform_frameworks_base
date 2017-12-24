@@ -29,6 +29,11 @@ class RecoverableKeyStoreDbContract {
         static final String TABLE_NAME = "keys";
 
         /**
+         * The user id of the profile the application is running under.
+         */
+        static final String COLUMN_NAME_USER_ID = "user_id";
+
+        /**
          * The uid of the application that generated the key.
          */
         static final String COLUMN_NAME_UID = "uid";
@@ -57,6 +62,11 @@ class RecoverableKeyStoreDbContract {
          * Timestamp of when this key was last synced with remote storage, or -1 if never synced.
          */
         static final String COLUMN_NAME_LAST_SYNCED_AT = "last_synced_at";
+
+        /**
+         * Status of the key sync {@code RecoverableKeyStoreLoader#setRecoveryStatus}
+         */
+        static final String COLUMN_NAME_RECOVERY_STATUS = "recovery_status";
     }
 
     /**
@@ -75,5 +85,32 @@ class RecoverableKeyStoreDbContract {
          * is used to wrap recoverable keys on disk.
          */
         static final String COLUMN_NAME_PLATFORM_KEY_GENERATION_ID = "platform_key_generation_id";
+    }
+
+    /**
+     * Table holding metadata of the recovery service.
+     */
+    static class RecoveryServiceMetadataEntry implements BaseColumns {
+        static final String TABLE_NAME = "recovery_service_metadata";
+
+        /**
+         * The user id of the profile the application is running under.
+         */
+        static final String COLUMN_NAME_USER_ID = "user_id";
+
+        /**
+         * The uid of the application that initializes the local recovery components.
+         */
+        static final String COLUMN_NAME_UID = "uid";
+
+        /**
+         * The public key of the recovery service.
+         */
+        static final String COLUMN_NAME_PUBLIC_KEY = "public_key";
+
+        /**
+         * The server parameters of the recovery service.
+         */
+        static final String COLUMN_NAME_SERVER_PARAMETERS = "server_parameters";
     }
 }

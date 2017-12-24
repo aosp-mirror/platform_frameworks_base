@@ -16,8 +16,8 @@
 
 package android.app.servertransaction;
 
+import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.LinkedList;
 import java.util.Map;
 
 /**
@@ -27,7 +27,7 @@ import java.util.Map;
 class ObjectPool {
 
     private static final Object sPoolSync = new Object();
-    private static final Map<Class, LinkedList<? extends ObjectPoolItem>> sPoolMap =
+    private static final Map<Class, ArrayList<? extends ObjectPoolItem>> sPoolMap =
             new HashMap<>();
 
     private static final int MAX_POOL_SIZE = 50;
@@ -40,9 +40,9 @@ class ObjectPool {
     public static <T extends ObjectPoolItem> T obtain(Class<T> itemClass) {
         synchronized (sPoolSync) {
             @SuppressWarnings("unchecked")
-            LinkedList<T> itemPool = (LinkedList<T>) sPoolMap.get(itemClass);
+            final ArrayList<T> itemPool = (ArrayList<T>) sPoolMap.get(itemClass);
             if (itemPool != null && !itemPool.isEmpty()) {
-                return itemPool.poll();
+                return itemPool.remove(itemPool.size() - 1);
             }
             return null;
         }
@@ -56,16 +56,20 @@ class ObjectPool {
     public static <T extends ObjectPoolItem> void recycle(T item) {
         synchronized (sPoolSync) {
             @SuppressWarnings("unchecked")
-            LinkedList<T> itemPool = (LinkedList<T>) sPoolMap.get(item.getClass());
+            ArrayList<T> itemPool = (ArrayList<T>) sPoolMap.get(item.getClass());
             if (itemPool == null) {
-                itemPool = new LinkedList<>();
+                itemPool = new ArrayList<>();
                 sPoolMap.put(item.getClass(), itemPool);
             }
-            if (itemPool.contains(item)) {
-                throw new IllegalStateException("Trying to recycle already recycled item");
+            // Check if the item is already in the pool
+            final int size = itemPool.size();
+            for (int i = 0; i < size; i++) {
+                if (itemPool.get(i) == item) {
+                    throw new IllegalStateException("Trying to recycle already recycled item");
+                }
             }
 
-            if (itemPool.size() < MAX_POOL_SIZE) {
+            if (size < MAX_POOL_SIZE) {
                 itemPool.add(item);
             }
         }

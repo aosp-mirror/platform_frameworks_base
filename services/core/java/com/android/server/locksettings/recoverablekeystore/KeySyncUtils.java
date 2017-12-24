@@ -20,10 +20,13 @@ import com.android.internal.annotations.VisibleForTesting;
 
 import java.nio.charset.StandardCharsets;
 import java.security.InvalidKeyException;
+import java.security.KeyFactory;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.security.PublicKey;
 import java.security.SecureRandom;
+import java.security.spec.InvalidKeySpecException;
+import java.security.spec.X509EncodedKeySpec;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -39,6 +42,7 @@ import javax.crypto.SecretKey;
  */
 public class KeySyncUtils {
 
+    private static final String PUBLIC_KEY_FACTORY_ALGORITHM = "EC";
     private static final String RECOVERY_KEY_ALGORITHM = "AES";
     private static final int RECOVERY_KEY_SIZE_BITS = 256;
 
@@ -50,6 +54,8 @@ public class KeySyncUtils {
             "V1 encrypted_application_key".getBytes(StandardCharsets.UTF_8);
     private static final byte[] RECOVERY_CLAIM_HEADER =
             "V1 KF_claim".getBytes(StandardCharsets.UTF_8);
+    private static final byte[] RECOVERY_RESPONSE_HEADER =
+            "V1 reencrypted_recovery_key".getBytes(StandardCharsets.UTF_8);
 
     private static final byte[] THM_KF_HASH_PREFIX = "THM_KF_hash".getBytes(StandardCharsets.UTF_8);
 
@@ -70,7 +76,7 @@ public class KeySyncUtils {
      *
      * @hide
      */
-    public byte[] thmEncryptRecoveryKey(
+    public static byte[] thmEncryptRecoveryKey(
             PublicKey publicKey,
             byte[] lockScreenHash,
             byte[] vaultParams,
@@ -112,7 +118,8 @@ public class KeySyncUtils {
      * @throws NoSuchAlgorithmException if any SecureBox algorithm is unavailable.
      * @throws InvalidKeyException if the hash cannot be used to encrypt for some reason.
      */
-    private static byte[] locallyEncryptRecoveryKey(byte[] lockScreenHash, SecretKey recoveryKey)
+    @VisibleForTesting
+    static byte[] locallyEncryptRecoveryKey(byte[] lockScreenHash, SecretKey recoveryKey)
             throws NoSuchAlgorithmException, InvalidKeyException {
         return SecureBox.encrypt(
                 /*theirPublicKey=*/ null,
@@ -199,6 +206,28 @@ public class KeySyncUtils {
     }
 
     /**
+     * Decrypts response from recovery claim, returning the locally encrypted key.
+     *
+     * @param keyClaimant The key claimant, used by the remote service to encrypt the response.
+     * @param vaultParams Vault params associated with the claim.
+     * @param encryptedResponse The encrypted response.
+     * @return The locally encrypted recovery key.
+     * @throws NoSuchAlgorithmException if any SecureBox algorithm is not present.
+     * @throws InvalidKeyException if the {@code keyClaimant} could not be used to decrypt.
+     * @throws AEADBadTagException if the message has been tampered with or was encrypted with a
+     *     different key.
+     */
+    public static byte[] decryptRecoveryClaimResponse(
+            byte[] keyClaimant, byte[] vaultParams, byte[] encryptedResponse)
+            throws NoSuchAlgorithmException, InvalidKeyException, AEADBadTagException {
+        return SecureBox.decrypt(
+                /*ourPrivateKey=*/ null,
+                /*sharedSecret=*/ keyClaimant,
+                /*header=*/ concat(RECOVERY_RESPONSE_HEADER, vaultParams),
+                /*encryptedPayload=*/ encryptedResponse);
+    }
+
+    /**
      * Decrypts a recovery key, after having retrieved it from a remote server.
      *
      * @param lskfHash The lock screen hash associated with the key.
@@ -234,6 +263,21 @@ public class KeySyncUtils {
                 /*sharedSecret=*/ recoveryKey,
                 /*header=*/ ENCRYPTED_APPLICATION_KEY_HEADER,
                 /*encryptedPayload=*/ encryptedApplicationKey);
+    }
+
+    /**
+     * Deserializes a X509 public key.
+     *
+     * @param key The bytes of the key.
+     * @return The key.
+     * @throws NoSuchAlgorithmException if the public key algorithm is unavailable.
+     * @throws InvalidKeySpecException if the bytes of the key are not a valid key.
+     */
+    public static PublicKey deserializePublicKey(byte[] key)
+            throws NoSuchAlgorithmException, InvalidKeySpecException {
+        KeyFactory keyFactory = KeyFactory.getInstance(PUBLIC_KEY_FACTORY_ALGORITHM);
+        X509EncodedKeySpec publicKeySpec = new X509EncodedKeySpec(key);
+        return keyFactory.generatePublic(publicKeySpec);
     }
 
     /**

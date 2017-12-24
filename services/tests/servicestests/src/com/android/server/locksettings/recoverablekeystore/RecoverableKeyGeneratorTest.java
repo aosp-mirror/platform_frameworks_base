@@ -16,62 +16,65 @@
 
 package com.android.server.locksettings.recoverablekeystore;
 
+import static junit.framework.Assert.assertNotNull;
+
 import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertEquals;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.Mockito.times;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
 
+import android.content.Context;
 import android.security.keystore.AndroidKeyStoreSecretKey;
 import android.security.keystore.KeyGenParameterSpec;
 import android.security.keystore.KeyProperties;
-import android.security.keystore.KeyProtection;
+import android.support.test.InstrumentationRegistry;
 import android.support.test.filters.SmallTest;
 import android.support.test.runner.AndroidJUnit4;
+
+import com.android.server.locksettings.recoverablekeystore.storage.RecoverableKeyStoreDb;
 
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.mockito.ArgumentCaptor;
-import org.mockito.Captor;
-import org.mockito.Mock;
-import org.mockito.MockitoAnnotations;
 
+import java.io.File;
+import java.nio.charset.StandardCharsets;
 import java.security.KeyStore;
 
+import javax.crypto.Cipher;
 import javax.crypto.KeyGenerator;
-import javax.crypto.SecretKey;
+import javax.crypto.spec.GCMParameterSpec;
 
 @SmallTest
 @RunWith(AndroidJUnit4.class)
 public class RecoverableKeyGeneratorTest {
+    private static final String DATABASE_FILE_NAME = "recoverablekeystore.db";
     private static final int TEST_GENERATION_ID = 3;
     private static final String ANDROID_KEY_STORE_PROVIDER = "AndroidKeyStore";
     private static final String KEY_ALGORITHM = "AES";
+    private static final int KEY_SIZE_BYTES = 32;
+    private static final String KEY_WRAP_ALGORITHM = "AES/GCM/NoPadding";
     private static final String TEST_ALIAS = "karlin";
     private static final String WRAPPING_KEY_ALIAS = "RecoverableKeyGeneratorTestWrappingKey";
-
-    @Mock
-    RecoverableKeyStorage mRecoverableKeyStorage;
-
-    @Captor ArgumentCaptor<KeyProtection> mKeyProtectionArgumentCaptor;
+    private static final int TEST_USER_ID = 1000;
+    private static final int KEYSTORE_UID_SELF = -1;
+    private static final int GCM_TAG_LENGTH_BITS = 128;
 
     private PlatformEncryptionKey mPlatformKey;
-    private SecretKey mKeyHandle;
+    private PlatformDecryptionKey mDecryptKey;
+    private RecoverableKeyStoreDb mRecoverableKeyStoreDb;
+    private File mDatabaseFile;
     private RecoverableKeyGenerator mRecoverableKeyGenerator;
 
     @Before
     public void setUp() throws Exception {
-        MockitoAnnotations.initMocks(this);
-        mPlatformKey = new PlatformEncryptionKey(TEST_GENERATION_ID, generateAndroidKeyStoreKey());
-        mKeyHandle = generateKey();
-        mRecoverableKeyGenerator = RecoverableKeyGenerator.newInstance(
-                mPlatformKey, mRecoverableKeyStorage);
+        Context context = InstrumentationRegistry.getTargetContext();
+        mDatabaseFile = context.getDatabasePath(DATABASE_FILE_NAME);
+        mRecoverableKeyStoreDb = RecoverableKeyStoreDb.newInstance(context);
 
-        when(mRecoverableKeyStorage.loadFromAndroidKeyStore(any())).thenReturn(mKeyHandle);
+        AndroidKeyStoreSecretKey platformKey = generateAndroidKeyStoreKey();
+        mPlatformKey = new PlatformEncryptionKey(TEST_GENERATION_ID, platformKey);
+        mDecryptKey = new PlatformDecryptionKey(TEST_GENERATION_ID, platformKey);
+        mRecoverableKeyGenerator = RecoverableKeyGenerator.newInstance(mRecoverableKeyStoreDb);
     }
 
     @After
@@ -79,67 +82,39 @@ public class RecoverableKeyGeneratorTest {
         KeyStore keyStore = KeyStore.getInstance(ANDROID_KEY_STORE_PROVIDER);
         keyStore.load(/*param=*/ null);
         keyStore.deleteEntry(WRAPPING_KEY_ALIAS);
-    }
 
-    @Test
-    public void generateAndStoreKey_setsKeyInKeyStore() throws Exception {
-        mRecoverableKeyGenerator.generateAndStoreKey(TEST_ALIAS);
-
-        verify(mRecoverableKeyStorage, times(1))
-                .importIntoAndroidKeyStore(eq(TEST_ALIAS), any(), any());
-    }
-
-    @Test
-    public void generateAndStoreKey_storesKeyEnabledForEncryptDecrypt() throws Exception {
-        mRecoverableKeyGenerator.generateAndStoreKey(TEST_ALIAS);
-
-        KeyProtection keyProtection = getKeyProtectionUsed();
-        assertEquals(KeyProperties.PURPOSE_ENCRYPT | KeyProperties.PURPOSE_DECRYPT,
-                keyProtection.getPurposes());
-    }
-
-    @Test
-    public void generateAndStoreKey_storesKeyEnabledForGCM() throws Exception {
-        mRecoverableKeyGenerator.generateAndStoreKey(TEST_ALIAS);
-
-        KeyProtection keyProtection = getKeyProtectionUsed();
-        assertArrayEquals(new String[] { KeyProperties.BLOCK_MODE_GCM },
-                keyProtection.getBlockModes());
-    }
-
-    @Test
-    public void generateAndStoreKey_storesKeyEnabledForNoPadding() throws Exception {
-        mRecoverableKeyGenerator.generateAndStoreKey(TEST_ALIAS);
-
-        KeyProtection keyProtection = getKeyProtectionUsed();
-        assertArrayEquals(new String[] { KeyProperties.ENCRYPTION_PADDING_NONE },
-                keyProtection.getEncryptionPaddings());
+        mRecoverableKeyStoreDb.close();
+        mDatabaseFile.delete();
     }
 
     @Test
     public void generateAndStoreKey_storesWrappedKey() throws Exception {
-        mRecoverableKeyGenerator.generateAndStoreKey(TEST_ALIAS);
+        mRecoverableKeyGenerator.generateAndStoreKey(
+                mPlatformKey, TEST_USER_ID, KEYSTORE_UID_SELF, TEST_ALIAS);
 
-        verify(mRecoverableKeyStorage, times(1)).persistToDisk(eq(TEST_ALIAS), any());
+        WrappedKey wrappedKey = mRecoverableKeyStoreDb.getKey(KEYSTORE_UID_SELF, TEST_ALIAS);
+        assertNotNull(wrappedKey);
     }
 
     @Test
-    public void generateAndStoreKey_returnsKeyHandle() throws Exception {
-        SecretKey secretKey = mRecoverableKeyGenerator.generateAndStoreKey(TEST_ALIAS);
+    public void generateAndStoreKey_returnsRawMaterialOfCorrectLength() throws Exception {
+        byte[] rawKey = mRecoverableKeyGenerator.generateAndStoreKey(
+                mPlatformKey, TEST_USER_ID, KEYSTORE_UID_SELF, TEST_ALIAS);
 
-        assertEquals(mKeyHandle, secretKey);
+        assertEquals(KEY_SIZE_BYTES, rawKey.length);
     }
 
-    private KeyProtection getKeyProtectionUsed() throws Exception {
-        verify(mRecoverableKeyStorage, times(1)).importIntoAndroidKeyStore(
-                any(), any(), mKeyProtectionArgumentCaptor.capture());
-        return mKeyProtectionArgumentCaptor.getValue();
-    }
+    @Test
+    public void generateAndStoreKey_storesTheWrappedVersionOfTheRawMaterial() throws Exception {
+        byte[] rawMaterial = mRecoverableKeyGenerator.generateAndStoreKey(
+                mPlatformKey, TEST_USER_ID, KEYSTORE_UID_SELF, TEST_ALIAS);
 
-    private SecretKey generateKey() throws Exception {
-        KeyGenerator keyGenerator = KeyGenerator.getInstance("AES");
-        keyGenerator.init(/*keySize=*/ 256);
-        return keyGenerator.generateKey();
+        WrappedKey wrappedKey = mRecoverableKeyStoreDb.getKey(KEYSTORE_UID_SELF, TEST_ALIAS);
+        Cipher cipher = Cipher.getInstance(KEY_WRAP_ALGORITHM);
+        cipher.init(Cipher.DECRYPT_MODE, mDecryptKey.getKey(),
+                new GCMParameterSpec(GCM_TAG_LENGTH_BITS, wrappedKey.getNonce()));
+        byte[] unwrappedMaterial = cipher.doFinal(wrappedKey.getKeyMaterial());
+        assertArrayEquals(rawMaterial, unwrappedMaterial);
     }
 
     private AndroidKeyStoreSecretKey generateAndroidKeyStoreKey() throws Exception {
@@ -152,5 +127,9 @@ public class RecoverableKeyGeneratorTest {
                     .setEncryptionPaddings(KeyProperties.ENCRYPTION_PADDING_NONE)
                     .build());
         return (AndroidKeyStoreSecretKey) keyGenerator.generateKey();
+    }
+
+    private static byte[] getUtf8Bytes(String s) {
+        return s.getBytes(StandardCharsets.UTF_8);
     }
 }

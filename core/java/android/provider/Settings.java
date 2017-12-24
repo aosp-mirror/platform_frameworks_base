@@ -5345,6 +5345,7 @@ public final class Settings {
          * @hide
          */
         @SystemApi
+        @TestApi
         public static final String AUTOFILL_USER_DATA_MAX_USER_DATA_SIZE =
                 "autofill_user_data_max_user_data_size";
 
@@ -5355,6 +5356,7 @@ public final class Settings {
          * @hide
          */
         @SystemApi
+        @TestApi
         public static final String AUTOFILL_USER_DATA_MAX_FIELD_CLASSIFICATION_IDS_SIZE =
                 "autofill_user_data_max_field_classification_size";
 
@@ -5364,6 +5366,7 @@ public final class Settings {
          * @hide
          */
         @SystemApi
+        @TestApi
         public static final String AUTOFILL_USER_DATA_MAX_VALUE_LENGTH =
                 "autofill_user_data_max_value_length";
 
@@ -5373,6 +5376,7 @@ public final class Settings {
          * @hide
          */
         @SystemApi
+        @TestApi
         public static final String AUTOFILL_USER_DATA_MIN_VALUE_LENGTH =
                 "autofill_user_data_min_value_length";
 
@@ -9565,6 +9569,31 @@ public final class Settings {
          * @hide
          */
         public static final String ANOMALY_DETECTION_CONSTANTS = "anomaly_detection_constants";
+
+        /**
+         * Battery tip specific settings
+         * This is encoded as a key=value list, separated by commas. Ex:
+         *
+         * "battery_tip_enabled=true,summary_enabled=true,high_usage_enabled=true,"
+         * "high_usage_app_count=3,reduced_battery_enabled=false,reduced_battery_percent=50"
+         *
+         * The following keys are supported:
+         *
+         * <pre>
+         * battery_tip_enabled              (boolean)
+         * summary_enabled                  (boolean)
+         * battery_saver_tip_enabled        (boolean)
+         * high_usage_enabled               (boolean)
+         * high_usage_app_count             (int)
+         * app_restriction_enabled          (boolean)
+         * reduced_battery_enabled          (boolean)
+         * reduced_battery_percent          (int)
+         * low_battery_enabled              (boolean)
+         * low_battery_hour                 (int)
+         * </pre>
+         * @hide
+         */
+        public static final String BATTERY_TIP_CONSTANTS = "battery_tip_constants";
 
         /**
          * Always on display(AOD) specific settings

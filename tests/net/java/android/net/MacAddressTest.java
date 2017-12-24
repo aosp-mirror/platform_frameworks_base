@@ -73,18 +73,18 @@ public class MacAddressTest {
     }
 
     @Test
-    public void testToSafeString() {
+    public void testToOuiString() {
         String[][] macs = {
-            {"07:00:d3:56:8a:c4", "07:00:d3:00:00:00"},
-            {"33:33:aa:bb:cc:dd", "33:33:aa:00:00:00"},
-            {"06:00:00:00:00:00", "06:00:00:00:00:00"},
-            {"07:00:d3:56:8a:c4", "07:00:d3:00:00:00"}
+            {"07:00:d3:56:8a:c4", "07:00:d3"},
+            {"33:33:aa:bb:cc:dd", "33:33:aa"},
+            {"06:00:00:00:00:00", "06:00:00"},
+            {"07:00:d3:56:8a:c4", "07:00:d3"}
         };
 
         for (String[] pair : macs) {
             String mac = pair[0];
             String expected = pair[1];
-            assertEquals(expected, MacAddress.fromString(mac).toSafeString());
+            assertEquals(expected, MacAddress.fromString(mac).toOuiString());
         }
     }
 

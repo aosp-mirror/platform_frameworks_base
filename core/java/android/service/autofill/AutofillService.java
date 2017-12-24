@@ -438,7 +438,7 @@ import com.android.internal.os.SomeArgs;
  *  AutofillValue password = passwordNode.getAutofillValue().getTextValue().toString();
  *
  *  save(username, password);
- * </pre>
+ *  </pre>
  *
  * <a name="Privacy"></a>
  * <h3>Privacy</h3>

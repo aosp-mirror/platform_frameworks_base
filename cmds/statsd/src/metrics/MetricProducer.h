@@ -27,6 +27,7 @@
 
 #include <log/logprint.h>
 #include <utils/RefBase.h>
+#include <unordered_map>
 
 namespace android {
 namespace os {
@@ -48,11 +49,20 @@ public:
           mCondition(conditionIndex >= 0 ? false : true),
           mConditionSliced(false),
           mWizard(wizard),
-          mConditionTrackerIndex(conditionIndex) {
-        // reuse the same map for non-sliced metrics too. this way, we avoid too many if-else.
-        mDimensionKeyMap[DEFAULT_DIMENSION_KEY] = std::vector<KeyValuePair>();
-    };
+          mConditionTrackerIndex(conditionIndex){};
     virtual ~MetricProducer(){};
+
+    void notifyAppUpgrade(const string& apk, const int uid, const int64_t version) override{
+            // TODO: Implement me.
+    };
+
+    void notifyAppRemoved(const string& apk, const int uid) override{
+            // TODO: Implement me.
+    };
+
+    void onUidMapReceived() override{
+            // TODO: Implement me.
+    };
 
     // Consume the parsed stats log entry that already matched the "what" of the metric.
     void onMatchedLogEvent(const size_t matcherIndex, const LogEvent& event) {
@@ -131,10 +141,6 @@ protected:
     int mConditionTrackerIndex;
 
     std::vector<KeyMatcher> mDimension;  // The dimension defined in statsd_config
-
-    // Keep the map from the internal HashableDimensionKey to std::vector<KeyValuePair>
-    // that StatsLogReport wants.
-    std::unordered_map<HashableDimensionKey, std::vector<KeyValuePair>> mDimensionKeyMap;
 
     std::vector<MetricConditionLink> mConditionLinks;
 

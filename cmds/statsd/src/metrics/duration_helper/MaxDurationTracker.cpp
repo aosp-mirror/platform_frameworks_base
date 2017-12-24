@@ -42,7 +42,7 @@ bool MaxDurationTracker::hitGuardRail(const HashableDimensionKey& newKey) {
     // 1. Report the tuple count if the tuple count > soft limit
     if (mInfos.size() > StatsdStats::kDimensionKeySizeSoftLimit - 1) {
         size_t newTupleCount = mInfos.size() + 1;
-        StatsdStats::getInstance().noteMetricDimensionSize(mConfigKey, mName + mEventKey,
+        StatsdStats::getInstance().noteMetricDimensionSize(mConfigKey, mName + mEventKey.toString(),
                                                            newTupleCount);
         // 2. Don't add more tuples, we are above the allowed threshold. Drop the data.
         if (newTupleCount > StatsdStats::kDimensionKeySizeHardLimit) {

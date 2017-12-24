@@ -274,9 +274,9 @@ public class SecureBoxTest {
 
     @Test
     public void decrypt_nullEncryptedPayload() throws Exception {
-        IllegalArgumentException expected =
+        NullPointerException expected =
                 expectThrows(
-                        IllegalArgumentException.class,
+                        NullPointerException.class,
                         () ->
                                 SecureBox.decrypt(
                                         THM_PRIVATE_KEY,

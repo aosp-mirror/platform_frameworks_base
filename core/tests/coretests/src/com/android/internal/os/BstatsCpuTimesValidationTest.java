@@ -15,19 +15,25 @@
  */
 package com.android.internal.os;
 
-import static android.app.ActivityManager.PROCESS_STATE_NONEXISTENT;
+import static android.os.BatteryStats.UID_TIMES_TYPE_ALL;
+import static android.os.BatteryStats.Uid.NUM_PROCESS_STATE;
+import static android.os.BatteryStats.Uid.PROCESS_STATE_BACKGROUND;
+import static android.os.BatteryStats.Uid.PROCESS_STATE_CACHED;
+import static android.os.BatteryStats.Uid.PROCESS_STATE_FOREGROUND;
+import static android.os.BatteryStats.Uid.PROCESS_STATE_FOREGROUND_SERVICE;
+import static android.os.BatteryStats.Uid.PROCESS_STATE_TOP;
+import static android.os.BatteryStats.Uid.PROCESS_STATE_TOP_SLEEPING;
+import static android.os.BatteryStats.Uid.UID_PROCESS_TYPES;
 
-import static junit.framework.Assert.assertEquals;
 import static junit.framework.Assert.assertNotNull;
 import static junit.framework.Assert.assertNull;
 import static junit.framework.Assert.assertTrue;
 import static junit.framework.Assert.fail;
 
-import static org.junit.Assume.assumeTrue;
-
 import com.android.frameworks.coretests.aidl.ICmdCallback;
 import com.android.frameworks.coretests.aidl.ICmdReceiver;
 
+import android.app.ActivityManager;
 import android.app.KeyguardManager;
 import android.content.ComponentName;
 import android.content.Context;
@@ -36,6 +42,7 @@ import android.content.IntentFilter;
 import android.content.ServiceConnection;
 import android.content.pm.PackageManager;
 import android.os.BatteryManager;
+import android.os.BatteryStats;
 import android.os.Bundle;
 import android.os.IBinder;
 import android.os.PowerManager;
@@ -45,9 +52,9 @@ import android.support.test.InstrumentationRegistry;
 import android.support.test.filters.LargeTest;
 import android.support.test.runner.AndroidJUnit4;
 import android.support.test.uiautomator.UiDevice;
+import android.util.DebugUtils;
 import android.util.Log;
 
-import org.junit.Assume;
 import org.junit.BeforeClass;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -61,22 +68,26 @@ import java.util.regex.Pattern;
 @LargeTest
 @RunWith(AndroidJUnit4.class)
 public class BstatsCpuTimesValidationTest {
-    private static final String TAG = BstatsCpuTimesValidationTest.class.getName();
+    private static final String TAG = BstatsCpuTimesValidationTest.class.getSimpleName();
 
     private static final String TEST_PKG = "com.android.coretests.apps.bstatstestapp";
     private static final String TEST_ACTIVITY = TEST_PKG + ".TestActivity";
+    private static final String TEST_SERVICE = TEST_PKG + ".TestService";
     private static final String ISOLATED_TEST_SERVICE = TEST_PKG + ".IsolatedTestService";
 
     private static final String EXTRA_KEY_CMD_RECEIVER = "cmd_receiver";
+    private static final int FLAG_START_FOREGROUND = 1;
 
     private static final int BATTERY_STATE_TIMEOUT_MS = 2000;
     private static final int BATTERY_STATE_CHECK_INTERVAL_MS = 200;
 
     private static final int START_ACTIVITY_TIMEOUT_MS = 2000;
+    private static final int START_FG_SERVICE_TIMEOUT_MS = 2000;
+    private static final int START_SERVICE_TIMEOUT_MS = 2000;
     private static final int START_ISOLATED_SERVICE_TIMEOUT_MS = 2000;
 
-    private static final int GENERAL_TIMEOUT_MS = 1000;
-    private static final int GENERAL_INTERVAL_MS = 100;
+    private static final int GENERAL_TIMEOUT_MS = 4000;
+    private static final int GENERAL_INTERVAL_MS = 200;
 
     private static final int WORK_DURATION_MS = 2000;
 
@@ -84,6 +95,7 @@ public class BstatsCpuTimesValidationTest {
     private static UiDevice sUiDevice;
     private static int sTestPkgUid;
     private static boolean sCpuFreqTimesAvailable;
+    private static boolean sPerProcStateTimesAvailable;
 
     @BeforeClass
     public static void setupOnce() throws Exception {
@@ -92,14 +104,20 @@ public class BstatsCpuTimesValidationTest {
         sContext.getPackageManager().setApplicationEnabledSetting(TEST_PKG,
                 PackageManager.COMPONENT_ENABLED_STATE_ENABLED, 0);
         sTestPkgUid = sContext.getPackageManager().getPackageUid(TEST_PKG, 0);
-        sCpuFreqTimesAvailable = cpuFreqTimesAvailable();
+        checkCpuTimesAvailability();
     }
 
     // Checks cpu freq times of system uid as an indication of whether /proc/uid_time_in_state
-    // kernel node is available.
-    private static boolean cpuFreqTimesAvailable() throws Exception {
-        final long[] cpuTimes = getAllCpuFreqTimes(Process.SYSTEM_UID);
-        return cpuTimes != null;
+    // and /proc/uid/<uid>/time_in_state kernel nodes are available.
+    private static void checkCpuTimesAvailability() throws Exception {
+        batteryOn();
+        SystemClock.sleep(GENERAL_TIMEOUT_MS);
+        batteryOff();
+        final long[] totalCpuTimes = getAllCpuFreqTimes(Process.SYSTEM_UID);
+        sCpuFreqTimesAvailable = totalCpuTimes != null;
+        final long[] fgSvcCpuTimes = getAllCpuFreqTimes(Process.SYSTEM_UID,
+                PROCESS_STATE_FOREGROUND_SERVICE);
+        sPerProcStateTimesAvailable = fgSvcCpuTimes != null;
     }
 
     @Test
@@ -112,7 +130,8 @@ public class BstatsCpuTimesValidationTest {
         forceStop();
         resetBatteryStats();
         final long[] initialSnapshot = getAllCpuFreqTimes(sTestPkgUid);
-        assertNull("Initial snapshot should be null", initialSnapshot);
+        assertNull("Initial snapshot should be null, initial=" + Arrays.toString(initialSnapshot),
+                initialSnapshot);
         doSomeWork();
         forceStop();
 
@@ -136,7 +155,8 @@ public class BstatsCpuTimesValidationTest {
         forceStop();
         resetBatteryStats();
         final long[] initialSnapshot = getAllCpuFreqTimes(sTestPkgUid);
-        assertNull("Initial snapshot should be null", initialSnapshot);
+        assertNull("Initial snapshot should be null, initial=" + Arrays.toString(initialSnapshot),
+                initialSnapshot);
         doSomeWork();
         forceStop();
 
@@ -166,7 +186,8 @@ public class BstatsCpuTimesValidationTest {
         forceStop();
         resetBatteryStats();
         final long[] initialSnapshot = getAllCpuFreqTimes(sTestPkgUid);
-        assertNull("Initial snapshot should be null", initialSnapshot);
+        assertNull("Initial snapshot should be null, initial=" + Arrays.toString(initialSnapshot),
+                initialSnapshot);
         doSomeWorkInIsolatedProcess();
         forceStop();
 
@@ -177,6 +198,224 @@ public class BstatsCpuTimesValidationTest {
             actualCpuTimeMs += cpuTimesMs[i];
         }
         assertApproximateValue("Incorrect total cpu time", WORK_DURATION_MS, actualCpuTimeMs);
+        batteryOffScreenOn();
+    }
+
+    @Test
+    public void testCpuFreqTimes_stateTop() throws Exception {
+        if (!sCpuFreqTimesAvailable || !sPerProcStateTimesAvailable) {
+            return;
+        }
+
+        batteryOnScreenOn();
+        forceStop();
+        resetBatteryStats();
+        final long[] initialSnapshot = getAllCpuFreqTimes(sTestPkgUid);
+        assertNull("Initial snapshot should be null, initial=" + Arrays.toString(initialSnapshot),
+                initialSnapshot);
+        assertNull("Initial top state snapshot should be null",
+                getAllCpuFreqTimes(sTestPkgUid, PROCESS_STATE_TOP));
+
+        doSomeWork(PROCESS_STATE_TOP);
+        forceStop();
+
+        final long[] cpuTimesMs = getAllCpuFreqTimes(sTestPkgUid, PROCESS_STATE_TOP);
+        final String msgCpuTimes = getAllCpuTimesMsg();
+        assertCpuTimesValid(cpuTimesMs);
+        long actualCpuTimeMs = 0;
+        for (int i = 0; i < cpuTimesMs.length / 2; ++i) {
+            actualCpuTimeMs += cpuTimesMs[i];
+        }
+        assertApproximateValue("Incorrect total cpu time, " + msgCpuTimes,
+                WORK_DURATION_MS, actualCpuTimeMs);
+        batteryOffScreenOn();
+    }
+
+    @Test
+    public void testIsolatedCpuFreqTimes_stateService() throws Exception {
+        if (!sCpuFreqTimesAvailable || !sPerProcStateTimesAvailable) {
+            return;
+        }
+
+        batteryOnScreenOn();
+        forceStop();
+        resetBatteryStats();
+        final long[] initialSnapshot = getAllCpuFreqTimes(sTestPkgUid);
+        assertNull("Initial snapshot should be null, initial=" + Arrays.toString(initialSnapshot),
+                initialSnapshot);
+        assertNull("Initial top state snapshot should be null",
+                getAllCpuFreqTimes(sTestPkgUid, PROCESS_STATE_TOP));
+
+        final ICmdReceiver activityReceiver = ICmdReceiver.Stub.asInterface(startActivity());
+        final ICmdReceiver isolatedReceiver = ICmdReceiver.Stub.asInterface(startIsolatedService());
+        try {
+            assertProcState(PROCESS_STATE_TOP);
+            isolatedReceiver.doSomeWork(WORK_DURATION_MS);
+        } finally {
+            activityReceiver.finishHost();
+            isolatedReceiver.finishHost();
+        }
+        forceStop();
+
+        final long[] cpuTimesMs = getAllCpuFreqTimes(sTestPkgUid, PROCESS_STATE_TOP);
+        final String msgCpuTimes = getAllCpuTimesMsg();
+        assertCpuTimesValid(cpuTimesMs);
+        long actualCpuTimeMs = 0;
+        for (int i = 0; i < cpuTimesMs.length / 2; ++i) {
+            actualCpuTimeMs += cpuTimesMs[i];
+        }
+        assertApproximateValue("Incorrect total cpu time, " + msgCpuTimes,
+                WORK_DURATION_MS, actualCpuTimeMs);
+        batteryOffScreenOn();
+    }
+
+    @Test
+    public void testCpuFreqTimes_stateTopSleeping() throws Exception {
+        if (!sCpuFreqTimesAvailable || !sPerProcStateTimesAvailable) {
+            return;
+        }
+
+        batteryOnScreenOff();
+        forceStop();
+        resetBatteryStats();
+        final long[] initialSnapshot = getAllCpuFreqTimes(sTestPkgUid);
+        assertNull("Initial snapshot should be null, initial=" + Arrays.toString(initialSnapshot),
+                initialSnapshot);
+        assertNull("Initial top state snapshot should be null",
+                getAllCpuFreqTimes(sTestPkgUid, PROCESS_STATE_TOP_SLEEPING));
+
+        doSomeWork(PROCESS_STATE_TOP_SLEEPING);
+        forceStop();
+
+        final long[] cpuTimesMs = getAllCpuFreqTimes(sTestPkgUid, PROCESS_STATE_TOP_SLEEPING);
+        final String msgCpuTimes = getAllCpuTimesMsg();
+        assertCpuTimesValid(cpuTimesMs);
+        long actualCpuTimeMs = 0;
+        for (int i = cpuTimesMs.length / 2; i < cpuTimesMs.length; ++i) {
+            actualCpuTimeMs += cpuTimesMs[i];
+        }
+        assertApproximateValue("Incorrect total cpu time, " + msgCpuTimes,
+                WORK_DURATION_MS, actualCpuTimeMs);
+        batteryOffScreenOn();
+    }
+
+    @Test
+    public void testCpuFreqTimes_stateFgService() throws Exception {
+        if (!sCpuFreqTimesAvailable || !sPerProcStateTimesAvailable) {
+            return;
+        }
+
+        batteryOnScreenOff();
+        forceStop();
+        resetBatteryStats();
+        final long[] initialSnapshot = getAllCpuFreqTimes(sTestPkgUid);
+        assertNull("Initial snapshot should be null, initial=" + Arrays.toString(initialSnapshot),
+                initialSnapshot);
+        assertNull("Initial top state snapshot should be null",
+                getAllCpuFreqTimes(sTestPkgUid, PROCESS_STATE_FOREGROUND_SERVICE));
+
+        doSomeWork(PROCESS_STATE_FOREGROUND_SERVICE);
+        forceStop();
+
+        final long[] cpuTimesMs = getAllCpuFreqTimes(sTestPkgUid, PROCESS_STATE_FOREGROUND_SERVICE);
+        final String msgCpuTimes = getAllCpuTimesMsg();
+        assertCpuTimesValid(cpuTimesMs);
+        long actualCpuTimeMs = 0;
+        for (int i = 0; i < cpuTimesMs.length / 2; ++i) {
+            actualCpuTimeMs += cpuTimesMs[i];
+        }
+        assertApproximateValue("Incorrect total cpu time, " + msgCpuTimes,
+                WORK_DURATION_MS, actualCpuTimeMs);
+        batteryOffScreenOn();
+    }
+
+    @Test
+    public void testCpuFreqTimes_stateFg() throws Exception {
+        if (!sCpuFreqTimesAvailable || !sPerProcStateTimesAvailable) {
+            return;
+        }
+
+        batteryOnScreenOn();
+        forceStop();
+        resetBatteryStats();
+        final long[] initialSnapshot = getAllCpuFreqTimes(sTestPkgUid);
+        assertNull("Initial snapshot should be null, initial=" + Arrays.toString(initialSnapshot),
+                initialSnapshot);
+        assertNull("Initial top state snapshot should be null",
+                getAllCpuFreqTimes(sTestPkgUid, PROCESS_STATE_FOREGROUND));
+
+        doSomeWork(PROCESS_STATE_FOREGROUND);
+        forceStop();
+
+        final long[] cpuTimesMs = getAllCpuFreqTimes(sTestPkgUid, PROCESS_STATE_FOREGROUND);
+        final String msgCpuTimes = getAllCpuTimesMsg();
+        assertCpuTimesValid(cpuTimesMs);
+        long actualCpuTimeMs = 0;
+        for (int i = 0; i < cpuTimesMs.length / 2; ++i) {
+            actualCpuTimeMs += cpuTimesMs[i];
+        }
+        assertApproximateValue("Incorrect total cpu time, " + msgCpuTimes,
+                WORK_DURATION_MS, actualCpuTimeMs);
+        batteryOff();
+    }
+
+    @Test
+    public void testCpuFreqTimes_stateBg() throws Exception {
+        if (!sCpuFreqTimesAvailable || !sPerProcStateTimesAvailable) {
+            return;
+        }
+
+        batteryOnScreenOff();
+        forceStop();
+        resetBatteryStats();
+        final long[] initialSnapshot = getAllCpuFreqTimes(sTestPkgUid);
+        assertNull("Initial snapshot should be null, initial=" + Arrays.toString(initialSnapshot),
+                initialSnapshot);
+        assertNull("Initial top state snapshot should be null",
+                getAllCpuFreqTimes(sTestPkgUid, PROCESS_STATE_BACKGROUND));
+
+        doSomeWork(PROCESS_STATE_BACKGROUND);
+        forceStop();
+
+        final long[] cpuTimesMs = getAllCpuFreqTimes(sTestPkgUid, PROCESS_STATE_BACKGROUND);
+        final String msgCpuTimes = getAllCpuTimesMsg();
+        assertCpuTimesValid(cpuTimesMs);
+        long actualCpuTimeMs = 0;
+        for (int i = 0; i < cpuTimesMs.length / 2; ++i) {
+            actualCpuTimeMs += cpuTimesMs[i];
+        }
+        assertApproximateValue("Incorrect total cpu time, " + msgCpuTimes,
+                WORK_DURATION_MS, actualCpuTimeMs);
+        batteryOffScreenOn();
+    }
+
+    @Test
+    public void testCpuFreqTimes_stateCached() throws Exception {
+        if (!sCpuFreqTimesAvailable || !sPerProcStateTimesAvailable) {
+            return;
+        }
+
+        batteryOnScreenOn();
+        forceStop();
+        resetBatteryStats();
+        final long[] initialSnapshot = getAllCpuFreqTimes(sTestPkgUid);
+        assertNull("Initial snapshot should be null, initial=" + Arrays.toString(initialSnapshot),
+                initialSnapshot);
+        assertNull("Initial top state snapshot should be null",
+                getAllCpuFreqTimes(sTestPkgUid, PROCESS_STATE_CACHED));
+
+        doSomeWork(PROCESS_STATE_CACHED);
+        forceStop();
+
+        final long[] cpuTimesMs = getAllCpuFreqTimes(sTestPkgUid, PROCESS_STATE_CACHED);
+        final String msgCpuTimes = getAllCpuTimesMsg();
+        assertCpuTimesValid(cpuTimesMs);
+        long actualCpuTimeMs = 0;
+        for (int i = 0; i < cpuTimesMs.length / 2; ++i) {
+            actualCpuTimeMs += cpuTimesMs[i];
+        }
+        assertApproximateValue("Incorrect total cpu time, " + msgCpuTimes,
+                WORK_DURATION_MS, actualCpuTimeMs);
         batteryOffScreenOn();
     }
 
@@ -219,6 +458,66 @@ public class BstatsCpuTimesValidationTest {
         receiver.finishHost();
     }
 
+    private void doSomeWork(int procState) throws Exception {
+        final ICmdReceiver receiver;
+        switch (procState) {
+            case PROCESS_STATE_TOP:
+                receiver = ICmdReceiver.Stub.asInterface(startActivity());
+                break;
+            case PROCESS_STATE_TOP_SLEEPING:
+                receiver = ICmdReceiver.Stub.asInterface(startActivity());
+                break;
+            case PROCESS_STATE_FOREGROUND_SERVICE:
+                receiver = ICmdReceiver.Stub.asInterface(startForegroundService());
+                break;
+            case PROCESS_STATE_FOREGROUND:
+                receiver = ICmdReceiver.Stub.asInterface(startService());
+                receiver.showApplicationOverlay();
+                break;
+            case PROCESS_STATE_BACKGROUND:
+                receiver = ICmdReceiver.Stub.asInterface(startService());
+                break;
+            case PROCESS_STATE_CACHED:
+                receiver = ICmdReceiver.Stub.asInterface(startActivity());
+                receiver.finishHost();
+                break;
+            default:
+                throw new IllegalArgumentException("Unknown state: " + procState);
+        }
+        try {
+            assertProcState(procState);
+            receiver.doSomeWork(WORK_DURATION_MS);
+        } finally {
+            receiver.finishHost();
+        }
+    }
+
+    private void assertProcState(String state) throws Exception {
+        final String expectedState = "(" + state + ")";
+        assertDelayedCondition("", () -> {
+            final String uidStateStr = executeCmd("cmd activity get-uid-state " + sTestPkgUid);
+            final String actualState = uidStateStr.split(" ")[1];
+            return expectedState.equals(actualState) ? null
+                    : "expected=" + expectedState + ", actual" + actualState;
+        });
+    }
+
+    private void assertProcState(int expectedState) throws Exception {
+        assertDelayedCondition("Unexpected proc state", () -> {
+            final String uidStateStr = executeCmd("cmd activity get-uid-state " + sTestPkgUid);
+            final int amProcState = Integer.parseInt(uidStateStr.split(" ")[0]);
+            final int actualState = BatteryStats.mapToInternalProcessState(amProcState);
+            return (actualState == expectedState) ? null
+                    : "expected=" + getStateName(BatteryStats.Uid.class, expectedState)
+                            + ", actual=" + getStateName(BatteryStats.Uid.class, actualState)
+                            + ", amState=" + getStateName(ActivityManager.class, amProcState);
+        });
+    }
+
+    private String getStateName(Class clazz, int procState) {
+        return DebugUtils.valueToString(clazz, "PROCESS_STATE_", procState);
+    }
+
     private IBinder startIsolatedService() throws Exception {
         final CountDownLatch latch = new CountDownLatch(1);
         final IBinder[] binders = new IBinder[1];
@@ -248,6 +547,59 @@ public class BstatsCpuTimesValidationTest {
         return null;
     }
 
+    private IBinder startForegroundService() throws Exception {
+        final CountDownLatch latch = new CountDownLatch(1);
+        final Intent launchIntent = new Intent()
+                .setComponent(new ComponentName(TEST_PKG, TEST_SERVICE))
+                .setFlags(FLAG_START_FOREGROUND);
+        final Bundle extras = new Bundle();
+        final IBinder[] binders = new IBinder[1];
+        extras.putBinder(EXTRA_KEY_CMD_RECEIVER, new ICmdCallback.Stub() {
+            @Override
+            public void onLaunched(IBinder receiver) {
+                binders[0] = receiver;
+                latch.countDown();
+            }
+        });
+        launchIntent.putExtras(extras);
+        sContext.startForegroundService(launchIntent);
+        if (latch.await(START_FG_SERVICE_TIMEOUT_MS, TimeUnit.MILLISECONDS)) {
+            if (binders[0] == null) {
+                fail("Receiver binder should not be null");
+            }
+            return binders[0];
+        } else {
+            fail("Timed out waiting for the test fg service to start; testUid=" + sTestPkgUid);
+        }
+        return null;
+    }
+
+    private IBinder startService() throws Exception {
+        final CountDownLatch latch = new CountDownLatch(1);
+        final Intent launchIntent = new Intent()
+                .setComponent(new ComponentName(TEST_PKG, TEST_SERVICE));
+        final Bundle extras = new Bundle();
+        final IBinder[] binders = new IBinder[1];
+        extras.putBinder(EXTRA_KEY_CMD_RECEIVER, new ICmdCallback.Stub() {
+            @Override
+            public void onLaunched(IBinder receiver) {
+                binders[0] = receiver;
+                latch.countDown();
+            }
+        });
+        launchIntent.putExtras(extras);
+        sContext.startService(launchIntent);
+        if (latch.await(START_SERVICE_TIMEOUT_MS, TimeUnit.MILLISECONDS)) {
+            if (binders[0] == null) {
+                fail("Receiver binder should not be null");
+            }
+            return binders[0];
+        } else {
+            fail("Timed out waiting for the test service to start; testUid=" + sTestPkgUid);
+        }
+        return null;
+    }
+
     private IBinder startActivity() throws Exception {
         final CountDownLatch latch = new CountDownLatch(1);
         final Intent launchIntent = new Intent()
@@ -256,7 +608,7 @@ public class BstatsCpuTimesValidationTest {
         final IBinder[] binders = new IBinder[1];
         extras.putBinder(EXTRA_KEY_CMD_RECEIVER, new ICmdCallback.Stub() {
             @Override
-            public void onActivityLaunched(IBinder receiver) {
+            public void onLaunched(IBinder receiver) {
                 binders[0] = receiver;
                 latch.countDown();
             }
@@ -274,21 +626,63 @@ public class BstatsCpuTimesValidationTest {
         return null;
     }
 
+    private static String getAllCpuTimesMsg() throws Exception {
+        final StringBuilder sb = new StringBuilder();
+        sb.append("uid=" + sTestPkgUid + ";");
+        sb.append(UID_TIMES_TYPE_ALL + "=" + getMsgCpuTimesSum(getAllCpuFreqTimes(sTestPkgUid)));
+        for (int i = 0; i < NUM_PROCESS_STATE; ++i) {
+            sb.append("|");
+            sb.append(UID_PROCESS_TYPES[i] + "="
+                    + getMsgCpuTimesSum(getAllCpuFreqTimes(sTestPkgUid, i)));
+        }
+        return sb.toString();
+    }
+
+    private static String getMsgCpuTimesSum(long[] cpuTimes) throws Exception {
+        if (cpuTimes == null) {
+            return "(0,0)";
+        }
+        long totalTime = 0;
+        for (int i = 0; i < cpuTimes.length / 2; ++i) {
+            totalTime += cpuTimes[i];
+        }
+        long screenOffTime = 0;
+        for (int i = cpuTimes.length / 2; i < cpuTimes.length; ++i) {
+            screenOffTime += cpuTimes[i];
+        }
+        return "(" + totalTime + "," + screenOffTime + ")";
+    }
+
     private static long[] getAllCpuFreqTimes(int uid) throws Exception {
         final String checkinDump = executeCmdSilent("dumpsys batterystats --checkin");
-        final Pattern pattern = Pattern.compile(uid + ",l,ctf,A,(.*?)\n");
+        final Pattern pattern = Pattern.compile(uid + ",l,ctf," + UID_TIMES_TYPE_ALL + ",(.*?)\n");
         final Matcher matcher = pattern.matcher(checkinDump);
         if (!matcher.find()) {
             return null;
         }
-        final String[] uidTimesStr = matcher.group(1).split(",");
-        final int freqCount = Integer.parseInt(uidTimesStr[0]);
-        if (uidTimesStr.length != (2 * freqCount + 1)) {
-            fail("Malformed data: " + Arrays.toString(uidTimesStr));
+        return parseCpuTimesStr(matcher.group(1));
+    }
+
+    private static long[] getAllCpuFreqTimes(int uid, int procState) throws Exception {
+        final String checkinDump = executeCmdSilent("dumpsys batterystats --checkin");
+        final Pattern pattern = Pattern.compile(
+                uid + ",l,ctf," + UID_PROCESS_TYPES[procState] + ",(.*?)\n");
+        final Matcher matcher = pattern.matcher(checkinDump);
+        if (!matcher.find()) {
+            return null;
+        }
+        return parseCpuTimesStr(matcher.group(1));
+    }
+
+    private static long[] parseCpuTimesStr(String str) {
+        final String[] cpuTimesStr = str.split(",");
+        final int freqCount = Integer.parseInt(cpuTimesStr[0]);
+        if (cpuTimesStr.length != (2 * freqCount + 1)) {
+            fail("Malformed data: " + Arrays.toString(cpuTimesStr));
         }
         final long[] cpuTimes = new long[freqCount * 2];
         for (int i = 0; i < cpuTimes.length; ++i) {
-            cpuTimes[i] = Long.parseLong(uidTimesStr[i + 1]);
+            cpuTimes[i] = Long.parseLong(cpuTimesStr[i + 1]);
         }
         return cpuTimes;
     }
@@ -312,12 +706,12 @@ public class BstatsCpuTimesValidationTest {
         screenOn();
     }
 
-    private void batteryOn() throws Exception {
+    private static void batteryOn() throws Exception {
         executeCmd("dumpsys battery unplug");
         assertBatteryState(false);
     }
 
-    private void batteryOff() throws Exception {
+    private static void batteryOff() throws Exception {
         executeCmd("dumpsys battery reset");
         assertBatteryState(true);
     }
@@ -336,43 +730,41 @@ public class BstatsCpuTimesValidationTest {
 
     private void forceStop() throws Exception {
         executeCmd("cmd activity force-stop " + TEST_PKG);
-        assertUidState(PROCESS_STATE_NONEXISTENT);
+        assertProcState("NONEXISTENT");
     }
 
-    private void assertUidState(int state) throws Exception {
-        final String uidStateStr = executeCmd("cmd activity get-uid-state " + sTestPkgUid);
-        final int uidState = Integer.parseInt(uidStateStr.split(" ")[0]);
-        assertEquals(state, uidState);
-    }
-
-    private void assertKeyguardUnLocked() {
+    private void assertKeyguardUnLocked() throws Exception {
         final KeyguardManager keyguardManager =
                 (KeyguardManager) sContext.getSystemService(Context.KEYGUARD_SERVICE);
-        assertDelayedCondition("Keyguard should be unlocked",
-                () -> !keyguardManager.isKeyguardLocked());
+        assertDelayedCondition("Unexpected Keyguard state", () ->
+                keyguardManager.isKeyguardLocked() ? "expected=unlocked" : null
+        );
     }
 
-    private void assertScreenInteractive(boolean interactive) {
+    private void assertScreenInteractive(boolean interactive) throws Exception {
         final PowerManager powerManager =
                 (PowerManager) sContext.getSystemService(Context.POWER_SERVICE);
-        assertDelayedCondition("Unexpected screen interactive state",
-                () -> interactive == powerManager.isInteractive());
+        assertDelayedCondition("Unexpected screen interactive state", () ->
+                interactive == powerManager.isInteractive() ? null : "expected=" + interactive
+        );
     }
 
-    private void assertDelayedCondition(String errorMsg, ExpectedCondition condition) {
+    private void assertDelayedCondition(String errMsgPrefix, ExpectedCondition condition)
+            throws Exception {
         final long endTime = SystemClock.uptimeMillis() + GENERAL_TIMEOUT_MS;
         while (SystemClock.uptimeMillis() <= endTime) {
-            if (condition.isTrue()) {
+            if (condition.getErrIfNotTrue() == null) {
                 return;
             }
             SystemClock.sleep(GENERAL_INTERVAL_MS);
         }
-        if (!condition.isTrue()) {
-            fail(errorMsg);
+        final String errMsg = condition.getErrIfNotTrue();
+        if (errMsg != null) {
+            fail(errMsgPrefix + ": " + errMsg);
         }
     }
 
-    private void assertBatteryState(boolean pluggedIn) throws Exception {
+    private static void assertBatteryState(boolean pluggedIn) throws Exception {
         final long endTime = SystemClock.uptimeMillis() + BATTERY_STATE_TIMEOUT_MS;
         while (isDevicePluggedIn() != pluggedIn && SystemClock.uptimeMillis() <= endTime) {
             Thread.sleep(BATTERY_STATE_CHECK_INTERVAL_MS);
@@ -383,13 +775,13 @@ public class BstatsCpuTimesValidationTest {
         }
     }
 
-    private boolean isDevicePluggedIn() {
+    private static boolean isDevicePluggedIn() {
         final Intent batteryIntent = sContext.registerReceiver(null,
                 new IntentFilter(Intent.ACTION_BATTERY_CHANGED));
         return batteryIntent.getIntExtra(BatteryManager.EXTRA_PLUGGED, -1) > 0;
     }
 
-    private String executeCmd(String cmd) throws Exception {
+    private static String executeCmd(String cmd) throws Exception {
         final String result = sUiDevice.executeShellCommand(cmd).trim();
         Log.d(TAG, String.format("Result for '%s': %s", cmd, result));
         return result;
@@ -400,6 +792,6 @@ public class BstatsCpuTimesValidationTest {
     }
 
     private interface ExpectedCondition {
-        boolean isTrue();
+        String getErrIfNotTrue() throws Exception;
     }
 }

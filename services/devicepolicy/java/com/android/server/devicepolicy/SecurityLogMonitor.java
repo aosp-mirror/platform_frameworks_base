@@ -19,11 +19,13 @@ package com.android.server.devicepolicy;
 import android.app.admin.DeviceAdminReceiver;
 import android.app.admin.SecurityLog;
 import android.app.admin.SecurityLog.SecurityEvent;
+import android.os.Process;
 import android.os.SystemClock;
 import android.util.Log;
 import android.util.Slog;
 
 import com.android.internal.annotations.GuardedBy;
+import com.android.internal.annotations.VisibleForTesting;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -31,8 +33,6 @@ import java.util.List;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
-
-import android.os.Process;
 
 /**
  * A class managing access to the security logs. It maintains an internal buffer of pending
@@ -48,7 +48,13 @@ class SecurityLogMonitor implements Runnable {
     private final Lock mLock = new ReentrantLock();
 
     SecurityLogMonitor(DevicePolicyManagerService service) {
-        mService = service;
+        this(service, 0 /* id */);
+    }
+
+    @VisibleForTesting
+    SecurityLogMonitor(DevicePolicyManagerService service, long id) {
+        this.mService = service;
+        this.mId = id;
     }
 
     private static final boolean DEBUG = false;  // STOPSHIP if true.
@@ -58,7 +64,7 @@ class SecurityLogMonitor implements Runnable {
      * it should be less than 100 bytes), setting 1024 entries as the threshold to notify Device
      * Owner.
      */
-    private static final int BUFFER_ENTRIES_NOTIFICATION_LEVEL = 1024;
+    @VisibleForTesting static final int BUFFER_ENTRIES_NOTIFICATION_LEVEL = 1024;
     /**
      * The maximum number of entries we should store before dropping earlier logs, to limit the
      * memory usage.
@@ -87,6 +93,8 @@ class SecurityLogMonitor implements Runnable {
     @GuardedBy("mLock")
     private ArrayList<SecurityEvent> mPendingLogs = new ArrayList<>();
     @GuardedBy("mLock")
+    private long mId;
+    @GuardedBy("mLock")
     private boolean mAllowedToRetrieve = false;
 
     /**
@@ -112,6 +120,7 @@ class SecurityLogMonitor implements Runnable {
         try {
             if (mMonitorThread == null) {
                 mPendingLogs = new ArrayList<>();
+                mId = 0;
                 mAllowedToRetrieve = false;
                 mNextAllowedRetrievalTimeMillis = -1;
                 mPaused = false;
@@ -137,6 +146,7 @@ class SecurityLogMonitor implements Runnable {
                 }
                 // Reset state and clear buffer
                 mPendingLogs = new ArrayList<>();
+                mId = 0;
                 mAllowedToRetrieve = false;
                 mNextAllowedRetrievalTimeMillis = -1;
                 mPaused = false;
@@ -305,6 +315,7 @@ class SecurityLogMonitor implements Runnable {
             if (lastNanos > currentNanos) {
                 // New event older than the last we've seen so far, must be due to reordering.
                 if (DEBUG) Slog.d(TAG, "New event in the overlap: " + currentNanos);
+                assignLogId(curEvent);
                 mPendingLogs.add(curEvent);
                 curPos++;
             } else if (lastNanos < currentNanos) {
@@ -317,6 +328,7 @@ class SecurityLogMonitor implements Runnable {
                     if (DEBUG) Slog.d(TAG, "Skipped dup event with timestamp: " + lastNanos);
                 } else {
                     // Wow, what a coincidence, or probably the clock is too coarse.
+                    assignLogId(curEvent);
                     mPendingLogs.add(curEvent);
                     if (DEBUG) Slog.d(TAG, "Event timestamp collision: " + lastNanos);
                 }
@@ -324,8 +336,13 @@ class SecurityLogMonitor implements Runnable {
                 curPos++;
             }
         }
+        // Assign an id to the new logs, after the overlap with mLastEvents.
+        List<SecurityEvent> idLogs = newLogs.subList(curPos, newLogs.size());
+        for (SecurityEvent event : idLogs) {
+            assignLogId(event);
+        }
         // Save the rest of the new batch.
-        mPendingLogs.addAll(newLogs.subList(curPos, newLogs.size()));
+        mPendingLogs.addAll(idLogs);
 
         if (mPendingLogs.size() > BUFFER_ENTRIES_MAXIMUM_LEVEL) {
             // Truncate buffer down to half of BUFFER_ENTRIES_MAXIMUM_LEVEL.
@@ -334,7 +351,20 @@ class SecurityLogMonitor implements Runnable {
                     mPendingLogs.size()));
             Slog.i(TAG, "Pending logs buffer full. Discarding old logs.");
         }
-        if (DEBUG) Slog.d(TAG, mPendingLogs.size() + " pending events in the buffer after merging");
+        if (DEBUG) Slog.d(TAG, mPendingLogs.size() + " pending events in the buffer after merging,"
+                + " with ids " + mPendingLogs.get(0).getId()
+                + " to " + mPendingLogs.get(mPendingLogs.size() - 1).getId());
+    }
+
+    @GuardedBy("mLock")
+    private void assignLogId(SecurityEvent event) {
+        event.setId(mId);
+        if (mId == Long.MAX_VALUE) {
+            Slog.i(TAG, "Reached maximum id value; wrapping around.");
+            mId = 0;
+        } else {
+            mId++;
+        }
     }
 
     @Override

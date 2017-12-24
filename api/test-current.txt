@@ -114,6 +114,10 @@ package android.app.admin {
     field public static final java.lang.String EXTRA_RESTRICTION = "android.app.extra.RESTRICTION";
   }
 
+  public static final class SecurityLog.SecurityEvent implements android.os.Parcelable {
+    ctor public SecurityLog.SecurityEvent(long, byte[]);
+  }
+
 }
 
 package android.app.usage {
@@ -314,10 +318,6 @@ package android.location {
     method public void setType(int);
   }
 
-  public class LocationManager {
-    method public int getGnssYearOfHardware();
-  }
-
 }
 
 package android.net {
@@ -439,6 +439,10 @@ package android.provider {
     field public static final java.lang.String ACCESSIBILITY_DISPLAY_MAGNIFICATION_ENABLED = "accessibility_display_magnification_enabled";
     field public static final java.lang.String AUTOFILL_FEATURE_FIELD_CLASSIFICATION = "autofill_field_classification";
     field public static final java.lang.String AUTOFILL_SERVICE = "autofill_service";
+    field public static final java.lang.String AUTOFILL_USER_DATA_MAX_FIELD_CLASSIFICATION_IDS_SIZE = "autofill_user_data_max_field_classification_size";
+    field public static final java.lang.String AUTOFILL_USER_DATA_MAX_USER_DATA_SIZE = "autofill_user_data_max_user_data_size";
+    field public static final java.lang.String AUTOFILL_USER_DATA_MAX_VALUE_LENGTH = "autofill_user_data_max_value_length";
+    field public static final java.lang.String AUTOFILL_USER_DATA_MIN_VALUE_LENGTH = "autofill_user_data_min_value_length";
     field public static final java.lang.String DISABLED_PRINT_SERVICES = "disabled_print_services";
     field public static final deprecated java.lang.String ENABLED_NOTIFICATION_POLICY_ACCESS_PACKAGES = "enabled_notification_policy_access_packages";
     field public static final java.lang.String SYNC_PARENT_SOUNDS = "sync_parent_sounds";
@@ -681,21 +685,6 @@ package android.telephony.mbms.vendor {
     field public static final java.lang.String EXTRA_TEMP_FILES_IN_USE = "android.telephony.mbms.extra.TEMP_FILES_IN_USE";
     field public static final java.lang.String EXTRA_TEMP_FILE_ROOT = "android.telephony.mbms.extra.TEMP_FILE_ROOT";
     field public static final java.lang.String EXTRA_TEMP_LIST = "android.telephony.mbms.extra.TEMP_LIST";
-  }
-
-}
-
-package android.test.mock {
-
-  public class MockContext extends android.content.Context {
-    method public int getUserId();
-  }
-
-  public deprecated class MockPackageManager extends android.content.pm.PackageManager {
-    method public java.lang.String getDefaultBrowserPackageNameAsUser(int);
-    method public int getInstallReason(java.lang.String, android.os.UserHandle);
-    method public java.lang.String getPermissionControllerPackageName();
-    method public boolean isPermissionReviewModeEnabled();
   }
 
 }
@@ -982,6 +971,10 @@ package android.widget {
 
   public class Spinner extends android.widget.AbsSpinner implements android.content.DialogInterface.OnClickListener {
     method public boolean isPopupShowing();
+  }
+
+  public class TextClock extends android.widget.TextView {
+    method public void disableClockTick();
   }
 
   public class TimePicker extends android.widget.FrameLayout {

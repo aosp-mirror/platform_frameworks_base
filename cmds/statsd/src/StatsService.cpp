@@ -201,7 +201,7 @@ status_t StatsService::command(FILE* in, FILE* out, FILE* err, Vector<String8>& 
         }
 
         if (!args[0].compare(String8("print-uid-map"))) {
-            return cmd_print_uid_map(out);
+            return cmd_print_uid_map(out, args);
         }
 
         if (!args[0].compare(String8("dump-report"))) {
@@ -248,9 +248,10 @@ void StatsService::print_cmd_help(FILE* out) {
     fprintf(out, "   # adb shell start\n");
     fprintf(out, "\n");
     fprintf(out, "\n");
-    fprintf(out, "usage: adb shell cmd stats print-uid-map \n");
+    fprintf(out, "usage: adb shell cmd stats print-uid-map [PKG]\n");
     fprintf(out, "\n");
     fprintf(out, "  Prints the UID, app name, version mapping.\n");
+    fprintf(out, "  PKG           Optional package name to print the uids of the package\n");
     fprintf(out, "\n");
     fprintf(out, "\n");
     fprintf(out, "usage: adb shell cmd stats pull-source [int] \n");
@@ -497,8 +498,19 @@ status_t StatsService::cmd_print_stats(FILE* out, const Vector<String8>& args) {
     return NO_ERROR;
 }
 
-status_t StatsService::cmd_print_uid_map(FILE* out) {
-    mUidMap->printUidMap(out);
+status_t StatsService::cmd_print_uid_map(FILE* out, const Vector<String8>& args) {
+    if (args.size() > 1) {
+        string pkg;
+        pkg.assign(args[1].c_str(), args[1].size());
+        auto uids = mUidMap->getAppUid(pkg);
+        fprintf(out, "%s -> [ ", pkg.c_str());
+        for (const auto& uid : uids) {
+            fprintf(out, "%d ", uid);
+        }
+        fprintf(out, "]\n");
+    } else {
+        mUidMap->printUidMap(out);
+    }
     return NO_ERROR;
 }
 

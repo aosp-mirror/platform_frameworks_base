@@ -120,8 +120,6 @@ MultiApkGenerator::MultiApkGenerator(LoadedApk* apk, IAaptContext* context)
 }
 
 bool MultiApkGenerator::FromBaseApk(const MultiApkGeneratorOptions& options) {
-  // TODO(safarmer): Handle APK version codes for the generated APKs.
-
   std::unordered_set<std::string> artifacts_to_keep = options.kept_artifacts;
   std::unordered_set<std::string> filtered_artifacts;
   std::unordered_set<std::string> kept_artifacts;
@@ -237,8 +235,8 @@ std::unique_ptr<ResourceTable> MultiApkGenerator::FilterTable(IAaptContext* cont
     splits.config_filter = &axis_filter;
   }
 
-  if (artifact.android_sdk && artifact.android_sdk.value().min_sdk_version) {
-    wrapped_context.SetMinSdkVersion(artifact.android_sdk.value().min_sdk_version.value());
+  if (artifact.android_sdk) {
+    wrapped_context.SetMinSdkVersion(artifact.android_sdk.value().min_sdk_version);
   }
 
   std::unique_ptr<ResourceTable> table = old_table.Clone();
@@ -301,7 +299,7 @@ bool MultiApkGenerator::UpdateManifest(const OutputArtifact& artifact,
       if (xml::Attribute* min_sdk_attr =
               uses_sdk_el->FindAttribute(xml::kSchemaAndroid, "minSdkVersion")) {
         // Populate with a pre-compiles attribute to we don't need to relink etc.
-        const std::string& min_sdk_str = std::to_string(android_sdk.min_sdk_version.value());
+        const std::string& min_sdk_str = std::to_string(android_sdk.min_sdk_version);
         min_sdk_attr->compiled_value = ResourceUtils::TryParseInt(min_sdk_str);
       } else {
         // There was no minSdkVersion. This is strange since at this point we should have been

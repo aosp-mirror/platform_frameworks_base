@@ -21,40 +21,37 @@ import static android.view.Surface.ROTATION_180;
 import static android.view.Surface.ROTATION_270;
 import static android.view.Surface.ROTATION_90;
 
-import android.annotation.NonNull;
+import android.graphics.Path;
 import android.graphics.Point;
 import android.graphics.Rect;
+import android.graphics.RectF;
+import android.graphics.Region;
 import android.os.Parcel;
 import android.os.Parcelable;
 
 import com.android.internal.annotations.VisibleForTesting;
 
-import java.util.ArrayList;
 import java.util.List;
 
 /**
  * Represents a part of the display that is not functional for displaying content.
  *
  * <p>{@code DisplayCutout} is immutable.
- *
- * @hide will become API
  */
 public final class DisplayCutout {
 
-    private static final Rect ZERO_RECT = new Rect(0, 0, 0, 0);
-    private static final ArrayList<Point> EMPTY_LIST = new ArrayList<>();
+    private static final Rect ZERO_RECT = new Rect();
+    private static final Region EMPTY_REGION = new Region();
 
     /**
-     * An instance where {@link #hasCutout()} returns {@code false}.
+     * An instance where {@link #isEmpty()} returns {@code true}.
      *
      * @hide
      */
-    public static final DisplayCutout NO_CUTOUT =
-            new DisplayCutout(ZERO_RECT, ZERO_RECT, EMPTY_LIST);
+    public static final DisplayCutout NO_CUTOUT = new DisplayCutout(ZERO_RECT, EMPTY_REGION);
 
     private final Rect mSafeInsets;
-    private final Rect mBoundingRect;
-    private final List<Point> mBoundingPolygon;
+    private final Region mBounds;
 
     /**
      * Creates a DisplayCutout instance.
@@ -64,22 +61,18 @@ public final class DisplayCutout {
      * @hide
      */
     @VisibleForTesting
-    public DisplayCutout(Rect safeInsets, Rect boundingRect, List<Point> boundingPolygon) {
+    public DisplayCutout(Rect safeInsets, Region bounds) {
         mSafeInsets = safeInsets != null ? safeInsets : ZERO_RECT;
-        mBoundingRect = boundingRect != null ? boundingRect : ZERO_RECT;
-        mBoundingPolygon = boundingPolygon != null ? boundingPolygon : EMPTY_LIST;
+        mBounds = bounds != null ? bounds : Region.obtain();
     }
 
     /**
-     * Returns whether there is a cutout.
+     * Returns true if there is no cutout or it is outside of the content view.
      *
-     * If false, the safe insets will all return zero, and the bounding box or polygon will be
-     * empty or outside the content view.
-     *
-     * @return {@code true} if there is a cutout, {@code false} otherwise
+     * @hide
      */
-    public boolean hasCutout() {
-        return !mSafeInsets.equals(ZERO_RECT);
+    public boolean isEmpty() {
+        return mSafeInsets.equals(ZERO_RECT);
     }
 
     /** Returns the inset from the top which avoids the display cutout. */
@@ -103,44 +96,41 @@ public final class DisplayCutout {
     }
 
     /**
-     * Obtains the safe insets in a rect.
+     * Returns the safe insets in a rect.
      *
-     * @param out a rect which is set to the safe insets.
+     * @return a rect which is set to the safe insets.
      * @hide
      */
-    public void getSafeInsets(@NonNull Rect out) {
-        out.set(mSafeInsets);
+    public Rect getSafeInsets() {
+        return new Rect(mSafeInsets);
     }
 
     /**
-     * Obtains the bounding rect of the cutout.
+     * Returns the bounding region of the cutout.
      *
-     * @param outRect is filled with the bounding rect of the cutout. Coordinates are relative
+     * @return the bounding region of the cutout. Coordinates are relative
      *         to the top-left corner of the content view.
      */
-    public void getBoundingRect(@NonNull Rect outRect) {
-        outRect.set(mBoundingRect);
+    public Region getBounds() {
+        return Region.obtain(mBounds);
     }
 
     /**
-     * Obtains the bounding polygon of the cutout.
+     * Returns the bounding rect of the cutout.
      *
-     * @param outPolygon is filled with a list of points representing the corners of a convex
-     *         polygon which covers the cutout. Coordinates are relative to the
-     *         top-left corner of the content view.
+     * @return the bounding rect of the cutout. Coordinates are relative
+     *         to the top-left corner of the content view.
+     * @hide
      */
-    public void getBoundingPolygon(List<Point> outPolygon) {
-        outPolygon.clear();
-        for (int i = 0; i < mBoundingPolygon.size(); i++) {
-            outPolygon.add(new Point(mBoundingPolygon.get(i)));
-        }
+    public Rect getBoundingRect() {
+        // TODO(roosa): Inline.
+        return mBounds.getBounds();
     }
 
     @Override
     public int hashCode() {
         int result = mSafeInsets.hashCode();
-        result = result * 31 + mBoundingRect.hashCode();
-        result = result * 31 + mBoundingPolygon.hashCode();
+        result = result * 31 + mBounds.getBounds().hashCode();
         return result;
     }
 
@@ -152,8 +142,7 @@ public final class DisplayCutout {
         if (o instanceof DisplayCutout) {
             DisplayCutout c = (DisplayCutout) o;
             return mSafeInsets.equals(c.mSafeInsets)
-                    && mBoundingRect.equals(c.mBoundingRect)
-                    && mBoundingPolygon.equals(c.mBoundingPolygon);
+                    && mBounds.equals(c.mBounds);
         }
         return false;
     }
@@ -161,7 +150,7 @@ public final class DisplayCutout {
     @Override
     public String toString() {
         return "DisplayCutout{insets=" + mSafeInsets
-                + " bounding=" + mBoundingRect
+                + " bounds=" + mBounds
                 + "}";
     }
 
@@ -172,15 +161,13 @@ public final class DisplayCutout {
      * @hide
      */
     public DisplayCutout inset(int insetLeft, int insetTop, int insetRight, int insetBottom) {
-        if (mBoundingRect.isEmpty()
+        if (mBounds.isEmpty()
                 || insetLeft == 0 && insetTop == 0 && insetRight == 0 && insetBottom == 0) {
             return this;
         }
 
         Rect safeInsets = new Rect(mSafeInsets);
-        Rect boundingRect = new Rect(mBoundingRect);
-        ArrayList<Point> boundingPolygon = new ArrayList<>();
-        getBoundingPolygon(boundingPolygon);
+        Region bounds = Region.obtain(mBounds);
 
         // Note: it's not really well defined what happens when the inset is negative, because we
         // don't know if the safe inset needs to expand in general.
@@ -197,10 +184,9 @@ public final class DisplayCutout {
             safeInsets.right = atLeastZero(safeInsets.right - insetRight);
         }
 
-        boundingRect.offset(-insetLeft, -insetTop);
-        offset(boundingPolygon, -insetLeft, -insetTop);
+        bounds.translate(-insetLeft, -insetTop);
 
-        return new DisplayCutout(safeInsets, boundingRect, boundingPolygon);
+        return new DisplayCutout(safeInsets, bounds);
     }
 
     /**
@@ -210,20 +196,17 @@ public final class DisplayCutout {
      * @hide
      */
     public DisplayCutout calculateRelativeTo(Rect frame) {
-        if (mBoundingRect.isEmpty() || !Rect.intersects(frame, mBoundingRect)) {
+        if (mBounds.isEmpty() || !Rect.intersects(frame, mBounds.getBounds())) {
             return NO_CUTOUT;
         }
 
-        Rect boundingRect = new Rect(mBoundingRect);
-        ArrayList<Point> boundingPolygon = new ArrayList<>();
-        getBoundingPolygon(boundingPolygon);
-
-        return DisplayCutout.calculateRelativeTo(frame, boundingRect, boundingPolygon);
+        return DisplayCutout.calculateRelativeTo(frame, Region.obtain(mBounds));
     }
 
-    private static DisplayCutout calculateRelativeTo(Rect frame, Rect boundingRect,
-            ArrayList<Point> boundingPolygon) {
+    private static DisplayCutout calculateRelativeTo(Rect frame, Region bounds) {
+        Rect boundingRect = bounds.getBounds();
         Rect safeRect = new Rect();
+
         int bestArea = 0;
         int bestVariant = 0;
         for (int variant = ROTATION_0; variant <= ROTATION_270; variant++) {
@@ -247,10 +230,9 @@ public final class DisplayCutout {
                     Math.max(0, frame.bottom - safeRect.bottom));
         }
 
-        boundingRect.offset(-frame.left, -frame.top);
-        offset(boundingPolygon, -frame.left, -frame.top);
+        bounds.translate(-frame.left, -frame.top);
 
-        return new DisplayCutout(safeRect, boundingRect, boundingPolygon);
+        return new DisplayCutout(safeRect, bounds);
     }
 
     private static int calculateInsetVariantArea(Rect frame, Rect boundingRect, int variant,
@@ -277,11 +259,6 @@ public final class DisplayCutout {
         return value < 0 ? 0 : value;
     }
 
-    private static void offset(ArrayList<Point> points, int dx, int dy) {
-        for (int i = 0; i < points.size(); i++) {
-            points.get(i).offset(dx, dy);
-        }
-    }
 
     /**
      * Creates an instance from a bounding polygon.
@@ -289,20 +266,28 @@ public final class DisplayCutout {
      * @hide
      */
     public static DisplayCutout fromBoundingPolygon(List<Point> points) {
-        Rect boundingRect = new Rect(Integer.MAX_VALUE, Integer.MAX_VALUE,
-                Integer.MIN_VALUE, Integer.MIN_VALUE);
-        ArrayList<Point> boundingPolygon = new ArrayList<>();
+        Region bounds = Region.obtain();
+        Path path = new Path();
 
+        path.reset();
         for (int i = 0; i < points.size(); i++) {
             Point point = points.get(i);
-            boundingRect.left = Math.min(boundingRect.left, point.x);
-            boundingRect.right = Math.max(boundingRect.right, point.x);
-            boundingRect.top = Math.min(boundingRect.top, point.y);
-            boundingRect.bottom = Math.max(boundingRect.bottom, point.y);
-            boundingPolygon.add(new Point(point));
+            if (i == 0) {
+                path.moveTo(point.x, point.y);
+            } else {
+                path.lineTo(point.x, point.y);
+            }
         }
+        path.close();
 
-        return new DisplayCutout(ZERO_RECT, boundingRect, boundingPolygon);
+        RectF clipRect = new RectF();
+        path.computeBounds(clipRect, false /* unused */);
+        Region clipRegion = Region.obtain();
+        clipRegion.set((int) clipRect.left, (int) clipRect.top,
+                (int) clipRect.right, (int) clipRect.bottom);
+
+        bounds.setPath(path, clipRegion);
+        return new DisplayCutout(ZERO_RECT, bounds);
     }
 
     /**
@@ -336,8 +321,7 @@ public final class DisplayCutout {
             } else {
                 out.writeInt(1);
                 out.writeTypedObject(mInner.mSafeInsets, flags);
-                out.writeTypedObject(mInner.mBoundingRect, flags);
-                out.writeTypedList(mInner.mBoundingPolygon, flags);
+                out.writeTypedObject(mInner.mBounds, flags);
             }
         }
 
@@ -368,13 +352,10 @@ public final class DisplayCutout {
                 return NO_CUTOUT;
             }
 
-            ArrayList<Point> boundingPolygon = new ArrayList<>();
-
             Rect safeInsets = in.readTypedObject(Rect.CREATOR);
-            Rect boundingRect = in.readTypedObject(Rect.CREATOR);
-            in.readTypedList(boundingPolygon, Point.CREATOR);
+            Region bounds = in.readTypedObject(Region.CREATOR);
 
-            return new DisplayCutout(safeInsets, boundingRect, boundingPolygon);
+            return new DisplayCutout(safeInsets, bounds);
         }
 
         public DisplayCutout get() {

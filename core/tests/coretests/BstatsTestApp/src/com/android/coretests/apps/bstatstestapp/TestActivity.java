@@ -15,19 +15,12 @@
  */
 package com.android.coretests.apps.bstatstestapp;
 
-import com.android.frameworks.coretests.aidl.ICmdCallback;
-import com.android.frameworks.coretests.aidl.ICmdReceiver;
-
 import android.app.Activity;
 import android.os.Bundle;
-import android.os.RemoteException;
-import android.os.SystemClock;
 import android.util.Log;
 
 public class TestActivity extends Activity {
-    private static final String TAG = TestActivity.class.getName();
-
-    private static final String EXTRA_KEY_CMD_RECEIVER = "cmd_receiver";
+    private static final String TAG = TestActivity.class.getSimpleName();
 
     @Override
     public void onCreate(Bundle icicle) {
@@ -37,21 +30,7 @@ public class TestActivity extends Activity {
     }
 
     private void notifyActivityLaunched() {
-        if (getIntent() == null) {
-            return;
-        }
-
-        final Bundle extras = getIntent().getExtras();
-        if (extras == null) {
-            return;
-        }
-        final ICmdCallback callback = ICmdCallback.Stub.asInterface(
-                extras.getBinder(EXTRA_KEY_CMD_RECEIVER));
-        try {
-            callback.onActivityLaunched(mReceiver.asBinder());
-        } catch (RemoteException e) {
-            Log.e(TAG, "Error occured while notifying the test: " + e);
-        }
+        Common.notifyLaunched(getIntent(), mReceiver.asBinder(), TAG);
     }
 
     @Override
@@ -60,24 +39,17 @@ public class TestActivity extends Activity {
         Log.d(TAG, "finish called");
     }
 
-    private ICmdReceiver mReceiver = new ICmdReceiver.Stub() {
+    private BaseCmdReceiver mReceiver = new BaseCmdReceiver() {
         @Override
         public void doSomeWork(int durationMs) {
-            final long endTime = SystemClock.uptimeMillis() + durationMs;
-            double x;
-            double y;
-            double z;
-            while (SystemClock.uptimeMillis() <= endTime) {
-                x = 0.02;
-                x *= 1000;
-                y = x % 5;
-                z = Math.sqrt(y / 100);
-            }
-        };
+            Common.doSomeWork(durationMs);
+        }
 
         @Override
         public void finishHost() {
-            finish();
+            if (!isFinishing()) {
+                finish();
+            }
         }
     };
 }

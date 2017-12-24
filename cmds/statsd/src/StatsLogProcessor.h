@@ -56,7 +56,7 @@ public:
 private:
     mutable mutex mBroadcastTimesMutex;
 
-    std::unordered_map<ConfigKey, std::unique_ptr<MetricsManager>> mMetricsManagers;
+    std::unordered_map<ConfigKey, sp<MetricsManager>> mMetricsManagers;
 
     std::unordered_map<ConfigKey, long> mLastBroadcastTimes;
 

@@ -120,7 +120,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 
             @Override
             /* package */ void onTransactionComplete(@ContextHubTransaction.Result int result) {
-                if (result == ContextHubTransaction.TRANSACTION_SUCCESS) {
+                if (result == ContextHubTransaction.RESULT_SUCCESS) {
                     // NOTE: The legacy JNI code used to do a query right after a load success
                     // to synchronize the service cache. Instead store the binary that was
                     // requested to load to update the cache later without doing a query.
@@ -130,7 +130,7 @@ import java.util.concurrent.atomic.AtomicInteger;
                 }
                 try {
                     onCompleteCallback.onTransactionComplete(result);
-                    if (result == ContextHubTransaction.TRANSACTION_SUCCESS) {
+                    if (result == ContextHubTransaction.RESULT_SUCCESS) {
                         mClientManager.onNanoAppLoaded(contextHubId, nanoAppBinary.getNanoAppId());
                     }
                 } catch (RemoteException e) {
@@ -166,12 +166,12 @@ import java.util.concurrent.atomic.AtomicInteger;
 
             @Override
             /* package */ void onTransactionComplete(@ContextHubTransaction.Result int result) {
-                if (result == ContextHubTransaction.TRANSACTION_SUCCESS) {
+                if (result == ContextHubTransaction.RESULT_SUCCESS) {
                     mNanoAppStateManager.removeNanoAppInstance(contextHubId, nanoAppId);
                 }
                 try {
                     onCompleteCallback.onTransactionComplete(result);
-                    if (result == ContextHubTransaction.TRANSACTION_SUCCESS) {
+                    if (result == ContextHubTransaction.RESULT_SUCCESS) {
                         mClientManager.onNanoAppUnloaded(contextHubId, nanoAppId);
                     }
                 } catch (RemoteException e) {
@@ -334,8 +334,8 @@ import java.util.concurrent.atomic.AtomicInteger;
 
         transaction.onTransactionComplete(
                 (result == TransactionResult.SUCCESS) ?
-                        ContextHubTransaction.TRANSACTION_SUCCESS :
-                        ContextHubTransaction.TRANSACTION_FAILED_AT_HUB);
+                        ContextHubTransaction.RESULT_SUCCESS :
+                        ContextHubTransaction.RESULT_FAILED_AT_HUB);
         removeTransactionAndStartNext();
     }
 
@@ -356,7 +356,7 @@ import java.util.concurrent.atomic.AtomicInteger;
             return;
         }
 
-        transaction.onQueryResponse(ContextHubTransaction.TRANSACTION_SUCCESS, nanoAppStateList);
+        transaction.onQueryResponse(ContextHubTransaction.RESULT_SUCCESS, nanoAppStateList);
         removeTransactionAndStartNext();
     }
 
@@ -416,7 +416,7 @@ import java.util.concurrent.atomic.AtomicInteger;
                         if (!transaction.isComplete()) {
                             Log.d(TAG, transaction + " timed out");
                             transaction.onTransactionComplete(
-                                    ContextHubTransaction.TRANSACTION_FAILED_TIMEOUT);
+                                    ContextHubTransaction.RESULT_FAILED_TIMEOUT);
 
                             removeTransactionAndStartNext();
                         }

@@ -40,12 +40,6 @@ public:
 
     virtual ~EventMetricProducer();
 
-    // TODO: Implement this later.
-    virtual void notifyAppUpgrade(const string& apk, const int uid, const int64_t version)
-            override{};
-    // TODO: Implement this later.
-    virtual void notifyAppRemoved(const string& apk, const int uid) override{};
-
 protected:
     void startNewProtoOutputStreamLocked();
 

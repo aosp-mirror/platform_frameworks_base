@@ -66,7 +66,7 @@ bool XmlNodeAction::Execute(XmlActionExecutorPolicy policy, std::vector<StringPi
         continue;
       }
 
-      if (policy == XmlActionExecutorPolicy::kWhitelist) {
+      if (policy != XmlActionExecutorPolicy::kNone) {
         DiagMessage error_msg(child_el->line_number);
         error_msg << "unexpected element ";
         PrintElementToDiagMessage(child_el, &error_msg);
@@ -74,8 +74,14 @@ bool XmlNodeAction::Execute(XmlActionExecutorPolicy policy, std::vector<StringPi
         for (const StringPiece& element : *bread_crumb) {
           error_msg << "<" << element << ">";
         }
-        diag->Error(error_msg);
-        error = true;
+        if (policy == XmlActionExecutorPolicy::kWhitelistWarning) {
+          // Treat the error only as a warning.
+          diag->Warn(error_msg);
+        } else {
+          // Policy is XmlActionExecutorPolicy::kWhitelist, we should fail.
+          diag->Error(error_msg);
+          error = true;
+        }
       }
     }
   }

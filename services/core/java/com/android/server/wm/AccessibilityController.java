@@ -16,6 +16,7 @@
 
 package com.android.server.wm;
 
+import static android.view.WindowManager.LayoutParams.TYPE_DOCK_DIVIDER;
 import static android.view.WindowManager.LayoutParams.TYPE_MAGNIFICATION_OVERLAY;
 import static android.view.WindowManager.LayoutParams.PRIVATE_FLAG_IS_ROUNDED_CORNERS_OVERLAY;
 
@@ -1068,8 +1069,11 @@ final class AccessibilityController {
                         continue;
                     }
 
-                    // If the window is not touchable - ignore.
-                    if ((flags & WindowManager.LayoutParams.FLAG_NOT_TOUCHABLE) != 0) {
+                    // Ignore non-touchable windows, except the split-screen divider, which is
+                    // occasionally non-touchable but still useful for identifying split-screen
+                    // mode.
+                    if (((flags & WindowManager.LayoutParams.FLAG_NOT_TOUCHABLE) != 0)
+                            && (windowState.mAttrs.type != TYPE_DOCK_DIVIDER)) {
                         continue;
                     }
 

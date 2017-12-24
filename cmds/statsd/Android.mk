@@ -54,7 +54,7 @@ statsd_common_src := \
     src/storage/StorageManager.cpp \
     src/StatsLogProcessor.cpp \
     src/StatsService.cpp \
-    src/stats_util.cpp \
+    src/HashableDimensionKey.cpp \
     src/guardrail/MemoryLeakTrackUtil.cpp \
     src/guardrail/StatsdStats.cpp
 
@@ -174,7 +174,8 @@ LOCAL_SRC_FILES := \
     tests/metrics/EventMetricProducer_test.cpp \
     tests/metrics/ValueMetricProducer_test.cpp \
     tests/metrics/GaugeMetricProducer_test.cpp \
-    tests/guardrail/StatsdStats_test.cpp
+    tests/guardrail/StatsdStats_test.cpp \
+    tests/metrics/metrics_test_helper.cpp
 
 LOCAL_STATIC_LIBRARIES := \
     $(statsd_common_static_libraries) \

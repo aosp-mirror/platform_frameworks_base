@@ -44,7 +44,8 @@ LOCAL_STATIC_JAVA_LIBRARIES := \
     android-support-test \
     mockito-robolectric-prebuilt \
     platform-test-annotations \
-    truth-prebuilt
+    truth-prebuilt \
+    testng
 
 LOCAL_JAVA_LIBRARIES := \
     junit \

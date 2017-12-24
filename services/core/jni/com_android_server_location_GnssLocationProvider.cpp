@@ -48,6 +48,7 @@ static jmethodID method_reportAGpsStatus;
 static jmethodID method_reportNmea;
 static jmethodID method_setEngineCapabilities;
 static jmethodID method_setGnssYearOfHardware;
+static jmethodID method_setGnssHardwareModelName;
 static jmethodID method_xtraDownloadRequest;
 static jmethodID method_reportNiNotification;
 static jmethodID method_requestRefLocation;
@@ -373,12 +374,11 @@ struct GnssCallback : public IGnssCallback {
 Return<void> GnssCallback::gnssNameCb(const android::hardware::hidl_string& name) {
     ALOGD("%s: name=%s\n", __func__, name.c_str());
 
-    // TODO(b/38003769): build Java code to connect to below code
-    /*
     JNIEnv* env = getJniEnv();
-    env->CallVoidMethod(mCallbacksObj, method_setGnssHardwareName, name);
+    jstring jstringName = env->NewStringUTF(name.c_str());
+    env->CallVoidMethod(mCallbacksObj, method_setGnssHardwareModelName, jstringName);
     checkAndClearExceptionFromCallback(env, __FUNCTION__);
-    */
+
     return Void();
 }
 
@@ -1031,6 +1031,8 @@ static void android_location_GnssLocationProvider_class_init_native(JNIEnv* env,
     method_reportNmea = env->GetMethodID(clazz, "reportNmea", "(J)V");
     method_setEngineCapabilities = env->GetMethodID(clazz, "setEngineCapabilities", "(I)V");
     method_setGnssYearOfHardware = env->GetMethodID(clazz, "setGnssYearOfHardware", "(I)V");
+    method_setGnssHardwareModelName = env->GetMethodID(clazz, "setGnssHardwareModelName",
+            "(Ljava/lang/String;)V");
     method_xtraDownloadRequest = env->GetMethodID(clazz, "xtraDownloadRequest", "()V");
     method_reportNiNotification = env->GetMethodID(clazz, "reportNiNotification",
             "(IIIIILjava/lang/String;Ljava/lang/String;II)V");

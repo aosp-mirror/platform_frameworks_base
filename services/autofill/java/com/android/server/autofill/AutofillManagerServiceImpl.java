@@ -43,7 +43,6 @@ import android.os.Binder;
 import android.os.Bundle;
 import android.os.IBinder;
 import android.os.Looper;
-import android.os.Process;
 import android.os.RemoteCallbackList;
 import android.os.RemoteException;
 import android.os.SystemClock;
@@ -401,7 +400,7 @@ final class AutofillManagerServiceImpl {
             return;
         }
 
-        session.logContextCommittedLocked();
+        session.logContextCommitted();
 
         final boolean finished = session.showSaveLocked();
         if (sVerbose) Slog.v(TAG, "finishSessionLocked(): session finished on save? " + finished);
@@ -714,7 +713,7 @@ final class AutofillManagerServiceImpl {
     /**
      * Updates the last fill response when an autofill context is committed.
      */
-    void logContextCommitted(int sessionId, @Nullable Bundle clientState,
+    void logContextCommittedLocked(int sessionId, @Nullable Bundle clientState,
             @Nullable ArrayList<String> selectedDatasets,
             @Nullable ArraySet<String> ignoredDatasets,
             @Nullable ArrayList<AutofillId> changedFieldIds,
@@ -724,44 +723,42 @@ final class AutofillManagerServiceImpl {
             @Nullable ArrayList<AutofillId> detectedFieldIdsList,
             @Nullable ArrayList<FieldClassification> detectedFieldClassificationsList,
             @NonNull String appPackageName) {
-        synchronized (mLock) {
-            if (isValidEventLocked("logDatasetNotSelected()", sessionId)) {
-                AutofillId[] detectedFieldsIds = null;
-                FieldClassification[] detectedFieldClassifications = null;
-                if (detectedFieldIdsList != null) {
-                    detectedFieldsIds = new AutofillId[detectedFieldIdsList.size()];
-                    detectedFieldIdsList.toArray(detectedFieldsIds);
-                    detectedFieldClassifications =
-                            new FieldClassification[detectedFieldClassificationsList.size()];
-                    detectedFieldClassificationsList.toArray(detectedFieldClassifications);
+        if (isValidEventLocked("logDatasetNotSelected()", sessionId)) {
+            AutofillId[] detectedFieldsIds = null;
+            FieldClassification[] detectedFieldClassifications = null;
+            if (detectedFieldIdsList != null) {
+                detectedFieldsIds = new AutofillId[detectedFieldIdsList.size()];
+                detectedFieldIdsList.toArray(detectedFieldsIds);
+                detectedFieldClassifications =
+                        new FieldClassification[detectedFieldClassificationsList.size()];
+                detectedFieldClassificationsList.toArray(detectedFieldClassifications);
 
-                    final int numberFields = detectedFieldsIds.length;
-                    int totalSize = 0;
-                    float totalScore = 0;
-                    for (int i = 0; i < numberFields; i++) {
-                        final FieldClassification fc = detectedFieldClassifications[i];
-                        final List<Match> matches = fc.getMatches();
-                        final int size = matches.size();
-                        totalSize += size;
-                        for (int j = 0; j < size; j++) {
-                            totalScore += matches.get(j).getScore();
-                        }
+                final int numberFields = detectedFieldsIds.length;
+                int totalSize = 0;
+                float totalScore = 0;
+                for (int i = 0; i < numberFields; i++) {
+                    final FieldClassification fc = detectedFieldClassifications[i];
+                    final List<Match> matches = fc.getMatches();
+                    final int size = matches.size();
+                    totalSize += size;
+                    for (int j = 0; j < size; j++) {
+                        totalScore += matches.get(j).getScore();
                     }
-
-                    final int averageScore = (int) ((totalScore * 100) / totalSize);
-                    mMetricsLogger.write(Helper
-                            .newLogMaker(MetricsEvent.AUTOFILL_FIELD_CLASSIFICATION_MATCHES,
-                                    appPackageName, getServicePackageName())
-                            .setCounterValue(numberFields)
-                            .addTaggedData(MetricsEvent.FIELD_AUTOFILL_MATCH_SCORE,
-                                    averageScore));
                 }
-                mEventHistory.addEvent(new Event(Event.TYPE_CONTEXT_COMMITTED, null,
-                        clientState, selectedDatasets, ignoredDatasets,
-                        changedFieldIds, changedDatasetIds,
-                        manuallyFilledFieldIds, manuallyFilledDatasetIds,
-                        detectedFieldsIds, detectedFieldClassifications));
+
+                final int averageScore = (int) ((totalScore * 100) / totalSize);
+                mMetricsLogger.write(Helper
+                        .newLogMaker(MetricsEvent.AUTOFILL_FIELD_CLASSIFICATION_MATCHES,
+                                appPackageName, getServicePackageName())
+                        .setCounterValue(numberFields)
+                        .addTaggedData(MetricsEvent.FIELD_AUTOFILL_MATCH_SCORE,
+                                averageScore));
             }
+            mEventHistory.addEvent(new Event(Event.TYPE_CONTEXT_COMMITTED, null,
+                    clientState, selectedDatasets, ignoredDatasets,
+                    changedFieldIds, changedDatasetIds,
+                    manuallyFilledFieldIds, manuallyFilledDatasetIds,
+                    detectedFieldsIds, detectedFieldClassifications));
         }
     }
 
@@ -835,7 +832,7 @@ final class AutofillManagerServiceImpl {
             pw.println(mContext.getString(R.string.config_defaultAutofillService));
         pw.print(prefix); pw.print("Disabled: "); pw.println(mDisabled);
         pw.print(prefix); pw.print("Field classification enabled: ");
-            pw.println(isFieldClassificationEnabled());
+            pw.println(isFieldClassificationEnabledLocked());
         pw.print(prefix); pw.print("Setup complete: "); pw.println(mSetupComplete);
         pw.print(prefix); pw.print("Last prune: "); pw.println(mLastPrune);
 
@@ -1095,7 +1092,18 @@ final class AutofillManagerServiceImpl {
         return false;
     }
 
-    boolean isFieldClassificationEnabled() {
+    // Called by AutofillManager, checks UID.
+    boolean isFieldClassificationEnabled(int uid) {
+        synchronized (mLock) {
+            if (!isCalledByServiceLocked("isFieldClassificationEnabled", uid)) {
+                return false;
+            }
+            return isFieldClassificationEnabledLocked();
+        }
+    }
+
+    // Called by internally, no need to check UID.
+    boolean isFieldClassificationEnabledLocked() {
         return Settings.Secure.getIntForUser(
                 mContext.getContentResolver(),
                 Settings.Secure.AUTOFILL_FEATURE_FIELD_CLASSIFICATION, 0,

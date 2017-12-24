@@ -248,6 +248,12 @@ StatsdConfig build_fake_config() {
     details->add_section(12);
     details->add_section(13);*/
 
+    AllowedLogSource* logSource = config.mutable_log_source();
+    logSource->add_uid(1000);
+    logSource->add_uid(0);
+    logSource->add_package("com.android.statsd.dogfood");
+    logSource->add_package("com.android.bluetooth");
+
     // Count process state changes, slice by uid.
     metric = config.add_count_metric();
     metric->set_name("METRIC_2");

@@ -45,8 +45,6 @@ struct GaugeBucket {
 // producer always reports the guage at the earliest time of the bucket when the condition is met.
 class GaugeMetricProducer : public virtual MetricProducer, public virtual PullDataReceiver {
 public:
-    // TODO: Pass in the start time from MetricsManager, it should be consistent
-    // for all metrics.
     GaugeMetricProducer(const ConfigKey& key, const GaugeMetric& countMetric,
                         const int conditionIndex, const sp<ConditionWizard>& wizard,
                         const int pullTagId, const int atomTagId, const int64_t startTimeNs);
@@ -55,12 +53,6 @@ public:
 
     // Handles when the pulled data arrives.
     void onDataPulled(const std::vector<std::shared_ptr<LogEvent>>& data) override;
-
-    // TODO: Implement this later.
-    virtual void notifyAppUpgrade(const string& apk, const int uid, const int64_t version)
-            override{};
-    // TODO: Implement this later.
-    virtual void notifyAppRemoved(const string& apk, const int uid) override{};
 
 protected:
     void onMatchedLogEventInternalLocked(

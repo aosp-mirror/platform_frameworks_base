@@ -109,7 +109,7 @@ HashableDimensionKey getDimensionKeyForCondition(const LogEvent& event,
         kv.set_key(link.key_in_condition(i).key());
     }
 
-    return getHashableKey(dimensionKey);
+    return HashableDimensionKey(dimensionKey);
 }
 
 }  // namespace statsd

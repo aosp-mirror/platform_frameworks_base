@@ -482,7 +482,7 @@ public class ContextHubService extends IContextHubService.Stub {
 
                 IContextHubClient client = mDefaultClientMap.get(contextHubHandle);
                 success = (client.sendMessageToNanoApp(message) ==
-                        ContextHubTransaction.TRANSACTION_SUCCESS);
+                        ContextHubTransaction.RESULT_SUCCESS);
             } else {
                 Log.e(TAG, "Failed to send nanoapp message - nanoapp with handle "
                         + nanoAppHandle + " does not exist.");
@@ -642,7 +642,7 @@ public class ContextHubService extends IContextHubService.Stub {
         if (nanoAppBinary == null) {
             Log.e(TAG, "NanoAppBinary cannot be null in loadNanoAppOnHub");
             transactionCallback.onTransactionComplete(
-                    ContextHubTransaction.TRANSACTION_FAILED_BAD_PARAMS);
+                    ContextHubTransaction.RESULT_FAILED_BAD_PARAMS);
             return;
         }
 
@@ -817,7 +817,7 @@ public class ContextHubService extends IContextHubService.Stub {
         if (mContextHubProxy == null) {
             try {
                 callback.onTransactionComplete(
-                        ContextHubTransaction.TRANSACTION_FAILED_HAL_UNAVAILABLE);
+                        ContextHubTransaction.RESULT_FAILED_HAL_UNAVAILABLE);
             } catch (RemoteException e) {
                 Log.e(TAG, "RemoteException while calling onTransactionComplete", e);
             }
@@ -828,7 +828,7 @@ public class ContextHubService extends IContextHubService.Stub {
                     + ContextHubTransaction.typeToString(transactionType, false /* upperCase */)
                     + " transaction for invalid hub ID " + contextHubId);
             try {
-                callback.onTransactionComplete(ContextHubTransaction.TRANSACTION_FAILED_BAD_PARAMS);
+                callback.onTransactionComplete(ContextHubTransaction.RESULT_FAILED_BAD_PARAMS);
             } catch (RemoteException e) {
                 Log.e(TAG, "RemoteException while calling onTransactionComplete", e);
             }

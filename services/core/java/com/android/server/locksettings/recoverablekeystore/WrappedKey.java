@@ -17,6 +17,7 @@
 package com.android.server.locksettings.recoverablekeystore;
 
 import android.util.Log;
+import android.security.recoverablekeystore.RecoverableKeyStoreLoader;
 
 import java.security.InvalidAlgorithmParameterException;
 import java.security.InvalidKeyException;
@@ -45,6 +46,7 @@ public class WrappedKey {
     private static final int GCM_TAG_LENGTH_BITS = 128;
 
     private final int mPlatformKeyGenerationId;
+    private final int mRecoveryStatus;
     private final byte[] mNonce;
     private final byte[] mKeyMaterial;
 
@@ -94,7 +96,25 @@ public class WrappedKey {
         return new WrappedKey(
                 /*nonce=*/ cipher.getIV(),
                 /*keyMaterial=*/ encryptedKeyMaterial,
-                /*platformKeyGenerationId=*/ wrappingKey.getGenerationId());
+                /*platformKeyGenerationId=*/ wrappingKey.getGenerationId(),
+                RecoverableKeyStoreLoader.RECOVERY_STATUS_SYNC_IN_PROGRESS);
+    }
+
+    /**
+     * A new instance with default recovery status.
+     *
+     * @param nonce The nonce with which the key material was encrypted.
+     * @param keyMaterial The encrypted bytes of the key material.
+     * @param platformKeyGenerationId The generation ID of the key used to wrap this key.
+     *
+     * @see RecoverableKeyStoreLoader.RECOVERY_STATUS_SYNC_IN_PROGRESS
+     * @hide
+     */
+    public WrappedKey(byte[] nonce, byte[] keyMaterial, int platformKeyGenerationId) {
+        mNonce = nonce;
+        mKeyMaterial = keyMaterial;
+        mPlatformKeyGenerationId = platformKeyGenerationId;
+        mRecoveryStatus = RecoverableKeyStoreLoader.RECOVERY_STATUS_SYNC_IN_PROGRESS;
     }
 
     /**
@@ -103,13 +123,16 @@ public class WrappedKey {
      * @param nonce The nonce with which the key material was encrypted.
      * @param keyMaterial The encrypted bytes of the key material.
      * @param platformKeyGenerationId The generation ID of the key used to wrap this key.
+     * @param recoveryStatus recovery status of the key.
      *
      * @hide
      */
-    public WrappedKey(byte[] nonce, byte[] keyMaterial, int platformKeyGenerationId) {
+    public WrappedKey(byte[] nonce, byte[] keyMaterial, int platformKeyGenerationId,
+            int recoveryStatus) {
         mNonce = nonce;
         mKeyMaterial = keyMaterial;
         mPlatformKeyGenerationId = platformKeyGenerationId;
+        mRecoveryStatus = recoveryStatus;
     }
 
     /**
@@ -130,7 +153,6 @@ public class WrappedKey {
         return mKeyMaterial;
     }
 
-
     /**
      * Returns the generation ID of the platform key, with which this key was wrapped.
      *
@@ -138,6 +160,15 @@ public class WrappedKey {
      */
     public int getPlatformKeyGenerationId() {
         return mPlatformKeyGenerationId;
+    }
+
+    /**
+     * Returns recovery status of the key.
+     *
+     * @hide
+     */
+    public int getRecoveryStatus() {
+        return mRecoveryStatus;
     }
 
     /**

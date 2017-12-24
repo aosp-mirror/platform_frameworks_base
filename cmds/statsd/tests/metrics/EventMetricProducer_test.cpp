@@ -12,8 +12,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#include "metrics_test_helper.h"
 #include "src/metrics/EventMetricProducer.h"
+#include "metrics_test_helper.h"
 
 #include <gmock/gmock.h>
 #include <gtest/gtest.h>
@@ -100,13 +100,13 @@ TEST(EventMetricProducerTest, TestEventsWithSlicedCondition) {
     event1.write("111");  // uid
     event1.init();
     ConditionKey key1;
-    key1["APP_IN_BACKGROUND_PER_UID"] = "2:111|";
+    key1["APP_IN_BACKGROUND_PER_UID"] = getMockedDimensionKey(2, "111");
 
     LogEvent event2(1, bucketStartTimeNs + 10);
     event2.write("222");  // uid
     event2.init();
     ConditionKey key2;
-    key2["APP_IN_BACKGROUND_PER_UID"] = "2:222|";
+    key2["APP_IN_BACKGROUND_PER_UID"] = getMockedDimensionKey(2, "222");
 
     sp<MockConditionWizard> wizard = new NaggyMock<MockConditionWizard>();
     EXPECT_CALL(*wizard, query(_, key1)).WillOnce(Return(ConditionState::kFalse));

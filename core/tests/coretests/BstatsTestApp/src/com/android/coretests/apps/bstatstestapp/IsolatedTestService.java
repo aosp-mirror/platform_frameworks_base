@@ -15,17 +15,14 @@
  */
 package com.android.coretests.apps.bstatstestapp;
 
-import com.android.frameworks.coretests.aidl.ICmdReceiver;
-
 import android.app.Service;
 import android.content.Intent;
 import android.os.IBinder;
 import android.os.Process;
-import android.os.SystemClock;
 import android.util.Log;
 
 public class IsolatedTestService extends Service {
-    private static final String TAG = IsolatedTestService.class.getName();
+    private static final String TAG = IsolatedTestService.class.getSimpleName();
 
     @Override
     public void onCreate() {
@@ -34,23 +31,20 @@ public class IsolatedTestService extends Service {
 
     @Override
     public IBinder onBind(Intent intent) {
+        Log.d(TAG, "onBind called. myUid=" + Process.myUid());
         return mReceiver.asBinder();
     }
 
-    private ICmdReceiver mReceiver = new ICmdReceiver.Stub() {
+    @Override
+    public void onDestroy() {
+        Log.d(TAG, "onDestroy called. myUid=" + Process.myUid());
+    }
+
+    private BaseCmdReceiver mReceiver = new BaseCmdReceiver() {
         @Override
         public void doSomeWork(int durationMs) {
-            final long endTime = SystemClock.uptimeMillis() + durationMs;
-            double x;
-            double y;
-            double z;
-            while (SystemClock.uptimeMillis() <= endTime) {
-                x = 0.02;
-                x *= 1000;
-                y = x % 5;
-                z = Math.sqrt(y / 100);
-            }
-        };
+            Common.doSomeWork(durationMs);
+        }
 
         @Override
         public void finishHost() {

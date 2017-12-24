@@ -63,7 +63,7 @@ map<string, HashableDimensionKey> getWakeLockQueryKey(int key, int uid,
     vector<KeyValuePair> kv_list;
     kv_list.push_back(kv1);
     map<string, HashableDimensionKey> queryKey;
-    queryKey[conditionName] = getHashableKey(kv_list);
+    queryKey[conditionName] = HashableDimensionKey(kv_list);
     return queryKey;
 }
 
