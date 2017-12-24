@@ -31,6 +31,7 @@ import android.os.BatteryManager;
 import android.os.BatteryStats;
 import android.os.Build;
 import android.os.connectivity.CellularBatteryStats;
+import android.os.connectivity.GpsBatteryStats;
 import android.os.FileUtils;
 import android.os.Handler;
 import android.os.IBatteryPropertiesRegistrar;
@@ -73,6 +74,7 @@ import android.view.Display;
 
 import com.android.internal.annotations.GuardedBy;
 import com.android.internal.annotations.VisibleForTesting;
+import com.android.internal.location.gnssmetrics.GnssMetrics;
 import com.android.internal.net.NetworkStatsFactory;
 import com.android.internal.util.ArrayUtils;
 import com.android.internal.util.FastPrintWriter;
@@ -634,6 +636,10 @@ public class BatteryStatsImpl extends BatteryStats {
 
     int mCameraOnNesting;
     StopwatchTimer mCameraOnTimer;
+
+    int mGpsSignalQualityBin = -1;
+    final StopwatchTimer[] mGpsSignalQualityTimer =
+        new StopwatchTimer[GnssMetrics.NUM_GPS_SIGNAL_QUALITY_LEVELS];
 
     int mPhoneSignalStrengthBin = -1;
     int mPhoneSignalStrengthBinRaw = -1;
@@ -4478,8 +4484,35 @@ public class BatteryStatsImpl extends BatteryStats {
             if (DEBUG_HISTORY) Slog.v(TAG, "Stop GPS to: "
                     + Integer.toHexString(mHistoryCur.states));
             addHistoryRecordLocked(elapsedRealtime, uptime);
+            stopAllGpsSignalQualityTimersLocked(-1);
+            mGpsSignalQualityBin = -1;
         }
         getUidStatsLocked(uid).noteStopGps(elapsedRealtime);
+    }
+
+    public void noteGpsSignalQualityLocked(int signalLevel) {
+        if (mGpsNesting == 0) {
+            return;
+        }
+        if (signalLevel < 0 || signalLevel >= GnssMetrics.NUM_GPS_SIGNAL_QUALITY_LEVELS) {
+            stopAllGpsSignalQualityTimersLocked(-1);
+            return;
+        }
+        final long elapsedRealtime = mClocks.elapsedRealtime();
+        final long uptime = mClocks.uptimeMillis();
+        if (mGpsSignalQualityBin != signalLevel) {
+            if (mGpsSignalQualityBin >= 0) {
+                mGpsSignalQualityTimer[mGpsSignalQualityBin].stopRunningLocked(elapsedRealtime);
+            }
+            if(!mGpsSignalQualityTimer[signalLevel].isRunningLocked()) {
+                mGpsSignalQualityTimer[signalLevel].startRunningLocked(elapsedRealtime);
+            }
+            mHistoryCur.states2 = (mHistoryCur.states2&~HistoryItem.STATE2_GPS_SIGNAL_QUALITY_MASK)
+                    | (signalLevel << HistoryItem.STATE2_GPS_SIGNAL_QUALITY_SHIFT);
+            addHistoryRecordLocked(elapsedRealtime, uptime);
+            mGpsSignalQualityBin = signalLevel;
+        }
+        return;
     }
 
     public void noteScreenStateLocked(int state) {
@@ -4813,6 +4846,18 @@ public class BatteryStatsImpl extends BatteryStats {
             mDailyPackageChanges = new ArrayList<>();
         }
         mDailyPackageChanges.add(pc);
+    }
+
+    void stopAllGpsSignalQualityTimersLocked(int except) {
+        final long elapsedRealtime = mClocks.elapsedRealtime();
+        for (int i = 0; i < GnssMetrics.NUM_GPS_SIGNAL_QUALITY_LEVELS; i++) {
+            if (i == except) {
+                continue;
+            }
+            while (mGpsSignalQualityTimer[i].isRunningLocked()) {
+                mGpsSignalQualityTimer[i].stopRunningLocked(elapsedRealtime);
+            }
+        }
     }
 
     public void notePhoneOnLocked() {
@@ -6050,6 +6095,20 @@ public class BatteryStatsImpl extends BatteryStats {
             val -= mUnpluggedNumConnectivityChange;
         }
         return val;
+    }
+
+    @Override public long getGpsSignalQualityTime(int strengthBin,
+        long elapsedRealtimeUs, int which) {
+        if (strengthBin < 0 || strengthBin >= GnssMetrics.NUM_GPS_SIGNAL_QUALITY_LEVELS) {
+            return 0;
+        }
+        return mGpsSignalQualityTimer[strengthBin].getTotalTimeLocked(
+            elapsedRealtimeUs, which);
+    }
+
+    @Override public long getGpsBatteryDrainMaMs() {
+        //TODO: Add GPS power computation (b/67213967)
+        return 0;
     }
 
     @Override public long getPhoneOnTime(long elapsedRealtimeUs, int which) {
@@ -9757,6 +9816,10 @@ public class BatteryStatsImpl extends BatteryStats {
             mWifiSignalStrengthsTimer[i] = new StopwatchTimer(mClocks, null, -800-i, null,
                     mOnBatteryTimeBase);
         }
+        for (int i=0; i< GnssMetrics.NUM_GPS_SIGNAL_QUALITY_LEVELS; i++) {
+            mGpsSignalQualityTimer[i] = new StopwatchTimer(mClocks, null, -1000-i, null,
+                mOnBatteryTimeBase);
+        }
         mAudioOnTimer = new StopwatchTimer(mClocks, null, -7, null, mOnBatteryTimeBase);
         mVideoOnTimer = new StopwatchTimer(mClocks, null, -8, null, mOnBatteryTimeBase);
         mFlashlightOnTimer = new StopwatchTimer(mClocks, null, -9, null, mOnBatteryTimeBase);
@@ -10445,6 +10508,9 @@ public class BatteryStatsImpl extends BatteryStats {
             mWifiSignalStrengthsTimer[i].reset(false);
         }
         mWifiMulticastWakelockTimer.reset(false);
+        for (int i=0; i< GnssMetrics.NUM_GPS_SIGNAL_QUALITY_LEVELS; i++) {
+            mGpsSignalQualityTimer[i].reset(false);
+        }
         mWifiActivity.reset(false);
         mBluetoothActivity.reset(false);
         mModemActivity.reset(false);
@@ -12301,6 +12367,21 @@ public class BatteryStatsImpl extends BatteryStats {
         return s;
     }
 
+    /*@hide */
+    public GpsBatteryStats getGpsBatteryStats() {
+        GpsBatteryStats s = new GpsBatteryStats();
+        final int which = STATS_SINCE_CHARGED;
+        final long rawRealTime = SystemClock.elapsedRealtime() * 1000;
+        s.setLoggingDurationMs(computeBatteryRealtime(rawRealTime, which) / 1000);
+        s.setEnergyConsumedMaMs(getGpsBatteryDrainMaMs());
+        long[] time = new long[GnssMetrics.NUM_GPS_SIGNAL_QUALITY_LEVELS];
+        for (int i=0; i<time.length; i++) {
+            time[i] = getGpsSignalQualityTime(i, rawRealTime, which) / 1000;
+        }
+        s.setTimeInGpsSignalQualityLevel(time);
+        return s;
+    }
+
     @Override
     public LevelStepTracker getChargeLevelStepTracker() {
         return mChargeStepTracker;
@@ -12906,6 +12987,9 @@ public class BatteryStatsImpl extends BatteryStats {
         for (int i=0; i<NUM_WIFI_SIGNAL_STRENGTH_BINS; i++) {
             mWifiSignalStrengthsTimer[i].readSummaryFromParcelLocked(in);
         }
+        for (int i=0; i<GnssMetrics.NUM_GPS_SIGNAL_QUALITY_LEVELS; i++) {
+            mGpsSignalQualityTimer[i].readSummaryFromParcelLocked(in);
+        }
         mWifiActivity.readSummaryFromParcel(in);
         mBluetoothActivity.readSummaryFromParcel(in);
         mModemActivity.readSummaryFromParcel(in);
@@ -13343,6 +13427,9 @@ public class BatteryStatsImpl extends BatteryStats {
         }
         for (int i=0; i<NUM_WIFI_SIGNAL_STRENGTH_BINS; i++) {
             mWifiSignalStrengthsTimer[i].writeSummaryFromParcelLocked(out, NOWREAL_SYS);
+        }
+        for (int i=0; i< GnssMetrics.NUM_GPS_SIGNAL_QUALITY_LEVELS; i++) {
+            mGpsSignalQualityTimer[i].writeSummaryFromParcelLocked(out, NOWREAL_SYS);
         }
         mWifiActivity.writeSummaryToParcel(out);
         mBluetoothActivity.writeSummaryToParcel(out);
@@ -13816,7 +13903,10 @@ public class BatteryStatsImpl extends BatteryStats {
             mWifiSignalStrengthsTimer[i] = new StopwatchTimer(mClocks, null, -800-i,
                     null, mOnBatteryTimeBase, in);
         }
-
+        for (int i=0; i<GnssMetrics.NUM_GPS_SIGNAL_QUALITY_LEVELS; i++) {
+            mGpsSignalQualityTimer[i] = new StopwatchTimer(mClocks, null, -1000-i,
+                null, mOnBatteryTimeBase, in);
+        }
         mWifiActivity = new ControllerActivityCounterImpl(mOnBatteryTimeBase,
                 NUM_WIFI_TX_LEVELS, in);
         mBluetoothActivity = new ControllerActivityCounterImpl(mOnBatteryTimeBase,
@@ -14016,6 +14106,9 @@ public class BatteryStatsImpl extends BatteryStats {
         for (int i=0; i<NUM_WIFI_SIGNAL_STRENGTH_BINS; i++) {
             mWifiSignalStrengthsTimer[i].writeToParcel(out, uSecRealtime);
         }
+        for (int i=0; i< GnssMetrics.NUM_GPS_SIGNAL_QUALITY_LEVELS; i++) {
+            mGpsSignalQualityTimer[i].writeToParcel(out, uSecRealtime);
+        }
         mWifiActivity.writeToParcel(out, 0);
         mBluetoothActivity.writeToParcel(out, 0);
         mModemActivity.writeToParcel(out, 0);
@@ -14209,6 +14302,10 @@ public class BatteryStatsImpl extends BatteryStats {
             for (int i=0; i<NUM_WIFI_SIGNAL_STRENGTH_BINS; i++) {
                 pr.println("*** Wifi signal strength #" + i + ":");
                 mWifiSignalStrengthsTimer[i].logState(pr, "  ");
+            }
+            for (int i=0; i<GnssMetrics.NUM_GPS_SIGNAL_QUALITY_LEVELS; i++) {
+                pr.println("*** GPS signal quality #" + i + ":");
+                mGpsSignalQualityTimer[i].logState(pr, "  ");
             }
             pr.println("*** Flashlight timer:");
             mFlashlightOnTimer.logState(pr, "  ");

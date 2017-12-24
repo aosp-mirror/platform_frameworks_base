@@ -35,6 +35,7 @@ import android.util.proto.ProtoOutputStream;
 import android.view.Display;
 
 import com.android.internal.annotations.VisibleForTesting;
+import com.android.internal.location.gnssmetrics.GnssMetrics;
 import com.android.internal.os.BatterySipper;
 import com.android.internal.os.BatteryStatsHelper;
 
@@ -1497,6 +1498,10 @@ public abstract class BatteryStats implements Parcelable {
         public static final int STATE2_WIFI_SIGNAL_STRENGTH_SHIFT = 4;
         public static final int STATE2_WIFI_SIGNAL_STRENGTH_MASK =
                 0x7 << STATE2_WIFI_SIGNAL_STRENGTH_SHIFT;
+        // Values for NUM_GPS_SIGNAL_QUALITY_LEVELS
+        public static final int STATE2_GPS_SIGNAL_QUALITY_SHIFT = 7;
+        public static final int STATE2_GPS_SIGNAL_QUALITY_MASK =
+            0x1 << STATE2_GPS_SIGNAL_QUALITY_SHIFT;
 
         public static final int STATE2_POWER_SAVE_FLAG = 1<<31;
         public static final int STATE2_VIDEO_ON_FLAG = 1<<30;
@@ -2085,6 +2090,23 @@ public abstract class BatteryStats implements Parcelable {
      */
     public abstract int getNumConnectivityChange(int which);
 
+
+    /**
+     * Returns the time in microseconds that the phone has been running with
+     * the given GPS signal quality level
+     *
+     * {@hide}
+     */
+    public abstract long getGpsSignalQualityTime(int strengthBin,
+        long elapsedRealtimeUs, int which);
+
+    /**
+     * Returns the GPS battery drain in mA-ms
+     *
+     * {@hide}
+     */
+    public abstract long getGpsBatteryDrainMaMs();
+
     /**
      * Returns the time in microseconds that the phone has been on while the device was
      * running on battery.
@@ -2309,6 +2331,9 @@ public abstract class BatteryStats implements Parcelable {
                 WIFI_SUPPL_STATE_NAMES, WIFI_SUPPL_STATE_SHORT_NAMES),
         new BitDescription(HistoryItem.STATE2_CAMERA_FLAG, "camera", "ca"),
         new BitDescription(HistoryItem.STATE2_BLUETOOTH_SCAN_FLAG, "ble_scan", "bles"),
+        new BitDescription(HistoryItem.STATE2_GPS_SIGNAL_QUALITY_MASK,
+            HistoryItem.STATE2_GPS_SIGNAL_QUALITY_SHIFT, "gps_signal_quality", "Gss",
+            new String[] { "poor", "good"}, new String[] { "poor", "good"}),
     };
 
     public static final String[] HISTORY_EVENT_NAMES = new String[] {
@@ -4725,6 +4750,43 @@ public abstract class BatteryStats implements Parcelable {
         pw.println(sb.toString());
 
         printControllerActivity(pw, sb, prefix, "WiFi", getWifiControllerActivity(), which);
+
+        pw.print(prefix);
+        sb.setLength(0);
+        sb.append(prefix);
+        sb.append("  GPS Statistics:");
+        pw.println(sb.toString());
+
+        sb.setLength(0);
+        sb.append(prefix);
+        sb.append("     GPS signal quality (Top 4 Average CN0):");
+        final String[] gpsSignalQualityDescription = new String[]{
+            "poor (less than 20 dBHz): ",
+            "good (greater than 20 dBHz): "};
+        final int numGpsSignalQualityBins = Math.min(GnssMetrics.NUM_GPS_SIGNAL_QUALITY_LEVELS,
+            gpsSignalQualityDescription.length);
+        for (int i=0; i<numGpsSignalQualityBins; i++) {
+            final long time = getGpsSignalQualityTime(i, rawRealtime, which);
+            sb.append("\n    ");
+            sb.append(prefix);
+            sb.append("  ");
+            sb.append(gpsSignalQualityDescription[i]);
+            formatTimeMs(sb, time/1000);
+            sb.append("(");
+            sb.append(formatRatioLocked(time, whichBatteryRealtime));
+            sb.append(") ");
+        }
+        pw.println(sb.toString());
+
+        final long gpsBatteryDrainMaMs = getGpsBatteryDrainMaMs();
+        if (gpsBatteryDrainMaMs > 0) {
+            pw.print(prefix);
+            sb.setLength(0);
+            sb.append(prefix);
+            sb.append("     Battery Drain (mAh): ");
+            sb.append(Double.toString(((double) gpsBatteryDrainMaMs)/(3600 * 1000)));
+            pw.println(sb.toString());
+        }
 
         pw.print(prefix);
         sb.setLength(0);
