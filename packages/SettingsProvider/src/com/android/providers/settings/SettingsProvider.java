@@ -1687,18 +1687,9 @@ public class SettingsProvider extends ContentProvider {
     }
 
     private List<String> getSettingsNamesLocked(int settingsType, int userId) {
-        boolean instantApp;
-        if (UserHandle.getAppId(Binder.getCallingUid()) < Process.FIRST_APPLICATION_UID) {
-            instantApp = false;
-        } else {
-            ApplicationInfo ai = getCallingApplicationInfoOrThrow();
-            instantApp = ai.isInstantApp();
-        }
-        if (instantApp) {
-            return new ArrayList<String>(getInstantAppAccessibleSettings(settingsType));
-        } else {
-            return mSettingsRegistry.getSettingsNamesLocked(settingsType, userId);
-        }
+        // Don't enforce the instant app whitelist for now -- its too prone to unintended breakage
+        // in the current form.
+        return mSettingsRegistry.getSettingsNamesLocked(settingsType, userId);
     }
 
     private void enforceSettingReadable(String settingName, int settingsType, int userId) {
@@ -1711,8 +1702,10 @@ public class SettingsProvider extends ContentProvider {
         }
         if (!getInstantAppAccessibleSettings(settingsType).contains(settingName)
                 && !getOverlayInstantAppAccessibleSettings(settingsType).contains(settingName)) {
-            throw new SecurityException("Setting " + settingName + " is not accessible from"
-                    + " ephemeral package " + getCallingPackage());
+            // Don't enforce the instant app whitelist for now -- its too prone to unintended
+            // breakage in the current form.
+            Slog.w(LOG_TAG, "Instant App " + ai.packageName
+                    + " trying to access unexposed setting, this will be an error in the future.");
         }
     }
 
