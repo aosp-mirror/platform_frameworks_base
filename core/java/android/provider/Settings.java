@@ -4878,6 +4878,16 @@ public final class Settings {
                 new SettingsValidators.InclusiveIntegerRangeValidator(0, 3600);
 
         /**
+         * Whether to wake the screen with the volume key, the value is boolean.
+         * 0 = 0ff, 1 = on
+         */
+        public static final String VOLUME_WAKE_SCREEN = "volume_wake_screen";
+
+        /** @hide */
+        public static final Validator VOLUME_WAKE_SCREEN_VALIDATOR =
+                BOOLEAN_VALIDATOR;
+
+        /**
          * IMPORTANT: If you add a new public settings you also have to add it to
          * PUBLIC_SETTINGS below. If the new setting is hidden you have to add
          * it to PRIVATE_SETTINGS below. Also add a validator that can validate
@@ -5105,6 +5115,7 @@ public final class Settings {
             PRIVATE_SETTINGS.add(STATUS_BAR_BRIGHTNESS_CONTROL);
             PRIVATE_SETTINGS.add(TORCH_LONG_PRESS_POWER_GESTURE);
             PRIVATE_SETTINGS.add(TORCH_LONG_PRESS_POWER_TIMEOUT);
+            PRIVATE_SETTINGS.add(VOLUME_WAKE_SCREEN);
         }
 
         /**
@@ -5235,6 +5246,7 @@ public final class Settings {
             VALIDATORS.put(STATUS_BAR_BRIGHTNESS_CONTROL, STATUS_BAR_BRIGHTNESS_CONTROL_VALIDATOR);
             VALIDATORS.put(TORCH_LONG_PRESS_POWER_GESTURE, TORCH_LONG_PRESS_POWER_GESTURE_VALIDATOR);
             VALIDATORS.put(TORCH_LONG_PRESS_POWER_TIMEOUT, TORCH_LONG_PRESS_POWER_TIMEOUT_VALIDATOR);
+            VALIDATORS.put(VOLUME_WAKE_SCREEN, VOLUME_WAKE_SCREEN_VALIDATOR);
         }
 
         /**
