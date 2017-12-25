@@ -71,6 +71,7 @@
 
     <!-- Device hardware keys -->
     <java-symbol type="integer" name="config_deviceHardwareKeys" />
+    <java-symbol type="integer" name="config_deviceHardwareWakeKeys" />
 
     <!-- Device keys user-customisable behavior -->
     <java-symbol type="integer" name="config_longPressOnHomeBehaviorHwkeys" />
