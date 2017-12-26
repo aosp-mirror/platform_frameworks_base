@@ -286,9 +286,8 @@ public class WallpaperManager {
         private Bitmap mDefaultWallpaper;
         private Handler mMainLooperHandler;
 
-        Globals(Looper looper) {
-            IBinder b = ServiceManager.getService(Context.WALLPAPER_SERVICE);
-            mService = IWallpaperManager.Stub.asInterface(b);
+        Globals(IWallpaperManager service, Looper looper) {
+            mService = service;
             mMainLooperHandler = new Handler(looper);
             forgetLoadedWallpaper();
         }
@@ -497,17 +496,17 @@ public class WallpaperManager {
     private static final Object sSync = new Object[0];
     private static Globals sGlobals;
 
-    static void initGlobals(Looper looper) {
+    static void initGlobals(IWallpaperManager service, Looper looper) {
         synchronized (sSync) {
             if (sGlobals == null) {
-                sGlobals = new Globals(looper);
+                sGlobals = new Globals(service, looper);
             }
         }
     }
 
-    /*package*/ WallpaperManager(Context context, Handler handler) {
+    /*package*/ WallpaperManager(IWallpaperManager service, Context context, Handler handler) {
         mContext = context;
-        initGlobals(context.getMainLooper());
+        initGlobals(service, context.getMainLooper());
     }
 
     /**
