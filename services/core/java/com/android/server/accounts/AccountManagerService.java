@@ -2007,11 +2007,11 @@ public class AccountManagerService
                     getAccountRemovedReceivers(accountToRename, accounts);
                 accounts.accountsDb.beginTransaction();
                 Account renamedAccount = new Account(newName, accountToRename.type);
-                if ((accounts.accountsDb.findCeAccountId(renamedAccount) >= 0)) {
-                    Log.e(TAG, "renameAccount failed - account with new name already exists");
-                    return null;
-                }
                 try {
+                    if ((accounts.accountsDb.findCeAccountId(renamedAccount) >= 0)) {
+                        Log.e(TAG, "renameAccount failed - account with new name already exists");
+                        return null;
+                    }
                     final long accountId = accounts.accountsDb.findDeAccountId(accountToRename);
                     if (accountId >= 0) {
                         accounts.accountsDb.renameCeAccount(accountId, newName);
