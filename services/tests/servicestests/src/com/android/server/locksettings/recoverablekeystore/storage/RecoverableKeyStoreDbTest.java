@@ -328,7 +328,6 @@ public class RecoverableKeyStoreDbTest {
     }
 
     @Test
-
     public void getRecoveryAgentUid_returnsUidIfSet() throws Exception {
         int userId = 12;
         int uid = 190992;
@@ -434,6 +433,17 @@ public class RecoverableKeyStoreDbTest {
                 serverParams2);
         assertThat(mRecoverableKeyStoreDb.getRecoveryServicePublicKey(userId, uid)).isEqualTo(
                 pubkey2);
+    }
+
+    @Test
+    public void getRecoveryServicePublicKey_returnsFirstKey() throws Exception {
+        int userId = 68;
+        int uid = 12904;
+        PublicKey publicKey = genRandomPublicKey();
+
+        mRecoverableKeyStoreDb.setRecoveryServicePublicKey(userId, uid, publicKey);
+
+        assertThat(mRecoverableKeyStoreDb.getRecoveryServicePublicKey(userId)).isEqualTo(publicKey);
     }
 
     @Test
