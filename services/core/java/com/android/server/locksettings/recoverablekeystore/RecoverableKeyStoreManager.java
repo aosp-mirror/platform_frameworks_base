@@ -34,6 +34,7 @@ import android.util.Log;
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.server.locksettings.recoverablekeystore.storage.RecoverableKeyStoreDb;
 import com.android.server.locksettings.recoverablekeystore.storage.RecoverySessionStorage;
+import com.android.server.locksettings.recoverablekeystore.storage.RecoverySnapshotStorage;
 
 import java.nio.charset.StandardCharsets;
 import java.security.InvalidKeyException;
@@ -75,6 +76,7 @@ public class RecoverableKeyStoreManager {
     private final ExecutorService mExecutorService;
     private final ListenersStorage mListenersStorage;
     private final RecoverableKeyGenerator mRecoverableKeyGenerator;
+    private final RecoverySnapshotStorage mSnapshotStorage;
 
     /**
      * Returns a new or existing instance.
@@ -89,7 +91,8 @@ public class RecoverableKeyStoreManager {
                     db,
                     new RecoverySessionStorage(),
                     Executors.newSingleThreadExecutor(),
-                    ListenersStorage.getInstance());
+                    ListenersStorage.getInstance(),
+                    new RecoverySnapshotStorage());
         }
         return mInstance;
     }
@@ -100,12 +103,14 @@ public class RecoverableKeyStoreManager {
             RecoverableKeyStoreDb recoverableKeyStoreDb,
             RecoverySessionStorage recoverySessionStorage,
             ExecutorService executorService,
-            ListenersStorage listenersStorage) {
+            ListenersStorage listenersStorage,
+            RecoverySnapshotStorage snapshotStorage) {
         mContext = context;
         mDatabase = recoverableKeyStoreDb;
         mRecoverySessionStorage = recoverySessionStorage;
         mExecutorService = executorService;
         mListenersStorage = listenersStorage;
+        mSnapshotStorage = snapshotStorage;
         try {
             mRecoverableKeyGenerator = RecoverableKeyGenerator.newInstance(mDatabase);
         } catch (NoSuchAlgorithmException e) {
@@ -143,24 +148,12 @@ public class RecoverableKeyStoreManager {
     public @NonNull KeyStoreRecoveryData getRecoveryData(@NonNull byte[] account, int userId)
             throws RemoteException {
         checkRecoverKeyStorePermission();
-        final int callingUid = Binder.getCallingUid(); // Recovery agent uid.
-        final int callingUserId = UserHandle.getCallingUserId();
-        final long callingIdentiy = Binder.clearCallingIdentity();
-        try {
-            // TODO: Return the latest snapshot for the calling recovery agent.
-        } finally {
-            Binder.restoreCallingIdentity(callingIdentiy);
-        }
 
-        // KeyStoreRecoveryData without application keys and empty recovery blob.
-        KeyStoreRecoveryData recoveryData =
-                new KeyStoreRecoveryData(
-                        /*snapshotVersion=*/ 1,
-                        new ArrayList<KeyStoreRecoveryMetadata>(),
-                        new ArrayList<KeyEntryRecoveryData>(),
-                        /*encryptedRecoveryKeyBlob=*/ new byte[] {});
-        throw new ServiceSpecificException(
-                RecoverableKeyStoreLoader.UNINITIALIZED_RECOVERY_PUBLIC_KEY);
+        KeyStoreRecoveryData snapshot = mSnapshotStorage.get(UserHandle.getCallingUserId());
+        if (snapshot == null) {
+            throw new ServiceSpecificException(RecoverableKeyStoreLoader.NO_SNAPSHOT_PENDING_ERROR);
+        }
+        return snapshot;
     }
 
     public void setSnapshotCreatedPendingIntent(@Nullable PendingIntent intent, int userId)
@@ -480,7 +473,7 @@ public class RecoverableKeyStoreManager {
         // So as not to block the critical path unlocking the phone, defer to another thread.
         try {
             mExecutorService.execute(KeySyncTask.newInstance(
-                    mContext, mDatabase, userId, storedHashType, credential));
+                    mContext, mDatabase, mSnapshotStorage, userId, storedHashType, credential));
         } catch (NoSuchAlgorithmException e) {
             Log.wtf(TAG, "Should never happen - algorithm unavailable for KeySync", e);
         } catch (KeyStoreException e) {

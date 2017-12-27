@@ -45,6 +45,8 @@ public class RecoverableKeyStoreLoader {
     public static final int NO_ERROR = KeyStore.NO_ERROR;
     public static final int SYSTEM_ERROR = KeyStore.SYSTEM_ERROR;
     public static final int UNINITIALIZED_RECOVERY_PUBLIC_KEY = 20;
+    public static final int NO_SNAPSHOT_PENDING_ERROR = 21;
+
     /**
      * Rate limit is enforced to prevent using too many trusted remote devices, since each device
      * can have its own number of user secret guesses allowed.

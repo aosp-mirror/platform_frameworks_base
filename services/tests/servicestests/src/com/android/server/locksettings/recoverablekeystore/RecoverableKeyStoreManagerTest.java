@@ -48,6 +48,7 @@ import android.support.test.runner.AndroidJUnit4;
 
 import com.android.server.locksettings.recoverablekeystore.storage.RecoverableKeyStoreDb;
 import com.android.server.locksettings.recoverablekeystore.storage.RecoverySessionStorage;
+import com.android.server.locksettings.recoverablekeystore.storage.RecoverySnapshotStorage;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
@@ -114,6 +115,7 @@ public class RecoverableKeyStoreManagerTest {
     private File mDatabaseFile;
     private RecoverableKeyStoreManager mRecoverableKeyStoreManager;
     private RecoverySessionStorage mRecoverySessionStorage;
+    private RecoverySnapshotStorage mRecoverySnapshotStorage;
 
     @Before
     public void setUp() {
@@ -134,7 +136,8 @@ public class RecoverableKeyStoreManagerTest {
                 mRecoverableKeyStoreDb,
                 mRecoverySessionStorage,
                 Executors.newSingleThreadExecutor(),
-                mMockListenersStorage);
+                mMockListenersStorage,
+                mRecoverySnapshotStorage);
     }
 
     @After
