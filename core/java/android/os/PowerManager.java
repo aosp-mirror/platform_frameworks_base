@@ -1540,7 +1540,7 @@ public final class PowerManager {
          */
         public void setWorkSource(WorkSource ws) {
             synchronized (mToken) {
-                if (ws != null && ws.size() == 0) {
+                if (ws != null && ws.isEmpty()) {
                     ws = null;
                 }
 
@@ -1552,7 +1552,7 @@ public final class PowerManager {
                     changed = true;
                     mWorkSource = new WorkSource(ws);
                 } else {
-                    changed = mWorkSource.diff(ws);
+                    changed = !mWorkSource.equals(ws);
                     if (changed) {
                         mWorkSource.set(ws);
                     }
