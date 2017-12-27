@@ -28,6 +28,7 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import android.content.Context;
@@ -70,6 +71,7 @@ public class KeySyncTaskTest {
     private static final String DATABASE_FILE_NAME = "recoverablekeystore.db";
     private static final int TEST_USER_ID = 1000;
     private static final int TEST_APP_UID = 10009;
+    private static final int TEST_RECOVERY_AGENT_UID = 90873;
     private static final String TEST_APP_KEY_ALIAS = "rcleaver";
     private static final int TEST_GENERATION_ID = 2;
     private static final int TEST_CREDENTIAL_TYPE = CREDENTIAL_TYPE_PASSWORD;
@@ -78,6 +80,7 @@ public class KeySyncTaskTest {
             "V1 THM_encrypted_recovery_key".getBytes(StandardCharsets.UTF_8);
 
     @Mock private PlatformKeyManager mPlatformKeyManager;
+    @Mock private RecoverySnapshotListenersStorage mSnapshotListenersStorage;
 
     private RecoverySnapshotStorage mRecoverySnapshotStorage;
     private RecoverableKeyStoreDb mRecoverableKeyStoreDb;
@@ -102,6 +105,7 @@ public class KeySyncTaskTest {
         mKeySyncTask = new KeySyncTask(
                 mRecoverableKeyStoreDb,
                 mRecoverySnapshotStorage,
+                mSnapshotListenersStorage,
                 TEST_USER_ID,
                 TEST_CREDENTIAL_TYPE,
                 TEST_CREDENTIAL,
@@ -202,6 +206,39 @@ public class KeySyncTaskTest {
     }
 
     @Test
+    public void run_doesNotSendAnythingIfNoRecoveryAgentSet() throws Exception {
+        SecretKey applicationKey = generateKey();
+        mRecoverableKeyStoreDb.setPlatformKeyGenerationId(TEST_USER_ID, TEST_GENERATION_ID);
+        mRecoverableKeyStoreDb.insertKey(
+                TEST_USER_ID,
+                TEST_APP_UID,
+                TEST_APP_KEY_ALIAS,
+                WrappedKey.fromSecretKey(mEncryptKey, applicationKey));
+        when(mSnapshotListenersStorage.hasListener(TEST_RECOVERY_AGENT_UID)).thenReturn(true);
+
+        mKeySyncTask.run();
+
+        assertNull(mRecoverySnapshotStorage.get(TEST_USER_ID));
+    }
+
+    @Test
+    public void run_doesNotSendAnythingIfNoRecoveryAgentPendingIntentRegistered() throws Exception {
+        SecretKey applicationKey = generateKey();
+        mRecoverableKeyStoreDb.setPlatformKeyGenerationId(TEST_USER_ID, TEST_GENERATION_ID);
+        mRecoverableKeyStoreDb.insertKey(
+                TEST_USER_ID,
+                TEST_APP_UID,
+                TEST_APP_KEY_ALIAS,
+                WrappedKey.fromSecretKey(mEncryptKey, applicationKey));
+        mRecoverableKeyStoreDb.setRecoveryServicePublicKey(
+                TEST_USER_ID, TEST_RECOVERY_AGENT_UID, mKeyPair.getPublic());
+
+        mKeySyncTask.run();
+
+        assertNull(mRecoverySnapshotStorage.get(TEST_USER_ID));
+    }
+
+    @Test
     public void run_sendsEncryptedKeysIfAvailableToSync() throws Exception {
         SecretKey applicationKey = generateKey();
         mRecoverableKeyStoreDb.setPlatformKeyGenerationId(TEST_USER_ID, TEST_GENERATION_ID);
@@ -210,6 +247,9 @@ public class KeySyncTaskTest {
                 TEST_APP_UID,
                 TEST_APP_KEY_ALIAS,
                 WrappedKey.fromSecretKey(mEncryptKey, applicationKey));
+        mRecoverableKeyStoreDb.setRecoveryServicePublicKey(
+                TEST_USER_ID, TEST_RECOVERY_AGENT_UID, mKeyPair.getPublic());
+        when(mSnapshotListenersStorage.hasListener(TEST_RECOVERY_AGENT_UID)).thenReturn(true);
 
         mKeySyncTask.run();
 
@@ -218,6 +258,7 @@ public class KeySyncTaskTest {
                 recoveryData.getRecoveryMetadata().get(0).getKeyDerivationParameters();
         assertEquals(KeyDerivationParameters.ALGORITHM_SHA256,
                 keyDerivationParameters.getAlgorithm());
+        verify(mSnapshotListenersStorage).recoverySnapshotAvailable(TEST_RECOVERY_AGENT_UID);
         byte[] lockScreenHash = KeySyncTask.hashCredentials(
                 keyDerivationParameters.getSalt(),
                 TEST_CREDENTIAL);

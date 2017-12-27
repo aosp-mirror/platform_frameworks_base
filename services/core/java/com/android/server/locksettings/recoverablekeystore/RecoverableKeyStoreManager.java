@@ -45,7 +45,6 @@ import java.security.PublicKey;
 import java.security.UnrecoverableKeyException;
 import java.security.spec.InvalidKeySpecException;
 import java.security.spec.X509EncodedKeySpec;
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
@@ -74,7 +73,7 @@ public class RecoverableKeyStoreManager {
     private final RecoverableKeyStoreDb mDatabase;
     private final RecoverySessionStorage mRecoverySessionStorage;
     private final ExecutorService mExecutorService;
-    private final ListenersStorage mListenersStorage;
+    private final RecoverySnapshotListenersStorage mListenersStorage;
     private final RecoverableKeyGenerator mRecoverableKeyGenerator;
     private final RecoverySnapshotStorage mSnapshotStorage;
 
@@ -91,8 +90,8 @@ public class RecoverableKeyStoreManager {
                     db,
                     new RecoverySessionStorage(),
                     Executors.newSingleThreadExecutor(),
-                    ListenersStorage.getInstance(),
-                    new RecoverySnapshotStorage());
+                    new RecoverySnapshotStorage(),
+                    new RecoverySnapshotListenersStorage());
         }
         return mInstance;
     }
@@ -103,8 +102,8 @@ public class RecoverableKeyStoreManager {
             RecoverableKeyStoreDb recoverableKeyStoreDb,
             RecoverySessionStorage recoverySessionStorage,
             ExecutorService executorService,
-            ListenersStorage listenersStorage,
-            RecoverySnapshotStorage snapshotStorage) {
+            RecoverySnapshotStorage snapshotStorage,
+            RecoverySnapshotListenersStorage listenersStorage) {
         mContext = context;
         mDatabase = recoverableKeyStoreDb;
         mRecoverySessionStorage = recoverySessionStorage;
@@ -462,7 +461,7 @@ public class RecoverableKeyStoreManager {
     /**
      * This function can only be used inside LockSettingsService.
      *
-     * @param storedHashType from {@Code CredentialHash}
+     * @param storedHashType from {@code CredentialHash}
      * @param credential - unencrypted String. Password length should be at most 16 symbols {@code
      *     mPasswordMaxLength}
      * @param userId for user who just unlocked the device.
@@ -473,7 +472,13 @@ public class RecoverableKeyStoreManager {
         // So as not to block the critical path unlocking the phone, defer to another thread.
         try {
             mExecutorService.execute(KeySyncTask.newInstance(
-                    mContext, mDatabase, mSnapshotStorage, userId, storedHashType, credential));
+                    mContext,
+                    mDatabase,
+                    mSnapshotStorage,
+                    mListenersStorage,
+                    userId,
+                    storedHashType,
+                    credential));
         } catch (NoSuchAlgorithmException e) {
             Log.wtf(TAG, "Should never happen - algorithm unavailable for KeySync", e);
         } catch (KeyStoreException e) {
