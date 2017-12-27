@@ -24,6 +24,7 @@ import android.database.ContentObserver;
 import android.net.Uri;
 import android.os.Handler;
 import android.provider.Settings;
+import android.text.TextUtils;
 import android.util.KeyValueListParser;
 import android.util.Slog;
 
@@ -51,6 +52,8 @@ class BackupManagerConstants extends ContentObserver {
             "full_backup_require_charging";
     private static final String FULL_BACKUP_REQUIRED_NETWORK_TYPE =
             "full_backup_required_network_type";
+    private static final String BACKUP_FINISHED_NOTIFICATION_RECEIVERS =
+            "backup_finished_notification_receivers";
 
     // Hard coded default values.
     private static final long DEFAULT_KEY_VALUE_BACKUP_INTERVAL_MILLISECONDS =
@@ -63,6 +66,7 @@ class BackupManagerConstants extends ContentObserver {
             24 * AlarmManager.INTERVAL_HOUR;
     private static final boolean DEFAULT_FULL_BACKUP_REQUIRE_CHARGING = true;
     private static final int DEFAULT_FULL_BACKUP_REQUIRED_NETWORK_TYPE = 2;
+    private static final String DEFAULT_BACKUP_FINISHED_NOTIFICATION_RECEIVERS = "";
 
     // Backup manager constants.
     private long mKeyValueBackupIntervalMilliseconds;
@@ -72,6 +76,7 @@ class BackupManagerConstants extends ContentObserver {
     private long mFullBackupIntervalMilliseconds;
     private boolean mFullBackupRequireCharging;
     private int mFullBackupRequiredNetworkType;
+    private String[] mBackupFinishedNotificationReceivers;
 
     private ContentResolver mResolver;
     private final KeyValueListParser mParser = new KeyValueListParser(',');
@@ -116,6 +121,14 @@ class BackupManagerConstants extends ContentObserver {
                 DEFAULT_FULL_BACKUP_REQUIRE_CHARGING);
         mFullBackupRequiredNetworkType = mParser.getInt(FULL_BACKUP_REQUIRED_NETWORK_TYPE,
                 DEFAULT_FULL_BACKUP_REQUIRED_NETWORK_TYPE);
+        final String backupFinishedNotificationReceivers = mParser.getString(
+                BACKUP_FINISHED_NOTIFICATION_RECEIVERS,
+                DEFAULT_BACKUP_FINISHED_NOTIFICATION_RECEIVERS);
+        if (backupFinishedNotificationReceivers.isEmpty()) {
+            mBackupFinishedNotificationReceivers = new String[] {};
+        } else {
+            mBackupFinishedNotificationReceivers = backupFinishedNotificationReceivers.split(":");
+        }
     }
 
     // The following are access methods for the individual parameters.
@@ -167,7 +180,6 @@ class BackupManagerConstants extends ContentObserver {
             Slog.v(TAG, "getFullBackupRequireCharging(...) returns " + mFullBackupRequireCharging);
         }
         return mFullBackupRequireCharging;
-
     }
 
     public synchronized int getFullBackupRequiredNetworkType() {
@@ -176,5 +188,13 @@ class BackupManagerConstants extends ContentObserver {
                     + mFullBackupRequiredNetworkType);
         }
         return mFullBackupRequiredNetworkType;
+    }
+
+    public synchronized String[] getBackupFinishedNotificationReceivers() {
+        if (RefactoredBackupManagerService.DEBUG_SCHEDULING) {
+            Slog.v(TAG, "getBackupFinishedNotificationReceivers(...) returns "
+                    + TextUtils.join(", ", mBackupFinishedNotificationReceivers));
+        }
+        return mBackupFinishedNotificationReceivers;
     }
 }

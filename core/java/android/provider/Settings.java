@@ -7252,7 +7252,10 @@ public final class Settings {
          * full_backup_interval_milliseconds       (long)
          * full_backup_require_charging            (boolean)
          * full_backup_required_network_type       (int)
+         * backup_finished_notification_receivers  (String[])
          * </pre>
+         *
+         * backup_finished_notification_receivers uses ":" as delimeter for values.
          *
          * <p>
          * Type: string
