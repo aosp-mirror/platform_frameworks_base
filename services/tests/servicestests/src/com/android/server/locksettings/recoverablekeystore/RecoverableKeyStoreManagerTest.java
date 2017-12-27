@@ -127,6 +127,7 @@ public class RecoverableKeyStoreManagerTest {
 
         when(mMockContext.getSystemService(anyString())).thenReturn(mKeyguardManager);
         when(mMockContext.getSystemServiceName(any())).thenReturn("test");
+        when(mMockContext.getApplicationContext()).thenReturn(mMockContext);
         when(mKeyguardManager.isDeviceSecure(anyInt())).thenReturn(true);
 
         mRecoverableKeyStoreManager = new RecoverableKeyStoreManager(
@@ -156,27 +157,6 @@ public class RecoverableKeyStoreManagerTest {
     public void generateAndStoreKey_returnsAKeyOfAppropriateSize() throws Exception {
         assertThat(mRecoverableKeyStoreManager.generateAndStoreKey(TEST_ALIAS))
                 .hasLength(RECOVERABLE_KEY_SIZE_BYTES);
-    }
-
-    @Test
-    public void generateAndStoreKey_storesTheWrappedFormOfTheReturnedBytes() throws Exception {
-        int uid = Binder.getCallingUid();
-
-        byte[] rawKey = mRecoverableKeyStoreManager.generateAndStoreKey(TEST_ALIAS);
-
-        WrappedKey wrappedKey = mRecoverableKeyStoreDb.getKey(uid, TEST_ALIAS);
-        PlatformEncryptionKey encryptionKey = PlatformKeyManager.getInstance(
-                mMockContext,
-                mRecoverableKeyStoreDb,
-                Binder.getCallingUserHandle().getIdentifier())
-                .getEncryptKey();
-        Cipher cipher = Cipher.getInstance(KEY_WRAP_CIPHER_ALGORITHM);
-        cipher.init(
-                Cipher.ENCRYPT_MODE,
-                encryptionKey.getKey(),
-                new GCMParameterSpec(GCM_TAG_SIZE_BITS, wrappedKey.getNonce()));
-        byte[] encryptedBytes = cipher.update(rawKey);
-        assertArrayEquals(encryptedBytes, wrappedKey.getKeyMaterial());
     }
 
     @Test
