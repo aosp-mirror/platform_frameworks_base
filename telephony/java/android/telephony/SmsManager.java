@@ -339,6 +339,7 @@ public final class SmsManager {
      * Send a text based SMS without writing it into the SMS Provider.
      *
      * <p>Requires Permission:
+     * {@link android.Manifest.permission#SEND_SMS} and
      * {@link android.Manifest.permission#MODIFY_PHONE_STATE} or the calling app has carrier
      * privileges.
      * </p>
@@ -347,7 +348,10 @@ public final class SmsManager {
      * @hide
      */
     @SystemApi
-    @RequiresPermission(android.Manifest.permission.MODIFY_PHONE_STATE)
+    @RequiresPermission(allOf = {
+            android.Manifest.permission.MODIFY_PHONE_STATE,
+            android.Manifest.permission.SEND_SMS
+    })
     public void sendTextMessageWithoutPersisting(
             String destinationAddress, String scAddress, String text,
             PendingIntent sentIntent, PendingIntent deliveryIntent) {
