@@ -108,28 +108,14 @@ public class NotificationLockscreenUserManager implements Dumpable {
                 // Start the overview connection to the launcher service
                 Dependency.get(OverviewProxyService.class).startConnectionToCurrentUser();
             } else if (Intent.ACTION_USER_PRESENT.equals(action)) {
-                List<ActivityManager.RecentTaskInfo> recentTask = null;
                 try {
-                    recentTask = ActivityManager.getService().getRecentTasks(1,
-                            ActivityManager.RECENT_WITH_EXCLUDED,
-                            mCurrentUserId).getList();
+                    final int lastResumedActivityUserId =
+                            ActivityManager.getService().getLastResumedActivityUserId();
+                    if (mUserManager.isManagedProfile(lastResumedActivityUserId)) {
+                        showForegroundManagedProfileActivityToast();
+                    }
                 } catch (RemoteException e) {
                     // Abandon hope activity manager not running.
-                }
-                if (recentTask != null && recentTask.size() > 0) {
-                    UserInfo user = mUserManager.getUserInfo(recentTask.get(0).userId);
-                    if (user != null && user.isManagedProfile()) {
-                        Toast toast = Toast.makeText(mContext,
-                                R.string.managed_profile_foreground_toast,
-                                Toast.LENGTH_SHORT);
-                        TextView text = toast.getView().findViewById(android.R.id.message);
-                        text.setCompoundDrawablesRelativeWithIntrinsicBounds(
-                                R.drawable.stat_sys_managed_profile_status, 0, 0, 0);
-                        int paddingPx = mContext.getResources().getDimensionPixelSize(
-                                R.dimen.managed_profile_toast_padding);
-                        text.setCompoundDrawablePadding(paddingPx);
-                        toast.show();
-                    }
                 }
             } else if (NOTIFICATION_UNLOCKED_BY_WORK_CHALLENGE_ACTION.equals(action)) {
                 final IntentSender intentSender = intent.getParcelableExtra(Intent.EXTRA_INTENT);
@@ -240,6 +226,19 @@ public class NotificationLockscreenUserManager implements Dumpable {
         updateCurrentProfilesCache();
 
         mSettingsObserver.onChange(false);  // set up
+    }
+
+    private void showForegroundManagedProfileActivityToast() {
+        Toast toast = Toast.makeText(mContext,
+                R.string.managed_profile_foreground_toast,
+                Toast.LENGTH_SHORT);
+        TextView text = toast.getView().findViewById(android.R.id.message);
+        text.setCompoundDrawablesRelativeWithIntrinsicBounds(
+                R.drawable.stat_sys_managed_profile_status, 0, 0, 0);
+        int paddingPx = mContext.getResources().getDimensionPixelSize(
+                R.dimen.managed_profile_toast_padding);
+        text.setCompoundDrawablePadding(paddingPx);
+        toast.show();
     }
 
     public boolean shouldShowLockscreenNotifications() {
