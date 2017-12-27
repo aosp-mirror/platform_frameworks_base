@@ -38,6 +38,7 @@ import android.support.test.InstrumentationRegistry;
 import android.support.test.filters.LargeTest;
 import android.support.test.runner.AndroidJUnit4;
 import android.support.test.uiautomator.UiDevice;
+import android.text.TextUtils;
 import android.util.Log;
 
 import org.junit.AfterClass;
@@ -214,7 +215,6 @@ public class ConnOnActivityStartTest {
         try{
             turnBatteryOff();
             setAppIdle(true);
-            SystemClock.sleep(30000);
             turnScreenOn();
             startActivityAndCheckNetworkAccess();
         } finally {
@@ -286,7 +286,7 @@ public class ConnOnActivityStartTest {
     private void setAppIdle(boolean enabled) throws Exception {
         executeCommand("am set-inactive " + TEST_PKG + " " + enabled);
         assertDelayedCommandResult("am get-inactive " + TEST_PKG, "Idle=" + enabled,
-                10 /* maxTries */, 2000 /* napTimeMs */);
+                15 /* maxTries */, 2000 /* napTimeMs */);
     }
 
     private void updateRestrictBackgroundBlacklist(boolean add) throws Exception {
@@ -407,13 +407,35 @@ public class ConnOnActivityStartTest {
     private static void dumpOnFailure() throws Exception {
         dump("network_management");
         dump("netpolicy");
-        dump("usagestats");
+        dumpUsageStats();
+    }
+
+    private static void dumpUsageStats() throws Exception {
+        final String output = executeSilentCommand("dumpsys usagestats");
+        final StringBuilder sb = new StringBuilder();
+        final TextUtils.SimpleStringSplitter splitter = new TextUtils.SimpleStringSplitter('\n');
+        splitter.setString(output);
+        String str;
+        while (splitter.hasNext()) {
+            str = splitter.next();
+            if (str.contains("package=") && !str.contains(TEST_PKG)) {
+                continue;
+            }
+            if (str.trim().startsWith("config=") || str.trim().startsWith("time=")) {
+                continue;
+            }
+            sb.append(str).append('\n');
+        }
+        dump("usagestats", sb.toString());
     }
 
     private static void dump(String service) throws Exception {
+        dump(service, executeSilentCommand("dumpsys " + service));
+    }
+
+    private static void dump(String service, String dump) throws Exception {
         Log.d(TAG, ">>> Begin dump " + service);
-        Log.printlns(Log.LOG_ID_MAIN, Log.DEBUG,
-                TAG, executeSilentCommand("dumpsys " + service), null);
+        Log.printlns(Log.LOG_ID_MAIN, Log.DEBUG, TAG, dump, null);
         Log.d(TAG, "<<< End dump " + service);
     }
 
