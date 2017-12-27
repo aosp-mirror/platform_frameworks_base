@@ -1058,6 +1058,25 @@ public class WorkSource implements Parcelable {
             }
             proto.end(contentProto);
         }
+
+        if (mChains != null) {
+            for (int i = 0; i < mChains.size(); i++) {
+                final WorkChain wc = mChains.get(i);
+                final long workChain = proto.start(WorkSourceProto.WORK_CHAINS);
+
+                final String[] tags = wc.getTags();
+                final int[] uids = wc.getUids();
+                for (int j = 0; j < tags.length; j++) {
+                    final long contentProto = proto.start(WorkSourceProto.WORK_SOURCE_CONTENTS);
+                    proto.write(WorkSourceProto.WorkSourceContentProto.UID, uids[j]);
+                    proto.write(WorkSourceProto.WorkSourceContentProto.NAME, tags[j]);
+                    proto.end(contentProto);
+                }
+
+                proto.end(workChain);
+            }
+        }
+
         proto.end(workSourceToken);
     }
 
