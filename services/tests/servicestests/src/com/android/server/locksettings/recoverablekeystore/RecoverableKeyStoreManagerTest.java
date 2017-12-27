@@ -108,7 +108,7 @@ public class RecoverableKeyStoreManagerTest {
     private static final int GCM_TAG_SIZE_BITS = 128;
 
     @Mock private Context mMockContext;
-    @Mock private ListenersStorage mMockListenersStorage;
+    @Mock private RecoverySnapshotListenersStorage mMockListenersStorage;
     @Mock private KeyguardManager mKeyguardManager;
 
     private RecoverableKeyStoreDb mRecoverableKeyStoreDb;
@@ -137,8 +137,8 @@ public class RecoverableKeyStoreManagerTest {
                 mRecoverableKeyStoreDb,
                 mRecoverySessionStorage,
                 Executors.newSingleThreadExecutor(),
-                mMockListenersStorage,
-                mRecoverySnapshotStorage);
+                mRecoverySnapshotStorage,
+                mMockListenersStorage);
     }
 
     @After

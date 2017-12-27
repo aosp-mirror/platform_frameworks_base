@@ -330,6 +330,36 @@ public class RecoverableKeyStoreDb {
     }
 
     /**
+     * Returns the uid of the recovery agent for the given user, or -1 if none is set.
+     */
+    public int getRecoveryAgentUid(int userId) {
+        SQLiteDatabase db = mKeyStoreDbHelper.getReadableDatabase();
+
+        String[] projection = { RecoveryServiceMetadataEntry.COLUMN_NAME_UID };
+        String selection = RecoveryServiceMetadataEntry.COLUMN_NAME_USER_ID + " = ?";
+        String[] selectionArguments = { Integer.toString(userId) };
+
+        try (
+            Cursor cursor = db.query(
+                    RecoveryServiceMetadataEntry.TABLE_NAME,
+                    projection,
+                    selection,
+                    selectionArguments,
+                    /*groupBy=*/ null,
+                    /*having=*/ null,
+                    /*orderBy=*/ null)
+        ) {
+            int count = cursor.getCount();
+            if (count == 0) {
+                return -1;
+            }
+            cursor.moveToFirst();
+            return cursor.getInt(
+                    cursor.getColumnIndexOrThrow(RecoveryServiceMetadataEntry.COLUMN_NAME_UID));
+        }
+    }
+
+    /**
      * Returns the public key of the recovery service.
      *
      * @param userId The uid of the profile the application is running under.

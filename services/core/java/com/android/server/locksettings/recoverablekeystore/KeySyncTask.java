@@ -71,11 +71,13 @@ public class KeySyncTask implements Runnable {
     private final PlatformKeyManager.Factory mPlatformKeyManagerFactory;
     private final VaultKeySupplier mVaultKeySupplier;
     private final RecoverySnapshotStorage mRecoverySnapshotStorage;
+    private final RecoverySnapshotListenersStorage mSnapshotListenersStorage;
 
     public static KeySyncTask newInstance(
             Context context,
             RecoverableKeyStoreDb recoverableKeyStoreDb,
             RecoverySnapshotStorage snapshotStorage,
+            RecoverySnapshotListenersStorage recoverySnapshotListenersStorage,
             int userId,
             int credentialType,
             String credential
@@ -83,6 +85,7 @@ public class KeySyncTask implements Runnable {
         return new KeySyncTask(
                 recoverableKeyStoreDb,
                 snapshotStorage,
+                recoverySnapshotListenersStorage,
                 userId,
                 credentialType,
                 credential,
@@ -107,11 +110,13 @@ public class KeySyncTask implements Runnable {
     KeySyncTask(
             RecoverableKeyStoreDb recoverableKeyStoreDb,
             RecoverySnapshotStorage snapshotStorage,
+            RecoverySnapshotListenersStorage recoverySnapshotListenersStorage,
             int userId,
             int credentialType,
             String credential,
             PlatformKeyManager.Factory platformKeyManagerFactory,
             VaultKeySupplier vaultKeySupplier) {
+        mSnapshotListenersStorage = recoverySnapshotListenersStorage;
         mRecoverableKeyStoreDb = recoverableKeyStoreDb;
         mUserId = userId;
         mCredentialType = credentialType;
@@ -133,6 +138,18 @@ public class KeySyncTask implements Runnable {
     private void syncKeys() {
         if (!isSyncPending()) {
             Log.d(TAG, "Key sync not needed.");
+            return;
+        }
+
+        int recoveryAgentUid = mRecoverableKeyStoreDb.getRecoveryAgentUid(mUserId);
+
+        if (recoveryAgentUid == -1) {
+            Log.w(TAG, "No recovery agent initialized for user " + mUserId);
+            return;
+        }
+
+        if (!mSnapshotListenersStorage.hasListener(recoveryAgentUid)) {
+            Log.w(TAG, "No pending intent registered for recovery agent " + recoveryAgentUid);
             return;
         }
 
@@ -192,7 +209,6 @@ public class KeySyncTask implements Runnable {
             return;
         }
 
-        // TODO: why is the secret sent here? I thought it wasn't sent in the raw at all.
         KeyStoreRecoveryMetadata metadata = new KeyStoreRecoveryMetadata(
                 /*userSecretType=*/ TYPE_LOCKSCREEN,
                 /*lockScreenUiFormat=*/ mCredentialType,
@@ -207,6 +223,7 @@ public class KeySyncTask implements Runnable {
                 /*recoveryMetadata=*/ metadataList,
                 /*applicationKeyBlobs=*/ createApplicationKeyEntries(encryptedApplicationKeys),
                 /*encryptedRecoveryKeyblob=*/ encryptedRecoveryKey));
+        mSnapshotListenersStorage.recoverySnapshotAvailable(recoveryAgentUid);
     }
 
     private PublicKey getVaultPublicKey() {

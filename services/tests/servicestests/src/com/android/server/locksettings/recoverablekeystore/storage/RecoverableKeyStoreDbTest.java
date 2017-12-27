@@ -328,6 +328,20 @@ public class RecoverableKeyStoreDbTest {
     }
 
     @Test
+    public void getRecoveryAgentUid_returnsUidIfSet() throws Exception {
+        int userId = 12;
+        int uid = 190992;
+        mRecoverableKeyStoreDb.setRecoveryServicePublicKey(userId, uid, genRandomPublicKey());
+
+        assertThat(mRecoverableKeyStoreDb.getRecoveryAgentUid(userId)).isEqualTo(uid);
+    }
+
+    @Test
+    public void getRecoveryAgentUid_returnsMinusOneForNonexistentAgent() throws Exception {
+        assertThat(mRecoverableKeyStoreDb.getRecoveryAgentUid(12)).isEqualTo(-1);
+    }
+
+    @Test
     public void setServerParameters_replaceOldValue() throws Exception {
         int userId = 12;
         int uid = 10009;
