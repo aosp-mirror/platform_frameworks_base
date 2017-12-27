@@ -857,6 +857,7 @@ public class Activity extends ContextThemeWrapper
     private boolean mHasCurrentPermissionsRequest;
 
     private boolean mAutoFillResetNeeded;
+    private boolean mAutoFillIgnoreFirstResumePause;
 
     /** The last autofill id that was returned from {@link #getNextAutofillId()} */
     private int mLastAutofillId = View.LAST_APP_AUTOFILL_ID;
@@ -1253,10 +1254,7 @@ public class Activity extends ContextThemeWrapper
         getApplication().dispatchActivityStarted(this);
 
         if (mAutoFillResetNeeded) {
-            AutofillManager afm = getAutofillManager();
-            if (afm != null) {
-                afm.onVisibleForAutofill();
-            }
+            getAutofillManager().onVisibleForAutofill();
         }
     }
 
@@ -1320,6 +1318,20 @@ public class Activity extends ContextThemeWrapper
         if (DEBUG_LIFECYCLE) Slog.v(TAG, "onResume " + this);
         getApplication().dispatchActivityResumed(this);
         mActivityTransitionState.onResume(this, isTopOfTask());
+        if (mAutoFillResetNeeded) {
+            if (!mAutoFillIgnoreFirstResumePause) {
+                View focus = getCurrentFocus();
+                if (focus != null && focus.canNotifyAutofillEnterExitEvent()) {
+                    // TODO: in Activity killed/recreated case, i.e. SessionLifecycleTest#
+                    // testDatasetVisibleWhileAutofilledAppIsLifecycled: the View's initial
+                    // window visibility after recreation is INVISIBLE in onResume() and next frame
+                    // ViewRootImpl.performTraversals() changes window visibility to VISIBLE.
+                    // So we cannot call View.notifyEnterOrExited() which will do nothing
+                    // when View.isVisibleToUser() is false.
+                    getAutofillManager().notifyViewEntered(focus);
+                }
+            }
+        }
         mCalled = true;
     }
 
@@ -1681,6 +1693,19 @@ public class Activity extends ContextThemeWrapper
     protected void onPause() {
         if (DEBUG_LIFECYCLE) Slog.v(TAG, "onPause " + this);
         getApplication().dispatchActivityPaused(this);
+        if (mAutoFillResetNeeded) {
+            if (!mAutoFillIgnoreFirstResumePause) {
+                if (DEBUG_LIFECYCLE) Slog.v(TAG, "autofill notifyViewExited " + this);
+                View focus = getCurrentFocus();
+                if (focus != null && focus.canNotifyAutofillEnterExitEvent()) {
+                    getAutofillManager().notifyViewExited(focus);
+                }
+            } else {
+                // reset after first pause()
+                if (DEBUG_LIFECYCLE) Slog.v(TAG, "autofill got first pause " + this);
+                mAutoFillIgnoreFirstResumePause = false;
+            }
+        }
         mCalled = true;
     }
 
@@ -1870,6 +1895,10 @@ public class Activity extends ContextThemeWrapper
         getApplication().dispatchActivityStopped(this);
         mTranslucentCallback = null;
         mCalled = true;
+
+        if (mAutoFillResetNeeded) {
+            getAutofillManager().onInvisibleForAutofill();
+        }
 
         if (isFinishing()) {
             if (mAutoFillResetNeeded) {
@@ -6266,7 +6295,7 @@ public class Activity extends ContextThemeWrapper
 
         mHandler.getLooper().dump(new PrintWriterPrinter(writer), prefix);
 
-        final AutofillManager afm = getAutofillManager();
+        final AutofillManager afm = mAutofillManager;
         if (afm != null) {
             afm.dump(prefix, writer);
         } else {
@@ -7120,12 +7149,22 @@ public class Activity extends ContextThemeWrapper
         }
     }
 
-    final void performResume() {
+    final void performResume(boolean followedByPause) {
         performRestart(true /* start */);
 
         mFragments.execPendingActions();
 
         mLastNonConfigurationInstances = null;
+
+        if (mAutoFillResetNeeded) {
+            // When Activity is destroyed in paused state, and relaunch activity, there will be
+            // extra onResume and onPause event,  ignore the first onResume and onPause.
+            // see ActivityThread.handleRelaunchActivity()
+            mAutoFillIgnoreFirstResumePause = followedByPause;
+            if (mAutoFillIgnoreFirstResumePause && DEBUG_LIFECYCLE) {
+                Slog.v(TAG, "autofill will ignore first pause when relaunching " + this);
+            }
+        }
 
         mCalled = false;
         // mResumed is set by the instrumentation
@@ -7311,7 +7350,7 @@ public class Activity extends ContextThemeWrapper
             }
         } else if (who.startsWith(AUTO_FILL_AUTH_WHO_PREFIX)) {
             Intent resultData = (resultCode == Activity.RESULT_OK) ? data : null;
-            getAutofillManager().onAuthenticationResult(requestCode, resultData);
+            getAutofillManager().onAuthenticationResult(requestCode, resultData, getCurrentFocus());
         } else {
             Fragment frag = mFragments.findFragmentByWho(who);
             if (frag != null) {
@@ -7583,6 +7622,12 @@ public class Activity extends ContextThemeWrapper
     @Override
     public boolean isVisibleForAutofill() {
         return !mStopped;
+    }
+
+    /** @hide */
+    @Override
+    public boolean isDisablingEnterExitEventForAutofill() {
+        return mAutoFillIgnoreFirstResumePause || !mResumed;
     }
 
     /**

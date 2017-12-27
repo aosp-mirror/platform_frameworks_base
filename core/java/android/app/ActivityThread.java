@@ -3071,7 +3071,7 @@ public final class ActivityThread extends ClientTransactionHandler {
         checkAndBlockForNetworkAccess();
         deliverNewIntents(r, intents);
         if (resumed) {
-            r.activity.performResume();
+            r.activity.performResume(false);
             r.activity.mTemporaryPause = false;
         }
 
@@ -3681,7 +3681,7 @@ public final class ActivityThread extends ClientTransactionHandler {
                     deliverResults(r, r.pendingResults);
                     r.pendingResults = null;
                 }
-                r.activity.performResume();
+                r.activity.performResume(r.startsNotResumed);
 
                 synchronized (mResourcesManager) {
                     // If there is a pending local relaunch that was requested when the activity was
@@ -4400,7 +4400,7 @@ public final class ActivityThread extends ClientTransactionHandler {
             checkAndBlockForNetworkAccess();
             deliverResults(r, results);
             if (resumed) {
-                r.activity.performResume();
+                r.activity.performResume(false);
                 r.activity.mTemporaryPause = false;
             }
         }

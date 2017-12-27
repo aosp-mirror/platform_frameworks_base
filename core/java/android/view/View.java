@@ -7207,20 +7207,24 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
         notifyEnterOrExitForAutoFillIfNeeded(gainFocus);
     }
 
-    private void notifyEnterOrExitForAutoFillIfNeeded(boolean enter) {
-        if (isAutofillable() && isAttachedToWindow()) {
+    /** @hide */
+    public void notifyEnterOrExitForAutoFillIfNeeded(boolean enter) {
+        if (canNotifyAutofillEnterExitEvent()) {
             AutofillManager afm = getAutofillManager();
             if (afm != null) {
-                if (enter && hasWindowFocus() && isFocused()) {
+                if (enter && isFocused()) {
                     // We have not been laid out yet, hence cannot evaluate
                     // whether this view is visible to the user, we will do
                     // the evaluation once layout is complete.
                     if (!isLaidOut()) {
                         mPrivateFlags3 |= PFLAG3_NOTIFY_AUTOFILL_ENTER_ON_LAYOUT;
                     } else if (isVisibleToUser()) {
+                        // TODO This is a potential problem that View gets focus before it's visible
+                        // to User. Ideally View should handle the event when isVisibleToUser()
+                        // becomes true where it should issue notifyViewEntered().
                         afm.notifyViewEntered(this);
                     }
-                } else if (!hasWindowFocus() || !isFocused()) {
+                } else if (!isFocused()) {
                     afm.notifyViewExited(this);
                 }
             }
@@ -8281,6 +8285,11 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
     private boolean isAutofillable() {
         return getAutofillType() != AUTOFILL_TYPE_NONE && isImportantForAutofill()
                 && getAutofillViewId() > LAST_APP_AUTOFILL_ID;
+    }
+
+    /** @hide */
+    public boolean canNotifyAutofillEnterExitEvent() {
+        return isAutofillable() && isAttachedToWindow();
     }
 
     private void populateVirtualStructure(ViewStructure structure,
@@ -12399,8 +12408,6 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
         } else if (imm != null && (mPrivateFlags & PFLAG_FOCUSED) != 0) {
             imm.focusIn(this);
         }
-
-        notifyEnterOrExitForAutoFillIfNeeded(hasWindowFocus);
 
         refreshDrawableState();
     }

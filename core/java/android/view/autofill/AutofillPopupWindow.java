@@ -78,8 +78,10 @@ public class AutofillPopupWindow extends PopupWindow {
     public AutofillPopupWindow(@NonNull IAutofillWindowPresenter presenter) {
         mWindowPresenter = new WindowPresenter(presenter);
 
+        setTouchModal(false);
         setOutsideTouchable(true);
-        setInputMethodMode(INPUT_METHOD_NEEDED);
+        setInputMethodMode(INPUT_METHOD_NOT_NEEDED);
+        setFocusable(true);
     }
 
     @Override

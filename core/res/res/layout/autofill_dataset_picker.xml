@@ -24,6 +24,8 @@
         android:id="@+id/autofill_dataset_list"
         android:layout_width="fill_parent"
         android:layout_height="fill_parent"
+        android:drawSelectorOnTop="true"
+        android:clickable="true"
         android:divider="@null"
         android:visibility="gone">
     </ListView>
