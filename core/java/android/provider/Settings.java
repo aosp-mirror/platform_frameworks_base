@@ -11344,6 +11344,15 @@ public final class Settings {
                 "chained_battery_attribution_enabled";
 
         /**
+         * The packages whitelisted to be run in autofill compatibility mode.
+         *
+         * @hide
+         */
+        @SystemApi
+        public static final String AUTOFILL_COMPAT_ALLOWED_PACKAGES =
+                "autofill_compat_allowed_packages";
+
+        /**
          * Settings to backup. This is here so that it's in the same place as the settings
          * keys and easy to update.
          *
@@ -11884,8 +11893,6 @@ public final class Settings {
           * @hide
           */
         public static final String MULTI_SIM_SMS_PROMPT = "multi_sim_sms_prompt";
-
-
 
         /** User preferred subscriptions setting.
           * This holds the details of the user selected subscription from the card and

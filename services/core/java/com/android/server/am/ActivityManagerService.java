@@ -385,6 +385,7 @@ import android.view.RemoteAnimationDefinition;
 import android.view.View;
 import android.view.WindowManager;
 
+import android.view.autofill.AutofillManagerInternal;
 import com.android.internal.R;
 import com.android.internal.annotations.GuardedBy;
 import com.android.internal.annotations.VisibleForTesting;
@@ -7479,6 +7480,18 @@ public class ActivityManagerService extends IActivityManager.Stub
                 thread.attachAgent(preBindAgent);
             }
 
+
+            // Figure out whether the app needs to run in autofill compat mode.
+            boolean isAutofillCompatEnabled = false;
+            if (UserHandle.getAppId(app.info.uid) >= Process.FIRST_APPLICATION_UID) {
+                final AutofillManagerInternal afm = LocalServices.getService(
+                        AutofillManagerInternal.class);
+                if (afm != null) {
+                    isAutofillCompatEnabled = afm.isCompatibilityModeRequested(
+                            app.info.packageName, app.info.versionCode, app.userId);
+                }
+            }
+
             checkTime(startTime, "attachApplicationLocked: immediately before bindApplication");
             mStackSupervisor.getActivityMetricsLogger().notifyBindApplication(app);
             if (app.isolatedEntryPoint != null) {
@@ -7496,7 +7509,7 @@ public class ActivityManagerService extends IActivityManager.Stub
                         new Configuration(getGlobalConfiguration()), app.compat,
                         getCommonServicesLocked(app.isolated),
                         mCoreSettingsObserver.getCoreSettingsLocked(),
-                        buildSerial);
+                        buildSerial, isAutofillCompatEnabled);
             } else {
                 thread.bindApplication(processName, appInfo, providers, null, profilerInfo,
                         null, null, null, testMode,
@@ -7505,7 +7518,7 @@ public class ActivityManagerService extends IActivityManager.Stub
                         new Configuration(getGlobalConfiguration()), app.compat,
                         getCommonServicesLocked(app.isolated),
                         mCoreSettingsObserver.getCoreSettingsLocked(),
-                        buildSerial);
+                        buildSerial, isAutofillCompatEnabled);
             }
 
             checkTime(startTime, "attachApplicationLocked: immediately after bindApplication");
@@ -13640,6 +13653,7 @@ public class ActivityManagerService extends IActivityManager.Stub
                 // Timed out.
                 return;
             }
+
             if ((sendReceiver=pae.receiver) != null) {
                 // Caller wants result sent back to them.
                 sendBundle = new Bundle();

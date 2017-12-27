@@ -637,6 +637,8 @@ public final class ActivityThread extends ClientTransactionHandler {
         /** Initial values for {@link Profiler}. */
         ProfilerInfo initProfilerInfo;
 
+        boolean autofillCompatibilityEnabled;
+
         public String toString() {
             return "AppBindData{appInfo=" + appInfo + "}";
         }
@@ -863,7 +865,7 @@ public final class ActivityThread extends ClientTransactionHandler {
                 boolean enableBinderTracking, boolean trackAllocation,
                 boolean isRestrictedBackupMode, boolean persistent, Configuration config,
                 CompatibilityInfo compatInfo, Map services, Bundle coreSettings,
-                String buildSerial) {
+                String buildSerial, boolean autofillCompatibilityEnabled) {
 
             if (services != null) {
                 // Setup the service cache in the ServiceManager
@@ -889,6 +891,7 @@ public final class ActivityThread extends ClientTransactionHandler {
             data.compatInfo = compatInfo;
             data.initProfilerInfo = profilerInfo;
             data.buildSerial = buildSerial;
+            data.autofillCompatibilityEnabled = autofillCompatibilityEnabled;
             sendMessage(H.BIND_APPLICATION, data);
         }
 
@@ -5840,6 +5843,10 @@ public final class ActivityThread extends ClientTransactionHandler {
             // If the app is being launched for full backup or restore, bring it up in
             // a restricted environment with the base application class.
             app = data.info.makeApplication(data.restrictedBackupMode, null);
+
+            // Propagate autofill compat state
+            app.setAutofillCompatibilityEnabled(data.autofillCompatibilityEnabled);
+
             mInitialApplication = app;
 
             // don't bring up providers in restricted mode; they may depend on the

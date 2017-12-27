@@ -113,6 +113,7 @@ import android.view.Window.WindowControllerCallback;
 import android.view.WindowManager;
 import android.view.WindowManagerGlobal;
 import android.view.accessibility.AccessibilityEvent;
+import android.view.autofill.AutofillId;
 import android.view.autofill.AutofillManager;
 import android.view.autofill.AutofillManager.AutofillClient;
 import android.view.autofill.AutofillPopupWindow;
@@ -125,7 +126,6 @@ import com.android.internal.annotations.GuardedBy;
 import com.android.internal.app.IVoiceInteractor;
 import com.android.internal.app.ToolbarActionBar;
 import com.android.internal.app.WindowDecorActionBar;
-import com.android.internal.policy.DecorView;
 import com.android.internal.policy.PhoneWindow;
 
 import dalvik.system.VMRuntime;
@@ -5961,10 +5961,14 @@ public class Activity extends ContextThemeWrapper
      *
      * @return Returns the complete component name for this activity
      */
-    @Override
-    public ComponentName getComponentName()
-    {
+    public ComponentName getComponentName() {
         return mComponent;
+    }
+
+    /** @hide */
+    @Override
+    public final ComponentName autofillClientGetComponentName() {
+        return getComponentName();
     }
 
     /**
@@ -6262,13 +6266,18 @@ public class Activity extends ContextThemeWrapper
      *
      * @param action the action to run on the UI thread
      */
-    @Override
     public final void runOnUiThread(Runnable action) {
         if (Thread.currentThread() != mUiThread) {
             mHandler.post(action);
         } else {
             action.run();
         }
+    }
+
+    /** @hide */
+    @Override
+    public final void autofillClientRunOnUiThread(Runnable action) {
+        runOnUiThread(action);
     }
 
     /**
@@ -7076,6 +7085,18 @@ public class Activity extends ContextThemeWrapper
         mCurrentConfig = config;
 
         mWindow.setColorMode(info.colorMode);
+
+        setAutofillCompatibilityEnabled(application.isAutofillCompatibilityEnabled());
+        enableAutofillCompatibilityIfNeeded();
+    }
+
+    private void enableAutofillCompatibilityIfNeeded() {
+        if (isAutofillCompatibilityEnabled()) {
+            final AutofillManager afm = getSystemService(AutofillManager.class);
+            if (afm != null) {
+                afm.enableCompatibilityMode();
+            }
+        }
     }
 
     /** @hide */
@@ -7572,7 +7593,7 @@ public class Activity extends ContextThemeWrapper
 
     /** @hide */
     @Override
-    final public void autofillCallbackAuthenticate(int authenticationId, IntentSender intent,
+    public final void autofillClientAuthenticate(int authenticationId, IntentSender intent,
             Intent fillInIntent) {
         try {
             startIntentSenderForResultInner(intent, AUTO_FILL_AUTH_WHO_PREFIX,
@@ -7584,13 +7605,13 @@ public class Activity extends ContextThemeWrapper
 
     /** @hide */
     @Override
-    final public void autofillCallbackResetableStateAvailable() {
+    public final void autofillClientResetableStateAvailable() {
         mAutoFillResetNeeded = true;
     }
 
     /** @hide */
     @Override
-    final public boolean autofillCallbackRequestShowFillUi(@NonNull View anchor, int width,
+    public final boolean autofillClientRequestShowFillUi(@NonNull View anchor, int width,
             int height, @Nullable Rect anchorBounds, IAutofillWindowPresenter presenter) {
         final boolean wasShowing;
 
@@ -7607,7 +7628,7 @@ public class Activity extends ContextThemeWrapper
 
     /** @hide */
     @Override
-    final public boolean autofillCallbackRequestHideFillUi() {
+    public final boolean autofillClientRequestHideFillUi() {
         if (mAutofillPopupWindow == null) {
             return false;
         }
@@ -7618,8 +7639,16 @@ public class Activity extends ContextThemeWrapper
 
     /** @hide */
     @Override
-    @NonNull public View[] findViewsByAutofillIdTraversal(@NonNull int[] viewIds) {
-        final View[] views = new View[viewIds.length];
+    public final boolean autofillClientIsFillUiShowing() {
+        return mAutofillPopupWindow != null && mAutofillPopupWindow.isShowing();
+    }
+
+    /** @hide */
+    @Override
+    @NonNull
+    public final View[] autofillClientFindViewsByAutofillIdTraversal(
+            @NonNull AutofillId[] autofillId) {
+        final View[] views = new View[autofillId.length];
         final ArrayList<ViewRootImpl> roots =
                 WindowManagerGlobal.getInstance().getRootViews(getActivityToken());
 
@@ -7627,10 +7656,11 @@ public class Activity extends ContextThemeWrapper
             final View rootView = roots.get(rootNum).getView();
 
             if (rootView != null) {
-                for (int viewNum = 0; viewNum < viewIds.length; viewNum++) {
+                final int viewCount = autofillId.length;
+                for (int viewNum = 0; viewNum < viewCount; viewNum++) {
                     if (views[viewNum] == null) {
                         views[viewNum] = rootView.findViewByAutofillIdTraversal(
-                                viewIds[viewNum]);
+                                autofillId[viewNum].getViewId());
                     }
                 }
             }
@@ -7641,14 +7671,15 @@ public class Activity extends ContextThemeWrapper
 
     /** @hide */
     @Override
-    @Nullable public View findViewByAutofillIdTraversal(int viewId) {
+    @Nullable
+    public final View autofillClientFindViewByAutofillIdTraversal(AutofillId autofillId) {
         final ArrayList<ViewRootImpl> roots =
                 WindowManagerGlobal.getInstance().getRootViews(getActivityToken());
         for (int rootNum = 0; rootNum < roots.size(); rootNum++) {
             final View rootView = roots.get(rootNum).getView();
 
             if (rootView != null) {
-                final View view = rootView.findViewByAutofillIdTraversal(viewId);
+                final View view = rootView.findViewByAutofillIdTraversal(autofillId.getViewId());
                 if (view != null) {
                     return view;
                 }
@@ -7660,50 +7691,62 @@ public class Activity extends ContextThemeWrapper
 
     /** @hide */
     @Override
-    @NonNull public boolean[] getViewVisibility(@NonNull int[] viewIds) {
-        final boolean[] isVisible = new boolean[viewIds.length];
-        final View views[] = findViewsByAutofillIdTraversal(viewIds);
-
-        for (int i = 0; i < viewIds.length; i++) {
-            View view = views[i];
-            if (view == null) {
-                isVisible[i] = false;
-                continue;
-            }
-
-            isVisible[i] = true;
-
-            // Check if the view is visible by checking all parents
-            while (true) {
-                if (view instanceof DecorView && view.getViewRootImpl() == view.getParent()) {
-                    break;
-                }
-
-                if (view.getVisibility() != View.VISIBLE) {
-                    isVisible[i] = false;
-                    break;
-                }
-
-                if (view.getParent() instanceof View) {
-                    view = (View) view.getParent();
+    public final @NonNull boolean[] autofillClientGetViewVisibility(
+            @NonNull AutofillId[] autofillIds) {
+        final int autofillIdCount = autofillIds.length;
+        final boolean[] visible = new boolean[autofillIdCount];
+        for (int i = 0; i < autofillIdCount; i++) {
+            final AutofillId autofillId = autofillIds[i];
+            final View view = autofillClientFindViewByAutofillIdTraversal(autofillId);
+            if (view != null) {
+                if (!autofillId.isVirtual()) {
+                    visible[i] = view.isVisibleToUser();
                 } else {
-                    break;
+                    visible[i] = view.isVisibleToUserForAutofill(autofillId.getVirtualChildId());
                 }
             }
         }
+        return visible;
+    }
 
-        return isVisible;
+    /** @hide */
+    public final @Nullable View autofillClientFindViewByAccessibilityIdTraversal(int viewId,
+            int windowId) {
+        final ArrayList<ViewRootImpl> roots = WindowManagerGlobal.getInstance()
+                .getRootViews(getActivityToken());
+        for (int rootNum = 0; rootNum < roots.size(); rootNum++) {
+            final View rootView = roots.get(rootNum).getView();
+            if (rootView != null && rootView.getAccessibilityWindowId() == windowId) {
+                final View view = rootView.findViewByAccessibilityIdTraversal(viewId);
+                if (view != null) {
+                    return view;
+                }
+            }
+        }
+        return null;
     }
 
     /** @hide */
     @Override
-    public boolean isVisibleForAutofill() {
+    public final @Nullable IBinder autofillClientGetActivityToken() {
+        return getActivityToken();
+    }
+
+    /** @hide */
+    @Override
+    public final boolean autofillClientIsVisibleForAutofill() {
         return !mStopped;
     }
 
     /** @hide */
     @Override
-    public boolean isDisablingEnterExitEventForAutofill() {
+    public final boolean autofillIsCompatibilityModeEnabled() {
+        return isAutofillCompatibilityEnabled();
+    }
+
+    /** @hide */
+    @Override
+    public final boolean isDisablingEnterExitEventForAutofill() {
         return mAutoFillIgnoreFirstResumePause || !mResumed;
     }
 

@@ -994,4 +994,20 @@ public class ContextWrapper extends Context {
     public void setAutofillClient(AutofillClient client) {
         mBase.setAutofillClient(client);
     }
+
+    /**
+     * @hide
+     */
+    @Override
+    public boolean isAutofillCompatibilityEnabled() {
+        return mBase.isAutofillCompatibilityEnabled();
+    }
+
+    /**
+     * @hide
+     */
+    @Override
+    public void setAutofillCompatibilityEnabled(boolean  autofillCompatEnabled) {
+        mBase.setAutofillCompatibilityEnabled(autofillCompatEnabled);
+    }
 }

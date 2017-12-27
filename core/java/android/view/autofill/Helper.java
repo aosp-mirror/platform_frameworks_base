@@ -19,6 +19,8 @@ package android.view.autofill;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 
+import java.util.Collection;
+
 /** @hide */
 public final class Helper {
 
@@ -57,6 +59,20 @@ public final class Helper {
             builder.append("'");
         }
         builder.append(" ]");
+    }
+
+    /**
+     * Convers a collaction of {@link AutofillId AutofillIds} to an array.
+     * @param collection The collection.
+     * @return The array.
+     */
+    public static @NonNull AutofillId[] toArray(Collection<AutofillId> collection) {
+        if (collection == null) {
+            return new AutofillId[0];
+        }
+        final AutofillId[] array = new AutofillId[collection.size()];
+        collection.toArray(array);
+        return array;
     }
 
     private Helper() {

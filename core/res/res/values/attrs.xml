@@ -7903,6 +7903,23 @@
         <attr name="settingsActivity" />
     </declare-styleable>
 
+    <!-- Use <code>compatibility-package</code> as a child tag of <code>autofill-service</code>
+         in the XML resource that describes an {@link android.service.autofill.AutofillService}
+         to specify a package and an optional max version code for which to request compatibility
+         mode. If no max version code is specified compatibility mode is requested for all package
+         versions. The max version code is useful to avoid requesting compatibility mode for newer
+         package versions that are known to natively support autofill.
+    -->
+    <declare-styleable name="AutofillService_CompatibilityPackage">
+        <!-- The package name for which compatibility mode is requested. -->
+        <attr name="name" />
+        <!-- The max version code of the package for which compatibility mode is
+             requested. This corresponds to the long value returned by {@link
+             android.content.pm.PackageInfo#getLongVersionCode()} for the target package.
+        -->
+        <attr name="maxLongVersionCode" format="string" />
+    </declare-styleable>
+
     <!-- =============================== -->
     <!-- Contacts meta-data attributes -->
     <!-- =============================== -->

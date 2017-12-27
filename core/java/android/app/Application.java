@@ -26,6 +26,7 @@ import android.content.ContextWrapper;
 import android.content.Intent;
 import android.content.res.Configuration;
 import android.os.Bundle;
+import android.view.autofill.AutofillManager;
 
 /**
  * Base class for maintaining global application state. You can provide your own
@@ -298,5 +299,38 @@ public class Application extends ContextWrapper implements ComponentCallbacks2 {
                 ((OnProvideAssistDataListener)callbacks[i]).onProvideAssistData(activity, data);
             }
         }
+    }
+
+    /** @hide */
+    @Override
+    public AutofillManager.AutofillClient getAutofillClient() {
+        final AutofillManager.AutofillClient client = super.getAutofillClient();
+        if (client != null) {
+            return client;
+        }
+        // Okay, ppl use the application context when they should not. This breaks
+        // autofill among other things. We pick the focused activity since autofill
+        // interacts only with the currently focused activity and we need the fill
+        // client only if a call comes from the focused activity. Sigh...
+        final ActivityThread activityThread = ActivityThread.currentActivityThread();
+        if (activityThread == null) {
+            return null;
+        }
+        final int activityCount = activityThread.mActivities.size();
+        for (int i = 0; i < activityCount; i++) {
+            final ActivityThread.ActivityClientRecord record =
+                    activityThread.mActivities.valueAt(i);
+            if (record == null) {
+                continue;
+            }
+            final Activity activity = record.activity;
+            if (activity == null) {
+                continue;
+            }
+            if (activity.getWindow().getDecorView().hasFocus()) {
+                return record.activity;
+            }
+        }
+        return null;
     }
 }

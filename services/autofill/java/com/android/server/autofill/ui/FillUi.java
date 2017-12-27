@@ -513,6 +513,12 @@ final class FillUi {
         public void show(WindowManager.LayoutParams params) {
             if (sVerbose) Slog.v(TAG, "show(): showing=" + mShowing + ", params="+  params);
             try {
+                // Okay here is a bit of voodoo - we want to show the window as system
+                // controlled one so it covers app windows - adjust the params accordingly.
+                params.type = WindowManager.LayoutParams.TYPE_SYSTEM_DIALOG;
+                params.token = null;
+                params.packageName = "android";
+                params.flags |= WindowManager.LayoutParams.FLAG_LAYOUT_IN_SCREEN;
                 if (!mShowing) {
                     params.accessibilityTitle = mContentView.getContext()
                             .getString(R.string.autofill_picker_accessibility_title);
@@ -565,7 +571,6 @@ final class FillUi {
             }
             return false;
         }
-
     }
 
     public void dump(PrintWriter pw, String prefix) {

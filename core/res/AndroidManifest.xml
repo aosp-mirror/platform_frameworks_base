@@ -4179,6 +4179,16 @@
         <service android:name="com.android.server.display.BrightnessIdleJob"
                  android:permission="android.permission.BIND_JOB_SERVICE" >
         </service>
+
+        <service
+                android:name="com.android.server.autofill.AutofillCompatAccessibilityService"
+                android:permission="android.permission.BIND_ACCESSIBILITY_SERVICE"
+                android:exported="true">
+            <meta-data
+                    android:name="android.accessibilityservice"
+                    android:resource="@xml/autofill_compat_accessibility_service" />
+        </service>
+
 </application>
 
 </manifest>

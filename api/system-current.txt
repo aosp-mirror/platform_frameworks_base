@@ -4119,6 +4119,7 @@ package android.provider {
   public static final class Settings.Global extends android.provider.Settings.NameValueTable {
     method public static boolean putString(android.content.ContentResolver, java.lang.String, java.lang.String, java.lang.String, boolean);
     method public static void resetToDefaults(android.content.ContentResolver, java.lang.String);
+    field public static final java.lang.String AUTOFILL_COMPAT_ALLOWED_PACKAGES = "autofill_compat_allowed_packages";
     field public static final java.lang.String OTA_DISABLE_AUTOMATIC_UPDATE = "ota_disable_automatic_update";
     field public static final java.lang.String THEATER_MODE_ON = "theater_mode_on";
     field public static final java.lang.String WEBVIEW_MULTIPROCESS = "webview_multiprocess";
