@@ -455,7 +455,7 @@ public class NotificationPanelView extends PanelView implements
             mTopPaddingAdjustment = 0;
         } else {
             mClockPositionAlgorithm.setup(
-                    mStatusBar.getMaxKeyguardNotifications(),
+                    mStatusBar.getMaxNotificationsWhileLocked(),
                     getMaxPanelHeight(),
                     getExpandedHeight(),
                     mNotificationStackScroller.getNotGoneChildCount(),

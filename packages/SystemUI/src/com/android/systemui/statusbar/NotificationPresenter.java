@@ -16,11 +16,10 @@
 package com.android.systemui.statusbar;
 
 import android.content.Intent;
+import android.content.pm.PackageManager;
 import android.os.Handler;
-import android.service.notification.NotificationListenerService;
+import android.service.notification.StatusBarNotification;
 import android.view.View;
-
-import java.util.Set;
 
 /**
  * An abstraction of something that presents notifications, e.g. StatusBar. Contains methods
@@ -29,9 +28,11 @@ import java.util.Set;
  * for affecting the state of the system (e.g. starting an intent, given that the presenter may
  * want to perform some action before doing so).
  */
-public interface NotificationPresenter extends NotificationUpdateHandler,
-        NotificationData.Environment, NotificationRemoteInputManager.Callback {
-
+public interface NotificationPresenter extends NotificationData.Environment,
+        NotificationRemoteInputManager.Callback,
+        ExpandableNotificationRow.OnExpandClickListener,
+        ActivatableNotificationView.OnActivatedListener,
+        NotificationEntryManager.Callback {
     /**
      * Returns true if the presenter is not visible. For example, it may not be necessary to do
      * animations if this returns true.
@@ -50,31 +51,14 @@ public interface NotificationPresenter extends NotificationUpdateHandler,
     void startNotificationGutsIntent(Intent intent, int appUid);
 
     /**
-     * Returns NotificationData.
-     */
-    NotificationData getNotificationData();
-
-    /**
      * Returns the Handler for NotificationPresenter.
      */
     Handler getHandler();
-
-    // TODO: Create NotificationEntryManager and move this method to there.
-    /**
-     * Signals that some notifications have changed, and NotificationPresenter should update itself.
-     */
-    void updateNotifications();
 
     /**
      * Refresh or remove lockscreen artwork from media metadata or the lockscreen wallpaper.
      */
     void updateMediaMetaData(boolean metaDataChanged, boolean allowEnterAnimation);
-
-    // TODO: Create NotificationEntryManager and move this method to there.
-    /**
-     * Gets the latest ranking map.
-     */
-    NotificationListenerService.RankingMap getLatestRankingMap();
 
     /**
      * Called when the locked status of the device is changed for a work profile.
@@ -107,4 +91,32 @@ public interface NotificationPresenter extends NotificationUpdateHandler,
      * @return true iff the device is locked
      */
     boolean isDeviceLocked(int userId);
+
+    /**
+     * @return true iff the device is in vr mode
+     */
+    boolean isDeviceInVrMode();
+
+    /**
+     * Updates the visual representation of the notifications.
+     */
+    void updateNotificationViews();
+
+    /**
+     * @return true iff the device is dozing
+     */
+    boolean isDozing();
+
+    /**
+     * Returns the maximum number of notifications to show while locked.
+     *
+     * @param recompute whether something has changed that means we should recompute this value
+     * @return the maximum number of notifications to show while locked
+     */
+    int getMaxNotificationsWhileLocked(boolean recompute);
+
+    /**
+     * Called when the row states are updated by NotificationViewHierarchyManager.
+     */
+    void onUpdateRowStates();
 }

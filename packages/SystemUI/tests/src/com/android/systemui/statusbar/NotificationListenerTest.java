@@ -19,7 +19,6 @@ package com.android.systemui.statusbar;
 import static junit.framework.Assert.assertTrue;
 
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -38,6 +37,8 @@ import com.android.systemui.SysuiTestCase;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.mockito.Mock;
+import org.mockito.MockitoAnnotations;
 
 import java.util.HashSet;
 import java.util.Set;
@@ -49,40 +50,45 @@ public class NotificationListenerTest extends SysuiTestCase {
     private static final String TEST_PACKAGE_NAME = "test";
     private static final int TEST_UID = 0;
 
-    private NotificationPresenter mPresenter;
-    private Handler mHandler;
+    @Mock private NotificationPresenter mPresenter;
+    @Mock private NotificationListenerService.RankingMap mRanking;
+    @Mock private NotificationData mNotificationData;
+
+    // Dependency mocks:
+    @Mock private NotificationEntryManager mEntryManager;
+    @Mock private NotificationRemoteInputManager mRemoteInputManager;
+
     private NotificationListener mListener;
+    private Handler mHandler;
     private StatusBarNotification mSbn;
-    private NotificationListenerService.RankingMap mRanking;
     private Set<String> mKeysKeptForRemoteInput;
-    private NotificationData mNotificationData;
-    private NotificationRemoteInputManager mRemoteInputManager;
 
     @Before
     public void setUp() {
+        MockitoAnnotations.initMocks(this);
+        mDependency.injectTestDependency(NotificationEntryManager.class, mEntryManager);
+        mDependency.injectTestDependency(NotificationRemoteInputManager.class,
+                mRemoteInputManager);
+
         mHandler = new Handler(Looper.getMainLooper());
-        mPresenter = mock(NotificationPresenter.class);
-        mNotificationData = mock(NotificationData.class);
-        mRanking = mock(NotificationListenerService.RankingMap.class);
-        mRemoteInputManager = mock(NotificationRemoteInputManager.class);
         mKeysKeptForRemoteInput = new HashSet<>();
 
         when(mPresenter.getHandler()).thenReturn(mHandler);
-        when(mPresenter.getNotificationData()).thenReturn(mNotificationData);
+        when(mEntryManager.getNotificationData()).thenReturn(mNotificationData);
         when(mRemoteInputManager.getKeysKeptForRemoteInput()).thenReturn(mKeysKeptForRemoteInput);
 
-        mListener = new NotificationListener(mRemoteInputManager, mContext);
+        mListener = new NotificationListener(mContext);
         mSbn = new StatusBarNotification(TEST_PACKAGE_NAME, TEST_PACKAGE_NAME, 0, null, TEST_UID, 0,
                 new Notification(), UserHandle.CURRENT, null, 0);
 
-        mListener.setUpWithPresenter(mPresenter);
+        mListener.setUpWithPresenter(mPresenter, mEntryManager);
     }
 
     @Test
     public void testNotificationAddCallsAddNotification() {
         mListener.onNotificationPosted(mSbn, mRanking);
         waitForIdleSync(mHandler);
-        verify(mPresenter).addNotification(mSbn, mRanking);
+        verify(mEntryManager).addNotification(mSbn, mRanking);
     }
 
     @Test
@@ -98,14 +104,14 @@ public class NotificationListenerTest extends SysuiTestCase {
         when(mNotificationData.get(mSbn.getKey())).thenReturn(new NotificationData.Entry(mSbn));
         mListener.onNotificationPosted(mSbn, mRanking);
         waitForIdleSync(mHandler);
-        verify(mPresenter).updateNotification(mSbn, mRanking);
+        verify(mEntryManager).updateNotification(mSbn, mRanking);
     }
 
     @Test
     public void testNotificationRemovalCallsRemoveNotification() {
         mListener.onNotificationRemoved(mSbn, mRanking);
         waitForIdleSync(mHandler);
-        verify(mPresenter).removeNotification(mSbn.getKey(), mRanking);
+        verify(mEntryManager).removeNotification(mSbn.getKey(), mRanking);
     }
 
     @Test
@@ -113,6 +119,6 @@ public class NotificationListenerTest extends SysuiTestCase {
         mListener.onNotificationRankingUpdate(mRanking);
         waitForIdleSync(mHandler);
         // RankingMap may be modified by plugins.
-        verify(mPresenter).updateNotificationRanking(any());
+        verify(mEntryManager).updateNotificationRanking(any());
     }
 }

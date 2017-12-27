@@ -18,9 +18,22 @@ package com.android.systemui.car;
 import android.content.Context;
 import android.util.ArrayMap;
 
+import com.android.internal.logging.MetricsLogger;
+import com.android.systemui.Dependency;
 import com.android.systemui.Dependency.DependencyProvider;
+import com.android.systemui.ForegroundServiceController;
 import com.android.systemui.SystemUIFactory;
+import com.android.systemui.UiOffloadThread;
 import com.android.systemui.plugins.VolumeDialogController;
+import com.android.systemui.statusbar.NotificationEntryManager;
+import com.android.systemui.statusbar.NotificationGutsManager;
+import com.android.systemui.statusbar.NotificationListener;
+import com.android.systemui.statusbar.NotificationLockscreenUserManager;
+import com.android.systemui.statusbar.NotificationMediaManager;
+import com.android.systemui.statusbar.NotificationRemoteInputManager;
+import com.android.systemui.statusbar.notification.VisualStabilityManager;
+import com.android.systemui.statusbar.phone.NotificationGroupManager;
+import com.android.systemui.statusbar.policy.DeviceProvisionedController;
 import com.android.systemui.volume.car.CarVolumeDialogController;
 
 /**
@@ -32,5 +45,7 @@ public class CarSystemUIFactory extends SystemUIFactory {
             Context context) {
         super.injectDependencies(providers, context);
         providers.put(VolumeDialogController.class, () -> new CarVolumeDialogController(context));
+        providers.put(NotificationEntryManager.class,
+                () -> new CarNotificationEntryManager(context));
     }
 }

@@ -40,9 +40,11 @@ public class NotificationMediaManager implements Dumpable {
     private static final String TAG = "NotificationMediaManager";
     public static final boolean DEBUG_MEDIA = false;
 
-    private final NotificationPresenter mPresenter;
     private final Context mContext;
     private final MediaSessionManager mMediaSessionManager;
+
+    protected NotificationPresenter mPresenter;
+    protected NotificationEntryManager mEntryManager;
     private MediaController mMediaController;
     private String mMediaNotificationKey;
     private MediaMetadata mMediaMetadata;
@@ -73,13 +75,18 @@ public class NotificationMediaManager implements Dumpable {
         }
     };
 
-    public NotificationMediaManager(NotificationPresenter presenter, Context context) {
-        mPresenter = presenter;
+    public NotificationMediaManager(Context context) {
         mContext = context;
         mMediaSessionManager
                 = (MediaSessionManager) mContext.getSystemService(Context.MEDIA_SESSION_SERVICE);
         // TODO: use MediaSessionManager.SessionListener to hook us up to future updates
         // in session state
+    }
+
+    public void setUpWithPresenter(NotificationPresenter presenter,
+            NotificationEntryManager entryManager) {
+        mPresenter = presenter;
+        mEntryManager = entryManager;
     }
 
     public void onNotificationRemoved(String key) {
@@ -100,8 +107,8 @@ public class NotificationMediaManager implements Dumpable {
     public void findAndUpdateMediaNotifications() {
         boolean metaDataChanged = false;
 
-        synchronized (mPresenter.getNotificationData()) {
-            ArrayList<NotificationData.Entry> activeNotifications = mPresenter
+        synchronized (mEntryManager.getNotificationData()) {
+            ArrayList<NotificationData.Entry> activeNotifications = mEntryManager
                     .getNotificationData().getActiveNotifications();
             final int N = activeNotifications.size();
 
@@ -188,7 +195,7 @@ public class NotificationMediaManager implements Dumpable {
         }
 
         if (metaDataChanged) {
-            mPresenter.updateNotifications();
+            mEntryManager.updateNotifications();
         }
         mPresenter.updateMediaMetaData(metaDataChanged, true);
     }

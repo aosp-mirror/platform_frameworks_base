@@ -81,7 +81,7 @@ public class NotificationLockscreenUserManager implements Dumpable {
                     isCurrentProfile(getSendingUserId())) {
                 mUsersAllowingPrivateNotifications.clear();
                 updateLockscreenNotificationSetting();
-                mPresenter.updateNotifications();
+                mEntryManager.updateNotifications();
             } else if (Intent.ACTION_DEVICE_LOCKED_CHANGED.equals(action)) {
                 if (userId != mCurrentUserId && isCurrentProfile(userId)) {
                     mPresenter.onWorkChallengeChanged();
@@ -157,6 +157,7 @@ public class NotificationLockscreenUserManager implements Dumpable {
 
     protected int mCurrentUserId = 0;
     protected NotificationPresenter mPresenter;
+    protected NotificationEntryManager mEntryManager;
     protected ContentObserver mLockscreenSettingsObserver;
     protected ContentObserver mSettingsObserver;
 
@@ -170,8 +171,10 @@ public class NotificationLockscreenUserManager implements Dumpable {
                 ServiceManager.getService(Context.STATUS_BAR_SERVICE));
     }
 
-    public void setUpWithPresenter(NotificationPresenter presenter) {
+    public void setUpWithPresenter(NotificationPresenter presenter,
+            NotificationEntryManager entryManager) {
         mPresenter = presenter;
+        mEntryManager = entryManager;
 
         mLockscreenSettingsObserver = new ContentObserver(mPresenter.getHandler()) {
             @Override
@@ -182,7 +185,7 @@ public class NotificationLockscreenUserManager implements Dumpable {
                 mUsersAllowingNotifications.clear();
                 // ... and refresh all the notifications
                 updateLockscreenNotificationSetting();
-                mPresenter.updateNotifications();
+                mEntryManager.updateNotifications();
             }
         };
 
@@ -191,7 +194,7 @@ public class NotificationLockscreenUserManager implements Dumpable {
             public void onChange(boolean selfChange) {
                 updateLockscreenNotificationSetting();
                 if (mDeviceProvisionedController.isDeviceProvisioned()) {
-                    mPresenter.updateNotifications();
+                    mEntryManager.updateNotifications();
                 }
             }
         };
@@ -271,13 +274,13 @@ public class NotificationLockscreenUserManager implements Dumpable {
      */
     public boolean shouldHideNotifications(String key) {
         return isLockscreenPublicMode(mCurrentUserId)
-                && mPresenter.getNotificationData().getVisibilityOverride(key) ==
+                && mEntryManager.getNotificationData().getVisibilityOverride(key) ==
                         Notification.VISIBILITY_SECRET;
     }
 
     public boolean shouldShowOnKeyguard(StatusBarNotification sbn) {
         return mShowLockscreenNotifications
-                && !mPresenter.getNotificationData().isAmbient(sbn.getKey());
+                && !mEntryManager.getNotificationData().isAmbient(sbn.getKey());
     }
 
     private void setShowLockscreenNotifications(boolean show) {
@@ -395,7 +398,7 @@ public class NotificationLockscreenUserManager implements Dumpable {
     }
 
     private boolean packageHasVisibilityOverride(String key) {
-        return mPresenter.getNotificationData().getVisibilityOverride(key) ==
+        return mEntryManager.getNotificationData().getVisibilityOverride(key) ==
                 Notification.VISIBILITY_PRIVATE;
     }
 

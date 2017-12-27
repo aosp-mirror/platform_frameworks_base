@@ -27,6 +27,7 @@ import android.os.UserHandle;
 import android.service.notification.StatusBarNotification;
 import android.util.Log;
 
+import com.android.systemui.Dependency;
 import com.android.systemui.statusbar.phone.NotificationListenerWithPlugins;
 
 /**
@@ -36,14 +37,16 @@ import com.android.systemui.statusbar.phone.NotificationListenerWithPlugins;
 public class NotificationListener extends NotificationListenerWithPlugins {
     private static final String TAG = "NotificationListener";
 
-    private final NotificationRemoteInputManager mRemoteInputManager;
+    // Dependencies:
+    private final NotificationRemoteInputManager mRemoteInputManager =
+            Dependency.get(NotificationRemoteInputManager.class);
+
     private final Context mContext;
 
-    private NotificationPresenter mPresenter;
+    protected NotificationPresenter mPresenter;
+    protected NotificationEntryManager mEntryManager;
 
-    public NotificationListener(NotificationRemoteInputManager remoteInputManager,
-            Context context) {
-        mRemoteInputManager = remoteInputManager;
+    public NotificationListener(Context context) {
         mContext = context;
     }
 
@@ -59,7 +62,7 @@ public class NotificationListener extends NotificationListenerWithPlugins {
         final RankingMap currentRanking = getCurrentRanking();
         mPresenter.getHandler().post(() -> {
             for (StatusBarNotification sbn : notifications) {
-                mPresenter.addNotification(sbn, currentRanking);
+                mEntryManager.addNotification(sbn, currentRanking);
             }
         });
     }
@@ -73,7 +76,8 @@ public class NotificationListener extends NotificationListenerWithPlugins {
                 processForRemoteInput(sbn.getNotification(), mContext);
                 String key = sbn.getKey();
                 mRemoteInputManager.getKeysKeptForRemoteInput().remove(key);
-                boolean isUpdate = mPresenter.getNotificationData().get(key) != null;
+                boolean isUpdate =
+                        mEntryManager.getNotificationData().get(key) != null;
                 // In case we don't allow child notifications, we ignore children of
                 // notifications that have a summary, since` we're not going to show them
                 // anyway. This is true also when the summary is canceled,
@@ -86,16 +90,17 @@ public class NotificationListener extends NotificationListenerWithPlugins {
 
                     // Remove existing notification to avoid stale data.
                     if (isUpdate) {
-                        mPresenter.removeNotification(key, rankingMap);
+                        mEntryManager.removeNotification(key, rankingMap);
                     } else {
-                        mPresenter.getNotificationData().updateRanking(rankingMap);
+                        mEntryManager.getNotificationData()
+                                .updateRanking(rankingMap);
                     }
                     return;
                 }
                 if (isUpdate) {
-                    mPresenter.updateNotification(sbn, rankingMap);
+                    mEntryManager.updateNotification(sbn, rankingMap);
                 } else {
-                    mPresenter.addNotification(sbn, rankingMap);
+                    mEntryManager.addNotification(sbn, rankingMap);
                 }
             });
         }
@@ -107,7 +112,9 @@ public class NotificationListener extends NotificationListenerWithPlugins {
         if (DEBUG) Log.d(TAG, "onNotificationRemoved: " + sbn);
         if (sbn != null && !onPluginNotificationRemoved(sbn, rankingMap)) {
             final String key = sbn.getKey();
-            mPresenter.getHandler().post(() -> mPresenter.removeNotification(key, rankingMap));
+            mPresenter.getHandler().post(() -> {
+                mEntryManager.removeNotification(key, rankingMap);
+            });
         }
     }
 
@@ -116,12 +123,16 @@ public class NotificationListener extends NotificationListenerWithPlugins {
         if (DEBUG) Log.d(TAG, "onRankingUpdate");
         if (rankingMap != null) {
             RankingMap r = onPluginRankingUpdate(rankingMap);
-            mPresenter.getHandler().post(() -> mPresenter.updateNotificationRanking(r));
+            mPresenter.getHandler().post(() -> {
+                mEntryManager.updateNotificationRanking(r);
+            });
         }
     }
 
-    public void setUpWithPresenter(NotificationPresenter presenter) {
+    public void setUpWithPresenter(NotificationPresenter presenter,
+            NotificationEntryManager entryManager) {
         mPresenter = presenter;
+        mEntryManager = entryManager;
 
         try {
             registerAsSystemService(mContext,

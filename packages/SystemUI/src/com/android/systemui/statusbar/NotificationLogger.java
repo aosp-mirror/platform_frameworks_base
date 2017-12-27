@@ -27,8 +27,8 @@ import android.util.Log;
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.statusbar.IStatusBarService;
 import com.android.internal.statusbar.NotificationVisibility;
+import com.android.systemui.Dependency;
 import com.android.systemui.UiOffloadThread;
-import com.android.systemui.statusbar.stack.NotificationStackScrollLayout;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -47,21 +47,22 @@ public class NotificationLogger {
     /** Keys of notifications currently visible to the user. */
     private final ArraySet<NotificationVisibility> mCurrentlyVisibleNotifications =
             new ArraySet<>();
-    private final NotificationListenerService mNotificationListener;
-    private final UiOffloadThread mUiOffloadThread;
 
-    protected NotificationPresenter mPresenter;
+    // Dependencies:
+    private final NotificationListenerService mNotificationListener =
+            Dependency.get(NotificationListener.class);
+    private final UiOffloadThread mUiOffloadThread = Dependency.get(UiOffloadThread.class);
+
+    protected NotificationEntryManager mEntryManager;
     protected Handler mHandler = new Handler();
     protected IStatusBarService mBarService;
     private long mLastVisibilityReportUptimeMs;
-    private NotificationStackScrollLayout mStackScroller;
+    private NotificationListContainer mListContainer;
 
-    protected final NotificationStackScrollLayout.OnChildLocationsChangedListener
-            mNotificationLocationsChangedListener =
-            new NotificationStackScrollLayout.OnChildLocationsChangedListener() {
+    protected final OnChildLocationsChangedListener mNotificationLocationsChangedListener =
+            new OnChildLocationsChangedListener() {
                 @Override
-                public void onChildLocationsChanged(
-                        NotificationStackScrollLayout stackScrollLayout) {
+                public void onChildLocationsChanged() {
                     if (mHandler.hasCallbacks(mVisibilityReporter)) {
                         // Visibilities will be reported when the existing
                         // callback is executed.
@@ -99,13 +100,13 @@ public class NotificationLogger {
             //    notifications.
             // 3. Report newly visible and no-longer visible notifications.
             // 4. Keep currently visible notifications for next report.
-            ArrayList<NotificationData.Entry> activeNotifications = mPresenter.
-                    getNotificationData().getActiveNotifications();
+            ArrayList<NotificationData.Entry> activeNotifications = mEntryManager
+                    .getNotificationData().getActiveNotifications();
             int N = activeNotifications.size();
             for (int i = 0; i < N; i++) {
                 NotificationData.Entry entry = activeNotifications.get(i);
                 String key = entry.notification.getKey();
-                boolean isVisible = mStackScroller.isInVisibleLocation(entry.row);
+                boolean isVisible = mListContainer.isInVisibleLocation(entry.row);
                 NotificationVisibility visObj = NotificationVisibility.obtain(key, i, isVisible);
                 boolean previouslyVisible = mCurrentlyVisibleNotifications.contains(visObj);
                 if (isVisible) {
@@ -135,19 +136,15 @@ public class NotificationLogger {
         }
     };
 
-    public NotificationLogger(NotificationListenerService notificationListener,
-            UiOffloadThread uiOffloadThread) {
-        mNotificationListener = notificationListener;
-        mUiOffloadThread = uiOffloadThread;
+    public NotificationLogger() {
         mBarService = IStatusBarService.Stub.asInterface(
                 ServiceManager.getService(Context.STATUS_BAR_SERVICE));
     }
 
-    // TODO: Remove dependency on NotificationStackScrollLayout.
-    public void setUpWithPresenter(NotificationPresenter presenter,
-            NotificationStackScrollLayout stackScroller) {
-        mPresenter = presenter;
-        mStackScroller = stackScroller;
+    public void setUpWithEntryManager(NotificationEntryManager entryManager,
+            NotificationListContainer listContainer) {
+        mEntryManager = entryManager;
+        mListContainer = listContainer;
     }
 
     public void stopNotificationLogging() {
@@ -159,18 +156,18 @@ public class NotificationLogger {
             recycleAllVisibilityObjects(mCurrentlyVisibleNotifications);
         }
         mHandler.removeCallbacks(mVisibilityReporter);
-        mStackScroller.setChildLocationsChangedListener(null);
+        mListContainer.setChildLocationsChangedListener(null);
     }
 
     public void startNotificationLogging() {
-        mStackScroller.setChildLocationsChangedListener(mNotificationLocationsChangedListener);
+        mListContainer.setChildLocationsChangedListener(mNotificationLocationsChangedListener);
         // Some transitions like mVisibleToUser=false -> mVisibleToUser=true don't
         // cause the scroller to emit child location events. Hence generate
         // one ourselves to guarantee that we're reporting visible
         // notifications.
         // (Note that in cases where the scroller does emit events, this
         // additional event doesn't break anything.)
-        mNotificationLocationsChangedListener.onChildLocationsChanged(mStackScroller);
+        mNotificationLocationsChangedListener.onChildLocationsChanged();
     }
 
     private void logNotificationVisibilityChanges(
@@ -219,5 +216,12 @@ public class NotificationLogger {
     @VisibleForTesting
     public Runnable getVisibilityReporter() {
         return mVisibilityReporter;
+    }
+
+    /**
+     * A listener that is notified when some child locations might have changed.
+     */
+    public interface OnChildLocationsChangedListener {
+        void onChildLocationsChanged();
     }
 }

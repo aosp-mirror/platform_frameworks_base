@@ -36,7 +36,6 @@ import com.android.internal.statusbar.IStatusBarService;
 import com.android.internal.statusbar.NotificationVisibility;
 import com.android.systemui.SysuiTestCase;
 import com.android.systemui.UiOffloadThread;
-import com.android.systemui.statusbar.stack.NotificationStackScrollLayout;
 
 import com.google.android.collect.Lists;
 
@@ -55,11 +54,14 @@ public class NotificationLoggerTest extends SysuiTestCase {
     private static final int TEST_UID = 0;
 
     @Mock private NotificationPresenter mPresenter;
-    @Mock private NotificationListener mListener;
-    @Mock private NotificationStackScrollLayout mStackScroller;
+    @Mock private NotificationListContainer mListContainer;
     @Mock private IStatusBarService mBarService;
     @Mock private NotificationData mNotificationData;
     @Mock private ExpandableNotificationRow mRow;
+
+    // Dependency mocks:
+    @Mock private NotificationEntryManager mEntryManager;
+    @Mock private NotificationListener mListener;
 
     private NotificationData.Entry mEntry;
     private StatusBarNotification mSbn;
@@ -68,24 +70,25 @@ public class NotificationLoggerTest extends SysuiTestCase {
     @Before
     public void setUp() {
         MockitoAnnotations.initMocks(this);
+        mDependency.injectTestDependency(NotificationEntryManager.class, mEntryManager);
+        mDependency.injectTestDependency(NotificationListener.class, mListener);
 
-        when(mPresenter.getNotificationData()).thenReturn(mNotificationData);
+        when(mEntryManager.getNotificationData()).thenReturn(mNotificationData);
 
         mSbn = new StatusBarNotification(TEST_PACKAGE_NAME, TEST_PACKAGE_NAME, 0, null, TEST_UID,
                 0, new Notification(), UserHandle.CURRENT, null, 0);
         mEntry = new NotificationData.Entry(mSbn);
         mEntry.row = mRow;
 
-        mLogger = new TestableNotificationLogger(mListener, mDependency.get(UiOffloadThread.class),
-                mBarService);
-        mLogger.setUpWithPresenter(mPresenter, mStackScroller);
+        mLogger = new TestableNotificationLogger(mBarService);
+        mLogger.setUpWithEntryManager(mEntryManager, mListContainer);
     }
 
     @Test
     public void testOnChildLocationsChangedReportsVisibilityChanged() throws Exception {
-        when(mStackScroller.isInVisibleLocation(any())).thenReturn(true);
+        when(mListContainer.isInVisibleLocation(any())).thenReturn(true);
         when(mNotificationData.getActiveNotifications()).thenReturn(Lists.newArrayList(mEntry));
-        mLogger.getChildLocationsChangedListenerForTest().onChildLocationsChanged(mStackScroller);
+        mLogger.getChildLocationsChangedListenerForTest().onChildLocationsChanged();
         waitForIdleSync(mLogger.getHandlerForTest());
         waitForUiOffloadThread();
 
@@ -97,7 +100,7 @@ public class NotificationLoggerTest extends SysuiTestCase {
 
         // |mEntry| won't change visibility, so it shouldn't be reported again:
         Mockito.reset(mBarService);
-        mLogger.getChildLocationsChangedListenerForTest().onChildLocationsChanged(mStackScroller);
+        mLogger.getChildLocationsChangedListenerForTest().onChildLocationsChanged();
         waitForIdleSync(mLogger.getHandlerForTest());
         waitForUiOffloadThread();
 
@@ -107,9 +110,9 @@ public class NotificationLoggerTest extends SysuiTestCase {
     @Test
     public void testStoppingNotificationLoggingReportsCurrentNotifications()
             throws Exception {
-        when(mStackScroller.isInVisibleLocation(any())).thenReturn(true);
+        when(mListContainer.isInVisibleLocation(any())).thenReturn(true);
         when(mNotificationData.getActiveNotifications()).thenReturn(Lists.newArrayList(mEntry));
-        mLogger.getChildLocationsChangedListenerForTest().onChildLocationsChanged(mStackScroller);
+        mLogger.getChildLocationsChangedListenerForTest().onChildLocationsChanged();
         waitForIdleSync(mLogger.getHandlerForTest());
         waitForUiOffloadThread();
         Mockito.reset(mBarService);
@@ -123,17 +126,13 @@ public class NotificationLoggerTest extends SysuiTestCase {
 
     private class TestableNotificationLogger extends NotificationLogger {
 
-        public TestableNotificationLogger(
-                NotificationListenerService notificationListener,
-                UiOffloadThread uiOffloadThread,
-                IStatusBarService barService) {
-            super(notificationListener, uiOffloadThread);
+        public TestableNotificationLogger(IStatusBarService barService) {
             mBarService = barService;
             // Make this on the main thread so we can wait for it during tests.
             mHandler = new Handler(Looper.getMainLooper());
         }
 
-        public NotificationStackScrollLayout.OnChildLocationsChangedListener
+        public OnChildLocationsChangedListener
                 getChildLocationsChangedListenerForTest() {
             return mNotificationLocationsChangedListener;
         }

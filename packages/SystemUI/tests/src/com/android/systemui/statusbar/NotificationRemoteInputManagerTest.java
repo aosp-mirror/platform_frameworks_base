@@ -34,36 +34,41 @@ public class NotificationRemoteInputManagerTest extends SysuiTestCase {
     private static final String TEST_PACKAGE_NAME = "test";
     private static final int TEST_UID = 0;
 
-    private Handler mHandler;
-    private TestableNotificationRemoteInputManager mRemoteInputManager;
-    private StatusBarNotification mSbn;
-    private NotificationData.Entry mEntry;
-
     @Mock private NotificationPresenter mPresenter;
     @Mock private RemoteInputController.Delegate mDelegate;
-    @Mock private NotificationLockscreenUserManager mLockscreenUserManager;
     @Mock private NotificationRemoteInputManager.Callback mCallback;
     @Mock private RemoteInputController mController;
     @Mock private NotificationListenerService.RankingMap mRanking;
     @Mock private ExpandableNotificationRow mRow;
 
+    // Dependency mocks:
+    @Mock private NotificationEntryManager mEntryManager;
+    @Mock private NotificationLockscreenUserManager mLockscreenUserManager;
+
+    private Handler mHandler;
+    private TestableNotificationRemoteInputManager mRemoteInputManager;
+    private StatusBarNotification mSbn;
+    private NotificationData.Entry mEntry;
+
     @Before
     public void setUp() {
         MockitoAnnotations.initMocks(this);
+        mDependency.injectTestDependency(NotificationEntryManager.class, mEntryManager);
+        mDependency.injectTestDependency(NotificationLockscreenUserManager.class,
+                mLockscreenUserManager);
         mHandler = new Handler(Looper.getMainLooper());
 
         when(mPresenter.getHandler()).thenReturn(mHandler);
-        when(mPresenter.getLatestRankingMap()).thenReturn(mRanking);
+        when(mEntryManager.getLatestRankingMap()).thenReturn(mRanking);
 
-        mRemoteInputManager = new TestableNotificationRemoteInputManager(mLockscreenUserManager,
-                mContext);
+        mRemoteInputManager = new TestableNotificationRemoteInputManager(mContext);
         mSbn = new StatusBarNotification(TEST_PACKAGE_NAME, TEST_PACKAGE_NAME, 0, null, TEST_UID,
                 0, new Notification(), UserHandle.CURRENT, null, 0);
         mEntry = new NotificationData.Entry(mSbn);
         mEntry.row = mRow;
 
-        mRemoteInputManager.setUpWithPresenterForTest(mPresenter, mCallback, mDelegate,
-                mController);
+        mRemoteInputManager.setUpWithPresenterForTest(mPresenter, mEntryManager, mCallback,
+                mDelegate, mController);
     }
 
     @Test
@@ -97,21 +102,21 @@ public class NotificationRemoteInputManagerTest extends SysuiTestCase {
 
         assertTrue(mRemoteInputManager.getRemoteInputEntriesToRemoveOnCollapse().isEmpty());
         verify(mController).removeRemoteInput(mEntry, null);
-        verify(mPresenter).removeNotification(mEntry.key, mRanking);
+        verify(mEntryManager).removeNotification(mEntry.key, mRanking);
     }
 
     private class TestableNotificationRemoteInputManager extends NotificationRemoteInputManager {
 
-        public TestableNotificationRemoteInputManager(
-                NotificationLockscreenUserManager lockscreenUserManager, Context context) {
-            super(lockscreenUserManager, context);
+        public TestableNotificationRemoteInputManager(Context context) {
+            super(context);
         }
 
         public void setUpWithPresenterForTest(NotificationPresenter presenter,
+                NotificationEntryManager entryManager,
                 Callback callback,
                 RemoteInputController.Delegate delegate,
                 RemoteInputController controller) {
-            super.setUpWithPresenter(presenter, callback, delegate);
+            super.setUpWithPresenter(presenter, entryManager, callback, delegate);
             mRemoteInputController = controller;
         }
     }

@@ -39,6 +39,7 @@ import android.widget.TextView;
 
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.statusbar.IStatusBarService;
+import com.android.systemui.Dependency;
 import com.android.systemui.Dumpable;
 import com.android.systemui.statusbar.policy.RemoteInputView;
 
@@ -70,7 +71,10 @@ public class NotificationRemoteInputManager implements Dumpable {
 
     protected final ArraySet<NotificationData.Entry> mRemoteInputEntriesToRemoveOnCollapse =
             new ArraySet<>();
-    protected final NotificationLockscreenUserManager mLockscreenUserManager;
+
+    // Dependencies:
+    protected final NotificationLockscreenUserManager mLockscreenUserManager =
+            Dependency.get(NotificationLockscreenUserManager.class);
 
     /**
      * Notifications with keys in this set are not actually around anymore. We kept them around
@@ -83,6 +87,7 @@ public class NotificationRemoteInputManager implements Dumpable {
 
     protected RemoteInputController mRemoteInputController;
     protected NotificationPresenter mPresenter;
+    protected NotificationEntryManager mEntryManager;
     protected IStatusBarService mBarService;
     protected Callback mCallback;
 
@@ -263,9 +268,7 @@ public class NotificationRemoteInputManager implements Dumpable {
         }
     };
 
-    public NotificationRemoteInputManager(NotificationLockscreenUserManager lockscreenUserManager,
-            Context context) {
-        mLockscreenUserManager = lockscreenUserManager;
+    public NotificationRemoteInputManager(Context context) {
         mContext = context;
         mBarService = IStatusBarService.Stub.asInterface(
                 ServiceManager.getService(Context.STATUS_BAR_SERVICE));
@@ -273,16 +276,18 @@ public class NotificationRemoteInputManager implements Dumpable {
     }
 
     public void setUpWithPresenter(NotificationPresenter presenter,
+            NotificationEntryManager entryManager,
             Callback callback,
             RemoteInputController.Delegate delegate) {
         mPresenter = presenter;
+        mEntryManager = entryManager;
         mCallback = callback;
         mRemoteInputController = new RemoteInputController(delegate);
         mRemoteInputController.addCallback(new RemoteInputController.Callback() {
             @Override
             public void onRemoteInputSent(NotificationData.Entry entry) {
                 if (FORCE_REMOTE_INPUT_HISTORY && mKeysKeptForRemoteInput.contains(entry.key)) {
-                    mPresenter.removeNotification(entry.key, null);
+                    mEntryManager.removeNotification(entry.key, null);
                 } else if (mRemoteInputEntriesToRemoveOnCollapse.contains(entry)) {
                     // We're currently holding onto this notification, but from the apps point of
                     // view it is already canceled, so we'll need to cancel it on the apps behalf
@@ -290,7 +295,7 @@ public class NotificationRemoteInputManager implements Dumpable {
                     // bit.
                     mPresenter.getHandler().postDelayed(() -> {
                         if (mRemoteInputEntriesToRemoveOnCollapse.remove(entry)) {
-                            mPresenter.removeNotification(entry.key, null);
+                            mEntryManager.removeNotification(entry.key, null);
                         }
                     }, REMOTE_INPUT_KEPT_ENTRY_AUTO_CANCEL_DELAY);
                 }
@@ -336,7 +341,7 @@ public class NotificationRemoteInputManager implements Dumpable {
         for (int i = 0; i < mRemoteInputEntriesToRemoveOnCollapse.size(); i++) {
             NotificationData.Entry entry = mRemoteInputEntriesToRemoveOnCollapse.valueAt(i);
             mRemoteInputController.removeRemoteInput(entry, null);
-            mPresenter.removeNotification(entry.key, mPresenter.getLatestRankingMap());
+            mEntryManager.removeNotification(entry.key, mEntryManager.getLatestRankingMap());
         }
         mRemoteInputEntriesToRemoveOnCollapse.clear();
     }
