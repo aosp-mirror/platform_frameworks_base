@@ -57,6 +57,7 @@ class RecoverableKeyStoreDbHelper extends SQLiteOpenHelper {
                     + RecoveryServiceMetadataEntry.COLUMN_NAME_USER_ID + " INTEGER,"
                     + RecoveryServiceMetadataEntry.COLUMN_NAME_UID + " INTEGER,"
                     + RecoveryServiceMetadataEntry.COLUMN_NAME_PUBLIC_KEY + " BLOB,"
+                    + RecoveryServiceMetadataEntry.COLUMN_NAME_SECRET_TYPES + " TEXT,"
                     + RecoveryServiceMetadataEntry.COLUMN_NAME_SERVER_PARAMETERS + " INTEGER,"
                     + "UNIQUE("
                     + RecoveryServiceMetadataEntry.COLUMN_NAME_USER_ID  + ","

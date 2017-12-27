@@ -229,7 +229,8 @@ public class RecoverableKeyStoreManager {
             @NonNull @KeyStoreRecoveryMetadata.UserSecretType int[] secretTypes, int userId)
             throws RemoteException {
         checkRecoverKeyStorePermission();
-        throw new UnsupportedOperationException();
+        mDatabase.setRecoverySecretTypes(UserHandle.getCallingUserId(), Binder.getCallingUid(),
+            secretTypes);
     }
 
     /**
@@ -240,7 +241,8 @@ public class RecoverableKeyStoreManager {
      */
     public @NonNull int[] getRecoverySecretTypes(int userId) throws RemoteException {
         checkRecoverKeyStorePermission();
-        throw new UnsupportedOperationException();
+        return mDatabase.getRecoverySecretTypes(UserHandle.getCallingUserId(),
+            Binder.getCallingUid());
     }
 
     /**

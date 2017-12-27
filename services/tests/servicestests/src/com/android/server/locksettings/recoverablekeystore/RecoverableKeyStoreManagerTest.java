@@ -362,6 +362,26 @@ public class RecoverableKeyStoreManagerTest {
     }
 
     @Test
+    public void setRecoverySecretTypes() throws Exception {
+        int userId = UserHandle.getCallingUserId();
+        int[] types1 = new int[]{11, 2000};
+        int[] types2 = new int[]{1, 2, 3};
+        int[] types3 = new int[]{};
+
+        mRecoverableKeyStoreManager.setRecoverySecretTypes(types1, userId);
+        assertThat(mRecoverableKeyStoreManager.getRecoverySecretTypes(userId)).isEqualTo(
+                types1);
+
+        mRecoverableKeyStoreManager.setRecoverySecretTypes(types2, userId);
+        assertThat(mRecoverableKeyStoreManager.getRecoverySecretTypes(userId)).isEqualTo(
+                types2);
+
+        mRecoverableKeyStoreManager.setRecoverySecretTypes(types3, userId);
+        assertThat(mRecoverableKeyStoreManager.getRecoverySecretTypes(userId)).isEqualTo(
+                types3);
+    }
+
+    @Test
     public void setRecoveryStatus_forOneAlias() throws Exception {
         int userId = UserHandle.getCallingUserId();
         int uid = Binder.getCallingUid();
