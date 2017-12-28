@@ -89,4 +89,7 @@ cc_library {
                                                             // initialization with {}.
         },
     },
+    sanitize: {
+        blacklist: "libandroidfw_blacklist.txt",
+    },
 }
