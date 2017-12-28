@@ -63,6 +63,7 @@ public class KeySyncTask implements Runnable {
     private static final int SALT_LENGTH_BYTES = 16;
     private static final int LENGTH_PREFIX_BYTES = Integer.BYTES;
     private static final String LOCK_SCREEN_HASH_ALGORITHM = "SHA-256";
+    private static final int TRUSTED_HARDWARE_MAX_ATTEMPTS = 10;
 
     private final RecoverableKeyStoreDb mRecoverableKeyStoreDb;
     private final int mUserId;
@@ -140,16 +141,20 @@ public class KeySyncTask implements Runnable {
             Log.w(TAG, "No recovery agent initialized for user " + mUserId);
             return;
         }
-
         if (!mSnapshotListenersStorage.hasListener(recoveryAgentUid)) {
             Log.w(TAG, "No pending intent registered for recovery agent " + recoveryAgentUid);
             return;
         }
 
         PublicKey publicKey = getVaultPublicKey();
-
         if (publicKey == null) {
             Log.w(TAG, "Not initialized for KeySync: no public key set. Cancelling task.");
+            return;
+        }
+
+        Long deviceId = mRecoverableKeyStoreDb.getServerParameters(mUserId, recoveryAgentUid);
+        if (deviceId == null) {
+            Log.w(TAG, "No device ID set for user " + mUserId);
             return;
         }
 
@@ -191,8 +196,12 @@ public class KeySyncTask implements Runnable {
             return;
         }
 
-        // TODO: construct vault params and vault metadata
-        byte[] vaultParams = {};
+        // TODO: where do we get counter_id from here?
+        byte[] vaultParams = KeySyncUtils.packVaultParams(
+                publicKey,
+                /*counterId=*/ 1,
+                TRUSTED_HARDWARE_MAX_ATTEMPTS,
+                deviceId);
 
         byte[] encryptedRecoveryKey;
         try {

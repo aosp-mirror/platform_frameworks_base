@@ -72,6 +72,7 @@ public class KeySyncTaskTest {
     private static final int TEST_USER_ID = 1000;
     private static final int TEST_APP_UID = 10009;
     private static final int TEST_RECOVERY_AGENT_UID = 90873;
+    private static final long TEST_DEVICE_ID = 13295035643L;
     private static final String TEST_APP_KEY_ALIAS = "rcleaver";
     private static final int TEST_GENERATION_ID = 2;
     private static final int TEST_CREDENTIAL_TYPE = CREDENTIAL_TYPE_PASSWORD;
@@ -223,6 +224,8 @@ public class KeySyncTaskTest {
     @Test
     public void run_doesNotSendAnythingIfNoRecoveryAgentPendingIntentRegistered() throws Exception {
         SecretKey applicationKey = generateKey();
+        mRecoverableKeyStoreDb.setServerParameters(
+                TEST_USER_ID, TEST_RECOVERY_AGENT_UID, TEST_DEVICE_ID);
         mRecoverableKeyStoreDb.setPlatformKeyGenerationId(TEST_USER_ID, TEST_GENERATION_ID);
         mRecoverableKeyStoreDb.insertKey(
                 TEST_USER_ID,
@@ -238,8 +241,28 @@ public class KeySyncTaskTest {
     }
 
     @Test
+    public void run_doesNotSendAnythingIfNoDeviceIdIsSet() throws Exception {
+        SecretKey applicationKey = generateKey();
+        mRecoverableKeyStoreDb.setPlatformKeyGenerationId(TEST_USER_ID, TEST_GENERATION_ID);
+        mRecoverableKeyStoreDb.insertKey(
+                TEST_USER_ID,
+                TEST_APP_UID,
+                TEST_APP_KEY_ALIAS,
+                WrappedKey.fromSecretKey(mEncryptKey, applicationKey));
+        mRecoverableKeyStoreDb.setRecoveryServicePublicKey(
+                TEST_USER_ID, TEST_RECOVERY_AGENT_UID, mKeyPair.getPublic());
+        when(mSnapshotListenersStorage.hasListener(TEST_RECOVERY_AGENT_UID)).thenReturn(true);
+
+        mKeySyncTask.run();
+
+        assertNull(mRecoverySnapshotStorage.get(TEST_USER_ID));
+    }
+
+    @Test
     public void run_sendsEncryptedKeysIfAvailableToSync() throws Exception {
         SecretKey applicationKey = generateKey();
+        mRecoverableKeyStoreDb.setServerParameters(
+                TEST_USER_ID, TEST_RECOVERY_AGENT_UID, TEST_DEVICE_ID);
         mRecoverableKeyStoreDb.setPlatformKeyGenerationId(TEST_USER_ID, TEST_GENERATION_ID);
         mRecoverableKeyStoreDb.insertKey(
                 TEST_USER_ID,
@@ -261,11 +284,15 @@ public class KeySyncTaskTest {
         byte[] lockScreenHash = KeySyncTask.hashCredentials(
                 keyDerivationParameters.getSalt(),
                 TEST_CREDENTIAL);
-        // TODO: what should vault params be here?
+        // TODO: what should counter_id be here?
         byte[] recoveryKey = decryptThmEncryptedKey(
                 lockScreenHash,
                 recoveryData.getEncryptedRecoveryKeyBlob(),
-                /*vaultParams=*/ new byte[0]);
+                /*vaultParams=*/ KeySyncUtils.packVaultParams(
+                        mKeyPair.getPublic(),
+                        /*counterId=*/ 1,
+                        /*maxAttempts=*/ 10,
+                        TEST_DEVICE_ID));
         List<KeyEntryRecoveryData> applicationKeys = recoveryData.getApplicationKeyBlobs();
         assertEquals(1, applicationKeys.size());
         KeyEntryRecoveryData keyData = applicationKeys.get(0);
