@@ -59,7 +59,6 @@ public interface JobSchedulerInternal {
 
     /**
      * Stats about the first load after boot and the most recent save.
-     * STOPSHIP Remove it and the relevant code once b/64536115 is fixed.
      */
     public class JobStorePersistStats {
         public int countAllJobsLoaded = -1;
