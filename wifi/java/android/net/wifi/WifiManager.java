@@ -3123,7 +3123,7 @@ public class WifiManager {
 
         public void setWorkSource(WorkSource ws) {
             synchronized (mBinder) {
-                if (ws != null && ws.size() == 0) {
+                if (ws != null && ws.isEmpty()) {
                     ws = null;
                 }
                 boolean changed = true;
@@ -3135,7 +3135,7 @@ public class WifiManager {
                         changed = mWorkSource != null;
                         mWorkSource = new WorkSource(ws);
                     } else {
-                        changed = mWorkSource.diff(ws);
+                        changed = !mWorkSource.equals(ws);
                         if (changed) {
                             mWorkSource.set(ws);
                         }
