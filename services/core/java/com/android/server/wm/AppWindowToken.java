@@ -1541,6 +1541,7 @@ class AppWindowToken extends WindowToken implements WindowManagerService.AppFree
                 if (stack != null) {
                     stack.getRelativePosition(mTmpPoint);
                     stack.getBounds(mTmpRect);
+                    mTmpRect.offsetTo(0, 0);
                 }
                 final AnimationAdapter adapter = new LocalAnimationAdapter(
                         new WindowAnimationSpec(a, mTmpPoint, mTmpRect,

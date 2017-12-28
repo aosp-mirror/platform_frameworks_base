@@ -92,8 +92,8 @@ public class WindowAnimationSpec implements AnimationSpec {
             t.setFinalCrop(leash, mStackBounds);
             t.setWindowCrop(leash, tmp.transformation.getClipRect());
         } else {
-            mTmpRect.set(tmp.transformation.getClipRect());
-            mTmpRect.intersect(mStackBounds);
+            mTmpRect.set(mStackBounds);
+            mTmpRect.intersect(tmp.transformation.getClipRect());
             t.setWindowCrop(leash, mTmpRect);
         }
     }
