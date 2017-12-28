@@ -109,6 +109,11 @@ class RecoverableKeyStoreDbContract {
         static final String COLUMN_NAME_PUBLIC_KEY = "public_key";
 
         /**
+         * Secret types used for end-to-end encryption.
+         */
+        static final String COLUMN_NAME_SECRET_TYPES = "secret_types";
+
+        /**
          * The server parameters of the recovery service.
          */
         static final String COLUMN_NAME_SERVER_PARAMETERS = "server_parameters";

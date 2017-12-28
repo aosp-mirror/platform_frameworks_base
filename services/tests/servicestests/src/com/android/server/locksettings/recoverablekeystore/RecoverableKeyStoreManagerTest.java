@@ -48,6 +48,7 @@ import android.support.test.runner.AndroidJUnit4;
 
 import com.android.server.locksettings.recoverablekeystore.storage.RecoverableKeyStoreDb;
 import com.android.server.locksettings.recoverablekeystore.storage.RecoverySessionStorage;
+import com.android.server.locksettings.recoverablekeystore.storage.RecoverySnapshotStorage;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
@@ -107,13 +108,14 @@ public class RecoverableKeyStoreManagerTest {
     private static final int GCM_TAG_SIZE_BITS = 128;
 
     @Mock private Context mMockContext;
-    @Mock private ListenersStorage mMockListenersStorage;
+    @Mock private RecoverySnapshotListenersStorage mMockListenersStorage;
     @Mock private KeyguardManager mKeyguardManager;
 
     private RecoverableKeyStoreDb mRecoverableKeyStoreDb;
     private File mDatabaseFile;
     private RecoverableKeyStoreManager mRecoverableKeyStoreManager;
     private RecoverySessionStorage mRecoverySessionStorage;
+    private RecoverySnapshotStorage mRecoverySnapshotStorage;
 
     @Before
     public void setUp() {
@@ -127,6 +129,7 @@ public class RecoverableKeyStoreManagerTest {
 
         when(mMockContext.getSystemService(anyString())).thenReturn(mKeyguardManager);
         when(mMockContext.getSystemServiceName(any())).thenReturn("test");
+        when(mMockContext.getApplicationContext()).thenReturn(mMockContext);
         when(mKeyguardManager.isDeviceSecure(anyInt())).thenReturn(true);
 
         mRecoverableKeyStoreManager = new RecoverableKeyStoreManager(
@@ -134,6 +137,7 @@ public class RecoverableKeyStoreManagerTest {
                 mRecoverableKeyStoreDb,
                 mRecoverySessionStorage,
                 Executors.newSingleThreadExecutor(),
+                mRecoverySnapshotStorage,
                 mMockListenersStorage);
     }
 
@@ -156,27 +160,6 @@ public class RecoverableKeyStoreManagerTest {
     public void generateAndStoreKey_returnsAKeyOfAppropriateSize() throws Exception {
         assertThat(mRecoverableKeyStoreManager.generateAndStoreKey(TEST_ALIAS))
                 .hasLength(RECOVERABLE_KEY_SIZE_BYTES);
-    }
-
-    @Test
-    public void generateAndStoreKey_storesTheWrappedFormOfTheReturnedBytes() throws Exception {
-        int uid = Binder.getCallingUid();
-
-        byte[] rawKey = mRecoverableKeyStoreManager.generateAndStoreKey(TEST_ALIAS);
-
-        WrappedKey wrappedKey = mRecoverableKeyStoreDb.getKey(uid, TEST_ALIAS);
-        PlatformEncryptionKey encryptionKey = PlatformKeyManager.getInstance(
-                mMockContext,
-                mRecoverableKeyStoreDb,
-                Binder.getCallingUserHandle().getIdentifier())
-                .getEncryptKey();
-        Cipher cipher = Cipher.getInstance(KEY_WRAP_CIPHER_ALGORITHM);
-        cipher.init(
-                Cipher.ENCRYPT_MODE,
-                encryptionKey.getKey(),
-                new GCMParameterSpec(GCM_TAG_SIZE_BITS, wrappedKey.getNonce()));
-        byte[] encryptedBytes = cipher.update(rawKey);
-        assertArrayEquals(encryptedBytes, wrappedKey.getKeyMaterial());
     }
 
     @Test
@@ -376,6 +359,26 @@ public class RecoverableKeyStoreManagerTest {
                 new Intent(), /*flags=*/ 0);
         mRecoverableKeyStoreManager.setSnapshotCreatedPendingIntent(intent, /*userId=*/ 0);
         verify(mMockListenersStorage).setSnapshotListener(eq(uid), any(PendingIntent.class));
+    }
+
+    @Test
+    public void setRecoverySecretTypes() throws Exception {
+        int userId = UserHandle.getCallingUserId();
+        int[] types1 = new int[]{11, 2000};
+        int[] types2 = new int[]{1, 2, 3};
+        int[] types3 = new int[]{};
+
+        mRecoverableKeyStoreManager.setRecoverySecretTypes(types1, userId);
+        assertThat(mRecoverableKeyStoreManager.getRecoverySecretTypes(userId)).isEqualTo(
+                types1);
+
+        mRecoverableKeyStoreManager.setRecoverySecretTypes(types2, userId);
+        assertThat(mRecoverableKeyStoreManager.getRecoverySecretTypes(userId)).isEqualTo(
+                types2);
+
+        mRecoverableKeyStoreManager.setRecoverySecretTypes(types3, userId);
+        assertThat(mRecoverableKeyStoreManager.getRecoverySecretTypes(userId)).isEqualTo(
+                types3);
     }
 
     @Test

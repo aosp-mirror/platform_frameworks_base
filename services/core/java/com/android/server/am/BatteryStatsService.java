@@ -464,15 +464,16 @@ public final class BatteryStatsService extends IBatteryStats.Stub
             boolean unimportantForLogging) {
         enforceCallingPermission();
         synchronized (mStats) {
-            mStats.noteStartWakeLocked(uid, pid, name, historyName, type, unimportantForLogging,
-                    SystemClock.elapsedRealtime(), SystemClock.uptimeMillis());
+            mStats.noteStartWakeLocked(uid, pid, null, name, historyName, type,
+                    unimportantForLogging, SystemClock.elapsedRealtime(),
+                    SystemClock.uptimeMillis());
         }
     }
 
     public void noteStopWakelock(int uid, int pid, String name, String historyName, int type) {
         enforceCallingPermission();
         synchronized (mStats) {
-            mStats.noteStopWakeLocked(uid, pid, name, historyName, type,
+            mStats.noteStopWakeLocked(uid, pid, null, name, historyName, type,
                     SystemClock.elapsedRealtime(), SystemClock.uptimeMillis());
         }
     }

@@ -612,7 +612,7 @@ class RootWindowContainer extends WindowContainer<DisplayContent> {
                         defaultDisplay.pendingLayoutChanges);
         }
 
-        if (!mService.mAnimator.mAppWindowAnimating && mService.mAppTransition.isRunning()) {
+        if (!isAppAnimating() && mService.mAppTransition.isRunning()) {
             // We have finished the animation of an app transition. To do this, we have delayed a
             // lot of operations like showing and hiding apps, moving apps in Z-order, etc. The app
             // token list reflects the correct Z-order, but the window list may now be out of sync
@@ -1035,7 +1035,7 @@ class RootWindowContainer extends WindowContainer<DisplayContent> {
             final int count = mChildren.size();
             for (int i = 0; i < count; ++i) {
                 final DisplayContent displayContent = mChildren.get(i);
-                displayContent.dump("  ", pw);
+                displayContent.dump(pw, "  ", true /* dumpAll */);
             }
         } else {
             pw.println("  NO DISPLAY");

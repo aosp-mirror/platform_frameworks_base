@@ -193,7 +193,7 @@ public class AppWindowTokenTests extends WindowTestsBase {
         assertEquals(SCREEN_ORIENTATION_LANDSCAPE, mToken.getOrientation());
 
         mToken.setFillsParent(true);
-        mToken.hidden = true;
+        mToken.setHidden(true);
         mToken.sendingToBottom = true;
         // Can not specify orientation if app isn't visible even though it fills parent.
         assertEquals(SCREEN_ORIENTATION_UNSET, mToken.getOrientation());

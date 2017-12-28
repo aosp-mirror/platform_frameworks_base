@@ -4324,7 +4324,7 @@ public final class PowerManagerService extends SystemService
                 mContext.enforceCallingOrSelfPermission(
                         android.Manifest.permission.DEVICE_POWER, null);
             }
-            if (ws != null && ws.size() != 0) {
+            if (ws != null && !ws.isEmpty()) {
                 mContext.enforceCallingOrSelfPermission(
                         android.Manifest.permission.UPDATE_DEVICE_STATS, null);
             } else {
@@ -4379,7 +4379,7 @@ public final class PowerManagerService extends SystemService
             }
 
             mContext.enforceCallingOrSelfPermission(android.Manifest.permission.WAKE_LOCK, null);
-            if (ws != null && ws.size() != 0) {
+            if (ws != null && !ws.isEmpty()) {
                 mContext.enforceCallingOrSelfPermission(
                         android.Manifest.permission.UPDATE_DEVICE_STATS, null);
             } else {

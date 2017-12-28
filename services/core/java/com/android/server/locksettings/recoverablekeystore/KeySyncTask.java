@@ -16,14 +16,20 @@
 
 package com.android.server.locksettings.recoverablekeystore;
 
+import static android.security.recoverablekeystore.KeyStoreRecoveryMetadata.TYPE_LOCKSCREEN;
+
 import android.annotation.NonNull;
 import android.content.Context;
+import android.security.recoverablekeystore.KeyDerivationParameters;
+import android.security.recoverablekeystore.KeyEntryRecoveryData;
+import android.security.recoverablekeystore.KeyStoreRecoveryData;
 import android.security.recoverablekeystore.KeyStoreRecoveryMetadata;
 import android.util.Log;
 
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.widget.LockPatternUtils;
 import com.android.server.locksettings.recoverablekeystore.storage.RecoverableKeyStoreDb;
+import com.android.server.locksettings.recoverablekeystore.storage.RecoverySnapshotStorage;
 
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
@@ -36,6 +42,8 @@ import java.security.NoSuchAlgorithmException;
 import java.security.PublicKey;
 import java.security.SecureRandom;
 import java.security.UnrecoverableKeyException;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
 
 import javax.crypto.KeyGenerator;
@@ -58,28 +66,30 @@ public class KeySyncTask implements Runnable {
 
     private final RecoverableKeyStoreDb mRecoverableKeyStoreDb;
     private final int mUserId;
-    private final RecoverableSnapshotConsumer mSnapshotConsumer;
     private final int mCredentialType;
     private final String mCredential;
     private final PlatformKeyManager.Factory mPlatformKeyManagerFactory;
     private final VaultKeySupplier mVaultKeySupplier;
+    private final RecoverySnapshotStorage mRecoverySnapshotStorage;
+    private final RecoverySnapshotListenersStorage mSnapshotListenersStorage;
 
     public static KeySyncTask newInstance(
             Context context,
             RecoverableKeyStoreDb recoverableKeyStoreDb,
+            RecoverySnapshotStorage snapshotStorage,
+            RecoverySnapshotListenersStorage recoverySnapshotListenersStorage,
             int userId,
             int credentialType,
             String credential
     ) throws NoSuchAlgorithmException, KeyStoreException, InsecureUserException {
         return new KeySyncTask(
                 recoverableKeyStoreDb,
+                snapshotStorage,
+                recoverySnapshotListenersStorage,
                 userId,
                 credentialType,
                 credential,
                 () -> PlatformKeyManager.getInstance(context, recoverableKeyStoreDb, userId),
-                (salt, recoveryKey, applicationKeys) -> {
-                    // TODO: implement sending intent
-                },
                 () -> {
                     throw new UnsupportedOperationException("Not implemented vault key.");
                 });
@@ -99,19 +109,21 @@ public class KeySyncTask implements Runnable {
     @VisibleForTesting
     KeySyncTask(
             RecoverableKeyStoreDb recoverableKeyStoreDb,
+            RecoverySnapshotStorage snapshotStorage,
+            RecoverySnapshotListenersStorage recoverySnapshotListenersStorage,
             int userId,
             int credentialType,
             String credential,
             PlatformKeyManager.Factory platformKeyManagerFactory,
-            RecoverableSnapshotConsumer snapshotConsumer,
             VaultKeySupplier vaultKeySupplier) {
+        mSnapshotListenersStorage = recoverySnapshotListenersStorage;
         mRecoverableKeyStoreDb = recoverableKeyStoreDb;
         mUserId = userId;
         mCredentialType = credentialType;
         mCredential = credential;
         mPlatformKeyManagerFactory = platformKeyManagerFactory;
-        mSnapshotConsumer = snapshotConsumer;
         mVaultKeySupplier = vaultKeySupplier;
+        mRecoverySnapshotStorage = snapshotStorage;
     }
 
     @Override
@@ -126,6 +138,18 @@ public class KeySyncTask implements Runnable {
     private void syncKeys() {
         if (!isSyncPending()) {
             Log.d(TAG, "Key sync not needed.");
+            return;
+        }
+
+        int recoveryAgentUid = mRecoverableKeyStoreDb.getRecoveryAgentUid(mUserId);
+
+        if (recoveryAgentUid == -1) {
+            Log.w(TAG, "No recovery agent initialized for user " + mUserId);
+            return;
+        }
+
+        if (!mSnapshotListenersStorage.hasListener(recoveryAgentUid)) {
+            Log.w(TAG, "No pending intent registered for recovery agent " + recoveryAgentUid);
             return;
         }
 
@@ -185,7 +209,21 @@ public class KeySyncTask implements Runnable {
             return;
         }
 
-        mSnapshotConsumer.accept(salt, encryptedRecoveryKey, encryptedApplicationKeys);
+        KeyStoreRecoveryMetadata metadata = new KeyStoreRecoveryMetadata(
+                /*userSecretType=*/ TYPE_LOCKSCREEN,
+                /*lockScreenUiFormat=*/ mCredentialType,
+                /*keyDerivationParameters=*/ KeyDerivationParameters.createSHA256Parameters(salt),
+                /*secret=*/ new byte[0]);
+        ArrayList<KeyStoreRecoveryMetadata> metadataList = new ArrayList<>();
+        metadataList.add(metadata);
+
+        // TODO: implement snapshot version
+        mRecoverySnapshotStorage.put(mUserId, new KeyStoreRecoveryData(
+                /*snapshotVersion=*/ 1,
+                /*recoveryMetadata=*/ metadataList,
+                /*applicationKeyBlobs=*/ createApplicationKeyEntries(encryptedApplicationKeys),
+                /*encryptedRecoveryKeyblob=*/ encryptedRecoveryKey));
+        mSnapshotListenersStorage.recoverySnapshotAvailable(recoveryAgentUid);
     }
 
     private PublicKey getVaultPublicKey() {
@@ -290,15 +328,16 @@ public class KeySyncTask implements Runnable {
         return keyGenerator.generateKey();
     }
 
-    /**
-     * TODO: just replace with the Intent call. I'm not sure exactly what this looks like, hence
-     * this interface, so I can test in the meantime.
-     */
-    public interface RecoverableSnapshotConsumer {
-        void accept(
-                byte[] salt,
-                byte[] encryptedRecoveryKey,
-                Map<String, byte[]> encryptedApplicationKeys);
+    private static List<KeyEntryRecoveryData> createApplicationKeyEntries(
+            Map<String, byte[]> encryptedApplicationKeys) {
+        ArrayList<KeyEntryRecoveryData> keyEntries = new ArrayList<>();
+        for (String alias : encryptedApplicationKeys.keySet()) {
+            keyEntries.add(
+                    new KeyEntryRecoveryData(
+                            alias.getBytes(StandardCharsets.UTF_8),
+                            encryptedApplicationKeys.get(alias)));
+        }
+        return keyEntries;
     }
 
     /**

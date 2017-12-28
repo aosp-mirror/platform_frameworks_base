@@ -64,8 +64,6 @@ class WallpaperController {
     // to another, and this is the previous wallpaper target.
     private WindowState mPrevWallpaperTarget = null;
 
-    private int mWallpaperAnimLayerAdjustment;
-
     private float mLastWallpaperX = -1;
     private float mLastWallpaperY = -1;
     private float mLastWallpaperXStep = -1;
@@ -112,7 +110,7 @@ class WallpaperController {
         mFindResults.resetTopWallpaper = true;
         if (w != winAnimator.mWindowDetachedWallpaper && w.mAppToken != null) {
             // If this window's app token is hidden and not animating, it is of no interest to us.
-            if (w.mAppToken.hidden && w.mAppToken.mAppAnimator.animation == null) {
+            if (w.mAppToken.isHidden() && !w.mAppToken.isSelfAnimating()) {
                 if (DEBUG_WALLPAPER) Slog.v(TAG,
                         "Skipping hidden and not animating token: " + w);
                 return false;
@@ -130,10 +128,10 @@ class WallpaperController {
         }
 
         final boolean keyguardGoingAwayWithWallpaper = (w.mAppToken != null
-                && AppTransition.isKeyguardGoingAwayTransit(
-                w.mAppToken.mAppAnimator.getTransit())
-                && (w.mAppToken.mAppAnimator.getTransitFlags()
-                & TRANSIT_FLAG_KEYGUARD_GOING_AWAY_WITH_WALLPAPER) != 0);
+                && w.mAppToken.isSelfAnimating()
+                && AppTransition.isKeyguardGoingAwayTransit(w.mAppToken.getTransit())
+                && (w.mAppToken.getTransitFlags()
+                        & TRANSIT_FLAG_KEYGUARD_GOING_AWAY_WITH_WALLPAPER) != 0);
 
         boolean needsShowWhenLockedWallpaper = false;
         if ((w.mAttrs.flags & FLAG_SHOW_WHEN_LOCKED) != 0
@@ -204,18 +202,19 @@ class WallpaperController {
     private boolean isWallpaperVisible(WindowState wallpaperTarget) {
         if (DEBUG_WALLPAPER) Slog.v(TAG, "Wallpaper vis: target " + wallpaperTarget + ", obscured="
                 + (wallpaperTarget != null ? Boolean.toString(wallpaperTarget.mObscured) : "??")
-                + " anim=" + ((wallpaperTarget != null && wallpaperTarget.mAppToken != null)
-                ? wallpaperTarget.mAppToken.mAppAnimator.animation : null)
+                + " animating=" + ((wallpaperTarget != null && wallpaperTarget.mAppToken != null)
+                ? wallpaperTarget.mAppToken.isSelfAnimating() : null)
                 + " prev=" + mPrevWallpaperTarget);
         return (wallpaperTarget != null
                 && (!wallpaperTarget.mObscured || (wallpaperTarget.mAppToken != null
-                && wallpaperTarget.mAppToken.mAppAnimator.animation != null)))
+                && wallpaperTarget.mAppToken.isSelfAnimating())))
                 || mPrevWallpaperTarget != null;
     }
 
     boolean isWallpaperTargetAnimating() {
         return mWallpaperTarget != null && mWallpaperTarget.mWinAnimator.isAnimationSet()
-                && !mWallpaperTarget.mWinAnimator.isDummyAnimation();
+                && (mWallpaperTarget.mAppToken == null
+                        || !mWallpaperTarget.mAppToken.isWaitingForTransitionStart());
     }
 
     void updateWallpaperVisibility() {
@@ -250,7 +249,7 @@ class WallpaperController {
         for (int i = mWallpaperTokens.size() - 1; i >= 0; i--) {
             final WallpaperWindowToken token = mWallpaperTokens.get(i);
             token.hideWallpaperToken(wasDeferred, "hideWallpapers");
-            if (DEBUG_WALLPAPER_LIGHT && !token.hidden) Slog.d(TAG, "Hiding wallpaper " + token
+            if (DEBUG_WALLPAPER_LIGHT && !token.isHidden()) Slog.d(TAG, "Hiding wallpaper " + token
                     + " from " + winGoingAway + " target=" + mWallpaperTarget + " prev="
                     + mPrevWallpaperTarget + "\n" + Debug.getCallers(5, "  "));
         }
@@ -441,10 +440,6 @@ class WallpaperController {
         }
     }
 
-    int getAnimLayerAdjustment() {
-        return mWallpaperAnimLayerAdjustment;
-    }
-
     private void findWallpaperTarget(DisplayContent dc) {
         mFindResults.reset();
         if (dc.isStackVisible(WINDOWING_MODE_FREEFORM)) {
@@ -546,7 +541,7 @@ class WallpaperController {
     private void updateWallpaperTokens(boolean visible) {
         for (int curTokenNdx = mWallpaperTokens.size() - 1; curTokenNdx >= 0; curTokenNdx--) {
             final WallpaperWindowToken token = mWallpaperTokens.get(curTokenNdx);
-            token.updateWallpaperWindows(visible, mWallpaperAnimLayerAdjustment);
+            token.updateWallpaperWindows(visible);
             token.getDisplayContent().assignWindowLayers(false);
         }
     }
@@ -565,12 +560,6 @@ class WallpaperController {
         if (DEBUG_WALLPAPER) Slog.v(TAG, "Wallpaper visibility: " + visible);
 
         if (visible) {
-            // If the wallpaper target is animating, we may need to copy its layer adjustment.
-            // Only do this if we are not transferring between two wallpaper targets.
-            mWallpaperAnimLayerAdjustment =
-                    (mPrevWallpaperTarget == null && mWallpaperTarget.mAppToken != null)
-                            ? mWallpaperTarget.mAppToken.getAnimLayerAdjustment() : 0;
-
             if (mWallpaperTarget.mWallpaperX >= 0) {
                 mLastWallpaperX = mWallpaperTarget.mWallpaperX;
                 mLastWallpaperXStep = mWallpaperTarget.mWallpaperXStep;
@@ -680,10 +669,6 @@ class WallpaperController {
             pw.print(prefix);
             pw.print("mLastWallpaperDisplayOffsetX="); pw.print(mLastWallpaperDisplayOffsetX);
             pw.print(" mLastWallpaperDisplayOffsetY="); pw.println(mLastWallpaperDisplayOffsetY);
-        }
-
-        if (mWallpaperAnimLayerAdjustment != 0) {
-            pw.println(prefix + "mWallpaperAnimLayerAdjustment=" + mWallpaperAnimLayerAdjustment);
         }
     }
 

@@ -56,7 +56,7 @@ interface IKeystoreService {
     int clear_uid(long uid);
 
     // Keymaster 0.4 methods
-    int addRngEntropy(in byte[] data);
+    int addRngEntropy(in byte[] data, int flags);
     int generateKey(String alias, in KeymasterArguments arguments, in byte[] entropy, int uid,
         int flags, out KeyCharacteristics characteristics);
     int getKeyCharacteristics(String alias, in KeymasterBlob clientId, in KeymasterBlob appId,
@@ -78,4 +78,8 @@ interface IKeystoreService {
     int attestKey(String alias, in KeymasterArguments params, out KeymasterCertificateChain chain);
     int attestDeviceIds(in KeymasterArguments params, out KeymasterCertificateChain chain);
     int onDeviceOffBody();
+    int importWrappedKey(in String wrappedKeyAlias, in byte[] wrappedKey,
+        in String wrappingKeyAlias, in byte[] maskingKey, in KeymasterArguments arguments,
+        in long rootSid, in long fingerprintSid,
+        out KeyCharacteristics characteristics);
 }

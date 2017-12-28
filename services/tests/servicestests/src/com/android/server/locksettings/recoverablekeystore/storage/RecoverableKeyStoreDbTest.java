@@ -328,6 +328,115 @@ public class RecoverableKeyStoreDbTest {
     }
 
     @Test
+
+    public void getRecoveryAgentUid_returnsUidIfSet() throws Exception {
+        int userId = 12;
+        int uid = 190992;
+        mRecoverableKeyStoreDb.setRecoveryServicePublicKey(userId, uid, genRandomPublicKey());
+
+        assertThat(mRecoverableKeyStoreDb.getRecoveryAgentUid(userId)).isEqualTo(uid);
+    }
+
+    @Test
+    public void getRecoveryAgentUid_returnsMinusOneForNonexistentAgent() throws Exception {
+        assertThat(mRecoverableKeyStoreDb.getRecoveryAgentUid(12)).isEqualTo(-1);
+    }
+
+    public void setRecoverySecretTypes_emptyDefaultValue() throws Exception {
+        int userId = 12;
+        int uid = 10009;
+        assertThat(mRecoverableKeyStoreDb.getRecoverySecretTypes(userId, uid)).isEqualTo(
+                new int[]{}); // default
+    }
+
+    @Test
+    public void setRecoverySecretTypes_updateValue() throws Exception {
+        int userId = 12;
+        int uid = 10009;
+        int[] types1 = new int[]{1};
+        int[] types2 = new int[]{2};
+
+        mRecoverableKeyStoreDb.setRecoverySecretTypes(userId, uid, types1);
+        assertThat(mRecoverableKeyStoreDb.getRecoverySecretTypes(userId, uid)).isEqualTo(
+                types1);
+        mRecoverableKeyStoreDb.setRecoverySecretTypes(userId, uid, types2);
+        assertThat(mRecoverableKeyStoreDb.getRecoverySecretTypes(userId, uid)).isEqualTo(
+                types2);
+    }
+
+    @Test
+    public void setRecoverySecretTypes_withMultiElementArrays() throws Exception {
+        int userId = 12;
+        int uid = 10009;
+        int[] types1 = new int[]{11, 2000};
+        int[] types2 = new int[]{1, 2, 3};
+        int[] types3 = new int[]{};
+
+        mRecoverableKeyStoreDb.setRecoverySecretTypes(userId, uid, types1);
+        assertThat(mRecoverableKeyStoreDb.getRecoverySecretTypes(userId, uid)).isEqualTo(
+                types1);
+        mRecoverableKeyStoreDb.setRecoverySecretTypes(userId, uid, types2);
+        assertThat(mRecoverableKeyStoreDb.getRecoverySecretTypes(userId, uid)).isEqualTo(
+                types2);
+        mRecoverableKeyStoreDb.setRecoverySecretTypes(userId, uid, types3);
+        assertThat(mRecoverableKeyStoreDb.getRecoverySecretTypes(userId, uid)).isEqualTo(
+                types3);
+    }
+
+    @Test
+    public void setRecoverySecretTypes_withDifferentUid() throws Exception {
+        int userId = 12;
+        int uid1 = 10011;
+        int uid2 = 10012;
+        int[] types1 = new int[]{1};
+        int[] types2 = new int[]{2};
+
+        mRecoverableKeyStoreDb.setRecoverySecretTypes(userId, uid1, types1);
+        mRecoverableKeyStoreDb.setRecoverySecretTypes(userId, uid2, types2);
+        assertThat(mRecoverableKeyStoreDb.getRecoverySecretTypes(userId, uid1)).isEqualTo(
+                types1);
+        assertThat(mRecoverableKeyStoreDb.getRecoverySecretTypes(userId, uid2)).isEqualTo(
+                types2);
+    }
+
+    @Test
+    public void setRecoveryServiceMetadataMethods() throws Exception {
+        int userId = 12;
+        int uid = 10009;
+
+        PublicKey pubkey1 = genRandomPublicKey();
+        int[] types1 = new int[]{1};
+        long serverParams1 = 111L;
+
+        PublicKey pubkey2 = genRandomPublicKey();
+        int[] types2 = new int[]{2};
+        long serverParams2 = 222L;
+
+        mRecoverableKeyStoreDb.setRecoveryServicePublicKey(userId, uid, pubkey1);
+        mRecoverableKeyStoreDb.setRecoverySecretTypes(userId, uid, types1);
+        mRecoverableKeyStoreDb.setServerParameters(userId, uid, serverParams1);
+
+        assertThat(mRecoverableKeyStoreDb.getRecoverySecretTypes(userId, uid)).isEqualTo(
+                types1);
+        assertThat(mRecoverableKeyStoreDb.getServerParameters(userId, uid)).isEqualTo(
+                serverParams1);
+        assertThat(mRecoverableKeyStoreDb.getRecoveryServicePublicKey(userId, uid)).isEqualTo(
+                pubkey1);
+
+        // Check that the methods don't interfere with each other.
+        mRecoverableKeyStoreDb.setRecoveryServicePublicKey(userId, uid, pubkey2);
+        mRecoverableKeyStoreDb.setRecoverySecretTypes(userId, uid, types2);
+        mRecoverableKeyStoreDb.setServerParameters(userId, uid, serverParams2);
+
+        assertThat(mRecoverableKeyStoreDb.getRecoverySecretTypes(userId, uid)).isEqualTo(
+                types2);
+        assertThat(mRecoverableKeyStoreDb.getServerParameters(userId, uid)).isEqualTo(
+                serverParams2);
+        assertThat(mRecoverableKeyStoreDb.getRecoveryServicePublicKey(userId, uid)).isEqualTo(
+                pubkey2);
+    }
+
+    @Test
     public void setServerParameters_replaceOldValue() throws Exception {
         int userId = 12;
         int uid = 10009;

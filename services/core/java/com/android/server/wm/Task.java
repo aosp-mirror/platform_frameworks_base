@@ -536,14 +536,7 @@ class Task extends WindowContainer<AppWindowToken> {
     /** Cancels any running app transitions associated with the task. */
     void cancelTaskWindowTransition() {
         for (int i = mChildren.size() - 1; i >= 0; --i) {
-            mChildren.get(i).mAppAnimator.clearAnimation();
-        }
-    }
-
-    /** Cancels any running thumbnail transitions associated with the task. */
-    void cancelTaskThumbnailTransition() {
-        for (int i = mChildren.size() - 1; i >= 0; --i) {
-            mChildren.get(i).mAppAnimator.clearThumbnail();
+            mChildren.get(i).cancelAnimation();
         }
     }
 
@@ -656,6 +649,9 @@ class Task extends WindowContainer<AppWindowToken> {
         mDimmer.resetDimStates();
         super.prepareSurfaces();
         getDimBounds(mTmpDimBoundsRect);
+
+        // Bounds need to be relative, as the dim layer is a child.
+        mTmpDimBoundsRect.offsetTo(0, 0);
         if (mDimmer.updateDims(getPendingTransaction(), mTmpDimBoundsRect)) {
             scheduleAnimation();
         }
@@ -677,7 +673,9 @@ class Task extends WindowContainer<AppWindowToken> {
         proto.end(token);
     }
 
-    public void dump(String prefix, PrintWriter pw) {
+    @Override
+    public void dump(PrintWriter pw, String prefix, boolean dumpAll) {
+        super.dump(pw, prefix, dumpAll);
         final String doublePrefix = prefix + "  ";
 
         pw.println(prefix + "taskId=" + mTaskId);
@@ -691,7 +689,7 @@ class Task extends WindowContainer<AppWindowToken> {
         for (int i = mChildren.size() - 1; i >= 0; i--) {
             final AppWindowToken wtoken = mChildren.get(i);
             pw.println(triplePrefix + "Activity #" + i + " " + wtoken);
-            wtoken.dump(pw, triplePrefix);
+            wtoken.dump(pw, triplePrefix, dumpAll);
         }
     }
 

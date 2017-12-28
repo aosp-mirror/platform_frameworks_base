@@ -199,16 +199,6 @@ public class TaskWindowContainerController
         }
     }
 
-    public void cancelThumbnailTransition() {
-        synchronized (mWindowMap) {
-            if (mContainer == null) {
-                Slog.w(TAG_WM, "cancelThumbnailTransition: taskId " + mTaskId + " not found.");
-                return;
-            }
-            mContainer.cancelTaskThumbnailTransition();
-        }
-    }
-
     public void setTaskDescription(TaskDescription taskDescription) {
         synchronized (mWindowMap) {
             if (mContainer == null) {

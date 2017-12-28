@@ -16,6 +16,7 @@
 
 package com.android.server.wm;
 
+import static android.util.TimeUtils.NANOS_PER_MS;
 import static android.view.Choreographer.CALLBACK_TRAVERSAL;
 import static android.view.Choreographer.getSfInstance;
 
@@ -142,6 +143,7 @@ class SurfaceAnimationRunner {
             // Transaction will be applied in the commit phase.
             scheduleApplyTransaction();
         });
+
         anim.addListener(new AnimatorListenerAdapter() {
             @Override
             public void onAnimationStart(Animator animation) {
@@ -158,6 +160,7 @@ class SurfaceAnimationRunner {
                     mRunningAnimations.remove(a.mLeash);
                     synchronized (mCancelLock) {
                         if (!a.mCancelled) {
+
                             // Post on other thread that we can push final state without jank.
                             AnimationThread.getHandler().post(a.mFinishCallback);
                         }
@@ -166,6 +169,14 @@ class SurfaceAnimationRunner {
             }
         });
         anim.start();
+        if (a.mAnimSpec.canSkipFirstFrame()) {
+            // If we can skip the first frame, we start one frame later.
+            anim.setCurrentPlayTime(mChoreographer.getFrameIntervalNanos() / NANOS_PER_MS);
+        }
+
+        // Immediately start the animation by manually applying an animation frame. Otherwise, the
+        // start time would only be set in the next frame, leading to a delay.
+        anim.doAnimationFrame(mChoreographer.getFrameTime());
         a.mAnim = anim;
         mRunningAnimations.put(a.mLeash, a);
     }
@@ -189,6 +200,7 @@ class SurfaceAnimationRunner {
     }
 
     private void applyTransaction() {
+        mFrameTransaction.setAnimationTransaction();
         mFrameTransaction.apply();
         mApplyScheduled = false;
     }

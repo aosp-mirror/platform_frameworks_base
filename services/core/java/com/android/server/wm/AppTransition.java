@@ -38,7 +38,6 @@ import static com.android.internal.R.styleable.WindowAnimation_wallpaperIntraOpe
 import static com.android.internal.R.styleable.WindowAnimation_wallpaperIntraOpenExitAnimation;
 import static com.android.internal.R.styleable.WindowAnimation_wallpaperOpenEnterAnimation;
 import static com.android.internal.R.styleable.WindowAnimation_wallpaperOpenExitAnimation;
-import static com.android.server.wm.AppWindowAnimator.PROLONG_ANIMATION_AT_START;
 import static com.android.server.wm.WindowManagerDebugConfig.DEBUG_ANIM;
 import static com.android.server.wm.WindowManagerDebugConfig.DEBUG_APP_TRANSITIONS;
 import static com.android.server.wm.WindowManagerDebugConfig.TAG_WITH_CLASS_NAME;
@@ -63,6 +62,7 @@ import android.os.Debug;
 import android.os.IBinder;
 import android.os.IRemoteCallback;
 import android.os.RemoteException;
+import android.os.SystemClock;
 import android.os.SystemProperties;
 import android.os.UserHandle;
 import android.util.ArraySet;
@@ -415,17 +415,23 @@ public class AppTransition implements Dump {
      * @return bit-map of WindowManagerPolicy#FINISH_LAYOUT_REDO_* to indicate whether another
      *         layout pass needs to be done
      */
-    int goodToGo(int transit, AppWindowAnimator topOpeningAppAnimator,
-            AppWindowAnimator topClosingAppAnimator, ArraySet<AppWindowToken> openingApps,
+    int goodToGo(int transit, AppWindowToken topOpeningApp,
+            AppWindowToken topClosingApp, ArraySet<AppWindowToken> openingApps,
             ArraySet<AppWindowToken> closingApps) {
         mNextAppTransition = TRANSIT_UNSET;
         mNextAppTransitionFlags = 0;
         setAppTransitionState(APP_STATE_RUNNING);
+        final AnimationAdapter topOpeningAnim = topOpeningApp != null
+                ? topOpeningApp.getAnimation()
+                : null;
         int redoLayout = notifyAppTransitionStartingLocked(transit,
-                topOpeningAppAnimator != null ? topOpeningAppAnimator.mAppToken.token : null,
-                topClosingAppAnimator != null ? topClosingAppAnimator.mAppToken.token : null,
-                topOpeningAppAnimator != null ? topOpeningAppAnimator.animation : null,
-                topClosingAppAnimator != null ? topClosingAppAnimator.animation : null);
+                topOpeningApp != null ? topOpeningApp.token : null,
+                topClosingApp != null ? topClosingApp.token : null,
+                topOpeningAnim != null ? topOpeningAnim.getDurationHint() : 0,
+                topOpeningAnim != null
+                        ? topOpeningAnim.getStatusBarTransitionsStartTime()
+                        : SystemClock.uptimeMillis(),
+                AnimationAdapter.STATUS_BAR_TRANSITION_DURATION);
         mService.getDefaultDisplayContentLocked().getDockedDividerController()
                 .notifyAppTransitionStarting(openingApps, transit);
 
@@ -433,8 +439,8 @@ public class AppTransition implements Dump {
         // ended it already then we don't need to wait.
         if (transit == TRANSIT_DOCK_TASK_FROM_RECENTS && !mProlongedAnimationsEnded) {
             for (int i = openingApps.size() - 1; i >= 0; i--) {
-                final AppWindowAnimator appAnimator = openingApps.valueAt(i).mAppAnimator;
-                appAnimator.startProlongAnimation(PROLONG_ANIMATION_AT_START);
+                final AppWindowToken app = openingApps.valueAt(i);
+                app.startDelayingAnimationStart();
             }
         }
         return redoLayout;
@@ -504,11 +510,12 @@ public class AppTransition implements Dump {
     }
 
     private int notifyAppTransitionStartingLocked(int transit, IBinder openToken,
-            IBinder closeToken, Animation openAnimation, Animation closeAnimation) {
+            IBinder closeToken, long duration, long statusBarAnimationStartTime,
+            long statusBarAnimationDuration) {
         int redoLayout = 0;
         for (int i = 0; i < mListeners.size(); i++) {
             redoLayout |= mListeners.get(i).onAppTransitionStartingLocked(transit, openToken,
-                    closeToken, openAnimation, closeAnimation);
+                    closeToken, duration, statusBarAnimationStartTime, statusBarAnimationDuration);
         }
         return redoLayout;
     }
@@ -1885,9 +1892,6 @@ public class AppTransition implements Dump {
                             mNextAppTransitionFutureCallback, null /* finishedCallback */,
                             mNextAppTransitionScaleUp);
                     mNextAppTransitionFutureCallback = null;
-                    if (specs != null) {
-                        mService.prolongAnimationsFromSpecs(specs, mNextAppTransitionScaleUp);
-                    }
                 }
                 mService.requestTraversal();
             });

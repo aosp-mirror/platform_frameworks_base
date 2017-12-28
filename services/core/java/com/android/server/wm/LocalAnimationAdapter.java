@@ -16,10 +16,9 @@
 
 package com.android.server.wm;
 
-import android.graphics.Point;
+import android.os.SystemClock;
 import android.view.SurfaceControl;
 import android.view.SurfaceControl.Transaction;
-import android.view.animation.Animation;
 
 import com.android.server.wm.SurfaceAnimator.OnAnimationFinishedCallback;
 
@@ -30,6 +29,7 @@ import com.android.server.wm.SurfaceAnimator.OnAnimationFinishedCallback;
 class LocalAnimationAdapter implements AnimationAdapter {
 
     private final AnimationSpec mSpec;
+
     private final SurfaceAnimationRunner mAnimator;
 
     LocalAnimationAdapter(AnimationSpec spec, SurfaceAnimationRunner animator) {
@@ -64,6 +64,11 @@ class LocalAnimationAdapter implements AnimationAdapter {
         return mSpec.getDuration();
     }
 
+    @Override
+    public long getStatusBarTransitionsStartTime() {
+        return mSpec.calculateStatusBarTransitionStartTime();
+    }
+
     /**
      * Describes how to apply an animation.
      */
@@ -84,6 +89,13 @@ class LocalAnimationAdapter implements AnimationAdapter {
         }
 
         /**
+         * @see AnimationAdapter#getStatusBarTransitionsStartTime
+         */
+        default long calculateStatusBarTransitionStartTime() {
+            return SystemClock.uptimeMillis();
+        }
+
+        /**
          * @return The duration of the animation.
          */
         long getDuration();
@@ -91,10 +103,17 @@ class LocalAnimationAdapter implements AnimationAdapter {
         /**
          * Called when the spec needs to apply the current animation state to the leash.
          *
-         * @param t The transaction to use to apply a transform.
-         * @param leash The leash to apply the state to.
+         * @param t               The transaction to use to apply a transform.
+         * @param leash           The leash to apply the state to.
          * @param currentPlayTime The current time of the animation.
          */
         void apply(Transaction t, SurfaceControl leash, long currentPlayTime);
+
+        /**
+         * @see AppTransition#canSkipFirstFrame
+         */
+        default boolean canSkipFirstFrame() {
+            return false;
+        }
     }
 }

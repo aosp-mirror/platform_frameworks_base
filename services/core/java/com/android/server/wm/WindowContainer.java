@@ -29,7 +29,8 @@ import static android.view.SurfaceControl.Transaction;
 
 import android.annotation.CallSuper;
 import android.content.res.Configuration;
-import android.graphics.PixelFormat.Opacity;
+import android.graphics.Point;
+import android.graphics.Rect;
 import android.util.Slog;
 import android.view.MagnificationSpec;
 import android.view.SurfaceControl;
@@ -93,6 +94,11 @@ class WindowContainer<E extends WindowContainer> extends ConfigurationContainer<
     protected final SurfaceAnimator mSurfaceAnimator;
     protected final WindowManagerService mService;
 
+    private final Point mTmpPos = new Point();
+
+    /** Total number of elements in this subtree, including our own hierarchy element. */
+    private int mTreeWeight = 1;
+
     WindowContainer(WindowManagerService service) {
         mService = service;
         mPendingTransaction = service.mTransactionFactory.make();
@@ -112,6 +118,13 @@ class WindowContainer<E extends WindowContainer> extends ConfigurationContainer<
     @Override
     protected E getChildAt(int index) {
         return mChildren.get(index);
+    }
+
+    @Override
+    public void onConfigurationChanged(Configuration newParentConfig) {
+        super.onConfigurationChanged(newParentConfig);
+        updateSurfacePosition(getPendingTransaction());
+        scheduleAnimation();
     }
 
     final protected void setParent(WindowContainer<WindowContainer> parent) {
@@ -147,7 +160,7 @@ class WindowContainer<E extends WindowContainer> extends ConfigurationContainer<
             // surface animator such that hierarchy is preserved when animating, i.e.
             // mSurfaceControl stays attached to the leash and we just reparent the leash to the
             // new parent.
-            mSurfaceAnimator.reparent(getPendingTransaction(), mParent.mSurfaceControl);
+            reparentSurfaceControl(getPendingTransaction(), mParent.mSurfaceControl);
         }
 
         // Either way we need to ask the parent to assign us a Z-order.
@@ -190,6 +203,8 @@ class WindowContainer<E extends WindowContainer> extends ConfigurationContainer<
         } else {
             mChildren.add(positionToAdd, child);
         }
+        onChildAdded(child);
+
         // Set the parent after we've actually added a child in case a subclass depends on this.
         child.setParent(this);
     }
@@ -203,8 +218,19 @@ class WindowContainer<E extends WindowContainer> extends ConfigurationContainer<
                     + " can't add to container=" + getName());
         }
         mChildren.add(index, child);
+        onChildAdded(child);
+
         // Set the parent after we've actually added a child in case a subclass depends on this.
         child.setParent(this);
+    }
+
+    private void onChildAdded(WindowContainer child) {
+        mTreeWeight += child.mTreeWeight;
+        WindowContainer parent = getParent();
+        while (parent != null) {
+            parent.mTreeWeight += child.mTreeWeight;
+            parent = parent.getParent();
+        }
     }
 
     /**
@@ -215,10 +241,20 @@ class WindowContainer<E extends WindowContainer> extends ConfigurationContainer<
     @CallSuper
     void removeChild(E child) {
         if (mChildren.remove(child)) {
+            onChildRemoved(child);
             child.setParent(null);
         } else {
             throw new IllegalArgumentException("removeChild: container=" + child.getName()
                     + " is not a child of container=" + getName());
+        }
+    }
+
+    private void onChildRemoved(WindowContainer child) {
+        mTreeWeight -= child.mTreeWeight;
+        WindowContainer parent = getParent();
+        while (parent != null) {
+            parent.mTreeWeight -= child.mTreeWeight;
+            parent = parent.getParent();
         }
     }
 
@@ -236,7 +272,9 @@ class WindowContainer<E extends WindowContainer> extends ConfigurationContainer<
             // Need to do this after calling remove on the child because the child might try to
             // remove/detach itself from its parent which will cause an exception if we remove
             // it before calling remove on the child.
-            mChildren.remove(child);
+            if (mChildren.remove(child)) {
+                onChildRemoved(child);
+            }
         }
 
         if (mSurfaceControl != null) {
@@ -252,6 +290,34 @@ class WindowContainer<E extends WindowContainer> extends ConfigurationContainer<
             setController(null);
         }
 
+    }
+
+    /**
+     * @return The index of this element in the hierarchy tree in prefix order.
+     */
+    int getPrefixOrderIndex() {
+        if (mParent == null) {
+            return 0;
+        }
+        return mParent.getPrefixOrderIndex(this);
+    }
+
+    private int getPrefixOrderIndex(WindowContainer child) {
+        int order = 0;
+        for (int i = 0; i < mChildren.size(); i++) {
+            final WindowContainer childI = mChildren.get(i);
+            if (child == childI) {
+                break;
+            }
+            order += childI.mTreeWeight;
+        }
+        if (mParent != null) {
+            order += mParent.getPrefixOrderIndex(this);
+        }
+
+        // We also need to count ourselves.
+        order++;
+        return order;
     }
 
     /**
@@ -446,6 +512,20 @@ class WindowContainer<E extends WindowContainer> extends ConfigurationContainer<
     }
 
     /**
+     * @return {@code true} if in this subtree of the hierarchy we have an {@link AppWindowToken}
+     *         that is {@link #isSelfAnimating}; {@code false} otherwise.
+     */
+    boolean isAppAnimating() {
+        for (int j = mChildren.size() - 1; j >= 0; j--) {
+            final WindowContainer wc = mChildren.get(j);
+            if (wc.isAppAnimating()) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    /**
      * @return Whether our own container running an animation at the moment.
      */
     boolean isSelfAnimating() {
@@ -529,14 +609,6 @@ class WindowContainer<E extends WindowContainer> extends ConfigurationContainer<
         for (int i = mChildren.size() - 1; i >= 0; --i) {
             final WindowContainer wc = mChildren.get(i);
             wc.checkAppWindowsReadyToShow();
-        }
-    }
-
-    /** Step currently ongoing animation for App window containers. */
-    void stepAppWindowsAnimation(long currentTime) {
-        for (int i = mChildren.size() - 1; i >= 0; --i) {
-            final WindowContainer wc = mChildren.get(i);
-            wc.stepAppWindowsAnimation(currentTime);
         }
     }
 
@@ -815,10 +887,7 @@ class WindowContainer<E extends WindowContainer> extends ConfigurationContainer<
     void assignLayer(Transaction t, int layer) {
         final boolean changed = layer != mLastLayer || mLastRelativeToLayer != null;
         if (mSurfaceControl != null && changed) {
-
-            // Route through surface animator to accommodate that our surface control might be
-            // attached to the leash, and leash is attached to parent container.
-            mSurfaceAnimator.setLayer(t, layer);
+            setLayer(t, layer);
             mLastLayer = layer;
             mLastRelativeToLayer = null;
         }
@@ -827,13 +896,28 @@ class WindowContainer<E extends WindowContainer> extends ConfigurationContainer<
     void assignRelativeLayer(Transaction t, SurfaceControl relativeTo, int layer) {
         final boolean changed = layer != mLastLayer || mLastRelativeToLayer != relativeTo;
         if (mSurfaceControl != null && changed) {
-
-            // Route through surface animator to accommodate that our surface control might be
-            // attached to the leash, and leash is attached to parent container.
-            mSurfaceAnimator.setRelativeLayer(t, relativeTo, layer);
+            setRelativeLayer(t, relativeTo, layer);
             mLastLayer = layer;
             mLastRelativeToLayer = relativeTo;
         }
+    }
+
+    protected void setLayer(Transaction t, int layer) {
+
+        // Route through surface animator to accommodate that our surface control might be
+        // attached to the leash, and leash is attached to parent container.
+        mSurfaceAnimator.setLayer(t, layer);
+    }
+
+    protected void setRelativeLayer(Transaction t, SurfaceControl relativeTo, int layer) {
+
+        // Route through surface animator to accommodate that our surface control might be
+        // attached to the leash, and leash is attached to parent container.
+        mSurfaceAnimator.setRelativeLayer(t, relativeTo, layer);
+    }
+
+    protected void reparentSurfaceControl(Transaction t, SurfaceControl newParent) {
+        mSurfaceAnimator.reparent(t, newParent);
     }
 
     void assignChildLayers(Transaction t) {
@@ -991,6 +1075,10 @@ class WindowContainer<E extends WindowContainer> extends ConfigurationContainer<
         mSurfaceAnimator.startAnimation(t, anim, hidden);
     }
 
+    void transferAnimation(WindowContainer from) {
+        mSurfaceAnimator.transferAnimation(from.mSurfaceAnimator);
+    }
+
     void cancelAnimation() {
         mSurfaceAnimator.cancelAnimation();
     }
@@ -998,6 +1086,17 @@ class WindowContainer<E extends WindowContainer> extends ConfigurationContainer<
     @Override
     public Builder makeAnimationLeash() {
         return makeSurface();
+    }
+
+    /**
+     * @return The layer on which all app animations are happening.
+     */
+    SurfaceControl getAppAnimationLayer() {
+        final WindowContainer parent = getParent();
+        if (parent != null) {
+            return parent.getAppAnimationLayer();
+        }
+        return null;
     }
 
     @Override
@@ -1059,10 +1158,34 @@ class WindowContainer<E extends WindowContainer> extends ConfigurationContainer<
         return mSurfaceControl.getHeight();
     }
 
+    @CallSuper
     void dump(PrintWriter pw, String prefix, boolean dumpAll) {
         if (mSurfaceAnimator.isAnimating()) {
             pw.print(prefix); pw.println("ContainerAnimator:");
             mSurfaceAnimator.dump(pw, prefix + "  ");
+        }
+    }
+
+    void updateSurfacePosition(SurfaceControl.Transaction transaction) {
+        if (mSurfaceControl == null) {
+            return;
+        }
+
+        getRelativePosition(mTmpPos);
+        transaction.setPosition(mSurfaceControl, mTmpPos.x, mTmpPos.y);
+
+        for (int i = mChildren.size() - 1; i >= 0; i--) {
+            mChildren.get(i).updateSurfacePosition(transaction);
+        }
+    }
+
+    void getRelativePosition(Point outPos) {
+        final Rect bounds = getBounds();
+        outPos.set(bounds.left, bounds.top);
+        final WindowContainer parent = getParent();
+        if (parent != null) {
+            final Rect parentBounds = parent.getBounds();
+            outPos.offset(-parentBounds.left, -parentBounds.top);
         }
     }
 }

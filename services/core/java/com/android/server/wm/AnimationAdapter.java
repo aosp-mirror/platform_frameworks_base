@@ -30,6 +30,8 @@ import com.android.server.wm.SurfaceAnimator.OnAnimationFinishedCallback;
  */
 interface AnimationAdapter {
 
+    long STATUS_BAR_TRANSITION_DURATION = 120L;
+
     /**
      * @return Whether we should detach the wallpaper during the animation.
      * @see Animation#setDetachWallpaper
@@ -66,4 +68,13 @@ interface AnimationAdapter {
      * @return The approximate duration of the animation, in milliseconds.
      */
     long getDurationHint();
+
+    /**
+     * If this animation is run as an app opening animation, this calculates the start time for all
+     * status bar transitions that happen as part of the app opening animation, which will be
+     * forwarded to SystemUI.
+     *
+     * @return the desired start time of the status bar transition, in uptime millis
+     */
+    long getStatusBarTransitionsStartTime();
 }

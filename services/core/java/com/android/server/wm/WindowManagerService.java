@@ -71,13 +71,9 @@ import static com.android.server.LockGuard.INDEX_WINDOW;
 import static com.android.server.LockGuard.installLock;
 import static com.android.server.policy.WindowManagerPolicy.FINISH_LAYOUT_REDO_LAYOUT;
 import static com.android.server.policy.WindowManagerPolicy.FINISH_LAYOUT_REDO_WALLPAPER;
-import static com.android.server.wm.AppTransition.TRANSIT_UNSET;
-import static com.android.server.wm.AppWindowAnimator.PROLONG_ANIMATION_AT_END;
-import static com.android.server.wm.AppWindowAnimator.PROLONG_ANIMATION_AT_START;
 import static com.android.server.wm.KeyguardDisableHandler.KEYGUARD_POLICY_CHANGED;
 import static com.android.server.wm.WindowManagerDebugConfig.DEBUG;
 import static com.android.server.wm.WindowManagerDebugConfig.DEBUG_ADD_REMOVE;
-import static com.android.server.wm.WindowManagerDebugConfig.DEBUG_ANIM;
 import static com.android.server.wm.WindowManagerDebugConfig.DEBUG_APP_TRANSITIONS;
 import static com.android.server.wm.WindowManagerDebugConfig.DEBUG_BOOT;
 import static com.android.server.wm.WindowManagerDebugConfig.DEBUG_CONFIGURATION;
@@ -177,6 +173,7 @@ import android.os.UserHandle;
 import android.os.WorkSource;
 import android.provider.Settings;
 import android.text.format.DateUtils;
+import android.util.ArrayMap;
 import android.util.ArraySet;
 import android.util.DisplayMetrics;
 import android.util.EventLog;
@@ -566,12 +563,10 @@ public class WindowManagerService extends IWindowManager.Stub
     int mDockedStackCreateMode = SPLIT_SCREEN_CREATE_MODE_TOP_OR_LEFT;
     Rect mDockedStackCreateBounds;
 
-    private final SparseIntArray mTmpTaskIds = new SparseIntArray();
-
     boolean mForceResizableTasks = false;
     boolean mSupportsPictureInPicture = false;
 
-    private boolean mDisableTransitionAnimation = false;
+    boolean mDisableTransitionAnimation = false;
 
     int getDragLayerLocked() {
         return mPolicy.getWindowLayerFromTypeLw(TYPE_DRAG) * TYPE_LAYER_MULTIPLIER + TYPE_LAYER_OFFSET;
@@ -769,6 +764,11 @@ public class WindowManagerService extends IWindowManager.Stub
     final WindowAnimator mAnimator;
     final SurfaceAnimationRunner mSurfaceAnimationRunner;
 
+    /**
+     * Keeps track of which animations got transferred to which animators. Entries will get cleaned
+     * up when the animation finishes.
+     */
+    final ArrayMap<AnimationAdapter, SurfaceAnimator> mAnimationTransferMap = new ArrayMap<>();
     final BoundsAnimationController mBoundsAnimationController;
 
     private final PointerEventDispatcher mPointerEventDispatcher;
@@ -852,35 +852,6 @@ public class WindowManagerService extends IWindowManager.Stub
             Trace.traceEnd(TRACE_TAG_WINDOW_MANAGER);
         }
     }
-
-    /**
-     * Executes an empty animation transaction without holding the WM lock to simulate
-     * back-pressure. See {@link WindowAnimator#animate} why this is needed.
-     */
-    void executeEmptyAnimationTransaction() {
-        try {
-            Trace.traceBegin(TRACE_TAG_WINDOW_MANAGER, "openSurfaceTransaction");
-            synchronized (mWindowMap) {
-                if (mRoot.mSurfaceTraceEnabled) {
-                    mRoot.mRemoteEventTrace.openSurfaceTransaction();
-                }
-                SurfaceControl.openTransaction();
-                SurfaceControl.setAnimationTransaction();
-                if (mRoot.mSurfaceTraceEnabled) {
-                    mRoot.mRemoteEventTrace.closeSurfaceTransaction();
-                }
-            }
-        } finally {
-            Trace.traceEnd(TRACE_TAG_WINDOW_MANAGER);
-        }
-        try {
-            Trace.traceBegin(TRACE_TAG_WINDOW_MANAGER, "closeSurfaceTransaction");
-            SurfaceControl.closeTransaction();
-        } finally {
-            Trace.traceEnd(TRACE_TAG_WINDOW_MANAGER);
-        }
-    }
-
     /** Listener to notify activity manager about app transitions. */
     final WindowManagerInternal.AppTransitionListener mActivityManagerAppTransitionNotifier
             = new WindowManagerInternal.AppTransitionListener() {
@@ -2279,83 +2250,6 @@ public class WindowManagerService extends IWindowManager.Stub
         }
     }
 
-    boolean applyAnimationLocked(AppWindowToken atoken, WindowManager.LayoutParams lp,
-            int transit, boolean enter, boolean isVoiceInteraction) {
-        if (mDisableTransitionAnimation) {
-            if (DEBUG_APP_TRANSITIONS || DEBUG_ANIM) {
-                Slog.v(TAG_WM,
-                        "applyAnimation: transition animation is disabled. atoken=" + atoken);
-            }
-            atoken.mAppAnimator.clearAnimation();
-            return false;
-        }
-        // Only apply an animation if the display isn't frozen.  If it is
-        // frozen, there is no reason to animate and it can cause strange
-        // artifacts when we unfreeze the display if some different animation
-        // is running.
-        Trace.traceBegin(TRACE_TAG_WINDOW_MANAGER, "WM#applyAnimationLocked");
-        if (atoken.okToAnimate()) {
-            final DisplayContent displayContent = atoken.getTask().getDisplayContent();
-            final DisplayInfo displayInfo = displayContent.getDisplayInfo();
-            final int width = displayInfo.appWidth;
-            final int height = displayInfo.appHeight;
-            if (DEBUG_APP_TRANSITIONS || DEBUG_ANIM) Slog.v(TAG_WM,
-                    "applyAnimation: atoken=" + atoken);
-
-            // Determine the visible rect to calculate the thumbnail clip
-            final WindowState win = atoken.findMainWindow();
-            final Rect frame = new Rect(0, 0, width, height);
-            final Rect displayFrame = new Rect(0, 0,
-                    displayInfo.logicalWidth, displayInfo.logicalHeight);
-            final Rect insets = new Rect();
-            final Rect stableInsets = new Rect();
-            Rect surfaceInsets = null;
-            final boolean freeform = win != null && win.inFreeformWindowingMode();
-            if (win != null) {
-                // Containing frame will usually cover the whole screen, including dialog windows.
-                // For freeform workspace windows it will not cover the whole screen and it also
-                // won't exactly match the final freeform window frame (e.g. when overlapping with
-                // the status bar). In that case we need to use the final frame.
-                if (freeform) {
-                    frame.set(win.mFrame);
-                } else {
-                    frame.set(win.mContainingFrame);
-                }
-                surfaceInsets = win.getAttrs().surfaceInsets;
-                insets.set(win.mContentInsets);
-                stableInsets.set(win.mStableInsets);
-            }
-
-            if (atoken.mLaunchTaskBehind) {
-                // Differentiate the two animations. This one which is briefly on the screen
-                // gets the !enter animation, and the other activity which remains on the
-                // screen gets the enter animation. Both appear in the mOpeningApps set.
-                enter = false;
-            }
-            if (DEBUG_APP_TRANSITIONS) Slog.d(TAG_WM, "Loading animation for app transition."
-                    + " transit=" + AppTransition.appTransitionToString(transit) + " enter=" + enter
-                    + " frame=" + frame + " insets=" + insets + " surfaceInsets=" + surfaceInsets);
-            final Configuration displayConfig = displayContent.getConfiguration();
-            Animation a = mAppTransition.loadAnimation(lp, transit, enter, displayConfig.uiMode,
-                    displayConfig.orientation, frame, displayFrame, insets, surfaceInsets,
-                    stableInsets, isVoiceInteraction, freeform, atoken.getTask().mTaskId);
-            if (a != null) {
-                if (DEBUG_ANIM) logWithStack(TAG, "Loaded animation " + a + " for " + atoken);
-                final int containingWidth = frame.width();
-                final int containingHeight = frame.height();
-                atoken.mAppAnimator.setAnimation(a, containingWidth, containingHeight, width,
-                        height, mAppTransition.canSkipFirstFrame(),
-                        mAppTransition.getAppStackClipMode(),
-                        transit, mAppTransition.getTransitFlags());
-            }
-        } else {
-            atoken.mAppAnimator.clearAnimation();
-        }
-        Trace.traceEnd(TRACE_TAG_WINDOW_MANAGER);
-
-        return atoken.mAppAnimator.animation != null;
-    }
-
     boolean checkCallingPermission(String permission, String func) {
         // Quick check: if the calling permission is me, it's all okay.
         if (Binder.getCallingPid() == myPid()) {
@@ -2701,7 +2595,6 @@ public class WindowManagerService extends IWindowManager.Stub
         synchronized (mWindowMap) {
             mAppTransition.overridePendingAppTransitionMultiThumb(specs, onAnimationStartedCallback,
                     onAnimationFinishedCallback, scaleUp);
-            prolongAnimationsFromSpecs(specs, scaleUp);
 
         }
     }
@@ -2709,27 +2602,6 @@ public class WindowManagerService extends IWindowManager.Stub
     public void overridePendingAppTransitionStartCrossProfileApps() {
         synchronized (mWindowMap) {
             mAppTransition.overridePendingAppTransitionStartCrossProfileApps();
-        }
-    }
-
-    void prolongAnimationsFromSpecs(@NonNull AppTransitionAnimationSpec[] specs, boolean scaleUp) {
-        // This is used by freeform <-> recents windows transition. We need to synchronize
-        // the animation with the appearance of the content of recents, so we will make
-        // animation stay on the first or last frame a little longer.
-        mTmpTaskIds.clear();
-        for (int i = specs.length - 1; i >= 0; i--) {
-            mTmpTaskIds.put(specs[i].taskId, 0);
-        }
-        for (final WindowState win : mWindowMap.values()) {
-            final Task task = win.getTask();
-            if (task != null && mTmpTaskIds.get(task.mTaskId, -1) != -1
-                    && task.inFreeformWindowingMode()) {
-                final AppWindowToken appToken = win.mAppToken;
-                if (appToken != null && appToken.mAppAnimator != null) {
-                    appToken.mAppAnimator.startProlongAnimation(scaleUp ?
-                            PROLONG_ANIMATION_AT_START : PROLONG_ANIMATION_AT_END);
-                }
-            }
         }
     }
 
@@ -2755,8 +2627,8 @@ public class WindowManagerService extends IWindowManager.Stub
         synchronized (mWindowMap) {
             for (final WindowState win : mWindowMap.values()) {
                 final AppWindowToken appToken = win.mAppToken;
-                if (appToken != null && appToken.mAppAnimator != null) {
-                    appToken.mAppAnimator.endProlongedAnimation();
+                if (appToken != null) {
+                    appToken.endDelayingAnimationStart();
                 }
             }
             mAppTransition.notifyProlongedAnimationsEnded();
@@ -2808,15 +2680,6 @@ public class WindowManagerService extends IWindowManager.Stub
             if (win != null) {
                 win.mWinAnimator.setOpaqueLocked(isOpaque);
             }
-        }
-    }
-
-    void updateTokenInPlaceLocked(AppWindowToken wtoken, int transit) {
-        if (transit != TRANSIT_UNSET) {
-            if (wtoken.mAppAnimator.animation == AppWindowAnimator.sDummyAnimation) {
-                wtoken.mAppAnimator.setNullAnimation();
-            }
-            applyAnimationLocked(wtoken, null, transit, false, false);
         }
     }
 
@@ -5614,7 +5477,9 @@ public class WindowManagerService extends IWindowManager.Stub
 
     /** Note that Locked in this case is on mLayoutToAnim */
     void scheduleAnimationLocked() {
-        mAnimator.scheduleAnimation();
+        if (mAnimator != null) {
+            mAnimator.scheduleAnimation();
+        }
     }
 
     // TODO: Move to DisplayContent

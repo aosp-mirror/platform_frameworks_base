@@ -456,6 +456,16 @@ public class WorkSource implements Parcelable {
     }
 
     /**
+     * Returns {@code true} iff. this work source contains zero UIDs and zero WorkChains to
+     * attribute usage to.
+     *
+     * @hide for internal use only.
+     */
+    public boolean isEmpty() {
+        return mNum == 0 && (mChains == null || mChains.isEmpty());
+    }
+
+    /**
      * @return the list of {@code WorkChains} associated with this {@code WorkSource}.
      * @hide
      */
@@ -842,6 +852,14 @@ public class WorkSource implements Parcelable {
             return this;
         }
 
+        /**
+         * Return the UID to which this WorkChain should be attributed to, i.e, the UID performing
+         * the actual work.
+         */
+        public int getAttributionUid() {
+            return mUids[mSize - 1];
+        }
+
         // TODO: The following three trivial getters are purely for testing and will be removed
         // once we have higher level logic in place, e.g for serializing this WorkChain to a proto,
         // diffing it etc.
@@ -930,6 +948,55 @@ public class WorkSource implements Parcelable {
                         return new WorkChain[size];
                     }
                 };
+    }
+
+    /**
+     * Computes the differences in WorkChains contained between {@code oldWs} and {@code newWs}.
+     *
+     * Returns {@code null} if no differences exist, otherwise returns a two element array. The
+     * first element is a list of "new" chains, i.e WorkChains present in {@code newWs} but not in
+     * {@code oldWs}. The second element is a list of "gone" chains, i.e WorkChains present in
+     * {@code oldWs} but not in {@code newWs}.
+     *
+     * @hide
+     */
+    public static ArrayList<WorkChain>[] diffChains(WorkSource oldWs, WorkSource newWs) {
+        ArrayList<WorkChain> newChains = null;
+        ArrayList<WorkChain> goneChains = null;
+
+        // TODO(narayan): This is a dumb O(M*N) algorithm that determines what has changed across
+        // WorkSource objects. We can replace this with something smarter, for e.g by defining
+        // a Comparator between WorkChains. It's unclear whether that will be more efficient if
+        // the number of chains associated with a WorkSource is expected to be small
+        if (oldWs.mChains != null) {
+            for (int i = 0; i < oldWs.mChains.size(); ++i) {
+                final WorkChain wc = oldWs.mChains.get(i);
+                if (newWs.mChains == null || !newWs.mChains.contains(wc)) {
+                    if (goneChains == null) {
+                        goneChains = new ArrayList<>(oldWs.mChains.size());
+                    }
+                    goneChains.add(wc);
+                }
+            }
+        }
+
+        if (newWs.mChains != null) {
+            for (int i = 0; i < newWs.mChains.size(); ++i) {
+                final WorkChain wc = newWs.mChains.get(i);
+                if (oldWs.mChains == null || !oldWs.mChains.contains(wc)) {
+                    if (newChains == null) {
+                        newChains = new ArrayList<>(newWs.mChains.size());
+                    }
+                    newChains.add(wc);
+                }
+            }
+        }
+
+        if (newChains != null || goneChains != null) {
+            return new ArrayList[] { newChains, goneChains };
+        }
+
+        return null;
     }
 
     @Override

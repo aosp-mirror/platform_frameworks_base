@@ -95,6 +95,16 @@ public class KeyStore {
     public static final int FLAG_ENCRYPTED = 1;
 
     /**
+     * Select Software keymaster device, which as of this writing is the lowest security
+     * level available on an android device. If neither FLAG_STRONGBOX nor FLAG_SOFTWARE is provided
+     * A TEE based keymaster implementation is implied.
+     *
+     * Need to be in sync with KeyStoreFlag in system/security/keystore/include/keystore/keystore.h
+     * For historical reasons this corresponds to the KEYSTORE_FLAG_FALLBACK flag.
+     */
+    public static final int FLAG_SOFTWARE = 1 << 1;
+
+    /**
      * A private flag that's only available to system server to indicate that this key is part of
      * device encryption flow so it receives special treatment from keystore. For example this key
      * will not be super encrypted, and it will be stored separately under an unique UID instead
@@ -103,6 +113,16 @@ public class KeyStore {
      * Need to be in sync with KeyStoreFlag in system/security/keystore/include/keystore/keystore.h
      */
     public static final int FLAG_CRITICAL_TO_DEVICE_ENCRYPTION = 1 << 3;
+
+    /**
+     * Select Strongbox keymaster device, which as of this writing the the highest security level
+     * available an android devices. If neither FLAG_STRONGBOX nor FLAG_SOFTWARE is provided
+     * A TEE based keymaster implementation is implied.
+     *
+     * Need to be in sync with KeyStoreFlag in system/security/keystore/include/keystore/keystore.h
+     */
+    public static final int FLAG_STRONGBOX = 1 << 4;
+
 
     // States
     public enum State { UNLOCKED, LOCKED, UNINITIALIZED };
@@ -440,9 +460,9 @@ public class KeyStore {
         return mError;
     }
 
-    public boolean addRngEntropy(byte[] data) {
+    public boolean addRngEntropy(byte[] data, int flags) {
         try {
-            return mBinder.addRngEntropy(data) == NO_ERROR;
+            return mBinder.addRngEntropy(data, flags) == NO_ERROR;
         } catch (RemoteException e) {
             Log.w(TAG, "Cannot connect to keystore", e);
             return false;

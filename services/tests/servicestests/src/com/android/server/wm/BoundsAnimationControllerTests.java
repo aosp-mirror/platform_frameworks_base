@@ -110,7 +110,7 @@ public class BoundsAnimationControllerTests extends WindowTestsBase {
         }
 
         public void notifyTransitionStarting(int transit) {
-            mListener.onAppTransitionStartingLocked(transit, null, null, null, null);
+            mListener.onAppTransitionStartingLocked(transit, null, null, 0, 0, 0);
         }
 
         public void notifyTransitionFinished() {

@@ -23,6 +23,7 @@ import android.content.Context;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.security.recoverablekeystore.RecoverableKeyStoreLoader;
+import android.text.TextUtils;
 import android.util.Log;
 
 import com.android.server.locksettings.recoverablekeystore.WrappedKey;
@@ -30,18 +31,18 @@ import com.android.server.locksettings.recoverablekeystore.storage.RecoverableKe
 import com.android.server.locksettings.recoverablekeystore.storage.RecoverableKeyStoreDbContract.RecoveryServiceMetadataEntry;
 import com.android.server.locksettings.recoverablekeystore.storage.RecoverableKeyStoreDbContract.UserMetadataEntry;
 
-
-
 import java.security.KeyFactory;
 import java.security.NoSuchAlgorithmException;
 import java.security.PublicKey;
 import java.security.spec.InvalidKeySpecException;
 import java.security.spec.X509EncodedKeySpec;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+import java.util.StringJoiner;
 
 /**
  * Database of recoverable key information.
@@ -330,6 +331,36 @@ public class RecoverableKeyStoreDb {
     }
 
     /**
+     * Returns the uid of the recovery agent for the given user, or -1 if none is set.
+     */
+    public int getRecoveryAgentUid(int userId) {
+        SQLiteDatabase db = mKeyStoreDbHelper.getReadableDatabase();
+
+        String[] projection = { RecoveryServiceMetadataEntry.COLUMN_NAME_UID };
+        String selection = RecoveryServiceMetadataEntry.COLUMN_NAME_USER_ID + " = ?";
+        String[] selectionArguments = { Integer.toString(userId) };
+
+        try (
+            Cursor cursor = db.query(
+                    RecoveryServiceMetadataEntry.TABLE_NAME,
+                    projection,
+                    selection,
+                    selectionArguments,
+                    /*groupBy=*/ null,
+                    /*having=*/ null,
+                    /*orderBy=*/ null)
+        ) {
+            int count = cursor.getCount();
+            if (count == 0) {
+                return -1;
+            }
+            cursor.moveToFirst();
+            return cursor.getInt(
+                    cursor.getColumnIndexOrThrow(RecoveryServiceMetadataEntry.COLUMN_NAME_UID));
+        }
+    }
+
+    /**
      * Returns the public key of the recovery service.
      *
      * @param userId The uid of the profile the application is running under.
@@ -392,6 +423,99 @@ public class RecoverableKeyStoreDb {
                                 userId, uid));
                 return null;
             }
+        }
+    }
+
+    /**
+     * Updates the list of user secret types used for end-to-end encryption.
+     * If no secret types are set, recovery snapshot will not be created.
+     * See {@code KeyStoreRecoveryMetadata}
+     *
+     * @param userId The uid of the profile the application is running under.
+     * @param uid The uid of the application.
+     * @param secretTypes list of secret types
+     * @return The primary key of the updated row, or -1 if failed.
+     *
+     * @hide
+     */
+    public long setRecoverySecretTypes(int userId, int uid, int[] secretTypes) {
+        SQLiteDatabase db = mKeyStoreDbHelper.getWritableDatabase();
+        ContentValues values = new ContentValues();
+        StringJoiner joiner = new StringJoiner(",");
+        Arrays.stream(secretTypes).forEach(i -> joiner.add(Integer.toString(i)));
+        String typesAsCsv = joiner.toString();
+        values.put(RecoveryServiceMetadataEntry.COLUMN_NAME_SECRET_TYPES, typesAsCsv);
+        String selection =
+                RecoveryServiceMetadataEntry.COLUMN_NAME_USER_ID + " = ? AND "
+                + RecoveryServiceMetadataEntry.COLUMN_NAME_UID + " = ?";
+        ensureRecoveryServiceMetadataEntryExists(userId, uid);
+        return db.update(RecoveryServiceMetadataEntry.TABLE_NAME, values, selection,
+            new String[] {String.valueOf(userId), String.valueOf(uid)});
+    }
+
+    /**
+     * Returns the list of secret types used for end-to-end encryption.
+     *
+     * @param userId The uid of the profile the application is running under.
+     * @param uid The uid of the application who initialized the local recovery components.
+     * @return Secret types or empty array, if types were not set.
+     *
+     * @hide
+     */
+    public @NonNull int[] getRecoverySecretTypes(int userId, int uid) {
+        SQLiteDatabase db = mKeyStoreDbHelper.getReadableDatabase();
+
+        String[] projection = {
+                RecoveryServiceMetadataEntry._ID,
+                RecoveryServiceMetadataEntry.COLUMN_NAME_USER_ID,
+                RecoveryServiceMetadataEntry.COLUMN_NAME_UID,
+                RecoveryServiceMetadataEntry.COLUMN_NAME_SECRET_TYPES};
+        String selection =
+                RecoveryServiceMetadataEntry.COLUMN_NAME_USER_ID + " = ? AND "
+                        + RecoveryServiceMetadataEntry.COLUMN_NAME_UID + " = ?";
+        String[] selectionArguments = {Integer.toString(userId), Integer.toString(uid)};
+
+        try (
+                Cursor cursor = db.query(
+                        RecoveryServiceMetadataEntry.TABLE_NAME,
+                        projection,
+                        selection,
+                        selectionArguments,
+                        /*groupBy=*/ null,
+                        /*having=*/ null,
+                        /*orderBy=*/ null)
+        ) {
+            int count = cursor.getCount();
+            if (count == 0) {
+                return new int[]{};
+            }
+            if (count > 1) {
+                Log.wtf(TAG,
+                        String.format(Locale.US,
+                                "%d deviceId entries found for userId=%d uid=%d. "
+                                        + "Should only ever be 0 or 1.", count, userId, uid));
+                return new int[]{};
+            }
+            cursor.moveToFirst();
+            int idx = cursor.getColumnIndexOrThrow(
+                    RecoveryServiceMetadataEntry.COLUMN_NAME_SECRET_TYPES);
+            if (cursor.isNull(idx)) {
+                return new int[]{};
+            }
+            String csv = cursor.getString(idx);
+            if (TextUtils.isEmpty(csv)) {
+                return new int[]{};
+            }
+            String[] types = csv.split(",");
+            int[] result =  new int[types.length];
+            for (int i = 0; i < types.length; i++) {
+                try {
+                    result[i] = Integer.parseInt(types[i]);
+                } catch (NumberFormatException e) {
+                    Log.wtf(TAG, "String format error " + e);
+                }
+            }
+            return result;
         }
     }
 

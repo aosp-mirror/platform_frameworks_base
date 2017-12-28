@@ -733,7 +733,10 @@ Status StatsService::addConfiguration(const String16& key,
         string keyString = string(String8(key).string());
         ConfigKey configKey(ipc->getCallingUid(), keyString);
         StatsdConfig cfg;
-        cfg.ParseFromArray(&config[0], config.size());
+        if (!cfg.ParseFromArray(&config[0], config.size())) {
+            *success = false;
+            return Status::ok();
+        }
         mConfigManager->UpdateConfig(configKey, cfg);
         mConfigManager->SetConfigReceiver(configKey, string(String8(package).string()),
                                           string(String8(cls).string()));

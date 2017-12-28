@@ -198,20 +198,6 @@ public class PipManager implements BasePipManager {
      * Expands the PIP.
      */
     public final void onBusEvent(ExpandPipEvent event) {
-        if (event.clearThumbnailWindows) {
-            try {
-                StackInfo stackInfo = mActivityManager.getStackInfo(
-                        WINDOWING_MODE_PINNED, ACTIVITY_TYPE_UNDEFINED);
-                if (stackInfo != null && stackInfo.taskIds != null) {
-                    ActivityManagerWrapper am = ActivityManagerWrapper.getInstance();
-                    for (int taskId : stackInfo.taskIds) {
-                        am.cancelThumbnailTransition(taskId);
-                    }
-                }
-            } catch (RemoteException e) {
-                // Do nothing
-            }
-        }
         mTouchHandler.getMotionHelper().expandPip(false /* skipAnimation */);
     }
 

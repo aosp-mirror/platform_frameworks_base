@@ -45,6 +45,7 @@ import android.os.ServiceManager;
 import android.os.SystemClock;
 import android.os.UserHandle;
 import android.os.WorkSource;
+import android.os.WorkSource.WorkChain;
 import android.telephony.DataConnectionRealTimeInfo;
 import android.telephony.ModemActivityInfo;
 import android.telephony.ServiceState;
@@ -79,6 +80,7 @@ import com.android.internal.util.FastXmlSerializer;
 import com.android.internal.util.JournaledFile;
 import com.android.internal.util.XmlUtils;
 
+import java.util.List;
 import libcore.util.EmptyArray;
 import org.xmlpull.v1.XmlPullParser;
 import org.xmlpull.v1.XmlPullParserException;
@@ -4064,8 +4066,8 @@ public class BatteryStatsImpl extends BatteryStats {
     private String mInitialAcquireWakeName;
     private int mInitialAcquireWakeUid = -1;
 
-    public void noteStartWakeLocked(int uid, int pid, String name, String historyName, int type,
-            boolean unimportantForLogging, long elapsedRealtime, long uptime) {
+    public void noteStartWakeLocked(int uid, int pid, WorkChain wc, String name, String historyName,
+        int type, boolean unimportantForLogging, long elapsedRealtime, long uptime) {
         uid = mapUid(uid);
         if (type == WAKE_TYPE_PARTIAL) {
             // Only care about partial wake locks, since full wake locks
@@ -4113,12 +4115,21 @@ public class BatteryStatsImpl extends BatteryStats {
                 }
                 requestWakelockCpuUpdate();
             }
+
             getUidStatsLocked(uid).noteStartWakeLocked(pid, name, type, elapsedRealtime);
+
+            // TODO(statsd): Use the attribution chain specified in WorkChain instead of uid.
+            // The debug logging here can be deleted once statsd is wired up.
+            if (DEBUG) {
+                Slog.w(TAG, "StatsLog [start]: uid=" + uid + ", type=" + type + ", name=" + name
+                + ", wc=" + wc);
+            }
+            StatsLog.write(StatsLog.WAKELOCK_STATE_CHANGED, uid, type, name, 1);
         }
     }
 
-    public void noteStopWakeLocked(int uid, int pid, String name, String historyName, int type,
-            long elapsedRealtime, long uptime) {
+    public void noteStopWakeLocked(int uid, int pid, WorkChain wc, String name, String historyName,
+            int type, long elapsedRealtime, long uptime) {
         uid = mapUid(uid);
         if (type == WAKE_TYPE_PARTIAL) {
             mWakeLockNesting--;
@@ -4148,7 +4159,16 @@ public class BatteryStatsImpl extends BatteryStats {
                 }
                 requestWakelockCpuUpdate();
             }
+
             getUidStatsLocked(uid).noteStopWakeLocked(pid, name, type, elapsedRealtime);
+
+            // TODO(statsd): Use the attribution chain specified in WorkChain instead of uid.
+            // The debug logging here can be deleted once statsd is wired up.
+            if (DEBUG) {
+                Slog.w(TAG, "StatsLog [stop]: uid=" + uid + ", type=" + type + ", name=" + name
+                    + ", wc=" + wc);
+            }
+            StatsLog.write(StatsLog.WAKELOCK_STATE_CHANGED, uid, type, name, 0);
         }
     }
 
@@ -4158,8 +4178,17 @@ public class BatteryStatsImpl extends BatteryStats {
         final long uptime = mClocks.uptimeMillis();
         final int N = ws.size();
         for (int i=0; i<N; i++) {
-            noteStartWakeLocked(ws.get(i), pid, name, historyName, type, unimportantForLogging,
-                    elapsedRealtime, uptime);
+            noteStartWakeLocked(ws.get(i), pid, null, name, historyName, type,
+                    unimportantForLogging, elapsedRealtime, uptime);
+        }
+
+        List<WorkChain> wcs = ws.getWorkChains();
+        if (wcs != null) {
+            for (int i = 0; i < wcs.size(); ++i) {
+                final WorkChain wc = wcs.get(i);
+                noteStartWakeLocked(wc.getAttributionUid(), pid, wc, name, historyName, type,
+                        unimportantForLogging, elapsedRealtime, uptime);
+            }
         }
     }
 
@@ -4168,17 +4197,46 @@ public class BatteryStatsImpl extends BatteryStats {
             String newHistoryName, int newType, boolean newUnimportantForLogging) {
         final long elapsedRealtime = mClocks.elapsedRealtime();
         final long uptime = mClocks.uptimeMillis();
+
+        List<WorkChain>[] wcs = WorkSource.diffChains(ws, newWs);
+
         // For correct semantics, we start the need worksources first, so that we won't
         // make inappropriate history items as if all wake locks went away and new ones
         // appeared.  This is okay because tracking of wake locks allows nesting.
+        //
+        // First the starts :
         final int NN = newWs.size();
         for (int i=0; i<NN; i++) {
-            noteStartWakeLocked(newWs.get(i), newPid, newName, newHistoryName, newType,
+            noteStartWakeLocked(newWs.get(i), newPid, null, newName, newHistoryName, newType,
                     newUnimportantForLogging, elapsedRealtime, uptime);
         }
+        if (wcs != null) {
+            List<WorkChain> newChains = wcs[0];
+            if (newChains != null) {
+                for (int i = 0; i < newChains.size(); ++i) {
+                    final WorkChain newChain = newChains.get(i);
+                    noteStartWakeLocked(newChain.getAttributionUid(), newPid, newChain, newName,
+                        newHistoryName, newType, newUnimportantForLogging, elapsedRealtime,
+                        uptime);
+                }
+            }
+        }
+
+        // Then the stops :
         final int NO = ws.size();
         for (int i=0; i<NO; i++) {
-            noteStopWakeLocked(ws.get(i), pid, name, historyName, type, elapsedRealtime, uptime);
+            noteStopWakeLocked(ws.get(i), pid, null, name, historyName, type, elapsedRealtime,
+                    uptime);
+        }
+        if (wcs != null) {
+            List<WorkChain> goneChains = wcs[1];
+            if (goneChains != null) {
+                for (int i = 0; i < goneChains.size(); ++i) {
+                    final WorkChain goneChain = goneChains.get(i);
+                    noteStopWakeLocked(goneChain.getAttributionUid(), pid, goneChain, name,
+                            historyName, type, elapsedRealtime, uptime);
+                }
+            }
         }
     }
 
@@ -4188,7 +4246,17 @@ public class BatteryStatsImpl extends BatteryStats {
         final long uptime = mClocks.uptimeMillis();
         final int N = ws.size();
         for (int i=0; i<N; i++) {
-            noteStopWakeLocked(ws.get(i), pid, name, historyName, type, elapsedRealtime, uptime);
+            noteStopWakeLocked(ws.get(i), pid, null, name, historyName, type, elapsedRealtime,
+                    uptime);
+        }
+
+        List<WorkChain> wcs = ws.getWorkChains();
+        if (wcs != null) {
+            for (int i = 0; i < wcs.size(); ++i) {
+                final WorkChain wc = wcs.get(i);
+                noteStopWakeLocked(wc.getAttributionUid(), pid, wc, name, historyName, type,
+                        elapsedRealtime, uptime);
+            }
         }
     }
 
@@ -4432,10 +4500,10 @@ public class BatteryStatsImpl extends BatteryStats {
                 updateTimeBasesLocked(mOnBatteryTimeBase.isRunning(), state,
                         mClocks.uptimeMillis() * 1000, elapsedRealtime * 1000);
                 // Fake a wake lock, so we consider the device waked as long as the screen is on.
-                noteStartWakeLocked(-1, -1, "screen", null, WAKE_TYPE_PARTIAL, false,
+                noteStartWakeLocked(-1, -1, null, "screen", null, WAKE_TYPE_PARTIAL, false,
                         elapsedRealtime, uptime);
             } else if (isScreenOn(oldState)) {
-                noteStopWakeLocked(-1, -1, "screen", "screen", WAKE_TYPE_PARTIAL,
+                noteStopWakeLocked(-1, -1, null, "screen", "screen", WAKE_TYPE_PARTIAL,
                         elapsedRealtime, uptime);
                 updateTimeBasesLocked(mOnBatteryTimeBase.isRunning(), state,
                         mClocks.uptimeMillis() * 1000, elapsedRealtime * 1000);
@@ -9227,8 +9295,6 @@ public class BatteryStatsImpl extends BatteryStats {
             Wakelock wl = mWakelockStats.startObject(name);
             if (wl != null) {
                 getWakelockTimerLocked(wl, type).startRunningLocked(elapsedRealtimeMs);
-                // TODO(statsd): Hopefully use a worksource instead of a uid (so move elsewhere)
-                StatsLog.write(StatsLog.WAKELOCK_STATE_CHANGED, getUid(), type, name, 1);
             }
             if (type == WAKE_TYPE_PARTIAL) {
                 createAggregatedPartialWakelockTimerLocked().startRunningLocked(elapsedRealtimeMs);
@@ -9247,8 +9313,6 @@ public class BatteryStatsImpl extends BatteryStats {
                 StopwatchTimer wlt = getWakelockTimerLocked(wl, type);
                 wlt.stopRunningLocked(elapsedRealtimeMs);
                 if (!wlt.isRunningLocked()) { // only tell statsd if truly stopped
-                    // TODO(statsd): Possibly use a worksource instead of a uid.
-                    StatsLog.write(StatsLog.WAKELOCK_STATE_CHANGED, getUid(), type, name, 0);
                 }
             }
             if (type == WAKE_TYPE_PARTIAL) {
