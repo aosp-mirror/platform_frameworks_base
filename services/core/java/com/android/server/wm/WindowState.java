@@ -2222,12 +2222,13 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
                         mWinAnimator + ": " + mPolicyVisibilityAfterAnim);
             }
             mPolicyVisibility = mPolicyVisibilityAfterAnim;
-            setDisplayLayoutNeeded();
             if (!mPolicyVisibility) {
+                mWinAnimator.hide("checkPolicyVisibilityChange");
                 if (mService.mCurrentFocus == this) {
                     if (DEBUG_FOCUS_LIGHT) Slog.i(TAG,
                             "setAnimationLocked: setting mFocusMayChange true");
                     mService.mFocusMayChange = true;
+                    setDisplayLayoutNeeded();
                 }
                 // Window is no longer visible -- make sure if we were waiting
                 // for it to be displayed before enabling the display, that
