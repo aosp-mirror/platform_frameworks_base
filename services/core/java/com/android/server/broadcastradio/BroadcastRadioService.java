@@ -25,6 +25,7 @@ import android.hardware.radio.ITuner;
 import android.hardware.radio.ITunerCallback;
 import android.hardware.radio.RadioManager;
 import android.os.ParcelableException;
+import android.util.Slog;
 
 import com.android.server.SystemService;
 
@@ -33,6 +34,8 @@ import java.util.Objects;
 import java.util.OptionalInt;
 
 public class BroadcastRadioService extends SystemService {
+    private static final String TAG = "BcRadioSrv";
+
     private final ServiceImpl mServiceImpl = new ServiceImpl();
 
     private final com.android.server.broadcastradio.hal1.BroadcastRadioService mHal1 =
@@ -84,13 +87,14 @@ public class BroadcastRadioService extends SystemService {
         @Override
         public ITuner openTuner(int moduleId, RadioManager.BandConfig bandConfig,
                 boolean withAudio, ITunerCallback callback) {
+            Slog.i(TAG, "openTuner(" + moduleId + ", _, " + withAudio + ", _)");
             enforcePolicyAccess();
             if (callback == null) {
                 throw new IllegalArgumentException("Callback must not be empty");
             }
             synchronized (mLock) {
                 if (mHal2.hasModule(moduleId)) {
-                    throw new RuntimeException("Not implemented");
+                    return mHal2.openSession(moduleId, callback);
                 } else {
                     return mHal1.openTuner(moduleId, bandConfig, withAudio, callback);
                 }

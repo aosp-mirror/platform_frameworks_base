@@ -18,12 +18,17 @@ package com.android.server.broadcastradio.hal2;
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.hardware.broadcastradio.V2_0.AmFmBandRange;
+import android.hardware.broadcastradio.V2_0.AmFmRegionConfig;
 import android.hardware.broadcastradio.V2_0.Properties;
+import android.hardware.broadcastradio.V2_0.Result;
 import android.hardware.broadcastradio.V2_0.VendorKeyValue;
 import android.hardware.radio.ProgramSelector;
 import android.hardware.radio.RadioManager;
+import android.os.ParcelableException;
 import android.util.Slog;
 
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -34,6 +39,28 @@ import java.util.Set;
 
 class Convert {
     private static final String TAG = "BcRadio2Srv.convert";
+
+    static void throwOnError(String action, int result) {
+        switch (result) {
+            case Result.OK:
+                return;
+            case Result.UNKNOWN_ERROR:
+                throw new ParcelableException(new RuntimeException(action + ": UNKNOWN_ERROR"));
+            case Result.INTERNAL_ERROR:
+                throw new ParcelableException(new RuntimeException(action + ": INTERNAL_ERROR"));
+            case Result.INVALID_ARGUMENTS:
+                throw new IllegalArgumentException(action + ": INVALID_ARGUMENTS");
+            case Result.INVALID_STATE:
+                throw new IllegalStateException(action + ": INVALID_STATE");
+            case Result.NOT_SUPPORTED:
+                throw new UnsupportedOperationException(action + ": NOT_SUPPORTED");
+            case Result.TIMEOUT:
+                throw new ParcelableException(new RuntimeException(action + ": TIMEOUT"));
+            default:
+                throw new ParcelableException(new RuntimeException(
+                        action + ": unknown error (" + result + ")"));
+        }
+    }
 
     private static @NonNull Map<String, String>
     vendorInfoFromHal(@Nullable List<VendorKeyValue> info) {
@@ -94,12 +121,47 @@ class Convert {
         return pTypes.stream().mapToInt(Integer::intValue).toArray();
     }
 
-    static @NonNull RadioManager.ModuleProperties
-    propertiesFromHal(int id, @NonNull String serviceName, Properties prop) {
-        Objects.requireNonNull(prop);
+    private static @NonNull RadioManager.BandDescriptor[]
+    amfmConfigToBands(@Nullable AmFmRegionConfig config) {
+        if (config == null) return new RadioManager.BandDescriptor[0];
 
-        // TODO(b/69958423): implement region info
-        RadioManager.BandDescriptor[] bands = new RadioManager.BandDescriptor[0];
+        int len = config.ranges.size();
+        List<RadioManager.BandDescriptor> bands = new ArrayList<>(len);
+
+        // Just a dummy value.
+        int region = RadioManager.REGION_ITU_1;
+
+        for (AmFmBandRange range : config.ranges) {
+            FrequencyBand bandType = Utils.getBand(range.lowerBound);
+            if (bandType == FrequencyBand.UNKNOWN) {
+                Slog.e(TAG, "Unknown frequency band at " + range.lowerBound + "kHz");
+                continue;
+            }
+            if (bandType == FrequencyBand.FM) {
+                bands.add(new RadioManager.FmBandDescriptor(region, RadioManager.BAND_FM,
+                    range.lowerBound, range.upperBound, range.spacing,
+
+                    // TODO(b/69958777): stereo, rds, ta, af, ea
+                    true, true, true, true, true
+                ));
+            } else {  // AM
+                bands.add(new RadioManager.AmBandDescriptor(region, RadioManager.BAND_AM,
+                    range.lowerBound, range.upperBound, range.spacing,
+
+                    // TODO(b/69958777): stereo
+                    true
+                ));
+            }
+        }
+
+        return bands.toArray(new RadioManager.BandDescriptor[bands.size()]);
+    }
+
+    static @NonNull RadioManager.ModuleProperties
+    propertiesFromHal(int id, @NonNull String serviceName, @NonNull Properties prop,
+            @Nullable AmFmRegionConfig amfmConfig) {
+        Objects.requireNonNull(serviceName);
+        Objects.requireNonNull(prop);
 
         int[] supportedIdentifierTypes = prop.supportedIdentifierTypes.stream().
                 mapToInt(Integer::intValue).toArray();
@@ -123,7 +185,7 @@ class Convert {
                 1,      // numAudioSources
                 false,  // isCaptureSupported
 
-                bands,
+                amfmConfigToBands(amfmConfig),
                 true,  // isBgScanSupported is deprecated
                 supportedProgramTypes,
                 supportedIdentifierTypes,

@@ -38,6 +38,7 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -645,7 +646,8 @@ public class RadioManager {
         private final boolean mAf;
         private final boolean mEa;
 
-        FmBandDescriptor(int region, int type, int lowerLimit, int upperLimit, int spacing,
+        /** @hide */
+        public FmBandDescriptor(int region, int type, int lowerLimit, int upperLimit, int spacing,
                 boolean stereo, boolean rds, boolean ta, boolean af, boolean ea) {
             super(region, type, lowerLimit, upperLimit, spacing);
             mStereo = stereo;
@@ -771,7 +773,8 @@ public class RadioManager {
 
         private final boolean mStereo;
 
-        AmBandDescriptor(int region, int type, int lowerLimit, int upperLimit, int spacing,
+        /** @hide */
+        public AmBandDescriptor(int region, int type, int lowerLimit, int upperLimit, int spacing,
                 boolean stereo) {
             super(region, type, lowerLimit, upperLimit, spacing);
             mStereo = stereo;
@@ -843,10 +846,10 @@ public class RadioManager {
     /** Radio band configuration. */
     public static class BandConfig implements Parcelable {
 
-        final BandDescriptor mDescriptor;
+        @NonNull final BandDescriptor mDescriptor;
 
         BandConfig(BandDescriptor descriptor) {
-            mDescriptor = descriptor;
+            mDescriptor = Objects.requireNonNull(descriptor);
         }
 
         BandConfig(int region, int type, int lowerLimit, int upperLimit, int spacing) {
@@ -968,7 +971,8 @@ public class RadioManager {
         private final boolean mAf;
         private final boolean mEa;
 
-        FmBandConfig(FmBandDescriptor descriptor) {
+        /** @hide */
+        public FmBandConfig(FmBandDescriptor descriptor) {
             super((BandDescriptor)descriptor);
             mStereo = descriptor.isStereoSupported();
             mRds = descriptor.isRdsSupported();
@@ -1204,7 +1208,8 @@ public class RadioManager {
     public static class AmBandConfig extends BandConfig {
         private final boolean mStereo;
 
-        AmBandConfig(AmBandDescriptor descriptor) {
+        /** @hide */
+        public AmBandConfig(AmBandDescriptor descriptor) {
             super((BandDescriptor)descriptor);
             mStereo = descriptor.isStereoSupported();
         }
