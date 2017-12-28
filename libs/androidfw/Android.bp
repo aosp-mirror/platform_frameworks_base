@@ -171,6 +171,7 @@ cc_benchmark {
 
         // Actual benchmarks.
         "tests/AssetManager2_bench.cpp",
+        "tests/AttributeResolution_bench.cpp",
         "tests/SparseEntry_bench.cpp",
         "tests/Theme_bench.cpp",
     ],
