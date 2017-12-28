@@ -20,6 +20,7 @@ import static android.app.ActivityManager.StackId.INVALID_STACK_ID;
 import static android.app.ActivityManagerInternal.APP_TRANSITION_SNAPSHOT;
 import static android.app.ActivityManagerInternal.APP_TRANSITION_SPLASH_SCREEN;
 import static android.app.ActivityManagerInternal.APP_TRANSITION_WINDOWS_DRAWN;
+
 import static com.android.server.policy.WindowManagerPolicy.FINISH_LAYOUT_REDO_CONFIG;
 import static com.android.server.policy.WindowManagerPolicy.FINISH_LAYOUT_REDO_LAYOUT;
 import static com.android.server.wm.AppTransition.TRANSIT_ACTIVITY_CLOSE;
@@ -43,28 +44,19 @@ import static com.android.server.wm.AppTransition.isKeyguardGoingAwayTransit;
 import static com.android.server.wm.WindowManagerDebugConfig.DEBUG;
 import static com.android.server.wm.WindowManagerDebugConfig.DEBUG_APP_TRANSITIONS;
 import static com.android.server.wm.WindowManagerDebugConfig.SHOW_LIGHT_TRANSACTIONS;
-import static com.android.server.wm.WindowManagerDebugConfig.SHOW_TRANSACTIONS;
 import static com.android.server.wm.WindowManagerDebugConfig.TAG_WITH_CLASS_NAME;
 import static com.android.server.wm.WindowManagerDebugConfig.TAG_WM;
 import static com.android.server.wm.WindowManagerService.H.NOTIFY_APP_TRANSITION_STARTING;
 import static com.android.server.wm.WindowManagerService.H.REPORT_WINDOWS_CHANGE;
 import static com.android.server.wm.WindowManagerService.LAYOUT_REPEAT_THRESHOLD;
-import static com.android.server.wm.WindowManagerService.MAX_ANIMATION_DURATION;
 import static com.android.server.wm.WindowManagerService.UPDATE_FOCUS_PLACING_SURFACES;
 
-import android.content.res.Configuration;
-import android.graphics.GraphicBuffer;
-import android.graphics.PixelFormat;
-import android.graphics.Rect;
-import android.os.Binder;
 import android.os.Debug;
 import android.os.Trace;
 import android.util.ArraySet;
 import android.util.Slog;
 import android.util.SparseIntArray;
 import android.view.Display;
-import android.view.DisplayInfo;
-import android.view.Surface;
 import android.view.SurfaceControl;
 import android.view.WindowManager.LayoutParams;
 import android.view.animation.Animation;
@@ -414,7 +406,6 @@ class WindowSurfacePlacer {
             }
             wtoken.updateReportedVisibilityLocked();
             wtoken.waitingToShow = false;
-
             if (SHOW_LIGHT_TRANSACTIONS) Slog.i(TAG,
                     ">>> OPEN TRANSACTION handleAppTransitionReadyLocked()");
             mService.openSurfaceTransaction();
@@ -435,6 +426,8 @@ class WindowSurfacePlacer {
             }
             if (mService.mAppTransition.isNextAppTransitionThumbnailUp()) {
                 wtoken.attachThumbnailAnimation();
+            } else if (mService.mAppTransition.isNextAppTransitionOpenCrossProfileApps()) {
+                wtoken.attachCrossProfileAppsThumbnailAnimation();
             }
         }
         return topOpeningApp;
