@@ -494,4 +494,34 @@ TEST_F(ManifestFixerTest, UnexpectedElementsInManifest) {
   ASSERT_THAT(manifest, IsNull());
 }
 
+
+TEST_F(ManifestFixerTest, UsesLibraryMustHaveNonEmptyName) {
+  std::string input = R"(
+      <manifest xmlns:android="http://schemas.android.com/apk/res/android"
+          package="android">
+        <application>
+          <uses-library android:name="" />
+        </application>
+      </manifest>)";
+  EXPECT_THAT(Verify(input), IsNull());
+
+  input = R"(
+      <manifest xmlns:android="http://schemas.android.com/apk/res/android"
+          package="android">
+        <application>
+          <uses-library />
+        </application>
+      </manifest>)";
+  EXPECT_THAT(Verify(input), IsNull());
+
+  input = R"(
+       <manifest xmlns:android="http://schemas.android.com/apk/res/android"
+           package="android">
+         <application>
+           <uses-library android:name="blahhh" />
+         </application>
+       </manifest>)";
+  EXPECT_THAT(Verify(input), NotNull());
+}
+
 }  // namespace aapt
