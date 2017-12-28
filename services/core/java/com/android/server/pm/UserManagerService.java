@@ -27,7 +27,6 @@ import android.app.Activity;
 import android.app.ActivityManager;
 import android.app.ActivityManagerInternal;
 import android.app.ActivityManagerNative;
-import android.app.AppOpsManager;
 import android.app.IActivityManager;
 import android.app.IStopUserCallback;
 import android.app.KeyguardManager;
@@ -795,12 +794,7 @@ public class UserManagerService extends IUserManager.Stub {
                     "target should only be specified when we are disabling quiet mode.");
         }
 
-        if (!isAllowedToSetWorkMode(callingPackage, Binder.getCallingUid())) {
-            throw new SecurityException("Not allowed to call trySetQuietModeEnabled, "
-                    + "caller is foreground default launcher "
-                    + "nor with MANAGE_USERS/MODIFY_QUIET_MODE permission");
-        }
-
+        ensureCanModifyQuietMode(callingPackage, Binder.getCallingUid(), target != null);
         final long identity = Binder.clearCallingIdentity();
         try {
             if (enableQuietMode) {
@@ -824,35 +818,44 @@ public class UserManagerService extends IUserManager.Stub {
     }
 
     /**
-     * An app can modify quiet mode if the caller meets one of the condition:
+     * The caller can modify quiet mode if it meets one of these conditions:
      * <ul>
      *     <li>Has system UID or root UID</li>
      *     <li>Has {@link Manifest.permission#MODIFY_QUIET_MODE}</li>
      *     <li>Has {@link Manifest.permission#MANAGE_USERS}</li>
      * </ul>
+     * <p>
+     * If caller wants to start an intent after disabling the quiet mode, it must has
+     * {@link Manifest.permission#MANAGE_USERS}.
      */
-    private boolean isAllowedToSetWorkMode(String callingPackage, int callingUid) {
+    private void ensureCanModifyQuietMode(String callingPackage, int callingUid,
+            boolean startIntent) {
         if (hasManageUsersPermission()) {
-            return true;
+            return;
         }
-
+        if (startIntent) {
+            throw new SecurityException("MANAGE_USERS permission is required to start intent "
+                    + "after disabling quiet mode.");
+        }
         final boolean hasModifyQuietModePermission = ActivityManager.checkComponentPermission(
                 Manifest.permission.MODIFY_QUIET_MODE,
                 callingUid, -1, true) == PackageManager.PERMISSION_GRANTED;
         if (hasModifyQuietModePermission) {
-            return true;
+            return;
         }
 
+        verifyCallingPackage(callingPackage, callingUid);
         final ShortcutServiceInternal shortcutInternal =
                 LocalServices.getService(ShortcutServiceInternal.class);
         if (shortcutInternal != null) {
             boolean isForegroundLauncher =
                     shortcutInternal.isForegroundDefaultLauncher(callingPackage, callingUid);
             if (isForegroundLauncher) {
-                return true;
+                return;
             }
         }
-        return false;
+        throw new SecurityException("Can't modify quiet mode, caller is neither foreground "
+                + "default launcher nor has MANAGE_USERS/MODIFY_QUIET_MODE permission");
     }
 
     private void setQuietModeEnabled(
@@ -3930,6 +3933,18 @@ public class UserManagerService extends IUserManager.Stub {
                 }
             }
             return false;
+        }
+    }
+
+    /**
+     * Check if the calling package name matches with the calling UID, throw
+     * {@link SecurityException} if not.
+     */
+    private void verifyCallingPackage(String callingPackage, int callingUid) {
+        int packageUid = mPm.getPackageUid(callingPackage, 0,  UserHandle.getUserId(callingUid));
+        if (packageUid != callingUid) {
+            throw new SecurityException("Specified package " + callingPackage
+                    + " does not match the calling uid " + callingUid);
         }
     }
 }
