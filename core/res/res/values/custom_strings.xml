@@ -2,4 +2,8 @@
     <!-- Strings for Bluetooth service -->
     <!-- toast message informing user that Bluetooth stays on after airplane mode is turned on. [CHAR LIMIT=NONE] -->
     <string name="bluetooth_airplane_mode_toast">Bluetooth will stay on during airplane mode</string>
+
+    <!-- Long-press back kill application -->
+    <string name="app_killed_message">Application killed</string>
+
 </resources>

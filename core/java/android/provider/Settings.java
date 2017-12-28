@@ -4727,6 +4727,16 @@ public final class Settings {
                 ANY_STRING_VALIDATOR;
 
         /**
+         * Whether to allow killing of the foreground app by long-pressing the Back button
+         * @hide
+         */
+        public static final String KILL_APP_LONGPRESS_BACK = "kill_app_longpress_back";
+
+        /** @hide */
+        public static final Validator KILL_APP_LONGPRESS_BACK_VALIDATOR =
+                BOOLEAN_VALIDATOR;
+
+        /**
          * IMPORTANT: If you add a new public settings you also have to add it to
          * PUBLIC_SETTINGS below. If the new setting is hidden you have to add
          * it to PRIVATE_SETTINGS below. Also add a validator that can validate
@@ -4940,6 +4950,7 @@ public final class Settings {
             PRIVATE_SETTINGS.add(CAMERA_LAUNCH);
             PRIVATE_SETTINGS.add(REFRESH_RATE_SETTING);
             PRIVATE_SETTINGS.add(NAVIGATION_BAR_MODE_OVERLAY);
+            PRIVATE_SETTINGS.add(KILL_APP_LONGPRESS_BACK);
         }
 
         /**
@@ -5056,6 +5067,7 @@ public final class Settings {
             VALIDATORS.put(CAMERA_LAUNCH, CAMERA_LAUNCH_VALIDATOR);
             VALIDATORS.put(REFRESH_RATE_SETTING, REFRESH_RATE_SETTING_VALIDATOR);
             VALIDATORS.put(NAVIGATION_BAR_MODE_OVERLAY, NAVIGATION_BAR_MODE_OVERLAY_VALIDATOR);
+            VALIDATORS.put(KILL_APP_LONGPRESS_BACK, KILL_APP_LONGPRESS_BACK_VALIDATOR);
         }
 
         /**
