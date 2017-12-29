@@ -219,7 +219,7 @@ class SurfaceAnimator {
             return;
         }
         final SurfaceControl surface = mAnimatable.getSurfaceControl();
-        final SurfaceControl parent = mAnimatable.getParentSurfaceControl();
+        final SurfaceControl parent = mAnimatable.getAnimationLeashParent();
         if (surface == null || parent == null) {
             Slog.w(TAG, "Unable to transfer animation, surface or parent is null");
             cancelAnimation();
@@ -293,6 +293,7 @@ class SurfaceAnimator {
             int height, boolean hidden) {
         if (DEBUG_ANIM) Slog.i(TAG, "Reparenting to leash");
         final SurfaceControl.Builder builder = mAnimatable.makeAnimationLeash()
+                .setParent(mAnimatable.getAnimationLeashParent())
                 .setName(surface + " - animation-leash")
                 .setSize(width, height);
         final SurfaceControl leash = builder.build();
@@ -359,6 +360,11 @@ class SurfaceAnimator {
          *         position in the hierarchy.
          */
         SurfaceControl.Builder makeAnimationLeash();
+
+        /**
+         * @return The parent that should be used for the animation leash.
+         */
+        @Nullable SurfaceControl getAnimationLeashParent();
 
         /**
          * @return The surface of the object to be animated.

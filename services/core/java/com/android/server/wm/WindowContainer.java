@@ -1088,6 +1088,11 @@ class WindowContainer<E extends WindowContainer> extends ConfigurationContainer<
         return makeSurface();
     }
 
+    @Override
+    public SurfaceControl getAnimationLeashParent() {
+        return getParentSurfaceControl();
+    }
+
     /**
      * @return The layer on which all app animations are happening.
      */

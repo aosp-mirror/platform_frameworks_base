@@ -1512,9 +1512,8 @@ class AppWindowToken extends WindowToken implements WindowManagerService.AppFree
     }
 
     @Override
-    public SurfaceControl.Builder makeAnimationLeash() {
-        return super.makeAnimationLeash()
-                .setParent(getAppAnimationLayer());
+    public SurfaceControl getAnimationLeashParent() {
+        return getAppAnimationLayer();
     }
 
     boolean applyAnimationLocked(WindowManager.LayoutParams lp, int transit, boolean enter,

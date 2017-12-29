@@ -246,6 +246,11 @@ public class SurfaceAnimatorTest extends WindowTestsBase {
         }
 
         @Override
+        public SurfaceControl getAnimationLeashParent() {
+            return mParent;
+        }
+
+        @Override
         public SurfaceControl getSurfaceControl() {
             return mSurface;
         }
