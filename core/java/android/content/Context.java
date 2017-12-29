@@ -3021,7 +3021,8 @@ public abstract class Context {
             SYSTEM_HEALTH_SERVICE,
             //@hide: INCIDENT_SERVICE,
             //@hide: STATS_COMPANION_SERVICE,
-            COMPANION_DEVICE_SERVICE
+            COMPANION_DEVICE_SERVICE,
+            CROSS_PROFILE_APPS_SERVICE
     })
     @Retention(RetentionPolicy.SOURCE)
     public @interface ServiceName {}
