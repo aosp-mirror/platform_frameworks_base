@@ -211,7 +211,7 @@ class AppWindowToken extends WindowToken implements WindowManagerService.AppFree
     private int mTransitFlags;
 
     /** Whether our surface was set to be showing in the last call to {@link #prepareSurfaces} */
-    private boolean mLastSurfaceShowing;
+    private boolean mLastSurfaceShowing = true;
 
     private AppWindowThumbnail mThumbnail;
 
