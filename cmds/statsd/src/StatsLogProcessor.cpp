@@ -81,6 +81,9 @@ StatsLogProcessor::~StatsLogProcessor() {
 void StatsLogProcessor::onAnomalyAlarmFired(
         const uint64_t timestampNs,
         unordered_set<sp<const AnomalyAlarm>, SpHash<AnomalyAlarm>> anomalySet) {
+    // TODO: This is a thread-safety issue. mMetricsManagers could change under our feet.
+    // TODO: Solution? Lock everything! :(
+    // TODO: Question: Can we replace the other lock (broadcast), or do we need to supplement it?
     for (const auto& itr : mMetricsManagers) {
         itr.second->onAnomalyAlarmFired(timestampNs, anomalySet);
     }

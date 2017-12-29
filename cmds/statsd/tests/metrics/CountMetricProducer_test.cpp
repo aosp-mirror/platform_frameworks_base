@@ -196,8 +196,6 @@ TEST(CountMetricProducerTest, TestAnomalyDetection) {
     int64_t bucket2StartTimeNs = bucketStartTimeNs + bucketSizeNs;
     int64_t bucket3StartTimeNs = bucketStartTimeNs + 2 * bucketSizeNs;
 
-    sp<AnomalyTracker> anomalyTracker = new AnomalyTracker(alert, kConfigKey);
-
     CountMetric metric;
     metric.set_name("1");
     metric.mutable_bucket()->set_bucket_size_millis(bucketSizeNs / 1000000);
@@ -205,7 +203,7 @@ TEST(CountMetricProducerTest, TestAnomalyDetection) {
     sp<MockConditionWizard> wizard = new NaggyMock<MockConditionWizard>();
     CountMetricProducer countProducer(kConfigKey, metric, -1 /*-1 meaning no condition*/, wizard,
                                       bucketStartTimeNs);
-    countProducer.addAnomalyTracker(anomalyTracker);
+    sp<AnomalyTracker> anomalyTracker = countProducer.addAnomalyTracker(alert);
 
     int tagId = 1;
     LogEvent event1(tagId, bucketStartTimeNs + 1);
@@ -222,13 +220,13 @@ TEST(CountMetricProducerTest, TestAnomalyDetection) {
 
     EXPECT_EQ(1UL, countProducer.mCurrentSlicedCounter->size());
     EXPECT_EQ(2L, countProducer.mCurrentSlicedCounter->begin()->second);
-    EXPECT_EQ(anomalyTracker->getLastAlarmTimestampNs(), -1LL);
+    EXPECT_EQ(anomalyTracker->getLastAnomalyTimestampNs(), -1LL);
 
     // One event in bucket #2. No alarm as bucket #0 is trashed out.
     countProducer.onMatchedLogEvent(1 /*log matcher index*/, event3);
     EXPECT_EQ(1UL, countProducer.mCurrentSlicedCounter->size());
     EXPECT_EQ(1L, countProducer.mCurrentSlicedCounter->begin()->second);
-    EXPECT_EQ(anomalyTracker->getLastAlarmTimestampNs(), -1LL);
+    EXPECT_EQ(anomalyTracker->getLastAnomalyTimestampNs(), -1LL);
 
     // Two events in bucket #3.
     countProducer.onMatchedLogEvent(1 /*log matcher index*/, event4);
@@ -237,12 +235,12 @@ TEST(CountMetricProducerTest, TestAnomalyDetection) {
     EXPECT_EQ(1UL, countProducer.mCurrentSlicedCounter->size());
     EXPECT_EQ(3L, countProducer.mCurrentSlicedCounter->begin()->second);
     // Anomaly at event 6 is within refractory period. The alarm is at event 5 timestamp not event 6
-    EXPECT_EQ(anomalyTracker->getLastAlarmTimestampNs(), (long long)event5.GetTimestampNs());
+    EXPECT_EQ(anomalyTracker->getLastAnomalyTimestampNs(), (long long)event5.GetTimestampNs());
 
     countProducer.onMatchedLogEvent(1 /*log matcher index*/, event7);
     EXPECT_EQ(1UL, countProducer.mCurrentSlicedCounter->size());
     EXPECT_EQ(4L, countProducer.mCurrentSlicedCounter->begin()->second);
-    EXPECT_EQ(anomalyTracker->getLastAlarmTimestampNs(), (long long)event7.GetTimestampNs());
+    EXPECT_EQ(anomalyTracker->getLastAnomalyTimestampNs(), (long long)event7.GetTimestampNs());
 }
 
 }  // namespace statsd

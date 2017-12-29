@@ -61,22 +61,10 @@ public:
                                  const HashableDimensionKey& key,
                                  const int64_t& currentBucketValue);
 
-    // Starts the alarm at the given timestamp.
-    void startAlarm(const HashableDimensionKey& dimensionKey, const uint64_t& eventTime);
-    // Stops the alarm.
-    void stopAlarm(const HashableDimensionKey& dimensionKey);
-
-    // Stop all the alarms owned by this tracker.
-    void stopAllAlarms();
-
-    // Init the anmaly monitor which is shared across anomaly trackers.
-    inline void setAnomalyMonitor(const sp<AnomalyMonitor>& anomalyMonitor) {
-        mAnomalyMonitor = anomalyMonitor;
+    // Init the AnomalyMonitor which is shared across anomaly trackers.
+    virtual void setAnomalyMonitor(const sp<AnomalyMonitor>& anomalyMonitor) {
+        return; // Base AnomalyTracker class has no need for the AnomalyMonitor.
     }
-
-    // Declares the anomaly when the alarm expired given the current timestamp.
-    void declareAnomalyIfAlarmExpired(const HashableDimensionKey& dimensionKey,
-                                      const uint64_t& timestampNs);
 
     // Helper function to return the sum value of past buckets at given dimension.
     int64_t getSumOverPastBuckets(const HashableDimensionKey& key) const;
@@ -89,9 +77,9 @@ public:
         return mAlert.trigger_if_sum_gt();
     }
 
-    // Helper function to return the last alarm timestamp.
-    inline int64_t getLastAlarmTimestampNs() const {
-        return mLastAlarmTimestampNs;
+    // Helper function to return the timestamp of the last detected anomaly.
+    inline int64_t getLastAnomalyTimestampNs() const {
+        return mLastAnomalyTimestampNs;
     }
 
     inline int getNumOfPastBuckets() const {
@@ -100,15 +88,12 @@ public:
 
     // Declares an anomaly for each alarm in firedAlarms that belongs to this AnomalyTracker,
     // and removes it from firedAlarms. Does NOT remove the alarm from the AnomalyMonitor.
-    // TODO: This will actually be called from a different thread, so make it thread-safe!
-    // TODO: Consider having AnomalyMonitor have a reference to each relevant MetricProducer
-    //       instead of calling it from a chain starting at StatsLogProcessor.
-    void informAlarmsFired(const uint64_t& timestampNs,
-            unordered_set<sp<const AnomalyAlarm>, SpHash<AnomalyAlarm>>& firedAlarms);
+    virtual void informAlarmsFired(const uint64_t& timestampNs,
+            unordered_set<sp<const AnomalyAlarm>, SpHash<AnomalyAlarm>>& firedAlarms) {
+        return; // The base AnomalyTracker class doesn't have alarms.
+    }
 
 protected:
-    void flushPastBuckets(const int64_t& currBucketNum);
-
     // statsd_config.proto Alert message that defines this tracker.
     const Alert mAlert;
 
@@ -118,13 +103,6 @@ protected:
     // Number of past buckets. One less than the total number of buckets needed
     // for the anomaly detection (since the current bucket is not in the past).
     int mNumOfPastBuckets;
-
-    // The alarms owned by this tracker. The alarm monitor also shares the alarm pointers when they
-    // are still active.
-    std::unordered_map<HashableDimensionKey, sp<const AnomalyAlarm>> mAlarms;
-
-    // Anomaly alarm monitor.
-    sp<AnomalyMonitor> mAnomalyMonitor;
 
     // The exisiting bucket list.
     std::vector<shared_ptr<DimToValMap>> mPastBuckets;
@@ -136,7 +114,9 @@ protected:
     int64_t mMostRecentBucketNum = -1;
 
     // The timestamp when the last anomaly was declared.
-    int64_t mLastAlarmTimestampNs = -1;
+    int64_t mLastAnomalyTimestampNs = -1;
+
+    void flushPastBuckets(const int64_t& currBucketNum);
 
     // Add the information in the given bucket to mSumOverPastBuckets.
     void addBucketToSum(const shared_ptr<DimToValMap>& bucket);
@@ -145,13 +125,13 @@ protected:
     // and remove any items with value 0.
     void subtractBucketFromSum(const shared_ptr<DimToValMap>& bucket);
 
-    bool isInRefractoryPeriod(const uint64_t& timestampNs);
+    bool isInRefractoryPeriod(const uint64_t& timestampNs) const;
 
     // Calculates the corresponding bucket index within the circular array.
     size_t index(int64_t bucketNum) const;
 
     // Resets all bucket data. For use when all the data gets stale.
-    void resetStorage();
+    virtual void resetStorage();
 
     // Informs the incident service that an anomaly has occurred.
     void informIncidentd();
@@ -160,11 +140,6 @@ protected:
     FRIEND_TEST(AnomalyTrackerTest, TestSparseBuckets);
     FRIEND_TEST(GaugeMetricProducerTest, TestAnomalyDetection);
     FRIEND_TEST(CountMetricProducerTest, TestAnomalyDetection);
-    FRIEND_TEST(OringDurationTrackerTest, TestPredictAnomalyTimestamp);
-    FRIEND_TEST(OringDurationTrackerTest, TestAnomalyDetection);
-    FRIEND_TEST(MaxDurationTrackerTest, TestAnomalyDetection);
-    FRIEND_TEST(MaxDurationTrackerTest, TestAnomalyDetection);
-    FRIEND_TEST(OringDurationTrackerTest, TestAnomalyDetection);
 };
 
 }  // namespace statsd

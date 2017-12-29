@@ -17,7 +17,7 @@
 #ifndef DURATION_TRACKER_H
 #define DURATION_TRACKER_H
 
-#include "anomaly/AnomalyTracker.h"
+#include "anomaly/DurationAnomalyTracker.h"
 #include "condition/ConditionWizard.h"
 #include "config/ConfigKey.h"
 #include "stats_util.h"
@@ -63,7 +63,7 @@ public:
     DurationTracker(const ConfigKey& key, const string& name, const HashableDimensionKey& eventKey,
                     sp<ConditionWizard> wizard, int conditionIndex, bool nesting,
                     uint64_t currentBucketStartNs, uint64_t bucketSizeNs,
-                    const std::vector<sp<AnomalyTracker>>& anomalyTrackers)
+                    const std::vector<sp<DurationAnomalyTracker>>& anomalyTrackers)
         : mConfigKey(key),
           mName(name),
           mEventKey(eventKey),
@@ -94,7 +94,7 @@ public:
             std::unordered_map<HashableDimensionKey, std::vector<DurationBucket>>* output) = 0;
 
     // Predict the anomaly timestamp given the current status.
-    virtual int64_t predictAnomalyTimestampNs(const AnomalyTracker& anomalyTracker,
+    virtual int64_t predictAnomalyTimestampNs(const DurationAnomalyTracker& anomalyTracker,
                                               const uint64_t currentTimestamp) const = 0;
 
 protected:
@@ -163,7 +163,7 @@ protected:
 
     uint64_t mCurrentBucketNum;
 
-    std::vector<sp<AnomalyTracker>> mAnomalyTrackers;
+    std::vector<sp<DurationAnomalyTracker>> mAnomalyTrackers;
 
     FRIEND_TEST(OringDurationTrackerTest, TestPredictAnomalyTimestamp);
     FRIEND_TEST(OringDurationTrackerTest, TestAnomalyDetection);
