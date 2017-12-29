@@ -203,6 +203,8 @@ public class RefactoredBackupManagerService implements BackupManagerServiceInter
 
     public static final String RUN_BACKUP_ACTION = "android.app.backup.intent.RUN";
     public static final String RUN_INITIALIZE_ACTION = "android.app.backup.intent.INIT";
+    public static final String BACKUP_FINISHED_ACTION = "android.intent.action.BACKUP_FINISHED";
+    public static final String BACKUP_FINISHED_PACKAGE_EXTRA = "packageName";
 
     // Timeout interval for deciding that a bind or clear-data has taken too long
     private static final long TIMEOUT_INTERVAL = 10 * 1000;
@@ -1417,6 +1419,14 @@ public class RefactoredBackupManagerService implements BackupManagerServiceInter
     // through the transport.
     public void logBackupComplete(String packageName) {
         if (packageName.equals(PACKAGE_MANAGER_SENTINEL)) return;
+
+        for (String receiver : mConstants.getBackupFinishedNotificationReceivers()) {
+            final Intent notification = new Intent();
+            notification.setAction(BACKUP_FINISHED_ACTION);
+            notification.setPackage(receiver);
+            notification.putExtra(BACKUP_FINISHED_PACKAGE_EXTRA, packageName);
+            mContext.sendBroadcastAsUser(notification, UserHandle.OWNER);
+        }
 
         mProcessedPackagesJournal.addPackage(packageName);
     }
