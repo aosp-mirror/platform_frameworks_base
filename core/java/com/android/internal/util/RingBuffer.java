@@ -67,16 +67,21 @@ public class RingBuffer<T> {
      */
     public T getNextSlot() {
         final int nextSlotIdx = indexOf(mCursor++);
-        T item = mBuffer[nextSlotIdx];
-        if (item == null) {
-            try {
-                item = (T) mBuffer.getClass().getComponentType().newInstance();
-            } catch (IllegalAccessException | InstantiationException e) {
-                return null;
-            }
-            mBuffer[nextSlotIdx] = item;
+        if (mBuffer[nextSlotIdx] == null) {
+            mBuffer[nextSlotIdx] = createNewItem();
         }
-        return item;
+        return mBuffer[nextSlotIdx];
+    }
+
+    /**
+     * @return a new object of type <T> or null if a new object could not be created.
+     */
+    protected T createNewItem() {
+        try {
+            return (T) mBuffer.getClass().getComponentType().newInstance();
+        } catch (IllegalAccessException | InstantiationException e) {
+            return null;
+        }
     }
 
     public T[] toArray() {
