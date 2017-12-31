@@ -219,20 +219,20 @@ TEST(MaxDurationTrackerTest, TestAnomalyDetection) {
     uint64_t eventStartTimeNs = bucketStartTimeNs + NS_PER_SEC + 1;
     uint64_t bucketSizeNs = 30 * NS_PER_SEC;
 
-    sp<AnomalyTracker> anomalyTracker = new AnomalyTracker(alert, kConfigKey);
+    sp<DurationAnomalyTracker> anomalyTracker = new DurationAnomalyTracker(alert, kConfigKey);
     MaxDurationTracker tracker(kConfigKey, "metric", eventKey, wizard, -1, true, bucketStartTimeNs,
                                bucketSizeNs, {anomalyTracker});
 
     tracker.noteStart(key1, true, eventStartTimeNs, conditionKey1);
     tracker.noteStop(key1, eventStartTimeNs + 10, false);
-    EXPECT_EQ(anomalyTracker->mLastAlarmTimestampNs, -1);
+    EXPECT_EQ(anomalyTracker->mLastAnomalyTimestampNs, -1);
     EXPECT_EQ(10LL, tracker.mDuration);
 
     tracker.noteStart(key2, true, eventStartTimeNs + 20, conditionKey1);
     tracker.flushIfNeeded(eventStartTimeNs + 2 * bucketSizeNs + 3 * NS_PER_SEC, &buckets);
     tracker.noteStop(key2, eventStartTimeNs + 2 * bucketSizeNs + 3 * NS_PER_SEC, false);
     EXPECT_EQ((long long)(4 * NS_PER_SEC + 1LL), tracker.mDuration);
-    EXPECT_EQ(anomalyTracker->mLastAlarmTimestampNs,
+    EXPECT_EQ(anomalyTracker->mLastAnomalyTimestampNs,
               (long long)(eventStartTimeNs + 2 * bucketSizeNs + 3 * NS_PER_SEC));
 }
 

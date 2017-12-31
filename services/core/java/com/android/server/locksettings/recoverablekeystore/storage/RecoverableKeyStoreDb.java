@@ -22,7 +22,6 @@ import android.content.ContentValues;
 import android.content.Context;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
-import android.security.recoverablekeystore.RecoverableKeyStoreLoader;
 import android.text.TextUtils;
 import android.util.Log;
 
@@ -36,10 +35,8 @@ import java.security.NoSuchAlgorithmException;
 import java.security.PublicKey;
 import java.security.spec.InvalidKeySpecException;
 import java.security.spec.X509EncodedKeySpec;
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.StringJoiner;
@@ -368,6 +365,7 @@ public class RecoverableKeyStoreDb {
      *
      * @hide
      */
+    @Nullable
     public PublicKey getRecoveryServicePublicKey(int userId, int uid) {
         SQLiteDatabase db = mKeyStoreDbHelper.getReadableDatabase();
 
@@ -409,12 +407,8 @@ public class RecoverableKeyStoreDb {
                 return null;
             }
             byte[] keyBytes = cursor.getBlob(idx);
-            X509EncodedKeySpec pkSpec = new X509EncodedKeySpec(keyBytes);
             try {
-                return KeyFactory.getInstance("EC").generatePublic(pkSpec);
-            } catch (NoSuchAlgorithmException e) {
-                // Should never happen
-                throw new RuntimeException(e);
+                return decodeX509Key(keyBytes);
             } catch (InvalidKeySpecException e) {
                 Log.wtf(TAG,
                         String.format(Locale.US,
@@ -507,7 +501,7 @@ public class RecoverableKeyStoreDb {
                 return new int[]{};
             }
             String[] types = csv.split(",");
-            int[] result =  new int[types.length];
+            int[] result = new int[types.length];
             for (int i = 0; i < types.length; i++) {
                 try {
                     result[i] = Integer.parseInt(types[i]);
@@ -516,6 +510,48 @@ public class RecoverableKeyStoreDb {
                 }
             }
             return result;
+        }
+    }
+
+    /**
+     * Returns the first (and only?) public key for {@code userId}.
+     *
+     * @param userId The uid of the profile whose keys are to be synced.
+     * @return The public key, or null if none exists.
+     */
+    @Nullable
+    public PublicKey getRecoveryServicePublicKey(int userId) {
+        SQLiteDatabase db = mKeyStoreDbHelper.getReadableDatabase();
+
+        String[] projection = { RecoveryServiceMetadataEntry.COLUMN_NAME_PUBLIC_KEY };
+        String selection =
+                RecoveryServiceMetadataEntry.COLUMN_NAME_USER_ID + " = ?";
+        String[] selectionArguments = { Integer.toString(userId) };
+
+        try (
+            Cursor cursor = db.query(
+                    RecoveryServiceMetadataEntry.TABLE_NAME,
+                    projection,
+                    selection,
+                    selectionArguments,
+                    /*groupBy=*/ null,
+                    /*having=*/ null,
+                    /*orderBy=*/ null)
+        ) {
+            if (cursor.getCount() < 1) {
+                return null;
+            }
+
+            cursor.moveToFirst();
+            byte[] keyBytes = cursor.getBlob(cursor.getColumnIndexOrThrow(
+                    RecoveryServiceMetadataEntry.COLUMN_NAME_PUBLIC_KEY));
+
+            try {
+                return decodeX509Key(keyBytes);
+            } catch (InvalidKeySpecException e) {
+                Log.wtf(TAG, "Could not decode public key for " + userId);
+                return null;
+            }
         }
     }
 
@@ -619,5 +655,14 @@ public class RecoverableKeyStoreDb {
         mKeyStoreDbHelper.close();
     }
 
-    // TODO: Add method for updating the 'last synced' time.
+    @Nullable
+    private static PublicKey decodeX509Key(byte[] keyBytes) throws InvalidKeySpecException {
+        X509EncodedKeySpec publicKeySpec = new X509EncodedKeySpec(keyBytes);
+        try {
+            return KeyFactory.getInstance("EC").generatePublic(publicKeySpec);
+        } catch (NoSuchAlgorithmException e) {
+            // Should never happen
+            throw new RuntimeException(e);
+        }
+    }
 }

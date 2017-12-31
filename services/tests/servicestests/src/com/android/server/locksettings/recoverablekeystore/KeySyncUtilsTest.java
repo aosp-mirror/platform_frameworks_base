@@ -30,9 +30,12 @@ import com.google.common.collect.ImmutableMap;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
+import java.nio.ByteBuffer;
+import java.nio.ByteOrder;
 import java.nio.charset.StandardCharsets;
 import java.security.KeyPair;
 import java.security.MessageDigest;
+import java.security.PublicKey;
 import java.util.Arrays;
 import java.util.Map;
 import java.util.Random;
@@ -57,6 +60,8 @@ public class KeySyncUtilsTest {
             "V1 KF_claim".getBytes(StandardCharsets.UTF_8);
     private static final byte[] RECOVERY_RESPONSE_HEADER =
             "V1 reencrypted_recovery_key".getBytes(StandardCharsets.UTF_8);
+    private static final int PUBLIC_KEY_LENGTH_BYTES = 65;
+    private static final int VAULT_PARAMS_LENGTH_BYTES = 85;
 
     @Test
     public void calculateThmKfHash_isShaOfLockScreenHashWithPrefix() throws Exception {
@@ -334,6 +339,82 @@ public class KeySyncUtilsTest {
         } catch (AEADBadTagException e) {
             // expected
         }
+    }
+
+    @Test
+    public void packVaultParams_returns85Bytes() throws Exception {
+        PublicKey thmPublicKey = SecureBox.genKeyPair().getPublic();
+
+        byte[] packedForm = KeySyncUtils.packVaultParams(
+                thmPublicKey,
+                /*counterId=*/ 1001L,
+                /*maxAttempts=*/ 10,
+                /*deviceId=*/ 1L);
+
+        assertEquals(VAULT_PARAMS_LENGTH_BYTES, packedForm.length);
+    }
+
+    @Test
+    public void packVaultParams_encodesPublicKeyInFirst65Bytes() throws Exception {
+        PublicKey thmPublicKey = SecureBox.genKeyPair().getPublic();
+
+        byte[] packedForm = KeySyncUtils.packVaultParams(
+                thmPublicKey,
+                /*counterId=*/ 1001L,
+                /*maxAttempts=*/ 10,
+                /*deviceId=*/ 1L);
+
+        assertArrayEquals(
+                SecureBox.encodePublicKey(thmPublicKey),
+                Arrays.copyOf(packedForm, PUBLIC_KEY_LENGTH_BYTES));
+    }
+
+    @Test
+    public void packVaultParams_encodesCounterIdAsSecondParam() throws Exception {
+        long counterId = 103502L;
+
+        byte[] packedForm = KeySyncUtils.packVaultParams(
+                SecureBox.genKeyPair().getPublic(),
+                counterId,
+                /*maxAttempts=*/ 10,
+                /*deviceId=*/ 1L);
+
+        ByteBuffer byteBuffer = ByteBuffer.wrap(packedForm)
+                .order(ByteOrder.LITTLE_ENDIAN);
+        byteBuffer.position(PUBLIC_KEY_LENGTH_BYTES);
+        assertEquals(counterId, byteBuffer.getLong());
+    }
+
+    @Test
+    public void packVaultParams_encodesMaxAttemptsAsThirdParam() throws Exception {
+        int maxAttempts = 10;
+
+        byte[] packedForm = KeySyncUtils.packVaultParams(
+                SecureBox.genKeyPair().getPublic(),
+                /*counterId=*/ 1001L,
+                maxAttempts,
+                /*deviceId=*/ 1L);
+
+        ByteBuffer byteBuffer = ByteBuffer.wrap(packedForm)
+                .order(ByteOrder.LITTLE_ENDIAN);
+        byteBuffer.position(PUBLIC_KEY_LENGTH_BYTES + Long.BYTES);
+        assertEquals(maxAttempts, byteBuffer.getInt());
+    }
+
+    @Test
+    public void packVaultParams_encodesDeviceIdAsLastParam() throws Exception {
+        long deviceId = 102942158152L;
+
+        byte[] packedForm = KeySyncUtils.packVaultParams(
+                SecureBox.genKeyPair().getPublic(),
+                /*counterId=*/ 10021L,
+                /*maxAttempts=*/ 10,
+                deviceId);
+
+        ByteBuffer byteBuffer = ByteBuffer.wrap(packedForm)
+                .order(ByteOrder.LITTLE_ENDIAN);
+        byteBuffer.position(PUBLIC_KEY_LENGTH_BYTES + Long.BYTES + Integer.BYTES);
+        assertEquals(deviceId, byteBuffer.getLong());
     }
 
     private static byte[] randomBytes(int n) {

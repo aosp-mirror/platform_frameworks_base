@@ -622,6 +622,14 @@ public class AccessPoint implements Comparable<AccessPoint> {
         return mRssi;
     }
 
+    public ConcurrentHashMap<String, ScanResult> getScanResults() {
+        return mScanResultCache;
+    }
+
+    public Map<String, TimestampedScoredNetwork> getScoredNetworkCache() {
+        return mScoredNetworkCache;
+    }
+
     /**
      * Updates {@link #mRssi}.
      *
@@ -845,41 +853,8 @@ public class AccessPoint implements Comparable<AccessPoint> {
         }
 
         if (WifiTracker.sVerboseLogging) {
-            // Add RSSI/band information for this config, what was seen up to 6 seconds ago
-            // verbose WiFi Logging is only turned on thru developers settings
-            if (isActive() && mInfo != null) {
-                summary.append(" f=" + Integer.toString(mInfo.getFrequency()));
-            }
-            summary.append(" " + getVisibilityStatus());
-            if (config != null && !config.getNetworkSelectionStatus().isNetworkEnabled()) {
-                summary.append(" (" + config.getNetworkSelectionStatus().getNetworkStatusString());
-                if (config.getNetworkSelectionStatus().getDisableTime() > 0) {
-                    long now = System.currentTimeMillis();
-                    long diff = (now - config.getNetworkSelectionStatus().getDisableTime()) / 1000;
-                    long sec = diff%60; //seconds
-                    long min = (diff/60)%60; //minutes
-                    long hour = (min/60)%60; //hours
-                    summary.append(", ");
-                    if (hour > 0) summary.append(Long.toString(hour) + "h ");
-                    summary.append( Long.toString(min) + "m ");
-                    summary.append( Long.toString(sec) + "s ");
-                }
-                summary.append(")");
-            }
-
-            if (config != null) {
-                WifiConfiguration.NetworkSelectionStatus networkStatus =
-                        config.getNetworkSelectionStatus();
-                for (int index = WifiConfiguration.NetworkSelectionStatus.NETWORK_SELECTION_ENABLE;
-                        index < WifiConfiguration.NetworkSelectionStatus
-                        .NETWORK_SELECTION_DISABLED_MAX; index++) {
-                    if (networkStatus.getDisableReasonCounter(index) != 0) {
-                        summary.append(" " + WifiConfiguration.NetworkSelectionStatus
-                                .getNetworkDisableReasonString(index) + "="
-                                + networkStatus.getDisableReasonCounter(index));
-                    }
-                }
-            }
+            evictOldScanResults();
+            summary.append(WifiUtils.buildLoggingSummary(this, config));
         }
 
         // If Speed label and summary are both present, use the preference combination to combine
@@ -894,127 +869,6 @@ public class AccessPoint implements Comparable<AccessPoint> {
         } else {
             return summary.toString();
         }
-    }
-
-    /**
-     * Returns the visibility status of the WifiConfiguration.
-     *
-     * @return autojoin debugging information
-     * TODO: use a string formatter
-     * ["rssi 5Ghz", "num results on 5GHz" / "rssi 5Ghz", "num results on 5GHz"]
-     * For instance [-40,5/-30,2]
-     */
-    private String getVisibilityStatus() {
-        StringBuilder visibility = new StringBuilder();
-        StringBuilder scans24GHz = new StringBuilder();
-        StringBuilder scans5GHz = new StringBuilder();
-        String bssid = null;
-
-        long now = System.currentTimeMillis();
-
-        if (isActive() && mInfo != null) {
-            bssid = mInfo.getBSSID();
-            if (bssid != null) {
-                visibility.append(" ").append(bssid);
-            }
-            visibility.append(" rssi=").append(mInfo.getRssi());
-            visibility.append(" ");
-            visibility.append(" score=").append(mInfo.score);
-            if (mSpeed != Speed.NONE) {
-                visibility.append(" speed=").append(getSpeedLabel());
-            }
-            visibility.append(String.format(" tx=%.1f,", mInfo.txSuccessRate));
-            visibility.append(String.format("%.1f,", mInfo.txRetriesRate));
-            visibility.append(String.format("%.1f ", mInfo.txBadRate));
-            visibility.append(String.format("rx=%.1f", mInfo.rxSuccessRate));
-        }
-
-        int maxRssi5 = WifiConfiguration.INVALID_RSSI;
-        int maxRssi24 = WifiConfiguration.INVALID_RSSI;
-        final int maxDisplayedScans = 4;
-        int num5 = 0; // number of scanned BSSID on 5GHz band
-        int num24 = 0; // number of scanned BSSID on 2.4Ghz band
-        int numBlackListed = 0;
-        evictOldScanResults();
-
-        // TODO: sort list by RSSI or age
-        long nowMs = SystemClock.elapsedRealtime();
-        for (ScanResult result : mScanResultCache.values()) {
-            if (result.frequency >= LOWER_FREQ_5GHZ
-                    && result.frequency <= HIGHER_FREQ_5GHZ) {
-                // Strictly speaking: [4915, 5825]
-                num5++;
-
-                if (result.level > maxRssi5) {
-                    maxRssi5 = result.level;
-                }
-                if (num5 <= maxDisplayedScans) {
-                    scans5GHz.append(verboseScanResultSummary(result, bssid, nowMs));
-                }
-            } else if (result.frequency >= LOWER_FREQ_24GHZ
-                    && result.frequency <= HIGHER_FREQ_24GHZ) {
-                // Strictly speaking: [2412, 2482]
-                num24++;
-
-                if (result.level > maxRssi24) {
-                    maxRssi24 = result.level;
-                }
-                if (num24 <= maxDisplayedScans) {
-                    scans24GHz.append(verboseScanResultSummary(result, bssid, nowMs));
-                }
-            }
-        }
-        visibility.append(" [");
-        if (num24 > 0) {
-            visibility.append("(").append(num24).append(")");
-            if (num24 > maxDisplayedScans) {
-                visibility.append("max=").append(maxRssi24).append(",");
-            }
-            visibility.append(scans24GHz.toString());
-        }
-        visibility.append(";");
-        if (num5 > 0) {
-            visibility.append("(").append(num5).append(")");
-            if (num5 > maxDisplayedScans) {
-                visibility.append("max=").append(maxRssi5).append(",");
-            }
-            visibility.append(scans5GHz.toString());
-        }
-        if (numBlackListed > 0)
-            visibility.append("!").append(numBlackListed);
-        visibility.append("]");
-
-        return visibility.toString();
-    }
-
-    @VisibleForTesting
-    /* package */ String verboseScanResultSummary(ScanResult result, String bssid, long nowMs) {
-        StringBuilder stringBuilder = new StringBuilder();
-        stringBuilder.append(" \n{").append(result.BSSID);
-        if (result.BSSID.equals(bssid)) {
-            stringBuilder.append("*");
-        }
-        stringBuilder.append("=").append(result.frequency);
-        stringBuilder.append(",").append(result.level);
-        int speed = getSpecificApSpeed(result);
-        if (speed != Speed.NONE) {
-            stringBuilder.append(",")
-                    .append(getSpeedLabel(speed));
-        }
-        int ageSeconds = (int) (nowMs - result.timestamp / 1000) / 1000;
-        stringBuilder.append(",").append(ageSeconds).append("s");
-        stringBuilder.append("}");
-        return stringBuilder.toString();
-    }
-
-    @Speed private int getSpecificApSpeed(ScanResult result) {
-        TimestampedScoredNetwork timedScore = mScoredNetworkCache.get(result.BSSID);
-        if (timedScore == null) {
-            return Speed.NONE;
-        }
-        // For debugging purposes we may want to use mRssi rather than result.level as the average
-        // speed wil be determined by mRssi
-        return timedScore.getScore().calculateBadge(result.level);
     }
 
     /**
@@ -1275,7 +1129,7 @@ public class AccessPoint implements Comparable<AccessPoint> {
     }
 
     @Nullable
-    private String getSpeedLabel(@Speed int speed) {
+    String getSpeedLabel(@Speed int speed) {
         switch (speed) {
             case Speed.VERY_FAST:
                 return mContext.getString(R.string.speed_label_very_fast);

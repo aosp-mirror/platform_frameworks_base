@@ -98,13 +98,13 @@ public:
         return byteSizeLocked();
     }
 
-    virtual sp<AnomalyTracker> createAnomalyTracker(const Alert &alert) {
-        return new AnomalyTracker(alert, mConfigKey);
-    }
-
-    void addAnomalyTracker(sp<AnomalyTracker> tracker) {
+    virtual sp<AnomalyTracker> addAnomalyTracker(const Alert &alert) {
         std::lock_guard<std::mutex> lock(mMutex);
-        mAnomalyTrackers.push_back(tracker);
+        sp<AnomalyTracker> anomalyTracker = new AnomalyTracker(alert, mConfigKey);
+        if (anomalyTracker != nullptr) {
+            mAnomalyTrackers.push_back(anomalyTracker);
+        }
+        return anomalyTracker;
     }
 
     int64_t getBuckeSizeInNs() const {

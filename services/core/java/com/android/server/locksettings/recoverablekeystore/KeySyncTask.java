@@ -63,13 +63,13 @@ public class KeySyncTask implements Runnable {
     private static final int SALT_LENGTH_BYTES = 16;
     private static final int LENGTH_PREFIX_BYTES = Integer.BYTES;
     private static final String LOCK_SCREEN_HASH_ALGORITHM = "SHA-256";
+    private static final int TRUSTED_HARDWARE_MAX_ATTEMPTS = 10;
 
     private final RecoverableKeyStoreDb mRecoverableKeyStoreDb;
     private final int mUserId;
     private final int mCredentialType;
     private final String mCredential;
     private final PlatformKeyManager.Factory mPlatformKeyManagerFactory;
-    private final VaultKeySupplier mVaultKeySupplier;
     private final RecoverySnapshotStorage mRecoverySnapshotStorage;
     private final RecoverySnapshotListenersStorage mSnapshotListenersStorage;
 
@@ -89,10 +89,7 @@ public class KeySyncTask implements Runnable {
                 userId,
                 credentialType,
                 credential,
-                () -> PlatformKeyManager.getInstance(context, recoverableKeyStoreDb, userId),
-                () -> {
-                    throw new UnsupportedOperationException("Not implemented vault key.");
-                });
+                () -> PlatformKeyManager.getInstance(context, recoverableKeyStoreDb, userId));
     }
 
     /**
@@ -114,15 +111,13 @@ public class KeySyncTask implements Runnable {
             int userId,
             int credentialType,
             String credential,
-            PlatformKeyManager.Factory platformKeyManagerFactory,
-            VaultKeySupplier vaultKeySupplier) {
+            PlatformKeyManager.Factory platformKeyManagerFactory) {
         mSnapshotListenersStorage = recoverySnapshotListenersStorage;
         mRecoverableKeyStoreDb = recoverableKeyStoreDb;
         mUserId = userId;
         mCredentialType = credentialType;
         mCredential = credential;
         mPlatformKeyManagerFactory = platformKeyManagerFactory;
-        mVaultKeySupplier = vaultKeySupplier;
         mRecoverySnapshotStorage = snapshotStorage;
     }
 
@@ -142,14 +137,24 @@ public class KeySyncTask implements Runnable {
         }
 
         int recoveryAgentUid = mRecoverableKeyStoreDb.getRecoveryAgentUid(mUserId);
-
         if (recoveryAgentUid == -1) {
             Log.w(TAG, "No recovery agent initialized for user " + mUserId);
             return;
         }
-
         if (!mSnapshotListenersStorage.hasListener(recoveryAgentUid)) {
             Log.w(TAG, "No pending intent registered for recovery agent " + recoveryAgentUid);
+            return;
+        }
+
+        PublicKey publicKey = getVaultPublicKey();
+        if (publicKey == null) {
+            Log.w(TAG, "Not initialized for KeySync: no public key set. Cancelling task.");
+            return;
+        }
+
+        Long deviceId = mRecoverableKeyStoreDb.getServerParameters(mUserId, recoveryAgentUid);
+        if (deviceId == null) {
+            Log.w(TAG, "No device ID set for user " + mUserId);
             return;
         }
 
@@ -191,13 +196,17 @@ public class KeySyncTask implements Runnable {
             return;
         }
 
-        // TODO: construct vault params and vault metadata
-        byte[] vaultParams = {};
+        // TODO: where do we get counter_id from here?
+        byte[] vaultParams = KeySyncUtils.packVaultParams(
+                publicKey,
+                /*counterId=*/ 1,
+                TRUSTED_HARDWARE_MAX_ATTEMPTS,
+                deviceId);
 
         byte[] encryptedRecoveryKey;
         try {
             encryptedRecoveryKey = KeySyncUtils.thmEncryptRecoveryKey(
-                    mVaultKeySupplier.get(),
+                    publicKey,
                     localLskfHash,
                     vaultParams,
                     recoveryKey);
@@ -227,8 +236,7 @@ public class KeySyncTask implements Runnable {
     }
 
     private PublicKey getVaultPublicKey() {
-        // TODO: fill this in
-        throw new UnsupportedOperationException("TODO: get vault public key.");
+        return mRecoverableKeyStoreDb.getRecoveryServicePublicKey(mUserId);
     }
 
     /**
@@ -338,12 +346,5 @@ public class KeySyncTask implements Runnable {
                             encryptedApplicationKeys.get(alias)));
         }
         return keyEntries;
-    }
-
-    /**
-     * TODO: until this is in the database, so we can test.
-     */
-    public interface VaultKeySupplier {
-        PublicKey get();
     }
 }

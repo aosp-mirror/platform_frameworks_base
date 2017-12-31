@@ -4443,8 +4443,12 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
         if (isChildWindow()) {
             // TODO: This probably falls apart at some point and we should
             // actually compute relative coordinates.
+
+            // Since the parent was outset by its surface insets, we need to undo the outsetting
+            // with insetting by the same amount.
             final WindowState parent = getParentWindow();
-            outPoint.offset(-parent.mFrame.left, -parent.mFrame.top);
+            outPoint.offset(-parent.mFrame.left + parent.mAttrs.surfaceInsets.left,
+                    -parent.mFrame.top + parent.mAttrs.surfaceInsets.top);
         } else if (parentWindowContainer != null) {
             final Rect parentBounds = parentWindowContainer.getBounds();
             outPoint.offset(-parentBounds.left, -parentBounds.top);

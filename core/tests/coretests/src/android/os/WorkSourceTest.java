@@ -322,4 +322,13 @@ public class WorkSourceTest extends TestCase {
         assertEquals(new WorkChain().addNode(0, "tag0"), diffs[1].get(0));
         assertEquals(new WorkChain().addNode(2, "tag2"), diffs[1].get(1));
     }
+
+    public void testGetAttributionId() {
+        WorkSource ws1 = new WorkSource();
+        WorkChain wc = ws1.createWorkChain();
+        wc.addNode(100, "tag");
+        assertEquals(100, wc.getAttributionUid());
+        wc.addNode(200, "tag2");
+        assertEquals(100, wc.getAttributionUid());
+    }
 }

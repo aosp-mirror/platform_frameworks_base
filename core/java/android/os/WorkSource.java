@@ -853,11 +853,11 @@ public class WorkSource implements Parcelable {
         }
 
         /**
-         * Return the UID to which this WorkChain should be attributed to, i.e, the UID performing
-         * the actual work.
+         * Return the UID to which this WorkChain should be attributed to, i.e, the UID that
+         * initiated the work and not the UID performing it.
          */
         public int getAttributionUid() {
-            return mUids[mSize - 1];
+            return mUids[0];
         }
 
         // TODO: The following three trivial getters are purely for testing and will be removed

@@ -66,7 +66,6 @@ import java.util.Collections;
 public class AccessPointTest {
 
     private static final String TEST_SSID = "\"test_ssid\"";
-    private static final int NUM_SCAN_RESULTS = 5;
 
     private static final ArrayList<ScanResult> SCAN_RESULTS = buildScanResultCache();
 
@@ -439,26 +438,6 @@ public class AccessPointTest {
     }
 
     @Test
-    public void testVerboseSummaryString_showsScanResultSpeedLabel() {
-        WifiTracker.sVerboseLogging = true;
-
-        Bundle bundle = new Bundle();
-        ArrayList<ScanResult> scanResults = buildScanResultCache();
-        bundle.putParcelableArrayList(AccessPoint.KEY_SCANRESULTCACHE, scanResults);
-        AccessPoint ap = new AccessPoint(mContext, bundle);
-
-        when(mockWifiNetworkScoreCache.getScoredNetwork(any(ScanResult.class)))
-                .thenReturn(buildScoredNetworkWithMockBadgeCurve());
-        when(mockBadgeCurve.lookupScore(anyInt())).thenReturn((byte) AccessPoint.Speed.VERY_FAST);
-
-        ap.update(mockWifiNetworkScoreCache, true /* scoringUiEnabled */,
-                MAX_SCORE_CACHE_AGE_MILLIS);
-        String summary = ap.verboseScanResultSummary(scanResults.get(0), null, 0);
-
-        assertThat(summary.contains(mContext.getString(R.string.speed_label_very_fast))).isTrue();
-    }
-
-    @Test
     public void testSummaryString_concatenatesSpeedLabel() {
         AccessPoint ap = createAccessPointWithScanResultCache();
         ap.update(new WifiConfiguration());
@@ -559,7 +538,6 @@ public class AccessPointTest {
 
     private ScoredNetwork buildScoredNetworkWithMockBadgeCurve() {
         return buildScoredNetworkWithGivenBadgeCurve(mockBadgeCurve);
-
     }
 
     private ScoredNetwork buildScoredNetworkWithGivenBadgeCurve(RssiCurve badgeCurve) {
@@ -570,7 +548,6 @@ public class AccessPointTest {
                 badgeCurve,
                 false /* meteredHint */,
                 attr1);
-
     }
 
     private AccessPoint createAccessPointWithScanResultCache() {

@@ -372,7 +372,13 @@ public class SecureBox {
         }
     }
 
-    @VisibleForTesting
+    /**
+     * Encodes public key in format expected by the secure hardware module. This is used as part
+     * of the vault params.
+     *
+     * @param publicKey The public key.
+     * @return The key packed into a 65-byte array.
+     */
     static byte[] encodePublicKey(PublicKey publicKey) {
         ECPoint point = ((ECPublicKey) publicKey).getW();
         byte[] x = point.getAffineX().toByteArray();

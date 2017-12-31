@@ -1581,6 +1581,8 @@ public class LockSettingsService extends ILockSettings.Stub {
                 userId, progressCallback);
         // The user employs synthetic password based credential.
         if (response != null) {
+            mRecoverableKeyStoreManager.lockScreenSecretAvailable(credentialType, credential,
+                    userId);
             return response;
         }
 
@@ -1705,6 +1707,9 @@ public class LockSettingsService extends ILockSettings.Stub {
                                 /* TODO(roosa): keep the same password quality */, userId);
                 if (!hasChallenge) {
                     notifyActivePasswordMetricsAvailable(credential, userId);
+                    // Use credentials to create recoverable keystore snapshot.
+                    mRecoverableKeyStoreManager.lockScreenSecretAvailable(
+                            storedHash.type, credential, userId);
                     return VerifyCredentialResponse.OK;
                 }
                 // Fall through to get the auth token. Technically this should never happen,

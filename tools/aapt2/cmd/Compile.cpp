@@ -186,6 +186,12 @@ static bool LoadInputFilesFromDir(IAaptContext* context, const CompileOptions& o
       out_path_data->push_back(std::move(path_data.value()));
     }
   }
+
+  // File-system directory enumeration order is platform-dependent. Sort the result to remove any
+  // inconsistencies between platforms.
+  std::sort(
+      out_path_data->begin(), out_path_data->end(),
+      [](const ResourcePathData& a, const ResourcePathData& b) { return a.source < b.source; });
   return true;
 }
 

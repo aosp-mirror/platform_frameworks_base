@@ -29,6 +29,22 @@ using android::StringPiece;
 
 namespace aapt {
 
+static bool RequiredNameIsNotEmpty(xml::Element* el, SourcePathDiagnostics* diag) {
+  xml::Attribute* attr = el->FindAttribute(xml::kSchemaAndroid, "name");
+  if (attr == nullptr) {
+    diag->Error(DiagMessage(el->line_number)
+                << "<" << el->name << "> is missing attribute 'android:name'");
+    return false;
+  }
+
+  if (attr->value.empty()) {
+    diag->Error(DiagMessage(el->line_number)
+                << "attribute 'android:name' in <" << el->name << "> tag must not be empty");
+    return false;
+  }
+  return true;
+}
+
 // This is how PackageManager builds class names from AndroidManifest.xml entries.
 static bool NameIsJavaClassName(xml::Element* el, xml::Attribute* attr,
                                 SourcePathDiagnostics* diag) {
@@ -59,21 +75,29 @@ static bool OptionalNameIsJavaClassName(xml::Element* el, SourcePathDiagnostics*
 }
 
 static bool RequiredNameIsJavaClassName(xml::Element* el, SourcePathDiagnostics* diag) {
-  if (xml::Attribute* attr = el->FindAttribute(xml::kSchemaAndroid, "name")) {
-    return NameIsJavaClassName(el, attr, diag);
+  xml::Attribute* attr = el->FindAttribute(xml::kSchemaAndroid, "name");
+  if (attr == nullptr) {
+    diag->Error(DiagMessage(el->line_number)
+                << "<" << el->name << "> is missing attribute 'android:name'");
+    return false;
   }
-  diag->Error(DiagMessage(el->line_number)
-              << "<" << el->name << "> is missing attribute 'android:name'");
-  return false;
+  return NameIsJavaClassName(el, attr, diag);
 }
 
 static bool RequiredNameIsJavaPackage(xml::Element* el, SourcePathDiagnostics* diag) {
-  if (xml::Attribute* attr = el->FindAttribute(xml::kSchemaAndroid, "name")) {
-    return util::IsJavaPackageName(attr->value);
+  xml::Attribute* attr = el->FindAttribute(xml::kSchemaAndroid, "name");
+  if (attr == nullptr) {
+    diag->Error(DiagMessage(el->line_number)
+                << "<" << el->name << "> is missing attribute 'android:name'");
+    return false;
   }
-  diag->Error(DiagMessage(el->line_number)
-              << "<" << el->name << "> is missing attribute 'android:name'");
-  return false;
+
+  if (!util::IsJavaPackageName(attr->value)) {
+    diag->Error(DiagMessage(el->line_number) << "attribute 'android:name' in <" << el->name
+                                             << "> tag must be a valid Java package name");
+    return false;
+  }
+  return true;
 }
 
 static xml::XmlNodeAction::ActionFuncWithDiag RequiredAndroidAttribute(const std::string& attr) {
@@ -213,8 +237,8 @@ bool ManifestFixer::BuildRules(xml::XmlActionExecutor* executor,
 
   // Common <intent-filter> actions.
   xml::XmlNodeAction intent_filter_action;
-  intent_filter_action["action"];
-  intent_filter_action["category"];
+  intent_filter_action["action"].Action(RequiredNameIsNotEmpty);
+  intent_filter_action["category"].Action(RequiredNameIsNotEmpty);
   intent_filter_action["data"];
 
   // Common <meta-data> actions.
@@ -317,8 +341,8 @@ bool ManifestFixer::BuildRules(xml::XmlActionExecutor* executor,
   xml::XmlNodeAction& application_action = manifest_action["application"];
   application_action.Action(OptionalNameIsJavaClassName);
 
-  application_action["uses-library"].Action(RequiredNameIsJavaPackage);
-  application_action["library"].Action(RequiredNameIsJavaPackage);
+  application_action["uses-library"].Action(RequiredNameIsNotEmpty);
+  application_action["library"].Action(RequiredNameIsNotEmpty);
 
   xml::XmlNodeAction& static_library_action = application_action["static-library"];
   static_library_action.Action(RequiredNameIsJavaPackage);

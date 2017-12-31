@@ -480,9 +480,8 @@ bool initAlerts(const StatsdConfig& config, const unordered_map<string, int>& me
         }
         const int metricIndex = itr->second;
         sp<MetricProducer> metric = allMetricProducers[metricIndex];
-        sp<AnomalyTracker> anomalyTracker = metric->createAnomalyTracker(alert);
+        sp<AnomalyTracker> anomalyTracker = metric->addAnomalyTracker(alert);
         if (anomalyTracker != nullptr) {
-            metric->addAnomalyTracker(anomalyTracker);
             allAnomalyTrackers.push_back(anomalyTracker);
         }
     }
