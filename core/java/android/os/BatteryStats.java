@@ -7051,6 +7051,28 @@ public abstract class BatteryStats implements Parcelable {
                     }
                 }
             }
+
+            for (int procState = 0; procState < Uid.NUM_PROCESS_STATE; ++procState) {
+                final long[] timesMs = u.getCpuFreqTimes(which, procState);
+                if (timesMs != null && timesMs.length == cpuFreqs.length) {
+                    long[] screenOffTimesMs = u.getScreenOffCpuFreqTimes(which, procState);
+                    if (screenOffTimesMs == null) {
+                        screenOffTimesMs = new long[timesMs.length];
+                    }
+                    final long procToken = proto.start(UidProto.Cpu.BY_PROCESS_STATE);
+                    proto.write(UidProto.Cpu.ByProcessState.PROCESS_STATE, procState);
+                    for (int ic = 0; ic < timesMs.length; ++ic) {
+                        long cToken = proto.start(UidProto.Cpu.ByProcessState.BY_FREQUENCY);
+                        proto.write(UidProto.Cpu.ByFrequency.FREQUENCY_INDEX, ic + 1);
+                        proto.write(UidProto.Cpu.ByFrequency.TOTAL_DURATION_MS,
+                                timesMs[ic]);
+                        proto.write(UidProto.Cpu.ByFrequency.SCREEN_OFF_DURATION_MS,
+                                screenOffTimesMs[ic]);
+                        proto.end(cToken);
+                    }
+                    proto.end(procToken);
+                }
+            }
             proto.end(cpuToken);
 
             // Flashlight (FLASHLIGHT_DATA)
