@@ -32,12 +32,10 @@ import android.os.Process;
 import android.os.UserHandle;
 import android.text.TextUtils;
 
-import java.io.FileInputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
+import libcore.io.Streams;
 
-import libcore.io.IoUtils;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
 
 /**
  * This class is a command line utility for manipulating content. A client
@@ -122,13 +120,14 @@ public class Content {
                     + "\n"
                     + "usage: adb shell content read --uri <URI> [--user <USER_ID>]\n"
                     + "  Example:\n"
-                    + "  # cat default ringtone to a file, then pull to host\n"
-                    + "  adb shell 'content read --uri content://settings/system/ringtone >"
-                    + " /mnt/sdcard/tmp.ogg' && adb pull /mnt/sdcard/tmp.ogg\n"
+                    + "  adb shell 'content read --uri content://settings/system/ringtone_cache' > host.ogg\n"
+                    + "\n"
+                    + "usage: adb shell content write --uri <URI> [--user <USER_ID>]\n"
+                    + "  Example:\n"
+                    + "  adb shell 'content write --uri content://settings/system/ringtone_cache' < host.ogg\n"
                     + "\n"
                     + "usage: adb shell content gettype --uri <URI> [--user <USER_ID>]\n"
                     + "  Example:\n"
-                    + "  # Show the mime-type of the URI\n"
                     + "  adb shell content gettype --uri content://media/internal/audio/media/\n"
                     + "\n";
 
@@ -139,6 +138,7 @@ public class Content {
         private static final String ARGUMENT_QUERY = "query";
         private static final String ARGUMENT_CALL = "call";
         private static final String ARGUMENT_READ = "read";
+        private static final String ARGUMENT_WRITE = "write";
         private static final String ARGUMENT_GET_TYPE = "gettype";
         private static final String ARGUMENT_WHERE = "--where";
         private static final String ARGUMENT_BIND = "--bind";
@@ -179,6 +179,8 @@ public class Content {
                     return parseCallCommand();
                 } else if (ARGUMENT_READ.equals(operation)) {
                     return parseReadCommand();
+                } else if (ARGUMENT_WRITE.equals(operation)) {
+                    return parseWriteCommand();
                 } else if (ARGUMENT_GET_TYPE.equals(operation)) {
                     return parseGetTypeCommand();
                 } else {
@@ -337,6 +339,25 @@ public class Content {
                         + " Did you specify --uri argument?");
             }
             return new ReadCommand(uri, userId);
+        }
+
+        private WriteCommand parseWriteCommand() {
+            Uri uri = null;
+            int userId = UserHandle.USER_SYSTEM;
+            for (String argument; (argument = mTokenizer.nextArg())!= null;) {
+                if (ARGUMENT_URI.equals(argument)) {
+                    uri = Uri.parse(argumentValueRequired(argument));
+                } else if (ARGUMENT_USER.equals(argument)) {
+                    userId = Integer.parseInt(argumentValueRequired(argument));
+                } else {
+                    throw new IllegalArgumentException("Unsupported argument: " + argument);
+                }
+            }
+            if (uri == null) {
+                throw new IllegalArgumentException("Content provider URI not specified."
+                        + " Did you specify --uri argument?");
+            }
+            return new WriteCommand(uri, userId);
         }
 
         public QueryCommand parseQueryCommand() {
@@ -561,20 +582,21 @@ public class Content {
 
         @Override
         public void onExecute(IContentProvider provider) throws Exception {
-            final ParcelFileDescriptor fd = provider.openFile(null, mUri, "r", null, null);
-            copy(new FileInputStream(fd.getFileDescriptor()), System.out);
+            try (ParcelFileDescriptor fd = provider.openFile(null, mUri, "r", null, null)) {
+                Streams.copy(new FileInputStream(fd.getFileDescriptor()), System.out);
+            }
+        }
+    }
+
+    private static class WriteCommand extends Command {
+        public WriteCommand(Uri uri, int userId) {
+            super(uri, userId);
         }
 
-        private static void copy(InputStream is, OutputStream os) throws IOException {
-            final byte[] buffer = new byte[8 * 1024];
-            int read;
-            try {
-                while ((read = is.read(buffer)) > -1) {
-                    os.write(buffer, 0, read);
-                }
-            } finally {
-                IoUtils.closeQuietly(is);
-                IoUtils.closeQuietly(os);
+        @Override
+        public void onExecute(IContentProvider provider) throws Exception {
+            try (ParcelFileDescriptor fd = provider.openFile(null, mUri, "w", null, null)) {
+                Streams.copy(System.in, new FileOutputStream(fd.getFileDescriptor()));
             }
         }
     }
