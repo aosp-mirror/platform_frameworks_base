@@ -560,16 +560,9 @@ public class PerformBackupTask implements BackupRestoreTask {
                 }
                 backupManagerService.addBackupTrace("init required; rerunning");
                 try {
-                    final String name = backupManagerService.getTransportManager()
+                    String name = backupManagerService.getTransportManager()
                             .getTransportName(mTransportClient.getTransportComponent());
-                    if (name != null) {
-                        backupManagerService.getPendingInits().add(name);
-                    } else {
-                        if (DEBUG) {
-                            Slog.w(TAG, "Couldn't find name of transport "
-                                    + mTransportClient.getTransportComponent() + " for init");
-                        }
-                    }
+                    backupManagerService.getPendingInits().add(name);
                 } catch (Exception e) {
                     Slog.w(TAG, "Failed to query transport name for init: " + e.getMessage());
                     // swallow it and proceed; we don't rely on this
