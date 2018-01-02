@@ -722,6 +722,7 @@ gensrcs {
     ],
 
     srcs: [
+        "core/proto/android/os/batterytype.proto",
         "core/proto/android/os/cpufreq.proto",
         "core/proto/android/os/cpuinfo.proto",
         "core/proto/android/os/kernelwake.proto",

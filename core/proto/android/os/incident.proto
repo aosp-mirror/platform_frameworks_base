@@ -18,6 +18,7 @@ syntax = "proto2";
 option java_multiple_files = true;
 option java_outer_classname = "IncidentProtoMetadata";
 
+import "frameworks/base/core/proto/android/os/batterytype.proto";
 import "frameworks/base/core/proto/android/os/cpufreq.proto";
 import "frameworks/base/core/proto/android/os/cpuinfo.proto";
 import "frameworks/base/core/proto/android/os/incidentheader.proto";
@@ -92,6 +93,11 @@ message IncidentProto {
     optional CpuFreq cpu_freq = 2004 [
         (section).type = SECTION_FILE,
         (section).args = "/sys/devices/system/cpu/cpufreq/all_time_in_state"
+    ];
+
+    optional BatteryTypeProto battery_type = 2006 [
+        (section).type = SECTION_FILE,
+        (section).args = "/sys/class/power_supply/bms/battery_type"
     ];
 
     // System Services

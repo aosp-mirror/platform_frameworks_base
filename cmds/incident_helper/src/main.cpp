@@ -16,6 +16,7 @@
 
 #define LOG_TAG "incident_helper"
 
+#include "parsers/BatteryTypeParser.h"
 #include "parsers/CpuFreqParser.h"
 #include "parsers/CpuInfoParser.h"
 #include "parsers/KernelWakesParser.h"
@@ -63,6 +64,8 @@ static TextParserBase* selectParser(int section) {
             return new CpuInfoParser();
         case 2004:
             return new CpuFreqParser();
+        case 2006:
+            return new BatteryTypeParser();
         default:
             return NULL;
     }
