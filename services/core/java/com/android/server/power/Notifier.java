@@ -209,10 +209,7 @@ final class Notifier {
 
         try {
             if (workSource != null) {
-                final int N = workSource.size();
-                for (int i=0; i<N; i++) {
-                    mBatteryStats.noteLongPartialWakelockStart(tag, historyTag, workSource.get(i));
-                }
+                mBatteryStats.noteLongPartialWakelockStartFromSource(tag, historyTag, workSource);
             } else {
                 mBatteryStats.noteLongPartialWakelockStart(tag, historyTag, ownerUid);
             }
@@ -230,10 +227,7 @@ final class Notifier {
 
         try {
             if (workSource != null) {
-                final int N = workSource.size();
-                for (int i=0; i<N; i++) {
-                    mBatteryStats.noteLongPartialWakelockFinish(tag, historyTag, workSource.get(i));
-                }
+                mBatteryStats.noteLongPartialWakelockFinishFromSource(tag, historyTag, workSource);
             } else {
                 mBatteryStats.noteLongPartialWakelockFinish(tag, historyTag, ownerUid);
             }
