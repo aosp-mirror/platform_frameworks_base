@@ -15,8 +15,11 @@
  */
 package android.hardware.location;
 
+import android.annotation.NonNull;
 import android.annotation.RequiresPermission;
 import android.os.RemoteException;
+
+import com.android.internal.util.Preconditions;
 
 import dalvik.system.CloseGuard;
 
@@ -65,6 +68,7 @@ public class ContextHubClient implements Closeable {
      *
      * @return the ContextHubInfo of the attached hub
      */
+    @NonNull
     public ContextHubInfo getAttachedHub() {
         return mAttachedHub;
     }
@@ -96,12 +100,16 @@ public class ContextHubClient implements Closeable {
      *
      * @return the result of sending the message defined as in ContextHubTransaction.Result
      *
+     * @throws NullPointerException if NanoAppMessage is null
+     *
      * @see NanoAppMessage
      * @see ContextHubTransaction.Result
      */
     @RequiresPermission(android.Manifest.permission.LOCATION_HARDWARE)
     @ContextHubTransaction.Result
-    public int sendMessageToNanoApp(NanoAppMessage message) {
+    public int sendMessageToNanoApp(@NonNull NanoAppMessage message) {
+        Preconditions.checkNotNull(message, "NanoAppMessage cannot be null");
+
         try {
             return mClientProxy.sendMessageToNanoApp(message);
         } catch (RemoteException e) {
