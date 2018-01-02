@@ -261,7 +261,7 @@ public class OverlayPackagesProviderTest extends AndroidTestCase {
     }
 
     private void verifyAppsAreNonRequired(String action, String... appArray) {
-        assertEquals(listFromArray(appArray),
+        assertEquals(setFromArray(appArray),
                 mHelper.getNonRequiredApps(TEST_MDM_COMPONENT_NAME, TEST_USER_ID, action));
     }
 
@@ -347,14 +347,7 @@ public class OverlayPackagesProviderTest extends AndroidTestCase {
         if (array == null) {
             return null;
         }
-        return new HashSet<T>(Arrays.asList(array));
-    }
-
-    private <T> List<T> listFromArray(T... array) {
-        if (array == null) {
-            return null;
-        }
-        return Arrays.asList(array);
+        return new HashSet<>(Arrays.asList(array));
     }
 
     class FakePackageManager extends MockPackageManager {
