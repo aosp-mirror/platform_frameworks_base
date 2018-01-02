@@ -87,6 +87,7 @@ import com.android.internal.R;
 import com.android.internal.widget.LockPatternUtils;
 import com.android.server.LocalServices;
 import com.android.server.SystemService;
+import com.android.server.devicepolicy.DevicePolicyManagerService.RestrictionsListener;
 import com.android.server.pm.UserRestrictionsUtils;
 
 import org.hamcrest.BaseMatcher;
@@ -4020,6 +4021,8 @@ public class DevicePolicyManagerTest extends DpmTestBase {
         dpm.setPasswordMinimumNumeric(admin1, 1);
         dpm.setPasswordMinimumSymbols(admin1, 0);
 
+        reset(mContext.spiedContext);
+
         PasswordMetrics passwordMetricsNoSymbols = new PasswordMetrics(
                 DevicePolicyManager.PASSWORD_QUALITY_COMPLEX, 9,
                 8, 2,
@@ -4069,9 +4072,16 @@ public class DevicePolicyManagerTest extends DpmTestBase {
         dpm.setActivePasswordState(passwordMetrics, userHandle);
         dpm.reportPasswordChanged(userHandle);
 
+        // Drain ACTION_DEVICE_POLICY_MANAGER_STATE_CHANGED broadcasts as part of
+        // reportPasswordChanged()
+        verify(mContext.spiedContext, times(3)).sendBroadcastAsUser(
+                MockUtils.checkIntentAction(
+                        DevicePolicyManager.ACTION_DEVICE_POLICY_MANAGER_STATE_CHANGED),
+                MockUtils.checkUserHandle(userHandle));
+
         final Intent intent = new Intent(DeviceAdminReceiver.ACTION_PASSWORD_CHANGED);
         intent.setComponent(admin1);
-        intent.putExtra(Intent.EXTRA_USER, UserHandle.of(mContext.binder.callingUid));
+        intent.putExtra(Intent.EXTRA_USER, UserHandle.of(userHandle));
 
         verify(mContext.spiedContext, times(1)).sendBroadcastAsUser(
                 MockUtils.checkIntent(intent),
@@ -4480,6 +4490,45 @@ public class DevicePolicyManagerTest extends DpmTestBase {
 
         verifyCanGetOwnerInstalledCaCerts(null, caller);
         verifyCantGetOwnerInstalledCaCertsProfileOwnerRemoval(null, caller);
+    }
+
+    public void testDisallowSharingIntoProfileSetRestriction() {
+        Bundle restriction = new Bundle();
+        restriction.putBoolean(UserManager.DISALLOW_SHARE_INTO_MANAGED_PROFILE, true);
+
+        mContext.binder.callingUid = DpmMockContext.SYSTEM_UID;
+        RestrictionsListener listener = new RestrictionsListener(mContext);
+        listener.onUserRestrictionsChanged(DpmMockContext.CALLER_USER_HANDLE, restriction,
+                new Bundle());
+        verifyDataSharingChangedBroadcast();
+    }
+
+    public void testDisallowSharingIntoProfileClearRestriction() {
+        Bundle restriction = new Bundle();
+        restriction.putBoolean(UserManager.DISALLOW_SHARE_INTO_MANAGED_PROFILE, true);
+
+        mContext.binder.callingUid = DpmMockContext.SYSTEM_UID;
+        RestrictionsListener listener = new RestrictionsListener(mContext);
+        listener.onUserRestrictionsChanged(DpmMockContext.CALLER_USER_HANDLE, new Bundle(),
+                restriction);
+        verifyDataSharingChangedBroadcast();
+    }
+
+    public void testDisallowSharingIntoProfileUnchanged() {
+        RestrictionsListener listener = new RestrictionsListener(mContext);
+        listener.onUserRestrictionsChanged(DpmMockContext.CALLER_USER_HANDLE, new Bundle(),
+                new Bundle());
+        verify(mContext.spiedContext, never()).sendBroadcastAsUser(any(), any());
+    }
+
+    private void verifyDataSharingChangedBroadcast() {
+        Intent expectedIntent = new Intent(
+                DevicePolicyManager.ACTION_DATA_SHARING_RESTRICTION_CHANGED);
+        expectedIntent.setPackage("com.android.managedprovisioning");
+        expectedIntent.putExtra(Intent.EXTRA_USER_ID, DpmMockContext.CALLER_USER_HANDLE);
+        verify(mContext.spiedContext, times(1)).sendBroadcastAsUser(
+                MockUtils.checkIntent(expectedIntent),
+                MockUtils.checkUserHandle(UserHandle.USER_SYSTEM));
     }
 
     private void verifyCanGetOwnerInstalledCaCerts(

@@ -1254,6 +1254,26 @@ public class DevicePolicyManager {
             = "android.app.action.SYSTEM_UPDATE_POLICY_CHANGED";
 
     /**
+     * Broadcast action to notify ManagedProvisioning that
+     * {@link UserManager#DISALLOW_SHARE_INTO_MANAGED_PROFILE} restriction has changed.
+     * @hide
+     */
+    @SdkConstant(SdkConstantType.BROADCAST_INTENT_ACTION)
+    public static final String ACTION_DATA_SHARING_RESTRICTION_CHANGED =
+            "android.app.action.DATA_SHARING_RESTRICTION_CHANGED";
+
+    /**
+     * Broadcast action from ManagedProvisioning to notify that the latest change to
+     * {@link UserManager#DISALLOW_SHARE_INTO_MANAGED_PROFILE} restriction has been successfully
+     * applied (cross profile intent filters updated). Only usesd for CTS tests.
+     * @hide
+     */
+    @TestApi
+    @SdkConstant(SdkConstantType.BROADCAST_INTENT_ACTION)
+    public static final String ACTION_DATA_SHARING_RESTRICTION_APPLIED =
+            "android.app.action.DATA_SHARING_RESTRICTION_APPLIED";
+
+    /**
      * Permission policy to prompt user for new permission requests for runtime permissions.
      * Already granted or denied permissions are not affected by this.
      */
@@ -6057,6 +6077,13 @@ public class DevicePolicyManager {
      * Called by a profile owner of a managed profile to remove the cross-profile intent filters
      * that go from the managed profile to the parent, or from the parent to the managed profile.
      * Only removes those that have been set by the profile owner.
+     * <p>
+     * <em>Note</em>: A list of default cross profile intent filters are set up by the system when
+     * the profile is created, some of them ensure the proper functioning of the profile, while
+     * others enable sharing of data from the parent to the managed profile for user convenience.
+     * These default intent filters are not cleared when this API is called. If the default cross
+     * profile data sharing is not desired, they can be disabled with
+     * {@link UserManager#DISALLOW_SHARE_INTO_MANAGED_PROFILE}.
      *
      * @param admin Which {@link DeviceAdminReceiver} this request is associated with.
      * @throws SecurityException if {@code admin} is not a device or profile owner.
