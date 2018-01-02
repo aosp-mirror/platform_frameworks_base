@@ -27,14 +27,9 @@ import org.robolectric.internal.bytecode.InstrumentationConfiguration;
 import org.robolectric.internal.bytecode.SandboxClassLoader;
 import org.robolectric.util.Util;
 
-import java.io.File;
-import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.OutputStreamWriter;
-import java.io.PrintWriter;
 import java.net.URL;
-import java.util.Arrays;
 import java.util.Set;
 
 import javax.annotation.Nonnull;
