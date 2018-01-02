@@ -1424,6 +1424,8 @@ public class RefactoredBackupManagerService implements BackupManagerServiceInter
             final Intent notification = new Intent();
             notification.setAction(BACKUP_FINISHED_ACTION);
             notification.setPackage(receiver);
+            notification.addFlags(Intent.FLAG_INCLUDE_STOPPED_PACKAGES |
+                    Intent.FLAG_RECEIVER_FOREGROUND);
             notification.putExtra(BACKUP_FINISHED_PACKAGE_EXTRA, packageName);
             mContext.sendBroadcastAsUser(notification, UserHandle.OWNER);
         }
