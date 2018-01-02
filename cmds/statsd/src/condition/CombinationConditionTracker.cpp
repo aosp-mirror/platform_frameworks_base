@@ -103,7 +103,7 @@ bool CombinationConditionTracker::init(const vector<Predicate>& allConditionConf
 }
 
 void CombinationConditionTracker::isConditionMet(
-        const map<string, HashableDimensionKey>& conditionParameters,
+        const ConditionKey& conditionParameters,
         const vector<sp<ConditionTracker>>& allConditions,
         vector<ConditionState>& conditionCache) const {
     for (const int childIndex : mChildren) {

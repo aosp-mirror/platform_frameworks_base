@@ -191,10 +191,10 @@ TEST(CollationTest, FailOnSkippedFieldsMultiple) {
  * Test that atoms that have an attribution chain not in the first position are
  * rejected.
  */
-TEST(CollationTest, FailBadAttributionChainPosition) {
+TEST(CollationTest, FailBadAttributionNodePosition) {
   Atoms atoms;
   int errorCount =
-      collate_atoms(BadAttributionChainPosition::descriptor(), &atoms);
+      collate_atoms(BadAttributionNodePosition::descriptor(), &atoms);
 
   EXPECT_EQ(1, errorCount);
 }

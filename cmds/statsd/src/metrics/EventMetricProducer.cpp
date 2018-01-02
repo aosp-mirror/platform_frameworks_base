@@ -96,6 +96,10 @@ std::unique_ptr<std::vector<uint8_t>> serializeProtoLocked(ProtoOutputStream& pr
     return buffer;
 }
 
+void EventMetricProducer::onDumpReportLocked(const uint64_t dumpTimeNs, StatsLogReport* report) {
+
+}
+
 void EventMetricProducer::onDumpReportLocked(const uint64_t dumpTimeNs,
                                              ProtoOutputStream* protoOutput) {
     protoOutput->write(FIELD_TYPE_STRING | FIELD_ID_NAME, mName);
@@ -121,7 +125,7 @@ void EventMetricProducer::onConditionChangedLocked(const bool conditionMet,
 
 void EventMetricProducer::onMatchedLogEventInternalLocked(
         const size_t matcherIndex, const HashableDimensionKey& eventKey,
-        const std::map<std::string, HashableDimensionKey>& conditionKey, bool condition,
+        const ConditionKey& conditionKey, bool condition,
         const LogEvent& event) {
     if (!condition) {
         return;

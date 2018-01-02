@@ -52,9 +52,10 @@ TEST(DurationMetricTrackerTest, TestNoCondition) {
     LogEvent event1(tagId, bucketStartTimeNs + 1);
     LogEvent event2(tagId, bucketStartTimeNs + bucketSizeNs + 2);
 
+    FieldMatcher dimensions;
     DurationMetricProducer durationProducer(
             kConfigKey, metric, -1 /*no condition*/, 1 /* start index */, 2 /* stop index */,
-            3 /* stop_all index */, false /*nesting*/, wizard, {}, bucketStartTimeNs);
+            3 /* stop_all index */, false /*nesting*/, wizard, dimensions, bucketStartTimeNs);
 
     durationProducer.onMatchedLogEvent(1 /* start index*/, event1);
     durationProducer.onMatchedLogEvent(2 /* stop index*/, event2);
@@ -88,9 +89,10 @@ TEST(DurationMetricTrackerTest, TestNonSlicedCondition) {
     LogEvent event3(tagId, bucketStartTimeNs + bucketSizeNs + 1);
     LogEvent event4(tagId, bucketStartTimeNs + bucketSizeNs + 3);
 
+    FieldMatcher dimensions;
     DurationMetricProducer durationProducer(
             kConfigKey, metric, 0 /* condition index */, 1 /* start index */, 2 /* stop index */,
-            3 /* stop_all index */, false /*nesting*/, wizard, {}, bucketStartTimeNs);
+            3 /* stop_all index */, false /*nesting*/, wizard, dimensions, bucketStartTimeNs);
     EXPECT_FALSE(durationProducer.mCondition);
     EXPECT_FALSE(durationProducer.isConditionSliced());
 

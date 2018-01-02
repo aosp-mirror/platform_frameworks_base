@@ -42,6 +42,8 @@ public:
 
     virtual ~ConditionTracker(){};
 
+    inline const string& getName() { return mName; }
+
     // Initialize this ConditionTracker. This initialization is done recursively (DFS). It can also
     // be done in the constructor, but we do it separately because (1) easy to return a bool to
     // indicate whether the initialization is successful. (2) makes unit test easier.
@@ -83,7 +85,7 @@ public:
     //                  done recursively
     // [conditionCache]: the cache holding the condition evaluation values.
     virtual void isConditionMet(
-            const std::map<std::string, HashableDimensionKey>& conditionParameters,
+            const ConditionKey& conditionParameters,
             const std::vector<sp<ConditionTracker>>& allConditions,
             std::vector<ConditionState>& conditionCache) const = 0;
 

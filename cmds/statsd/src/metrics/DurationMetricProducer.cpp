@@ -20,6 +20,7 @@
 #include "DurationMetricProducer.h"
 #include "guardrail/StatsdStats.h"
 #include "stats_util.h"
+#include "stats_log_util.h"
 
 #include <limits.h>
 #include <stdlib.h>
@@ -50,12 +51,6 @@ const int FIELD_ID_DATA = 1;
 // for DurationMetricData
 const int FIELD_ID_DIMENSION = 1;
 const int FIELD_ID_BUCKET_INFO = 2;
-// for KeyValuePair
-const int FIELD_ID_KEY = 1;
-const int FIELD_ID_VALUE_STR = 2;
-const int FIELD_ID_VALUE_INT = 3;
-const int FIELD_ID_VALUE_BOOL = 4;
-const int FIELD_ID_VALUE_FLOAT = 5;
 // for DurationBucketInfo
 const int FIELD_ID_START_BUCKET_NANOS = 1;
 const int FIELD_ID_END_BUCKET_NANOS = 2;
@@ -66,7 +61,7 @@ DurationMetricProducer::DurationMetricProducer(const ConfigKey& key, const Durat
                                                const size_t stopIndex, const size_t stopAllIndex,
                                                const bool nesting,
                                                const sp<ConditionWizard>& wizard,
-                                               const vector<KeyMatcher>& internalDimension,
+                                               const FieldMatcher& internalDimensions,
                                                const uint64_t startTimeNs)
     : MetricProducer(metric.name(), key, startTimeNs, conditionIndex, wizard),
       mAggregationType(metric.aggregation_type()),
@@ -74,7 +69,7 @@ DurationMetricProducer::DurationMetricProducer(const ConfigKey& key, const Durat
       mStopIndex(stopIndex),
       mStopAllIndex(stopAllIndex),
       mNested(nesting),
-      mInternalDimension(internalDimension) {
+      mInternalDimensions(internalDimensions) {
     // TODO: The following boiler plate code appears in all MetricProducers, but we can't abstract
     // them in the base class, because the proto generated CountMetric, and DurationMetric are
     // not related. Maybe we should add a template in the future??
@@ -85,7 +80,7 @@ DurationMetricProducer::DurationMetricProducer(const ConfigKey& key, const Durat
     }
 
     // TODO: use UidMap if uid->pkg_name is required
-    mDimension.insert(mDimension.begin(), metric.dimension().begin(), metric.dimension().end());
+    mDimensions = metric.dimensions();
 
     if (metric.links().size() > 0) {
         mConditionLinks.insert(mConditionLinks.begin(), metric.links().begin(),
@@ -151,6 +146,24 @@ void DurationMetricProducer::onConditionChangedLocked(const bool conditionMet,
     }
 }
 
+void DurationMetricProducer::onDumpReportLocked(const uint64_t dumpTimeNs, StatsLogReport* report) {
+    flushIfNeededLocked(dumpTimeNs);
+    report->set_metric_name(mName);
+    report->set_start_report_nanos(mStartTimeNs);
+
+    auto duration_metrics = report->mutable_duration_metrics();
+    for (const auto& pair : mPastBuckets) {
+        DurationMetricData* metricData = duration_metrics->add_data();
+        *metricData->mutable_dimension() = pair.first.getDimensionsValue();
+        for (const auto& bucket : pair.second) {
+            auto bucketInfo = metricData->add_bucket_info();
+            bucketInfo->set_start_bucket_nanos(bucket.mBucketStartNs);
+            bucketInfo->set_end_bucket_nanos(bucket.mBucketEndNs);
+            bucketInfo->set_duration_nanos(bucket.mDuration);
+        }
+    }
+}
+
 void DurationMetricProducer::onDumpReportLocked(const uint64_t dumpTimeNs,
                                                 ProtoOutputStream* protoOutput) {
     flushIfNeededLocked(dumpTimeNs);
@@ -163,28 +176,16 @@ void DurationMetricProducer::onDumpReportLocked(const uint64_t dumpTimeNs,
 
     for (const auto& pair : mPastBuckets) {
         const HashableDimensionKey& hashableKey = pair.first;
-        const vector<KeyValuePair>& kvs = hashableKey.getKeyValuePairs();
         VLOG("  dimension key %s", hashableKey.c_str());
 
         long long wrapperToken =
                 protoOutput->start(FIELD_TYPE_MESSAGE | FIELD_COUNT_REPEATED | FIELD_ID_DATA);
 
-        // First fill dimension (KeyValuePairs).
-        for (const auto& kv : kvs) {
-            long long dimensionToken = protoOutput->start(
-                    FIELD_TYPE_MESSAGE | FIELD_COUNT_REPEATED | FIELD_ID_DIMENSION);
-            protoOutput->write(FIELD_TYPE_INT32 | FIELD_ID_KEY, kv.key());
-            if (kv.has_value_str()) {
-                protoOutput->write(FIELD_TYPE_STRING | FIELD_ID_VALUE_STR, kv.value_str());
-            } else if (kv.has_value_int()) {
-                protoOutput->write(FIELD_TYPE_INT64 | FIELD_ID_VALUE_INT, kv.value_int());
-            } else if (kv.has_value_bool()) {
-                protoOutput->write(FIELD_TYPE_BOOL | FIELD_ID_VALUE_BOOL, kv.value_bool());
-            } else if (kv.has_value_float()) {
-                protoOutput->write(FIELD_TYPE_FLOAT | FIELD_ID_VALUE_FLOAT, kv.value_float());
-            }
-            protoOutput->end(dimensionToken);
-        }
+        // First fill dimension.
+        long long dimensionToken = protoOutput->start(
+                FIELD_TYPE_MESSAGE | FIELD_COUNT_REPEATED | FIELD_ID_DIMENSION);
+        writeDimensionsValueProtoToStream(hashableKey.getDimensionsValue(), protoOutput);
+        protoOutput->end(dimensionToken);
 
         // Then fill bucket_info (DurationBucketInfo).
         for (const auto& bucket : pair.second) {
@@ -249,7 +250,7 @@ bool DurationMetricProducer::hitGuardRailLocked(const HashableDimensionKey& newK
 
 void DurationMetricProducer::onMatchedLogEventInternalLocked(
         const size_t matcherIndex, const HashableDimensionKey& eventKey,
-        const map<string, HashableDimensionKey>& conditionKeys, bool condition,
+        const ConditionKey& conditionKeys, bool condition,
         const LogEvent& event) {
     flushIfNeededLocked(event.GetTimestampNs());
 
@@ -260,7 +261,6 @@ void DurationMetricProducer::onMatchedLogEventInternalLocked(
         return;
     }
 
-    HashableDimensionKey atomKey(getDimensionKey(event, mInternalDimension));
 
     if (mCurrentSlicedDuration.find(eventKey) == mCurrentSlicedDuration.end()) {
         if (hitGuardRailLocked(eventKey)) {
@@ -271,11 +271,25 @@ void DurationMetricProducer::onMatchedLogEventInternalLocked(
 
     auto it = mCurrentSlicedDuration.find(eventKey);
 
-    if (matcherIndex == mStartIndex) {
-        it->second->noteStart(atomKey, condition, event.GetTimestampNs(), conditionKeys);
-    } else if (matcherIndex == mStopIndex) {
-        it->second->noteStop(atomKey, event.GetTimestampNs(), false);
+    std::vector<DimensionsValue> values = getDimensionKeys(event, mInternalDimensions);
+    if (values.empty()) {
+        if (matcherIndex == mStartIndex) {
+            it->second->noteStart(DEFAULT_DIMENSION_KEY, condition,
+                                  event.GetTimestampNs(), conditionKeys);
+        } else if (matcherIndex == mStopIndex) {
+            it->second->noteStop(DEFAULT_DIMENSION_KEY, event.GetTimestampNs(), false);
+        }
+    } else {
+        for (const DimensionsValue& value : values) {
+            if (matcherIndex == mStartIndex) {
+                it->second->noteStart(HashableDimensionKey(value), condition,
+                                      event.GetTimestampNs(), conditionKeys);
+            } else if (matcherIndex == mStopIndex) {
+                it->second->noteStop(HashableDimensionKey(value), event.GetTimestampNs(), false);
+            }
+        }
     }
+
 }
 
 size_t DurationMetricProducer::byteSizeLocked() const {

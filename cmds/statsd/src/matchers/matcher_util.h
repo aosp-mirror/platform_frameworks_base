@@ -14,8 +14,7 @@
  * limitations under the License.
  */
 
-#ifndef MATCHER_UTIL_H
-#define MATCHER_UTIL_H
+#pragma once
 
 #include "logd/LogEvent.h"
 
@@ -28,6 +27,7 @@
 #include "frameworks/base/cmds/statsd/src/stats_log.pb.h"
 #include "frameworks/base/cmds/statsd/src/statsd_config.pb.h"
 #include "stats_util.h"
+#include "packages/UidMap.h"
 
 namespace android {
 namespace os {
@@ -42,12 +42,14 @@ enum MatchingState {
 bool combinationMatch(const std::vector<int>& children, const LogicalOperation& operation,
                       const std::vector<MatchingState>& matcherResults);
 
-bool matchesSimple(const SimpleAtomMatcher& simpleMatcher, const LogEvent& wrapper);
+bool matchFieldSimple(const UidMap& uidMap, const FieldValueMap& dimensionsMap,
+                      const FieldValueMatcher& matcher, const Field& field);
 
-std::vector<KeyValuePair> getDimensionKey(const LogEvent& event,
-                                          const std::vector<KeyMatcher>& dimensions);
+bool matchesSimple(const UidMap& uidMap,
+    const SimpleAtomMatcher& simpleMatcher, const LogEvent& wrapper);
+
+std::vector<DimensionsValue> getDimensionKeys(const LogEvent& event, const FieldMatcher& matcher);
 
 }  // namespace statsd
 }  // namespace os
 }  // namespace android
-#endif  // MATCHER_UTIL_H

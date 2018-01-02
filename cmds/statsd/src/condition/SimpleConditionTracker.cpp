@@ -76,10 +76,9 @@ SimpleConditionTracker::SimpleConditionTracker(
         mStopAllLogMatcherIndex = -1;
     }
 
-    mOutputDimension.insert(mOutputDimension.begin(), simplePredicate.dimension().begin(),
-                            simplePredicate.dimension().end());
+    mOutputDimensions = simplePredicate.dimensions();
 
-    if (mOutputDimension.size() > 0) {
+    if (mOutputDimensions.child_size() > 0) {
         mSliced = true;
     }
 
@@ -150,6 +149,14 @@ void SimpleConditionTracker::handleConditionEvent(const HashableDimensionKey& ou
                                                   bool matchStart,
                                                   std::vector<ConditionState>& conditionCache,
                                                   std::vector<bool>& conditionChangedCache) {
+    if ((int)conditionChangedCache.size() <= mIndex) {
+        ALOGE("handleConditionEvent: param conditionChangedCache not initialized.");
+        return;
+    }
+    if ((int)conditionCache.size() <= mIndex) {
+        ALOGE("handleConditionEvent: param conditionCache not initialized.");
+        return;
+    }
     bool changed = false;
     auto outputIt = mSlicedConditionState.find(outputKey);
     ConditionState newCondition;
@@ -278,36 +285,64 @@ void SimpleConditionTracker::evaluateCondition(const LogEvent& event,
         return;
     }
 
-    // outputKey is the output key values. e.g, uid:1234
-    const HashableDimensionKey outputKey(getDimensionKey(event, mOutputDimension));
-    handleConditionEvent(outputKey, matchedState == 1, conditionCache, conditionChangedCache);
+    // outputKey is the output values. e.g, uid:1234
+    const std::vector<DimensionsValue> outputValues = getDimensionKeys(event, mOutputDimensions);
+    if (outputValues.size() == 0) {
+        // The original implementation would generate an empty string dimension hash when condition
+        // is not sliced.
+        handleConditionEvent(
+            DEFAULT_DIMENSION_KEY, matchedState == 1, conditionCache, conditionChangedCache);
+    } else if (outputValues.size() == 1) {
+        handleConditionEvent(HashableDimensionKey(outputValues[0]), matchedState == 1,
+            conditionCache, conditionChangedCache);
+    } else {
+        // If this event has multiple nodes in the attribution chain,  this log event probably will
+        // generate multiple dimensions. If so, we will find if the condition changes for any
+        // dimension and ask the corresponding metric producer to verify whether the actual sliced
+        // condition has changed or not.
+        // A high level assumption is that a predicate is either sliced or unsliced. We will never
+        // have both sliced and unsliced version of a predicate.
+        for (const DimensionsValue& outputValue : outputValues) {
+            vector<ConditionState> dimensionalConditionCache(conditionCache.size(),
+                                                             ConditionState::kNotEvaluated);
+            vector<bool> dimensionalConditionChangedCache(conditionChangedCache.size(), false);
+
+            handleConditionEvent(HashableDimensionKey(outputValue), matchedState == 1,
+                dimensionalConditionCache, dimensionalConditionChangedCache);
+
+            OrConditionState(dimensionalConditionCache, &conditionCache);
+            OrBooleanVector(dimensionalConditionChangedCache, &conditionChangedCache);
+        }
+    }
 }
 
 void SimpleConditionTracker::isConditionMet(
-        const map<string, HashableDimensionKey>& conditionParameters,
+        const ConditionKey& conditionParameters,
         const vector<sp<ConditionTracker>>& allConditions,
         vector<ConditionState>& conditionCache) const {
     const auto pair = conditionParameters.find(mName);
-    HashableDimensionKey key =
-            (pair == conditionParameters.end()) ? DEFAULT_DIMENSION_KEY : pair->second;
 
-    if (pair == conditionParameters.end() && mOutputDimension.size() > 0) {
+    if (pair == conditionParameters.end() && mOutputDimensions.child_size() > 0) {
         ALOGE("Predicate %s output has dimension, but it's not specified in the query!",
               mName.c_str());
         conditionCache[mIndex] = mInitialValue;
         return;
     }
+    std::vector<HashableDimensionKey> defaultKeys = {DEFAULT_DIMENSION_KEY};
+    const std::vector<HashableDimensionKey> &keys =
+            (pair == conditionParameters.end()) ? defaultKeys : pair->second;
 
-    VLOG("simplePredicate %s query key: %s", mName.c_str(), key.c_str());
-
-    auto startedCountIt = mSlicedConditionState.find(key);
-    if (startedCountIt == mSlicedConditionState.end()) {
-        conditionCache[mIndex] = mInitialValue;
-    } else {
-        conditionCache[mIndex] =
-                startedCountIt->second > 0 ? ConditionState::kTrue : ConditionState::kFalse;
+    ConditionState conditionState = ConditionState::kNotEvaluated;
+    for (const auto& key : keys) {
+        auto startedCountIt = mSlicedConditionState.find(key);
+        if (startedCountIt != mSlicedConditionState.end()) {
+            conditionState = conditionState |
+                    (startedCountIt->second > 0 ? ConditionState::kTrue : ConditionState::kFalse);
+        } else {
+            conditionState = conditionState | mInitialValue;
+        }
     }
-
+    conditionCache[mIndex] = conditionState;
     VLOG("Predicate %s return %d", mName.c_str(), conditionCache[mIndex]);
 }
 

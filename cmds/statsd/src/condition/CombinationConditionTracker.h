@@ -41,7 +41,7 @@ public:
                            std::vector<ConditionState>& conditionCache,
                            std::vector<bool>& changedCache) override;
 
-    void isConditionMet(const std::map<std::string, HashableDimensionKey>& conditionParameters,
+    void isConditionMet(const ConditionKey& conditionParameters,
                         const std::vector<sp<ConditionTracker>>& allConditions,
                         std::vector<ConditionState>& conditionCache) const override;
 

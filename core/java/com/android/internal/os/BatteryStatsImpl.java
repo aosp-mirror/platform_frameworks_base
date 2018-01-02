@@ -4118,13 +4118,10 @@ public class BatteryStatsImpl extends BatteryStats {
 
             getUidStatsLocked(uid).noteStartWakeLocked(pid, name, type, elapsedRealtime);
 
-            // TODO(statsd): Use the attribution chain specified in WorkChain instead of uid.
-            // The debug logging here can be deleted once statsd is wired up.
-            if (DEBUG) {
-                Slog.w(TAG, "StatsLog [start]: uid=" + uid + ", type=" + type + ", name=" + name
-                + ", wc=" + wc);
+            if (wc != null) {
+                StatsLog.write(
+                        StatsLog.WAKELOCK_STATE_CHANGED, wc.getUids(), wc.getTags(), type, name, 1);
             }
-            StatsLog.write(StatsLog.WAKELOCK_STATE_CHANGED, uid, type, name, 1);
         }
     }
 
@@ -4161,14 +4158,10 @@ public class BatteryStatsImpl extends BatteryStats {
             }
 
             getUidStatsLocked(uid).noteStopWakeLocked(pid, name, type, elapsedRealtime);
-
-            // TODO(statsd): Use the attribution chain specified in WorkChain instead of uid.
-            // The debug logging here can be deleted once statsd is wired up.
-            if (DEBUG) {
-                Slog.w(TAG, "StatsLog [stop]: uid=" + uid + ", type=" + type + ", name=" + name
-                    + ", wc=" + wc);
+            if (wc != null) {
+                StatsLog.write(
+                        StatsLog.WAKELOCK_STATE_CHANGED, wc.getUids(), wc.getTags(), type, name, 0);
             }
-            StatsLog.write(StatsLog.WAKELOCK_STATE_CHANGED, uid, type, name, 0);
         }
     }
 

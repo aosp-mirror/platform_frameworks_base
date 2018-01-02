@@ -19,6 +19,7 @@
 
 #include "ValueMetricProducer.h"
 #include "guardrail/StatsdStats.h"
+#include "stats_log_util.h"
 
 #include <cutils/log.h>
 #include <limits.h>
@@ -54,12 +55,6 @@ const int FIELD_ID_DATA = 1;
 // for ValueMetricData
 const int FIELD_ID_DIMENSION = 1;
 const int FIELD_ID_BUCKET_INFO = 2;
-// for KeyValuePair
-const int FIELD_ID_KEY = 1;
-const int FIELD_ID_VALUE_STR = 2;
-const int FIELD_ID_VALUE_INT = 3;
-const int FIELD_ID_VALUE_BOOL = 4;
-const int FIELD_ID_VALUE_FLOAT = 5;
 // for ValueBucketInfo
 const int FIELD_ID_START_BUCKET_NANOS = 1;
 const int FIELD_ID_END_BUCKET_NANOS = 2;
@@ -84,7 +79,7 @@ ValueMetricProducer::ValueMetricProducer(const ConfigKey& key, const ValueMetric
         mBucketSizeNs = kDefaultBucketSizeMillis * 1000 * 1000;
     }
 
-    mDimension.insert(mDimension.begin(), metric.dimension().begin(), metric.dimension().end());
+    mDimensions = metric.dimensions();
 
     if (metric.links().size() > 0) {
         mConditionLinks.insert(mConditionLinks.begin(), metric.links().begin(),
@@ -121,6 +116,23 @@ void ValueMetricProducer::onSlicedConditionMayChangeLocked(const uint64_t eventT
     VLOG("Metric %s onSlicedConditionMayChange", mName.c_str());
 }
 
+void ValueMetricProducer::onDumpReportLocked(const uint64_t dumpTimeNs, StatsLogReport* report) {
+    flushIfNeededLocked(dumpTimeNs);
+    report->set_metric_name(mName);
+    report->set_start_report_nanos(mStartTimeNs);
+    auto value_metrics = report->mutable_value_metrics();
+    for (const auto& pair : mPastBuckets) {
+        ValueMetricData* metricData = value_metrics->add_data();
+        *metricData->mutable_dimension() = pair.first.getDimensionsValue();
+        for (const auto& bucket : pair.second) {
+            ValueBucketInfo* bucketInfo = metricData->add_bucket_info();
+            bucketInfo->set_start_bucket_nanos(bucket.mBucketStartNs);
+            bucketInfo->set_end_bucket_nanos(bucket.mBucketEndNs);
+            bucketInfo->set_value(bucket.mValue);
+        }
+    }
+}
+
 void ValueMetricProducer::onDumpReportLocked(const uint64_t dumpTimeNs,
                                              ProtoOutputStream* protoOutput) {
     VLOG("metric %s dump report now...", mName.c_str());
@@ -132,26 +144,14 @@ void ValueMetricProducer::onDumpReportLocked(const uint64_t dumpTimeNs,
     for (const auto& pair : mPastBuckets) {
         const HashableDimensionKey& hashableKey = pair.first;
         VLOG("  dimension key %s", hashableKey.c_str());
-        const vector<KeyValuePair>& kvs = hashableKey.getKeyValuePairs();
         long long wrapperToken =
                 protoOutput->start(FIELD_TYPE_MESSAGE | FIELD_COUNT_REPEATED | FIELD_ID_DATA);
 
-        // First fill dimension (KeyValuePairs).
-        for (const auto& kv : kvs) {
-            long long dimensionToken = protoOutput->start(
-                    FIELD_TYPE_MESSAGE | FIELD_COUNT_REPEATED | FIELD_ID_DIMENSION);
-            protoOutput->write(FIELD_TYPE_INT32 | FIELD_ID_KEY, kv.key());
-            if (kv.has_value_str()) {
-                protoOutput->write(FIELD_TYPE_STRING | FIELD_ID_VALUE_STR, kv.value_str());
-            } else if (kv.has_value_int()) {
-                protoOutput->write(FIELD_TYPE_INT64 | FIELD_ID_VALUE_INT, kv.value_int());
-            } else if (kv.has_value_bool()) {
-                protoOutput->write(FIELD_TYPE_BOOL | FIELD_ID_VALUE_BOOL, kv.value_bool());
-            } else if (kv.has_value_float()) {
-                protoOutput->write(FIELD_TYPE_FLOAT | FIELD_ID_VALUE_FLOAT, kv.value_float());
-            }
-            protoOutput->end(dimensionToken);
-        }
+        // First fill dimension.
+        long long dimensionToken = protoOutput->start(
+                FIELD_TYPE_MESSAGE | FIELD_COUNT_REPEATED | FIELD_ID_DIMENSION);
+        writeDimensionsValueProtoToStream(hashableKey.getDimensionsValue(), protoOutput);
+        protoOutput->end(dimensionToken);
 
         // Then fill bucket_info (ValueBucketInfo).
         for (const auto& bucket : pair.second) {
@@ -256,7 +256,7 @@ bool ValueMetricProducer::hitGuardRailLocked(const HashableDimensionKey& newKey)
 
 void ValueMetricProducer::onMatchedLogEventInternalLocked(
         const size_t matcherIndex, const HashableDimensionKey& eventKey,
-        const map<string, HashableDimensionKey>& conditionKey, bool condition,
+        const ConditionKey& conditionKey, bool condition,
         const LogEvent& event) {
     uint64_t eventTimeNs = event.GetTimestampNs();
     if (eventTimeNs < mCurrentBucketStartTimeNs) {

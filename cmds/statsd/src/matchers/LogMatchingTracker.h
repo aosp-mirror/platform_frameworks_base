@@ -65,8 +65,8 @@ public:
     // Get the tagIds that this matcher cares about. The combined collection is stored
     // in MetricMananger, so that we can pass any LogEvents that are not interest of us. It uses
     // some memory but hopefully it can save us much CPU time when there is flood of events.
-    virtual const std::set<int>& getTagIds() const {
-        return mTagIds;
+    virtual const std::set<int>& getAtomIds() const {
+        return mAtomIds;
     }
 
     const std::string& getName() const {
@@ -88,7 +88,7 @@ protected:
     // useful when we have a complex CombinationLogMatcherTracker.
     // TODO: Consider use an array instead of stl set. In reality, the number of the tag ids a
     // LogMatchingTracker cares is only a few.
-    std::set<int> mTagIds;
+    std::set<int> mAtomIds;
 };
 
 }  // namespace statsd

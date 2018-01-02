@@ -25,20 +25,20 @@ namespace statsd {
 
 class HashableDimensionKey {
 public:
-    explicit HashableDimensionKey(const std::vector<KeyValuePair>& keyValuePairs)
-        : mKeyValuePairs(keyValuePairs){};
+    explicit HashableDimensionKey(const DimensionsValue& dimensionsValue)
+        : mDimensionsValue(dimensionsValue){};
 
     HashableDimensionKey(){};
 
     HashableDimensionKey(const HashableDimensionKey& that)
-        : mKeyValuePairs(that.getKeyValuePairs()){};
+        : mDimensionsValue(that.getDimensionsValue()){};
 
     HashableDimensionKey& operator=(const HashableDimensionKey& from) = default;
 
     std::string toString() const;
 
-    inline const std::vector<KeyValuePair>& getKeyValuePairs() const {
-        return mKeyValuePairs;
+    inline const DimensionsValue& getDimensionsValue() const {
+        return mDimensionsValue;
     }
 
     bool operator==(const HashableDimensionKey& that) const;
@@ -50,8 +50,10 @@ public:
     }
 
 private:
-    std::vector<KeyValuePair> mKeyValuePairs;
+    DimensionsValue mDimensionsValue;
 };
+
+android::hash_t hashDimensionsValue(const DimensionsValue& value);
 
 }  // namespace statsd
 }  // namespace os
@@ -60,42 +62,11 @@ private:
 namespace std {
 
 using android::os::statsd::HashableDimensionKey;
-using android::os::statsd::KeyValuePair;
 
 template <>
 struct hash<HashableDimensionKey> {
     std::size_t operator()(const HashableDimensionKey& key) const {
-        android::hash_t hash = 0;
-        for (const auto& pair : key.getKeyValuePairs()) {
-            hash = android::JenkinsHashMix(hash, android::hash_type(pair.key()));
-            hash = android::JenkinsHashMix(
-                    hash, android::hash_type(static_cast<int32_t>(pair.value_case())));
-            switch (pair.value_case()) {
-                case KeyValuePair::ValueCase::kValueStr:
-                    hash = android::JenkinsHashMix(
-                            hash,
-                            static_cast<uint32_t>(std::hash<std::string>()(pair.value_str())));
-                    break;
-                case KeyValuePair::ValueCase::kValueInt:
-                    hash = android::JenkinsHashMix(hash, android::hash_type(pair.value_int()));
-                    break;
-                case KeyValuePair::ValueCase::kValueLong:
-                    hash = android::JenkinsHashMix(
-                            hash, android::hash_type(static_cast<int64_t>(pair.value_long())));
-                    break;
-                case KeyValuePair::ValueCase::kValueBool:
-                    hash = android::JenkinsHashMix(hash, android::hash_type(pair.value_bool()));
-                    break;
-                case KeyValuePair::ValueCase::kValueFloat: {
-                    float floatVal = pair.value_float();
-                    hash = android::JenkinsHashMixBytes(hash, (uint8_t*)&floatVal, sizeof(float));
-                    break;
-                }
-                case KeyValuePair::ValueCase::VALUE_NOT_SET:
-                    break;
-            }
-        }
-        return hash;
+        return hashDimensionsValue(key.getDimensionsValue());
     }
 };
 

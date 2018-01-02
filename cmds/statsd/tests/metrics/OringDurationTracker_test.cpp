@@ -35,11 +35,12 @@ namespace os {
 namespace statsd {
 
 const ConfigKey kConfigKey(0, "test");
-const HashableDimensionKey eventKey = getMockedDimensionKey(0, "event");
+const int TagId = 1;
+const HashableDimensionKey eventKey = getMockedDimensionKey(TagId, 0, "event");
 
-const HashableDimensionKey kConditionKey1 = getMockedDimensionKey(1, "maps");
-const HashableDimensionKey kEventKey1 = getMockedDimensionKey(2, "maps");
-const HashableDimensionKey kEventKey2 = getMockedDimensionKey(3, "maps");
+const std::vector<HashableDimensionKey> kConditionKey1 = {getMockedDimensionKey(TagId, 1, "maps")};
+const HashableDimensionKey kEventKey1 = getMockedDimensionKey(TagId, 2, "maps");
+const HashableDimensionKey kEventKey2 = getMockedDimensionKey(TagId, 3, "maps");
 
 TEST(OringDurationTrackerTest, TestDurationOverlap) {
     sp<MockConditionWizard> wizard = new NaggyMock<MockConditionWizard>();

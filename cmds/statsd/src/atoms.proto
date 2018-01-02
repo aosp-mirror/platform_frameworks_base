@@ -104,24 +104,18 @@ message Atom {
 }
 
 /**
- * An attribution represents an application or module that is part of process where a particular bit
- * of work is done.
+ * This proto represents a node of an attribution chain.
+ * Note: All attribution chains are represented as a repeated field of type
+ * AttributionNode. It is understood that in such arrays, the order is that
+ * of calls, that is [A, B, C] if A calls B that calls C.
  */
-message Attribution {
-    // The uid for an application or module.
+message AttributionNode {
+    // The uid for a given element in the attribution chain.
     optional int32 uid = 1;
-    // The string tag for the attribution node.
-    optional string tag = 2;
-}
 
-/**
- * An attribution chain represents the chained attributions of applications or modules that
- * resulted in a particular bit of work being done.
- * The ordering of the attributions is that of calls, that is uid = [A, B, C] if A calls B that
- * calls C.
- */
-message AttributionChain {
-    repeated Attribution attribution = 1;
+    // The (optional) string tag for an element in the attribution chain. If the
+    // element has no tag, it is encoded as an empty string.
+    optional string tag = 2;
 }
 
 /*
@@ -151,7 +145,7 @@ message AttributionChain {
  */
 
 message AttributionChainDummyAtom {
-    optional AttributionChain attribution_chain = 1;
+    repeated AttributionNode attribution_node = 1;
     optional int32 value = 2;
 }
 
@@ -421,8 +415,7 @@ message CameraStateChanged {
  *   TODO
  */
 message WakelockStateChanged {
-    // TODO: Add attribution instead of uid.
-    optional int32 uid = 1;
+    repeated AttributionNode attribution_node = 1;
 
     // Type of wakelock.
     enum Type {
@@ -780,13 +773,14 @@ message SettingChanged {
   *   frameworks/base/services/core/java/com/android/server/am/ActivityRecord.java
  */
 message ActivityForegroundStateChanged {
+    optional int32 uid = 1;
+    optional string pkg_name = 2;
+    optional string class_name = 3;
+
     enum Activity {
         MOVE_TO_BACKGROUND = 0;
         MOVE_TO_FOREGROUND = 1;
     }
-    optional int32 uid = 1;
-    optional string pkg_name = 2;
-    optional string class_name = 3;
     optional Activity activity = 4;
 }
 

@@ -38,10 +38,12 @@ namespace statsd {
 
 const ConfigKey kConfigKey(0, "test");
 
-const HashableDimensionKey eventKey = getMockedDimensionKey(0, "1");
-const HashableDimensionKey conditionKey = getMockedDimensionKey(4, "1");
-const HashableDimensionKey key1 = getMockedDimensionKey(1, "1");
-const HashableDimensionKey key2 = getMockedDimensionKey(1, "2");
+const int TagId = 1;
+
+const HashableDimensionKey eventKey = getMockedDimensionKey(TagId, 0, "1");
+const std::vector<HashableDimensionKey> conditionKey = {getMockedDimensionKey(TagId, 4, "1")};
+const HashableDimensionKey key1 = getMockedDimensionKey(TagId, 1, "1");
+const HashableDimensionKey key2 = getMockedDimensionKey(TagId, 1, "2");
 
 TEST(MaxDurationTrackerTest, TestSimpleMaxDuration) {
     sp<MockConditionWizard> wizard = new NaggyMock<MockConditionWizard>();
@@ -174,7 +176,7 @@ TEST(MaxDurationTrackerTest, TestMaxDurationWithCondition) {
     sp<MockConditionWizard> wizard = new NaggyMock<MockConditionWizard>();
 
     ConditionKey conditionKey1;
-    HashableDimensionKey eventKey = getMockedDimensionKey(2, "maps");
+    HashableDimensionKey eventKey = getMockedDimensionKey(TagId, 2, "maps");
     conditionKey1["APP_BACKGROUND"] = conditionKey;
 
     EXPECT_CALL(*wizard, query(_, conditionKey1))  // #4

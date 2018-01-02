@@ -52,7 +52,7 @@ TEST(StatsLogProcessorTest, TestRateLimitByteSize) {
     sp<UidMap> m = new UidMap();
     sp<AnomalyMonitor> anomalyMonitor;
     // Construct the processor with a dummy sendBroadcast function that does nothing.
-    StatsLogProcessor p(m, anomalyMonitor, [](const ConfigKey& key) {});
+    StatsLogProcessor p(m, anomalyMonitor, 0, [](const ConfigKey& key) {});
 
     MockMetricsManager mockMetricsManager;
 
@@ -69,7 +69,7 @@ TEST(StatsLogProcessorTest, TestRateLimitBroadcast) {
     sp<UidMap> m = new UidMap();
     sp<AnomalyMonitor> anomalyMonitor;
     int broadcastCount = 0;
-    StatsLogProcessor p(m, anomalyMonitor,
+    StatsLogProcessor p(m, anomalyMonitor, 0,
                         [&broadcastCount](const ConfigKey& key) { broadcastCount++; });
 
     MockMetricsManager mockMetricsManager;
@@ -93,7 +93,7 @@ TEST(StatsLogProcessorTest, TestDropWhenByteSizeTooLarge) {
     sp<UidMap> m = new UidMap();
     sp<AnomalyMonitor> anomalyMonitor;
     int broadcastCount = 0;
-    StatsLogProcessor p(m, anomalyMonitor,
+    StatsLogProcessor p(m, anomalyMonitor, 0,
                         [&broadcastCount](const ConfigKey& key) { broadcastCount++; });
 
     MockMetricsManager mockMetricsManager;

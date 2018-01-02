@@ -24,8 +24,14 @@ option java_outer_classname = "StatsLog";
 
 import "frameworks/base/cmds/statsd/src/atoms.proto";
 
-message KeyValuePair {
-  optional int32 key = 1;
+message Field {
+  optional int32 field = 1;
+  optional int32 position_index = 2 [default = -1];
+  repeated Field child = 3;
+}
+
+message DimensionsValue {
+  optional int32 field = 1;
 
   oneof value {
     string value_str = 2;
@@ -33,7 +39,12 @@ message KeyValuePair {
     int64 value_long = 4;
     bool value_bool = 5;
     float value_float = 6;
+    DimensionsValueTuple value_tuple = 7;
   }
+}
+
+message DimensionsValueTuple {
+  repeated DimensionsValue dimensions_value = 1;
 }
 
 message EventMetricData {
@@ -51,7 +62,7 @@ message CountBucketInfo {
 }
 
 message CountMetricData {
-  repeated KeyValuePair dimension = 1;
+  optional DimensionsValue dimension = 1;
 
   repeated CountBucketInfo bucket_info = 2;
 }
@@ -65,7 +76,7 @@ message DurationBucketInfo {
 }
 
 message DurationMetricData {
-  repeated KeyValuePair dimension = 1;
+  optional DimensionsValue dimension = 1;
 
   repeated DurationBucketInfo bucket_info = 2;
 }
@@ -79,7 +90,7 @@ message ValueBucketInfo {
 }
 
 message ValueMetricData {
-  repeated KeyValuePair dimension = 1;
+  optional DimensionsValue dimension = 1;
 
   repeated ValueBucketInfo bucket_info = 2;
 }
@@ -93,7 +104,7 @@ message GaugeBucketInfo {
 }
 
 message GaugeMetricData {
-  repeated KeyValuePair dimension = 1;
+  optional DimensionsValue dimension = 1;
 
   repeated GaugeBucketInfo bucket_info = 2;
 }

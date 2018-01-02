@@ -63,11 +63,12 @@ const int FIELD_ID_UID_MAP = 2;
 
 StatsLogProcessor::StatsLogProcessor(const sp<UidMap>& uidMap,
                                      const sp<AnomalyMonitor>& anomalyMonitor,
+                                     const long timeBaseSec,
                                      const std::function<void(const ConfigKey&)>& sendBroadcast)
     : mUidMap(uidMap),
       mAnomalyMonitor(anomalyMonitor),
       mSendBroadcast(sendBroadcast),
-      mTimeBaseSec(time(nullptr)) {
+      mTimeBaseSec(timeBaseSec) {
     // On each initialization of StatsLogProcessor, check stats-data directory to see if there is
     // any left over data to be read.
     StorageManager::sendBroadcast(STATS_DATA_DIR, mSendBroadcast);
@@ -97,7 +98,6 @@ void StatsLogProcessor::OnLogEvent(const LogEvent& msg) {
         pair.second->onLogEvent(msg);
         flushIfNecessary(msg.GetTimestampNs(), pair.first, *(pair.second));
     }
-
     // Hard-coded logic to update the isolated uid's in the uid-map.
     // The field numbers need to be currently updated by hand with atoms.proto
     if (msg.GetTagId() == android::util::ISOLATED_UID_CHANGED) {
@@ -117,9 +117,7 @@ void StatsLogProcessor::OnLogEvent(const LogEvent& msg) {
 
 void StatsLogProcessor::OnConfigUpdated(const ConfigKey& key, const StatsdConfig& config) {
     ALOGD("Updated configuration for key %s", key.ToString().c_str());
-
     sp<MetricsManager> newMetricsManager = new MetricsManager(key, config, mTimeBaseSec, mUidMap);
-
     auto it = mMetricsManagers.find(key);
     if (it == mMetricsManagers.end() && mMetricsManagers.size() > StatsdStats::kMaxConfigCount) {
         ALOGE("Can't accept more configs!");
@@ -150,6 +148,19 @@ size_t StatsLogProcessor::GetMetricsSize(const ConfigKey& key) const {
         return 0;
     }
     return it->second->byteSize();
+}
+
+void StatsLogProcessor::onDumpReport(const ConfigKey& key, const uint64_t& dumpTimeStampNs, ConfigMetricsReportList* report) {
+    auto it = mMetricsManagers.find(key);
+    if (it == mMetricsManagers.end()) {
+        ALOGW("Config source %s does not exist", key.ToString().c_str());
+        return;
+    }
+    report->mutable_config_key()->set_uid(key.GetUid());
+    report->mutable_config_key()->set_name(key.GetName());
+    ConfigMetricsReport* configMetricsReport = report->add_reports();
+    it->second->onDumpReport(dumpTimeStampNs, configMetricsReport);
+    // TODO: dump uid mapping.
 }
 
 void StatsLogProcessor::onDumpReport(const ConfigKey& key, vector<uint8_t>* outData) {

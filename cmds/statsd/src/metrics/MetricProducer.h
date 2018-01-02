@@ -50,6 +50,7 @@ public:
           mConditionSliced(false),
           mWizard(wizard),
           mConditionTrackerIndex(conditionIndex){};
+
     virtual ~MetricProducer(){};
 
     void notifyAppUpgrade(const string& apk, const int uid, const int64_t version) override{
@@ -90,6 +91,10 @@ public:
         std::lock_guard<std::mutex> lock(mMutex);
         return onDumpReportLocked(dumpTimeNs, protoOutput);
     }
+    void onDumpReport(const uint64_t dumpTimeNs, StatsLogReport* report) {
+        std::lock_guard<std::mutex> lock(mMutex);
+        return onDumpReportLocked(dumpTimeNs, report);
+    }
 
     // Returns the memory in bytes currently used to store this metric's data. Does not change
     // state.
@@ -112,11 +117,16 @@ public:
         return mBucketSizeNs;
     }
 
+    inline const string& getName() {
+        return mName;
+    }
+
 protected:
     virtual void onConditionChangedLocked(const bool condition, const uint64_t eventTime) = 0;
     virtual void onSlicedConditionMayChangeLocked(const uint64_t eventTime) = 0;
     virtual void onDumpReportLocked(const uint64_t dumpTimeNs,
                                     android::util::ProtoOutputStream* protoOutput) = 0;
+    virtual void onDumpReportLocked(const uint64_t dumpTimeNs, StatsLogReport* report) = 0;
     virtual size_t byteSizeLocked() const = 0;
 
     const std::string mName;
@@ -140,7 +150,7 @@ protected:
 
     int mConditionTrackerIndex;
 
-    std::vector<KeyMatcher> mDimension;  // The dimension defined in statsd_config
+    FieldMatcher mDimensions;  // The dimension defined in statsd_config
 
     std::vector<MetricConditionLink> mConditionLinks;
 
@@ -163,7 +173,7 @@ protected:
      */
     virtual void onMatchedLogEventInternalLocked(
             const size_t matcherIndex, const HashableDimensionKey& eventKey,
-            const std::map<std::string, HashableDimensionKey>& conditionKey, bool condition,
+            const ConditionKey& conditionKey, bool condition,
             const LogEvent& event) = 0;
 
     // Consume the parsed stats log entry that already matched the "what" of the metric.

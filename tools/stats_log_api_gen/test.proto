@@ -39,7 +39,7 @@ enum AnEnum {
 }
 
 message AllTypesAtom {
-  optional android.os.statsd.AttributionChain attribution_chain = 1;
+  repeated android.os.statsd.AttributionNode attribution_chain = 1;
   optional double double_field = 2;
   optional float float_field = 3;
   optional int64 int64_field = 4;
@@ -99,12 +99,12 @@ message BadSkippedFieldMultiple {
     }
 }
 
-message BadAttributionChainPositionAtom {
+message BadAttributionNodePositionAtom {
   optional int32 field1 = 1;
-  optional android.os.statsd.AttributionChain attribution = 2;
+  repeated android.os.statsd.AttributionNode attribution = 2;
 }
 
-message BadAttributionChainPosition {
-  oneof event { BadAttributionChainPositionAtom bad = 1; }
+message BadAttributionNodePosition {
+  oneof event { BadAttributionNodePositionAtom bad = 1; }
 }
 

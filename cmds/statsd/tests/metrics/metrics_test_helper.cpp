@@ -18,15 +18,12 @@ namespace android {
 namespace os {
 namespace statsd {
 
-HashableDimensionKey getMockedDimensionKey(int key, string value) {
-    KeyValuePair pair;
-    pair.set_key(key);
-    pair.set_value_str(value);
-
-    vector<KeyValuePair> pairs;
-    pairs.push_back(pair);
-
-    return HashableDimensionKey(pairs);
+HashableDimensionKey getMockedDimensionKey(int tagId, int key, string value) {
+    DimensionsValue dimensionsValue;
+    dimensionsValue.set_field(tagId);
+    dimensionsValue.mutable_value_tuple()->add_dimensions_value()->set_field(key);
+    dimensionsValue.mutable_value_tuple()->mutable_dimensions_value(0)->set_value_str(value);
+    return HashableDimensionKey(dimensionsValue);
 }
 
 }  // namespace statsd
