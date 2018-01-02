@@ -16,8 +16,6 @@
 
 package com.android.internal.util;
 
-import static com.android.internal.util.ArrayUtils.isEmpty;
-
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.util.ArraySet;
@@ -173,10 +171,17 @@ public class CollectionUtils {
     }
 
     /**
-     * Returns the size of the given list, or 0 if the list is null
+     * Returns the size of the given collection, or 0 if null
      */
     public static int size(@Nullable Collection<?> cur) {
         return cur != null ? cur.size() : 0;
+    }
+
+    /**
+     * Returns whether the given collection {@link Collection#isEmpty is empty} or {@code null}
+     */
+    public static boolean isEmpty(@Nullable Collection<?> cur) {
+        return size(cur) == 0;
     }
 
     /**
