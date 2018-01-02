@@ -305,6 +305,7 @@ public class Vpn {
         } else {
             for (Network underlying : underlyingNetworks) {
                 final NetworkCapabilities underlyingCaps = cm.getNetworkCapabilities(underlying);
+                if (underlyingCaps == null) continue;
                 for (int underlyingType : underlyingCaps.getTransportTypes()) {
                     transportTypes = ArrayUtils.appendInt(transportTypes, underlyingType);
                 }
