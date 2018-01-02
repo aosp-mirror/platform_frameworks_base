@@ -15,8 +15,10 @@
  */
 package android.telephony.euicc;
 
+import android.annotation.IntDef;
 import android.annotation.Nullable;
 import android.annotation.SdkConstant;
+import android.annotation.SystemApi;
 import android.app.Activity;
 import android.app.PendingIntent;
 import android.content.Context;
@@ -28,6 +30,9 @@ import android.os.RemoteException;
 import android.os.ServiceManager;
 
 import com.android.internal.telephony.euicc.IEuiccController;
+
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
 
 /**
  * EuiccManager is the application interface to eUICCs, or eSIMs/embedded SIMs.
@@ -167,6 +172,35 @@ public class EuiccManager {
      */
     public static final String META_DATA_CARRIER_ICON = "android.telephony.euicc.carriericon";
 
+    /**
+     * Euicc OTA update status which can be got by {@link #getOtaStatus}
+     * @hide
+     */
+    @Retention(RetentionPolicy.SOURCE)
+    @IntDef(prefix = {"EUICC_OTA_"}, value = {
+            EUICC_OTA_IN_PROGRESS,
+            EUICC_OTA_FAILED,
+            EUICC_OTA_SUCCEEDED,
+            EUICC_OTA_NOT_NEEDED,
+            EUICC_OTA_STATUS_UNAVAILABLE
+
+    })
+    public @interface OtaStatus{}
+
+    /**
+     * An OTA is in progress. During this time, the eUICC is not available and the user may lose
+     * network access.
+     */
+    public static final int EUICC_OTA_IN_PROGRESS = 1;
+    /** The OTA update failed. */
+    public static final int EUICC_OTA_FAILED = 2;
+    /** The OTA update finished successfully. */
+    public static final int EUICC_OTA_SUCCEEDED = 3;
+    /** The OTA update not needed since current eUICC OS is latest. */
+    public static final int EUICC_OTA_NOT_NEEDED = 4;
+    /** The OTA status is unavailable since eUICC service is unavailable. */
+    public static final int EUICC_OTA_STATUS_UNAVAILABLE = 5;
+
     private final Context mContext;
 
     /** @hide */
@@ -205,6 +239,26 @@ public class EuiccManager {
         }
         try {
             return getIEuiccController().getEid();
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    /**
+     * Returns the current status of eUICC OTA.
+     *
+     * <p>Requires the {@link android.Manifest.permission#WRITE_EMBEDDED_SUBSCRIPTIONS} permission.
+     *
+     * @return the status of eUICC OTA. If {@link #isEnabled()} is false or the eUICC is not ready,
+     *     {@link OtaStatus#EUICC_OTA_STATUS_UNAVAILABLE} will be returned.
+     */
+    @SystemApi
+    public int getOtaStatus() {
+        if (!isEnabled()) {
+            return EUICC_OTA_STATUS_UNAVAILABLE;
+        }
+        try {
+            return getIEuiccController().getOtaStatus();
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
