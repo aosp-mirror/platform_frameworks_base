@@ -726,33 +726,7 @@ public class UsbDeviceManager implements ActivityManagerInternal.ScreenObserver 
         }
 
         private void updateUsbFunctions() {
-            updateAudioSourceFunction();
             updateMidiFunction();
-        }
-
-        private void updateAudioSourceFunction() {
-            boolean enabled = (mCurrentFunctions & UsbManager.FUNCTION_AUDIO_SOURCE) != 0;
-            if (enabled != mAudioSourceEnabled) {
-                int card = -1;
-                int device = -1;
-
-                if (enabled) {
-                    Scanner scanner = null;
-                    try {
-                        scanner = new Scanner(new File(AUDIO_SOURCE_PCM_PATH));
-                        card = scanner.nextInt();
-                        device = scanner.nextInt();
-                    } catch (FileNotFoundException e) {
-                        Slog.e(TAG, "could not open audio source PCM file", e);
-                    } finally {
-                        if (scanner != null) {
-                            scanner.close();
-                        }
-                    }
-                }
-                mUsbAlsaManager.setAccessoryAudioState(enabled, card, device);
-                mAudioSourceEnabled = enabled;
-            }
         }
 
         private void updateMidiFunction() {

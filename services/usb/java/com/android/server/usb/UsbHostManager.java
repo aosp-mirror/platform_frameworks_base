@@ -44,7 +44,7 @@ import java.util.LinkedList;
  */
 public class UsbHostManager {
     private static final String TAG = UsbHostManager.class.getSimpleName();
-    private static final boolean DEBUG = true;
+    private static final boolean DEBUG = false;
 
     private final Context mContext;
 
@@ -230,6 +230,7 @@ public class UsbHostManager {
     }
 
     private boolean isBlackListed(String deviceAddress) {
+        Slog.i(TAG, "isBlackListed(" + deviceAddress + ")");
         int count = mHostBlacklist.length;
         for (int i = 0; i < count; i++) {
             if (deviceAddress.startsWith(mHostBlacklist[i])) {
@@ -241,6 +242,7 @@ public class UsbHostManager {
 
     /* returns true if the USB device should not be accessible by applications */
     private boolean isBlackListed(int clazz, int subClass) {
+        Slog.i(TAG, "isBlackListed(" + clazz + ", " + subClass + ")");
         // blacklist hubs
         if (clazz == UsbConstants.USB_CLASS_HUB) return true;
 
@@ -312,13 +314,7 @@ public class UsbHostManager {
                                 usbDeviceConnectionHandler);
                     }
 
-                    // Headset?
-                    boolean isInputHeadset = parser.isInputHeadset();
-                    boolean isOutputHeadset = parser.isOutputHeadset();
-                    Slog.i(TAG, "---- isHeadset[in: " + isInputHeadset
-                            + " , out: " + isOutputHeadset + "]");
-
-                    mUsbAlsaManager.usbDeviceAdded(newDevice, isInputHeadset, isOutputHeadset);
+                    mUsbAlsaManager.usbDeviceAdded(deviceAddress, newDevice, parser);
 
                     // Tracking
                     addConnectionRecord(deviceAddress, ConnectionRecord.CONNECT,
@@ -343,10 +339,13 @@ public class UsbHostManager {
     /* Called from JNI in monitorUsbHostBus to report USB device removal */
     @SuppressWarnings("unused")
     private void usbDeviceRemoved(String deviceAddress) {
+        if (DEBUG) {
+            Slog.d(TAG, "usbDeviceRemoved(" + deviceAddress + ") - start");
+        }
         synchronized (mLock) {
             UsbDevice device = mDevices.remove(deviceAddress);
             if (device != null) {
-                mUsbAlsaManager.usbDeviceRemoved(device);
+                mUsbAlsaManager.usbDeviceRemoved(deviceAddress/*device*/);
                 mSettingsManager.usbDeviceRemoved(device);
                 getCurrentUserSettings().usbDeviceRemoved(device);
 

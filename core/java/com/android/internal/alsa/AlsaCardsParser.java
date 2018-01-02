@@ -31,7 +31,9 @@ public class AlsaCardsParser {
     private static final String TAG = "AlsaCardsParser";
     protected static final boolean DEBUG = false;
 
-    private static final String kCardsFilePath = "/proc/asound/cards";
+    private static final String kAlsaFolderPath = "/proc/asound";
+    private static final String kCardsFilePath = kAlsaFolderPath + "/cards";
+    private static final String kDeviceAddressPrefix = "/dev/bus/usb/";
 
     private static LineTokenizer mTokenizer = new LineTokenizer(" :[]");
 
@@ -47,13 +49,30 @@ public class AlsaCardsParser {
         private static final String TAG = "AlsaCardRecord";
         private static final String kUsbCardKeyStr = "at usb-";
 
-        public int mCardNum = -1;
-        public String mField1 = "";
-        public String mCardName = "";
-        public String mCardDescription = "";
-        public boolean mIsUsb = false;
+        int mCardNum = -1;
+        String mField1 = "";
+        String mCardName = "";
+        String mCardDescription = "";
+
+        private String mUsbDeviceAddress = null;
 
         public AlsaCardRecord() {}
+
+        public int getCardNum() {
+            return mCardNum;
+        }
+
+        public String getCardName() {
+            return mCardName;
+        }
+
+        public String getCardDescription() {
+            return mCardDescription;
+        }
+
+        public void setDeviceAddress(String usbDeviceAddress) {
+            mUsbDeviceAddress = usbDeviceAddress;
+        }
 
         private boolean parse(String line, int lineIndex) {
             int tokenIndex = 0;
@@ -87,8 +106,8 @@ public class AlsaCardsParser {
                   tokenIndex = mTokenizer.nextToken(line, 0);
                   if (tokenIndex != -1) {
                       int keyIndex = line.indexOf(kUsbCardKeyStr);
-                      mIsUsb = keyIndex != -1;
-                      if (mIsUsb) {
+                      boolean isUsb = keyIndex != -1;
+                      if (isUsb) {
                           mCardDescription = line.substring(tokenIndex, keyIndex - 1);
                       }
                   }
@@ -97,14 +116,18 @@ public class AlsaCardsParser {
             return true;
         }
 
+        boolean isUsb() {
+            return mUsbDeviceAddress != null;
+        }
+
         public String textFormat() {
-          return mCardName + " : " + mCardDescription;
+          return mCardName + " : " + mCardDescription + " [addr:" + mUsbDeviceAddress + "]";
         }
 
         public void log(int listIndex) {
             Slog.d(TAG, "" + listIndex +
                 " [" + mCardNum + " " + mCardName + " : " + mCardDescription +
-                " usb:" + mIsUsb);
+                " usb:" + isUsb());
         }
     }
 
@@ -112,7 +135,7 @@ public class AlsaCardsParser {
 
     public int scan() {
         if (DEBUG) {
-            Slog.i(TAG, "AlsaCardsParser.scan()....");
+            Slog.d(TAG, "AlsaCardsParser.scan()....");
         }
 
         mCardRecords = new ArrayList<AlsaCardRecord>();
@@ -125,7 +148,7 @@ public class AlsaCardsParser {
             while ((line = bufferedReader.readLine()) != null) {
                 AlsaCardRecord cardRecord = new AlsaCardRecord();
                 if (DEBUG) {
-                    Slog.i(TAG, "  " + line);
+                    Slog.d(TAG, "  " + line);
                 }
                 cardRecord.parse(line, 0);
 
@@ -134,10 +157,23 @@ public class AlsaCardsParser {
                     break;
                 }
                 if (DEBUG) {
-                    Slog.i(TAG, "  " + line);
+                    Slog.d(TAG, "  " + line);
                 }
                 cardRecord.parse(line, 1);
 
+                // scan "usbbus" file
+                int cardNum = cardRecord.mCardNum;
+                String cardFolderPath = kAlsaFolderPath + "/card" + cardNum;
+                File usbbusFile = new File(cardFolderPath + "/usbbus");
+                if (usbbusFile.exists()) {
+                    // read it in
+                    FileReader usbbusReader = new FileReader(usbbusFile);
+                    String deviceAddress = (new BufferedReader(usbbusReader)).readLine();
+                    if (deviceAddress != null) {
+                        cardRecord.setDeviceAddress(kDeviceAddressPrefix + deviceAddress);
+                    }
+                    usbbusReader.close();
+                }
                 mCardRecords.add(cardRecord);
             }
             reader.close();
@@ -147,14 +183,12 @@ public class AlsaCardsParser {
                 mScanStatus = SCANSTATUS_EMPTY;
             }
         } catch (FileNotFoundException e) {
-            e.printStackTrace();
             mScanStatus = SCANSTATUS_FAIL;
         } catch (IOException e) {
-            e.printStackTrace();
             mScanStatus = SCANSTATUS_FAIL;
         }
         if (DEBUG) {
-            Slog.i(TAG, "  status:" + mScanStatus);
+            Slog.d(TAG, "  status:" + mScanStatus);
         }
         return mScanStatus;
     }
@@ -163,122 +197,13 @@ public class AlsaCardsParser {
         return mScanStatus;
     }
 
-    public ArrayList<AlsaCardRecord> getScanRecords() {
-        return mCardRecords;
-    }
-
-    public AlsaCardRecord getCardRecordAt(int index) {
-        return mCardRecords.get(index);
-    }
-
-    public AlsaCardRecord getCardRecordFor(int cardNum) {
-        for (AlsaCardRecord rec : mCardRecords) {
-            if (rec.mCardNum == cardNum) {
-                return rec;
+    public AlsaCardRecord findCardNumFor(String deviceAddress) {
+        for(AlsaCardRecord cardRec : mCardRecords) {
+            if (cardRec.isUsb() && cardRec.mUsbDeviceAddress.equals(deviceAddress)) {
+                return cardRec;
             }
         }
-
         return null;
-    }
-
-    public int getNumCardRecords() {
-        return mCardRecords.size();
-    }
-
-    public boolean isCardUsb(int cardNum) {
-        for (AlsaCardRecord rec : mCardRecords) {
-            if (rec.mCardNum == cardNum) {
-                return rec.mIsUsb;
-            }
-        }
-
-        return false;
-    }
-
-    // return -1 if none found
-    public int getDefaultUsbCard() {
-        // save the current list of devices
-        ArrayList<AlsaCardsParser.AlsaCardRecord> prevRecs = mCardRecords;
-        if (DEBUG) {
-            LogDevices("Previous Devices:", prevRecs);
-        }
-
-        // get the new list of devices
-        if (scan() != SCANSTATUS_SUCCESS) {
-            Slog.e(TAG, "Error scanning Alsa cards file.");
-            return -1;
-        }
-
-        if (DEBUG) {
-            LogDevices("Current Devices:", mCardRecords);
-        }
-
-        // Calculate the difference between the old and new device list
-        ArrayList<AlsaCardRecord> newRecs = getNewCardRecords(prevRecs);
-        if (DEBUG) {
-            LogDevices("New Devices:", newRecs);
-        }
-
-        // Choose the most-recently added EXTERNAL card
-        // Check recently added devices
-        for (AlsaCardRecord rec : newRecs) {
-            if (DEBUG) {
-                Slog.d(TAG, rec.mCardName + " card:" + rec.mCardNum + " usb:" + rec.mIsUsb);
-            }
-            if (rec.mIsUsb) {
-                // Found it
-                return rec.mCardNum;
-            }
-        }
-
-        // or return the first added EXTERNAL card?
-        for (AlsaCardRecord rec : prevRecs) {
-            if (DEBUG) {
-                Slog.d(TAG, rec.mCardName + " card:" + rec.mCardNum + " usb:" + rec.mIsUsb);
-            }
-            if (rec.mIsUsb) {
-                return rec.mCardNum;
-            }
-        }
-
-        return -1;
-    }
-
-    public int getDefaultCard() {
-        // return an external card if possible
-        int card = getDefaultUsbCard();
-        if (DEBUG) {
-            Slog.d(TAG, "getDefaultCard() default usb card:" + card);
-        }
-
-        if (card < 0 && getNumCardRecords() > 0) {
-            // otherwise return the (internal) card with the highest number
-            card = getCardRecordAt(getNumCardRecords() - 1).mCardNum;
-        }
-        if (DEBUG) {
-            Slog.d(TAG, "  returns card:" + card);
-        }
-        return card;
-    }
-
-    static public boolean hasCardNumber(ArrayList<AlsaCardRecord> recs, int cardNum) {
-        for (AlsaCardRecord cardRec : recs) {
-            if (cardRec.mCardNum == cardNum) {
-                return true;
-            }
-        }
-        return false;
-    }
-
-    public ArrayList<AlsaCardRecord> getNewCardRecords(ArrayList<AlsaCardRecord> prevScanRecs) {
-        ArrayList<AlsaCardRecord> newRecs = new ArrayList<AlsaCardRecord>();
-        for (AlsaCardRecord rec : mCardRecords) {
-            // now scan to see if this card number is in the previous scan list
-            if (!hasCardNumber(prevScanRecs, rec.mCardNum)) {
-                newRecs.add(rec);
-            }
-        }
-        return newRecs;
     }
 
     //
@@ -286,19 +211,19 @@ public class AlsaCardsParser {
     //
     private void Log(String heading) {
         if (DEBUG) {
-            Slog.i(TAG, heading);
+            Slog.d(TAG, heading);
             for (AlsaCardRecord cardRec : mCardRecords) {
-                Slog.i(TAG, cardRec.textFormat());
+                Slog.d(TAG, cardRec.textFormat());
             }
         }
     }
 
-    static private void LogDevices(String caption, ArrayList<AlsaCardRecord> deviceList) {
-        Slog.d(TAG, caption + " ----------------");
-        int listIndex = 0;
-        for (AlsaCardRecord device : deviceList) {
-            device.log(listIndex++);
-        }
-        Slog.d(TAG, "----------------");
-    }
+//    static private void LogDevices(String caption, ArrayList<AlsaCardRecord> deviceList) {
+//        Slog.d(TAG, caption + " ----------------");
+//        int listIndex = 0;
+//        for (AlsaCardRecord device : deviceList) {
+//            device.log(listIndex++);
+//        }
+//        Slog.d(TAG, caption + "----------------");
+//    }
 }
