@@ -122,15 +122,19 @@ void TestUtils::layoutTextUnscaled(const SkPaint& paint, const char* text,
 void TestUtils::drawUtf8ToCanvas(Canvas* canvas, const char* text, const SkPaint& paint, float x,
                                  float y) {
     auto utf16 = asciiToUtf16(text);
-    canvas->drawText(utf16.get(), 0, strlen(text), strlen(text), x, y, minikin::Bidi::LTR, paint,
-                     nullptr);
+    SkPaint glyphPaint(paint);
+    glyphPaint.setTextEncoding(SkPaint::kGlyphID_TextEncoding);
+    canvas->drawText(utf16.get(), 0, strlen(text), strlen(text), x, y, minikin::Bidi::LTR,
+            glyphPaint, nullptr);
 }
 
 void TestUtils::drawUtf8ToCanvas(Canvas* canvas, const char* text, const SkPaint& paint,
                                  const SkPath& path) {
     auto utf16 = asciiToUtf16(text);
-    canvas->drawTextOnPath(utf16.get(), strlen(text), minikin::Bidi::LTR, path, 0, 0, paint,
-                           nullptr);
+    SkPaint glyphPaint(paint);
+    glyphPaint.setTextEncoding(SkPaint::kGlyphID_TextEncoding);
+    canvas->drawTextOnPath(utf16.get(), strlen(text), minikin::Bidi::LTR, path, 0, 0, glyphPaint,
+            nullptr);
 }
 
 void TestUtils::TestTask::run() {

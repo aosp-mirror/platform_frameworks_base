@@ -38,7 +38,6 @@ public:
         card = TestUtils::createNode(
                 0, 0, width, height, [&](RenderProperties& props, Canvas& canvas) {
                     SkPaint paint;
-                    paint.setTextEncoding(SkPaint::kGlyphID_TextEncoding);
                     paint.setAntiAlias(true);
                     paint.setTextSize(50);
 

@@ -537,7 +537,6 @@ RENDERTHREAD_OPENGL_PIPELINE_TEST(FrameBuilder, regionClipStopsMerge) {
                 canvas.save(SaveFlags::MatrixClip);
                 canvas.clipPath(&path, SkClipOp::kIntersect);
                 SkPaint paint;
-                paint.setTextEncoding(SkPaint::kGlyphID_TextEncoding);
                 paint.setAntiAlias(true);
                 paint.setTextSize(50);
                 TestUtils::drawUtf8ToCanvas(&canvas, "Test string1", paint, 100, 100);
@@ -569,7 +568,6 @@ RENDERTHREAD_OPENGL_PIPELINE_TEST(FrameBuilder, textMerging) {
     auto node = TestUtils::createNode<RecordingCanvas>(0, 0, 400, 400, [](RenderProperties& props,
                                                                           RecordingCanvas& canvas) {
         SkPaint paint;
-        paint.setTextEncoding(SkPaint::kGlyphID_TextEncoding);
         paint.setAntiAlias(true);
         paint.setTextSize(50);
         TestUtils::drawUtf8ToCanvas(&canvas, "Test string1", paint, 100, 0);  // will be top clipped
@@ -603,7 +601,6 @@ RENDERTHREAD_OPENGL_PIPELINE_TEST(FrameBuilder, textStrikethrough) {
                 textPaint.setAntiAlias(true);
                 textPaint.setTextSize(20);
                 textPaint.setFlags(textPaint.getFlags() | SkPaint::kStrikeThruText_ReserveFlag);
-                textPaint.setTextEncoding(SkPaint::kGlyphID_TextEncoding);
                 for (int i = 0; i < LOOPS; i++) {
                     TestUtils::drawUtf8ToCanvas(&canvas, "test text", textPaint, 10, 100 * (i + 1));
                 }
@@ -654,7 +651,6 @@ RENDERTHREAD_OPENGL_PIPELINE_TEST(FrameBuilder, textStyle) {
     auto node = TestUtils::createNode<RecordingCanvas>(
             0, 0, 400, 400, [](RenderProperties& props, RecordingCanvas& canvas) {
                 SkPaint paint;
-                paint.setTextEncoding(SkPaint::kGlyphID_TextEncoding);
                 paint.setAntiAlias(true);
                 paint.setTextSize(50);
                 paint.setStrokeWidth(10);

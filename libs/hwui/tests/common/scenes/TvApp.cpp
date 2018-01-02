@@ -117,7 +117,6 @@ private:
                                          canvas.drawColor(0xFFFFEEEE, SkBlendMode::kSrcOver);
 
                                          SkPaint paint;
-                                         paint.setTextEncoding(SkPaint::kGlyphID_TextEncoding);
                                          paint.setAntiAlias(true);
                                          paint.setTextSize(24);
 

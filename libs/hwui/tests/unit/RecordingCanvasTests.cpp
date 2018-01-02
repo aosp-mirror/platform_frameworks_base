@@ -175,7 +175,6 @@ OPENGL_PIPELINE_TEST(RecordingCanvas, drawGlyphs) {
         SkPaint paint;
         paint.setAntiAlias(true);
         paint.setTextSize(20);
-        paint.setTextEncoding(SkPaint::kGlyphID_TextEncoding);
         TestUtils::drawUtf8ToCanvas(&canvas, "test text", paint, 25, 25);
     });
 
@@ -196,7 +195,6 @@ OPENGL_PIPELINE_TEST(RecordingCanvas, drawGlyphs_strikeThruAndUnderline) {
         SkPaint paint;
         paint.setAntiAlias(true);
         paint.setTextSize(20);
-        paint.setTextEncoding(SkPaint::kGlyphID_TextEncoding);
         for (int i = 0; i < 2; i++) {
             for (int j = 0; j < 2; j++) {
                 uint32_t flags = paint.getFlags();
@@ -238,7 +236,6 @@ OPENGL_PIPELINE_TEST(RecordingCanvas, drawGlyphs_forceAlignLeft) {
         SkPaint paint;
         paint.setAntiAlias(true);
         paint.setTextSize(20);
-        paint.setTextEncoding(SkPaint::kGlyphID_TextEncoding);
         paint.setTextAlign(SkPaint::kLeft_Align);
         TestUtils::drawUtf8ToCanvas(&canvas, "test text", paint, 25, 25);
         paint.setTextAlign(SkPaint::kCenter_Align);
@@ -805,9 +802,7 @@ OPENGL_PIPELINE_TEST(RecordingCanvas, drawText) {
         Paint paint;
         paint.setAntiAlias(true);
         paint.setTextSize(20);
-        paint.setTextEncoding(SkPaint::kGlyphID_TextEncoding);
-        std::unique_ptr<uint16_t[]> dst = TestUtils::asciiToUtf16("HELLO");
-        canvas.drawText(dst.get(), 0, 5, 5, 25, 25, minikin::Bidi::FORCE_LTR, paint, NULL);
+        TestUtils::drawUtf8ToCanvas(&canvas, "HELLO", paint, 25, 25);
     });
 
     int count = 0;
@@ -829,9 +824,7 @@ OPENGL_PIPELINE_TEST(RecordingCanvas, drawTextInHighContrast) {
         paint.setColor(SK_ColorWHITE);
         paint.setAntiAlias(true);
         paint.setTextSize(20);
-        paint.setTextEncoding(SkPaint::kGlyphID_TextEncoding);
-        std::unique_ptr<uint16_t[]> dst = TestUtils::asciiToUtf16("HELLO");
-        canvas.drawText(dst.get(), 0, 5, 5, 25, 25, minikin::Bidi::FORCE_LTR, paint, NULL);
+        TestUtils::drawUtf8ToCanvas(&canvas, "HELLO", paint, 25, 25);
     });
     Properties::enableHighContrastText = false;
 

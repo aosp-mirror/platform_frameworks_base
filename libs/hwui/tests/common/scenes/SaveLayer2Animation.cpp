@@ -42,10 +42,8 @@ public:
 
         mBluePaint.setColor(SkColorSetARGB(255, 0, 0, 255));
         mBluePaint.setTextSize(padding);
-        mBluePaint.setTextEncoding(SkPaint::kGlyphID_TextEncoding);
         mGreenPaint.setColor(SkColorSetARGB(255, 0, 255, 0));
         mGreenPaint.setTextSize(padding);
-        mGreenPaint.setTextEncoding(SkPaint::kGlyphID_TextEncoding);
 
         // interleave drawText and drawRect with saveLayer ops
         for (int i = 0; i < regions; i++, top += smallRectHeight) {
@@ -54,18 +52,15 @@ public:
             canvas.drawColor(SkColorSetARGB(255, 255, 255, 0), SkBlendMode::kSrcOver);
             std::string stri = std::to_string(i);
             std::string offscreen = "offscreen line " + stri;
-            std::unique_ptr<uint16_t[]> offtext = TestUtils::asciiToUtf16(offscreen.c_str());
-            canvas.drawText(offtext.get(), 0, offscreen.length(), offscreen.length(), bounds.fLeft,
-                            top + padding, minikin::Bidi::FORCE_LTR, mBluePaint, nullptr);
+            TestUtils::drawUtf8ToCanvas(&canvas, offscreen.c_str(), mBluePaint, bounds.fLeft,
+                    top + padding);
             canvas.restore();
 
             canvas.drawRect(bounds.fLeft, top + padding, bounds.fRight,
                             top + smallRectHeight - padding, mBluePaint);
             std::string onscreen = "onscreen line " + stri;
-            std::unique_ptr<uint16_t[]> ontext = TestUtils::asciiToUtf16(onscreen.c_str());
-            canvas.drawText(ontext.get(), 0, onscreen.length(), onscreen.length(), bounds.fLeft,
-                            top + smallRectHeight - padding, minikin::Bidi::FORCE_LTR, mGreenPaint,
-                            nullptr);
+            TestUtils::drawUtf8ToCanvas(&canvas, onscreen.c_str(), mGreenPaint, bounds.fLeft,
+                    top + smallRectHeight - padding);
         }
     }
     void doFrame(int frameNr) override {}
