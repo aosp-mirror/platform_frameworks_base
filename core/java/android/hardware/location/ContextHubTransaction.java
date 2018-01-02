@@ -74,7 +74,7 @@ public class ContextHubTransaction<T> {
             RESULT_FAILED_UNKNOWN,
             RESULT_FAILED_BAD_PARAMS,
             RESULT_FAILED_UNINITIALIZED,
-            RESULT_FAILED_PENDING,
+            RESULT_FAILED_BUSY,
             RESULT_FAILED_AT_HUB,
             RESULT_FAILED_TIMEOUT,
             RESULT_FAILED_SERVICE_INTERNAL_FAILURE,
@@ -97,7 +97,7 @@ public class ContextHubTransaction<T> {
     /**
      * Failure mode when there are too many transactions pending.
      */
-    public static final int RESULT_FAILED_PENDING = 4;
+    public static final int RESULT_FAILED_BUSY = 4;
     /**
      * Failure mode when the request went through, but failed asynchronously at the hub.
      */
