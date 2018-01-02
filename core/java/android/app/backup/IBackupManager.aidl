@@ -402,12 +402,25 @@ interface IBackupManager {
     /**
      * Ask the framework whether this app is eligible for backup.
      *
+     * <p>If you are calling this method multiple times, you should instead use
+     * {@link #filterAppsEligibleForBackup(String[])} to save resources.
+     *
      * <p>Callers must hold the android.permission.BACKUP permission to use this method.
      *
      * @param packageName The name of the package.
      * @return Whether this app is eligible for backup.
      */
     boolean isAppEligibleForBackup(String packageName);
+
+    /**
+     * Filter the packages that are eligible for backup and return the result.
+     *
+     * <p>Callers must hold the android.permission.BACKUP permission to use this method.
+     *
+     * @param packages The list of packages to filter.
+     * @return The packages eligible for backup.
+     */
+    String[] filterAppsEligibleForBackup(in String[] packages);
 
     /**
      * Request an immediate backup, providing an observer to which results of the backup operation

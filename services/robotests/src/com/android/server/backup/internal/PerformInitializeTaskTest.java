@@ -19,6 +19,9 @@ package com.android.server.backup.internal;
 import static android.app.backup.BackupTransport.TRANSPORT_ERROR;
 import static android.app.backup.BackupTransport.TRANSPORT_OK;
 
+import static com.android.server.backup.testing.TransportTestUtils.TRANSPORT_NAME;
+import static com.android.server.backup.testing.TransportTestUtils.TRANSPORT_NAMES;
+
 import static com.google.common.truth.Truth.assertThat;
 
 import static org.mockito.ArgumentMatchers.any;
@@ -30,7 +33,6 @@ import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
-import android.annotation.Nullable;
 import android.app.AlarmManager;
 import android.app.Application;
 import android.app.PendingIntent;
@@ -41,8 +43,9 @@ import android.platform.test.annotations.Presubmit;
 import com.android.internal.backup.IBackupTransport;
 import com.android.server.backup.RefactoredBackupManagerService;
 import com.android.server.backup.TransportManager;
+import com.android.server.backup.testing.TransportTestUtils;
+import com.android.server.backup.testing.TransportTestUtils.TransportData;
 import com.android.server.backup.transport.TransportClient;
-import com.android.server.backup.transport.TransportNotAvailableException;
 import com.android.server.testing.FrameworkRobolectricTestRunner;
 import com.android.server.testing.SystemLoaderClasses;
 
@@ -55,7 +58,6 @@ import org.robolectric.RuntimeEnvironment;
 import org.robolectric.annotation.Config;
 
 import java.io.File;
-import java.util.Arrays;
 import java.util.List;
 
 @RunWith(FrameworkRobolectricTestRunner.class)
@@ -63,14 +65,6 @@ import java.util.List;
 @SystemLoaderClasses({PerformInitializeTaskTest.class, TransportManager.class})
 @Presubmit
 public class PerformInitializeTaskTest {
-    private static final String[] TRANSPORT_NAMES = {
-        "android/com.android.internal.backup.LocalTransport",
-        "com.google.android.gms/.backup.migrate.service.D2dTransport",
-        "com.google.android.gms/.backup.BackupTransportService"
-    };
-
-    private static final String TRANSPORT_NAME = TRANSPORT_NAMES[0];
-
     @Mock private RefactoredBackupManagerService mBackupManagerService;
     @Mock private TransportManager mTransportManager;
     @Mock private OnTaskFinishedListener mListener;
@@ -113,9 +107,11 @@ public class PerformInitializeTaskTest {
         performInitializeTask.run();
 
         verify(mBackupManagerService)
-                .recordInitPending(false, TRANSPORT_NAME, dirName(TRANSPORT_NAME));
+                .recordInitPending(
+                        false, TRANSPORT_NAME, TransportTestUtils.dirName(TRANSPORT_NAME));
         verify(mBackupManagerService)
-                .resetBackupState(eq(new File(mBaseStateDir, dirName(TRANSPORT_NAME))));
+                .resetBackupState(
+                        eq(new File(mBaseStateDir, TransportTestUtils.dirName(TRANSPORT_NAME))));
     }
 
     @Test
@@ -142,7 +138,8 @@ public class PerformInitializeTaskTest {
         verify(mTransport).initializeDevice();
         verify(mTransport, never()).finishBackup();
         verify(mBackupManagerService)
-                .recordInitPending(true, TRANSPORT_NAME, dirName(TRANSPORT_NAME));
+                .recordInitPending(
+                        true, TRANSPORT_NAME, TransportTestUtils.dirName(TRANSPORT_NAME));
     }
 
     @Test
@@ -181,7 +178,8 @@ public class PerformInitializeTaskTest {
         verify(mTransport).initializeDevice();
         verify(mTransport).finishBackup();
         verify(mBackupManagerService)
-                .recordInitPending(true, TRANSPORT_NAME, dirName(TRANSPORT_NAME));
+                .recordInitPending(
+                        true, TRANSPORT_NAME, TransportTestUtils.dirName(TRANSPORT_NAME));
     }
 
     @Test
@@ -210,7 +208,9 @@ public class PerformInitializeTaskTest {
 
     @Test
     public void testRun_whenOnlyOneTransportFails() throws Exception {
-        List<TransportData> transports = setUpTransports(TRANSPORT_NAMES[0], TRANSPORT_NAMES[1]);
+        List<TransportData> transports =
+                TransportTestUtils.setUpTransports(
+                        mTransportManager, TRANSPORT_NAMES[0], TRANSPORT_NAMES[1]);
         configureTransport(transports.get(0).transportMock, TRANSPORT_ERROR, 0);
         configureTransport(transports.get(1).transportMock, TRANSPORT_OK, TRANSPORT_OK);
         PerformInitializeTask performInitializeTask =
@@ -226,7 +226,8 @@ public class PerformInitializeTaskTest {
 
     @Test
     public void testRun_withMultipleTransports() throws Exception {
-        List<TransportData> transports = setUpTransports(TRANSPORT_NAMES);
+        List<TransportData> transports =
+                TransportTestUtils.setUpTransports(mTransportManager, TRANSPORT_NAMES);
         configureTransport(transports.get(0).transportMock, TRANSPORT_OK, TRANSPORT_OK);
         configureTransport(transports.get(1).transportMock, TRANSPORT_OK, TRANSPORT_OK);
         configureTransport(transports.get(2).transportMock, TRANSPORT_OK, TRANSPORT_OK);
@@ -243,7 +244,9 @@ public class PerformInitializeTaskTest {
 
     @Test
     public void testRun_whenOnlyOneTransportFails_disposesAllTransports() throws Exception {
-        List<TransportData> transports = setUpTransports(TRANSPORT_NAMES[0], TRANSPORT_NAMES[1]);
+        List<TransportData> transports =
+                TransportTestUtils.setUpTransports(
+                        mTransportManager, TRANSPORT_NAMES[0], TRANSPORT_NAMES[1]);
         configureTransport(transports.get(0).transportMock, TRANSPORT_ERROR, 0);
         configureTransport(transports.get(1).transportMock, TRANSPORT_OK, TRANSPORT_OK);
         PerformInitializeTask performInitializeTask =
@@ -259,7 +262,9 @@ public class PerformInitializeTaskTest {
 
     @Test
     public void testRun_whenTransportNotRegistered() throws Exception {
-        setUpTransport(new TransportData(TRANSPORT_NAME, null, null));
+        TransportTestUtils.setUpTransports(
+                mTransportManager, new TransportData(TRANSPORT_NAME, null, null));
+
         PerformInitializeTask performInitializeTask = createPerformInitializeTask(TRANSPORT_NAME);
 
         performInitializeTask.run();
@@ -272,7 +277,8 @@ public class PerformInitializeTaskTest {
     @Test
     public void testRun_whenOnlyOneTransportNotRegistered() throws Exception {
         List<TransportData> transports =
-                setUpTransports(
+                TransportTestUtils.setUpTransports(
+                        mTransportManager,
                         new TransportData(TRANSPORT_NAMES[0], null, null),
                         new TransportData(TRANSPORT_NAMES[1]));
         String registeredTransportName = transports.get(1).transportName;
@@ -291,7 +297,8 @@ public class PerformInitializeTaskTest {
     @Test
     public void testRun_whenTransportNotAvailable() throws Exception {
         TransportClient transportClient = mock(TransportClient.class);
-        setUpTransport(new TransportData(TRANSPORT_NAME, null, transportClient));
+        TransportTestUtils.setUpTransports(
+                mTransportManager, new TransportData(TRANSPORT_NAME, null, transportClient));
         PerformInitializeTask performInitializeTask = createPerformInitializeTask(TRANSPORT_NAME);
 
         performInitializeTask.run();
@@ -304,7 +311,8 @@ public class PerformInitializeTaskTest {
     @Test
     public void testRun_whenTransportThrowsDeadObjectException() throws Exception {
         TransportClient transportClient = mock(TransportClient.class);
-        setUpTransport(new TransportData(TRANSPORT_NAME, mTransport, transportClient));
+        TransportTestUtils.setUpTransports(
+                mTransportManager, new TransportData(TRANSPORT_NAME, mTransport, transportClient));
         when(mTransport.initializeDevice()).thenThrow(DeadObjectException.class);
         PerformInitializeTask performInitializeTask = createPerformInitializeTask(TRANSPORT_NAME);
 
@@ -332,80 +340,9 @@ public class PerformInitializeTaskTest {
         when(transportMock.finishBackup()).thenReturn(finishBackupStatus);
     }
 
-    private List<TransportData> setUpTransports(String... transportNames) throws Exception {
-        return setUpTransports(
-                Arrays.stream(transportNames)
-                        .map(TransportData::new)
-                        .toArray(TransportData[]::new));
-    }
-
-    /** @see #setUpTransport(TransportData) */
-    private List<TransportData> setUpTransports(TransportData... transports) throws Exception {
-        for (TransportData transport : transports) {
-            setUpTransport(transport);
-        }
-        return Arrays.asList(transports);
-    }
-
     private void setUpTransport(String transportName) throws Exception {
-        setUpTransport(new TransportData(transportName, mTransport, mock(TransportClient.class)));
-    }
-
-    /**
-     * Configures transport according to {@link TransportData}:
-     *
-     * <ul>
-     *   <li>{@link TransportData#transportMock} {@code null} means {@link
-     *       TransportClient#connectOrThrow(String)} throws {@link TransportNotAvailableException}.
-     *   <li>{@link TransportData#transportClientMock} {@code null} means {@link
-     *       TransportManager#getTransportClient(String, String)} returns {@code null}.
-     * </ul>
-     */
-    private void setUpTransport(TransportData transport) throws Exception {
-        String transportName = transport.transportName;
-        String transportDirName = dirName(transportName);
-        IBackupTransport transportMock = transport.transportMock;
-        TransportClient transportClientMock = transport.transportClientMock;
-
-        if (transportMock != null) {
-            when(transportMock.name()).thenReturn(transportName);
-            when(transportMock.transportDirName()).thenReturn(transportDirName);
-        }
-
-        if (transportClientMock != null) {
-            when(transportClientMock.getTransportDirName()).thenReturn(transportDirName);
-            if (transportMock != null) {
-                when(transportClientMock.connectOrThrow(any())).thenReturn(transportMock);
-            } else {
-                when(transportClientMock.connectOrThrow(any()))
-                        .thenThrow(TransportNotAvailableException.class);
-            }
-        }
-
-        when(mTransportManager.getTransportClient(eq(transportName), any()))
-                .thenReturn(transportClientMock);
-    }
-
-    private String dirName(String transportName) {
-        return transportName + "_dir_name";
-    }
-
-    private static class TransportData {
-        private final String transportName;
-        @Nullable private final IBackupTransport transportMock;
-        @Nullable private final TransportClient transportClientMock;
-
-        private TransportData(
-                String transportName,
-                @Nullable IBackupTransport transportMock,
-                @Nullable TransportClient transportClientMock) {
-            this.transportName = transportName;
-            this.transportMock = transportMock;
-            this.transportClientMock = transportClientMock;
-        }
-
-        private TransportData(String transportName) {
-            this(transportName, mock(IBackupTransport.class), mock(TransportClient.class));
-        }
+        TransportTestUtils.setUpTransport(
+                mTransportManager,
+                new TransportData(transportName, mTransport, mock(TransportClient.class)));
     }
 }

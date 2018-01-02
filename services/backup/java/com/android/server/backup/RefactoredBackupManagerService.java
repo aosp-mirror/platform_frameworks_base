@@ -148,6 +148,7 @@ import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Queue;
 import java.util.Random;
@@ -3093,29 +3094,30 @@ public class RefactoredBackupManagerService implements BackupManagerServiceInter
         }
     }
 
-    // Supply the configuration summary string for the given transport.  If the name is
-    // not one of the available transports, or if the transport does not supply any
-    // summary / destination string, the method can return null.
-    //
-    // This string is used VERBATIM as the summary text of the relevant Settings item!
+    /**
+     * Supply the current destination string for the given transport. If the name is not one of the
+     * registered transports the method will return null.
+     *
+     * <p>This string is used VERBATIM as the summary text of the relevant Settings item.
+     *
+     * @param transportName The name of the registered transport.
+     * @return The current destination string or null if the transport is not registered.
+     */
     @Override
     public String getDestinationString(String transportName) {
-        mContext.enforceCallingOrSelfPermission(android.Manifest.permission.BACKUP,
-                "getDestinationString");
+        mContext.enforceCallingOrSelfPermission(
+                android.Manifest.permission.BACKUP, "getDestinationString");
 
-        final IBackupTransport transport = mTransportManager.getTransportBinder(transportName);
-        if (transport != null) {
-            try {
-                final String text = transport.currentDestinationString();
-                if (MORE_DEBUG) Slog.d(TAG, "getDestinationString() returning " + text);
-                return text;
-            } catch (Exception e) {
-                /* fall through to return null */
-                Slog.e(TAG, "Unable to get string from transport: " + e.getMessage());
+        try {
+            String string = mTransportManager.getTransportCurrentDestinationString(transportName);
+            if (MORE_DEBUG) {
+                Slog.d(TAG, "getDestinationString() returning " + string);
             }
+            return string;
+        } catch (TransportNotRegisteredException e) {
+            Slog.e(TAG, "Unable to get destination string from transport: " + e.getMessage());
+            return null;
         }
-
-        return null;
     }
 
     // Supply the manage-data intent for the given transport.
@@ -3385,31 +3387,41 @@ public class RefactoredBackupManagerService implements BackupManagerServiceInter
 
     @Override
     public boolean isAppEligibleForBackup(String packageName) {
-        mContext.enforceCallingOrSelfPermission(android.Manifest.permission.BACKUP,
-                "isAppEligibleForBackup");
-        try {
-            PackageInfo packageInfo = mPackageManager.getPackageInfo(packageName,
-                    PackageManager.GET_SIGNATURES);
-            if (!AppBackupUtils.appIsEligibleForBackup(packageInfo.applicationInfo,
-                            mPackageManager) ||
-                    AppBackupUtils.appIsStopped(packageInfo.applicationInfo) ||
-                    AppBackupUtils.appIsDisabled(packageInfo.applicationInfo, mPackageManager)) {
-                return false;
-            }
-            IBackupTransport transport = mTransportManager.getCurrentTransportBinder();
-            if (transport != null) {
-                try {
-                    return transport.isAppEligibleForBackup(packageInfo,
-                            AppBackupUtils.appGetsFullBackup(packageInfo));
-                } catch (Exception e) {
-                    Slog.e(TAG, "Unable to ask about eligibility: " + e.getMessage());
-                }
-            }
-            // If transport is not present we couldn't tell that the package is not eligible.
-            return true;
-        } catch (NameNotFoundException e) {
-            return false;
+        mContext.enforceCallingOrSelfPermission(
+                android.Manifest.permission.BACKUP, "isAppEligibleForBackup");
+
+        String callerLogString = "BMS.isAppEligibleForBackup";
+        TransportClient transportClient =
+                mTransportManager.getCurrentTransportClient(callerLogString);
+        boolean eligible =
+                AppBackupUtils.appIsRunningAndEligibleForBackupWithTransport(
+                        transportClient, packageName, mPackageManager);
+        if (transportClient != null) {
+            mTransportManager.disposeOfTransportClient(transportClient, callerLogString);
         }
+        return eligible;
+    }
+
+    @Override
+    public String[] filterAppsEligibleForBackup(String[] packages) {
+        mContext.enforceCallingOrSelfPermission(
+                android.Manifest.permission.BACKUP, "filterAppsEligibleForBackup");
+
+        String callerLogString = "BMS.filterAppsEligibleForBackup";
+        TransportClient transportClient =
+                mTransportManager.getCurrentTransportClient(callerLogString);
+        List<String> eligibleApps = new LinkedList<>();
+        for (String packageName : packages) {
+            if (AppBackupUtils
+                    .appIsRunningAndEligibleForBackupWithTransport(
+                            transportClient, packageName, mPackageManager)) {
+                eligibleApps.add(packageName);
+            }
+        }
+        if (transportClient != null) {
+            mTransportManager.disposeOfTransportClient(transportClient, callerLogString);
+        }
+        return eligibleApps.toArray(new String[eligibleApps.size()]);
     }
 
     @Override
@@ -3473,10 +3485,10 @@ public class RefactoredBackupManagerService implements BackupManagerServiceInter
                     pw.println((t.equals(mTransportManager.getCurrentTransportName()) ? "  * "
                             : "    ") + t);
                     try {
-                        IBackupTransport transport = mTransportManager.getTransportBinder(t);
                         File dir = new File(mBaseStateDir,
                                 mTransportManager.getTransportDirName(t));
-                        pw.println("       destination: " + transport.currentDestinationString());
+                        pw.println("       destination: "
+                                + mTransportManager.getTransportCurrentDestinationString(t));
                         pw.println("       intent: "
                                 + mTransportManager.getTransportConfigurationIntent(t));
                         for (File f : dir.listFiles()) {
