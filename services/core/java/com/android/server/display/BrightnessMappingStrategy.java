@@ -222,8 +222,6 @@ public abstract class BrightnessMappingStrategy {
 
         @Override
         public boolean setBrightnessConfiguration(@Nullable BrightnessConfiguration config) {
-            Slog.e(TAG,
-                    "setBrightnessConfiguration called on device without display information.");
             return false;
         }
 
