@@ -544,47 +544,48 @@ public final class ContextHubManager {
     /**
      * Creates an interface to the ContextHubClient to send down to the service.
      *
+     * @param client the ContextHubClient object associated with this callback
      * @param callback the callback to invoke at the client process
      * @param executor the executor to invoke callbacks for this client
      *
      * @return the callback interface
      */
     private IContextHubClientCallback createClientCallback(
-            ContextHubClientCallback callback, Executor executor) {
+            ContextHubClient client, ContextHubClientCallback callback, Executor executor) {
         return new IContextHubClientCallback.Stub() {
             @Override
             public void onMessageFromNanoApp(NanoAppMessage message) {
-                executor.execute(() -> callback.onMessageFromNanoApp(message));
+                executor.execute(() -> callback.onMessageFromNanoApp(client, message));
             }
 
             @Override
             public void onHubReset() {
-                executor.execute(() -> callback.onHubReset());
+                executor.execute(() -> callback.onHubReset(client));
             }
 
             @Override
             public void onNanoAppAborted(long nanoAppId, int abortCode) {
-                executor.execute(() -> callback.onNanoAppAborted(nanoAppId, abortCode));
+                executor.execute(() -> callback.onNanoAppAborted(client, nanoAppId, abortCode));
             }
 
             @Override
             public void onNanoAppLoaded(long nanoAppId) {
-                executor.execute(() -> callback.onNanoAppLoaded(nanoAppId));
+                executor.execute(() -> callback.onNanoAppLoaded(client, nanoAppId));
             }
 
             @Override
             public void onNanoAppUnloaded(long nanoAppId) {
-                executor.execute(() -> callback.onNanoAppUnloaded(nanoAppId));
+                executor.execute(() -> callback.onNanoAppUnloaded(client, nanoAppId));
             }
 
             @Override
             public void onNanoAppEnabled(long nanoAppId) {
-                executor.execute(() -> callback.onNanoAppEnabled(nanoAppId));
+                executor.execute(() -> callback.onNanoAppEnabled(client, nanoAppId));
             }
 
             @Override
             public void onNanoAppDisabled(long nanoAppId) {
-                executor.execute(() -> callback.onNanoAppDisabled(nanoAppId));
+                executor.execute(() -> callback.onNanoAppDisabled(client, nanoAppId));
             }
         };
     }
@@ -615,16 +616,19 @@ public final class ContextHubManager {
         Preconditions.checkNotNull(hubInfo, "ContextHubInfo cannot be null");
         Preconditions.checkNotNull(executor, "Executor cannot be null");
 
-        IContextHubClientCallback clientInterface = createClientCallback(callback, executor);
+        ContextHubClient client = new ContextHubClient(hubInfo);
+        IContextHubClientCallback clientInterface = createClientCallback(
+                client, callback, executor);
 
-        IContextHubClient client;
+        IContextHubClient clientProxy;
         try {
-            client = mService.createClient(clientInterface, hubInfo.getId());
+            clientProxy = mService.createClient(clientInterface, hubInfo.getId());
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
 
-        return new ContextHubClient(client, clientInterface, hubInfo);
+        client.setClientProxy(clientProxy);
+        return client;
     }
 
     /**

@@ -38,12 +38,7 @@ public class ContextHubClient implements Closeable {
     /*
      * The proxy to the client interface at the service.
      */
-    private final IContextHubClient mClientProxy;
-
-    /*
-     * The callback interface associated with this client.
-     */
-    private final IContextHubClientCallback mCallbackInterface;
+    private IContextHubClient mClientProxy = null;
 
     /*
      * The Context Hub that this client is attached to.
@@ -54,13 +49,25 @@ public class ContextHubClient implements Closeable {
 
     private final AtomicBoolean mIsClosed = new AtomicBoolean(false);
 
-    /* package */ ContextHubClient(
-            IContextHubClient clientProxy, IContextHubClientCallback callback,
-            ContextHubInfo hubInfo) {
-        mClientProxy = clientProxy;
-        mCallbackInterface = callback;
+    /* package */ ContextHubClient(ContextHubInfo hubInfo) {
         mAttachedHub = hubInfo;
         mCloseGuard.open("close");
+    }
+
+    /**
+     * Sets the proxy interface of the client at the service. This method should always be called
+     * by the ContextHubManager after the client is registered at the service, and should only be
+     * called once.
+     *
+     * @param clientProxy the proxy of the client at the service
+     */
+    /* package */ void setClientProxy(IContextHubClient clientProxy) {
+        Preconditions.checkNotNull(clientProxy, "IContextHubClient cannot be null");
+        if (mClientProxy != null) {
+            throw new IllegalStateException("Cannot change client proxy multiple times");
+        }
+
+        mClientProxy = clientProxy;
     }
 
     /**
