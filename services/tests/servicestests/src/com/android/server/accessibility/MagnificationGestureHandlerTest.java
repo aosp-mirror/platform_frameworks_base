@@ -48,6 +48,34 @@ import org.junit.runner.RunWith;
 import java.util.function.IntConsumer;
 
 
+/**
+ * Tests the state transitions of {@link MagnificationGestureHandler}
+ *
+ * Here's a dot graph describing the transitions being tested:
+ * {@code
+ *      digraph {
+ *          IDLE -> SHORTCUT_TRIGGERED [label="a11y\nbtn"]
+ *          SHORTCUT_TRIGGERED -> IDLE [label="a11y\nbtn"]
+ *          IDLE -> DOUBLE_TAP [label="2tap"]
+ *          DOUBLE_TAP -> IDLE [label="timeout"]
+ *          DOUBLE_TAP -> TRIPLE_TAP_AND_HOLD [label="down"]
+ *          SHORTCUT_TRIGGERED -> TRIPLE_TAP_AND_HOLD [label="down"]
+ *          TRIPLE_TAP_AND_HOLD -> ZOOMED [label="up"]
+ *          TRIPLE_TAP_AND_HOLD -> DRAGGING_TMP [label="hold/\nswipe"]
+ *          DRAGGING_TMP -> IDLE [label="release"]
+ *          ZOOMED -> ZOOMED_DOUBLE_TAP [label="2tap"]
+ *          ZOOMED_DOUBLE_TAP -> ZOOMED [label="timeout"]
+ *          ZOOMED_DOUBLE_TAP -> DRAGGING [label="hold"]
+ *          ZOOMED_DOUBLE_TAP -> IDLE [label="tap"]
+ *          DRAGGING -> ZOOMED [label="release"]
+ *          ZOOMED -> IDLE [label="a11y\nbtn"]
+ *          ZOOMED -> PANNING [label="2hold"]
+ *          PANNING -> PANNING_SCALING [label="pinch"]
+ *          PANNING_SCALING -> ZOOMED [label="release"]
+ *          PANNING -> ZOOMED [label="release"]
+ *      }
+ * }
+ */
 @RunWith(AndroidJUnit4.class)
 public class MagnificationGestureHandlerTest {
 
