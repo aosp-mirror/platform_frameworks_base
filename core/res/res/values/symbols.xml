@@ -3198,6 +3198,7 @@
   <java-symbol type="string" name="battery_saver_warning_title" />
 
   <java-symbol type="string" name="global_action_logout" />
+  <java-symbol type="string" name="config_mainBuiltInDisplayCutout" />
   <java-symbol type="drawable" name="ic_logout" />
 
   <java-symbol type="array" name="config_autoBrightnessDisplayValuesNits" />

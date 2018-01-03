@@ -22,6 +22,7 @@ import static android.view.Surface.ROTATION_90;
 import static com.android.server.wm.proto.DisplayFramesProto.STABLE_BOUNDS;
 
 import android.annotation.NonNull;
+import android.content.res.Resources;
 import android.graphics.Point;
 import android.graphics.Rect;
 import android.util.proto.ProtoOutputStream;
@@ -100,8 +101,11 @@ public class DisplayFrames {
     /** During layout, the current screen borders along which input method windows are placed. */
     public final Rect mDock = new Rect();
 
-    /** Definition of the cutout */
+    /** The display cutout used for layout (after rotation and emulation) */
     @NonNull public DisplayCutout mDisplayCutout = DisplayCutout.NO_CUTOUT;
+
+    /** The cutout as supplied by display info */
+    @NonNull private DisplayCutout mDisplayInfoCutout = DisplayCutout.NO_CUTOUT;
 
     /**
      * During layout, the frame that is display-cutout safe, i.e. that does not intersect with it.
@@ -126,6 +130,8 @@ public class DisplayFrames {
         mRotation = info.rotation;
         mDisplayInfoOverscan.set(
                 info.overscanLeft, info.overscanTop, info.overscanRight, info.overscanBottom);
+        mDisplayInfoCutout = info.displayCutout != null
+                ? info.displayCutout : DisplayCutout.NO_CUTOUT;
     }
 
     public void onBeginLayout(boolean emulateDisplayCutout, int statusBarHeight) {
@@ -166,11 +172,28 @@ public class DisplayFrames {
         mStable.set(mUnrestricted);
         mStableFullscreen.set(mUnrestricted);
         mCurrent.set(mUnrestricted);
-        mDisplayCutout = DisplayCutout.NO_CUTOUT;
-        mDisplayCutoutSafe.set(Integer.MIN_VALUE, Integer.MIN_VALUE,
-                Integer.MAX_VALUE, Integer.MAX_VALUE);
+        mDisplayCutout = mDisplayInfoCutout;
         if (emulateDisplayCutout) {
             setEmulatedDisplayCutout((int) (statusBarHeight * 0.8));
+        }
+        mDisplayCutout = mDisplayCutout.calculateRelativeTo(mOverscan);
+
+        mDisplayCutoutSafe.set(Integer.MIN_VALUE, Integer.MIN_VALUE,
+                Integer.MAX_VALUE, Integer.MAX_VALUE);
+        if (!mDisplayCutout.isEmpty()) {
+            final DisplayCutout c = mDisplayCutout;
+            if (c.getSafeInsetLeft() > 0) {
+                mDisplayCutoutSafe.left = mRestrictedOverscan.left + c.getSafeInsetLeft();
+            }
+            if (c.getSafeInsetTop() > 0) {
+                mDisplayCutoutSafe.top = mRestrictedOverscan.top + c.getSafeInsetTop();
+            }
+            if (c.getSafeInsetRight() > 0) {
+                mDisplayCutoutSafe.right = mRestrictedOverscan.right - c.getSafeInsetRight();
+            }
+            if (c.getSafeInsetBottom() > 0) {
+                mDisplayCutoutSafe.bottom = mRestrictedOverscan.bottom - c.getSafeInsetBottom();
+            }
         }
     }
 
@@ -194,8 +217,7 @@ public class DisplayFrames {
                         new Point(height, (screenWidth - widthBottom) / 2),
                         new Point(height, (screenWidth + widthBottom) / 2),
                         new Point(0, (screenWidth + widthTop) / 2)
-                )).calculateRelativeTo(mUnrestricted);
-                mDisplayCutoutSafe.left = height;
+                ));
                 break;
             case ROTATION_180:
                 mDisplayCutout = DisplayCutout.fromBoundingPolygon(Arrays.asList(
@@ -203,8 +225,7 @@ public class DisplayFrames {
                         new Point((screenWidth - widthBottom) / 2, screenHeight - height),
                         new Point((screenWidth + widthBottom) / 2, screenHeight - height),
                         new Point((screenWidth + widthTop) / 2, screenHeight)
-                )).calculateRelativeTo(mUnrestricted);
-                mDisplayCutoutSafe.bottom = screenHeight - height;
+                ));
                 break;
             case ROTATION_270:
                 mDisplayCutout = DisplayCutout.fromBoundingPolygon(Arrays.asList(
@@ -212,8 +233,7 @@ public class DisplayFrames {
                         new Point(screenHeight - height, (screenWidth - widthBottom) / 2),
                         new Point(screenHeight - height, (screenWidth + widthBottom) / 2),
                         new Point(screenHeight, (screenWidth + widthTop) / 2)
-                )).calculateRelativeTo(mUnrestricted);
-                mDisplayCutoutSafe.right = screenHeight - height;
+                ));
                 break;
             default:
                 mDisplayCutout = DisplayCutout.fromBoundingPolygon(Arrays.asList(
@@ -221,8 +241,7 @@ public class DisplayFrames {
                         new Point((screenWidth - widthBottom) / 2, height),
                         new Point((screenWidth + widthBottom) / 2, height),
                         new Point((screenWidth + widthTop) / 2, 0)
-                )).calculateRelativeTo(mUnrestricted);
-                mDisplayCutoutSafe.top = height;
+                ));
                 break;
         }
     }

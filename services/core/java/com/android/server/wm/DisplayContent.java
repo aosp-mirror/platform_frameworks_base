@@ -62,6 +62,7 @@ import static com.android.server.policy.WindowManagerPolicy.FINISH_LAYOUT_REDO_A
 import static com.android.server.policy.WindowManagerPolicy.FINISH_LAYOUT_REDO_CONFIG;
 import static com.android.server.policy.WindowManagerPolicy.FINISH_LAYOUT_REDO_LAYOUT;
 import static com.android.server.policy.WindowManagerPolicy.FINISH_LAYOUT_REDO_WALLPAPER;
+import static com.android.server.wm.utils.CoordinateTransforms.transformPhysicalToLogicalCoordinates;
 import static com.android.server.wm.AppTransition.TRANSIT_KEYGUARD_UNOCCLUDE;
 import static com.android.server.wm.WindowManagerDebugConfig.DEBUG_ADD_REMOVE;
 import static com.android.server.wm.WindowManagerDebugConfig.DEBUG_BOOT;
@@ -121,6 +122,7 @@ import android.content.res.CompatibilityInfo;
 import android.content.res.Configuration;
 import android.graphics.Bitmap;
 import android.graphics.Matrix;
+import android.graphics.Path;
 import android.graphics.Rect;
 import android.graphics.RectF;
 import android.graphics.Region;
@@ -137,6 +139,7 @@ import android.util.MutableBoolean;
 import android.util.Slog;
 import android.util.proto.ProtoOutputStream;
 import android.view.Display;
+import android.view.DisplayCutout;
 import android.view.DisplayInfo;
 import android.view.InputDevice;
 import android.view.MagnificationSpec;
@@ -158,6 +161,7 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Objects;
 import java.util.function.Consumer;
 import java.util.function.Predicate;
 
@@ -207,6 +211,9 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
     int mInitialDisplayWidth = 0;
     int mInitialDisplayHeight = 0;
     int mInitialDisplayDensity = 0;
+
+    DisplayCutout mInitialDisplayCutout;
+    DisplayCutout mDisplayCutoutOverride;
 
     /**
      * Overridden display size. Initialized with {@link #mInitialDisplayWidth}
@@ -1160,6 +1167,7 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
             mDisplayInfo.getLogicalMetrics(mRealDisplayMetrics,
                     CompatibilityInfo.DEFAULT_COMPATIBILITY_INFO, null);
         }
+        mDisplayInfo.displayCutout = calculateDisplayCutoutForCurrentRotation();
         mDisplayInfo.getAppMetrics(mDisplayMetrics);
         if (mDisplayScalingDisabled) {
             mDisplayInfo.flags |= Display.FLAG_SCALING_DISABLED;
@@ -1179,6 +1187,18 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
 
         updateBounds();
         return mDisplayInfo;
+    }
+
+    DisplayCutout calculateDisplayCutoutForCurrentRotation() {
+        final DisplayCutout cutout = mInitialDisplayCutout;
+        if (cutout == null || cutout == DisplayCutout.NO_CUTOUT || mRotation == ROTATION_0) {
+            return cutout;
+        }
+        final Path bounds = cutout.getBounds().getBoundaryPath();
+        transformPhysicalToLogicalCoordinates(mRotation, mInitialDisplayWidth,
+                mInitialDisplayHeight, mTmpMatrix);
+        bounds.transform(mTmpMatrix);
+        return DisplayCutout.fromBounds(bounds);
     }
 
     /**
@@ -1643,6 +1663,7 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
         mInitialDisplayWidth = mDisplayInfo.logicalWidth;
         mInitialDisplayHeight = mDisplayInfo.logicalHeight;
         mInitialDisplayDensity = mDisplayInfo.logicalDensityDpi;
+        mInitialDisplayCutout = mDisplayInfo.displayCutout;
     }
 
     /**
@@ -1657,10 +1678,12 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
         final int newWidth = rotated ? mDisplayInfo.logicalHeight : mDisplayInfo.logicalWidth;
         final int newHeight = rotated ? mDisplayInfo.logicalWidth : mDisplayInfo.logicalHeight;
         final int newDensity = mDisplayInfo.logicalDensityDpi;
+        final DisplayCutout newCutout = mDisplayInfo.displayCutout;
 
         final boolean displayMetricsChanged = mInitialDisplayWidth != newWidth
                 || mInitialDisplayHeight != newHeight
-                || mInitialDisplayDensity != mDisplayInfo.logicalDensityDpi;
+                || mInitialDisplayDensity != mDisplayInfo.logicalDensityDpi
+                || !Objects.equals(mInitialDisplayCutout, newCutout);
 
         if (displayMetricsChanged) {
             // Check if display size or density is forced.
@@ -1677,6 +1700,7 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
             mInitialDisplayWidth = newWidth;
             mInitialDisplayHeight = newHeight;
             mInitialDisplayDensity = newDensity;
+            mInitialDisplayCutout = newCutout;
             mService.reconfigureDisplayLocked(this);
         }
     }

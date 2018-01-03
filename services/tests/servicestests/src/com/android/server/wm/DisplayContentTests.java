@@ -37,13 +37,18 @@ import org.junit.runner.RunWith;
 
 import android.annotation.SuppressLint;
 import android.content.res.Configuration;
+import android.graphics.Path;
+import android.graphics.Point;
+import android.graphics.Rect;
 import android.os.SystemClock;
 import android.platform.test.annotations.Presubmit;
 import android.support.test.filters.SmallTest;
 import android.support.test.runner.AndroidJUnit4;
 import android.util.DisplayMetrics;
 import android.util.SparseIntArray;
+import android.view.DisplayCutout;
 import android.view.MotionEvent;
+import android.view.Surface;
 
 import java.util.Arrays;
 import java.util.LinkedList;
@@ -53,7 +58,7 @@ import java.util.List;
  * Tests for the {@link DisplayContent} class.
  *
  * Build/Install/Run:
- *  bit FrameworksServicesTests:com.android.server.wm.DisplayContentTests
+ *  atest com.android.server.wm.DisplayContentTests
  */
 @SmallTest
 @Presubmit
@@ -385,6 +390,38 @@ public class DisplayContentTests extends WindowTestsBase {
     }
 
     @Test
+    public void testDisplayCutout_rot0() throws Exception {
+        synchronized (sWm.getWindowManagerLock()) {
+            final DisplayContent dc = createNewDisplay();
+            dc.mInitialDisplayWidth = 200;
+            dc.mInitialDisplayHeight = 400;
+            final DisplayCutout cutout = createCutout(new Rect(80, 0, 120, 10));
+
+            dc.mInitialDisplayCutout = cutout;
+            dc.setRotation(Surface.ROTATION_0);
+            dc.computeScreenConfiguration(new Configuration()); // recomputes dc.mDisplayInfo.
+
+            assertEquals(cutout, dc.getDisplayInfo().displayCutout);
+        }
+    }
+
+    @Test
+    public void testDisplayCutout_rot90() throws Exception {
+        synchronized (sWm.getWindowManagerLock()) {
+            final DisplayContent dc = createNewDisplay();
+            dc.mInitialDisplayWidth = 200;
+            dc.mInitialDisplayHeight = 400;
+            final DisplayCutout cutout = createCutout(new Rect(80, 0, 120, 10));
+
+            dc.mInitialDisplayCutout = cutout;
+            dc.setRotation(Surface.ROTATION_90);
+            dc.computeScreenConfiguration(new Configuration()); // recomputes dc.mDisplayInfo.
+
+            assertEquals(createCutout(new Rect(0, 80, 10, 120)), dc.getDisplayInfo().displayCutout);
+        }
+    }
+
+    @Test
     @SuppressLint("InlinedApi")
     public void testOrientationDefinedByKeyguard() {
         final DisplayContent dc = createNewDisplay();
@@ -448,5 +485,11 @@ public class DisplayContentTests extends WindowTestsBase {
                 x,
                 y,
                 metaState);
+    }
+
+    private DisplayCutout createCutout(Rect r) {
+        Path p = new Path();
+        p.addRect(r.left, r.top, r.right, r.bottom, Path.Direction.CCW);
+        return DisplayCutout.fromBounds(p);
     }
 }
