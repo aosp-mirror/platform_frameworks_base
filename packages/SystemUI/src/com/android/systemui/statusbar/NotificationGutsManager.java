@@ -229,10 +229,9 @@ public class NotificationGutsManager implements Dumpable {
                 }
             }
             try {
-                info.bindNotification(pmUser, iNotificationManager, pkg, new ArrayList(channels),
-                        row.getEntry().channel.getImportance(), sbn, onSettingsClick,
-                        onAppSettingsClick, onDoneClick, mCheckSaveListener,
-                        mNonBlockablePkgs);
+                info.bindNotification(pmUser, iNotificationManager, pkg, row.getEntry().channel,
+                        channels.size(), sbn, mCheckSaveListener, onSettingsClick,
+                        onAppSettingsClick, mNonBlockablePkgs);
             } catch (RemoteException e) {
                 Log.e(TAG, e.toString());
             }
