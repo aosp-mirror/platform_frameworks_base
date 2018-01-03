@@ -49,6 +49,7 @@ import java.security.NoSuchAlgorithmException;
 import java.security.PublicKey;
 import java.security.Signature;
 import java.security.SignatureException;
+import java.security.cert.CertificateEncodingException;
 import java.security.cert.CertificateException;
 import java.security.cert.CertificateFactory;
 import java.security.cert.X509Certificate;
@@ -398,9 +399,23 @@ public class ApkSignatureSchemeV3Verifier {
                 case PROOF_OF_ROTATION_ATTR_ID:
                     if (por != null) {
                         throw new SecurityException("Encountered multiple Proof-of-rotation records"
-                                + " when verifying APK Signature Scheme v3 signature.");
+                                + " when verifying APK Signature Scheme v3 signature");
                     }
                     por = verifyProofOfRotationStruct(attr, certFactory);
+                    // make sure that the last certificate in the Proof-of-rotation record matches
+                    // the one used to sign this APK.
+                    try {
+                        if (por.certs.size() > 0
+                                && !Arrays.equals(por.certs.get(por.certs.size() - 1).getEncoded(),
+                                        certChain[0].getEncoded())) {
+                            throw new SecurityException("Terminal certificate in Proof-of-rotation"
+                                    + " record does not match APK signing certificate");
+                        }
+                    } catch (CertificateEncodingException e) {
+                        throw new SecurityException("Failed to encode certificate when comparing"
+                                + " Proof-of-rotation record and signing certificate", e);
+                    }
+
                     break;
                 default:
                     // not the droid we're looking for, move along, move along.
