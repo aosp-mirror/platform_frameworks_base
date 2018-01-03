@@ -5595,24 +5595,25 @@ public class AccountManagerService
         long ident = Binder.clearCallingIdentity();
         try {
             packages = mPackageManager.getPackagesForUid(callingUid);
+            if (packages != null) {
+                for (String name : packages) {
+                    try {
+                        PackageInfo packageInfo =
+                                mPackageManager.getPackageInfo(name, 0 /* flags */);
+                        if (packageInfo != null
+                                && (packageInfo.applicationInfo.flags & ApplicationInfo.FLAG_SYSTEM)
+                                != 0) {
+                            return true;
+                        }
+                    } catch (NameNotFoundException e) {
+                        Log.w(TAG, String.format("Could not find package [%s]", name), e);
+                    }
+                }
+            } else {
+                Log.w(TAG, "No known packages with uid " + callingUid);
+            }
         } finally {
             Binder.restoreCallingIdentity(ident);
-        }
-        if (packages != null) {
-            for (String name : packages) {
-                try {
-                    PackageInfo packageInfo = mPackageManager.getPackageInfo(name, 0 /* flags */);
-                    if (packageInfo != null
-                            && (packageInfo.applicationInfo.flags & ApplicationInfo.FLAG_SYSTEM)
-                                    != 0) {
-                        return true;
-                    }
-                } catch (NameNotFoundException e) {
-                    Log.w(TAG, String.format("Could not find package [%s]", name), e);
-                }
-            }
-        } else {
-            Log.w(TAG, "No known packages with uid " + callingUid);
         }
         return false;
     }
