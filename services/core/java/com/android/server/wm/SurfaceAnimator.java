@@ -72,23 +72,29 @@ class SurfaceAnimator {
                     target.mInnerAnimationFinishedCallback.onAnimationFinished(anim);
                     return;
                 }
-                if (anim != mAnimation) {
-                    // Callback was from another animation - ignore.
-                    return;
-                }
 
-                final Transaction t = new Transaction();
-                SurfaceControl.openTransaction();
-                try {
-                    reset(t, true /* destroyLeash */);
-                    animationFinishedCallback.run();
-                } finally {
-                    // TODO: This should use pendingTransaction eventually, but right now things
-                    // happening on the animation finished callback are happening on the global
-                    // transaction.
-                    SurfaceControl.mergeToGlobalTransaction(t);
-                    SurfaceControl.closeTransaction();
-                }
+                // TODO: This should use pendingTransaction eventually, but right now things
+                // happening on the animation finished callback are happening on the global
+                // transaction.
+                // For now we need to run this after it's guaranteed that the transaction that
+                // reparents the surface onto the leash is executed already. Otherwise this may be
+                // executed first, leading to surface loss, as the reparent operations wouldn't
+                // be in order.
+                mService.mAnimator.addAfterPrepareSurfacesRunnable(() -> {
+                    if (anim != mAnimation) {
+                        // Callback was from another animation - ignore.
+                        return;
+                    }
+                    final Transaction t = new Transaction();
+                    SurfaceControl.openTransaction();
+                    try {
+                        reset(t, true /* destroyLeash */);
+                        animationFinishedCallback.run();
+                    } finally {
+                        SurfaceControl.mergeToGlobalTransaction(t);
+                        SurfaceControl.closeTransaction();
+                    }
+                });
             }
         };
     }

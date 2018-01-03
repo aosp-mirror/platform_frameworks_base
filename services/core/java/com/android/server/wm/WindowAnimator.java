@@ -35,6 +35,7 @@ import com.android.server.AnimationThread;
 import com.android.server.policy.WindowManagerPolicy;
 
 import java.io.PrintWriter;
+import java.util.ArrayList;
 
 /**
  * Singleton class that carries out the animations and Surface operations in a separate task
@@ -86,6 +87,12 @@ public class WindowAnimator {
      * vsync-app and then schedule the animation tick at the right time (vsync-sf).
      */
     private boolean mAnimationFrameCallbackScheduled;
+
+    /**
+     * A list of runnable that need to be run after {@link WindowContainer#prepareSurfaces} is
+     * executed and the corresponding transaction is closed and applied.
+     */
+    private final ArrayList<Runnable> mAfterPrepareSurfacesRunnables = new ArrayList<>();
 
     WindowAnimator(final WindowManagerService service) {
         mService = service;
@@ -262,6 +269,7 @@ public class WindowAnimator {
             mService.destroyPreservedSurfaceLocked();
             mService.mWindowPlacerLocked.destroyPendingSurfaces();
 
+            executeAfterPrepareSurfacesRunnables();
 
             if (DEBUG_WINDOW_TRACE) {
                 Slog.i(TAG, "!!! animate: exit mAnimating=" + mAnimating
@@ -424,5 +432,24 @@ public class WindowAnimator {
 
     void orAnimating(boolean animating) {
         mAnimating |= animating;
+    }
+
+    /**
+     * Adds a runnable to be executed after {@link WindowContainer#prepareSurfaces} is called and
+     * the corresponding transaction is closed and applied.
+     */
+    void addAfterPrepareSurfacesRunnable(Runnable r) {
+        mAfterPrepareSurfacesRunnables.add(r);
+        scheduleAnimation();
+    }
+
+    private void executeAfterPrepareSurfacesRunnables() {
+
+        // Traverse in order they were added.
+        final int size = mAfterPrepareSurfacesRunnables.size();
+        for (int i = 0; i < size; i++) {
+            mAfterPrepareSurfacesRunnables.get(i).run();
+        }
+        mAfterPrepareSurfacesRunnables.clear();
     }
 }
