@@ -44,7 +44,7 @@ namespace os {
 namespace statsd {
 
 // for StatsLogReport
-const int FIELD_ID_NAME = 1;
+const int FIELD_ID_ID = 1;
 const int FIELD_ID_START_REPORT_NANOS = 2;
 const int FIELD_ID_END_REPORT_NANOS = 3;
 const int FIELD_ID_GAUGE_METRICS = 8;
@@ -63,7 +63,7 @@ GaugeMetricProducer::GaugeMetricProducer(const ConfigKey& key, const GaugeMetric
                                          const sp<ConditionWizard>& wizard, const int atomTagId,
                                          const int pullTagId, const uint64_t startTimeNs,
                                          shared_ptr<StatsPullerManager> statsPullerManager)
-    : MetricProducer(metric.name(), key, startTimeNs, conditionIndex, wizard),
+    : MetricProducer(metric.id(), key, startTimeNs, conditionIndex, wizard),
       mStatsPullerManager(statsPullerManager),
       mPullTagId(pullTagId),
       mAtomTagId(atomTagId) {
@@ -92,7 +92,7 @@ GaugeMetricProducer::GaugeMetricProducer(const ConfigKey& key, const GaugeMetric
                                               metric.bucket().bucket_size_millis());
     }
 
-    VLOG("metric %s created. bucket size %lld start_time: %lld", metric.name().c_str(),
+    VLOG("metric %lld created. bucket size %lld start_time: %lld", (long long)metric.id(),
          (long long)mBucketSizeNs, (long long)mStartTimeNs);
 }
 
@@ -118,11 +118,11 @@ void GaugeMetricProducer::onDumpReportLocked(const uint64_t dumpTimeNs, StatsLog
 
 void GaugeMetricProducer::onDumpReportLocked(const uint64_t dumpTimeNs,
                                              ProtoOutputStream* protoOutput) {
-    VLOG("gauge metric %s dump report now...", mName.c_str());
+    VLOG("gauge metric %lld report now...", (long long)mMetricId);
 
     flushIfNeededLocked(dumpTimeNs);
 
-    protoOutput->write(FIELD_TYPE_STRING | FIELD_ID_NAME, mName);
+    protoOutput->write(FIELD_TYPE_INT64 | FIELD_ID_ID, (long long)mMetricId);
     protoOutput->write(FIELD_TYPE_INT64 | FIELD_ID_START_REPORT_NANOS, (long long)mStartTimeNs);
     long long protoToken = protoOutput->start(FIELD_TYPE_MESSAGE | FIELD_ID_GAUGE_METRICS);
 
@@ -166,7 +166,7 @@ void GaugeMetricProducer::onDumpReportLocked(const uint64_t dumpTimeNs,
 
 void GaugeMetricProducer::onConditionChangedLocked(const bool conditionMet,
                                                    const uint64_t eventTime) {
-    VLOG("Metric %s onConditionChanged", mName.c_str());
+    VLOG("Metric %lld onConditionChanged", (long long)mMetricId);
     flushIfNeededLocked(eventTime);
     mCondition = conditionMet;
 
@@ -194,7 +194,7 @@ void GaugeMetricProducer::onConditionChangedLocked(const bool conditionMet,
 }
 
 void GaugeMetricProducer::onSlicedConditionMayChangeLocked(const uint64_t eventTime) {
-    VLOG("Metric %s onSlicedConditionMayChange", mName.c_str());
+    VLOG("Metric %lld onSlicedConditionMayChange", (long long)mMetricId);
 }
 
 std::shared_ptr<FieldValueMap> GaugeMetricProducer::getGaugeFields(const LogEvent& event) {
@@ -223,11 +223,11 @@ bool GaugeMetricProducer::hitGuardRailLocked(const HashableDimensionKey& newKey)
     // 1. Report the tuple count if the tuple count > soft limit
     if (mCurrentSlicedBucket->size() > StatsdStats::kDimensionKeySizeSoftLimit - 1) {
         size_t newTupleCount = mCurrentSlicedBucket->size() + 1;
-        StatsdStats::getInstance().noteMetricDimensionSize(mConfigKey, mName, newTupleCount);
+        StatsdStats::getInstance().noteMetricDimensionSize(mConfigKey, mMetricId, newTupleCount);
         // 2. Don't add more tuples, we are above the allowed threshold. Drop the data.
         if (newTupleCount > StatsdStats::kDimensionKeySizeHardLimit) {
-            ALOGE("GaugeMetric %s dropping data for dimension key %s", mName.c_str(),
-                  newKey.c_str());
+            ALOGE("GaugeMetric %lld dropping data for dimension key %s",
+                (long long)mMetricId, newKey.c_str());
             return true;
         }
     }
@@ -314,7 +314,8 @@ void GaugeMetricProducer::flushIfNeededLocked(const uint64_t& eventTimeNs) {
         info.mGaugeFields = slice.second;
         auto& bucketList = mPastBuckets[slice.first];
         bucketList.push_back(info);
-        VLOG("gauge metric %s, dump key value: %s", mName.c_str(), slice.first.c_str());
+        VLOG("gauge metric %lld, dump key value: %s",
+            (long long)mMetricId, slice.first.c_str());
     }
 
     // Reset counters
@@ -331,7 +332,7 @@ void GaugeMetricProducer::flushIfNeededLocked(const uint64_t& eventTimeNs) {
     int64_t numBucketsForward = (eventTimeNs - mCurrentBucketStartTimeNs) / mBucketSizeNs;
     mCurrentBucketStartTimeNs = mCurrentBucketStartTimeNs + numBucketsForward * mBucketSizeNs;
     mCurrentBucketNum += numBucketsForward;
-    VLOG("metric %s: new bucket start time: %lld", mName.c_str(),
+    VLOG("metric %lld: new bucket start time: %lld", (long long)mMetricId,
          (long long)mCurrentBucketStartTimeNs);
 }
 

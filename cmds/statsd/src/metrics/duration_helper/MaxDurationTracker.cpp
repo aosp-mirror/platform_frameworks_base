@@ -24,12 +24,12 @@ namespace android {
 namespace os {
 namespace statsd {
 
-MaxDurationTracker::MaxDurationTracker(const ConfigKey& key, const string& name,
+MaxDurationTracker::MaxDurationTracker(const ConfigKey& key, const int64_t& id,
                                        const HashableDimensionKey& eventKey,
                                        sp<ConditionWizard> wizard, int conditionIndex, bool nesting,
                                        uint64_t currentBucketStartNs, uint64_t bucketSizeNs,
                                        const vector<sp<DurationAnomalyTracker>>& anomalyTrackers)
-    : DurationTracker(key, name, eventKey, wizard, conditionIndex, nesting, currentBucketStartNs,
+    : DurationTracker(key, id, eventKey, wizard, conditionIndex, nesting, currentBucketStartNs,
                       bucketSizeNs, anomalyTrackers) {
 }
 
@@ -42,12 +42,13 @@ bool MaxDurationTracker::hitGuardRail(const HashableDimensionKey& newKey) {
     // 1. Report the tuple count if the tuple count > soft limit
     if (mInfos.size() > StatsdStats::kDimensionKeySizeSoftLimit - 1) {
         size_t newTupleCount = mInfos.size() + 1;
-        StatsdStats::getInstance().noteMetricDimensionSize(mConfigKey, mName + mEventKey.toString(),
-                                                           newTupleCount);
+        StatsdStats::getInstance().noteMetricDimensionSize(
+            mConfigKey, hashDimensionsValue(mTrackerId, mEventKey.getDimensionsValue()),
+            newTupleCount);
         // 2. Don't add more tuples, we are above the allowed threshold. Drop the data.
         if (newTupleCount > StatsdStats::kDimensionKeySizeHardLimit) {
-            ALOGE("MaxDurTracker %s dropping data for dimension key %s", mName.c_str(),
-                  newKey.c_str());
+            ALOGE("MaxDurTracker %lld dropping data for dimension key %s",
+                (long long)mTrackerId, newKey.c_str());
             return true;
         }
     }

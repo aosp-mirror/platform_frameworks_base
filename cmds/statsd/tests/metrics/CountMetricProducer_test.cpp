@@ -15,6 +15,7 @@
 #include "src/metrics/CountMetricProducer.h"
 #include "src/dimension.h"
 #include "metrics_test_helper.h"
+#include "tests/statsd_test_util.h"
 
 #include <gmock/gmock.h>
 #include <gtest/gtest.h>
@@ -33,7 +34,7 @@ namespace android {
 namespace os {
 namespace statsd {
 
-const ConfigKey kConfigKey(0, "test");
+const ConfigKey kConfigKey(0, 12345);
 
 TEST(CountMetricProducerTest, TestNonDimensionalEvents) {
     int64_t bucketStartTimeNs = 10000000000;
@@ -43,7 +44,7 @@ TEST(CountMetricProducerTest, TestNonDimensionalEvents) {
     int tagId = 1;
 
     CountMetric metric;
-    metric.set_name("1");
+    metric.set_id(1);
     metric.mutable_bucket()->set_bucket_size_millis(bucketSizeNs / 1000000);
 
     LogEvent event1(tagId, bucketStartTimeNs + 1);
@@ -100,9 +101,9 @@ TEST(CountMetricProducerTest, TestEventsWithNonSlicedCondition) {
     int64_t bucketSizeNs = 30 * 1000 * 1000 * 1000LL;
 
     CountMetric metric;
-    metric.set_name("1");
+    metric.set_id(1);
     metric.mutable_bucket()->set_bucket_size_millis(bucketSizeNs / 1000000);
-    metric.set_condition("SCREEN_ON");
+    metric.set_condition(StringToId("SCREEN_ON"));
 
     LogEvent event1(1, bucketStartTimeNs + 1);
     LogEvent event2(1, bucketStartTimeNs + 10);
@@ -142,11 +143,11 @@ TEST(CountMetricProducerTest, TestEventsWithSlicedCondition) {
     int conditionTagId = 2;
 
     CountMetric metric;
-    metric.set_name("1");
+    metric.set_id(1);
     metric.mutable_bucket()->set_bucket_size_millis(bucketSizeNs / 1000000);
-    metric.set_condition("APP_IN_BACKGROUND_PER_UID_AND_SCREEN_ON");
+    metric.set_condition(StringToId("APP_IN_BACKGROUND_PER_UID_AND_SCREEN_ON"));
     MetricConditionLink* link = metric.add_links();
-    link->set_condition("APP_IN_BACKGROUND_PER_UID");
+    link->set_condition(StringToId("APP_IN_BACKGROUND_PER_UID"));
     *link->mutable_dimensions_in_what() = buildSimpleAtomFieldMatcher(tagId, 1);
     *link->mutable_dimensions_in_condition() = buildSimpleAtomFieldMatcher(conditionTagId, 2);
 
@@ -154,13 +155,15 @@ TEST(CountMetricProducerTest, TestEventsWithSlicedCondition) {
     event1.write("111");  // uid
     event1.init();
     ConditionKey key1;
-    key1["APP_IN_BACKGROUND_PER_UID"] = {getMockedDimensionKey(conditionTagId, 2, "111")};
+    key1[StringToId("APP_IN_BACKGROUND_PER_UID")] =
+        {getMockedDimensionKey(conditionTagId, 2, "111")};
 
     LogEvent event2(tagId, bucketStartTimeNs + 10);
     event2.write("222");  // uid
     event2.init();
     ConditionKey key2;
-    key2["APP_IN_BACKGROUND_PER_UID"] = {getMockedDimensionKey(conditionTagId, 2, "222")};
+    key2[StringToId("APP_IN_BACKGROUND_PER_UID")] =
+        {getMockedDimensionKey(conditionTagId, 2, "222")};
 
     sp<MockConditionWizard> wizard = new NaggyMock<MockConditionWizard>();
     EXPECT_CALL(*wizard, query(_, key1)).WillOnce(Return(ConditionState::kFalse));
@@ -189,8 +192,8 @@ TEST(CountMetricProducerTest, TestEventsWithSlicedCondition) {
 
 TEST(CountMetricProducerTest, TestAnomalyDetection) {
     Alert alert;
-    alert.set_name("alert");
-    alert.set_metric_name("1");
+    alert.set_id(11);
+    alert.set_metric_id(1);
     alert.set_trigger_if_sum_gt(2);
     alert.set_number_of_buckets(2);
     alert.set_refractory_period_secs(1);
@@ -201,7 +204,7 @@ TEST(CountMetricProducerTest, TestAnomalyDetection) {
     int64_t bucket3StartTimeNs = bucketStartTimeNs + 2 * bucketSizeNs;
 
     CountMetric metric;
-    metric.set_name("1");
+    metric.set_id(1);
     metric.mutable_bucket()->set_bucket_size_millis(bucketSizeNs / 1000000);
 
     sp<MockConditionWizard> wizard = new NaggyMock<MockConditionWizard>();

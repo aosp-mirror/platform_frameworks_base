@@ -43,9 +43,9 @@ StatsdConfig CreateStatsdConfig(DurationMetric::AggregationType aggregationType)
     *config.add_predicate() = holdingWakelockPredicate;
 
     auto durationMetric = config.add_duration_metric();
-    durationMetric->set_name("WakelockDuration");
-    durationMetric->set_what(holdingWakelockPredicate.name());
-    durationMetric->set_condition(screenIsOffPredicate.name());
+    durationMetric->set_id(StringToId("WakelockDuration"));
+    durationMetric->set_what(holdingWakelockPredicate.id());
+    durationMetric->set_condition(screenIsOffPredicate.id());
     durationMetric->set_aggregation_type(aggregationType);
     // The metric is dimensioning by first attribution node and only by uid.
     *durationMetric->mutable_dimensions() =

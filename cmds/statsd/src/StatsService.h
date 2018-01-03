@@ -77,25 +77,27 @@ public:
     /**
      * Binder call for clients to request data for this configuration key.
      */
-    virtual Status getData(const String16& key, vector<uint8_t>* output) override;
+    virtual Status getData(int64_t key, vector<uint8_t>* output) override;
+
 
     /**
      * Binder call for clients to get metadata across all configs in statsd.
      */
     virtual Status getMetadata(vector<uint8_t>* output) override;
 
+
     /**
      * Binder call to let clients send a configuration and indicate they're interested when they
      * should requestData for this configuration.
      */
-    virtual Status addConfiguration(const String16& key, const vector <uint8_t>& config,
-                                   const String16& package, const String16& cls, bool* success)
+    virtual Status addConfiguration(int64_t key, const vector <uint8_t>& config,
+                                    const String16& package, const String16& cls, bool* success)
     override;
 
     /**
      * Binder call to allow clients to remove the specified configuration.
      */
-    virtual Status removeConfiguration(const String16& key, bool* success) override;
+    virtual Status removeConfiguration(int64_t key, bool* success) override;
 
     // TODO: public for testing since statsd doesn't run when system starts. Change to private
     // later.

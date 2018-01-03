@@ -32,7 +32,7 @@ const HashableDimensionKey DEFAULT_DIMENSION_KEY = HashableDimensionKey();
 // Minimum bucket size in seconds
 const long kMinBucketSizeSec = 5 * 60;
 
-typedef std::map<std::string, std::vector<HashableDimensionKey>> ConditionKey;
+typedef std::map<int64_t, std::vector<HashableDimensionKey>> ConditionKey;
 
 typedef std::unordered_map<HashableDimensionKey, int64_t> DimToValMap;
 

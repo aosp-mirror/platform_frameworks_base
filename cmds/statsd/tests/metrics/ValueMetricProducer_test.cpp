@@ -14,6 +14,7 @@
 
 #include "src/metrics/ValueMetricProducer.h"
 #include "metrics_test_helper.h"
+#include "tests/statsd_test_util.h"
 
 #include <gmock/gmock.h>
 #include <gtest/gtest.h>
@@ -34,9 +35,9 @@ namespace android {
 namespace os {
 namespace statsd {
 
-const ConfigKey kConfigKey(0, "test");
+const ConfigKey kConfigKey(0, 12345);
 const int tagId = 1;
-const string metricName = "test_metric";
+const int64_t metricId = 123;
 const int64_t bucketStartTimeNs = 10000000000;
 const int64_t bucketSizeNs = 60 * 1000 * 1000 * 1000LL;
 const int64_t bucket2StartTimeNs = bucketStartTimeNs + bucketSizeNs;
@@ -48,7 +49,7 @@ const int64_t bucket4StartTimeNs = bucketStartTimeNs + 3 * bucketSizeNs;
  */
 TEST(ValueMetricProducerTest, TestNonDimensionalEvents) {
     ValueMetric metric;
-    metric.set_name(metricName);
+    metric.set_id(metricId);
     metric.mutable_bucket()->set_bucket_size_millis(bucketSizeNs / 1000000);
     metric.set_value_field(2);
 
@@ -124,10 +125,10 @@ TEST(ValueMetricProducerTest, TestNonDimensionalEvents) {
  */
 TEST(ValueMetricProducerTest, TestEventsWithNonSlicedCondition) {
     ValueMetric metric;
-    metric.set_name(metricName);
+    metric.set_id(metricId);
     metric.mutable_bucket()->set_bucket_size_millis(bucketSizeNs / 1000000);
     metric.set_value_field(2);
-    metric.set_condition("SCREEN_ON");
+    metric.set_condition(StringToId("SCREEN_ON"));
 
     sp<MockConditionWizard> wizard = new NaggyMock<MockConditionWizard>();
     shared_ptr<MockStatsPullerManager> pullerManager =
@@ -200,7 +201,7 @@ TEST(ValueMetricProducerTest, TestEventsWithNonSlicedCondition) {
 
 TEST(ValueMetricProducerTest, TestPushedEventsWithoutCondition) {
     ValueMetric metric;
-    metric.set_name(metricName);
+    metric.set_id(metricId);
     metric.mutable_bucket()->set_bucket_size_millis(bucketSizeNs / 1000000);
     metric.set_value_field(2);
 
@@ -240,14 +241,14 @@ TEST(ValueMetricProducerTest, TestPushedEventsWithoutCondition) {
 
 TEST(ValueMetricProducerTest, TestAnomalyDetection) {
     Alert alert;
-    alert.set_name("alert");
-    alert.set_metric_name(metricName);
+    alert.set_id(101);
+    alert.set_metric_id(metricId);
     alert.set_trigger_if_sum_gt(130);
     alert.set_number_of_buckets(2);
     alert.set_refractory_period_secs(3);
 
     ValueMetric metric;
-    metric.set_name(metricName);
+    metric.set_id(metricId);
     metric.mutable_bucket()->set_bucket_size_millis(bucketSizeNs / 1000000);
     metric.set_value_field(2);
 

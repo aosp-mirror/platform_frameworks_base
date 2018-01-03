@@ -14,6 +14,7 @@
 
 #include "src/config/ConfigManager.h"
 #include "src/metrics/MetricsManager.h"
+#include "statsd_test_util.h"
 
 #include <gmock/gmock.h>
 #include <gtest/gtest.h>
@@ -31,7 +32,7 @@ namespace os {
 namespace statsd {
 
 static ostream& operator<<(ostream& os, const StatsdConfig& config) {
-    return os << "StatsdConfig{name=" << config.name().c_str() << "}";
+    return os << "StatsdConfig{id=" << config.id() << "}";
 }
 
 }  // namespace statsd
@@ -50,19 +51,21 @@ public:
 /**
  * Validate that the ConfigKey is the one we wanted.
  */
-MATCHER_P2(ConfigKeyEq, uid, name, "") {
-    return arg.GetUid() == uid && arg.GetName() == name;
+MATCHER_P2(ConfigKeyEq, uid, id, "") {
+    return arg.GetUid() == uid && (long long)arg.GetId() == (long long)id;
 }
 
 /**
  * Validate that the StatsdConfig is the one we wanted.
  */
-MATCHER_P(StatsdConfigEq, name, "") {
-    return arg.name() == name;
+MATCHER_P(StatsdConfigEq, id, 0) {
+    return (long long)arg.id() == (long long)id;
 }
 
+const int64_t testConfigId = 12345;
+
 TEST(ConfigManagerTest, TestFakeConfig) {
-    auto metricsManager = std::make_unique<MetricsManager>(ConfigKey(0, "test"),
+    auto metricsManager = std::make_unique<MetricsManager>(ConfigKey(0, testConfigId),
                                                            build_fake_config(), 1000, new UidMap());
     EXPECT_TRUE(metricsManager->isConfigValid());
 }
@@ -77,13 +80,13 @@ TEST(ConfigManagerTest, TestAddUpdateRemove) {
     manager->AddListener(listener);
 
     StatsdConfig config91;
-    config91.set_name("91");
+    config91.set_id(91);
     StatsdConfig config92;
-    config92.set_name("92");
+    config92.set_id(92);
     StatsdConfig config93;
-    config93.set_name("93");
+    config93.set_id(93);
     StatsdConfig config94;
-    config94.set_name("94");
+    config94.set_id(94);
 
     {
         InSequence s;
@@ -91,42 +94,46 @@ TEST(ConfigManagerTest, TestAddUpdateRemove) {
         manager->Startup();
 
         // Add another one
-        EXPECT_CALL(*(listener.get()), OnConfigUpdated(ConfigKeyEq(1, "zzz"), StatsdConfigEq("91")))
+        EXPECT_CALL(*(listener.get()), OnConfigUpdated(ConfigKeyEq(1, StringToId("zzz")),
+            StatsdConfigEq(91)))
                 .RetiresOnSaturation();
-        manager->UpdateConfig(ConfigKey(1, "zzz"), config91);
+        manager->UpdateConfig(ConfigKey(1, StringToId("zzz")), config91);
 
         // Update It
-        EXPECT_CALL(*(listener.get()), OnConfigUpdated(ConfigKeyEq(1, "zzz"), StatsdConfigEq("92")))
+        EXPECT_CALL(*(listener.get()), OnConfigUpdated(ConfigKeyEq(1, StringToId("zzz")),
+            StatsdConfigEq(92)))
                 .RetiresOnSaturation();
-        manager->UpdateConfig(ConfigKey(1, "zzz"), config92);
+        manager->UpdateConfig(ConfigKey(1, StringToId("zzz")), config92);
 
         // Add one with the same uid but a different name
-        EXPECT_CALL(*(listener.get()), OnConfigUpdated(ConfigKeyEq(1, "yyy"), StatsdConfigEq("93")))
+        EXPECT_CALL(*(listener.get()), OnConfigUpdated(ConfigKeyEq(1, StringToId("yyy")),
+            StatsdConfigEq(93)))
                 .RetiresOnSaturation();
-        manager->UpdateConfig(ConfigKey(1, "yyy"), config93);
+        manager->UpdateConfig(ConfigKey(1, StringToId("yyy")), config93);
 
         // Add one with the same name but a different uid
-        EXPECT_CALL(*(listener.get()), OnConfigUpdated(ConfigKeyEq(2, "zzz"), StatsdConfigEq("94")))
+        EXPECT_CALL(*(listener.get()), OnConfigUpdated(ConfigKeyEq(2, StringToId("zzz")),
+            StatsdConfigEq(94)))
                 .RetiresOnSaturation();
-        manager->UpdateConfig(ConfigKey(2, "zzz"), config94);
+        manager->UpdateConfig(ConfigKey(2, StringToId("zzz")), config94);
 
         // Remove (1,yyy)
-        EXPECT_CALL(*(listener.get()), OnConfigRemoved(ConfigKeyEq(1, "yyy")))
+        EXPECT_CALL(*(listener.get()), OnConfigRemoved(ConfigKeyEq(1, StringToId("yyy"))))
                 .RetiresOnSaturation();
-        manager->RemoveConfig(ConfigKey(1, "yyy"));
+        manager->RemoveConfig(ConfigKey(1, StringToId("yyy")));
 
         // Remove (2,zzz)
-        EXPECT_CALL(*(listener.get()), OnConfigRemoved(ConfigKeyEq(2, "zzz")))
+        EXPECT_CALL(*(listener.get()), OnConfigRemoved(ConfigKeyEq(2, StringToId("zzz"))))
                 .RetiresOnSaturation();
-        manager->RemoveConfig(ConfigKey(2, "zzz"));
+        manager->RemoveConfig(ConfigKey(2, StringToId("zzz")));
 
         // Remove (1,zzz)
-        EXPECT_CALL(*(listener.get()), OnConfigRemoved(ConfigKeyEq(1, "zzz")))
+        EXPECT_CALL(*(listener.get()), OnConfigRemoved(ConfigKeyEq(1, StringToId("zzz"))))
                 .RetiresOnSaturation();
-        manager->RemoveConfig(ConfigKey(1, "zzz"));
+        manager->RemoveConfig(ConfigKey(1, StringToId("zzz")));
 
         // Remove (2,zzz) again and we shouldn't get the callback
-        manager->RemoveConfig(ConfigKey(2, "zzz"));
+        manager->RemoveConfig(ConfigKey(2, StringToId("zzz")));
     }
 }
 
@@ -142,16 +149,16 @@ TEST(ConfigManagerTest, TestRemoveUid) {
     StatsdConfig config;
 
     EXPECT_CALL(*(listener.get()), OnConfigUpdated(_, _)).Times(5);
-    EXPECT_CALL(*(listener.get()), OnConfigRemoved(ConfigKeyEq(2, "xxx")));
-    EXPECT_CALL(*(listener.get()), OnConfigRemoved(ConfigKeyEq(2, "yyy")));
-    EXPECT_CALL(*(listener.get()), OnConfigRemoved(ConfigKeyEq(2, "zzz")));
+    EXPECT_CALL(*(listener.get()), OnConfigRemoved(ConfigKeyEq(2, StringToId("xxx"))));
+    EXPECT_CALL(*(listener.get()), OnConfigRemoved(ConfigKeyEq(2, StringToId("yyy"))));
+    EXPECT_CALL(*(listener.get()), OnConfigRemoved(ConfigKeyEq(2, StringToId("zzz"))));
 
     manager->Startup();
-    manager->UpdateConfig(ConfigKey(1, "aaa"), config);
-    manager->UpdateConfig(ConfigKey(2, "xxx"), config);
-    manager->UpdateConfig(ConfigKey(2, "yyy"), config);
-    manager->UpdateConfig(ConfigKey(2, "zzz"), config);
-    manager->UpdateConfig(ConfigKey(3, "bbb"), config);
+    manager->UpdateConfig(ConfigKey(1, StringToId("aaa")), config);
+    manager->UpdateConfig(ConfigKey(2, StringToId("xxx")), config);
+    manager->UpdateConfig(ConfigKey(2, StringToId("yyy")), config);
+    manager->UpdateConfig(ConfigKey(2, StringToId("zzz")), config);
+    manager->UpdateConfig(ConfigKey(3, StringToId("bbb")), config);
 
     manager->RemoveConfigs(2);
 }

@@ -27,10 +27,10 @@ using std::ostringstream;
 ConfigKey::ConfigKey() {
 }
 
-ConfigKey::ConfigKey(const ConfigKey& that) : mName(that.mName), mUid(that.mUid) {
+ConfigKey::ConfigKey(const ConfigKey& that) : mId(that.mId), mUid(that.mUid) {
 }
 
-ConfigKey::ConfigKey(int uid, const string& name) : mName(name), mUid(uid) {
+ConfigKey::ConfigKey(int uid, const int64_t& id) : mId(id), mUid(uid) {
 }
 
 ConfigKey::~ConfigKey() {
@@ -38,8 +38,19 @@ ConfigKey::~ConfigKey() {
 
 string ConfigKey::ToString() const {
     ostringstream out;
-    out << '(' << mUid << ',' << mName << ')';
+    out << '(' << mUid << ',' << mId << ')';
     return out.str();
+}
+
+
+int64_t StrToInt64(const string& str) {
+    char* endp;
+    int64_t value;
+    value = strtoll(str.c_str(), &endp, 0);
+    if (endp == str.c_str() || *endp != '\0') {
+        value = 0;
+    }
+    return value;
 }
 
 }  // namespace statsd

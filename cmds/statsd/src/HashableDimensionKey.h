@@ -53,6 +53,7 @@ private:
     DimensionsValue mDimensionsValue;
 };
 
+android::hash_t hashDimensionsValue(int64_t seed, const DimensionsValue& value);
 android::hash_t hashDimensionsValue(const DimensionsValue& value);
 
 }  // namespace statsd

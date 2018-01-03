@@ -41,7 +41,7 @@ namespace os {
 namespace statsd {
 
 // for StatsLogReport
-const int FIELD_ID_NAME = 1;
+const int FIELD_ID_ID = 1;
 const int FIELD_ID_START_REPORT_NANOS = 2;
 const int FIELD_ID_END_REPORT_NANOS = 3;
 const int FIELD_ID_EVENT_METRICS = 4;
@@ -55,7 +55,7 @@ EventMetricProducer::EventMetricProducer(const ConfigKey& key, const EventMetric
                                          const int conditionIndex,
                                          const sp<ConditionWizard>& wizard,
                                          const uint64_t startTimeNs)
-    : MetricProducer(metric.name(), key, startTimeNs, conditionIndex, wizard) {
+    : MetricProducer(metric.id(), key, startTimeNs, conditionIndex, wizard) {
     if (metric.links().size() > 0) {
         mConditionLinks.insert(mConditionLinks.begin(), metric.links().begin(),
                                metric.links().end());
@@ -64,7 +64,7 @@ EventMetricProducer::EventMetricProducer(const ConfigKey& key, const EventMetric
 
     startNewProtoOutputStreamLocked();
 
-    VLOG("metric %s created. bucket size %lld start_time: %lld", metric.name().c_str(),
+    VLOG("metric %lld created. bucket size %lld start_time: %lld", (long long)metric.id(),
          (long long)mBucketSizeNs, (long long)mStartTimeNs);
 }
 
@@ -102,12 +102,13 @@ void EventMetricProducer::onDumpReportLocked(const uint64_t dumpTimeNs, StatsLog
 
 void EventMetricProducer::onDumpReportLocked(const uint64_t dumpTimeNs,
                                              ProtoOutputStream* protoOutput) {
-    protoOutput->write(FIELD_TYPE_STRING | FIELD_ID_NAME, mName);
+    protoOutput->write(FIELD_TYPE_INT64 | FIELD_ID_ID, (long long)mMetricId);
     protoOutput->write(FIELD_TYPE_INT64 | FIELD_ID_START_REPORT_NANOS, (long long)mStartTimeNs);
     protoOutput->write(FIELD_TYPE_INT64 | FIELD_ID_END_REPORT_NANOS, (long long)dumpTimeNs);
 
     size_t bufferSize = mProto->size();
-    VLOG("metric %s dump report now... proto size: %zu ", mName.c_str(), bufferSize);
+    VLOG("metric %lld dump report now... proto size: %zu ",
+        (long long)mMetricId, bufferSize);
     std::unique_ptr<std::vector<uint8_t>> buffer = serializeProtoLocked(*mProto);
 
     protoOutput->write(FIELD_TYPE_MESSAGE | FIELD_ID_EVENT_METRICS,
@@ -119,7 +120,7 @@ void EventMetricProducer::onDumpReportLocked(const uint64_t dumpTimeNs,
 
 void EventMetricProducer::onConditionChangedLocked(const bool conditionMet,
                                                    const uint64_t eventTime) {
-    VLOG("Metric %s onConditionChanged", mName.c_str());
+    VLOG("Metric %lld onConditionChanged", (long long)mMetricId);
     mCondition = conditionMet;
 }
 

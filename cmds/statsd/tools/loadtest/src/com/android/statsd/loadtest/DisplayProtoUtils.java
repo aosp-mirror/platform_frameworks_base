@@ -26,7 +26,7 @@ public class DisplayProtoUtils {
         sb.append("ConfigKey: ");
         if (reports.hasConfigKey()) {
             com.android.os.StatsLog.ConfigMetricsReportList.ConfigKey key = reports.getConfigKey();
-            sb.append("\tuid: ").append(key.getUid()).append(" name: ").append(key.getName())
+            sb.append("\tuid: ").append(key.getUid()).append(" id: ").append(key.getId())
                     .append("\n");
         }
 
@@ -34,7 +34,7 @@ public class DisplayProtoUtils {
             sb.append("StatsLogReport size: ").append(report.getMetricsCount()).append("\n");
             for (StatsLog.StatsLogReport log : report.getMetricsList()) {
                 sb.append("\n\n");
-                sb.append("metric id: ").append(log.getMetricName()).append("\n");
+                sb.append("metric id: ").append(log.getMetricId()).append("\n");
                 sb.append("start time:").append(getDateStr(log.getStartReportNanos())).append("\n");
                 sb.append("end time:").append(getDateStr(log.getEndReportNanos())).append("\n");
 

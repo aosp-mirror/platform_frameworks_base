@@ -34,6 +34,8 @@ import static com.android.statsd.dogfood.DisplayProtoUtils.displayLogReport;
 
 public class MainActivity extends Activity {
     private final static String TAG = "StatsdDogfood";
+    private final static long CONFIG_ID = 987654321;
+
 
     final int[] mUids = {11111111, 2222222};
     StatsManager mStatsManager;
@@ -163,7 +165,7 @@ public class MainActivity extends Activity {
                     return;
                 }
                 if (mStatsManager != null) {
-                    byte[] data = mStatsManager.getData("fake");
+                    byte[] data = mStatsManager.getData(CONFIG_ID);
                     if (data != null) {
                         displayData(data);
                     } else {
@@ -186,7 +188,7 @@ public class MainActivity extends Activity {
                     byte[] config = new byte[inputStream.available()];
                     inputStream.read(config);
                     if (mStatsManager != null) {
-                        if (mStatsManager.addConfiguration("fake",
+                        if (mStatsManager.addConfiguration(CONFIG_ID,
                                 config, getPackageName(), MainActivity.this.getClass().getName())) {
                             Toast.makeText(
                                     MainActivity.this, "Config pushed", Toast.LENGTH_LONG).show();

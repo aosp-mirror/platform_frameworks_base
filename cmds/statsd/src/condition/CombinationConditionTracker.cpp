@@ -30,20 +30,20 @@ using std::unique_ptr;
 using std::unordered_map;
 using std::vector;
 
-CombinationConditionTracker::CombinationConditionTracker(const string& name, const int index)
-    : ConditionTracker(name, index) {
-    VLOG("creating CombinationConditionTracker %s", mName.c_str());
+CombinationConditionTracker::CombinationConditionTracker(const int64_t& id, const int index)
+    : ConditionTracker(id, index) {
+    VLOG("creating CombinationConditionTracker %lld", (long long)mConditionId);
 }
 
 CombinationConditionTracker::~CombinationConditionTracker() {
-    VLOG("~CombinationConditionTracker() %s", mName.c_str());
+    VLOG("~CombinationConditionTracker() %lld", (long long)mConditionId);
 }
 
 bool CombinationConditionTracker::init(const vector<Predicate>& allConditionConfig,
                                        const vector<sp<ConditionTracker>>& allConditionTrackers,
-                                       const unordered_map<string, int>& conditionNameIndexMap,
+                                       const unordered_map<int64_t, int>& conditionIdIndexMap,
                                        vector<bool>& stack) {
-    VLOG("Combination predicate init() %s", mName.c_str());
+    VLOG("Combination predicate init() %lld", (long long)mConditionId);
     if (mInitialized) {
         return true;
     }
@@ -62,11 +62,11 @@ bool CombinationConditionTracker::init(const vector<Predicate>& allConditionConf
         return false;
     }
 
-    for (string child : combinationCondition.predicate()) {
-        auto it = conditionNameIndexMap.find(child);
+    for (auto child : combinationCondition.predicate()) {
+        auto it = conditionIdIndexMap.find(child);
 
-        if (it == conditionNameIndexMap.end()) {
-            ALOGW("Predicate %s not found in the config", child.c_str());
+        if (it == conditionIdIndexMap.end()) {
+            ALOGW("Predicate %lld not found in the config", (long long)child);
             return false;
         }
 
@@ -79,13 +79,13 @@ bool CombinationConditionTracker::init(const vector<Predicate>& allConditionConf
         }
 
         bool initChildSucceeded = childTracker->init(allConditionConfig, allConditionTrackers,
-                                                     conditionNameIndexMap, stack);
+                                                     conditionIdIndexMap, stack);
 
         if (!initChildSucceeded) {
-            ALOGW("Child initialization failed %s ", child.c_str());
+            ALOGW("Child initialization failed %lld ", (long long)child);
             return false;
         } else {
-            ALOGW("Child initialization success %s ", child.c_str());
+            ALOGW("Child initialization success %lld ", (long long)child);
         }
 
         mChildren.push_back(childIndex);
@@ -154,8 +154,8 @@ void CombinationConditionTracker::evaluateCondition(
             }
         }
         nonSlicedConditionCache[mIndex] = ConditionState::kUnknown;
-        ALOGD("CombinationPredicate %s sliced may changed? %d", mName.c_str(),
-              conditionChangedCache[mIndex] == true);
+        ALOGD("CombinationPredicate %lld sliced may changed? %d", (long long)mConditionId,
+            conditionChangedCache[mIndex] == true);
     }
 }
 

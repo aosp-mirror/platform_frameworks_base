@@ -36,7 +36,7 @@ namespace android {
 namespace os {
 namespace statsd {
 
-const ConfigKey kConfigKey(0, "test");
+const ConfigKey kConfigKey(0, 12345);
 
 TEST(DurationMetricTrackerTest, TestNoCondition) {
     sp<MockConditionWizard> wizard = new NaggyMock<MockConditionWizard>();
@@ -44,7 +44,7 @@ TEST(DurationMetricTrackerTest, TestNoCondition) {
     uint64_t bucketSizeNs = 30 * 1000 * 1000 * 1000LL;
 
     DurationMetric metric;
-    metric.set_name("1");
+    metric.set_id(1);
     metric.mutable_bucket()->set_bucket_size_millis(bucketSizeNs / 1000000);
     metric.set_aggregation_type(DurationMetric_AggregationType_SUM);
 
@@ -79,7 +79,7 @@ TEST(DurationMetricTrackerTest, TestNonSlicedCondition) {
     uint64_t bucketSizeNs = 30 * 1000 * 1000 * 1000LL;
 
     DurationMetric metric;
-    metric.set_name("1");
+    metric.set_id(1);
     metric.mutable_bucket()->set_bucket_size_millis(bucketSizeNs / 1000000);
     metric.set_aggregation_type(DurationMetric_AggregationType_SUM);
 

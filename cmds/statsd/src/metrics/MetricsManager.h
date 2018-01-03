@@ -131,6 +131,9 @@ private:
 
     void initLogSourceWhiteList();
 
+    // The metrics that don't need to be uploaded or even reported.
+    std::set<int64_t> mNoReportMetricIds;
+
     FRIEND_TEST(WakelockDurationE2eTest, TestAggregatedPredicateDimensions);
     FRIEND_TEST(MetricConditionLinkE2eTest, TestMultiplePredicatesAndLinks);
 };

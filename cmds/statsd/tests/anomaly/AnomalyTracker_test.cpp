@@ -31,7 +31,7 @@ namespace android {
 namespace os {
 namespace statsd {
 
-const ConfigKey kConfigKey(0, "test");
+const ConfigKey kConfigKey(0, 12345);
 
 HashableDimensionKey getMockDimensionKey(int key, string value) {
     DimensionsValue dimensionsValue;
