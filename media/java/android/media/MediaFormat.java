@@ -680,6 +680,21 @@ public final class MediaFormat {
     public static final String KEY_LATENCY = "latency";
 
     /**
+     * An optional key describing the maximum number of non-display-order coded frames.
+     * This is an optional parameter that applies only to video encoders. Application should
+     * check the value for this key in the output format to see if codec will produce
+     * non-display-order coded frames. If encoder supports it, the output frames' order will be
+     * different from the display order and each frame's display order could be retrived from
+     * {@link MediaCodec.BufferInfo#presentationTimeUs}. Before API level 27, application may
+     * receive non-display-order coded frames even though the application did not request it.
+     * Note: Application should not rearrange the frames to display order before feeding them
+     * to {@link MediaMuxer#writeSampleData}.
+     * <p>
+     * The default value is 0.
+     */
+    public static final String KEY_OUTPUT_REORDER_DEPTH = "output-reorder-depth";
+
+    /**
      * A key describing the desired clockwise rotation on an output surface.
      * This key is only used when the codec is configured using an output surface.
      * The associated value is an integer, representing degrees. Supported values
