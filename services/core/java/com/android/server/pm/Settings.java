@@ -3122,7 +3122,7 @@ public final class Settings {
                             ATTR_VOLUME_UUID);
                     final VersionInfo ver = findOrCreateVersion(volumeUuid);
                     ver.sdkVersion = XmlUtils.readIntAttribute(parser, ATTR_SDK_VERSION);
-                    ver.databaseVersion = XmlUtils.readIntAttribute(parser, ATTR_SDK_VERSION);
+                    ver.databaseVersion = XmlUtils.readIntAttribute(parser, ATTR_DATABASE_VERSION);
                     ver.fingerprint = XmlUtils.readStringAttribute(parser, ATTR_FINGERPRINT);
                 } else {
                     Slog.w(PackageManagerService.TAG, "Unknown element under <packages>: "
