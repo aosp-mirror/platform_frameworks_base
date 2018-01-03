@@ -29,8 +29,8 @@ using std::unique_ptr;
 using std::unordered_map;
 using std::vector;
 
-CombinationLogMatchingTracker::CombinationLogMatchingTracker(const string& name, const int index)
-    : LogMatchingTracker(name, index) {
+CombinationLogMatchingTracker::CombinationLogMatchingTracker(const int64_t& id, const int index)
+    : LogMatchingTracker(id, index) {
 }
 
 CombinationLogMatchingTracker::~CombinationLogMatchingTracker() {
@@ -38,7 +38,7 @@ CombinationLogMatchingTracker::~CombinationLogMatchingTracker() {
 
 bool CombinationLogMatchingTracker::init(const vector<AtomMatcher>& allLogMatchers,
                                          const vector<sp<LogMatchingTracker>>& allTrackers,
-                                         const unordered_map<string, int>& matcherMap,
+                                         const unordered_map<int64_t, int>& matcherMap,
                                          vector<bool>& stack) {
     if (mInitialized) {
         return true;
@@ -60,10 +60,10 @@ bool CombinationLogMatchingTracker::init(const vector<AtomMatcher>& allLogMatche
         return false;
     }
 
-    for (const string& child : matcher.matcher()) {
+    for (const auto& child : matcher.matcher()) {
         auto pair = matcherMap.find(child);
         if (pair == matcherMap.end()) {
-            ALOGW("Matcher %s not found in the config", child.c_str());
+            ALOGW("Matcher %lld not found in the config", (long long)child);
             return false;
         }
 
@@ -76,7 +76,7 @@ bool CombinationLogMatchingTracker::init(const vector<AtomMatcher>& allLogMatche
         }
 
         if (!allTrackers[childIndex]->init(allLogMatchers, allTrackers, matcherMap, stack)) {
-            ALOGW("child matcher init failed %s", child.c_str());
+            ALOGW("child matcher init failed %lld", (long long)child);
             return false;
         }
 

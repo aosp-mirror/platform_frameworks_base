@@ -21,8 +21,8 @@ namespace android {
 namespace os {
 namespace statsd {
 
-android::hash_t hashDimensionsValue(const DimensionsValue& value) {
-    android::hash_t hash = 0;
+android::hash_t hashDimensionsValue(int64_t seed, const DimensionsValue& value) {
+    android::hash_t hash = seed;
     hash = android::JenkinsHashMix(hash, android::hash_type(value.field()));
 
     hash = android::JenkinsHashMix(hash, android::hash_type((int)value.value_case()));
@@ -61,6 +61,10 @@ android::hash_t hashDimensionsValue(const DimensionsValue& value) {
             break;
     }
     return JenkinsHashWhiten(hash);
+}
+
+android::hash_t hashDimensionsValue(const DimensionsValue& value) {
+    return hashDimensionsValue(0, value);
 }
 
 using std::string;

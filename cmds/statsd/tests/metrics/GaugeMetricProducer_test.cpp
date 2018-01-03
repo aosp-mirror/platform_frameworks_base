@@ -15,6 +15,7 @@
 #include "src/metrics/GaugeMetricProducer.h"
 #include "logd/LogEvent.h"
 #include "metrics_test_helper.h"
+#include "tests/statsd_test_util.h"
 
 #include <gmock/gmock.h>
 #include <gtest/gtest.h>
@@ -34,9 +35,9 @@ namespace android {
 namespace os {
 namespace statsd {
 
-const ConfigKey kConfigKey(0, "test");
+const ConfigKey kConfigKey(0, 12345);
 const int tagId = 1;
-const string metricName = "test_metric";
+const int64_t metricId = 123;
 const int64_t bucketStartTimeNs = 10000000000;
 const int64_t bucketSizeNs = 60 * 1000 * 1000 * 1000LL;
 const int64_t bucket2StartTimeNs = bucketStartTimeNs + bucketSizeNs;
@@ -45,7 +46,7 @@ const int64_t bucket4StartTimeNs = bucketStartTimeNs + 3 * bucketSizeNs;
 
 TEST(GaugeMetricProducerTest, TestNoCondition) {
     GaugeMetric metric;
-    metric.set_name(metricName);
+    metric.set_id(metricId);
     metric.mutable_bucket()->set_bucket_size_millis(bucketSizeNs / 1000000);
     metric.mutable_gauge_fields_filter()->set_include_all(false);
     auto gaugeFieldMatcher = metric.mutable_gauge_fields_filter()->mutable_fields();
@@ -119,12 +120,12 @@ TEST(GaugeMetricProducerTest, TestNoCondition) {
 
 TEST(GaugeMetricProducerTest, TestWithCondition) {
     GaugeMetric metric;
-    metric.set_name(metricName);
+    metric.set_id(metricId);
     metric.mutable_bucket()->set_bucket_size_millis(bucketSizeNs / 1000000);
     auto gaugeFieldMatcher = metric.mutable_gauge_fields_filter()->mutable_fields();
     gaugeFieldMatcher->set_field(tagId);
     gaugeFieldMatcher->add_child()->set_field(2);
-    metric.set_condition("SCREEN_ON");
+    metric.set_condition(StringToId("SCREEN_ON"));
 
     sp<MockConditionWizard> wizard = new NaggyMock<MockConditionWizard>();
 
@@ -186,7 +187,7 @@ TEST(GaugeMetricProducerTest, TestAnomalyDetection) {
     EXPECT_CALL(*pullerManager, UnRegisterReceiver(tagId, _)).WillOnce(Return());
 
     GaugeMetric metric;
-    metric.set_name(metricName);
+    metric.set_id(metricId);
     metric.mutable_bucket()->set_bucket_size_millis(bucketSizeNs / 1000000);
     auto gaugeFieldMatcher = metric.mutable_gauge_fields_filter()->mutable_fields();
     gaugeFieldMatcher->set_field(tagId);
@@ -195,8 +196,8 @@ TEST(GaugeMetricProducerTest, TestAnomalyDetection) {
                                       tagId, tagId, bucketStartTimeNs, pullerManager);
 
     Alert alert;
-    alert.set_name("alert");
-    alert.set_metric_name(metricName);
+    alert.set_id(101);
+    alert.set_metric_id(metricId);
     alert.set_trigger_if_sum_gt(25);
     alert.set_number_of_buckets(2);
     sp<AnomalyTracker> anomalyTracker = gaugeProducer.addAnomalyTracker(alert);

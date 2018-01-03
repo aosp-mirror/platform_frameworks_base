@@ -845,11 +845,11 @@ message AnomalyDetected {
     // Uid that owns the config whose anomaly detection alert fired.
     optional int32 config_uid = 1;
 
-    // Name of the config whose anomaly detection alert fired.
-    optional string config_name = 2;
+    // Id of the config whose anomaly detection alert fired.
+    optional int64 config_id = 2;
 
-    // Name of the alert (i.e. name of the anomaly that was detected).
-    optional string alert_name = 3;
+    // Id of the alert (i.e. name of the anomaly that was detected).
+    optional int64 alert_id = 3;
 }
 
 /**

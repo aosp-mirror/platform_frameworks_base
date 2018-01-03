@@ -13,8 +13,9 @@
 // limitations under the License.
 
 #include "src/metrics/duration_helper/OringDurationTracker.h"
-#include "metrics_test_helper.h"
 #include "src/condition/ConditionWizard.h"
+#include "metrics_test_helper.h"
+#include "tests/statsd_test_util.h"
 
 #include <gmock/gmock.h>
 #include <gtest/gtest.h>
@@ -34,8 +35,9 @@ namespace android {
 namespace os {
 namespace statsd {
 
-const ConfigKey kConfigKey(0, "test");
+const ConfigKey kConfigKey(0, 12345);
 const int TagId = 1;
+const int64_t metricId = 123;
 const HashableDimensionKey eventKey = getMockedDimensionKey(TagId, 0, "event");
 
 const std::vector<HashableDimensionKey> kConditionKey1 = {getMockedDimensionKey(TagId, 1, "maps")};
@@ -46,7 +48,7 @@ TEST(OringDurationTrackerTest, TestDurationOverlap) {
     sp<MockConditionWizard> wizard = new NaggyMock<MockConditionWizard>();
 
     ConditionKey key1;
-    key1["APP_BACKGROUND"] = kConditionKey1;
+    key1[StringToId("APP_BACKGROUND")] = kConditionKey1;
 
     unordered_map<HashableDimensionKey, vector<DurationBucket>> buckets;
 
@@ -55,7 +57,7 @@ TEST(OringDurationTrackerTest, TestDurationOverlap) {
     uint64_t bucketSizeNs = 30 * 1000 * 1000 * 1000LL;
     uint64_t durationTimeNs = 2 * 1000;
 
-    OringDurationTracker tracker(kConfigKey, "metric", eventKey, wizard, 1, false,
+    OringDurationTracker tracker(kConfigKey, metricId, eventKey, wizard, 1, false,
                                  bucketStartTimeNs, bucketSizeNs, {});
 
     tracker.noteStart(kEventKey1, true, eventStartTimeNs, key1);
@@ -75,7 +77,7 @@ TEST(OringDurationTrackerTest, TestDurationNested) {
     sp<MockConditionWizard> wizard = new NaggyMock<MockConditionWizard>();
 
     ConditionKey key1;
-    key1["APP_BACKGROUND"] = kConditionKey1;
+    key1[StringToId("APP_BACKGROUND")] = kConditionKey1;
 
     unordered_map<HashableDimensionKey, vector<DurationBucket>> buckets;
 
@@ -83,7 +85,7 @@ TEST(OringDurationTrackerTest, TestDurationNested) {
     uint64_t eventStartTimeNs = bucketStartTimeNs + 1;
     uint64_t bucketSizeNs = 30 * 1000 * 1000 * 1000LL;
 
-    OringDurationTracker tracker(kConfigKey, "metric", eventKey, wizard, 1, true, bucketStartTimeNs,
+    OringDurationTracker tracker(kConfigKey, metricId, eventKey, wizard, 1, true, bucketStartTimeNs,
                                  bucketSizeNs, {});
 
     tracker.noteStart(kEventKey1, true, eventStartTimeNs, key1);
@@ -102,7 +104,7 @@ TEST(OringDurationTrackerTest, TestStopAll) {
     sp<MockConditionWizard> wizard = new NaggyMock<MockConditionWizard>();
 
     ConditionKey key1;
-    key1["APP_BACKGROUND"] = kConditionKey1;
+    key1[StringToId("APP_BACKGROUND")] = kConditionKey1;
 
     unordered_map<HashableDimensionKey, vector<DurationBucket>> buckets;
 
@@ -110,7 +112,7 @@ TEST(OringDurationTrackerTest, TestStopAll) {
     uint64_t eventStartTimeNs = bucketStartTimeNs + 1;
     uint64_t bucketSizeNs = 30 * 1000 * 1000 * 1000LL;
 
-    OringDurationTracker tracker(kConfigKey, "metric", eventKey, wizard, 1, true, bucketStartTimeNs,
+    OringDurationTracker tracker(kConfigKey, metricId, eventKey, wizard, 1, true, bucketStartTimeNs,
                                  bucketSizeNs, {});
 
     tracker.noteStart(kEventKey1, true, eventStartTimeNs, key1);
@@ -128,7 +130,7 @@ TEST(OringDurationTrackerTest, TestCrossBucketBoundary) {
     sp<MockConditionWizard> wizard = new NaggyMock<MockConditionWizard>();
 
     ConditionKey key1;
-    key1["APP_BACKGROUND"] = kConditionKey1;
+    key1[StringToId("APP_BACKGROUND")] = kConditionKey1;
 
     unordered_map<HashableDimensionKey, vector<DurationBucket>> buckets;
 
@@ -137,7 +139,7 @@ TEST(OringDurationTrackerTest, TestCrossBucketBoundary) {
     uint64_t bucketSizeNs = 30 * 1000 * 1000 * 1000LL;
     uint64_t durationTimeNs = 2 * 1000;
 
-    OringDurationTracker tracker(kConfigKey, "metric", eventKey, wizard, 1, true, bucketStartTimeNs,
+    OringDurationTracker tracker(kConfigKey, metricId, eventKey, wizard, 1, true, bucketStartTimeNs,
                                  bucketSizeNs, {});
 
     tracker.noteStart(kEventKey1, true, eventStartTimeNs, key1);
@@ -163,7 +165,7 @@ TEST(OringDurationTrackerTest, TestDurationConditionChange) {
     sp<MockConditionWizard> wizard = new NaggyMock<MockConditionWizard>();
 
     ConditionKey key1;
-    key1["APP_BACKGROUND"] = kConditionKey1;
+    key1[StringToId("APP_BACKGROUND")] = kConditionKey1;
 
     EXPECT_CALL(*wizard, query(_, key1))  // #4
             .WillOnce(Return(ConditionState::kFalse));
@@ -175,7 +177,7 @@ TEST(OringDurationTrackerTest, TestDurationConditionChange) {
     uint64_t bucketSizeNs = 30 * 1000 * 1000 * 1000LL;
     uint64_t durationTimeNs = 2 * 1000;
 
-    OringDurationTracker tracker(kConfigKey, "metric", eventKey, wizard, 1, false,
+    OringDurationTracker tracker(kConfigKey, metricId, eventKey, wizard, 1, false,
                                  bucketStartTimeNs, bucketSizeNs, {});
 
     tracker.noteStart(kEventKey1, true, eventStartTimeNs, key1);
@@ -194,7 +196,7 @@ TEST(OringDurationTrackerTest, TestDurationConditionChange2) {
     sp<MockConditionWizard> wizard = new NaggyMock<MockConditionWizard>();
 
     ConditionKey key1;
-    key1["APP_BACKGROUND"] = kConditionKey1;
+    key1[StringToId("APP_BACKGROUND")] = kConditionKey1;
 
     EXPECT_CALL(*wizard, query(_, key1))
             .Times(2)
@@ -208,7 +210,7 @@ TEST(OringDurationTrackerTest, TestDurationConditionChange2) {
     uint64_t bucketSizeNs = 30 * 1000 * 1000 * 1000LL;
     uint64_t durationTimeNs = 2 * 1000;
 
-    OringDurationTracker tracker(kConfigKey, "metric", eventKey, wizard, 1, false,
+    OringDurationTracker tracker(kConfigKey, metricId, eventKey, wizard, 1, false,
                                  bucketStartTimeNs, bucketSizeNs, {});
 
     tracker.noteStart(kEventKey1, true, eventStartTimeNs, key1);
@@ -229,7 +231,7 @@ TEST(OringDurationTrackerTest, TestDurationConditionChangeNested) {
     sp<MockConditionWizard> wizard = new NaggyMock<MockConditionWizard>();
 
     ConditionKey key1;
-    key1["APP_BACKGROUND"] = kConditionKey1;
+    key1[StringToId("APP_BACKGROUND")] = kConditionKey1;
 
     EXPECT_CALL(*wizard, query(_, key1))  // #4
             .WillOnce(Return(ConditionState::kFalse));
@@ -240,7 +242,7 @@ TEST(OringDurationTrackerTest, TestDurationConditionChangeNested) {
     uint64_t eventStartTimeNs = bucketStartTimeNs + 1;
     uint64_t bucketSizeNs = 30 * 1000 * 1000 * 1000LL;
 
-    OringDurationTracker tracker(kConfigKey, "metric", eventKey, wizard, 1, true, bucketStartTimeNs,
+    OringDurationTracker tracker(kConfigKey, metricId, eventKey, wizard, 1, true, bucketStartTimeNs,
                                  bucketSizeNs, {});
 
     tracker.noteStart(kEventKey1, true, eventStartTimeNs, key1);
@@ -260,8 +262,8 @@ TEST(OringDurationTrackerTest, TestDurationConditionChangeNested) {
 
 TEST(OringDurationTrackerTest, TestPredictAnomalyTimestamp) {
     Alert alert;
-    alert.set_name("alert");
-    alert.set_metric_name("1");
+    alert.set_id(101);
+    alert.set_metric_id(1);
     alert.set_trigger_if_sum_gt(40 * NS_PER_SEC);
     alert.set_number_of_buckets(2);
     alert.set_refractory_period_secs(1);
@@ -269,13 +271,13 @@ TEST(OringDurationTrackerTest, TestPredictAnomalyTimestamp) {
     unordered_map<HashableDimensionKey, vector<DurationBucket>> buckets;
     sp<MockConditionWizard> wizard = new NaggyMock<MockConditionWizard>();
     ConditionKey key1;
-    key1["APP_BACKGROUND"] = kConditionKey1;
+    key1[StringToId("APP_BACKGROUND")] = kConditionKey1;
     uint64_t bucketStartTimeNs = 10 * NS_PER_SEC;
     uint64_t eventStartTimeNs = bucketStartTimeNs + NS_PER_SEC + 1;
     uint64_t bucketSizeNs = 30 * NS_PER_SEC;
 
     sp<DurationAnomalyTracker> anomalyTracker = new DurationAnomalyTracker(alert, kConfigKey);
-    OringDurationTracker tracker(kConfigKey, "metric", eventKey, wizard, 1, true, bucketStartTimeNs,
+    OringDurationTracker tracker(kConfigKey, metricId, eventKey, wizard, 1, true, bucketStartTimeNs,
                                  bucketSizeNs, {anomalyTracker});
 
     // Nothing in the past bucket.
@@ -322,8 +324,8 @@ TEST(OringDurationTrackerTest, TestPredictAnomalyTimestamp) {
 
 TEST(OringDurationTrackerTest, TestAnomalyDetection) {
     Alert alert;
-    alert.set_name("alert");
-    alert.set_metric_name("1");
+    alert.set_id(101);
+    alert.set_metric_id(1);
     alert.set_trigger_if_sum_gt(40 * NS_PER_SEC);
     alert.set_number_of_buckets(2);
     alert.set_refractory_period_secs(1);
@@ -331,13 +333,13 @@ TEST(OringDurationTrackerTest, TestAnomalyDetection) {
     unordered_map<HashableDimensionKey, vector<DurationBucket>> buckets;
     sp<MockConditionWizard> wizard = new NaggyMock<MockConditionWizard>();
     ConditionKey key1;
-    key1["APP_BACKGROUND"] = kConditionKey1;
+    key1[StringToId("APP_BACKGROUND")] = kConditionKey1;
     uint64_t bucketStartTimeNs = 10 * NS_PER_SEC;
     uint64_t eventStartTimeNs = bucketStartTimeNs + NS_PER_SEC + 1;
     uint64_t bucketSizeNs = 30 * NS_PER_SEC;
 
     sp<DurationAnomalyTracker> anomalyTracker = new DurationAnomalyTracker(alert, kConfigKey);
-    OringDurationTracker tracker(kConfigKey, "metric", eventKey, wizard, 1, true /*nesting*/,
+    OringDurationTracker tracker(kConfigKey, metricId, eventKey, wizard, 1, true /*nesting*/,
                                  bucketStartTimeNs, bucketSizeNs, {anomalyTracker});
 
     tracker.noteStart(DEFAULT_DIMENSION_KEY, true, eventStartTimeNs, key1);

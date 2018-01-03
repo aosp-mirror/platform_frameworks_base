@@ -13,8 +13,9 @@
 // limitations under the License.
 
 #include "src/metrics/duration_helper/MaxDurationTracker.h"
-#include "metrics_test_helper.h"
 #include "src/condition/ConditionWizard.h"
+#include "metrics_test_helper.h"
+#include "tests/statsd_test_util.h"
 
 #include <gmock/gmock.h>
 #include <gtest/gtest.h>
@@ -36,7 +37,7 @@ namespace android {
 namespace os {
 namespace statsd {
 
-const ConfigKey kConfigKey(0, "test");
+const ConfigKey kConfigKey(0, 12345);
 
 const int TagId = 1;
 
@@ -50,12 +51,13 @@ TEST(MaxDurationTrackerTest, TestSimpleMaxDuration) {
 
     unordered_map<HashableDimensionKey, vector<DurationBucket>> buckets;
     ConditionKey conditionKey1;
-    conditionKey1["condition"] = conditionKey;
+    conditionKey1[StringToId("condition")] = conditionKey;
 
     uint64_t bucketStartTimeNs = 10000000000;
     uint64_t bucketSizeNs = 30 * 1000 * 1000 * 1000LL;
 
-    MaxDurationTracker tracker(kConfigKey, "metric", eventKey, wizard, -1, false, bucketStartTimeNs,
+    int64_t metricId = 1;
+    MaxDurationTracker tracker(kConfigKey, metricId, eventKey, wizard, -1, false, bucketStartTimeNs,
                                bucketSizeNs, {});
 
     tracker.noteStart(key1, true, bucketStartTimeNs, conditionKey1);
@@ -79,12 +81,13 @@ TEST(MaxDurationTrackerTest, TestStopAll) {
 
     unordered_map<HashableDimensionKey, vector<DurationBucket>> buckets;
     ConditionKey conditionKey1;
-    conditionKey1["condition"] = conditionKey;
+    conditionKey1[StringToId("condition")] = conditionKey;
 
     uint64_t bucketStartTimeNs = 10000000000;
     uint64_t bucketSizeNs = 30 * 1000 * 1000 * 1000LL;
 
-    MaxDurationTracker tracker(kConfigKey, "metric", eventKey, wizard, -1, false, bucketStartTimeNs,
+    int64_t metricId = 1;
+    MaxDurationTracker tracker(kConfigKey, metricId, eventKey, wizard, -1, false, bucketStartTimeNs,
                                bucketSizeNs, {});
 
     tracker.noteStart(key1, true, bucketStartTimeNs + 1, conditionKey1);
@@ -110,12 +113,13 @@ TEST(MaxDurationTrackerTest, TestCrossBucketBoundary) {
 
     unordered_map<HashableDimensionKey, vector<DurationBucket>> buckets;
     ConditionKey conditionKey1;
-    conditionKey1["condition"] = conditionKey;
+    conditionKey1[StringToId("condition")] = conditionKey;
 
     uint64_t bucketStartTimeNs = 10000000000;
     uint64_t bucketSizeNs = 30 * 1000 * 1000 * 1000LL;
 
-    MaxDurationTracker tracker(kConfigKey, "metric", eventKey, wizard, -1, false, bucketStartTimeNs,
+    int64_t metricId = 1;
+    MaxDurationTracker tracker(kConfigKey, metricId, eventKey, wizard, -1, false, bucketStartTimeNs,
                                bucketSizeNs, {});
 
     // The event starts.
@@ -141,12 +145,13 @@ TEST(MaxDurationTrackerTest, TestCrossBucketBoundary_nested) {
 
     unordered_map<HashableDimensionKey, vector<DurationBucket>> buckets;
     ConditionKey conditionKey1;
-    conditionKey1["condition"] = conditionKey;
+    conditionKey1[StringToId("condition")] = conditionKey;
 
     uint64_t bucketStartTimeNs = 10000000000;
     uint64_t bucketSizeNs = 30 * 1000 * 1000 * 1000LL;
 
-    MaxDurationTracker tracker(kConfigKey, "metric", eventKey, wizard, -1, true, bucketStartTimeNs,
+    int64_t metricId = 1;
+    MaxDurationTracker tracker(kConfigKey, metricId, eventKey, wizard, -1, true, bucketStartTimeNs,
                                bucketSizeNs, {});
 
     // 2 starts
@@ -177,7 +182,7 @@ TEST(MaxDurationTrackerTest, TestMaxDurationWithCondition) {
 
     ConditionKey conditionKey1;
     HashableDimensionKey eventKey = getMockedDimensionKey(TagId, 2, "maps");
-    conditionKey1["APP_BACKGROUND"] = conditionKey;
+    conditionKey1[StringToId("APP_BACKGROUND")] = conditionKey;
 
     EXPECT_CALL(*wizard, query(_, conditionKey1))  // #4
             .WillOnce(Return(ConditionState::kFalse));
@@ -189,7 +194,8 @@ TEST(MaxDurationTrackerTest, TestMaxDurationWithCondition) {
     uint64_t bucketSizeNs = 30 * 1000 * 1000 * 1000LL;
     int64_t durationTimeNs = 2 * 1000;
 
-    MaxDurationTracker tracker(kConfigKey, "metric", eventKey, wizard, 1, false, bucketStartTimeNs,
+    int64_t metricId = 1;
+    MaxDurationTracker tracker(kConfigKey, metricId, eventKey, wizard, 1, false, bucketStartTimeNs,
                                bucketSizeNs, {});
     EXPECT_TRUE(tracker.mAnomalyTrackers.empty());
 
@@ -206,9 +212,10 @@ TEST(MaxDurationTrackerTest, TestMaxDurationWithCondition) {
 }
 
 TEST(MaxDurationTrackerTest, TestAnomalyDetection) {
+    int64_t metricId = 1;
     Alert alert;
-    alert.set_name("alert");
-    alert.set_metric_name("metric");
+    alert.set_id(101);
+    alert.set_metric_id(metricId);
     alert.set_trigger_if_sum_gt(32 * NS_PER_SEC);
     alert.set_number_of_buckets(2);
     alert.set_refractory_period_secs(1);
@@ -216,13 +223,13 @@ TEST(MaxDurationTrackerTest, TestAnomalyDetection) {
     unordered_map<HashableDimensionKey, vector<DurationBucket>> buckets;
     sp<MockConditionWizard> wizard = new NaggyMock<MockConditionWizard>();
     ConditionKey conditionKey1;
-    conditionKey1["APP_BACKGROUND"] = conditionKey;
+    conditionKey1[StringToId("APP_BACKGROUND")] = conditionKey;
     uint64_t bucketStartTimeNs = 10 * NS_PER_SEC;
     uint64_t eventStartTimeNs = bucketStartTimeNs + NS_PER_SEC + 1;
     uint64_t bucketSizeNs = 30 * NS_PER_SEC;
 
     sp<DurationAnomalyTracker> anomalyTracker = new DurationAnomalyTracker(alert, kConfigKey);
-    MaxDurationTracker tracker(kConfigKey, "metric", eventKey, wizard, -1, true, bucketStartTimeNs,
+    MaxDurationTracker tracker(kConfigKey, metricId, eventKey, wizard, -1, true, bucketStartTimeNs,
                                bucketSizeNs, {anomalyTracker});
 
     tracker.noteStart(key1, true, eventStartTimeNs, conditionKey1);

@@ -40,6 +40,11 @@ public:
 
     virtual ~AnomalyTracker();
 
+    // Add subscriptions that depend on this alert.
+    void addSubscription(const Subscription& subscription) {
+        mSubscriptions.push_back(subscription);
+    }
+
     // Adds a bucket.
     // Bucket index starts from 0.
     void addPastBucket(std::shared_ptr<DimToValMap> bucketValues, const int64_t& bucketNum);
@@ -97,6 +102,9 @@ protected:
     // statsd_config.proto Alert message that defines this tracker.
     const Alert mAlert;
 
+    // The subscriptions that depend on this alert.
+    std::vector<Subscription> mSubscriptions;
+
     // A reference to the Alert's config key.
     const ConfigKey& mConfigKey;
 
@@ -104,7 +112,7 @@ protected:
     // for the anomaly detection (since the current bucket is not in the past).
     int mNumOfPastBuckets;
 
-    // The exisiting bucket list.
+    // The existing bucket list.
     std::vector<shared_ptr<DimToValMap>> mPastBuckets;
 
     // Sum over all existing buckets cached in mPastBuckets.
@@ -133,8 +141,8 @@ protected:
     // Resets all bucket data. For use when all the data gets stale.
     virtual void resetStorage();
 
-    // Informs the incident service that an anomaly has occurred.
-    void informIncidentd();
+    // Informs the subscribers that an anomaly has occurred.
+    void informSubscribers();
 
     FRIEND_TEST(AnomalyTrackerTest, TestConsecutiveBuckets);
     FRIEND_TEST(AnomalyTrackerTest, TestSparseBuckets);

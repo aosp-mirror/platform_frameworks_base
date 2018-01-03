@@ -46,7 +46,7 @@ namespace os {
 namespace statsd {
 
 // for StatsLogReport
-const int FIELD_ID_NAME = 1;
+const int FIELD_ID_ID = 1;
 const int FIELD_ID_START_REPORT_NANOS = 2;
 const int FIELD_ID_END_REPORT_NANOS = 3;
 const int FIELD_ID_VALUE_METRICS = 7;
@@ -68,7 +68,7 @@ ValueMetricProducer::ValueMetricProducer(const ConfigKey& key, const ValueMetric
                                          const sp<ConditionWizard>& wizard, const int pullTagId,
                                          const uint64_t startTimeNs,
                                          shared_ptr<StatsPullerManager> statsPullerManager)
-    : MetricProducer(metric.name(), key, startTimeNs, conditionIndex, wizard),
+    : MetricProducer(metric.id(), key, startTimeNs, conditionIndex, wizard),
       mValueField(metric.value_field()),
       mStatsPullerManager(statsPullerManager),
       mPullTagId(pullTagId) {
@@ -92,8 +92,8 @@ ValueMetricProducer::ValueMetricProducer(const ConfigKey& key, const ValueMetric
         mStatsPullerManager->RegisterReceiver(mPullTagId, this,
                                               metric.bucket().bucket_size_millis());
     }
-    VLOG("value metric %s created. bucket size %lld start_time: %lld", metric.name().c_str(),
-         (long long)mBucketSizeNs, (long long)mStartTimeNs);
+    VLOG("value metric %lld created. bucket size %lld start_time: %lld",
+        (long long)metric.id(), (long long)mBucketSizeNs, (long long)mStartTimeNs);
 }
 
 // for testing
@@ -113,12 +113,12 @@ ValueMetricProducer::~ValueMetricProducer() {
 }
 
 void ValueMetricProducer::onSlicedConditionMayChangeLocked(const uint64_t eventTime) {
-    VLOG("Metric %s onSlicedConditionMayChange", mName.c_str());
+    VLOG("Metric %lld onSlicedConditionMayChange", (long long)mMetricId);
 }
 
 void ValueMetricProducer::onDumpReportLocked(const uint64_t dumpTimeNs, StatsLogReport* report) {
     flushIfNeededLocked(dumpTimeNs);
-    report->set_metric_name(mName);
+    report->set_metric_id(mMetricId);
     report->set_start_report_nanos(mStartTimeNs);
     auto value_metrics = report->mutable_value_metrics();
     for (const auto& pair : mPastBuckets) {
@@ -135,9 +135,9 @@ void ValueMetricProducer::onDumpReportLocked(const uint64_t dumpTimeNs, StatsLog
 
 void ValueMetricProducer::onDumpReportLocked(const uint64_t dumpTimeNs,
                                              ProtoOutputStream* protoOutput) {
-    VLOG("metric %s dump report now...", mName.c_str());
+    VLOG("metric %lld dump report now...", (long long)mMetricId);
     flushIfNeededLocked(dumpTimeNs);
-    protoOutput->write(FIELD_TYPE_STRING | FIELD_ID_NAME, mName);
+    protoOutput->write(FIELD_TYPE_INT64 | FIELD_ID_ID, (long long)mMetricId);
     protoOutput->write(FIELD_TYPE_INT64 | FIELD_ID_START_REPORT_NANOS, (long long)mStartTimeNs);
     long long protoToken = protoOutput->start(FIELD_TYPE_MESSAGE | FIELD_ID_VALUE_METRICS);
 
@@ -171,7 +171,7 @@ void ValueMetricProducer::onDumpReportLocked(const uint64_t dumpTimeNs,
     protoOutput->end(protoToken);
     protoOutput->write(FIELD_TYPE_INT64 | FIELD_ID_END_REPORT_NANOS, (long long)dumpTimeNs);
 
-    VLOG("metric %s dump report now...", mName.c_str());
+    VLOG("metric %lld dump report now...", (long long)mMetricId);
     mPastBuckets.clear();
     mStartTimeNs = mCurrentBucketStartTimeNs;
     // TODO: Clear mDimensionKeyMap once the report is dumped.
@@ -242,11 +242,11 @@ bool ValueMetricProducer::hitGuardRailLocked(const HashableDimensionKey& newKey)
     }
     if (mCurrentSlicedBucket.size() > StatsdStats::kDimensionKeySizeSoftLimit - 1) {
         size_t newTupleCount = mCurrentSlicedBucket.size() + 1;
-        StatsdStats::getInstance().noteMetricDimensionSize(mConfigKey, mName, newTupleCount);
+        StatsdStats::getInstance().noteMetricDimensionSize(mConfigKey, mMetricId, newTupleCount);
         // 2. Don't add more tuples, we are above the allowed threshold. Drop the data.
         if (newTupleCount > StatsdStats::kDimensionKeySizeHardLimit) {
-            ALOGE("ValueMetric %s dropping data for dimension key %s", mName.c_str(),
-                  newKey.c_str());
+            ALOGE("ValueMetric %lld dropping data for dimension key %s",
+                (long long)mMetricId, newKey.c_str());
             return true;
         }
     }
@@ -346,7 +346,7 @@ void ValueMetricProducer::flushIfNeededLocked(const uint64_t& eventTimeNs) {
     if (numBucketsForward > 1) {
         VLOG("Skipping forward %lld buckets", (long long)numBucketsForward);
     }
-    VLOG("metric %s: new bucket start time: %lld", mName.c_str(),
+    VLOG("metric %lld: new bucket start time: %lld", (long long)mMetricId,
          (long long)mCurrentBucketStartTimeNs);
 }
 

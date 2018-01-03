@@ -28,7 +28,7 @@ namespace statsd {
 // they stop or bucket expires.
 class MaxDurationTracker : public DurationTracker {
 public:
-    MaxDurationTracker(const ConfigKey& key, const string& name,
+    MaxDurationTracker(const ConfigKey& key, const int64_t& id,
                        const HashableDimensionKey& eventKey, sp<ConditionWizard> wizard,
                        int conditionIndex, bool nesting, uint64_t currentBucketStartNs,
                        uint64_t bucketSizeNs,

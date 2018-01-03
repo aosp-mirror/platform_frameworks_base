@@ -84,12 +84,12 @@ message SimpleAtomMatcher {
 }
 
 message AtomMatcher {
-    optional string name = 1;
+    optional int64 id = 1;
 
     message Combination {
         optional LogicalOperation operation = 1;
 
-        repeated string matcher = 2;
+        repeated int64 matcher = 2;
     }
     oneof contents {
         SimpleAtomMatcher simple_atom_matcher = 2;
@@ -98,13 +98,13 @@ message AtomMatcher {
 }
 
 message SimplePredicate {
-    optional string start = 1;
+    optional int64 start = 1;
 
-    optional string stop = 2;
+    optional int64 stop = 2;
 
     optional bool count_nesting = 3 [default = true];
 
-    optional string stop_all = 4;
+    optional int64 stop_all = 4;
 
     enum InitialValue {
         UNKNOWN = 0;
@@ -116,12 +116,12 @@ message SimplePredicate {
 }
 
 message Predicate {
-    optional string name = 1;
+    optional int64 id = 1;
 
     message Combination {
         optional LogicalOperation operation = 1;
 
-        repeated string predicate = 2;
+        repeated int64 predicate = 2;
     }
 
     oneof contents {
@@ -135,7 +135,7 @@ message Bucket {
 }
 
 message MetricConditionLink {
-    optional string condition = 1;
+    optional int64 condition = 1;
 
     optional FieldMatcher dimensions_in_what = 2;
 
@@ -148,21 +148,21 @@ message FieldFilter {
 }
 
 message EventMetric {
-    optional string name = 1;
+    optional int64 id = 1;
 
-    optional string what = 2;
+    optional int64 what = 2;
 
-    optional string condition = 3;
+    optional int64 condition = 3;
 
     repeated MetricConditionLink links = 4;
 }
 
 message CountMetric {
-    optional string name = 1;
+    optional int64 id = 1;
 
-    optional string what = 2;
+    optional int64 what = 2;
 
-    optional string condition = 3;
+    optional int64 condition = 3;
 
     optional FieldMatcher dimensions = 4;
 
@@ -172,11 +172,11 @@ message CountMetric {
 }
 
 message DurationMetric {
-    optional string name = 1;
+    optional int64 id = 1;
 
-    optional string what = 2;
+    optional int64 what = 2;
 
-    optional string condition = 3;
+    optional int64 condition = 3;
 
     repeated MetricConditionLink links = 4;
 
@@ -193,13 +193,13 @@ message DurationMetric {
 }
 
 message GaugeMetric {
-    optional string name = 1;
+    optional int64 id = 1;
 
-    optional string what = 2;
+    optional int64 what = 2;
 
     optional FieldFilter gauge_fields_filter = 3;
 
-    optional string condition = 4;
+    optional int64 condition = 4;
 
     optional FieldMatcher dimensions = 5;
 
@@ -209,13 +209,13 @@ message GaugeMetric {
 }
 
 message ValueMetric {
-    optional string name = 1;
+    optional int64 id = 1;
 
-    optional string what = 2;
+    optional int64 what = 2;
 
     optional int32 value_field = 3;
 
-    optional string condition = 4;
+    optional int64 condition = 4;
 
     optional FieldMatcher dimensions = 5;
 
@@ -228,20 +228,15 @@ message ValueMetric {
 }
 
 message Alert {
-    optional string name = 1;
+    optional int64 id = 1;
 
-    optional string metric_name = 2;
+    optional int64 metric_id = 2;
 
-    message IncidentdDetails {
-        repeated int32 section = 1;
-    }
-    optional IncidentdDetails incidentd_details = 3;
+    optional int32 number_of_buckets = 3;
 
-    optional int32 number_of_buckets = 4;
+    optional int32 refractory_period_secs = 4;
 
-    optional int32 refractory_period_secs = 5;
-
-    optional int64 trigger_if_sum_gt = 6;
+    optional int64 trigger_if_sum_gt = 5;
 }
 
 message AllowedLogSource {
@@ -249,8 +244,40 @@ message AllowedLogSource {
     repeated string package = 2;
 }
 
+message Alarm {
+    optional int64 id = 1;
+    optional int64 offset_millis = 2;
+    optional int64 period_millis = 3;
+}
+
+message IncidentdDetails {
+    repeated int32 section = 1;
+}
+
+message PerfettoDetails {
+    optional int32 perfetto_stuff = 1;
+}
+
+message Subscription {
+    optional int64 id = 1;
+
+    enum RuleType {
+        RULE_TYPE_UNSPECIFIED = 0;
+        ALARM = 1;
+        ALERT = 2;
+    }
+    optional RuleType rule_type = 2;
+
+    optional int64 rule_id = 3;
+
+    oneof subscriber_information {
+        IncidentdDetails incidentd_details = 4;
+        PerfettoDetails perfetto_details = 5;
+    }
+}
+
 message StatsdConfig {
-    optional string name = 1;
+    optional int64 id = 1;
 
     repeated EventMetric event_metric = 2;
 
@@ -268,5 +295,11 @@ message StatsdConfig {
 
     repeated Alert alert = 9;
 
-    optional AllowedLogSource log_source = 10;
+    repeated Alarm alarm = 10;
+
+    repeated Subscription subscription = 11;
+
+    optional AllowedLogSource log_source = 12;
+
+    repeated int64 no_report_metric = 13;
 }

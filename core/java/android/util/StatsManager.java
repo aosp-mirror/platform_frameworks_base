@@ -53,7 +53,7 @@ public final class StatsManager {
      * @return true if successful
      */
     @RequiresPermission(Manifest.permission.DUMP)
-    public boolean addConfiguration(String configKey, byte[] config, String pkg, String cls) {
+    public boolean addConfiguration(long configKey, byte[] config, String pkg, String cls) {
         synchronized (this) {
             try {
                 IStatsManager service = getIStatsManagerLocked();
@@ -76,7 +76,7 @@ public final class StatsManager {
      * @return true if successful
      */
     @RequiresPermission(Manifest.permission.DUMP)
-    public boolean removeConfiguration(String configKey) {
+    public boolean removeConfiguration(long configKey) {
         synchronized (this) {
             try {
                 IStatsManager service = getIStatsManagerLocked();
@@ -100,7 +100,7 @@ public final class StatsManager {
      * @return Serialized ConfigMetricsReportList proto. Returns null on failure.
      */
     @RequiresPermission(Manifest.permission.DUMP)
-    public byte[] getData(String configKey) {
+    public byte[] getData(long configKey) {
         synchronized (this) {
             try {
                 IStatsManager service = getIStatsManagerLocked();

@@ -294,7 +294,7 @@ public class LoadtestActivity extends Activity {
             return null;
         }
         if (mStatsManager != null) {
-            byte[] data = mStatsManager.getData(ConfigFactory.CONFIG_NAME);
+            byte[] data = mStatsManager.getData(ConfigFactory.CONFIG_ID);
             if (data != null) {
                 ConfigMetricsReportList reports = null;
                 try {
@@ -453,7 +453,7 @@ public class LoadtestActivity extends Activity {
         // TODO: Clear all configs instead of specific ones.
         if (mStatsManager != null) {
             if (mStarted) {
-                if (!mStatsManager.removeConfiguration(ConfigFactory.CONFIG_NAME)) {
+                if (!mStatsManager.removeConfiguration(ConfigFactory.CONFIG_ID)) {
                     Log.d(TAG, "Removed loadtest statsd configs.");
                 } else {
                     Log.d(TAG, "Failed to remove loadtest configs.");
@@ -464,7 +464,7 @@ public class LoadtestActivity extends Activity {
 
     private boolean setConfig(byte[] config) {
       if (mStatsManager != null) {
-            if (mStatsManager.addConfiguration(ConfigFactory.CONFIG_NAME,
+            if (mStatsManager.addConfiguration(ConfigFactory.CONFIG_ID,
                 config, getPackageName(), LoadtestActivity.this.getClass().getName())) {
                 Log.d(TAG, "Config pushed to statsd");
                 return true;

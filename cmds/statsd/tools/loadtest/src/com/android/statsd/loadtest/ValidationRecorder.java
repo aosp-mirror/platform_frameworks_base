@@ -59,18 +59,8 @@ public class ValidationRecorder extends PerfDataRecorder {
             Log.d(TAG, "GOT DATA");
             for (ConfigMetricsReport report : reports) {
                 for (StatsLogReport logReport : report.getMetricsList()) {
-                    if (!logReport.hasMetricName()) {
+                    if (!logReport.hasMetricId()) {
                         Log.e(TAG, "Metric missing name.");
-                        continue;
-                    }
-                    String metricName = logReport.getMetricName();
-                    if (metricName.startsWith("EVENT_BATTERY_LEVEL_CHANGES_WHILE_SCREEN_IS_ON_")) {
-                        validateEventBatteryLevelChangesWhileScreenIsOn(logReport);
-                        continue;
-                    }
-                    if (metricName.startsWith("EVENT_BATTERY_LEVEL_CHANGES_")) {
-                        validateEventBatteryLevelChanges(logReport);
-                        continue;
                     }
                 }
             }
@@ -78,7 +68,7 @@ public class ValidationRecorder extends PerfDataRecorder {
     }
 
     private void validateEventBatteryLevelChanges(StatsLogReport logReport) {
-        Log.d(TAG, "Validating " + logReport.getMetricName());
+        Log.d(TAG, "Validating " + logReport.getMetricId());
         if (logReport.hasEventMetrics()) {
             Log.d(TAG, "Num events captured: " + logReport.getEventMetrics().getDataCount());
             for (EventMetricData data : logReport.getEventMetrics().getDataList()) {
@@ -90,6 +80,6 @@ public class ValidationRecorder extends PerfDataRecorder {
     }
 
     private void validateEventBatteryLevelChangesWhileScreenIsOn(StatsLogReport logReport) {
-        Log.d(TAG, "Validating " + logReport.getMetricName());
+        Log.d(TAG, "Validating " + logReport.getMetricId());
     }
 }

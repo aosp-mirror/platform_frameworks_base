@@ -41,7 +41,7 @@ import java.util.List;
  * Creates StatsdConfig protos for loadtesting.
  */
 public class ConfigFactory {
-    public static final String CONFIG_NAME = "LOADTEST";
+    public static final long CONFIG_ID = 123456789;
 
     private static final String TAG = "loadtest.ConfigFactory";
 
@@ -86,7 +86,7 @@ public class ConfigFactory {
                           boolean includeDuration, boolean includeEvent, boolean includeValue,
                           boolean includeGauge) {
         StatsdConfig.Builder config = StatsdConfig.newBuilder()
-            .setName(CONFIG_NAME);
+            .setId(CONFIG_ID);
         if (placebo) {
           replication = 0;  // Config will be empty, aside from a name.
         }
@@ -160,7 +160,7 @@ public class ConfigFactory {
      */
     private void addEventMetric(EventMetric template, int suffix, StatsdConfig.Builder config) {
         EventMetric.Builder metric = template.toBuilder()
-            .setName(template.getName() + suffix)
+            .setId(template.getId() + suffix)
             .setWhat(template.getWhat() + suffix);
         if (template.hasCondition()) {
             metric.setCondition(template.getCondition() + suffix);
@@ -186,7 +186,7 @@ public class ConfigFactory {
     private void addCountMetric(CountMetric template, int suffix, long bucketMillis,
         StatsdConfig.Builder config) {
         CountMetric.Builder metric = template.toBuilder()
-            .setName(template.getName() + suffix)
+            .setId(template.getId() + suffix)
             .setWhat(template.getWhat() + suffix);
         if (template.hasCondition()) {
             metric.setCondition(template.getCondition() + suffix);
@@ -207,7 +207,7 @@ public class ConfigFactory {
     private void addDurationMetric(DurationMetric template, int suffix, long bucketMillis,
         StatsdConfig.Builder config) {
         DurationMetric.Builder metric = template.toBuilder()
-            .setName(template.getName() + suffix)
+            .setId(template.getId() + suffix)
             .setWhat(template.getWhat() + suffix);
         if (template.hasCondition()) {
             metric.setCondition(template.getCondition() + suffix);
@@ -228,7 +228,7 @@ public class ConfigFactory {
     private void addGaugeMetric(GaugeMetric template, int suffix, long bucketMillis,
         StatsdConfig.Builder config) {
         GaugeMetric.Builder metric = template.toBuilder()
-            .setName(template.getName() + suffix)
+            .setId(template.getId() + suffix)
             .setWhat(template.getWhat() + suffix);
         if (template.hasCondition()) {
             metric.setCondition(template.getCondition() + suffix);
@@ -249,7 +249,7 @@ public class ConfigFactory {
     private void addValueMetric(ValueMetric template, int suffix, long bucketMillis,
         StatsdConfig.Builder config) {
         ValueMetric.Builder metric = template.toBuilder()
-            .setName(template.getName() + suffix)
+            .setId(template.getId() + suffix)
             .setWhat(template.getWhat() + suffix);
         if (template.hasCondition()) {
             metric.setCondition(template.getCondition() + suffix);
@@ -269,11 +269,11 @@ public class ConfigFactory {
      */
     private void addPredicate(Predicate template, int suffix, StatsdConfig.Builder config) {
         Predicate.Builder predicate = template.toBuilder()
-            .setName(template.getName() + suffix);
+            .setId(template.getId() + suffix);
         if (template.hasCombination()) {
             Predicate.Combination.Builder cb = template.getCombination().toBuilder()
                 .clearPredicate();
-            for (String child : template.getCombination().getPredicateList()) {
+            for (long child : template.getCombination().getPredicateList()) {
                 cb.addPredicate(child + suffix);
             }
             predicate.setCombination(cb.build());
@@ -296,11 +296,11 @@ public class ConfigFactory {
      */
     private void addMatcher(AtomMatcher template, int suffix, StatsdConfig.Builder config) {
         AtomMatcher.Builder matcher = template.toBuilder()
-            .setName(template.getName() + suffix);
+            .setId(template.getId() + suffix);
         if (template.hasCombination()) {
             AtomMatcher.Combination.Builder cb = template.getCombination().toBuilder()
                 .clearMatcher();
-            for (String child : template.getCombination().getMatcherList()) {
+            for (long child : template.getCombination().getMatcherList()) {
                 cb.addMatcher(child + suffix);
             }
             matcher.setCombination(cb);

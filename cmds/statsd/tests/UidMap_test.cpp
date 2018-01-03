@@ -18,6 +18,7 @@
 #include "guardrail/StatsdStats.h"
 #include "logd/LogEvent.h"
 #include "statslog.h"
+#include "statsd_test_util.h"
 
 #include <gtest/gtest.h>
 
@@ -156,8 +157,8 @@ TEST(UidMapTest, TestUpdateApp) {
 TEST(UidMapTest, TestClearingOutput) {
     UidMap m;
 
-    ConfigKey config1(1, "config1");
-    ConfigKey config2(1, "config2");
+    ConfigKey config1(1, StringToId("config1"));
+    ConfigKey config2(1, StringToId("config2"));
 
     m.OnConfigUpdated(config1);
 
@@ -211,7 +212,7 @@ TEST(UidMapTest, TestClearingOutput) {
 TEST(UidMapTest, TestMemoryComputed) {
     UidMap m;
 
-    ConfigKey config1(1, "config1");
+    ConfigKey config1(1, StringToId("config1"));
     m.OnConfigUpdated(config1);
 
     size_t startBytes = m.mBytesUsed;
@@ -241,7 +242,7 @@ TEST(UidMapTest, TestMemoryGuardrail) {
     UidMap m;
     string buf;
 
-    ConfigKey config1(1, "config1");
+    ConfigKey config1(1, StringToId("config1"));
     m.OnConfigUpdated(config1);
 
     size_t startBytes = m.mBytesUsed;

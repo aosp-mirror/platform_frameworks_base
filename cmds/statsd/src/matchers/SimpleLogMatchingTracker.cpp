@@ -29,10 +29,10 @@ using std::unordered_map;
 using std::vector;
 
 
-SimpleLogMatchingTracker::SimpleLogMatchingTracker(const string& name, const int index,
+SimpleLogMatchingTracker::SimpleLogMatchingTracker(const int64_t& id, const int index,
                                                    const SimpleAtomMatcher& matcher,
                                                    const UidMap& uidMap)
-    : LogMatchingTracker(name, index), mMatcher(matcher), mUidMap(uidMap) {
+    : LogMatchingTracker(id, index), mMatcher(matcher), mUidMap(uidMap) {
     if (!matcher.has_atom_id()) {
         mInitialized = false;
     } else {
@@ -46,7 +46,7 @@ SimpleLogMatchingTracker::~SimpleLogMatchingTracker() {
 
 bool SimpleLogMatchingTracker::init(const vector<AtomMatcher>& allLogMatchers,
                                     const vector<sp<LogMatchingTracker>>& allTrackers,
-                                    const unordered_map<string, int>& matcherMap,
+                                    const unordered_map<int64_t, int>& matcherMap,
                                     vector<bool>& stack) {
     // no need to do anything.
     return mInitialized;
@@ -56,7 +56,7 @@ void SimpleLogMatchingTracker::onLogEvent(const LogEvent& event,
                                           const vector<sp<LogMatchingTracker>>& allTrackers,
                                           vector<MatchingState>& matcherResults) {
     if (matcherResults[mIndex] != MatchingState::kNotComputed) {
-        VLOG("Matcher %s already evaluated ", mName.c_str());
+        VLOG("Matcher %lld already evaluated ", (long long)mId);
         return;
     }
 
@@ -67,7 +67,7 @@ void SimpleLogMatchingTracker::onLogEvent(const LogEvent& event,
 
     bool matched = matchesSimple(mUidMap, mMatcher, event);
     matcherResults[mIndex] = matched ? MatchingState::kMatched : MatchingState::kNotMatched;
-    VLOG("Stats SimpleLogMatcher %s matched? %d", mName.c_str(), matched);
+    VLOG("Stats SimpleLogMatcher %lld matched? %d", (long long)mId, matched);
 }
 
 }  // namespace statsd

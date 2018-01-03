@@ -37,14 +37,14 @@ class ConfigKey {
 public:
     ConfigKey();
     explicit ConfigKey(const ConfigKey& that);
-    ConfigKey(int uid, const string& name);
+    ConfigKey(int uid, const int64_t& id);
     ~ConfigKey();
 
     inline int GetUid() const {
         return mUid;
     }
-    inline const string& GetName() const {
-        return mName;
+    inline const int64_t& GetId() const {
+        return mId;
     }
 
     inline bool operator<(const ConfigKey& that) const {
@@ -54,23 +54,25 @@ public:
         if (mUid > that.mUid) {
             return false;
         }
-        return mName < that.mName;
+        return mId < that.mId;
     };
 
     inline bool operator==(const ConfigKey& that) const {
-        return mUid == that.mUid && mName == that.mName;
+        return mUid == that.mUid && mId == that.mId;
     };
 
     string ToString() const;
 
 private:
-    string mName;
+    int64_t mId;
     int mUid;
 };
 
 inline ostream& operator<<(ostream& os, const ConfigKey& config) {
     return os << config.ToString();
 }
+
+int64_t StrToInt64(const string& str);
 
 }  // namespace statsd
 }  // namespace os
@@ -87,7 +89,7 @@ using android::os::statsd::ConfigKey;
 template <>
 struct hash<ConfigKey> {
     std::size_t operator()(const ConfigKey& key) const {
-        return (7 * key.GetUid()) ^ ((hash<string>()(key.GetName())));
+        return (7 * key.GetUid()) ^ ((hash<long long>()(key.GetId())));
     }
 };
 

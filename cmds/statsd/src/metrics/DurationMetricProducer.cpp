@@ -42,7 +42,7 @@ namespace os {
 namespace statsd {
 
 // for StatsLogReport
-const int FIELD_ID_NAME = 1;
+const int FIELD_ID_ID = 1;
 const int FIELD_ID_START_REPORT_NANOS = 2;
 const int FIELD_ID_END_REPORT_NANOS = 3;
 const int FIELD_ID_DURATION_METRICS = 6;
@@ -63,7 +63,7 @@ DurationMetricProducer::DurationMetricProducer(const ConfigKey& key, const Durat
                                                const sp<ConditionWizard>& wizard,
                                                const FieldMatcher& internalDimensions,
                                                const uint64_t startTimeNs)
-    : MetricProducer(metric.name(), key, startTimeNs, conditionIndex, wizard),
+    : MetricProducer(metric.id(), key, startTimeNs, conditionIndex, wizard),
       mAggregationType(metric.aggregation_type()),
       mStartIndex(startIndex),
       mStopIndex(stopIndex),
@@ -88,7 +88,7 @@ DurationMetricProducer::DurationMetricProducer(const ConfigKey& key, const Durat
         mConditionSliced = true;
     }
 
-    VLOG("metric %s created. bucket size %lld start_time: %lld", metric.name().c_str(),
+    VLOG("metric %lld created. bucket size %lld start_time: %lld", (long long)metric.id(),
          (long long)mBucketSizeNs, (long long)mStartTimeNs);
 }
 
@@ -116,17 +116,17 @@ unique_ptr<DurationTracker> DurationMetricProducer::createDurationTracker(
     switch (mAggregationType) {
         case DurationMetric_AggregationType_SUM:
             return make_unique<OringDurationTracker>(
-                    mConfigKey, mName, eventKey, mWizard, mConditionTrackerIndex, mNested,
+                    mConfigKey, mMetricId, eventKey, mWizard, mConditionTrackerIndex, mNested,
                     mCurrentBucketStartTimeNs, mBucketSizeNs, mAnomalyTrackers);
         case DurationMetric_AggregationType_MAX_SPARSE:
             return make_unique<MaxDurationTracker>(
-                    mConfigKey, mName, eventKey, mWizard, mConditionTrackerIndex, mNested,
+                    mConfigKey, mMetricId, eventKey, mWizard, mConditionTrackerIndex, mNested,
                     mCurrentBucketStartTimeNs, mBucketSizeNs, mAnomalyTrackers);
     }
 }
 
 void DurationMetricProducer::onSlicedConditionMayChangeLocked(const uint64_t eventTime) {
-    VLOG("Metric %s onSlicedConditionMayChange", mName.c_str());
+    VLOG("Metric %lld onSlicedConditionMayChange", (long long)mMetricId);
     flushIfNeededLocked(eventTime);
     // Now for each of the on-going event, check if the condition has changed for them.
     for (auto& pair : mCurrentSlicedDuration) {
@@ -136,7 +136,7 @@ void DurationMetricProducer::onSlicedConditionMayChangeLocked(const uint64_t eve
 
 void DurationMetricProducer::onConditionChangedLocked(const bool conditionMet,
                                                       const uint64_t eventTime) {
-    VLOG("Metric %s onConditionChanged", mName.c_str());
+    VLOG("Metric %lld onConditionChanged", (long long)mMetricId);
     mCondition = conditionMet;
     flushIfNeededLocked(eventTime);
     // TODO: need to populate the condition change time from the event which triggers the condition
@@ -148,7 +148,7 @@ void DurationMetricProducer::onConditionChangedLocked(const bool conditionMet,
 
 void DurationMetricProducer::onDumpReportLocked(const uint64_t dumpTimeNs, StatsLogReport* report) {
     flushIfNeededLocked(dumpTimeNs);
-    report->set_metric_name(mName);
+    report->set_metric_id(mMetricId);
     report->set_start_report_nanos(mStartTimeNs);
 
     auto duration_metrics = report->mutable_duration_metrics();
@@ -168,11 +168,11 @@ void DurationMetricProducer::onDumpReportLocked(const uint64_t dumpTimeNs,
                                                 ProtoOutputStream* protoOutput) {
     flushIfNeededLocked(dumpTimeNs);
 
-    protoOutput->write(FIELD_TYPE_STRING | FIELD_ID_NAME, mName);
+    protoOutput->write(FIELD_TYPE_INT64 | FIELD_ID_ID, (long long)mMetricId);
     protoOutput->write(FIELD_TYPE_INT64 | FIELD_ID_START_REPORT_NANOS, (long long)mStartTimeNs);
     long long protoToken = protoOutput->start(FIELD_TYPE_MESSAGE | FIELD_ID_DURATION_METRICS);
 
-    VLOG("metric %s dump report now...", mName.c_str());
+    VLOG("metric %lld dump report now...", (long long)mMetricId);
 
     for (const auto& pair : mPastBuckets) {
         const HashableDimensionKey& hashableKey = pair.first;
@@ -237,11 +237,11 @@ bool DurationMetricProducer::hitGuardRailLocked(const HashableDimensionKey& newK
     // 1. Report the tuple count if the tuple count > soft limit
     if (mCurrentSlicedDuration.size() > StatsdStats::kDimensionKeySizeSoftLimit - 1) {
         size_t newTupleCount = mCurrentSlicedDuration.size() + 1;
-        StatsdStats::getInstance().noteMetricDimensionSize(mConfigKey, mName, newTupleCount);
+        StatsdStats::getInstance().noteMetricDimensionSize(mConfigKey, mMetricId, newTupleCount);
         // 2. Don't add more tuples, we are above the allowed threshold. Drop the data.
         if (newTupleCount > StatsdStats::kDimensionKeySizeHardLimit) {
-            ALOGE("DurationMetric %s dropping data for dimension key %s", mName.c_str(),
-                  newKey.c_str());
+            ALOGE("DurationMetric %lld dropping data for dimension key %s",
+                (long long)mMetricId, newKey.c_str());
             return true;
         }
     }

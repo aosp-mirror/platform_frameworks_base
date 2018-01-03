@@ -121,6 +121,8 @@ sp<StatsLogProcessor> CreateStatsLogProcessor(const long timeBaseSec, const Stat
 // Util function to sort the log events by timestamp.
 void sortLogEventsByTimestamp(std::vector<std::unique_ptr<LogEvent>> *events);
 
+int64_t StringToId(const string& str);
+
 }  // namespace statsd
 }  // namespace os
 }  // namespace android

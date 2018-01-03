@@ -51,7 +51,7 @@ MetricsManager::MetricsManager(const ConfigKey& key, const StatsdConfig& config,
     mConfigValid =
             initStatsdConfig(key, config, *uidMap, timeBaseSec, mTagIds, mAllAtomMatchers, mAllConditionTrackers,
                              mAllMetricProducers, mAllAnomalyTrackers, mConditionToMetricMap,
-                             mTrackerToMetricMap, mTrackerToConditionMap);
+                             mTrackerToMetricMap, mTrackerToConditionMap, mNoReportMetricIds);
 
     if (!config.has_log_source()) {
         // TODO(b/70794411): uncomment the following line and remove the hard coded log source
@@ -143,8 +143,10 @@ void MetricsManager::onUidMapReceived() {
 }
 
 void MetricsManager::onDumpReport(const uint64_t& dumpTimeStampNs, ConfigMetricsReport* report) {
-    for (auto& producer : mAllMetricProducers) {
-        producer->onDumpReport(dumpTimeStampNs, report->add_metrics());
+    for (const auto& producer : mAllMetricProducers) {
+        if (mNoReportMetricIds.find(producer->getMetricId()) == mNoReportMetricIds.end()) {
+            producer->onDumpReport(dumpTimeStampNs, report->add_metrics());
+        }
     }
 }
 
@@ -152,11 +154,13 @@ void MetricsManager::onDumpReport(ProtoOutputStream* protoOutput) {
     VLOG("=========================Metric Reports Start==========================");
     uint64_t dumpTimeStampNs = time(nullptr) * NS_PER_SEC;
     // one StatsLogReport per MetricProduer
-    for (auto& metric : mAllMetricProducers) {
-        long long token =
-                protoOutput->start(FIELD_TYPE_MESSAGE | FIELD_COUNT_REPEATED | FIELD_ID_METRICS);
-        metric->onDumpReport(dumpTimeStampNs, protoOutput);
-        protoOutput->end(token);
+    for (const auto& producer : mAllMetricProducers) {
+        if (mNoReportMetricIds.find(producer->getMetricId()) == mNoReportMetricIds.end()) {
+            long long token =
+                    protoOutput->start(FIELD_TYPE_MESSAGE | FIELD_COUNT_REPEATED | FIELD_ID_METRICS);
+            producer->onDumpReport(dumpTimeStampNs, protoOutput);
+            protoOutput->end(token);
+        }
     }
     VLOG("=========================Metric Reports End==========================");
 }
@@ -240,7 +244,7 @@ void MetricsManager::onLogEvent(const LogEvent& event) {
     for (size_t i = 0; i < mAllAtomMatchers.size(); i++) {
         if (matcherCache[i] == MatchingState::kMatched) {
             StatsdStats::getInstance().noteMatcherMatched(mConfigKey,
-                                                          mAllAtomMatchers[i]->getName());
+                                                          mAllAtomMatchers[i]->getId());
             auto pair = mTrackerToMetricMap.find(i);
             if (pair != mTrackerToMetricMap.end()) {
                 auto& metricList = pair->second;

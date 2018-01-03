@@ -15,6 +15,7 @@
 #include "src/metrics/EventMetricProducer.h"
 #include "src/dimension.h"
 #include "metrics_test_helper.h"
+#include "tests/statsd_test_util.h"
 
 #include <gmock/gmock.h>
 #include <gtest/gtest.h>
@@ -33,7 +34,7 @@ namespace android {
 namespace os {
 namespace statsd {
 
-const ConfigKey kConfigKey(0, "test");
+const ConfigKey kConfigKey(0, 12345);
 
 TEST(EventMetricProducerTest, TestNoCondition) {
     uint64_t bucketStartTimeNs = 10000000000;
@@ -41,7 +42,7 @@ TEST(EventMetricProducerTest, TestNoCondition) {
     uint64_t bucketSizeNs = 30 * 1000 * 1000 * 1000LL;
 
     EventMetric metric;
-    metric.set_name("1");
+    metric.set_id(1);
 
     LogEvent event1(1 /*tag id*/, bucketStartTimeNs + 1);
     LogEvent event2(1 /*tag id*/, bucketStartTimeNs + 2);
@@ -64,8 +65,8 @@ TEST(EventMetricProducerTest, TestEventsWithNonSlicedCondition) {
     uint64_t bucketSizeNs = 30 * 1000 * 1000 * 1000LL;
 
     EventMetric metric;
-    metric.set_name("1");
-    metric.set_condition("SCREEN_ON");
+    metric.set_id(1);
+    metric.set_condition(StringToId("SCREEN_ON"));
 
     LogEvent event1(1, bucketStartTimeNs + 1);
     LogEvent event2(1, bucketStartTimeNs + 10);
@@ -93,10 +94,10 @@ TEST(EventMetricProducerTest, TestEventsWithSlicedCondition) {
     int conditionTagId = 2;
 
     EventMetric metric;
-    metric.set_name("1");
-    metric.set_condition("APP_IN_BACKGROUND_PER_UID_AND_SCREEN_ON");
+    metric.set_id(1);
+    metric.set_condition(StringToId("APP_IN_BACKGROUND_PER_UID_AND_SCREEN_ON"));
     MetricConditionLink* link = metric.add_links();
-    link->set_condition("APP_IN_BACKGROUND_PER_UID");
+    link->set_condition(StringToId("APP_IN_BACKGROUND_PER_UID"));
     *link->mutable_dimensions_in_what() = buildSimpleAtomFieldMatcher(tagId, 1);
     *link->mutable_dimensions_in_condition() = buildSimpleAtomFieldMatcher(conditionTagId, 2);
 
@@ -104,13 +105,13 @@ TEST(EventMetricProducerTest, TestEventsWithSlicedCondition) {
     EXPECT_TRUE(event1.write("111"));
     event1.init();
     ConditionKey key1;
-    key1["APP_IN_BACKGROUND_PER_UID"] = {getMockedDimensionKey(conditionTagId, 2, "111")};
+    key1[StringToId("APP_IN_BACKGROUND_PER_UID")] = {getMockedDimensionKey(conditionTagId, 2, "111")};
 
     LogEvent event2(tagId, bucketStartTimeNs + 10);
     EXPECT_TRUE(event2.write("222"));
     event2.init();
     ConditionKey key2;
-    key2["APP_IN_BACKGROUND_PER_UID"] = {getMockedDimensionKey(conditionTagId, 2, "222")};
+    key2[StringToId("APP_IN_BACKGROUND_PER_UID")] = {getMockedDimensionKey(conditionTagId, 2, "222")};
 
     sp<MockConditionWizard> wizard = new NaggyMock<MockConditionWizard>();
     EXPECT_CALL(*wizard, query(_, key1)).WillOnce(Return(ConditionState::kFalse));
