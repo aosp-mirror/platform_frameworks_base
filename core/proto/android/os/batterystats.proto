@@ -672,7 +672,7 @@ message UidProto {
     // In approximate order or priority (top being what the framework considers
     // most important and is thus least likely to kill when resources are
     // needed:
-    // top > foreground service > top sleeping > foreground > background > cache
+    // top > foreground service > foreground > background > top sleeping > heavy weight > cache
     enum State {
       // Time this uid has any processes in the top state (or above such as
       // persistent).
@@ -680,20 +680,26 @@ message UidProto {
       // Time this uid has any process with a started out bound foreground
       // service, but none in the "top" state.
       PROCESS_STATE_FOREGROUND_SERVICE = 1;
-      // Time this uid has any process that is top while the device is sleeping,
-      // but none in the "foreground service" or better state. Sleeping is
-      // mostly screen off, but also includes the time when the screen is on but
-      // the device has not yet been unlocked.
-      PROCESS_STATE_TOP_SLEEPING = 2;
       // Time this uid has any process in an active foreground state, but none
       // in the "top sleeping" or better state.
-      PROCESS_STATE_FOREGROUND = 3;
+      PROCESS_STATE_FOREGROUND = 2;
       // Time this uid has any process in an active background state, but none
       // in the "foreground" or better state.
-      PROCESS_STATE_BACKGROUND = 4;
+      PROCESS_STATE_BACKGROUND = 3;
+      // Time this uid has any process that is top while the device is sleeping,
+      // but not active for any other reason. We consider is a kind of cached
+      // process for execution restrictions. Sleeping is mostly screen off, but
+      // also includes the time when the screen is on but the device has not yet
+      // been unlocked.
+      PROCESS_STATE_TOP_SLEEPING = 4;
+      // Time this uid has any process that is in the background but it has an
+      // activity marked as "can't save state".  This is essentially a cached
+      // process, though the system will try much harder than normal to avoid
+      // killing it.
+      PROCESS_STATE_HEAVY_WEIGHT = 5;
       // Time this uid has any processes that are sitting around cached, not in
       // one of the other active states.
-      PROCESS_STATE_CACHED = 5;
+      PROCESS_STATE_CACHED = 6;
     }
     optional State state = 1;
     optional int64 duration_ms = 2;
