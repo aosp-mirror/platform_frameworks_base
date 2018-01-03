@@ -4291,8 +4291,22 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
         float9[Matrix.MSKEW_Y] = mWinAnimator.mDtDx;
         float9[Matrix.MSKEW_X] = mWinAnimator.mDtDy;
         float9[Matrix.MSCALE_Y] = mWinAnimator.mDsDy;
-        float9[Matrix.MTRANS_X] = mSurfacePosition.x + mShownPosition.x;
-        float9[Matrix.MTRANS_Y] = mSurfacePosition.y + mShownPosition.y;
+        int x = mSurfacePosition.x + mShownPosition.x;
+        int y = mSurfacePosition.y + mShownPosition.y;
+
+        // If changed, also adjust transformFrameToSurfacePosition
+        final WindowContainer parent = getParent();
+        if (isChildWindow()) {
+            final WindowState parentWindow = getParentWindow();
+            x += parentWindow.mFrame.left - parentWindow.mAttrs.surfaceInsets.left;
+            y += parentWindow.mFrame.top - parentWindow.mAttrs.surfaceInsets.top;
+        } else if (parent != null) {
+            final Rect parentBounds = parent.getBounds();
+            x += parentBounds.left;
+            y += parentBounds.top;
+        }
+        float9[Matrix.MTRANS_X] = x;
+        float9[Matrix.MTRANS_Y] = y;
         float9[Matrix.MPERSP_0] = 0;
         float9[Matrix.MPERSP_1] = 0;
         float9[Matrix.MPERSP_2] = 1;
@@ -4439,6 +4453,8 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
 
     private void transformFrameToSurfacePosition(int left, int top, Point outPoint) {
         outPoint.set(left, top);
+
+        // If changed, also adjust getTransformationMatrix
         final WindowContainer parentWindowContainer = getParent();
         if (isChildWindow()) {
             // TODO: This probably falls apart at some point and we should
