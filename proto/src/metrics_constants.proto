@@ -5094,6 +5094,36 @@ message MetricsEvent {
     // Tag used to report autofill field classification scores
     FIELD_AUTOFILL_MATCH_SCORE = 1274;
 
+    // ACTION: Usb config has been changed to charging
+    // CATEGORY: SETTINGS
+    // OS: P
+    ACTION_USB_CONFIG_CHARGING = 1275;
+
+    // ACTION: Usb config has been changed to mtp (file transfer)
+    // CATEGORY: SETTINGS
+    // OS: P
+    ACTION_USB_CONFIG_MTP = 1276;
+
+    // ACTION: Usb config has been changed to ptp (photo transfer)
+    // CATEGORY: SETTINGS
+    // OS: P
+    ACTION_USB_CONFIG_PTP = 1277;
+
+    // ACTION: Usb config has been changed to rndis (usb tethering)
+    // CATEGORY: SETTINGS
+    // OS: P
+    ACTION_USB_CONFIG_RNDIS = 1278;
+
+    // ACTION: Usb config has been changed to midi
+    // CATEGORY: SETTINGS
+    // OS: P
+    ACTION_USB_CONFIG_MIDI = 1279;
+
+    // ACTION: Usb config has been changed to accessory
+    // CATEGORY: SETTINGS
+    // OS: P
+    ACTION_USB_CONFIG_ACCESSORY = 1280;
+
     // ---- End P Constants, all P constants go above this line ----
     // Add new aosp constants above this line.
     // END OF AOSP CONSTANTS
