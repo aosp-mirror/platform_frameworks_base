@@ -652,6 +652,14 @@ public class BatteryStatsImpl extends BatteryStats {
             new LongSamplingCounter[NUM_NETWORK_ACTIVITY_TYPES];
 
     /**
+     * The WiFi Overall wakelock timer
+     * This timer tracks the actual aggregate time for which MC wakelocks are enabled
+     * since addition of per UID timers would not result in an accurate value due to overlapp of
+     * per uid wakelock timers
+     */
+    StopwatchTimer mWifiMulticastWakelockTimer;
+
+    /**
      * The WiFi controller activity (time in tx, rx, idle, and power consumed) for the device.
      */
     ControllerActivityCounterImpl mWifiActivity;
@@ -5589,6 +5597,12 @@ public class BatteryStatsImpl extends BatteryStats {
             if (DEBUG_HISTORY) Slog.v(TAG, "WIFI multicast on to: "
                     + Integer.toHexString(mHistoryCur.states));
             addHistoryRecordLocked(elapsedRealtime, uptime);
+
+            // Start Wifi Multicast overall timer
+            if (!mWifiMulticastWakelockTimer.isRunningLocked()) {
+                if (DEBUG_HISTORY) Slog.v(TAG, "WiFi Multicast Overall Timer Started");
+                mWifiMulticastWakelockTimer.startRunningLocked(elapsedRealtime);
+            }
         }
         mWifiMulticastNesting++;
         getUidStatsLocked(uid).noteWifiMulticastEnabledLocked(elapsedRealtime);
@@ -5604,6 +5618,12 @@ public class BatteryStatsImpl extends BatteryStats {
             if (DEBUG_HISTORY) Slog.v(TAG, "WIFI multicast off to: "
                     + Integer.toHexString(mHistoryCur.states));
             addHistoryRecordLocked(elapsedRealtime, uptime);
+
+            // Stop Wifi Multicast overall timer
+            if (mWifiMulticastWakelockTimer.isRunningLocked()) {
+                if (DEBUG_HISTORY) Slog.v(TAG, "Multicast Overall Timer Stopped");
+                mWifiMulticastWakelockTimer.stopRunningLocked(elapsedRealtime);
+            }
         }
         getUidStatsLocked(uid).noteWifiMulticastDisabledLocked(elapsedRealtime);
     }
@@ -5888,6 +5908,16 @@ public class BatteryStatsImpl extends BatteryStats {
 
     @Override public int getMobileRadioActiveUnknownCount(int which) {
         return (int)mMobileRadioActiveUnknownCount.getCountLocked(which);
+    }
+
+    @Override public long getWifiMulticastWakelockTime(
+            long elapsedRealtimeUs, int which) {
+        return mWifiMulticastWakelockTimer.getTotalTimeLocked(
+                elapsedRealtimeUs, which);
+    }
+
+    @Override public int getWifiMulticastWakelockCount(int which) {
+        return mWifiMulticastWakelockTimer.getCountLocked(which);
     }
 
     @Override public long getWifiOnTime(long elapsedRealtimeUs, int which) {
@@ -9490,6 +9520,8 @@ public class BatteryStatsImpl extends BatteryStats {
         mMobileRadioActiveAdjustedTime = new LongSamplingCounter(mOnBatteryTimeBase);
         mMobileRadioActiveUnknownTime = new LongSamplingCounter(mOnBatteryTimeBase);
         mMobileRadioActiveUnknownCount = new LongSamplingCounter(mOnBatteryTimeBase);
+        mWifiMulticastWakelockTimer = new StopwatchTimer(mClocks, null,
+                WIFI_AGGREGATE_MULTICAST_ENABLED, null, mOnBatteryTimeBase);
         mWifiOnTimer = new StopwatchTimer(mClocks, null, -4, null, mOnBatteryTimeBase);
         mGlobalWifiRunningTimer = new StopwatchTimer(mClocks, null, -5, null, mOnBatteryTimeBase);
         for (int i=0; i<NUM_WIFI_STATES; i++) {
@@ -10191,6 +10223,7 @@ public class BatteryStatsImpl extends BatteryStats {
         for (int i=0; i<NUM_WIFI_SIGNAL_STRENGTH_BINS; i++) {
             mWifiSignalStrengthsTimer[i].reset(false);
         }
+        mWifiMulticastWakelockTimer.reset(false);
         mWifiActivity.reset(false);
         mBluetoothActivity.reset(false);
         mModemActivity.reset(false);
@@ -12637,6 +12670,7 @@ public class BatteryStatsImpl extends BatteryStats {
         mMobileRadioActiveAdjustedTime.readSummaryFromParcelLocked(in);
         mMobileRadioActiveUnknownTime.readSummaryFromParcelLocked(in);
         mMobileRadioActiveUnknownCount.readSummaryFromParcelLocked(in);
+        mWifiMulticastWakelockTimer.readSummaryFromParcelLocked(in);
         mWifiRadioPowerState = DataConnectionRealTimeInfo.DC_POWER_STATE_LOW;
         mWifiOn = false;
         mWifiOnTimer.readSummaryFromParcelLocked(in);
@@ -13077,6 +13111,7 @@ public class BatteryStatsImpl extends BatteryStats {
         mMobileRadioActiveAdjustedTime.writeSummaryFromParcelLocked(out);
         mMobileRadioActiveUnknownTime.writeSummaryFromParcelLocked(out);
         mMobileRadioActiveUnknownCount.writeSummaryFromParcelLocked(out);
+        mWifiMulticastWakelockTimer.writeSummaryFromParcelLocked(out, NOWREAL_SYS);
         mWifiOnTimer.writeSummaryFromParcelLocked(out, NOWREAL_SYS);
         mGlobalWifiRunningTimer.writeSummaryFromParcelLocked(out, NOWREAL_SYS);
         for (int i=0; i<NUM_WIFI_STATES; i++) {
@@ -13540,6 +13575,8 @@ public class BatteryStatsImpl extends BatteryStats {
         mMobileRadioActiveAdjustedTime = new LongSamplingCounter(mOnBatteryTimeBase, in);
         mMobileRadioActiveUnknownTime = new LongSamplingCounter(mOnBatteryTimeBase, in);
         mMobileRadioActiveUnknownCount = new LongSamplingCounter(mOnBatteryTimeBase, in);
+        mWifiMulticastWakelockTimer = new StopwatchTimer(mClocks, null, -4, null,
+                mOnBatteryTimeBase, in);
         mWifiRadioPowerState = DataConnectionRealTimeInfo.DC_POWER_STATE_LOW;
         mWifiOn = false;
         mWifiOnTimer = new StopwatchTimer(mClocks, null, -4, null, mOnBatteryTimeBase, in);
@@ -13746,6 +13783,7 @@ public class BatteryStatsImpl extends BatteryStats {
         mMobileRadioActiveAdjustedTime.writeToParcel(out);
         mMobileRadioActiveUnknownTime.writeToParcel(out);
         mMobileRadioActiveUnknownCount.writeToParcel(out);
+        mWifiMulticastWakelockTimer.writeToParcel(out, uSecRealtime);
         mWifiOnTimer.writeToParcel(out, uSecRealtime);
         mGlobalWifiRunningTimer.writeToParcel(out, uSecRealtime);
         for (int i=0; i<NUM_WIFI_STATES; i++) {
@@ -13932,6 +13970,8 @@ public class BatteryStatsImpl extends BatteryStats {
             mMobileRadioActiveTimer.logState(pr, "  ");
             pr.println("*** Mobile network active adjusted timer:");
             mMobileRadioActiveAdjustedTime.logState(pr, "  ");
+            pr.println("*** Wifi Multicast WakeLock Timer:");
+            mWifiMulticastWakelockTimer.logState(pr, "  ");
             pr.println("*** mWifiRadioPowerState=" + mWifiRadioPowerState);
             pr.println("*** Wifi timer:");
             mWifiOnTimer.logState(pr, "  ");
