@@ -1642,8 +1642,9 @@ public final class CameraCharacteristics extends CameraMetadata<CameraCharacteri
      * lifetime. Typical examples include parameters that require a
      * time-consuming hardware re-configuration or internal camera pipeline
      * change. For performance reasons we advise clients to pass their initial
-     * values as part of {@link SessionConfiguration#setSessionParameters }. Once
-     * the camera capture session is enabled it is also recommended to avoid
+     * values as part of
+     * {@link SessionConfiguration#setSessionParameters }.i
+     * Once the camera capture session is enabled it is also recommended to avoid
      * changing them from their initial values set in
      * {@link SessionConfiguration#setSessionParameters }.
      * Control over session parameters can still be exerted in capture requests
@@ -1653,15 +1654,18 @@ public final class CameraCharacteristics extends CameraMetadata<CameraCharacteri
      * <li>The camera client starts by quering the session parameter key list via
      *   {@link android.hardware.camera2.CameraCharacteristics#getAvailableSessionKeys }.</li>
      * <li>Before triggering the capture session create sequence, a capture request
-     *   must be built via {@link CameraDevice#createCaptureRequest } using an
-     *   appropriate template matching the particular use case.</li>
+     *   must be built via
+     *   {@link CameraDevice#createCaptureRequest }
+     *   using an appropriate template matching the particular use case.</li>
      * <li>The client should go over the list of session parameters and check
      *   whether some of the keys listed matches with the parameters that
      *   they intend to modify as part of the first capture request.</li>
      * <li>If there is no such match, the capture request can be  passed
-     *   unmodified to {@link SessionConfiguration#setSessionParameters }.</li>
+     *   unmodified to
+     *   {@link SessionConfiguration#setSessionParameters }.</li>
      * <li>If matches do exist, the client should update the respective values
-     *   and pass the request to {@link SessionConfiguration#setSessionParameters }.</li>
+     *   and pass the request to
+     *   {@link SessionConfiguration#setSessionParameters }.</li>
      * <li>After the capture session initialization completes the session parameter
      *   key list can continue to serve as reference when posting or updating
      *   further requests. As mentioned above further changes to session
@@ -2970,6 +2974,18 @@ public final class CameraCharacteristics extends CameraMetadata<CameraCharacteri
     @PublicKey
     public static final Key<Integer> INFO_SUPPORTED_HARDWARE_LEVEL =
             new Key<Integer>("android.info.supportedHardwareLevel", int.class);
+
+    /**
+     * <p>A short string for manufacturer version information about the camera device, such as
+     * ISP hardware, sensors, etc.</p>
+     * <p>This can be used in {@link android.media.ExifInterface#TAG_IMAGE_DESCRIPTION TAG_IMAGE_DESCRIPTION}
+     * in jpeg EXIF. This key may be absent if no version information is available on the
+     * device.</p>
+     * <p><b>Optional</b> - This value may be {@code null} on some devices.</p>
+     */
+    @PublicKey
+    public static final Key<String> INFO_VERSION =
+            new Key<String>("android.info.version", String.class);
 
     /**
      * <p>The maximum number of frames that can occur after a request
