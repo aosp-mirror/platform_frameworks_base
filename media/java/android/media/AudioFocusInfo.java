@@ -130,13 +130,11 @@ public final class AudioFocusInfo implements Parcelable {
         dest.writeInt(mSdkTarget);
     }
 
-    @SystemApi
     @Override
     public int hashCode() {
         return Objects.hash(mAttributes, mClientUid, mClientId, mPackageName, mGainRequest, mFlags);
     }
 
-    @SystemApi
     @Override
     public boolean equals(Object obj) {
         if (this == obj)
