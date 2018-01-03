@@ -3035,15 +3035,8 @@ class AlarmManagerService extends SystemService {
                     Slog.v(TAG, "sending alarm " + alarm);
                 }
                 if (RECORD_ALARMS_IN_HISTORY) {
-                    if (alarm.workSource != null && alarm.workSource.size() > 0) {
-                        for (int wi=0; wi<alarm.workSource.size(); wi++) {
-                            ActivityManager.noteAlarmStart(
-                                    alarm.operation, alarm.workSource.get(wi), alarm.statsTag);
-                        }
-                    } else {
-                        ActivityManager.noteAlarmStart(
-                                alarm.operation, alarm.uid, alarm.statsTag);
-                    }
+                    ActivityManager.noteAlarmStart(alarm.operation, alarm.workSource, alarm.uid,
+                            alarm.statsTag);
                 }
                 mDeliveryTracker.deliverLocked(alarm, nowELAPSED, allowWhileIdle);
             } catch (RuntimeException e) {
@@ -3553,15 +3546,8 @@ class AlarmManagerService extends SystemService {
                 fs.aggregateTime += nowELAPSED - fs.startTime;
             }
             if (RECORD_ALARMS_IN_HISTORY) {
-                if (inflight.mWorkSource != null && inflight.mWorkSource.size() > 0) {
-                    for (int wi=0; wi<inflight.mWorkSource.size(); wi++) {
-                        ActivityManager.noteAlarmFinish(
-                                inflight.mPendingIntent, inflight.mWorkSource.get(wi), inflight.mTag);
-                    }
-                } else {
-                    ActivityManager.noteAlarmFinish(
-                            inflight.mPendingIntent, inflight.mUid, inflight.mTag);
-                }
+                ActivityManager.noteAlarmFinish(inflight.mPendingIntent, inflight.mWorkSource,
+                        inflight.mUid, inflight.mTag);
             }
         }
 
@@ -3771,18 +3757,9 @@ class AlarmManagerService extends SystemService {
                     || alarm.type == RTC_WAKEUP) {
                 bs.numWakeup++;
                 fs.numWakeup++;
-                if (alarm.workSource != null && alarm.workSource.size() > 0) {
-                    for (int wi=0; wi<alarm.workSource.size(); wi++) {
-                        final String wsName = alarm.workSource.getName(wi);
-                        ActivityManager.noteWakeupAlarm(
-                                alarm.operation, alarm.workSource.get(wi),
-                                (wsName != null) ? wsName : alarm.packageName,
-                                alarm.statsTag);
-                    }
-                } else {
-                    ActivityManager.noteWakeupAlarm(
-                            alarm.operation, alarm.uid, alarm.packageName, alarm.statsTag);
-                }
+                ActivityManager.noteWakeupAlarm(
+                        alarm.operation, alarm.workSource, alarm.uid, alarm.packageName,
+                        alarm.statsTag);
             }
         }
     }

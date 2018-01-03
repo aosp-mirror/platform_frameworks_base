@@ -16,6 +16,8 @@
 
 package com.android.internal.os;
 
+import android.os.Handler;
+import android.os.Looper;
 import android.util.SparseIntArray;
 
 import java.util.ArrayList;
@@ -37,6 +39,9 @@ public class MockBatteryStatsImpl extends BatteryStatsImpl {
                 mOnBatteryTimeBase);
         mBluetoothScanTimer = new StopwatchTimer(mClocks, null, -14, null, mOnBatteryTimeBase);
         setExternalStatsSyncLocked(new DummyExternalStatsSync());
+
+        // A no-op handler.
+        mHandler = new Handler(Looper.getMainLooper()) {};
     }
 
     MockBatteryStatsImpl() {
@@ -57,6 +62,12 @@ public class MockBatteryStatsImpl extends BatteryStatsImpl {
 
     public boolean isOnBattery() {
         return mForceOnBattery ? true : super.isOnBattery();
+    }
+
+    public void forceRecordAllHistory() {
+        mHaveBatteryLevel = true;
+        mRecordingHistory = true;
+        mRecordAllHistory = true;
     }
 
     public TimeBase getOnBatteryBackgroundTimeBase(int uid) {

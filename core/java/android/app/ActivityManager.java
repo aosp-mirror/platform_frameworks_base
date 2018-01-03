@@ -60,6 +60,7 @@ import android.os.RemoteException;
 import android.os.ServiceManager;
 import android.os.SystemProperties;
 import android.os.UserHandle;
+import android.os.WorkSource;
 import android.text.TextUtils;
 import android.util.ArrayMap;
 import android.util.DisplayMetrics;
@@ -3911,10 +3912,10 @@ public class ActivityManager {
     /**
      * @hide
      */
-    public static void noteWakeupAlarm(PendingIntent ps, int sourceUid, String sourcePkg,
-            String tag) {
+    public static void noteWakeupAlarm(PendingIntent ps, WorkSource workSource, int sourceUid,
+            String sourcePkg, String tag) {
         try {
-            getService().noteWakeupAlarm((ps != null) ? ps.getTarget() : null,
+            getService().noteWakeupAlarm((ps != null) ? ps.getTarget() : null, workSource,
                     sourceUid, sourcePkg, tag);
         } catch (RemoteException ex) {
         }
@@ -3923,19 +3924,24 @@ public class ActivityManager {
     /**
      * @hide
      */
-    public static void noteAlarmStart(PendingIntent ps, int sourceUid, String tag) {
+    public static void noteAlarmStart(PendingIntent ps, WorkSource workSource, int sourceUid,
+            String tag) {
         try {
-            getService().noteAlarmStart((ps != null) ? ps.getTarget() : null, sourceUid, tag);
+            getService().noteAlarmStart((ps != null) ? ps.getTarget() : null, workSource,
+                    sourceUid, tag);
         } catch (RemoteException ex) {
         }
     }
 
+
     /**
      * @hide
      */
-    public static void noteAlarmFinish(PendingIntent ps, int sourceUid, String tag) {
+    public static void noteAlarmFinish(PendingIntent ps, WorkSource workSource, int sourceUid,
+            String tag) {
         try {
-            getService().noteAlarmFinish((ps != null) ? ps.getTarget() : null, sourceUid, tag);
+            getService().noteAlarmFinish((ps != null) ? ps.getTarget() : null, workSource,
+                    sourceUid, tag);
         } catch (RemoteException ex) {
         }
     }

@@ -506,8 +506,8 @@ public class BatteryStatsImpl extends BatteryStats {
     final HistoryEventTracker mActiveEvents = new HistoryEventTracker();
 
     long mHistoryBaseTime;
-    boolean mHaveBatteryLevel = false;
-    boolean mRecordingHistory = false;
+    protected boolean mHaveBatteryLevel = false;
+    protected boolean mRecordingHistory = false;
     int mNumHistoryItems;
 
     final Parcel mHistoryBuffer = Parcel.obtain();
@@ -3975,30 +3975,85 @@ public class BatteryStatsImpl extends BatteryStats {
         addHistoryEventLocked(elapsedRealtime, uptime, HistoryItem.EVENT_JOB_FINISH, name, uid);
     }
 
-    public void noteAlarmStartLocked(String name, int uid) {
-        if (!mRecordAllHistory) {
-            return;
-        }
-        uid = mapUid(uid);
-        final long elapsedRealtime = mClocks.elapsedRealtime();
-        final long uptime = mClocks.uptimeMillis();
-        if (!mActiveEvents.updateState(HistoryItem.EVENT_ALARM_START, name, uid, 0)) {
-            return;
-        }
-        addHistoryEventLocked(elapsedRealtime, uptime, HistoryItem.EVENT_ALARM_START, name, uid);
+    public void noteAlarmStartLocked(String name, WorkSource workSource, int uid) {
+        noteAlarmStartOrFinishLocked(HistoryItem.EVENT_ALARM_START, name, workSource, uid);
     }
 
-    public void noteAlarmFinishLocked(String name, int uid) {
+    public void noteAlarmFinishLocked(String name, WorkSource workSource, int uid) {
+        noteAlarmStartOrFinishLocked(HistoryItem.EVENT_ALARM_FINISH, name, workSource, uid);
+    }
+
+    private void noteAlarmStartOrFinishLocked(int historyItem, String name, WorkSource workSource,
+            int uid) {
         if (!mRecordAllHistory) {
             return;
         }
-        uid = mapUid(uid);
+
         final long elapsedRealtime = mClocks.elapsedRealtime();
         final long uptime = mClocks.uptimeMillis();
-        if (!mActiveEvents.updateState(HistoryItem.EVENT_ALARM_FINISH, name, uid, 0)) {
+
+        if (workSource != null) {
+            for (int i = 0; i < workSource.size(); ++i) {
+                uid = mapUid(workSource.get(i));
+                if (mActiveEvents.updateState(historyItem, name, uid, 0)) {
+                    addHistoryEventLocked(elapsedRealtime, uptime, historyItem, name, uid);
+                }
+            }
+
+            List<WorkChain> workChains = workSource.getWorkChains();
+            if (workChains != null) {
+                for (int i = 0; i < workChains.size(); ++i) {
+                    uid = mapUid(workChains.get(i).getAttributionUid());
+                    if (mActiveEvents.updateState(historyItem, name, uid, 0)) {
+                        addHistoryEventLocked(elapsedRealtime, uptime, historyItem, name, uid);
+                    }
+                }
+            }
+        } else {
+            uid = mapUid(uid);
+
+            if (mActiveEvents.updateState(historyItem, name, uid, 0)) {
+                addHistoryEventLocked(elapsedRealtime, uptime, historyItem, name, uid);
+            }
+        }
+    }
+
+    public void noteWakupAlarmLocked(String packageName, int uid, WorkSource workSource,
+            String tag) {
+        if (!isOnBattery()) {
             return;
         }
-        addHistoryEventLocked(elapsedRealtime, uptime, HistoryItem.EVENT_ALARM_FINISH, name, uid);
+
+        if (workSource != null) {
+            for (int i = 0; i < workSource.size(); ++i) {
+                uid = workSource.get(i);
+                final String workSourceName = workSource.getName(i);
+
+                BatteryStatsImpl.Uid.Pkg pkg = getPackageStatsLocked(uid,
+                        workSourceName != null ? workSourceName : packageName);
+                pkg.noteWakeupAlarmLocked(tag);
+
+                StatsLog.write(StatsLog.WAKEUP_ALARM_OCCURRED, uid, tag);
+            }
+
+            ArrayList<WorkChain> workChains = workSource.getWorkChains();
+            if (workChains != null) {
+                for (int i = 0; i < workChains.size(); ++i) {
+                    final WorkChain wc = workChains.get(i);
+                    uid = wc.getAttributionUid();
+
+                    BatteryStatsImpl.Uid.Pkg pkg = getPackageStatsLocked(uid, packageName);
+                    pkg.noteWakeupAlarmLocked(tag);
+
+                    // TODO(statsd): Log the full attribution chain here once it's available
+                    StatsLog.write(StatsLog.WAKEUP_ALARM_OCCURRED, uid, tag);
+                }
+            }
+        } else {
+            BatteryStatsImpl.Uid.Pkg pkg = getPackageStatsLocked(uid, packageName);
+            pkg.noteWakeupAlarmLocked(tag);
+            StatsLog.write(StatsLog.WAKEUP_ALARM_OCCURRED, uid, tag);
+        }
     }
 
     private void requestWakelockCpuUpdate() {
