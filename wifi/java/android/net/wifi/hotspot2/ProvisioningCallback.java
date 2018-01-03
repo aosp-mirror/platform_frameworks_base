@@ -26,11 +26,47 @@ import android.os.Handler;
  */
 public abstract class ProvisioningCallback {
 
-   /**
+    /**
      * The reason code for Provisioning Failure due to connection failure to OSU AP.
      * @hide
      */
     public static final int OSU_FAILURE_AP_CONNECTION      = 1;
+
+    /**
+     * The reason code for Provisioning Failure due to connection failure to OSU AP.
+     * @hide
+     */
+    public static final int OSU_FAILURE_SERVER_URL_INVALID = 2;
+
+    /**
+     * The reason code for Provisioning Failure due to connection failure to OSU AP.
+     * @hide
+     */
+    public static final int OSU_FAILURE_SERVER_CONNECTION  = 3;
+
+    /**
+     * The reason code for Provisioning Failure due to connection failure to OSU AP.
+     * @hide
+     */
+    public static final int OSU_FAILURE_SERVER_VALIDATION  = 4;
+
+    /**
+     * The reason code for Provisioning Failure due to connection failure to OSU AP.
+     * @hide
+     */
+    public static final int OSU_FAILURE_PROVIDER_VERIFICATION = 5;
+
+    /**
+     * The reason code for Provisioning Failure when a provisioning flow is aborted.
+     * @hide
+     */
+    public static final int OSU_FAILURE_PROVISIONING_ABORTED = 6;
+
+    /**
+     * The reason code for Provisioning Failure when a provisioning flow is aborted.
+     * @hide
+     */
+    public static final int OSU_FAILURE_PROVISIONING_NOT_AVAILABLE = 7;
 
     /**
      * The status code for Provisioning flow to indicate connecting to OSU AP
@@ -43,6 +79,24 @@ public abstract class ProvisioningCallback {
      * @hide
      */
     public static final int OSU_STATUS_AP_CONNECTED        = 2;
+
+    /**
+     * The status code for Provisioning flow to indicate connecting to OSU AP
+     * @hide
+     */
+    public static final int OSU_STATUS_SERVER_CONNECTED    = 3;
+
+    /**
+     * The status code for Provisioning flow to indicate connecting to OSU AP
+     * @hide
+     */
+    public static final int OSU_STATUS_SERVER_VALIDATED    = 4;
+
+    /**
+     * The status code for Provisioning flow to indicate connecting to OSU AP
+     * @hide
+     */
+    public static final int OSU_STATUS_PROVIDER_VERIFIED   = 5;
 
     /**
      * Provisioning status for OSU failure
