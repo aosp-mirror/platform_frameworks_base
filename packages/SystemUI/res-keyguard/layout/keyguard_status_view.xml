@@ -34,6 +34,7 @@
         android:orientation="vertical">
         <RelativeLayout
             android:id="@+id/keyguard_clock_container"
+            android:animateLayoutChanges="true"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_gravity="center_horizontal|top">
@@ -59,14 +60,23 @@
                 android:layout_toEndOf="@id/clock_view"
                 android:visibility="invisible"
                 android:src="@drawable/ic_aod_charging_24dp"
-                android:contentDescription="@string/accessibility_ambient_display_charging"
-            />
+                android:contentDescription="@string/accessibility_ambient_display_charging" />
+            <View
+                android:id="@+id/clock_separator"
+                android:layout_width="16dp"
+                android:layout_height="1dp"
+                android:layout_marginTop="10dp"
+                android:layout_below="@id/clock_view"
+                android:background="#f00"
+                android:layout_centerHorizontal="true" />
 
             <include layout="@layout/keyguard_status_area"
                 android:id="@+id/keyguard_status_area"
+                android:layout_marginTop="10dp"
+                android:layout_marginBottom="@dimen/widget_vertical_padding"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_below="@id/clock_view" />
+                android:layout_below="@id/clock_separator" />
         </RelativeLayout>
 
         <TextView
@@ -83,6 +93,5 @@
             android:letterSpacing="0.05"
             android:ellipsize="marquee"
             android:singleLine="true" />
-
     </LinearLayout>
 </com.android.keyguard.KeyguardStatusView>

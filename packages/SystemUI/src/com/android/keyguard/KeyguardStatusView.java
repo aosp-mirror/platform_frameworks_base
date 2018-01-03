@@ -28,6 +28,7 @@ import android.os.UserHandle;
 import android.support.v4.graphics.ColorUtils;
 import android.text.TextUtils;
 import android.text.format.DateFormat;
+import android.util.ArraySet;
 import android.util.AttributeSet;
 import android.util.Log;
 import android.util.Slog;
@@ -38,10 +39,10 @@ import android.widget.GridLayout;
 import android.widget.TextClock;
 import android.widget.TextView;
 
-import com.android.internal.util.ArrayUtils;
 import com.android.internal.widget.LockPatternUtils;
-import com.android.settingslib.Utils;
 import com.android.systemui.ChargingView;
+
+import com.google.android.collect.Sets;
 
 import java.util.Locale;
 
@@ -52,8 +53,11 @@ public class KeyguardStatusView extends GridLayout {
 
     private final LockPatternUtils mLockPatternUtils;
     private final AlarmManager mAlarmManager;
+    private final float mSmallClockScale;
+    private final float mWidgetPadding;
 
     private TextClock mClockView;
+    private View mClockSeparator;
     private TextView mOwnerInfo;
     private ViewGroup mClockContainer;
     private ChargingView mBatteryDoze;
@@ -61,7 +65,7 @@ public class KeyguardStatusView extends GridLayout {
     private Runnable mPendingMarqueeStart;
     private Handler mHandler;
 
-    private View[] mVisibleInDoze;
+    private ArraySet<View> mVisibleInDoze;
     private boolean mPulsing;
     private float mDarkAmount = 0;
     private int mTextColor;
@@ -112,6 +116,9 @@ public class KeyguardStatusView extends GridLayout {
         mAlarmManager = (AlarmManager) context.getSystemService(Context.ALARM_SERVICE);
         mLockPatternUtils = new LockPatternUtils(getContext());
         mHandler = new Handler(Looper.myLooper());
+        mSmallClockScale = getResources().getDimension(R.dimen.widget_small_font_size)
+                / getResources().getDimension(R.dimen.widget_big_font_size);
+        mWidgetPadding = getResources().getDimension(R.dimen.widget_vertical_padding);
     }
 
     private void setEnableMarquee(boolean enabled) {
@@ -150,8 +157,13 @@ public class KeyguardStatusView extends GridLayout {
         mOwnerInfo = findViewById(R.id.owner_info);
         mBatteryDoze = findViewById(R.id.battery_doze);
         mKeyguardSlice = findViewById(R.id.keyguard_status_area);
-        mVisibleInDoze = new View[]{mBatteryDoze, mClockView, mKeyguardSlice};
+        mClockSeparator = findViewById(R.id.clock_separator);
+        mVisibleInDoze = Sets.newArraySet(mBatteryDoze, mClockView, mKeyguardSlice,
+                mClockSeparator);
         mTextColor = mClockView.getCurrentTextColor();
+
+        mKeyguardSlice.setListener(this::onSliceContentChanged);
+        onSliceContentChanged(mKeyguardSlice.hasHeader());
 
         boolean shouldMarquee = KeyguardUpdateMonitor.getInstance(mContext).isDeviceInteractive();
         setEnableMarquee(shouldMarquee);
@@ -161,6 +173,22 @@ public class KeyguardStatusView extends GridLayout {
         // Disable elegant text height because our fancy colon makes the ymin value huge for no
         // reason.
         mClockView.setElegantTextHeight(false);
+    }
+
+    private void onSliceContentChanged(boolean hasHeader) {
+        final float clockScale = hasHeader ? mSmallClockScale : 1;
+        float translation = (mClockView.getHeight() - (mClockView.getHeight() * clockScale)) / 2f;
+        if (hasHeader) {
+            translation -= mWidgetPadding;
+        }
+        mClockView.setTranslationY(translation);
+        mClockView.setScaleX(clockScale);
+        mClockView.setScaleY(clockScale);
+        final float batteryTranslation =
+                -(mClockView.getWidth() - (mClockView.getWidth() * clockScale)) / 2;
+        mBatteryDoze.setTranslationX(batteryTranslation);
+        mBatteryDoze.setTranslationY(translation);
+        mClockSeparator.setVisibility(hasHeader ? VISIBLE : GONE);
     }
 
     @Override
@@ -303,7 +331,7 @@ public class KeyguardStatusView extends GridLayout {
         final int N = mClockContainer.getChildCount();
         for (int i = 0; i < N; i++) {
             View child = mClockContainer.getChildAt(i);
-            if (ArrayUtils.contains(mVisibleInDoze, child)) {
+            if (mVisibleInDoze.contains(child)) {
                 continue;
             }
             child.setAlpha(dark ? 0 : 1);
@@ -312,10 +340,12 @@ public class KeyguardStatusView extends GridLayout {
             mOwnerInfo.setAlpha(dark ? 0 : 1);
         }
 
+        final int blendedTextColor = ColorUtils.blendARGB(mTextColor, Color.WHITE, darkAmount);
         updateDozeVisibleViews();
         mBatteryDoze.setDark(dark);
         mKeyguardSlice.setDark(darkAmount);
-        mClockView.setTextColor(ColorUtils.blendARGB(mTextColor, Color.WHITE, darkAmount));
+        mClockView.setTextColor(blendedTextColor);
+        mClockSeparator.setBackgroundColor(blendedTextColor);
     }
 
     public void setPulsing(boolean pulsing) {

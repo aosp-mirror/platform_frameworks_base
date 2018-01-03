@@ -24,8 +24,6 @@ import android.icu.text.DateFormat;
 import android.icu.text.DisplayContext;
 import android.net.Uri;
 import android.os.Handler;
-import android.app.slice.Slice;
-import android.app.slice.SliceProvider;
 
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.systemui.R;
@@ -33,15 +31,22 @@ import com.android.systemui.R;
 import java.util.Date;
 import java.util.Locale;
 
+import androidx.app.slice.Slice;
+import androidx.app.slice.SliceProvider;
+import androidx.app.slice.builders.ListBuilder;
+import androidx.app.slice.builders.ListBuilder.RowBuilder;
+
 /**
  * Simple Slice provider that shows the current date.
  */
 public class KeyguardSliceProvider extends SliceProvider {
 
     public static final String KEYGUARD_SLICE_URI = "content://com.android.systemui.keyguard/main";
+    public static final String KEYGUARD_DATE_URI = "content://com.android.systemui.keyguard/date";
 
     private final Date mCurrentTime = new Date();
     protected final Uri mSliceUri;
+    protected final Uri mDateUri;
     private final Handler mHandler;
     private String mDatePattern;
     private DateFormat mDateFormat;
@@ -80,23 +85,31 @@ public class KeyguardSliceProvider extends SliceProvider {
     KeyguardSliceProvider(Handler handler) {
         mHandler = handler;
         mSliceUri = Uri.parse(KEYGUARD_SLICE_URI);
+        mDateUri = Uri.parse(KEYGUARD_DATE_URI);
     }
+
+
 
     @Override
     public Slice onBindSlice(Uri sliceUri) {
-        return new Slice.Builder(sliceUri).addText(mLastText, null, Slice.HINT_TITLE).build();
+        return new ListBuilder(mSliceUri)
+                .addRow(new RowBuilder(mDateUri).setTitle(mLastText)).build();
     }
 
     @Override
-    public boolean onCreate() {
-
+    public boolean onCreateSliceProvider() {
         mDatePattern = getContext().getString(R.string.system_ui_date_pattern);
-
         registerClockUpdate(false /* everyMinute */);
         updateClock();
         return true;
     }
 
+    /**
+     * Registers a broadcast receiver for clock updates, include date, time zone and manually
+     * changing the date/time via the settings app.
+     *
+     * @param everyMinute {@code true} if you also want updates every minute.
+     */
     protected void registerClockUpdate(boolean everyMinute) {
         if (mRegistered) {
             if (mRegisteredEveryMinute == everyMinute) {
