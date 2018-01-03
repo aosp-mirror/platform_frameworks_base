@@ -1923,6 +1923,8 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
                     mService.unregisterPointerEventListener(mService.mMousePositionTracker);
                 }
             }
+            mService.mAnimator.removeDisplayLocked(mDisplayId);
+
             // The pending transaction won't be applied so we should
             // just clean up any surfaces pending destruction.
             onPendingTransactionApplied();
