@@ -22,6 +22,7 @@
 #include "parsers/KernelWakesParser.h"
 #include "parsers/PageTypeInfoParser.h"
 #include "parsers/ProcrankParser.h"
+#include "parsers/PsParser.h"
 #include "parsers/SystemPropertiesParser.h"
 
 #include <android-base/file.h>
@@ -64,6 +65,8 @@ static TextParserBase* selectParser(int section) {
             return new CpuInfoParser();
         case 2004:
             return new CpuFreqParser();
+        case 2005:
+            return new PsParser();
         case 2006:
             return new BatteryTypeParser();
         default:

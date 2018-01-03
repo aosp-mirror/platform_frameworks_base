@@ -25,6 +25,7 @@ import "frameworks/base/core/proto/android/os/incidentheader.proto";
 import "frameworks/base/core/proto/android/os/kernelwake.proto";
 import "frameworks/base/core/proto/android/os/pagetypeinfo.proto";
 import "frameworks/base/core/proto/android/os/procrank.proto";
+import "frameworks/base/core/proto/android/os/ps.proto";
 import "frameworks/base/core/proto/android/os/system_properties.proto";
 import "frameworks/base/core/proto/android/providers/settings.proto";
 import "frameworks/base/core/proto/android/server/activitymanagerservice.proto";
@@ -66,7 +67,7 @@ message IncidentProto {
     // Device information
     optional SystemPropertiesProto system_properties = 1000 [
         (section).type = SECTION_COMMAND,
-        (section).args = "/system/bin/getprop"
+        (section).args = "getprop"
     ];
 
     // Linux services
@@ -87,12 +88,17 @@ message IncidentProto {
 
     optional CpuInfo cpu_info = 2003 [
         (section).type = SECTION_COMMAND,
-        (section).args = "/system/bin/top -b -n 1 -H -s 6 -o pid,tid,user,pr,ni,%cpu,s,virt,res,pcy,cmd,name"
+        (section).args = "top -b -n 1 -H -s 6 -o pid,tid,user,pr,ni,%cpu,s,virt,res,pcy,cmd,name"
     ];
 
     optional CpuFreq cpu_freq = 2004 [
         (section).type = SECTION_FILE,
         (section).args = "/sys/devices/system/cpu/cpufreq/all_time_in_state"
+    ];
+
+    optional PsDumpProto processes_and_threads = 2005 [
+        (section).type = SECTION_COMMAND,
+        (section).args = "ps -A -T -Z -O pri,nice,rtprio,sched,pcy,time"
     ];
 
     optional BatteryTypeProto battery_type = 2006 [

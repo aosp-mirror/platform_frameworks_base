@@ -81,7 +81,9 @@ message CpuInfo {
         optional string virt = 8;   // virtual memory size, i.e. 14.0G, 13.5M
         optional string res = 9;    // Resident size, i.e. 0, 3.1G
 
-        // How Android memory manager will treat the task
+        // How Android memory manager will treat the task.
+        // TODO: use PsDumpProto.Process.Policy instead once we extern variables
+        // and are able to include the same .h file in two files.
         enum Policy {
             POLICY_UNKNOWN = 0;
             POLICY_fg = 1;  // foreground, the name is lower case for parsing the value

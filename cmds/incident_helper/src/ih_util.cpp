@@ -52,6 +52,12 @@ static inline std::string trimHeader(const std::string& s) {
     return toLowerStr(trimDefault(s));
 }
 
+static inline bool isNumber(const std::string& s) {
+    std::string::const_iterator it = s.begin();
+    while (it != s.end() && std::isdigit(*it)) ++it;
+    return !s.empty() && it == s.end();
+}
+
 // This is similiar to Split in android-base/file.h, but it won't add empty string
 static void split(const std::string& line, std::vector<std::string>& words,
         const trans_func& func, const std::string& delimiters) {
@@ -86,22 +92,78 @@ record_t parseRecord(const std::string& line, const std::string& delimiters) {
     return record;
 }
 
+bool getColumnIndices(std::vector<int>& indices, const char** headerNames, const std::string& line) {
+    indices.clear();
+
+    size_t lastIndex = 0;
+    int i = 0;
+    while (headerNames[i] != NULL) {
+        string s = headerNames[i];
+        lastIndex = line.find(s, lastIndex);
+        if (lastIndex == string::npos) {
+            fprintf(stderr, "Bad Task Header: %s\n", line.c_str());
+            return false;
+        }
+        lastIndex += s.length();
+        indices.push_back(lastIndex);
+        i++;
+    }
+
+    return true;
+}
+
 record_t parseRecordByColumns(const std::string& line, const std::vector<int>& indices, const std::string& delimiters) {
     record_t record;
     int lastIndex = 0;
+    int lastBeginning = 0;
     int lineSize = (int)line.size();
     for (std::vector<int>::const_iterator it = indices.begin(); it != indices.end(); ++it) {
         int idx = *it;
-        if (lastIndex > idx || idx > lineSize) {
-            record.clear(); // The indices is wrong, return empty;
+        if (idx <= lastIndex) {
+            // We saved up until lastIndex last time, so we should start at
+            // lastIndex + 1 this time.
+            idx = lastIndex + 1;
+        }
+        if (idx > lineSize) {
+            if (lastIndex < idx && lastIndex < lineSize) {
+                // There's a little bit more for us to save, which we'll do
+                // outside of the loop.
+                break;
+            }
+            // If we're past the end of the line AND we've already saved everything up to the end.
+            fprintf(stderr, "index wrong: lastIndex: %d, idx: %d, lineSize: %d\n", lastIndex, idx, lineSize);
+            record.clear(); // The indices are wrong, return empty.
             return record;
         }
         while (idx < lineSize && delimiters.find(line[idx++]) == std::string::npos);
         record.push_back(trimDefault(line.substr(lastIndex, idx - lastIndex)));
+        lastBeginning = lastIndex;
         lastIndex = idx;
     }
-    record.push_back(trimDefault(line.substr(lastIndex, lineSize - lastIndex)));
+    if (lineSize - lastIndex > 0) {
+        int beginning = lastIndex;
+        if (record.size() == indices.size()) {
+            // We've already encountered all of the columns...put whatever is
+            // left in the last column.
+            record.pop_back();
+            beginning = lastBeginning;
+        }
+        record.push_back(trimDefault(line.substr(beginning, lineSize - beginning)));
+    }
     return record;
+}
+
+void printRecord(const record_t& record) {
+    fprintf(stderr, "Record: { ");
+    if (record.size() == 0) {
+        fprintf(stderr, "}\n");
+        return;
+    }
+    for(size_t i = 0; i < record.size(); ++i) {
+        if(i != 0) fprintf(stderr, "\", ");
+        fprintf(stderr, "\"%s", record[i].c_str());
+    }
+    fprintf(stderr, "\" }\n");
 }
 
 bool stripPrefix(std::string* line, const char* key, bool endAtDelimiter) {
@@ -210,7 +272,10 @@ Table::~Table()
 void
 Table::addEnumTypeMap(const char* field, const char* enumNames[], const int enumValues[], const int enumSize)
 {
-    if (mFields.find(field) == mFields.end()) return;
+    if (mFields.find(field) == mFields.end()) {
+        fprintf(stderr, "Field '%s' not found", string(field).c_str());
+        return;
+    }
 
     map<std::string, int> enu;
     for (int i = 0; i < enumSize; i++) {
@@ -268,6 +333,8 @@ Table::insertField(ProtoOutputStream* proto, const std::string& name, const std:
                 }
             } else if (mEnumValuesByName.find(value) != mEnumValuesByName.end()) {
                 proto->write(found, mEnumValuesByName[value]);
+            } else if (isNumber(value)) {
+                proto->write(found, toInt(value));
             } else {
                 return false;
             }
