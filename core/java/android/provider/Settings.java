@@ -7593,6 +7593,13 @@ public final class Settings {
         public static final String BACKUP_MANAGER_CONSTANTS = "backup_manager_constants";
 
         /**
+         * Flag to set if the system should predictively attempt to re-enable Bluetooth while
+         * the user is driving.
+         * @hide
+         */
+        public static final String BLUETOOTH_ON_WHILE_DRIVING = "bluetooth_on_while_driving";
+
+        /**
          * This are the settings to be backed up.
          *
          * NOTE: Settings are backed up and restored in the order they appear
