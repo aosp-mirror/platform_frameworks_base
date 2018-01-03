@@ -229,17 +229,6 @@ public class KeyguardStatusView extends GridLayout {
         return mClockView.getTextSize();
     }
 
-    public static String formatNextAlarm(Context context, AlarmManager.AlarmClockInfo info) {
-        if (info == null) {
-            return "";
-        }
-        String skeleton = DateFormat.is24HourFormat(context, ActivityManager.getCurrentUser())
-                ? "EHm"
-                : "Ehma";
-        String pattern = DateFormat.getBestDateTimePattern(Locale.getDefault(), skeleton);
-        return DateFormat.format(pattern, info.getTriggerTime()).toString();
-    }
-
     private void updateOwnerInfo() {
         if (mOwnerInfo == null) return;
         String ownerInfo = getOwnerInfo();
