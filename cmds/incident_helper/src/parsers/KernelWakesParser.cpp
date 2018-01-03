@@ -47,9 +47,13 @@ KernelWakesParser::Parse(const int in, const int out) const
         // parse for each record, the line delimiter is \t only!
         record = parseRecord(line, TAB_DELIMITER);
 
-        if (record.size() != header.size()) {
+        if (record.size() < header.size()) {
             // TODO: log this to incident report!
             fprintf(stderr, "[%s]Line %d has missing fields\n%s\n", this->name.string(), nline, line.c_str());
+            continue;
+        } else if (record.size() > header.size()) {
+            // TODO: log this to incident report!
+            fprintf(stderr, "[%s]Line %d has extra fields\n%s\n", this->name.string(), nline, line.c_str());
             continue;
         }
 

@@ -37,7 +37,7 @@ import java.util.Objects;
  *
  * @hide (@SystemApi)
  */
-public class ResponderConfig implements Parcelable {
+public final class ResponderConfig implements Parcelable {
     private static final int AWARE_BAND_2_DISCOVERY_CHANNEL = 2437;
 
     /** @hide */
@@ -122,15 +122,14 @@ public class ResponderConfig implements Parcelable {
     /**
      * The MAC address of the Responder. Will be null if a Wi-Fi Aware peer identifier (the
      * peerHandle field) ise used to identify the Responder.
-     * TODO: convert to MacAddress
      */
-    public MacAddress macAddress;
+    public final MacAddress macAddress;
 
     /**
      * The peer identifier of a Wi-Fi Aware Responder. Will be null if a MAC Address (the macAddress
      * field) is used to identify the Responder.
      */
-    public PeerHandle peerHandle;
+    public final PeerHandle peerHandle;
 
     /**
      * The device type of the Responder.
@@ -171,7 +170,7 @@ public class ResponderConfig implements Parcelable {
     public final int preamble;
 
     /**
-     * Constructs Responder configuration.
+     * Constructs Responder configuration, using a MAC address to identify the Responder.
      *
      * @param macAddress      The MAC address of the Responder.
      * @param responderType   The type of the responder device, specified using
@@ -210,7 +209,7 @@ public class ResponderConfig implements Parcelable {
     }
 
     /**
-     * Constructs Responder configuration.
+     * Constructs Responder configuration, using a Wi-Fi Aware PeerHandle to identify the Responder.
      *
      * @param peerHandle      The Wi-Fi Aware peer identifier of the Responder.
      * @param responderType   The type of the responder device, specified using
@@ -234,6 +233,45 @@ public class ResponderConfig implements Parcelable {
             boolean supports80211mc, @ChannelWidth int channelWidth, int frequency, int centerFreq0,
             int centerFreq1, @PreambleType int preamble) {
         this.macAddress = null;
+        this.peerHandle = peerHandle;
+        this.responderType = responderType;
+        this.supports80211mc = supports80211mc;
+        this.channelWidth = channelWidth;
+        this.frequency = frequency;
+        this.centerFreq0 = centerFreq0;
+        this.centerFreq1 = centerFreq1;
+        this.preamble = preamble;
+    }
+
+    /**
+     * Constructs Responder configuration. This is an internal-only constructor which specifies both
+     * a MAC address and a Wi-Fi PeerHandle to identify the Responder.
+     *
+     * @param macAddress      The MAC address of the Responder.
+     * @param peerHandle      The Wi-Fi Aware peer identifier of the Responder.
+     * @param responderType   The type of the responder device, specified using
+     *                        {@link ResponderType}.
+     * @param supports80211mc Indicates whether the responder supports IEEE 802.11mc.
+     * @param channelWidth    Responder channel bandwidth, specified using {@link ChannelWidth}.
+     * @param frequency       The primary 20 MHz frequency (in MHz) of the channel of the Responder.
+     * @param centerFreq0     Not used if the {@code channelWidth} is 20 MHz. If the Responder uses
+     *                        40, 80 or 160 MHz, this is the center frequency (in MHz), if the
+     *                        Responder uses 80 + 80 MHz, this is the center frequency of the first
+     *                        segment (in MHz).
+     * @param centerFreq1     Only used if the {@code channelWidth} is 80 + 80 MHz. If the
+     *                        Responder
+     *                        uses 80 + 80 MHz, this is the center frequency of the second segment
+     *                        (in
+     *                        MHz).
+     * @param preamble        The preamble used by the Responder, specified using
+     *                        {@link PreambleType}.
+     * @hide
+     */
+    public ResponderConfig(@NonNull MacAddress macAddress, @NonNull PeerHandle peerHandle,
+            @ResponderType int responderType, boolean supports80211mc,
+            @ChannelWidth int channelWidth, int frequency, int centerFreq0, int centerFreq1,
+            @PreambleType int preamble) {
+        this.macAddress = macAddress;
         this.peerHandle = peerHandle;
         this.responderType = responderType;
         this.supports80211mc = supports80211mc;

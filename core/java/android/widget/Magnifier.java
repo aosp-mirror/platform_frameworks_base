@@ -125,7 +125,7 @@ public final class Magnifier {
                 mView.getWidth() - mBitmap.getWidth()));
         final int startY = mCenterZoomCoords.y - mBitmap.getHeight() / 2;
 
-        if (startX != mPrevStartCoordsInSurface.x || startY != mPrevStartCoordsInSurface.y) {
+        if (xPosInView != mPrevPosInView.x || yPosInView != mPrevPosInView.y) {
             performPixelCopy(startX, startY);
 
             mPrevPosInView.x = xPosInView;

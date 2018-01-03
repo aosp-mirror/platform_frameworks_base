@@ -256,6 +256,7 @@ java_library {
         "core/java/android/service/euicc/IGetEidCallback.aidl",
         "core/java/android/service/euicc/IGetEuiccInfoCallback.aidl",
         "core/java/android/service/euicc/IGetEuiccProfileInfoListCallback.aidl",
+        "core/java/android/service/euicc/IGetOtaStatusCallback.aidl",
         "core/java/android/service/euicc/IRetainSubscriptionsForFactoryResetCallback.aidl",
         "core/java/android/service/euicc/ISwitchToSubscriptionCallback.aidl",
         "core/java/android/service/euicc/IUpdateSubscriptionNicknameCallback.aidl",
@@ -721,11 +722,13 @@ gensrcs {
     ],
 
     srcs: [
+        "core/proto/android/os/batterytype.proto",
         "core/proto/android/os/cpufreq.proto",
         "core/proto/android/os/cpuinfo.proto",
         "core/proto/android/os/kernelwake.proto",
         "core/proto/android/os/pagetypeinfo.proto",
         "core/proto/android/os/procrank.proto",
+        "core/proto/android/os/ps.proto",
         "core/proto/android/os/system_properties.proto",
     ],
 

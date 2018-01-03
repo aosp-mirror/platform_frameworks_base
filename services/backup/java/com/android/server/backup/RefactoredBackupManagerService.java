@@ -1086,34 +1086,34 @@ public class RefactoredBackupManagerService implements BackupManagerServiceInter
     }
 
     /**
-     * Maintain persistent state around whether need to do an initialize operation.
-     * Must be called with the queue lock held.
+     * Maintain persistent state around whether need to do an initialize operation. This will lock
+     * on {@link #getQueueLock()}.
      */
-    @GuardedBy("mQueueLock")
-    public void recordInitPendingLocked(
+    public void recordInitPending(
             boolean isPending, String transportName, String transportDirName) {
-        if (MORE_DEBUG) {
-            Slog.i(TAG, "recordInitPendingLocked: " + isPending
-                    + " on transport " + transportName);
-        }
-
-        File stateDir = new File(mBaseStateDir, transportDirName);
-        File initPendingFile = new File(stateDir, INIT_SENTINEL_FILE_NAME);
-
-        if (isPending) {
-            // We need an init before we can proceed with sending backup data.
-            // Record that with an entry in our set of pending inits, as well as
-            // journaling it via creation of a sentinel file.
-            mPendingInits.add(transportName);
-            try {
-                (new FileOutputStream(initPendingFile)).close();
-            } catch (IOException ioe) {
-                // Something is badly wrong with our permissions; just try to move on
+        synchronized (mQueueLock) {
+            if (MORE_DEBUG) {
+                Slog.i(TAG, "recordInitPending(" + isPending + ") on transport " + transportName);
             }
-        } else {
-            // No more initialization needed; wipe the journal and reset our state.
-            initPendingFile.delete();
-            mPendingInits.remove(transportName);
+
+            File stateDir = new File(mBaseStateDir, transportDirName);
+            File initPendingFile = new File(stateDir, INIT_SENTINEL_FILE_NAME);
+
+            if (isPending) {
+                // We need an init before we can proceed with sending backup data.
+                // Record that with an entry in our set of pending inits, as well as
+                // journaling it via creation of a sentinel file.
+                mPendingInits.add(transportName);
+                try {
+                    (new FileOutputStream(initPendingFile)).close();
+                } catch (IOException ioe) {
+                    // Something is badly wrong with our permissions; just try to move on
+                }
+            } else {
+                // No more initialization needed; wipe the journal and reset our state.
+                initPendingFile.delete();
+                mPendingInits.remove(transportName);
+            }
         }
     }
 
@@ -2321,7 +2321,9 @@ public class RefactoredBackupManagerService implements BackupManagerServiceInter
         final long oldId = Binder.clearCallingIdentity();
         try {
             mWakelock.acquire();
-            mBackupHandler.post(new PerformInitializeTask(this, transportNames, observer));
+            OnTaskFinishedListener listener = caller -> mWakelock.release();
+            mBackupHandler.post(
+                    new PerformInitializeTask(this, transportNames, observer, listener));
         } finally {
             Binder.restoreCallingIdentity(oldId);
         }
@@ -2812,7 +2814,7 @@ public class RefactoredBackupManagerService implements BackupManagerServiceInter
 
                         // build the set of transports for which we are posting an init
                         for (int i = 0; i < transportNames.size(); i++) {
-                            recordInitPendingLocked(
+                            recordInitPending(
                                     true,
                                     transportNames.get(i),
                                     transportDirNames.get(i));

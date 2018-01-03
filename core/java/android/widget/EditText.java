@@ -105,6 +105,11 @@ public class EditText extends TextView {
 
     @Override
     public Editable getText() {
+        CharSequence text = super.getText();
+        if (text instanceof Editable) {
+            return (Editable) super.getText();
+        }
+        super.setText(text, BufferType.EDITABLE);
         return (Editable) super.getText();
     }
 

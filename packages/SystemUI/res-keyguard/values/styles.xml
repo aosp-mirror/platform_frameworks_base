@@ -78,4 +78,18 @@
         <item name="wallpaperTextColorSecondary">@*android:color/secondary_text_material_dark</item>
     </style>
 
+    <style name="TextAppearance.Keyguard" parent="Theme.SystemUI">
+        <item name="android:textSize">@dimen/widget_title_font_size</item>
+        <item name="android:gravity">center</item>
+        <item name="android:ellipsize">end</item>
+        <item name="android:maxLines">2</item>
+    </style>
+
+    <style name="TextAppearance.Keyguard.Secondary">
+        <item name="android:layout_width">wrap_content</item>
+        <item name="android:layout_height">wrap_content</item>
+        <item name="android:textSize">@dimen/widget_label_font_size</item>
+        <item name="android:singleLine">true</item>
+    </style>
+
 </resources>

@@ -525,7 +525,8 @@ public class SettingsBackupTest {
                  Settings.Secure.VOICE_INTERACTION_SERVICE,
                  Settings.Secure.VOICE_RECOGNITION_SERVICE,
                  Settings.Secure.INSTANT_APPS_ENABLED,
-                 Settings.Secure.BACKUP_MANAGER_CONSTANTS);
+                 Settings.Secure.BACKUP_MANAGER_CONSTANTS,
+                 Settings.Secure.KEYGUARD_SLICE_URI);
 
     @Test
     public void systemSettingsBackedUpOrBlacklisted() {

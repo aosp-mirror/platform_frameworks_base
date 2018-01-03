@@ -163,10 +163,12 @@ import android.content.pm.PackageCleanItem;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageInfoLite;
 import android.content.pm.PackageInstaller;
+import android.content.pm.PackageList;
 import android.content.pm.PackageManager;
 import android.content.pm.PackageManagerInternal;
 import android.content.pm.PackageManager.LegacyPackageDeleteObserver;
 import android.content.pm.PackageManager.PackageInfoFlags;
+import android.content.pm.PackageManagerInternal.PackageListObserver;
 import android.content.pm.PackageParser;
 import android.content.pm.PackageParser.ActivityIntentInfo;
 import android.content.pm.PackageParser.Package;
@@ -756,6 +758,9 @@ public class PackageManagerService extends IPackageManager.Stub
      */
     @GuardedBy("mPackages")
     final SparseArray<Map<String, Integer>> mChangedPackagesSequenceNumbers = new SparseArray<>();
+
+    @GuardedBy("mPackages")
+    final private ArraySet<PackageListObserver> mPackageListObservers = new ArraySet<>();
 
     class PackageParserCallback implements PackageParser.Callback {
         @Override public final boolean hasFeature(String feature) {
@@ -2093,6 +2098,10 @@ public class PackageManagerService extends IPackageManager.Stub
                         mSettings.applyPendingPermissionGrantsLPw(packageName, userId);
                     }
                 }
+            }
+
+            if (allNewUsers && !update) {
+                notifyPackageAdded(packageName);
             }
 
             // Log current value of "unknown sources" setting
@@ -12983,6 +12992,34 @@ public class PackageManagerService extends IPackageManager.Stub
         });
     }
 
+    @Override
+    public void notifyPackageAdded(String packageName) {
+        final PackageListObserver[] observers;
+        synchronized (mPackages) {
+            if (mPackageListObservers.size() == 0) {
+                return;
+            }
+            observers = (PackageListObserver[]) mPackageListObservers.toArray();
+        }
+        for (int i = observers.length - 1; i >= 0; --i) {
+            observers[i].onPackageAdded(packageName);
+        }
+    }
+
+    @Override
+    public void notifyPackageRemoved(String packageName) {
+        final PackageListObserver[] observers;
+        synchronized (mPackages) {
+            if (mPackageListObservers.size() == 0) {
+                return;
+            }
+            observers = (PackageListObserver[]) mPackageListObservers.toArray();
+        }
+        for (int i = observers.length - 1; i >= 0; --i) {
+            observers[i].onPackageRemoved(packageName);
+        }
+    }
+
     /**
      * Sends a broadcast for the given action.
      * <p>If {@code isInstantApp} is {@code true}, then the broadcast is protected with
@@ -17640,6 +17677,7 @@ public class PackageManagerService extends IPackageManager.Stub
                         removedPackage, extras,
                         Intent.FLAG_RECEIVER_INCLUDE_BACKGROUND,
                         null, null, broadcastUsers, instantUserIds);
+                    packageSender.notifyPackageRemoved(removedPackage);
                 }
             }
             if (removedAppId >= 0) {
@@ -20395,10 +20433,9 @@ Slog.v(TAG, ":: stepped forward, applying functor at tag " + parser.getName());
             }
         }
         sUserManager.systemReady();
-
         // If we upgraded grant all default permissions before kicking off.
         for (int userId : grantPermissionsUserIds) {
-            mDefaultPermissionPolicy.grantDefaultPermissions(mPackages.values(), userId);
+            mDefaultPermissionPolicy.grantDefaultPermissions(userId);
         }
 
         if (grantPermissionsUserIds == EMPTY_INT_ARRAY) {
@@ -22445,8 +22482,8 @@ Slog.v(TAG, ":: stepped forward, applying functor at tag " + parser.getName());
     }
 
     void onNewUserCreated(final int userId) {
+        mDefaultPermissionPolicy.grantDefaultPermissions(userId);
         synchronized(mPackages) {
-            mDefaultPermissionPolicy.grantDefaultPermissions(mPackages.values(), userId);
             // If permission review for legacy apps is required, we represent
             // dagerous permissions for such apps as always granted runtime
             // permissions to keep per user flag state whether review is needed.
@@ -22929,6 +22966,29 @@ Slog.v(TAG, ":: stepped forward, applying functor at tag " + parser.getName());
                 packageName = resolveInternalPackageNameLPr(
                         packageName, PackageManager.VERSION_CODE_HIGHEST);
                 return mPackages.get(packageName);
+            }
+        }
+
+        @Override
+        public PackageList getPackageList(PackageListObserver observer) {
+            synchronized (mPackages) {
+                final int N = mPackages.size();
+                final ArrayList<String> list = new ArrayList<>(N);
+                for (int i = 0; i < N; i++) {
+                    list.add(mPackages.keyAt(i));
+                }
+                final PackageList packageList = new PackageList(list, observer);
+                if (observer != null) {
+                    mPackageListObservers.add(packageList);
+                }
+                return packageList;
+            }
+        }
+
+        @Override
+        public void removePackageListObserver(PackageListObserver observer) {
+            synchronized (mPackages) {
+                mPackageListObservers.remove(observer);
             }
         }
 
@@ -23594,4 +23654,6 @@ interface PackageSender {
         final IIntentReceiver finishedReceiver, final int[] userIds, int[] instantUserIds);
     void sendPackageAddedForNewUsers(String packageName, boolean sendBootCompleted,
         boolean includeStopped, int appId, int[] userIds, int[] instantUserIds);
+    void notifyPackageAdded(String packageName);
+    void notifyPackageRemoved(String packageName);
 }

@@ -39,7 +39,12 @@ LOCAL_STATIC_ANDROID_LIBRARIES := \
     android-support-v7-mediarouter \
     android-support-v7-palette \
     android-support-v14-preference \
-    android-support-v17-leanback
+    android-support-v17-leanback \
+    android-slices-core \
+    android-slices-view \
+    android-slices-builders \
+    apptoolkit-arch-core-runtime \
+    apptoolkit-lifecycle-extensions \
 
 LOCAL_STATIC_JAVA_LIBRARIES := \
     SystemUI-tags \
