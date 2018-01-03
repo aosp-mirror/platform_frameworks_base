@@ -1415,6 +1415,12 @@
         android:label="@string/permlab_nfc"
         android:protectionLevel="normal" />
 
+    <!-- Allows applications to receive NFC transaction events.
+         <p>Protection level: normal
+    -->
+    <permission android:name="android.permission.NFC_TRANSACTION_EVENT"
+        android:protectionLevel="normal" />
+
     <!-- @SystemApi Allows an internal user to use privileged ConnectivityManager APIs.
          @hide -->
     <permission android:name="android.permission.CONNECTIVITY_INTERNAL"
