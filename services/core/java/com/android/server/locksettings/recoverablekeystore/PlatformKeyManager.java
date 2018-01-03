@@ -88,7 +88,8 @@ public class PlatformKeyManager {
      *
      * @hide
      */
-    public static PlatformKeyManager getInstance(Context context, RecoverableKeyStoreDb database, int userId)
+    public static PlatformKeyManager getInstance(Context context, RecoverableKeyStoreDb database,
+            int userId)
             throws KeyStoreException, NoSuchAlgorithmException, InsecureUserException {
         context = context.getApplicationContext();
         PlatformKeyManager keyManager = new PlatformKeyManager(
