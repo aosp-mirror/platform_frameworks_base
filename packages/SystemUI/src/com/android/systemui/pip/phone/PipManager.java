@@ -65,6 +65,7 @@ public class PipManager implements BasePipManager {
     private PipMenuActivityController mMenuController;
     private PipMediaController mMediaController;
     private PipTouchHandler mTouchHandler;
+    private PipAppOpsListener mAppOpsListener;
 
     /**
      * Handler for system task stack changes.
@@ -75,6 +76,7 @@ public class PipManager implements BasePipManager {
             mTouchHandler.onActivityPinned();
             mMediaController.onActivityPinned();
             mMenuController.onActivityPinned();
+            mAppOpsListener.onActivityPinned(packageName);
 
             SystemServicesProxy.getInstance(mContext).setPipVisibility(true);
         }
@@ -87,6 +89,7 @@ public class PipManager implements BasePipManager {
             final int userId = topActivity != null ? topPipActivityInfo.second : 0;
             mMenuController.onActivityUnpinned();
             mTouchHandler.onActivityUnpinned(topActivity);
+            mAppOpsListener.onActivityUnpinned();
 
             SystemServicesProxy.getInstance(mContext).setPipVisibility(topActivity != null);
         }
@@ -177,6 +180,8 @@ public class PipManager implements BasePipManager {
                 mInputConsumerController);
         mTouchHandler = new PipTouchHandler(context, mActivityManager, mMenuController,
                 mInputConsumerController);
+        mAppOpsListener = new PipAppOpsListener(context, mActivityManager,
+                mTouchHandler.getMotionHelper());
         EventBus.getDefault().register(this);
     }
 
