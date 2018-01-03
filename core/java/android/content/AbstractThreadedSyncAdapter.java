@@ -21,6 +21,7 @@ import android.os.Build;
 import android.os.Bundle;
 import android.os.IBinder;
 import android.os.Process;
+import android.os.RemoteException;
 import android.os.Trace;
 import android.util.Log;
 
@@ -165,6 +166,12 @@ public abstract class AbstractThreadedSyncAdapter {
     }
 
     private class ISyncAdapterImpl extends ISyncAdapter.Stub {
+        @Override
+        public void onUnsyncableAccount(ISyncAdapterUnsyncableAccountCallback cb)
+                throws RemoteException {
+            cb.onUnsyncableAccountDone(AbstractThreadedSyncAdapter.this.onUnsyncableAccount());
+        }
+
         @Override
         public void startSync(ISyncContext syncContext, String authority, Account account,
                 Bundle extras) {
@@ -371,6 +378,26 @@ public abstract class AbstractThreadedSyncAdapter {
      */
     public final IBinder getSyncAdapterBinder() {
         return mISyncAdapterImpl.asBinder();
+    }
+
+    /**
+     * Allows to defer syncing until all accounts are properly set up.
+     *
+     * <p>Called when a account / authority pair
+     * <ul>
+     * <li>that can be handled by this adapter</li>
+     * <li>{@link ContentResolver#requestSync(SyncRequest) is synced}</li>
+     * <li>and the account/provider {@link ContentResolver#getIsSyncable(Account, String) has
+     * unknown state (<0)}.</li>
+     * </ul>
+     *
+     * <p>This might be called on a different service connection as {@link #onPerformSync}.
+     *
+     * @return If {@code false} syncing is deferred. Returns {@code true} by default, i.e. by
+     *         default syncing starts immediately.
+     */
+    public boolean onUnsyncableAccount() {
+        return true;
     }
 
     /**

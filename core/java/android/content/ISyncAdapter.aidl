@@ -19,12 +19,21 @@ package android.content;
 import android.accounts.Account;
 import android.os.Bundle;
 import android.content.ISyncContext;
+import android.content.ISyncAdapterUnsyncableAccountCallback;
 
 /**
  * Interface used to control the sync activity on a SyncAdapter
  * @hide
  */
 oneway interface ISyncAdapter {
+    /**
+     * Called before {@link #startSync}. This allows the adapter to defer syncs until the
+     * adapter is ready for the account
+     *
+     * @param cb If called back with {@code false} accounts are not synced.
+     */
+    void onUnsyncableAccount(ISyncAdapterUnsyncableAccountCallback cb);
+
     /**
      * Initiate a sync for this account. SyncAdapter-specific parameters may
      * be specified in extras, which is guaranteed to not be null.
