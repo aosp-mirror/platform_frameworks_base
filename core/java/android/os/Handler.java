@@ -388,6 +388,8 @@ public class Handler {
      * The runnable will be run on the thread to which this handler is attached.
      *
      * @param r The Runnable that will be executed.
+     * @param token An instance which can be used to cancel {@code r} via
+     *         {@link #removeCallbacksAndMessages}.
      * @param uptimeMillis The absolute time at which the callback should run,
      *         using the {@link android.os.SystemClock#uptimeMillis} time-base.
      * 
@@ -429,6 +431,32 @@ public class Handler {
         return sendMessageDelayed(getPostMessage(r), delayMillis);
     }
     
+    /**
+     * Causes the Runnable r to be added to the message queue, to be run
+     * after the specified amount of time elapses.
+     * The runnable will be run on the thread to which this handler
+     * is attached.
+     * <b>The time-base is {@link android.os.SystemClock#uptimeMillis}.</b>
+     * Time spent in deep sleep will add an additional delay to execution.
+     *
+     * @param r The Runnable that will be executed.
+     * @param token An instance which can be used to cancel {@code r} via
+     *         {@link #removeCallbacksAndMessages}.
+     * @param delayMillis The delay (in milliseconds) until the Runnable
+     *        will be executed.
+     *
+     * @return Returns true if the Runnable was successfully placed in to the
+     *         message queue.  Returns false on failure, usually because the
+     *         looper processing the message queue is exiting.  Note that a
+     *         result of true does not mean the Runnable will be processed --
+     *         if the looper is quit before the delivery time of the message
+     *         occurs then the message will be dropped.
+     */
+    public final boolean postDelayed(Runnable r, Object token, long delayMillis)
+    {
+        return sendMessageDelayed(getPostMessage(r, token), delayMillis);
+    }
+
     /**
      * Posts a message to an object that implements Runnable.
      * Causes the Runnable r to executed on the next iteration through the
