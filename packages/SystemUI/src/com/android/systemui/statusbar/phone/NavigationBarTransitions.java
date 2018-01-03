@@ -80,7 +80,8 @@ public final class NavigationBarTransitions extends BarTransitions {
 
     @Override
     protected boolean isLightsOut(int mode) {
-        return super.isLightsOut(mode) || (mAutoDim && !mWallpaperVisible);
+        return super.isLightsOut(mode) || (mAutoDim && !mWallpaperVisible
+                && mode != MODE_WARNING);
     }
 
     public LightBarTransitionsController getLightTransitionsController() {
@@ -108,7 +109,9 @@ public final class NavigationBarTransitions extends BarTransitions {
         // ok, everyone, stop it right there
         navButtons.animate().cancel();
 
-        final float navButtonsAlpha = lightsOut ? 0.6f : 1f;
+        // Bump percentage by 10% if dark.
+        float darkBump = mLightTransitionsController.getCurrentDarkIntensity() / 10;
+        final float navButtonsAlpha = lightsOut ? 0.6f + darkBump : 1f;
 
         if (!animate) {
             navButtons.setAlpha(navButtonsAlpha);
@@ -129,6 +132,9 @@ public final class NavigationBarTransitions extends BarTransitions {
         SparseArray<ButtonDispatcher> buttonDispatchers = mView.getButtonDispatchers();
         for (int i = buttonDispatchers.size() - 1; i >= 0; i--) {
             buttonDispatchers.valueAt(i).setDarkIntensity(darkIntensity);
+        }
+        if (mAutoDim) {
+            applyLightsOut(false, true);
         }
     }
 
