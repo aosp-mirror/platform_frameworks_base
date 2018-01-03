@@ -40,12 +40,6 @@ final class GestureUtils {
         return (deltaTime >= timeout);
     }
 
-    public static boolean isSamePointerContext(MotionEvent first, MotionEvent second) {
-        return (first.getPointerIdBits() == second.getPointerIdBits()
-                && first.getPointerId(first.getActionIndex())
-                        == second.getPointerId(second.getActionIndex()));
-    }
-
     /**
      * Determines whether a two pointer gesture is a dragging one.
      *
