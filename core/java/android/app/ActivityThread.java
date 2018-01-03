@@ -1650,9 +1650,7 @@ public final class ActivityThread extends ClientTransactionHandler {
                             (String[]) ((SomeArgs) msg.obj).arg2);
                     break;
                 case EXECUTE_TRANSACTION:
-                    final ClientTransaction transaction = (ClientTransaction) msg.obj;
-                    mTransactionExecutor.execute(transaction);
-                    transaction.recycle();
+                    mTransactionExecutor.execute(((ClientTransaction) msg.obj));
                     break;
             }
             Object obj = msg.obj;
