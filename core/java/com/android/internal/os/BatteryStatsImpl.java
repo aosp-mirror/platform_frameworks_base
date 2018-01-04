@@ -6947,6 +6947,8 @@ public class BatteryStatsImpl extends BatteryStats {
                             WIFI_MULTICAST_ENABLED, mBsi.mWifiMulticastTimers, mBsi.mOnBatteryTimeBase);
                 }
                 mWifiMulticastTimer.startRunningLocked(elapsedRealtimeMs);
+                StatsLog.write_non_chained(
+                        StatsLog.WIFI_MULTICAST_LOCK_STATE_CHANGED, getUid(), null, 1);
             }
         }
 
@@ -6955,6 +6957,8 @@ public class BatteryStatsImpl extends BatteryStats {
             if (mWifiMulticastEnabled) {
                 mWifiMulticastEnabled = false;
                 mWifiMulticastTimer.stopRunningLocked(elapsedRealtimeMs);
+                StatsLog.write_non_chained(
+                        StatsLog.WIFI_MULTICAST_LOCK_STATE_CHANGED, getUid(), null, 0);
             }
         }
 
