@@ -309,13 +309,14 @@ TEST(OringDurationTrackerTest, TestPredictAnomalyTimestamp) {
               tracker.predictAnomalyTimestampNs(*anomalyTracker, event3StartTimeNs));
 }
 
-TEST(OringDurationTrackerTest, TestAnomalyDetection) {
+TEST(OringDurationTrackerTest, TestAnomalyDetectionExpiredAlarm) {
     Alert alert;
     alert.set_id(101);
     alert.set_metric_id(1);
     alert.set_trigger_if_sum_gt(40 * NS_PER_SEC);
     alert.set_num_buckets(2);
-    alert.set_refractory_period_secs(1);
+    const int32_t refPeriodSec = 45;
+    alert.set_refractory_period_secs(refPeriodSec);
 
     unordered_map<HashableDimensionKey, vector<DurationBucket>> buckets;
     sp<MockConditionWizard> wizard = new NaggyMock<MockConditionWizard>();
@@ -328,23 +329,86 @@ TEST(OringDurationTrackerTest, TestAnomalyDetection) {
     OringDurationTracker tracker(kConfigKey, metricId, eventKey, wizard, 1, true /*nesting*/,
                                  bucketStartTimeNs, bucketSizeNs, false, {anomalyTracker});
 
-    tracker.noteStart(DEFAULT_DIMENSION_KEY, true, eventStartTimeNs, ConditionKey());
-    tracker.noteStop(DEFAULT_DIMENSION_KEY, eventStartTimeNs + 10, false);
-    EXPECT_EQ(anomalyTracker->mLastAnomalyTimestampNs, -1);
+    tracker.noteStart(kEventKey1, true, eventStartTimeNs, ConditionKey());
+    tracker.noteStop(kEventKey1, eventStartTimeNs + 10, false);
+    EXPECT_EQ(anomalyTracker->getRefractoryPeriodEndsSec(eventKey), 0U);
     EXPECT_TRUE(tracker.mStarted.empty());
     EXPECT_EQ(10LL, tracker.mDuration);
 
     EXPECT_EQ(0u, tracker.mStarted.size());
 
-    tracker.noteStart(DEFAULT_DIMENSION_KEY, true, eventStartTimeNs + 20, ConditionKey());
+    tracker.noteStart(kEventKey1, true, eventStartTimeNs + 20, ConditionKey());
     EXPECT_EQ(1u, anomalyTracker->mAlarms.size());
     EXPECT_EQ((long long)(51ULL * NS_PER_SEC),
               (long long)(anomalyTracker->mAlarms.begin()->second->timestampSec * NS_PER_SEC));
+    // The alarm is set to fire at 51s, and when it does, an anomaly would be declared. However,
+    // because this is a unit test, the alarm won't actually fire at all. Since the alarm fails
+    // to fire in time, the anomaly is instead caught when noteStop is called, at around 71s.
     tracker.flushIfNeeded(eventStartTimeNs + 2 * bucketSizeNs + 25, &buckets);
-    tracker.noteStop(DEFAULT_DIMENSION_KEY, eventStartTimeNs + 2 * bucketSizeNs + 25, false);
+    tracker.noteStop(kEventKey1, eventStartTimeNs + 2 * bucketSizeNs + 25, false);
     EXPECT_EQ(anomalyTracker->getSumOverPastBuckets(eventKey), (long long)(bucketSizeNs));
-    EXPECT_EQ((long long)(eventStartTimeNs + 2 * bucketSizeNs + 25),
-              anomalyTracker->mLastAnomalyTimestampNs);
+    EXPECT_EQ(anomalyTracker->getRefractoryPeriodEndsSec(eventKey),
+              (eventStartTimeNs + 2 * bucketSizeNs + 25) / NS_PER_SEC + refPeriodSec);
+}
+
+TEST(OringDurationTrackerTest, TestAnomalyDetectionFiredAlarm) {
+    Alert alert;
+    alert.set_id(101);
+    alert.set_metric_id(1);
+    alert.set_trigger_if_sum_gt(40 * NS_PER_SEC);
+    alert.set_num_buckets(2);
+    const int32_t refPeriodSec = 45;
+    alert.set_refractory_period_secs(refPeriodSec);
+
+    unordered_map<HashableDimensionKey, vector<DurationBucket>> buckets;
+    sp<MockConditionWizard> wizard = new NaggyMock<MockConditionWizard>();
+    ConditionKey conkey;
+    conkey[StringToId("APP_BACKGROUND")] = kConditionKey1;
+    uint64_t bucketStartTimeNs = 10 * NS_PER_SEC;
+    uint64_t eventStartTimeNs = bucketStartTimeNs + NS_PER_SEC + 1;
+    uint64_t bucketSizeNs = 30 * NS_PER_SEC;
+
+    sp<DurationAnomalyTracker> anomalyTracker = new DurationAnomalyTracker(alert, kConfigKey);
+    OringDurationTracker tracker(kConfigKey, metricId, eventKey, wizard, 1, true /*nesting*/,
+                                 bucketStartTimeNs, bucketSizeNs, false, {anomalyTracker});
+
+    tracker.noteStart(kEventKey1, true, 15 * NS_PER_SEC, conkey); // start key1
+    EXPECT_EQ(1u, anomalyTracker->mAlarms.size());
+    sp<const AnomalyAlarm> alarm = anomalyTracker->mAlarms.begin()->second;
+    EXPECT_EQ((long long)(55ULL * NS_PER_SEC), (long long)(alarm->timestampSec * NS_PER_SEC));
+    EXPECT_EQ(anomalyTracker->getRefractoryPeriodEndsSec(eventKey), 0U);
+
+    tracker.noteStop(kEventKey1, 17 * NS_PER_SEC, false); // stop key1 (2 seconds later)
+    EXPECT_EQ(0u, anomalyTracker->mAlarms.size());
+    EXPECT_EQ(anomalyTracker->getRefractoryPeriodEndsSec(eventKey), 0U);
+
+    tracker.noteStart(kEventKey1, true, 22 * NS_PER_SEC, conkey); // start key1 again
+    EXPECT_EQ(1u, anomalyTracker->mAlarms.size());
+    alarm = anomalyTracker->mAlarms.begin()->second;
+    EXPECT_EQ((long long)(60ULL * NS_PER_SEC), (long long)(alarm->timestampSec * NS_PER_SEC));
+    EXPECT_EQ(anomalyTracker->getRefractoryPeriodEndsSec(eventKey), 0U);
+
+    tracker.noteStart(kEventKey2, true, 32 * NS_PER_SEC, conkey); // start key2
+    EXPECT_EQ(1u, anomalyTracker->mAlarms.size());
+    alarm = anomalyTracker->mAlarms.begin()->second;
+    EXPECT_EQ((long long)(60ULL * NS_PER_SEC), (long long)(alarm->timestampSec * NS_PER_SEC));
+    EXPECT_EQ(anomalyTracker->getRefractoryPeriodEndsSec(eventKey), 0U);
+
+    tracker.noteStop(kEventKey1, 47 * NS_PER_SEC, false); // stop key1
+    EXPECT_EQ(1u, anomalyTracker->mAlarms.size());
+    alarm = anomalyTracker->mAlarms.begin()->second;
+    EXPECT_EQ((long long)(60ULL * NS_PER_SEC), (long long)(alarm->timestampSec * NS_PER_SEC));
+    EXPECT_EQ(anomalyTracker->getRefractoryPeriodEndsSec(eventKey), 0U);
+
+    // Now, at 60s, which is 38s after key1 started again, we have reached 40s of 'on' time.
+    std::unordered_set<sp<const AnomalyAlarm>, SpHash<AnomalyAlarm>> firedAlarms({alarm});
+    anomalyTracker->informAlarmsFired(62 * NS_PER_SEC, firedAlarms);
+    EXPECT_EQ(0u, anomalyTracker->mAlarms.size());
+    EXPECT_EQ(anomalyTracker->getRefractoryPeriodEndsSec(eventKey), 62U + refPeriodSec);
+
+    tracker.noteStop(kEventKey2, 69 * NS_PER_SEC, false); // stop key2
+    EXPECT_EQ(0u, anomalyTracker->mAlarms.size());
+    EXPECT_EQ(anomalyTracker->getRefractoryPeriodEndsSec(eventKey), 62U + refPeriodSec);
 }
 
 }  // namespace statsd

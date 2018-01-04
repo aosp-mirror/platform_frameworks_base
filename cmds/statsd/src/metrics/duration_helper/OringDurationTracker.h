@@ -67,7 +67,8 @@ private:
     FRIEND_TEST(OringDurationTrackerTest, TestCrossBucketBoundary);
     FRIEND_TEST(OringDurationTrackerTest, TestDurationConditionChange);
     FRIEND_TEST(OringDurationTrackerTest, TestPredictAnomalyTimestamp);
-    FRIEND_TEST(OringDurationTrackerTest, TestAnomalyDetection);
+    FRIEND_TEST(OringDurationTrackerTest, TestAnomalyDetectionExpiredAlarm);
+    FRIEND_TEST(OringDurationTrackerTest, TestAnomalyDetectionFiredAlarm);
 };
 
 }  // namespace statsd

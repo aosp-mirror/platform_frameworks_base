@@ -50,7 +50,7 @@ public:
                                       const uint64_t& timestampNs);
 
     // Declares an anomaly for each alarm in firedAlarms that belongs to this DurationAnomalyTracker
-    // and removes it from firedAlarms. Does NOT remove the alarm from the AnomalyMonitor.
+    // and removes it from firedAlarms.
     // TODO: This will actually be called from a different thread, so make it thread-safe!
     //          This means that almost every function in DurationAnomalyTracker needs to be locked.
     //          But this should be done at the level of StatsLogProcessor, which needs to lock
@@ -70,10 +70,10 @@ protected:
     void resetStorage() override;
 
     FRIEND_TEST(OringDurationTrackerTest, TestPredictAnomalyTimestamp);
-    FRIEND_TEST(OringDurationTrackerTest, TestAnomalyDetection);
+    FRIEND_TEST(OringDurationTrackerTest, TestAnomalyDetectionExpiredAlarm);
+    FRIEND_TEST(OringDurationTrackerTest, TestAnomalyDetectionFiredAlarm);
     FRIEND_TEST(MaxDurationTrackerTest, TestAnomalyDetection);
     FRIEND_TEST(MaxDurationTrackerTest, TestAnomalyDetection);
-    FRIEND_TEST(OringDurationTrackerTest, TestAnomalyDetection);
 };
 
 }  // namespace statsd

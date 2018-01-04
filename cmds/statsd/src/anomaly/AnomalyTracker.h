@@ -52,16 +52,13 @@ public:
                        const int64_t& bucketNum);
 
     // Returns true if detected anomaly for the existing buckets on one or more dimension keys.
-    bool detectAnomaly(const int64_t& currBucketNum, const DimToValMap& currentBucket);
     bool detectAnomaly(const int64_t& currBucketNum, const HashableDimensionKey& key,
                        const int64_t& currentBucketValue);
 
     // Informs incidentd about the detected alert.
-    void declareAnomaly(const uint64_t& timestampNs);
+    void declareAnomaly(const uint64_t& timestampNs, const HashableDimensionKey& key);
 
     // Detects the alert and informs the incidentd when applicable.
-    void detectAndDeclareAnomaly(const uint64_t& timestampNs, const int64_t& currBucketNum,
-                                 const DimToValMap& currentBucket);
     void detectAndDeclareAnomaly(const uint64_t& timestampNs, const int64_t& currBucketNum,
                                  const HashableDimensionKey& key,
                                  const int64_t& currentBucketValue);
@@ -82,9 +79,11 @@ public:
         return mAlert.trigger_if_sum_gt();
     }
 
-    // Helper function to return the timestamp of the last detected anomaly.
-    inline int64_t getLastAnomalyTimestampNs() const {
-        return mLastAnomalyTimestampNs;
+    // Returns the refractory period timestamp (in seconds) for the given key.
+    // If there is no stored refractory period ending timestamp, returns 0.
+    uint32_t getRefractoryPeriodEndsSec(const HashableDimensionKey& key) const {
+        const auto& it = mRefractoryPeriodEndsSec.find(key);
+        return it != mRefractoryPeriodEndsSec.end() ? it->second : 0;
     }
 
     inline int getNumOfPastBuckets() const {
@@ -121,8 +120,11 @@ protected:
     // The bucket number of the last added bucket.
     int64_t mMostRecentBucketNum = -1;
 
-    // The timestamp when the last anomaly was declared.
-    int64_t mLastAnomalyTimestampNs = -1;
+    // Map from each dimension to the timestamp that its refractory period (if this anomaly was
+    // declared for that dimension) ends, in seconds. Only anomalies that occur after this period
+    // ends will be declared.
+    // Entries may be, but are not guaranteed to be, removed after the period is finished.
+    unordered_map<HashableDimensionKey, uint32_t> mRefractoryPeriodEndsSec;
 
     void flushPastBuckets(const int64_t& currBucketNum);
 
@@ -133,7 +135,7 @@ protected:
     // and remove any items with value 0.
     void subtractBucketFromSum(const shared_ptr<DimToValMap>& bucket);
 
-    bool isInRefractoryPeriod(const uint64_t& timestampNs) const;
+    bool isInRefractoryPeriod(const uint64_t& timestampNs, const HashableDimensionKey& key);
 
     // Calculates the corresponding bucket index within the circular array.
     size_t index(int64_t bucketNum) const;
@@ -142,12 +144,12 @@ protected:
     virtual void resetStorage();
 
     // Informs the subscribers that an anomaly has occurred.
-    void informSubscribers();
+    void informSubscribers(const HashableDimensionKey& key);
 
     FRIEND_TEST(AnomalyTrackerTest, TestConsecutiveBuckets);
     FRIEND_TEST(AnomalyTrackerTest, TestSparseBuckets);
     FRIEND_TEST(GaugeMetricProducerTest, TestAnomalyDetection);
-    FRIEND_TEST(CountMetricProducerTest, TestAnomalyDetection);
+    FRIEND_TEST(CountMetricProducerTest, TestAnomalyDetectionUnSliced);
 };
 
 }  // namespace statsd

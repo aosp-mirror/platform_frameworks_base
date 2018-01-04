@@ -46,7 +46,7 @@ void DurationAnomalyTracker::declareAnomalyIfAlarmExpired(const HashableDimensio
 
     if (itr->second != nullptr &&
         static_cast<uint32_t>(timestampNs / NS_PER_SEC) >= itr->second->timestampSec) {
-        declareAnomaly(timestampNs);
+        declareAnomaly(timestampNs, dimensionKey);
         stopAlarm(dimensionKey);
     }
 }
@@ -55,7 +55,7 @@ void DurationAnomalyTracker::startAlarm(const HashableDimensionKey& dimensionKey
                                 const uint64_t& timestampNs) {
 
     uint32_t timestampSec = static_cast<uint32_t>(timestampNs / NS_PER_SEC);
-    if (isInRefractoryPeriod(timestampNs)) {
+    if (isInRefractoryPeriod(timestampNs, dimensionKey)) {
         VLOG("Skipping setting anomaly alarm since it'd fall in the refractory period");
         return;
     }
@@ -104,7 +104,7 @@ void DurationAnomalyTracker::informAlarmsFired(const uint64_t& timestampNs,
 
     // Now declare each of these alarms to have fired.
     for (const auto& kv : matchedAlarms) {
-        declareAnomaly(timestampNs /* TODO: , kv.first */);
+        declareAnomaly(timestampNs, kv.first);
         mAlarms.erase(kv.first);
         firedAlarms.erase(kv.second);  // No one else can also own it, so we're done with it.
     }
