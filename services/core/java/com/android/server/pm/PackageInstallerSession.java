@@ -988,11 +988,8 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
         for (File addedFile : addedFiles) {
             final ApkLite apk;
             try {
-                int flags = PackageParser.PARSE_COLLECT_CERTIFICATES;
-                if ((params.installFlags & PackageManager.INSTALL_INSTANT_APP) != 0) {
-                    flags |= PackageParser.PARSE_IS_EPHEMERAL;
-                }
-                apk = PackageParser.parseApkLite(addedFile, flags);
+                apk = PackageParser.parseApkLite(
+                        addedFile, PackageParser.PARSE_COLLECT_CERTIFICATES);
             } catch (PackageParserException e) {
                 throw PackageManagerException.from(e);
             }

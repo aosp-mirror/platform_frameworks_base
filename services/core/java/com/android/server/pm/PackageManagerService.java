@@ -16385,7 +16385,6 @@ public class PackageManagerService extends IPackageManager.Stub
                 | PackageParser.PARSE_ENFORCE_CODE
                 | (forwardLocked ? PackageParser.PARSE_FORWARD_LOCK : 0)
                 | (onExternal ? PackageParser.PARSE_EXTERNAL_STORAGE : 0)
-                | (instantApp ? PackageParser.PARSE_IS_EPHEMERAL : 0)
                 | (forceSdk ? PackageParser.PARSE_FORCE_SDK : 0);
         PackageParser pp = new PackageParser();
         pp.setSeparateProcesses(mSeparateProcesses);
@@ -16413,19 +16412,29 @@ public class PackageManagerService extends IPackageManager.Stub
             return;
         }
 
-        // Instant apps must have target SDK >= O and have targetSanboxVersion >= 2
-        if (instantApp && pkg.applicationInfo.targetSdkVersion <= Build.VERSION_CODES.N_MR1) {
-            Slog.w(TAG, "Instant app package " + pkg.packageName + " does not target O");
-            res.setError(INSTALL_FAILED_SANDBOX_VERSION_DOWNGRADE,
-                    "Instant app package must target O");
-            return;
-        }
-        if (instantApp && pkg.applicationInfo.targetSandboxVersion != 2) {
-            Slog.w(TAG, "Instant app package " + pkg.packageName
-                    + " does not target targetSandboxVersion 2");
-            res.setError(INSTALL_FAILED_SANDBOX_VERSION_DOWNGRADE,
-                    "Instant app package must use targetSanboxVersion 2");
-            return;
+        // Instant apps have several additional install-time checks.
+        if (instantApp) {
+            if (pkg.applicationInfo.targetSdkVersion < Build.VERSION_CODES.O) {
+                Slog.w(TAG,
+                        "Instant app package " + pkg.packageName + " does not target at least O");
+                res.setError(INSTALL_FAILED_INSTANT_APP_INVALID,
+                        "Instant app package must target at least O");
+                return;
+            }
+            if (pkg.applicationInfo.targetSandboxVersion != 2) {
+                Slog.w(TAG, "Instant app package " + pkg.packageName
+                        + " does not target targetSandboxVersion 2");
+                res.setError(INSTALL_FAILED_INSTANT_APP_INVALID,
+                        "Instant app package must use targetSandboxVersion 2");
+                return;
+            }
+            if (pkg.mSharedUserId != null) {
+                Slog.w(TAG, "Instant app package " + pkg.packageName
+                        + " may not declare sharedUserId.");
+                res.setError(INSTALL_FAILED_INSTANT_APP_INVALID,
+                        "Instant app package may not declare a sharedUserId");
+                return;
+            }
         }
 
         if (pkg.applicationInfo.isStaticSharedLibrary()) {
@@ -16492,6 +16501,15 @@ public class PackageManagerService extends IPackageManager.Stub
             }
         } catch (PackageParserException e) {
             res.setError("Failed collect during installPackageLI", e);
+            return;
+        }
+
+        if (instantApp && pkg.mSigningDetails.signatureSchemeVersion
+                < SignatureSchemeVersion.SIGNING_BLOCK_V2) {
+            Slog.w(TAG, "Instant app package " + pkg.packageName
+                    + " is not signed with at least APK Signature Scheme v2");
+            res.setError(INSTALL_FAILED_INSTANT_APP_INVALID,
+                    "Instant app package must be signed with APK Signature Scheme v2 or greater");
             return;
         }
 
