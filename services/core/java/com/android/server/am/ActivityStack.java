@@ -537,15 +537,17 @@ class ActivityStack<T extends StackWindowController> extends ConfigurationContai
         final ActivityStack splitScreenStack = display.getSplitScreenPrimaryStack();
         mTmpOptions.setLaunchWindowingMode(preferredWindowingMode);
 
+        int windowingMode = preferredWindowingMode;
         // Need to make sure windowing mode is supported. If we in the process of creating the stack
         // no need to resolve the windowing mode again as it is already resolved to the right mode.
-        int windowingMode = creating
-                ? preferredWindowingMode
-                : display.resolveWindowingMode(
-                        null /* ActivityRecord */, mTmpOptions, topTask, getActivityType());
-        if (splitScreenStack == this && windowingMode == WINDOWING_MODE_SPLIT_SCREEN_SECONDARY) {
-            // Resolution to split-screen secondary for the primary split-screen stack means we want
-            // to go fullscreen.
+        if (!creating) {
+            windowingMode = display.validateWindowingMode(windowingMode,
+                    null /* ActivityRecord */, topTask, getActivityType());
+        }
+        if (splitScreenStack == this
+                && windowingMode == WINDOWING_MODE_SPLIT_SCREEN_SECONDARY) {
+            // Resolution to split-screen secondary for the primary split-screen stack means
+            // we want to go fullscreen.
             windowingMode = WINDOWING_MODE_FULLSCREEN;
         }
 
@@ -595,6 +597,7 @@ class ActivityStack<T extends StackWindowController> extends ConfigurationContai
                 mStackSupervisor.mNoAnimActivities.add(topActivity);
             }
             super.setWindowingMode(windowingMode);
+            windowingMode = getWindowingMode();
 
             if (creating) {
                 // Nothing else to do if we don't have a window container yet. E.g. call from ctor.
@@ -621,15 +624,6 @@ class ActivityStack<T extends StackWindowController> extends ConfigurationContai
             mTmpRect2.setEmpty();
             if (windowingMode != WINDOWING_MODE_FULLSCREEN) {
                 mWindowContainerController.getRawBounds(mTmpRect2);
-                if (windowingMode == WINDOWING_MODE_FREEFORM) {
-                    if (topTask != null) {
-                        // TODO: Can we consolidate this and other sites that call this methods?
-                        Rect bounds = topTask().getLaunchBounds();
-                        if (bounds != null) {
-                            mTmpRect2.set(bounds);
-                        }
-                    }
-                }
             }
 
             if (!Objects.equals(getOverrideBounds(), mTmpRect2)) {
@@ -4818,9 +4812,11 @@ class ActivityStack<T extends StackWindowController> extends ConfigurationContai
                         // For freeform stack we don't adjust the size of the tasks to match that
                         // of the stack, but we do try to make sure the tasks are still contained
                         // with the bounds of the stack.
-                        mTmpRect2.set(task.getOverrideBounds());
-                        fitWithinBounds(mTmpRect2, bounds);
-                        task.updateOverrideConfiguration(mTmpRect2);
+                        if (task.getOverrideBounds() != null) {
+                            mTmpRect2.set(task.getOverrideBounds());
+                            fitWithinBounds(mTmpRect2, bounds);
+                            task.updateOverrideConfiguration(mTmpRect2);
+                        }
                     } else {
                         task.updateOverrideConfiguration(taskBounds, insetBounds);
                     }

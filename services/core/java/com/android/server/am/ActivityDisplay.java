@@ -315,16 +315,6 @@ class ActivityDisplay extends ConfigurationContainer<ActivityStack>
                     + windowingMode);
         }
 
-        if (windowingMode == WINDOWING_MODE_UNDEFINED) {
-            // TODO: Should be okay to have stacks with with undefined windowing mode long term, but
-            // have to set them to something for now due to logic that depending on them.
-            windowingMode = getWindowingMode(); // Put in current display's windowing mode
-            if (windowingMode == WINDOWING_MODE_UNDEFINED) {
-                // Else fullscreen for now...
-                windowingMode = WINDOWING_MODE_FULLSCREEN;
-            }
-        }
-
         final int stackId = getNextStackId();
         return createStackUnchecked(windowingMode, activityType, stackId, onTop);
     }
@@ -578,7 +568,21 @@ class ActivityDisplay extends ConfigurationContainer<ActivityStack>
                 windowingMode = getWindowingMode();
             }
         }
+        return validateWindowingMode(windowingMode, r, task, activityType);
+    }
 
+    /**
+     * Check that the requested windowing-mode is appropriate for the specified task and/or activity
+     * on this display.
+     *
+     * @param windowingMode The windowing-mode to validate.
+     * @param r The {@link ActivityRecord} to check against.
+     * @param task The {@link TaskRecord} to check against.
+     * @param activityType An activity type.
+     * @return The provided windowingMode or the closest valid mode which is appropriate.
+     */
+    int validateWindowingMode(int windowingMode, @Nullable ActivityRecord r,
+        @Nullable TaskRecord task, int activityType) {
         // Make sure the windowing mode we are trying to use makes sense for what is supported.
         final ActivityTaskManagerService service = mSupervisor.mService;
         boolean supportsMultiWindow = service.mSupportsMultiWindow;
