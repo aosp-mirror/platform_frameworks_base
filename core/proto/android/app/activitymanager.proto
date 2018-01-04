@@ -38,29 +38,29 @@ enum ProcessState {
   PROCESS_STATE_BOUND_FOREGROUND_SERVICE = 300;
   // Process is hosting a foreground service.
   PROCESS_STATE_FOREGROUND_SERVICE = 400;
-  // Same as PROCESS_STATE_TOP but while device is sleeping.
-  PROCESS_STATE_TOP_SLEEPING = 500;
   // Process is important to the user, and something they are aware of.
-  PROCESS_STATE_IMPORTANT_FOREGROUND = 600;
+  PROCESS_STATE_IMPORTANT_FOREGROUND = 500;
   // Process is important to the user, but not something they are aware of.
-  PROCESS_STATE_IMPORTANT_BACKGROUND = 700;
+  PROCESS_STATE_IMPORTANT_BACKGROUND = 600;
   // Process is in the background transient so we will try to keep running.
-  PROCESS_STATE_TRANSIENT_BACKGROUND = 800;
+  PROCESS_STATE_TRANSIENT_BACKGROUND = 700;
   // Process is in the background running a backup/restore operation.
-  PROCESS_STATE_BACKUP = 900;
-  // Process is in the background, but it can't restore its state so we want
-  // to try to avoid killing it.
-  PROCESS_STATE_HEAVY_WEIGHT = 1000;
+  PROCESS_STATE_BACKUP = 800;
   // Process is in the background running a service. Unlike oom_adj, this
   // level is used for both the normal running in background state and the
   // executing operations state.
-  PROCESS_STATE_SERVICE = 1100;
+  PROCESS_STATE_SERVICE = 900;
   // Process is in the background running a receiver. Note that from the
   // perspective of oom_adj, receivers run at a higher foreground level, but
   // for our prioritization here that is not necessary and putting them
   // below services means many fewer changes in some process states as they
   // receive broadcasts.
-  PROCESS_STATE_RECEIVER = 1200;
+  PROCESS_STATE_RECEIVER = 1000;
+  // Same as PROCESS_STATE_TOP but while device is sleeping.
+  PROCESS_STATE_TOP_SLEEPING = 1100;
+  // Process is in the background, but it can't restore its state so we want
+  // to try to avoid killing it.
+  PROCESS_STATE_HEAVY_WEIGHT = 1200;
   // Process is in the background but hosts the home activity.
   PROCESS_STATE_HOME = 1300;
   // Process is in the background but hosts the last shown activity.
@@ -70,9 +70,12 @@ enum ProcessState {
   // Process is being cached for later use and is a client of another cached
   // process that contains activities.
   PROCESS_STATE_CACHED_ACTIVITY_CLIENT = 1600;
+  // Process is being cached for later use and has an activity that corresponds
+  // to an existing recent task.
+  PROCESS_STATE_CACHED_RECENT = 1700;
   // Process is being cached for later use and is empty.
-  PROCESS_STATE_CACHED_EMPTY = 1700;
+  PROCESS_STATE_CACHED_EMPTY = 1800;
   // Process does not exist.
-  PROCESS_STATE_NONEXISTENT = 1800;
+  PROCESS_STATE_NONEXISTENT = 1900;
 }
 
