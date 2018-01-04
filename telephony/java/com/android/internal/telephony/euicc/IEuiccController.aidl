@@ -30,6 +30,7 @@ interface IEuiccController {
     oneway void getDefaultDownloadableSubscriptionList(
         String callingPackage, in PendingIntent callbackIntent);
     String getEid();
+    int getOtaStatus();
     oneway void downloadSubscription(in DownloadableSubscription subscription,
         boolean switchAfterDownload, String callingPackage, in PendingIntent callbackIntent);
     EuiccInfo getEuiccInfo();

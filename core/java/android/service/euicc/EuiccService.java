@@ -23,6 +23,7 @@ import android.os.IBinder;
 import android.os.RemoteException;
 import android.telephony.euicc.DownloadableSubscription;
 import android.telephony.euicc.EuiccInfo;
+import android.telephony.euicc.EuiccManager.OtaStatus;
 import android.util.ArraySet;
 
 import java.util.concurrent.LinkedBlockingQueue;
@@ -203,6 +204,16 @@ public abstract class EuiccService extends Service {
     public abstract String onGetEid(int slotId);
 
     /**
+     * Return the status of OTA update.
+     *
+     * @param slotId ID of the SIM slot to use for the operation. This is currently not populated
+     *     but is here to future-proof the APIs.
+     * @return The status of Euicc OTA update.
+     * @see android.telephony.euicc.EuiccManager#getOtaStatus
+     */
+    public abstract @OtaStatus int onGetOtaStatus(int slotId);
+
+    /**
      * Populate {@link DownloadableSubscription} metadata for the given downloadable subscription.
      *
      * @param slotId ID of the SIM slot to use for the operation. This is currently not populated
@@ -377,6 +388,21 @@ public abstract class EuiccService extends Service {
                     String eid = EuiccService.this.onGetEid(slotId);
                     try {
                         callback.onSuccess(eid);
+                    } catch (RemoteException e) {
+                        // Can't communicate with the phone process; ignore.
+                    }
+                }
+            });
+        }
+
+        @Override
+        public void getOtaStatus(int slotId, IGetOtaStatusCallback callback) {
+            mExecutor.execute(new Runnable() {
+                @Override
+                public void run() {
+                    int status = EuiccService.this.onGetOtaStatus(slotId);
+                    try {
+                        callback.onSuccess(status);
                     } catch (RemoteException e) {
                         // Can't communicate with the phone process; ignore.
                     }
