@@ -269,6 +269,10 @@ public class WifiAwareManager {
                     + identityChangedListener);
         }
 
+        if (attachCallback == null) {
+            throw new IllegalArgumentException("Null callback provided");
+        }
+
         synchronized (mLock) {
             Looper looper = (handler == null) ? Looper.getMainLooper() : handler.getLooper();
 
@@ -299,6 +303,10 @@ public class WifiAwareManager {
     public void publish(int clientId, Looper looper, PublishConfig publishConfig,
             DiscoverySessionCallback callback) {
         if (VDBG) Log.v(TAG, "publish(): clientId=" + clientId + ", config=" + publishConfig);
+
+        if (callback == null) {
+            throw new IllegalArgumentException("Null callback provided");
+        }
 
         try {
             mService.publish(mContext.getOpPackageName(), clientId, publishConfig,
@@ -331,6 +339,10 @@ public class WifiAwareManager {
                 Log.v(TAG,
                         "subscribe(): clientId=" + clientId + ", config=" + subscribeConfig);
             }
+        }
+
+        if (callback == null) {
+            throw new IllegalArgumentException("Null callback provided");
         }
 
         try {
