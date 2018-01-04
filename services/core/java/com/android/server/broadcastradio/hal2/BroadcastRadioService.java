@@ -17,6 +17,8 @@
 package com.android.server.broadcastradio.hal2;
 
 import android.annotation.NonNull;
+import android.hardware.radio.ITuner;
+import android.hardware.radio.ITunerCallback;
 import android.hardware.radio.RadioManager;
 import android.hardware.broadcastradio.V2_0.IBroadcastRadio;
 import android.hidl.manager.V1_0.IServiceManager;
@@ -28,6 +30,7 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.stream.Collectors;
 
 public class BroadcastRadioService {
@@ -75,5 +78,16 @@ public class BroadcastRadioService {
 
     public boolean hasModule(int id) {
         return mModules.containsKey(id);
+    }
+
+    public ITuner openSession(int moduleId, @NonNull ITunerCallback callback) {
+        Objects.requireNonNull(callback);
+
+        RadioModule module = mModules.get(moduleId);
+        if (module == null) {
+            throw new IllegalArgumentException("Invalid module ID");
+        }
+
+        return module.openSession(callback);
     }
 }
