@@ -499,7 +499,7 @@ public class KeyguardManager {
                 }
             });
         } catch (RemoteException e) {
-            Log.i(TAG, "Failed to dismiss keyguard: " + e);
+            throw e.rethrowFromSystemServer();
         }
     }
 

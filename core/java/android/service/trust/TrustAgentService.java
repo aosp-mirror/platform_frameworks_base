@@ -18,6 +18,7 @@ package android.service.trust;
 
 import android.Manifest;
 import android.annotation.IntDef;
+import android.annotation.NonNull;
 import android.annotation.SdkConstant;
 import android.annotation.SystemApi;
 import android.app.Service;
@@ -37,6 +38,7 @@ import android.os.UserHandle;
 import android.os.UserManager;
 import android.util.Log;
 import android.util.Slog;
+
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.util.List;
@@ -301,7 +303,7 @@ public class TrustAgentService extends Service {
     public void onDeviceUnlockLockout(long timeoutMs) {
     }
 
-  /**
+    /**
      * Called when an escrow token is added for user userId.
      *
      * @param token the added token
@@ -557,6 +559,31 @@ public class TrustAgentService extends Service {
                 mCallback.unlockUserWithToken(handle, token, user.getIdentifier());
             } catch (RemoteException e) {
                 onError("calling unlockUserWithToken");
+            }
+        }
+    }
+
+    /**
+     * Request showing a transient error message on the keyguard.
+     * The message will be visible on the lock screen or always on display if possible but can be
+     * overridden by other keyguard events of higher priority - eg. fingerprint auth error.
+     * Other trust agents may override your message if posted simultaneously.
+     *
+     * @param message Message to show.
+     */
+    public final void showKeyguardErrorMessage(@NonNull CharSequence message) {
+        if (message == null) {
+            throw new IllegalArgumentException("message cannot be null");
+        }
+        synchronized (mLock) {
+            if (mCallback == null) {
+                Slog.w(TAG, "Cannot show message because service is not connected to framework.");
+                throw new IllegalStateException("Trust agent is not connected");
+            }
+            try {
+                mCallback.showKeyguardErrorMessage(message);
+            } catch (RemoteException e) {
+                onError("calling showKeyguardErrorMessage");
             }
         }
     }

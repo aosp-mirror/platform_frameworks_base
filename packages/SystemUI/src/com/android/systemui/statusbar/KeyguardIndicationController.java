@@ -78,7 +78,7 @@ public class KeyguardIndicationController {
     private StatusBarKeyguardViewManager mStatusBarKeyguardViewManager;
 
     private String mRestingIndication;
-    private String mTransientIndication;
+    private CharSequence mTransientIndication;
     private int mTransientTextColor;
     private int mInitialTextColor;
     private boolean mVisible;
@@ -246,14 +246,14 @@ public class KeyguardIndicationController {
     /**
      * Shows {@param transientIndication} until it is hidden by {@link #hideTransientIndication}.
      */
-    public void showTransientIndication(String transientIndication) {
+    public void showTransientIndication(CharSequence transientIndication) {
         showTransientIndication(transientIndication, mInitialTextColor);
     }
 
     /**
      * Shows {@param transientIndication} until it is hidden by {@link #hideTransientIndication}.
      */
-    public void showTransientIndication(String transientIndication, int textColor) {
+    public void showTransientIndication(CharSequence transientIndication, int textColor) {
         mTransientIndication = transientIndication;
         mTransientTextColor = textColor;
         mHandler.removeMessages(MSG_HIDE_TRANSIENT);
@@ -487,6 +487,12 @@ public class KeyguardIndicationController {
                 mMessageToShowOnScreenOn = errString;
             }
             mLastSuccessiveErrorMessage = msgId;
+        }
+
+        @Override
+        public void onTrustAgentErrorMessage(CharSequence message) {
+            int errorColor = Utils.getColorError(mContext);
+            showTransientIndication(message, errorColor);
         }
 
         @Override
