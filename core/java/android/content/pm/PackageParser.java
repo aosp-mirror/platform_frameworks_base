@@ -811,6 +811,8 @@ public class PackageParser {
 
     public static final int PARSE_MUST_BE_APK = 1 << 0;
     public static final int PARSE_IGNORE_PROCESSES = 1 << 1;
+    /** @deprecated forward lock no longer functional. remove. */
+    @Deprecated
     public static final int PARSE_FORWARD_LOCK = 1 << 2;
     public static final int PARSE_EXTERNAL_STORAGE = 1 << 3;
     public static final int PARSE_IS_SYSTEM_DIR = 1 << 4;
@@ -6001,6 +6003,8 @@ public class PackageParser {
             }
         }
 
+        /** @deprecated Forward locked apps no longer supported. Resource path not needed. */
+        @Deprecated
         public void setApplicationInfoResourcePath(String resourcePath) {
             this.applicationInfo.setResourcePath(resourcePath);
             if (childPackages != null) {
@@ -6011,6 +6015,8 @@ public class PackageParser {
             }
         }
 
+        /** @deprecated Forward locked apps no longer supported. Resource path not needed. */
+        @Deprecated
         public void setApplicationInfoBaseResourcePath(String resourcePath) {
             this.applicationInfo.setBaseResourcePath(resourcePath);
             if (childPackages != null) {
@@ -6059,6 +6065,8 @@ public class PackageParser {
             // Children have no splits
         }
 
+        /** @deprecated Forward locked apps no longer supported. Resource path not needed. */
+        @Deprecated
         public void setApplicationInfoSplitResourcePaths(String[] resroucePaths) {
             this.applicationInfo.setSplitResourcePaths(resroucePaths);
             // Children have no splits
