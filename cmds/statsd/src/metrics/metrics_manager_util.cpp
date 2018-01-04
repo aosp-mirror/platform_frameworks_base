@@ -459,7 +459,7 @@ bool initMetrics(const ConfigKey& key, const StatsdConfig& config, const long ti
         }
 
         sp<MetricProducer> gaugeProducer = new GaugeMetricProducer(
-                key, metric, conditionIndex, wizard, pullTagId, atomTagId, startTimeNs);
+                key, metric, conditionIndex, wizard, pullTagId, startTimeNs);
         allMetricProducers.push_back(gaugeProducer);
     }
     for (int i = 0; i < config.no_report_metric_size(); ++i) {

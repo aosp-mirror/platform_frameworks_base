@@ -60,13 +60,12 @@ const int FIELD_ID_ATOM = 3;
 
 GaugeMetricProducer::GaugeMetricProducer(const ConfigKey& key, const GaugeMetric& metric,
                                          const int conditionIndex,
-                                         const sp<ConditionWizard>& wizard, const int atomTagId,
+                                         const sp<ConditionWizard>& wizard,
                                          const int pullTagId, const uint64_t startTimeNs,
                                          shared_ptr<StatsPullerManager> statsPullerManager)
     : MetricProducer(metric.id(), key, startTimeNs, conditionIndex, wizard),
       mStatsPullerManager(statsPullerManager),
-      mPullTagId(pullTagId),
-      mAtomTagId(atomTagId) {
+      mPullTagId(pullTagId) {
     mCurrentSlicedBucket = std::make_shared<DimToGaugeFieldsMap>();
     mCurrentSlicedBucketForAnomaly = std::make_shared<DimToValMap>();
     int64_t bucketSizeMills = 0;
@@ -101,8 +100,8 @@ GaugeMetricProducer::GaugeMetricProducer(const ConfigKey& key, const GaugeMetric
 GaugeMetricProducer::GaugeMetricProducer(const ConfigKey& key, const GaugeMetric& metric,
                                          const int conditionIndex,
                                          const sp<ConditionWizard>& wizard, const int pullTagId,
-                                         const int atomTagId, const int64_t startTimeNs)
-    : GaugeMetricProducer(key, metric, conditionIndex, wizard, pullTagId, atomTagId, startTimeNs,
+                                         const int64_t startTimeNs)
+    : GaugeMetricProducer(key, metric, conditionIndex, wizard, pullTagId, startTimeNs,
                           make_shared<StatsPullerManager>()) {
 }
 

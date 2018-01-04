@@ -65,7 +65,7 @@ TEST(GaugeMetricProducerTest, TestNoCondition) {
     EXPECT_CALL(*pullerManager, UnRegisterReceiver(tagId, _)).WillOnce(Return());
 
     GaugeMetricProducer gaugeProducer(kConfigKey, metric, -1 /*-1 meaning no condition*/, wizard,
-                                      tagId, tagId, bucketStartTimeNs, pullerManager);
+                                      tagId, bucketStartTimeNs, pullerManager);
 
     vector<shared_ptr<LogEvent>> allData;
     allData.clear();
@@ -145,7 +145,7 @@ TEST(GaugeMetricProducerTest, TestWithCondition) {
                 return true;
             }));
 
-    GaugeMetricProducer gaugeProducer(kConfigKey, metric, 1, wizard, tagId, tagId,
+    GaugeMetricProducer gaugeProducer(kConfigKey, metric, 1, wizard, tagId,
                                       bucketStartTimeNs, pullerManager);
 
     gaugeProducer.onConditionChanged(true, bucketStartTimeNs + 8);
@@ -194,7 +194,7 @@ TEST(GaugeMetricProducerTest, TestAnomalyDetection) {
     gaugeFieldMatcher->set_field(tagId);
     gaugeFieldMatcher->add_child()->set_field(2);
     GaugeMetricProducer gaugeProducer(kConfigKey, metric, -1 /*-1 meaning no condition*/, wizard,
-                                      tagId, tagId, bucketStartTimeNs, pullerManager);
+                                      tagId, bucketStartTimeNs, pullerManager);
 
     Alert alert;
     alert.set_id(101);
