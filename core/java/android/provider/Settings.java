@@ -8790,6 +8790,7 @@ public final class Settings {
          * Type: string package name or null if the feature is either not provided or disabled.
          * @hide
          */
+        @TestApi
         public static final String USE_OPEN_WIFI_PACKAGE = "use_open_wifi_package";
 
         /**

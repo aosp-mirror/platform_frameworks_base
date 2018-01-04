@@ -23049,6 +23049,11 @@ Slog.v(TAG, ":: stepped forward, applying functor at tag " + parser.getName());
         }
 
         @Override
+        public void setUseOpenWifiAppPackagesProvider(PackagesProvider provider) {
+            mDefaultPermissionPolicy.setUseOpenWifiAppPackagesProvider(provider);
+        }
+
+        @Override
         public void setSyncAdapterPackagesprovider(SyncAdapterPackagesProvider provider) {
             mDefaultPermissionPolicy.setSyncAdapterPackagesProvider(provider);
         }
@@ -23069,6 +23074,12 @@ Slog.v(TAG, ":: stepped forward, applying functor at tag " + parser.getName());
         @Override
         public void grantDefaultPermissionsToDefaultSimCallManager(String packageName, int userId) {
             mDefaultPermissionPolicy.grantDefaultPermissionsToDefaultSimCallManager(
+                    packageName, userId);
+        }
+
+        @Override
+        public void grantDefaultPermissionsToDefaultUseOpenWifiApp(String packageName, int userId) {
+            mDefaultPermissionPolicy.grantDefaultPermissionsToDefaultUseOpenWifiApp(
                     packageName, userId);
         }
 

@@ -435,6 +435,10 @@ package android.provider {
     field public static final java.lang.String ACTION_ENTERPRISE_PRIVACY_SETTINGS = "android.settings.ENTERPRISE_PRIVACY_SETTINGS";
   }
 
+  public static final class Settings.Global extends android.provider.Settings.NameValueTable {
+    field public static final java.lang.String USE_OPEN_WIFI_PACKAGE = "use_open_wifi_package";
+  }
+
   public static final class Settings.Secure extends android.provider.Settings.NameValueTable {
     field public static final java.lang.String ACCESSIBILITY_DISPLAY_MAGNIFICATION_ENABLED = "accessibility_display_magnification_enabled";
     field public static final java.lang.String AUTOFILL_FEATURE_FIELD_CLASSIFICATION = "autofill_field_classification";
