@@ -63,9 +63,11 @@ import javax.crypto.AEADBadTagException;
 public class RecoverableKeyStoreManager {
     private static final String TAG = "RecoverableKeyStoreMgr";
 
-    private static final int ERROR_INSECURE_USER = 1;
-    private static final int ERROR_KEYSTORE_INTERNAL_ERROR = 2;
-    private static final int ERROR_DATABASE_ERROR = 3;
+    // TODO: move error codes to RecoverableKeyStoreLoader.
+    private static int ERROR_INSECURE_USER = 1;
+    private static int ERROR_KEYSTORE_INTERNAL_ERROR = 2;
+    private static int ERROR_DATABASE_ERROR = 3;
+    private static int ERROR_RECOVERY_SESSION_NOT_FOUND = 4;
 
     private static RecoverableKeyStoreManager mInstance;
 
@@ -119,9 +121,10 @@ public class RecoverableKeyStoreManager {
     }
 
     public void initRecoveryService(
-            @NonNull String rootCertificateAlias, @NonNull byte[] signedPublicKeyList, int userId)
+            @NonNull String rootCertificateAlias, @NonNull byte[] signedPublicKeyList)
             throws RemoteException {
         checkRecoverKeyStorePermission();
+        int userId = UserHandle.getCallingUserId();
         // TODO: open /system/etc/security/... cert file, and check the signature on the public keys
         PublicKey publicKey;
         try {
@@ -144,22 +147,22 @@ public class RecoverableKeyStoreManager {
      * @return recovery data
      * @hide
      */
-    public @NonNull KeyStoreRecoveryData getRecoveryData(@NonNull byte[] account, int userId)
+    public @NonNull KeyStoreRecoveryData getRecoveryData(@NonNull byte[] account)
             throws RemoteException {
         checkRecoverKeyStorePermission();
 
         KeyStoreRecoveryData snapshot = mSnapshotStorage.get(UserHandle.getCallingUserId());
         if (snapshot == null) {
-            throw new ServiceSpecificException(RecoverableKeyStoreLoader.NO_SNAPSHOT_PENDING_ERROR);
+            throw new ServiceSpecificException(RecoverableKeyStoreLoader.ERROR_NO_SNAPSHOT_PENDING);
         }
         return snapshot;
     }
 
-    public void setSnapshotCreatedPendingIntent(@Nullable PendingIntent intent, int userId)
+    public void setSnapshotCreatedPendingIntent(@Nullable PendingIntent intent)
             throws RemoteException {
         checkRecoverKeyStorePermission();
-        final int recoveryAgentUid = Binder.getCallingUid();
-        mListenersStorage.setSnapshotListener(recoveryAgentUid, intent);
+        int uid = Binder.getCallingUid();
+        mListenersStorage.setSnapshotListener(uid, intent);
     }
 
     /**
@@ -168,14 +171,15 @@ public class RecoverableKeyStoreManager {
      *
      * @return Map from Recovery agent account to snapshot version.
      */
-    public @NonNull Map<byte[], Integer> getRecoverySnapshotVersions(int userId)
+    public @NonNull Map<byte[], Integer> getRecoverySnapshotVersions()
             throws RemoteException {
         checkRecoverKeyStorePermission();
         throw new UnsupportedOperationException();
     }
 
-    public void setServerParameters(long serverParameters, int userId) throws RemoteException {
+    public void setServerParameters(long serverParameters) throws RemoteException {
         checkRecoverKeyStorePermission();
+        int userId = UserHandle.getCallingUserId();
         mDatabase.setServerParameters(userId, Binder.getCallingUid(), serverParameters);
     }
 
@@ -187,7 +191,7 @@ public class RecoverableKeyStoreManager {
      * @param status - new status
      */
     public void setRecoveryStatus(
-            @NonNull String packageName, @Nullable String[] aliases, int status, int userId)
+            @NonNull String packageName, @Nullable String[] aliases, int status)
             throws RemoteException {
         checkRecoverKeyStorePermission();
         int uid = Binder.getCallingUid();
@@ -211,7 +215,7 @@ public class RecoverableKeyStoreManager {
      *
      * @return {@code Map} from KeyStore alias to recovery status.
      */
-    public @NonNull Map<String, Integer> getRecoveryStatus(@Nullable String packageName, int userId)
+    public @NonNull Map<String, Integer> getRecoveryStatus(@Nullable String packageName)
             throws RemoteException {
         // Any application should be able to check status for its own keys.
         // If caller is a recovery agent it can check statuses for other packages, but
@@ -225,7 +229,7 @@ public class RecoverableKeyStoreManager {
      * @hide
      */
     public void setRecoverySecretTypes(
-            @NonNull @KeyStoreRecoveryMetadata.UserSecretType int[] secretTypes, int userId)
+            @NonNull @KeyStoreRecoveryMetadata.UserSecretType int[] secretTypes)
             throws RemoteException {
         checkRecoverKeyStorePermission();
         mDatabase.setRecoverySecretTypes(UserHandle.getCallingUserId(), Binder.getCallingUid(),
@@ -238,7 +242,7 @@ public class RecoverableKeyStoreManager {
      * @return secret types
      * @hide
      */
-    public @NonNull int[] getRecoverySecretTypes(int userId) throws RemoteException {
+    public @NonNull int[] getRecoverySecretTypes() throws RemoteException {
         checkRecoverKeyStorePermission();
         return mDatabase.getRecoverySecretTypes(UserHandle.getCallingUserId(),
             Binder.getCallingUid());
@@ -250,17 +254,17 @@ public class RecoverableKeyStoreManager {
      * @return secret types
      * @hide
      */
-    public @NonNull int[] getPendingRecoverySecretTypes(int userId) throws RemoteException {
+    public @NonNull int[] getPendingRecoverySecretTypes() throws RemoteException {
         checkRecoverKeyStorePermission();
         throw new UnsupportedOperationException();
     }
 
     public void recoverySecretAvailable(
-            @NonNull KeyStoreRecoveryMetadata recoverySecret, int userId) throws RemoteException {
-        final int callingUid = Binder.getCallingUid(); // Recovery agent uid.
+            @NonNull KeyStoreRecoveryMetadata recoverySecret) throws RemoteException {
+        int uid = Binder.getCallingUid();
         if (recoverySecret.getLockScreenUiFormat() == KeyStoreRecoveryMetadata.TYPE_LOCKSCREEN) {
             throw new SecurityException(
-                    "Caller " + callingUid + "is not allowed to set lock screen secret");
+                    "Caller " + uid + " is not allowed to set lock screen secret");
         }
         checkRecoverKeyStorePermission();
         // TODO: add hook from LockSettingsService to set lock screen secret.
@@ -284,10 +288,10 @@ public class RecoverableKeyStoreManager {
             @NonNull byte[] verifierPublicKey,
             @NonNull byte[] vaultParams,
             @NonNull byte[] vaultChallenge,
-            @NonNull List<KeyStoreRecoveryMetadata> secrets,
-            int userId)
+            @NonNull List<KeyStoreRecoveryMetadata> secrets)
             throws RemoteException {
         checkRecoverKeyStorePermission();
+        int uid = Binder.getCallingUid();
 
         if (secrets.size() != 1) {
             // TODO: support multiple secrets
@@ -297,7 +301,7 @@ public class RecoverableKeyStoreManager {
         byte[] keyClaimant = KeySyncUtils.generateKeyClaimant();
         byte[] kfHash = secrets.get(0).getSecret();
         mRecoverySessionStorage.add(
-                userId,
+                uid,
                 new RecoverySessionStorage.Entry(sessionId, kfHash, keyClaimant, vaultParams));
 
         try {
@@ -335,22 +339,21 @@ public class RecoverableKeyStoreManager {
      *     service.
      * @param applicationKeys The encrypted key blobs returned by the remote vault service. These
      *     were wrapped with the recovery key.
-     * @param uid The uid of the recovery agent.
      * @return Map from alias to raw key material.
      * @throws RemoteException if an error occurred recovering the keys.
      */
     public Map<String, byte[]> recoverKeys(
             @NonNull String sessionId,
             @NonNull byte[] encryptedRecoveryKey,
-            @NonNull List<KeyEntryRecoveryData> applicationKeys,
-            int uid)
+            @NonNull List<KeyEntryRecoveryData> applicationKeys)
             throws RemoteException {
         checkRecoverKeyStorePermission();
-
+        int uid = Binder.getCallingUid();
         RecoverySessionStorage.Entry sessionEntry = mRecoverySessionStorage.get(uid, sessionId);
         if (sessionEntry == null) {
-            throw new RemoteException(String.format(Locale.US,
-                    "User %d does not have pending session '%s'", uid, sessionId));
+            throw new ServiceSpecificException(ERROR_KEYSTORE_INTERNAL_ERROR,
+                    String.format(Locale.US,
+                    "Application uid=%d does not have pending session '%s'", uid, sessionId));
         }
 
         try {
@@ -372,7 +375,7 @@ public class RecoverableKeyStoreManager {
      */
     public byte[] generateAndStoreKey(@NonNull String alias) throws RemoteException {
         int uid = Binder.getCallingUid();
-        int userId = Binder.getCallingUserHandle().getIdentifier();
+        int userId = UserHandle.getCallingUserId();
 
         PlatformEncryptionKey encryptionKey;
 
@@ -400,7 +403,7 @@ public class RecoverableKeyStoreManager {
 
     private byte[] decryptRecoveryKey(
             RecoverySessionStorage.Entry sessionEntry, byte[] encryptedClaimResponse)
-            throws RemoteException {
+            throws RemoteException, ServiceSpecificException {
         try {
             byte[] locallyEncryptedKey = KeySyncUtils.decryptRecoveryClaimResponse(
                     sessionEntry.getKeyClaimant(),
@@ -408,18 +411,12 @@ public class RecoverableKeyStoreManager {
                     encryptedClaimResponse);
             return KeySyncUtils.decryptRecoveryKey(sessionEntry.getLskfHash(), locallyEncryptedKey);
         } catch (InvalidKeyException | AEADBadTagException e) {
-            throw new RemoteException(
-                    "Failed to decrypt recovery key",
-                    e,
-                    /*enableSuppression=*/ true,
-                    /*writeableStackTrace=*/ true);
+            throw new ServiceSpecificException(ERROR_KEYSTORE_INTERNAL_ERROR,
+                    "Failed to decrypt recovery key " + e.getMessage());
+
         } catch (NoSuchAlgorithmException e) {
             // Should never happen: all the algorithms used are required by AOSP implementations
-            throw new RemoteException(
-                    "Missing required algorithm",
-                    e,
-                    /*enableSuppression=*/ true,
-                    /*writeableStackTrace=*/ true);
+            throw new ServiceSpecificException(ERROR_KEYSTORE_INTERNAL_ERROR, e.getMessage());
         }
     }
 

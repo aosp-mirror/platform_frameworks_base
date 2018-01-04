@@ -37,6 +37,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.os.Binder;
 import android.os.RemoteException;
+import android.os.ServiceSpecificException;
 import android.os.UserHandle;
 import android.security.recoverablekeystore.KeyDerivationParameters;
 import android.security.recoverablekeystore.KeyEntryRecoveryData;
@@ -96,7 +97,6 @@ public class RecoverableKeyStoreManagerTest {
     private static final byte[] TEST_SECRET = getUtf8Bytes("password1234");
     private static final byte[] TEST_VAULT_CHALLENGE = getUtf8Bytes("vault_challenge");
     private static final byte[] TEST_VAULT_PARAMS = getUtf8Bytes("vault_params");
-    private static final int TEST_USER_ID = 10009;
     private static final int KEY_CLAIMANT_LENGTH_BYTES = 16;
     private static final byte[] RECOVERY_RESPONSE_HEADER =
             "V1 reencrypted_recovery_key".getBytes(StandardCharsets.UTF_8);
@@ -174,8 +174,7 @@ public class RecoverableKeyStoreManagerTest {
                                 TYPE_LOCKSCREEN,
                                 TYPE_PASSWORD,
                                 KeyDerivationParameters.createSHA256Parameters(TEST_SALT),
-                                TEST_SECRET)),
-                TEST_USER_ID);
+                                TEST_SECRET)));
 
         verify(mMockContext, times(1))
                 .enforceCallingOrSelfPermission(
@@ -194,12 +193,11 @@ public class RecoverableKeyStoreManagerTest {
                                 TYPE_LOCKSCREEN,
                                 TYPE_PASSWORD,
                                 KeyDerivationParameters.createSHA256Parameters(TEST_SALT),
-                                TEST_SECRET)),
-                TEST_USER_ID);
+                                TEST_SECRET)));
 
         assertEquals(1, mRecoverySessionStorage.size());
         RecoverySessionStorage.Entry entry =
-                mRecoverySessionStorage.get(TEST_USER_ID, TEST_SESSION_ID);
+                mRecoverySessionStorage.get(Binder.getCallingUid(), TEST_SESSION_ID);
         assertArrayEquals(TEST_SECRET, entry.getLskfHash());
         assertEquals(KEY_CLAIMANT_LENGTH_BYTES, entry.getKeyClaimant().length);
     }
@@ -212,8 +210,7 @@ public class RecoverableKeyStoreManagerTest {
                     TEST_PUBLIC_KEY,
                     TEST_VAULT_PARAMS,
                     TEST_VAULT_CHALLENGE,
-                    ImmutableList.of(),
-                    TEST_USER_ID);
+                    ImmutableList.of());
             fail("should have thrown");
         } catch (RemoteException e) {
             assertEquals("Only a single KeyStoreRecoveryMetadata is supported", e.getMessage());
@@ -233,8 +230,7 @@ public class RecoverableKeyStoreManagerTest {
                                     TYPE_LOCKSCREEN,
                                     TYPE_PASSWORD,
                                     KeyDerivationParameters.createSHA256Parameters(TEST_SALT),
-                                    TEST_SECRET)),
-                    TEST_USER_ID);
+                                    TEST_SECRET)));
             fail("should have thrown");
         } catch (RemoteException e) {
             assertEquals("Not a valid X509 key", e.getMessage());
@@ -249,12 +245,10 @@ public class RecoverableKeyStoreManagerTest {
                     /*recoveryKeyBlob=*/ randomBytes(32),
                     /*applicationKeys=*/ ImmutableList.of(
                             new KeyEntryRecoveryData(getUtf8Bytes("alias"), randomBytes(32))
-                    ),
-                    TEST_USER_ID);
+                    ));
             fail("should have thrown");
-        } catch (RemoteException e) {
-            assertEquals("User 10009 does not have pending session 'karlin'",
-                    e.getMessage());
+        } catch (ServiceSpecificException e) {
+            // expected
         }
     }
 
@@ -269,18 +263,17 @@ public class RecoverableKeyStoreManagerTest {
                         TYPE_LOCKSCREEN,
                         TYPE_PASSWORD,
                         KeyDerivationParameters.createSHA256Parameters(TEST_SALT),
-                        TEST_SECRET)),
-                TEST_USER_ID);
+                        TEST_SECRET)));
 
         try {
             mRecoverableKeyStoreManager.recoverKeys(
                     TEST_SESSION_ID,
                     /*encryptedRecoveryKey=*/ randomBytes(60),
-                    /*applicationKeys=*/ ImmutableList.of(),
-                    /*uid=*/ TEST_USER_ID);
+                    /*applicationKeys=*/ ImmutableList.of());
             fail("should have thrown");
-        } catch (RemoteException e) {
-            assertEquals("Failed to decrypt recovery key", e.getMessage());
+        } catch (ServiceSpecificException e) {
+            assertThat(e.getMessage()).startsWith("Failed to decrypt recovery key");
+            //assertEquals("Failed to decrypt recovery key", e.getMessage());
         }
     }
 
@@ -295,9 +288,8 @@ public class RecoverableKeyStoreManagerTest {
                         TYPE_LOCKSCREEN,
                         TYPE_PASSWORD,
                         KeyDerivationParameters.createSHA256Parameters(TEST_SALT),
-                        TEST_SECRET)),
-                TEST_USER_ID);
-        byte[] keyClaimant = mRecoverySessionStorage.get(TEST_USER_ID, TEST_SESSION_ID)
+                        TEST_SECRET)));
+        byte[] keyClaimant = mRecoverySessionStorage.get(Binder.getCallingUid(), TEST_SESSION_ID)
                 .getKeyClaimant();
         SecretKey recoveryKey = randomRecoveryKey();
         byte[] encryptedClaimResponse = encryptClaimResponse(
@@ -310,8 +302,7 @@ public class RecoverableKeyStoreManagerTest {
             mRecoverableKeyStoreManager.recoverKeys(
                     TEST_SESSION_ID,
                     /*encryptedRecoveryKey=*/ encryptedClaimResponse,
-                    /*applicationKeys=*/ ImmutableList.of(badApplicationKey),
-                    /*uid=*/ TEST_USER_ID);
+                    /*applicationKeys=*/ ImmutableList.of(badApplicationKey));
             fail("should have thrown");
         } catch (RemoteException e) {
             assertEquals("Failed to recover key with alias 'nick'", e.getMessage());
@@ -329,9 +320,8 @@ public class RecoverableKeyStoreManagerTest {
                         TYPE_LOCKSCREEN,
                         TYPE_PASSWORD,
                         KeyDerivationParameters.createSHA256Parameters(TEST_SALT),
-                        TEST_SECRET)),
-                TEST_USER_ID);
-        byte[] keyClaimant = mRecoverySessionStorage.get(TEST_USER_ID, TEST_SESSION_ID)
+                        TEST_SECRET)));
+        byte[] keyClaimant = mRecoverySessionStorage.get(Binder.getCallingUid(), TEST_SESSION_ID)
                 .getKeyClaimant();
         SecretKey recoveryKey = randomRecoveryKey();
         byte[] encryptedClaimResponse = encryptClaimResponse(
@@ -344,8 +334,7 @@ public class RecoverableKeyStoreManagerTest {
         Map<String, byte[]> recoveredKeys = mRecoverableKeyStoreManager.recoverKeys(
                 TEST_SESSION_ID,
                 encryptedClaimResponse,
-                ImmutableList.of(applicationKey),
-                TEST_USER_ID);
+                ImmutableList.of(applicationKey));
 
         assertThat(recoveredKeys).hasSize(1);
         assertThat(recoveredKeys.get(TEST_ALIAS)).isEqualTo(applicationKeyBytes);
@@ -357,27 +346,26 @@ public class RecoverableKeyStoreManagerTest {
         PendingIntent intent = PendingIntent.getBroadcast(
                 InstrumentationRegistry.getTargetContext(), /*requestCode=*/1,
                 new Intent(), /*flags=*/ 0);
-        mRecoverableKeyStoreManager.setSnapshotCreatedPendingIntent(intent, /*userId=*/ 0);
+        mRecoverableKeyStoreManager.setSnapshotCreatedPendingIntent(intent);
         verify(mMockListenersStorage).setSnapshotListener(eq(uid), any(PendingIntent.class));
     }
 
     @Test
     public void setRecoverySecretTypes() throws Exception {
-        int userId = UserHandle.getCallingUserId();
         int[] types1 = new int[]{11, 2000};
         int[] types2 = new int[]{1, 2, 3};
         int[] types3 = new int[]{};
 
-        mRecoverableKeyStoreManager.setRecoverySecretTypes(types1, userId);
-        assertThat(mRecoverableKeyStoreManager.getRecoverySecretTypes(userId)).isEqualTo(
+        mRecoverableKeyStoreManager.setRecoverySecretTypes(types1);
+        assertThat(mRecoverableKeyStoreManager.getRecoverySecretTypes()).isEqualTo(
                 types1);
 
-        mRecoverableKeyStoreManager.setRecoverySecretTypes(types2, userId);
-        assertThat(mRecoverableKeyStoreManager.getRecoverySecretTypes(userId)).isEqualTo(
+        mRecoverableKeyStoreManager.setRecoverySecretTypes(types2);
+        assertThat(mRecoverableKeyStoreManager.getRecoverySecretTypes()).isEqualTo(
                 types2);
 
-        mRecoverableKeyStoreManager.setRecoverySecretTypes(types3, userId);
-        assertThat(mRecoverableKeyStoreManager.getRecoverySecretTypes(userId)).isEqualTo(
+        mRecoverableKeyStoreManager.setRecoverySecretTypes(types3);
+        assertThat(mRecoverableKeyStoreManager.getRecoverySecretTypes()).isEqualTo(
                 types3);
     }
 
@@ -391,13 +379,13 @@ public class RecoverableKeyStoreManagerTest {
         WrappedKey wrappedKey = new WrappedKey(NONCE, KEY_MATERIAL, GENERATION_ID, status);
         mRecoverableKeyStoreDb.insertKey(userId, uid, alias, wrappedKey);
         Map<String, Integer> statuses =
-                mRecoverableKeyStoreManager.getRecoveryStatus(/*packageName=*/ null, userId);
+                mRecoverableKeyStoreManager.getRecoveryStatus(/*packageName=*/ null);
         assertThat(statuses).hasSize(1);
         assertThat(statuses).containsEntry(alias, status);
 
         mRecoverableKeyStoreManager.setRecoveryStatus(
-                /*packageName=*/ null, new String[] {alias}, status2, userId);
-        statuses = mRecoverableKeyStoreManager.getRecoveryStatus(/*packageName=*/ null, userId);
+                /*packageName=*/ null, new String[] {alias}, status2);
+        statuses = mRecoverableKeyStoreManager.getRecoveryStatus(/*packageName=*/ null);
         assertThat(statuses).hasSize(1);
         assertThat(statuses).containsEntry(alias, status2); // updated
     }
@@ -415,30 +403,30 @@ public class RecoverableKeyStoreManagerTest {
         mRecoverableKeyStoreDb.insertKey(userId, uid, alias, wrappedKey);
         mRecoverableKeyStoreDb.insertKey(userId, uid, alias2, wrappedKey);
         Map<String, Integer> statuses =
-                mRecoverableKeyStoreManager.getRecoveryStatus(/*packageName=*/ null, userId);
+                mRecoverableKeyStoreManager.getRecoveryStatus(/*packageName=*/ null);
         assertThat(statuses).hasSize(2);
         assertThat(statuses).containsEntry(alias, status);
         assertThat(statuses).containsEntry(alias2, status);
 
         mRecoverableKeyStoreManager.setRecoveryStatus(
-                /*packageName=*/ null, /*aliases=*/ null, status2, userId);
-        statuses = mRecoverableKeyStoreManager.getRecoveryStatus(/*packageName=*/ null, userId);
+                /*packageName=*/ null, /*aliases=*/ null, status2);
+        statuses = mRecoverableKeyStoreManager.getRecoveryStatus(/*packageName=*/ null);
         assertThat(statuses).hasSize(2);
         assertThat(statuses).containsEntry(alias, status2); // updated
         assertThat(statuses).containsEntry(alias2, status2); // updated
 
         mRecoverableKeyStoreManager.setRecoveryStatus(
-                /*packageName=*/ null, new String[] {alias2}, status3, userId);
+                /*packageName=*/ null, new String[] {alias2}, status3);
 
-        statuses = mRecoverableKeyStoreManager.getRecoveryStatus(/*packageName=*/ null, userId);
+        statuses = mRecoverableKeyStoreManager.getRecoveryStatus(/*packageName=*/ null);
         assertThat(statuses).hasSize(2);
         assertThat(statuses).containsEntry(alias, status2);
         assertThat(statuses).containsEntry(alias2, status3); // updated
 
         mRecoverableKeyStoreManager.setRecoveryStatus(
-                /*packageName=*/ null, new String[] {alias, alias2}, status, userId);
+                /*packageName=*/ null, new String[] {alias, alias2}, status);
 
-        statuses = mRecoverableKeyStoreManager.getRecoveryStatus(/*packageName=*/ null, userId);
+        statuses = mRecoverableKeyStoreManager.getRecoveryStatus(/*packageName=*/ null);
         assertThat(statuses).hasSize(2);
         assertThat(statuses).containsEntry(alias, status); // updated
         assertThat(statuses).containsEntry(alias2, status); // updated
