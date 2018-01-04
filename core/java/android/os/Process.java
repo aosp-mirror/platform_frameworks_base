@@ -157,6 +157,12 @@ public class Process {
      */
     public static final int INCIDENTD_UID = 1067;
 
+    /**
+     * Defines the UID/GID for the Secure Element service process.
+     * @hide
+     */
+    public static final int SE_UID = 1068;
+
     /** {@hide} */
     public static final int NOBODY_UID = 9999;
 

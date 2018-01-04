@@ -4170,6 +4170,16 @@ public abstract class Context {
     public static final String CROSS_PROFILE_APPS_SERVICE = "crossprofileapps";
 
     /**
+     * Use with {@link #getSystemService} to retrieve a
+     * {@link android.se.omapi.ISecureElementService}
+     * for accessing the SecureElementService.
+     *
+     * @hide
+     */
+    @SystemApi
+    public static final String SECURE_ELEMENT_SERVICE = "secure_element";
+
+    /**
      * Determine whether the given permission is allowed for a particular
      * process and user ID running in the system.
      *

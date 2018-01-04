@@ -781,6 +781,7 @@ package android.content {
     field public static final java.lang.String NETWORK_SCORE_SERVICE = "network_score";
     field public static final java.lang.String OEM_LOCK_SERVICE = "oem_lock";
     field public static final java.lang.String PERSISTENT_DATA_BLOCK_SERVICE = "persistent_data_block";
+    field public static final java.lang.String SECURE_ELEMENT_SERVICE = "secure_element";
     field public static final java.lang.String STATS_MANAGER = "stats";
     field public static final java.lang.String SYSTEM_UPDATE_SERVICE = "system_update";
     field public static final java.lang.String VR_SERVICE = "vrmanager";
