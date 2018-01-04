@@ -16,6 +16,7 @@
 
 package android.util.apk;
 
+import android.util.ArrayMap;
 import android.util.Pair;
 
 import java.io.FileDescriptor;
@@ -30,6 +31,7 @@ import java.security.NoSuchAlgorithmException;
 import java.security.spec.AlgorithmParameterSpec;
 import java.security.spec.MGF1ParameterSpec;
 import java.security.spec.PSSParameterSpec;
+import java.util.Arrays;
 import java.util.Map;
 
 /**
@@ -84,16 +86,41 @@ final class ApkSigningBlockUtils {
 
     static void verifyIntegrity(
             Map<Integer, byte[]> expectedDigests,
-            FileDescriptor apkFileDescriptor,
-            long apkSigningBlockOffset,
-            long centralDirOffset,
-            long eocdOffset,
-            ByteBuffer eocdBuf) throws SecurityException {
-
+            RandomAccessFile apk,
+            SignatureInfo signatureInfo) throws SecurityException {
         if (expectedDigests.isEmpty()) {
             throw new SecurityException("No digests provided");
         }
 
+        Map<Integer, byte[]> expected1MbChunkDigests = new ArrayMap<>();
+        if (expectedDigests.containsKey(CONTENT_DIGEST_CHUNKED_SHA256)) {
+            expected1MbChunkDigests.put(CONTENT_DIGEST_CHUNKED_SHA256,
+                    expectedDigests.get(CONTENT_DIGEST_CHUNKED_SHA256));
+        }
+        if (expectedDigests.containsKey(CONTENT_DIGEST_CHUNKED_SHA512)) {
+            expected1MbChunkDigests.put(CONTENT_DIGEST_CHUNKED_SHA512,
+                    expectedDigests.get(CONTENT_DIGEST_CHUNKED_SHA512));
+        }
+
+        if (expectedDigests.containsKey(CONTENT_DIGEST_VERITY_CHUNKED_SHA256)) {
+            verifyIntegrityForVerityBasedAlgorithm(
+                    expectedDigests.get(CONTENT_DIGEST_VERITY_CHUNKED_SHA256), apk, signatureInfo);
+        } else if (!expected1MbChunkDigests.isEmpty()) {
+            try {
+                verifyIntegrityFor1MbChunkBasedAlgorithm(expected1MbChunkDigests, apk.getFD(),
+                        signatureInfo);
+            } catch (IOException e) {
+                throw new SecurityException("Cannot get FD", e);
+            }
+        } else {
+            throw new SecurityException("No known digest exists for integrity check");
+        }
+    }
+
+    private static void verifyIntegrityFor1MbChunkBasedAlgorithm(
+            Map<Integer, byte[]> expectedDigests,
+            FileDescriptor apkFileDescriptor,
+            SignatureInfo signatureInfo) throws SecurityException {
         // We need to verify the integrity of the following three sections of the file:
         // 1. Everything up to the start of the APK Signing Block.
         // 2. ZIP Central Directory.
@@ -105,16 +132,18 @@ final class ApkSigningBlockUtils {
         // APK are already there in the OS's page cache and thus mmap does not use additional
         // physical memory.
         DataSource beforeApkSigningBlock =
-                new MemoryMappedFileDataSource(apkFileDescriptor, 0, apkSigningBlockOffset);
+                new MemoryMappedFileDataSource(apkFileDescriptor, 0,
+                        signatureInfo.apkSigningBlockOffset);
         DataSource centralDir =
                 new MemoryMappedFileDataSource(
-                        apkFileDescriptor, centralDirOffset, eocdOffset - centralDirOffset);
+                        apkFileDescriptor, signatureInfo.centralDirOffset,
+                        signatureInfo.eocdOffset - signatureInfo.centralDirOffset);
 
         // For the purposes of integrity verification, ZIP End of Central Directory's field Start of
         // Central Directory must be considered to point to the offset of the APK Signing Block.
-        eocdBuf = eocdBuf.duplicate();
+        ByteBuffer eocdBuf = signatureInfo.eocd.duplicate();
         eocdBuf.order(ByteOrder.LITTLE_ENDIAN);
-        ZipUtils.setZipEocdCentralDirectoryOffset(eocdBuf, apkSigningBlockOffset);
+        ZipUtils.setZipEocdCentralDirectoryOffset(eocdBuf, signatureInfo.apkSigningBlockOffset);
         DataSource eocd = new ByteBufferDataSource(eocdBuf);
 
         int[] digestAlgorithms = new int[expectedDigests.size()];
@@ -126,7 +155,7 @@ final class ApkSigningBlockUtils {
         byte[][] actualDigests;
         try {
             actualDigests =
-                    computeContentDigests(
+                    computeContentDigestsPer1MbChunk(
                             digestAlgorithms,
                             new DataSource[] {beforeApkSigningBlock, centralDir, eocd});
         } catch (DigestException e) {
@@ -144,7 +173,7 @@ final class ApkSigningBlockUtils {
         }
     }
 
-    private static byte[][] computeContentDigests(
+    private static byte[][] computeContentDigestsPer1MbChunk(
             int[] digestAlgorithms,
             DataSource[] contents) throws DigestException {
         // For each digest algorithm the result is computed as follows:
@@ -256,6 +285,26 @@ final class ApkSigningBlockUtils {
         return result;
     }
 
+    private static void verifyIntegrityForVerityBasedAlgorithm(
+            byte[] expectedRootHash,
+            RandomAccessFile apk,
+            SignatureInfo signatureInfo) throws SecurityException {
+        try {
+            ApkVerityBuilder.ApkVerityResult verity = ApkVerityBuilder.generateApkVerity(apk,
+                    signatureInfo, new ByteBufferFactory() {
+                        @Override
+                        public ByteBuffer create(int capacity) {
+                            return ByteBuffer.allocate(capacity);
+                        }
+                    });
+            if (!Arrays.equals(expectedRootHash, verity.rootHash)) {
+                throw new SecurityException("APK verity digest of contents did not verify");
+            }
+        } catch (DigestException | IOException | NoSuchAlgorithmException e) {
+            throw new SecurityException("Error during verification", e);
+        }
+    }
+
     /**
      * Returns the ZIP End of Central Directory (EoCD) and its offset in the file.
      *
@@ -304,9 +353,13 @@ final class ApkSigningBlockUtils {
     static final int SIGNATURE_ECDSA_WITH_SHA256 = 0x0201;
     static final int SIGNATURE_ECDSA_WITH_SHA512 = 0x0202;
     static final int SIGNATURE_DSA_WITH_SHA256 = 0x0301;
+    static final int SIGNATURE_VERITY_RSA_PKCS1_V1_5_WITH_SHA256 = 0x0401;
+    static final int SIGNATURE_VERITY_ECDSA_WITH_SHA256 = 0x0403;
+    static final int SIGNATURE_VERITY_DSA_WITH_SHA256 = 0x0405;
 
     static final int CONTENT_DIGEST_CHUNKED_SHA256 = 1;
     static final int CONTENT_DIGEST_CHUNKED_SHA512 = 2;
+    static final int CONTENT_DIGEST_VERITY_CHUNKED_SHA256 = 3;
 
     static int compareSignatureAlgorithm(int sigAlgorithm1, int sigAlgorithm2) {
         int digestAlgorithm1 = getSignatureAlgorithmContentDigestAlgorithm(sigAlgorithm1);
@@ -321,6 +374,7 @@ final class ApkSigningBlockUtils {
                     case CONTENT_DIGEST_CHUNKED_SHA256:
                         return 0;
                     case CONTENT_DIGEST_CHUNKED_SHA512:
+                    case CONTENT_DIGEST_VERITY_CHUNKED_SHA256:
                         return -1;
                     default:
                         throw new IllegalArgumentException(
@@ -329,9 +383,22 @@ final class ApkSigningBlockUtils {
             case CONTENT_DIGEST_CHUNKED_SHA512:
                 switch (digestAlgorithm2) {
                     case CONTENT_DIGEST_CHUNKED_SHA256:
+                    case CONTENT_DIGEST_VERITY_CHUNKED_SHA256:
                         return 1;
                     case CONTENT_DIGEST_CHUNKED_SHA512:
                         return 0;
+                    default:
+                        throw new IllegalArgumentException(
+                                "Unknown digestAlgorithm2: " + digestAlgorithm2);
+                }
+            case CONTENT_DIGEST_VERITY_CHUNKED_SHA256:
+                switch (digestAlgorithm2) {
+                    case CONTENT_DIGEST_CHUNKED_SHA512:
+                        return -1;
+                    case CONTENT_DIGEST_VERITY_CHUNKED_SHA256:
+                        return 0;
+                    case CONTENT_DIGEST_CHUNKED_SHA256:
+                        return 1;
                     default:
                         throw new IllegalArgumentException(
                                 "Unknown digestAlgorithm2: " + digestAlgorithm2);
@@ -352,6 +419,10 @@ final class ApkSigningBlockUtils {
             case SIGNATURE_RSA_PKCS1_V1_5_WITH_SHA512:
             case SIGNATURE_ECDSA_WITH_SHA512:
                 return CONTENT_DIGEST_CHUNKED_SHA512;
+            case SIGNATURE_VERITY_RSA_PKCS1_V1_5_WITH_SHA256:
+            case SIGNATURE_VERITY_ECDSA_WITH_SHA256:
+            case SIGNATURE_VERITY_DSA_WITH_SHA256:
+                return CONTENT_DIGEST_VERITY_CHUNKED_SHA256;
             default:
                 throw new IllegalArgumentException(
                         "Unknown signature algorithm: 0x"
@@ -362,6 +433,7 @@ final class ApkSigningBlockUtils {
     static String getContentDigestAlgorithmJcaDigestAlgorithm(int digestAlgorithm) {
         switch (digestAlgorithm) {
             case CONTENT_DIGEST_CHUNKED_SHA256:
+            case CONTENT_DIGEST_VERITY_CHUNKED_SHA256:
                 return "SHA-256";
             case CONTENT_DIGEST_CHUNKED_SHA512:
                 return "SHA-512";
@@ -374,6 +446,7 @@ final class ApkSigningBlockUtils {
     private static int getContentDigestAlgorithmOutputSizeBytes(int digestAlgorithm) {
         switch (digestAlgorithm) {
             case CONTENT_DIGEST_CHUNKED_SHA256:
+            case CONTENT_DIGEST_VERITY_CHUNKED_SHA256:
                 return 256 / 8;
             case CONTENT_DIGEST_CHUNKED_SHA512:
                 return 512 / 8;
@@ -389,11 +462,14 @@ final class ApkSigningBlockUtils {
             case SIGNATURE_RSA_PSS_WITH_SHA512:
             case SIGNATURE_RSA_PKCS1_V1_5_WITH_SHA256:
             case SIGNATURE_RSA_PKCS1_V1_5_WITH_SHA512:
+            case SIGNATURE_VERITY_RSA_PKCS1_V1_5_WITH_SHA256:
                 return "RSA";
             case SIGNATURE_ECDSA_WITH_SHA256:
             case SIGNATURE_ECDSA_WITH_SHA512:
+            case SIGNATURE_VERITY_ECDSA_WITH_SHA256:
                 return "EC";
             case SIGNATURE_DSA_WITH_SHA256:
+            case SIGNATURE_VERITY_DSA_WITH_SHA256:
                 return "DSA";
             default:
                 throw new IllegalArgumentException(
@@ -416,14 +492,17 @@ final class ApkSigningBlockUtils {
                         new PSSParameterSpec(
                                 "SHA-512", "MGF1", MGF1ParameterSpec.SHA512, 512 / 8, 1));
             case SIGNATURE_RSA_PKCS1_V1_5_WITH_SHA256:
+            case SIGNATURE_VERITY_RSA_PKCS1_V1_5_WITH_SHA256:
                 return Pair.create("SHA256withRSA", null);
             case SIGNATURE_RSA_PKCS1_V1_5_WITH_SHA512:
                 return Pair.create("SHA512withRSA", null);
             case SIGNATURE_ECDSA_WITH_SHA256:
+            case SIGNATURE_VERITY_ECDSA_WITH_SHA256:
                 return Pair.create("SHA256withECDSA", null);
             case SIGNATURE_ECDSA_WITH_SHA512:
                 return Pair.create("SHA512withECDSA", null);
             case SIGNATURE_DSA_WITH_SHA256:
+            case SIGNATURE_VERITY_DSA_WITH_SHA256:
                 return Pair.create("SHA256withDSA", null);
             default:
                 throw new IllegalArgumentException(
