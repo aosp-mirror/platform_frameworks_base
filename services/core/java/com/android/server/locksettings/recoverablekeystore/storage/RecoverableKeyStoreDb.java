@@ -590,6 +590,7 @@ public class RecoverableKeyStoreDb {
      *
      * @hide
      */
+    @Nullable
     public Long getServerParameters(int userId, int uid) {
         SQLiteDatabase db = mKeyStoreDbHelper.getReadableDatabase();
 
