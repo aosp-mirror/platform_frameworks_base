@@ -3863,7 +3863,7 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
      * @hide
      */
     @Override
-    public Bitmap createSnapshot(Bitmap.Config quality, int backgroundColor, boolean skipChildren) {
+    public Bitmap createSnapshot(ViewDebug.CanvasProvider canvasProvider, boolean skipChildren) {
         int count = mChildrenCount;
         int[] visibilities = null;
 
@@ -3879,17 +3879,17 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
             }
         }
 
-        Bitmap b = super.createSnapshot(quality, backgroundColor, skipChildren);
-
-        if (skipChildren) {
-            for (int i = 0; i < count; i++) {
-                View child = getChildAt(i);
-                child.mViewFlags = (child.mViewFlags & ~View.VISIBILITY_MASK)
-                        | (visibilities[i] & View.VISIBILITY_MASK);
+        try {
+            return super.createSnapshot(canvasProvider, skipChildren);
+        } finally {
+            if (skipChildren) {
+                for (int i = 0; i < count; i++) {
+                    View child = getChildAt(i);
+                    child.mViewFlags = (child.mViewFlags & ~View.VISIBILITY_MASK)
+                            | (visibilities[i] & View.VISIBILITY_MASK);
+                }
             }
         }
-
-        return b;
     }
 
     /** Return true if this ViewGroup is laying out using optical bounds. */
