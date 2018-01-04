@@ -19,6 +19,7 @@ package com.android.server;
 import static android.Manifest.permission.DUMP;
 import static android.net.IpSecManager.INVALID_RESOURCE_ID;
 import static android.system.OsConstants.AF_INET;
+import static android.system.OsConstants.EINVAL;
 import static android.system.OsConstants.IPPROTO_UDP;
 import static android.system.OsConstants.SOCK_DGRAM;
 import static com.android.internal.util.Preconditions.checkNotNull;
@@ -1220,7 +1221,11 @@ public class IpSecService extends IIpSecService.Stub {
                                 info.getSpiRecord(direction).getSpi());
             }
         } catch (ServiceSpecificException e) {
-            // FIXME: get the error code and throw is at an IOException from Errno Exception
+            if (e.errorCode == EINVAL) {
+                throw new IllegalArgumentException(e.toString());
+            } else {
+                throw e;
+            }
         }
     }
 
