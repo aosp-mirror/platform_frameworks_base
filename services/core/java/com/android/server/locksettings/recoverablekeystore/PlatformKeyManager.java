@@ -146,7 +146,6 @@ public class PlatformKeyManager {
     public void regenerate() throws NoSuchAlgorithmException, KeyStoreException {
         int nextId = getGenerationId() + 1;
         generateAndLoadKey(nextId);
-        setGenerationId(nextId);
     }
 
     /**
@@ -219,7 +218,6 @@ public class PlatformKeyManager {
         }
 
         generateAndLoadKey(generationId);
-        mDatabase.setPlatformKeyGenerationId(mUserId, generationId);
     }
 
     /**
@@ -300,6 +298,8 @@ public class PlatformKeyManager {
                     .setEncryptionPaddings(KeyProperties.ENCRYPTION_PADDING_NONE)
                     .setBoundToSpecificSecureUserId(mUserId)
                     .build());
+
+        setGenerationId(generationId);
 
         try {
             secretKey.destroy();
