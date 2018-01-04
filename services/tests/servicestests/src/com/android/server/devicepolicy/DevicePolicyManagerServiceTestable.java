@@ -60,40 +60,33 @@ public class DevicePolicyManagerServiceTestable extends DevicePolicyManagerServi
      */
     public static class OwnersTestable extends Owners {
         public static final String LEGACY_FILE = "legacy.xml";
-        public static final String DEVICE_OWNER_FILE = "device_owner2.xml";
-        public static final String PROFILE_OWNER_FILE = "profile_owner.xml";
-
-        private final File mLegacyFile;
-        private final File mDeviceOwnerFile;
-        private final File mUsersDataDir;
 
         public OwnersTestable(MockSystemServices services) {
             super(services.userManager, services.userManagerInternal,
-                    services.packageManagerInternal);
-            mLegacyFile = new File(services.dataDir, LEGACY_FILE);
-            mDeviceOwnerFile = new File(services.dataDir, DEVICE_OWNER_FILE);
-            mUsersDataDir = new File(services.dataDir, "users");
+                    services.packageManagerInternal, new MockInjector(services));
         }
 
-        @Override
-        File getLegacyConfigFileWithTestOverride() {
-            return mLegacyFile;
-        }
+        static class MockInjector extends Injector {
+            private final MockSystemServices mServices;
 
-        @Override
-        File getDeviceOwnerFileWithTestOverride() {
-            return mDeviceOwnerFile;
-        }
+            private MockInjector(MockSystemServices services) {
+                mServices = services;
+            }
 
-        @Override
-        File getProfileOwnerFileWithTestOverride(int userId) {
-            final File userDir = new File(mUsersDataDir, String.valueOf(userId));
-            return new File(userDir, PROFILE_OWNER_FILE);
+            @Override
+            File environmentGetDataSystemDirectory() {
+                return mServices.dataDir;
+            }
+
+            @Override
+            File environmentGetUserSystemDirectory(int userId) {
+                return mServices.environment.getUserSystemDirectory(userId);
+            }
         }
     }
 
     public final DpmMockContext context;
-    private final MockInjector mMockInjector;
+    protected final MockInjector mMockInjector;
 
     public DevicePolicyManagerServiceTestable(MockSystemServices services, DpmMockContext context) {
         this(new MockInjector(services, context));
@@ -124,8 +117,7 @@ public class DevicePolicyManagerServiceTestable extends DevicePolicyManagerServi
         }
     }
 
-
-    private static class MockInjector extends Injector {
+    static class MockInjector extends Injector {
 
         public final DpmMockContext context;
         private final MockSystemServices services;
@@ -133,7 +125,7 @@ public class DevicePolicyManagerServiceTestable extends DevicePolicyManagerServi
         // Key is a pair of uri and userId
         private final Map<Pair<Uri, Integer>, ContentObserver> mContentObservers = new ArrayMap<>();
 
-        private MockInjector(MockSystemServices services, DpmMockContext context) {
+        public MockInjector(MockSystemServices services, DpmMockContext context) {
             super(context);
             this.services = services;
             this.context = context;
@@ -448,6 +440,12 @@ public class DevicePolicyManagerServiceTestable extends DevicePolicyManagerServi
         @Override
         void postOnSystemServerInitThreadPool(Runnable runnable) {
             runnable.run();
+        }
+
+        @Override
+        public TransferOwnershipMetadataManager newTransferOwnershipMetadataManager() {
+            return new TransferOwnershipMetadataManager(
+                    new TransferOwnershipMetadataManagerTest.MockInjector());
         }
     }
 }

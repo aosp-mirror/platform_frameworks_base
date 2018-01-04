@@ -487,15 +487,14 @@ public class DeviceAdminReceiver extends BroadcastReceiver {
      * allows a mobile device management application to pass data to the management application
      * instance after owner transfer.
      *
-     * <p>
-     * If the transfer is successful, the new device owner receives the data in
+     * <p>If the transfer is successful, the new owner receives the data in
      * {@link DeviceAdminReceiver#onTransferOwnershipComplete(Context, PersistableBundle)}.
      * The bundle is not changed during the ownership transfer.
      *
      * @see DevicePolicyManager#transferOwnership(ComponentName, ComponentName, PersistableBundle)
      */
-    public static final String EXTRA_TRANSFER_OWNER_ADMIN_EXTRAS_BUNDLE =
-            "android.app.extra.TRANSFER_OWNER_ADMIN_EXTRAS_BUNDLE";
+    public static final String EXTRA_TRANSFER_OWNERSHIP_ADMIN_EXTRAS_BUNDLE =
+            "android.app.extra.TRANSFER_OWNERSHIP_ADMIN_EXTRAS_BUNDLE";
 
     /**
      * Name under which a device administration component indicates whether it supports transfer of
@@ -1063,7 +1062,7 @@ public class DeviceAdminReceiver extends BroadcastReceiver {
             onUserSwitched(context, intent, intent.getParcelableExtra(Intent.EXTRA_USER));
         } else if (ACTION_TRANSFER_OWNERSHIP_COMPLETE.equals(action)) {
             PersistableBundle bundle =
-                    intent.getParcelableExtra(EXTRA_TRANSFER_OWNER_ADMIN_EXTRAS_BUNDLE);
+                    intent.getParcelableExtra(EXTRA_TRANSFER_OWNERSHIP_ADMIN_EXTRAS_BUNDLE);
             onTransferOwnershipComplete(context, bundle);
         }
     }

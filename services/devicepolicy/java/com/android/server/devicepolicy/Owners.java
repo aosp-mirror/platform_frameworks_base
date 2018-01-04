@@ -34,6 +34,7 @@ import android.util.Slog;
 import android.util.SparseArray;
 import android.util.Xml;
 
+import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.util.FastXmlSerializer;
 
 import org.xmlpull.v1.XmlPullParser;
@@ -110,13 +111,23 @@ class Owners {
     private SystemUpdateInfo mSystemUpdateInfo;
 
     private final Object mLock = new Object();
+    private final Injector mInjector;
 
     public Owners(UserManager userManager,
             UserManagerInternal userManagerInternal,
             PackageManagerInternal packageManagerInternal) {
+        this(userManager, userManagerInternal, packageManagerInternal, new Injector());
+    }
+
+    @VisibleForTesting
+    Owners(UserManager userManager,
+            UserManagerInternal userManagerInternal,
+            PackageManagerInternal packageManagerInternal,
+            Injector injector) {
         mUserManager = userManager;
         mUserManagerInternal = userManagerInternal;
         mPackageManagerInternal = packageManagerInternal;
+        mInjector = injector;
     }
 
     /**
@@ -125,7 +136,7 @@ class Owners {
     void load() {
         synchronized (mLock) {
             // First, try to read from the legacy file.
-            final File legacy = getLegacyConfigFileWithTestOverride();
+            final File legacy = getLegacyConfigFile();
 
             final List<UserInfo> users = mUserManager.getUsers(true);
 
@@ -288,7 +299,7 @@ class Owners {
         }
     }
 
-    void transferDeviceOwner(ComponentName target) {
+    void transferDeviceOwnership(ComponentName target) {
         synchronized (mLock) {
             // We don't set a name because it's not used anyway.
             // See DevicePolicyManagerService#getDeviceOwnerName
@@ -642,7 +653,7 @@ class Owners {
     private class DeviceOwnerReadWriter extends FileReadWriter {
 
         protected DeviceOwnerReadWriter() {
-            super(getDeviceOwnerFileWithTestOverride());
+            super(getDeviceOwnerFile());
         }
 
         @Override
@@ -713,7 +724,7 @@ class Owners {
         private final int mUserId;
 
         ProfileOwnerReadWriter(int userId) {
-            super(getProfileOwnerFileWithTestOverride(userId));
+            super(getProfileOwnerFile(userId));
             mUserId = userId;
         }
 
@@ -870,15 +881,29 @@ class Owners {
         }
     }
 
-    File getLegacyConfigFileWithTestOverride() {
-        return new File(Environment.getDataSystemDirectory(), DEVICE_OWNER_XML_LEGACY);
+    @VisibleForTesting
+    File getLegacyConfigFile() {
+        return new File(mInjector.environmentGetDataSystemDirectory(), DEVICE_OWNER_XML_LEGACY);
     }
 
-    File getDeviceOwnerFileWithTestOverride() {
-        return new File(Environment.getDataSystemDirectory(), DEVICE_OWNER_XML);
+    @VisibleForTesting
+    File getDeviceOwnerFile() {
+        return new File(mInjector.environmentGetDataSystemDirectory(), DEVICE_OWNER_XML);
     }
 
-    File getProfileOwnerFileWithTestOverride(int userId) {
-        return new File(Environment.getUserSystemDirectory(userId), PROFILE_OWNER_XML);
+    @VisibleForTesting
+    File getProfileOwnerFile(int userId) {
+        return new File(mInjector.environmentGetUserSystemDirectory(userId), PROFILE_OWNER_XML);
+    }
+
+    @VisibleForTesting
+    public static class Injector {
+        File environmentGetDataSystemDirectory() {
+            return Environment.getDataSystemDirectory();
+        }
+
+        File environmentGetUserSystemDirectory(int userId) {
+            return Environment.getUserSystemDirectory(userId);
+        }
     }
 }
