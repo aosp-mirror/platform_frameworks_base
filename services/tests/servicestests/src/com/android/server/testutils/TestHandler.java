@@ -104,6 +104,15 @@ public class TestHandler extends Handler {
         return new PriorityQueue<>(mMessages);
     }
 
+    /**
+     * Optionally-overridable to allow deciphering message types
+     *
+     * @see android.util.DebugUtils#valueToString - a handy utility to use when overriding this
+     */
+    protected String messageToString(Message message) {
+        return message.toString();
+    }
+
     private void dispatch(MsgInfo msg) {
         int msgId = msg.message.what;
 
@@ -148,7 +157,7 @@ public class TestHandler extends Handler {
         @Override
         public String toString() {
             return "MsgInfo{" +
-                    "message=" + message +
+                    "message=" + messageToString(message) +
                     ", sendTime=" + sendTime +
                     '}';
         }
