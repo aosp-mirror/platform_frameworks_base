@@ -18,6 +18,7 @@ package com.android.statsd.loadtest;
 import android.content.Context;
 import android.util.Log;
 import com.android.os.StatsLog.StatsdStatsReport;
+import com.android.internal.os.StatsdConfigProto.TimeUnit;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -27,8 +28,8 @@ public class StatsdStatsRecorder extends PerfDataRecorder {
     private final LoadtestActivity mLoadtestActivity;
 
     public StatsdStatsRecorder(LoadtestActivity loadtestActivity, boolean placebo, int replication,
-        long bucketMins, long periodSecs, int burst) {
-        super(placebo, replication, bucketMins, periodSecs, burst);
+            TimeUnit bucket, long periodSecs, int burst) {
+        super(placebo, replication, bucket, periodSecs, burst);
         mLoadtestActivity = loadtestActivity;
     }
 

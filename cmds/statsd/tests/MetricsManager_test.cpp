@@ -80,7 +80,7 @@ StatsdConfig buildGoodConfig() {
     CountMetric* metric = config.add_count_metric();
     metric->set_id(3);
     metric->set_what(StringToId("SCREEN_IS_ON"));
-    metric->mutable_bucket()->set_bucket_size_millis(30 * 1000L);
+    metric->set_bucket(ONE_MINUTE);
     metric->mutable_dimensions()->set_field(2 /*SCREEN_STATE_CHANGE*/);
     metric->mutable_dimensions()->add_child()->set_field(1);
 
@@ -131,7 +131,7 @@ StatsdConfig buildAlertWithUnknownMetric() {
     CountMetric* metric = config.add_count_metric();
     metric->set_id(3);
     metric->set_what(StringToId("SCREEN_IS_ON"));
-    metric->mutable_bucket()->set_bucket_size_millis(30 * 1000L);
+    metric->set_bucket(ONE_MINUTE);
     metric->mutable_dimensions()->set_field(2 /*SCREEN_STATE_CHANGE*/);
     metric->mutable_dimensions()->add_child()->set_field(1);
 
@@ -177,7 +177,7 @@ StatsdConfig buildMissingPredicate() {
     CountMetric* metric = config.add_count_metric();
     metric->set_id(3);
     metric->set_what(StringToId("SCREEN_EVENT"));
-    metric->mutable_bucket()->set_bucket_size_millis(30 * 1000L);
+    metric->set_bucket(ONE_MINUTE);
     metric->set_condition(StringToId("SOME_CONDITION"));
 
     AtomMatcher* eventMatcher = config.add_atom_matcher();
@@ -215,7 +215,7 @@ StatsdConfig buildDimensionMetricsWithMultiTags() {
     CountMetric* metric = config.add_count_metric();
     metric->set_id(3);
     metric->set_what(StringToId("BATTERY_LOW"));
-    metric->mutable_bucket()->set_bucket_size_millis(30 * 1000L);
+    metric->set_bucket(ONE_MINUTE);
     // This case is interesting. We want to dimension across two atoms.
     metric->mutable_dimensions()->add_child()->set_field(1);
 

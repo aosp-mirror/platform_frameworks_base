@@ -29,6 +29,20 @@ enum Position {
     ANY = 3;
 }
 
+enum TimeUnit {
+    TIME_UNIT_UNSPECIFIED = 0;
+    ONE_MINUTE = 1;
+    FIVE_MINUTES = 2;
+    TEN_MINUTES = 3;
+    THIRTY_MINUTES = 4;
+    ONE_HOUR = 5;
+    THREE_HOURS = 6;
+    SIX_HOURS = 7;
+    TWELVE_HOURS = 8;
+    ONE_DAY = 9;
+    CTS = 1000;
+}
+
 message FieldMatcher {
     optional int32 field = 1;
 
@@ -166,7 +180,7 @@ message CountMetric {
 
     optional FieldMatcher dimensions = 4;
 
-    optional Bucket bucket = 5;
+    optional TimeUnit bucket = 5;
 
     repeated MetricConditionLink links = 6;
 }
@@ -189,7 +203,7 @@ message DurationMetric {
 
     optional FieldMatcher dimensions = 6;
 
-    optional Bucket bucket = 7;
+    optional TimeUnit bucket = 7;
 }
 
 message GaugeMetric {
@@ -203,7 +217,7 @@ message GaugeMetric {
 
     optional FieldMatcher dimensions = 5;
 
-    optional Bucket bucket = 6;
+    optional TimeUnit bucket = 6;
 
     repeated MetricConditionLink links = 7;
 }
@@ -219,7 +233,7 @@ message ValueMetric {
 
     optional FieldMatcher dimensions = 5;
 
-    optional Bucket bucket = 6;
+    optional TimeUnit bucket = 6;
 
     repeated MetricConditionLink links = 7;
 

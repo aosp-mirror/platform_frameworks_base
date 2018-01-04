@@ -17,6 +17,7 @@
 #pragma once
 
 #include <android/util/ProtoOutputStream.h>
+#include "frameworks/base/cmds/statsd/src/statsd_config.pb.h"
 #include "frameworks/base/cmds/statsd/src/stats_log.pb.h"
 #include "field_util.h"
 
@@ -35,6 +36,9 @@ void writeFieldProtoToStream(
 // Helper function to construct the field value tree and write to ProtoOutputStream
 void writeFieldValueTreeToStream(const FieldValueMap &fieldValueMap,
     util::ProtoOutputStream* protoOutput);
+
+// Convert the TimeUnit enum to the bucket size in millis.
+int64_t TimeUnitToBucketSizeInMillis(TimeUnit unit);
 
 }  // namespace statsd
 }  // namespace os

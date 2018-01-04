@@ -61,8 +61,6 @@ const int FIELD_ID_START_BUCKET_NANOS = 1;
 const int FIELD_ID_END_BUCKET_NANOS = 2;
 const int FIELD_ID_VALUE = 3;
 
-static const uint64_t kDefaultBucketSizeMillis = 60 * 60 * 1000L;
-
 // ValueMetric has a minimum bucket size of 10min so that we don't pull too frequently
 ValueMetricProducer::ValueMetricProducer(const ConfigKey& key, const ValueMetric& metric,
                                          const int conditionIndex,
@@ -74,12 +72,14 @@ ValueMetricProducer::ValueMetricProducer(const ConfigKey& key, const ValueMetric
       mStatsPullerManager(statsPullerManager),
       mPullTagId(pullTagId) {
     // TODO: valuemetric for pushed events may need unlimited bucket length
-    if (metric.has_bucket() && metric.bucket().has_bucket_size_millis()) {
-        mBucketSizeNs = metric.bucket().bucket_size_millis() * 1000 * 1000;
+    int64_t bucketSizeMills = 0;
+    if (metric.has_bucket()) {
+        bucketSizeMills = TimeUnitToBucketSizeInMillis(metric.bucket());
     } else {
-        mBucketSizeNs = kDefaultBucketSizeMillis * 1000 * 1000;
+        bucketSizeMills = TimeUnitToBucketSizeInMillis(ONE_HOUR);
     }
 
+    mBucketSizeNs = bucketSizeMills * 1000000;
     mDimensions = metric.dimensions();
 
     if (metric.links().size() > 0) {
@@ -90,8 +90,7 @@ ValueMetricProducer::ValueMetricProducer(const ConfigKey& key, const ValueMetric
 
     if (!metric.has_condition() && mPullTagId != -1) {
         VLOG("Setting up periodic pulling for %d", mPullTagId);
-        mStatsPullerManager->RegisterReceiver(mPullTagId, this,
-                                              metric.bucket().bucket_size_millis());
+        mStatsPullerManager->RegisterReceiver(mPullTagId, this, bucketSizeMills);
     }
     VLOG("value metric %lld created. bucket size %lld start_time: %lld",
         (long long)metric.id(), (long long)mBucketSizeNs, (long long)mStartTimeNs);

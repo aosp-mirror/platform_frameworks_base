@@ -20,6 +20,7 @@ import android.util.Log;
 import com.android.os.StatsLog.ConfigMetricsReport;
 import com.android.os.StatsLog.EventMetricData;
 import com.android.os.StatsLog.StatsLogReport;
+import com.android.internal.os.StatsdConfigProto.TimeUnit;
 import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -33,8 +34,8 @@ public class ValidationRecorder extends PerfDataRecorder {
     private final LoadtestActivity mLoadtestActivity;
 
     public ValidationRecorder(LoadtestActivity loadtestActivity, boolean placebo, int replication,
-        long bucketMins, long periodSecs, int burst) {
-        super(placebo, replication, bucketMins, periodSecs, burst);
+            TimeUnit bucket, long periodSecs, int burst) {
+        super(placebo, replication, bucket, periodSecs, burst);
         mLoadtestActivity = loadtestActivity;
     }
 

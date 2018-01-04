@@ -86,9 +86,6 @@ private:
     // Util function to flush the old packet.
     void flushIfNeededLocked(const uint64_t& eventTime);
 
-    // The default bucket size for gauge metric is 1 hr.
-    static const uint64_t kDefaultGaugemBucketSizeNs = 60ULL * 60 * 1000 * 1000 * 1000;
-
     std::shared_ptr<StatsPullerManager> mStatsPullerManager;
     // tagId for pulled data. -1 if this is not pulled
     const int mPullTagId;
