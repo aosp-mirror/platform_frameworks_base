@@ -723,6 +723,7 @@ public class AccessibilityNodeInfo implements Parcelable {
     private CharSequence mText;
     private CharSequence mHintText;
     private CharSequence mError;
+    private CharSequence mPaneTitle;
     private CharSequence mContentDescription;
     private String mViewIdResourceName;
     private ArrayList<String> mExtraDataKeys;
@@ -2033,6 +2034,33 @@ public class AccessibilityNodeInfo implements Parcelable {
     }
 
     /**
+     * If this node represents a visually distinct region of the screen that may update separately
+     * from the rest of the window, it is considered a pane. Set the pane title to indicate that
+     * the node is a pane, and to provide a title for it.
+     * <p>
+     *   <strong>Note:</strong> Cannot be called from an
+     *   {@link android.accessibilityservice.AccessibilityService}.
+     *   This class is made immutable before being delivered to an AccessibilityService.
+     * </p>
+     * @param paneTitle The title of the pane represented by this node.
+     */
+    public void setPaneTitle(@Nullable CharSequence paneTitle) {
+        enforceNotSealed();
+        mPaneTitle = (paneTitle == null)
+                ? null : paneTitle.subSequence(0, paneTitle.length());
+    }
+
+    /**
+     * Get the title of the pane represented by this node.
+     *
+     * @return The title of the pane represented by this node, or {@code null} if this node does
+     *         not represent a pane.
+     */
+    public @Nullable CharSequence getPaneTitle() {
+        return mPaneTitle;
+    }
+
+    /**
      * Get the drawing order of the view corresponding it this node.
      * <p>
      * Drawing order is determined only within the node's parent, so this index is only relative
@@ -3151,6 +3179,10 @@ public class AccessibilityNodeInfo implements Parcelable {
             nonDefaultFields |= bitAt(fieldIndex);
         }
         fieldIndex++;
+        if (!Objects.equals(mPaneTitle, DEFAULT.mPaneTitle)) {
+            nonDefaultFields |= bitAt(fieldIndex);
+        }
+        fieldIndex++;
         if (!Objects.equals(mViewIdResourceName, DEFAULT.mViewIdResourceName)) {
             nonDefaultFields |= bitAt(fieldIndex);
         }
@@ -3270,6 +3302,7 @@ public class AccessibilityNodeInfo implements Parcelable {
         if (isBitSet(nonDefaultFields, fieldIndex++)) {
             parcel.writeCharSequence(mContentDescription);
         }
+        if (isBitSet(nonDefaultFields, fieldIndex++)) parcel.writeCharSequence(mPaneTitle);
         if (isBitSet(nonDefaultFields, fieldIndex++)) parcel.writeString(mViewIdResourceName);
 
         if (isBitSet(nonDefaultFields, fieldIndex++)) parcel.writeInt(mTextSelectionStart);
@@ -3341,6 +3374,7 @@ public class AccessibilityNodeInfo implements Parcelable {
         mHintText = other.mHintText;
         mError = other.mError;
         mContentDescription = other.mContentDescription;
+        mPaneTitle = other.mPaneTitle;
         mViewIdResourceName = other.mViewIdResourceName;
 
         if (mActions != null) mActions.clear();
@@ -3461,6 +3495,7 @@ public class AccessibilityNodeInfo implements Parcelable {
         if (isBitSet(nonDefaultFields, fieldIndex++)) {
             mContentDescription = parcel.readCharSequence();
         }
+        if (isBitSet(nonDefaultFields, fieldIndex++)) mPaneTitle = parcel.readString();
         if (isBitSet(nonDefaultFields, fieldIndex++)) mViewIdResourceName = parcel.readString();
 
         if (isBitSet(nonDefaultFields, fieldIndex++)) mTextSelectionStart = parcel.readInt();

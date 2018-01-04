@@ -3030,6 +3030,10 @@
              value, {@code false}, leaves the screen reader to consider other signals, such as
              focusability or the presence of text, to decide what it focus.-->
         <attr name="screenReaderFocusable" format="boolean" />
+
+        <!-- The title this view should present to accessibility as a pane title.
+             See {@link android.view.View#setAccessibilityPaneTitle(CharSequence)} -->
+        <attr name="accessibilityPaneTitle" format="string" />
     </declare-styleable>
 
     <!-- Attributes that can be assigned to a tag for a particular View. -->

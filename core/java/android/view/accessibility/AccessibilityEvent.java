@@ -565,6 +565,12 @@ public final class AccessibilityEvent extends AccessibilityRecord implements Par
     public static final int CONTENT_CHANGE_TYPE_CONTENT_DESCRIPTION = 0x00000004;
 
     /**
+     * Change type for {@link #TYPE_WINDOW_CONTENT_CHANGED} event:
+     * The node's pane title changed.
+     */
+    public static final int CONTENT_CHANGE_TYPE_PANE_TITLE = 0x00000008;
+
+    /**
      * Change type for {@link #TYPE_WINDOWS_CHANGED} event:
      * The window was added.
      */
@@ -654,7 +660,8 @@ public final class AccessibilityEvent extends AccessibilityRecord implements Par
                     CONTENT_CHANGE_TYPE_UNDEFINED,
                     CONTENT_CHANGE_TYPE_SUBTREE,
                     CONTENT_CHANGE_TYPE_TEXT,
-                    CONTENT_CHANGE_TYPE_CONTENT_DESCRIPTION
+                    CONTENT_CHANGE_TYPE_CONTENT_DESCRIPTION,
+                    CONTENT_CHANGE_TYPE_PANE_TITLE
             })
     public @interface ContentChangeTypes {}
 

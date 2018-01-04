@@ -4045,6 +4045,12 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
     private CharSequence mContentDescription;
 
     /**
+     * If this view represents a distinct part of the window, it can have a title that labels the
+     * area.
+     */
+    private CharSequence mAccessibilityPaneTitle;
+
+    /**
      * Specifies the id of a view for which this view serves as a label for
      * accessibility purposes.
      */
@@ -5407,6 +5413,11 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
                 case R.styleable.View_screenReaderFocusable:
                     if (a.peekValue(attr) != null) {
                         setScreenReaderFocusable(a.getBoolean(attr, false));
+                    }
+                    break;
+                case R.styleable.View_accessibilityPaneTitle:
+                    if (a.peekValue(attr) != null) {
+                        setAccessibilityPaneTitle(a.getString(attr));
                     }
                     break;
             }
@@ -7218,6 +7229,35 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
     }
 
     /**
+     * If this view is a visually distinct portion of a window, for example the content view of
+     * a fragment that is replaced, it is considered a pane for accessibility purposes. In order
+     * for accessibility services to understand the views role, and to announce its title as
+     * appropriate, such views should have pane titles.
+     *
+     * @param accessibilityPaneTitle The pane's title.
+     *
+     * {@see AccessibilityNodeInfo#setPaneTitle(CharSequence)}
+     */
+    public void setAccessibilityPaneTitle(CharSequence accessibilityPaneTitle) {
+        if (!TextUtils.equals(accessibilityPaneTitle, mAccessibilityPaneTitle)) {
+            mAccessibilityPaneTitle = accessibilityPaneTitle;
+            notifyViewAccessibilityStateChangedIfNeeded(
+                    AccessibilityEvent.CONTENT_CHANGE_TYPE_PANE_TITLE);
+        }
+    }
+
+    /**
+     * Get the title of the pane for purposes of accessibility.
+     *
+     * @return The current pane title.
+     *
+     * {@see #setAccessibilityPaneTitle}.
+     */
+    public CharSequence getAccessibilityPaneTitle() {
+        return mAccessibilityPaneTitle;
+    }
+
+    /**
      * Sends an accessibility event of the given type. If accessibility is
      * not enabled this method has no effect. The default implementation calls
      * {@link #onInitializeAccessibilityEvent(AccessibilityEvent)} first
@@ -8514,6 +8554,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
 
         info.addAction(AccessibilityAction.ACTION_SHOW_ON_SCREEN);
         populateAccessibilityNodeInfoDrawingOrderInParent(info);
+        info.setPaneTitle(mAccessibilityPaneTitle);
     }
 
     /**
@@ -11405,6 +11446,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      * {@link #getAccessibilityLiveRegion()} is not
      * {@link #ACCESSIBILITY_LIVE_REGION_NONE}.
      * </ul>
+     * <li>Has an accessibility pane title, see {@link #setAccessibilityPaneTitle}</li>
      * </ol>
      *
      * @return Whether the view is exposed for accessibility.
@@ -11431,7 +11473,8 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
 
         return mode == IMPORTANT_FOR_ACCESSIBILITY_YES || isActionableForAccessibility()
                 || hasListenersForAccessibility() || getAccessibilityNodeProvider() != null
-                || getAccessibilityLiveRegion() != ACCESSIBILITY_LIVE_REGION_NONE;
+                || getAccessibilityLiveRegion() != ACCESSIBILITY_LIVE_REGION_NONE
+                || (mAccessibilityPaneTitle != null);
     }
 
     /**
