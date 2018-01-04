@@ -272,7 +272,6 @@
   <java-symbol type="bool" name="config_suspendWhenScreenOffDueToProximity" />
   <java-symbol type="bool" name="config_swipeDisambiguation" />
   <java-symbol type="bool" name="config_syncstorageengine_masterSyncAutomatically" />
-  <java-symbol type="bool" name="config_telephony_use_own_number_for_voicemail" />
   <java-symbol type="bool" name="config_ui_enableFadingMarquee" />
   <java-symbol type="bool" name="config_enableHapticTextHandle" />
   <java-symbol type="bool" name="config_use_strict_phone_number_comparation" />
