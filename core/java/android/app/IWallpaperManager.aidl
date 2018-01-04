@@ -159,5 +159,5 @@ interface IWallpaperManager {
     /**
      * Called from SystemUI when it shows the AoD UI.
      */
-    void setInAmbientMode(boolean inAmbientMode, boolean animated);
+    oneway void setInAmbientMode(boolean inAmbientMode, boolean animated);
 }
