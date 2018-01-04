@@ -20,6 +20,7 @@
 #include <map>
 #include <set>
 #include <string>
+#include <sstream>
 
 using namespace android;
 using namespace android::os;
@@ -482,9 +483,44 @@ static bool generateSectionListCpp(Descriptor const* descriptor) {
 }
 
 // ================================================================================
+static string replace_string(const string& str, const char replace, const char with)
+{
+    string result(str);
+    const int N = result.size();
+    for (int i=0; i<N; i++) {
+        if (result[i] == replace) {
+            result[i] = with;
+        }
+    }
+    return result;
+}
+
+static void generateCsv(Descriptor const* descriptor, const string& indent, set<string>* parents) {
+    DebugStringOptions options;
+    options.include_comments = true;
+    for (int i=0; i<descriptor->field_count(); i++) {
+        const FieldDescriptor* field = descriptor->field(i);
+        stringstream text;
+        if (field->type() == FieldDescriptor::TYPE_MESSAGE) {
+            text << field->message_type()->name();
+        } else {
+            text << field->type_name();
+        }
+        text << " " << field->name();
+        printf("%s%s,\n", indent.c_str(), replace_string(text.str(), '\n', ' ').c_str());
+        if (field->type() == FieldDescriptor::TYPE_MESSAGE &&
+            parents->find(field->message_type()->full_name()) == parents->end()) {
+            parents->insert(field->message_type()->full_name());
+            generateCsv(field->message_type(), indent + ",", parents);
+            parents->erase(field->message_type()->full_name());
+        }
+    }
+}
+
+// ================================================================================
 int main(int argc, char const *argv[])
 {
-    if (argc != 2) return 1;
+    if (argc < 2) return 1;
     const char* module = argv[1];
 
     Descriptor const* descriptor = IncidentProto::descriptor();
@@ -495,7 +531,23 @@ int main(int argc, char const *argv[])
     if (strcmp(module, "incidentd") == 0 ) {
         return !generateSectionListCpp(descriptor);
     }
-
-    // return failure if not called by the whitelisted modules
+    // Generates Csv Format of proto definition for each section.
+    if (strcmp(module, "csv") == 0 && argc > 2) {
+        int sectionId = atoi(argv[2]);
+        for (int i=0; i<descriptor->field_count(); i++) {
+            const FieldDescriptor* field = descriptor->field(i);
+            if (strcmp(field->name().c_str(), argv[2]) == 0
+                || field->number() == sectionId) {
+                set<string> parents;
+                printf("%s\n", field->name().c_str());
+                generateCsv(field->message_type(), "", &parents);
+                break;
+            }
+        }
+        // Returns failure if csv is enabled to prevent Android building with it.
+        // It doesn't matter if this command runs manually.
+        return 1;
+    }
+    // Returns failure if not called by the whitelisted modules
     return 1;
 }
