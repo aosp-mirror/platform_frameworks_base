@@ -537,7 +537,24 @@ message UidProto {
       // Screen-off CPU time in milliseconds.
       optional int64 screen_off_duration_ms = 3;
     }
+    // CPU times accumulated across all process states.
     repeated ByFrequency by_frequency = 3;
+
+    enum ProcessState {
+      TOP = 0;
+      FOREGROUND_SERVICE = 1;
+      FOREGROUND = 2;
+      BACKGROUND = 3;
+      TOP_SLEEPING = 4;
+      HEAVY_WEIGHT = 5;
+      CACHED = 6;
+    }
+    // CPU times at different process states.
+    message ByProcessState {
+      optional ProcessState process_state = 1;
+      repeated ByFrequency by_frequency = 2;
+    }
+    repeated ByProcessState by_process_state = 4;
   }
   optional Cpu cpu = 7;
 

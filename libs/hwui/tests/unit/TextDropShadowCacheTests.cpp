@@ -29,6 +29,7 @@ using namespace android::uirenderer;
 RENDERTHREAD_OPENGL_PIPELINE_TEST(TextDropShadowCache, addRemove) {
     SkPaint paint;
     paint.setTextSize(20);
+    paint.setTextEncoding(SkPaint::kGlyphID_TextEncoding);
 
     GammaFontRenderer gammaFontRenderer;
     FontRenderer& fontRenderer = gammaFontRenderer.getFontRenderer();

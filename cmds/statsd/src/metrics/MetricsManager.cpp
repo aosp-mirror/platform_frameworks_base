@@ -173,6 +173,22 @@ void MetricsManager::onLogEvent(const LogEvent& event) {
             VLOG("log source %d not on the whitelist", event.GetUid());
             return;
         }
+    } else { // Check that app hook fields are valid.
+        // TODO: Find a way to make these checks easier to maintain if the app hooks get changed.
+
+        // Label is 2nd from last field and must be from [0, 15].
+        status_t err = NO_ERROR;
+        long label = event.GetLong(event.size()-1, &err);
+        if (err != NO_ERROR || label < 0 || label > 15) {
+            VLOG("App hook does not have valid label %ld", label);
+            return;
+        }
+        // The state must be from 0,3. This part of code must be manually updated.
+        long apphookState = event.GetLong(event.size(), &err);
+        if (err != NO_ERROR || apphookState < 0 || apphookState > 3) {
+            VLOG("App hook does not have valid state %ld", apphookState);
+            return;
+        }
     }
 
     int tagId = event.GetTagId();

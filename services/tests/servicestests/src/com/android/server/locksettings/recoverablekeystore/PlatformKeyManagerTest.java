@@ -205,6 +205,14 @@ public class PlatformKeyManagerTest {
     }
 
     @Test
+    public void init_savesGenerationIdToDatabase() throws Exception {
+        mPlatformKeyManager.init();
+
+        assertEquals(1,
+                mRecoverableKeyStoreDb.getPlatformKeyGenerationId(USER_ID_FIXTURE));
+    }
+
+    @Test
     public void init_setsGenerationIdTo1() throws Exception {
         mPlatformKeyManager.init();
 
@@ -212,7 +220,38 @@ public class PlatformKeyManagerTest {
     }
 
     @Test
+    public void init_incrementsGenerationIdIfKeyIsUnavailable() throws Exception {
+        mPlatformKeyManager.init();
+
+        mPlatformKeyManager.init();
+
+        assertEquals(2, mPlatformKeyManager.getGenerationId());
+    }
+
+    @Test
+    public void init_doesNotIncrementGenerationIdIfKeyAvailable() throws Exception {
+        mPlatformKeyManager.init();
+        when(mKeyStoreProxy
+                .containsAlias("com.android.server.locksettings.recoverablekeystore/"
+                        + "platform/42/1/decrypt")).thenReturn(true);
+        when(mKeyStoreProxy
+                .containsAlias("com.android.server.locksettings.recoverablekeystore/"
+                        + "platform/42/1/encrypt")).thenReturn(true);
+
+        mPlatformKeyManager.init();
+
+        assertEquals(1, mPlatformKeyManager.getGenerationId());
+    }
+
+    @Test
+    public void getGenerationId_returnsMinusOneIfNotInitialized() throws Exception {
+        assertEquals(-1, mPlatformKeyManager.getGenerationId());
+    }
+
+    @Test
     public void getDecryptKey_getsDecryptKeyWithCorrectAlias() throws Exception {
+        mPlatformKeyManager.init();
+
         mPlatformKeyManager.getDecryptKey();
 
         verify(mKeyStoreProxy).getKey(
@@ -222,6 +261,8 @@ public class PlatformKeyManagerTest {
 
     @Test
     public void getEncryptKey_getsDecryptKeyWithCorrectAlias() throws Exception {
+        mPlatformKeyManager.init();
+
         mPlatformKeyManager.getEncryptKey();
 
         verify(mKeyStoreProxy).getKey(

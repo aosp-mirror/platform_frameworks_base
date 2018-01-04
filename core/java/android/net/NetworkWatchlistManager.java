@@ -59,8 +59,8 @@ public class NetworkWatchlistManager {
     /**
      * Report network watchlist records if necessary.
      *
-     * Watchlist report process will run summarize records into a single report, then the
-     * report will be processed by differential privacy framework and store it on disk.
+     * Watchlist report process will summarize records into a single report, then the
+     * report will be processed by differential privacy framework and stored on disk.
      *
      * @hide
      */
@@ -69,6 +69,20 @@ public class NetworkWatchlistManager {
             mNetworkWatchlistManager.reportWatchlistIfNecessary();
         } catch (RemoteException e) {
             Log.e(TAG, "Cannot report records", e);
+            e.rethrowFromSystemServer();
+        }
+    }
+
+    /**
+     * Reload network watchlist.
+     *
+     * @hide
+     */
+    public void reloadWatchlist() {
+        try {
+            mNetworkWatchlistManager.reloadWatchlist();
+        } catch (RemoteException e) {
+            Log.e(TAG, "Unable to reload watchlist");
             e.rethrowFromSystemServer();
         }
     }

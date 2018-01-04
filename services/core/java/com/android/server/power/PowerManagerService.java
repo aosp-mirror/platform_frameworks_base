@@ -57,6 +57,7 @@ import android.os.Trace;
 import android.os.UserHandle;
 import android.os.UserManager;
 import android.os.WorkSource;
+import android.os.WorkSource.WorkChain;
 import android.provider.Settings;
 import android.provider.Settings.SettingNotFoundException;
 import android.service.dreams.DreamManagerInternal;
@@ -1974,6 +1975,16 @@ public final class PowerManagerService extends SystemService
                 final int uid = wakeLock.mWorkSource.get(k);
                 if (userId == UserHandle.getUserId(uid)) {
                     return true;
+                }
+            }
+
+            final ArrayList<WorkChain> workChains = wakeLock.mWorkSource.getWorkChains();
+            if (workChains != null) {
+                for (int k = 0; k < workChains.size(); k++) {
+                    final int uid = workChains.get(k).getAttributionUid();
+                    if (userId == UserHandle.getUserId(uid)) {
+                        return true;
+                    }
                 }
             }
         }

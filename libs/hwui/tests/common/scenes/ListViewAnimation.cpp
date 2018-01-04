@@ -83,7 +83,6 @@ class ListViewAnimation : public TestListViewSceneBase {
         canvas.drawRoundRect(0, 0, itemWidth, itemHeight, dp(6), dp(6), roundRectPaint);
 
         SkPaint textPaint;
-        textPaint.setTextEncoding(SkPaint::kGlyphID_TextEncoding);
         textPaint.setColor(rand() % 2 ? Color::Black : Color::Grey_500);
         textPaint.setTextSize(dp(20));
         textPaint.setAntiAlias(true);

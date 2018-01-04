@@ -115,16 +115,12 @@ public class PlatformKeyManager {
     /**
      * Returns the current generation ID of the platform key. This increments whenever a platform
      * key has to be replaced. (e.g., because the user has removed and then re-added their lock
-     * screen).
+     * screen). Returns -1 if no key has been generated yet.
      *
      * @hide
      */
     public int getGenerationId() {
-        int generationId = mDatabase.getPlatformKeyGenerationId(mUserId);
-        if (generationId == -1) {
-            return 1;
-        }
-        return generationId;
+        return mDatabase.getPlatformKeyGenerationId(mUserId);
     }
 
     /**
@@ -207,14 +203,22 @@ public class PlatformKeyManager {
                     Locale.US, "Platform key generation %d exists already.", generationId));
             return;
         }
-        if (generationId == 1) {
+        if (generationId == -1) {
             Log.i(TAG, "Generating initial platform ID.");
         } else {
             Log.w(TAG, String.format(Locale.US, "Platform generation ID was %d but no "
                     + "entry was present in AndroidKeyStore. Generating fresh key.", generationId));
         }
 
+        if (generationId == -1) {
+            generationId = 1;
+        } else {
+            // Had to generate a fresh key, bump the generation id
+            generationId++;
+        }
+
         generateAndLoadKey(generationId);
+        mDatabase.setPlatformKeyGenerationId(mUserId, generationId);
     }
 
     /**

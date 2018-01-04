@@ -216,7 +216,6 @@ public class RecoverableKeyStoreManager {
         // Any application should be able to check status for its own keys.
         // If caller is a recovery agent it can check statuses for other packages, but
         // only for recoverable keys it manages.
-        checkRecoverKeyStorePermission();
         return mDatabase.getStatusForAllKeys(Binder.getCallingUid());
     }
 

@@ -22,5 +22,6 @@ import android.os.SharedMemory;
 interface INetworkWatchlistManager {
     boolean startWatchlistLogging();
     boolean stopWatchlistLogging();
+    void reloadWatchlist();
     void reportWatchlistIfNecessary();
 }
