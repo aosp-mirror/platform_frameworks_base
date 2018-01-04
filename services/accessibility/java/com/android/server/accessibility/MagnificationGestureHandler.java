@@ -760,10 +760,10 @@ class MagnificationGestureHandler extends BaseEventStreamTransformation {
                 int policyFlags) {
             if (event.getActionMasked() == ACTION_DOWN) {
                 mPreLastDown = mLastDown;
-                mLastDown = event;
+                mLastDown = MotionEvent.obtain(event);
             } else if (event.getActionMasked() == ACTION_UP) {
                 mPreLastUp = mLastUp;
-                mLastUp = event;
+                mLastUp = MotionEvent.obtain(event);
             }
 
             MotionEventInfo info = MotionEventInfo.obtain(event, rawEvent,
