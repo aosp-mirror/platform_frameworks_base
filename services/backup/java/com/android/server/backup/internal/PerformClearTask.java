@@ -23,12 +23,14 @@ import android.util.Slog;
 
 import com.android.internal.backup.IBackupTransport;
 import com.android.server.backup.RefactoredBackupManagerService;
+import com.android.server.backup.TransportManager;
 import com.android.server.backup.transport.TransportClient;
 
 import java.io.File;
 
 public class PerformClearTask implements Runnable {
     private final RefactoredBackupManagerService mBackupManagerService;
+    private final TransportManager mTransportManager;
     private final TransportClient mTransportClient;
     private final PackageInfo mPackage;
     private final OnTaskFinishedListener mListener;
@@ -37,6 +39,7 @@ public class PerformClearTask implements Runnable {
             TransportClient transportClient, PackageInfo packageInfo,
             OnTaskFinishedListener listener) {
         mBackupManagerService = backupManagerService;
+        mTransportManager = backupManagerService.getTransportManager();
         mTransportClient = transportClient;
         mPackage = packageInfo;
         mListener = listener;
@@ -47,8 +50,9 @@ public class PerformClearTask implements Runnable {
         IBackupTransport transport = null;
         try {
             // Clear the on-device backup state to ensure a full backup next time
-            File stateDir = new File(mBackupManagerService.getBaseStateDir(),
-                    mTransportClient.getTransportDirName());
+            String transportDirName =
+                    mTransportManager.getTransportDirName(mTransportClient.getTransportComponent());
+            File stateDir = new File(mBackupManagerService.getBaseStateDir(), transportDirName);
             File stateFile = new File(stateDir, mPackage.packageName);
             stateFile.delete();
 

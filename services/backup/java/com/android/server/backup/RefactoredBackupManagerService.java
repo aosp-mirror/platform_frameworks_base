@@ -1604,9 +1604,15 @@ public class RefactoredBackupManagerService implements BackupManagerServiceInter
             return BackupManager.ERROR_BACKUP_NOT_ALLOWED;
         }
 
-        TransportClient transportClient =
-                mTransportManager.getCurrentTransportClient("BMS.requestBackup()");
-        if (transportClient == null) {
+        final TransportClient transportClient;
+        final String transportDirName;
+        try {
+            transportDirName =
+                    mTransportManager.getTransportDirName(
+                            mTransportManager.getCurrentTransportName());
+            transportClient =
+                    mTransportManager.getCurrentTransportClientOrThrow("BMS.requestBackup()");
+        } catch (TransportNotRegisteredException e) {
             BackupObserverUtils.sendBackupFinished(observer, BackupManager.ERROR_TRANSPORT_ABORTED);
             monitor = BackupManagerMonitorUtils.monitorEvent(monitor,
                     BackupManagerMonitor.LOG_EVENT_ID_TRANSPORT_IS_NULL,
@@ -1651,12 +1657,11 @@ public class RefactoredBackupManagerService implements BackupManagerServiceInter
                     + " k/v backups");
         }
 
-        String dirName = transportClient.getTransportDirName();
         boolean nonIncrementalBackup = (flags & BackupManager.FLAG_NON_INCREMENTAL_BACKUP) != 0;
 
         Message msg = mBackupHandler.obtainMessage(MSG_REQUEST_BACKUP);
-        msg.obj = new BackupParams(transportClient, dirName, kvBackupList, fullBackupList, observer,
-                monitor, listener, true, nonIncrementalBackup);
+        msg.obj = new BackupParams(transportClient, transportDirName, kvBackupList, fullBackupList,
+                observer, monitor, listener, true, nonIncrementalBackup);
         mBackupHandler.sendMessage(msg);
         return BackupManager.SUCCESS;
     }

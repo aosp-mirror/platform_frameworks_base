@@ -68,7 +68,6 @@ public class TransportClient {
     private final Intent mBindIntent;
     private final String mIdentifier;
     private final ComponentName mTransportComponent;
-    private final String mTransportDirName;
     private final Handler mListenerHandler;
     private final String mPrefixForLog;
     private final Object mStateLock = new Object();
@@ -87,13 +86,11 @@ public class TransportClient {
             Context context,
             Intent bindIntent,
             ComponentName transportComponent,
-            String transportDirName,
             String identifier) {
         this(
                 context,
                 bindIntent,
                 transportComponent,
-                transportDirName,
                 identifier,
                 new Handler(Looper.getMainLooper()));
     }
@@ -103,12 +100,10 @@ public class TransportClient {
             Context context,
             Intent bindIntent,
             ComponentName transportComponent,
-            String transportDirName,
             String identifier,
             Handler listenerHandler) {
         mContext = context;
         mTransportComponent = transportComponent;
-        mTransportDirName = transportDirName;
         mBindIntent = bindIntent;
         mIdentifier = identifier;
         mListenerHandler = listenerHandler;
@@ -120,10 +115,6 @@ public class TransportClient {
 
     public ComponentName getTransportComponent() {
         return mTransportComponent;
-    }
-
-    public String getTransportDirName() {
-        return mTransportDirName;
     }
 
     // Calls to onServiceDisconnected() or onBindingDied() turn TransportClient UNUSABLE. After one
