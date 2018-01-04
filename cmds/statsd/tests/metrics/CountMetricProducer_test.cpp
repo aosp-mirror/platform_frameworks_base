@@ -195,7 +195,7 @@ TEST(CountMetricProducerTest, TestAnomalyDetection) {
     alert.set_id(11);
     alert.set_metric_id(1);
     alert.set_trigger_if_sum_gt(2);
-    alert.set_number_of_buckets(2);
+    alert.set_num_buckets(2);
     alert.set_refractory_period_secs(1);
 
     int64_t bucketStartTimeNs = 10000000000;

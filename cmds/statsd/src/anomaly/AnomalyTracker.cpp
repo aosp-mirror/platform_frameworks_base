@@ -34,11 +34,11 @@ namespace statsd {
 AnomalyTracker::AnomalyTracker(const Alert& alert, const ConfigKey& configKey)
     : mAlert(alert),
       mConfigKey(configKey),
-      mNumOfPastBuckets(mAlert.number_of_buckets() - 1) {
+      mNumOfPastBuckets(mAlert.num_buckets() - 1) {
     VLOG("AnomalyTracker() called");
-    if (mAlert.number_of_buckets() <= 0) {
+    if (mAlert.num_buckets() <= 0) {
         ALOGE("Cannot create AnomalyTracker with %lld buckets",
-              (long long)mAlert.number_of_buckets());
+              (long long)mAlert.num_buckets());
         return;
     }
     if (!mAlert.has_trigger_if_sum_gt()) {

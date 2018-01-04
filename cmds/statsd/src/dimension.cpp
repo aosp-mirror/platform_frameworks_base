@@ -351,6 +351,23 @@ bool IsSubDimension(const DimensionsValue& dimension, const DimensionsValue& sub
     }
 }
 
+long getLongFromDimenValue(const DimensionsValue& dimensionValue) {
+    switch (dimensionValue.value_case()) {
+        case DimensionsValue::ValueCase::kValueInt:
+            return dimensionValue.value_int();
+        case DimensionsValue::ValueCase::kValueLong:
+            return dimensionValue.value_long();
+        case DimensionsValue::ValueCase::kValueBool:
+            return dimensionValue.value_bool() ? 1 : 0;
+        case DimensionsValue::ValueCase::kValueFloat:
+            return (int64_t)dimensionValue.value_float();
+        case DimensionsValue::ValueCase::kValueTuple:
+        case DimensionsValue::ValueCase::kValueStr:
+        case DimensionsValue::ValueCase::VALUE_NOT_SET:
+            return 0;
+    }
+}
+
 }  // namespace statsd
 }  // namespace os
 }  // namespace android

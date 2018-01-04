@@ -486,9 +486,9 @@ bool initAlerts(const StatsdConfig& config,
                   (long long)alert.metric_id());
             return false;
         }
-        if (alert.trigger_if_sum_gt() < 0 || alert.number_of_buckets() <= 0) {
-            ALOGW("invalid alert: threshold=%lld num_buckets= %d",
-                  alert.trigger_if_sum_gt(), alert.number_of_buckets());
+        if (alert.trigger_if_sum_gt() < 0 || alert.num_buckets() <= 0) {
+            ALOGW("invalid alert: threshold=%f num_buckets= %d",
+                  alert.trigger_if_sum_gt(), alert.num_buckets());
             return false;
         }
         const int metricIndex = itr->second;

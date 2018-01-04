@@ -377,7 +377,8 @@ StatsdConfig build_fake_config() {
     ValueMetric* valueMetric = config.add_value_metric();
     valueMetric->set_id(11);
     valueMetric->set_what(109);
-    valueMetric->set_value_field(KERNEL_WAKELOCK_COUNT_KEY);
+    valueMetric->mutable_value_field()->set_field(KERNEL_WAKELOCK_TAG_ID);
+    valueMetric->mutable_value_field()->add_child()->set_field(KERNEL_WAKELOCK_COUNT_KEY);
     valueMetric->set_condition(201);
     dimensions = valueMetric->mutable_dimensions();
     dimensions->set_field(KERNEL_WAKELOCK_TAG_ID);
