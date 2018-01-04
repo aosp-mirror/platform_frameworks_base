@@ -14,10 +14,13 @@
 
 package com.android.systemui.globalactions;
 
+import static com.android.internal.widget.LockPatternUtils.StrongAuthTracker.SOME_AUTH_REQUIRED_AFTER_USER_REQUEST;
+import static com.android.internal.widget.LockPatternUtils.StrongAuthTracker.STRONG_AUTH_NOT_REQUIRED;
 import static com.android.internal.widget.LockPatternUtils.StrongAuthTracker.STRONG_AUTH_REQUIRED_AFTER_USER_LOCKDOWN;
 
 import android.app.ActivityManager;
 import android.app.Dialog;
+import android.app.KeyguardManager;
 import android.app.WallpaperManager;
 import android.app.admin.DevicePolicyManager;
 import android.content.BroadcastReceiver;
@@ -120,6 +123,8 @@ class GlobalActionsDialog implements DialogInterface.OnDismissListener,
     private final AudioManager mAudioManager;
     private final IDreamManager mDreamManager;
     private final DevicePolicyManager mDevicePolicyManager;
+    private final LockPatternUtils mLockPatternUtils;
+    private final KeyguardManager mKeyguardManager;
 
     private ArrayList<Action> mItems;
     private ActionsDialog mDialog;
@@ -150,6 +155,8 @@ class GlobalActionsDialog implements DialogInterface.OnDismissListener,
                 ServiceManager.getService(DreamService.DREAM_SERVICE));
         mDevicePolicyManager = (DevicePolicyManager) mContext.getSystemService(
                 Context.DEVICE_POLICY_SERVICE);
+        mLockPatternUtils = new LockPatternUtils(mContext);
+        mKeyguardManager = (KeyguardManager) mContext.getSystemService(Context.KEYGUARD_SERVICE);
 
         // receive broadcasts
         IntentFilter filter = new IntentFilter();
@@ -323,7 +330,8 @@ class GlobalActionsDialog implements DialogInterface.OnDismissListener,
                 mItems.add(getSettingsAction());
             } else if (GLOBAL_ACTION_KEY_LOCKDOWN.equals(actionKey)) {
                 if (Settings.Secure.getInt(mContext.getContentResolver(),
-                            Settings.Secure.LOCKDOWN_IN_POWER_MENU, 0) != 0) {
+                            Settings.Secure.LOCKDOWN_IN_POWER_MENU, 0) != 0
+                        && shouldDisplayLockdown()) {
                     mItems.add(getLockdownAction());
                 }
             } else if (GLOBAL_ACTION_KEY_VOICEASSIST.equals(actionKey)) {
@@ -370,6 +378,19 @@ class GlobalActionsDialog implements DialogInterface.OnDismissListener,
         dialog.setOnDismissListener(this);
 
         return dialog;
+    }
+
+    private boolean shouldDisplayLockdown() {
+        int userId = getCurrentUser().id;
+        // Lockdown is meaningless without a place to go.
+        if (!mKeyguardManager.isDeviceSecure(userId)) {
+            return false;
+        }
+
+        // Only show the lockdown button if the device isn't locked down (for whatever reason).
+        int state = mLockPatternUtils.getStrongAuthForUser(userId);
+        return (state == STRONG_AUTH_NOT_REQUIRED
+                || state == SOME_AUTH_REQUIRED_AFTER_USER_REQUEST);
     }
 
     private final class PowerAction extends SinglePressAction implements LongPressAction {
