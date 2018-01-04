@@ -386,23 +386,7 @@ public class KeySyncUtilsTest {
     }
 
     @Test
-    public void packVaultParams_encodesMaxAttemptsAsThirdParam() throws Exception {
-        int maxAttempts = 10;
-
-        byte[] packedForm = KeySyncUtils.packVaultParams(
-                SecureBox.genKeyPair().getPublic(),
-                /*counterId=*/ 1001L,
-                maxAttempts,
-                /*deviceId=*/ 1L);
-
-        ByteBuffer byteBuffer = ByteBuffer.wrap(packedForm)
-                .order(ByteOrder.LITTLE_ENDIAN);
-        byteBuffer.position(PUBLIC_KEY_LENGTH_BYTES + Long.BYTES);
-        assertEquals(maxAttempts, byteBuffer.getInt());
-    }
-
-    @Test
-    public void packVaultParams_encodesDeviceIdAsLastParam() throws Exception {
+    public void packVaultParams_encodesDeviceIdAsThirdParam() throws Exception {
         long deviceId = 102942158152L;
 
         byte[] packedForm = KeySyncUtils.packVaultParams(
@@ -413,9 +397,26 @@ public class KeySyncUtilsTest {
 
         ByteBuffer byteBuffer = ByteBuffer.wrap(packedForm)
                 .order(ByteOrder.LITTLE_ENDIAN);
-        byteBuffer.position(PUBLIC_KEY_LENGTH_BYTES + Long.BYTES + Integer.BYTES);
+        byteBuffer.position(PUBLIC_KEY_LENGTH_BYTES + Long.BYTES);
         assertEquals(deviceId, byteBuffer.getLong());
     }
+
+    @Test
+    public void packVaultParams_encodesMaxAttemptsAsLastParam() throws Exception {
+        int maxAttempts = 10;
+
+        byte[] packedForm = KeySyncUtils.packVaultParams(
+                SecureBox.genKeyPair().getPublic(),
+                /*counterId=*/ 1001L,
+                maxAttempts,
+                /*deviceId=*/ 1L);
+
+        ByteBuffer byteBuffer = ByteBuffer.wrap(packedForm)
+                .order(ByteOrder.LITTLE_ENDIAN);
+        byteBuffer.position(PUBLIC_KEY_LENGTH_BYTES + 2 * Long.BYTES);
+        assertEquals(maxAttempts, byteBuffer.getInt());
+    }
+
 
     private static byte[] randomBytes(int n) {
         byte[] bytes = new byte[n];
