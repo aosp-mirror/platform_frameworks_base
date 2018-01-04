@@ -13,6 +13,7 @@
 // limitations under the License.
 
 #include "src/metrics/DurationMetricProducer.h"
+#include "src/stats_log_util.h"
 #include "metrics_test_helper.h"
 #include "src/condition/ConditionWizard.h"
 
@@ -41,11 +42,11 @@ const ConfigKey kConfigKey(0, 12345);
 TEST(DurationMetricTrackerTest, TestNoCondition) {
     sp<MockConditionWizard> wizard = new NaggyMock<MockConditionWizard>();
     uint64_t bucketStartTimeNs = 10000000000;
-    uint64_t bucketSizeNs = 30 * 1000 * 1000 * 1000LL;
+    int64_t bucketSizeNs = TimeUnitToBucketSizeInMillis(ONE_MINUTE) * 1000000LL;
 
     DurationMetric metric;
     metric.set_id(1);
-    metric.mutable_bucket()->set_bucket_size_millis(bucketSizeNs / 1000000);
+    metric.set_bucket(ONE_MINUTE);
     metric.set_aggregation_type(DurationMetric_AggregationType_SUM);
 
     int tagId = 1;
@@ -76,11 +77,11 @@ TEST(DurationMetricTrackerTest, TestNoCondition) {
 TEST(DurationMetricTrackerTest, TestNonSlicedCondition) {
     sp<MockConditionWizard> wizard = new NaggyMock<MockConditionWizard>();
     uint64_t bucketStartTimeNs = 10000000000;
-    uint64_t bucketSizeNs = 30 * 1000 * 1000 * 1000LL;
+    int64_t bucketSizeNs = TimeUnitToBucketSizeInMillis(ONE_MINUTE) * 1000000LL;
 
     DurationMetric metric;
     metric.set_id(1);
-    metric.mutable_bucket()->set_bucket_size_millis(bucketSizeNs / 1000000);
+    metric.set_bucket(ONE_MINUTE);
     metric.set_aggregation_type(DurationMetric_AggregationType_SUM);
 
     int tagId = 1;

@@ -234,7 +234,7 @@ StatsdConfig build_fake_config() {
     CountMetric* metric = config.add_count_metric();
     metric->set_id(1);  // METRIC_1
     metric->set_what(102);  //  "SCREEN_TURNED_ON"
-    metric->mutable_bucket()->set_bucket_size_millis(30 * 1000L);
+    metric->set_bucket(ONE_MINUTE);
 
     // Anomaly threshold for screen-on count.
     // TODO(b/70627390): Uncomment once the bug is fixed.
@@ -258,7 +258,7 @@ StatsdConfig build_fake_config() {
     metric = config.add_count_metric();
     metric->set_id(2);  // "METRIC_2"
     metric->set_what(104);
-    metric->mutable_bucket()->set_bucket_size_millis(30 * 1000L);
+    metric->set_bucket(ONE_MINUTE);
     FieldMatcher* dimensions = metric->mutable_dimensions();
     dimensions->set_field(UID_PROCESS_STATE_TAG_ID);
     dimensions->add_child()->set_field(UID_PROCESS_STATE_UID_KEY);
@@ -280,7 +280,7 @@ StatsdConfig build_fake_config() {
     metric = config.add_count_metric();
     metric->set_id(3);
     metric->set_what(104);
-    metric->mutable_bucket()->set_bucket_size_millis(30 * 1000L);
+    metric->set_bucket(ONE_MINUTE);
 
     dimensions = metric->mutable_dimensions();
     dimensions->set_field(UID_PROCESS_STATE_TAG_ID);
@@ -291,7 +291,7 @@ StatsdConfig build_fake_config() {
     metric = config.add_count_metric();
     metric->set_id(4);
     metric->set_what(107);
-    metric->mutable_bucket()->set_bucket_size_millis(30 * 1000L);
+    metric->set_bucket(ONE_MINUTE);
     dimensions = metric->mutable_dimensions();
     dimensions->set_field(WAKE_LOCK_TAG_ID);
     dimensions->add_child()->set_field(WAKE_LOCK_UID_KEY_ID);
@@ -308,7 +308,7 @@ StatsdConfig build_fake_config() {
     // Duration of an app holding any wl, while screen on and app in background, slice by uid
     DurationMetric* durationMetric = config.add_duration_metric();
     durationMetric->set_id(5);
-    durationMetric->mutable_bucket()->set_bucket_size_millis(30 * 1000L);
+    durationMetric->set_bucket(ONE_MINUTE);
     durationMetric->set_aggregation_type(DurationMetric_AggregationType_SUM);
     dimensions = durationMetric->mutable_dimensions();
     dimensions->set_field(WAKE_LOCK_TAG_ID);
@@ -325,7 +325,7 @@ StatsdConfig build_fake_config() {
     // max Duration of an app holding any wl, while screen on and app in background, slice by uid
     durationMetric = config.add_duration_metric();
     durationMetric->set_id(6);
-    durationMetric->mutable_bucket()->set_bucket_size_millis(30 * 1000L);
+    durationMetric->set_bucket(ONE_MINUTE);
     durationMetric->set_aggregation_type(DurationMetric_AggregationType_MAX_SPARSE);
     dimensions = durationMetric->mutable_dimensions();
     dimensions->set_field(WAKE_LOCK_TAG_ID);
@@ -342,7 +342,7 @@ StatsdConfig build_fake_config() {
     // Duration of an app holding any wl, while screen on and app in background
     durationMetric = config.add_duration_metric();
     durationMetric->set_id(7);
-    durationMetric->mutable_bucket()->set_bucket_size_millis(30 * 1000L);
+    durationMetric->set_bucket(ONE_MINUTE);
     durationMetric->set_aggregation_type(DurationMetric_AggregationType_MAX_SPARSE);
     durationMetric->set_what(205);
     durationMetric->set_condition(204);
@@ -357,7 +357,7 @@ StatsdConfig build_fake_config() {
     // Duration of screen on time.
     durationMetric = config.add_duration_metric();
     durationMetric->set_id(8);
-    durationMetric->mutable_bucket()->set_bucket_size_millis(10 * 1000L);
+    durationMetric->set_bucket(ONE_MINUTE);
     durationMetric->set_aggregation_type(DurationMetric_AggregationType_SUM);
     durationMetric->set_what(201);
 
@@ -384,7 +384,7 @@ StatsdConfig build_fake_config() {
     dimensions->set_field(KERNEL_WAKELOCK_TAG_ID);
     dimensions->add_child()->set_field(KERNEL_WAKELOCK_NAME_KEY);
     // This is for testing easier. We should never set bucket size this small.
-    valueMetric->mutable_bucket()->set_bucket_size_millis(60 * 1000L);
+    durationMetric->set_bucket(ONE_MINUTE);
 
     // Add an EventMetric to log process state change events.
     EventMetric* eventMetric = config.add_event_metric();
@@ -398,7 +398,7 @@ StatsdConfig build_fake_config() {
     auto gaugeFieldMatcher = gaugeMetric->mutable_gauge_fields_filter()->mutable_fields();
     gaugeFieldMatcher->set_field(DEVICE_TEMPERATURE_TAG_ID);
     gaugeFieldMatcher->add_child()->set_field(DEVICE_TEMPERATURE_KEY);
-    gaugeMetric->mutable_bucket()->set_bucket_size_millis(60 * 1000L);
+    durationMetric->set_bucket(ONE_MINUTE);
 
     // Event matchers.
     AtomMatcher* temperatureAtomMatcher = config.add_atom_matcher();

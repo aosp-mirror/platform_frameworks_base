@@ -69,11 +69,13 @@ GaugeMetricProducer::GaugeMetricProducer(const ConfigKey& key, const GaugeMetric
       mAtomTagId(atomTagId) {
     mCurrentSlicedBucket = std::make_shared<DimToGaugeFieldsMap>();
     mCurrentSlicedBucketForAnomaly = std::make_shared<DimToValMap>();
-    if (metric.has_bucket() && metric.bucket().has_bucket_size_millis()) {
-        mBucketSizeNs = metric.bucket().bucket_size_millis() * 1000 * 1000;
+    int64_t bucketSizeMills = 0;
+    if (metric.has_bucket()) {
+        bucketSizeMills = TimeUnitToBucketSizeInMillis(metric.bucket());
     } else {
-        mBucketSizeNs = kDefaultGaugemBucketSizeNs;
+        bucketSizeMills = TimeUnitToBucketSizeInMillis(ONE_HOUR);
     }
+    mBucketSizeNs = bucketSizeMills * 1000000;
 
     mFieldFilter = metric.gauge_fields_filter();
 
@@ -88,8 +90,7 @@ GaugeMetricProducer::GaugeMetricProducer(const ConfigKey& key, const GaugeMetric
 
     // Kicks off the puller immediately.
     if (mPullTagId != -1) {
-        mStatsPullerManager->RegisterReceiver(mPullTagId, this,
-                                              metric.bucket().bucket_size_millis());
+        mStatsPullerManager->RegisterReceiver(mPullTagId, this, bucketSizeMills);
     }
 
     VLOG("metric %lld created. bucket size %lld start_time: %lld", (long long)metric.id(),

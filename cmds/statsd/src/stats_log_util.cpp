@@ -218,8 +218,34 @@ void writeFieldValueTreeToStream(const FieldValueMap &fieldValueMap,
         protoOutput->end(tokenStack.top().first);
         tokenStack.pop();
     }
+}
 
-
+int64_t TimeUnitToBucketSizeInMillis(TimeUnit unit) {
+    switch (unit) {
+        case ONE_MINUTE:
+            return 60 * 1000LL;
+        case FIVE_MINUTES:
+            return 5 * 60 * 1000LL;
+        case TEN_MINUTES:
+            return 10 * 60 * 1000LL;
+        case THIRTY_MINUTES:
+            return 30 * 60 * 1000LL;
+        case ONE_HOUR:
+            return 60 * 60 * 1000LL;
+        case THREE_HOURS:
+            return 3 * 60 * 60 * 1000LL;
+        case SIX_HOURS:
+            return 6 * 60 * 60 * 1000LL;
+        case TWELVE_HOURS:
+            return 12 * 60 * 60 * 1000LL;
+        case ONE_DAY:
+            return 24 * 60 * 60 * 1000LL;
+        case CTS:
+            return 1000;
+        case TIME_UNIT_UNSPECIFIED:
+        default:
+            return -1;
+    }
 }
 
 }  // namespace statsd

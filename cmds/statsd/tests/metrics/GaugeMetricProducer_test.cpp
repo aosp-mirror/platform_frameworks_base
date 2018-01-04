@@ -13,6 +13,7 @@
 // limitations under the License.
 
 #include "src/metrics/GaugeMetricProducer.h"
+#include "src/stats_log_util.h"
 #include "logd/LogEvent.h"
 #include "metrics_test_helper.h"
 #include "tests/statsd_test_util.h"
@@ -39,7 +40,7 @@ const ConfigKey kConfigKey(0, 12345);
 const int tagId = 1;
 const int64_t metricId = 123;
 const int64_t bucketStartTimeNs = 10000000000;
-const int64_t bucketSizeNs = 60 * 1000 * 1000 * 1000LL;
+const int64_t bucketSizeNs = TimeUnitToBucketSizeInMillis(ONE_MINUTE) * 1000000LL;
 const int64_t bucket2StartTimeNs = bucketStartTimeNs + bucketSizeNs;
 const int64_t bucket3StartTimeNs = bucketStartTimeNs + 2 * bucketSizeNs;
 const int64_t bucket4StartTimeNs = bucketStartTimeNs + 3 * bucketSizeNs;
@@ -47,7 +48,7 @@ const int64_t bucket4StartTimeNs = bucketStartTimeNs + 3 * bucketSizeNs;
 TEST(GaugeMetricProducerTest, TestNoCondition) {
     GaugeMetric metric;
     metric.set_id(metricId);
-    metric.mutable_bucket()->set_bucket_size_millis(bucketSizeNs / 1000000);
+    metric.set_bucket(ONE_MINUTE);
     metric.mutable_gauge_fields_filter()->set_include_all(false);
     auto gaugeFieldMatcher = metric.mutable_gauge_fields_filter()->mutable_fields();
     gaugeFieldMatcher->set_field(tagId);
@@ -121,7 +122,7 @@ TEST(GaugeMetricProducerTest, TestNoCondition) {
 TEST(GaugeMetricProducerTest, TestWithCondition) {
     GaugeMetric metric;
     metric.set_id(metricId);
-    metric.mutable_bucket()->set_bucket_size_millis(bucketSizeNs / 1000000);
+    metric.set_bucket(ONE_MINUTE);
     auto gaugeFieldMatcher = metric.mutable_gauge_fields_filter()->mutable_fields();
     gaugeFieldMatcher->set_field(tagId);
     gaugeFieldMatcher->add_child()->set_field(2);
@@ -188,7 +189,7 @@ TEST(GaugeMetricProducerTest, TestAnomalyDetection) {
 
     GaugeMetric metric;
     metric.set_id(metricId);
-    metric.mutable_bucket()->set_bucket_size_millis(bucketSizeNs / 1000000);
+    metric.set_bucket(ONE_MINUTE);
     auto gaugeFieldMatcher = metric.mutable_gauge_fields_filter()->mutable_fields();
     gaugeFieldMatcher->set_field(tagId);
     gaugeFieldMatcher->add_child()->set_field(2);

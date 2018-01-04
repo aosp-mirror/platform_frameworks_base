@@ -47,6 +47,7 @@ import android.widget.Toast;
 import com.android.os.StatsLog.ConfigMetricsReport;
 import com.android.os.StatsLog.ConfigMetricsReportList;
 import com.android.os.StatsLog.StatsdStatsReport;
+import com.android.internal.os.StatsdConfigProto.TimeUnit;
 import java.util.List;
 
 /**
@@ -169,7 +170,7 @@ public class LoadtestActivity extends Activity {
     private long mPeriodSecs;
 
     /** The bucket size, in minutes, for aggregate metrics. */
-    private long mBucketMins;
+    private TimeUnit mBucket;
 
     /** The duration, in minutes, of the loadtest. */
     private long mDurationMins;
@@ -360,7 +361,7 @@ public class LoadtestActivity extends Activity {
         getData();
 
         // Create a config and push it to statsd.
-        if (!setConfig(mFactory.getConfig(mReplication, mBucketMins * 60 * 1000, mPlacebo,
+        if (!setConfig(mFactory.getConfig(mReplication, mBucket, mPlacebo,
                 mIncludeCountMetric, mIncludeDurationMetric, mIncludeEventMetric,
                 mIncludeValueMetric, mIncludeGaugeMetric))) {
             return;
@@ -377,7 +378,7 @@ public class LoadtestActivity extends Activity {
         scheduleNext();
 
         // Start tracking performance.
-        mPerfData = new PerfData(this, mPlacebo, mReplication, mBucketMins, mPeriodSecs, mBurst);
+        mPerfData = new PerfData(this, mPlacebo, mReplication, mBucket, mPeriodSecs, mBurst);
         mPerfData.startRecording(this);
 
         mReportText.setText("Loadtest in progress.");
@@ -483,8 +484,8 @@ public class LoadtestActivity extends Activity {
         mPeriodSecs = periodSecs;
     }
 
-    private synchronized void setBucketMins(long bucketMins) {
-        mBucketMins = bucketMins;
+    private synchronized void setBucket(TimeUnit bucket) {
+        mBucket = bucket;
     }
 
     private synchronized void setBurst(int burst) {
@@ -536,12 +537,12 @@ public class LoadtestActivity extends Activity {
     }
 
     private void initBucket() {
-        mBucketMins = getResources().getInteger(R.integer.bucket_default);
+        mBucket = TimeUnit.valueOf(getResources().getInteger(R.integer.bucket_default));
         mBucketText = (EditText) findViewById(R.id.bucket);
-        mBucketText.addTextChangedListener(new NumericalWatcher(mBucketText, 1, 24 * 60) {
+        mBucketText.addTextChangedListener(new NumericalWatcher(mBucketText, 1, 9) {
             @Override
             public void onNewValue(int newValue) {
-                setBucketMins(newValue);
+                setBucket(TimeUnit.valueOf(newValue));
             }
         });
         handleFocus(mBucketText);

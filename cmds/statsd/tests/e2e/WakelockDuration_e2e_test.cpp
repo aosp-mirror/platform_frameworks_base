@@ -15,6 +15,7 @@
 #include <gtest/gtest.h>
 
 #include "src/StatsLogProcessor.h"
+#include "src/stats_log_util.h"
 #include "tests/statsd_test_util.h"
 
 #include <vector>
@@ -51,7 +52,7 @@ StatsdConfig CreateStatsdConfig(DurationMetric::AggregationType aggregationType)
     *durationMetric->mutable_dimensions() =
         CreateAttributionUidDimensions(
             android::util::WAKELOCK_STATE_CHANGED, {Position::FIRST});
-    durationMetric->mutable_bucket()->set_bucket_size_millis(30 * 1000LL);
+    durationMetric->set_bucket(ONE_MINUTE);
     return config;
 }
 
@@ -61,7 +62,7 @@ TEST(WakelockDurationE2eTest, TestAggregatedPredicateDimensions) {
         auto config = CreateStatsdConfig(aggregationType);
         uint64_t bucketStartTimeNs = 10000000000;
         uint64_t bucketSizeNs =
-            config.duration_metric(0).bucket().bucket_size_millis() * 1000 * 1000;
+            TimeUnitToBucketSizeInMillis(config.duration_metric(0).bucket()) * 1000000LL;
 
         auto processor = CreateStatsLogProcessor(bucketStartTimeNs / NS_PER_SEC, config, cfgKey);
         EXPECT_EQ(processor->mMetricsManagers.size(), 1u);

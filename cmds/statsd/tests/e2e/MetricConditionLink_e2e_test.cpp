@@ -15,6 +15,7 @@
 #include <gtest/gtest.h>
 
 #include "src/StatsLogProcessor.h"
+#include "src/stats_log_util.h"
 #include "tests/statsd_test_util.h"
 
 #include <vector>
@@ -68,7 +69,7 @@ StatsdConfig CreateStatsdConfig() {
     // The metric is dimensioning by uid only.
     *countMetric->mutable_dimensions() =
         CreateDimensions(android::util::PROCESS_LIFE_CYCLE_STATE_CHANGED, {1});
-    countMetric->mutable_bucket()->set_bucket_size_millis(30 * 1000LL);
+    countMetric->set_bucket(ONE_MINUTE);
 
     // Links between crash atom and condition of app is in syncing.
     auto links = countMetric->add_links();
@@ -95,7 +96,8 @@ StatsdConfig CreateStatsdConfig() {
 TEST(MetricConditionLinkE2eTest, TestMultiplePredicatesAndLinks) {
     auto config = CreateStatsdConfig();
     uint64_t bucketStartTimeNs = 10000000000;
-    uint64_t bucketSizeNs = config.count_metric(0).bucket().bucket_size_millis() * 1000 * 1000;
+    uint64_t bucketSizeNs =
+        TimeUnitToBucketSizeInMillis(config.count_metric(0).bucket()) * 1000000LL;
 
     ConfigKey cfgKey;
     auto processor = CreateStatsLogProcessor(bucketStartTimeNs / NS_PER_SEC, config, cfgKey);

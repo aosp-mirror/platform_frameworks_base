@@ -21,6 +21,7 @@ import android.os.Environment;
 import android.util.Log;
 import android.os.Debug;
 
+import com.android.internal.os.StatsdConfigProto.TimeUnit;
 import java.io.BufferedReader;
 import java.io.Closeable;
 import java.io.File;
@@ -38,10 +39,10 @@ public abstract class PerfDataRecorder {
     protected final String mTimeAsString;
     protected final String mColumnSuffix;
 
-    protected PerfDataRecorder(boolean placebo, int replication, long bucketMins, long periodSecs,
+    protected PerfDataRecorder(boolean placebo, int replication, TimeUnit bucket, long periodSecs,
         int burst) {
         mTimeAsString = new SimpleDateFormat("YYYY_MM_dd_HH_mm_ss").format(new Date());
-        mColumnSuffix = getColumnSuffix(placebo, replication, bucketMins, periodSecs, burst);
+        mColumnSuffix = getColumnSuffix(placebo, replication, bucket, periodSecs, burst);
     }
 
     /** Starts recording performance data. */
@@ -120,12 +121,12 @@ public abstract class PerfDataRecorder {
     }
 
     /** Gets the suffix to use in the column name for perf data. */
-    private String getColumnSuffix(boolean placebo, int replication, long bucketMins,
+    private String getColumnSuffix(boolean placebo, int replication, TimeUnit bucket,
         long periodSecs, int burst) {
         if (placebo) {
             return "_placebo_p=" + periodSecs;
         }
-        return "_r=" + replication + "_bkt=" + bucketMins + "_p=" + periodSecs + "_bst=" + burst;
+        return "_r=" + replication + "_bkt=" + bucket + "_p=" + periodSecs + "_bst=" + burst;
     }
 
 

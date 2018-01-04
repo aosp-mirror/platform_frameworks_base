@@ -31,6 +31,7 @@ import com.android.internal.os.StatsdConfigProto.FieldValueMatcher;
 import com.android.internal.os.StatsdConfigProto.AtomMatcher;
 import com.android.internal.os.StatsdConfigProto.SimplePredicate;
 import com.android.internal.os.StatsdConfigProto.StatsdConfig;
+import com.android.internal.os.StatsdConfigProto.TimeUnit;
 
 import java.io.InputStream;
 import java.io.IOException;
@@ -82,7 +83,7 @@ public class ConfigFactory {
      * @param placebo If true, only return an empty config
      * @return The serialized config
      */
-  public byte[] getConfig(int replication, long bucketMillis, boolean placebo, boolean includeCount,
+  public byte[] getConfig(int replication, TimeUnit bucket, boolean placebo, boolean includeCount,
                           boolean includeDuration, boolean includeEvent, boolean includeValue,
                           boolean includeGauge) {
         StatsdConfig.Builder config = StatsdConfig.newBuilder()
@@ -101,25 +102,25 @@ public class ConfigFactory {
             }
             if (includeCount) {
                 for (CountMetric metric : mTemplate.getCountMetricList()) {
-                    addCountMetric(metric, i, bucketMillis, config);
+                    addCountMetric(metric, i, bucket, config);
                     numMetrics++;
                 }
             }
             if (includeDuration) {
                 for (DurationMetric metric : mTemplate.getDurationMetricList()) {
-                    addDurationMetric(metric, i, bucketMillis, config);
+                    addDurationMetric(metric, i, bucket, config);
                     numMetrics++;
                 }
             }
             if (includeGauge) {
                 for (GaugeMetric metric : mTemplate.getGaugeMetricList()) {
-                    addGaugeMetric(metric, i, bucketMillis, config);
+                    addGaugeMetric(metric, i, bucket, config);
                     numMetrics++;
                 }
             }
             if (includeValue) {
                 for (ValueMetric metric : mTemplate.getValueMetricList()) {
-                    addValueMetric(metric, i, bucketMillis, config);
+                    addValueMetric(metric, i, bucket, config);
                     numMetrics++;
                 }
             }
@@ -173,17 +174,11 @@ public class ConfigFactory {
         config.addEventMetric(metric);
     }
 
-    private Bucket getBucket(long bucketMillis) {
-        return Bucket.newBuilder()
-            .setBucketSizeMillis(bucketMillis)
-            .build();
-    }
-
     /**
      * Creates a {@link CountMetric} based on the template. Makes sure that all names are appended
      * with the provided suffix, and overrides the bucket size. Then adds that metric to the config.
      */
-    private void addCountMetric(CountMetric template, int suffix, long bucketMillis,
+    private void addCountMetric(CountMetric template, int suffix, TimeUnit bucket,
         StatsdConfig.Builder config) {
         CountMetric.Builder metric = template.toBuilder()
             .setId(template.getId() + suffix)
@@ -196,7 +191,7 @@ public class ConfigFactory {
             metric.clearLinks();
             metric.addAllLinks(links);
         }
-        metric.setBucket(getBucket(bucketMillis));
+        metric.setBucket(bucket);
         config.addCountMetric(metric);
     }
 
@@ -204,7 +199,7 @@ public class ConfigFactory {
      * Creates a {@link DurationMetric} based on the template. Makes sure that all names are appended
      * with the provided suffix, and overrides the bucket size. Then adds that metric to the config.
      */
-    private void addDurationMetric(DurationMetric template, int suffix, long bucketMillis,
+    private void addDurationMetric(DurationMetric template, int suffix, TimeUnit bucket,
         StatsdConfig.Builder config) {
         DurationMetric.Builder metric = template.toBuilder()
             .setId(template.getId() + suffix)
@@ -217,7 +212,7 @@ public class ConfigFactory {
             metric.clearLinks();
             metric.addAllLinks(links);
         }
-        metric.setBucket(getBucket(bucketMillis));
+        metric.setBucket(bucket);
         config.addDurationMetric(metric);
     }
 
@@ -225,7 +220,7 @@ public class ConfigFactory {
      * Creates a {@link GaugeMetric} based on the template. Makes sure that all names are appended
      * with the provided suffix, and overrides the bucket size. Then adds that metric to the config.
      */
-    private void addGaugeMetric(GaugeMetric template, int suffix, long bucketMillis,
+    private void addGaugeMetric(GaugeMetric template, int suffix, TimeUnit bucket,
         StatsdConfig.Builder config) {
         GaugeMetric.Builder metric = template.toBuilder()
             .setId(template.getId() + suffix)
@@ -238,7 +233,7 @@ public class ConfigFactory {
             metric.clearLinks();
             metric.addAllLinks(links);
         }
-        metric.setBucket(getBucket(bucketMillis));
+        metric.setBucket(bucket);
         config.addGaugeMetric(metric);
     }
 
@@ -246,7 +241,7 @@ public class ConfigFactory {
      * Creates a {@link ValueMetric} based on the template. Makes sure that all names are appended
      * with the provided suffix, and overrides the bucket size. Then adds that metric to the config.
      */
-    private void addValueMetric(ValueMetric template, int suffix, long bucketMillis,
+    private void addValueMetric(ValueMetric template, int suffix, TimeUnit bucket,
         StatsdConfig.Builder config) {
         ValueMetric.Builder metric = template.toBuilder()
             .setId(template.getId() + suffix)
@@ -259,7 +254,7 @@ public class ConfigFactory {
             metric.clearLinks();
             metric.addAllLinks(links);
         }
-        metric.setBucket(getBucket(bucketMillis));
+        metric.setBucket(bucket);
         config.addValueMetric(metric);
     }
 
