@@ -16,6 +16,8 @@
 
 package android.view;
 
+import static android.view.DisplayCutoutProto.BOUNDS;
+import static android.view.DisplayCutoutProto.INSETS;
 import static android.view.Surface.ROTATION_0;
 import static android.view.Surface.ROTATION_180;
 import static android.view.Surface.ROTATION_270;
@@ -28,6 +30,7 @@ import android.graphics.RectF;
 import android.graphics.Region;
 import android.os.Parcel;
 import android.os.Parcelable;
+import android.util.proto.ProtoOutputStream;
 
 import com.android.internal.annotations.VisibleForTesting;
 
@@ -152,6 +155,16 @@ public final class DisplayCutout {
         return "DisplayCutout{insets=" + mSafeInsets
                 + " bounds=" + mBounds
                 + "}";
+    }
+
+    /**
+     * @hide
+     */
+    public void writeToProto(ProtoOutputStream proto, long fieldId) {
+        final long token = proto.start(fieldId);
+        mSafeInsets.writeToProto(proto, INSETS);
+        mBounds.getBounds().writeToProto(proto, BOUNDS);
+        proto.end(token);
     }
 
     /**
