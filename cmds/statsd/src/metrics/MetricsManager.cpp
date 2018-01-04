@@ -53,7 +53,7 @@ MetricsManager::MetricsManager(const ConfigKey& key, const StatsdConfig& config,
                              mAllMetricProducers, mAllAnomalyTrackers, mConditionToMetricMap,
                              mTrackerToMetricMap, mTrackerToConditionMap, mNoReportMetricIds);
 
-    if (!config.has_log_source()) {
+    if (config.allowed_log_source_size() == 0) {
         // TODO(b/70794411): uncomment the following line and remove the hard coded log source
         // after all configs have the log source added.
         // mConfigValid = false;
@@ -63,10 +63,14 @@ MetricsManager::MetricsManager(const ConfigKey& key, const StatsdConfig& config,
         mAllowedUid.push_back(0);
         mAllowedLogSources.insert(mAllowedUid.begin(), mAllowedUid.end());
     } else {
-        mAllowedUid.insert(mAllowedUid.begin(), config.log_source().uid().begin(),
-                           config.log_source().uid().end());
-        mAllowedPkg.insert(mAllowedPkg.begin(), config.log_source().package().begin(),
-                           config.log_source().package().end());
+        for (const auto& source : config.allowed_log_source()) {
+            auto it = UidMap::sAidToUidMapping.find(source);
+            if (it != UidMap::sAidToUidMapping.end()) {
+                mAllowedUid.push_back(it->second);
+            } else {
+                mAllowedPkg.push_back(source);
+            }
+        }
 
         if (mAllowedUid.size() + mAllowedPkg.size() > StatsdStats::kMaxLogSourceCount) {
             ALOGE("Too many log sources. This is likely to be an error in the config.");

@@ -239,11 +239,6 @@ message Alert {
     optional double trigger_if_sum_gt = 5;
 }
 
-message AllowedLogSource {
-    repeated int32 uid = 1;
-    repeated string package = 2;
-}
-
 message Alarm {
     optional int64 id = 1;
     optional int64 offset_millis = 2;
@@ -299,7 +294,7 @@ message StatsdConfig {
 
     repeated Subscription subscription = 11;
 
-    optional AllowedLogSource log_source = 12;
+    repeated string allowed_log_source = 12;
 
     repeated int64 no_report_metric = 13;
 }

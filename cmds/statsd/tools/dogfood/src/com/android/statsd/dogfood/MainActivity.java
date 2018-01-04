@@ -36,7 +36,6 @@ public class MainActivity extends Activity {
     private final static String TAG = "StatsdDogfood";
     private final static long CONFIG_ID = 987654321;
 
-
     final int[] mUids = {11111111, 2222222};
     StatsManager mStatsManager;
     TextView mReportText;

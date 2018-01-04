@@ -57,6 +57,10 @@ public:
 
     void onUidMapReceived() override;
 
+    bool shouldAddUidMapListener() const {
+        return !mAllowedPkg.empty();
+    }
+
     // Config source owner can call onDumpReport() to get all the metrics collected.
     virtual void onDumpReport(android::util::ProtoOutputStream* protoOutput);
     virtual void onDumpReport(const uint64_t& dumpTimeStampNs, ConfigMetricsReport* report);
