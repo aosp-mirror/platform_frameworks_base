@@ -142,6 +142,7 @@ import android.os.SystemClock;
 import android.os.Trace;
 import android.os.UserHandle;
 import android.os.WorkSource;
+import android.text.TextUtils;
 import android.util.DisplayMetrics;
 import android.util.MergedConfiguration;
 import android.util.Slog;
@@ -3676,6 +3677,13 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
             windowInfo.activityToken = mAppToken.appToken.asBinder();
         }
         windowInfo.title = mAttrs.accessibilityTitle;
+        // Panel windows have no public way to set the a11y title directly. Use the
+        // regular title as a fallback.
+        if (TextUtils.isEmpty(windowInfo.title)
+                && (mAttrs.type >= WindowManager.LayoutParams.FIRST_SUB_WINDOW)
+                && (mAttrs.type <= WindowManager.LayoutParams.LAST_SUB_WINDOW)) {
+            windowInfo.title = mAttrs.getTitle();
+        }
         windowInfo.accessibilityIdOfAnchor = mAttrs.accessibilityIdOfAnchor;
         windowInfo.focused = isFocused();
         Task task = getTask();

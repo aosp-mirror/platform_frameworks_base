@@ -17,6 +17,7 @@
 package com.android.server.accessibility;
 
 import static android.view.WindowManager.LayoutParams.TYPE_ACCESSIBILITY_OVERLAY;
+import static android.view.accessibility.AccessibilityEvent.WINDOWS_CHANGE_ACCESSIBILITY_FOCUSED;
 import static android.view.accessibility.AccessibilityNodeInfo.ACTION_ACCESSIBILITY_FOCUS;
 import static android.view.accessibility.AccessibilityNodeInfo.ACTION_CLEAR_ACCESSIBILITY_FOCUS;
 
@@ -762,7 +763,6 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
                 mPictureInPictureActionReplacingConnection = wrapper;
                 wrapper.linkToDeath();
             }
-            mSecurityPolicy.notifyWindowsChanged();
         }
     }
 
@@ -2283,6 +2283,14 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
         }
     }
 
+    private void sendAccessibilityEventLocked(AccessibilityEvent event, int userId) {
+        // Resync to avoid calling out with the lock held
+        event.setEventTime(SystemClock.uptimeMillis());
+        mMainHandler.obtainMessage(
+                MainHandler.MSG_SEND_ACCESSIBILITY_EVENT, userId, 0 /* unused */, event)
+                .sendToTarget();
+    }
+
     /**
      * AIDL-exposed method. System only.
      * Inform accessibility that a fingerprint gesture was performed
@@ -2419,6 +2427,7 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
         public static final int MSG_SEND_ACCESSIBILITY_BUTTON_TO_INPUT_FILTER = 13;
         public static final int MSG_SHOW_ACCESSIBILITY_BUTTON_CHOOSER = 14;
         public static final int MSG_INIT_SERVICE = 15;
+        public static final int MSG_SEND_ACCESSIBILITY_EVENT = 16;
 
         public MainHandler(Looper looper) {
             super(looper);
@@ -2519,6 +2528,12 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
                             (AccessibilityServiceConnection) msg.obj;
                     service.initializeService();
                 } break;
+
+                case MSG_SEND_ACCESSIBILITY_EVENT: {
+                    final AccessibilityEvent event = (AccessibilityEvent) msg.obj;
+                    final int userId = msg.arg1;
+                    sendAccessibilityEvent(event, userId);
+                }
             }
         }
 
@@ -2533,7 +2548,7 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
                     AccessibilityEvent event = AccessibilityEvent.obtain(
                             AccessibilityEvent.TYPE_ANNOUNCEMENT);
                     event.getText().add(message);
-                    sendAccessibilityEvent(event, mCurrentUserId);
+                    sendAccessibilityEventLocked(event, mCurrentUserId);
                 }
             }
         }
@@ -2961,21 +2976,21 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
     public class SecurityPolicy {
         public static final int INVALID_WINDOW_ID = -1;
 
-        private static final int RETRIEVAL_ALLOWING_EVENT_TYPES =
-            AccessibilityEvent.TYPE_VIEW_CLICKED
-            | AccessibilityEvent.TYPE_VIEW_FOCUSED
-            | AccessibilityEvent.TYPE_VIEW_HOVER_ENTER
-            | AccessibilityEvent.TYPE_VIEW_HOVER_EXIT
-            | AccessibilityEvent.TYPE_VIEW_LONG_CLICKED
-            | AccessibilityEvent.TYPE_VIEW_TEXT_CHANGED
-            | AccessibilityEvent.TYPE_WINDOW_STATE_CHANGED
-            | AccessibilityEvent.TYPE_VIEW_SELECTED
-            | AccessibilityEvent.TYPE_WINDOW_CONTENT_CHANGED
-            | AccessibilityEvent.TYPE_VIEW_TEXT_SELECTION_CHANGED
-            | AccessibilityEvent.TYPE_VIEW_SCROLLED
-            | AccessibilityEvent.TYPE_VIEW_ACCESSIBILITY_FOCUSED
-            | AccessibilityEvent.TYPE_VIEW_ACCESSIBILITY_FOCUS_CLEARED
-            | AccessibilityEvent.TYPE_VIEW_TEXT_TRAVERSED_AT_MOVEMENT_GRANULARITY;
+        private static final int KEEP_SOURCE_EVENT_TYPES = AccessibilityEvent.TYPE_VIEW_CLICKED
+                | AccessibilityEvent.TYPE_VIEW_FOCUSED
+                | AccessibilityEvent.TYPE_VIEW_HOVER_ENTER
+                | AccessibilityEvent.TYPE_VIEW_HOVER_EXIT
+                | AccessibilityEvent.TYPE_VIEW_LONG_CLICKED
+                | AccessibilityEvent.TYPE_VIEW_TEXT_CHANGED
+                | AccessibilityEvent.TYPE_WINDOW_STATE_CHANGED
+                | AccessibilityEvent.TYPE_WINDOWS_CHANGED
+                | AccessibilityEvent.TYPE_VIEW_SELECTED
+                | AccessibilityEvent.TYPE_WINDOW_CONTENT_CHANGED
+                | AccessibilityEvent.TYPE_VIEW_TEXT_SELECTION_CHANGED
+                | AccessibilityEvent.TYPE_VIEW_SCROLLED
+                | AccessibilityEvent.TYPE_VIEW_ACCESSIBILITY_FOCUSED
+                | AccessibilityEvent.TYPE_VIEW_ACCESSIBILITY_FOCUS_CLEARED
+                | AccessibilityEvent.TYPE_VIEW_TEXT_TRAVERSED_AT_MOVEMENT_GRANULARITY;
 
         // In Z order
         public List<AccessibilityWindowInfo> mWindows;
@@ -3137,10 +3152,10 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
                 mWindows = new ArrayList<>();
             }
 
-            final int oldWindowCount = mWindows.size();
-            for (int i = oldWindowCount - 1; i >= 0; i--) {
-                mWindows.remove(i).recycle();
-            }
+            List<AccessibilityWindowInfo> oldWindowList = new ArrayList<>(mWindows);
+            SparseArray<AccessibilityWindowInfo> oldWindowsById = mA11yWindowInfoById.clone();
+
+            mWindows.clear();
             mA11yWindowInfoById.clear();
 
             for (int i = 0; i < mWindowInfoById.size(); i++) {
@@ -3202,7 +3217,49 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
                 }
             }
 
-            notifyWindowsChanged();
+            sendEventsForChangedWindowsLocked(oldWindowList, oldWindowsById);
+
+            final int oldWindowCount = oldWindowList.size();
+            for (int i = oldWindowCount - 1; i >= 0; i--) {
+                oldWindowList.remove(i).recycle();
+            }
+        }
+
+        private void sendEventsForChangedWindowsLocked(List<AccessibilityWindowInfo> oldWindows,
+                SparseArray<AccessibilityWindowInfo> oldWindowsById) {
+            List<AccessibilityEvent> events = new ArrayList<>();
+            // Send events for all removed windows
+            final int oldWindowsCount = oldWindows.size();
+            for (int i = 0; i < oldWindowsCount; i++) {
+                final AccessibilityWindowInfo window = oldWindows.get(i);
+                if (mA11yWindowInfoById.get(window.getId()) == null) {
+                    events.add(AccessibilityEvent.obtainWindowsChangedEvent(
+                            window.getId(), AccessibilityEvent.WINDOWS_CHANGE_REMOVED));
+                }
+            }
+
+            // Look for other changes
+            int oldWindowIndex = 0;
+            final int newWindowCount = mWindows.size();
+            for (int i = 0; i < newWindowCount; i++) {
+                final AccessibilityWindowInfo newWindow = mWindows.get(i);
+                final AccessibilityWindowInfo oldWindow = oldWindowsById.get(newWindow.getId());
+                if (oldWindow == null) {
+                    events.add(AccessibilityEvent.obtainWindowsChangedEvent(
+                            newWindow.getId(), AccessibilityEvent.WINDOWS_CHANGE_ADDED));
+                } else {
+                    int changes = newWindow.differenceFrom(oldWindow);
+                    if (changes !=  0) {
+                        events.add(AccessibilityEvent.obtainWindowsChangedEvent(
+                                newWindow.getId(), changes));
+                    }
+                }
+            }
+
+            final int numEvents = events.size();
+            for (int i = 0; i < numEvents; i++) {
+                sendAccessibilityEventLocked(events.get(i), mCurrentUserId);
+            }
         }
 
         public boolean computePartialInteractiveRegionForWindowLocked(int windowId,
@@ -3243,7 +3300,7 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
         }
 
         public void updateEventSourceLocked(AccessibilityEvent event) {
-            if ((event.getEventType() & RETRIEVAL_ALLOWING_EVENT_TYPES) == 0) {
+            if ((event.getEventType() & KEEP_SOURCE_EVENT_TYPES) == 0) {
                 event.setSource((View) null);
             }
         }
@@ -3357,46 +3414,55 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
 
         private void setActiveWindowLocked(int windowId) {
             if (mActiveWindowId != windowId) {
+                sendAccessibilityEventLocked(
+                        AccessibilityEvent.obtainWindowsChangedEvent(
+                                mActiveWindowId, AccessibilityEvent.WINDOWS_CHANGE_ACTIVE),
+                        mCurrentUserId);
+
                 mActiveWindowId = windowId;
                 if (mWindows != null) {
                     final int windowCount = mWindows.size();
                     for (int i = 0; i < windowCount; i++) {
                         AccessibilityWindowInfo window = mWindows.get(i);
-                        window.setActive(window.getId() == windowId);
+                        if (window.getId() == windowId) {
+                            window.setActive(true);
+                            sendAccessibilityEventLocked(
+                                    AccessibilityEvent.obtainWindowsChangedEvent(windowId,
+                                            AccessibilityEvent.WINDOWS_CHANGE_ACTIVE),
+                                    mCurrentUserId);
+                        } else {
+                            window.setActive(false);
+                        }
                     }
                 }
-                notifyWindowsChanged();
             }
         }
 
         private void setAccessibilityFocusedWindowLocked(int windowId) {
             if (mAccessibilityFocusedWindowId != windowId) {
+                sendAccessibilityEventLocked(
+                        AccessibilityEvent.obtainWindowsChangedEvent(
+                                mAccessibilityFocusedWindowId,
+                                WINDOWS_CHANGE_ACCESSIBILITY_FOCUSED),
+                        mCurrentUserId);
+
                 mAccessibilityFocusedWindowId = windowId;
                 if (mWindows != null) {
                     final int windowCount = mWindows.size();
                     for (int i = 0; i < windowCount; i++) {
                         AccessibilityWindowInfo window = mWindows.get(i);
-                        window.setAccessibilityFocused(window.getId() == windowId);
+                        if (window.getId() == windowId) {
+                            window.setAccessibilityFocused(true);
+                            sendAccessibilityEventLocked(
+                                    AccessibilityEvent.obtainWindowsChangedEvent(
+                                            windowId, WINDOWS_CHANGE_ACCESSIBILITY_FOCUSED),
+                                    mCurrentUserId);
+
+                        } else {
+                            window.setAccessibilityFocused(false);
+                        }
                     }
                 }
-
-                notifyWindowsChanged();
-            }
-        }
-
-        public void notifyWindowsChanged() {
-            if (mWindowsForAccessibilityCallback == null) {
-                return;
-            }
-            final long identity = Binder.clearCallingIdentity();
-            try {
-                // Let the client know the windows changed.
-                AccessibilityEvent event = AccessibilityEvent.obtain(
-                        AccessibilityEvent.TYPE_WINDOWS_CHANGED);
-                event.setEventTime(SystemClock.uptimeMillis());
-                sendAccessibilityEvent(event, mCurrentUserId);
-            } finally {
-                Binder.restoreCallingIdentity(identity);
             }
         }
 
