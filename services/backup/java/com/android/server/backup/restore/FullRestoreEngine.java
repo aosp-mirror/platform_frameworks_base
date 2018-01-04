@@ -66,7 +66,6 @@ public class FullRestoreEngine extends RestoreEngine {
     // Task in charge of monitoring timeouts
     private final BackupRestoreTask mMonitorTask;
 
-    private final RestoreInstallObserver mInstallObserver = new RestoreInstallObserver();
     private final RestoreDeleteObserver mDeleteObserver = new RestoreDeleteObserver();
 
     // Dedicated observer, if any
@@ -249,13 +248,12 @@ public class FullRestoreEngine extends RestoreEngine {
                                     Slog.d(TAG, "APK file; installing");
                                 }
                                 // Try to install the app.
-                                String installerName = mPackageInstallers.get(pkg);
+                                String installerPackageName = mPackageInstallers.get(pkg);
                                 boolean isSuccessfullyInstalled = RestoreUtils.installApk(
-                                        instream, mBackupManagerService.getPackageManager(),
-                                        mInstallObserver, mDeleteObserver, mManifestSignatures,
-                                        mPackagePolicies, info, installerName,
-                                        bytesReadListener, mBackupManagerService.getDataDir()
-                                                                                         );
+                                        instream, mBackupManagerService.getContext(),
+                                        mDeleteObserver, mManifestSignatures,
+                                        mPackagePolicies, info, installerPackageName,
+                                        bytesReadListener);
                                 // good to go; promote to ACCEPT
                                 mPackagePolicies.put(pkg, isSuccessfullyInstalled
                                         ? RestorePolicy.ACCEPT

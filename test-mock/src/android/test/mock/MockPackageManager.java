@@ -1090,15 +1090,6 @@ public class MockPackageManager extends PackageManager {
      * @hide
      */
     @Override
-    public void installPackage(Uri packageURI, PackageInstallObserver observer,
-            int flags, String installerPackageName) {
-        throw new UnsupportedOperationException();
-    }
-
-    /**
-     * @hide
-     */
-    @Override
     public void addCrossProfileIntentFilter(IntentFilter filter, int sourceUserId, int targetUserId,
             int flags) {
         throw new UnsupportedOperationException();

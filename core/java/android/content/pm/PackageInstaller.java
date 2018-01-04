@@ -324,7 +324,14 @@ public class PackageInstaller {
      */
     public int createSession(@NonNull SessionParams params) throws IOException {
         try {
-            return mInstaller.createSession(params, mInstallerPackageName, mUserId);
+            final String installerPackage;
+            if (params.installerPackageName == null) {
+                installerPackage = mInstallerPackageName;
+            } else {
+                installerPackage = params.installerPackageName;
+            }
+
+            return mInstaller.createSession(params, installerPackage, mUserId);
         } catch (RuntimeException e) {
             ExceptionUtils.maybeUnwrapIOException(e);
             throw e;
@@ -1081,6 +1088,8 @@ public class PackageInstaller {
         public String volumeUuid;
         /** {@hide} */
         public String[] grantedRuntimePermissions;
+        /** {@hide} */
+        public String installerPackageName;
 
         /**
          * Construct parameters for a new package install session.
@@ -1109,6 +1118,7 @@ public class PackageInstaller {
             abiOverride = source.readString();
             volumeUuid = source.readString();
             grantedRuntimePermissions = source.readStringArray();
+            installerPackageName = source.readString();
         }
 
         /**
@@ -1304,6 +1314,18 @@ public class PackageInstaller {
             }
         }
 
+        /**
+         * Set the installer package for the app.
+         *
+         * By default this is the app that created the {@link PackageInstaller} object.
+         *
+         * @param installerPackageName name of the installer package
+         * {@hide}
+         */
+        public void setInstallerPackageName(String installerPackageName) {
+            this.installerPackageName = installerPackageName;
+        }
+
         /** {@hide} */
         public void dump(IndentingPrintWriter pw) {
             pw.printPair("mode", mode);
@@ -1319,6 +1341,7 @@ public class PackageInstaller {
             pw.printPair("abiOverride", abiOverride);
             pw.printPair("volumeUuid", volumeUuid);
             pw.printPair("grantedRuntimePermissions", grantedRuntimePermissions);
+            pw.printPair("installerPackageName", installerPackageName);
             pw.println();
         }
 
@@ -1343,6 +1366,7 @@ public class PackageInstaller {
             dest.writeString(abiOverride);
             dest.writeString(volumeUuid);
             dest.writeStringArray(grantedRuntimePermissions);
+            dest.writeString(installerPackageName);
         }
 
         public static final Parcelable.Creator<SessionParams>
