@@ -67,7 +67,8 @@ abstract class BaseIDevicePolicyManager extends IDevicePolicyManager.Stub {
     public void transferOwner(ComponentName admin, ComponentName target, PersistableBundle bundle) {}
 
     public boolean generateKeyPair(ComponentName who, String callerPackage, String algorithm,
-            ParcelableKeyGenParameterSpec keySpec, KeymasterCertificateChain attestationChain) {
+            ParcelableKeyGenParameterSpec keySpec, int idAttestationFlags,
+            KeymasterCertificateChain attestationChain) {
         return false;
     }
 

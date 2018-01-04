@@ -1668,6 +1668,46 @@ public class DevicePolicyManager {
     public static final String ACTION_DEVICE_ADMIN_SERVICE
             = "android.app.action.DEVICE_ADMIN_SERVICE";
 
+    /** @hide */
+    @Retention(RetentionPolicy.SOURCE)
+    @IntDef(flag = true, prefix = {"ID_TYPE_"}, value = {
+        ID_TYPE_BASE_INFO,
+        ID_TYPE_SERIAL,
+        ID_TYPE_IMEI,
+        ID_TYPE_MEID
+    })
+    public @interface AttestationIdType {}
+
+    /**
+     * Specifies that the device should attest its manufacturer details. For use with
+     * {@link #generateKeyPair}.
+     *
+     * @see #generateKeyPair
+     */
+    public static final int ID_TYPE_BASE_INFO = 1;
+
+    /**
+     * Specifies that the device should attest its serial number. For use with
+     * {@link #generateKeyPair}.
+     *
+     * @see #generateKeyPair
+     */
+    public static final int ID_TYPE_SERIAL = 2;
+
+    /**
+     * Specifies that the device should attest its IMEI. For use with {@link #generateKeyPair}.
+     *
+     * @see #generateKeyPair
+     */
+    public static final int ID_TYPE_IMEI = 4;
+
+    /**
+     * Specifies that the device should attest its MEID. For use with {@link #generateKeyPair}.
+     *
+     * @see #generateKeyPair
+     */
+    public static final int ID_TYPE_MEID = 8;
+
     /**
      * Return true if the given administrator component is currently active (enabled) in the system.
      *
@@ -4106,22 +4146,46 @@ public class DevicePolicyManager {
      * @param algorithm The key generation algorithm, see {@link java.security.KeyPairGenerator}.
      * @param keySpec Specification of the key to generate, see
      * {@link java.security.KeyPairGenerator}.
+     * @param idAttestationFlags A bitmask of all the identifiers that should be included in the
+     *        attestation record ({@code ID_TYPE_BASE_INFO}, {@code ID_TYPE_SERIAL},
+     *        {@code ID_TYPE_IMEI} and {@code ID_TYPE_MEID}), or {@code 0} if no device
+     *        identification is required in the attestation record.
+     *        Device owner, profile owner and their delegated certificate installer can use
+     *        {@link #ID_TYPE_BASE_INFO} to request inclusion of the general device information
+     *        including manufacturer, model, brand, device and product in the attestation record.
+     *        Only device owner and their delegated certificate installer can use
+     *        {@link #ID_TYPE_SERIAL}, {@link #ID_TYPE_IMEI} and {@link #ID_TYPE_MEID} to request
+     *        unique device identifiers to be attested.
+     *        <p>
+     *        If any of {@link #ID_TYPE_SERIAL}, {@link #ID_TYPE_IMEI} and {@link #ID_TYPE_MEID}
+     *        is set, it is implicitly assumed that {@link #ID_TYPE_BASE_INFO} is also set.
+     *        <p>
+     *        If any flag is specified, then an attestation challenge must be included in the
+     *        {@code keySpec}.
      * @return A non-null {@code AttestedKeyPair} if the key generation succeeded, null otherwise.
      * @throws SecurityException if {@code admin} is not {@code null} and not a device or profile
-     *         owner.
-     * @throws IllegalArgumentException if the alias in {@code keySpec} is empty, or if the
+     *         owner. If Device ID attestation is requested (using {@link #ID_TYPE_SERIAL},
+     *         {@link #ID_TYPE_IMEI} or {@link #ID_TYPE_MEID}), the caller must be the Device Owner
+     *         or the Certificate Installer delegate.
+     * @throws IllegalArgumentException if the alias in {@code keySpec} is empty, if the
      *         algorithm specification in {@code keySpec} is not {@code RSAKeyGenParameterSpec}
-     *         or {@code ECGenParameterSpec}.
+     *         or {@code ECGenParameterSpec}, or if Device ID attestation was requested but the
+     *         {@code keySpec} does not contain an attestation challenge.
+     * @see KeyGenParameterSpec.Builder#setAttestationChallenge(byte[])
      */
     public AttestedKeyPair generateKeyPair(@Nullable ComponentName admin,
-            @NonNull String algorithm, @NonNull KeyGenParameterSpec keySpec) {
+            @NonNull String algorithm, @NonNull KeyGenParameterSpec keySpec,
+            @AttestationIdType int idAttestationFlags) {
         throwIfParentInstance("generateKeyPair");
         try {
             final ParcelableKeyGenParameterSpec parcelableSpec =
                     new ParcelableKeyGenParameterSpec(keySpec);
             KeymasterCertificateChain attestationChain = new KeymasterCertificateChain();
+
+            // Translate ID attestation flags to values used by AttestationUtils
             final boolean success = mService.generateKeyPair(
-                    admin, mContext.getPackageName(), algorithm, parcelableSpec, attestationChain);
+                    admin, mContext.getPackageName(), algorithm, parcelableSpec,
+                    idAttestationFlags, attestationChain);
             if (!success) {
                 Log.e(TAG, "Error generating key via DevicePolicyManagerService.");
                 return null;
