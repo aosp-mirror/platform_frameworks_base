@@ -45,6 +45,7 @@ import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
 import java.util.ArrayList;
+import java.util.concurrent.CountDownLatch;
 
 /**
  * Test class for {@link SurfaceAnimatorTest}.
@@ -82,6 +83,7 @@ public class SurfaceAnimatorTest extends WindowTestsBase {
         verify(mSpec).startAnimation(any(), any(), callbackCaptor.capture());
 
         callbackCaptor.getValue().onAnimationFinished(mSpec);
+        waitUntilPrepareSurfaces();
         assertNotAnimating(mAnimatable);
         assertTrue(mAnimatable.mFinishedCallbackCalled);
         assertTrue(mAnimatable.mPendingDestroySurfaces.contains(mAnimatable.mLeash));
@@ -104,11 +106,13 @@ public class SurfaceAnimatorTest extends WindowTestsBase {
 
         // First animation was finished, but this shouldn't cancel the second animation
         callbackCaptor.getValue().onAnimationFinished(mSpec);
+        waitUntilPrepareSurfaces();
         assertTrue(mAnimatable.mSurfaceAnimator.isAnimating());
 
         // Second animation was finished
         verify(mSpec2).startAnimation(any(), any(), callbackCaptor.capture());
         callbackCaptor.getValue().onAnimationFinished(mSpec2);
+        waitUntilPrepareSurfaces();
         assertNotAnimating(mAnimatable);
         assertTrue(mAnimatable.mFinishedCallbackCalled);
     }
@@ -160,6 +164,7 @@ public class SurfaceAnimatorTest extends WindowTestsBase {
         assertEquals(leash, mAnimatable2.mSurfaceAnimator.mLeash);
         assertFalse(mAnimatable.mPendingDestroySurfaces.contains(leash));
         callbackCaptor.getValue().onAnimationFinished(mSpec);
+        waitUntilPrepareSurfaces();
         assertNotAnimating(mAnimatable2);
         assertTrue(mAnimatable2.mFinishedCallbackCalled);
         assertTrue(mAnimatable2.mPendingDestroySurfaces.contains(leash));
@@ -173,6 +178,14 @@ public class SurfaceAnimatorTest extends WindowTestsBase {
     private void assertNotAnimating(MyAnimatable animatable) {
         assertFalse(animatable.mSurfaceAnimator.isAnimating());
         assertNull(animatable.mSurfaceAnimator.getAnimation());
+    }
+
+    private void waitUntilPrepareSurfaces() throws Exception {
+        final CountDownLatch latch = new CountDownLatch(1);
+        synchronized (sWm.mWindowMap) {
+            sWm.mAnimator.addAfterPrepareSurfacesRunnable(latch::countDown);
+        }
+        latch.await();
     }
 
     private class MyAnimatable implements Animatable {
