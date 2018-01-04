@@ -199,7 +199,7 @@ TEST(GaugeMetricProducerTest, TestAnomalyDetection) {
     alert.set_id(101);
     alert.set_metric_id(metricId);
     alert.set_trigger_if_sum_gt(25);
-    alert.set_number_of_buckets(2);
+    alert.set_num_buckets(2);
     sp<AnomalyTracker> anomalyTracker = gaugeProducer.addAnomalyTracker(alert);
 
     int tagId = 1;

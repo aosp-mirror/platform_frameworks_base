@@ -265,7 +265,7 @@ TEST(OringDurationTrackerTest, TestPredictAnomalyTimestamp) {
     alert.set_id(101);
     alert.set_metric_id(1);
     alert.set_trigger_if_sum_gt(40 * NS_PER_SEC);
-    alert.set_number_of_buckets(2);
+    alert.set_num_buckets(2);
     alert.set_refractory_period_secs(1);
 
     unordered_map<HashableDimensionKey, vector<DurationBucket>> buckets;
@@ -327,7 +327,7 @@ TEST(OringDurationTrackerTest, TestAnomalyDetection) {
     alert.set_id(101);
     alert.set_metric_id(1);
     alert.set_trigger_if_sum_gt(40 * NS_PER_SEC);
-    alert.set_number_of_buckets(2);
+    alert.set_num_buckets(2);
     alert.set_refractory_period_secs(1);
 
     unordered_map<HashableDimensionKey, vector<DurationBucket>> buckets;

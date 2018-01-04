@@ -17,6 +17,7 @@
 #define DEBUG false  // STOPSHIP if true
 #include "Log.h"
 
+#include "dimension.h"
 #include "ValueMetricProducer.h"
 #include "guardrail/StatsdStats.h"
 #include "stats_log_util.h"
@@ -218,7 +219,8 @@ void ValueMetricProducer::onDataPulled(const std::vector<std::shared_ptr<LogEven
         // For scheduled pulled data, the effective event time is snap to the nearest
         // bucket boundary to make bucket finalize.
         uint64_t realEventTime = allData.at(0)->GetTimestampNs();
-        uint64_t eventTime = mStartTimeNs + ((realEventTime - mStartTimeNs)/mBucketSizeNs) * mBucketSizeNs;
+        uint64_t eventTime = mStartTimeNs +
+            ((realEventTime - mStartTimeNs)/mBucketSizeNs) * mBucketSizeNs;
 
         mCondition = false;
         for (const auto& data : allData) {
@@ -272,7 +274,11 @@ void ValueMetricProducer::onMatchedLogEventInternalLocked(
     }
     Interval& interval = mCurrentSlicedBucket[eventKey];
 
-    long value = get_value(event);
+    std::shared_ptr<FieldValueMap> valueFieldMap = getValueFields(event);
+    if (valueFieldMap->empty() || valueFieldMap->size() > 1) {
+        return;
+    }
+    const long value = getLongFromDimenValue(valueFieldMap->begin()->second);
 
     if (mPullTagId != -1) { // for pulled events
         if (mCondition == true) {
@@ -296,15 +302,11 @@ void ValueMetricProducer::onMatchedLogEventInternalLocked(
     }
 }
 
-long ValueMetricProducer::get_value(const LogEvent& event) {
-    status_t err = NO_ERROR;
-    long val = event.GetLong(mValueField, &err);
-    if (err == NO_ERROR) {
-        return val;
-    } else {
-        VLOG("Can't find value in message. %s", event.ToString().c_str());
-        return 0;
-    }
+std::shared_ptr<FieldValueMap> ValueMetricProducer::getValueFields(const LogEvent& event) {
+    std::shared_ptr<FieldValueMap> valueFields =
+        std::make_shared<FieldValueMap>(event.getFieldValueMap());
+    filterFields(mValueField, valueFields.get());
+    return valueFields;
 }
 
 void ValueMetricProducer::flushIfNeededLocked(const uint64_t& eventTimeNs) {

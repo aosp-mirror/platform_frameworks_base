@@ -89,7 +89,7 @@ StatsdConfig buildGoodConfig() {
     auto alert = config.add_alert();
     alert->set_id(3);
     alert->set_metric_id(3);
-    alert->set_number_of_buckets(10);
+    alert->set_num_buckets(10);
     alert->set_refractory_period_secs(100);
     alert->set_trigger_if_sum_gt(100);
     return config;
@@ -138,7 +138,7 @@ StatsdConfig buildAlertWithUnknownMetric() {
     auto alert = config.add_alert();
     alert->set_id(3);
     alert->set_metric_id(2);
-    alert->set_number_of_buckets(10);
+    alert->set_num_buckets(10);
     alert->set_refractory_period_secs(100);
     alert->set_trigger_if_sum_gt(100);
     return config;
@@ -222,7 +222,7 @@ StatsdConfig buildDimensionMetricsWithMultiTags() {
     auto alert = config.add_alert();
     alert->set_id(103);
     alert->set_metric_id(3);
-    alert->set_number_of_buckets(10);
+    alert->set_num_buckets(10);
     alert->set_refractory_period_secs(100);
     alert->set_trigger_if_sum_gt(100);
     return config;

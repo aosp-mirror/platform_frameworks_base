@@ -51,7 +51,8 @@ TEST(ValueMetricProducerTest, TestNonDimensionalEvents) {
     ValueMetric metric;
     metric.set_id(metricId);
     metric.mutable_bucket()->set_bucket_size_millis(bucketSizeNs / 1000000);
-    metric.set_value_field(2);
+    metric.mutable_value_field()->set_field(tagId);
+    metric.mutable_value_field()->add_child()->set_field(2);
 
     sp<MockConditionWizard> wizard = new NaggyMock<MockConditionWizard>();
     // TODO: pending refactor of StatsPullerManager
@@ -127,7 +128,8 @@ TEST(ValueMetricProducerTest, TestEventsWithNonSlicedCondition) {
     ValueMetric metric;
     metric.set_id(metricId);
     metric.mutable_bucket()->set_bucket_size_millis(bucketSizeNs / 1000000);
-    metric.set_value_field(2);
+    metric.mutable_value_field()->set_field(tagId);
+    metric.mutable_value_field()->add_child()->set_field(2);
     metric.set_condition(StringToId("SCREEN_ON"));
 
     sp<MockConditionWizard> wizard = new NaggyMock<MockConditionWizard>();
@@ -203,7 +205,8 @@ TEST(ValueMetricProducerTest, TestPushedEventsWithoutCondition) {
     ValueMetric metric;
     metric.set_id(metricId);
     metric.mutable_bucket()->set_bucket_size_millis(bucketSizeNs / 1000000);
-    metric.set_value_field(2);
+    metric.mutable_value_field()->set_field(tagId);
+    metric.mutable_value_field()->add_child()->set_field(2);
 
     sp<MockConditionWizard> wizard = new NaggyMock<MockConditionWizard>();
     shared_ptr<MockStatsPullerManager> pullerManager =
@@ -244,13 +247,14 @@ TEST(ValueMetricProducerTest, TestAnomalyDetection) {
     alert.set_id(101);
     alert.set_metric_id(metricId);
     alert.set_trigger_if_sum_gt(130);
-    alert.set_number_of_buckets(2);
+    alert.set_num_buckets(2);
     alert.set_refractory_period_secs(3);
 
     ValueMetric metric;
     metric.set_id(metricId);
     metric.mutable_bucket()->set_bucket_size_millis(bucketSizeNs / 1000000);
-    metric.set_value_field(2);
+    metric.mutable_value_field()->set_field(tagId);
+    metric.mutable_value_field()->add_child()->set_field(2);
 
     sp<MockConditionWizard> wizard = new NaggyMock<MockConditionWizard>();
     ValueMetricProducer valueProducer(kConfigKey, metric, -1 /*-1 meaning no condition*/, wizard,
