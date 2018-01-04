@@ -87,10 +87,6 @@ interface IDisplayManager {
     // Requires BRIGHTNESS_SLIDER_USAGE permission.
     ParceledListSlice getBrightnessEvents(String callingPackage);
 
-    // STOPSHIP remove when adaptive brightness code is updated to accept curves.
-    // Requires BRIGHTNESS_SLIDER_USAGE permission.
-    void setBrightness(int brightness);
-
     // Sets the global brightness configuration for a given user. Requires
     // CONFIGURE_DISPLAY_BRIGHTNESS, and INTERACT_ACROSS_USER if the user being configured is not
     // the same as the calling user.

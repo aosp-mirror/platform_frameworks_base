@@ -17,6 +17,8 @@
 package com.android.server.display;
 
 import android.annotation.Nullable;
+import android.content.res.Resources;
+import android.content.res.TypedArray;
 import android.hardware.display.BrightnessConfiguration;
 import android.os.PowerManager;
 import android.util.MathUtils;
@@ -41,11 +43,30 @@ public abstract class BrightnessMappingStrategy {
     private static final boolean DEBUG = false;
 
     @Nullable
-    public static BrightnessMappingStrategy create(
-            float[] luxLevels, int[] brightnessLevelsBacklight, float[] brightnessLevelsNits,
-            float[] nitsRange, int[] backlightRange) {
+    public static BrightnessMappingStrategy create(Resources resources) {
+        float[] luxLevels = getLuxLevels(resources.getIntArray(
+                com.android.internal.R.array.config_autoBrightnessLevels));
+        int[] brightnessLevelsBacklight = resources.getIntArray(
+                com.android.internal.R.array.config_autoBrightnessLcdBacklightValues);
+        float[] brightnessLevelsNits = getFloatArray(resources.obtainTypedArray(
+                com.android.internal.R.array.config_autoBrightnessDisplayValuesNits));
+
+        float[] nitsRange = getFloatArray(resources.obtainTypedArray(
+                com.android.internal.R.array.config_screenBrightnessNits));
+        int[] backlightRange = resources.getIntArray(
+                com.android.internal.R.array.config_screenBrightnessBacklight);
+
         if (isValidMapping(nitsRange, backlightRange)
                 && isValidMapping(luxLevels, brightnessLevelsNits)) {
+            int minimumBacklight = resources.getInteger(
+                    com.android.internal.R.integer.config_screenBrightnessSettingMinimum);
+            int maximumBacklight = resources.getInteger(
+                    com.android.internal.R.integer.config_screenBrightnessSettingMaximum);
+            if (backlightRange[0] > minimumBacklight
+                    || backlightRange[backlightRange.length - 1] < maximumBacklight) {
+                Slog.w(TAG, "Screen brightness mapping does not cover whole range of available"
+                        + " backlight values, autobrightness functionality may be impaired.");
+            }
             BrightnessConfiguration.Builder builder = new BrightnessConfiguration.Builder();
             builder.setCurve(luxLevels, brightnessLevelsNits);
             return new PhysicalMappingStrategy(builder.build(), nitsRange, backlightRange);
@@ -54,6 +75,25 @@ public abstract class BrightnessMappingStrategy {
         } else {
             return null;
         }
+    }
+
+    private static float[] getLuxLevels(int[] lux) {
+        // The first control point is implicit and always at 0 lux.
+        float[] levels = new float[lux.length + 1];
+        for (int i = 0; i < lux.length; i++) {
+            levels[i + 1] = (float) lux[i];
+        }
+        return levels;
+    }
+
+    private static float[] getFloatArray(TypedArray array) {
+        final int N = array.length();
+        float[] vals = new float[N];
+        for (int i = 0; i < N; i++) {
+            vals[i] = array.getFloat(i, -1.0f);
+        }
+        array.recycle();
+        return vals;
     }
 
     private static boolean isValidMapping(float[] x, float[] y) {
@@ -124,9 +164,16 @@ public abstract class BrightnessMappingStrategy {
      * brightness and 0 is the display at minimum brightness.
      *
      * @param lux The current ambient brightness in lux.
-     * @return The desired brightness of the display compressed to the range [0, 1.0].
+     * @return The desired brightness of the display normalized to the range [0, 1.0].
      */
     public abstract float getBrightness(float lux);
+
+    /**
+     * Gets the display's brightness in nits for the given backlight value.
+     *
+     * Returns -1.0f if there's no available mapping for the backlight to nits.
+     */
+    public abstract float getNits(int backlight);
 
     public abstract void dump(PrintWriter pw);
 
@@ -186,6 +233,11 @@ public abstract class BrightnessMappingStrategy {
         }
 
         @Override
+        public float getNits(int backlight) {
+            return -1.0f;
+        }
+
+        @Override
         public void dump(PrintWriter pw) {
             pw.println("SimpleMappingStrategy");
             pw.println("  mSpline=" + mSpline);
@@ -209,7 +261,11 @@ public abstract class BrightnessMappingStrategy {
 
         // A spline mapping from nits to the corresponding backlight value, normalized to the range
         // [0, 1.0].
-        private final Spline mBacklightSpline;
+        private final Spline mNitsToBacklightSpline;
+
+        // A spline mapping from the device's backlight value, normalized to the range [0, 1.0], to
+        // a brightness in nits.
+        private final Spline mBacklightToNitsSpline;
 
         // The default brightness configuration.
         private final BrightnessConfiguration mDefaultConfig;
@@ -227,19 +283,18 @@ public abstract class BrightnessMappingStrategy {
 
             // Setup the backlight spline
             final int N = nits.length;
-            float[] x = new float[N];
-            float[] y = new float[N];
+            float[] normalizedBacklight = new float[N];
             for (int i = 0; i < N; i++) {
-                x[i] = nits[i];
-                y[i] = normalizeAbsoluteBrightness(backlight[i]);
+                normalizedBacklight[i] = normalizeAbsoluteBrightness(backlight[i]);
             }
 
-            mBacklightSpline = Spline.createSpline(x, y);
+            mNitsToBacklightSpline = Spline.createSpline(nits, normalizedBacklight);
+            mBacklightToNitsSpline = Spline.createSpline(normalizedBacklight, nits);
             if (DEBUG) {
-                Slog.d(TAG, "Backlight spline: " + mBacklightSpline);
+                Slog.d(TAG, "Backlight spline: " + mNitsToBacklightSpline);
                 for (float v = 1f; v < nits[nits.length - 1] * 1.25f; v *= 1.25f) {
                     Slog.d(TAG, String.format(
-                                "  %7.1f: %7.1f", v, mBacklightSpline.interpolate(v)));
+                                "  %7.1f: %7.1f", v, mNitsToBacklightSpline.interpolate(v)));
                 }
             }
 
@@ -275,7 +330,12 @@ public abstract class BrightnessMappingStrategy {
 
         @Override
         public float getBrightness(float lux) {
-            return mBacklightSpline.interpolate(mBrightnessSpline.interpolate(lux));
+            return mNitsToBacklightSpline.interpolate(mBrightnessSpline.interpolate(lux));
+        }
+
+        @Override
+        public float getNits(int backlight) {
+            return mBacklightToNitsSpline.interpolate(normalizeAbsoluteBrightness(backlight));
         }
 
         @Override
@@ -283,7 +343,7 @@ public abstract class BrightnessMappingStrategy {
             pw.println("PhysicalMappingStrategy");
             pw.println("  mConfig=" + mConfig);
             pw.println("  mBrightnessSpline=" + mBrightnessSpline);
-            pw.println("  mBacklightSpline=" + mBacklightSpline);
+            pw.println("  mNitsToBacklightSpline=" + mNitsToBacklightSpline);
         }
     }
 }

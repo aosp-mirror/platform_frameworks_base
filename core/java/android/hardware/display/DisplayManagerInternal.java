@@ -222,6 +222,11 @@ public abstract class DisplayManagerInternal {
         // set by the user as opposed to being programmatically controlled by apps.
         public boolean brightnessSetByUser;
 
+        // Set to true if screenBrightness or screenAutoBrightnessAdjustment are being set
+        // temporarily. This is typically set while the user has their finger on the brightness
+        // control, before they've selected the final brightness value.
+        public boolean brightnessIsTemporary;
+
         // If true, enables automatic brightness control.
         public boolean useAutoBrightness;
 
@@ -280,6 +285,7 @@ public abstract class DisplayManagerInternal {
             screenAutoBrightnessAdjustment = other.screenAutoBrightnessAdjustment;
             screenLowPowerBrightnessFactor = other.screenLowPowerBrightnessFactor;
             brightnessSetByUser = other.brightnessSetByUser;
+            brightnessIsTemporary = other.brightnessIsTemporary;
             useAutoBrightness = other.useAutoBrightness;
             blockScreenOn = other.blockScreenOn;
             lowPowerMode = other.lowPowerMode;
@@ -303,6 +309,7 @@ public abstract class DisplayManagerInternal {
                     && screenLowPowerBrightnessFactor
                     == other.screenLowPowerBrightnessFactor
                     && brightnessSetByUser == other.brightnessSetByUser
+                    && brightnessIsTemporary == other.brightnessIsTemporary
                     && useAutoBrightness == other.useAutoBrightness
                     && blockScreenOn == other.blockScreenOn
                     && lowPowerMode == other.lowPowerMode
@@ -324,6 +331,7 @@ public abstract class DisplayManagerInternal {
                     + ", screenAutoBrightnessAdjustment=" + screenAutoBrightnessAdjustment
                     + ", screenLowPowerBrightnessFactor=" + screenLowPowerBrightnessFactor
                     + ", brightnessSetByUser=" + brightnessSetByUser
+                    + ", brightnessIsTemporary=" + brightnessIsTemporary
                     + ", useAutoBrightness=" + useAutoBrightness
                     + ", blockScreenOn=" + blockScreenOn
                     + ", lowPowerMode=" + lowPowerMode
