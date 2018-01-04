@@ -744,8 +744,6 @@ public final class ContextHubManager {
                 synchronized (this) {
                     mLocalCallback.onMessageReceipt(hubId, nanoAppId, message);
                 }
-            } else {
-                Log.d(TAG, "Context hub manager client callback is NULL");
             }
         }
     };
@@ -759,7 +757,7 @@ public final class ContextHubManager {
         try {
             mService.registerCallback(mClientCallback);
         } catch (RemoteException e) {
-            Log.w(TAG, "Could not register callback:" + e);
+            throw e.rethrowFromSystemServer();
         }
     }
 }
