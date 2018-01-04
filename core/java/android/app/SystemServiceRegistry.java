@@ -494,7 +494,7 @@ final class SystemServiceRegistry {
         registerService(Context.TELEPHONY_SUBSCRIPTION_SERVICE, SubscriptionManager.class,
                 new CachedServiceFetcher<SubscriptionManager>() {
             @Override
-            public SubscriptionManager createService(ContextImpl ctx) {
+            public SubscriptionManager createService(ContextImpl ctx) throws ServiceNotFoundException {
                 return new SubscriptionManager(ctx.getOuterContext());
             }});
 
