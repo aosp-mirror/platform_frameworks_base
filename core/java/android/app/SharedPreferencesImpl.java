@@ -50,11 +50,6 @@ import java.util.Map;
 import java.util.Set;
 import java.util.WeakHashMap;
 import java.util.concurrent.CountDownLatch;
-import java.util.concurrent.ExecutionException;
-import java.util.concurrent.Future;
-import java.util.concurrent.FutureTask;
-import java.util.concurrent.TimeUnit;
-import java.util.concurrent.TimeoutException;
 
 final class SharedPreferencesImpl implements SharedPreferences {
     private static final String TAG = "SharedPreferencesImpl";
@@ -74,10 +69,14 @@ final class SharedPreferencesImpl implements SharedPreferences {
     private final Object mLock = new Object();
     private final Object mWritingToDiskLock = new Object();
 
-    private Future<Map<String, Object>> mMap;
+    @GuardedBy("mLock")
+    private Map<String, Object> mMap;
 
     @GuardedBy("mLock")
     private int mDiskWritesInFlight = 0;
+
+    @GuardedBy("mLock")
+    private boolean mLoaded = false;
 
     @GuardedBy("mLock")
     private StructTimespec mStatTimestamp;
@@ -106,18 +105,27 @@ final class SharedPreferencesImpl implements SharedPreferences {
         mFile = file;
         mBackupFile = makeBackupFile(file);
         mMode = mode;
+        mLoaded = false;
         mMap = null;
         startLoadFromDisk();
     }
 
     private void startLoadFromDisk() {
-        FutureTask<Map<String, Object>> futureTask = new FutureTask<>(() -> loadFromDisk());
-        mMap = futureTask;
-        new Thread(futureTask, "SharedPreferencesImpl-load").start();
+        synchronized (mLock) {
+            mLoaded = false;
+        }
+        new Thread("SharedPreferencesImpl-load") {
+            public void run() {
+                loadFromDisk();
+            }
+        }.start();
     }
 
-    private Map<String, Object> loadFromDisk() {
+    private void loadFromDisk() {
         synchronized (mLock) {
+            if (mLoaded) {
+                return;
+            }
             if (mBackupFile.exists()) {
                 mFile.delete();
                 mBackupFile.renameTo(mFile);
@@ -150,14 +158,16 @@ final class SharedPreferencesImpl implements SharedPreferences {
         }
 
         synchronized (mLock) {
+            mLoaded = true;
             if (map != null) {
+                mMap = map;
                 mStatTimestamp = stat.st_mtim;
                 mStatSize = stat.st_size;
             } else {
-                map = new HashMap<>();
+                mMap = new HashMap<>();
             }
+            mLock.notifyAll();
         }
-        return map;
     }
 
     static File makeBackupFile(File prefsFile) {
@@ -216,37 +226,36 @@ final class SharedPreferencesImpl implements SharedPreferences {
         }
     }
 
-    private @GuardedBy("mLock") Map<String, Object> getLoaded() {
-        try {
-            return mMap.get();
-        } catch (InterruptedException | ExecutionException e) {
-            throw new IllegalStateException(e);
-        }
-    }
-    private @GuardedBy("mLock") Map<String, Object> getLoadedWithBlockGuard() {
-        if (!mMap.isDone()) {
+    private void awaitLoadedLocked() {
+        if (!mLoaded) {
             // Raise an explicit StrictMode onReadFromDisk for this
             // thread, since the real read will be in a different
             // thread and otherwise ignored by StrictMode.
             BlockGuard.getThreadPolicy().onReadFromDisk();
         }
-        return getLoaded();
+        while (!mLoaded) {
+            try {
+                mLock.wait();
+            } catch (InterruptedException unused) {
+            }
+        }
     }
 
     @Override
     public Map<String, ?> getAll() {
-        Map<String, Object> map = getLoadedWithBlockGuard();
         synchronized (mLock) {
-            return new HashMap<String, Object>(map);
+            awaitLoadedLocked();
+            //noinspection unchecked
+            return new HashMap<String, Object>(mMap);
         }
     }
 
     @Override
     @Nullable
     public String getString(String key, @Nullable String defValue) {
-        Map<String, Object> map = getLoadedWithBlockGuard();
         synchronized (mLock) {
-            String v = (String) map.get(key);
+            awaitLoadedLocked();
+            String v = (String)mMap.get(key);
             return v != null ? v : defValue;
         }
     }
@@ -254,65 +263,66 @@ final class SharedPreferencesImpl implements SharedPreferences {
     @Override
     @Nullable
     public Set<String> getStringSet(String key, @Nullable Set<String> defValues) {
-        Map<String, Object> map = getLoadedWithBlockGuard();
         synchronized (mLock) {
-            @SuppressWarnings("unchecked")
-            Set<String> v = (Set<String>) map.get(key);
+            awaitLoadedLocked();
+            Set<String> v = (Set<String>) mMap.get(key);
             return v != null ? v : defValues;
         }
     }
 
     @Override
     public int getInt(String key, int defValue) {
-        Map<String, Object> map = getLoadedWithBlockGuard();
         synchronized (mLock) {
-            Integer v = (Integer) map.get(key);
+            awaitLoadedLocked();
+            Integer v = (Integer)mMap.get(key);
             return v != null ? v : defValue;
         }
     }
     @Override
     public long getLong(String key, long defValue) {
-        Map<String, Object> map = getLoadedWithBlockGuard();
         synchronized (mLock) {
-            Long v = (Long) map.get(key);
+            awaitLoadedLocked();
+            Long v = (Long)mMap.get(key);
             return v != null ? v : defValue;
         }
     }
     @Override
     public float getFloat(String key, float defValue) {
-        Map<String, Object> map = getLoadedWithBlockGuard();
         synchronized (mLock) {
-            Float v = (Float) map.get(key);
+            awaitLoadedLocked();
+            Float v = (Float)mMap.get(key);
             return v != null ? v : defValue;
         }
     }
     @Override
     public boolean getBoolean(String key, boolean defValue) {
-        Map<String, Object> map = getLoadedWithBlockGuard();
         synchronized (mLock) {
-            Boolean v = (Boolean) map.get(key);
+            awaitLoadedLocked();
+            Boolean v = (Boolean)mMap.get(key);
             return v != null ? v : defValue;
         }
     }
 
     @Override
     public boolean contains(String key) {
-        Map<String, Object> map = getLoadedWithBlockGuard();
         synchronized (mLock) {
-            return map.containsKey(key);
+            awaitLoadedLocked();
+            return mMap.containsKey(key);
         }
     }
 
     @Override
     public Editor edit() {
-        // TODO: remove the need to call getLoaded() when
+        // TODO: remove the need to call awaitLoadedLocked() when
         // requesting an editor.  will require some work on the
         // Editor, but then we should be able to do:
         //
         //      context.getSharedPreferences(..).edit().putString(..).apply()
         //
         // ... all without blocking.
-        getLoadedWithBlockGuard();
+        synchronized (mLock) {
+            awaitLoadedLocked();
+        }
 
         return new EditorImpl();
     }
@@ -466,43 +476,13 @@ final class SharedPreferencesImpl implements SharedPreferences {
                 // a memory commit comes in when we're already
                 // writing to disk.
                 if (mDiskWritesInFlight > 0) {
-                    // We can't modify our map as a currently
+                    // We can't modify our mMap as a currently
                     // in-flight write owns it.  Clone it before
                     // modifying it.
                     // noinspection unchecked
-                    mMap = new Future<Map<String, Object>>() {
-                        private Map<String, Object> mCopiedMap =
-                                new HashMap<String, Object>(getLoaded());
-
-                        @Override
-                        public boolean cancel(boolean mayInterruptIfRunning) {
-                            return false;
-                        }
-
-                        @Override
-                        public boolean isCancelled() {
-                            return false;
-                        }
-
-                        @Override
-                        public boolean isDone() {
-                            return true;
-                        }
-
-                        @Override
-                        public Map<String, Object> get()
-                                throws InterruptedException, ExecutionException {
-                            return mCopiedMap;
-                        }
-
-                        @Override
-                        public Map<String, Object> get(long timeout, TimeUnit unit)
-                                throws InterruptedException, ExecutionException, TimeoutException {
-                            return mCopiedMap;
-                        }
-                    };
+                    mMap = new HashMap<String, Object>(mMap);
                 }
-                mapToWriteToDisk = getLoaded();
+                mapToWriteToDisk = mMap;
                 mDiskWritesInFlight++;
 
                 boolean hasListeners = mListeners.size() > 0;
