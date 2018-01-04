@@ -252,12 +252,26 @@ aidl_files := \
 	system/netd/server/binder/android/net/UidRange.aidl \
 	frameworks/base/telephony/java/android/telephony/PcoData.aidl \
 
+aidl_parcelables :=
+define stubs-to-aidl-parcelables
+  gen := $(TARGET_OUT_COMMON_INTERMEDIATES)/$1.aidl
+  aidl_parcelables += $$(gen)
+  $$(gen): $(call java-lib-header-files,$1) | $(HOST_OUT_EXECUTABLES)/sdkparcelables
+	@echo Extract SDK parcelables: $$@
+	rm -f $$@
+	$(HOST_OUT_EXECUTABLES)/sdkparcelables $$< $$@
+endef
+
+$(foreach stubs,android_stubs_current android_test_stubs_current android_system_stubs_current,\
+  $(eval $(call stubs-to-aidl-parcelables,$(stubs))))
+
 gen := $(TARGET_OUT_COMMON_INTERMEDIATES)/framework.aidl
-$(gen): PRIVATE_SRC_FILES := $(aidl_files)
-ALL_SDK_FILES += $(gen)
-$(gen): $(aidl_files) | $(AIDL)
-		@echo Aidl Preprocess: $@
-		$(hide) $(AIDL) --preprocess $@ $(PRIVATE_SRC_FILES)
+.KATI_RESTAT: $(gen)
+$(gen): $(aidl_parcelables)
+	@echo Combining SDK parcelables: $@
+	rm -f $@.tmp
+	cat $^ | sort -u > $@.tmp
+	$(call commit-change-for-toc,$@)
 
 # the documentation
 # ============================================================
@@ -554,8 +568,6 @@ LOCAL_UNINSTALLABLE_MODULE := true
 
 include $(BUILD_DROIDDOC)
 
-# $(gen), i.e. framework.aidl, is also needed while building against the current stub.
-$(full_target): $(gen)
 $(INTERNAL_PLATFORM_API_FILE): $(full_target)
 $(call dist-for-goals,sdk,$(INTERNAL_PLATFORM_API_FILE))
 
@@ -591,8 +603,6 @@ LOCAL_UNINSTALLABLE_MODULE := true
 
 include $(BUILD_DROIDDOC)
 
-# $(gen), i.e. framework.aidl, is also needed while building against the current stub.
-$(full_target): $(gen)
 $(INTERNAL_PLATFORM_SYSTEM_API_FILE): $(full_target)
 $(call dist-for-goals,sdk,$(INTERNAL_PLATFORM_SYSTEM_API_FILE))
 
@@ -629,8 +639,6 @@ LOCAL_UNINSTALLABLE_MODULE := true
 
 include $(BUILD_DROIDDOC)
 
-# $(gen), i.e. framework.aidl, is also needed while building against the current stub.
-$(full_target): $(gen)
 $(INTERNAL_PLATFORM_TEST_API_FILE): $(full_target)
 $(call dist-for-goals,sdk,$(INTERNAL_PLATFORM_TEST_API_FILE))
 
@@ -659,9 +667,6 @@ LOCAL_DROIDDOC_CUSTOM_TEMPLATE_DIR:=external/doclava/res/assets/templates-sdk
 LOCAL_UNINSTALLABLE_MODULE := true
 
 include $(BUILD_DROIDDOC)
-
-# $(gen), i.e. framework.aidl, is also needed while building against the current stub.
-$(full_target): $(gen)
 
 # Run this for checkbuild
 checkbuild: doc-comment-check-docs
