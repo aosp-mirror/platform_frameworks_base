@@ -165,6 +165,8 @@ package android.content.pm {
     method public abstract int getInstallReason(java.lang.String, android.os.UserHandle);
     method public abstract java.lang.String getPermissionControllerPackageName();
     method public abstract boolean isPermissionReviewModeEnabled();
+    field public static final java.lang.String FEATURE_ADOPTABLE_STORAGE = "android.software.adoptable_storage";
+    field public static final java.lang.String FEATURE_FILE_BASED_ENCRYPTION = "android.software.file_based_encryption";
   }
 
   public class PermissionInfo extends android.content.pm.PackageItemInfo implements android.os.Parcelable {

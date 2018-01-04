@@ -2480,9 +2480,16 @@ public abstract class PackageManager {
             = "android.software.securely_removes_users";
 
     /** {@hide} */
+    @TestApi
     @SdkConstant(SdkConstantType.FEATURE)
     public static final String FEATURE_FILE_BASED_ENCRYPTION
             = "android.software.file_based_encryption";
+
+    /** {@hide} */
+    @TestApi
+    @SdkConstant(SdkConstantType.FEATURE)
+    public static final String FEATURE_ADOPTABLE_STORAGE
+            = "android.software.adoptable_storage";
 
     /**
      * Feature for {@link #getSystemAvailableFeatures} and {@link #hasSystemFeature}:

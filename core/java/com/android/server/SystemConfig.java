@@ -633,6 +633,11 @@ public class SystemConfig {
             addFeature(PackageManager.FEATURE_SECURELY_REMOVES_USERS, 0);
         }
 
+        // Help legacy devices that may not have updated their static config
+        if (StorageManager.hasAdoptable()) {
+            addFeature(PackageManager.FEATURE_ADOPTABLE_STORAGE, 0);
+        }
+
         if (ActivityManager.isLowRamDeviceStatic()) {
             addFeature(PackageManager.FEATURE_RAM_LOW, 0);
         } else {
