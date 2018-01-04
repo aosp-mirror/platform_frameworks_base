@@ -4028,18 +4028,17 @@ public class BatteryStatsImpl extends BatteryStats {
 
     public void noteWakupAlarmLocked(String packageName, int uid, WorkSource workSource,
             String tag) {
-        if (!isOnBattery()) {
-            return;
-        }
 
         if (workSource != null) {
             for (int i = 0; i < workSource.size(); ++i) {
                 uid = workSource.get(i);
                 final String workSourceName = workSource.getName(i);
 
-                BatteryStatsImpl.Uid.Pkg pkg = getPackageStatsLocked(uid,
-                        workSourceName != null ? workSourceName : packageName);
-                pkg.noteWakeupAlarmLocked(tag);
+                if (isOnBattery()) {
+                    BatteryStatsImpl.Uid.Pkg pkg = getPackageStatsLocked(uid,
+                            workSourceName != null ? workSourceName : packageName);
+                    pkg.noteWakeupAlarmLocked(tag);
+                }
 
                 StatsLog.write(StatsLog.WAKEUP_ALARM_OCCURRED, uid, tag);
             }
@@ -4050,16 +4049,20 @@ public class BatteryStatsImpl extends BatteryStats {
                     final WorkChain wc = workChains.get(i);
                     uid = wc.getAttributionUid();
 
-                    BatteryStatsImpl.Uid.Pkg pkg = getPackageStatsLocked(uid, packageName);
-                    pkg.noteWakeupAlarmLocked(tag);
+                    if (isOnBattery()) {
+                        BatteryStatsImpl.Uid.Pkg pkg = getPackageStatsLocked(uid, packageName);
+                        pkg.noteWakeupAlarmLocked(tag);
+                    }
 
                     // TODO(statsd): Log the full attribution chain here once it's available
                     StatsLog.write(StatsLog.WAKEUP_ALARM_OCCURRED, uid, tag);
                 }
             }
         } else {
-            BatteryStatsImpl.Uid.Pkg pkg = getPackageStatsLocked(uid, packageName);
-            pkg.noteWakeupAlarmLocked(tag);
+            if (isOnBattery()) {
+                BatteryStatsImpl.Uid.Pkg pkg = getPackageStatsLocked(uid, packageName);
+                pkg.noteWakeupAlarmLocked(tag);
+            }
             StatsLog.write(StatsLog.WAKEUP_ALARM_OCCURRED, uid, tag);
         }
     }
