@@ -2331,11 +2331,15 @@ package android.location {
     method public deprecated boolean addGpsNavigationMessageListener(android.location.GpsNavigationMessageEvent.Listener);
     method public void flushGnssBatch();
     method public int getGnssBatchSize();
+    method public boolean isLocationEnabledForUser(android.os.UserHandle);
+    method public boolean isProviderEnabledForUser(java.lang.String, android.os.UserHandle);
     method public boolean registerGnssBatchedLocationCallback(long, boolean, android.location.BatchedLocationCallback, android.os.Handler);
     method public deprecated void removeGpsMeasurementListener(android.location.GpsMeasurementsEvent.Listener);
     method public deprecated void removeGpsNavigationMessageListener(android.location.GpsNavigationMessageEvent.Listener);
     method public void requestLocationUpdates(android.location.LocationRequest, android.location.LocationListener, android.os.Looper);
     method public void requestLocationUpdates(android.location.LocationRequest, android.app.PendingIntent);
+    method public void setLocationEnabledForUser(boolean, android.os.UserHandle);
+    method public boolean setProviderEnabledForUser(java.lang.String, boolean, android.os.UserHandle);
     method public boolean unregisterGnssBatchedLocationCallback(android.location.BatchedLocationCallback);
   }
 

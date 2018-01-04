@@ -1220,9 +1220,6 @@ class SettingsProtoDumpUtil {
         dumpSetting(s, p,
                 Settings.Secure.LOCATION_MODE,
                 SecureSettingsProto.LOCATION_MODE);
-        dumpSetting(s, p,
-                Settings.Secure.LOCATION_PREVIOUS_MODE,
-                SecureSettingsProto.LOCATION_PREVIOUS_MODE);
         // Settings.Secure.LOCK_BIOMETRIC_WEAK_FLAGS intentionally excluded since it's deprecated.
         dumpSetting(s, p,
                 Settings.Secure.LOCK_TO_APP_EXIT_LOCKED,
