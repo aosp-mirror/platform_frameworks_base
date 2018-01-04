@@ -186,7 +186,7 @@ class Convert {
                 false,  // isCaptureSupported
 
                 amfmConfigToBands(amfmConfig),
-                true,  // isBgScanSupported is deprecated
+                false,  // isBgScanSupported is deprecated
                 supportedProgramTypes,
                 supportedIdentifierTypes,
                 vendorInfoFromHal(prop.vendorInfo));

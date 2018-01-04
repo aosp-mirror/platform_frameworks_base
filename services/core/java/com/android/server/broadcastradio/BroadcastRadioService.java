@@ -94,7 +94,7 @@ public class BroadcastRadioService extends SystemService {
             }
             synchronized (mLock) {
                 if (mHal2.hasModule(moduleId)) {
-                    return mHal2.openSession(moduleId, callback);
+                    return mHal2.openSession(moduleId, bandConfig, withAudio, callback);
                 } else {
                     return mHal1.openTuner(moduleId, bandConfig, withAudio, callback);
                 }
