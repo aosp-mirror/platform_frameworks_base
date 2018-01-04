@@ -16,6 +16,9 @@
 
 package com.android.server.wm;
 
+import static android.app.WindowConfiguration.WINDOWING_MODE_FULLSCREEN;
+import static android.app.WindowConfiguration.WINDOWING_MODE_PINNED;
+import static android.app.WindowConfiguration.WINDOWING_MODE_UNDEFINED;
 import static android.content.pm.ActivityInfo.CONFIG_ORIENTATION;
 import static android.content.pm.ActivityInfo.CONFIG_SCREEN_SIZE;
 import static android.content.pm.ActivityInfo.SCREEN_ORIENTATION_BEHIND;
@@ -53,6 +56,7 @@ import static com.android.server.wm.proto.AppWindowTokenProto.WINDOW_TOKEN;
 
 import android.annotation.CallSuper;
 import android.app.Activity;
+import android.app.WindowConfiguration.WindowingMode;
 import android.content.res.Configuration;
 import android.graphics.GraphicBuffer;
 import android.graphics.Point;
@@ -1211,6 +1215,30 @@ class AppWindowToken extends WindowToken implements WindowManagerService.AppFree
     }
 
     @Override
+    public void onConfigurationChanged(Configuration newParentConfig) {
+        final int prevWinMode = getWindowingMode();
+        super.onConfigurationChanged(newParentConfig);
+        final int winMode = getWindowingMode();
+
+        if (prevWinMode == winMode) {
+            return;
+        }
+
+        if (prevWinMode != WINDOWING_MODE_UNDEFINED && winMode == WINDOWING_MODE_PINNED) {
+            // Entering PiP from fullscreen, reset the snap fraction
+            mDisplayContent.mPinnedStackControllerLocked.resetReentrySnapFraction(this);
+        } else if (prevWinMode == WINDOWING_MODE_PINNED && winMode != WINDOWING_MODE_UNDEFINED) {
+            // Leaving PiP to fullscreen, save the snap fraction based on the pre-animation bounds
+            // for the next re-entry into PiP (assuming the activity is not hidden or destroyed)
+            final TaskStack pinnedStack = mDisplayContent.getPinnedStack();
+            if (pinnedStack != null) {
+                mDisplayContent.mPinnedStackControllerLocked.saveReentrySnapFraction(this,
+                        pinnedStack.mPreAnimationBounds);
+            }
+        }
+    }
+
+    @Override
     void checkAppWindowsReadyToShow() {
         if (allDrawn == mLastAllDrawn) {
             return;
@@ -1836,6 +1864,11 @@ class AppWindowToken extends WindowToken implements WindowManagerService.AppFree
     @Override
     void setHidden(boolean hidden) {
         super.setHidden(hidden);
+
+        if (hidden) {
+            // Once the app window is hidden, reset the last saved PiP snap fraction
+            mDisplayContent.mPinnedStackControllerLocked.resetReentrySnapFraction(this);
+        }
         scheduleAnimation();
     }
 
