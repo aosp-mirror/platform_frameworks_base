@@ -45,7 +45,6 @@ import android.view.ViewTreeObserver;
 import android.view.WindowInsets;
 import android.view.accessibility.AccessibilityEvent;
 import android.widget.FrameLayout;
-
 import com.android.internal.logging.MetricsLogger;
 import com.android.internal.logging.nano.MetricsProto.MetricsEvent;
 import com.android.keyguard.KeyguardStatusView;
@@ -670,7 +669,7 @@ public class NotificationPanelView extends PanelView implements
 
     @Override
     public boolean onInterceptTouchEvent(MotionEvent event) {
-        if (mBlockTouches || mQs.isCustomizing()) {
+        if (mBlockTouches || mQsFullyExpanded && mQs.onInterceptTouchEvent(event)) {
             return false;
         }
         initDownStates(event);

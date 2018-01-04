@@ -25,6 +25,7 @@ import android.support.annotation.VisibleForTesting;
 import android.util.Log;
 import android.view.ContextThemeWrapper;
 import android.view.LayoutInflater;
+import android.view.MotionEvent;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.view.ViewGroup;
@@ -204,6 +205,11 @@ public class QSFragment extends Fragment implements QS {
     @Override
     public boolean isShowingDetail() {
         return mQSPanel.isShowingCustomize() || mQSDetail.isShowingDetail();
+    }
+
+    @Override
+    public boolean onInterceptTouchEvent(MotionEvent event) {
+        return isCustomizing() || mQSPanel.onInterceptTouchEvent(event);
     }
 
     @Override
