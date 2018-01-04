@@ -44,6 +44,7 @@ import android.content.UndoManager;
 import android.content.res.ColorStateList;
 import android.content.res.CompatibilityInfo;
 import android.content.res.Configuration;
+import android.content.res.ResourceId;
 import android.content.res.Resources;
 import android.content.res.TypedArray;
 import android.content.res.XmlResourceParser;
@@ -785,9 +786,11 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
     // mAutoSizeStepGranularityInPx.
     private boolean mHasPresetAutoSizeValues = false;
 
-    // Indicates whether the text was set from resources or dynamically, so it can be used to
+    // Indicates whether the text was set statically or dynamically, so it can be used to
     // sanitize autofill requests.
-    private boolean mTextFromResource = false;
+    private boolean mSetFromXmlOrResourceId = false;
+    // Resource id used to set the text - used for autofill purposes.
+    private @StringRes int mTextId = ResourceId.ID_NULL;
 
     /**
      * Kick-start the font cache for the zygote process (to pay the cost of
@@ -926,7 +929,8 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
 
         int n = a.getIndexCount();
 
-        boolean fromResourceId = false;
+        // Must set id in a temporary variable because it will be reset by setText()
+        boolean setFromXml = false;
         for (int i = 0; i < n; i++) {
             int attr = a.getIndex(i);
 
@@ -1068,7 +1072,8 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
                     break;
 
                 case com.android.internal.R.styleable.TextView_text:
-                    fromResourceId = true;
+                    setFromXml = true;
+                    mTextId = a.getResourceId(attr, ResourceId.ID_NULL);
                     text = a.getText(attr);
                     break;
 
@@ -1460,8 +1465,8 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
         }
 
         setText(text, bufferType);
-        if (fromResourceId) {
-            mTextFromResource = true;
+        if (setFromXml) {
+            mSetFromXmlOrResourceId = true;
         }
 
         if (hint != null) setHint(hint);
@@ -5278,7 +5283,7 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
 
     private void setText(CharSequence text, BufferType type,
                          boolean notifyBefore, int oldlen) {
-        mTextFromResource = false;
+        mSetFromXmlOrResourceId = false;
         if (text == null) {
             text = "";
         }
@@ -5516,7 +5521,8 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
     @android.view.RemotableViewMethod
     public final void setText(@StringRes int resid) {
         setText(getContext().getResources().getText(resid));
-        mTextFromResource = true;
+        mSetFromXmlOrResourceId = true;
+        mTextId = resid;
     }
 
     /**
@@ -5543,7 +5549,8 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
      */
     public final void setText(@StringRes int resid, BufferType type) {
         setText(getContext().getResources().getText(resid), type);
-        mTextFromResource = true;
+        mSetFromXmlOrResourceId = true;
+        mTextId = resid;
     }
 
     /**
@@ -10234,7 +10241,10 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
         final boolean isPassword = hasPasswordTransformationMethod()
                 || isPasswordInputType(getInputType());
         if (forAutofill) {
-            structure.setDataIsSensitive(!mTextFromResource);
+            structure.setDataIsSensitive(!mSetFromXmlOrResourceId);
+            if (mTextId != ResourceId.ID_NULL) {
+                structure.setTextIdEntry(getResources().getResourceEntryName(mTextId));
+            }
         }
 
         if (!isPassword || forAutofill) {
