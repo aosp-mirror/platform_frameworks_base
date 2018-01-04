@@ -18901,7 +18901,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      *
      * @hide
      */
-    public Bitmap createSnapshot(Bitmap.Config quality, int backgroundColor, boolean skipChildren) {
+    public Bitmap createSnapshot(ViewDebug.CanvasProvider canvasProvider, boolean skipChildren) {
         int width = mRight - mLeft;
         int height = mBottom - mTop;
 
@@ -18910,71 +18910,48 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
         width = (int) ((width * scale) + 0.5f);
         height = (int) ((height * scale) + 0.5f);
 
-        Bitmap bitmap = Bitmap.createBitmap(mResources.getDisplayMetrics(),
-                width > 0 ? width : 1, height > 0 ? height : 1, quality);
-        if (bitmap == null) {
-            throw new OutOfMemoryError();
-        }
+        Canvas oldCanvas = null;
+        try {
+            Canvas canvas = canvasProvider.getCanvas(this,
+                    width > 0 ? width : 1, height > 0 ? height : 1);
 
-        Resources resources = getResources();
-        if (resources != null) {
-            bitmap.setDensity(resources.getDisplayMetrics().densityDpi);
-        }
-
-        Canvas canvas;
-        if (attachInfo != null) {
-            canvas = attachInfo.mCanvas;
-            if (canvas == null) {
-                canvas = new Canvas();
+            if (attachInfo != null) {
+                oldCanvas = attachInfo.mCanvas;
+                // Temporarily clobber the cached Canvas in case one of our children
+                // is also using a drawing cache. Without this, the children would
+                // steal the canvas by attaching their own bitmap to it and bad, bad
+                // things would happen (invisible views, corrupted drawings, etc.)
+                attachInfo.mCanvas = null;
             }
-            canvas.setBitmap(bitmap);
-            // Temporarily clobber the cached Canvas in case one of our children
-            // is also using a drawing cache. Without this, the children would
-            // steal the canvas by attaching their own bitmap to it and bad, bad
-            // things would happen (invisible views, corrupted drawings, etc.)
-            attachInfo.mCanvas = null;
-        } else {
-            // This case should hopefully never or seldom happen
-            canvas = new Canvas(bitmap);
-        }
-        boolean enabledHwBitmapsInSwMode = canvas.isHwBitmapsInSwModeEnabled();
-        canvas.setHwBitmapsInSwModeEnabled(true);
-        if ((backgroundColor & 0xff000000) != 0) {
-            bitmap.eraseColor(backgroundColor);
-        }
 
-        computeScroll();
-        final int restoreCount = canvas.save();
-        canvas.scale(scale, scale);
-        canvas.translate(-mScrollX, -mScrollY);
+            computeScroll();
+            final int restoreCount = canvas.save();
+            canvas.scale(scale, scale);
+            canvas.translate(-mScrollX, -mScrollY);
 
-        // Temporarily remove the dirty mask
-        int flags = mPrivateFlags;
-        mPrivateFlags &= ~PFLAG_DIRTY_MASK;
+            // Temporarily remove the dirty mask
+            int flags = mPrivateFlags;
+            mPrivateFlags &= ~PFLAG_DIRTY_MASK;
 
-        // Fast path for layouts with no backgrounds
-        if ((mPrivateFlags & PFLAG_SKIP_DRAW) == PFLAG_SKIP_DRAW) {
-            dispatchDraw(canvas);
-            drawAutofilledHighlight(canvas);
-            if (mOverlay != null && !mOverlay.isEmpty()) {
-                mOverlay.getOverlayView().draw(canvas);
+            // Fast path for layouts with no backgrounds
+            if ((mPrivateFlags & PFLAG_SKIP_DRAW) == PFLAG_SKIP_DRAW) {
+                dispatchDraw(canvas);
+                drawAutofilledHighlight(canvas);
+                if (mOverlay != null && !mOverlay.isEmpty()) {
+                    mOverlay.getOverlayView().draw(canvas);
+                }
+            } else {
+                draw(canvas);
             }
-        } else {
-            draw(canvas);
+
+            mPrivateFlags = flags;
+            canvas.restoreToCount(restoreCount);
+            return canvasProvider.createBitmap();
+        } finally {
+            if (oldCanvas != null) {
+                attachInfo.mCanvas = oldCanvas;
+            }
         }
-
-        mPrivateFlags = flags;
-
-        canvas.restoreToCount(restoreCount);
-        canvas.setBitmap(null);
-        canvas.setHwBitmapsInSwModeEnabled(enabledHwBitmapsInSwMode);
-
-        if (attachInfo != null) {
-            // Restore the cached Canvas for our siblings
-            attachInfo.mCanvas = canvas;
-        }
-
-        return bitmap;
     }
 
     /**

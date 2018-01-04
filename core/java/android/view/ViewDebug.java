@@ -21,6 +21,7 @@ import android.content.Context;
 import android.content.res.Resources;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
+import android.graphics.Point;
 import android.graphics.Rect;
 import android.os.Debug;
 import android.os.Handler;
@@ -773,16 +774,15 @@ public class ViewDebug {
             final CountDownLatch latch = new CountDownLatch(1);
             final Bitmap[] cache = new Bitmap[1];
 
-            captureView.post(new Runnable() {
-                public void run() {
-                    try {
-                        cache[0] = captureView.createSnapshot(
-                                Bitmap.Config.ARGB_8888, 0, skipChildren);
-                    } catch (OutOfMemoryError e) {
-                        Log.w("View", "Out of memory for bitmap");
-                    } finally {
-                        latch.countDown();
-                    }
+            captureView.post(() -> {
+                try {
+                    CanvasProvider provider = captureView.isHardwareAccelerated()
+                            ? new HardwareCanvasProvider() : new SoftwareCanvasProvider();
+                    cache[0] = captureView.createSnapshot(provider, skipChildren);
+                } catch (OutOfMemoryError e) {
+                    Log.w("View", "Out of memory for bitmap");
+                } finally {
+                    latch.countDown();
                 }
             });
 
@@ -1739,5 +1739,87 @@ public class ViewDebug {
                 view.setLayoutParams(p);
             }
         });
+    }
+
+    /**
+     * @hide
+     */
+    public static class SoftwareCanvasProvider implements CanvasProvider {
+
+        private Canvas mCanvas;
+        private Bitmap mBitmap;
+        private boolean mEnabledHwBitmapsInSwMode;
+
+        @Override
+        public Canvas getCanvas(View view, int width, int height) {
+            mBitmap = Bitmap.createBitmap(view.getResources().getDisplayMetrics(),
+                    width, height, Bitmap.Config.ARGB_8888);
+            if (mBitmap == null) {
+                throw new OutOfMemoryError();
+            }
+            mBitmap.setDensity(view.getResources().getDisplayMetrics().densityDpi);
+
+            if (view.mAttachInfo != null) {
+                mCanvas = view.mAttachInfo.mCanvas;
+            }
+            if (mCanvas == null) {
+                mCanvas = new Canvas();
+            }
+            mEnabledHwBitmapsInSwMode = mCanvas.isHwBitmapsInSwModeEnabled();
+            mCanvas.setBitmap(mBitmap);
+            return mCanvas;
+        }
+
+        @Override
+        public Bitmap createBitmap() {
+            mCanvas.setBitmap(null);
+            mCanvas.setHwBitmapsInSwModeEnabled(mEnabledHwBitmapsInSwMode);
+            return mBitmap;
+        }
+    }
+
+    /**
+     * @hide
+     */
+    public static class HardwareCanvasProvider implements CanvasProvider {
+
+        private View mView;
+        private Point mSize;
+        private RenderNode mNode;
+        private DisplayListCanvas mCanvas;
+
+        @Override
+        public Canvas getCanvas(View view, int width, int height) {
+            mView = view;
+            mSize = new Point(width, height);
+            mNode = RenderNode.create("ViewDebug", mView);
+            mNode.setLeftTopRightBottom(0, 0, width, height);
+            mNode.setClipToBounds(false);
+            mCanvas = mNode.start(width, height);
+            return mCanvas;
+        }
+
+        @Override
+        public Bitmap createBitmap() {
+            mNode.end(mCanvas);
+            return ThreadedRenderer.createHardwareBitmap(mNode, mSize.x, mSize.y);
+        }
+    }
+
+    /**
+     * @hide
+     */
+    public interface CanvasProvider {
+
+        /**
+         * Returns a canvas which can be used to draw {@param view}
+         */
+        Canvas getCanvas(View view, int width, int height);
+
+        /**
+         * Creates a bitmap from previously returned canvas
+         * @return
+         */
+        Bitmap createBitmap();
     }
 }
