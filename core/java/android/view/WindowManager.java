@@ -17,6 +17,32 @@
 package android.view;
 
 import static android.content.pm.ActivityInfo.COLOR_MODE_DEFAULT;
+import static android.view.WindowLayoutParamsProto.ALPHA;
+import static android.view.WindowLayoutParamsProto.BUTTON_BRIGHTNESS;
+import static android.view.WindowLayoutParamsProto.COLOR_MODE;
+import static android.view.WindowLayoutParamsProto.FLAGS;
+import static android.view.WindowLayoutParamsProto.FLAGS_EXTRA;
+import static android.view.WindowLayoutParamsProto.FORMAT;
+import static android.view.WindowLayoutParamsProto.GRAVITY;
+import static android.view.WindowLayoutParamsProto.HAS_SYSTEM_UI_LISTENERS;
+import static android.view.WindowLayoutParamsProto.HEIGHT;
+import static android.view.WindowLayoutParamsProto.HORIZONTAL_MARGIN;
+import static android.view.WindowLayoutParamsProto.INPUT_FEATURE_FLAGS;
+import static android.view.WindowLayoutParamsProto.NEEDS_MENU_KEY;
+import static android.view.WindowLayoutParamsProto.PREFERRED_REFRESH_RATE;
+import static android.view.WindowLayoutParamsProto.PRIVATE_FLAGS;
+import static android.view.WindowLayoutParamsProto.ROTATION_ANIMATION;
+import static android.view.WindowLayoutParamsProto.SCREEN_BRIGHTNESS;
+import static android.view.WindowLayoutParamsProto.SOFT_INPUT_MODE;
+import static android.view.WindowLayoutParamsProto.SUBTREE_SYSTEM_UI_VISIBILITY_FLAGS;
+import static android.view.WindowLayoutParamsProto.SYSTEM_UI_VISIBILITY_FLAGS;
+import static android.view.WindowLayoutParamsProto.TYPE;
+import static android.view.WindowLayoutParamsProto.USER_ACTIVITY_TIMEOUT;
+import static android.view.WindowLayoutParamsProto.VERTICAL_MARGIN;
+import static android.view.WindowLayoutParamsProto.WIDTH;
+import static android.view.WindowLayoutParamsProto.WINDOW_ANIMATIONS;
+import static android.view.WindowLayoutParamsProto.X;
+import static android.view.WindowLayoutParamsProto.Y;
 
 import android.Manifest.permission;
 import android.annotation.IntDef;
@@ -2722,7 +2748,33 @@ public interface WindowManager extends ViewManager {
          */
         public void writeToProto(ProtoOutputStream proto, long fieldId) {
             final long token = proto.start(fieldId);
-            proto.write(WindowLayoutParamsProto.TYPE, type);
+            proto.write(TYPE, type);
+            proto.write(X, x);
+            proto.write(Y, y);
+            proto.write(WIDTH, width);
+            proto.write(HEIGHT, height);
+            proto.write(HORIZONTAL_MARGIN, horizontalMargin);
+            proto.write(VERTICAL_MARGIN, verticalMargin);
+            proto.write(GRAVITY, gravity);
+            proto.write(SOFT_INPUT_MODE, softInputMode);
+            proto.write(FORMAT, format);
+            proto.write(WINDOW_ANIMATIONS, windowAnimations);
+            proto.write(ALPHA, alpha);
+            proto.write(SCREEN_BRIGHTNESS, screenBrightness);
+            proto.write(BUTTON_BRIGHTNESS, buttonBrightness);
+            proto.write(ROTATION_ANIMATION, rotationAnimation);
+            proto.write(PREFERRED_REFRESH_RATE, preferredRefreshRate);
+            proto.write(WindowLayoutParamsProto.PREFERRED_DISPLAY_MODE_ID, preferredDisplayModeId);
+            proto.write(HAS_SYSTEM_UI_LISTENERS, hasSystemUiListeners);
+            proto.write(INPUT_FEATURE_FLAGS, inputFeatures);
+            proto.write(USER_ACTIVITY_TIMEOUT, userActivityTimeout);
+            proto.write(NEEDS_MENU_KEY, needsMenuKey);
+            proto.write(COLOR_MODE, mColorMode);
+            proto.write(FLAGS, flags);
+            proto.write(FLAGS_EXTRA, flags2);
+            proto.write(PRIVATE_FLAGS, privateFlags);
+            proto.write(SYSTEM_UI_VISIBILITY_FLAGS, systemUiVisibility);
+            proto.write(SUBTREE_SYSTEM_UI_VISIBILITY_FLAGS, subtreeSystemUiVisibility);
             proto.end(token);
         }
 

@@ -38,4 +38,16 @@ message DisplayProto {
         // The display is on and optimized for VR mode.
         DISPLAY_STATE_VR = 5;
     }
+    enum ColorMode {
+        COLOR_MODE_INVALID = -1;
+        COLOR_MODE_BT601_625 = 1;
+        COLOR_MODE_BT601_625_UNADJUSTED = 2;
+        COLOR_MODE_BT601_525 = 3;
+        COLOR_MODE_BT601_525_UNADJUSTED = 4;
+        COLOR_MODE_BT709 = 5;
+        COLOR_MODE_DCI_P3 = 6;
+        COLOR_MODE_SRGB = 7;
+        COLOR_MODE_ADOBE_RGB = 8;
+        COLOR_MODE_DISPLAY_P3 = 9;
+    }
 }
