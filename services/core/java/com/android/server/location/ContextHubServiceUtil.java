@@ -221,7 +221,7 @@ import java.util.ArrayList;
             case Result.NOT_INIT:
                 return ContextHubTransaction.RESULT_FAILED_UNINITIALIZED;
             case Result.TRANSACTION_PENDING:
-                return ContextHubTransaction.RESULT_FAILED_PENDING;
+                return ContextHubTransaction.RESULT_FAILED_BUSY;
             case Result.TRANSACTION_FAILED:
             case Result.UNKNOWN_FAILURE:
             default: /* fall through */

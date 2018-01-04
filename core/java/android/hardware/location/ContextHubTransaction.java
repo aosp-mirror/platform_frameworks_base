@@ -18,8 +18,11 @@ package android.hardware.location;
 import android.annotation.CallbackExecutor;
 import android.annotation.IntDef;
 import android.annotation.NonNull;
+import android.annotation.SystemApi;
 import android.os.Handler;
 import android.os.HandlerExecutor;
+
+import com.android.internal.util.Preconditions;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
@@ -35,17 +38,19 @@ import java.util.concurrent.TimeoutException;
  * through the ContextHubManager APIs. The caller can either retrieve the result
  * synchronously through a blocking call ({@link #waitForResponse(long, TimeUnit)}) or
  * asynchronously through a user-defined listener
- * ({@link #setOnCompleteListener(Listener, Executor)} )}).
+ * ({@link #setOnCompleteListener(OnCompleteListener, Executor)} )}).
  *
  * @param <T> the type of the contents in the transaction response
  *
  * @hide
  */
+@SystemApi
 public class ContextHubTransaction<T> {
     private static final String TAG = "ContextHubTransaction";
 
     /**
      * Constants describing the type of a transaction through the Context Hub Service.
+     * {@hide}
      */
     @Retention(RetentionPolicy.SOURCE)
     @IntDef(prefix = { "TYPE_" }, value = {
@@ -65,6 +70,7 @@ public class ContextHubTransaction<T> {
 
     /**
      * Constants describing the result of a transaction or request through the Context Hub Service.
+     * {@hide}
      */
     @Retention(RetentionPolicy.SOURCE)
     @IntDef(prefix = { "RESULT_" }, value = {
@@ -72,7 +78,7 @@ public class ContextHubTransaction<T> {
             RESULT_FAILED_UNKNOWN,
             RESULT_FAILED_BAD_PARAMS,
             RESULT_FAILED_UNINITIALIZED,
-            RESULT_FAILED_PENDING,
+            RESULT_FAILED_BUSY,
             RESULT_FAILED_AT_HUB,
             RESULT_FAILED_TIMEOUT,
             RESULT_FAILED_SERVICE_INTERNAL_FAILURE,
@@ -95,7 +101,7 @@ public class ContextHubTransaction<T> {
     /**
      * Failure mode when there are too many transactions pending.
      */
-    public static final int RESULT_FAILED_PENDING = 4;
+    public static final int RESULT_FAILED_BUSY = 4;
     /**
      * Failure mode when the request went through, but failed asynchronously at the hub.
      */
@@ -151,7 +157,7 @@ public class ContextHubTransaction<T> {
      * @param <L> the type of the contents in the transaction response
      */
     @FunctionalInterface
-    public interface Listener<L> {
+    public interface OnCompleteListener<L> {
         /**
          * The listener function to invoke when the transaction completes.
          *
@@ -181,7 +187,7 @@ public class ContextHubTransaction<T> {
     /*
      * The listener to be invoked when the transaction completes.
      */
-    private ContextHubTransaction.Listener<T> mListener = null;
+    private ContextHubTransaction.OnCompleteListener<T> mListener = null;
 
     /*
      * Synchronization latch used to block on response.
@@ -272,8 +278,8 @@ public class ContextHubTransaction<T> {
      * A transaction can be invalidated if the process owning the transaction is no longer active
      * and the reference to this object is lost.
      *
-     * This method or {@link #setOnCompleteListener(ContextHubTransaction.Listener)} can only be
-     * invoked once, or an IllegalStateException will be thrown.
+     * This method or {@link #setOnCompleteListener(ContextHubTransaction.OnCompleteListener)} can
+     * only be invoked once, or an IllegalStateException will be thrown.
      *
      * @param listener the listener to be invoked upon completion
      * @param executor the executor to invoke the callback
@@ -282,15 +288,11 @@ public class ContextHubTransaction<T> {
      * @throws NullPointerException if the callback or handler is null
      */
     public void setOnCompleteListener(
-            @NonNull ContextHubTransaction.Listener<T> listener,
+            @NonNull ContextHubTransaction.OnCompleteListener<T> listener,
             @NonNull @CallbackExecutor Executor executor) {
         synchronized (this) {
-            if (listener == null) {
-                throw new NullPointerException("Listener cannot be null");
-            }
-            if (executor == null) {
-                throw new NullPointerException("Executor cannot be null");
-            }
+            Preconditions.checkNotNull(listener, "OnCompleteListener cannot be null");
+            Preconditions.checkNotNull(executor, "Executor cannot be null");
             if (mListener != null) {
                 throw new IllegalStateException(
                         "Cannot set ContextHubTransaction listener multiple times");
@@ -308,18 +310,19 @@ public class ContextHubTransaction<T> {
     /**
      * Sets the listener to be invoked invoked when the transaction completes.
      *
-     * Equivalent to {@link #setOnCompleteListener(ContextHubTransaction.Listener, Executor)}
-     * with the executor using the main thread's Looper.
+     * Equivalent to {@link #setOnCompleteListener(ContextHubTransaction.OnCompleteListener,
+     * Executor)} with the executor using the main thread's Looper.
      *
-     * This method or {@link #setOnCompleteListener(ContextHubTransaction.Listener, Executor)}
-     * can only be invoked once, or an IllegalStateException will be thrown.
+     * This method or {@link #setOnCompleteListener(ContextHubTransaction.OnCompleteListener,
+     * Executor)} can only be invoked once, or an IllegalStateException will be thrown.
      *
      * @param listener the listener to be invoked upon completion
      *
      * @throws IllegalStateException if this method is called multiple times
      * @throws NullPointerException if the callback is null
      */
-    public void setOnCompleteListener(@NonNull ContextHubTransaction.Listener<T> listener) {
+    public void setOnCompleteListener(
+            @NonNull ContextHubTransaction.OnCompleteListener<T> listener) {
         setOnCompleteListener(listener, new HandlerExecutor(Handler.getMain()));
     }
 
@@ -337,9 +340,7 @@ public class ContextHubTransaction<T> {
      */
     /* package */ void setResponse(ContextHubTransaction.Response<T> response) {
         synchronized (this) {
-            if (response == null) {
-                throw new NullPointerException("Response cannot be null");
-            }
+            Preconditions.checkNotNull(response, "Response cannot be null");
             if (mIsResponseSet) {
                 throw new IllegalStateException(
                         "Cannot set response of ContextHubTransaction multiple times");
