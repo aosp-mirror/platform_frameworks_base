@@ -3756,6 +3756,7 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
      *
      * @param elegant set the paint's elegant metrics flag.
      *
+     * @see #isElegantTextHeight()
      * @see Paint#isElegantTextHeight()
      *
      * @attr ref android.R.styleable#TextView_elegantTextHeight
@@ -9125,8 +9126,7 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
 
     /**
      *
-     * Checks whether the transformation method applied to this TextView is set to ALL CAPS. This
-     * settings is internally ignored if this field is editable or selectable.
+     * Checks whether the transformation method applied to this TextView is set to ALL CAPS.
      * @return Whether the current transformation method is for ALL CAPS.
      *
      * @see #setAllCaps(boolean)
