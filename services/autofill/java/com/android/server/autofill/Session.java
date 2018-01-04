@@ -69,6 +69,7 @@ import android.service.autofill.FieldClassification;
 import android.util.ArrayMap;
 import android.util.ArraySet;
 import android.util.LocalLog;
+import android.util.Pair;
 import android.util.Slog;
 import android.util.SparseArray;
 import android.util.TimeUtils;
@@ -84,6 +85,7 @@ import com.android.internal.logging.MetricsLogger;
 import com.android.internal.logging.nano.MetricsProto.MetricsEvent;
 import com.android.internal.os.HandlerCaller;
 import com.android.internal.util.ArrayUtils;
+import com.android.server.autofill.AutofillManagerServiceImpl.FieldClassificationAlgorithmService;
 import com.android.server.autofill.ui.AutoFillUI;
 import com.android.server.autofill.ui.PendingUi;
 
@@ -1088,7 +1090,8 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
 
                     // Sets field classification score for field
                     if (userData!= null) {
-                        setScore(detectedFieldIds, detectedFieldClassifications, userData,
+                        setFieldClassificationScore(mService.getFieldClassificationService(),
+                                detectedFieldIds, detectedFieldClassifications, userData,
                                 viewState.id, currentValue);
                     }
                 } // else
@@ -1133,7 +1136,9 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
      * Adds the matches to {@code detectedFieldsIds} and {@code detectedFieldClassifications} for
      * {@code fieldId} based on its {@code currentValue} and {@code userData}.
      */
-    private static void setScore(@NonNull ArrayList<AutofillId> detectedFieldIds,
+    private static void setFieldClassificationScore(
+            @NonNull AutofillManagerServiceImpl.FieldClassificationAlgorithmService  service,
+            @NonNull ArrayList<AutofillId> detectedFieldIds,
             @NonNull ArrayList<FieldClassification> detectedFieldClassifications,
             @NonNull UserData userData, @NonNull AutofillId fieldId,
             @NonNull AutofillValue currentValue) {
@@ -1150,11 +1155,16 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
             return;
         }
 
+        final String algorithm = userData.getFieldClassificationAlgorithm();
+        final Bundle algorithmArgs = userData.getAlgorithmArgs();
         ArrayList<Match> matches = null;
         for (int i = 0; i < userValues.length; i++) {
             String remoteId = remoteIds[i];
             final String value = userValues[i];
-            final float score = userData.getScorer().getScore(currentValue, value);
+            final Pair<String, Float> result = service.getScore(algorithm, algorithmArgs,
+                    currentValue, value);
+            final String actualAlgorithm = result.first;
+            final float score = result.second;
             if (score > 0) {
                 if (sVerbose) {
                     Slog.v(TAG, "adding score " + score + " at index " + i + " and id " + fieldId);
@@ -1162,7 +1172,7 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
                 if (matches == null) {
                     matches = new ArrayList<>(userValues.length);
                 }
-                matches.add(new Match(remoteId, score));
+                matches.add(new Match(remoteId, score, actualAlgorithm));
             }
             else if (sVerbose) Slog.v(TAG, "skipping score 0 at index " + i + " and id " + fieldId);
         }

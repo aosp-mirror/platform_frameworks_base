@@ -51,6 +51,7 @@ import android.os.UserManager;
 import android.provider.Settings;
 import android.service.autofill.AutofillService;
 import android.service.autofill.AutofillServiceInfo;
+import android.service.autofill.EditDistanceScorer;
 import android.service.autofill.FieldClassification;
 import android.service.autofill.FieldClassification.Match;
 import android.service.autofill.FillEventHistory;
@@ -63,6 +64,8 @@ import android.util.ArrayMap;
 import android.util.ArraySet;
 import android.util.DebugUtils;
 import android.util.LocalLog;
+import android.util.Log;
+import android.util.Pair;
 import android.util.Slog;
 import android.util.SparseArray;
 import android.util.TimeUtils;
@@ -81,6 +84,7 @@ import com.android.server.autofill.ui.AutoFillUI;
 
 import java.io.PrintWriter;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Random;
 
@@ -105,7 +109,10 @@ final class AutofillManagerServiceImpl {
     private final AutoFillUI mUi;
     private final MetricsLogger mMetricsLogger = new MetricsLogger();
 
+    @GuardedBy("mLock")
     private RemoteCallbackList<IAutoFillManagerClient> mClients;
+
+    @GuardedBy("mLock")
     private AutofillServiceInfo mInfo;
 
     private static final Random sRandom = new Random();
@@ -113,25 +120,74 @@ final class AutofillManagerServiceImpl {
     private final LocalLog mRequestsHistory;
     private final LocalLog mUiLatencyHistory;
 
+    // TODO(b/70939974): temporary, will be moved to ExtServices
+    static final class FieldClassificationAlgorithmService {
+
+        /**
+         * Gets the name of all available algorithms.
+         */
+        @NonNull
+        public List<String> getAvailableAlgorithms() {
+            return Arrays.asList(EditDistanceScorer.NAME);
+        }
+
+        /**
+         * Gets the default algorithm that's used when an algorithm is not specified or is invalid.
+         */
+        @NonNull
+        public String getDefaultAlgorithm() {
+            return EditDistanceScorer.NAME;
+        }
+
+        /**
+         * Gets a field classification score.
+         *
+         * @param algorithmName algorithm to be used. If invalid, the default algorithm will be used
+         * instead.
+         * @param algorithmArgs optional arguments to be passed to the algorithm.
+         * @param actualValue value entered by the user.
+         * @param userDataValue value from the user data.
+         *
+         * @return pair containing the algorithm used and the score.
+         */
+        // TODO(b/70939974): use parcelable instead of pair
+        Pair<String, Float> getScore(@NonNull String algorithmName, @Nullable Bundle algorithmArgs,
+                @NonNull AutofillValue actualValue, @NonNull String userDataValue) {
+            if (!EditDistanceScorer.NAME.equals(algorithmName)) {
+                Log.w(TAG, "Ignoring invalid algorithm (" + algorithmName + ") and using "
+                        + EditDistanceScorer.NAME + " instead");
+            }
+            return new Pair<>(EditDistanceScorer.NAME,
+                    EditDistanceScorer.getInstance().getScore(actualValue, userDataValue));
+        }
+    }
+
+    private final FieldClassificationAlgorithmService mFcService =
+            new FieldClassificationAlgorithmService();
+
     /**
      * Apps disabled by the service; key is package name, value is when they will be enabled again.
      */
+    @GuardedBy("mLock")
     private ArrayMap<String, Long> mDisabledApps;
 
     /**
      * Activities disabled by the service; key is component name, value is when they will be enabled
      * again.
      */
+    @GuardedBy("mLock")
     private ArrayMap<ComponentName, Long> mDisabledActivities;
 
     /**
      * Whether service was disabled for user due to {@link UserManager} restrictions.
      */
+    @GuardedBy("mLock")
     private boolean mDisabled;
 
     /**
      * Data used for field classification.
      */
+    @GuardedBy("mLock")
     private UserData mUserData;
 
     /**
@@ -235,7 +291,7 @@ final class AutofillManagerServiceImpl {
     }
 
     void updateLocked(boolean disabled) {
-        final boolean wasEnabled = isEnabled();
+        final boolean wasEnabled = isEnabledLocked();
         if (sVerbose) {
             Slog.v(TAG, "updateLocked(u=" + mUserId + "): wasEnabled=" + wasEnabled
                     + ", mSetupComplete= " + mSetupComplete
@@ -274,7 +330,7 @@ final class AutofillManagerServiceImpl {
             Slog.e(TAG, "Bad AutofillServiceInfo for '" + componentName + "': " + e);
             mInfo = null;
         }
-        final boolean isEnabled = isEnabled();
+        final boolean isEnabled = isEnabledLocked();
         if (wasEnabled != isEnabled) {
             if (!isEnabled) {
                 final int sessionCount = mSessions.size();
@@ -292,7 +348,7 @@ final class AutofillManagerServiceImpl {
             mClients = new RemoteCallbackList<>();
         }
         mClients.register(client);
-        return isEnabled();
+        return isEnabledLocked();
     }
 
     void removeClientLocked(IAutoFillManagerClient client) {
@@ -302,7 +358,7 @@ final class AutofillManagerServiceImpl {
     }
 
     void setAuthenticationResultLocked(Bundle data, int sessionId, int authenticationId, int uid) {
-        if (!isEnabled()) {
+        if (!isEnabledLocked()) {
             return;
         }
         final Session session = mSessions.get(sessionId);
@@ -312,7 +368,7 @@ final class AutofillManagerServiceImpl {
     }
 
     void setHasCallback(int sessionId, int uid, boolean hasIt) {
-        if (!isEnabled()) {
+        if (!isEnabledLocked()) {
             return;
         }
         final Session session = mSessions.get(sessionId);
@@ -327,7 +383,7 @@ final class AutofillManagerServiceImpl {
             @NonNull IBinder appCallbackToken, @NonNull AutofillId autofillId,
             @NonNull Rect virtualBounds, @Nullable AutofillValue value, boolean hasCallback,
             int flags, @NonNull ComponentName componentName) {
-        if (!isEnabled()) {
+        if (!isEnabledLocked()) {
             return 0;
         }
 
@@ -388,7 +444,7 @@ final class AutofillManagerServiceImpl {
     }
 
     void finishSessionLocked(int sessionId, int uid) {
-        if (!isEnabled()) {
+        if (!isEnabledLocked()) {
             return;
         }
 
@@ -411,7 +467,7 @@ final class AutofillManagerServiceImpl {
     }
 
     void cancelSessionLocked(int sessionId, int uid) {
-        if (!isEnabled()) {
+        if (!isEnabledLocked()) {
             return;
         }
 
@@ -799,14 +855,15 @@ final class AutofillManagerServiceImpl {
     // Called by AutofillManager
     void setUserData(int callingUid, UserData userData) {
         synchronized (mLock) {
-            if (isCalledByServiceLocked("setUserData", callingUid)) {
-                mUserData = userData;
-                // Log it
-                int numberFields = mUserData == null ? 0: mUserData.getRemoteIds().length;
-                mMetricsLogger.write(Helper.newLogMaker(MetricsEvent.AUTOFILL_USERDATA_UPDATED,
-                        getServicePackageName(), null)
-                        .setCounterValue(numberFields));
+            if (!isCalledByServiceLocked("setUserData", callingUid)) {
+                return;
             }
+            mUserData = userData;
+            // Log it
+            int numberFields = mUserData == null ? 0: mUserData.getRemoteIds().length;
+            mMetricsLogger.write(Helper.newLogMaker(MetricsEvent.AUTOFILL_USERDATA_UPDATED,
+                    getServicePackageName(), null)
+                    .setCounterValue(numberFields));
         }
     }
 
@@ -917,6 +974,11 @@ final class AutofillManagerServiceImpl {
             pw.println();
             mUserData.dump(prefix2, pw);
         }
+
+        pw.print(prefix); pw.print("Available Field Classification algorithms: ");
+        pw.println(mFcService.getAvailableAlgorithms());
+        pw.print(prefix); pw.print("Default Field Classification algorithm: ");
+        pw.println(mFcService.getDefaultAlgorithm());
     }
 
     void destroySessionsLocked() {
@@ -964,11 +1026,13 @@ final class AutofillManagerServiceImpl {
                 final IAutoFillManagerClient client = clients.getBroadcastItem(i);
                 try {
                     final boolean resetSession;
+                    final boolean isEnabled;
                     synchronized (mLock) {
                         resetSession = resetClient || isClientSessionDestroyedLocked(client);
+                        isEnabled = isEnabledLocked();
                     }
                     int flags = 0;
-                    if (isEnabled()) {
+                    if (isEnabled) {
                         flags |= AutofillManager.SET_STATE_FLAG_ENABLED;
                     }
                     if (resetSession) {
@@ -1004,7 +1068,7 @@ final class AutofillManagerServiceImpl {
         return true;
     }
 
-    boolean isEnabled() {
+    boolean isEnabledLocked() {
         return mSetupComplete && mInfo != null && !mDisabled;
     }
 
@@ -1093,9 +1157,9 @@ final class AutofillManagerServiceImpl {
     }
 
     // Called by AutofillManager, checks UID.
-    boolean isFieldClassificationEnabled(int uid) {
+    boolean isFieldClassificationEnabled(int callingUid) {
         synchronized (mLock) {
-            if (!isCalledByServiceLocked("isFieldClassificationEnabled", uid)) {
+            if (!isCalledByServiceLocked("isFieldClassificationEnabled", callingUid)) {
                 return false;
             }
             return isFieldClassificationEnabledLocked();
@@ -1108,6 +1172,28 @@ final class AutofillManagerServiceImpl {
                 mContext.getContentResolver(),
                 Settings.Secure.AUTOFILL_FEATURE_FIELD_CLASSIFICATION, 0,
                 mUserId) == 1;
+    }
+
+    FieldClassificationAlgorithmService getFieldClassificationService() {
+        return mFcService;
+    }
+
+    List<String> getAvailableFieldClassificationAlgorithms(int callingUid) {
+        synchronized (mLock) {
+            if (!isCalledByServiceLocked("getFCAlgorithms()", callingUid)) {
+                return null;
+            }
+        }
+        return mFcService.getAvailableAlgorithms();
+    }
+
+    String getDefaultFieldClassificationAlgorithm(int callingUid) {
+        synchronized (mLock) {
+            if (!isCalledByServiceLocked("getDefaultFCAlgorithm()", callingUid)) {
+                return null;
+            }
+        }
+        return mFcService.getDefaultAlgorithm();
     }
 
     @Override

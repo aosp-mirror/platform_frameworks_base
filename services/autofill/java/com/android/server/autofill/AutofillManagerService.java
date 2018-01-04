@@ -479,7 +479,7 @@ public final class AutofillManagerService extends SystemService {
         if (service != null) {
             service.destroySessionsLocked();
             service.updateLocked(disabled);
-            if (!service.isEnabled()) {
+            if (!service.isEnabledLocked()) {
                 removeCachedServiceLocked(userId);
             }
         }
@@ -618,6 +618,34 @@ public final class AutofillManagerService extends SystemService {
             }
 
             return false;
+        }
+
+        @Override
+        public String getDefaultFieldClassificationAlgorithm() throws RemoteException {
+            final int userId = UserHandle.getCallingUserId();
+
+            synchronized (mLock) {
+                final AutofillManagerServiceImpl service = peekServiceForUserLocked(userId);
+                if (service != null) {
+                    return service.getDefaultFieldClassificationAlgorithm(getCallingUid());
+                }
+            }
+
+            return null;
+        }
+
+        @Override
+        public List<String> getAvailableFieldClassificationAlgorithms() throws RemoteException {
+            final int userId = UserHandle.getCallingUserId();
+
+            synchronized (mLock) {
+                final AutofillManagerServiceImpl service = peekServiceForUserLocked(userId);
+                if (service != null) {
+                    return service.getAvailableFieldClassificationAlgorithms(getCallingUid());
+                }
+            }
+
+            return null;
         }
 
         @Override
