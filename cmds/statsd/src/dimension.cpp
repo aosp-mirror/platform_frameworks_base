@@ -17,6 +17,7 @@
 #include "Log.h"
 
 #include "frameworks/base/cmds/statsd/src/statsd_config.pb.h"
+#include "frameworks/base/cmds/statsd/src/statsd_internal.pb.h"
 #include "dimension.h"
 #include "field_util.h"
 
