@@ -48,6 +48,11 @@ public:
      */
     void Startup();
 
+    /*
+     * Dummy initializer for tests.
+     */
+    void StartupForTest();
+
     /**
      * Someone else wants to know about the configs.
      */
