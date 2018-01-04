@@ -61,10 +61,25 @@
     <!-- When the battery is low, this is displayed to the user in a dialog.  The title of the low battery alert.  [CHAR LIMIT=NONE]-->
     <string name="battery_low_title">Battery is low</string>
 
+    <!-- When the battery is low and hybrid notifications are enabled, this is displayed to the user in a dialog.
+         The title of the low battery alert.  [CHAR LIMIT=NONE]-->
+    <string name="battery_low_title_hybrid">Battery is low. Turn on Battery Saver</string>
+
     <!-- A message that appears when the battery level is getting low in a dialog.  This is
-        appened to the subtitle of the low battery alert.  "percentage" is the percentage of battery
+        appended to the subtitle of the low battery alert.  "percentage" is the percentage of battery
         remaining [CHAR LIMIT=none]-->
     <string name="battery_low_percent_format"><xliff:g id="percentage">%s</xliff:g> remaining</string>
+
+    <!-- A message that appears when the battery remaining estimate is low in a dialog.  This is
+    appended to the subtitle of the low battery alert.  "percentage" is the percentage of battery
+    remaining. "time" is the amount of time remaining before the phone runs out of battery [CHAR LIMIT=none]-->
+    <string name="battery_low_percent_format_hybrid"><xliff:g id="percentage">%s</xliff:g> remaining, about <xliff:g id="time">%s</xliff:g> left based on your usage</string>
+
+    <!-- A message that appears when the battery remaining estimate is low in a dialog and insufficient
+    data was present to say it is customized to the user. This is appended to the subtitle of the
+    low battery alert.  "percentage" is the percentage of battery remaining. "time" is the amount
+     of time remaining before the phone runs out of battery [CHAR LIMIT=none]-->
+    <string name="battery_low_percent_format_hybrid_short"><xliff:g id="percentage">%s</xliff:g> remaining, about <xliff:g id="time">%s</xliff:g> left</string>
 
     <!-- Same as battery_low_percent_format, with a notice about battery saver if on. [CHAR LIMIT=none]-->
     <string name="battery_low_percent_format_saver_started"><xliff:g id="percentage">%s</xliff:g> remaining. Battery Saver is on.</string>
