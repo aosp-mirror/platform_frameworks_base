@@ -2197,7 +2197,8 @@ public class UserManager {
 
     /**
      * Similar to {@link #trySetQuietModeEnabled(boolean, UserHandle)}, except you can specify
-     * a target to start when user is unlocked.
+     * a target to start when user is unlocked. If {@code target} is specified, caller must have
+     * the {@link android.Manifest.permission#MANAGE_USERS} permission.
      *
      * @see {@link #trySetQuietModeEnabled(boolean, UserHandle)}
      * @hide
