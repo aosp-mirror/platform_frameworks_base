@@ -3532,7 +3532,7 @@ public abstract class Context {
      * @see android.net.wifi.rtt.WifiRttManager
      * @hide
      */
-    public static final String WIFI_RTT_RANGING_SERVICE = "rttmanager2";
+    public static final String WIFI_RTT_RANGING_SERVICE = "wifirtt";
 
     /**
      * Use with {@link #getSystemService} to retrieve a {@link
