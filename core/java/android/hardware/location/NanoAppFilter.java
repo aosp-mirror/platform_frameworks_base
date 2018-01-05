@@ -16,15 +16,18 @@
 
 package android.hardware.location;
 
-
 import android.annotation.SystemApi;
 import android.os.Parcel;
 import android.os.Parcelable;
 
 /**
+ * @deprecated Use {@link android.hardware.location.ContextHubManager#queryNanoApps(ContextHubInfo)}
+ *             to find loaded nanoapps, which doesn't require using this class as a parameter.
+ *
  * @hide
  */
 @SystemApi
+@Deprecated
 public class NanoAppFilter {
 
     private static final String TAG = "NanoAppFilter";
