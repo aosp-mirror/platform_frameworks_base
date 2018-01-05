@@ -43,14 +43,19 @@ import android.os.Binder;
 import android.os.Bundle;
 import android.os.IBinder;
 import android.os.Looper;
+import android.os.Parcel;
+import android.os.Parcelable;
 import android.os.RemoteCallbackList;
 import android.os.RemoteException;
 import android.os.SystemClock;
 import android.os.UserHandle;
 import android.os.UserManager;
+import android.os.Parcelable.Creator;
+import android.os.RemoteCallback;
 import android.provider.Settings;
 import android.service.autofill.AutofillService;
 import android.service.autofill.AutofillServiceInfo;
+import android.service.autofill.Dataset;
 import android.service.autofill.EditDistanceScorer;
 import android.service.autofill.FieldClassification;
 import android.service.autofill.FieldClassification.Match;
@@ -123,6 +128,8 @@ final class AutofillManagerServiceImpl {
     // TODO(b/70939974): temporary, will be moved to ExtServices
     static final class FieldClassificationAlgorithmService {
 
+        static final String EXTRA_SCORES = "scores";
+
         /**
          * Gets the name of all available algorithms.
          */
@@ -140,26 +147,110 @@ final class AutofillManagerServiceImpl {
         }
 
         /**
-         * Gets a field classification score.
+         * Gets the field classification scores.
          *
          * @param algorithmName algorithm to be used. If invalid, the default algorithm will be used
          * instead.
          * @param algorithmArgs optional arguments to be passed to the algorithm.
-         * @param actualValue value entered by the user.
-         * @param userDataValue value from the user data.
-         *
-         * @return pair containing the algorithm used and the score.
+         * @param currentValues values entered by the user.
+         * @param userValues values from the user data.
+         * @param callback returns a nullable bundle with the parcelable results on
+         * {@link #EXTRA_SCORES}.
          */
-        // TODO(b/70939974): use parcelable instead of pair
-        Pair<String, Float> getScore(@NonNull String algorithmName, @Nullable Bundle algorithmArgs,
-                @NonNull AutofillValue actualValue, @NonNull String userDataValue) {
-            if (!EditDistanceScorer.NAME.equals(algorithmName)) {
-                Log.w(TAG, "Ignoring invalid algorithm (" + algorithmName + ") and using "
-                        + EditDistanceScorer.NAME + " instead");
+        @Nullable
+        void getScores(@NonNull String algorithmName, @Nullable Bundle algorithmArgs,
+                List<AutofillValue> currentValues, @NonNull String[] userValues,
+                @NonNull RemoteCallback callback) {
+            if (currentValues == null || userValues == null) {
+                // TODO(b/70939974): use preconditions / add unit test
+                throw new IllegalArgumentException("values cannot be null");
             }
-            return new Pair<>(EditDistanceScorer.NAME,
-                    EditDistanceScorer.getInstance().getScore(actualValue, userDataValue));
+            if (currentValues.isEmpty() || userValues.length == 0) {
+                Slog.w(TAG, "getScores(): empty currentvalues (" + currentValues
+                        + ") or userValues (" + Arrays.toString(userValues) + ")");
+                // TODO(b/70939974): add unit test
+                callback.sendResult(null);
+            }
+            String actualAlgorithName = algorithmName;
+            if (!EditDistanceScorer.NAME.equals(algorithmName)) {
+                Slog.w(TAG, "Ignoring invalid algorithm (" + algorithmName + ") and using "
+                        + EditDistanceScorer.NAME + " instead");
+                actualAlgorithName = EditDistanceScorer.NAME;
+            }
+            final int currentValuesSize = currentValues.size();
+            if (sDebug) {
+                Log.d(TAG, "getScores() will return a " + currentValuesSize + "x"
+                        + userValues.length + " matrix for " + actualAlgorithName);
+            }
+            final FieldClassificationScores scores = new FieldClassificationScores(
+                    actualAlgorithName, currentValuesSize, userValues.length);
+            final EditDistanceScorer algorithm = EditDistanceScorer.getInstance();
+            for (int i = 0; i < currentValuesSize; i++) {
+                for (int j = 0; j < userValues.length; j++) {
+                    final float score = algorithm.getScore(currentValues.get(i), userValues[j]);
+                    scores.scores[i][j] = score;
+                }
+            }
+            final Bundle result = new Bundle();
+            result.putParcelable(EXTRA_SCORES, scores);
+            callback.sendResult(result);
         }
+    }
+
+    // TODO(b/70939974): temporary, will be moved to ExtServices
+    public static final class FieldClassificationScores implements Parcelable {
+        public final String algorithmName;
+        public final float[][] scores;
+
+        public FieldClassificationScores(String algorithmName, int size1, int size2) {
+            this.algorithmName = algorithmName;
+            scores = new float[size1][size2];
+        }
+
+        public FieldClassificationScores(Parcel parcel) {
+            algorithmName = parcel.readString();
+            final int size1 = parcel.readInt();
+            final int size2 = parcel.readInt();
+            scores = new float[size1][size2];
+            for (int i = 0; i < size1; i++) {
+                for (int j = 0; j < size2; j++) {
+                    scores[i][j] = parcel.readFloat();
+                }
+            }
+        }
+
+        @Override
+        public int describeContents() {
+            return 0;
+        }
+
+        @Override
+        public void writeToParcel(Parcel parcel, int flags) {
+            parcel.writeString(algorithmName);
+            int size1 = scores.length;
+            int size2 = scores[0].length;
+            parcel.writeInt(size1);
+            parcel.writeInt(size2);
+            for (int i = 0; i < size1; i++) {
+                for (int j = 0; j < size2; j++) {
+                    parcel.writeFloat(scores[i][j]);
+                }
+            }
+        }
+
+        public static final Creator<FieldClassificationScores> CREATOR = new Creator<FieldClassificationScores>() {
+
+            @Override
+            public FieldClassificationScores createFromParcel(Parcel parcel) {
+                return new FieldClassificationScores(parcel);
+            }
+
+            @Override
+            public FieldClassificationScores[] newArray(int size) {
+                return new FieldClassificationScores[size];
+            }
+
+        };
     }
 
     private final FieldClassificationAlgorithmService mFcService =
@@ -776,10 +867,33 @@ final class AutofillManagerServiceImpl {
             @Nullable ArrayList<String> changedDatasetIds,
             @Nullable ArrayList<AutofillId> manuallyFilledFieldIds,
             @Nullable ArrayList<ArrayList<String>> manuallyFilledDatasetIds,
+            @NonNull String appPackageName) {
+        logContextCommittedLocked(sessionId, clientState, selectedDatasets, ignoredDatasets,
+                changedFieldIds, changedDatasetIds, manuallyFilledFieldIds,
+                manuallyFilledDatasetIds, null, null, appPackageName);
+    }
+
+    void logContextCommittedLocked(int sessionId, @Nullable Bundle clientState,
+            @Nullable ArrayList<String> selectedDatasets,
+            @Nullable ArraySet<String> ignoredDatasets,
+            @Nullable ArrayList<AutofillId> changedFieldIds,
+            @Nullable ArrayList<String> changedDatasetIds,
+            @Nullable ArrayList<AutofillId> manuallyFilledFieldIds,
+            @Nullable ArrayList<ArrayList<String>> manuallyFilledDatasetIds,
             @Nullable ArrayList<AutofillId> detectedFieldIdsList,
             @Nullable ArrayList<FieldClassification> detectedFieldClassificationsList,
             @NonNull String appPackageName) {
         if (isValidEventLocked("logDatasetNotSelected()", sessionId)) {
+            if (sVerbose) {
+                Slog.v(TAG, "logContextCommitted() with FieldClassification: id=" + sessionId
+                        + ", selectedDatasets=" + selectedDatasets
+                        + ", ignoredDatasetIds=" + ignoredDatasets
+                        + ", changedAutofillIds=" + changedFieldIds
+                        + ", changedDatasetIds=" + changedDatasetIds
+                        + ", manuallyFilledFieldIds=" + manuallyFilledFieldIds
+                        + ", detectedFieldIds=" + detectedFieldIdsList
+                        + ", detectedFieldClassifications=" + detectedFieldClassificationsList);
+            }
             AutofillId[] detectedFieldsIds = null;
             FieldClassification[] detectedFieldClassifications = null;
             if (detectedFieldIdsList != null) {
