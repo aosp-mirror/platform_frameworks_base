@@ -16,7 +16,6 @@
 
 package com.android.server.am;
 
-import static android.app.ITaskStackListener.FORCED_RESIZEABLE_REASON_SECONDARY_DISPLAY;
 import static android.app.ITaskStackListener.FORCED_RESIZEABLE_REASON_SPLIT_SCREEN;
 import static android.app.WindowConfiguration.ACTIVITY_TYPE_RECENTS;
 import static android.app.WindowConfiguration.ACTIVITY_TYPE_STANDARD;
@@ -144,7 +143,6 @@ import com.android.internal.app.IVoiceInteractor;
 import com.android.internal.os.BatteryStatsImpl;
 import com.android.server.Watchdog;
 import com.android.server.am.ActivityManagerService.ItemMatcher;
-import com.android.server.am.EventLogTags;
 import com.android.server.wm.ConfigurationContainer;
 import com.android.server.wm.StackWindowController;
 import com.android.server.wm.StackWindowListener;
@@ -1811,7 +1809,7 @@ class ActivityStack<T extends StackWindowController> extends ConfigurationContai
             boolean behindFullscreenActivity = !stackShouldBeVisible;
             boolean resumeNextActivity = mStackSupervisor.isFocusedStack(this)
                     && (isInStackLocked(starting) == null);
-            final boolean isTopFullscreenStack = getDisplay().isTopFullscreenStack(this);
+            final boolean isTopNotPinnedStack = getDisplay().isTopNotPinnedStack(this);
             for (int taskNdx = mTaskHistory.size() - 1; taskNdx >= 0; --taskNdx) {
                 final TaskRecord task = mTaskHistory.get(taskNdx);
                 final ArrayList<ActivityRecord> activities = task.mActivities;
@@ -1833,7 +1831,7 @@ class ActivityStack<T extends StackWindowController> extends ConfigurationContai
 
                     // Now check whether it's really visible depending on Keyguard state.
                     final boolean reallyVisible = checkKeyguardVisibility(r,
-                            visibleIgnoringKeyguard, isTop && isTopFullscreenStack);
+                            visibleIgnoringKeyguard, isTop && isTopNotPinnedStack);
                     if (visibleIgnoringKeyguard) {
                         behindFullscreenActivity = updateBehindFullscreen(!stackShouldBeVisible,
                                 behindFullscreenActivity, r);
