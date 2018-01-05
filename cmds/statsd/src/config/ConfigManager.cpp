@@ -49,15 +49,13 @@ ConfigManager::~ConfigManager() {
 void ConfigManager::Startup() {
     map<ConfigKey, StatsdConfig> configsFromDisk;
     StorageManager::readConfigFromDisk(configsFromDisk);
-    // TODO(b/70667694): Make the configs from disk be used. And remove the fake config,
-    // and tests shouldn't call this Startup(), maybe call StartupForTest() so we don't read
-    // configs from disk for tests.
-    // for (const auto& pair : configsFromDisk) {
-    //    UpdateConfig(pair.first, pair.second);
-    //}
+    for (const auto& pair : configsFromDisk) {
+        UpdateConfig(pair.first, pair.second);
+    }
+}
 
-    // Uncomment the following line and use the hard coded config for development.
-    // UpdateConfig(ConfigKey(1000, "fake"), build_fake_config());
+void ConfigManager::StartupForTest() {
+    // Dummy function to avoid reading configs from disks for tests.
 }
 
 void ConfigManager::AddListener(const sp<ConfigListener>& listener) {
