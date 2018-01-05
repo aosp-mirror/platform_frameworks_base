@@ -1654,8 +1654,8 @@ public class RadioManager {
         TunerCallbackAdapter halCallback = new TunerCallbackAdapter(callback, handler);
         try {
             tuner = mService.openTuner(moduleId, config, withAudio, halCallback);
-        } catch (RemoteException e) {
-            Log.e(TAG, "Failed to open tuner", e);
+        } catch (RemoteException | IllegalArgumentException ex) {
+            Log.e(TAG, "Failed to open tuner", ex);
             return null;
         }
         if (tuner == null) {

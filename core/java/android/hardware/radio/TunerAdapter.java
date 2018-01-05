@@ -63,6 +63,7 @@ class TunerAdapter extends RadioTuner {
 
     @Override
     public int setConfiguration(RadioManager.BandConfig config) {
+        if (config == null) return RadioManager.STATUS_BAD_VALUE;
         try {
             mTuner.setConfiguration(config);
             mBand = config.getType();

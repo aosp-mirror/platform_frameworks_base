@@ -18,10 +18,16 @@ package com.android.server.broadcastradio.hal2;
 
 import android.annotation.NonNull;
 import android.graphics.Bitmap;
+import android.hardware.broadcastradio.V2_0.ConfigFlag;
 import android.hardware.broadcastradio.V2_0.ITunerSession;
+import android.hardware.broadcastradio.V2_0.Result;
 import android.hardware.radio.ITuner;
 import android.hardware.radio.ProgramSelector;
 import android.hardware.radio.RadioManager;
+import android.media.AudioSystem;
+import android.os.RemoteException;
+import android.util.MutableBoolean;
+import android.util.MutableInt;
 import android.util.Slog;
 
 import java.util.List;
@@ -30,16 +36,23 @@ import java.util.Objects;
 
 class TunerSession extends ITuner.Stub {
     private static final String TAG = "BcRadio2Srv.session";
+    private static final String kAudioDeviceName = "Radio tuner source";
 
     private final Object mLock = new Object();
 
     private final ITunerSession mHwSession;
     private final TunerCallback mCallback;
     private boolean mIsClosed = false;
+    private boolean mIsAudioConnected = false;
+    private boolean mIsMuted = false;
+
+    // necessary only for older APIs compatibility
+    private RadioManager.BandConfig mDummyConfig = null;
 
     TunerSession(@NonNull ITunerSession hwSession, @NonNull TunerCallback callback) {
         mHwSession = Objects.requireNonNull(hwSession);
         mCallback = Objects.requireNonNull(callback);
+        notifyAudioServiceLocked(true);
     }
 
     @Override
@@ -47,6 +60,7 @@ class TunerSession extends ITuner.Stub {
         synchronized (mLock) {
             if (mIsClosed) return;
             mIsClosed = true;
+            notifyAudioServiceLocked(false);
         }
     }
 
@@ -61,77 +75,197 @@ class TunerSession extends ITuner.Stub {
         }
     }
 
+    private void notifyAudioServiceLocked(boolean connected) {
+        if (mIsAudioConnected == connected) return;
+
+        Slog.d(TAG, "Notifying AudioService about new state: " + connected);
+        int ret = AudioSystem.setDeviceConnectionState(AudioSystem.DEVICE_IN_FM_TUNER,
+            connected ? AudioSystem.DEVICE_STATE_AVAILABLE : AudioSystem.DEVICE_STATE_UNAVAILABLE,
+            null, kAudioDeviceName);
+
+        if (ret == AudioSystem.AUDIO_STATUS_OK) {
+            mIsAudioConnected = connected;
+        } else {
+            Slog.e(TAG, "Failed to notify AudioService about new state: " + connected);
+        }
+    }
+
     @Override
-    public void setConfiguration(RadioManager.BandConfig config) {}
+    public void setConfiguration(RadioManager.BandConfig config) {
+        synchronized (mLock) {
+            checkNotClosedLocked();
+            mDummyConfig = Objects.requireNonNull(config);
+            Slog.i(TAG, "Ignoring setConfiguration - not applicable for broadcastradio HAL 2.x");
+            TunerCallback.dispatch(() -> mCallback.mClientCb.onConfigurationChanged(config));
+        }
+    }
 
     @Override
     public RadioManager.BandConfig getConfiguration() {
-        return null;
+        synchronized (mLock) {
+            checkNotClosedLocked();
+            return mDummyConfig;
+        }
     }
 
     @Override
-    public void setMuted(boolean mute) {}
+    public void setMuted(boolean mute) {
+        synchronized (mLock) {
+            checkNotClosedLocked();
+            if (mIsMuted == mute) return;
+            mIsMuted = mute;
+            notifyAudioServiceLocked(!mute);
+        }
+    }
 
     @Override
     public boolean isMuted() {
-        return false;
+        synchronized (mLock) {
+            checkNotClosedLocked();
+            return mIsMuted;
+        }
     }
 
     @Override
-    public void step(boolean directionDown, boolean skipSubChannel) {}
+    public void step(boolean directionDown, boolean skipSubChannel) {
+        synchronized (mLock) {
+            checkNotClosedLocked();
+        }
+    }
 
     @Override
-    public void scan(boolean directionDown, boolean skipSubChannel) {}
+    public void scan(boolean directionDown, boolean skipSubChannel) {
+        synchronized (mLock) {
+            checkNotClosedLocked();
+        }
+    }
 
     @Override
-    public void tune(ProgramSelector selector) {}
+    public void tune(ProgramSelector selector) {
+        synchronized (mLock) {
+            checkNotClosedLocked();
+        }
+    }
 
     @Override
-    public void cancel() {}
+    public void cancel() {
+        synchronized (mLock) {
+            checkNotClosedLocked();
+        }
+    }
 
     @Override
-    public void cancelAnnouncement() {}
+    public void cancelAnnouncement() {
+        synchronized (mLock) {
+            checkNotClosedLocked();
+        }
+    }
 
     @Override
     public RadioManager.ProgramInfo getProgramInformation() {
-        return null;
+        synchronized (mLock) {
+            checkNotClosedLocked();
+            return null;
+        }
     }
 
     @Override
     public Bitmap getImage(int id) {
-        return null;
+        synchronized (mLock) {
+            checkNotClosedLocked();
+            return null;
+        }
     }
 
     @Override
     public boolean startBackgroundScan() {
+        Slog.i(TAG, "Explicit background scan trigger is not supported with HAL 2.x");
         return false;
     }
 
     @Override
     public List<RadioManager.ProgramInfo> getProgramList(Map vendorFilter) {
-        return null;
+        synchronized (mLock) {
+            checkNotClosedLocked();
+            return null;
+        }
+    }
+
+    private boolean getConfigFlag(int flag) {
+        Slog.v(TAG, "getConfigFlag " + ConfigFlag.toString(flag));
+        synchronized (mLock) {
+            checkNotClosedLocked();
+
+            MutableInt halResult = new MutableInt(Result.UNKNOWN_ERROR);
+            MutableBoolean flagState = new MutableBoolean(false);
+            try {
+                mHwSession.getConfigFlag(flag, (int result, boolean value) -> {
+                    halResult.value = result;
+                    flagState.value = value;
+                });
+            } catch (RemoteException ex) {
+                throw new RuntimeException("Failed to get flag " + ConfigFlag.toString(flag), ex);
+            }
+            Convert.throwOnError("getConfigFlag", halResult.value);
+
+            return flagState.value;
+        }
+    }
+
+    private void setConfigFlag(int flag, boolean value) {
+        Slog.v(TAG, "setConfigFlag " + ConfigFlag.toString(flag) + " = " + value);
+        synchronized (mLock) {
+            checkNotClosedLocked();
+
+            int halResult;
+            try {
+                halResult = mHwSession.setConfigFlag(flag, value);
+            } catch (RemoteException ex) {
+                throw new RuntimeException("Failed to set flag " + ConfigFlag.toString(flag), ex);
+            }
+            Convert.throwOnError("setConfigFlag", halResult);
+        }
     }
 
     @Override
     public boolean isAnalogForced() {
-        return false;
+        try {
+            return getConfigFlag(ConfigFlag.FORCE_ANALOG);
+        } catch (UnsupportedOperationException ex) {
+            throw new IllegalStateException(ex);
+        }
     }
 
     @Override
-    public void setAnalogForced(boolean isForced) {}
+    public void setAnalogForced(boolean isForced) {
+        try {
+            setConfigFlag(ConfigFlag.FORCE_ANALOG, isForced);
+        } catch (UnsupportedOperationException ex) {
+            throw new IllegalStateException(ex);
+        }
+    }
 
     @Override
     public Map setParameters(Map parameters) {
-        return null;
+        synchronized (mLock) {
+            checkNotClosedLocked();
+            return null;
+        }
     }
 
     @Override
     public Map getParameters(List<String> keys) {
-        return null;
+        synchronized (mLock) {
+            checkNotClosedLocked();
+            return null;
+        }
     }
 
     @Override
     public boolean isAntennaConnected() {
-        return true;
+        synchronized (mLock) {
+            checkNotClosedLocked();
+            return true;
+        }
     }
 }

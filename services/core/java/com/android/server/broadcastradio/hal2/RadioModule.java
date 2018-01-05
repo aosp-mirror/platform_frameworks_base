@@ -63,7 +63,7 @@ class RadioModule {
         }
     }
 
-    public @NonNull ITuner openSession(@NonNull android.hardware.radio.ITunerCallback userCb) {
+    public @NonNull TunerSession openSession(@NonNull android.hardware.radio.ITunerCallback userCb) {
         TunerCallback cb = new TunerCallback(Objects.requireNonNull(userCb));
         Mutable<ITunerSession> hwSession = new Mutable<>();
         MutableInt halResult = new MutableInt(Result.UNKNOWN_ERROR);
@@ -81,25 +81,6 @@ class RadioModule {
         Convert.throwOnError("openSession", halResult.value);
         Objects.requireNonNull(hwSession.value);
 
-        TunerSession session = new TunerSession(hwSession.value, cb);
-
-        // send out legacy callback about band configuration
-        RadioManager.BandDescriptor[] bands = mProperties.getBands();
-        if (bands != null && bands.length > 0) {
-            RadioManager.BandDescriptor descr = bands[0];  // just pick first
-            Mutable<RadioManager.BandConfig> config = new Mutable<>();
-            if (descr instanceof RadioManager.FmBandDescriptor) {
-                config.value = new RadioManager.FmBandConfig((RadioManager.FmBandDescriptor)descr);
-            } else if (descr instanceof RadioManager.AmBandDescriptor) {
-                config.value = new RadioManager.AmBandConfig((RadioManager.AmBandDescriptor)descr);
-            } else {
-                Slog.w(TAG, "Descriptor is neither AM nor FM");
-            }
-            if (config.value != null) {
-                TunerCallback.dispatch(() -> userCb.onConfigurationChanged(config.value));
-            }
-        }
-
-        return session;
+        return new TunerSession(hwSession.value, cb);
     }
 }

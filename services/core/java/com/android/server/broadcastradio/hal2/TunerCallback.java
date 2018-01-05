@@ -31,14 +31,14 @@ import java.util.Objects;
 class TunerCallback extends ITunerCallback.Stub {
     private static final String TAG = "BcRadio2Srv.cb";
 
-    final android.hardware.radio.ITunerCallback mCb;
+    final android.hardware.radio.ITunerCallback mClientCb;
 
     interface RunnableThrowingRemoteException {
         void run() throws RemoteException;
     }
 
     TunerCallback(@NonNull android.hardware.radio.ITunerCallback clientCallback) {
-        mCb = Objects.requireNonNull(clientCallback);
+        mClientCb = Objects.requireNonNull(clientCallback);
     }
 
     static void dispatch(RunnableThrowingRemoteException func) {

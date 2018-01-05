@@ -17,6 +17,7 @@
 package com.android.server.broadcastradio.hal2;
 
 import android.annotation.NonNull;
+import android.annotation.Nullable;
 import android.hardware.radio.ITuner;
 import android.hardware.radio.ITunerCallback;
 import android.hardware.radio.RadioManager;
@@ -80,14 +81,21 @@ public class BroadcastRadioService {
         return mModules.containsKey(id);
     }
 
-    public ITuner openSession(int moduleId, @NonNull ITunerCallback callback) {
+    public ITuner openSession(int moduleId, @Nullable RadioManager.BandConfig legacyConfig,
+        boolean withAudio, @NonNull ITunerCallback callback) {
         Objects.requireNonNull(callback);
+
+        if (!withAudio) {
+            throw new IllegalArgumentException("Non-audio sessions not supported with HAL 2.x");
+        }
 
         RadioModule module = mModules.get(moduleId);
         if (module == null) {
             throw new IllegalArgumentException("Invalid module ID");
         }
 
-        return module.openSession(callback);
+        TunerSession session = module.openSession(callback);
+        session.setConfiguration(legacyConfig);
+        return session;
     }
 }
