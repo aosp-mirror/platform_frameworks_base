@@ -265,6 +265,18 @@ public class TransportManager {
     }
 
     /**
+     * Retrieve the current destination string of {@code transportName}.
+     * @throws TransportNotRegisteredException if the transport is not registered.
+     */
+    public String getTransportCurrentDestinationString(String transportName)
+            throws TransportNotRegisteredException {
+        synchronized (mTransportLock) {
+            return getRegisteredTransportDescriptionOrThrowLocked(transportName)
+                    .currentDestinationString;
+        }
+    }
+
+    /**
      * Retrieve the data management label of {@code transportName}.
      * @throws TransportNotRegisteredException if the transport is not registered.
      */

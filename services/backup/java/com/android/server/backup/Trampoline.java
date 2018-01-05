@@ -452,6 +452,12 @@ public class Trampoline extends IBackupManager.Stub {
     }
 
     @Override
+    public String[] filterAppsEligibleForBackup(String[] packages) {
+        BackupManagerServiceInterface svc = mService;
+        return (svc != null) ? svc.filterAppsEligibleForBackup(packages) : null;
+    }
+
+    @Override
     public int requestBackup(String[] packages, IBackupObserver observer,
             IBackupManagerMonitor monitor, int flags) throws RemoteException {
         BackupManagerServiceInterface svc = mService;
