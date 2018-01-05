@@ -35,8 +35,10 @@ import java.security.NoSuchAlgorithmException;
 import java.security.PublicKey;
 import java.security.spec.InvalidKeySpecException;
 import java.security.spec.X509EncodedKeySpec;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.StringJoiner;
@@ -220,16 +222,19 @@ public class RecoverableKeyStoreDb {
     }
 
     /**
-     * Returns all keys for the given {@code userId} and {@code platformKeyGenerationId}.
+     * Returns all keys for the given {@code userId} {@code recoveryAgentUid}
+     * and {@code platformKeyGenerationId}.
      *
      * @param userId User id of the profile to which all the keys are associated.
+     * @param recoveryAgentUid Uid of the recovery agent which will perform the sync
      * @param platformKeyGenerationId The generation ID of the platform key that wrapped these keys.
      *     (i.e., this should be the most recent generation ID, as older platform keys are not
      *     usable.)
      *
      * @hide
      */
-    public Map<String, WrappedKey> getAllKeys(int userId, int platformKeyGenerationId) {
+    public Map<String, WrappedKey> getAllKeys(int userId, int recoveryAgentUid,
+            int platformKeyGenerationId) {
         SQLiteDatabase db = mKeyStoreDbHelper.getReadableDatabase();
         String[] projection = {
                 KeysEntry._ID,
@@ -239,9 +244,13 @@ public class RecoverableKeyStoreDb {
                 KeysEntry.COLUMN_NAME_RECOVERY_STATUS};
         String selection =
                 KeysEntry.COLUMN_NAME_USER_ID + " = ? AND "
+                + KeysEntry.COLUMN_NAME_UID + " = ? AND "
                 + KeysEntry.COLUMN_NAME_GENERATION_ID + " = ?";
         String[] selectionArguments = {
-                Integer.toString(userId), Integer.toString(platformKeyGenerationId) };
+                Integer.toString(userId),
+                Integer.toString(recoveryAgentUid),
+                Integer.toString(platformKeyGenerationId)
+            };
 
         try (
             Cursor cursor = db.query(
@@ -341,9 +350,12 @@ public class RecoverableKeyStoreDb {
     }
 
     /**
-     * Returns the uid of the recovery agent for the given user, or -1 if none is set.
+     * Returns the list of recovery agents initialized for given {@code userId}
+     * @param userId The userId of the profile the application is running under.
+     * @return The list of recovery agents
+     * @hide
      */
-    public int getRecoveryAgentUid(int userId) {
+    public @NonNull List<Integer> getRecoveryAgents(int userId) {
         SQLiteDatabase db = mKeyStoreDbHelper.getReadableDatabase();
 
         String[] projection = { RecoveryServiceMetadataEntry.COLUMN_NAME_UID };
@@ -361,19 +373,20 @@ public class RecoverableKeyStoreDb {
                     /*orderBy=*/ null)
         ) {
             int count = cursor.getCount();
-            if (count == 0) {
-                return -1;
+            ArrayList<Integer> result = new ArrayList<>(count);
+            while (cursor.moveToNext()) {
+                int uid = cursor.getInt(
+                        cursor.getColumnIndexOrThrow(RecoveryServiceMetadataEntry.COLUMN_NAME_UID));
+                result.add(uid);
             }
-            cursor.moveToFirst();
-            return cursor.getInt(
-                    cursor.getColumnIndexOrThrow(RecoveryServiceMetadataEntry.COLUMN_NAME_UID));
+            return result;
         }
     }
 
     /**
      * Returns the public key of the recovery service.
      *
-     * @param userId The uid of the profile the application is running under.
+     * @param userId The userId of the profile the application is running under.
      * @param uid The uid of the application who initializes the local recovery components.
      *
      * @hide
@@ -438,7 +451,7 @@ public class RecoverableKeyStoreDb {
      * If no secret types are set, recovery snapshot will not be created.
      * See {@code KeyStoreRecoveryMetadata}
      *
-     * @param userId The uid of the profile the application is running under.
+     * @param userId The userId of the profile the application is running under.
      * @param uid The uid of the application.
      * @param secretTypes list of secret types
      * @return The primary key of the updated row, or -1 if failed.
@@ -463,7 +476,7 @@ public class RecoverableKeyStoreDb {
     /**
      * Returns the list of secret types used for end-to-end encryption.
      *
-     * @param userId The uid of the profile the application is running under.
+     * @param userId The userId of the profile the application is running under.
      * @param uid The uid of the application who initialized the local recovery components.
      * @return Secret types or empty array, if types were not set.
      *
@@ -529,7 +542,7 @@ public class RecoverableKeyStoreDb {
     /**
      * Returns the first (and only?) public key for {@code userId}.
      *
-     * @param userId The uid of the profile whose keys are to be synced.
+     * @param userId The userId of the profile whose keys are to be synced.
      * @return The public key, or null if none exists.
      */
     @Nullable
@@ -569,10 +582,40 @@ public class RecoverableKeyStoreDb {
     }
 
     /**
+     * Updates the counterId
+     *
+     * @param userId The userId of the profile the application is running under.
+     * @param uid The uid of the application.
+     * @param counterId The counterId.
+     * @return The primary key of the inserted row, or -1 if failed.
+     *
+     * @hide
+     */
+    public long setCounterId(int userId, int uid, long counterId) {
+        return setLong(userId, uid,
+                RecoveryServiceMetadataEntry.COLUMN_NAME_COUNTER_ID, counterId);
+    }
+
+    /**
+     * Returns the counter id.
+     *
+     * @param userId The userId of the profile the application is running under.
+     * @param uid The uid of the application who initialized the local recovery components.
+     * @return The counter id
+     *
+     * @hide
+     */
+    @Nullable
+    public Long getCounterId(int userId, int uid) {
+        return getLong(userId, uid, RecoveryServiceMetadataEntry.COLUMN_NAME_COUNTER_ID);
+    }
+
+
+    /**
      * Updates the server parameters given by the application initializing the local recovery
      * components.
      *
-     * @param userId The uid of the profile the application is running under.
+     * @param userId The userId of the profile the application is running under.
      * @param uid The uid of the application.
      * @param serverParameters The server parameters.
      * @return The primary key of the inserted row, or -1 if failed.
@@ -580,24 +623,15 @@ public class RecoverableKeyStoreDb {
      * @hide
      */
     public long setServerParameters(int userId, int uid, long serverParameters) {
-        SQLiteDatabase db = mKeyStoreDbHelper.getWritableDatabase();
-        ContentValues values = new ContentValues();
-        values.put(RecoveryServiceMetadataEntry.COLUMN_NAME_SERVER_PARAMETERS, serverParameters);
-        String selection =
-                RecoveryServiceMetadataEntry.COLUMN_NAME_USER_ID + " = ? AND "
-                        + RecoveryServiceMetadataEntry.COLUMN_NAME_UID + " = ?";
-        String[] selectionArguments = {Integer.toString(userId), Integer.toString(uid)};
-
-        ensureRecoveryServiceMetadataEntryExists(userId, uid);
-        return db.update(
-                RecoveryServiceMetadataEntry.TABLE_NAME, values, selection, selectionArguments);
+        return setLong(userId, uid,
+                RecoveryServiceMetadataEntry.COLUMN_NAME_SERVER_PARAMETERS, serverParameters);
     }
 
     /**
      * Returns the server paramters that was previously set by the application who initialized the
      * local recovery service components.
      *
-     * @param userId The uid of the profile the application is running under.
+     * @param userId The userId of the profile the application is running under.
      * @param uid The uid of the application who initialized the local recovery components.
      * @return The server parameters that were previously set, or null if there's none.
      *
@@ -605,27 +639,103 @@ public class RecoverableKeyStoreDb {
      */
     @Nullable
     public Long getServerParameters(int userId, int uid) {
+        return getLong(userId, uid, RecoveryServiceMetadataEntry.COLUMN_NAME_SERVER_PARAMETERS);
+
+    }
+
+    /**
+     * Updates the snapshot version.
+     *
+     * @param userId The userId of the profile the application is running under.
+     * @param uid The uid of the application.
+     * @param snapshotVersion The snapshot version
+     * @return The primary key of the inserted row, or -1 if failed.
+     *
+     * @hide
+     */
+    public long setSnapshotVersion(int userId, int uid, long snapshotVersion) {
+        return setLong(userId, uid,
+                RecoveryServiceMetadataEntry.COLUMN_NAME_SNAPSHOT_VERSION, snapshotVersion);
+    }
+
+    /**
+     * Returns the snapshot version
+     *
+     * @param userId The userId of the profile the application is running under.
+     * @param uid The uid of the application who initialized the local recovery components.
+     * @return The server parameters that were previously set, or null if there's none.
+     *
+     * @hide
+     */
+    @Nullable
+    public Long getSnapshotVersion(int userId, int uid) {
+        return getLong(userId, uid,
+            RecoveryServiceMetadataEntry.COLUMN_NAME_SNAPSHOT_VERSION);
+    }
+
+    /**
+     * Updates the snapshot version.
+     *
+     * @param userId The userId of the profile the application is running under.
+     * @param uid The uid of the application.
+     * @param pending The server parameters.
+     * @return The primary key of the inserted row, or -1 if failed.
+     *
+     * @hide
+     */
+    public long setShouldCreateSnapshot(int userId, int uid, boolean pending) {
+        return setLong(userId, uid,
+                RecoveryServiceMetadataEntry.COLUMN_NAME_SHOULD_CREATE_SNAPSHOT, pending ? 1 : 0);
+    }
+
+    /**
+     * Returns {@code true} if new snapshot should be created.
+     * Returns {@code false} if the flag was never set.
+     *
+     * @param userId The userId of the profile the application is running under.
+     * @param uid The uid of the application who initialized the local recovery components.
+     * @return snapshot outdated flag.
+     *
+     * @hide
+     */
+    public boolean getShouldCreateSnapshot(int userId, int uid) {
+        Long res = getLong(userId, uid,
+                RecoveryServiceMetadataEntry.COLUMN_NAME_SHOULD_CREATE_SNAPSHOT);
+        return res != null && res != 0L;
+    }
+
+    /**
+     * Returns given long value from the database.
+     *
+     * @param userId The userId of the profile the application is running under.
+     * @param uid The uid of the application who initialized the local recovery components.
+     * @param key from {@code RecoveryServiceMetadataEntry}
+     * @return The value that were previously set, or null if there's none.
+     *
+     * @hide
+     */
+    private Long getLong(int userId, int uid, String key) {
         SQLiteDatabase db = mKeyStoreDbHelper.getReadableDatabase();
 
         String[] projection = {
                 RecoveryServiceMetadataEntry._ID,
                 RecoveryServiceMetadataEntry.COLUMN_NAME_USER_ID,
                 RecoveryServiceMetadataEntry.COLUMN_NAME_UID,
-                RecoveryServiceMetadataEntry.COLUMN_NAME_SERVER_PARAMETERS};
+                key};
         String selection =
                 RecoveryServiceMetadataEntry.COLUMN_NAME_USER_ID + " = ? AND "
                         + RecoveryServiceMetadataEntry.COLUMN_NAME_UID + " = ?";
         String[] selectionArguments = {Integer.toString(userId), Integer.toString(uid)};
 
         try (
-                Cursor cursor = db.query(
-                        RecoveryServiceMetadataEntry.TABLE_NAME,
-                        projection,
-                        selection,
-                        selectionArguments,
-                        /*groupBy=*/ null,
-                        /*having=*/ null,
-                        /*orderBy=*/ null)
+            Cursor cursor = db.query(
+                    RecoveryServiceMetadataEntry.TABLE_NAME,
+                    projection,
+                    selection,
+                    selectionArguments,
+                    /*groupBy=*/ null,
+                    /*having=*/ null,
+                    /*orderBy=*/ null)
         ) {
             int count = cursor.getCount();
             if (count == 0) {
@@ -634,19 +744,44 @@ public class RecoverableKeyStoreDb {
             if (count > 1) {
                 Log.wtf(TAG,
                         String.format(Locale.US,
-                                "%d deviceId entries found for userId=%d uid=%d. "
+                                "%d entries found for userId=%d uid=%d. "
                                         + "Should only ever be 0 or 1.", count, userId, uid));
                 return null;
             }
             cursor.moveToFirst();
-            int idx = cursor.getColumnIndexOrThrow(
-                    RecoveryServiceMetadataEntry.COLUMN_NAME_SERVER_PARAMETERS);
+            int idx = cursor.getColumnIndexOrThrow(key);
             if (cursor.isNull(idx)) {
                 return null;
             } else {
                 return cursor.getLong(idx);
             }
         }
+    }
+
+    /**
+     * Sets a long value in the database.
+     *
+     * @param userId The userId of the profile the application is running under.
+     * @param uid The uid of the application who initialized the local recovery components.
+     * @param key defined in {@code RecoveryServiceMetadataEntry}
+     * @param value new value.
+     * @return The primary key of the inserted row, or -1 if failed.
+     *
+     * @hide
+     */
+
+    private long setLong(int userId, int uid, String key, long value) {
+        SQLiteDatabase db = mKeyStoreDbHelper.getWritableDatabase();
+        ContentValues values = new ContentValues();
+        values.put(key, value);
+        String selection =
+                RecoveryServiceMetadataEntry.COLUMN_NAME_USER_ID + " = ? AND "
+                        + RecoveryServiceMetadataEntry.COLUMN_NAME_UID + " = ?";
+        String[] selectionArguments = {Integer.toString(userId), Integer.toString(uid)};
+
+        ensureRecoveryServiceMetadataEntryExists(userId, uid);
+        return db.update(
+                RecoveryServiceMetadataEntry.TABLE_NAME, values, selection, selectionArguments);
     }
 
     /**

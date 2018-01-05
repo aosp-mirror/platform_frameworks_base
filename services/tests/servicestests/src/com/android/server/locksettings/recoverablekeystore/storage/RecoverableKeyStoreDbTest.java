@@ -40,6 +40,7 @@ import java.nio.charset.StandardCharsets;
 import java.security.KeyPairGenerator;
 import java.security.PublicKey;
 import java.security.spec.ECGenParameterSpec;
+import java.util.List;
 import java.util.Map;
 
 @SmallTest
@@ -167,7 +168,7 @@ public class RecoverableKeyStoreDbTest {
         WrappedKey wrappedKey = new WrappedKey(nonce, keyMaterial, generationId);
         mRecoverableKeyStoreDb.insertKey(userId, uid, alias, wrappedKey);
 
-        Map<String, WrappedKey> keys = mRecoverableKeyStoreDb.getAllKeys(userId, generationId);
+        Map<String, WrappedKey> keys = mRecoverableKeyStoreDb.getAllKeys(userId, uid, generationId);
 
         assertEquals(1, keys.size());
         assertTrue(keys.containsKey(alias));
@@ -189,7 +190,7 @@ public class RecoverableKeyStoreDbTest {
                 userId, uid, /*alias=*/ "test", wrappedKey);
 
         Map<String, WrappedKey> keys = mRecoverableKeyStoreDb.getAllKeys(
-                userId, /*generationId=*/ 7);
+                userId, uid, /*generationId=*/ 7);
 
         assertTrue(keys.isEmpty());
     }
@@ -204,7 +205,7 @@ public class RecoverableKeyStoreDbTest {
                 /*userId=*/ 1, uid, /*alias=*/ "test", wrappedKey);
 
         Map<String, WrappedKey> keys = mRecoverableKeyStoreDb.getAllKeys(
-                /*userId=*/ 2, generationId);
+                /*userId=*/ 2, uid, generationId);
 
         assertTrue(keys.isEmpty());
     }
@@ -344,17 +345,33 @@ public class RecoverableKeyStoreDbTest {
     }
 
     @Test
-    public void getRecoveryAgentUid_returnsUidIfSet() throws Exception {
+    public void getRecoveryAgents_returnsUidIfSet() throws Exception {
         int userId = 12;
         int uid = 190992;
         mRecoverableKeyStoreDb.setRecoveryServicePublicKey(userId, uid, genRandomPublicKey());
 
-        assertThat(mRecoverableKeyStoreDb.getRecoveryAgentUid(userId)).isEqualTo(uid);
+        assertThat(mRecoverableKeyStoreDb.getRecoveryAgents(userId)).contains(uid);
     }
 
     @Test
-    public void getRecoveryAgentUid_returnsMinusOneForNonexistentAgent() throws Exception {
-        assertThat(mRecoverableKeyStoreDb.getRecoveryAgentUid(12)).isEqualTo(-1);
+    public void getRecoveryAgents_returnsEmptyListIfThereAreNoAgents() throws Exception {
+        int userId = 12;
+        assertThat(mRecoverableKeyStoreDb.getRecoveryAgents(userId)).isEmpty();
+        assertThat(mRecoverableKeyStoreDb.getRecoveryAgents(userId)).isNotNull();
+    }
+
+    @Test
+    public void getRecoveryAgents_withTwoAgents() throws Exception {
+        int userId = 12;
+        int uid1 = 190992;
+        int uid2 = 190993;
+        mRecoverableKeyStoreDb.setRecoveryServicePublicKey(userId, uid1, genRandomPublicKey());
+        mRecoverableKeyStoreDb.setRecoveryServicePublicKey(userId, uid2, genRandomPublicKey());
+        List<Integer> agents = mRecoverableKeyStoreDb.getRecoveryAgents(userId);
+
+        assertThat(agents).hasSize(2);
+        assertThat(agents).contains(uid1);
+        assertThat(agents).contains(uid2);
     }
 
     public void setRecoverySecretTypes_emptyDefaultValue() throws Exception {
@@ -492,6 +509,52 @@ public class RecoverableKeyStoreDbTest {
         long serverParams = 123456L;
         mRecoverableKeyStoreDb.setServerParameters(userId, uid, serverParams);
         assertThat(mRecoverableKeyStoreDb.getServerParameters(userId, uid)).isEqualTo(serverParams);
+    }
+
+    @Test
+    public void setCounterId_defaultValueAndTwoUpdates() throws Exception {
+        int userId = 12;
+        int uid = 10009;
+        long value1 = 111L;
+        long value2 = 222L;
+        assertThat(mRecoverableKeyStoreDb.getCounterId(userId, uid)).isNull();
+
+        mRecoverableKeyStoreDb.setCounterId(userId, uid, value1);
+        assertThat(mRecoverableKeyStoreDb.getCounterId(userId, uid)).isEqualTo(
+                value1);
+
+        mRecoverableKeyStoreDb.setCounterId(userId, uid, value2);
+        assertThat(mRecoverableKeyStoreDb.getCounterId(userId, uid)).isEqualTo(
+                value2);
+    }
+
+    @Test
+    public void setSnapshotVersion_defaultValueAndTwoUpdates() throws Exception {
+        int userId = 12;
+        int uid = 10009;
+        long value1 = 111L;
+        long value2 = 222L;
+        assertThat(mRecoverableKeyStoreDb.getSnapshotVersion(userId, uid)).isNull();
+        mRecoverableKeyStoreDb.setSnapshotVersion(userId, uid, value1);
+        assertThat(mRecoverableKeyStoreDb.getSnapshotVersion(userId, uid)).isEqualTo(
+                value1);
+        mRecoverableKeyStoreDb.setSnapshotVersion(userId, uid, value2);
+        assertThat(mRecoverableKeyStoreDb.getSnapshotVersion(userId, uid)).isEqualTo(
+                value2);
+    }
+
+    @Test
+    public void setShouldCreateSnapshot_defaultValueAndTwoUpdates() throws Exception {
+        int userId = 12;
+        int uid = 10009;
+        boolean value1 = true;
+        boolean value2 = false;
+        assertThat(mRecoverableKeyStoreDb.getShouldCreateSnapshot(userId, uid)).isEqualTo(false);
+        mRecoverableKeyStoreDb.setShouldCreateSnapshot(userId, uid, value1);
+        assertThat(mRecoverableKeyStoreDb.getShouldCreateSnapshot(userId, uid)).isEqualTo(value1);
+        mRecoverableKeyStoreDb.setShouldCreateSnapshot(userId, uid, value2);
+        assertThat(mRecoverableKeyStoreDb.getShouldCreateSnapshot(userId, uid)).isEqualTo(
+                value2);
     }
 
     @Test

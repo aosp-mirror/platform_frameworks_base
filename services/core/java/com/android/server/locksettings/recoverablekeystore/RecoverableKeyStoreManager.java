@@ -174,8 +174,8 @@ public class RecoverableKeyStoreManager {
     public @NonNull KeyStoreRecoveryData getRecoveryData(@NonNull byte[] account)
             throws RemoteException {
         checkRecoverKeyStorePermission();
-
-        KeyStoreRecoveryData snapshot = mSnapshotStorage.get(UserHandle.getCallingUserId());
+        int uid = Binder.getCallingUid();
+        KeyStoreRecoveryData snapshot = mSnapshotStorage.get(uid);
         if (snapshot == null) {
             throw new ServiceSpecificException(RecoverableKeyStoreLoader.ERROR_NO_SNAPSHOT_PENDING);
         }
@@ -433,7 +433,13 @@ public class RecoverableKeyStoreManager {
     }
 
     public void removeKey(@NonNull String alias) throws RemoteException {
-        mDatabase.removeKey(Binder.getCallingUid(), alias);
+        int uid = Binder.getCallingUid();
+        int userId = UserHandle.getCallingUserId();
+
+        boolean wasRemoved = mDatabase.removeKey(uid, alias);
+        if (wasRemoved) {
+            mDatabase.setShouldCreateSnapshot(userId, uid, true);
+        }
     }
 
     private byte[] decryptRecoveryKey(
@@ -505,7 +511,8 @@ public class RecoverableKeyStoreManager {
                     mListenersStorage,
                     userId,
                     storedHashType,
-                    credential));
+                    credential,
+                    /*credentialUpdated=*/ false));
         } catch (NoSuchAlgorithmException e) {
             Log.wtf(TAG, "Should never happen - algorithm unavailable for KeySync", e);
         } catch (KeyStoreException e) {
@@ -515,12 +522,35 @@ public class RecoverableKeyStoreManager {
         }
     }
 
-    /** This function can only be used inside LockSettingsService. */
+    /**
+     * This function can only be used inside LockSettingsService.
+     * @param storedHashType from {@code CredentialHash}
+     * @param credential - unencrypted String
+     * @param userId for the user whose lock screen credentials were changed.
+     * @hide
+     */
     public void lockScreenSecretChanged(
-            @KeyStoreRecoveryMetadata.LockScreenUiFormat int type,
+            int storedHashType,
             @Nullable String credential,
             int userId) {
-        throw new UnsupportedOperationException();
+        // So as not to block the critical path unlocking the phone, defer to another thread.
+        try {
+            mExecutorService.execute(KeySyncTask.newInstance(
+                    mContext,
+                    mDatabase,
+                    mSnapshotStorage,
+                    mListenersStorage,
+                    userId,
+                    storedHashType,
+                    credential,
+                    /*credentialUpdated=*/ true));
+        } catch (NoSuchAlgorithmException e) {
+            Log.wtf(TAG, "Should never happen - algorithm unavailable for KeySync", e);
+        } catch (KeyStoreException e) {
+            Log.e(TAG, "Key store error encountered during recoverable key sync", e);
+        } catch (InsecureUserException e) {
+            Log.wtf(TAG, "Impossible - insecure user, but user just entered lock screen", e);
+        }
     }
 
     private void checkRecoverKeyStorePermission() {
