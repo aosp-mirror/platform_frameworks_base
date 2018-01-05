@@ -96,7 +96,26 @@ public class RecoverableKeyStoreManagerTest {
     private static final byte[] TEST_SALT = getUtf8Bytes("salt");
     private static final byte[] TEST_SECRET = getUtf8Bytes("password1234");
     private static final byte[] TEST_VAULT_CHALLENGE = getUtf8Bytes("vault_challenge");
-    private static final byte[] TEST_VAULT_PARAMS = getUtf8Bytes("vault_params");
+    private static final byte[] TEST_VAULT_PARAMS = new byte[] {
+        // backend_key
+        (byte) 0x04, (byte) 0xb8, (byte) 0x00, (byte) 0x11, (byte) 0x18, (byte) 0x98, (byte) 0x1d,
+        (byte) 0xf0, (byte) 0x6e, (byte) 0xb4, (byte) 0x94, (byte) 0xfe, (byte) 0x86, (byte) 0xda,
+        (byte) 0x1c, (byte) 0x07, (byte) 0x8d, (byte) 0x01, (byte) 0xb4, (byte) 0x3a, (byte) 0xf6,
+        (byte) 0x8d, (byte) 0xdc, (byte) 0x61, (byte) 0xd0, (byte) 0x46, (byte) 0x49, (byte) 0x95,
+        (byte) 0x0f, (byte) 0x10, (byte) 0x86, (byte) 0x93, (byte) 0x24, (byte) 0x66, (byte) 0xe0,
+        (byte) 0x3f, (byte) 0xd2, (byte) 0xdf, (byte) 0xf3, (byte) 0x79, (byte) 0x20, (byte) 0x1d,
+        (byte) 0x91, (byte) 0x55, (byte) 0xb0, (byte) 0xe5, (byte) 0xbd, (byte) 0x7a, (byte) 0x8b,
+        (byte) 0x32, (byte) 0x7d, (byte) 0x25, (byte) 0x53, (byte) 0xa2, (byte) 0xfc, (byte) 0xa5,
+        (byte) 0x65, (byte) 0xe1, (byte) 0xbd, (byte) 0x21, (byte) 0x44, (byte) 0x7e, (byte) 0x78,
+        (byte) 0x52, (byte) 0xfa,
+        // counter_id
+        (byte) 0x31, (byte) 0x32, (byte) 0x33, (byte) 0x34, (byte) 0x00, (byte) 0x00, (byte) 0x00,
+        (byte) 0x00,
+        // device_parameter
+        (byte) 0x78, (byte) 0x56, (byte) 0x34, (byte) 0x12, (byte) 0x00, (byte) 0x00, (byte) 0x00,
+        (byte) 0x0,
+        // max_attempts
+        (byte) 0x0a, (byte) 0x00, (byte) 0x00, (byte) 0x00};
     private static final int TEST_GENERATION_ID = 2;
     private static final int TEST_USER_ID = 10009;
     private static final int KEY_CLAIMANT_LENGTH_BYTES = 16;
@@ -245,6 +264,28 @@ public class RecoverableKeyStoreManagerTest {
             fail("should have thrown");
         } catch (ServiceSpecificException e) {
             assertEquals("Not a valid X509 key", e.getMessage());
+        }
+    }
+
+    @Test
+    public void startRecoverySession_throwsIfPublicKeysMismatch() throws Exception {
+        byte[] vaultParams = TEST_VAULT_PARAMS.clone();
+        vaultParams[1] ^= (byte) 1;  // Flip 1 bit
+        try {
+            mRecoverableKeyStoreManager.startRecoverySession(
+                    TEST_SESSION_ID,
+                    TEST_PUBLIC_KEY,
+                    vaultParams,
+                    TEST_VAULT_CHALLENGE,
+                    ImmutableList.of(
+                            new KeyStoreRecoveryMetadata(
+                                    TYPE_LOCKSCREEN,
+                                    TYPE_PASSWORD,
+                                    KeyDerivationParameters.createSHA256Parameters(TEST_SALT),
+                                    TEST_SECRET)));
+            fail("should have thrown");
+        } catch (ServiceSpecificException e) {
+            assertThat(e.getMessage()).contains("do not match");
         }
     }
 
