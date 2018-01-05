@@ -16,16 +16,10 @@
 
 package com.android.commands.sm;
 
-import static android.os.storage.StorageManager.PROP_ADOPTABLE_FBE;
-import static android.os.storage.StorageManager.PROP_HAS_ADOPTABLE;
-import static android.os.storage.StorageManager.PROP_VIRTUAL_DISK;
-
-import android.os.IBinder;
 import android.os.IVoldTaskListener;
 import android.os.PersistableBundle;
 import android.os.RemoteException;
 import android.os.ServiceManager;
-import android.os.SystemProperties;
 import android.os.storage.DiskInfo;
 import android.os.storage.IStorageManager;
 import android.os.storage.StorageManager;
@@ -145,15 +139,7 @@ public final class Sm {
     }
 
     public void runHasAdoptable() {
-        final boolean hasHardware = SystemProperties.getBoolean(PROP_HAS_ADOPTABLE, false)
-                || SystemProperties.getBoolean(PROP_VIRTUAL_DISK, false);
-        final boolean hasSoftware;
-        if (StorageManager.isFileEncryptedNativeOnly()) {
-            hasSoftware = SystemProperties.getBoolean(PROP_ADOPTABLE_FBE, false);
-        } else {
-            hasSoftware = true;
-        }
-        System.out.println(hasHardware && hasSoftware);
+        System.out.println(StorageManager.hasAdoptable());
     }
 
     public void runGetPrimaryStorageUuid() throws RemoteException {

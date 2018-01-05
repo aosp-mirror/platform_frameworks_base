@@ -968,11 +968,6 @@ class StorageManagerService extends IStorageManager.Stub
                         || mForceAdoptable) {
                     flags |= DiskInfo.FLAG_ADOPTABLE;
                 }
-                // Adoptable storage isn't currently supported on FBE devices
-                if (StorageManager.isFileEncryptedNativeOnly()
-                        && !SystemProperties.getBoolean(StorageManager.PROP_ADOPTABLE_FBE, false)) {
-                    flags &= ~DiskInfo.FLAG_ADOPTABLE;
-                }
                 mDisks.put(diskId, new DiskInfo(diskId, flags));
             }
         }
@@ -1910,12 +1905,6 @@ class StorageManagerService extends IStorageManager.Stub
         }
 
         if ((mask & StorageManager.DEBUG_FORCE_ADOPTABLE) != 0) {
-            if (StorageManager.isFileEncryptedNativeOnly()
-                    && !SystemProperties.getBoolean(StorageManager.PROP_ADOPTABLE_FBE, false)) {
-                throw new IllegalStateException(
-                        "Adoptable storage not available on device with native FBE");
-            }
-
             synchronized (mLock) {
                 mForceAdoptable = (flags & StorageManager.DEBUG_FORCE_ADOPTABLE) != 0;
 
