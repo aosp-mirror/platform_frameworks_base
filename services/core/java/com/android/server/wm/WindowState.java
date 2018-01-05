@@ -2642,8 +2642,11 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
 
     boolean destroySurface(boolean cleanupOnResume, boolean appStopped) {
         boolean destroyedSomething = false;
-        for (int i = mChildren.size() - 1; i >= 0; --i) {
-            final WindowState c = mChildren.get(i);
+
+        // Copying to a different list as multiple children can be removed.
+        final ArrayList<WindowState> childWindows = new ArrayList<>(mChildren);
+        for (int i = childWindows.size() - 1; i >= 0; --i) {
+            final WindowState c = childWindows.get(i);
             destroyedSomething |= c.destroySurface(cleanupOnResume, appStopped);
         }
 
@@ -3873,8 +3876,7 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
 
         if (!mChildren.isEmpty()) {
             // Copying to a different list as multiple children can be removed.
-            // TODO: Not sure if we really need to copy this into a different list.
-            final LinkedList<WindowState> childWindows = new LinkedList(mChildren);
+            final ArrayList<WindowState> childWindows = new ArrayList<>(mChildren);
             for (int i = childWindows.size() - 1; i >= 0; i--) {
                 childWindows.get(i).onExitAnimationDone();
             }
