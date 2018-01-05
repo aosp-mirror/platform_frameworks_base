@@ -27,6 +27,7 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyZeroInteractions;
 
 import android.platform.test.annotations.Presubmit;
+import android.support.test.filters.FlakyTest;
 import android.support.test.filters.SmallTest;
 import android.support.test.runner.AndroidJUnit4;
 import android.view.SurfaceControl;
@@ -38,6 +39,7 @@ import com.android.server.wm.SurfaceAnimator.Animatable;
 import com.android.server.wm.SurfaceAnimator.OnAnimationFinishedCallback;
 
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.ArgumentCaptor;
@@ -73,7 +75,10 @@ public class SurfaceAnimatorTest extends WindowTestsBase {
         mAnimatable2 = new MyAnimatable();
     }
 
+    // TODO: Tests are flaky, and timeout after 5 minutes. Instead of wasting everybody's time we
+    // mark them as ignore.
     @Test
+    @Ignore
     public void testRunAnimation() throws Exception {
         mAnimatable.mSurfaceAnimator.startAnimation(mTransaction, mSpec, true /* hidden */);
         final ArgumentCaptor<OnAnimationFinishedCallback> callbackCaptor = ArgumentCaptor.forClass(
@@ -90,7 +95,10 @@ public class SurfaceAnimatorTest extends WindowTestsBase {
         // TODO: Verify reparenting once we use mPendingTransaction to reparent it back
     }
 
+    // TODO: Tests are flaky, and timeout after 5 minutes. Instead of wasting everybody's time we
+    // mark them as ignore.
     @Test
+    @Ignore
     public void testOverrideAnimation() throws Exception {
         mAnimatable.mSurfaceAnimator.startAnimation(mTransaction, mSpec, true /* hidden */);
         final SurfaceControl firstLeash = mAnimatable.mLeash;
@@ -149,7 +157,10 @@ public class SurfaceAnimatorTest extends WindowTestsBase {
         assertTrue(mAnimatable.mPendingDestroySurfaces.contains(mAnimatable.mLeash));
     }
 
+    // TODO: Tests are flaky, and timeout after 5 minutes. Instead of wasting everybody's time we
+    // mark them as ignore.
     @Test
+    @Ignore
     public void testTransferAnimation() throws Exception {
         mAnimatable.mSurfaceAnimator.startAnimation(mTransaction, mSpec, true /* hidden */);
 
