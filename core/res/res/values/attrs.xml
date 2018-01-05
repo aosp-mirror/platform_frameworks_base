@@ -4470,6 +4470,10 @@
         <attr name="shadowRadius" format="float" />
         <!-- Elegant text height, especially for less compacted complex script text. -->
         <attr name="elegantTextHeight" format="boolean" />
+        <!-- Whether to respect the ascent and descent of the fallback fonts that are used in
+        displaying the text. When true, fallback fonts that end up getting used can increase
+        the ascent and descent of the lines that they are used on. -->
+        <attr name="fallbackLineSpacing" format="boolean"/>
         <!-- Text letter-spacing. -->
         <attr name="letterSpacing" format="float" />
         <!-- Font feature settings. -->
@@ -4803,6 +4807,10 @@
         <attr name="textAllCaps" />
         <!-- Elegant text height, especially for less compacted complex script text. -->
         <attr name="elegantTextHeight" />
+        <!-- Whether to respect the ascent and descent of the fallback fonts that are used in
+        displaying the text. When true, fallback fonts that end up getting used can increase
+        the ascent and descent of the lines that they are used on. -->
+        <attr name="fallbackLineSpacing" format="boolean"/>
         <!-- Text letter-spacing. -->
         <attr name="letterSpacing" />
         <!-- Font feature settings. -->

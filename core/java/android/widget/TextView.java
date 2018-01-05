@@ -296,6 +296,7 @@ import java.util.Locale;
  * @attr ref android.R.styleable#TextView_imeActionId
  * @attr ref android.R.styleable#TextView_editorExtras
  * @attr ref android.R.styleable#TextView_elegantTextHeight
+ * @attr ref android.R.styleable#TextView_fallbackLineSpacing
  * @attr ref android.R.styleable#TextView_letterSpacing
  * @attr ref android.R.styleable#TextView_fontFeatureSettings
  * @attr ref android.R.styleable#TextView_breakStrategy
@@ -655,7 +656,7 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
     // True if internationalized input should be used for numbers and date and time.
     private final boolean mUseInternationalizedInput;
     // True if fallback fonts that end up getting used should be allowed to affect line spacing.
-    /* package */ final boolean mUseFallbackLineSpacing;
+    /* package */ boolean mUseFallbackLineSpacing;
 
     @ViewDebug.ExportedProperty(category = "text")
     private int mGravity = Gravity.TOP | Gravity.START;
@@ -3255,6 +3256,8 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
         float mShadowDx = 0, mShadowDy = 0, mShadowRadius = 0;
         boolean mHasElegant = false;
         boolean mElegant = false;
+        boolean mHasFallbackLineSpacing = false;
+        boolean mFallbackLineSpacing = false;
         boolean mHasLetterSpacing = false;
         float mLetterSpacing = 0;
         String mFontFeatureSettings = null;
@@ -3279,6 +3282,8 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
                     + "    mShadowRadius:" + mShadowRadius + "\n"
                     + "    mHasElegant:" + mHasElegant + "\n"
                     + "    mElegant:" + mElegant + "\n"
+                    + "    mHasFallbackLineSpacing:" + mHasFallbackLineSpacing + "\n"
+                    + "    mFallbackLineSpacing:" + mFallbackLineSpacing + "\n"
                     + "    mHasLetterSpacing:" + mHasLetterSpacing + "\n"
                     + "    mLetterSpacing:" + mLetterSpacing + "\n"
                     + "    mFontFeatureSettings:" + mFontFeatureSettings + "\n"
@@ -3317,6 +3322,8 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
                 com.android.internal.R.styleable.TextAppearance_shadowRadius);
         sAppearanceValues.put(com.android.internal.R.styleable.TextView_elegantTextHeight,
                 com.android.internal.R.styleable.TextAppearance_elegantTextHeight);
+        sAppearanceValues.put(com.android.internal.R.styleable.TextView_fallbackLineSpacing,
+                com.android.internal.R.styleable.TextAppearance_fallbackLineSpacing);
         sAppearanceValues.put(com.android.internal.R.styleable.TextView_letterSpacing,
                 com.android.internal.R.styleable.TextAppearance_letterSpacing);
         sAppearanceValues.put(com.android.internal.R.styleable.TextView_fontFeatureSettings,
@@ -3407,6 +3414,11 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
                     attributes.mHasElegant = true;
                     attributes.mElegant = appearance.getBoolean(attr, attributes.mElegant);
                     break;
+                case com.android.internal.R.styleable.TextAppearance_fallbackLineSpacing:
+                    attributes.mHasFallbackLineSpacing = true;
+                    attributes.mFallbackLineSpacing = appearance.getBoolean(attr,
+                            attributes.mFallbackLineSpacing);
+                    break;
                 case com.android.internal.R.styleable.TextAppearance_letterSpacing:
                     attributes.mHasLetterSpacing = true;
                     attributes.mLetterSpacing =
@@ -3458,6 +3470,10 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
 
         if (attributes.mHasElegant) {
             setElegantTextHeight(attributes.mElegant);
+        }
+
+        if (attributes.mHasFallbackLineSpacing) {
+            setFallbackLineSpacing(attributes.mFallbackLineSpacing);
         }
 
         if (attributes.mHasLetterSpacing) {
@@ -3741,7 +3757,7 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
      *
      * @param elegant set the paint's elegant metrics flag.
      *
-     * @see Paint#isElegantTextHeight(boolean)
+     * @see Paint#isElegantTextHeight()
      *
      * @attr ref android.R.styleable#TextView_elegantTextHeight
      */
@@ -3754,6 +3770,43 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
                 invalidate();
             }
         }
+    }
+
+    /**
+     * Set whether to respect the ascent and descent of the fallback fonts that are used in
+     * displaying the text (which is needed to avoid text from consecutive lines running into
+     * each other). If set, fallback fonts that end up getting used can increase the ascent
+     * and descent of the lines that they are used on.
+     * <p/>
+     * It is required to be true if text could be in languages like Burmese or Tibetan where text
+     * is typically much taller or deeper than Latin text.
+     *
+     * @param enabled whether to expand linespacing based on fallback fonts, {@code true} by default
+     *
+     * @see StaticLayout.Builder#setUseLineSpacingFromFallbacks(boolean)
+     *
+     * @attr ref android.R.styleable#TextView_fallbackLineSpacing
+     */
+    public void setFallbackLineSpacing(boolean enabled) {
+        if (mUseFallbackLineSpacing != enabled) {
+            mUseFallbackLineSpacing = enabled;
+            if (mLayout != null) {
+                nullLayouts();
+                requestLayout();
+                invalidate();
+            }
+        }
+    }
+
+    /**
+     * @return whether fallback line spacing is enabled, {@code true} by default
+     *
+     * @see #setFallbackLineSpacing(boolean)
+     *
+     * @attr ref android.R.styleable#TextView_fallbackLineSpacing
+     */
+    public boolean isFallbackLineSpacing() {
+        return mUseFallbackLineSpacing;
     }
 
     /**
