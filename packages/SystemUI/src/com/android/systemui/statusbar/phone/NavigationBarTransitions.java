@@ -26,7 +26,6 @@ import android.view.IWallpaperVisibilityListener;
 import android.view.IWindowManager;
 import android.view.MotionEvent;
 import android.view.View;
-import android.view.WindowManagerGlobal;
 
 import com.android.internal.statusbar.IStatusBarService;
 import com.android.systemui.Dependency;
@@ -37,6 +36,7 @@ public final class NavigationBarTransitions extends BarTransitions {
     private final NavigationBarView mView;
     private final IStatusBarService mBarService;
     private final LightBarTransitionsController mLightTransitionsController;
+    private final boolean mAllowAutoDimWallpaperNotVisible;
     private boolean mWallpaperVisible;
 
     private boolean mLightsOut;
@@ -49,6 +49,8 @@ public final class NavigationBarTransitions extends BarTransitions {
                 ServiceManager.getService(Context.STATUS_BAR_SERVICE));
         mLightTransitionsController = new LightBarTransitionsController(view.getContext(),
                 this::applyDarkIntensity);
+        mAllowAutoDimWallpaperNotVisible = view.getContext().getResources()
+                .getBoolean(R.bool.config_navigation_bar_enable_auto_dim_no_visible_wallpaper);
 
         IWindowManager windowManagerService = Dependency.get(IWindowManager.class);
         Handler handler = Handler.getMain();
@@ -80,8 +82,8 @@ public final class NavigationBarTransitions extends BarTransitions {
 
     @Override
     protected boolean isLightsOut(int mode) {
-        return super.isLightsOut(mode) || (mAutoDim && !mWallpaperVisible
-                && mode != MODE_WARNING);
+        return super.isLightsOut(mode) || (mAllowAutoDimWallpaperNotVisible && mAutoDim
+                && !mWallpaperVisible && mode != MODE_WARNING);
     }
 
     public LightBarTransitionsController getLightTransitionsController() {
