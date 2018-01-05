@@ -387,7 +387,7 @@ public final class BluetoothLeScanner {
                 if (mScannerId > 0) {
                     mLeScanClients.put(mScanCallback, this);
                 } else {
-                    // Registration timed out or got exception, reset scannerId to -1 so no
+                    // Registration timed out or got exception, reset RscannerId to -1 so no
                     // subsequent operations can proceed.
                     if (mScannerId == 0) mScannerId = -1;
 
