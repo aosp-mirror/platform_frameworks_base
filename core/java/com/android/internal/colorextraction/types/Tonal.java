@@ -53,10 +53,8 @@ public class Tonal implements ExtractionType {
 
     public static final int THRESHOLD_COLOR_LIGHT = 0xffe0e0e0;
     public static final int MAIN_COLOR_LIGHT = 0xffe0e0e0;
-    public static final int SECONDARY_COLOR_LIGHT = 0xff9e9e9e;
     public static final int THRESHOLD_COLOR_DARK = 0xff212121;
     public static final int MAIN_COLOR_DARK = 0xff000000;
-    public static final int SECONDARY_COLOR_DARK = 0xff000000;
 
     private final TonalPalette mGreyPalette;
     private final ArrayList<TonalPalette> mTonalPalettes;
@@ -211,10 +209,8 @@ public class Tonal implements ExtractionType {
         }
 
         // Normal colors:
-        // best fit + a 2 colors offset
         outColorsNormal.setMainColor(mainColor);
-        int secondaryIndex = primaryIndex + (primaryIndex >= 2 ? -2 : 2);
-        outColorsNormal.setSecondaryColor(getColorInt(secondaryIndex, h, s, l));
+        outColorsNormal.setSecondaryColor(mainColor);
 
         // Dark colors:
         // Stops at 4th color, only lighter if dark text is supported
@@ -225,9 +221,9 @@ public class Tonal implements ExtractionType {
         } else {
             primaryIndex = Math.min(fitIndex, 3);
         }
-        secondaryIndex = primaryIndex + (primaryIndex >= 2 ? -2 : 2);
-        outColorsDark.setMainColor(getColorInt(primaryIndex, h, s, l));
-        outColorsDark.setSecondaryColor(getColorInt(secondaryIndex, h, s, l));
+        mainColor = getColorInt(primaryIndex, h, s, l);
+        outColorsDark.setMainColor(mainColor);
+        outColorsDark.setSecondaryColor(mainColor);
 
         // Extra Dark:
         // Stay close to dark colors until dark text is supported
@@ -238,9 +234,9 @@ public class Tonal implements ExtractionType {
         } else {
             primaryIndex = 2;
         }
-        secondaryIndex = primaryIndex + (primaryIndex >= 2 ? -2 : 2);
-        outColorsExtraDark.setMainColor(getColorInt(primaryIndex, h, s, l));
-        outColorsExtraDark.setSecondaryColor(getColorInt(secondaryIndex, h, s, l));
+        mainColor = getColorInt(primaryIndex, h, s, l);
+        outColorsExtraDark.setMainColor(mainColor);
+        outColorsExtraDark.setSecondaryColor(mainColor);
 
         outColorsNormal.setSupportsDarkText(supportsDarkText);
         outColorsDark.setSupportsDarkText(supportsDarkText);
@@ -273,11 +269,10 @@ public class Tonal implements ExtractionType {
         boolean light = inWallpaperColors != null
                 && (inWallpaperColors.getColorHints() & WallpaperColors.HINT_SUPPORTS_DARK_TEXT)
                 != 0;
-        int innerColor = light ? MAIN_COLOR_LIGHT : MAIN_COLOR_DARK;
-        int outerColor = light ? SECONDARY_COLOR_LIGHT : SECONDARY_COLOR_DARK;
+        final int color = light ? MAIN_COLOR_LIGHT : MAIN_COLOR_DARK;
 
-        outGradientColors.setMainColor(innerColor);
-        outGradientColors.setSecondaryColor(outerColor);
+        outGradientColors.setMainColor(color);
+        outGradientColors.setSecondaryColor(color);
         outGradientColors.setSupportsDarkText(light);
     }
 
