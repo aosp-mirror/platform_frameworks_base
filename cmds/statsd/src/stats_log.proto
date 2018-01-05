@@ -24,12 +24,6 @@ option java_outer_classname = "StatsLog";
 
 import "frameworks/base/cmds/statsd/src/atoms.proto";
 
-message Field {
-  optional int32 field = 1;
-  optional int32 position_index = 2 [default = -1];
-  repeated Field child = 3;
-}
-
 message DimensionsValue {
   optional int32 field = 1;
 

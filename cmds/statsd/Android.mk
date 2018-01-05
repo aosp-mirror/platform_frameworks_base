@@ -19,6 +19,7 @@ statsd_common_src := \
     ../../core/java/android/os/IStatsManager.aidl \
     src/stats_log.proto \
     src/statsd_config.proto \
+    src/statsd_internal.proto \
     src/atoms.proto \
     src/field_util.cpp \
     src/stats_log_util.cpp \
