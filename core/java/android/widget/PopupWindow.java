@@ -2563,7 +2563,9 @@ public class PopupWindow {
                     public void onViewDetachedFromWindow(View v) {
                         v.removeOnAttachStateChangeListener(this);
 
-                        TransitionManager.endTransitions(PopupDecorView.this);
+                        if (isAttachedToWindow()) {
+                            TransitionManager.endTransitions(PopupDecorView.this);
+                        }
                     }
                 };
 
