@@ -36,9 +36,11 @@ import android.app.PendingIntent;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Binder;
-import android.os.RemoteException;
 import android.os.ServiceSpecificException;
 import android.os.UserHandle;
+import android.security.keystore.AndroidKeyStoreSecretKey;
+import android.security.keystore.KeyGenParameterSpec;
+import android.security.keystore.KeyProperties;
 import android.security.recoverablekeystore.KeyDerivationParameters;
 import android.security.recoverablekeystore.KeyEntryRecoveryData;
 import android.security.recoverablekeystore.KeyStoreRecoveryMetadata;
@@ -67,9 +69,8 @@ import java.util.concurrent.Executors;
 import java.util.Map;
 import java.util.Random;
 
-import javax.crypto.Cipher;
+import javax.crypto.KeyGenerator;
 import javax.crypto.SecretKey;
-import javax.crypto.spec.GCMParameterSpec;
 import javax.crypto.spec.SecretKeySpec;
 
 @SmallTest
@@ -77,7 +78,6 @@ import javax.crypto.spec.SecretKeySpec;
 public class RecoverableKeyStoreManagerTest {
     private static final String DATABASE_FILE_NAME = "recoverablekeystore.db";
 
-    private static final String KEY_WRAP_CIPHER_ALGORITHM = "AES/GCM/NoPadding";
     private static final String TEST_SESSION_ID = "karlin";
     private static final byte[] TEST_PUBLIC_KEY = new byte[] {
         (byte) 0x30, (byte) 0x59, (byte) 0x30, (byte) 0x13, (byte) 0x06, (byte) 0x07, (byte) 0x2a,
@@ -97,6 +97,8 @@ public class RecoverableKeyStoreManagerTest {
     private static final byte[] TEST_SECRET = getUtf8Bytes("password1234");
     private static final byte[] TEST_VAULT_CHALLENGE = getUtf8Bytes("vault_challenge");
     private static final byte[] TEST_VAULT_PARAMS = getUtf8Bytes("vault_params");
+    private static final int TEST_GENERATION_ID = 2;
+    private static final int TEST_USER_ID = 10009;
     private static final int KEY_CLAIMANT_LENGTH_BYTES = 16;
     private static final byte[] RECOVERY_RESPONSE_HEADER =
             "V1 reencrypted_recovery_key".getBytes(StandardCharsets.UTF_8);
@@ -105,20 +107,24 @@ public class RecoverableKeyStoreManagerTest {
     private static final int GENERATION_ID = 1;
     private static final byte[] NONCE = getUtf8Bytes("nonce");
     private static final byte[] KEY_MATERIAL = getUtf8Bytes("keymaterial");
-    private static final int GCM_TAG_SIZE_BITS = 128;
+    private static final String KEY_ALGORITHM = "AES";
+    private static final String ANDROID_KEY_STORE_PROVIDER = "AndroidKeyStore";
+    private static final String WRAPPING_KEY_ALIAS = "RecoverableKeyStoreManagerTest/WrappingKey";
 
     @Mock private Context mMockContext;
     @Mock private RecoverySnapshotListenersStorage mMockListenersStorage;
     @Mock private KeyguardManager mKeyguardManager;
+    @Mock private PlatformKeyManager mPlatformKeyManager;
 
     private RecoverableKeyStoreDb mRecoverableKeyStoreDb;
     private File mDatabaseFile;
     private RecoverableKeyStoreManager mRecoverableKeyStoreManager;
     private RecoverySessionStorage mRecoverySessionStorage;
     private RecoverySnapshotStorage mRecoverySnapshotStorage;
+    private PlatformEncryptionKey mPlatformEncryptionKey;
 
     @Before
-    public void setUp() {
+    public void setUp() throws Exception {
         MockitoAnnotations.initMocks(this);
 
         Context context = InstrumentationRegistry.getTargetContext();
@@ -130,7 +136,11 @@ public class RecoverableKeyStoreManagerTest {
         when(mMockContext.getSystemService(anyString())).thenReturn(mKeyguardManager);
         when(mMockContext.getSystemServiceName(any())).thenReturn("test");
         when(mMockContext.getApplicationContext()).thenReturn(mMockContext);
-        when(mKeyguardManager.isDeviceSecure(anyInt())).thenReturn(true);
+        when(mKeyguardManager.isDeviceSecure(TEST_USER_ID)).thenReturn(true);
+
+        mPlatformEncryptionKey =
+                new PlatformEncryptionKey(TEST_GENERATION_ID, generateAndroidKeyStoreKey());
+        when(mPlatformKeyManager.getEncryptKey(anyInt())).thenReturn(mPlatformEncryptionKey);
 
         mRecoverableKeyStoreManager = new RecoverableKeyStoreManager(
                 mMockContext,
@@ -138,7 +148,8 @@ public class RecoverableKeyStoreManagerTest {
                 mRecoverySessionStorage,
                 Executors.newSingleThreadExecutor(),
                 mRecoverySnapshotStorage,
-                mMockListenersStorage);
+                mMockListenersStorage,
+                mPlatformKeyManager);
     }
 
     @After
@@ -212,7 +223,7 @@ public class RecoverableKeyStoreManagerTest {
                     TEST_VAULT_CHALLENGE,
                     ImmutableList.of());
             fail("should have thrown");
-        } catch (RemoteException e) {
+        } catch (ServiceSpecificException e) {
             assertEquals("Only a single KeyStoreRecoveryMetadata is supported", e.getMessage());
         }
     }
@@ -232,7 +243,7 @@ public class RecoverableKeyStoreManagerTest {
                                     KeyDerivationParameters.createSHA256Parameters(TEST_SALT),
                                     TEST_SECRET)));
             fail("should have thrown");
-        } catch (RemoteException e) {
+        } catch (ServiceSpecificException e) {
             assertEquals("Not a valid X509 key", e.getMessage());
         }
     }
@@ -273,7 +284,6 @@ public class RecoverableKeyStoreManagerTest {
             fail("should have thrown");
         } catch (ServiceSpecificException e) {
             assertThat(e.getMessage()).startsWith("Failed to decrypt recovery key");
-            //assertEquals("Failed to decrypt recovery key", e.getMessage());
         }
     }
 
@@ -304,8 +314,8 @@ public class RecoverableKeyStoreManagerTest {
                     /*encryptedRecoveryKey=*/ encryptedClaimResponse,
                     /*applicationKeys=*/ ImmutableList.of(badApplicationKey));
             fail("should have thrown");
-        } catch (RemoteException e) {
-            assertEquals("Failed to recover key with alias 'nick'", e.getMessage());
+        } catch (ServiceSpecificException e) {
+            assertThat(e.getMessage()).startsWith("Failed to recover key with alias 'nick'");
         }
     }
 
@@ -465,5 +475,17 @@ public class RecoverableKeyStoreManagerTest {
         byte[] bytes = new byte[n];
         new Random().nextBytes(bytes);
         return bytes;
+    }
+
+    private AndroidKeyStoreSecretKey generateAndroidKeyStoreKey() throws Exception {
+        KeyGenerator keyGenerator = KeyGenerator.getInstance(
+                KEY_ALGORITHM,
+                ANDROID_KEY_STORE_PROVIDER);
+        keyGenerator.init(new KeyGenParameterSpec.Builder(
+                WRAPPING_KEY_ALIAS, KeyProperties.PURPOSE_ENCRYPT | KeyProperties.PURPOSE_DECRYPT)
+                .setBlockModes(KeyProperties.BLOCK_MODE_GCM)
+                .setEncryptionPaddings(KeyProperties.ENCRYPTION_PADDING_NONE)
+                .build());
+        return (AndroidKeyStoreSecretKey) keyGenerator.generateKey();
     }
 }

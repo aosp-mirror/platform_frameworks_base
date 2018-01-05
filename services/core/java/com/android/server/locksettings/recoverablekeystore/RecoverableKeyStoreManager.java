@@ -85,22 +85,34 @@ public class RecoverableKeyStoreManager {
     private final RecoverySnapshotListenersStorage mListenersStorage;
     private final RecoverableKeyGenerator mRecoverableKeyGenerator;
     private final RecoverySnapshotStorage mSnapshotStorage;
+    private final PlatformKeyManager mPlatformKeyManager;
 
     /**
      * Returns a new or existing instance.
      *
      * @hide
      */
-    public static synchronized RecoverableKeyStoreManager getInstance(Context mContext) {
+    public static synchronized RecoverableKeyStoreManager getInstance(Context context) {
         if (mInstance == null) {
-            RecoverableKeyStoreDb db = RecoverableKeyStoreDb.newInstance(mContext);
+            RecoverableKeyStoreDb db = RecoverableKeyStoreDb.newInstance(context);
+            PlatformKeyManager platformKeyManager;
+            try {
+                platformKeyManager = PlatformKeyManager.getInstance(context, db);
+            } catch (NoSuchAlgorithmException e) {
+                // Impossible: all algorithms must be supported by AOSP
+                throw new RuntimeException(e);
+            } catch (KeyStoreException e) {
+                throw new ServiceSpecificException(ERROR_KEYSTORE_INTERNAL_ERROR, e.getMessage());
+            }
+
             mInstance = new RecoverableKeyStoreManager(
-                    mContext.getApplicationContext(),
+                    context.getApplicationContext(),
                     db,
                     new RecoverySessionStorage(),
                     Executors.newSingleThreadExecutor(),
                     new RecoverySnapshotStorage(),
-                    new RecoverySnapshotListenersStorage());
+                    new RecoverySnapshotListenersStorage(),
+                    platformKeyManager);
         }
         return mInstance;
     }
@@ -112,13 +124,16 @@ public class RecoverableKeyStoreManager {
             RecoverySessionStorage recoverySessionStorage,
             ExecutorService executorService,
             RecoverySnapshotStorage snapshotStorage,
-            RecoverySnapshotListenersStorage listenersStorage) {
+            RecoverySnapshotListenersStorage listenersStorage,
+            PlatformKeyManager platformKeyManager) {
         mContext = context;
         mDatabase = recoverableKeyStoreDb;
         mRecoverySessionStorage = recoverySessionStorage;
         mExecutorService = executorService;
         mListenersStorage = listenersStorage;
         mSnapshotStorage = snapshotStorage;
+        mPlatformKeyManager = platformKeyManager;
+
         try {
             mRecoverableKeyGenerator = RecoverableKeyGenerator.newInstance(mDatabase);
         } catch (NoSuchAlgorithmException e) {
@@ -380,12 +395,10 @@ public class RecoverableKeyStoreManager {
         int uid = Binder.getCallingUid();
         int userId = UserHandle.getCallingUserId();
 
-        PlatformEncryptionKey encryptionKey;
 
+        PlatformEncryptionKey encryptionKey;
         try {
-            PlatformKeyManager platformKeyManager = PlatformKeyManager.getInstance(
-                    mContext, mDatabase, userId);
-            encryptionKey = platformKeyManager.getEncryptKey();
+            encryptionKey = mPlatformKeyManager.getEncryptKey(userId);
         } catch (NoSuchAlgorithmException e) {
             // Impossible: all algorithms must be supported by AOSP
             throw new RuntimeException(e);

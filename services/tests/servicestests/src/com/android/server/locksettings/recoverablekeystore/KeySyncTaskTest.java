@@ -114,7 +114,7 @@ public class KeySyncTaskTest {
 
         mWrappingKey = generateAndroidKeyStoreKey();
         mEncryptKey = new PlatformEncryptionKey(TEST_GENERATION_ID, mWrappingKey);
-        when(mPlatformKeyManager.getDecryptKey()).thenReturn(
+        when(mPlatformKeyManager.getDecryptKey(TEST_USER_ID)).thenReturn(
                 new PlatformDecryptionKey(TEST_GENERATION_ID, mWrappingKey));
     }
 
