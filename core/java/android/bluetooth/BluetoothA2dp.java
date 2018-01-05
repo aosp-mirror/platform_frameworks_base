@@ -17,6 +17,7 @@
 package android.bluetooth;
 
 import android.Manifest;
+import android.annotation.Nullable;
 import android.annotation.RequiresPermission;
 import android.annotation.SdkConstant;
 import android.annotation.SdkConstant.SdkConstantType;
@@ -101,6 +102,24 @@ public final class BluetoothA2dp implements BluetoothProfile {
     @SdkConstant(SdkConstantType.BROADCAST_INTENT_ACTION)
     public static final String ACTION_AVRCP_CONNECTION_STATE_CHANGED =
             "android.bluetooth.a2dp.profile.action.AVRCP_CONNECTION_STATE_CHANGED";
+
+    /**
+     * Intent used to broadcast the selection of a connected device as active.
+     *
+     * <p>This intent will have one extra:
+     * <ul>
+     * <li> {@link BluetoothDevice#EXTRA_DEVICE} - The remote device. It can
+     * be null if no device is active. </li>
+     * </ul>
+     *
+     * <p>Requires {@link android.Manifest.permission#BLUETOOTH} permission to
+     * receive.
+     *
+     * @hide
+     */
+    @SdkConstant(SdkConstantType.BROADCAST_INTENT_ACTION)
+    public static final String ACTION_ACTIVE_DEVICE_CHANGED =
+            "android.bluetooth.a2dp.profile.action.ACTIVE_DEVICE_CHANGED";
 
     /**
      * Intent used to broadcast the change in the Audio Codec state of the
@@ -419,6 +438,75 @@ public final class BluetoothA2dp implements BluetoothProfile {
         } catch (RemoteException e) {
             Log.e(TAG, "Stack:" + Log.getStackTraceString(new Throwable()));
             return BluetoothProfile.STATE_DISCONNECTED;
+        } finally {
+            mServiceLock.readLock().unlock();
+        }
+    }
+
+    /**
+     * Select a connected device as active.
+     *
+     * The active device selection is per profile. An active device's
+     * purpose is profile-specific. For example, A2DP audio streaming
+     * is to the active A2DP Sink device. If a remote device is not
+     * connected, it cannot be selected as active.
+     *
+     * <p> This API returns false in scenarios like the profile on the
+     * device is not connected or Bluetooth is not turned on.
+     * When this API returns true, it is guaranteed that the
+     * {@link #ACTION_ACTIVE_DEVICE_CHANGED} intent will be broadcasted
+     * with the active device.
+     *
+     * <p>Requires {@link android.Manifest.permission#BLUETOOTH_ADMIN}
+     * permission.
+     *
+     * @param device the remote Bluetooth device. Could be null to clear
+     * the active device and stop streaming audio to a Bluetooth device.
+     * @return false on immediate error, true otherwise
+     * @hide
+     */
+    public boolean setActiveDevice(@Nullable BluetoothDevice device) {
+        if (DBG) log("setActiveDevice(" + device + ")");
+        try {
+            mServiceLock.readLock().lock();
+            if (mService != null && isEnabled()
+                    && ((device == null) || isValidDevice(device))) {
+                return mService.setActiveDevice(device);
+            }
+            if (mService == null) Log.w(TAG, "Proxy not attached to service");
+            return false;
+        } catch (RemoteException e) {
+            Log.e(TAG, "Stack:" + Log.getStackTraceString(new Throwable()));
+            return false;
+        } finally {
+            mServiceLock.readLock().unlock();
+        }
+    }
+
+    /**
+     * Get the connected device that is active.
+     *
+     * <p>Requires {@link android.Manifest.permission#BLUETOOTH}
+     * permission.
+     *
+     * @return the connected device that is active or null if no device
+     * is active
+     * @hide
+     */
+    @RequiresPermission(Manifest.permission.BLUETOOTH)
+    @Nullable
+    public BluetoothDevice getActiveDevice() {
+        if (VDBG) log("getActiveDevice()");
+        try {
+            mServiceLock.readLock().lock();
+            if (mService != null && isEnabled()) {
+                return mService.getActiveDevice();
+            }
+            if (mService == null) Log.w(TAG, "Proxy not attached to service");
+            return null;
+        } catch (RemoteException e) {
+            Log.e(TAG, "Stack:" + Log.getStackTraceString(new Throwable()));
+            return null;
         } finally {
             mServiceLock.readLock().unlock();
         }
