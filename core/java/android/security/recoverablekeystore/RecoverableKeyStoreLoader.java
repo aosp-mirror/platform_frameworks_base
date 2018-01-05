@@ -43,10 +43,53 @@ public class RecoverableKeyStoreLoader {
 
     public static final int NO_ERROR = KeyStore.NO_ERROR;
     public static final int SYSTEM_ERROR = KeyStore.SYSTEM_ERROR;
+
+    /**
+     * Failed because the loader has not been initialized with a recovery public key yet.
+     */
     public static final int ERROR_UNINITIALIZED_RECOVERY_PUBLIC_KEY = 20;
+
+    /**
+     * Failed because no snapshot is yet pending to be synced for the user.
+     */
     public static final int ERROR_NO_SNAPSHOT_PENDING = 21;
+
+    /**
+     * Failed due to an error internal to AndroidKeyStore.
+     */
     public static final int ERROR_KEYSTORE_INTERNAL_ERROR = 22;
+
+    /**
+     * Failed because the user does not have a lock screen set.
+     */
     public static final int ERROR_INSECURE_USER = 24;
+
+    /**
+     * Failed because of an internal database error.
+     */
+    public static final int ERROR_DATABASE_ERROR = 25;
+
+    /**
+     * Failed because the provided certificate was not a valid X509 certificate.
+     */
+    public static final int ERROR_BAD_X509_CERTIFICATE = 26;
+
+    /**
+     * Should never be thrown - some algorithm that all AOSP implementations must support is
+     * not available.
+     */
+    public static final int ERROR_UNEXPECTED_MISSING_ALGORITHM = 27;
+
+    /**
+     * The caller is attempting to perform an operation that is not yet fully supported in the API.
+     */
+    public static final int ERROR_NOT_YET_SUPPORTED = 28;
+
+    /**
+     * Error thrown if decryption failed. This might be because the tag is wrong, the key is wrong,
+     * the data has become corrupted, the data has been tampered with, etc.
+     */
+    public static final int ERROR_DECRYPTION_FAILED = 29;
 
     /**
      * Rate limit is enforced to prevent using too many trusted remote devices, since each device
@@ -54,7 +97,7 @@ public class RecoverableKeyStoreLoader {
      *
      * @hide
      */
-    public static final int RATE_LIMIT_EXCEEDED = 21;
+    public static final int ERROR_RATE_LIMIT_EXCEEDED = 30;
 
     /** Key has been successfully synced. */
     public static final int RECOVERY_STATUS_SYNCED = 0;
@@ -89,12 +132,13 @@ public class RecoverableKeyStoreLoader {
         /**
          * Creates new {@link #RecoverableKeyStoreLoaderException} instance from the error code.
          *
-         * @param errorCode
+         * @param errorCode An error code, as listed at the top of this file.
+         * @param message The associated error message.
          * @hide
          */
-        public static RecoverableKeyStoreLoaderException fromErrorCode(int errorCode) {
-            return new RecoverableKeyStoreLoaderException(
-                    errorCode, getMessageFromErrorCode(errorCode));
+        public static RecoverableKeyStoreLoaderException fromErrorCode(
+                int errorCode, String message) {
+            return new RecoverableKeyStoreLoaderException(errorCode, message);
         }
 
         /**
@@ -106,32 +150,17 @@ public class RecoverableKeyStoreLoader {
          */
         static RecoverableKeyStoreLoaderException fromServiceSpecificException(
                 ServiceSpecificException e) throws RecoverableKeyStoreLoaderException {
-            throw RecoverableKeyStoreLoaderException.fromErrorCode(e.errorCode);
+            throw RecoverableKeyStoreLoaderException.fromErrorCode(e.errorCode, e.getMessage());
         }
 
         private RecoverableKeyStoreLoaderException(int errorCode, String message) {
             super(message);
+            mErrorCode = errorCode;
         }
 
         /** Returns errorCode. */
         public int getErrorCode() {
             return mErrorCode;
-        }
-
-        /** @hide */
-        private static String getMessageFromErrorCode(int errorCode) {
-            switch (errorCode) {
-                case NO_ERROR:
-                    return "OK";
-                case SYSTEM_ERROR:
-                    return "System error";
-                case ERROR_UNINITIALIZED_RECOVERY_PUBLIC_KEY:
-                    return "Recovery service is not initialized";
-                case RATE_LIMIT_EXCEEDED:
-                    return "Rate limit exceeded";
-                default:
-                    return String.valueOf("Unknown error code " + errorCode);
-            }
         }
     }
 
