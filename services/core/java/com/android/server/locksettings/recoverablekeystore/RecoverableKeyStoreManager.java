@@ -16,6 +16,19 @@
 
 package com.android.server.locksettings.recoverablekeystore;
 
+import static android.security.recoverablekeystore.RecoverableKeyStoreLoader
+        .ERROR_BAD_X509_CERTIFICATE;
+import static android.security.recoverablekeystore.RecoverableKeyStoreLoader.ERROR_DATABASE_ERROR;
+import static android.security.recoverablekeystore.RecoverableKeyStoreLoader
+        .ERROR_DECRYPTION_FAILED;
+import static android.security.recoverablekeystore.RecoverableKeyStoreLoader.ERROR_INSECURE_USER;
+import static android.security.recoverablekeystore.RecoverableKeyStoreLoader
+        .ERROR_KEYSTORE_INTERNAL_ERROR;
+import static android.security.recoverablekeystore.RecoverableKeyStoreLoader
+        .ERROR_NOT_YET_SUPPORTED;
+import static android.security.recoverablekeystore.RecoverableKeyStoreLoader
+        .ERROR_UNEXPECTED_MISSING_ALGORITHM;
+
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.app.PendingIntent;
@@ -63,12 +76,6 @@ import javax.crypto.AEADBadTagException;
 public class RecoverableKeyStoreManager {
     private static final String TAG = "RecoverableKeyStoreMgr";
 
-    // TODO: move error codes to RecoverableKeyStoreLoader.
-    private static int ERROR_INSECURE_USER = 1;
-    private static int ERROR_KEYSTORE_INTERNAL_ERROR = 2;
-    private static int ERROR_DATABASE_ERROR = 3;
-    private static int ERROR_RECOVERY_SESSION_NOT_FOUND = 4;
-
     private static RecoverableKeyStoreManager mInstance;
 
     private final Context mContext;
@@ -115,8 +122,8 @@ public class RecoverableKeyStoreManager {
         try {
             mRecoverableKeyGenerator = RecoverableKeyGenerator.newInstance(mDatabase);
         } catch (NoSuchAlgorithmException e) {
-            // Impossible: all AOSP implementations must support AES.
-            throw new RuntimeException(e);
+            Log.wtf(TAG, "AES keygen algorithm not available. AOSP must support this.", e);
+            throw new ServiceSpecificException(ERROR_UNEXPECTED_MISSING_ALGORITHM, e.getMessage());
         }
     }
 
@@ -133,10 +140,11 @@ public class RecoverableKeyStoreManager {
             X509EncodedKeySpec pkSpec = new X509EncodedKeySpec(signedPublicKeyList);
             publicKey = kf.generatePublic(pkSpec);
         } catch (NoSuchAlgorithmException e) {
-            // Should never happen
-            throw new RuntimeException(e);
+            Log.wtf(TAG, "EC algorithm not available. AOSP must support this.", e);
+            throw new ServiceSpecificException(ERROR_UNEXPECTED_MISSING_ALGORITHM, e.getMessage());
         } catch (InvalidKeySpecException e) {
-            throw new RemoteException("Invalid public key for the recovery service");
+            throw new ServiceSpecificException(
+                    ERROR_BAD_X509_CERTIFICATE, "Not a valid X509 certificate.");
         }
         mDatabase.setRecoveryServicePublicKey(userId, Binder.getCallingUid(), publicKey);
     }
@@ -295,7 +303,9 @@ public class RecoverableKeyStoreManager {
 
         if (secrets.size() != 1) {
             // TODO: support multiple secrets
-            throw new RemoteException("Only a single KeyStoreRecoveryMetadata is supported");
+            throw new ServiceSpecificException(
+                    ERROR_NOT_YET_SUPPORTED,
+                    "Only a single KeyStoreRecoveryMetadata is supported");
         }
 
         byte[] keyClaimant = KeySyncUtils.generateKeyClaimant();
@@ -314,18 +324,11 @@ public class RecoverableKeyStoreManager {
                     thmKfHash,
                     keyClaimant);
         } catch (NoSuchAlgorithmException e) {
-            // Should never happen: all the algorithms used are required by AOSP implementations.
-            throw new RemoteException(
-                    "Missing required algorithm",
-                    e,
-                    /*enableSuppression=*/ true,
-                    /*writeableStackTrace=*/ true);
+            Log.wtf(TAG, "SecureBox algorithm missing. AOSP must support this.", e);
+            throw new ServiceSpecificException(ERROR_UNEXPECTED_MISSING_ALGORITHM, e.getMessage());
         } catch (InvalidKeySpecException | InvalidKeyException e) {
-            throw new RemoteException(
-                    "Not a valid X509 key",
-                    e,
-                    /*enableSuppression=*/ true,
-                    /*writeableStackTrace=*/ true);
+            throw new ServiceSpecificException(ERROR_BAD_X509_CERTIFICATE,
+                    "Not a valid X509 key");
         }
     }
 
@@ -439,18 +442,12 @@ public class RecoverableKeyStoreManager {
                         KeySyncUtils.decryptApplicationKey(recoveryKey, encryptedKeyMaterial);
                 keyMaterialByAlias.put(alias, keyMaterial);
             } catch (NoSuchAlgorithmException e) {
-                // Should never happen: all the algorithms used are required by AOSP implementations
-                throw new RemoteException(
-                        "Missing required algorithm",
-                        e,
-                    /*enableSuppression=*/ true,
-                    /*writeableStackTrace=*/ true);
+                Log.wtf(TAG, "Missing SecureBox algorithm. AOSP required to support this.", e);
+                throw new ServiceSpecificException(
+                        ERROR_UNEXPECTED_MISSING_ALGORITHM, e.getMessage());
             } catch (InvalidKeyException | AEADBadTagException e) {
-                throw new RemoteException(
-                        "Failed to recover key with alias '" + alias + "'",
-                        e,
-                    /*enableSuppression=*/ true,
-                    /*writeableStackTrace=*/ true);
+                throw new ServiceSpecificException(ERROR_DECRYPTION_FAILED,
+                        "Failed to recover key with alias '" + alias + "': " + e.getMessage());
             }
         }
         return keyMaterialByAlias;
