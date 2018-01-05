@@ -2799,6 +2799,17 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
     }
 
     @Override
+    public String getSubscriptionPlansOwner(int subId) {
+        if (UserHandle.getCallingAppId() != android.os.Process.SYSTEM_UID) {
+            throw new SecurityException();
+        }
+
+        synchronized (mNetworkPoliciesSecondLock) {
+            return mSubscriptionPlansOwner.get(subId);
+        }
+    }
+
+    @Override
     protected void dump(FileDescriptor fd, PrintWriter writer, String[] args) {
         if (!DumpUtils.checkDumpPermission(mContext, TAG, writer)) return;
 
