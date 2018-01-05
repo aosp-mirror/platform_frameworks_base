@@ -21,6 +21,7 @@ import android.content.ContentResolver;
 import android.content.Context;
 import android.content.pm.ProviderInfo;
 import android.content.res.Resources;
+import android.test.mock.MockContentProvider;
 import android.test.mock.MockContext;
 import android.test.mock.MockContentResolver;
 import android.database.DatabaseUtils;
@@ -152,7 +153,7 @@ public abstract class ProviderTestCase2<T extends ContentProvider> extends Andro
         T instance = providerClass.newInstance();
         ProviderInfo providerInfo = new ProviderInfo();
         providerInfo.authority = authority;
-        instance.attachInfoForTesting(context, providerInfo);
+        MockContentProvider.attachInfoForTesting(instance, context, providerInfo);
         return instance;
     }
 
