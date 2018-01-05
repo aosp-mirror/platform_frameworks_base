@@ -827,6 +827,8 @@ public class AudioSystem
     private static native boolean native_is_offload_supported(int encoding, int sampleRate,
             int channelMask, int channelIndexMask);
 
+    public static native int getMicrophones(ArrayList<MicrophoneInfo> microphonesInfo);
+
     // Items shared with audio service
 
     /**

@@ -48,11 +48,13 @@ import android.os.ServiceManager;
 import android.os.SystemClock;
 import android.os.UserHandle;
 import android.provider.Settings;
+import android.text.TextUtils;
 import android.util.ArrayMap;
 import android.util.Log;
 import android.util.Slog;
 import android.view.KeyEvent;
 
+import java.io.IOException;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.util.ArrayList;
@@ -4564,6 +4566,51 @@ public class AudioManager {
                 }
             }
         }
+    }
+
+    /**
+     * Set port id for microphones by matching device type and address.
+     * @hide
+     */
+    public static void setPortIdForMicrophones(ArrayList<MicrophoneInfo> microphones) {
+        AudioDeviceInfo[] devices = getDevicesStatic(AudioManager.GET_DEVICES_INPUTS);
+        for (int i = microphones.size() - 1; i >= 0; i--) {
+            boolean foundPortId = false;
+            for (AudioDeviceInfo device : devices) {
+                if (device.getPort().type() == microphones.get(i).getInternalDeviceType()
+                        && TextUtils.equals(device.getAddress(), microphones.get(i).getAddress())) {
+                    microphones.get(i).setId(device.getId());
+                    foundPortId = true;
+                    break;
+                }
+            }
+            if (!foundPortId) {
+                Log.i(TAG, "Failed to find port id for device with type:"
+                        + microphones.get(i).getType() + " address:"
+                        + microphones.get(i).getAddress());
+                microphones.remove(i);
+            }
+        }
+    }
+
+    /**
+     * Returns a list of {@link MicrophoneInfo} that corresponds to the characteristics
+     * of all available microphones. The list is empty when no microphones are available
+     * on the device. An error during the query will result in an IOException being thrown.
+     *
+     * @return a list that contains all microphones' characteristics
+     * @throws IOException if an error occurs.
+     */
+    public List<MicrophoneInfo> getMicrophones() throws IOException {
+        ArrayList<MicrophoneInfo> microphones = new ArrayList<MicrophoneInfo>();
+        int status = AudioSystem.getMicrophones(microphones);
+        if (status != AudioManager.SUCCESS) {
+            // fail and bail!
+            Log.e(TAG, "getMicrophones failed:" + status);
+            return new ArrayList<MicrophoneInfo>(); // Always return a list.
+        }
+        setPortIdForMicrophones(microphones);
+        return microphones;
     }
 
     // Since we need to calculate the changes since THE LAST NOTIFICATION, and not since the
