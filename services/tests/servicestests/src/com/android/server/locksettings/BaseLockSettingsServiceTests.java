@@ -27,6 +27,7 @@ import static org.mockito.Mockito.when;
 import android.app.IActivityManager;
 import android.app.NotificationManager;
 import android.app.admin.DevicePolicyManager;
+import android.app.admin.DevicePolicyManagerInternal;
 import android.app.trust.TrustManager;
 import android.content.ComponentName;
 import android.content.pm.UserInfo;
@@ -41,6 +42,7 @@ import android.test.AndroidTestCase;
 
 import com.android.internal.widget.ILockSettings;
 import com.android.internal.widget.LockPatternUtils;
+import com.android.server.LocalServices;
 
 import org.mockito.invocation.InvocationOnMock;
 import org.mockito.stubbing.Answer;
@@ -75,6 +77,7 @@ public class BaseLockSettingsServiceTests extends AndroidTestCase {
     FakeStorageManager mStorageManager;
     IActivityManager mActivityManager;
     DevicePolicyManager mDevicePolicyManager;
+    DevicePolicyManagerInternal mDevicePolicyManagerInternal;
     KeyStore mKeyStore;
     MockSyntheticPasswordManager mSpManager;
 
@@ -88,6 +91,10 @@ public class BaseLockSettingsServiceTests extends AndroidTestCase {
         mStorageManager = new FakeStorageManager();
         mActivityManager = mock(IActivityManager.class);
         mDevicePolicyManager = mock(DevicePolicyManager.class);
+        mDevicePolicyManagerInternal = mock(DevicePolicyManagerInternal.class);
+
+        LocalServices.removeServiceForTest(DevicePolicyManagerInternal.class);
+        LocalServices.addService(DevicePolicyManagerInternal.class, mDevicePolicyManagerInternal);
 
         mContext = new MockLockSettingsContext(getContext(), mUserManager, mNotificationManager,
                 mDevicePolicyManager, mock(StorageManager.class), mock(TrustManager.class));
