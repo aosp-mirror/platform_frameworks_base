@@ -1832,9 +1832,11 @@ public final class ActivityThread {
                     handleLocalVoiceInteractionStarted((IBinder) ((SomeArgs) msg.obj).arg1,
                             (IVoiceInteractor) ((SomeArgs) msg.obj).arg2);
                     break;
-                case ATTACH_AGENT:
-                    handleAttachAgent((String) msg.obj);
+                case ATTACH_AGENT: {
+                    Application app = getApplication();
+                    handleAttachAgent((String) msg.obj, app != null ? app.mLoadedApk : null);
                     break;
+                }
                 case APPLICATION_INFO_CHANGED:
                     mUpdatingSystemConfig = true;
                     try {
@@ -3119,11 +3121,23 @@ public final class ActivityThread {
         }
     }
 
-    static final void handleAttachAgent(String agent) {
+    private static boolean attemptAttachAgent(String agent, ClassLoader classLoader) {
         try {
-            VMDebug.attachAgent(agent);
+            VMDebug.attachAgent(agent, classLoader);
+            return true;
         } catch (IOException e) {
-            Slog.e(TAG, "Attaching agent failed: " + agent);
+            Slog.e(TAG, "Attaching agent with " + classLoader + " failed: " + agent);
+            return false;
+        }
+    }
+
+    static void handleAttachAgent(String agent, LoadedApk loadedApk) {
+        ClassLoader classLoader = loadedApk != null ? loadedApk.getClassLoader() : null;
+        if (attemptAttachAgent(agent, classLoader)) {
+            return;
+        }
+        if (classLoader != null) {
+            attemptAttachAgent(agent, null);
         }
     }
 
@@ -5441,12 +5455,16 @@ public final class ActivityThread {
         mCompatConfiguration = new Configuration(data.config);
 
         mProfiler = new Profiler();
+        String agent = null;
         if (data.initProfilerInfo != null) {
             mProfiler.profileFile = data.initProfilerInfo.profileFile;
             mProfiler.profileFd = data.initProfilerInfo.profileFd;
             mProfiler.samplingInterval = data.initProfilerInfo.samplingInterval;
             mProfiler.autoStopProfiler = data.initProfilerInfo.autoStopProfiler;
             mProfiler.streamingOutput = data.initProfilerInfo.streamingOutput;
+            if (data.initProfilerInfo.attachAgentDuringBind) {
+                agent = data.initProfilerInfo.agent;
+            }
         }
 
         // send up app name; do this *before* waiting for debugger
@@ -5495,6 +5513,10 @@ public final class ActivityThread {
         }
 
         data.loadedApk = getLoadedApkNoCheck(data.appInfo, data.compatInfo);
+
+        if (agent != null) {
+            handleAttachAgent(agent, data.loadedApk);
+        }
 
         /**
          * Switch this process to density compatibility mode if needed.
