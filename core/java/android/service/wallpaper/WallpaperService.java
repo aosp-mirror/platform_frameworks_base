@@ -563,9 +563,12 @@ public abstract class WallpaperService extends Service {
          * Called when the device enters or exits ambient mode.
          *
          * @param inAmbientMode {@code true} if in ambient mode.
+         * @param animated {@code true} if you'll have te opportunity of animating your transition
+         *                 {@code false} when the screen will blank and the wallpaper should be
+         *                 set to ambient mode immediately.
          * @hide
          */
-        public void onAmbientModeChanged(boolean inAmbientMode) {
+        public void onAmbientModeChanged(boolean inAmbientMode, boolean animated) {
         }
 
         /**
@@ -1021,18 +1024,20 @@ public abstract class WallpaperService extends Service {
          * Executes life cycle event and updates internal ambient mode state based on
          * message sent from handler.
          *
-         * @param inAmbientMode True if in ambient mode.
+         * @param inAmbientMode {@code true} if in ambient mode.
+         * @param animated {@code true} if the transition will be animated.
          * @hide
          */
         @VisibleForTesting
-        public void doAmbientModeChanged(boolean inAmbientMode) {
+        public void doAmbientModeChanged(boolean inAmbientMode, boolean animated) {
             if (!mDestroyed) {
                 if (DEBUG) {
-                    Log.v(TAG, "onAmbientModeChanged(" + inAmbientMode + "): " + this);
+                    Log.v(TAG, "onAmbientModeChanged(" + inAmbientMode + ", "
+                            + animated + "): " + this);
                 }
                 mIsInAmbientMode = inAmbientMode;
                 if (mCreated) {
-                    onAmbientModeChanged(inAmbientMode);
+                    onAmbientModeChanged(inAmbientMode, animated);
                 }
             }
         }
@@ -1278,8 +1283,10 @@ public abstract class WallpaperService extends Service {
         }
 
         @Override
-        public void setInAmbientMode(boolean inAmbientDisplay) throws RemoteException {
-            Message msg = mCaller.obtainMessageI(DO_IN_AMBIENT_MODE, inAmbientDisplay ? 1 : 0);
+        public void setInAmbientMode(boolean inAmbientDisplay, boolean animated)
+                throws RemoteException {
+            Message msg = mCaller.obtainMessageII(DO_IN_AMBIENT_MODE, inAmbientDisplay ? 1 : 0,
+                    animated ? 1 : 0);
             mCaller.sendMessage(msg);
         }
 
@@ -1350,7 +1357,7 @@ public abstract class WallpaperService extends Service {
                     return;
                 }
                 case DO_IN_AMBIENT_MODE: {
-                    mEngine.doAmbientModeChanged(message.arg1 != 0);
+                    mEngine.doAmbientModeChanged(message.arg1 != 0, message.arg2 != 0);
                     return;
                 }
                 case MSG_UPDATE_SURFACE:
