@@ -4739,6 +4739,15 @@
         <!-- Extra spacing between lines of text, as a multiplier. The value will not be applied
              for the last line of text.-->
         <attr name="lineSpacingMultiplier" format="float" />
+        <!-- Explicit height between lines of text. If set, this will override the values set
+             for lineSpacingExtra and lineSpacingMultiplier. -->
+        <attr name="lineHeight" format="dimension" />
+        <!-- Distance from the top of the TextView to the first text baseline. If set, this
+             overrides the value set for paddingTop. -->
+        <attr name="firstBaselineToTopHeight" format="dimension" />
+        <!-- Distance from the bottom of the TextView to the last text baseline. If set, this
+             overrides the value set for paddingBottom. -->
+        <attr name="lastBaselineToBottomHeight" format="dimension" />
         <!-- The number of times to repeat the marquee animation. Only applied if the
              TextView has marquee enabled. -->
         <attr name="marqueeRepeatLimit" format="integer">
