@@ -89,7 +89,7 @@ public class KeySyncTask implements Runnable {
                 userId,
                 credentialType,
                 credential,
-                () -> PlatformKeyManager.getInstance(context, recoverableKeyStoreDb, userId));
+                () -> PlatformKeyManager.getInstance(context, recoverableKeyStoreDb));
     }
 
     /**
@@ -246,7 +246,7 @@ public class KeySyncTask implements Runnable {
             throws InsecureUserException, KeyStoreException, UnrecoverableKeyException,
             NoSuchAlgorithmException, NoSuchPaddingException, BadPlatformKeyException {
         PlatformKeyManager platformKeyManager = mPlatformKeyManagerFactory.newInstance();
-        PlatformDecryptionKey decryptKey = platformKeyManager.getDecryptKey();
+        PlatformDecryptionKey decryptKey = platformKeyManager.getDecryptKey(mUserId);
         Map<String, WrappedKey> wrappedKeys = mRecoverableKeyStoreDb.getAllKeys(
                 mUserId, decryptKey.getGenerationId());
         return WrappedKey.unwrapKeys(decryptKey, wrappedKeys);

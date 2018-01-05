@@ -78,7 +78,7 @@ public class PlatformKeyManagerTest {
         mDatabaseFile = context.getDatabasePath(DATABASE_FILE_NAME);
         mRecoverableKeyStoreDb = RecoverableKeyStoreDb.newInstance(context);
         mPlatformKeyManager = new PlatformKeyManager(
-                USER_ID_FIXTURE, mContext, mKeyStoreProxy, mRecoverableKeyStoreDb);
+                mContext, mKeyStoreProxy, mRecoverableKeyStoreDb);
 
         when(mContext.getSystemService(anyString())).thenReturn(mKeyguardManager);
         when(mContext.getSystemServiceName(any())).thenReturn("test");
@@ -93,7 +93,7 @@ public class PlatformKeyManagerTest {
 
     @Test
     public void init_createsEncryptKeyWithCorrectAlias() throws Exception {
-        mPlatformKeyManager.init();
+        mPlatformKeyManager.init(USER_ID_FIXTURE);
 
         verify(mKeyStoreProxy).setEntry(
                 eq("com.android.server.locksettings.recoverablekeystore/platform/42/1/encrypt"),
@@ -103,14 +103,14 @@ public class PlatformKeyManagerTest {
 
     @Test
     public void init_createsEncryptKeyWithCorrectPurposes() throws Exception {
-        mPlatformKeyManager.init();
+        mPlatformKeyManager.init(USER_ID_FIXTURE);
 
         assertEquals(KeyProperties.PURPOSE_ENCRYPT, getEncryptKeyProtection().getPurposes());
     }
 
     @Test
     public void init_createsEncryptKeyWithCorrectPaddings() throws Exception {
-        mPlatformKeyManager.init();
+        mPlatformKeyManager.init(USER_ID_FIXTURE);
 
         assertArrayEquals(
                 new String[] { KeyProperties.ENCRYPTION_PADDING_NONE },
@@ -119,7 +119,7 @@ public class PlatformKeyManagerTest {
 
     @Test
     public void init_createsEncryptKeyWithCorrectBlockModes() throws Exception {
-        mPlatformKeyManager.init();
+        mPlatformKeyManager.init(USER_ID_FIXTURE);
 
         assertArrayEquals(
                 new String[] { KeyProperties.BLOCK_MODE_GCM },
@@ -128,14 +128,14 @@ public class PlatformKeyManagerTest {
 
     @Test
     public void init_createsEncryptKeyWithoutAuthenticationRequired() throws Exception {
-        mPlatformKeyManager.init();
+        mPlatformKeyManager.init(USER_ID_FIXTURE);
 
         assertFalse(getEncryptKeyProtection().isUserAuthenticationRequired());
     }
 
     @Test
     public void init_createsDecryptKeyWithCorrectAlias() throws Exception {
-        mPlatformKeyManager.init();
+        mPlatformKeyManager.init(USER_ID_FIXTURE);
 
         verify(mKeyStoreProxy).setEntry(
                 eq("com.android.server.locksettings.recoverablekeystore/platform/42/1/decrypt"),
@@ -145,14 +145,14 @@ public class PlatformKeyManagerTest {
 
     @Test
     public void init_createsDecryptKeyWithCorrectPurposes() throws Exception {
-        mPlatformKeyManager.init();
+        mPlatformKeyManager.init(USER_ID_FIXTURE);
 
         assertEquals(KeyProperties.PURPOSE_DECRYPT, getDecryptKeyProtection().getPurposes());
     }
 
     @Test
     public void init_createsDecryptKeyWithCorrectPaddings() throws Exception {
-        mPlatformKeyManager.init();
+        mPlatformKeyManager.init(USER_ID_FIXTURE);
 
         assertArrayEquals(
                 new String[] { KeyProperties.ENCRYPTION_PADDING_NONE },
@@ -161,7 +161,7 @@ public class PlatformKeyManagerTest {
 
     @Test
     public void init_createsDecryptKeyWithCorrectBlockModes() throws Exception {
-        mPlatformKeyManager.init();
+        mPlatformKeyManager.init(USER_ID_FIXTURE);
 
         assertArrayEquals(
                 new String[] { KeyProperties.BLOCK_MODE_GCM },
@@ -170,14 +170,14 @@ public class PlatformKeyManagerTest {
 
     @Test
     public void init_createsDecryptKeyWithAuthenticationRequired() throws Exception {
-        mPlatformKeyManager.init();
+        mPlatformKeyManager.init(USER_ID_FIXTURE);
 
         assertTrue(getDecryptKeyProtection().isUserAuthenticationRequired());
     }
 
     @Test
     public void init_createsDecryptKeyWithAuthenticationValidFor15Seconds() throws Exception {
-        mPlatformKeyManager.init();
+        mPlatformKeyManager.init(USER_ID_FIXTURE);
 
         assertEquals(
                 USER_AUTHENTICATION_VALIDITY_DURATION_SECONDS,
@@ -186,7 +186,7 @@ public class PlatformKeyManagerTest {
 
     @Test
     public void init_createsDecryptKeyBoundToTheUsersAuthentication() throws Exception {
-        mPlatformKeyManager.init();
+        mPlatformKeyManager.init(USER_ID_FIXTURE);
 
         assertEquals(
                 USER_ID_FIXTURE,
@@ -195,7 +195,7 @@ public class PlatformKeyManagerTest {
 
     @Test
     public void init_createsBothKeysWithSameMaterial() throws Exception {
-        mPlatformKeyManager.init();
+        mPlatformKeyManager.init(USER_ID_FIXTURE);
 
         verify(mKeyStoreProxy, times(2)).setEntry(any(), mEntryArgumentCaptor.capture(), any());
         List<KeyStore.Entry> entries = mEntryArgumentCaptor.getAllValues();
@@ -206,7 +206,7 @@ public class PlatformKeyManagerTest {
 
     @Test
     public void init_savesGenerationIdToDatabase() throws Exception {
-        mPlatformKeyManager.init();
+        mPlatformKeyManager.init(USER_ID_FIXTURE);
 
         assertEquals(1,
                 mRecoverableKeyStoreDb.getPlatformKeyGenerationId(USER_ID_FIXTURE));
@@ -214,23 +214,23 @@ public class PlatformKeyManagerTest {
 
     @Test
     public void init_setsGenerationIdTo1() throws Exception {
-        mPlatformKeyManager.init();
+        mPlatformKeyManager.init(USER_ID_FIXTURE);
 
-        assertEquals(1, mPlatformKeyManager.getGenerationId());
+        assertEquals(1, mPlatformKeyManager.getGenerationId(USER_ID_FIXTURE));
     }
 
     @Test
     public void init_incrementsGenerationIdIfKeyIsUnavailable() throws Exception {
-        mPlatformKeyManager.init();
+        mPlatformKeyManager.init(USER_ID_FIXTURE);
 
-        mPlatformKeyManager.init();
+        mPlatformKeyManager.init(USER_ID_FIXTURE);
 
-        assertEquals(2, mPlatformKeyManager.getGenerationId());
+        assertEquals(2, mPlatformKeyManager.getGenerationId(USER_ID_FIXTURE));
     }
 
     @Test
     public void init_doesNotIncrementGenerationIdIfKeyAvailable() throws Exception {
-        mPlatformKeyManager.init();
+        mPlatformKeyManager.init(USER_ID_FIXTURE);
         when(mKeyStoreProxy
                 .containsAlias("com.android.server.locksettings.recoverablekeystore/"
                         + "platform/42/1/decrypt")).thenReturn(true);
@@ -238,21 +238,19 @@ public class PlatformKeyManagerTest {
                 .containsAlias("com.android.server.locksettings.recoverablekeystore/"
                         + "platform/42/1/encrypt")).thenReturn(true);
 
-        mPlatformKeyManager.init();
+        mPlatformKeyManager.init(USER_ID_FIXTURE);
 
-        assertEquals(1, mPlatformKeyManager.getGenerationId());
+        assertEquals(1, mPlatformKeyManager.getGenerationId(USER_ID_FIXTURE));
     }
 
     @Test
     public void getGenerationId_returnsMinusOneIfNotInitialized() throws Exception {
-        assertEquals(-1, mPlatformKeyManager.getGenerationId());
+        assertEquals(-1, mPlatformKeyManager.getGenerationId(USER_ID_FIXTURE));
     }
 
     @Test
     public void getDecryptKey_getsDecryptKeyWithCorrectAlias() throws Exception {
-        mPlatformKeyManager.init();
-
-        mPlatformKeyManager.getDecryptKey();
+        mPlatformKeyManager.getDecryptKey(USER_ID_FIXTURE);
 
         verify(mKeyStoreProxy).getKey(
                 eq("com.android.server.locksettings.recoverablekeystore/platform/42/1/decrypt"),
@@ -261,9 +259,7 @@ public class PlatformKeyManagerTest {
 
     @Test
     public void getEncryptKey_getsDecryptKeyWithCorrectAlias() throws Exception {
-        mPlatformKeyManager.init();
-
-        mPlatformKeyManager.getEncryptKey();
+        mPlatformKeyManager.getEncryptKey(USER_ID_FIXTURE);
 
         verify(mKeyStoreProxy).getKey(
                 eq("com.android.server.locksettings.recoverablekeystore/platform/42/1/encrypt"),
@@ -272,18 +268,18 @@ public class PlatformKeyManagerTest {
 
     @Test
     public void regenerate_incrementsTheGenerationId() throws Exception {
-        mPlatformKeyManager.init();
+        mPlatformKeyManager.init(USER_ID_FIXTURE);
 
-        mPlatformKeyManager.regenerate();
+        mPlatformKeyManager.regenerate(USER_ID_FIXTURE);
 
-        assertEquals(2, mPlatformKeyManager.getGenerationId());
+        assertEquals(2, mPlatformKeyManager.getGenerationId(USER_ID_FIXTURE));
     }
 
     @Test
     public void regenerate_generatesANewEncryptKeyWithTheCorrectAlias() throws Exception {
-        mPlatformKeyManager.init();
+        mPlatformKeyManager.init(USER_ID_FIXTURE);
 
-        mPlatformKeyManager.regenerate();
+        mPlatformKeyManager.regenerate(USER_ID_FIXTURE);
 
         verify(mKeyStoreProxy).setEntry(
                 eq("com.android.server.locksettings.recoverablekeystore/platform/42/2/encrypt"),
@@ -293,9 +289,9 @@ public class PlatformKeyManagerTest {
 
     @Test
     public void regenerate_generatesANewDecryptKeyWithTheCorrectAlias() throws Exception {
-        mPlatformKeyManager.init();
+        mPlatformKeyManager.init(USER_ID_FIXTURE);
 
-        mPlatformKeyManager.regenerate();
+        mPlatformKeyManager.regenerate(USER_ID_FIXTURE);
 
         verify(mKeyStoreProxy).setEntry(
                 eq("com.android.server.locksettings.recoverablekeystore/platform/42/2/decrypt"),
