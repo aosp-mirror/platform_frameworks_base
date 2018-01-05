@@ -191,8 +191,21 @@ class TunerSession extends ITuner.Stub {
         }
     }
 
-    private boolean getConfigFlag(int flag) {
-        Slog.v(TAG, "getConfigFlag " + ConfigFlag.toString(flag));
+    @Override
+    public boolean isConfigFlagSupported(int flag) {
+        try {
+            isConfigFlagSet(flag);
+            return true;
+        } catch (IllegalStateException ex) {
+            return true;
+        } catch (UnsupportedOperationException ex) {
+            return false;
+        }
+    }
+
+    @Override
+    public boolean isConfigFlagSet(int flag) {
+        Slog.v(TAG, "isConfigFlagSet " + ConfigFlag.toString(flag));
         synchronized (mLock) {
             checkNotClosedLocked();
 
@@ -204,15 +217,16 @@ class TunerSession extends ITuner.Stub {
                     flagState.value = value;
                 });
             } catch (RemoteException ex) {
-                throw new RuntimeException("Failed to get flag " + ConfigFlag.toString(flag), ex);
+                throw new RuntimeException("Failed to check flag " + ConfigFlag.toString(flag), ex);
             }
-            Convert.throwOnError("getConfigFlag", halResult.value);
+            Convert.throwOnError("isConfigFlagSet", halResult.value);
 
             return flagState.value;
         }
     }
 
-    private void setConfigFlag(int flag, boolean value) {
+    @Override
+    public void setConfigFlag(int flag, boolean value) {
         Slog.v(TAG, "setConfigFlag " + ConfigFlag.toString(flag) + " = " + value);
         synchronized (mLock) {
             checkNotClosedLocked();
@@ -224,24 +238,6 @@ class TunerSession extends ITuner.Stub {
                 throw new RuntimeException("Failed to set flag " + ConfigFlag.toString(flag), ex);
             }
             Convert.throwOnError("setConfigFlag", halResult);
-        }
-    }
-
-    @Override
-    public boolean isAnalogForced() {
-        try {
-            return getConfigFlag(ConfigFlag.FORCE_ANALOG);
-        } catch (UnsupportedOperationException ex) {
-            throw new IllegalStateException(ex);
-        }
-    }
-
-    @Override
-    public void setAnalogForced(boolean isForced) {
-        try {
-            setConfigFlag(ConfigFlag.FORCE_ANALOG, isForced);
-        } catch (UnsupportedOperationException ex) {
-            throw new IllegalStateException(ex);
         }
     }
 

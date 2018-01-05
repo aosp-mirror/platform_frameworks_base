@@ -290,7 +290,9 @@ public abstract class RadioTuner {
      * @throws IllegalStateException if the switch is not supported at current
      *         configuration.
      * @return {@code true} if analog is forced, {@code false} otherwise.
+     * @deprecated Use {@link isConfigFlagSet(int)} instead.
      */
+    @Deprecated
     public abstract boolean isAnalogForced();
 
     /**
@@ -305,8 +307,48 @@ public abstract class RadioTuner {
      * @param isForced {@code true} to force analog, {@code false} for a default behaviour.
      * @throws IllegalStateException if the switch is not supported at current
      *         configuration.
+     * @deprecated Use {@link setConfigFlag(int, boolean)} instead.
      */
+    @Deprecated
     public abstract void setAnalogForced(boolean isForced);
+
+    /**
+     * Checks, if a given config flag is supported
+     *
+     * @param flag Flag to check.
+     * @return True, if the flag is supported.
+     */
+    public boolean isConfigFlagSupported(@RadioManager.ConfigFlag int flag) {
+        return false;
+    }
+
+    /**
+     * Fetches the current setting of a given config flag.
+     *
+     * The success/failure result is consistent with isConfigFlagSupported.
+     *
+     * @param flag Flag to fetch.
+     * @return The current value of the flag.
+     * @throws IllegalStateException if the flag is not applicable right now.
+     * @throws UnsupportedOperationException if the flag is not supported at all.
+     */
+    public boolean isConfigFlagSet(@RadioManager.ConfigFlag int flag) {
+        throw new UnsupportedOperationException();
+    }
+
+    /**
+     * Sets the config flag.
+     *
+     * The success/failure result is consistent with isConfigFlagSupported.
+     *
+     * @param flag Flag to set.
+     * @param value The new value of a given flag.
+     * @throws IllegalStateException if the flag is not applicable right now.
+     * @throws UnsupportedOperationException if the flag is not supported at all.
+     */
+    public void setConfigFlag(@RadioManager.ConfigFlag int flag, boolean value) {
+        throw new UnsupportedOperationException();
+    }
 
     /**
      * Generic method for setting vendor-specific parameter values.
@@ -316,6 +358,7 @@ public abstract class RadioTuner {
      * Framework does not make any assumptions on the keys or values, other than
      * ones stated in VendorKeyValue documentation (a requirement of key
      * prefixes).
+     * See VendorKeyValue at hardware/interfaces/broadcastradio/2.0/types.hal.
      *
      * For each pair in the result map, the key will be one of the keys
      * contained in the input (possibly with wildcards expanded), and the value
@@ -332,10 +375,11 @@ public abstract class RadioTuner {
      *
      * @param parameters Vendor-specific key-value pairs.
      * @return Operation completion status for parameters being set.
-     * @hide FutureFeature
      */
-    public abstract @NonNull Map<String, String>
-            setParameters(@NonNull Map<String, String> parameters);
+    public @NonNull Map<String, String>
+            setParameters(@NonNull Map<String, String> parameters) {
+        throw new UnsupportedOperationException();
+    }
 
     /**
      * Generic method for retrieving vendor-specific parameter values.
@@ -355,10 +399,11 @@ public abstract class RadioTuner {
      *
      * @param keys Parameter keys to fetch.
      * @return Vendor-specific key-value pairs.
-     * @hide FutureFeature
      */
-    public abstract @NonNull Map<String, String>
-            getParameters(@NonNull List<String> keys);
+    public @NonNull Map<String, String>
+            getParameters(@NonNull List<String> keys) {
+        throw new UnsupportedOperationException();
+    }
 
     /**
      * Get current antenna connection state for current configuration.
@@ -494,7 +539,6 @@ public abstract class RadioTuner {
          * asynchronously.
          *
          * @param parameters Vendor-specific key-value pairs.
-         * @hide FutureFeature
          */
         public void onParametersUpdated(@NonNull Map<String, String> parameters) {}
     }

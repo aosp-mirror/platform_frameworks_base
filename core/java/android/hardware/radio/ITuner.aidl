@@ -82,17 +82,9 @@ interface ITuner {
      */
     List<RadioManager.ProgramInfo> getProgramList(in Map vendorFilter);
 
-    /**
-     * @throws IllegalStateException if the switch is not supported at current
-     *         configuration.
-     */
-    boolean isAnalogForced();
-
-    /**
-     * @throws IllegalStateException if the switch is not supported at current
-     *         configuration.
-     */
-    void setAnalogForced(boolean isForced);
+    boolean isConfigFlagSupported(int flag);
+    boolean isConfigFlagSet(int flag);
+    void setConfigFlag(int flag, boolean value);
 
     /**
      * @param parameters Vendor-specific key-value pairs, must be Map<String, String>
