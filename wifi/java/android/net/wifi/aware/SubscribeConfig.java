@@ -435,8 +435,6 @@ public final class SubscribeConfig implements Parcelable {
          *
          * @return The builder to facilitate chaining
          *         {@code builder.setXXX(..).setXXX(..)}.
-         *
-         * @hide
          */
         public Builder setMinDistanceMm(int minDistanceMm) {
             mMinDistanceMm = minDistanceMm;
@@ -466,8 +464,6 @@ public final class SubscribeConfig implements Parcelable {
          *
          * @return The builder to facilitate chaining
          *         {@code builder.setXXX(..).setXXX(..)}.
-         *
-         * @hide
          */
         public Builder setMaxDistanceMm(int maxDistanceMm) {
             mMaxDistanceMm = maxDistanceMm;
