@@ -69,4 +69,12 @@ public abstract class AbstractPreferenceController {
             pref.setVisible(isVisible);
         }
     }
+
+
+    /**
+     * @return a String for the summary of the preference.
+     */
+    public String getSummary() {
+        return null;
+    }
 }
