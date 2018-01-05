@@ -2776,6 +2776,11 @@
          the display's native orientation. -->
     <string translatable="false" name="config_mainBuiltInDisplayCutout"></string>
 
+    <!-- Whether the display cutout region of the main built-in display should be forced to
+         black in software (to avoid aliasing or emulate a cutout that is not physically existent).
+         -->
+    <bool name="config_fillMainBuiltInDisplayCutout">false</bool>
+
     <!-- Ultrasound support for Mic/speaker path -->
     <!-- Whether the default microphone audio source supports near-ultrasound frequencies
          (range of 18 - 21 kHz). -->

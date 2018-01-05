@@ -38,6 +38,9 @@ import android.view.ViewGroup.LayoutParams;
 import android.view.WindowInsets;
 import android.view.WindowManager;
 
+import com.android.systemui.statusbar.policy.ConfigurationController;
+import com.android.systemui.statusbar.policy.ConfigurationController.ConfigurationListener;
+
 import java.util.Collections;
 import java.util.List;
 
@@ -45,18 +48,28 @@ import java.util.List;
  * Emulates a display cutout by drawing its shape in an overlay as supplied by
  * {@link DisplayCutout}.
  */
-public class EmulatedDisplayCutout extends SystemUI {
+public class EmulatedDisplayCutout extends SystemUI implements ConfigurationListener {
     private View mOverlay;
     private boolean mAttached;
     private WindowManager mWindowManager;
 
     @Override
     public void start() {
+        Dependency.get(ConfigurationController.class).addCallback(this);
+
         mWindowManager = mContext.getSystemService(WindowManager.class);
-        mContext.getContentResolver().registerContentObserver(
-                Settings.Global.getUriFor(Settings.Global.EMULATE_DISPLAY_CUTOUT),
-                false, mObserver, UserHandle.USER_ALL);
-        mObserver.onChange(false);
+        updateAttached();
+    }
+
+    @Override
+    public void onOverlayChanged() {
+        updateAttached();
+    }
+
+    private void updateAttached() {
+        boolean shouldAttach = mContext.getResources().getBoolean(
+                com.android.internal.R.bool.config_fillMainBuiltInDisplayCutout);
+        setAttached(shouldAttach);
     }
 
     private void setAttached(boolean attached) {
@@ -93,17 +106,6 @@ public class EmulatedDisplayCutout extends SystemUI {
         lp.gravity = Gravity.TOP;
         return lp;
     }
-
-    private ContentObserver mObserver = new ContentObserver(new Handler(Looper.getMainLooper())) {
-        @Override
-        public void onChange(boolean selfChange) {
-            boolean emulateCutout = Settings.Global.getInt(
-                    mContext.getContentResolver(), Settings.Global.EMULATE_DISPLAY_CUTOUT,
-                    Settings.Global.EMULATE_DISPLAY_CUTOUT_OFF)
-                    != Settings.Global.EMULATE_DISPLAY_CUTOUT_OFF;
-            setAttached(emulateCutout);
-        }
-    };
 
     private static class CutoutView extends View {
         private final Paint mPaint = new Paint();

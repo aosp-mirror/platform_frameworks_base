@@ -16,6 +16,7 @@
 
 package com.android.server.display;
 
+import android.app.ActivityThread;
 import android.content.res.Resources;
 import com.android.server.LocalServices;
 import com.android.server.lights.Light;
@@ -392,7 +393,7 @@ final class LocalDisplayAdapter extends DisplayAdapter {
                             | DisplayDeviceInfo.FLAG_SUPPORTS_PROTECTED_BUFFERS;
                 }
 
-                final Resources res = getContext().getResources();
+                final Resources res = getOverlayContext().getResources();
                 if (mBuiltInDisplayId == SurfaceControl.BUILT_IN_DISPLAY_ID_MAIN) {
                     mInfo.name = res.getString(
                             com.android.internal.R.string.display_manager_built_in_display_name);
@@ -685,6 +686,11 @@ final class LocalDisplayAdapter extends DisplayAdapter {
             mInfo = null;
             sendDisplayDeviceEventLocked(this, DISPLAY_DEVICE_EVENT_CHANGED);
         }
+    }
+
+    /** Supplies a context whose Resources apply runtime-overlays */
+    Context getOverlayContext() {
+        return ActivityThread.currentActivityThread().getSystemUiContext();
     }
 
     /**

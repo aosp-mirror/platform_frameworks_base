@@ -3199,6 +3199,7 @@
 
   <java-symbol type="string" name="global_action_logout" />
   <java-symbol type="string" name="config_mainBuiltInDisplayCutout" />
+  <java-symbol type="bool" name="config_fillMainBuiltInDisplayCutout" />
   <java-symbol type="drawable" name="ic_logout" />
 
   <java-symbol type="array" name="config_autoBrightnessDisplayValuesNits" />
