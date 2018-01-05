@@ -85,9 +85,6 @@ class BackupManagerConstants extends ContentObserver {
         super(handler);
         mResolver = resolver;
         updateSettings();
-    }
-
-    public void start() {
         mResolver.registerContentObserver(
                 Settings.Secure.getUriFor(Settings.Secure.BACKUP_MANAGER_CONSTANTS), false, this);
     }
