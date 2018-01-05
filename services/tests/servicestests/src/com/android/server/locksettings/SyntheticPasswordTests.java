@@ -23,6 +23,7 @@ import static android.app.admin.DevicePolicyManager.PASSWORD_QUALITY_UNSPECIFIED
 import static com.android.internal.widget.LockPatternUtils.CREDENTIAL_TYPE_PASSWORD;
 import static com.android.internal.widget.LockPatternUtils.SYNTHETIC_PASSWORD_ENABLED_KEY;
 import static com.android.internal.widget.LockPatternUtils.SYNTHETIC_PASSWORD_HANDLE_KEY;
+
 import static org.mockito.Mockito.verify;
 
 import android.app.admin.PasswordMetrics;
@@ -97,15 +98,18 @@ public class SyntheticPasswordTests extends BaseLockSettingsServiceTests {
         final byte[] primaryStorageKey = mStorageManager.getUserUnlockToken(PRIMARY_USER_ID);
         enableSyntheticPassword();
         // Performs migration
-        assertEquals(VerifyCredentialResponse.RESPONSE_OK,
-                mService.verifyCredential(PASSWORD, LockPatternUtils.CREDENTIAL_TYPE_PASSWORD, 0, PRIMARY_USER_ID).getResponseCode());
+        assertEquals(VerifyCredentialResponse.RESPONSE_OK, mService.verifyCredential(
+                PASSWORD, LockPatternUtils.CREDENTIAL_TYPE_PASSWORD, 0, PRIMARY_USER_ID)
+                    .getResponseCode());
         assertEquals(sid, mGateKeeperService.getSecureUserId(PRIMARY_USER_ID));
         assertTrue(hasSyntheticPassword(PRIMARY_USER_ID));
 
         // SP-based verification
-        assertEquals(VerifyCredentialResponse.RESPONSE_OK,
-                mService.verifyCredential(PASSWORD, LockPatternUtils.CREDENTIAL_TYPE_PASSWORD, 0, PRIMARY_USER_ID).getResponseCode());
-        assertArrayNotSame(primaryStorageKey, mStorageManager.getUserUnlockToken(PRIMARY_USER_ID));
+        assertEquals(VerifyCredentialResponse.RESPONSE_OK, mService.verifyCredential(
+                PASSWORD, LockPatternUtils.CREDENTIAL_TYPE_PASSWORD, 0, PRIMARY_USER_ID)
+                        .getResponseCode());
+        assertArrayNotEquals(primaryStorageKey,
+                mStorageManager.getUserUnlockToken(PRIMARY_USER_ID));
     }
 
     private void initializeCredentialUnderSP(String password, int userId) throws RemoteException {
@@ -126,8 +130,9 @@ public class SyntheticPasswordTests extends BaseLockSettingsServiceTests {
         mService.setLockCredential(NEWPASSWORD, LockPatternUtils.CREDENTIAL_TYPE_PASSWORD, PASSWORD,
                 PASSWORD_QUALITY_ALPHABETIC, PRIMARY_USER_ID);
         mGateKeeperService.clearSecureUserId(PRIMARY_USER_ID);
-        assertEquals(VerifyCredentialResponse.RESPONSE_OK,
-                mService.verifyCredential(NEWPASSWORD, LockPatternUtils.CREDENTIAL_TYPE_PASSWORD, 0, PRIMARY_USER_ID).getResponseCode());
+        assertEquals(VerifyCredentialResponse.RESPONSE_OK, mService.verifyCredential(
+                NEWPASSWORD, LockPatternUtils.CREDENTIAL_TYPE_PASSWORD, 0, PRIMARY_USER_ID)
+                        .getResponseCode());
         assertEquals(sid, mGateKeeperService.getSecureUserId(PRIMARY_USER_ID));
     }
 
@@ -136,11 +141,13 @@ public class SyntheticPasswordTests extends BaseLockSettingsServiceTests {
         final String BADPASSWORD = "testSyntheticPasswordVerifyCredential-badpassword";
 
         initializeCredentialUnderSP(PASSWORD, PRIMARY_USER_ID);
-        assertEquals(VerifyCredentialResponse.RESPONSE_OK,
-                mService.verifyCredential(PASSWORD, LockPatternUtils.CREDENTIAL_TYPE_PASSWORD, 0, PRIMARY_USER_ID).getResponseCode());
+        assertEquals(VerifyCredentialResponse.RESPONSE_OK, mService.verifyCredential(
+                PASSWORD, LockPatternUtils.CREDENTIAL_TYPE_PASSWORD, 0, PRIMARY_USER_ID)
+                        .getResponseCode());
 
-        assertEquals(VerifyCredentialResponse.RESPONSE_ERROR,
-                mService.verifyCredential(BADPASSWORD, LockPatternUtils.CREDENTIAL_TYPE_PASSWORD, 0, PRIMARY_USER_ID).getResponseCode());
+        assertEquals(VerifyCredentialResponse.RESPONSE_ERROR, mService.verifyCredential(
+                BADPASSWORD, LockPatternUtils.CREDENTIAL_TYPE_PASSWORD, 0, PRIMARY_USER_ID)
+                    .getResponseCode());
     }
 
     public void testSyntheticPasswordClearCredential() throws RemoteException {
@@ -157,9 +164,10 @@ public class SyntheticPasswordTests extends BaseLockSettingsServiceTests {
         // set a new password
         mService.setLockCredential(NEWPASSWORD, LockPatternUtils.CREDENTIAL_TYPE_PASSWORD, null,
                 PASSWORD_QUALITY_ALPHABETIC, PRIMARY_USER_ID);
-        assertEquals(VerifyCredentialResponse.RESPONSE_OK,
-                mService.verifyCredential(NEWPASSWORD, LockPatternUtils.CREDENTIAL_TYPE_PASSWORD, 0, PRIMARY_USER_ID).getResponseCode());
-        assertNotSame(sid, mGateKeeperService.getSecureUserId(PRIMARY_USER_ID));
+        assertEquals(VerifyCredentialResponse.RESPONSE_OK, mService.verifyCredential(
+                NEWPASSWORD, LockPatternUtils.CREDENTIAL_TYPE_PASSWORD, 0, PRIMARY_USER_ID)
+                    .getResponseCode());
+        assertNotEquals(sid, mGateKeeperService.getSecureUserId(PRIMARY_USER_ID));
     }
 
     public void testSyntheticPasswordClearCredentialUntrusted() throws RemoteException {
@@ -176,9 +184,10 @@ public class SyntheticPasswordTests extends BaseLockSettingsServiceTests {
         // set a new password
         mService.setLockCredential(NEWPASSWORD, LockPatternUtils.CREDENTIAL_TYPE_PASSWORD, null,
                 PASSWORD_QUALITY_ALPHABETIC, PRIMARY_USER_ID);
-        assertEquals(VerifyCredentialResponse.RESPONSE_OK,
-                mService.verifyCredential(NEWPASSWORD, LockPatternUtils.CREDENTIAL_TYPE_PASSWORD, 0, PRIMARY_USER_ID).getResponseCode());
-        assertNotSame(sid, mGateKeeperService.getSecureUserId(PRIMARY_USER_ID));
+        assertEquals(VerifyCredentialResponse.RESPONSE_OK, mService.verifyCredential(
+                NEWPASSWORD, LockPatternUtils.CREDENTIAL_TYPE_PASSWORD, 0, PRIMARY_USER_ID)
+                    .getResponseCode());
+        assertNotEquals(sid, mGateKeeperService.getSecureUserId(PRIMARY_USER_ID));
     }
 
     public void testSyntheticPasswordChangeCredentialUntrusted() throws RemoteException {
@@ -190,14 +199,14 @@ public class SyntheticPasswordTests extends BaseLockSettingsServiceTests {
         // Untrusted change password
         mService.setLockCredential(NEWPASSWORD, LockPatternUtils.CREDENTIAL_TYPE_PASSWORD, null,
                 PASSWORD_QUALITY_ALPHABETIC, PRIMARY_USER_ID);
-        assertNotSame(0 ,mGateKeeperService.getSecureUserId(PRIMARY_USER_ID));
-        assertNotSame(sid ,mGateKeeperService.getSecureUserId(PRIMARY_USER_ID));
+        assertNotEquals(0, mGateKeeperService.getSecureUserId(PRIMARY_USER_ID));
+        assertNotEquals(sid, mGateKeeperService.getSecureUserId(PRIMARY_USER_ID));
 
         // Verify the password
-        assertEquals(VerifyCredentialResponse.RESPONSE_OK,
-                mService.verifyCredential(NEWPASSWORD, LockPatternUtils.CREDENTIAL_TYPE_PASSWORD, 0, PRIMARY_USER_ID).getResponseCode());
+        assertEquals(VerifyCredentialResponse.RESPONSE_OK, mService.verifyCredential(
+                NEWPASSWORD, LockPatternUtils.CREDENTIAL_TYPE_PASSWORD, 0, PRIMARY_USER_ID)
+                    .getResponseCode());
     }
-
 
     public void testManagedProfileUnifiedChallengeMigration() throws RemoteException {
         final String UnifiedPassword = "testManagedProfileUnifiedChallengeMigration-pwd";
@@ -215,16 +224,20 @@ public class SyntheticPasswordTests extends BaseLockSettingsServiceTests {
 
         // do migration
         enableSyntheticPassword();
-        assertEquals(VerifyCredentialResponse.RESPONSE_OK,
-                mService.verifyCredential(UnifiedPassword, LockPatternUtils.CREDENTIAL_TYPE_PASSWORD, 0, PRIMARY_USER_ID).getResponseCode());
+        assertEquals(VerifyCredentialResponse.RESPONSE_OK, mService.verifyCredential(
+                UnifiedPassword, LockPatternUtils.CREDENTIAL_TYPE_PASSWORD, 0, PRIMARY_USER_ID)
+                        .getResponseCode());
 
         // verify
-        assertEquals(VerifyCredentialResponse.RESPONSE_OK,
-                mService.verifyCredential(UnifiedPassword, LockPatternUtils.CREDENTIAL_TYPE_PASSWORD, 0, PRIMARY_USER_ID).getResponseCode());
+        assertEquals(VerifyCredentialResponse.RESPONSE_OK, mService.verifyCredential(
+                UnifiedPassword, LockPatternUtils.CREDENTIAL_TYPE_PASSWORD, 0, PRIMARY_USER_ID)
+                        .getResponseCode());
         assertEquals(primarySid, mGateKeeperService.getSecureUserId(PRIMARY_USER_ID));
         assertEquals(profileSid, mGateKeeperService.getSecureUserId(MANAGED_PROFILE_USER_ID));
-        assertArrayNotSame(primaryStorageKey, mStorageManager.getUserUnlockToken(PRIMARY_USER_ID));
-        assertArrayNotSame(profileStorageKey, mStorageManager.getUserUnlockToken(MANAGED_PROFILE_USER_ID));
+        assertArrayNotEquals(primaryStorageKey,
+                mStorageManager.getUserUnlockToken(PRIMARY_USER_ID));
+        assertArrayNotEquals(profileStorageKey,
+                mStorageManager.getUserUnlockToken(MANAGED_PROFILE_USER_ID));
         assertTrue(hasSyntheticPassword(PRIMARY_USER_ID));
         assertTrue(hasSyntheticPassword(MANAGED_PROFILE_USER_ID));
     }
@@ -247,20 +260,26 @@ public class SyntheticPasswordTests extends BaseLockSettingsServiceTests {
 
         // do migration
         enableSyntheticPassword();
-        assertEquals(VerifyCredentialResponse.RESPONSE_OK,
-                mService.verifyCredential(primaryPassword, LockPatternUtils.CREDENTIAL_TYPE_PASSWORD, 0, PRIMARY_USER_ID).getResponseCode());
-        assertEquals(VerifyCredentialResponse.RESPONSE_OK,
-                mService.verifyCredential(profilePassword, LockPatternUtils.CREDENTIAL_TYPE_PASSWORD, 0, MANAGED_PROFILE_USER_ID).getResponseCode());
+        assertEquals(VerifyCredentialResponse.RESPONSE_OK, mService.verifyCredential(
+                primaryPassword, LockPatternUtils.CREDENTIAL_TYPE_PASSWORD, 0, PRIMARY_USER_ID)
+                        .getResponseCode());
+        assertEquals(VerifyCredentialResponse.RESPONSE_OK, mService.verifyCredential(
+                profilePassword, LockPatternUtils.CREDENTIAL_TYPE_PASSWORD,
+                0, MANAGED_PROFILE_USER_ID).getResponseCode());
 
         // verify
-        assertEquals(VerifyCredentialResponse.RESPONSE_OK,
-                mService.verifyCredential(primaryPassword, LockPatternUtils.CREDENTIAL_TYPE_PASSWORD, 0, PRIMARY_USER_ID).getResponseCode());
-        assertEquals(VerifyCredentialResponse.RESPONSE_OK,
-                mService.verifyCredential(profilePassword, LockPatternUtils.CREDENTIAL_TYPE_PASSWORD, 0, MANAGED_PROFILE_USER_ID).getResponseCode());
+        assertEquals(VerifyCredentialResponse.RESPONSE_OK, mService.verifyCredential(
+                primaryPassword, LockPatternUtils.CREDENTIAL_TYPE_PASSWORD, 0, PRIMARY_USER_ID)
+                        .getResponseCode());
+        assertEquals(VerifyCredentialResponse.RESPONSE_OK, mService.verifyCredential(
+                profilePassword, LockPatternUtils.CREDENTIAL_TYPE_PASSWORD,
+                0, MANAGED_PROFILE_USER_ID).getResponseCode());
         assertEquals(primarySid, mGateKeeperService.getSecureUserId(PRIMARY_USER_ID));
         assertEquals(profileSid, mGateKeeperService.getSecureUserId(MANAGED_PROFILE_USER_ID));
-        assertArrayNotSame(primaryStorageKey, mStorageManager.getUserUnlockToken(PRIMARY_USER_ID));
-        assertArrayNotSame(profileStorageKey, mStorageManager.getUserUnlockToken(MANAGED_PROFILE_USER_ID));
+        assertArrayNotEquals(primaryStorageKey,
+                mStorageManager.getUserUnlockToken(PRIMARY_USER_ID));
+        assertArrayNotEquals(profileStorageKey,
+                mStorageManager.getUserUnlockToken(MANAGED_PROFILE_USER_ID));
         assertTrue(hasSyntheticPassword(PRIMARY_USER_ID));
         assertTrue(hasSyntheticPassword(MANAGED_PROFILE_USER_ID));
     }
@@ -288,9 +307,9 @@ public class SyntheticPasswordTests extends BaseLockSettingsServiceTests {
         metric.quality = PASSWORD_QUALITY_SOMETHING;
         verify(mDevicePolicyManager).setActivePasswordState(metric, PRIMARY_USER_ID);
 
-        assertEquals(VerifyCredentialResponse.RESPONSE_OK,
-                mService.verifyCredential(PATTERN, LockPatternUtils.CREDENTIAL_TYPE_PATTERN, 0,
-                        PRIMARY_USER_ID).getResponseCode());
+        assertEquals(VerifyCredentialResponse.RESPONSE_OK, mService.verifyCredential(
+                PATTERN, LockPatternUtils.CREDENTIAL_TYPE_PATTERN, 0, PRIMARY_USER_ID)
+                    .getResponseCode());
         assertArrayEquals(storageKey, mStorageManager.getUserUnlockToken(PRIMARY_USER_ID));
     }
 
@@ -304,7 +323,8 @@ public class SyntheticPasswordTests extends BaseLockSettingsServiceTests {
         long handle = mService.addEscrowToken(TOKEN.getBytes(), PRIMARY_USER_ID);
         assertFalse(mService.isEscrowTokenActive(handle, PRIMARY_USER_ID));
 
-        mService.verifyCredential(PASSWORD, LockPatternUtils.CREDENTIAL_TYPE_PASSWORD, 0, PRIMARY_USER_ID).getResponseCode();
+        mService.verifyCredential(PASSWORD, LockPatternUtils.CREDENTIAL_TYPE_PASSWORD,
+                0, PRIMARY_USER_ID).getResponseCode();
         assertTrue(mService.isEscrowTokenActive(handle, PRIMARY_USER_ID));
 
         mService.setLockCredentialWithToken(null, LockPatternUtils.CREDENTIAL_TYPE_NONE, handle,
@@ -312,8 +332,9 @@ public class SyntheticPasswordTests extends BaseLockSettingsServiceTests {
         mService.setLockCredentialWithToken(PATTERN, LockPatternUtils.CREDENTIAL_TYPE_PATTERN,
                 handle, TOKEN.getBytes(), PASSWORD_QUALITY_SOMETHING, PRIMARY_USER_ID);
 
-        assertEquals(VerifyCredentialResponse.RESPONSE_OK,
-                mService.verifyCredential(PATTERN, LockPatternUtils.CREDENTIAL_TYPE_PATTERN, 0, PRIMARY_USER_ID).getResponseCode());
+        assertEquals(VerifyCredentialResponse.RESPONSE_OK, mService.verifyCredential(
+                PATTERN, LockPatternUtils.CREDENTIAL_TYPE_PATTERN, 0, PRIMARY_USER_ID)
+                        .getResponseCode());
         assertArrayEquals(storageKey, mStorageManager.getUserUnlockToken(PRIMARY_USER_ID));
     }
 
@@ -328,7 +349,8 @@ public class SyntheticPasswordTests extends BaseLockSettingsServiceTests {
         long handle = mService.addEscrowToken(TOKEN.getBytes(), PRIMARY_USER_ID);
         assertFalse(mService.isEscrowTokenActive(handle, PRIMARY_USER_ID));
 
-        mService.verifyCredential(PASSWORD, LockPatternUtils.CREDENTIAL_TYPE_PASSWORD, 0, PRIMARY_USER_ID).getResponseCode();
+        mService.verifyCredential(PASSWORD, LockPatternUtils.CREDENTIAL_TYPE_PASSWORD,
+                0, PRIMARY_USER_ID).getResponseCode();
         assertTrue(mService.isEscrowTokenActive(handle, PRIMARY_USER_ID));
 
         mService.setLockCredential(PATTERN, LockPatternUtils.CREDENTIAL_TYPE_PATTERN, PASSWORD,
@@ -337,12 +359,14 @@ public class SyntheticPasswordTests extends BaseLockSettingsServiceTests {
         mService.setLockCredentialWithToken(NEWPASSWORD, LockPatternUtils.CREDENTIAL_TYPE_PASSWORD,
                 handle, TOKEN.getBytes(), PASSWORD_QUALITY_ALPHABETIC, PRIMARY_USER_ID);
 
-        assertEquals(VerifyCredentialResponse.RESPONSE_OK,
-                mService.verifyCredential(NEWPASSWORD, LockPatternUtils.CREDENTIAL_TYPE_PASSWORD, 0, PRIMARY_USER_ID).getResponseCode());
+        assertEquals(VerifyCredentialResponse.RESPONSE_OK, mService.verifyCredential(
+                NEWPASSWORD, LockPatternUtils.CREDENTIAL_TYPE_PASSWORD, 0, PRIMARY_USER_ID)
+                    .getResponseCode());
         assertArrayEquals(storageKey, mStorageManager.getUserUnlockToken(PRIMARY_USER_ID));
     }
 
-    public void testEscrowTokenActivatedImmediatelyIfNoUserPasswordNeedsMigration() throws RemoteException {
+    public void testEscrowTokenActivatedImmediatelyIfNoUserPasswordNeedsMigration()
+            throws RemoteException {
         final String TOKEN = "some-high-entropy-secure-token";
         enableSyntheticPassword();
         long handle = mService.addEscrowToken(TOKEN.getBytes(), PRIMARY_USER_ID);
@@ -351,7 +375,8 @@ public class SyntheticPasswordTests extends BaseLockSettingsServiceTests {
         assertTrue(hasSyntheticPassword(PRIMARY_USER_ID));
     }
 
-    public void testEscrowTokenActivatedImmediatelyIfNoUserPasswordNoMigration() throws RemoteException {
+    public void testEscrowTokenActivatedImmediatelyIfNoUserPasswordNoMigration()
+            throws RemoteException {
         final String TOKEN = "some-high-entropy-secure-token";
         initializeCredentialUnderSP(null, PRIMARY_USER_ID);
         long handle = mService.addEscrowToken(TOKEN.getBytes(), PRIMARY_USER_ID);
@@ -360,7 +385,8 @@ public class SyntheticPasswordTests extends BaseLockSettingsServiceTests {
         assertTrue(hasSyntheticPassword(PRIMARY_USER_ID));
     }
 
-    public void testEscrowTokenActivatedLaterWithUserPasswordNeedsMigration() throws RemoteException {
+    public void testEscrowTokenActivatedLaterWithUserPasswordNeedsMigration()
+            throws RemoteException {
         final String TOKEN = "some-high-entropy-secure-token";
         final String PASSWORD = "password";
         // Set up pre-SP user password
@@ -373,9 +399,9 @@ public class SyntheticPasswordTests extends BaseLockSettingsServiceTests {
         // Token not activated immediately since user password exists
         assertFalse(mService.isEscrowTokenActive(handle, PRIMARY_USER_ID));
         // Activate token (password gets migrated to SP at the same time)
-        assertEquals(VerifyCredentialResponse.RESPONSE_OK,
-                mService.verifyCredential(PASSWORD, LockPatternUtils.CREDENTIAL_TYPE_PASSWORD, 0,
-                        PRIMARY_USER_ID).getResponseCode());
+        assertEquals(VerifyCredentialResponse.RESPONSE_OK, mService.verifyCredential(
+                PASSWORD, LockPatternUtils.CREDENTIAL_TYPE_PASSWORD, 0, PRIMARY_USER_ID)
+                    .getResponseCode());
         // Verify token is activated
         assertTrue(mService.isEscrowTokenActive(handle, PRIMARY_USER_ID));
     }
@@ -422,7 +448,7 @@ public class SyntheticPasswordTests extends BaseLockSettingsServiceTests {
         assertArrayEquals(PAYLOAD2, deserialized.passwordHandle);
     }
 
-    // b/34600579
+    // b/62213311
     //TODO: add non-migration work profile case, and unify/un-unify transition.
     //TODO: test token after user resets password
     //TODO: test token based reset after unified work challenge
