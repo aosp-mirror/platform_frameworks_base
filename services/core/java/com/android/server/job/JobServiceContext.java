@@ -38,12 +38,14 @@ import android.os.PowerManager;
 import android.os.RemoteException;
 import android.os.UserHandle;
 import android.os.WorkSource;
+import android.util.EventLog;
 import android.util.Slog;
 import android.util.TimeUtils;
 
 import com.android.internal.annotations.GuardedBy;
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.app.IBatteryStats;
+import com.android.server.EventLogTags;
 import com.android.server.job.controllers.JobStatus;
 
 /**
@@ -222,17 +224,20 @@ public final class JobServiceContext implements ServiceConnection {
                     isDeadlineExpired, triggeredUris, triggeredAuthorities, job.network);
             mExecutionStartTimeElapsed = sElapsedRealtimeClock.millis();
 
-            if (DEBUG_STANDBY) {
-                final long whenDeferred = job.getWhenStandbyDeferred();
-                if (whenDeferred > 0) {
+            final long whenDeferred = job.getWhenStandbyDeferred();
+            if (whenDeferred > 0) {
+                final long deferral = mExecutionStartTimeElapsed - whenDeferred;
+                EventLog.writeEvent(EventLogTags.JOB_DEFERRED_EXECUTION, deferral);
+                if (DEBUG_STANDBY) {
                     StringBuilder sb = new StringBuilder(128);
                     sb.append("Starting job deferred for standby by ");
-                    TimeUtils.formatDuration(mExecutionStartTimeElapsed - whenDeferred, sb);
-                    sb.append(" : ");
+                    TimeUtils.formatDuration(deferral, sb);
+                    sb.append(" ms : ");
                     sb.append(job.toShortString());
                     Slog.v(TAG, sb.toString());
                 }
             }
+
             // Once we'e begun executing a job, we by definition no longer care whether
             // it was inflated from disk with not-yet-coherent delay/deadline bounds.
             job.clearPersistedUtcTimes();
