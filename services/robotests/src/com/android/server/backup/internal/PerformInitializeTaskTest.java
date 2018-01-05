@@ -108,10 +108,13 @@ public class PerformInitializeTaskTest {
 
         verify(mBackupManagerService)
                 .recordInitPending(
-                        false, TRANSPORT_NAME, TransportTestUtils.dirName(TRANSPORT_NAME));
+                        false, TRANSPORT_NAME, TransportTestUtils.transportDirName(TRANSPORT_NAME));
         verify(mBackupManagerService)
                 .resetBackupState(
-                        eq(new File(mBaseStateDir, TransportTestUtils.dirName(TRANSPORT_NAME))));
+                        eq(
+                                new File(
+                                        mBaseStateDir,
+                                        TransportTestUtils.transportDirName(TRANSPORT_NAME))));
     }
 
     @Test
@@ -139,7 +142,7 @@ public class PerformInitializeTaskTest {
         verify(mTransport, never()).finishBackup();
         verify(mBackupManagerService)
                 .recordInitPending(
-                        true, TRANSPORT_NAME, TransportTestUtils.dirName(TRANSPORT_NAME));
+                        true, TRANSPORT_NAME, TransportTestUtils.transportDirName(TRANSPORT_NAME));
     }
 
     @Test
@@ -179,7 +182,7 @@ public class PerformInitializeTaskTest {
         verify(mTransport).finishBackup();
         verify(mBackupManagerService)
                 .recordInitPending(
-                        true, TRANSPORT_NAME, TransportTestUtils.dirName(TRANSPORT_NAME));
+                        true, TRANSPORT_NAME, TransportTestUtils.transportDirName(TRANSPORT_NAME));
     }
 
     @Test

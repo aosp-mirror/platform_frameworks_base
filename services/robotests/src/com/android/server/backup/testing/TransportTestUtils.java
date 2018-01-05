@@ -22,24 +22,27 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 import android.annotation.Nullable;
+import android.content.ComponentName;
 
 import com.android.internal.backup.IBackupTransport;
 import com.android.server.backup.TransportManager;
 import com.android.server.backup.transport.TransportClient;
 import com.android.server.backup.transport.TransportNotAvailableException;
+import com.android.server.backup.transport.TransportNotRegisteredException;
 
 import java.util.Arrays;
 import java.util.List;
 
 public class TransportTestUtils {
     public static final String[] TRANSPORT_NAMES = {
-            "android/com.android.internal.backup.LocalTransport",
-            "com.google.android.gms/.backup.migrate.service.D2dTransport",
-            "com.google.android.gms/.backup.BackupTransportService"
+        "android/com.android.internal.backup.LocalTransport",
+        "com.google.android.gms/.backup.migrate.service.D2dTransport",
+        "com.google.android.gms/.backup.BackupTransportService"
     };
 
     public static final String TRANSPORT_NAME = TRANSPORT_NAMES[0];
 
+    /** {@code transportName} has to be in the {@link ComponentName} format (with '/') */
     public static TransportData setUpCurrentTransport(
             TransportManager transportManager, String transportName) throws Exception {
         TransportData transport = setUpTransports(transportManager, transportName).get(0);
@@ -48,6 +51,7 @@ public class TransportTestUtils {
         return transport;
     }
 
+    /** {@code transportName} has to be in the {@link ComponentName} format (with '/') */
     public static List<TransportData> setUpTransports(
             TransportManager transportManager, String... transportNames) throws Exception {
         return setUpTransports(
@@ -70,39 +74,61 @@ public class TransportTestUtils {
      * Configures transport according to {@link TransportData}:
      *
      * <ul>
-     *   <li>{@link TransportData#transportMock} {@code null} means {@link
-     *       TransportClient#connectOrThrow(String)} throws {@link TransportNotAvailableException}.
-     *   <li>{@link TransportData#transportClientMock} {@code null} means {@link
-     *       TransportManager#getTransportClient(String, String)} returns {@code null}.
+     *   <li>{@link TransportData#transportMock} {@code null} means transport not available.
+     *   <li>{@link TransportData#transportClientMock} {@code null} means transport not registered.
      * </ul>
      */
     public static void setUpTransport(TransportManager transportManager, TransportData transport)
             throws Exception {
         String transportName = transport.transportName;
-        String transportDirName = dirName(transportName);
+        String transportDirName = transportDirName(transportName);
+        ComponentName transportComponent = transportComponentName(transportName);
         IBackupTransport transportMock = transport.transportMock;
         TransportClient transportClientMock = transport.transportClientMock;
 
-        if (transportMock != null) {
-            when(transportMock.name()).thenReturn(transportName);
-            when(transportMock.transportDirName()).thenReturn(transportDirName);
-        }
-
         if (transportClientMock != null) {
-            when(transportClientMock.getTransportDirName()).thenReturn(transportDirName);
+            // Transport registered
+            when(transportManager.getTransportClient(eq(transportName), any()))
+                    .thenReturn(transportClientMock);
+            when(transportManager.getTransportClientOrThrow(eq(transportName), any()))
+                    .thenReturn(transportClientMock);
+            when(transportManager.getTransportName(transportComponent)).thenReturn(transportName);
+            when(transportManager.getTransportDirName(eq(transportName)))
+                    .thenReturn(transportDirName);
+            when(transportManager.getTransportDirName(eq(transportComponent)))
+                    .thenReturn(transportDirName);
+            when(transportClientMock.getTransportComponent()).thenReturn(transportComponent);
+
             if (transportMock != null) {
+                // Transport registered and available
                 when(transportClientMock.connectOrThrow(any())).thenReturn(transportMock);
+                when(transportMock.name()).thenReturn(transportName);
+                when(transportMock.transportDirName()).thenReturn(transportDirName);
             } else {
+                // Transport registered but unavailable
                 when(transportClientMock.connectOrThrow(any()))
                         .thenThrow(TransportNotAvailableException.class);
             }
+        } else {
+            // Transport not registered
+            when(transportManager.getTransportClient(eq(transportName), any())).thenReturn(null);
+            when(transportManager.getTransportClientOrThrow(eq(transportName), any()))
+                    .thenThrow(TransportNotRegisteredException.class);
+            when(transportManager.getTransportName(transportComponent))
+                    .thenThrow(TransportNotRegisteredException.class);
+            when(transportManager.getTransportDirName(eq(transportName)))
+                    .thenThrow(TransportNotRegisteredException.class);
+            when(transportManager.getTransportDirName(eq(transportComponent)))
+                    .thenThrow(TransportNotRegisteredException.class);
         }
-
-        when(transportManager.getTransportClient(eq(transportName), any()))
-                .thenReturn(transportClientMock);
     }
 
-    public static String dirName(String transportName) {
+    /** {@code transportName} has to be in the {@link ComponentName} format (with '/') */
+    public static ComponentName transportComponentName(String transportName) {
+        return ComponentName.unflattenFromString(transportName);
+    }
+
+    public static String transportDirName(String transportName) {
         return transportName + "_dir_name";
     }
 

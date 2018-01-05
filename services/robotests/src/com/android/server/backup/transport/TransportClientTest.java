@@ -43,7 +43,6 @@ import com.android.server.testing.FrameworkRobolectricTestRunner;
 import com.android.server.testing.SystemLoaderClasses;
 
 import org.junit.Before;
-import org.junit.BeforeClass;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.ArgumentCaptor;
@@ -65,7 +64,6 @@ public class TransportClientTest {
     @Mock private IBackupTransport.Stub mIBackupTransport;
     private TransportClient mTransportClient;
     private ComponentName mTransportComponent;
-    private String mTransportDirName;
     private Intent mBindIntent;
     private ShadowLooper mShadowLooper;
 
@@ -77,14 +75,12 @@ public class TransportClientTest {
         mShadowLooper = shadowOf(mainLooper);
         mTransportComponent =
                 new ComponentName(PACKAGE_NAME, PACKAGE_NAME + ".transport.Transport");
-        mTransportDirName = mTransportComponent.toString();
         mBindIntent = new Intent(SERVICE_ACTION_TRANSPORT_HOST).setComponent(mTransportComponent);
         mTransportClient =
                 new TransportClient(
                         mContext,
                         mBindIntent,
                         mTransportComponent,
-                        mTransportDirName,
                         "1",
                         new Handler(mainLooper));
 
@@ -94,11 +90,6 @@ public class TransportClientTest {
                         anyInt(),
                         any(UserHandle.class)))
                 .thenReturn(true);
-    }
-
-    @Test
-    public void testGetTransportDirName_returnsTransportDirName() {
-        assertThat(mTransportClient.getTransportDirName()).isEqualTo(mTransportDirName);
     }
 
     @Test

@@ -122,7 +122,9 @@ public class PerformInitializeTask implements Runnable {
                 transportClientsToDisposeOf.add(transportClient);
 
                 Slog.i(TAG, "Initializing (wiping) backup transport storage: " + transportName);
-                String transportDirName = transportClient.getTransportDirName();
+                String transportDirName =
+                        mTransportManager.getTransportDirName(
+                                transportClient.getTransportComponent());
                 EventLog.writeEvent(EventLogTags.BACKUP_START, transportDirName);
                 long startRealtime = SystemClock.elapsedRealtime();
 
