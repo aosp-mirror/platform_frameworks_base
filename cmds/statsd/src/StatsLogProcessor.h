@@ -57,7 +57,7 @@ public:
     void WriteDataToDisk();
 
 private:
-    mutable mutex mBroadcastTimesMutex;
+    mutable mutex mMetricsMutex;
 
     std::unordered_map<ConfigKey, sp<MetricsManager>> mMetricsManagers;
 
@@ -72,8 +72,8 @@ private:
 
     /* Check if we should send a broadcast if approaching memory limits and if we're over, we
      * actually delete the data. */
-    void flushIfNecessary(uint64_t timestampNs, const ConfigKey& key,
-                          MetricsManager& metricsManager);
+    void flushIfNecessaryLocked(uint64_t timestampNs, const ConfigKey& key,
+                                MetricsManager& metricsManager);
 
     // Function used to send a broadcast so that receiver for the config key can call getData
     // to retrieve the stored data.

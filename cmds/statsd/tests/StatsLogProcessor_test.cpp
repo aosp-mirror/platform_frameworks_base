@@ -60,9 +60,9 @@ TEST(StatsLogProcessorTest, TestRateLimitByteSize) {
     // Expect only the first flush to trigger a check for byte size since the last two are
     // rate-limited.
     EXPECT_CALL(mockMetricsManager, byteSize()).Times(1);
-    p.flushIfNecessary(99, key, mockMetricsManager);
-    p.flushIfNecessary(100, key, mockMetricsManager);
-    p.flushIfNecessary(101, key, mockMetricsManager);
+    p.flushIfNecessaryLocked(99, key, mockMetricsManager);
+    p.flushIfNecessaryLocked(100, key, mockMetricsManager);
+    p.flushIfNecessaryLocked(101, key, mockMetricsManager);
 }
 
 TEST(StatsLogProcessorTest, TestRateLimitBroadcast) {
@@ -80,12 +80,12 @@ TEST(StatsLogProcessorTest, TestRateLimitBroadcast) {
             .WillRepeatedly(Return(int(StatsdStats::kMaxMetricsBytesPerConfig * .95)));
 
     // Expect only one broadcast despite always returning a size that should trigger broadcast.
-    p.flushIfNecessary(1, key, mockMetricsManager);
+    p.flushIfNecessaryLocked(1, key, mockMetricsManager);
     EXPECT_EQ(1, broadcastCount);
 
     // This next call to flush should not trigger a broadcast.
     p.mLastByteSizeTimes.clear();  // Force another check for byte size.
-    p.flushIfNecessary(2, key, mockMetricsManager);
+    p.flushIfNecessaryLocked(2, key, mockMetricsManager);
     EXPECT_EQ(1, broadcastCount);
 }
 
@@ -106,7 +106,7 @@ TEST(StatsLogProcessorTest, TestDropWhenByteSizeTooLarge) {
     EXPECT_CALL(mockMetricsManager, onDumpReport(_)).Times(1);
 
     // Expect to call the onDumpReport and skip the broadcast.
-    p.flushIfNecessary(1, key, mockMetricsManager);
+    p.flushIfNecessaryLocked(1, key, mockMetricsManager);
     EXPECT_EQ(0, broadcastCount);
 }
 
