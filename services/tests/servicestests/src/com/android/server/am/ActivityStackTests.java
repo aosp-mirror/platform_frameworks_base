@@ -47,7 +47,7 @@ import org.junit.Test;
  * Tests for the {@link ActivityStack} class.
  *
  * Build/Install/Run:
- *  bit FrameworksServicesTests:com.android.server.am.ActivityStackTests
+ *  atest ActivityStackTests
  */
 @SmallTest
 @Presubmit
@@ -101,6 +101,29 @@ public class ActivityStackTests extends ActivityTestsBase {
 
         // Make sure the resumed activity is untouched.
         assertEquals(mStack.mResumedActivity, r);
+    }
+
+    @Test
+    public void testPrimarySplitScreenToFullscreenWhenMovedToBack() throws Exception {
+        // Create primary splitscreen stack. This will create secondary stacks and places the
+        // existing fullscreen stack on the bottom.
+        final ActivityStack primarySplitScreen = mService.mStackSupervisor.getDefaultDisplay()
+                .createStack(WINDOWING_MODE_SPLIT_SCREEN_PRIMARY, ACTIVITY_TYPE_STANDARD,
+                        true /* onTop */);
+
+        // Assert windowing mode.
+        assertEquals(primarySplitScreen.getWindowingMode(), WINDOWING_MODE_SPLIT_SCREEN_PRIMARY);
+
+        // Move primary to back.
+        primarySplitScreen.moveToBack("testPrimarySplitScreenToFullscreenWhenMovedToBack",
+                null /* task */);
+
+        // Assert that stack is at the bottom.
+        assertEquals(mService.mStackSupervisor.getDefaultDisplay().getIndexOf(primarySplitScreen),
+                0);
+
+        // Ensure no longer in splitscreen.
+        assertEquals(primarySplitScreen.getWindowingMode(), WINDOWING_MODE_FULLSCREEN);
     }
 
     @Test
