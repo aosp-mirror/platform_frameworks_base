@@ -1956,82 +1956,78 @@ public class LockSettingsService extends ILockSettings.Stub {
 
     @Override
     public void initRecoveryService(@NonNull String rootCertificateAlias,
-            @NonNull byte[] signedPublicKeyList, @UserIdInt int userId)
-            throws RemoteException {
+            @NonNull byte[] signedPublicKeyList) throws RemoteException {
         mRecoverableKeyStoreManager.initRecoveryService(rootCertificateAlias,
-                signedPublicKeyList, userId);
+                signedPublicKeyList);
     }
 
     @Override
-    public KeyStoreRecoveryData getRecoveryData(@NonNull byte[] account, @UserIdInt int userId)
-            throws RemoteException {
-        return mRecoverableKeyStoreManager.getRecoveryData(account, userId);
+    public KeyStoreRecoveryData getRecoveryData(@NonNull byte[] account) throws RemoteException {
+        return mRecoverableKeyStoreManager.getRecoveryData(account);
     }
 
-    public void setSnapshotCreatedPendingIntent(@Nullable PendingIntent intent, int userId)
+    public void setSnapshotCreatedPendingIntent(@Nullable PendingIntent intent)
             throws RemoteException {
-        mRecoverableKeyStoreManager.setSnapshotCreatedPendingIntent(intent, userId);
+        mRecoverableKeyStoreManager.setSnapshotCreatedPendingIntent(intent);
     }
 
-    public Map getRecoverySnapshotVersions(int userId) throws RemoteException {
-        return mRecoverableKeyStoreManager.getRecoverySnapshotVersions(userId);
+    public Map getRecoverySnapshotVersions() throws RemoteException {
+        return mRecoverableKeyStoreManager.getRecoverySnapshotVersions();
     }
 
     @Override
-    public void setServerParameters(long serverParameters, @UserIdInt int userId)
-            throws RemoteException {
-        mRecoverableKeyStoreManager.setServerParameters(serverParameters, userId);
+    public void setServerParameters(long serverParameters) throws RemoteException {
+        mRecoverableKeyStoreManager.setServerParameters(serverParameters);
     }
 
     @Override
     public void setRecoveryStatus(@NonNull String packageName, @Nullable String[] aliases,
-            int status, @UserIdInt int userId) throws RemoteException {
-        mRecoverableKeyStoreManager.setRecoveryStatus(packageName, aliases, status, userId);
+            int status) throws RemoteException {
+        mRecoverableKeyStoreManager.setRecoveryStatus(packageName, aliases, status);
     }
 
-    public Map getRecoveryStatus(@Nullable String packageName, int userId) throws RemoteException {
-        return mRecoverableKeyStoreManager.getRecoveryStatus(packageName, userId);
+    public Map getRecoveryStatus(@Nullable String packageName) throws RemoteException {
+        return mRecoverableKeyStoreManager.getRecoveryStatus(packageName);
     }
 
     @Override
     public void setRecoverySecretTypes(@NonNull @KeyStoreRecoveryMetadata.UserSecretType
-            int[] secretTypes, @UserIdInt int userId) throws RemoteException {
-        mRecoverableKeyStoreManager.setRecoverySecretTypes(secretTypes, userId);
+            int[] secretTypes) throws RemoteException {
+        mRecoverableKeyStoreManager.setRecoverySecretTypes(secretTypes);
     }
 
     @Override
-    public int[] getRecoverySecretTypes(@UserIdInt int userId) throws RemoteException {
-        return mRecoverableKeyStoreManager.getRecoverySecretTypes(userId);
+    public int[] getRecoverySecretTypes() throws RemoteException {
+        return mRecoverableKeyStoreManager.getRecoverySecretTypes();
 
     }
 
     @Override
-    public int[] getPendingRecoverySecretTypes(@UserIdInt int userId) throws RemoteException {
+    public int[] getPendingRecoverySecretTypes() throws RemoteException {
         throw new SecurityException("Not implemented");
     }
 
     @Override
-    public void recoverySecretAvailable(@NonNull KeyStoreRecoveryMetadata recoverySecret,
-            @UserIdInt int userId) throws RemoteException {
-        mRecoverableKeyStoreManager.recoverySecretAvailable(recoverySecret, userId);
+    public void recoverySecretAvailable(@NonNull KeyStoreRecoveryMetadata recoverySecret)
+            throws RemoteException {
+        mRecoverableKeyStoreManager.recoverySecretAvailable(recoverySecret);
     }
 
     @Override
     public byte[] startRecoverySession(@NonNull String sessionId,
             @NonNull byte[] verifierPublicKey, @NonNull byte[] vaultParams,
-            @NonNull byte[] vaultChallenge, @NonNull List<KeyStoreRecoveryMetadata> secrets,
-            @UserIdInt int userId) throws RemoteException {
+            @NonNull byte[] vaultChallenge, @NonNull List<KeyStoreRecoveryMetadata> secrets)
+            throws RemoteException {
         return mRecoverableKeyStoreManager.startRecoverySession(sessionId, verifierPublicKey,
-                vaultParams, vaultChallenge, secrets, userId);
+                vaultParams, vaultChallenge, secrets);
     }
 
     @Override
     public Map<String, byte[]> recoverKeys(@NonNull String sessionId,
-            @NonNull byte[] recoveryKeyBlob, @NonNull List<KeyEntryRecoveryData> applicationKeys,
-            @UserIdInt int userId)
+            @NonNull byte[] recoveryKeyBlob, @NonNull List<KeyEntryRecoveryData> applicationKeys)
             throws RemoteException {
         return mRecoverableKeyStoreManager.recoverKeys(
-                sessionId, recoveryKeyBlob, applicationKeys, userId);
+                sessionId, recoveryKeyBlob, applicationKeys);
     }
 
     @Override

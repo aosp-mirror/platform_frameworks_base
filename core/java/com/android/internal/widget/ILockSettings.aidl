@@ -63,22 +63,21 @@ interface ILockSettings {
     // RecoverableKeyStoreLoader methods.
     // {@code ServiceSpecificException} may be thrown to signal an error, which caller can
     // convert to  {@code RecoverableKeyStoreLoader}.
-    void initRecoveryService(in String rootCertificateAlias, in byte[] signedPublicKeyList,
-            int userId);
-    KeyStoreRecoveryData getRecoveryData(in byte[] account, int userId);
+    void initRecoveryService(in String rootCertificateAlias, in byte[] signedPublicKeyList);
+    KeyStoreRecoveryData getRecoveryData(in byte[] account);
     byte[] generateAndStoreKey(String alias);
-    void setSnapshotCreatedPendingIntent(in PendingIntent intent, int userId);
-    Map getRecoverySnapshotVersions(int userId);
-    void setServerParameters(long serverParameters, int userId);
-    void setRecoveryStatus(in String packageName, in String[] aliases, int status, int userId);
-    Map getRecoveryStatus(in String packageName, int userId);
-    void setRecoverySecretTypes(in int[] secretTypes, int userId);
-    int[] getRecoverySecretTypes(int userId);
-    int[] getPendingRecoverySecretTypes(int userId);
-    void recoverySecretAvailable(in KeyStoreRecoveryMetadata recoverySecret, int userId);
+    void setSnapshotCreatedPendingIntent(in PendingIntent intent);
+    Map getRecoverySnapshotVersions();
+    void setServerParameters(long serverParameters);
+    void setRecoveryStatus(in String packageName, in String[] aliases, int status);
+    Map getRecoveryStatus(in String packageName);
+    void setRecoverySecretTypes(in int[] secretTypes);
+    int[] getRecoverySecretTypes();
+    int[] getPendingRecoverySecretTypes();
+    void recoverySecretAvailable(in KeyStoreRecoveryMetadata recoverySecret);
     byte[] startRecoverySession(in String sessionId,
             in byte[] verifierPublicKey, in byte[] vaultParams, in byte[] vaultChallenge,
-            in List<KeyStoreRecoveryMetadata> secrets, int userId);
+            in List<KeyStoreRecoveryMetadata> secrets);
     Map/*<String, byte[]>*/ recoverKeys(in String sessionId, in byte[] recoveryKeyBlob,
-            in List<KeyEntryRecoveryData> applicationKeys, int userId);
+            in List<KeyEntryRecoveryData> applicationKeys);
 }
