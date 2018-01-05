@@ -68,7 +68,6 @@ public class UsbConfirmActivity extends AlertActivity
         String appName = mResolveInfo.loadLabel(packageManager).toString();
 
         final AlertController.AlertParams ap = mAlertParams;
-        ap.mIcon = mResolveInfo.loadIcon(packageManager);
         ap.mTitle = appName;
         if (mDevice == null) {
             ap.mMessage = getString(R.string.usb_accessory_confirm_prompt, appName,
