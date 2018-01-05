@@ -28,8 +28,10 @@ public class MemoryDataRecorder extends PerfDataRecorder {
     private StringBuilder mSb;
 
     public MemoryDataRecorder(boolean placebo, int replication, TimeUnit bucket, long periodSecs,
-        int burst) {
-        super(placebo, replication, bucket, periodSecs, burst);
+        int burst,  boolean includeCountMetric, boolean includeDurationMetric,
+        boolean includeEventMetric,  boolean includeValueMetric, boolean includeGaugeMetric) {
+      super(placebo, replication, bucket, periodSecs, burst, includeCountMetric,
+          includeDurationMetric, includeEventMetric, includeValueMetric, includeGaugeMetric);
     }
 
     @Override

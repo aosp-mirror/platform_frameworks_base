@@ -34,8 +34,11 @@ public class ValidationRecorder extends PerfDataRecorder {
     private final LoadtestActivity mLoadtestActivity;
 
     public ValidationRecorder(LoadtestActivity loadtestActivity, boolean placebo, int replication,
-            TimeUnit bucket, long periodSecs, int burst) {
-        super(placebo, replication, bucket, periodSecs, burst);
+        TimeUnit bucket, long periodSecs, int burst,  boolean includeCountMetric,
+        boolean includeDurationMetric, boolean includeEventMetric,  boolean includeValueMetric,
+        boolean includeGaugeMetric) {
+      super(placebo, replication, bucket, periodSecs, burst, includeCountMetric,
+          includeDurationMetric, includeEventMetric, includeValueMetric, includeGaugeMetric);
         mLoadtestActivity = loadtestActivity;
     }
 
@@ -55,6 +58,9 @@ public class ValidationRecorder extends PerfDataRecorder {
     }
 
     private void validateData() {
+        // The code below is commented out because it calls getData, which has the side-effect
+        // of clearing statsd's data buffer.
+        /*
         List<ConfigMetricsReport> reports = mLoadtestActivity.getData();
         if (reports != null) {
             Log.d(TAG, "GOT DATA");
@@ -66,6 +72,7 @@ public class ValidationRecorder extends PerfDataRecorder {
                 }
             }
         }
+        */
     }
 
     private void validateEventBatteryLevelChanges(StatsLogReport logReport) {

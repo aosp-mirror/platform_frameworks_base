@@ -28,8 +28,10 @@ public class BatteryDataRecorder extends PerfDataRecorder {
     private static final String DUMP_FILENAME = TAG + "_dump.tmp";
 
     public BatteryDataRecorder(boolean placebo, int replication, TimeUnit bucket, long periodSecs,
-        int burst) {
-        super(placebo, replication, bucket, periodSecs, burst);
+        int burst, boolean includeCountMetric, boolean includeDurationMetric,
+        boolean includeEventMetric,  boolean includeValueMetric, boolean includeGaugeMetric) {
+      super(placebo, replication, bucket, periodSecs, burst, includeCountMetric,
+          includeDurationMetric, includeEventMetric, includeValueMetric, includeGaugeMetric);
     }
 
     @Override

@@ -42,6 +42,16 @@ import java.util.List;
  * Creates StatsdConfig protos for loadtesting.
  */
 public class ConfigFactory {
+    public static class ConfigMetadata {
+        public final byte[] bytes;
+        public final int numMetrics;
+
+        public ConfigMetadata(byte[] bytes, int numMetrics) {
+            this.bytes = bytes;
+            this.numMetrics = numMetrics;
+        }
+    }
+
     public static final long CONFIG_ID = 123456789;
 
     private static final String TAG = "loadtest.ConfigFactory";
@@ -81,11 +91,11 @@ public class ConfigFactory {
      *        ones
      * @param bucketMillis The bucket size, in milliseconds, for aggregate metrics
      * @param placebo If true, only return an empty config
-     * @return The serialized config
+     * @return The serialized config and the number of metrics.
      */
-  public byte[] getConfig(int replication, TimeUnit bucket, boolean placebo, boolean includeCount,
-                          boolean includeDuration, boolean includeEvent, boolean includeValue,
-                          boolean includeGauge) {
+    public ConfigMetadata getConfig(int replication, TimeUnit bucket, boolean placebo,
+            boolean includeCount, boolean includeDuration, boolean includeEvent,
+            boolean includeValue, boolean includeGauge) {
         StatsdConfig.Builder config = StatsdConfig.newBuilder()
             .setId(CONFIG_ID);
         if (placebo) {
@@ -137,7 +147,7 @@ public class ConfigFactory {
         Log.d(TAG, "Loadtest config is : " + config.build());
         Log.d(TAG, "Generated config has " + numMetrics + " metrics");
 
-        return config.build().toByteArray();
+        return new ConfigMetadata(config.build().toByteArray(), numMetrics);
     }
 
     /**
