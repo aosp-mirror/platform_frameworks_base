@@ -76,10 +76,12 @@ import java.util.Map;
  */
 public class LoadtestActivity extends Activity implements AdapterView.OnItemSelectedListener {
 
-    private static final String TAG = "StatsdLoadtest";
+    private static final String TAG = "loadtest.LoadtestActivity";
     public static final String TYPE = "type";
     private static final String PUSH_ALARM = "push_alarm";
     public static final String PERF_ALARM = "perf_alarm";
+    private static final String SET_REPLICATION = "set_replication";
+    private static final String REPLICATION = "replication";
     private static final String START = "start";
     private static final String STOP = "stop";
     private static final Map<String, TimeUnit> TIME_UNIT_MAP = initializeTimeUnitMap();
@@ -231,7 +233,7 @@ public class LoadtestActivity extends Activity implements AdapterView.OnItemSele
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        Log.d(TAG, "Starting loadtest");
+        Log.d(TAG, "Starting loadtest Activity");
 
         setContentView(R.layout.activity_loadtest);
         mReportText = (TextView) findViewById(R.id.report_text);
@@ -289,6 +291,11 @@ public class LoadtestActivity extends Activity implements AdapterView.OnItemSele
             case PUSH_ALARM:
                 onAlarm();
                 break;
+            case SET_REPLICATION:
+                if (intent.hasExtra(REPLICATION)) {
+                    setReplication(intent.getIntExtra(REPLICATION, 0));
+                }
+                break;
             case START:
                 startLoadtest();
                 break;
@@ -340,6 +347,10 @@ public class LoadtestActivity extends Activity implements AdapterView.OnItemSele
                 ConfigMetricsReportList reports = null;
                 try {
                     reports = ConfigMetricsReportList.parseFrom(data);
+                    Log.d(TAG, "Num reports: " + reports.getReportsCount());
+                    StringBuilder sb = new StringBuilder();
+                    DisplayProtoUtils.displayLogReport(sb, reports);
+                    Log.d(TAG, sb.toString());
                 } catch (com.google.protobuf.InvalidProtocolBufferException e) {
                     Log.d(TAG, "Invalid data");
                 }
@@ -411,9 +422,6 @@ public class LoadtestActivity extends Activity implements AdapterView.OnItemSele
         // Prepare to push a sequence of atoms to logd.
         mPusher = new SequencePusher(mBurst, mPlacebo);
 
-        // Force a data flush by requesting data.
-        getData();
-
         // Create a config and push it to statsd.
         if (!setConfig(mFactory.getConfig(mReplication, mBucket, mPlacebo,
                 mIncludeCountMetric, mIncludeDurationMetric, mIncludeEventMetric,
@@ -463,6 +471,9 @@ public class LoadtestActivity extends Activity implements AdapterView.OnItemSele
             mPerfData.onDestroy();
             mPerfData = null;
         }
+
+        // Obtain the latest data and display it.
+        getData();
 
         long elapsedTimeMins = (long) Math.floor(
             (SystemClock.elapsedRealtime() - mStartedTimeMillis) / 60 / 1000);
@@ -541,7 +552,10 @@ public class LoadtestActivity extends Activity implements AdapterView.OnItemSele
     }
 
     private synchronized void setReplication(int replication) {
-        mReplication = replication;
+        if (mStarted) {
+          return;
+        }
+        mReplicationText.setText("" + replication);
     }
 
     private synchronized void setPeriodSecs(long periodSecs) {
@@ -573,7 +587,7 @@ public class LoadtestActivity extends Activity implements AdapterView.OnItemSele
     private void initBurst() {
         mBurst = getResources().getInteger(R.integer.burst_default);
         mBurstText = (EditText) findViewById(R.id.burst);
-        mBurstText.addTextChangedListener(new NumericalWatcher(mBurstText, 0, 50) {
+        mBurstText.addTextChangedListener(new NumericalWatcher(mBurstText, 0, 1000) {
             @Override
             public void onNewValue(int newValue) {
                 setBurst(newValue);
@@ -585,10 +599,10 @@ public class LoadtestActivity extends Activity implements AdapterView.OnItemSele
     private void initReplication() {
         mReplication = getResources().getInteger(R.integer.replication_default);
         mReplicationText = (EditText) findViewById(R.id.replication);
-        mReplicationText.addTextChangedListener(new NumericalWatcher(mReplicationText, 1, 100) {
+        mReplicationText.addTextChangedListener(new NumericalWatcher(mReplicationText, 1, 4096) {
             @Override
             public void onNewValue(int newValue) {
-                setReplication(newValue);
+                mReplication = newValue;
             }
         });
         handleFocus(mReplicationText);
@@ -606,9 +620,7 @@ public class LoadtestActivity extends Activity implements AdapterView.OnItemSele
         mBucketSpinner.setOnItemSelectedListener(this);
 
         for (String label : TIME_UNIT_MAP.keySet()) {
-          Log.d(TAG, "EVALUATE " + label + " VS " + defaultValue);
           if (defaultValue.equals(TIME_UNIT_MAP.get(label).toString())) {
-                Log.d(TAG, " FOUND IT");
                 mBucketSpinner.setSelection(dataAdapter.getPosition(label));
             }
         }

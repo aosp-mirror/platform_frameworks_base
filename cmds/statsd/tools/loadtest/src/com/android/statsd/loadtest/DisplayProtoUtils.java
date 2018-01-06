@@ -22,18 +22,28 @@ import com.android.os.StatsLog;
 import java.util.List;
 
 public class DisplayProtoUtils {
+    private static final int MAX_NUM_METRICS_TO_DISPLAY = 10;
+
     public static void displayLogReport(StringBuilder sb, StatsLog.ConfigMetricsReportList reports) {
-        sb.append("ConfigKey: ");
+        sb.append("******************** Report ********************\n");
         if (reports.hasConfigKey()) {
+            sb.append("ConfigKey: ");
             com.android.os.StatsLog.ConfigMetricsReportList.ConfigKey key = reports.getConfigKey();
             sb.append("\tuid: ").append(key.getUid()).append(" id: ").append(key.getId())
                     .append("\n");
         }
 
+        int numMetrics = 0;
         for (StatsLog.ConfigMetricsReport report : reports.getReportsList()) {
             sb.append("StatsLogReport size: ").append(report.getMetricsCount()).append("\n");
             for (StatsLog.StatsLogReport log : report.getMetricsList()) {
-                sb.append("\n\n");
+                numMetrics++;
+                if (numMetrics > MAX_NUM_METRICS_TO_DISPLAY) {
+                    sb.append("... output truncated\n");
+                    sb.append("************************************************");
+                    return;
+                }
+                sb.append("\n");
                 sb.append("metric id: ").append(log.getMetricId()).append("\n");
                 sb.append("start time:").append(getDateStr(log.getStartReportNanos())).append("\n");
                 sb.append("end time:").append(getDateStr(log.getEndReportNanos())).append("\n");
@@ -65,6 +75,7 @@ public class DisplayProtoUtils {
                 }
             }
         }
+        sb.append("************************************************");
     }
 
     public static String getDateStr(long nanoSec) {
