@@ -149,6 +149,9 @@ class AlarmManagerService extends SystemService {
     private long mNextNonWakeup;
     private long mLastWakeupSet;
     private long mLastWakeup;
+    private long mLastTickSet;
+    private long mLastTickIssued; // elapsed
+    private long mLastTickReceived;
     int mBroadcastRefCount = 0;
     PowerManager.WakeLock mWakeLock;
     boolean mLastWakeLockUnimportantForLogging;
@@ -1596,6 +1599,7 @@ class AlarmManagerService extends SystemService {
             pw.println();
 
             mForceAppStandbyTracker.dump(pw, "  ");
+            pw.println();
 
             final long nowRTC = System.currentTimeMillis();
             final long nowELAPSED = SystemClock.elapsedRealtime();
@@ -1607,8 +1611,12 @@ class AlarmManagerService extends SystemService {
             pw.println();
             pw.print("  mLastTimeChangeClockTime="); pw.print(mLastTimeChangeClockTime);
             pw.print("="); pw.println(sdf.format(new Date(mLastTimeChangeClockTime)));
-            pw.print("  mLastTimeChangeRealtime=");
-            TimeUtils.formatDuration(mLastTimeChangeRealtime, pw);
+            pw.print("  mLastTimeChangeRealtime="); pw.println(mLastTimeChangeRealtime);
+            pw.print("  mLastTickIssued=");
+            TimeUtils.formatDuration(mLastTickIssued - nowELAPSED, pw);
+            pw.println();
+            pw.print("  mLastTickReceived="); pw.println(sdf.format(new Date(mLastTickReceived)));
+            pw.print("  mLastTickSet="); pw.println(sdf.format(new Date(mLastTickSet)));
             pw.println();
             if (!mInteractive) {
                 pw.print("  Time since non-interactive: ");
@@ -3284,6 +3292,9 @@ class AlarmManagerService extends SystemService {
                 if (DEBUG_BATCH) {
                     Slog.v(TAG, "Received TIME_TICK alarm; rescheduling");
                 }
+                synchronized (mLock) {
+                    mLastTickReceived = System.currentTimeMillis();
+                }
                 scheduleTimeTickEvent();
             } else if (intent.getAction().equals(Intent.ACTION_DATE_CHANGED)) {
                 // Since the kernel does not keep track of DST, we need to
@@ -3309,6 +3320,11 @@ class AlarmManagerService extends SystemService {
             setImpl(ELAPSED_REALTIME, SystemClock.elapsedRealtime() + tickEventDelay, 0,
                     0, mTimeTickSender, null, null, AlarmManager.FLAG_STANDALONE, workSource,
                     null, Process.myUid(), "android");
+
+            // Finally, remember when we set the tick alarm
+            synchronized (mLock) {
+                mLastTickSet = currentTime;
+            }
         }
 
         public void scheduleDateChangedEvent() {
@@ -3660,6 +3676,11 @@ class AlarmManagerService extends SystemService {
             if (alarm.operation != null) {
                 // PendingIntent alarm
                 mSendCount++;
+
+                if (alarm.priorityClass.priority == PRIO_TICK) {
+                    mLastTickIssued = nowELAPSED;
+                }
+
                 try {
                     alarm.operation.send(getContext(), 0,
                             mBackgroundIntent.putExtra(
