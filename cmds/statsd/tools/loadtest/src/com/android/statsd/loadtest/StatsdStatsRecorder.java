@@ -28,8 +28,11 @@ public class StatsdStatsRecorder extends PerfDataRecorder {
     private final LoadtestActivity mLoadtestActivity;
 
     public StatsdStatsRecorder(LoadtestActivity loadtestActivity, boolean placebo, int replication,
-            TimeUnit bucket, long periodSecs, int burst) {
-        super(placebo, replication, bucket, periodSecs, burst);
+        TimeUnit bucket, long periodSecs, int burst, boolean includeCountMetric,
+        boolean includeDurationMetric, boolean includeEventMetric,  boolean includeValueMetric,
+        boolean includeGaugeMetric) {
+      super(placebo, replication, bucket, periodSecs, burst, includeCountMetric,
+          includeDurationMetric, includeEventMetric, includeValueMetric, includeGaugeMetric);
         mLoadtestActivity = loadtestActivity;
     }
 
@@ -56,7 +59,7 @@ public class StatsdStatsRecorder extends PerfDataRecorder {
                 .append(configStats.getConditionCount() + "\n")
                 .append("matcher_count,")
                 .append(configStats.getMatcherCount() + "\n");
-            writeData(context, "statsdstats_", "", sb);
+            writeData(context, "statsdstats_", "stat,value", sb);
         }
     }
 }

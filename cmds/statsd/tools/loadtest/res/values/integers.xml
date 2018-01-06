@@ -17,7 +17,6 @@
 */
 -->
 <resources>
-    <integer name="bucket_default">10</integer>
     <integer name="burst_default">1</integer>
     <integer name="period_default">2</integer>
     <integer name="replication_default">1</integer>
