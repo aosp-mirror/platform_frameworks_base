@@ -421,7 +421,7 @@ public final class PlaybackActivityMonitor
     private final DuckingManager mDuckingManager = new DuckingManager();
 
     @Override
-    public boolean duckPlayers(FocusRequester winner, FocusRequester loser) {
+    public boolean duckPlayers(FocusRequester winner, FocusRequester loser, boolean forceDuck) {
         if (DEBUG) {
             Log.v(TAG, String.format("duckPlayers: uids winner=%d loser=%d",
                     winner.getClientUid(), loser.getClientUid()));
@@ -441,8 +441,8 @@ public final class PlaybackActivityMonitor
                         && loser.hasSameUid(apc.getClientUid())
                         && apc.getPlayerState() == AudioPlaybackConfiguration.PLAYER_STATE_STARTED)
                 {
-                    if (apc.getAudioAttributes().getContentType() ==
-                            AudioAttributes.CONTENT_TYPE_SPEECH) {
+                    if (!forceDuck && (apc.getAudioAttributes().getContentType() ==
+                            AudioAttributes.CONTENT_TYPE_SPEECH)) {
                         // the player is speaking, ducking will make the speech unintelligible
                         // so let the app handle it instead
                         Log.v(TAG, "not ducking player " + apc.getPlayerInterfaceId()
