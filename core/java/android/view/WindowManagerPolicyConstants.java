@@ -18,8 +18,6 @@ package android.view;
 
 import static android.view.Display.DEFAULT_DISPLAY;
 
-import android.annotation.SystemApi;
-
 /**
  * Constants for interfacing with WindowManagerService and WindowManagerPolicyInternal.
  * @hide
@@ -62,7 +60,6 @@ public interface WindowManagerPolicyConstants {
      * Set to {@code true} when intent was invoked from pressing the home key.
      * @hide
      */
-    @SystemApi
     String EXTRA_FROM_HOME_KEY = "android.intent.extra.FROM_HOME_KEY";
 
     // TODO: move this to a more appropriate place.

@@ -707,7 +707,6 @@ public class BackupManager {
      * redirects them into main-thread actions.  This serializes the backup
      * progress callbacks nicely within the usual main-thread lifecycle pattern.
      */
-    @SystemApi
     private class BackupObserverWrapper extends IBackupObserver.Stub {
         final Handler mHandler;
         final BackupObserver mObserver;
