@@ -27,7 +27,6 @@ import static android.app.usage.UsageStatsManager.STANDBY_BUCKET_FREQUENT;
 import static android.app.usage.UsageStatsManager.STANDBY_BUCKET_NEVER;
 import static android.app.usage.UsageStatsManager.STANDBY_BUCKET_RARE;
 import static android.app.usage.UsageStatsManager.STANDBY_BUCKET_WORKING_SET;
-
 import static com.android.server.SystemService.PHASE_BOOT_COMPLETED;
 import static com.android.server.SystemService.PHASE_SYSTEM_SERVICES_READY;
 
@@ -80,6 +79,7 @@ import com.android.internal.os.SomeArgs;
 import com.android.internal.util.ArrayUtils;
 import com.android.internal.util.IndentingPrintWriter;
 import com.android.server.LocalServices;
+import com.android.server.usage.AppIdleHistory.AppUsageHistory;
 
 import java.io.File;
 import java.io.PrintWriter;
@@ -189,6 +189,48 @@ public class AppStandbyController {
     private PackageManager mPackageManager;
     Injector mInjector;
 
+    static final ArrayList<StandbyUpdateRecord> sStandbyUpdatePool = new ArrayList<>(4);
+
+    public static class StandbyUpdateRecord {
+        // Identity of the app whose standby state has changed
+        String packageName;
+        int userId;
+
+        // What the standby bucket the app is now in
+        int bucket;
+
+        // Whether the bucket change is because the user has started interacting with the app
+        boolean isUserInteraction;
+
+        StandbyUpdateRecord(String pkgName, int userId, int bucket, boolean isInteraction) {
+            this.packageName = pkgName;
+            this.userId = userId;
+            this.bucket = bucket;
+            this.isUserInteraction = isInteraction;
+        }
+
+        public static StandbyUpdateRecord obtain(String pkgName, int userId,
+                int bucket, boolean isInteraction) {
+            synchronized (sStandbyUpdatePool) {
+                final int size = sStandbyUpdatePool.size();
+                if (size < 1) {
+                    return new StandbyUpdateRecord(pkgName, userId, bucket, isInteraction);
+                }
+                StandbyUpdateRecord r = sStandbyUpdatePool.remove(size - 1);
+                r.packageName = pkgName;
+                r.userId = userId;
+                r.bucket = bucket;
+                r.isUserInteraction = isInteraction;
+                return r;
+            }
+        }
+
+        public void recycle() {
+            synchronized (sStandbyUpdatePool) {
+                sStandbyUpdatePool.add(this);
+            }
+        }
+    }
 
     AppStandbyController(Context context, Looper looper) {
         this(new Injector(context, looper));
@@ -270,11 +312,11 @@ public class AppStandbyController {
                 }
                 if (!packageName.equals(providerPkgName)) {
                     synchronized (mAppIdleLock) {
-                        int newBucket = mAppIdleHistory.reportUsage(packageName, userId,
+                        AppUsageHistory appUsage = mAppIdleHistory.reportUsage(packageName, userId,
                                 STANDBY_BUCKET_ACTIVE, elapsedRealtime,
                                 elapsedRealtime + 2 * ONE_HOUR);
                         maybeInformListeners(packageName, userId, elapsedRealtime,
-                                newBucket);
+                                appUsage.currentBucket, false);
                     }
                 }
             } catch (PackageManager.NameNotFoundException e) {
@@ -408,7 +450,7 @@ public class AppStandbyController {
                                 STANDBY_BUCKET_EXEMPTED, REASON_DEFAULT);
                     }
                     maybeInformListeners(packageName, userId, elapsedRealtime,
-                            STANDBY_BUCKET_EXEMPTED);
+                            STANDBY_BUCKET_EXEMPTED, false);
                 } else {
                     synchronized (mAppIdleLock) {
                         AppIdleHistory.AppUsageHistory app =
@@ -437,7 +479,7 @@ public class AppStandbyController {
                                 mAppIdleHistory.setAppStandbyBucket(packageName, userId,
                                         elapsedRealtime, newBucket, REASON_TIMEOUT);
                                 maybeInformListeners(packageName, userId, elapsedRealtime,
-                                        newBucket);
+                                        newBucket, false);
                             }
                         }
                     }
@@ -465,13 +507,16 @@ public class AppStandbyController {
     }
 
     private void maybeInformListeners(String packageName, int userId,
-            long elapsedRealtime, int bucket) {
+            long elapsedRealtime, int bucket, boolean userStartedInteracting) {
         synchronized (mAppIdleLock) {
             // TODO: fold these into one call + lookup for efficiency if needed
             if (mAppIdleHistory.shouldInformListeners(packageName, userId,
                     elapsedRealtime, bucket)) {
+                StandbyUpdateRecord r = StandbyUpdateRecord.obtain(packageName, userId,
+                        bucket, userStartedInteracting);
                 mHandler.sendMessage(mHandler.obtainMessage(MSG_INFORM_LISTENERS,
-                        userId, bucket, packageName));
+                        StandbyUpdateRecord.obtain(packageName, userId,
+                                bucket, userStartedInteracting)));
             }
         }
     }
@@ -557,19 +602,27 @@ public class AppStandbyController {
                     || event.mEventType == UsageEvents.Event.USER_INTERACTION
                     || event.mEventType == UsageEvents.Event.NOTIFICATION_SEEN)) {
 
-                final int newBucket;
+                final AppUsageHistory appHistory = mAppIdleHistory.getAppUsageHistory(
+                        event.mPackage, userId, elapsedRealtime);
+                final int prevBucket = appHistory.currentBucket;
+                final String prevBucketReason = appHistory.bucketingReason;
                 if (event.mEventType == UsageEvents.Event.NOTIFICATION_SEEN) {
-                    newBucket = mAppIdleHistory.reportUsage(event.mPackage, userId,
+                    mAppIdleHistory.reportUsage(appHistory, event.mPackage,
                             STANDBY_BUCKET_WORKING_SET,
                             elapsedRealtime, elapsedRealtime + 2 * ONE_HOUR);
                 } else {
-                    newBucket = mAppIdleHistory.reportUsage(event.mPackage, userId,
+                    mAppIdleHistory.reportUsage(event.mPackage, userId,
                             STANDBY_BUCKET_ACTIVE,
                             elapsedRealtime, elapsedRealtime + 2 * ONE_HOUR);
                 }
 
+                final boolean userStartedInteracting =
+                        appHistory.currentBucket == STANDBY_BUCKET_ACTIVE &&
+                        prevBucket != appHistory.currentBucket &&
+                        prevBucketReason != REASON_USAGE;
                 maybeInformListeners(event.mPackage, userId, elapsedRealtime,
-                        newBucket);
+                        appHistory.currentBucket, userStartedInteracting);
+
                 if (previouslyIdle) {
                     notifyBatteryStats(event.mPackage, userId, false);
                 }
@@ -602,7 +655,7 @@ public class AppStandbyController {
                 userId, elapsedRealtime);
         // Inform listeners if necessary
         if (previouslyIdle != stillIdle) {
-            maybeInformListeners(packageName, userId, elapsedRealtime, standbyBucket);
+            maybeInformListeners(packageName, userId, elapsedRealtime, standbyBucket, false);
             if (!stillIdle) {
                 notifyBatteryStats(packageName, userId, idle);
             }
@@ -862,8 +915,7 @@ public class AppStandbyController {
             mAppIdleHistory.setAppStandbyBucket(packageName, userId, elapsedRealtime, newBucket,
                     reason);
         }
-        maybeInformListeners(packageName, userId, elapsedRealtime,
-                newBucket);
+        maybeInformListeners(packageName, userId, elapsedRealtime, newBucket, false);
     }
 
     @VisibleForTesting
@@ -949,11 +1001,14 @@ public class AppStandbyController {
         return packageName != null && packageName.equals(activeScorer);
     }
 
-    void informListeners(String packageName, int userId, int bucket) {
+    void informListeners(String packageName, int userId, int bucket, boolean userInteraction) {
         final boolean idle = bucket >= STANDBY_BUCKET_RARE;
         synchronized (mPackageAccessListeners) {
             for (AppIdleStateChangeListener listener : mPackageAccessListeners) {
                 listener.onAppIdleStateChanged(packageName, userId, idle, bucket);
+                if (userInteraction) {
+                    listener.onUserInteractionStarted(packageName, userId);
+                }
             }
         }
     }
@@ -1207,7 +1262,9 @@ public class AppStandbyController {
         public void handleMessage(Message msg) {
             switch (msg.what) {
                 case MSG_INFORM_LISTENERS:
-                    informListeners((String) msg.obj, msg.arg1, msg.arg2);
+                    StandbyUpdateRecord r = (StandbyUpdateRecord) msg.obj;
+                    informListeners(r.packageName, r.userId, r.bucket, r.isUserInteraction);
+                    r.recycle();
                     break;
 
                 case MSG_FORCE_IDLE_STATE:

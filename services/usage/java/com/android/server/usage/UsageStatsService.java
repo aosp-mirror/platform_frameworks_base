@@ -1022,6 +1022,12 @@ public class UsageStatsService extends SystemService implements
             return mAppStandby.getTimeSinceLastJobRun(packageName, userId);
         }
 
+        @Override
+        public void reportAppJobState(String packageName, int userId,
+                int numDeferredJobs, long timeSinceLastJobRun) {
+        }
+
+        @Override
         public void onActiveAdminAdded(String packageName, int userId) {
             mAppStandby.addActiveDeviceAdmin(packageName, userId);
         }

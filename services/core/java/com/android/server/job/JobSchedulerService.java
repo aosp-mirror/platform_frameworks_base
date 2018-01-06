@@ -1029,6 +1029,11 @@ public final class JobSchedulerService extends com.android.server.SystemService
         }
     }
 
+    void reportAppUsage(String packageName, int userId) {
+        // This app just transitioned into interactive use or near equivalent, so we should
+        // take a look at its job state for feedback purposes.
+    }
+
     /**
      * Initializes the system service.
      * <p>
@@ -2075,6 +2080,11 @@ public final class JobSchedulerService extends com.android.server.SystemService
         }
 
         @Override
+        public void reportAppUsage(String packageName, int userId) {
+            JobSchedulerService.this.reportAppUsage(packageName, userId);
+        }
+
+        @Override
         public JobStorePersistStats getPersistStats() {
             synchronized (mLock) {
                 return new JobStorePersistStats(mJobs.getPersistStats());
@@ -2131,6 +2141,40 @@ public final class JobSchedulerService extends com.android.server.SystemService
                 Slog.i(TAG, "Global parole state now " + (isParoleOn ? "ON" : "OFF"));
             }
             mInParole = isParoleOn;
+        }
+
+        @Override
+        public void onUserInteractionStarted(String packageName, int userId) {
+            final int uid = mLocalPM.getPackageUid(packageName,
+                    PackageManager.MATCH_UNINSTALLED_PACKAGES, userId);
+            if (uid < 0) {
+                // Quietly ignore; the case is already logged elsewhere
+                return;
+            }
+
+            final long sinceLast = sElapsedRealtimeClock.millis() -
+                    mUsageStats.getTimeSinceLastJobRun(packageName, userId);
+            final DeferredJobCounter counter = new DeferredJobCounter();
+            synchronized (mLock) {
+                mJobs.forEachJobForSourceUid(uid, counter);
+            }
+
+            mUsageStats.reportAppJobState(packageName, userId, counter.numDeferred(), sinceLast);
+        }
+    }
+
+    static class DeferredJobCounter implements JobStatusFunctor {
+        private int mDeferred = 0;
+
+        public int numDeferred() {
+            return mDeferred;
+        }
+
+        @Override
+        public void process(JobStatus job) {
+            if (job.getWhenStandbyDeferred() > 0) {
+                mDeferred++;
+            }
         }
     }
 

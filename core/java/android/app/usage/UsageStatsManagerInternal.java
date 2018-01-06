@@ -146,6 +146,14 @@ public abstract class UsageStatsManagerInternal {
          * allowed to do work even if they're idle or in a low bucket.
          */
         public abstract void onParoleStateChanged(boolean isParoleOn);
+
+        /**
+         * Optional callback to inform the listener that the app has transitioned into
+         * an active state due to user interaction.
+         */
+        public void onUserInteractionStarted(String packageName, @UserIdInt int userId) {
+            // No-op by default
+        }
     }
 
     /**  Backup/Restore API */
@@ -206,4 +214,17 @@ public abstract class UsageStatsManagerInternal {
      * indicated here before by a call to {@link #setLastJobRunTime(String, int, long)}.
      */
     public abstract long getTimeSinceLastJobRun(String packageName, @UserIdInt int userId);
+
+    /**
+     * Report a few data points about an app's job state at the current time.
+     *
+     * @param packageName the app whose job state is being described
+     * @param userId which user the app is associated with
+     * @param numDeferredJobs the number of pending jobs that were deferred
+     *   due to bucketing policy
+     * @param timeSinceLastJobRun number of milliseconds since the last time one of
+     *   this app's jobs was executed
+     */
+    public abstract void reportAppJobState(String packageName, @UserIdInt int userId,
+            int numDeferredJobs, long timeSinceLastJobRun);
 }

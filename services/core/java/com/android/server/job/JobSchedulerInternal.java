@@ -55,6 +55,14 @@ public interface JobSchedulerInternal {
     void removeBackingUpUid(int uid);
     void clearAllBackingUpUids();
 
+    /**
+     * The user has started interacting with the app.  Take any appropriate action.
+     */
+    void reportAppUsage(String packageName, int userId);
+
+    /**
+     * Report a snapshot of sync-related jobs back to the sync manager
+     */
     JobStorePersistStats getPersistStats();
 
     /**
