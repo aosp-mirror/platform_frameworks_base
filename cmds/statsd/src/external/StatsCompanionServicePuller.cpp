@@ -22,6 +22,7 @@
 #include <private/android_filesystem_config.h>
 #include "StatsCompanionServicePuller.h"
 #include "StatsService.h"
+#include "guardrail/StatsdStats.h"
 
 using namespace android;
 using namespace android::base;
@@ -39,13 +40,16 @@ const int kLogMsgHeaderSize = 28;
 
 // The reading and parsing are implemented in Java. It is not difficult to port over. But for now
 // let StatsCompanionService handle that and send the data back.
-bool StatsCompanionServicePuller::Pull(const int tagId, vector<shared_ptr<LogEvent> >* data) {
+StatsCompanionServicePuller::StatsCompanionServicePuller(int tagId) : StatsPuller(tagId) {
+}
+
+bool StatsCompanionServicePuller::PullInternal(vector<shared_ptr<LogEvent> >* data) {
     sp<IStatsCompanionService> statsCompanion = StatsService::getStatsCompanionService();
     vector<StatsLogEventWrapper> returned_value;
     if (statsCompanion != NULL) {
-        Status status = statsCompanion->pullData(tagId, &returned_value);
+        Status status = statsCompanion->pullData(mTagId, &returned_value);
         if (!status.isOk()) {
-            ALOGW("error pulling for %d", tagId);
+            ALOGW("error pulling for %d", mTagId);
             return false;
         }
         data->clear();
@@ -60,7 +64,7 @@ bool StatsCompanionServicePuller::Pull(const int tagId, vector<shared_ptr<LogEve
             std::copy(it.bytes.begin(), it.bytes.end(), tmp.buf + kLogMsgHeaderSize);
             data->push_back(make_shared<LogEvent>(tmp));
         }
-        ALOGD("StatsCompanionServicePuller::pull succeeded for %d", tagId);
+        ALOGD("StatsCompanionServicePuller::pull succeeded for %d", mTagId);
         return true;
     } else {
         ALOGW("statsCompanion not found!");

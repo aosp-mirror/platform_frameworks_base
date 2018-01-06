@@ -246,4 +246,12 @@ message StatsdStatsReport {
         optional int32 alarms_registered = 1;
     }
     optional AnomalyAlarmStats anomaly_alarm_stats = 9;
+
+    message PulledAtomStats {
+        optional int32 atom_id = 1;
+        optional int64 total_pull = 2;
+        optional int64 total_pull_from_cache = 3;
+        optional int64 min_pull_interval_sec = 4;
+    }
+    repeated PulledAtomStats pulled_atom_stats = 10;
 }

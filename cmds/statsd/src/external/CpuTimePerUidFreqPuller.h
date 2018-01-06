@@ -33,7 +33,8 @@ namespace statsd {
  */
 class CpuTimePerUidFreqPuller : public StatsPuller {
  public:
-  bool Pull(const int tagId, vector<std::shared_ptr<LogEvent>>* data) override;
+     CpuTimePerUidFreqPuller();
+     bool PullInternal(vector<std::shared_ptr<LogEvent>>* data) override;
 };
 
 }  // namespace statsd
