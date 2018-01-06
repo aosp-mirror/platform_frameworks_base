@@ -2695,6 +2695,13 @@ public class ActivityManagerService extends IActivityManager.Stub
         }
 
         @Override
+        public void onBootPhase(int phase) {
+            if (phase == PHASE_SYSTEM_SERVICES_READY) {
+                mService.mBatteryStatsService.systemServicesReady();
+            }
+        }
+
+        @Override
         public void onCleanupUser(int userId) {
             mService.mBatteryStatsService.onCleanupUser(userId);
         }

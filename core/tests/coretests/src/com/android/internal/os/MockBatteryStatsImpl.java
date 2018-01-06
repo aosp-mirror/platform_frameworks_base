@@ -139,6 +139,11 @@ public class MockBatteryStatsImpl extends BatteryStatsImpl {
         }
 
         @Override
+        public Future<?> scheduleCpuSyncDueToSettingChange() {
+            return null;
+        }
+
+        @Override
         public Future<?> scheduleReadProcStateCpuTimes(
                 boolean onBattery, boolean onBatteryScreenOff) {
             return null;

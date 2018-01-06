@@ -118,9 +118,14 @@ class BatteryExternalStatsWorker implements BatteryStatsImpl.ExternalStatsSync {
     }
 
     @Override
+    public synchronized Future<?> scheduleCpuSyncDueToSettingChange() {
+        return scheduleSyncLocked("setting-change", UPDATE_CPU);
+    }
+
+    @Override
     public Future<?> scheduleReadProcStateCpuTimes(boolean onBattery, boolean onBatteryScreenOff) {
         synchronized (mStats) {
-            if (!mStats.mPerProcStateCpuTimesAvailable) {
+            if (!mStats.trackPerProcStateCpuTimes()) {
                 return null;
             }
         }
@@ -138,7 +143,7 @@ class BatteryExternalStatsWorker implements BatteryStatsImpl.ExternalStatsSync {
     public Future<?> scheduleCopyFromAllUidsCpuTimes(
             boolean onBattery, boolean onBatteryScreenOff) {
         synchronized (mStats) {
-            if (!mStats.mPerProcStateCpuTimesAvailable) {
+            if (!mStats.trackPerProcStateCpuTimes()) {
                 return null;
             }
         }

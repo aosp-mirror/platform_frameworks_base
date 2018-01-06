@@ -21,10 +21,13 @@ import android.annotation.Nullable;
 import android.app.ActivityManager;
 import android.bluetooth.BluetoothActivityEnergyInfo;
 import android.bluetooth.UidTraffic;
+import android.content.ContentResolver;
 import android.content.Context;
 import android.content.Intent;
+import android.database.ContentObserver;
 import android.net.ConnectivityManager;
 import android.net.NetworkStats;
+import android.net.Uri;
 import android.net.wifi.WifiActivityEnergyInfo;
 import android.net.wifi.WifiManager;
 import android.os.BatteryManager;
@@ -46,6 +49,7 @@ import android.os.SystemClock;
 import android.os.UserHandle;
 import android.os.WorkSource;
 import android.os.WorkSource.WorkChain;
+import android.provider.Settings;
 import android.telephony.DataConnectionRealTimeInfo;
 import android.telephony.ModemActivityInfo;
 import android.telephony.ServiceState;
@@ -54,6 +58,7 @@ import android.telephony.TelephonyManager;
 import android.text.TextUtils;
 import android.util.ArrayMap;
 import android.util.IntArray;
+import android.util.KeyValueListParser;
 import android.util.Log;
 import android.util.LogWriter;
 import android.util.LongSparseArray;
@@ -292,7 +297,16 @@ public class BatteryStatsImpl extends BatteryStats {
     public void updateProcStateCpuTimes(boolean onBattery, boolean onBatteryScreenOff) {
         final SparseIntArray uidStates;
         synchronized (BatteryStatsImpl.this) {
+            if (!mConstants.TRACK_CPU_TIMES_BY_PROC_STATE) {
+                return;
+            }
             if(!initKernelSingleUidTimeReaderLocked()) {
+                return;
+            }
+            // If the KernelSingleUidTimeReader has stale cpu times, then we shouldn't try to
+            // compute deltas since it might result in mis-attributing cpu times to wrong states.
+            if (mKernelSingleUidTimeReader.hasStaleData()) {
+                mPendingUids.clear();
                 return;
             }
 
@@ -355,12 +369,23 @@ public class BatteryStatsImpl extends BatteryStats {
      */
     public void copyFromAllUidsCpuTimes(boolean onBattery, boolean onBatteryScreenOff) {
         synchronized (BatteryStatsImpl.this) {
+            if (!mConstants.TRACK_CPU_TIMES_BY_PROC_STATE) {
+                return;
+            }
             if(!initKernelSingleUidTimeReaderLocked()) {
                 return;
             }
 
             final SparseArray<long[]> allUidCpuFreqTimesMs =
                     mKernelUidCpuFreqTimeReader.getAllUidCpuFreqTimeMs();
+            // If the KernelSingleUidTimeReader has stale cpu times, then we shouldn't try to
+            // compute deltas since it might result in mis-attributing cpu times to wrong states.
+            if (mKernelSingleUidTimeReader.hasStaleData()) {
+                mKernelSingleUidTimeReader.setAllUidsCpuTimesMs(allUidCpuFreqTimesMs);
+                mKernelSingleUidTimeReader.markDataAsStale(false);
+                mPendingUids.clear();
+                return;
+            }
             for (int i = allUidCpuFreqTimesMs.size() - 1; i >= 0; --i) {
                 final int uid = allUidCpuFreqTimesMs.keyAt(i);
                 final Uid u = getAvailableUidStatsLocked(mapUid(uid));
@@ -450,6 +475,7 @@ public class BatteryStatsImpl extends BatteryStats {
         Future<?> scheduleCpuSyncDueToRemovedUid(int uid);
         Future<?> scheduleReadProcStateCpuTimes(boolean onBattery, boolean onBatteryScreenOff);
         Future<?> scheduleCopyFromAllUidsCpuTimes(boolean onBattery, boolean onBatteryScreenOff);
+        Future<?> scheduleCpuSyncDueToSettingChange();
     }
 
     public Handler mHandler;
@@ -812,6 +838,9 @@ public class BatteryStatsImpl extends BatteryStats {
     @VisibleForTesting
     protected PowerProfile mPowerProfile;
 
+    @GuardedBy("this")
+    private final Constants mConstants;
+
     /*
      * Holds a SamplingTimer associated with each Resource Power Manager state and voter,
      * recording their times when on-battery (regardless of screen state).
@@ -900,6 +929,7 @@ public class BatteryStatsImpl extends BatteryStats {
         mHandler = null;
         mPlatformIdleStateCallback = null;
         mUserInfoProvider = null;
+        mConstants = new Constants(mHandler);
         clearHistoryLocked();
     }
 
@@ -9411,7 +9441,7 @@ public class BatteryStatsImpl extends BatteryStats {
                 if (mProcessState != ActivityManager.PROCESS_STATE_NONEXISTENT) {
                     mProcessStateTimer[mProcessState].stopRunningLocked(elapsedRealtimeMs);
 
-                    if (mBsi.mPerProcStateCpuTimesAvailable) {
+                    if (mBsi.trackPerProcStateCpuTimes()) {
                         if (mBsi.mPendingUids.size() == 0) {
                             mBsi.mExternalSync.scheduleReadProcStateCpuTimes(
                                     mBsi.mOnBatteryTimeBase.isRunning(),
@@ -9765,6 +9795,7 @@ public class BatteryStatsImpl extends BatteryStats {
         mCheckinFile = new AtomicFile(new File(systemDir, "batterystats-checkin.bin"));
         mDailyFile = new AtomicFile(new File(systemDir, "batterystats-daily.xml"));
         mHandler = new MyHandler(handler.getLooper());
+        mConstants = new Constants(mHandler);
         mStartCount++;
         mScreenOnTimer = new StopwatchTimer(mClocks, null, -1, null, mOnBatteryTimeBase);
         mScreenDozeTimer = new StopwatchTimer(mClocks, null, -1, null, mOnBatteryTimeBase);
@@ -9860,6 +9891,7 @@ public class BatteryStatsImpl extends BatteryStats {
         mDailyFile = null;
         mHandler = null;
         mExternalSync = null;
+        mConstants = new Constants(mHandler);
         clearHistoryLocked();
         readFromParcel(p);
         mPlatformIdleStateCallback = null;
@@ -12611,6 +12643,78 @@ public class BatteryStatsImpl extends BatteryStats {
         recordShutdownLocked(mClocks.elapsedRealtime(), mClocks.uptimeMillis());
         writeSyncLocked();
         mShuttingDown = true;
+    }
+
+    public boolean trackPerProcStateCpuTimes() {
+        return mConstants.TRACK_CPU_TIMES_BY_PROC_STATE && mPerProcStateCpuTimesAvailable;
+    }
+
+    public void systemServicesReady(Context context) {
+        mConstants.startObserving(context.getContentResolver());
+    }
+
+    @VisibleForTesting
+    public final class Constants extends ContentObserver {
+        public static final String KEY_TRACK_CPU_TIMES_BY_PROC_STATE
+                = "track_cpu_times_by_proc_state";
+
+        private static final boolean DEFAULT_TRACK_CPU_TIMES_BY_PROC_STATE = true;
+
+        public boolean TRACK_CPU_TIMES_BY_PROC_STATE = DEFAULT_TRACK_CPU_TIMES_BY_PROC_STATE;
+
+        private ContentResolver mResolver;
+        private final KeyValueListParser mParser = new KeyValueListParser(',');
+
+        public Constants(Handler handler) {
+            super(handler);
+        }
+
+        public void startObserving(ContentResolver resolver) {
+            mResolver = resolver;
+            mResolver.registerContentObserver(
+                    Settings.Global.getUriFor(Settings.Global.BATTERY_STATS_CONSTANTS),
+                    false /* notifyForDescendants */, this);
+            updateConstants();
+        }
+
+        @Override
+        public void onChange(boolean selfChange, Uri uri) {
+            updateConstants();
+        }
+
+        private void updateConstants() {
+            synchronized (BatteryStatsImpl.this) {
+                try {
+                    mParser.setString(Settings.Global.getString(mResolver,
+                            Settings.Global.BATTERY_STATS_CONSTANTS));
+                } catch (IllegalArgumentException e) {
+                    // Failed to parse the settings string, log this and move on
+                    // with defaults.
+                    Slog.e(TAG, "Bad batterystats settings", e);
+                }
+
+                updateTrackCpuTimesByProcStateLocked(TRACK_CPU_TIMES_BY_PROC_STATE,
+                        mParser.getBoolean(KEY_TRACK_CPU_TIMES_BY_PROC_STATE,
+                                DEFAULT_TRACK_CPU_TIMES_BY_PROC_STATE));
+            }
+        }
+
+        private void updateTrackCpuTimesByProcStateLocked(boolean wasEnabled, boolean isEnabled) {
+            TRACK_CPU_TIMES_BY_PROC_STATE = isEnabled;
+            if (isEnabled && !wasEnabled) {
+                mKernelSingleUidTimeReader.markDataAsStale(true);
+                mExternalSync.scheduleCpuSyncDueToSettingChange();
+            }
+        }
+
+        public void dumpLocked(PrintWriter pw) {
+            pw.print(KEY_TRACK_CPU_TIMES_BY_PROC_STATE); pw.print("=");
+            pw.println(TRACK_CPU_TIMES_BY_PROC_STATE);
+        }
+    }
+
+    public void dumpConstantsLocked(PrintWriter pw) {
+        mConstants.dumpLocked(pw);
     }
 
     Parcel mPendingWrite = null;

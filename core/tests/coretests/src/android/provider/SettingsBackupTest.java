@@ -112,6 +112,7 @@ public class SettingsBackupTest {
                     Settings.Global.BATTERY_DISCHARGE_DURATION_THRESHOLD,
                     Settings.Global.BATTERY_DISCHARGE_THRESHOLD,
                     Settings.Global.BATTERY_SAVER_DEVICE_SPECIFIC_CONSTANTS,
+                    Settings.Global.BATTERY_STATS_CONSTANTS,
                     Settings.Global.BLE_SCAN_ALWAYS_AVAILABLE,
                     Settings.Global.BLUETOOTH_A2DP_SINK_PRIORITY_PREFIX,
                     Settings.Global.BLUETOOTH_A2DP_SRC_PRIORITY_PREFIX,

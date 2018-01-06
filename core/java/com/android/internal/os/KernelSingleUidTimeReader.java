@@ -46,12 +46,14 @@ public class KernelSingleUidTimeReader {
     private final int mCpuFreqsCount;
 
     @GuardedBy("this")
-    private final SparseArray<long[]> mLastUidCpuTimeMs = new SparseArray<>();
+    private SparseArray<long[]> mLastUidCpuTimeMs = new SparseArray<>();
 
     @GuardedBy("this")
     private int mReadErrorCounter;
     @GuardedBy("this")
     private boolean mSingleUidCpuTimesAvailable = true;
+    @GuardedBy("this")
+    private boolean mHasStaleData;
 
     private final Injector mInjector;
 
@@ -164,6 +166,30 @@ public class KernelSingleUidTimeReader {
             }
         }
         return deltaTimesMs;
+    }
+
+    public void markDataAsStale(boolean hasStaleData) {
+        synchronized (this) {
+            mHasStaleData = hasStaleData;
+        }
+    }
+
+    public boolean hasStaleData() {
+        synchronized (this) {
+            return mHasStaleData;
+        }
+    }
+
+    public void setAllUidsCpuTimesMs(SparseArray<long[]> allUidsCpuTimesMs) {
+        synchronized (this) {
+            mLastUidCpuTimeMs.clear();
+            for (int i = allUidsCpuTimesMs.size() - 1; i >= 0; --i) {
+                final long[] cpuTimesMs = allUidsCpuTimesMs.valueAt(i);
+                if (cpuTimesMs != null) {
+                    mLastUidCpuTimeMs.put(allUidsCpuTimesMs.keyAt(i), cpuTimesMs.clone());
+                }
+            }
+        }
     }
 
     public void removeUid(int uid) {
