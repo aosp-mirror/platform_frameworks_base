@@ -1098,6 +1098,8 @@ public final class BluetoothDevice implements Parcelable {
      * @return true on success, false on error
      * @hide
      */
+    @SystemApi
+    @RequiresPermission(android.Manifest.permission.BLUETOOTH_ADMIN)
     public boolean cancelBondProcess() {
         final IBluetooth service = sService;
         if (service == null) {
@@ -1125,6 +1127,8 @@ public final class BluetoothDevice implements Parcelable {
      * @return true on success, false on error
      * @hide
      */
+    @SystemApi
+    @RequiresPermission(android.Manifest.permission.BLUETOOTH_ADMIN)
     public boolean removeBond() {
         final IBluetooth service = sService;
         if (service == null) {
@@ -1174,6 +1178,7 @@ public final class BluetoothDevice implements Parcelable {
      * @hide
      */
     @SystemApi
+    @RequiresPermission(android.Manifest.permission.BLUETOOTH)
     public boolean isConnected() {
         final IBluetooth service = sService;
         if (service == null) {
@@ -1197,6 +1202,7 @@ public final class BluetoothDevice implements Parcelable {
      * @hide
      */
     @SystemApi
+    @RequiresPermission(android.Manifest.permission.BLUETOOTH)
     public boolean isEncrypted() {
         final IBluetooth service = sService;
         if (service == null) {
@@ -1444,6 +1450,8 @@ public final class BluetoothDevice implements Parcelable {
      * @return Whether the value has been successfully set.
      * @hide
      */
+    @SystemApi
+    @RequiresPermission(android.Manifest.permission.BLUETOOTH_PRIVILEGED)
     public boolean setPhonebookAccessPermission(int value) {
         final IBluetooth service = sService;
         if (service == null) {
