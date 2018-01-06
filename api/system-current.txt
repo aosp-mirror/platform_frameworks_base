@@ -137,6 +137,7 @@ package android {
     field public static final java.lang.String RECEIVE_EMERGENCY_BROADCAST = "android.permission.RECEIVE_EMERGENCY_BROADCAST";
     field public static final java.lang.String RECEIVE_WIFI_CREDENTIAL_CHANGE = "android.permission.RECEIVE_WIFI_CREDENTIAL_CHANGE";
     field public static final java.lang.String RECOVERY = "android.permission.RECOVERY";
+    field public static final java.lang.String RECOVER_KEYSTORE = "android.permission.RECOVER_KEYSTORE";
     field public static final java.lang.String REGISTER_CALL_PROVIDER = "android.permission.REGISTER_CALL_PROVIDER";
     field public static final java.lang.String REGISTER_CONNECTION_MANAGER = "android.permission.REGISTER_CONNECTION_MANAGER";
     field public static final java.lang.String REGISTER_SIM_SUBSCRIPTION = "android.permission.REGISTER_SIM_SUBSCRIPTION";
