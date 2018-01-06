@@ -33,6 +33,7 @@ import android.metrics.LogMaker;
 import android.os.Bundle;
 import android.os.IBinder;
 import android.os.Parcelable;
+import android.os.RemoteCallback;
 import android.os.RemoteException;
 import android.service.autofill.AutofillService;
 import android.service.autofill.FillEventHistory;
@@ -53,9 +54,12 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.ref.WeakReference;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
+import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.TimeUnit;
 
 // TODO: use java.lang.ref.Cleaner once Android supports Java 9
 import sun.misc.Cleaner;
@@ -169,10 +173,14 @@ public final class AutofillManager {
     public static final String EXTRA_CLIENT_STATE =
             "android.view.autofill.extra.CLIENT_STATE";
 
-
     /** @hide */
     public static final String EXTRA_RESTORE_SESSION_TOKEN =
             "android.view.autofill.extra.RESTORE_SESSION_TOKEN";
+
+    /** @hide */
+    public static final String EXTRA_AVAILABLE_ALGORITHMS = "available_algorithms";
+    /** @hide */
+    public static final String EXTRA_DEFAULT_ALGORITHM = "default_algorithm";
 
     private static final String SESSION_ID_TAG = "android:sessionId";
     private static final String STATE_TAG = "android:state";
@@ -257,6 +265,12 @@ public final class AutofillManager {
      * @hide
      */
     public static final int STATE_DISABLED_BY_SERVICE = 4;
+
+    /**
+     * Timeout in ms for calls to the field classification service.
+     * @hide
+     */
+    public static final int FC_SERVICE_TIMEOUT = 5000;
 
     /**
      * Makes an authentication id from a request id and a dataset id.
@@ -1092,10 +1106,22 @@ public final class AutofillManager {
      * and it's ignored if the caller currently doesn't have an enabled autofill service for
      * the user.
      */
+    // TODO(b/70939974): refactor this method to be "purely" sync by getting the info from the
+    // the ExtService manifest (instead of calling the service)
     @Nullable
     public String getDefaultFieldClassificationAlgorithm() {
+        final SyncRemoteCallbackListener<String> listener =
+                new SyncRemoteCallbackListener<String>() {
+
+            @Override
+            String getResult(Bundle result) {
+                return result == null ? null : result.getString(EXTRA_DEFAULT_ALGORITHM);
+            }
+        };
+
         try {
-            return mService.getDefaultFieldClassificationAlgorithm();
+            mService.getDefaultFieldClassificationAlgorithm(new RemoteCallback(listener));
+            return listener.getResult(FC_SERVICE_TIMEOUT);
         } catch (RemoteException e) {
             e.rethrowFromSystemServer();
             return null;
@@ -1107,17 +1133,32 @@ public final class AutofillManager {
      * <a href="AutofillService.html#FieldClassification">field classification</a>.
      *
      * <p><b>Note:</b> This method should only be called by an app providing an autofill service,
-     * and it's ignored if the caller currently doesn't have an enabled autofill service for
-     * the user.
-     *
-     * @return list of all algorithms currently available, or an empty list if the caller currently
-     * does not have an enabled autofill service for the user.
+     * and it returns an empty list if the caller currently doesn't have an enabled autofill service
+     * for the user.
      */
+    // TODO(b/70939974): refactor this method to be "purely" sync by getting the info from the
+    // the ExtService manifest (instead of calling the service)
     @NonNull
     public List<String> getAvailableFieldClassificationAlgorithms() {
+        final SyncRemoteCallbackListener<List<String>> listener =
+                new SyncRemoteCallbackListener<List<String>>() {
+
+            @Override
+            List<String> getResult(Bundle result) {
+                List<String> algorithms = null;
+                if (result != null) {
+                    final String[] asArray = result.getStringArray(EXTRA_AVAILABLE_ALGORITHMS);
+                    if (asArray != null) {
+                        algorithms = Arrays.asList(asArray);
+                    }
+                }
+                return algorithms != null ? algorithms : Collections.emptyList();
+            }
+        };
+
         try {
-            final List<String> names = mService.getAvailableFieldClassificationAlgorithms();
-            return names != null ? names : Collections.emptyList();
+            mService.getAvailableFieldClassificationAlgorithms(new RemoteCallback(listener));
+            return listener.getResult(FC_SERVICE_TIMEOUT);
         } catch (RemoteException e) {
             e.rethrowFromSystemServer();
             return null;
@@ -2195,5 +2236,37 @@ public final class AutofillManager {
                 afm.post(() -> afm.setSessionFinished(newState));
             }
         }
+    }
+
+    private abstract static class SyncRemoteCallbackListener<T>
+            implements RemoteCallback.OnResultListener {
+
+        private final CountDownLatch mLatch = new CountDownLatch(1);
+        private T mResult;
+
+        @Override
+        public void onResult(Bundle result) {
+            if (sVerbose) Log.w(TAG, "SyncRemoteCallbackListener.onResult(): " + result);
+            mResult = getResult(result);
+            mLatch.countDown();
+        }
+
+        T getResult(int timeoutMs) {
+            T result = null;
+            try {
+                if (mLatch.await(timeoutMs, TimeUnit.MILLISECONDS)) {
+                    result = mResult;
+                } else {
+                    Log.w(TAG, "SyncRemoteCallbackListener not called in " + timeoutMs + "ms");
+                }
+            } catch (InterruptedException e) {
+                Log.w(TAG, "SyncRemoteCallbackListener interrupted: " + e);
+                Thread.currentThread().interrupt();
+            }
+            if (sVerbose) Log.w(TAG, "SyncRemoteCallbackListener: returning " + result);
+            return result;
+        }
+
+        abstract T getResult(Bundle result);
     }
 }

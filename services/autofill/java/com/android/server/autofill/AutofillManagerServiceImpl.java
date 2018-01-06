@@ -43,20 +43,15 @@ import android.os.Binder;
 import android.os.Bundle;
 import android.os.IBinder;
 import android.os.Looper;
-import android.os.Parcel;
-import android.os.Parcelable;
+import android.os.RemoteCallback;
 import android.os.RemoteCallbackList;
 import android.os.RemoteException;
 import android.os.SystemClock;
 import android.os.UserHandle;
 import android.os.UserManager;
-import android.os.Parcelable.Creator;
-import android.os.RemoteCallback;
 import android.provider.Settings;
 import android.service.autofill.AutofillService;
 import android.service.autofill.AutofillServiceInfo;
-import android.service.autofill.Dataset;
-import android.service.autofill.EditDistanceScorer;
 import android.service.autofill.FieldClassification;
 import android.service.autofill.FieldClassification.Match;
 import android.service.autofill.FillEventHistory;
@@ -69,8 +64,6 @@ import android.util.ArrayMap;
 import android.util.ArraySet;
 import android.util.DebugUtils;
 import android.util.LocalLog;
-import android.util.Log;
-import android.util.Pair;
 import android.util.Slog;
 import android.util.SparseArray;
 import android.util.TimeUtils;
@@ -89,7 +82,6 @@ import com.android.server.autofill.ui.AutoFillUI;
 
 import java.io.PrintWriter;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 import java.util.Random;
 
@@ -124,137 +116,7 @@ final class AutofillManagerServiceImpl {
 
     private final LocalLog mRequestsHistory;
     private final LocalLog mUiLatencyHistory;
-
-    // TODO(b/70939974): temporary, will be moved to ExtServices
-    static final class FieldClassificationAlgorithmService {
-
-        static final String EXTRA_SCORES = "scores";
-
-        /**
-         * Gets the name of all available algorithms.
-         */
-        @NonNull
-        public List<String> getAvailableAlgorithms() {
-            return Arrays.asList(EditDistanceScorer.NAME);
-        }
-
-        /**
-         * Gets the default algorithm that's used when an algorithm is not specified or is invalid.
-         */
-        @NonNull
-        public String getDefaultAlgorithm() {
-            return EditDistanceScorer.NAME;
-        }
-
-        /**
-         * Gets the field classification scores.
-         *
-         * @param algorithmName algorithm to be used. If invalid, the default algorithm will be used
-         * instead.
-         * @param algorithmArgs optional arguments to be passed to the algorithm.
-         * @param currentValues values entered by the user.
-         * @param userValues values from the user data.
-         * @param callback returns a nullable bundle with the parcelable results on
-         * {@link #EXTRA_SCORES}.
-         */
-        @Nullable
-        void getScores(@NonNull String algorithmName, @Nullable Bundle algorithmArgs,
-                List<AutofillValue> currentValues, @NonNull String[] userValues,
-                @NonNull RemoteCallback callback) {
-            if (currentValues == null || userValues == null) {
-                // TODO(b/70939974): use preconditions / add unit test
-                throw new IllegalArgumentException("values cannot be null");
-            }
-            if (currentValues.isEmpty() || userValues.length == 0) {
-                Slog.w(TAG, "getScores(): empty currentvalues (" + currentValues
-                        + ") or userValues (" + Arrays.toString(userValues) + ")");
-                // TODO(b/70939974): add unit test
-                callback.sendResult(null);
-            }
-            String actualAlgorithName = algorithmName;
-            if (!EditDistanceScorer.NAME.equals(algorithmName)) {
-                Slog.w(TAG, "Ignoring invalid algorithm (" + algorithmName + ") and using "
-                        + EditDistanceScorer.NAME + " instead");
-                actualAlgorithName = EditDistanceScorer.NAME;
-            }
-            final int currentValuesSize = currentValues.size();
-            if (sDebug) {
-                Log.d(TAG, "getScores() will return a " + currentValuesSize + "x"
-                        + userValues.length + " matrix for " + actualAlgorithName);
-            }
-            final FieldClassificationScores scores = new FieldClassificationScores(
-                    actualAlgorithName, currentValuesSize, userValues.length);
-            final EditDistanceScorer algorithm = EditDistanceScorer.getInstance();
-            for (int i = 0; i < currentValuesSize; i++) {
-                for (int j = 0; j < userValues.length; j++) {
-                    final float score = algorithm.getScore(currentValues.get(i), userValues[j]);
-                    scores.scores[i][j] = score;
-                }
-            }
-            final Bundle result = new Bundle();
-            result.putParcelable(EXTRA_SCORES, scores);
-            callback.sendResult(result);
-        }
-    }
-
-    // TODO(b/70939974): temporary, will be moved to ExtServices
-    public static final class FieldClassificationScores implements Parcelable {
-        public final String algorithmName;
-        public final float[][] scores;
-
-        public FieldClassificationScores(String algorithmName, int size1, int size2) {
-            this.algorithmName = algorithmName;
-            scores = new float[size1][size2];
-        }
-
-        public FieldClassificationScores(Parcel parcel) {
-            algorithmName = parcel.readString();
-            final int size1 = parcel.readInt();
-            final int size2 = parcel.readInt();
-            scores = new float[size1][size2];
-            for (int i = 0; i < size1; i++) {
-                for (int j = 0; j < size2; j++) {
-                    scores[i][j] = parcel.readFloat();
-                }
-            }
-        }
-
-        @Override
-        public int describeContents() {
-            return 0;
-        }
-
-        @Override
-        public void writeToParcel(Parcel parcel, int flags) {
-            parcel.writeString(algorithmName);
-            int size1 = scores.length;
-            int size2 = scores[0].length;
-            parcel.writeInt(size1);
-            parcel.writeInt(size2);
-            for (int i = 0; i < size1; i++) {
-                for (int j = 0; j < size2; j++) {
-                    parcel.writeFloat(scores[i][j]);
-                }
-            }
-        }
-
-        public static final Creator<FieldClassificationScores> CREATOR = new Creator<FieldClassificationScores>() {
-
-            @Override
-            public FieldClassificationScores createFromParcel(Parcel parcel) {
-                return new FieldClassificationScores(parcel);
-            }
-
-            @Override
-            public FieldClassificationScores[] newArray(int size) {
-                return new FieldClassificationScores[size];
-            }
-
-        };
-    }
-
-    private final FieldClassificationAlgorithmService mFcService =
-            new FieldClassificationAlgorithmService();
+    private final FieldClassificationStrategy mFieldClassificationStrategy;
 
     /**
      * Apps disabled by the service; key is package name, value is when they will be enabled again.
@@ -324,6 +186,7 @@ final class AutofillManagerServiceImpl {
         mUiLatencyHistory = uiLatencyHistory;
         mUserId = userId;
         mUi = ui;
+        mFieldClassificationStrategy = new FieldClassificationStrategy(context, userId);
         updateLocked(disabled);
     }
 
@@ -1089,10 +952,8 @@ final class AutofillManagerServiceImpl {
             mUserData.dump(prefix2, pw);
         }
 
-        pw.print(prefix); pw.print("Available Field Classification algorithms: ");
-        pw.println(mFcService.getAvailableAlgorithms());
-        pw.print(prefix); pw.print("Default Field Classification algorithm: ");
-        pw.println(mFcService.getDefaultAlgorithm());
+        pw.print(prefix); pw.println("Field Classification strategy: ");
+        mFieldClassificationStrategy.dump(prefix2, pw);
     }
 
     void destroySessionsLocked() {
@@ -1288,26 +1149,26 @@ final class AutofillManagerServiceImpl {
                 mUserId) == 1;
     }
 
-    FieldClassificationAlgorithmService getFieldClassificationService() {
-        return mFcService;
+    FieldClassificationStrategy getFieldClassificationStrategy() {
+        return mFieldClassificationStrategy;
     }
 
-    List<String> getAvailableFieldClassificationAlgorithms(int callingUid) {
+    void getAvailableFieldClassificationAlgorithms(int callingUid, RemoteCallback callback) {
         synchronized (mLock) {
             if (!isCalledByServiceLocked("getFCAlgorithms()", callingUid)) {
-                return null;
+                return;
             }
         }
-        return mFcService.getAvailableAlgorithms();
+        mFieldClassificationStrategy.getAvailableAlgorithms(callback);
     }
 
-    String getDefaultFieldClassificationAlgorithm(int callingUid) {
+    void getDefaultFieldClassificationAlgorithm(int callingUid, RemoteCallback callback) {
         synchronized (mLock) {
             if (!isCalledByServiceLocked("getDefaultFCAlgorithm()", callingUid)) {
-                return null;
+                return;
             }
         }
-        return mFcService.getDefaultAlgorithm();
+        mFieldClassificationStrategy.getDefaultAlgorithm(callback);
     }
 
     @Override

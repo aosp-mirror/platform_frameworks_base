@@ -13,10 +13,9 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package android.service.autofill;
+package android.ext.services.autofill;
 
 import android.annotation.NonNull;
-import android.annotation.TestApi;
 import android.view.autofill.AutofillValue;
 
 /**
@@ -24,20 +23,15 @@ import android.view.autofill.AutofillValue;
  * by the user and the expected value predicted by an autofill service.
  */
 // TODO(b/70291841): explain algorithm once it's fully implemented
-/** @hide */
-@TestApi
-public final class EditDistanceScorer {
+final class EditDistanceScorer {
 
     private static final EditDistanceScorer sInstance = new EditDistanceScorer();
 
-    /** @hide */
     public static final String NAME = "EDIT_DISTANCE";
 
     /**
      * Gets the singleton instance.
      */
-    @TestApi
-    /** @hide */
     public static EditDistanceScorer getInstance() {
         return sInstance;
     }
@@ -52,9 +46,7 @@ public final class EditDistanceScorer {
      * <p>A full-match is {@code 1.0} (representing 100%), a full mismatch is {@code 0.0} and
      * partial mathces are something in between, typically using edit-distance algorithms.
      *
-     * @hide
      */
-    @TestApi
     public float getScore(@NonNull AutofillValue actualValue, @NonNull String userDataValue) {
         if (actualValue == null || !actualValue.isText() || userDataValue == null) return 0;
         // TODO(b/70291841): implement edit distance - currently it's returning either 0, 100%, or
