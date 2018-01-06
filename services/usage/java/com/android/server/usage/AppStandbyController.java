@@ -36,7 +36,6 @@ import android.app.AppGlobals;
 import android.app.admin.DevicePolicyManager;
 import android.app.usage.UsageStatsManager.StandbyBuckets;
 import android.app.usage.UsageEvents;
-import android.app.usage.UsageStatsManager;
 import android.app.usage.UsageStatsManagerInternal.AppIdleStateChangeListener;
 import android.appwidget.AppWidgetManager;
 import android.content.BroadcastReceiver;
@@ -263,8 +262,9 @@ public class AppStandbyController {
                 }
                 if (!packageName.equals(providerPkgName)) {
                     synchronized (mAppIdleLock) {
-                        int newBucket = mAppIdleHistory.reportMildUsage(packageName, userId,
-                                    elapsedRealtime);
+                        int newBucket = mAppIdleHistory.reportUsage(packageName, userId,
+                                STANDBY_BUCKET_ACTIVE, elapsedRealtime,
+                                elapsedRealtime + 2 * ONE_HOUR);
                         maybeInformListeners(packageName, userId, elapsedRealtime,
                                 newBucket);
                     }
@@ -406,8 +406,10 @@ public class AppStandbyController {
                         AppIdleHistory.AppUsageHistory app =
                                 mAppIdleHistory.getAppUsageHistory(packageName,
                                 userId, elapsedRealtime);
-                        // If the bucket was forced by the developer, leave it alone
-                        if (REASON_FORCED.equals(app.bucketingReason)) {
+                        // If the bucket was forced by the developer or the app is within the
+                        // temporary active period, leave it alone.
+                        if (REASON_FORCED.equals(app.bucketingReason)
+                                || !hasBucketTimeoutPassed(app, elapsedRealtime)) {
                             continue;
                         }
                         boolean predictionLate = false;
@@ -447,6 +449,11 @@ public class AppStandbyController {
                 && app.lastPredictedTime > 0
                 && mAppIdleHistory.getElapsedTime(elapsedRealtime)
                     - app.lastPredictedTime > PREDICTION_TIMEOUT;
+    }
+
+    private boolean hasBucketTimeoutPassed(AppIdleHistory.AppUsageHistory app,
+            long elapsedRealtime) {
+        return app.bucketTimeoutTime < mAppIdleHistory.getElapsedTime(elapsedRealtime);
     }
 
     private void maybeInformListeners(String packageName, int userId,
@@ -544,11 +551,13 @@ public class AppStandbyController {
 
                 final int newBucket;
                 if (event.mEventType == UsageEvents.Event.NOTIFICATION_SEEN) {
-                    newBucket = mAppIdleHistory.reportMildUsage(event.mPackage, userId,
-                            elapsedRealtime);
+                    newBucket = mAppIdleHistory.reportUsage(event.mPackage, userId,
+                            STANDBY_BUCKET_WORKING_SET,
+                            elapsedRealtime, elapsedRealtime + 2 * ONE_HOUR);
                 } else {
                     newBucket = mAppIdleHistory.reportUsage(event.mPackage, userId,
-                            elapsedRealtime);
+                            STANDBY_BUCKET_ACTIVE,
+                            elapsedRealtime, elapsedRealtime + 2 * ONE_HOUR);
                 }
 
                 maybeInformListeners(event.mPackage, userId, elapsedRealtime,
@@ -589,6 +598,19 @@ public class AppStandbyController {
             if (!stillIdle) {
                 notifyBatteryStats(packageName, userId, idle);
             }
+        }
+    }
+
+    public void setLastJobRunTime(String packageName, int userId, long elapsedRealtime) {
+        synchronized (mAppIdleLock) {
+            mAppIdleHistory.setLastJobRunTime(packageName, userId, elapsedRealtime);
+        }
+    }
+
+    public long getTimeSinceLastJobRun(String packageName, int userId) {
+        final long elapsedRealtime = mInjector.elapsedRealtime();
+        synchronized (mAppIdleLock) {
+            return mAppIdleHistory.getTimeSinceLastJobRun(packageName, userId, elapsedRealtime);
         }
     }
 
@@ -805,16 +827,27 @@ public class AppStandbyController {
             AppIdleHistory.AppUsageHistory app = mAppIdleHistory.getAppUsageHistory(packageName,
                     userId, elapsedRealtime);
             boolean predicted = reason != null && reason.startsWith(REASON_PREDICTED);
+
             // Don't allow changing bucket if higher than ACTIVE
             if (app.currentBucket < STANDBY_BUCKET_ACTIVE) return;
-            // Don't allow prediction to change from or to NEVER
+
+            // Don't allow prediction to change from/to NEVER
             if ((app.currentBucket == STANDBY_BUCKET_NEVER
                     || newBucket == STANDBY_BUCKET_NEVER)
                     && predicted) {
                 return;
             }
+
             // If the bucket was forced, don't allow prediction to override
             if (app.bucketingReason.equals(REASON_FORCED) && predicted) return;
+
+            // If the bucket is required to stay in a higher state for a specified duration, don't
+            // override unless the duration has passed
+            if (predicted && app.currentBucket < newBucket
+                    && !hasBucketTimeoutPassed(app, elapsedRealtime)) {
+                return;
+            }
+
             mAppIdleHistory.setAppStandbyBucket(packageName, userId, elapsedRealtime, newBucket,
                     reason);
         }
@@ -947,7 +980,10 @@ public class AppStandbyController {
                 final PackageInfo pi = packages.get(i);
                 String packageName = pi.packageName;
                 if (pi.applicationInfo != null && pi.applicationInfo.isSystemApp()) {
-                    mAppIdleHistory.reportUsage(packageName, userId, elapsedRealtime);
+                    // Mark app as used for 4 hours. After that it can timeout to whatever the
+                    // past usage pattern was.
+                    mAppIdleHistory.reportUsage(packageName, userId, STANDBY_BUCKET_ACTIVE, 0,
+                            elapsedRealtime + 4 * ONE_HOUR);
                     if (isAppSpecial(packageName, UserHandle.getAppId(pi.applicationInfo.uid),
                             userId)) {
                         mAppIdleHistory.setAppStandbyBucket(packageName, userId, elapsedRealtime,
@@ -965,12 +1001,6 @@ public class AppStandbyController {
         args.arg3 = userId;
         mHandler.obtainMessage(MSG_REPORT_CONTENT_PROVIDER_USAGE, args)
                 .sendToTarget();
-    }
-
-    void dumpHistory(IndentingPrintWriter idpw, int userId) {
-        synchronized (mAppIdleLock) {
-            mAppIdleHistory.dumpHistory(idpw, userId);
-        }
     }
 
     void dumpUser(IndentingPrintWriter idpw, int userId, String pkg) {
