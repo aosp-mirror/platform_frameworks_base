@@ -102,7 +102,6 @@ message Atom {
         CpuTimePerUidFreq cpu_time_per_uid_freq = 10010;
         WifiActivityEnergyInfo wifi_activity_energy_info = 10011;
         ModemActivityInfo modem_activity_info = 10012;
-        AttributionChainDummyAtom attribution_chain_dummy_atom = 100000;
     }
 }
 
@@ -146,11 +145,6 @@ message AttributionNode {
  *   - If there is a UID, it goes first. Think in an object-oriented fashion.
  * *****************************************************************************
  */
-
-message AttributionChainDummyAtom {
-    repeated AttributionNode attribution_node = 1;
-    optional int32 value = 2;
-}
 
 /**
  * Logs when the screen state changes.
@@ -218,8 +212,7 @@ message ProcessLifeCycleStateChanged {
  *   frameworks/base/core/java/com/android/internal/os/BatteryStatsImpl.java
  */
 message BleScanStateChanged {
-    // TODO: Add attribution instead of uid.
-    optional int32 uid = 1;
+    repeated AttributionNode attribution_node = 1;
 
     enum State {
         OFF = 0;
@@ -236,8 +229,7 @@ message BleScanStateChanged {
  */
 // TODO: Consider changing to tracking per-scanner-id (log from AppScanStats).
 message BleUnoptimizedScanStateChanged {
-    // TODO: Add attribution instead of uid.
-    optional int32 uid = 1;
+    repeated AttributionNode attribution_node = 1;
 
     enum State {
         OFF = 0;
@@ -254,8 +246,7 @@ message BleUnoptimizedScanStateChanged {
  */
 // TODO: Consider changing to tracking per-scanner-id (log from AppScanStats).
 message BleScanResultReceived {
-    // TODO: Add attribution instead of uid.
-    optional int32 uid = 1;
+    repeated AttributionNode attribution_node = 1;
 
     // Number of ble scan results returned.
     optional int32 num_of_results = 2;
@@ -268,8 +259,7 @@ message BleScanResultReceived {
  *   frameworks/base/core/java/com/android/internal/os/BatteryStatsImpl.java
  */
 message SensorStateChanged {
-    // TODO: Add attribution instead of uid.
-    optional int32 uid = 1;
+    repeated AttributionNode attribution_node = 1;
 
     // TODO: Is there a way to get the actual name of the sensor?
     // The id (int) of the sensor.
@@ -290,8 +280,7 @@ message SensorStateChanged {
  *   frameworks/base/core/java/com/android/internal/os/BatteryStatsImpl.java
  */
 message GpsScanStateChanged {
-    // TODO: Add attribution instead of uid.
-    optional int32 uid = 1;
+    repeated AttributionNode attribution_node = 1;
 
     enum State {
         OFF = 0;
@@ -308,8 +297,7 @@ message GpsScanStateChanged {
  *   frameworks/base/core/java/com/android/internal/os/BatteryStatsImpl.java
  */
 message SyncStateChanged {
-    // TODO: Add attribution instead of uid.
-    optional int32 uid = 1;
+    repeated AttributionNode attribution_node = 1;
 
     // Name of the sync (as named in the app)
     optional string name = 2;
@@ -328,8 +316,7 @@ message SyncStateChanged {
  *   frameworks/base/core/java/com/android/internal/os/BatteryStatsImpl.java
  */
 message ScheduledJobStateChanged {
-    // TODO: Add attribution instead of uid.
-    optional int32 uid = 1;
+    repeated AttributionNode attribution_node = 1;
 
     // Name of the job (as named in the app)
     optional string name = 2;
@@ -350,8 +337,7 @@ message ScheduledJobStateChanged {
  *   frameworks/base/core/java/com/android/internal/os/BatteryStatsImpl.java
  */
 message AudioStateChanged {
-    // TODO: Add attribution instead of uid.
-    optional int32 uid = 1;
+    repeated AttributionNode attribution_node = 1;
 
     enum State {
         OFF = 0;
@@ -367,8 +353,7 @@ message AudioStateChanged {
  *   frameworks/base/core/java/com/android/internal/os/BatteryStatsImpl.java
  */
 message MediaCodecActivityChanged {
-    // TODO: Add attribution instead of uid.
-    optional int32 uid = 1;
+    repeated AttributionNode attribution_node = 1;
 
     enum State {
         OFF = 0;
@@ -384,8 +369,7 @@ message MediaCodecActivityChanged {
  *   frameworks/base/core/java/com/android/internal/os/BatteryStatsImpl.java
  */
 message FlashlightStateChanged {
-    // TODO: Add attribution instead of uid.
-    optional int32 uid = 1;
+    repeated AttributionNode attribution_node = 1;
 
     enum State {
         OFF = 0;
@@ -401,8 +385,7 @@ message FlashlightStateChanged {
  *   frameworks/base/core/java/com/android/internal/os/BatteryStatsImpl.java
  */
 message CameraStateChanged {
-    // TODO: Add attribution instead of uid.
-    optional int32 uid = 1;
+    repeated AttributionNode attribution_node = 1;
 
     enum State {
         OFF = 0;
@@ -447,8 +430,7 @@ message WakelockStateChanged {
  *   frameworks/base/core/java/com/android/internal/os/BatteryStatsImpl.java
  */
 message LongPartialWakelockStateChanged {
-    // TODO: Add attribution instead of uid?
-    optional int32 uid = 1;
+    repeated AttributionNode attribution_node = 1;
 
     // The wakelock tag (Called tag in the Java API, sometimes name elsewhere).
     optional string tag = 2;
@@ -605,8 +587,7 @@ message DeviceOnStatusChanged {
  *   frameworks/base/services/core/java/com/android/server/am/ActivityManagerService.java
  */
 message WakeupAlarmOccurred {
-    // TODO: Add attribution instead of uid?
-    optional int32 uid = 1;
+    repeated AttributionNode attribution_node = 1;
 
     // Name of the wakeup alarm.
     optional string tag = 2;
@@ -673,8 +654,7 @@ message KernelWakeupReported {
  *   frameworks/base/core/java/com/android/internal/os/BatteryStatsImpl.java
  */
 message WifiLockStateChanged {
-    // TODO: Add attribution instead of uid.
-    optional int32 uid = 1;
+    repeated AttributionNode attribution_node = 1;
 
     enum State {
         OFF = 0;
@@ -708,8 +688,7 @@ message WifiSignalStrengthChanged {
  *   frameworks/base/core/java/com/android/internal/os/BatteryStatsImpl.java
  */
 message WifiScanStateChanged {
-    // TODO: Add attribution instead of uid.
-    optional int32 uid = 1;
+    repeated AttributionNode attribution_node = 1;
 
     enum State {
         OFF = 0;
