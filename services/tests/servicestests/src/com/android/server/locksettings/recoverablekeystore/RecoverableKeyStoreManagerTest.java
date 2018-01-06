@@ -193,6 +193,16 @@ public class RecoverableKeyStoreManagerTest {
     }
 
     @Test
+    public void removeKey_removesAKey() throws Exception {
+        int uid = Binder.getCallingUid();
+        mRecoverableKeyStoreManager.generateAndStoreKey(TEST_ALIAS);
+
+        mRecoverableKeyStoreManager.removeKey(TEST_ALIAS);
+
+        assertThat(mRecoverableKeyStoreDb.getKey(uid, TEST_ALIAS)).isNull();
+    }
+
+    @Test
     public void startRecoverySession_checksPermissionFirst() throws Exception {
         mRecoverableKeyStoreManager.startRecoverySession(
                 TEST_SESSION_ID,

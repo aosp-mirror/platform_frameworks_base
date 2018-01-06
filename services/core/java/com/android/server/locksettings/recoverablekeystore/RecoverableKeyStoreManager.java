@@ -411,7 +411,6 @@ public class RecoverableKeyStoreManager {
         int uid = Binder.getCallingUid();
         int userId = UserHandle.getCallingUserId();
 
-
         PlatformEncryptionKey encryptionKey;
         try {
             encryptionKey = mPlatformKeyManager.getEncryptKey(userId);
@@ -431,6 +430,10 @@ public class RecoverableKeyStoreManager {
         } catch (RecoverableKeyStorageException e) {
             throw new ServiceSpecificException(ERROR_DATABASE_ERROR, e.getMessage());
         }
+    }
+
+    public void removeKey(@NonNull String alias) throws RemoteException {
+        mDatabase.removeKey(Binder.getCallingUid(), alias);
     }
 
     private byte[] decryptRecoveryKey(

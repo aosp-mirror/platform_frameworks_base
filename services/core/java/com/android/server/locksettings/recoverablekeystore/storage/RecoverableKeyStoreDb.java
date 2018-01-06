@@ -147,6 +147,19 @@ public class RecoverableKeyStoreDb {
     }
 
     /**
+     * Removes key with {@code alias} for app with {@code uid}.
+     *
+     * @return {@code true} if deleted a row.
+     */
+    public boolean removeKey(int uid, String alias) {
+        SQLiteDatabase db = mKeyStoreDbHelper.getWritableDatabase();
+        String selection = KeysEntry.COLUMN_NAME_UID + " = ? AND " +
+                KeysEntry.COLUMN_NAME_ALIAS + " = ?";
+        String[] selectionArgs = { Integer.toString(uid), alias };
+        return db.delete(KeysEntry.TABLE_NAME, selection, selectionArgs) > 0;
+    }
+
+    /**
      * Returns all statuses for keys {@code uid} and {@code platformKeyGenerationId}.
      *
      * @param uid of the application
