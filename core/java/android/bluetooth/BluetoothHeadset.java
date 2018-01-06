@@ -1071,9 +1071,35 @@ public final class BluetoothHeadset implements BluetoothProfile {
     }
 
     /**
-     * check if in-band ringing is supported for this platform.
+     * Check if in-band ringing is currently enabled. In-band ringing could be disabled during an
+     * active connection.
      *
-     * @return true if in-band ringing is supported false if in-band ringing is not supported
+     * @return true if in-band ringing is enabled, false if in-band ringing is disabled
+     * @hide
+     */
+    @RequiresPermission(android.Manifest.permission.BLUETOOTH)
+    public boolean isInbandRingingEnabled() {
+        if (DBG) {
+            log("isInbandRingingEnabled()");
+        }
+        final IBluetoothHeadset service = mService;
+        if (service != null && isEnabled()) {
+            try {
+                return service.isInbandRingingEnabled();
+            } catch (RemoteException e) {
+                Log.e(TAG, Log.getStackTraceString(new Throwable()));
+            }
+        }
+        if (service == null) {
+            Log.w(TAG, "Proxy not attached to service");
+        }
+        return false;
+    }
+
+    /**
+     * Check if in-band ringing is supported for this platform.
+     *
+     * @return true if in-band ringing is supported, false if in-band ringing is not supported
      * @hide
      */
     public static boolean isInbandRingingSupported(Context context) {
