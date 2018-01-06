@@ -57,7 +57,7 @@
     <dimen name="widget_separator_thickness">2dp</dimen>
     <dimen name="widget_horizontal_padding">8dp</dimen>
     <dimen name="widget_icon_size">16dp</dimen>
-    <dimen name="widget_icon_padding">4dp</dimen>
+    <dimen name="widget_icon_padding">8dp</dimen>
 
     <!-- The y translation to apply at the start in appear animations. -->
     <dimen name="appear_y_translation_start">32dp</dimen>
