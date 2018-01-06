@@ -1128,6 +1128,9 @@ class SettingsProtoDumpUtil {
         dumpSetting(s, p,
                 Settings.Global.SHOW_FIRST_CRASH_DIALOG,
                 GlobalSettingsProto.SHOW_FIRST_CRASH_DIALOG);
+        dumpSetting(s, p,
+                    Settings.Global.WIFI_CONNECTED_MAC_RANDOMIZATION_ENABLED,
+                    GlobalSettingsProto.WIFI_CONNECTED_MAC_RANDOMIZATION_ENABLED);
     }
 
     /** Dump a single {@link SettingsState.Setting} to a proto buf */

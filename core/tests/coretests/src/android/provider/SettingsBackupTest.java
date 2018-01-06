@@ -390,6 +390,7 @@ public class SettingsBackupTest {
                     Settings.Global.WFC_IMS_ROAMING_MODE,
                     Settings.Global.WIFI_BADGING_THRESHOLDS,
                     Settings.Global.WIFI_BOUNCE_DELAY_OVERRIDE_MS,
+                    Settings.Global.WIFI_CONNECTED_MAC_RANDOMIZATION_ENABLED,
                     Settings.Global.WIFI_COUNTRY_CODE,
                     Settings.Global.WIFI_DEVICE_OWNER_CONFIGS_LOCKDOWN,
                     Settings.Global.WIFI_DISPLAY_CERTIFICATION_ON,
