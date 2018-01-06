@@ -36,19 +36,16 @@ public class IpSecConfigTest {
     public void testDefaults() throws Exception {
         IpSecConfig c = new IpSecConfig();
         assertEquals(IpSecTransform.MODE_TRANSPORT, c.getMode());
-        assertEquals("", c.getLocalAddress());
-        assertEquals("", c.getRemoteAddress());
+        assertEquals("", c.getSourceAddress());
+        assertEquals("", c.getDestinationAddress());
         assertNull(c.getNetwork());
         assertEquals(IpSecTransform.ENCAP_NONE, c.getEncapType());
         assertEquals(IpSecManager.INVALID_RESOURCE_ID, c.getEncapSocketResourceId());
         assertEquals(0, c.getEncapRemotePort());
         assertEquals(0, c.getNattKeepaliveInterval());
-        for (int direction :
-                new int[] {IpSecTransform.DIRECTION_OUT, IpSecTransform.DIRECTION_IN}) {
-            assertNull(c.getEncryption(direction));
-            assertNull(c.getAuthentication(direction));
-            assertEquals(IpSecManager.INVALID_RESOURCE_ID, c.getSpiResourceId(direction));
-        }
+        assertNull(c.getEncryption());
+        assertNull(c.getAuthentication());
+        assertEquals(IpSecManager.INVALID_RESOURCE_ID, c.getSpiResourceId());
     }
 
     @Test
@@ -57,34 +54,21 @@ public class IpSecConfigTest {
 
         IpSecConfig c = new IpSecConfig();
         c.setMode(IpSecTransform.MODE_TUNNEL);
-        c.setLocalAddress("0.0.0.0");
-        c.setRemoteAddress("1.2.3.4");
+        c.setSourceAddress("0.0.0.0");
+        c.setDestinationAddress("1.2.3.4");
         c.setEncapType(android.system.OsConstants.UDP_ENCAP_ESPINUDP);
         c.setEncapSocketResourceId(7);
         c.setEncapRemotePort(22);
         c.setNattKeepaliveInterval(42);
         c.setEncryption(
-                IpSecTransform.DIRECTION_OUT,
                 new IpSecAlgorithm(
                         IpSecAlgorithm.CRYPT_AES_CBC,
                         new byte[] {0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 0xA, 0xB, 0xC, 0xD, 0xE, 0xF}));
         c.setAuthentication(
-                IpSecTransform.DIRECTION_OUT,
                 new IpSecAlgorithm(
                         IpSecAlgorithm.AUTH_HMAC_MD5,
                         new byte[] {1, 2, 3, 4, 5, 6, 7, 8, 9, 0xA, 0xB, 0xC, 0xD, 0xE, 0xF, 0}));
-        c.setSpiResourceId(IpSecTransform.DIRECTION_OUT, 1984);
-        c.setEncryption(
-                IpSecTransform.DIRECTION_IN,
-                new IpSecAlgorithm(
-                        IpSecAlgorithm.CRYPT_AES_CBC,
-                        new byte[] {2, 1, 2, 3, 4, 5, 6, 7, 8, 9, 0xA, 0xB, 0xC, 0xD, 0xE, 0xF}));
-        c.setAuthentication(
-                IpSecTransform.DIRECTION_IN,
-                new IpSecAlgorithm(
-                        IpSecAlgorithm.AUTH_HMAC_MD5,
-                        new byte[] {1, 2, 3, 4, 5, 6, 7, 8, 9, 0xA, 0xB, 0xC, 0xD, 0xE, 0xF, 1}));
-        c.setSpiResourceId(IpSecTransform.DIRECTION_IN, 99);
+        c.setSpiResourceId(1984);
         assertParcelingIsLossless(c);
     }
 
