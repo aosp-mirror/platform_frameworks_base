@@ -58,6 +58,7 @@ import java.security.PublicKey;
 import java.security.UnrecoverableKeyException;
 import java.security.spec.InvalidKeySpecException;
 import java.security.spec.X509EncodedKeySpec;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
@@ -323,6 +324,23 @@ public class RecoverableKeyStoreManager {
                     "Only a single KeyStoreRecoveryMetadata is supported");
         }
 
+        PublicKey publicKey;
+        try {
+            publicKey = KeySyncUtils.deserializePublicKey(verifierPublicKey);
+        } catch (NoSuchAlgorithmException e) {
+            // Should never happen
+            throw new RuntimeException(e);
+        } catch (InvalidKeySpecException e) {
+            throw new ServiceSpecificException(ERROR_BAD_X509_CERTIFICATE, "Not a valid X509 key");
+        }
+        // The raw public key bytes contained in vaultParams must match the ones given in
+        // verifierPublicKey; otherwise, the user secret may be decrypted by a key that is not owned
+        // by the original recovery service.
+        if (!publicKeysMatch(publicKey, vaultParams)) {
+            throw new ServiceSpecificException(ERROR_BAD_X509_CERTIFICATE,
+                    "The public keys given in verifierPublicKey and vaultParams do not match.");
+        }
+
         byte[] keyClaimant = KeySyncUtils.generateKeyClaimant();
         byte[] kfHash = secrets.get(0).getSecret();
         mRecoverySessionStorage.add(
@@ -331,7 +349,6 @@ public class RecoverableKeyStoreManager {
 
         try {
             byte[] thmKfHash = KeySyncUtils.calculateThmKfHash(kfHash);
-            PublicKey publicKey = KeySyncUtils.deserializePublicKey(verifierPublicKey);
             return KeySyncUtils.encryptRecoveryClaim(
                     publicKey,
                     vaultParams,
@@ -341,9 +358,8 @@ public class RecoverableKeyStoreManager {
         } catch (NoSuchAlgorithmException e) {
             Log.wtf(TAG, "SecureBox algorithm missing. AOSP must support this.", e);
             throw new ServiceSpecificException(ERROR_UNEXPECTED_MISSING_ALGORITHM, e.getMessage());
-        } catch (InvalidKeySpecException | InvalidKeyException e) {
-            throw new ServiceSpecificException(ERROR_BAD_X509_CERTIFICATE,
-                    "Not a valid X509 key");
+        } catch (InvalidKeyException e) {
+            throw new ServiceSpecificException(ERROR_BAD_X509_CERTIFICATE, e.getMessage());
         }
     }
 
@@ -352,7 +368,7 @@ public class RecoverableKeyStoreManager {
      * service.
      *
      * @param sessionId The session ID used to generate the claim. See
-     *     {@link #startRecoverySession(String, byte[], byte[], byte[], List, int)}.
+     *     {@link #startRecoverySession(String, byte[], byte[], byte[], List)}.
      * @param encryptedRecoveryKey The encrypted recovery key blob returned by the remote vault
      *     service.
      * @param applicationKeys The encrypted key blobs returned by the remote vault service. These
@@ -508,5 +524,10 @@ public class RecoverableKeyStoreManager {
         mContext.enforceCallingOrSelfPermission(
                 RecoverableKeyStoreLoader.PERMISSION_RECOVER_KEYSTORE,
                 "Caller " + Binder.getCallingUid() + " doesn't have RecoverKeyStore permission.");
+    }
+
+    private boolean publicKeysMatch(PublicKey publicKey, byte[] vaultParams) {
+        byte[] encodedPublicKey = SecureBox.encodePublicKey(publicKey);
+        return Arrays.equals(encodedPublicKey, Arrays.copyOf(vaultParams, encodedPublicKey.length));
     }
 }
