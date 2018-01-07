@@ -123,6 +123,21 @@ void sortLogEventsByTimestamp(std::vector<std::unique_ptr<LogEvent>> *events);
 
 int64_t StringToId(const string& str);
 
+void ValidateAttributionUidDimension(const DimensionsValue& value, int atomId, int uid);
+void ValidateAttributionUidAndTagDimension(
+    const DimensionsValue& value, int atomId, int uid, const std::string& tag);
+
+template <typename T>
+void sortMetricDataByDimensionsValue(const T& metricData, T* sortedMetricData) {
+    std::map<HashableDimensionKey, int> dimensionIndexMap;
+    for (int i = 0; i < metricData.data_size(); ++i) {
+        dimensionIndexMap.insert(std::make_pair(metricData.data(i).dimension(), i));
+    }
+    for (const auto& itr : dimensionIndexMap) {
+        *sortedMetricData->add_data() = metricData.data(itr.second);
+    }
+}
+
 }  // namespace statsd
 }  // namespace os
 }  // namespace android
