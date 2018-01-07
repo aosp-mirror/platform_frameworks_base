@@ -4321,6 +4321,34 @@ public class BatteryStatsImpl extends BatteryStats {
 
     public void noteLongPartialWakelockStart(String name, String historyName, int uid) {
         uid = mapUid(uid);
+        noteLongPartialWakeLockStartInternal(name, historyName, uid);
+        StatsLog.write(StatsLog.LONG_PARTIAL_WAKELOCK_STATE_CHANGED, uid, name, historyName, 1);
+    }
+
+    public void noteLongPartialWakelockStartFromSource(String name, String historyName,
+            WorkSource workSource) {
+        final int N = workSource.size();
+        for (int i = 0; i < N; ++i) {
+            final int uid = mapUid(workSource.get(i));
+            noteLongPartialWakeLockStartInternal(name, historyName, uid);
+            StatsLog.write(StatsLog.LONG_PARTIAL_WAKELOCK_STATE_CHANGED, uid, name, historyName, 1);
+        }
+
+        final ArrayList<WorkChain> workChains = workSource.getWorkChains();
+        if (workChains != null) {
+            for (int i = 0; i < workChains.size(); ++i) {
+                final WorkChain workChain = workChains.get(i);
+                final int uid = workChain.getAttributionUid();
+                noteLongPartialWakeLockStartInternal(name, historyName, uid);
+
+                // TODO(statsd): the Log WorkChain to statds, and not just the uid.
+                StatsLog.write(StatsLog.LONG_PARTIAL_WAKELOCK_STATE_CHANGED, uid, name, historyName,
+                        1);
+            }
+        }
+    }
+
+    private void noteLongPartialWakeLockStartInternal(String name, String historyName, int uid) {
         final long elapsedRealtime = mClocks.elapsedRealtime();
         final long uptime = mClocks.uptimeMillis();
         if (historyName == null) {
@@ -4332,11 +4360,39 @@ public class BatteryStatsImpl extends BatteryStats {
         }
         addHistoryEventLocked(elapsedRealtime, uptime, HistoryItem.EVENT_LONG_WAKE_LOCK_START,
                 historyName, uid);
-        StatsLog.write(StatsLog.LONG_PARTIAL_WAKELOCK_STATE_CHANGED, uid, name, historyName, 1);
     }
 
     public void noteLongPartialWakelockFinish(String name, String historyName, int uid) {
         uid = mapUid(uid);
+        noteLongPartialWakeLockFinishInternal(name, historyName, uid);
+        StatsLog.write(StatsLog.LONG_PARTIAL_WAKELOCK_STATE_CHANGED, uid, name, historyName, 0);
+    }
+
+    public void noteLongPartialWakelockFinishFromSource(String name, String historyName,
+            WorkSource workSource) {
+        final int N = workSource.size();
+        for (int i = 0; i < N; ++i) {
+            final int uid = mapUid(workSource.get(i));
+            noteLongPartialWakeLockFinishInternal(name, historyName, uid);
+            StatsLog.write(StatsLog.LONG_PARTIAL_WAKELOCK_STATE_CHANGED, uid, name, historyName, 0);
+        }
+
+        final ArrayList<WorkChain> workChains = workSource.getWorkChains();
+        if (workChains != null) {
+            for (int i = 0; i < workChains.size(); ++i) {
+                final WorkChain workChain = workChains.get(i);
+                final int uid = workChain.getAttributionUid();
+
+                noteLongPartialWakeLockFinishInternal(name, historyName, uid);
+
+                // TODO(statsd): the Log WorkChain to statds, and not just the uid.
+                StatsLog.write(StatsLog.LONG_PARTIAL_WAKELOCK_STATE_CHANGED, uid, name, historyName,
+                        0);
+            }
+        }
+    }
+
+    private void noteLongPartialWakeLockFinishInternal(String name, String historyName, int uid) {
         final long elapsedRealtime = mClocks.elapsedRealtime();
         final long uptime = mClocks.uptimeMillis();
         if (historyName == null) {
@@ -4348,7 +4404,6 @@ public class BatteryStatsImpl extends BatteryStats {
         }
         addHistoryEventLocked(elapsedRealtime, uptime, HistoryItem.EVENT_LONG_WAKE_LOCK_FINISH,
                 historyName, uid);
-        StatsLog.write(StatsLog.LONG_PARTIAL_WAKELOCK_STATE_CHANGED, uid, name, historyName, 0);
     }
 
     void aggregateLastWakeupUptimeLocked(long uptimeMs) {
