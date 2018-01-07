@@ -4028,18 +4028,17 @@ public class BatteryStatsImpl extends BatteryStats {
 
     public void noteWakupAlarmLocked(String packageName, int uid, WorkSource workSource,
             String tag) {
-        if (!isOnBattery()) {
-            return;
-        }
 
         if (workSource != null) {
             for (int i = 0; i < workSource.size(); ++i) {
                 uid = workSource.get(i);
                 final String workSourceName = workSource.getName(i);
 
-                BatteryStatsImpl.Uid.Pkg pkg = getPackageStatsLocked(uid,
-                        workSourceName != null ? workSourceName : packageName);
-                pkg.noteWakeupAlarmLocked(tag);
+                if (isOnBattery()) {
+                    BatteryStatsImpl.Uid.Pkg pkg = getPackageStatsLocked(uid,
+                            workSourceName != null ? workSourceName : packageName);
+                    pkg.noteWakeupAlarmLocked(tag);
+                }
 
                 StatsLog.write(StatsLog.WAKEUP_ALARM_OCCURRED, uid, tag);
             }
@@ -4050,16 +4049,20 @@ public class BatteryStatsImpl extends BatteryStats {
                     final WorkChain wc = workChains.get(i);
                     uid = wc.getAttributionUid();
 
-                    BatteryStatsImpl.Uid.Pkg pkg = getPackageStatsLocked(uid, packageName);
-                    pkg.noteWakeupAlarmLocked(tag);
+                    if (isOnBattery()) {
+                        BatteryStatsImpl.Uid.Pkg pkg = getPackageStatsLocked(uid, packageName);
+                        pkg.noteWakeupAlarmLocked(tag);
+                    }
 
                     // TODO(statsd): Log the full attribution chain here once it's available
                     StatsLog.write(StatsLog.WAKEUP_ALARM_OCCURRED, uid, tag);
                 }
             }
         } else {
-            BatteryStatsImpl.Uid.Pkg pkg = getPackageStatsLocked(uid, packageName);
-            pkg.noteWakeupAlarmLocked(tag);
+            if (isOnBattery()) {
+                BatteryStatsImpl.Uid.Pkg pkg = getPackageStatsLocked(uid, packageName);
+                pkg.noteWakeupAlarmLocked(tag);
+            }
             StatsLog.write(StatsLog.WAKEUP_ALARM_OCCURRED, uid, tag);
         }
     }
@@ -5282,8 +5285,9 @@ public class BatteryStatsImpl extends BatteryStats {
         }
     }
 
-    private void noteBluetoothScanStartedLocked(int uid, boolean isUnoptimized) {
-        uid = mapUid(uid);
+    private void noteBluetoothScanStartedLocked(WorkChain workChain, int uid,
+            boolean isUnoptimized) {
+        uid = getAttributionUid(uid, workChain);
         final long elapsedRealtime = mClocks.elapsedRealtime();
         final long uptime = mClocks.uptimeMillis();
         if (mBluetoothScanNesting == 0) {
@@ -5294,18 +5298,36 @@ public class BatteryStatsImpl extends BatteryStats {
             mBluetoothScanTimer.startRunningLocked(elapsedRealtime);
         }
         mBluetoothScanNesting++;
+
+        // TODO(statsd): Log WorkChain here if it's non-null.
+        StatsLog.write(StatsLog.BLE_SCAN_STATE_CHANGED, uid, 1);
+        if (isUnoptimized) {
+            StatsLog.write(StatsLog.BLE_UNOPTIMIZED_SCAN_STATE_CHANGED, uid, 1);
+        }
+
         getUidStatsLocked(uid).noteBluetoothScanStartedLocked(elapsedRealtime, isUnoptimized);
+        if (workChain != null) {
+            getUidStatsLocked(uid).addBluetoothWorkChain(workChain, isUnoptimized);
+        }
     }
 
     public void noteBluetoothScanStartedFromSourceLocked(WorkSource ws, boolean isUnoptimized) {
         final int N = ws.size();
         for (int i = 0; i < N; i++) {
-            noteBluetoothScanStartedLocked(ws.get(i), isUnoptimized);
+            noteBluetoothScanStartedLocked(null, ws.get(i), isUnoptimized);
+        }
+
+        final List<WorkChain> workChains = ws.getWorkChains();
+        if (workChains != null) {
+            for (int i = 0; i < workChains.size(); ++i) {
+                noteBluetoothScanStartedLocked(workChains.get(i), -1, isUnoptimized);
+            }
         }
     }
 
-    private void noteBluetoothScanStoppedLocked(int uid, boolean isUnoptimized) {
-        uid = mapUid(uid);
+    private void noteBluetoothScanStoppedLocked(WorkChain workChain, int uid,
+            boolean isUnoptimized) {
+        uid = getAttributionUid(uid, workChain);
         final long elapsedRealtime = mClocks.elapsedRealtime();
         final long uptime = mClocks.uptimeMillis();
         mBluetoothScanNesting--;
@@ -5316,13 +5338,38 @@ public class BatteryStatsImpl extends BatteryStats {
             addHistoryRecordLocked(elapsedRealtime, uptime);
             mBluetoothScanTimer.stopRunningLocked(elapsedRealtime);
         }
+
+        // TODO(statsd): Log WorkChain here if it's non-null.
+        StatsLog.write(StatsLog.BLE_SCAN_STATE_CHANGED, uid, 0);
+        if (isUnoptimized) {
+            StatsLog.write(StatsLog.BLE_UNOPTIMIZED_SCAN_STATE_CHANGED, uid, 0);
+        }
+
         getUidStatsLocked(uid).noteBluetoothScanStoppedLocked(elapsedRealtime, isUnoptimized);
+        if (workChain != null) {
+            getUidStatsLocked(uid).removeBluetoothWorkChain(workChain, isUnoptimized);
+        }
+    }
+
+    private int getAttributionUid(int uid, WorkChain workChain) {
+        if (workChain != null) {
+            return mapUid(workChain.getAttributionUid());
+        }
+
+        return mapUid(uid);
     }
 
     public void noteBluetoothScanStoppedFromSourceLocked(WorkSource ws, boolean isUnoptimized) {
         final int N = ws.size();
         for (int i = 0; i < N; i++) {
-            noteBluetoothScanStoppedLocked(ws.get(i), isUnoptimized);
+            noteBluetoothScanStoppedLocked(null, ws.get(i), isUnoptimized);
+        }
+
+        final List<WorkChain> workChains = ws.getWorkChains();
+        if (workChains != null) {
+            for (int i = 0; i < workChains.size(); ++i) {
+                noteBluetoothScanStoppedLocked(workChains.get(i), -1, isUnoptimized);
+            }
         }
     }
 
@@ -5336,9 +5383,35 @@ public class BatteryStatsImpl extends BatteryStats {
                     + Integer.toHexString(mHistoryCur.states2));
             addHistoryRecordLocked(elapsedRealtime, uptime);
             mBluetoothScanTimer.stopAllRunningLocked(elapsedRealtime);
+
+
             for (int i=0; i<mUidStats.size(); i++) {
                 BatteryStatsImpl.Uid uid = mUidStats.valueAt(i);
                 uid.noteResetBluetoothScanLocked(elapsedRealtime);
+
+                StatsLog.write(StatsLog.BLE_SCAN_STATE_CHANGED, uid.getUid(), 0);
+
+                List<WorkChain> allWorkChains = uid.getAllBluetoothWorkChains();
+                if (allWorkChains != null) {
+                    for (int j = 0; j < allWorkChains.size(); ++j) {
+                        // TODO(statsd) : Log the entire workchain here.
+                        StatsLog.write(StatsLog.BLE_SCAN_STATE_CHANGED,
+                                allWorkChains.get(j).getAttributionUid(), 0);
+                    }
+
+                    allWorkChains.clear();
+                }
+
+                List<WorkChain> unoptimizedWorkChains = uid.getUnoptimizedBluetoothWorkChains();
+                if (unoptimizedWorkChains != null) {
+                    for (int j = 0; j < unoptimizedWorkChains.size(); ++j) {
+                        // TODO(statsd) : Log the entire workchain here.
+                        StatsLog.write(StatsLog.BLE_UNOPTIMIZED_SCAN_STATE_CHANGED,
+                                unoptimizedWorkChains.get(j).getAttributionUid(), 0);
+                    }
+
+                    unoptimizedWorkChains.clear();
+                }
             }
         }
     }
@@ -5348,6 +5421,18 @@ public class BatteryStatsImpl extends BatteryStats {
         for (int i = 0; i < N; i++) {
             int uid = mapUid(ws.get(i));
             getUidStatsLocked(uid).noteBluetoothScanResultsLocked(numNewResults);
+            StatsLog.write(StatsLog.BLE_SCAN_RESULT_RECEIVED, uid, numNewResults);
+        }
+
+        final List<WorkChain> workChains = ws.getWorkChains();
+        if (workChains != null) {
+            for (int i = 0; i < workChains.size(); ++i) {
+                final WorkChain wc = workChains.get(i);
+                int uid = mapUid(wc.getAttributionUid());
+                getUidStatsLocked(uid).noteBluetoothScanResultsLocked(numNewResults);
+                // TODO(statsd): Log the entire WorkChain here.
+                StatsLog.write(StatsLog.BLE_SCAN_RESULT_RECEIVED, uid, numNewResults);
+            }
         }
     }
 
@@ -5397,6 +5482,15 @@ public class BatteryStatsImpl extends BatteryStats {
                 int uid = mapUid(ws.get(i));
                 getUidStatsLocked(uid).noteWifiRunningLocked(elapsedRealtime);
             }
+
+            List<WorkChain> workChains = ws.getWorkChains();
+            if (workChains != null) {
+                for (int i = 0; i < workChains.size(); ++i) {
+                    int uid = mapUid(workChains.get(i).getAttributionUid());
+                    getUidStatsLocked(uid).noteWifiRunningLocked(elapsedRealtime);
+                }
+            }
+
             scheduleSyncExternalStatsLocked("wifi-running", ExternalStatsSync.UPDATE_WIFI);
         } else {
             Log.w(TAG, "noteWifiRunningLocked -- called while WIFI running");
@@ -5411,10 +5505,27 @@ public class BatteryStatsImpl extends BatteryStats {
                 int uid = mapUid(oldWs.get(i));
                 getUidStatsLocked(uid).noteWifiStoppedLocked(elapsedRealtime);
             }
+
+            List<WorkChain> workChains = oldWs.getWorkChains();
+            if (workChains != null) {
+                for (int i = 0; i < workChains.size(); ++i) {
+                    int uid = mapUid(workChains.get(i).getAttributionUid());
+                    getUidStatsLocked(uid).noteWifiStoppedLocked(elapsedRealtime);
+                }
+            }
+
             N = newWs.size();
             for (int i=0; i<N; i++) {
                 int uid = mapUid(newWs.get(i));
                 getUidStatsLocked(uid).noteWifiRunningLocked(elapsedRealtime);
+            }
+
+            workChains = newWs.getWorkChains();
+            if (workChains != null) {
+                for (int i = 0; i < workChains.size(); ++i) {
+                    int uid = mapUid(workChains.get(i).getAttributionUid());
+                    getUidStatsLocked(uid).noteWifiRunningLocked(elapsedRealtime);
+                }
             }
         } else {
             Log.w(TAG, "noteWifiRunningChangedLocked -- called while WIFI not running");
@@ -5436,6 +5547,15 @@ public class BatteryStatsImpl extends BatteryStats {
                 int uid = mapUid(ws.get(i));
                 getUidStatsLocked(uid).noteWifiStoppedLocked(elapsedRealtime);
             }
+
+            List<WorkChain> workChains = ws.getWorkChains();
+            if (workChains != null) {
+                for (int i = 0; i < workChains.size(); ++i) {
+                    int uid = mapUid(workChains.get(i).getAttributionUid());
+                    getUidStatsLocked(uid).noteWifiStoppedLocked(elapsedRealtime);
+                }
+            }
+
             scheduleSyncExternalStatsLocked("wifi-stopped", ExternalStatsSync.UPDATE_WIFI);
         } else {
             Log.w(TAG, "noteWifiStoppedLocked -- called while WIFI not running");
@@ -5517,7 +5637,6 @@ public class BatteryStatsImpl extends BatteryStats {
     int mWifiFullLockNesting = 0;
 
     public void noteFullWifiLockAcquiredLocked(int uid) {
-        uid = mapUid(uid);
         final long elapsedRealtime = mClocks.elapsedRealtime();
         final long uptime = mClocks.uptimeMillis();
         if (mWifiFullLockNesting == 0) {
@@ -5531,7 +5650,6 @@ public class BatteryStatsImpl extends BatteryStats {
     }
 
     public void noteFullWifiLockReleasedLocked(int uid) {
-        uid = mapUid(uid);
         final long elapsedRealtime = mClocks.elapsedRealtime();
         final long uptime = mClocks.uptimeMillis();
         mWifiFullLockNesting--;
@@ -5547,7 +5665,6 @@ public class BatteryStatsImpl extends BatteryStats {
     int mWifiScanNesting = 0;
 
     public void noteWifiScanStartedLocked(int uid) {
-        uid = mapUid(uid);
         final long elapsedRealtime = mClocks.elapsedRealtime();
         final long uptime = mClocks.uptimeMillis();
         if (mWifiScanNesting == 0) {
@@ -5561,7 +5678,6 @@ public class BatteryStatsImpl extends BatteryStats {
     }
 
     public void noteWifiScanStoppedLocked(int uid) {
-        uid = mapUid(uid);
         final long elapsedRealtime = mClocks.elapsedRealtime();
         final long uptime = mClocks.uptimeMillis();
         mWifiScanNesting--;
@@ -5631,28 +5747,95 @@ public class BatteryStatsImpl extends BatteryStats {
     public void noteFullWifiLockAcquiredFromSourceLocked(WorkSource ws) {
         int N = ws.size();
         for (int i=0; i<N; i++) {
-            noteFullWifiLockAcquiredLocked(ws.get(i));
+            final int uid = mapUid(ws.get(i));
+            noteFullWifiLockAcquiredLocked(uid);
+            StatsLog.write(StatsLog.WIFI_LOCK_STATE_CHANGED, uid, 1);
+        }
+
+        final List<WorkChain> workChains = ws.getWorkChains();
+        if (workChains != null) {
+            for (int i = 0; i < workChains.size(); ++i) {
+                final WorkChain workChain = workChains.get(i);
+                final int uid = mapUid(workChain.getAttributionUid());
+                noteFullWifiLockAcquiredLocked(uid);
+
+                // TODO(statsd): Log workChain instead of uid here.
+                if (DEBUG) {
+                    Slog.v(TAG, "noteFullWifiLockAcquiredFromSourceLocked: " + workChain);
+                }
+                StatsLog.write(StatsLog.WIFI_LOCK_STATE_CHANGED, uid, 1);
+            }
         }
     }
 
     public void noteFullWifiLockReleasedFromSourceLocked(WorkSource ws) {
         int N = ws.size();
         for (int i=0; i<N; i++) {
-            noteFullWifiLockReleasedLocked(ws.get(i));
+            final int uid = mapUid(ws.get(i));
+            noteFullWifiLockReleasedLocked(uid);
+            StatsLog.write(StatsLog.WIFI_LOCK_STATE_CHANGED, uid, 0);
+        }
+
+        final List<WorkChain> workChains = ws.getWorkChains();
+        if (workChains != null) {
+            for (int i = 0; i < workChains.size(); ++i) {
+                final WorkChain workChain = workChains.get(i);
+                final int uid = mapUid(workChain.getAttributionUid());
+                noteFullWifiLockReleasedLocked(uid);
+
+                // TODO(statsd): Log workChain instead of uid here.
+                if (DEBUG) {
+                    Slog.v(TAG, "noteFullWifiLockReleasedFromSourceLocked: " + workChain);
+                }
+                StatsLog.write(StatsLog.WIFI_LOCK_STATE_CHANGED, uid, 0);
+            }
         }
     }
 
     public void noteWifiScanStartedFromSourceLocked(WorkSource ws) {
         int N = ws.size();
         for (int i=0; i<N; i++) {
-            noteWifiScanStartedLocked(ws.get(i));
+            final int uid = mapUid(ws.get(i));
+            noteWifiScanStartedLocked(uid);
+            StatsLog.write(StatsLog.WIFI_SCAN_STATE_CHANGED, uid, 1);
+        }
+
+        final List<WorkChain> workChains = ws.getWorkChains();
+        if (workChains != null) {
+            for (int i = 0; i < workChains.size(); ++i) {
+                final WorkChain workChain = workChains.get(i);
+                final int uid = mapUid(workChain.getAttributionUid());
+                noteWifiScanStartedLocked(uid);
+
+                // TODO(statsd): Log workChain instead of uid here.
+                if (DEBUG) {
+                    Slog.v(TAG, "noteWifiScanStartedFromSourceLocked: " + workChain);
+                }
+                StatsLog.write(StatsLog.WIFI_SCAN_STATE_CHANGED, uid, 1);
+            }
         }
     }
 
     public void noteWifiScanStoppedFromSourceLocked(WorkSource ws) {
         int N = ws.size();
         for (int i=0; i<N; i++) {
-            noteWifiScanStoppedLocked(ws.get(i));
+            final int uid = mapUid(ws.get(i));
+            noteWifiScanStoppedLocked(uid);
+            StatsLog.write(StatsLog.WIFI_SCAN_STATE_CHANGED, uid, 0);
+        }
+
+        final List<WorkChain> workChains = ws.getWorkChains();
+        if (workChains != null) {
+            for (int i = 0; i < workChains.size(); ++i) {
+                final WorkChain workChain = workChains.get(i);
+                final int uid = mapUid(workChain.getAttributionUid());
+                noteWifiScanStoppedLocked(uid);
+
+                if (DEBUG) {
+                    Slog.v(TAG, "noteWifiScanStoppedFromSourceLocked: " + workChain);
+                }
+                StatsLog.write(StatsLog.WIFI_SCAN_STATE_CHANGED, uid, 0);
+            }
         }
     }
 
@@ -5661,12 +5844,26 @@ public class BatteryStatsImpl extends BatteryStats {
         for (int i=0; i<N; i++) {
             noteWifiBatchedScanStartedLocked(ws.get(i), csph);
         }
+
+        final List<WorkChain> workChains = ws.getWorkChains();
+        if (workChains != null) {
+            for (int i = 0; i < workChains.size(); ++i) {
+                noteWifiBatchedScanStartedLocked(workChains.get(i).getAttributionUid(), csph);
+            }
+        }
     }
 
     public void noteWifiBatchedScanStoppedFromSourceLocked(WorkSource ws) {
         int N = ws.size();
         for (int i=0; i<N; i++) {
             noteWifiBatchedScanStoppedLocked(ws.get(i));
+        }
+
+        final List<WorkChain> workChains = ws.getWorkChains();
+        if (workChains != null) {
+            for (int i = 0; i < workChains.size(); ++i) {
+                noteWifiBatchedScanStoppedLocked(workChains.get(i).getAttributionUid());
+            }
         }
     }
 
@@ -5675,12 +5872,26 @@ public class BatteryStatsImpl extends BatteryStats {
         for (int i=0; i<N; i++) {
             noteWifiMulticastEnabledLocked(ws.get(i));
         }
+
+        final List<WorkChain> workChains = ws.getWorkChains();
+        if (workChains != null) {
+            for (int i = 0; i < workChains.size(); ++i) {
+                noteWifiMulticastEnabledLocked(workChains.get(i).getAttributionUid());
+            }
+        }
     }
 
     public void noteWifiMulticastDisabledFromSourceLocked(WorkSource ws) {
         int N = ws.size();
         for (int i=0; i<N; i++) {
             noteWifiMulticastDisabledLocked(ws.get(i));
+        }
+
+        final List<WorkChain> workChains = ws.getWorkChains();
+        if (workChains != null) {
+            for (int i = 0; i < workChains.size(); ++i) {
+                noteWifiMulticastDisabledLocked(workChains.get(i).getAttributionUid());
+            }
         }
     }
 
@@ -6249,6 +6460,15 @@ public class BatteryStatsImpl extends BatteryStats {
          */
         final SparseArray<Pid> mPids = new SparseArray<>();
 
+        /**
+         * The list of WorkChains associated with active bluetooth scans.
+         *
+         * NOTE: This is a hack and it only needs to exist because there's a "reset" API that is
+         * supposed to stop and log all WorkChains that were currently active.
+         */
+        ArrayList<WorkChain> mAllBluetoothChains = null;
+        ArrayList<WorkChain> mUnoptimizedBluetoothChains = null;
+
         public Uid(BatteryStatsImpl bsi, int uid) {
             mBsi = bsi;
             mUid = uid;
@@ -6476,8 +6696,6 @@ public class BatteryStatsImpl extends BatteryStats {
                             mBsi.mFullWifiLockTimers, mBsi.mOnBatteryTimeBase);
                 }
                 mFullWifiLockTimer.startRunningLocked(elapsedRealtimeMs);
-                // TODO(statsd): Possibly use a worksource instead of a uid.
-                StatsLog.write(StatsLog.WIFI_LOCK_STATE_CHANGED, getUid(), 1);
             }
         }
 
@@ -6486,10 +6704,6 @@ public class BatteryStatsImpl extends BatteryStats {
             if (mFullWifiLockOut) {
                 mFullWifiLockOut = false;
                 mFullWifiLockTimer.stopRunningLocked(elapsedRealtimeMs);
-                if (!mFullWifiLockTimer.isRunningLocked()) { // only tell statsd if truly stopped
-                    // TODO(statsd): Possibly use a worksource instead of a uid.
-                    StatsLog.write(StatsLog.WIFI_LOCK_STATE_CHANGED, getUid(), 0);
-                }
             }
         }
 
@@ -6503,8 +6717,6 @@ public class BatteryStatsImpl extends BatteryStats {
                             mOnBatteryBackgroundTimeBase);
                 }
                 mWifiScanTimer.startRunningLocked(elapsedRealtimeMs);
-                // TODO(statsd): Possibly use a worksource instead of a uid.
-                StatsLog.write(StatsLog.WIFI_SCAN_STATE_CHANGED, getUid(), 1);
             }
         }
 
@@ -6513,10 +6725,6 @@ public class BatteryStatsImpl extends BatteryStats {
             if (mWifiScanStarted) {
                 mWifiScanStarted = false;
                 mWifiScanTimer.stopRunningLocked(elapsedRealtimeMs);
-                if (!mWifiScanTimer.isRunningLocked()) { // only tell statsd if truly stopped
-                    // TODO(statsd): Possibly use a worksource instead of a uid.
-                    StatsLog.write(StatsLog.WIFI_SCAN_STATE_CHANGED, getUid(), 0);
-                }
             }
         }
 
@@ -6780,44 +6988,63 @@ public class BatteryStatsImpl extends BatteryStats {
             return mBluetoothUnoptimizedScanTimer;
         }
 
-        public void noteBluetoothScanStartedLocked(long elapsedRealtimeMs, boolean isUnoptimized) {
+        public void noteBluetoothScanStartedLocked(long elapsedRealtimeMs,
+                boolean isUnoptimized) {
             createBluetoothScanTimerLocked().startRunningLocked(elapsedRealtimeMs);
-            // TODO(statsd): Possibly use a worksource instead of a uid.
-            StatsLog.write(StatsLog.BLE_SCAN_STATE_CHANGED, getUid(), 1);
             if (isUnoptimized) {
                 createBluetoothUnoptimizedScanTimerLocked().startRunningLocked(elapsedRealtimeMs);
-                // TODO(statsd): Possibly use a worksource instead of a uid.
-                StatsLog.write(StatsLog.BLE_UNOPTIMIZED_SCAN_STATE_CHANGED, getUid(), 1);
             }
         }
 
         public void noteBluetoothScanStoppedLocked(long elapsedRealtimeMs, boolean isUnoptimized) {
             if (mBluetoothScanTimer != null) {
                 mBluetoothScanTimer.stopRunningLocked(elapsedRealtimeMs);
-                if (!mBluetoothScanTimer.isRunningLocked()) { // only tell statsd if truly stopped
-                    // TODO(statsd): Possibly use a worksource instead of a uid.
-                    StatsLog.write(StatsLog.BLE_SCAN_STATE_CHANGED, getUid(), 0);
-                }
             }
             if (isUnoptimized && mBluetoothUnoptimizedScanTimer != null) {
                 mBluetoothUnoptimizedScanTimer.stopRunningLocked(elapsedRealtimeMs);
-                if (!mBluetoothUnoptimizedScanTimer.isRunningLocked()) {
-                    // TODO(statsd): Possibly use a worksource instead of a uid.
-                    StatsLog.write(StatsLog.BLE_UNOPTIMIZED_SCAN_STATE_CHANGED, getUid(), 0);
-                }
             }
         }
+
+        public void addBluetoothWorkChain(WorkChain workChain, boolean isUnoptimized) {
+            if (mAllBluetoothChains == null) {
+                mAllBluetoothChains = new ArrayList<WorkChain>(4);
+            }
+
+            if (isUnoptimized && mUnoptimizedBluetoothChains == null) {
+                mUnoptimizedBluetoothChains = new ArrayList<WorkChain>(4);
+            }
+
+            mAllBluetoothChains.add(workChain);
+            if (isUnoptimized) {
+                mUnoptimizedBluetoothChains.add(workChain);
+            }
+        }
+
+        public void removeBluetoothWorkChain(WorkChain workChain, boolean isUnoptimized) {
+            if (mAllBluetoothChains != null) {
+                mAllBluetoothChains.remove(workChain);
+            }
+
+            if (isUnoptimized && mUnoptimizedBluetoothChains != null) {
+                mUnoptimizedBluetoothChains.remove(workChain);
+            }
+        }
+
+        public List<WorkChain> getAllBluetoothWorkChains() {
+            return mAllBluetoothChains;
+        }
+
+        public List<WorkChain> getUnoptimizedBluetoothWorkChains() {
+            return mUnoptimizedBluetoothChains;
+        }
+
 
         public void noteResetBluetoothScanLocked(long elapsedRealtimeMs) {
             if (mBluetoothScanTimer != null) {
                 mBluetoothScanTimer.stopAllRunningLocked(elapsedRealtimeMs);
-                // TODO(statsd): Possibly use a worksource instead of a uid.
-                StatsLog.write(StatsLog.BLE_SCAN_STATE_CHANGED, getUid(), 0);
             }
             if (mBluetoothUnoptimizedScanTimer != null) {
                 mBluetoothUnoptimizedScanTimer.stopAllRunningLocked(elapsedRealtimeMs);
-                // TODO(statsd): Possibly use a worksource instead of a uid.
-                StatsLog.write(StatsLog.BLE_UNOPTIMIZED_SCAN_STATE_CHANGED, getUid(), 0);
             }
         }
 
@@ -6839,9 +7066,6 @@ public class BatteryStatsImpl extends BatteryStats {
             createBluetoothScanResultCounterLocked().addAtomic(numNewResults);
             // Uses background timebase, so the count will only be incremented if uid in background.
             createBluetoothScanResultBgCounterLocked().addAtomic(numNewResults);
-            // TODO(statsd): Possibly use a worksource instead of a uid.
-            // TODO(statsd): This could be in AppScanStats instead, if desired.
-            StatsLog.write(StatsLog.BLE_SCAN_RESULT_RECEIVED, getUid(), numNewResults);
         }
 
         @Override

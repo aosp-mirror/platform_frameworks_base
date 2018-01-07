@@ -54,7 +54,7 @@ const int FIELD_ID_CONFIG_KEY = 1;
 const int FIELD_ID_REPORTS = 2;
 // for ConfigKey
 const int FIELD_ID_UID = 1;
-const int FIELD_ID_NAME = 2;
+const int FIELD_ID_ID = 2;
 // for ConfigMetricsReport
 const int FIELD_ID_METRICS = 1;
 const int FIELD_ID_UID_MAP = 2;
@@ -127,7 +127,7 @@ void StatsLogProcessor::OnConfigUpdated(const ConfigKey& key, const StatsdConfig
     if (newMetricsManager->isConfigValid()) {
         mUidMap->OnConfigUpdated(key);
         newMetricsManager->setAnomalyMonitor(mAnomalyMonitor);
-        if (config.log_source().package().size() > 0) {
+        if (newMetricsManager->shouldAddUidMapListener()) {
             // We have to add listener after the MetricsManager is constructed because it's
             // not safe to create wp or sp from this pointer inside its constructor.
             mUidMap->addListener(newMetricsManager.get());
@@ -150,14 +150,15 @@ size_t StatsLogProcessor::GetMetricsSize(const ConfigKey& key) const {
     return it->second->byteSize();
 }
 
-void StatsLogProcessor::onDumpReport(const ConfigKey& key, const uint64_t& dumpTimeStampNs, ConfigMetricsReportList* report) {
+void StatsLogProcessor::onDumpReport(const ConfigKey& key, const uint64_t& dumpTimeStampNs,
+                                     ConfigMetricsReportList* report) {
     auto it = mMetricsManagers.find(key);
     if (it == mMetricsManagers.end()) {
         ALOGW("Config source %s does not exist", key.ToString().c_str());
         return;
     }
     report->mutable_config_key()->set_uid(key.GetUid());
-    report->mutable_config_key()->set_name(key.GetName());
+    report->mutable_config_key()->set_id(key.GetId());
     ConfigMetricsReport* configMetricsReport = report->add_reports();
     it->second->onDumpReport(dumpTimeStampNs, configMetricsReport);
     // TODO: dump uid mapping.
@@ -181,7 +182,7 @@ void StatsLogProcessor::onDumpReport(const ConfigKey& key, vector<uint8_t>* outD
     // Start of ConfigKey.
     long long configKeyToken = proto.start(FIELD_TYPE_MESSAGE | FIELD_ID_CONFIG_KEY);
     proto.write(FIELD_TYPE_INT32 | FIELD_ID_UID, key.GetUid());
-    proto.write(FIELD_TYPE_STRING | FIELD_ID_NAME, key.GetName());
+    proto.write(FIELD_TYPE_INT64 | FIELD_ID_ID, (long long)key.GetId());
     proto.end(configKeyToken);
     // End of ConfigKey.
 
@@ -278,8 +279,8 @@ void StatsLogProcessor::WriteDataToDisk() {
         vector<uint8_t> data;
         onDumpReport(key, &data);
         // TODO: Add a guardrail to prevent accumulation of file on disk.
-        string file_name = StringPrintf("%s/%d-%s-%ld", STATS_DATA_DIR, key.GetUid(),
-                                        key.GetName().c_str(), time(nullptr));
+        string file_name = StringPrintf("%s/%d-%lld-%ld", STATS_DATA_DIR, key.GetUid(),
+                                        (long long)key.GetId(), time(nullptr));
         StorageManager::writeFile(file_name.c_str(), &data[0], data.size());
     }
 }

@@ -20,6 +20,7 @@ import android.Manifest;
 import android.annotation.RequiresPermission;
 import android.annotation.SystemApi;
 import android.annotation.SystemService;
+import android.annotation.TestApi;
 import android.app.usage.UsageStatsManager;
 import android.content.Context;
 import android.media.AudioAttributes.AttributeUsage;
@@ -37,6 +38,7 @@ import com.android.internal.app.IAppOpsCallback;
 import com.android.internal.app.IAppOpsService;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 
@@ -106,6 +108,7 @@ public class AppOpsManager {
 
     // when adding one of these:
     //  - increment _NUM_OP
+    //  - define an OPSTR_* constant (marked as @SystemApi)
     //  - add rows to sOpToSwitch, sOpToString, sOpNames, sOpToPerms, sOpDefault
     //  - add descriptive strings to Settings/res/values/arrays.xml
     //  - add the op to the appropriate template in AppOpsState.OpsTemplate (settings app)
@@ -278,7 +281,7 @@ public class AppOpsManager {
     public static final String OPSTR_GET_USAGE_STATS
             = "android:get_usage_stats";
     /** Activate a VPN connection without user intervention. @hide */
-    @SystemApi
+    @SystemApi @TestApi
     public static final String OPSTR_ACTIVATE_VPN
             = "android:activate_vpn";
     /** Allows an application to read the user's contacts data. */
@@ -360,6 +363,7 @@ public class AppOpsManager {
     public static final String OPSTR_WRITE_SETTINGS
             = "android:write_settings";
     /** @hide Get device accounts. */
+    @SystemApi @TestApi
     public static final String OPSTR_GET_ACCOUNTS
             = "android:get_accounts";
     public static final String OPSTR_READ_PHONE_NUMBERS
@@ -368,11 +372,127 @@ public class AppOpsManager {
     public static final String OPSTR_PICTURE_IN_PICTURE
             = "android:picture_in_picture";
     /** @hide */
+    @SystemApi @TestApi
     public static final String OPSTR_INSTANT_APP_START_FOREGROUND
             = "android:instant_app_start_foreground";
     /** Answer incoming phone calls */
     public static final String OPSTR_ANSWER_PHONE_CALLS
             = "android:answer_phone_calls";
+
+    /** @hide */
+    @SystemApi @TestApi
+    public static final String OPSTR_GPS = "android:gps";
+    /** @hide */
+    @SystemApi @TestApi
+    public static final String OPSTR_VIBRATE = "android:vibrate";
+    /** @hide */
+    @SystemApi @TestApi
+    public static final String OPSTR_WIFI_SCAN = "android:wifi_scan";
+    /** @hide */
+    @SystemApi @TestApi
+    public static final String OPSTR_POST_NOTIFICATION = "android:post_notification";
+    /** @hide */
+    @SystemApi @TestApi
+    public static final String OPSTR_NEIGHBORING_CELLS = "android:neighboring_cells";
+    /** @hide */
+    @SystemApi @TestApi
+    public static final String OPSTR_WRITE_SMS = "android:write_sms";
+    /** @hide */
+    @SystemApi @TestApi
+    public static final String OPSTR_RECEIVE_EMERGENCY_BROADCAST =
+            "android:receive_emergency_broadcast";
+    /** @hide */
+    @SystemApi @TestApi
+    public static final String OPSTR_READ_ICC_SMS = "android:read_icc_sms";
+    /** @hide */
+    @SystemApi @TestApi
+    public static final String OPSTR_WRITE_ICC_SMS = "android:write_icc_sms";
+    /** @hide */
+    @SystemApi @TestApi
+    public static final String OPSTR_ACCESS_NOTIFICATIONS = "android:access_notifications";
+    /** @hide */
+    @SystemApi @TestApi
+    public static final String OPSTR_PLAY_AUDIO = "android:play_audio";
+    /** @hide */
+    @SystemApi @TestApi
+    public static final String OPSTR_READ_CLIPBOARD = "android:read_clipboard";
+    /** @hide */
+    @SystemApi @TestApi
+    public static final String OPSTR_WRITE_CLIPBOARD = "android:write_clipboard";
+    /** @hide */
+    @SystemApi @TestApi
+    public static final String OPSTR_TAKE_MEDIA_BUTTONS = "android:take_media_buttons";
+    /** @hide */
+    @SystemApi @TestApi
+    public static final String OPSTR_TAKE_AUDIO_FOCUS = "android:take_audio_focus";
+    /** @hide */
+    @SystemApi @TestApi
+    public static final String OPSTR_AUDIO_MASTER_VOLUME = "android:audio_master_volume";
+    /** @hide */
+    @SystemApi @TestApi
+    public static final String OPSTR_AUDIO_VOICE_VOLUME = "android:audio_voice_volume";
+    /** @hide */
+    @SystemApi @TestApi
+    public static final String OPSTR_AUDIO_RING_VOLUME = "android:audio_ring_volume";
+    /** @hide */
+    @SystemApi @TestApi
+    public static final String OPSTR_AUDIO_MEDIA_VOLUME = "android:audio_media_volume";
+    /** @hide */
+    @SystemApi @TestApi
+    public static final String OPSTR_AUDIO_ALARM_VOLUME = "android:audio_alarm_volume";
+    /** @hide */
+    @SystemApi @TestApi
+    public static final String OPSTR_AUDIO_NOTIFICATION_VOLUME =
+            "android:audio_notification_volume";
+    /** @hide */
+    @SystemApi @TestApi
+    public static final String OPSTR_AUDIO_BLUETOOTH_VOLUME = "android:audio_bluetooth_volume";
+    /** @hide */
+    @SystemApi @TestApi
+    public static final String OPSTR_WAKE_LOCK = "android:wake_lock";
+    /** @hide */
+    @SystemApi @TestApi
+    public static final String OPSTR_MUTE_MICROPHONE = "android:mute_microphone";
+    /** @hide */
+    @SystemApi @TestApi
+    public static final String OPSTR_TOAST_WINDOW = "android:toast_window";
+    /** @hide */
+    @SystemApi @TestApi
+    public static final String OPSTR_PROJECT_MEDIA = "android:project_media";
+    /** @hide */
+    @SystemApi @TestApi
+    public static final String OPSTR_WRITE_WALLPAPER = "android:write_wallpaper";
+    /** @hide */
+    @SystemApi @TestApi
+    public static final String OPSTR_ASSIST_STRUCTURE = "android:assist_structure";
+    /** @hide */
+    @SystemApi @TestApi
+    public static final String OPSTR_ASSIST_SCREENSHOT = "android:assist_screenshot";
+    /** @hide */
+    @SystemApi @TestApi
+    public static final String OPSTR_TURN_SCREEN_ON = "android:turn_screen_on";
+    /** @hide */
+    @SystemApi @TestApi
+    public static final String OPSTR_RUN_IN_BACKGROUND = "android:run_in_background";
+    /** @hide */
+    @SystemApi @TestApi
+    public static final String OPSTR_AUDIO_ACCESSIBILITY_VOLUME =
+            "android:audio_accessibility_volume";
+    /** @hide */
+    @SystemApi @TestApi
+    public static final String OPSTR_REQUEST_INSTALL_PACKAGES = "android:request_install_packages";
+    /** @hide */
+    @SystemApi @TestApi
+    public static final String OPSTR_RUN_ANY_IN_BACKGROUND = "android:run_any_in_background";
+    /** @hide */
+    @SystemApi @TestApi
+    public static final String OPSTR_CHANGE_WIFI_STATE = "change_wifi_state";
+    /** @hide */
+    @SystemApi @TestApi
+    public static final String OPSTR_REQUEST_DELETE_PACKAGES = "request_delete_packages";
+    /** @hide */
+    @SystemApi @TestApi
+    public static final String OPSTR_BIND_ACCESSIBILITY_SERVICE = "bind_accessibility_service";
 
     // Warning: If an permission is added here it also has to be added to
     // com.android.packageinstaller.permission.utils.EventLogger
@@ -510,60 +630,59 @@ public class AppOpsManager {
 
     /**
      * This maps each operation to the public string constant for it.
-     * If it doesn't have a public string constant, it maps to null.
      */
-    private static String[] sOpToString = new String[] {
+    private static String[] sOpToString = new String[]{
             OPSTR_COARSE_LOCATION,
             OPSTR_FINE_LOCATION,
-            null,
-            null,
+            OPSTR_GPS,
+            OPSTR_VIBRATE,
             OPSTR_READ_CONTACTS,
             OPSTR_WRITE_CONTACTS,
             OPSTR_READ_CALL_LOG,
             OPSTR_WRITE_CALL_LOG,
             OPSTR_READ_CALENDAR,
             OPSTR_WRITE_CALENDAR,
-            null,
-            null,
-            null,
+            OPSTR_WIFI_SCAN,
+            OPSTR_POST_NOTIFICATION,
+            OPSTR_NEIGHBORING_CELLS,
             OPSTR_CALL_PHONE,
             OPSTR_READ_SMS,
-            null,
+            OPSTR_WRITE_SMS,
             OPSTR_RECEIVE_SMS,
-            null,
+            OPSTR_RECEIVE_EMERGENCY_BROADCAST,
             OPSTR_RECEIVE_MMS,
             OPSTR_RECEIVE_WAP_PUSH,
             OPSTR_SEND_SMS,
-            null,
-            null,
+            OPSTR_READ_ICC_SMS,
+            OPSTR_WRITE_ICC_SMS,
             OPSTR_WRITE_SETTINGS,
             OPSTR_SYSTEM_ALERT_WINDOW,
-            null,
+            OPSTR_ACCESS_NOTIFICATIONS,
             OPSTR_CAMERA,
             OPSTR_RECORD_AUDIO,
-            null,
-            null,
-            null,
-            null,
-            null,
-            null,
-            null,
-            null,
-            null,
-            null,
-            null,
-            null,
-            null,
+            OPSTR_PLAY_AUDIO,
+            OPSTR_READ_CLIPBOARD,
+            OPSTR_WRITE_CLIPBOARD,
+            OPSTR_TAKE_MEDIA_BUTTONS,
+            OPSTR_TAKE_AUDIO_FOCUS,
+            OPSTR_AUDIO_MASTER_VOLUME,
+            OPSTR_AUDIO_VOICE_VOLUME,
+            OPSTR_AUDIO_RING_VOLUME,
+            OPSTR_AUDIO_MEDIA_VOLUME,
+            OPSTR_AUDIO_ALARM_VOLUME,
+            OPSTR_AUDIO_NOTIFICATION_VOLUME,
+            OPSTR_AUDIO_BLUETOOTH_VOLUME,
+            OPSTR_WAKE_LOCK,
             OPSTR_MONITOR_LOCATION,
             OPSTR_MONITOR_HIGH_POWER_LOCATION,
             OPSTR_GET_USAGE_STATS,
-            null,
-            null,
-            null,
+            OPSTR_MUTE_MICROPHONE,
+            OPSTR_TOAST_WINDOW,
+            OPSTR_PROJECT_MEDIA,
             OPSTR_ACTIVATE_VPN,
-            null,
-            null,
-            null,
+            OPSTR_WRITE_WALLPAPER,
+            OPSTR_ASSIST_STRUCTURE,
+            OPSTR_ASSIST_SCREENSHOT,
             OPSTR_READ_PHONE_STATE,
             OPSTR_ADD_VOICEMAIL,
             OPSTR_USE_SIP,
@@ -574,19 +693,19 @@ public class AppOpsManager {
             OPSTR_MOCK_LOCATION,
             OPSTR_READ_EXTERNAL_STORAGE,
             OPSTR_WRITE_EXTERNAL_STORAGE,
-            null,
+            OPSTR_TURN_SCREEN_ON,
             OPSTR_GET_ACCOUNTS,
-            null,
-            null, // OP_AUDIO_ACCESSIBILITY_VOLUME
+            OPSTR_RUN_IN_BACKGROUND,
+            OPSTR_AUDIO_ACCESSIBILITY_VOLUME,
             OPSTR_READ_PHONE_NUMBERS,
-            null, // OP_REQUEST_INSTALL_PACKAGES
+            OPSTR_REQUEST_INSTALL_PACKAGES,
             OPSTR_PICTURE_IN_PICTURE,
             OPSTR_INSTANT_APP_START_FOREGROUND,
             OPSTR_ANSWER_PHONE_CALLS,
-            null, // OP_RUN_ANY_IN_BACKGROUND
-            null, // OP_CHANGE_WIFI_STATE
-            null, // OP_REQUEST_DELETE_PACKAGES
-            null, // OP_BIND_ACCESSIBILITY_SERVICE
+            OPSTR_RUN_ANY_IN_BACKGROUND,
+            OPSTR_CHANGE_WIFI_STATE,
+            OPSTR_REQUEST_DELETE_PACKAGES,
+            OPSTR_BIND_ACCESSIBILITY_SERVICE,
     };
 
     /**
@@ -1996,5 +2115,15 @@ public class AppOpsManager {
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
+    }
+
+    /**
+     * Returns all supported operation names.
+     * @hide
+     */
+    @SystemApi
+    @TestApi
+    public static String[] getOpStrs() {
+        return Arrays.copyOf(sOpToString, sOpToString.length);
     }
 }

@@ -346,13 +346,14 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
                 || (isSelfUpdatePermissionGranted
                     && mPm.getPackageUid(mPackageName, 0, userId) == mInstallerUid);
         final boolean isInstallerRoot = (mInstallerUid == Process.ROOT_UID);
+        final boolean isInstallerSystem = (mInstallerUid == Process.SYSTEM_UID);
         final boolean forcePermissionPrompt =
                 (params.installFlags & PackageManager.INSTALL_FORCE_PERMISSION_PROMPT) != 0;
 
         // Device owners and affiliated profile owners  are allowed to silently install packages, so
         // the permission check is waived if the installer is the device owner.
         return forcePermissionPrompt || !(isPermissionGranted || isInstallerRoot
-                || isInstallerDeviceOwnerOrAffiliatedProfileOwnerLocked());
+                || isInstallerSystem || isInstallerDeviceOwnerOrAffiliatedProfileOwnerLocked());
     }
 
     public PackageInstallerSession(PackageInstallerService.InternalCallback callback,

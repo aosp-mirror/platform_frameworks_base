@@ -18,9 +18,15 @@ package com.android.server.broadcastradio.hal2;
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.hardware.radio.ITuner;
 import android.hardware.radio.RadioManager;
+import android.hardware.broadcastradio.V2_0.AmFmRegionConfig;
 import android.hardware.broadcastradio.V2_0.IBroadcastRadio;
+import android.hardware.broadcastradio.V2_0.ITunerSession;
+import android.hardware.broadcastradio.V2_0.Result;
+import android.os.ParcelableException;
 import android.os.RemoteException;
+import android.util.MutableInt;
 import android.util.Slog;
 
 import java.util.Objects;
@@ -42,13 +48,39 @@ class RadioModule {
             IBroadcastRadio service = IBroadcastRadio.getService();
             if (service == null) return null;
 
+            Mutable<AmFmRegionConfig> amfmConfig = new Mutable<>();
+            service.getAmFmRegionConfig(false, (int result, AmFmRegionConfig config) -> {
+                if (result == Result.OK) amfmConfig.value = config;
+            });
+
             RadioManager.ModuleProperties prop =
-                    Convert.propertiesFromHal(idx, fqName, service.getProperties());
+                    Convert.propertiesFromHal(idx, fqName, service.getProperties(), amfmConfig.value);
 
             return new RadioModule(service, prop);
         } catch (RemoteException ex) {
             Slog.e(TAG, "failed to load module " + fqName, ex);
             return null;
         }
+    }
+
+    public @NonNull TunerSession openSession(@NonNull android.hardware.radio.ITunerCallback userCb) {
+        TunerCallback cb = new TunerCallback(Objects.requireNonNull(userCb));
+        Mutable<ITunerSession> hwSession = new Mutable<>();
+        MutableInt halResult = new MutableInt(Result.UNKNOWN_ERROR);
+
+        try {
+            mService.openSession(cb, (int result, ITunerSession session) -> {
+                hwSession.value = session;
+                halResult.value = result;
+            });
+        } catch (RemoteException ex) {
+            Slog.e(TAG, "failed to open session", ex);
+            throw new ParcelableException(ex);
+        }
+
+        Convert.throwOnError("openSession", halResult.value);
+        Objects.requireNonNull(hwSession.value);
+
+        return new TunerSession(hwSession.value, cb);
     }
 }

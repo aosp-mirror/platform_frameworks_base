@@ -23,6 +23,10 @@ import android.os.ServiceManager;
 import android.util.Log;
 
 import com.android.internal.annotations.VisibleForTesting;
+import com.android.keyguard.KeyguardUpdateMonitor;
+import com.android.keyguard.KeyguardUpdateMonitorCallback;
+import com.android.systemui.statusbar.phone.DozeParameters;
+import com.android.systemui.statusbar.phone.StatusBarKeyguardViewManager;
 
 import java.io.PrintWriter;
 
@@ -34,18 +38,28 @@ public class DozeWallpaperState implements DozeMachine.Part {
     private static final String TAG = "DozeWallpaperState";
     private static final boolean DEBUG = Log.isLoggable(TAG, Log.DEBUG);
 
-    @VisibleForTesting
-    final IWallpaperManager mWallpaperManagerService;
+    private final IWallpaperManager mWallpaperManagerService;
+    private boolean mKeyguardVisible;
     private boolean mIsAmbientMode;
+    private final DozeParameters mDozeParameters;
 
-    public DozeWallpaperState() {
+    public DozeWallpaperState(Context context) {
         this(IWallpaperManager.Stub.asInterface(
-                ServiceManager.getService(Context.WALLPAPER_SERVICE)));
+                ServiceManager.getService(Context.WALLPAPER_SERVICE)),
+                new DozeParameters(context), KeyguardUpdateMonitor.getInstance(context));
     }
 
     @VisibleForTesting
-    DozeWallpaperState(IWallpaperManager wallpaperManagerService) {
+    DozeWallpaperState(IWallpaperManager wallpaperManagerService, DozeParameters parameters,
+            KeyguardUpdateMonitor keyguardUpdateMonitor) {
         mWallpaperManagerService = wallpaperManagerService;
+        mDozeParameters = parameters;
+        keyguardUpdateMonitor.registerCallback(new KeyguardUpdateMonitorCallback() {
+            @Override
+            public void onKeyguardVisibilityChanged(boolean showing) {
+                mKeyguardVisible = showing;
+            }
+        });
     }
 
     @Override
@@ -58,17 +72,25 @@ public class DozeWallpaperState implements DozeMachine.Part {
             case DOZE_REQUEST_PULSE:
             case DOZE_PULSING:
             case DOZE_PULSE_DONE:
-                isAmbientMode = true;
+                isAmbientMode = mDozeParameters.getAlwaysOn();
                 break;
             default:
                 isAmbientMode = false;
         }
 
+        final boolean animated;
+        if (isAmbientMode) {
+            animated = mDozeParameters.getCanControlScreenOffAnimation() && !mKeyguardVisible;
+        } else {
+            animated = !mDozeParameters.getDisplayNeedsBlanking();
+        }
+
         if (isAmbientMode != mIsAmbientMode) {
             mIsAmbientMode = isAmbientMode;
             try {
-                Log.i(TAG, "AoD wallpaper state changed to: " + mIsAmbientMode);
-                mWallpaperManagerService.setInAmbientMode(mIsAmbientMode);
+                Log.i(TAG, "AoD wallpaper state changed to: " + mIsAmbientMode
+                        + ", animated: " + animated);
+                mWallpaperManagerService.setInAmbientMode(mIsAmbientMode, animated);
             } catch (RemoteException e) {
                 // Cannot notify wallpaper manager service, but it's fine, let's just skip it.
                 Log.w(TAG, "Cannot notify state to WallpaperManagerService: " + mIsAmbientMode);

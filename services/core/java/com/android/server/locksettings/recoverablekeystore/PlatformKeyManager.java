@@ -71,7 +71,6 @@ public class PlatformKeyManager {
     private final Context mContext;
     private final KeyStoreProxy mKeyStore;
     private final RecoverableKeyStoreDb mDatabase;
-    private final int mUserId;
 
     private static final String ANDROID_KEY_STORE_PROVIDER = "AndroidKeyStore";
 
@@ -80,33 +79,25 @@ public class PlatformKeyManager {
      * defined by {@code context}.
      *
      * @param context This should be the context of the RecoverableKeyStoreLoader service.
-     * @param userId The ID of the user to whose lock screen the platform key must be bound.
      * @throws KeyStoreException if failed to initialize AndroidKeyStore.
      * @throws NoSuchAlgorithmException if AES is unavailable - should never happen.
-     * @throws InsecureUserException if the user does not have a lock screen set.
      * @throws SecurityException if the caller does not have permission to write to /data/system.
      *
      * @hide
      */
-    public static PlatformKeyManager getInstance(Context context, RecoverableKeyStoreDb database, int userId)
-            throws KeyStoreException, NoSuchAlgorithmException, InsecureUserException {
-        context = context.getApplicationContext();
-        PlatformKeyManager keyManager = new PlatformKeyManager(
-                userId,
-                context,
+    public static PlatformKeyManager getInstance(Context context, RecoverableKeyStoreDb database)
+            throws KeyStoreException, NoSuchAlgorithmException {
+        return new PlatformKeyManager(
+                context.getApplicationContext(),
                 new KeyStoreProxyImpl(getAndLoadAndroidKeyStore()),
                 database);
-        keyManager.init();
-        return keyManager;
     }
 
     @VisibleForTesting
     PlatformKeyManager(
-            int userId,
             Context context,
             KeyStoreProxy keyStore,
             RecoverableKeyStoreDb database) {
-        mUserId = userId;
         mKeyStore = keyStore;
         mContext = context;
         mDatabase = database;
@@ -117,68 +108,91 @@ public class PlatformKeyManager {
      * key has to be replaced. (e.g., because the user has removed and then re-added their lock
      * screen). Returns -1 if no key has been generated yet.
      *
+     * @param userId The ID of the user to whose lock screen the platform key must be bound.
+     *
      * @hide
      */
-    public int getGenerationId() {
-        return mDatabase.getPlatformKeyGenerationId(mUserId);
+    public int getGenerationId(int userId) {
+        return mDatabase.getPlatformKeyGenerationId(userId);
     }
 
     /**
      * Returns {@code true} if the platform key is available. A platform key won't be available if
      * the user has not set up a lock screen.
      *
+     * @param userId The ID of the user to whose lock screen the platform key must be bound.
+     *
      * @hide
      */
-    public boolean isAvailable() {
-        return mContext.getSystemService(KeyguardManager.class).isDeviceSecure(mUserId);
+    public boolean isAvailable(int userId) {
+        return mContext.getSystemService(KeyguardManager.class).isDeviceSecure(userId);
     }
 
     /**
      * Generates a new key and increments the generation ID. Should be invoked if the platform key
      * is corrupted and needs to be rotated.
      *
+     * @param userId The ID of the user to whose lock screen the platform key must be bound.
      * @throws NoSuchAlgorithmException if AES is unavailable - should never happen.
      * @throws KeyStoreException if there is an error in AndroidKeyStore.
+     * @throws InsecureUserException if the user does not have a lock screen set.
      *
      * @hide
      */
-    public void regenerate() throws NoSuchAlgorithmException, KeyStoreException {
-        int nextId = getGenerationId() + 1;
-        generateAndLoadKey(nextId);
-        setGenerationId(nextId);
+    public void regenerate(int userId)
+            throws NoSuchAlgorithmException, KeyStoreException, InsecureUserException {
+        if (!isAvailable(userId)) {
+            throw new InsecureUserException(String.format(
+                    Locale.US, "%d does not have a lock screen set.", userId));
+        }
+
+        int generationId = getGenerationId(userId);
+        int nextId;
+        if (generationId == -1) {
+            nextId = 1;
+        } else {
+            nextId = generationId + 1;
+        }
+        generateAndLoadKey(userId, nextId);
     }
 
     /**
      * Returns the platform key used for encryption.
      *
+     * @param userId The ID of the user to whose lock screen the platform key must be bound.
      * @throws KeyStoreException if there was an AndroidKeyStore error.
      * @throws UnrecoverableKeyException if the key could not be recovered.
      * @throws NoSuchAlgorithmException if AES is unavailable - should never occur.
+     * @throws InsecureUserException if the user does not have a lock screen set.
      *
      * @hide
      */
-    public PlatformEncryptionKey getEncryptKey()
-            throws KeyStoreException, UnrecoverableKeyException, NoSuchAlgorithmException {
-        int generationId = getGenerationId();
+    public PlatformEncryptionKey getEncryptKey(int userId) throws KeyStoreException,
+           UnrecoverableKeyException, NoSuchAlgorithmException, InsecureUserException {
+        init(userId);
+        int generationId = getGenerationId(userId);
         AndroidKeyStoreSecretKey key = (AndroidKeyStoreSecretKey) mKeyStore.getKey(
-                getEncryptAlias(generationId), /*password=*/ null);
+                getEncryptAlias(userId, generationId), /*password=*/ null);
         return new PlatformEncryptionKey(generationId, key);
     }
 
     /**
      * Returns the platform key used for decryption. Only works after a recent screen unlock.
      *
+     * @param userId The ID of the user to whose lock screen the platform key must be bound.
      * @throws KeyStoreException if there was an AndroidKeyStore error.
      * @throws UnrecoverableKeyException if the key could not be recovered.
      * @throws NoSuchAlgorithmException if AES is unavailable - should never occur.
+     * @throws InsecureUserException if the user does not have a lock screen set.
      *
      * @hide
      */
-    public PlatformDecryptionKey getDecryptKey()
-            throws KeyStoreException, UnrecoverableKeyException, NoSuchAlgorithmException {
-        int generationId = getGenerationId();
+    public PlatformDecryptionKey getDecryptKey(int userId) throws KeyStoreException,
+           UnrecoverableKeyException, NoSuchAlgorithmException, InsecureUserException {
+        init(userId);
+        int generationId = getGenerationId(userId);
         AndroidKeyStoreSecretKey key = (AndroidKeyStoreSecretKey) mKeyStore.getKey(
-                getDecryptAlias(generationId), /*password=*/ null);
+                getDecryptAlias(userId, generationId), /*password=*/ null);
         return new PlatformDecryptionKey(generationId, key);
     }
 
@@ -186,39 +200,36 @@ public class PlatformKeyManager {
      * Initializes the class. If there is no current platform key, and the user has a lock screen
      * set, will create the platform key and set the generation ID.
      *
+     * @param userId The ID of the user to whose lock screen the platform key must be bound.
      * @throws KeyStoreException if there was an error in AndroidKeyStore.
      * @throws NoSuchAlgorithmException if AES is unavailable - should never happen.
      *
      * @hide
      */
-    public void init() throws KeyStoreException, NoSuchAlgorithmException, InsecureUserException {
-        if (!isAvailable()) {
+    void init(int userId)
+            throws KeyStoreException, NoSuchAlgorithmException, InsecureUserException {
+        if (!isAvailable(userId)) {
             throw new InsecureUserException(String.format(
-                    Locale.US, "%d does not have a lock screen set.", mUserId));
+                    Locale.US, "%d does not have a lock screen set.", userId));
         }
 
-        int generationId = getGenerationId();
-        if (isKeyLoaded(generationId)) {
+        int generationId = getGenerationId(userId);
+        if (isKeyLoaded(userId, generationId)) {
             Log.i(TAG, String.format(
                     Locale.US, "Platform key generation %d exists already.", generationId));
             return;
         }
         if (generationId == -1) {
             Log.i(TAG, "Generating initial platform ID.");
+            generationId = 1;
         } else {
             Log.w(TAG, String.format(Locale.US, "Platform generation ID was %d but no "
                     + "entry was present in AndroidKeyStore. Generating fresh key.", generationId));
-        }
-
-        if (generationId == -1) {
-            generationId = 1;
-        } else {
             // Had to generate a fresh key, bump the generation id
             generationId++;
         }
 
-        generateAndLoadKey(generationId);
-        mDatabase.setPlatformKeyGenerationId(mUserId, generationId);
+        generateAndLoadKey(userId, generationId);
     }
 
     /**
@@ -228,11 +239,12 @@ public class PlatformKeyManager {
      * <p>These IDs look as follows:
      * {@code com.security.recoverablekeystore/platform/<user id>/<generation id>/encrypt}
      *
+     * @param userId The ID of the user to whose lock screen the platform key must be bound.
      * @param generationId The generation ID.
      * @return The alias.
      */
-    private String getEncryptAlias(int generationId) {
-        return KEY_ALIAS_PREFIX + mUserId + "/" + generationId + "/" + ENCRYPT_KEY_ALIAS_SUFFIX;
+    private String getEncryptAlias(int userId, int generationId) {
+        return KEY_ALIAS_PREFIX + userId + "/" + generationId + "/" + ENCRYPT_KEY_ALIAS_SUFFIX;
     }
 
     /**
@@ -242,18 +254,19 @@ public class PlatformKeyManager {
      * <p>These IDs look as follows:
      * {@code com.security.recoverablekeystore/platform/<user id>/<generation id>/decrypt}
      *
+     * @param userId The ID of the user to whose lock screen the platform key must be bound.
      * @param generationId The generation ID.
      * @return The alias.
      */
-    private String getDecryptAlias(int generationId) {
-        return KEY_ALIAS_PREFIX + mUserId + "/" + generationId + "/" + DECRYPT_KEY_ALIAS_SUFFIX;
+    private String getDecryptAlias(int userId, int generationId) {
+        return KEY_ALIAS_PREFIX + userId + "/" + generationId + "/" + DECRYPT_KEY_ALIAS_SUFFIX;
     }
 
     /**
      * Sets the current generation ID to {@code generationId}.
      */
-    private void setGenerationId(int generationId) {
-        mDatabase.setPlatformKeyGenerationId(mUserId, generationId);
+    private void setGenerationId(int userId, int generationId) {
+        mDatabase.setPlatformKeyGenerationId(userId, generationId);
     }
 
     /**
@@ -262,9 +275,9 @@ public class PlatformKeyManager {
      *
      * @throws KeyStoreException if there was an error checking AndroidKeyStore.
      */
-    private boolean isKeyLoaded(int generationId) throws KeyStoreException {
-        return mKeyStore.containsAlias(getEncryptAlias(generationId))
-                && mKeyStore.containsAlias(getDecryptAlias(generationId));
+    private boolean isKeyLoaded(int userId, int generationId) throws KeyStoreException {
+        return mKeyStore.containsAlias(getEncryptAlias(userId, generationId))
+                && mKeyStore.containsAlias(getDecryptAlias(userId, generationId));
     }
 
     /**
@@ -275,10 +288,10 @@ public class PlatformKeyManager {
      *     available since API version 1.
      * @throws KeyStoreException if there was an issue loading the keys into AndroidKeyStore.
      */
-    private void generateAndLoadKey(int generationId)
+    private void generateAndLoadKey(int userId, int generationId)
             throws NoSuchAlgorithmException, KeyStoreException {
-        String encryptAlias = getEncryptAlias(generationId);
-        String decryptAlias = getDecryptAlias(generationId);
+        String encryptAlias = getEncryptAlias(userId, generationId);
+        String decryptAlias = getDecryptAlias(userId, generationId);
         SecretKey secretKey = generateAesKey();
 
         mKeyStore.setEntry(
@@ -297,8 +310,10 @@ public class PlatformKeyManager {
                             USER_AUTHENTICATION_VALIDITY_DURATION_SECONDS)
                     .setBlockModes(KeyProperties.BLOCK_MODE_GCM)
                     .setEncryptionPaddings(KeyProperties.ENCRYPTION_PADDING_NONE)
-                    .setBoundToSpecificSecureUserId(mUserId)
+                    .setBoundToSpecificSecureUserId(userId)
                     .build());
+
+        setGenerationId(userId, generationId);
 
         try {
             secretKey.destroy();

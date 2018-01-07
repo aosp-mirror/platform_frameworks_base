@@ -45,6 +45,10 @@ import static android.app.admin.DevicePolicyManager.DELEGATION_INSTALL_EXISTING_
 import static android.app.admin.DevicePolicyManager.DELEGATION_KEEP_UNINSTALLED_PACKAGES;
 import static android.app.admin.DevicePolicyManager.DELEGATION_PACKAGE_ACCESS;
 import static android.app.admin.DevicePolicyManager.DELEGATION_PERMISSION_GRANT;
+import static android.app.admin.DevicePolicyManager.ID_TYPE_BASE_INFO;
+import static android.app.admin.DevicePolicyManager.ID_TYPE_IMEI;
+import static android.app.admin.DevicePolicyManager.ID_TYPE_MEID;
+import static android.app.admin.DevicePolicyManager.ID_TYPE_SERIAL;
 import static android.app.admin.DevicePolicyManager.LEAVE_ALL_SYSTEM_APPS_ENABLED;
 import static android.app.admin.DevicePolicyManager.PASSWORD_QUALITY_COMPLEX;
 import static android.app.admin.DevicePolicyManager.PASSWORD_QUALITY_UNSPECIFIED;
@@ -217,8 +221,10 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map.Entry;
+import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
@@ -5052,17 +5058,82 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
         return false;
     }
 
+    private void enforceIsDeviceOwnerOrCertInstallerOfDeviceOwner(
+            ComponentName who, String callerPackage, int callerUid) throws SecurityException {
+        if (who == null) {
+            if (!mOwners.hasDeviceOwner()) {
+                throw new SecurityException("Not in Device Owner mode.");
+            }
+            if (UserHandle.getUserId(callerUid) != mOwners.getDeviceOwnerUserId()) {
+                throw new SecurityException("Caller not from device owner user");
+            }
+            if (!isCallerDelegate(callerPackage, DELEGATION_CERT_INSTALL)) {
+                throw new SecurityException("Caller with uid " + mInjector.binderGetCallingUid() +
+                        "has no permission to generate keys.");
+            }
+        } else {
+            // Caller provided - check it is the device owner.
+            synchronized (this) {
+                getActiveAdminForCallerLocked(who, DeviceAdminInfo.USES_POLICY_DEVICE_OWNER);
+            }
+        }
+    }
+
+    @VisibleForTesting
+    public static int[] translateIdAttestationFlags(
+            int idAttestationFlags) {
+        Map<Integer, Integer> idTypeToAttestationFlag = new HashMap();
+        idTypeToAttestationFlag.put(ID_TYPE_SERIAL, AttestationUtils.ID_TYPE_SERIAL);
+        idTypeToAttestationFlag.put(ID_TYPE_IMEI, AttestationUtils.ID_TYPE_IMEI);
+        idTypeToAttestationFlag.put(ID_TYPE_MEID, AttestationUtils.ID_TYPE_MEID);
+
+        int numFlagsSet = Integer.bitCount(idAttestationFlags);
+        // No flags are set - return null to indicate no device ID attestation information should
+        // be included in the attestation record.
+        if (numFlagsSet == 0) {
+            return null;
+        }
+
+        // If the ID_TYPE_BASE_INFO is set, make sure that a non-null array is returned, even if
+        // no other flag is set. That will lead to inclusion of general device make data in the
+        // attestation record, but no specific device identifiers.
+        if ((idAttestationFlags & ID_TYPE_BASE_INFO) != 0) {
+            numFlagsSet -= 1;
+            idAttestationFlags = idAttestationFlags & (~ID_TYPE_BASE_INFO);
+        }
+
+        int[] attestationUtilsFlags = new int[numFlagsSet];
+        int i = 0;
+        for (Integer idType: idTypeToAttestationFlag.keySet()) {
+            if ((idType & idAttestationFlags) != 0) {
+                attestationUtilsFlags[i++] = idTypeToAttestationFlag.get(idType);
+            }
+        }
+
+        return attestationUtilsFlags;
+    }
+
     @Override
     public boolean generateKeyPair(ComponentName who, String callerPackage, String algorithm,
             ParcelableKeyGenParameterSpec parcelableKeySpec,
+            int idAttestationFlags,
             KeymasterCertificateChain attestationChain) {
-        enforceCanManageScope(who, callerPackage, DeviceAdminInfo.USES_POLICY_PROFILE_OWNER,
-                DELEGATION_CERT_INSTALL);
+        // Get attestation flags, if any.
+        final int[] attestationUtilsFlags = translateIdAttestationFlags(idAttestationFlags);
+        final boolean deviceIdAttestationRequired = attestationUtilsFlags != null;
+        final int callingUid = mInjector.binderGetCallingUid();
+
+        if (deviceIdAttestationRequired && attestationUtilsFlags.length > 0) {
+            enforceIsDeviceOwnerOrCertInstallerOfDeviceOwner(who, callerPackage, callingUid);
+        } else {
+            enforceCanManageScope(who, callerPackage, DeviceAdminInfo.USES_POLICY_PROFILE_OWNER,
+                    DELEGATION_CERT_INSTALL);
+        }
         final KeyGenParameterSpec keySpec = parcelableKeySpec.getSpec();
-        if (TextUtils.isEmpty(keySpec.getKeystoreAlias())) {
+        final String alias = keySpec.getKeystoreAlias();
+        if (TextUtils.isEmpty(alias)) {
             throw new IllegalArgumentException("Empty alias provided.");
         }
-        final String alias = keySpec.getKeystoreAlias();
         // As the caller will be granted access to the key, ensure no UID was specified, as
         // it will not have the desired effect.
         if (keySpec.getUid() != KeyStore.UID_SELF) {
@@ -5070,7 +5141,10 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
             return false;
         }
 
-        final int callingUid = mInjector.binderGetCallingUid();
+        if (deviceIdAttestationRequired && (keySpec.getAttestationChallenge() == null)) {
+            throw new IllegalArgumentException(
+                    "Requested Device ID attestation but challenge is empty.");
+        }
 
         final UserHandle userHandle = mInjector.binderGetCallingUserHandle();
         final long id = mInjector.binderClearCallingIdentity();
@@ -5103,7 +5177,7 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
                 final byte[] attestationChallenge = keySpec.getAttestationChallenge();
                 if (attestationChallenge != null) {
                     final boolean attestationResult = keyChain.attestKey(
-                            alias, attestationChallenge, attestationChain);
+                            alias, attestationChallenge, attestationUtilsFlags, attestationChain);
                     if (!attestationResult) {
                         Log.e(LOG_TAG, String.format(
                                 "Attestation for %s failed, deleting key.", alias));
@@ -11802,10 +11876,14 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
 
         final long id = mInjector.binderClearCallingIdentity();
         try {
-            //STOPSHIP add support for COMP, DO, edge cases when device is rebooted/work mode off,
+            //STOPSHIP add support for COMP, edge cases when device is rebooted/work mode off,
             //transfer callbacks and broadcast
-            if (isProfileOwner(admin, callingUserId)) {
-                transferProfileOwner(admin, target, callingUserId);
+            synchronized (this) {
+                if (isProfileOwner(admin, callingUserId)) {
+                    transferProfileOwnerLocked(admin, target, callingUserId);
+                } else if (isDeviceOwner(admin, callingUserId)) {
+                    transferDeviceOwnerLocked(admin, target, callingUserId);
+                }
             }
         } finally {
             mInjector.binderRestoreCallingIdentity(id);
@@ -11815,15 +11893,25 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
     /**
      * Transfers the profile owner for user with id profileOwnerUserId from admin to target.
      */
-    private void transferProfileOwner(ComponentName admin, ComponentName target,
+    private void transferProfileOwnerLocked(ComponentName admin, ComponentName target,
             int profileOwnerUserId) {
-        synchronized (this) {
-            transferActiveAdminUncheckedLocked(target, admin, profileOwnerUserId);
-            mOwners.transferProfileOwner(target, profileOwnerUserId);
-            Slog.i(LOG_TAG, "Profile owner set: " + target + " on user " + profileOwnerUserId);
-            mOwners.writeProfileOwner(profileOwnerUserId);
-            mDeviceAdminServiceController.startServiceForOwner(
-                    target.getPackageName(), profileOwnerUserId, "transfer-profile-owner");
-        }
+        transferActiveAdminUncheckedLocked(target, admin, profileOwnerUserId);
+        mOwners.transferProfileOwner(target, profileOwnerUserId);
+        Slog.i(LOG_TAG, "Profile owner set: " + target + " on user " + profileOwnerUserId);
+        mOwners.writeProfileOwner(profileOwnerUserId);
+        mDeviceAdminServiceController.startServiceForOwner(
+                target.getPackageName(), profileOwnerUserId, "transfer-profile-owner");
+    }
+
+    /**
+     * Transfers the device owner for user with id userId from admin to target.
+     */
+    private void transferDeviceOwnerLocked(ComponentName admin, ComponentName target, int userId) {
+        transferActiveAdminUncheckedLocked(target, admin, userId);
+        mOwners.transferDeviceOwner(target);
+        Slog.i(LOG_TAG, "Device owner set: " + target + " on user " + userId);
+        mOwners.writeDeviceOwner();
+        mDeviceAdminServiceController.startServiceForOwner(
+                target.getPackageName(), userId, "transfer-device-owner");
     }
 }

@@ -32,6 +32,7 @@ import static org.mockito.Mockito.verify;
 
 import android.annotation.NonNull;
 import android.content.Context;
+import android.os.Message;
 import android.support.test.InstrumentationRegistry;
 import android.support.test.runner.AndroidJUnit4;
 import android.util.DebugUtils;
@@ -48,6 +49,34 @@ import org.junit.runner.RunWith;
 import java.util.function.IntConsumer;
 
 
+/**
+ * Tests the state transitions of {@link MagnificationGestureHandler}
+ *
+ * Here's a dot graph describing the transitions being tested:
+ * {@code
+ *      digraph {
+ *          IDLE -> SHORTCUT_TRIGGERED [label="a11y\nbtn"]
+ *          SHORTCUT_TRIGGERED -> IDLE [label="a11y\nbtn"]
+ *          IDLE -> DOUBLE_TAP [label="2tap"]
+ *          DOUBLE_TAP -> IDLE [label="timeout"]
+ *          DOUBLE_TAP -> TRIPLE_TAP_AND_HOLD [label="down"]
+ *          SHORTCUT_TRIGGERED -> TRIPLE_TAP_AND_HOLD [label="down"]
+ *          TRIPLE_TAP_AND_HOLD -> ZOOMED [label="up"]
+ *          TRIPLE_TAP_AND_HOLD -> DRAGGING_TMP [label="hold/\nswipe"]
+ *          DRAGGING_TMP -> IDLE [label="release"]
+ *          ZOOMED -> ZOOMED_DOUBLE_TAP [label="2tap"]
+ *          ZOOMED_DOUBLE_TAP -> ZOOMED [label="timeout"]
+ *          ZOOMED_DOUBLE_TAP -> DRAGGING [label="hold"]
+ *          ZOOMED_DOUBLE_TAP -> IDLE [label="tap"]
+ *          DRAGGING -> ZOOMED [label="release"]
+ *          ZOOMED -> IDLE [label="a11y\nbtn"]
+ *          ZOOMED -> PANNING [label="2hold"]
+ *          PANNING -> PANNING_SCALING [label="pinch"]
+ *          PANNING_SCALING -> ZOOMED [label="release"]
+ *          PANNING -> ZOOMED [label="release"]
+ *      }
+ * }
+ */
 @RunWith(AndroidJUnit4.class)
 public class MagnificationGestureHandlerTest {
 
@@ -75,6 +104,8 @@ public class MagnificationGestureHandlerTest {
     private OffsettableClock mClock;
     private MagnificationGestureHandler mMgh;
     private TestHandler mHandler;
+
+    private long mLastDownTime = Integer.MIN_VALUE;
 
     @Before
     public void setUp() {
@@ -104,7 +135,13 @@ public class MagnificationGestureHandlerTest {
         MagnificationGestureHandler h = new MagnificationGestureHandler(
                 mContext, mMagnificationController,
                 detectTripleTap, detectShortcutTrigger);
-        mHandler = new TestHandler(h.mDetectingState, mClock);
+        mHandler = new TestHandler(h.mDetectingState, mClock) {
+            @Override
+            protected String messageToString(Message m) {
+                return DebugUtils.valueToString(
+                        MagnificationGestureHandler.DetectingState.class, "MESSAGE_", m.what);
+            }
+        };
         h.mDetectingState.mHandler = mHandler;
         h.setNext(strictMock(EventStreamTransformation.class));
         return h;
@@ -184,11 +221,11 @@ public class MagnificationGestureHandlerTest {
             fastForward1sec();
         }, STATE_ZOOMED);
 
-        // tap+tap+swipe gets delegated
-        assertTransition(STATE_2TAPS, () -> {
-            allowEventDelegation();
-            swipe();
-        }, STATE_IDLE);
+        // tap+tap+swipe doesn't get delegated
+        assertTransition(STATE_2TAPS, () -> swipe(), STATE_IDLE);
+
+        // tap+tap+swipe initiates viewport dragging immediately
+        assertTransition(STATE_2TAPS, () -> swipeAndHold(), STATE_DRAGGING_TMP);
     }
 
     @Test
@@ -439,23 +476,24 @@ public class MagnificationGestureHandlerTest {
     }
 
     private void tap() {
-        MotionEvent downEvent = downEvent();
-        send(downEvent);
-        send(upEvent(downEvent.getDownTime()));
+        send(downEvent());
+        send(upEvent());
     }
 
     private void swipe() {
-        MotionEvent downEvent = downEvent();
-        send(downEvent);
+        swipeAndHold();
+        send(upEvent());
+    }
+
+    private void swipeAndHold() {
+        send(downEvent());
         send(moveEvent(DEFAULT_X * 2, DEFAULT_Y * 2));
-        send(upEvent(downEvent.getDownTime()));
     }
 
     private void longTap() {
-        MotionEvent downEvent = downEvent();
-        send(downEvent);
+        send(downEvent());
         fastForward(2000);
-        send(upEvent(downEvent.getDownTime()));
+        send(upEvent());
     }
 
     private void triggerShortcut() {
@@ -473,26 +511,22 @@ public class MagnificationGestureHandlerTest {
     }
 
     private MotionEvent moveEvent(float x, float y) {
-        return MotionEvent.obtain(defaultDownTime(), mClock.now(), ACTION_MOVE, x, y, 0);
+        return MotionEvent.obtain(mLastDownTime, mClock.now(), ACTION_MOVE, x, y, 0);
     }
 
     private MotionEvent downEvent() {
-        return MotionEvent.obtain(mClock.now(), mClock.now(),
+        mLastDownTime = mClock.now();
+        return MotionEvent.obtain(mLastDownTime, mLastDownTime,
                 ACTION_DOWN, DEFAULT_X, DEFAULT_Y, 0);
     }
 
     private MotionEvent upEvent() {
-        return upEvent(defaultDownTime());
+        return upEvent(mLastDownTime);
     }
 
     private MotionEvent upEvent(long downTime) {
         return MotionEvent.obtain(downTime, mClock.now(),
                 MotionEvent.ACTION_UP, DEFAULT_X, DEFAULT_Y, 0);
-    }
-
-    private long defaultDownTime() {
-        MotionEvent lastDown = mMgh.mDetectingState.mLastDown;
-        return lastDown == null ? mClock.now() - 1 : lastDown.getDownTime();
     }
 
     private MotionEvent pointerEvent(int action, float x, float y) {

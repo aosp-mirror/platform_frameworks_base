@@ -3215,22 +3215,31 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
         }
         int descendantFocusability = getDescendantFocusability();
 
+        boolean result;
         switch (descendantFocusability) {
             case FOCUS_BLOCK_DESCENDANTS:
-                return super.requestFocus(direction, previouslyFocusedRect);
+                result = super.requestFocus(direction, previouslyFocusedRect);
+                break;
             case FOCUS_BEFORE_DESCENDANTS: {
                 final boolean took = super.requestFocus(direction, previouslyFocusedRect);
-                return took ? took : onRequestFocusInDescendants(direction, previouslyFocusedRect);
+                result = took ? took : onRequestFocusInDescendants(direction,
+                        previouslyFocusedRect);
+                break;
             }
             case FOCUS_AFTER_DESCENDANTS: {
                 final boolean took = onRequestFocusInDescendants(direction, previouslyFocusedRect);
-                return took ? took : super.requestFocus(direction, previouslyFocusedRect);
+                result = took ? took : super.requestFocus(direction, previouslyFocusedRect);
+                break;
             }
             default:
                 throw new IllegalStateException("descendant focusability must be "
                         + "one of FOCUS_BEFORE_DESCENDANTS, FOCUS_AFTER_DESCENDANTS, FOCUS_BLOCK_DESCENDANTS "
                         + "but is " + descendantFocusability);
         }
+        if (result && !isLayoutValid() && ((mPrivateFlags & PFLAG_WANTS_FOCUS) == 0)) {
+            mPrivateFlags |= PFLAG_WANTS_FOCUS;
+        }
+        return result;
     }
 
     /**
@@ -3854,7 +3863,7 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
      * @hide
      */
     @Override
-    public Bitmap createSnapshot(Bitmap.Config quality, int backgroundColor, boolean skipChildren) {
+    public Bitmap createSnapshot(ViewDebug.CanvasProvider canvasProvider, boolean skipChildren) {
         int count = mChildrenCount;
         int[] visibilities = null;
 
@@ -3870,17 +3879,17 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
             }
         }
 
-        Bitmap b = super.createSnapshot(quality, backgroundColor, skipChildren);
-
-        if (skipChildren) {
-            for (int i = 0; i < count; i++) {
-                View child = getChildAt(i);
-                child.mViewFlags = (child.mViewFlags & ~View.VISIBILITY_MASK)
-                        | (visibilities[i] & View.VISIBILITY_MASK);
+        try {
+            return super.createSnapshot(canvasProvider, skipChildren);
+        } finally {
+            if (skipChildren) {
+                for (int i = 0; i < count; i++) {
+                    View child = getChildAt(i);
+                    child.mViewFlags = (child.mViewFlags & ~View.VISIBILITY_MASK)
+                            | (visibilities[i] & View.VISIBILITY_MASK);
+                }
             }
         }
-
-        return b;
     }
 
     /** Return true if this ViewGroup is laying out using optical bounds. */

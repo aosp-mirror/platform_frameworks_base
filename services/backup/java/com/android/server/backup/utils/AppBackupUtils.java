@@ -20,6 +20,8 @@ import static com.android.server.backup.RefactoredBackupManagerService.MORE_DEBU
 import static com.android.server.backup.RefactoredBackupManagerService.SHARED_BACKUP_AGENT_PACKAGE;
 import static com.android.server.backup.RefactoredBackupManagerService.TAG;
 
+import android.annotation.Nullable;
+import android.app.backup.BackupTransport;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
@@ -27,7 +29,9 @@ import android.content.pm.Signature;
 import android.os.Process;
 import android.util.Slog;
 
+import com.android.internal.backup.IBackupTransport;
 import com.android.internal.util.ArrayUtils;
+import com.android.server.backup.transport.TransportClient;
 
 /**
  * Utility methods wrapping operations on ApplicationInfo and PackageInfo.
@@ -69,6 +73,44 @@ public class AppBackupUtils {
         // Everything else checks out; the only remaining roadblock would be if the
         // package were disabled
         return !appIsDisabled(app, pm);
+    }
+
+    /**
+     * Returns whether an app is eligible for backup at runtime. That is, the app has to:
+     * <ol>
+     *     <li>Return true for {@link #appIsEligibleForBackup(ApplicationInfo, PackageManager)}
+     *     <li>Return false for {@link #appIsStopped(ApplicationInfo)}
+     *     <li>Return false for {@link #appIsDisabled(ApplicationInfo, PackageManager)}
+     *     <li>Be eligible for the transport via
+     *         {@link BackupTransport#isAppEligibleForBackup(PackageInfo, boolean)}
+     * </ol>
+     */
+    public static boolean appIsRunningAndEligibleForBackupWithTransport(
+            @Nullable TransportClient transportClient, String packageName, PackageManager pm) {
+        try {
+            PackageInfo packageInfo = pm.getPackageInfo(packageName, PackageManager.GET_SIGNATURES);
+            ApplicationInfo applicationInfo = packageInfo.applicationInfo;
+            if (!appIsEligibleForBackup(applicationInfo, pm)
+                    || appIsStopped(applicationInfo)
+                    || appIsDisabled(applicationInfo, pm)) {
+                return false;
+            }
+            if (transportClient != null) {
+                try {
+                    IBackupTransport transport =
+                            transportClient.connectOrThrow(
+                                    "AppBackupUtils.appIsEligibleForBackupAtRuntime");
+                    return transport.isAppEligibleForBackup(
+                            packageInfo, AppBackupUtils.appGetsFullBackup(packageInfo));
+                } catch (Exception e) {
+                    Slog.e(TAG, "Unable to ask about eligibility: " + e.getMessage());
+                }
+            }
+            // If transport is not present we couldn't tell that the package is not eligible.
+            return true;
+        } catch (PackageManager.NameNotFoundException e) {
+            return false;
+        }
     }
 
     /** Avoid backups of 'disabled' apps. */

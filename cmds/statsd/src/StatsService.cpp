@@ -335,7 +335,7 @@ status_t StatsService::cmd_trigger_broadcast(FILE* out, Vector<String8>& args) {
         print_cmd_help(out);
         return UNKNOWN_ERROR;
     }
-    auto receiver = mConfigManager->GetConfigReceiver(ConfigKey(uid, name));
+    auto receiver = mConfigManager->GetConfigReceiver(ConfigKey(uid, StrToInt64(name)));
     sp<IStatsCompanionService> sc = getStatsCompanionService();
     if (sc != nullptr) {
         sc->sendBroadcast(String16(receiver.first.c_str()), String16(receiver.second.c_str()));
@@ -404,13 +404,13 @@ status_t StatsService::cmd_config(FILE* in, FILE* out, FILE* err, Vector<String8
                 }
 
                 // Add / update the config.
-                mConfigManager->UpdateConfig(ConfigKey(uid, name), config);
+                mConfigManager->UpdateConfig(ConfigKey(uid, StrToInt64(name)), config);
             } else {
                 if (argCount == 2) {
                     cmd_remove_all_configs(out);
                 } else {
                     // Remove the config.
-                    mConfigManager->RemoveConfig(ConfigKey(uid, name));
+                    mConfigManager->RemoveConfig(ConfigKey(uid, StrToInt64(name)));
                 }
             }
 
@@ -459,7 +459,7 @@ status_t StatsService::cmd_dump_report(FILE* out, FILE* err, const Vector<String
         }
         if (good) {
             vector<uint8_t> data;
-            mProcessor->onDumpReport(ConfigKey(uid, name), &data);
+            mProcessor->onDumpReport(ConfigKey(uid, StrToInt64(name)), &data);
             // TODO: print the returned StatsLogReport to file instead of printing to logcat.
             if (proto) {
                 for (size_t i = 0; i < data.size(); i ++) {
@@ -699,12 +699,11 @@ void StatsService::OnLogEvent(const LogEvent& event) {
     mProcessor->OnLogEvent(event);
 }
 
-Status StatsService::getData(const String16& key, vector<uint8_t>* output) {
+Status StatsService::getData(int64_t key, vector<uint8_t>* output) {
     IPCThreadState* ipc = IPCThreadState::self();
     VLOG("StatsService::getData with Pid %i, Uid %i", ipc->getCallingPid(), ipc->getCallingUid());
     if (checkCallingPermission(String16(kPermissionDump))) {
-        string keyStr = string(String8(key).string());
-        ConfigKey configKey(ipc->getCallingUid(), keyStr);
+        ConfigKey configKey(ipc->getCallingUid(), key);
         mProcessor->onDumpReport(configKey, output);
         return Status::ok();
     } else {
@@ -724,14 +723,13 @@ Status StatsService::getMetadata(vector<uint8_t>* output) {
     }
 }
 
-Status StatsService::addConfiguration(const String16& key,
+Status StatsService::addConfiguration(int64_t key,
                                       const vector <uint8_t>& config,
                                       const String16& package, const String16& cls,
                                       bool* success) {
     IPCThreadState* ipc = IPCThreadState::self();
     if (checkCallingPermission(String16(kPermissionDump))) {
-        string keyString = string(String8(key).string());
-        ConfigKey configKey(ipc->getCallingUid(), keyString);
+        ConfigKey configKey(ipc->getCallingUid(), key);
         StatsdConfig cfg;
         if (!cfg.ParseFromArray(&config[0], config.size())) {
             *success = false;
@@ -748,11 +746,10 @@ Status StatsService::addConfiguration(const String16& key,
     }
 }
 
-Status StatsService::removeConfiguration(const String16& key, bool* success) {
+Status StatsService::removeConfiguration(int64_t key, bool* success) {
     IPCThreadState* ipc = IPCThreadState::self();
     if (checkCallingPermission(String16(kPermissionDump))) {
-        string keyStr = string(String8(key).string());
-        mConfigManager->RemoveConfig(ConfigKey(ipc->getCallingUid(), keyStr));
+        mConfigManager->RemoveConfig(ConfigKey(ipc->getCallingUid(), key));
         *success = true;
         return Status::ok();
     } else {

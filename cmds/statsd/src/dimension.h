@@ -56,6 +56,8 @@ void DimensionsValueToString(const DimensionsValue& value, std::string *flattene
 
 bool IsSubDimension(const DimensionsValue& dimension, const DimensionsValue& sub);
 
+// Helper function to get long value from the DimensionsValue proto.
+long getLongFromDimenValue(const DimensionsValue& dimensionValue);
 }  // namespace statsd
 }  // namespace os
 }  // namespace android

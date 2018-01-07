@@ -123,8 +123,6 @@ public class StorageManager {
     public static final String PROP_SDCARDFS = "persist.sys.sdcardfs";
     /** {@hide} */
     public static final String PROP_VIRTUAL_DISK = "persist.sys.virtual_disk";
-    /** {@hide} */
-    public static final String PROP_ADOPTABLE_FBE = "persist.sys.adoptable_fbe";
 
     /** {@hide} */
     public static final String UUID_PRIVATE_INTERNAL = null;
@@ -1473,6 +1471,11 @@ public class StorageManager {
     public static boolean isFileEncryptedNativeOrEmulated() {
         return isFileEncryptedNativeOnly()
                || isFileEncryptedEmulatedOnly();
+    }
+
+    /** {@hide} */
+    public static boolean hasAdoptable() {
+        return SystemProperties.getBoolean(PROP_HAS_ADOPTABLE, false);
     }
 
     /** {@hide} */

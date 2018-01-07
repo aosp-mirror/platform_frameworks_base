@@ -18,6 +18,7 @@ syntax = "proto2";
 
 import "frameworks/base/core/proto/android/content/configuration.proto";
 import "frameworks/base/core/proto/android/graphics/rect.proto";
+import "frameworks/base/core/proto/android/view/displaycutout.proto";
 import "frameworks/base/core/proto/android/view/displayinfo.proto";
 import "frameworks/base/core/proto/android/view/windowlayoutparams.proto";
 
@@ -172,6 +173,27 @@ message WindowStateProto {
   repeated WindowStateProto child_windows = 15;
   optional .android.graphics.RectProto surface_position = 16;
   optional .android.graphics.RectProto shown_position = 17;
+  optional int32 requested_width = 18;
+  optional int32 requested_height = 19;
+  optional int32 view_visibility = 20;
+  optional int32 system_ui_visibility = 21;
+  optional bool has_surface = 22;
+  optional bool is_ready_for_display = 23;
+  optional .android.graphics.RectProto display_frame = 24;
+  optional .android.graphics.RectProto overscan_frame = 25;
+  optional .android.graphics.RectProto visible_frame = 26;
+  optional .android.graphics.RectProto decor_frame = 27;
+  optional .android.graphics.RectProto outset_frame = 28;
+  optional .android.graphics.RectProto overscan_insets = 29;
+  optional .android.graphics.RectProto visible_insets = 30;
+  optional .android.graphics.RectProto stable_insets = 31;
+  optional .android.graphics.RectProto outsets = 32;
+  optional .android.view.DisplayCutoutProto cutout = 33;
+  optional bool remove_on_exit = 34;
+  optional bool destroying = 35;
+  optional bool removed = 36;
+  optional bool is_on_screen = 37;
+  optional bool is_visible = 38;
 }
 
 message IdentifierProto {
@@ -184,6 +206,15 @@ message IdentifierProto {
 message WindowStateAnimatorProto {
   optional .android.graphics.RectProto last_clip_rect = 1;
   optional WindowSurfaceControllerProto surface = 2;
+  enum DrawState {
+    NO_SURFACE = 0;
+    DRAW_PENDING = 1;
+    COMMIT_DRAW_PENDING = 2;
+    READY_TO_SHOW = 3;
+    HAS_DRAWN = 4;
+  }
+  optional DrawState draw_state = 3;
+  optional .android.graphics.RectProto system_decor_rect = 4;
 }
 
 /* represents WindowSurfaceController */

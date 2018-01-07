@@ -460,7 +460,8 @@ public class UserRestrictionsUtils {
                         // DISALLOW_DATA_ROAMING user restriction is set.
 
                         // Multi sim device.
-                        SubscriptionManager subscriptionManager = new SubscriptionManager(context);
+                        SubscriptionManager subscriptionManager = context
+                                .getSystemService(SubscriptionManager.class);
                         final List<SubscriptionInfo> subscriptionInfoList =
                             subscriptionManager.getActiveSubscriptionInfoList();
                         if (subscriptionInfoList != null) {

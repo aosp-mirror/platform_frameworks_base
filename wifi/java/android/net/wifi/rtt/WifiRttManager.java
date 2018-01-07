@@ -123,6 +123,10 @@ public class WifiRttManager {
                     + ", callback=" + callback + ", handler=" + handler);
         }
 
+        if (callback == null) {
+            throw new IllegalArgumentException("Null callback provided");
+        }
+
         Looper looper = (handler == null) ? Looper.getMainLooper() : handler.getLooper();
         Binder binder = new Binder();
         try {

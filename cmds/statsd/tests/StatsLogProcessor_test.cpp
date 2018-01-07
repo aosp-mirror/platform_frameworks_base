@@ -41,7 +41,7 @@ using android::util::ProtoOutputStream;
  */
 class MockMetricsManager : public MetricsManager {
 public:
-    MockMetricsManager() : MetricsManager(ConfigKey(1, "key"), StatsdConfig(), 1000, new UidMap()) {
+    MockMetricsManager() : MetricsManager(ConfigKey(1, 12345), StatsdConfig(), 1000, new UidMap()) {
     }
 
     MOCK_METHOD0(byteSize, size_t());
@@ -56,7 +56,7 @@ TEST(StatsLogProcessorTest, TestRateLimitByteSize) {
 
     MockMetricsManager mockMetricsManager;
 
-    ConfigKey key(100, "key");
+    ConfigKey key(100, 12345);
     // Expect only the first flush to trigger a check for byte size since the last two are
     // rate-limited.
     EXPECT_CALL(mockMetricsManager, byteSize()).Times(1);
@@ -74,7 +74,7 @@ TEST(StatsLogProcessorTest, TestRateLimitBroadcast) {
 
     MockMetricsManager mockMetricsManager;
 
-    ConfigKey key(100, "key");
+    ConfigKey key(100, 12345);
     EXPECT_CALL(mockMetricsManager, byteSize())
             .Times(2)
             .WillRepeatedly(Return(int(StatsdStats::kMaxMetricsBytesPerConfig * .95)));
@@ -98,7 +98,7 @@ TEST(StatsLogProcessorTest, TestDropWhenByteSizeTooLarge) {
 
     MockMetricsManager mockMetricsManager;
 
-    ConfigKey key(100, "key");
+    ConfigKey key(100, 12345);
     EXPECT_CALL(mockMetricsManager, byteSize())
             .Times(1)
             .WillRepeatedly(Return(int(StatsdStats::kMaxMetricsBytesPerConfig * 1.2)));

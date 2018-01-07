@@ -15,6 +15,8 @@
  */
 package com.android.statsd.loadtest;
 
+import com.android.internal.os.StatsdConfigProto.TimeUnit;
+
 import android.annotation.Nullable;
 import android.app.AlarmManager;
 import android.app.PendingIntent;
@@ -52,15 +54,24 @@ public class PerfData extends PerfDataRecorder {
     private final Set<PerfDataRecorder> mRecorders;
 
     public PerfData(LoadtestActivity loadtestActivity, boolean placebo, int replication,
-        long bucketMins, long periodSecs,  int burst) {
-        super(placebo, replication, bucketMins, periodSecs, burst);
+        TimeUnit bucket, long periodSecs,  int burst, boolean includeCountMetric,
+        boolean includeDurationMetric, boolean includeEventMetric,  boolean includeValueMetric,
+        boolean includeGaugeMetric) {
+      super(placebo, replication, bucket, periodSecs, burst, includeCountMetric,
+          includeDurationMetric, includeEventMetric, includeValueMetric, includeGaugeMetric);
         mRecorders = new HashSet();
-        mRecorders.add(new BatteryDataRecorder(placebo, replication, bucketMins, periodSecs, burst));
-        mRecorders.add(new MemoryDataRecorder(placebo, replication, bucketMins, periodSecs, burst));
-        mRecorders.add(new StatsdStatsRecorder(loadtestActivity, placebo, replication, bucketMins,
-                periodSecs, burst));
-        mRecorders.add(new ValidationRecorder(loadtestActivity, placebo, replication, bucketMins,
-                periodSecs, burst));
+        mRecorders.add(new BatteryDataRecorder(placebo, replication, bucket, periodSecs, burst,
+                includeCountMetric, includeDurationMetric, includeEventMetric, includeValueMetric,
+                includeGaugeMetric));
+        mRecorders.add(new MemoryDataRecorder(placebo, replication, bucket, periodSecs, burst,
+                includeCountMetric, includeDurationMetric, includeEventMetric, includeValueMetric,
+                includeGaugeMetric));
+        mRecorders.add(new StatsdStatsRecorder(loadtestActivity, placebo, replication, bucket,
+                periodSecs, burst, includeCountMetric, includeDurationMetric, includeEventMetric,
+                includeValueMetric, includeGaugeMetric));
+        mRecorders.add(new ValidationRecorder(loadtestActivity, placebo, replication, bucket,
+                periodSecs, burst, includeCountMetric, includeDurationMetric, includeEventMetric,
+                includeValueMetric, includeGaugeMetric));
         mAlarmMgr = (AlarmManager) loadtestActivity.getSystemService(Context.ALARM_SERVICE);
     }
 

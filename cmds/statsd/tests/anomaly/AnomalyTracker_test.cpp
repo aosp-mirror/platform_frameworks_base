@@ -31,7 +31,7 @@ namespace android {
 namespace os {
 namespace statsd {
 
-const ConfigKey kConfigKey(0, "test");
+const ConfigKey kConfigKey(0, 12345);
 
 HashableDimensionKey getMockDimensionKey(int key, string value) {
     DimensionsValue dimensionsValue;
@@ -57,7 +57,7 @@ std::shared_ptr<DimToValMap> MockBucket(
 TEST(AnomalyTrackerTest, TestConsecutiveBuckets) {
     const int64_t bucketSizeNs = 30 * NS_PER_SEC;
     Alert alert;
-    alert.set_number_of_buckets(3);
+    alert.set_num_buckets(3);
     alert.set_refractory_period_secs(2 * bucketSizeNs / NS_PER_SEC);
     alert.set_trigger_if_sum_gt(2);
 
@@ -177,7 +177,7 @@ TEST(AnomalyTrackerTest, TestConsecutiveBuckets) {
 TEST(AnomalyTrackerTest, TestSparseBuckets) {
     const int64_t bucketSizeNs = 30 * NS_PER_SEC;
     Alert alert;
-    alert.set_number_of_buckets(3);
+    alert.set_num_buckets(3);
     alert.set_refractory_period_secs(2 * bucketSizeNs / NS_PER_SEC);
     alert.set_trigger_if_sum_gt(2);
 

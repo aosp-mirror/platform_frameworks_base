@@ -34,7 +34,8 @@ interface IKeyChainService {
     void setUserSelectable(String alias, boolean isUserSelectable);
 
     boolean generateKeyPair(in String algorithm, in ParcelableKeyGenParameterSpec spec);
-    boolean attestKey(in String alias, in byte[] challenge, out KeymasterCertificateChain chain);
+    boolean attestKey(in String alias, in byte[] challenge, in int[] idAttestationFlags,
+            out KeymasterCertificateChain chain);
     boolean setKeyPairCertificate(String alias, in byte[] userCert, in byte[] certChain);
 
     // APIs used by CertInstaller and DevicePolicyManager

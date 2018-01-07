@@ -16,19 +16,17 @@
 
 package com.android.server.backup;
 
+import static com.google.common.truth.Truth.assertThat;
+
 import android.app.AlarmManager;
 import android.content.Context;
 import android.os.Handler;
 import android.platform.test.annotations.Presubmit;
 import android.provider.Settings;
 
-import com.android.server.backup.testing.ShadowBackupTransportStub;
-import com.android.server.backup.testing.ShadowContextImplForBackup;
-import com.android.server.backup.testing.ShadowPackageManagerForBackup;
 import com.android.server.testing.FrameworkRobolectricTestRunner;
 import com.android.server.testing.SystemLoaderClasses;
 
-import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -36,19 +34,9 @@ import org.mockito.MockitoAnnotations;
 import org.robolectric.RuntimeEnvironment;
 import org.robolectric.annotation.Config;
 
-import static com.google.common.truth.Truth.assertThat;
-
 @RunWith(FrameworkRobolectricTestRunner.class)
-@Config(
-        manifest = Config.NONE,
-        sdk = 26,
-        shadows = {
-                ShadowContextImplForBackup.class,
-                ShadowBackupTransportStub.class,
-                ShadowPackageManagerForBackup.class
-        }
-)
-@SystemLoaderClasses({TransportManager.class})
+@Config(manifest = Config.NONE, sdk = 26)
+@SystemLoaderClasses({BackupManagerConstants.class})
 @Presubmit
 public class BackupManagerConstantsTest {
     private static final String PACKAGE_NAME = "some.package.name";
@@ -59,17 +47,13 @@ public class BackupManagerConstantsTest {
         MockitoAnnotations.initMocks(this);
     }
 
-    @After
-    public void tearDown() throws Exception {
-    }
-
     @Test
     public void testDefaultValues() throws Exception {
         final Context context = RuntimeEnvironment.application.getApplicationContext();
         final Handler handler = new Handler();
 
-        Settings.Secure.putString(context.getContentResolver(),
-                Settings.Secure.BACKUP_MANAGER_CONSTANTS, null);
+        Settings.Secure.putString(
+                context.getContentResolver(), Settings.Secure.BACKUP_MANAGER_CONSTANTS, null);
 
         final BackupManagerConstants constants =
                 new BackupManagerConstants(handler, context.getContentResolver());
@@ -93,17 +77,21 @@ public class BackupManagerConstantsTest {
         final Context context = RuntimeEnvironment.application.getApplicationContext();
         final Handler handler = new Handler();
 
-        final String recievers_setting = "backup_finished_notification_receivers=" +
-                PACKAGE_NAME + ':' + ANOTHER_PACKAGE_NAME;
-        Settings.Secure.putString(context.getContentResolver(),
-                Settings.Secure.BACKUP_MANAGER_CONSTANTS, recievers_setting);
+        final String recieversSetting =
+                "backup_finished_notification_receivers="
+                        + PACKAGE_NAME
+                        + ':'
+                        + ANOTHER_PACKAGE_NAME;
+        Settings.Secure.putString(
+                context.getContentResolver(),
+                Settings.Secure.BACKUP_MANAGER_CONSTANTS,
+                recieversSetting);
 
         final BackupManagerConstants constants =
                 new BackupManagerConstants(handler, context.getContentResolver());
         constants.start();
 
-        assertThat(constants.getBackupFinishedNotificationReceivers()).isEqualTo(new String[] {
-                PACKAGE_NAME,
-                ANOTHER_PACKAGE_NAME});
+        assertThat(constants.getBackupFinishedNotificationReceivers())
+                .isEqualTo(new String[] {PACKAGE_NAME, ANOTHER_PACKAGE_NAME});
     }
 }

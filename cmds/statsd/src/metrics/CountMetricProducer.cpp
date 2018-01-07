@@ -43,7 +43,7 @@ namespace os {
 namespace statsd {
 
 // for StatsLogReport
-const int FIELD_ID_NAME = 1;
+const int FIELD_ID_ID = 1;
 const int FIELD_ID_START_REPORT_NANOS = 2;
 const int FIELD_ID_END_REPORT_NANOS = 3;
 const int FIELD_ID_COUNT_METRICS = 5;
@@ -61,10 +61,10 @@ CountMetricProducer::CountMetricProducer(const ConfigKey& key, const CountMetric
                                          const int conditionIndex,
                                          const sp<ConditionWizard>& wizard,
                                          const uint64_t startTimeNs)
-    : MetricProducer(metric.name(), key, startTimeNs, conditionIndex, wizard) {
+    : MetricProducer(metric.id(), key, startTimeNs, conditionIndex, wizard) {
     // TODO: evaluate initial conditions. and set mConditionMet.
-    if (metric.has_bucket() && metric.bucket().has_bucket_size_millis()) {
-        mBucketSizeNs = metric.bucket().bucket_size_millis() * 1000 * 1000;
+    if (metric.has_bucket()) {
+        mBucketSizeNs = TimeUnitToBucketSizeInMillis(metric.bucket()) * 1000000;
     } else {
         mBucketSizeNs = LLONG_MAX;
     }
@@ -78,7 +78,7 @@ CountMetricProducer::CountMetricProducer(const ConfigKey& key, const CountMetric
         mConditionSliced = true;
     }
 
-    VLOG("metric %s created. bucket size %lld start_time: %lld", metric.name().c_str(),
+    VLOG("metric %lld created. bucket size %lld start_time: %lld", (long long)metric.id(),
          (long long)mBucketSizeNs, (long long)mStartTimeNs);
 }
 
@@ -87,12 +87,12 @@ CountMetricProducer::~CountMetricProducer() {
 }
 
 void CountMetricProducer::onSlicedConditionMayChangeLocked(const uint64_t eventTime) {
-    VLOG("Metric %s onSlicedConditionMayChange", mName.c_str());
+    VLOG("Metric %lld onSlicedConditionMayChange", (long long)mMetricId);
 }
 
 void CountMetricProducer::onDumpReportLocked(const uint64_t dumpTimeNs, StatsLogReport* report) {
     flushIfNeededLocked(dumpTimeNs);
-    report->set_metric_name(mName);
+    report->set_metric_id(mMetricId);
     report->set_start_report_nanos(mStartTimeNs);
 
     auto count_metrics = report->mutable_count_metrics();
@@ -112,11 +112,11 @@ void CountMetricProducer::onDumpReportLocked(const uint64_t dumpTimeNs,
                                              ProtoOutputStream* protoOutput) {
     flushIfNeededLocked(dumpTimeNs);
 
-    protoOutput->write(FIELD_TYPE_STRING | FIELD_ID_NAME, mName);
+    protoOutput->write(FIELD_TYPE_INT64 | FIELD_ID_ID, (long long)mMetricId);
     protoOutput->write(FIELD_TYPE_INT64 | FIELD_ID_START_REPORT_NANOS, (long long)mStartTimeNs);
     long long protoToken = protoOutput->start(FIELD_TYPE_MESSAGE | FIELD_ID_COUNT_METRICS);
 
-    VLOG("metric %s dump report now...", mName.c_str());
+    VLOG("metric %lld dump report now...",(long long)mMetricId);
 
     for (const auto& counter : mPastBuckets) {
         const HashableDimensionKey& hashableKey = counter.first;
@@ -158,7 +158,7 @@ void CountMetricProducer::onDumpReportLocked(const uint64_t dumpTimeNs,
 
 void CountMetricProducer::onConditionChangedLocked(const bool conditionMet,
                                                    const uint64_t eventTime) {
-    VLOG("Metric %s onConditionChanged", mName.c_str());
+    VLOG("Metric %lld onConditionChanged", (long long)mMetricId);
     mCondition = conditionMet;
 }
 
@@ -170,11 +170,11 @@ bool CountMetricProducer::hitGuardRailLocked(const HashableDimensionKey& newKey)
     // 1. Report the tuple count if the tuple count > soft limit
     if (mCurrentSlicedCounter->size() > StatsdStats::kDimensionKeySizeSoftLimit - 1) {
         size_t newTupleCount = mCurrentSlicedCounter->size() + 1;
-        StatsdStats::getInstance().noteMetricDimensionSize(mConfigKey, mName, newTupleCount);
+        StatsdStats::getInstance().noteMetricDimensionSize(mConfigKey, mMetricId, newTupleCount);
         // 2. Don't add more tuples, we are above the allowed threshold. Drop the data.
         if (newTupleCount > StatsdStats::kDimensionKeySizeHardLimit) {
-            ALOGE("CountMetric %s dropping data for dimension key %s", mName.c_str(),
-                  newKey.c_str());
+            ALOGE("CountMetric %lld dropping data for dimension key %s",
+                (long long)mMetricId, newKey.c_str());
             return true;
         }
     }
@@ -215,7 +215,7 @@ void CountMetricProducer::onMatchedLogEventInternalLocked(
                                          mCurrentSlicedCounter->find(eventKey)->second);
     }
 
-    VLOG("metric %s %s->%lld", mName.c_str(), eventKey.c_str(),
+    VLOG("metric %lld %s->%lld", (long long)mMetricId, eventKey.c_str(),
          (long long)(*mCurrentSlicedCounter)[eventKey]);
 }
 
@@ -234,8 +234,8 @@ void CountMetricProducer::flushIfNeededLocked(const uint64_t& eventTimeNs) {
         info.mCount = counter.second;
         auto& bucketList = mPastBuckets[counter.first];
         bucketList.push_back(info);
-        VLOG("metric %s, dump key value: %s -> %lld", mName.c_str(), counter.first.c_str(),
-             (long long)counter.second);
+        VLOG("metric %lld, dump key value: %s -> %lld",
+            (long long)mMetricId, counter.first.c_str(), (long long)counter.second);
     }
 
     for (auto& tracker : mAnomalyTrackers) {
@@ -247,7 +247,7 @@ void CountMetricProducer::flushIfNeededLocked(const uint64_t& eventTimeNs) {
     uint64_t numBucketsForward = (eventTimeNs - mCurrentBucketStartTimeNs) / mBucketSizeNs;
     mCurrentBucketStartTimeNs = mCurrentBucketStartTimeNs + numBucketsForward * mBucketSizeNs;
     mCurrentBucketNum += numBucketsForward;
-    VLOG("metric %s: new bucket start time: %lld", mName.c_str(),
+    VLOG("metric %lld: new bucket start time: %lld", (long long)mMetricId,
          (long long)mCurrentBucketStartTimeNs);
 }
 

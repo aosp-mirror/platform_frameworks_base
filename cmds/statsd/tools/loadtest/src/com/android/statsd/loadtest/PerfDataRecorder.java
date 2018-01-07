@@ -21,6 +21,7 @@ import android.os.Environment;
 import android.util.Log;
 import android.os.Debug;
 
+import com.android.internal.os.StatsdConfigProto.TimeUnit;
 import java.io.BufferedReader;
 import java.io.Closeable;
 import java.io.File;
@@ -38,10 +39,13 @@ public abstract class PerfDataRecorder {
     protected final String mTimeAsString;
     protected final String mColumnSuffix;
 
-    protected PerfDataRecorder(boolean placebo, int replication, long bucketMins, long periodSecs,
-        int burst) {
+    protected PerfDataRecorder(boolean placebo, int replication, TimeUnit bucket, long periodSecs,
+        int burst, boolean includeCountMetric, boolean includeDurationMetric,
+        boolean includeEventMetric,  boolean includeValueMetric, boolean includeGaugeMetric) {
         mTimeAsString = new SimpleDateFormat("YYYY_MM_dd_HH_mm_ss").format(new Date());
-        mColumnSuffix = getColumnSuffix(placebo, replication, bucketMins, periodSecs, burst);
+        mColumnSuffix = getColumnSuffix(placebo, replication, bucket, periodSecs, burst,
+            includeCountMetric, includeDurationMetric, includeEventMetric, includeValueMetric,
+            includeGaugeMetric);
     }
 
     /** Starts recording performance data. */
@@ -120,14 +124,35 @@ public abstract class PerfDataRecorder {
     }
 
     /** Gets the suffix to use in the column name for perf data. */
-    private String getColumnSuffix(boolean placebo, int replication, long bucketMins,
-        long periodSecs, int burst) {
+    private String getColumnSuffix(boolean placebo, int replication, TimeUnit bucket,
+        long periodSecs, int burst, boolean includeCountMetric, boolean includeDurationMetric,
+        boolean includeEventMetric,  boolean includeValueMetric, boolean includeGaugeMetric) {
         if (placebo) {
             return "_placebo_p=" + periodSecs;
         }
-        return "_r=" + replication + "_bkt=" + bucketMins + "_p=" + periodSecs + "_bst=" + burst;
+        StringBuilder sb = new StringBuilder()
+            .append("_r=" + replication)
+            .append("_bkt=" + bucket)
+            .append("_p=" + periodSecs)
+            .append("_bst=" + burst)
+            .append("_m=");
+        if (includeCountMetric) {
+            sb.append("c");
+        }
+        if (includeEventMetric) {
+            sb.append("e");
+        }
+        if (includeDurationMetric) {
+            sb.append("d");
+        }
+        if (includeGaugeMetric) {
+            sb.append("g");
+        }
+        if (includeValueMetric) {
+            sb.append("v");
+        }
+        return sb.toString();
     }
-
 
     private File getStorageDir() {
         File file = new File(Environment.getExternalStoragePublicDirectory(

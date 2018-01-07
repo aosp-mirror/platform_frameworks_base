@@ -28,7 +28,8 @@ namespace statsd {
  */
 class ResourcePowerManagerPuller : public StatsPuller {
 public:
-    bool Pull(const int tagId, vector<std::shared_ptr<LogEvent>>* data) override;
+    ResourcePowerManagerPuller(int tagId);
+    bool PullInternal(vector<std::shared_ptr<LogEvent>>* data) override;
 };
 
 }  // namespace statsd

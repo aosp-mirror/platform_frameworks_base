@@ -12245,6 +12245,7 @@ public class ActivityManagerService extends IActivityManager.Stub
         mConstants.start(mContext.getContentResolver());
         mCoreSettingsObserver = new CoreSettingsObserver(this);
         mFontScaleSettingObserver = new FontScaleSettingObserver();
+        GlobalSettingsToPropertiesMapper.start(mContext.getContentResolver());
 
         // Now that the settings provider is published we can consider sending
         // in a rescue party.
@@ -14875,6 +14876,7 @@ public class ActivityManagerService extends IActivityManager.Stub
                 (process != null && process.info != null) ?
                         (process.info.isInstantApp() ? 1 : 0) : -1,
                 activity != null ? activity.shortComponentName : null,
+                activity != null ? activity.packageName : null,
                 process != null ? (process.isInterestingToUserLocked() ? 1 : 0) : -1);
 
         // Rate-limit how often we're willing to do the heavy lifting below to

@@ -17,6 +17,7 @@
 #include "Log.h"
 
 #include "frameworks/base/cmds/statsd/src/statsd_config.pb.h"
+#include "frameworks/base/cmds/statsd/src/statsd_internal.pb.h"
 #include "dimension.h"
 #include "field_util.h"
 
@@ -348,6 +349,23 @@ bool IsSubDimension(const DimensionsValue& dimension, const DimensionsValue& sub
             return false;
         default:
             return false;
+    }
+}
+
+long getLongFromDimenValue(const DimensionsValue& dimensionValue) {
+    switch (dimensionValue.value_case()) {
+        case DimensionsValue::ValueCase::kValueInt:
+            return dimensionValue.value_int();
+        case DimensionsValue::ValueCase::kValueLong:
+            return dimensionValue.value_long();
+        case DimensionsValue::ValueCase::kValueBool:
+            return dimensionValue.value_bool() ? 1 : 0;
+        case DimensionsValue::ValueCase::kValueFloat:
+            return (int64_t)dimensionValue.value_float();
+        case DimensionsValue::ValueCase::kValueTuple:
+        case DimensionsValue::ValueCase::kValueStr:
+        case DimensionsValue::ValueCase::VALUE_NOT_SET:
+            return 0;
     }
 }
 

@@ -13,8 +13,10 @@
 // limitations under the License.
 
 #include "src/metrics/GaugeMetricProducer.h"
+#include "src/stats_log_util.h"
 #include "logd/LogEvent.h"
 #include "metrics_test_helper.h"
+#include "tests/statsd_test_util.h"
 
 #include <gmock/gmock.h>
 #include <gtest/gtest.h>
@@ -34,19 +36,19 @@ namespace android {
 namespace os {
 namespace statsd {
 
-const ConfigKey kConfigKey(0, "test");
+const ConfigKey kConfigKey(0, 12345);
 const int tagId = 1;
-const string metricName = "test_metric";
+const int64_t metricId = 123;
 const int64_t bucketStartTimeNs = 10000000000;
-const int64_t bucketSizeNs = 60 * 1000 * 1000 * 1000LL;
+const int64_t bucketSizeNs = TimeUnitToBucketSizeInMillis(ONE_MINUTE) * 1000000LL;
 const int64_t bucket2StartTimeNs = bucketStartTimeNs + bucketSizeNs;
 const int64_t bucket3StartTimeNs = bucketStartTimeNs + 2 * bucketSizeNs;
 const int64_t bucket4StartTimeNs = bucketStartTimeNs + 3 * bucketSizeNs;
 
 TEST(GaugeMetricProducerTest, TestNoCondition) {
     GaugeMetric metric;
-    metric.set_name(metricName);
-    metric.mutable_bucket()->set_bucket_size_millis(bucketSizeNs / 1000000);
+    metric.set_id(metricId);
+    metric.set_bucket(ONE_MINUTE);
     metric.mutable_gauge_fields_filter()->set_include_all(false);
     auto gaugeFieldMatcher = metric.mutable_gauge_fields_filter()->mutable_fields();
     gaugeFieldMatcher->set_field(tagId);
@@ -63,7 +65,7 @@ TEST(GaugeMetricProducerTest, TestNoCondition) {
     EXPECT_CALL(*pullerManager, UnRegisterReceiver(tagId, _)).WillOnce(Return());
 
     GaugeMetricProducer gaugeProducer(kConfigKey, metric, -1 /*-1 meaning no condition*/, wizard,
-                                      tagId, tagId, bucketStartTimeNs, pullerManager);
+                                      tagId, bucketStartTimeNs, pullerManager);
 
     vector<shared_ptr<LogEvent>> allData;
     allData.clear();
@@ -119,12 +121,12 @@ TEST(GaugeMetricProducerTest, TestNoCondition) {
 
 TEST(GaugeMetricProducerTest, TestWithCondition) {
     GaugeMetric metric;
-    metric.set_name(metricName);
-    metric.mutable_bucket()->set_bucket_size_millis(bucketSizeNs / 1000000);
+    metric.set_id(metricId);
+    metric.set_bucket(ONE_MINUTE);
     auto gaugeFieldMatcher = metric.mutable_gauge_fields_filter()->mutable_fields();
     gaugeFieldMatcher->set_field(tagId);
     gaugeFieldMatcher->add_child()->set_field(2);
-    metric.set_condition("SCREEN_ON");
+    metric.set_condition(StringToId("SCREEN_ON"));
 
     sp<MockConditionWizard> wizard = new NaggyMock<MockConditionWizard>();
 
@@ -143,7 +145,7 @@ TEST(GaugeMetricProducerTest, TestWithCondition) {
                 return true;
             }));
 
-    GaugeMetricProducer gaugeProducer(kConfigKey, metric, 1, wizard, tagId, tagId,
+    GaugeMetricProducer gaugeProducer(kConfigKey, metric, 1, wizard, tagId,
                                       bucketStartTimeNs, pullerManager);
 
     gaugeProducer.onConditionChanged(true, bucketStartTimeNs + 8);
@@ -186,19 +188,19 @@ TEST(GaugeMetricProducerTest, TestAnomalyDetection) {
     EXPECT_CALL(*pullerManager, UnRegisterReceiver(tagId, _)).WillOnce(Return());
 
     GaugeMetric metric;
-    metric.set_name(metricName);
-    metric.mutable_bucket()->set_bucket_size_millis(bucketSizeNs / 1000000);
+    metric.set_id(metricId);
+    metric.set_bucket(ONE_MINUTE);
     auto gaugeFieldMatcher = metric.mutable_gauge_fields_filter()->mutable_fields();
     gaugeFieldMatcher->set_field(tagId);
     gaugeFieldMatcher->add_child()->set_field(2);
     GaugeMetricProducer gaugeProducer(kConfigKey, metric, -1 /*-1 meaning no condition*/, wizard,
-                                      tagId, tagId, bucketStartTimeNs, pullerManager);
+                                      tagId, bucketStartTimeNs, pullerManager);
 
     Alert alert;
-    alert.set_name("alert");
-    alert.set_metric_name(metricName);
+    alert.set_id(101);
+    alert.set_metric_id(metricId);
     alert.set_trigger_if_sum_gt(25);
-    alert.set_number_of_buckets(2);
+    alert.set_num_buckets(2);
     sp<AnomalyTracker> anomalyTracker = gaugeProducer.addAnomalyTracker(alert);
 
     int tagId = 1;

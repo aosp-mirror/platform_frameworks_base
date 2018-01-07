@@ -124,7 +124,7 @@ void StorageManager::sendBroadcast(const char* path,
         }
         if (index < 2) continue;
 
-        sendBroadcast(ConfigKey(uid, configName));
+        sendBroadcast(ConfigKey(uid, StrToInt64(configName)));
     }
 }
 
@@ -198,6 +198,7 @@ void StorageManager::readConfigFromDisk(map<ConfigKey, StatsdConfig>& configsMap
             index++;
         }
         if (index < 2) continue;
+
         string file_name = StringPrintf("%s/%s", STATS_SERVICE_DIR, name);
         VLOG("full file %s", file_name.c_str());
         int fd = open(file_name.c_str(), O_RDONLY | O_CLOEXEC);
@@ -206,7 +207,7 @@ void StorageManager::readConfigFromDisk(map<ConfigKey, StatsdConfig>& configsMap
             if (android::base::ReadFdToString(fd, &content)) {
                 StatsdConfig config;
                 if (config.ParseFromString(content)) {
-                    configsMap[ConfigKey(uid, configName)] = config;
+                    configsMap[ConfigKey(uid, StrToInt64(configName))] = config;
                     VLOG("map key uid=%d|name=%s", uid, name);
                 }
             }

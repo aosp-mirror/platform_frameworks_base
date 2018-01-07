@@ -1,5 +1,6 @@
 #include "CreateJavaOutputStreamAdaptor.h"
 #include "SkData.h"
+#include "SkMalloc.h"
 #include "SkRefCnt.h"
 #include "SkStream.h"
 #include "SkTypes.h"

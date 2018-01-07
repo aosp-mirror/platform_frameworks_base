@@ -415,7 +415,12 @@ public class PackageInstallerService extends IPackageInstaller.Stub {
             params.installFlags |= PackageManager.INSTALL_FROM_ADB;
 
         } else {
-            mAppOps.checkPackage(callingUid, installerPackageName);
+            // Only apps with INSTALL_PACKAGES are allowed to set an installer that is not the
+            // caller.
+            if (mContext.checkCallingOrSelfPermission(Manifest.permission.INSTALL_PACKAGES) !=
+                    PackageManager.PERMISSION_GRANTED) {
+                mAppOps.checkPackage(callingUid, installerPackageName);
+            }
 
             params.installFlags &= ~PackageManager.INSTALL_FROM_ADB;
             params.installFlags &= ~PackageManager.INSTALL_ALL_USERS;

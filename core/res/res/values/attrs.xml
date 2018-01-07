@@ -4470,6 +4470,10 @@
         <attr name="shadowRadius" format="float" />
         <!-- Elegant text height, especially for less compacted complex script text. -->
         <attr name="elegantTextHeight" format="boolean" />
+        <!-- Whether to respect the ascent and descent of the fallback fonts that are used in
+        displaying the text. When true, fallback fonts that end up getting used can increase
+        the ascent and descent of the lines that they are used on. -->
+        <attr name="fallbackLineSpacing" format="boolean"/>
         <!-- Text letter-spacing. -->
         <attr name="letterSpacing" format="float" />
         <!-- Font feature settings. -->
@@ -4803,6 +4807,10 @@
         <attr name="textAllCaps" />
         <!-- Elegant text height, especially for less compacted complex script text. -->
         <attr name="elegantTextHeight" />
+        <!-- Whether to respect the ascent and descent of the fallback fonts that are used in
+        displaying the text. When true, fallback fonts that end up getting used can increase
+        the ascent and descent of the lines that they are used on. -->
+        <attr name="fallbackLineSpacing" format="boolean"/>
         <!-- Text letter-spacing. -->
         <attr name="letterSpacing" />
         <!-- Font feature settings. -->
@@ -8699,8 +8707,11 @@
          common values are 400 for regular weight and 700 for bold weight. If unspecified, the value
          in the font's header tables will be used. -->
         <attr name="fontWeight" format="integer" />
-        <!-- The index of the font in the tcc font file. If the font file referenced is not in the
-         tcc format, this attribute needs not be specified. -->
+        <!-- The index of the font in the ttc (TrueType Collection) font file. If the font file
+         referenced is not in the ttc format, this attribute needs not be specified.
+         {@see android.graphics.Typeface#Builder.setTtcIndex(int)}.
+         The default value is 0. More details about the TrueType Collection font format can be found
+         here: https://en.wikipedia.org/wiki/TrueType#TrueType_Collection. -->
         <attr name="ttcIndex" format="integer" />
         <!-- The variation settings to be applied to the font. The string should be in the following
          format: "'tag1' value1, 'tag2' value2, ...". If the default variation settings should be

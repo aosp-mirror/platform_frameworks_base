@@ -32,6 +32,8 @@ import android.view.WindowManagerGlobal;
 import android.view.autofill.AutofillId;
 import android.view.autofill.AutofillValue;
 
+import com.android.internal.util.Preconditions;
+
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -624,6 +626,7 @@ public class AssistStructure implements Parcelable {
         int mMinEms = -1;
         int mMaxEms = -1;
         int mMaxLength = -1;
+        @Nullable String mTextIdEntry;
 
         // POJO used to override some autofill-related values when the node is parcelized.
         // Not written to parcel.
@@ -701,7 +704,7 @@ public class AssistStructure implements Parcelable {
             final int flags = mFlags;
             if ((flags&FLAGS_HAS_ID) != 0) {
                 mId = in.readInt();
-                if (mId != 0) {
+                if (mId != View.NO_ID) {
                     mIdEntry = preader.readString();
                     if (mIdEntry != null) {
                         mIdType = preader.readString();
@@ -724,6 +727,7 @@ public class AssistStructure implements Parcelable {
                 mMinEms = in.readInt();
                 mMaxEms = in.readInt();
                 mMaxLength = in.readInt();
+                mTextIdEntry = preader.readString();
             }
             if ((flags&FLAGS_HAS_LARGE_COORDS) != 0) {
                 mX = in.readInt();
@@ -857,7 +861,7 @@ public class AssistStructure implements Parcelable {
             out.writeInt(writtenFlags);
             if ((flags&FLAGS_HAS_ID) != 0) {
                 out.writeInt(mId);
-                if (mId != 0) {
+                if (mId != View.NO_ID) {
                     pwriter.writeString(mIdEntry);
                     if (mIdEntry != null) {
                         pwriter.writeString(mIdType);
@@ -890,6 +894,7 @@ public class AssistStructure implements Parcelable {
                 out.writeInt(mMinEms);
                 out.writeInt(mMaxEms);
                 out.writeInt(mMaxLength);
+                pwriter.writeString(mTextIdEntry);
             }
             if ((flags&FLAGS_HAS_LARGE_COORDS) != 0) {
                 out.writeInt(mX);
@@ -1430,6 +1435,17 @@ public class AssistStructure implements Parcelable {
         }
 
         /**
+         * Gets the identifier used to set the text associated with this view.
+         *
+         * <p>It's only relevant when the {@link AssistStructure} is used for autofill purposes,
+         * not for assist purposes.
+         */
+        @Nullable
+        public String getTextIdEntry() {
+            return mTextIdEntry;
+        }
+
+        /**
          * Return additional hint text associated with the node; this is typically used with
          * a node that takes user input, describing to the user what the input means.
          */
@@ -1681,6 +1697,11 @@ public class AssistStructure implements Parcelable {
             ViewNodeText t = getNodeText();
             t.mLineCharOffsets = charOffsets;
             t.mLineBaselines = baselines;
+        }
+
+        @Override
+        public void setTextIdEntry(@NonNull String entryName) {
+            mNode.mTextIdEntry = Preconditions.checkNotNull(entryName);
         }
 
         @Override
@@ -2082,6 +2103,7 @@ public class AssistStructure implements Parcelable {
             Log.i(TAG, prefix + "  Text color fg: #" + Integer.toHexString(node.getTextColor())
                     + ", bg: #" + Integer.toHexString(node.getTextBackgroundColor()));
             Log.i(TAG, prefix + "  Input type: " + node.getInputType());
+            Log.i(TAG, prefix + "  Resource id: " + node.getTextIdEntry());
         }
         String webDomain = node.getWebDomain();
         if (webDomain != null) {

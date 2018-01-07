@@ -121,7 +121,7 @@ class BackupManagerConstants extends ContentObserver {
                 DEFAULT_FULL_BACKUP_REQUIRE_CHARGING);
         mFullBackupRequiredNetworkType = mParser.getInt(FULL_BACKUP_REQUIRED_NETWORK_TYPE,
                 DEFAULT_FULL_BACKUP_REQUIRED_NETWORK_TYPE);
-        final String backupFinishedNotificationReceivers = mParser.getString(
+        String backupFinishedNotificationReceivers = mParser.getString(
                 BACKUP_FINISHED_NOTIFICATION_RECEIVERS,
                 DEFAULT_BACKUP_FINISHED_NOTIFICATION_RECEIVERS);
         if (backupFinishedNotificationReceivers.isEmpty()) {
@@ -190,6 +190,9 @@ class BackupManagerConstants extends ContentObserver {
         return mFullBackupRequiredNetworkType;
     }
 
+    /**
+     * Returns an array of package names that should be notified whenever a backup finishes.
+     */
     public synchronized String[] getBackupFinishedNotificationReceivers() {
         if (RefactoredBackupManagerService.DEBUG_SCHEDULING) {
             Slog.v(TAG, "getBackupFinishedNotificationReceivers(...) returns "

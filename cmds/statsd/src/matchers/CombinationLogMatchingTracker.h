@@ -31,11 +31,11 @@ namespace statsd {
 // Represents a AtomMatcher_Combination in the StatsdConfig.
 class CombinationLogMatchingTracker : public virtual LogMatchingTracker {
 public:
-    CombinationLogMatchingTracker(const std::string& name, const int index);
+    CombinationLogMatchingTracker(const int64_t& id, const int index);
 
     bool init(const std::vector<AtomMatcher>& allLogMatchers,
               const std::vector<sp<LogMatchingTracker>>& allTrackers,
-              const std::unordered_map<std::string, int>& matcherMap,
+              const std::unordered_map<int64_t, int>& matcherMap,
               std::vector<bool>& stack);
 
     ~CombinationLogMatchingTracker();

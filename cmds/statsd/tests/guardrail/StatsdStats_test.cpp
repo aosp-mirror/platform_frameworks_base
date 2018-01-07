@@ -14,6 +14,7 @@
 
 #include "src/guardrail/StatsdStats.h"
 #include "statslog.h"
+#include "tests/statsd_test_util.h"
 
 #include <gtest/gtest.h>
 #include <vector>
@@ -28,8 +29,7 @@ using std::vector;
 
 TEST(StatsdStatsTest, TestValidConfigAdd) {
     StatsdStats stats;
-    string name = "StatsdTest";
-    ConfigKey key(0, name);
+    ConfigKey key(0, 12345);
     const int metricsCount = 10;
     const int conditionsCount = 20;
     const int matchersCount = 30;
@@ -45,7 +45,7 @@ TEST(StatsdStatsTest, TestValidConfigAdd) {
     EXPECT_EQ(1, report.config_stats_size());
     const auto& configReport = report.config_stats(0);
     EXPECT_EQ(0, configReport.uid());
-    EXPECT_EQ(name, configReport.name());
+    EXPECT_EQ(12345, configReport.id());
     EXPECT_EQ(metricsCount, configReport.metric_count());
     EXPECT_EQ(conditionsCount, configReport.condition_count());
     EXPECT_EQ(matchersCount, configReport.matcher_count());
@@ -56,8 +56,7 @@ TEST(StatsdStatsTest, TestValidConfigAdd) {
 
 TEST(StatsdStatsTest, TestInvalidConfigAdd) {
     StatsdStats stats;
-    string name = "StatsdTest";
-    ConfigKey key(0, name);
+    ConfigKey key(0, 12345);
     const int metricsCount = 10;
     const int conditionsCount = 20;
     const int matchersCount = 30;
@@ -78,8 +77,7 @@ TEST(StatsdStatsTest, TestInvalidConfigAdd) {
 
 TEST(StatsdStatsTest, TestConfigRemove) {
     StatsdStats stats;
-    string name = "StatsdTest";
-    ConfigKey key(0, name);
+    ConfigKey key(0, 12345);
     const int metricsCount = 10;
     const int conditionsCount = 20;
     const int matchersCount = 30;
@@ -105,22 +103,22 @@ TEST(StatsdStatsTest, TestConfigRemove) {
 
 TEST(StatsdStatsTest, TestSubStats) {
     StatsdStats stats;
-    ConfigKey key(0, "test");
+    ConfigKey key(0, 12345);
     stats.noteConfigReceived(key, 2, 3, 4, 5, true);
 
-    stats.noteMatcherMatched(key, "matcher1");
-    stats.noteMatcherMatched(key, "matcher1");
-    stats.noteMatcherMatched(key, "matcher2");
+    stats.noteMatcherMatched(key, StringToId("matcher1"));
+    stats.noteMatcherMatched(key, StringToId("matcher1"));
+    stats.noteMatcherMatched(key, StringToId("matcher2"));
 
-    stats.noteConditionDimensionSize(key, "condition1", 250);
-    stats.noteConditionDimensionSize(key, "condition1", 240);
+    stats.noteConditionDimensionSize(key, StringToId("condition1"), 250);
+    stats.noteConditionDimensionSize(key, StringToId("condition1"), 240);
 
-    stats.noteMetricDimensionSize(key, "metric1", 201);
-    stats.noteMetricDimensionSize(key, "metric1", 202);
+    stats.noteMetricDimensionSize(key, StringToId("metric1"), 201);
+    stats.noteMetricDimensionSize(key, StringToId("metric1"), 202);
 
-    stats.noteAnomalyDeclared(key, "alert1");
-    stats.noteAnomalyDeclared(key, "alert1");
-    stats.noteAnomalyDeclared(key, "alert2");
+    stats.noteAnomalyDeclared(key, StringToId("alert1"));
+    stats.noteAnomalyDeclared(key, StringToId("alert1"));
+    stats.noteAnomalyDeclared(key, StringToId("alert2"));
 
     // broadcast-> 2
     stats.noteBroadcastSent(key);
@@ -147,39 +145,39 @@ TEST(StatsdStatsTest, TestSubStats) {
 
     EXPECT_EQ(2, configReport.matcher_stats_size());
     // matcher1 is the first in the list
-    if (!configReport.matcher_stats(0).name().compare("matcher1")) {
+    if (configReport.matcher_stats(0).id() == StringToId("matcher1")) {
         EXPECT_EQ(2, configReport.matcher_stats(0).matched_times());
         EXPECT_EQ(1, configReport.matcher_stats(1).matched_times());
-        EXPECT_EQ("matcher2", configReport.matcher_stats(1).name());
+        EXPECT_EQ(StringToId("matcher2"), configReport.matcher_stats(1).id());
     } else {
         // matcher1 is the second in the list.
         EXPECT_EQ(1, configReport.matcher_stats(0).matched_times());
-        EXPECT_EQ("matcher2", configReport.matcher_stats(0).name());
+        EXPECT_EQ(StringToId("matcher2"), configReport.matcher_stats(0).id());
 
         EXPECT_EQ(2, configReport.matcher_stats(1).matched_times());
-        EXPECT_EQ("matcher1", configReport.matcher_stats(1).name());
+        EXPECT_EQ(StringToId("matcher1"), configReport.matcher_stats(1).id());
     }
 
     EXPECT_EQ(2, configReport.alert_stats_size());
-    bool alert1first = !configReport.alert_stats(0).name().compare("alert1");
-    EXPECT_EQ("alert1", configReport.alert_stats(alert1first ? 0 : 1).name());
+    bool alert1first = configReport.alert_stats(0).id() == StringToId("alert1");
+    EXPECT_EQ(StringToId("alert1"), configReport.alert_stats(alert1first ? 0 : 1).id());
     EXPECT_EQ(2, configReport.alert_stats(alert1first ? 0 : 1).alerted_times());
-    EXPECT_EQ("alert2", configReport.alert_stats(alert1first ? 1 : 0).name());
+    EXPECT_EQ(StringToId("alert2"), configReport.alert_stats(alert1first ? 1 : 0).id());
     EXPECT_EQ(1, configReport.alert_stats(alert1first ? 1 : 0).alerted_times());
 
     EXPECT_EQ(1, configReport.condition_stats_size());
-    EXPECT_EQ("condition1", configReport.condition_stats(0).name());
+    EXPECT_EQ(StringToId("condition1"), configReport.condition_stats(0).id());
     EXPECT_EQ(250, configReport.condition_stats(0).max_tuple_counts());
 
     EXPECT_EQ(1, configReport.metric_stats_size());
-    EXPECT_EQ("metric1", configReport.metric_stats(0).name());
+    EXPECT_EQ(StringToId("metric1"), configReport.metric_stats(0).id());
     EXPECT_EQ(202, configReport.metric_stats(0).max_tuple_counts());
 
     // after resetting the stats, some new events come
-    stats.noteMatcherMatched(key, "matcher99");
-    stats.noteConditionDimensionSize(key, "condition99", 300);
-    stats.noteMetricDimensionSize(key, "metric99", 270);
-    stats.noteAnomalyDeclared(key, "alert99");
+    stats.noteMatcherMatched(key, StringToId("matcher99"));
+    stats.noteConditionDimensionSize(key, StringToId("condition99"), 300);
+    stats.noteMetricDimensionSize(key, StringToId("metric99tion99"), 270);
+    stats.noteAnomalyDeclared(key, StringToId("alert99"));
 
     // now the config stats should only contain the stats about the new event.
     stats.dumpStats(&output, false);
@@ -188,19 +186,19 @@ TEST(StatsdStatsTest, TestSubStats) {
     EXPECT_EQ(1, report.config_stats_size());
     const auto& configReport2 = report.config_stats(0);
     EXPECT_EQ(1, configReport2.matcher_stats_size());
-    EXPECT_EQ("matcher99", configReport2.matcher_stats(0).name());
+    EXPECT_EQ(StringToId("matcher99"), configReport2.matcher_stats(0).id());
     EXPECT_EQ(1, configReport2.matcher_stats(0).matched_times());
 
     EXPECT_EQ(1, configReport2.condition_stats_size());
-    EXPECT_EQ("condition99", configReport2.condition_stats(0).name());
+    EXPECT_EQ(StringToId("condition99"), configReport2.condition_stats(0).id());
     EXPECT_EQ(300, configReport2.condition_stats(0).max_tuple_counts());
 
     EXPECT_EQ(1, configReport2.metric_stats_size());
-    EXPECT_EQ("metric99", configReport2.metric_stats(0).name());
+    EXPECT_EQ(StringToId("metric99tion99"), configReport2.metric_stats(0).id());
     EXPECT_EQ(270, configReport2.metric_stats(0).max_tuple_counts());
 
     EXPECT_EQ(1, configReport2.alert_stats_size());
-    EXPECT_EQ("alert99", configReport2.alert_stats(0).name());
+    EXPECT_EQ(StringToId("alert99"), configReport2.alert_stats(0).id());
     EXPECT_EQ(1, configReport2.alert_stats(0).alerted_times());
 }
 
@@ -260,7 +258,7 @@ TEST(StatsdStatsTest, TestTimestampThreshold) {
     for (int i = 0; i < StatsdStats::kMaxTimestampCount; i++) {
         timestamps.push_back(i);
     }
-    ConfigKey key(0, "test");
+    ConfigKey key(0, 12345);
     stats.noteConfigReceived(key, 2, 3, 4, 5, true);
 
     for (int i = 0; i < StatsdStats::kMaxTimestampCount; i++) {

@@ -13,16 +13,17 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package android.service.autofill;
 
-/**
- * Helper class used to calculate a score.
- *
- * <p>Typically used to calculate the
- * <a href="AutofillService.html#FieldClassification">field classification</a> score between an
- * actual {@link android.view.autofill.AutofillValue} filled by the user and the expected value
- * predicted by an autofill service.
- */
-public interface Scorer {
+syntax = "proto2";
+option optimize_for = LITE_RUNTIME;
 
+package android.os.statsd;
+
+option java_package = "com.android.os";
+option java_outer_classname = "StatsdInternalProto";
+
+message Field {
+  optional int32 field = 1;
+  optional int32 position_index = 2 [default = -1];
+  repeated Field child = 3;
 }

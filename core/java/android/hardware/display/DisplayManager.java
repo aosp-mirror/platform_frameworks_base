@@ -628,13 +628,6 @@ public final class DisplayManager {
     }
 
     /**
-     * @hide STOPSHIP - remove when adaptive brightness accepts curves.
-     */
-    public void setBrightness(int brightness) {
-        mGlobal.setBrightness(brightness);
-    }
-
-    /**
      * Sets the global display brightness configuration.
      *
      * @hide

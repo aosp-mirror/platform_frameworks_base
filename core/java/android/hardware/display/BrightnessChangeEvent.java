@@ -28,7 +28,7 @@ import android.os.Parcelable;
  */
 public final class BrightnessChangeEvent implements Parcelable {
     /** Brightness in nits */
-    public int brightness;
+    public float brightness;
 
     /** Timestamp of the change {@see System.currentTimeMillis()} */
     public long timeStamp;
@@ -58,7 +58,7 @@ public final class BrightnessChangeEvent implements Parcelable {
     public int colorTemperature;
 
     /** Brightness level before slider adjustment */
-    public int lastBrightness;
+    public float lastBrightness;
 
     public BrightnessChangeEvent() {
     }
@@ -78,7 +78,7 @@ public final class BrightnessChangeEvent implements Parcelable {
     }
 
     private BrightnessChangeEvent(Parcel source) {
-        brightness = source.readInt();
+        brightness = source.readFloat();
         timeStamp = source.readLong();
         packageName = source.readString();
         userId = source.readInt();
@@ -87,7 +87,7 @@ public final class BrightnessChangeEvent implements Parcelable {
         batteryLevel = source.readFloat();
         nightMode = source.readBoolean();
         colorTemperature = source.readInt();
-        lastBrightness = source.readInt();
+        lastBrightness = source.readFloat();
     }
 
     public static final Creator<BrightnessChangeEvent> CREATOR =
@@ -107,7 +107,7 @@ public final class BrightnessChangeEvent implements Parcelable {
 
     @Override
     public void writeToParcel(Parcel dest, int flags) {
-        dest.writeInt(brightness);
+        dest.writeFloat(brightness);
         dest.writeLong(timeStamp);
         dest.writeString(packageName);
         dest.writeInt(userId);
@@ -116,6 +116,6 @@ public final class BrightnessChangeEvent implements Parcelable {
         dest.writeFloat(batteryLevel);
         dest.writeBoolean(nightMode);
         dest.writeInt(colorTemperature);
-        dest.writeInt(lastBrightness);
+        dest.writeFloat(lastBrightness);
     }
 }

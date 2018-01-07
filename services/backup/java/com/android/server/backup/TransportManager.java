@@ -49,6 +49,7 @@ import com.android.server.EventLogTags;
 import com.android.server.backup.transport.TransportClient;
 import com.android.server.backup.transport.TransportClientManager;
 import com.android.server.backup.transport.TransportConnectionListener;
+import com.android.server.backup.transport.TransportNotAvailableException;
 import com.android.server.backup.transport.TransportNotRegisteredException;
 
 import java.util.ArrayList;
@@ -265,6 +266,18 @@ public class TransportManager {
     }
 
     /**
+     * Retrieve the current destination string of {@code transportName}.
+     * @throws TransportNotRegisteredException if the transport is not registered.
+     */
+    public String getTransportCurrentDestinationString(String transportName)
+            throws TransportNotRegisteredException {
+        synchronized (mTransportLock) {
+            return getRegisteredTransportDescriptionOrThrowLocked(transportName)
+                    .currentDestinationString;
+        }
+    }
+
+    /**
      * Retrieve the data management label of {@code transportName}.
      * @throws TransportNotRegisteredException if the transport is not registered.
      */
@@ -285,6 +298,18 @@ public class TransportManager {
             throws TransportNotRegisteredException {
         synchronized (mTransportLock) {
             return getRegisteredTransportDescriptionOrThrowLocked(transportName)
+                    .transportDirName;
+        }
+    }
+
+    /**
+     * Retrieve the transport dir name of {@code transportComponent}.
+     * @throws TransportNotRegisteredException if the transport is not registered.
+     */
+    public String getTransportDirName(ComponentName transportComponent)
+            throws TransportNotRegisteredException {
+        synchronized (mTransportLock) {
+            return getRegisteredTransportDescriptionOrThrowLocked(transportComponent)
                     .transportDirName;
         }
     }
@@ -358,7 +383,6 @@ public class TransportManager {
         return description;
     }
 
-
     @GuardedBy("mTransportLock")
     @Nullable
     private Map.Entry<ComponentName, TransportDescription> getRegisteredTransportEntryLocked(
@@ -373,17 +397,35 @@ public class TransportManager {
         return null;
     }
 
+    @GuardedBy("mTransportLock")
+    private TransportDescription getRegisteredTransportDescriptionOrThrowLocked(
+            ComponentName transportComponent) throws TransportNotRegisteredException {
+        TransportDescription description =
+                mRegisteredTransportsDescriptionMap.get(transportComponent);
+        if (description == null) {
+            throw new TransportNotRegisteredException(transportComponent);
+        }
+        return description;
+    }
+
     @Nullable
     public TransportClient getTransportClient(String transportName, String caller) {
+        try {
+            return getTransportClientOrThrow(transportName, caller);
+        } catch (TransportNotRegisteredException e) {
+            Slog.w(TAG, "Transport " + transportName + " not registered");
+            return null;
+        }
+    }
+
+    public TransportClient getTransportClientOrThrow(String transportName, String caller)
+            throws TransportNotRegisteredException {
         synchronized (mTransportLock) {
             ComponentName component = getRegisteredTransportComponentLocked(transportName);
             if (component == null) {
-                Slog.w(TAG, "Transport " + transportName + " not registered");
-                return null;
+                throw new TransportNotRegisteredException(transportName);
             }
-            TransportDescription description = mRegisteredTransportsDescriptionMap.get(component);
-            return mTransportClientManager.getTransportClient(
-                    component, description.transportDirName, caller);
+            return mTransportClientManager.getTransportClient(component, caller);
         }
     }
 
@@ -403,7 +445,25 @@ public class TransportManager {
      */
     @Nullable
     public TransportClient getCurrentTransportClient(String caller) {
-        return getTransportClient(mCurrentTransportName, caller);
+        synchronized (mTransportLock) {
+            return getTransportClient(mCurrentTransportName, caller);
+        }
+    }
+
+    /**
+     * Returns a {@link TransportClient} for the current transport or throws if not registered.
+     *
+     * @param caller A {@link String} identifying the caller for logging/debugging purposes. Check
+     *     {@link TransportClient#connectAsync(TransportConnectionListener, String)} for more
+     *     details.
+     * @return A {@link TransportClient}.
+     * @throws TransportNotRegisteredException if the transport is not registered.
+     */
+    public TransportClient getCurrentTransportClientOrThrow(String caller)
+            throws TransportNotRegisteredException {
+        synchronized (mTransportLock) {
+            return getTransportClientOrThrow(mCurrentTransportName, caller);
+        }
     }
 
     /**

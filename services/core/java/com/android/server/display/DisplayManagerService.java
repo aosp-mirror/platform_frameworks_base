@@ -270,8 +270,6 @@ public final class DisplayManagerService extends SystemService {
 
     private final Injector mInjector;
 
-    private final BrightnessTracker mBrightnessTracker;
-
     public DisplayManagerService(Context context) {
         this(context, new Injector());
     }
@@ -290,7 +288,6 @@ public final class DisplayManagerService extends SystemService {
 
         PowerManager pm = (PowerManager) mContext.getSystemService(Context.POWER_SERVICE);
         mGlobalDisplayBrightness = pm.getDefaultScreenBrightnessSetting();
-        mBrightnessTracker = new BrightnessTracker(context, null);
         mCurrentUserId = UserHandle.USER_SYSTEM;
     }
 
@@ -1339,9 +1336,6 @@ public final class DisplayManagerService extends SystemService {
 
             pw.println();
             mPersistentDataStore.dump(pw);
-
-            pw.println();
-            mBrightnessTracker.dump(pw);
         }
     }
 
@@ -1417,10 +1411,6 @@ public final class DisplayManagerService extends SystemService {
                             mTempExternalTouchViewport, mTempVirtualTouchViewports);
                     break;
                 }
-
-                case MSG_REGISTER_BRIGHTNESS_TRACKER:
-                    mBrightnessTracker.start();
-                    break;
 
                 case MSG_LOAD_BRIGHTNESS_CONFIGURATION:
                     loadBrightnessConfiguration();
@@ -1833,22 +1823,9 @@ public final class DisplayManagerService extends SystemService {
             final int userId = UserHandle.getUserId(callingUid);
             final long token = Binder.clearCallingIdentity();
             try {
-                return mBrightnessTracker.getEvents(userId, hasUsageStats);
-            } finally {
-                Binder.restoreCallingIdentity(token);
-            }
-        }
-
-        @Override // Binder call
-        public void setBrightness(int brightness) {
-            // STOPSHIP - remove when adaptive brightness controller accepts curves.
-            mContext.enforceCallingOrSelfPermission(
-                    Manifest.permission.BRIGHTNESS_SLIDER_USAGE,
-                    "Permission to set brightness.");
-            int userId = UserHandle.getUserId(Binder.getCallingUid());
-            final long token = Binder.clearCallingIdentity();
-            try {
-                mBrightnessTracker.setBrightness(brightness, userId);
+                synchronized (mSyncRoot) {
+                    return mDisplayPowerController.getBrightnessEvents(userId, hasUsageStats);
+                }
             } finally {
                 Binder.restoreCallingIdentity(token);
             }
@@ -2028,7 +2005,9 @@ public final class DisplayManagerService extends SystemService {
 
         @Override
         public void persistBrightnessSliderEvents() {
-            mBrightnessTracker.persistEvents();
+            synchronized (mSyncRoot) {
+                mDisplayPowerController.persistBrightnessSliderEvents();
+            }
         }
     }
 }

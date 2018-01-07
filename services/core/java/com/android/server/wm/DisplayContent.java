@@ -187,9 +187,10 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
             new NonAppWindowContainers("mBelowAppWindowsContainers", mService);
     // Contains all IME window containers. Note that the z-ordering of the IME windows will depend
     // on the IME target. We mainly have this container grouping so we can keep track of all the IME
-    // window containers together and move them in-sync if/when needed.
-    private final NonAppWindowContainers mImeWindowsContainers =
-            new NonAppWindowContainers("mImeWindowsContainers", mService);
+    // window containers together and move them in-sync if/when needed. We use a subclass of
+    // WindowContainer which is omitted from screen magnification, as the IME is never magnified.
+    private final NonMagnifiableWindowContainers mImeWindowsContainers =
+            new NonMagnifiableWindowContainers("mImeWindowsContainers", mService);
 
     private WindowState mTmpWindow;
     private WindowState mTmpWindow2;
@@ -3650,6 +3651,16 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
             return mName;
         }
     }
+
+    private class NonMagnifiableWindowContainers extends NonAppWindowContainers {
+        NonMagnifiableWindowContainers(String name, WindowManagerService service) {
+            super(name, service);
+        }
+
+        @Override
+        void applyMagnificationSpec(Transaction t, MagnificationSpec spec) {
+        }
+    };
 
     SurfaceControl.Builder makeSurface(SurfaceSession s) {
         return mService.makeSurfaceBuilder(s)

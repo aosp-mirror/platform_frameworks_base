@@ -84,22 +84,22 @@ message Atom {
         // TODO: Reorder the numbering so that the most frequent occur events occur in the first 15.
     }
 
-    // Pulled events will start at field 1000.
+    // Pulled events will start at field 10000.
     oneof pulled {
-        WifiBytesTransfer wifi_bytes_transfer = 1000;
-        WifiBytesTransferByFgBg wifi_bytes_transfer_by_fg_bg = 1001;
-        MobileBytesTransfer mobile_bytes_transfer = 1002;
-        MobileBytesTransferByFgBg mobile_bytes_transfer_by_fg_bg = 1003;
-        KernelWakelock kernel_wakelock = 1004;
-        PlatformSleepState platform_sleep_state = 1005;
-        SleepStateVoter sleep_state_voter = 1006;
-        SubsystemSleepState subsystem_sleep_state = 1007;
-        CpuTimePerFreq cpu_time_per_freq = 1008;
-        CpuTimePerUid cpu_time_per_uid = 1009;
-        CpuTimePerUidFreq cpu_time_per_uid_freq = 1010;
-        WifiActivityEnergyInfo wifi_activity_energy_info = 1011;
-        ModemActivityInfo modem_activity_info = 1012;
-        AttributionChainDummyAtom attribution_chain_dummy_atom = 10000;
+        WifiBytesTransfer wifi_bytes_transfer = 10000;
+        WifiBytesTransferByFgBg wifi_bytes_transfer_by_fg_bg = 10001;
+        MobileBytesTransfer mobile_bytes_transfer = 10002;
+        MobileBytesTransferByFgBg mobile_bytes_transfer_by_fg_bg = 10003;
+        KernelWakelock kernel_wakelock = 10004;
+        PlatformSleepState platform_sleep_state = 10005;
+        SleepStateVoter sleep_state_voter = 10006;
+        SubsystemSleepState subsystem_sleep_state = 10007;
+        CpuTimePerFreq cpu_time_per_freq = 10008;
+        CpuTimePerUid cpu_time_per_uid = 10009;
+        CpuTimePerUidFreq cpu_time_per_uid_freq = 10010;
+        WifiActivityEnergyInfo wifi_activity_energy_info = 10011;
+        ModemActivityInfo modem_activity_info = 10012;
+        AttributionChainDummyAtom attribution_chain_dummy_atom = 100000;
     }
 }
 
@@ -800,16 +800,19 @@ message DropboxErrorChanged {
     optional string process_name = 3;
 
     // The pid if available. -1 means not available.
-    optional int32 pid = 4;
+    optional sint32 pid = 4;
 
     // 1 indicates is instant app. -1 indicates Not applicable.
-    optional int32 is_instant_app = 5;
+    optional sint32 is_instant_app = 5;
 
     // The activity name if available.
     optional string activity_name = 6;
 
+    // The package name if available.
+    optional string package_name = 7;
+
     // 1 indicates in foreground. -1 indicates not available.
-    optional int32 is_foreground = 7;
+    optional sint32 is_foreground = 8;
 }
 
 /*
@@ -845,11 +848,11 @@ message AnomalyDetected {
     // Uid that owns the config whose anomaly detection alert fired.
     optional int32 config_uid = 1;
 
-    // Name of the config whose anomaly detection alert fired.
-    optional string config_name = 2;
+    // Id of the config whose anomaly detection alert fired.
+    optional int64 config_id = 2;
 
-    // Name of the alert (i.e. name of the anomaly that was detected).
-    optional string alert_name = 3;
+    // Id of the alert (i.e. name of the anomaly that was detected).
+    optional int64 alert_id = 3;
 }
 
 /**

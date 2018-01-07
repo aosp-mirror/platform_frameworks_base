@@ -23,7 +23,6 @@ import android.content.pm.PackageManager.NameNotFoundException;
 import android.os.RemoteException;
 import android.os.ServiceManager;
 import android.os.ServiceSpecificException;
-import android.os.UserHandle;
 import android.security.KeyStore;
 import android.util.AndroidException;
 
@@ -44,8 +43,53 @@ public class RecoverableKeyStoreLoader {
 
     public static final int NO_ERROR = KeyStore.NO_ERROR;
     public static final int SYSTEM_ERROR = KeyStore.SYSTEM_ERROR;
-    public static final int UNINITIALIZED_RECOVERY_PUBLIC_KEY = 20;
-    public static final int NO_SNAPSHOT_PENDING_ERROR = 21;
+
+    /**
+     * Failed because the loader has not been initialized with a recovery public key yet.
+     */
+    public static final int ERROR_UNINITIALIZED_RECOVERY_PUBLIC_KEY = 20;
+
+    /**
+     * Failed because no snapshot is yet pending to be synced for the user.
+     */
+    public static final int ERROR_NO_SNAPSHOT_PENDING = 21;
+
+    /**
+     * Failed due to an error internal to AndroidKeyStore.
+     */
+    public static final int ERROR_KEYSTORE_INTERNAL_ERROR = 22;
+
+    /**
+     * Failed because the user does not have a lock screen set.
+     */
+    public static final int ERROR_INSECURE_USER = 24;
+
+    /**
+     * Failed because of an internal database error.
+     */
+    public static final int ERROR_DATABASE_ERROR = 25;
+
+    /**
+     * Failed because the provided certificate was not a valid X509 certificate.
+     */
+    public static final int ERROR_BAD_X509_CERTIFICATE = 26;
+
+    /**
+     * Should never be thrown - some algorithm that all AOSP implementations must support is
+     * not available.
+     */
+    public static final int ERROR_UNEXPECTED_MISSING_ALGORITHM = 27;
+
+    /**
+     * The caller is attempting to perform an operation that is not yet fully supported in the API.
+     */
+    public static final int ERROR_NOT_YET_SUPPORTED = 28;
+
+    /**
+     * Error thrown if decryption failed. This might be because the tag is wrong, the key is wrong,
+     * the data has become corrupted, the data has been tampered with, etc.
+     */
+    public static final int ERROR_DECRYPTION_FAILED = 29;
 
     /**
      * Rate limit is enforced to prevent using too many trusted remote devices, since each device
@@ -53,7 +97,7 @@ public class RecoverableKeyStoreLoader {
      *
      * @hide
      */
-    public static final int RATE_LIMIT_EXCEEDED = 21;
+    public static final int ERROR_RATE_LIMIT_EXCEEDED = 30;
 
     /** Key has been successfully synced. */
     public static final int RECOVERY_STATUS_SYNCED = 0;
@@ -88,12 +132,13 @@ public class RecoverableKeyStoreLoader {
         /**
          * Creates new {@link #RecoverableKeyStoreLoaderException} instance from the error code.
          *
-         * @param errorCode
+         * @param errorCode An error code, as listed at the top of this file.
+         * @param message The associated error message.
          * @hide
          */
-        public static RecoverableKeyStoreLoaderException fromErrorCode(int errorCode) {
-            return new RecoverableKeyStoreLoaderException(
-                    errorCode, getMessageFromErrorCode(errorCode));
+        public static RecoverableKeyStoreLoaderException fromErrorCode(
+                int errorCode, String message) {
+            return new RecoverableKeyStoreLoaderException(errorCode, message);
         }
 
         /**
@@ -105,32 +150,17 @@ public class RecoverableKeyStoreLoader {
          */
         static RecoverableKeyStoreLoaderException fromServiceSpecificException(
                 ServiceSpecificException e) throws RecoverableKeyStoreLoaderException {
-            throw RecoverableKeyStoreLoaderException.fromErrorCode(e.errorCode);
+            throw RecoverableKeyStoreLoaderException.fromErrorCode(e.errorCode, e.getMessage());
         }
 
         private RecoverableKeyStoreLoaderException(int errorCode, String message) {
             super(message);
+            mErrorCode = errorCode;
         }
 
         /** Returns errorCode. */
         public int getErrorCode() {
             return mErrorCode;
-        }
-
-        /** @hide */
-        private static String getMessageFromErrorCode(int errorCode) {
-            switch (errorCode) {
-                case NO_ERROR:
-                    return "OK";
-                case SYSTEM_ERROR:
-                    return "System error";
-                case UNINITIALIZED_RECOVERY_PUBLIC_KEY:
-                    return "Recovery service is not initialized";
-                case RATE_LIMIT_EXCEEDED:
-                    return "Rate limit exceeded";
-                default:
-                    return String.valueOf("Unknown error code " + errorCode);
-            }
         }
     }
 
@@ -156,8 +186,7 @@ public class RecoverableKeyStoreLoader {
             @NonNull String rootCertificateAlias, @NonNull byte[] signedPublicKeyList)
             throws RecoverableKeyStoreLoaderException {
         try {
-            mBinder.initRecoveryService(
-                    rootCertificateAlias, signedPublicKeyList, UserHandle.getCallingUserId());
+            mBinder.initRecoveryService(rootCertificateAlias, signedPublicKeyList);
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         } catch (ServiceSpecificException e) {
@@ -176,8 +205,7 @@ public class RecoverableKeyStoreLoader {
     public @NonNull KeyStoreRecoveryData getRecoveryData(@NonNull byte[] account)
             throws RecoverableKeyStoreLoaderException {
         try {
-            KeyStoreRecoveryData recoveryData =
-                    mBinder.getRecoveryData(account, UserHandle.getCallingUserId());
+            KeyStoreRecoveryData recoveryData = mBinder.getRecoveryData(account);
             return recoveryData;
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
@@ -198,7 +226,7 @@ public class RecoverableKeyStoreLoader {
     public void setSnapshotCreatedPendingIntent(@Nullable PendingIntent intent)
             throws RecoverableKeyStoreLoaderException {
         try {
-            mBinder.setSnapshotCreatedPendingIntent(intent, UserHandle.getCallingUserId());
+            mBinder.setSnapshotCreatedPendingIntent(intent);
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         } catch (ServiceSpecificException e) {
@@ -220,8 +248,7 @@ public class RecoverableKeyStoreLoader {
             // IPC doesn't support generic Maps.
             @SuppressWarnings("unchecked")
             Map<byte[], Integer> result =
-                    (Map<byte[], Integer>)
-                            mBinder.getRecoverySnapshotVersions(UserHandle.getCallingUserId());
+                    (Map<byte[], Integer>) mBinder.getRecoverySnapshotVersions();
             return result;
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
@@ -243,7 +270,7 @@ public class RecoverableKeyStoreLoader {
     public void setServerParameters(long serverParameters)
             throws RecoverableKeyStoreLoaderException {
         try {
-            mBinder.setServerParameters(serverParameters, UserHandle.getCallingUserId());
+            mBinder.setServerParameters(serverParameters);
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         } catch (ServiceSpecificException e) {
@@ -265,7 +292,7 @@ public class RecoverableKeyStoreLoader {
             @NonNull String packageName, @Nullable String[] aliases, int status)
             throws NameNotFoundException, RecoverableKeyStoreLoaderException {
         try {
-            mBinder.setRecoveryStatus(packageName, aliases, status, UserHandle.getCallingUserId());
+            mBinder.setRecoveryStatus(packageName, aliases, status);
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         } catch (ServiceSpecificException e) {
@@ -297,7 +324,7 @@ public class RecoverableKeyStoreLoader {
             @SuppressWarnings("unchecked")
             Map<String, Integer> result =
                     (Map<String, Integer>)
-                            mBinder.getRecoveryStatus(packageName, UserHandle.getCallingUserId());
+                            mBinder.getRecoveryStatus(packageName);
             return result;
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
@@ -317,7 +344,7 @@ public class RecoverableKeyStoreLoader {
             @NonNull @KeyStoreRecoveryMetadata.UserSecretType int[] secretTypes)
             throws RecoverableKeyStoreLoaderException {
         try {
-            mBinder.setRecoverySecretTypes(secretTypes, UserHandle.getCallingUserId());
+            mBinder.setRecoverySecretTypes(secretTypes);
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         } catch (ServiceSpecificException e) {
@@ -335,7 +362,7 @@ public class RecoverableKeyStoreLoader {
     public @NonNull @KeyStoreRecoveryMetadata.UserSecretType int[] getRecoverySecretTypes()
             throws RecoverableKeyStoreLoaderException {
         try {
-            return mBinder.getRecoverySecretTypes(UserHandle.getCallingUserId());
+            return mBinder.getRecoverySecretTypes();
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         } catch (ServiceSpecificException e) {
@@ -353,7 +380,7 @@ public class RecoverableKeyStoreLoader {
     public @NonNull @KeyStoreRecoveryMetadata.UserSecretType int[] getPendingRecoverySecretTypes()
             throws RecoverableKeyStoreLoaderException {
         try {
-            return mBinder.getPendingRecoverySecretTypes(UserHandle.getCallingUserId());
+            return mBinder.getPendingRecoverySecretTypes();
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         } catch (ServiceSpecificException e) {
@@ -373,7 +400,7 @@ public class RecoverableKeyStoreLoader {
     public void recoverySecretAvailable(@NonNull KeyStoreRecoveryMetadata recoverySecret)
             throws RecoverableKeyStoreLoaderException {
         try {
-            mBinder.recoverySecretAvailable(recoverySecret, UserHandle.getCallingUserId());
+            mBinder.recoverySecretAvailable(recoverySecret);
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         } catch (ServiceSpecificException e) {
@@ -412,8 +439,7 @@ public class RecoverableKeyStoreLoader {
                             verifierPublicKey,
                             vaultParams,
                             vaultChallenge,
-                            secrets,
-                            UserHandle.getCallingUserId());
+                            secrets);
             return recoveryClaim;
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
@@ -426,7 +452,7 @@ public class RecoverableKeyStoreLoader {
      * Imports keys.
      *
      * @param sessionId Id for recovery session, same as in
-     *     {@link #startRecoverySession(String, byte[], byte[], byte[], List)} on}.
+     *     {@link #startRecoverySession(String, byte[], byte[], byte[], List)}.
      * @param recoveryKeyBlob Recovery blob encrypted by symmetric key generated for this session.
      * @param applicationKeys Application keys. Key material can be decrypted using recoveryKeyBlob
      *     and session. KeyStore only uses package names from the application info in {@link
@@ -440,7 +466,7 @@ public class RecoverableKeyStoreLoader {
             throws RecoverableKeyStoreLoaderException {
         try {
             return (Map<String, byte[]>) mBinder.recoverKeys(
-                    sessionId, recoveryKeyBlob, applicationKeys, UserHandle.getCallingUserId());
+                    sessionId, recoveryKeyBlob, applicationKeys);
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         } catch (ServiceSpecificException e) {

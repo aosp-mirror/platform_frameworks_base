@@ -45,6 +45,13 @@ const int DIMENSIONS_VALUE_VALUE_TUPLE = 7;
 // for MessageValue Proto
 const int FIELD_ID_FIELD_VALUE_IN_MESSAGE_VALUE_PROTO = 1;
 
+// for PulledAtomStats proto
+const int FIELD_ID_PULLED_ATOM_STATS = 10;
+const int FIELD_ID_PULL_ATOM_ID = 1;
+const int FIELD_ID_TOTAL_PULL = 2;
+const int FIELD_ID_TOTAL_PULL_FROM_CACHE = 3;
+const int FIELD_ID_MIN_PULL_INTERVAL_SEC = 4;
+
 void writeDimensionsValueProtoToStream(const DimensionsValue& dimensionsValue,
                                        ProtoOutputStream* protoOutput) {
     protoOutput->write(FIELD_TYPE_INT32 | DIMENSIONS_VALUE_FIELD, dimensionsValue.field());
@@ -218,8 +225,47 @@ void writeFieldValueTreeToStream(const FieldValueMap &fieldValueMap,
         protoOutput->end(tokenStack.top().first);
         tokenStack.pop();
     }
+}
 
+int64_t TimeUnitToBucketSizeInMillis(TimeUnit unit) {
+    switch (unit) {
+        case ONE_MINUTE:
+            return 60 * 1000LL;
+        case FIVE_MINUTES:
+            return 5 * 60 * 1000LL;
+        case TEN_MINUTES:
+            return 10 * 60 * 1000LL;
+        case THIRTY_MINUTES:
+            return 30 * 60 * 1000LL;
+        case ONE_HOUR:
+            return 60 * 60 * 1000LL;
+        case THREE_HOURS:
+            return 3 * 60 * 60 * 1000LL;
+        case SIX_HOURS:
+            return 6 * 60 * 60 * 1000LL;
+        case TWELVE_HOURS:
+            return 12 * 60 * 60 * 1000LL;
+        case ONE_DAY:
+            return 24 * 60 * 60 * 1000LL;
+        case CTS:
+            return 1000;
+        case TIME_UNIT_UNSPECIFIED:
+        default:
+            return -1;
+    }
+}
 
+void writePullerStatsToStream(const std::pair<int, StatsdStats::PulledAtomStats>& pair,
+                              util::ProtoOutputStream* protoOutput) {
+    long long token = protoOutput->start(FIELD_TYPE_MESSAGE | FIELD_ID_PULLED_ATOM_STATS |
+                                         FIELD_COUNT_REPEATED);
+    protoOutput->write(FIELD_TYPE_INT32 | FIELD_ID_PULL_ATOM_ID, (int32_t)pair.first);
+    protoOutput->write(FIELD_TYPE_INT64 | FIELD_ID_TOTAL_PULL, (long long)pair.second.totalPull);
+    protoOutput->write(FIELD_TYPE_INT64 | FIELD_ID_TOTAL_PULL_FROM_CACHE,
+                       (long long)pair.second.totalPullFromCache);
+    protoOutput->write(FIELD_TYPE_INT64 | FIELD_ID_MIN_PULL_INTERVAL_SEC,
+                       (long long)pair.second.minPullIntervalSec);
+    protoOutput->end(token);
 }
 
 }  // namespace statsd

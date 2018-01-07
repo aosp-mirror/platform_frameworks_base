@@ -20,6 +20,9 @@
 #include <fstream>
 #include "external/CpuTimePerUidFreqPuller.h"
 
+#include "../guardrail/StatsdStats.h"
+#include "CpuTimePerUidFreqPuller.h"
+#include "guardrail/StatsdStats.h"
 #include "logd/LogEvent.h"
 #include "statslog.h"
 
@@ -45,43 +48,47 @@ static const int kLineBufferSize = 1024;
  * This provides the times a UID's processes spent executing at each different cpu frequency.
  * The file contains a monotonically increasing count of time for a single boot.
  */
-bool CpuTimePerUidFreqPuller::Pull(const int tagId, vector<shared_ptr<LogEvent>>* data) {
-  data->clear();
+CpuTimePerUidFreqPuller::CpuTimePerUidFreqPuller()
+    : StatsPuller(android::util::CPU_TIME_PER_UID_FREQ) {
+}
 
-  ifstream fin;
-  fin.open(sProcFile);
-  if (!fin.good()) {
-    VLOG("Failed to read pseudo file %s", sProcFile.c_str());
-    return false;
-  }
+bool CpuTimePerUidFreqPuller::PullInternal(vector<shared_ptr<LogEvent>>* data) {
+    data->clear();
 
-  uint64_t timestamp = time(nullptr) * NS_PER_SEC;
-  char buf[kLineBufferSize];
-  // first line prints the format and frequencies
-  fin.getline(buf, kLineBufferSize);
-  char * pch;
-  while(!fin.eof()){
+    ifstream fin;
+    fin.open(sProcFile);
+    if (!fin.good()) {
+        VLOG("Failed to read pseudo file %s", sProcFile.c_str());
+        return false;
+    }
+
+    uint64_t timestamp = time(nullptr) * NS_PER_SEC;
+    char buf[kLineBufferSize];
+    // first line prints the format and frequencies
     fin.getline(buf, kLineBufferSize);
-    pch = strtok (buf, " :");
-    if (pch == NULL) break;
-    uint64_t uid = std::stoull(pch);
-    pch = strtok(NULL, " ");
-    uint64_t timeMs;
-    int idx = 0;
-    do {
-      timeMs = std::stoull(pch);
-      auto ptr = make_shared<LogEvent>(android::util::CPU_TIME_PER_UID_FREQ, timestamp);
-      ptr->write(uid);
-      ptr->write(idx);
-      ptr->write(timeMs);
-      ptr->init();
-      data->push_back(ptr);
-      VLOG("uid %lld, freq idx %d, sys time %lld", (long long)uid, idx, (long long)timeMs);
-      idx ++;
-      pch = strtok(NULL, " ");
-    } while (pch != NULL);
-  }
-  return true;
+    char* pch;
+    while (!fin.eof()) {
+        fin.getline(buf, kLineBufferSize);
+        pch = strtok(buf, " :");
+        if (pch == NULL) break;
+        uint64_t uid = std::stoull(pch);
+        pch = strtok(NULL, " ");
+        uint64_t timeMs;
+        int idx = 0;
+        do {
+            timeMs = std::stoull(pch);
+            auto ptr = make_shared<LogEvent>(android::util::CPU_TIME_PER_UID_FREQ, timestamp);
+            ptr->write(uid);
+            ptr->write(idx);
+            ptr->write(timeMs);
+            ptr->init();
+            data->push_back(ptr);
+            VLOG("uid %lld, freq idx %d, sys time %lld", (long long)uid, idx, (long long)timeMs);
+            idx++;
+            pch = strtok(NULL, " ");
+        } while (pch != NULL);
+    }
+    return true;
 }
 
 }  // namespace statsd

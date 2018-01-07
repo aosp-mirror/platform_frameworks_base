@@ -50,7 +50,7 @@ class GaugeMetricProducer : public virtual MetricProducer, public virtual PullDa
 public:
     GaugeMetricProducer(const ConfigKey& key, const GaugeMetric& countMetric,
                         const int conditionIndex, const sp<ConditionWizard>& wizard,
-                        const int pullTagId, const int atomTagId, const int64_t startTimeNs);
+                        const int pullTagId, const int64_t startTimeNs);
 
     virtual ~GaugeMetricProducer();
 
@@ -71,7 +71,7 @@ private:
     // for testing
     GaugeMetricProducer(const ConfigKey& key, const GaugeMetric& gaugeMetric,
                         const int conditionIndex, const sp<ConditionWizard>& wizard,
-                        const int pullTagId, const int atomTagId, const uint64_t startTimeNs,
+                        const int pullTagId, const uint64_t startTimeNs,
                         std::shared_ptr<StatsPullerManager> statsPullerManager);
 
     // Internal interface to handle condition change.
@@ -85,9 +85,6 @@ private:
 
     // Util function to flush the old packet.
     void flushIfNeededLocked(const uint64_t& eventTime);
-
-    // The default bucket size for gauge metric is 1 hr.
-    static const uint64_t kDefaultGaugemBucketSizeNs = 60ULL * 60 * 1000 * 1000 * 1000;
 
     std::shared_ptr<StatsPullerManager> mStatsPullerManager;
     // tagId for pulled data. -1 if this is not pulled
@@ -105,8 +102,6 @@ private:
 
     // Translate Atom based bucket to single numeric value bucket for anomaly
     void updateCurrentSlicedBucketForAnomaly();
-
-    int mAtomTagId;
 
     // Whitelist of fields to report. Empty means all are reported.
     FieldFilter mFieldFilter;

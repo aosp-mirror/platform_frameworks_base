@@ -13141,80 +13141,6 @@ public class PackageManagerService extends IPackageManager.Stub
         }
     }
 
-    @Override
-    public void installPackageAsUser(String originPath, IPackageInstallObserver2 observer,
-            int installFlags, String installerPackageName, int userId) {
-        mContext.enforceCallingOrSelfPermission(android.Manifest.permission.INSTALL_PACKAGES, null);
-
-        final int callingUid = Binder.getCallingUid();
-        mPermissionManager.enforceCrossUserPermission(callingUid, userId,
-                true /* requireFullPermission */, true /* checkShell */, "installPackageAsUser");
-
-        if (isUserRestricted(userId, UserManager.DISALLOW_INSTALL_APPS)) {
-            try {
-                if (observer != null) {
-                    observer.onPackageInstalled("", INSTALL_FAILED_USER_RESTRICTED, null, null);
-                }
-            } catch (RemoteException re) {
-            }
-            return;
-        }
-
-        if ((callingUid == Process.SHELL_UID) || (callingUid == Process.ROOT_UID)) {
-            installFlags |= PackageManager.INSTALL_FROM_ADB;
-
-        } else {
-            // Caller holds INSTALL_PACKAGES permission, so we're less strict
-            // about installerPackageName.
-
-            installFlags &= ~PackageManager.INSTALL_FROM_ADB;
-            installFlags &= ~PackageManager.INSTALL_ALL_USERS;
-        }
-
-        UserHandle user;
-        if ((installFlags & PackageManager.INSTALL_ALL_USERS) != 0) {
-            user = UserHandle.ALL;
-        } else {
-            user = new UserHandle(userId);
-        }
-
-        // Only system components can circumvent runtime permissions when installing.
-        if ((installFlags & PackageManager.INSTALL_GRANT_RUNTIME_PERMISSIONS) != 0
-                && mContext.checkCallingOrSelfPermission(Manifest.permission
-                .INSTALL_GRANT_RUNTIME_PERMISSIONS) == PackageManager.PERMISSION_DENIED) {
-            throw new SecurityException("You need the "
-                    + "android.permission.INSTALL_GRANT_RUNTIME_PERMISSIONS permission "
-                    + "to use the PackageManager.INSTALL_GRANT_RUNTIME_PERMISSIONS flag");
-        }
-
-        if ((installFlags & PackageManager.INSTALL_FORWARD_LOCK) != 0
-                || (installFlags & PackageManager.INSTALL_EXTERNAL) != 0) {
-            throw new IllegalArgumentException(
-                    "New installs into ASEC containers no longer supported");
-        }
-
-        final File originFile = new File(originPath);
-        final OriginInfo origin = OriginInfo.fromUntrustedFile(originFile);
-
-        final Message msg = mHandler.obtainMessage(INIT_COPY);
-        final VerificationInfo verificationInfo = new VerificationInfo(
-                null /*originatingUri*/, null /*referrer*/, -1 /*originatingUid*/, callingUid);
-        final InstallParams params = new InstallParams(origin, null /*moveInfo*/, observer,
-                installFlags, installerPackageName, null /*volumeUuid*/, verificationInfo, user,
-                null /*packageAbiOverride*/, null /*grantedPermissions*/,
-                null /*certificates*/, PackageManager.INSTALL_REASON_UNKNOWN);
-        params.setTraceMethod("installAsUser").setTraceCookie(System.identityHashCode(params));
-        msg.obj = params;
-
-        Trace.asyncTraceBegin(TRACE_TAG_PACKAGE_MANAGER, "installAsUser",
-                System.identityHashCode(msg.obj));
-        Trace.asyncTraceBegin(TRACE_TAG_PACKAGE_MANAGER, "queueInstall",
-                System.identityHashCode(msg.obj));
-
-        mHandler.sendMessage(msg);
-    }
-
-
     /**
      * Ensure that the install reason matches what we know about the package installer (e.g. whether
      * it is acting on behalf on an enterprise or the user).
@@ -23049,6 +22975,11 @@ Slog.v(TAG, ":: stepped forward, applying functor at tag " + parser.getName());
         }
 
         @Override
+        public void setUseOpenWifiAppPackagesProvider(PackagesProvider provider) {
+            mDefaultPermissionPolicy.setUseOpenWifiAppPackagesProvider(provider);
+        }
+
+        @Override
         public void setSyncAdapterPackagesprovider(SyncAdapterPackagesProvider provider) {
             mDefaultPermissionPolicy.setSyncAdapterPackagesProvider(provider);
         }
@@ -23069,6 +23000,12 @@ Slog.v(TAG, ":: stepped forward, applying functor at tag " + parser.getName());
         @Override
         public void grantDefaultPermissionsToDefaultSimCallManager(String packageName, int userId) {
             mDefaultPermissionPolicy.grantDefaultPermissionsToDefaultSimCallManager(
+                    packageName, userId);
+        }
+
+        @Override
+        public void grantDefaultPermissionsToDefaultUseOpenWifiApp(String packageName, int userId) {
+            mDefaultPermissionPolicy.grantDefaultPermissionsToDefaultUseOpenWifiApp(
                     packageName, userId);
         }
 

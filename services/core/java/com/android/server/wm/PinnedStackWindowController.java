@@ -61,7 +61,7 @@ public class PinnedStackWindowController extends StackWindowController {
                     displayContent.getPinnedStackController();
             if (stackBounds == null) {
                 // Calculate the aspect ratio bounds from the default bounds
-                stackBounds = pinnedStackController.getDefaultBounds();
+                stackBounds = pinnedStackController.getDefaultOrLastSavedBounds();
             }
 
             if (pinnedStackController.isValidPictureInPictureAspectRatio(aspectRatio)) {
@@ -173,7 +173,7 @@ public class PinnedStackWindowController extends StackWindowController {
      * from fullscreen to non-fullscreen bounds.
      */
     public boolean deferScheduleMultiWindowModeChanged() {
-        synchronized(mWindowMap) {
+        synchronized (mWindowMap) {
             return mContainer.deferScheduleMultiWindowModeChanged();
         }
     }

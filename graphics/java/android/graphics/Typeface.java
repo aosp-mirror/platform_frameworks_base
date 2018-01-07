@@ -429,7 +429,7 @@ public class Typeface {
         }
 
         /**
-         * Sets an index of the font collection.
+         * Sets an index of the font collection. See {@link android.R.attr#ttcIndex}.
          *
          * Can not be used for Typeface source. build() method will return null for invalid index.
          * @param ttcIndex An index of the font collection. If the font source is not font

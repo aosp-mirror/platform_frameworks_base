@@ -129,8 +129,10 @@ import java.util.Map;
  * String summary = "&lt;html>&lt;body>You scored &lt;b>192&lt;/b> points.&lt;/body>&lt;/html>";
  * webview.loadData(summary, "text/html", null);
  * // ... although note that there are restrictions on what this HTML can do.
- * // See the JavaDocs for {@link #loadData(String,String,String) loadData()} and {@link
- * #loadDataWithBaseURL(String,String,String,String,String) loadDataWithBaseURL()} for more info.
+ * // See {@link #loadData(String,String,String)} and {@link
+ * #loadDataWithBaseURL(String,String,String,String,String)} for more info.
+ * // Also see {@link #loadData(String,String,String)} for information on encoding special
+ * // characters.
  * </pre>
  *
  * <p>A WebView has several customization points where you can add your
@@ -989,13 +991,21 @@ public class WebView extends AbsoluteLayout
      * #loadDataWithBaseURL(String,String,String,String,String)
      * loadDataWithBaseURL()} with an appropriate base URL.
      * <p>
-     * The encoding parameter specifies whether the data is base64 or URL
+     * The {@code encoding} parameter specifies whether the data is base64 or URL
      * encoded. If the data is base64 encoded, the value of the encoding
-     * parameter must be 'base64'. For all other values of the parameter,
-     * including {@code null}, it is assumed that the data uses ASCII encoding for
-     * octets inside the range of safe URL characters and use the standard %xx
-     * hex encoding of URLs for octets outside that range. For example, '#',
-     * '%', '\', '?' should be replaced by %23, %25, %27, %3f respectively.
+     * parameter must be 'base64'. HTML can be encoded with {@link
+     * android.util.Base64#encodeToString(byte[],int)} like so:
+     * <pre>
+     * String unencodedHtml =
+     *     "&lt;html&gt;&lt;body&gt;'%28' is the code for '('&lt;/body&gt;&lt;/html&gt;";
+     * String encodedHtml = Base64.encodeToString(unencodedHtml.getBytes(), Base64.NO_PADDING);
+     * webView.loadData(encodedHtml, "text/html", "base64");
+     * </pre>
+     * <p>
+     * For all other values of {@code encoding} (including {@code null}) it is assumed that the
+     * data uses ASCII encoding for octets inside the range of safe URL characters and use the
+     * standard %xx hex encoding of URLs for octets outside that range. See <a
+     * href="https://tools.ietf.org/html/rfc3986#section-2.2">RFC 3986</a> for more information.
      * <p>
      * The {@code mimeType} parameter specifies the format of the data.
      * If WebView can't handle the specified MIME type, it will download the data.

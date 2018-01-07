@@ -60,12 +60,12 @@ struct DurationBucket {
 
 class DurationTracker {
 public:
-    DurationTracker(const ConfigKey& key, const string& name, const HashableDimensionKey& eventKey,
+    DurationTracker(const ConfigKey& key, const int64_t& id, const HashableDimensionKey& eventKey,
                     sp<ConditionWizard> wizard, int conditionIndex, bool nesting,
                     uint64_t currentBucketStartNs, uint64_t bucketSizeNs,
                     const std::vector<sp<DurationAnomalyTracker>>& anomalyTrackers)
         : mConfigKey(key),
-          mName(name),
+          mTrackerId(id),
           mEventKey(eventKey),
           mWizard(wizard),
           mConditionTrackerIndex(conditionIndex),
@@ -145,7 +145,7 @@ protected:
     // A reference to the DurationMetricProducer's config key.
     const ConfigKey& mConfigKey;
 
-    const std::string mName;
+    const int64_t mTrackerId;
 
     HashableDimensionKey mEventKey;
 

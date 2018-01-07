@@ -17,12 +17,14 @@
 package android.telephony;
 
 import android.annotation.NonNull;
+import android.annotation.Nullable;
 import android.annotation.SdkConstant;
-import android.annotation.SystemApi;
 import android.annotation.SdkConstant.SdkConstantType;
+import android.annotation.SystemApi;
 import android.annotation.SystemService;
 import android.content.Context;
 import android.content.Intent;
+import android.content.pm.PackageManager;
 import android.content.res.Configuration;
 import android.content.res.Resources;
 import android.net.INetworkPolicyManager;
@@ -32,11 +34,14 @@ import android.os.Looper;
 import android.os.Message;
 import android.os.RemoteException;
 import android.os.ServiceManager;
+import android.os.ServiceManager.ServiceNotFoundException;
 import android.util.DisplayMetrics;
+
 import com.android.internal.telephony.IOnSubscriptionsChangedListener;
 import com.android.internal.telephony.ISub;
 import com.android.internal.telephony.ITelephonyRegistry;
 import com.android.internal.telephony.PhoneConstants;
+
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -430,6 +435,26 @@ public class SubscriptionManager {
             = "android.telephony.action.DEFAULT_SMS_SUBSCRIPTION_CHANGED";
 
     /**
+     * Activity Action: Display UI for managing the billing relationship plans
+     * between a carrier and a specific subscriber.
+     * <p>
+     * Carrier apps are encouraged to implement this activity, and the OS will
+     * provide an affordance to quickly enter this activity, typically via
+     * Settings. This affordance will only be shown when the carrier app is
+     * actively providing subscription plan information via
+     * {@link #setSubscriptionPlans(int, List)}.
+     * <p>
+     * Contains {@link #EXTRA_SUBSCRIPTION_INDEX} to indicate which subscription
+     * the user is interested in.
+     *
+     * @hide
+     */
+    @SdkConstant(SdkConstantType.ACTIVITY_INTENT_ACTION)
+    @SystemApi
+    public static final String ACTION_MANAGE_SUBSCRIPTION_PLANS
+            = "android.telephony.action.MANAGE_SUBSCRIPTION_PLANS";
+
+    /**
      * Integer extra used with {@link #ACTION_DEFAULT_SUBSCRIPTION_CHANGED} and
      * {@link #ACTION_DEFAULT_SMS_SUBSCRIPTION_CHANGED} to indicate the subscription
      * which has changed.
@@ -437,6 +462,7 @@ public class SubscriptionManager {
     public static final String EXTRA_SUBSCRIPTION_INDEX = "android.telephony.extra.SUBSCRIPTION_INDEX";
 
     private final Context mContext;
+    private final INetworkPolicyManager mNetworkPolicy;
 
     /**
      * A listener class for monitoring changes to {@link SubscriptionInfo} records.
@@ -509,22 +535,20 @@ public class SubscriptionManager {
     }
 
     /** @hide */
-    public SubscriptionManager(Context context) {
+    public SubscriptionManager(Context context) throws ServiceNotFoundException {
         if (DBG) logd("SubscriptionManager created");
         mContext = context;
+        mNetworkPolicy = INetworkPolicyManager.Stub
+                .asInterface(ServiceManager.getServiceOrThrow(Context.NETWORK_POLICY_SERVICE));
     }
 
     /**
-     * Get an instance of the SubscriptionManager from the Context.
-     * This invokes {@link android.content.Context#getSystemService
-     * Context.getSystemService(Context.TELEPHONY_SUBSCRIPTION_SERVICE)}.
-     *
-     * @param context to use.
-     * @return SubscriptionManager instance
+     * @deprecated developers should always obtain references directly from
+     *             {@link Context#getSystemService(Class)}.
      */
+    @Deprecated
     public static SubscriptionManager from(Context context) {
-        return (SubscriptionManager) context.getSystemService(
-                Context.TELEPHONY_SUBSCRIPTION_SERVICE);
+        return context.getSystemService(SubscriptionManager.class);
     }
 
     /**
@@ -1622,11 +1646,9 @@ public class SubscriptionManager {
      */
     @SystemApi
     public @NonNull List<SubscriptionPlan> getSubscriptionPlans(int subId) {
-        final INetworkPolicyManager npm = INetworkPolicyManager.Stub
-                .asInterface(ServiceManager.getService(Context.NETWORK_POLICY_SERVICE));
         try {
             SubscriptionPlan[] subscriptionPlans =
-                    npm.getSubscriptionPlans(subId, mContext.getOpPackageName());
+                    mNetworkPolicy.getSubscriptionPlans(subId, mContext.getOpPackageName());
             return subscriptionPlans == null
                     ? Collections.emptyList() : Arrays.asList(subscriptionPlans);
         } catch (RemoteException e) {
@@ -1654,13 +1676,52 @@ public class SubscriptionManager {
      */
     @SystemApi
     public void setSubscriptionPlans(int subId, @NonNull List<SubscriptionPlan> plans) {
-        final INetworkPolicyManager npm = INetworkPolicyManager.Stub
-                .asInterface(ServiceManager.getService(Context.NETWORK_POLICY_SERVICE));
         try {
-            npm.setSubscriptionPlans(subId, plans.toArray(new SubscriptionPlan[plans.size()]),
-                    mContext.getOpPackageName());
+            mNetworkPolicy.setSubscriptionPlans(subId,
+                    plans.toArray(new SubscriptionPlan[plans.size()]), mContext.getOpPackageName());
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
+    }
+
+    /** @hide */
+    private String getSubscriptionPlansOwner(int subId) {
+        try {
+            return mNetworkPolicy.getSubscriptionPlansOwner(subId);
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    /**
+     * Create an {@link Intent} that will launch towards the carrier app that is
+     * currently defining the billing relationship plan through
+     * {@link #setSubscriptionPlans(int, List)}.
+     *
+     * @return ready to launch Intent targeted towards the carrier app, or
+     *         {@code null} if no carrier app is defined, or if the defined
+     *         carrier app provides no management activity.
+     * @hide
+     */
+    public @Nullable Intent createManageSubscriptionIntent(int subId) {
+        // Bail if no owner
+        final String owner = getSubscriptionPlansOwner(subId);
+        if (owner == null) return null;
+
+        // Bail if no plans
+        final List<SubscriptionPlan> plans = getSubscriptionPlans(subId);
+        if (plans.isEmpty()) return null;
+
+        final Intent intent = new Intent(ACTION_MANAGE_SUBSCRIPTION_PLANS);
+        intent.setPackage(owner);
+        intent.putExtra(EXTRA_SUBSCRIPTION_INDEX, subId);
+
+        // Bail if not implemented
+        if (mContext.getPackageManager().queryIntentActivities(intent,
+                PackageManager.MATCH_DEFAULT_ONLY).isEmpty()) {
+            return null;
+        }
+
+        return intent;
     }
 }

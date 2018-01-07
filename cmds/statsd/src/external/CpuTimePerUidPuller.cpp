@@ -20,6 +20,8 @@
 #include <fstream>
 #include "external/CpuTimePerUidPuller.h"
 
+#include "CpuTimePerUidPuller.h"
+#include "guardrail/StatsdStats.h"
 #include "logd/LogEvent.h"
 #include "statslog.h"
 
@@ -42,38 +44,42 @@ static const int kLineBufferSize = 1024;
  * This provides the time a UID's processes spent executing in user-space and kernel-space.
  * The file contains a monotonically increasing count of time for a single boot.
  */
-bool CpuTimePerUidPuller::Pull(const int tagId, vector<shared_ptr<LogEvent>>* data) {
-  data->clear();
+CpuTimePerUidPuller::CpuTimePerUidPuller() : StatsPuller(android::util::CPU_TIME_PER_UID) {
+}
 
-  ifstream fin;
-  fin.open(sProcFile);
-  if (!fin.good()) {
-    VLOG("Failed to read pseudo file %s", sProcFile.c_str());
-    return false;
-  }
+bool CpuTimePerUidPuller::PullInternal(vector<shared_ptr<LogEvent>>* data) {
+    data->clear();
 
-  uint64_t timestamp = time(nullptr) * NS_PER_SEC;
-  char buf[kLineBufferSize];
-  char * pch;
-  while(!fin.eof()){
-    fin.getline(buf, kLineBufferSize);
-    pch = strtok(buf, " :");
-    if (pch == NULL) break;
-    uint64_t uid = std::stoull(pch);
-    pch = strtok(buf, " ");
-    uint64_t userTimeMs = std::stoull(pch);
-    pch = strtok(buf, " ");
-    uint64_t sysTimeMs = std::stoull(pch);
+    ifstream fin;
+    fin.open(sProcFile);
+    if (!fin.good()) {
+        VLOG("Failed to read pseudo file %s", sProcFile.c_str());
+        return false;
+    }
 
-    auto ptr = make_shared<LogEvent>(android::util::CPU_TIME_PER_UID, timestamp);
-    ptr->write(uid);
-    ptr->write(userTimeMs);
-    ptr->write(sysTimeMs);
-    ptr->init();
-    data->push_back(ptr);
-    VLOG("uid %lld, user time %lld, sys time %lld", (long long)uid, (long long)userTimeMs, (long long)sysTimeMs);
-  }
-  return true;
+    uint64_t timestamp = time(nullptr) * NS_PER_SEC;
+    char buf[kLineBufferSize];
+    char* pch;
+    while (!fin.eof()) {
+        fin.getline(buf, kLineBufferSize);
+        pch = strtok(buf, " :");
+        if (pch == NULL) break;
+        uint64_t uid = std::stoull(pch);
+        pch = strtok(buf, " ");
+        uint64_t userTimeMs = std::stoull(pch);
+        pch = strtok(buf, " ");
+        uint64_t sysTimeMs = std::stoull(pch);
+
+        auto ptr = make_shared<LogEvent>(android::util::CPU_TIME_PER_UID, timestamp);
+        ptr->write(uid);
+        ptr->write(userTimeMs);
+        ptr->write(sysTimeMs);
+        ptr->init();
+        data->push_back(ptr);
+        VLOG("uid %lld, user time %lld, sys time %lld", (long long)uid, (long long)userTimeMs,
+             (long long)sysTimeMs);
+    }
+    return true;
 }
 
 }  // namespace statsd

@@ -32,8 +32,8 @@ namespace statsd {
 
 class ConditionTracker : public virtual RefBase {
 public:
-    ConditionTracker(const std::string& name, const int index)
-        : mName(name),
+    ConditionTracker(const int64_t& id, const int index)
+        : mConditionId(id),
           mIndex(index),
           mInitialized(false),
           mTrackerIndex(),
@@ -42,7 +42,7 @@ public:
 
     virtual ~ConditionTracker(){};
 
-    inline const string& getName() { return mName; }
+    inline const int64_t& getId() { return mConditionId; }
 
     // Initialize this ConditionTracker. This initialization is done recursively (DFS). It can also
     // be done in the constructor, but we do it separately because (1) easy to return a bool to
@@ -50,11 +50,11 @@ public:
     // allConditionConfig: the list of all Predicate config from statsd_config.
     // allConditionTrackers: the list of all ConditionTrackers (this is needed because we may also
     //                       need to call init() on children conditions)
-    // conditionNameIndexMap: the mapping from condition name to its index.
+    // conditionIdIndexMap: the mapping from condition id to its index.
     // stack: a bit map to keep track which nodes have been visited on the stack in the recursion.
     virtual bool init(const std::vector<Predicate>& allConditionConfig,
                       const std::vector<sp<ConditionTracker>>& allConditionTrackers,
-                      const std::unordered_map<std::string, int>& conditionNameIndexMap,
+                      const std::unordered_map<int64_t, int>& conditionIdIndexMap,
                       std::vector<bool>& stack) = 0;
 
     // evaluate current condition given the new event.
@@ -99,9 +99,7 @@ public:
     }
 
 protected:
-    // We don't really need the string name, but having a name here makes log messages
-    // easy to debug.
-    const std::string mName;
+    const int64_t mConditionId;
 
     // the index of this condition in the manager's condition list.
     const int mIndex;

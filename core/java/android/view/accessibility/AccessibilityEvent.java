@@ -38,19 +38,14 @@ import java.util.List;
  * <p>
  * An accessibility event is fired by an individual view which populates the event with
  * data for its state and requests from its parent to send the event to interested
- * parties. The parent can optionally add an {@link AccessibilityRecord} for itself before
- * dispatching a similar request to its parent. A parent can also choose not to respect the
- * request for sending an event. The accessibility event is sent by the topmost view in the
- * view tree. Therefore, an {@link android.accessibilityservice.AccessibilityService} can
- * explore all records in an accessibility event to obtain more information about the
- * context in which the event was fired.
+ * parties. The parent can optionally modify or even block the event based on its broader
+ * understanding of the user interface's context.
  * </p>
  * <p>
- * The main purpose of an accessibility event is to expose enough information for an
- * {@link android.accessibilityservice.AccessibilityService} to provide meaningful feedback
- * to the user. Sometimes however, an accessibility service may need more contextual
- * information then the one in the event pay-load. In such cases the service can obtain
- * the event source which is an {@link AccessibilityNodeInfo} (snapshot of a View state)
+ * The main purpose of an accessibility event is to communicate changes in the UI to an
+ * {@link android.accessibilityservice.AccessibilityService}. The service may then inspect,
+ * if needed the user interface by examining the View hierarchy, as represented by a tree of
+ * {@link AccessibilityNodeInfo}s (snapshot of a View state)
  * which can be used for exploring the window content. Note that the privilege for accessing
  * an event's source, thus the window content, has to be explicitly requested. For more
  * details refer to {@link android.accessibilityservice.AccessibilityService}. If an
@@ -85,21 +80,6 @@ import java.util.List;
  *   <li>{@link #getClassName()} - The class name of the source.</li>
  *   <li>{@link #getPackageName()} - The package name of the source.</li>
  *   <li>{@link #getEventTime()}  - The event time.</li>
- *   <li>{@link #getText()} - The text of the source's sub-tree.</li>
- *   <li>{@link #isEnabled()} - Whether the source is enabled.</li>
- *   <li>{@link #isPassword()} - Whether the source is password.</li>
- *   <li>{@link #isChecked()} - Whether the source is checked.</li>
- *   <li>{@link #getContentDescription()} - The content description of the source.</li>
- *   <li>{@link #getScrollX()} - The offset of the source left edge in pixels
- *       (without descendants of AdapterView).</li>
- *   <li>{@link #getScrollY()} - The offset of the source top edge in pixels
- *       (without descendants of AdapterView).</li>
- *   <li>{@link #getFromIndex()} - The zero based index of the first visible item of the source,
- *       inclusive (for descendants of AdapterView).</li>
- *   <li>{@link #getToIndex()} - The zero based index of the last visible item of the source,
- *       inclusive (for descendants of AdapterView).</li>
- *   <li>{@link #getItemCount()} - The total items of the source
- *       (for descendants of AdapterView).</li>
  * </ul>
  * </p>
  * <p>
@@ -113,21 +93,6 @@ import java.util.List;
  *   <li>{@link #getClassName()} - The class name of the source.</li>
  *   <li>{@link #getPackageName()} - The package name of the source.</li>
  *   <li>{@link #getEventTime()}  - The event time.</li>
- *   <li>{@link #getText()} - The text of the source's sub-tree.</li>
- *   <li>{@link #isEnabled()} - Whether the source is enabled.</li>
- *   <li>{@link #isPassword()} - Whether the source is password.</li>
- *   <li>{@link #isChecked()} - Whether the source is checked.</li>
- *   <li>{@link #getContentDescription()} - The content description of the source.</li>
- *   <li>{@link #getScrollX()} - The offset of the source left edge in pixels
- *       (without descendants of AdapterView).</li>
- *   <li>{@link #getScrollY()} - The offset of the source top edge in pixels
- *       (without descendants of AdapterView).</li>
- *   <li>{@link #getFromIndex()} - The zero based index of the first visible item of the source,
- *       inclusive (for descendants of AdapterView).</li>
- *   <li>{@link #getToIndex()} - The zero based index of the last visible item of the source,
- *       inclusive (for descendants of AdapterView).</li>
- *   <li>{@link #getItemCount()} - The total items of the source
- *       (for descendants of AdapterView).</li>
  * </ul>
  * </p>
  * <p>
@@ -141,23 +106,6 @@ import java.util.List;
  *   <li>{@link #getClassName()} - The class name of the source.</li>
  *   <li>{@link #getPackageName()} - The package name of the source.</li>
  *   <li>{@link #getEventTime()}  - The event time.</li>
- *   <li>{@link #getText()} - The text of the source's sub-tree.</li>
- *   <li>{@link #isEnabled()} - Whether the source is enabled.</li>
- *   <li>{@link #isPassword()} - Whether the source is password.</li>
- *   <li>{@link #isChecked()} - Whether the source is checked.</li>
- *   <li>{@link #getItemCount()} - The number of selectable items of the source.</li>
- *   <li>{@link #getCurrentItemIndex()} - The currently selected item index.</li>
- *   <li>{@link #getContentDescription()} - The content description of the source.</li>
- *   <li>{@link #getScrollX()} - The offset of the source left edge in pixels
- *       (without descendants of AdapterView).</li>
- *   <li>{@link #getScrollY()} - The offset of the source top edge in pixels
- *       (without descendants of AdapterView).</li>
- *   <li>{@link #getFromIndex()} - The zero based index of the first visible item of the source,
- *       inclusive (for descendants of AdapterView).</li>
- *   <li>{@link #getToIndex()} - The zero based index of the last visible item of the source,
- *       inclusive (for descendants of AdapterView).</li>
- *   <li>{@link #getItemCount()} - The total items of the source
- *       (for descendants of AdapterView).</li>
  * </ul>
  * </p>
  * <p>
@@ -171,23 +119,6 @@ import java.util.List;
  *   <li>{@link #getClassName()} - The class name of the source.</li>
  *   <li>{@link #getPackageName()} - The package name of the source.</li>
  *   <li>{@link #getEventTime()}  - The event time.</li>
- *   <li>{@link #getText()} - The text of the source's sub-tree.</li>
- *   <li>{@link #isEnabled()} - Whether the source is enabled.</li>
- *   <li>{@link #isPassword()} - Whether the source is password.</li>
- *   <li>{@link #isChecked()} - Whether the source is checked.</li>
- *   <li>{@link #getItemCount()} - The number of focusable items on the screen.</li>
- *   <li>{@link #getCurrentItemIndex()} - The currently focused item index.</li>
- *   <li>{@link #getContentDescription()} - The content description of the source.</li>
- *   <li>{@link #getScrollX()} - The offset of the source left edge in pixels
- *       (without descendants of AdapterView).</li>
- *   <li>{@link #getScrollY()} - The offset of the source top edge in pixels
- *       (without descendants of AdapterView).</li>
- *   <li>{@link #getFromIndex()} - The zero based index of the first visible item of the source,
- *       inclusive (for descendants of AdapterView).</li>
- *   <li>{@link #getToIndex()} - The zero based index of the last visible item of the source,
- *       inclusive (for descendants of AdapterView).</li>
- *   <li>{@link #getItemCount()} - The total items of the source
- *       (for descendants of AdapterView).</li>
  * </ul>
  * </p>
  * <p>
@@ -201,15 +132,11 @@ import java.util.List;
  *   <li>{@link #getClassName()} - The class name of the source.</li>
  *   <li>{@link #getPackageName()} - The package name of the source.</li>
  *   <li>{@link #getEventTime()}  - The event time.</li>
- *   <li>{@link #getText()} - The text of the source.</li>
- *   <li>{@link #isEnabled()} - Whether the source is enabled.</li>
- *   <li>{@link #isPassword()} - Whether the source is password.</li>
- *   <li>{@link #isChecked()} - Whether the source is checked.</li>
+ *   <li>{@link #getText()} - The new text of the source.</li>
+ *   <li>{@link #getBeforeText()} - The text of the source before the change.</li>
  *   <li>{@link #getFromIndex()} - The text change start index.</li>
  *   <li>{@link #getAddedCount()} - The number of added characters.</li>
  *   <li>{@link #getRemovedCount()} - The number of removed characters.</li>
- *   <li>{@link #getBeforeText()} - The text of the source before the change.</li>
- *   <li>{@link #getContentDescription()} - The content description of the source.</li>
  * </ul>
  * </p>
  * <p>
@@ -223,13 +150,6 @@ import java.util.List;
  *   <li>{@link #getClassName()} - The class name of the source.</li>
  *   <li>{@link #getPackageName()} - The package name of the source.</li>
  *   <li>{@link #getEventTime()}  - The event time.</li>
- *   <li>{@link #getText()} - The text of the source.</li>
- *   <li>{@link #isPassword()} - Whether the source is password.</li>
- *   <li>{@link #getFromIndex()} - The selection start index.</li>
- *   <li>{@link #getToIndex()} - The selection end index.</li>
- *   <li>{@link #getItemCount()} - The length of the source text.</li>
- *   <li>{@link #isEnabled()} - Whether the source is enabled.</li>
- *   <li>{@link #getContentDescription()} - The content description of the source.</li>
  * </ul>
  * </p>
  * <b>View text traversed at movement granularity</b> - represents the event of traversing the
@@ -251,23 +171,11 @@ import java.util.List;
  *   <li>{@link #getToIndex()} - The end of the text that was skipped over in this movement.
  *       This is the ending point when moving forward through the text, but not when moving
  *       back.</li>
- *   <li>{@link #isPassword()} - Whether the source is password.</li>
- *   <li>{@link #isEnabled()} - Whether the source is enabled.</li>
- *   <li>{@link #getContentDescription()} - The content description of the source.</li>
- *   <li>{@link #getMovementGranularity()} - Sets the granularity at which a view's text
- *       was traversed.</li>
  *   <li>{@link #getAction()} - Gets traversal action which specifies the direction.</li>
  * </ul>
  * </p>
  * <p>
- * <b>View scrolled</b> - represents the event of scrolling a view. If
- * the source is a descendant of {@link android.widget.AdapterView} the
- * scroll is reported in terms of visible items - the first visible item,
- * the last visible item, and the total items - because the the source
- * is unaware of its pixel size since its adapter is responsible for
- * creating views. In all other cases the scroll is reported as the current
- * scroll on the X and Y axis respectively plus the height of the source in
- * pixels.</br>
+ * <b>View scrolled</b> - represents the event of scrolling a view. </br>
  * <em>Type:</em> {@link #TYPE_VIEW_SCROLLED}</br>
  * <em>Properties:</em></br>
  * <ul>
@@ -276,29 +184,9 @@ import java.util.List;
  *   <li>{@link #getClassName()} - The class name of the source.</li>
  *   <li>{@link #getPackageName()} - The package name of the source.</li>
  *   <li>{@link #getEventTime()}  - The event time.</li>
- *   <li>{@link #getText()} - The text of the source's sub-tree.</li>
- *   <li>{@link #isEnabled()} - Whether the source is enabled.</li>
- *   <li>{@link #getContentDescription()} - The content description of the source.</li>
- *   <li>{@link #getScrollX()} - The offset of the source left edge in pixels
- *       (without descendants of AdapterView).</li>
- *   <li>{@link #getScrollY()} - The offset of the source top edge in pixels
- *       (without descendants of AdapterView).</li>
- *   <li>{@link #getFromIndex()} - The zero based index of the first visible item of the source,
- *       inclusive (for descendants of AdapterView).</li>
- *   <li>{@link #getToIndex()} - The zero based index of the last visible item of the source,
- *       inclusive (for descendants of AdapterView).</li>
- *   <li>{@link #getItemCount()} - The total items of the source
- *       (for descendants of AdapterView).</li>
+ *   <li>{@link #getScrollDeltaX()} - The difference in the horizontal position.</li>
+ *   <li>{@link #getScrollDeltaY()} - The difference in the vertical position.</li>
  * </ul>
- * <em>Note:</em> This event type is not dispatched to descendants though
- * {@link android.view.View#dispatchPopulateAccessibilityEvent(AccessibilityEvent)
- * View.dispatchPopulateAccessibilityEvent(AccessibilityEvent)}, hence the event
- * source {@link android.view.View} and the sub-tree rooted at it will not receive
- * calls to {@link android.view.View#onPopulateAccessibilityEvent(AccessibilityEvent)
- * View.onPopulateAccessibilityEvent(AccessibilityEvent)}. The preferred way to add
- * text content to such events is by setting the
- * {@link android.R.styleable#View_contentDescription contentDescription} of the source
- * view.</br>
  * </p>
  * <p>
  * <b>TRANSITION TYPES</b></br>
@@ -316,7 +204,6 @@ import java.util.List;
  *   <li>{@link #getPackageName()} - The package name of the source.</li>
  *   <li>{@link #getEventTime()}  - The event time.</li>
  *   <li>{@link #getText()} - The text of the source's sub-tree.</li>
- *   <li>{@link #isEnabled()} - Whether the source is enabled.</li>
  * </ul>
  * </p>
  * <p>
@@ -325,10 +212,6 @@ import java.util.List;
  * a view size, etc.</br>
  * </p>
  * <p>
- * <strong>Note:</strong> This event is fired only for the window source of the
- * last accessibility event different from {@link #TYPE_NOTIFICATION_STATE_CHANGED}
- * and its purpose is to notify clients that the content of the user interaction
- * window has changed.</br>
  * <em>Type:</em> {@link #TYPE_WINDOW_CONTENT_CHANGED}</br>
  * <em>Properties:</em></br>
  * <ul>
@@ -339,32 +222,26 @@ import java.util.List;
  *   <li>{@link #getPackageName()} - The package name of the source.</li>
  *   <li>{@link #getEventTime()}  - The event time.</li>
  * </ul>
- * <em>Note:</em> This event type is not dispatched to descendants though
- * {@link android.view.View#dispatchPopulateAccessibilityEvent(AccessibilityEvent)
- * View.dispatchPopulateAccessibilityEvent(AccessibilityEvent)}, hence the event
- * source {@link android.view.View} and the sub-tree rooted at it will not receive
- * calls to {@link android.view.View#onPopulateAccessibilityEvent(AccessibilityEvent)
- * View.onPopulateAccessibilityEvent(AccessibilityEvent)}. The preferred way to add
- * text content to such events is by setting the
- * {@link android.R.styleable#View_contentDescription contentDescription} of the source
- * view.</br>
  * </p>
  * <p>
- * <b>Windows changed</b> - represents the event of changes in the windows shown on
+ * <b>Windows changed</b> - represents a change in the windows shown on
  * the screen such as a window appeared, a window disappeared, a window size changed,
- * a window layer changed, etc.</br>
+ * a window layer changed, etc. These events should only come from the system, which is responsible
+ * for managing windows. The list of windows is available from
+ * {@link android.accessibilityservice.AccessibilityService#getWindows()}.
+ * For regions of the user interface that are presented as windows but are
+ * controlled by an app's process, use {@link #TYPE_WINDOW_STATE_CHANGED}.</br>
  * <em>Type:</em> {@link #TYPE_WINDOWS_CHANGED}</br>
  * <em>Properties:</em></br>
  * <ul>
  *   <li>{@link #getEventType()} - The type of the event.</li>
  *   <li>{@link #getEventTime()} - The event time.</li>
+ *   <li>{@link #getWindowChanges()}</li> - The specific change to the source window
  * </ul>
  * <em>Note:</em> You can retrieve the {@link AccessibilityWindowInfo} for the window
- * source of the event via {@link AccessibilityEvent#getSource()} to get the source
- * node on which then call {@link AccessibilityNodeInfo#getWindow()
- * AccessibilityNodeInfo.getWindow()} to get the window. Also all windows on the screen can
- * be retrieved by a call to {@link android.accessibilityservice.AccessibilityService#getWindows()
- * android.accessibilityservice.AccessibilityService.getWindows()}.
+ * source of the event by looking through the list returned by
+ * {@link android.accessibilityservice.AccessibilityService#getWindows()} for the window whose ID
+ * matches {@link #getWindowId()}.
  * </p>
  * <p>
  * <b>NOTIFICATION TYPES</b></br>
@@ -402,19 +279,6 @@ import java.util.List;
  *   <li>{@link #getClassName()} - The class name of the source.</li>
  *   <li>{@link #getPackageName()} - The package name of the source.</li>
  *   <li>{@link #getEventTime()}  - The event time.</li>
- *   <li>{@link #getText()} - The text of the source's sub-tree.</li>
- *   <li>{@link #isEnabled()} - Whether the source is enabled.</li>
- *   <li>{@link #getContentDescription()} - The content description of the source.</li>
- *   <li>{@link #getScrollX()} - The offset of the source left edge in pixels
- *       (without descendants of AdapterView).</li>
- *   <li>{@link #getScrollY()} - The offset of the source top edge in pixels
- *       (without descendants of AdapterView).</li>
- *   <li>{@link #getFromIndex()} - The zero based index of the first visible item of the source,
- *       inclusive (for descendants of AdapterView).</li>
- *   <li>{@link #getToIndex()} - The zero based index of the last visible item of the source,
- *       inclusive (for descendants of AdapterView).</li>
- *   <li>{@link #getItemCount()} - The total items of the source
- *       (for descendants of AdapterView).</li>
  * </ul>
  * </p>
  * <b>View hover exit</b> - represents the event of stopping to hover
@@ -428,19 +292,6 @@ import java.util.List;
  *   <li>{@link #getClassName()} - The class name of the source.</li>
  *   <li>{@link #getPackageName()} - The package name of the source.</li>
  *   <li>{@link #getEventTime()}  - The event time.</li>
- *   <li>{@link #getText()} - The text of the source's sub-tree.</li>
- *   <li>{@link #isEnabled()} - Whether the source is enabled.</li>
- *   <li>{@link #getContentDescription()} - The content description of the source.</li>
- *   <li>{@link #getScrollX()} - The offset of the source left edge in pixels
- *       (without descendants of AdapterView).</li>
- *   <li>{@link #getScrollY()} - The offset of the source top edge in pixels
- *       (without descendants of AdapterView).</li>
- *   <li>{@link #getFromIndex()} - The zero based index of the first visible item of the source,
- *       inclusive (for descendants of AdapterView).</li>
- *   <li>{@link #getToIndex()} - The zero based index of the last visible item of the source,
- *       inclusive (for descendants of AdapterView).</li>
- *   <li>{@link #getItemCount()} - The total items of the source
- *       (for descendants of AdapterView).</li>
  * </ul>
  * </p>
  * <p>
@@ -513,10 +364,10 @@ import java.util.List;
  * <b>MISCELLANEOUS TYPES</b></br>
  * </p>
  * <p>
- * <b>Announcement</b> - represents the event of an application making an
- * announcement. Usually this announcement is related to some sort of a context
- * change for which none of the events representing UI transitions is a good fit.
- * For example, announcing a new page in a book.</br>
+ * <b>Announcement</b> - represents the event of an application requesting a screen reader to make
+ * an announcement. Because the event carries no semantic meaning, this event is appropriate only
+ * in exceptional situations where additional screen reader output is needed but other types of
+ * accessibility services do not need to be aware of the change.</br>
  * <em>Type:</em> {@link #TYPE_ANNOUNCEMENT}</br>
  * <em>Properties:</em></br>
  * <ul>
@@ -526,7 +377,6 @@ import java.util.List;
  *   <li>{@link #getPackageName()} - The package name of the source.</li>
  *   <li>{@link #getEventTime()}  - The event time.</li>
  *   <li>{@link #getText()} - The text of the announcement.</li>
- *   <li>{@link #isEnabled()} - Whether the source is enabled.</li>
  * </ul>
  * </p>
  *
@@ -674,7 +524,8 @@ public final class AccessibilityEvent extends AccessibilityRecord implements Par
     public static final int TYPE_TOUCH_INTERACTION_END = 0x00200000;
 
     /**
-     * Represents the event change in the windows shown on the screen.
+     * Represents the event change in the system windows shown on the screen. This event type should
+     * only be dispatched by the system.
      */
     public static final int TYPE_WINDOWS_CHANGED = 0x00400000;
 
@@ -696,7 +547,8 @@ public final class AccessibilityEvent extends AccessibilityRecord implements Par
 
     /**
      * Change type for {@link #TYPE_WINDOW_CONTENT_CHANGED} event:
-     * A node in the subtree rooted at the source node was added or removed.
+     * One or more content changes occurred in the the subtree rooted at the source node,
+     * or the subtree's structure changed when a node was added or removed.
      */
     public static final int CONTENT_CHANGE_TYPE_SUBTREE = 0x00000001;
 
@@ -712,6 +564,99 @@ public final class AccessibilityEvent extends AccessibilityRecord implements Par
      */
     public static final int CONTENT_CHANGE_TYPE_CONTENT_DESCRIPTION = 0x00000004;
 
+    /**
+     * Change type for {@link #TYPE_WINDOWS_CHANGED} event:
+     * The window was added.
+     */
+    public static final int WINDOWS_CHANGE_ADDED = 0x00000001;
+
+    /**
+     * Change type for {@link #TYPE_WINDOWS_CHANGED} event:
+     * A window was removed.
+     */
+    public static final int WINDOWS_CHANGE_REMOVED = 0x00000002;
+
+    /**
+     * Change type for {@link #TYPE_WINDOWS_CHANGED} event:
+     * The window's title changed.
+     */
+    public static final int WINDOWS_CHANGE_TITLE = 0x00000004;
+
+    /**
+     * Change type for {@link #TYPE_WINDOWS_CHANGED} event:
+     * The window's bounds changed.
+     */
+    public static final int WINDOWS_CHANGE_BOUNDS = 0x00000008;
+
+    /**
+     * Change type for {@link #TYPE_WINDOWS_CHANGED} event:
+     * The window's layer changed.
+     */
+    public static final int WINDOWS_CHANGE_LAYER = 0x00000010;
+
+    /**
+     * Change type for {@link #TYPE_WINDOWS_CHANGED} event:
+     * The window's {@link AccessibilityWindowInfo#isActive()} changed.
+     */
+    public static final int WINDOWS_CHANGE_ACTIVE = 0x00000020;
+
+    /**
+     * Change type for {@link #TYPE_WINDOWS_CHANGED} event:
+     * The window's {@link AccessibilityWindowInfo#isFocused()} changed.
+     */
+    public static final int WINDOWS_CHANGE_FOCUSED = 0x00000040;
+
+    /**
+     * Change type for {@link #TYPE_WINDOWS_CHANGED} event:
+     * The window's {@link AccessibilityWindowInfo#isAccessibilityFocused()} changed.
+     */
+    public static final int WINDOWS_CHANGE_ACCESSIBILITY_FOCUSED = 0x00000080;
+
+    /**
+     * Change type for {@link #TYPE_WINDOWS_CHANGED} event:
+     * The window's parent changed.
+     */
+    public static final int WINDOWS_CHANGE_PARENT = 0x00000100;
+
+    /**
+     * Change type for {@link #TYPE_WINDOWS_CHANGED} event:
+     * The window's children changed.
+     */
+    public static final int WINDOWS_CHANGE_CHILDREN = 0x00000200;
+
+    /**
+     * Change type for {@link #TYPE_WINDOWS_CHANGED} event:
+     * The window either entered or exited picture-in-picture mode.
+     */
+    public static final int WINDOWS_CHANGE_PIP = 0x00000400;
+
+    /** @hide */
+    @Retention(RetentionPolicy.SOURCE)
+    @IntDef(flag = true, prefix = { "WINDOWS_CHANGE_" }, value = {
+            WINDOWS_CHANGE_ADDED,
+            WINDOWS_CHANGE_REMOVED,
+            WINDOWS_CHANGE_TITLE,
+            WINDOWS_CHANGE_BOUNDS,
+            WINDOWS_CHANGE_LAYER,
+            WINDOWS_CHANGE_ACTIVE,
+            WINDOWS_CHANGE_FOCUSED,
+            WINDOWS_CHANGE_ACCESSIBILITY_FOCUSED,
+            WINDOWS_CHANGE_PARENT,
+            WINDOWS_CHANGE_CHILDREN,
+            WINDOWS_CHANGE_PIP
+    })
+    public @interface WindowsChangeTypes {}
+
+    /** @hide */
+    @Retention(RetentionPolicy.SOURCE)
+    @IntDef(flag = true, prefix = { "CONTENT_CHANGE_TYPE_" },
+            value = {
+                    CONTENT_CHANGE_TYPE_UNDEFINED,
+                    CONTENT_CHANGE_TYPE_SUBTREE,
+                    CONTENT_CHANGE_TYPE_TEXT,
+                    CONTENT_CHANGE_TYPE_CONTENT_DESCRIPTION
+            })
+    public @interface ContentChangeTypes {}
 
     /** @hide */
     @IntDef(flag = true, prefix = { "TYPE_" }, value = {
@@ -782,6 +727,7 @@ public final class AccessibilityEvent extends AccessibilityRecord implements Par
     int mMovementGranularity;
     int mAction;
     int mContentChangeTypes;
+    int mWindowChangeTypes;
 
     private ArrayList<AccessibilityRecord> mRecords;
 
@@ -802,6 +748,7 @@ public final class AccessibilityEvent extends AccessibilityRecord implements Par
         mMovementGranularity = event.mMovementGranularity;
         mAction = event.mAction;
         mContentChangeTypes = event.mContentChangeTypes;
+        mWindowChangeTypes = event.mWindowChangeTypes;
         mEventTime = event.mEventTime;
         mPackageName = event.mPackageName;
     }
@@ -885,6 +832,7 @@ public final class AccessibilityEvent extends AccessibilityRecord implements Par
      *         <li>{@link AccessibilityEvent#CONTENT_CHANGE_TYPE_UNDEFINED}
      *         </ul>
      */
+    @ContentChangeTypes
     public int getContentChangeTypes() {
         return mContentChangeTypes;
     }
@@ -913,9 +861,46 @@ public final class AccessibilityEvent extends AccessibilityRecord implements Par
      * @throws IllegalStateException If called from an AccessibilityService.
      * @see #getContentChangeTypes()
      */
-    public void setContentChangeTypes(int changeTypes) {
+    public void setContentChangeTypes(@ContentChangeTypes int changeTypes) {
         enforceNotSealed();
         mContentChangeTypes = changeTypes;
+    }
+
+    /**
+     * Get the bit mask of change types signaled by a {@link #TYPE_WINDOWS_CHANGED} event. A
+     * single event may represent multiple change types.
+     *
+     * @return The bit mask of change types.
+     */
+    @WindowsChangeTypes
+    public int getWindowChanges() {
+        return mWindowChangeTypes;
+    }
+
+    /** @hide  */
+    public void setWindowChanges(@WindowsChangeTypes int changes) {
+        mWindowChangeTypes = changes;
+    }
+
+    private static String windowChangeTypesToString(@WindowsChangeTypes int types) {
+        return BitUtils.flagsToString(types, AccessibilityEvent::singleWindowChangeTypeToString);
+    }
+
+    private static String singleWindowChangeTypeToString(int type) {
+        switch (type) {
+            case WINDOWS_CHANGE_ADDED: return "WINDOWS_CHANGE_ADDED";
+            case WINDOWS_CHANGE_REMOVED: return "WINDOWS_CHANGE_REMOVED";
+            case WINDOWS_CHANGE_TITLE: return "WINDOWS_CHANGE_TITLE";
+            case WINDOWS_CHANGE_BOUNDS: return "WINDOWS_CHANGE_BOUNDS";
+            case WINDOWS_CHANGE_LAYER: return "WINDOWS_CHANGE_LAYER";
+            case WINDOWS_CHANGE_ACTIVE: return "WINDOWS_CHANGE_ACTIVE";
+            case WINDOWS_CHANGE_FOCUSED: return "WINDOWS_CHANGE_FOCUSED";
+            case WINDOWS_CHANGE_ACCESSIBILITY_FOCUSED:
+                return "WINDOWS_CHANGE_ACCESSIBILITY_FOCUSED";
+            case WINDOWS_CHANGE_PARENT: return "WINDOWS_CHANGE_PARENT";
+            case WINDOWS_CHANGE_CHILDREN: return "WINDOWS_CHANGE_CHILDREN";
+            default: return Integer.toHexString(type);
+        }
     }
 
     /**
@@ -1025,6 +1010,26 @@ public final class AccessibilityEvent extends AccessibilityRecord implements Par
     }
 
     /**
+     * Convenience method to obtain a {@link #TYPE_WINDOWS_CHANGED} event for a specific window and
+     * change set.
+     *
+     * @param windowId The ID of the window that changed
+     * @param windowChangeTypes The changes to populate
+     * @return An instance of a TYPE_WINDOWS_CHANGED, populated with the requested fields and with
+     *         importantForAccessibility set to {@code true}.
+     *
+     * @hide
+     */
+    public static AccessibilityEvent obtainWindowsChangedEvent(
+            int windowId, int windowChangeTypes) {
+        final AccessibilityEvent event = AccessibilityEvent.obtain(TYPE_WINDOWS_CHANGED);
+        event.setWindowId(windowId);
+        event.setWindowChanges(windowChangeTypes);
+        event.setImportantForAccessibility(true);
+        return event;
+    }
+
+    /**
      * Returns a cached instance if such is available or a new one is
      * instantiated with its type property set.
      *
@@ -1099,6 +1104,7 @@ public final class AccessibilityEvent extends AccessibilityRecord implements Par
         mMovementGranularity = 0;
         mAction = 0;
         mContentChangeTypes = 0;
+        mWindowChangeTypes = 0;
         mPackageName = null;
         mEventTime = 0;
         if (mRecords != null) {
@@ -1120,6 +1126,7 @@ public final class AccessibilityEvent extends AccessibilityRecord implements Par
         mMovementGranularity = parcel.readInt();
         mAction = parcel.readInt();
         mContentChangeTypes = parcel.readInt();
+        mWindowChangeTypes = parcel.readInt();
         mPackageName = TextUtils.CHAR_SEQUENCE_CREATOR.createFromParcel(parcel);
         mEventTime = parcel.readLong();
         mConnectionId = parcel.readInt();
@@ -1178,6 +1185,7 @@ public final class AccessibilityEvent extends AccessibilityRecord implements Par
         parcel.writeInt(mMovementGranularity);
         parcel.writeInt(mAction);
         parcel.writeInt(mContentChangeTypes);
+        parcel.writeInt(mWindowChangeTypes);
         TextUtils.writeToParcel(mPackageName, parcel, 0);
         parcel.writeLong(mEventTime);
         parcel.writeInt(mConnectionId);
@@ -1238,11 +1246,13 @@ public final class AccessibilityEvent extends AccessibilityRecord implements Par
         builder.append("; PackageName: ").append(mPackageName);
         builder.append("; MovementGranularity: ").append(mMovementGranularity);
         builder.append("; Action: ").append(mAction);
+        builder.append("; ContentChangeTypes: ").append(
+                contentChangeTypesToString(mContentChangeTypes));
+        builder.append("; WindowChangeTypes: ").append(
+                windowChangeTypesToString(mWindowChangeTypes));
         builder.append(super.toString());
         if (DEBUG) {
             builder.append("\n");
-            builder.append("; ContentChangeTypes: ").append(
-                    contentChangeTypesToString(mContentChangeTypes));
             builder.append("; sourceWindowId: ").append(mSourceWindowId);
             builder.append("; mSourceNodeId: ").append(mSourceNodeId);
             for (int i = 0; i < getRecordCount(); i++) {

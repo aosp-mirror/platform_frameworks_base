@@ -15,6 +15,7 @@
  */
 package android.hardware.location;
 
+import android.annotation.SystemApi;
 import android.os.Parcel;
 import android.os.Parcelable;
 import android.util.Log;
@@ -27,6 +28,7 @@ import java.util.Arrays;
 /**
  * @hide
  */
+@SystemApi
 public final class NanoAppBinary implements Parcelable {
     private static final String TAG = "NanoAppBinary";
 

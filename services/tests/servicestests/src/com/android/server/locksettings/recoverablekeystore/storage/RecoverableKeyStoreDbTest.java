@@ -113,6 +113,22 @@ public class RecoverableKeyStoreDbTest {
     }
 
     @Test
+    public void removeKey_removesAKey() {
+        int userId = 6;
+        int uid = 60001;
+        String alias = "rupertbates";
+        WrappedKey key = new WrappedKey(
+                getUtf8Bytes("nonce1"),
+                getUtf8Bytes("key1"),
+                /*platformKeyGenerationId=*/ 1);
+        mRecoverableKeyStoreDb.insertKey(userId, uid, alias, key);
+
+        assertTrue(mRecoverableKeyStoreDb.removeKey(uid, alias));
+
+        assertNull(mRecoverableKeyStoreDb.getKey(uid, alias));
+    }
+
+    @Test
     public void getKey_returnsNullIfNoKey() {
         WrappedKey key = mRecoverableKeyStoreDb.getKey(
                 /*userId=*/ 1, /*alias=*/ "hello");

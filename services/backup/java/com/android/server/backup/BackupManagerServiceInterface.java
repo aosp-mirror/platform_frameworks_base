@@ -186,6 +186,8 @@ public interface BackupManagerServiceInterface {
 
   boolean isAppEligibleForBackup(String packageName);
 
+  String[] filterAppsEligibleForBackup(String[] packages);
+
   void dump(FileDescriptor fd, PrintWriter pw, String[] args);
 
   IBackupManager getBackupManagerBinder();

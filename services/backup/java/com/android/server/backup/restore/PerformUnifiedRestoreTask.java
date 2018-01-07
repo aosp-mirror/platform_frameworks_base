@@ -61,6 +61,7 @@ import com.android.server.backup.BackupUtils;
 import com.android.server.backup.PackageManagerBackupAgent;
 import com.android.server.backup.PackageManagerBackupAgent.Metadata;
 import com.android.server.backup.RefactoredBackupManagerService;
+import com.android.server.backup.TransportManager;
 import com.android.server.backup.internal.OnTaskFinishedListener;
 import com.android.server.backup.transport.TransportClient;
 import com.android.server.backup.utils.AppBackupUtils;
@@ -78,6 +79,7 @@ import java.util.List;
 public class PerformUnifiedRestoreTask implements BackupRestoreTask {
 
     private RefactoredBackupManagerService backupManagerService;
+    private final TransportManager mTransportManager;
     // Transport client we're working with to do the restore
     private final TransportClient mTransportClient;
 
@@ -164,6 +166,7 @@ public class PerformUnifiedRestoreTask implements BackupRestoreTask {
             int pmToken, boolean isFullSystemRestore, String[] filterSet,
             OnTaskFinishedListener listener) {
         this.backupManagerService = backupManagerService;
+        mTransportManager = backupManagerService.getTransportManager();
         mEphemeralOpToken = backupManagerService.generateRandomIntegerToken();
         mState = UnifiedRestoreState.INITIAL;
         mStartRealtime = SystemClock.elapsedRealtime();
@@ -349,8 +352,9 @@ public class PerformUnifiedRestoreTask implements BackupRestoreTask {
         }
 
         try {
-            String transportDir = mTransportClient.getTransportDirName();
-            mStateDir = new File(backupManagerService.getBaseStateDir(), transportDir);
+            String transportDirName =
+                    mTransportManager.getTransportDirName(mTransportClient.getTransportComponent());
+            mStateDir = new File(backupManagerService.getBaseStateDir(), transportDirName);
 
             // Fetch the current metadata from the dataset first
             PackageInfo pmPackage = new PackageInfo();

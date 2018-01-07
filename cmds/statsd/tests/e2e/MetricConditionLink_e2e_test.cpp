@@ -15,6 +15,7 @@
 #include <gtest/gtest.h>
 
 #include "src/StatsLogProcessor.h"
+#include "src/stats_log_util.h"
 #include "tests/statsd_test_util.h"
 
 #include <vector>
@@ -55,24 +56,24 @@ StatsdConfig CreateStatsdConfig() {
     *config.add_predicate() = isInBackgroundPredicate;
 
     auto combinationPredicate = config.add_predicate();
-    combinationPredicate->set_name("combinationPredicate");
+    combinationPredicate->set_id(StringToId("combinationPredicate"));
     combinationPredicate->mutable_combination()->set_operation(LogicalOperation::AND);
     addPredicateToPredicateCombination(screenIsOffPredicate, combinationPredicate);
     addPredicateToPredicateCombination(isSyncingPredicate, combinationPredicate);
     addPredicateToPredicateCombination(isInBackgroundPredicate, combinationPredicate);
 
     auto countMetric = config.add_count_metric();
-    countMetric->set_name("AppCrashes");
-    countMetric->set_what(appCrashMatcher.name());
-    countMetric->set_condition(combinationPredicate->name());
+    countMetric->set_id(StringToId("AppCrashes"));
+    countMetric->set_what(appCrashMatcher.id());
+    countMetric->set_condition(combinationPredicate->id());
     // The metric is dimensioning by uid only.
     *countMetric->mutable_dimensions() =
         CreateDimensions(android::util::PROCESS_LIFE_CYCLE_STATE_CHANGED, {1});
-    countMetric->mutable_bucket()->set_bucket_size_millis(30 * 1000LL);
+    countMetric->set_bucket(ONE_MINUTE);
 
     // Links between crash atom and condition of app is in syncing.
     auto links = countMetric->add_links();
-    links->set_condition(isSyncingPredicate.name());
+    links->set_condition(isSyncingPredicate.id());
     auto dimensionWhat = links->mutable_dimensions_in_what();
     dimensionWhat->set_field(android::util::PROCESS_LIFE_CYCLE_STATE_CHANGED);
     dimensionWhat->add_child()->set_field(1);  // uid field.
@@ -82,7 +83,7 @@ StatsdConfig CreateStatsdConfig() {
 
     // Links between crash atom and condition of app is in background.
     links = countMetric->add_links();
-    links->set_condition(isInBackgroundPredicate.name());
+    links->set_condition(isInBackgroundPredicate.id());
     dimensionWhat = links->mutable_dimensions_in_what();
     dimensionWhat->set_field(android::util::PROCESS_LIFE_CYCLE_STATE_CHANGED);
     dimensionWhat->add_child()->set_field(1);  // uid field.
@@ -95,7 +96,8 @@ StatsdConfig CreateStatsdConfig() {
 TEST(MetricConditionLinkE2eTest, TestMultiplePredicatesAndLinks) {
     auto config = CreateStatsdConfig();
     uint64_t bucketStartTimeNs = 10000000000;
-    uint64_t bucketSizeNs = config.count_metric(0).bucket().bucket_size_millis() * 1000 * 1000;
+    uint64_t bucketSizeNs =
+        TimeUnitToBucketSizeInMillis(config.count_metric(0).bucket()) * 1000000LL;
 
     ConfigKey cfgKey;
     auto processor = CreateStatsLogProcessor(bucketStartTimeNs / NS_PER_SEC, config, cfgKey);

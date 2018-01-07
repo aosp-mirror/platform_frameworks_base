@@ -15,15 +15,20 @@
  */
 package android.hardware.location;
 
+import android.annotation.SystemApi;
+
+import java.util.concurrent.Executor;
+
 /**
  * A class for {@link android.hardware.location.ContextHubClient ContextHubClient} to
  * receive messages and life-cycle events from nanoapps in the Context Hub at which the client is
  * attached to.
  *
- * This callback is registered through the
- * {@link android.hardware.location.ContextHubManager#createClient() creation} of
- * {@link android.hardware.location.ContextHubClient ContextHubClient}. Callbacks are
- * invoked in the following ways:
+ * This callback is registered through the {@link
+ * android.hardware.location.ContextHubManager#createClient(
+ * ContextHubInfo, ContextHubClientCallback, Executor) creation} of
+ * {@link android.hardware.location.ContextHubClient ContextHubClient}. Callbacks are invoked in
+ * the following ways:
  * 1) Messages from nanoapps delivered through onMessageFromNanoApp may either be broadcasted
  *    or targeted to a specific client.
  * 2) Nanoapp or Context Hub events (the remaining callbacks) are broadcasted to all clients, and
@@ -31,6 +36,7 @@ package android.hardware.location;
  *
  * @hide
  */
+@SystemApi
 public class ContextHubClientCallback {
     /**
      * Callback invoked when receiving a message from a nanoapp.
@@ -38,48 +44,56 @@ public class ContextHubClientCallback {
      * The message contents of this callback may either be broadcasted or targeted to the
      * client receiving the invocation.
      *
+     * @param client the client that is associated with this callback
      * @param message the message sent by the nanoapp
      */
-    public void onMessageFromNanoApp(NanoAppMessage message) {}
+    public void onMessageFromNanoApp(ContextHubClient client, NanoAppMessage message) {}
 
     /**
      * Callback invoked when the attached Context Hub has reset.
+     *
+     * @param client the client that is associated with this callback
      */
-    public void onHubReset() {}
+    public void onHubReset(ContextHubClient client) {}
 
     /**
      * Callback invoked when a nanoapp aborts at the attached Context Hub.
      *
+     * @param client the client that is associated with this callback
      * @param nanoAppId the ID of the nanoapp that had aborted
      * @param abortCode the reason for nanoapp's abort, specific to each nanoapp
      */
-    public void onNanoAppAborted(long nanoAppId, int abortCode) {}
+    public void onNanoAppAborted(ContextHubClient client, long nanoAppId, int abortCode) {}
 
     /**
      * Callback invoked when a nanoapp is loaded at the attached Context Hub.
      *
+     * @param client the client that is associated with this callback
      * @param nanoAppId the ID of the nanoapp that had been loaded
      */
-    public void onNanoAppLoaded(long nanoAppId) {}
+    public void onNanoAppLoaded(ContextHubClient client, long nanoAppId) {}
 
     /**
      * Callback invoked when a nanoapp is unloaded from the attached Context Hub.
      *
+     * @param client the client that is associated with this callback
      * @param nanoAppId the ID of the nanoapp that had been unloaded
      */
-    public void onNanoAppUnloaded(long nanoAppId) {}
+    public void onNanoAppUnloaded(ContextHubClient client, long nanoAppId) {}
 
     /**
      * Callback invoked when a nanoapp is enabled at the attached Context Hub.
      *
+     * @param client the client that is associated with this callback
      * @param nanoAppId the ID of the nanoapp that had been enabled
      */
-    public void onNanoAppEnabled(long nanoAppId) {}
+    public void onNanoAppEnabled(ContextHubClient client, long nanoAppId) {}
 
     /**
      * Callback invoked when a nanoapp is disabled at the attached Context Hub.
      *
+     * @param client the client that is associated with this callback
      * @param nanoAppId the ID of the nanoapp that had been disabled
      */
-    public void onNanoAppDisabled(long nanoAppId) {}
+    public void onNanoAppDisabled(ContextHubClient client, long nanoAppId) {}
 }

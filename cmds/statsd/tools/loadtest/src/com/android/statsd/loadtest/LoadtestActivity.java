@@ -39,15 +39,22 @@ import android.view.View;
 import android.view.inputmethod.InputMethodManager;
 import android.view.MotionEvent;
 import android.view.View.OnFocusChangeListener;
+import android.widget.AdapterView;
+import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.CheckBox;
 import android.widget.EditText;
+import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.Toast;
 import com.android.os.StatsLog.ConfigMetricsReport;
 import com.android.os.StatsLog.ConfigMetricsReportList;
 import com.android.os.StatsLog.StatsdStatsReport;
+import com.android.internal.os.StatsdConfigProto.TimeUnit;
+import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 /**
  * Runs a load test for statsd.
@@ -67,7 +74,7 @@ import java.util.List;
  *   <li> The 'burst' parameter controls how many atoms are pushed at the same time (per period).
  * </ul>
  */
-public class LoadtestActivity extends Activity {
+public class LoadtestActivity extends Activity implements AdapterView.OnItemSelectedListener {
 
     private static final String TAG = "StatsdLoadtest";
     public static final String TYPE = "type";
@@ -75,6 +82,8 @@ public class LoadtestActivity extends Activity {
     public static final String PERF_ALARM = "perf_alarm";
     private static final String START = "start";
     private static final String STOP = "stop";
+    private static final Map<String, TimeUnit> TIME_UNIT_MAP = initializeTimeUnitMap();
+    private static final List<String> TIME_UNIT_LABELS = initializeTimeUnitLabels();
 
     public final static class PusherAlarmReceiver extends BroadcastReceiver {
         @Override
@@ -94,6 +103,35 @@ public class LoadtestActivity extends Activity {
          }
     }
 
+    private static Map<String, TimeUnit> initializeTimeUnitMap() {
+        Map<String, TimeUnit> labels = new HashMap();
+        labels.put("1m", TimeUnit.ONE_MINUTE);
+        labels.put("5m", TimeUnit.FIVE_MINUTES);
+        labels.put("10m", TimeUnit.TEN_MINUTES);
+        labels.put("30m", TimeUnit.THIRTY_MINUTES);
+        labels.put("1h", TimeUnit.ONE_HOUR);
+        labels.put("3h", TimeUnit.THREE_HOURS);
+        labels.put("6h", TimeUnit.SIX_HOURS);
+        labels.put("12h", TimeUnit.TWELVE_HOURS);
+        labels.put("1d", TimeUnit.ONE_DAY);
+        labels.put("1s", TimeUnit.CTS);
+        return labels;
+    }
+    private static List<String> initializeTimeUnitLabels() {
+        List<String> labels = new ArrayList();
+        labels.add("1s");
+        labels.add("1m");
+        labels.add("5m");
+        labels.add("10m");
+        labels.add("30m");
+        labels.add("1h");
+        labels.add("3h");
+        labels.add("6h");
+        labels.add("12h");
+        labels.add("1d");
+        return labels;
+    }
+
     private AlarmManager mAlarmMgr;
 
     /** Used to periodically log atoms to logd. */
@@ -104,7 +142,7 @@ public class LoadtestActivity extends Activity {
 
     private Button mStartStop;
     private EditText mReplicationText;
-    private EditText mBucketText;
+    private Spinner mBucketSpinner;
     private EditText mPeriodText;
     private EditText mBurstText;
     private EditText mDurationText;
@@ -169,7 +207,7 @@ public class LoadtestActivity extends Activity {
     private long mPeriodSecs;
 
     /** The bucket size, in minutes, for aggregate metrics. */
-    private long mBucketMins;
+    private TimeUnit mBucket;
 
     /** The duration, in minutes, of the loadtest. */
     private long mDurationMins;
@@ -185,6 +223,9 @@ public class LoadtestActivity extends Activity {
 
     /** For intra-minute periods. */
     private final Handler mHandler = new Handler();
+
+    /** Number of metrics in the current config. */
+    private int mNumMetrics;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -294,7 +335,7 @@ public class LoadtestActivity extends Activity {
             return null;
         }
         if (mStatsManager != null) {
-            byte[] data = mStatsManager.getData(ConfigFactory.CONFIG_NAME);
+            byte[] data = mStatsManager.getData(ConfigFactory.CONFIG_ID);
             if (data != null) {
                 ConfigMetricsReportList reports = null;
                 try {
@@ -310,6 +351,18 @@ public class LoadtestActivity extends Activity {
         return null;
     }
 
+    @Override
+    public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
+        String item = parent.getItemAtPosition(position).toString();
+
+        mBucket = TIME_UNIT_MAP.get(item);
+    }
+
+    @Override
+    public void onNothingSelected(AdapterView<?> parent) {
+        // Another interface callback
+    }
+
     private void onPerfAlarm() {
         if (mPerfData != null) {
             mPerfData.onAlarm(this);
@@ -317,7 +370,9 @@ public class LoadtestActivity extends Activity {
         // Piggy-back on that alarm to show the elapsed time.
         long elapsedTimeMins = (long) Math.floor(
             (SystemClock.elapsedRealtime() - mStartedTimeMillis) / 60 / 1000);
-        mReportText.setText("Loadtest in progress. Elapsed time = " + elapsedTimeMins + " min(s)");
+        mReportText.setText("Loadtest in progress.\n"
+            + "num metrics =" + mNumMetrics
+            + "\nElapsed time = " + elapsedTimeMins + " min(s)");
     }
 
     private void onAlarm() {
@@ -360,7 +415,7 @@ public class LoadtestActivity extends Activity {
         getData();
 
         // Create a config and push it to statsd.
-        if (!setConfig(mFactory.getConfig(mReplication, mBucketMins * 60 * 1000, mPlacebo,
+        if (!setConfig(mFactory.getConfig(mReplication, mBucket, mPlacebo,
                 mIncludeCountMetric, mIncludeDurationMetric, mIncludeEventMetric,
                 mIncludeValueMetric, mIncludeGaugeMetric))) {
             return;
@@ -377,10 +432,12 @@ public class LoadtestActivity extends Activity {
         scheduleNext();
 
         // Start tracking performance.
-        mPerfData = new PerfData(this, mPlacebo, mReplication, mBucketMins, mPeriodSecs, mBurst);
+        mPerfData = new PerfData(this, mPlacebo, mReplication, mBucket, mPeriodSecs, mBurst,
+            mIncludeCountMetric, mIncludeDurationMetric, mIncludeEventMetric, mIncludeValueMetric,
+            mIncludeGaugeMetric);
         mPerfData.startRecording(this);
 
-        mReportText.setText("Loadtest in progress.");
+        mReportText.setText("Loadtest in progress.\nnum metrics =" + mNumMetrics);
         mStartedTimeMillis = SystemClock.elapsedRealtime();
 
         updateStarted(true);
@@ -426,9 +483,16 @@ public class LoadtestActivity extends Activity {
         mBurstText.setEnabled(!mPlacebo && !mStarted);
         mReplicationText.setEnabled(!mPlacebo && !mStarted);
         mPeriodText.setEnabled(!mStarted);
-        mBucketText.setEnabled(!mPlacebo && !mStarted);
+        mBucketSpinner.setEnabled(!mPlacebo && !mStarted);
         mDurationText.setEnabled(!mStarted);
         mPlaceboCheckBox.setEnabled(!mStarted);
+
+        boolean enabled = !mStarted && !mPlaceboCheckBox.isChecked();
+        mCountMetricCheckBox.setEnabled(enabled);
+        mDurationMetricCheckBox.setEnabled(enabled);
+        mEventMetricCheckBox.setEnabled(enabled);
+        mValueMetricCheckBox.setEnabled(enabled);
+        mGaugeMetricCheckBox.setEnabled(enabled);
     }
 
     private boolean statsdRunning() {
@@ -453,7 +517,7 @@ public class LoadtestActivity extends Activity {
         // TODO: Clear all configs instead of specific ones.
         if (mStatsManager != null) {
             if (mStarted) {
-                if (!mStatsManager.removeConfiguration(ConfigFactory.CONFIG_NAME)) {
+                if (!mStatsManager.removeConfiguration(ConfigFactory.CONFIG_ID)) {
                     Log.d(TAG, "Removed loadtest statsd configs.");
                 } else {
                     Log.d(TAG, "Failed to remove loadtest configs.");
@@ -462,10 +526,11 @@ public class LoadtestActivity extends Activity {
         }
     }
 
-    private boolean setConfig(byte[] config) {
+    private boolean setConfig(ConfigFactory.ConfigMetadata configData) {
       if (mStatsManager != null) {
-            if (mStatsManager.addConfiguration(ConfigFactory.CONFIG_NAME,
-                config, getPackageName(), LoadtestActivity.this.getClass().getName())) {
+            if (mStatsManager.addConfiguration(ConfigFactory.CONFIG_ID,
+                configData.bytes, getPackageName(), LoadtestActivity.this.getClass().getName())) {
+                mNumMetrics = configData.numMetrics;
                 Log.d(TAG, "Config pushed to statsd");
                 return true;
             } else {
@@ -483,10 +548,6 @@ public class LoadtestActivity extends Activity {
         mPeriodSecs = periodSecs;
     }
 
-    private synchronized void setBucketMins(long bucketMins) {
-        mBucketMins = bucketMins;
-    }
-
     private synchronized void setBurst(int burst) {
         mBurst = burst;
     }
@@ -495,12 +556,9 @@ public class LoadtestActivity extends Activity {
         mDurationMins = durationMins;
     }
 
-    private synchronized void setPlacebo(boolean placebo) {
-        mPlacebo = placebo;
-        updateControlsEnabled();
-    }
 
     private void handleFocus(EditText editText) {
+      /*
         editText.setOnFocusChangeListener(new OnFocusChangeListener() {
             @Override
             public void onFocusChange(View v, boolean hasFocus) {
@@ -509,6 +567,7 @@ public class LoadtestActivity extends Activity {
                 }
             }
         });
+      */
     }
 
     private void initBurst() {
@@ -536,15 +595,23 @@ public class LoadtestActivity extends Activity {
     }
 
     private void initBucket() {
-        mBucketMins = getResources().getInteger(R.integer.bucket_default);
-        mBucketText = (EditText) findViewById(R.id.bucket);
-        mBucketText.addTextChangedListener(new NumericalWatcher(mBucketText, 1, 24 * 60) {
-            @Override
-            public void onNewValue(int newValue) {
-                setBucketMins(newValue);
+        String defaultValue = getResources().getString(R.string.bucket_default);
+        mBucket = TimeUnit.valueOf(defaultValue);
+        mBucketSpinner = (Spinner) findViewById(R.id.bucket_spinner);
+
+        ArrayAdapter<String> dataAdapter = new ArrayAdapter<String>(
+            this, R.layout.spinner_item, TIME_UNIT_LABELS);
+
+        mBucketSpinner.setAdapter(dataAdapter);
+        mBucketSpinner.setOnItemSelectedListener(this);
+
+        for (String label : TIME_UNIT_MAP.keySet()) {
+          Log.d(TAG, "EVALUATE " + label + " VS " + defaultValue);
+          if (defaultValue.equals(TIME_UNIT_MAP.get(label).toString())) {
+                Log.d(TAG, " FOUND IT");
+                mBucketSpinner.setSelection(dataAdapter.getPosition(label));
             }
-        });
-        handleFocus(mBucketText);
+        }
     }
 
     private void initPeriod() {
@@ -577,7 +644,8 @@ public class LoadtestActivity extends Activity {
         mPlaceboCheckBox.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                setPlacebo(((CheckBox) view).isChecked());
+                mPlacebo = mPlaceboCheckBox.isChecked();
+                updateControlsEnabled();
             }
         });
     }

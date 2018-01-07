@@ -1302,8 +1302,8 @@
 
          If this is defined then:
             - config_autoBrightnessLcdBacklightValues should not be defined
-            - config_screenBrightnessMinimumNits must be defined
-            - config_screenBrightnessMaximumNits must be defined
+            - config_screenBrightnessNits must be defined
+            - config_screenBrightnessBacklight must be defined
 
          This array should have size one greater than the size of the config_autoBrightnessLevels
          array. The brightness values must be non-negative and non-decreasing. This must be
@@ -1347,28 +1347,23 @@
         <item>200</item>
     </integer-array>
 
-    <!-- The minimum brightness of the display in nits. On OLED displays this should be measured
-         with an all white image while the display is fully on and the backlight is set to
-         config_screenBrightnessSettingMinimum or config_screenBrightnessSettingDark, whichever
-         is darker.
+    <!-- An array describing the screen's backlight values corresponding to the brightness
+         values in the config_screenBrightnessNits array.
 
-         If this and config_screenBrightnessMinimumNits are set, then the display's brightness
-         range is assumed to be linear between
-         (config_screenBrightnessSettingMinimum, config_screenBrightnessMinimumNits) and
-         (config_screenBrightnessSettingMaximum, config_screenBrightnessMaximumNits). -->
-    <item name="config_screenBrightnessMinimumNits" format="float" type="dimen">-1.0</item>
+         This array should be equal in size to config_screenBrightnessBacklight. -->
+    <integer-array name="config_screenBrightnessBacklight">
+    </integer-array>
 
-    <!-- The maximum brightness of the display in nits. On OLED displays this should be measured
-         with an all white image while the display is fully on and the "backlight" is set to
-         config_screenBrightnessSettingMaximum. Note that this value should *not* reflect the
-         maximum brightness value for any high brightness modes but only the maximum brightness
-         value obtainable in a sustainable manner.
+    <!-- An array of floats describing the screen brightness in nits corresponding to the backlight
+         values in the config_screenBrightnessBacklight array.  On OLED displays these  values
+         should be measured with an all white image while the display is in the fully on state.
+         Note that this value should *not* reflect the maximum brightness value for any high
+         brightness modes but only the maximum brightness value obtainable in a sustainable manner.
 
-         If this and config_screenBrightnessMinimumNits are set to something non-negative, then the
-         display's brightness range is assumed to be linear between
-         (config_screenBrightnessSettingMinimum, config_screenBrightnessMaximumNits) and
-         (config_screenBrightnessSettingMaximum, config_screenBrightnessMaximumNits). -->
-    <item name="config_screenBrightnessMaximumNits" format="float" type="dimen">-1.0</item>
+         This array should be equal in size to config_screenBrightnessBacklight -->
+    <array name="config_screenBrightnessNits">
+    </array>
+
 
     <!-- Array of ambient lux threshold values. This is used for determining hysteresis constraint
          values by calculating the index to use for lookup and then setting the constraint value

@@ -298,8 +298,8 @@ public class KeySyncUtils {
                 .order(ByteOrder.LITTLE_ENDIAN)
                 .put(SecureBox.encodePublicKey(thmPublicKey))
                 .putLong(counterId)
-                .putInt(maxAttempts)
                 .putLong(deviceId)
+                .putInt(maxAttempts)
                 .array();
     }
 

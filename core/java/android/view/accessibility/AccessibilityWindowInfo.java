@@ -21,9 +21,12 @@ import android.annotation.TestApi;
 import android.graphics.Rect;
 import android.os.Parcel;
 import android.os.Parcelable;
+import android.text.TextUtils;
 import android.util.LongArray;
 import android.util.Pools.SynchronizedPool;
+import android.view.accessibility.AccessibilityEvent.WindowsChangeTypes;
 
+import java.util.Objects;
 import java.util.concurrent.atomic.AtomicInteger;
 
 /**
@@ -575,7 +578,7 @@ public final class AccessibilityWindowInfo implements Parcelable {
         StringBuilder builder = new StringBuilder();
         builder.append("AccessibilityWindowInfo[");
         builder.append("title=").append(mTitle);
-        builder.append("id=").append(mId);
+        builder.append(", id=").append(mId);
         builder.append(", type=").append(typeToString(mType));
         builder.append(", layer=").append(mLayer);
         builder.append(", bounds=").append(mBoundsInScreen);
@@ -711,6 +714,60 @@ public final class AccessibilityWindowInfo implements Parcelable {
             return true;
         }
         return false;
+    }
+
+    /**
+     * Reports how this window differs from a possibly different state of the same window. The
+     * argument must have the same id and type as neither of those properties may change.
+     *
+     * @param other The new state.
+     * @return A set of flags showing how the window has changes, or 0 if the two states are the
+     * same.
+     *
+     * @hide
+     */
+    @WindowsChangeTypes
+    public int differenceFrom(AccessibilityWindowInfo other) {
+        if (other.mId != mId) {
+            throw new IllegalArgumentException("Not same window.");
+        }
+        if (other.mType != mType) {
+            throw new IllegalArgumentException("Not same type.");
+        }
+        int changes = 0;
+        if (!TextUtils.equals(mTitle, other.mTitle)) {
+            changes |= AccessibilityEvent.WINDOWS_CHANGE_TITLE;
+        }
+
+        if (!mBoundsInScreen.equals(other.mBoundsInScreen)) {
+            changes |= AccessibilityEvent.WINDOWS_CHANGE_BOUNDS;
+        }
+        if (mLayer != other.mLayer) {
+            changes |= AccessibilityEvent.WINDOWS_CHANGE_LAYER;
+        }
+        if (getBooleanProperty(BOOLEAN_PROPERTY_ACTIVE)
+                != other.getBooleanProperty(BOOLEAN_PROPERTY_ACTIVE)) {
+            changes |= AccessibilityEvent.WINDOWS_CHANGE_ACTIVE;
+        }
+        if (getBooleanProperty(BOOLEAN_PROPERTY_FOCUSED)
+                != other.getBooleanProperty(BOOLEAN_PROPERTY_FOCUSED)) {
+            changes |= AccessibilityEvent.WINDOWS_CHANGE_FOCUSED;
+        }
+        if (getBooleanProperty(BOOLEAN_PROPERTY_ACCESSIBILITY_FOCUSED)
+                != other.getBooleanProperty(BOOLEAN_PROPERTY_ACCESSIBILITY_FOCUSED)) {
+            changes |= AccessibilityEvent.WINDOWS_CHANGE_ACCESSIBILITY_FOCUSED;
+        }
+        if (getBooleanProperty(BOOLEAN_PROPERTY_PICTURE_IN_PICTURE)
+                != other.getBooleanProperty(BOOLEAN_PROPERTY_PICTURE_IN_PICTURE)) {
+            changes |= AccessibilityEvent.WINDOWS_CHANGE_PIP;
+        }
+        if (mParentId != other.mParentId) {
+            changes |= AccessibilityEvent.WINDOWS_CHANGE_PARENT;
+        }
+        if (!Objects.equals(mChildIds, other.mChildIds)) {
+            changes |= AccessibilityEvent.WINDOWS_CHANGE_CHILDREN;
+        }
+        return changes;
     }
 
     public static final Parcelable.Creator<AccessibilityWindowInfo> CREATOR =

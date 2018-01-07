@@ -48,8 +48,8 @@ import static android.view.WindowManager.LayoutParams.PRIVATE_FLAG_WILL_NOT_REPL
 import static android.view.WindowManager.LayoutParams.SOFT_INPUT_ADJUST_RESIZE;
 import static android.view.WindowManager.LayoutParams.SOFT_INPUT_MASK_ADJUST;
 import static android.view.WindowManager.LayoutParams.TYPE_APPLICATION;
-import static android.view.WindowManager.LayoutParams.TYPE_APPLICATION_MEDIA_OVERLAY;
 import static android.view.WindowManager.LayoutParams.TYPE_APPLICATION_MEDIA;
+import static android.view.WindowManager.LayoutParams.TYPE_APPLICATION_MEDIA_OVERLAY;
 import static android.view.WindowManager.LayoutParams.TYPE_APPLICATION_STARTING;
 import static android.view.WindowManager.LayoutParams.TYPE_BASE_APPLICATION;
 import static android.view.WindowManager.LayoutParams.TYPE_DOCK_DIVIDER;
@@ -112,15 +112,36 @@ import static com.android.server.wm.proto.WindowStateProto.CHILD_WINDOWS;
 import static com.android.server.wm.proto.WindowStateProto.CONTAINING_FRAME;
 import static com.android.server.wm.proto.WindowStateProto.CONTENT_FRAME;
 import static com.android.server.wm.proto.WindowStateProto.CONTENT_INSETS;
+import static com.android.server.wm.proto.WindowStateProto.CUTOUT;
+import static com.android.server.wm.proto.WindowStateProto.DECOR_FRAME;
+import static com.android.server.wm.proto.WindowStateProto.DESTROYING;
+import static com.android.server.wm.proto.WindowStateProto.DISPLAY_FRAME;
 import static com.android.server.wm.proto.WindowStateProto.DISPLAY_ID;
 import static com.android.server.wm.proto.WindowStateProto.FRAME;
 import static com.android.server.wm.proto.WindowStateProto.GIVEN_CONTENT_INSETS;
+import static com.android.server.wm.proto.WindowStateProto.HAS_SURFACE;
 import static com.android.server.wm.proto.WindowStateProto.IDENTIFIER;
+import static com.android.server.wm.proto.WindowStateProto.IS_ON_SCREEN;
+import static com.android.server.wm.proto.WindowStateProto.IS_READY_FOR_DISPLAY;
+import static com.android.server.wm.proto.WindowStateProto.IS_VISIBLE;
+import static com.android.server.wm.proto.WindowStateProto.OUTSETS;
+import static com.android.server.wm.proto.WindowStateProto.OUTSET_FRAME;
+import static com.android.server.wm.proto.WindowStateProto.OVERSCAN_FRAME;
+import static com.android.server.wm.proto.WindowStateProto.OVERSCAN_INSETS;
 import static com.android.server.wm.proto.WindowStateProto.PARENT_FRAME;
-import static com.android.server.wm.proto.WindowStateProto.STACK_ID;
+import static com.android.server.wm.proto.WindowStateProto.REMOVED;
+import static com.android.server.wm.proto.WindowStateProto.REMOVE_ON_EXIT;
+import static com.android.server.wm.proto.WindowStateProto.REQUESTED_HEIGHT;
+import static com.android.server.wm.proto.WindowStateProto.REQUESTED_WIDTH;
 import static com.android.server.wm.proto.WindowStateProto.SHOWN_POSITION;
+import static com.android.server.wm.proto.WindowStateProto.STABLE_INSETS;
+import static com.android.server.wm.proto.WindowStateProto.STACK_ID;
 import static com.android.server.wm.proto.WindowStateProto.SURFACE_INSETS;
 import static com.android.server.wm.proto.WindowStateProto.SURFACE_POSITION;
+import static com.android.server.wm.proto.WindowStateProto.SYSTEM_UI_VISIBILITY;
+import static com.android.server.wm.proto.WindowStateProto.VIEW_VISIBILITY;
+import static com.android.server.wm.proto.WindowStateProto.VISIBLE_FRAME;
+import static com.android.server.wm.proto.WindowStateProto.VISIBLE_INSETS;
 import static com.android.server.wm.proto.WindowStateProto.WINDOW_CONTAINER;
 
 import android.annotation.CallSuper;
@@ -142,6 +163,7 @@ import android.os.SystemClock;
 import android.os.Trace;
 import android.os.UserHandle;
 import android.os.WorkSource;
+import android.text.TextUtils;
 import android.util.DisplayMetrics;
 import android.util.MergedConfiguration;
 import android.util.Slog;
@@ -3084,6 +3106,27 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
         for (int i = 0; i < mChildren.size(); i++) {
             mChildren.get(i).writeToProto(proto, CHILD_WINDOWS, trim);
         }
+        proto.write(REQUESTED_WIDTH, mRequestedWidth);
+        proto.write(REQUESTED_HEIGHT, mRequestedHeight);
+        proto.write(VIEW_VISIBILITY, mViewVisibility);
+        proto.write(SYSTEM_UI_VISIBILITY, mSystemUiVisibility);
+        proto.write(HAS_SURFACE, mHasSurface);
+        proto.write(IS_READY_FOR_DISPLAY, isReadyForDisplay());
+        mDisplayFrame.writeToProto(proto, DISPLAY_FRAME);
+        mOverscanFrame.writeToProto(proto, OVERSCAN_FRAME);
+        mVisibleFrame.writeToProto(proto, VISIBLE_FRAME);
+        mDecorFrame.writeToProto(proto, DECOR_FRAME);
+        mOutsetFrame.writeToProto(proto, OUTSET_FRAME);
+        mOverscanInsets.writeToProto(proto, OVERSCAN_INSETS);
+        mVisibleInsets.writeToProto(proto, VISIBLE_INSETS);
+        mStableInsets.writeToProto(proto, STABLE_INSETS);
+        mOutsets.writeToProto(proto, OUTSETS);
+        mDisplayCutout.writeToProto(proto, CUTOUT);
+        proto.write(REMOVE_ON_EXIT, mRemoveOnExit);
+        proto.write(DESTROYING, mDestroying);
+        proto.write(REMOVED, mRemoved);
+        proto.write(IS_ON_SCREEN, isOnScreen());
+        proto.write(IS_VISIBLE, isVisible());
         proto.end(token);
     }
 
@@ -3676,6 +3719,13 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
             windowInfo.activityToken = mAppToken.appToken.asBinder();
         }
         windowInfo.title = mAttrs.accessibilityTitle;
+        // Panel windows have no public way to set the a11y title directly. Use the
+        // regular title as a fallback.
+        if (TextUtils.isEmpty(windowInfo.title)
+                && (mAttrs.type >= WindowManager.LayoutParams.FIRST_SUB_WINDOW)
+                && (mAttrs.type <= WindowManager.LayoutParams.LAST_SUB_WINDOW)) {
+            windowInfo.title = mAttrs.getTitle();
+        }
         windowInfo.accessibilityIdOfAnchor = mAttrs.accessibilityIdOfAnchor;
         windowInfo.focused = isFocused();
         Task task = getTask();
@@ -4432,6 +4482,7 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
 
         // Leash is now responsible for position, so set our position to 0.
         t.setPosition(mSurfaceControl, 0, 0);
+        mLastSurfacePosition.set(0, 0);
     }
 
     @Override
@@ -4447,8 +4498,9 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
         }
 
         transformFrameToSurfacePosition(mFrame.left, mFrame.top, mSurfacePosition);
-        if (!mSurfaceAnimator.hasLeash()) {
+        if (!mSurfaceAnimator.hasLeash() && !mLastSurfacePosition.equals(mSurfacePosition)) {
             t.setPosition(mSurfaceControl, mSurfacePosition.x, mSurfacePosition.y);
+            mLastSurfacePosition.set(mSurfacePosition.x, mSurfacePosition.y);
         }
     }
 

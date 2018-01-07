@@ -22,7 +22,7 @@ namespace statsd {
 AtomMatcher CreateWakelockStateChangedAtomMatcher(const string& name,
                                                   WakelockStateChanged::State state) {
     AtomMatcher atom_matcher;
-    atom_matcher.set_name(name);
+    atom_matcher.set_id(StringToId(name));
     auto simple_atom_matcher = atom_matcher.mutable_simple_atom_matcher();
     simple_atom_matcher->set_atom_id(android::util::WAKELOCK_STATE_CHANGED);
     auto field_value_matcher = simple_atom_matcher->add_field_value_matcher();
@@ -42,7 +42,7 @@ AtomMatcher CreateReleaseWakelockAtomMatcher() {
 AtomMatcher CreateScreenStateChangedAtomMatcher(
     const string& name, ScreenStateChanged::State state) {
     AtomMatcher atom_matcher;
-    atom_matcher.set_name(name);
+    atom_matcher.set_id(StringToId(name));
     auto simple_atom_matcher = atom_matcher.mutable_simple_atom_matcher();
     simple_atom_matcher->set_atom_id(android::util::SCREEN_STATE_CHANGED);
     auto field_value_matcher = simple_atom_matcher->add_field_value_matcher();
@@ -62,7 +62,7 @@ AtomMatcher CreateScreenTurnedOffAtomMatcher() {
 AtomMatcher CreateSyncStateChangedAtomMatcher(
     const string& name, SyncStateChanged::State state) {
     AtomMatcher atom_matcher;
-    atom_matcher.set_name(name);
+    atom_matcher.set_id(StringToId(name));
     auto simple_atom_matcher = atom_matcher.mutable_simple_atom_matcher();
     simple_atom_matcher->set_atom_id(android::util::SYNC_STATE_CHANGED);
     auto field_value_matcher = simple_atom_matcher->add_field_value_matcher();
@@ -82,7 +82,7 @@ AtomMatcher CreateSyncEndAtomMatcher() {
 AtomMatcher CreateActivityForegroundStateChangedAtomMatcher(
     const string& name, ActivityForegroundStateChanged::Activity activity) {
     AtomMatcher atom_matcher;
-    atom_matcher.set_name(name);
+    atom_matcher.set_id(StringToId(name));
     auto simple_atom_matcher = atom_matcher.mutable_simple_atom_matcher();
     simple_atom_matcher->set_atom_id(android::util::ACTIVITY_FOREGROUND_STATE_CHANGED);
     auto field_value_matcher = simple_atom_matcher->add_field_value_matcher();
@@ -104,7 +104,7 @@ AtomMatcher CreateMoveToForegroundAtomMatcher() {
 AtomMatcher CreateProcessLifeCycleStateChangedAtomMatcher(
     const string& name, ProcessLifeCycleStateChanged::Event event) {
     AtomMatcher atom_matcher;
-    atom_matcher.set_name(name);
+    atom_matcher.set_id(StringToId(name));
     auto simple_atom_matcher = atom_matcher.mutable_simple_atom_matcher();
     simple_atom_matcher->set_atom_id(android::util::PROCESS_LIFE_CYCLE_STATE_CHANGED);
     auto field_value_matcher = simple_atom_matcher->add_field_value_matcher();
@@ -121,47 +121,47 @@ AtomMatcher CreateProcessCrashAtomMatcher() {
 
 Predicate CreateScreenIsOnPredicate() {
     Predicate predicate;
-    predicate.set_name("ScreenIsOn");
-    predicate.mutable_simple_predicate()->set_start("ScreenTurnedOn");
-    predicate.mutable_simple_predicate()->set_stop("ScreenTurnedOff");
+    predicate.set_id(StringToId("ScreenIsOn"));
+    predicate.mutable_simple_predicate()->set_start(StringToId("ScreenTurnedOn"));
+    predicate.mutable_simple_predicate()->set_stop(StringToId("ScreenTurnedOff"));
     return predicate;
 }
 
 Predicate CreateScreenIsOffPredicate() {
     Predicate predicate;
-    predicate.set_name("ScreenIsOff");
-    predicate.mutable_simple_predicate()->set_start("ScreenTurnedOff");
-    predicate.mutable_simple_predicate()->set_stop("ScreenTurnedOn");
+    predicate.set_id(StringToId("ScreenIsOff"));
+    predicate.mutable_simple_predicate()->set_start(StringToId("ScreenTurnedOff"));
+    predicate.mutable_simple_predicate()->set_stop(StringToId("ScreenTurnedOn"));
     return predicate;
 }
 
 Predicate CreateHoldingWakelockPredicate() {
     Predicate predicate;
-    predicate.set_name("HoldingWakelock");
-    predicate.mutable_simple_predicate()->set_start("AcquireWakelock");
-    predicate.mutable_simple_predicate()->set_stop("ReleaseWakelock");
+    predicate.set_id(StringToId("HoldingWakelock"));
+    predicate.mutable_simple_predicate()->set_start(StringToId("AcquireWakelock"));
+    predicate.mutable_simple_predicate()->set_stop(StringToId("ReleaseWakelock"));
     return predicate;
 }
 
 Predicate CreateIsSyncingPredicate() {
     Predicate predicate;
-    predicate.set_name("IsSyncing");
-    predicate.mutable_simple_predicate()->set_start("SyncStart");
-    predicate.mutable_simple_predicate()->set_stop("SyncEnd");
+    predicate.set_id(StringToId("IsSyncing"));
+    predicate.mutable_simple_predicate()->set_start(StringToId("SyncStart"));
+    predicate.mutable_simple_predicate()->set_stop(StringToId("SyncEnd"));
     return predicate;
 }
 
 Predicate CreateIsInBackgroundPredicate() {
     Predicate predicate;
-    predicate.set_name("IsInBackground");
-    predicate.mutable_simple_predicate()->set_start("MoveToBackground");
-    predicate.mutable_simple_predicate()->set_stop("MoveToForeground");
+    predicate.set_id(StringToId("IsInBackground"));
+    predicate.mutable_simple_predicate()->set_start(StringToId("MoveToBackground"));
+    predicate.mutable_simple_predicate()->set_stop(StringToId("MoveToForeground"));
     return predicate;
 }
 
 void addPredicateToPredicateCombination(const Predicate& predicate,
                                         Predicate* combinationPredicate) {
-    combinationPredicate->mutable_combination()->add_predicate(predicate.name());
+    combinationPredicate->mutable_combination()->add_predicate(predicate.id());
 }
 
 FieldMatcher CreateAttributionUidDimensions(const int atomId,
@@ -316,6 +316,9 @@ void sortLogEventsByTimestamp(std::vector<std::unique_ptr<LogEvent>> *events) {
             });
 }
 
+int64_t StringToId(const string& str) {
+    return static_cast<int64_t>(std::hash<std::string>()(str));
+}
 }  // namespace statsd
 }  // namespace os
 }  // namespace android

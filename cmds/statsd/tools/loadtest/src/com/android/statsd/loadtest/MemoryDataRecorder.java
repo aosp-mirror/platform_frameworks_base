@@ -18,6 +18,7 @@ package com.android.statsd.loadtest;
 import android.content.Context;
 import android.os.SystemClock;
 import android.util.Log;
+import com.android.internal.os.StatsdConfigProto.TimeUnit;
 
 public class MemoryDataRecorder extends PerfDataRecorder {
     private static final String TAG = "loadtest.MemoryDataDataRecorder";
@@ -26,9 +27,11 @@ public class MemoryDataRecorder extends PerfDataRecorder {
     private long mStartTimeMillis;
     private StringBuilder mSb;
 
-    public MemoryDataRecorder(boolean placebo, int replication, long bucketMins, long periodSecs,
-        int burst) {
-        super(placebo, replication, bucketMins, periodSecs, burst);
+    public MemoryDataRecorder(boolean placebo, int replication, TimeUnit bucket, long periodSecs,
+        int burst,  boolean includeCountMetric, boolean includeDurationMetric,
+        boolean includeEventMetric,  boolean includeValueMetric, boolean includeGaugeMetric) {
+      super(placebo, replication, bucket, periodSecs, burst, includeCountMetric,
+          includeDurationMetric, includeEventMetric, includeValueMetric, includeGaugeMetric);
     }
 
     @Override

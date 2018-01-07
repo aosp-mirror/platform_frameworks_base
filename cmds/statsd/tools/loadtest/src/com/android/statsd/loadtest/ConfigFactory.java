@@ -31,6 +31,7 @@ import com.android.internal.os.StatsdConfigProto.FieldValueMatcher;
 import com.android.internal.os.StatsdConfigProto.AtomMatcher;
 import com.android.internal.os.StatsdConfigProto.SimplePredicate;
 import com.android.internal.os.StatsdConfigProto.StatsdConfig;
+import com.android.internal.os.StatsdConfigProto.TimeUnit;
 
 import java.io.InputStream;
 import java.io.IOException;
@@ -41,7 +42,17 @@ import java.util.List;
  * Creates StatsdConfig protos for loadtesting.
  */
 public class ConfigFactory {
-    public static final String CONFIG_NAME = "LOADTEST";
+    public static class ConfigMetadata {
+        public final byte[] bytes;
+        public final int numMetrics;
+
+        public ConfigMetadata(byte[] bytes, int numMetrics) {
+            this.bytes = bytes;
+            this.numMetrics = numMetrics;
+        }
+    }
+
+    public static final long CONFIG_ID = 123456789;
 
     private static final String TAG = "loadtest.ConfigFactory";
 
@@ -80,13 +91,13 @@ public class ConfigFactory {
      *        ones
      * @param bucketMillis The bucket size, in milliseconds, for aggregate metrics
      * @param placebo If true, only return an empty config
-     * @return The serialized config
+     * @return The serialized config and the number of metrics.
      */
-  public byte[] getConfig(int replication, long bucketMillis, boolean placebo, boolean includeCount,
-                          boolean includeDuration, boolean includeEvent, boolean includeValue,
-                          boolean includeGauge) {
+    public ConfigMetadata getConfig(int replication, TimeUnit bucket, boolean placebo,
+            boolean includeCount, boolean includeDuration, boolean includeEvent,
+            boolean includeValue, boolean includeGauge) {
         StatsdConfig.Builder config = StatsdConfig.newBuilder()
-            .setName(CONFIG_NAME);
+            .setId(CONFIG_ID);
         if (placebo) {
           replication = 0;  // Config will be empty, aside from a name.
         }
@@ -101,25 +112,25 @@ public class ConfigFactory {
             }
             if (includeCount) {
                 for (CountMetric metric : mTemplate.getCountMetricList()) {
-                    addCountMetric(metric, i, bucketMillis, config);
+                    addCountMetric(metric, i, bucket, config);
                     numMetrics++;
                 }
             }
             if (includeDuration) {
                 for (DurationMetric metric : mTemplate.getDurationMetricList()) {
-                    addDurationMetric(metric, i, bucketMillis, config);
+                    addDurationMetric(metric, i, bucket, config);
                     numMetrics++;
                 }
             }
             if (includeGauge) {
                 for (GaugeMetric metric : mTemplate.getGaugeMetricList()) {
-                    addGaugeMetric(metric, i, bucketMillis, config);
+                    addGaugeMetric(metric, i, bucket, config);
                     numMetrics++;
                 }
             }
             if (includeValue) {
                 for (ValueMetric metric : mTemplate.getValueMetricList()) {
-                    addValueMetric(metric, i, bucketMillis, config);
+                    addValueMetric(metric, i, bucket, config);
                     numMetrics++;
                 }
             }
@@ -136,7 +147,7 @@ public class ConfigFactory {
         Log.d(TAG, "Loadtest config is : " + config.build());
         Log.d(TAG, "Generated config has " + numMetrics + " metrics");
 
-        return config.build().toByteArray();
+        return new ConfigMetadata(config.build().toByteArray(), numMetrics);
     }
 
     /**
@@ -160,7 +171,7 @@ public class ConfigFactory {
      */
     private void addEventMetric(EventMetric template, int suffix, StatsdConfig.Builder config) {
         EventMetric.Builder metric = template.toBuilder()
-            .setName(template.getName() + suffix)
+            .setId(template.getId() + suffix)
             .setWhat(template.getWhat() + suffix);
         if (template.hasCondition()) {
             metric.setCondition(template.getCondition() + suffix);
@@ -173,20 +184,14 @@ public class ConfigFactory {
         config.addEventMetric(metric);
     }
 
-    private Bucket getBucket(long bucketMillis) {
-        return Bucket.newBuilder()
-            .setBucketSizeMillis(bucketMillis)
-            .build();
-    }
-
     /**
      * Creates a {@link CountMetric} based on the template. Makes sure that all names are appended
      * with the provided suffix, and overrides the bucket size. Then adds that metric to the config.
      */
-    private void addCountMetric(CountMetric template, int suffix, long bucketMillis,
+    private void addCountMetric(CountMetric template, int suffix, TimeUnit bucket,
         StatsdConfig.Builder config) {
         CountMetric.Builder metric = template.toBuilder()
-            .setName(template.getName() + suffix)
+            .setId(template.getId() + suffix)
             .setWhat(template.getWhat() + suffix);
         if (template.hasCondition()) {
             metric.setCondition(template.getCondition() + suffix);
@@ -196,7 +201,7 @@ public class ConfigFactory {
             metric.clearLinks();
             metric.addAllLinks(links);
         }
-        metric.setBucket(getBucket(bucketMillis));
+        metric.setBucket(bucket);
         config.addCountMetric(metric);
     }
 
@@ -204,10 +209,10 @@ public class ConfigFactory {
      * Creates a {@link DurationMetric} based on the template. Makes sure that all names are appended
      * with the provided suffix, and overrides the bucket size. Then adds that metric to the config.
      */
-    private void addDurationMetric(DurationMetric template, int suffix, long bucketMillis,
+    private void addDurationMetric(DurationMetric template, int suffix, TimeUnit bucket,
         StatsdConfig.Builder config) {
         DurationMetric.Builder metric = template.toBuilder()
-            .setName(template.getName() + suffix)
+            .setId(template.getId() + suffix)
             .setWhat(template.getWhat() + suffix);
         if (template.hasCondition()) {
             metric.setCondition(template.getCondition() + suffix);
@@ -217,7 +222,7 @@ public class ConfigFactory {
             metric.clearLinks();
             metric.addAllLinks(links);
         }
-        metric.setBucket(getBucket(bucketMillis));
+        metric.setBucket(bucket);
         config.addDurationMetric(metric);
     }
 
@@ -225,10 +230,10 @@ public class ConfigFactory {
      * Creates a {@link GaugeMetric} based on the template. Makes sure that all names are appended
      * with the provided suffix, and overrides the bucket size. Then adds that metric to the config.
      */
-    private void addGaugeMetric(GaugeMetric template, int suffix, long bucketMillis,
+    private void addGaugeMetric(GaugeMetric template, int suffix, TimeUnit bucket,
         StatsdConfig.Builder config) {
         GaugeMetric.Builder metric = template.toBuilder()
-            .setName(template.getName() + suffix)
+            .setId(template.getId() + suffix)
             .setWhat(template.getWhat() + suffix);
         if (template.hasCondition()) {
             metric.setCondition(template.getCondition() + suffix);
@@ -238,7 +243,7 @@ public class ConfigFactory {
             metric.clearLinks();
             metric.addAllLinks(links);
         }
-        metric.setBucket(getBucket(bucketMillis));
+        metric.setBucket(bucket);
         config.addGaugeMetric(metric);
     }
 
@@ -246,10 +251,10 @@ public class ConfigFactory {
      * Creates a {@link ValueMetric} based on the template. Makes sure that all names are appended
      * with the provided suffix, and overrides the bucket size. Then adds that metric to the config.
      */
-    private void addValueMetric(ValueMetric template, int suffix, long bucketMillis,
+    private void addValueMetric(ValueMetric template, int suffix, TimeUnit bucket,
         StatsdConfig.Builder config) {
         ValueMetric.Builder metric = template.toBuilder()
-            .setName(template.getName() + suffix)
+            .setId(template.getId() + suffix)
             .setWhat(template.getWhat() + suffix);
         if (template.hasCondition()) {
             metric.setCondition(template.getCondition() + suffix);
@@ -259,7 +264,7 @@ public class ConfigFactory {
             metric.clearLinks();
             metric.addAllLinks(links);
         }
-        metric.setBucket(getBucket(bucketMillis));
+        metric.setBucket(bucket);
         config.addValueMetric(metric);
     }
 
@@ -269,11 +274,11 @@ public class ConfigFactory {
      */
     private void addPredicate(Predicate template, int suffix, StatsdConfig.Builder config) {
         Predicate.Builder predicate = template.toBuilder()
-            .setName(template.getName() + suffix);
+            .setId(template.getId() + suffix);
         if (template.hasCombination()) {
             Predicate.Combination.Builder cb = template.getCombination().toBuilder()
                 .clearPredicate();
-            for (String child : template.getCombination().getPredicateList()) {
+            for (long child : template.getCombination().getPredicateList()) {
                 cb.addPredicate(child + suffix);
             }
             predicate.setCombination(cb.build());
@@ -296,11 +301,11 @@ public class ConfigFactory {
      */
     private void addMatcher(AtomMatcher template, int suffix, StatsdConfig.Builder config) {
         AtomMatcher.Builder matcher = template.toBuilder()
-            .setName(template.getName() + suffix);
+            .setId(template.getId() + suffix);
         if (template.hasCombination()) {
             AtomMatcher.Combination.Builder cb = template.getCombination().toBuilder()
                 .clearMatcher();
-            for (String child : template.getCombination().getMatcherList()) {
+            for (long child : template.getCombination().getMatcherList()) {
                 cb.addMatcher(child + suffix);
             }
             matcher.setCombination(cb);

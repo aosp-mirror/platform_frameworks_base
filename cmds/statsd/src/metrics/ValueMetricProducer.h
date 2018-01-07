@@ -70,7 +70,7 @@ private:
     // Util function to flush the old packet.
     void flushIfNeededLocked(const uint64_t& eventTime);
 
-    const int32_t mValueField;
+    const FieldMatcher mValueField;
 
     std::shared_ptr<StatsPullerManager> mStatsPullerManager;
 
@@ -103,7 +103,7 @@ private:
     // TODO: Add a lock to mPastBuckets.
     std::unordered_map<HashableDimensionKey, std::vector<ValueBucket>> mPastBuckets;
 
-    long get_value(const LogEvent& event);
+    std::shared_ptr<FieldValueMap> getValueFields(const LogEvent& event);
 
     // Util function to check whether the specified dimension hits the guardrail.
     bool hitGuardRailLocked(const HashableDimensionKey& newKey);

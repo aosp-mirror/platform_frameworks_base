@@ -268,6 +268,18 @@ public class CarrierText extends TextView {
         }
     }
 
+    @Override
+    protected void onVisibilityChanged(View changedView, int visibility) {
+        super.onVisibilityChanged(changedView, visibility);
+
+        // Only show marquee when visible
+        if (visibility == VISIBLE) {
+            setEllipsize(TextUtils.TruncateAt.MARQUEE);
+        } else {
+            setEllipsize(TextUtils.TruncateAt.END);
+        }
+    }
+
     /**
      * Top-level function for creating carrier text. Makes text based on simState, PLMN
      * and SPN as well as device capabilities, such as being emergency call capable.

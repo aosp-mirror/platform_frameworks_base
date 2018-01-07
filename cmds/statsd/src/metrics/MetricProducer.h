@@ -39,9 +39,9 @@ namespace statsd {
 // be a no-op.
 class MetricProducer : public virtual PackageInfoListener {
 public:
-    MetricProducer(const std::string& name, const ConfigKey& key, const int64_t startTimeNs,
+    MetricProducer(const int64_t& metricId, const ConfigKey& key, const int64_t startTimeNs,
                    const int conditionIndex, const sp<ConditionWizard>& wizard)
-        : mName(name),
+        : mMetricId(metricId),
           mConfigKey(key),
           mStartTimeNs(startTimeNs),
           mCurrentBucketStartTimeNs(startTimeNs),
@@ -117,8 +117,8 @@ public:
         return mBucketSizeNs;
     }
 
-    inline const string& getName() {
-        return mName;
+    inline const int64_t& getMetricId() {
+        return mMetricId;
     }
 
 protected:
@@ -129,7 +129,7 @@ protected:
     virtual void onDumpReportLocked(const uint64_t dumpTimeNs, StatsLogReport* report) = 0;
     virtual size_t byteSizeLocked() const = 0;
 
-    const std::string mName;
+    const int64_t mMetricId;
 
     const ConfigKey mConfigKey;
 

@@ -57,6 +57,10 @@ public:
 
     void onUidMapReceived() override;
 
+    bool shouldAddUidMapListener() const {
+        return !mAllowedPkg.empty();
+    }
+
     // Config source owner can call onDumpReport() to get all the metrics collected.
     virtual void onDumpReport(android::util::ProtoOutputStream* protoOutput);
     virtual void onDumpReport(const uint64_t& dumpTimeStampNs, ConfigMetricsReport* report);
@@ -130,6 +134,9 @@ private:
     std::unordered_map<int, std::vector<int>> mConditionToMetricMap;
 
     void initLogSourceWhiteList();
+
+    // The metrics that don't need to be uploaded or even reported.
+    std::set<int64_t> mNoReportMetricIds;
 
     FRIEND_TEST(WakelockDurationE2eTest, TestAggregatedPredicateDimensions);
     FRIEND_TEST(MetricConditionLinkE2eTest, TestMultiplePredicatesAndLinks);

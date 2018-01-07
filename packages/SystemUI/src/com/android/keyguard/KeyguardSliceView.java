@@ -98,9 +98,6 @@ public class KeyguardSliceView extends LinearLayout implements View.OnClickListe
     protected void onAttachedToWindow() {
         super.onAttachedToWindow();
 
-        // Set initial content
-        showSlice(Slice.bindSlice(getContext(), mKeyguardSliceUri));
-
         // Make sure we always have the most current slice
         mLiveData.observeForever(this);
     }
@@ -265,7 +262,6 @@ public class KeyguardSliceView extends LinearLayout implements View.OnClickListe
 
         if (wasObserving) {
             mLiveData.observeForever(this);
-            showSlice(Slice.bindSlice(getContext(), mKeyguardSliceUri));
         }
     }
 

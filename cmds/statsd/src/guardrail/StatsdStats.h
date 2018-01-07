@@ -17,6 +17,7 @@
 
 #include "config/ConfigKey.h"
 #include "frameworks/base/cmds/statsd/src/stats_log.pb.h"
+#include "statslog.h"
 
 #include <gtest/gtest_prod.h>
 #include <log/log_time.h>
@@ -62,6 +63,13 @@ public:
     /* Min period between two checks of byte size per config key in nanoseconds. */
     static const unsigned long long kMinByteSizeCheckPeriodNs = 10 * NS_PER_SEC;
 
+    // Default minimum interval between pulls for an atom. Pullers can return cached values if
+    // another pull request happens within this interval.
+    static std::map<int, long> kPullerCooldownMap;
+
+    // Default cooldown time for a puller
+    static const long kDefaultPullerCooldown = 1;
+
     /**
      * Report a new config has been received and report the static stats about the config.
      *
@@ -99,10 +107,10 @@ public:
      * count > kDimensionKeySizeSoftLimit.
      *
      * [key]: The config key that this condition belongs to.
-     * [name]: The name of the condition.
+     * [id]: The id of the condition.
      * [size]: The output tuple size.
      */
-    void noteConditionDimensionSize(const ConfigKey& key, const std::string& name, int size);
+    void noteConditionDimensionSize(const ConfigKey& key, const int64_t& id, int size);
 
     /**
      * Report the size of output tuple of a metric.
@@ -111,26 +119,26 @@ public:
      * count > kDimensionKeySizeSoftLimit.
      *
      * [key]: The config key that this metric belongs to.
-     * [name]: The name of the metric.
+     * [id]: The id of the metric.
      * [size]: The output tuple size.
      */
-    void noteMetricDimensionSize(const ConfigKey& key, const std::string& name, int size);
+    void noteMetricDimensionSize(const ConfigKey& key, const int64_t& id, int size);
 
     /**
      * Report a matcher has been matched.
      *
      * [key]: The config key that this matcher belongs to.
-     * [name]: The name of the matcher.
+     * [id]: The id of the matcher.
      */
-    void noteMatcherMatched(const ConfigKey& key, const std::string& name);
+    void noteMatcherMatched(const ConfigKey& key, const int64_t& id);
 
     /**
      * Report that an anomaly detection alert has been declared.
      *
      * [key]: The config key that this alert belongs to.
-     * [name]: The name of the alert.
+     * [id]: The id of the alert.
      */
-    void noteAnomalyDeclared(const ConfigKey& key, const std::string& name);
+    void noteAnomalyDeclared(const ConfigKey& key, const int64_t& id);
 
     /**
      * Report an atom event has been logged.
@@ -154,6 +162,15 @@ public:
     void setUidMapChanges(int changes);
     void setCurrentUidMapMemory(int bytes);
 
+    // Update minimum interval between pulls for an pulled atom
+    void updateMinPullIntervalSec(int pullAtomId, long intervalSec);
+
+    // Notify pull request for an atom
+    void notePull(int pullAtomId);
+
+    // Notify pull request for an atom served from cached data
+    void notePullFromCache(int pullAtomId);
+
     /**
      * Reset the historical stats. Including all stats in icebox, and the tracked stats about
      * metrics, matchers, and atoms. The active configs will be kept and StatsdStats will continue
@@ -167,6 +184,12 @@ public:
      * [reset]: whether to clear the historical stats after the call.
      */
     void dumpStats(std::vector<uint8_t>* buffer, bool reset);
+
+    typedef struct {
+        long totalPull;
+        long totalPullFromCache;
+        long minPullIntervalSec;
+    } PulledAtomStats;
 
 private:
     StatsdStats();
@@ -187,12 +210,12 @@ private:
     // Stores the number of output tuple of condition trackers when it's bigger than
     // kDimensionKeySizeSoftLimit. When you see the number is kDimensionKeySizeHardLimit +1,
     // it means some data has been dropped.
-    std::map<const ConfigKey, std::map<const std::string, int>> mConditionStats;
+    std::map<const ConfigKey, std::map<const int64_t, int>> mConditionStats;
 
     // Stores the number of output tuple of metric producers when it's bigger than
     // kDimensionKeySizeSoftLimit. When you see the number is kDimensionKeySizeHardLimit +1,
     // it means some data has been dropped.
-    std::map<const ConfigKey, std::map<const std::string, int>> mMetricsStats;
+    std::map<const ConfigKey, std::map<const int64_t, int>> mMetricsStats;
 
     // Stores the number of times a pushed atom is logged.
     // The size of the vector is the largest pushed atom id in atoms.proto + 1. Atoms
@@ -200,16 +223,18 @@ private:
     // This is a vector, not a map because it will be accessed A LOT -- for each stats log.
     std::vector<int> mPushedAtomStats;
 
+    std::map<int, PulledAtomStats> mPulledAtomStats;
+
     // Stores the number of times statsd modified the anomaly alarm registered with
     // StatsCompanionService.
     int mAnomalyAlarmRegisteredStats = 0;
 
     // Stores the number of times an anomaly detection alert has been declared
     // (per config, per alert name).
-    std::map<const ConfigKey, std::map<const std::string, int>> mAlertStats;
+    std::map<const ConfigKey, std::map<const int64_t, int>> mAlertStats;
 
     // Stores how many times a matcher have been matched.
-    std::map<const ConfigKey, std::map<const std::string, int>> mMatcherStats;
+    std::map<const ConfigKey, std::map<const int64_t, int>> mMatcherStats;
 
     void noteConfigRemovedInternalLocked(const ConfigKey& key);
 

@@ -26,6 +26,8 @@ import android.util.Pair;
 import android.view.autofill.AutofillId;
 import android.view.autofill.AutofillValue;
 
+import com.android.internal.util.Preconditions;
+
 import java.util.List;
 
 /**
@@ -202,6 +204,16 @@ public abstract class ViewStructure {
      * @param baselines The baseline where the line is drawn on screen.
      */
     public abstract void setTextLines(int[] charOffsets, int[] baselines);
+
+    /**
+     * Sets the identifier used to set the text associated with this view.
+     *
+     * <p>Should only be set when the node is used for autofill purposes - it will be ignored
+     * when used for Assist.
+     */
+    public void setTextIdEntry(@NonNull String entryName) {
+        Preconditions.checkNotNull(entryName);
+    }
 
     /**
      * Set optional hint text associated with this view; this is for example the text that is

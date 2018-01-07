@@ -71,7 +71,7 @@ interface IStatsManager {
      * Fetches data for the specified configuration key. Returns a byte array representing proto
      * wire-encoded of ConfigMetricsReportList.
      */
-    byte[] getData(in String key);
+    byte[] getData(in long key);
 
     /**
      * Fetches metadata across statsd. Returns byte array representing wire-encoded proto.
@@ -86,7 +86,7 @@ interface IStatsManager {
      *
      * Returns if this configuration was correctly registered.
      */
-    boolean addConfiguration(in String configKey, in byte[] config, in String pkg, in String cls);
+    boolean addConfiguration(in long configKey, in byte[] config, in String pkg, in String cls);
 
     /**
      * Removes the configuration with the matching config key. No-op if this config key does not
@@ -94,5 +94,5 @@ interface IStatsManager {
      *
      * Returns if this configuration key was removed.
      */
-    boolean removeConfiguration(in String configKey);
+    boolean removeConfiguration(in long configKey);
 }

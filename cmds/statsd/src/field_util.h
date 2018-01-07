@@ -17,6 +17,7 @@
 #pragma once
 
 #include "frameworks/base/cmds/statsd/src/statsd_config.pb.h"
+#include "frameworks/base/cmds/statsd/src/statsd_internal.pb.h"
 #include "frameworks/base/cmds/statsd/src/stats_log.pb.h"
 
 #include <unordered_map>

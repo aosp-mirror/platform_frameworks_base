@@ -18,6 +18,7 @@ package com.android.statsd.loadtest;
 import android.annotation.Nullable;
 import android.content.Context;
 import android.util.Log;
+import com.android.internal.os.StatsdConfigProto.TimeUnit;
 import java.text.ParseException;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -26,9 +27,11 @@ public class BatteryDataRecorder extends PerfDataRecorder {
     private static final String TAG = "loadtest.BatteryDataRecorder";
     private static final String DUMP_FILENAME = TAG + "_dump.tmp";
 
-    public BatteryDataRecorder(boolean placebo, int replication, long bucketMins, long periodSecs,
-        int burst) {
-        super(placebo, replication, bucketMins, periodSecs, burst);
+    public BatteryDataRecorder(boolean placebo, int replication, TimeUnit bucket, long periodSecs,
+        int burst, boolean includeCountMetric, boolean includeDurationMetric,
+        boolean includeEventMetric,  boolean includeValueMetric, boolean includeGaugeMetric) {
+      super(placebo, replication, bucket, periodSecs, burst, includeCountMetric,
+          includeDurationMetric, includeEventMetric, includeValueMetric, includeGaugeMetric);
     }
 
     @Override

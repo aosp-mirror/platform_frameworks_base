@@ -20,6 +20,7 @@ import android.util.Log;
 import com.android.os.StatsLog.ConfigMetricsReport;
 import com.android.os.StatsLog.EventMetricData;
 import com.android.os.StatsLog.StatsLogReport;
+import com.android.internal.os.StatsdConfigProto.TimeUnit;
 import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -33,8 +34,11 @@ public class ValidationRecorder extends PerfDataRecorder {
     private final LoadtestActivity mLoadtestActivity;
 
     public ValidationRecorder(LoadtestActivity loadtestActivity, boolean placebo, int replication,
-        long bucketMins, long periodSecs, int burst) {
-        super(placebo, replication, bucketMins, periodSecs, burst);
+        TimeUnit bucket, long periodSecs, int burst,  boolean includeCountMetric,
+        boolean includeDurationMetric, boolean includeEventMetric,  boolean includeValueMetric,
+        boolean includeGaugeMetric) {
+      super(placebo, replication, bucket, periodSecs, burst, includeCountMetric,
+          includeDurationMetric, includeEventMetric, includeValueMetric, includeGaugeMetric);
         mLoadtestActivity = loadtestActivity;
     }
 
@@ -54,31 +58,25 @@ public class ValidationRecorder extends PerfDataRecorder {
     }
 
     private void validateData() {
+        // The code below is commented out because it calls getData, which has the side-effect
+        // of clearing statsd's data buffer.
+        /*
         List<ConfigMetricsReport> reports = mLoadtestActivity.getData();
         if (reports != null) {
             Log.d(TAG, "GOT DATA");
             for (ConfigMetricsReport report : reports) {
                 for (StatsLogReport logReport : report.getMetricsList()) {
-                    if (!logReport.hasMetricName()) {
+                    if (!logReport.hasMetricId()) {
                         Log.e(TAG, "Metric missing name.");
-                        continue;
-                    }
-                    String metricName = logReport.getMetricName();
-                    if (metricName.startsWith("EVENT_BATTERY_LEVEL_CHANGES_WHILE_SCREEN_IS_ON_")) {
-                        validateEventBatteryLevelChangesWhileScreenIsOn(logReport);
-                        continue;
-                    }
-                    if (metricName.startsWith("EVENT_BATTERY_LEVEL_CHANGES_")) {
-                        validateEventBatteryLevelChanges(logReport);
-                        continue;
                     }
                 }
             }
         }
+        */
     }
 
     private void validateEventBatteryLevelChanges(StatsLogReport logReport) {
-        Log.d(TAG, "Validating " + logReport.getMetricName());
+        Log.d(TAG, "Validating " + logReport.getMetricId());
         if (logReport.hasEventMetrics()) {
             Log.d(TAG, "Num events captured: " + logReport.getEventMetrics().getDataCount());
             for (EventMetricData data : logReport.getEventMetrics().getDataList()) {
@@ -90,6 +88,6 @@ public class ValidationRecorder extends PerfDataRecorder {
     }
 
     private void validateEventBatteryLevelChangesWhileScreenIsOn(StatsLogReport logReport) {
-        Log.d(TAG, "Validating " + logReport.getMetricName());
+        Log.d(TAG, "Validating " + logReport.getMetricId());
     }
 }

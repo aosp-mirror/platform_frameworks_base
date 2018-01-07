@@ -48,6 +48,7 @@ import java.io.File;
 @SmallTest
 @Presubmit
 @RunWith(AndroidJUnit4.class)
+// TODO: Migrate this to Robolectric and merge with BackupManagerServiceRoboTest (and remove 'Robo')
 public class BackupManagerServiceTest {
     private static final String TAG = "BMSTest";
     private static final ComponentName TRANSPORT_COMPONENT =

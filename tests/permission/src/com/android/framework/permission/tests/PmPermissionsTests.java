@@ -71,18 +71,6 @@ public class PmPermissionsTests extends AndroidTestCase {
     private class TestInstallObserver extends PackageInstallObserver {
     }
 
-    @SmallTest
-    public void testInstallPackage() {
-        TestInstallObserver observer = new TestInstallObserver();
-        try {
-            mPm.installPackage(null, observer, 0, null);
-            fail("PackageManager.installPackage" +
-                    "did not throw SecurityException as expected");
-        } catch (SecurityException e) {
-            // expected
-        }
-    }
-
     /*
      * This test verifies that PackageManger.freeStorage
      * enforces permission android.permission.CLEAR_APP_CACHE

@@ -3125,6 +3125,12 @@
     <permission android:name="android.permission.BACKUP"
         android:protectionLevel="signature|privileged" />
 
+    <!-- @SystemApi Allows application to manage RecoverableKeyStoreLoader.
+    <p>Not for use by third-party applications.
+         @hide -->
+    <permission android:name="android.permission.RECOVER_KEYSTORE"
+        android:protectionLevel="signature|privileged" />
+
     <!-- Allows a package to launch the secure full-backup confirmation UI.
          ONLY the system process may hold this permission.
          @hide -->
@@ -3914,6 +3920,14 @@
                 android:permission="android.permission.UPDATE_CONFIG">
             <intent-filter>
                 <action android:name="android.intent.action.UPDATE_SMART_SELECTION" />
+                <data android:scheme="content" android:host="*" android:mimeType="*/*" />
+            </intent-filter>
+        </receiver>
+
+        <receiver android:name="com.android.server.updates.CarrierIdInstallReceiver"
+                  android:permission="android.permission.UPDATE_CONFIG">
+            <intent-filter>
+                <action android:name="com.android.internal.intent.action.UPDATE_CARRIER_ID_DB" />
                 <data android:scheme="content" android:host="*" android:mimeType="*/*" />
             </intent-filter>
         </receiver>

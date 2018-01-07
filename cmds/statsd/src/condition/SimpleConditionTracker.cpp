@@ -33,17 +33,17 @@ using std::unordered_map;
 using std::vector;
 
 SimpleConditionTracker::SimpleConditionTracker(
-        const ConfigKey& key, const string& name, const int index,
+        const ConfigKey& key, const int64_t& id, const int index,
         const SimplePredicate& simplePredicate,
-        const unordered_map<string, int>& trackerNameIndexMap)
-    : ConditionTracker(name, index), mConfigKey(key) {
-    VLOG("creating SimpleConditionTracker %s", mName.c_str());
+        const unordered_map<int64_t, int>& trackerNameIndexMap)
+    : ConditionTracker(id, index), mConfigKey(key) {
+    VLOG("creating SimpleConditionTracker %lld", (long long)mConditionId);
     mCountNesting = simplePredicate.count_nesting();
 
     if (simplePredicate.has_start()) {
         auto pair = trackerNameIndexMap.find(simplePredicate.start());
         if (pair == trackerNameIndexMap.end()) {
-            ALOGW("Start matcher %s not found in the config", simplePredicate.start().c_str());
+            ALOGW("Start matcher %lld not found in the config", (long long)simplePredicate.start());
             return;
         }
         mStartLogMatcherIndex = pair->second;
@@ -55,7 +55,7 @@ SimpleConditionTracker::SimpleConditionTracker(
     if (simplePredicate.has_stop()) {
         auto pair = trackerNameIndexMap.find(simplePredicate.stop());
         if (pair == trackerNameIndexMap.end()) {
-            ALOGW("Stop matcher %s not found in the config", simplePredicate.stop().c_str());
+            ALOGW("Stop matcher %lld not found in the config", (long long)simplePredicate.stop());
             return;
         }
         mStopLogMatcherIndex = pair->second;
@@ -67,7 +67,7 @@ SimpleConditionTracker::SimpleConditionTracker(
     if (simplePredicate.has_stop_all()) {
         auto pair = trackerNameIndexMap.find(simplePredicate.stop_all());
         if (pair == trackerNameIndexMap.end()) {
-            ALOGW("Stop all matcher %s not found in the config", simplePredicate.stop().c_str());
+            ALOGW("Stop all matcher %lld found in the config", (long long)simplePredicate.stop_all());
             return;
         }
         mStopAllLogMatcherIndex = pair->second;
@@ -99,15 +99,15 @@ SimpleConditionTracker::~SimpleConditionTracker() {
 
 bool SimpleConditionTracker::init(const vector<Predicate>& allConditionConfig,
                                   const vector<sp<ConditionTracker>>& allConditionTrackers,
-                                  const unordered_map<string, int>& conditionNameIndexMap,
+                                  const unordered_map<int64_t, int>& conditionIdIndexMap,
                                   vector<bool>& stack) {
     // SimpleConditionTracker does not have dependency on other conditions, thus we just return
     // if the initialization was successful.
     return mInitialized;
 }
 
-void print(map<HashableDimensionKey, int>& conditions, const string& name) {
-    VLOG("%s DUMP:", name.c_str());
+void print(map<HashableDimensionKey, int>& conditions, const int64_t& id) {
+    VLOG("%lld DUMP:", (long long)id);
     for (const auto& pair : conditions) {
         VLOG("\t%s : %d", pair.first.c_str(), pair.second);
     }
@@ -135,10 +135,11 @@ bool SimpleConditionTracker::hitGuardRail(const HashableDimensionKey& newKey) {
     // 1. Report the tuple count if the tuple count > soft limit
     if (mSlicedConditionState.size() > StatsdStats::kDimensionKeySizeSoftLimit - 1) {
         size_t newTupleCount = mSlicedConditionState.size() + 1;
-        StatsdStats::getInstance().noteConditionDimensionSize(mConfigKey, mName, newTupleCount);
+        StatsdStats::getInstance().noteConditionDimensionSize(mConfigKey, mConditionId, newTupleCount);
         // 2. Don't add more tuples, we are above the allowed threshold. Drop the data.
         if (newTupleCount > StatsdStats::kDimensionKeySizeHardLimit) {
-            ALOGE("Predicate %s dropping data for dimension key %s", mName.c_str(), newKey.c_str());
+            ALOGE("Predicate %lld dropping data for dimension key %s",
+                (long long)mConditionId, newKey.c_str());
             return true;
         }
     }
@@ -222,13 +223,13 @@ void SimpleConditionTracker::handleConditionEvent(const HashableDimensionKey& ou
 
     // dump all dimensions for debugging
     if (DEBUG) {
-        print(mSlicedConditionState, mName);
+        print(mSlicedConditionState, mConditionId);
     }
 
     conditionChangedCache[mIndex] = changed;
     conditionCache[mIndex] = newCondition;
 
-    VLOG("SimplePredicate %s nonSlicedChange? %d", mName.c_str(),
+    VLOG("SimplePredicate %lld nonSlicedChange? %d", (long long)mConditionId,
          conditionChangedCache[mIndex] == true);
 }
 
@@ -239,7 +240,8 @@ void SimpleConditionTracker::evaluateCondition(const LogEvent& event,
                                                vector<bool>& conditionChangedCache) {
     if (conditionCache[mIndex] != ConditionState::kNotEvaluated) {
         // it has been evaluated.
-        VLOG("Yes, already evaluated, %s %d", mName.c_str(), conditionCache[mIndex]);
+        VLOG("Yes, already evaluated, %lld %d",
+            (long long)mConditionId, conditionCache[mIndex]);
         return;
     }
 
@@ -320,11 +322,11 @@ void SimpleConditionTracker::isConditionMet(
         const ConditionKey& conditionParameters,
         const vector<sp<ConditionTracker>>& allConditions,
         vector<ConditionState>& conditionCache) const {
-    const auto pair = conditionParameters.find(mName);
+    const auto pair = conditionParameters.find(mConditionId);
 
     if (pair == conditionParameters.end() && mOutputDimensions.child_size() > 0) {
-        ALOGE("Predicate %s output has dimension, but it's not specified in the query!",
-              mName.c_str());
+        ALOGE("Predicate %lld output has dimension, but it's not specified in the query!",
+              (long long)mConditionId);
         conditionCache[mIndex] = mInitialValue;
         return;
     }
@@ -343,7 +345,7 @@ void SimpleConditionTracker::isConditionMet(
         }
     }
     conditionCache[mIndex] = conditionState;
-    VLOG("Predicate %s return %d", mName.c_str(), conditionCache[mIndex]);
+    VLOG("Predicate %lld return %d", (long long)mConditionId, conditionCache[mIndex]);
 }
 
 }  // namespace statsd

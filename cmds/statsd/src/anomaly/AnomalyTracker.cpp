@@ -34,11 +34,11 @@ namespace statsd {
 AnomalyTracker::AnomalyTracker(const Alert& alert, const ConfigKey& configKey)
     : mAlert(alert),
       mConfigKey(configKey),
-      mNumOfPastBuckets(mAlert.number_of_buckets() - 1) {
+      mNumOfPastBuckets(mAlert.num_buckets() - 1) {
     VLOG("AnomalyTracker() called");
-    if (mAlert.number_of_buckets() <= 0) {
+    if (mAlert.num_buckets() <= 0) {
         ALOGE("Cannot create AnomalyTracker with %lld buckets",
-              (long long)mAlert.number_of_buckets());
+              (long long)mAlert.num_buckets());
         return;
     }
     if (!mAlert.has_trigger_if_sum_gt()) {
@@ -205,23 +205,21 @@ void AnomalyTracker::declareAnomaly(const uint64_t& timestampNs) {
     // TODO: If we had access to the bucket_size_millis, consider calling resetStorage()
     // if (mAlert.refractory_period_secs() > mNumOfPastBuckets * bucketSizeNs) { resetStorage(); }
 
-    if (mAlert.has_incidentd_details()) {
-        if (mAlert.has_name()) {
-            ALOGI("An anomaly (%s) has occurred! Informing incidentd.",
-                  mAlert.name().c_str());
+    if (!mSubscriptions.empty()) {
+        if (mAlert.has_id()) {
+            ALOGI("An anomaly (%llu) has occurred! Informing subscribers.",mAlert.id());
+            informSubscribers();
         } else {
-            // TODO: Can construct a name based on the criteria (and/or relay the criteria).
-            ALOGI("An anomaly (nameless) has occurred! Informing incidentd.");
+            ALOGI("An anomaly (with no id) has occurred! Not informing any subscribers.");
         }
-        informIncidentd();
     } else {
-        ALOGI("An anomaly has occurred! (But informing incidentd not requested.)");
+        ALOGI("An anomaly has occurred! (But no subscriber for that alert.)");
     }
 
-    StatsdStats::getInstance().noteAnomalyDeclared(mConfigKey, mAlert.name());
+    StatsdStats::getInstance().noteAnomalyDeclared(mConfigKey, mAlert.id());
 
     android::util::stats_write(android::util::ANOMALY_DETECTED, mConfigKey.GetUid(),
-                               mConfigKey.GetName().c_str(), mAlert.name().c_str());
+                               mConfigKey.GetId(), mAlert.id());
 }
 
 void AnomalyTracker::detectAndDeclareAnomaly(const uint64_t& timestampNs,
@@ -246,27 +244,46 @@ bool AnomalyTracker::isInRefractoryPeriod(const uint64_t& timestampNs) const {
             timestampNs - mLastAnomalyTimestampNs <= mAlert.refractory_period_secs() * NS_PER_SEC;
 }
 
-void AnomalyTracker::informIncidentd() {
-    VLOG("informIncidentd called.");
-    if (!mAlert.has_incidentd_details()) {
-        ALOGE("Attempted to call incidentd without any incidentd_details.");
-        return;
-    }
-    sp<IIncidentManager> service = interface_cast<IIncidentManager>(
-            defaultServiceManager()->getService(android::String16("incident")));
-    if (service == NULL) {
-        ALOGW("Couldn't get the incident service.");
+void AnomalyTracker::informSubscribers() {
+    VLOG("informSubscribers called.");
+    if (mSubscriptions.empty()) {
+        ALOGE("Attempt to call with no subscribers.");
         return;
     }
 
-    IncidentReportArgs incidentReport;
-    const Alert::IncidentdDetails& details = mAlert.incidentd_details();
-    for (int i = 0; i < details.section_size(); i++) {
-        incidentReport.addSection(details.section(i));
+    std::set<int> incidentdSections;
+    for (const Subscription& subscription : mSubscriptions) {
+        switch (subscription.subscriber_information_case()) {
+            case Subscription::SubscriberInformationCase::kIncidentdDetails:
+                for (int i = 0; i < subscription.incidentd_details().section_size(); i++) {
+                    incidentdSections.insert(subscription.incidentd_details().section(i));
+                }
+                break;
+            case Subscription::SubscriberInformationCase::kPerfettoDetails:
+                ALOGW("Perfetto reports not implemented.");
+                break;
+            default:
+                break;
+        }
     }
-    // TODO: Pass in mAlert.name() into the addHeader?
-
-    service->reportIncident(incidentReport);
+    if (!incidentdSections.empty()) {
+        sp<IIncidentManager> service = interface_cast<IIncidentManager>(
+                defaultServiceManager()->getService(android::String16("incident")));
+        if (service != NULL) {
+            IncidentReportArgs incidentReport;
+            for (const auto section : incidentdSections) {
+                incidentReport.addSection(section);
+            }
+            int64_t alertId = mAlert.id();
+            std::vector<uint8_t> header;
+            uint8_t* src = static_cast<uint8_t*>(static_cast<void*>(&alertId));
+            header.insert(header.end(), src, src + sizeof(int64_t));
+            incidentReport.addHeader(header);
+            service->reportIncident(incidentReport);
+        } else {
+            ALOGW("Couldn't get the incident service.");
+        }
+    }
 }
 
 }  // namespace statsd

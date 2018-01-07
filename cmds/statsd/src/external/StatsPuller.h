@@ -18,11 +18,13 @@
 
 #include <android/os/StatsLogEventWrapper.h>
 #include <utils/String16.h>
+#include <mutex>
 #include <vector>
+
 #include "logd/LogEvent.h"
+#include "guardrail/StatsdStats.h"
 
 using android::os::StatsLogEventWrapper;
-using std::vector;
 
 namespace android {
 namespace os {
@@ -30,9 +32,33 @@ namespace statsd {
 
 class StatsPuller {
 public:
-    virtual ~StatsPuller(){};
+    StatsPuller(const int tagId);
 
-    virtual bool Pull(const int tagId, vector<std::shared_ptr<LogEvent>>* data) = 0;
+    virtual ~StatsPuller() {}
+
+    bool Pull(std::vector<std::shared_ptr<LogEvent>>* data);
+
+protected:
+    // The atom tag id this puller pulls
+    const int mTagId;
+
+private:
+    mutable std::mutex mLock;
+    // Minimum time before this puller does actual pull again.
+    // If a pull request comes before cooldown, a cached version from purevious pull
+    // will be returned.
+    // The actual value should be determined by individual pullers.
+    long mCoolDownSec;
+    // For puller stats
+    long mMinPullIntervalSec = LONG_MAX;
+
+    virtual bool PullInternal(std::vector<std::shared_ptr<LogEvent>>* data) = 0;
+
+    // Cache of data from last pull. If next request comes before cool down finishes,
+    // cached data will be returned.
+    std::vector<std::shared_ptr<LogEvent>> mCachedData;
+
+    long mLastPullTimeSec;
 };
 
 }  // namespace statsd
