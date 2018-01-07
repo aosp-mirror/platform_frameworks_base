@@ -49,6 +49,7 @@ import android.os.storage.VolumeInfo;
 import android.provider.Settings;
 import android.text.format.DateUtils;
 import android.util.ArrayMap;
+import android.util.DataUnit;
 import android.util.Slog;
 import android.util.SparseLongArray;
 
@@ -73,7 +74,7 @@ public class StorageStatsService extends IStorageStatsManager.Stub {
     private static final String PROP_VERIFY_STORAGE = "fw.verify_storage";
 
     private static final long DELAY_IN_MILLIS = 30 * DateUtils.SECOND_IN_MILLIS;
-    private static final long DEFAULT_QUOTA = 64 * TrafficStats.MB_IN_BYTES;
+    private static final long DEFAULT_QUOTA = DataUnit.MEBIBYTES.toBytes(64);
 
     public static class Lifecycle extends SystemService {
         private StorageStatsService mService;

@@ -16,7 +16,6 @@
 
 package android.provider;
 
-import static android.net.TrafficStats.KB_IN_BYTES;
 import static android.system.OsConstants.SEEK_SET;
 
 import static com.android.internal.util.Preconditions.checkArgument;
@@ -51,6 +50,7 @@ import android.os.RemoteException;
 import android.os.storage.StorageVolume;
 import android.system.ErrnoException;
 import android.system.Os;
+import android.util.DataUnit;
 import android.util.Log;
 
 import libcore.io.IoUtils;
@@ -173,7 +173,7 @@ public final class DocumentsContract {
     /**
      * Buffer is large enough to rewind past any EXIF headers.
      */
-    private static final int THUMBNAIL_BUFFER_SIZE = (int) (128 * KB_IN_BYTES);
+    private static final int THUMBNAIL_BUFFER_SIZE = (int) DataUnit.KIBIBYTES.toBytes(128);
 
     /** {@hide} */
     public static final String EXTERNAL_STORAGE_PROVIDER_AUTHORITY =

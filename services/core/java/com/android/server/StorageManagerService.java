@@ -96,6 +96,7 @@ import android.text.TextUtils;
 import android.text.format.DateUtils;
 import android.util.ArrayMap;
 import android.util.AtomicFile;
+import android.util.DataUnit;
 import android.util.Log;
 import android.util.Pair;
 import android.util.Slog;
@@ -3508,8 +3509,8 @@ class StorageManagerService extends IStorageManager.Stub
                 pw.print(") total size: ");
                 pw.print(pair.second);
                 pw.print(" (");
-                pw.print((float) pair.second / TrafficStats.GB_IN_BYTES);
-                pw.println(" GB)");
+                pw.print(DataUnit.MEBIBYTES.toBytes(pair.second));
+                pw.println(" MiB)");
             }
             pw.println("Force adoptable: " + mForceAdoptable);
             pw.println();
