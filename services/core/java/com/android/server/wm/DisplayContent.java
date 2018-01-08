@@ -49,6 +49,7 @@ import static android.view.WindowManager.LayoutParams.PRIVATE_FLAG_KEYGUARD;
 import static android.view.WindowManager.LayoutParams.TYPE_APPLICATION;
 import static android.view.WindowManager.LayoutParams.TYPE_APPLICATION_STARTING;
 import static android.view.WindowManager.LayoutParams.TYPE_BOOT_PROGRESS;
+import static android.view.WindowManager.LayoutParams.TYPE_DOCK_DIVIDER;
 import static android.view.WindowManager.LayoutParams.TYPE_DRAWN_APPLICATION;
 import static android.view.WindowManager.LayoutParams.TYPE_DREAM;
 import static android.view.WindowManager.LayoutParams.TYPE_INPUT_METHOD;
@@ -3496,37 +3497,47 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
 
         @Override
         void assignChildLayers(SurfaceControl.Transaction t) {
+
+            final int NORMAL_STACK_STATE = 0;
+            final int SPLIT_SCREEN_STACK_STATE = 1;
+            final int ASSISTANT_STACK_STATE = 2;
+            final int BOOSTED_STATE = 3;
+            final int ALWAYS_ON_TOP_STATE = 4;
+
             int layer = 0;
+            for (int state = 0; state <= ALWAYS_ON_TOP_STATE; state++) {
+                for (int i = 0; i < mChildren.size(); i++) {
+                    final TaskStack s = mChildren.get(i);
+                    layer++;
+                    if (state == NORMAL_STACK_STATE && !s.inSplitScreenPrimaryWindowingMode() &&
+                            !s.isActivityTypeAssistant() &&
+                            !s.needsZBoost() && !s.isAlwaysOnTop()) {
+                        s.assignLayer(t, layer);
+                    } else if (state == SPLIT_SCREEN_STACK_STATE &&
+                            s.inSplitScreenPrimaryWindowingMode()) {
+                        s.assignLayer(t, layer);
+                    } else if (state == ASSISTANT_STACK_STATE &&
+                            s.isActivityTypeAssistant()) {
+                        s.assignLayer(t, layer);
+                    } else if (state == BOOSTED_STATE && s.needsZBoost()) {
+                        s.assignLayer(t, layer);
+                    } else if (state == ALWAYS_ON_TOP_STATE &&
+                            s.isAlwaysOnTop()) {
+                        s.assignLayer(t, layer);
+                    }
+                }
+                // The appropriate place for App-Transitions to occur is right
+                // above all other animations but still below things in the Picture-and-Picture
+                // windowing mode.
+                if (state == BOOSTED_STATE && mAppAnimationLayer != null) {
+                    t.setLayer(mAppAnimationLayer, layer++);
+                }
+            }
+            for (int i = 0; i < mChildren.size(); i++) {
+                final TaskStack s = mChildren.get(i);
+                s.assignChildLayers(t);
+            }
 
-            // We allow stacks to change visual order from the AM specified order due to
-            // Z-boosting during animations. However we must take care to ensure TaskStacks
-            // which are marked as alwaysOnTop remain that way.
-            for (int i = 0; i < mChildren.size(); i++) {
-                final TaskStack s = mChildren.get(i);
-                s.assignChildLayers();
-                if (!s.needsZBoost() && !s.isAlwaysOnTop()) {
-                    s.assignLayer(t, layer++);
-                }
-            }
-            for (int i = 0; i < mChildren.size(); i++) {
-                final TaskStack s = mChildren.get(i);
-                if (s.needsZBoost() && !s.isAlwaysOnTop()) {
-                    s.assignLayer(t, layer++);
-                }
-            }
-            for (int i = 0; i < mChildren.size(); i++) {
-                final TaskStack s = mChildren.get(i);
-                if (s.isAlwaysOnTop()) {
-                    s.assignLayer(t, layer++);
-                }
-            }
-
-            // The appropriate place for App-Transitions to occur is right
-            // above all other animations but still below things in the Picture-and-Picture
-            // windowing mode.
-            if (mAppAnimationLayer != null) {
-                t.setLayer(mAppAnimationLayer, layer++);
-            }
         }
 
         @Override
@@ -3560,6 +3571,18 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
                     && imeContainer.getSurfaceControl() != null;
             for (int j = 0; j < mChildren.size(); ++j) {
                 final WindowToken wt = mChildren.get(j);
+
+                // The divider is unique in that it does not have an AppWindowToken but needs to be
+                // interleaved with them. In particular it must be above any split-screen stacks
+                // but below any always-on-top stacks.
+                if (wt.windowType == TYPE_DOCK_DIVIDER) {
+                    final TaskStack dockedStack = getSplitScreenPrimaryStack();
+                    if (dockedStack != null) {
+                        wt.assignRelativeLayer(t, dockedStack.getSurfaceControl(),
+                                Integer.MAX_VALUE);
+                        continue;
+                    }
+                }
                 wt.assignLayer(t, j);
                 wt.assignChildLayers(t);
 
