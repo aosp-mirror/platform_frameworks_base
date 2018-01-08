@@ -21,7 +21,9 @@ import android.os.Parcel;
 import android.os.Parcelable;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
+import java.util.Objects;
 
 /**
  * Describes information about a detected access point. In addition
@@ -225,6 +227,50 @@ public class ScanResult implements Parcelable {
      * {@hide}
      */
     public long seen;
+
+    /**
+     * On devices with multiple hardware radio chains, this class provides metadata about
+     * each radio chain that was used to receive this scan result (probe response or beacon).
+     * {@hide}
+     */
+    public static class RadioChainInfo {
+        /** Vendor defined id for a radio chain. */
+        public int id;
+        /** Detected signal level in dBm (also known as the RSSI) on this radio chain. */
+        public int level;
+
+        @Override
+        public String toString() {
+            return "RadioChainInfo: id=" + id + ", level=" + level;
+        }
+
+        @Override
+        public boolean equals(Object otherObj) {
+            if (this == otherObj) {
+                return true;
+            }
+            if (!(otherObj instanceof RadioChainInfo)) {
+                return false;
+            }
+            RadioChainInfo other = (RadioChainInfo) otherObj;
+            return id == other.id && level == other.level;
+        }
+
+        @Override
+        public int hashCode() {
+            return Objects.hash(id, level);
+        }
+    };
+
+    /**
+     * Information about the list of the radio chains used to receive this scan result
+     * (probe response or beacon).
+     *
+     * For Example: On devices with 2 hardware radio chains, this list could hold 1 or 2
+     * entries based on whether this scan result was received using one or both the chains.
+     * {@hide}
+     */
+    public RadioChainInfo[] radioChainInfos;
 
     /**
      * @hide
@@ -481,6 +527,7 @@ public class ScanResult implements Parcelable {
         this.isCarrierAp = false;
         this.carrierApEapType = UNSPECIFIED;
         this.carrierName = null;
+        this.radioChainInfos = null;
     }
 
     /** {@hide} */
@@ -502,6 +549,7 @@ public class ScanResult implements Parcelable {
         this.isCarrierAp = false;
         this.carrierApEapType = UNSPECIFIED;
         this.carrierName = null;
+        this.radioChainInfos = null;
     }
 
     /** {@hide} */
@@ -530,6 +578,7 @@ public class ScanResult implements Parcelable {
         this.isCarrierAp = false;
         this.carrierApEapType = UNSPECIFIED;
         this.carrierName = null;
+        this.radioChainInfos = null;
     }
 
     /** {@hide} */
@@ -572,6 +621,7 @@ public class ScanResult implements Parcelable {
             isCarrierAp = source.isCarrierAp;
             carrierApEapType = source.carrierApEapType;
             carrierName = source.carrierName;
+            radioChainInfos = source.radioChainInfos;
         }
     }
 
@@ -615,6 +665,7 @@ public class ScanResult implements Parcelable {
         sb.append(", Carrier AP: ").append(isCarrierAp ? "yes" : "no");
         sb.append(", Carrier AP EAP Type: ").append(carrierApEapType);
         sb.append(", Carrier name: ").append(carrierName);
+        sb.append(", Radio Chain Infos: ").append(Arrays.toString(radioChainInfos));
         return sb.toString();
     }
 
@@ -687,6 +738,16 @@ public class ScanResult implements Parcelable {
         dest.writeInt(isCarrierAp ? 1 : 0);
         dest.writeInt(carrierApEapType);
         dest.writeString(carrierName);
+
+        if (radioChainInfos != null) {
+            dest.writeInt(radioChainInfos.length);
+            for (int i = 0; i < radioChainInfos.length; i++) {
+                dest.writeInt(radioChainInfos[i].id);
+                dest.writeInt(radioChainInfos[i].level);
+            }
+        } else {
+            dest.writeInt(0);
+        }
     }
 
     /** Implement the Parcelable interface {@hide} */
@@ -759,6 +820,15 @@ public class ScanResult implements Parcelable {
                 sr.isCarrierAp = in.readInt() != 0;
                 sr.carrierApEapType = in.readInt();
                 sr.carrierName = in.readString();
+                n = in.readInt();
+                if (n != 0) {
+                    sr.radioChainInfos = new RadioChainInfo[n];
+                    for (int i = 0; i < n; i++) {
+                        sr.radioChainInfos[i] = new RadioChainInfo();
+                        sr.radioChainInfos[i].id = in.readInt();
+                        sr.radioChainInfos[i].level = in.readInt();
+                    }
+                }
                 return sr;
             }
 
