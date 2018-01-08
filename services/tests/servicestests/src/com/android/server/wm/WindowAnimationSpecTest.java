@@ -25,6 +25,7 @@ import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 
+import android.graphics.Point;
 import android.graphics.Rect;
 import android.platform.test.annotations.Presubmit;
 import android.support.test.filters.SmallTest;
@@ -69,6 +70,19 @@ public class WindowAnimationSpecTest {
         verify(mTransaction).setWindowCrop(eq(mSurfaceControl), argThat(Rect::isEmpty));
         verify(mTransaction).setFinalCrop(eq(mSurfaceControl),
                 argThat(rect -> rect.equals(mStackBounds)));
+    }
+
+    @Test
+    public void testApply_clipAfterOffsetPosition() {
+        // Stack bounds is (0, 0, 10, 10) position is (20, 40)
+        WindowAnimationSpec windowAnimationSpec = new WindowAnimationSpec(mAnimation,
+                new Point(20, 40), mStackBounds, false /* canSkipFirstFrame */,
+                STACK_CLIP_AFTER_ANIM);
+        windowAnimationSpec.apply(mTransaction, mSurfaceControl, 0);
+        verify(mTransaction).setWindowCrop(eq(mSurfaceControl), argThat(Rect::isEmpty));
+        verify(mTransaction).setFinalCrop(eq(mSurfaceControl),
+                argThat(rect -> rect.left == 20 && rect.top == 40 && rect.right == 30
+                        && rect.bottom == 50));
     }
 
     @Test
