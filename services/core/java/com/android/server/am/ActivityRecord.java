@@ -2730,12 +2730,14 @@ final class ActivityRecord extends ConfigurationContainer implements AppWindowCo
     }
 
     /**
-     * @return true if the activity contains windows that have
-     *         {@link LayoutParams#FLAG_SHOW_WHEN_LOCKED} set or if the activity has set
-     *         {@link #mShowWhenLocked}.
+     * @return true if the activity windowing mode is not
+     *         {@link android.app.WindowConfiguration#WINDOWING_MODE_PINNED} and activity contains
+     *         windows that have {@link LayoutParams#FLAG_SHOW_WHEN_LOCKED} set or if the activity
+     *         has set {@link #mShowWhenLocked}.
+     *         Multi-windowing mode will be exited if true is returned.
      */
     boolean canShowWhenLocked() {
-        return !inMultiWindowMode() && (mShowWhenLocked
+        return !inPinnedWindowingMode() && (mShowWhenLocked
                 || service.mWindowManager.containsShowWhenLockedWindow(appToken));
     }
 

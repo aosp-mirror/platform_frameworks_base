@@ -556,10 +556,10 @@ class ActivityDisplay extends ConfigurationContainer<ActivityStack> {
         return stack == getTopStack();
     }
 
-    boolean isTopFullscreenStack(ActivityStack stack) {
+    boolean isTopNotPinnedStack(ActivityStack stack) {
         for (int i = mStacks.size() - 1; i >= 0; --i) {
             final ActivityStack current = mStacks.get(i);
-            if (current.getWindowingMode() == WINDOWING_MODE_FULLSCREEN) {
+            if (!current.inPinnedWindowingMode()) {
                 return current == stack;
             }
         }
