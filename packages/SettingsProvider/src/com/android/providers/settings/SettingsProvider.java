@@ -2592,7 +2592,9 @@ public class SettingsProvider extends ContentProvider {
         public void onUidRemovedLocked(int uid) {
             final SettingsState ssaidSettings = getSettingsLocked(SETTINGS_TYPE_SSAID,
                     UserHandle.getUserId(uid));
-            ssaidSettings.deleteSettingLocked(Integer.toString(uid));
+            if (ssaidSettings != null) {
+                ssaidSettings.deleteSettingLocked(Integer.toString(uid));
+            }
         }
 
         @Nullable
