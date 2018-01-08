@@ -32,6 +32,8 @@
               android:layout_width="match_parent"
               android:layout_height="wrap_content"
               android:layout_marginBottom="@dimen/widget_vertical_padding"
+              android:paddingStart="64dp"
+              android:paddingEnd="64dp"
               android:theme="@style/TextAppearance.Keyguard"
     />
     <LinearLayout android:id="@+id/row"
