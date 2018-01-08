@@ -260,13 +260,6 @@ final class DisplayPowerController implements AutomaticBrightnessController.Call
     private long mScreenOnBlockStartRealTime;
     private long mScreenOffBlockStartRealTime;
 
-    // The last brightness that was set by the user and not temporary. Set to -1 when a brightness
-    // has yet to be recorded.
-    private int mLastBrightness;
-    // The last auto brightness adjustment that was set by the user and not temporary. Set to
-    // Float.NaN when an auto-brightness adjustment hasn't been recorded yet.
-    private float mLastAutoBrightnessAdjustment;
-
     // Screen state we reported to policy. Must be one of REPORTED_TO_POLICY_SCREEN_* fields.
     private int mReportedScreenStateToPolicy;
 
@@ -299,13 +292,17 @@ final class DisplayPowerController implements AutomaticBrightnessController.Call
     @Nullable
     private BrightnessMappingStrategy mBrightnessMapper;
 
-    // The default brightness configuration. Used for whenever we don't have a valid brightness
-    // configuration set. This is typically seen with users that don't have a brightness
-    // configuration that's different from the default.
-    private BrightnessConfiguration mDefaultBrightnessConfiguration;
-
     // The current brightness configuration.
+    @Nullable
     private BrightnessConfiguration mBrightnessConfiguration;
+
+    // The last brightness that was set by the user and not temporary. Set to -1 when a brightness
+    // has yet to be recorded.
+    private int mLastBrightness;
+
+    // The last auto brightness adjustment that was set by the user and not temporary. Set to
+    // Float.NaN when an auto-brightness adjustment hasn't been recorded yet.
+    private float mLastAutoBrightnessAdjustment;
 
     // Animators.
     private ObjectAnimator mColorFadeOnAnimator;
@@ -1488,8 +1485,7 @@ final class DisplayPowerController implements AutomaticBrightnessController.Call
                     }
                     break;
                 case MSG_CONFIGURE_BRIGHTNESS:
-                    BrightnessConfiguration c = (BrightnessConfiguration) msg.obj;
-                    mBrightnessConfiguration = c != null ? c : mDefaultBrightnessConfiguration;
+                    mBrightnessConfiguration = (BrightnessConfiguration)msg.obj;
                     updatePowerState();
                     break;
             }

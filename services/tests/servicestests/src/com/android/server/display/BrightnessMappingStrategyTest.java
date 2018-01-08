@@ -17,6 +17,7 @@
 package com.android.server.display;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
@@ -27,6 +28,7 @@ import static org.mockito.Mockito.when;
 
 import android.content.res.Resources;
 import android.content.res.TypedArray;
+import android.hardware.display.BrightnessConfiguration;
 import android.os.PowerManager;
 import android.support.test.filters.SmallTest;
 import android.support.test.runner.AndroidJUnit4;
@@ -111,9 +113,38 @@ public class BrightnessMappingStrategyTest {
             final float lux = (LUX_LEVELS[i - 1] + LUX_LEVELS[i]) / 2;
             final float backlight = simple.getBrightness(lux) * PowerManager.BRIGHTNESS_ON;
             assertTrue("Desired brightness should be between adjacent control points.",
-                    backlight > DISPLAY_LEVELS_BACKLIGHT[i-1]
+                    backlight > DISPLAY_LEVELS_BACKLIGHT[i - 1]
                         && backlight < DISPLAY_LEVELS_BACKLIGHT[i]);
         }
+    }
+
+    @Test
+    public void testSimpleStrategyIgnoresNewConfiguration() {
+        Resources res = createResources(LUX_LEVELS, DISPLAY_LEVELS_BACKLIGHT);
+        BrightnessMappingStrategy strategy = BrightnessMappingStrategy.create(res);
+
+        final int N = LUX_LEVELS.length;
+        final float[] lux = { 0f, 1f };
+        final float[] nits = { 0, PowerManager.BRIGHTNESS_ON };
+
+        BrightnessConfiguration config = new BrightnessConfiguration.Builder()
+                .setCurve(lux, nits)
+                .build();
+        strategy.setBrightnessConfiguration(config);
+        assertNotEquals(1.0f, strategy.getBrightness(1f), 0.01 /*tolerance*/);
+    }
+
+    @Test
+    public void testSimpleStrategyIgnoresNullConfiguration() {
+        Resources res = createResources(LUX_LEVELS, DISPLAY_LEVELS_BACKLIGHT);
+        BrightnessMappingStrategy strategy = BrightnessMappingStrategy.create(res);
+
+        strategy.setBrightnessConfiguration(null);
+        final int N = DISPLAY_LEVELS_BACKLIGHT.length;
+        final float expectedBrightness =
+                (float) DISPLAY_LEVELS_BACKLIGHT[N - 1] / PowerManager.BRIGHTNESS_ON;
+        assertEquals(expectedBrightness,
+                strategy.getBrightness(LUX_LEVELS[N - 1]), 0.01 /*tolerance*/);
     }
 
     @Test
@@ -142,8 +173,34 @@ public class BrightnessMappingStrategyTest {
             final float backlight = physical.getBrightness(lux) * PowerManager.BRIGHTNESS_ON;
             final float nits = backlightToBrightness.interpolate(backlight);
             assertTrue("Desired brightness should be between adjacent control points.",
-                    nits > DISPLAY_LEVELS_NITS[i-1] && nits < DISPLAY_LEVELS_NITS[i]);
+                    nits > DISPLAY_LEVELS_NITS[i - 1] && nits < DISPLAY_LEVELS_NITS[i]);
         }
+    }
+
+    @Test
+    public void testPhysicalStrategyUsesNewConfigurations() {
+        Resources res = createResources(LUX_LEVELS, DISPLAY_LEVELS_NITS,
+                DISPLAY_RANGE_NITS, BACKLIGHT_RANGE);
+        BrightnessMappingStrategy strategy = BrightnessMappingStrategy.create(res);
+
+        final float[] lux = { 0f, 1f };
+        final float[] nits = {
+                DISPLAY_RANGE_NITS[0],
+                DISPLAY_RANGE_NITS[DISPLAY_RANGE_NITS.length - 1]
+        };
+
+        BrightnessConfiguration config = new BrightnessConfiguration.Builder()
+                .setCurve(lux, nits)
+                .build();
+        strategy.setBrightnessConfiguration(config);
+        assertEquals(1.0f, strategy.getBrightness(1f), 0.01 /*tolerance*/);
+
+        // Check that null returns us to the default configuration.
+        strategy.setBrightnessConfiguration(null);
+        final int N = DISPLAY_LEVELS_NITS.length;
+        final float expectedBrightness = DISPLAY_LEVELS_NITS[N - 1] / DISPLAY_RANGE_NITS[1];
+        assertEquals(expectedBrightness,
+                strategy.getBrightness(LUX_LEVELS[N - 1]), 0.01f /*tolerance*/);
     }
 
     @Test
