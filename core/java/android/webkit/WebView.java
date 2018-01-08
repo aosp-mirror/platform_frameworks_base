@@ -1797,9 +1797,10 @@ public class WebView extends AbsoluteLayout
      * @return the address, or if no address is found, null
      */
     public static String findAddress(String addr) {
-        // TODO: Rewrite this in Java so it is not needed to start up chromium
-        // Could also be deprecated
-        return getFactory().getStatics().findAddress(addr);
+        if (addr == null) {
+            throw new NullPointerException("addr is null");
+        }
+        return FindAddress.findAddress(addr);
     }
 
     /**
