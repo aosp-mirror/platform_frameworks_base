@@ -16,6 +16,8 @@
 
 package com.android.systemui.doze;
 
+import static com.android.systemui.doze.DozeMachine.State.DOZE_AOD_PAUSED;
+
 import android.app.AlarmManager;
 import android.content.Context;
 import android.os.Handler;
@@ -79,6 +81,11 @@ public class DozeUi implements DozeMachine.Part {
     public void transitionTo(DozeMachine.State oldState, DozeMachine.State newState) {
         switch (newState) {
             case DOZE_AOD:
+                if (oldState == DOZE_AOD_PAUSED) {
+                    mHost.dozeTimeTick();
+                }
+                scheduleTimeTick();
+                break;
             case DOZE_AOD_PAUSING:
                 scheduleTimeTick();
                 break;
