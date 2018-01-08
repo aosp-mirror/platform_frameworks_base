@@ -1329,6 +1329,21 @@ public class AudioManager {
      }
 
     //====================================================================
+    // Offload query
+    /**
+     * @hide
+     * TODO unhide (intentional white space to attract attention:    
+     * Returns whether offloaded playback of an audio format is supported on the device.
+     * Offloaded playback is where the decoding of an audio stream is not competing with other
+     * software resources. In general, it is supported by dedicated hardware, such as audio DSPs.
+     * @param format the audio format (codec, sample rate, channels) being checked.
+     * @return true if the given audio format can be offloaded.
+     */
+    public static boolean isOffloadedPlaybackSupported(@NonNull AudioFormat format) {
+        return AudioSystem.isOffloadSupported(format);
+    }
+
+    //====================================================================
     // Bluetooth SCO control
     /**
      * Sticky broadcast intent action indicating that the Bluetooth SCO audio

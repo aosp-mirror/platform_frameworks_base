@@ -73,6 +73,7 @@ struct audiotrack_callback_cookie {
     jobject     audioTrack_ref;
     bool        busy;
     Condition   cond;
+    bool        isOffload;
 };
 
 // keep these values in sync with AudioTrack.java
@@ -90,6 +91,7 @@ class AudioTrackJniStorage {
     AudioTrackJniStorage() {
         mCallbackData.audioTrack_class = 0;
         mCallbackData.audioTrack_ref = 0;
+        mCallbackData.isOffload = false;
     }
 
     ~AudioTrackJniStorage() {
@@ -132,27 +134,34 @@ static void audioCallback(int event, void* user, void *info) {
     }
 
     switch (event) {
-    case AudioTrack::EVENT_MARKER: {
-        JNIEnv *env = AndroidRuntime::getJNIEnv();
-        if (user != NULL && env != NULL) {
-            env->CallStaticVoidMethod(
-                callbackInfo->audioTrack_class,
-                javaAudioTrackFields.postNativeEventInJava,
-                callbackInfo->audioTrack_ref, event, 0,0, NULL);
-            if (env->ExceptionCheck()) {
-                env->ExceptionDescribe();
-                env->ExceptionClear();
+    // Offload only events
+    case AudioTrack::EVENT_STREAM_END:
+    case AudioTrack::EVENT_MORE_DATA:
+    // a.k.a. tear down
+    case AudioTrack::EVENT_NEW_IAUDIOTRACK:
+        if (callbackInfo->isOffload) {
+            JNIEnv *env = AndroidRuntime::getJNIEnv();
+            if (user != NULL && env != NULL) {
+                env->CallStaticVoidMethod(
+                        callbackInfo->audioTrack_class,
+                        javaAudioTrackFields.postNativeEventInJava,
+                        callbackInfo->audioTrack_ref, event, 0,0, NULL);
+                if (env->ExceptionCheck()) {
+                    env->ExceptionDescribe();
+                    env->ExceptionClear();
+                }
             }
-        }
         } break;
 
+    // PCM and offload events
+    case AudioTrack::EVENT_MARKER:
     case AudioTrack::EVENT_NEW_POS: {
         JNIEnv *env = AndroidRuntime::getJNIEnv();
         if (user != NULL && env != NULL) {
             env->CallStaticVoidMethod(
-                callbackInfo->audioTrack_class,
-                javaAudioTrackFields.postNativeEventInJava,
-                callbackInfo->audioTrack_ref, event, 0,0, NULL);
+                    callbackInfo->audioTrack_class,
+                    javaAudioTrackFields.postNativeEventInJava,
+                    callbackInfo->audioTrack_ref, event, 0,0, NULL);
             if (env->ExceptionCheck()) {
                 env->ExceptionDescribe();
                 env->ExceptionClear();
@@ -198,30 +207,12 @@ sp<AudioTrack> android_media_AudioTrack_getAudioTrack(JNIEnv* env, jobject audio
     return getAudioTrack(env, audioTrackObj);
 }
 
-// This function converts Java channel masks to a native channel mask.
-// validity should be checked with audio_is_output_channel().
-static inline audio_channel_mask_t nativeChannelMaskFromJavaChannelMasks(
-        jint channelPositionMask, jint channelIndexMask)
-{
-    if (channelIndexMask != 0) {  // channel index mask takes priority
-        // To convert to a native channel mask, the Java channel index mask
-        // requires adding the index representation.
-        return audio_channel_mask_from_representation_and_bits(
-                        AUDIO_CHANNEL_REPRESENTATION_INDEX,
-                        channelIndexMask);
-    }
-    // To convert to a native channel mask, the Java channel position mask
-    // requires a shift by 2 to skip the two deprecated channel
-    // configurations "default" and "mono".
-    return (audio_channel_mask_t)(channelPositionMask >> 2);
-}
-
 // ----------------------------------------------------------------------------
 static jint
 android_media_AudioTrack_setup(JNIEnv *env, jobject thiz, jobject weak_this, jobject jaa,
         jintArray jSampleRate, jint channelPositionMask, jint channelIndexMask,
         jint audioFormat, jint buffSizeInBytes, jint memoryMode, jintArray jSession,
-        jlong nativeAudioTrack) {
+        jlong nativeAudioTrack, jboolean offload) {
 
     ALOGV("sampleRates=%p, channel mask=%x, index mask=%x, audioFormat(Java)=%d, buffSize=%d"
         "nativeAudioTrack=0x%" PRIX64,
@@ -322,7 +313,18 @@ android_media_AudioTrack_setup(JNIEnv *env, jobject thiz, jobject weak_this, job
         lpJniStorage->mCallbackData.audioTrack_class = (jclass)env->NewGlobalRef(clazz);
         // we use a weak reference so the AudioTrack object can be garbage collected.
         lpJniStorage->mCallbackData.audioTrack_ref = env->NewGlobalRef(weak_this);
+        lpJniStorage->mCallbackData.isOffload = offload;
         lpJniStorage->mCallbackData.busy = false;
+
+        audio_offload_info_t offloadInfo;
+        if (offload) {
+            offloadInfo = AUDIO_INFO_INITIALIZER;
+            offloadInfo.format = format;
+            offloadInfo.sample_rate = sampleRateInHertz;
+            offloadInfo.channel_mask = nativeChannelMask;
+            offloadInfo.has_video = false;
+            offloadInfo.stream_type = AUDIO_STREAM_MUSIC; //required for offload
+        }
 
         // initialize the native AudioTrack object
         status_t status = NO_ERROR;
@@ -342,7 +344,7 @@ android_media_AudioTrack_setup(JNIEnv *env, jobject thiz, jobject weak_this, job
                     true,// thread can call Java
                     sessionId,// audio session ID
                     AudioTrack::TRANSFER_SYNC,
-                    NULL,                         // default offloadInfo
+                    offload ? &offloadInfo : NULL,
                     -1, -1,                       // default uid, pid values
                     paa);
             break;
@@ -1234,7 +1236,7 @@ static const JNINativeMethod gMethods[] = {
     {"native_stop",          "()V",      (void *)android_media_AudioTrack_stop},
     {"native_pause",         "()V",      (void *)android_media_AudioTrack_pause},
     {"native_flush",         "()V",      (void *)android_media_AudioTrack_flush},
-    {"native_setup",     "(Ljava/lang/Object;Ljava/lang/Object;[IIIIII[IJ)I",
+    {"native_setup",     "(Ljava/lang/Object;Ljava/lang/Object;[IIIIII[IJZ)I",
                                          (void *)android_media_AudioTrack_setup},
     {"native_finalize",      "()V",      (void *)android_media_AudioTrack_finalize},
     {"native_release",       "()V",      (void *)android_media_AudioTrack_release},
