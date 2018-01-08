@@ -16,7 +16,6 @@
 
 package com.android.server.wm;
 
-import android.util.MergedConfiguration;
 import android.view.WindowManager;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -45,8 +44,7 @@ import static org.junit.Assert.assertTrue;
 /**
  * Tests for the {@link WindowState} class.
  *
- * Build/Install/Run:
- *  bit FrameworksServicesTests:com.android.server.wm.WindowStateTests
+ * atest FrameworksServicesTests:com.android.server.wm.WindowStateTests
  */
 @SmallTest
 @Presubmit
@@ -211,6 +209,18 @@ public class WindowStateTests extends WindowTestsBase {
     public void testPrepareWindowToDisplayDuringRelayout() throws Exception {
         testPrepareWindowToDisplayDuringRelayout(false /*wasVisible*/);
         testPrepareWindowToDisplayDuringRelayout(true /*wasVisible*/);
+    }
+
+    @Test
+    public void testCanAffectSystemUiFlags() throws Exception {
+        final WindowState app = createWindow(null, TYPE_APPLICATION, "app");
+        app.mToken.setHidden(false);
+        assertTrue(app.canAffectSystemUiFlags());
+        app.mToken.setHidden(true);
+        assertFalse(app.canAffectSystemUiFlags());
+        app.mToken.setHidden(false);
+        app.mAttrs.alpha = 0.0f;
+        assertFalse(app.canAffectSystemUiFlags());
     }
 
     private void testPrepareWindowToDisplayDuringRelayout(boolean wasVisible) {

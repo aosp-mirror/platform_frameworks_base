@@ -1521,10 +1521,13 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
     @Override
     public boolean canAffectSystemUiFlags() {
         final boolean translucent = mAttrs.alpha == 0.0f;
+        if (translucent) {
+            return false;
+        }
         if (mAppToken == null) {
             final boolean shown = mWinAnimator.getShown();
             final boolean exiting = mAnimatingExit || mDestroying;
-            return shown && !exiting && !translucent;
+            return shown && !exiting;
         } else {
             return !mAppToken.isHidden();
         }
