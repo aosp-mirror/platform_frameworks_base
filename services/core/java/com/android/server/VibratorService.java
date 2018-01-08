@@ -26,6 +26,7 @@ import android.content.res.Resources;
 import android.database.ContentObserver;
 import android.hardware.input.InputManager;
 import android.hardware.vibrator.V1_0.Constants.EffectStrength;
+import android.icu.text.DateFormat;
 import android.media.AudioManager;
 import android.os.PowerManager.ServiceType;
 import android.os.PowerSaveState;
@@ -62,12 +63,15 @@ import java.io.FileDescriptor;
 import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.LinkedList;
+import java.util.Date;
 
 public class VibratorService extends IVibratorService.Stub
         implements InputManager.InputDeviceListener {
     private static final String TAG = "VibratorService";
     private static final boolean DEBUG = false;
     private static final String SYSTEM_UI_PACKAGE = "com.android.systemui";
+
+    private static final long[] DOUBLE_CLICK_EFFECT_FALLBACK_TIMINGS = { 0, 30, 100, 30 };
 
     private final LinkedList<VibrationInfo> mPreviousVibrations;
     private final int mPreviousVibrationsLimit;
@@ -110,7 +114,12 @@ public class VibratorService extends IVibratorService.Stub
     private class Vibration implements IBinder.DeathRecipient {
         private final IBinder mToken;
         private final VibrationEffect mEffect;
+        // Start time in CLOCK_BOOTTIME base.
         private final long mStartTime;
+        // Start time in unix epoch time. Only to be used for debugging purposes and to correlate
+        // with other system events, any duration calculations should be done use mStartTime so as
+        // not to be affected by discontinuities created by RTC adjustments.
+        private final long mStartTimeDebug;
         private final int mUsageHint;
         private final int mUid;
         private final String mOpPkg;
@@ -119,7 +128,8 @@ public class VibratorService extends IVibratorService.Stub
                 int usageHint, int uid, String opPkg) {
             mToken = token;
             mEffect = effect;
-            mStartTime = SystemClock.uptimeMillis();
+            mStartTime = SystemClock.elapsedRealtime();
+            mStartTimeDebug = System.currentTimeMillis();
             mUsageHint = usageHint;
             mUid = uid;
             mOpPkg = opPkg;
@@ -153,18 +163,22 @@ public class VibratorService extends IVibratorService.Stub
             return (mUid == Process.SYSTEM_UID || mUid == 0 || SYSTEM_UI_PACKAGE.equals(mOpPkg))
                     && !repeating;
         }
+
+        public VibrationInfo toInfo() {
+            return new VibrationInfo(mStartTimeDebug, mEffect, mUsageHint, mUid, mOpPkg);
+        }
     }
 
     private static class VibrationInfo {
-        private final long mStartTime;
+        private final long mStartTimeDebug;
         private final VibrationEffect mEffect;
         private final int mUsageHint;
         private final int mUid;
         private final String mOpPkg;
 
-        public VibrationInfo(long startTime, VibrationEffect effect,
+        public VibrationInfo(long startTimeDebug, VibrationEffect effect,
                 int usageHint, int uid, String opPkg) {
-            mStartTime = startTime;
+            mStartTimeDebug = startTimeDebug;
             mEffect = effect;
             mUsageHint = usageHint;
             mUid = uid;
@@ -174,8 +188,8 @@ public class VibratorService extends IVibratorService.Stub
         @Override
         public String toString() {
             return new StringBuilder()
-                    .append(", startTime: ")
-                    .append(mStartTime)
+                    .append("startTime: ")
+                    .append(DateFormat.getDateTimeInstance().format(new Date(mStartTimeDebug)))
                     .append(", effect: ")
                     .append(mEffect)
                     .append(", usageHint: ")
@@ -225,7 +239,7 @@ public class VibratorService extends IVibratorService.Stub
                 com.android.internal.R.array.config_virtualKeyVibePattern);
         VibrationEffect clickEffect = createEffect(clickEffectTimings);
         VibrationEffect doubleClickEffect = VibrationEffect.createWaveform(
-                new long[] {0, 30, 100, 30} /*timings*/, -1);
+               DOUBLE_CLICK_EFFECT_FALLBACK_TIMINGS, -1 /*repeatIndex*/);
         long[] tickEffectTimings = getLongIntArray(context.getResources(),
                 com.android.internal.R.array.config_clockTickVibePattern);
         VibrationEffect tickEffect = createEffect(tickEffectTimings);
@@ -392,17 +406,7 @@ public class VibratorService extends IVibratorService.Stub
         }
 
         Vibration vib = new Vibration(token, effect, usageHint, uid, opPkg);
-
-        // Only link against waveforms since they potentially don't have a finish if
-        // they're repeating. Let other effects just play out until they're done.
-        if (effect instanceof VibrationEffect.Waveform) {
-            try {
-                token.linkToDeath(vib, 0);
-            } catch (RemoteException e) {
-                return;
-            }
-        }
-
+        linkVibration(vib);
 
         long ident = Binder.clearCallingIdentity();
         try {
@@ -430,8 +434,7 @@ public class VibratorService extends IVibratorService.Stub
         if (mPreviousVibrations.size() > mPreviousVibrationsLimit) {
             mPreviousVibrations.removeFirst();
         }
-        mPreviousVibrations.addLast(new VibrationInfo(
-                    vib.mStartTime, vib.mEffect, vib.mUsageHint, vib.mUid, vib.mOpPkg));
+        mPreviousVibrations.addLast(vib.toInfo());
     }
 
     @Override // Binder call
@@ -589,7 +592,20 @@ public class VibratorService extends IVibratorService.Stub
                         AppOpsManager.OP_VIBRATE, mCurrentVibration.mUid,
                         mCurrentVibration.mOpPkg);
             } catch (RemoteException e) { }
+            unlinkVibration(mCurrentVibration);
             mCurrentVibration = null;
+        }
+    }
+
+    private void linkVibration(Vibration vib) {
+        // Only link against waveforms since they potentially don't have a finish if
+        // they're repeating. Let other effects just play out until they're done.
+        if (vib.mEffect instanceof VibrationEffect.Waveform) {
+            try {
+                vib.mToken.linkToDeath(vib, 0);
+            } catch (RemoteException e) {
+                return;
+            }
         }
     }
 
@@ -742,8 +758,7 @@ public class VibratorService extends IVibratorService.Stub
         synchronized (mInputDeviceVibrators) {
             VibrationEffect.Prebaked prebaked = (VibrationEffect.Prebaked) vib.mEffect;
             // Input devices don't support prebaked effect, so skip trying it with them.
-            final int vibratorCount = mInputDeviceVibrators.size();
-            if (vibratorCount == 0) {
+            if (mInputDeviceVibrators.isEmpty()) {
                 long timeout = vibratorPerformEffect(prebaked.getId(), EffectStrength.MEDIUM);
                 if (timeout > 0) {
                     noteVibratorOnLocked(vib.mUid, timeout);
@@ -753,17 +768,23 @@ public class VibratorService extends IVibratorService.Stub
             if (!prebaked.shouldFallback()) {
                 return 0;
             }
-            final int id = prebaked.getId();
-            if (id < 0 || id >= mFallbackEffects.length || mFallbackEffects[id] == null) {
+            VibrationEffect effect = getFallbackEffect(prebaked.getId());
+            if (effect == null) {
                 Slog.w(TAG, "Failed to play prebaked effect, no fallback");
                 return 0;
             }
-            VibrationEffect effect = mFallbackEffects[id];
             Vibration fallbackVib =
                     new Vibration(vib.mToken, effect, vib.mUsageHint, vib.mUid, vib.mOpPkg);
             startVibrationInnerLocked(fallbackVib);
         }
         return 0;
+    }
+
+    private VibrationEffect getFallbackEffect(int effectId) {
+        if (effectId < 0 || effectId >= mFallbackEffects.length) {
+            return null;
+        }
+        return mFallbackEffects[effectId];
     }
 
     private void noteVibratorOnLocked(int uid, long millis) {
