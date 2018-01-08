@@ -27,6 +27,7 @@ import android.content.Context;
 import android.media.MediaPlayer;
 import android.os.RemoteException;
 import android.os.ServiceManager;
+import android.util.DataUnit;
 
 import com.android.server.NetworkManagementSocketTagger;
 
@@ -56,15 +57,20 @@ public class TrafficStats {
      */
     public final static int UNSUPPORTED = -1;
 
-    /** @hide */
+    /** @hide @deprecated use {@link DataUnit} instead to clarify SI-vs-IEC */
+    @Deprecated
     public static final long KB_IN_BYTES = 1024;
-    /** @hide */
+    /** @hide @deprecated use {@link DataUnit} instead to clarify SI-vs-IEC */
+    @Deprecated
     public static final long MB_IN_BYTES = KB_IN_BYTES * 1024;
-    /** @hide */
+    /** @hide @deprecated use {@link DataUnit} instead to clarify SI-vs-IEC */
+    @Deprecated
     public static final long GB_IN_BYTES = MB_IN_BYTES * 1024;
-    /** @hide */
+    /** @hide @deprecated use {@link DataUnit} instead to clarify SI-vs-IEC */
+    @Deprecated
     public static final long TB_IN_BYTES = GB_IN_BYTES * 1024;
-    /** @hide */
+    /** @hide @deprecated use {@link DataUnit} instead to clarify SI-vs-IEC */
+    @Deprecated
     public static final long PB_IN_BYTES = TB_IN_BYTES * 1024;
 
     /**
