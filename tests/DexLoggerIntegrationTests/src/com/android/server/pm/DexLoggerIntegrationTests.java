@@ -57,11 +57,11 @@ import java.util.List;
 @RunWith(JUnit4.class)
 public final class DexLoggerIntegrationTests {
 
-    private static final String TAG = DexLoggerIntegrationTests.class.getSimpleName();
-
     private static final String PACKAGE_NAME = "com.android.frameworks.dexloggertest";
 
+    // Event log tag used for SNET related events
     private static final int SNET_TAG = 0x534e4554;
+    // Subtag used to distinguish dynamic code loading events
     private static final String DCL_SUBTAG = "dcl";
 
     // Obtained via "echo -n copied.jar | sha256sum"
@@ -77,7 +77,8 @@ public final class DexLoggerIntegrationTests {
 
         // Copy the jar from our Java resources to a private data directory
         File privateCopy = new File(context.getDir("jars", Context.MODE_PRIVATE), "copied.jar");
-        try (InputStream input = DexLoggerIntegrationTests.class.getResourceAsStream("/javalib.jar");
+        Class<?> thisClass = DexLoggerIntegrationTests.class;
+        try (InputStream input = thisClass.getResourceAsStream("/javalib.jar");
                 OutputStream output = new FileOutputStream(privateCopy)) {
             byte[] buffer = new byte[1024];
             while (true) {
@@ -112,7 +113,8 @@ public final class DexLoggerIntegrationTests {
 
         // There may already be events in the event log - figure out the most recent one
         EventLog.readEvents(tagList, events);
-        long previousEventNanos = events.isEmpty() ? 0 : events.get(events.size() - 1).getTimeNanos();
+        long previousEventNanos =
+                events.isEmpty() ? 0 : events.get(events.size() - 1).getTimeNanos();
         events.clear();
 
         Process process = Runtime.getRuntime().exec(
