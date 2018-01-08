@@ -19,6 +19,6 @@
 <resources>
     <!-- A list of apps to be retained in the managed profile by a particular vendor.
             Takes precedence over the disallowed apps lists. -->
-    <string-array name="vendor_required_apps_managed_profile">
+    <string-array translatable="false" name="vendor_required_apps_managed_profile">
     </string-array>
 </resources>

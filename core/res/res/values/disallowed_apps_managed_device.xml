@@ -18,6 +18,6 @@
 -->
 <resources>
     <!-- A list of apps to be removed from the managed device. -->
-    <string-array name="disallowed_apps_managed_device">
+    <string-array translatable="false" name="disallowed_apps_managed_device">
     </string-array>
 </resources>

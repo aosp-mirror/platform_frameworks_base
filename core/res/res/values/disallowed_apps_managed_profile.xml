@@ -18,6 +18,6 @@
 -->
 <resources>
     <!-- A list of apps to be removed from the managed profile. -->
-    <string-array name="disallowed_apps_managed_profile">
+    <string-array translatable="false" name="disallowed_apps_managed_profile">
     </string-array>
 </resources>
