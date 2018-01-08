@@ -2245,8 +2245,9 @@ public class PackageParser {
                         return null;
                     }
 
+                    boolean defaultToCurrentDevBranch = (flags & PARSE_FORCE_SDK) != 0;
                     final int targetSdkVersion = PackageParser.computeTargetSdkVersion(targetVers,
-                            targetCode, SDK_VERSION, SDK_CODENAMES, outError);
+                            targetCode, SDK_CODENAMES, outError, defaultToCurrentDevBranch);
                     if (targetSdkVersion < 0) {
                         mParseError = PackageManager.INSTALL_FAILED_OLDER_SDK;
                         return null;
@@ -2562,19 +2563,19 @@ public class PackageParser {
      *                   application manifest, or 0 otherwise
      * @param targetCode targetSdkVersion code, if specified in the application
      *                   manifest, or {@code null} otherwise
-     * @param platformSdkVersion platform SDK version number, typically
-     *                           Build.VERSION.SDK_INT
      * @param platformSdkCodenames array of allowed pre-release SDK codenames
      *                             for this platform
      * @param outError output array to populate with error, if applicable
+     * @param forceCurrentDev if development target code is not available, use the current
+     *                        development version by default.
      * @return the targetSdkVersion to use at runtime, or -1 if the package is
      *         not compatible with this platform
      * @hide Exposed for unit testing only.
      */
     @TestApi
     public static int computeTargetSdkVersion(@IntRange(from = 0) int targetVers,
-            @Nullable String targetCode, @IntRange(from = 1) int platformSdkVersion,
-            @NonNull String[] platformSdkCodenames, @NonNull String[] outError) {
+            @Nullable String targetCode, @NonNull String[] platformSdkCodenames,
+            @NonNull String[] outError, boolean forceCurrentDev) {
         // If it's a release SDK, return the version number unmodified.
         if (targetCode == null) {
             return targetVers;
@@ -2582,7 +2583,7 @@ public class PackageParser {
 
         // If it's a pre-release SDK and the codename matches this platform, it
         // definitely targets this SDK.
-        if (ArrayUtils.contains(platformSdkCodenames, targetCode)) {
+        if (ArrayUtils.contains(platformSdkCodenames, targetCode) || forceCurrentDev) {
             return Build.VERSION_CODES.CUR_DEVELOPMENT;
         }
 
