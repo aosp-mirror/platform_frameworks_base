@@ -146,6 +146,7 @@ public class OverviewProxyService implements CallbackController<OverviewProxyLis
         filter.addDataScheme("package");
         filter.addDataSchemeSpecificPart(mLauncherComponentName.getPackageName(),
                 PatternMatcher.PATTERN_LITERAL);
+        filter.addAction(Intent.ACTION_PACKAGE_CHANGED);
         mContext.registerReceiver(mLauncherAddedReceiver, filter);
     }
 
