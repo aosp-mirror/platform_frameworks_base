@@ -488,8 +488,6 @@
     <string name="bluetooth_show_devices_without_names">Show Bluetooth devices without names</string>
     <!-- Setting Checkbox title for disabling Bluetooth absolute volume -->
     <string name="bluetooth_disable_absolute_volume">Disable absolute volume</string>
-    <!-- Setting Checkbox title for enabling Bluetooth inband ringing -->
-    <string name="bluetooth_enable_inband_ringing">Enable in-band ringing</string>
 
     <!-- UI debug setting: Select Bluetooth AVRCP Version -->
     <string name="bluetooth_select_avrcp_version_string">Bluetooth AVRCP Version</string>
@@ -582,8 +580,6 @@
     <string name="bluetooth_show_devices_without_names_summary">Bluetooth devices without names (MAC addresses only) will be displayed</string>
     <!-- Summary of checkbox for disabling Bluetooth absolute volume -->
     <string name="bluetooth_disable_absolute_volume_summary">Disables the Bluetooth absolute volume feature in case of volume issues with remote devices such as unacceptably loud volume or lack of control.</string>
-    <!-- Summary of checkbox for enabling Bluetooth inband ringing -->
-    <string name="bluetooth_enable_inband_ringing_summary">Allow ringtones on the phone to be played on Bluetooth headsets</string>
 
     <!-- Title of checkbox setting that enables the terminal app. [CHAR LIMIT=32] -->
     <string name="enable_terminal_title">Local terminal</string>
