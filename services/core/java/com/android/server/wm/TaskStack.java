@@ -714,10 +714,11 @@ public class TaskStack extends WindowContainer<Task> implements
     @Override
     public void onConfigurationChanged(Configuration newParentConfig) {
         final int prevWindowingMode = getWindowingMode();
+        super.onConfigurationChanged(newParentConfig);
+
         // Only need to update surface size here since the super method will handle updating
         // surface position.
         updateSurfaceSize(getPendingTransaction());
-        super.onConfigurationChanged(newParentConfig);
         final int windowingMode = getWindowingMode();
 
         if (mDisplayContent == null || prevWindowingMode == windowingMode) {
