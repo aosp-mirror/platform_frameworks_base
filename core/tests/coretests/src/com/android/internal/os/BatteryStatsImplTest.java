@@ -71,7 +71,7 @@ public class BatteryStatsImplTest {
     @Test
     public void testUpdateProcStateCpuTimes() {
         mBatteryStatsImpl.setOnBatteryInternal(true);
-        mBatteryStatsImpl.updateTimeBasesLocked(true, Display.STATE_ON, 0, 0);
+        mBatteryStatsImpl.updateTimeBasesLocked(false, Display.STATE_ON, 0, 0);
 
         final int[] testUids = {10032, 10048, 10145, 10139};
         final int[] testProcStates = {
@@ -98,7 +98,7 @@ public class BatteryStatsImplTest {
             }
         }
 
-        mBatteryStatsImpl.updateProcStateCpuTimes();
+        mBatteryStatsImpl.updateProcStateCpuTimes(true, false);
 
         verifyNoPendingUids();
         for (int i = 0; i < testUids.length; ++i) {
@@ -125,7 +125,7 @@ public class BatteryStatsImplTest {
         }
         addPendingUids(testUids, testProcStates);
 
-        mBatteryStatsImpl.updateProcStateCpuTimes();
+        mBatteryStatsImpl.updateProcStateCpuTimes(true, false);
 
         verifyNoPendingUids();
         for (int i = 0; i < testUids.length; ++i) {
@@ -157,7 +157,7 @@ public class BatteryStatsImplTest {
         }
         addPendingUids(testUids, testProcStates);
 
-        mBatteryStatsImpl.updateProcStateCpuTimes();
+        mBatteryStatsImpl.updateProcStateCpuTimes(true, true);
 
         verifyNoPendingUids();
         for (int i = 0; i < testUids.length; ++i) {
@@ -196,7 +196,7 @@ public class BatteryStatsImplTest {
         final long[] isolatedUidCpuTimes = {495784, 398473, 4895, 4905, 30984093};
         when(mKernelSingleUidTimeReader.readDeltaMs(childUid)).thenReturn(isolatedUidCpuTimes);
 
-        mBatteryStatsImpl.updateProcStateCpuTimes();
+        mBatteryStatsImpl.updateProcStateCpuTimes(true, true);
 
         verifyNoPendingUids();
         for (int i = 0; i < testUids.length; ++i) {
@@ -227,8 +227,8 @@ public class BatteryStatsImplTest {
 
     @Test
     public void testCopyFromAllUidsCpuTimes() {
-        mBatteryStatsImpl.setOnBatteryInternal(true);
-        mBatteryStatsImpl.updateTimeBasesLocked(true, Display.STATE_ON, 0, 0);
+        mBatteryStatsImpl.setOnBatteryInternal(false);
+        mBatteryStatsImpl.updateTimeBasesLocked(false, Display.STATE_ON, 0, 0);
 
         final int[] testUids = {10032, 10048, 10145, 10139};
         final int[] testProcStates = {
@@ -264,7 +264,7 @@ public class BatteryStatsImplTest {
                     .thenReturn(expectedCpuTimes[i]);
         }
 
-        mBatteryStatsImpl.copyFromAllUidsCpuTimes();
+        mBatteryStatsImpl.copyFromAllUidsCpuTimes(true, false);
 
         verifyNoPendingUids();
         for (int i = 0; i < testUids.length; ++i) {

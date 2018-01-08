@@ -124,7 +124,7 @@ public class BatteryStatsImpl extends BatteryStats {
     private static final int MAGIC = 0xBA757475; // 'BATSTATS'
 
     // Current on-disk Parcel version
-    private static final int VERSION = 172 + (USE_OLD_HISTORY ? 1000 : 0);
+    private static final int VERSION = 173 + (USE_OLD_HISTORY ? 1000 : 0);
 
     // Maximum number of items we will record in the history.
     private static final int MAX_HISTORY_ITEMS;
@@ -289,7 +289,7 @@ public class BatteryStatsImpl extends BatteryStats {
     /**
      * Update per-freq cpu times for all the uids in {@link #mPendingUids}.
      */
-    public void updateProcStateCpuTimes() {
+    public void updateProcStateCpuTimes(boolean onBattery, boolean onBatteryScreenOff) {
         final SparseIntArray uidStates;
         synchronized (BatteryStatsImpl.this) {
             if(!initKernelSingleUidTimeReaderLocked()) {
@@ -307,7 +307,6 @@ public class BatteryStatsImpl extends BatteryStats {
             final int procState = uidStates.valueAt(i);
             final int[] isolatedUids;
             final Uid u;
-            final boolean onBattery;
             synchronized (BatteryStatsImpl.this) {
                 // It's possible that uid no longer exists and any internal references have
                 // already been deleted, so using {@link #getAvailableUidStatsLocked} to avoid
@@ -324,7 +323,6 @@ public class BatteryStatsImpl extends BatteryStats {
                         isolatedUids[j] = u.mChildUids.get(j);
                     }
                 }
-                onBattery = mOnBatteryInternal;
             }
             long[] cpuTimesMs = mKernelSingleUidTimeReader.readDeltaMs(uid);
             if (isolatedUids != null) {
@@ -335,10 +333,17 @@ public class BatteryStatsImpl extends BatteryStats {
             }
             if (onBattery && cpuTimesMs != null) {
                 synchronized (BatteryStatsImpl.this) {
-                    u.addProcStateTimesMs(procState, cpuTimesMs);
-                    u.addProcStateScreenOffTimesMs(procState, cpuTimesMs);
+                    u.addProcStateTimesMs(procState, cpuTimesMs, onBattery);
+                    u.addProcStateScreenOffTimesMs(procState, cpuTimesMs, onBatteryScreenOff);
                 }
             }
+        }
+    }
+
+    public void copyFromAllUidsCpuTimes() {
+        synchronized (BatteryStatsImpl.this) {
+            copyFromAllUidsCpuTimes(
+                    mOnBatteryTimeBase.isRunning(), mOnBatteryScreenOffTimeBase.isRunning());
         }
     }
 
@@ -348,7 +353,7 @@ public class BatteryStatsImpl extends BatteryStats {
      * already read this data for updating per-freq cpu times, we can use the same data for
      * per-procstate cpu times.
      */
-    public void copyFromAllUidsCpuTimes() {
+    public void copyFromAllUidsCpuTimes(boolean onBattery, boolean onBatteryScreenOff) {
         synchronized (BatteryStatsImpl.this) {
             if(!initKernelSingleUidTimeReaderLocked()) {
                 return;
@@ -368,7 +373,7 @@ public class BatteryStatsImpl extends BatteryStats {
                 }
                 final long[] deltaTimesMs = mKernelSingleUidTimeReader.computeDelta(
                         uid, cpuTimesMs.clone());
-                if (mOnBatteryInternal && deltaTimesMs != null) {
+                if (onBattery && deltaTimesMs != null) {
                     final int procState;
                     final int idx = mPendingUids.indexOfKey(uid);
                     if (idx >= 0) {
@@ -378,8 +383,8 @@ public class BatteryStatsImpl extends BatteryStats {
                         procState = u.mProcessState;
                     }
                     if (procState >= 0 && procState < Uid.NUM_PROCESS_STATE) {
-                        u.addProcStateTimesMs(procState, deltaTimesMs);
-                        u.addProcStateScreenOffTimesMs(procState, deltaTimesMs);
+                        u.addProcStateTimesMs(procState, deltaTimesMs, onBattery);
+                        u.addProcStateScreenOffTimesMs(procState, deltaTimesMs, onBatteryScreenOff);
                     }
                 }
             }
@@ -443,8 +448,8 @@ public class BatteryStatsImpl extends BatteryStats {
 
         Future<?> scheduleSync(String reason, int flags);
         Future<?> scheduleCpuSyncDueToRemovedUid(int uid);
-        Future<?> scheduleReadProcStateCpuTimes();
-        Future<?> scheduleCopyFromAllUidsCpuTimes();
+        Future<?> scheduleReadProcStateCpuTimes(boolean onBattery, boolean onBatteryScreenOff);
+        Future<?> scheduleCopyFromAllUidsCpuTimes(boolean onBattery, boolean onBatteryScreenOff);
     }
 
     public Handler mHandler;
@@ -1231,12 +1236,10 @@ public class BatteryStatsImpl extends BatteryStats {
         public long[] mCounts;
         public long[] mLoadedCounts;
         public long[] mUnpluggedCounts;
-        public long[] mPluggedCounts;
 
         private LongSamplingCounterArray(TimeBase timeBase, Parcel in) {
             mTimeBase = timeBase;
-            mPluggedCounts = in.createLongArray();
-            mCounts = copyArray(mPluggedCounts, mCounts);
+            mCounts = in.createLongArray();
             mLoadedCounts = in.createLongArray();
             mUnpluggedCounts = in.createLongArray();
             timeBase.add(this);
@@ -1255,17 +1258,16 @@ public class BatteryStatsImpl extends BatteryStats {
 
         @Override
         public void onTimeStarted(long elapsedRealTime, long baseUptime, long baseRealtime) {
-            mUnpluggedCounts = copyArray(mPluggedCounts, mUnpluggedCounts);
+            mUnpluggedCounts = copyArray(mCounts, mUnpluggedCounts);
         }
 
         @Override
         public void onTimeStopped(long elapsedRealtime, long baseUptime, long baseRealtime) {
-            mPluggedCounts = copyArray(mCounts, mPluggedCounts);
         }
 
         @Override
         public long[] getCountsLocked(int which) {
-            long[] val = copyArray(mTimeBase.isRunning() ? mCounts : mPluggedCounts, null);
+            long[] val = copyArray(mCounts, null);
             if (which == STATS_SINCE_UNPLUGGED) {
                 subtract(val, mUnpluggedCounts);
             } else if (which != STATS_SINCE_CHARGED) {
@@ -1278,15 +1280,18 @@ public class BatteryStatsImpl extends BatteryStats {
         public void logState(Printer pw, String prefix) {
             pw.println(prefix + "mCounts=" + Arrays.toString(mCounts)
                     + " mLoadedCounts=" + Arrays.toString(mLoadedCounts)
-                    + " mUnpluggedCounts=" + Arrays.toString(mUnpluggedCounts)
-                    + " mPluggedCounts=" + Arrays.toString(mPluggedCounts));
+                    + " mUnpluggedCounts=" + Arrays.toString(mUnpluggedCounts));
         }
 
         public void addCountLocked(long[] counts) {
+            addCountLocked(counts, mTimeBase.isRunning());
+        }
+
+        public void addCountLocked(long[] counts, boolean isRunning) {
             if (counts == null) {
                 return;
             }
-            if (mTimeBase.isRunning()) {
+            if (isRunning) {
                 if (mCounts == null) {
                     mCounts = new long[counts.length];
                 }
@@ -1306,7 +1311,6 @@ public class BatteryStatsImpl extends BatteryStats {
         public void reset(boolean detachIfReset) {
             fillArray(mCounts, 0);
             fillArray(mLoadedCounts, 0);
-            fillArray(mPluggedCounts, 0);
             fillArray(mUnpluggedCounts, 0);
             if (detachIfReset) {
                 detach();
@@ -1325,7 +1329,6 @@ public class BatteryStatsImpl extends BatteryStats {
             mCounts = in.createLongArray();
             mLoadedCounts = copyArray(mCounts, mLoadedCounts);
             mUnpluggedCounts = copyArray(mCounts, mUnpluggedCounts);
-            mPluggedCounts = copyArray(mCounts, mPluggedCounts);
         }
 
         public static void writeToParcel(Parcel out, LongSamplingCounterArray counterArray) {
@@ -3783,7 +3786,8 @@ public class BatteryStatsImpl extends BatteryStats {
                         + " and battery is " + (unplugged ? "on" : "off"));
             }
             updateCpuTimeLocked();
-            mExternalSync.scheduleCopyFromAllUidsCpuTimes();
+            mExternalSync.scheduleCopyFromAllUidsCpuTimes(mOnBatteryTimeBase.isRunning(),
+                    mOnBatteryScreenOffTimeBase.isRunning());
 
             mOnBatteryTimeBase.setRunning(unplugged, uptime, realtime);
             if (updateOnBatteryTimeBase) {
@@ -6648,7 +6652,7 @@ public class BatteryStatsImpl extends BatteryStats {
             return null;
         }
 
-        private void addProcStateTimesMs(int procState, long[] cpuTimesMs) {
+        private void addProcStateTimesMs(int procState, long[] cpuTimesMs, boolean onBattery) {
             if (mProcStateTimeMs == null) {
                 mProcStateTimeMs = new LongSamplingCounterArray[NUM_PROCESS_STATE];
             }
@@ -6657,10 +6661,11 @@ public class BatteryStatsImpl extends BatteryStats {
                 mProcStateTimeMs[procState] = new LongSamplingCounterArray(
                         mBsi.mOnBatteryTimeBase);
             }
-            mProcStateTimeMs[procState].addCountLocked(cpuTimesMs);
+            mProcStateTimeMs[procState].addCountLocked(cpuTimesMs, onBattery);
         }
 
-        private void addProcStateScreenOffTimesMs(int procState, long[] cpuTimesMs) {
+        private void addProcStateScreenOffTimesMs(int procState, long[] cpuTimesMs,
+                boolean onBatteryScreenOff) {
             if (mProcStateScreenOffTimeMs == null) {
                 mProcStateScreenOffTimeMs = new LongSamplingCounterArray[NUM_PROCESS_STATE];
             }
@@ -6669,7 +6674,7 @@ public class BatteryStatsImpl extends BatteryStats {
                 mProcStateScreenOffTimeMs[procState] = new LongSamplingCounterArray(
                         mBsi.mOnBatteryScreenOffTimeBase);
             }
-            mProcStateScreenOffTimeMs[procState].addCountLocked(cpuTimesMs);
+            mProcStateScreenOffTimeMs[procState].addCountLocked(cpuTimesMs, onBatteryScreenOff);
         }
 
         @Override
@@ -9408,7 +9413,9 @@ public class BatteryStatsImpl extends BatteryStats {
 
                     if (mBsi.mPerProcStateCpuTimesAvailable) {
                         if (mBsi.mPendingUids.size() == 0) {
-                            mBsi.mExternalSync.scheduleReadProcStateCpuTimes();
+                            mBsi.mExternalSync.scheduleReadProcStateCpuTimes(
+                                    mBsi.mOnBatteryTimeBase.isRunning(),
+                                    mBsi.mOnBatteryScreenOffTimeBase.isRunning());
                         }
                         if (mBsi.mPendingUids.indexOfKey(mUid) < 0
                                 || ArrayUtils.contains(CRITICAL_PROC_STATES, mProcessState)) {
