@@ -34,7 +34,6 @@ import java.io.File;
 import java.lang.reflect.Array;
 import java.lang.reflect.Field;
 import java.nio.charset.StandardCharsets;
-import java.security.cert.Certificate;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashSet;
@@ -262,14 +261,13 @@ public class PackageParserTest {
         assertBundleApproximateEquals(a.mAppMetaData, b.mAppMetaData);
         assertEquals(a.mVersionName, b.mVersionName);
         assertEquals(a.mSharedUserId, b.mSharedUserId);
-        assertTrue(Arrays.equals(a.mSignatures, b.mSignatures));
-        assertTrue(Arrays.equals(a.mCertificates, b.mCertificates));
+        assertTrue(Arrays.equals(a.mSigningDetails.signatures, b.mSigningDetails.signatures));
         assertTrue(Arrays.equals(a.mLastPackageUsageTimeInMills, b.mLastPackageUsageTimeInMills));
         assertEquals(a.mExtras, b.mExtras);
         assertEquals(a.mRestrictedAccountType, b.mRestrictedAccountType);
         assertEquals(a.mRequiredAccountType, b.mRequiredAccountType);
         assertEquals(a.mOverlayTarget, b.mOverlayTarget);
-        assertEquals(a.mSigningKeys, b.mSigningKeys);
+        assertEquals(a.mSigningDetails.publicKeys, b.mSigningDetails.publicKeys);
         assertEquals(a.mUpgradeKeySets, b.mUpgradeKeySets);
         assertEquals(a.mKeySetMapping, b.mKeySetMapping);
         assertEquals(a.cpuAbiOverride, b.cpuAbiOverride);
@@ -495,14 +493,16 @@ public class PackageParserTest {
         pkg.mAppMetaData = new Bundle();
         pkg.mVersionName = "foo17";
         pkg.mSharedUserId = "foo18";
-        pkg.mSignatures = new Signature[] { new Signature(new byte[16]) };
-        pkg.mCertificates = new Certificate[][] { new Certificate[] { null }};
+        pkg.mSigningDetails =
+                new PackageParser.SigningDetails(
+                        new Signature[] { new Signature(new byte[16]) },
+                        2,
+                        new ArraySet<>());
         pkg.mExtras = new Bundle();
         pkg.mRestrictedAccountType = "foo19";
         pkg.mRequiredAccountType = "foo20";
         pkg.mOverlayTarget = "foo21";
         pkg.mOverlayPriority = 100;
-        pkg.mSigningKeys = new ArraySet<>();
         pkg.mUpgradeKeySets = new ArraySet<>();
         pkg.mKeySetMapping = new ArrayMap<>();
         pkg.cpuAbiOverride = "foo22";
