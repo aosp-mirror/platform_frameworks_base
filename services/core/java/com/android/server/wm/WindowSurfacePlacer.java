@@ -349,21 +349,28 @@ class WindowSurfacePlacer {
             animLp = null;
         }
 
-        processApplicationsAnimatingInPlace(transit);
+        final int layoutRedo;
+        mService.mSurfaceAnimationRunner.deferStartingAnimations();
+        try {
+            processApplicationsAnimatingInPlace(transit);
 
-        mTmpLayerAndToken.token = null;
-        handleClosingApps(transit, animLp, voiceInteraction, mTmpLayerAndToken);
-        final AppWindowToken topClosingApp = mTmpLayerAndToken.token;
-        final AppWindowToken topOpeningApp = handleOpeningApps(transit, animLp, voiceInteraction);
+            mTmpLayerAndToken.token = null;
+            handleClosingApps(transit, animLp, voiceInteraction, mTmpLayerAndToken);
+            final AppWindowToken topClosingApp = mTmpLayerAndToken.token;
+            final AppWindowToken topOpeningApp = handleOpeningApps(transit, animLp,
+                    voiceInteraction);
 
-        mService.mAppTransition.setLastAppTransition(transit, topOpeningApp, topClosingApp);
+            mService.mAppTransition.setLastAppTransition(transit, topOpeningApp, topClosingApp);
 
-        final int flags = mService.mAppTransition.getTransitFlags();
-        int layoutRedo = mService.mAppTransition.goodToGo(transit, topOpeningApp,
-                topClosingApp, mService.mOpeningApps, mService.mClosingApps);
-        handleNonAppWindowsInTransition(transit, flags);
-        mService.mAppTransition.postAnimationCallback();
-        mService.mAppTransition.clear();
+            final int flags = mService.mAppTransition.getTransitFlags();
+            layoutRedo = mService.mAppTransition.goodToGo(transit, topOpeningApp,
+                    topClosingApp, mService.mOpeningApps, mService.mClosingApps);
+            handleNonAppWindowsInTransition(transit, flags);
+            mService.mAppTransition.postAnimationCallback();
+            mService.mAppTransition.clear();
+        } finally {
+            mService.mSurfaceAnimationRunner.continueStartingAnimations();
+        }
 
         mService.mTaskSnapshotController.onTransitionStarting();
 
