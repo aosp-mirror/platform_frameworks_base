@@ -112,17 +112,6 @@ update-android-test-base-api: $(ANDROID_TEST_BASE_OUTPUT_API_FILE) | $(ACP)
 
 endif  # not TARGET_BUILD_APPS not TARGET_BUILD_PDK=true
 
-# Build the legacy.test.stubs library
-# ===================================
-include $(CLEAR_VARS)
-
-LOCAL_MODULE := legacy.test.stubs
-LOCAL_SDK_VERSION := current
-
-LOCAL_STATIC_JAVA_LIBRARIES := android.test.base.stubs
-
-include $(BUILD_STATIC_JAVA_LIBRARY)
-
 ifeq ($(HOST_OS),linux)
 # Build the legacy-performance-test-hostdex library
 # =================================================
