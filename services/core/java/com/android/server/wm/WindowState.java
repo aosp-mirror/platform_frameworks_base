@@ -4580,7 +4580,8 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
         private MoveAnimationSpec(int fromX, int fromY, int toX, int toY) {
             final Animation anim = AnimationUtils.loadAnimation(mContext,
                     com.android.internal.R.anim.window_move_from_decor);
-            mDuration = anim.computeDurationHint();
+            mDuration = (long)
+                    (anim.computeDurationHint() * mService.getWindowAnimationScaleLocked());
             mInterpolator = anim.getInterpolator();
             mFrom.set(fromX, fromY);
             mTo.set(toX, toY);
