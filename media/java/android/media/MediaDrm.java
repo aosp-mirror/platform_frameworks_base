@@ -1562,10 +1562,19 @@ public final class MediaDrm implements AutoCloseable {
         private MetricsConstants() {}
 
         /**
-         * This is a placeholder metric. More metrics will be added.
-         * <P>
-         * TODO: Add the full set of metrics constants.
+         * Key to extract the number of successful {@link #openSession} calls
+         * from the {@link PersistableBundle} returned by a
+         * {@link #getMetrics} call.
          */
-        public static final String TEMPORARY = "/drm/mediadrm/dummymetric";
+        public static final String OPEN_SESSION_OK_COUNT
+            = "/drm/mediadrm/open_session/ok/count";
+
+        /**
+         * Key to extract the number of failed {@link #openSession} calls
+         * from the {@link PersistableBundle} returned by a
+         * {@link #getMetrics} call.
+         */
+        public static final String OPEN_SESSION_ERROR_COUNT
+            = "/drm/mediadrm/open_session/error/count";
     }
 }
