@@ -548,7 +548,8 @@ public class SubscriptionManager {
      */
     @Deprecated
     public static SubscriptionManager from(Context context) {
-        return context.getSystemService(SubscriptionManager.class);
+        return (SubscriptionManager) context
+                .getSystemService(Context.TELEPHONY_SUBSCRIPTION_SERVICE);
     }
 
     /**
