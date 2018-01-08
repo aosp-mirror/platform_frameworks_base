@@ -269,6 +269,15 @@ public class Process {
     public static final int THREAD_PRIORITY_URGENT_DISPLAY = -8;
 
     /**
+     * Standard priority of video threads.  Applications can not normally
+     * change to this priority.
+     * Use with {@link #setThreadPriority(int)} and
+     * {@link #setThreadPriority(int, int)}, <b>not</b> with the normal
+     * {@link java.lang.Thread} class.
+     */
+    public static final int THREAD_PRIORITY_VIDEO = -10;
+
+    /**
      * Standard priority of audio threads.  Applications can not normally
      * change to this priority.
      * Use with {@link #setThreadPriority(int)} and
