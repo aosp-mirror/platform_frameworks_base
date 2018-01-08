@@ -1753,9 +1753,6 @@
     <string-array name="config_twoDigitNumberPattern" translatable="false">
     </string-array>
 
-    <!-- The VoiceMail default value is displayed to my own number if it is true -->
-    <bool name="config_telephony_use_own_number_for_voicemail">false</bool>
-
     <!-- If this value is true, Sms encoded as octet is decoded by utf8 decoder.
          If false, decoded by Latin decoder. -->
     <bool name="config_sms_utf8_support">false</bool>
