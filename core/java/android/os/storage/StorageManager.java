@@ -16,9 +16,6 @@
 
 package android.os.storage;
 
-import static android.net.TrafficStats.GB_IN_BYTES;
-import static android.net.TrafficStats.MB_IN_BYTES;
-
 import android.annotation.BytesLong;
 import android.annotation.IntDef;
 import android.annotation.NonNull;
@@ -59,6 +56,7 @@ import android.system.ErrnoException;
 import android.system.Os;
 import android.system.OsConstants;
 import android.text.TextUtils;
+import android.util.DataUnit;
 import android.util.Log;
 import android.util.Pair;
 import android.util.Slog;
@@ -1197,12 +1195,12 @@ public class StorageManager {
     }
 
     private static final int DEFAULT_THRESHOLD_PERCENTAGE = 5;
-    private static final long DEFAULT_THRESHOLD_MAX_BYTES = 500 * MB_IN_BYTES;
+    private static final long DEFAULT_THRESHOLD_MAX_BYTES = DataUnit.MEBIBYTES.toBytes(500);
 
     private static final int DEFAULT_CACHE_PERCENTAGE = 10;
-    private static final long DEFAULT_CACHE_MAX_BYTES = 5 * GB_IN_BYTES;
+    private static final long DEFAULT_CACHE_MAX_BYTES = DataUnit.GIBIBYTES.toBytes(5);
 
-    private static final long DEFAULT_FULL_THRESHOLD_BYTES = MB_IN_BYTES;
+    private static final long DEFAULT_FULL_THRESHOLD_BYTES = DataUnit.MEBIBYTES.toBytes(1);
 
     /**
      * Return the number of available bytes until the given path is considered

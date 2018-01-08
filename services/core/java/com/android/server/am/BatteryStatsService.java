@@ -514,6 +514,7 @@ public final class BatteryStatsService extends IBatteryStats.Stub
         }
     }
 
+    @Override
     public void noteLongPartialWakelockStart(String name, String historyName, int uid) {
         enforceCallingPermission();
         synchronized (mStats) {
@@ -521,10 +522,29 @@ public final class BatteryStatsService extends IBatteryStats.Stub
         }
     }
 
+    @Override
+    public void noteLongPartialWakelockStartFromSource(String name, String historyName,
+            WorkSource workSource) {
+        enforceCallingPermission();
+        synchronized (mStats) {
+            mStats.noteLongPartialWakelockStartFromSource(name, historyName, workSource);
+        }
+    }
+
+    @Override
     public void noteLongPartialWakelockFinish(String name, String historyName, int uid) {
         enforceCallingPermission();
         synchronized (mStats) {
             mStats.noteLongPartialWakelockFinish(name, historyName, uid);
+        }
+    }
+
+    @Override
+    public void noteLongPartialWakelockFinishFromSource(String name, String historyName,
+            WorkSource workSource) {
+        enforceCallingPermission();
+        synchronized (mStats) {
+            mStats.noteLongPartialWakelockFinishFromSource(name, historyName, workSource);
         }
     }
 
