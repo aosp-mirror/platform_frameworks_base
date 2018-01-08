@@ -347,6 +347,9 @@ public final class IpSecTransform implements AutoCloseable {
          */
         public IpSecTransform.Builder setSpi(
                 @TransformDirection int direction, IpSecManager.SecurityParameterIndex spi) {
+            if (spi.getResourceId() == INVALID_RESOURCE_ID) {
+                throw new IllegalArgumentException("Invalid SecurityParameterIndex");
+            }
             mConfig.setSpiResourceId(direction, spi.getResourceId());
             return this;
         }
@@ -381,6 +384,9 @@ public final class IpSecTransform implements AutoCloseable {
         public IpSecTransform.Builder setIpv4Encapsulation(
                 IpSecManager.UdpEncapsulationSocket localSocket, int remotePort) {
             mConfig.setEncapType(ENCAP_ESPINUDP);
+            if (localSocket.getResourceId() == INVALID_RESOURCE_ID) {
+                throw new IllegalArgumentException("Invalid UdpEncapsulationSocket");
+            }
             mConfig.setEncapSocketResourceId(localSocket.getResourceId());
             mConfig.setEncapRemotePort(remotePort);
             return this;
@@ -426,6 +432,9 @@ public final class IpSecTransform implements AutoCloseable {
         public IpSecTransform buildTransportModeTransform(InetAddress remoteAddress)
                 throws IpSecManager.ResourceUnavailableException,
                         IpSecManager.SpiUnavailableException, IOException {
+            if (remoteAddress == null) {
+                throw new IllegalArgumentException("Remote address may not be null or empty!");
+            }
             mConfig.setMode(MODE_TRANSPORT);
             mConfig.setRemoteAddress(remoteAddress.getHostAddress());
             // FIXME: modifying a builder after calling build can change the built transform.
@@ -447,8 +456,12 @@ public final class IpSecTransform implements AutoCloseable {
          */
         public IpSecTransform buildTunnelModeTransform(
                 InetAddress localAddress, InetAddress remoteAddress) {
-            // FIXME: argument validation here
-            // throw new IllegalArgumentException("Natt Keepalive requires UDP Encapsulation");
+            if (localAddress == null) {
+                throw new IllegalArgumentException("Local address may not be null or empty!");
+            }
+            if (remoteAddress == null) {
+                throw new IllegalArgumentException("Remote address may not be null or empty!");
+            }
             mConfig.setLocalAddress(localAddress.getHostAddress());
             mConfig.setRemoteAddress(remoteAddress.getHostAddress());
             mConfig.setMode(MODE_TUNNEL);

@@ -69,7 +69,7 @@ public final class IpSecManager {
     }
 
     /** @hide */
-    public static final int INVALID_RESOURCE_ID = 0;
+    public static final int INVALID_RESOURCE_ID = -1;
 
     /**
      * Thrown to indicate that a requested SPI is in use.
@@ -128,7 +128,7 @@ public final class IpSecManager {
         private final InetAddress mRemoteAddress;
         private final CloseGuard mCloseGuard = CloseGuard.get();
         private int mSpi = INVALID_SECURITY_PARAMETER_INDEX;
-        private int mResourceId;
+        private int mResourceId = INVALID_RESOURCE_ID;
 
         /** Get the underlying SPI held by this object. */
         public int getSpi() {
@@ -146,6 +146,7 @@ public final class IpSecManager {
         public void close() {
             try {
                 mService.releaseSecurityParameterIndex(mResourceId);
+                mResourceId = INVALID_RESOURCE_ID;
             } catch (RemoteException e) {
                 throw e.rethrowFromSystemServer();
             }
@@ -501,7 +502,7 @@ public final class IpSecManager {
     public static final class UdpEncapsulationSocket implements AutoCloseable {
         private final ParcelFileDescriptor mPfd;
         private final IIpSecService mService;
-        private final int mResourceId;
+        private int mResourceId = INVALID_RESOURCE_ID;
         private final int mPort;
         private final CloseGuard mCloseGuard = CloseGuard.get();
 
@@ -554,6 +555,7 @@ public final class IpSecManager {
         public void close() throws IOException {
             try {
                 mService.closeUdpEncapsulationSocket(mResourceId);
+                mResourceId = INVALID_RESOURCE_ID;
             } catch (RemoteException e) {
                 throw e.rethrowFromSystemServer();
             }
