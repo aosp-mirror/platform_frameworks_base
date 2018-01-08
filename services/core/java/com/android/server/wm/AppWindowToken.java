@@ -649,8 +649,7 @@ class AppWindowToken extends WindowToken implements WindowManagerService.AppFree
         boolean destroyedSomething = false;
 
         // Copying to a different list as multiple children can be removed.
-        // TODO: Not sure why this is needed.
-        final LinkedList<WindowState> children = new LinkedList<>(mChildren);
+        final ArrayList<WindowState> children = new ArrayList<>(mChildren);
         for (int i = children.size() - 1; i >= 0; i--) {
             final WindowState win = children.get(i);
             destroyedSomething |= win.destroySurface(cleanupOnResume, mAppStopped);
