@@ -529,6 +529,13 @@ public class KeyguardAffordanceHelper {
         KeyguardAffordanceView targetView = left ? mLeftIcon : mRightIcon;
         KeyguardAffordanceView otherView = left ? mRightIcon : mLeftIcon;
         startSwiping(targetView);
+
+        // Do not animate the circle expanding if the affordance isn't visible,
+        // otherwise the circle will be meaningless.
+        if (targetView.getVisibility() != View.VISIBLE) {
+            animate = false;
+        }
+
         if (animate) {
             fling(0, false, !left);
             updateIcon(otherView, 0.0f, 0, true, false, true, false);
