@@ -27,7 +27,7 @@ namespace aapt {
 /** A filter to be applied to a path segment. */
 class IPathFilter {
  public:
-  ~IPathFilter() = default;
+  virtual ~IPathFilter() = default;
 
   /** Returns true if the path should be kept. */
   virtual bool Keep(const std::string& path) = 0;
