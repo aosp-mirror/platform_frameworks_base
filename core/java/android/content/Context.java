@@ -3221,7 +3221,7 @@ public abstract class Context {
     public abstract @Nullable String getSystemServiceName(@NonNull Class<?> serviceClass);
 
     /**
-     * Use with {@link #getSystemService} to retrieve a
+     * Use with {@link #getSystemService(String)} to retrieve a
      * {@link android.os.PowerManager} for controlling power management,
      * including "wake locks," which let you keep the device on while
      * you're running long tasks.
@@ -3229,117 +3229,117 @@ public abstract class Context {
     public static final String POWER_SERVICE = "power";
 
     /**
-     * Use with {@link #getSystemService} to retrieve a
+     * Use with {@link #getSystemService(String)} to retrieve a
      * {@link android.os.RecoverySystem} for accessing the recovery system
      * service.
      *
-     * @see #getSystemService
+     * @see #getSystemService(String)
      * @hide
      */
     public static final String RECOVERY_SERVICE = "recovery";
 
     /**
-     * Use with {@link #getSystemService} to retrieve a
+     * Use with {@link #getSystemService(String)} to retrieve a
      * {@link android.view.WindowManager} for accessing the system's window
      * manager.
      *
-     * @see #getSystemService
+     * @see #getSystemService(String)
      * @see android.view.WindowManager
      */
     public static final String WINDOW_SERVICE = "window";
 
     /**
-     * Use with {@link #getSystemService} to retrieve a
+     * Use with {@link #getSystemService(String)} to retrieve a
      * {@link android.view.LayoutInflater} for inflating layout resources in this
      * context.
      *
-     * @see #getSystemService
+     * @see #getSystemService(String)
      * @see android.view.LayoutInflater
      */
     public static final String LAYOUT_INFLATER_SERVICE = "layout_inflater";
 
     /**
-     * Use with {@link #getSystemService} to retrieve a
+     * Use with {@link #getSystemService(String)} to retrieve a
      * {@link android.accounts.AccountManager} for receiving intents at a
      * time of your choosing.
      *
-     * @see #getSystemService
+     * @see #getSystemService(String)
      * @see android.accounts.AccountManager
      */
     public static final String ACCOUNT_SERVICE = "account";
 
     /**
-     * Use with {@link #getSystemService} to retrieve a
+     * Use with {@link #getSystemService(String)} to retrieve a
      * {@link android.app.ActivityManager} for interacting with the global
      * system state.
      *
-     * @see #getSystemService
+     * @see #getSystemService(String)
      * @see android.app.ActivityManager
      */
     public static final String ACTIVITY_SERVICE = "activity";
 
     /**
-     * Use with {@link #getSystemService} to retrieve a
+     * Use with {@link #getSystemService(String)} to retrieve a
      * {@link android.app.AlarmManager} for receiving intents at a
      * time of your choosing.
      *
-     * @see #getSystemService
+     * @see #getSystemService(String)
      * @see android.app.AlarmManager
      */
     public static final String ALARM_SERVICE = "alarm";
 
     /**
-     * Use with {@link #getSystemService} to retrieve a
+     * Use with {@link #getSystemService(String)} to retrieve a
      * {@link android.app.NotificationManager} for informing the user of
      * background events.
      *
-     * @see #getSystemService
+     * @see #getSystemService(String)
      * @see android.app.NotificationManager
      */
     public static final String NOTIFICATION_SERVICE = "notification";
 
     /**
-     * Use with {@link #getSystemService} to retrieve a
+     * Use with {@link #getSystemService(String)} to retrieve a
      * {@link android.view.accessibility.AccessibilityManager} for giving the user
      * feedback for UI events through the registered event listeners.
      *
-     * @see #getSystemService
+     * @see #getSystemService(String)
      * @see android.view.accessibility.AccessibilityManager
      */
     public static final String ACCESSIBILITY_SERVICE = "accessibility";
 
     /**
-     * Use with {@link #getSystemService} to retrieve a
+     * Use with {@link #getSystemService(String)} to retrieve a
      * {@link android.view.accessibility.CaptioningManager} for obtaining
      * captioning properties and listening for changes in captioning
      * preferences.
      *
-     * @see #getSystemService
+     * @see #getSystemService(String)
      * @see android.view.accessibility.CaptioningManager
      */
     public static final String CAPTIONING_SERVICE = "captioning";
 
     /**
-     * Use with {@link #getSystemService} to retrieve a
+     * Use with {@link #getSystemService(String)} to retrieve a
      * {@link android.app.NotificationManager} for controlling keyguard.
      *
-     * @see #getSystemService
+     * @see #getSystemService(String)
      * @see android.app.KeyguardManager
      */
     public static final String KEYGUARD_SERVICE = "keyguard";
 
     /**
-     * Use with {@link #getSystemService} to retrieve a {@link
+     * Use with {@link #getSystemService(String)} to retrieve a {@link
      * android.location.LocationManager} for controlling location
      * updates.
      *
-     * @see #getSystemService
+     * @see #getSystemService(String)
      * @see android.location.LocationManager
      */
     public static final String LOCATION_SERVICE = "location";
 
     /**
-     * Use with {@link #getSystemService} to retrieve a
+     * Use with {@link #getSystemService(String)} to retrieve a
      * {@link android.location.CountryDetector} for detecting the country that
      * the user is in.
      *
@@ -3348,96 +3348,96 @@ public abstract class Context {
     public static final String COUNTRY_DETECTOR = "country_detector";
 
     /**
-     * Use with {@link #getSystemService} to retrieve a {@link
+     * Use with {@link #getSystemService(String)} to retrieve a {@link
      * android.app.SearchManager} for handling searches.
      *
-     * @see #getSystemService
+     * @see #getSystemService(String)
      * @see android.app.SearchManager
      */
     public static final String SEARCH_SERVICE = "search";
 
     /**
-     * Use with {@link #getSystemService} to retrieve a {@link
+     * Use with {@link #getSystemService(String)} to retrieve a {@link
      * android.hardware.SensorManager} for accessing sensors.
      *
-     * @see #getSystemService
+     * @see #getSystemService(String)
      * @see android.hardware.SensorManager
      */
     public static final String SENSOR_SERVICE = "sensor";
 
     /**
-     * Use with {@link #getSystemService} to retrieve a {@link
+     * Use with {@link #getSystemService(String)} to retrieve a {@link
      * android.os.storage.StorageManager} for accessing system storage
      * functions.
      *
-     * @see #getSystemService
+     * @see #getSystemService(String)
      * @see android.os.storage.StorageManager
      */
     public static final String STORAGE_SERVICE = "storage";
 
     /**
-     * Use with {@link #getSystemService} to retrieve a {@link
+     * Use with {@link #getSystemService(String)} to retrieve a {@link
      * android.app.usage.StorageStatsManager} for accessing system storage
      * statistics.
      *
-     * @see #getSystemService
+     * @see #getSystemService(String)
      * @see android.app.usage.StorageStatsManager
      */
     public static final String STORAGE_STATS_SERVICE = "storagestats";
 
     /**
-     * Use with {@link #getSystemService} to retrieve a
+     * Use with {@link #getSystemService(String)} to retrieve a
      * com.android.server.WallpaperService for accessing wallpapers.
      *
-     * @see #getSystemService
+     * @see #getSystemService(String)
      */
     public static final String WALLPAPER_SERVICE = "wallpaper";
 
     /**
-     * Use with {@link #getSystemService} to retrieve a {@link
+     * Use with {@link #getSystemService(String)} to retrieve a {@link
      * android.os.Vibrator} for interacting with the vibration hardware.
      *
-     * @see #getSystemService
+     * @see #getSystemService(String)
      * @see android.os.Vibrator
      */
     public static final String VIBRATOR_SERVICE = "vibrator";
 
     /**
-     * Use with {@link #getSystemService} to retrieve a {@link
+     * Use with {@link #getSystemService(String)} to retrieve a {@link
      * android.app.StatusBarManager} for interacting with the status bar.
      *
-     * @see #getSystemService
+     * @see #getSystemService(String)
      * @see android.app.StatusBarManager
      * @hide
      */
     public static final String STATUS_BAR_SERVICE = "statusbar";
 
     /**
-     * Use with {@link #getSystemService} to retrieve a {@link
+     * Use with {@link #getSystemService(String)} to retrieve a {@link
      * android.net.ConnectivityManager} for handling management of
      * network connections.
      *
-     * @see #getSystemService
+     * @see #getSystemService(String)
      * @see android.net.ConnectivityManager
      */
     public static final String CONNECTIVITY_SERVICE = "connectivity";
 
     /**
-     * Use with {@link #getSystemService} to retrieve a
+     * Use with {@link #getSystemService(String)} to retrieve a
      * {@link android.net.IpSecManager} for encrypting Sockets or Networks with
      * IPSec.
      *
-     * @see #getSystemService
+     * @see #getSystemService(String)
      */
     public static final String IPSEC_SERVICE = "ipsec";
 
     /**
-     * Use with {@link #getSystemService} to retrieve a {@link
+     * Use with {@link #getSystemService(String)} to retrieve a {@link
      * android.os.IUpdateLock} for managing runtime sequences that
      * must not be interrupted by headless OTA application or similar.
      *
      * @hide
-     * @see #getSystemService
+     * @see #getSystemService(String)
      * @see android.os.UpdateLock
      */
     public static final String UPDATE_LOCK_SERVICE = "updatelock";
@@ -3449,18 +3449,18 @@ public abstract class Context {
     public static final String NETWORKMANAGEMENT_SERVICE = "network_management";
 
     /**
-     * Use with {@link #getSystemService} to retrieve a
+     * Use with {@link #getSystemService(String)} to retrieve a
      * {@link com.android.server.slice.SliceManagerService} for managing slices.
      * @hide
-     * @see #getSystemService
+     * @see #getSystemService(String)
      */
     public static final String SLICE_SERVICE = "slice";
 
     /**
-     * Use with {@link #getSystemService} to retrieve a {@link
+     * Use with {@link #getSystemService(String)} to retrieve a {@link
      * android.app.usage.NetworkStatsManager} for querying network usage stats.
      *
-     * @see #getSystemService
+     * @see #getSystemService(String)
      * @see android.app.usage.NetworkStatsManager
      */
     public static final String NETWORK_STATS_SERVICE = "netstats";
@@ -3470,40 +3470,40 @@ public abstract class Context {
     public static final String NETWORK_WATCHLIST_SERVICE = "network_watchlist";
 
     /**
-     * Use with {@link #getSystemService} to retrieve a {@link
+     * Use with {@link #getSystemService(String)} to retrieve a {@link
      * android.net.wifi.WifiManager} for handling management of
      * Wi-Fi access.
      *
-     * @see #getSystemService
+     * @see #getSystemService(String)
      * @see android.net.wifi.WifiManager
      */
     public static final String WIFI_SERVICE = "wifi";
 
     /**
-     * Use with {@link #getSystemService} to retrieve a {@link
+     * Use with {@link #getSystemService(String)} to retrieve a {@link
      * android.net.wifi.p2p.WifiP2pManager} for handling management of
      * Wi-Fi peer-to-peer connections.
      *
-     * @see #getSystemService
+     * @see #getSystemService(String)
      * @see android.net.wifi.p2p.WifiP2pManager
      */
     public static final String WIFI_P2P_SERVICE = "wifip2p";
 
     /**
-     * Use with {@link #getSystemService} to retrieve a
+     * Use with {@link #getSystemService(String)} to retrieve a
      * {@link android.net.wifi.aware.WifiAwareManager} for handling management of
      * Wi-Fi Aware.
      *
-     * @see #getSystemService
+     * @see #getSystemService(String)
      * @see android.net.wifi.aware.WifiAwareManager
      */
     public static final String WIFI_AWARE_SERVICE = "wifiaware";
 
     /**
-     * Use with {@link #getSystemService} to retrieve a {@link
+     * Use with {@link #getSystemService(String)} to retrieve a {@link
      * android.net.wifi.WifiScanner} for scanning the wifi universe
      *
-     * @see #getSystemService
+     * @see #getSystemService(String)
      * @see android.net.wifi.WifiScanner
      * @hide
      */
@@ -3511,10 +3511,10 @@ public abstract class Context {
     public static final String WIFI_SCANNING_SERVICE = "wifiscanner";
 
     /**
-     * Use with {@link #getSystemService} to retrieve a {@link
+     * Use with {@link #getSystemService(String)} to retrieve a {@link
      * android.net.wifi.RttManager} for ranging devices with wifi
      *
-     * @see #getSystemService
+     * @see #getSystemService(String)
      * @see android.net.wifi.RttManager
      * @hide
      */
@@ -3522,24 +3522,24 @@ public abstract class Context {
     public static final String WIFI_RTT_SERVICE = "rttmanager";
 
     /**
-     * Use with {@link #getSystemService} to retrieve a {@link
+     * Use with {@link #getSystemService(String)} to retrieve a {@link
      * android.net.wifi.rtt.WifiRttManager} for ranging devices with wifi
      *
      * Note: this is a replacement for WIFI_RTT_SERVICE above. It will
      * be renamed once final implementation in place.
      *
-     * @see #getSystemService
+     * @see #getSystemService(String)
      * @see android.net.wifi.rtt.WifiRttManager
      * @hide
      */
     public static final String WIFI_RTT_RANGING_SERVICE = "wifirtt";
 
     /**
-     * Use with {@link #getSystemService} to retrieve a {@link
+     * Use with {@link #getSystemService(String)} to retrieve a {@link
      * android.net.lowpan.LowpanManager} for handling management of
      * LoWPAN access.
      *
-     * @see #getSystemService
+     * @see #getSystemService(String)
      * @see android.net.lowpan.LowpanManager
      *
      * @hide
@@ -3547,11 +3547,11 @@ public abstract class Context {
     public static final String LOWPAN_SERVICE = "lowpan";
 
     /**
-     * Use with {@link #getSystemService} to retrieve a {@link
+     * Use with {@link #getSystemService(String)} to retrieve a {@link
      * android.net.EthernetManager} for handling management of
      * Ethernet access.
      *
-     * @see #getSystemService
+     * @see #getSystemService(String)
      * @see android.net.EthernetManager
      *
      * @hide
@@ -3559,98 +3559,98 @@ public abstract class Context {
     public static final String ETHERNET_SERVICE = "ethernet";
 
     /**
-     * Use with {@link #getSystemService} to retrieve a {@link
+     * Use with {@link #getSystemService(String)} to retrieve a {@link
      * android.net.nsd.NsdManager} for handling management of network service
      * discovery
      *
-     * @see #getSystemService
+     * @see #getSystemService(String)
      * @see android.net.nsd.NsdManager
      */
     public static final String NSD_SERVICE = "servicediscovery";
 
     /**
-     * Use with {@link #getSystemService} to retrieve a
+     * Use with {@link #getSystemService(String)} to retrieve a
      * {@link android.media.AudioManager} for handling management of volume,
      * ringer modes and audio routing.
      *
-     * @see #getSystemService
+     * @see #getSystemService(String)
      * @see android.media.AudioManager
      */
     public static final String AUDIO_SERVICE = "audio";
 
     /**
-     * Use with {@link #getSystemService} to retrieve a
+     * Use with {@link #getSystemService(String)} to retrieve a
      * {@link android.hardware.fingerprint.FingerprintManager} for handling management
      * of fingerprints.
      *
-     * @see #getSystemService
+     * @see #getSystemService(String)
      * @see android.hardware.fingerprint.FingerprintManager
      */
     public static final String FINGERPRINT_SERVICE = "fingerprint";
 
     /**
-     * Use with {@link #getSystemService} to retrieve a
+     * Use with {@link #getSystemService(String)} to retrieve a
      * {@link android.media.MediaRouter} for controlling and managing
      * routing of media.
      *
-     * @see #getSystemService
+     * @see #getSystemService(String)
      * @see android.media.MediaRouter
      */
     public static final String MEDIA_ROUTER_SERVICE = "media_router";
 
     /**
-     * Use with {@link #getSystemService} to retrieve a
+     * Use with {@link #getSystemService(String)} to retrieve a
      * {@link android.media.session.MediaSessionManager} for managing media Sessions.
      *
-     * @see #getSystemService
+     * @see #getSystemService(String)
      * @see android.media.session.MediaSessionManager
      */
     public static final String MEDIA_SESSION_SERVICE = "media_session";
 
     /**
-     * Use with {@link #getSystemService} to retrieve a
+     * Use with {@link #getSystemService(String)} to retrieve a
      * {@link android.telephony.TelephonyManager} for handling management the
      * telephony features of the device.
      *
-     * @see #getSystemService
+     * @see #getSystemService(String)
      * @see android.telephony.TelephonyManager
      */
     public static final String TELEPHONY_SERVICE = "phone";
 
     /**
-     * Use with {@link #getSystemService} to retrieve a
+     * Use with {@link #getSystemService(String)} to retrieve a
      * {@link android.telephony.SubscriptionManager} for handling management the
      * telephony subscriptions of the device.
      *
-     * @see #getSystemService
+     * @see #getSystemService(String)
      * @see android.telephony.SubscriptionManager
      */
     public static final String TELEPHONY_SUBSCRIPTION_SERVICE = "telephony_subscription_service";
 
     /**
-     * Use with {@link #getSystemService} to retrieve a
+     * Use with {@link #getSystemService(String)} to retrieve a
      * {@link android.telecom.TelecomManager} to manage telecom-related features
      * of the device.
      *
-     * @see #getSystemService
+     * @see #getSystemService(String)
      * @see android.telecom.TelecomManager
      */
     public static final String TELECOM_SERVICE = "telecom";
 
     /**
-     * Use with {@link #getSystemService} to retrieve a
+     * Use with {@link #getSystemService(String)} to retrieve a
      * {@link android.telephony.CarrierConfigManager} for reading carrier configuration values.
      *
-     * @see #getSystemService
+     * @see #getSystemService(String)
      * @see android.telephony.CarrierConfigManager
      */
     public static final String CARRIER_CONFIG_SERVICE = "carrier_config";
 
     /**
-     * Use with {@link #getSystemService} to retrieve a
+     * Use with {@link #getSystemService(String)} to retrieve a
      * {@link android.telephony.euicc.EuiccManager} to manage the device eUICC (embedded SIM).
      *
-     * @see #getSystemService
+     * @see #getSystemService(String)
      * @see android.telephony.euicc.EuiccManager
      * TODO(b/35851809): Unhide this API.
      * @hide
@@ -3658,47 +3658,47 @@ public abstract class Context {
     public static final String EUICC_SERVICE = "euicc_service";
 
     /**
-     * Use with {@link #getSystemService} to retrieve a
+     * Use with {@link #getSystemService(String)} to retrieve a
      * {@link android.content.ClipboardManager} for accessing and modifying
      * the contents of the global clipboard.
      *
-     * @see #getSystemService
+     * @see #getSystemService(String)
      * @see android.content.ClipboardManager
      */
     public static final String CLIPBOARD_SERVICE = "clipboard";
 
     /**
-     * Use with {@link #getSystemService} to retrieve a
+     * Use with {@link #getSystemService(String)} to retrieve a
      * {@link TextClassificationManager} for text classification services.
      *
-     * @see #getSystemService
+     * @see #getSystemService(String)
      * @see TextClassificationManager
      */
     public static final String TEXT_CLASSIFICATION_SERVICE = "textclassification";
 
     /**
-     * Use with {@link #getSystemService} to retrieve a
+     * Use with {@link #getSystemService(String)} to retrieve a
      * {@link android.view.inputmethod.InputMethodManager} for accessing input
      * methods.
      *
-     * @see #getSystemService
+     * @see #getSystemService(String)
      */
     public static final String INPUT_METHOD_SERVICE = "input_method";
 
     /**
-     * Use with {@link #getSystemService} to retrieve a
+     * Use with {@link #getSystemService(String)} to retrieve a
      * {@link android.view.textservice.TextServicesManager} for accessing
      * text services.
      *
-     * @see #getSystemService
+     * @see #getSystemService(String)
      */
     public static final String TEXT_SERVICES_MANAGER_SERVICE = "textservices";
 
     /**
-     * Use with {@link #getSystemService} to retrieve a
+     * Use with {@link #getSystemService(String)} to retrieve a
      * {@link android.appwidget.AppWidgetManager} for accessing AppWidgets.
      *
-     * @see #getSystemService
+     * @see #getSystemService(String)
      */
     public static final String APPWIDGET_SERVICE = "appwidget";
 
@@ -3706,7 +3706,7 @@ public abstract class Context {
      * Official published name of the (internal) voice interaction manager service.
      *
      * @hide
-     * @see #getSystemService
+     * @see #getSystemService(String)
      */
     public static final String VOICE_INTERACTION_MANAGER_SERVICE = "voiceinteraction";
 
@@ -3714,119 +3714,119 @@ public abstract class Context {
      * Official published name of the (internal) autofill service.
      *
      * @hide
-     * @see #getSystemService
+     * @see #getSystemService(String)
      */
     public static final String AUTOFILL_MANAGER_SERVICE = "autofill";
 
     /**
-     * Use with {@link #getSystemService} to access the
+     * Use with {@link #getSystemService(String)} to access the
      * {@link com.android.server.voiceinteraction.SoundTriggerService}.
      *
      * @hide
-     * @see #getSystemService
+     * @see #getSystemService(String)
      */
     public static final String SOUND_TRIGGER_SERVICE = "soundtrigger";
 
 
     /**
-     * Use with {@link #getSystemService} to retrieve an
+     * Use with {@link #getSystemService(String)} to retrieve an
      * {@link android.app.backup.IBackupManager IBackupManager} for communicating
      * with the backup mechanism.
      * @hide
      *
-     * @see #getSystemService
+     * @see #getSystemService(String)
      */
     @SystemApi
     public static final String BACKUP_SERVICE = "backup";
 
     /**
-     * Use with {@link #getSystemService} to retrieve a
+     * Use with {@link #getSystemService(String)} to retrieve a
      * {@link android.os.DropBoxManager} instance for recording
      * diagnostic logs.
-     * @see #getSystemService
+     * @see #getSystemService(String)
      */
     public static final String DROPBOX_SERVICE = "dropbox";
 
     /**
      * System service name for the DeviceIdleController.  There is no Java API for this.
-     * @see #getSystemService
+     * @see #getSystemService(String)
      * @hide
      */
     public static final String DEVICE_IDLE_CONTROLLER = "deviceidle";
 
     /**
-     * Use with {@link #getSystemService} to retrieve a
+     * Use with {@link #getSystemService(String)} to retrieve a
      * {@link android.app.admin.DevicePolicyManager} for working with global
      * device policy management.
      *
-     * @see #getSystemService
+     * @see #getSystemService(String)
      */
     public static final String DEVICE_POLICY_SERVICE = "device_policy";
 
     /**
-     * Use with {@link #getSystemService} to retrieve a
+     * Use with {@link #getSystemService(String)} to retrieve a
      * {@link android.app.UiModeManager} for controlling UI modes.
      *
-     * @see #getSystemService
+     * @see #getSystemService(String)
      */
     public static final String UI_MODE_SERVICE = "uimode";
 
     /**
-     * Use with {@link #getSystemService} to retrieve a
+     * Use with {@link #getSystemService(String)} to retrieve a
      * {@link android.app.DownloadManager} for requesting HTTP downloads.
      *
-     * @see #getSystemService
+     * @see #getSystemService(String)
      */
     public static final String DOWNLOAD_SERVICE = "download";
 
     /**
-     * Use with {@link #getSystemService} to retrieve a
+     * Use with {@link #getSystemService(String)} to retrieve a
      * {@link android.os.BatteryManager} for managing battery state.
      *
-     * @see #getSystemService
+     * @see #getSystemService(String)
      */
     public static final String BATTERY_SERVICE = "batterymanager";
 
     /**
-     * Use with {@link #getSystemService} to retrieve a
+     * Use with {@link #getSystemService(String)} to retrieve a
      * {@link android.nfc.NfcManager} for using NFC.
      *
-     * @see #getSystemService
+     * @see #getSystemService(String)
      */
     public static final String NFC_SERVICE = "nfc";
 
     /**
-     * Use with {@link #getSystemService} to retrieve a
+     * Use with {@link #getSystemService(String)} to retrieve a
      * {@link android.bluetooth.BluetoothManager} for using Bluetooth.
      *
-     * @see #getSystemService
+     * @see #getSystemService(String)
      */
     public static final String BLUETOOTH_SERVICE = "bluetooth";
 
     /**
-     * Use with {@link #getSystemService} to retrieve a
+     * Use with {@link #getSystemService(String)} to retrieve a
      * {@link android.net.sip.SipManager} for accessing the SIP related service.
      *
-     * @see #getSystemService
+     * @see #getSystemService(String)
      */
     /** @hide */
     public static final String SIP_SERVICE = "sip";
 
     /**
-     * Use with {@link #getSystemService} to retrieve a {@link
+     * Use with {@link #getSystemService(String)} to retrieve a {@link
      * android.hardware.usb.UsbManager} for access to USB devices (as a USB host)
      * and for controlling this device's behavior as a USB device.
      *
-     * @see #getSystemService
+     * @see #getSystemService(String)
      * @see android.hardware.usb.UsbManager
      */
     public static final String USB_SERVICE = "usb";
 
     /**
-     * Use with {@link #getSystemService} to retrieve a {@link
+     * Use with {@link #getSystemService(String)} to retrieve a {@link
      * android.hardware.SerialManager} for access to serial ports.
      *
-     * @see #getSystemService
+     * @see #getSystemService(String)
      * @see android.hardware.SerialManager
      *
      * @hide
@@ -3834,11 +3834,11 @@ public abstract class Context {
     public static final String SERIAL_SERVICE = "serial";
 
     /**
-     * Use with {@link #getSystemService} to retrieve a
+     * Use with {@link #getSystemService(String)} to retrieve a
      * {@link android.hardware.hdmi.HdmiControlManager} for controlling and managing
      * HDMI-CEC protocol.
      *
-     * @see #getSystemService
+     * @see #getSystemService(String)
      * @see android.hardware.hdmi.HdmiControlManager
      * @hide
      */
@@ -3846,67 +3846,67 @@ public abstract class Context {
     public static final String HDMI_CONTROL_SERVICE = "hdmi_control";
 
     /**
-     * Use with {@link #getSystemService} to retrieve a
+     * Use with {@link #getSystemService(String)} to retrieve a
      * {@link android.hardware.input.InputManager} for interacting with input devices.
      *
-     * @see #getSystemService
+     * @see #getSystemService(String)
      * @see android.hardware.input.InputManager
      */
     public static final String INPUT_SERVICE = "input";
 
     /**
-     * Use with {@link #getSystemService} to retrieve a
+     * Use with {@link #getSystemService(String)} to retrieve a
      * {@link android.hardware.display.DisplayManager} for interacting with display devices.
      *
-     * @see #getSystemService
+     * @see #getSystemService(String)
      * @see android.hardware.display.DisplayManager
      */
     public static final String DISPLAY_SERVICE = "display";
 
     /**
-     * Use with {@link #getSystemService} to retrieve a
+     * Use with {@link #getSystemService(String)} to retrieve a
      * {@link android.os.UserManager} for managing users on devices that support multiple users.
      *
-     * @see #getSystemService
+     * @see #getSystemService(String)
      * @see android.os.UserManager
      */
     public static final String USER_SERVICE = "user";
 
     /**
-     * Use with {@link #getSystemService} to retrieve a
+     * Use with {@link #getSystemService(String)} to retrieve a
      * {@link android.content.pm.LauncherApps} for querying and monitoring launchable apps across
      * profiles of a user.
      *
-     * @see #getSystemService
+     * @see #getSystemService(String)
      * @see android.content.pm.LauncherApps
      */
     public static final String LAUNCHER_APPS_SERVICE = "launcherapps";
 
     /**
-     * Use with {@link #getSystemService} to retrieve a
+     * Use with {@link #getSystemService(String)} to retrieve a
      * {@link android.content.RestrictionsManager} for retrieving application restrictions
      * and requesting permissions for restricted operations.
-     * @see #getSystemService
+     * @see #getSystemService(String)
      * @see android.content.RestrictionsManager
      */
     public static final String RESTRICTIONS_SERVICE = "restrictions";
 
     /**
-     * Use with {@link #getSystemService} to retrieve a
+     * Use with {@link #getSystemService(String)} to retrieve a
      * {@link android.app.AppOpsManager} for tracking application operations
      * on the device.
      *
-     * @see #getSystemService
+     * @see #getSystemService(String)
      * @see android.app.AppOpsManager
      */
     public static final String APP_OPS_SERVICE = "appops";
 
     /**
-     * Use with {@link #getSystemService} to retrieve a
+     * Use with {@link #getSystemService(String)} to retrieve a
      * {@link android.hardware.camera2.CameraManager} for interacting with
      * camera devices.
      *
-     * @see #getSystemService
+     * @see #getSystemService(String)
      * @see android.hardware.camera2.CameraManager
      */
     public static final String CAMERA_SERVICE = "camera";
@@ -3915,51 +3915,51 @@ public abstract class Context {
      * {@link android.print.PrintManager} for printing and managing
      * printers and print tasks.
      *
-     * @see #getSystemService
+     * @see #getSystemService(String)
      * @see android.print.PrintManager
      */
     public static final String PRINT_SERVICE = "print";
 
     /**
-     * Use with {@link #getSystemService} to retrieve a
+     * Use with {@link #getSystemService(String)} to retrieve a
      * {@link android.companion.CompanionDeviceManager} for managing companion devices
      *
-     * @see #getSystemService
+     * @see #getSystemService(String)
      * @see android.companion.CompanionDeviceManager
      */
     public static final String COMPANION_DEVICE_SERVICE = "companiondevice";
 
     /**
-     * Use with {@link #getSystemService} to retrieve a
+     * Use with {@link #getSystemService(String)} to retrieve a
      * {@link android.hardware.ConsumerIrManager} for transmitting infrared
      * signals from the device.
      *
-     * @see #getSystemService
+     * @see #getSystemService(String)
      * @see android.hardware.ConsumerIrManager
      */
     public static final String CONSUMER_IR_SERVICE = "consumer_ir";
 
     /**
      * {@link android.app.trust.TrustManager} for managing trust agents.
-     * @see #getSystemService
+     * @see #getSystemService(String)
      * @see android.app.trust.TrustManager
      * @hide
      */
     public static final String TRUST_SERVICE = "trust";
 
     /**
-     * Use with {@link #getSystemService} to retrieve a
+     * Use with {@link #getSystemService(String)} to retrieve a
      * {@link android.media.tv.TvInputManager} for interacting with TV inputs
      * on the device.
      *
-     * @see #getSystemService
+     * @see #getSystemService(String)
      * @see android.media.tv.TvInputManager
      */
     public static final String TV_INPUT_SERVICE = "tv_input";
 
     /**
      * {@link android.net.NetworkScoreManager} for managing network scoring.
-     * @see #getSystemService
+     * @see #getSystemService(String)
      * @see android.net.NetworkScoreManager
      * @hide
      */
@@ -3967,29 +3967,29 @@ public abstract class Context {
     public static final String NETWORK_SCORE_SERVICE = "network_score";
 
     /**
-     * Use with {@link #getSystemService} to retrieve a {@link
+     * Use with {@link #getSystemService(String)} to retrieve a {@link
      * android.app.usage.UsageStatsManager} for querying device usage stats.
      *
-     * @see #getSystemService
+     * @see #getSystemService(String)
      * @see android.app.usage.UsageStatsManager
      */
     public static final String USAGE_STATS_SERVICE = "usagestats";
 
     /**
-     * Use with {@link #getSystemService} to retrieve a {@link
+     * Use with {@link #getSystemService(String)} to retrieve a {@link
      * android.app.job.JobScheduler} instance for managing occasional
      * background tasks.
-     * @see #getSystemService
+     * @see #getSystemService(String)
      * @see android.app.job.JobScheduler
      */
     public static final String JOB_SCHEDULER_SERVICE = "jobscheduler";
 
     /**
-     * Use with {@link #getSystemService} to retrieve a {@link
+     * Use with {@link #getSystemService(String)} to retrieve a {@link
      * android.service.persistentdata.PersistentDataBlockManager} instance
      * for interacting with a storage device that lives across factory resets.
      *
-     * @see #getSystemService
+     * @see #getSystemService(String)
      * @see android.service.persistentdata.PersistentDataBlockManager
      * @hide
      */
@@ -3997,10 +3997,10 @@ public abstract class Context {
     public static final String PERSISTENT_DATA_BLOCK_SERVICE = "persistent_data_block";
 
     /**
-     * Use with {@link #getSystemService} to retrieve a {@link
+     * Use with {@link #getSystemService(String)} to retrieve a {@link
      * android.service.oemlock.OemLockManager} instance for managing the OEM lock.
      *
-     * @see #getSystemService
+     * @see #getSystemService(String)
      * @see android.service.oemlock.OemLockManager
      * @hide
      */
@@ -4008,54 +4008,54 @@ public abstract class Context {
     public static final String OEM_LOCK_SERVICE = "oem_lock";
 
     /**
-     * Use with {@link #getSystemService} to retrieve a {@link
+     * Use with {@link #getSystemService(String)} to retrieve a {@link
      * android.media.projection.MediaProjectionManager} instance for managing
      * media projection sessions.
-     * @see #getSystemService
+     * @see #getSystemService(String)
      * @see android.media.projection.MediaProjectionManager
      */
     public static final String MEDIA_PROJECTION_SERVICE = "media_projection";
 
     /**
-     * Use with {@link #getSystemService} to retrieve a
+     * Use with {@link #getSystemService(String)} to retrieve a
      * {@link android.media.midi.MidiManager} for accessing the MIDI service.
      *
-     * @see #getSystemService
+     * @see #getSystemService(String)
      */
     public static final String MIDI_SERVICE = "midi";
 
 
     /**
-     * Use with {@link #getSystemService} to retrieve a
+     * Use with {@link #getSystemService(String)} to retrieve a
      * {@link android.hardware.radio.RadioManager} for accessing the broadcast radio service.
      *
-     * @see #getSystemService
+     * @see #getSystemService(String)
      * @hide
      */
     public static final String RADIO_SERVICE = "broadcastradio";
 
     /**
-     * Use with {@link #getSystemService} to retrieve a
+     * Use with {@link #getSystemService(String)} to retrieve a
      * {@link android.os.HardwarePropertiesManager} for accessing the hardware properties service.
      *
-     * @see #getSystemService
+     * @see #getSystemService(String)
      */
     public static final String HARDWARE_PROPERTIES_SERVICE = "hardware_properties";
 
     /**
-     * Use with {@link #getSystemService} to retrieve a
+     * Use with {@link #getSystemService(String)} to retrieve a
      * {@link android.content.pm.ShortcutManager} for accessing the launcher shortcut service.
      *
-     * @see #getSystemService
+     * @see #getSystemService(String)
      * @see android.content.pm.ShortcutManager
      */
     public static final String SHORTCUT_SERVICE = "shortcut";
 
     /**
-     * Use with {@link #getSystemService} to retrieve a {@link
+     * Use with {@link #getSystemService(String)} to retrieve a {@link
      * android.hardware.location.ContextHubManager} for accessing context hubs.
      *
-     * @see #getSystemService
+     * @see #getSystemService(String)
      * @see android.hardware.location.ContextHubManager
      *
      * @hide
@@ -4064,11 +4064,11 @@ public abstract class Context {
     public static final String CONTEXTHUB_SERVICE = "contexthub";
 
     /**
-     * Use with {@link #getSystemService} to retrieve a
+     * Use with {@link #getSystemService(String)} to retrieve a
      * {@link android.os.health.SystemHealthManager} for accessing system health (battery, power,
      * memory, etc) metrics.
      *
-     * @see #getSystemService
+     * @see #getSystemService(String)
      */
     public static final String SYSTEM_HEALTH_SERVICE = "systemhealth";
 
@@ -4097,46 +4097,46 @@ public abstract class Context {
     public static final String STATS_COMPANION_SERVICE = "statscompanion";
 
     /**
-     * Use with {@link #getSystemService} to retrieve an {@link android.stats.StatsManager}.
+     * Use with {@link #getSystemService(String)} to retrieve an {@link android.stats.StatsManager}.
      * @hide
      */
     @SystemApi
     public static final String STATS_MANAGER = "stats";
 
     /**
-     * Use with {@link #getSystemService} to retrieve a {@link
+     * Use with {@link #getSystemService(String)} to retrieve a {@link
      * android.content.om.OverlayManager} for managing overlay packages.
      *
-     * @see #getSystemService
+     * @see #getSystemService(String)
      * @see android.content.om.OverlayManager
      * @hide
      */
     public static final String OVERLAY_SERVICE = "overlay";
 
     /**
-     * Use with {@link #getSystemService} to retrieve a
+     * Use with {@link #getSystemService(String)} to retrieve a
      * {@link VrManager} for accessing the VR service.
      *
-     * @see #getSystemService
+     * @see #getSystemService(String)
      * @hide
      */
     @SystemApi
     public static final String VR_SERVICE = "vrmanager";
 
     /**
-     * Use with {@link #getSystemService} to retrieve an
+     * Use with {@link #getSystemService(String)} to retrieve an
      * {@link android.app.timezone.ITimeZoneRulesManager}.
      * @hide
      *
-     * @see #getSystemService
+     * @see #getSystemService(String)
      */
     public static final String TIME_ZONE_RULES_MANAGER_SERVICE = "timezone";
 
     /**
-     * Use with {@link #getSystemService} to retrieve a
+     * Use with {@link #getSystemService(String)} to retrieve a
      * {@link android.content.pm.crossprofile.CrossProfileApps} for cross profile operations.
      *
-     * @see #getSystemService
+     * @see #getSystemService(String)
      */
     public static final String CROSS_PROFILE_APPS_SERVICE = "crossprofileapps";
 
