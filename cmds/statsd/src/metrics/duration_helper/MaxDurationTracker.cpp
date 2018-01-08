@@ -28,9 +28,10 @@ MaxDurationTracker::MaxDurationTracker(const ConfigKey& key, const int64_t& id,
                                        const HashableDimensionKey& eventKey,
                                        sp<ConditionWizard> wizard, int conditionIndex, bool nesting,
                                        uint64_t currentBucketStartNs, uint64_t bucketSizeNs,
+                                       bool conditionSliced,
                                        const vector<sp<DurationAnomalyTracker>>& anomalyTrackers)
     : DurationTracker(key, id, eventKey, wizard, conditionIndex, nesting, currentBucketStartNs,
-                      bucketSizeNs, anomalyTrackers) {
+                      bucketSizeNs, conditionSliced, anomalyTrackers) {
 }
 
 bool MaxDurationTracker::hitGuardRail(const HashableDimensionKey& newKey) {
@@ -63,7 +64,9 @@ void MaxDurationTracker::noteStart(const HashableDimensionKey& key, bool conditi
     }
 
     DurationInfo& duration = mInfos[key];
-    duration.conditionKeys = conditionKey;
+    if (mConditionSliced) {
+        duration.conditionKeys = conditionKey;
+    }
     VLOG("MaxDuration: key %s start condition %d", key.c_str(), condition);
 
     switch (duration.state) {
