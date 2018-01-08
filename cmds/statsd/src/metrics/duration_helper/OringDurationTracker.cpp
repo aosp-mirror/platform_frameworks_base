@@ -27,10 +27,10 @@ using std::pair;
 OringDurationTracker::OringDurationTracker(
         const ConfigKey& key, const int64_t& id, const HashableDimensionKey& eventKey,
         sp<ConditionWizard> wizard, int conditionIndex, bool nesting, uint64_t currentBucketStartNs,
-        uint64_t bucketSizeNs, const vector<sp<DurationAnomalyTracker>>& anomalyTrackers)
-
+        uint64_t bucketSizeNs, bool conditionSliced,
+        const vector<sp<DurationAnomalyTracker>>& anomalyTrackers)
     : DurationTracker(key, id, eventKey, wizard, conditionIndex, nesting, currentBucketStartNs,
-                      bucketSizeNs, anomalyTrackers),
+                      bucketSizeNs, conditionSliced, anomalyTrackers),
       mStarted(),
       mPaused() {
     mLastStartTime = 0;
@@ -73,7 +73,7 @@ void OringDurationTracker::noteStart(const HashableDimensionKey& key, bool condi
         mPaused[key]++;
     }
 
-    if (mConditionKeyMap.find(key) == mConditionKeyMap.end()) {
+    if (mConditionSliced && mConditionKeyMap.find(key) == mConditionKeyMap.end()) {
         mConditionKeyMap[key] = conditionKey;
     }
 
