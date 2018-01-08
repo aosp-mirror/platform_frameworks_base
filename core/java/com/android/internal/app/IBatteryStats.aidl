@@ -91,8 +91,7 @@ interface IBatteryStats {
 
     void noteVibratorOn(int uid, long durationMillis);
     void noteVibratorOff(int uid);
-    void noteStartGps(int uid);
-    void noteStopGps(int uid);
+    void noteGpsChanged(in WorkSource oldSource, in WorkSource newSource);
     void noteGpsSignalQuality(int signalLevel);
     void noteScreenState(int state);
     void noteScreenBrightness(int brightness);

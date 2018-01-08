@@ -23,10 +23,12 @@ import android.app.ActivityManager;
 import android.os.BatteryManager;
 import android.os.BatteryStats;
 import android.os.BatteryStats.HistoryItem;
+import android.os.BatteryStats.Uid.Sensor;
 import android.os.WorkSource;
 import android.support.test.filters.SmallTest;
 import android.view.Display;
 
+import com.android.internal.os.BatteryStatsImpl.DualTimer;
 import com.android.internal.os.BatteryStatsImpl.Uid;
 import junit.framework.TestCase;
 
@@ -445,5 +447,53 @@ public class BatteryStatsNoteTest extends TestCase {
         assertEquals(1, pkg.getWakeupAlarmStats().size());
         pkg = bi.getPackageStatsLocked(100, "com.foo.baz_alternate");
         assertEquals(0, pkg.getWakeupAlarmStats().size());
+    }
+
+    @SmallTest
+    public void testNoteGpsChanged() {
+        final MockClocks clocks = new MockClocks(); // holds realtime and uptime in ms
+        MockBatteryStatsImpl bi = new MockBatteryStatsImpl(clocks);
+        bi.setRecordAllHistoryLocked(true);
+        bi.forceRecordAllHistory();
+        bi.mForceOnBattery = true;
+
+        bi.updateTimeBasesLocked(true, Display.STATE_OFF, 0, 0);
+        bi.noteUidProcessStateLocked(UID, ActivityManager.PROCESS_STATE_TOP);
+
+        WorkSource ws = new WorkSource();
+        ws.add(UID);
+
+        bi.noteGpsChangedLocked(new WorkSource(), ws);
+        DualTimer t = bi.getUidStatsLocked(UID).getSensorTimerLocked(Sensor.GPS, false);
+        assertNotNull(t);
+        assertTrue(t.isRunningLocked());
+
+        bi.noteGpsChangedLocked(ws, new WorkSource());
+        t = bi.getUidStatsLocked(UID).getSensorTimerLocked(Sensor.GPS, false);
+        assertFalse(t.isRunningLocked());
+    }
+
+    @SmallTest
+    public void testNoteGpsChanged_workSource() {
+        final MockClocks clocks = new MockClocks(); // holds realtime and uptime in ms
+        MockBatteryStatsImpl bi = new MockBatteryStatsImpl(clocks);
+        bi.setRecordAllHistoryLocked(true);
+        bi.forceRecordAllHistory();
+        bi.mForceOnBattery = true;
+
+        bi.updateTimeBasesLocked(true, Display.STATE_OFF, 0, 0);
+        bi.noteUidProcessStateLocked(UID, ActivityManager.PROCESS_STATE_TOP);
+
+        WorkSource ws = new WorkSource();
+        ws.createWorkChain().addNode(UID, "com.foo");
+
+        bi.noteGpsChangedLocked(new WorkSource(), ws);
+        DualTimer t = bi.getUidStatsLocked(UID).getSensorTimerLocked(Sensor.GPS, false);
+        assertNotNull(t);
+        assertTrue(t.isRunningLocked());
+
+        bi.noteGpsChangedLocked(ws, new WorkSource());
+        t = bi.getUidStatsLocked(UID).getSensorTimerLocked(Sensor.GPS, false);
+        assertFalse(t.isRunningLocked());
     }
 }

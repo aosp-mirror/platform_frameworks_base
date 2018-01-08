@@ -64,6 +64,7 @@ import android.os.SystemClock;
 import android.os.SystemProperties;
 import android.os.UserHandle;
 import android.os.WorkSource;
+import android.os.WorkSource.WorkChain;
 import android.provider.Settings;
 import android.provider.Telephony.Carriers;
 import android.provider.Telephony.Sms.Intents;
@@ -346,7 +347,8 @@ public class GnssLocationProvider implements LocationProviderInterface {
 
     // Current request from underlying location clients.
     private ProviderRequest mProviderRequest = null;
-    // Current list of underlying location clients.
+    // The WorkSource associated with the most recent client request (i.e, most recent call to
+    // setRequest).
     private WorkSource mWorkSource = null;
     // True if gps should be disabled (used to support battery saver mode in settings).
     private boolean mDisableGps = false;
@@ -408,6 +410,7 @@ public class GnssLocationProvider implements LocationProviderInterface {
     private final IAppOpsService mAppOpsService;
     private final IBatteryStats mBatteryStats;
 
+    // Current list of underlying location clients.
     // only modified on handler thread
     private WorkSource mClientSource = new WorkSource();
 
@@ -1345,46 +1348,80 @@ public class GnssLocationProvider implements LocationProviderInterface {
     }
 
     private void updateClientUids(WorkSource source) {
-        // Update work source.
-        WorkSource[] changes = mClientSource.setReturningDiffs(source);
-        if (changes == null) {
+        if (source.equals(mClientSource)) {
             return;
         }
-        WorkSource newWork = changes[0];
-        WorkSource goneWork = changes[1];
 
-        // Update sources that were not previously tracked.
-        if (newWork != null) {
-            int lastuid = -1;
-            for (int i = 0; i < newWork.size(); i++) {
-                try {
-                    int uid = newWork.get(i);
-                    mAppOpsService.startOperation(AppOpsManager.getToken(mAppOpsService),
-                            AppOpsManager.OP_GPS, uid, newWork.getName(i));
-                    if (uid != lastuid) {
-                        lastuid = uid;
-                        mBatteryStats.noteStartGps(uid);
-                    }
-                } catch (RemoteException e) {
-                    Log.w(TAG, "RemoteException", e);
-                }
-            }
+        // (1) Inform BatteryStats that the list of IDs we're tracking changed.
+        try {
+            mBatteryStats.noteGpsChanged(mClientSource, source);
+        } catch (RemoteException e) {
+            Log.w(TAG, "RemoteException", e);
         }
 
-        // Update sources that are no longer tracked.
-        if (goneWork != null) {
-            int lastuid = -1;
-            for (int i = 0; i < goneWork.size(); i++) {
-                try {
-                    int uid = goneWork.get(i);
-                    mAppOpsService.finishOperation(AppOpsManager.getToken(mAppOpsService),
-                            AppOpsManager.OP_GPS, uid, goneWork.getName(i));
-                    if (uid != lastuid) {
-                        lastuid = uid;
-                        mBatteryStats.noteStopGps(uid);
+        // (2) Inform AppOps service about the list of changes to UIDs.
+
+        List<WorkChain>[] diffs = WorkSource.diffChains(mClientSource, source);
+        if (diffs != null) {
+            List<WorkChain> newChains = diffs[0];
+            List<WorkChain> goneChains = diffs[1];
+
+            if (newChains != null) {
+                for (int i = 0; i < newChains.size(); ++i) {
+                    final WorkChain newChain = newChains.get(i);
+                    try {
+                        mAppOpsService.startOperation(AppOpsManager.getToken(mAppOpsService),
+                                AppOpsManager.OP_GPS, newChain.getAttributionUid(),
+                                newChain.getAttributionTag());
+                    } catch (RemoteException e) {
+                        Log.w(TAG, "RemoteException", e);
                     }
-                } catch (RemoteException e) {
-                    Log.w(TAG, "RemoteException", e);
+                }
+            }
+
+            if (goneChains != null) {
+                for (int i = 0; i < goneChains.size(); i++) {
+                    final WorkChain goneChain = goneChains.get(i);
+                    try {
+                        mAppOpsService.finishOperation(AppOpsManager.getToken(mAppOpsService),
+                                AppOpsManager.OP_GPS, goneChain.getAttributionUid(),
+                                goneChain.getAttributionTag());
+                    } catch (RemoteException e) {
+                        Log.w(TAG, "RemoteException", e);
+                    }
+                }
+            }
+
+            mClientSource.transferWorkChains(source);
+        }
+
+        // Update the flat UIDs and names list and inform app-ops of all changes.
+        WorkSource[] changes = mClientSource.setReturningDiffs(source);
+        if (changes != null) {
+            WorkSource newWork = changes[0];
+            WorkSource goneWork = changes[1];
+
+            // Update sources that were not previously tracked.
+            if (newWork != null) {
+                for (int i = 0; i < newWork.size(); i++) {
+                    try {
+                        mAppOpsService.startOperation(AppOpsManager.getToken(mAppOpsService),
+                                AppOpsManager.OP_GPS, newWork.get(i), newWork.getName(i));
+                    } catch (RemoteException e) {
+                        Log.w(TAG, "RemoteException", e);
+                    }
+                }
+            }
+
+            // Update sources that are no longer tracked.
+            if (goneWork != null) {
+                for (int i = 0; i < goneWork.size(); i++) {
+                    try {
+                        mAppOpsService.finishOperation(AppOpsManager.getToken(mAppOpsService),
+                                AppOpsManager.OP_GPS, goneWork.get(i), goneWork.getName(i));
+                    } catch (RemoteException e) {
+                        Log.w(TAG, "RemoteException", e);
+                    }
                 }
             }
         }
