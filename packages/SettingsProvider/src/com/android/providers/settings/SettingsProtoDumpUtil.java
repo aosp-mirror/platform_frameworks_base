@@ -1720,9 +1720,6 @@ class SettingsProtoDumpUtil {
                 Settings.Secure.QS_TILES,
                 SecureSettingsProto.QS_TILES);
         dumpSetting(s, p,
-                Settings.Secure.DEMO_USER_SETUP_COMPLETE,
-                SecureSettingsProto.DEMO_USER_SETUP_COMPLETE);
-        dumpSetting(s, p,
                 Settings.Secure.INSTANT_APPS_ENABLED,
                 SecureSettingsProto.INSTANT_APPS_ENABLED);
         dumpSetting(s, p,
