@@ -53,6 +53,7 @@
 #include <private/android_filesystem_config.h>
 #include <utils/String8.h>
 #include <selinux/android.h>
+#include <seccomp_policy.h>
 #include <processgroup/processgroup.h>
 
 #include "core_jni_helpers.h"
@@ -75,6 +76,8 @@ static pid_t gSystemServerPid = 0;
 static const char kZygoteClassName[] = "com/android/internal/os/Zygote";
 static jclass gZygoteClass;
 static jmethodID gCallPostForkChildHooks;
+
+static bool g_is_security_enforced = true;
 
 // Must match values in com.android.internal.os.Zygote.
 enum MountExternalKind {
@@ -227,6 +230,20 @@ static void PreApplicationInit() {
 
   // Set the jemalloc decay time to 1.
   mallopt(M_DECAY_TIME, 1);
+}
+
+static void SetUpSeccompFilter(uid_t uid) {
+  if (!g_is_security_enforced) {
+    ALOGI("seccomp disabled by setenforce 0");
+    return;
+  }
+
+  // Apply system or app filter based on uid.
+  if (getuid() >= AID_APP_START) {
+    set_app_seccomp_filter();
+  } else {
+    set_system_seccomp_filter();
+  }
 }
 
 static void EnableKeepCapabilities(JNIEnv* env) {
@@ -541,6 +558,11 @@ static pid_t ForkAndSpecializeCommon(JNIEnv* env, uid_t uid, gid_t gid, jintArra
       RuntimeAbort(env, __LINE__, "Call to sigprocmask(SIG_UNBLOCK, { SIGCHLD }) failed.");
     }
 
+    // Must be called when the new process still has CAP_SYS_ADMIN.  The other alternative is to
+    // call prctl(PR_SET_NO_NEW_PRIVS, 1) afterward, but that breaks SELinux domain transition (see
+    // b/71859146).
+    SetUpSeccompFilter(uid);
+
     // Keep capabilities across UID change, unless we're staying root.
     if (uid != 0) {
       EnableKeepCapabilities(env);
@@ -698,6 +720,12 @@ static uint64_t GetEffectiveCapabilityMask(JNIEnv* env) {
 
 namespace android {
 
+static void com_android_internal_os_Zygote_nativeSecurityInit(JNIEnv*, jclass) {
+  // security_getenforce is not allowed on app process. Initialize and cache the value before
+  // zygote forks.
+  g_is_security_enforced = security_getenforce();
+}
+
 static void com_android_internal_os_Zygote_nativePreApplicationInit(JNIEnv*, jclass) {
   PreApplicationInit();
 }
@@ -832,6 +860,8 @@ static void com_android_internal_os_Zygote_nativeUnmountStorageOnInit(JNIEnv* en
 }
 
 static const JNINativeMethod gMethods[] = {
+    { "nativeSecurityInit", "()V",
+      (void *) com_android_internal_os_Zygote_nativeSecurityInit },
     { "nativeForkAndSpecialize",
       "(II[II[[IILjava/lang/String;Ljava/lang/String;[I[ILjava/lang/String;Ljava/lang/String;)I",
       (void *) com_android_internal_os_Zygote_nativeForkAndSpecialize },
