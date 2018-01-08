@@ -57,7 +57,6 @@ public class BackupManagerConstantsTest {
 
         final BackupManagerConstants constants =
                 new BackupManagerConstants(handler, context.getContentResolver());
-        constants.start();
 
         assertThat(constants.getKeyValueBackupIntervalMilliseconds())
                 .isEqualTo(4 * AlarmManager.INTERVAL_HOUR);
@@ -89,7 +88,6 @@ public class BackupManagerConstantsTest {
 
         final BackupManagerConstants constants =
                 new BackupManagerConstants(handler, context.getContentResolver());
-        constants.start();
 
         assertThat(constants.getBackupFinishedNotificationReceivers())
                 .isEqualTo(new String[] {PACKAGE_NAME, ANOTHER_PACKAGE_NAME});
