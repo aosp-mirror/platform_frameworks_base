@@ -311,7 +311,6 @@ import java.util.Locale;
 public class TextView extends View implements ViewTreeObserver.OnPreDrawListener {
     static final String LOG_TAG = "TextView";
     static final boolean DEBUG_EXTRACT = false;
-    static final boolean DEBUG_AUTOFILL = false;
     private static final float[] TEMP_POSITION = new float[2];
 
     // Enum for the "typeface" XML parameter.
@@ -9516,7 +9515,7 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
         }
         final AutofillManager afm = mContext.getSystemService(AutofillManager.class);
         if (afm != null) {
-            if (DEBUG_AUTOFILL) {
+            if (android.view.autofill.Helper.sVerbose) {
                 Log.v(LOG_TAG, "sendAfterTextChanged(): notify AFM for text=" + mText);
             }
             afm.notifyValueChanged(TextView.this);
@@ -10296,7 +10295,14 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
         if (forAutofill) {
             structure.setDataIsSensitive(!mSetFromXmlOrResourceId);
             if (mTextId != ResourceId.ID_NULL) {
-                structure.setTextIdEntry(getResources().getResourceEntryName(mTextId));
+                try {
+                    structure.setTextIdEntry(getResources().getResourceEntryName(mTextId));
+                } catch (Resources.NotFoundException e) {
+                    if (android.view.autofill.Helper.sVerbose) {
+                        Log.v(LOG_TAG, "onProvideAutofillStructure(): cannot set name for text id "
+                                + mTextId + ": " + e.getMessage());
+                    }
+                }
             }
         }
 
