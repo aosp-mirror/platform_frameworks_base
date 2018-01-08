@@ -34,6 +34,8 @@ const std::string DEFAULT_WHITESPACE = " \t";
 const std::string DEFAULT_NEWLINE = "\r\n";
 const std::string TAB_DELIMITER = "\t";
 const std::string COMMA_DELIMITER = ",";
+const std::string PIPE_DELIMITER = "|";
+const std::string PARENTHESES_DELIMITER = "()";
 
 // returns true if c is a-zA-Z0-9 or underscore
 bool isValidChar(char c);
@@ -87,6 +89,11 @@ void printRecord(const record_t& record);
  */
 bool stripPrefix(std::string* line, const char* key, bool endAtDelimiter = false);
 bool stripSuffix(std::string* line, const char* key, bool endAtDelimiter = false);
+
+/**
+ * behead the given line by the cut, return the head and reassign the line to be the rest.
+ */
+std::string behead(std::string* line, const char cut);
 
 /**
  * Converts string to the desired type

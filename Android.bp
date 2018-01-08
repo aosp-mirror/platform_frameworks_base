@@ -730,10 +730,18 @@ gensrcs {
         "core/proto/android/os/procrank.proto",
         "core/proto/android/os/ps.proto",
         "core/proto/android/os/system_properties.proto",
+        "core/proto/android/util/event_log_tags.proto",
     ],
 
     // Append protoc-gen-cppstream tool's PATH otherwise aprotoc can't find the plugin tool
-    cmd: "PATH=$$PATH:$$(dirname $(location protoc-gen-cppstream)) $(location aprotoc) --plugin=protoc-gen-cpp-stream=$(location protoc-gen-cppstream) --dependency_out=$(depfile) --cppstream_out=$(genDir)/ -Iexternal/protobuf/src -I . $(in)",
+    cmd: "mkdir -p $(genDir) " +
+        "&& $(location aprotoc) " +
+        "  --plugin=$(location protoc-gen-cppstream) " +
+        "  --dependency_out=$(depfile) " +
+        "  --cppstream_out=$(genDir) " +
+        "  -Iexternal/protobuf/src " +
+        "  -I . " +
+        "  $(in)",
 
     output_extension = "proto.h",
 }

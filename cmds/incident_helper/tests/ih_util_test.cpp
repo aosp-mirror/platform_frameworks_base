@@ -60,6 +60,9 @@ TEST(IhUtilTest, ParseRecord) {
     result = parseRecord("123,456,78_9", ",");
     expected = { "123", "456", "78_9" };
     EXPECT_EQ(expected, result);
+
+    result = parseRecord("", " ");
+    EXPECT_TRUE(result.empty());
 }
 
 TEST(IhUtilTest, ParseRecordByColumns) {
@@ -131,6 +134,22 @@ TEST(IhUtilTest, stripSuffix) {
     string data4 = " 243%abc";
     EXPECT_FALSE(stripSuffix(&data4, "bc", true));
     EXPECT_THAT(data4, StrEq(" 243%abc"));
+}
+
+TEST(IhUtilTest, behead) {
+    string testcase1 = "81002 dropbox_file_copy (a)(b)";
+    EXPECT_THAT(behead(&testcase1, ' '), StrEq("81002"));
+    EXPECT_THAT(behead(&testcase1, ' '), StrEq("dropbox_file_copy"));
+    EXPECT_THAT(testcase1, "(a)(b)");
+
+    string testcase2 = "adbce,erwqr";
+    EXPECT_THAT(behead(&testcase2, ' '), StrEq("adbce,erwqr"));
+    EXPECT_THAT(testcase2, "");
+
+    string testcase3 = "first second";
+    EXPECT_THAT(behead(&testcase3, ' '), StrEq("first"));
+    EXPECT_THAT(behead(&testcase3, ' '), StrEq("second"));
+    EXPECT_THAT(testcase3, "");
 }
 
 TEST(IhUtilTest, Reader) {

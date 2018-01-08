@@ -37,6 +37,9 @@ enum SectionType {
 
     // incidentd calls dumpsys for annotated field
     SECTION_DUMPSYS = 3;
+
+    // incidentd calls logs for annotated field
+    SECTION_LOG = 4;
 }
 
 message SectionFlags {

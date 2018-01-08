@@ -208,6 +208,19 @@ bool stripSuffix(std::string* line, const char* key, bool endAtDelimiter) {
     return true;
 }
 
+std::string behead(std::string* line, const char cut) {
+    auto found = line->find_first_of(cut);
+    if (found == std::string::npos) {
+        std::string head = line->substr(0);
+        line->assign("");
+        return head;
+    }
+    std::string head = line->substr(0, found);
+    while(line->at(found) == cut) found++; // trim more cut of the rest
+    line->assign(line->substr(found));
+    return head;
+}
+
 int toInt(const std::string& s) {
     return atoi(s.c_str());
 }

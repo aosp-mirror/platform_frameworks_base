@@ -43,6 +43,8 @@ import "frameworks/base/core/proto/android/service/notification.proto";
 import "frameworks/base/core/proto/android/service/package.proto";
 import "frameworks/base/core/proto/android/service/print.proto";
 import "frameworks/base/core/proto/android/service/procstats.proto";
+import "frameworks/base/core/proto/android/util/event_log_tags.proto";
+import "frameworks/base/core/proto/android/util/log.proto";
 import "frameworks/base/libs/incident/proto/android/privacy.proto";
 import "frameworks/base/libs/incident/proto/android/section.proto";
 
@@ -59,6 +61,8 @@ message IncidentMetadata {
 // the sections are able to be controlled and configured by section ids.
 // Instead privacy field options need to be configured in each section proto message.
 message IncidentProto {
+    reserved 1001;
+
     // Incident header from callers
     repeated IncidentHeaderProto header = 1;
     // Internal metadata of incidentd
@@ -68,6 +72,52 @@ message IncidentProto {
     optional SystemPropertiesProto system_properties = 1000 [
         (section).type = SECTION_COMMAND,
         (section).args = "getprop"
+    ];
+
+    // Device Logs
+    optional android.util.EventLogTagMapProto event_log_tag_map = 1100 [
+        (section).type = SECTION_FILE,
+        (section).args = "/system/etc/event-log-tags"
+    ];
+
+    optional android.util.LogProto main_logs = 1101 [
+        (section).type = SECTION_LOG,
+        (section).args = "LOG_ID_MAIN"
+    ];
+
+    optional android.util.LogProto radio_logs = 1102 [
+        (section).type = SECTION_LOG,
+        (section).args = "LOG_ID_RADIO"
+    ];
+
+    optional android.util.LogProto events_logs = 1103 [
+        (section).type = SECTION_LOG,
+        (section).args = "LOG_ID_EVENTS"
+    ];
+
+    optional android.util.LogProto system_logs = 1104 [
+        (section).type = SECTION_LOG,
+        (section).args = "LOG_ID_SYSTEM"
+    ];
+
+    optional android.util.LogProto crash_logs = 1105 [
+        (section).type = SECTION_LOG,
+        (section).args = "LOG_ID_CRASH"
+    ];
+
+    optional android.util.LogProto stats_logs = 1106 [
+        (section).type = SECTION_LOG,
+        (section).args = "LOG_ID_STATS"
+    ];
+
+    optional android.util.LogProto security_logs = 1107 [
+        (section).type = SECTION_LOG,
+        (section).args = "LOG_ID_SECURITY"
+    ];
+
+    optional android.util.LogProto kernel_logs = 1108 [
+        (section).type = SECTION_LOG,
+        (section).args = "LOG_ID_KERNEL"
     ];
 
     // Linux services
@@ -196,4 +246,5 @@ message IncidentProto {
         (section).type = SECTION_DUMPSYS,
         (section).args = "graphicsstats --proto"
     ];
+
 }
