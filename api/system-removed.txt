@@ -142,10 +142,7 @@ package android.net.wifi {
   }
 
   public class WifiManager {
-    method public deprecated java.util.List<android.net.wifi.BatchedScanResult> getBatchedScanResults();
     method public android.net.wifi.WifiConnectionStatistics getConnectionStatistics();
-    method public deprecated boolean isBatchedScanSupported();
-    method public deprecated boolean startLocationRestrictedScan(android.os.WorkSource);
   }
 
 }
