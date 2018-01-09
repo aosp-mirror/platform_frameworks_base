@@ -235,6 +235,8 @@ public final class Choreographer {
         for (int i = 0; i <= CALLBACK_LAST; i++) {
             mCallbackQueues[i] = new CallbackQueue();
         }
+        // b/68769804: For low FPS experiments.
+        setFPSDivisor(SystemProperties.getInt(ThreadedRenderer.DEBUG_FPS_DIVISOR, 1));
     }
 
     private static float getRefreshRate() {
@@ -605,6 +607,7 @@ public final class Choreographer {
     void setFPSDivisor(int divisor) {
         if (divisor <= 0) divisor = 1;
         mFPSDivisor = divisor;
+        ThreadedRenderer.setFPSDivisor(divisor);
     }
 
     void doFrame(long frameTimeNanos, int frame) {
