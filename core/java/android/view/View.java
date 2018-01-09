@@ -11172,6 +11172,8 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
 
         if (!isLayoutValid()) {
             mPrivateFlags |= PFLAG_WANTS_FOCUS;
+        } else {
+            clearParentsWantFocus();
         }
 
         handleFocusGainInternal(direction, previouslyFocusedRect);
