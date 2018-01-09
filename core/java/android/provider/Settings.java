@@ -11221,6 +11221,15 @@ public final class Settings {
          */
         public static final String ENABLE_GNSS_RAW_MEAS_FULL_TRACKING =
                 "enable_gnss_raw_meas_full_tracking";
+
+        /**
+         * Whether we've enabled zram on this device. Takes effect on
+         * reboot. The value "1" enables zram; "0" disables it, and
+         * everything else is unspecified.
+         * @hide
+         */
+        public static final String ZRAM_ENABLED =
+                "zram_enabled";
     }
 
     /**

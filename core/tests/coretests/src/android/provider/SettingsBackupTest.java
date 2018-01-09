@@ -418,7 +418,8 @@ public class SettingsBackupTest {
                     Settings.Global.WTF_IS_FATAL,
                     Settings.Global.ZEN_MODE,
                     Settings.Global.ZEN_MODE_CONFIG_ETAG,
-                    Settings.Global.ZEN_MODE_RINGER_LEVEL);
+                    Settings.Global.ZEN_MODE_RINGER_LEVEL,
+                    Settings.Global.ZRAM_ENABLED);
 
     private static final Set<String> BACKUP_BLACKLISTED_SECURE_SETTINGS =
              newHashSet(
