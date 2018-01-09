@@ -6575,6 +6575,13 @@ public class WindowManagerService extends IWindowManager.Stub
         }
     }
 
+    public void onOverlayChanged() {
+        synchronized (mWindowMap) {
+            mPolicy.onOverlayChangedLw();
+            requestTraversal();
+        }
+    }
+
     public void onDisplayChanged(int displayId) {
         synchronized (mWindowMap) {
             final DisplayContent displayContent = mRoot.getDisplayContentOrCreate(displayId);
