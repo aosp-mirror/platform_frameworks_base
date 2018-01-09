@@ -4564,6 +4564,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
             dockFrame.top = displayFrames.mStable.top;
             displayFrames.mContent.set(dockFrame);
             displayFrames.mVoiceContent.set(dockFrame);
+            displayFrames.mCurrent.set(dockFrame);
 
             if (DEBUG_LAYOUT) Slog.v(TAG, "Status bar: " + String.format(
                     "dock=%s content=%s cur=%s", dockFrame.toString(),
