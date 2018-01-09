@@ -123,8 +123,6 @@ interface IBatteryStats {
     void noteWifiScanStoppedFromSource(in WorkSource ws);
     void noteWifiBatchedScanStartedFromSource(in WorkSource ws, int csph);
     void noteWifiBatchedScanStoppedFromSource(in WorkSource ws);
-    void noteWifiMulticastEnabledFromSource(in WorkSource ws);
-    void noteWifiMulticastDisabledFromSource(in WorkSource ws);
     void noteWifiRadioPowerState(int powerState, long timestampNs, int uid);
     void noteNetworkInterfaceType(String iface, int type);
     void noteNetworkStatsEnabled();
