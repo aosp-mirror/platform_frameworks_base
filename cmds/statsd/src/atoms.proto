@@ -81,6 +81,9 @@ message Atom {
         DropboxErrorChanged dropbox_error_changed = 45;
         AnomalyDetected anomaly_detected = 46;
         AppHook app_hook = 47;
+        AppStartChanged app_start_changed = 48;
+        AppStartCancelChanged app_start_cancel_changed = 49;
+        AppStartFullyDrawnChanged app_start_fully_drawn_changed = 50;
         // TODO: Reorder the numbering so that the most frequent occur events occur in the first 15.
     }
 
@@ -853,6 +856,100 @@ message AnomalyDetected {
 
     // Id of the alert (i.e. name of the anomaly that was detected).
     optional int64 alert_id = 3;
+}
+
+message AppStartChanged {
+    // The uid if available. -1 means not available.
+    optional int32 uid = 1;
+
+    // The app package name.
+    optional string pkg_name = 2;
+
+    enum TransitionType {
+        APP_START_TRANSITION_TYPE_UNKNOWN = 0;
+        WARM = 1;
+        HOT = 2;
+        COLD = 3;
+    }
+    // The transition type.
+    optional TransitionType type = 3;
+
+    // The activity name.
+    optional string activity_name = 4;
+
+    // The name of the calling app. Empty if not set.
+    optional string calling_pkg_name = 5;
+
+    // Whether the app is an instant app.
+    optional bool is_instant_app = 6;
+
+    // Device uptime when activity started.
+    optional int64 activity_start_msec = 7;
+
+    // TODO: Update android/app/ActivityManagerInternal.java constants to depend on our proto enum.
+    enum TransitionReason {
+        APP_START_TRANSITION_REASON_UNKNOWN = 0;
+        SPLASH_SCREEN = 1;
+        WINDOWS_DRAWN = 2;
+        TIMEOUT = 3;
+        SNAPSHOT = 4;
+    }
+    optional TransitionReason reason = 8;
+
+    optional int32 transition_delay_msec = 9;
+    // -1 if not set.
+    optional int32 starting_window_delay_msec = 10;
+    // -1 if not set.
+    optional int32 bind_application_delay_msec = 11;
+    optional int32 windows_drawn_delay_msec = 12;
+
+    // Empty if not set.
+    optional string launch_token = 13;
+
+}
+
+message AppStartCancelChanged {
+    // The uid if available. -1 means not available.
+    optional int32 uid = 1;
+
+    // The app package name.
+    optional string pkg_name = 2;
+
+    enum TransitionType {
+        APP_START_TRANSITION_TYPE_UNKNOWN = 0;
+        WARM = 1;
+        HOT = 2;
+        COLD = 3;
+    }
+    // The transition type.
+    optional TransitionType type = 3;
+
+    // The activity name.
+    optional string activity_name = 4;
+}
+
+message AppStartFullyDrawnChanged {
+    // The uid if available. -1 means not available.
+    optional int32 uid = 1;
+
+    // The app package name.
+    optional string pkg_name = 2;
+
+    enum TransitionType {
+        APP_START_TRANSITION_TYPE_UNKNOWN = 0;
+        WITH_BUNDLE = 1;
+        WITHOUT_BUNDLE = 2;
+    }
+    // The transition type.
+    optional TransitionType type = 3;
+
+    // The activity name.
+    optional string activity_name = 4;
+
+    optional bool transition_process_running = 5;
+
+    // App startup time (until call to Activity#reportFullyDrawn()).
+    optional int64 app_startup_time_ms = 6;
 }
 
 /**

@@ -42,6 +42,7 @@ import android.os.SystemClock;
 import android.util.Slog;
 import android.util.SparseArray;
 import android.util.SparseIntArray;
+import android.util.StatsLog;
 
 import com.android.internal.logging.MetricsLogger;
 import com.android.internal.os.SomeArgs;
@@ -431,6 +432,12 @@ class ActivityMetricsLogger {
         builder.setType(type);
         builder.addTaggedData(FIELD_CLASS_NAME, info.launchedActivity.info.name);
         mMetricsLogger.write(builder);
+        StatsLog.write(
+                StatsLog.APP_START_CANCEL_CHANGED,
+                info.launchedActivity.appInfo.uid,
+                info.launchedActivity.packageName,
+                convertAppStartTransitionType(type),
+                info.launchedActivity.info.name);
     }
 
     private void logAppTransitionMultiEvents() {
@@ -450,9 +457,9 @@ class ActivityMetricsLogger {
                 builder.addTaggedData(APP_TRANSITION_CALLING_PACKAGE_NAME,
                         info.launchedActivity.launchedFromPackage);
             }
-            if (info.launchedActivity.info.launchToken != null) {
-                builder.addTaggedData(FIELD_INSTANT_APP_LAUNCH_TOKEN,
-                        info.launchedActivity.info.launchToken);
+            String launchToken = info.launchedActivity.info.launchToken;
+            if (launchToken != null) {
+                builder.addTaggedData(FIELD_INSTANT_APP_LAUNCH_TOKEN, launchToken);
                 info.launchedActivity.info.launchToken = null;
             }
             builder.addTaggedData(APP_TRANSITION_IS_EPHEMERAL, isInstantApp ? 1 : 0);
@@ -470,8 +477,36 @@ class ActivityMetricsLogger {
             }
             builder.addTaggedData(APP_TRANSITION_WINDOWS_DRAWN_DELAY_MS, info.windowsDrawnDelayMs);
             mMetricsLogger.write(builder);
+            StatsLog.write(
+                    StatsLog.APP_START_CHANGED,
+                    info.launchedActivity.appInfo.uid,
+                    info.launchedActivity.packageName,
+                    convertAppStartTransitionType(type),
+                    info.launchedActivity.info.name,
+                    info.launchedActivity.launchedFromPackage,
+                    isInstantApp,
+                    mCurrentTransitionDeviceUptime * 1000,
+                    info.reason,
+                    mCurrentTransitionDelayMs,
+                    info.startingWindowDelayMs,
+                    info.bindApplicationDelayMs,
+                    info.windowsDrawnDelayMs,
+                    launchToken);
         }
     }
+
+    private int convertAppStartTransitionType(int tronType) {
+        if (tronType == TYPE_TRANSITION_COLD_LAUNCH) {
+            return StatsLog.APP_START_CHANGED__TYPE__COLD;
+        }
+        if (tronType == TYPE_TRANSITION_WARM_LAUNCH) {
+            return StatsLog.APP_START_CHANGED__TYPE__WARM;
+        }
+        if (tronType == TYPE_TRANSITION_HOT_LAUNCH) {
+            return StatsLog.APP_START_CHANGED__TYPE__HOT;
+        }
+        return StatsLog.APP_START_CHANGED__TYPE__APP_START_TRANSITION_TYPE_UNKNOWN;
+     }
 
     void logAppTransitionReportedDrawn(ActivityRecord r, boolean restoredFromBundle) {
         final StackTransitionInfo info = mLastStackTransitionInfo.get(r.getStackId());
@@ -481,14 +516,24 @@ class ActivityMetricsLogger {
         final LogMaker builder = new LogMaker(APP_TRANSITION_REPORTED_DRAWN);
         builder.setPackageName(r.packageName);
         builder.addTaggedData(FIELD_CLASS_NAME, r.info.name);
-        builder.addTaggedData(APP_TRANSITION_REPORTED_DRAWN_MS,
-                SystemClock.uptimeMillis() - mLastTransitionStartTime);
+        long startupTimeMs = SystemClock.uptimeMillis() - mLastTransitionStartTime;
+        builder.addTaggedData(APP_TRANSITION_REPORTED_DRAWN_MS, startupTimeMs);
         builder.setType(restoredFromBundle
                 ? TYPE_TRANSITION_REPORTED_DRAWN_WITH_BUNDLE
                 : TYPE_TRANSITION_REPORTED_DRAWN_NO_BUNDLE);
         builder.addTaggedData(APP_TRANSITION_PROCESS_RUNNING,
                 info.currentTransitionProcessRunning ? 1 : 0);
         mMetricsLogger.write(builder);
+        StatsLog.write(
+                StatsLog.APP_START_FULLY_DRAWN_CHANGED,
+                info.launchedActivity.appInfo.uid,
+                info.launchedActivity.packageName,
+                restoredFromBundle
+                        ? StatsLog.APP_START_FULLY_DRAWN_CHANGED__TYPE__WITH_BUNDLE
+                        : StatsLog.APP_START_FULLY_DRAWN_CHANGED__TYPE__WITHOUT_BUNDLE,
+                info.launchedActivity.info.name,
+                info.currentTransitionProcessRunning,
+                startupTimeMs);
     }
 
     private int getTransitionType(StackTransitionInfo info) {
