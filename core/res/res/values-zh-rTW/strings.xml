@@ -21,6 +21,10 @@
 <resources xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
     <string name="byteShort" msgid="8340973892742019101">"位元組"</string>
+    <string name="kilobyteShort" msgid="7542884022844556968">"KB"</string>
+    <string name="megabyteShort" msgid="6355851576770428922">"MB"</string>
+    <string name="gigabyteShort" msgid="3259882455212193214">"GB"</string>
+    <string name="terabyteShort" msgid="231613018159186962">"TB"</string>
     <string name="petabyteShort" msgid="5637816680144990219">"PB"</string>
     <string name="fileSizeSuffix" msgid="8897567456150907538">"<xliff:g id="NUMBER">%1$s</xliff:g> <xliff:g id="UNIT">%2$s</xliff:g>"</string>
     <string name="untitled" msgid="4638956954852782576">"&lt;未命名&gt;"</string>
@@ -1116,6 +1120,9 @@
     <string name="wifi_available_content_failed_to_connect" msgid="3377406637062802645">"輕觸即可查看所有網路"</string>
     <string name="wifi_available_action_connect" msgid="2635699628459488788">"連線"</string>
     <string name="wifi_available_action_all_networks" msgid="1100098935861622985">"所有網路"</string>
+    <string name="wifi_wakeup_onboarding_title" msgid="228772560195634292">"Wi‑Fi 將自動開啟"</string>
+    <string name="wifi_wakeup_onboarding_subtext" msgid="3989697580301186973">"當你位於已儲存的高品質網路範圍內時"</string>
+    <string name="wifi_wakeup_onboarding_action_disable" msgid="838648204200836028">"不要重新開啟"</string>
     <string name="wifi_available_sign_in" msgid="9157196203958866662">"登入 Wi-Fi 網路"</string>
     <string name="network_available_sign_in" msgid="1848877297365446605">"登入網路"</string>
     <!-- no translation found for network_available_sign_in_detailed (8000081941447976118) -->

@@ -21,6 +21,10 @@
 <resources xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
     <string name="byteShort" msgid="8340973892742019101">"B"</string>
+    <string name="kilobyteShort" msgid="7542884022844556968">" KB"</string>
+    <string name="megabyteShort" msgid="6355851576770428922">"MB"</string>
+    <string name="gigabyteShort" msgid="3259882455212193214">"GB"</string>
+    <string name="terabyteShort" msgid="231613018159186962">"TB"</string>
     <string name="petabyteShort" msgid="5637816680144990219">"PB"</string>
     <string name="fileSizeSuffix" msgid="8897567456150907538">"<xliff:g id="NUMBER">%1$s</xliff:g> <xliff:g id="UNIT">%2$s</xliff:g>"</string>
     <string name="untitled" msgid="4638956954852782576">"&lt;Naamloos&gt;"</string>
@@ -835,8 +839,8 @@
     <string name="permdesc_writeHistoryBookmarks" product="tablet" msgid="6825527469145760922">"Hiermee kan de app de webgeschiedenis wijzigen in de systeemeigen browser en de bladwijzers die zijn opgeslagen op je tablet. Deze toestemming kan niet worden geforceerd door andere browsers of andere apps met internetmogelijkheden.."</string>
     <string name="permdesc_writeHistoryBookmarks" product="tv" msgid="7007393823197766548">"Hiermee kan de app de webgeschiedenis wijzigen in de systeemeigen browser en de bladwijzers die zijn opgeslagen op je tv. De app kan browsergegevens wissen of aanpassen. Deze toestemming kan niet worden geforceerd door andere browsers of andere apps met internetmogelijkheden."</string>
     <string name="permdesc_writeHistoryBookmarks" product="default" msgid="8497389531014185509">"Hiermee kan de app de webgeschiedenis wijzigen in de systeemeigen browser en de bladwijzers die zijn opgeslagen op je telefoon. Deze toestemming kan niet worden geforceerd door andere browsers of andere apps met internetmogelijkheden."</string>
-    <string name="permlab_setAlarm" msgid="1379294556362091814">"een alarm instellen"</string>
-    <string name="permdesc_setAlarm" msgid="316392039157473848">"Hiermee kan de app een alarm instellen in een geïnstalleerde wekkerapp. Deze functie wordt door sommige wekkerapps niet geïmplementeerd."</string>
+    <string name="permlab_setAlarm" msgid="1379294556362091814">"een wekker instellen"</string>
+    <string name="permdesc_setAlarm" msgid="316392039157473848">"Hiermee kan de app een wekker instellen in een geïnstalleerde wekker-app. Deze functie wordt door sommige wekker-apps niet geïmplementeerd."</string>
     <string name="permlab_addVoicemail" msgid="5525660026090959044">"voicemail toevoegen"</string>
     <string name="permdesc_addVoicemail" msgid="6604508651428252437">"Hiermee kan de app berichten toevoegen aan de inbox van je voicemail."</string>
     <string name="permlab_writeGeolocationPermissions" msgid="5962224158955273932">"geolocatiemachtigingen voor browser aanpassen"</string>
@@ -1116,6 +1120,9 @@
     <string name="wifi_available_content_failed_to_connect" msgid="3377406637062802645">"Tik om alle netwerken te bekijken"</string>
     <string name="wifi_available_action_connect" msgid="2635699628459488788">"Verbinding maken"</string>
     <string name="wifi_available_action_all_networks" msgid="1100098935861622985">"Alle netwerken"</string>
+    <string name="wifi_wakeup_onboarding_title" msgid="228772560195634292">"Wifi wordt automatisch ingeschakeld"</string>
+    <string name="wifi_wakeup_onboarding_subtext" msgid="3989697580301186973">"Wanneer je in de buurt van een opgeslagen netwerk van hoge kwaliteit bent"</string>
+    <string name="wifi_wakeup_onboarding_action_disable" msgid="838648204200836028">"Niet weer inschakelen"</string>
     <string name="wifi_available_sign_in" msgid="9157196203958866662">"Inloggen bij wifi-netwerk"</string>
     <string name="network_available_sign_in" msgid="1848877297365446605">"Inloggen bij netwerk"</string>
     <!-- no translation found for network_available_sign_in_detailed (8000081941447976118) -->
@@ -1677,7 +1684,7 @@
       <item quantity="one">Gedurende 1 u</item>
     </plurals>
     <string name="zen_mode_until" msgid="7336308492289875088">"Tot <xliff:g id="FORMATTEDTIME">%1$s</xliff:g>"</string>
-    <string name="zen_mode_alarm" msgid="9128205721301330797">"Tot <xliff:g id="FORMATTEDTIME">%1$s</xliff:g> (volgend alarm)"</string>
+    <string name="zen_mode_alarm" msgid="9128205721301330797">"Tot <xliff:g id="FORMATTEDTIME">%1$s</xliff:g> (volgende wekker)"</string>
     <string name="zen_mode_forever" msgid="1916263162129197274">"Totdat je \'Niet storen\' uitschakelt"</string>
     <string name="zen_mode_forever_dnd" msgid="3792132696572189081">"Totdat u \'Niet storen\' uitschakelt"</string>
     <string name="zen_mode_rule_name_combination" msgid="191109939968076477">"<xliff:g id="FIRST">%1$s</xliff:g>/<xliff:g id="REST">%2$s</xliff:g>"</string>
