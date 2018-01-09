@@ -94,6 +94,9 @@ jstring JNICALL Java_com_android_server_usb_descriptors_UsbDescriptorParser_getD
         j_str = env->NewString((jchar*)byteBuffer, numUSC2Bytes/2);
         free(byteBuffer);
     }
+
+    usb_device_close(device);
+
     return j_str;
 }
 
