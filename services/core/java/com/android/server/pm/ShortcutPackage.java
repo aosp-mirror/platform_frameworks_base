@@ -459,8 +459,7 @@ class ShortcutPackage extends ShortcutPackageItem {
         }
 
         // Then, for the pinned set for each launcher, set the pin flag one by one.
-        mShortcutUser.mService.getUserShortcutsLocked(getPackageUserId())
-                .forAllLaunchers(launcherShortcuts -> {
+        mShortcutUser.forAllLaunchers(launcherShortcuts -> {
             final ArraySet<String> pinned = launcherShortcuts.getPinnedShortcutIds(
                     getPackageName(), getPackageUserId());
 
