@@ -251,8 +251,8 @@ public class EuiccManager {
      *
      * @return the status of eUICC OTA. If {@link #isEnabled()} is false or the eUICC is not ready,
      *     {@link OtaStatus#EUICC_OTA_STATUS_UNAVAILABLE} will be returned.
+     * TODO(b/35851809): Make this a SystemApi.
      */
-    @SystemApi
     public int getOtaStatus() {
         if (!isEnabled()) {
             return EUICC_OTA_STATUS_UNAVAILABLE;
