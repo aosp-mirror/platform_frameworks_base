@@ -114,6 +114,8 @@ public class StorageManager {
     /** {@hide} */
     public static final String PROP_HAS_ADOPTABLE = "vold.has_adoptable";
     /** {@hide} */
+    public static final String PROP_HAS_RESERVED = "vold.has_reserved";
+    /** {@hide} */
     public static final String PROP_FORCE_ADOPTABLE = "persist.fw.force_adoptable";
     /** {@hide} */
     public static final String PROP_EMULATE_FBE = "persist.sys.emulate_fbe";

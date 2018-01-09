@@ -67,6 +67,9 @@ class SurfaceAnimationRunner {
     @VisibleForTesting
     final ArrayMap<SurfaceControl, RunningAnimation> mRunningAnimations = new ArrayMap<>();
 
+    @GuardedBy("mLock")
+    private boolean mAnimationStartDeferred;
+
     SurfaceAnimationRunner() {
         this(null /* callbackProvider */, null /* animatorFactory */, new Transaction());
     }
@@ -86,13 +89,41 @@ class SurfaceAnimationRunner {
                 : SfValueAnimator::new;
     }
 
+    /**
+     * Defers starting of animations until {@link #continueStartingAnimations} is called. This
+     * method is NOT nestable.
+     *
+     * @see #continueStartingAnimations
+     */
+    void deferStartingAnimations() {
+        synchronized (mLock) {
+            mAnimationStartDeferred = true;
+        }
+    }
+
+    /**
+     * Continues starting of animations.
+     *
+     * @see #deferStartingAnimations
+     */
+    void continueStartingAnimations() {
+        synchronized (mLock) {
+            mAnimationStartDeferred = false;
+            if (!mPendingAnimations.isEmpty()) {
+                mChoreographer.postFrameCallback(this::startAnimations);
+            }
+        }
+    }
+
     void startAnimation(AnimationSpec a, SurfaceControl animationLeash, Transaction t,
             Runnable finishCallback) {
         synchronized (mLock) {
             final RunningAnimation runningAnim = new RunningAnimation(a, animationLeash,
                     finishCallback);
             mPendingAnimations.put(animationLeash, runningAnim);
-            mChoreographer.postFrameCallback(this::stepAnimation);
+            if (!mAnimationStartDeferred) {
+                mChoreographer.postFrameCallback(this::startAnimations);
+            }
 
             // Some animations (e.g. move animations) require the initial transform to be applied
             // immediately.
@@ -185,7 +216,7 @@ class SurfaceAnimationRunner {
         a.mAnimSpec.apply(t, a.mLeash, currentPlayTime);
     }
 
-    private void stepAnimation(long frameTimeNanos) {
+    private void startAnimations(long frameTimeNanos) {
         synchronized (mLock) {
             startPendingAnimationsLocked();
         }

@@ -17,6 +17,8 @@
 #ifndef SECTION_LIST_H
 #define SECTION_LIST_H
 
+#include <log/log_event_list.h> // include log_id_t enums.
+
 #include "Privacy.h"
 #include "Section.h"
 

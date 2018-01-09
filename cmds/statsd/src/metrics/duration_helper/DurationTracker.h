@@ -62,7 +62,7 @@ class DurationTracker {
 public:
     DurationTracker(const ConfigKey& key, const int64_t& id, const HashableDimensionKey& eventKey,
                     sp<ConditionWizard> wizard, int conditionIndex, bool nesting,
-                    uint64_t currentBucketStartNs, uint64_t bucketSizeNs,
+                    uint64_t currentBucketStartNs, uint64_t bucketSizeNs, bool conditionSliced,
                     const std::vector<sp<DurationAnomalyTracker>>& anomalyTrackers)
         : mConfigKey(key),
           mTrackerId(id),
@@ -74,6 +74,7 @@ public:
           mCurrentBucketStartTimeNs(currentBucketStartNs),
           mDuration(0),
           mCurrentBucketNum(0),
+          mConditionSliced(conditionSliced),
           mAnomalyTrackers(anomalyTrackers){};
 
     virtual ~DurationTracker(){};
@@ -162,6 +163,8 @@ protected:
     int64_t mDuration;  // current recorded duration result
 
     uint64_t mCurrentBucketNum;
+
+    const bool mConditionSliced;
 
     std::vector<sp<DurationAnomalyTracker>> mAnomalyTrackers;
 

@@ -185,6 +185,10 @@ public final class BatteryStatsService extends IBatteryStats.Stub
         ServiceManager.addService(BatteryStats.SERVICE_NAME, asBinder());
     }
 
+    public void systemServicesReady() {
+        mStats.systemServicesReady(mContext);
+    }
+
     private final class LocalService extends BatteryStatsInternal {
         @Override
         public String[] getWifiIfaces() {
@@ -1185,6 +1189,7 @@ public final class BatteryStatsService extends IBatteryStats.Stub
         pw.println("  --write: force write current collected stats to disk.");
         pw.println("  --new-daily: immediately create and write new daily stats record.");
         pw.println("  --read-daily: read-load last written daily stats.");
+        pw.println("  --settings: dump the settings key/values related to batterystats");
         pw.println("  <package.name>: optional name of package to filter output by.");
         pw.println("  -h: print this help text.");
         pw.println("Battery stats (batterystats) commands:");
@@ -1195,6 +1200,12 @@ public final class BatteryStatsService extends IBatteryStats.Stub
         pw.println("          wake_lock_in, alarms and proc events");
         pw.println("      no-auto-reset: don't automatically reset stats when unplugged");
         pw.println("      pretend-screen-off: pretend the screen is off, even if screen state changes");
+    }
+
+    private void dumpSettings(PrintWriter pw) {
+        synchronized (mStats) {
+            mStats.dumpConstantsLocked(pw);
+        }
     }
 
     private int doEnableOrDisable(PrintWriter pw, int i, String[] args, boolean enable) {
@@ -1306,6 +1317,9 @@ public final class BatteryStatsService extends IBatteryStats.Stub
                     return;
                 } else if ("-h".equals(arg)) {
                     dumpHelp(pw);
+                    return;
+                } else if ("--settings".equals(arg)) {
+                    dumpSettings(pw);
                     return;
                 } else if ("-a".equals(arg)) {
                     flags |= BatteryStats.DUMP_VERBOSE;

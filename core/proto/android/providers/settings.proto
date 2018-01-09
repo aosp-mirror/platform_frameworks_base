@@ -582,7 +582,7 @@ message SecureSettingsProto {
     optional SettingProto downloads_backup_charging_only = 162;
     optional SettingProto automatic_storage_manager_downloads_days_to_retain = 163;
     optional SettingProto qs_tiles = 164;
-    optional SettingProto demo_user_setup_complete = 165;
+    reserved 165; // Removed demo_user_setup_complete
     optional SettingProto instant_apps_enabled = 166;
     optional SettingProto device_paired = 167;
     optional SettingProto package_verifier_state = 191;

@@ -31,7 +31,7 @@ public:
     MaxDurationTracker(const ConfigKey& key, const int64_t& id,
                        const HashableDimensionKey& eventKey, sp<ConditionWizard> wizard,
                        int conditionIndex, bool nesting, uint64_t currentBucketStartNs,
-                       uint64_t bucketSizeNs,
+                       uint64_t bucketSizeNs, bool conditionSliced,
                        const std::vector<sp<DurationAnomalyTracker>>& anomalyTrackers);
     void noteStart(const HashableDimensionKey& key, bool condition, const uint64_t eventTime,
                    const ConditionKey& conditionKey) override;

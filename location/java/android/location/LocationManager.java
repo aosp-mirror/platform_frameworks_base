@@ -42,6 +42,7 @@ import java.util.List;
 
 import static android.Manifest.permission.ACCESS_COARSE_LOCATION;
 import static android.Manifest.permission.ACCESS_FINE_LOCATION;
+import static android.Manifest.permission.LOCATION_HARDWARE;
 
 /**
  * This class provides access to the system location services.  These
@@ -880,6 +881,34 @@ public class LocationManager {
     public void requestLocationUpdates(LocationRequest request, PendingIntent intent) {
         checkPendingIntent(intent);
         requestLocationUpdates(request, null, null, intent);
+    }
+
+    /**
+     * Set the last known location with a new location.
+     *
+     * <p>A privileged client can inject a {@link Location} if it has a better estimate of what
+     * the recent location is.  This is especially useful when the device boots up and the GPS
+     * chipset is in the process of getting the first fix.  If the client has cached the location,
+     * it can inject the {@link Location}, so if an app requests for a {@link Location} from {@link
+     * #getLastKnownLocation(String)}, the location information is still useful before getting
+     * the first fix.</p>
+     *
+     * <p> Useful in products like Auto.
+     *
+     * @param newLocation newly available {@link Location} object
+     * @return true if update was successful, false if not
+     *
+     * @throws SecurityException if no suitable permission is present
+     *
+     * @hide
+     */
+    @RequiresPermission(allOf = {LOCATION_HARDWARE, ACCESS_FINE_LOCATION})
+    public boolean injectLocation(Location newLocation) {
+        try {
+            return mService.injectLocation(newLocation);
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
     }
 
     private ListenerTransport wrapListener(LocationListener listener, Looper looper) {

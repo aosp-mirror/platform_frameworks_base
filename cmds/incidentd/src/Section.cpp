@@ -16,21 +16,29 @@
 
 #define LOG_TAG "incidentd"
 
-#include "FdBuffer.h"
-#include "Privacy.h"
-#include "PrivacyBuffer.h"
 #include "Section.h"
 
-#include "io_util.h"
-#include "section_list.h"
+#include <errno.h>
+#include <unistd.h>
+#include <wait.h>
+
+#include <memory>
+#include <mutex>
 
 #include <android/util/protobuf.h>
-#include <private/android_filesystem_config.h>
 #include <binder/IServiceManager.h>
-#include <map>
-#include <mutex>
-#include <wait.h>
-#include <unistd.h>
+#include <log/log_event_list.h>
+#include <log/logprint.h>
+#include <log/log_read.h>
+#include <private/android_filesystem_config.h> // for AID_NOBODY
+#include <private/android_logger.h>
+
+#include "FdBuffer.h"
+#include "frameworks/base/core/proto/android/util/log.proto.h"
+#include "io_util.h"
+#include "Privacy.h"
+#include "PrivacyBuffer.h"
+#include "section_list.h"
 
 using namespace android::util;
 using namespace std;
@@ -41,7 +49,7 @@ const int FIELD_ID_INCIDENT_HEADER = 1;
 // incident section parameters
 const int   WAIT_MAX = 5;
 const struct timespec WAIT_INTERVAL_NS = {0, 200 * 1000 * 1000};
-const char* INCIDENT_HELPER = "/system/bin/incident_helper";
+const char INCIDENT_HELPER[] = "/system/bin/incident_helper";
 
 static pid_t
 fork_execute_incident_helper(const int id, const char* name, Fpipe& p2cPipe, Fpipe& c2pPipe)
@@ -608,4 +616,161 @@ DumpsysSection::BlockingCall(int pipeWriteFd) const
     service->dump(pipeWriteFd, mArgs);
 
     return NO_ERROR;
+}
+
+// ================================================================================
+// initialization only once in Section.cpp.
+map<log_id_t, log_time> LogSection::gLastLogsRetrieved;
+
+LogSection::LogSection(int id, log_id_t logID)
+    :WorkerThreadSection(id),
+     mLogID(logID)
+{
+    name += "logcat ";
+    name += android_log_id_to_name(logID);
+    switch (logID) {
+    case LOG_ID_EVENTS:
+    case LOG_ID_STATS:
+    case LOG_ID_SECURITY:
+        mBinary = true;
+        break;
+    default:
+        mBinary = false;
+    }
+}
+
+LogSection::~LogSection()
+{
+}
+
+static size_t
+trimTail(char const* buf, size_t len)
+{
+    while (len > 0) {
+        char c = buf[len - 1];
+        if (c == '\0' || c == ' ' || c == '\n' || c == '\r' || c == ':') {
+            len--;
+        } else {
+            break;
+        }
+    }
+    return len;
+}
+
+static inline int32_t get4LE(uint8_t const* src) {
+    return src[0] | (src[1] << 8) | (src[2] << 16) | (src[3] << 24);
+}
+
+status_t
+LogSection::BlockingCall(int pipeWriteFd) const
+{
+    status_t err = NO_ERROR;
+    // Open log buffer and getting logs since last retrieved time if any.
+    unique_ptr<logger_list, void (*)(logger_list*)> loggers(
+        gLastLogsRetrieved.find(mLogID) == gLastLogsRetrieved.end() ?
+        android_logger_list_alloc(ANDROID_LOG_RDONLY | ANDROID_LOG_NONBLOCK, 0, 0) :
+        android_logger_list_alloc_time(ANDROID_LOG_RDONLY | ANDROID_LOG_NONBLOCK,
+            gLastLogsRetrieved[mLogID], 0),
+        android_logger_list_free);
+
+    if (android_logger_open(loggers.get(), mLogID) == NULL) {
+        ALOGW("LogSection %s: Can't get logger.", this->name.string());
+        return err;
+    }
+
+    log_msg msg;
+    log_time lastTimestamp(0);
+
+    ProtoOutputStream proto;
+    while (true) { // keeps reading until logd buffer is fully read.
+        status_t err = android_logger_list_read(loggers.get(), &msg);
+        // err = 0 - no content, unexpected connection drop or EOF.
+        // err = +ive number - size of retrieved data from logger
+        // err = -ive number, OS supplied error _except_ for -EAGAIN
+        // err = -EAGAIN, graceful indication for ANDRODI_LOG_NONBLOCK that this is the end of data.
+        if (err <= 0) {
+            if (err != -EAGAIN) {
+                ALOGE("LogSection %s: fails to read a log_msg.\n", this->name.string());
+            }
+            break;
+        }
+        if (mBinary) {
+            // remove the first uint32 which is tag's index in event log tags
+            android_log_context context = create_android_log_parser(msg.msg() + sizeof(uint32_t),
+                    msg.len() - sizeof(uint32_t));;
+            android_log_list_element elem;
+
+            lastTimestamp.tv_sec = msg.entry_v1.sec;
+            lastTimestamp.tv_nsec = msg.entry_v1.nsec;
+
+            // format a BinaryLogEntry
+            long long token = proto.start(LogProto::BINARY_LOGS);
+            proto.write(BinaryLogEntry::SEC, msg.entry_v1.sec);
+            proto.write(BinaryLogEntry::NANOSEC, msg.entry_v1.nsec);
+            proto.write(BinaryLogEntry::UID, (int) msg.entry_v4.uid);
+            proto.write(BinaryLogEntry::PID, msg.entry_v1.pid);
+            proto.write(BinaryLogEntry::TID, msg.entry_v1.tid);
+            proto.write(BinaryLogEntry::TAG_INDEX, get4LE(reinterpret_cast<uint8_t const*>(msg.msg())));
+            do {
+                elem = android_log_read_next(context);
+                long long elemToken = proto.start(BinaryLogEntry::ELEMS);
+                switch (elem.type) {
+                    case EVENT_TYPE_INT:
+                        proto.write(BinaryLogEntry::Elem::TYPE, BinaryLogEntry::Elem::EVENT_TYPE_INT);
+                        proto.write(BinaryLogEntry::Elem::VAL_INT32, (int) elem.data.int32);
+                        break;
+                    case EVENT_TYPE_LONG:
+                        proto.write(BinaryLogEntry::Elem::TYPE, BinaryLogEntry::Elem::EVENT_TYPE_LONG);
+                        proto.write(BinaryLogEntry::Elem::VAL_INT64, (long long) elem.data.int64);
+                        break;
+                    case EVENT_TYPE_STRING:
+                        proto.write(BinaryLogEntry::Elem::TYPE, BinaryLogEntry::Elem::EVENT_TYPE_STRING);
+                        proto.write(BinaryLogEntry::Elem::VAL_STRING, elem.data.string, elem.len);
+                        break;
+                    case EVENT_TYPE_FLOAT:
+                        proto.write(BinaryLogEntry::Elem::TYPE, BinaryLogEntry::Elem::EVENT_TYPE_FLOAT);
+                        proto.write(BinaryLogEntry::Elem::VAL_FLOAT, elem.data.float32);
+                        break;
+                    case EVENT_TYPE_LIST:
+                        proto.write(BinaryLogEntry::Elem::TYPE, BinaryLogEntry::Elem::EVENT_TYPE_LIST);
+                        break;
+                    case EVENT_TYPE_LIST_STOP:
+                        proto.write(BinaryLogEntry::Elem::TYPE, BinaryLogEntry::Elem::EVENT_TYPE_LIST_STOP);
+                        break;
+                    case EVENT_TYPE_UNKNOWN:
+                        proto.write(BinaryLogEntry::Elem::TYPE, BinaryLogEntry::Elem::EVENT_TYPE_UNKNOWN);
+                        break;
+                }
+                proto.end(elemToken);
+            } while ((elem.type != EVENT_TYPE_UNKNOWN) && !elem.complete);
+            proto.end(token);
+            if (context) {
+                android_log_destroy(&context);
+            }
+        } else {
+            AndroidLogEntry entry;
+            err = android_log_processLogBuffer(&msg.entry_v1, &entry);
+            if (err != NO_ERROR) {
+                ALOGE("LogSection %s: fails to process to an entry.\n", this->name.string());
+                break;
+            }
+            lastTimestamp.tv_sec = entry.tv_sec;
+            lastTimestamp.tv_nsec = entry.tv_nsec;
+
+            // format a TextLogEntry
+            long long token = proto.start(LogProto::TEXT_LOGS);
+            proto.write(TextLogEntry::SEC, (long long)entry.tv_sec);
+            proto.write(TextLogEntry::NANOSEC, (long long)entry.tv_nsec);
+            proto.write(TextLogEntry::PRIORITY, (int)entry.priority);
+            proto.write(TextLogEntry::UID, entry.uid);
+            proto.write(TextLogEntry::PID, entry.pid);
+            proto.write(TextLogEntry::TID, entry.tid);
+            proto.write(TextLogEntry::TAG, entry.tag, trimTail(entry.tag, entry.tagLen));
+            proto.write(TextLogEntry::LOG, entry.message, trimTail(entry.message, entry.messageLen));
+            proto.end(token);
+        }
+    }
+    gLastLogsRetrieved[mLogID] = lastTimestamp;
+    proto.flush(pipeWriteFd);
+    return err;
 }

@@ -16,6 +16,7 @@
 
 package android.bluetooth;
 
+import android.annotation.Nullable;
 import android.annotation.RequiresPermission;
 import android.annotation.SdkConstant;
 import android.annotation.SdkConstant.SdkConstantType;
@@ -93,6 +94,23 @@ public final class BluetoothHeadset implements BluetoothProfile {
     public static final String ACTION_AUDIO_STATE_CHANGED =
             "android.bluetooth.headset.profile.action.AUDIO_STATE_CHANGED";
 
+    /**
+     * Intent used to broadcast the selection of a connected device as active.
+     *
+     * <p>This intent will have one extra:
+     * <ul>
+     * <li> {@link BluetoothDevice#EXTRA_DEVICE} - The remote device. It can
+     * be null if no device is active. </li>
+     * </ul>
+     *
+     * <p>Requires {@link android.Manifest.permission#BLUETOOTH} permission to
+     * receive.
+     *
+     * @hide
+     */
+    @SdkConstant(SdkConstantType.BROADCAST_INTENT_ACTION)
+    public static final String ACTION_ACTIVE_DEVICE_CHANGED =
+            "android.bluetooth.headset.profile.action.ACTIVE_DEVICE_CHANGED";
 
     /**
      * Intent used to broadcast that the headset has posted a
@@ -980,6 +998,76 @@ public final class BluetoothHeadset implements BluetoothProfile {
             Log.w(TAG, "Proxy not attached to service");
         }
         return false;
+    }
+
+    /**
+     * Select a connected device as active.
+     *
+     * The active device selection is per profile. An active device's
+     * purpose is profile-specific. For example, in HFP and HSP profiles,
+     * it is the device used for phone call audio. If a remote device is not
+     * connected, it cannot be selected as active.
+     *
+     * <p> This API returns false in scenarios like the profile on the
+     * device is not connected or Bluetooth is not turned on.
+     * When this API returns true, it is guaranteed that the
+     * {@link #ACTION_ACTIVE_DEVICE_CHANGED} intent will be broadcasted
+     * with the active device.
+     *
+     * <p>Requires {@link android.Manifest.permission#BLUETOOTH_ADMIN}
+     * permission.
+     *
+     * @param device Remote Bluetooth Device, could be null if phone call audio should not be
+     * streamed to a headset
+     * @return false on immediate error, true otherwise
+     * @hide
+     */
+    @RequiresPermission(android.Manifest.permission.BLUETOOTH_ADMIN)
+    public boolean setActiveDevice(@Nullable BluetoothDevice device) {
+        if (DBG) {
+            Log.d(TAG, "setActiveDevice: " + device);
+        }
+        final IBluetoothHeadset service = mService;
+        if (service != null && isEnabled() && (device == null || isValidDevice(device))) {
+            try {
+                return service.setActiveDevice(device);
+            } catch (RemoteException e) {
+                Log.e(TAG, Log.getStackTraceString(new Throwable()));
+            }
+        }
+        if (service == null) {
+            Log.w(TAG, "Proxy not attached to service");
+        }
+        return false;
+    }
+
+    /**
+     * Get the connected device that is active.
+     *
+     * <p>Requires {@link android.Manifest.permission#BLUETOOTH}
+     * permission.
+     *
+     * @return the connected device that is active or null if no device
+     * is active.
+     * @hide
+     */
+    @RequiresPermission(android.Manifest.permission.BLUETOOTH)
+    public BluetoothDevice getActiveDevice() {
+        if (VDBG) {
+            Log.d(TAG, "getActiveDevice");
+        }
+        final IBluetoothHeadset service = mService;
+        if (service != null && isEnabled()) {
+            try {
+                return service.getActiveDevice();
+            } catch (RemoteException e) {
+                Log.e(TAG, Log.getStackTraceString(new Throwable()));
+            }
+        }
+        if (service == null) {
+            Log.w(TAG, "Proxy not attached to service");
+        }
+        return null;
     }
 
     /**

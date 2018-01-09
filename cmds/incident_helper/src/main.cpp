@@ -19,6 +19,7 @@
 #include "parsers/BatteryTypeParser.h"
 #include "parsers/CpuFreqParser.h"
 #include "parsers/CpuInfoParser.h"
+#include "parsers/EventLogTagsParser.h"
 #include "parsers/KernelWakesParser.h"
 #include "parsers/PageTypeInfoParser.h"
 #include "parsers/ProcrankParser.h"
@@ -55,6 +56,8 @@ static TextParserBase* selectParser(int section) {
         // IDs larger than 1 are section ids reserved in incident.proto
         case 1000:
             return new SystemPropertiesParser();
+        case 1100:
+            return new EventLogTagsParser();
         case 2000:
             return new ProcrankParser();
         case 2001:

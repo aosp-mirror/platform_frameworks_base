@@ -12,21 +12,62 @@
 static jmethodID    gInputStream_readMethodID;
 static jmethodID    gInputStream_skipMethodID;
 
+// FIXME: Share with ByteBufferStreamAdaptor.cpp?
+static JNIEnv* get_env_or_die(JavaVM* jvm) {
+    JNIEnv* env;
+    if (jvm->GetEnv(reinterpret_cast<void**>(&env), JNI_VERSION_1_6) != JNI_OK) {
+        LOG_ALWAYS_FATAL("Failed to get JNIEnv for JavaVM: %p", jvm);
+    }
+    return env;
+}
+
 /**
  *  Wrapper for a Java InputStream.
  */
 class JavaInputStreamAdaptor : public SkStream {
+    JavaInputStreamAdaptor(JavaVM* jvm, jobject js, jbyteArray ar, jint capacity,
+                           bool swallowExceptions)
+            : fJvm(jvm)
+            , fJavaInputStream(js)
+            , fJavaByteArray(ar)
+            , fCapacity(capacity)
+            , fBytesRead(0)
+            , fIsAtEnd(false)
+            , fSwallowExceptions(swallowExceptions) {}
+
 public:
-    JavaInputStreamAdaptor(JNIEnv* env, jobject js, jbyteArray ar)
-        : fEnv(env), fJavaInputStream(js), fJavaByteArray(ar) {
-        SkASSERT(ar);
-        fCapacity = env->GetArrayLength(ar);
-        SkASSERT(fCapacity > 0);
-        fBytesRead = 0;
-        fIsAtEnd = false;
+    static JavaInputStreamAdaptor* Create(JNIEnv* env, jobject js, jbyteArray ar,
+                                          bool swallowExceptions) {
+        JavaVM* jvm;
+        LOG_ALWAYS_FATAL_IF(env->GetJavaVM(&jvm) != JNI_OK);
+
+        js = env->NewGlobalRef(js);
+        if (!js) {
+            return nullptr;
+        }
+
+        ar = (jbyteArray) env->NewGlobalRef(ar);
+        if (!ar) {
+            env->DeleteGlobalRef(js);
+            return nullptr;
+        }
+
+        jint capacity = env->GetArrayLength(ar);
+        return new JavaInputStreamAdaptor(jvm, js, ar, capacity, swallowExceptions);
     }
 
-    virtual size_t read(void* buffer, size_t size) {
+    ~JavaInputStreamAdaptor() override {
+        auto* env = get_env_or_die(fJvm);
+        env->DeleteGlobalRef(fJavaInputStream);
+        env->DeleteGlobalRef(fJavaByteArray);
+    }
+
+    size_t read(void* buffer, size_t size) override {
+        auto* env = get_env_or_die(fJvm);
+        if (!fSwallowExceptions && checkException(env)) {
+            // Just in case the caller did not clear from a previous exception.
+            return 0;
+        }
         if (NULL == buffer) {
             if (0 == size) {
                 return 0;
@@ -37,10 +78,10 @@ public:
                  */
                 size_t amountSkipped = 0;
                 do {
-                    size_t amount = this->doSkip(size - amountSkipped);
+                    size_t amount = this->doSkip(size - amountSkipped, env);
                     if (0 == amount) {
                         char tmp;
-                        amount = this->doRead(&tmp, 1);
+                        amount = this->doRead(&tmp, 1, env);
                         if (0 == amount) {
                             // if read returned 0, we're at EOF
                             fIsAtEnd = true;
@@ -52,16 +93,13 @@ public:
                 return amountSkipped;
             }
         }
-        return this->doRead(buffer, size);
+        return this->doRead(buffer, size, env);
     }
 
-    virtual bool isAtEnd() const {
-        return fIsAtEnd;
-    }
+    bool isAtEnd() const override { return fIsAtEnd; }
 
 private:
-    size_t doRead(void* buffer, size_t size) {
-        JNIEnv* env = fEnv;
+    size_t doRead(void* buffer, size_t size, JNIEnv* env) {
         size_t bytesRead = 0;
         // read the bytes
         do {
@@ -76,13 +114,9 @@ private:
 
             jint n = env->CallIntMethod(fJavaInputStream,
                                         gInputStream_readMethodID, fJavaByteArray, 0, requested);
-            if (env->ExceptionCheck()) {
-                env->ExceptionDescribe();
-                env->ExceptionClear();
+            if (checkException(env)) {
                 SkDebugf("---- read threw an exception\n");
-                // Consider the stream to be at the end, since there was an error.
-                fIsAtEnd = true;
-                return 0;
+                return bytesRead;
             }
 
             if (n < 0) { // n == 0 should not be possible, see InputStream read() specifications.
@@ -92,14 +126,9 @@ private:
 
             env->GetByteArrayRegion(fJavaByteArray, 0, n,
                                     reinterpret_cast<jbyte*>(buffer));
-            if (env->ExceptionCheck()) {
-                env->ExceptionDescribe();
-                env->ExceptionClear();
+            if (checkException(env)) {
                 SkDebugf("---- read:GetByteArrayRegion threw an exception\n");
-                // The error was not with the stream itself, but consider it to be at the
-                // end, since we do not have a way to recover.
-                fIsAtEnd = true;
-                return 0;
+                return bytesRead;
             }
 
             buffer = (void*)((char*)buffer + n);
@@ -111,14 +140,10 @@ private:
         return bytesRead;
     }
 
-    size_t doSkip(size_t size) {
-        JNIEnv* env = fEnv;
-
+    size_t doSkip(size_t size, JNIEnv* env) {
         jlong skipped = env->CallLongMethod(fJavaInputStream,
                                             gInputStream_skipMethodID, (jlong)size);
-        if (env->ExceptionCheck()) {
-            env->ExceptionDescribe();
-            env->ExceptionClear();
+        if (checkException(env)) {
             SkDebugf("------- skip threw an exception\n");
             return 0;
         }
@@ -129,19 +154,36 @@ private:
         return (size_t)skipped;
     }
 
-    JNIEnv*     fEnv;
-    jobject     fJavaInputStream;   // the caller owns this object
-    jbyteArray  fJavaByteArray;     // the caller owns this object
-    jint        fCapacity;
+    bool checkException(JNIEnv* env) {
+        if (!env->ExceptionCheck()) {
+            return false;
+        }
+
+        env->ExceptionDescribe();
+        if (fSwallowExceptions) {
+            env->ExceptionClear();
+        }
+
+        // There is no way to recover from the error, so consider the stream
+        // to be at the end.
+        fIsAtEnd = true;
+
+        return true;
+    }
+
+    JavaVM*     fJvm;
+    jobject     fJavaInputStream;
+    jbyteArray  fJavaByteArray;
+    const jint  fCapacity;
     size_t      fBytesRead;
     bool        fIsAtEnd;
+    const bool  fSwallowExceptions;
 };
 
-SkStream* CreateJavaInputStreamAdaptor(JNIEnv* env, jobject stream,
-                                       jbyteArray storage) {
-    return new JavaInputStreamAdaptor(env, stream, storage);
+SkStream* CreateJavaInputStreamAdaptor(JNIEnv* env, jobject stream, jbyteArray storage,
+                                       bool swallowExceptions) {
+    return JavaInputStreamAdaptor::Create(env, stream, storage, swallowExceptions);
 }
-
 
 static SkMemoryStream* adaptor_to_mem_stream(SkStream* stream) {
     SkASSERT(stream != NULL);

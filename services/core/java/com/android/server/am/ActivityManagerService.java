@@ -2521,13 +2521,15 @@ public class ActivityManagerService extends IActivityManager.Stub
                         }
                     }
                     if (proc != null) {
+                        long startTime = SystemClock.currentThreadTimeMillis();
                         long pss = Debug.getPss(pid, tmp, null);
+                        long endTime = SystemClock.currentThreadTimeMillis();
                         synchronized (ActivityManagerService.this) {
                             if (pss != 0 && proc.thread != null && proc.setProcState == procState
                                     && proc.pid == pid && proc.lastPssTime == lastPssTime) {
                                 num++;
                                 recordPssSampleLocked(proc, procState, pss, tmp[0], tmp[1],
-                                        SystemClock.uptimeMillis());
+                                        endTime-startTime, SystemClock.uptimeMillis());
                             }
                         }
                     }
@@ -2692,6 +2694,13 @@ public class ActivityManagerService extends IActivityManager.Stub
         @Override
         public void onStart() {
             mService.start();
+        }
+
+        @Override
+        public void onBootPhase(int phase) {
+            if (phase == PHASE_SYSTEM_SERVICES_READY) {
+                mService.mBatteryStatsService.systemServicesReady();
+            }
         }
 
         @Override
@@ -6539,13 +6548,17 @@ public class ActivityManagerService extends IActivityManager.Stub
                 }
             }
             infos[i] = new Debug.MemoryInfo();
+            long startTime = SystemClock.currentThreadTimeMillis();
             Debug.getMemoryInfo(pids[i], infos[i]);
+            long endTime = SystemClock.currentThreadTimeMillis();
             if (proc != null) {
                 synchronized (this) {
                     if (proc.thread != null && proc.setAdj == oomAdj) {
                         // Record this for posterity if the process has been stable.
                         proc.baseProcessTracker.addPss(infos[i].getTotalPss(),
-                                infos[i].getTotalUss(), false, proc.pkgList);
+                                infos[i].getTotalUss(), false,
+                                ProcessStats.ADD_PSS_EXTERNAL_SLOW, endTime-startTime,
+                                proc.pkgList);
                     }
                 }
             }
@@ -6567,12 +6580,15 @@ public class ActivityManagerService extends IActivityManager.Stub
                 }
             }
             long[] tmpUss = new long[1];
+            long startTime = SystemClock.currentThreadTimeMillis();
             pss[i] = Debug.getPss(pids[i], tmpUss, null);
+            long endTime = SystemClock.currentThreadTimeMillis();
             if (proc != null) {
                 synchronized (this) {
                     if (proc.thread != null && proc.setAdj == oomAdj) {
                         // Record this for posterity if the process has been stable.
-                        proc.baseProcessTracker.addPss(pss[i], tmpUss[0], false, proc.pkgList);
+                        proc.baseProcessTracker.addPss(pss[i], tmpUss[0], false,
+                                ProcessStats.ADD_PSS_EXTERNAL, endTime-startTime, proc.pkgList);
                     }
                 }
             }
@@ -17661,11 +17677,20 @@ public class ActivityManagerService extends IActivityManager.Stub
                 if (mi == null) {
                     mi = new Debug.MemoryInfo();
                 }
+                final int reportType;
+                final long startTime;
+                final long endTime;
                 if (opts.dumpDetails || (!brief && !opts.oomOnly)) {
+                    reportType = ProcessStats.ADD_PSS_EXTERNAL_SLOW;
+                    startTime = SystemClock.currentThreadTimeMillis();
                     Debug.getMemoryInfo(pid, mi);
+                    endTime = SystemClock.currentThreadTimeMillis();
                     hasSwapPss = mi.hasSwappedOutPss;
                 } else {
+                    reportType = ProcessStats.ADD_PSS_EXTERNAL;
+                    startTime = SystemClock.currentThreadTimeMillis();
                     mi.dalvikPss = (int)Debug.getPss(pid, tmpLong, null);
+                    endTime = SystemClock.currentThreadTimeMillis();
                     mi.dalvikPrivateDirty = (int)tmpLong[0];
                 }
                 if (opts.dumpDetails) {
@@ -17708,7 +17733,8 @@ public class ActivityManagerService extends IActivityManager.Stub
                 synchronized (this) {
                     if (r.thread != null && oomAdj == r.getSetAdjWithServices()) {
                         // Record this for posterity if the process has been stable.
-                        r.baseProcessTracker.addPss(myTotalPss, myTotalUss, true, r.pkgList);
+                        r.baseProcessTracker.addPss(myTotalPss, myTotalUss, true,
+                                reportType, endTime-startTime, r.pkgList);
                     }
                 }
 
@@ -18151,11 +18177,20 @@ public class ActivityManagerService extends IActivityManager.Stub
             if (mi == null) {
                 mi = new Debug.MemoryInfo();
             }
+            final int reportType;
+            final long startTime;
+            final long endTime;
             if (opts.dumpDetails || (!brief && !opts.oomOnly)) {
+                reportType = ProcessStats.ADD_PSS_EXTERNAL_SLOW;
+                startTime = SystemClock.currentThreadTimeMillis();
                 Debug.getMemoryInfo(pid, mi);
+                endTime = SystemClock.currentThreadTimeMillis();
                 hasSwapPss = mi.hasSwappedOutPss;
             } else {
+                reportType = ProcessStats.ADD_PSS_EXTERNAL;
+                startTime = SystemClock.currentThreadTimeMillis();
                 mi.dalvikPss = (int) Debug.getPss(pid, tmpLong, null);
+                endTime = SystemClock.currentThreadTimeMillis();
                 mi.dalvikPrivateDirty = (int) tmpLong[0];
             }
             if (opts.dumpDetails) {
@@ -18194,7 +18229,8 @@ public class ActivityManagerService extends IActivityManager.Stub
             synchronized (this) {
                 if (r.thread != null && oomAdj == r.getSetAdjWithServices()) {
                     // Record this for posterity if the process has been stable.
-                    r.baseProcessTracker.addPss(myTotalPss, myTotalUss, true, r.pkgList);
+                    r.baseProcessTracker.addPss(myTotalPss, myTotalUss, true,
+                            reportType, endTime-startTime, r.pkgList);
                 }
             }
 
@@ -22456,11 +22492,12 @@ public class ActivityManagerService extends IActivityManager.Stub
      * Record new PSS sample for a process.
      */
     void recordPssSampleLocked(ProcessRecord proc, int procState, long pss, long uss, long swapPss,
-            long now) {
+            long pssDuration, long now) {
         EventLogTags.writeAmPss(proc.pid, proc.uid, proc.processName, pss * 1024, uss * 1024,
                 swapPss * 1024);
         proc.lastPssTime = now;
-        proc.baseProcessTracker.addPss(pss, uss, true, proc.pkgList);
+        proc.baseProcessTracker.addPss(pss, uss, true, ProcessStats.ADD_PSS_INTERNAL,
+                pssDuration, proc.pkgList);
         if (DEBUG_PSS) Slog.d(TAG_PSS,
                 "PSS of " + proc.toShortString() + ": " + pss + " lastPss=" + proc.lastPss
                 + " state=" + ProcessList.makeProcStateString(procState));
@@ -22955,8 +22992,11 @@ public class ActivityManagerService extends IActivityManager.Stub
                 // the data right when a process is transitioning between process
                 // states, which well tend to give noisy data.
                 long start = SystemClock.uptimeMillis();
+                long startTime = SystemClock.currentThreadTimeMillis();
                 long pss = Debug.getPss(app.pid, mTmpLong, null);
-                recordPssSampleLocked(app, app.curProcState, pss, mTmpLong[0], mTmpLong[1], now);
+                long endTime = SystemClock.currentThreadTimeMillis();
+                recordPssSampleLocked(app, app.curProcState, pss, endTime-startTime,
+                        mTmpLong[0], mTmpLong[1], now);
                 mPendingPssProcesses.remove(app);
                 Slog.i(TAG, "Recorded pss for " + app + " state " + app.setProcState
                         + " to " + app.curProcState + ": "

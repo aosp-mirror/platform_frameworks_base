@@ -261,6 +261,10 @@ option java_package com.android.server
 2756 fstrim_finish (time|2|3)
 
 # ---------------------------
+# Job scheduler
+# ---------------------------
+8000 job_deferred_execution (time|2|3)
+
 # AudioService.java
 # ---------------------------
 40000 volume_changed (stream|1), (prev_level|1), (level|1), (max_level|1), (caller|3)

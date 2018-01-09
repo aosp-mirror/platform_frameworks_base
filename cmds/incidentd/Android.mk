@@ -14,6 +14,9 @@
 
 LOCAL_PATH:= $(call my-dir)
 
+# proto files used in incidentd to generate cppstream proto headers.
+PROTO_FILES:= frameworks/base/core/proto/android/util/log.proto
+
 # ========= #
 # incidentd #
 # ========= #
@@ -59,20 +62,38 @@ LOCAL_SHARED_LIBRARIES := \
         libutils
 
 LOCAL_MODULE_CLASS := EXECUTABLES
+
 gen_src_dir := $(local-generated-sources-dir)
 
-GEN := $(gen_src_dir)/src/section_list.cpp
-$(GEN): $(HOST_OUT_EXECUTABLES)/incident-section-gen
-$(GEN): PRIVATE_CUSTOM_TOOL = \
+# generate section_list.cpp
+GEN_LIST := $(gen_src_dir)/src/section_list.cpp
+$(GEN_LIST): $(HOST_OUT_EXECUTABLES)/incident-section-gen
+$(GEN_LIST): PRIVATE_CUSTOM_TOOL = \
     $(HOST_OUT_EXECUTABLES)/incident-section-gen incidentd > $@
-$(GEN): $(HOST_OUT_EXECUTABLES)/incident-section-gen
+$(GEN_LIST): $(HOST_OUT_EXECUTABLES)/incident-section-gen
 	$(transform-generated-source)
-LOCAL_GENERATED_SOURCES += $(GEN)
+LOCAL_GENERATED_SOURCES += $(GEN_LIST)
+GEN_LIST:=
+
+# generate cppstream proto, add proto files to PROTO_FILES
+GEN_PROTO := $(gen_src_dir)/proto.timestamp
+$(GEN_PROTO): $(HOST_OUT_EXECUTABLES)/aprotoc $(HOST_OUT_EXECUTABLES)/protoc-gen-cppstream $(PROTO_FILES)
+$(GEN_PROTO): PRIVATE_GEN_SRC_DIR := $(gen_src_dir)
+$(GEN_PROTO): PRIVATE_CUSTOM_TOOL = \
+    $(HOST_OUT_EXECUTABLES)/aprotoc --plugin=protoc-gen-cppstream=$(HOST_OUT_EXECUTABLES)/protoc-gen-cppstream \
+        --cppstream_out=$(PRIVATE_GEN_SRC_DIR) -Iexternal/protobuf/src -I . \
+        $(PROTO_FILES) \
+    && touch $@
+$(GEN_PROTO): $(HOST_OUT_EXECUTABLES)/aprotoc
+	$(transform-generated-source)
+LOCAL_GENERATED_SOURCES += $(GEN_PROTO)
+GEN_PROTO:=
 
 gen_src_dir:=
-GEN:=
 
+ifeq ($(BUILD_WITH_INCIDENTD_RC), true)
 LOCAL_INIT_RC := incidentd.rc
+endif
 
 include $(BUILD_EXECUTABLE)
 
@@ -119,5 +140,23 @@ LOCAL_SHARED_LIBRARIES := \
     libutils \
 
 LOCAL_TEST_DATA := $(call find-test-data-in-subdirs, $(LOCAL_PATH), *, testdata)
+
+LOCAL_MODULE_CLASS := NATIVE_TESTS
+gen_src_dir := $(local-generated-sources-dir)
+# generate cppstream proto for testing
+GEN_PROTO := $(gen_src_dir)/log.proto.timestamp
+$(GEN_PROTO): $(HOST_OUT_EXECUTABLES)/aprotoc $(HOST_OUT_EXECUTABLES)/protoc-gen-cppstream $(PROTO_FILES)
+$(GEN_PROTO): PRIVATE_GEN_SRC_DIR := $(gen_src_dir)
+$(GEN_PROTO): PRIVATE_CUSTOM_TOOL = \
+    $(HOST_OUT_EXECUTABLES)/aprotoc --plugin=protoc-gen-cppstream=$(HOST_OUT_EXECUTABLES)/protoc-gen-cppstream \
+        --cppstream_out=$(PRIVATE_GEN_SRC_DIR) -Iexternal/protobuf/src -I . \
+        $(PROTO_FILES) \
+    && touch $@
+$(GEN_PROTO): $(HOST_OUT_EXECUTABLES)/aprotoc
+	$(transform-generated-source)
+LOCAL_GENERATED_SOURCES += $(GEN_PROTO)
+GEN_PROTO:=
+
+gen_src_dir:=
 
 include $(BUILD_NATIVE_TEST)

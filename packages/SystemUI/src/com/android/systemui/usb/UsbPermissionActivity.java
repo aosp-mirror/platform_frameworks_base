@@ -90,7 +90,6 @@ public class UsbPermissionActivity extends AlertActivity
         String appName = aInfo.loadLabel(packageManager).toString();
 
         final AlertController.AlertParams ap = mAlertParams;
-        ap.mIcon = aInfo.loadIcon(packageManager);
         ap.mTitle = appName;
         if (mDevice == null) {
             ap.mMessage = getString(R.string.usb_accessory_permission_prompt, appName,

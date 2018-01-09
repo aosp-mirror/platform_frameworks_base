@@ -102,17 +102,11 @@ public final class IpSecConfig implements Parcelable {
 
     /** Set the local IP address for Tunnel mode */
     public void setLocalAddress(String localAddress) {
-        if (localAddress == null) {
-            throw new IllegalArgumentException("localAddress may not be null!");
-        }
         mLocalAddress = localAddress;
     }
 
     /** Set the remote IP address for this IPsec transform */
     public void setRemoteAddress(String remoteAddress) {
-        if (remoteAddress == null) {
-            throw new IllegalArgumentException("remoteAddress may not be null!");
-        }
         mRemoteAddress = remoteAddress;
     }
 

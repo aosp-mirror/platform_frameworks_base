@@ -199,8 +199,10 @@ public class NavigationBarView extends FrameLayout implements PluginListener<Nav
         }
     }
 
-    private final OverviewProxyListener mOverviewProxyListener =
-            isConnected -> setSlippery(!isConnected);
+    private final OverviewProxyListener mOverviewProxyListener = isConnected -> {
+        setSlippery(!isConnected);
+        setDisabledFlags(mDisabledFlags, true);
+    };
 
     public NavigationBarView(Context context, AttributeSet attrs) {
         super(context, attrs);

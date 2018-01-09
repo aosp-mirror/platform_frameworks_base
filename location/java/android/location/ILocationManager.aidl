@@ -79,6 +79,7 @@ interface ILocationManager
     boolean startGnssBatch(long periodNanos, boolean wakeOnFifoFull, String packageName);
     void flushGnssBatch(String packageName);
     boolean stopGnssBatch();
+    boolean injectLocation(in Location location);
 
     // --- deprecated ---
     List<String> getAllProviders();

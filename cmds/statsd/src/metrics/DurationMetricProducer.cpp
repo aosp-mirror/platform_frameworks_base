@@ -117,11 +117,11 @@ unique_ptr<DurationTracker> DurationMetricProducer::createDurationTracker(
         case DurationMetric_AggregationType_SUM:
             return make_unique<OringDurationTracker>(
                     mConfigKey, mMetricId, eventKey, mWizard, mConditionTrackerIndex, mNested,
-                    mCurrentBucketStartTimeNs, mBucketSizeNs, mAnomalyTrackers);
+                    mCurrentBucketStartTimeNs, mBucketSizeNs, mConditionSliced, mAnomalyTrackers);
         case DurationMetric_AggregationType_MAX_SPARSE:
             return make_unique<MaxDurationTracker>(
                     mConfigKey, mMetricId, eventKey, mWizard, mConditionTrackerIndex, mNested,
-                    mCurrentBucketStartTimeNs, mBucketSizeNs, mAnomalyTrackers);
+                    mCurrentBucketStartTimeNs, mBucketSizeNs, mConditionSliced, mAnomalyTrackers);
     }
 }
 

@@ -159,6 +159,8 @@
     <protected-broadcast
         android:name="android.bluetooth.headset.action.HF_INDICATORS_VALUE_CHANGED" />
     <protected-broadcast
+        android:name="android.bluetooth.headset.profile.action.ACTIVE_DEVICE_CHANGED" />
+    <protected-broadcast
         android:name="android.bluetooth.headsetclient.profile.action.CONNECTION_STATE_CHANGED" />
     <protected-broadcast
         android:name="android.bluetooth.headsetclient.profile.action.AUDIO_STATE_CHANGED" />
@@ -172,6 +174,8 @@
         android:name="android.bluetooth.headsetclient.profile.action.LAST_VTAG" />
     <protected-broadcast
         android:name="android.bluetooth.a2dp.profile.action.CONNECTION_STATE_CHANGED" />
+    <protected-broadcast
+        android:name="android.bluetooth.a2dp.profile.action.ACTIVE_DEVICE_CHANGED" />
     <protected-broadcast
         android:name="android.bluetooth.a2dp.profile.action.PLAYING_STATE_CHANGED" />
     <protected-broadcast

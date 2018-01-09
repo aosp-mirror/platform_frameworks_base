@@ -162,6 +162,20 @@ public class SurfaceAnimationRunnerTest extends WindowTestsBase {
         verify(mMockAnimationSpec, atLeastOnce()).apply(any(), any(), eq(0L));
     }
 
+    @Test
+    public void testDeferStartingAnimations() throws Exception {
+        mSurfaceAnimationRunner.deferStartingAnimations();
+        mSurfaceAnimationRunner.startAnimation(createTranslateAnimation(), mMockSurface,
+                mMockTransaction, this::finishedCallback);
+        waitUntilNextFrame();
+        assertTrue(mSurfaceAnimationRunner.mRunningAnimations.isEmpty());
+        mSurfaceAnimationRunner.continueStartingAnimations();
+        waitUntilNextFrame();
+        assertFalse(mSurfaceAnimationRunner.mRunningAnimations.isEmpty());
+        mFinishCallbackLatch.await(1, SECONDS);
+        assertFinishCallbackCalled();
+    }
+
     private void waitUntilNextFrame() throws Exception {
         final CountDownLatch latch = new CountDownLatch(1);
         mSurfaceAnimationRunner.mChoreographer.postCallback(Choreographer.CALLBACK_COMMIT,

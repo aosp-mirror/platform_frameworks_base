@@ -35,6 +35,7 @@ import android.util.TimeUtils;
 
 import com.android.internal.annotations.GuardedBy;
 import com.android.internal.os.BatteryStatsImpl;
+import com.android.internal.util.function.pooled.PooledLambda;
 
 import libcore.util.EmptyArray;
 
@@ -117,48 +118,44 @@ class BatteryExternalStatsWorker implements BatteryStatsImpl.ExternalStatsSync {
     }
 
     @Override
-    public Future<?> scheduleReadProcStateCpuTimes() {
+    public synchronized Future<?> scheduleCpuSyncDueToSettingChange() {
+        return scheduleSyncLocked("setting-change", UPDATE_CPU);
+    }
+
+    @Override
+    public Future<?> scheduleReadProcStateCpuTimes(boolean onBattery, boolean onBatteryScreenOff) {
         synchronized (mStats) {
-            if (!mStats.mPerProcStateCpuTimesAvailable) {
+            if (!mStats.trackPerProcStateCpuTimes()) {
                 return null;
             }
         }
         synchronized (BatteryExternalStatsWorker.this) {
             if (!mExecutorService.isShutdown()) {
-                return mExecutorService.submit(mReadProcStateCpuTimesTask);
+                return mExecutorService.submit(PooledLambda.obtainRunnable(
+                        BatteryStatsImpl::updateProcStateCpuTimes,
+                        mStats, onBattery, onBatteryScreenOff).recycleOnUse());
             }
         }
         return null;
     }
 
     @Override
-    public Future<?> scheduleCopyFromAllUidsCpuTimes() {
+    public Future<?> scheduleCopyFromAllUidsCpuTimes(
+            boolean onBattery, boolean onBatteryScreenOff) {
         synchronized (mStats) {
-            if (!mStats.mPerProcStateCpuTimesAvailable) {
+            if (!mStats.trackPerProcStateCpuTimes()) {
                 return null;
             }
         }
         synchronized (BatteryExternalStatsWorker.this) {
             if (!mExecutorService.isShutdown()) {
-                return mExecutorService.submit(mCopyFromAllUidsCpuTimesTask);
+                return mExecutorService.submit(PooledLambda.obtainRunnable(
+                        BatteryStatsImpl::copyFromAllUidsCpuTimes,
+                        mStats, onBattery, onBatteryScreenOff).recycleOnUse());
             }
         }
         return null;
     }
-
-    private final Runnable mReadProcStateCpuTimesTask = new Runnable() {
-        @Override
-        public void run() {
-            mStats.updateProcStateCpuTimes();
-        }
-    };
-
-    private final Runnable mCopyFromAllUidsCpuTimesTask = new Runnable() {
-        @Override
-        public void run() {
-            mStats.copyFromAllUidsCpuTimes();
-        }
-    };
 
     public synchronized Future<?> scheduleWrite() {
         if (mExecutorService.isShutdown()) {

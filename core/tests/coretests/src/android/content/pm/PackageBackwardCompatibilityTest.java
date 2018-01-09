@@ -41,6 +41,8 @@ public class PackageBackwardCompatibilityTest {
 
     private static final String ANDROID_TEST_MOCK = "android.test.mock";
 
+    private static final String OTHER_LIBRARY = "other.library";
+
     private Package mPackage;
 
     private static ArrayList<String> arrayList(String... strings) {
@@ -73,6 +75,18 @@ public class PackageBackwardCompatibilityTest {
         PackageBackwardCompatibility.modifySharedLibraries(mPackage);
         assertEquals("usesLibraries not updated correctly",
                 arrayList(ORG_APACHE_HTTP_LEGACY),
+                mPackage.usesLibraries);
+        assertNull("usesOptionalLibraries not updated correctly", mPackage.usesOptionalLibraries);
+    }
+
+    @Test
+    public void targeted_at_O_not_empty_usesLibraries() {
+        mPackage.applicationInfo.targetSdkVersion = Build.VERSION_CODES.O;
+        mPackage.usesLibraries = arrayList(OTHER_LIBRARY);
+        PackageBackwardCompatibility.modifySharedLibraries(mPackage);
+        // The org.apache.http.legacy jar should be added at the start of the list.
+        assertEquals("usesLibraries not updated correctly",
+                arrayList(ORG_APACHE_HTTP_LEGACY, OTHER_LIBRARY),
                 mPackage.usesLibraries);
         assertNull("usesOptionalLibraries not updated correctly", mPackage.usesOptionalLibraries);
     }

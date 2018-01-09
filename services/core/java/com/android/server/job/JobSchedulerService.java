@@ -185,6 +185,11 @@ public final class JobSchedulerService extends com.android.server.SystemService
     boolean mReportedActive;
 
     /**
+     * Are we currently in device-wide standby parole?
+     */
+    volatile boolean mInParole;
+
+    /**
      * Current limit on the number of concurrent JobServiceContext entries we want to
      * keep actively running a job.
      */
@@ -466,11 +471,11 @@ public final class JobSchedulerService extends com.android.server.SystemService
                         DEFAULT_MAX_STANDARD_RESCHEDULE_COUNT);
                 MAX_WORK_RESCHEDULE_COUNT = mParser.getInt(KEY_MAX_WORK_RESCHEDULE_COUNT,
                         DEFAULT_MAX_WORK_RESCHEDULE_COUNT);
-                MIN_LINEAR_BACKOFF_TIME = mParser.getLong(KEY_MIN_LINEAR_BACKOFF_TIME,
+                MIN_LINEAR_BACKOFF_TIME = mParser.getDurationMillis(KEY_MIN_LINEAR_BACKOFF_TIME,
                         DEFAULT_MIN_LINEAR_BACKOFF_TIME);
-                MIN_EXP_BACKOFF_TIME = mParser.getLong(KEY_MIN_EXP_BACKOFF_TIME,
+                MIN_EXP_BACKOFF_TIME = mParser.getDurationMillis(KEY_MIN_EXP_BACKOFF_TIME,
                         DEFAULT_MIN_EXP_BACKOFF_TIME);
-                STANDBY_HEARTBEAT_TIME = mParser.getLong(KEY_STANDBY_HEARTBEAT_TIME,
+                STANDBY_HEARTBEAT_TIME = mParser.getDurationMillis(KEY_STANDBY_HEARTBEAT_TIME,
                         DEFAULT_STANDBY_HEARTBEAT_TIME);
                 STANDBY_BEATS[1] = mParser.getInt(KEY_STANDBY_WORKING_BEATS,
                         DEFAULT_STANDBY_WORKING_BEATS);
@@ -1720,28 +1725,31 @@ public final class JobSchedulerService extends com.android.server.SystemService
         }
 
         // If the app is in a non-active standby bucket, make sure we've waited
-        // an appropriate amount of time since the last invocation
-        final int bucket = job.getStandbyBucket();
-        if (mHeartbeat < mNextBucketHeartbeat[bucket]) {
-            // Only skip this job if it's still waiting for the end of its (initial) nominal
-            // bucket interval.  Once it's waited that long, we let it go ahead and clear.
-            // The final (NEVER) bucket is special; we never age those apps' jobs into
-            // runnability.
-            if (bucket >= mConstants.STANDBY_BEATS.length
-                    || (mHeartbeat < job.getBaseHeartbeat() + mConstants.STANDBY_BEATS[bucket])) {
-                // TODO: log/trace that we're deferring the job due to bucketing if we hit this
-                if (job.getWhenStandbyDeferred() == 0) {
-                    if (DEBUG_STANDBY) {
-                        Slog.v(TAG, "Bucket deferral: " + mHeartbeat + " < "
-                                + mNextBucketHeartbeat[job.getStandbyBucket()] + " for " + job);
+        // an appropriate amount of time since the last invocation.  During device-
+        // wide parole, standby bucketing is ignored.
+        if (!mInParole) {
+            final int bucket = job.getStandbyBucket();
+            if (mHeartbeat < mNextBucketHeartbeat[bucket]) {
+                // Only skip this job if it's still waiting for the end of its (initial) nominal
+                // bucket interval.  Once it's waited that long, we let it go ahead and clear.
+                // The final (NEVER) bucket is special; we never age those apps' jobs into
+                // runnability.
+                if (bucket >= mConstants.STANDBY_BEATS.length
+                        || (mHeartbeat < job.getBaseHeartbeat() + mConstants.STANDBY_BEATS[bucket])) {
+                    // TODO: log/trace that we're deferring the job due to bucketing if we hit this
+                    if (job.getWhenStandbyDeferred() == 0) {
+                        if (DEBUG_STANDBY) {
+                            Slog.v(TAG, "Bucket deferral: " + mHeartbeat + " < "
+                                    + mNextBucketHeartbeat[job.getStandbyBucket()] + " for " + job);
+                        }
+                        job.setWhenStandbyDeferred(sElapsedRealtimeClock.millis());
                     }
-                    job.setWhenStandbyDeferred(sElapsedRealtimeClock.millis());
-                }
-                return false;
-            } else {
-                if (DEBUG_STANDBY) {
-                    Slog.v(TAG, "Bucket deferred job aged into runnability at "
-                            + mHeartbeat + " : " + job);
+                    return false;
+                } else {
+                    if (DEBUG_STANDBY) {
+                        Slog.v(TAG, "Bucket deferred job aged into runnability at "
+                                + mHeartbeat + " : " + job);
+                    }
                 }
             }
         }
@@ -2086,7 +2094,10 @@ public final class JobSchedulerService extends com.android.server.SystemService
 
         @Override
         public void onParoleStateChanged(boolean isParoleOn) {
-            // Unused
+            if (DEBUG_STANDBY) {
+                Slog.i(TAG, "Global parole state now " + (isParoleOn ? "ON" : "OFF"));
+            }
+            mInParole = isParoleOn;
         }
     }
 

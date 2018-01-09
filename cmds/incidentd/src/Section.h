@@ -19,7 +19,9 @@
 
 #include "Reporter.h"
 
+#include <map>
 #include <stdarg.h>
+
 #include <utils/String8.h>
 #include <utils/String16.h>
 #include <utils/Vector.h>
@@ -120,6 +122,25 @@ public:
 private:
     String16 mService;
     Vector<String16> mArgs;
+};
+
+/**
+ * Section that reads from logd.
+ */
+class LogSection : public WorkerThreadSection
+{
+    // global last log retrieved timestamp for each log_id_t.
+    static map<log_id_t, log_time> gLastLogsRetrieved;
+
+public:
+    LogSection(int id, log_id_t logID);
+    virtual ~LogSection();
+
+    virtual status_t BlockingCall(int pipeWriteFd) const;
+
+private:
+    log_id_t mLogID;
+    bool mBinary;
 };
 
 #endif // SECTIONS_H

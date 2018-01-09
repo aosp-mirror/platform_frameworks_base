@@ -2784,7 +2784,7 @@
     <bool name="config_eap_sim_based_auth_supported">true</bool>
 
     <!-- How long history of previous vibrations should be kept for the dumpsys. -->
-    <integer name="config_previousVibrationsDumpLimit">20</integer>
+    <integer name="config_previousVibrationsDumpLimit">50</integer>
 
     <!-- The default vibration strength, must be between 1 and 255 inclusive. -->
     <integer name="config_defaultVibrationAmplitude">255</integer>

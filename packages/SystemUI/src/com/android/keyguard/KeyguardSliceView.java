@@ -26,6 +26,9 @@ import android.graphics.Paint;
 import android.graphics.drawable.Drawable;
 import android.net.Uri;
 import android.provider.Settings;
+import android.text.Layout;
+import android.text.TextUtils;
+import android.text.TextUtils.TruncateAt;
 import android.util.AttributeSet;
 import android.util.Log;
 import android.view.View;
@@ -40,6 +43,7 @@ import com.android.systemui.R;
 import com.android.systemui.keyguard.KeyguardSliceProvider;
 import com.android.systemui.tuner.TunerService;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.function.Consumer;
@@ -129,7 +133,20 @@ public class KeyguardSliceView extends LinearLayout implements View.OnClickListe
                     android.app.slice.SliceItem.FORMAT_TEXT,
                     new String[]{android.app.slice.Slice.HINT_TITLE},
                     null /* nonHints */);
-            mTitle.setText(mainTitle.getText());
+            CharSequence title = mainTitle.getText();
+            mTitle.setText(title);
+
+            // Check if we're already ellipsizing the text.
+            // We're going to figure out the best possible line break if not.
+            Layout layout = mTitle.getLayout();
+            if (layout != null){
+                final int lineCount = layout.getLineCount();
+                if (lineCount > 0) {
+                    if (layout.getEllipsisCount(lineCount - 1) == 0) {
+                        mTitle.setText(findBestLineBreak(title));
+                    }
+                }
+            }
         }
 
         mClickActions.clear();
@@ -193,6 +210,46 @@ public class KeyguardSliceView extends LinearLayout implements View.OnClickListe
         }
 
         mListener.accept(mHasHeader);
+    }
+
+    /**
+     * Breaks a string in 2 lines where both have similar character count
+     * but first line is always longer.
+     *
+     * @param charSequence Original text.
+     * @return Optimal string.
+     */
+    private CharSequence findBestLineBreak(CharSequence charSequence) {
+        if (TextUtils.isEmpty(charSequence)) {
+            return charSequence;
+        }
+
+        String source = charSequence.toString();
+        // Ignore if there is only 1 word,
+        // or if line breaks were manually set.
+        if (source.contains("\n") || !source.contains(" ")) {
+            return source;
+        }
+
+        final String[] words = source.split(" ");
+        final StringBuilder optimalString = new StringBuilder(source.length());
+        int current = 0;
+        while (optimalString.length() < source.length() - optimalString.length()) {
+            optimalString.append(words[current]);
+            if (current < words.length - 1) {
+                optimalString.append(" ");
+            }
+            current++;
+        }
+        optimalString.append("\n");
+        for (int i = current; i < words.length; i++) {
+            optimalString.append(words[i]);
+            if (current < words.length - 1) {
+                optimalString.append(" ");
+            }
+        }
+
+        return optimalString.toString();
     }
 
     public void setDark(float darkAmount) {
@@ -287,6 +344,9 @@ public class KeyguardSliceView extends LinearLayout implements View.OnClickListe
             setPadding(horizontalPadding, 0, horizontalPadding, 0);
             setCompoundDrawablePadding((int) context.getResources()
                     .getDimension(R.dimen.widget_icon_padding));
+            setMaxWidth(KeyguardSliceView.this.getWidth() / 2);
+            setMaxLines(1);
+            setEllipsize(TruncateAt.END);
         }
 
         public void setHasDivider(boolean hasDivider) {
