@@ -31,6 +31,11 @@ public interface ServiceConnection {
      * the {@link android.os.IBinder} of the communication channel to the
      * Service.
      *
+     * <p class="note"><b>Note:</b> If the system has started to bind your
+     * client app to a service, it's possible that your app will never receive
+     * this callback. Your app won't receive a callback if there's an issue with
+     * the service, such as the service crashing while being created.
+     *
      * @param name The concrete component name of the service that has
      * been connected.
      *
