@@ -20,6 +20,7 @@ import android.annotation.NonNull;
 import android.os.Parcel;
 import android.os.Parcelable;
 import android.text.TextUtils;
+import android.util.proto.ProtoOutputStream;
 
 import java.util.Objects;
 
@@ -387,6 +388,35 @@ public class NetworkRequest implements Parcelable {
         return "NetworkRequest [ " + type + " id=" + requestId +
                 (legacyType != ConnectivityManager.TYPE_NONE ? ", legacyType=" + legacyType : "") +
                 ", " + networkCapabilities.toString() + " ]";
+    }
+
+    private int typeToProtoEnum(Type t) {
+        switch (t) {
+            case NONE:
+                return NetworkRequestProto.TYPE_NONE;
+            case LISTEN:
+                return NetworkRequestProto.TYPE_LISTEN;
+            case TRACK_DEFAULT:
+                return NetworkRequestProto.TYPE_TRACK_DEFAULT;
+            case REQUEST:
+                return NetworkRequestProto.TYPE_REQUEST;
+            case BACKGROUND_REQUEST:
+                return NetworkRequestProto.TYPE_BACKGROUND_REQUEST;
+            default:
+                return NetworkRequestProto.TYPE_UNKNOWN;
+        }
+    }
+
+    /** @hide */
+    public void writeToProto(ProtoOutputStream proto, long fieldId) {
+        final long token = proto.start(fieldId);
+
+        proto.write(NetworkRequestProto.TYPE, typeToProtoEnum(type));
+        proto.write(NetworkRequestProto.REQUEST_ID, requestId);
+        proto.write(NetworkRequestProto.LEGACY_TYPE, legacyType);
+        networkCapabilities.writeToProto(proto, NetworkRequestProto.NETWORK_CAPABILITIES);
+
+        proto.end(token);
     }
 
     public boolean equals(Object obj) {

@@ -27,10 +27,12 @@ import android.content.IntentFilter;
 import android.os.UserHandle;
 import android.util.ArraySet;
 import android.util.Slog;
+import android.util.proto.ProtoOutputStream;
 
 import com.android.server.am.ActivityManagerService;
 import com.android.server.job.JobSchedulerService;
 import com.android.server.job.StateChangedListener;
+import com.android.server.job.StateControllerProto;
 
 import java.io.PrintWriter;
 
@@ -215,5 +217,28 @@ public final class IdleController extends StateController {
             UserHandle.formatUid(pw, js.getSourceUid());
             pw.println();
         }
+    }
+
+    @Override
+    public void dumpControllerStateLocked(ProtoOutputStream proto, long fieldId, int filterUid) {
+        final long token = proto.start(fieldId);
+        final long mToken = proto.start(StateControllerProto.IDLE);
+
+        proto.write(StateControllerProto.IdleController.IS_IDLE, mIdleTracker.isIdle());
+
+        for (int i = 0; i < mTrackedTasks.size(); i++) {
+            final JobStatus js = mTrackedTasks.valueAt(i);
+            if (!js.shouldDump(filterUid)) {
+                continue;
+            }
+            final long jsToken = proto.start(StateControllerProto.IdleController.TRACKED_JOBS);
+            js.writeToShortProto(proto, StateControllerProto.IdleController.TrackedJob.INFO);
+            proto.write(StateControllerProto.IdleController.TrackedJob.SOURCE_UID,
+                    js.getSourceUid());
+            proto.end(jsToken);
+        }
+
+        proto.end(mToken);
+        proto.end(token);
     }
 }

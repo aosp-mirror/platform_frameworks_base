@@ -25,9 +25,11 @@ import android.os.UserHandle;
 import android.os.WorkSource;
 import android.util.Slog;
 import android.util.TimeUtils;
+import android.util.proto.ProtoOutputStream;
 
 import com.android.server.job.JobSchedulerService;
 import com.android.server.job.StateChangedListener;
+import com.android.server.job.StateControllerProto;
 
 import java.io.PrintWriter;
 import java.util.Iterator;
@@ -331,7 +333,7 @@ public final class TimeController extends StateController {
     public void dumpControllerStateLocked(PrintWriter pw, int filterUid) {
         final long nowElapsed = sElapsedRealtimeClock.millis();
         pw.print("Alarms: now=");
-        pw.print(sElapsedRealtimeClock.millis());
+        pw.print(nowElapsed);
         pw.println();
         pw.print("Next delay alarm in ");
         TimeUtils.formatDuration(mNextDelayExpiredElapsedMillis, nowElapsed, pw);
@@ -364,5 +366,41 @@ public final class TimeController extends StateController {
             }
             pw.println();
         }
+    }
+
+    @Override
+    public void dumpControllerStateLocked(ProtoOutputStream proto, long fieldId, int filterUid) {
+        final long token = proto.start(fieldId);
+        final long mToken = proto.start(StateControllerProto.TIME);
+
+        final long nowElapsed = sElapsedRealtimeClock.millis();
+        proto.write(StateControllerProto.TimeController.NOW_ELAPSED_REALTIME, nowElapsed);
+        proto.write(StateControllerProto.TimeController.TIME_UNTIL_NEXT_DELAY_ALARM_MS,
+                mNextDelayExpiredElapsedMillis - nowElapsed);
+        proto.write(StateControllerProto.TimeController.TIME_UNTIL_NEXT_DEADLINE_ALARM_MS,
+                mNextJobExpiredElapsedMillis - nowElapsed);
+
+        for (JobStatus ts : mTrackedJobs) {
+            if (!ts.shouldDump(filterUid)) {
+                continue;
+            }
+            final long tsToken = proto.start(StateControllerProto.TimeController.TRACKED_JOBS);
+            ts.writeToShortProto(proto, StateControllerProto.TimeController.TrackedJob.INFO);
+
+            proto.write(StateControllerProto.TimeController.TrackedJob.HAS_TIMING_DELAY_CONSTRAINT,
+                    ts.hasTimingDelayConstraint());
+            proto.write(StateControllerProto.TimeController.TrackedJob.DELAY_TIME_REMAINING_MS,
+                    ts.getEarliestRunTime() - nowElapsed);
+
+            proto.write(StateControllerProto.TimeController.TrackedJob.HAS_DEADLINE_CONSTRAINT,
+                    ts.hasDeadlineConstraint());
+            proto.write(StateControllerProto.TimeController.TrackedJob.TIME_REMAINING_UNTIL_DEADLINE_MS,
+                    ts.getLatestRunTimeElapsed() - nowElapsed);
+
+            proto.end(tsToken);
+        }
+
+        proto.end(mToken);
+        proto.end(token);
     }
 }

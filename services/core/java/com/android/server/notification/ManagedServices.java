@@ -251,23 +251,17 @@ abstract public class ManagedServices {
         for (ComponentName cmpt : mEnabledServicesForCurrentProfiles) {
             if (filter != null && !filter.matches(cmpt)) continue;
 
-            final long cToken = proto.start(ManagedServicesProto.ENABLED);
-            cmpt.toProto(proto);
-            proto.end(cToken);
+            cmpt.writeToProto(proto, ManagedServicesProto.ENABLED);
         }
 
         for (ManagedServiceInfo info : mServices) {
             if (filter != null && !filter.matches(info.component)) continue;
 
-            final long lToken = proto.start(ManagedServicesProto.LIVE_SERVICES);
-            info.toProto(proto, this);
-            proto.end(lToken);
+            info.writeToProto(proto, ManagedServicesProto.LIVE_SERVICES, this);
         }
 
         for (ComponentName name : mSnoozingForCurrentProfiles) {
-            final long cToken = proto.start(ManagedServicesProto.SNOOZED);
-            name.toProto(proto);
-            proto.end(cToken);
+            name.writeToProto(proto, ManagedServicesProto.SNOOZED);
         }
     }
 
@@ -1132,14 +1126,16 @@ abstract public class ManagedServices {
                     .append(']').toString();
         }
 
-        public void toProto(ProtoOutputStream proto, ManagedServices host) {
-            final long cToken = proto.start(ManagedServiceInfoProto.COMPONENT);
-            component.toProto(proto);
-            proto.end(cToken);
+        public void writeToProto(ProtoOutputStream proto, long fieldId, ManagedServices host) {
+            final long token = proto.start(fieldId);
+
+            component.writeToProto(proto, ManagedServiceInfoProto.COMPONENT);
             proto.write(ManagedServiceInfoProto.USER_ID, userid);
             proto.write(ManagedServiceInfoProto.SERVICE, service.getClass().getName());
             proto.write(ManagedServiceInfoProto.IS_SYSTEM, isSystem);
             proto.write(ManagedServiceInfoProto.IS_GUEST, isGuest(host));
+
+            proto.end(token);
         }
 
         public boolean enabledAndUserMatches(int nid) {
