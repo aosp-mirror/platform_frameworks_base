@@ -1096,6 +1096,11 @@ public class DynamicLayout extends Layout {
 
         public void onSpanChanged(Spannable s, Object o, int start, int end, int nstart, int nend) {
             if (o instanceof UpdateLayout) {
+                if (start > end) {
+                    // Bug: 67926915 start cannot be determined, fallback to reflow from start
+                    // instead of causing an exception
+                    start = 0;
+                }
                 reflow(s, start, end - start, end - start);
                 reflow(s, nstart, nend - nstart, nend - nstart);
             }
