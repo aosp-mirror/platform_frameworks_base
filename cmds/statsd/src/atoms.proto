@@ -322,8 +322,9 @@ message ScheduledJobStateChanged {
     optional string name = 2;
 
     enum State {
-        OFF = 0;
-        ON = 1;
+        FINISHED = 0;
+        STARTED = 1;
+        SCHEDULED = 2;
     }
     optional State state = 3;
 
