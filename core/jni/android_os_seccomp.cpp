@@ -21,20 +21,33 @@
 
 #include "seccomp_policy.h"
 
-static void Seccomp_setPolicy(JNIEnv* /*env*/) {
+static void Seccomp_setSystemServerPolicy(JNIEnv* /*env*/) {
     if (security_getenforce() == 0) {
         ALOGI("seccomp disabled by setenforce 0");
         return;
     }
 
-    if (!set_seccomp_filter()) {
+    if (!set_system_seccomp_filter()) {
+        ALOGE("Failed to set seccomp policy - killing");
+        exit(1);
+    }
+}
+
+static void Seccomp_setAppPolicy(JNIEnv* /*env*/) {
+    if (security_getenforce() == 0) {
+        ALOGI("seccomp disabled by setenforce 0");
+        return;
+    }
+
+    if (!set_app_seccomp_filter()) {
         ALOGE("Failed to set seccomp policy - killing");
         exit(1);
     }
 }
 
 static const JNINativeMethod method_table[] = {
-    NATIVE_METHOD(Seccomp, setPolicy, "()V"),
+    NATIVE_METHOD(Seccomp, setSystemServerPolicy, "()V"),
+    NATIVE_METHOD(Seccomp, setAppPolicy, "()V"),
 };
 
 namespace android {

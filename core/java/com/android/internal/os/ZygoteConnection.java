@@ -30,6 +30,7 @@ import android.net.Credentials;
 import android.net.LocalSocket;
 import android.os.FactoryTest;
 import android.os.Process;
+import android.os.Seccomp;
 import android.os.SystemProperties;
 import android.os.Trace;
 import android.system.ErrnoException;
@@ -766,6 +767,9 @@ class ZygoteConnection {
         if (parsedArgs.niceName != null) {
             Process.setArgV0(parsedArgs.niceName);
         }
+
+        // Set app specific seccomp policy.
+        Seccomp.setAppPolicy();
 
         // End of the postFork event.
         Trace.traceEnd(Trace.TRACE_TAG_ACTIVITY_MANAGER);
