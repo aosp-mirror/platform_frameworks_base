@@ -16,19 +16,23 @@
 
 package com.android.frameworks.perftests.amteststestapp;
 
-import android.app.Activity;
-import android.os.Looper;
+import android.app.Service;
+import android.content.Intent;
+import android.os.Binder;
+import android.os.IBinder;
 
 import com.android.frameworks.perftests.am.util.Constants;
 import com.android.frameworks.perftests.am.util.Utils;
 
-public class TestActivity extends Activity {
+public class TestService extends Service {
     @Override
-    protected void onResume() {
-        super.onResume();
-        Looper.myQueue().addIdleHandler(() -> {
-            Utils.sendTime(getIntent(), Constants.TYPE_TARGET_PACKAGE_START);
-            return false;
-        });
+    public IBinder onBind(Intent intent) {
+        return new Binder();
+    }
+
+    @Override
+    public int onStartCommand(Intent intent, int flags, int startId) {
+        Utils.sendTime(intent, Constants.TYPE_SERVICE_START);
+        return super.onStartCommand(intent, flags, startId);
     }
 }

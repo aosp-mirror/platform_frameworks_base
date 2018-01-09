@@ -33,7 +33,8 @@ public class BroadcastPerfTest extends BasePerfTest {
         runPerfFunction(() -> {
             startTargetPackage();
 
-            final Intent intent = createIntent(Constants.ACTION_BROADCAST_MANIFEST_RECEIVE);
+            final Intent intent = createBroadcastIntent(
+                    Constants.ACTION_BROADCAST_MANIFEST_RECEIVE);
 
             final long startTime = System.nanoTime();
 
@@ -48,7 +49,8 @@ public class BroadcastPerfTest extends BasePerfTest {
     @Test
     public void manifestBroadcastNotRunning() {
         runPerfFunction(() -> {
-            final Intent intent = createIntent(Constants.ACTION_BROADCAST_MANIFEST_RECEIVE);
+            final Intent intent = createBroadcastIntent(
+                    Constants.ACTION_BROADCAST_MANIFEST_RECEIVE);
 
             final long startTime = System.nanoTime();
 
@@ -65,7 +67,8 @@ public class BroadcastPerfTest extends BasePerfTest {
         runPerfFunction(() -> {
             startTargetPackage();
 
-            final Intent intent = createIntent(Constants.ACTION_BROADCAST_REGISTERED_RECEIVE);
+            final Intent intent = createBroadcastIntent(
+                    Constants.ACTION_BROADCAST_REGISTERED_RECEIVE);
 
             final long startTime = System.nanoTime();
 

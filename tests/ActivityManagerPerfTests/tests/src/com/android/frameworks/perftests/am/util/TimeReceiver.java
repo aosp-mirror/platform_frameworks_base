@@ -45,20 +45,23 @@ public class TimeReceiver {
         }
     }
 
+    public void addTimeForTypeToQueue(String type, long timeNs) {
+        if (type == null) {
+            throw new IllegalArgumentException("type is null when adding time to queue");
+        }
+        if (timeNs < 0) {
+            throw new RuntimeException(
+                    "time is negative/non-existant (" + timeNs + ") when adding time to queue");
+        }
+        mQueue.add(new ReceivedMessage(type, timeNs));
+    }
+
     public Bundle createReceiveTimeExtraBinder() {
         Bundle extras = new Bundle();
         extras.putBinder(Constants.EXTRA_RECEIVER_CALLBACK, new ITimeReceiverCallback.Stub() {
             @Override
             public void sendTime(String type, long timeNs) throws RemoteException {
-                if (type == null) {
-                    throw new RuntimeException("receivedType is null");
-                }
-                if (timeNs < 0) {
-                    throw new RuntimeException(
-                            "receivedTime is negative/non-existant: " + timeNs);
-                }
-                Log.i(TAG, type + " " + timeNs);
-                mQueue.add(new ReceivedMessage(type, timeNs));
+                addTimeForTypeToQueue(type, timeNs);
             }
         });
         return extras;

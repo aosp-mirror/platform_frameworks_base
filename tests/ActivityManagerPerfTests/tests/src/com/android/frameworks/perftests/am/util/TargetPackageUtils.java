@@ -27,6 +27,7 @@ public class TargetPackageUtils {
 
     public static final String PACKAGE_NAME = "com.android.frameworks.perftests.amteststestapp";
     public static final String ACTIVITY_NAME = PACKAGE_NAME + ".TestActivity";
+    public static final String SERVICE_NAME = PACKAGE_NAME + ".TestService";
 
     private static final long WAIT_TIME_MS = 100L;
 
