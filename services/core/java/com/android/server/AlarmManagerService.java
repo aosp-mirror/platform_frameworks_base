@@ -1162,12 +1162,12 @@ class AlarmManagerService extends SystemService {
             // ignored; both services live in system_server
         }
         publishBinderService(Context.ALARM_SERVICE, mService);
-        mForceAppStandbyTracker.start();
     }
 
     @Override
     public void onBootPhase(int phase) {
         if (phase == PHASE_SYSTEM_SERVICES_READY) {
+            mForceAppStandbyTracker.start();
             mConstants.start(getContext().getContentResolver());
             mAppOps = (AppOpsManager) getContext().getSystemService(Context.APP_OPS_SERVICE);
             mLocalDeviceIdleController

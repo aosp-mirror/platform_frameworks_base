@@ -211,6 +211,7 @@ public class SettingsBackupTest {
                     Settings.Global.EUICC_FACTORY_RESET_TIMEOUT_MILLIS,
                     Settings.Global.FANCY_IME_ANIMATIONS,
                     Settings.Global.FORCE_ALLOW_ON_EXTERNAL,
+                    Settings.Global.FORCED_APP_STANDBY_ENABLED,
                     Settings.Global.FSTRIM_MANDATORY_INTERVAL,
                     Settings.Global.GLOBAL_HTTP_PROXY_EXCLUSION_LIST,
                     Settings.Global.GLOBAL_HTTP_PROXY_HOST,
