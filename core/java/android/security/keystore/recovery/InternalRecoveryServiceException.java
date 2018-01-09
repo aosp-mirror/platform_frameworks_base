@@ -16,8 +16,9 @@
 
 package android.security.keystore.recovery;
 
-import java.security.GeneralSecurityException;
+import android.annotation.SystemApi;
 
+import java.security.GeneralSecurityException;
 /**
  * An error thrown when something went wrong internally in the recovery service.
  *
@@ -26,6 +27,7 @@ import java.security.GeneralSecurityException;
  *
  * @hide
  */
+@SystemApi
 public class InternalRecoveryServiceException extends GeneralSecurityException {
     public InternalRecoveryServiceException(String msg) {
         super(msg);

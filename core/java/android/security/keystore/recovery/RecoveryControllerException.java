@@ -22,6 +22,7 @@ import java.security.GeneralSecurityException;
  * Base exception for errors thrown by {@link RecoveryController}.
  *
  * @hide
+ * Deprecated
  */
 public abstract class RecoveryControllerException extends GeneralSecurityException {
     RecoveryControllerException() { }

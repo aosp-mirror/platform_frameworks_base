@@ -17,6 +17,8 @@
 package android.security.keystore.recovery;
 
 import android.annotation.NonNull;
+import android.annotation.RequiresPermission;
+import android.annotation.SystemApi;
 import android.os.RemoteException;
 import android.os.ServiceSpecificException;
 import android.util.Log;
@@ -32,6 +34,7 @@ import java.util.Map;
  *
  * @hide
  */
+@SystemApi
 public class RecoverySession implements AutoCloseable {
     private static final String TAG = "RecoverySession";
 
@@ -48,6 +51,7 @@ public class RecoverySession implements AutoCloseable {
     /**
      * A new session, started by {@code recoveryManager}.
      */
+    @RequiresPermission(android.Manifest.permission.RECOVER_KEYSTORE)
     static RecoverySession newInstance(RecoveryController recoveryController) {
         return new RecoverySession(recoveryController, newSessionId());
     }
@@ -88,6 +92,7 @@ public class RecoverySession implements AutoCloseable {
      * @throws InternalRecoveryServiceException if an unexpected error occurred in the recovery
      *     service.
      */
+    @RequiresPermission(android.Manifest.permission.RECOVER_KEYSTORE)
     @NonNull public byte[] start(
             @NonNull byte[] verifierPublicKey,
             @NonNull byte[] vaultParams,
@@ -125,6 +130,7 @@ public class RecoverySession implements AutoCloseable {
      * @throws DecryptionFailedException if unable to decrypt the snapshot.
      * @throws InternalRecoveryServiceException if an error occurs internal to the recovery service.
      */
+    @RequiresPermission(android.Manifest.permission.RECOVER_KEYSTORE)
     public Map<String, byte[]> recoverKeys(
             @NonNull byte[] recoveryKeyBlob,
             @NonNull List<WrappedApplicationKey> applicationKeys)
@@ -158,9 +164,8 @@ public class RecoverySession implements AutoCloseable {
     /**
      * Deletes all data associated with {@code session}. Should not be invoked directly but via
      * {@link RecoverySession#close()}.
-     *
-     * @hide
      */
+    @RequiresPermission(android.Manifest.permission.RECOVER_KEYSTORE)
     @Override
     public void close() {
         try {

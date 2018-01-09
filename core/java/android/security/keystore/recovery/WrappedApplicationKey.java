@@ -17,6 +17,8 @@
 package android.security.keystore.recovery;
 
 import android.annotation.NonNull;
+import android.annotation.SystemApi;
+
 import android.os.Parcel;
 import android.os.Parcelable;
 
@@ -36,6 +38,7 @@ import com.android.internal.util.Preconditions;
  *
  * @hide
  */
+@SystemApi
 public final class WrappedApplicationKey implements Parcelable {
     private String mAlias;
     // The only supported format is AES-256 symmetric key.
@@ -143,9 +146,6 @@ public final class WrappedApplicationKey implements Parcelable {
                 }
             };
 
-    /**
-     * @hide
-     */
     @Override
     public void writeToParcel(Parcel out, int flags) {
         out.writeString(mAlias);
