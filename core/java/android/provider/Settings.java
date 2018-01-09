@@ -8704,6 +8704,8 @@ public final class Settings {
 
         /**
          * Whether soft AP will shut down after a timeout period when no devices are connected.
+         *
+         * Type: int (0 for false, 1 for true)
          * @hide
          */
         public static final String SOFT_AP_TIMEOUT_ENABLED = "soft_ap_timeout_enabled";
