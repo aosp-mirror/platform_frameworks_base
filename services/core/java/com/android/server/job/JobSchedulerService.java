@@ -471,11 +471,11 @@ public final class JobSchedulerService extends com.android.server.SystemService
                         DEFAULT_MAX_STANDARD_RESCHEDULE_COUNT);
                 MAX_WORK_RESCHEDULE_COUNT = mParser.getInt(KEY_MAX_WORK_RESCHEDULE_COUNT,
                         DEFAULT_MAX_WORK_RESCHEDULE_COUNT);
-                MIN_LINEAR_BACKOFF_TIME = mParser.getLong(KEY_MIN_LINEAR_BACKOFF_TIME,
+                MIN_LINEAR_BACKOFF_TIME = mParser.getDurationMillis(KEY_MIN_LINEAR_BACKOFF_TIME,
                         DEFAULT_MIN_LINEAR_BACKOFF_TIME);
-                MIN_EXP_BACKOFF_TIME = mParser.getLong(KEY_MIN_EXP_BACKOFF_TIME,
+                MIN_EXP_BACKOFF_TIME = mParser.getDurationMillis(KEY_MIN_EXP_BACKOFF_TIME,
                         DEFAULT_MIN_EXP_BACKOFF_TIME);
-                STANDBY_HEARTBEAT_TIME = mParser.getLong(KEY_STANDBY_HEARTBEAT_TIME,
+                STANDBY_HEARTBEAT_TIME = mParser.getDurationMillis(KEY_STANDBY_HEARTBEAT_TIME,
                         DEFAULT_STANDBY_HEARTBEAT_TIME);
                 STANDBY_BEATS[1] = mParser.getInt(KEY_STANDBY_WORKING_BEATS,
                         DEFAULT_STANDBY_WORKING_BEATS);

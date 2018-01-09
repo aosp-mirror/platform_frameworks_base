@@ -36,7 +36,6 @@ import android.app.AppGlobals;
 import android.app.admin.DevicePolicyManager;
 import android.app.usage.UsageStatsManager.StandbyBuckets;
 import android.app.usage.UsageEvents;
-import android.app.usage.UsageStatsManager;
 import android.app.usage.UsageStatsManagerInternal.AppIdleStateChangeListener;
 import android.appwidget.AppWidgetManager;
 import android.content.BroadcastReceiver;
@@ -82,6 +81,8 @@ import com.android.server.LocalServices;
 
 import java.io.File;
 import java.io.PrintWriter;
+import java.time.Duration;
+import java.time.format.DateTimeParseException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -1278,10 +1279,10 @@ public class AppStandbyController {
             synchronized (mAppIdleLock) {
 
                 // Default: 24 hours between paroles
-                mAppIdleParoleIntervalMillis = mParser.getLong(KEY_PAROLE_INTERVAL,
+                mAppIdleParoleIntervalMillis = mParser.getDurationMillis(KEY_PAROLE_INTERVAL,
                         COMPRESS_TIME ? ONE_MINUTE * 10 : 24 * 60 * ONE_MINUTE);
 
-                mAppIdleParoleDurationMillis = mParser.getLong(KEY_PAROLE_DURATION,
+                mAppIdleParoleDurationMillis = mParser.getDurationMillis(KEY_PAROLE_DURATION,
                         COMPRESS_TIME ? ONE_MINUTE : 10 * ONE_MINUTE); // 10 minutes
 
                 String screenThresholdsValue = mParser.getString(KEY_SCREEN_TIME_THRESHOLDS, null);
@@ -1308,7 +1309,15 @@ public class AppStandbyController {
                 if (thresholds.length == THRESHOLD_BUCKETS.length) {
                     long[] array = new long[THRESHOLD_BUCKETS.length];
                     for (int i = 0; i < THRESHOLD_BUCKETS.length; i++) {
-                        array[i] = Long.parseLong(thresholds[i]);
+                        try {
+                            if (thresholds[i].startsWith("P") || thresholds[i].startsWith("p")) {
+                                array[i] = Duration.parse(thresholds[i]).toMillis();
+                            } else {
+                                array[i] = Long.parseLong(thresholds[i]);
+                            }
+                        } catch (NumberFormatException|DateTimeParseException e) {
+                            return defaults;
+                        }
                     }
                     return array;
                 } else {
