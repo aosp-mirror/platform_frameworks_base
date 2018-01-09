@@ -5676,39 +5676,38 @@ public class TelephonyManager {
      * @param enable Whether to enable mobile data.
      *
      * @see #hasCarrierPrivileges
+     * @deprecated use {@link #setUserMobileDataEnabled(boolean)} instead.
      */
+    @Deprecated
     @RequiresPermission(android.Manifest.permission.MODIFY_PHONE_STATE)
     public void setDataEnabled(boolean enable) {
-        setDataEnabled(getSubId(SubscriptionManager.getDefaultDataSubscriptionId()), enable);
+        setUserMobileDataEnabled(enable);
     }
-
-    /** @hide */
-    @SystemApi
-    @RequiresPermission(android.Manifest.permission.MODIFY_PHONE_STATE)
-    public void setDataEnabled(int subId, boolean enable) {
-        try {
-            Log.d(TAG, "setDataEnabled: enabled=" + enable);
-            ITelephony telephony = getITelephony();
-            if (telephony != null)
-                telephony.setDataEnabled(subId, enable);
-        } catch (RemoteException e) {
-            Log.e(TAG, "Error calling ITelephony#setDataEnabled", e);
-        }
-    }
-
 
     /**
-     * @deprecated use {@link #isDataEnabled()} instead.
+     * @hide
+     * @deprecated use {@link #setUserMobileDataEnabled(boolean)} instead.
+    */
+    @SystemApi
+    @Deprecated
+    @RequiresPermission(android.Manifest.permission.MODIFY_PHONE_STATE)
+    public void setDataEnabled(int subId, boolean enable) {
+        setUserMobileDataEnabled(subId, enable);
+    }
+
+    /**
+     * @deprecated use {@link #isUserMobileDataEnabled()} instead.
      * @hide
      */
     @SystemApi
     @Deprecated
     public boolean getDataEnabled() {
-        return isDataEnabled();
+        return isUserMobileDataEnabled();
     }
 
     /**
-     * Returns whether mobile data is enabled or not.
+     * Returns whether mobile data is enabled or not per user setting. There are other factors
+     * that could disable mobile data, but they are not considered here.
      *
      * If this object has been created with {@link #createForSubscriptionId}, applies to the given
      * subId. Otherwise, applies to {@link SubscriptionManager#getDefaultDataSubscriptionId()}
@@ -5725,28 +5724,21 @@ public class TelephonyManager {
      * @return true if mobile data is enabled.
      *
      * @see #hasCarrierPrivileges
+     * @deprecated use {@link #isUserMobileDataEnabled()} instead.
      */
-    @SuppressWarnings("deprecation")
+    @Deprecated
     public boolean isDataEnabled() {
-        return getDataEnabled(getSubId(SubscriptionManager.getDefaultDataSubscriptionId()));
+        return isUserMobileDataEnabled();
     }
 
     /**
-     * @deprecated use {@link #isDataEnabled(int)} instead.
+     * @deprecated use {@link #isUserMobileDataEnabled()} instead.
      * @hide
      */
+    @Deprecated
     @SystemApi
     public boolean getDataEnabled(int subId) {
-        boolean retVal = false;
-        try {
-            ITelephony telephony = getITelephony();
-            if (telephony != null)
-                retVal = telephony.getDataEnabled(subId);
-        } catch (RemoteException e) {
-            Log.e(TAG, "Error calling ITelephony#getDataEnabled", e);
-        } catch (NullPointerException e) {
-        }
-        return retVal;
+        return isUserMobileDataEnabled(subId);
     }
 
     /** @hide */
@@ -6897,5 +6889,102 @@ public class TelephonyManager {
             Log.e(TAG, "Error calling ITelephony#getSignalStrength", e);
         }
         return null;
+    }
+
+    /**
+     * Turns mobile data on or off.
+     * If the {@link TelephonyManager} object has been created with
+     * {@link #createForSubscriptionId}, this API applies to the given subId.
+     * Otherwise, it applies to {@link SubscriptionManager#getDefaultDataSubscriptionId()}
+     *
+     * <p>Requires Permission:
+     *     {@link android.Manifest.permission#MODIFY_PHONE_STATE MODIFY_PHONE_STATE} or that the
+     *     calling app has carrier privileges.
+     *
+     * @param enable Whether to enable mobile data.
+     *
+     * @see #hasCarrierPrivileges
+     */
+    @RequiresPermission(android.Manifest.permission.MODIFY_PHONE_STATE)
+    public void setUserMobileDataEnabled(boolean enable) {
+        setUserMobileDataEnabled(
+                getSubId(SubscriptionManager.getDefaultDataSubscriptionId()), enable);
+    }
+
+    /**
+     * Returns whether mobile data is enabled or not per user setting. There are other factors
+     * that could disable mobile data, but they are not considered here.
+     *
+     * If this object has been created with {@link #createForSubscriptionId}, applies to the given
+     * subId. Otherwise, applies to {@link SubscriptionManager#getDefaultDataSubscriptionId()}
+     *
+     * <p>Requires one of the following permissions:
+     * {@link android.Manifest.permission#ACCESS_NETWORK_STATE ACCESS_NETWORK_STATE},
+     * {@link android.Manifest.permission#MODIFY_PHONE_STATE MODIFY_PHONE_STATE}, or that the
+     * calling app has carrier privileges.
+     *
+     * <p>Note that this does not take into account any data restrictions that may be present on the
+     * calling app. Such restrictions may be inspected with
+     * {@link ConnectivityManager#getRestrictBackgroundStatus}.
+     *
+     * @return true if mobile data is enabled.
+     *
+     * @see #hasCarrierPrivileges
+     */
+    @RequiresPermission(anyOf = {
+            android.Manifest.permission.ACCESS_NETWORK_STATE,
+            android.Manifest.permission.MODIFY_PHONE_STATE
+    })
+    public boolean isUserMobileDataEnabled() {
+        return isUserMobileDataEnabled(
+                getSubId(SubscriptionManager.getDefaultDataSubscriptionId()));
+    }
+
+    /**
+     * @hide
+     * Unlike isUserMobileDataEnabled, this API also evaluates carrierDataEnabled,
+     * policyDataEnabled etc to give a final decision.
+     */
+    public boolean isMobileDataEnabled() {
+        boolean retVal = false;
+        try {
+            int subId = getSubId(SubscriptionManager.getDefaultDataSubscriptionId());
+            ITelephony telephony = getITelephony();
+            if (telephony != null)
+                retVal = telephony.isDataEnabled(subId);
+        } catch (RemoteException e) {
+            Log.e(TAG, "Error calling ITelephony#isDataEnabled", e);
+        } catch (NullPointerException e) {
+        }
+        return retVal;
+    }
+
+    /**
+     * Utility class of {@link #isUserMobileDataEnabled()};
+     */
+    private boolean isUserMobileDataEnabled(int subId) {
+        boolean retVal = false;
+        try {
+            ITelephony telephony = getITelephony();
+            if (telephony != null)
+                retVal = telephony.isUserDataEnabled(subId);
+        } catch (RemoteException e) {
+            Log.e(TAG, "Error calling ITelephony#isUserDataEnabled", e);
+        } catch (NullPointerException e) {
+        }
+        return retVal;
+    }
+
+    /** Utility method of {@link #setUserMobileDataEnabled(boolean)} */
+    @RequiresPermission(android.Manifest.permission.MODIFY_PHONE_STATE)
+    private void setUserMobileDataEnabled(int subId, boolean enable) {
+        try {
+            Log.d(TAG, "setUserMobileDataEnabled: enabled=" + enable);
+            ITelephony telephony = getITelephony();
+            if (telephony != null)
+                telephony.setUserDataEnabled(subId, enable);
+        } catch (RemoteException e) {
+            Log.e(TAG, "Error calling ITelephony#setUserDataEnabled", e);
+        }
     }
 }
