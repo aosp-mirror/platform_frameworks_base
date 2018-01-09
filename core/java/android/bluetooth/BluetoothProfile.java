@@ -19,6 +19,7 @@ package android.bluetooth;
 
 import android.Manifest;
 import android.annotation.RequiresPermission;
+import android.annotation.SystemApi;
 
 import java.util.List;
 
@@ -185,6 +186,7 @@ public interface BluetoothProfile {
      *
      * @hide
      **/
+    @SystemApi
     public static final int PRIORITY_ON = 100;
 
     /**
@@ -193,6 +195,7 @@ public interface BluetoothProfile {
      *
      * @hide
      **/
+    @SystemApi
     public static final int PRIORITY_OFF = 0;
 
     /**
