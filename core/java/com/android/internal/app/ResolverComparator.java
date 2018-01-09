@@ -411,6 +411,9 @@ class ResolverComparator implements Comparator<ResolvedComponentInfo> {
             mContext.unbindService(mConnection);
             mConnection.destroy();
         }
+        if (mAfterCompute != null) {
+            mAfterCompute.afterCompute();
+        }
         if (DEBUG) {
             Log.d(TAG, "Unbinded Resolver Ranker.");
         }
@@ -573,7 +576,6 @@ class ResolverComparator implements Comparator<ResolvedComponentInfo> {
             if (DEBUG) {
                 Log.d(TAG, "Has not found valid ResolverRankerService; Skip Prediction");
             }
-            return;
         } else {
             try {
                 mConnectSignal.await(CONNECTION_COST_TIMEOUT_MILLIS, TimeUnit.MILLISECONDS);
