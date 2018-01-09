@@ -16,179 +16,111 @@
 
 package android.content.pm;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNull;
+import static android.content.pm.PackageBuilder.builder;
+import static android.content.pm.SharedLibraryNames.ANDROID_TEST_MOCK;
+import static android.content.pm.SharedLibraryNames.ANDROID_TEST_RUNNER;
+import static android.content.pm.SharedLibraryNames.ORG_APACHE_HTTP_LEGACY;
 
-import android.content.pm.PackageParser.Package;
 import android.os.Build;
 import android.support.test.filters.SmallTest;
 
-import org.junit.Before;
+import org.junit.Assume;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.JUnit4;
 
 import java.util.ArrayList;
-import java.util.Collections;
+import java.util.List;
 
 @SmallTest
 @RunWith(JUnit4.class)
-public class PackageBackwardCompatibilityTest {
-
-    private static final String ORG_APACHE_HTTP_LEGACY = "org.apache.http.legacy";
-
-    private static final String ANDROID_TEST_RUNNER = "android.test.runner";
-
-    private static final String ANDROID_TEST_MOCK = "android.test.mock";
-
-    private static final String OTHER_LIBRARY = "other.library";
-
-    private Package mPackage;
-
-    private static ArrayList<String> arrayList(String... strings) {
-        ArrayList<String> list = new ArrayList<>();
-        Collections.addAll(list, strings);
-        return list;
-    }
-
-    @Before
-    public void setUp() {
-        mPackage = new Package("org.package.name");
-        mPackage.applicationInfo.targetSdkVersion = Build.VERSION_CODES.CUR_DEVELOPMENT;
-    }
+public class PackageBackwardCompatibilityTest extends PackageSharedLibraryUpdaterTest {
 
     @Test
-    public void null_usesLibraries() {
-        PackageBackwardCompatibility.modifySharedLibraries(mPackage);
-        assertNull("usesLibraries not updated correctly", mPackage.usesLibraries);
+    public void null_usesLibraries_and_usesOptionalLibraries() {
+        PackageBuilder before = builder();
+        PackageBuilder after = builder();
+
+        checkBackwardsCompatibility(before, after);
     }
 
+    /**
+     * Detect when the org.apache.http.legacy is not on the bootclasspath.
+     *
+     * <p>This test will be ignored when org.apache.http.legacy is not on the bootclasspath and
+     * succeed otherwise. This allows a developer to ensure that the tests are being
+     */
     @Test
-    public void null_usesOptionalLibraries() {
-        PackageBackwardCompatibility.modifySharedLibraries(mPackage);
-        assertNull("usesOptionalLibraries not updated correctly", mPackage.usesOptionalLibraries);
+    public void detectWhenOAHLisOnBCP() {
+        Assume.assumeTrue(PackageBackwardCompatibility.bootClassPathContainsOAHL());
     }
 
+    /**
+     * Ensures that the {@link PackageBackwardCompatibility} uses {@link OrgApacheHttpLegacyUpdater}
+     * when necessary.
+     *
+     * <p>More comprehensive tests for that class can be found in
+     * {@link OrgApacheHttpLegacyUpdaterTest}.
+     */
     @Test
     public void targeted_at_O() {
-        mPackage.applicationInfo.targetSdkVersion = Build.VERSION_CODES.O;
-        PackageBackwardCompatibility.modifySharedLibraries(mPackage);
-        if (PackageBackwardCompatibility.removeOAHLFromBCP()) {
-            assertEquals("usesLibraries not updated correctly",
-                    arrayList(ORG_APACHE_HTTP_LEGACY),
-                    mPackage.usesLibraries);
-        } else {
-            assertNull("usesOptionalLibraries not updated correctly", mPackage.usesLibraries);
+        PackageBuilder before = builder()
+                .targetSdkVersion(Build.VERSION_CODES.O);
+
+        List<String> expected = new ArrayList<>();
+        if (!PackageBackwardCompatibility.bootClassPathContainsOAHL()) {
+            expected.add(ORG_APACHE_HTTP_LEGACY);
         }
-        assertNull("usesOptionalLibraries not updated correctly", mPackage.usesOptionalLibraries);
+
+        PackageBuilder after = builder()
+                .targetSdkVersion(Build.VERSION_CODES.O)
+                .requiredLibraries(expected);
+
+        checkBackwardsCompatibility(before, after);
     }
 
-    @Test
-    public void targeted_at_O_not_empty_usesLibraries() {
-        mPackage.applicationInfo.targetSdkVersion = Build.VERSION_CODES.O;
-        mPackage.usesLibraries = arrayList(OTHER_LIBRARY);
-        PackageBackwardCompatibility.modifySharedLibraries(mPackage);
-        if (PackageBackwardCompatibility.removeOAHLFromBCP()) {
-            // The org.apache.http.legacy jar should be added at the start of the list.
-            assertEquals("usesLibraries not updated correctly",
-                    arrayList(ORG_APACHE_HTTP_LEGACY, OTHER_LIBRARY),
-                    mPackage.usesLibraries);
-        } else {
-            assertEquals("usesLibraries not updated correctly",
-                    arrayList(OTHER_LIBRARY),
-                    mPackage.usesLibraries);
-        }
-        assertNull("usesOptionalLibraries not updated correctly", mPackage.usesOptionalLibraries);
-    }
-
-    @Test
-    public void targeted_at_O_org_apache_http_legacy_in_usesLibraries() {
-        mPackage.applicationInfo.targetSdkVersion = Build.VERSION_CODES.O;
-        mPackage.usesLibraries = arrayList(ORG_APACHE_HTTP_LEGACY);
-        PackageBackwardCompatibility.modifySharedLibraries(mPackage);
-        if (PackageBackwardCompatibility.removeOAHLFromBCP()) {
-            assertEquals("usesLibraries not updated correctly",
-                    arrayList(ORG_APACHE_HTTP_LEGACY),
-                    mPackage.usesLibraries);
-        } else {
-            assertNull("usesLibraries not updated correctly", mPackage.usesLibraries);
-        }
-        assertNull("usesOptionalLibraries not updated correctly", mPackage.usesOptionalLibraries);
-    }
-
-    @Test
-    public void targeted_at_O_org_apache_http_legacy_in_usesOptionalLibraries() {
-        mPackage.applicationInfo.targetSdkVersion = Build.VERSION_CODES.O;
-        mPackage.usesOptionalLibraries = arrayList(ORG_APACHE_HTTP_LEGACY);
-        PackageBackwardCompatibility.modifySharedLibraries(mPackage);
-        assertNull("usesLibraries not updated correctly", mPackage.usesLibraries);
-        if (PackageBackwardCompatibility.removeOAHLFromBCP()) {
-            assertEquals("usesOptionalLibraries not updated correctly",
-                    arrayList(ORG_APACHE_HTTP_LEGACY),
-                    mPackage.usesOptionalLibraries);
-        } else {
-            assertNull("usesOptionalLibraries not updated correctly",
-                    mPackage.usesOptionalLibraries);
-        }
-    }
-
+    /**
+     * Ensures that the {@link PackageBackwardCompatibility} uses
+     * {@link RemoveUnnecessaryOrgApacheHttpLegacyLibraryTest}
+     * when necessary.
+     *
+     * <p>More comprehensive tests for that class can be found in
+     * {@link RemoveUnnecessaryOrgApacheHttpLegacyLibraryTest}.
+     */
     @Test
     public void org_apache_http_legacy_in_usesLibraries() {
-        mPackage.usesLibraries = arrayList(ORG_APACHE_HTTP_LEGACY);
-        PackageBackwardCompatibility.modifySharedLibraries(mPackage);
-        if (PackageBackwardCompatibility.removeOAHLFromBCP()) {
-            assertEquals("usesLibraries not updated correctly",
-                    arrayList(ORG_APACHE_HTTP_LEGACY),
-                    mPackage.usesLibraries);
-        } else {
-            assertNull("usesLibraries not updated correctly", mPackage.usesLibraries);
-        }
-        assertNull("usesOptionalLibraries not updated correctly", mPackage.usesOptionalLibraries);
+        Assume.assumeTrue("Test requires that "
+                        + ORG_APACHE_HTTP_LEGACY + " is on the bootclasspath",
+                PackageBackwardCompatibility.bootClassPathContainsOAHL());
+
+        PackageBuilder before = builder()
+                .requiredLibraries(ORG_APACHE_HTTP_LEGACY);
+
+        // org.apache.http.legacy should be removed from the libraries because it is provided
+        // on the bootclasspath and providing both increases start up cost unnecessarily.
+        PackageBuilder after = builder();
+
+        checkBackwardsCompatibility(before, after);
     }
 
-    @Test
-    public void org_apache_http_legacy_in_usesOptionalLibraries() {
-        mPackage.usesOptionalLibraries = arrayList(ORG_APACHE_HTTP_LEGACY);
-        PackageBackwardCompatibility.modifySharedLibraries(mPackage);
-        assertNull("usesLibraries not updated correctly", mPackage.usesLibraries);
-        if (PackageBackwardCompatibility.removeOAHLFromBCP()) {
-            assertEquals("usesOptionalLibraries not updated correctly",
-                    arrayList(ORG_APACHE_HTTP_LEGACY),
-                    mPackage.usesOptionalLibraries);
-        } else {
-            assertNull("usesOptionalLibraries not updated correctly",
-                    mPackage.usesOptionalLibraries);
-        }
-    }
-
+    /**
+     * Ensures that the {@link PackageBackwardCompatibility} uses a
+     * {@link PackageBackwardCompatibility.AndroidTestRunnerSplitUpdater}.
+     *
+     * <p>More comprehensive tests for that class can be found in
+     * {@link AndroidTestRunnerSplitUpdaterTest}.
+     */
     @Test
     public void android_test_runner_in_usesLibraries() {
-        mPackage.usesLibraries = arrayList(ANDROID_TEST_RUNNER);
-        PackageBackwardCompatibility.modifySharedLibraries(mPackage);
-        assertEquals("usesLibraries not updated correctly",
-                arrayList(ANDROID_TEST_RUNNER, ANDROID_TEST_MOCK),
-                mPackage.usesLibraries);
+        PackageBuilder before = builder().requiredLibraries(ANDROID_TEST_RUNNER);
+
+        PackageBuilder after = builder()
+                .requiredLibraries(ANDROID_TEST_RUNNER, ANDROID_TEST_MOCK);
+
+        checkBackwardsCompatibility(before, after);
     }
 
-    @Test
-    public void android_test_runner_in_usesOptionalLibraries() {
-        mPackage.usesOptionalLibraries = arrayList(ANDROID_TEST_RUNNER);
-        PackageBackwardCompatibility.modifySharedLibraries(mPackage);
-        assertEquals("usesOptionalLibraries not updated correctly",
-                arrayList(ANDROID_TEST_RUNNER, ANDROID_TEST_MOCK),
-                mPackage.usesOptionalLibraries);
-    }
-
-    @Test
-    public void android_test_runner_in_usesLibraries_android_test_mock_in_usesOptionalLibraries() {
-        mPackage.usesLibraries = arrayList(ANDROID_TEST_RUNNER);
-        mPackage.usesOptionalLibraries = arrayList(ANDROID_TEST_MOCK);
-        PackageBackwardCompatibility.modifySharedLibraries(mPackage);
-        assertEquals("usesLibraries not updated correctly",
-                arrayList(ANDROID_TEST_RUNNER),
-                mPackage.usesLibraries);
-        assertEquals("usesOptionalLibraries not updated correctly",
-                arrayList(ANDROID_TEST_MOCK),
-                mPackage.usesOptionalLibraries);
+    private void checkBackwardsCompatibility(PackageBuilder before, PackageBuilder after) {
+        checkBackwardsCompatibility(before, after, PackageBackwardCompatibility::getInstance);
     }
 }

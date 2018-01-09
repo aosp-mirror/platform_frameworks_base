@@ -17,6 +17,7 @@ package android.content.pm;
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.os.Build;
 
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.util.ArrayUtils;
@@ -38,6 +39,12 @@ public abstract class PackageSharedLibraryUpdater {
      */
     public abstract void updatePackage(PackageParser.Package pkg);
 
+    static void removeLibrary(PackageParser.Package pkg, String libraryName) {
+        pkg.usesLibraries = ArrayUtils.remove(pkg.usesLibraries, libraryName);
+        pkg.usesOptionalLibraries =
+                ArrayUtils.remove(pkg.usesOptionalLibraries, libraryName);
+    }
+
     static @NonNull
             <T> ArrayList<T> prefix(@Nullable ArrayList<T> cur, T val) {
         if (cur == null) {
@@ -47,9 +54,54 @@ public abstract class PackageSharedLibraryUpdater {
         return cur;
     }
 
-    static boolean isLibraryPresent(ArrayList<String> usesLibraries,
+    private static boolean isLibraryPresent(ArrayList<String> usesLibraries,
             ArrayList<String> usesOptionalLibraries, String apacheHttpLegacy) {
         return ArrayUtils.contains(usesLibraries, apacheHttpLegacy)
                 || ArrayUtils.contains(usesOptionalLibraries, apacheHttpLegacy);
+    }
+
+    static boolean apkTargetsApiLevelLessThanOrEqualToOMR1(PackageParser.Package pkg) {
+        int targetSdkVersion = pkg.applicationInfo.targetSdkVersion;
+        return targetSdkVersion <= Build.VERSION_CODES.O_MR1;
+    }
+
+    /**
+     * Add an implicit dependency.
+     *
+     * <p>If the package has an existing dependency on {@code existingLibrary} then prefix it with
+     * the {@code implicitDependency} if it is not already in the list of libraries.
+     *
+     * @param pkg the {@link PackageParser.Package} to update.
+     * @param existingLibrary the existing library.
+     * @param implicitDependency the implicit dependency to add
+     */
+    void prefixImplicitDependency(PackageParser.Package pkg, String existingLibrary,
+            String implicitDependency) {
+        ArrayList<String> usesLibraries = pkg.usesLibraries;
+        ArrayList<String> usesOptionalLibraries = pkg.usesOptionalLibraries;
+
+        if (!isLibraryPresent(usesLibraries, usesOptionalLibraries, implicitDependency)) {
+            if (ArrayUtils.contains(usesLibraries, existingLibrary)) {
+                prefix(usesLibraries, implicitDependency);
+            } else if (ArrayUtils.contains(usesOptionalLibraries, existingLibrary)) {
+                prefix(usesOptionalLibraries, implicitDependency);
+            }
+
+            pkg.usesLibraries = usesLibraries;
+            pkg.usesOptionalLibraries = usesOptionalLibraries;
+        }
+    }
+
+    void prefixRequiredLibrary(PackageParser.Package pkg, String libraryName) {
+        ArrayList<String> usesLibraries = pkg.usesLibraries;
+        ArrayList<String> usesOptionalLibraries = pkg.usesOptionalLibraries;
+
+        boolean alreadyPresent = isLibraryPresent(
+                usesLibraries, usesOptionalLibraries, libraryName);
+        if (!alreadyPresent) {
+            usesLibraries = prefix(usesLibraries, libraryName);
+
+            pkg.usesLibraries = usesLibraries;
+        }
     }
 }
