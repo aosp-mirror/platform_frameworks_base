@@ -83,7 +83,7 @@ public class WorkModeTile extends QSTileImpl<BooleanState> implements
 
     @Override
     public CharSequence getTileLabel() {
-        return mContext.getString(R.string.quick_settings_work_mode_label);
+        return mContext.getString(R.string.quick_settings_work_mode_on_label);
     }
 
     @Override
@@ -98,16 +98,17 @@ public class WorkModeTile extends QSTileImpl<BooleanState> implements
             state.value = mProfileController.isWorkModeEnabled();
         }
 
-        state.label = mContext.getString(R.string.quick_settings_work_mode_label);
         state.icon = mIcon;
         if (state.value) {
             state.slash.isSlashed = false;
             state.contentDescription =  mContext.getString(
                     R.string.accessibility_quick_settings_work_mode_on);
+            state.label = mContext.getString(R.string.quick_settings_work_mode_on_label);
         } else {
             state.slash.isSlashed = true;
             state.contentDescription =  mContext.getString(
                     R.string.accessibility_quick_settings_work_mode_off);
+            state.label = mContext.getString(R.string.quick_settings_work_mode_off_label);
         }
         state.expandedAccessibilityClassName = Switch.class.getName();
         state.state = state.value ? Tile.STATE_ACTIVE : Tile.STATE_INACTIVE;
