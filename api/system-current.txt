@@ -1701,6 +1701,39 @@ package android.hardware.location {
 
 package android.hardware.radio {
 
+  public final class ProgramList implements java.lang.AutoCloseable {
+    method public void addOnCompleteListener(java.util.concurrent.Executor, android.hardware.radio.ProgramList.OnCompleteListener);
+    method public void addOnCompleteListener(android.hardware.radio.ProgramList.OnCompleteListener);
+    method public void close();
+    method public android.hardware.radio.RadioManager.ProgramInfo get(android.hardware.radio.ProgramSelector.Identifier);
+    method public void registerListCallback(java.util.concurrent.Executor, android.hardware.radio.ProgramList.ListCallback);
+    method public void registerListCallback(android.hardware.radio.ProgramList.ListCallback);
+    method public void removeOnCompleteListener(android.hardware.radio.ProgramList.OnCompleteListener);
+    method public java.util.List<android.hardware.radio.RadioManager.ProgramInfo> toList();
+    method public void unregisterListCallback(android.hardware.radio.ProgramList.ListCallback);
+  }
+
+  public static final class ProgramList.Filter implements android.os.Parcelable {
+    ctor public ProgramList.Filter(java.util.Set<java.lang.Integer>, java.util.Set<android.hardware.radio.ProgramSelector.Identifier>, boolean, boolean);
+    method public boolean areCategoriesIncluded();
+    method public boolean areModificationsExcluded();
+    method public int describeContents();
+    method public java.util.Set<java.lang.Integer> getIdentifierTypes();
+    method public java.util.Set<android.hardware.radio.ProgramSelector.Identifier> getIdentifiers();
+    method public void writeToParcel(android.os.Parcel, int);
+    field public static final android.os.Parcelable.Creator<android.hardware.radio.ProgramList.Filter> CREATOR;
+  }
+
+  public static abstract class ProgramList.ListCallback {
+    ctor public ProgramList.ListCallback();
+    method public void onItemChanged(android.hardware.radio.ProgramSelector.Identifier);
+    method public void onItemRemoved(android.hardware.radio.ProgramSelector.Identifier);
+  }
+
+  public static abstract interface ProgramList.OnCompleteListener {
+    method public abstract void onComplete();
+  }
+
   public final class ProgramSelector implements android.os.Parcelable {
     ctor public ProgramSelector(int, android.hardware.radio.ProgramSelector.Identifier, android.hardware.radio.ProgramSelector.Identifier[], long[]);
     method public static android.hardware.radio.ProgramSelector createAmFmSelector(int, int);
@@ -1724,6 +1757,7 @@ package android.hardware.radio {
     field public static final int IDENTIFIER_TYPE_DRMO_SERVICE_ID = 9; // 0x9
     field public static final int IDENTIFIER_TYPE_HD_STATION_ID_EXT = 3; // 0x3
     field public static final int IDENTIFIER_TYPE_HD_SUBCHANNEL = 4; // 0x4
+    field public static final int IDENTIFIER_TYPE_INVALID = 0; // 0x0
     field public static final int IDENTIFIER_TYPE_RDS_PI = 2; // 0x2
     field public static final int IDENTIFIER_TYPE_SXM_CHANNEL = 13; // 0xd
     field public static final int IDENTIFIER_TYPE_SXM_SERVICE_ID = 12; // 0xc
@@ -1735,6 +1769,7 @@ package android.hardware.radio {
     field public static final int PROGRAM_TYPE_DRMO = 6; // 0x6
     field public static final int PROGRAM_TYPE_FM = 2; // 0x2
     field public static final int PROGRAM_TYPE_FM_HD = 4; // 0x4
+    field public static final int PROGRAM_TYPE_INVALID = 0; // 0x0
     field public static final int PROGRAM_TYPE_SXM = 7; // 0x7
     field public static final int PROGRAM_TYPE_VENDOR_END = 1999; // 0x7cf
     field public static final int PROGRAM_TYPE_VENDOR_START = 1000; // 0x3e8
@@ -1953,10 +1988,11 @@ package android.hardware.radio {
     method public abstract void cancelAnnouncement();
     method public abstract void close();
     method public abstract int getConfiguration(android.hardware.radio.RadioManager.BandConfig[]);
+    method public android.hardware.radio.ProgramList getDynamicProgramList(android.hardware.radio.ProgramList.Filter);
     method public abstract boolean getMute();
     method public java.util.Map<java.lang.String, java.lang.String> getParameters(java.util.List<java.lang.String>);
     method public abstract int getProgramInformation(android.hardware.radio.RadioManager.ProgramInfo[]);
-    method public abstract java.util.List<android.hardware.radio.RadioManager.ProgramInfo> getProgramList(java.util.Map<java.lang.String, java.lang.String>);
+    method public abstract deprecated java.util.List<android.hardware.radio.RadioManager.ProgramInfo> getProgramList(java.util.Map<java.lang.String, java.lang.String>);
     method public abstract boolean hasControl();
     method public abstract deprecated boolean isAnalogForced();
     method public abstract boolean isAntennaConnected();

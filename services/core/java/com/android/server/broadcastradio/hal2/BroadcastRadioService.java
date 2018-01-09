@@ -82,7 +82,7 @@ public class BroadcastRadioService {
     }
 
     public ITuner openSession(int moduleId, @Nullable RadioManager.BandConfig legacyConfig,
-        boolean withAudio, @NonNull ITunerCallback callback) {
+        boolean withAudio, @NonNull ITunerCallback callback) throws RemoteException {
         Objects.requireNonNull(callback);
 
         if (!withAudio) {
