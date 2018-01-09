@@ -5124,6 +5124,11 @@ message MetricsEvent {
     // OS: P
     ACTION_USB_CONFIG_ACCESSORY = 1280;
 
+    // OPEN: Settings > Battery > Smart Battery
+    // CATEGORY: SETTINGS
+    // OS: P
+    FUELGAUGE_SMART_BATTERY = 1281;
+
     // ---- End P Constants, all P constants go above this line ----
     // Add new aosp constants above this line.
     // END OF AOSP CONSTANTS
