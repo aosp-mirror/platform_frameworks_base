@@ -91,7 +91,9 @@ GEN_PROTO:=
 
 gen_src_dir:=
 
+ifeq ($(BUILD_WITH_INCIDENTD_RC), true)
 LOCAL_INIT_RC := incidentd.rc
+endif
 
 include $(BUILD_EXECUTABLE)
 
