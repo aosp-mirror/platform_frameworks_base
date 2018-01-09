@@ -49,6 +49,7 @@ import com.android.internal.os.BackgroundThread;
 import com.android.internal.os.SomeArgs;
 import com.android.internal.util.ArrayUtils;
 import com.android.internal.util.XmlUtils;
+import com.android.server.pm.permission.BasePermission;
 
 import libcore.io.IoUtils;
 import org.xmlpull.v1.XmlPullParser;
@@ -301,7 +302,7 @@ class InstantAppRegistry {
             // into account but also allow the value from the old computation to avoid
             // data loss.
             final String[] signaturesSha256Digests = PackageUtils.computeSignaturesSha256Digests(
-                    pkg.mSigningDetails.signatures);
+                    pkg.mSignatures);
             final String signaturesSha256Digest = PackageUtils.computeSignaturesSha256Digest(
                     signaturesSha256Digests);
 
@@ -312,7 +313,7 @@ class InstantAppRegistry {
             }
 
             // For backwards compatibility we accept match based on first signature
-            if (pkg.mSigningDetails.signatures.length > 1 && currentCookieFile.equals(computeInstantCookieFile(
+            if (pkg.mSignatures.length > 1 && currentCookieFile.equals(computeInstantCookieFile(
                     pkg.packageName, signaturesSha256Digests[0], userId))) {
                 return;
             }
@@ -1175,13 +1176,12 @@ class InstantAppRegistry {
             // We prefer the modern computation procedure where all certs are taken
             // into account and delete the file derived via the legacy hash computation.
             File newCookieFile = computeInstantCookieFile(pkg.packageName,
-                    PackageUtils.computeSignaturesSha256Digest(pkg.mSigningDetails.signatures), userId);
-            if (!pkg.mSigningDetails.hasSignatures()) {
-                Slog.wtf(LOG_TAG, "Parsed Instant App contains no valid signatures!");
-            }
-            File oldCookieFile = peekInstantCookieFile(pkg.packageName, userId);
-            if (oldCookieFile != null && !newCookieFile.equals(oldCookieFile)) {
-                oldCookieFile.delete();
+                    PackageUtils.computeSignaturesSha256Digest(pkg.mSignatures), userId);
+            if (pkg.mSignatures.length > 0) {
+                File oldCookieFile = peekInstantCookieFile(pkg.packageName, userId);
+                if (oldCookieFile != null && !newCookieFile.equals(oldCookieFile)) {
+                    oldCookieFile.delete();
+                }
             }
             cancelPendingPersistLPw(pkg, userId);
             addPendingPersistCookieLPw(userId, pkg, cookie, newCookieFile);
