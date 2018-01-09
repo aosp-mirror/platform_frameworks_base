@@ -102,7 +102,8 @@ class WindowContainer<E extends WindowContainer> extends ConfigurationContainer<
     WindowContainer(WindowManagerService service) {
         mService = service;
         mPendingTransaction = service.mTransactionFactory.make();
-        mSurfaceAnimator = new SurfaceAnimator(this, this::onAnimationFinished, service);
+        mSurfaceAnimator = new SurfaceAnimator(this, this::onAnimationFinished,
+                service.mAnimator::addAfterPrepareSurfacesRunnable, service);
     }
 
     @Override

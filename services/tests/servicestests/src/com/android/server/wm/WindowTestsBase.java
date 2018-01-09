@@ -103,7 +103,6 @@ class WindowTestsBase {
 
         context.getDisplay().getDisplayInfo(mDisplayInfo);
         mDisplayContent = createNewDisplay();
-        sWm.mAnimator.mInitialized = true;
         sWm.mDisplayEnabled = true;
         sWm.mDisplayReady = true;
 

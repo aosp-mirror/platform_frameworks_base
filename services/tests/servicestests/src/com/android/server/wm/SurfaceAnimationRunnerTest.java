@@ -37,6 +37,7 @@ import android.platform.test.annotations.Presubmit;
 import android.support.test.filters.FlakyTest;
 import android.support.test.filters.SmallTest;
 import android.support.test.runner.AndroidJUnit4;
+import android.util.Log;
 import android.view.Choreographer;
 import android.view.Choreographer.FrameCallback;
 import android.view.SurfaceControl;
@@ -159,8 +160,12 @@ public class SurfaceAnimationRunnerTest extends WindowTestsBase {
         when(mMockAnimationSpec.getDuration()).thenReturn(200L);
         mSurfaceAnimationRunner.startAnimation(mMockAnimationSpec, mMockSurface, mMockTransaction,
                 this::finishedCallback);
+
+        // We need to wait for two frames: The first frame starts the animation, the second frame
+        // actually cancels the animation.
         waitUntilNextFrame();
-        assertFalse(mSurfaceAnimationRunner.mRunningAnimations.isEmpty());
+        waitUntilNextFrame();
+        assertTrue(mSurfaceAnimationRunner.mRunningAnimations.isEmpty());
         verify(mMockAnimationSpec, atLeastOnce()).apply(any(), any(), eq(0L));
     }
 

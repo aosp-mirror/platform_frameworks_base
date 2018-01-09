@@ -75,10 +75,7 @@ public class SurfaceAnimatorTest extends WindowTestsBase {
         mAnimatable2 = new MyAnimatable();
     }
 
-    // TODO: Tests are flaky, and timeout after 5 minutes. Instead of wasting everybody's time we
-    // mark them as ignore.
     @Test
-    @Ignore
     public void testRunAnimation() throws Exception {
         mAnimatable.mSurfaceAnimator.startAnimation(mTransaction, mSpec, true /* hidden */);
         final ArgumentCaptor<OnAnimationFinishedCallback> callbackCaptor = ArgumentCaptor.forClass(
@@ -88,17 +85,13 @@ public class SurfaceAnimatorTest extends WindowTestsBase {
         verify(mSpec).startAnimation(any(), any(), callbackCaptor.capture());
 
         callbackCaptor.getValue().onAnimationFinished(mSpec);
-        waitUntilPrepareSurfaces();
         assertNotAnimating(mAnimatable);
         assertTrue(mAnimatable.mFinishedCallbackCalled);
         assertTrue(mAnimatable.mPendingDestroySurfaces.contains(mAnimatable.mLeash));
         // TODO: Verify reparenting once we use mPendingTransaction to reparent it back
     }
 
-    // TODO: Tests are flaky, and timeout after 5 minutes. Instead of wasting everybody's time we
-    // mark them as ignore.
     @Test
-    @Ignore
     public void testOverrideAnimation() throws Exception {
         mAnimatable.mSurfaceAnimator.startAnimation(mTransaction, mSpec, true /* hidden */);
         final SurfaceControl firstLeash = mAnimatable.mLeash;
@@ -114,13 +107,11 @@ public class SurfaceAnimatorTest extends WindowTestsBase {
 
         // First animation was finished, but this shouldn't cancel the second animation
         callbackCaptor.getValue().onAnimationFinished(mSpec);
-        waitUntilPrepareSurfaces();
         assertTrue(mAnimatable.mSurfaceAnimator.isAnimating());
 
         // Second animation was finished
         verify(mSpec2).startAnimation(any(), any(), callbackCaptor.capture());
         callbackCaptor.getValue().onAnimationFinished(mSpec2);
-        waitUntilPrepareSurfaces();
         assertNotAnimating(mAnimatable);
         assertTrue(mAnimatable.mFinishedCallbackCalled);
     }
@@ -157,10 +148,7 @@ public class SurfaceAnimatorTest extends WindowTestsBase {
         assertTrue(mAnimatable.mPendingDestroySurfaces.contains(mAnimatable.mLeash));
     }
 
-    // TODO: Tests are flaky, and timeout after 5 minutes. Instead of wasting everybody's time we
-    // mark them as ignore.
     @Test
-    @Ignore
     public void testTransferAnimation() throws Exception {
         mAnimatable.mSurfaceAnimator.startAnimation(mTransaction, mSpec, true /* hidden */);
 
@@ -175,7 +163,6 @@ public class SurfaceAnimatorTest extends WindowTestsBase {
         assertEquals(leash, mAnimatable2.mSurfaceAnimator.mLeash);
         assertFalse(mAnimatable.mPendingDestroySurfaces.contains(leash));
         callbackCaptor.getValue().onAnimationFinished(mSpec);
-        waitUntilPrepareSurfaces();
         assertNotAnimating(mAnimatable2);
         assertTrue(mAnimatable2.mFinishedCallbackCalled);
         assertTrue(mAnimatable2.mPendingDestroySurfaces.contains(leash));
@@ -189,14 +176,6 @@ public class SurfaceAnimatorTest extends WindowTestsBase {
     private void assertNotAnimating(MyAnimatable animatable) {
         assertFalse(animatable.mSurfaceAnimator.isAnimating());
         assertNull(animatable.mSurfaceAnimator.getAnimation());
-    }
-
-    private void waitUntilPrepareSurfaces() throws Exception {
-        final CountDownLatch latch = new CountDownLatch(1);
-        synchronized (sWm.mWindowMap) {
-            sWm.mAnimator.addAfterPrepareSurfacesRunnable(latch::countDown);
-        }
-        latch.await();
     }
 
     private class MyAnimatable implements Animatable {
@@ -219,7 +198,7 @@ public class SurfaceAnimatorTest extends WindowTestsBase {
                     .build();
             mFinishedCallbackCalled = false;
             mLeash = null;
-            mSurfaceAnimator = new SurfaceAnimator(this, mFinishedCallback, sWm);
+            mSurfaceAnimator = new SurfaceAnimator(this, mFinishedCallback, Runnable::run, sWm);
         }
 
         @Override
