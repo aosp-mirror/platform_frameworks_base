@@ -19,7 +19,7 @@
 <resources>
     <!-- A list of apps to be retained on the managed user.
             Takes precedence over the disallowed apps lists. -->
-    <string-array name="required_apps_managed_user">
+    <string-array translatable="false" name="required_apps_managed_user">
         <item>com.android.settings</item>
         <item>com.android.contacts</item>
         <item>com.android.dialer</item>

@@ -19,7 +19,7 @@
 <resources>
     <!-- A list of apps to be retained on the managed device.
             Takes precedence over the disallowed apps lists. -->
-    <string-array name="required_apps_managed_device">
+    <string-array translatable="false" name="required_apps_managed_device">
         <item>com.android.settings</item>
         <item>com.android.contacts</item>
         <item>com.android.dialer</item>
