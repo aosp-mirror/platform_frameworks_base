@@ -1753,6 +1753,15 @@ package android.hardware.radio {
     field public static final int CLASS_AM_FM = 0; // 0x0
     field public static final int CLASS_DT = 2; // 0x2
     field public static final int CLASS_SAT = 1; // 0x1
+    field public static final int CONFIG_DAB_DAB_LINKING = 6; // 0x6
+    field public static final int CONFIG_DAB_DAB_SOFT_LINKING = 8; // 0x8
+    field public static final int CONFIG_DAB_FM_LINKING = 7; // 0x7
+    field public static final int CONFIG_DAB_FM_SOFT_LINKING = 9; // 0x9
+    field public static final int CONFIG_FORCE_ANALOG = 2; // 0x2
+    field public static final int CONFIG_FORCE_DIGITAL = 3; // 0x3
+    field public static final int CONFIG_FORCE_MONO = 1; // 0x1
+    field public static final int CONFIG_RDS_AF = 4; // 0x4
+    field public static final int CONFIG_RDS_REG = 5; // 0x5
     field public static final int REGION_ITU_1 = 0; // 0x0
     field public static final int REGION_ITU_2 = 1; // 0x1
     field public static final int REGION_JAPAN = 3; // 0x3
@@ -1932,15 +1941,20 @@ package android.hardware.radio {
     method public abstract void close();
     method public abstract int getConfiguration(android.hardware.radio.RadioManager.BandConfig[]);
     method public abstract boolean getMute();
+    method public java.util.Map<java.lang.String, java.lang.String> getParameters(java.util.List<java.lang.String>);
     method public abstract int getProgramInformation(android.hardware.radio.RadioManager.ProgramInfo[]);
     method public abstract java.util.List<android.hardware.radio.RadioManager.ProgramInfo> getProgramList(java.util.Map<java.lang.String, java.lang.String>);
     method public abstract boolean hasControl();
-    method public abstract boolean isAnalogForced();
+    method public abstract deprecated boolean isAnalogForced();
     method public abstract boolean isAntennaConnected();
+    method public boolean isConfigFlagSet(int);
+    method public boolean isConfigFlagSupported(int);
     method public abstract int scan(int, boolean);
-    method public abstract void setAnalogForced(boolean);
+    method public abstract deprecated void setAnalogForced(boolean);
+    method public void setConfigFlag(int, boolean);
     method public abstract int setConfiguration(android.hardware.radio.RadioManager.BandConfig);
     method public abstract int setMute(boolean);
+    method public java.util.Map<java.lang.String, java.lang.String> setParameters(java.util.Map<java.lang.String, java.lang.String>);
     method public abstract boolean startBackgroundScan();
     method public abstract int step(int, boolean);
     method public abstract deprecated int tune(int, int);
@@ -1966,6 +1980,7 @@ package android.hardware.radio {
     method public void onEmergencyAnnouncement(boolean);
     method public void onError(int);
     method public deprecated void onMetadataChanged(android.hardware.radio.RadioMetadata);
+    method public void onParametersUpdated(java.util.Map<java.lang.String, java.lang.String>);
     method public void onProgramInfoChanged(android.hardware.radio.RadioManager.ProgramInfo);
     method public void onProgramListChanged();
     method public void onTrafficAnnouncement(boolean);

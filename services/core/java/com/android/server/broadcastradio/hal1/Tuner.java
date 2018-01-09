@@ -263,19 +263,31 @@ class Tuner extends ITuner.Stub {
     }
 
     @Override
-    public boolean isAnalogForced() {
-        synchronized (mLock) {
-            checkNotClosedLocked();
-            return nativeIsAnalogForced(mNativeContext);
-        }
+    public boolean isConfigFlagSupported(int flag) {
+        return flag == RadioManager.CONFIG_FORCE_ANALOG;
     }
 
     @Override
-    public void setAnalogForced(boolean isForced) {
-        synchronized (mLock) {
-            checkNotClosedLocked();
-            nativeSetAnalogForced(mNativeContext, isForced);
+    public boolean isConfigFlagSet(int flag) {
+        if (flag == RadioManager.CONFIG_FORCE_ANALOG) {
+            synchronized (mLock) {
+                checkNotClosedLocked();
+                return nativeIsAnalogForced(mNativeContext);
+            }
         }
+        throw new UnsupportedOperationException("Not supported by HAL 1.x");
+    }
+
+    @Override
+    public void setConfigFlag(int flag, boolean value) {
+        if (flag == RadioManager.CONFIG_FORCE_ANALOG) {
+            synchronized (mLock) {
+                checkNotClosedLocked();
+                nativeSetAnalogForced(mNativeContext, value);
+                return;
+            }
+        }
+        throw new UnsupportedOperationException("Not supported by HAL 1.x");
     }
 
     @Override

@@ -120,6 +120,71 @@ public class RadioManager {
      * @see BandDescriptor */
     public static final int REGION_KOREA  = 4;
 
+    /**
+     * Forces mono audio stream reception.
+     *
+     * Analog broadcasts can recover poor reception conditions by jointing
+     * stereo channels into one. Mainly for, but not limited to AM/FM.
+     */
+    public static final int CONFIG_FORCE_MONO = 1;
+    /**
+     * Forces the analog playback for the supporting radio technology.
+     *
+     * User may disable digital playback for FM HD Radio or hybrid FM/DAB with
+     * this option. This is purely user choice, ie. does not reflect digital-
+     * analog handover state managed from the HAL implementation side.
+     *
+     * Some radio technologies may not support this, ie. DAB.
+     */
+    public static final int CONFIG_FORCE_ANALOG = 2;
+    /**
+     * Forces the digital playback for the supporting radio technology.
+     *
+     * User may disable digital-analog handover that happens with poor
+     * reception conditions. With digital forced, the radio will remain silent
+     * instead of switching to analog channel if it's available. This is purely
+     * user choice, it does not reflect the actual state of handover.
+     */
+    public static final int CONFIG_FORCE_DIGITAL = 3;
+    /**
+     * RDS Alternative Frequencies.
+     *
+     * If set and the currently tuned RDS station broadcasts on multiple
+     * channels, radio tuner automatically switches to the best available
+     * alternative.
+     */
+    public static final int CONFIG_RDS_AF = 4;
+    /**
+     * RDS region-specific program lock-down.
+     *
+     * Allows user to lock to the current region as they move into the
+     * other region.
+     */
+    public static final int CONFIG_RDS_REG = 5;
+    /** Enables DAB-DAB hard- and implicit-linking (the same content). */
+    public static final int CONFIG_DAB_DAB_LINKING = 6;
+    /** Enables DAB-FM hard- and implicit-linking (the same content). */
+    public static final int CONFIG_DAB_FM_LINKING = 7;
+    /** Enables DAB-DAB soft-linking (related content). */
+    public static final int CONFIG_DAB_DAB_SOFT_LINKING = 8;
+    /** Enables DAB-FM soft-linking (related content). */
+    public static final int CONFIG_DAB_FM_SOFT_LINKING = 9;
+
+    /** @hide */
+    @IntDef(prefix = { "CONFIG_" }, value = {
+        CONFIG_FORCE_MONO,
+        CONFIG_FORCE_ANALOG,
+        CONFIG_FORCE_DIGITAL,
+        CONFIG_RDS_AF,
+        CONFIG_RDS_REG,
+        CONFIG_DAB_DAB_LINKING,
+        CONFIG_DAB_FM_LINKING,
+        CONFIG_DAB_DAB_SOFT_LINKING,
+        CONFIG_DAB_FM_SOFT_LINKING,
+    })
+    @Retention(RetentionPolicy.SOURCE)
+    public @interface ConfigFlag {}
+
     private static void writeStringMap(@NonNull Parcel dest, @NonNull Map<String, String> map) {
         dest.writeInt(map.size());
         for (Map.Entry<String, String> entry : map.entrySet()) {

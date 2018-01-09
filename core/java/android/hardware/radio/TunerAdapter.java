@@ -236,17 +236,36 @@ class TunerAdapter extends RadioTuner {
 
     @Override
     public boolean isAnalogForced() {
+        return isConfigFlagSet(RadioManager.CONFIG_FORCE_ANALOG);
+    }
+
+    @Override
+    public void setAnalogForced(boolean isForced) {
+        setConfigFlag(RadioManager.CONFIG_FORCE_ANALOG, isForced);
+    }
+
+    @Override
+    public boolean isConfigFlagSupported(@RadioManager.ConfigFlag int flag) {
         try {
-            return mTuner.isAnalogForced();
+            return mTuner.isConfigFlagSupported(flag);
         } catch (RemoteException e) {
             throw new RuntimeException("service died", e);
         }
     }
 
     @Override
-    public void setAnalogForced(boolean isForced) {
+    public boolean isConfigFlagSet(@RadioManager.ConfigFlag int flag) {
         try {
-            mTuner.setAnalogForced(isForced);
+            return mTuner.isConfigFlagSet(flag);
+        } catch (RemoteException e) {
+            throw new RuntimeException("service died", e);
+        }
+    }
+
+    @Override
+    public void setConfigFlag(@RadioManager.ConfigFlag int flag, boolean value) {
+        try {
+            mTuner.setConfigFlag(flag, value);
         } catch (RemoteException e) {
             throw new RuntimeException("service died", e);
         }
