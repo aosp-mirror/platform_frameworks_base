@@ -288,65 +288,9 @@ public class SettingsBackupAgent extends BackupAgentHelper {
 
     @Override
     public void onFullBackup(FullBackupDataOutput data)  throws IOException {
-        byte[] systemSettingsData = getSystemSettings();
-        byte[] secureSettingsData = getSecureSettings();
-        byte[] globalSettingsData = getGlobalSettings();
-        byte[] lockSettingsData   = getLockSettings(UserHandle.myUserId());
-        byte[] locale = mSettingsHelper.getLocaleData();
-        byte[] softApConfigData = getSoftAPConfiguration();
-        byte[] netPoliciesData = getNetworkPolicies();
-        byte[] wifiFullConfigData = getNewWifiConfigData();
-
-        // Write the data to the staging file, then emit that as our tarfile
-        // representation of the backed-up settings.
-        String root = getFilesDir().getAbsolutePath();
-        File stage = new File(root, STAGE_FILE);
-        try {
-            FileOutputStream filestream = new FileOutputStream(stage);
-            BufferedOutputStream bufstream = new BufferedOutputStream(filestream);
-            DataOutputStream out = new DataOutputStream(bufstream);
-
-            if (DEBUG_BACKUP) Log.d(TAG, "Writing flattened data version " + FULL_BACKUP_VERSION);
-            out.writeInt(FULL_BACKUP_VERSION);
-
-            if (DEBUG_BACKUP) Log.d(TAG, systemSettingsData.length + " bytes of settings data");
-            out.writeInt(systemSettingsData.length);
-            out.write(systemSettingsData);
-            if (DEBUG_BACKUP) {
-                Log.d(TAG, secureSettingsData.length + " bytes of secure settings data");
-            }
-            out.writeInt(secureSettingsData.length);
-            out.write(secureSettingsData);
-            if (DEBUG_BACKUP) {
-                Log.d(TAG, globalSettingsData.length + " bytes of global settings data");
-            }
-            out.writeInt(globalSettingsData.length);
-            out.write(globalSettingsData);
-            if (DEBUG_BACKUP) Log.d(TAG, locale.length + " bytes of locale data");
-            out.writeInt(locale.length);
-            out.write(locale);
-            if (DEBUG_BACKUP) Log.d(TAG, lockSettingsData.length + " bytes of lock settings data");
-            out.writeInt(lockSettingsData.length);
-            out.write(lockSettingsData);
-            if (DEBUG_BACKUP) Log.d(TAG, softApConfigData.length + " bytes of softap config data");
-            out.writeInt(softApConfigData.length);
-            out.write(softApConfigData);
-            if (DEBUG_BACKUP) Log.d(TAG, netPoliciesData.length + " bytes of net policies data");
-            out.writeInt(netPoliciesData.length);
-            out.write(netPoliciesData);
-            if (DEBUG_BACKUP) {
-                Log.d(TAG, wifiFullConfigData.length + " bytes of wifi config data");
-            }
-            out.writeInt(wifiFullConfigData.length);
-            out.write(wifiFullConfigData);
-
-            out.flush();    // also flushes downstream
-
-            // now we're set to emit the tar stream
-            fullBackupFile(stage, data);
-        } finally {
-            stage.delete();
-        }
+        // Full backup of SettingsBackupAgent support was removed in Android P. If you want to adb
+        // backup com.android.providers.settings package use \"-keyvalue\" flag.
+        // Full restore of SettingsBackupAgent is still available for backwards compatibility.
     }
 
     @Override
