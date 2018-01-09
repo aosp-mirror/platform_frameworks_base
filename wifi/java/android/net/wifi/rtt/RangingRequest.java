@@ -17,6 +17,7 @@
 package android.net.wifi.rtt;
 
 import android.annotation.NonNull;
+import android.annotation.SystemApi;
 import android.net.MacAddress;
 import android.net.wifi.ScanResult;
 import android.net.wifi.aware.AttachCallback;
@@ -41,8 +42,6 @@ import java.util.StringJoiner;
  * The ranging request is a batch request - specifying a set of devices (specified using
  * {@link RangingRequest.Builder#addAccessPoint(ScanResult)} and
  * {@link RangingRequest.Builder#addAccessPoints(List)}).
- *
- * @hide RTT_API
  */
 public final class RangingRequest implements Parcelable {
     private static final int MAX_PEERS = 10;
@@ -198,7 +197,7 @@ public final class RangingRequest implements Parcelable {
             return addResponder(ResponderConfig.fromWifiAwarePeerHandleWithDefaults(peerHandle));
         }
 
-        /*
+        /**
          * Add the Responder device specified by the {@link ResponderConfig} to the list of devices
          * with which to measure range. The total number of peers added to the request cannot exceed
          * the limit specified by {@link #getMaxPeers()}.
@@ -206,8 +205,9 @@ public final class RangingRequest implements Parcelable {
          * @param responder Information on the RTT Responder.
          * @return The builder, to facilitate chaining {@code builder.setXXX(..).setXXX(..)}.
          *
-         * @hide (SystemApi)
+         * @hide
          */
+        @SystemApi
         public Builder addResponder(@NonNull ResponderConfig responder) {
             if (responder == null) {
                 throw new IllegalArgumentException("Null Responder!");

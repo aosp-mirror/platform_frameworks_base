@@ -18,6 +18,7 @@ package android.net.wifi.rtt;
 
 import android.annotation.IntDef;
 import android.annotation.NonNull;
+import android.annotation.SystemApi;
 import android.net.MacAddress;
 import android.net.wifi.ScanResult;
 import android.net.wifi.aware.PeerHandle;
@@ -35,8 +36,9 @@ import java.util.Objects;
  * A Responder configuration may be constructed from a {@link ScanResult} or manually (with the
  * data obtained out-of-band from a peer).
  *
- * @hide (@SystemApi)
+ * @hide
  */
+@SystemApi
 public final class ResponderConfig implements Parcelable {
     private static final int AWARE_BAND_2_DISCOVERY_CHANNEL = 2437;
 
@@ -290,7 +292,7 @@ public final class ResponderConfig implements Parcelable {
         MacAddress macAddress = MacAddress.fromString(scanResult.BSSID);
         int responderType = RESPONDER_AP;
         boolean supports80211mc = scanResult.is80211mcResponder();
-        int channelWidth = translcateScanResultChannelWidth(scanResult.channelWidth);
+        int channelWidth = translateScanResultChannelWidth(scanResult.channelWidth);
         int frequency = scanResult.frequency;
         int centerFreq0 = scanResult.centerFreq0;
         int centerFreq1 = scanResult.centerFreq1;
@@ -454,7 +456,7 @@ public final class ResponderConfig implements Parcelable {
     }
 
     /** @hide */
-    static int translcateScanResultChannelWidth(int scanResultChannelWidth) {
+    static int translateScanResultChannelWidth(int scanResultChannelWidth) {
         switch (scanResultChannelWidth) {
             case ScanResult.CHANNEL_WIDTH_20MHZ:
                 return CHANNEL_WIDTH_20MHZ;
@@ -468,7 +470,7 @@ public final class ResponderConfig implements Parcelable {
                 return CHANNEL_WIDTH_80MHZ_PLUS_MHZ;
             default:
                 throw new IllegalArgumentException(
-                        "translcateScanResultChannelWidth: bad " + scanResultChannelWidth);
+                        "translateScanResultChannelWidth: bad " + scanResultChannelWidth);
         }
     }
 }

@@ -3257,6 +3257,52 @@ package android.net.wifi.aware {
 
 }
 
+package android.net.wifi.rtt {
+
+  public static final class RangingRequest.Builder {
+    method public android.net.wifi.rtt.RangingRequest.Builder addResponder(android.net.wifi.rtt.ResponderConfig);
+  }
+
+  public final class ResponderConfig implements android.os.Parcelable {
+    ctor public ResponderConfig(android.net.MacAddress, int, boolean, int, int, int, int, int);
+    ctor public ResponderConfig(android.net.wifi.aware.PeerHandle, int, boolean, int, int, int, int, int);
+    method public int describeContents();
+    method public static android.net.wifi.rtt.ResponderConfig fromScanResult(android.net.wifi.ScanResult);
+    method public static android.net.wifi.rtt.ResponderConfig fromWifiAwarePeerHandleWithDefaults(android.net.wifi.aware.PeerHandle);
+    method public static android.net.wifi.rtt.ResponderConfig fromWifiAwarePeerMacAddressWithDefaults(android.net.MacAddress);
+    method public void writeToParcel(android.os.Parcel, int);
+    field public static final int CHANNEL_WIDTH_160MHZ = 3; // 0x3
+    field public static final int CHANNEL_WIDTH_20MHZ = 0; // 0x0
+    field public static final int CHANNEL_WIDTH_40MHZ = 1; // 0x1
+    field public static final int CHANNEL_WIDTH_80MHZ = 2; // 0x2
+    field public static final int CHANNEL_WIDTH_80MHZ_PLUS_MHZ = 4; // 0x4
+    field public static final android.os.Parcelable.Creator<android.net.wifi.rtt.ResponderConfig> CREATOR;
+    field public static final int PREAMBLE_HT = 1; // 0x1
+    field public static final int PREAMBLE_LEGACY = 0; // 0x0
+    field public static final int PREAMBLE_VHT = 2; // 0x2
+    field public static final int RESPONDER_AP = 0; // 0x0
+    field public static final int RESPONDER_AWARE = 4; // 0x4
+    field public static final int RESPONDER_P2P_CLIENT = 3; // 0x3
+    field public static final int RESPONDER_P2P_GO = 2; // 0x2
+    field public static final int RESPONDER_STA = 1; // 0x1
+    field public final int centerFreq0;
+    field public final int centerFreq1;
+    field public final int channelWidth;
+    field public final int frequency;
+    field public final android.net.MacAddress macAddress;
+    field public final android.net.wifi.aware.PeerHandle peerHandle;
+    field public final int preamble;
+    field public final int responderType;
+    field public final boolean supports80211mc;
+  }
+
+  public class WifiRttManager {
+    method public void cancelRanging(android.os.WorkSource);
+    method public void startRanging(android.os.WorkSource, android.net.wifi.rtt.RangingRequest, android.net.wifi.rtt.RangingResultCallback, android.os.Handler);
+  }
+
+}
+
 package android.nfc {
 
   public final class NfcAdapter {

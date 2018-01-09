@@ -2327,8 +2327,6 @@ public abstract class PackageManager {
     /**
      * Feature for {@link #getSystemAvailableFeatures} and
      * {@link #hasSystemFeature}: The device supports Wi-Fi RTT (IEEE 802.11mc).
-     *
-     * @hide RTT_API
      */
     @SdkConstant(SdkConstantType.FEATURE)
     public static final String FEATURE_WIFI_RTT = "android.hardware.wifi.rtt";
