@@ -49,7 +49,6 @@ import static android.view.WindowManager.LayoutParams.PRIVATE_FLAG_KEYGUARD;
 import static android.view.WindowManager.LayoutParams.TYPE_APPLICATION;
 import static android.view.WindowManager.LayoutParams.TYPE_APPLICATION_STARTING;
 import static android.view.WindowManager.LayoutParams.TYPE_BOOT_PROGRESS;
-import static android.view.WindowManager.LayoutParams.TYPE_DOCK_DIVIDER;
 import static android.view.WindowManager.LayoutParams.TYPE_DRAWN_APPLICATION;
 import static android.view.WindowManager.LayoutParams.TYPE_DREAM;
 import static android.view.WindowManager.LayoutParams.TYPE_INPUT_METHOD;
@@ -3571,18 +3570,6 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
                     && imeContainer.getSurfaceControl() != null;
             for (int j = 0; j < mChildren.size(); ++j) {
                 final WindowToken wt = mChildren.get(j);
-
-                // The divider is unique in that it does not have an AppWindowToken but needs to be
-                // interleaved with them. In particular it must be above any split-screen stacks
-                // but below any always-on-top stacks.
-                if (wt.windowType == TYPE_DOCK_DIVIDER) {
-                    final TaskStack dockedStack = getSplitScreenPrimaryStack();
-                    if (dockedStack != null) {
-                        wt.assignRelativeLayer(t, dockedStack.getSurfaceControl(),
-                                Integer.MAX_VALUE);
-                        continue;
-                    }
-                }
                 wt.assignLayer(t, j);
                 wt.assignChildLayers(t);
 
