@@ -396,4 +396,19 @@ interface IWindowManager
      * Return the touch region for the current IME window, or an empty region if there is none.
      */
     Region getCurrentImeTouchRegion();
+
+    /**
+     * Starts a window trace.
+     */
+    void startWindowTrace();
+
+    /**
+     * Stops a window trace.
+     */
+    void stopWindowTrace();
+
+    /**
+     * Returns true if window trace is enabled.
+     */
+    boolean isWindowTraceEnabled();
 }

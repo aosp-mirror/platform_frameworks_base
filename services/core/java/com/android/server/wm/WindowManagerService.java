@@ -5326,6 +5326,25 @@ public class WindowManagerService extends IWindowManager.Stub
         reconfigureDisplayLocked(displayContent);
     }
 
+    @Override
+    public void startWindowTrace(){
+        try {
+            mWindowTracing.startTrace(null /* printwriter */);
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    @Override
+    public void stopWindowTrace(){
+        mWindowTracing.stopTrace(null /* printwriter */);
+    }
+
+    @Override
+    public boolean isWindowTraceEnabled() {
+        return mWindowTracing.isEnabled();
+    }
+
     // -------------------------------------------------------------
     // Internals
     // -------------------------------------------------------------
