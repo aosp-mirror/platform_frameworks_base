@@ -308,8 +308,6 @@ public class ZOrderingTests extends WindowTestsBase {
 
     @Test
     public void testStackLayers() throws Exception {
-        final WindowState anyWindow1 =
-                createWindow(null, TYPE_BASE_APPLICATION, mDisplayContent, "anyWindow");
         final WindowState pinnedStackWindow = createWindowOnStack(null, WINDOWING_MODE_PINNED,
                 ACTIVITY_TYPE_STANDARD, TYPE_BASE_APPLICATION, mDisplayContent,
                 "pinnedStackWindow");
@@ -319,16 +317,10 @@ public class ZOrderingTests extends WindowTestsBase {
         final WindowState assistantStackWindow = createWindowOnStack(null, WINDOWING_MODE_FULLSCREEN,
                 ACTIVITY_TYPE_ASSISTANT, TYPE_BASE_APPLICATION,
                 mDisplayContent, "assistantStackWindow");
-        final WindowState anyWindow2 =
-                createWindow(null, TYPE_BASE_APPLICATION, mDisplayContent, "anyWindow");
 
         mDisplayContent.assignChildLayers(mTransaction);
 
-        // We compare the split-screen windowing mode to two different normal windowing
-        // mode windows added before and after it to ensure the correct Z ordering irrespective
-        // of ordering in the child list.
-        assertWindowLayerGreaterThan(mTransaction, dockedStackWindow, anyWindow1);
-        assertWindowLayerGreaterThan(mTransaction, dockedStackWindow, anyWindow2);
+        assertWindowLayerGreaterThan(mTransaction, dockedStackWindow, mAppWindow);
         assertWindowLayerGreaterThan(mTransaction, assistantStackWindow, dockedStackWindow);
         assertWindowLayerGreaterThan(mTransaction, pinnedStackWindow, assistantStackWindow);
     }
