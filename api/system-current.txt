@@ -174,6 +174,7 @@ package android {
     field public static final java.lang.String UPDATE_LOCK = "android.permission.UPDATE_LOCK";
     field public static final java.lang.String UPDATE_TIME_ZONE_RULES = "android.permission.UPDATE_TIME_ZONE_RULES";
     field public static final java.lang.String USER_ACTIVITY = "android.permission.USER_ACTIVITY";
+    field public static final java.lang.String USE_RESERVED_DISK = "android.permission.USE_RESERVED_DISK";
     field public static final java.lang.String WRITE_APN_SETTINGS = "android.permission.WRITE_APN_SETTINGS";
     field public static final java.lang.String WRITE_DREAM_STATE = "android.permission.WRITE_DREAM_STATE";
     field public static final java.lang.String WRITE_GSERVICES = "android.permission.WRITE_GSERVICES";
