@@ -72,7 +72,9 @@ LOCAL_GENERATED_SOURCES += $(GEN)
 gen_src_dir:=
 GEN:=
 
+ifeq ($(BUILD_WITH_INCIDENTD_RC), true)
 LOCAL_INIT_RC := incidentd.rc
+endif
 
 include $(BUILD_EXECUTABLE)
 
