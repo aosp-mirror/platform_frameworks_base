@@ -21,12 +21,10 @@ import static android.app.WindowConfiguration.ACTIVITY_TYPE_STANDARD;
 import static android.app.WindowConfiguration.WINDOWING_MODE_FULLSCREEN;
 import static android.app.WindowConfiguration.WINDOWING_MODE_PINNED;
 import static android.app.WindowConfiguration.WINDOWING_MODE_SPLIT_SCREEN_PRIMARY;
-import static android.app.WindowConfiguration.WINDOWING_MODE_SPLIT_SCREEN_SECONDARY;
 import static android.view.WindowManager.LayoutParams.TYPE_APPLICATION_ATTACHED_DIALOG;
 import static android.view.WindowManager.LayoutParams.TYPE_APPLICATION_MEDIA;
 import static android.view.WindowManager.LayoutParams.TYPE_APPLICATION_MEDIA_OVERLAY;
 import static android.view.WindowManager.LayoutParams.TYPE_BASE_APPLICATION;
-import static android.view.WindowManager.LayoutParams.TYPE_DOCK_DIVIDER;
 import static android.view.WindowManager.LayoutParams.TYPE_NAVIGATION_BAR_PANEL;
 import static android.view.WindowManager.LayoutParams.TYPE_STATUS_BAR_PANEL;
 import static android.view.WindowManager.LayoutParams.TYPE_STATUS_BAR_SUB_PANEL;
@@ -368,30 +366,5 @@ public class ZOrderingTests extends WindowTestsBase {
 
         assertWindowLayerGreaterThan(mTransaction, anyWindow, mediaOverlayChild);
         assertWindowLayerGreaterThan(mTransaction, mediaOverlayChild, child);
-    }
-
-    @Test
-    public void testDockedDividerPosition() throws Exception {
-        final WindowState pinnedStackWindow = createWindowOnStack(null, WINDOWING_MODE_PINNED,
-                ACTIVITY_TYPE_STANDARD, TYPE_BASE_APPLICATION, mDisplayContent,
-                "pinnedStackWindow");
-        final WindowState splitScreenWindow = createWindowOnStack(null,
-                WINDOWING_MODE_SPLIT_SCREEN_PRIMARY, ACTIVITY_TYPE_STANDARD, TYPE_BASE_APPLICATION,
-                mDisplayContent, "splitScreenWindow");
-        final WindowState splitScreenSecondaryWindow = createWindowOnStack(null,
-                WINDOWING_MODE_SPLIT_SCREEN_SECONDARY, ACTIVITY_TYPE_STANDARD,
-                TYPE_BASE_APPLICATION, mDisplayContent, "splitScreenSecondaryWindow");
-        final WindowState assistantStackWindow = createWindowOnStack(null, WINDOWING_MODE_FULLSCREEN,
-                ACTIVITY_TYPE_ASSISTANT, TYPE_BASE_APPLICATION,
-                mDisplayContent, "assistantStackWindow");
-        final WindowState dockedDividerWindow = createWindow(null, TYPE_DOCK_DIVIDER,
-                mDisplayContent, "dockedDivider");
-
-        mDisplayContent.assignChildLayers(mTransaction);
-
-        assertWindowLayerGreaterThan(mTransaction, dockedDividerWindow, splitScreenWindow);
-        assertWindowLayerGreaterThan(mTransaction, dockedDividerWindow, splitScreenSecondaryWindow);
-        assertWindowLayerGreaterThan(mTransaction, assistantStackWindow, dockedDividerWindow);
-        assertWindowLayerGreaterThan(mTransaction, pinnedStackWindow, dockedDividerWindow);
     }
 }
