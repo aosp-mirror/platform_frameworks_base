@@ -7518,7 +7518,8 @@ public class DevicePolicyManager {
     }
 
     /**
-     * Called by a device owner to disable the keyguard altogether.
+     * Called by a device owner or profile owner of secondary users that is affiliated with the
+     * device to disable the keyguard altogether.
      * <p>
      * Setting the keyguard to disabled has the same effect as choosing "None" as the screen lock
      * type. However, this call has no effect if a password, pin or pattern is currently set. If a
@@ -7533,7 +7534,10 @@ public class DevicePolicyManager {
      * @param disabled {@code true} disables the keyguard, {@code false} reenables it.
      * @return {@code false} if attempting to disable the keyguard while a lock password was in
      *         place. {@code true} otherwise.
-     * @throws SecurityException if {@code admin} is not a device owner.
+     * @throws SecurityException if {@code admin} is not the device owner, or a profile owner of
+     * secondary user that is affiliated with the device.
+     * @see #isAffiliatedUser
+     * @see #getSecondaryUsers
      */
     public boolean setKeyguardDisabled(@NonNull ComponentName admin, boolean disabled) {
         throwIfParentInstance("setKeyguardDisabled");
@@ -7545,9 +7549,9 @@ public class DevicePolicyManager {
     }
 
     /**
-     * Called by device owner to disable the status bar. Disabling the status bar blocks
-     * notifications, quick settings and other screen overlays that allow escaping from a single use
-     * device.
+     * Called by device owner or profile owner of secondary users  that is affiliated with the
+     * device to disable the status bar. Disabling the status bar blocks notifications, quick
+     * settings and other screen overlays that allow escaping from a single use device.
      * <p>
      * <strong>Note:</strong> This method has no effect for LockTask mode. The behavior of the
      * status bar in LockTask mode can be configured with
@@ -7558,7 +7562,10 @@ public class DevicePolicyManager {
      * @param admin Which {@link DeviceAdminReceiver} this request is associated with.
      * @param disabled {@code true} disables the status bar, {@code false} reenables it.
      * @return {@code false} if attempting to disable the status bar failed. {@code true} otherwise.
-     * @throws SecurityException if {@code admin} is not a device owner.
+     * @throws SecurityException if {@code admin} is not the device owner, or a profile owner of
+     * secondary user that is affiliated with the device.
+     * @see #isAffiliatedUser
+     * @see #getSecondaryUsers
      */
     public boolean setStatusBarDisabled(@NonNull ComponentName admin, boolean disabled) {
         throwIfParentInstance("setStatusBarDisabled");
