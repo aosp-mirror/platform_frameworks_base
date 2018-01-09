@@ -1392,6 +1392,34 @@ public class UserManager {
     }
 
     /**
+     * Return the time when the calling user started in elapsed milliseconds since boot,
+     * or 0 if not started.
+     *
+     * @hide
+     */
+    public long getUserStartRealtime() {
+        try {
+            return mService.getUserStartRealtime();
+        } catch (RemoteException re) {
+            throw re.rethrowFromSystemServer();
+        }
+    }
+
+    /**
+     * Return the time when the calling user was unlocked elapsed milliseconds since boot,
+     * or 0 if not unlocked.
+     *
+     * @hide
+     */
+    public long getUserUnlockRealtime() {
+        try {
+            return mService.getUserUnlockRealtime();
+        } catch (RemoteException re) {
+            throw re.rethrowFromSystemServer();
+        }
+    }
+
+    /**
      * Returns the UserInfo object describing a specific user.
      * Requires {@link android.Manifest.permission#MANAGE_USERS} permission.
      * @param userHandle the user handle of the user whose information is being requested.
