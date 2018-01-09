@@ -201,6 +201,8 @@ TEST(GaugeMetricProducerTest, TestAnomalyDetection) {
     alert.set_metric_id(metricId);
     alert.set_trigger_if_sum_gt(25);
     alert.set_num_buckets(2);
+    const int32_t refPeriodSec = 60;
+    alert.set_refractory_period_secs(refPeriodSec);
     sp<AnomalyTracker> anomalyTracker = gaugeProducer.addAnomalyTracker(alert);
 
     int tagId = 1;
@@ -213,10 +215,10 @@ TEST(GaugeMetricProducerTest, TestAnomalyDetection) {
     EXPECT_EQ(1UL, gaugeProducer.mCurrentSlicedBucket->size());
     EXPECT_EQ(13L,
         gaugeProducer.mCurrentSlicedBucket->begin()->second->begin()->second.value_int());
-    EXPECT_EQ(anomalyTracker->getLastAnomalyTimestampNs(), -1LL);
+    EXPECT_EQ(anomalyTracker->getRefractoryPeriodEndsSec(DEFAULT_DIMENSION_KEY), 0U);
 
     std::shared_ptr<LogEvent> event2 =
-            std::make_shared<LogEvent>(tagId, bucketStartTimeNs + bucketSizeNs + 10);
+            std::make_shared<LogEvent>(tagId, bucketStartTimeNs + bucketSizeNs + 20);
     event2->write("some value");
     event2->write(15);
     event2->init();
@@ -225,19 +227,21 @@ TEST(GaugeMetricProducerTest, TestAnomalyDetection) {
     EXPECT_EQ(1UL, gaugeProducer.mCurrentSlicedBucket->size());
     EXPECT_EQ(15L,
         gaugeProducer.mCurrentSlicedBucket->begin()->second->begin()->second.value_int());
-    EXPECT_EQ(anomalyTracker->getLastAnomalyTimestampNs(), (long long)event2->GetTimestampNs());
+    EXPECT_EQ(anomalyTracker->getRefractoryPeriodEndsSec(DEFAULT_DIMENSION_KEY),
+            event2->GetTimestampNs() / NS_PER_SEC + refPeriodSec);
 
     std::shared_ptr<LogEvent> event3 =
             std::make_shared<LogEvent>(tagId, bucketStartTimeNs + 2 * bucketSizeNs + 10);
     event3->write("some value");
-    event3->write(24);
+    event3->write(26);
     event3->init();
 
     gaugeProducer.onDataPulled({event3});
     EXPECT_EQ(1UL, gaugeProducer.mCurrentSlicedBucket->size());
-    EXPECT_EQ(24L,
+    EXPECT_EQ(26L,
         gaugeProducer.mCurrentSlicedBucket->begin()->second->begin()->second.value_int());
-    EXPECT_EQ(anomalyTracker->getLastAnomalyTimestampNs(), (long long)event3->GetTimestampNs());
+    EXPECT_EQ(anomalyTracker->getRefractoryPeriodEndsSec(DEFAULT_DIMENSION_KEY),
+            event2->GetTimestampNs() / NS_PER_SEC + refPeriodSec);
 
     // The event4 does not have the gauge field. Thus the current bucket value is 0.
     std::shared_ptr<LogEvent> event4 =
@@ -247,7 +251,6 @@ TEST(GaugeMetricProducerTest, TestAnomalyDetection) {
     gaugeProducer.onDataPulled({event4});
     EXPECT_EQ(1UL, gaugeProducer.mCurrentSlicedBucket->size());
     EXPECT_TRUE(gaugeProducer.mCurrentSlicedBucket->begin()->second->empty());
-    EXPECT_EQ(anomalyTracker->getLastAnomalyTimestampNs(), (long long)event3->GetTimestampNs());
 }
 
 }  // namespace statsd

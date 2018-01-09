@@ -84,7 +84,7 @@ private:
     FRIEND_TEST(CountMetricProducerTest, TestNonDimensionalEvents);
     FRIEND_TEST(CountMetricProducerTest, TestEventsWithNonSlicedCondition);
     FRIEND_TEST(CountMetricProducerTest, TestEventsWithSlicedCondition);
-    FRIEND_TEST(CountMetricProducerTest, TestAnomalyDetection);
+    FRIEND_TEST(CountMetricProducerTest, TestAnomalyDetectionUnSliced);
 };
 
 }  // namespace statsd

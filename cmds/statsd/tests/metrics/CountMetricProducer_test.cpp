@@ -191,13 +191,14 @@ TEST(CountMetricProducerTest, TestEventsWithSlicedCondition) {
     EXPECT_EQ(1LL, bucketInfo.mCount);
 }
 
-TEST(CountMetricProducerTest, TestAnomalyDetection) {
+TEST(CountMetricProducerTest, TestAnomalyDetectionUnSliced) {
     Alert alert;
     alert.set_id(11);
     alert.set_metric_id(1);
     alert.set_trigger_if_sum_gt(2);
     alert.set_num_buckets(2);
-    alert.set_refractory_period_secs(1);
+    const int32_t refPeriodSec = 1;
+    alert.set_refractory_period_secs(refPeriodSec);
 
     int64_t bucketStartTimeNs = 10000000000;
     int64_t bucketSizeNs = TimeUnitToBucketSizeInMillis(ONE_MINUTE) * 1000000LL;
@@ -220,7 +221,7 @@ TEST(CountMetricProducerTest, TestAnomalyDetection) {
     LogEvent event4(tagId, bucketStartTimeNs + 3 * bucketSizeNs + 1);
     LogEvent event5(tagId, bucketStartTimeNs + 3 * bucketSizeNs + 2);
     LogEvent event6(tagId, bucketStartTimeNs + 3 * bucketSizeNs + 3);
-    LogEvent event7(tagId, bucketStartTimeNs + 3 * bucketSizeNs + 3 + NS_PER_SEC);
+    LogEvent event7(tagId, bucketStartTimeNs + 3 * bucketSizeNs + 2 * NS_PER_SEC);
 
     // Two events in bucket #0.
     countProducer.onMatchedLogEvent(1 /*log matcher index*/, event1);
@@ -228,13 +229,13 @@ TEST(CountMetricProducerTest, TestAnomalyDetection) {
 
     EXPECT_EQ(1UL, countProducer.mCurrentSlicedCounter->size());
     EXPECT_EQ(2L, countProducer.mCurrentSlicedCounter->begin()->second);
-    EXPECT_EQ(anomalyTracker->getLastAnomalyTimestampNs(), -1LL);
+    EXPECT_EQ(anomalyTracker->getRefractoryPeriodEndsSec(DEFAULT_DIMENSION_KEY), 0U);
 
     // One event in bucket #2. No alarm as bucket #0 is trashed out.
     countProducer.onMatchedLogEvent(1 /*log matcher index*/, event3);
     EXPECT_EQ(1UL, countProducer.mCurrentSlicedCounter->size());
     EXPECT_EQ(1L, countProducer.mCurrentSlicedCounter->begin()->second);
-    EXPECT_EQ(anomalyTracker->getLastAnomalyTimestampNs(), -1LL);
+    EXPECT_EQ(anomalyTracker->getRefractoryPeriodEndsSec(DEFAULT_DIMENSION_KEY), 0U);
 
     // Two events in bucket #3.
     countProducer.onMatchedLogEvent(1 /*log matcher index*/, event4);
@@ -243,12 +244,14 @@ TEST(CountMetricProducerTest, TestAnomalyDetection) {
     EXPECT_EQ(1UL, countProducer.mCurrentSlicedCounter->size());
     EXPECT_EQ(3L, countProducer.mCurrentSlicedCounter->begin()->second);
     // Anomaly at event 6 is within refractory period. The alarm is at event 5 timestamp not event 6
-    EXPECT_EQ(anomalyTracker->getLastAnomalyTimestampNs(), (long long)event5.GetTimestampNs());
+    EXPECT_EQ(anomalyTracker->getRefractoryPeriodEndsSec(DEFAULT_DIMENSION_KEY),
+            event5.GetTimestampNs() / NS_PER_SEC + refPeriodSec);
 
     countProducer.onMatchedLogEvent(1 /*log matcher index*/, event7);
     EXPECT_EQ(1UL, countProducer.mCurrentSlicedCounter->size());
     EXPECT_EQ(4L, countProducer.mCurrentSlicedCounter->begin()->second);
-    EXPECT_EQ(anomalyTracker->getLastAnomalyTimestampNs(), (long long)event7.GetTimestampNs());
+    EXPECT_EQ(anomalyTracker->getRefractoryPeriodEndsSec(DEFAULT_DIMENSION_KEY),
+            event7.GetTimestampNs() / NS_PER_SEC + refPeriodSec);
 }
 
 }  // namespace statsd

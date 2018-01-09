@@ -169,7 +169,8 @@ protected:
     std::vector<sp<DurationAnomalyTracker>> mAnomalyTrackers;
 
     FRIEND_TEST(OringDurationTrackerTest, TestPredictAnomalyTimestamp);
-    FRIEND_TEST(OringDurationTrackerTest, TestAnomalyDetection);
+    FRIEND_TEST(OringDurationTrackerTest, TestAnomalyDetectionExpiredAlarm);
+    FRIEND_TEST(OringDurationTrackerTest, TestAnomalyDetectionFiredAlarm);
 };
 
 }  // namespace statsd
