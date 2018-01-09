@@ -792,11 +792,29 @@ final class BinderProxy implements IBinder {
         /**
          * Return the total number of pairs in the map.
          */
-        int size() {
+        private int size() {
             int size = 0;
             for (ArrayList<WeakReference<BinderProxy>> a : mMainIndexValues) {
                 if (a != null) {
                     size += a.size();
+                }
+            }
+            return size;
+        }
+
+        /**
+         * Return the total number of pairs in the map containing values that have
+         * not been cleared. More expensive than the above size function.
+         */
+        private int unclearedSize() {
+            int size = 0;
+            for (ArrayList<WeakReference<BinderProxy>> a : mMainIndexValues) {
+                if (a != null) {
+                    for (WeakReference<BinderProxy> ref : a) {
+                        if (ref.get() != null) {
+                            ++size;
+                        }
+                    }
                 }
             }
             return size;
@@ -895,17 +913,31 @@ final class BinderProxy implements IBinder {
                 Log.v(Binder.TAG, "BinderProxy map growth! bucket size = " + size
                         + " total = " + totalSize);
                 mWarnBucketSize += WARN_INCREMENT;
-                if (Build.IS_DEBUGGABLE && totalSize > CRASH_AT_SIZE) {
-                    diagnosticCrash();
+                if (Build.IS_DEBUGGABLE && totalSize >= CRASH_AT_SIZE) {
+                    // Use the number of uncleared entries to determine whether we should
+                    // really report a histogram and crash. We don't want to fundamentally
+                    // change behavior for a debuggable process, so we GC only if we are
+                    // about to crash.
+                    final int totalUnclearedSize = unclearedSize();
+                    if (totalUnclearedSize >= CRASH_AT_SIZE) {
+                        dumpProxyInterfaceCounts();
+                        Runtime.getRuntime().gc();
+                        throw new AssertionError("Binder ProxyMap has too many entries: "
+                                + totalSize + " (total), " + totalUnclearedSize + " (uncleared), "
+                                + unclearedSize() + " (uncleared after GC). BinderProxy leak?");
+                    } else if (totalSize > 3 * totalUnclearedSize / 2) {
+                        Log.v(Binder.TAG, "BinderProxy map has many cleared entries: "
+                                + (totalSize - totalUnclearedSize) + " of " + totalSize
+                                + " are cleared");
+                    }
                 }
             }
         }
 
         /**
-         * Dump a histogram to the logcat, then throw an assertion error. Used to diagnose
-         * abnormally large proxy maps.
+         * Dump a histogram to the logcat. Used to diagnose abnormally large proxy maps.
          */
-        private void diagnosticCrash() {
+        private void dumpProxyInterfaceCounts() {
             Map<String, Integer> counts = new HashMap<>();
             for (ArrayList<WeakReference<BinderProxy>> a : mMainIndexValues) {
                 if (a != null) {
@@ -940,11 +972,6 @@ final class BinderProxy implements IBinder {
                 Log.v(Binder.TAG, " #" + (i + 1) + ": " + sorted[i].getKey() + " x"
                         + sorted[i].getValue());
             }
-
-            // Now throw an assertion.
-            final int totalSize = size();
-            throw new AssertionError("Binder ProxyMap has too many entries: " + totalSize
-                    + ". BinderProxy leak?");
         }
 
         // Corresponding ArrayLists in the following two arrays always have the same size.
