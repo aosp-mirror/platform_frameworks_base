@@ -328,6 +328,86 @@ public class KeySyncTaskTest {
     }
 
     @Test
+    public void run_setsCorrectTypeForPassword() throws Exception {
+        mKeySyncTask = new KeySyncTask(
+                mRecoverableKeyStoreDb,
+                mRecoverySnapshotStorage,
+                mSnapshotListenersStorage,
+                TEST_USER_ID,
+                CREDENTIAL_TYPE_PASSWORD,
+                "password",
+                /*credentialUpdated=*/ false,
+                () -> mPlatformKeyManager);
+
+        mRecoverableKeyStoreDb.setRecoveryServicePublicKey(
+                TEST_USER_ID, TEST_RECOVERY_AGENT_UID, mKeyPair.getPublic());
+        when(mSnapshotListenersStorage.hasListener(TEST_RECOVERY_AGENT_UID)).thenReturn(true);
+        SecretKey applicationKey =
+                addApplicationKey(TEST_USER_ID, TEST_RECOVERY_AGENT_UID, TEST_APP_KEY_ALIAS);
+
+        mKeySyncTask.run();
+
+        KeyStoreRecoveryData recoveryData = mRecoverySnapshotStorage.get(TEST_RECOVERY_AGENT_UID);
+        assertThat(recoveryData.getRecoveryMetadata()).hasSize(1);
+        assertThat(recoveryData.getRecoveryMetadata().get(1).getLockScreenUiFormat()).
+                isEqualTo(TYPE_PASSWORD);
+    }
+
+   @Test
+    public void run_setsCorrectTypeForPin() throws Exception {
+        mKeySyncTask = new KeySyncTask(
+                mRecoverableKeyStoreDb,
+                mRecoverySnapshotStorage,
+                mSnapshotListenersStorage,
+                TEST_USER_ID,
+                CREDENTIAL_TYPE_PASSWORD,
+                /*credential=*/ "1234",
+                /*credentialUpdated=*/ false,
+                () -> mPlatformKeyManager);
+
+        mRecoverableKeyStoreDb.setRecoveryServicePublicKey(
+                TEST_USER_ID, TEST_RECOVERY_AGENT_UID, mKeyPair.getPublic());
+        when(mSnapshotListenersStorage.hasListener(TEST_RECOVERY_AGENT_UID)).thenReturn(true);
+        SecretKey applicationKey =
+                addApplicationKey(TEST_USER_ID, TEST_RECOVERY_AGENT_UID, TEST_APP_KEY_ALIAS);
+
+        mKeySyncTask.run();
+
+        KeyStoreRecoveryData recoveryData = mRecoverySnapshotStorage.get(TEST_RECOVERY_AGENT_UID);
+        assertThat(recoveryData.getRecoveryMetadata()).hasSize(1);
+        // Password with only digits is changed to pin.
+        assertThat(recoveryData.getRecoveryMetadata().get(1).getLockScreenUiFormat()).
+                isEqualTo(TYPE_PIN);
+    }
+
+    @Test
+    public void run_setsCorrectTypeForPattern() throws Exception {
+        mKeySyncTask = new KeySyncTask(
+                mRecoverableKeyStoreDb,
+                mRecoverySnapshotStorage,
+                mSnapshotListenersStorage,
+                TEST_USER_ID,
+                CREDENTIAL_TYPE_PATTERN,
+                "12345",
+                /*credentialUpdated=*/ false,
+                () -> mPlatformKeyManager);
+
+        mRecoverableKeyStoreDb.setRecoveryServicePublicKey(
+                TEST_USER_ID, TEST_RECOVERY_AGENT_UID, mKeyPair.getPublic());
+        when(mSnapshotListenersStorage.hasListener(TEST_RECOVERY_AGENT_UID)).thenReturn(true);
+        SecretKey applicationKey =
+                addApplicationKey(TEST_USER_ID, TEST_RECOVERY_AGENT_UID, TEST_APP_KEY_ALIAS);
+
+        mKeySyncTask.run();
+
+        KeyStoreRecoveryData recoveryData = mRecoverySnapshotStorage.get(TEST_RECOVERY_AGENT_UID);
+        assertThat(recoveryData.getRecoveryMetadata()).hasSize(1);
+        assertThat(recoveryData.getRecoveryMetadata().get(1).getLockScreenUiFormat()).
+                isEqualTo(TYPE_PATTERN);
+    }
+
+
+    @Test
     public void run_sendsEncryptedKeysWithTwoRegisteredAgents() throws Exception {
 
         mRecoverableKeyStoreDb.setRecoveryServicePublicKey(
@@ -345,7 +425,7 @@ public class KeySyncTaskTest {
     }
 
     @Test
-    public void run_doesnSendKeyToNonregisteredAgent() throws Exception {
+    public void run_doesNotSendKeyToNonregisteredAgent() throws Exception {
 
         mRecoverableKeyStoreDb.setRecoveryServicePublicKey(
                 TEST_USER_ID, TEST_RECOVERY_AGENT_UID, mKeyPair.getPublic());
