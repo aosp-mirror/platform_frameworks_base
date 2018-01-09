@@ -77,8 +77,8 @@ final class ActivityManagerConstants extends ContentObserver {
     private static final long DEFAULT_CONTENT_PROVIDER_RETAIN_TIME = 20*1000;
     private static final long DEFAULT_GC_TIMEOUT = 5*1000;
     private static final long DEFAULT_GC_MIN_INTERVAL = 60*1000;
-    private static final long DEFAULT_FULL_PSS_MIN_INTERVAL = 10*60*1000;
-    private static final long DEFAULT_FULL_PSS_LOWERED_INTERVAL = 2*60*1000;
+    private static final long DEFAULT_FULL_PSS_MIN_INTERVAL = 20*60*1000;
+    private static final long DEFAULT_FULL_PSS_LOWERED_INTERVAL = 5*60*1000;
     private static final long DEFAULT_POWER_CHECK_INTERVAL = (DEBUG_POWER_QUICK ? 1 : 5) * 60*1000;
     private static final int DEFAULT_POWER_CHECK_MAX_CPU_1 = 25;
     private static final int DEFAULT_POWER_CHECK_MAX_CPU_2 = 25;
