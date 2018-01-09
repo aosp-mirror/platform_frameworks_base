@@ -22,13 +22,12 @@ import android.os.Parcelable;
 
 import com.android.internal.util.Preconditions;
 
-
 /**
  * Helper class with data necessary recover a single application key, given a recovery key.
  *
  * <ul>
- * <li>Alias - Keystore alias of the key.
- * <li>Encrypted key material.
+ *   <li>Alias - Keystore alias of the key.
+ *   <li>Encrypted key material.
  * </ul>
  *
  * Note that Application info is not included. Recovery Agent can only make its own keys
@@ -37,49 +36,48 @@ import com.android.internal.util.Preconditions;
  * @hide
  */
 public final class KeyEntryRecoveryData implements Parcelable {
-    private final byte[] mAlias;
+    private final String mAlias;
     // The only supported format is AES-256 symmetric key.
     private final byte[] mEncryptedKeyMaterial;
 
-    public KeyEntryRecoveryData(@NonNull byte[] alias, @NonNull byte[] encryptedKeyMaterial) {
+    public KeyEntryRecoveryData(@NonNull String alias, @NonNull byte[] encryptedKeyMaterial) {
         mAlias = Preconditions.checkNotNull(alias);
         mEncryptedKeyMaterial = Preconditions.checkNotNull(encryptedKeyMaterial);
     }
 
     /**
      * Application-specific alias of the key.
+     *
      * @see java.security.KeyStore.aliases
      */
-    public @NonNull byte[] getAlias() {
+    public @NonNull String getAlias() {
         return mAlias;
     }
 
-    /**
-     * Encrypted key material encrypted by recovery key.
-     */
+    /** Encrypted key material encrypted by recovery key. */
     public @NonNull byte[] getEncryptedKeyMaterial() {
         return mEncryptedKeyMaterial;
     }
 
     public static final Parcelable.Creator<KeyEntryRecoveryData> CREATOR =
             new Parcelable.Creator<KeyEntryRecoveryData>() {
-        public KeyEntryRecoveryData createFromParcel(Parcel in) {
-                return new KeyEntryRecoveryData(in);
-        }
+                public KeyEntryRecoveryData createFromParcel(Parcel in) {
+                    return new KeyEntryRecoveryData(in);
+                }
 
-        public KeyEntryRecoveryData[] newArray(int length) {
-            return new KeyEntryRecoveryData[length];
-        }
-    };
+                public KeyEntryRecoveryData[] newArray(int length) {
+                    return new KeyEntryRecoveryData[length];
+                }
+            };
 
     @Override
     public void writeToParcel(Parcel out, int flags) {
-        out.writeByteArray(mAlias);
+        out.writeString(mAlias);
         out.writeByteArray(mEncryptedKeyMaterial);
     }
 
     protected KeyEntryRecoveryData(Parcel in) {
-        mAlias = in.createByteArray();
+        mAlias = in.readString();
         mEncryptedKeyMaterial = in.createByteArray();
     }
 

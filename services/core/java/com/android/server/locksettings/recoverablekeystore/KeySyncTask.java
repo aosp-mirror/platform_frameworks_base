@@ -342,7 +342,7 @@ public class KeySyncTask implements Runnable {
         for (String alias : encryptedApplicationKeys.keySet()) {
             keyEntries.add(
                     new KeyEntryRecoveryData(
-                            alias.getBytes(StandardCharsets.UTF_8),
+                            alias,
                             encryptedApplicationKeys.get(alias)));
         }
         return keyEntries;

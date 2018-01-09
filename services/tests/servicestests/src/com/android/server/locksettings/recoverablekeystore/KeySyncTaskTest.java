@@ -296,7 +296,7 @@ public class KeySyncTaskTest {
         List<KeyEntryRecoveryData> applicationKeys = recoveryData.getApplicationKeyBlobs();
         assertEquals(1, applicationKeys.size());
         KeyEntryRecoveryData keyData = applicationKeys.get(0);
-        assertArrayEquals(TEST_APP_KEY_ALIAS.getBytes(StandardCharsets.UTF_8), keyData.getAlias());
+        assertEquals(TEST_APP_KEY_ALIAS, keyData.getAlias());
         byte[] appKey = KeySyncUtils.decryptApplicationKey(
                 recoveryKey, keyData.getEncryptedKeyMaterial());
         assertArrayEquals(applicationKey.getEncoded(), appKey);
