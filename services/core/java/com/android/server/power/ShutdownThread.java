@@ -34,8 +34,6 @@ import android.content.IntentFilter;
 import android.graphics.Color;
 import android.graphics.drawable.ColorDrawable;
 import android.media.AudioAttributes;
-import android.nfc.INfcAdapter;
-import android.nfc.NfcAdapter;
 import android.os.FileUtils;
 import android.os.Handler;
 import android.os.PowerManager;
@@ -124,7 +122,6 @@ public final class ShutdownThread extends Thread {
     private static String METRIC_RADIOS = "shutdown_radios";
     private static String METRIC_BT = "shutdown_bt";
     private static String METRIC_RADIO = "shutdown_radio";
-    private static String METRIC_NFC = "shutdown_nfc";
     private static String METRIC_SM = "shutdown_storage_manager";
 
     private final Object mActionDoneSync = new Object();
@@ -630,29 +627,14 @@ public final class ShutdownThread extends Thread {
         Thread t = new Thread() {
             public void run() {
                 TimingsTraceLog shutdownTimingsTraceLog = newTimingsLog();
-                boolean nfcOff;
                 boolean bluetoothReadyForShutdown;
                 boolean radioOff;
 
-                final INfcAdapter nfc =
-                        INfcAdapter.Stub.asInterface(ServiceManager.checkService("nfc"));
                 final ITelephony phone =
                         ITelephony.Stub.asInterface(ServiceManager.checkService("phone"));
                 final IBluetoothManager bluetooth =
                         IBluetoothManager.Stub.asInterface(ServiceManager.checkService(
                                 BluetoothAdapter.BLUETOOTH_MANAGER_SERVICE));
-                try {
-                    nfcOff = nfc == null ||
-                             nfc.getState() == NfcAdapter.STATE_OFF;
-                    if (!nfcOff) {
-                        Log.w(TAG, "Turning off NFC...");
-                        metricStarted(METRIC_NFC);
-                        nfc.disable(false); // Don't persist new state
-                    }
-                } catch (RemoteException ex) {
-                Log.e(TAG, "RemoteException during NFC shutdown", ex);
-                    nfcOff = true;
-                }
 
                 try {
                     bluetoothReadyForShutdown = bluetooth == null ||
@@ -679,7 +661,7 @@ public final class ShutdownThread extends Thread {
                     radioOff = true;
                 }
 
-                Log.i(TAG, "Waiting for NFC, Bluetooth and Radio...");
+                Log.i(TAG, "Waiting for Bluetooth and Radio...");
 
                 long delay = endTime - SystemClock.elapsedRealtime();
                 while (delay > 0) {
@@ -723,23 +705,9 @@ public final class ShutdownThread extends Thread {
                                     .logDuration("ShutdownRadio", TRON_METRICS.get(METRIC_RADIO));
                         }
                     }
-                    if (!nfcOff) {
-                        try {
-                            nfcOff = nfc.getState() == NfcAdapter.STATE_OFF;
-                        } catch (RemoteException ex) {
-                            Log.e(TAG, "RemoteException during NFC shutdown", ex);
-                            nfcOff = true;
-                        }
-                        if (nfcOff) {
-                            Log.i(TAG, "NFC turned off.");
-                            metricEnded(METRIC_NFC);
-                            shutdownTimingsTraceLog
-                                    .logDuration("ShutdownNfc", TRON_METRICS.get(METRIC_NFC));
-                        }
-                    }
 
-                    if (radioOff && bluetoothReadyForShutdown && nfcOff) {
-                        Log.i(TAG, "NFC, Radio and Bluetooth shutdown complete.");
+                    if (radioOff && bluetoothReadyForShutdown) {
+                        Log.i(TAG, "Radio and Bluetooth shutdown complete.");
                         done[0] = true;
                         break;
                     }
@@ -756,7 +724,7 @@ public final class ShutdownThread extends Thread {
         } catch (InterruptedException ex) {
         }
         if (!done[0]) {
-            Log.w(TAG, "Timed out waiting for NFC, Radio and Bluetooth shutdown.");
+            Log.w(TAG, "Timed out waiting for Radio and Bluetooth shutdown.");
         }
     }
 
