@@ -7191,13 +7191,6 @@ public final class Settings {
         public static final String QS_TILES = "sysui_qs_tiles";
 
         /**
-         * Whether preloaded APKs have been installed for the user.
-         * @hide
-         */
-        public static final String DEMO_USER_SETUP_COMPLETE
-                = "demo_user_setup_complete";
-
-        /**
          * Specifies whether the web action API is enabled.
          *
          * @hide
