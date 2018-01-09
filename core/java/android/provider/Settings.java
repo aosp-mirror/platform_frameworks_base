@@ -9800,6 +9800,14 @@ public final class Settings {
         public static final java.lang.String APP_STANDBY_ENABLED = "app_standby_enabled";
 
         /**
+         * Whether or not Network Watchlist feature is enabled.
+         * Type: int (0 for false, 1 for true)
+         * Default: 0
+         * @hide
+         */
+        public static final String NETWORK_WATCHLIST_ENABLED = "network_watchlist_enabled";
+
+        /**
          * Get the key that retrieves a bluetooth headset's priority.
          * @hide
          */
