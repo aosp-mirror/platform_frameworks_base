@@ -639,6 +639,8 @@ public class AccessibilityNodeInfo implements Parcelable {
 
     private static final int BOOLEAN_PROPERTY_IS_SHOWING_HINT = 0x0100000;
 
+    private static final int BOOLEAN_PROPERTY_IS_HEADING = 0x0200000;
+
     /**
      * Bits that provide the id of a virtual descendant of a view.
      */
@@ -2406,6 +2408,30 @@ public class AccessibilityNodeInfo implements Parcelable {
      */
     public void setShowingHintText(boolean showingHintText) {
         setBooleanProperty(BOOLEAN_PROPERTY_IS_SHOWING_HINT, showingHintText);
+    }
+
+    /**
+     * Returns whether node represents a heading.
+     *
+     * @return {@code true} if the node is a heading, {@code false} otherwise.
+     */
+    public boolean isHeading() {
+        return getBooleanProperty(BOOLEAN_PROPERTY_IS_HEADING);
+    }
+
+    /**
+     * Sets whether the node represents a heading.
+     *
+     * <p>
+     *   <strong>Note:</strong> Cannot be called from an
+     *   {@link android.accessibilityservice.AccessibilityService}.
+     *   This class is made immutable before being delivered to an AccessibilityService.
+     * </p>
+     *
+     * @param isHeading {@code true} if the node is a heading, {@code false} otherwise.
+     */
+    public void setHeading(boolean isHeading) {
+        setBooleanProperty(BOOLEAN_PROPERTY_IS_HEADING, isHeading);
     }
 
     /**
@@ -4597,7 +4623,8 @@ public class AccessibilityNodeInfo implements Parcelable {
          * @param rowSpan The number of rows the item spans.
          * @param columnIndex The column index at which the item is located.
          * @param columnSpan The number of columns the item spans.
-         * @param heading Whether the item is a heading.
+         * @param heading Whether the item is a heading. (Prefer
+         *                {@link AccessibilityNodeInfo#setHeading(boolean)}).
          */
         public static CollectionItemInfo obtain(int rowIndex, int rowSpan,
                 int columnIndex, int columnSpan, boolean heading) {
@@ -4611,7 +4638,8 @@ public class AccessibilityNodeInfo implements Parcelable {
          * @param rowSpan The number of rows the item spans.
          * @param columnIndex The column index at which the item is located.
          * @param columnSpan The number of columns the item spans.
-         * @param heading Whether the item is a heading.
+         * @param heading Whether the item is a heading. (Prefer
+         *                {@link AccessibilityNodeInfo#setHeading(boolean)})
          * @param selected Whether the item is selected.
          */
         public static CollectionItemInfo obtain(int rowIndex, int rowSpan,
@@ -4698,6 +4726,7 @@ public class AccessibilityNodeInfo implements Parcelable {
          * heading, table header, etc.
          *
          * @return If the item is a heading.
+         * @deprecated Use {@link AccessibilityNodeInfo#isHeading()}
          */
         public boolean isHeading() {
             return mHeading;
