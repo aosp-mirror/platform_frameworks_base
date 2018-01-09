@@ -49,14 +49,17 @@ import static com.android.server.wm.WindowStateAnimator.STACK_CLIP_NONE;
 import static com.android.server.wm.proto.AppTransitionProto.APP_TRANSITION_STATE;
 import static com.android.server.wm.proto.AppTransitionProto.LAST_USED_APP_TRANSITION;
 
+import android.annotation.DrawableRes;
 import android.annotation.Nullable;
 import android.app.ActivityManager;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.res.Configuration;
+import android.graphics.Color;
 import android.graphics.GraphicBuffer;
 import android.graphics.Path;
 import android.graphics.Rect;
+import android.graphics.drawable.Drawable;
 import android.os.Binder;
 import android.os.Debug;
 import android.os.IBinder;
@@ -70,7 +73,10 @@ import android.util.Slog;
 import android.util.SparseArray;
 import android.util.proto.ProtoOutputStream;
 import android.view.AppTransitionAnimationSpec;
+import android.view.DisplayListCanvas;
 import android.view.IAppTransitionAnimationSpecsFuture;
+import android.view.RenderNode;
+import android.view.ThreadedRenderer;
 import android.view.WindowManager;
 import android.view.animation.AlphaAnimation;
 import android.view.animation.Animation;
@@ -389,6 +395,11 @@ public class AppTransition implements Dump {
     boolean isNextAppTransitionThumbnailDown() {
         return mNextAppTransitionType == NEXT_TRANSIT_TYPE_THUMBNAIL_SCALE_DOWN ||
                 mNextAppTransitionType == NEXT_TRANSIT_TYPE_THUMBNAIL_ASPECT_SCALE_DOWN;
+    }
+
+
+    boolean isNextAppTransitionOpenCrossProfileApps() {
+        return mNextAppTransitionType == NEXT_TRANSIT_TYPE_OPEN_CROSS_PROFILE_APPS;
     }
 
     /**
@@ -975,6 +986,43 @@ public class AppTransition implements Dump {
                 return THUMBNAIL_TRANSITION_EXIT_SCALE_DOWN;
             }
         }
+    }
+
+    /**
+     * Creates an overlay with a background color and a thumbnail for the cross profile apps
+     * animation.
+     */
+    GraphicBuffer createCrossProfileAppsThumbnail(
+            @DrawableRes int thumbnailDrawableRes, Rect frame) {
+        final int width = frame.width();
+        final int height = frame.height();
+
+        final RenderNode node = RenderNode.create("CrossProfileAppsThumbnail", null);
+        node.setLeftTopRightBottom(0, 0, width, height);
+        node.setClipToBounds(false);
+
+        final DisplayListCanvas canvas = node.start(width, height);
+        canvas.drawColor(Color.argb(0.6f, 0, 0, 0));
+        final int thumbnailSize = mService.mContext.getResources().getDimensionPixelSize(
+                com.android.internal.R.dimen.cross_profile_apps_thumbnail_size);
+        final Drawable drawable = mService.mContext.getDrawable(thumbnailDrawableRes);
+        drawable.setBounds(
+                (width - thumbnailSize) / 2,
+                (height - thumbnailSize) / 2,
+                (width + thumbnailSize) / 2,
+                (height + thumbnailSize) / 2);
+        drawable.draw(canvas);
+        node.end(canvas);
+
+        return ThreadedRenderer.createHardwareBitmap(node, width, height)
+                .createGraphicBufferHandle();
+    }
+
+    Animation createCrossProfileAppsThumbnailAnimationLocked(Rect appRect) {
+        final Animation animation = loadAnimationRes(
+                "android", com.android.internal.R.anim.cross_profile_apps_thumbnail_enter);
+        return prepareThumbnailAnimationWithDuration(animation, appRect.width(),
+                appRect.height(), 0, null);
     }
 
     /**
@@ -1624,9 +1672,10 @@ public class AppTransition implements Dump {
                 && (transit == TRANSIT_ACTIVITY_OPEN
                         || transit == TRANSIT_TASK_OPEN
                         || transit == TRANSIT_TASK_TO_FRONT)) {
+
             a = loadAnimationRes("android", enter
-                    ? com.android.internal.R.anim.activity_open_enter
-                    : com.android.internal.R.anim.activity_open_exit);
+                    ? com.android.internal.R.anim.task_open_enter_cross_profile_apps
+                    : com.android.internal.R.anim.task_open_exit);
             Slog.v(TAG,
                     "applyAnimation NEXT_TRANSIT_TYPE_OPEN_CROSS_PROFILE_APPS:"
                             + " anim=" + a + " transit=" + appTransitionToString(transit)
@@ -2007,6 +2056,8 @@ public class AppTransition implements Dump {
                 return "NEXT_TRANSIT_TYPE_THUMBNAIL_ASPECT_SCALE_UP";
             case NEXT_TRANSIT_TYPE_THUMBNAIL_ASPECT_SCALE_DOWN:
                 return "NEXT_TRANSIT_TYPE_THUMBNAIL_ASPECT_SCALE_DOWN";
+            case NEXT_TRANSIT_TYPE_OPEN_CROSS_PROFILE_APPS:
+                return "NEXT_TRANSIT_TYPE_OPEN_CROSS_PROFILE_APPS";
             default:
                 return "unknown type=" + mNextAppTransitionType;
         }
