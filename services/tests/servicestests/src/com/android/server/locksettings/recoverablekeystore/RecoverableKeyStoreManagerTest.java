@@ -213,7 +213,7 @@ public class RecoverableKeyStoreManagerTest {
                         new KeyStoreRecoveryMetadata(
                                 TYPE_LOCKSCREEN,
                                 TYPE_PASSWORD,
-                                KeyDerivationParameters.createSHA256Parameters(TEST_SALT),
+                                KeyDerivationParameters.createSha256Parameters(TEST_SALT),
                                 TEST_SECRET)));
 
         verify(mMockContext, times(1))
@@ -232,7 +232,7 @@ public class RecoverableKeyStoreManagerTest {
                         new KeyStoreRecoveryMetadata(
                                 TYPE_LOCKSCREEN,
                                 TYPE_PASSWORD,
-                                KeyDerivationParameters.createSHA256Parameters(TEST_SALT),
+                                KeyDerivationParameters.createSha256Parameters(TEST_SALT),
                                 TEST_SECRET)));
 
         assertEquals(1, mRecoverySessionStorage.size());
@@ -269,7 +269,7 @@ public class RecoverableKeyStoreManagerTest {
                             new KeyStoreRecoveryMetadata(
                                     TYPE_LOCKSCREEN,
                                     TYPE_PASSWORD,
-                                    KeyDerivationParameters.createSHA256Parameters(TEST_SALT),
+                                    KeyDerivationParameters.createSha256Parameters(TEST_SALT),
                                     TEST_SECRET)));
             fail("should have thrown");
         } catch (ServiceSpecificException e) {
@@ -291,7 +291,7 @@ public class RecoverableKeyStoreManagerTest {
                             new KeyStoreRecoveryMetadata(
                                     TYPE_LOCKSCREEN,
                                     TYPE_PASSWORD,
-                                    KeyDerivationParameters.createSHA256Parameters(TEST_SALT),
+                                    KeyDerivationParameters.createSha256Parameters(TEST_SALT),
                                     TEST_SECRET)));
             fail("should have thrown");
         } catch (ServiceSpecificException e) {
@@ -324,7 +324,7 @@ public class RecoverableKeyStoreManagerTest {
                 ImmutableList.of(new KeyStoreRecoveryMetadata(
                         TYPE_LOCKSCREEN,
                         TYPE_PASSWORD,
-                        KeyDerivationParameters.createSHA256Parameters(TEST_SALT),
+                        KeyDerivationParameters.createSha256Parameters(TEST_SALT),
                         TEST_SECRET)));
 
         try {
@@ -348,7 +348,7 @@ public class RecoverableKeyStoreManagerTest {
                 ImmutableList.of(new KeyStoreRecoveryMetadata(
                         TYPE_LOCKSCREEN,
                         TYPE_PASSWORD,
-                        KeyDerivationParameters.createSHA256Parameters(TEST_SALT),
+                        KeyDerivationParameters.createSha256Parameters(TEST_SALT),
                         TEST_SECRET)));
         byte[] keyClaimant = mRecoverySessionStorage.get(Binder.getCallingUid(), TEST_SESSION_ID)
                 .getKeyClaimant();
@@ -380,7 +380,7 @@ public class RecoverableKeyStoreManagerTest {
                 ImmutableList.of(new KeyStoreRecoveryMetadata(
                         TYPE_LOCKSCREEN,
                         TYPE_PASSWORD,
-                        KeyDerivationParameters.createSHA256Parameters(TEST_SALT),
+                        KeyDerivationParameters.createSha256Parameters(TEST_SALT),
                         TEST_SECRET)));
         byte[] keyClaimant = mRecoverySessionStorage.get(Binder.getCallingUid(), TEST_SESSION_ID)
                 .getKeyClaimant();

@@ -221,7 +221,7 @@ public class KeySyncTask implements Runnable {
         KeyStoreRecoveryMetadata metadata = new KeyStoreRecoveryMetadata(
                 /*userSecretType=*/ TYPE_LOCKSCREEN,
                 /*lockScreenUiFormat=*/ mCredentialType,
-                /*keyDerivationParameters=*/ KeyDerivationParameters.createSHA256Parameters(salt),
+                /*keyDerivationParameters=*/ KeyDerivationParameters.createSha256Parameters(salt),
                 /*secret=*/ new byte[0]);
         ArrayList<KeyStoreRecoveryMetadata> metadataList = new ArrayList<>();
         metadataList.add(metadata);
