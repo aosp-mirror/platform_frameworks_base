@@ -293,10 +293,13 @@ public final class BatteryService extends SystemService {
 
     private void updateBatteryWarningLevelLocked() {
         final ContentResolver resolver = mContext.getContentResolver();
-        int defWarnLevel = mContext.getResources().getInteger(
+        final int defWarnLevel = mContext.getResources().getInteger(
                 com.android.internal.R.integer.config_lowBatteryWarningLevel);
-        mLowBatteryWarningLevel = Settings.Global.getInt(resolver,
+        final int lowPowerModeTriggerLevel = Settings.Global.getInt(resolver,
                 Settings.Global.LOW_POWER_MODE_TRIGGER_LEVEL, defWarnLevel);
+
+        mLowBatteryWarningLevel = Math.min(defWarnLevel, lowPowerModeTriggerLevel);
+
         if (mLowBatteryWarningLevel == 0) {
             mLowBatteryWarningLevel = defWarnLevel;
         }
