@@ -166,7 +166,15 @@ static int write_stats_log_cpp(FILE *out, const Atoms &atoms,
                     attributionDecl.fields.front().name.c_str());
                 fprintf(out, "        event.begin();\n");
                 for (const auto &chainField : attributionDecl.fields) {
-                    fprintf(out, "        event << %s[i];\n", chainField.name.c_str());
+                    if (chainField.javaType == JAVA_TYPE_STRING) {
+                        fprintf(out, "        if (%s[i] != NULL) {\n", chainField.name.c_str());
+                        fprintf(out, "           event << %s[i];\n", chainField.name.c_str());
+                        fprintf(out, "        } else {\n");
+                        fprintf(out, "           event << \"\";\n");
+                        fprintf(out, "        }\n");
+                    } else {
+                        fprintf(out, "        event << %s[i];\n", chainField.name.c_str());
+                    }
                 }
                 fprintf(out, "        event.end();\n");
                 fprintf(out, "    }\n");
@@ -589,13 +597,18 @@ write_stats_log_jni(FILE* out, const Atoms& atoms, const AtomDecl &attributionDe
                         fprintf(out, "        jstring jstr = "
                             "(jstring)env->GetObjectArrayElement(%s, i);\n",
                              chainField.name.c_str());
-                        fprintf(out, "        ScopedUtfChars* scoped_%s = "
+                        fprintf(out, "        if (jstr == NULL) {\n");
+                        fprintf(out, "            %s_vec.push_back(NULL);\n",
+                            chainField.name.c_str());
+                        fprintf(out, "        } else {\n");
+                        fprintf(out, "            ScopedUtfChars* scoped_%s = "
                             "new ScopedUtfChars(env, jstr);\n",
                              chainField.name.c_str());
-                        fprintf(out, "        %s_vec.push_back(scoped_%s->c_str());\n",
+                        fprintf(out, "            %s_vec.push_back(scoped_%s->c_str());\n",
                                 chainField.name.c_str(), chainField.name.c_str());
-                        fprintf(out, "        scoped_%s_vec.push_back(scoped_%s);\n",
+                        fprintf(out, "            scoped_%s_vec.push_back(scoped_%s);\n",
                                 chainField.name.c_str(), chainField.name.c_str());
+                        fprintf(out, "        }\n");
                         fprintf(out, "    }\n");
                     }
                     fprintf(out, "\n");
@@ -648,7 +661,7 @@ write_stats_log_jni(FILE* out, const Atoms& atoms, const AtomDecl &attributionDe
                         fprintf(out, "    env->ReleaseIntArrayElements(%s, %s_array, 0);\n",
                             chainField.name.c_str(), chainField.name.c_str());
                     } else if (chainField.javaType == JAVA_TYPE_STRING) {
-                        fprintf(out, "    for (size_t i = 0; i < %s_length; ++i) {\n",
+                        fprintf(out, "    for (size_t i = 0; i < scoped_%s_vec.size(); ++i) {\n",
                             chainField.name.c_str());
                         fprintf(out, "        delete scoped_%s_vec[i];\n", chainField.name.c_str());
                         fprintf(out, "    }\n");
