@@ -743,9 +743,13 @@ public class StatsCompanionService extends IStatsCompanionService.Stub {
                 filter.addAction(Intent.ACTION_SHUTDOWN);
                 mContext.registerReceiverAsUser(
                         mShutdownEventReceiver, UserHandle.ALL, filter, null, null);
-
-                // Pull the latest state of UID->app name, version mapping when statsd starts.
-                informAllUidsLocked(mContext);
+                final long token = Binder.clearCallingIdentity();
+                try {
+                    // Pull the latest state of UID->app name, version mapping when statsd starts.
+                    informAllUidsLocked(mContext);
+                } finally {
+                    restoreCallingIdentity(token);
+                }
             } catch (RemoteException e) {
                 Slog.e(TAG, "Failed to inform statsd that statscompanion is ready", e);
                 forgetEverything();
