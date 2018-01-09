@@ -336,9 +336,6 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
             new TaskForResizePointSearchResult();
     private final ApplySurfaceChangesTransactionState mTmpApplySurfaceChangesTransactionState =
             new ApplySurfaceChangesTransactionState();
-    private final ScreenshotApplicationState mScreenshotApplicationState =
-            new ScreenshotApplicationState();
-    private final Transaction mTmpTransaction = new Transaction();
 
     // True if this display is in the process of being removed. Used to determine if the removal of
     // the display's direct children should be allowed.
@@ -655,10 +652,7 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
             mWallpaperController.updateWallpaperVisibility();
         }
 
-        // Use mTmpTransaction instead of mPendingTransaction because we don't want to commit
-        // other changes in mPendingTransaction at this point.
-        w.handleWindowMovedIfNeeded(mTmpTransaction);
-        SurfaceControl.mergeToGlobalTransaction(mTmpTransaction);
+        w.handleWindowMovedIfNeeded(mPendingTransaction);
 
         final WindowStateAnimator winAnimator = w.mWinAnimator;
 
@@ -693,33 +687,6 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
                     }
                 }
             }
-            final TaskStack stack = w.getStack();
-            if (!winAnimator.isWaitingForOpening()
-                    || (stack != null && stack.isAnimatingBounds())) {
-                // Updates the shown frame before we set up the surface. This is needed
-                // because the resizing could change the top-left position (in addition to
-                // size) of the window. setSurfaceBoundariesLocked uses mShownPosition to
-                // position the surface.
-                //
-                // If an animation is being started, we can't call this method because the
-                // animation hasn't processed its initial transformation yet, but in general
-                // we do want to update the position if the window is animating. We make an exception
-                // for the bounds animating state, where an application may have been waiting
-                // for an exit animation to start, but instead enters PiP. We need to ensure
-                // we always recompute the top-left in this case.
-                winAnimator.computeShownFrameLocked();
-            }
-            winAnimator.setSurfaceBoundariesLocked(mTmpRecoveringMemory /* recoveringMemory */);
-
-            // Since setSurfaceBoundariesLocked applies the clipping, we need to apply the position
-            // to the surface of the window container and also the position of the stack window
-            // container as well. Use mTmpTransaction instead of mPendingTransaction to avoid
-            // committing any existing changes in there.
-            w.updateSurfacePosition(mTmpTransaction);
-            if (stack != null) {
-                stack.updateSurfaceBounds(mTmpTransaction);
-            }
-            SurfaceControl.mergeToGlobalTransaction(mTmpTransaction);
         }
 
         final AppWindowToken atoken = w.mAppToken;
@@ -2822,6 +2789,7 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
 
         mTmpRecoveringMemory = recoveringMemory;
         forAllWindows(mApplySurfaceChangesTransaction, true /* traverseTopToBottom */);
+        prepareSurfaces();
 
         mService.mDisplayManagerInternal.setDisplayProperties(mDisplayId,
                 mTmpApplySurfaceChangesTransactionState.displayHasContent,
