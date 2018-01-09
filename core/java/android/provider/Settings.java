@@ -9775,6 +9775,22 @@ public final class Settings {
         public static final String TEXT_CLASSIFIER_CONSTANTS = "text_classifier_constants";
 
         /**
+         * BatteryStats specific settings.
+         * This is encoded as a key=value list, separated by commas. Ex: "foo=1,bar=true"
+         *
+         * The following keys are supported:
+         * <pre>
+         * track_cpu_times_by_proc_state (boolean)
+         * </pre>
+         *
+         * <p>
+         * Type: string
+         * @hide
+         * see also com.android.internal.os.BatteryStatsImpl.Constants
+         */
+        public static final String BATTERY_STATS_CONSTANTS = "battery_stats_constants";
+
+        /**
          * Whether or not App Standby feature is enabled. This controls throttling of apps
          * based on usage patterns and predictions.
          * Type: int (0 for false, 1 for true)

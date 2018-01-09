@@ -25,6 +25,8 @@ import static android.os.BatteryStats.Uid.PROCESS_STATE_TOP;
 import static android.os.BatteryStats.Uid.PROCESS_STATE_TOP_SLEEPING;
 import static android.os.BatteryStats.Uid.UID_PROCESS_TYPES;
 
+import static com.android.internal.os.BatteryStatsImpl.Constants.KEY_TRACK_CPU_TIMES_BY_PROC_STATE;
+
 import static junit.framework.Assert.assertNotNull;
 import static junit.framework.Assert.assertNull;
 import static junit.framework.Assert.assertTrue;
@@ -48,15 +50,19 @@ import android.os.IBinder;
 import android.os.PowerManager;
 import android.os.Process;
 import android.os.SystemClock;
+import android.provider.Settings;
 import android.support.test.InstrumentationRegistry;
 import android.support.test.filters.LargeTest;
 import android.support.test.runner.AndroidJUnit4;
 import android.support.test.uiautomator.UiDevice;
+import android.text.TextUtils;
 import android.util.DebugUtils;
 import android.util.Log;
 
 import org.junit.BeforeClass;
+import org.junit.Rule;
 import org.junit.Test;
+import org.junit.rules.TestName;
 import org.junit.runner.RunWith;
 
 import java.util.Arrays;
@@ -86,6 +92,9 @@ public class BstatsCpuTimesValidationTest {
     private static final int START_SERVICE_TIMEOUT_MS = 2000;
     private static final int START_ISOLATED_SERVICE_TIMEOUT_MS = 2000;
 
+    private static final int SETTING_UPDATE_TIMEOUT_MS = 2000;
+    private static final int SETTING_UPDATE_CHECK_INTERVAL_MS = 200;
+
     private static final int GENERAL_TIMEOUT_MS = 4000;
     private static final int GENERAL_INTERVAL_MS = 200;
 
@@ -96,6 +105,8 @@ public class BstatsCpuTimesValidationTest {
     private static int sTestPkgUid;
     private static boolean sCpuFreqTimesAvailable;
     private static boolean sPerProcStateTimesAvailable;
+
+    @Rule public TestName testName = new TestName();
 
     @BeforeClass
     public static void setupOnce() throws Exception {
@@ -123,6 +134,9 @@ public class BstatsCpuTimesValidationTest {
     @Test
     public void testCpuFreqTimes() throws Exception {
         if (!sCpuFreqTimesAvailable) {
+            Log.w(TAG, "Skipping " + testName.getMethodName()
+                    + "; freqTimesAvailable=" + sCpuFreqTimesAvailable
+                    + ", procStateTimesAvailable=" + sPerProcStateTimesAvailable);
             return;
         }
 
@@ -148,6 +162,9 @@ public class BstatsCpuTimesValidationTest {
     @Test
     public void testCpuFreqTimes_screenOff() throws Exception {
         if (!sCpuFreqTimesAvailable) {
+            Log.w(TAG, "Skipping " + testName.getMethodName()
+                    + "; freqTimesAvailable=" + sCpuFreqTimesAvailable
+                    + ", procStateTimesAvailable=" + sPerProcStateTimesAvailable);
             return;
         }
 
@@ -179,6 +196,9 @@ public class BstatsCpuTimesValidationTest {
     @Test
     public void testCpuFreqTimes_isolatedProcess() throws Exception {
         if (!sCpuFreqTimesAvailable) {
+            Log.w(TAG, "Skipping " + testName.getMethodName()
+                    + "; freqTimesAvailable=" + sCpuFreqTimesAvailable
+                    + ", procStateTimesAvailable=" + sPerProcStateTimesAvailable);
             return;
         }
 
@@ -204,6 +224,9 @@ public class BstatsCpuTimesValidationTest {
     @Test
     public void testCpuFreqTimes_stateTop() throws Exception {
         if (!sCpuFreqTimesAvailable || !sPerProcStateTimesAvailable) {
+            Log.w(TAG, "Skipping " + testName.getMethodName()
+                    + "; freqTimesAvailable=" + sCpuFreqTimesAvailable
+                    + ", procStateTimesAvailable=" + sPerProcStateTimesAvailable);
             return;
         }
 
@@ -234,6 +257,9 @@ public class BstatsCpuTimesValidationTest {
     @Test
     public void testIsolatedCpuFreqTimes_stateService() throws Exception {
         if (!sCpuFreqTimesAvailable || !sPerProcStateTimesAvailable) {
+            Log.w(TAG, "Skipping " + testName.getMethodName()
+                    + "; freqTimesAvailable=" + sCpuFreqTimesAvailable
+                    + ", procStateTimesAvailable=" + sPerProcStateTimesAvailable);
             return;
         }
 
@@ -272,6 +298,9 @@ public class BstatsCpuTimesValidationTest {
     @Test
     public void testCpuFreqTimes_stateTopSleeping() throws Exception {
         if (!sCpuFreqTimesAvailable || !sPerProcStateTimesAvailable) {
+            Log.w(TAG, "Skipping " + testName.getMethodName()
+                    + "; freqTimesAvailable=" + sCpuFreqTimesAvailable
+                    + ", procStateTimesAvailable=" + sPerProcStateTimesAvailable);
             return;
         }
 
@@ -302,6 +331,9 @@ public class BstatsCpuTimesValidationTest {
     @Test
     public void testCpuFreqTimes_stateFgService() throws Exception {
         if (!sCpuFreqTimesAvailable || !sPerProcStateTimesAvailable) {
+            Log.w(TAG, "Skipping " + testName.getMethodName()
+                    + "; freqTimesAvailable=" + sCpuFreqTimesAvailable
+                    + ", procStateTimesAvailable=" + sPerProcStateTimesAvailable);
             return;
         }
 
@@ -332,6 +364,9 @@ public class BstatsCpuTimesValidationTest {
     @Test
     public void testCpuFreqTimes_stateFg() throws Exception {
         if (!sCpuFreqTimesAvailable || !sPerProcStateTimesAvailable) {
+            Log.w(TAG, "Skipping " + testName.getMethodName()
+                    + "; freqTimesAvailable=" + sCpuFreqTimesAvailable
+                    + ", procStateTimesAvailable=" + sPerProcStateTimesAvailable);
             return;
         }
 
@@ -362,6 +397,9 @@ public class BstatsCpuTimesValidationTest {
     @Test
     public void testCpuFreqTimes_stateBg() throws Exception {
         if (!sCpuFreqTimesAvailable || !sPerProcStateTimesAvailable) {
+            Log.w(TAG, "Skipping " + testName.getMethodName()
+                    + "; freqTimesAvailable=" + sCpuFreqTimesAvailable
+                    + ", procStateTimesAvailable=" + sPerProcStateTimesAvailable);
             return;
         }
 
@@ -392,6 +430,9 @@ public class BstatsCpuTimesValidationTest {
     @Test
     public void testCpuFreqTimes_stateCached() throws Exception {
         if (!sCpuFreqTimesAvailable || !sPerProcStateTimesAvailable) {
+            Log.w(TAG, "Skipping " + testName.getMethodName()
+                    + "; freqTimesAvailable=" + sCpuFreqTimesAvailable
+                    + ", procStateTimesAvailable=" + sPerProcStateTimesAvailable);
             return;
         }
 
@@ -417,6 +458,124 @@ public class BstatsCpuTimesValidationTest {
         assertApproximateValue("Incorrect total cpu time, " + msgCpuTimes,
                 WORK_DURATION_MS, actualCpuTimeMs);
         batteryOffScreenOn();
+    }
+
+    @Test
+    public void testCpuFreqTimes_trackingDisabled() throws Exception {
+        if (!sCpuFreqTimesAvailable || !sPerProcStateTimesAvailable) {
+            Log.w(TAG, "Skipping " + testName.getMethodName()
+                    + "; freqTimesAvailable=" + sCpuFreqTimesAvailable
+                    + ", procStateTimesAvailable=" + sPerProcStateTimesAvailable);
+            return;
+        }
+
+        final String bstatsConstants = Settings.Global.getString(sContext.getContentResolver(),
+                Settings.Global.BATTERY_STATS_CONSTANTS);
+        try {
+            batteryOnScreenOn();
+            forceStop();
+            resetBatteryStats();
+            final long[] initialSnapshot = getAllCpuFreqTimes(sTestPkgUid);
+            assertNull("Initial snapshot should be null, initial="
+                    + Arrays.toString(initialSnapshot), initialSnapshot);
+            assertNull("Initial top state snapshot should be null",
+                    getAllCpuFreqTimes(sTestPkgUid, PROCESS_STATE_TOP));
+
+            doSomeWork(PROCESS_STATE_TOP);
+            forceStop();
+
+            final long[] cpuTimesMs = getAllCpuFreqTimes(sTestPkgUid, PROCESS_STATE_TOP);
+            final String msgCpuTimes = getAllCpuTimesMsg();
+            assertCpuTimesValid(cpuTimesMs);
+            long actualCpuTimeMs = 0;
+            for (int i = 0; i < cpuTimesMs.length / 2; ++i) {
+                actualCpuTimeMs += cpuTimesMs[i];
+            }
+            assertApproximateValue("Incorrect total cpu time, " + msgCpuTimes,
+                    WORK_DURATION_MS, actualCpuTimeMs);
+
+            updateTrackPerProcStateCpuTimesSetting(bstatsConstants, false);
+
+            doSomeWork(PROCESS_STATE_TOP);
+            forceStop();
+
+            final long[] cpuTimesMs2 = getAllCpuFreqTimes(sTestPkgUid, PROCESS_STATE_TOP);
+            assertCpuTimesValid(cpuTimesMs2);
+            assertCpuTimesEqual(cpuTimesMs2, cpuTimesMs, 20,
+                    "Unexpected cpu times with tracking off");
+
+            updateTrackPerProcStateCpuTimesSetting(bstatsConstants, true);
+
+            final long[] cpuTimesMs3 = getAllCpuFreqTimes(sTestPkgUid, PROCESS_STATE_TOP);
+            assertCpuTimesValid(cpuTimesMs3);
+            assertCpuTimesEqual(cpuTimesMs3, cpuTimesMs, 20,
+                    "Unexpected cpu times after turning on tracking");
+
+            doSomeWork(PROCESS_STATE_TOP);
+            forceStop();
+
+            final long[] cpuTimesMs4 = getAllCpuFreqTimes(sTestPkgUid, PROCESS_STATE_TOP);
+            assertCpuTimesValid(cpuTimesMs4);
+            actualCpuTimeMs = 0;
+            for (int i = 0; i < cpuTimesMs.length / 2; ++i) {
+                actualCpuTimeMs += cpuTimesMs[i];
+            }
+            assertApproximateValue("Incorrect total cpu time, " + msgCpuTimes,
+                    2 * WORK_DURATION_MS, actualCpuTimeMs);
+
+            batteryOffScreenOn();
+        } finally {
+            Settings.Global.putString(sContext.getContentResolver(),
+                    Settings.Global.BATTERY_STATS_CONSTANTS, bstatsConstants);
+        }
+    }
+
+    private void assertCpuTimesEqual(long[] actual, long[] expected, long delta, String errMsg) {
+        for (int i = actual.length - 1; i >= 0; --i) {
+            if (actual[i] > expected[i] + delta || actual[i] < expected[i]) {
+                fail(errMsg + ", actual=" + actual + ", expected=" + expected + ", delta=" + delta);
+            }
+        }
+    }
+
+    private void updateTrackPerProcStateCpuTimesSetting(String originalConstants, boolean enabled)
+            throws Exception {
+        final String newConstants;
+        final String setting = KEY_TRACK_CPU_TIMES_BY_PROC_STATE + "=" + enabled;
+        if (originalConstants == null || "null".equals(originalConstants)) {
+            newConstants = setting;
+        } else if (originalConstants.contains(KEY_TRACK_CPU_TIMES_BY_PROC_STATE)) {
+            newConstants = originalConstants.replaceAll(
+                    KEY_TRACK_CPU_TIMES_BY_PROC_STATE + "=(true|false)", setting);
+        } else {
+            newConstants = originalConstants + "," + setting;
+        }
+        Settings.Global.putString(sContext.getContentResolver(),
+                Settings.Global.BATTERY_STATS_CONSTANTS, newConstants);
+        assertTrackPerProcStateCpuTimesSetting(enabled);
+    }
+
+    private void assertTrackPerProcStateCpuTimesSetting(boolean enabled) throws Exception {
+        final String expectedValue = Boolean.toString(enabled);
+        assertDelayedCondition("Unexpected value for " + KEY_TRACK_CPU_TIMES_BY_PROC_STATE, () -> {
+            final String actualValue = getSettingValueFromDump(KEY_TRACK_CPU_TIMES_BY_PROC_STATE);
+            return expectedValue.equals(actualValue)
+                    ? null : "expected=" + expectedValue + ", actual=" + actualValue;
+        }, SETTING_UPDATE_TIMEOUT_MS, SETTING_UPDATE_CHECK_INTERVAL_MS);
+    }
+
+    private String getSettingValueFromDump(String key) throws Exception {
+        final String settingsDump = executeCmdSilent("dumpsys batterystats --settings");
+        final TextUtils.SimpleStringSplitter splitter = new TextUtils.SimpleStringSplitter('\n');
+        splitter.setString(settingsDump);
+        String next;
+        while (splitter.hasNext()) {
+            next = splitter.next();
+            if (next.startsWith(key)) {
+                return next.split("=")[1];
+            }
+        }
+        return null;
     }
 
     private void assertCpuTimesValid(long[] cpuTimes) {
@@ -750,13 +909,18 @@ public class BstatsCpuTimesValidationTest {
     }
 
     private void assertDelayedCondition(String errMsgPrefix, ExpectedCondition condition)
-            throws Exception {
-        final long endTime = SystemClock.uptimeMillis() + GENERAL_TIMEOUT_MS;
+        throws Exception {
+        assertDelayedCondition(errMsgPrefix, condition, GENERAL_TIMEOUT_MS, GENERAL_INTERVAL_MS);
+    }
+
+    private void assertDelayedCondition(String errMsgPrefix, ExpectedCondition condition,
+            long timeoutMs, long checkIntervalMs) throws Exception {
+        final long endTime = SystemClock.uptimeMillis() + timeoutMs;
         while (SystemClock.uptimeMillis() <= endTime) {
             if (condition.getErrIfNotTrue() == null) {
                 return;
             }
-            SystemClock.sleep(GENERAL_INTERVAL_MS);
+            SystemClock.sleep(checkIntervalMs);
         }
         final String errMsg = condition.getErrIfNotTrue();
         if (errMsg != null) {
