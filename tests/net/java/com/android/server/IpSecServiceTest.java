@@ -35,6 +35,8 @@ import static org.mockito.Mockito.when;
 
 import android.content.Context;
 import android.net.INetd;
+import android.net.IpSecAlgorithm;
+import android.net.IpSecConfig;
 import android.net.IpSecManager;
 import android.net.IpSecSpiResponse;
 import android.net.IpSecTransform;
@@ -75,6 +77,36 @@ public class IpSecServiceTest {
     private static final int TEST_UDP_ENCAP_PORT_OUT_RANGE = 100000;
 
     private static final InetAddress INADDR_ANY;
+
+    private static final byte[] AEAD_KEY = {
+        0x00, 0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07,
+        0x08, 0x09, 0x0A, 0x0B, 0x0C, 0x0D, 0x0E, 0x0F,
+        0x10, 0x11, 0x12, 0x13, 0x14, 0x15, 0x16, 0x17,
+        0x18, 0x19, 0x1A, 0x1B, 0x1C, 0x1D, 0x1E, 0x1F,
+        0x73, 0x61, 0x6C, 0x74
+    };
+    private static final byte[] CRYPT_KEY = {
+        0x00, 0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07,
+        0x08, 0x09, 0x0A, 0x0B, 0x0C, 0x0D, 0x0E, 0x0F,
+        0x10, 0x11, 0x12, 0x13, 0x14, 0x15, 0x16, 0x17,
+        0x18, 0x19, 0x1A, 0x1B, 0x1C, 0x1D, 0x1E, 0x1F
+    };
+    private static final byte[] AUTH_KEY = {
+        0x7A, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+        0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x7F,
+        0x7A, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+        0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x7F
+    };
+
+    private static final IpSecAlgorithm AUTH_ALGO =
+            new IpSecAlgorithm(IpSecAlgorithm.AUTH_HMAC_SHA256, AUTH_KEY, AUTH_KEY.length * 4);
+    private static final IpSecAlgorithm CRYPT_ALGO =
+            new IpSecAlgorithm(IpSecAlgorithm.CRYPT_AES_CBC, CRYPT_KEY);
+    private static final IpSecAlgorithm AEAD_ALGO =
+            new IpSecAlgorithm(IpSecAlgorithm.AUTH_CRYPT_AES_GCM, AEAD_KEY, 128);
+
+    private static final int[] DIRECTIONS =
+            new int[] {IpSecTransform.DIRECTION_IN, IpSecTransform.DIRECTION_OUT};
 
     static {
         try {
@@ -266,6 +298,127 @@ public class IpSecServiceTest {
             mIpSecService.closeUdpEncapsulationSocket(1);
             fail("IllegalArgumentException not thrown");
         } catch (IllegalArgumentException e) {
+        }
+    }
+
+    @Test
+    public void testValidateAlgorithmsAuth() {
+        for (int direction : DIRECTIONS) {
+            // Validate that correct algorithm type succeeds
+            IpSecConfig config = new IpSecConfig();
+            config.setAuthentication(direction, AUTH_ALGO);
+            mIpSecService.validateAlgorithms(config, direction);
+
+            // Validate that incorrect algorithm types fails
+            for (IpSecAlgorithm algo : new IpSecAlgorithm[] {CRYPT_ALGO, AEAD_ALGO}) {
+                try {
+                    config = new IpSecConfig();
+                    config.setAuthentication(direction, algo);
+                    mIpSecService.validateAlgorithms(config, direction);
+                    fail("Did not throw exception on invalid algorithm type");
+                } catch (IllegalArgumentException expected) {
+                }
+            }
+        }
+    }
+
+    @Test
+    public void testValidateAlgorithmsCrypt() {
+        for (int direction : DIRECTIONS) {
+            // Validate that correct algorithm type succeeds
+            IpSecConfig config = new IpSecConfig();
+            config.setEncryption(direction, CRYPT_ALGO);
+            mIpSecService.validateAlgorithms(config, direction);
+
+            // Validate that incorrect algorithm types fails
+            for (IpSecAlgorithm algo : new IpSecAlgorithm[] {AUTH_ALGO, AEAD_ALGO}) {
+                try {
+                    config = new IpSecConfig();
+                    config.setEncryption(direction, algo);
+                    mIpSecService.validateAlgorithms(config, direction);
+                    fail("Did not throw exception on invalid algorithm type");
+                } catch (IllegalArgumentException expected) {
+                }
+            }
+        }
+    }
+
+    @Test
+    public void testValidateAlgorithmsAead() {
+        for (int direction : DIRECTIONS) {
+            // Validate that correct algorithm type succeeds
+            IpSecConfig config = new IpSecConfig();
+            config.setAuthenticatedEncryption(direction, AEAD_ALGO);
+            mIpSecService.validateAlgorithms(config, direction);
+
+            // Validate that incorrect algorithm types fails
+            for (IpSecAlgorithm algo : new IpSecAlgorithm[] {AUTH_ALGO, CRYPT_ALGO}) {
+                try {
+                    config = new IpSecConfig();
+                    config.setAuthenticatedEncryption(direction, algo);
+                    mIpSecService.validateAlgorithms(config, direction);
+                    fail("Did not throw exception on invalid algorithm type");
+                } catch (IllegalArgumentException expected) {
+                }
+            }
+        }
+    }
+
+    @Test
+    public void testValidateAlgorithmsAuthCrypt() {
+        for (int direction : DIRECTIONS) {
+            // Validate that correct algorithm type succeeds
+            IpSecConfig config = new IpSecConfig();
+            config.setAuthentication(direction, AUTH_ALGO);
+            config.setEncryption(direction, CRYPT_ALGO);
+            mIpSecService.validateAlgorithms(config, direction);
+        }
+    }
+
+    @Test
+    public void testValidateAlgorithmsNoAlgorithms() {
+        IpSecConfig config = new IpSecConfig();
+        try {
+            mIpSecService.validateAlgorithms(config, IpSecTransform.DIRECTION_IN);
+            fail("Expected exception; no algorithms specified");
+        } catch (IllegalArgumentException expected) {
+        }
+    }
+
+    @Test
+    public void testValidateAlgorithmsAeadWithAuth() {
+        IpSecConfig config = new IpSecConfig();
+        config.setAuthenticatedEncryption(IpSecTransform.DIRECTION_IN, AEAD_ALGO);
+        config.setAuthentication(IpSecTransform.DIRECTION_IN, AUTH_ALGO);
+        try {
+            mIpSecService.validateAlgorithms(config, IpSecTransform.DIRECTION_IN);
+            fail("Expected exception; both AEAD and auth algorithm specified");
+        } catch (IllegalArgumentException expected) {
+        }
+    }
+
+    @Test
+    public void testValidateAlgorithmsAeadWithCrypt() {
+        IpSecConfig config = new IpSecConfig();
+        config.setAuthenticatedEncryption(IpSecTransform.DIRECTION_IN, AEAD_ALGO);
+        config.setEncryption(IpSecTransform.DIRECTION_IN, CRYPT_ALGO);
+        try {
+            mIpSecService.validateAlgorithms(config, IpSecTransform.DIRECTION_IN);
+            fail("Expected exception; both AEAD and crypt algorithm specified");
+        } catch (IllegalArgumentException expected) {
+        }
+    }
+
+    @Test
+    public void testValidateAlgorithmsAeadWithAuthAndCrypt() {
+        IpSecConfig config = new IpSecConfig();
+        config.setAuthenticatedEncryption(IpSecTransform.DIRECTION_IN, AEAD_ALGO);
+        config.setAuthentication(IpSecTransform.DIRECTION_IN, AUTH_ALGO);
+        config.setEncryption(IpSecTransform.DIRECTION_IN, CRYPT_ALGO);
+        try {
+            mIpSecService.validateAlgorithms(config, IpSecTransform.DIRECTION_IN);
+            fail("Expected exception; AEAD, auth and crypt algorithm specified");
+        } catch (IllegalArgumentException expected) {
         }
     }
 
