@@ -29,6 +29,7 @@ import android.app.AlarmManager;
 import android.app.IActivityManager;
 import android.app.NotificationManager;
 import android.app.backup.IBackupManager;
+import android.app.usage.UsageStatsManagerInternal;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
@@ -73,6 +74,7 @@ public class MockSystemServices {
     public final SystemPropertiesForMock systemProperties;
     public final UserManager userManager;
     public final UserManagerInternal userManagerInternal;
+    public final UsageStatsManagerInternal usageStatsManagerInternal;
     public final PackageManagerInternal packageManagerInternal;
     public final UserManagerForMock userManagerForMock;
     public final PowerManagerForMock powerManager;
@@ -108,6 +110,7 @@ public class MockSystemServices {
         systemProperties = mock(SystemPropertiesForMock.class);
         userManager = mock(UserManager.class);
         userManagerInternal = mock(UserManagerInternal.class);
+        usageStatsManagerInternal = mock(UsageStatsManagerInternal.class);
         userManagerForMock = mock(UserManagerForMock.class);
         packageManagerInternal = mock(PackageManagerInternal.class);
         powerManager = mock(PowerManagerForMock.class);

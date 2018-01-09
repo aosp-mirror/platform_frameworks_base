@@ -20,6 +20,7 @@ import android.app.IActivityManager;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
 import android.app.backup.IBackupManager;
+import android.app.usage.UsageStatsManagerInternal;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.IPackageManager;
@@ -149,6 +150,11 @@ public class DevicePolicyManagerServiceTestable extends DevicePolicyManagerServi
         @Override
         UserManagerInternal getUserManagerInternal() {
             return services.userManagerInternal;
+        }
+
+        @Override
+        UsageStatsManagerInternal getUsageStatsManagerInternal() {
+            return services.usageStatsManagerInternal;
         }
 
         @Override

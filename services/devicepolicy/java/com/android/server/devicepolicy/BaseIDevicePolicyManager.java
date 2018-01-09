@@ -38,6 +38,12 @@ import java.util.List;
  */
 abstract class BaseIDevicePolicyManager extends IDevicePolicyManager.Stub {
     /**
+     * To be called by {@link DevicePolicyManagerService#Lifecycle} when the service is started.
+     *
+     * @see {@link SystemService#onStart}.
+     */
+    abstract void handleStart();
+    /**
      * To be called by {@link DevicePolicyManagerService#Lifecycle} during the various boot phases.
      *
      * @see {@link SystemService#onBootPhase}.

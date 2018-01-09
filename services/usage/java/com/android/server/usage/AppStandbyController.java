@@ -33,7 +33,6 @@ import static com.android.server.SystemService.PHASE_SYSTEM_SERVICES_READY;
 
 import android.app.ActivityManager;
 import android.app.AppGlobals;
-import android.app.admin.DevicePolicyManager;
 import android.app.usage.UsageStatsManager.StandbyBuckets;
 import android.app.usage.UsageEvents;
 import android.app.usage.UsageStatsManagerInternal.AppIdleStateChangeListener;
@@ -66,13 +65,16 @@ import android.os.SystemClock;
 import android.os.UserHandle;
 import android.provider.Settings;
 import android.telephony.TelephonyManager;
+import android.util.ArraySet;
 import android.util.KeyValueListParser;
 import android.util.Slog;
+import android.util.SparseArray;
 import android.util.SparseIntArray;
 import android.util.TimeUtils;
 import android.view.Display;
 
 import com.android.internal.annotations.GuardedBy;
+import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.app.IBatteryStats;
 import com.android.internal.os.SomeArgs;
 import com.android.internal.util.ArrayUtils;
@@ -87,6 +89,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 /**
  * Manages the standby state of an app, listening to various events.
@@ -146,6 +149,9 @@ public class AppStandbyController {
     /** List of carrier-privileged apps that should be excluded from standby */
     @GuardedBy("mAppIdleLock")
     private List<String> mCarrierPrivilegedApps;
+
+    @GuardedBy("mActiveAdminApps")
+    private final SparseArray<Set<String>> mActiveAdminApps = new SparseArray<>();
 
     // Messages for the handler
     static final int MSG_INFORM_LISTENERS = 3;
@@ -619,6 +625,9 @@ public class AppStandbyController {
     public void onUserRemoved(int userId) {
         synchronized (mAppIdleLock) {
             mAppIdleHistory.onUserRemoved(userId);
+            synchronized (mActiveAdminApps) {
+                mActiveAdminApps.remove(userId);
+            }
         }
     }
 
@@ -857,10 +866,39 @@ public class AppStandbyController {
                 newBucket);
     }
 
-    private boolean isActiveDeviceAdmin(String packageName, int userId) {
-        DevicePolicyManager dpm = mContext.getSystemService(DevicePolicyManager.class);
-        if (dpm == null) return false;
-        return dpm.packageHasActiveAdmins(packageName, userId);
+    @VisibleForTesting
+    boolean isActiveDeviceAdmin(String packageName, int userId) {
+        synchronized (mActiveAdminApps) {
+            final Set<String> adminPkgs = mActiveAdminApps.get(userId);
+            return adminPkgs != null && adminPkgs.contains(packageName);
+        }
+    }
+
+    public void addActiveDeviceAdmin(String adminPkg, int userId) {
+        synchronized (mActiveAdminApps) {
+            Set<String> adminPkgs = mActiveAdminApps.get(userId);
+            if (adminPkgs == null) {
+                adminPkgs = new ArraySet<>();
+                mActiveAdminApps.put(userId, adminPkgs);
+            }
+            adminPkgs.add(adminPkg);
+        }
+    }
+
+    public void setActiveAdminApps(Set<String> adminPkgs, int userId) {
+        synchronized (mActiveAdminApps) {
+            if (adminPkgs == null) {
+                mActiveAdminApps.remove(userId);
+            } else {
+                mActiveAdminApps.put(userId, adminPkgs);
+            }
+        }
+    }
+
+    Set<String> getActiveAdminAppsForTest(int userId) {
+        synchronized (mActiveAdminApps) {
+            return mActiveAdminApps.get(userId);
+        }
     }
 
     /**

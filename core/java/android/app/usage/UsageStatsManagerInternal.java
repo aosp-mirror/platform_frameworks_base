@@ -22,6 +22,7 @@ import android.content.ComponentName;
 import android.content.res.Configuration;
 
 import java.util.List;
+import java.util.Set;
 
 /**
  * UsageStatsManager local system service interface.
@@ -157,6 +158,22 @@ public abstract class UsageStatsManagerInternal {
      * @param payload
      */
     public abstract void applyRestoredPayload(@UserIdInt int userId, String key, byte[] payload);
+
+    /**
+     * Called by DevicePolicyManagerService to inform that a new admin has been added.
+     *
+     * @param packageName the package in which the admin component is part of.
+     * @param userId the userId in which the admin has been added.
+     */
+    public abstract void onActiveAdminAdded(String packageName, int userId);
+
+    /**
+     * Called by DevicePolicyManagerService to inform about the active admins in an user.
+     *
+     * @param adminApps the set of active admins in {@param userId} or null if there are none.
+     * @param userId the userId to which the admin apps belong.
+     */
+    public abstract void setActiveAdminApps(Set<String> adminApps, int userId);
 
     /**
      * Return usage stats.

@@ -95,6 +95,7 @@ import android.app.admin.SystemUpdateInfo;
 import android.app.admin.SystemUpdatePolicy;
 import android.app.backup.IBackupManager;
 import android.app.trust.TrustManager;
+import android.app.usage.UsageStatsManagerInternal;
 import android.content.BroadcastReceiver;
 import android.content.ComponentName;
 import android.content.Context;
@@ -401,6 +402,7 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
     final IPackageManager mIPackageManager;
     final UserManager mUserManager;
     final UserManagerInternal mUserManagerInternal;
+    final UsageStatsManagerInternal mUsageStatsManagerInternal;
     final TelephonyManager mTelephonyManager;
     private final LockPatternUtils mLockPatternUtils;
     private final DevicePolicyConstants mConstants;
@@ -504,6 +506,7 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
         @Override
         public void onStart() {
             publishBinderService(Context.DEVICE_POLICY_SERVICE, mService);
+            mService.handleStart();
         }
 
         @Override
@@ -1560,6 +1563,7 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
                             removedAdmin = true;
                             policy.mAdminList.remove(i);
                             policy.mAdminMap.remove(aa.info.getComponent());
+                            pushActiveAdminPackagesLocked(userHandle);
                         }
                     }
                 } catch (RemoteException re) {
@@ -1651,6 +1655,10 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
 
         PackageManagerInternal getPackageManagerInternal() {
             return LocalServices.getService(PackageManagerInternal.class);
+        }
+
+        UsageStatsManagerInternal getUsageStatsManagerInternal() {
+            return LocalServices.getService(UsageStatsManagerInternal.class);
         }
 
         NotificationManager getNotificationManager() {
@@ -1923,6 +1931,8 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
 
         mUserManager = Preconditions.checkNotNull(injector.getUserManager());
         mUserManagerInternal = Preconditions.checkNotNull(injector.getUserManagerInternal());
+        mUsageStatsManagerInternal = Preconditions.checkNotNull(
+                injector.getUsageStatsManagerInternal());
         mIPackageManager = Preconditions.checkNotNull(injector.getIPackageManager());
         mTelephonyManager = Preconditions.checkNotNull(injector.getTelephonyManager());
 
@@ -3190,6 +3200,11 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
     }
 
     @Override
+    void handleStart() {
+        pushActiveAdminPackages();
+    }
+
+    @Override
     void handleStartUser(int userId) {
         updateScreenCaptureDisabledInWindowManager(userId,
                 getScreenCaptureDisabled(null, userId));
@@ -3357,6 +3372,8 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
                 if (replaceIndex == -1) {
                     policy.mAdminList.add(newAdmin);
                     enableIfNecessary(info.getPackageName(), userHandle);
+                    mUsageStatsManagerInternal.onActiveAdminAdded(
+                            adminReceiver.getPackageName(), userHandle);
                 } else {
                     policy.mAdminList.set(replaceIndex, newAdmin);
                 }
@@ -3367,6 +3384,35 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
                 mInjector.binderRestoreCallingIdentity(ident);
             }
         }
+    }
+
+    private void pushActiveAdminPackages() {
+        synchronized (this) {
+            final List<UserInfo> users = mUserManager.getUsers();
+            for (int i = users.size() - 1; i >= 0; --i) {
+                final int userId = users.get(i).id;
+                mUsageStatsManagerInternal.setActiveAdminApps(
+                        getActiveAdminPackagesLocked(userId), userId);
+            }
+        }
+    }
+
+    private void pushActiveAdminPackagesLocked(int userId) {
+        mUsageStatsManagerInternal.setActiveAdminApps(
+                getActiveAdminPackagesLocked(userId), userId);
+    }
+
+    private Set<String> getActiveAdminPackagesLocked(int userId) {
+        final DevicePolicyData policy = getUserData(userId);
+        Set<String> adminPkgs = null;
+        for (int i = policy.mAdminList.size() - 1; i >= 0; --i) {
+            final String pkgName = policy.mAdminList.get(i).info.getPackageName();
+            if (adminPkgs == null) {
+                adminPkgs = new ArraySet<>();
+            }
+            adminPkgs.add(pkgName);
+        }
+        return adminPkgs;
     }
 
     private void transferActiveAdminUncheckedLocked(ComponentName incomingReceiver,
@@ -3487,6 +3533,7 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
         }
     }
 
+    @Override
     public void forceRemoveActiveAdmin(ComponentName adminReceiver, int userHandle) {
         if (!mHasFeature) {
             return;
@@ -3540,7 +3587,7 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
     private boolean isPackageTestOnly(String packageName, int userHandle) {
         final ApplicationInfo ai;
         try {
-            ai = mIPackageManager.getApplicationInfo(packageName,
+            ai = mInjector.getIPackageManager().getApplicationInfo(packageName,
                     (PackageManager.MATCH_DIRECT_BOOT_AWARE
                             | PackageManager.MATCH_DIRECT_BOOT_UNAWARE), userHandle);
         } catch (RemoteException e) {
@@ -3562,7 +3609,7 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
     }
 
     private void enforceShell(String method) {
-        final int callingUid = Binder.getCallingUid();
+        final int callingUid = mInjector.binderGetCallingUid();
         if (callingUid != Process.SHELL_UID && callingUid != Process.ROOT_UID) {
             throw new SecurityException("Non-shell user attempted to call " + method);
         }
@@ -11140,6 +11187,7 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
             if (doProxyCleanup) {
                 resetGlobalProxyLocked(policy);
             }
+            pushActiveAdminPackagesLocked(userHandle);
             saveSettingsLocked(userHandle);
             updateMaximumTimeToLockLocked(userHandle);
             policy.mRemovingAdmins.remove(adminReceiver);

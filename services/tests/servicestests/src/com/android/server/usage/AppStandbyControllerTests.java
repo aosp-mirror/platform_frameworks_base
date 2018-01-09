@@ -34,13 +34,13 @@ import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotEquals;
 import static org.junit.Assert.assertTrue;
 
+import static org.junit.Assert.fail;
 import static org.mockito.Matchers.anyInt;
 import static org.mockito.Matchers.anyString;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
 
 import android.app.usage.UsageEvents;
-import android.app.usage.UsageStatsManager;
 import android.appwidget.AppWidgetManager;
 import android.content.Context;
 import android.content.ContextWrapper;
@@ -55,6 +55,7 @@ import android.platform.test.annotations.Presubmit;
 import android.support.test.filters.SmallTest;
 import android.support.test.InstrumentationRegistry;
 import android.support.test.runner.AndroidJUnit4;
+import android.util.ArraySet;
 import android.view.Display;
 
 import com.android.server.SystemService;
@@ -65,7 +66,9 @@ import org.junit.runner.RunWith;
 
 import java.io.File;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
+import java.util.Set;
 
 /**
  * Unit test for AppStandbyController.
@@ -78,6 +81,11 @@ public class AppStandbyControllerTests {
     private static final String PACKAGE_1 = "com.example.foo";
     private static final int UID_1 = 10000;
     private static final int USER_ID = 0;
+    private static final int USER_ID2 = 10;
+
+    private static final String ADMIN_PKG = "com.android.admin";
+    private static final String ADMIN_PKG2 = "com.android.admin2";
+    private static final String ADMIN_PKG3 = "com.android.admin3";
 
     private static final long MINUTE_MS = 60 * 1000;
     private static final long HOUR_MS = 60 * MINUTE_MS;
@@ -454,6 +462,105 @@ public class AppStandbyControllerTests {
         mController.setAppStandbyBucket(PACKAGE_1, USER_ID, STANDBY_BUCKET_FREQUENT,
                 REASON_PREDICTED, mInjector.mElapsedRealtime);
         assertBucket(STANDBY_BUCKET_FREQUENT);
+    }
 
+    @Test
+    public void testAddActiveDeviceAdmin() {
+        assertActiveAdmins(USER_ID, (String[]) null);
+        assertActiveAdmins(USER_ID2, (String[]) null);
+
+        mController.addActiveDeviceAdmin(ADMIN_PKG, USER_ID);
+        assertActiveAdmins(USER_ID, ADMIN_PKG);
+        assertActiveAdmins(USER_ID2, (String[]) null);
+
+        mController.addActiveDeviceAdmin(ADMIN_PKG, USER_ID);
+        assertActiveAdmins(USER_ID, ADMIN_PKG);
+        assertActiveAdmins(USER_ID2, (String[]) null);
+
+        mController.addActiveDeviceAdmin(ADMIN_PKG2, USER_ID2);
+        assertActiveAdmins(USER_ID, ADMIN_PKG);
+        assertActiveAdmins(USER_ID2, ADMIN_PKG2);
+    }
+
+    @Test
+    public void testSetActiveAdminApps() {
+        assertActiveAdmins(USER_ID, (String[]) null);
+        assertActiveAdmins(USER_ID2, (String[]) null);
+
+        setActiveAdmins(USER_ID, ADMIN_PKG, ADMIN_PKG2);
+        assertActiveAdmins(USER_ID, ADMIN_PKG, ADMIN_PKG2);
+        assertActiveAdmins(USER_ID2, (String[]) null);
+
+        mController.addActiveDeviceAdmin(ADMIN_PKG2, USER_ID2);
+        setActiveAdmins(USER_ID2, ADMIN_PKG);
+        assertActiveAdmins(USER_ID, ADMIN_PKG, ADMIN_PKG2);
+        assertActiveAdmins(USER_ID2, ADMIN_PKG);
+
+        mController.setActiveAdminApps(null, USER_ID);
+        assertActiveAdmins(USER_ID, (String[]) null);
+    }
+
+    @Test
+    public void isActiveDeviceAdmin() {
+        assertActiveAdmins(USER_ID, (String[]) null);
+        assertActiveAdmins(USER_ID2, (String[]) null);
+
+        mController.addActiveDeviceAdmin(ADMIN_PKG, USER_ID);
+        assertIsActiveAdmin(ADMIN_PKG, USER_ID);
+        assertIsNotActiveAdmin(ADMIN_PKG, USER_ID2);
+
+        mController.addActiveDeviceAdmin(ADMIN_PKG2, USER_ID2);
+        mController.addActiveDeviceAdmin(ADMIN_PKG, USER_ID2);
+        assertIsActiveAdmin(ADMIN_PKG, USER_ID);
+        assertIsNotActiveAdmin(ADMIN_PKG2, USER_ID);
+        assertIsActiveAdmin(ADMIN_PKG, USER_ID2);
+        assertIsActiveAdmin(ADMIN_PKG2, USER_ID2);
+
+        setActiveAdmins(USER_ID2, ADMIN_PKG2);
+        assertIsActiveAdmin(ADMIN_PKG2, USER_ID2);
+        assertIsNotActiveAdmin(ADMIN_PKG, USER_ID2);
+        assertIsActiveAdmin(ADMIN_PKG, USER_ID);
+        assertIsNotActiveAdmin(ADMIN_PKG2, USER_ID);
+    }
+
+    private String getAdminAppsStr(int userId) {
+        return getAdminAppsStr(userId, mController.getActiveAdminAppsForTest(userId));
+    }
+
+    private String getAdminAppsStr(int userId, Set<String> adminApps) {
+        return "admin apps for u" + userId + ": "
+                + (adminApps == null ? "null" : Arrays.toString(adminApps.toArray()));
+    }
+
+    private void assertIsActiveAdmin(String adminApp, int userId) {
+        assertTrue(adminApp + " should be an active admin; " + getAdminAppsStr(userId),
+                mController.isActiveDeviceAdmin(adminApp, userId));
+    }
+
+    private void assertIsNotActiveAdmin(String adminApp, int userId) {
+        assertFalse(adminApp + " shouldn't be an active admin; " + getAdminAppsStr(userId),
+                mController.isActiveDeviceAdmin(adminApp, userId));
+    }
+
+    private void assertActiveAdmins(int userId, String... admins) {
+        final Set<String> actualAdminApps = mController.getActiveAdminAppsForTest(userId);
+        if (admins == null) {
+            if (actualAdminApps != null && !actualAdminApps.isEmpty()) {
+                fail("Admin apps should be null; " + getAdminAppsStr(userId, actualAdminApps));
+            }
+            return;
+        }
+        assertEquals("No. of admin apps not equal; " + getAdminAppsStr(userId, actualAdminApps)
+                + "; expected=" + Arrays.toString(admins), admins.length, actualAdminApps.size());
+        final Set<String> adminAppsCopy = new ArraySet<>(actualAdminApps);
+        for (String admin : admins) {
+            adminAppsCopy.remove(admin);
+        }
+        assertTrue("Unexpected admin apps; " + getAdminAppsStr(userId, actualAdminApps)
+                + "; expected=" + Arrays.toString(admins), adminAppsCopy.isEmpty());
+    }
+
+    private void setActiveAdmins(int userId, String... admins) {
+        mController.setActiveAdminApps(new ArraySet<>(Arrays.asList(admins)), userId);
     }
 }
