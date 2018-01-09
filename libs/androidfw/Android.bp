@@ -145,6 +145,7 @@ cc_test {
         "tests/TypeWrappers_test.cpp",
         "tests/ZipUtils_test.cpp",
     ],
+    static_libs: ["libgmock"],
     target: {
         android: {
             srcs: [
