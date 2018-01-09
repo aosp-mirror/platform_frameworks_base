@@ -103,4 +103,8 @@ oneway interface IConnectionService {
 
     void handoverFailed(String callId, in ConnectionRequest request,
             int error, in Session.Info sessionInfo);
+
+    void connectionServiceFocusLost(in Session.Info sessionInfo);
+
+    void connectionServiceFocusGained(in Session.Info sessionInfo);
 }

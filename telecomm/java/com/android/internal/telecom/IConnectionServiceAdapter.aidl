@@ -119,4 +119,6 @@ oneway interface IConnectionServiceAdapter {
 
     void onPhoneAccountChanged(String callId, in PhoneAccountHandle pHandle,
     in Session.Info sessionInfo);
+
+    void onConnectionServiceFocusReleased(in Session.Info sessionInfo);
 }
