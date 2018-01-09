@@ -64,7 +64,6 @@ sk_sp<SkData> ShaderCache::load(const SkData& key) {
     size_t keySize = key.size();
     std::lock_guard<std::mutex> lock(mMutex);
     if (!mInitialized) {
-        ALOGE("ShaderCache::load not initialized");
         return nullptr;
     }
 
@@ -103,7 +102,6 @@ void ShaderCache::store(const SkData& key, const SkData& data) {
     std::lock_guard<std::mutex> lock(mMutex);
 
     if (!mInitialized) {
-        ALOGE("ShaderCache::store not initialized");
         return;
     }
 
