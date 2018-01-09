@@ -306,7 +306,7 @@ public class RecoverableKeyStoreManagerTest {
                     TEST_SESSION_ID,
                     /*recoveryKeyBlob=*/ randomBytes(32),
                     /*applicationKeys=*/ ImmutableList.of(
-                            new KeyEntryRecoveryData(getUtf8Bytes("alias"), randomBytes(32))
+                            new KeyEntryRecoveryData("alias", randomBytes(32))
                     ));
             fail("should have thrown");
         } catch (ServiceSpecificException e) {
@@ -356,7 +356,7 @@ public class RecoverableKeyStoreManagerTest {
         byte[] encryptedClaimResponse = encryptClaimResponse(
                 keyClaimant, TEST_SECRET, TEST_VAULT_PARAMS, recoveryKey);
         KeyEntryRecoveryData badApplicationKey = new KeyEntryRecoveryData(
-                TEST_ALIAS.getBytes(StandardCharsets.UTF_8),
+                TEST_ALIAS,
                 randomBytes(32));
 
         try {
@@ -389,7 +389,7 @@ public class RecoverableKeyStoreManagerTest {
                 keyClaimant, TEST_SECRET, TEST_VAULT_PARAMS, recoveryKey);
         byte[] applicationKeyBytes = randomBytes(32);
         KeyEntryRecoveryData applicationKey = new KeyEntryRecoveryData(
-                TEST_ALIAS.getBytes(StandardCharsets.UTF_8),
+                TEST_ALIAS,
                 encryptedApplicationKey(recoveryKey, applicationKeyBytes));
 
         Map<String, byte[]> recoveredKeys = mRecoverableKeyStoreManager.recoverKeys(

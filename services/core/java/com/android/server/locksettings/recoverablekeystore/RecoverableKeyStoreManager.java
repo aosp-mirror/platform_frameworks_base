@@ -466,7 +466,7 @@ public class RecoverableKeyStoreManager {
             @NonNull List<KeyEntryRecoveryData> applicationKeys) throws RemoteException {
         HashMap<String, byte[]> keyMaterialByAlias = new HashMap<>();
         for (KeyEntryRecoveryData applicationKey : applicationKeys) {
-            String alias = new String(applicationKey.getAlias(), StandardCharsets.UTF_8);
+            String alias = applicationKey.getAlias();
             byte[] encryptedKeyMaterial = applicationKey.getEncryptedKeyMaterial();
 
             try {
