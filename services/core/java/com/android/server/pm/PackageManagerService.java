@@ -337,6 +337,7 @@ import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.security.PublicKey;
 import java.security.SecureRandom;
+import java.security.cert.Certificate;
 import java.security.cert.CertificateException;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -5359,7 +5360,7 @@ public class PackageManagerService extends IPackageManager.Stub
                     || filterAppAccessLPr(ps2, callingUid, callingUserId)) {
                 return PackageManager.SIGNATURE_UNKNOWN_PACKAGE;
             }
-            return compareSignatures(p1.mSigningDetails.signatures, p2.mSigningDetails.signatures);
+            return compareSignatures(p1.mSignatures, p2.mSignatures);
         }
     }
 
@@ -8193,11 +8194,19 @@ public class PackageManagerService extends IPackageManager.Stub
                 && ps.timeStamp == lastModifiedTime
                 && !isCompatSignatureUpdateNeeded(pkg)
                 && !isRecoverSignatureUpdateNeeded(pkg)) {
-            if ((ps.pkg != null) &&
-                    PackageParser.SigningDetails.UNKNOWN != ps.pkg.mSigningDetails) {
-                // Optimization: reuse the existing cached signing data
+            long mSigningKeySetId = ps.keySetData.getProperSigningKeySet();
+            final KeySetManagerService ksms = mSettings.mKeySetManagerService;
+            ArraySet<PublicKey> signingKs;
+            synchronized (mPackages) {
+                signingKs = ksms.getPublicKeysFromKeySetLPr(mSigningKeySetId);
+            }
+            if (ps.signatures.mSignatures != null
+                    && ps.signatures.mSignatures.length != 0
+                    && signingKs != null) {
+                // Optimization: reuse the existing cached certificates
                 // if the package appears to be unchanged.
-                pkg.mSigningDetails = ps.pkg.mSigningDetails;
+                pkg.mSignatures = ps.signatures.mSignatures;
+                pkg.mSigningKeys = signingKs;
                 return;
             }
 
@@ -8537,7 +8546,7 @@ public class PackageManagerService extends IPackageManager.Stub
              * Check to make sure the signatures match first. If they don't,
              * wipe the installed application and its data.
              */
-            if (compareSignatures(ps.signatures.mSignatures, pkg.mSigningDetails.signatures)
+            if (compareSignatures(ps.signatures.mSignatures, pkg.mSignatures)
                     != PackageManager.SIGNATURE_MATCH) {
                 logCriticalInfo(Log.WARN, "Package " + ps.name + " appeared on system, but"
                         + " signatures don't match existing userdata copy; removing");
@@ -9509,10 +9518,9 @@ public class PackageManagerService extends IPackageManager.Stub
                     final String[] expectedCertDigests = requiredCertDigests[i];
                     // For apps targeting O MR1 we require explicit enumeration of all certs.
                     final String[] libCertDigests = (targetSdk > Build.VERSION_CODES.O)
-                            ? PackageUtils.computeSignaturesSha256Digests(
-                            libPkg.mSigningDetails.signatures)
+                            ? PackageUtils.computeSignaturesSha256Digests(libPkg.mSignatures)
                             : PackageUtils.computeSignaturesSha256Digests(
-                                    new Signature[]{libPkg.mSigningDetails.signatures[0]});
+                                    new Signature[]{libPkg.mSignatures[0]});
 
                     // Take a shortcut if sizes don't match. Note that if an app doesn't
                     // target O we don't parse the "additional-certificate" tags similarly
@@ -9848,14 +9856,14 @@ public class PackageManagerService extends IPackageManager.Stub
             if (ksms.checkUpgradeKeySetLocked(signatureCheckPs, pkg)) {
                 // We just determined the app is signed correctly, so bring
                 // over the latest parsed certs.
-                pkgSetting.signatures.mSignatures = pkg.mSigningDetails.signatures;
+                pkgSetting.signatures.mSignatures = pkg.mSignatures;
             } else {
                 if ((parseFlags & PackageParser.PARSE_IS_SYSTEM_DIR) == 0) {
                     throw new PackageManagerException(INSTALL_FAILED_UPDATE_INCOMPATIBLE,
                             "Package " + pkg.packageName + " upgrade keys do not match the "
                                     + "previously installed version");
                 } else {
-                    pkgSetting.signatures.mSignatures = pkg.mSigningDetails.signatures;
+                    pkgSetting.signatures.mSignatures = pkg.mSignatures;
                     String msg = "System package " + pkg.packageName
                             + " signature changed; retaining data.";
                     reportSettingsProblem(Log.WARN, msg);
@@ -9865,8 +9873,7 @@ public class PackageManagerService extends IPackageManager.Stub
             try {
                 final boolean compareCompat = isCompatSignatureUpdateNeeded(pkg);
                 final boolean compareRecover = isRecoverSignatureUpdateNeeded(pkg);
-                final boolean compatMatch = verifySignatures(signatureCheckPs,
-                        pkg.mSigningDetails.signatures,
+                final boolean compatMatch = verifySignatures(signatureCheckPs, pkg.mSignatures,
                         compareCompat, compareRecover);
                 // The new KeySets will be re-added later in the scanning process.
                 if (compatMatch) {
@@ -9876,14 +9883,14 @@ public class PackageManagerService extends IPackageManager.Stub
                 }
                 // We just determined the app is signed correctly, so bring
                 // over the latest parsed certs.
-                pkgSetting.signatures.mSignatures = pkg.mSigningDetails.signatures;
+                pkgSetting.signatures.mSignatures = pkg.mSignatures;
             } catch (PackageManagerException e) {
                 if ((parseFlags & PackageParser.PARSE_IS_SYSTEM_DIR) == 0) {
                     throw e;
                 }
                 // The signature has changed, but this package is in the system
                 // image...  let's recover!
-                pkgSetting.signatures.mSignatures = pkg.mSigningDetails.signatures;
+                pkgSetting.signatures.mSignatures = pkg.mSignatures;
                 // However...  if this package is part of a shared user, but it
                 // doesn't match the signature of the shared user, let's fail.
                 // What this means is that you can't change the signatures
@@ -9891,7 +9898,7 @@ public class PackageManagerService extends IPackageManager.Stub
                 // that unreasonable.
                 if (signatureCheckPs.sharedUser != null) {
                     if (compareSignatures(signatureCheckPs.sharedUser.signatures.mSignatures,
-                            pkg.mSigningDetails.signatures) != PackageManager.SIGNATURE_MATCH) {
+                            pkg.mSignatures) != PackageManager.SIGNATURE_MATCH) {
                         throw new PackageManagerException(
                                 INSTALL_PARSE_FAILED_INCONSISTENT_CERTIFICATES,
                                 "Signature mismatch for shared user: "
@@ -13197,7 +13204,7 @@ public class PackageManagerService extends IPackageManager.Stub
     void installStage(String packageName, File stagedDir,
             IPackageInstallObserver2 observer, PackageInstaller.SessionParams sessionParams,
             String installerPackageName, int installerUid, UserHandle user,
-            PackageParser.SigningDetails signingDetails) {
+            Certificate[][] certificates) {
         if (DEBUG_EPHEMERAL) {
             if ((sessionParams.installFlags & PackageManager.INSTALL_INSTANT_APP) != 0) {
                 Slog.d(TAG, "Ephemeral install of " + packageName);
@@ -13215,7 +13222,7 @@ public class PackageManagerService extends IPackageManager.Stub
         final InstallParams params = new InstallParams(origin, null, observer,
                 sessionParams.installFlags, installerPackageName, sessionParams.volumeUuid,
                 verificationInfo, user, sessionParams.abiOverride,
-                sessionParams.grantedRuntimePermissions, signingDetails, installReason);
+                sessionParams.grantedRuntimePermissions, certificates, installReason);
         params.setTraceMethod("installStage").setTraceCookie(System.identityHashCode(params));
         msg.obj = params;
 
@@ -13819,7 +13826,7 @@ public class PackageManagerService extends IPackageManager.Stub
             final PackageParser.Package pkg = mPackages.get(verifierInfo.packageName);
             if (pkg == null) {
                 return -1;
-            } else if (pkg.mSigningDetails.signatures.length != 1) {
+            } else if (pkg.mSignatures.length != 1) {
                 Slog.i(TAG, "Verifier package " + verifierInfo.packageName
                         + " has more than one signature; ignoring");
                 return -1;
@@ -13833,7 +13840,7 @@ public class PackageManagerService extends IPackageManager.Stub
 
             final byte[] expectedPublicKey;
             try {
-                final Signature verifierSig = pkg.mSigningDetails.signatures[0];
+                final Signature verifierSig = pkg.mSignatures[0];
                 final PublicKey publicKey = verifierSig.getPublicKey();
                 expectedPublicKey = publicKey.getEncoded();
             } catch (CertificateException e) {
@@ -14525,13 +14532,13 @@ public class PackageManagerService extends IPackageManager.Stub
         final String packageAbiOverride;
         final String[] grantedRuntimePermissions;
         final VerificationInfo verificationInfo;
-        final PackageParser.SigningDetails signingDetails;
+        final Certificate[][] certificates;
         final int installReason;
 
         InstallParams(OriginInfo origin, MoveInfo move, IPackageInstallObserver2 observer,
                 int installFlags, String installerPackageName, String volumeUuid,
                 VerificationInfo verificationInfo, UserHandle user, String packageAbiOverride,
-                String[] grantedPermissions, PackageParser.SigningDetails signingDetails, int installReason) {
+                String[] grantedPermissions, Certificate[][] certificates, int installReason) {
             super(user);
             this.origin = origin;
             this.move = move;
@@ -14542,7 +14549,7 @@ public class PackageManagerService extends IPackageManager.Stub
             this.verificationInfo = verificationInfo;
             this.packageAbiOverride = packageAbiOverride;
             this.grantedRuntimePermissions = grantedPermissions;
-            this.signingDetails = signingDetails;
+            this.certificates = certificates;
             this.installReason = installReason;
         }
 
@@ -14973,7 +14980,7 @@ public class PackageManagerService extends IPackageManager.Stub
         /** If non-null, drop an async trace when the install completes */
         final String traceMethod;
         final int traceCookie;
-        final PackageParser.SigningDetails signingDetails;
+        final Certificate[][] certificates;
         final int installReason;
 
         // The list of instruction sets supported by this app. This is currently
@@ -14985,7 +14992,7 @@ public class PackageManagerService extends IPackageManager.Stub
                 int installFlags, String installerPackageName, String volumeUuid,
                 UserHandle user, String[] instructionSets,
                 String abiOverride, String[] installGrantPermissions,
-                String traceMethod, int traceCookie, PackageParser.SigningDetails signingDetails,
+                String traceMethod, int traceCookie, Certificate[][] certificates,
                 int installReason) {
             this.origin = origin;
             this.move = move;
@@ -14999,7 +15006,7 @@ public class PackageManagerService extends IPackageManager.Stub
             this.installGrantPermissions = installGrantPermissions;
             this.traceMethod = traceMethod;
             this.traceCookie = traceCookie;
-            this.signingDetails = signingDetails;
+            this.certificates = certificates;
             this.installReason = installReason;
         }
 
@@ -15095,7 +15102,7 @@ public class PackageManagerService extends IPackageManager.Stub
                     params.installerPackageName, params.volumeUuid,
                     params.getUser(), null /*instructionSets*/, params.packageAbiOverride,
                     params.grantedRuntimePermissions,
-                    params.traceMethod, params.traceCookie, params.signingDetails,
+                    params.traceMethod, params.traceCookie, params.certificates,
                     params.installReason);
             if (isFwdLocked()) {
                 throw new IllegalArgumentException("Forward locking only supported in ASEC");
@@ -15105,7 +15112,7 @@ public class PackageManagerService extends IPackageManager.Stub
         /** Existing install */
         FileInstallArgs(String codePath, String resourcePath, String[] instructionSets) {
             super(OriginInfo.fromNothing(), null, null, 0, null, null, null, instructionSets,
-                    null, null, null, 0, PackageParser.SigningDetails.UNKNOWN,
+                    null, null, null, 0, null /*certificates*/,
                     PackageManager.INSTALL_REASON_UNKNOWN);
             this.codeFile = (codePath != null) ? new File(codePath) : null;
             this.resourceFile = (resourcePath != null) ? new File(resourcePath) : null;
@@ -15326,7 +15333,7 @@ public class PackageManagerService extends IPackageManager.Stub
                     params.installerPackageName, params.volumeUuid,
                     params.getUser(), null /* instruction sets */, params.packageAbiOverride,
                     params.grantedRuntimePermissions,
-                    params.traceMethod, params.traceCookie, params.signingDetails,
+                    params.traceMethod, params.traceCookie, params.certificates,
                     params.installReason);
         }
 
@@ -15665,8 +15672,7 @@ public class PackageManagerService extends IPackageManager.Stub
                 }
             } else {
                 // default to original signature matching
-                if (compareSignatures(oldPackage.mSigningDetails.signatures,
-                        pkg.mSigningDetails.signatures)
+                if (compareSignatures(oldPackage.mSignatures, pkg.mSignatures)
                         != PackageManager.SIGNATURE_MATCH) {
                     res.setError(INSTALL_FAILED_UPDATE_INCOMPATIBLE,
                             "New package has a different signature: " + pkgName);
@@ -16478,8 +16484,14 @@ public class PackageManagerService extends IPackageManager.Stub
 
         try {
             // either use what we've been given or parse directly from the APK
-            if (args.signingDetails != PackageParser.SigningDetails.UNKNOWN) {
-                pkg.setSigningDetails(args.signingDetails);
+            if (args.certificates != null) {
+                try {
+                    PackageParser.populateCertificates(pkg, args.certificates);
+                } catch (PackageParserException e) {
+                    // there was something wrong with the certificates we were given;
+                    // try to pull them from the APK
+                    PackageParser.collectCertificates(pkg, parseFlags);
+                }
             } else {
                 PackageParser.collectCertificates(pkg, parseFlags);
             }
@@ -16598,8 +16610,7 @@ public class PackageManagerService extends IPackageManager.Stub
                         final boolean compareCompat = isCompatSignatureUpdateNeeded(pkg);
                         final boolean compareRecover = isRecoverSignatureUpdateNeeded(pkg);
                         final boolean compatMatch = verifySignatures(
-                                signatureCheckPs, pkg.mSigningDetails.signatures, compareCompat,
-                                compareRecover);
+                                signatureCheckPs, pkg.mSignatures, compareCompat, compareRecover);
                         // The new KeySets will be re-added later in the scanning process.
                         if (compatMatch) {
                             synchronized (mPackages) {
@@ -16650,7 +16661,7 @@ public class PackageManagerService extends IPackageManager.Stub
                         sigsOk = ksms.checkUpgradeKeySetLocked(sourcePackageSetting, pkg);
                     } else {
                         sigsOk = compareSignatures(sourcePackageSetting.signatures.mSignatures,
-                                pkg.mSigningDetails.signatures) == PackageManager.SIGNATURE_MATCH;
+                                pkg.mSignatures) == PackageManager.SIGNATURE_MATCH;
                     }
                     if (!sigsOk) {
                         // If the owning package is the system itself, we log but allow
@@ -16926,8 +16937,7 @@ public class PackageManagerService extends IPackageManager.Stub
                 for (ActivityIntentInfo filter : a.intents) {
                     if (filter.needsVerification() && needsNetworkVerificationLPr(filter)) {
                         if (DEBUG_DOMAIN_VERIFICATION) {
-                            Slog.d(TAG,
-                                    "Intent filter needs verification, so processing all filters");
+                            Slog.d(TAG, "Intent filter needs verification, so processing all filters");
                         }
                         needToVerify = true;
                         break;
@@ -22235,8 +22245,8 @@ Slog.v(TAG, ":: stepped forward, applying functor at tag " + parser.getName());
         final OriginInfo origin = OriginInfo.fromExistingFile(codeFile);
         final InstallParams params = new InstallParams(origin, move, installObserver, installFlags,
                 installerPackageName, volumeUuid, null /*verificationInfo*/, user,
-                packageAbiOverride, null /*grantedPermissions*/,
-                PackageParser.SigningDetails.UNKNOWN, PackageManager.INSTALL_REASON_UNKNOWN);
+                packageAbiOverride, null /*grantedPermissions*/, null /*certificates*/,
+                PackageManager.INSTALL_REASON_UNKNOWN);
         params.setTraceMethod("movePackage").setTraceCookie(System.identityHashCode(params));
         msg.obj = params;
 

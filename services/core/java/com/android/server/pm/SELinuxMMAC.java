@@ -17,6 +17,8 @@
 package com.android.server.pm;
 
 import android.content.pm.PackageParser;
+import android.content.pm.PackageUserState;
+import android.content.pm.SELinuxUtil;
 import android.content.pm.Signature;
 import android.os.Environment;
 import android.util.Slog;
@@ -451,7 +453,7 @@ final class Policy {
     public String getMatchedSeInfo(PackageParser.Package pkg) {
         // Check for exact signature matches across all certs.
         Signature[] certs = mCerts.toArray(new Signature[0]);
-        if (!Signature.areExactMatch(certs, pkg.mSigningDetails.signatures)) {
+        if (!Signature.areExactMatch(certs, pkg.mSignatures)) {
             return null;
         }
 

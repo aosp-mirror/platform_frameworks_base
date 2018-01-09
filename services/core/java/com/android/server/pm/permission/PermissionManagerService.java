@@ -29,6 +29,7 @@ import static android.os.Trace.TRACE_TAG_PACKAGE_MANAGER;
 import android.Manifest;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.app.AppOpsManager;
 import android.content.Context;
 import android.content.pm.PackageManager;
 import android.content.pm.PackageManagerInternal;
@@ -55,17 +56,21 @@ import android.util.Log;
 import android.util.Slog;
 import android.util.SparseArray;
 
+import com.android.internal.R;
 import com.android.internal.annotations.GuardedBy;
 import com.android.internal.logging.MetricsLogger;
 import com.android.internal.logging.nano.MetricsProto.MetricsEvent;
 import com.android.internal.os.RoSystemProperties;
 import com.android.internal.util.ArrayUtils;
+import com.android.server.FgThread;
 import com.android.server.LocalServices;
 import com.android.server.ServiceThread;
 import com.android.server.SystemConfig;
 import com.android.server.Watchdog;
+import com.android.server.pm.PackageManagerService;
 import com.android.server.pm.PackageManagerServiceUtils;
 import com.android.server.pm.PackageSetting;
+import com.android.server.pm.ProcessLoggingHandler;
 import com.android.server.pm.SharedUserSetting;
 import com.android.server.pm.UserManagerService;
 import com.android.server.pm.permission.DefaultPermissionGrantPolicy.DefaultPermissionGrantedCallback;
@@ -1010,10 +1015,10 @@ Slog.e(TAG, "TODD: Packages: " + Arrays.toString(packages));
         final PackageParser.Package systemPackage =
                 mPackageManagerInt.getPackage(systemPackageName);
         boolean allowed = (PackageManagerServiceUtils.compareSignatures(
-                                bp.getSourceSignatures(), pkg.mSigningDetails.signatures)
+                                bp.getSourceSignatures(), pkg.mSignatures)
                         == PackageManager.SIGNATURE_MATCH)
                 || (PackageManagerServiceUtils.compareSignatures(
-                systemPackage.mSigningDetails.signatures, pkg.mSigningDetails.signatures)
+                                systemPackage.mSignatures, pkg.mSignatures)
                         == PackageManager.SIGNATURE_MATCH);
         if (!allowed && (privilegedPermission || oemPermission)) {
             if (pkg.isSystem()) {
