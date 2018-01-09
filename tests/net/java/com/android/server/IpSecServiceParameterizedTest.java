@@ -348,64 +348,6 @@ public class IpSecServiceParameterizedTest {
     }
 
     @Test
-    public void testCreateInvalidConfigAeadWithAuth() throws Exception {
-        IpSecConfig ipSecConfig = new IpSecConfig();
-        addDefaultSpisAndRemoteAddrToIpSecConfig(ipSecConfig);
-
-        for (int direction : DIRECTIONS) {
-            ipSecConfig.setAuthentication(direction, AUTH_ALGO);
-            ipSecConfig.setAuthenticatedEncryption(direction, AEAD_ALGO);
-        }
-
-        try {
-            mIpSecService.createTransportModeTransform(ipSecConfig, new Binder());
-            fail(
-                    "IpSecService should have thrown an error on authentication being"
-                            + " enabled with authenticated encryption");
-        } catch (IllegalArgumentException expected) {
-        }
-    }
-
-    @Test
-    public void testCreateInvalidConfigAeadWithCrypt() throws Exception {
-        IpSecConfig ipSecConfig = new IpSecConfig();
-        addDefaultSpisAndRemoteAddrToIpSecConfig(ipSecConfig);
-
-        for (int direction : DIRECTIONS) {
-            ipSecConfig.setEncryption(direction, CRYPT_ALGO);
-            ipSecConfig.setAuthenticatedEncryption(direction, AEAD_ALGO);
-        }
-
-        try {
-            mIpSecService.createTransportModeTransform(ipSecConfig, new Binder());
-            fail(
-                    "IpSecService should have thrown an error on encryption being"
-                            + " enabled with authenticated encryption");
-        } catch (IllegalArgumentException expected) {
-        }
-    }
-
-    @Test
-    public void testCreateInvalidConfigAeadWithAuthAndCrypt() throws Exception {
-        IpSecConfig ipSecConfig = new IpSecConfig();
-        addDefaultSpisAndRemoteAddrToIpSecConfig(ipSecConfig);
-
-        for (int direction : DIRECTIONS) {
-            ipSecConfig.setAuthentication(direction, AUTH_ALGO);
-            ipSecConfig.setEncryption(direction, CRYPT_ALGO);
-            ipSecConfig.setAuthenticatedEncryption(direction, AEAD_ALGO);
-        }
-
-        try {
-            mIpSecService.createTransportModeTransform(ipSecConfig, new Binder());
-            fail(
-                    "IpSecService should have thrown an error on authentication and encryption being"
-                            + " enabled with authenticated encryption");
-        } catch (IllegalArgumentException expected) {
-        }
-    }
-
-    @Test
     public void testDeleteTransportModeTransform() throws Exception {
         IpSecConfig ipSecConfig = new IpSecConfig();
         addDefaultSpisAndRemoteAddrToIpSecConfig(ipSecConfig);
