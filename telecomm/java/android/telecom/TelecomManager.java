@@ -645,7 +645,6 @@ public class TelecomManager {
             mContext = context;
         }
         mTelecomServiceOverride = telecomServiceImpl;
-        android.telecom.Log.initMd5Sum();
     }
 
     /**
