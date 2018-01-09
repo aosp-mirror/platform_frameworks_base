@@ -34,6 +34,7 @@ import android.animation.ValueAnimator;
 import android.graphics.Matrix;
 import android.graphics.Point;
 import android.platform.test.annotations.Presubmit;
+import android.support.test.filters.FlakyTest;
 import android.support.test.filters.SmallTest;
 import android.support.test.runner.AndroidJUnit4;
 import android.view.Choreographer;
@@ -135,6 +136,7 @@ public class SurfaceAnimationRunnerTest extends WindowTestsBase {
         assertFinishCallbackNotCalled();
     }
 
+    @FlakyTest(bugId = 71719744)
     @Test
     public void testCancel_sneakyCancelBeforeUpdate() throws Exception {
         mSurfaceAnimationRunner = new SurfaceAnimationRunner(null, () -> new ValueAnimator() {
