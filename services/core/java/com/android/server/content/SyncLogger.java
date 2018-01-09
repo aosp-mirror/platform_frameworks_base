@@ -233,12 +233,7 @@ public class SyncLogger {
 
         @Override
         public String jobParametersToString(JobParameters params) {
-            if (params == null) {
-                return "job:null";
-            } else {
-                return "job:#" + params.getJobId() + ":"
-                        + SyncOperation.maybeCreateFromJobExtras(params.getExtras());
-            }
+            return SyncJobService.jobParametersToString(params);
         }
 
         @Override
