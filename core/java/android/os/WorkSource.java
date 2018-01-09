@@ -7,7 +7,6 @@ import android.util.proto.ProtoOutputStream;
 
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Objects;
 
 /**
  * Describes the source of some work that may be done by someone else.
@@ -162,9 +161,21 @@ public class WorkSource implements Parcelable {
 
     @Override
     public boolean equals(Object o) {
-        return o instanceof WorkSource
-            && !diff((WorkSource) o)
-            && Objects.equals(mChains, ((WorkSource) o).mChains);
+        if (o instanceof WorkSource) {
+            WorkSource other = (WorkSource) o;
+
+            if (diff(other)) {
+                return false;
+            }
+
+            if (mChains != null && !mChains.isEmpty()) {
+                return mChains.equals(other.mChains);
+            } else {
+                return other.mChains == null || other.mChains.isEmpty();
+            }
+        }
+
+        return false;
     }
 
     @Override

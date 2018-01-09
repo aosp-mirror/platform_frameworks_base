@@ -128,6 +128,23 @@ public class WorkSourceTest extends TestCase {
         assertFalse(ws3.equals(ws1));
     }
 
+    public void testEquals_workChains_nullEmptyAreEquivalent() {
+        // Construct a WorkSource that has no WorkChains, but whose workChains list
+        // is non-null.
+        WorkSource ws1 = new WorkSource();
+        ws1.add(100);
+        ws1.createWorkChain().addNode(100, null);
+        ws1.getWorkChains().clear();
+
+        WorkSource ws2 = new WorkSource();
+        ws2.add(100);
+
+        assertEquals(ws1, ws2);
+
+        ws2.createWorkChain().addNode(100, null);
+        assertFalse(ws1.equals(ws2));
+    }
+
     public void testWorkSourceParcelling() {
         WorkSource ws = new WorkSource();
 
