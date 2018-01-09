@@ -25,6 +25,7 @@ import static org.mockito.Mockito.when;
 
 import android.accounts.Account;
 import android.accounts.AccountManager;
+import android.app.ActivityManagerInternal;
 import android.app.AlarmManager;
 import android.app.IActivityManager;
 import android.app.NotificationManager;
@@ -84,6 +85,7 @@ public class MockSystemServices {
     public final IIpConnectivityMetrics iipConnectivityMetrics;
     public final IWindowManager iwindowManager;
     public final IActivityManager iactivityManager;
+    public ActivityManagerInternal activityManagerInternal;
     public final IPackageManager ipackageManager;
     public final IBackupManager ibackupManager;
     public final IAudioService iaudioService;
@@ -120,6 +122,7 @@ public class MockSystemServices {
         iipConnectivityMetrics = mock(IIpConnectivityMetrics.class);
         iwindowManager = mock(IWindowManager.class);
         iactivityManager = mock(IActivityManager.class);
+        activityManagerInternal = mock(ActivityManagerInternal.class);
         ipackageManager = mock(IPackageManager.class);
         ibackupManager = mock(IBackupManager.class);
         iaudioService = mock(IAudioService.class);

@@ -6479,12 +6479,6 @@ public class DevicePolicyManager {
     public static final int MAKE_USER_DEMO = 0x0004;
 
     /**
-     * Flag used by {@link #createAndManageUser} to specify that the newly created user should be
-     * started in the background as part of the user creation.
-     */
-    public static final int START_USER_IN_BACKGROUND = 0x0008;
-
-    /**
      * Flag used by {@link #createAndManageUser} to specify that the newly created user should skip
      * the disabling of system apps during provisioning.
      */
@@ -6497,7 +6491,6 @@ public class DevicePolicyManager {
             SKIP_SETUP_WIZARD,
             MAKE_USER_EPHEMERAL,
             MAKE_USER_DEMO,
-            START_USER_IN_BACKGROUND,
             LEAVE_ALL_SYSTEM_APPS_ENABLED
     })
     @Retention(RetentionPolicy.SOURCE)
@@ -6526,7 +6519,8 @@ public class DevicePolicyManager {
      *            IllegalArgumentException is thrown.
      * @param adminExtras Extras that will be passed to onEnable of the admin receiver on the new
      *            user.
-     * @param flags {@link #SKIP_SETUP_WIZARD} is supported.
+     * @param flags {@link #SKIP_SETUP_WIZARD}, {@link #MAKE_USER_EPHEMERAL} and
+     *        {@link #LEAVE_ALL_SYSTEM_APPS_ENABLED} are supported.
      * @see UserHandle
      * @return the {@link android.os.UserHandle} object for the created user, or {@code null} if the
      *         user could not be created.
@@ -6545,8 +6539,8 @@ public class DevicePolicyManager {
     }
 
     /**
-     * Called by a device owner to remove a user and all associated data. The primary user can not
-     * be removed.
+     * Called by a device owner to remove a user/profile and all associated data. The primary user
+     * can not be removed.
      *
      * @param admin Which {@link DeviceAdminReceiver} this request is associated with.
      * @param userHandle the user to remove.
@@ -6563,14 +6557,14 @@ public class DevicePolicyManager {
     }
 
     /**
-     * Called by a device owner to switch the specified user to the foreground.
-     * <p> This cannot be used to switch to a managed profile.
+     * Called by a device owner to switch the specified secondary user to the foreground.
      *
      * @param admin Which {@link DeviceAdminReceiver} this request is associated with.
      * @param userHandle the user to switch to; null will switch to primary.
      * @return {@code true} if the switch was successful, {@code false} otherwise.
      * @throws SecurityException if {@code admin} is not a device owner.
      * @see Intent#ACTION_USER_FOREGROUND
+     * @see #getSecondaryUsers(ComponentName)
      */
     public boolean switchUser(@NonNull ComponentName admin, @Nullable UserHandle userHandle) {
         throwIfParentInstance("switchUser");
@@ -6582,13 +6576,32 @@ public class DevicePolicyManager {
     }
 
     /**
+     * Called by a device owner to start the specified secondary user in background.
+     *
+     * @param admin Which {@link DeviceAdminReceiver} this request is associated with.
+     * @param userHandle the user to be stopped.
+     * @return {@code true} if the user can be started, {@code false} otherwise.
+     * @throws SecurityException if {@code admin} is not a device owner.
+     * @see #getSecondaryUsers(ComponentName)
+     */
+    public boolean startUserInBackground(
+            @NonNull ComponentName admin, @NonNull UserHandle userHandle) {
+        throwIfParentInstance("startUserInBackground");
+        try {
+            return mService.startUserInBackground(admin, userHandle);
+        } catch (RemoteException re) {
+            throw re.rethrowFromSystemServer();
+        }
+    }
+
+    /**
      * Called by a device owner to stop the specified secondary user.
-     * <p> This cannot be used to stop the primary user or a managed profile.
      *
      * @param admin Which {@link DeviceAdminReceiver} this request is associated with.
      * @param userHandle the user to be stopped.
      * @return {@code true} if the user can be stopped, {@code false} otherwise.
      * @throws SecurityException if {@code admin} is not a device owner.
+     * @see #getSecondaryUsers(ComponentName)
      */
     public boolean stopUser(@NonNull ComponentName admin, @NonNull UserHandle userHandle) {
         throwIfParentInstance("stopUser");
@@ -6600,14 +6613,13 @@ public class DevicePolicyManager {
     }
 
     /**
-     * Called by a profile owner that is affiliated with the device to stop the calling user
-     * and switch back to primary.
-     * <p> This has no effect when called on a managed profile.
+     * Called by a profile owner of secondary user that is affiliated with the device to stop the
+     * calling user and switch back to primary.
      *
      * @param admin Which {@link DeviceAdminReceiver} this request is associated with.
      * @return {@code true} if the exit was successful, {@code false} otherwise.
      * @throws SecurityException if {@code admin} is not a profile owner affiliated with the device.
-     * @see #isAffiliatedUser
+     * @see #getSecondaryUsers(ComponentName)
      */
     public boolean logoutUser(@NonNull ComponentName admin) {
         throwIfParentInstance("logoutUser");
@@ -6619,17 +6631,18 @@ public class DevicePolicyManager {
     }
 
     /**
-     * Called by a device owner to list all secondary users on the device, excluding managed
-     * profiles.
+     * Called by a device owner to list all secondary users on the device. Managed profiles are not
+     * considered as secondary users.
      * <p> Used for various user management APIs, including {@link #switchUser}, {@link #removeUser}
      * and {@link #stopUser}.
      *
      * @param admin Which {@link DeviceAdminReceiver} this request is associated with.
      * @return list of other {@link UserHandle}s on the device.
      * @throws SecurityException if {@code admin} is not a device owner.
-     * @see #switchUser
-     * @see #removeUser
-     * @see #stopUser
+     * @see #removeUser(ComponentName, UserHandle)
+     * @see #switchUser(ComponentName, UserHandle)
+     * @see #startUserInBackground(ComponentName, UserHandle)
+     * @see #stopUser(ComponentName, UserHandle)
      */
     public List<UserHandle> getSecondaryUsers(@NonNull ComponentName admin) {
         throwIfParentInstance("getSecondaryUsers");
