@@ -24,8 +24,6 @@ import android.app.KeyguardManager;
 import android.app.ProgressDialog;
 import android.app.WallpaperColors;
 import android.app.WallpaperManager;
-import android.bluetooth.BluetoothAdapter;
-import android.bluetooth.IBluetoothManager;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.DialogInterface;
@@ -120,7 +118,6 @@ public final class ShutdownThread extends Thread {
     private static String METRIC_AM = "shutdown_activity_manager";
     private static String METRIC_PM = "shutdown_package_manager";
     private static String METRIC_RADIOS = "shutdown_radios";
-    private static String METRIC_BT = "shutdown_bt";
     private static String METRIC_RADIO = "shutdown_radio";
     private static String METRIC_SM = "shutdown_storage_manager";
 
@@ -415,7 +412,7 @@ public final class ShutdownThread extends Thread {
 
     /**
      * Makes sure we handle the shutdown gracefully.
-     * Shuts off power regardless of radio and bluetooth state if the alloted time has passed.
+     * Shuts off power regardless of radio state if the allotted time has passed.
      */
     public void run() {
         TimingsTraceLog shutdownTimingLog = newTimingsLog();
@@ -627,27 +624,10 @@ public final class ShutdownThread extends Thread {
         Thread t = new Thread() {
             public void run() {
                 TimingsTraceLog shutdownTimingsTraceLog = newTimingsLog();
-                boolean bluetoothReadyForShutdown;
                 boolean radioOff;
 
                 final ITelephony phone =
                         ITelephony.Stub.asInterface(ServiceManager.checkService("phone"));
-                final IBluetoothManager bluetooth =
-                        IBluetoothManager.Stub.asInterface(ServiceManager.checkService(
-                                BluetoothAdapter.BLUETOOTH_MANAGER_SERVICE));
-
-                try {
-                    bluetoothReadyForShutdown = bluetooth == null ||
-                            bluetooth.getState() == BluetoothAdapter.STATE_OFF;
-                    if (!bluetoothReadyForShutdown) {
-                        Log.w(TAG, "Disabling Bluetooth...");
-                        metricStarted(METRIC_BT);
-                        bluetooth.disable(mContext.getPackageName(), false);  // disable but don't persist new state
-                    }
-                } catch (RemoteException ex) {
-                    Log.e(TAG, "RemoteException during bluetooth shutdown", ex);
-                    bluetoothReadyForShutdown = true;
-                }
 
                 try {
                     radioOff = phone == null || !phone.needMobileRadioShutdown();
@@ -661,7 +641,7 @@ public final class ShutdownThread extends Thread {
                     radioOff = true;
                 }
 
-                Log.i(TAG, "Waiting for Bluetooth and Radio...");
+                Log.i(TAG, "Waiting for Radio...");
 
                 long delay = endTime - SystemClock.elapsedRealtime();
                 while (delay > 0) {
@@ -672,25 +652,6 @@ public final class ShutdownThread extends Thread {
                         sInstance.setRebootProgress(status, null);
                     }
 
-                    if (!bluetoothReadyForShutdown) {
-                        try {
-                          // BLE only mode can happen when BT is turned off
-                          // We will continue shutting down in such case
-                          bluetoothReadyForShutdown =
-                                  bluetooth.getState() == BluetoothAdapter.STATE_OFF ||
-                                  bluetooth.getState() == BluetoothAdapter.STATE_BLE_TURNING_OFF ||
-                                  bluetooth.getState() == BluetoothAdapter.STATE_BLE_ON;
-                        } catch (RemoteException ex) {
-                            Log.e(TAG, "RemoteException during bluetooth shutdown", ex);
-                            bluetoothReadyForShutdown = true;
-                        }
-                        if (bluetoothReadyForShutdown) {
-                            Log.i(TAG, "Bluetooth turned off.");
-                            metricEnded(METRIC_BT);
-                            shutdownTimingsTraceLog
-                                    .logDuration("ShutdownBt", TRON_METRICS.get(METRIC_BT));
-                        }
-                    }
                     if (!radioOff) {
                         try {
                             radioOff = !phone.needMobileRadioShutdown();
@@ -706,8 +667,8 @@ public final class ShutdownThread extends Thread {
                         }
                     }
 
-                    if (radioOff && bluetoothReadyForShutdown) {
-                        Log.i(TAG, "Radio and Bluetooth shutdown complete.");
+                    if (radioOff) {
+                        Log.i(TAG, "Radio shutdown complete.");
                         done[0] = true;
                         break;
                     }
@@ -724,7 +685,7 @@ public final class ShutdownThread extends Thread {
         } catch (InterruptedException ex) {
         }
         if (!done[0]) {
-            Log.w(TAG, "Timed out waiting for Radio and Bluetooth shutdown.");
+            Log.w(TAG, "Timed out waiting for Radio shutdown.");
         }
     }
 
