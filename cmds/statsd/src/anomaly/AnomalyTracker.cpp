@@ -19,6 +19,7 @@
 
 #include "AnomalyTracker.h"
 #include "guardrail/StatsdStats.h"
+#include "frameworks/base/libs/incident/proto/android/os/header.pb.h"
 
 #include <android/os/IIncidentManager.h>
 #include <android/os/IncidentReportArgs.h>
@@ -253,10 +254,10 @@ void AnomalyTracker::informSubscribers(const HashableDimensionKey& key) {
             for (const auto section : incidentdSections) {
                 incidentReport.addSection(section);
             }
-            int64_t alertId = mAlert.id();
-            std::vector<uint8_t> header;
-            uint8_t* src = static_cast<uint8_t*>(static_cast<void*>(&alertId));
-            header.insert(header.end(), src, src + sizeof(int64_t));
+            android::os::IncidentHeaderProto header;
+            header.set_alert_id(mAlert.id());
+            header.mutable_config_key()->set_uid(mConfigKey.GetUid());
+            header.mutable_config_key()->set_id(mConfigKey.GetId());
             incidentReport.addHeader(header);
             service->reportIncident(incidentReport);
         } else {

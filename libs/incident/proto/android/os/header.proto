@@ -19,31 +19,22 @@ option java_multiple_files = true;
 
 package android.os;
 
-// IncidentHeaderProto contains extra information the caller of incidentd want to
-// attach in an incident report, the data should just be informative.
+// IncidentHeaderProto contains extra information the caller of incidentd wants
+// to attach in an incident report, the data should just be informative.
 message IncidentHeaderProto {
-
-    // From statsd config, the name of the anomaly, usually human readable.
-    optional string incident_name = 1;
+    // From statsd config, the id of the anomaly alert, unique among alerts.
+    optional int64 alert_id = 1;
 
     // Format a human readable reason why an incident report is requested.
-    // It's optional and may directly come from a user clicking the bug-report button.
+    // It's optional and may directly come from a user input clicking the
+    // bug-report button.
     optional string reason = 2;
 
-    // From statsd, the metric which causes the anomaly triggered.
-    optional string metric_name = 3;
-
-    // From statsd, the metric value exceeds the threshold. This is useful for
-    // ValueMetric and GaugeMetric.
-    oneof metric_value {
-        int64 int64_value = 4;
-        double double_value = 5;
-    }
-
-    // Defines which stats config used to fire the request.
+    // Defines which stats config used to fire the request, incident report will
+    // only be uploaded if this value is given.
     message StatsdConfigKey {
-        optional int32 uid = 1;
-        optional string name = 2;
+      optional int32 uid = 1; // The uid pushes the config to statsd.
+      optional int64 id = 2; // The unique id of the statsd config.
     }
-    optional StatsdConfigKey config_key = 6;
+    optional StatsdConfigKey config_key = 3;
 }

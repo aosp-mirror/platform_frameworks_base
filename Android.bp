@@ -689,7 +689,10 @@ gensrcs {
         "  $(in) " +
         "&& $(location soong_zip) -jar -o $(out) -C $(genDir)/$(in) -D $(genDir)/$(in)",
 
-    srcs: ["core/proto/**/*.proto"],
+    srcs: [
+        "core/proto/**/*.proto",
+        "libs/incident/**/*.proto",
+    ],
     output_extension: "srcjar",
 }
 

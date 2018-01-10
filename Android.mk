@@ -797,7 +797,8 @@ LOCAL_PROTO_JAVA_OUTPUT_PARAMS := \
     store_unknown_fields = true
 LOCAL_JAVA_LIBRARIES := core-oj core-libart
 LOCAL_SRC_FILES := \
-    $(call all-proto-files-under, core/proto)
+    $(call all-proto-files-under, core/proto) \
+    $(call all-proto-files-under, libs/incident/proto/android/os)
 include $(BUILD_STATIC_JAVA_LIBRARY)
 
 
@@ -809,7 +810,8 @@ LOCAL_PROTOC_OPTIMIZE_TYPE := lite
 LOCAL_PROTOC_FLAGS := \
     -Iexternal/protobuf/src
 LOCAL_SRC_FILES := \
-    $(call all-proto-files-under, core/proto)
+    $(call all-proto-files-under, core/proto) \
+    $(call all-proto-files-under, libs/incident/proto/android/os)
 include $(BUILD_STATIC_JAVA_LIBRARY)
 
 # Include subdirectory makefiles
