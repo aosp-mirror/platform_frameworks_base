@@ -14,14 +14,14 @@
  * limitations under the License.
  */
 
-package com.android.server.pm;
+package com.android.server.pm.dex;
 
 import static com.google.common.truth.Truth.assertThat;
 
 import android.content.Context;
 import android.support.test.InstrumentationRegistry;
+import android.support.test.filters.LargeTest;
 import android.util.EventLog;
-
 import dalvik.system.DexClassLoader;
 
 import org.junit.After;
@@ -54,6 +54,7 @@ import java.util.List;
  *
  * Run with "atest DexLoggerIntegrationTests".
  */
+@LargeTest
 @RunWith(JUnit4.class)
 public final class DexLoggerIntegrationTests {
 
