@@ -35,24 +35,23 @@ import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.Mockito.any;
 import static org.mockito.Mockito.anyInt;
-import static org.mockito.Mockito.atLeast;
+import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.eq;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
-
 import android.app.servertransaction.ClientTransaction;
 import android.app.servertransaction.PauseActivityItem;
 import android.graphics.Rect;
 import android.platform.test.annotations.Presubmit;
 import android.support.test.filters.MediumTest;
 import android.support.test.runner.AndroidJUnit4;
+import android.util.MutableBoolean;
 
 import org.junit.runner.RunWith;
 import org.junit.Before;
 import org.junit.Test;
-
-import org.mockito.ArgumentCaptor;
+import org.mockito.invocation.InvocationOnMock;
 
 /**
  * Tests for the {@link ActivityRecord} class.
@@ -110,23 +109,20 @@ public class ActivityRecordTests extends ActivityTestsBase {
 
     @Test
     public void testPausingWhenVisibleFromStopped() throws Exception {
-        mActivity.state = STOPPED;
-        mActivity.makeVisibleIfNeeded(null /* starting */);
-        assertEquals(mActivity.state, PAUSING);
-
-        final ArgumentCaptor<ClientTransaction> transaction =
-                ArgumentCaptor.forClass(ClientTransaction.class);
-        verify(mActivity.app.thread, atLeast(1)).scheduleTransaction(transaction.capture());
-
-        boolean pauseFound = false;
-
-        for (ClientTransaction targetTransaction : transaction.getAllValues()) {
-            if (targetTransaction.getLifecycleStateRequest() instanceof PauseActivityItem) {
-                pauseFound = true;
+        final MutableBoolean pauseFound = new MutableBoolean(false);
+        doAnswer((InvocationOnMock invocationOnMock) -> {
+            final ClientTransaction transaction = invocationOnMock.getArgument(0);
+            if (transaction.getLifecycleStateRequest() instanceof PauseActivityItem) {
+                pauseFound.value = true;
             }
-        }
+            return null;
+        }).when(mActivity.app.thread).scheduleTransaction(any());
+        mActivity.state = STOPPED;
 
-        assertTrue(pauseFound);
+        mActivity.makeVisibleIfNeeded(null /* starting */);
+
+        assertEquals(mActivity.state, PAUSING);
+        assertTrue(pauseFound.value);
     }
 
     @Test
