@@ -17,7 +17,6 @@
 package com.android.internal.os;
 
 import android.os.IVold;
-import android.os.Seccomp;
 import android.os.Trace;
 import android.system.ErrnoException;
 import android.system.Os;
@@ -154,9 +153,6 @@ public final class Zygote {
      */
     public static int forkSystemServer(int uid, int gid, int[] gids, int runtimeFlags,
             int[][] rlimits, long permittedCapabilities, long effectiveCapabilities) {
-        // Set system server specific seccomp policy.
-        Seccomp.setSystemServerPolicy();
-
         VM_HOOKS.preFork();
         // Resets nice priority for zygote process.
         resetNicePriority();
