@@ -112,15 +112,13 @@ public class PhoneWindowManagerTest {
                 null, null, visibleIme, NAV_BAR_BOTTOM));
         assertEquals(visibleIme, PhoneWindowManager.chooseNavigationColorWindowLw(
                 null, dimmingImTarget, visibleIme, NAV_BAR_BOTTOM));
-        // TODO(b/69002467): A dimming window that is shown above the IME window should win.
-        assertEquals(visibleIme, PhoneWindowManager.chooseNavigationColorWindowLw(
+        assertEquals(dimmingNonImTarget, PhoneWindowManager.chooseNavigationColorWindowLw(
                 null, dimmingNonImTarget, visibleIme, NAV_BAR_BOTTOM));
         assertEquals(visibleIme, PhoneWindowManager.chooseNavigationColorWindowLw(
                 opaque, opaque, visibleIme, NAV_BAR_BOTTOM));
         assertEquals(visibleIme, PhoneWindowManager.chooseNavigationColorWindowLw(
                 opaque, dimmingImTarget, visibleIme, NAV_BAR_BOTTOM));
-        // TODO(b/69002467): A dimming window that is shown above the IME window should win.
-        assertEquals(visibleIme, PhoneWindowManager.chooseNavigationColorWindowLw(
+        assertEquals(dimmingNonImTarget, PhoneWindowManager.chooseNavigationColorWindowLw(
                 opaque, dimmingNonImTarget, visibleIme, NAV_BAR_BOTTOM));
 
         assertEquals(opaque, PhoneWindowManager.chooseNavigationColorWindowLw(
@@ -131,15 +129,12 @@ public class PhoneWindowManagerTest {
                 opaque, opaque, visibleIme, NAV_BAR_RIGHT));
 
         // Only IME windows that have FLAG_DRAWS_SYSTEM_BAR_BACKGROUNDS should be navigation color
-        // window, but it's not yet implemented.
-        // TODO(b/69002467): Support this.
-        assertEquals(imeNonDrawNavBar, PhoneWindowManager.chooseNavigationColorWindowLw(
+        // window.
+        assertEquals(opaque, PhoneWindowManager.chooseNavigationColorWindowLw(
                 opaque, opaque, imeNonDrawNavBar, NAV_BAR_BOTTOM));
-        // TODO(b/69002467): Support this.
-        assertEquals(imeNonDrawNavBar, PhoneWindowManager.chooseNavigationColorWindowLw(
+        assertEquals(dimmingImTarget, PhoneWindowManager.chooseNavigationColorWindowLw(
                 opaque, dimmingImTarget, imeNonDrawNavBar, NAV_BAR_BOTTOM));
-        // TODO(b/69002467): Support this.
-        assertEquals(imeNonDrawNavBar, PhoneWindowManager.chooseNavigationColorWindowLw(
+        assertEquals(dimmingNonImTarget, PhoneWindowManager.chooseNavigationColorWindowLw(
                 opaque, dimmingNonImTarget, imeNonDrawNavBar, NAV_BAR_BOTTOM));
     }
 
@@ -194,9 +189,9 @@ public class PhoneWindowManagerTest {
                 SYSTEM_UI_FLAG_LIGHT_NAVIGATION_BAR, opaqueLightNavBar, opaqueLightNavBar,
                 imeDrawDarkNavBar, imeDrawDarkNavBar));
 
-        // Currently SYSTEM_UI_FLAG_LIGHT_NAVIGATION_BAR in IME windows is ignored.
-        // TODO(b/69002467): Support this.
-        assertEquals(0, PhoneWindowManager.updateLightNavigationBarLw(
-                0, opaqueDarkNavBar, opaqueDarkNavBar, imeDrawLightNavBar, imeDrawLightNavBar));
+        // IME window should be able to use SYSTEM_UI_FLAG_LIGHT_NAVIGATION_BAR.
+        assertEquals(SYSTEM_UI_FLAG_LIGHT_NAVIGATION_BAR,
+                PhoneWindowManager.updateLightNavigationBarLw(0, opaqueDarkNavBar,
+                        opaqueDarkNavBar, imeDrawLightNavBar, imeDrawLightNavBar));
     }
 }

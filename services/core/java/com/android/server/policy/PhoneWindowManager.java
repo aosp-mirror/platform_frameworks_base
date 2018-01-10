@@ -7858,9 +7858,39 @@ public class PhoneWindowManager implements WindowManagerPolicy {
     static WindowState chooseNavigationColorWindowLw(WindowState opaque,
             WindowState opaqueOrDimming, WindowState imeWindow,
             @NavigationBarPosition int navBarPosition) {
-        if (imeWindow != null && imeWindow.isVisibleLw() && navBarPosition == NAV_BAR_BOTTOM) {
+        // If the IME window is visible and FLAG_DRAWS_SYSTEM_BAR_BACKGROUNDS is set, then IME
+        // window can be navigation color window.
+        final boolean imeWindowCanNavColorWindow = imeWindow != null
+                && imeWindow.isVisibleLw()
+                && navBarPosition == NAV_BAR_BOTTOM
+                && (PolicyControl.getWindowFlags(imeWindow, null)
+                & WindowManager.LayoutParams.FLAG_DRAWS_SYSTEM_BAR_BACKGROUNDS) != 0;
+
+        if (opaque != null && opaqueOrDimming == opaque) {
+            // If the top fullscreen-or-dimming window is also the top fullscreen, respect it
+            // unless IME window is also eligible, since currently the IME window is always show
+            // above the opaque fullscreen app window, regardless of the IME target window.
+            // TODO(b/31559891): Maybe we need to revisit this condition once b/31559891 is fixed.
+            return imeWindowCanNavColorWindow ? imeWindow : opaque;
+        }
+
+        if (opaqueOrDimming == null || !opaqueOrDimming.isDimming()) {
+            // No dimming window is involved. Determine the result only with the IME window.
+            return imeWindowCanNavColorWindow ? imeWindow : null;
+        }
+
+        if (!imeWindowCanNavColorWindow) {
+            // No IME window is involved. Determine the result only with opaqueOrDimming.
+            return opaqueOrDimming;
+        }
+
+        // The IME window and the dimming window are competing.  Check if the dimming window can be
+        // IME target or not.
+        if (LayoutParams.mayUseInputMethod(PolicyControl.getWindowFlags(opaqueOrDimming, null))) {
+            // The IME window is above the dimming window.
             return imeWindow;
         } else {
+            // The dimming window is above the IME window.
             return opaqueOrDimming;
         }
     }
@@ -7870,15 +7900,13 @@ public class PhoneWindowManager implements WindowManagerPolicy {
             WindowState imeWindow, WindowState navColorWin) {
 
         if (navColorWin != null) {
-            if (navColorWin == opaque) {
-                // If the top fullscreen-or-dimming window is also the top fullscreen, respect
-                // its light flag.
+            if (navColorWin == imeWindow || navColorWin == opaque) {
+                // Respect the light flag.
                 vis &= ~View.SYSTEM_UI_FLAG_LIGHT_NAVIGATION_BAR;
                 vis |= PolicyControl.getSystemUiVisibility(navColorWin, null)
                         & View.SYSTEM_UI_FLAG_LIGHT_NAVIGATION_BAR;
-            } else if ((navColorWin == opaqueOrDimming && navColorWin.isDimming())
-                    || navColorWin == imeWindow) {
-                // Otherwise if it's dimming or it's the IME window, clear the light flag.
+            } else if (navColorWin == opaqueOrDimming && navColorWin.isDimming()) {
+                // Clear the light flag for dimming window.
                 vis &= ~View.SYSTEM_UI_FLAG_LIGHT_NAVIGATION_BAR;
             }
         }
