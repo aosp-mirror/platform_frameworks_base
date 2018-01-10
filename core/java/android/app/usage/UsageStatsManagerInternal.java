@@ -16,6 +16,7 @@
 
 package android.app.usage;
 
+import android.annotation.UserIdInt;
 import android.app.usage.UsageStatsManager.StandbyBuckets;
 import android.content.ComponentName;
 import android.content.res.Configuration;
@@ -37,7 +38,7 @@ public abstract class UsageStatsManagerInternal {
      * @param eventType The event that occurred. Valid values can be found at
      * {@link UsageEvents}
      */
-    public abstract void reportEvent(ComponentName component, int userId, int eventType);
+    public abstract void reportEvent(ComponentName component, @UserIdInt int userId, int eventType);
 
     /**
      * Reports an event to the UsageStatsManager.
@@ -47,14 +48,14 @@ public abstract class UsageStatsManagerInternal {
      * @param eventType The event that occurred. Valid values can be found at
      * {@link UsageEvents}
      */
-    public abstract void reportEvent(String packageName, int userId, int eventType);
+    public abstract void reportEvent(String packageName, @UserIdInt int userId, int eventType);
 
     /**
      * Reports a configuration change to the UsageStatsManager.
      *
      * @param config The new device configuration.
      */
-    public abstract void reportConfigurationChange(Configuration config, int userId);
+    public abstract void reportConfigurationChange(Configuration config, @UserIdInt int userId);
 
     /**
      * Reports that an action equivalent to a ShortcutInfo is taken by the user.
@@ -65,7 +66,8 @@ public abstract class UsageStatsManagerInternal {
      *
      * @see android.content.pm.ShortcutManager#reportShortcutUsed(String)
      */
-    public abstract void reportShortcutUsage(String packageName, String shortcutId, int userId);
+    public abstract void reportShortcutUsage(String packageName, String shortcutId,
+            @UserIdInt int userId);
 
     /**
      * Reports that a content provider has been accessed by a foreground app.
@@ -73,7 +75,8 @@ public abstract class UsageStatsManagerInternal {
      * @param pkgName The package name of the content provider
      * @param userId The user in which the content provider was accessed.
      */
-    public abstract void reportContentProviderUsage(String name, String pkgName, int userId);
+    public abstract void reportContentProviderUsage(String name, String pkgName,
+            @UserIdInt int userId);
 
     /**
      * Prepares the UsageStatsService for shutdown.
@@ -89,7 +92,7 @@ public abstract class UsageStatsManagerInternal {
      * @param userId
      * @return
      */
-    public abstract boolean isAppIdle(String packageName, int uidForAppId, int userId);
+    public abstract boolean isAppIdle(String packageName, int uidForAppId, @UserIdInt int userId);
 
     /**
      * Returns the app standby bucket that the app is currently in.  This accessor does
@@ -101,15 +104,15 @@ public abstract class UsageStatsManagerInternal {
      * @return the AppStandby bucket code the app currently resides in.  If the app is
      *     unknown in the given user, STANDBY_BUCKET_NEVER is returned.
      */
-    @StandbyBuckets public abstract int getAppStandbyBucket(String packageName, int userId,
-            long nowElapsed);
+    @StandbyBuckets public abstract int getAppStandbyBucket(String packageName,
+            @UserIdInt int userId, long nowElapsed);
 
     /**
      * Returns all of the uids for a given user where all packages associating with that uid
      * are in the app idle state -- there are no associated apps that are not idle.  This means
      * all of the returned uids can be safely considered app idle.
      */
-    public abstract int[] getIdleUidsForUser(int userId);
+    public abstract int[] getIdleUidsForUser(@UserIdInt int userId);
 
     /**
      * @return True if currently app idle parole mode is on.  This means all idle apps are allow to
@@ -134,8 +137,8 @@ public abstract class UsageStatsManagerInternal {
     public static abstract class AppIdleStateChangeListener {
 
         /** Callback to inform listeners that the idle state has changed to a new bucket. */
-        public abstract void onAppIdleStateChanged(String packageName, int userId, boolean idle,
-                                                   int bucket);
+        public abstract void onAppIdleStateChanged(String packageName, @UserIdInt int userId,
+                boolean idle, int bucket);
 
         /**
          * Callback to inform listeners that the parole state has changed. This means apps are
@@ -144,10 +147,16 @@ public abstract class UsageStatsManagerInternal {
         public abstract void onParoleStateChanged(boolean isParoleOn);
     }
 
-    /*  Backup/Restore API */
-    public abstract byte[] getBackupPayload(int user, String key);
+    /**  Backup/Restore API */
+    public abstract byte[] getBackupPayload(@UserIdInt int userId, String key);
 
-    public abstract void applyRestoredPayload(int user, String key, byte[] payload);
+    /**
+     * ?
+     * @param userId
+     * @param key
+     * @param payload
+     */
+    public abstract void applyRestoredPayload(@UserIdInt int userId, String key, byte[] payload);
 
     /**
      * Return usage stats.
@@ -155,6 +164,29 @@ public abstract class UsageStatsManagerInternal {
      * @param obfuscateInstantApps whether instant app package names need to be obfuscated in the
      *     result.
      */
-    public abstract List<UsageStats> queryUsageStatsForUser(
-            int userId, int interval, long beginTime, long endTime, boolean obfuscateInstantApps);
+    public abstract List<UsageStats> queryUsageStatsForUser(@UserIdInt int userId, int interval,
+            long beginTime, long endTime, boolean obfuscateInstantApps);
+
+    /**
+     * Used to persist the last time a job was run for this app, in order to make decisions later
+     * whether a job should be deferred until later. The time passed in should be in elapsed
+     * realtime since boot.
+     * @param packageName the app that executed a job.
+     * @param userId the user associated with the job.
+     * @param elapsedRealtime the time when the job was executed, in elapsed realtime millis since
+     *                        boot.
+     */
+    public abstract void setLastJobRunTime(String packageName, @UserIdInt int userId,
+            long elapsedRealtime);
+
+    /**
+     * Returns the time in millis since a job was executed for this app, in elapsed realtime
+     * timebase. This value can be larger than the current elapsed realtime if the job was executed
+     * before the device was rebooted. The default value is {@link Long#MAX_VALUE}.
+     * @param packageName the app you're asking about.
+     * @param userId the user associated with the job.
+     * @return the time in millis since a job was last executed for the app, provided it was
+     * indicated here before by a call to {@link #setLastJobRunTime(String, int, long)}.
+     */
+    public abstract long getTimeSinceLastJobRun(String packageName, @UserIdInt int userId);
 }

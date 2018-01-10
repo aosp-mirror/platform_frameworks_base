@@ -21,6 +21,10 @@ import static android.app.usage.UsageStatsManager.STANDBY_BUCKET_ACTIVE;
 import static android.app.usage.UsageStatsManager.STANDBY_BUCKET_FREQUENT;
 import static android.app.usage.UsageStatsManager.STANDBY_BUCKET_RARE;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
+
 import android.app.usage.UsageStatsManager;
 import android.os.FileUtils;
 import android.test.AndroidTestCase;
@@ -116,5 +120,17 @@ public class AppIdleHistoryTests extends AndroidTestCase {
         assertTrue(aih.shouldInformListeners(PACKAGE_1, USER_ID, 5000, STANDBY_BUCKET_RARE));
         assertFalse(aih.shouldInformListeners(PACKAGE_1, USER_ID, 5000, STANDBY_BUCKET_RARE));
         assertTrue(aih.shouldInformListeners(PACKAGE_1, USER_ID, 5000, STANDBY_BUCKET_FREQUENT));
+    }
+
+    public void testJobRunTime() throws Exception {
+        AppIdleHistory aih = new AppIdleHistory(mStorageDir, 1000);
+
+        aih.setLastJobRunTime(PACKAGE_1, USER_ID, 2000);
+        assertEquals(Long.MAX_VALUE, aih.getTimeSinceLastJobRun(PACKAGE_2, USER_ID, 0));
+        assertEquals(4000, aih.getTimeSinceLastJobRun(PACKAGE_1, USER_ID, 6000));
+
+        aih.setLastJobRunTime(PACKAGE_2, USER_ID, 6000);
+        assertEquals(1000, aih.getTimeSinceLastJobRun(PACKAGE_2, USER_ID, 7000));
+        assertEquals(5000, aih.getTimeSinceLastJobRun(PACKAGE_1, USER_ID, 7000));
     }
 }
