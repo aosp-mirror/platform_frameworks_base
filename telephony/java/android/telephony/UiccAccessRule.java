@@ -32,6 +32,7 @@ import java.io.IOException;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.util.Arrays;
+import java.util.Objects;
 
 /**
  * Describes a single UICC access rule according to the GlobalPlatform Secure Element Access Control
@@ -202,6 +203,21 @@ public final class UiccAccessRule implements Parcelable {
     private boolean matches(byte[] certHash, String packageName) {
         return certHash != null && Arrays.equals(this.mCertificateHash, certHash) &&
                 (TextUtils.isEmpty(this.mPackageName) || this.mPackageName.equals(packageName));
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (this == obj) {
+            return true;
+        }
+        if (obj == null || getClass() != obj.getClass()) {
+            return false;
+        }
+
+        UiccAccessRule that = (UiccAccessRule) obj;
+        return Arrays.equals(mCertificateHash, that.mCertificateHash)
+                && Objects.equals(mPackageName, that.mPackageName)
+                && mAccessType == that.mAccessType;
     }
 
     @Override
