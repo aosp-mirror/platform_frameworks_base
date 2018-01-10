@@ -413,6 +413,9 @@ public class VolumeDialogImpl implements VolumeDialog {
             Events.writeEvent(mContext, Events.EVENT_ICON_CLICK, AudioManager.STREAM_RING,
                     mRingerIcon.getTag());
             final StreamState ss = mState.states.get(AudioManager.STREAM_RING);
+            if (ss == null) {
+                return;
+            }
             final boolean hasVibrator = mController.hasVibrator();
             if (mState.ringerModeInternal == AudioManager.RINGER_MODE_NORMAL) {
                 if (hasVibrator) {
@@ -617,6 +620,9 @@ public class VolumeDialogImpl implements VolumeDialog {
     protected void updateRingerH() {
         if (mState != null) {
             final StreamState ss = mState.states.get(AudioManager.STREAM_RING);
+            if (ss == null) {
+                return;
+            }
             switch (mState.ringerModeInternal) {
                 case AudioManager.RINGER_MODE_VIBRATE:
                     mRingerStatus.setText(R.string.volume_ringer_status_vibrate);
