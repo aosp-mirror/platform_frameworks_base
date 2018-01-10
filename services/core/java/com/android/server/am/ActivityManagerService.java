@@ -110,6 +110,7 @@ import static android.os.Process.setThreadPriority;
 import static android.os.Process.setThreadScheduler;
 import static android.os.Process.startWebView;
 import static android.os.Process.zygoteProcess;
+import static android.os.Trace.TRACE_TAG_ACTIVITY_MANAGER;
 import static android.provider.Settings.Global.ALWAYS_FINISH_ACTIVITIES;
 import static android.provider.Settings.Global.DEBUG_APP;
 import static android.provider.Settings.Global.DEVELOPMENT_ENABLE_FREEFORM_WINDOWS_SUPPORT;
@@ -735,6 +736,13 @@ public class ActivityManagerService extends IActivityManager.Stub
      * another activity.
      */
     private ActivityRecord mLastResumedActivity;
+
+    /**
+     * The activity that is currently being traced as the active resumed activity.
+     *
+     * @see #updateResumedAppTrace
+     */
+    private @Nullable ActivityRecord mTracedResumedActivity;
 
     /**
      * If non-null, we are tracking the time the user spends in the currently focused app.
@@ -3423,6 +3431,7 @@ public class ActivityManagerService extends IActivityManager.Stub
         if (mLastResumedActivity != null && r.userId != mLastResumedActivity.userId) {
             mUserController.sendForegroundProfileChanged(r.userId);
         }
+        updateResumedAppTrace(r);
         mLastResumedActivity = r;
 
         mWindowManager.setFocusedApp(r.appToken, true);
@@ -3434,6 +3443,22 @@ public class ActivityManagerService extends IActivityManager.Stub
                 r == null ? -1 : r.userId,
                 r == null ? "NULL" : r.shortComponentName,
                 reason);
+    }
+
+    private void updateResumedAppTrace(@Nullable ActivityRecord resumed) {
+        if (mTracedResumedActivity != null) {
+            Trace.asyncTraceEnd(TRACE_TAG_ACTIVITY_MANAGER,
+                    constructResumedTraceName(mTracedResumedActivity.packageName), 0);
+        }
+        if (resumed != null) {
+            Trace.asyncTraceBegin(TRACE_TAG_ACTIVITY_MANAGER,
+                    constructResumedTraceName(resumed.packageName), 0);
+        }
+        mTracedResumedActivity = resumed;
+    }
+
+    private String constructResumedTraceName(String packageName) {
+        return "focused app: " + packageName;
     }
 
     @Override
@@ -13073,6 +13098,7 @@ public class ActivityManagerService extends IActivityManager.Stub
             }
             mTopProcessState = ActivityManager.PROCESS_STATE_TOP_SLEEPING;
             mStackSupervisor.goingToSleepLocked();
+            updateResumedAppTrace(null /* resumed */);
             updateOomAdjLocked();
         }
     }
