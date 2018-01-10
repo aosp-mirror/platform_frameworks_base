@@ -49,7 +49,7 @@ LOCAL_STATIC_JAVA_LIBRARIES := \
 
 LOCAL_JAVA_LIBRARIES := \
     junit \
-    platform-robolectric-3.5.1-prebuilt
+    platform-robolectric-3.6.1-prebuilt
 
 LOCAL_INSTRUMENTATION_FOR := SettingsLibShell
 LOCAL_MODULE := SettingsLibRoboTests
@@ -74,4 +74,4 @@ LOCAL_TEST_PACKAGE := SettingsLibShell
 
 LOCAL_ROBOTEST_TIMEOUT := 36000
 
-include prebuilts/misc/common/robolectric/3.5.1/run_robotests.mk
+include prebuilts/misc/common/robolectric/3.6.1/run_robotests.mk
