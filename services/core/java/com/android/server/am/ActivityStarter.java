@@ -318,6 +318,13 @@ class ActivityStarter {
         boolean mayWait;
 
         /**
+         * Ensure constructed request matches reset instance.
+         */
+        Request() {
+            reset();
+        }
+
+        /**
          * Sets values back to the initial state, clearing any held references.
          */
         void reset() {
@@ -332,8 +339,8 @@ class ActivityStarter {
             resultTo = null;
             resultWho = null;
             requestCode = 0;
-            callingPid = 0;
-            callingUid = 0;
+            callingPid = DEFAULT_CALLING_PID;
+            callingUid = DEFAULT_CALLING_UID;
             callingPackage = null;
             realCallingPid = 0;
             realCallingUid = 0;
