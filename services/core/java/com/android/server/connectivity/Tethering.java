@@ -19,7 +19,6 @@ package com.android.server.connectivity;
 import static android.hardware.usb.UsbManager.USB_CONFIGURED;
 import static android.hardware.usb.UsbManager.USB_CONNECTED;
 import static android.hardware.usb.UsbManager.USB_FUNCTION_RNDIS;
-import static android.net.ConnectivityManager.getNetworkTypeName;
 import static android.net.wifi.WifiManager.EXTRA_WIFI_AP_INTERFACE_NAME;
 import static android.net.wifi.WifiManager.EXTRA_WIFI_AP_MODE;
 import static android.net.wifi.WifiManager.EXTRA_WIFI_AP_STATE;
@@ -43,7 +42,6 @@ import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
-import android.content.pm.PackageManager;
 import android.content.res.Resources;
 import android.hardware.usb.UsbManager;
 import android.net.ConnectivityManager;
@@ -53,9 +51,7 @@ import android.net.IpPrefix;
 import android.net.LinkAddress;
 import android.net.LinkProperties;
 import android.net.Network;
-import android.net.NetworkCapabilities;
 import android.net.NetworkInfo;
-import android.net.NetworkRequest;
 import android.net.NetworkState;
 import android.net.NetworkUtils;
 import android.net.RouteInfo;
@@ -76,7 +72,6 @@ import android.os.ResultReceiver;
 import android.os.UserHandle;
 import android.provider.Settings;
 import android.telephony.CarrierConfigManager;
-import android.telephony.TelephonyManager;
 import android.text.TextUtils;
 import android.util.ArrayMap;
 import android.util.Log;
@@ -85,8 +80,6 @@ import android.util.SparseArray;
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.messages.nano.SystemMessageProto.SystemMessage;
 import com.android.internal.notification.SystemNotificationChannels;
-import com.android.internal.telephony.IccCardConstants;
-import com.android.internal.telephony.TelephonyIntents;
 import com.android.internal.util.DumpUtils;
 import com.android.internal.util.IndentingPrintWriter;
 import com.android.internal.util.MessageUtils;
@@ -110,12 +103,8 @@ import java.net.InetAddress;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
-import java.util.HashMap;
 import java.util.HashSet;
-import java.util.Iterator;
-import java.util.Map;
 import java.util.Set;
-import java.util.concurrent.atomic.AtomicInteger;
 
 
 /**
@@ -193,8 +182,6 @@ public class Tethering extends BaseNetworkObserver {
     private int mLastNotificationId;
 
     private boolean mRndisEnabled;       // track the RNDIS function enabled state
-    private boolean mUsbTetherRequested; // true if USB tethering should be started
-                                         // when RNDIS is enabled
     // True iff. WiFi tethering should be started when soft AP is ready.
     private boolean mWifiTetherRequested;
 
@@ -867,33 +854,18 @@ public class Tethering extends BaseNetworkObserver {
             //
             // For more explanation, see b/62552150 .
             synchronized (Tethering.this.mPublicSync) {
-                // Always record the state of RNDIS.
-                // TODO: consider:
-                //     final boolean disconnected = !usbConnected;
-                //     if (disconnected) {
-                //         mRndisEnabled = false;
-                //         mUsbTetherRequested = false;
-                //         return;
-                //     }
-                //     final boolean configured = usbConnected && usbConfigured;
-                //     mRndisEnabled = configured ? rndisEnabled : false;
-                //     if (!configured) return;
-                mRndisEnabled = rndisEnabled;
-
-                if (usbConnected && !usbConfigured) {
-                    // Nothing to do here (only CONNECTED, not yet CONFIGURED).
-                    return;
-                }
-
-                // start tethering if we have a request pending
-                if (usbConfigured && mRndisEnabled && mUsbTetherRequested) {
+                if (!usbConnected && mRndisEnabled) {
+                    // Turn off tethering if it was enabled and there is a disconnect.
+                    tetherMatchingInterfaces(
+                            IControlsTethering.STATE_AVAILABLE,
+                            ConnectivityManager.TETHERING_USB);
+                } else if (usbConfigured && rndisEnabled) {
+                    // Tether if rndis is enabled and usb is configured.
                     tetherMatchingInterfaces(
                             IControlsTethering.STATE_TETHERED,
                             ConnectivityManager.TETHERING_USB);
                 }
-
-                // TODO: Figure out how to remove the need for this variable.
-                mUsbTetherRequested = false;
+                mRndisEnabled = usbConfigured && rndisEnabled;
             }
         }
 
@@ -1065,34 +1037,8 @@ public class Tethering extends BaseNetworkObserver {
     public int setUsbTethering(boolean enable) {
         if (VDBG) Log.d(TAG, "setUsbTethering(" + enable + ")");
         UsbManager usbManager = (UsbManager) mContext.getSystemService(Context.USB_SERVICE);
-
         synchronized (mPublicSync) {
-            if (enable) {
-                if (mRndisEnabled) {
-                    final long ident = Binder.clearCallingIdentity();
-                    try {
-                        tetherMatchingInterfaces(IControlsTethering.STATE_TETHERED,
-                                ConnectivityManager.TETHERING_USB);
-                    } finally {
-                        Binder.restoreCallingIdentity(ident);
-                    }
-                } else {
-                    mUsbTetherRequested = true;
-                    usbManager.setCurrentFunction(UsbManager.USB_FUNCTION_RNDIS, false);
-                }
-            } else {
-                final long ident = Binder.clearCallingIdentity();
-                try {
-                    tetherMatchingInterfaces(IControlsTethering.STATE_AVAILABLE,
-                            ConnectivityManager.TETHERING_USB);
-                } finally {
-                    Binder.restoreCallingIdentity(ident);
-                }
-                if (mRndisEnabled) {
-                    usbManager.setCurrentFunction(null, false);
-                }
-                mUsbTetherRequested = false;
-            }
+            usbManager.setCurrentFunction(enable ? UsbManager.USB_FUNCTION_RNDIS : null, false);
         }
         return ConnectivityManager.TETHER_ERROR_NO_ERROR;
     }
@@ -1149,7 +1095,7 @@ public class Tethering extends BaseNetworkObserver {
         if (!mForwardedDownstreams.isEmpty()) return true;
 
         synchronized (mPublicSync) {
-            return mUsbTetherRequested || mWifiTetherRequested;
+            return mWifiTetherRequested;
         }
     }
 
