@@ -20,6 +20,7 @@ import static android.accessibilityservice.AccessibilityServiceInfo.FEEDBACK_ALL
 import static android.accessibilityservice.AccessibilityServiceInfo.FEEDBACK_GENERIC;
 
 import static com.android.systemui.volume.Events.DISMISS_REASON_OUTPUT_CHOOSER;
+import static com.android.systemui.volume.Events.DISMISS_REASON_SETTINGS_CLICKED;
 import static com.android.systemui.volume.Events.DISMISS_REASON_TOUCH_OUTSIDE;
 
 import android.accessibilityservice.AccessibilityServiceInfo;
@@ -30,14 +31,13 @@ import android.app.Dialog;
 import android.app.KeyguardManager;
 import android.content.Context;
 import android.content.DialogInterface;
+import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.content.res.ColorStateList;
 import android.content.res.Resources;
 import android.graphics.Color;
 import android.graphics.Rect;
-import android.graphics.drawable.AnimatedVectorDrawable;
 import android.graphics.drawable.ColorDrawable;
-import android.graphics.drawable.Drawable;
 import android.media.AudioManager;
 import android.media.AudioSystem;
 import android.os.Debug;
@@ -45,9 +45,8 @@ import android.os.Handler;
 import android.os.Looper;
 import android.os.Message;
 import android.os.SystemClock;
+import android.provider.Settings;
 import android.provider.Settings.Global;
-import android.transition.AutoTransition;
-import android.transition.TransitionManager;
 import android.util.Log;
 import android.util.Slog;
 import android.util.SparseBooleanArray;
@@ -72,7 +71,6 @@ import android.widget.TextView;
 
 import com.android.settingslib.Utils;
 import com.android.systemui.Dependency;
-import com.android.systemui.Interpolators;
 import com.android.systemui.R;
 import com.android.systemui.plugins.VolumeDialog;
 import com.android.systemui.plugins.VolumeDialogController;
@@ -104,7 +102,6 @@ public class VolumeDialogImpl implements VolumeDialog {
     private CustomDialog mDialog;
     private ViewGroup mDialogView;
     private ViewGroup mDialogRowsView;
-    private ImageButton mExpandButton;
     private ImageButton mRingerIcon;
     private ImageButton mOutputChooser;
     private TextView mRingerStatus;
@@ -120,8 +117,6 @@ public class VolumeDialogImpl implements VolumeDialog {
     private final ColorStateList mInactiveSliderTint;
 
     private boolean mShowing;
-    private boolean mExpanded;
-    private boolean mExpandButtonAnimationRunning;
     private boolean mShowA11yStream;
 
     private int mActiveStream;
@@ -182,11 +177,11 @@ public class VolumeDialogImpl implements VolumeDialog {
 
         mDialog.setContentView(R.layout.volume_dialog);
         mDialog.setOnShowListener(dialog -> {
-            mDialogView.setTranslationY(-mDialogView.getHeight());
+            mDialogView.setTranslationX(mDialogView.getWidth() / 2);
             mDialogView.setAlpha(0);
             mDialogView.animate()
                     .alpha(1)
-                    .translationY(0)
+                    .translationX(0)
                     .setDuration(300)
                     .setInterpolator(new SystemUIInterpolators.LogDecelerateInterpolator())
                     .withEndAction(() -> {
@@ -205,19 +200,9 @@ public class VolumeDialogImpl implements VolumeDialog {
         VolumeUiLayout hardwareLayout = VolumeUiLayout.get(mDialogView);
         hardwareLayout.setOutsideTouchListener(view -> dismiss(DISMISS_REASON_TOUCH_OUTSIDE));
 
-        ViewGroup dialogContentView = mDialog.findViewById(R.id.volume_dialog_content);
-        mDialogRowsView = dialogContentView.findViewById(R.id.volume_dialog_rows);
+        mDialogRowsView = mDialog.findViewById(R.id.volume_dialog_rows);
         mRingerIcon = mDialog.findViewById(R.id.ringer_icon);
         mRingerStatus = mDialog.findViewById(R.id.ringer_status);
-
-        mExpanded = false;
-        mExpandButton = mDialogView.findViewById(R.id.volume_expand_button);
-        mExpandButton.setOnClickListener(mClickExpand);
-        mExpandButton.setVisibility(
-                AudioSystem.isSingleVolume(mContext) ? View.GONE : View.VISIBLE);
-
-        mOutputChooser = mDialogView.findViewById(R.id.output_chooser);
-        mOutputChooser.setOnClickListener(mClickOutputChooser);
 
         if (mRows.isEmpty()) {
             addRow(AudioManager.STREAM_MUSIC,
@@ -239,6 +224,10 @@ public class VolumeDialogImpl implements VolumeDialog {
         } else {
             addExistingRows();
         }
+
+        mOutputChooser = mDialogView.findViewById(R.id.output_chooser);
+        mOutputChooser.setOnClickListener(mClickOutputChooser);
+
         updateRowsH(getActiveRow());
         initRingerH();
     }
@@ -273,11 +262,9 @@ public class VolumeDialogImpl implements VolumeDialog {
         VolumeRow row = new VolumeRow();
         initRow(row, stream, iconRes, iconMuteRes, important, defaultStream);
         int rowSize;
-        int viewSize;
-        if (mShowA11yStream && dynamic && (rowSize = mRows.size()) > 1
-                && (viewSize = mDialogRowsView.getChildCount()) > 1) {
-            // A11y Stream should be the last in the list
-            mDialogRowsView.addView(row.view, viewSize - 2);
+        if (mShowA11yStream && dynamic && (rowSize = mRows.size()) > 1) {
+            // A11y Stream should be the first in the list, so it's shown to start of other rows
+            mDialogRowsView.addView(row.view, 0);
             mRows.add(rowSize - 2, row);
         } else {
             mDialogRowsView.addView(row.view);
@@ -315,7 +302,6 @@ public class VolumeDialogImpl implements VolumeDialog {
     public void dump(PrintWriter writer) {
         writer.println(VolumeDialogImpl.class.getSimpleName() + " state:");
         writer.print("  mShowing: "); writer.println(mShowing);
-        writer.print("  mExpanded: "); writer.println(mExpanded);
         writer.print("  mActiveStream: "); writer.println(mActiveStream);
         writer.print("  mDynamic: "); writer.println(mDynamic);
         writer.print("  mAutomute: "); writer.println(mAutomute);
@@ -432,6 +418,13 @@ public class VolumeDialogImpl implements VolumeDialog {
             }
             updateRingerH();
         });
+        mRingerIcon.setOnLongClickListener(v -> {
+            Intent intent = new Intent(Settings.ACTION_SOUND_SETTINGS);
+            intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+            dismissH(DISMISS_REASON_SETTINGS_CLICKED);
+            mContext.startActivity(intent);
+            return true;
+        });
         updateRingerH();
     }
 
@@ -468,7 +461,6 @@ public class VolumeDialogImpl implements VolumeDialog {
     private int computeTimeoutH() {
         if (mAccessibility.mFeedbackEnabled) return 20000;
         if (mHovering) return 16000;
-        if (mExpanded) return 5000;
         if (mSafetyWarning != null) return 5000;
         return 3000;
     }
@@ -480,13 +472,11 @@ public class VolumeDialogImpl implements VolumeDialog {
         mDialogView.animate().cancel();
         mShowing = false;
 
-        updateExpandedH(false /* expanding */, true /* dismissing */);
-
-        mDialogView.setTranslationY(0);
+        mDialogView.setTranslationX(0);
         mDialogView.setAlpha(1);
         mDialogView.animate()
                 .alpha(0)
-                .translationY(-mDialogView.getHeight())
+                .translationX(mDialogView.getWidth() / 2)
                 .setDuration(250)
                 .setInterpolator(new SystemUIInterpolators.LogAccelerateInterpolator())
                 .withEndAction(() -> mHandler.postDelayed(() -> {
@@ -514,67 +504,6 @@ public class VolumeDialogImpl implements VolumeDialog {
         }
     }
 
-    private void updateExpandedH(final boolean expanded, final boolean dismissing) {
-        if (D.BUG) Log.d(TAG, "updateExpandedH " + expanded);
-
-        if (mExpanded == expanded) return;
-        mExpanded = expanded;
-        mExpandButtonAnimationRunning = isAttached();
-        updateExpandButtonH();
-        TransitionManager.endTransitions(mDialogView);
-        final VolumeRow activeRow = getActiveRow();
-        if (!dismissing) {
-            mWindow.setLayout(mWindow.getAttributes().width, ViewGroup.LayoutParams.MATCH_PARENT);
-            TransitionManager.beginDelayedTransition(mDialogView, getTransition());
-        }
-        updateRowsH(activeRow);
-        rescheduleTimeoutH();
-    }
-
-    private AutoTransition getTransition() {
-        AutoTransition transition = new AutoTransition();
-        transition.setDuration(300);
-        transition.setInterpolator(Interpolators.LINEAR_OUT_SLOW_IN);
-        return transition;
-    }
-
-    private void updateExpandButtonH() {
-        if (D.BUG) Log.d(TAG, "updateExpandButtonH");
-
-        mExpandButton.setClickable(!mExpandButtonAnimationRunning);
-        if (!(mExpandButtonAnimationRunning && isAttached())) {
-            final int res = mExpanded ? R.drawable.ic_volume_collapse_animation
-                    : R.drawable.ic_volume_expand_animation;
-            if (hasTouchFeature()) {
-                mExpandButton.setImageResource(res);
-            } else {
-                // if there is no touch feature, show the volume ringer instead
-                mExpandButton.setImageResource(R.drawable.ic_volume_ringer);
-                mExpandButton.setBackgroundResource(0);  // remove gray background emphasis
-            }
-            mExpandButton.setContentDescription(mContext.getString(mExpanded ?
-                    R.string.accessibility_volume_collapse : R.string.accessibility_volume_expand));
-        }
-        if (mExpandButtonAnimationRunning) {
-            final Drawable d = mExpandButton.getDrawable();
-            if (d instanceof AnimatedVectorDrawable) {
-                // workaround to reset drawable
-                final AnimatedVectorDrawable avd = (AnimatedVectorDrawable) d.getConstantState()
-                        .newDrawable();
-                mExpandButton.setImageDrawable(avd);
-                avd.start();
-                mHandler.postDelayed(new Runnable() {
-                    @Override
-                    public void run() {
-                        mExpandButtonAnimationRunning = false;
-                        updateExpandButtonH();
-                        rescheduleTimeoutH();
-                    }
-                }, 300);
-            }
-        }
-    }
-
     private boolean isAttached() {
         return mDialogView != null && mDialogView.isAttachedToWindow();
     }
@@ -597,7 +526,7 @@ public class VolumeDialogImpl implements VolumeDialog {
             return true;
         }
 
-        return row.defaultStream || isActive || (mExpanded && row.important);
+        return row.defaultStream || isActive;
     }
 
     private void updateRowsH(final VolumeRow activeRow) {
@@ -953,16 +882,6 @@ public class VolumeDialogImpl implements VolumeDialog {
             return "";
         }
     }
-
-    private final OnClickListener mClickExpand = new OnClickListener() {
-        @Override
-        public void onClick(View v) {
-            mExpandButton.animate().cancel();
-            final boolean newExpand = !mExpanded;
-            Events.writeEvent(mContext, Events.EVENT_EXPAND, newExpand);
-            updateExpandedH(newExpand, false /* dismissing */);
-        }
-    };
 
     private final OnClickListener mClickOutputChooser = new OnClickListener() {
         @Override

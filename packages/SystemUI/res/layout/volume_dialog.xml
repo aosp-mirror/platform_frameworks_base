@@ -17,130 +17,76 @@
     xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    android:background="@android:color/transparent"
     android:theme="@style/qs_theme"
     android:clipChildren="false" >
-    <RelativeLayout
+    <LinearLayout
         android:id="@+id/volume_dialog"
-        android:layout_width="match_parent"
+        android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:paddingTop="@dimen/volume_row_padding_bottom"
-        android:background="@drawable/rounded_full_bg_bottom"
+        android:layout_gravity="center_vertical|end"
+        android:minWidth="@dimen/volume_dialog_panel_width"
+        android:background="@android:color/transparent"
+        android:layout_margin="12dp"
         android:translationZ="8dp"
+        android:orientation="vertical"
         android:clipChildren="false" >
 
         <LinearLayout
-            android:id="@+id/volume_dialog_content"
-            android:layout_width="match_parent"
+            android:id="@+id/volume_dialog_rows"
+            android:layout_width="@dimen/volume_dialog_panel_width"
             android:layout_height="wrap_content"
-            android:layout_toStartOf="@id/expand"
             android:clipChildren="false"
             android:clipToPadding="false"
+            android:paddingTop="12dp"
+            android:paddingBottom="12dp"
+            android:background="@drawable/rounded_bg_full"
+            android:orientation="horizontal" >
+                <!-- volume rows added and removed here! :-) -->
+        </LinearLayout>
+
+        <LinearLayout
+            android:id="@+id/footer"
+            android:layout_width="@dimen/volume_dialog_panel_width"
+            android:layout_height="@dimen/volume_dialog_panel_width"
+            android:clipChildren="false"
+            android:clipToPadding="false"
+            android:layout_marginTop="6dp"
+            android:layout_marginBottom="6dp"
+            android:layout_below="@id/volume_dialog_rows"
+            android:background="@drawable/rounded_bg_full"
+            android:gravity="center"
             android:orientation="vertical" >
 
-            <LinearLayout
-                android:id="@+id/volume_dialog_rows"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:orientation="vertical" >
-                <!-- volume rows added and removed here! :-) -->
-            </LinearLayout>
-
-
-        </LinearLayout>
-        <LinearLayout
-            android:id="@+id/expand"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:orientation="vertical"
-            android:layout_alignParentEnd="true"
-            android:layout_alignParentTop="true"
-            android:layout_marginEnd="@dimen/volume_expander_margin_end" >
             <TextView
+                android:id="@+id/ringer_title"
+                android:text="@string/ring_toggle_title"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:ellipsize="end"
                 android:maxLines="1"
-                android:textAppearance="@style/TextAppearance.Volume.Header" />
+                android:layout_centerVertical="true"
+                android:textColor="?android:attr/colorControlNormal"
+                android:textAppearance="?android:attr/textAppearanceSmall" />
+
             <com.android.keyguard.AlphaOptimizedImageButton
-                xmlns:android="http://schemas.android.com/apk/res/android"
-                xmlns:tools="http://schemas.android.com/tools"
-                android:id="@+id/volume_expand_button"
-                style="@style/VolumeButtons"
-                android:layout_width="@dimen/volume_button_size"
-                android:layout_height="@dimen/volume_button_size"
-                android:clickable="true"
-                android:soundEffectsEnabled="false"
-                android:src="@drawable/ic_volume_expand_animation"
-                android:background="@drawable/ripple_drawable"
-                tools:ignore="RtlHardcoded" />
-        </LinearLayout>
-        <RelativeLayout
-            android:id="@+id/footer"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:clipChildren="false"
-            android:clipToPadding="false"
-            android:layout_below="@id/volume_dialog_content"
-            android:layout_margin="10dp">
-            <!-- special row for ringer mode -->
-            <RelativeLayout
-                android:id="@+id/ringer_mode"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:background="@drawable/rounded_bg_full"
-                android:clipChildren="false"
-                android:clipToPadding="false"
-                android:layout_toStartOf="@id/output_chooser"
-                android:layout_margin="10dp">
-
-                <com.android.keyguard.AlphaOptimizedImageButton
-                    android:id="@+id/ringer_icon"
-                    style="@style/VolumeButtons"
-                    android:background="?android:selectableItemBackgroundBorderless"
-                    android:layout_width="@dimen/volume_button_size"
-                    android:layout_height="@dimen/volume_button_size"
-                    android:layout_alignParentStart="true"
-                    android:layout_centerVertical="true"
-                    android:soundEffectsEnabled="false" />
-
-                <TextView
-                    android:id="@+id/ringer_title"
-                    android:text="@string/ring_toggle_title"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:ellipsize="end"
-                    android:maxLines="1"
-                    android:layout_alignParentStart="true"
-                    android:layout_centerVertical="true"
-                    android:layout_toEndOf="@+id/ringer_icon"
-                    android:layout_marginStart="64dp"
-                    android:textColor="?android:attr/colorControlNormal"
-                    android:textAppearance="?android:attr/textAppearanceSmall"
-                    android:paddingStart="@dimen/volume_row_header_padding_start" />
-
-                <TextView
-                    android:id="@+id/ringer_status"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:ellipsize="end"
-                    android:layout_alignParentEnd="true"
-                    android:layout_centerVertical="true"
-                    android:layout_marginEnd="14dp"
-                    android:maxLines="1"
-                    android:textColor="?android:attr/colorControlNormal"
-                    android:textAppearance="?android:attr/textAppearanceSmall" />
-
-            </RelativeLayout>
-            <com.android.keyguard.AlphaOptimizedImageButton
-                android:id="@+id/output_chooser"
+                android:id="@+id/ringer_icon"
                 style="@style/VolumeButtons"
                 android:background="?android:selectableItemBackgroundBorderless"
                 android:layout_width="@dimen/volume_button_size"
                 android:layout_height="@dimen/volume_button_size"
-                android:layout_alignParentEnd="true"
-                android:layout_centerVertical="true"
-                android:src="@drawable/ic_settings_bluetooth"
+                android:tint="?android:attr/colorAccent"
                 android:soundEffectsEnabled="false" />
-        </RelativeLayout>
-    </RelativeLayout>
+
+            <TextView
+                android:id="@+id/ringer_status"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:ellipsize="end"
+                android:maxLines="1"
+                android:textColor="?android:attr/colorControlNormal"
+                android:textAppearance="?android:attr/textAppearanceSmall" />
+
+        </LinearLayout>
+    </LinearLayout>
 </com.android.systemui.volume.VolumeUiLayout>
