@@ -1762,6 +1762,20 @@ class UserController implements Handler.Callback {
         }
     }
 
+    void onUserRemoved(int userId) {
+        synchronized (mLock) {
+            int size = mUserProfileGroupIds.size();
+            for (int i = size - 1; i >= 0; i--) {
+                if (mUserProfileGroupIds.keyAt(i) == userId
+                        || mUserProfileGroupIds.valueAt(i) == userId) {
+                    mUserProfileGroupIds.removeAt(i);
+
+                }
+            }
+            mCurrentProfileIds = ArrayUtils.removeInt(mCurrentProfileIds, userId);
+        }
+    }
+
     /**
      * Returns whether the given user requires credential entry at this time. This is used to
      * intercept activity launches for work apps when the Work Challenge is present.
