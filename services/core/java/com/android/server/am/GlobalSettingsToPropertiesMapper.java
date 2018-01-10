@@ -37,7 +37,8 @@ class GlobalSettingsToPropertiesMapper {
 
     private static final String[][] sGlobalSettingsMapping = new String[][] {
     //  List mapping entries in the following format:
-    //            {Settings.Global.SETTING_NAME, "system_property_name"},
+    //  {Settings.Global.SETTING_NAME, "system_property_name"},
+        {Settings.Global.SYS_VDSO, "sys.vdso"},
     };
 
 
