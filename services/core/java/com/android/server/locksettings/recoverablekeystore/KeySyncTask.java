@@ -19,6 +19,7 @@ package com.android.server.locksettings.recoverablekeystore;
 import static android.security.recoverablekeystore.KeyStoreRecoveryMetadata.TYPE_LOCKSCREEN;
 
 import android.annotation.NonNull;
+import android.annotation.Nullable;
 import android.content.Context;
 import android.security.recoverablekeystore.KeyDerivationParameters;
 import android.security.recoverablekeystore.KeyEntryRecoveryData;
@@ -100,7 +101,7 @@ public class KeySyncTask implements Runnable {
      *
      * @param recoverableKeyStoreDb Database where the keys are stored.
      * @param userId The uid of the user whose profile has been unlocked.
-     * @param credentialType The type of credential - i.e., pattern or password.
+     * @param credentialType The type of credential as defined in {@code LockPatternUtils}
      * @param credential The credential, encoded as a {@link String}.
      * @param credentialUpdated signals weather credentials were updated.
      * @param platformKeyManagerFactory Instantiates a {@link PlatformKeyManager} for the user.
@@ -250,7 +251,7 @@ public class KeySyncTask implements Runnable {
         // TODO: store raw data in RecoveryServiceMetadataEntry and generate Parcelables later
         KeyStoreRecoveryMetadata metadata = new KeyStoreRecoveryMetadata(
                 /*userSecretType=*/ TYPE_LOCKSCREEN,
-                /*lockScreenUiFormat=*/ mCredentialType,
+                /*lockScreenUiFormat=*/ getUiFormat(mCredentialType, mCredential),
                 /*keyDerivationParameters=*/ KeyDerivationParameters.createSha256Parameters(salt),
                 /*secret=*/ new byte[0]);
         ArrayList<KeyStoreRecoveryMetadata> metadataList = new ArrayList<>();
@@ -347,7 +348,10 @@ public class KeySyncTask implements Runnable {
      * Returns {@code true} if {@code credential} looks like a pin.
      */
     @VisibleForTesting
-    static boolean isPin(@NonNull String credential) {
+    static boolean isPin(@Nullable String credential) {
+        if (credential == null) {
+            return false;
+        }
         int length = credential.length();
         for (int i = 0; i < length; i++) {
             if (!Character.isDigit(credential.charAt(i))) {
