@@ -25,6 +25,7 @@ import android.service.euicc.IGetEidCallback;
 import android.service.euicc.IGetEuiccInfoCallback;
 import android.service.euicc.IGetEuiccProfileInfoListCallback;
 import android.service.euicc.IGetOtaStatusCallback;
+import android.service.euicc.IOtaStatusChangedCallback;
 import android.service.euicc.IRetainSubscriptionsForFactoryResetCallback;
 import android.service.euicc.ISwitchToSubscriptionCallback;
 import android.service.euicc.IUpdateSubscriptionNicknameCallback;
@@ -39,6 +40,7 @@ oneway interface IEuiccService {
             boolean forceDeactivateSim, in IGetDownloadableSubscriptionMetadataCallback callback);
     void getEid(int slotId, in IGetEidCallback callback);
     void getOtaStatus(int slotId, in IGetOtaStatusCallback callback);
+    void startOtaIfNecessary(int slotId, in IOtaStatusChangedCallback statusChangedCallback);
     void getEuiccProfileInfoList(int slotId, in IGetEuiccProfileInfoListCallback callback);
     void getDefaultDownloadableSubscriptionList(int slotId, boolean forceDeactivateSim,
             in IGetDefaultDownloadableSubscriptionListCallback callback);
