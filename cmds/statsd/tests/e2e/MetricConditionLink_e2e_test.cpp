@@ -188,7 +188,7 @@ TEST(MetricConditionLinkE2eTest, TestMultiplePredicatesAndLinks) {
     sortLogEventsByTimestamp(&events);
 
     for (const auto& event : events) {
-        processor->OnLogEvent(*event);
+        processor->OnLogEvent(event.get());
     }
     ConfigMetricsReportList reports;
     processor->onDumpReport(cfgKey, bucketStartTimeNs + 2 * bucketSizeNs - 1, &reports);

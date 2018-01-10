@@ -132,6 +132,11 @@ public:
         return mFieldValueMap.size();
     }
 
+    /**
+     * Returns the mutable DimensionsValue proto for the specific the field.
+     */
+    DimensionsValue* findFieldValueOrNull(const Field& field);
+
     inline const FieldValueMap& getFieldValueMap() const { return mFieldValueMap; }
 
 private:

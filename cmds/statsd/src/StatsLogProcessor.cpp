@@ -25,6 +25,8 @@
 #include "guardrail/StatsdStats.h"
 #include "metrics/CountMetricProducer.h"
 #include "external/StatsPullerManager.h"
+#include "dimension.h"
+#include "field_util.h"
 #include "stats_util.h"
 #include "storage/StorageManager.h"
 
@@ -88,30 +90,56 @@ void StatsLogProcessor::onAnomalyAlarmFired(
     }
 }
 
-// TODO: what if statsd service restarts? How do we know what logs are already processed before?
-void StatsLogProcessor::OnLogEvent(const LogEvent& msg) {
-    std::lock_guard<std::mutex> lock(mMetricsMutex);
-
-    StatsdStats::getInstance().noteAtomLogged(msg.GetTagId(), msg.GetTimestampNs() / NS_PER_SEC);
-    // pass the event to metrics managers.
-    for (auto& pair : mMetricsManagers) {
-        pair.second->onLogEvent(msg);
-        flushIfNecessaryLocked(msg.GetTimestampNs(), pair.first, *(pair.second));
+void StatsLogProcessor::mapIsolatedUidToHostUidIfNecessaryLocked(LogEvent* event) const {
+    std::vector<Field> uidFields;
+    findFields(
+        event->getFieldValueMap(),
+        buildAttributionUidFieldMatcher(event->GetTagId(), Position::ANY),
+        &uidFields);
+    for (size_t i = 0; i < uidFields.size(); ++i) {
+        DimensionsValue* value = event->findFieldValueOrNull(uidFields[i]);
+        if (value != nullptr && value->value_case() == DimensionsValue::ValueCase::kValueInt) {
+            const int uid = mUidMap->getHostUidOrSelf(value->value_int());
+            value->set_value_int(uid);
+        }
     }
+}
+
+void StatsLogProcessor::onIsolatedUidChangedEventLocked(const LogEvent& event) {
+    status_t err = NO_ERROR, err2 = NO_ERROR, err3 = NO_ERROR;
+    bool is_create = event.GetBool(3, &err);
+    auto parent_uid = int(event.GetLong(1, &err2));
+    auto isolated_uid = int(event.GetLong(2, &err3));
+    if (err == NO_ERROR && err2 == NO_ERROR && err3 == NO_ERROR) {
+        if (is_create) {
+            mUidMap->assignIsolatedUid(isolated_uid, parent_uid);
+        } else {
+            mUidMap->removeIsolatedUid(isolated_uid, parent_uid);
+        }
+    } else {
+        ALOGE("Failed to parse uid in the isolated uid change event.");
+    }
+}
+
+// TODO: what if statsd service restarts? How do we know what logs are already processed before?
+void StatsLogProcessor::OnLogEvent(LogEvent* event) {
+    std::lock_guard<std::mutex> lock(mMetricsMutex);
+    StatsdStats::getInstance().noteAtomLogged(
+        event->GetTagId(), event->GetTimestampNs() / NS_PER_SEC);
+
     // Hard-coded logic to update the isolated uid's in the uid-map.
     // The field numbers need to be currently updated by hand with atoms.proto
-    if (msg.GetTagId() == android::util::ISOLATED_UID_CHANGED) {
-        status_t err = NO_ERROR, err2 = NO_ERROR, err3 = NO_ERROR;
-        bool is_create = msg.GetBool(3, &err);
-        auto parent_uid = int(msg.GetLong(1, &err2));
-        auto isolated_uid = int(msg.GetLong(2, &err3));
-        if (err == NO_ERROR && err2 == NO_ERROR && err3 == NO_ERROR) {
-            if (is_create) {
-                mUidMap->assignIsolatedUid(isolated_uid, parent_uid);
-            } else {
-                mUidMap->removeIsolatedUid(isolated_uid, parent_uid);
-            }
-        }
+    if (event->GetTagId() == android::util::ISOLATED_UID_CHANGED) {
+        onIsolatedUidChangedEventLocked(*event);
+    } else {
+        // Map the isolated uid to host uid if necessary.
+        mapIsolatedUidToHostUidIfNecessaryLocked(event);
+    }
+
+    // pass the event to metrics managers.
+    for (auto& pair : mMetricsManagers) {
+        pair.second->onLogEvent(*event);
+        flushIfNecessaryLocked(event->GetTimestampNs(), pair.first, *(pair.second));
     }
 }
 

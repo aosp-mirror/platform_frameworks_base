@@ -45,18 +45,18 @@ TEST(UidMapTest, TestIsolatedUID) {
     addEvent.write(1);    // Indicates creation.
     addEvent.init();
 
-    EXPECT_EQ(101, m->getParentUidOrSelf(101));
+    EXPECT_EQ(101, m->getHostUidOrSelf(101));
 
-    p.OnLogEvent(addEvent);
-    EXPECT_EQ(100, m->getParentUidOrSelf(101));
+    p.OnLogEvent(&addEvent);
+    EXPECT_EQ(100, m->getHostUidOrSelf(101));
 
     LogEvent removeEvent(android::util::ISOLATED_UID_CHANGED, 1);
     removeEvent.write(100);  // parent UID
     removeEvent.write(101);  // isolated UID
     removeEvent.write(0);    // Indicates removal.
     removeEvent.init();
-    p.OnLogEvent(removeEvent);
-    EXPECT_EQ(101, m->getParentUidOrSelf(101));
+    p.OnLogEvent(&removeEvent);
+    EXPECT_EQ(101, m->getHostUidOrSelf(101));
 }
 
 TEST(UidMapTest, TestMatching) {

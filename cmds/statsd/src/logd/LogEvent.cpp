@@ -397,6 +397,14 @@ DimensionsValue LogEvent::GetSimpleAtomDimensionsValueProto(size_t atomField)  c
     return dimensionsValue;
 }
 
+DimensionsValue* LogEvent::findFieldValueOrNull(const Field& field) {
+    auto it = mFieldValueMap.find(field);
+    if (it == mFieldValueMap.end()) {
+        return nullptr;
+    }
+    return &it->second;
+}
+
 string LogEvent::ToString() const {
     ostringstream result;
     result << "{ " << mTimestampNs << " (" << mTagId << ")";

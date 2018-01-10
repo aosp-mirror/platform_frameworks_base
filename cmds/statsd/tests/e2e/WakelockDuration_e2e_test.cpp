@@ -107,7 +107,7 @@ TEST(WakelockDurationE2eTest, TestAggregatedPredicateDimensions) {
         sortLogEventsByTimestamp(&events);
 
         for (const auto& event : events) {
-            processor->OnLogEvent(*event);
+            processor->OnLogEvent(event.get());
         }
 
         ConfigMetricsReportList reports;

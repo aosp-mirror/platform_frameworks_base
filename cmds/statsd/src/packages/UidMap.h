@@ -90,8 +90,8 @@ public:
     void assignIsolatedUid(int isolatedUid, int parentUid);
     void removeIsolatedUid(int isolatedUid, int parentUid);
 
-    // Returns the parent uid if it exists. Otherwise, returns the same uid that was passed-in.
-    int getParentUidOrSelf(int uid);
+    // Returns the host uid if it exists. Otherwise, returns the same uid that was passed-in.
+    int getHostUidOrSelf(int uid) const;
 
     // Gets the output. If every config key has received the output, then the output is cleared.
     UidMapping getOutput(const ConfigKey& key);

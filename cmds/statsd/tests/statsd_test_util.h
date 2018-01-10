@@ -111,6 +111,10 @@ std::unique_ptr<LogEvent> CreateReleaseWakelockEvent(
     const std::vector<AttributionNode>& attributions,
     const string& wakelockName, uint64_t timestampNs);
 
+// Create log event for releasing wakelock.
+std::unique_ptr<LogEvent> CreateIsolatedUidChangedEvent(
+    int isolatedUid, int hostUid, bool is_create, uint64_t timestampNs);
+
 // Helper function to create an AttributionNode proto.
 AttributionNode CreateAttribution(const int& uid, const string& tag);
 
