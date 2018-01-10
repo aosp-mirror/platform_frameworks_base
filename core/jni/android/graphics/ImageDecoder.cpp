@@ -15,6 +15,7 @@
  */
 
 #include "Bitmap.h"
+#include "BitmapFactory.h"
 #include "ByteBufferStreamAdaptor.h"
 #include "CreateJavaOutputStreamAdaptor.h"
 #include "GraphicsJNI.h"
@@ -500,6 +501,11 @@ static void ImageDecoder_nClose(JNIEnv* /*env*/, jobject /*clazz*/, jlong native
     delete reinterpret_cast<ImageDecoder*>(nativePtr);
 }
 
+static jstring ImageDecoder_nGetMimeType(JNIEnv* env, jobject /*clazz*/, jlong nativePtr) {
+    auto* decoder = reinterpret_cast<ImageDecoder*>(nativePtr);
+    return encodedFormatToString(env, decoder->mCodec->getEncodedFormat());
+}
+
 static const JNINativeMethod gImageDecoderMethods[] = {
     { "nCreate",        "(J)Landroid/graphics/ImageDecoder;",    (void*) ImageDecoder_nCreateAsset },
     { "nCreate",        "(Ljava/nio/ByteBuffer;II)Landroid/graphics/ImageDecoder;", (void*) ImageDecoder_nCreateByteBuffer },
@@ -511,6 +517,7 @@ static const JNINativeMethod gImageDecoderMethods[] = {
     { "nGetSampledSize","(JI)Landroid/graphics/Point;",          (void*) ImageDecoder_nGetSampledSize },
     { "nGetPadding",    "(JLandroid/graphics/Rect;)V",           (void*) ImageDecoder_nGetPadding },
     { "nClose",         "(J)V",                                  (void*) ImageDecoder_nClose},
+    { "nGetMimeType",   "(J)Ljava/lang/String;",                 (void*) ImageDecoder_nGetMimeType },
 };
 
 int register_android_graphics_ImageDecoder(JNIEnv* env) {
