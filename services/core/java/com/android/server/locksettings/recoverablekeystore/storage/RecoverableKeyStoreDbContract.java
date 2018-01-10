@@ -104,6 +104,15 @@ class RecoverableKeyStoreDbContract {
         static final String COLUMN_NAME_UID = "uid";
 
         /**
+         * Version of the latest recovery snapshot
+         */
+        static final String COLUMN_NAME_SNAPSHOT_VERSION = "snapshot_version";
+        /**
+         * Flag to generate new snapshot.
+         */
+        static final String COLUMN_NAME_SHOULD_CREATE_SNAPSHOT = "should_create_snapshot";
+
+        /**
          * The public key of the recovery service.
          */
         static final String COLUMN_NAME_PUBLIC_KEY = "public_key";
@@ -112,6 +121,11 @@ class RecoverableKeyStoreDbContract {
          * Secret types used for end-to-end encryption.
          */
         static final String COLUMN_NAME_SECRET_TYPES = "secret_types";
+
+        /**
+         * Locally generated random number.
+         */
+        static final String COLUMN_NAME_COUNTER_ID = "counter_id";
 
         /**
          * The server parameters of the recovery service.

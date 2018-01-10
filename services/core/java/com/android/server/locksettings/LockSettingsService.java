@@ -1284,6 +1284,7 @@ public class LockSettingsService extends ILockSettings.Stub {
             fixateNewestUserKeyAuth(userId);
             synchronizeUnifiedWorkChallengeForProfiles(userId, null);
             notifyActivePasswordMetricsAvailable(null, userId);
+            mRecoverableKeyStoreManager.lockScreenSecretChanged(credentialType, credential, userId);
             return;
         }
         if (credential == null) {
@@ -1333,6 +1334,8 @@ public class LockSettingsService extends ILockSettings.Stub {
                     .verifyChallenge(userId, 0, willStore.hash, credential.getBytes());
             setUserKeyProtection(userId, credential, convertResponse(gkResponse));
             fixateNewestUserKeyAuth(userId);
+            mRecoverableKeyStoreManager.lockScreenSecretChanged(credentialType, credential,
+                userId);
             // Refresh the auth token
             doVerifyCredential(credential, credentialType, true, 0, userId, null /* progressCallback */);
             synchronizeUnifiedWorkChallengeForProfiles(userId, null);

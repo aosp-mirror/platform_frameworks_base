@@ -180,10 +180,13 @@ public class RecoverableKeyStoreManagerTest {
     @Test
     public void generateAndStoreKey_storesTheKey() throws Exception {
         int uid = Binder.getCallingUid();
+        int userId = UserHandle.getCallingUserId();
 
         mRecoverableKeyStoreManager.generateAndStoreKey(TEST_ALIAS);
 
         assertThat(mRecoverableKeyStoreDb.getKey(uid, TEST_ALIAS)).isNotNull();
+
+        assertThat(mRecoverableKeyStoreDb.getShouldCreateSnapshot(userId, uid)).isTrue();
     }
 
     @Test
@@ -200,6 +203,20 @@ public class RecoverableKeyStoreManagerTest {
         mRecoverableKeyStoreManager.removeKey(TEST_ALIAS);
 
         assertThat(mRecoverableKeyStoreDb.getKey(uid, TEST_ALIAS)).isNull();
+    }
+
+    @Test
+    public void removeKey_UpdatesShouldCreateSnapshot() throws Exception {
+        int uid = Binder.getCallingUid();
+        int userId = UserHandle.getCallingUserId();
+
+        mRecoverableKeyStoreManager.generateAndStoreKey(TEST_ALIAS);
+        // Pretend that key was synced
+        mRecoverableKeyStoreDb.setShouldCreateSnapshot(userId, uid, false);
+
+        mRecoverableKeyStoreManager.removeKey(TEST_ALIAS);
+
+        assertThat(mRecoverableKeyStoreDb.getShouldCreateSnapshot(userId, uid)).isTrue();
     }
 
     @Test
@@ -253,7 +270,8 @@ public class RecoverableKeyStoreManagerTest {
                     ImmutableList.of());
             fail("should have thrown");
         } catch (ServiceSpecificException e) {
-            assertEquals("Only a single KeyStoreRecoveryMetadata is supported", e.getMessage());
+            assertThat(e.getMessage()).startsWith(
+                    "Only a single KeyStoreRecoveryMetadata is supported");
         }
     }
 

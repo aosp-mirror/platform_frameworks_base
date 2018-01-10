@@ -27,34 +27,34 @@ import com.android.internal.annotations.GuardedBy;
  *
  * <p>Recovery snapshots are generated after a successful screen unlock. They are only generated if
  * the recoverable keystore has been mutated since the previous snapshot. This class stores only the
- * latest snapshot for each user.
+ * latest snapshot for each recovery agent.
  *
  * <p>This class is thread-safe. It is used both on the service thread and the
  * {@link com.android.server.locksettings.recoverablekeystore.KeySyncTask} thread.
  */
 public class RecoverySnapshotStorage {
     @GuardedBy("this")
-    private final SparseArray<KeyStoreRecoveryData> mSnapshotByUserId = new SparseArray<>();
+    private final SparseArray<KeyStoreRecoveryData> mSnapshotByUid = new SparseArray<>();
 
     /**
-     * Sets the latest {@code snapshot} for the user {@code userId}.
+     * Sets the latest {@code snapshot} for the recovery agent {@code uid}.
      */
-    public synchronized void put(int userId, KeyStoreRecoveryData snapshot) {
-        mSnapshotByUserId.put(userId, snapshot);
+    public synchronized void put(int uid, KeyStoreRecoveryData snapshot) {
+        mSnapshotByUid.put(uid, snapshot);
     }
 
     /**
-     * Returns the latest snapshot for user {@code userId}, or null if none exists.
+     * Returns the latest snapshot for the recovery agent {@code uid}, or null if none exists.
      */
     @Nullable
-    public synchronized KeyStoreRecoveryData get(int userId) {
-        return mSnapshotByUserId.get(userId);
+    public synchronized KeyStoreRecoveryData get(int uid) {
+        return mSnapshotByUid.get(uid);
     }
 
     /**
-     * Removes any (if any) snapshot associated with user {@code userId}.
+     * Removes any (if any) snapshot associated with recovery agent {@code uid}.
      */
-    public synchronized void remove(int userId) {
-        mSnapshotByUserId.remove(userId);
+    public synchronized void remove(int uid) {
+        mSnapshotByUid.remove(uid);
     }
 }

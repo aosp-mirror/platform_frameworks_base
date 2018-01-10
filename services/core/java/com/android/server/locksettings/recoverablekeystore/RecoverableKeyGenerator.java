@@ -99,6 +99,7 @@ public class RecoverableKeyGenerator {
                             Locale.US, "Failed writing (%d, %s) to database.", uid, alias));
         }
 
+        mDatabase.setShouldCreateSnapshot(userId, uid, true);
         return key.getEncoded();
     }
 }
