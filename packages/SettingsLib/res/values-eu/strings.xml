@@ -202,7 +202,6 @@
     <string name="tethering_hardware_offload" msgid="7470077827090325814">"Konexioa partekatzeko hardwarearen azelerazioa"</string>
     <string name="bluetooth_show_devices_without_names" msgid="4708446092962060176">"Erakutsi Bluetooth gailuak izenik gabe"</string>
     <string name="bluetooth_disable_absolute_volume" msgid="2660673801947898809">"Desgaitu bolumen absolutua"</string>
-    <string name="bluetooth_enable_inband_ringing" msgid="3291686366721786740">"Gaitu tonuak audio-kanal berean erreproduzitzeko aukera"</string>
     <string name="bluetooth_select_avrcp_version_string" msgid="3750059931120293633">"Bluetooth AVRCP bertsioa"</string>
     <string name="bluetooth_select_avrcp_version_dialog_title" msgid="7277329668298705702">"Hautatu Bluetooth AVRCP bertsioa"</string>
     <string name="bluetooth_select_a2dp_codec_type" msgid="90597356942154882">"Bluetooth bidezko audioaren kodeka"</string>
@@ -248,7 +247,6 @@
     <string name="verify_apps_over_usb_summary" msgid="9164096969924529200">"Egiaztatu ADB/ADT bidez instalatutako aplikazioak portaera kaltegarriak antzemateko."</string>
     <string name="bluetooth_show_devices_without_names_summary" msgid="2351196058115755520">"Bluetooth gailuak izenik gabe (MAC helbideak soilik) erakutsiko dira"</string>
     <string name="bluetooth_disable_absolute_volume_summary" msgid="6031284410786545957">"Desgaitu egiten du Bluetooth bidezko bolumen absolutuaren eginbidea urruneko gailuetan arazoak hautematen badira; esaterako, bolumena ozenegia bada edo ezin bada kontrolatu."</string>
-    <string name="bluetooth_enable_inband_ringing_summary" msgid="2787866074741784975">"Onartu telefonoko tonuak Bluetooth entzungailuetan erreproduzitzeko aukera"</string>
     <string name="enable_terminal_title" msgid="95572094356054120">"Tokiko terminala"</string>
     <string name="enable_terminal_summary" msgid="67667852659359206">"Gaitu tokiko shell-sarbidea duen terminal-aplikazioa"</string>
     <string name="hdcp_checking_title" msgid="8605478913544273282">"HDCP egiaztapena"</string>
@@ -353,7 +351,7 @@
     <string name="daltonizer_mode_deuteranomaly" msgid="5475532989673586329">"Daltonismoa (gorri-berdeak)"</string>
     <string name="daltonizer_mode_protanomaly" msgid="8424148009038666065">"Protanopia (gorri-berdeak)"</string>
     <string name="daltonizer_mode_tritanomaly" msgid="481725854987912389">"Tritanopia (urdin-horia)"</string>
-    <string name="accessibility_display_daltonizer_preference_title" msgid="5800761362678707872">"Kolorearen zuzenketa"</string>
+    <string name="accessibility_display_daltonizer_preference_title" msgid="5800761362678707872">"Koloreen zuzenketa"</string>
     <string name="accessibility_display_daltonizer_preference_subtitle" msgid="3484969015295282911">"Eginbidea esperimentala da eta eragina izan dezake funtzionamenduan."</string>
     <string name="daltonizer_type_overridden" msgid="3116947244410245916">"<xliff:g id="TITLE">%1$s</xliff:g> hobespena gainjarri zaio"</string>
     <string name="power_remaining_duration_only" msgid="845431008899029842">"<xliff:g id="TIME">^1</xliff:g> inguru gelditzen dira"</string>

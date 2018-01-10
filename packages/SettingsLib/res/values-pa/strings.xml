@@ -202,7 +202,6 @@
     <string name="tethering_hardware_offload" msgid="7470077827090325814">"ਟੈਦਰਿੰਗ ਹਾਰਡਵੇਅਰ ਐਕਸੈੱਲਰੇਸ਼ਨ"</string>
     <string name="bluetooth_show_devices_without_names" msgid="4708446092962060176">"ਅਨਾਮ ਬਲੂਟੁੱਥ ਡੀਵਾਈਸਾਂ ਦਿਖਾਓ"</string>
     <string name="bluetooth_disable_absolute_volume" msgid="2660673801947898809">"ਪੂਰਨ ਵੌਲਿਊਮ ਨੂੰ ਅਯੋਗ ਬਣਾਓ"</string>
-    <string name="bluetooth_enable_inband_ringing" msgid="3291686366721786740">"ਇਨ-ਬੈਂਡ ਘੰਟੀ ਵੱਜਣ ਨੂੰ ਚਾਲੂ ਕਰੋ"</string>
     <string name="bluetooth_select_avrcp_version_string" msgid="3750059931120293633">"ਬਲੂਟੁੱਥ AVRCP ਵਰਜਨ"</string>
     <string name="bluetooth_select_avrcp_version_dialog_title" msgid="7277329668298705702">"ਬਲੂਟੁੱਥ AVRCP ਵਰਜਨ ਚੁਣੋ"</string>
     <string name="bluetooth_select_a2dp_codec_type" msgid="90597356942154882">"ਬਲੂਟੁੱਥ ਔਡੀਓ ਕੋਡੇਕ"</string>
@@ -248,7 +247,6 @@
     <string name="verify_apps_over_usb_summary" msgid="9164096969924529200">"ਹਾਨੀਕਾਰਕ ਵਿਵਹਾਰ ਲਈ ADB/ADT ਰਾਹੀਂ ਸਥਾਪਤ ਕੀਤੀਆਂ ਐਪਾਂ ਦੀ ਜਾਂਚ ਕਰੋ।"</string>
     <string name="bluetooth_show_devices_without_names_summary" msgid="2351196058115755520">"ਅਨਾਮ ਬਲੂਟੁੱਥ ਡੀਵਾਈਸਾਂ ਦਿਖਾਈਆਂ ਜਾਣਗੀਆਂ (ਸਿਰਫ਼ MAC ਪਤੇ)"</string>
     <string name="bluetooth_disable_absolute_volume_summary" msgid="6031284410786545957">"ਰਿਮੋਟ ਡੀਵਾਈਸਾਂ ਨਾਲ ਵੌਲਿਊਮ ਸਮੱਸਿਆਵਾਂ ਜਿਵੇਂ ਕਿ ਨਾ ਪਸੰਦ ਕੀਤੀ ਜਾਣ ਵਾਲੀ ਉੱਚੀ ਵੌਲਿਊਮ ਜਾਂ ਕੰਟਰੋਲ ਦੀ ਕਮੀ ਵਰਗੀ ਹਾਲਤ ਵਿੱਚ ਬਲੂਟੁੱਥ ਪੂਰਨ ਵੌਲਿਊਮ ਵਿਸ਼ੇਸ਼ਤਾ ਨੂੰ ਅਯੋਗ ਬਣਾਉਂਦਾ ਹੈ।"</string>
-    <string name="bluetooth_enable_inband_ringing_summary" msgid="2787866074741784975">"ਤੁਹਾਡੇ ਫ਼ੋਨ ਦੀਆਂ ਰਿੰਗਟੋਨਾਂ ਨੂੰ ਬਲੂਟੁੱਥ ਹੈੱਡਸੈੱਟਾਂ \'ਤੇ ਚਲਾਉਣ ਦੀ ਇਜਾਜ਼ਤ ਦਿਓ"</string>
     <string name="enable_terminal_title" msgid="95572094356054120">"ਸਥਾਨਕ ਟਰਮੀਨਲ"</string>
     <string name="enable_terminal_summary" msgid="67667852659359206">"ਟਰਮੀਨਲ ਐਪ ਨੂੰ ਚਾਲੂ ਕਰੋ ਜੋ ਸਥਾਨਕ ਸ਼ੈਲ ਪਹੁੰਚ ਪੇਸ਼ਕਸ਼ ਕਰਦਾ ਹੈ"</string>
     <string name="hdcp_checking_title" msgid="8605478913544273282">"HDCP ਜਾਂਚ"</string>

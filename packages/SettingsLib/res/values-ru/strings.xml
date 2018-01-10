@@ -202,7 +202,6 @@
     <string name="tethering_hardware_offload" msgid="7470077827090325814">"Аппаратное ускорение в режиме модема"</string>
     <string name="bluetooth_show_devices_without_names" msgid="4708446092962060176">"Показывать Bluetooth-устройства без названий"</string>
     <string name="bluetooth_disable_absolute_volume" msgid="2660673801947898809">"Отключить абсолютный уровень громкости"</string>
-    <string name="bluetooth_enable_inband_ringing" msgid="3291686366721786740">"Включить внутриполосное воспроизведение"</string>
     <string name="bluetooth_select_avrcp_version_string" msgid="3750059931120293633">"Версия Bluetooth AVRCP"</string>
     <string name="bluetooth_select_avrcp_version_dialog_title" msgid="7277329668298705702">"Выберите версию Bluetooth AVRCP"</string>
     <string name="bluetooth_select_a2dp_codec_type" msgid="90597356942154882">"Аудиокодек для передачи через Bluetooth"</string>
@@ -248,7 +247,6 @@
     <string name="verify_apps_over_usb_summary" msgid="9164096969924529200">"Выполнять проверку безопасности приложений при установке через ADB/ADT"</string>
     <string name="bluetooth_show_devices_without_names_summary" msgid="2351196058115755520">"Показывать Bluetooth-устройства без названий (только с MAC-адресами)"</string>
     <string name="bluetooth_disable_absolute_volume_summary" msgid="6031284410786545957">"Отключить абсолютный уровень громкости Bluetooth при возникновении проблем на удаленных устройствах, например при слишком громком звучании или невозможности контролировать настройку."</string>
-    <string name="bluetooth_enable_inband_ringing_summary" msgid="2787866074741784975">"Разрешить воспроизведение рингтонов на телефоне через Bluetooth-гарнитуру"</string>
     <string name="enable_terminal_title" msgid="95572094356054120">"Локальный терминальный доступ"</string>
     <string name="enable_terminal_summary" msgid="67667852659359206">"Разрешить терминальный доступ к локальной оболочке"</string>
     <string name="hdcp_checking_title" msgid="8605478913544273282">"Проверка HDCP"</string>

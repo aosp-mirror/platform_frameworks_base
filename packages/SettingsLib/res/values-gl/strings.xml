@@ -202,7 +202,6 @@
     <string name="tethering_hardware_offload" msgid="7470077827090325814">"Aceleración de hardware para conexión compartida"</string>
     <string name="bluetooth_show_devices_without_names" msgid="4708446092962060176">"Mostrar dispositivos Bluetooth sen nomes"</string>
     <string name="bluetooth_disable_absolute_volume" msgid="2660673801947898809">"Desactivar volume absoluto"</string>
-    <string name="bluetooth_enable_inband_ringing" msgid="3291686366721786740">"Activar a función de soar na mesma banda"</string>
     <string name="bluetooth_select_avrcp_version_string" msgid="3750059931120293633">"Versión AVRCP de Bluetooth"</string>
     <string name="bluetooth_select_avrcp_version_dialog_title" msgid="7277329668298705702">"Selecciona a versión AVRCP de Bluetooth"</string>
     <string name="bluetooth_select_a2dp_codec_type" msgid="90597356942154882">"Códec de audio por Bluetooth"</string>
@@ -248,7 +247,6 @@
     <string name="verify_apps_over_usb_summary" msgid="9164096969924529200">"Comprobar as aplicacións instaladas a través de ADB/ADT para detectar comportamento perigoso."</string>
     <string name="bluetooth_show_devices_without_names_summary" msgid="2351196058115755520">"Mostraranse dispositivos Bluetooth sen nomes (só enderezos MAC)"</string>
     <string name="bluetooth_disable_absolute_volume_summary" msgid="6031284410786545957">"Desactiva a función do volume absoluto do Bluetooth en caso de que se produzan problemas de volume cos dispositivos remotos, como volume demasiado alto ou falta de control."</string>
-    <string name="bluetooth_enable_inband_ringing_summary" msgid="2787866074741784975">"Permite que os tons de chamada do teléfono se reproduzan nos auriculares Bluetooth"</string>
     <string name="enable_terminal_title" msgid="95572094356054120">"Terminal local"</string>
     <string name="enable_terminal_summary" msgid="67667852659359206">"Activa a aplicación terminal que ofrece acceso ao shell local"</string>
     <string name="hdcp_checking_title" msgid="8605478913544273282">"Comprobación HDCP"</string>

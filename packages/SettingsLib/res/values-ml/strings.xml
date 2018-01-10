@@ -202,7 +202,6 @@
     <string name="tethering_hardware_offload" msgid="7470077827090325814">"ടെതറിംഗ് ഹാർഡ്‌വെയർ ത്വരിതപ്പെടുത്തൽ"</string>
     <string name="bluetooth_show_devices_without_names" msgid="4708446092962060176">"പേരില്ലാത്ത Bluetooth ഉപകരണങ്ങൾ കാണിക്കുക"</string>
     <string name="bluetooth_disable_absolute_volume" msgid="2660673801947898809">"അബ്‌സൊല്യൂട്ട് വോളിയം പ്രവർത്തനരഹിതമാക്കുക"</string>
-    <string name="bluetooth_enable_inband_ringing" msgid="3291686366721786740">"ഇൻ-ബാൻഡ് റിംഗുചെയ്യൽ പ്രവർത്തനക്ഷമമാക്കുക"</string>
     <string name="bluetooth_select_avrcp_version_string" msgid="3750059931120293633">"Bluetooth AVRCP പതിപ്പ്"</string>
     <string name="bluetooth_select_avrcp_version_dialog_title" msgid="7277329668298705702">"Bluetooth AVRCP പതിപ്പ് തിരഞ്ഞെടുക്കുക"</string>
     <string name="bluetooth_select_a2dp_codec_type" msgid="90597356942154882">"Bluetooth ഓഡിയോ കോഡെക്"</string>
@@ -248,7 +247,6 @@
     <string name="verify_apps_over_usb_summary" msgid="9164096969924529200">"കേടാക്കുന്ന പ്രവർത്തനരീതിയുള്ള ADB/ADT വഴി ഇൻസ്റ്റാളുചെയ്‌ത അപ്ലിക്കേഷനുകൾ പരിശോധിക്കുക."</string>
     <string name="bluetooth_show_devices_without_names_summary" msgid="2351196058115755520">"പേരില്ലാത്ത Bluetooth ഉപകരണങ്ങൾ (MAC വിലാസങ്ങൾ മാത്രം) പ്രദർശിപ്പിക്കും"</string>
     <string name="bluetooth_disable_absolute_volume_summary" msgid="6031284410786545957">"അസ്വീകാര്യമായ തരത്തിൽ ഉയർന്ന വോളിയമോ ശബ്ദ നിയന്ത്രണത്തിന്റെ അഭാവമോ പോലെ, വിദൂര ഉപകരണങ്ങളുമായി ബന്ധപ്പെട്ട വോളിയം പ്രശ്നങ്ങൾ ഉണ്ടാകുന്ന സാഹചര്യത്തിൽ, Bluetooth അബ്‌സൊല്യൂട്ട് വോളിയം ഫീച്ചർ പ്രവർത്തനരഹിതമാക്കുന്നു."</string>
-    <string name="bluetooth_enable_inband_ringing_summary" msgid="2787866074741784975">"ഫോണിലെ റിംഗ്‌ടോണുകൾ Bluetooth ഹെഡ്‌സെറ്റുകളിൽ പ്ലേ ചെയ്യാനായി അനുവദിക്കുക"</string>
     <string name="enable_terminal_title" msgid="95572094356054120">"പ്രാദേശിക ടെർമിനൽ"</string>
     <string name="enable_terminal_summary" msgid="67667852659359206">"പ്രാദേശിക ഷെൽ ആക്‌സസ് നൽകുന്ന ടെർമിനൽ അപ്ലിക്കേഷൻ പ്രവർത്തനക്ഷമമാക്കുക"</string>
     <string name="hdcp_checking_title" msgid="8605478913544273282">"HDCP പരിശോധന"</string>

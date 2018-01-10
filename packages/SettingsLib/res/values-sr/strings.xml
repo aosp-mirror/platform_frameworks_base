@@ -202,7 +202,6 @@
     <string name="tethering_hardware_offload" msgid="7470077827090325814">"Хардверско убрзање привезивања"</string>
     <string name="bluetooth_show_devices_without_names" msgid="4708446092962060176">"Прикажи Bluetooth уређаје без назива"</string>
     <string name="bluetooth_disable_absolute_volume" msgid="2660673801947898809">"Онемогући главно подешавање јачине звука"</string>
-    <string name="bluetooth_enable_inband_ringing" msgid="3291686366721786740">"Омогућавање звоњаве на истом каналу"</string>
     <string name="bluetooth_select_avrcp_version_string" msgid="3750059931120293633">"Верзија Bluetooth AVRCP-а"</string>
     <string name="bluetooth_select_avrcp_version_dialog_title" msgid="7277329668298705702">"Изаберите верзију Bluetooth AVRCP-а"</string>
     <string name="bluetooth_select_a2dp_codec_type" msgid="90597356942154882">"Bluetooth аудио кодек"</string>
@@ -248,7 +247,6 @@
     <string name="verify_apps_over_usb_summary" msgid="9164096969924529200">"Проверава да ли су апликације инсталиране преко ADB-а/ADT-а штетне."</string>
     <string name="bluetooth_show_devices_without_names_summary" msgid="2351196058115755520">"Биће приказани Bluetooth уређаји без назива (само са MAC адресама)"</string>
     <string name="bluetooth_disable_absolute_volume_summary" msgid="6031284410786545957">"Онемогућава главно подешавање јачине звука на Bluetooth уређају у случају проблема са јачином звука на даљинским уређајима, као што су изузетно велика јачина звука или недостатак контроле."</string>
-    <string name="bluetooth_enable_inband_ringing_summary" msgid="2787866074741784975">"Омогућите да се мелодија звона на телефону пушта преко Bluetooth слушалица"</string>
     <string name="enable_terminal_title" msgid="95572094356054120">"Локални терминал"</string>
     <string name="enable_terminal_summary" msgid="67667852659359206">"Омогући аплик. терминала за приступ локалном командном окружењу"</string>
     <string name="hdcp_checking_title" msgid="8605478913544273282">"HDCP провера"</string>

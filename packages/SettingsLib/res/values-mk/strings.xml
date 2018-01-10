@@ -202,7 +202,6 @@
     <string name="tethering_hardware_offload" msgid="7470077827090325814">"Хардверско забрзување за врзување"</string>
     <string name="bluetooth_show_devices_without_names" msgid="4708446092962060176">"Прикажувај уреди со Bluetooth без имиња"</string>
     <string name="bluetooth_disable_absolute_volume" msgid="2660673801947898809">"Оневозможете апсолутна јачина на звук"</string>
-    <string name="bluetooth_enable_inband_ringing" msgid="3291686366721786740">"Овозможете ѕвонење во појас"</string>
     <string name="bluetooth_select_avrcp_version_string" msgid="3750059931120293633">"Верзија Bluetooth AVRCP"</string>
     <string name="bluetooth_select_avrcp_version_dialog_title" msgid="7277329668298705702">"Изберете верзија Bluetooth AVRCP"</string>
     <string name="bluetooth_select_a2dp_codec_type" msgid="90597356942154882">"Кодек за аудио преку Bluetooth"</string>
@@ -248,7 +247,6 @@
     <string name="verify_apps_over_usb_summary" msgid="9164096969924529200">"Провери апликации инсталирани преку ADB/ADT за штетно однесување."</string>
     <string name="bluetooth_show_devices_without_names_summary" msgid="2351196058115755520">"Уредите со Bluetooth без имиња (само MAC-адреси) ќе се прикажуваат"</string>
     <string name="bluetooth_disable_absolute_volume_summary" msgid="6031284410786545957">"Ја оневозможува карактеристиката за апсолутна јачина на звук преку Bluetooth во случај кога ќе настанат проблеми со далечинските уреди, како на пр., неприфатливо силен звук или недоволна контрола."</string>
-    <string name="bluetooth_enable_inband_ringing_summary" msgid="2787866074741784975">"Дозволи мелодиите на телефонот да се пуштаат на Bluetooth слушалките"</string>
     <string name="enable_terminal_title" msgid="95572094356054120">"Локален терминал"</string>
     <string name="enable_terminal_summary" msgid="67667852659359206">"Овозможи апликација на терминал што овозможува локален пристап кон школка."</string>
     <string name="hdcp_checking_title" msgid="8605478913544273282">"Проверување HDCP"</string>

@@ -202,7 +202,6 @@
     <string name="tethering_hardware_offload" msgid="7470077827090325814">"شتاب سخت‌افزاری اتصال به اینترنت با تلفن همراه"</string>
     <string name="bluetooth_show_devices_without_names" msgid="4708446092962060176">"نمایش دستگاه‌های بلوتوث بدون نام"</string>
     <string name="bluetooth_disable_absolute_volume" msgid="2660673801947898809">"غیرفعال کردن میزان صدای مطلق"</string>
-    <string name="bluetooth_enable_inband_ringing" msgid="3291686366721786740">"فعال کردن زنگ زدن درون باندی"</string>
     <string name="bluetooth_select_avrcp_version_string" msgid="3750059931120293633">"‏نسخه AVRCP بلوتوث"</string>
     <string name="bluetooth_select_avrcp_version_dialog_title" msgid="7277329668298705702">"‏انتخاب نسخه AVRCP بلوتوث"</string>
     <string name="bluetooth_select_a2dp_codec_type" msgid="90597356942154882">"کدک بلوتوث صوتی"</string>
@@ -248,7 +247,6 @@
     <string name="verify_apps_over_usb_summary" msgid="9164096969924529200">"‏برنامه‌های نصب شده از طریق ADB/ADT را ازنظر رفتار مخاطره‌آمیز بررسی کنید."</string>
     <string name="bluetooth_show_devices_without_names_summary" msgid="2351196058115755520">"‏دستگاه‌های بلوتوث بدون نام (فقط نشانی‌های MAC) نشان داده خواهند شد"</string>
     <string name="bluetooth_disable_absolute_volume_summary" msgid="6031284410786545957">"در صورت وجود مشکل میزان صدا با دستگاه‌های راه دور مثل میزان صدای بلند ناخوشایند یا عدم کنترل صدا، قابلیت میزان صدای کامل بلوتوث را غیرفعال کنید."</string>
-    <string name="bluetooth_enable_inband_ringing_summary" msgid="2787866074741784975">"اجازه می‌دهد آهنگ‌های زنگ تلفن در هدست‌های بلوتوث پخش شود"</string>
     <string name="enable_terminal_title" msgid="95572094356054120">"ترمینال محلی"</string>
     <string name="enable_terminal_summary" msgid="67667852659359206">"فعال کردن ترمینال برنامه‌ کاربردی که دسترسی به برنامه محلی را پیشنهاد می‌کند"</string>
     <string name="hdcp_checking_title" msgid="8605478913544273282">"‏بررسی HDCP"</string>

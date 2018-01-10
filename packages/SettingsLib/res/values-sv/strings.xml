@@ -202,7 +202,6 @@
     <string name="tethering_hardware_offload" msgid="7470077827090325814">"Maskinvaruacceleration för internetdelning"</string>
     <string name="bluetooth_show_devices_without_names" msgid="4708446092962060176">"Visa namnlösa Bluetooth-enheter"</string>
     <string name="bluetooth_disable_absolute_volume" msgid="2660673801947898809">"Inaktivera Absolute volume"</string>
-    <string name="bluetooth_enable_inband_ringing" msgid="3291686366721786740">"Aktivera samtal inom nätverket"</string>
     <string name="bluetooth_select_avrcp_version_string" msgid="3750059931120293633">"AVRCP-version för Bluetooth"</string>
     <string name="bluetooth_select_avrcp_version_dialog_title" msgid="7277329668298705702">"Välj AVRCP-version för Bluetooth"</string>
     <string name="bluetooth_select_a2dp_codec_type" msgid="90597356942154882">"Ljudkodek för Bluetooth"</string>
@@ -248,7 +247,6 @@
     <string name="verify_apps_over_usb_summary" msgid="9164096969924529200">"Kontrollera om appar som installeras via ADB/ADT kan vara skadliga."</string>
     <string name="bluetooth_show_devices_without_names_summary" msgid="2351196058115755520">"Bluetooth-enheter utan namn (enbart MAC-adresser) visas"</string>
     <string name="bluetooth_disable_absolute_volume_summary" msgid="6031284410786545957">"Inaktivera Bluetooth-funktionen Absolute volume om det skulle uppstå problem med volymen på fjärrenheter, t.ex. alldeles för hög volym eller brist på kontroll."</string>
-    <string name="bluetooth_enable_inband_ringing_summary" msgid="2787866074741784975">"Tillåt att ringsignaler på mobilen kan spelas upp i Bluetooth-headset"</string>
     <string name="enable_terminal_title" msgid="95572094356054120">"Lokal terminal"</string>
     <string name="enable_terminal_summary" msgid="67667852659359206">"Aktivera en terminalapp som ger åtkomst till hyllor lokalt"</string>
     <string name="hdcp_checking_title" msgid="8605478913544273282">"HDCP-kontroll"</string>

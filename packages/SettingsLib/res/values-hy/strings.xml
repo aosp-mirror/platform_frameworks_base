@@ -202,7 +202,6 @@
     <string name="tethering_hardware_offload" msgid="7470077827090325814">"Սարքակազմի արագացման միացում"</string>
     <string name="bluetooth_show_devices_without_names" msgid="4708446092962060176">"Ցուցադրել Bluetooth սարքերն առանց անունների"</string>
     <string name="bluetooth_disable_absolute_volume" msgid="2660673801947898809">"Անջատել ձայնի բացարձակ ուժգնությունը"</string>
-    <string name="bluetooth_enable_inband_ringing" msgid="3291686366721786740">"Միացնել ներխմբային զանգը"</string>
     <string name="bluetooth_select_avrcp_version_string" msgid="3750059931120293633">"Bluetooth AVRCP տարբերակը"</string>
     <string name="bluetooth_select_avrcp_version_dialog_title" msgid="7277329668298705702">"Ընտրել Bluetooth AVRCP տարբերակը"</string>
     <string name="bluetooth_select_a2dp_codec_type" msgid="90597356942154882">"Bluetooth աուդիո կոդեկ"</string>
@@ -248,7 +247,6 @@
     <string name="verify_apps_over_usb_summary" msgid="9164096969924529200">"Ստուգեք տեղադրված հավելվածը ADB/ADT-ի միջոցով կասկածելի աշխատանքի պատճառով:"</string>
     <string name="bluetooth_show_devices_without_names_summary" msgid="2351196058115755520">"Bluetooth սարքերը կցուցադրվեն առանց անունների (միայն MAC հասցեները)"</string>
     <string name="bluetooth_disable_absolute_volume_summary" msgid="6031284410786545957">"Կասեցնում է Bluetooth-ի ձայնի բացարձակ ուժգնության գործառույթը՝ հեռավոր սարքերի հետ ձայնի ուժգնությանը վերաբերող խնդիրներ ունենալու դեպքում (օրինակ՝ երբ ձայնի ուժգնությունն անընդունելի է կամ դրա կառավարումը հնարավոր չէ):"</string>
-    <string name="bluetooth_enable_inband_ringing_summary" msgid="2787866074741784975">"Ընձեռել հեռախոսի բոլոր զանգերանգների Bluetooth ականջակալներով նվագարկումը"</string>
     <string name="enable_terminal_title" msgid="95572094356054120">"Տեղային տերմինալ"</string>
     <string name="enable_terminal_summary" msgid="67667852659359206">"Միացնել տերմինալային հավելվածը, որն առաջարկում է մուտք տեղային խեցի"</string>
     <string name="hdcp_checking_title" msgid="8605478913544273282">"HDCP ստուգում"</string>
