@@ -440,6 +440,13 @@ public interface WindowManagerPolicy extends WindowManagerPolicyConstants {
          */
         public boolean isDimming();
 
+        /**
+         * Returns true if the window is letterboxed for the display cutout.
+         */
+        default boolean isLetterboxedForDisplayCutoutLw() {
+            return false;
+        }
+
         /** @return the current windowing mode of this window. */
         int getWindowingMode();
 
