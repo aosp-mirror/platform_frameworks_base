@@ -16,9 +16,13 @@
 
 package android.content.om;
 
+import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.os.Parcel;
 import android.os.Parcelable;
+
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
 
 /**
  * Immutable overlay information about a package. All PackageInfos that
@@ -27,6 +31,19 @@ import android.os.Parcelable;
  * @hide
  */
 public final class OverlayInfo implements Parcelable {
+
+    @IntDef(prefix = "STATE_", value = {
+            STATE_UNKNOWN,
+            STATE_MISSING_TARGET,
+            STATE_NO_IDMAP,
+            STATE_DISABLED,
+            STATE_ENABLED,
+            STATE_TARGET_UPGRADING,
+            STATE_OVERLAY_UPGRADING,
+    })
+    @Retention(RetentionPolicy.SOURCE)
+    public @interface State {}
+
     /**
      * An internal state used as the initial state of an overlay. OverlayInfo
      * objects exposed outside the {@link
@@ -61,6 +78,18 @@ public final class OverlayInfo implements Parcelable {
     public static final int STATE_ENABLED = 3;
 
     /**
+     * The target package is currently being upgraded; the state will change
+     * once the package installation has finished.
+     */
+    public static final int STATE_TARGET_UPGRADING = 4;
+
+    /**
+     * The overlay package is currently being upgraded; the state will change
+     * once the package installation has finished.
+     */
+    public static final int STATE_OVERLAY_UPGRADING = 5;
+
+    /**
      * Package name of the overlay package
      */
     public final String packageName;
@@ -77,13 +106,8 @@ public final class OverlayInfo implements Parcelable {
 
     /**
      * The state of this OverlayInfo as defined by the STATE_* constants in this class.
-     *
-     * @see #STATE_MISSING_TARGET
-     * @see #STATE_NO_IDMAP
-     * @see #STATE_DISABLED
-     * @see #STATE_ENABLED
      */
-    public final int state;
+    public final @State int state;
 
     /**
      * User handle for which this overlay applies
@@ -96,13 +120,13 @@ public final class OverlayInfo implements Parcelable {
      * @param source the source OverlayInfo to base the new instance on
      * @param state the new state for the source OverlayInfo
      */
-    public OverlayInfo(@NonNull OverlayInfo source, int state) {
+    public OverlayInfo(@NonNull OverlayInfo source, @State int state) {
         this(source.packageName, source.targetPackageName, source.baseCodePath, state,
                 source.userId);
     }
 
     public OverlayInfo(@NonNull String packageName, @NonNull String targetPackageName,
-            @NonNull String baseCodePath, int state, int userId) {
+            @NonNull String baseCodePath, @State int state, int userId) {
         this.packageName = packageName;
         this.targetPackageName = targetPackageName;
         this.baseCodePath = baseCodePath;
@@ -136,6 +160,8 @@ public final class OverlayInfo implements Parcelable {
             case STATE_NO_IDMAP:
             case STATE_DISABLED:
             case STATE_ENABLED:
+            case STATE_TARGET_UPGRADING:
+            case STATE_OVERLAY_UPGRADING:
                 break;
             default:
                 throw new IllegalArgumentException("State " + state + " is not a valid state");
@@ -156,7 +182,8 @@ public final class OverlayInfo implements Parcelable {
         dest.writeInt(userId);
     }
 
-    public static final Parcelable.Creator<OverlayInfo> CREATOR = new Parcelable.Creator<OverlayInfo>() {
+    public static final Parcelable.Creator<OverlayInfo> CREATOR =
+            new Parcelable.Creator<OverlayInfo>() {
         @Override
         public OverlayInfo createFromParcel(Parcel source) {
             return new OverlayInfo(source);
@@ -189,14 +216,9 @@ public final class OverlayInfo implements Parcelable {
      * Translate a state to a human readable string. Only intended for
      * debugging purposes.
      *
-     * @see #STATE_MISSING_TARGET
-     * @see #STATE_NO_IDMAP
-     * @see #STATE_DISABLED
-     * @see #STATE_ENABLED
-     *
      * @return a human readable String representing the state.
      */
-    public static String stateToString(int state) {
+    public static String stateToString(@State int state) {
         switch (state) {
             case STATE_UNKNOWN:
                 return "STATE_UNKNOWN";
@@ -208,6 +230,10 @@ public final class OverlayInfo implements Parcelable {
                 return "STATE_DISABLED";
             case STATE_ENABLED:
                 return "STATE_ENABLED";
+            case STATE_TARGET_UPGRADING:
+                return "STATE_TARGET_UPGRADING";
+            case STATE_OVERLAY_UPGRADING:
+                return "STATE_OVERLAY_UPGRADING";
             default:
                 return "<unknown state>";
         }
