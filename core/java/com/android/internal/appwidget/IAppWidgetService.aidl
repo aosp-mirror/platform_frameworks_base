@@ -56,6 +56,7 @@ interface IAppWidgetService {
     void partiallyUpdateAppWidgetIds(String callingPackage, in int[] appWidgetIds,
             in RemoteViews views);
     void updateAppWidgetProvider(in ComponentName provider, in RemoteViews views);
+    void updateAppWidgetProviderInfo(in ComponentName provider, in String metadataKey);
     void notifyAppWidgetViewDataChanged(String packageName, in int[] appWidgetIds, int viewId);
     ParceledListSlice getInstalledProvidersForProfile(int categoryFilter, int profileId,
             String packageName);
