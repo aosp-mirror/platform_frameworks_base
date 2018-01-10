@@ -21,9 +21,11 @@ LOCAL_PACKAGE_NAME := StatsdDogfood
 LOCAL_SRC_FILES := $(call all-java-files-under, src)
 LOCAL_SRC_FILES += ../../src/stats_log.proto \
                    ../../src/atoms.proto \
+                   ../../src/perfetto/perfetto_config.proto \
                    ../../src/statsd_config.proto
 
 LOCAL_PROTOC_FLAGS := --proto_path=$(LOCAL_PATH)/../../src/
+
 LOCAL_RESOURCE_DIR := $(LOCAL_PATH)/res
 LOCAL_STATIC_JAVA_LIBRARIES := platformprotoslite
 

@@ -34,6 +34,7 @@ statsd_common_src := \
     src/config/ConfigKey.cpp \
     src/config/ConfigListener.cpp \
     src/config/ConfigManager.cpp \
+    src/external/Perfetto.cpp \
     src/external/StatsPuller.cpp \
     src/external/StatsCompanionServicePuller.cpp \
     src/external/SubsystemSleepStatePuller.cpp \
@@ -57,6 +58,7 @@ statsd_common_src := \
     src/metrics/MetricsManager.cpp \
     src/metrics/metrics_manager_util.cpp \
     src/packages/UidMap.cpp \
+    src/perfetto/perfetto_config.proto \
     src/storage/StorageManager.cpp \
     src/StatsLogProcessor.cpp \
     src/StatsService.cpp \
@@ -209,6 +211,7 @@ LOCAL_MODULE := statsdprotolite
 LOCAL_SRC_FILES := \
     src/stats_log.proto \
     src/statsd_config.proto \
+    src/perfetto/perfetto_config.proto \
     src/atoms.proto
 
 LOCAL_PROTOC_OPTIMIZE_TYPE := lite
