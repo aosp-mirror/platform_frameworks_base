@@ -1362,14 +1362,13 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
     private int computeRelevantEventTypes(UserState userState, Client client) {
         int relevantEventTypes = 0;
 
-        int numBoundServices = userState.mBoundServices.size();
-        for (int i = 0; i < numBoundServices; i++) {
-            AccessibilityServiceConnection service =
-                    userState.mBoundServices.get(i);
+        // Use iterator for thread-safety
+        for (AccessibilityServiceConnection service : userState.mBoundServices) {
             relevantEventTypes |= isClientInPackageWhitelist(service.getServiceInfo(), client)
                     ? service.getRelevantEventTypes()
                     : 0;
         }
+
         relevantEventTypes |= isClientInPackageWhitelist(
                 mUiAutomationManager.getServiceInfo(), client)
                 ? mUiAutomationManager.getRelevantEventTypes()
