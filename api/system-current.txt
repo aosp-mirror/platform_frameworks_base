@@ -33,6 +33,7 @@ package android {
     field public static final java.lang.String BIND_TV_REMOTE_SERVICE = "android.permission.BIND_TV_REMOTE_SERVICE";
     field public static final java.lang.String BLUETOOTH_PRIVILEGED = "android.permission.BLUETOOTH_PRIVILEGED";
     field public static final java.lang.String BRICK = "android.permission.BRICK";
+    field public static final java.lang.String BRIGHTNESS_SLIDER_USAGE = "android.permission.BRIGHTNESS_SLIDER_USAGE";
     field public static final deprecated java.lang.String BROADCAST_NETWORK_PRIVILEGED = "android.permission.BROADCAST_NETWORK_PRIVILEGED";
     field public static final java.lang.String CALL_PRIVILEGED = "android.permission.CALL_PRIVILEGED";
     field public static final java.lang.String CAMERA_DISABLE_TRANSMIT_LED = "android.permission.CAMERA_DISABLE_TRANSMIT_LED";
@@ -46,6 +47,7 @@ package android {
     field public static final java.lang.String CHANGE_CONFIGURATION = "android.permission.CHANGE_CONFIGURATION";
     field public static final java.lang.String CHANGE_DEVICE_IDLE_TEMP_WHITELIST = "android.permission.CHANGE_DEVICE_IDLE_TEMP_WHITELIST";
     field public static final java.lang.String CLEAR_APP_USER_DATA = "android.permission.CLEAR_APP_USER_DATA";
+    field public static final java.lang.String CONFIGURE_DISPLAY_BRIGHTNESS = "android.permission.CONFIGURE_DISPLAY_BRIGHTNESS";
     field public static final java.lang.String CONNECTIVITY_INTERNAL = "android.permission.CONNECTIVITY_INTERNAL";
     field public static final java.lang.String CONNECTIVITY_USE_RESTRICTED_NETWORKS = "android.permission.CONNECTIVITY_USE_RESTRICTED_NETWORKS";
     field public static final java.lang.String CONTROL_INCALL_EXPERIENCE = "android.permission.CONTROL_INCALL_EXPERIENCE";
@@ -1078,8 +1080,38 @@ package android.hardware.camera2.params {
 
 package android.hardware.display {
 
+  public final class BrightnessChangeEvent implements android.os.Parcelable {
+    method public int describeContents();
+    method public void writeToParcel(android.os.Parcel, int);
+    field public static final android.os.Parcelable.Creator<android.hardware.display.BrightnessChangeEvent> CREATOR;
+    field public final float batteryLevel;
+    field public final float brightness;
+    field public final int colorTemperature;
+    field public final float lastBrightness;
+    field public final long[] luxTimestamps;
+    field public final float[] luxValues;
+    field public final boolean nightMode;
+    field public final java.lang.String packageName;
+    field public final long timeStamp;
+  }
+
+  public final class BrightnessConfiguration implements android.os.Parcelable {
+    method public int describeContents();
+    method public android.util.Pair<float[], float[]> getCurve();
+    method public void writeToParcel(android.os.Parcel, int);
+    field public static final android.os.Parcelable.Creator<android.hardware.display.BrightnessConfiguration> CREATOR;
+  }
+
+  public static class BrightnessConfiguration.Builder {
+    ctor public BrightnessConfiguration.Builder();
+    method public android.hardware.display.BrightnessConfiguration build();
+    method public android.hardware.display.BrightnessConfiguration.Builder setCurve(float[], float[]);
+  }
+
   public final class DisplayManager {
+    method public java.util.List<android.hardware.display.BrightnessChangeEvent> getBrightnessEvents();
     method public android.graphics.Point getStableDisplaySize();
+    method public void setBrightnessConfiguration(android.hardware.display.BrightnessConfiguration);
   }
 
 }

@@ -16,6 +16,8 @@
 
 package android.hardware.display;
 
+import android.annotation.SystemApi;
+import android.annotation.TestApi;
 import android.os.Parcel;
 import android.os.Parcelable;
 import android.util.Pair;
@@ -25,6 +27,8 @@ import com.android.internal.util.Preconditions;
 import java.util.Arrays;
 
 /** @hide */
+@SystemApi
+@TestApi
 public final class BrightnessConfiguration implements Parcelable {
     private final float[] mLux;
     private final float[] mNits;
