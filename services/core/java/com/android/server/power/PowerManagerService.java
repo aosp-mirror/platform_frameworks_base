@@ -3140,7 +3140,8 @@ public final class PowerManagerService extends SystemService
                     if (Arrays.binarySearch(mDeviceIdleWhitelist, appid) < 0 &&
                             Arrays.binarySearch(mDeviceIdleTempWhitelist, appid) < 0 &&
                             state.mProcState != ActivityManager.PROCESS_STATE_NONEXISTENT &&
-                            state.mProcState > ActivityManager.PROCESS_STATE_FOREGROUND_SERVICE) {
+                            state.mProcState >
+                                    ActivityManager.PROCESS_STATE_BOUND_FOREGROUND_SERVICE) {
                         disabled = true;
                     }
                 }

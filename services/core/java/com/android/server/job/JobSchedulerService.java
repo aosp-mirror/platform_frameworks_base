@@ -965,7 +965,7 @@ public final class JobSchedulerService extends com.android.server.SystemService
                 // with just the foreground priority.  This means that persistent processes
                 // can never be the top app priority...  that is fine.
                 mUidPriorityOverride.put(uid, JobInfo.PRIORITY_TOP_APP);
-            } else if (procState <= ActivityManager.PROCESS_STATE_FOREGROUND_SERVICE) {
+            } else if (procState <= ActivityManager.PROCESS_STATE_BOUND_FOREGROUND_SERVICE) {
                 mUidPriorityOverride.put(uid, JobInfo.PRIORITY_FOREGROUND_APP);
             } else {
                 mUidPriorityOverride.delete(uid);
