@@ -1810,4 +1810,6 @@
     <string name="shortcut_restore_not_supported" msgid="5028808567940014190">"Не можеше да се врати кратенката бидејќи апликацијата не поддржува бекап и враќање"</string>
     <string name="shortcut_restore_signature_mismatch" msgid="2406209324521327518">"Не можеше да се врати кратенката бидејќи потписот на апликацијата не се совпаѓа"</string>
     <string name="shortcut_restore_unknown_issue" msgid="8703738064603262597">"Не можеше да се врати кратенката"</string>
+    <!-- no translation found for shortcut_disabled_reason_unknown (5276016910284687075) -->
+    <skip />
 </resources>

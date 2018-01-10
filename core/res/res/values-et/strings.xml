@@ -1807,4 +1807,6 @@
     <string name="shortcut_restore_not_supported" msgid="5028808567940014190">"Otseteed ei õnnestunud taastada, kuna rakendus ei toeta varundamist ega taastamist"</string>
     <string name="shortcut_restore_signature_mismatch" msgid="2406209324521327518">"Otseteed ei õnnestunud taastada, kuna rakenduse allkiri ei ühti"</string>
     <string name="shortcut_restore_unknown_issue" msgid="8703738064603262597">"Otseteed ei õnnestunud taastada"</string>
+    <!-- no translation found for shortcut_disabled_reason_unknown (5276016910284687075) -->
+    <skip />
 </resources>

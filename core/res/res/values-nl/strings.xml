@@ -1807,4 +1807,6 @@
     <string name="shortcut_restore_not_supported" msgid="5028808567940014190">"Kan snelkoppeling niet herstellen omdat de app geen ondersteuning biedt voor \'Back-up maken en terugzetten\'"</string>
     <string name="shortcut_restore_signature_mismatch" msgid="2406209324521327518">"Kan snelkoppeling niet herstellen vanwege een niet-overeenkomende app-ondertekening"</string>
     <string name="shortcut_restore_unknown_issue" msgid="8703738064603262597">"Kan snelkoppeling niet herstellen"</string>
+    <!-- no translation found for shortcut_disabled_reason_unknown (5276016910284687075) -->
+    <skip />
 </resources>

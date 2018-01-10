@@ -1205,7 +1205,7 @@
     <string name="usb_unsupported_audio_accessory_title" msgid="3529881374464628084">"Ett tillbehör med analog ljudutgång hittades"</string>
     <string name="usb_unsupported_audio_accessory_message" msgid="6309553946441565215">"Den anslutna enheten är inte kompatibel med mobilen. Tryck här om du vill veta mer."</string>
     <string name="adb_active_notification_title" msgid="6729044778949189918">"USB-felsökning ansluten"</string>
-    <string name="adb_active_notification_message" msgid="4948470599328424059">"Tryck om du vill inaktivera USB-felsökning."</string>
+    <string name="adb_active_notification_message" msgid="4948470599328424059">"Tryck för att inaktivera USB-felsökning."</string>
     <string name="adb_active_notification_message" product="tv" msgid="8470296818270110396">"Välj för att inaktivera USB-felsökning."</string>
     <string name="taking_remote_bugreport_notification_title" msgid="6742483073875060934">"Felrapporten överförs …"</string>
     <string name="share_remote_bugreport_notification_title" msgid="4987095013583691873">"Vill du dela felrapporten?"</string>
@@ -1807,4 +1807,6 @@
     <string name="shortcut_restore_not_supported" msgid="5028808567940014190">"Det gick inte att återställa genvägen eftersom appen inte har stöd för säkerhetskopiering och återställning"</string>
     <string name="shortcut_restore_signature_mismatch" msgid="2406209324521327518">"Det gick inte att återställa genvägen eftersom appens signatur inte stämmer"</string>
     <string name="shortcut_restore_unknown_issue" msgid="8703738064603262597">"Det gick inte att återställa genvägen"</string>
+    <!-- no translation found for shortcut_disabled_reason_unknown (5276016910284687075) -->
+    <skip />
 </resources>

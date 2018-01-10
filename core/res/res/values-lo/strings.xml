@@ -1807,4 +1807,6 @@
     <string name="shortcut_restore_not_supported" msgid="5028808567940014190">"ບໍ່ສາມາດກູ້ທາງລັດຂຶ້ນມາໄດ້ເນື່ອງຈາກແອັບບໍ່ຮອງຮັບການສຳຮອງ ແລະ ກູ້ຂໍ້ມູນ"</string>
     <string name="shortcut_restore_signature_mismatch" msgid="2406209324521327518">"ບໍ່ສາມາດກູ້ທາງລັດຄືນມາໄດ້ເນື່ອງຈາກລາຍເຊັນແອັບບໍ່ກົງກັນ"</string>
     <string name="shortcut_restore_unknown_issue" msgid="8703738064603262597">"ບໍ່ສາມາດກູ້ທາງລັດຄືນມາໄດ້"</string>
+    <!-- no translation found for shortcut_disabled_reason_unknown (5276016910284687075) -->
+    <skip />
 </resources>

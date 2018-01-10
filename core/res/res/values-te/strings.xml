@@ -1808,4 +1808,6 @@
     <string name="shortcut_restore_not_supported" msgid="5028808567940014190">"బ్యాకప్ మరియు పునరుద్ధరణకు యాప్ మద్దతు ఇవ్వని కారణంగా సత్వరమార్గాన్ని పునరుద్ధరించడం సాధ్యపడలేదు"</string>
     <string name="shortcut_restore_signature_mismatch" msgid="2406209324521327518">"యాప్ సంతకం సరిపోలని కారణంగా సత్వరమార్గాన్ని పునరుద్ధరించడం సాధ్యపడలేదు"</string>
     <string name="shortcut_restore_unknown_issue" msgid="8703738064603262597">"సత్వరమార్గాన్ని పునరుద్ధరించడం సాధ్యపడలేదు"</string>
+    <!-- no translation found for shortcut_disabled_reason_unknown (5276016910284687075) -->
+    <skip />
 </resources>

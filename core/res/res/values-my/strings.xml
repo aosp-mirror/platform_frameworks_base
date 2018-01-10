@@ -1808,4 +1808,6 @@
     <string name="shortcut_restore_not_supported" msgid="5028808567940014190">"အက်ပ်သည် မိတ္တူကူးခြင်းနှင့် ပြန်ယူခြင်းကို ပံ့ပိုးခြင်းမရှိသည့်အတွက် ဖြတ်လမ်းလင့်ခ်ကို ပြန်ယူ၍မရပါ"</string>
     <string name="shortcut_restore_signature_mismatch" msgid="2406209324521327518">"အက်ပ်လက်မှတ် မတူညီသည့်အတွက် ဖြတ်လမ်းလင့်ခ်များကို ပြန်ယူ၍မရပါ"</string>
     <string name="shortcut_restore_unknown_issue" msgid="8703738064603262597">"ဖြတ်လမ်းလင့်ခ်ကို ပြန်ယူ၍မရပါ"</string>
+    <!-- no translation found for shortcut_disabled_reason_unknown (5276016910284687075) -->
+    <skip />
 </resources>

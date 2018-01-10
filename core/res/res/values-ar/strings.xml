@@ -51,7 +51,7 @@
     <string name="needPuk2" msgid="4526033371987193070">"‏اكتب PUK2 لإلغاء تأمين شريحة SIM."</string>
     <string name="enablePin" msgid="209412020907207950">"‏محاولة غير ناجحة، مكّن قفل SIM/RUIM."</string>
     <plurals name="pinpuk_attempts" formatted="false" msgid="1251012001539225582">
-      <item quantity="zero">‏لم يتبق لديك أية محاولات (<xliff:g id="NUMBER_1">%d</xliff:g>) يتم بعدها قفل شريحة SIM.</item>
+      <item quantity="zero">‏لم يتبق لديك أي محاولات (<xliff:g id="NUMBER_1">%d</xliff:g>) يتم بعدها قفل شريحة SIM.</item>
       <item quantity="two">‏يتبقى لديك محاولتان (<xliff:g id="NUMBER_1">%d</xliff:g>) يتم بعدهما قفل شريحة SIM.</item>
       <item quantity="few">‏يتبقى لديك <xliff:g id="NUMBER_1">%d</xliff:g> محاولات يتم بعدها قفل شريحة SIM.</item>
       <item quantity="many">‏يتبقى لديك <xliff:g id="NUMBER_1">%d</xliff:g> محاولة يتم بعدها قفل شريحة SIM.</item>
@@ -448,9 +448,9 @@
     <string name="permdesc_setTimeZone" product="tv" msgid="888864653946175955">"يتيح للتطبيق تغيير المنطقة الزمنية للتلفزيون."</string>
     <string name="permdesc_setTimeZone" product="default" msgid="4499943488436633398">"للسماح للتطبيق بتغيير المنطقة الزمنية للهاتف."</string>
     <string name="permlab_getAccounts" msgid="1086795467760122114">"البحث عن حسابات على الجهاز"</string>
-    <string name="permdesc_getAccounts" product="tablet" msgid="2741496534769660027">"للسماح للتطبيق بالحصول على قائمة بالحسابات التي يعرفها الجهاز اللوحي. وقد يتضمن ذلك أية حسابات تم إنشاؤها بواسطة التطبيقات التي ثبتها."</string>
-    <string name="permdesc_getAccounts" product="tv" msgid="4190633395633907543">"يتيح للتطبيق الحصول على قائمة بالحسابات المعروفة في التلفزيون. وقد يتضمن هذا أية حسابات أنشأتها التطبيقات التي ثبتها."</string>
-    <string name="permdesc_getAccounts" product="default" msgid="3448316822451807382">"للسماح للتطبيق بالحصول على قائمة بالحسابات التي يعرفها الهاتف. وقد يتضمن ذلك أية حسابات تم إنشاؤها بواسطة التطبيقات التي ثبتها."</string>
+    <string name="permdesc_getAccounts" product="tablet" msgid="2741496534769660027">"للسماح للتطبيق بالحصول على قائمة بالحسابات التي يعرفها الجهاز اللوحي. وقد يتضمن ذلك أي حسابات تم إنشاؤها بواسطة التطبيقات التي ثبتها."</string>
+    <string name="permdesc_getAccounts" product="tv" msgid="4190633395633907543">"يتيح للتطبيق الحصول على قائمة بالحسابات المعروفة في التلفزيون. وقد يتضمن هذا أي حسابات أنشأتها التطبيقات التي ثبتها."</string>
+    <string name="permdesc_getAccounts" product="default" msgid="3448316822451807382">"للسماح للتطبيق بالحصول على قائمة بالحسابات التي يعرفها الهاتف. وقد يتضمن ذلك أي حسابات تم إنشاؤها بواسطة التطبيقات التي ثبتها."</string>
     <string name="permlab_accessNetworkState" msgid="4951027964348974773">"عرض اتصالات الشبكة"</string>
     <string name="permdesc_accessNetworkState" msgid="8318964424675960975">"للسماح للتطبيق بعرض معلومات حول اتصالات الشبكة كعرض معلومات عن الشبكات المتوفرة والشبكات المتصلة."</string>
     <string name="permlab_createNetworkSockets" msgid="7934516631384168107">"حق الوصول الكامل إلى الشبكة"</string>
@@ -472,7 +472,7 @@
     <string name="permdesc_bluetoothAdmin" product="tv" msgid="3373125682645601429">"يتيح للتطبيق تهيئة تلفزيون بلوتوث المحلي، واكتشاف الأجهزة البعيدة وإقرانها."</string>
     <string name="permdesc_bluetoothAdmin" product="default" msgid="8931682159331542137">"للسماح للتطبيق بتهيئة هاتف البلوتوث المحلي، واكتشاف أجهزة التحكم عن بعد والاقتران بها."</string>
     <string name="permlab_accessWimaxState" msgid="4195907010610205703">"‏الاتصال بـشبكة WiMAX وقطع الاتصال بها"</string>
-    <string name="permdesc_accessWimaxState" msgid="6360102877261978887">"‏للسماح للتطبيق بتحديد ما إذا تم تمكين WiMAX وتحديد معلومات حول أية شبكات WiMAX متصلة."</string>
+    <string name="permdesc_accessWimaxState" msgid="6360102877261978887">"‏للسماح للتطبيق بتحديد ما إذا تم تمكين WiMAX وتحديد معلومات حول أي شبكات WiMAX متصلة."</string>
     <string name="permlab_changeWimaxState" msgid="340465839241528618">"‏تغيير حالة WiMAX"</string>
     <string name="permdesc_changeWimaxState" product="tablet" msgid="3156456504084201805">"‏للسماح للتطبيق بتوصيل الجهاز اللوحي بشبكات WiMAX وقطع اتصاله بها."</string>
     <string name="permdesc_changeWimaxState" product="tv" msgid="6022307083934827718">"‏يتيح للتطبيق توصيل التلفزيون أو إلغاء توصيله بشبكات WiMAX."</string>
@@ -817,7 +817,7 @@
     <string name="granularity_label_line" msgid="5764267235026120888">"سطر"</string>
     <string name="factorytest_failed" msgid="5410270329114212041">"تعذّر اختبار المصنع"</string>
     <string name="factorytest_not_system" msgid="4435201656767276723">"‏إجراء FACTORY_TEST غير متاح سوى للحزم المثبتة في /system/app."</string>
-    <string name="factorytest_no_action" msgid="872991874799998561">"‏لم يتم العثور على أية حزمة توفر إجراء FACTORY_TEST."</string>
+    <string name="factorytest_no_action" msgid="872991874799998561">"‏لم يتم العثور على أي حزمة توفر إجراء FACTORY_TEST."</string>
     <string name="factorytest_reboot" msgid="6320168203050791643">"إعادة تشغيل"</string>
     <string name="js_dialog_title" msgid="1987483977834603872">"تعرض الصفحة في \"<xliff:g id="TITLE">%s</xliff:g>\":"</string>
     <string name="js_dialog_title_default" msgid="6961903213729667573">"جافا سكريبت"</string>
@@ -1186,7 +1186,7 @@
     <string name="ringtone_picker_title_notification" msgid="4837740874822788802">"أصوات الإشعار"</string>
     <string name="ringtone_unknown" msgid="3914515995813061520">"غير معروف"</string>
     <plurals name="wifi_available" formatted="false" msgid="7900333017752027322">
-      <item quantity="zero">‏لا تتوفر أية شبكات Wi-Fi</item>
+      <item quantity="zero">‏لا تتوفر أي شبكات Wi-Fi</item>
       <item quantity="two">‏تتوفر شبكتا Wi-Fi</item>
       <item quantity="few">‏تتوفر شبكات Wi-Fi</item>
       <item quantity="many">‏تتوفر شبكات Wi-Fi</item>
@@ -1194,7 +1194,7 @@
       <item quantity="one">‏تتوفر شبكة Wi-Fi واحدة</item>
     </plurals>
     <plurals name="wifi_available_detailed" formatted="false" msgid="1140699367193975606">
-      <item quantity="zero">‏لا تتوفر أية شبكات Wi-Fi مفتوحة</item>
+      <item quantity="zero">‏لا تتوفر أي شبكات Wi-Fi مفتوحة</item>
       <item quantity="two">‏تتوفر شبكتا Wi-Fi مفتوحتان</item>
       <item quantity="few">‏تتوفر شبكات Wi-Fi مفتوحة</item>
       <item quantity="many">‏تتوفر شبكات Wi-Fi مفتوحة</item>
@@ -1413,7 +1413,7 @@
     <string name="back_button_label" msgid="2300470004503343439">"رجوع"</string>
     <string name="next_button_label" msgid="1080555104677992408">"التالي"</string>
     <string name="skip_button_label" msgid="1275362299471631819">"تخطي"</string>
-    <string name="no_matches" msgid="8129421908915840737">"ليس هناك أية مطابقات"</string>
+    <string name="no_matches" msgid="8129421908915840737">"ليس هناك أي مطابقات"</string>
     <string name="find_on_page" msgid="1946799233822820384">"بحث في الصفحة"</string>
     <plurals name="matches_found" formatted="false" msgid="1210884353962081884">
       <item quantity="zero"><xliff:g id="INDEX">%d</xliff:g> من <xliff:g id="TOTAL">%d</xliff:g></item>
@@ -1947,4 +1947,6 @@
     <string name="shortcut_restore_not_supported" msgid="5028808567940014190">"تعذّرت استعادة الاختصار لأن التطبيق لا يوفِّر إمكانية النسخ الاحتياطي والاستعادة"</string>
     <string name="shortcut_restore_signature_mismatch" msgid="2406209324521327518">"تعذّرت استعادة الاختصار بسبب عدم تطابق توقيع التطبيق"</string>
     <string name="shortcut_restore_unknown_issue" msgid="8703738064603262597">"تعذّرت استعادة الاختصار"</string>
+    <!-- no translation found for shortcut_disabled_reason_unknown (5276016910284687075) -->
+    <skip />
 </resources>
