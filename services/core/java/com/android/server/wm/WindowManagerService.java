@@ -5874,6 +5874,7 @@ public class WindowManagerService extends IWindowManager.Stub
      * the screen is.
      * @see WindowManagerPolicy#getNavBarPosition()
      */
+    @WindowManagerPolicy.NavigationBarPosition
     public int getNavBarPosition() {
         synchronized (mWindowMap) {
             // Perform layout if it was scheduled before to make sure that we get correct nav bar

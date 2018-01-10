@@ -588,6 +588,7 @@ class TestWindowManagerPolicy implements WindowManagerPolicy {
         return false;
     }
 
+    @NavigationBarPosition
     @Override
     public int getNavBarPosition() {
         return NAV_BAR_BOTTOM;
