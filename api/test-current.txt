@@ -47,6 +47,7 @@ package android.app {
 
   public class AppOpsManager {
     method public static java.lang.String[] getOpStrs();
+    method public void setMode(int, int, java.lang.String, int);
     field public static final java.lang.String OPSTR_ACCESS_NOTIFICATIONS = "android:access_notifications";
     field public static final java.lang.String OPSTR_ACTIVATE_VPN = "android:activate_vpn";
     field public static final java.lang.String OPSTR_ASSIST_SCREENSHOT = "android:assist_screenshot";
