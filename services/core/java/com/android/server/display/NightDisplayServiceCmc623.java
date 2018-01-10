@@ -51,9 +51,13 @@ import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 
+import java.time.LocalDateTime;
+import java.time.LocalTime;
+import java.time.ZoneId;
 import java.util.concurrent.atomic.AtomicBoolean;
-import java.util.Calendar;
 import java.util.TimeZone;
+
+import com.android.internal.R;
 
 /**
  * Tints the display at night.
@@ -266,7 +270,7 @@ public final class NightDisplayServiceCmc623 extends SystemService
     }
 
     @Override
-    public void onCustomStartTimeChanged(NightDisplayController.LocalTime startTime) {
+    public void onCustomStartTimeChanged(LocalTime startTime) {
         Slog.d(TAG, "onCustomStartTimeChanged: startTime=" + startTime);
 
         if (mAutoMode != null) {
@@ -275,7 +279,7 @@ public final class NightDisplayServiceCmc623 extends SystemService
     }
 
     @Override
-    public void onCustomEndTimeChanged(NightDisplayController.LocalTime endTime) {
+    public void onCustomEndTimeChanged(LocalTime endTime) {
         Slog.d(TAG, "onCustomEndTimeChanged: endTime=" + endTime);
 
         if (mAutoMode != null) {
@@ -286,6 +290,13 @@ public final class NightDisplayServiceCmc623 extends SystemService
     @Override
     public void onColorTemperatureChanged(int colorTemperature) {
         applyTint(true);
+    }
+
+    @Override
+    public void onDisplayColorModeChanged(int colorMode) {
+        if (mController.isActivated()) {
+            applyTint(true);
+        }
     }
 
     /**
@@ -324,6 +335,36 @@ public final class NightDisplayServiceCmc623 extends SystemService
         }
     }
 
+    /**
+     * Returns the first date time corresponding to the local time that occurs before the
+     * provided date time.
+     *
+     * @param compareTime the LocalDateTime to compare against
+     * @return the prior LocalDateTime corresponding to this local time
+     */
+    public static LocalDateTime getDateTimeBefore(LocalTime localTime, LocalDateTime compareTime) {
+        final LocalDateTime ldt = LocalDateTime.of(compareTime.getYear(), compareTime.getMonth(),
+                compareTime.getDayOfMonth(), localTime.getHour(), localTime.getMinute());
+
+        // Check if the local time has passed, if so return the same time yesterday.
+        return ldt.isAfter(compareTime) ? ldt.minusDays(1) : ldt;
+    }
+
+    /**
+     * Returns the first date time corresponding to this local time that occurs after the
+     * provided date time.
+     *
+     * @param compareTime the LocalDateTime to compare against
+     * @return the next LocalDateTime corresponding to this local time
+     */
+    public static LocalDateTime getDateTimeAfter(LocalTime localTime, LocalDateTime compareTime) {
+        final LocalDateTime ldt = LocalDateTime.of(compareTime.getYear(), compareTime.getMonth(),
+                compareTime.getDayOfMonth(), localTime.getHour(), localTime.getMinute());
+
+        // Check if the local time has passed, if so return the same time tomorrow.
+        return ldt.isBefore(compareTime) ? ldt.plusDays(1) : ldt;
+    }
+
     private abstract class AutoMode implements NightDisplayController.Callback {
         public abstract void onStart();
 
@@ -335,10 +376,10 @@ public final class NightDisplayServiceCmc623 extends SystemService
         private final AlarmManager mAlarmManager;
         private final BroadcastReceiver mTimeChangedReceiver;
 
-        private NightDisplayController.LocalTime mStartTime;
-        private NightDisplayController.LocalTime mEndTime;
+        private LocalTime mStartTime;
+        private LocalTime mEndTime;
 
-        private Calendar mLastActivatedTime;
+        private LocalDateTime mLastActivatedTime;
 
         CustomAutoMode() {
             mAlarmManager = (AlarmManager) getContext().getSystemService(Context.ALARM_SERVICE);
@@ -351,31 +392,15 @@ public final class NightDisplayServiceCmc623 extends SystemService
         }
 
         private void updateActivated() {
-            final Calendar now = Calendar.getInstance();
-            final Calendar startTime = mStartTime.getDateTimeBefore(now);
-            final Calendar endTime = mEndTime.getDateTimeAfter(startTime);
+            final LocalDateTime now = LocalDateTime.now();
+            final LocalDateTime start = getDateTimeBefore(mStartTime, now);
+            final LocalDateTime end = getDateTimeAfter(mEndTime, start);
+            boolean activate = now.isBefore(end);
 
-            boolean activate = now.before(endTime);
             if (mLastActivatedTime != null) {
-                // Convert mLastActivatedTime to the current timezone if needed.
-                final TimeZone currentTimeZone = now.getTimeZone();
-                if (!currentTimeZone.equals(mLastActivatedTime.getTimeZone())) {
-                    final int year = mLastActivatedTime.get(Calendar.YEAR);
-                    final int dayOfYear = mLastActivatedTime.get(Calendar.DAY_OF_YEAR);
-                    final int hourOfDay = mLastActivatedTime.get(Calendar.HOUR_OF_DAY);
-                    final int minute = mLastActivatedTime.get(Calendar.MINUTE);
-
-                    mLastActivatedTime.setTimeZone(currentTimeZone);
-                    mLastActivatedTime.set(Calendar.YEAR, year);
-                    mLastActivatedTime.set(Calendar.DAY_OF_YEAR, dayOfYear);
-                    mLastActivatedTime.set(Calendar.HOUR_OF_DAY, hourOfDay);
-                    mLastActivatedTime.set(Calendar.MINUTE, minute);
-                }
-
                 // Maintain the existing activated state if within the current period.
-                if (mLastActivatedTime.before(now)
-                        && mLastActivatedTime.after(startTime)
-                        && (mLastActivatedTime.after(endTime) || now.before(endTime))) {
+                if (mLastActivatedTime.isBefore(now) && mLastActivatedTime.isAfter(start)
+                        && (mLastActivatedTime.isAfter(end) || now.isBefore(end))) {
                     activate = mController.isActivated();
                 }
             }
@@ -386,11 +411,12 @@ public final class NightDisplayServiceCmc623 extends SystemService
             updateNextAlarm(mIsActivated, now);
         }
 
-        private void updateNextAlarm(@Nullable Boolean activated, @NonNull Calendar now) {
+        private void updateNextAlarm(@Nullable Boolean activated, @NonNull LocalDateTime now) {
             if (activated != null) {
-                final Calendar next = activated ? mEndTime.getDateTimeAfter(now)
-                        : mStartTime.getDateTimeAfter(now);
-                mAlarmManager.setExact(AlarmManager.RTC, next.getTimeInMillis(), TAG, this, null);
+                final LocalDateTime next = activated ? getDateTimeAfter(mEndTime, now)
+                        : getDateTimeAfter(mStartTime, now);
+                final long millis = next.atZone(ZoneId.systemDefault()).toInstant().toEpochMilli();
+                mAlarmManager.setExact(AlarmManager.RTC, millis, TAG, this, null);
             }
         }
 
@@ -420,18 +446,18 @@ public final class NightDisplayServiceCmc623 extends SystemService
         @Override
         public void onActivated(boolean activated) {
             mLastActivatedTime = mController.getLastActivatedTime();
-            updateNextAlarm(activated, Calendar.getInstance());
+            updateNextAlarm(activated, LocalDateTime.now());
         }
 
         @Override
-        public void onCustomStartTimeChanged(NightDisplayController.LocalTime startTime) {
+        public void onCustomStartTimeChanged(LocalTime startTime) {
             mStartTime = startTime;
             mLastActivatedTime = null;
             updateActivated();
         }
 
         @Override
-        public void onCustomEndTimeChanged(NightDisplayController.LocalTime endTime) {
+        public void onCustomEndTimeChanged(LocalTime endTime) {
             mEndTime = endTime;
             mLastActivatedTime = null;
             updateActivated();
@@ -460,15 +486,15 @@ public final class NightDisplayServiceCmc623 extends SystemService
             }
 
             boolean activate = state.isNight();
-            final Calendar lastActivatedTime = mController.getLastActivatedTime();
+            final LocalDateTime lastActivatedTime = mController.getLastActivatedTime();
             if (lastActivatedTime != null) {
-                final Calendar now = Calendar.getInstance();
-                final Calendar sunrise = state.sunrise();
-                final Calendar sunset = state.sunset();
+                final LocalDateTime now = LocalDateTime.now();
+                final LocalDateTime sunrise = state.sunrise();
+                final LocalDateTime sunset = state.sunset();
 
                 // Maintain the existing activated state if within the current period.
-                if (lastActivatedTime.before(now)
-                        && (lastActivatedTime.after(sunrise) ^ lastActivatedTime.after(sunset))) {
+                if (lastActivatedTime.isBefore(now) && (lastActivatedTime.isBefore(sunrise)
+                        ^ lastActivatedTime.isBefore(sunset))) {
                     activate = mController.isActivated();
                 }
             }
