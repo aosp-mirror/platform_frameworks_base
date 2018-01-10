@@ -232,6 +232,8 @@ class PackageManagerShellCommand extends ShellCommand {
                     return runHasFeature();
                 case "set-harmful-app-warning":
                     return runSetHarmfulAppWarning();
+                case "get-harmful-app-warning":
+                    return runGetHarmfulAppWarning();
                 default: {
                     String nextArg = getNextArg();
                     if (nextArg == null) {
@@ -2113,6 +2115,31 @@ class PackageManagerShellCommand extends ShellCommand {
         return 0;
     }
 
+    private int runGetHarmfulAppWarning() throws RemoteException {
+        int userId = UserHandle.USER_CURRENT;
+
+        String opt;
+        while ((opt = getNextOption()) != null) {
+            if (opt.equals("--user")) {
+                userId = UserHandle.parseUserArg(getNextArgRequired());
+            } else {
+                getErrPrintWriter().println("Error: Unknown option: " + opt);
+                return -1;
+            }
+        }
+
+        userId = translateUserId(userId, false /*allowAll*/, "runGetHarmfulAppWarning");
+
+        final String packageName = getNextArgRequired();
+        final CharSequence warning = mInterface.getHarmfulAppWarning(packageName, userId);
+        if (!TextUtils.isEmpty(warning)) {
+            getOutPrintWriter().println(warning);
+            return 0;
+        } else {
+            return 1;
+        }
+    }
+
     private static String checkAbiArgument(String abi) {
         if (TextUtils.isEmpty(abi)) {
             throw new IllegalArgumentException("Missing ABI argument");
@@ -2662,6 +2689,9 @@ class PackageManagerShellCommand extends ShellCommand {
         pw.println("");
         pw.println("  set-harmful-app-warning [--user <USER_ID>] <PACKAGE> [<WARNING>]");
         pw.println("    Mark the app as harmful with the given warning message.");
+        pw.println("");
+        pw.println("  get-harmful-app-warning [--user <USER_ID>] <PACKAGE>");
+        pw.println("    Return the harmful app warning message for the given app, if present");
         pw.println();
         Intent.printIntentArgsHelp(pw , "");
     }
