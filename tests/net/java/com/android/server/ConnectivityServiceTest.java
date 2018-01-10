@@ -128,11 +128,13 @@ import com.android.internal.util.ArrayUtils;
 import com.android.internal.util.WakeupMessage;
 import com.android.internal.util.test.BroadcastInterceptingContext;
 import com.android.internal.util.test.FakeSettingsProvider;
+import com.android.server.connectivity.ConnectivityConstants;
 import com.android.server.connectivity.DefaultNetworkMetrics;
 import com.android.server.connectivity.IpConnectivityMetrics;
 import com.android.server.connectivity.MockableSystemProperties;
 import com.android.server.connectivity.NetworkAgentInfo;
 import com.android.server.connectivity.NetworkMonitor;
+import com.android.server.connectivity.Vpn;
 import com.android.server.net.NetworkPinner;
 import com.android.server.net.NetworkPolicyManagerInternal;
 
@@ -380,7 +382,7 @@ public class ConnectivityServiceTest {
                     mScore = 20;
                     break;
                 case TRANSPORT_VPN:
-                    mScore = 0;
+                    mScore = ConnectivityConstants.VPN_DEFAULT_SCORE;
                     break;
                 default:
                     throw new UnsupportedOperationException("unimplemented network type");

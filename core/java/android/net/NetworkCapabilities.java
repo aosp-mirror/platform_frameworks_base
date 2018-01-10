@@ -895,6 +895,17 @@ public final class NetworkCapabilities implements Parcelable {
     private Set<UidRange> mUids = null;
 
     /**
+     * Convenience method to set the UIDs this network applies to to a single UID.
+     * @hide
+     */
+    public NetworkCapabilities setSingleUid(int uid) {
+        final ArraySet<UidRange> identity = new ArraySet<>(1);
+        identity.add(new UidRange(uid, uid));
+        setUids(identity);
+        return this;
+    }
+
+    /**
      * Set the list of UIDs this network applies to.
      * This makes a copy of the set so that callers can't modify it after the call.
      * @hide

@@ -850,7 +850,8 @@ public class Vpn {
         long token = Binder.clearCallingIdentity();
         try {
             mNetworkAgent = new NetworkAgent(mLooper, mContext, NETWORKTYPE /* logtag */,
-                    mNetworkInfo, mNetworkCapabilities, lp, 0 /* score */, networkMisc) {
+                    mNetworkInfo, mNetworkCapabilities, lp,
+                    ConnectivityConstants.VPN_DEFAULT_SCORE, networkMisc) {
                             @Override
                             public void unwanted() {
                                 // We are user controlled, not driven by NetworkRequest.
