@@ -19,11 +19,14 @@ package com.android.server.wm;
 import static com.android.server.wm.WindowManagerDebugConfig.DEBUG_ANIM;
 import static com.android.server.wm.WindowManagerDebugConfig.TAG_WITH_CLASS_NAME;
 import static com.android.server.wm.WindowManagerDebugConfig.TAG_WM;
+import static com.android.server.wm.proto.SurfaceAnimatorProto.ANIMATION_ADAPTER;
+import static com.android.server.wm.proto.SurfaceAnimatorProto.ANIMATION_START_DELAYED;
+import static com.android.server.wm.proto.SurfaceAnimatorProto.LEASH;
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
-import android.util.ArrayMap;
 import android.util.Slog;
+import android.util.proto.ProtoOutputStream;
 import android.view.SurfaceControl;
 import android.view.SurfaceControl.Transaction;
 
@@ -307,6 +310,24 @@ class SurfaceAnimator {
         }
         t.reparent(surface, leash.getHandle());
         return leash;
+    }
+
+    /**
+     * Write to a protocol buffer output stream. Protocol buffer message definition is at {@link
+     * com.android.server.wm.proto.SurfaceAnimatorProto}.
+     *
+     * @param proto Stream to write the SurfaceAnimator object to.
+     * @param fieldId Field Id of the SurfaceAnimator as defined in the parent message.
+     * @hide
+     */
+    void writeToProto(ProtoOutputStream proto, long fieldId) {
+        final long token = proto.start(fieldId);
+        proto.write(ANIMATION_ADAPTER, mAnimation != null ? mAnimation.toString() : "null");
+        if (mLeash != null){
+            mLeash.writeToProto(proto, LEASH);
+        }
+        proto.write(ANIMATION_START_DELAYED, mAnimationStartDelayed);
+        proto.end(token);
     }
 
     void dump(PrintWriter pw, String prefix) {

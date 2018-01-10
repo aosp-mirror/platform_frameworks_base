@@ -16,20 +16,22 @@
 
 package android.view;
 
-import static android.view.Surface.ROTATION_270;
-import static android.view.Surface.ROTATION_90;
 import static android.graphics.Matrix.MSCALE_X;
 import static android.graphics.Matrix.MSCALE_Y;
 import static android.graphics.Matrix.MSKEW_X;
 import static android.graphics.Matrix.MSKEW_Y;
 import static android.graphics.Matrix.MTRANS_X;
 import static android.graphics.Matrix.MTRANS_Y;
+import static android.view.Surface.ROTATION_270;
+import static android.view.Surface.ROTATION_90;
+import static android.view.SurfaceControlProto.HASH_CODE;
+import static android.view.SurfaceControlProto.NAME;
 
 import android.annotation.Size;
 import android.graphics.Bitmap;
 import android.graphics.GraphicBuffer;
-import android.graphics.PixelFormat;
 import android.graphics.Matrix;
+import android.graphics.PixelFormat;
 import android.graphics.Point;
 import android.graphics.Rect;
 import android.graphics.Region;
@@ -40,11 +42,13 @@ import android.os.Process;
 import android.os.UserHandle;
 import android.util.ArrayMap;
 import android.util.Log;
+import android.util.proto.ProtoOutputStream;
 import android.view.Surface.OutOfResourcesException;
 
 import com.android.internal.annotations.GuardedBy;
 
 import dalvik.system.CloseGuard;
+
 import libcore.util.NativeAllocationRegistry;
 
 import java.io.Closeable;
@@ -626,6 +630,21 @@ public class SurfaceControl implements Parcelable {
         dest.writeInt(mWidth);
         dest.writeInt(mHeight);
         nativeWriteToParcel(mNativeObject, dest);
+    }
+
+    /**
+     * Write to a protocol buffer output stream. Protocol buffer message definition is at {@link
+     * android.view.SurfaceControlProto}.
+     *
+     * @param proto Stream to write the SurfaceControl object to.
+     * @param fieldId Field Id of the SurfaceControl as defined in the parent message.
+     * @hide
+     */
+    public void writeToProto(ProtoOutputStream proto, long fieldId) {
+        final long token = proto.start(fieldId);
+        proto.write(HASH_CODE, System.identityHashCode(this));
+        proto.write(NAME, mName);
+        proto.end(token);
     }
 
     public static final Creator<SurfaceControl> CREATOR

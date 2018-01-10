@@ -16,11 +16,7 @@
 
 package com.android.server.wm;
 
-import android.annotation.CallSuper;
-import android.util.proto.ProtoOutputStream;
-import java.util.Comparator;
 import static android.view.WindowManager.LayoutParams.FLAG_SHOW_WALLPAPER;
-
 import static com.android.server.wm.WindowManagerDebugConfig.DEBUG_ADD_REMOVE;
 import static com.android.server.wm.WindowManagerDebugConfig.DEBUG_FOCUS;
 import static com.android.server.wm.WindowManagerDebugConfig.DEBUG_WINDOW_MOVEMENT;
@@ -28,15 +24,20 @@ import static com.android.server.wm.WindowManagerDebugConfig.TAG_WITH_CLASS_NAME
 import static com.android.server.wm.WindowManagerDebugConfig.TAG_WM;
 import static com.android.server.wm.WindowManagerService.UPDATE_FOCUS_NORMAL;
 import static com.android.server.wm.proto.WindowTokenProto.HASH_CODE;
+import static com.android.server.wm.proto.WindowTokenProto.HIDDEN;
+import static com.android.server.wm.proto.WindowTokenProto.PAUSED;
+import static com.android.server.wm.proto.WindowTokenProto.WAITING_TO_SHOW;
 import static com.android.server.wm.proto.WindowTokenProto.WINDOWS;
 import static com.android.server.wm.proto.WindowTokenProto.WINDOW_CONTAINER;
 
+import android.annotation.CallSuper;
 import android.os.Debug;
 import android.os.IBinder;
 import android.util.Slog;
-import android.view.SurfaceControl;
+import android.util.proto.ProtoOutputStream;
 
 import java.io.PrintWriter;
+import java.util.Comparator;
 
 /**
  * Container of a set of related windows in the window manager. Often this is an AppWindowToken,
@@ -276,6 +277,9 @@ class WindowToken extends WindowContainer<WindowState> {
             final WindowState w = mChildren.get(i);
             w.writeToProto(proto, WINDOWS, trim);
         }
+        proto.write(HIDDEN, mHidden);
+        proto.write(WAITING_TO_SHOW, waitingToShow);
+        proto.write(PAUSED, paused);
         proto.end(token);
     }
 
