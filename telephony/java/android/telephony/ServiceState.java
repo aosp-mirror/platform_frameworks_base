@@ -20,7 +20,6 @@ import android.annotation.IntDef;
 import android.os.Bundle;
 import android.os.Parcel;
 import android.os.Parcelable;
-import android.telephony.Rlog;
 import android.text.TextUtils;
 
 import java.lang.annotation.Retention;
@@ -250,6 +249,11 @@ public class ServiceState implements Parcelable {
      * @hide
      */
     public static final int ROAMING_TYPE_INTERNATIONAL = 3;
+
+    /**
+     * Unknown ID. Could be returned by {@link #getNetworkId()} or {@link #getSystemId()}
+     */
+    public static final int UNKNOWN_ID = -1;
 
     private int mVoiceRoamingType;
     private int mDataRoamingType;
@@ -1248,12 +1252,20 @@ public class ServiceState implements Parcelable {
         return this.mCssIndicator ? 1 : 0;
     }
 
-    /** @hide */
+    /**
+     * Get the CDMA NID (Network Identification Number), a number uniquely identifying a network
+     * within a wireless system. (Defined in 3GPP2 C.S0023 3.4.8)
+     * @return The CDMA NID or {@link #UNKNOWN_ID} if not available.
+     */
     public int getNetworkId() {
         return this.mNetworkId;
     }
 
-    /** @hide */
+    /**
+     * Get the CDMA SID (System Identification Number), a number uniquely identifying a wireless
+     * system. (Defined in 3GPP2 C.S0023 3.4.8)
+     * @return The CDMA SID or {@link #UNKNOWN_ID} if not available.
+     */
     public int getSystemId() {
         return this.mSystemId;
     }
