@@ -174,9 +174,9 @@ public abstract class DisplayManagerInternal {
     public abstract boolean isUidPresentOnDisplay(int uid, int displayId);
 
     /**
-     * Persist brightness slider events.
+     * Persist brightness slider events and ambient brightness stats.
      */
-    public abstract void persistBrightnessSliderEvents();
+    public abstract void persistBrightnessTrackerState();
 
     /**
      * Notifies the display manager that resource overlays have changed.

@@ -3012,6 +3012,13 @@
     <permission android:name="android.permission.BRIGHTNESS_SLIDER_USAGE"
         android:protectionLevel="signature|privileged|development" />
 
+    <!-- Allows an application to collect ambient light stats.
+         <p>Not for use by third party applications.</p>
+         TODO: Make a system API
+         @hide -->
+    <permission android:name="android.permission.ACCESS_AMBIENT_LIGHT_STATS"
+        android:protectionLevel="signature|privileged|development" />
+
     <!-- Allows an application to modify the display brightness configuration
          @hide
          @SystemApi -->
