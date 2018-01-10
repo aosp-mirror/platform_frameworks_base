@@ -202,7 +202,6 @@
     <string name="tethering_hardware_offload" msgid="7470077827090325814">"ٹیدرنگ ہارڈویئر سرعت کاری"</string>
     <string name="bluetooth_show_devices_without_names" msgid="4708446092962060176">"بغیر نام والے بلوٹوتھ آلات دکھائیں"</string>
     <string name="bluetooth_disable_absolute_volume" msgid="2660673801947898809">"مطلق والیوم کو غیر فعال کریں"</string>
-    <string name="bluetooth_enable_inband_ringing" msgid="3291686366721786740">"ان بینڈ رنگنگ فعال کریں"</string>
     <string name="bluetooth_select_avrcp_version_string" msgid="3750059931120293633">"‏بلوٹوتھ AVRCP ورژن"</string>
     <string name="bluetooth_select_avrcp_version_dialog_title" msgid="7277329668298705702">"‏بلوٹوتھ AVRCP ورژن منتخب کریں"</string>
     <string name="bluetooth_select_a2dp_codec_type" msgid="90597356942154882">"بلوٹوتھ آڈیو کوڈیک"</string>
@@ -248,7 +247,6 @@
     <string name="verify_apps_over_usb_summary" msgid="9164096969924529200">"‏نقصان دہ رویے کے مدنظر ADB/ADT کی معرفت انسٹال شدہ ایپس کی جانچ کریں۔"</string>
     <string name="bluetooth_show_devices_without_names_summary" msgid="2351196058115755520">"‏بغیر نام والے بلوٹوتھ آلات (صرف MAC پتے) ڈسپلے کئے جائیں گے"</string>
     <string name="bluetooth_disable_absolute_volume_summary" msgid="6031284410786545957">"ریموٹ آلات کے ساتھ والیوم کے مسائل مثلاً نا قابل قبول حد تک بلند والیوم یا کنٹرول نہ ہونے کی صورت میں بلو ٹوتھ مطلق والیوم والی خصوصیت کو غیر فعال کریں۔"</string>
-    <string name="bluetooth_enable_inband_ringing_summary" msgid="2787866074741784975">"فون پر موجود رنگ ٹونز کو بلوٹوتھ ہیڈ سیٹز پر چلنے دیں"</string>
     <string name="enable_terminal_title" msgid="95572094356054120">"مقامی ٹرمینل"</string>
     <string name="enable_terminal_summary" msgid="67667852659359206">"مقامی شیل رسائی پیش کرنے والی ٹرمینل ایپ فعال کریں"</string>
     <string name="hdcp_checking_title" msgid="8605478913544273282">"‏HDCP چیکنگ"</string>

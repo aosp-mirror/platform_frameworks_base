@@ -202,7 +202,6 @@
     <string name="tethering_hardware_offload" msgid="7470077827090325814">"Апаратне прискорення під час використання телефона в режимі модема"</string>
     <string name="bluetooth_show_devices_without_names" msgid="4708446092962060176">"Показувати пристрої Bluetooth без назв"</string>
     <string name="bluetooth_disable_absolute_volume" msgid="2660673801947898809">"Вимкнути абсолютну гучність"</string>
-    <string name="bluetooth_enable_inband_ringing" msgid="3291686366721786740">"Увімкнути внутрішньосмугові сигнали"</string>
     <string name="bluetooth_select_avrcp_version_string" msgid="3750059931120293633">"Версія Bluetooth AVRCP"</string>
     <string name="bluetooth_select_avrcp_version_dialog_title" msgid="7277329668298705702">"Виберіть версію Bluetooth AVRCP"</string>
     <string name="bluetooth_select_a2dp_codec_type" msgid="90597356942154882">"Кодек для аудіо Bluetooth"</string>
@@ -248,7 +247,6 @@
     <string name="verify_apps_over_usb_summary" msgid="9164096969924529200">"Перевіряти безпеку додатків, установлених через ADB/ADT."</string>
     <string name="bluetooth_show_devices_without_names_summary" msgid="2351196058115755520">"Пристрої Bluetooth відображатимуться без назв (лише MAC-адреси)"</string>
     <string name="bluetooth_disable_absolute_volume_summary" msgid="6031284410786545957">"Функція абсолютної гучності Bluetooth вимикається, якщо на віддалених пристроях виникають проблеми, як-от надто висока гучність або втрата контролю."</string>
-    <string name="bluetooth_enable_inband_ringing_summary" msgid="2787866074741784975">"Дозволити відтворювати сигнали дзвінка на телефоні через гарнітуру Bluetooth"</string>
     <string name="enable_terminal_title" msgid="95572094356054120">"Локальний термінал"</string>
     <string name="enable_terminal_summary" msgid="67667852659359206">"Увімк. програму-термінал, що надає локальний доступ до оболонки"</string>
     <string name="hdcp_checking_title" msgid="8605478913544273282">"Перевірка HDCP"</string>

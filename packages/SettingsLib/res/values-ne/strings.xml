@@ -202,7 +202,6 @@
     <string name="tethering_hardware_offload" msgid="7470077827090325814">"टेदरिङको लागि हार्डवेयरको प्रवेग"</string>
     <string name="bluetooth_show_devices_without_names" msgid="4708446092962060176">"नामकरण नगरिएका ब्लुटुथ यन्त्रहरू देखाउनुहोस्"</string>
     <string name="bluetooth_disable_absolute_volume" msgid="2660673801947898809">"निरपेक्ष आवाज असक्षम गर्नुहोस्"</string>
-    <string name="bluetooth_enable_inband_ringing" msgid="3291686366721786740">"इन-ब्यान्ड घन्टी बज्ने सुविधालाई सक्षम पार्नुहोस्"</string>
     <string name="bluetooth_select_avrcp_version_string" msgid="3750059931120293633">"ब्लुटुथको AVRCP संस्करण"</string>
     <string name="bluetooth_select_avrcp_version_dialog_title" msgid="7277329668298705702">"ब्लुटुथको AVRCP संस्करण चयन गर्नुहोस्"</string>
     <string name="bluetooth_select_a2dp_codec_type" msgid="90597356942154882">"ब्लुटुथ अडियोको कोडेक"</string>
@@ -248,7 +247,6 @@
     <string name="verify_apps_over_usb_summary" msgid="9164096969924529200">"हानिकारक व्यवहारको लागि ADB/ADT को माध्यमबाट स्थापित अनुप्रयोगहरूको जाँच गर्नुहोस्।"</string>
     <string name="bluetooth_show_devices_without_names_summary" msgid="2351196058115755520">"नामकरण नगरिएका ब्लुटुथ यन्त्रहरू (MAC ठेगाना भएका मात्र) देखाइनेछ"</string>
     <string name="bluetooth_disable_absolute_volume_summary" msgid="6031284410786545957">"रिमोट यन्त्रहरूमा अस्वीकार्य चर्को आवाज वा नियन्त्रणमा कमी जस्ता आवाज सम्बन्धी समस्याहरूको अवस्थामा ब्लुटुथ निरपेक्ष आवाज सुविधालाई असक्षम गराउँछ।"</string>
-    <string name="bluetooth_enable_inband_ringing_summary" msgid="2787866074741784975">"उक्त फोनमा भएका रिङटोनहरूलाई ब्लुटुथका हेडसेटहरूमा प्ले गर्न दिनुहोस्"</string>
     <string name="enable_terminal_title" msgid="95572094356054120">"स्थानीय टर्मिनल"</string>
     <string name="enable_terminal_summary" msgid="67667852659359206">"स्थानीय सेल पहुँच प्रदान गर्ने टर्मिनल अनुप्रयोग सक्षम गर्नुहोस्"</string>
     <string name="hdcp_checking_title" msgid="8605478913544273282">"HDCP जाँच गर्दै"</string>

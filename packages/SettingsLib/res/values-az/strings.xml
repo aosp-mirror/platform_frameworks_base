@@ -202,7 +202,6 @@
     <string name="tethering_hardware_offload" msgid="7470077827090325814">"Birləşmə üçün avadanlıq akselerasiyası"</string>
     <string name="bluetooth_show_devices_without_names" msgid="4708446092962060176">"Bluetooth cihazlarını adsız göstərin"</string>
     <string name="bluetooth_disable_absolute_volume" msgid="2660673801947898809">"Mütləq səs həcmi deaktiv edin"</string>
-    <string name="bluetooth_enable_inband_ringing" msgid="3291686366721786740">"Diapazon daxili zəngi aktiv edin"</string>
     <string name="bluetooth_select_avrcp_version_string" msgid="3750059931120293633">"Bluetooth AVRCP Versiya"</string>
     <string name="bluetooth_select_avrcp_version_dialog_title" msgid="7277329668298705702">"Bluetooth AVRCP Versiyasını seçin"</string>
     <string name="bluetooth_select_a2dp_codec_type" msgid="90597356942154882">"Bluetooth Audio Kodek"</string>
@@ -248,7 +247,6 @@
     <string name="verify_apps_over_usb_summary" msgid="9164096969924529200">"ADB/ADT vasitəsi ilə quraşdırılmış tətbiqləri zərərli davranış üzrə yoxlayın."</string>
     <string name="bluetooth_show_devices_without_names_summary" msgid="2351196058115755520">"Adsız Bluetooth cihazları (yalnız MAC ünvanları) göstəriləcək"</string>
     <string name="bluetooth_disable_absolute_volume_summary" msgid="6031284410786545957">"Uzaqdan idarə olunan cihazlarda dözülməz yüksək səs həcmi və ya nəzarət çatışmazlığı kimi səs problemləri olduqda Bluetooth mütləq səs həcmi xüsusiyyətini deaktiv edir."</string>
-    <string name="bluetooth_enable_inband_ringing_summary" msgid="2787866074741784975">"Telefondakı bütün melodiyaların Bluetooth qulaqlıqlarında oxudulmasına icazə verin"</string>
     <string name="enable_terminal_title" msgid="95572094356054120">"Yerli terminal"</string>
     <string name="enable_terminal_summary" msgid="67667852659359206">"Yerli örtük girişini təklif edən terminal tətbiqi aktiv edin"</string>
     <string name="hdcp_checking_title" msgid="8605478913544273282">"HDCP yoxlanılır"</string>

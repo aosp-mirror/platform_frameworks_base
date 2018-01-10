@@ -202,7 +202,6 @@
     <string name="tethering_hardware_offload" msgid="7470077827090325814">"網絡共享硬件加速"</string>
     <string name="bluetooth_show_devices_without_names" msgid="4708446092962060176">"顯示沒有名稱的藍牙裝置"</string>
     <string name="bluetooth_disable_absolute_volume" msgid="2660673801947898809">"停用絕對音量功能"</string>
-    <string name="bluetooth_enable_inband_ringing" msgid="3291686366721786740">"啟用頻內鈴聲"</string>
     <string name="bluetooth_select_avrcp_version_string" msgid="3750059931120293633">"藍牙 AVRCP 版本"</string>
     <string name="bluetooth_select_avrcp_version_dialog_title" msgid="7277329668298705702">"選擇藍牙 AVRCP 版本"</string>
     <string name="bluetooth_select_a2dp_codec_type" msgid="90597356942154882">"藍牙音訊編解碼器"</string>
@@ -248,7 +247,6 @@
     <string name="verify_apps_over_usb_summary" msgid="9164096969924529200">"透過 ADB/ADT 檢查安裝的應用程式有否有害的行為。"</string>
     <string name="bluetooth_show_devices_without_names_summary" msgid="2351196058115755520">"系統將顯示沒有名稱 (只有 MAC 位址) 的藍牙裝置"</string>
     <string name="bluetooth_disable_absolute_volume_summary" msgid="6031284410786545957">"連線至遠端裝置時，如發生音量過大或無法控制音量等問題，請停用藍牙絕對音量功能。"</string>
-    <string name="bluetooth_enable_inband_ringing_summary" msgid="2787866074741784975">"允許藍牙耳機播放手機鈴聲"</string>
     <string name="enable_terminal_title" msgid="95572094356054120">"本機終端機"</string>
     <string name="enable_terminal_summary" msgid="67667852659359206">"啟用可提供本機命令介面存取權的終端機應用程式"</string>
     <string name="hdcp_checking_title" msgid="8605478913544273282">"HDCP 檢查"</string>

@@ -202,7 +202,6 @@
     <string name="tethering_hardware_offload" msgid="7470077827090325814">"Aceleración por hardware para conexión compartida"</string>
     <string name="bluetooth_show_devices_without_names" msgid="4708446092962060176">"Mostrar dispositivos Bluetooth sin nombre"</string>
     <string name="bluetooth_disable_absolute_volume" msgid="2660673801947898809">"Inhabilitar volumen absoluto"</string>
-    <string name="bluetooth_enable_inband_ringing" msgid="3291686366721786740">"Habilitar tono de llamada por Bluetooth"</string>
     <string name="bluetooth_select_avrcp_version_string" msgid="3750059931120293633">"Versión AVRCP del Bluetooth"</string>
     <string name="bluetooth_select_avrcp_version_dialog_title" msgid="7277329668298705702">"Selecciona la versión AVRCP del Bluetooth"</string>
     <string name="bluetooth_select_a2dp_codec_type" msgid="90597356942154882">"Códec de audio por Bluetooth"</string>
@@ -248,7 +247,6 @@
     <string name="verify_apps_over_usb_summary" msgid="9164096969924529200">"Comprueba las aplicaciones instaladas mediante ADB/ADT para detectar comportamientos dañinos"</string>
     <string name="bluetooth_show_devices_without_names_summary" msgid="2351196058115755520">"Se mostrarán dispositivos Bluetooth sin nombre (solo direcciones MAC)"</string>
     <string name="bluetooth_disable_absolute_volume_summary" msgid="6031284410786545957">"Inhabilita la función de volumen absoluto de Bluetooth si se producen problemas de volumen con dispositivos remotos (por ejemplo, volumen demasiado alto o falta de control)."</string>
-    <string name="bluetooth_enable_inband_ringing_summary" msgid="2787866074741784975">"Permite que los tonos de llamada del teléfono se reproduzcan en auriculares Bluetooth"</string>
     <string name="enable_terminal_title" msgid="95572094356054120">"Terminal local"</string>
     <string name="enable_terminal_summary" msgid="67667852659359206">"Habilitar aplicación de terminal que ofrece acceso a shell local"</string>
     <string name="hdcp_checking_title" msgid="8605478913544273282">"Comprobación de HDCP"</string>

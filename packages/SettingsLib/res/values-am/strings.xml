@@ -202,7 +202,6 @@
     <string name="tethering_hardware_offload" msgid="7470077827090325814">"የሃርድዌር ማቀላጠፊያን በማስተሳሰር ላይ"</string>
     <string name="bluetooth_show_devices_without_names" msgid="4708446092962060176">"የብሉቱዝ መሣሪያዎችን ያለ ስሞች አሳይ"</string>
     <string name="bluetooth_disable_absolute_volume" msgid="2660673801947898809">"ፍጹማዊ ድምፅን አሰናክል"</string>
-    <string name="bluetooth_enable_inband_ringing" msgid="3291686366721786740">"የውስጠ-ሞገድ ማስጮህን አንቃ"</string>
     <string name="bluetooth_select_avrcp_version_string" msgid="3750059931120293633">"የብሉቱዝ AVRCP ስሪት"</string>
     <string name="bluetooth_select_avrcp_version_dialog_title" msgid="7277329668298705702">"የብሉቱዝ AVRCP ስሪት ይምረጡ"</string>
     <string name="bluetooth_select_a2dp_codec_type" msgid="90597356942154882">"የብሉቱዝ ኦዲዮ ኮዴክ"</string>
@@ -248,7 +247,6 @@
     <string name="verify_apps_over_usb_summary" msgid="9164096969924529200">"በADB/ADT በኩል የተጫኑ መተግበሪያዎች ጎጂ ባህሪ ካላቸው ያረጋግጡ።"</string>
     <string name="bluetooth_show_devices_without_names_summary" msgid="2351196058115755520">"የብሉቱዝ መሣሪያዎች ያለ ስሞች (MAC አድራሻዎች ብቻ) ይታያሉ"</string>
     <string name="bluetooth_disable_absolute_volume_summary" msgid="6031284410786545957">"እንደ ተቀባይነት በሌለው ደረጃ ድምፁ ከፍ ማለት ወይም መቆጣጠር አለመቻል ያሉ ከሩቅ መሣሪያዎች ጋር የድምፅ ችግር በሚኖርበት ጊዜ የብሉቱዝ ፍጹማዊ ድምፅን ባሕሪ ያሰናክላል።"</string>
-    <string name="bluetooth_enable_inband_ringing_summary" msgid="2787866074741784975">"በስልኩ ላይ ያሉ የጥሪ ቅላጼዎች በብሉቱዝ ጆሮ ማዳመጫዎች ላይ እንዲጫወቱ ፍቀድ"</string>
     <string name="enable_terminal_title" msgid="95572094356054120">"አካባቢያዊ ተርሚናል"</string>
     <string name="enable_terminal_summary" msgid="67667852659359206">"የአካባቢያዊ ሼል መዳረሻ የሚያቀርብ የተርሚናል መተግበሪያ አንቃ"</string>
     <string name="hdcp_checking_title" msgid="8605478913544273282">"የHDCP ምልከታ"</string>

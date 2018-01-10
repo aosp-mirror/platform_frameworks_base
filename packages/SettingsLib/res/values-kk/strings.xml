@@ -202,7 +202,6 @@
     <string name="tethering_hardware_offload" msgid="7470077827090325814">"Тетерингтің аппараттық жеделдетуі"</string>
     <string name="bluetooth_show_devices_without_names" msgid="4708446092962060176">"Атаусыз Bluetooth құрылғыларын көрсету"</string>
     <string name="bluetooth_disable_absolute_volume" msgid="2660673801947898809">"Абсолютті дыбыс деңгейін өшіру"</string>
-    <string name="bluetooth_enable_inband_ringing" msgid="3291686366721786740">"Ішкі жолақтағы шылдырлауды қосу"</string>
     <string name="bluetooth_select_avrcp_version_string" msgid="3750059931120293633">"Bluetooth AVRCP нұсқасы"</string>
     <string name="bluetooth_select_avrcp_version_dialog_title" msgid="7277329668298705702">"Bluetooth AVRCP нұсқасын таңдау"</string>
     <string name="bluetooth_select_a2dp_codec_type" msgid="90597356942154882">"Bluetooth аудимазмұн кодегі"</string>
@@ -248,7 +247,6 @@
     <string name="verify_apps_over_usb_summary" msgid="9164096969924529200">"ADB/ADT арқылы орнатылған қолданбалардың залалды болмауын тексеру."</string>
     <string name="bluetooth_show_devices_without_names_summary" msgid="2351196058115755520">"Атаусыз Bluetooth құрылғылары (тек MAC мекенжайымен) көрсетіледі"</string>
     <string name="bluetooth_disable_absolute_volume_summary" msgid="6031284410786545957">"Қолайсыз қатты дыбыс деңгейі немесе басқарудың болмауы сияқты қашықтағы құрылғыларда дыбыс деңгейімен мәселелер жағдайында Bluetooth абсолютті дыбыс деңгейі функциясын өшіреді."</string>
-    <string name="bluetooth_enable_inband_ringing_summary" msgid="2787866074741784975">"Телефондағы қоңырау әуендерінің Bluetooth құлақаспабында ойнатылуына мүмкіндік беру"</string>
     <string name="enable_terminal_title" msgid="95572094356054120">"Жергілікті терминал"</string>
     <string name="enable_terminal_summary" msgid="67667852659359206">"Жергілікті шелл-код қол жетімділігін ұсынатын терминалды қолданбаны қосу"</string>
     <string name="hdcp_checking_title" msgid="8605478913544273282">"HDCP (жоғары кең жолақты сандық мазмұнды қорғау) тексеру"</string>

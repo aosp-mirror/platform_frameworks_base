@@ -202,7 +202,6 @@
     <string name="tethering_hardware_offload" msgid="7470077827090325814">"ការ​បង្កើនល្បឿន​ផ្នែករឹងសម្រាប់​ការភ្ជាប់"</string>
     <string name="bluetooth_show_devices_without_names" msgid="4708446092962060176">"បង្ហាញ​ឧបករណ៍​ប្ល៊ូធូស​គ្មានឈ្មោះ"</string>
     <string name="bluetooth_disable_absolute_volume" msgid="2660673801947898809">"បិទកម្រិតសំឡេងលឺខ្លាំង"</string>
-    <string name="bluetooth_enable_inband_ringing" msgid="3291686366721786740">"បើក​ការ​រោទ៍​ក្នុងបណ្តាញ"</string>
     <string name="bluetooth_select_avrcp_version_string" msgid="3750059931120293633">"កំណែប្ល៊ូធូស AVRCP"</string>
     <string name="bluetooth_select_avrcp_version_dialog_title" msgid="7277329668298705702">"ជ្រើសរើសកំណែប្ល៊ូធូស AVRCP"</string>
     <string name="bluetooth_select_a2dp_codec_type" msgid="90597356942154882">"កូឌិក​សំឡេង​ប៊្លូធូស"</string>
@@ -248,7 +247,6 @@
     <string name="verify_apps_over_usb_summary" msgid="9164096969924529200">"ពិនិត្យ​កម្មវិធី​បាន​ដំឡើង​តាម​រយៈ ADB/ADT សម្រាប់​ឥរិយាបថ​ដែល​គ្រោះ​ថ្នាក់។"</string>
     <string name="bluetooth_show_devices_without_names_summary" msgid="2351196058115755520">"​ឧបករណ៍​ប្ល៊ូធូសគ្មានឈ្មោះ​ (អាសយដ្ឋាន MAC តែប៉ុណ្ណោះ) នឹង​បង្ហាញ"</string>
     <string name="bluetooth_disable_absolute_volume_summary" msgid="6031284410786545957">"បិទលក្ខណៈពិសេសកម្រិតសំឡេងលឺខ្លាំងពេលភ្ជាប់ប៊្លូធូសក្នុងករណីមានបញ្ហាជាមួយឧបករណ៍បញ្ជាពីចម្ងាយ ដូចជាកម្រិតសំឡេងលឺខ្លាំងដែលមិនអាចទទួលយកបាន ឬខ្វះការគ្រប់គ្រង។"</string>
-    <string name="bluetooth_enable_inband_ringing_summary" msgid="2787866074741784975">"អនុញ្ញាត​ឲ្យ​សំឡេង​រោទ៍​នៅ​លើ​ទូរសព្ទ​បញ្ចេញសំឡេង​តាម​រយៈ​កាស​ប្ល៊ូធូស"</string>
     <string name="enable_terminal_title" msgid="95572094356054120">"ស្ថានីយ​មូលដ្ឋាន"</string>
     <string name="enable_terminal_summary" msgid="67667852659359206">"បើក​កម្មវិធី​ស្ថានីយ​ដែល​ផ្ដល់​ការ​ចូល​សែល​មូលដ្ឋាន"</string>
     <string name="hdcp_checking_title" msgid="8605478913544273282">"ពិនិត្យ HDCP"</string>
