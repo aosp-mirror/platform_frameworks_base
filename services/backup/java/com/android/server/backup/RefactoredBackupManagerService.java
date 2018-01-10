@@ -207,6 +207,10 @@ public class RefactoredBackupManagerService implements BackupManagerServiceInter
     public static final String BACKUP_FINISHED_ACTION = "android.intent.action.BACKUP_FINISHED";
     public static final String BACKUP_FINISHED_PACKAGE_EXTRA = "packageName";
 
+    // Time delay for initialization operations that can be delayed so as not to consume too much CPU
+    // on bring-up and increase time-to-UI.
+    private static final long INITIALIZATION_DELAY_MILLIS = 3000;
+
     // Timeout interval for deciding that a bind or clear-data has taken too long
     private static final long TIMEOUT_INTERVAL = 10 * 1000;
 
@@ -281,6 +285,9 @@ public class RefactoredBackupManagerService implements BackupManagerServiceInter
     private volatile boolean mClearingData;
 
     private final BackupPasswordManager mBackupPasswordManager;
+
+    // Time when we post the transport registration operation
+    private final long mRegisterTransportsRequestedTime;
 
     @GuardedBy("mPendingRestores")
     private boolean mIsRestoreInProgress;
@@ -735,6 +742,9 @@ public class RefactoredBackupManagerService implements BackupManagerServiceInter
         // Set up our transport options and initialize the default transport
         SystemConfig systemConfig = SystemConfig.getInstance();
         Set<ComponentName> transportWhitelist = systemConfig.getBackupTransportWhitelist();
+        if (transportWhitelist == null) {
+            transportWhitelist = Collections.emptySet();
+        }
 
         String transport =
                 Settings.Secure.getString(
@@ -749,8 +759,7 @@ public class RefactoredBackupManagerService implements BackupManagerServiceInter
                 new TransportManager(
                         context,
                         transportWhitelist,
-                        transport,
-                        backupThread.getLooper());
+                        transport);
 
         // If encrypted file systems is enabled or disabled, this call will return the
         // correct directory.
@@ -852,12 +861,14 @@ public class RefactoredBackupManagerService implements BackupManagerServiceInter
         }
 
         mTransportManager = transportManager;
-        mTransportManager.setTransportBoundListener(mTransportBoundListener);
-        mTransportManager.registerAllTransports();
+        mTransportManager.setOnTransportRegisteredListener(this::onTransportRegistered);
+        mRegisterTransportsRequestedTime = SystemClock.elapsedRealtime();
+        mBackupHandler.postDelayed(
+                mTransportManager::registerTransports, INITIALIZATION_DELAY_MILLIS);
 
-        // Now that we know about valid backup participants, parse any
-        // leftover journal files into the pending backup set
-        mBackupHandler.post(this::parseLeftoverJournals);
+        // Now that we know about valid backup participants, parse any leftover journal files into
+        // the pending backup set
+        mBackupHandler.postDelayed(this::parseLeftoverJournals, INITIALIZATION_DELAY_MILLIS);
 
         // Power management
         mWakelock = mPowerManager.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK, "*backup*");
@@ -1151,39 +1162,28 @@ public class RefactoredBackupManagerService implements BackupManagerServiceInter
         }
     }
 
-    private TransportManager.TransportBoundListener mTransportBoundListener =
-            new TransportManager.TransportBoundListener() {
-                @Override
-                public boolean onTransportBound(IBackupTransport transport) {
-                    // If the init sentinel file exists, we need to be sure to perform the init
-                    // as soon as practical.  We also create the state directory at registration
-                    // time to ensure it's present from the outset.
-                    String name = null;
-                    try {
-                        name = transport.name();
-                        String transportDirName = transport.transportDirName();
-                        File stateDir = new File(mBaseStateDir, transportDirName);
-                        stateDir.mkdirs();
+    private void onTransportRegistered(String transportName, String transportDirName) {
+        if (DEBUG) {
+            long timeMs = SystemClock.elapsedRealtime() - mRegisterTransportsRequestedTime;
+            Slog.d(TAG, "Transport " + transportName + " registered " + timeMs
+                    + "ms after first request (delay = " + INITIALIZATION_DELAY_MILLIS + "ms)");
+        }
 
-                        File initSentinel = new File(stateDir, INIT_SENTINEL_FILE_NAME);
-                        if (initSentinel.exists()) {
-                            synchronized (mQueueLock) {
-                                mPendingInits.add(name);
+        File stateDir = new File(mBaseStateDir, transportDirName);
+        stateDir.mkdirs();
 
-                                // TODO: pick a better starting time than now + 1 minute
-                                long delay = 1000 * 60; // one minute, in milliseconds
-                                mAlarmManager.set(AlarmManager.RTC_WAKEUP,
-                                        System.currentTimeMillis() + delay, mRunInitIntent);
-                            }
-                        }
-                        return true;
-                    } catch (Exception e) {
-                        // the transport threw when asked its file naming prefs; declare it invalid
-                        Slog.w(TAG, "Failed to regiser transport: " + name);
-                        return false;
-                    }
-                }
-            };
+        File initSentinel = new File(stateDir, INIT_SENTINEL_FILE_NAME);
+        if (initSentinel.exists()) {
+            synchronized (mQueueLock) {
+                mPendingInits.add(transportName);
+
+                // TODO: pick a better starting time than now + 1 minute
+                long delay = 1000 * 60; // one minute, in milliseconds
+                mAlarmManager.set(AlarmManager.RTC_WAKEUP,
+                        System.currentTimeMillis() + delay, mRunInitIntent);
+            }
+        }
+    }
 
     // ----- Track installation/removal of packages -----
     private BroadcastReceiver mBroadcastReceiver = new BroadcastReceiver() {
@@ -2891,14 +2891,14 @@ public class RefactoredBackupManagerService implements BackupManagerServiceInter
         mContext.enforceCallingOrSelfPermission(android.Manifest.permission.BACKUP,
                 "listAllTransports");
 
-        return mTransportManager.getBoundTransportNames();
+        return mTransportManager.getRegisteredTransportNames();
     }
 
     @Override
     public ComponentName[] listAllTransportComponents() {
         mContext.enforceCallingOrSelfPermission(android.Manifest.permission.BACKUP,
                 "listAllTransportComponents");
-        return mTransportManager.getAllTransportComponents();
+        return mTransportManager.getRegisteredTransportComponents();
     }
 
     @Override
@@ -3003,6 +3003,8 @@ public class RefactoredBackupManagerService implements BackupManagerServiceInter
 
     /** Selects transport {@code transportName} and returns previous selected transport. */
     @Override
+    @Deprecated
+    @Nullable
     public String selectBackupTransport(String transportName) {
         mContext.enforceCallingOrSelfPermission(
                 android.Manifest.permission.BACKUP, "selectBackupTransport");

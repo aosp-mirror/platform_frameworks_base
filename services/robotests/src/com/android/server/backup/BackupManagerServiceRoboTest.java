@@ -16,7 +16,11 @@
 
 package com.android.server.backup;
 
-import static com.android.server.backup.testing.TransportTestUtils.TRANSPORT_NAMES;
+import static com.android.server.backup.testing.TransportData.backupTransport;
+import static com.android.server.backup.testing.TransportData.d2dTransport;
+import static com.android.server.backup.testing.TransportData.localTransport;
+import static com.android.server.backup.testing.TransportTestUtils.setUpCurrentTransport;
+import static com.android.server.backup.testing.TransportTestUtils.setUpTransports;
 
 import static com.google.common.truth.Truth.assertThat;
 
@@ -24,6 +28,7 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static org.robolectric.Shadows.shadowOf;
@@ -39,8 +44,8 @@ import android.platform.test.annotations.Presubmit;
 import android.provider.Settings;
 
 import com.android.server.backup.testing.ShadowAppBackupUtils;
-import com.android.server.backup.testing.TransportTestUtils;
-import com.android.server.backup.testing.TransportTestUtils.TransportData;
+import com.android.server.backup.testing.TransportData;
+import com.android.server.backup.testing.TransportTestUtils.TransportMock;
 import com.android.server.backup.transport.TransportNotRegisteredException;
 import com.android.server.testing.FrameworkRobolectricTestRunner;
 import com.android.server.testing.SystemLoaderClasses;
@@ -57,10 +62,10 @@ import org.robolectric.shadows.ShadowContextWrapper;
 import org.robolectric.shadows.ShadowLog;
 import org.robolectric.shadows.ShadowLooper;
 import org.robolectric.shadows.ShadowSettings;
+import org.robolectric.shadows.ShadowSystemClock;
 
 import java.io.File;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
 @RunWith(FrameworkRobolectricTestRunner.class)
@@ -73,21 +78,23 @@ import java.util.Map;
 @Presubmit
 public class BackupManagerServiceRoboTest {
     private static final String TAG = "BMSTest";
-    private static final String TRANSPORT_NAME =
-            "com.google.android.gms/.backup.BackupTransportService";
 
     @Mock private TransportManager mTransportManager;
     private HandlerThread mBackupThread;
     private ShadowLooper mShadowBackupLooper;
     private File mBaseStateDir;
     private File mDataDir;
-    private RefactoredBackupManagerService mBackupManagerService;
     private ShadowContextWrapper mShadowContext;
     private Context mContext;
+    private TransportData mTransport;
+    private String mTransportName;
 
     @Before
     public void setUp() throws Exception {
         MockitoAnnotations.initMocks(this);
+
+        mTransport = backupTransport();
+        mTransportName = mTransport.transportName;
 
         mBackupThread = new HandlerThread("backup-test");
         mBackupThread.setUncaughtExceptionHandler(
@@ -102,15 +109,6 @@ public class BackupManagerServiceRoboTest {
         File cacheDir = mContext.getCacheDir();
         mBaseStateDir = new File(cacheDir, "base_state_dir");
         mDataDir = new File(cacheDir, "data_dir");
-
-        mBackupManagerService =
-                new RefactoredBackupManagerService(
-                        mContext,
-                        new Trampoline(mContext),
-                        mBackupThread,
-                        mBaseStateDir,
-                        mDataDir,
-                        mTransportManager);
     }
 
     @After
@@ -124,10 +122,12 @@ public class BackupManagerServiceRoboTest {
     @Test
     public void testDestinationString() throws Exception {
         mShadowContext.grantPermissions(android.Manifest.permission.BACKUP);
-        when(mTransportManager.getTransportCurrentDestinationString(eq(TRANSPORT_NAME)))
+        when(mTransportManager.getTransportCurrentDestinationString(eq(mTransportName)))
                 .thenReturn("destinationString");
+        RefactoredBackupManagerService backupManagerService =
+                createInitializedBackupManagerService();
 
-        String destination = mBackupManagerService.getDestinationString(TRANSPORT_NAME);
+        String destination = backupManagerService.getDestinationString(mTransportName);
 
         assertThat(destination).isEqualTo("destinationString");
     }
@@ -135,10 +135,12 @@ public class BackupManagerServiceRoboTest {
     @Test
     public void testDestinationString_whenTransportNotRegistered() throws Exception {
         mShadowContext.grantPermissions(android.Manifest.permission.BACKUP);
-        when(mTransportManager.getTransportCurrentDestinationString(eq(TRANSPORT_NAME)))
+        when(mTransportManager.getTransportCurrentDestinationString(eq(mTransportName)))
                 .thenThrow(TransportNotRegisteredException.class);
+        RefactoredBackupManagerService backupManagerService =
+                createInitializedBackupManagerService();
 
-        String destination = mBackupManagerService.getDestinationString(TRANSPORT_NAME);
+        String destination = backupManagerService.getDestinationString(mTransportName);
 
         assertThat(destination).isNull();
     }
@@ -146,12 +148,14 @@ public class BackupManagerServiceRoboTest {
     @Test
     public void testDestinationString_withoutPermission() throws Exception {
         mShadowContext.denyPermissions(android.Manifest.permission.BACKUP);
-        when(mTransportManager.getTransportCurrentDestinationString(eq(TRANSPORT_NAME)))
+        when(mTransportManager.getTransportCurrentDestinationString(eq(mTransportName)))
                 .thenThrow(TransportNotRegisteredException.class);
+        RefactoredBackupManagerService backupManagerService =
+                createInitializedBackupManagerService();
 
         expectThrows(
                 SecurityException.class,
-                () -> mBackupManagerService.getDestinationString(TRANSPORT_NAME));
+                () -> backupManagerService.getDestinationString(mTransportName));
     }
 
     /* Tests for app eligibility */
@@ -159,24 +163,28 @@ public class BackupManagerServiceRoboTest {
     @Test
     public void testIsAppEligibleForBackup_whenAppEligible() throws Exception {
         mShadowContext.grantPermissions(android.Manifest.permission.BACKUP);
-        TransportData transport =
-                TransportTestUtils.setUpCurrentTransport(mTransportManager, TRANSPORT_NAME);
+        TransportMock transportMock = setUpCurrentTransport(mTransportManager, backupTransport());
         ShadowAppBackupUtils.sAppIsRunningAndEligibleForBackupWithTransport = p -> true;
+        RefactoredBackupManagerService backupManagerService =
+                createInitializedBackupManagerService();
 
-        boolean result = mBackupManagerService.isAppEligibleForBackup("app.package");
+        boolean result = backupManagerService.isAppEligibleForBackup("app.package");
 
         assertThat(result).isTrue();
+
         verify(mTransportManager)
-                .disposeOfTransportClient(eq(transport.transportClientMock), any());
+                .disposeOfTransportClient(eq(transportMock.transportClient), any());
     }
 
     @Test
     public void testIsAppEligibleForBackup_whenAppNotEligible() throws Exception {
         mShadowContext.grantPermissions(android.Manifest.permission.BACKUP);
-        TransportTestUtils.setUpCurrentTransport(mTransportManager, TRANSPORT_NAME);
+        setUpCurrentTransport(mTransportManager, mTransport);
         ShadowAppBackupUtils.sAppIsRunningAndEligibleForBackupWithTransport = p -> false;
+        RefactoredBackupManagerService backupManagerService =
+                createInitializedBackupManagerService();
 
-        boolean result = mBackupManagerService.isAppEligibleForBackup("app.package");
+        boolean result = backupManagerService.isAppEligibleForBackup("app.package");
 
         assertThat(result).isFalse();
     }
@@ -184,38 +192,43 @@ public class BackupManagerServiceRoboTest {
     @Test
     public void testIsAppEligibleForBackup_withoutPermission() throws Exception {
         mShadowContext.denyPermissions(android.Manifest.permission.BACKUP);
-        TransportTestUtils.setUpCurrentTransport(mTransportManager, TRANSPORT_NAME);
+        setUpCurrentTransport(mTransportManager, mTransport);
+        RefactoredBackupManagerService backupManagerService =
+                createInitializedBackupManagerService();
 
         expectThrows(
                 SecurityException.class,
-                () -> mBackupManagerService.isAppEligibleForBackup("app.package"));
+                () -> backupManagerService.isAppEligibleForBackup("app.package"));
     }
 
     @Test
     public void testFilterAppsEligibleForBackup() throws Exception {
         mShadowContext.grantPermissions(android.Manifest.permission.BACKUP);
-        TransportData transport =
-                TransportTestUtils.setUpCurrentTransport(mTransportManager, TRANSPORT_NAME);
+        TransportMock transportMock = setUpCurrentTransport(mTransportManager, mTransport);
         Map<String, Boolean> packagesMap = new HashMap<>();
         packagesMap.put("package.a", true);
         packagesMap.put("package.b", false);
         ShadowAppBackupUtils.sAppIsRunningAndEligibleForBackupWithTransport = packagesMap::get;
+        RefactoredBackupManagerService backupManagerService =
+                createInitializedBackupManagerService();
         String[] packages = packagesMap.keySet().toArray(new String[packagesMap.size()]);
 
-        String[] filtered = mBackupManagerService.filterAppsEligibleForBackup(packages);
+        String[] filtered = backupManagerService.filterAppsEligibleForBackup(packages);
 
         assertThat(filtered).asList().containsExactly("package.a");
         verify(mTransportManager)
-                .disposeOfTransportClient(eq(transport.transportClientMock), any());
+                .disposeOfTransportClient(eq(transportMock.transportClient), any());
     }
 
     @Test
     public void testFilterAppsEligibleForBackup_whenNoneIsEligible() throws Exception {
         mShadowContext.grantPermissions(android.Manifest.permission.BACKUP);
         ShadowAppBackupUtils.sAppIsRunningAndEligibleForBackupWithTransport = p -> false;
+        RefactoredBackupManagerService backupManagerService =
+                createInitializedBackupManagerService();
 
         String[] filtered =
-                mBackupManagerService.filterAppsEligibleForBackup(
+                backupManagerService.filterAppsEligibleForBackup(
                         new String[] {"package.a", "package.b"});
 
         assertThat(filtered).isEmpty();
@@ -224,12 +237,14 @@ public class BackupManagerServiceRoboTest {
     @Test
     public void testFilterAppsEligibleForBackup_withoutPermission() throws Exception {
         mShadowContext.denyPermissions(android.Manifest.permission.BACKUP);
-        TransportTestUtils.setUpCurrentTransport(mTransportManager, TRANSPORT_NAME);
+        setUpCurrentTransport(mTransportManager, mTransport);
+        RefactoredBackupManagerService backupManagerService =
+                createInitializedBackupManagerService();
 
         expectThrows(
                 SecurityException.class,
                 () ->
-                        mBackupManagerService.filterAppsEligibleForBackup(
+                        backupManagerService.filterAppsEligibleForBackup(
                                 new String[] {"package.a", "package.b"}));
     }
 
@@ -238,14 +253,12 @@ public class BackupManagerServiceRoboTest {
     private TransportData mNewTransport;
     private TransportData mOldTransport;
     private ComponentName mNewTransportComponent;
-    private ISelectBackupTransportCallback mCallback;
 
     private void setUpForSelectTransport() throws Exception {
-        List<TransportData> transports =
-                TransportTestUtils.setUpTransports(mTransportManager, TRANSPORT_NAMES);
-        mNewTransport = transports.get(0);
-        mNewTransportComponent = mNewTransport.transportClientMock.getTransportComponent();
-        mOldTransport = transports.get(1);
+        mNewTransport = backupTransport();
+        mNewTransportComponent = mNewTransport.getTransportComponent();
+        mOldTransport = d2dTransport();
+        setUpTransports(mTransportManager, mNewTransport, mOldTransport, localTransport());
         when(mTransportManager.selectTransport(eq(mNewTransport.transportName)))
                 .thenReturn(mOldTransport.transportName);
     }
@@ -254,9 +267,11 @@ public class BackupManagerServiceRoboTest {
     public void testSelectBackupTransport() throws Exception {
         setUpForSelectTransport();
         mShadowContext.grantPermissions(android.Manifest.permission.BACKUP);
+        RefactoredBackupManagerService backupManagerService =
+                createInitializedBackupManagerService();
 
         String oldTransport =
-                mBackupManagerService.selectBackupTransport(mNewTransport.transportName);
+                backupManagerService.selectBackupTransport(mNewTransport.transportName);
 
         assertThat(getSettingsTransport()).isEqualTo(mNewTransport.transportName);
         assertThat(oldTransport).isEqualTo(mOldTransport.transportName);
@@ -266,10 +281,12 @@ public class BackupManagerServiceRoboTest {
     public void testSelectBackupTransport_withoutPermission() throws Exception {
         setUpForSelectTransport();
         mShadowContext.denyPermissions(android.Manifest.permission.BACKUP);
+        RefactoredBackupManagerService backupManagerService =
+                createInitializedBackupManagerService();
 
         expectThrows(
                 SecurityException.class,
-                () -> mBackupManagerService.selectBackupTransport(mNewTransport.transportName));
+                () -> backupManagerService.selectBackupTransport(mNewTransport.transportName));
     }
 
     @Test
@@ -278,9 +295,11 @@ public class BackupManagerServiceRoboTest {
         mShadowContext.grantPermissions(android.Manifest.permission.BACKUP);
         when(mTransportManager.registerAndSelectTransport(eq(mNewTransportComponent)))
                 .thenReturn(BackupManager.SUCCESS);
+        RefactoredBackupManagerService backupManagerService =
+                createInitializedBackupManagerService();
         ISelectBackupTransportCallback callback = mock(ISelectBackupTransportCallback.class);
 
-        mBackupManagerService.selectBackupTransportAsync(mNewTransportComponent, callback);
+        backupManagerService.selectBackupTransportAsync(mNewTransportComponent, callback);
 
         mShadowBackupLooper.runToEndOfTasks();
         assertThat(getSettingsTransport()).isEqualTo(mNewTransport.transportName);
@@ -293,9 +312,11 @@ public class BackupManagerServiceRoboTest {
         mShadowContext.grantPermissions(android.Manifest.permission.BACKUP);
         when(mTransportManager.registerAndSelectTransport(eq(mNewTransportComponent)))
                 .thenReturn(BackupManager.ERROR_TRANSPORT_UNAVAILABLE);
+        RefactoredBackupManagerService backupManagerService =
+                createInitializedBackupManagerService();
         ISelectBackupTransportCallback callback = mock(ISelectBackupTransportCallback.class);
 
-        mBackupManagerService.selectBackupTransportAsync(mNewTransportComponent, callback);
+        backupManagerService.selectBackupTransportAsync(mNewTransportComponent, callback);
 
         mShadowBackupLooper.runToEndOfTasks();
         assertThat(getSettingsTransport()).isNotEqualTo(mNewTransport.transportName);
@@ -304,19 +325,19 @@ public class BackupManagerServiceRoboTest {
 
     @Test
     public void testSelectBackupTransportAsync_whenTransportGetsUnregistered() throws Exception {
-        TransportTestUtils.setUpTransports(
-                mTransportManager, new TransportData(TRANSPORT_NAME, null, null));
-        ComponentName newTransportComponent =
-                TransportTestUtils.transportComponentName(TRANSPORT_NAME);
+        setUpTransports(mTransportManager, mTransport.unregistered());
+        ComponentName newTransportComponent = mTransport.getTransportComponent();
         mShadowContext.grantPermissions(android.Manifest.permission.BACKUP);
         when(mTransportManager.registerAndSelectTransport(eq(newTransportComponent)))
                 .thenReturn(BackupManager.SUCCESS);
+        RefactoredBackupManagerService backupManagerService =
+                createInitializedBackupManagerService();
         ISelectBackupTransportCallback callback = mock(ISelectBackupTransportCallback.class);
 
-        mBackupManagerService.selectBackupTransportAsync(newTransportComponent, callback);
+        backupManagerService.selectBackupTransportAsync(newTransportComponent, callback);
 
         mShadowBackupLooper.runToEndOfTasks();
-        assertThat(getSettingsTransport()).isNotEqualTo(TRANSPORT_NAME);
+        assertThat(getSettingsTransport()).isNotEqualTo(mTransportName);
         verify(callback).onFailure(anyInt());
     }
 
@@ -324,18 +345,70 @@ public class BackupManagerServiceRoboTest {
     public void testSelectBackupTransportAsync_withoutPermission() throws Exception {
         setUpForSelectTransport();
         mShadowContext.denyPermissions(android.Manifest.permission.BACKUP);
-        ComponentName newTransportComponent =
-                mNewTransport.transportClientMock.getTransportComponent();
+        RefactoredBackupManagerService backupManagerService =
+                createInitializedBackupManagerService();
+        ComponentName newTransportComponent = mNewTransport.getTransportComponent();
 
         expectThrows(
                 SecurityException.class,
                 () ->
-                        mBackupManagerService.selectBackupTransportAsync(
+                        backupManagerService.selectBackupTransportAsync(
                                 newTransportComponent, mock(ISelectBackupTransportCallback.class)));
     }
 
     private String getSettingsTransport() {
         return ShadowSettings.ShadowSecure.getString(
                 mContext.getContentResolver(), Settings.Secure.BACKUP_TRANSPORT);
+    }
+
+    /* Miscellaneous tests */
+
+    @Test
+    public void testConstructor_postRegisterTransports() {
+        mShadowContext.grantPermissions(android.Manifest.permission.BACKUP);
+
+        createBackupManagerService();
+
+        mShadowBackupLooper.runToEndOfTasks();
+        verify(mTransportManager).registerTransports();
+    }
+
+    @Test
+    public void testConstructor_doesNotRegisterTransportsSynchronously() {
+        mShadowContext.grantPermissions(android.Manifest.permission.BACKUP);
+
+        createBackupManagerService();
+
+        // Operations posted to mBackupThread only run with mShadowBackupLooper.runToEndOfTasks()
+        verify(mTransportManager, never()).registerTransports();
+    }
+
+    private RefactoredBackupManagerService createBackupManagerService() {
+        return new RefactoredBackupManagerService(
+                mContext,
+                new Trampoline(mContext),
+                mBackupThread,
+                mBaseStateDir,
+                mDataDir,
+                mTransportManager);
+    }
+
+    private RefactoredBackupManagerService createInitializedBackupManagerService() {
+        RefactoredBackupManagerService backupManagerService =
+                new RefactoredBackupManagerService(
+                        mContext,
+                        new Trampoline(mContext),
+                        mBackupThread,
+                        mBaseStateDir,
+                        mDataDir,
+                        mTransportManager);
+        mShadowBackupLooper.runToEndOfTasks();
+        // Handler instances have their own clock, so advancing looper (with runToEndOfTasks())
+        // above does NOT advance the handlers' clock, hence whenever a handler post messages with
+        // specific time to the looper the time of those messages will be before the looper's time.
+        // To fix this we advance SystemClock as well since that is from where the handlers read
+        // time.
+        ShadowSystemClock.setCurrentTimeMillis(mShadowBackupLooper.getScheduler().getCurrentTime());
+        return backupManagerService;
     }
 }
