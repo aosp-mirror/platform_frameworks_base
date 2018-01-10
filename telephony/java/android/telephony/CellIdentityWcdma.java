@@ -17,8 +17,6 @@
 package android.telephony;
 
 import android.os.Parcel;
-import android.os.Parcelable;
-import android.telephony.Rlog;
 import android.text.TextUtils;
 
 import java.util.Objects;
@@ -26,9 +24,8 @@ import java.util.Objects;
 /**
  * CellIdentity to represent a unique UMTS cell
  */
-public final class CellIdentityWcdma implements Parcelable {
-
-    private static final String LOG_TAG = "CellIdentityWcdma";
+public final class CellIdentityWcdma extends CellIdentity {
+    private static final String TAG = CellIdentityWcdma.class.getSimpleName();
     private static final boolean DBG = false;
 
     // 16-bit Location Area Code, 0..65535
@@ -39,10 +36,6 @@ public final class CellIdentityWcdma implements Parcelable {
     private final int mPsc;
     // 16-bit UMTS Absolute RF Channel Number
     private final int mUarfcn;
-    // 3-digit Mobile Country Code in string format
-    private final String mMccStr;
-    // 2 or 3-digit Mobile Network Code in string format
-    private final String mMncStr;
     // long alpha Operator Name String or Enhanced Operator Name String
     private final String mAlphaLong;
     // short alpha Operator Name String or Enhanced Operator Name String
@@ -52,12 +45,11 @@ public final class CellIdentityWcdma implements Parcelable {
      * @hide
      */
     public CellIdentityWcdma() {
+        super(TAG, TYPE_TDSCDMA, null, null);
         mLac = Integer.MAX_VALUE;
         mCid = Integer.MAX_VALUE;
         mPsc = Integer.MAX_VALUE;
         mUarfcn = Integer.MAX_VALUE;
-        mMccStr = null;
-        mMncStr = null;
         mAlphaLong = null;
         mAlphaShort = null;
     }
@@ -106,36 +98,11 @@ public final class CellIdentityWcdma implements Parcelable {
      */
     public CellIdentityWcdma (int lac, int cid, int psc, int uarfcn,
                               String mccStr, String mncStr, String alphal, String alphas) {
+        super(TAG, TYPE_WCDMA, mccStr, mncStr);
         mLac = lac;
         mCid = cid;
         mPsc = psc;
         mUarfcn = uarfcn;
-
-        // Only allow INT_MAX if unknown string mcc/mnc
-        if (mccStr == null || mccStr.matches("^[0-9]{3}$")) {
-            mMccStr = mccStr;
-        } else if (mccStr.isEmpty() || mccStr.equals(String.valueOf(Integer.MAX_VALUE))) {
-            // If the mccStr is empty or unknown, set it as null.
-            mMccStr = null;
-        } else {
-            // TODO: b/69384059 Should throw IllegalArgumentException for the invalid MCC format
-            // after the bug got fixed.
-            mMccStr = null;
-            log("invalid MCC format: " + mccStr);
-        }
-
-        if (mncStr == null || mncStr.matches("^[0-9]{2,3}$")) {
-            mMncStr = mncStr;
-        } else if (mncStr.isEmpty() || mncStr.equals(String.valueOf(Integer.MAX_VALUE))) {
-            // If the mncStr is empty or unknown, set it as null.
-            mMncStr = null;
-        } else {
-            // TODO: b/69384059 Should throw IllegalArgumentException for the invalid MNC format
-            // after the bug got fixed.
-            mMncStr = null;
-            log("invalid MNC format: " + mncStr);
-        }
-
         mAlphaLong = alphal;
         mAlphaShort = alphas;
     }
@@ -250,58 +217,53 @@ public final class CellIdentityWcdma implements Parcelable {
         }
 
         CellIdentityWcdma o = (CellIdentityWcdma) other;
-        return mLac == o.mLac &&
-                mCid == o.mCid &&
-                mPsc == o.mPsc &&
-                mUarfcn == o.mUarfcn &&
-                TextUtils.equals(mMccStr, o.mMccStr) &&
-                TextUtils.equals(mMncStr, o.mMncStr) &&
-                TextUtils.equals(mAlphaLong, o.mAlphaLong) &&
-                TextUtils.equals(mAlphaShort, o.mAlphaShort);
+        return mLac == o.mLac
+                && mCid == o.mCid
+                && mPsc == o.mPsc
+                && mUarfcn == o.mUarfcn
+                && TextUtils.equals(mMccStr, o.mMccStr)
+                && TextUtils.equals(mMncStr, o.mMncStr)
+                && TextUtils.equals(mAlphaLong, o.mAlphaLong)
+                && TextUtils.equals(mAlphaShort, o.mAlphaShort);
     }
 
     @Override
     public String toString() {
-        StringBuilder sb = new StringBuilder("CellIdentityWcdma:{");
-        sb.append(" mLac=").append(mLac);
-        sb.append(" mCid=").append(mCid);
-        sb.append(" mPsc=").append(mPsc);
-        sb.append(" mUarfcn=").append(mUarfcn);
-        sb.append(" mMcc=").append(mMccStr);
-        sb.append(" mMnc=").append(mMncStr);
-        sb.append(" mAlphaLong=").append(mAlphaLong);
-        sb.append(" mAlphaShort=").append(mAlphaShort);
-        sb.append("}");
-
-        return sb.toString();
-    }
-
-    /** Implement the Parcelable interface */
-    @Override
-    public int describeContents() {
-        return 0;
+        return new StringBuilder(TAG)
+        .append(":{ mLac=").append(mLac)
+        .append(" mCid=").append(mCid)
+        .append(" mPsc=").append(mPsc)
+        .append(" mUarfcn=").append(mUarfcn)
+        .append(" mMcc=").append(mMccStr)
+        .append(" mMnc=").append(mMncStr)
+        .append(" mAlphaLong=").append(mAlphaLong)
+        .append(" mAlphaShort=").append(mAlphaShort)
+        .append("}").toString();
     }
 
     /** Implement the Parcelable interface */
     @Override
     public void writeToParcel(Parcel dest, int flags) {
         if (DBG) log("writeToParcel(Parcel, int): " + toString());
+        super.writeToParcel(dest, TYPE_WCDMA);
         dest.writeInt(mLac);
         dest.writeInt(mCid);
         dest.writeInt(mPsc);
         dest.writeInt(mUarfcn);
-        dest.writeString(mMccStr);
-        dest.writeString(mMncStr);
         dest.writeString(mAlphaLong);
         dest.writeString(mAlphaShort);
     }
 
     /** Construct from Parcel, type has already been processed */
     private CellIdentityWcdma(Parcel in) {
-        this(in.readInt(), in.readInt(), in.readInt(), in.readInt(), in.readString(),
-                in.readString(), in.readString(), in.readString());
-
-        if (DBG) log("CellIdentityWcdma(Parcel): " + toString());
+        super(TAG, TYPE_WCDMA, in);
+        mLac = in.readInt();
+        mCid = in.readInt();
+        mPsc = in.readInt();
+        mUarfcn = in.readInt();
+        mAlphaLong = in.readString();
+        mAlphaShort = in.readString();
+        if (DBG) log(toString());
     }
 
     /** Implement the Parcelable interface */
@@ -310,7 +272,8 @@ public final class CellIdentityWcdma implements Parcelable {
             new Creator<CellIdentityWcdma>() {
                 @Override
                 public CellIdentityWcdma createFromParcel(Parcel in) {
-                    return new CellIdentityWcdma(in);
+                    in.readInt();   // skip
+                    return createFromParcelBody(in);
                 }
 
                 @Override
@@ -319,10 +282,8 @@ public final class CellIdentityWcdma implements Parcelable {
                 }
             };
 
-    /**
-     * log
-     */
-    private static void log(String s) {
-        Rlog.w(LOG_TAG, s);
+    /** @hide */
+    protected static CellIdentityWcdma createFromParcelBody(Parcel in) {
+        return new CellIdentityWcdma(in);
     }
 }
