@@ -143,7 +143,11 @@ public final class NetworkScanRequest implements Parcelable {
                     int incrementalResultsPeriodicity,
                     ArrayList<String> mccMncs) {
         this.mScanType = scanType;
-        this.mSpecifiers = specifiers.clone();
+        if (specifiers != null) {
+            this.mSpecifiers = specifiers.clone();
+        } else {
+            this.mSpecifiers = null;
+        }
         this.mSearchPeriodicity = searchPeriodicity;
         this.mMaxSearchTime = maxSearchTime;
         this.mIncrementalResults = incrementalResults;
@@ -187,7 +191,7 @@ public final class NetworkScanRequest implements Parcelable {
 
     /** Returns the radio access technologies with bands or channels that need to be scanned. */
     public RadioAccessSpecifier[] getSpecifiers() {
-        return mSpecifiers.clone();
+        return mSpecifiers == null ? null : mSpecifiers.clone();
     }
 
     /**
