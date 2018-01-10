@@ -20,6 +20,5 @@ package android.os;
  * @hide
  */
 public final class Seccomp {
-    public static native void setSystemServerPolicy();
-    public static native void setAppPolicy();
+    public static final native void setPolicy();
 }
