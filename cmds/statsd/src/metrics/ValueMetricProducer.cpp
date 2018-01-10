@@ -285,8 +285,15 @@ void ValueMetricProducer::onMatchedLogEventInternalLocked(
             interval.start = value;
             interval.startUpdated = true;
         } else {
+            // Generally we expect value to be monotonically increasing.
+            // If not, there was a reset event. We take the absolute value as
+            // diff in this case.
             if (interval.startUpdated) {
-                interval.sum += (value - interval.start);
+                if (value > interval.start) {
+                    interval.sum += (value - interval.start);
+                } else {
+                    interval.sum += value;
+                }
                 interval.startUpdated = false;
             } else {
                 VLOG("No start for matching end %ld", value);
