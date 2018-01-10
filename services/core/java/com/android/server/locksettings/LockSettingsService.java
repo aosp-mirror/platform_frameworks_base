@@ -912,8 +912,11 @@ public class LockSettingsService extends ILockSettings.Stub {
     }
 
     private void notifySeparateProfileChallengeChanged(int userId) {
-        LocalServices.getService(DevicePolicyManagerInternal.class)
-                .reportSeparateProfileChallengeChanged(userId);
+        final DevicePolicyManagerInternal dpmi = LocalServices.getService(
+                DevicePolicyManagerInternal.class);
+        if (dpmi != null) {
+            dpmi.reportSeparateProfileChallengeChanged(userId);
+        }
     }
 
     @Override
