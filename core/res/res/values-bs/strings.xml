@@ -21,6 +21,10 @@
 <resources xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
     <string name="byteShort" msgid="8340973892742019101">"B"</string>
+    <string name="kilobyteShort" msgid="7542884022844556968">"kB"</string>
+    <string name="megabyteShort" msgid="6355851576770428922">"MB"</string>
+    <string name="gigabyteShort" msgid="3259882455212193214">"GB"</string>
+    <string name="terabyteShort" msgid="231613018159186962">"TB"</string>
     <string name="petabyteShort" msgid="5637816680144990219">"PB"</string>
     <string name="fileSizeSuffix" msgid="8897567456150907538">"<xliff:g id="NUMBER">%1$s</xliff:g> <xliff:g id="UNIT">%2$s</xliff:g>"</string>
     <string name="untitled" msgid="4638956954852782576">"&lt;Bez naslova&gt;"</string>
@@ -86,7 +90,7 @@
     <string name="notification_channel_network_alert" msgid="4427736684338074967">"Upozorenja"</string>
     <string name="notification_channel_call_forward" msgid="2419697808481833249">"Preusmjeravanje poziva"</string>
     <string name="notification_channel_emergency_callback" msgid="6686166232265733921">"Način rada za hitni povratni poziv"</string>
-    <string name="notification_channel_mobile_data_status" msgid="4575131690860945836">"Status mobilnih podataka"</string>
+    <string name="notification_channel_mobile_data_status" msgid="4575131690860945836">"Status prijenosa podataka na mobilnoj mreži"</string>
     <string name="notification_channel_sms" msgid="3441746047346135073">"SMS poruke"</string>
     <string name="notification_channel_voice_mail" msgid="3954099424160511919">"Poruke govorne pošte"</string>
     <string name="notification_channel_wfc" msgid="2130802501654254801">"Wi-Fi pozivanje"</string>
@@ -1140,6 +1144,9 @@
     <string name="wifi_available_content_failed_to_connect" msgid="3377406637062802645">"Dodirnite da vidite sve mreže"</string>
     <string name="wifi_available_action_connect" msgid="2635699628459488788">"Povežite se"</string>
     <string name="wifi_available_action_all_networks" msgid="1100098935861622985">"Sve mreže"</string>
+    <string name="wifi_wakeup_onboarding_title" msgid="228772560195634292">"Wi‑Fi veza će se automatski uključiti"</string>
+    <string name="wifi_wakeup_onboarding_subtext" msgid="3989697580301186973">"Kada ste u blizini sačuvane mreže visokog kvaliteta"</string>
+    <string name="wifi_wakeup_onboarding_action_disable" msgid="838648204200836028">"Nemoj ponovo uključiti"</string>
     <string name="wifi_available_sign_in" msgid="9157196203958866662">"Prijavljivanje na Wi-Fi mrežu"</string>
     <string name="network_available_sign_in" msgid="1848877297365446605">"Prijava na mrežu"</string>
     <!-- no translation found for network_available_sign_in_detailed (8000081941447976118) -->
@@ -1150,7 +1157,7 @@
     <string name="network_switch_metered_detail" msgid="775163331794506615">"Kada <xliff:g id="PREVIOUS_NETWORK">%2$s</xliff:g> nema pristup internetu, uređaj koristi mrežu <xliff:g id="NEW_NETWORK">%1$s</xliff:g>. Moguća je naplata usluge."</string>
     <string name="network_switch_metered_toast" msgid="5779283181685974304">"Prebačeno iz mreže <xliff:g id="PREVIOUS_NETWORK">%1$s</xliff:g> u <xliff:g id="NEW_NETWORK">%2$s</xliff:g> mrežu"</string>
   <string-array name="network_switch_type_name">
-    <item msgid="3979506840912951943">"mobilni podaci"</item>
+    <item msgid="3979506840912951943">"prijenos podataka na mobilnoj mreži"</item>
     <item msgid="75483255295529161">"Wi-Fi"</item>
     <item msgid="6862614801537202646">"Bluetooth"</item>
     <item msgid="5447331121797802871">"Ethernet"</item>

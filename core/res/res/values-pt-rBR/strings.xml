@@ -21,6 +21,10 @@
 <resources xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
     <string name="byteShort" msgid="8340973892742019101">"B"</string>
+    <string name="kilobyteShort" msgid="7542884022844556968">"KB"</string>
+    <string name="megabyteShort" msgid="6355851576770428922">"MB"</string>
+    <string name="gigabyteShort" msgid="3259882455212193214">"GB"</string>
+    <string name="terabyteShort" msgid="231613018159186962">"TB"</string>
     <string name="petabyteShort" msgid="5637816680144990219">"PB"</string>
     <string name="fileSizeSuffix" msgid="8897567456150907538">"<xliff:g id="NUMBER">%1$s</xliff:g> <xliff:g id="UNIT">%2$s</xliff:g>"</string>
     <string name="untitled" msgid="4638956954852782576">"&lt;Sem título&gt;"</string>
@@ -200,9 +204,9 @@
     <string name="shutdown_confirm" product="tv" msgid="476672373995075359">"Sua TV será desligada."</string>
     <string name="shutdown_confirm" product="watch" msgid="3490275567476369184">"Seu relógio será desligado."</string>
     <string name="shutdown_confirm" product="default" msgid="649792175242821353">"O seu telefone será desligado."</string>
-    <string name="shutdown_confirm_question" msgid="2906544768881136183">"Deseja desligar?"</string>
+    <string name="shutdown_confirm_question" msgid="2906544768881136183">"Quer desligar?"</string>
     <string name="reboot_safemode_title" msgid="7054509914500140361">"Reiniciar no modo de segurança"</string>
-    <string name="reboot_safemode_confirm" msgid="55293944502784668">"Deseja reiniciar no modo de segurança? Isso desativará todos os apps de terceiros instalados. Eles serão restaurados quando você reiniciar novamente."</string>
+    <string name="reboot_safemode_confirm" msgid="55293944502784668">"Quer reiniciar no modo de segurança? Isso desativará todos os apps de terceiros instalados. Eles serão restaurados quando você reiniciar novamente."</string>
     <string name="recent_tasks_title" msgid="3691764623638127888">"Recente"</string>
     <string name="no_recent_tasks" msgid="8794906658732193473">"Nenhum app recente"</string>
     <string name="global_actions" product="tablet" msgid="408477140088053665">"Opções do tablet"</string>
@@ -808,7 +812,7 @@
     <string name="js_dialog_before_unload_title" msgid="2619376555525116593">"Confirmar navegação"</string>
     <string name="js_dialog_before_unload_positive_button" msgid="3112752010600484130">"Sair desta página"</string>
     <string name="js_dialog_before_unload_negative_button" msgid="5614861293026099715">"Permanecer nesta página"</string>
-    <string name="js_dialog_before_unload" msgid="3468816357095378590">"<xliff:g id="MESSAGE">%s</xliff:g>\n\nTem certeza de que deseja sair desta página?"</string>
+    <string name="js_dialog_before_unload" msgid="3468816357095378590">"<xliff:g id="MESSAGE">%s</xliff:g>\n\nTem certeza que quer sair desta página?"</string>
     <string name="save_password_label" msgid="6860261758665825069">"Confirmar"</string>
     <string name="double_tap_toast" msgid="4595046515400268881">"Dica: toque duas vezes para aumentar e diminuir o zoom."</string>
     <string name="autofill_this_form" msgid="4616758841157816676">"Preench. aut."</string>
@@ -841,7 +845,7 @@
     <string name="permdesc_addVoicemail" msgid="6604508651428252437">"Permite que o app adicione mensagens a sua caixa de entrada do correio de voz."</string>
     <string name="permlab_writeGeolocationPermissions" msgid="5962224158955273932">"Modifique as permissões de geolocalização de seu navegador"</string>
     <string name="permdesc_writeGeolocationPermissions" msgid="1083743234522638747">"Permite que o app modifique as permissões de geolocalização do navegador. Apps maliciosos podem usar isso para permitir o envio de informações locais para sites arbitrários."</string>
-    <string name="save_password_message" msgid="767344687139195790">"Deseja que o navegador lembre desta senha?"</string>
+    <string name="save_password_message" msgid="767344687139195790">"Quer que o navegador lembre desta senha?"</string>
     <string name="save_password_notnow" msgid="6389675316706699758">"Agora não"</string>
     <string name="save_password_remember" msgid="6491879678996749466">"Lembrar"</string>
     <string name="save_password_never" msgid="8274330296785855105">"Nunca"</string>
@@ -1043,7 +1047,7 @@
     <string name="force_close" msgid="8346072094521265605">"OK"</string>
     <string name="report" msgid="4060218260984795706">"Informar"</string>
     <string name="wait" msgid="7147118217226317732">"Aguardar"</string>
-    <string name="webpage_unresponsive" msgid="3272758351138122503">"A página não responde.\n\nDeseja fechá-la?"</string>
+    <string name="webpage_unresponsive" msgid="3272758351138122503">"A página não responde.\n\nQuer fechá-la?"</string>
     <string name="launch_warning_title" msgid="1547997780506713581">"App redirecionado"</string>
     <string name="launch_warning_replace" msgid="6202498949970281412">"<xliff:g id="APP_NAME">%1$s</xliff:g> não está em execução."</string>
     <string name="launch_warning_original" msgid="188102023021668683">"<xliff:g id="APP_NAME">%1$s</xliff:g> foi iniciado."</string>
@@ -1116,6 +1120,9 @@
     <string name="wifi_available_content_failed_to_connect" msgid="3377406637062802645">"Toque para ver todas as redes"</string>
     <string name="wifi_available_action_connect" msgid="2635699628459488788">"Conectar"</string>
     <string name="wifi_available_action_all_networks" msgid="1100098935861622985">"Todas as redes"</string>
+    <string name="wifi_wakeup_onboarding_title" msgid="228772560195634292">"O Wi‑Fi será ativado automaticamente"</string>
+    <string name="wifi_wakeup_onboarding_subtext" msgid="3989697580301186973">"Quando você estiver perto de uma rede salva de alta qualidade"</string>
+    <string name="wifi_wakeup_onboarding_action_disable" msgid="838648204200836028">"Não ativar novamente"</string>
     <string name="wifi_available_sign_in" msgid="9157196203958866662">"Fazer login na rede Wi-Fi"</string>
     <string name="network_available_sign_in" msgid="1848877297365446605">"Fazer login na rede"</string>
     <!-- no translation found for network_available_sign_in_detailed (8000081941447976118) -->
@@ -1156,7 +1163,7 @@
     <string name="wifi_p2p_frequency_conflict_message" product="default" msgid="7363907213787469151">"O telefone desconectará temporariamente da rede Wi-Fi enquanto estiver conectado a <xliff:g id="DEVICE_NAME">%1$s</xliff:g>"</string>
     <string name="select_character" msgid="3365550120617701745">"Inserir caractere"</string>
     <string name="sms_control_title" msgid="7296612781128917719">"Enviando mensagens SMS"</string>
-    <string name="sms_control_message" msgid="3867899169651496433">"&lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; envia uma grande quantidade de mensagens SMS. Deseja permitir que este app continue enviando mensagens?"</string>
+    <string name="sms_control_message" msgid="3867899169651496433">"&lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; envia uma grande quantidade de mensagens SMS. Quer permitir que este app continue enviando mensagens?"</string>
     <string name="sms_control_yes" msgid="3663725993855816807">"Permitir"</string>
     <string name="sms_control_no" msgid="625438561395534982">"Negar"</string>
     <string name="sms_short_code_confirm_message" msgid="1645436466285310855">"&lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; deseja enviar uma mensagem para &lt;b&gt;<xliff:g id="DEST_ADDRESS">%2$s</xliff:g>&lt;/b&gt;."</string>
@@ -1279,7 +1286,7 @@
     <string name="dial_number_using" msgid="5789176425167573586">"Discar número\nusando <xliff:g id="NUMBER">%s</xliff:g>"</string>
     <string name="create_contact_using" msgid="4947405226788104538">"Criar contato \nusando <xliff:g id="NUMBER">%s</xliff:g>"</string>
     <string name="grant_credentials_permission_message_header" msgid="2106103817937859662">"O app a seguir ou outros apps solicitam permissão para acessar sua conta, agora e no futuro."</string>
-    <string name="grant_credentials_permission_message_footer" msgid="3125211343379376561">"Deseja permitir essa solicitação?"</string>
+    <string name="grant_credentials_permission_message_footer" msgid="3125211343379376561">"Quer permitir essa solicitação?"</string>
     <string name="grant_permissions_header_text" msgid="6874497408201826708">"Solicitação de acesso"</string>
     <string name="allow" msgid="7225948811296386551">"Permitir"</string>
     <string name="deny" msgid="2081879885755434506">"Negar"</string>

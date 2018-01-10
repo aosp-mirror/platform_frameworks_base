@@ -21,6 +21,10 @@
 <resources xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
     <string name="byteShort" msgid="8340973892742019101">"B"</string>
+    <string name="kilobyteShort" msgid="7542884022844556968">"KB"</string>
+    <string name="megabyteShort" msgid="6355851576770428922">"MB"</string>
+    <string name="gigabyteShort" msgid="3259882455212193214">"GB"</string>
+    <string name="terabyteShort" msgid="231613018159186962">"TB"</string>
     <string name="petabyteShort" msgid="5637816680144990219">"PB"</string>
     <string name="fileSizeSuffix" msgid="8897567456150907538">"<xliff:g id="NUMBER">%1$s</xliff:g> <xliff:g id="UNIT">%2$s</xliff:g>"</string>
     <string name="untitled" msgid="4638956954852782576">"&lt;Unbenannt&gt;"</string>
@@ -545,8 +549,8 @@
     <string name="permdesc_handoverStatus" msgid="4788144087245714948">"Ermöglicht dieser App, Informationen zu aktuellen Android Beam-Übertragungen zu erhalten"</string>
     <string name="permlab_removeDrmCertificates" msgid="7044888287209892751">"DRM-Zertifikate entfernen"</string>
     <string name="permdesc_removeDrmCertificates" msgid="7272999075113400993">"Ermöglicht einer App das Entfernen von DRM-Zertifikaten. Sollte für normale Apps nie benötigt werden."</string>
-    <string name="permlab_bindCarrierMessagingService" msgid="1490229371796969158">"An einen Mobilfunkanbieter-SMS/MMS-Dienst binden"</string>
-    <string name="permdesc_bindCarrierMessagingService" msgid="2762882888502113944">"Ermöglicht dem Inhaber die Bindung an die Oberfläche eines Mobilfunkanbieter-SMS/MMS-Dienstes auf oberster Ebene. Für normale Apps sollte dies nie erforderlich sein."</string>
+    <string name="permlab_bindCarrierMessagingService" msgid="1490229371796969158">"An einen Mobilfunkanbieter-Messaging-Dienst binden"</string>
+    <string name="permdesc_bindCarrierMessagingService" msgid="2762882888502113944">"Ermöglicht dem Inhaber die Bindung an die Oberfläche eines Mobilfunkanbieter-Messaging-Dienstes auf oberster Ebene. Für normale Apps sollte dies nie erforderlich sein."</string>
     <string name="permlab_bindCarrierServices" msgid="3233108656245526783">"An Mobilfunkanbieter-Dienste binden"</string>
     <string name="permdesc_bindCarrierServices" msgid="1391552602551084192">"Ermöglicht dem Inhaber die Bindung an Mobilfunkanbieter-Dienste. Für normale Apps sollte dies nicht erforderlich sein."</string>
     <string name="permlab_access_notification_policy" msgid="4247510821662059671">"Auf \"Nicht stören\" zugreifen"</string>
@@ -1116,6 +1120,9 @@
     <string name="wifi_available_content_failed_to_connect" msgid="3377406637062802645">"Tippen, um alle Netzwerke zu sehen"</string>
     <string name="wifi_available_action_connect" msgid="2635699628459488788">"Verbinden"</string>
     <string name="wifi_available_action_all_networks" msgid="1100098935861622985">"Alle Netzwerke"</string>
+    <string name="wifi_wakeup_onboarding_title" msgid="228772560195634292">"WLAN wird automatisch aktiviert"</string>
+    <string name="wifi_wakeup_onboarding_subtext" msgid="3989697580301186973">"Wenn du in der Nähe eines sicheren gespeicherten Netzwerks bist"</string>
+    <string name="wifi_wakeup_onboarding_action_disable" msgid="838648204200836028">"Nicht wieder aktivieren"</string>
     <string name="wifi_available_sign_in" msgid="9157196203958866662">"In WLAN anmelden"</string>
     <string name="network_available_sign_in" msgid="1848877297365446605">"Im Netzwerk anmelden"</string>
     <!-- no translation found for network_available_sign_in_detailed (8000081941447976118) -->
@@ -1640,7 +1647,7 @@
     <string name="package_installed_device_owner" msgid="6875717669960212648">"Von deinem Administrator installiert"</string>
     <string name="package_updated_device_owner" msgid="1847154566357862089">"Von deinem Administrator aktualisiert"</string>
     <string name="package_deleted_device_owner" msgid="2307122077550236438">"Von deinem Administrator gelöscht"</string>
-    <string name="battery_saver_description" msgid="5394663545060026162">"Der Energiesparmodus schont den Akku, indem er die Leistung des Geräts reduziert und die Vibrationsfunktion, Standortdienste sowie die meisten Hintergrunddatenaktivitäten einschränkt. E-Mail, SMS/MMS und andere Apps, die auf deinem Gerät synchronisiert werden, werden möglicherweise nur aktualisiert, wenn du sie öffnest.\n\nDer Energiesparmodus wird automatisch deaktiviert, wenn dein Gerät aufgeladen wird."</string>
+    <string name="battery_saver_description" msgid="5394663545060026162">"Der Energiesparmodus schont den Akku, indem er die Leistung des Geräts reduziert und die Vibrationsfunktion, Standortdienste sowie die meisten Hintergrunddatenaktivitäten einschränkt. E-Mail, Messaging und andere Apps, die auf deinem Gerät synchronisiert werden, werden möglicherweise nur aktualisiert, wenn du sie öffnest.\n\nDer Energiesparmodus wird automatisch deaktiviert, wenn dein Gerät aufgeladen wird."</string>
     <string name="data_saver_description" msgid="6015391409098303235">"Mit dem Datensparmodus wird die Datennutzung verringert, indem verhindert wird, dass im Hintergrund Daten von Apps gesendet oder empfangen werden. Datenzugriffe sind mit einer aktiven App zwar möglich, erfolgen aber seltener. Als Folge davon könnten Bilder beispielsweise erst dann sichtbar werden, wenn sie angetippt werden."</string>
     <string name="data_saver_enable_title" msgid="4674073932722787417">"Datensparmodus aktivieren?"</string>
     <string name="data_saver_enable_button" msgid="7147735965247211818">"Aktivieren"</string>
