@@ -67,6 +67,7 @@ public final class Slice implements Parcelable {
             HINT_TOGGLE,
             HINT_HORIZONTAL,
             HINT_PARTIAL,
+            HINT_SEE_MORE
     })
     @Retention(RetentionPolicy.SOURCE)
     public @interface SliceHint {}
@@ -151,7 +152,11 @@ public final class Slice implements Parcelable {
      * Used to indicate the maximum integer value for a {@link #SUBTYPE_SLIDER}.
      */
     public static final String HINT_MAX = "max";
-
+    /**
+     * A hint representing that this item should be used to indicate that there's more
+     * content associated with this slice.
+     */
+    public static final String HINT_SEE_MORE = "see_more";
     /**
      * Key to retrieve an extra added to an intent when a control is changed.
      */
