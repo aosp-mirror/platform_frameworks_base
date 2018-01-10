@@ -60,6 +60,20 @@ public class EuiccManager {
     public static final String ACTION_MANAGE_EMBEDDED_SUBSCRIPTIONS =
             "android.telephony.euicc.action.MANAGE_EMBEDDED_SUBSCRIPTIONS";
 
+
+    /**
+     * Broadcast Action: The eUICC OTA status is changed.
+     * <p class="note">
+     * Requires the {@link android.Manifest.permission#WRITE_EMBEDDED_SUBSCRIPTIONS} permission.
+     *
+     * <p class="note">This is a protected intent that can only be sent
+     * by the system.
+     * TODO(b/35851809): Make this a SystemApi.
+     */
+    @SdkConstant(SdkConstant.SdkConstantType.BROADCAST_INTENT_ACTION)
+    public static final String ACTION_OTA_STATUS_CHANGED
+            = "android.telephony.euicc.action.OTA_STATUS_CHANGED";
+
     /**
      * Intent action to provision an embedded subscription.
      *
