@@ -68,17 +68,26 @@ static void process_media_retriever_call(JNIEnv *env, status_t opStatus, const c
     }
 }
 
-static MediaMetadataRetriever* getRetriever(JNIEnv* env, jobject thiz)
+static sp<MediaMetadataRetriever> getRetriever(JNIEnv* env, jobject thiz)
 {
     // No lock is needed, since it is called internally by other methods that are protected
     MediaMetadataRetriever* retriever = (MediaMetadataRetriever*) env->GetLongField(thiz, fields.context);
     return retriever;
 }
 
-static void setRetriever(JNIEnv* env, jobject thiz, MediaMetadataRetriever* retriever)
+static void setRetriever(JNIEnv* env, jobject thiz, const sp<MediaMetadataRetriever> &retriever)
 {
     // No lock is needed, since it is called internally by other methods that are protected
-    env->SetLongField(thiz, fields.context, (jlong) retriever);
+
+    if (retriever != NULL) {
+        retriever->incStrong(thiz);
+    }
+    sp<MediaMetadataRetriever> old = getRetriever(env, thiz);
+    if (old != NULL) {
+        old->decStrong(thiz);
+    }
+
+    env->SetLongField(thiz, fields.context, (jlong) retriever.get());
 }
 
 static void
@@ -87,7 +96,7 @@ android_media_MediaMetadataRetriever_setDataSourceAndHeaders(
         jobjectArray keys, jobjectArray values) {
 
     ALOGV("setDataSource");
-    MediaMetadataRetriever* retriever = getRetriever(env, thiz);
+    sp<MediaMetadataRetriever> retriever = getRetriever(env, thiz);
     if (retriever == 0) {
         jniThrowException(
                 env,
@@ -146,7 +155,7 @@ android_media_MediaMetadataRetriever_setDataSourceAndHeaders(
 static void android_media_MediaMetadataRetriever_setDataSourceFD(JNIEnv *env, jobject thiz, jobject fileDescriptor, jlong offset, jlong length)
 {
     ALOGV("setDataSource");
-    MediaMetadataRetriever* retriever = getRetriever(env, thiz);
+    sp<MediaMetadataRetriever> retriever = getRetriever(env, thiz);
     if (retriever == 0) {
         jniThrowException(env, "java/lang/IllegalStateException", "No retriever available");
         return;
@@ -175,7 +184,7 @@ static void android_media_MediaMetadataRetriever_setDataSourceFD(JNIEnv *env, jo
 static void android_media_MediaMetadataRetriever_setDataSourceCallback(JNIEnv *env, jobject thiz, jobject dataSource)
 {
     ALOGV("setDataSourceCallback");
-    MediaMetadataRetriever* retriever = getRetriever(env, thiz);
+    sp<MediaMetadataRetriever> retriever = getRetriever(env, thiz);
     if (retriever == 0) {
         jniThrowException(env, "java/lang/IllegalStateException", "No retriever available");
         return;
@@ -249,7 +258,7 @@ static jobject android_media_MediaMetadataRetriever_getFrameAtTime(
 {
     ALOGV("getFrameAtTime: %lld us option: %d dst width: %d heigh: %d",
             (long long)timeUs, option, dst_width, dst_height);
-    MediaMetadataRetriever* retriever = getRetriever(env, thiz);
+    sp<MediaMetadataRetriever> retriever = getRetriever(env, thiz);
     if (retriever == 0) {
         jniThrowException(env, "java/lang/IllegalStateException", "No retriever available");
         return NULL;
@@ -344,7 +353,7 @@ static jbyteArray android_media_MediaMetadataRetriever_getEmbeddedPicture(
         JNIEnv *env, jobject thiz, jint pictureType)
 {
     ALOGV("getEmbeddedPicture: %d", pictureType);
-    MediaMetadataRetriever* retriever = getRetriever(env, thiz);
+    sp<MediaMetadataRetriever> retriever = getRetriever(env, thiz);
     if (retriever == 0) {
         jniThrowException(env, "java/lang/IllegalStateException", "No retriever available");
         return NULL;
@@ -379,7 +388,7 @@ static jbyteArray android_media_MediaMetadataRetriever_getEmbeddedPicture(
 static jobject android_media_MediaMetadataRetriever_extractMetadata(JNIEnv *env, jobject thiz, jint keyCode)
 {
     ALOGV("extractMetadata");
-    MediaMetadataRetriever* retriever = getRetriever(env, thiz);
+    sp<MediaMetadataRetriever> retriever = getRetriever(env, thiz);
     if (retriever == 0) {
         jniThrowException(env, "java/lang/IllegalStateException", "No retriever available");
         return NULL;
@@ -397,9 +406,7 @@ static void android_media_MediaMetadataRetriever_release(JNIEnv *env, jobject th
 {
     ALOGV("release");
     Mutex::Autolock lock(sLock);
-    MediaMetadataRetriever* retriever = getRetriever(env, thiz);
-    delete retriever;
-    setRetriever(env, thiz, (MediaMetadataRetriever*) 0);
+    setRetriever(env, thiz, NULL);
 }
 
 static void android_media_MediaMetadataRetriever_native_finalize(JNIEnv *env, jobject thiz)
@@ -466,7 +473,7 @@ static void android_media_MediaMetadataRetriever_native_init(JNIEnv *env)
 static void android_media_MediaMetadataRetriever_native_setup(JNIEnv *env, jobject thiz)
 {
     ALOGV("native_setup");
-    MediaMetadataRetriever* retriever = new MediaMetadataRetriever();
+    sp<MediaMetadataRetriever> retriever = new MediaMetadataRetriever();
     if (retriever == 0) {
         jniThrowException(env, "java/lang/RuntimeException", "Out of memory");
         return;
