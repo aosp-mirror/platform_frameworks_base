@@ -60,7 +60,7 @@ public final class KeyDerivationParameters implements Parcelable {
     /**
      * Creates instance of the class to to derive key using salted SHA256 hash.
      */
-    public static KeyDerivationParameters createSHA256Parameters(@NonNull byte[] salt) {
+    public static KeyDerivationParameters createSha256Parameters(@NonNull byte[] salt) {
         return new KeyDerivationParameters(ALGORITHM_SHA256, salt);
     }
 
