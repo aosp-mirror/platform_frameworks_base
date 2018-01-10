@@ -319,6 +319,54 @@ void sortLogEventsByTimestamp(std::vector<std::unique_ptr<LogEvent>> *events) {
 int64_t StringToId(const string& str) {
     return static_cast<int64_t>(std::hash<std::string>()(str));
 }
+
+void ValidateAttributionUidDimension(const DimensionsValue& value, int atomId, int uid) {
+    EXPECT_EQ(value.field(), atomId);
+    EXPECT_EQ(value.value_tuple().dimensions_value_size(), 1);
+    // Attribution field.
+    EXPECT_EQ(value.value_tuple().dimensions_value(0).field(), 1);
+    // Uid only.
+    EXPECT_EQ(value.value_tuple().dimensions_value(0)
+        .value_tuple().dimensions_value_size(), 1);
+    EXPECT_EQ(value.value_tuple().dimensions_value(0)
+        .value_tuple().dimensions_value(0).field(), 1);
+    EXPECT_EQ(value.value_tuple().dimensions_value(0)
+        .value_tuple().dimensions_value(0).value_int(), uid);
+}
+
+void ValidateUidDimension(const DimensionsValue& value, int atomId, int uid) {
+    EXPECT_EQ(value.field(), atomId);
+    EXPECT_EQ(value.value_tuple().dimensions_value_size(), 1);
+    // Attribution field.
+    EXPECT_EQ(value.value_tuple().dimensions_value(0).field(), 1);
+    // Uid only.
+    EXPECT_EQ(value.value_tuple().dimensions_value(0)
+        .value_tuple().dimensions_value_size(), 1);
+    EXPECT_EQ(value.value_tuple().dimensions_value(0)
+        .value_tuple().dimensions_value(0).field(), 1);
+    EXPECT_EQ(value.value_tuple().dimensions_value(0)
+        .value_tuple().dimensions_value(0).value_int(), uid);
+}
+
+void ValidateAttributionUidAndTagDimension(
+    const DimensionsValue& value, int atomId, int uid, const std::string& tag) {
+    EXPECT_EQ(value.field(), atomId);
+    EXPECT_EQ(value.value_tuple().dimensions_value_size(), 1);
+    // Attribution field.
+    EXPECT_EQ(value.value_tuple().dimensions_value(0).field(), 1);
+    // Uid only.
+    EXPECT_EQ(value.value_tuple().dimensions_value(0)
+        .value_tuple().dimensions_value_size(), 2);
+    EXPECT_EQ(value.value_tuple().dimensions_value(0)
+        .value_tuple().dimensions_value(0).field(), 1);
+    EXPECT_EQ(value.value_tuple().dimensions_value(0)
+        .value_tuple().dimensions_value(0).value_int(), uid);
+    EXPECT_EQ(value.value_tuple().dimensions_value(0)
+        .value_tuple().dimensions_value(1).field(), 2);
+    EXPECT_EQ(value.value_tuple().dimensions_value(0)
+        .value_tuple().dimensions_value(1).value_str(), tag);
+}
+
 }  // namespace statsd
 }  // namespace os
 }  // namespace android

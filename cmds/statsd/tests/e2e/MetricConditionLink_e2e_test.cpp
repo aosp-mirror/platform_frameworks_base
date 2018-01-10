@@ -25,6 +25,7 @@ namespace os {
 namespace statsd {
 
 #ifdef __ANDROID__
+namespace {
 
 StatsdConfig CreateStatsdConfig() {
     StatsdConfig config;
@@ -92,6 +93,8 @@ StatsdConfig CreateStatsdConfig() {
     dimensionCondition->add_child()->set_field(1);  // uid field.
     return config;
 }
+}  // namespace
+
 
 TEST(MetricConditionLinkE2eTest, TestMultiplePredicatesAndLinks) {
     auto config = CreateStatsdConfig();

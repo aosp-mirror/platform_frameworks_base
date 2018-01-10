@@ -56,6 +56,10 @@ public:
     /* Flushes data to disk. Data on memory will be gone after written to disk. */
     void WriteDataToDisk();
 
+    inline sp<UidMap> getUidMap() {
+        return mUidMap;
+    }
+
 private:
     mutable mutex mMetricsMutex;
 
@@ -87,6 +91,7 @@ private:
     FRIEND_TEST(StatsLogProcessorTest, TestDropWhenByteSizeTooLarge);
     FRIEND_TEST(WakelockDurationE2eTest, TestAggregatedPredicateDimensions);
     FRIEND_TEST(MetricConditionLinkE2eTest, TestMultiplePredicatesAndLinks);
+    FRIEND_TEST(AttributionE2eTest, TestAttributionMatchAndSlice);
 
 };
 
