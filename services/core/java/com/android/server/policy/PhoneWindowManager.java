@@ -2255,9 +2255,13 @@ public class PhoneWindowManager implements WindowManagerPolicy {
         // http://developer.android.com/guide/practices/screens_support.html#range
         // For car, ignore the dp limitation. It's physically impossible to rotate the car's screen
         // so if the orientation is forced, we need to respect that no matter what.
-        boolean isCar = mContext.getPackageManager().hasSystemFeature(
+        final boolean isCar = mContext.getPackageManager().hasSystemFeature(
                 PackageManager.FEATURE_AUTOMOTIVE);
-        mForceDefaultOrientation = ((longSizeDp >= 960 && shortSizeDp >= 720) || isCar) &&
+        // For TV, it's usually 960dp x 540dp, ignore the size limitation.
+        // so if the orientation is forced, we need to respect that no matter what.
+        final boolean isTv = mContext.getPackageManager().hasSystemFeature(
+                PackageManager.FEATURE_LEANBACK);
+        mForceDefaultOrientation = ((longSizeDp >= 960 && shortSizeDp >= 720) || isCar || isTv) &&
                 res.getBoolean(com.android.internal.R.bool.config_forceDefaultOrientation) &&
                 // For debug purposes the next line turns this feature off with:
                 // $ adb shell setprop config.override_forced_orient true
